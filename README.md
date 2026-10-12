@@ -1,19 +1,21 @@
-# TradeThesis public website preview — v10
+# TradeThesis public website preview — v15
 
-Open `00_OPEN_INTERACTIVE_PREVIEW.html` first for the bundled interactive preview.
+Open `00_OPEN_INTERACTIVE_PREVIEW.html` first, or open each HTML page directly from this folder.
 
-## Product-page decisions
-- The public catalogue shows one self-paced product: **The TradeThesis Trading Path**. The live classroom is a separate offer.
-- The detail page uses the course name as the primary heading; the value proposition supports it rather than competing for product identity.
-- The course map is one connected roadmap. Foundations, Technical Toolkit, Trading Mechanics, and Psychology & Going Live are stages within the product, not separate checkout items.
-- The “By the end…” outcomes card is preserved as a signature design feature.
-- The detailed 30-lesson outline is expandable so visitors can skim the path first and open detail when they want it.
-- The working one-time price is ₹999 and is labelled proposed.
-- The 30-day learning plan is described in the page, but secure access and automatic lesson delivery are not implemented in static HTML.
-- The six-session live classroom remains separate.
-- Public pages use a textual illustrative prompt, not personal trading chart screenshots.
-- Checkout, authentication, secure paid access and scheduled release must be connected before launch.
+## What changed in v15
+- Kept the homepage and its existing rich Trading Path hook unchanged.
+- Upgraded the self-paced offer on `courses.html` from the small catalogue card to the full rich two-column presentation from the approved reference: course promise and outcomes on the left; proposed price, inclusions, connected four-stage outline and CTA on the right.
+- Retained the six-week live classroom as a separate offer above the self-paced course.
+- The CTA on the Courses page goes to `trading-path.html` for the complete detail page.
+- Public sales pages contain no personal instructor charts.
 
-## Pages
-`index.html`, `courses.html`, `trading-path.html`, `live-class.html`.
-`foundations.html` redirects old local bookmarks to the canonical `trading-path.html` page.
+## Files
+- `index.html` — homepage (unchanged from v14)
+- `courses.html` — catalogue with richer self-paced course offering
+- `trading-path.html` — full course detail page
+- `live-class.html` — separate six-week live classroom offer
+- `foundations.html` — safe redirect page to the course overview
+- `00_OPEN_INTERACTIVE_PREVIEW.html` — interactive preview router
+
+## Before launch
+₹999 remains a proposed price. Checkout, secure access control, authenticated learner progress and scheduled lesson release must be connected in Django before selling.

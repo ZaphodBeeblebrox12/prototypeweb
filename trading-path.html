@@ -559,36 +559,135 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
 @media(max-width:780px){.course-hero-grid{grid-template-columns:1fr;gap:24px}.course-hero-offer{grid-row:auto}.course-hero-copy h1{font-size:clamp(41px,8vw,55px);max-width:700px}.course-promise{font-size:clamp(25px,5vw,31px)}.course-hero-offer .purchase-card{padding:22px}.roadmap-stage{grid-template-columns:40px minmax(0,1fr);gap:0 14px;padding:20px 17px}.roadmap-main{grid-column:2}.roadmap-topics{grid-column:2;padding-top:13px}.roadmap-index-wrap{grid-row:1 / span 2}.roadmap-index-wrap:after{bottom:-39px}.course-curriculum-heading{display:block}.course-curriculum-heading>p{margin-top:10px}.course-overview-intro>p{font-size:13px}}
 @media(max-width:650px){.course-hero-copy .breadcrumb{margin-bottom:20px;font-size:10px}.course-hero-copy h1{font-size:clamp(38px,10.2vw,49px);line-height:1.04}.course-promise{font-size:25px;line-height:1.18}.course-hero-copy .intro{font-size:14px;line-height:1.8}.course-facts{gap:10px;padding:12px 0}.course-facts strong{font-size:18px}.course-facts i{height:17px}.course-hero-copy .hand-row{align-items:flex-start;flex-direction:column}.course-hero-copy .note-context{border:0;padding:0;max-width:100%}.course-hero-actions{display:grid;grid-template-columns:1fr}.course-hero-actions .button{width:100%;white-space:normal;text-align:center}.outcomes{padding:18px 17px 16px}.outcomes-heading h3{font-size:22px}.outcome-grid{grid-template-columns:1fr;gap:12px}.outcome-method{gap:7px;font-size:10px}.course-curriculum{margin-top:32px}.course-roadmap{border-radius:15px}.roadmap-stage{grid-template-columns:34px minmax(0,1fr);padding:18px 13px;gap:0 11px}.roadmap-index{width:30px;height:30px;flex-basis:30px;font-size:13px}.roadmap-index-wrap:after{top:30px;bottom:-37px}.roadmap-meta{font-size:8px}.roadmap-main h3{font-size:24px}.roadmap-promise{font-size:14px}.roadmap-main>p:last-child{font-size:12px}.roadmap-topics{gap:5px;padding-top:12px}.roadmap-topics span{font-size:9px;padding:5px 7px}.outline-lessons{grid-template-columns:1fr}.outline-lessons li,.outline-lessons li:nth-child(-n+2){border-top:1px solid #eee8dc}.outline-lessons li:first-child{border-top:0}.outline-stage-head{align-items:flex-start;flex-direction:column;gap:4px}.enrolment-includes-grid{grid-template-columns:1fr}.course-curriculum-heading h2{font-size:31px}}
 
+
+/* v13 — bring the approved homepage course-card composition onto the course detail page.
+   Only trading-path.html uses these rules; the homepage hook is deliberately unchanged. */
+.course-product-hero{padding:28px 0 50px}
+.course-product-frame{padding:clamp(20px,2.5vw,31px);border:1px solid var(--line);border-radius:26px;background:#fffaf1;box-shadow:0 14px 38px #29382e08}
+.course-product-frame .course-hero-grid{grid-template-columns:minmax(0,1.08fr) minmax(330px,.92fr);gap:clamp(22px,2.8vw,36px);align-items:stretch}
+.course-product-frame .course-hero-copy{padding:10px 2px 3px 0}
+.course-product-frame .course-hero-copy .breadcrumb{margin-bottom:26px}
+.course-product-frame .course-hero-copy>.eyebrow{margin-bottom:13px}
+.course-product-frame .course-hero-copy h1{max-width:650px;font:400 clamp(36px,3.8vw,52px)/1.04 var(--serif);letter-spacing:-.045em;margin:0 0 9px}
+.course-product-frame .course-promise{font:italic clamp(20px,2.2vw,26px)/1.22 var(--serif);color:var(--green);margin:0 0 16px;max-width:650px}
+.course-product-frame .course-hero-copy .intro{font-size:13px;line-height:1.85;max-width:650px;margin:0 0 17px}
+.course-product-frame .course-facts{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:0;margin:0 0 16px}
+.course-product-frame .course-facts span{display:inline-flex;align-items:baseline;gap:4px;padding:7px 10px;border:1px solid var(--line);border-radius:99px;background:#fffdf8;font-size:10px;color:var(--muted);white-space:nowrap}
+.course-product-frame .course-facts strong{font-size:12px;color:var(--ink)}
+.course-product-frame .course-facts i{display:none}
+.course-product-frame .product-outcomes{margin:0;padding:17px 18px 14px;background:#f2eee3;border-color:#ded7c6;border-radius:16px}
+.course-product-frame .outcomes-heading{display:flex;align-items:flex-start;gap:10px}
+.course-product-frame .outcomes-icon{display:grid;place-items:center;width:31px;height:31px;flex:0 0 auto;border-radius:9px;background:var(--butter);font-size:19px;color:var(--green-deep)}
+.course-product-frame .outcomes-heading-copy h3{font:400 clamp(20px,2vw,24px)/1.12 var(--serif);margin:2px 0 4px}
+.course-product-frame .outcomes-heading-copy p{font-size:10px;line-height:1.6;margin:0 0 13px;color:var(--muted)}
+.course-product-frame .outcome-grid{gap:11px 14px;margin-top:0}
+.course-product-frame .outcome-grid>div{grid-template-columns:23px minmax(0,1fr);gap:7px}
+.course-product-frame .outcome-grid b{font-size:13px}
+.course-product-frame .outcome-grid span{font-size:10px;line-height:1.6}
+.course-product-frame .outcome-method{display:flex;align-items:center;flex-wrap:wrap;gap:8px;border-top:1px dashed #c9c0af;margin-top:13px;padding-top:11px;font-size:10px;color:var(--green-deep)}
+.course-product-frame .outcome-method span{font-weight:750}
+.course-product-frame .outcome-method i{font-style:normal;color:var(--tomato)}
+.course-product-footnote{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:13px;font-size:10px;line-height:1.7;color:var(--muted)}
+.course-product-footnote .hand-note{font-size:13px;padding:7px 10px;margin:0;white-space:nowrap}
+.course-product-frame .course-hero-offer{align-self:stretch;min-width:0}
+.course-product-frame .product-purchase-card{height:100%;box-sizing:border-box;padding:24px 23px 18px;background:#e5eadc;border-color:#cddac5;border-radius:19px}
+.product-offer-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative}
+.product-offer-heading .tag{display:inline-flex;align-items:center;max-width:calc(100% - 38px);white-space:normal;line-height:1.4;padding:7px 10px;background:#fff8e2;border:1px solid #e8d8a7;border-radius:99px;color:#755c2b;font-size:9px;letter-spacing:.07em}
+.product-watermark{position:absolute;right:0;top:-7px;font:italic 46px/.9 var(--serif);color:#355a460d;pointer-events:none}
+.course-product-frame .product-price{margin:17px 0 7px;gap:9px}
+.course-product-frame .product-price strong{font:400 43px/1 var(--serif);letter-spacing:-.04em}
+.course-product-frame .product-price span{font-size:9px;line-height:1.4}
+.course-product-frame .product-purchase-card>p{font-size:11px;line-height:1.75;margin-bottom:12px}
+.course-product-frame .product-check-list{gap:7px;margin:0 0 15px}
+.course-product-frame .product-check-list li{font-size:10px;line-height:1.6;padding-left:19px}
+.product-stage-list{display:grid;gap:0;border-top:1px solid #c6d4bd;border-bottom:1px solid #c6d4bd;margin:12px 0 14px;padding:4px 0}
+.product-stage-list>div{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;gap:8px;padding:7px 0}
+.product-stage-list b{font:650 10px/1.5 var(--sans);color:var(--deep)}
+.product-stage-list span{font-size:9px;line-height:1.5;text-align:right;color:#61705f}
+.course-product-frame .product-enrol-button{width:100%;min-height:45px;white-space:normal;margin-top:1px}
+.course-product-frame .product-purchase-card .fine-note{font-size:9px!important;line-height:1.55;margin-top:9px}
+.course-product-frame .course-scope-statement{margin-top:12px;padding-top:12px;border-top:1px solid #c6d4bd;font-size:10px;line-height:1.7;color:#4e604f}
+
+.course-product-hero+.section{padding-top:38px!important}
+@media(max-width:1000px){.course-product-frame .course-hero-grid{grid-template-columns:minmax(0,1fr) minmax(295px,.88fr);gap:20px}.course-product-frame .course-hero-copy h1{font-size:clamp(35px,4.1vw,46px)}.course-product-frame .product-purchase-card{padding:21px 19px 17px}.course-product-frame .outcome-grid{gap:10px}}
+@media(max-width:780px){.course-product-hero{padding:24px 0 38px}.course-product-frame{padding:20px;border-radius:22px}.course-product-frame .course-hero-grid{grid-template-columns:1fr;gap:22px}.course-product-frame .course-hero-copy{padding:0}.course-product-frame .course-hero-copy h1{font-size:clamp(37px,7vw,50px);max-width:720px}.course-product-frame .course-hero-copy .intro{font-size:14px}.course-product-frame .course-hero-offer{grid-row:auto}.course-product-frame .product-purchase-card{height:auto;padding:23px}.course-product-frame .outcome-grid span{font-size:11px}.course-product-footnote{align-items:flex-start}}
+@media(max-width:520px){.course-product-frame{padding:15px;border-radius:18px}.course-product-frame .course-hero-copy .breadcrumb{margin-bottom:18px;font-size:10px}.course-product-frame .course-hero-copy h1{font-size:clamp(34px,9.6vw,44px);line-height:1.05}.course-product-frame .course-promise{font-size:22px}.course-product-frame .course-facts{gap:6px}.course-product-frame .course-facts span{font-size:9px;padding:6px 8px}.course-product-frame .product-outcomes{padding:16px 13px 13px}.course-product-frame .outcomes-heading-copy h3{font-size:21px}.course-product-frame .outcome-grid{grid-template-columns:1fr;gap:10px}.course-product-frame .outcome-grid span{font-size:11px}.course-product-frame .outcome-method{gap:6px;font-size:9px}.course-product-footnote{display:grid;gap:7px}.course-product-footnote .hand-note{justify-self:start;white-space:normal}.course-product-frame .product-purchase-card{padding:19px 16px}.product-stage-list>div{grid-template-columns:1fr;gap:2px}.product-stage-list span{text-align:left;font-size:10px}.course-product-frame .product-price strong{font-size:41px}}
+
+
+/* v14 refinement — the detail page is the full sales presentation; keep all content inside its frame. */
+.course-product-frame .course-hero-grid{align-items:stretch}
+.course-product-frame .course-hero-offer{display:flex;flex-direction:column;min-width:0;align-self:stretch}
+.course-product-frame .product-purchase-card{width:100%;height:100%;display:flex;flex-direction:column;justify-content:flex-start}
+.course-product-frame .product-stage-list{margin-top:auto}
+.course-product-frame .course-scope-statement{margin-top:12px}
+.course-product-frame .course-hero-copy{display:flex;flex-direction:column;align-items:stretch}
+.course-product-frame .course-product-footnote{margin-top:13px}
+.course-product-hero+.section{padding-top:44px!important}
+@media(min-width:1100px){
+ .course-product-frame .course-hero-grid{grid-template-columns:minmax(0,1.08fr) minmax(340px,.92fr);gap:clamp(26px,3vw,40px)}
+ .course-product-frame .product-purchase-card{padding:25px 24px 20px}
+}
+@media(max-width:780px){
+ .course-product-frame .product-purchase-card{height:auto}
+ .course-product-frame .product-stage-list{margin-top:12px}
+}
+
 </style><meta content="v10-2026-10-12" name="tradethesis-build"/></head><body>
 <div class="topline">One course · 30 lessons · four connected stages · <a href="courses.html">Back to Courses</a></div><header class="header"><div class="wrap nav"><a class="brand" href="index.html"><span class="brand-mark">T.</span><span><span class="brand-name">TradeThesis</span><span class="brand-tag">Conviction before execution</span></span></a><nav class="navlinks"><a href="index.html#approach">Our approach</a><a class="active" href="courses.html">Courses</a><a href="index.html#community">Community</a><a href="index.html#desk">The Desk</a></nav><a class="button" href="#course-curriculum">Explore the full course ↓</a><button aria-expanded="false" aria-label="Open navigation" class="mobile-toggle">☰</button></div><nav class="wrap mobilelinks"><a href="index.html#approach">Our approach</a><a href="courses.html">Courses</a><a href="index.html#community">Community</a><a href="index.html#desk">The Desk</a></nav></header>
 <main>
-<section class="page-hero course-hero-compact"><div class="wrap"><div class="course-hero-grid">
-<div class="course-hero-copy">
-<nav class="breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span aria-hidden="true">/</span><a href="courses.html">Courses</a><span aria-hidden="true">/</span><span aria-current="page">The TradeThesis Trading Path</span></nav>
-<div class="eyebrow">Self-paced course · complete curriculum</div>
-<h1>The TradeThesis Trading Path</h1>
-<p class="course-promise">From reading the screen to building your own trading process.</p>
-<p class="intro">One connected course that moves from market mechanics and chart reading to trade planning, risk, psychology and review. Each stage builds on the last, so you learn to explain the decision—not just recognise a pattern.</p>
-<div class="course-facts" aria-label="Course at a glance"><span><strong>30</strong> lessons</span><i aria-hidden="true"></i><span><strong>4</strong> connected stages</span><i aria-hidden="true"></i><span><strong>30-day</strong> learning plan</span></div>
-<div class="hand-row"><span class="hand-note yellow">One course. One enrolment.</span><span class="note-context">The four stages are parts of the same learning journey—not separate products.</span></div>
-<div class="course-hero-actions"><a class="button outline" href="#course-curriculum">Explore the curriculum ↓</a><a class="button" href="#enrolment-includes">What you’ll receive ↗</a></div>
-</div>
-<aside aria-label="The TradeThesis Trading Path price and inclusions" class="course-hero-offer"><div class="purchase-card">
-<span class="tag">COMPLETE SELF-PACED COURSE</span>
-<div class="purchase-price"><strong>₹999</strong><span>proposed · one-time payment</span></div>
-<p>One enrolment for the full 30-lesson Trading Path.</p>
-<ul class="check-list"><li>30 written lessons across four connected stages</li><li>Practice prompts, knowledge checks and stage quizzes</li><li>Foundations Field Notes workbook and teaching diagrams</li><li>Fictional case, trade checklist and playbook exercises</li><li>Final quiz and review across the learning path</li></ul>
-<button class="button" data-preview-checkout="">Review enrolment ↗</button>
-<p class="fine-note">Website preview only. No payment will be taken.</p>
-<div class="course-scope-statement"><strong>What this purchase covers:</strong> the complete 30-lesson course—not an individual stage.</div>
-</div><div class="note-box"><strong>A note before you enrol:</strong> the goal is a clearer decision process, not a promise of profits or a signal service.</div></aside>
-</div></div></section>
+<section class="page-hero course-hero-compact course-product-hero">
+ <div class="wrap">
+  <div class="course-product-frame">
+   <div class="course-hero-grid">
+    <div class="course-hero-copy">
+     <nav class="breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span aria-hidden="true">/</span><a href="courses.html">Courses</a><span aria-hidden="true">/</span><span aria-current="page">The TradeThesis Trading Path</span></nav>
+     <div class="eyebrow">The self-paced course</div>
+     <h1>The TradeThesis Trading Path</h1>
+     <p class="course-promise">Understand the screen before you risk the money.</p>
+     <p class="intro">A practical, connected journey from reading the market screen to analysing price, constructing a trade plan, defining risk and reviewing your decisions. Learn to explain your reasoning—not just recognise a pattern.</p>
+     <div class="course-facts" aria-label="Course at a glance"><span><strong>30</strong> lessons</span><i aria-hidden="true"></i><span><strong>4</strong> connected stages</span><i aria-hidden="true"></i><span><strong>30-day</strong> learning sequence</span></div>
+     <div class="outcomes outcomes-coursewide product-outcomes">
+      <div class="outcomes-heading"><span aria-hidden="true" class="outcomes-icon">✎</span><div class="outcomes-heading-copy"><h3>By the end, you should be able to…</h3><p>Not predict every move. Read the screen with a little more care.</p></div></div>
+      <div class="outcome-grid">
+       <div><b>01</b><span>Describe what price is doing and separate observation from interpretation.</span></div>
+       <div><b>02</b><span>Use chart structure and technical tools as evidence, not automatic instructions.</span></div>
+       <div><b>03</b><span>Connect a trade idea to entry, invalidation, position size and risk.</span></div>
+       <div><b>04</b><span>Review a decision, learn from the result and refine a written process.</span></div>
+      </div>
+      <div aria-label="The learning loop" class="outcome-method"><span>Observe</span><i aria-hidden="true">→</i><span>Interpret</span><i aria-hidden="true">→</i><span>Question</span><i aria-hidden="true">→</i><span>Record</span></div>
+     </div>
+     <div class="course-product-footnote"><span class="hand-note yellow">One course. One enrolment.</span><span>The four stages are connected parts of the same learning journey—not separate products.</span></div>
+    </div>
+    <aside aria-label="The TradeThesis Trading Path price and inclusions" class="course-hero-offer">
+     <div class="purchase-card product-purchase-card">
+      <div class="product-offer-heading"><span class="tag">One course · Four stages</span><span class="product-watermark" aria-hidden="true">TT</span></div>
+      <div class="purchase-price product-price"><strong>₹999</strong><span>proposed<br>one-time payment</span></div>
+      <p>One connected self-paced course, moving from the mechanics of the screen to a process you can explain.</p>
+      <ul class="check-list product-check-list">
+       <li>30 written lessons across four connected stages</li>
+       <li>Practice prompts and knowledge checks</li>
+       <li>Stage quizzes and a final quiz</li>
+       <li>Field Notes workbook and teaching diagrams</li>
+       <li>Fictional case exercises and playbook work</li>
+      </ul>
+      <div class="product-stage-list" aria-label="The four connected stages">
+       <div><b>01 · Foundations</b><span>Understand the screen</span></div>
+       <div><b>02 · Technical Toolkit</b><span>Read structure and evidence</span></div>
+       <div><b>03 · Trading Mechanics</b><span>Construct and manage a plan</span></div>
+       <div><b>04 · Psychology &amp; Going Live</b><span>Review and refine your process</span></div>
+      </div>
+      <button class="button product-enrol-button" data-preview-checkout>Continue to enrolment ↗</button>
+      <p class="fine-note">Checkout is a preview interaction. No payment will be taken.</p>
+      <div class="course-scope-statement"><strong>One enrolment covers the full course:</strong> all four connected stages of the 30-lesson Trading Path.</div>
+     </div>
+</aside>
+   </div>
+  </div>
+ </div>
+</section>
 <section class="section white" style="padding-top:42px"><div class="wrap">
-<div class="course-overview-intro"><div class="eyebrow">The outcome of the whole course</div><h2 class="detail-heading">Learn the whole process, not a collection of disconnected tricks.</h2><p>The TradeThesis Trading Path moves from basic market mechanics to reading context, planning trades, managing exposure and reviewing decisions. Each stage gives you a stronger base for the next one. The point is to know what you can observe, what you are interpreting, and what you still need to check.</p></div>
-<div class="outcomes outcomes-coursewide"><div class="outcomes-heading"><span aria-hidden="true" class="outcomes-icon">✎</span><div class="outcomes-heading-copy"><h3>By the end, you should be able to…</h3><p>Not predict every move. Explain your reasoning with more care.</p></div></div>
-<div class="outcome-grid"><div><b>01</b><span>Explain what market prices, orders, candles and volume show—and what they cannot tell you alone.</span></div><div><b>02</b><span>Read chart structure and use technical tools as evidence, not automatic instructions.</span></div><div><b>03</b><span>Turn an idea into a plan with entry logic, invalidation, position size and explicit risk.</span></div><div><b>04</b><span>Review a series of decisions, learn from the record and write down a process you can explain.</span></div></div>
-<div aria-label="The learning loop" class="outcome-method"><span>Observe</span><i aria-hidden="true">→</i><span>Interpret</span><i aria-hidden="true">→</i><span>Question</span><i aria-hidden="true">→</i><span>Record</span></div></div>
-<div class="course-curriculum" id="course-curriculum"><div class="course-curriculum-heading"><div><div class="eyebrow">The curriculum</div><h2>The course, in four connected stages.</h2></div><p>Follow the stages in sequence. Each adds a different part of the decision process, and the last brings the earlier work into a personal playbook.</p></div>
+<div class="course-overview-intro"><div class="eyebrow">How the whole course fits together</div><h2 class="detail-heading">Four stages. One connected learning path.</h2><p>The TradeThesis Trading Path moves from basic market mechanics to reading context, planning trades, managing exposure and reviewing decisions. Each stage gives you a stronger base for the next one. The point is to know what you can observe, what you are interpreting, and what you still need to check.</p></div>
+<div class="course-curriculum" id="course-curriculum"><div class="course-curriculum-heading"><div><div class="eyebrow">The curriculum</div><h2>The complete curriculum, in four connected stages.</h2></div><p>Follow the stages in sequence. Each adds a different part of the decision process, and the last brings the earlier work into a personal playbook.</p></div>
 <div class="course-unity-note"><span aria-hidden="true">↳</span><span><strong>One connected curriculum.</strong> Learn the market mechanics first, add chart context next, turn analysis into a plan, then review how you make decisions.</span></div>
 <div class="course-roadmap" aria-label="Four connected stages of the Trading Path">
 <article class="roadmap-stage"><div class="roadmap-index-wrap"><span class="roadmap-index">01</span></div><div class="roadmap-main"><div class="roadmap-meta">Lessons 01–08 · 8 lessons</div><h3>Foundations</h3><p class="roadmap-promise">Understand the screen before you risk the money.</p><p>Start with how prices form, what orders do, how charts communicate information, and why quantity, leverage and costs matter.</p></div><div class="roadmap-topics"><span>Markets &amp; orders</span><span>Candles &amp; volume</span><span>Quantity &amp; leverage</span><span>Analysis &amp; style</span></div></article>
