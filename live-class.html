@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/><meta content="Explore the TradeThesis live classroom: practical sessions connecting chart context, trade construction, risk, management, exits, and review." name="description"/><title>Trade Construction &amp; Management — TradeThesis</title><style>
+:root{--paper:#fbf7ef;--paper2:#f2ebdf;--card:#fffdf8;--ink:#29382e;--muted:#687268;--green:#355a46;--deep:#254334;--sage:#dce7d6;--tomato:#c96f50;--butter:#f0d38a;--line:#ded8ca;--line-dark:#c7c0b1;--serif:Georgia,"Times New Roman",serif;--sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--mono:"SFMono-Regular",Consolas,monospace;--shadow:0 17px 45px #29382e10}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:92px}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6}a{color:inherit;text-decoration:none}button,input,textarea{font:inherit}button{cursor:pointer}a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--tomato);outline-offset:3px}::selection{background:var(--butter);color:var(--ink)}.wrap{width:min(1160px,calc(100% - 48px));margin-inline:auto}.topline{background:var(--deep);color:#f8f4e9;padding:9px 16px;text-align:center;font-size:11px;letter-spacing:.025em}.topline a{color:var(--butter);text-decoration:underline;text-underline-offset:3px}.header{position:sticky;top:0;z-index:30;background:#fbf7efed;backdrop-filter:blur(14px);border-bottom:1px solid #ded8caad}.nav{height:74px;display:flex;align-items:center;justify-content:space-between;gap:22px}.brand{display:flex;align-items:center;gap:10px;flex-shrink:0}.brand-mark{width:39px;height:39px;display:grid;place-items:center;border-radius:13px 13px 13px 5px;background:var(--green);color:var(--butter);font:italic 24px var(--serif);transform:rotate(-3deg)}.brand-name{display:block;font:600 19px/.95 var(--serif);letter-spacing:.015em}.brand-tag{display:block;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-top:6px}.navlinks{display:flex;align-items:center;gap:25px;color:var(--muted);font-size:12px}.navlinks a:hover,.navlinks a.active{color:var(--deep)}.navlinks a.active{font-weight:800}.button{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:12px 18px;border:1px solid var(--green);border-radius:999px;background:var(--green);color:#fffdf8;font-size:12px;font-weight:750;transition:transform .18s,box-shadow .18s;white-space:nowrap}.button:hover{transform:translateY(-2px);box-shadow:0 7px 18px #26362d1b}.button.outline{background:transparent;color:var(--green)}.button.butter{background:var(--butter);border-color:var(--butter);color:var(--ink)}.button.small{padding:9px 13px;font-size:11px}.mobile-toggle{display:none;width:40px;height:40px;border:1px solid var(--line);border-radius:50%;background:transparent}.mobilelinks{display:none}.eyebrow{display:flex;align-items:center;gap:9px;color:var(--green);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}.eyebrow:before{content:"";display:inline-block;width:19px;height:2px;background:var(--tomato)}h1,h2,h3,p{margin-top:0}.hero{padding:58px 0 65px;position:relative;overflow:hidden}.hero:after{content:"";position:absolute;right:-165px;top:-150px;width:400px;height:400px;border:1px solid #d9cda9;border-radius:50%;box-shadow:0 0 0 27px #e9c87910,0 0 0 65px #e9c8790c;pointer-events:none}.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:58px;align-items:center;position:relative;z-index:1}.hero h1{font:400 clamp(46px,5.1vw,70px)/1.01 var(--serif);letter-spacing:-.048em;margin:19px 0 20px;max-width:590px}.hero h1 em{font-weight:400;color:var(--green);text-decoration:underline;text-decoration-color:#e2bd75;text-decoration-thickness:3px;text-underline-offset:5px}.intro{font-size:15px;line-height:1.85;color:var(--muted);max-width:510px;margin:0 0 25px}.hero-actions{display:flex;gap:10px;flex-wrap:wrap}.quick-truths{display:flex;gap:9px 17px;flex-wrap:wrap;margin-top:23px;color:var(--muted);font-size:10px}.quick-truths span{display:flex;align-items:center;gap:6px}.quick-truths span:before{content:"✓";display:grid;place-items:center;width:16px;height:16px;border-radius:50%;background:var(--sage);color:var(--green);font-weight:800;font-size:10px}.reassure{border-left:2px solid var(--tomato);padding:5px 0 5px 12px;margin-top:23px;max-width:450px;color:var(--muted);font-size:11px;line-height:1.7}.reassure strong{color:var(--ink)}.study-wrap{position:relative;padding:13px;background:#e8e4d6;border:1px solid #d9d1bf;border-radius:26px;box-shadow:var(--shadow);transform:rotate(.7deg)}.study-wrap:after{content:"a little practice";position:absolute;right:12px;top:-14px;background:var(--butter);color:#655637;padding:6px 12px;border-radius:2px;font:italic 14px var(--serif);transform:rotate(4deg);box-shadow:0 3px 8px #29382e12;z-index:3}.study-card{background:#283b30;color:#faf4e6;min-height:400px;border-radius:18px;padding:22px;position:relative;overflow:hidden}.study-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;font:9px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:#c4d0bf}.study-pill{border:1px solid #91a991;border-radius:99px;padding:5px 8px;color:#dce7d6;white-space:nowrap}.study-title{font:400 29px/1.05 var(--serif);margin:27px 0 6px}.study-sub{font-size:11px;color:#bdcbb8}.chart{display:block;width:100%;height:auto;margin-top:9px}.chart-label{font:9px var(--mono);letter-spacing:.09em;fill:#f0d38a}.exercise{position:relative;z-index:2;margin-top:-34px;margin-inline:9px;background:var(--card);border:1px solid #e3ddcf;border-radius:15px;padding:15px 16px 14px;box-shadow:0 13px 30px #0c191136;color:var(--ink)}.exercise-kicker{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--tomato)}.exercise h2{font:400 21px/1.17 var(--serif);margin:6px 0 12px;max-width:390px}.answers{display:flex;gap:7px;flex-wrap:wrap}.answers button{border:1px solid var(--line);border-radius:99px;background:transparent;padding:7px 10px;font-size:10px;transition:background .15s,color .15s}.answers button:hover,.answers button[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:white}.answer-copy{font-size:11px;line-height:1.6;color:var(--muted);margin:11px 0 0;padding-top:10px;border-top:1px solid var(--line)}.answer-copy:empty{display:none}.quickstrip{background:var(--sage);border-block:1px solid #d1ddcb}.quickstrip-grid{display:grid;grid-template-columns:repeat(4,1fr)}.quick-item{padding:19px 16px;border-right:1px solid #c8d7c3}.quick-item:first-child{padding-left:0}.quick-item:last-child{border:0}.quick-item b{display:block;font:400 18px var(--serif)}.quick-item span{font-size:11px;color:#5e6b60}.section{padding:76px 0}.section.white{background:#fffaf1;border-block:1px solid var(--line)}.section.deep-paper{background:var(--paper2);border-block:1px solid var(--line)}.section-head{display:flex;align-items:end;justify-content:space-between;gap:28px;margin-bottom:29px}.section-head h2{font:400 clamp(34px,4.1vw,50px)/1.04 var(--serif);letter-spacing:-.04em;margin:12px 0 0;max-width:650px}.section-head>p{max-width:390px;margin:0;color:var(--muted);font-size:13px;line-height:1.8}.two-col{display:grid;grid-template-columns:.85fr 1.15fr;gap:72px;align-items:start}.big-heading{font:400 clamp(36px,4.2vw,50px)/1.04 var(--serif);letter-spacing:-.04em;margin:12px 0 22px}.margin-note{background:var(--butter);padding:23px;border-radius:3px 22px 22px 22px;transform:rotate(-1.2deg);box-shadow:0 9px 20px #8b754015}.margin-note p{font:italic 22px/1.3 var(--serif);margin:0}.margin-note small{display:block;font:10px var(--sans);color:#62583b;margin-top:14px}.body-copy{font-size:14px;line-height:1.9;color:var(--muted)}.body-copy strong{color:var(--ink)}.signature{font:italic 18px var(--serif);color:var(--green);margin-top:19px}.hand-note{display:inline-flex;align-items:flex-start;gap:8px;max-width:100%;font:italic 15px/1.35 var(--serif);color:var(--tomato);transform:rotate(-1.2deg)}.hand-note:before{content:"↳";font:16px/1 var(--serif);color:var(--green);margin-top:1px;flex:0 0 auto}.hand-note.yellow{background:#f5e7bd;padding:10px 13px;border-radius:2px 12px 12px 12px;box-shadow:0 4px 13px #29382e0a}.hand-note.sage{background:#e5eadc;padding:10px 13px;border-radius:12px 2px 12px 12px;color:var(--deep)}.hand-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:19px}.note-context{font-size:11px;line-height:1.7;color:var(--muted)}.course-grid{display:grid;grid-template-columns:1fr 1fr;gap:17px}.course-card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:25px;display:flex;flex-direction:column;min-height:330px;position:relative;overflow:hidden;transition:transform .18s,border-color .18s,box-shadow .18s}.course-card:hover{transform:translateY(-3px);border-color:#b8c5af;box-shadow:var(--shadow)}.course-card.featured{background:#e5eadc}.course-card.live{background:#f8edcf}.card-top{display:flex;align-items:center;justify-content:space-between;gap:10px}.tag{display:inline-flex;align-items:center;border:1px solid #d4d0c4;border-radius:99px;padding:6px 9px;font-size:9px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:var(--green);background:#fffdf899}.tag.warm{background:#fff9e8;border-color:#e0d3ad;color:#7a6030}.card-number{font:italic 15px var(--serif);color:var(--tomato)}.course-card h3{font:400 31px/1.1 var(--serif);margin:20px 0 9px;letter-spacing:-.025em}.course-card p{font-size:12px;line-height:1.8;color:var(--muted);margin:0;max-width:500px}.card-meta{display:flex;gap:7px;flex-wrap:wrap;margin:17px 0}.card-meta span{font-size:10px;border:1px solid #d5d6c7;padding:6px 8px;border-radius:99px;color:#5c6c5d}.card-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:auto;padding-top:18px}.price{font:400 26px var(--serif)}.price small{font:11px var(--sans);color:var(--muted)}.text-link{display:inline-flex;gap:7px;align-items:center;color:var(--green);font-size:12px;font-weight:800}.text-link:hover{text-decoration:underline;text-underline-offset:4px}.section-aside{font-size:11px;color:var(--muted);margin-top:18px}.section-aside strong{color:var(--green)}.arc{position:relative;display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.arc:before{content:"";position:absolute;left:5%;right:5%;top:16px;border-top:1px dashed #c9c0af}.arc-step{position:relative}.arc-dot{height:33px;width:33px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff9ed;border:4px solid var(--paper2);font:12px var(--mono);position:relative;z-index:1}.arc-step:nth-child(2n) .arc-dot{background:var(--tomato)}.arc-step h3{font:400 20px/1.15 var(--serif);margin:14px 0 7px}.arc-step p{font-size:11px;color:var(--muted);line-height:1.65;margin:0}.community-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.community-panel{padding:29px;border-radius:22px;background:var(--green);color:#f9f4e8;min-height:240px;position:relative;overflow:hidden}.community-panel.light{background:#f1dfb5;color:var(--ink)}.community-icon{font-size:23px}.community-kicker{font-size:9px;letter-spacing:.12em;text-transform:uppercase;opacity:.7;margin-top:17px}.community-panel h3{font:400 29px/1.08 var(--serif);max-width:400px;margin:12px 0}.community-panel p{font-size:12px;line-height:1.8;max-width:460px;opacity:.88;margin:0}.scribble{position:absolute;right:21px;top:20px;font:italic 16px var(--serif);transform:rotate(7deg);color:var(--butter)}.community-panel.light .scribble{color:var(--tomato)}.reading-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.reading{padding:22px;background:var(--card);border:1px solid var(--line);border-radius:16px;min-height:205px;display:flex;flex-direction:column}.reading.featured{background:#e5eadc;transform:rotate(-.3deg)}.read-meta{font-size:9px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:var(--tomato)}.reading h3{font:400 25px/1.12 var(--serif);margin:16px 0 10px}.reading p{font-size:11px;color:var(--muted);line-height:1.75;margin:0}.reading .text-link{margin-top:auto;padding-top:18px}.quote-band{padding:57px 0 60px;text-align:center;background:#fffaf1;border-block:1px solid var(--line)}.quote-doodle{display:inline-block;margin:0 auto 14px;padding:6px 11px;background:#f1dfb5;color:#88543f;font:italic 14px var(--serif);transform:rotate(-2deg);border-radius:2px 10px 10px 10px}.quote-band blockquote{font:400 clamp(28px,3.9vw,43px)/1.18 var(--serif);letter-spacing:-.025em;max-width:790px;margin:10px auto 13px}.quote-band p{font-size:11px;color:var(--muted);margin:0}.last-call{padding-top:0}.cta-box{background:var(--deep);color:#fff8e9;padding:40px;border-radius:25px;display:flex;align-items:center;justify-content:space-between;gap:30px;position:relative;overflow:hidden}.cta-box:after{content:"?";position:absolute;right:22%;top:-100px;font:320px/.9 var(--serif);color:#f0d38a0d;pointer-events:none}.cta-box .eyebrow{color:var(--butter)}.cta-box .eyebrow:before{background:var(--butter)}.cta-box h2{font:400 clamp(32px,4vw,46px)/1.06 var(--serif);letter-spacing:-.035em;margin:12px 0;max-width:650px}.cta-box p{font-size:12px;line-height:1.8;color:#d7e0d1;max-width:545px;margin:0}.cta-box .button{position:relative;z-index:1;flex-shrink:0}.cta-note{font:italic 14px/1.4 var(--serif);color:var(--butter);margin-top:12px;transform:rotate(-1deg)}footer{padding:35px 0 22px}.footer-main{display:flex;justify-content:space-between;align-items:start;gap:32px;padding-bottom:25px}.footer-copy{font-size:11px;line-height:1.8;color:var(--muted);max-width:320px;margin:12px 0 0}.footer-links{display:flex;flex-wrap:wrap;gap:18px;color:var(--muted);font-size:11px}.footer-links a:hover{color:var(--green)}.footer-bottom{border-top:1px solid var(--line);padding-top:15px;display:flex;justify-content:space-between;gap:20px;font-size:9px;line-height:1.7;color:#778075}.disclaimer{max-width:800px}.page-hero{padding:61px 0 42px;position:relative}.page-hero h1{font:400 clamp(43px,5vw,64px)/1.02 var(--serif);letter-spacing:-.05em;max-width:780px;margin:16px 0}.page-hero .intro{max-width:680px;margin-bottom:0}.breadcrumb{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:10px;margin-bottom:26px}.breadcrumb a:hover{color:var(--green);text-decoration:underline}.catalogue-intro{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:28px}.catalogue-intro p{margin:0;color:var(--muted);font-size:13px;max-width:390px}.course-large{display:grid;grid-template-columns:1.15fr .85fr;gap:35px;align-items:start;padding:30px;border:1px solid var(--line);border-radius:23px;background:#fffaf1;margin-bottom:18px;box-shadow:0 10px 35px #29382e07}.course-large.sage{background:#e5eadc}.course-large.gold{background:#f8edcf}.course-large h2{font:400 34px/1.08 var(--serif);margin:15px 0 10px}.course-large p{font-size:13px;color:var(--muted);line-height:1.85}.course-large ul{padding-left:18px;color:var(--muted);font-size:12px;line-height:1.9;margin:13px 0 0}.offer-side{background:#ffffff99;border:1px solid #ddd8ca;border-radius:17px;padding:23px}.offer-side .price{font-size:37px}.offer-side p{font-size:11px;line-height:1.7}.offer-side .button{width:100%;margin-top:9px}.note-box{margin-top:18px;padding:14px 16px;border-left:2px solid var(--tomato);background:#fffaf1;color:var(--muted);font-size:12px;line-height:1.75}.future-list{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}.future-card{border:1px dashed var(--line-dark);border-radius:16px;padding:19px;background:#fffaf070;min-height:160px}.future-card .tag{background:transparent}.future-card h3{font:400 23px/1.15 var(--serif);margin:17px 0 8px}.future-card p{font-size:11px;line-height:1.7;color:var(--muted);margin:0}.course-detail-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:36px;align-items:start}.detail-copy h2{font:400 clamp(30px,3vw,40px)/1.1 var(--serif);letter-spacing:-.03em;margin:0 0 15px}.detail-copy>p{font-size:13px;line-height:1.9;color:var(--muted)}.detail-sidebar{position:sticky;top:100px}.purchase-card{background:var(--sage);border:1px solid #d0ddc9;border-radius:19px;padding:24px;position:relative;overflow:hidden}.purchase-card .tag{background:#f5e7bd;border-color:#e8d8a7}.purchase-price{display:flex;align-items:baseline;gap:9px;margin:17px 0 3px}.purchase-price strong{font:400 44px/1 var(--serif);letter-spacing:-.04em}.purchase-price span{font-size:11px;color:var(--muted)}.purchase-card>p{font-size:12px;color:#59685b;line-height:1.75}.check-list{list-style:none;padding:0;margin:17px 0 20px;display:grid;gap:10px}.check-list li{font-size:11px;line-height:1.6;padding-left:22px;position:relative}.check-list li:before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:800}.fine-note{text-align:center;font-size:9px!important;line-height:1.5;color:var(--muted)!important;margin:11px 0 0}.module-scope{margin-top:13px;padding-top:13px;border-top:1px solid #c6d5c0;font-size:10px;line-height:1.7;color:#5c685c}.module-scope strong{color:var(--ink)}.outcomes{margin:23px 0;padding:21px;background:#f2eee3;border:1px solid var(--line);border-radius:16px}.outcomes h3{font:400 23px var(--serif);margin:0 0 7px}.outcomes>p{font-size:11px;color:var(--muted);margin-bottom:16px}.outcome-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 17px}.outcome-grid>div{display:grid;grid-template-columns:25px 1fr;gap:8px}.outcome-grid b{font:italic 15px var(--serif);color:var(--tomato)}.outcome-grid span{font-size:11px;line-height:1.7;color:var(--muted)}.lesson-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 18px;margin:20px 0 0}.lesson{display:grid;grid-template-columns:29px 1fr;gap:8px;align-items:start;padding:13px 0;border-top:1px solid var(--line)}.lesson .num{font:italic 17px var(--serif);color:var(--tomato)}.lesson strong{display:block;font-size:12px}.lesson span{display:block;font-size:10px;line-height:1.7;color:var(--muted);margin-top:3px}.placeholder-charts{margin:25px 0;display:grid;grid-template-columns:1fr 1fr;gap:12px}.chart-slot{border:1px dashed #b5ad9a;border-radius:15px;background:#f4efe4;padding:20px;min-height:150px;display:flex;flex-direction:column;justify-content:center}.chart-slot .slot-icon{font:28px var(--serif);color:var(--tomato)}.chart-slot strong{font:400 19px var(--serif);margin:8px 0 4px}.chart-slot p{font-size:10px;line-height:1.7;color:var(--muted);margin:0}.fit-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.fit-card{border-radius:17px;padding:22px;background:var(--sage)}.fit-card.not{background:#f4e2d5}.fit-card h3{font:400 25px var(--serif);margin:0 0 12px}.fit-card ul{list-style:none;padding:0;margin:0;display:grid;gap:9px}.fit-card li{font-size:11px;line-height:1.65;padding-left:21px;position:relative}.fit-card:not(.not) li:before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:800}.fit-card.not li:before{content:"×";position:absolute;left:0;color:#a8523b;font-weight:800}.faq{max-width:820px;margin:0 auto}.faq details{padding:17px 0;border-top:1px solid var(--line)}.faq details:last-child{border-bottom:1px solid var(--line)}.faq summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:20px;font-size:13px;font-weight:700}.faq summary::-webkit-details-marker{display:none}.faq summary:after{content:"+";font:400 20px var(--serif);color:var(--tomato)}.faq details[open] summary:after{content:"−"}.faq details p{font-size:12px;line-height:1.85;color:var(--muted);max-width:740px;margin:12px 35px 0 0}.lesson-callout{padding:14px 17px;background:#e5eadc;border-left:2px solid #91a78a;border-radius:0 12px 12px 0;font:italic 15px/1.5 var(--serif);color:var(--deep);margin:19px 0}.modal{position:fixed;inset:0;z-index:70;background:#17261db8;backdrop-filter:blur(5px);display:none;place-items:center;padding:18px}.modal.open{display:grid}.modal-box{position:relative;width:min(510px,100%);max-height:90vh;overflow:auto;background:var(--paper);padding:28px;border-radius:23px;box-shadow:0 30px 90px #0004}.close{position:absolute;right:15px;top:15px;width:34px;height:34px;border:1px solid var(--line);border-radius:50%;background:transparent;font-size:20px}.modal-box h2{font:400 34px/1.07 var(--serif);letter-spacing:-.03em;margin:13px 30px 10px 0}.modal-box>p{font-size:12px;line-height:1.8;color:var(--muted)}.field{display:grid;gap:6px;margin:13px 0}.field label{font-size:10px;color:var(--muted);font-weight:650}.field input,.field textarea{width:100%;padding:12px;border:1px solid var(--line-dark);border-radius:10px;background:var(--card);color:var(--ink);font-size:12px}.field textarea{min-height:76px;resize:vertical}.modal-box form>.button{width:100%;margin-top:6px}.modal-help{font-size:9px!important;color:var(--muted)!important}.no-scroll{overflow:hidden}.coming{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-size:10px}.coming:before{content:"";width:6px;height:6px;border-radius:50%;background:#c6a65f}.back-link{font-size:11px;color:var(--green);font-weight:750}
+@media(max-width:900px){.navlinks{gap:14px}.navlinks a{font-size:11px}.hero-grid{gap:28px}.two-col{gap:38px}.course-large{gap:20px}.arc{grid-template-columns:repeat(3,1fr);gap:18px 12px}.arc:before{display:none}.course-detail-grid{gap:24px}.detail-sidebar{top:90px}}
+@media(max-width:650px){.wrap{width:calc(100% - 32px)}.topline{font-size:10px}.nav{height:66px}.navlinks,.nav>.button{display:none}.mobile-toggle{display:block}.mobilelinks.open{display:flex;flex-wrap:wrap;gap:12px 20px;padding:0 0 15px;color:var(--muted);font-size:12px}.hero{padding:38px 0 45px}.hero-grid,.two-col,.course-large,.course-detail-grid{grid-template-columns:1fr;gap:30px}.hero h1{font-size:clamp(45px,12vw,61px)}.intro{font-size:14px}.study-wrap{transform:none;margin-right:7px}.study-card{padding:17px;min-height:390px}.study-wrap:after{right:8px;top:-10px}.exercise{margin-inline:4px}.quickstrip-grid{grid-template-columns:1fr 1fr}.quick-item{padding:15px 9px;border-bottom:1px solid #c8d7c3}.quick-item:nth-child(2){border-right:0}.quick-item:nth-child(3){padding-left:0}.quick-item:nth-child(3),.quick-item:nth-child(4){border-bottom:0}.quick-item b{font-size:17px}.section{padding:57px 0}.section-head{display:block}.section-head>p{margin-top:13px}.course-grid,.community-grid,.reading-grid,.future-list{grid-template-columns:1fr}.course-card{min-height:280px}.arc{grid-template-columns:1fr 1fr;gap:21px 18px}.arc-step h3{margin-top:10px}.community-panel{min-height:220px;padding:24px}.quote-band{padding:48px 0}.cta-box{display:block;padding:28px 23px}.cta-box .button{margin-top:20px}.footer-main{display:block}.footer-links{margin-top:23px;gap:13px 17px}.footer-bottom{display:block}.disclaimer{margin-bottom:10px}.catalogue-intro{display:block}.catalogue-intro p{margin-top:12px}.course-large{padding:22px}.offer-side{padding:20px}.detail-sidebar{position:static;grid-row:1}.outcome-grid,.lesson-grid,.placeholder-charts,.fit-grid{grid-template-columns:1fr}.page-hero{padding:39px 0 28px}.page-hero h1{font-size:clamp(42px,11vw,58px)}.modal-box{padding:24px}.hand-row{align-items:flex-start;justify-content:flex-start;gap:10px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}}
+
+/*
+  Pass 2 — restore the original TradeThesis typographic character.
+  Keep the exact original font stacks: Georgia/Times for display and notes,
+  the existing system sans stack for reading, and monospace for small labels.
+  This pass adjusts hierarchy, contrast, rhythm and the few cramped layouts;
+  it does not introduce a new font or a new visual identity.
+*/
+:root{
+  --serif:Georgia,"Times New Roman",serif;
+  --sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:"SFMono-Regular",Consolas,monospace;
+  --reading:15px;
+}
+body{font-family:var(--sans);font-size:15px;line-height:1.65;letter-spacing:0}
+
+/* Header: keep every navigation label on one line, with a calm CTA. */
+.nav{gap:clamp(12px,1.8vw,22px)}
+.navlinks{flex:0 1 auto;gap:clamp(13px,1.8vw,22px);white-space:nowrap;font-size:12px}
+.navlinks a{white-space:nowrap}
+.nav>.button{display:inline-flex;width:auto;flex:0 0 auto;margin:0;padding:12px 17px;font-size:12px}
+.brand-name{font-size:19px;letter-spacing:.015em}
+.brand-tag{font-size:8px;letter-spacing:.13em}
+
+/* The original serif headline should lead; body copy should support it, not disappear. */
+.hero{padding:60px 0 62px}
+.hero-grid{grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:clamp(30px,4vw,50px)}
+.hero h1{font:400 clamp(46px,5.1vw,70px)/1.01 var(--serif);letter-spacing:-.048em;max-width:590px}
+.intro,.hero .intro{font-size:16px;line-height:1.8;color:var(--muted)}
+.quick-truths{font-size:11px;gap:10px 15px;line-height:1.45}
+.reassure{font-size:12px;line-height:1.75}
+.study-wrap{padding:13px}
+.study-card{min-height:430px;padding:22px}
+.study-title{font:400 30px/1.05 var(--serif)}
+.study-sub{font-size:12px}
+.exercise-kicker{font-size:10px;letter-spacing:.1em}
+.exercise h2{font:400 22px/1.17 var(--serif)}
+.answers button{font-size:11px;line-height:1.35;padding:8px 11px}
+.answer-copy{font-size:12px;line-height:1.7}
+
+/* Retain the original editorial scale from the shared document. */
+.section{padding:78px 0}
+.section-head h2{font:400 clamp(34px,4.1vw,50px)/1.04 var(--serif);letter-spacing:-.04em}
+.section-head>p{font-size:14px;line-height:1.8}
+.big-heading{font:400 clamp(36px,4.2vw,50px)/1.04 var(--serif);letter-spacing:-.04em}
+.body-copy{font-size:15px;line-height:1.9}
+.hand-note{font:italic 15px/1.4 var(--serif)}
+.note-context{font-size:12px;line-height:1.7}
+.eyebrow{font-size:10px;letter-spacing:.13em}
+.quick-item b{font:400 18px var(--serif)}
+.quick-item span{font-size:11px}
+
+/* Course cards: clearer hierarchy, better reading size, and a quiet editorial detail. */
+.course-card{padding:27px;min-height:340px}
+.course-card h3{font:400 31px/1.1 var(--serif);letter-spacing:-.025em}
+.course-card p{font-size:14px;line-height:1.8;max-width:520px}
+.card-meta span{font-size:11px;padding:6px 9px}
+.card-number{font:italic 15px var(--serif)}
+.course-card:after{content:"01";position:absolute;right:20px;bottom:14px;font:italic 104px/.8 var(--serif);color:var(--green);opacity:.065;transform:rotate(-7deg);pointer-events:none}
+.course-card:nth-child(2):after{content:"02";color:#9b633f;transform:rotate(5deg)}
+.course-card>*{position:relative;z-index:1}
+.course-card:after{z-index:0}
+.text-link{font-size:12px}
+
+/* Catalogue page: make the introductory note purposeful rather than stranded in whitespace. */
+.page-hero{padding:58px 0 42px}
+.page-hero h1{font:400 clamp(43px,5vw,64px)/1.02 var(--serif);letter-spacing:-.05em;max-width:790px}
+.page-hero .intro{max-width:720px;font-size:16px;line-height:1.8}
+.breadcrumb{font-size:11px;margin-bottom:25px}
+.page-hero .hand-row{justify-content:flex-start;gap:22px;margin-top:20px}
+.page-hero .note-context{max-width:360px;border-left:1px solid var(--line-dark);padding:5px 0 5px 15px}
+.catalogue-intro{align-items:center;gap:32px;margin-bottom:28px}
+.catalogue-intro>p{max-width:340px;padding:13px 16px;border-left:2px solid #91a78a;border-radius:0 12px 12px 0;background:#e5eadc;font-size:13px;line-height:1.7}
+.course-large{gap:clamp(23px,3vw,38px);padding:clamp(24px,3vw,34px);margin-bottom:20px}
+.course-large h2{font:400 clamp(31px,3.3vw,38px)/1.08 var(--serif);letter-spacing:-.03em}
+.course-large p{font-size:14px;line-height:1.85}
+.course-large ul{font-size:13px;line-height:1.75;display:grid;gap:5px}
+.offer-side{padding:25px}
+.offer-side p{font-size:13px;line-height:1.75}
+.offer-side .price{font:400 39px/1.05 var(--serif)}
+.offer-side .price small{font:12px var(--sans)}
+.offer-side .button{width:100%;margin-top:10px}
+.future-card{padding:22px;min-height:178px}
+.future-card h3{font:400 24px/1.15 var(--serif);margin:17px 0 9px}
+.future-card p{font-size:13px;line-height:1.75}
+.note-box{font-size:13px;line-height:1.8}
+
+/* Individual course pages: generous editorial headings and more readable lesson detail. */
+.course-detail-grid{gap:clamp(28px,4vw,44px)}
+.detail-copy h2{font:400 clamp(31px,3.2vw,41px)/1.1 var(--serif);letter-spacing:-.03em}
+.detail-copy>p{font-size:15px;line-height:1.9}
+.outcomes{padding:24px}
+.outcomes h3{font:400 25px/1.15 var(--serif)}
+.outcomes>p{font-size:12px;line-height:1.75;color:var(--muted)}
+.outcome-grid{gap:16px 19px}
+.outcome-grid span{font-size:13px;line-height:1.7;color:var(--muted)}
+.lesson-grid{gap:9px 22px}
+.lesson{padding:14px 0;grid-template-columns:31px 1fr;gap:9px}
+.lesson strong{font-size:13px;line-height:1.5}
+.lesson span{font-size:12px;line-height:1.7}
+.placeholder-charts{gap:14px}
+.chart-slot{padding:22px;min-height:170px}
+.chart-slot strong{font-size:13px;line-height:1.5}
+.chart-slot p{font-size:12px;line-height:1.7;color:var(--muted);margin:8px 0 0}
+.purchase-card{padding:26px}
+.purchase-price strong{font:400 46px/1 var(--serif);letter-spacing:-.04em}
+.purchase-price span{font-size:12px}
+.purchase-card>p{font-size:13px;line-height:1.8}
+.check-list{gap:11px}
+.check-list li{font-size:12px;line-height:1.7}
+.module-scope{font-size:11px;line-height:1.75}
+.fit-card{padding:24px}
+.fit-card h3{font:400 26px/1.15 var(--serif)}
+.fit-card li{font-size:12px;line-height:1.75}
+.faq summary{font-size:14px;line-height:1.5}
+.faq details p{font-size:13px;line-height:1.85}
+.lesson-callout{font:italic 15px/1.5 var(--serif)}
+
+/* Community and free-reading sections: keep the small human notes, reduce tiny print. */
+.community-panel{padding:31px;min-height:255px}
+.community-kicker{font-size:10px}
+.community-panel h3{font:400 clamp(27px,2.8vw,32px)/1.08 var(--serif)}
+.community-panel p{font-size:13px;line-height:1.8}
+.community-bottom{font-size:11px;line-height:1.6}
+.quote-band p{font-size:12px}
+.read-meta{font-size:10px}
+.reading{padding:24px;min-height:220px}
+.reading h3{font:400 25px/1.12 var(--serif)}
+.reading p{font-size:13px;line-height:1.75}
+.cta-box p{font-size:13px;line-height:1.85}
+.cta-note{font:italic 14px/1.4 var(--serif)}
+.footer-copy{font-size:12px;line-height:1.8}
+.footer-links{font-size:12px}
+.footer-bottom{font-size:10px;line-height:1.75}
+.fine-note{font-size:10px!important}
+
+@media(max-width:1050px) and (min-width:651px){
+  .nav{gap:14px}
+  .navlinks{gap:12px;font-size:11px}
+  .nav>.button{padding:11px 13px;font-size:11px}
+  .brand{gap:8px}
+  .brand-mark{width:36px;height:36px}
+  .brand-name{font-size:18px}
+  .hero-grid{gap:28px}
+  .course-large{gap:22px}
+}
+@media(max-width:900px){
+  .hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,.95fr);gap:22px}
+  .hero h1{font-size:clamp(44px,5.5vw,58px)}
+  .navlinks{gap:11px}
+  .course-card{padding:22px}
+  .course-card h3{font-size:28px}
+  .community-panel{padding:25px}
+}
+@media(max-width:650px){
+  body{font-size:14px}
+  .nav{gap:10px}
+  .navlinks,.nav>.button{display:none}
+  .mobile-toggle{display:grid;place-items:center;flex:0 0 40px}
+  .mobilelinks{gap:14px 19px;padding:0 0 16px;font-size:13px}
+  .hero{padding:39px 0 47px}
+  .hero-grid{grid-template-columns:1fr;gap:31px}
+  .hero h1{font-size:clamp(44px,11vw,59px);line-height:1.02}
+  .intro,.hero .intro,.page-hero .intro{font-size:15px;line-height:1.8}
+  .study-card{min-height:405px}
+  .section{padding:59px 0}
+  .section-head>p{font-size:14px}
+  .course-card{min-height:0;padding:23px}
+  .course-card:after{font-size:82px}
+  .course-card p{font-size:14px}
+  .page-hero{padding:38px 0 30px}
+  .page-hero h1{font-size:clamp(40px,10.5vw,56px)}
+  .page-hero .hand-row{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+  .page-hero .note-context{border-left:0;border-top:1px solid var(--line-dark);padding:10px 0 0;max-width:none}
+  .catalogue-intro{display:block}
+  .catalogue-intro>p{margin-top:15px;max-width:430px}
+  .course-large{grid-template-columns:1fr;gap:22px;padding:22px}
+  .offer-side{padding:21px}
+  .course-large h2{font-size:32px}
+  .course-detail-grid{grid-template-columns:1fr;gap:26px}
+  .detail-sidebar{position:static;grid-row:1}
+  .outcome-grid,.lesson-grid,.placeholder-charts,.fit-grid{grid-template-columns:1fr}
+  .outcomes{padding:19px}
+  .fit-card{padding:21px}
+  .reading-grid{grid-template-columns:1fr}
+  .community-panel{min-height:0}
+  .cta-box{padding:27px 22px}
+  .footer-bottom{font-size:10px}
+}
+
+
+
+/* Course catalogue and learning-path detail pass */
+.pathway-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin-top:25px}
+.pathway-card{position:relative;display:flex;flex-direction:column;min-width:0;padding:25px;background:var(--card);border:1px solid var(--line);border-radius:19px;box-shadow:0 8px 24px #29382e06;overflow:hidden}
+.pathway-card.featured{background:#e5eadc;border-color:#cddac5}
+.pathway-card:nth-child(4){background:#f8edcf}
+.pathway-card .pathway-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.pathway-card .tag{display:inline-flex;align-items:center;width:max-content;max-width:100%;border:1px solid #d4d0c4;border-radius:99px;padding:6px 9px;background:#fffdf8;font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--green)}
+.pathway-card .tag.pending{background:#fff9e8;border-color:#e0d3ad;color:#7a6030}
+.pathway-card .pathway-index{font:italic 16px var(--serif);color:var(--tomato);white-space:nowrap}
+.pathway-card h3{font:400 30px/1.1 var(--serif);letter-spacing:-.025em;margin:6px 0 10px}
+.pathway-card>p{font-size:12px;line-height:1.8;color:var(--muted);margin:0;max-width:540px}
+.pathway-card .pathway-list{display:grid;gap:7px;list-style:none;padding:0;margin:18px 0 20px}
+.pathway-card .pathway-list li{position:relative;padding-left:19px;font-size:11px;line-height:1.6;color:var(--ink)}
+.pathway-card .pathway-list li:before{content:'✓';position:absolute;left:0;top:0;color:var(--green);font-weight:800}
+.pathway-card .pathway-footer{display:flex;align-items:end;justify-content:space-between;gap:14px;margin-top:auto;padding-top:16px;border-top:1px solid #b9c5b2}
+.pathway-card .pathway-meta{font-size:10px;line-height:1.7;color:var(--muted)}
+.pathway-card .pathway-meta strong{display:block;color:var(--ink);font:400 23px/1.1 var(--serif);margin-bottom:4px}
+.pathway-card .text-link{flex-shrink:0;font-size:11px;white-space:nowrap}
+.pathway-card .pathway-footnote{font-size:10px;line-height:1.7;color:var(--muted);border-top:1px dashed #c9c0af;padding-top:10px;margin-top:14px}
+.catalogue-top{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:7px}
+.catalogue-top>p{max-width:400px;margin:0;color:var(--muted);font-size:13px;line-height:1.8}
+.release-note{margin-top:19px;padding:14px 16px;border-left:2px solid var(--tomato);background:#fffaf1;color:var(--muted);font-size:11px;line-height:1.8}
+.live-class-band{display:grid;grid-template-columns:1fr auto;align-items:center;gap:28px;padding:29px 31px;background:var(--green);color:#f9f4e8;border-radius:21px}
+.live-class-band .eyebrow{color:var(--butter)}.live-class-band .eyebrow:before{background:var(--butter)}
+.live-class-band h2{font:400 clamp(27px,3.3vw,35px)/1.1 var(--serif);margin:11px 0 9px}
+.live-class-band p{font-size:12px;line-height:1.8;color:#dfe5d9;max-width:700px;margin:0}
+.live-class-band .button{white-space:nowrap}
+.home-learning-doors{display:grid;grid-template-columns:1.15fr .85fr;gap:13px;margin-top:25px}
+.learning-door{display:flex;align-items:start;justify-content:space-between;gap:20px;padding:23px 24px;border:1px solid var(--line);border-radius:17px;background:var(--card)}
+.learning-door.primary{background:#e5eadc;border-color:#cddac5}
+.learning-door h3{font:400 25px/1.12 var(--serif);margin:0 0 8px}
+.learning-door p{font-size:12px;line-height:1.8;color:var(--muted);margin:0;max-width:470px}
+.learning-door .text-link{display:inline-flex;margin-top:14px;font-size:11px;font-weight:800;color:var(--green)}
+.learning-door .door-mark{font:italic 22px var(--serif);color:var(--tomato);flex:0 0 auto}
+.module-overview-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(270px,.75fr);gap:35px;align-items:start}
+.module-overview-copy h2{font:400 clamp(30px,3.7vw,42px)/1.08 var(--serif);letter-spacing:-.035em;margin:12px 0 13px}
+.module-overview-copy>p{font-size:13px;line-height:1.9;color:var(--muted);margin:0 0 12px}
+.module-outcomes{display:grid;gap:11px;margin-top:19px}
+.module-outcome{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start;font-size:12px;line-height:1.75}
+.module-outcome .tick{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--sage);color:var(--green);font-size:11px;font-weight:800}
+.module-status-card{position:sticky;top:100px;padding:24px;background:#fffaf1;border:1px solid var(--line);border-radius:18px}
+.module-status-card .status{display:inline-flex;align-items:center;border:1px solid #e0d3ad;background:#fff2d3;border-radius:99px;padding:6px 10px;color:#75602b;font-size:9px;text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+.module-status-card h3{font:400 25px/1.1 var(--serif);margin:15px 0 8px}
+.module-status-card p{font-size:11px;line-height:1.8;color:var(--muted);margin:0 0 12px}
+.module-status-card ul{padding-left:17px;margin:8px 0 0;color:var(--muted);font-size:11px;line-height:1.8}
+.lesson-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 23px;margin-top:22px}
+.lesson-item{display:grid;grid-template-columns:42px 1fr;gap:11px;padding:16px 0;border-top:1px solid var(--line);align-items:start}
+.lesson-item .lesson-number{font:italic 17px var(--serif);color:var(--tomato);padding-top:1px}
+.lesson-item h3{font:400 21px/1.15 var(--serif);margin:0 0 5px}
+.lesson-item p{font-size:11px;line-height:1.7;color:var(--muted);margin:0}
+.chart-placeholder-intro{font-size:12px;line-height:1.8;color:var(--muted);max-width:780px;margin:14px 0 24px}
+.chart-slot-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.chart-slot{padding:17px 18px;background:var(--card);border:1px dashed var(--line-dark);border-radius:13px;min-width:0}
+.chart-slot .slot-kicker{font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--tomato);font-weight:800}
+.chart-slot h3{font:400 18px/1.2 var(--serif);margin:8px 0 6px}
+.chart-slot p{font-size:11px;line-height:1.75;color:var(--muted);margin:0 0 9px}
+.chart-slot code{font-size:10px;line-height:1.5;white-space:normal;overflow-wrap:anywhere;color:var(--green-deep);background:#e5eadc;border-radius:5px;padding:4px 6px;display:inline-block}
+.generated-figure{margin:22px 0 0;padding:13px;background:#fffdf8;border:1px solid var(--line);border-radius:16px}
+.generated-figure img{display:block;width:100%;height:auto;max-height:340px;object-fit:contain;background:white;border-radius:8px}
+.generated-figure figcaption{font-size:10px;line-height:1.7;color:var(--muted);padding:10px 3px 1px}
+.module-next-step{margin-top:25px;padding:26px 28px;border-radius:19px;background:#e5eadc;border:1px solid #cddac5;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.module-next-step h2{font:400 29px/1.12 var(--serif);margin:8px 0}
+.module-next-step p{font-size:12px;line-height:1.8;color:var(--muted);max-width:680px;margin:0}
+@media(max-width:760px){.pathway-grid,.home-learning-doors,.module-overview-grid,.lesson-grid,.chart-slot-grid{grid-template-columns:1fr}.catalogue-top{display:block}.catalogue-top>p{margin-top:14px}.live-class-band{grid-template-columns:1fr;padding:24px}.live-class-band .button{width:100%}.pathway-card{padding:21px}.pathway-card .pathway-footer{align-items:start;flex-direction:column}.module-status-card{position:static}.module-next-step{display:block;padding:22px}.module-next-step .button{display:inline-flex;margin-top:16px;width:100%}.learning-door{padding:20px}}
+
+
+
+/* TradeThesis CSS integrity pass · v5 */
+:root{color-scheme:light}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:clip}
+body{min-width:320px;overflow-x:clip}
+*,*::before,*::after{box-sizing:border-box}
+img,svg,video,canvas,iframe{max-width:100%}
+img{height:auto}
+.wrap{width:min(1160px,calc(100% - 48px));margin-inline:auto}
+.course-hero-grid{grid-template-columns:minmax(0,1.15fr) minmax(285px,.78fr)}
+.course-hero-copy,.course-hero-offer,.course-detail-grid,.course-detail-grid>*{min-width:0}
+.page-hero .eyebrow,.course-hero-copy .eyebrow{max-width:100%;overflow-wrap:anywhere}
+h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
+.topline{position:relative;z-index:40;line-height:1.45}
+.header{z-index:30}
+.course-hero-offer .purchase-card{box-sizing:border-box;min-width:0}
+.lesson-item,.module-overview-copy,.module-status-card,.pathway-card,.course-large{min-width:0}
+@media(max-width:1050px){.nav{gap:14px}.navlinks{gap:15px}.navlinks a{font-size:11px}.course-hero-grid{gap:28px}}
+@media(max-width:780px){
+ .course-hero-grid{grid-template-columns:minmax(0,1fr);gap:24px}
+ .course-hero-offer{grid-row:auto}
+ .course-hero-copy h1{font-size:clamp(39px,8.8vw,56px);line-height:1.04}
+ .course-hero-offer .purchase-card{padding:22px}
+ .module-overview-grid,.course-detail-grid{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:650px){
+ .wrap{width:calc(100% - 32px)}
+ .topline{font-size:10px;padding:8px 12px}
+ .nav{min-height:66px;height:auto;gap:10px}
+ .brand{min-width:0}.brand-name{font-size:18px}.brand-tag{font-size:7px}
+ .page-hero{padding:36px 0 28px}
+ .page-hero h1{font-size:clamp(39px,10.5vw,52px);line-height:1.04;letter-spacing:-.04em}
+ .course-hero-copy h1{font-size:clamp(39px,10.5vw,52px)}
+ .course-hero-actions{gap:8px}
+ .course-hero-actions .button,.module-next-step .button{white-space:normal;text-align:center}
+ .purchase-card .button,.course-hero-offer .button{width:100%;white-space:normal}
+ .section{padding-block:52px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+</style><meta content="v5-2026-10-12" name="tradethesis-build"/></head><body>
+<div class="topline">The TradeThesis Trading Path · 30 lessons · four connected stages · <a href="courses.html">Explore the course</a></div><header class="header"><div class="wrap nav"><a class="brand" href="index.html"><span class="brand-mark">T.</span><span><span class="brand-name">TradeThesis</span><span class="brand-tag">Conviction before execution</span></span></a><nav class="navlinks"><a href="index.html#approach">Our approach</a><a class="active" href="courses.html">Courses</a><a href="index.html#community">Community</a><a href="index.html#desk">The Desk</a></nav><button class="button" data-preview-enquiry="">Ask for class details ↗</button><button aria-expanded="false" aria-label="Open navigation" class="mobile-toggle">☰</button></div><nav class="wrap mobilelinks"><a href="index.html#approach">Our approach</a><a href="courses.html">Courses</a><a href="index.html#community">Community</a><a href="index.html#desk">The Desk</a></nav></header>
+<main><section class="page-hero"><div class="wrap"><div class="breadcrumb"><a href="index.html">Home</a><span>／</span><a href="courses.html">Courses</a><span>／</span><span>Live classroom</span></div><div class="eyebrow">The live classroom · Separate offering</div><h1>Six weekends. One connected way of thinking.</h1><p class="intro">A guided class for people who want to connect the pieces instead of collecting disconnected tips. We work through chart examples, talk about competing interpretations, and make room for the questions that often get skipped.</p><div class="hand-row"><span class="hand-note yellow">Bring the awkward questions. They're usually the useful ones.</span><span class="note-context">Dates and fees are shared after enquiry, once confirmed.</span></div></div></section>
+<section class="section white" style="padding-top:36px"><div class="wrap course-detail-grid"><article class="detail-copy"><div class="eyebrow">What the six sessions cover</div><h2>From the first look at a chart to the review afterward.</h2><p>The classroom is built around a connected trading decision. Rather than treating a chart pattern or an entry as the whole story, each session asks how the parts fit together—and what would make you change your mind.</p><div class="lesson-grid" style="grid-template-columns:1fr"><div class="lesson"><span class="num">01</span><div><strong>Reading the context</strong><span>Structure, price behaviour and the bigger picture.</span></div></div><div class="lesson"><span class="num">02</span><div><strong>Constructing the thesis</strong><span>Evidence, alternative scenarios and invalidation.</span></div></div><div class="lesson"><span class="num">03</span><div><strong>Thinking about entry</strong><span>Location, timing and what you need to see.</span></div></div><div class="lesson"><span class="num">04</span><div><strong>Making risk explicit</strong><span>Stops, exposure and the cost of being wrong.</span></div></div><div class="lesson"><span class="num">05</span><div><strong>Managing and exiting</strong><span>Planning for decisions once a trade is active.</span></div></div><div class="lesson"><span class="num">06</span><div><strong>Reviewing the decision</strong><span>Journalling, learning and refining your process.</span></div></div></div><div class="lesson-callout">A useful question to keep nearby: “What would change my mind?”</div><div class="eyebrow" style="margin-top:30px">The classroom is designed for</div><h2 style="margin-top:13px">People who want a process, not a list of calls.</h2><div class="fit-grid"><div class="fit-card"><h3>You may find it useful if…</h3><ul><li>You know some chart concepts but struggle to connect them.</li><li>You want to explain your reasoning more clearly.</li><li>You are ready to discuss risk, exits and reviews—not only entries.</li><li>You value questions and respectful differences in interpretation.</li></ul></div><div class="fit-card not"><h3>This is not…</h3><ul><li>A live buy/sell signal or trade-copying room.</li><li>A promise of returns or a guaranteed outcome.</li><li>A substitute for personal risk decisions.</li><li>A course with confirmed dates and fees in this preview.</li></ul></div></div></article><aside class="detail-sidebar"><div class="purchase-card"><span class="tag">Six live weekend classes</span><h2 style="font:400 29px/1.1 var(--serif);margin:17px 0 10px">Trade Construction &amp; Management</h2><p>Guided learning, chart discussion and a connected framework for decisions before, during and after a trade.</p><ul class="check-list"><li>Six-session learning outline</li><li>Chart examples and discussion prompts</li><li>Practice explaining your own reasoning</li><li>Focus on risk, management, exit and review</li></ul><button class="button" data-preview-enquiry="">Ask for dates, fees &amp; outline ↗</button><p class="fine-note">This preview does not send your enquiry.</p><div class="module-scope"><strong>Before publishing:</strong> confirm class dates, fees, cohort size, delivery format, access details and the exact included materials.</div></div><div class="note-box"><strong>Take your time.</strong> Ask for the details first, then decide whether the format fits your schedule and experience.</div></aside></div></section>
+<section class="section deep-paper"><div class="wrap"><div class="section-head"><div><div class="eyebrow">One connected process</div><h2>Context → thesis → entry → risk → review.</h2></div><p>The aim isn't to produce the most confident answer in the room. It's to practise a reasoned answer, stay open to contrary evidence, and know what you are risking.</p></div><div class="arc"><article class="arc-step"><div class="arc-dot">01</div><h3>Context</h3><p>What is price doing?</p></article><article class="arc-step"><div class="arc-dot">02</div><h3>Thesis</h3><p>What supports the idea?</p></article><article class="arc-step"><div class="arc-dot">03</div><h3>Entry</h3><p>What needs to happen?</p></article><article class="arc-step"><div class="arc-dot">04</div><h3>Risk</h3><p>Where is the idea wrong?</p></article><article class="arc-step"><div class="arc-dot">05</div><h3>Management</h3><p>What decisions may follow?</p></article><article class="arc-step"><div class="arc-dot">06</div><h3>Review</h3><p>What did you learn?</p></article></div></div></section>
+<section class="section last-call"><div class="wrap"><div class="cta-box"><div><div class="eyebrow">Ask first. Decide with the details.</div><h2>Let’s see whether the class fits.</h2><p>Request the next intake’s dates, fees and full outline. You should have enough information to make a calm, informed decision before you enrol.</p><div class="cta-note">No pressure to sign up on the spot.</div></div><button class="button butter" data-preview-enquiry="">Request class details ↗</button></div></div></section></main>
+<footer><div class="wrap"><div class="footer-main"><div><a class="brand" href="index.html"><span class="brand-mark">T.</span><span><span class="brand-name">TradeThesis</span><span class="brand-tag">Conviction before execution</span></span></a><p class="footer-copy">Trading education for people who want to understand the decision, not just copy the entry.</p></div><nav class="footer-links"><a href="index.html">Home</a><a href="courses.html">All courses</a><a href="trading-path.html">The Trading Path</a><a href="index.html#community">Community</a></nav></div><div class="footer-bottom"><div class="disclaimer">For educational purposes only. Trading involves risk, including the possible loss of capital. No course can guarantee profits.</div><span>© TradeThesis · Website preview</span></div></div></footer>
+<div aria-hidden="true" aria-modal="true" class="modal" id="previewModal" role="dialog"><div class="modal-box"><button aria-label="Close dialog" class="close">×</button><div class="eyebrow">No rush, just details</div><h2 data-modal-title="">Ask for class details</h2><p data-modal-copy="">This is a website preview.</p><p class="modal-help">Connect this action to your live enquiry workflow before publishing.</p></div></div><script>
+const toggle=document.querySelector('.mobile-toggle');
+const mobile=document.querySelector('.mobilelinks');
+if(toggle&&mobile){toggle.addEventListener('click',()=>{const open=mobile.classList.toggle('open');toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'Close navigation':'Open navigation');toggle.textContent=open?'×':'☰'});mobile.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{mobile.classList.remove('open');toggle.setAttribute('aria-expanded','false');toggle.textContent='☰'}));}
+const answerText={context:'Good instinct. Before getting attached to a move, ask what price is doing and where the chart sits in the bigger picture.',risk:'That question belongs near the start, not as an afterthought. What would prove your idea wrong, and what might that cost you?',both:'Exactly. Context and risk belong in the same conversation. A trade idea is incomplete until you can explain both what supports it and what would invalidate it.'};
+document.querySelectorAll('[data-answer]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-answer]').forEach(item=>item.setAttribute('aria-pressed','false'));button.setAttribute('aria-pressed','true');const copy=document.getElementById('answerCopy');if(copy)copy.textContent=answerText[button.dataset.answer]}));
+const modal=document.getElementById('previewModal');
+if(modal){const close=modal.querySelector('.close');let previousFocus=null;function showModal(title,body){previousFocus=document.activeElement;modal.querySelector('[data-modal-title]').textContent=title;modal.querySelector('[data-modal-copy]').textContent=body;modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.classList.add('no-scroll');close.focus()}function hideModal(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.classList.remove('no-scroll');if(previousFocus&&previousFocus.focus)previousFocus.focus()}document.querySelectorAll('[data-preview-checkout]').forEach(el=>el.addEventListener('click',()=>showModal('Checkout is not connected yet.','This is a visual website preview. The next step would be to connect this button to your account, checkout and course-access flow. No payment has been taken.')));document.querySelectorAll('[data-preview-enquiry]').forEach(el=>el.addEventListener('click',()=>showModal('Ask for the class details.','This preview has no live enquiry delivery. Before publishing, connect this action to your enquiry form or email workflow so people can receive confirmed dates, fees and the full outline.')));close.addEventListener('click',hideModal);modal.addEventListener('click',e=>{if(e.target===modal)hideModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))hideModal()});}
+
+</script></body></html>
