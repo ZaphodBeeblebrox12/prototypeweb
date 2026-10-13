@@ -1387,7 +1387,7 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
 .sample-lesson .sample-prompt{margin-top:15px;padding:14px 16px;background:#fffaf1;border-left:2px solid var(--tomato);color:var(--ink)}
 .public-course-note{font-size:10px;line-height:1.7;color:var(--muted);margin-top:12px}
 @media (max-width:780px) {
-  .course-hero-grid{grid-template-columns:1fr;gap:25px}
+
   .course-hero-offer{grid-row:2}
   .course-hero-copy .breadcrumb{margin-bottom:18px}
   .course-hero-copy h1{font-size:clamp(39px,10vw,56px)}
