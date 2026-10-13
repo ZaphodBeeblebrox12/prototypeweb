@@ -2306,3 +2306,55 @@ body.construct-page .paper-first-live small{display:block;font-size:10px;line-he
   .home-path-feature .home-offer-disclaimer,
   .self-paced-product-frame .sp-preview-note{font-size:12px}
 }
+
+
+/* Personal handwritten nudge on the Trading Path offers: Home and Courses only. */
+.course-explore-nudge{
+  position:relative;
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-end;
+  min-height:70px;
+  margin:7px 0 0;
+  overflow:visible;
+  color:var(--tomato);
+}
+.course-explore-nudge__text{
+  display:block;
+  box-sizing:border-box;
+  width:calc(100% - 72px);
+  max-width:365px;
+  margin:5px 64px 0 0;
+  text-align:right;
+  font:italic 17px/1.25 'Segoe Print','Bradley Hand','Comic Sans MS',cursive;
+  letter-spacing:-.02em;
+  color:#a95d43;
+  transform:rotate(-1.2deg);
+}
+.course-explore-nudge__arrow{
+  position:absolute;
+  right:5px;
+  top:0;
+  width:70px;
+  height:70px;
+  overflow:visible;
+  color:#c96f50;
+  pointer-events:none;
+}
+@media (max-width:780px){
+  .sp-offer-panel > .course-explore-nudge{order:5;min-height:76px;}
+  .sp-offer-panel > .sp-offer-button{order:6;margin:3px 0 10px;}
+  .sp-offer-panel > .sp-preview-note{order:7;}
+  .sp-offer-panel > .sp-stage-list{order:8;}
+  .sp-offer-panel > .sp-scope-note{order:9;}
+}
+@media (max-width:650px){
+  .course-explore-nudge{min-height:76px;margin-top:9px;}
+  .course-explore-nudge__text{
+    width:calc(100% - 64px);
+    margin-right:58px;
+    font-size:15px;
+    line-height:1.22;
+  }
+  .course-explore-nudge__arrow{right:2px;width:68px;height:76px;}
+}
