@@ -1677,16 +1677,9 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
   .course-product-frame .course-facts{gap:6px}
   .course-product-frame .course-facts span{font-size:9px;padding:6px 8px}
   .course-product-frame .product-outcomes{padding:16px 13px 13px}
-  .course-product-frame .outcomes-heading-copy h3{font-size:21px}
-  .course-product-frame .outcome-grid{grid-template-columns:1fr;gap:10px}
-  .course-product-frame .outcome-grid span{font-size:11px}
-  .course-product-frame .outcome-method{gap:6px;font-size:9px}
-  .course-product-footnote{display:grid;gap:7px}
   .course-product-footnote .hand-note{justify-self:start;white-space:normal}
-  .course-product-frame .product-purchase-card{padding:19px 16px}
   .product-stage-list>div{grid-template-columns:1fr;gap:2px}
   .product-stage-list span{text-align:left;font-size:10px}
-  .course-product-frame .product-price strong{font-size:41px}
 }
 /* v14 refinement — the detail page is the full sales presentation; keep all content inside its frame. */ .course-product-frame .course-hero-grid{align-items:stretch}
 .course-product-frame .course-hero-offer{display:flex;flex-direction:column;min-width:0;align-self:stretch}
@@ -1718,7 +1711,7 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
   .course-product-frame .course-hero-offer{order: 6; grid-row: auto;}
   .course-product-frame .course-hero-copy > .outcomes{order: 7;}
   .course-product-frame .course-hero-copy > .course-product-footnote{order: 8;}
-  .course-product-frame .product-purchase-card{height: auto; padding: 18px 16px 16px; border-radius: 16px;}
+  .course-product-frame .product-purchase-card{padding: 18px 16px 16px; border-radius: 16px;}
   .course-product-frame .product-price strong{font-size: 35px;}
   .course-product-frame .product-purchase-card > p{font-size: 13px; line-height: 1.68;}
   .course-product-frame .product-purchase-card .fine-note{font-size: 10px !important; line-height: 1.55;}
