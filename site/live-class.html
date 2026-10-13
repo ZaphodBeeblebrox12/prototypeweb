@@ -926,9 +926,17 @@ const sampleResponses={
  signal:{correct:false,text:'A chart fragment cannot establish a guaranteed opportunity. There is no guaranteed outcome. A reasoned plan would still need context, conditions, invalidation, costs and an explicit risk decision.'}
 };
 document.querySelectorAll('[data-live-answer]').forEach(btn=>btn.addEventListener('click',()=>{
- document.querySelectorAll('[data-live-answer]').forEach(el=>el.setAttribute('aria-pressed','false'));
- btn.setAttribute('aria-pressed','true'); const item=sampleResponses[btn.dataset.liveAnswer]; const target=document.getElementById('liveSampleFeedback');
- target.textContent=(item.correct?'Good distinction. ':'Look again. ')+item.text; target.dataset.result=item.correct?'correct':'review';
+ const item=sampleResponses[btn.dataset.liveAnswer];
+ const target=document.getElementById('liveSampleFeedback');
+ if(!item||!target)return;
+ document.querySelectorAll('[data-live-answer]').forEach(el=>{
+  el.setAttribute('aria-pressed','false');
+  delete el.dataset.result;
+ });
+ btn.setAttribute('aria-pressed','true');
+ btn.dataset.result=item.correct?'correct':'review';
+ target.textContent=(item.correct?'Good distinction. ':'Look again. ')+item.text;
+ target.dataset.result=item.correct?'correct':'review';
 }));
 const enquiry=document.getElementById('liveEnquiryForm');
 if(enquiry){enquiry.addEventListener('submit',e=>{e.preventDefault();const result=document.getElementById('liveEnquiryResult');result.textContent='Preview only: the form has been checked in your browser, but nothing has been sent or stored. When connected to Django, this action should create an enquiry record and show a clear confirmation.';result.classList.add('show');});}
