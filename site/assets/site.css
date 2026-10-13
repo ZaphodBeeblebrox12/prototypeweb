@@ -243,7 +243,6 @@ footer{padding:35px 0 22px}
   .quick-item:nth-child(3){padding-left:0}
   .quick-item:nth-child(3),.quick-item:nth-child(4){border-bottom:0}
   .quick-item b{font-size:17px}
-  .section{padding:57px 0}
   .section-head{display:block}
   .section-head>p{margin-top:13px}
   .community-grid,.reading-grid,.future-list{grid-template-columns:1fr}
@@ -380,7 +379,6 @@ body{font-family:var(--sans);font-size:15px;line-height:1.65;letter-spacing:0}
   .hero h1{font-size:clamp(44px,11vw,59px);line-height:1.02}
   .intro,.hero .intro,.page-hero .intro{font-size:15px;line-height:1.8}
   .study-card{min-height:405px}
-  .section{padding:59px 0}
   .section-head>p{font-size:14px}
   .page-hero{padding:38px 0 30px}
   .page-hero h1{font-size:clamp(40px,10.5vw,56px)}
@@ -485,7 +483,6 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
   .course-hero-actions{gap:8px}
   .course-hero-actions .button,.module-next-step .button{white-space:normal;text-align:center}
   .purchase-card .button,.course-hero-offer .button{width:100%;white-space:normal}
-  .section{padding-block:52px}
 }
 @media (prefers-reduced-motion:reduce) {
   *,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
