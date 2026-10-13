@@ -1228,7 +1228,9 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
 .sample-question h3{font:400 21px/1.2 var(--serif);margin:6px 0 12px}
 .sample-answers{display:grid;gap:7px}
 .sample-answers button{text-align:left;border:1px solid var(--line);background:transparent;border-radius:10px;padding:9px 11px;font-size:11px;line-height:1.5;color:var(--ink)}
-.sample-answers button:hover,.sample-answers button[aria-pressed="true"]{border-color:var(--green);background:#e5eadc}
+.sample-answers button:hover{border-color:var(--green);background:#e5eadc}
+.sample-answers button[aria-pressed="true"][data-result="correct"]{border-color:var(--green);background:#e5eadc;color:var(--deep)}
+.sample-answers button[aria-pressed="true"][data-result="review"]{border-color:#c96f50;background:#f8e5dc;color:var(--ink)}
 .sample-feedback{font-size:11px;line-height:1.7;color:var(--muted);margin:11px 0 0;padding-top:11px;border-top:1px solid var(--line)}
 .sample-feedback:empty{display:none}
 .sample-disclaimer{font-size:9px;line-height:1.5;color:#d0d8cc;margin:10px 3px 0}
