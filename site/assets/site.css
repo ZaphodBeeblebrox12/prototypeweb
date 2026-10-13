@@ -15,22 +15,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 .wrap{width:min(1160px,calc(100% - 48px));margin-inline:auto}
 .topline{background:var(--deep);color:#f8f4e9;padding:9px 16px;text-align:center;font-size:11px;letter-spacing:.025em}
 .topline a{color:var(--butter);text-decoration:underline;text-underline-offset:3px}
-.header{position:sticky;top:0;z-index:30;background:#fbf7efed;backdrop-filter:blur(14px);border-bottom:1px solid #ded8caad}
-.nav{height:74px;display:flex;align-items:center;justify-content:space-between;gap:22px}
 .brand{display:flex;align-items:center;gap:10px;flex-shrink:0}
 .brand-mark{width:39px;height:39px;display:grid;place-items:center;border-radius:13px 13px 13px 5px;background:var(--green);color:var(--butter);font:italic 24px var(--serif);transform:rotate(-3deg)}
 .brand-name{display:block;font:600 19px/.95 var(--serif);letter-spacing:.015em}
 .brand-tag{display:block;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-top:6px}
-.navlinks{display:flex;align-items:center;gap:25px;color:var(--muted);font-size:12px}
-.navlinks a:hover,.navlinks a.active{color:var(--deep)}
-.navlinks a.active{font-weight:800}
 .button{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:12px 18px;border:1px solid var(--green);border-radius:999px;background:var(--green);color:#fffdf8;font-size:12px;font-weight:750;transition:transform .18s,box-shadow .18s;white-space:nowrap}
 .button:hover{transform:translateY(-2px);box-shadow:0 7px 18px #26362d1b}
 .button.outline{background:transparent;color:var(--green)}
 .button.butter{background:var(--butter);border-color:var(--butter);color:var(--ink)}
 .button.small{padding:9px 13px;font-size:11px}
-.mobile-toggle{display:none;width:40px;height:40px;border:1px solid var(--line);border-radius:50%;background:transparent}
-.mobilelinks{display:none}
 .eyebrow{display:flex;align-items:center;gap:9px;color:var(--green);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
 .eyebrow:before{content:"";display:inline-block;width:19px;height:2px;background:var(--tomato)}
 h1,h2,h3,p{margin-top:0}
@@ -243,8 +236,6 @@ footer{padding:35px 0 22px}
 .coming:before{content:"";width:6px;height:6px;border-radius:50%;background:#c6a65f}
 .back-link{font-size:11px;color:var(--green);font-weight:750}
 @media (max-width:900px) {
-  .navlinks{gap:14px}
-  .navlinks a{font-size:11px}
   .hero-grid{gap:28px}
   .two-col{gap:38px}
   .course-large{gap:20px}
@@ -256,10 +247,6 @@ footer{padding:35px 0 22px}
 @media (max-width:650px) {
   .wrap{width:calc(100% - 32px)}
   .topline{font-size:10px}
-  .nav{height:66px}
-  .navlinks,.nav>.button{display:none}
-  .mobile-toggle{display:block}
-  .mobilelinks.open{display:flex;flex-wrap:wrap;gap:12px 20px;padding:0 0 15px;color:var(--muted);font-size:12px}
   .hero{padding:38px 0 45px}
   .hero-grid,.two-col,.course-large,.course-detail-grid{grid-template-columns:1fr;gap:30px}
   .hero h1{font-size:clamp(45px,12vw,61px)}
@@ -306,10 +293,6 @@ footer{padding:35px 0 22px}
 }
 /* Pass 2 — restore the original TradeThesis typographic character. Keep the exact original font stacks: Georgia/Times for display and notes, the existing system sans stack for reading, and monospace for small labels. This pass adjusts hierarchy, contrast, rhythm and the few cramped layouts; it does not introduce a new font or a new visual identity. */ :root{--serif:Georgia,"Times New Roman",serif; --sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; --mono:"SFMono-Regular",Consolas,monospace; --reading:15px;}
 body{font-family:var(--sans);font-size:15px;line-height:1.65;letter-spacing:0}
-/* Header: keep every navigation label on one line, with a calm CTA. */ .nav{gap:clamp(12px,1.8vw,22px)}
-.navlinks{flex:0 1 auto;gap:clamp(13px,1.8vw,22px);white-space:nowrap;font-size:12px}
-.navlinks a{white-space:nowrap}
-.nav>.button{display:inline-flex;width:auto;flex:0 0 auto;margin:0;padding:12px 17px;font-size:12px}
 .brand-name{font-size:19px;letter-spacing:.015em}
 .brand-tag{font-size:8px;letter-spacing:.13em}
 /* The original serif headline should lead; body copy should support it, not disappear. */ .hero{padding:60px 0 62px}
@@ -413,9 +396,6 @@ body{font-family:var(--sans);font-size:15px;line-height:1.65;letter-spacing:0}
 .footer-bottom{font-size:10px;line-height:1.75}
 .fine-note{font-size:10px!important}
 @media (max-width:1050px) and (min-width:651px) {
-  .nav{gap:14px}
-  .navlinks{gap:12px;font-size:11px}
-  .nav>.button{padding:11px 13px;font-size:11px}
   .brand{gap:8px}
   .brand-mark{width:36px;height:36px}
   .brand-name{font-size:18px}
@@ -425,16 +405,12 @@ body{font-family:var(--sans);font-size:15px;line-height:1.65;letter-spacing:0}
 @media (max-width:900px) {
   .hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,.95fr);gap:22px}
   .hero h1{font-size:clamp(44px,5.5vw,58px)}
-  .navlinks{gap:11px}
   .course-card{padding:22px}
   .course-card h3{font-size:28px}
   .community-panel{padding:25px}
 }
 @media (max-width:650px) {
   body{font-size:14px}
-  .nav{gap:10px}
-  .mobile-toggle{display:grid;place-items:center;flex:0 0 40px}
-  .mobilelinks{gap:14px 19px;padding:0 0 16px;font-size:13px}
   .hero{padding:39px 0 47px}
   .hero-grid{grid-template-columns:1fr;gap:31px}
   .hero h1{font-size:clamp(44px,11vw,59px);line-height:1.02}
@@ -548,13 +524,9 @@ img{height:auto}
 .page-hero .eyebrow,.course-hero-copy .eyebrow{max-width:100%;overflow-wrap:anywhere}
 h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
 .topline{position:relative;z-index:40;line-height:1.45}
-.header{z-index:30}
 .course-hero-offer .purchase-card{box-sizing:border-box;min-width:0}
 .lesson-item,.module-overview-copy,.module-status-card,.pathway-card,.course-large{min-width:0}
 @media (max-width:1050px) {
-  .nav{gap:14px}
-  .navlinks{gap:15px}
-  .navlinks a{font-size:11px}
   .course-hero-grid{gap:28px}
 }
 @media (max-width:780px) {
@@ -566,7 +538,6 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
 }
 @media (max-width:650px) {
   .topline{font-size:10px;padding:8px 12px}
-  .nav{min-height:66px;height:auto;gap:10px}
   .brand{min-width:0}
   .brand-name{font-size:18px}
   .brand-tag{font-size:7px}
@@ -724,8 +695,6 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
 }
 @media (min-width: 1100px) {
   .wrap{width: min(1280px, calc(100% - 64px));}
-  .nav{height: 68px;}
-  .navlinks{gap: 21px;}
   .hero{padding: 46px 0 50px;}
   .hero-grid{gap: 42px;}
   .section{padding: 60px 0;}
@@ -745,18 +714,11 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
   body{font-size: 15px;}
   .wrap{width: calc(100% - 36px);}
   .topline{font-size: 10px; line-height: 1.45; padding: 8px 12px;}
-  .header{backdrop-filter: blur(12px);}
-  .nav{min-height: 64px; height: auto; gap: 10px; padding-block: 8px;}
   .brand{gap: 9px; min-width: 0;}
   .brand-mark{width: 36px; height: 36px; flex: 0 0 36px; border-radius: 12px 12px 12px 4px; font-size: 22px;}
   .brand-name{font-size: 18px; line-height: 1;}
   .brand-tag{font-size: 8px; letter-spacing: .10em; margin-top: 5px;}
   .navlinks, .nav > .button{display: none !important;}
-  .mobile-toggle{display: grid !important; place-items: center; flex: 0 0 44px; width: 44px; height: 44px; border: 1px solid var(--line-dark); border-radius: 50%; background: transparent; color: var(--green); font-size: 21px; line-height: 1;}
-  .mobilelinks{display: none;}
-  .mobilelinks.open{display: grid; grid-template-columns: 1fr; gap: 0; padding: 4px 0 17px; color: var(--ink); font-size: 13px;}
-  .mobilelinks.open a:not(.mobile-menu-cta){display: flex; align-items: center; min-height: 44px; padding: 10px 2px; border-top: 1px solid var(--line); font-size: 14px;}
-  .mobilelinks.open .mobile-menu-cta{display: flex; align-items: center; justify-content: center; min-height: 46px; padding: 12px 16px; margin-top: 12px; border: 1px solid var(--green); border-radius: 999px; background: var(--green); color: #fffdf8; text-align: center; font-size: 13px; font-weight: 750;}
   .button{min-height: 44px; padding: 12px 16px; line-height: 1.25; white-space: normal; text-align: center;}
   .button.small{min-height: 40px;}
   .section{padding-block: 45px;}
@@ -820,13 +782,7 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
   .topline a{margin-left: 0; flex: 0 0 auto; display: inline-flex; align-items: center; min-height: 24px; padding-left: 8px; border-left: 1px solid #708879; font-size: 10px; white-space: nowrap; text-underline-offset: 2px;}
   .topline-link-full{display: none !important;}
   .topline-link-short{display: inline !important;}
-  /* Slightly cleaner header: same mark and tagline, with more intentional alignment. */ .nav{min-height: 62px; padding-block: 6px;}
   .brand-tag{font-size: 8px; letter-spacing: .09em;}
-  .mobile-toggle{background: #fffaf1; box-shadow: 0 2px 6px #29382e06; transition: background-color .15s, border-color .15s;}
-  .mobile-toggle[aria-expanded="true"]{background: var(--sage); border-color: #b9cbb2;}
-  .mobilelinks.open{padding-top: 5px;}
-  .mobilelinks.open a:not(.mobile-menu-cta){color: var(--ink);}
-  .mobilelinks.open .mobile-menu-cta{border-radius: 12px;}
   /* Homepage: let the practice lead naturally instead of burying it below reassurance copy. */ .hero-grid{row-gap: 0;}
   .hero-grid > div:first-child{display: contents;}
   .hero-grid > div:first-child > .eyebrow{order: 1;}
@@ -902,20 +858,13 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
   html{scroll-behavior: auto;}
   *, *::before, *::after{transition-duration: 0.01ms !important; animation-duration: 0.01ms !important;}
 }
-/* TradeThesis brand lockups: preserve the supplied logo artwork across breakpoints. */ .header .brand{display:flex; align-items:center; flex:0 1 auto; min-width:0; width:clamp(190px, 20vw, 252px); max-width:100%; gap:0;}
-.header .brand-logo{display:block; width:100%; height:auto; max-height:60px; object-fit:contain; object-position:left center;}
 .footer-main .brand-footer{display:inline-flex; width:min(232px, 100%); align-items:center; gap:0;}
 .footer-main .brand-logo-footer{display:block; width:100%; height:auto; object-fit:contain; object-position:left center;}
 .brand-mark, .brand-name, .brand-tag{/* retained for non-logo fallbacks; hidden only where the artwork is used */}
 @media (max-width: 780px) {
-  .header .brand{width:clamp(158px, 46vw, 184px); flex:0 1 auto;}
-  .header .brand-logo{max-height:46px;}
   .footer-main .brand-footer{width:min(205px, 100%);}
 }
-@media (max-width: 360px) {
-  .header .brand{width:154px;}
-  .header .brand-logo{max-height:42px;}
-}
+
 /* Course-package integration · 30-day guided drip and included resources */ .sp-format-line{display:flex;flex-wrap:wrap;align-items:center;gap:7px 10px;margin:10px 0 2px;padding:10px 12px;border:1px solid #d7dfd1;border-radius:12px;background:#f9f7ed;color:var(--green);font-size:10px;line-height:1.5}
 .sp-format-line i{font-style:normal;color:var(--tomato)}
 .product-format-line{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 15px}
@@ -948,17 +897,7 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
   .sp-format-line{font-size:10px;gap:6px}
   .resource-note{font-size:15px}
 }
-/* CONSTRUCT integration: a little more depth in the shared public-site header. */ .header{isolation:isolate;position:sticky;background:linear-gradient(180deg,#fffdf9 0%,#f8f2e8 100%);border-bottom:1px solid #d9d1c3;box-shadow:0 6px 20px #29382e0a,inset 0 1px 0 #fff;}
-.header:before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,#c96f50 0%,#d2b66d 22%,#355a46 56%,#f0d38a 100%);pointer-events:none;z-index:0;}
-.header:after{content:"";position:absolute;right:3.5%;top:-218px;width:330px;height:330px;border:1px solid #c8a65a50;border-radius:50%;box-shadow:0 0 0 22px #c8a65a0b,0 0 0 48px #c8a65a08,0 0 0 76px #c8a65a06;pointer-events:none;z-index:0;}
-.header .nav,.header .mobilelinks{position:relative;z-index:1;}
-.header .brand-logo{filter:drop-shadow(0 1px 0 #ffffff78);}
-.header .nav>.button{box-shadow:inset 0 1px 0 #ffffff32,0 3px 0 #1f3e30,0 7px 15px #233b2e13;background:linear-gradient(180deg,#3d684f 0%,#2d4f3d 100%);}
-.header .nav>.button:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 #ffffff3b,0 4px 0 #1f3e30,0 9px 18px #233b2e18;}
-@media (max-width:650px) {
-  .header:after{right:-100px;top:-238px;width:290px;height:290px;opacity:.8}
-  .header .nav{position:relative;z-index:1}
-}
+
 /* Course-family pass: CONSTRUCT mirrors the Trading Path card geometry, while support changes the emphasis. */ .home-construct-feature{margin-top:18px;background:linear-gradient(135deg,#fffaf1 0%,#f7f1e6 100%);border-color:#d8cdae;position:relative;overflow:hidden}
 .home-construct-feature:after{content:"";position:absolute;right:-185px;top:-220px;width:390px;height:390px;border:1px solid #c49a4a39;border-radius:50%;box-shadow:0 0 0 24px #c49a4a08,0 0 0 53px #c49a4a06;pointer-events:none}
 .home-construct-story,.home-construct-offer{position:relative;z-index:1}
@@ -1427,7 +1366,6 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
   .enquiry-form input, .enquiry-form textarea, .enquiry-form select{min-height: 44px; font-size: 16px;}
   .enquiry-form .button{width: 100%;}
 }
-/* CONSTRUCT integration: a little more depth in the shared public-site header. */ .header{isolation:isolate;position:sticky;background:linear-gradient(180deg,#fffdf9f2 0%,#f8f2e8f5 100%);border-bottom:1px solid #d9d1c3;box-shadow:0 6px 20px #29382e0a,inset 0 1px 0 #fff;}
 /* Pass 4: clearer public course pages and consistent module navigation */ .course-hero-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(285px,.78fr);gap:clamp(26px,4vw,48px);align-items:start}
 .course-hero-copy{min-width:0}
 .course-hero-copy .breadcrumb{margin-bottom:26px}
@@ -2042,13 +1980,11 @@ body.construct-page .paper-first-live small{display:block;font-size:10px;line-he
   body.construct-page .program-art:before{font-size:11px;right:9px;top:-10px}
 }
 
-
 /* Page-specific spacing exceptions live here instead of inline HTML styles. */
 .section.courses-catalogue-section{padding-top:38px}
 .section.courses-live-section{padding-top:34px}
 .section.trading-path-overview-section{padding-top:42px}
 .course-fit-section .course-fit-sample-label{margin-top:31px}
-
 
 /* Sitewide shared navigation — based on the CONSTRUCT header. */
 .sitewide-header{position:sticky;top:0;z-index:30;isolation:isolate;background:linear-gradient(180deg,#fffdf9 0%,#f8f2e8 100%);border-bottom:1px solid #d9d1c3;box-shadow:0 6px 20px #29382e0a,inset 0 1px 0 #fff}
