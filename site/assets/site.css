@@ -5,7 +5,7 @@
 
 :root{--paper:#fbf7ef;--paper2:#f2ebdf;--card:#fffdf8;--ink:#29382e;--muted:#687268;--green:#355a46;--deep:#254334;--green-deep:var(--deep);--sage:#dce7d6;--tomato:#c96f50;--butter:#f0d38a;--line:#ded8ca;--line-dark:#c7c0b1;--serif:Georgia,"Times New Roman",serif;--sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--mono:"SFMono-Regular",Consolas,monospace;--shadow:0 17px 45px #29382e10}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:92px}
+html{scroll-behavior:smooth;scroll-padding-top:86px;-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:clip}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6}
 a{color:inherit;text-decoration:none}
 button,input,textarea{font:inherit}
@@ -659,7 +659,6 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
   .answers button, .sample-answers button{min-height: 44px; padding: 10px 13px; font-size: 12px; line-height: 1.35; text-align: left;}
   .answers button{text-align: center;}
   .reassure, .note-context{font-size: 12px; line-height: 1.65;}
-  section[id], [id].section{scroll-margin-top: 78px;}
 }
 @media (max-width: 380px) {
   .wrap{width: calc(100% - 32px);}
@@ -1287,7 +1286,7 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
 .course-hero-offer .module-scope{font-size:11px;line-height:1.7}
 .course-hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
 .course-hero-actions .button{white-space:normal}
-#module-lessons{scroll-margin-top:100px}
+
 .sample-lesson{margin-top:27px;padding:22px 24px;background:#f2eee3;border:1px solid var(--line);border-radius:16px}
 .sample-lesson summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;font:400 22px/1.2 var(--serif)}
 .sample-lesson summary::-webkit-details-marker{display:none}
@@ -1353,7 +1352,7 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
 .course-overview-intro h2{font:400 clamp(31px,3.2vw,41px)/1.1 var(--serif);letter-spacing:-.03em;margin:12px 0 15px;max-width:820px}
 .course-overview-intro>p{max-width:850px;font-size:14px;line-height:1.9;color:var(--muted)}
 .outcomes-coursewide{margin-top:23px;margin-bottom:33px}
-.course-curriculum{margin-top:45px;scroll-margin-top:96px}
+.course-curriculum{margin-top:45px}
 .course-curriculum-heading{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:22px}
 .course-curriculum-heading h2{font:400 clamp(30px,3.5vw,43px)/1.08 var(--serif);letter-spacing:-.035em;margin:10px 0 8px;max-width:720px}
 .course-curriculum-heading p{max-width:420px;margin:0;color:var(--muted);font-size:12px;line-height:1.8}
@@ -1450,7 +1449,7 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
 .course-overview-intro{max-width:870px}
 .course-overview-intro h2{font-size:clamp(30px,3.2vw,40px);line-height:1.08}
 .outcomes-coursewide{margin-top:20px;margin-bottom:32px}
-.course-curriculum{margin-top:39px;scroll-margin-top:98px}
+.course-curriculum{margin-top:39px}
 .course-curriculum-heading{align-items:end;gap:27px}
 .course-curriculum-heading h2{max-width:660px}
 .course-unity-note{margin-bottom:16px}
@@ -1650,7 +1649,6 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
   .sample-lesson{padding: 17px;}
 }
 
-html{scroll-behavior:smooth;scroll-padding-top:100px;-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:clip}
 body.construct-page{min-width:320px;overflow-x:clip;margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.65}
 body.construct-page a{color:inherit;text-decoration:none}
 body.construct-page button, body.construct-page input, body.construct-page textarea{font:inherit}
