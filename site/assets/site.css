@@ -2002,6 +2002,7 @@ body.construct-page .paper-first-live small{display:block;font-size:10px;line-he
 .sitewide-header .nav>.button:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 #ffffff3b,0 4px 0 #1f3e30,0 9px 18px #233b2e18}
 .sitewide-header .nav>.button.outline{background:transparent;color:var(--green);box-shadow:none}
 .sitewide-header .mobile-toggle{display:none;background:transparent;border:1px solid var(--line-dark);border-radius:50%;width:42px;height:42px;color:var(--green);font-size:18px;line-height:1}
+.sitewide-header .mobile-toggle[aria-expanded="true"]{background:var(--sage);border-color:#b9cbb2}
 .sitewide-header .mobilelinks{display:none;position:relative;z-index:1}
 @media (max-width:1050px){
   .sitewide-header .nav{grid-template-columns:minmax(165px,200px) minmax(0,1fr) auto;gap:14px}
