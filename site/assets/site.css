@@ -1923,3 +1923,142 @@ body.construct-page .paper-first-live small{display:block;font-size:10px;line-he
   .sitewide-header .mobilelinks.open{padding:4px 0 15px}
   .sitewide-header .mobilelinks a{font-size:14px}
 }
+
+
+/* Accessibility pass — Trading Path course card.
+   Preserve the existing TradeThesis palette and editorial character while
+   allowing the card to grow naturally instead of compressing its text. */
+.course-product-frame .course-hero-grid{
+  grid-template-columns:minmax(0,1.04fr) minmax(350px,.96fr);
+  gap:clamp(28px,3.2vw,44px);
+  align-items:start;
+}
+.course-product-frame .course-hero-copy,
+.course-product-frame .product-purchase-card{min-width:0}
+.course-product-frame .course-hero-copy>.eyebrow,
+.course-product-frame .course-hero-copy .breadcrumb{font-size:12px}
+.course-product-frame .course-hero-copy>.intro{
+  font-size:15px;
+  line-height:1.8;
+  color:#526256;
+}
+.course-product-frame .course-facts span{font-size:12px;padding:8px 11px}
+.course-product-frame .course-facts strong{font-size:13px}
+.course-product-frame .outcomes{padding:20px 21px 18px}
+.course-product-frame .outcomes-heading-copy h3{
+  font-size:clamp(22px,2.1vw,26px);
+  line-height:1.15;
+}
+.course-product-frame .outcomes-heading-copy p{font-size:13px;line-height:1.65}
+.course-product-frame .outcome-grid{gap:14px 18px}
+.course-product-frame .outcome-grid>div{
+  grid-template-columns:27px minmax(0,1fr);
+  gap:9px;
+}
+.course-product-frame .outcome-grid b{font-size:15px}
+.course-product-frame .outcome-grid span{
+  font-size:14px;
+  line-height:1.7;
+  color:#4d5e52;
+}
+.course-product-frame .outcome-method{gap:8px;font-size:12px;line-height:1.6}
+.course-product-frame .product-purchase-card{
+  height:auto;
+  padding:27px 26px 22px;
+}
+.course-product-frame .product-offer-heading .tag{
+  font-size:12px;
+  line-height:1.45;
+  padding:7px 11px;
+}
+.course-product-frame .product-price{margin:20px 0 10px}
+.course-product-frame .product-price strong{font-size:46px}
+.course-product-frame .product-price span{font-size:12px;line-height:1.5}
+.course-product-frame .product-purchase-card>p{
+  font-size:15px;
+  line-height:1.75;
+  color:#4f6052;
+  margin-bottom:16px;
+}
+.course-product-frame .product-format-line{gap:7px}
+.course-product-frame .product-format-line span{
+  font-size:12px;
+  line-height:1.45;
+  padding:7px 9px;
+}
+.course-product-frame .product-check-list{gap:11px;margin:4px 0 22px}
+.course-product-frame .product-check-list li{
+  font-size:14px;
+  line-height:1.7;
+  padding-left:23px;
+}
+.course-product-frame .product-stage-list{
+  margin:4px 0 17px;
+  padding:6px 0;
+}
+.course-product-frame .product-stage-list>div{
+  grid-template-columns:minmax(0,1fr) minmax(0,.9fr);
+  gap:12px;
+  align-items:start;
+  padding:11px 0;
+}
+.course-product-frame .product-stage-list b{font:650 14px/1.55 var(--sans)}
+.course-product-frame .product-stage-list span{
+  font-size:13px;
+  line-height:1.6;
+  text-align:right;
+  color:#526253;
+}
+.course-product-frame .product-enrol-button{
+  min-height:50px;
+  font-size:15px;
+  white-space:normal;
+}
+.course-product-frame .product-purchase-card .fine-note{
+  font-size:12px!important;
+  line-height:1.6;
+  margin-top:12px;
+}
+.course-product-frame .course-scope-statement{font-size:13px;line-height:1.7}
+.course-product-frame .course-product-footnote{font-size:13px;line-height:1.7}
+.course-product-frame .course-product-footnote .hand-note{font-size:14px}
+@media (max-width:1050px) and (min-width:781px){
+  .course-product-frame .course-hero-grid{
+    grid-template-columns:minmax(0,1fr) minmax(330px,.94fr);
+    gap:24px;
+  }
+  .course-product-frame .product-purchase-card{padding:23px 21px}
+  .course-product-frame .product-stage-list>div{grid-template-columns:1fr;gap:3px}
+  .course-product-frame .product-stage-list span{text-align:left}
+}
+@media (max-width:780px){
+  .course-product-frame .course-hero-grid{grid-template-columns:minmax(0,1fr);gap:23px}
+  .course-product-frame .product-purchase-card{height:auto;padding:24px 22px 20px}
+  .course-product-frame .outcome-grid span{font-size:14px}
+  .course-product-frame .product-stage-list>div{
+    grid-template-columns:minmax(0,1fr) minmax(0,.9fr);
+    gap:10px;
+  }
+  .course-product-frame .product-stage-list span{text-align:right;font-size:13px}
+}
+@media (max-width:650px){
+  .course-product-frame .course-hero-grid{gap:18px}
+  .course-product-frame .course-hero-copy>.intro{font-size:15px}
+  .course-product-frame .course-facts span{font-size:12px;padding:7px 9px}
+  .course-product-frame .outcomes{padding:19px 17px 17px}
+  .course-product-frame .outcomes-heading-copy h3{font-size:23px}
+  .course-product-frame .outcomes-heading-copy p{font-size:13px}
+  .course-product-frame .outcome-grid{grid-template-columns:1fr;gap:12px}
+  .course-product-frame .outcome-grid>div{padding:4px 0}
+  .course-product-frame .outcome-grid span{font-size:14px}
+  .course-product-frame .product-purchase-card{padding:22px 18px 19px}
+  .course-product-frame .product-price strong{font-size:42px}
+  .course-product-frame .product-purchase-card>p{font-size:15px}
+  .course-product-frame .product-check-list li{font-size:14px}
+  .course-product-frame .product-stage-list>div{grid-template-columns:1fr;gap:2px}
+  .course-product-frame .product-stage-list b{font-size:14px}
+  .course-product-frame .product-stage-list span{text-align:left;font-size:13px}
+  .course-product-frame .product-purchase-card .fine-note{font-size:12px!important}
+  .course-product-frame .course-scope-statement{font-size:13px}
+  .course-product-frame .course-product-footnote{font-size:13px}
+}
