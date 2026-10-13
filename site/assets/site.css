@@ -2105,7 +2105,7 @@ body.construct-page .paper-first-live small{display:block;font-size:10px;line-he
   .sitewide-header .mobile-toggle{display:grid;place-items:center;flex:0 0 42px}
   .sitewide-header .mobilelinks.open{display:flex;position:relative;z-index:1;flex-direction:column;gap:0;padding:0 0 16px;background:#f8f2e8f8;border-top:1px solid #e3dac9;box-shadow:0 12px 22px #29382e10}
   .sitewide-header .mobilelinks a{display:flex;align-items:center;min-height:44px;padding:12px 2px;border-bottom:1px solid #e3dac9;color:#58665b;font-size:14px}
-  .sitewide-header .mobilelinks .mobile-menu-cta{justify-content:center;background:linear-gradient(180deg,#3d684f 0%,#2d4f3d 100%);color:#fffdf8;text-align:center;border-radius:12px;margin-top:12px;padding:13px 16px;border:0;font-size:13px;font-weight:750}
+  .sitewide-header .mobilelinks .mobile-menu-cta{justify-content:center;background:linear-gradient(180deg,#3d684f 0%,#2d4f3d 100%);color:#fffdf8;text-align:center;border-radius:999px;margin-top:12px;padding:13px 16px;border:0;font-size:13px;font-weight:750}
   .sitewide-header:after{right:-90px;top:-245px;width:285px;height:285px}
 }
 @media (max-width:480px){
