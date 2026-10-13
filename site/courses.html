@@ -3,8 +3,8 @@
  <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1" name="viewport"/>
-  <meta content="Explore the current TradeThesis live classroom and the separate self-paced Trading Path. Practical learning, a connected process and no signal-selling." name="description"/>
-  <title>Courses — TradeThesis</title>
+  <meta content="Compare the 30-day Trading Path, the 70-day guided self-paced CONSTRUCT programme, and the separate six-week live classroom." name="description"/>
+  <title>Courses — Trading Path, CONSTRUCT &amp; Live Classroom | TradeThesis</title>
   <link rel="icon" type="image/png" sizes="192x192" href="assets/tradethesis-icon.png">
   <style>
    :root{--paper:#fbf7ef;--paper2:#f2ebdf;--card:#fffdf8;--ink:#29382e;--muted:#687268;--green:#355a46;--deep:#254334;--sage:#dce7d6;--tomato:#c96f50;--butter:#f0d38a;--line:#ded8ca;--line-dark:#c7c0b1;--serif:Georgia,"Times New Roman",serif;--sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;--mono:"SFMono-Regular",Consolas,monospace;--shadow:0 17px 45px #29382e10}
@@ -784,11 +784,72 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
 @media(max-width:1000px){.resource-stack-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.resource-stack-grid{grid-template-columns:1fr;gap:10px}.resource-stack-card{padding:18px}.resource-stack-card h3{font-size:22px}.product-format-line span{font-size:10px}.sp-format-line{font-size:10px;gap:6px}.resource-note{font-size:15px}}
 
+
+/* CONSTRUCT integration: a little more depth in the shared public-site header. */
+.header{isolation:isolate;position:sticky;background:linear-gradient(180deg,#fffdf9 0%,#f8f2e8 100%);border-bottom:1px solid #d9d1c3;box-shadow:0 6px 20px #29382e0a,inset 0 1px 0 #fff;}
+.header:before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,#c96f50 0%,#d2b66d 22%,#355a46 56%,#f0d38a 100%);pointer-events:none;z-index:0;}
+.header:after{content:"";position:absolute;right:3.5%;top:-218px;width:330px;height:330px;border:1px solid #c8a65a50;border-radius:50%;box-shadow:0 0 0 22px #c8a65a0b,0 0 0 48px #c8a65a08,0 0 0 76px #c8a65a06;pointer-events:none;z-index:0;}
+.header .nav,.header .mobilelinks{position:relative;z-index:1;}
+.header .brand-logo{filter:drop-shadow(0 1px 0 #ffffff78);}
+.header .nav>.button{box-shadow:inset 0 1px 0 #ffffff32,0 3px 0 #1f3e30,0 7px 15px #233b2e13;background:linear-gradient(180deg,#3d684f 0%,#2d4f3d 100%);}
+.header .nav>.button:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 #ffffff3b,0 4px 0 #1f3e30,0 9px 18px #233b2e18;}
+@media(max-width:650px){.header:after{right:-100px;top:-238px;width:290px;height:290px;opacity:.8}.header .nav{position:relative;z-index:1}}
+
+
+/* Course catalogue alignment pass: one TradeThesis offer system, two different learning formats. */
+.self-paced-catalogue{padding-bottom:34px}
+.construct-catalogue{padding:20px 0 64px;background:var(--paper)}
+.construct-offer-frame{position:relative;overflow:hidden;padding:clamp(20px,2.5vw,31px);border:1px solid var(--line);border-radius:26px;background:#fffaf1;box-shadow:0 14px 38px #29382e08}
+.construct-offer-frame:after{content:"";position:absolute;right:-180px;top:-220px;width:390px;height:390px;border:1px solid #c49a4a38;border-radius:50%;box-shadow:0 0 0 24px #c49a4a08,0 0 0 53px #c49a4a06;pointer-events:none}
+.construct-offer-main{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(330px,.92fr);gap:clamp(22px,2.8vw,36px);align-items:stretch;position:relative;z-index:1}
+.construct-offer-copy{min-width:0;padding:10px 2px 3px 0}
+.construct-offer-copy>.eyebrow{margin-bottom:13px}
+.construct-offer-copy h2{font:400 clamp(36px,3.8vw,52px)/1.04 var(--serif);letter-spacing:-.045em;color:var(--deep);margin:0 0 9px;max-width:650px}
+.construct-promise{font:italic clamp(20px,2.2vw,26px)/1.22 var(--serif);color:var(--green);margin:0 0 16px}
+.construct-offer-copy>p:not(.construct-promise){font-size:13px;line-height:1.85;max-width:680px;margin:0 0 17px;color:var(--muted)}
+.construct-facts{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 19px}
+.construct-facts span{display:inline-flex;align-items:center;padding:7px 10px;border:1px solid var(--line);border-radius:99px;background:#fffdf8;font-size:10px;color:var(--muted)}
+.construct-support-list{display:grid;gap:0;border-top:1px solid #ded8ca}
+.construct-support-list>div{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;padding:13px 0;border-bottom:1px solid #ded8ca}
+.construct-support-list b{font:italic 15px var(--serif);color:var(--tomato)}
+.construct-support-list span{font-size:11px;line-height:1.7;color:var(--muted)}
+.construct-support-list strong{display:block;font-size:12px;color:var(--ink);font-weight:700;margin-bottom:2px}
+.construct-offer-side{align-self:stretch;min-width:0;padding:24px 23px 18px;border:1px solid #cddac5;border-radius:19px;background:#e5eadc;box-shadow:none;position:relative;overflow:hidden}
+.construct-side-top{display:flex;align-items:center;justify-content:space-between;gap:10px;position:relative}
+.construct-side-kicker{display:inline-flex;align-items:center;padding:7px 10px;border:1px solid #e8d8a7;border-radius:99px;background:#fff8e2;color:#755c2b;font-size:9px;line-height:1.4;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.construct-side-watermark{position:absolute;right:3px;top:-4px;font:italic 46px/.9 var(--serif);color:#355a460d;pointer-events:none}
+.construct-price-row{display:flex;align-items:baseline;gap:10px;margin:19px 0 6px;position:relative}
+.construct-price-row strong{font:400 43px/1 var(--serif);letter-spacing:-.04em;color:var(--ink)}
+.construct-price-row span{font-size:9px;line-height:1.45;color:var(--muted)}
+.construct-community-included{display:flex;align-items:center;gap:9px;padding:10px 12px;margin:8px 0 17px;border:1px solid #cbd7c3;border-radius:12px;background:#f8f8ee}
+.construct-community-included>span{display:grid;place-items:center;flex:0 0 auto;width:27px;height:27px;border-radius:50%;background:var(--butter);color:var(--deep);font-size:16px}
+.construct-community-included strong{display:block;font-size:11px;color:var(--deep)}
+.construct-community-included small{display:block;font-size:10px;line-height:1.45;color:var(--muted);margin-top:2px}
+.construct-offer-side h3{font:400 clamp(23px,2.5vw,30px)/1.1 var(--serif);letter-spacing:-.025em;color:var(--deep);margin:0 0 9px}
+.construct-offer-side>p:not(.construct-price-note){font-size:11px;line-height:1.75;color:#59685b;margin:0 0 11px}
+.construct-side-output{display:grid;grid-template-columns:27px minmax(0,1fr);gap:8px;padding:10px 0;border-top:1px solid #c6d4bd}
+.construct-side-output>span{font:italic 15px var(--serif);color:var(--tomato)}
+.construct-side-output strong{display:block;font-size:11px;font-weight:700;color:var(--ink)}
+.construct-side-output small{display:block;font-size:10px;line-height:1.5;color:#61705f;margin-top:2px}
+.construct-cta{width:100%;min-height:45px;margin-top:13px;white-space:normal;text-align:center}
+.construct-price-note{font-size:9px!important;line-height:1.55!important;margin:9px 0 0!important;color:var(--muted)!important;text-align:center}
+@media(max-width:1000px){.construct-offer-main{grid-template-columns:minmax(0,1fr) minmax(295px,.88fr);gap:20px}.construct-offer-copy h2{font-size:clamp(35px,4.1vw,46px)}.construct-offer-side{padding:21px 19px 17px}}
+@media(max-width:780px){.self-paced-catalogue{padding-bottom:25px}.construct-catalogue{padding-top:15px;padding-bottom:40px}.construct-offer-main{grid-template-columns:1fr;gap:22px}.construct-offer-frame{padding:20px;border-radius:22px}.construct-offer-copy{padding:0}.construct-offer-copy h2{font-size:clamp(37px,7vw,50px);max-width:720px}.construct-offer-copy>p:not(.construct-promise){font-size:14px}.construct-offer-side{padding:23px}.construct-offer-side h3{font-size:29px}}
+@media(max-width:520px){.construct-offer-frame{padding:15px;border-radius:18px}.construct-offer-copy h2{font-size:clamp(34px,9.6vw,44px);line-height:1.05}.construct-promise{font-size:22px}.construct-facts{gap:6px}.construct-facts span{font-size:9px;padding:6px 8px;white-space:normal}.construct-offer-side{padding:19px 16px}.construct-price-row strong{font-size:41px}.construct-support-list span{font-size:11px}}
+
+
+/* Pass 2 — handwritten paper notes continue the same personal design language across course plans. */
+.self-paced-product-frame,.construct-offer-frame{position:relative}
+.self-paced-product-frame:before{content:"a little practice";position:absolute;right:31px;top:-12px;z-index:5;display:block;padding:6px 11px 7px;background:var(--butter);color:#655637;border-radius:2px;font:italic 13px/1.1 var(--serif);transform:rotate(3deg);box-shadow:0 3px 8px #29382e12;white-space:nowrap;pointer-events:none}
+.construct-offer-copy{position:relative}
+.construct-offer-copy:before{content:"we’ll work through it together";position:absolute;right:4px;top:-13px;z-index:4;display:block;padding:6px 11px 7px;background:var(--butter);color:#655637;border-radius:2px;font:italic 13px/1.1 var(--serif);transform:rotate(-2deg);box-shadow:0 3px 8px #29382e12;white-space:nowrap;pointer-events:none}
+@media(max-width:650px){.self-paced-product-frame:before{right:16px;top:-10px;font-size:11px;padding:5px 8px}.construct-offer-copy:before{right:0;top:-10px;font-size:11px;padding:5px 8px}}
+
 </style>
-  <meta content="v15-2026-10-12" name="tradethesis-build"/>
+  <meta content="v17-course-family-2026-10-13" name="tradethesis-build"/>
  </head>
  <body data-page-key="courses">
-  <div class="topline"><span class="topline-message">The current offering: Trade Construction &amp; Management ·</span><span class="topline-short">Six-week live classroom</span><a href="live-class.html" class="topline-link"><span class="topline-link-full">Explore the live classroom ↗</span><span class="topline-link-short">Explore ↗</span></a></div>
+  <div class="topline"><span class="topline-message">CONSTRUCT · 70 days of lessons, review and guided practice ·</span><span class="topline-short">CONSTRUCT · guided programme</span><a href="construct.html" class="topline-link"><span class="topline-link-full">Explore CONSTRUCT ↗</span><span class="topline-link-short">Explore ↗</span></a></div>
   <header class="header">
    <div class="wrap nav">
     <a class="brand" href="index.html"><img class="brand-logo brand-logo-header" src="assets/tradethesis-horizontal.png" alt="TradeThesis — Conviction before execution"></a>
@@ -806,8 +867,8 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
       The Desk
      </a>
     </nav>
-    <a class="button" href="live-class.html#enquire">
-     Ask about the live class ↗
+    <a class="button" href="construct.html">
+     Explore CONSTRUCT ↗
     </a>
     <button aria-expanded="false" aria-label="Open navigation" class="mobile-toggle">
      ☰
@@ -827,7 +888,7 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
      The Desk
     </a>
    
-    <a class="mobile-menu-cta" href="live-class.html#enquire">Ask about the live class ↗</a>
+    <a class="mobile-menu-cta" href="construct.html">Explore CONSTRUCT ↗</a>
    </nav>
   </header>
   <main id="course-catalogue">
@@ -848,27 +909,112 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
       Learn with TradeThesis
      </div>
      <h1>
-      Two ways to learn. One belief: the thinking matters.
+      Start with the basics. Then learn to manage the whole trade.
      </h1>
      <p class="intro">
-      Whether you want to learn through live discussion or work through a self-paced curriculum, the aim is the same: understand the decision, not just copy the entry.
+      Start with the 30-day Trading Path, move into CONSTRUCT for structured feedback and guided practice, or choose the six-week live classroom if you prefer to learn in a room together. The format changes; the focus on sound decisions does not.
      </p>
      <div class="hand-row">
       <span class="hand-note yellow">
        Start where you are. Build from there.
       </span>
       <span class="note-context">
-       These are two distinct offers, with different formats and enrolments.
+       Three formats. Choose the level of support that fits where you are now.
       </span>
      </div>
     </div>
    </section>
-   <section class="section white" id="current-offer" style="padding-top:34px">
+   <section class="section self-paced-catalogue" id="self-paced" style="padding-top:38px">
+    <div class="wrap">
+     <article class="self-paced-product-frame" aria-labelledby="pathOfferHeading">
+      <div class="self-paced-product-grid">
+       <div class="self-paced-product-copy">
+        <div class="eyebrow">The self-paced course</div>
+        <h2 id="pathOfferHeading">The TradeThesis Trading Path</h2>
+        <p class="sp-course-promise">Understand the screen before you risk the money.</p>
+        <p class="sp-course-intro">Thirty written lessons guide you from market mechanics and chart reading to trade planning, risk, psychology and review. One lesson a day, with lifetime access to catch up when you need to.</p>
+        <div class="sp-course-facts" aria-label="Course at a glance">
+         <span>30 written lessons</span><span>4 connected stages</span><span>One lesson each day</span>
+        </div>
+        <div class="sp-outcomes">
+         <div class="sp-outcomes-heading"><span class="sp-pencil" aria-hidden="true">✎</span><div><h3>By the end, you should be able to…</h3><p>Not predict every move. Read the screen with a little more care.</p></div></div>
+         <div class="sp-outcome-grid">
+          <div><b>01</b><span>Describe what price is doing and separate observation from interpretation.</span></div>
+          <div><b>02</b><span>Use chart structure and technical tools as evidence, not automatic instructions.</span></div>
+          <div><b>03</b><span>Connect a trade idea to entry, invalidation, position size and risk.</span></div>
+          <div><b>04</b><span>Review a decision, learn from the result and refine a written process.</span></div>
+         </div>
+         <div class="sp-outcome-method"><span>Observe</span><i aria-hidden="true">→</i><span>Interpret</span><i aria-hidden="true">→</i><span>Question</span><i aria-hidden="true">→</i><span>Record</span></div>
+        </div>
+        <div class="sp-course-footnote"><span class="hand-note yellow">One course. One enrolment.</span><span>The four stages are connected parts of the same learning journey—not separate products.</span></div>
+       </div>
+       <aside class="sp-course-offer" aria-label="The TradeThesis Trading Path price and inclusions">
+        <div class="sp-offer-panel">
+         <div class="sp-offer-top"><span class="sp-offer-tag">One course · Four stages</span><span class="sp-watermark" aria-hidden="true">TT</span></div>
+         <div class="sp-price"><strong>₹999</strong><span>one-time payment<br>lifetime access</span></div>
+         <p class="sp-offer-description">A guided 30-day learning sequence: one lesson each day, with lifetime access so a missed day does not mean losing your place.</p><div class="sp-format-line"><span>15–20 min lesson</span><i aria-hidden="true">+</i><span>10 min action step</span><i aria-hidden="true">·</i><span>Telegram delivery</span></div>
+         <ul class="sp-includes">
+          <li>30 written lessons with action steps and knowledge checks</li>
+          <li>Stage checkpoints on Days 8, 16 and 24, plus the final quiz</li>
+          <li>Six cheat sheets and a glossary</li>
+          <li>Journal, position-size calculator, checklist and playbook templates</li>
+          <li>50-question practice bank and 10 trade-review cards</li>
+         </ul>
+         <div class="sp-stage-list" aria-label="The four connected stages">
+          <div><b>01 · Foundations</b><span>Understand the screen</span></div>
+          <div><b>02 · Technical Toolkit</b><span>Read structure and evidence</span></div>
+          <div><b>03 · Trading Mechanics</b><span>Construct and manage a plan</span></div>
+          <div><b>04 · Psychology &amp; Going Live</b><span>Review and refine your process</span></div>
+         </div>
+         <div class="sp-scope-note"><strong>Included:</strong> the First 30 Days Live plan, Myths vs Facts, a curated resources list, a 30-day tracker and a completion-certificate template.</div><a class="button sp-offer-button" href="trading-path.html">Explore the full course ↗</a>
+         <p class="sp-preview-note">The course detail page explains the full curriculum, learning sequence and inclusions.</p>
+         <div class="sp-scope-note"><strong>One enrolment covers the full course:</strong> all four connected stages of the 30-lesson Trading Path.</div>
+        </div>
+       </aside>
+      </div>
+     </article>
+    </div>
+   </section>
+   
+   <section class="section construct-catalogue" id="construct">
+    <div class="wrap">
+     <article class="construct-offer-frame" aria-labelledby="constructOfferHeading">
+      <div class="construct-offer-main">
+       <div class="construct-offer-copy">
+        <div class="eyebrow">The guided programme · 70 days</div>
+        <h2 id="constructOfferHeading">CONSTRUCT: Trade Construction &amp; Management</h2>
+        <p class="construct-promise">Self-paced lessons. Guided execution.</p>
+        <p>You work through lessons on your own schedule, then apply them through assignments and feedback. Your practice is paper-trading-led, so you can experiment with setups and styles before risking capital. In live lessons, I’ll answer questions and demonstrate how I approach trade execution and management.</p>
+        <div class="construct-facts"><span>43 core lessons</span><span>10 weekend assignments</span><span>8 Review Clinics</span><span>Capstone defence</span></div>
+        <div class="construct-support-list">
+         <div><b>01</b><span><strong>Learn through the week</strong>Four lessons unlock each Monday; read them when you can.</span></div>
+         <div><b>02</b><span><strong>Do the work</strong>Weekend assignments turn concepts into theses, risk plans and trade reviews.</span></div>
+         <div><b>03</b><span><strong>Learn with me</strong>Thesis reviews, risk audits and live interactions where I answer questions and demonstrate trade execution and management.</span></div>
+        </div>
+       </div>
+       <aside class="construct-offer-side" aria-label="CONSTRUCT fee, community support and outcomes">
+        <div class="construct-side-top"><span class="construct-side-kicker">The guided programme · 70 days</span><span class="construct-side-watermark" aria-hidden="true">II</span></div>
+        <div class="construct-price-row"><strong>₹17,000</strong><span>programme fee<br>no separate community fee</span></div>
+        <div class="construct-community-included"><span aria-hidden="true">✳</span><div><strong>The Wobbling Candle</strong><small>12 months of community access included</small></div></div>
+        <h3>A trading system you can explain—and defend.</h3>
+        <p>By the end of the 70 days, you'll have brought context, thesis, entry, risk, management, exit and review into a written, backtested process of your own.</p>
+        <div class="construct-side-output"><span>01</span><div><strong>Written Risk Policy</strong><small>Limits decided before the trade.</small></div></div>
+        <div class="construct-side-output"><span>02</span><div><strong>After-Entry Decision Tree</strong><small>Rules for the moments after entry.</small></div></div>
+        <div class="construct-side-output"><span>03</span><div><strong>Backtest and Strategy Card</strong><small>Historical evidence, with costs and slippage.</small></div></div>
+        <div class="construct-side-output"><span>04</span><div><strong>Defended playbook</strong><small>A process you can talk through.</small></div></div>
+        <a class="button construct-cta" href="construct.html">Explore the 70-day programme ↗</a>
+        <p class="construct-price-note">This is guided practice, not a signals or trade-calls service. The ₹28,000 Income Desk is a separate advanced tier.</p>
+       </aside>
+      </div>
+     </article>
+    </div>
+   </section>
+<section class="section white" id="current-offer" style="padding-top:34px">
     <div class="wrap">
      <div class="catalogue-intro">
       <div>
        <div class="eyebrow">
-        Current live offering
+        Prefer a shorter, live format?
        </div>
        <h2 class="big-heading">
         Learn in the room, with a process to build.
@@ -987,57 +1133,6 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
      </article>
     </div>
    </section>
-   <section class="section self-paced-catalogue" id="self-paced" style="padding-top:38px">
-    <div class="wrap">
-     <article class="self-paced-product-frame" aria-labelledby="pathOfferHeading">
-      <div class="self-paced-product-grid">
-       <div class="self-paced-product-copy">
-        <div class="eyebrow">The self-paced course</div>
-        <h2 id="pathOfferHeading">The TradeThesis Trading Path</h2>
-        <p class="sp-course-promise">Understand the screen before you risk the money.</p>
-        <p class="sp-course-intro">Thirty written lessons guide you from market mechanics and chart reading to trade planning, risk, psychology and review. One lesson a day, with lifetime access to catch up when you need to.</p>
-        <div class="sp-course-facts" aria-label="Course at a glance">
-         <span>30 written lessons</span><span>4 connected stages</span><span>One lesson each day</span>
-        </div>
-        <div class="sp-outcomes">
-         <div class="sp-outcomes-heading"><span class="sp-pencil" aria-hidden="true">✎</span><div><h3>By the end, you should be able to…</h3><p>Not predict every move. Read the screen with a little more care.</p></div></div>
-         <div class="sp-outcome-grid">
-          <div><b>01</b><span>Describe what price is doing and separate observation from interpretation.</span></div>
-          <div><b>02</b><span>Use chart structure and technical tools as evidence, not automatic instructions.</span></div>
-          <div><b>03</b><span>Connect a trade idea to entry, invalidation, position size and risk.</span></div>
-          <div><b>04</b><span>Review a decision, learn from the result and refine a written process.</span></div>
-         </div>
-         <div class="sp-outcome-method"><span>Observe</span><i aria-hidden="true">→</i><span>Interpret</span><i aria-hidden="true">→</i><span>Question</span><i aria-hidden="true">→</i><span>Record</span></div>
-        </div>
-        <div class="sp-course-footnote"><span class="hand-note yellow">One course. One enrolment.</span><span>The four stages are connected parts of the same learning journey—not separate products.</span></div>
-       </div>
-       <aside class="sp-course-offer" aria-label="The TradeThesis Trading Path price and inclusions">
-        <div class="sp-offer-panel">
-         <div class="sp-offer-top"><span class="sp-offer-tag">One course · Four stages</span><span class="sp-watermark" aria-hidden="true">TT</span></div>
-         <div class="sp-price"><strong>₹999</strong><span>one-time payment<br>lifetime access</span></div>
-         <p class="sp-offer-description">A guided 30-day learning sequence: one lesson each day, with lifetime access so a missed day does not mean losing your place.</p><div class="sp-format-line"><span>15–20 min lesson</span><i aria-hidden="true">+</i><span>10 min action step</span><i aria-hidden="true">·</i><span>Telegram delivery</span></div>
-         <ul class="sp-includes">
-          <li>30 written lessons with action steps and knowledge checks</li>
-          <li>Stage checkpoints on Days 8, 16 and 24, plus the final quiz</li>
-          <li>Six cheat sheets and a glossary</li>
-          <li>Journal, position-size calculator, checklist and playbook templates</li>
-          <li>50-question practice bank and 10 trade-review cards</li>
-         </ul>
-         <div class="sp-stage-list" aria-label="The four connected stages">
-          <div><b>01 · Foundations</b><span>Understand the screen</span></div>
-          <div><b>02 · Technical Toolkit</b><span>Read structure and evidence</span></div>
-          <div><b>03 · Trading Mechanics</b><span>Construct and manage a plan</span></div>
-          <div><b>04 · Psychology &amp; Going Live</b><span>Review and refine your process</span></div>
-         </div>
-         <div class="sp-scope-note"><strong>Included:</strong> the First 30 Days Live plan, Myths vs Facts, a curated resources list, a 30-day tracker and a completion-certificate template.</div><a class="button sp-offer-button" href="trading-path.html">Explore the full course ↗</a>
-         <p class="sp-preview-note">The course detail page explains the full curriculum, learning sequence and inclusions.</p>
-         <div class="sp-scope-note"><strong>One enrolment covers the full course:</strong> all four connected stages of the 30-lesson Trading Path.</div>
-        </div>
-       </aside>
-      </div>
-     </article>
-    </div>
-   </section>
    <section class="section deep-paper">
     <div class="wrap">
      <div class="cta-box">
@@ -1046,17 +1141,17 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
         Not sure which fits?
        </div>
        <h2>
-        Think about how you learn best.
+        Choose the support you need right now.
        </h2>
        <p>
-        Choose the live classroom if you value guided discussion and weekly practice. Choose the Trading Path if you prefer a self-paced sequence of written lessons and exercises. They are separate offers; neither is a required add-on to the other.
+        The Trading Path gives you the foundations. CONSTRUCT adds assignment deadlines, thesis reviews, risk audits and clinics over 70 days. The six-week live classroom is a shorter, group-based alternative. Each is a separate offer.
        </p>
        <div class="cta-note">
         One useful next step is enough.
        </div>
       </div>
-      <a class="button butter" href="live-class.html#enquire">
-       Ask about the live class ↗
+      <a class="button butter" href="construct.html">
+       Explore CONSTRUCT ↗
       </a>
      </div>
     </div>
@@ -1077,6 +1172,9 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
       </a>
       <a href="trading-path.html">
        The Trading Path
+      </a>
+      <a href="construct.html">
+       CONSTRUCT · 70 days
       </a>
       <a href="live-class.html">
        Live classroom

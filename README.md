@@ -12,13 +12,17 @@ This package collects the current TradeThesis static website prototype, approved
 
 ## Included
 
-- **Website prototype:** homepage, course catalogue, Trading Path sales page, separate live-class page, redirect page, desktop preview and mobile preview.
+- **Website prototype:** homepage, course catalogue, Trading Path sales page, new CONSTRUCT 70-day guided programme page, separate live-class page, redirect page, desktop preview and mobile preview.
 - **Course room:** the current Pass 6 HTML prototype, including the quarter-circle lesson motif, desktop navigation layout, mobile drawer, lessons, resource library, glossary and Excel workbook download.
-- **Course source:** the latest supplied `starter-drip-course(4).zip` content, extracted without rewriting it: 30 Markdown lessons, generated chart images, bonus materials, templates, certificate sample, PDF course ebook, HTML ebook and delivery drafts.
+- **Course source:** the latest supplied `starter-drip-course(4).zip` content, extracted without rewriting it, plus the supplied CONSTRUCT curriculum source: 30 Markdown lessons, generated chart images, bonus materials, templates, certificate sample, PDF course ebook, HTML ebook and delivery drafts.
 - **Learner downloads:** Excel trading journal, CSV companion, formatted searchable glossary, position-size calculator and practical templates.
 - **Brand assets:** horizontal logo, wordmark and monogram icon.
 - **Integration documents:** curriculum manifest, production integration notes and source-sync notes.
 - **Review screenshots:** the approved desktop layout, short viewport, and mobile drawer.
+
+## Course catalogue design
+
+The ₹999 Trading Path and ₹17,000 CONSTRUCT offers now share a course-card system: common outer framing, two-column layout, heading and price hierarchy, spacing, offer-panel geometry, and mobile stacking. Their differences are intentional and content-led: the Trading Path emphasizes self-study, lessons, checkpoints and permanent course access; CONSTRUCT emphasizes feedback, deadlines, Review Clinics, risk accountability and 12 months in The Wobbling Candle community with no separate fee. The homepage gives the ₹999 Trading Path the only detailed offer card; CONSTRUCT and the six-week live classroom are compact routes to explore when the visitor is ready for more support.
 
 ## Important status and access notes
 
@@ -31,6 +35,7 @@ Do not publish the entire package to a public web server. The `course-source/` f
 - `site/` — static public website pages and brand assets
 - `course-room/` — current standalone course-room prototype
 - `course-source/starter-drip-course/` — editable 30-day course source and supplied assets
+- `course-source/construct/` — CONSTRUCT website curriculum and notes
 - `learner-downloads/` — individual tools for easier review
 - `brand-assets/` — logo artwork
 - `course-integration/` — curriculum and production handoff documents
@@ -45,3 +50,9 @@ python -m http.server 8000
 ```
 
 Then open `http://localhost:8000/START_HERE.html`.
+
+## Pass 2 positioning note
+The homepage features the ₹999 Trading Path as the only full-size offer. CONSTRUCT and the six-week live classroom are compact routes to explore when a visitor is ready for more support. The Courses catalogue keeps both detailed offers within a shared visual system, with distinct handwritten paper notes.
+
+## Pass 2 content and presentation
+The homepage gives the ₹999 Trading Path the only full-size offer card; CONSTRUCT and the six-week live classroom remain compact options. The Courses page keeps detailed cards for both priced courses in a shared design system. Small tilted paper notes add a handwritten editorial touch. CONSTRUCT is paper-trading-led, includes 12 months in The Wobbling Candle at no separate fee, lets learners bring questions to the instructor, and features live lessons demonstrating trade execution and management. The public copy does not state the number or calendar timing of those live lessons.

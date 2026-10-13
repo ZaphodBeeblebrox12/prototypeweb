@@ -730,8 +730,19 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
 @media(max-width:1000px){.resource-stack-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.resource-stack-grid{grid-template-columns:1fr;gap:10px}.resource-stack-card{padding:18px}.resource-stack-card h3{font-size:22px}.product-format-line span{font-size:10px}.sp-format-line{font-size:10px;gap:6px}.resource-note{font-size:15px}}
 
+
+/* CONSTRUCT integration: a little more depth in the shared public-site header. */
+.header{isolation:isolate;position:sticky;background:linear-gradient(180deg,#fffdf9f2 0%,#f8f2e8f5 100%);border-bottom:1px solid #d9d1c3;box-shadow:0 6px 20px #29382e0a,inset 0 1px 0 #fff;}
+.header:before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,#c96f50 0%,#d2b66d 22%,#355a46 56%,#f0d38a 100%);pointer-events:none;z-index:0;}
+.header:after{content:"";position:absolute;right:3.5%;top:-218px;width:330px;height:330px;border:1px solid #c8a65a50;border-radius:50%;box-shadow:0 0 0 22px #c8a65a0b,0 0 0 48px #c8a65a08,0 0 0 76px #c8a65a06;pointer-events:none;z-index:0;}
+.header .nav,.header .mobilelinks{position:relative;z-index:1;}
+.header .brand-logo{filter:drop-shadow(0 1px 0 #ffffff78);}
+.header .nav>.button{box-shadow:inset 0 1px 0 #ffffff32,0 3px 0 #1f3e30,0 7px 15px #233b2e13;background:linear-gradient(180deg,#3d684f 0%,#2d4f3d 100%);}
+.header .nav>.button:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 #ffffff3b,0 4px 0 #1f3e30,0 9px 18px #233b2e18;}
+@media(max-width:650px){.header:after{right:-100px;top:-238px;width:290px;height:290px;opacity:.8}.header .nav{position:relative;z-index:1}}
+
 </style>
-  <meta content="v11-2026-10-12" name="tradethesis-build"/>
+  <meta content="v16-construct-2026-10-13" name="tradethesis-build"/>
  </head>
  <body data-page-key="live-class">
   <div class="topline"><span class="topline-message">Trade Construction &amp; Management · six-week live classroom ·</span><span class="topline-short">Six-week live classroom</span><a href="#class-path" class="topline-link"><span class="topline-link-full">See the learning path ↗</span><span class="topline-link-short">Learning path ↗</span></a></div>

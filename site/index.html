@@ -730,8 +730,62 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
 @media(max-width:1000px){.resource-stack-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.resource-stack-grid{grid-template-columns:1fr;gap:10px}.resource-stack-card{padding:18px}.resource-stack-card h3{font-size:22px}.product-format-line span{font-size:10px}.sp-format-line{font-size:10px;gap:6px}.resource-note{font-size:15px}}
 
+
+/* CONSTRUCT integration: a little more depth in the shared public-site header. */
+.header{isolation:isolate;position:sticky;background:linear-gradient(180deg,#fffdf9 0%,#f8f2e8 100%);border-bottom:1px solid #d9d1c3;box-shadow:0 6px 20px #29382e0a,inset 0 1px 0 #fff;}
+.header:before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,#c96f50 0%,#d2b66d 22%,#355a46 56%,#f0d38a 100%);pointer-events:none;z-index:0;}
+.header:after{content:"";position:absolute;right:3.5%;top:-218px;width:330px;height:330px;border:1px solid #c8a65a50;border-radius:50%;box-shadow:0 0 0 22px #c8a65a0b,0 0 0 48px #c8a65a08,0 0 0 76px #c8a65a06;pointer-events:none;z-index:0;}
+.header .nav,.header .mobilelinks{position:relative;z-index:1;}
+.header .brand-logo{filter:drop-shadow(0 1px 0 #ffffff78);}
+.header .nav>.button{box-shadow:inset 0 1px 0 #ffffff32,0 3px 0 #1f3e30,0 7px 15px #233b2e13;background:linear-gradient(180deg,#3d684f 0%,#2d4f3d 100%);}
+.header .nav>.button:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 #ffffff3b,0 4px 0 #1f3e30,0 9px 18px #233b2e18;}
+@media(max-width:650px){.header:after{right:-100px;top:-238px;width:290px;height:290px;opacity:.8}.header .nav{position:relative;z-index:1}}
+
+
+/* Course-family pass: CONSTRUCT mirrors the Trading Path card geometry, while support changes the emphasis. */
+.home-construct-feature{margin-top:18px;background:linear-gradient(135deg,#fffaf1 0%,#f7f1e6 100%);border-color:#d8cdae;position:relative;overflow:hidden}
+.home-construct-feature:after{content:"";position:absolute;right:-185px;top:-220px;width:390px;height:390px;border:1px solid #c49a4a39;border-radius:50%;box-shadow:0 0 0 24px #c49a4a08,0 0 0 53px #c49a4a06;pointer-events:none}
+.home-construct-story,.home-construct-offer{position:relative;z-index:1}
+.home-construct-feature .home-path-story h3{max-width:680px}
+.home-construct-feature .home-construct-outcome{background:#f1ebdc;border-color:#e0d4ba}
+.home-construct-feature .home-outcome-grid{gap:10px 14px}
+.home-construct-feature .home-learning-loop{border-color:#cdbf9e}
+.home-construct-offer{background:#e5eadc;border-color:#cddac5}
+.home-construct-community{display:flex;align-items:center;gap:9px;padding:10px 12px;margin:8px 0 13px;border:1px solid #cbd7c3;border-radius:12px;background:#f8f8ee}
+.home-construct-community>span{display:grid;place-items:center;flex:0 0 auto;width:27px;height:27px;border-radius:50%;background:var(--butter);color:var(--deep);font-size:16px}
+.home-construct-community strong{display:block;font-size:11px;color:var(--deep)}
+.home-construct-community small{display:block;font-size:10px;line-height:1.45;color:var(--muted);margin-top:2px}
+.home-construct-offer .home-offer-summary{margin-top:7px}
+.home-construct-offer .home-stage-list{margin-top:10px}
+@media(max-width:980px){.home-construct-feature{grid-template-columns:minmax(0,1fr) minmax(300px,.85fr)}}
+@media(max-width:760px){.home-construct-feature{grid-template-columns:1fr;padding:12px;border-radius:20px}.home-construct-story{padding:13px 8px 10px}.home-construct-offer{padding:22px 19px}.home-construct-feature .home-path-story h3{font-size:clamp(32px,8vw,42px)}}
+@media(max-width:430px){.home-construct-feature .home-outcome-grid{grid-template-columns:1fr;gap:10px}.home-construct-feature .home-outcome span{font-size:11px}}
+
+
+/* Pass 2 — keep the homepage focused on the ₹999 Trading Path; add a personal paper-note detail. */
+.home-path-feature{position:relative}
+.home-path-feature:before{content:"a little practice";position:absolute;right:28px;top:-13px;z-index:5;display:block;padding:6px 12px 7px;background:var(--butter);color:#655637;border-radius:2px;font:italic 14px/1.1 var(--serif);transform:rotate(3deg);box-shadow:0 3px 8px #29382e12;white-space:nowrap}
+.home-construct-teaser{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(260px,.75fr);gap:25px;align-items:center;margin-top:17px;padding:20px 23px;background:#f5efe3;border:1px solid #dfd5c3;border-radius:16px;position:relative;overflow:hidden}
+.home-construct-teaser:after{content:"";position:absolute;right:-120px;top:-180px;width:270px;height:270px;border:1px solid #c49a4a38;border-radius:50%;box-shadow:0 0 0 19px #c49a4a08,0 0 0 42px #c49a4a06;pointer-events:none}
+.home-construct-teaser-copy,.home-construct-teaser-side{position:relative;z-index:1;min-width:0}
+.home-construct-teaser-copy .eyebrow{font-size:9px}
+.home-construct-teaser h3{font:400 clamp(23px,2.4vw,30px)/1.12 var(--serif);letter-spacing:-.025em;margin:9px 0 7px;color:var(--deep)}
+.home-construct-teaser h3 span{color:var(--muted);font-size:.8em}
+.home-construct-teaser-copy>p{font-size:12px;line-height:1.75;color:var(--muted);margin:0;max-width:680px}
+.home-construct-mini-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.home-construct-mini-tags span{font-size:9px;color:var(--green);background:#fffaf1;border:1px solid #ddd4c2;border-radius:99px;padding:5px 8px}
+.home-construct-teaser-side{border-left:1px solid #d8cdb8;padding-left:22px}
+.home-construct-teaser-price{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.home-construct-teaser-price strong{font:400 31px/1 var(--serif);letter-spacing:-.03em;color:var(--deep)}
+.home-construct-teaser-price span{font-size:9px;color:var(--muted)}
+.home-construct-teaser-side p{font-size:10px;line-height:1.65;color:var(--muted);margin:8px 0 10px;max-width:340px}
+.home-construct-teaser-side p b{color:var(--deep)}
+.home-construct-teaser-link{display:inline-flex;align-items:center;gap:8px;font-size:10px;font-weight:800;color:var(--green);border-bottom:1px solid #b6c6b0;padding-bottom:3px}
+@media(max-width:760px){.home-construct-teaser{grid-template-columns:1fr;gap:12px;padding:16px 17px}.home-construct-teaser-side{border-left:0;border-top:1px solid #d8cdb8;padding:11px 0 0}.home-construct-mini-tags{display:none}.home-construct-teaser-copy>p{line-height:1.6}.home-construct-teaser-side p{line-height:1.5;margin:6px 0 8px}.home-path-feature:before{right:20px;top:-12px;font-size:13px}}
+@media(max-width:430px){.home-construct-teaser h3{font-size:24px}.home-construct-teaser h3 span{display:block;margin-top:3px}.home-construct-teaser-side p{max-width:none}}
+
 </style>
-  <meta content="v11-2026-10-12" name="tradethesis-build"/>
+  <meta content="v17-course-family-2026-10-13" name="tradethesis-build"/>
  </head>
  <body>
   <div class="topline"><span class="topline-message">The TradeThesis Trading Path · 30 lessons · four connected stages ·</span><span class="topline-short">30 lessons · 4 connected stages</span><a href="courses.html" class="topline-link"><span class="topline-link-full">Explore the course</span><span class="topline-link-short">Explore ↗</span></a></div>
@@ -1023,7 +1077,7 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
        </h2>
       </div>
       <p>
-       Take a closer look at the self-paced Trading Path below, then explore the full curriculum on its own page. Prefer guided discussion and shared practice? The live classroom is a separate experience.
+       The 30-day Trading Path is the place to begin. When you are ready for more feedback or prefer to learn in a group, there are guided options to explore further.
       </p>
      </div>
      <div class="home-path-feature" aria-labelledby="homePathTitle">
@@ -1071,6 +1125,20 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
        <p class="home-offer-disclaimer">Preview only. Checkout and secure learner access will be connected before launch.</p>
       </aside>
      </div>
+
+     <article class="home-construct-teaser" aria-labelledby="homeConstructHeading">
+      <div class="home-construct-teaser-copy">
+       <div class="eyebrow">When you are ready for more support</div>
+       <h3 id="homeConstructHeading">CONSTRUCT <span>· Trade Construction &amp; Management</span></h3>
+       <p>Paper-trading-led practice, feedback and live lessons where I demonstrate trade execution.</p>
+       <div class="home-construct-mini-tags"><span>Guided practice</span><span>Feedback &amp; accountability</span></div>
+      </div>
+      <aside class="home-construct-teaser-side" aria-label="CONSTRUCT overview">
+       <div class="home-construct-teaser-price"><strong>₹17,000</strong><span>one programme fee</span></div>
+       <p><b>The Wobbling Candle</b> is included for 12 months. Bring your questions; I’ll answer and help you work through the reasoning.</p>
+       <a class="home-construct-teaser-link" href="construct.html">See how CONSTRUCT works <span aria-hidden="true">↗</span></a>
+      </aside>
+     </article>
      <div class="home-live-invite">
       <div class="home-live-mark" aria-hidden="true">☕</div>
       <div class="home-live-copy"><div class="eyebrow">Prefer to learn together?</div><h3>Trade Construction &amp; Management</h3><p>A separate six-week live classroom with guided discussion, practical worksheets and a final playbook.</p></div>
@@ -1078,7 +1146,7 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
      </div>
      <div class="hand-row">
       <span class="hand-note yellow">A path is useful when each step gives you something to work with.</span>
-      <span class="note-context">Self-paced learning and the live classroom are separate offers.</span>
+      <span class="note-context">The Trading Path builds the foundations; CONSTRUCT adds guided feedback; the live classroom offers a separate group format.</span>
      </div>
     </div>
    </section>

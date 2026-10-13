@@ -1,22 +1,22 @@
 {
-  "project": "TradeThesis Full Project",
-  "release": "review bundle",
-  "file_count": 113,
+  "project": "TradeThesis Full Project — CONSTRUCT integration",
+  "release": "course presentation pass 2 · static review bundle · 2026-10-13",
+  "file_count": 134,
   "files": [
     {
       "path": "PROJECT_CONTENTS.md",
-      "size_bytes": 862,
-      "sha256": "f2f61b9955767343c14f6e09e6ace2b374b4ce027a2fda22b9cebe60c63802b8"
+      "size_bytes": 2418,
+      "sha256": "5e4ad4378b8b7e07fa7c0b6eca715b5d7c2ad28a4a2c7aef3b37551927416bc9"
     },
     {
       "path": "README.md",
-      "size_bytes": 3577,
-      "sha256": "d585ff2a15e571e728647f5739359863ef44c4b8b97c23b1c52f0b582f2a05c6"
+      "size_bytes": 5415,
+      "sha256": "70e446622e4e37ca5cf76606d0249e6040a3f67848240d8b9756e79d40724110"
     },
     {
       "path": "START_HERE.html",
-      "size_bytes": 5058,
-      "sha256": "a830fc34f269d7f44c76f395669a4995ec6844557eb91a5a846df40aed5c2c8e"
+      "size_bytes": 5158,
+      "sha256": "32955b0d0195e1226f28edf09572fbd66dd6df1762bc174a7a8ec4a33d8aa20b"
     },
     {
       "path": "brand-assets/tradethesis-horizontal.png",
@@ -32,6 +32,11 @@
       "path": "brand-assets/tradethesis-wordmark.png",
       "size_bytes": 23828,
       "sha256": "c62d568b9e9f6adcdc21bdcf5f097f15654cc184eb5364b9b85e88efd3385e18"
+    },
+    {
+      "path": "course-integration/CONSTRUCT_INTEGRATION.md",
+      "size_bytes": 2280,
+      "sha256": "30876520b996037106b837d5451482c88119303c2485a783ee977aa046e7915d"
     },
     {
       "path": "course-integration/EDITORIAL_VOICE_PASS_8_SOURCE_SYNC.md",
@@ -52,6 +57,16 @@
       "path": "course-room/TradeThesis_Course_Room.html",
       "size_bytes": 822818,
       "sha256": "9606bd21868e6cf5b04ea069f7229ae64d355e640959820b4d23a88435011401"
+    },
+    {
+      "path": "course-source/construct/README.md",
+      "size_bytes": 683,
+      "sha256": "f1f365404da4228e2dba2bd677432b6e11808ffbd03db567fefa0e1a35768a1f"
+    },
+    {
+      "path": "course-source/construct/website-curriculum-source.md",
+      "size_bytes": 9667,
+      "sha256": "98c5b7a0668a5ff1e7158d2ee8d0fcb002d44b51f95e56476797c42a36f8cff1"
     },
     {
       "path": "course-source/starter-drip-course/CHART_GUIDE.md",
@@ -494,9 +509,64 @@
       "sha256": "d0f7e9788a42137c4c4d9843c503cff333eace4aa48f97d4c5dba94c1fcea795"
     },
     {
+      "path": "review/COURSE_CARD_ALIGNMENT_PASS_1.md",
+      "size_bytes": 2318,
+      "sha256": "aaa182f8b75fd6d56c64d98e1d8a4f089994a2a130b006d58a836c367c05370a"
+    },
+    {
+      "path": "review/COURSE_CARD_ALIGNMENT_PASS_2.md",
+      "size_bytes": 2129,
+      "sha256": "f6e4d10568fab3cbf0be973a5950ebc67a2c48067a92338a0245096c7842911d"
+    },
+    {
       "path": "review/PASS_6_DESIGN_NOTES.md",
       "size_bytes": 975,
       "sha256": "350e70b2bf5416f0000b8dbb1b7f8ace0f4bba5e13fbd1ffb8cd500640bb8b6e"
+    },
+    {
+      "path": "review/screenshots/construct-community-desktop-pass-2.png",
+      "size_bytes": 211555,
+      "sha256": "a2f6326dc00b04528e122232ed6b8b17baf59280f9ff5ad942c4718b9d4da136"
+    },
+    {
+      "path": "review/screenshots/construct-community-mobile-pass-2.png",
+      "size_bytes": 85910,
+      "sha256": "dc2f79c8abbcd3c8da5f9c1e61186f1d915a710cdda47048ab6a90c8eee05f5e"
+    },
+    {
+      "path": "review/screenshots/construct-hero-desktop-pass-2.png",
+      "size_bytes": 372474,
+      "sha256": "29e71831e7669a20e94e5423078079834d713b4ea5c77bbd8b65a199ce8af764"
+    },
+    {
+      "path": "review/screenshots/construct-paper-practice-desktop-pass-2.png",
+      "size_bytes": 230396,
+      "sha256": "d4e8965f12c13bf4b0f2ca07e35f9e583290860788819db256bb6030cab77b31"
+    },
+    {
+      "path": "review/screenshots/construct-paper-practice-mobile-pass-2.png",
+      "size_bytes": 86195,
+      "sha256": "f48478357fa1e959dd3564ff28162b07110cb39dd62ee6e8b2668c82d23c6154"
+    },
+    {
+      "path": "review/screenshots/course-comparison-desktop-pass-2.png",
+      "size_bytes": 280409,
+      "sha256": "5964217b9f75c91a0d1a19d1eeb42d5fbc187f0874636063f4c92d3f942e5a8b"
+    },
+    {
+      "path": "review/screenshots/course-comparison-mobile-pass-2.png",
+      "size_bytes": 83878,
+      "sha256": "8487829c948e4ad2b65608b830ed81e7233a2402127ab17bfcb6677a1ee67bb4"
+    },
+    {
+      "path": "review/screenshots/course-construct-offer-desktop-pass-2.png",
+      "size_bytes": 259684,
+      "sha256": "06204145801067a46c15d95b1c95861f75d8c026b9d465f29d506bebbf310ce6"
+    },
+    {
+      "path": "review/screenshots/course-construct-offer-mobile-pass-2.png",
+      "size_bytes": 88517,
+      "sha256": "3cba2e2ff4b36bc3b0432b311b79a7c5bab1ed6bcfc1e6e6e5f4fc4c3ff6f506"
     },
     {
       "path": "review/screenshots/desktop-full-viewport.png",
@@ -514,19 +584,49 @@
       "sha256": "86d3fb6b67845ba92b36f7399705ec3593ed18c6f1e0537e14b206e9305a116a"
     },
     {
+      "path": "review/screenshots/homepage-learning-desktop-pass-2.png",
+      "size_bytes": 257581,
+      "sha256": "6c816ef9a947586a1e3f256211b3326dcbb85555695f5828950a8be2ff1ebee8"
+    },
+    {
+      "path": "review/screenshots/homepage-learning-mobile-pass-2.png",
+      "size_bytes": 85859,
+      "sha256": "cf7433fac8a82a9533766efbcb1e4e8e549f055489af1fc47690b5af3128acec"
+    },
+    {
+      "path": "review/screenshots/homepage-options-desktop-pass-2.png",
+      "size_bytes": 221684,
+      "sha256": "a17c59e86fc05ef4e3361622233a7f015fa834f56e962abdf32e23957a174ab4"
+    },
+    {
+      "path": "review/screenshots/homepage-options-mobile-pass-2.png",
+      "size_bytes": 87439,
+      "sha256": "af29c6bc9e12e1257f3b8a65a6b08770953ee632d43395f486c37945c829780d"
+    },
+    {
       "path": "review/screenshots/mobile-drawer.png",
       "size_bytes": 98536,
       "sha256": "c8fac9b311bd30e8416a21c546979ec29a80bfb5edd32d3ce79f8a2a46a46829"
     },
     {
       "path": "site/00_OPEN_INTERACTIVE_PREVIEW.html",
-      "size_bytes": 552957,
-      "sha256": "c0bcfdbcfa8a0203d8f930ea325329eb3bda2baa931ab0b30789ea9b9ef26fbc"
+      "size_bytes": 2199,
+      "sha256": "8828d613ae271a9a1367390b66b7f3240d04391dd8ce2dc34e2c0fd0e23918e3"
     },
     {
       "path": "site/MOBILE_PREVIEW.html",
-      "size_bytes": 590219,
-      "sha256": "9ce6d130ac1623dd658216dcd6addf2a6fcaf14253d8a95783bbb4cdb79a0b49"
+      "size_bytes": 404,
+      "sha256": "b8bf0468ed61187ceba88c3b28376aab8436404e3f7a3f9ca322baf7dd35b66e"
+    },
+    {
+      "path": "site/PASS_2_QA.json",
+      "size_bytes": 3486,
+      "sha256": "0d7754fe202e30f109459c47c228aa26c73d2e406525727d9ba9de5f46331f12"
+    },
+    {
+      "path": "site/README.md",
+      "size_bytes": 1301,
+      "sha256": "2308259468e425cf0b001b4bef2ab8ef8611fd0eb55352310cd38e0662f70560"
     },
     {
       "path": "site/assets/tradethesis-horizontal.png",
@@ -544,9 +644,14 @@
       "sha256": "c62d568b9e9f6adcdc21bdcf5f097f15654cc184eb5364b9b85e88efd3385e18"
     },
     {
+      "path": "site/construct.html",
+      "size_bytes": 47714,
+      "sha256": "4ed89cdcbbc9df09ea1d762d5084b94967321c4997da199209194357500bf9a1"
+    },
+    {
       "path": "site/courses.html",
-      "size_bytes": 91735,
-      "sha256": "5bc6c2676fd0609550cb2a9ef00c0f04157345616284ac595412db945dadff9d"
+      "size_bytes": 103134,
+      "sha256": "b3e4a7ecd554ac38522cdeb948a270a4c2ff50062e0131052dc191b957e15361"
     },
     {
       "path": "site/foundations.html",
@@ -555,18 +660,18 @@
     },
     {
       "path": "site/index.html",
-      "size_bytes": 95921,
-      "sha256": "bb9cbbb8bff941478ffc18c30760aacb6b28f623c7a27a9987b031b92dc001e7"
+      "size_bytes": 103206,
+      "sha256": "02184a60d62e85713aaa2027d328f8d8581662d2ab9a8f50cd7b7284ef2e6843"
     },
     {
       "path": "site/live-class.html",
-      "size_bytes": 101396,
-      "sha256": "f7d3a2877d0d3821ca722337f295b6de8fad34b0f00eb99ee084afddccdad1f1"
+      "size_bytes": 102659,
+      "sha256": "a5d2ab7e74de577b7e1ccb362bae1fcc615b7031433466096ffbef07c3e7228b"
     },
     {
       "path": "site/trading-path.html",
-      "size_bytes": 123861,
-      "sha256": "dbf0ead59f030770a30caf832349e62d437cb942b04f2ec7c124b4198fde638b"
+      "size_bytes": 125190,
+      "sha256": "ae36cb2f2b21b24648a854dd70078209ea533383e76bd76ae63bf787af1077bc"
     }
   ]
 }
