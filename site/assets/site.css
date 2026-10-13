@@ -2062,3 +2062,252 @@ body.construct-page .paper-first-live small{display:block;font-size:10px;line-he
   .course-product-frame .course-scope-statement{font-size:13px}
   .course-product-frame .course-product-footnote{font-size:13px}
 }
+
+
+/* Consistent readable type for every Trading Path offer surface: homepage, catalogue, and detail page. */
+/* Homepage offer — site/index.html */
+.home-path-feature .home-path-description{
+  font-size:15px;
+  line-height:1.8;
+  color:#526256;
+}
+.home-path-feature .home-path-chips{gap:8px 9px}
+.home-path-feature .home-path-chips span{
+  font-size:12px;
+  line-height:1.45;
+  padding:8px 11px;
+}
+.home-path-feature .home-outcome-card{padding:20px 21px 18px}
+.home-path-feature .home-outcome-heading h4{
+  font-size:clamp(22px,2.1vw,26px);
+  line-height:1.15;
+}
+.home-path-feature .home-outcome-heading p{
+  font-size:13px;
+  line-height:1.65;
+}
+.home-path-feature .home-outcome-grid{gap:14px 18px}
+.home-path-feature .home-outcome{
+  grid-template-columns:27px minmax(0,1fr);
+  gap:9px;
+}
+.home-path-feature .home-outcome b{font-size:15px}
+.home-path-feature .home-outcome span{
+  font-size:14px;
+  line-height:1.7;
+  color:#4d5e52;
+}
+.home-path-feature .home-learning-loop{
+  gap:9px;
+  font-size:12px;
+  line-height:1.6;
+}
+.home-path-feature .home-path-footnote{
+  font-size:12px;
+  line-height:1.7;
+}
+.home-path-feature .home-offer-tag{
+  font-size:11px;
+  line-height:1.45;
+  padding:7px 11px;
+}
+.home-path-feature .home-price-row{margin:20px 0 10px}
+.home-path-feature .home-price-row strong{font-size:46px}
+.home-path-feature .home-price-row span{font-size:12px;line-height:1.5}
+.home-path-feature .home-offer-summary{
+  font-size:15px;
+  line-height:1.75;
+  color:#4f6052;
+  margin-bottom:16px;
+}
+.home-path-feature .home-offer-includes{gap:11px;margin-bottom:20px}
+.home-path-feature .home-offer-includes li{
+  font-size:14px;
+  line-height:1.7;
+  padding-left:23px;
+}
+.home-path-feature .home-stage-list{margin:4px 0 17px;padding:6px 0}
+.home-path-feature .home-stage-list>div{
+  grid-template-columns:minmax(0,1fr) minmax(0,.9fr);
+  align-items:start;
+  gap:12px;
+  padding:11px 0;
+}
+.home-path-feature .home-stage-list b{
+  font:650 14px/1.55 var(--sans);
+}
+.home-path-feature .home-stage-list span{
+  font-size:13px;
+  line-height:1.6;
+  text-align:right;
+  color:#526253;
+}
+.home-path-feature .home-offer-button{
+  min-height:50px;
+  font-size:15px;
+  white-space:normal;
+}
+.home-path-feature .home-offer-disclaimer{
+  font-size:12px;
+  line-height:1.6;
+  margin-top:12px;
+}
+/* Courses catalogue offer — site/courses.html */
+.self-paced-product-frame .sp-course-intro{
+  font-size:15px;
+  line-height:1.8;
+  color:#526256;
+}
+.self-paced-product-frame .sp-course-facts{gap:8px}
+.self-paced-product-frame .sp-course-facts span{
+  font-size:12px;
+  padding:8px 11px;
+}
+.self-paced-product-frame .sp-outcomes{padding:20px 21px 18px}
+.self-paced-product-frame .sp-outcomes-heading h3{
+  font-size:clamp(22px,2.1vw,26px);
+  line-height:1.15;
+}
+.self-paced-product-frame .sp-outcomes-heading p{
+  font-size:13px;
+  line-height:1.65;
+}
+.self-paced-product-frame .sp-outcome-grid{gap:14px 18px}
+.self-paced-product-frame .sp-outcome-grid>div{
+  grid-template-columns:27px minmax(0,1fr);
+  gap:9px;
+}
+.self-paced-product-frame .sp-outcome-grid b{font-size:15px}
+.self-paced-product-frame .sp-outcome-grid span{
+  font-size:14px;
+  line-height:1.7;
+  color:#4d5e52;
+}
+.self-paced-product-frame .sp-outcome-method{
+  gap:9px;
+  font-size:12px;
+  line-height:1.6;
+}
+.self-paced-product-frame .sp-course-footnote{
+  font-size:13px;
+  line-height:1.7;
+}
+.self-paced-product-frame .sp-course-footnote .hand-note{font-size:14px}
+.self-paced-product-frame .sp-offer-panel{
+  height:auto;
+  padding:27px 26px 22px;
+}
+.self-paced-product-frame .sp-offer-tag{
+  font-size:11px;
+  line-height:1.45;
+  padding:7px 11px;
+}
+.self-paced-product-frame .sp-price{margin:20px 0 10px}
+.self-paced-product-frame .sp-price strong{font-size:46px}
+.self-paced-product-frame .sp-price span{font-size:12px;line-height:1.5}
+.self-paced-product-frame .sp-offer-description{
+  font-size:15px;
+  line-height:1.75;
+  color:#4f6052;
+  margin-bottom:16px;
+}
+.self-paced-product-frame .sp-format-line{
+  font-size:12px;
+  line-height:1.6;
+  gap:7px 10px;
+}
+.self-paced-product-frame .sp-includes{gap:11px;margin-bottom:20px}
+.self-paced-product-frame .sp-includes li{
+  font-size:14px;
+  line-height:1.7;
+  padding-left:23px;
+}
+.self-paced-product-frame .sp-stage-list{margin:4px 0 17px;padding:6px 0}
+.self-paced-product-frame .sp-stage-list>div{
+  grid-template-columns:minmax(0,1fr) minmax(0,.9fr);
+  align-items:start;
+  gap:12px;
+  padding:11px 0;
+}
+.self-paced-product-frame .sp-stage-list b{font:650 14px/1.55 var(--sans)}
+.self-paced-product-frame .sp-stage-list span{
+  font-size:13px;
+  line-height:1.6;
+  text-align:right;
+  color:#526253;
+}
+.self-paced-product-frame .sp-scope-note{
+  font-size:13px;
+  line-height:1.7;
+}
+.self-paced-product-frame .sp-offer-button{
+  min-height:50px;
+  font-size:15px;
+  white-space:normal;
+}
+.self-paced-product-frame .sp-preview-note{
+  font-size:12px;
+  line-height:1.6;
+  margin-top:12px;
+}
+/* Prevent compressed two-column stage rows on intermediate screen widths. */
+@media (max-width:1050px) and (min-width:781px){
+  .home-path-feature .home-stage-list>div,
+  .self-paced-product-frame .sp-stage-list>div{
+    grid-template-columns:1fr;
+    gap:3px;
+  }
+  .home-path-feature .home-stage-list span,
+  .self-paced-product-frame .sp-stage-list span{text-align:left}
+  .home-path-feature .home-path-feature{gap:20px}
+}
+@media (max-width:780px){
+  .home-path-feature .home-path-description,
+  .self-paced-product-frame .sp-course-intro{font-size:15px}
+  .home-path-feature .home-outcome-grid,
+  .self-paced-product-frame .sp-outcome-grid{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  .home-path-feature .home-outcome span,
+  .self-paced-product-frame .sp-outcome-grid span{font-size:14px}
+  .home-path-feature .home-path-footnote,
+  .self-paced-product-frame .sp-course-footnote{font-size:13px}
+  .home-path-feature .home-path-offer,
+  .self-paced-product-frame .sp-offer-panel{height:auto}
+  .home-path-feature .home-stage-list>div,
+  .self-paced-product-frame .sp-stage-list>div{
+    grid-template-columns:minmax(0,1fr) minmax(0,.9fr);
+    gap:10px;
+  }
+  .home-path-feature .home-stage-list span,
+  .self-paced-product-frame .sp-stage-list span{text-align:right}
+}
+@media (max-width:650px){
+  .home-path-feature .home-outcome-card,
+  .self-paced-product-frame .sp-outcomes{padding:19px 17px 17px}
+  .home-path-feature .home-outcome-heading h4,
+  .self-paced-product-frame .sp-outcomes-heading h3{font-size:23px}
+  .home-path-feature .home-outcome-heading p,
+  .self-paced-product-frame .sp-outcomes-heading p{font-size:13px}
+  .home-path-feature .home-path-offer,
+  .self-paced-product-frame .sp-offer-panel{padding:22px 18px 19px}
+  .home-path-feature .home-price-row strong,
+  .self-paced-product-frame .sp-price strong{font-size:42px}
+  .home-path-feature .home-offer-summary,
+  .self-paced-product-frame .sp-offer-description{font-size:15px}
+  .home-path-feature .home-offer-includes li,
+  .self-paced-product-frame .sp-includes li{font-size:14px}
+  .home-path-feature .home-stage-list>div,
+  .self-paced-product-frame .sp-stage-list>div{
+    grid-template-columns:1fr;
+    gap:2px;
+  }
+  .home-path-feature .home-stage-list span,
+  .self-paced-product-frame .sp-stage-list span{
+    text-align:left;
+    font-size:13px;
+  }
+  .home-path-feature .home-offer-disclaimer,
+  .self-paced-product-frame .sp-preview-note{font-size:12px}
+}
