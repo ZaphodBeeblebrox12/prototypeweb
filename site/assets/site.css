@@ -265,7 +265,6 @@ footer{padding:35px 0 22px}
   .section-head{display:block}
   .section-head>p{margin-top:13px}
   .course-grid,.community-grid,.reading-grid,.future-list{grid-template-columns:1fr}
-  .course-card{min-height:280px}
   .arc{grid-template-columns:1fr 1fr;gap:21px 18px}
   .arc-step h3{margin-top:10px}
   .community-panel{min-height:220px;padding:24px}
@@ -418,9 +417,7 @@ body{font-family:var(--sans);font-size:15px;line-height:1.65;letter-spacing:0}
   .study-card{min-height:405px}
   .section{padding:59px 0}
   .section-head>p{font-size:14px}
-  .course-card{min-height:0;padding:23px}
   .course-card:after{font-size:82px}
-  .course-card p{font-size:14px}
   .page-hero{padding:38px 0 30px}
   .page-hero h1{font-size:clamp(40px,10.5vw,56px)}
   .page-hero .hand-row{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
@@ -1509,7 +1506,6 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
   .outline-lessons{grid-template-columns:1fr}
   .outline-lessons li,.outline-lessons li:nth-child(-n+2){border-top:1px solid #eee8dc}
   .outline-lessons li:first-child{border-top:0}
-  .enrolment-includes-grid{grid-template-columns:1fr}
   .enrolment-overview .section-head{display:block}
 }
 /* v10 — reusable, product-first course page system */ .course-hero-grid{grid-template-columns:minmax(0,1.08fr) minmax(310px,.82fr);gap:clamp(28px,4.1vw,56px);align-items:start}
