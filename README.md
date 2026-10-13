@@ -1,21 +1,47 @@
-# TradeThesis public website preview — v15
+# TradeThesis — Full Design & Course Project
 
-Open `00_OPEN_INTERACTIVE_PREVIEW.html` first, or open each HTML page directly from this folder.
+This package collects the current TradeThesis static website prototype, approved Pass 6 course-room redesign, source materials for the 30-day starter drip course, learner downloads, logo assets, and handoff notes in one place.
 
-## What changed in v15
-- Kept the homepage and its existing rich Trading Path hook unchanged.
-- Upgraded the self-paced offer on `courses.html` from the small catalogue card to the full rich two-column presentation from the approved reference: course promise and outcomes on the left; proposed price, inclusions, connected four-stage outline and CTA on the right.
-- Retained the six-week live classroom as a separate offer above the self-paced course.
-- The CTA on the Courses page goes to `trading-path.html` for the complete detail page.
-- Public sales pages contain no personal instructor charts.
+## Start here
 
-## Files
-- `index.html` — homepage (unchanged from v14)
-- `courses.html` — catalogue with richer self-paced course offering
-- `trading-path.html` — full course detail page
-- `live-class.html` — separate six-week live classroom offer
-- `foundations.html` — safe redirect page to the course overview
-- `00_OPEN_INTERACTIVE_PREVIEW.html` — interactive preview router
+1. Open `START_HERE.html` in a browser for links to the main parts of this package.
+2. For the public website, open `site/00_OPEN_INTERACTIVE_PREVIEW.html` (or `site/MOBILE_PREVIEW.html` to review the mobile layout). The individual pages are also in `site/`.
+3. For the learner-facing course-room prototype, open `course-room/TradeThesis_Course_Room.html`.
+4. The full editable source package is in `course-source/starter-drip-course/`. Begin with its `README.md` and `COURSE_ROADMAP.md`.
+5. Standalone learner downloads are in `learner-downloads/`, including the Excel journal and formatted glossary.
 
-## Before launch
-₹999 remains a proposed price. Checkout, secure access control, authenticated learner progress and scheduled lesson release must be connected in Django before selling.
+## Included
+
+- **Website prototype:** homepage, course catalogue, Trading Path sales page, separate live-class page, redirect page, desktop preview and mobile preview.
+- **Course room:** the current Pass 6 HTML prototype, including the quarter-circle lesson motif, desktop navigation layout, mobile drawer, lessons, resource library, glossary and Excel workbook download.
+- **Course source:** the latest supplied `starter-drip-course(4).zip` content, extracted without rewriting it: 30 Markdown lessons, generated chart images, bonus materials, templates, certificate sample, PDF course ebook, HTML ebook and delivery drafts.
+- **Learner downloads:** Excel trading journal, CSV companion, formatted searchable glossary, position-size calculator and practical templates.
+- **Brand assets:** horizontal logo, wordmark and monogram icon.
+- **Integration documents:** curriculum manifest, production integration notes and source-sync notes.
+- **Review screenshots:** the approved desktop layout, short viewport, and mobile drawer.
+
+## Important status and access notes
+
+This is a **design and content review package**, not a production backend. Checkout, authenticated learner accounts, server-side progress, scheduled daily release and production Telegram delivery are not connected. The course-room prototype deliberately has all 30 lessons available for review. The ₹999 Trading Path does **not** include trading-bot access; delivery of course lessons through Telegram is separate from access to any trading bot.
+
+Do not publish the entire package to a public web server. The `course-source/` folder contains full paid-course content and internal delivery/production materials. Publish only the appropriate website pages and implement authenticated access and scheduled release before selling the course. The prototype's locally available lesson files are not access-controlled.
+
+## Folder map
+
+- `site/` — static public website pages and brand assets
+- `course-room/` — current standalone course-room prototype
+- `course-source/starter-drip-course/` — editable 30-day course source and supplied assets
+- `learner-downloads/` — individual tools for easier review
+- `brand-assets/` — logo artwork
+- `course-integration/` — curriculum and production handoff documents
+- `review/` — screenshots and design notes
+
+## Local use
+
+Use a modern browser such as Firefox or Chrome. The HTML previews are self-contained or use only relative assets included in this package. If a browser blocks a particular local-file action, run a simple static server from this directory, for example:
+
+```bash
+python -m http.server 8000
+```
+
+Then open `http://localhost:8000/START_HERE.html`.

@@ -1,0 +1,3 @@
+date,instrument,setup_type,direction,entry,stop,exit,qty,risk_per_unit,pnl_rs,r_result,checklist_followed,mistake_code,one_line
+2026-10-12,NIFTY FUT,Pullback-20EMA,LONG,24100,24040,24220,1,4500,=IF(D2="LONG",(F2-D2)*G2,(D2-F2)*G2),=J2/(ABS(D2-E2)*G2),Y,None,"Textbook; wanted to exit early at +1R — held per plan"
+2026-10-12,RELIANCE,Breakout-range,LONG,2500,2470,2550,50,15000,=IF(D3="LONG",(F3-D3)*G3,(D3-F3)*G3),=J3/(ABS(D3-E3)*G3),N,4,"Moved stop — turned small loss into big one. Lesson logged"

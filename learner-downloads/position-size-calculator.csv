@@ -1,0 +1,15 @@
+POSITION SIZE CALCULATOR — open in Google Sheets/Excel (formulas are live)
+ACCOUNT_SIZE,200000
+RISK_PERCENT,1.5
+ENTRY,24100
+STOP,24040
+VALUE_PER_POINT,75
+LOT_SIZE,1
+,,,
+Risk (Rs),=B1*B2/100,,,
+Stop distance (points),=ABS(B3-B4),,,
+Risk per lot (Rs),=B7*B5*B6,,,
+MAX LOTS (round down),=FLOOR(B8/B9,1),,,
+,,"If MAX LOTS = 0, this trade does NOT fit your account. Skip it.",
+,R-multiple of your planned target:,(TARGET-ENTRY)/(ENTRY-STOP),"← enter target in B13 to check"
+TARGET,24220,=IF(B12>2,"Tradeable 2R+","R:R too small — skip"),

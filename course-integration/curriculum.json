@@ -1,0 +1,348 @@
+{
+  "product": {
+    "name": "The TradeThesis Trading Path",
+    "price_inr": 999,
+    "price_type": "one_time",
+    "access": "lifetime",
+    "delivery_model": "one lesson per day via Telegram",
+    "scheduled_days": 30,
+    "daily_time": "15–20 min lesson + about 10 min action step",
+    "status": "website preview only; connect checkout, enrolment, release scheduler and Telegram delivery before launch"
+  },
+  "checkpoints": [
+    {
+      "day": 8,
+      "name": "Level 1 quiz"
+    },
+    {
+      "day": 16,
+      "name": "Level 2 quiz"
+    },
+    {
+      "day": 24,
+      "name": "Level 3 quiz"
+    },
+    {
+      "day": 30,
+      "name": "Final quiz and graduation"
+    }
+  ],
+  "levels": [
+    {
+      "level": 1,
+      "name": "Foundations",
+      "first_day": 1,
+      "last_day": 8,
+      "directory": "level-1-foundations"
+    },
+    {
+      "level": 2,
+      "name": "Technical Toolkit",
+      "first_day": 9,
+      "last_day": 16,
+      "directory": "level-2-technical-toolkit"
+    },
+    {
+      "level": 3,
+      "name": "Trading Mechanics",
+      "first_day": 17,
+      "last_day": 24,
+      "directory": "level-3-trading-mechanics"
+    },
+    {
+      "level": 4,
+      "name": "Psychology & Going Live",
+      "first_day": 25,
+      "last_day": 30,
+      "directory": "level-4-psychology"
+    }
+  ],
+  "lessons": [
+    {
+      "day": 1,
+      "level": 1,
+      "title": "How Markets Actually Work",
+      "duration": "~8 min",
+      "source_file": "level-1-foundations/01-how-markets-work.md"
+    },
+    {
+      "day": 2,
+      "level": 1,
+      "title": "Brokers & Order Types",
+      "duration": "~9 min",
+      "source_file": "level-1-foundations/02-brokers-and-order-types.md"
+    },
+    {
+      "day": 3,
+      "level": 1,
+      "title": "Reading Charts — Candles, Timeframes, Volume",
+      "duration": "~10 min",
+      "source_file": "level-1-foundations/03-reading-charts.md"
+    },
+    {
+      "day": 4,
+      "level": 1,
+      "title": "Points, Ticks & Lot Sizes — What a Move Is Worth",
+      "duration": "~8 min",
+      "source_file": "level-1-foundations/04-points-ticks-lot-sizes.md"
+    },
+    {
+      "day": 5,
+      "level": 1,
+      "title": "Leverage & Margin — The #1 Account Killer",
+      "duration": "~9 min",
+      "source_file": "level-1-foundations/05-leverage-and-margin.md"
+    },
+    {
+      "day": 6,
+      "level": 1,
+      "title": "Long vs Short, Spreads & Slippage",
+      "duration": "~8 min",
+      "source_file": "level-1-foundations/06-long-short-spreads-slippage.md"
+    },
+    {
+      "day": 7,
+      "level": 1,
+      "title": "The Three Types of Analysis",
+      "duration": "~8 min",
+      "source_file": "level-1-foundations/07-three-types-of-analysis.md"
+    },
+    {
+      "day": 8,
+      "level": 1,
+      "title": "Find Your Trading Style + Level 1 Quiz",
+      "duration": "~10 min",
+      "source_file": "level-1-foundations/08-find-your-trading-style.md"
+    },
+    {
+      "day": 9,
+      "level": 2,
+      "title": "Support & Resistance — Levels That Actually Matter",
+      "duration": "~12 min",
+      "source_file": "level-2-technical-toolkit/09-support-and-resistance.md"
+    },
+    {
+      "day": 10,
+      "level": 2,
+      "title": "Trendlines & Channels",
+      "duration": "~11 min",
+      "source_file": "level-2-technical-toolkit/10-trendlines-and-channels.md"
+    },
+    {
+      "day": 11,
+      "level": 2,
+      "title": "Candlestick Patterns — Only the 5 Worth Knowing",
+      "duration": "~12 min",
+      "source_file": "level-2-technical-toolkit/11-candlestick-patterns.md"
+    },
+    {
+      "day": 12,
+      "level": 2,
+      "title": "Chart Patterns — Double Tops, Triangles, Flags",
+      "duration": "~12 min",
+      "source_file": "level-2-technical-toolkit/12-chart-patterns.md"
+    },
+    {
+      "day": 13,
+      "level": 2,
+      "title": "Moving Averages",
+      "duration": "~11 min",
+      "source_file": "level-2-technical-toolkit/13-moving-averages.md"
+    },
+    {
+      "day": 14,
+      "level": 2,
+      "title": "RSI & MACD — and How Beginners Misuse Them",
+      "duration": "~12 min",
+      "source_file": "level-2-technical-toolkit/14-rsi-and-macd.md"
+    },
+    {
+      "day": 15,
+      "level": 2,
+      "title": "Fibonacci Basics",
+      "duration": "~10 min",
+      "source_file": "level-2-technical-toolkit/15-fibonacci-basics.md"
+    },
+    {
+      "day": 16,
+      "level": 2,
+      "title": "Multiple Timeframe Analysis",
+      "duration": "~12 min",
+      "source_file": "level-2-technical-toolkit/16-multiple-timeframe-analysis.md"
+    },
+    {
+      "day": 17,
+      "level": 3,
+      "title": "Entries & Exits — Where the Money Is Actually Made",
+      "duration": "~13 min",
+      "source_file": "level-3-trading-mechanics/17-entries-and-exits.md"
+    },
+    {
+      "day": 18,
+      "level": 3,
+      "title": "Stop Losses — Placement Rules That Survive",
+      "duration": "~13 min",
+      "source_file": "level-3-trading-mechanics/18-stop-losses.md"
+    },
+    {
+      "day": 19,
+      "level": 3,
+      "title": "Risk Management — The 1–2% Rule",
+      "duration": "~13 min",
+      "source_file": "level-3-trading-mechanics/19-risk-management.md"
+    },
+    {
+      "day": 20,
+      "level": 3,
+      "title": "Position Sizing (Interactive Calculator Day)",
+      "duration": "~14 min",
+      "source_file": "level-3-trading-mechanics/20-position-sizing.md"
+    },
+    {
+      "day": 21,
+      "level": 3,
+      "title": "Risk:Reward & Expectancy — The Math of Profitability",
+      "duration": "~12 min",
+      "source_file": "level-3-trading-mechanics/21-risk-reward-and-expectancy.md"
+    },
+    {
+      "day": 22,
+      "level": 3,
+      "title": "Breakouts vs Pullbacks",
+      "duration": "~12 min",
+      "source_file": "level-3-trading-mechanics/22-breakouts-vs-pullbacks.md"
+    },
+    {
+      "day": 23,
+      "level": 3,
+      "title": "Building Your Trade Checklist",
+      "duration": "~11 min",
+      "source_file": "level-3-trading-mechanics/23-trade-checklist.md"
+    },
+    {
+      "day": 24,
+      "level": 3,
+      "title": "Level 3 Quiz",
+      "duration": "~10 min",
+      "source_file": "level-3-trading-mechanics/24-level-3-quiz.md"
+    },
+    {
+      "day": 25,
+      "level": 4,
+      "title": "Trading Psychology",
+      "duration": "~13 min",
+      "source_file": "level-4-psychology/25-trading-psychology.md"
+    },
+    {
+      "day": 26,
+      "level": 4,
+      "title": "The 7 Mistakes That Kill Beginner Accounts",
+      "duration": "~12 min",
+      "source_file": "level-4-psychology/26-seven-mistakes.md"
+    },
+    {
+      "day": 27,
+      "level": 4,
+      "title": "Journaling — Track Yourself Like a Business",
+      "duration": "~12 min",
+      "source_file": "level-4-psychology/27-journaling.md"
+    },
+    {
+      "day": 28,
+      "level": 4,
+      "title": "Backtesting Basics",
+      "duration": "~13 min",
+      "source_file": "level-4-psychology/28-backtesting-basics.md"
+    },
+    {
+      "day": 29,
+      "level": 4,
+      "title": "Full Recap — Assembling Your Playbook",
+      "duration": "~12 min",
+      "source_file": "level-4-psychology/29-playbook-assembly.md"
+    },
+    {
+      "day": 30,
+      "level": 4,
+      "title": "Final Quiz & Graduation",
+      "duration": "~15 min",
+      "source_file": "level-4-psychology/30-final-quiz-and-graduation.md"
+    }
+  ],
+  "customer_resources": [
+    {
+      "name": "Cheat sheet: candlestick patterns",
+      "file": "assets/cheatsheets/cheat-sheet-candlestick-patterns.md"
+    },
+    {
+      "name": "Cheat sheet: chart patterns",
+      "file": "assets/cheatsheets/cheat-sheet-chart-patterns.md"
+    },
+    {
+      "name": "Cheat sheet: formulas",
+      "file": "assets/cheatsheets/cheat-sheet-formulas.md"
+    },
+    {
+      "name": "Cheat sheet: indicators",
+      "file": "assets/cheatsheets/cheat-sheet-indicators.md"
+    },
+    {
+      "name": "Cheat sheet: risk rules",
+      "file": "assets/cheatsheets/cheat-sheet-risk-rules.md"
+    },
+    {
+      "name": "Glossary",
+      "file": "assets/cheatsheets/glossary.md"
+    },
+    {
+      "name": "Completion tracker",
+      "file": "assets/templates/completion-tracker.md"
+    },
+    {
+      "name": "Journal template",
+      "file": "assets/templates/journal-template.csv"
+    },
+    {
+      "name": "Playbook template",
+      "file": "assets/templates/playbook-template.md"
+    },
+    {
+      "name": "Position-size calculator",
+      "file": "assets/templates/position-size-calculator.csv"
+    },
+    {
+      "name": "Printable trade checklist",
+      "file": "assets/templates/trade-checklist-printable.md"
+    },
+    {
+      "name": "First 30 Days Live plan",
+      "file": "bonus/bonus-1-first-30-days-live.md"
+    },
+    {
+      "name": "50-question quiz bank",
+      "file": "bonus/bonus-2-quiz-bank.md"
+    },
+    {
+      "name": "Myths vs Facts",
+      "file": "bonus/bonus-3-myths-vs-facts.md"
+    },
+    {
+      "name": "Curated resources",
+      "file": "bonus/bonus-4-resources.md"
+    },
+    {
+      "name": "10 trade-review cards",
+      "file": "bonus/bonus-5-trade-review-cards.md"
+    },
+    {
+      "name": "Completion certificate template",
+      "file": "certificate/CERTIFICATE-template.md"
+    }
+  ],
+  "asset_readiness": {
+    "chart_exports_expected": 21,
+    "chart_images_present": 5,
+    "chart_exports_still_needed": 16,
+    "source": "CHART_GUIDE.md"
+  }
+}

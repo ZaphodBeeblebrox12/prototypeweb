@@ -1,0 +1,572 @@
+{
+  "project": "TradeThesis Full Project",
+  "release": "review bundle",
+  "file_count": 113,
+  "files": [
+    {
+      "path": "PROJECT_CONTENTS.md",
+      "size_bytes": 862,
+      "sha256": "f2f61b9955767343c14f6e09e6ace2b374b4ce027a2fda22b9cebe60c63802b8"
+    },
+    {
+      "path": "README.md",
+      "size_bytes": 3577,
+      "sha256": "d585ff2a15e571e728647f5739359863ef44c4b8b97c23b1c52f0b582f2a05c6"
+    },
+    {
+      "path": "START_HERE.html",
+      "size_bytes": 5058,
+      "sha256": "a830fc34f269d7f44c76f395669a4995ec6844557eb91a5a846df40aed5c2c8e"
+    },
+    {
+      "path": "brand-assets/tradethesis-horizontal.png",
+      "size_bytes": 28446,
+      "sha256": "a70a88a7c9211f578daa4b844b42d19de8071abec0485de1b6081cd3feaf41b9"
+    },
+    {
+      "path": "brand-assets/tradethesis-icon.png",
+      "size_bytes": 23834,
+      "sha256": "7c0423c7198dff6bb61f080c1d785e3b7aa29e9215912b37128289e15465ae2e"
+    },
+    {
+      "path": "brand-assets/tradethesis-wordmark.png",
+      "size_bytes": 23828,
+      "sha256": "c62d568b9e9f6adcdc21bdcf5f097f15654cc184eb5364b9b85e88efd3385e18"
+    },
+    {
+      "path": "course-integration/EDITORIAL_VOICE_PASS_8_SOURCE_SYNC.md",
+      "size_bytes": 863,
+      "sha256": "6e452a7632f628244a137fb41e165b2c35cf2c3c52e7f99d9c582cec35114a2b"
+    },
+    {
+      "path": "course-integration/PRODUCTION_INTEGRATION.md",
+      "size_bytes": 3596,
+      "sha256": "e83da58e3d9c07c10a1f58a223934db60dbf224d90ca5c70e4f806c00116f165"
+    },
+    {
+      "path": "course-integration/curriculum.json",
+      "size_bytes": 9399,
+      "sha256": "5c525d8204ab5af54576a08bb1d860347ee74f67fc53e49166df8fb0bb8f2d65"
+    },
+    {
+      "path": "course-room/TradeThesis_Course_Room.html",
+      "size_bytes": 822818,
+      "sha256": "9606bd21868e6cf5b04ea069f7229ae64d355e640959820b4d23a88435011401"
+    },
+    {
+      "path": "course-source/starter-drip-course/CHART_GUIDE.md",
+      "size_bytes": 3583,
+      "sha256": "59b1595a9f6f870f6c1f64890e21f529dc5b7feef828def2aad94315347073da"
+    },
+    {
+      "path": "course-source/starter-drip-course/COURSE_ROADMAP.md",
+      "size_bytes": 2273,
+      "sha256": "80aba630ba042cc52be78c4e810e76719c6723c11938c406bc7f5db06b69d097"
+    },
+    {
+      "path": "course-source/starter-drip-course/FAQ.md",
+      "size_bytes": 2952,
+      "sha256": "073078d635d4aae82692bf46e09ad19f3368f25c520fb8791fd2a8a7458fc304"
+    },
+    {
+      "path": "course-source/starter-drip-course/README.md",
+      "size_bytes": 3422,
+      "sha256": "36a420881ef1fd279f7914ed1be4e1f45056505a02711bc63dc9189a0021ea3e"
+    },
+    {
+      "path": "course-source/starter-drip-course/assets/SALES-PAGE.md",
+      "size_bytes": 3798,
+      "sha256": "5bbefdfd8cf8ac107a1e230f42c8ea0b10917b8a737bd3ffba00052c88a59562"
+    },
+    {
+      "path": "course-source/starter-drip-course/assets/VALUE-STACK.md",
+      "size_bytes": 1005,
+      "sha256": "630fb0f8c6a8185d345900e45700b2890f158303453a80975d89897cca05b3fa"
+    },
+    {
+      "path": "course-source/starter-drip-course/assets/cheatsheets/cheat-sheet-candlestick-patterns.md",
+      "size_bytes": 1283,
+      "sha256": "5b788e563c424587d9d6bef9db3d9ab1ce230349ee9465aebc5b7340761b9d85"
+    },
+    {
+      "path": "course-source/starter-drip-course/assets/cheatsheets/cheat-sheet-chart-patterns.md",
+      "size_bytes": 1342,
+      "sha256": "bcb878e564f05cfb125132571716afcba44cba967b4e938c6e0588f5f7aba8a6"
+    },
+    {
+      "path": "course-source/starter-drip-course/assets/cheatsheets/cheat-sheet-formulas.md",
+      "size_bytes": 1766,
+      "sha256": "3545c9c79c80a77ab0e095f4aca9b1cb3cf3c8c4f8b7620dab366be1ddff24ac"
+    },
+    {
+      "path": "course-source/starter-drip-course/assets/cheatsheets/cheat-sheet-indicators.md",
+      "size_bytes": 1565,
+      "sha256": "9490ccf3e7da993ac67d81f49d45fed85180fd2f4b04e464677ef6d7b387823c"
+    },
+    {
+      "path": "course-source/starter-drip-course/assets/cheatsheets/cheat-sheet-risk-rules.md",
+      "size_bytes": 717,
+      "sha256": "66f85ef88143a48be9abb9d8dbe9cde4f620a0b6b8b93b348d16512bfe6d465f"
+    },
+    {
+      "path": "course-source/starter-drip-course/assets/cheatsheets/glossary.md",
+      "size_bytes": 2830,
+      "sha256": "1cf5ad5db79efbea935f8f5bb502ef6e7df3718c61cdd7f6dbceeb2d98fae58f"
+    },
+    {
+      "path": "course-source/starter-drip-course/assets/templates/completion-tracker.md",
+      "size_bytes": 1199,
+      "sha256": "7f46b422cb97f26e686e6292177269b1f0257b38c6201e25b1288d3e339f3cb6"
+    },
+    {
+      "path": "course-source/starter-drip-course/assets/templates/journal-template.csv",
+      "size_bytes": 504,
+      "sha256": "57b0fc0b27a3992df450f80dc14589eb7e73c023a7b0684748b72894a0c31435"
+    },
+    {
+      "path": "course-source/starter-drip-course/assets/templates/playbook-template.md",
+      "size_bytes": 804,
+      "sha256": "19d83388ae1b694e79e4e00fa92081172ff9f17c9802af5d7945a3fb0520e4a7"
+    },
+    {
+      "path": "course-source/starter-drip-course/assets/templates/position-size-calculator.csv",
+      "size_bytes": 539,
+      "sha256": "f53402d95384662e3c368bc11bc99a5682e460b056ebcb2977f2b1fd4f4ac23e"
+    },
+    {
+      "path": "course-source/starter-drip-course/assets/templates/trade-checklist-printable.md",
+      "size_bytes": 839,
+      "sha256": "d0f7e9788a42137c4c4d9843c503cff333eace4aa48f97d4c5dba94c1fcea795"
+    },
+    {
+      "path": "course-source/starter-drip-course/bonus/bonus-1-first-30-days-live.md",
+      "size_bytes": 2891,
+      "sha256": "41e13179e62989f59cd9c37849436eac564a108ae230ccf946e1071ee80a542f"
+    },
+    {
+      "path": "course-source/starter-drip-course/bonus/bonus-2-quiz-bank.md",
+      "size_bytes": 6126,
+      "sha256": "48e0c3f6e5d0330352f0e89347ee839d8bb6586b217aaffb0a58d761769b967d"
+    },
+    {
+      "path": "course-source/starter-drip-course/bonus/bonus-3-myths-vs-facts.md",
+      "size_bytes": 2378,
+      "sha256": "f0665b9832da36c3e9143546f66c6f561dfbd8777b88ce47a1d04e28f615b882"
+    },
+    {
+      "path": "course-source/starter-drip-course/bonus/bonus-4-resources.md",
+      "size_bytes": 1347,
+      "sha256": "04006aeccfb6e8627ae7ccc2e024140fded3c8326434e47a1d2c8b0d2adcd0c8"
+    },
+    {
+      "path": "course-source/starter-drip-course/bonus/bonus-5-trade-review-cards.md",
+      "size_bytes": 4626,
+      "sha256": "092d43163c58f3cf1899da8eddcc868105fd1e54641c81356a0e405b56885e01"
+    },
+    {
+      "path": "course-source/starter-drip-course/certificate/CERTIFICATE-template.md",
+      "size_bytes": 2136,
+      "sha256": "1e98a3f1417ccd09fef42661edfd573a23fcf1a8070c1bc3197d90ea82b14f4c"
+    },
+    {
+      "path": "course-source/starter-drip-course/certificate/certificate-sample.pdf",
+      "size_bytes": 2588,
+      "sha256": "487de3dfdad573a66347c586dcf4ffa3828183c7a41bd94b05514104425ad8fa"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L1-01-auction.png",
+      "size_bytes": 49040,
+      "sha256": "1336ffd0ff7221a730cf5d926172aa1ce04b00718ad7eda31d138123b323cbcd"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L1-02-order-types.png",
+      "size_bytes": 65122,
+      "sha256": "1a2c16df92282fff9ad7dd3d8364b7ed848be1d265829269edb0300ef96a51b3"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L1-03-candle-anatomy.png",
+      "size_bytes": 36575,
+      "sha256": "fc29659462ab2713a21355fcac957d1d0fa0b3cb20e80fa19029ccde3c3f66ca"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L1-03-timeframes.png",
+      "size_bytes": 178881,
+      "sha256": "6d30908a092bcbcbf3ee222ddb406beed1661bd58243580e29885b51a23c880e"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L1-03-volume-spike.png",
+      "size_bytes": 39214,
+      "sha256": "cd0af4fecc8dbdb1534795224f25d596b9eb5a6956230e77ed0bc6de5aea3863"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L1-04-point-move.png",
+      "size_bytes": 78196,
+      "sha256": "668a5f7665d4d6d25ca750ba5872b1b17f259ee2f90b66f4100bfe544ae385e1"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L1-05-equity-curves.png",
+      "size_bytes": 111820,
+      "sha256": "a853c6ae64607bb041ac0e552018eb01e491ae584c846d79f0fa6d907e7147e9"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L1-06-spread.png",
+      "size_bytes": 57365,
+      "sha256": "d133c4598f1e9f87766aeafc458403611ab7a8ec5a358ad9d94ed0f8978e8cc6"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L1-07-three-analyses.png",
+      "size_bytes": 80492,
+      "sha256": "79265955a372148c33e11cc77cc77ecd7d0303c7470d2af76a7052e235f1a065"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L1-08-styles.png",
+      "size_bytes": 100081,
+      "sha256": "257ddbd66c9d1e14231d00ec1c786cfd87fcf4a6b17f31fc2ab43f6b5b126b5c"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L2-09-sr-zones.png",
+      "size_bytes": 108981,
+      "sha256": "5f3d08349135939191c2a47dcf37aaf568c09b9281f2b49cfeb06ab23fa579b4"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L2-10-trendline-channel.png",
+      "size_bytes": 87460,
+      "sha256": "e6621c46e8145b175b4ba208f09175ccd7b5c277b3bfffeffc227177bd9108c3"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L2-11-candle-patterns.png",
+      "size_bytes": 407158,
+      "sha256": "9bae08ca06de64acb9140a900044c7085d479bf3d0a619b740715e7a7998877b"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L2-12-chart-patterns.png",
+      "size_bytes": 80480,
+      "sha256": "f7b6bb12d9bb2301ebec2e7f167cc758d56b687acc55ff66f79f93fd57dfe261"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L2-13-moving-averages.png",
+      "size_bytes": 113314,
+      "sha256": "47a29dc2abff73845de9dd9e4091e76c3d93d05ebce8dfefd51589a0fbc50fc7"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L2-14-rsi-divergence.png",
+      "size_bytes": 79259,
+      "sha256": "957e3a440414e1b0e3bd116ff8fb68a67de63c8c34b8e1a8a3f831478823d95a"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L2-15-fibonacci.png",
+      "size_bytes": 80680,
+      "sha256": "d642cbfc590971ba02bf6c6f71c5377271a498c73079638b7f5931f16f87b361"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L2-16-topdown.png",
+      "size_bytes": 150865,
+      "sha256": "5f6fcb755c4433a49fd6bf884e42bd16055220f97224170e3e9872180040b41a"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L2-22-breakout-vs-pullback.png",
+      "size_bytes": 122755,
+      "sha256": "c40262a5ebafb5e39c7ba28af7ef449de613d8d5d9226d067990c51cae64faf0"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L3-17-trade-anatomy.png",
+      "size_bytes": 88404,
+      "sha256": "46e0c2afb80b2dfee85788353e153eae470311b255bdd70d2aa1fda44a273381"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L3-18-stop-placement.png",
+      "size_bytes": 100842,
+      "sha256": "053384bf23f1fd7780c5ada42216688584679c26ecd88c1fb7ee4e3d26537962"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L3-21-risk-reward.png",
+      "size_bytes": 76468,
+      "sha256": "1b76414cdbcbc9f1a4e843deeeec6d2c98ac1bccc7ccc894dc8f5e8ef0a186fa"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L4-26-overtrading.png",
+      "size_bytes": 117790,
+      "sha256": "7c0c976e8f0a1b9bfca87a5f4b243ffaa1b67477ce282ac81103f2abbd3a1f09"
+    },
+    {
+      "path": "course-source/starter-drip-course/charts/generated/L4-28-backtest.png",
+      "size_bytes": 93269,
+      "sha256": "3a4dff5a512cece5d22bb8e8eeaf3f71864371d0366b243ce6c5784d85ad005c"
+    },
+    {
+      "path": "course-source/starter-drip-course/delivery/Starter-Trading-Course-Complete.pdf",
+      "size_bytes": 2637710,
+      "sha256": "5b92d08b27c3b3d0aeef08345d52c10f80475900ca0ee0093350042ae40d6aa1"
+    },
+    {
+      "path": "course-source/starter-drip-course/delivery/course-ebook.html",
+      "size_bytes": 3545136,
+      "sha256": "3d51bb427d3a95a0e7836e2e97415ee260ba2e69ab67ecee19efbd3451410943"
+    },
+    {
+      "path": "course-source/starter-drip-course/delivery/email-sequence.md",
+      "size_bytes": 18385,
+      "sha256": "ed937452435e1699bdfba6388ad85fd7058f91a04e7480c3325892c380a8a8d2"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-1-foundations/01-how-markets-work.md",
+      "size_bytes": 7004,
+      "sha256": "018084b2f5e6b3d8708825a4bd8b8e5295f6f9ef3462b12bf01461a53a62b019"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-1-foundations/02-brokers-and-order-types.md",
+      "size_bytes": 6496,
+      "sha256": "a7e25dce8df4d01bc617488964f3ef27dae993948c022db6648965025f1797d3"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-1-foundations/03-reading-charts.md",
+      "size_bytes": 5991,
+      "sha256": "25a5de75aabb51d06c94dc1752f0903a9dea7101e7cb42edc25db1c54e8244b2"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-1-foundations/04-points-ticks-lot-sizes.md",
+      "size_bytes": 5894,
+      "sha256": "44384a3cadca2e935aec8c852d265048c6a1ec41e4e4de9344027b8e974d8f38"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-1-foundations/05-leverage-and-margin.md",
+      "size_bytes": 7023,
+      "sha256": "6a8d4e6df685a92fa9e007c0bfac45411e016b6d40c90693f731f55714422800"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-1-foundations/06-long-short-spreads-slippage.md",
+      "size_bytes": 5866,
+      "sha256": "9fdc41a78635b7ff334a8a9915576a5a0faa51bfa9a63ad0542fe23784472966"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-1-foundations/07-three-types-of-analysis.md",
+      "size_bytes": 5494,
+      "sha256": "06618a5622bc58c82916f1de217902951cbb971422d421f36907598d92806ee1"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-1-foundations/08-find-your-trading-style.md",
+      "size_bytes": 6267,
+      "sha256": "1d116c10f1d1e125ad2ce15707866598b1015484d54b9fd7f5ac0b01802f0a33"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-2-technical-toolkit/09-support-and-resistance.md",
+      "size_bytes": 7400,
+      "sha256": "1fb34db04cf586f26d3b683f25ab0d9a447253e864f9ed5d284c3166800052ff"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-2-technical-toolkit/10-trendlines-and-channels.md",
+      "size_bytes": 6244,
+      "sha256": "b75b3c7643fc2ca2f0f23dc65d9ff8a3a69ceb72c381fd6be9e2e70e42ee5f04"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-2-technical-toolkit/11-candlestick-patterns.md",
+      "size_bytes": 6391,
+      "sha256": "4fa42dd8954656f677a85db6b748850ad30b6abe48bc64d79f0ac3eaacfb7da0"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-2-technical-toolkit/12-chart-patterns.md",
+      "size_bytes": 6796,
+      "sha256": "c0bc0b902874ba50e19f5811e9a3027ec182727604bdd3410549116e58cd23cd"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-2-technical-toolkit/13-moving-averages.md",
+      "size_bytes": 6708,
+      "sha256": "d7a68611a12327c3209da55272517c1f92f3b889305dd699195086b6bc5ab911"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-2-technical-toolkit/14-rsi-and-macd.md",
+      "size_bytes": 6672,
+      "sha256": "a7f83a098cf8d9de81cdd003804a0639f180c8fc0ee95aad684dd017b8bf1676"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-2-technical-toolkit/15-fibonacci-basics.md",
+      "size_bytes": 6350,
+      "sha256": "774144b43429d7a3a178246821b6a2059f6419af216b25016b54208eb4a38868"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-2-technical-toolkit/16-multiple-timeframe-analysis.md",
+      "size_bytes": 8284,
+      "sha256": "293779c9b1a8c97169c53008109ed913d90e72ff58ef51bbfee1945e659518bb"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-3-trading-mechanics/17-entries-and-exits.md",
+      "size_bytes": 7614,
+      "sha256": "36abb29f289af42c44e3d8a406562cc3c1c432825bedcd7a848b080b9c87de4b"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-3-trading-mechanics/18-stop-losses.md",
+      "size_bytes": 7239,
+      "sha256": "e980fb978ab8bf88682392d4e383c817dfc76a51299a05b28d8b9c7c56ef2ef5"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-3-trading-mechanics/19-risk-management.md",
+      "size_bytes": 6953,
+      "sha256": "3ab200455a6e3899475d44f5ef403bc4091359731206925dcb6e2b02fc0690f7"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-3-trading-mechanics/20-position-sizing.md",
+      "size_bytes": 6952,
+      "sha256": "7731f79b1f452d4dc90641f683212b4f7cc7d3b110e08903d5bd1ec16740e483"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-3-trading-mechanics/21-risk-reward-and-expectancy.md",
+      "size_bytes": 6739,
+      "sha256": "64e59f31956a02b51a1c44ecaf1d497dd528c0390d1135295343b76ccebf75f0"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-3-trading-mechanics/22-breakouts-vs-pullbacks.md",
+      "size_bytes": 8041,
+      "sha256": "389023866e2cfdb1483e94eae8bd7f66ee8eeae35e4e14d2546feced1b09e260"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-3-trading-mechanics/23-trade-checklist.md",
+      "size_bytes": 7064,
+      "sha256": "bd4bcb3314fd8bc557a6b9e76463dd134ddbc1077d2065b301ecc7d652dc1d74"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-3-trading-mechanics/24-level-3-quiz.md",
+      "size_bytes": 4226,
+      "sha256": "1590064f6d8778e3b543a97ad8404ee1057bf78ea3a9cbbba059189de8a351d3"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-4-psychology/25-trading-psychology.md",
+      "size_bytes": 8327,
+      "sha256": "5af684aa45b62da7a818c260610ccd1ac714dc80079f8484053e227118d7d163"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-4-psychology/26-seven-mistakes.md",
+      "size_bytes": 6321,
+      "sha256": "037f3e53947d838939ee9698e89deecc7582f596a7f6a843516d715d96567b90"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-4-psychology/27-journaling.md",
+      "size_bytes": 6751,
+      "sha256": "50e40c892571f53b344a6b4f05ac30862655abe79da6780ff5d7defb2c7778f2"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-4-psychology/28-backtesting-basics.md",
+      "size_bytes": 7866,
+      "sha256": "046427b5b223538f670875db7cb318d6564842d8212c70091af64bc4f5f86011"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-4-psychology/29-playbook-assembly.md",
+      "size_bytes": 6382,
+      "sha256": "03dd6a81fc1c76676cdd0be49f3c3e265c0faf4df29661f2c2589b421133c2de"
+    },
+    {
+      "path": "course-source/starter-drip-course/level-4-psychology/30-final-quiz-and-graduation.md",
+      "size_bytes": 6570,
+      "sha256": "f59cd18a665de58312016429a1ec8072d33d5cb282a72dcf4fb24632d6db1488"
+    },
+    {
+      "path": "learner-downloads/TradeThesis_Journal_Template.xlsx",
+      "size_bytes": 35426,
+      "sha256": "1dfba44163e44195aa68a07b4051f4245c4d217a08b71aaab4f0d664b1c8f4c7"
+    },
+    {
+      "path": "learner-downloads/TradeThesis_Trading_Glossary.html",
+      "size_bytes": 16249,
+      "sha256": "90e18a840106e260d1f78dfe7dc2a1b6087798f6d48c61e3035dd406ec9a98d8"
+    },
+    {
+      "path": "learner-downloads/completion-tracker.md",
+      "size_bytes": 1199,
+      "sha256": "7f46b422cb97f26e686e6292177269b1f0257b38c6201e25b1288d3e339f3cb6"
+    },
+    {
+      "path": "learner-downloads/journal-template.csv",
+      "size_bytes": 211,
+      "sha256": "664d19c509f6301ba64ed771fce51047dbcb0c89458a46536d39903ad39f719a"
+    },
+    {
+      "path": "learner-downloads/playbook-template.md",
+      "size_bytes": 804,
+      "sha256": "19d83388ae1b694e79e4e00fa92081172ff9f17c9802af5d7945a3fb0520e4a7"
+    },
+    {
+      "path": "learner-downloads/position-size-calculator.csv",
+      "size_bytes": 539,
+      "sha256": "f53402d95384662e3c368bc11bc99a5682e460b056ebcb2977f2b1fd4f4ac23e"
+    },
+    {
+      "path": "learner-downloads/trade-checklist-printable.md",
+      "size_bytes": 839,
+      "sha256": "d0f7e9788a42137c4c4d9843c503cff333eace4aa48f97d4c5dba94c1fcea795"
+    },
+    {
+      "path": "review/PASS_6_DESIGN_NOTES.md",
+      "size_bytes": 975,
+      "sha256": "350e70b2bf5416f0000b8dbb1b7f8ace0f4bba5e13fbd1ffb8cd500640bb8b6e"
+    },
+    {
+      "path": "review/screenshots/desktop-full-viewport.png",
+      "size_bytes": 320589,
+      "sha256": "983bba058c33fd5af8684373087da640642d2ad13a3b583fef473fc516b22a2b"
+    },
+    {
+      "path": "review/screenshots/desktop-overview.png",
+      "size_bytes": 137951,
+      "sha256": "86d3fb6b67845ba92b36f7399705ec3593ed18c6f1e0537e14b206e9305a116a"
+    },
+    {
+      "path": "review/screenshots/desktop-short-viewport.png",
+      "size_bytes": 137951,
+      "sha256": "86d3fb6b67845ba92b36f7399705ec3593ed18c6f1e0537e14b206e9305a116a"
+    },
+    {
+      "path": "review/screenshots/mobile-drawer.png",
+      "size_bytes": 98536,
+      "sha256": "c8fac9b311bd30e8416a21c546979ec29a80bfb5edd32d3ce79f8a2a46a46829"
+    },
+    {
+      "path": "site/00_OPEN_INTERACTIVE_PREVIEW.html",
+      "size_bytes": 552957,
+      "sha256": "c0bcfdbcfa8a0203d8f930ea325329eb3bda2baa931ab0b30789ea9b9ef26fbc"
+    },
+    {
+      "path": "site/MOBILE_PREVIEW.html",
+      "size_bytes": 590219,
+      "sha256": "9ce6d130ac1623dd658216dcd6addf2a6fcaf14253d8a95783bbb4cdb79a0b49"
+    },
+    {
+      "path": "site/assets/tradethesis-horizontal.png",
+      "size_bytes": 28446,
+      "sha256": "a70a88a7c9211f578daa4b844b42d19de8071abec0485de1b6081cd3feaf41b9"
+    },
+    {
+      "path": "site/assets/tradethesis-icon.png",
+      "size_bytes": 23834,
+      "sha256": "7c0423c7198dff6bb61f080c1d785e3b7aa29e9215912b37128289e15465ae2e"
+    },
+    {
+      "path": "site/assets/tradethesis-wordmark.png",
+      "size_bytes": 23828,
+      "sha256": "c62d568b9e9f6adcdc21bdcf5f097f15654cc184eb5364b9b85e88efd3385e18"
+    },
+    {
+      "path": "site/courses.html",
+      "size_bytes": 91735,
+      "sha256": "5bc6c2676fd0609550cb2a9ef00c0f04157345616284ac595412db945dadff9d"
+    },
+    {
+      "path": "site/foundations.html",
+      "size_bytes": 408,
+      "sha256": "42f8662e5906cb6a5fd60a2938427135897742a05345a4afe4a7ce7bfb1daaa1"
+    },
+    {
+      "path": "site/index.html",
+      "size_bytes": 95921,
+      "sha256": "bb9cbbb8bff941478ffc18c30760aacb6b28f623c7a27a9987b031b92dc001e7"
+    },
+    {
+      "path": "site/live-class.html",
+      "size_bytes": 101396,
+      "sha256": "f7d3a2877d0d3821ca722337f295b6de8fad34b0f00eb99ee084afddccdad1f1"
+    },
+    {
+      "path": "site/trading-path.html",
+      "size_bytes": 123861,
+      "sha256": "dbf0ead59f030770a30caf832349e62d437cb942b04f2ec7c124b4198fde638b"
+    }
+  ]
+}
