@@ -939,7 +939,24 @@ document.querySelectorAll('[data-live-answer]').forEach(btn=>btn.addEventListene
  target.dataset.result=item.correct?'correct':'review';
 }));
 const enquiry=document.getElementById('liveEnquiryForm');
-if(enquiry){enquiry.addEventListener('submit',e=>{e.preventDefault();const result=document.getElementById('liveEnquiryResult');result.textContent='Preview only: the form has been checked in your browser, but nothing has been sent or stored. When connected to Django, this action should create an enquiry record and show a clear confirmation.';result.classList.add('show');});}
+if(enquiry){
+ const result=document.getElementById('liveEnquiryResult');
+ const clearReview=()=>{
+  if(!result)return;
+  result.textContent='';
+  result.classList.remove('show');
+  delete result.dataset.result;
+ };
+ enquiry.addEventListener('input',clearReview);
+ enquiry.addEventListener('change',clearReview);
+ enquiry.addEventListener('submit',e=>{
+  e.preventDefault();
+  if(!result)return;
+  result.textContent='Preview complete: your required fields and email format passed the browser checks. Nothing has been sent or saved.';
+  result.dataset.result='preview';
+  result.classList.add('show');
+ });
+}
   </script>
  </body>
 </html>
