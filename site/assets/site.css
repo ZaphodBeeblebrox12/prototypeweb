@@ -2066,3 +2066,10 @@ body.construct-page .paper-first-live small{display:block;font-size:10px;line-he
   body.construct-page .paper-first-panel{padding:20px 16px}
   body.construct-page .program-art:before{font-size:11px;right:9px;top:-10px}
 }
+
+
+/* Page-specific spacing exceptions live here instead of inline HTML styles. */
+.section.courses-catalogue-section{padding-top:38px}
+.section.courses-live-section{padding-top:34px}
+.section.trading-path-overview-section{padding-top:42px}
+.course-fit-section .course-fit-sample-label{margin-top:31px}
