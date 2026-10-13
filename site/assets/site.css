@@ -432,7 +432,6 @@ body{font-family:var(--sans);font-size:15px;line-height:1.65;letter-spacing:0}
   .fit-card{padding:21px}
   .reading-grid{grid-template-columns:1fr}
   .community-panel{min-height:0}
-  .cta-box{padding:27px 22px}
   .footer-bottom{font-size:10px}
 }
 /* Course catalogue and learning-path detail pass */ .pathway-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin-top:25px}
