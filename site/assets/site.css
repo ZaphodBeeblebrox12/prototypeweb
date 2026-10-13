@@ -170,6 +170,7 @@ footer{padding:35px 0 22px}
 .future-card h3{font:400 23px/1.15 var(--serif);margin:17px 0 8px}
 .future-card p{font-size:11px;line-height:1.7;color:var(--muted);margin:0}
 .course-detail-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:36px;align-items:start}
+.course-detail-grid.outline-full-width{grid-template-columns:minmax(0,1fr)}
 .detail-copy h2{font:400 clamp(30px,3vw,40px)/1.1 var(--serif);letter-spacing:-.03em;margin:0 0 15px}
 .detail-copy>p{font-size:13px;line-height:1.9;color:var(--muted)}
 .detail-sidebar{position:sticky;top:100px}
