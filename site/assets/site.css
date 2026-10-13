@@ -1707,7 +1707,7 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
 @media (max-width: 650px) {
   .course-product-hero{padding: 19px 0 31px;}
   .course-product-frame{padding: 16px 12px; border-radius: 20px;}
-  .course-product-frame .course-hero-grid{grid-template-columns: minmax(0,1fr); gap: 12px;}
+  .course-product-frame .course-hero-grid{gap: 12px;}
   /* Let mobile read the promise and facts, then see the offer before the full outcomes. */ .course-product-frame .course-hero-copy{display: contents;}
   .course-product-frame .course-hero-copy > .breadcrumb{order: 0; margin: 0 0 5px;}
   .course-product-frame .course-hero-copy > .eyebrow{order: 1;}
