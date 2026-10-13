@@ -2259,7 +2259,7 @@ body.construct-page .paper-first-live small{display:block;font-size:10px;line-he
   }
   .home-path-feature .home-stage-list span,
   .self-paced-product-frame .sp-stage-list span{text-align:left}
-  .home-path-feature .home-path-feature{gap:20px}
+  .home-path-feature{gap:20px}
 }
 @media (max-width:780px){
   .home-path-feature .home-path-description,
