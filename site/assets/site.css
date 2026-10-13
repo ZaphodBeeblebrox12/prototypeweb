@@ -1291,28 +1291,12 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
   .live-enquiry{gap:18px;padding:22px}
 }
 @media (max-width:650px) {
-  .live-hero{padding:34px 0 45px}
-  .live-hero-grid{grid-template-columns:1fr;gap:28px}
-  .live-hero h1{font-size:clamp(42px,11vw,56px)}
   .live-hook{font-size:26px}
   .live-facts{gap:10px}
-  .sample-panel{transform:none;margin:0 5px}
-  .sample-panel-inner{padding:16px}
-  .sample-panel h2{font-size:24px}
-  .sample-question{margin-inline:4px;padding:14px}
-  .live-outcomes{grid-template-columns:1fr}
-  .milestone{grid-template-columns:39px minmax(0,1fr);padding:16px 14px;gap:10px}
-  .milestone-num{width:34px;height:34px;font-size:16px}
-  .milestone h3{font-size:23px}
   .milestone-output{grid-template-columns:1fr;gap:5px}
   .playbook-band{grid-template-columns:1fr;padding:19px}
   .playbook-pages{grid-template-columns:1fr 1fr}
-  .included-grid{grid-template-columns:1fr}
   .included-item{min-height:0}
-  .progress-steps{grid-template-columns:1fr 1fr}
-  .live-enquiry{grid-template-columns:1fr;padding:20px}
-  .live-enquiry h2{font-size:32px}
-  .live-hero-actions .button{flex:1}
   .live-breadcrumb{margin-bottom:20px}
 }
 @media (prefers-reduced-motion:reduce) {
