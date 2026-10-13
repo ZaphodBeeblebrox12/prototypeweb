@@ -275,8 +275,8 @@ footer{padding:35px 0 22px}
   .footer-links{margin-top:23px;gap:13px 17px}
   .footer-bottom{display:block}
   .disclaimer{margin-bottom:10px}
-  .catalogue-intro{display:block}
-  .catalogue-intro p{margin-top:12px}
+  
+  
   .course-large{padding:22px}
   .offer-side{padding:20px}
   .detail-sidebar{position:static;grid-row:1}
@@ -1018,7 +1018,7 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
   .live-feature-offer,.selfpaced-offer{grid-template-columns:1fr 0.8fr;gap:17px;padding:22px}
 }
 @media (max-width:650px) {
-  .live-feature-offer,.selfpaced-offer{grid-template-columns:1fr;padding:19px}
+  .selfpaced-offer{grid-template-columns:1fr;padding:19px}
   .live-feature-points{grid-template-columns:1fr}
   .live-feature-points span{display:grid;grid-template-columns:25px 1fr;gap:7px}
   .live-feature-points b{margin:0}
@@ -1120,7 +1120,7 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
   .live-feature-side{padding: 17px;}
   .self-paced-catalogue{padding-bottom: 43px !important;}
   .self-paced-product-frame{padding: 17px 13px; border-radius: 19px;}
-  .self-paced-product-grid{grid-template-columns: 1fr; gap: 17px;}
+  .self-paced-product-grid{gap: 17px;}
   .self-paced-product-copy h2{font-size: clamp(30px, 7.6vw, 37px); line-height: 1.1;}
   .sp-outcomes{padding: 16px;}
   .sp-outcomes-heading h3{font-size: 22px;}
