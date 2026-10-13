@@ -1459,7 +1459,7 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
 .curriculum-card>p:not(.stage-promise){font-size:12px;line-height:1.8;color:var(--muted);margin:0 0 16px}
 .stage-topic-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:4px}
 .stage-topic-list span{display:inline-flex;border:1px solid #d9d7ca;border-radius:99px;padding:5px 8px;font-size:10px;line-height:1.35;color:#5a695b;background:#fffdf88a}
-.full-outline{margin-top:17px;border:1px solid var(--line);border-radius:17px;background:#fffdf8;overflow:hidden}
+.full-outline{margin-top:15px;border:1px solid var(--line);border-radius:17px;background:#fffdf8;overflow:hidden}
 .full-outline>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 21px;font-size:12px;font-weight:800;color:var(--green)}
 .full-outline>summary::-webkit-details-marker{display:none}
 .full-outline>summary:after{content:'+';display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border:1px solid var(--line-dark);border-radius:50%;font:18px var(--sans);font-weight:400}
@@ -1502,7 +1502,7 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
   .course-unity-note{font-size:11px}
   .full-outline>summary{padding:15px}
   .full-outline-body{padding:0 15px 17px}
-  .outline-stage-head{align-items:flex-start;flex-direction:column;gap:4px}
+  .outline-stage-head{align-items:flex-start;flex-direction:column}
   .outline-lessons{grid-template-columns:1fr}
   .outline-lessons li,.outline-lessons li:nth-child(-n+2){border-top:1px solid #eee8dc}
   .outline-lessons li:first-child{border-top:0}
@@ -1558,7 +1558,7 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
 .roadmap-main>p:last-child{font-size:12px;line-height:1.75;color:var(--muted);margin:0;max-width:610px}
 .roadmap-topics{display:flex;align-content:start;align-items:flex-start;gap:6px;flex-wrap:wrap;padding-top:6px;min-width:0}
 .roadmap-topics span{display:inline-flex;max-width:100%;border:1px solid #ded8ca;border-radius:99px;padding:6px 8px;background:#fbf7ef;color:#59685b;font-size:10px;line-height:1.4}
-.full-outline{margin-top:15px}
+
 .full-outline>summary{font-size:12px;min-height:62px}
 .enrolment-overview{margin-top:38px}
 .course-details-rule{border-radius:0 10px 10px 0}
