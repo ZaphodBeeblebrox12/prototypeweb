@@ -759,7 +759,7 @@ h1,h2,h3,p,li,figcaption,.note-context,.module-scope{overflow-wrap:break-word}
   .mobilelinks.open .mobile-menu-cta{display: flex; align-items: center; justify-content: center; min-height: 46px; padding: 12px 16px; margin-top: 12px; border: 1px solid var(--green); border-radius: 999px; background: var(--green); color: #fffdf8; text-align: center; font-size: 13px; font-weight: 750;}
   .button{min-height: 44px; padding: 12px 16px; line-height: 1.25; white-space: normal; text-align: center;}
   .button.small{min-height: 40px;}
-  .section{padding-block: 45px !important;}
+  .section{padding-block: 45px;}
   .section-head{gap: 12px; margin-bottom: 22px;}
   .section-head h2, .big-heading{font-size: clamp(31px, 8vw, 39px); line-height: 1.08;}
   .section-head > p, .body-copy{font-size: 14px; line-height: 1.78;}
