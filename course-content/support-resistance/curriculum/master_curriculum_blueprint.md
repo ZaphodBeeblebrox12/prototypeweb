@@ -997,4 +997,48 @@ A lesson is ready only when these questions can be answered.
 ### Content production items
 
 - [ ] Create the controlled chart set for Lessons 1–5.
-- [ ] Prepare reference overlay/rationale for Clear W, Uneven Lows and Wider Neckline.
+- [ ] Prepare reference overlay/rationale for Clear W, Uneven Lows and Wider Neckline.- [ ] Build a chart annotation register: source, instrument, timeframe, crop, teaching purpose, marks revealed at each step, accepted alternatives.
+- [ ] Select an instructor micro-case for Lesson 9 or 10.
+- [ ] Select one reaction-based full trade and one failure/no-trade full case for Lessons 16–17.
+- [ ] Write the scenario worksheet and post-mortem template.
+- [ ] Create a parallel unseen chart for retakes of the final assessment.
+- [ ] Check each lesson's book links and bibliography before publication.
+
+### Website/design handoff items
+
+- [ ] Course preview outline, outcomes and format.
+- [ ] Learning-room shell with persistent lesson navigation.
+- [ ] Reusable staged chart reveal.
+- [ ] ChartLab launch, return, submission and feedback states.
+- [ ] Lesson/quiz/ChartLab completion event definitions.
+- [ ] Responsive chart activity and accessible non-drag controls.
+- [ ] Account-backed progress model scoped as a future implementation requirement until built and verified.
+
+### Order of work
+
+1. Approve this blueprint as the course architecture.
+2. Collect the real-chart candidates with the intake brief; do not begin coding.
+3. Finalise the controlled chart set and answer keys.
+4. Write final student-facing lesson scripts and exercises in sequence.
+5. Map each approved lesson to the website content model and interaction states.
+6. Only then implement lesson pages or alter the repository, with explicit approval for the proposed change set.
+
+---
+
+## 12. References and further reading
+
+**[1] Murphy, John J.** *Technical Analysis of the Financial Markets: A Comprehensive Guide to Trading Methods and Applications*. Prentice Hall Press. Publisher page: https://www.penguinrandomhouse.com/books/350647/technical-analysis-of-the-financial-markets-by-john-j-murphy/.
+
+**[2] Schwager, Jack D., and Mark Etzkorn.** *A Complete Guide to the Futures Market*, 2nd ed. Wiley, 2016. Chapter 7, “Trading Ranges”: https://onlinelibrary.wiley.com/doi/10.1002/9781119209713.ch7. Chapter 8, “Support and Resistance”: https://onlinelibrary.wiley.com/doi/10.1002/9781119209713.ch8.
+
+**[3] Grimes, Adam.** *The Art and Science of Technical Analysis: Market Structure, Price Action & Trading Strategies*. Wiley, 2012. Book page: https://onlinelibrary.wiley.com/doi/book/10.1002/9781119202837. Chapter 4, “On Trading Ranges”: https://onlinelibrary.wiley.com/doi/10.1002/9781119202837.ch4. Chapter 5, “Interfaces between Trends and Ranges”: https://onlinelibrary.wiley.com/doi/10.1002/9781119202837.ch5.
+
+**[4] Osler, Carol L.** “Support for Resistance: Technical Analysis and Intraday Exchange Rates.” *Economic Policy Review*, Federal Reserve Bank of New York, July 2000: https://www.newyorkfed.org/research/epr/00v06n2/0007osle.html.
+
+**[5] Osler, Carol L.** “Currency Orders and Exchange-Rate Dynamics: Explaining the Success of Technical Analysis.” Federal Reserve Bank of New York Staff Report 125, 2001: https://www.newyorkfed.org/research/staff_reports/sr125.html.
+
+**[6] Shannon, Brian.** *Technical Analysis Using Multiple Timeframes: Understand Market Structure and Profit from Trend Alignment*. Alphatrends, 2008. Bibliographic listing: https://books.google.com/books/about/Technical_Analysis_Using_Multiple_Timefr.html?id=b-Eo0AEACAAJ.
+
+**[7] Bulkowski, Thomas N.** *Encyclopedia of Chart Patterns*, 3rd ed. Wiley, 2021. Publisher page: https://www.wiley-vch.de/en/areas-interest/finance-economics-law/finance-investments-13fi/trading-13fi4/encyclopedia-of-chart-patterns-978-1-119-73968-5.
+
+**Final note:** This is the curriculum master plan. It is intentionally detailed enough to guide the lesson content and the learning-room design together, but it does not alter the website or repo. Lesson scripts and actual chart assets remain production tasks under this agreed structure.
