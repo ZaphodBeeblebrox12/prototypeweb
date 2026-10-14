@@ -1,0 +1,213 @@
+{
+  "title": "ChartLab — Mark the Zone",
+  "version": 1,
+  "status": "Review draft",
+  "data_notice": "Illustrative teaching data only; not live or real-market historical data.",
+  "general_principles": [
+    "Support and resistance zones represent areas where price previously reacted; they do not create the reaction or guarantee a future move.",
+    "Reference zones are teaching anchors, not exact-price grading targets.",
+    "Assess support and resistance separately; feedback must address structure location, coverage, zone width, reasoning and a next action.",
+    "Do not treat the W-shape as an automatic entry signal or guaranteed bullish reversal."
+  ],
+  "evaluation_dimensions": [
+    {
+      "id": "location",
+      "question": "Is the zone on the relevant part of structure?",
+      "support": "Around both troughs, not just one low.",
+      "resistance": "Around the intervening recovery high/neckline, not later highs."
+    },
+    {
+      "id": "coverage",
+      "question": "Does it capture the relevant reaction cluster?",
+      "guidance": "Allow reasonable boundary differences; don't require exact pixel overlap."
+    },
+    {
+      "id": "width",
+      "question": "Is the zone useful without being too broad?",
+      "guidance": "Support and resistance may have different widths. Each width should be justified by its own price behaviour."
+    },
+    {
+      "id": "reasoning",
+      "question": "Does the learner point to observable chart evidence?",
+      "guidance": "Reward reference to repeated reactions, wick/body variation, swing highs/lows and the neckline; challenge claims of guaranteed reversals."
+    }
+  ],
+  "studies": [
+    {
+      "id": "clear-w",
+      "name": "Clear W",
+      "objective": "Identify two troughs and the intervening recovery high as two distinct areas of interest.",
+      "reference_zones": {
+        "support": {
+          "lower": 98.5,
+          "upper": 100.8,
+          "evidence": "Two prominent trough wicks approximately 99.15 and 98.70."
+        },
+        "resistance": {
+          "lower": 104.6,
+          "upper": 106.2,
+          "evidence": "Intervening recovery high approximately 105.9."
+        }
+      },
+      "plausible_coaching_ranges": {
+        "support": {
+          "lower_boundary": [
+            97.8,
+            99.2
+          ],
+          "upper_boundary": [
+            100.0,
+            101.3
+          ],
+          "width_guidance": "Keep the band focused while representing both trough reactions."
+        },
+        "resistance": {
+          "lower_boundary": [
+            104.0,
+            105.2
+          ],
+          "upper_boundary": [
+            105.5,
+            106.8
+          ],
+          "width_guidance": "Capture the neckline, not the later highs."
+        }
+      },
+      "rationale": {
+        "support": "Repeated reactions occur in a similar low area, but not at one exact price. The zone should cover both troughs without swallowing unrelated price action.",
+        "resistance": "The recovery between the troughs reaches a local high and backs away; this is the neckline area.",
+        "caution": "The W and the zones do not guarantee a bullish continuation."
+      },
+      "quiz": {
+        "q1": {
+          "correct": "Support surrounds the two troughs; resistance marks the intervening swing high, or neckline.",
+          "misconceptions": {
+            "exact": "Zones are areas, not exact prices that force reversals.",
+            "signal": "Zones alone do not confirm a buy or sell entry."
+          }
+        },
+        "q2": {
+          "correct": "Price moved above the prior resistance area; follow-through remains uncertain.",
+          "misconceptions": {
+            "continue": "A close above resistance does not guarantee continuation.",
+            "support": "Support is not guaranteed to hold on a future return."
+          }
+        }
+      }
+    },
+    {
+      "id": "uneven-lows",
+      "name": "Uneven lows",
+      "objective": "Accommodate a deeper second trough without making support indiscriminately wide.",
+      "reference_zones": {
+        "support": {
+          "lower": 97.7,
+          "upper": 101.0,
+          "evidence": "Trough lows approximately 99.50 and 97.85."
+        },
+        "resistance": {
+          "lower": 104.1,
+          "upper": 105.9,
+          "evidence": "Intervening recovery high approximately 105.6."
+        }
+      },
+      "plausible_coaching_ranges": {
+        "support": {
+          "lower_boundary": [
+            97.0,
+            98.4
+          ],
+          "upper_boundary": [
+            100.0,
+            101.6
+          ],
+          "width_guidance": "Both trough reactions must remain represented; avoid unrelated price action."
+        },
+        "resistance": {
+          "lower_boundary": [
+            103.7,
+            104.8
+          ],
+          "upper_boundary": [
+            105.3,
+            106.5
+          ],
+          "width_guidance": "Do not automatically widen resistance to match support."
+        }
+      },
+      "rationale": {
+        "support": "The second trough reaches lower, so a thin band around only the first low omits part of the structure. The wider band remains anchored to the two lows.",
+        "resistance": "Resistance remains the intervening recovery high; its width is determined independently from support.",
+        "caution": "An uneven low neither proves failure nor confirms a reversal."
+      },
+      "quiz": {
+        "q1": {
+          "correct": "Support may be wider because the two lows are less even and the second probe is deeper."
+        },
+        "q2": {
+          "correct": "No. Each zone's width should reflect its own price behaviour."
+        },
+        "q3": {
+          "correct": "No. The deeper second trough changes the evidence but does not guarantee the next move."
+        }
+      }
+    },
+    {
+      "id": "wider-neckline",
+      "name": "Wider neckline",
+      "objective": "Represent a broader recovery/hesitation band while keeping support focused on the troughs.",
+      "reference_zones": {
+        "support": {
+          "lower": 98.7,
+          "upper": 101.0,
+          "evidence": "Trough wicks approximately 99.45 and 98.90."
+        },
+        "resistance": {
+          "lower": 104.0,
+          "upper": 106.8,
+          "evidence": "Broader intervening recovery high, local high approximately 106.7."
+        }
+      },
+      "plausible_coaching_ranges": {
+        "support": {
+          "lower_boundary": [
+            98.0,
+            99.4
+          ],
+          "upper_boundary": [
+            100.1,
+            101.5
+          ],
+          "width_guidance": "Keep support anchored to the low cluster."
+        },
+        "resistance": {
+          "lower_boundary": [
+            103.5,
+            104.8
+          ],
+          "upper_boundary": [
+            106.0,
+            107.5
+          ],
+          "width_guidance": "Capture the broader recovery cluster without expanding into unrelated prices."
+        }
+      },
+      "rationale": {
+        "support": "Both troughs remain in a focused low area; do not widen support just because resistance is broader.",
+        "resistance": "The recovery hesitates across a wider area, so a band conveys the visible variation better than a precise line.",
+        "caution": "A broader neckline does not guarantee breakout or rejection."
+      },
+      "quiz": {
+        "q1": {
+          "correct": "Resistance is wider because the recovery high and hesitation span a broader area."
+        },
+        "q2": {
+          "correct": "No. Each zone reflects its own reaction cluster."
+        },
+        "q3": {
+          "correct": "No. The zone represents an area to observe, not a prediction."
+        }
+      }
+    }
+  ]
+}
