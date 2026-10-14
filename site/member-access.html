@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Sign in or create your TradeThesis member account.">
+  <title>Member access | TradeThesis</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: light-dark(#f7f3e9,#17251d);
+      --surface: light-dark(#fffdf8,#223229);
+      --soft: light-dark(#f2ecdf,#29392f);
+      --ink: light-dark(#29382e,#f1f0e5);
+      --muted: light-dark(#687268,#b5c0b2);
+      --line: light-dark(#ded8ca,#3b4b40);
+      --green: light-dark(#355a46,#a5c9a9);
+      --deep: light-dark(#254334,#15241b);
+      --tomato: light-dark(#c96f50,#e59a7f);
+      --butter: light-dark(#f0d38a,#ab9354);
+      --serif: Georgia, "Times New Roman", serif;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--paper); color: var(--ink); font-family: var(--sans); }
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid var(--tomato); outline-offset: 3px; }
+    .topbar { height: 74px; display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(18px,5vw,66px); border-bottom: 1px solid var(--line); background: var(--surface); }
+    .brand { display: flex; align-items: center; gap: 11px; }
+    .brand-mark { width: 37px; height: 37px; border-radius: 12px 12px 12px 4px; display: grid; place-items: center; background: var(--green); color: light-dark(#fffdf8,#17251d); font: italic 23px var(--serif); transform: rotate(-3deg); }
+    .brand strong { display: block; font: 600 19px/1 var(--serif); }
+    .brand small { display: block; margin-top: 4px; color: var(--muted); font-size: 8px; letter-spacing: .12em; text-transform: uppercase; }
+    .back { font-size: 11px; font-weight: 700; color: var(--green); }
+    .layout { width: min(1110px,calc(100% - 44px)); margin: 48px auto 62px; display: grid; grid-template-columns: minmax(0,1fr) minmax(340px,.78fr); gap: clamp(28px,6vw,82px); align-items: center; }
+    .story { min-width: 0; }
+    .eyebrow { display: flex; align-items: center; gap: 9px; font-size: 9px; font-weight: 850; letter-spacing: .15em; text-transform: uppercase; color: var(--green); }
+    .eyebrow:before { content: ""; height: 2px; width: 18px; background: var(--tomato); }
+    h1 { margin: 18px 0 17px; font: 400 clamp(43px,6.5vw,74px)/.98 var(--serif); letter-spacing: -.055em; max-width: 620px; }
+    h1 em { font-style: italic; color: var(--green); }
+    .story-copy { max-width: 495px; color: var(--muted); font-size: 13px; line-height: 1.9; }
+    .principles { margin-top: 27px; display: grid; gap: 13px; max-width: 420px; }
+    .principle { display: grid; grid-template-columns: 29px minmax(0,1fr); gap: 11px; align-items: start; }
+    .principle-index { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 9px; border: 1px solid var(--line); color: var(--tomato); font: 10px var(--serif); }
+    .principle strong { display: block; font-size: 11px; }
+    .principle small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .margin-note { max-width: 415px; margin-top: 32px; padding: 17px 20px; border-left: 2px solid var(--tomato); background: var(--soft); color: var(--muted); font: italic 17px/1.45 var(--serif); }
+    .access-card { min-width: 0; padding: 27px; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); box-shadow: 0 21px 56px light-dark(#29382e10,#0004); }
+    .card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 22px; }
+    .card-top .eyebrow { font-size: 8px; }
+    .secure-label { border: 1px solid var(--line); border-radius: 99px; padding: 5px 8px; font-size: 8px; color: var(--muted); white-space: nowrap; }
+    .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; background: var(--soft); border-radius: 11px; }
+    .tab { border: 1px solid transparent; border-radius: 8px; background: transparent; color: var(--muted); padding: 10px 9px; font-size: 11px; font-weight: 750; }
+    .tab[aria-selected="true"] { background: var(--surface); border-color: var(--line); color: var(--ink); box-shadow: 0 2px 7px #17251d0a; }
+    .form-title { margin: 24px 0 6px; font: 400 30px/1.1 var(--serif); letter-spacing: -.03em; }
+    .form-intro { margin: 0 0 20px; color: var(--muted); font-size: 10px; line-height: 1.7; }
+    .field { display: grid; gap: 7px; margin: 13px 0; }
+    .field label { font-size: 10px; font-weight: 750; }
+    .field input { width: 100%; padding: 12px 13px; background: var(--paper); border: 1px solid var(--line); border-radius: 9px; color: var(--ink); font-size: 11px; }
+    .form-row { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin: 12px 0 18px; }
+    .remember { display: flex; align-items: center; gap: 7px; font-size: 10px; color: var(--muted); }
+    .remember input { accent-color: var(--green); }
+    .text-button { border: 0; padding: 0; background: transparent; color: var(--green); font-size: 10px; font-weight: 750; cursor: pointer; }
+    .primary { display: inline-flex; width: 100%; min-height: 45px; align-items: center; justify-content: center; border: 1px solid var(--green); border-radius: 99px; background: var(--green); color: light-dark(#fffdf8,#17251d); font-size: 11px; font-weight: 800; cursor: pointer; transition: transform .15s,box-shadow .15s; }
+    .primary:hover { transform: translateY(-1px); box-shadow: 0 5px 13px #25433422; }
+    .form-note { margin: 13px 0 0; text-align: center; color: var(--muted); font-size: 9px; line-height: 1.6; }
+    .feedback { display: none; margin-top: 15px; padding: 12px; border: 1px solid var(--line); border-left: 3px solid var(--tomato); border-radius: 0 9px 9px 0; background: var(--soft); font-size: 10px; line-height: 1.7; color: var(--muted); }
+    .feedback.show { display: block; }
+    .feedback a { display: inline-block; margin-top: 8px; color: var(--green); font-weight: 800; }
+    .account-preview { margin-top: 22px; padding-top: 19px; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .account-preview span { color: var(--muted); font-size: 9px; line-height: 1.6; }
+    .account-preview a { font-size: 10px; font-weight: 800; color: var(--green); white-space: nowrap; }
+    [hidden] { display: none !important; }
+    footer { border-top: 1px solid var(--line); padding: 17px clamp(18px,5vw,66px); display: flex; gap: 15px; flex-wrap: wrap; justify-content: space-between; color: var(--muted); font-size: 9px; }
+    @media(max-width:800px) { .layout { grid-template-columns: 1fr; max-width: 580px; margin-top: 34px; gap: 30px; } h1 { max-width: 580px; font-size: clamp(43px,9vw,62px); } .principles { grid-template-columns: 1fr 1fr; gap: 12px; } .margin-note { margin-top: 22px; } }
+    @media(max-width:480px) { .topbar { height: 65px; padding: 0 16px; } .layout { width: calc(100% - 32px); margin: 27px auto 39px; } .access-card { padding: 21px 18px; } .principles { grid-template-columns: 1fr; } .back { font-size: 10px; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html" aria-label="TradeThesis home"><span class="brand-mark">T</span><span><strong>TradeThesis</strong><small>Member access</small></span></a>
+    <a class="back" href="index.html">← Back to the website</a>
+  </header>
+  <main class="layout">
+    <section class="story">
+      <div class="eyebrow">TradeThesis / member desk</div>
+      <h1>Your place to learn, connect and <em>keep track.</em></h1>
+      <p class="story-copy">One account for the courses you purchase, the communities you join and the receipts you need. Whether you bought a course once or have a recurring membership, your access and payment terms stay clear.</p>
+      <div class="principles">
+        <div class="principle"><span class="principle-index">01</span><span><strong>Your learning, together</strong><small>Open courses and programmes attached to your account.</small></span></div>
+        <div class="principle"><span class="principle-index">02</span><span><strong>Communities, connected</strong><small>Link Telegram and Discord through verified account flows.</small></span></div>
+        <div class="principle"><span class="principle-index">03</span><span><strong>Payments, made clear</strong><small>Review purchases, receipts and renewals without guesswork.</small></span></div>
+      </div>
+      <div class="margin-note">“A good member space removes admin friction and leaves more room for the work.”</div>
+    </section>
+    <section class="access-card" aria-labelledby="formTitle">
+      <div class="card-top"><div class="eyebrow">Your account</div><span class="secure-label">Account access</span></div>
+      <div class="tabs" role="tablist" aria-label="Choose account action">
+        <button class="tab" id="signInTab" role="tab" aria-selected="true" aria-controls="signInPanel">Sign in</button>
+        <button class="tab" id="createTab" role="tab" aria-selected="false" aria-controls="createPanel">Create account</button>
+      </div>
+      <form id="signInPanel" role="tabpanel" aria-labelledby="signInTab">
+        <h2 id="formTitle" class="form-title">Welcome back.</h2>
+        <p class="form-intro">Sign in to find your purchases, learning access and connected communities.</p>
+        <div class="field"><label for="loginEmail">Email address</label><input id="loginEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+        <div class="field"><label for="loginPassword">Password</label><input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Your password" required></div>
+        <div class="form-row"><label class="remember"><input type="checkbox" name="remember"> Remember me</label><button type="button" class="text-button" id="forgot">Forgot password?</button></div>
+        <button class="primary" type="submit">Sign in ↗</button>
+        <p class="form-note">Secure sign-in will be connected before launch. No credentials are sent or stored in this preview.</p>
+      </form>
+      <form id="createPanel" role="tabpanel" aria-labelledby="createTab" hidden>
+        <h2 class="form-title">Make it yours.</h2>
+        <p class="form-intro">Create one account to keep your courses, purchases and member connections together.</p>
+        <div class="field"><label for="createName">Your name</label><input id="createName" name="name" autocomplete="name" placeholder="Full name" required></div>
+        <div class="field"><label for="createEmail">Email address</label><input id="createEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+        <div class="field"><label for="createPassword">Create a password</label><input id="createPassword" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" required></div>
+        <div class="form-row"><label class="remember"><input type="checkbox" name="terms" required> I agree to the terms</label></div>
+        <button class="primary" type="submit">Create account ↗</button>
+        <p class="form-note">This form is a visual prototype. Account creation is not active yet.</p>
+      </form>
+      <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+      <div class="account-preview"><span>Review the member dashboard<br>with sample account data.</span><a href="member-area.html">Open dashboard preview →</a></div>
+    </section>
+  </main>
+  <footer><span>TradeThesis · Conviction before execution</span><span>For educational purposes only. Trading involves risk.</span></footer>
+  <script>
+    (() => {
+      const signInTab = document.getElementById('signInTab');
+      const createTab = document.getElementById('createTab');
+      const signInPanel = document.getElementById('signInPanel');
+      const createPanel = document.getElementById('createPanel');
+      const feedback = document.getElementById('feedback');
+      function setMode(create) {
+        signInPanel.hidden = create;
+        createPanel.hidden = !create;
+        signInTab.setAttribute('aria-selected', String(!create));
+        createTab.setAttribute('aria-selected', String(create));
+        feedback.classList.remove('show');
+      }
+      signInTab.addEventListener('click', () => setMode(false));
+      createTab.addEventListener('click', () => setMode(true));
+      function show(message, includeDashboard = false) {
+        feedback.textContent = '';
+        feedback.append(document.createTextNode(message));
+        if (includeDashboard) {
+          feedback.append(document.createElement('br'));
+          const link = document.createElement('a');
+          link.href = 'member-area.html';
+          link.textContent = 'Open the dashboard preview →';
+          feedback.append(link);
+        }
+        feedback.classList.add('show');
+      }
+      signInPanel.addEventListener('submit', event => {
+        event.preventDefault();
+        if (signInPanel.reportValidity()) show('Preview only: authentication is not connected, and these details have not been sent or saved.', true);
+      });
+      createPanel.addEventListener('submit', event => {
+        event.preventDefault();
+        if (createPanel.reportValidity()) show('Preview only: account creation is not active, and these details have not been sent or saved.', true);
+      });
+      document.getElementById('forgot').addEventListener('click', () => show('Password recovery will use a verified email flow when authentication is connected. No reset email has been sent.'));
+    })();
+  </script>
+</body>
+</html>
