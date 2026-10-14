@@ -1,0 +1,20 @@
+<PARSED TEXT FOR SHEET: 1 / 1 TABS
+TAB NAME: tradethesis_sr_lesson_completion_criteria_v1.csv>index,lesson_id,completion_state,required_conditions,concept_check_or_assessment_rule,special_rule
+0,L01,Lesson complete,Core content reviewed; activity response submitted or reasoned ambiguity recorded; three-item check submitted; feedback reviewed.,Concept check met at proposed >=2/3; below threshold invites explanation review + retry.,General formative policy
+1,L02,Lesson complete,"Structure label, visible evidence, uncertainty; check submitted; feedback reviewed.",Proposed >=2/3; do not let one recent candle substitute for structure.,General formative policy
+2,L03,Lesson complete,Swing selection and omission rationale submitted; check + feedback reviewed.,Proposed >=2/3; accept reasoned alternatives.,General formative policy
+3,L04,Lesson complete,Boundary choice and include/exclude rationale submitted; check + feedback reviewed.,Proposed >=2/3; no pixel-perfect grading.,General formative policy
+4,L05,Lesson complete,Editing choice submitted; Clear W submission recorded before reference reveal.,Proposed >=2/3; keep lab drawing for comparison.,ChartLab gate
+5,L06,Lesson complete,Boundary rationale submitted; check + feedback reviewed.,Proposed >=2/3; reasoned boundaries over exact coordinates.,General formative policy
+6,L07,Lesson complete,Removed/merged marks explained; check + feedback reviewed.,Proposed >=2/3; no ChartLab.,General formative policy
+7,L08,Lesson complete,Qualitative zone judgement submitted; Uneven Lows submission before reference reveal.,Proposed >=2/3; no numeric magic score.,ChartLab gate
+8,L09,Lesson complete,Synthetic approach observation task and check complete; authentic case required before release.,Proposed >=2/3; no fabricated instructor case.,Authentic content dependency
+9,L10,Lesson complete,Reaction/possible acceptance/inconclusive classification and rationale submitted; feedback reviewed.,Proposed >=2/3; permit inconclusive.,General formative policy
+10,L11,Lesson complete,Timeline evidence log submitted; explain what changed; feedback reviewed.,Proposed >=2/3; touch count alone insufficient.,General formative policy
+11,L12,Lesson complete,Initial crossing response captured before later reveal; update after subsequent sequence.,Proposed >=2/3; preserve staged sequence.,Progressive reveal
+12,L13,Lesson complete,Hold and failed return compared; feedback reviewed.,Proposed >=2/3; retest not mandatory.,General formative policy
+13,L14,Lesson complete,Pre-break response submitted; Wider Neckline lab submitted before reveal.,Proposed >=2/3; keep failed outcome out of initial state.,ChartLab gate
+14,L15,Lesson complete,"Conditional scenario(s), invalidation, opposing area/space, alternatives or justified stand-aside submitted.",Proposed >=2/3; not an entry/sizing signal.,General formative policy
+15,L16,Lesson complete,Chronological authentic reaction-trade case review; actual instructor material required before release.,Proposed >=2/3; process evaluated separately from outcome.,Authentic content dependency
+16,L17,Lesson complete,Chronological authentic failed-thesis/loss/stand-aside review; genuine example required before release.,Proposed >=2/3; distinguish thesis and process failures.,Authentic content dependency
+17,L18,Final assessment submitted/reviewed,Unfamiliar chart response + seven canonical quiz items submitted; then reveal + rubric review.,Proposed 70/100 and no-zero in zone selection/conditional reasoning; pilot required.,Final assessment; separate from formative policy
