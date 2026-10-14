@@ -329,3 +329,72 @@
  .courses-catalogue-page .cc-outline-count{display:none}
 }
 @media(prefers-reduced-motion:reduce){.courses-catalogue-page .cc-route,.courses-catalogue-page .cc-micro-card,.courses-catalogue-page .cc-programme-card,.courses-catalogue-page .cc-programme-cta,.courses-catalogue-page .cc-card-action i{transition:none!important}}
+
+/* Courses-page button refinement: retain the pill shape, improve legibility, remove the glossy feel. */
+.courses-catalogue-page .sitewide-header .nav>.button,
+.courses-catalogue-page .cc-hero-actions .button,
+.courses-catalogue-page .cc-bottom-cta .button,
+.courses-catalogue-page .cc-programme-cta,
+.courses-catalogue-page .cc-live-cta,
+.courses-catalogue-page .cc-modal-cta{
+  min-height:48px;
+  padding:12px 20px;
+  border-radius:999px;
+  font-family:var(--sans);
+  font-size:14px;
+  font-weight:650;
+  letter-spacing:0;
+  line-height:1.3;
+  box-shadow:0 2px 0 #25433420;
+  transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease,border-color .18s ease;
+}
+.courses-catalogue-page .sitewide-header .nav>.button{
+  background:var(--green);
+  background-image:none;
+  border-color:var(--green);
+  box-shadow:0 2px 0 #25433420;
+}
+.courses-catalogue-page .sitewide-header .nav>.button:hover,
+.courses-catalogue-page .cc-hero-actions .button:hover,
+.courses-catalogue-page .cc-bottom-cta .button:hover,
+.courses-catalogue-page .cc-programme-cta:hover,
+.courses-catalogue-page .cc-live-cta:hover,
+.courses-catalogue-page .cc-modal-cta:hover{
+  transform:translateY(-1px);
+  box-shadow:0 4px 11px #253c2e1c;
+}
+.courses-catalogue-page .cc-programme-cta{
+  padding-inline:19px;
+  font-weight:650;
+}
+.courses-catalogue-page .cc-live-cta{
+  padding-inline:19px;
+  font-weight:650;
+}
+.courses-catalogue-page .cc-modal-cta{
+  padding-inline:20px;
+  font-weight:650;
+}
+.courses-catalogue-page .cc-card-action{
+  font-size:12px;
+  font-weight:650;
+}
+.courses-catalogue-page .cc-card-action i{
+  width:27px;
+  height:27px;
+  font-size:14px;
+}
+@media(max-width:650px){
+  .courses-catalogue-page .sitewide-header .nav>.button,
+  .courses-catalogue-page .cc-hero-actions .button,
+  .courses-catalogue-page .cc-bottom-cta .button,
+  .courses-catalogue-page .cc-programme-cta,
+  .courses-catalogue-page .cc-live-cta,
+  .courses-catalogue-page .cc-modal-cta{
+    min-height:48px;
+    padding:12px 18px;
+    font-size:14px;
+    font-weight:650;
+  }
+  .courses-catalogue-page .cc-card-action{font-size:12px}
+}
