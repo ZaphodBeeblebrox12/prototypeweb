@@ -56,3 +56,10 @@ The homepage features the ₹999 Trading Path as the only full-size offer. CONST
 
 ## Pass 2 content and presentation
 The homepage gives the ₹999 Trading Path the only full-size offer card; CONSTRUCT and the six-week live classroom remain compact options. The Courses page keeps detailed cards for both priced courses in a shared design system. Small tilted paper notes add a handwritten editorial touch. CONSTRUCT is paper-trading-led, includes 12 months in The Wobbling Candle at no separate fee, lets learners bring questions to the instructor, and features live lessons demonstrating trade execution and management. The public copy does not state the number or calendar timing of those live lessons.
+
+
+## Support & Resistance course source checkpoint
+
+The complete written first-pass source and production handoff are maintained under [`course-content/support-resistance/`](course-content/support-resistance/README.md). Start with the [continuation notes](course-content/support-resistance/CONTINUATION_NOTES.md), then read the [master curriculum](course-content/support-resistance/curriculum/master_curriculum_blueprint.md), [coursewide production blueprint](course-content/support-resistance/production/coursewide_production_blueprint.md), [build status](course-content/support-resistance/production/current_build_status.csv), [release gates](course-content/support-resistance/production/release_gate_tracker.csv), and [second-pass register](course-content/support-resistance/production/second_pass_review_register.md).
+
+**Status:** first-pass content draft; second-pass editorial review deferred by agreement. The learning room and secure reveal/progress behaviours are not yet implemented or runtime-tested. Authentic instructor chart/trade records for Lessons 9, 16 and 17 remain outstanding. The chart image binaries and full production ZIP are not yet committed to this repository; see the continuation notes for the asset transfer/rebuild gap. Internal answer keys and instructor-only notes in this folder must never be exposed to learners.
