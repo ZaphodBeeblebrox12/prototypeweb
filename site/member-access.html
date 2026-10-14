@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Sign in or create your TradeThesis member account.">
   <title>Member access | TradeThesis</title>
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/tradethesis-icon.png">
+  <link href="assets/site.css" rel="stylesheet">
   <style>
     :root {
       color-scheme: light dark;
@@ -78,10 +80,26 @@
   </style>
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="index.html" aria-label="TradeThesis home"><span class="brand-mark">T</span><span><strong>TradeThesis</strong><small>Member access</small></span></a>
-    <a class="back" href="index.html">← Back to the website</a>
-  </header>
+  <header class="header sitewide-header">
+  <div class="wrap nav">
+    <a class="brand" href="index.html" aria-label="TradeThesis home"><img class="brand-logo brand-logo-header" src="assets/tradethesis-horizontal.png" alt="TradeThesis — Conviction before execution"></a>
+    <nav aria-label="Main navigation" class="navlinks">
+      <a href="index.html#approach">Our approach</a>
+      <a href="courses.html">Courses</a>
+      <a href="community.html">Community</a>
+      <a href="index.html#desk">The Desk</a>
+    </nav>
+    <a class="button" href="member-area.html">Open member dashboard ↗</a>
+    <button aria-expanded="false" aria-label="Open navigation" class="mobile-toggle" type="button">☰</button>
+  </div>
+  <nav aria-label="Mobile navigation" class="wrap mobilelinks">
+    <a href="index.html#approach">Our approach</a>
+    <a href="courses.html">Courses</a>
+    <a href="community.html">Community</a>
+    <a href="index.html#desk">The Desk</a>
+    <a class="mobile-menu-cta" href="member-area.html">Open member dashboard ↗</a>
+  </nav>
+</header>
   <main class="layout">
     <section class="story">
       <div class="eyebrow">TradeThesis / member desk</div>
@@ -163,5 +181,24 @@
       document.getElementById('forgot').addEventListener('click', () => show('Password recovery will use a verified email flow when authentication is connected. No reset email has been sent.'));
     })();
   </script>
+<script>
+(() => {
+  const toggle = document.querySelector('.sitewide-header .mobile-toggle');
+  const mobile = document.querySelector('.sitewide-header .mobilelinks');
+  if (!toggle || !mobile) return;
+  toggle.addEventListener('click', () => {
+    const open = mobile.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+    toggle.textContent = open ? '×' : '☰';
+  });
+  mobile.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
+    mobile.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', 'Open navigation');
+    toggle.textContent = '☰';
+  }));
+})();
+</script>
 </body>
 </html>
