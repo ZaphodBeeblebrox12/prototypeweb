@@ -46,7 +46,7 @@
         <p class="cc-programme-description">${escapeHTML(course.description)}</p>
         <div class="cc-programme-facts">${course.facts.map(fact => `<span>${escapeHTML(fact)}</span>`).join('')}</div>
         <div class="cc-programme-outputs">${outputs.map((output, index) => `<div class="cc-programme-output"><b>0${index + 1}</b><span>${escapeHTML(output)}</span></div>`).join('')}</div>
-        <div class="cc-programme-bottom"><div class="cc-price-block"><span class="cc-price">${escapeHTML(course.price)}</span><span class="cc-price-note">${escapeHTML(course.priceNote)}</span></div><a class="button cc-programme-cta" href="${escapeHTML(course.href)}">${escapeHTML(course.cta)} <span aria-hidden="true">↗</span></a></div>
+        <div class="cc-programme-bottom"><div class="cc-price-block"><span class="cc-price">${escapeHTML(course.price)}</span><span class="cc-price-note">${escapeHTML(course.priceNote)}</span></div><a class="cc-programme-cta" href="${escapeHTML(course.href)}">${escapeHTML(course.cta)} <span aria-hidden="true">↗</span></a></div>
         ${isConstruct ? `<div class="cc-community-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 19 6v5c0 5-3.2 8.3-7 10-3.8-1.7-7-5-7-10V6z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg><span>${escapeHTML(course.community)}</span></div>` : `<div class="cc-community-note cc-community-note--path"><span aria-hidden="true">✳</span><span>${escapeHTML(course.delivery)}. ${escapeHTML(course.community)}</span></div>`}
       </div>
     </article>`;
@@ -65,7 +65,7 @@
     supportHost.innerHTML = supportingProgrammes.map(support => `<article class="cc-live-card" id="${escapeHTML(support.id)}">
       <div class="cc-live-icon" aria-hidden="true"><svg viewBox="0 0 64 64"><rect x="8" y="10" width="48" height="34" rx="5"/><path d="M22 54h20M32 44v10M17 34l9-10 8 5 12-13"/><path d="M42 16h4v4"/></svg></div>
       <div class="cc-live-copy"><span class="cc-kicker">Priority 0${support.priority} · A different way to learn</span><h2>${escapeHTML(support.title)}</h2><p>${escapeHTML(support.description)}</p><div class="cc-live-facts">${support.facts.map(fact => `<span>${escapeHTML(fact)}</span>`).join('')}</div></div>
-      <a class="button outline cc-live-cta" href="${escapeHTML(support.href)}">${escapeHTML(support.cta)} <span aria-hidden="true">↗</span></a>
+      <a class="cc-live-cta" href="${escapeHTML(support.href)}">${escapeHTML(support.cta)} <span aria-hidden="true">↗</span></a>
     </article>`).join('');
   }
 
@@ -142,7 +142,7 @@
     <div class="cc-outline-header"><h3>Inside the course</h3><span>Open a section to preview it</span></div>
     <div class="cc-outline" id="cc-outline">${course.modules.map((module, index) => `<section class="cc-outline-item ${index === 0 ? 'is-open' : ''}"><button class="cc-outline-toggle" type="button" aria-expanded="${index === 0 ? 'true' : 'false'}" aria-controls="cc-outline-preview-${escapeHTML(course.id)}-${index}"><span class="cc-outline-num">${String(index + 1).padStart(2, '0')}</span><span class="cc-outline-title">${escapeHTML(module.title)}</span><span class="cc-outline-count">${escapeHTML(module.count)}</span><span class="cc-outline-sign" aria-hidden="true">+</span></button><div class="cc-outline-preview" id="cc-outline-preview-${escapeHTML(course.id)}-${index}" ${index === 0 ? '' : 'hidden'}><p>${escapeHTML(module.preview)}</p><ul>${module.points.map(point => `<li>${escapeHTML(point)}</li>`).join('')}</ul></div></section>`).join('')}</div>
     <p class="cc-modal-fit"><b>Where it fits:</b> ${escapeHTML(course.complements)} This is a standalone purchase; it does not include community access.</p>`;
-    modalFooter.innerHTML = `<div class="cc-modal-price-wrap"><span class="cc-modal-price">${escapeHTML(course.price)}</span><span class="cc-modal-price-note">Illustrative price · standalone micro-course</span></div><button class="button cc-modal-cta" type="button" data-get-course="${escapeHTML(course.id)}">Get this course <span aria-hidden="true">↗</span></button>`;
+    modalFooter.innerHTML = `<div class="cc-modal-price-wrap"><span class="cc-modal-price">${escapeHTML(course.price)}</span><span class="cc-modal-price-note">Illustrative price · standalone micro-course</span></div><button class="cc-modal-cta" type="button" data-get-course="${escapeHTML(course.id)}">Get this course <span aria-hidden="true">↗</span></button>`;
   }
 
   function openModal(course, opener) {
