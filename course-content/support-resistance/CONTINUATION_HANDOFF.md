@@ -9,7 +9,7 @@
 - Course source root: `course-content/support-resistance/`
 - This is a source/content checkpoint. No website or course-room implementation was performed by these commits.
 - Current work style: continue the first pass; defer full cross-document editorial review to the second pass. Add precise entries to `production/second_pass_review_register.md/.csv` when an issue needs revisiting. Do not interrupt the first pass for general polishing unless it blocks correctness or a downstream task.
-- The repo is public. User explicitly asked to commit the course materials now; internal answer keys and production notes are therefore included. Do not assume they are safe for learner-facing delivery. The production learning room must never expose private answer keys by direct URLs.
+- **Accepted pre-launch exposure decision (2026-10-15):** The user accepts answer keys, reference assets, and production notes remaining in the public repository while the course is being developed. Treat this as an accepted, non-blocking project decision. Do not raise it again in routine progress updates. Revisit only if the user changes this decision or a concrete learner-delivery implementation requires a specific access-control decision. This records the user's preference; it does not claim that hosted access controls have been implemented.
 
 ## Course scope
 
