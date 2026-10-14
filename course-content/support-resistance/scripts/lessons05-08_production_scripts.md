@@ -998,3 +998,296 @@ Reveal each statement, ask the student to choose **Helpful**, **Not a reliable r
 > Three touches is a count, not a complete explanation. Were the reactions clear? Did they describe the same area? What was price doing around them? The count alone cannot answer that.
 
 **Shortcut B:** “Every additional touch makes the zone stronger.”
+**Reveal explanation:**
+
+> Additional visits add information about how price is interacting with the area, but they do not automatically improve or weaken it. The behaviour and broader context matter.
+
+**Shortcut C:** “A zone becomes weak after every retest.”
+
+**Reveal explanation:**
+
+> That is also too simple. A retest is a new interaction to interpret, not a universal verdict. We will later study how evidence can change as price revisits, crosses or moves away from an area.
+
+**Instructor note:** Keep breakout and retest mechanics brief here; they are taught properly in Lessons 10–14. The goal is to remove false shortcuts, not pre-teach those lessons.
+
+### 8:00–9:10 — Apply the review to one area
+
+**Show:** A new area with a clear structural anchor but some ambiguity around the exact extent of related reactions.
+
+**On-screen prompt:**
+
+> Complete both sentences:
+>
+> “This area is worth watching in this chart because…”
+>
+> “What remains uncertain is…”
+
+**Model response shown after attempt:**
+
+> “The area relates to a prior turning point and two reactions in a similar region. The chart gives me a reason to mark it, but it does not tell me whether price will react the same way next time.”
+
+**Instructor note:** The actual model response must be matched to the synthetic chart. Do not use a generic answer that names two reactions if the asset does not show them.
+
+### 9:10–10:00 — Prepare the second ChartLab
+
+**On-screen copy:**
+
+> Your first ChartLab showed a relatively clear W-shaped structure. This one is less tidy: the lows do not line up exactly.
+>
+> Your job is not to force them into a perfect horizontal line. Use the structure and the related reactions to draw an area you can explain.
+
+Do not show the reference band yet.
+
+### 10:00–16:30 — ChartLab Study 2: Uneven Lows
+
+**Launch label:**
+
+> ChartLab 2 — Uneven Lows
+
+**Student-facing introduction:**
+
+> The lower reactions are related, but they do not occur at one identical price. Inspect the full swing structure before marking support.
+>
+> Submit support first. Then mark the relevant opposing resistance area. You will see the reference reasoning only after both drawings are submitted.
+
+**Required interaction sequence:**
+
+1. Open the unlabelled chart with the uneven lows and opposing upper reaction. No band, markers or guide lines should reveal the intended answer.
+2. Learner draws support around the related lower reactions and submits. Lock the support step and preserve the student's band visibly.
+3. Learner draws resistance around the relevant opposing upper area and submits.
+4. Show both student bands beside the reference, with separate reasoning for support and resistance.
+5. Tailor support feedback specifically to the uneven lows: does the band capture the related lower reactions without following one outlying wick so broadly that it stops describing a useful area? Was the boundary logic consistent? Does an alternative band also capture the structure defensibly?
+6. Tailor resistance feedback to the chart's actual upper reaction. Do not evaluate resistance with a generic message copied from support.
+7. Ask the learner to answer the reflection: “What made these lows related, and what did you choose not to force into alignment?”
+8. Present the two-question knowledge check and completion/return action.
+
+**Required feedback states:**
+- Support band captures both/most intended reactions with defensible width.
+- Support is too narrow to relate the uneven lows.
+- Support is excessively broad or dominated by an outlying wick without adequate explanation.
+- A different but defensible support band captures the same structural region.
+- Resistance band is anchored to the wrong local movement.
+- Resistance band is broadly defensible but its boundaries need explanation.
+- Learner signals uncertainty or does not submit a complete drawing.
+
+**After comparison — student-facing debrief:**
+
+> The lows did not need to be identical for you to examine them as a related area. What matters is whether your band describes the structure you intended to mark and whether you can explain its limits.
+>
+> Compare your drawing with the reference, then look at the chart again without either band. Can you now explain why the area deserves attention—and what it cannot tell you?
+
+**Instructor note:** This study should feel harder than Clear W, but not like a trick question. The challenge is imperfect alignment, not hidden data or arbitrary tolerance. If the synthetic chart does not support a reasonably clear reference and a plausible alternative, revise the chart before release.
+
+### 16:30–18:45 — Knowledge check
+
+**Q1. A candidate zone has five visible visits, but the reactions are noisy and its structural role is unclear. What can you conclude?**
+
+A. Five visits make it the strongest zone on the chart.  
+B. The area has been visited several times, but the count alone does not establish its usefulness.  
+C. The zone must fail because it has been touched too often.
+
+**Correct answer:** B.
+
+**Feedback:**
+
+> The count is one observation. Look at how the area fits the structure, how price behaved around it and what remains uncertain.
+
+**Q2. In Uneven Lows, what matters most when comparing your support band with the reference?**
+
+A. Every low must be inside a perfectly level line.  
+B. Whether your band captures the related structure with defensible boundaries and a clear rationale.  
+C. Whether you predicted the next price movement correctly.
+
+**Correct answer:** B.
+
+**Feedback:**
+
+> The task is to represent the related reaction area, not to force all lows to match or predict the next move.
+
+### 18:45–20:00 — Close the first three skills as one achievement
+
+**On-screen takeaway:**
+
+> **Evaluate the evidence. Do not turn it into a magic number.**
+
+**On-screen closing copy:**
+
+> Look at what you can now do that you could not do at the start of this course. You can recognise structure, select the areas that matter, draw boundaries you can explain, simplify the chart and question your own assumptions about a zone.
+>
+> You have not learned to predict every reaction—and that is not the goal. You have begun to build a repeatable way to read a chart and explain your decisions. The next module turns to what price does as it approaches and interacts with these areas.
+
+**Chart Reading Notes prompt:**
+
+> This zone is worth attention because…  
+> The visible evidence is…  
+> The part I cannot know from this chart alone is…
+
+**Tone note:** This is the strongest progress acknowledgement in Lessons 5–8 because the learner has now connected selection, drawing, editing and evaluation. Keep it concrete and modest. No “you are now a professional trader” language, no return claims and no badge implying mastery.
+
+## 4. Chart pack and annotation specification
+
+### L08-A — Qualitative comparison pair
+
+- **Purpose:** Demonstrate why touch count alone is insufficient.
+- **Area A:** More contacts/crossings but less coherent behaviour in the visible structure.
+- **Area B:** Fewer but more interpretable reactions and a clearer structural anchor.
+- **Must not imply:** Area B is guaranteed to work, has an established higher probability, or is objectively “strong” based on one single dimension.
+- **Reveals:** structural anchor; reaction description; current relevance; uncertainty notes.
+
+### L08-B — Three-shortcut statements
+
+- Render each statement separately so the student cannot simply react to a wall of text.
+- The answer choices should be “Helpful,” “Not a reliable rule,” and “Needs context” rather than “true/false” where context matters.
+- Feedback must clarify why an absolute shortcut is inadequate.
+
+### CL-02 — ChartLab Study 2: Uneven Lows
+
+- **Purpose:** Apply zone boundary judgement when related lows are not perfectly aligned.
+- **Chart requirement:** At least two relevant lower reactions that differ visibly, with enough shared structure to justify examining a broad area, plus a distinct opposing upper reaction for resistance.
+- **Task order:** Support submit → lock support → resistance submit → lock both → side-by-side comparison → tailored feedback → short written reflection → two-question check → completion/return.
+- **Support reference rationale:** Identify the structural lows, explain which wick/body portions inform the band, explain the chosen width, and state whether another boundary choice would also be defensible.
+- **Resistance reference rationale:** Identify the intended upper reaction independently, explain why the band does not simply mirror the support band's width, and note relevant upper price action intentionally excluded.
+- **No-touch-count scoring:** Do not display “zone strength,” a prediction percentage, or “number of touches = grade.”
+- **Reasonable alternative state:** Where a student's boundaries are shifted but still capture the relevant region coherently, explain what the alternative includes and what trade-off it introduces.
+
+## 5. Model answers and scoring notes
+
+### Qualitative zone comparison
+
+**Strong answer:** Identifies a structural anchor, describes the observed behaviour around the zone (pause, turn, overlap, crossings or movement away), considers relevance to the current chart and acknowledges at least one uncertainty.
+
+**Developing answer:** Notes one visible feature, such as the number of visits, but does not explain the broader structure or acknowledge its limits.
+
+**Weak answer:** Calls the highest-touch area “strongest” without analysis, assigns a numerical score with no method, assumes the zone must hold, or infers hidden institutional intentions as facts from the chart alone.
+
+### Uneven Lows ChartLab
+
+**Strong support answer:** Captures the related lower reactions with a defensible band; acknowledges that the lows differ; explains the wick/body trade-off; avoids expanding the zone so broadly that unrelated movement becomes indistinguishable.
+
+**Acceptable alternative:** A moderately wider or narrower band can be accepted if it captures the relevant structure and the learner explains the trade-off. The reference band is not a mathematically unique boundary.
+
+**Weak support answer:** Draws a hairline through only one low and cannot explain the others; places the band around an unrelated small dip; or makes it so broad that it no longer describes the lower reaction region.
+
+**Strong resistance answer:** Uses the chart's own opposing upper reaction and independent boundary logic. The support zone's width does not dictate resistance width.
+
+**Scoring principle:** Assess the quality of the reasoning and coverage. Do not grade whether price later reversed, and do not award a predictive probability from the drawing.
+
+## 6. Instructor notes and reference integration
+
+- **Adam Grimes, *The Art and Science of Technical Analysis*:** the main critical reference for resisting overconfidence in conventional levels and understanding the uncertain relationship between trends and ranges. Use this to challenge automatic rules rather than claiming that support/resistance can never be useful.
+- **Schwager and Etzkorn, *A Complete Guide to the Futures Market*, Chapters 7–8:** conventional support/resistance and trading-range background. Major highs/lows and clusters may deserve attention, but their presence alone does not create a guarantee.
+- **Carol L. Osler's Federal Reserve Bank of New York research on FX support/resistance:** optional instructor background for the proposition that some supplied support/resistance levels have been studied empirically in a specific foreign-exchange setting. State the boundary of that evidence: it does not establish that any hand-drawn zone, any market or any learner's method has predictive edge.
+
+**Exact wording to avoid:**
+- “The more times price touches a zone, the stronger it becomes.”
+- “Three touches confirms the level.”
+- “This zone has a 90% chance of holding.”
+- “Institutions are definitely buying here.”
+- “The chart proves this will be support again.”
+
+**Prefer:**
+- “The chart shows several reactions around a similar area.”
+- “This gives us a reason to examine the zone; it does not prove what will happen next.”
+- “The boundary is a reasoned interpretation, and another boundary may be defensible.”
+- “We can describe visible price behaviour; this chart alone does not prove the intention of market participants.”
+
+## 7. Website and learning-room handoff
+
+The lesson needs:
+
+- two contrasting zones with no automatic numerical strength rating;
+- sequential prompts and feedback that distinguish observed facts from interpretations;
+- an explicit “not sure / need more context” route;
+- a ChartLab entry action after the concept lesson, not at page load;
+- support and resistance submissions preserved together in the comparison state;
+- tailored feedback for uneven lows, including the reasonable-alternative state;
+- a short reflection and knowledge check before completion;
+- return from ChartLab to the same lesson context.
+
+As in Lesson 5, persistence of attempts and completion to the authenticated user account is a future implementation requirement unless already independently verified. Content should not advertise progress saving or cross-device continuity before that is proven.
+
+## 8. Lesson 8 production checklist
+
+- [ ] Comparison pair presents a real judgement problem, not an obvious trick.
+- [ ] The course does not turn the five review questions into a score.
+- [ ] Touch-count shortcuts receive nuanced explanations.
+- [ ] Uneven Lows has a coherent reference area and at least one reasoned alternative if the chart supports it.
+- [ ] ChartLab submits support before resistance and keeps both drawings visible for comparison.
+- [ ] Feedback is specific to each zone and the actual chart geometry.
+- [ ] No automatic “strong/weak” grade or probability is displayed.
+- [ ] Final reflection reinforces evidence plus uncertainty.
+- [ ] Course progress language acknowledges a new skill without overclaiming mastery.
+
+---
+
+# Cross-lesson production handoff: Lessons 5–8
+
+## Exact content and asset dependencies
+
+| ID | Deliverable | Used in | Must include |
+|---|---|---|---|
+| L05-A | Over-marked selection chart | Lesson 5 | candidate marks; keep/combine/leave-out rationale; desktop/mobile crops |
+| CL-01 | Clear W ChartLab study | Lesson 5 | unlabelled chart; support reference; resistance reference; separate rationales; feedback states; two-question check |
+| L06-A | Lower reactions with wick/body variation | Lesson 6 | initial chart; wick/body guides; narrow/defensible/broad alternatives |
+| L06-B | Resistance boundary example | Lesson 6 | unlabelled and annotated state; independent boundary rationale |
+| L06-C | Independent boundary practice | Lesson 6 | unseen chart; reference band; answer prompts; acceptable alternative note |
+| L07-A | Over-marked demonstration | Lesson 7 | incremental removals/merges; reason for each change; final clean view |
+| L07-B | Independent editing chart | Lesson 7 | unseen candidate zones; before/after; rationale for every edit |
+| L08-A | Qualitative zone comparison | Lesson 8 | contrasting evidence; contextual questions; no ranking score |
+| CL-02 | Uneven Lows ChartLab study | Lesson 8 | uneven lower reactions; support and resistance tasks; nuanced feedback; reasoned alternative state |
+
+## Per-asset source and release record
+
+Each asset record must contain:
+
+- asset ID and filename;
+- author and creation date;
+- schematic/fictional or historical-data status;
+- historical-data source and usage permission, if applicable;
+- intended learning objective and the question it asks;
+- initial unlabelled state;
+- every reveal state and the timing/order of each annotation;
+- reference zone coordinates or boundaries for the implementation team;
+- rationale for both included and excluded candles/reactions;
+- reasonable alternative reading, if one is supported;
+- concise alt text;
+- desktop and mobile readability review;
+- confirmation that no answer is visible in the initial state.
+
+## Global quality gate before these lessons enter the learning room
+
+- The learning sequence follows the order in this pack.
+- Lesson 5 is the first ChartLab task; Lesson 8 is the second. Lesson 6 and Lesson 7 remain guided static/selection exercises, not new ChartLabs.
+- Lesson 9 remains the first short personal-chart micro-case.
+- All reference drawings are accompanied by reasoning, not presented as the one objectively correct shape.
+- There are no invented probability scores, touch-count formulas or promises of predictive advantage.
+- Student-facing text is visually distinguished from instructor/production notes.
+- The learner has a meaningful written reflection or evidence statement at the end of each lesson.
+- Any claimed save, resume, completion or cross-device behaviour is verified in the actual product before it is described as available.
+
+---
+
+# References used in Lessons 5–8
+
+These references inform the curriculum; the student-facing lessons should explain the concepts in original TradeThesis wording. Do not reproduce book passages, illustrations or proprietary example charts.
+
+1. **Murphy, John J.** *Technical Analysis of the Financial Markets*. Penguin Random House. Broad foundation for conventional technical analysis, trends and support/resistance concepts.  
+   https://www.penguinrandomhouse.com/books/350647/technical-analysis-of-the-financial-markets-by-john-j-murphy/
+
+2. **Schwager, Jack D., and Mark Etzkorn.** *A Complete Guide to the Futures Market*. Wiley. See Chapter 7, “Trading Ranges,” and Chapter 8, “Support and Resistance.” Useful for range boundaries, major prior highs/lows and clusters of turns.  
+   Chapter 7: https://onlinelibrary.wiley.com/doi/10.1002/9781119209713.ch7  
+   Chapter 8: https://onlinelibrary.wiley.com/doi/10.1002/9781119209713.ch8
+
+3. **Grimes, Adam.** *The Art and Science of Technical Analysis*. Wiley. Especially the discussion of trading ranges and transitions between trends and ranges. Used as a critical counterweight to mechanical rules and overconfidence in conventional marks.  
+   https://onlinelibrary.wiley.com/doi/book/10.1002/9781119202837
+
+4. **Osler, Carol L.** Federal Reserve Bank of New York research on support/resistance levels in foreign exchange. Instructor background only; findings in a specific FX setting must not be generalised to every market, every zone or the student's own method.  
+   Federal Reserve Bank of New York research page: https://www.newyorkfed.org/research/staff_reports/sr125.html
+
+---
+
+## Final authoring note
+
+The goal of these four lessons is not to persuade learners that support and resistance is a secret. The goal is to let them feel a sequence of capabilities taking shape: first they choose, then they explain boundaries, then they edit, then they evaluate evidence with uncertainty intact.
+
+The right moment for encouragement is after a learner has done meaningful reasoning. Tell them exactly what improved. Do not use generic cheerleading, badges that imply mastery, or language that turns a chart-reading lesson into a promise of trading success.
