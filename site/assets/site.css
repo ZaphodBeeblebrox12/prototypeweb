@@ -19,7 +19,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{
 .brand-mark{width:39px;height:39px;display:grid;place-items:center;border-radius:13px 13px 13px 5px;background:var(--green);color:var(--butter);font:italic 24px var(--serif);transform:rotate(-3deg)}
 .brand-name{display:block;font:600 19px/.95 var(--serif);letter-spacing:.015em}
 .brand-tag{display:block;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-top:6px}
-.button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:48px;padding:12px 20px;border:1px solid var(--green);border-radius:999px;background:var(--green);color:#fffdf8;font-family:var(--sans);font-size:14px;font-weight:650;letter-spacing:0;line-height:1.3;transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease,border-color .18s ease;box-shadow:0 2px 0 #25433420;white-space:nowrap}
+.button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:48px;padding:12px 20px;border:1px solid var(--green);border-radius:999px;background:var(--green);color:#fffdf8;font-family:var(--sans);font-size:14px;font-weight:600;letter-spacing:0;line-height:1.3;transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease,border-color .18s ease;box-shadow:0 2px 0 #25433420;white-space:nowrap}
 .button:hover{transform:translateY(-1px);box-shadow:0 4px 11px #253c2e1c}
 .button.outline{background:transparent;color:var(--green);box-shadow:none}
 .button.outline:hover{background:#edf1e9;box-shadow:0 3px 10px #253c2e10}
@@ -1660,8 +1660,8 @@ body.construct-page ::selection{background:var(--butter);color:var(--ink)}
 body.construct-page .wrap{width:min(1200px,calc(100% - 48px));margin-inline:auto}
 body.construct-page .topline{background:var(--deep);color:#f8f4e9;padding:7px 16px;text-align:center;font-size:11px;letter-spacing:.025em}
 body.construct-page .topline strong{color:var(--butter)}
-body.construct-page .button{display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:12px 18px;min-height:44px;border:1px solid var(--green);border-radius:999px;background:linear-gradient(180deg,#3d684f 0%,#2d4f3d 100%);color:#fffdf8;font-size:12px;font-weight:750;transition:transform .18s,box-shadow .18s;white-space:nowrap;box-shadow:inset 0 1px 0 #ffffff32,0 3px 0 #1f3e30,0 7px 15px #233b2e13}
-body.construct-page .button:hover{transform:translateY(-1px);box-shadow:inset 0 1px 0 #ffffff3b,0 4px 0 #1f3e30,0 9px 18px #233b2e18}
+/* CONSTRUCT actions inherit the shared .button system; only CTA variants differ. */
+
 body.construct-page .button.outline{background:transparent;color:var(--green);box-shadow:none}
 body.construct-page main{overflow:hidden}
 body.construct-page .breadcrumb{font-size:11px;color:var(--muted);margin-bottom:25px}
@@ -1776,7 +1776,7 @@ body.construct-page .cta-panel .eyebrow{color:var(--butter)}
 body.construct-page .cta-panel .eyebrow:before{background:var(--butter)}
 body.construct-page .cta-panel h2{font:400 clamp(31px,3.8vw,45px)/1.05 var(--serif);margin:13px 0 9px;max-width:700px}
 body.construct-page .cta-panel p{font-size:13px;color:#d8e0d3;line-height:1.8;max-width:720px;margin:0}
-body.construct-page .cta-panel .button{background:var(--butter);color:#29382e;border-color:var(--butter);box-shadow:inset 0 1px 0 #ffffff55,0 3px 0 #8e7338,0 9px 18px #10231833}
+body.construct-page .cta-panel .button{background:var(--butter);background-image:none;color:#29382e;border-color:var(--butter);box-shadow:0 2px 0 #8e733820}
 body.construct-page .footer{background:#f4eee3;border-top:1px solid var(--line);padding:27px 0 23px}
 body.construct-page .footer-inner{display:flex;justify-content:space-between;gap:25px;align-items:center}
 body.construct-page .footer-logo{width:210px;max-width:100%;height:auto;display:block}
@@ -1891,7 +1891,7 @@ body.construct-page .paper-first-live small{display:block;font-size:10px;line-he
 .sitewide-header .navlinks a:after{content:"";position:absolute;left:50%;right:50%;bottom:17px;height:2px;background:linear-gradient(90deg,#b98b3d,#e0c57b);transition:left .2s,right .2s}
 .sitewide-header .navlinks a:hover,.sitewide-header .navlinks a.active,.sitewide-header .navlinks a[aria-current="page"]{color:var(--deep)}
 .sitewide-header .navlinks a:hover:after,.sitewide-header .navlinks a.active:after,.sitewide-header .navlinks a[aria-current="page"]:after{left:0;right:0}
-.sitewide-header .nav>.button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:48px;padding:12px 20px;border:1px solid var(--green);border-radius:999px;background:var(--green);background-image:none;color:#fffdf8;font-family:var(--sans);font-size:14px;font-weight:650;letter-spacing:0;line-height:1.3;transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease,border-color .18s ease;white-space:nowrap;box-shadow:0 2px 0 #25433420}
+.sitewide-header .nav>.button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:48px;padding:12px 20px;border:1px solid var(--green);border-radius:999px;background:var(--green);background-image:none;color:#fffdf8;font-family:var(--sans);font-size:14px;font-weight:600;letter-spacing:0;line-height:1.3;transition:transform .18s ease,box-shadow .18s ease,background-color .18s ease,border-color .18s ease;white-space:nowrap;box-shadow:0 2px 0 #25433420}
 .sitewide-header .nav>.button:hover{transform:translateY(-1px);box-shadow:0 4px 11px #253c2e1c}
 .sitewide-header .nav>.button.outline{background:transparent;color:var(--green);box-shadow:none}
 .sitewide-header .mobile-toggle{display:none;background:transparent;border:1px solid var(--line-dark);border-radius:50%;width:42px;height:42px;color:var(--green);font-size:18px;line-height:1}
