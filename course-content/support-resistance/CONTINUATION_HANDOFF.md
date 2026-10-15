@@ -107,14 +107,14 @@ Do not add another ChartLab activity or move these without explicit user approva
 
 The chart/source asset set is committed to `my-new-branch` under `chart_assets/`. The verified Git tree contains:
 
-- 121 PNG chart renders.
-- 121 SVG chart renders.
-- 48 synthetic illustrative OHLC datasets.
+- 123 PNG chart renders.
+- 123 SVG chart renders.
+- 49 synthetic illustrative OHLC datasets.
 - Two CSV manifests, the chart generator, and `SHA256SUMS.txt`.
 
 The Lesson 18 reference-chart annotation correction is also committed. The generator, both PNG exports, both SVG exports, and their checksum entries have been updated.
 
-**Verification still outstanding:** The source archive's checksum inventory and path coverage have been checked, and all 48 CSV datasets match after accounting for Git line-ending normalization. Representative remote checksum checks have passed, but the complete remote-byte comparison of all 242 rendered charts and the full visual/instructional review have not yet been completed.
+**Verification status (2026-10-15):** The 242 pre-existing renders (121 PNG and 121 SVG) passed a complete remote-byte SHA-256 comparison against their recorded entries. All 49 datasets match source content after normalizing Git LF/CRLF line endings. The four new Lesson 13 render files (two PNG, two SVG) and new dataset are committed and listed in the checksum inventory, but independent byte-for-byte verification of those five new payloads remains outstanding. Full visual/instructional review remains outstanding for the chart set.
 
 See `production/BINARY_ASSET_TRANSFER_STATUS.md` for the detailed verification record. Keep the source archives as backups until the complete audit passes.
 
@@ -129,7 +129,7 @@ See `production/BINARY_ASSET_TRANSFER_STATUS.md` for the detailed verification r
 
 ## Recommended next steps
 
-1. Complete the remote-byte checksum comparison for all 242 committed PNG/SVG chart renders; keep the source archives as backups until it passes.
+1. Independently verify the four new Lesson 13 PNG/SVG render payloads and the new dataset against their recorded checksums; keep source archives as backups until this targeted check passes.
 2. Reconcile the recording/media delivery manifest with the committed asset state. Separately correct the stale Lesson 18 QA flags in the CSV, then resolve the remaining Lesson 15, Lesson 10, and Lesson 11–13 mapping questions.
 3. Continue first-pass course production, mapping each cue to its exact asset, narration source, caption/transcript status, planned export name, and delivery state.
 4. Keep authentic instructor chart/trade intake for Lessons 9, 16, and 17 as explicit dependencies until the user supplies the records.
