@@ -72,7 +72,16 @@
 .sr-room-work-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(255px,.9fr);gap:14px;align-items:start}
 .sr-room-chart-figure{min-width:0;margin:0;border:1px solid var(--line);border-radius:11px;background:#fffdf8;overflow:hidden}.sr-room-chart-figure[hidden]{display:none}
 .sr-room-chart-top{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid #eee6d8;color:#59685a;font-size:8px;font-weight:850;letter-spacing:.08em}
-.sr-room-chart-top span:last-child{color:#9b8250}.sr-room-chart-figure img{display:block;width:100%;height:auto;min-height:160px;object-fit:contain;background:#fff}
+.sr-room-chart-top span:last-child{color:#9b8250}.sr-room-chart-viewport{width:100%;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.sr-room-chart-viewport img{display:block;width:100%;height:auto;min-height:160px;object-fit:contain;background:#fff}
+.sr-room-chart-controls{padding:10px 11px;border-top:1px solid #eee6d8;background:#faf6ee}
+.sr-room-chart-controls[hidden]{display:none!important}
+.sr-room-chart-control-meta{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#59685a;font-size:9px;font-weight:800}
+#sr-chart-stage-count{flex-shrink:0;color:var(--muted);font-variant-numeric:tabular-nums}
+#sr-chart-reveal-guidance{margin:6px 0 9px;color:var(--muted);font-size:9px;line-height:1.6}
+.sr-room-chart-control-buttons{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.sr-room-chart-control-buttons button{min-height:36px;padding:8px 11px;font-size:9px}
+.sr-room-chart-control-buttons button:disabled{opacity:.45;cursor:not-allowed}
 .sr-room-chart-figure figcaption{padding:9px 11px;border-top:1px solid #eee6d8;color:var(--muted);font-size:8px;line-height:1.5}
 .sr-room-chart-fallback{padding:24px 14px;background:#f6f1e6;color:var(--muted);font-size:10px;line-height:1.7}
 .sr-room-practice{min-width:0;padding:14px;border:1px solid var(--line);border-radius:11px;background:#faf6ee}

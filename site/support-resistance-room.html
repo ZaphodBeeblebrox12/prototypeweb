@@ -80,9 +80,19 @@
         <div class="sr-room-tab-panel" id="sr-tab-lesson" role="tabpanel" aria-labelledby="sr-tab-button-lesson">
           <div class="sr-room-work-grid">
             <figure class="sr-room-chart-figure" id="sr-chart-figure" hidden>
-              <div class="sr-room-chart-top"><span id="sr-chart-label">Illustrative chart</span><span>OBSERVE FIRST</span></div>
-              <img id="sr-chart-image" alt="" loading="lazy">
+              <div class="sr-room-chart-top"><span id="sr-chart-label">Illustrative chart</span><span>CHART EVIDENCE</span></div>
+              <div class="sr-room-chart-viewport" id="sr-chart-viewport">
+                <img id="sr-chart-image" alt="" loading="lazy">
+              </div>
               <figcaption id="sr-chart-caption">Illustrative chart — not historical market data.</figcaption>
+              <div class="sr-room-chart-controls" id="sr-chart-controls" hidden aria-label="Chart reveal controls">
+                <div class="sr-room-chart-control-meta"><span id="sr-chart-stage-status">Observe first</span><span id="sr-chart-stage-count" aria-live="polite">View 1 of 1</span></div>
+                <p id="sr-chart-reveal-guidance" aria-live="polite"></p>
+                <div class="sr-room-chart-control-buttons">
+                  <button class="button sr-room-secondary" type="button" id="sr-chart-prev" disabled>← Previous view</button>
+                  <button class="button sr-room-primary" type="button" id="sr-chart-next" disabled>Reveal next view →</button>
+                </div>
+              </div>
               <div class="sr-room-chart-fallback" id="sr-chart-fallback" hidden>The chart could not be loaded in this preview. You can still read the prompt and record your reasoning.</div>
             </figure>
             <div class="sr-room-practice">

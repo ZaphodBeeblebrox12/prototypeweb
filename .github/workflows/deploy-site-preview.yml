@@ -6,6 +6,7 @@ on:
       - my-new-branch
     paths:
       - "site/**"
+      - "course-content/support-resistance/chart_assets/charts/**"
       - ".github/workflows/deploy-site-preview.yml"
   workflow_dispatch:
 
@@ -30,6 +31,29 @@ jobs:
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+
+      - name: Stage chart images referenced by the learning room
+        run: |
+          python - <<'PY'
+          import re
+          import shutil
+          from pathlib import Path
+
+          source = Path("course-content/support-resistance/chart_assets/charts")
+          app = Path("site/assets/support-resistance-room.js").read_text(encoding="utf-8")
+          names = sorted(set(re.findall(r"""["']([A-Za-z0-9_-]+\.png)["']""", app)))
+          names = [name for name in names if name.startswith(("L", "CL"))]
+          missing = [name for name in names if not (source / name).is_file()]
+          if missing:
+              raise SystemExit("Missing learning-room chart assets: " + ", ".join(missing))
+          target = Path("site/assets/support-resistance-charts")
+          if target.exists():
+              shutil.rmtree(target)
+          target.mkdir(parents=True, exist_ok=True)
+          for name in names:
+              shutil.copy2(source / name, target / name)
+          print(f"Staged {len(names)} referenced chart images for the preview.")
+          PY
 
       - name: Upload the site folder
         uses: actions/upload-pages-artifact@v3

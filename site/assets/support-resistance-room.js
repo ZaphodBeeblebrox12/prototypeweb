@@ -2,7 +2,7 @@
   "use strict";
   const $ = id => document.getElementById(id);
   const STORAGE_KEY = "tradethesis.support-resistance-room.preview.v1";
-  const chartRoot = "../course-content/support-resistance/chart_assets/charts/";
+  const chartRoot = "assets/support-resistance-charts/";
   const modules = [
     {id:1,name:"Understand",range:"Lessons 1–2",outcome:"Describe the chart before explaining it."},
     {id:2,name:"Find",range:"Lessons 3–5",outcome:"Choose fewer, more defensible areas."},
@@ -12,8 +12,8 @@
     {id:6,name:"Apply & review",range:"Lessons 15–18",outcome:"Use conditional scenarios and accept uncertainty."}
   ];
   const lessons = [
-    {id:1,module:1,title:"What support and resistance actually tell you",duration:"12–15 min",summary:"Prior price behaviour can make an area worth examining. It does not make that area a guaranteed barrier or a complete trading signal.",outcome:"Describe prior reactions while keeping observation separate from prediction.",chart:"L01-A-01-clean.png",alt:"Illustrative candles decline into a broad lower price area, move upward, and later revisit a similar area. No zones are drawn.",prompt:"What does a support/resistance zone tell you—and what does it not tell you?",instructions:"Describe the visible reactions first. Avoid claiming that the next move is known.",cue:"A zone is an area of interest based on prior price behaviour, not a promise about the next move.",quiz:{q:"What does a support/resistance zone tell you?",options:["The exact price where the next reversal must occur.","An area linked to prior price behaviour that may be relevant to the current read.","A complete entry signal by itself."],correct:1,feedback:"A zone provides context from prior behaviour. It does not guarantee a hold or supply a complete trade plan."}},
-    {id:2,module:1,title:"Read structure before drawing",duration:"15 min",summary:"Read the broad path of price before marking areas. Relative swing highs and lows help distinguish rising structure, falling structure, a range, or a transition that is not yet clear.",outcome:"Classify the broad structure and point to the major turns that support that description.",chart:"L02-A-01-clean.png",alt:"Illustrative rising price sequence with no reference markings.",prompt:"What broad structure best describes the visible sequence?",instructions:"Point to the turns that support your label. Transition or unclear is acceptable when evidence is mixed.",cue:"Describe the larger swing sequence before bringing in zones or trade decisions.",quiz:{q:"What is the useful first step before drawing zones?",options:["Mark every local high and low.","Describe the broad structure using meaningful swing highs and lows.","Choose the direction you want price to move."],correct:1,feedback:"The broad swing structure gives context. Marking everything or choosing a direction first encourages hindsight."}},
+    {id:1,module:1,title:"What support and resistance actually tell you",duration:"12–15 min",summary:"Prior price behaviour can make an area worth examining. It does not make that area a guaranteed barrier or a complete trading signal.",outcome:"Describe prior reactions while keeping observation separate from prediction.",chart:"L01-A-01-clean.png",chartStages:[{"file":"L01-A-01-clean.png","label":"Start · unlabelled","alt":"Illustrative price sequence before any support area is drawn. Several candles react near a similar lower area.","caption":"Start unlabelled. Describe the lower reactions you can see before naming the area."},{"file":"L01-A-02-band.png","label":"Reveal 1 · broad area","alt":"The same illustrative lower-reaction sequence with a broad neutral band around the related reactions.","caption":"The broad band gathers related reactions. It is an area, not one exact price."},{"file":"L01-A-03-labelled.png","label":"Reveal 2 · prior reactions","alt":"The lower band is labelled prior reaction area.","caption":"“Prior reaction area” describes the evidence without claiming who caused the turn or predicting the next move."},{"file":"L01-A-05-breakdown.png","label":"Later evidence · area crossed","alt":"Later illustrative candles trade decisively below the previously marked lower reaction area.","caption":"Later candles trade through the area. This does not erase the earlier reactions; it shows the area was not a guaranteed barrier."}],alt:"Illustrative candles decline into a broad lower price area, move upward, and later revisit a similar area. No zones are drawn.",prompt:"What does a support/resistance zone tell you—and what does it not tell you?",instructions:"Describe the visible reactions first. Avoid claiming that the next move is known.",cue:"A zone is an area of interest based on prior price behaviour, not a promise about the next move.",quiz:{q:"What does a support/resistance zone tell you?",options:["The exact price where the next reversal must occur.","An area linked to prior price behaviour that may be relevant to the current read.","A complete entry signal by itself."],correct:1,feedback:"A zone provides context from prior behaviour. It does not guarantee a hold or supply a complete trade plan."}},
+    {id:2,module:1,title:"Read structure before drawing",duration:"15 min",summary:"Read the broad path of price before marking areas. Relative swing highs and lows help distinguish rising structure, falling structure, a range, or a transition that is not yet clear.",outcome:"Classify the broad structure and point to the major turns that support that description.",chart:"L02-A-01-clean.png",chartStages:[{"file":"L02-A-01-clean.png","label":"Start · rising sequence","alt":"Illustrative rising candlestick sequence with no reference markings.","caption":"Start with the broad path. Is the sequence generally rising, falling, ranging or unclear?"},{"file":"L02-A-02-turns.png","label":"Reveal 1 · candidate turns","alt":"The rising sequence with a selection of candidate local turning points marked.","caption":"Candidate turns are highlighted. Which points explain the broad path, and which are minor fluctuations?"},{"file":"L02-A-03-structure-reference.png","label":"Reveal 2 · worked rising read","alt":"The rising sequence labelled with generally higher highs and higher lows.","caption":"One worked read: relative highs and lows generally move higher. This is a reference, not the only defensible set of turns."},{"file":"L02-B-01-clean.png","label":"Compare · falling sequence","alt":"Illustrative falling sequence with upward retracements and no reference labels.","caption":"Now compare a falling sequence. Describe its broad path before checking a reference."},{"file":"L02-B-02-structure-reference.png","label":"Reveal 3 · worked falling read","alt":"The falling sequence annotated with a selection of lower highs and lower lows.","caption":"This reference identifies generally lower highs and lower lows. The reasoning matters more than exact marker placement."},{"file":"L02-C-01-clean.png","label":"Compare · possible range","alt":"Illustrative price movement back and forth inside a broad region, without boundaries drawn.","caption":"This sequence moves back and forth within a broad area rather than making clear sustained progress in one direction."},{"file":"L02-C-02-major-turns.png","label":"Reveal 4 · major turns","alt":"The range sequence with a small set of major turning points marked.","caption":"Major turns help communicate the broad back-and-forth path. Not every local turn needs a label."},{"file":"L02-C-03-range-reference.png","label":"Reveal 5 · approximate range","alt":"The range sequence with a broad bracket marking an approximate trading region.","caption":"A broad bracket summarises an approximate region. It is not a precision trading signal."},{"file":"L02-D-01-early-state.png","label":"Transition · early state","alt":"First segment of an illustrative rise with the later candles hidden.","caption":"The earlier rise is visible, but the later transition is hidden. Make a provisional classification from the evidence shown now."},{"file":"L02-D-02-later-state.png","label":"Transition · later evidence","alt":"The full illustrative sequence showing an earlier rise giving way to more overlapping, less directional movement and a possible range.","caption":"With more candles, price overlaps and becomes less directional. A possible range is more defensible now; do not use future evidence to grade the earlier read."}],alt:"Illustrative rising price sequence with no reference markings.",prompt:"What broad structure best describes the visible sequence?",instructions:"Point to the turns that support your label. Transition or unclear is acceptable when evidence is mixed.",cue:"Describe the larger swing sequence before bringing in zones or trade decisions.",quiz:{q:"What is the useful first step before drawing zones?",options:["Mark every local high and low.","Describe the broad structure using meaningful swing highs and lows.","Choose the direction you want price to move."],correct:1,feedback:"The broad swing structure gives context. Marking everything or choosing a direction first encourages hindsight."}},
     {id:3,module:2,title:"Identify meaningful swing points",duration:"15 min",summary:"A chart can contain many local peaks and troughs. Select the turns that carry useful structural information rather than treating every fluctuation as equally important.",outcome:"Choose a small, explainable set of swing points and say why minor turns were left out.",chart:"L03-A-01-clean.png",alt:"Illustrative over-marked teaching chart for selecting meaningful turns.",prompt:"Which turns deserve attention for the question you are asking?",instructions:"Name what makes a selected turn relevant to the broader structure. Do not justify a mark only because price later moved away from it.",cue:"A useful selection is selective and explainable; it is not a count of every visible wiggle.",quiz:{q:"What is the purpose of selecting meaningful swing points?",options:["To label every fluctuation.","To reduce noise by identifying turns relevant to the broader structure.","To know where price must reverse next."],correct:1,feedback:"The task is to separate meaningful structure from local noise—not to predict an exact reversal."}},
     {id:4,module:2,title:"Zones, not perfect lines",duration:"15 min",summary:"Related reactions may sit near one another without sharing an exact price. A zone makes room for that variation; its width should be defensible from the visible reactions.",outcome:"Explain why boundaries include some reactions and exclude others without claiming one exact answer always exists.",chart:"L04-A-01-clean.png",alt:"Illustrative lower reactions with wick and body variation, before boundaries are drawn.",prompt:"What evidence would help you defend the width of an area?",instructions:"Look across related reactions. Consider what a very narrow or very broad boundary would include or leave out.",cue:"Use a consistent convention and explain the trade-off. Precision is not the same as certainty.",quiz:{q:"Which statement best describes a zone boundary?",options:["There is one exact, universally correct price.","A defensible area accounts for relevant reactions and has an explainable width.","Always draw the same fixed number of ticks around a wick."],correct:1,feedback:"Boundary conventions can vary. What matters here is a consistent, evidence-based explanation."}},
     {id:5,module:2,title:"Choose the right areas and reduce clutter",duration:"18–22 min",summary:"Keep areas that help explain the chart and remove redundant or low-relevance marks. ChartLab 1, Clear W, practises that judgement on a controlled illustrative chart.",outcome:"Select a small number of relevant areas and explain what extra marks add—or fail to add.",chart:"CL01-01-clean.png",alt:"Clear W: illustrative W-like sequence with two related lower reactions and an upper reaction between them; no zones are drawn.",prompt:"Which areas would you keep to help explain the structure, and which would you leave unmarked?",instructions:"Make your first selection before comparing it with any reference. There is no need to mark every plausible area.",cue:"ChartLab reference overlays are not included in this preview. Explain what your selection clarifies and leaves out.",lab:"Clear W",labNo:1,quiz:{q:"When selecting areas for a readable chart, what is the best guide?",options:["Keep every plausible area so nothing is missed.","Keep a few areas relevant to the current question and explain the omissions.","Keep only the area closest to the latest candle."],correct:1,feedback:"Editing is part of analysis. Relevance to the current question matters more than filling the chart."}},
@@ -31,7 +31,7 @@
     {id:17,module:6,title:"Case study: when the thesis fails, or you stay out",duration:"18–24 min",summary:"This lesson will examine an authentic failed thesis, losing trade or stand-aside decision. It will distinguish thesis failure from process failure.",outcome:"When authentic evidence is added, explain what changed and how process quality differs from outcome.",prompt:"What is the difference between a thesis failing and the decision process being poor?",instructions:"This is a preparation reflection, not a substitute for the authentic case. The evidence and review sequence remain pending.",cue:"The real example must be supplied before this can be reviewed as substantive course content.",pending:{title:"Authentic failed-thesis or no-trade example pending",copy:"A genuine instructor example and candid review have not been supplied. The prototype will not fabricate a loss, missed trade, stand-aside decision or hindsight explanation."}},
     {id:18,module:6,title:"Final chart review and knowledge check",duration:"30–35 min",summary:"Bring the method together on an unfamiliar chart: describe structure, select and defend zones, interpret current behaviour, build conditional scenarios and state what would change your view.",outcome:"Present a coherent chart-reading rationale, allow uncertainty, and separate reasoning quality from eventual price outcome.",prompt:"On an unfamiliar chart, what structure do you see, which areas can you defend, and what would make you change your view?",instructions:"The full unseen-chart assessment, score policy, retry and gated reference reveal are not implemented in this preview.",cue:"This lesson is an assessment shell only. No answer key or final reference is shown here.",assessment:true}
   ];
-  const emptyState = () => ({active:1,statuses:{},responses:{},attempts:{},notes:{},quizChoices:{},quizSubmitted:{}});
+  const emptyState = () => ({active:1,statuses:{},responses:{},attempts:{},notes:{},quizChoices:{},quizSubmitted:{},chartStages:{}});
   let saved = loadState();
   let activeId = Number(saved.active) || 1;
   let activeTab = "lesson";
@@ -112,6 +112,53 @@
       feedback.textContent=(correct?"That fits the lesson. ":"Review the distinction. ")+l.quiz.feedback;root.append(feedback);
     }
   }
+  function chartStageIndex(l){
+    const stages=l.chartStages;
+    if(!Array.isArray(stages)||!stages.length)return 0;
+    const value=Number((saved.chartStages||{})[l.id]);
+    return Number.isFinite(value)?Math.max(0,Math.min(stages.length-1,value)):0;
+  }
+  function updateChartStageControls(l){
+    const controls=$("sr-chart-controls"),stages=l.chartStages;
+    if(!controls)return;
+    if(!Array.isArray(stages)||stages.length<2){controls.hidden=true;return}
+    controls.hidden=false;
+    const index=chartStageIndex(l),attempted=!!saved.attempts[l.id]||!!((saved.responses[l.id]||"").trim());
+    const previous=$("sr-chart-prev"),next=$("sr-chart-next");
+    previous.disabled=index===0;
+    next.disabled=index===stages.length-1||(index===0&&!attempted);
+    next.textContent=index===stages.length-1?"End of sequence":"Reveal next view →";
+    $("sr-chart-stage-count").textContent="View "+(index+1)+" of "+stages.length;
+    $("sr-chart-stage-status").textContent=stages[index].label;
+    $("sr-chart-reveal-guidance").textContent=index===0&&!attempted
+      ?"Write your first read below or tick “I have made an attempt” before revealing the next view."
+      :index===stages.length-1
+        ?"You have reached the end of this sequence. You can revisit earlier views to compare what changed."
+        :"Compare the visible evidence with your first read before moving on.";
+  }
+  function renderChart(l){
+    const figure=$("sr-chart-figure"),img=$("sr-chart-image"),fallback=$("sr-chart-fallback"),controls=$("sr-chart-controls");
+    const stages=l.chartStages,stage=Array.isArray(stages)&&stages.length?stages[chartStageIndex(l)]:null;
+    if(!l.chart){figure.hidden=true;img.removeAttribute("src");controls.hidden=true;return}
+    figure.hidden=false;img.hidden=false;fallback.hidden=true;
+    img.alt=stage?stage.alt:l.alt;
+    img.onerror=()=>{img.hidden=true;fallback.hidden=false};
+    img.onload=()=>{img.hidden=false;fallback.hidden=true};
+    img.src=chartRoot+(stage?stage.file:l.chart);
+    $("sr-chart-label").textContent=stage?stage.label:(l.lab?"ChartLab "+l.labNo+" · "+l.lab:"Illustrative chart");
+    $("sr-chart-caption").textContent="Illustrative chart — not historical market data. "+(stage?stage.caption:"Use the visible chart as evidence for the prompt; avoid treating it as a prediction.");
+    updateChartStageControls(l);
+  }
+  function moveChartStage(direction){
+    const l=lessonFor(activeId),stages=l.chartStages;
+    if(!Array.isArray(stages)||!stages.length)return;
+    const index=chartStageIndex(l),attempted=!!saved.attempts[l.id]||!!((saved.responses[l.id]||"").trim());
+    if(direction>0&&index===0&&!attempted)return;
+    saved.chartStages=saved.chartStages||{};
+    saved.chartStages[l.id]=Math.max(0,Math.min(stages.length-1,index+direction));
+    saveState();renderChart(l);
+  }
+
   function renderLesson(){
     const l=lessonFor(activeId),m=moduleFor(l.module),state=statusOf(l.id);
     $("sr-lesson-number").textContent="LESSON "+String(l.id).padStart(2,"0")+" / 18";$("sr-lesson-module").textContent=m.name.toUpperCase();
@@ -120,9 +167,7 @@
     const tags=[l.duration+" · estimated"];if(l.lab)tags.push("ChartLab "+l.labNo+" · "+l.lab);if(l.pending)tags.push("Authentic material pending");if(l.assessment)tags.push("Assessment shell only");
     $("sr-lesson-tags").innerHTML=tags.map(t=>'<span class="sr-room-tag'+(t.startsWith("ChartLab")?" is-lab":"")+'">'+t+'</span>').join("");
     const pending=$("sr-pending-material");pending.hidden=!l.pending;if(l.pending){$("sr-pending-title").textContent=l.pending.title;$("sr-pending-copy").textContent=l.pending.copy}
-    const figure=$("sr-chart-figure"),img=$("sr-chart-image"),fallback=$("sr-chart-fallback");
-    if(l.chart){figure.hidden=false;img.hidden=false;fallback.hidden=true;img.alt=l.alt;img.src=chartRoot+l.chart;$("sr-chart-label").textContent=l.lab?"ChartLab "+l.labNo+" · "+l.lab:"Illustrative chart";$("sr-chart-caption").textContent="Illustrative chart — not historical market data. Clean state only; reference overlays omitted.";img.onerror=()=>{img.hidden=true;fallback.hidden=false}}
-    else{figure.hidden=true;img.removeAttribute("src")}
+    renderChart(l);
     $("sr-practice-prompt").textContent=l.prompt;$("sr-practice-instructions").textContent=l.instructions;$("sr-practice-cue").textContent=l.cue;
     $("sr-practice-response").value=saved.responses[l.id]||"";$("sr-attempt-made").checked=!!saved.attempts[l.id];$("sr-response-save-state").textContent="Saved in this browser only";
     $("sr-lesson-notes").value=saved.notes[l.id]||"";$("sr-notes-save-state").textContent="Saved in this browser only";
@@ -137,10 +182,12 @@
   $("sr-previous-button").addEventListener("click",()=>{if(activeId>1)selectLesson(activeId-1,true)});
   $("sr-next-button").addEventListener("click",()=>{if(activeId<18)selectLesson(activeId+1,true);else $("sr-room-top").scrollIntoView({behavior:"smooth",block:"start"})});
   $("sr-complete-button").addEventListener("click",()=>{saved.statuses[activeId]=statusOf(activeId)==="complete"?"in-progress":"complete";saveState();renderLesson()});
+  $("sr-chart-prev").addEventListener("click",()=>moveChartStage(-1));
+  $("sr-chart-next").addEventListener("click",()=>moveChartStage(1));
   document.querySelectorAll("[data-sr-tab]").forEach(btn=>btn.addEventListener("click",()=>setTab(btn.dataset.srTab)));
   $("sr-lesson-search").addEventListener("input",renderOutline);$("sr-module-filter").addEventListener("change",renderOutline);$("sr-status-filter").addEventListener("change",renderOutline);
-  $("sr-practice-response").addEventListener("input",()=>{saved.responses[activeId]=$("sr-practice-response").value;saveState()});
-  $("sr-attempt-made").addEventListener("change",()=>{saved.attempts[activeId]=$("sr-attempt-made").checked;saveState()});
+  $("sr-practice-response").addEventListener("input",()=>{saved.responses[activeId]=$("sr-practice-response").value;saveState();updateChartStageControls(lessonFor(activeId))});
+  $("sr-attempt-made").addEventListener("change",()=>{saved.attempts[activeId]=$("sr-attempt-made").checked;saveState();updateChartStageControls(lessonFor(activeId))});
   $("sr-lesson-notes").addEventListener("input",()=>{saved.notes[activeId]=$("sr-lesson-notes").value;saveState()});
   $("sr-clear-notes").addEventListener("click",()=>{if(!confirm("Clear notes for this lesson from this browser?"))return;delete saved.notes[activeId];saveState();$("sr-lesson-notes").value="";$("sr-notes-save-state").textContent="Notes cleared in this browser."});
   $("sr-module-filter").insertAdjacentHTML("beforeend",modules.map(m=>'<option value="'+m.id+'">'+m.id+". "+m.name+'</option>').join(""));
