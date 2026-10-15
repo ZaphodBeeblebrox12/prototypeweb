@@ -1,7 +1,7 @@
 workstream,status,blocking_dependency,release_gate,second_pass_register
 Curriculum and lesson scripts,Drafted and assembled,Editorial consistency pass,One canonical reviewed source per lesson,SP-01 — cross-course consistency deferred until whole-course second pass
 Student workbook,Drafted v1,Cross-check worksheets against final scripts,Learners can use each worksheet without extra instructions,SP-02 — align fields to canonical scripts in second pass
-Controlled chart assets,123 states / 49 synthetic datasets committed; prior 242 renders hash-verified,Instructional review and mobile QA; checksum verification of five new Lesson 13 payloads,Every state approved and mapped to the lesson sequence,"SP-03, SP-04, SP-05, SP-14 — visual/data/sequence/metadata review deferred"
+Controlled chart assets,123 PNG + 123 SVG renders / 49 synthetic datasets committed; integrity verified,Visual/instructional review and mobile QA,Every state approved and mapped to the lesson sequence,"SP-03, SP-04, SP-05, SP-14 — visual/data/sequence/metadata review deferred"
 Lesson 9 authentic micro-case,Blocked,Instructor's real pre-interaction chart and original rationale,Authenticity and reveal timing verified,SP-06 — waiting for user-provided authentic chart/rationale
 Lesson 16 real trade case,Blocked,Instructor's real chart/entry/risk/management/exit record,Chronology supported by actual records; reconstruction labelled,SP-07 — waiting for user-provided authentic trade record
 Lesson 17 failed thesis or no-trade case,Blocked,Instructor's real example and candid review,Original thesis/invalidation and changing evidence supported by records,SP-08 — waiting for user-provided authentic example

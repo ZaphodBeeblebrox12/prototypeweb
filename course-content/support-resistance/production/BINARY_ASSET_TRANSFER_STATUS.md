@@ -1,6 +1,6 @@
 # Binary Asset Transfer Status
 
-**Status: committed to `my-new-branch`. Inventory and path coverage are verified; all 48 CSV datasets match the source content after normalizing Git's LF line endings. Full remote-byte SHA-256 verification of all 242 rendered files was completed on 2026-10-15; all matched their recorded checksum entries. Full visual/instructional approval remains outstanding.**
+**Status: committed to `my-new-branch`. Inventory and path coverage are verified; all 49 datasets are present. Full remote-byte SHA-256 verification of the 242 original rendered files passed on 2026-10-15. The four new Lesson 13 render files and new dataset are verified against the checksum inventory, including both PNG replacements after commit `c9003d2829ae6683484782e1a94af01a4722f715`. Full visual/instructional approval remains outstanding.**
 
 ## Verified Git record
 
@@ -12,9 +12,9 @@
 
 The upload commit added 292 files to Git. The current branch tree contains the expected inventory:
 
-- 121 PNG chart renders.
-- 121 SVG chart renders.
-- 48 OHLC/source CSV datasets under `data/`.
+- 123 PNG chart renders.
+- 123 SVG chart renders.
+- 49 OHLC/source CSV datasets under `data/`.
 - 2 existing CSV manifests.
 - `source/build_chart_assets.py`.
 - `SHA256SUMS.txt`.
@@ -23,9 +23,9 @@ The upload commit added 292 files to Git. The current branch tree contains the e
 
 The local overlay archive `tradethesis_sr_chart_assets_repo_overlay_v1.zip` is 4,528,218 bytes, SHA-256 `17b81228ec7aa976c859d75d6c3a7050e80b7088eae169eda4f017d4cb40ca8b`. Its 291 checksum entries (121 PNG + 121 SVG + 48 data CSVs + the generator) were checked against the archive contents; all matched. All 291 unique paths in that inventory exist in the Git tree, with no missing or duplicate inventory paths.
 
-All 48 committed CSV Git blobs were compared against the local source using Git's expected CRLF-to-LF line-ending normalization; all 48 matched. The original checksum inventory records SHA-256 hashes of the extracted source files, where the CSVs use CRLF. Git stores normalized LF text blobs, so comparing the recorded CSV hashes directly to LF-formatted Git blob bytes will produce a different hash even when the data content matches. The checksum inventory is intentionally left unchanged because its hashes correctly describe the source overlay files.
+The 48 original committed CSV Git blobs were compared against the local source using Git's expected CRLF-to-LF line-ending normalization; all 48 matched. The new Lesson 13 CSV matched its recorded SHA-256 entry exactly. The original checksum inventory records SHA-256 hashes of the extracted source files, where the original CSVs use CRLF. Git stores normalized LF text blobs, so comparing those recorded hashes directly to LF-formatted Git blob bytes can produce a different hash even when the data content matches. The checksum inventory remains unchanged because its hashes correctly describe the source payloads.
 
-The full remote-byte SHA-256 comparison of all 242 rendered chart files (121 PNG and 121 SVG) was completed on 2026-10-15. Every remote file matched its corresponding entry in `SHA256SUMS.txt`; no byte mismatches were found. This supersedes the earlier representative-only verification note.
+The full remote-byte SHA-256 comparison of the 242 original rendered chart files (121 PNG and 121 SVG) was completed on 2026-10-15. Every file matched its entry in `SHA256SUMS.txt`. The four newly added Lesson 13 render files and dataset were checked against their entries. After the PNG replacement commit `c9003d2829ae6683484782e1a94af01a4722f715` was pushed, the user ran `certutil -hashfile ... SHA256` on both PNGs and confirmed exact matches for both recorded hashes. The two SVGs and CSV had already matched their recorded hashes. There are now 246 rendered files (123 PNG and 123 SVG) and 49 datasets. No checksum inventory edit was needed.
 
 The CSV values are synthetic illustrative values, not historical market data. File presence and checksum verification do not constitute visual, instructional, or learner-facing approval.
 
