@@ -137,3 +137,12 @@
  .sr-room-teaching-body p{font-size:12px;line-height:1.7}
  .sr-room-teaching-body ul{font-size:11px;padding-left:18px}
 }
+
+/* Transfer from the worked chart to the learner's own journal */
+.sr-room-field-note{margin-top:14px;padding-top:13px;border-top:1px solid #e8dfd0}
+.sr-room-field-note[hidden]{display:none!important}
+.sr-room-field-note-label{color:#53624e;font-size:9px;font-weight:850;letter-spacing:.1em;text-transform:uppercase}
+.sr-room-field-note p{margin:6px 0;color:var(--text);font-size:12px;line-height:1.65}
+.sr-room-field-note pre{white-space:pre-wrap;overflow-wrap:anywhere;margin:9px 0 5px;padding:11px;border:1px solid #e5dfd3;border-radius:8px;background:#fff;color:var(--ink);font:inherit;font-size:12px;line-height:1.7}
+.sr-room-field-note .sr-room-field-note-help{margin-bottom:0;color:var(--muted);font-size:10px}
+@media(max-width:640px){.sr-room-field-note pre{font-size:11px}}

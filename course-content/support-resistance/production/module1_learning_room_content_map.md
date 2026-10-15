@@ -77,3 +77,13 @@ All charts in these two lessons are synthetic illustrative OHLC sequences. They 
 - Chart asset descriptions: `chart_assets/asset_manifest.csv`
 - Internal model answers and review notes: `chart_assets/answer_key_and_review_notes.md`
 - Teaching-depth standard: `production/MODULE_DEPTH_WORKING_NOTES.md`
+
+
+## Transfer pass — field notes
+
+The final worked view of each lesson now ends with a specific journal prompt and sentence frame. This is the transfer step after the learner has compared their attempt with a model answer:
+
+- **Lesson 1:** record one visible prior reaction, the limited interpretation it supports, and one thing it cannot guarantee. The frame prompts the learner to reassess if price returns rather than treating the original area as a promise.
+- **Lesson 2:** describe the earlier structure, identify what new evidence appeared, explain why the reading changed, and preserve a reasonable alternative. The frame explicitly discourages hindsight.
+
+The field-note panel appears only on the final reference view of each lesson. It directs students to the existing **My notes** tab; it does not claim their notes are sent to an instructor or stored in a member account.
