@@ -291,11 +291,11 @@
       "canonical_script_path": "scripts/lessons09-12_production_scripts.md",
       "learner_goal": "Distinguish brief crossings from more sustained movement beyond a zone.",
       "activity_id": "L12",
-      "interaction_pattern": "Show first crossing → pause and request current read → reveal return or follow-through → independent practice.",
-      "submission_requirement": "Each reveal allows updated judgement, including “not enough evidence yet.”",
-      "special_rules": "No hindsight in the initial view.",
+      "interaction_pattern": "Read concept and define a prior zone → record confirmation convention and its trade-off → reveal the September 2016 NIFTY 50 case in stages → compare provisional view with later contradictory evidence → complete field note.",
+      "submission_requirement": "Before the final reveal, record observation, provisional interpretation, alternative, confirmation rule, rule cost, and evidence that would weaken the view.",
+      "special_rules": "A close or multi-close filter is a convention, not a guarantee; preserve the optional FX research note's limits; no universal volume rule; historical chart reference is provisional pending user-owned or rights-cleared visual replacement.",
       "dependencies": [],
-      "status": "Draft specification; map against live UI in implementation pass"
+      "status": "Expanded script draft merged; live UI and source-asset mapping pending"
     },
     {
       "lesson_id": "L13",
@@ -305,11 +305,11 @@
       "canonical_script_path": "scripts/lessons13-17_production_scripts.md",
       "learner_goal": "Treat return tests and role reversal as possibilities, not requirements.",
       "activity_id": "L13",
-      "interaction_pattern": "Reveal break → return to former area → compare hold and failure cases → write conditions that would change view.",
-      "submission_requirement": "Learner compares a holding and failed return rather than memorising one rule.",
-      "special_rules": "A retest is not mandatory; role reversal is not guaranteed.",
+      "interaction_pattern": "Reveal break → pause for initial interpretation → reveal return to the original area → compare hold-like and failure-like responses → record before/after timeline → compare with worked explanation.",
+      "submission_requirement": "Preserve an initial note before later candles; record boundary rationale, break, return, response and what changes the interpretation. 'Inconclusive so far' remains valid.",
+      "special_rules": "A retest is not mandatory; role reversal is not guaranteed; do not move the original zone without recording a reason; historical chart reference is provisional pending user-owned or rights-cleared visual replacement.",
       "dependencies": [],
-      "status": "Draft specification; map against live UI in implementation pass"
+      "status": "Expanded script draft merged; live UI and source-asset mapping pending"
     },
     {
       "lesson_id": "L14",
@@ -319,11 +319,11 @@
       "canonical_script_path": "scripts/lessons13-17_production_scripts.md",
       "learner_goal": "Analyse a failed break without hindsight and consider alternate paths.",
       "activity_id": "L14",
-      "interaction_pattern": "Observe pre-break chart → reveal first move beyond → reveal return through → compare with pullback-holds example → ChartLab Wider Neckline.",
-      "submission_requirement": "Only planned ChartLab #3: Wider Neckline. Preserve the “before” state without the later break visible.",
-      "special_rules": "Keep alternate outcomes visible in the lesson.",
+      "interaction_pattern": "Observe pre-break context → reveal the move beyond the prior boundary → capture a provisional thesis → reveal the 2 February 2018 contradiction → compare with a pullback-that-holds sequence → field-note review → ChartLab Wider Neckline.",
+      "submission_requirement": "Record original thesis and evidence available then before revealing contradictory candles; after reveal, identify contradiction, revised reading and process/outcome distinction. Keep ChartLab submissions gated until submitted.",
+      "special_rules": "Use 'failed breakout' only after contradictory evidence; failure is not an automatic reverse signal; preserve Wider Neckline as ChartLab 3 and add no ChartLab; historical chart reference is provisional pending user-owned or rights-cleared visual replacement.",
       "dependencies": [],
-      "status": "Draft specification; map against live UI in implementation pass"
+      "status": "Expanded script draft merged; live UI and source-asset mapping pending"
     },
     {
       "lesson_id": "L15",
@@ -997,7 +997,8 @@
           "dataset_id": "L04_A_lower_reactions_wick_body_variation",
           "state": "too-narrow boundary comparison",
           "png_path": "chart_assets/charts/L04-A-03-too-narrow.png",
-          "editable_svg_path": "chart_assets/charts/L04-A-03-too-narrow.svg",          "source_csv_path": "chart_assets/data/L04_A_lower_reactions_wick_body_variation.csv",
+          "editable_svg_path": "chart_assets/charts/L04-A-03-too-narrow.svg",
+          "source_csv_path": "chart_assets/data/L04_A_lower_reactions_wick_body_variation.csv",
           "visible_bars": 22,
           "source_type": "synthetic illustrative OHLC",
           "price_context": "fictional numerical values; not historical prices",
@@ -1996,7 +1997,8 @@
           "source_csv_path": "chart_assets/data/L10_quick-push-no-follow-through.csv",
           "visible_bars": 7,
           "source_type": "synthetic illustrative OHLC",
-          "price_context": "fictional numerical values; not historical prices",          "alt_text": "Reference view for the practice sequence labels the intended evidence category as inconclusive / mixed, while stating that it is not a forecast.",
+          "price_context": "fictional numerical values; not historical prices",
+          "alt_text": "Reference view for the practice sequence labels the intended evidence category as inconclusive / mixed, while stating that it is not a forecast.",
           "release_gate": "after_required_submission",
           "audience_when_released": "learner_after_submission",
           "notes": ""
@@ -2995,7 +2997,8 @@
     },
     {
       "asset_id": "L01-B-04-resistance-label",
-      "sequence_order": 11,      "dataset_id": "L01_B_repeated_upper_reaction",
+      "sequence_order": 11,
+      "dataset_id": "L01_B_repeated_upper_reaction",
       "state": "resistance area label",
       "png_path": "chart_assets/charts/L01-B-04-resistance-label.png",
       "editable_svg_path": "chart_assets/charts/L01-B-04-resistance-label.svg",
@@ -3994,7 +3997,8 @@
       "source_csv_path": "chart_assets/data/CL02_uneven_lows.csv",
       "visible_bars": 20,
       "source_type": "synthetic illustrative OHLC",
-      "price_context": "fictional numerical values; not historical prices",      "alt_text": "Uneven Lows chart with both support and resistance reference zones visible after the learner submits both drawings.",
+      "price_context": "fictional numerical values; not historical prices",
+      "alt_text": "Uneven Lows chart with both support and resistance reference zones visible after the learner submits both drawings.",
       "release_gate": "after_required_submission",
       "audience_when_released": "learner_after_submission",
       "notes": ""

@@ -709,7 +709,7 @@ Accept any answer that names the specific changed candle sequence or price behav
 
 **Document role:** Student-facing lesson and production handoff  
 **Curriculum position:** Module 5 — Breakouts and Failed Attempts  
-**Estimated duration:** 17–19 minutes  
+**Estimated duration:** 25–30 minutes  
 **Format:** Observe the crossing → distinguish observation from thesis → progressive sequences → conditional response practice  
 **Asset rule:** Use controlled sequences. Do not launch ChartLab Study 3 here; *Wider Neckline* remains in Lesson 14 after students have studied retests and failed breakouts.
 
@@ -896,6 +896,39 @@ The learner completes each sequence with the future candles hidden until their c
 **Bridge:**
 
 > Next, we will explore what may happen when price returns to a broken area. Sometimes the old role appears to reverse; sometimes price re-enters the previous range. Neither outcome should be assumed in advance.
+
+### Extended reading: confirmation is a convention, not certainty
+
+**A close beyond a line is evidence. It is not a verdict.**
+
+Before interpreting a breakout, define the area using only information visible before the move. Keep that boundary stable while later candles develop. If you redraw it, record the change rather than pretending the revised boundary was always there.
+
+An intraday penetration, a close beyond the zone, time spent outside it, volume and follow-through are different kinds of evidence. A wick beyond the band followed by a close back inside shows that price traded beyond the area but the session did not finish beyond the selected edge. A close outside gives a different observation, but a close just beyond the edge can still fail. A distance filter may avoid marginal crossings but delay recognition; a time filter such as multiple closes can make a rule consistent but cannot make the move invulnerable. Volume may add context when the data is appropriate and comparable. Practitioners differ on how much weight to give it; neither a volume surge nor its absence is a universal verdict.
+
+State the timeframe and convention. A daily close beyond a prior range boundary is not the same observation as a one-minute wick. A local break may also remain inside a larger range. You do not need a universal confirmation formula; you need a rule you can explain and an honest account of its trade-off.
+
+The important distinction is between **using a filter** and **believing the filter removes uncertainty**. A filter can reject some ambiguous cases while admitting others that later fail. It is a decision convention, not a promise about the next candle.
+
+### Worked historical case: NIFTY 50 daily bars, September 2016
+
+**Temporary internal teaching reference:** the candidate band is approximately **8,810–8,850 index points**, selected around prior upper-area activity at the end of August and start of September. It is an instructional analytical choice, not an official level. Replace the associated chart with user-owned or rights-cleared material before publication.
+
+At the first reveal, show price approaching the band and hide subsequent candles. Ask the learner what would count as a break on the daily timeframe, which confirmation convention they would use, and what that convention might miss.
+
+Then reveal the move outside the band: the daily close was **8,943 on 6 September**, **8,917.95 on 7 September**, and **8,952.50 on 8 September**. This is more evidence of a move beyond the selected area than a single intraday wick. Ask the learner to record a provisional view and the evidence that would weaken it.
+
+Finally reveal the **9 September** close of **8,866.70**, still above the chosen band, and the **12 September** close of **8,715.60**, back below it. In this selected window, the move failed to sustain itself above the area. The later outcome does not prove that the earlier filter was irrational; it shows that a consistent filter can still admit a move that later fails.
+
+### Field note before the worked explanation
+
+Before revealing the final stage, record:
+1. **Boundary:** why this area was worth watching before the break.
+2. **Rule:** which evidence you required—penetration, close, distance, time outside, volume, or a combination.
+3. **First read:** what you believed after the early closes, using only the candles then visible.
+4. **Cost of the rule:** what delay or missed move your filter could create.
+5. **Revision condition:** what future evidence would weaken your interpretation.
+
+Do not score learners for guessing the ending. Score accurate observation, a clearly stated convention, and a meaningful revision condition.
 
 ## 4. Assessment and answer-key policy
 
