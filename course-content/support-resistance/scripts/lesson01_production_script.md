@@ -3,7 +3,7 @@
 
 **Document role:** Production-ready content brief for the first student-facing lesson  
 **Curriculum authority:** `tradethesis_support_resistance_curriculum_blueprint.md`  
-**Status:** Draft for curriculum review; no website or repository changes authorised  
+**Status:** Draft for curriculum review; the student-facing Lesson 1 teaching sequence is now integrated into the learning-room preview as a staged subset. See `production/module1_learning_room_content_map.md`; this full script remains the production source for further editorial work.  
 **Planned duration:** 12–15 minutes  
 **Learner level:** Beginner; knows how to read a basic candlestick chart but has not studied support/resistance  
 **Lesson format:** Observe → name → reveal → test a counterexample → practise → retain

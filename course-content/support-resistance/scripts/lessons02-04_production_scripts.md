@@ -4,7 +4,7 @@
 **Document role:** Production-ready content brief for Lessons 2, 3 and 4  
 **Curriculum authority:** `tradethesis_support_resistance_curriculum_blueprint.md`  
 **Preceding lesson:** Lesson 01 — What Support and Resistance Actually Tell You  
-**Status:** Draft for review; no website code or repository changes authorised  
+**Status:** Draft for review; Lesson 2's student-facing teaching sequence is now integrated into the learning-room preview as a staged subset. Lessons 3–4 remain separate production work. See `production/module1_learning_room_content_map.md` for the Lesson 2 integration map.  
 **Intended learner:** Beginner who can read a basic candlestick chart  
 **Production principle:** Let students observe and attempt an interpretation before revealing the explanation. Teach only the skill required for the current lesson.
 
