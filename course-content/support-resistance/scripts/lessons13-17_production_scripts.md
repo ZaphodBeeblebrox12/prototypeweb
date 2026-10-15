@@ -25,7 +25,7 @@ This pack continues the approved 18-lesson curriculum. It assumes Lessons 1–12
 
 Teach students to understand a return to a broken zone as a possible event, not a required step. Explain why former resistance may later behave as support, or former support as resistance, while emphasising that the role can fail.
 
-**Estimated duration:** 15–18 minutes  
+**Estimated duration:** 25–30 minutes  
 **Prerequisites:** Lessons 1–12  
 **Chart type:** Controlled historical or purpose-built examples, no indicators needed  
 **Personal charts:** Not required in this lesson  
@@ -114,6 +114,40 @@ Present two small, similarly scaled chart excerpts:
 >
 > Finally, do not assume that every breakout must return to its origin. Sometimes price continues without a retest. Missing that move is not a reason to chase it.
 
+## Expanded reading and worked historical case
+
+**A retest is not confirmation. It is the next test of a claim.**
+
+The word *retest* describes a return towards an area that price previously crossed. It does not tell us whether the old area is holding in its new role. Separate three events in your notes: the **break**, the **return**, and the **response after the return**.
+
+A return may touch the edge, enter part of the band, travel through it or stop just short. None of these observations alone settles the outcome. If price stays on the new side and later moves away, a role-reversal interpretation becomes more plausible in that sequence. If price crosses back into the old range and cannot reclaim the area, the interpretation weakens. If the candles overlap around the boundary, “inconclusive so far” may be the best description.
+
+Do not redraw the original zone just to make the return look neat after you have seen it. If new evidence leads you to revise a boundary, record when and why. The analyst's job is to make a defensible judgement with the information available at each stage—not to produce a perfect-looking chart after the fact.
+
+Also keep the possibility that no return occurs. A breakout does not owe the analyst a tidy retest. Missing a move because it never returned is not a reason to chase it, and the absence of a retest does not invalidate every break.
+
+### Worked historical case: NIFTY 50 daily bars, August 2014
+
+**Temporary internal teaching reference:** the candidate former-resistance zone is approximately **7,795–7,865 index points**, selected around prior upper-area activity. These are chosen teaching boundaries, not official levels. Replace the associated chart with user-owned or rights-cleared material before publication.
+
+On **18 August 2014**, the daily close was **7,874.25**, above the selected band. Hide subsequent candles and ask whether the break alone proves the area has changed roles. Then reveal **20 August**: the session's low was **7,864.05** and its close was **7,875.30**. The low reached just inside the selected band while the close finished above it. In the following selected window, price stayed above the area and moved higher.
+
+This sequence is consistent with the old area remaining relevant from above during this window. It does not establish that the band caused the rally or must hold on another visit. Another defensible boundary could lead to a slightly different description, so explain the boundary rather than reward pixel-perfect matching.
+
+### The comparison that matters
+
+Compare this hold-like sequence with a return that crosses through the original zone and closes inside the prior range. Ask what changed in the **response after the return**. Both sequences can be called returns or retests; later evidence distinguishes a holding interpretation from a weakening one.
+
+### Field note: preserve the revision, not just the conclusion
+
+Require a four-stage timeline:
+1. **Before the break:** why the area was selected.
+2. **After the break:** what changed and what remained unproven.
+3. **At the return:** whether price touched, entered or crossed the area, including the close.
+4. **After later candles:** what strengthened or weakened the interpretation.
+
+Then ask: “Which sentence in your first note would you keep, and which would you revise?” This turns notes into a record of reasoning rather than a retrospective explanation.
+
 ## Guided practice
 
 **Task:** On a new chart, students must:
@@ -185,7 +219,7 @@ Correct: Price moving back through the former resistance area and failing to hol
 
 Teach students to recognise when price moves beyond a zone but fails to sustain that move, and to revise their interpretation without pretending the failure was obvious beforehand.
 
-**Estimated duration:** 18–22 minutes  
+**Estimated duration:** 30–38 minutes  
 **Prerequisites:** Lessons 9–13  
 **ChartLab:** Third and final planned study, **Wider Neckline**  
 **Personal charts:** Not yet a full case study; a brief instructor chart may be used only if the controlled exercise is complete and the historical sequence is clearly documented.
@@ -276,6 +310,43 @@ Use a second sequence in which price pulls back towards the zone but remains bey
 > This is why we planned alternatives before the outcome. We do not need to know which scenario will happen to define what evidence would support or weaken each one.
 >
 > The lesson is not “fade every breakout.” That would replace one rigid rule with another. The lesson is to observe, update, and avoid defending a thesis after its supporting evidence has disappeared.
+
+## Expanded reading: a failed move is evidence, not an instruction
+
+**A failed breakout can tell you more than the breakout attempt—but it is not an automatic reverse signal.**
+
+A failed-breakout interpretation depends on later evidence. At the first crossing, price has moved beyond the area; do not label the attempt a failure before contradictory evidence exists. If price later returns through the original boundary and cannot sustain the move outside it, the continuation thesis has weakened. That still does not establish that price must reverse strongly in the opposite direction.
+
+Use a four-part review:
+1. **Prior boundary:** what area was defensible before the attempted break? Preserve the original markings for the first comparison.
+2. **Break attempt:** what was visible then—a wick, close, distance beyond the band, or follow-through?
+3. **Contradiction:** what later behaviour challenged the continuation idea? Distinguish a return into the band from a close back inside the prior range.
+4. **After the contradiction:** did price continue into the range, recover, or remain mixed? The response affects how strongly the failure should be described.
+
+A brief return inside a zone can be inconclusive. Sustained movement back into the old range is stronger evidence against the original continuation thesis. A pullback that approaches the zone and remains beyond it is not the same sequence as a move that crosses back through and cannot reclaim the area.
+
+The opposite direction becomes an alternative worth assessing, not an automatic trade. A chart does not reveal who was trapped, whether an institution engineered the move, or why it happened. Keep claims tied to observable price behaviour.
+
+### Worked historical case: NIFTY 50 daily bars, January–February 2018
+
+**Temporary internal teaching reference:** the candidate former-resistance area is approximately **10,900–10,920 index points**, framed around the prior swing high near **10,906.85 on 19 January 2018**. It is a selected instructional boundary, not an official market level. Replace the associated chart with user-owned or rights-cleared material before publication.
+
+Reveal the sequence through **1 February** but hide **2 February**. The daily close moved above the selected area on **22 January** at **10,966.20** and remained above it through the following sessions; the close on **1 February** was **11,016.90**. Ask: “What is the strongest claim this evidence supports? What remains uncertain? What would make the continuation interpretation weaker?”
+
+Require a provisional response before continuing. Then reveal **2 February**: the session closed at **10,760.60**, back below the original band after trading as high as **11,117.35** the day before. This is material contradictory evidence for the idea that price was sustaining itself above the old boundary in this window.
+
+The lesson is not that the failure was obvious in advance, nor that a short trade was automatically justified. At the time of the earlier closes, the later move back below the band was not yet visible. Preserve the earlier reasoning, then revise it in response to new information.
+
+### Field note: the failure record
+
+Before showing the worked interpretation, record:
+- **Original thesis:** what did I think the move beyond the boundary meant?
+- **Evidence available then:** what had price done up to that point? Exclude future candles.
+- **Contradiction:** which later observation weakened the thesis?
+- **Revised reading:** what is now more plausible, and what remains uncertain?
+- **Process check:** was the initial interpretation reasonable given the evidence then available, even though the move later failed?
+
+This separates decision process from outcome. A reasonable thesis can fail; a profitable outcome can follow weak reasoning. Review the evidence and consistency of process rather than simply rewarding the final direction.
 
 ## ChartLab study 3 — Wider Neckline
 
