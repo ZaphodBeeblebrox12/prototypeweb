@@ -14,6 +14,8 @@ All charts in these two lessons are synthetic illustrative OHLC sequences. They 
 
 ## Lesson 1 — What Support and Resistance Actually Tell You
 
+**13 staged views.** The upper-side example now follows the same evidence-first order as the support example: clean chart → band → “prior reaction area” → “resistance area.”
+
 | View | Asset | Instructional purpose |
 |---|---|---|
 | 1 | `L01-A-01-clean.png` | Observe the sequence before a zone or concept label is shown. |
@@ -22,12 +24,13 @@ All charts in these two lessons are synthetic illustrative OHLC sequences. They 
 | 4 | `L01-A-04-support-label.png` | Define support as prior behaviour; distinguish it from a guarantee or complete trade signal. |
 | 5 | `L01-B-01-clean.png` | Transfer the observe-first method to the upper-side example before naming resistance. |
 | 6 | `L01-B-02-band.png` | Show variation across related upper reactions; keep boundary selection provisional. |
-| 7 | `L01-B-04-resistance-label.png` | Define resistance and compare it with support using parallel reasoning. |
-| 8 | `L01-A-05-breakdown.png` | Use the later crossing as a counterexample: new evidence changes the reading but does not erase earlier reactions. |
-| 9 | `L01-PRACTICE-A-01-clean.png` | Learner identifies evidence on a clearer practice example before the reference. |
-| 10 | `L01-PRACTICE-A-02-reference.png` | Worked reasoning: repeated visible reactions support a candidate area, not a guaranteed hold. |
-| 11 | `L01-PRACTICE-B-01-clean.png` | Learner works with weaker, less clustered evidence. |
-| 12 | `L01-PRACTICE-B-02-reference.png` | Model answer explicitly accepts an uncertain reading or a broad candidate area with limits. |
+| 7 | `L01-B-03-labelled.png` | Name the visible upper reactions descriptively before the specialist term appears. |
+| 8 | `L01-B-04-resistance-label.png` | Define resistance and compare it with support using parallel reasoning. |
+| 9 | `L01-A-05-breakdown.png` | Use the later crossing as a counterexample: new evidence changes the reading but does not erase earlier reactions. |
+| 10 | `L01-PRACTICE-A-01-clean.png` | Learner identifies evidence on a clearer practice example before the reference. |
+| 11 | `L01-PRACTICE-A-02-reference.png` | Worked reasoning: repeated visible reactions support a candidate area, not a guaranteed hold. |
+| 12 | `L01-PRACTICE-B-01-clean.png` | Learner works with weaker, less clustered evidence. |
+| 13 | `L01-PRACTICE-B-02-reference.png` | Model answer explicitly accepts an uncertain reading or a broad candidate area with limits. |
 
 ### Key learning distinctions
 
