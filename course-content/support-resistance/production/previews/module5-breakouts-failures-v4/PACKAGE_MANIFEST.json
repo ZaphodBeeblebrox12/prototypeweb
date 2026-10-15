@@ -1,0 +1,50 @@
+{
+  "package": "TradeThesis Module 5 \u2014 Breakouts & Failures",
+  "version": "v5-instructor-voice-taxonomy-retests-and-failure-depth",
+  "status": "standalone internal teaching review package; no website or canonical repository commit in this version",
+  "lesson_count": 3,
+  "lesson_durations_minutes": {
+    "12": "30\u201335",
+    "13": "38\u201345",
+    "14": "55\u201365 including Wider Neckline"
+  },
+  "estimated_guided_time_minutes": {
+    "min": 123,
+    "max": 145
+  },
+  "script_word_counts": {
+    "LESSON_12_BREAKOUT_OR_TEMPORARY_PENETRATION.md": 3643,
+    "LESSON_13_RETESTS_AND_ROLE_REVERSAL.md": 2764,
+    "LESSON_14_FAILED_BREAKOUTS_AND_ALTERNATE_OUTCOMES.md": 4994
+  },
+  "total_script_words": 11401,
+  "main_reading_words": 7722,
+  "unique_schematic_figures": 26,
+  "in_reader_figure_instances": 30,
+  "in_reader_figures_by_lesson": {
+    "12": 6,
+    "13": 8,
+    "14": 16
+  },
+  "historical_staged_chart_images": 9,
+  "source_csv_excerpts": 3,
+  "knowledge_check_questions_per_lesson": 5,
+  "field_note_prompts": 4,
+  "simple_to_complex_retest_order": [
+    "FIG19_simple_break_return_response.png",
+    "FIG20_simple_retest_outcomes.png",
+    "FIG16_retest_depth_and_closes.png",
+    "FIG05_three_retest_outcomes.png",
+    "FIG04_break_return_response.png"
+  ],
+  "stop_loss_marker_scope": "FIG21_failed_breakout_structural_stop.png appears only in Lesson 14, within hypothetical failed-breakout instruction; no stop markers on breakout/retest illustrations.",
+  "author_references": "Named author attribution is kept only in BREAKOUTS_FAILURES_AUTHOR_RESEARCH.md; it does not appear in learner-facing readings or interaction text.",
+  "preserved_chartlabs": [
+    "Clear W \u2014 Lesson 5",
+    "Uneven Lows \u2014 Lesson 8",
+    "Wider Neckline \u2014 Lesson 14"
+  ],
+  "licensing_warning": "Upstream NIFTY 50 source dataset redistribution rights are unverified. Historical excerpts/images are temporary internal teaching examples; replace with user-owned or rights-cleared charts before public distribution.",
+  "checksums": "SHA256SUMS.txt covers every file except itself and PACKAGE_MANIFEST.json.",
+  "word_count_method": "Total script words = whitespace-separated tokens in the three exported lesson Markdown files. Main reading words = whitespace-separated tokens in deep-content section titles, block text, and list items; figure alt text/captions, evidence-stage prompts, field notes, knowledge checks, objectives and instructor close are not included in main reading count."
+}
