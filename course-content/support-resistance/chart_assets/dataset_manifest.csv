@@ -40,6 +40,7 @@ L12_C_mixed_crossings,11,data/L12_C_mixed_crossings.csv,synthetic illustrative O
 L13_break_then_return,13,data/L13_break_then_return.csv,synthetic illustrative OHLC,fictional numerical values; not historical prices
 L13_role_reversal_holds,12,data/L13_role_reversal_holds.csv,synthetic illustrative OHLC,fictional numerical values; not historical prices
 L13_role_reversal_fails,12,data/L13_role_reversal_fails.csv,synthetic illustrative OHLC,fictional numerical values; not historical prices
+L13_practice_role_reversal,18,data/L13_practice_role_reversal.csv,synthetic illustrative OHLC,fictional numerical values; not historical prices
 L14_failed_breakout_sequence,16,data/L14_failed_breakout_sequence.csv,synthetic illustrative OHLC,fictional numerical values; not historical prices
 L14_pullback_holds,15,data/L14_pullback_holds.csv,synthetic illustrative OHLC,fictional numerical values; not historical prices
 CL03_wider_neckline,18,data/CL03_wider_neckline.csv,synthetic illustrative OHLC,fictional numerical values; not historical prices

@@ -669,6 +669,129 @@ draw_chart('L13-C2-fail','L13_role_reversal_fails',l13fail,'comparison outcome: 
            extra_text=[{'x':0.4,'y':105.0,'text':'A retest is not a guarantee that the old zone changes role','fontsize':8.5}],
            alt_text='Alternative illustrative return-to-area sequence moves back through former resistance and into the old range, showing that role reversal can fail.')
 
+# --- Lesson 13 independent guided practice: fresh role-reversal example ---
+l13practice = [
+    {'open':99.2,'high':100.0,'low':98.7,'close':99.6},
+    {'open':99.6,'high':100.5,'low':99.2,'close':100.1},
+    {'open':100.1,'high':100.8,'low':98.9,'close':99.2},
+    {'open':99.3,'high':101.5,'low':99.0,'close':101.2},
+    {'open':101.0,'high':102.6,'low':100.6,'close':102.3},
+    {'open':102.4,'high':102.9,'low':101.2,'close':101.7},
+    {'open':101.6,'high':104.0,'low':101.4,'close':103.8},
+    {'open':103.7,'high':105.7,'low':103.4,'close':105.2},
+    {'open':105.2,'high':105.6,'low':103.9,'close':104.4},
+    {'open':104.3,'high':106.0,'low':104.0,'close':105.6},
+    {'open':105.7,'high':106.1,'low':104.5,'close':104.9},
+    {'open':105.0,'high':107.3,'low':104.8,'close':106.8},
+    {'open':106.9,'high':108.6,'low':106.4,'close':108.3},
+    {'open':108.1,'high':109.7,'low':107.7,'close':109.2},
+    {'open':109.3,'high':109.5,'low':107.8,'close':108.1},
+    {'open':108.2,'high':108.7,'low':106.5,'close':106.8},
+    {'open':106.7,'high':107.2,'low':105.4,'close':106.0},
+    {'open':106.1,'high':107.1,'low':105.8,'close':106.6},
+]
+save_dataset('L13_practice_role_reversal', l13practice)
+draw_chart('L13-PRACTICE-01-clean', 'L13_practice_role_reversal', l13practice,
+           'fresh independent practice; annotations hidden',
+           label='Independent practice — retest and role reversal',
+           alt_text='Independent practice chart shows an illustrative rising sequence, a move beyond a prior upper reaction area, and a later return toward it. No zone, labels or outcome are revealed.')
+draw_chart('L13-PRACTICE-02-reference', 'L13_practice_role_reversal', l13practice,
+           'reference zone and sequence cues after submission',
+           bands=[{'low':104.8,'high':106.0,'label':'former resistance area','x':2}],
+           markers=[{'bar':10,'kind':'high','label':'Earlier reaction','label_offset':0.55},
+                    {'bar':17,'kind':'low','label':'Return to area','label_offset':-0.55}],
+           extra_text=[{'x':0.45,'y':112.0,'text':'Possible role reversal is a hypothesis, not a conclusion','fontsize':8.5}],
+           label='One defensible reference — reveal after submission',
+           note='POST-SUBMISSION REFERENCE', y_limits=(97.0,113.5),
+           alt_text='Post-submission reference for the independent practice: one defensible former-resistance zone is marked with the earlier reaction and later return; possible role reversal remains a hypothesis, not a conclusion.')
+# Keep generated PNG previews light while retaining a legible 1024x576 course image.
+from PIL import Image
+for asset_id in ('L13-PRACTICE-01-clean', 'L13-PRACTICE-02-reference'):
+    png_path = CHART_DIR / f'{asset_id}.png'
+    with Image.open(png_path) as rendered:
+        rendered.convert('RGB').resize((1024, 576), Image.Resampling.LANCZOS).convert(
+            'P', palette=Image.Palette.ADAPTIVE, colors=16
+        ).save(png_path, optimize=True, bits=8)
+
+
+# Use compact, deterministic vector exports for the new Lesson 13 practice pair.
+def _l13_svg_num(value):
+    return f"{value:.3f}".rstrip("0").rstrip(".")
+
+def _write_l13_compact_svg(asset_id, reference=False):
+    width, height = 1024, 576
+    left, right, top, bottom = 72.0, 992.0, 54.0, 480.0
+    ymin, ymax = (97.0, 113.5) if reference else (97.4, 111.5)
+    def sx(index):
+        return 100.0 + index * ((right - left - 56.0) / (len(l13practice) - 1))
+    def sy(price):
+        return top + (ymax - price) * (bottom - top) / (ymax - ymin)
+    title = ("One defensible reference — reveal after submission" if reference
+             else "Independent practice — retest and role reversal")
+    desc = ("Post-submission reference. A former-resistance area, earlier reaction and later return are marked; possible role reversal is a hypothesis, not a conclusion."
+            if reference else
+            "Clean independent practice. No zone or answer labels are shown. Illustrative chart — not historical market data.")
+    parts = [
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="576" viewBox="0 0 1024 576">',
+        f'<title>{title}</title>', f'<desc>{desc}</desc>',
+        '<rect width="1024" height="576" fill="#ffffff"/>',
+        f'<rect x="{_l13_svg_num(left)}" y="{_l13_svg_num(top)}" width="{_l13_svg_num(right-left)}" height="{_l13_svg_num(bottom-top)}" fill="#ffffff"/>'
+    ]
+    if reference:
+        y1, y2 = sy(106.0), sy(104.8)
+        parts.extend([
+            f'<rect x="{_l13_svg_num(left)}" y="{_l13_svg_num(y1)}" width="{_l13_svg_num(right-left)}" height="{_l13_svg_num(y2-y1)}" fill="#e7c76d" fill-opacity="0.27"/>',
+            f'<line x1="{_l13_svg_num(left)}" y1="{_l13_svg_num(y1)}" x2="{_l13_svg_num(right)}" y2="{_l13_svg_num(y1)}" stroke="#9d781b" stroke-width="1"/>',
+            f'<line x1="{_l13_svg_num(left)}" y1="{_l13_svg_num(y2)}" x2="{_l13_svg_num(right)}" y2="{_l13_svg_num(y2)}" stroke="#9d781b" stroke-width="1"/>'
+        ])
+    ticks = list(range(98, 113 if reference else 111, 2))
+    for tick in ticks:
+        y=sy(tick)
+        parts.extend([
+            f'<line x1="{_l13_svg_num(left)}" y1="{_l13_svg_num(y)}" x2="{_l13_svg_num(right)}" y2="{_l13_svg_num(y)}" stroke="#e7eaed" stroke-width="0.8"/>',
+            f'<text x="63" y="{_l13_svg_num(y+3)}" text-anchor="end" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#66727b">{tick}</text>'
+        ])
+    for idx in (0,4,9,13,17):
+        x=sx(idx)
+        parts.append(f'<line x1="{_l13_svg_num(x)}" y1="{_l13_svg_num(top)}" x2="{_l13_svg_num(x)}" y2="{_l13_svg_num(bottom)}" stroke="#f2f4f5" stroke-width="0.55"/>')
+    parts.append(f'<text x="24" y="270" text-anchor="middle" transform="rotate(-90 24 270)" font-family="DejaVu Sans, sans-serif" font-size="12" fill="#263238">Illustrative price</text>')
+    parts.append(f'<text x="{_l13_svg_num(left)}" y="30" font-family="DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#263238">{title}</text>')
+    for i,bar in enumerate(l13practice):
+        x=sx(i);open_y=sy(bar["open"]);close_y=sy(bar["close"]);high_y=sy(bar["high"]);low_y=sy(bar["low"])
+        up=bar["close"]>=bar["open"];fill="#f7fafc" if up else "#52616b"
+        parts.extend([
+            f'<line x1="{_l13_svg_num(x)}" y1="{_l13_svg_num(high_y)}" x2="{_l13_svg_num(x)}" y2="{_l13_svg_num(low_y)}" stroke="#66737d" stroke-width="1.2"/>',
+            f'<rect x="{_l13_svg_num(x-13.5)}" y="{_l13_svg_num(min(open_y,close_y))}" width="27" height="{_l13_svg_num(max(abs(open_y-close_y),2.0))}" fill="{fill}" stroke="#34495e" stroke-width="1.05"/>'
+        ])
+    if reference:
+        labelx, labely = 150.0, sy(106.35)
+        parts.extend([
+            f'<rect x="{_l13_svg_num(labelx-5)}" y="{_l13_svg_num(labely-18)}" width="177" height="23" rx="4" fill="#fff9e8" stroke="#d9c17a" stroke-width="0.7"/>',
+            f'<text x="{_l13_svg_num(labelx+4)}" y="{_l13_svg_num(labely-3)}" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#263238">former resistance area</text>',
+            f'<circle cx="{_l13_svg_num(sx(9))}" cy="{_l13_svg_num(sy(106.0))}" r="5" fill="#276a75" stroke="#ffffff" stroke-width="1"/>',
+            f'<rect x="{_l13_svg_num(sx(9)-65)}" y="{_l13_svg_num(sy(106.0)-36)}" width="130" height="22" rx="4" fill="#ffffff" stroke="#d6dde1" stroke-width="0.7"/>',
+            f'<text x="{_l13_svg_num(sx(9))}" y="{_l13_svg_num(sy(106.0)-21)}" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="700" fill="#263238">Earlier reaction</text>',
+            f'<circle cx="{_l13_svg_num(sx(16))}" cy="{_l13_svg_num(sy(105.4))}" r="5" fill="#276a75" stroke="#ffffff" stroke-width="1"/>',
+            f'<rect x="{_l13_svg_num(sx(16)-62)}" y="{_l13_svg_num(sy(105.4)+9)}" width="124" height="22" rx="4" fill="#ffffff" stroke="#d6dde1" stroke-width="0.7"/>',
+            f'<text x="{_l13_svg_num(sx(16))}" y="{_l13_svg_num(sy(105.4)+24)}" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="700" fill="#263238">Return to area</text>',
+            '<rect x="80" y="62" width="394" height="26" rx="4" fill="#ffffff" stroke="#d6dde1" stroke-width="0.7"/>',
+            '<text x="90" y="79" font-family="DejaVu Sans, sans-serif" font-size="10.5" fill="#263238">Possible role reversal is a hypothesis, not a conclusion</text>'
+        ])
+    parts.extend([
+        f'<line x1="{_l13_svg_num(left)}" y1="{_l13_svg_num(bottom)}" x2="{_l13_svg_num(right)}" y2="{_l13_svg_num(bottom)}" stroke="#d8dde1" stroke-width="0.8"/>',
+        f'<line x1="{_l13_svg_num(left)}" y1="{_l13_svg_num(top)}" x2="{_l13_svg_num(left)}" y2="{_l13_svg_num(bottom)}" stroke="#d8dde1" stroke-width="0.8"/>'
+    ])
+    for idx,label in ((0,"Earlier"),(9,"Sequence"),(17,"Later")):
+        parts.append(f'<text x="{_l13_svg_num(sx(idx))}" y="502" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#66727b">{label}</text>')
+    parts.append('<text x="512" y="548" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#66727b">Illustrative chart — not historical market data</text>')
+    if reference:
+        parts.append('<text x="992" y="548" text-anchor="end" font-family="DejaVu Sans, sans-serif" font-size="10" fill="#66727b">POST-SUBMISSION REFERENCE</text>')
+    parts.append('</svg>')
+    (CHART_DIR / f"{asset_id}.svg").write_text("\\n".join(parts) + "\\n", encoding="utf-8")
+
+_write_l13_compact_svg('L13-PRACTICE-01-clean', reference=False)
+_write_l13_compact_svg('L13-PRACTICE-02-reference', reference=True)
+
 # --- Lesson 14: failed breakouts and alternate outcomes ---
 l14a_closes = [97.8,98.4,99.2,99.7,100.5,101.0,100.6,100.1,100.4,101.2,102.2,102.8,101.9,100.7,99.8,99.3]
 l14a = bars_from_closes(l14a_closes,1401)

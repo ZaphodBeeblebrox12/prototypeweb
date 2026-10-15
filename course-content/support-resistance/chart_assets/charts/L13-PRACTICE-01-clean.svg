@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="576" viewBox="0 0 1024 576">
+<title>Independent practice — retest and role reversal</title>
+<desc>Clean independent practice. No zone or answer labels are shown. Illustrative chart — not historical market data.</desc>
+<rect width="1024" height="576" fill="#ffffff"/>
+<rect x="72" y="54" width="920" height="426" fill="#ffffff"/>
+<line x1="72" y1="461.872" x2="992" y2="461.872" stroke="#e7eaed" stroke-width="0.8"/>
+<text x="63" y="464.872" text-anchor="end" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#66727b">98</text>
+<line x1="72" y1="401.447" x2="992" y2="401.447" stroke="#e7eaed" stroke-width="0.8"/>
+<text x="63" y="404.447" text-anchor="end" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#66727b">100</text>
+<line x1="72" y1="341.021" x2="992" y2="341.021" stroke="#e7eaed" stroke-width="0.8"/>
+<text x="63" y="344.021" text-anchor="end" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#66727b">102</text>
+<line x1="72" y1="280.596" x2="992" y2="280.596" stroke="#e7eaed" stroke-width="0.8"/>
+<text x="63" y="283.596" text-anchor="end" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#66727b">104</text>
+<line x1="72" y1="220.17" x2="992" y2="220.17" stroke="#e7eaed" stroke-width="0.8"/>
+<text x="63" y="223.17" text-anchor="end" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#66727b">106</text>
+<line x1="72" y1="159.745" x2="992" y2="159.745" stroke="#e7eaed" stroke-width="0.8"/>
+<text x="63" y="162.745" text-anchor="end" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#66727b">108</text>
+<line x1="72" y1="99.319" x2="992" y2="99.319" stroke="#e7eaed" stroke-width="0.8"/>
+<text x="63" y="102.319" text-anchor="end" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#66727b">110</text>
+<line x1="100" y1="54" x2="100" y2="480" stroke="#f2f4f5" stroke-width="0.55"/>
+<line x1="303.294" y1="54" x2="303.294" y2="480" stroke="#f2f4f5" stroke-width="0.55"/>
+<line x1="557.412" y1="54" x2="557.412" y2="480" stroke="#f2f4f5" stroke-width="0.55"/>
+<line x1="760.706" y1="54" x2="760.706" y2="480" stroke="#f2f4f5" stroke-width="0.55"/>
+<line x1="964" y1="54" x2="964" y2="480" stroke="#f2f4f5" stroke-width="0.55"/>
+<text x="24" y="270" text-anchor="middle" transform="rotate(-90 24 270)" font-family="DejaVu Sans, sans-serif" font-size="12" fill="#263238">Illustrative price</text>
+<text x="72" y="30" font-family="DejaVu Sans, sans-serif" font-size="15" font-weight="700" fill="#263238">Independent practice — retest and role reversal</text>
+<line x1="100" y1="401.447" x2="100" y2="440.723" stroke="#66737d" stroke-width="1.2"/>
+<rect x="86.5" y="413.532" width="27" height="12.085" fill="#f7fafc" stroke="#34495e" stroke-width="1.05"/>
+<line x1="150.824" y1="386.34" x2="150.824" y2="425.617" stroke="#66737d" stroke-width="1.2"/>
+<rect x="137.324" y="398.426" width="27" height="15.106" fill="#f7fafc" stroke="#34495e" stroke-width="1.05"/>
+<line x1="201.647" y1="377.277" x2="201.647" y2="434.681" stroke="#66737d" stroke-width="1.2"/>
+<rect x="188.147" y="398.426" width="27" height="27.191" fill="#52616b" stroke="#34495e" stroke-width="1.05"/>
+<line x1="252.471" y1="356.128" x2="252.471" y2="431.66" stroke="#66737d" stroke-width="1.2"/>
+<rect x="238.971" y="365.191" width="27" height="57.404" fill="#f7fafc" stroke="#34495e" stroke-width="1.05"/>
+<line x1="303.294" y1="322.894" x2="303.294" y2="383.319" stroke="#66737d" stroke-width="1.2"/>
+<rect x="289.794" y="331.957" width="27" height="39.277" fill="#f7fafc" stroke="#34495e" stroke-width="1.05"/>
+<line x1="354.118" y1="313.83" x2="354.118" y2="365.191" stroke="#66737d" stroke-width="1.2"/>
+<rect x="340.618" y="328.936" width="27" height="21.149" fill="#52616b" stroke="#34495e" stroke-width="1.05"/>
+<line x1="404.941" y1="280.596" x2="404.941" y2="359.149" stroke="#66737d" stroke-width="1.2"/>
+<rect x="391.441" y="286.638" width="27" height="66.468" fill="#f7fafc" stroke="#34495e" stroke-width="1.05"/>
+<line x1="455.765" y1="229.234" x2="455.765" y2="298.723" stroke="#66737d" stroke-width="1.2"/>
+<rect x="442.265" y="244.34" width="27" height="45.319" fill="#f7fafc" stroke="#34495e" stroke-width="1.05"/>
+<line x1="506.588" y1="232.255" x2="506.588" y2="283.617" stroke="#66737d" stroke-width="1.2"/>
+<rect x="493.088" y="244.34" width="27" height="24.17" fill="#52616b" stroke="#34495e" stroke-width="1.05"/>
+<line x1="557.412" y1="220.17" x2="557.412" y2="280.596" stroke="#66737d" stroke-width="1.2"/>
+<rect x="543.912" y="232.255" width="27" height="39.277" fill="#f7fafc" stroke="#34495e" stroke-width="1.05"/>
+<line x1="608.235" y1="217.149" x2="608.235" y2="265.489" stroke="#66737d" stroke-width="1.2"/>
+<rect x="594.735" y="229.234" width="27" height="24.17" fill="#52616b" stroke="#34495e" stroke-width="1.05"/>
+<line x1="659.059" y1="180.894" x2="659.059" y2="256.426" stroke="#66737d" stroke-width="1.2"/>
+<rect x="645.559" y="196" width="27" height="54.383" fill="#f7fafc" stroke="#34495e" stroke-width="1.05"/>
+<line x1="709.882" y1="141.617" x2="709.882" y2="208.085" stroke="#66737d" stroke-width="1.2"/>
+<rect x="696.382" y="150.681" width="27" height="42.298" fill="#f7fafc" stroke="#34495e" stroke-width="1.05"/>
+<line x1="760.706" y1="108.383" x2="760.706" y2="168.809" stroke="#66737d" stroke-width="1.2"/>
+<rect x="747.206" y="123.489" width="27" height="33.234" fill="#f7fafc" stroke="#34495e" stroke-width="1.05"/>
+<line x1="811.529" y1="114.426" x2="811.529" y2="165.787" stroke="#66737d" stroke-width="1.2"/>
+<rect x="798.029" y="120.468" width="27" height="36.255" fill="#52616b" stroke="#34495e" stroke-width="1.05"/>
+<line x1="862.353" y1="138.596" x2="862.353" y2="205.064" stroke="#66737d" stroke-width="1.2"/>
+<rect x="848.853" y="153.702" width="27" height="42.298" fill="#52616b" stroke="#34495e" stroke-width="1.05"/>
+<line x1="913.176" y1="183.915" x2="913.176" y2="238.298" stroke="#66737d" stroke-width="1.2"/>
+<rect x="899.676" y="199.021" width="27" height="21.149" fill="#52616b" stroke="#34495e" stroke-width="1.05"/>
+<line x1="964" y1="186.936" x2="964" y2="226.213" stroke="#66737d" stroke-width="1.2"/>
+<rect x="950.5" y="202.043" width="27" height="15.106" fill="#f7fafc" stroke="#34495e" stroke-width="1.05"/>
+<line x1="72" y1="480" x2="992" y2="480" stroke="#d8dde1" stroke-width="0.8"/>
+<line x1="72" y1="54" x2="72" y2="480" stroke="#d8dde1" stroke-width="0.8"/>
+<text x="100" y="502" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#66727b">Earlier</text>
+<text x="557.412" y="502" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#66727b">Sequence</text>
+<text x="964" y="502" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#66727b">Later</text>
+<text x="512" y="548" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#66727b">Illustrative chart — not historical market data</text>
+</svg>
