@@ -738,7 +738,7 @@ draw_chart('L18-A-01-unseen','L18_A_final_unseen_assessment',l18a,'final assessm
 draw_chart('L18-A-02-reference-internal','L18_A_final_unseen_assessment',l18a,'INTERNAL reference analysis; do not show before submission',
            bands=[{'low':98.5,'high':99.8,'label':'lower area'},{'low':102.5,'high':104.0,'label':'upper area'}],
            markers=[{'bar':8,'kind':'high','label':'candidate major high'},{'bar':20,'kind':'low','label':'candidate major low'},{'bar':26,'kind':'high','label':'later swing'}],
-           extra_text=[{'x':0.4,'y':105.5,'text':'One defensible reading; transition/unclear is also acceptable with evidence','fontsize':8.4}],
+           extra_text=[{'x':12.2,'y':105.5,'text':'One defensible reading; transition/unclear is also acceptable with evidence','fontsize':8.4}],
            alt_text='Internal reference for the final assessment shows one defensible pair of zones and major turns, while explicitly allowing an evidenced transition or unclear interpretation.')
 l18b_closes = [106,104.7,103.1,102.0,103.0,101.6,100.4,101.5,99.8,98.9,100.1,101.2,99.6,98.8,99.9,101.4,102.7,101.8,100.5,102.0,103.4,102.5,101.4,102.3,103.6]
 l18b = bars_from_closes(l18b_closes,1802,{8:(98.3,None),13:(98.25,None),9:(None,100.5),20:(None,104.0)})
@@ -748,7 +748,7 @@ draw_chart('L18-B-01-retry-unseen','L18_B_parallel_retry',l18b,'parallel retry c
 draw_chart('L18-B-02-retry-reference-internal','L18_B_parallel_retry',l18b,'INTERNAL parallel retry reference; do not show before retry',
            bands=[{'low':98.2,'high':99.5,'label':'lower area'},{'low':102.6,'high':104.0,'label':'upper area'}],
            markers=[{'bar':2,'kind':'high','label':'earlier high'},{'bar':10,'kind':'low','label':'candidate low'},{'bar':21,'kind':'high','label':'later high'}],
-           extra_text=[{'x':0.4,'y':106.9,'text':'Parallel task: same rubric, fresh chart, no copied reference drawing','fontsize':8.4}],
+           extra_text=[{'x':12.2,'y':106.9,'text':'Parallel task: same rubric, fresh chart, no copied reference drawing','fontsize':8.4}],
            alt_text='Internal parallel retry reference with one defensible zone interpretation and a distinct swing selection; must remain hidden until retry submission.')
 
 # Save registers.

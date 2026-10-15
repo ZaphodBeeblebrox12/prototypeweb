@@ -630,19 +630,19 @@ z
    </g>
    <g id="text_15">
     <g id="patch_37">
-     <path d="M 103.392 88.585953 
-L 386.472 88.585953 
-Q 388.572 88.585953 388.572 86.485953 
-L 388.572 78.356328 
-Q 388.572 76.256328 386.472 76.256328 
-L 103.392 76.256328 
-Q 101.292 76.256328 101.292 78.356328 
-L 101.292 86.485953 
-Q 101.292 88.585953 103.392 88.585953 
+     <path d="M 485.712 88.585953 
+L 768.792 88.585953 
+Q 770.892 88.585953 770.892 86.485953 
+L 770.892 78.356328 
+Q 770.892 76.256328 768.792 76.256328 
+L 485.712 76.256328 
+Q 483.612 76.256328 483.612 78.356328 
+L 483.612 86.485953 
+Q 483.612 88.585953 485.712 88.585953 
 z
 " style="fill: #ffffff; stroke: #d6dde1; stroke-width: 0.65; stroke-linejoin: miter"/>
     </g>
-    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #263238" x="103.392" y="84.739015" transform="rotate(-0 103.392 84.739015)">Parallel task: same rubric, fresh chart, no copied reference drawing</text>
+    <text style="font-size: 8.4px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #263238" x="485.712" y="84.739015" transform="rotate(-0 485.712 84.739015)">Parallel task: same rubric, fresh chart, no copied reference drawing</text>
    </g>
   </g>
   <g id="text_16">
