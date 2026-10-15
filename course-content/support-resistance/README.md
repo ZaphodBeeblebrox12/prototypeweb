@@ -21,7 +21,7 @@ This directory is the canonical working source for the 18-lesson Support & Resis
 
 ## Status and constraints
 
-This is a first-pass production source checkpoint, not a publication-ready course. The complete v1.8 production ZIP contains 242 chart render files (121 PNG and 121 SVG), 48 OHLC/source CSV datasets and the chart-build Python source. The current GitHub connector can commit text files but has no direct binary upload operation. Therefore the chart binaries, OHLC datasets and generator source are indexed by the manifests but **are not all committed as individual Git files yet**. The complete archive remains a companion artifact; see `production/BINARY_ASSET_TRANSFER_STATUS.md`.
+This is a first-pass production source checkpoint, not a publication-ready course. The current Git tree contains 246 chart render files (123 PNG and 123 SVG), 49 synthetic illustrative OHLC CSV datasets, the chart-build Python source, manifests and `SHA256SUMS.txt`. The earlier 242 renders (121 PNG and 121 SVG) passed the recorded remote-byte SHA-256 comparison on 2026-10-15. The four new Lesson 13 render files and its new dataset are present in Git and listed in the checksum inventory, but their independent byte-for-byte verification is still outstanding. See `production/BINARY_ASSET_TRANSFER_STATUS.md` and the recording-media review notes for verification boundaries.
 
 Do not claim the learning room, authenticated progress, secure reveal authorization, cross-device persistence, or runtime tests are implemented. The acceptance matrix is a test plan; all runtime tests remain pending until implementation.
 
