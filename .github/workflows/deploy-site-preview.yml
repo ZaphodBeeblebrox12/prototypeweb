@@ -29,8 +29,9 @@ jobs:
       - name: Check out preview branch
         uses: actions/checkout@v4
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
+      # This site is plain static HTML/CSS/JS. The configure-pages action
+      # performs a Pages-site API lookup that is returning 404 in this repo;
+      # the upload-pages-artifact + deploy-pages steps are sufficient here.
 
       - name: Stage chart images referenced by the learning room
         run: |
