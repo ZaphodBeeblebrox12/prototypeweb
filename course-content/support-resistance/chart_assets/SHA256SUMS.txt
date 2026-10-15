@@ -76,10 +76,12 @@ e2c115405a74c348533906ca6dbc1f7a451e03d33db05255d47da5e31e15fb9a  course-content
 b95a06b474aafa0b580ae04bcdfaae4b68f57f83d73f0663381ec35aca0daa89  course-content/support-resistance/chart_assets/charts/L03-A-01-clean.svg
 bd9b040951cd3452a3e2260348c7f24df7eeaa8df7d971a4c66ac9d05c3c4a78  course-content/support-resistance/chart_assets/charts/L03-A-02-candidate-turns.png
 b1588181ba60f87a884abf4a54e39890d936c1017c34db391b24262103dc5cdf  course-content/support-resistance/chart_assets/charts/L03-A-02-candidate-turns.svg
-63c34b0c36a03f54c44a531bcd7c824c518713a4154f2895a9c039a5dc53660a  course-content/support-resistance/chart_assets/charts/L03-A-03-reference-points.png
-5ec0fea65f7743472db7fb97c4aa3b002dcd6fe632031d9d32e44ea0473bee5f  course-content/support-resistance/chart_assets/charts/L03-A-03-reference-points.svg
-744bfe72295f200cbfe0178491b3a52f33b4b44469cd90a4712951b56754364c  course-content/support-resistance/chart_assets/charts/L03-A-04-simplified.png
-97508ed2bb89ac94f34ff8b2ad46c58dd186277e547569b0711b9b0c3855e27f  course-content/support-resistance/chart_assets/charts/L03-A-04-simplified.svg
+f501ee847c3173909d9d5104a5b3eb67eb6c20e5da64918603451a9d1cf24f63  course-content/support-resistance/chart_assets/charts/L03-A-03-reference-points.png
+553a14a83614aff6c4a93b5380ed13684c91b79fc274b6b53c9dbb2f3d2827fa  course-content/support-resistance/chart_assets/charts/L03-A-03-reference-points.svg
+9f462a09a64bdb7c89600cc636afa381e588a6cedbff0503acbb5227041e2bd5  course-content/support-resistance/chart_assets/charts/L03-A-04-simplified.png
+7c7a48e9d8a47b497b45f5bf48837cef779d9eb42307543447655e7f735c5a2c  course-content/support-resistance/chart_assets/charts/L03-A-04-simplified.svg
+7dac26d9ea8d4f76ee6b335544496403aa580b542f6cd1910f79b513ddadbc12  course-content/support-resistance/chart_assets/charts/L03-B-01-candidate-turns.png
+81d5be3ce86b13210ba34ce9e6bc0daa0990e461ba848effd61bfc5ef3ab7b6e  course-content/support-resistance/chart_assets/charts/L03-B-01-candidate-turns.svg
 2f6f7753dd8763c30271f15862f25df12a409e962334cf4d4730627ef333209a  course-content/support-resistance/chart_assets/charts/L03-B-01-practice.png
 7043a14394e3c68166e7146fe66eaa3945045ca107d80a6e92f8cdc021b228e3  course-content/support-resistance/chart_assets/charts/L03-B-01-practice.svg
 f7653e0d513d5dbe8198795592ea4ccd0699c28f8b261913739d5dabecc3d349  course-content/support-resistance/chart_assets/charts/L03-B-02-reference.png

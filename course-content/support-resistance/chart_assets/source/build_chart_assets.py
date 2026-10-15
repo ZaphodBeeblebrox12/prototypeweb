@@ -310,8 +310,9 @@ candidates_a = [{'bar':2,'kind':'high','label':'C1','color':MUTED},{'bar':3,'kin
                 {'bar':20,'kind':'high','label':'C11','color':MUTED}]
 draw_chart('L03-A-02-candidate-turns', 'L03_A_overmarked_teaching', l03a, 'candidate points available', markers=candidates_a,
            alt_text='Same chart with candidate turning points identified by neutral IDs, including major swings and minor fluctuations.')
-ref_a = [{'bar':2,'kind':'high','label':'Major high'},{'bar':13,'kind':'low','label':'Major low'},
-         {'bar':20,'kind':'high','label':'Recovery high'},{'bar':23,'kind':'low','label':'Pullback low'}, {'bar':24,'kind':'high','label':'Later high'}]
+ref_a = [{'bar':13,'kind':'low','label':'Major low'},
+         {'bar':20,'kind':'high','label':'Recovery high'},{'bar':23,'kind':'low','label':'Pullback low'},
+         {'bar':24,'kind':'high','label':'Later high'}]
 draw_chart('L03-A-03-reference-points', 'L03_A_overmarked_teaching', l03a, 'reference set with rationale markers', markers=ref_a,
            alt_text='Reference selection highlights a smaller set of structural turns that explain the broader path, leaving minor fluctuations unmarked.')
 draw_chart('L03-A-04-simplified', 'L03_A_overmarked_teaching', l03a, 'simplified view after removing minor marks', markers=ref_a,
@@ -323,6 +324,14 @@ l03b = bars_from_closes(l03b_closes, 302)
 save_dataset('L03_B_independent_practice', l03b)
 draw_chart('L03-B-01-practice', 'L03_B_independent_practice', l03b, 'independent practice; answer hidden',
            alt_text='Illustrative practice chart with a rising but uneven path and several minor turns competing for attention.')
+candidates_b = [{'bar':2,'kind':'high','label':'B1','color':MUTED},{'bar':3,'kind':'low','label':'B2','color':MUTED},
+                {'bar':4,'kind':'high','label':'B3','color':MUTED},{'bar':5,'kind':'low','label':'B4','color':MUTED},
+                {'bar':6,'kind':'high','label':'B5','color':MUTED},{'bar':7,'kind':'low','label':'B6','color':MUTED},
+                {'bar':8,'kind':'high','label':'B7','color':MUTED},{'bar':9,'kind':'low','label':'B8','color':MUTED},
+                {'bar':14,'kind':'high','label':'B9','color':MUTED},{'bar':19,'kind':'low','label':'B10','color':MUTED}]
+draw_chart('L03-B-01-candidate-turns', 'L03_B_independent_practice', l03b, 'independent practice; candidate IDs shown',
+           markers=candidates_b,
+           alt_text='Same independent rising practice sequence with neutral candidate IDs on larger and smaller turns; no reference points are marked.')
 ref_b = [{'bar':3,'kind':'low','label':'Swing low'},{'bar':6,'kind':'high','label':'Swing high'},
          {'bar':7,'kind':'low','label':'Higher low'},{'bar':14,'kind':'high','label':'Higher high'},
          {'bar':19,'kind':'low','label':'Borderline low','color':OPTIONAL},{'bar':21,'kind':'low','label':'Later low'}]

@@ -106,6 +106,14 @@
           <section class="sr-room-teaching" id="sr-teaching-content" hidden aria-labelledby="sr-teaching-title" aria-live="polite">
             <div class="sr-room-teaching-head"><span class="sr-room-eyebrow" id="sr-teaching-kicker">WHAT TO NOTICE</span><h3 id="sr-teaching-title"></h3></div>
             <div class="sr-room-teaching-body" id="sr-teaching-body"></div>
+            <section class="sr-room-teaching-selection" id="sr-teaching-selection-panel" hidden aria-labelledby="sr-teaching-selection-prompt">
+              <p class="sr-room-teaching-selection-prompt" id="sr-teaching-selection-prompt"></p>
+              <div class="sr-room-candidate-grid" id="sr-teaching-selection-options" role="group" aria-label="Candidate turning points"></div>
+              <div class="sr-room-selection-meta"><strong id="sr-teaching-selection-count">0 selected</strong><span id="sr-teaching-selection-status" aria-live="polite"></span></div>
+              <label for="sr-teaching-selection-note">Why do these points help explain the chart?</label>
+              <textarea id="sr-teaching-selection-note" rows="3" placeholder="These turns help show…"></textarea>
+              <button class="sr-room-selection-unsure" type="button" id="sr-teaching-selection-unsure" aria-pressed="false">I am not sure yet</button>
+            </section>
             <div class="sr-room-teaching-takeaway"><strong>Carry this forward</strong><p id="sr-teaching-takeaway"></p></div>
             <div class="sr-room-field-note" id="sr-teaching-field-note" hidden>
               <div class="sr-room-field-note-label" id="sr-teaching-field-note-label">FIELD NOTE</div>
