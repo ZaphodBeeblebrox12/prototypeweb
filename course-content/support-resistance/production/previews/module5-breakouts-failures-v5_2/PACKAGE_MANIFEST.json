@@ -1,0 +1,83 @@
+{
+  "package": "TradeThesis Module 5 — Breakouts & Failures",
+  "version": "v5.2-chart-led-editorial-pass",
+  "status": "standalone internal review package with chart-led examples, plain-English volume terminology, reusable module-depth working notes and a related Volume catalogue-course signpost; no website integration",
+  "lesson_count": 3,
+  "lesson_durations_minutes": {
+    "12": "30–35",
+    "13": "38–45",
+    "14": "55–65 including Wider Neckline"
+  },
+  "estimated_guided_time_minutes": {
+    "min": 123,
+    "max": 145
+  },
+  "script_word_counts": {
+    "LESSON_12_BREAKOUT_OR_TEMPORARY_PENETRATION.md": 4535,
+    "LESSON_13_RETESTS_AND_ROLE_REVERSAL.md": 3403,
+    "LESSON_14_FAILED_BREAKOUTS_AND_ALTERNATE_OUTCOMES.md": 5364
+  },
+  "total_script_words": 13302,
+  "main_reading_words": 7155,
+  "unique_schematic_figures": 26,
+  "in_reader_figure_instances": 30,
+  "in_reader_figures_by_lesson": {
+    "12": 8,
+    "13": 8,
+    "14": 14
+  },
+  "historical_staged_chart_images": 9,
+  "source_csv_excerpts": 3,
+  "knowledge_check_questions_per_lesson": {
+    "12": 7,
+    "13": 7,
+    "14": 8
+  },
+  "field_note_prompts": 4,
+  "simple_to_complex_retest_order": [
+    "FIG19_simple_break_return_response.png",
+    "FIG20_simple_retest_outcomes.png",
+    "FIG16_retest_depth_and_closes.png",
+    "FIG05_three_retest_outcomes.png",
+    "FIG04_break_return_response.png"
+  ],
+  "stop_loss_marker_scope": "FIG21_failed_breakout_structural_stop.png appears only in Lesson 14, within a hypothetical failed-breakout example; no stop markers on breakout/retest illustrations.",
+  "author_references": "Named author attribution is kept only in BREAKOUTS_FAILURES_AUTHOR_RESEARCH.md; it does not appear in learner-facing readings or interaction text.",
+  "preserved_chartlabs": [
+    "Clear W — Lesson 5",
+    "Uneven Lows — Lesson 8",
+    "Wider Neckline — Lesson 14"
+  ],
+  "licensing_warning": "Upstream NIFTY 50 source dataset redistribution rights are unverified. Historical excerpts/images are temporary internal teaching examples; replace with user-owned or rights-cleared charts before public distribution.",
+  "checksums": "SHA256SUMS.txt covers every file except itself and PACKAGE_MANIFEST.json.",
+  "word_count_method": "Total script words = whitespace-separated tokens in the three exported lesson Markdown files. Main reading words = whitespace-separated tokens in deep-content section titles, block text, and list items; figure alt text/captions, evidence-stage prompts, field notes, knowledge checks, objectives and instructor close are not included in main reading count.",
+  "knowledge_check_total_questions": 22,
+  "model_stage_answers": 9,
+  "stage_rubric_items_per_lesson": {
+    "12": 4,
+    "13": 4,
+    "14": 4
+  },
+  "mock_dom_qa": {
+    "assertions": 36,
+    "passed": 36
+  },
+  "language_pass": {
+    "version": "v5.1",
+    "summary": "warmer one-to-one instructor voice, plain-English definitions, evidence ladder, 9 staged model answers/self-checks, rubrics for all lessons, and 22 varied checks with automated feedback"
+  },
+  "inline_historical_chart_instances": {
+    "12": 1,
+    "13": 1,
+    "14": 1
+  },
+  "total_inline_visual_instances": 33,
+  "chart_led_editorial_pass": {
+    "version": "v5.2",
+    "summary": "first-stage real NIFTY 50 chart alongside applied question in each lesson; later chart states kept gated; stage-specific captions; Volume shown as an existing catalogue course; spot FX, CFD and tick volume defined at first use; template redesign kept separate"
+  },
+  "package_file_count_before_checksums": 71,
+  "total_package_files_including_manifest_and_checksums": 73,
+  "reusable_depth_working_notes": "MODULE_DEPTH_WORKING_NOTES.md",
+  "reusable_depth_working_notes_summary": "Reusable instructional-depth methodology derived from Module 5 for application across remaining modules; the dedicated shared-template redesign remains a separate pass."
+}

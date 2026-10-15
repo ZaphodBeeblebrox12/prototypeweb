@@ -1,0 +1,10 @@
+file,rows_visible,first_visible_date,last_visible_date,zone_low,zone_high,lesson,stage
+charts/L12-01-before-break.png,35,2016-07-15,2016-09-02,8810,8850,L12,01
+charts/L12-02-outside-zone.png,38,2016-07-15,2016-09-08,8810,8850,L12,02
+charts/L12-03-later-failure.png,43,2016-07-15,2016-09-16,8810,8850,L12,03
+charts/L13-01-before-break.png,35,2014-06-26,2014-08-14,7795,7865,L13,01
+charts/L13-02-return-toward-area.png,40,2014-06-26,2014-08-22,7795,7865,L13,02
+charts/L13-03-later-evidence.png,58,2014-06-26,2014-09-18,7795,7865,L13,03
+charts/L14-01-before-break.png,35,2017-12-01,2018-01-19,10875,10920,L14,01
+charts/L14-02-initial-return.png,43,2017-12-01,2018-02-01,10875,10920,L14,02
+charts/L14-03-failed-follow-through.png,55,2017-12-01,2018-02-20,10875,10920,L14,03
