@@ -8,3 +8,7 @@ All pages use the original TradeThesis horizontal logo and preserve relative `as
 
 ## Pass 2 course positioning
 The homepage features only the ₹999 Trading Path in detail; CONSTRUCT and the live classroom are compact links. On the dedicated CONSTRUCT page, the copy now highlights paper-trading-led experimentation, live lessons with the instructor, demonstrations of trade execution and management, and the instructor's presence to answer questions in The Wobbling Candle. The public copy does not specify a count or calendar cadence for the live lessons.
+
+## Support & Resistance Learning Room preview
+
+Select **Support & Resistance room** in `00_OPEN_INTERACTIVE_PREVIEW.html` to review the 18-lesson, six-module learning-room prototype. It uses browser-local demo notes/progress only. Authentication, purchases, server persistence, protected answer delivery, and production ChartLab submissions are not connected. Chart source assets are referenced from the repository's `course-content/support-resistance/chart_assets/` folder for review builds.
