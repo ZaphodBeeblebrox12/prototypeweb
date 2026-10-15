@@ -103,9 +103,17 @@ def draw_chart(asset_id: str, dataset_id: str, bars: list[dict[str, float]], sta
             ax.axhline(lo, color=band.get('edge_color', BAND_EDGE), linewidth=0.95, alpha=0.85, zorder=2)
             ax.axhline(hi, color=band.get('edge_color', BAND_EDGE), linewidth=0.95, alpha=0.85, zorder=2)
         if band.get('label'):
-            x = band.get('x', max(1, int(n * 0.58)))
-            ax.text(x, hi + (max(b['high'] for b in use) - min(b['low'] for b in use)) * 0.025,
-                    band['label'], ha='left', va='bottom', fontsize=9, color=INK,
+            if band.get('label_gutter'):
+                x = band.get('x', n + 0.15)
+                y = band.get('label_y', (lo + hi) / 2)
+                ha = band.get('ha', 'left')
+                va = band.get('va', 'center')
+            else:
+                x = band.get('x', max(1, int(n * 0.58)))
+                y = band.get('label_y', hi + (max(b['high'] for b in use) - min(b['low'] for b in use)) * 0.025)
+                ha = band.get('ha', 'left')
+                va = band.get('va', 'bottom')
+            ax.text(x, y, band['label'], ha=ha, va=va, fontsize=9, color=INK,
                     bbox={'boxstyle': 'round,pad=0.3', 'facecolor': '#FFF9E8', 'edgecolor': '#D9C17A', 'linewidth': 0.7},
                     zorder=6)
 
@@ -146,7 +154,8 @@ def draw_chart(asset_id: str, dataset_id: str, bars: list[dict[str, float]], sta
                 va=t.get('va', 'top'), zorder=10,
                 bbox=t.get('bbox', {'boxstyle': 'round,pad=0.25', 'facecolor': '#FFFFFF', 'edgecolor': '#D6DDE1', 'linewidth': 0.65}))
 
-    ax.set_xlim(-0.8, n-0.2)
+    label_gutter = any(band.get('label_gutter') and band.get('label') for band in (bands or []))
+    ax.set_xlim(-0.8, n+3.8 if label_gutter else n-0.2)
     if y_limits:
         ax.set_ylim(*y_limits)
     else:
@@ -187,11 +196,11 @@ draw_chart('L01-A-01-clean', 'L01_A_repeated_lower_reaction', support1, 'unlabel
            alt_text='Illustrative candles decline into a broad lower price area, move upward, and later revisit a similar area before a later extension is shown.')
 draw_chart('L01-A-02-band', 'L01_A_repeated_lower_reaction', support1, 'band only', visible_bars=16, bands=[{**band_support1,'label':None}],
            alt_text='Same illustrative lower reaction sequence with a neutral band around the area where price reacted more than once.')
-draw_chart('L01-A-03-labelled', 'L01_A_repeated_lower_reaction', support1, 'band plus prior-reaction label', visible_bars=16, bands=[band_support1],
+draw_chart('L01-A-03-labelled', 'L01_A_repeated_lower_reaction', support1, 'band plus prior-reaction label', visible_bars=16, bands=[{**band_support1,'label_gutter':True}],
            alt_text='Same illustrative sequence with the lower band labelled prior reaction area.')
-draw_chart('L01-A-04-support-label', 'L01_A_repeated_lower_reaction', support1, 'support area label', visible_bars=16, bands=[{'low':97.7,'high':99.0,'label':'support area'}],
+draw_chart('L01-A-04-support-label', 'L01_A_repeated_lower_reaction', support1, 'support area label', visible_bars=16, bands=[{'low':97.7,'high':99.0,'label':'support area','label_gutter':True}],
            alt_text='Same illustrative sequence with the lower area labelled support area.')
-draw_chart('L01-A-05-breakdown', 'L01_A_repeated_lower_reaction', support1, 'later candles crossing decisively through band', bands=[{'low':97.7,'high':99.0,'label':'support area'}],
+draw_chart('L01-A-05-breakdown', 'L01_A_repeated_lower_reaction', support1, 'later candles crossing decisively through band', bands=[{'low':97.7,'high':99.0,'label':'support area','label_gutter':True}],
            alt_text='Illustrative support-area sequence extended with later candles moving decisively below the former lower reaction area.')
 
 resist1_closes = [98.9,99.5,100.3,101.4,102.7,103.8,103.1,101.8,100.9,101.8,103.2,104.4,103.7,102.3,101.4,100.7]
@@ -202,9 +211,9 @@ draw_chart('L01-B-01-clean', 'L01_B_repeated_upper_reaction', resist1, 'unlabell
            alt_text='Illustrative price sequence rises into a broad upper area, turns down, returns to that area and turns down again.')
 draw_chart('L01-B-02-band', 'L01_B_repeated_upper_reaction', resist1, 'band only', bands=[{**resband,'label':None}],
            alt_text='Same upper reaction sequence with a broad neutral band around related upper reactions.')
-draw_chart('L01-B-03-labelled', 'L01_B_repeated_upper_reaction', resist1, 'band plus prior-reaction label', bands=[resband],
+draw_chart('L01-B-03-labelled', 'L01_B_repeated_upper_reaction', resist1, 'band plus prior-reaction label', bands=[{**resband,'label_gutter':True}],
            alt_text='Same upper reaction sequence with a band labelled prior reaction area.')
-draw_chart('L01-B-04-resistance-label', 'L01_B_repeated_upper_reaction', resist1, 'resistance area label', bands=[{'low':103.7,'high':105.0,'label':'resistance area'}],
+draw_chart('L01-B-04-resistance-label', 'L01_B_repeated_upper_reaction', resist1, 'resistance area label', bands=[{'low':103.7,'high':105.0,'label':'resistance area','label_gutter':True}],
            alt_text='Same upper reaction sequence with the band labelled resistance area.')
 
 # Lesson 1 separate simple practice charts
@@ -214,7 +223,7 @@ save_dataset('L01_PRACTICE_A_clearer_reactions', p1a)
 draw_chart('L01-PRACTICE-A-01-clean', 'L01_PRACTICE_A_clearer_reactions', p1a, 'practice, no annotation',
            alt_text='Illustrative practice chart with two relatively clear lower reactions and upward movement away from each.')
 draw_chart('L01-PRACTICE-A-02-reference', 'L01_PRACTICE_A_clearer_reactions', p1a, 'practice reference overlay',
-           bands=[{'low':97.7,'high':99.1,'label':'one defensible lower area'}],
+           bands=[{'low':97.7,'high':99.1,'label':'one defensible lower area','label_gutter':True}],
            alt_text='Practice chart with one defensible lower reaction area shown as a band; other boundaries may also be defensible.')
 p1b_closes = [101.8,100.5,99.4,98.3,99.4,100.1,99.5,98.9,100.0,99.2,98.1,99.0,100.0]
 p1b = bars_from_closes(p1b_closes, 104, {3:(97.7,None),7:(98.4,None),10:(97.5,None)})
@@ -222,8 +231,8 @@ save_dataset('L01_PRACTICE_B_ambiguous_reactions', p1b)
 draw_chart('L01-PRACTICE-B-01-clean', 'L01_PRACTICE_B_ambiguous_reactions', p1b, 'practice, ambiguous evidence',
            alt_text='Illustrative practice chart with uneven lower reactions; the evidence for one precise repeated area is weaker and uncertainty is reasonable.')
 draw_chart('L01-PRACTICE-B-02-reference', 'L01_PRACTICE_B_ambiguous_reactions', p1b, 'practice uncertainty reference',
-           bands=[{'low':97.5,'high':98.8,'label':'broad candidate area'}],
-           extra_text=[{'x':1,'y':101.5,'text':'Evidence is less clustered; “unclear” is acceptable','fontsize':8.5}],
+           bands=[{'low':97.5,'high':98.8,'label':None}],
+           extra_text=[{'x':8.0,'y':102.7,'text':'Evidence is less clustered; “unclear” is acceptable','fontsize':8.5}],
            alt_text='Same ambiguous practice chart with a broad candidate area and a note that uncertainty is acceptable.')
 
 # --- Lesson 2: broad structure ---
@@ -271,7 +280,6 @@ l02d_closes = [99,100.2,99.7,101.1,100.5,102.0,101.4,103.1,102.6,104.2,103.3,105
 l02d = bars_from_closes(l02d_closes, 204)
 save_dataset('L02_D_trend_to_range', l02d)
 draw_chart('L02-D-01-early-state', 'L02_D_trend_to_range', l02d, 'early state; future candles hidden', visible_bars=13,
-           extra_text=[{'x':0.4,'y':106.0,'text':'Earlier: rising structure','fontsize':9}],
            alt_text='First segment of an illustrative rise with the later candles hidden; early structure is directional but the transition is not yet established.')
 draw_chart('L02-D-02-later-state', 'L02_D_trend_to_range', l02d, 'later state; overlap revealed', visible_bars=26,
            extra_text=[{'x':0.4,'y':106.0,'text':'Earlier: rising structure','fontsize':9}, {'x':16.0,'y':105.7,'text':'Later: less directional / possible range','fontsize':9}],

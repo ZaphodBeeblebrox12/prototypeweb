@@ -240,7 +240,7 @@ Each plan separates student-facing content from instructor notes. The “say/sho
 
 **Student-facing sequence**
 
-1. **Open with an unlabelled chart.** Show a clean historical excerpt where price has reacted in roughly similar areas more than once. Do not draw lines, name the asset, or show a future outcome. Ask: *“Before we label anything, what stands out about where price has paused, turned or moved away?”*
+1. **Open with an unlabelled chart.** Show a clean schematic chart built from synthetic illustrative OHLC data, with price reacting in roughly similar areas more than once. Do not draw lines, add a structure label, or show the later outcome. Ask: *“Before we label anything, what stands out about where price has paused, turned or moved away?”* The current Lesson 1 chart set is illustrative, not historical market evidence. If a future revision uses historical data, record its instrument, timeframe, visible period, source and distribution rights before using it.
 2. **Let the learner observe first.** Offer “I see a repeated area,” “I see a trend,” “I am not sure yet,” or a short free-text response. Do not grade intuition at this stage.
 3. **Define the terms in plain language.** Support is an area where falling price has previously found enough response to stop or reverse for a time. Resistance is an area where rising price has previously met enough opposing response to pause or reverse. These are descriptions of price behaviour, not guarantees about what happens next.
 4. **Reveal the broad zones, not precision lines.** Explain that the chart records price, not the full reason for every move. We can observe reactions; we cannot identify every participant's intention from a candle alone.
