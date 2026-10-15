@@ -234,7 +234,7 @@ ee995ffe86837db4ba31cbaf4180c52e0dc391426453e82c77e5654cef24be82  course-content
 b8c025f049149772bc38ffeabe0262c07fb38debe01d52a9f5d3177c67cea6b0  course-content/support-resistance/chart_assets/charts/L15-B-02-reference.svg
 8bac7e1bac03bcdb223e85d4bbd574914abf6f4d56abf49e5f4fe07b2b97b650  course-content/support-resistance/chart_assets/charts/L18-A-01-unseen.png
 51dcef59e3765c039fdfb2735fdc372fdafda97bcc32e25f45855c1df12152ba  course-content/support-resistance/chart_assets/charts/L18-A-01-unseen.svg
-33c7544bb57b9ac442e1e6f66eaf27d3b23e91725e675775c23cfc3775f2ade5 course-content/support-resistance/chart_assets/charts/L18-A-02-reference-internal.png
+33c7544bb57b9ac442e1e6f66eaf27d3b23e91725e675775c23cfc3775f2ade5  course-content/support-resistance/chart_assets/charts/L18-A-02-reference-internal.png
 03a8ab07b48d4006f338870b08159a3a96bf7646ddb25a64791870fc156db235  course-content/support-resistance/chart_assets/charts/L18-A-02-reference-internal.svg
 ba231f40b1e316408fb1267c278c00ea4eacdd246eadb04f1e854619b3d11e0b  course-content/support-resistance/chart_assets/charts/L18-B-01-retry-unseen.png
 d4fed1196fbd8f9b6ecf79a41981431a04dfb1204baa5fca13bdef4b0b62d9f5  course-content/support-resistance/chart_assets/charts/L18-B-01-retry-unseen.svg
