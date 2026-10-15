@@ -173,6 +173,7 @@ Module 5 uses reusable components—staged chart case, model answer, self-check,
 - [ ] The voice is warm, experienced and direct—not repetitive or defensive.
 - [ ] New content adds understanding rather than duplicating another section.
 - [ ] Data rights, provenance and any untested QA are recorded.
+- [ ] Catalogue cross-links refer to relevant existing courses; any destination URL has been verified.
 - [ ] Template improvements are logged for the separate template pass.
 
 **Working principle:** Teach the learner to see, describe, reason, compare and revise. A lesson should feel deeper because the learner understands more and can do more—not simply because the document is longer.
