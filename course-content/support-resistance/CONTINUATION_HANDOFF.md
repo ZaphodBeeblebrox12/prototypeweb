@@ -103,11 +103,20 @@ Do not add another ChartLab activity or move these without explicit user approva
 - `asset_audit.md`
 - `answer_key_and_review_notes.md`
 
-## Binary/source assets not yet individually committed
+## Chart and source assets — committed; verification in progress
 
-The v1.8 production archive contains 242 rendered chart files (121 PNG + 121 SVG), 48 OHLC/source CSV files and `chart_assets/source/build_chart_assets.py`. The GitHub connector used in this workflow can create text blobs and commits, but exposes no direct binary-upload/release-asset operation. The files above contain the chart/data manifests and notes, but **do not pretend that the 242 chart files, 48 datasets and generator source are already in Git**.
+The chart/source asset set is committed to `my-new-branch` under `chart_assets/`. The verified Git tree contains:
 
-See `production/BINARY_ASSET_TRANSFER_STATUS.md`. To complete this part, use a local Git clone with ordinary Git credentials or another verified binary-capable upload method; extract the chart/data/source directories from the verified v1.8 ZIP into `course-content/support-resistance/chart_assets/`, preserve filenames and manifest paths, then commit and verify counts/checksums. Do not replace binary assets with text placeholders. Keep the source archive as a backup until verification is complete.
+- 121 PNG chart renders.
+- 121 SVG chart renders.
+- 48 synthetic illustrative OHLC datasets.
+- Two CSV manifests, the chart generator, and `SHA256SUMS.txt`.
+
+The Lesson 18 reference-chart annotation correction is also committed. The generator, both PNG exports, both SVG exports, and their checksum entries have been updated.
+
+**Verification still outstanding:** The source archive's checksum inventory and path coverage have been checked, and all 48 CSV datasets match after accounting for Git line-ending normalization. Representative remote checksum checks have passed, but the complete remote-byte comparison of all 242 rendered charts and the full visual/instructional review have not yet been completed.
+
+See `production/BINARY_ASSET_TRANSFER_STATUS.md` for the detailed verification record. Keep the source archives as backups until the complete audit passes.
 
 ## Release / implementation status
 
@@ -120,13 +129,12 @@ See `production/BINARY_ASSET_TRANSFER_STATUS.md`. To complete this part, use a l
 
 ## Recommended next steps
 
-1. Verify the latest branch head and this handoff commit.
-2. Finish committing binary/source chart assets from the v1.8 archive using a local Git push or binary-capable path; verify 121 PNG, 121 SVG, 48 source datasets, and generator source are in Git.
-3. Add exact SHA-256 inventory for the v1.8 archive and committed asset set.
-4. Continue first-pass course production (asset-by-asset recording/media delivery manifest, mapping each cue to exact asset, narration, caption/transcript status, export name and delivery status).
-5. Keep authentic instructor chart/trade intake as explicit dependencies until the user supplies the records.
-6. At the end of first pass, run the second-pass register across all 18 lessons, all student materials, chart reveals, assessment, wording consistency and accessibility.
-7. Only after approval, begin site implementation; do not change or commit site code without explicit user approval.
+1. Complete the remote-byte checksum comparison for all 242 committed PNG/SVG chart renders; keep the source archives as backups until it passes.
+2. Reconcile the recording/media delivery manifest with the committed asset state. Separately correct the stale Lesson 18 QA flags in the CSV, then resolve the remaining Lesson 15, Lesson 10, and Lesson 11–13 mapping questions.
+3. Continue first-pass course production, mapping each cue to its exact asset, narration source, caption/transcript status, planned export name, and delivery state.
+4. Keep authentic instructor chart/trade intake for Lessons 9, 16, and 17 as explicit dependencies until the user supplies the records.
+5. At the end of the first pass, run the second-pass register across all 18 lessons, student materials, chart reveals, assessment, wording consistency, and accessibility.
+6. Only after explicit approval, begin site implementation; do not change or commit site code without file-level approval.
 
 ## Source references
 
