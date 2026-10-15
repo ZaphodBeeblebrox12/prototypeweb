@@ -123,6 +123,10 @@ When a concept deserves more depth than the current lesson can provide, connect 
 
 **Module 5 application:** Lesson 12 presents **Volume** as an existing course in the catalogue. It does not claim volume can explain the NIFTY 50 example, which is a price-only chart with no volume bars.
 
+**Where this entered the production sequence:** The Volume cross-reference was added during the **v5.2 chart-led editorial pass**, after the main teaching-depth/content expansion and the v5.1 language pass. It is an editorial connection to the existing TradeThesis catalogue—not an extra lesson or ChartLab, and not a claim that the source books specifically prescribed that link.
+
+For future modules, inspect the real catalogue and cross-link a course only when it helps answer a question raised by the lesson. Keep the current lesson useful on its own; name the related course accurately; describe the additional learning it offers; and do not invent or imply a working destination URL unless it has been verified. If there is no genuinely relevant existing course, omit the card.
+
 ## 12. Depth choices made in Module 5
 
 These show how the method was applied to specific concepts; other modules should decide which distinctions suit their subject.
@@ -141,13 +145,15 @@ Module 5 uses reusable components—staged chart case, model answer, self-check,
 
 ## 14. Workflow for the remaining modules
 
+**Module 5 process reference:** research distinctive source contributions and map them to the curriculum; establish the teaching-depth standard; expand the lesson content; build the staged visual and practice experience; run a learner-language pass (v5.1); then run a chart-led editorial pass (v5.2), placing chart evidence beside claims, explaining any beginner-blocking terms in context and connecting the lesson to a relevant existing catalogue course where useful. The dedicated comparison with TradeThesis Trading Path remains deferred to a separate template pass.
+
 1. **Inventory first:** map each existing lesson's goals, content, examples, charts, activities, checks and known gaps. Do not assume something is missing until the current content is inspected.
 2. **Map the learning sequence:** identify the learner's question, evidence, explanation, limits, alternatives and practice for every major concept.
 3. **Audit the evidence:** identify available charts and examples. Flag any claim that describes a chart not shown nearby.
 4. **Expand hard concepts:** add first-use definitions, boundary conditions, counterexamples and worked examples where they are needed.
 5. **Add self-study scaffolding:** model answers, usable quick references, rubrics and checks in proportion to lesson density.
 6. **Run the voice pass:** replace dense or defensive prose with calm, concrete teacher-to-student explanations.
-7. **Link the catalogue:** add existing related courses only where they help the student.
+7. **Link the catalogue:** inspect the actual TradeThesis catalogue; add a relevant existing course only where it helps the student, explain why it is related, and verify any destination URL before using it.
 8. **Check completeness:** ensure every learning objective is taught, practised and checked somewhere. Separate true omissions from content outside a lesson's scope.
 9. **Run QA:** verify chart stages, captions, source provenance, navigation, reveal behaviour, answer feedback and the mobile/browser experience. Mark anything not tested.
 10. **Log template issues separately:** do not let styling debates block improvements to the learning itself.
