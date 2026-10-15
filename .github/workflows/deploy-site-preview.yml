@@ -31,11 +31,6 @@ jobs:
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-        with:
-          # The repository's Pages source is already set to GitHub Actions.
-          # Avoid a Pages site lookup here: on first provisioning GitHub's
-          # pages API can return 404 even when the repository has has_pages=true.
-          enablement: true
 
       - name: Stage chart images referenced by the learning room
         run: |
