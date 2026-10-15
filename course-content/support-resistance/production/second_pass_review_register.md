@@ -111,3 +111,12 @@ Inspect the actual repository and product architecture; reconcile this stack-neu
 **Location:** `production/implementation_acceptance_test_matrix_v1.csv`; `production/release_gate_tracker_v1.csv`; deployed/staging learning room and protected asset routes.
 
 Execute the matrix after implementation, attach test output/screenshots/network traces and record pass/fail per case. Static package validation is not proof of server-side reveal authorization, drawing persistence, access revocation, or end-to-end ChartLab behaviour. Keep relevant release gates open until evidence exists.
+
+
+## SP-37 — Module 5 breakout/failure depth, visual assets and lesson-room alignment
+**Priority:** High · **State:** PARKED — second pass
+
+**Location:** lessons09-12_production_scripts.md (Lesson 12); lessons13-17_production_scripts.md (Lessons 13–14); course_content_manifest.json (L12–L14); module5_breakouts_author_research.md; and the current site/support-resistance-room.html preview.
+
+Review the expanded reading and author-source attributions against the cited sources; verify that each lesson's field notes, knowledge checks, reveal order and manifest contract agree; test “inconclusive” as a valid response; preserve exactly three ChartLabs with Wider Neckline in Lesson 14; and reconcile the increased lesson timings with the course-wide estimate. Historical NIFTY 50 bands are instructional choices, not official levels, and source redistribution rights are unverified. Replace the provisional chart visuals with user-owned or rights-cleared examples before publication. The Learning Room currently does not render these expanded canonical readings or all lesson-specific note stages; scope and approve that website work separately, then run desktop/mobile accessibility and progressive-reveal QA. Do not mark this item done until source review, asset replacement, timing reconciliation, and end-to-end UI evidence are recorded.
+

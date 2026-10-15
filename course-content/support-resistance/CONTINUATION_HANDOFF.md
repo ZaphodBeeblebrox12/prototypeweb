@@ -126,15 +126,19 @@ See `production/BINARY_ASSET_TRANSFER_STATUS.md` for the detailed verification r
 - The acceptance test matrix lists 32 planned cases; they must remain “not run” until executed against an implementation.
 - Do not mark course publication-ready just because the source pack is complete.
 - The source scripts are a first-pass draft; the agreed full second pass is deferred until the first pass is complete.
+- Module 5 depth merge: canonical Lessons 12–14 now include longer original readings, provisional historical examples, decision-record prompts, and revised lesson timings. Source update: 78a7b84d93ef92d42c413b63b650d1efe10486a0.
+- Current Module 5 duration estimate: Lesson 12 (25–30 min), Lesson 13 (25–30 min), and Lesson 14 (30–38 min including Wider Neckline). Recalculate the course-wide duration after lesson timings are reconciled.
+- Historical chart caveat: the NIFTY 50 case dates and selected bands are provisional internal teaching references. The source dataset's redistribution rights are not verified. Do not ship upstream chart images/raw extracts; replace the visuals with user-owned or rights-cleared charts before public release.
+- Learning Room dependency: the current site/support-resistance-room.html review build has not yet been reconciled with the longer canonical reading sections and new field-note stages. Implement that separately after a file-level website change set is explicitly approved.
 
 ## Recommended next steps
 
-1. Complete the outstanding visual and instructional review of the committed charts; keep source archives as backups until visual review is complete.
+1. Review the expanded Module 5 canonical scripts, then complete the outstanding visual and instructional review of the chart set. Replace provisional historical chart visuals with user-owned or rights-cleared assets before publication.
 2. Reconcile the recording/media delivery manifest with the committed asset state. Separately correct the stale Lesson 18 QA flags in the CSV, then resolve the remaining Lesson 15, Lesson 10, and Lesson 11–13 mapping questions.
 3. Continue first-pass course production, mapping each cue to its exact asset, narration source, caption/transcript status, planned export name, and delivery state.
 4. Keep authentic instructor chart/trade intake for Lessons 9, 16, and 17 as explicit dependencies until the user supplies the records.
-5. At the end of the first pass, run the second-pass register across all 18 lessons, student materials, chart reveals, assessment, wording consistency, and accessibility.
-6. Only after explicit approval, begin site implementation; do not change or commit site code without file-level approval.
+5. At the end of the first pass, run the second-pass register across all 18 lessons, student materials, chart reveals, assessment, wording consistency, timing, and accessibility.
+6. Prepare a separate website change set to render the longer Module 5 readings, progressive chart states and lesson-specific field notes; do not change site code until the exact file-level plan is approved.
 
 ## Source references
 
