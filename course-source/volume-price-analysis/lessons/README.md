@@ -3,7 +3,7 @@
 
 **Current status:** All six module manuscripts (30 lessons) have been rewritten as student-facing teaching material on `my-new-branch`. The former continuous narration-script format has been removed from the module lesson files. The new format explains the concepts directly, uses worked cases, provides learner tasks with feedback, and ends with practical checks or transfer work.
 
-**Not yet release-ready:** The student-first text is a source rewrite, not a claim that the complete website course is finished. Visual assets and ChartLabs for the remaining lessons are still needed; the existing M01-L01 pilot still needs browser, accessibility and beginner validation. The rewritten lesson pages have not yet been integrated into the member learning experience, and no actual learner-duration test has been completed.
+**Source packages are complete; release validation is not.** All 30 lessons now have direct links to a primary chart, standalone ChartLab, underlying synthetic data and accessible description. The reusable student worksheet workbook is also available. Exact-page browser rendering, accessibility checks, true-beginner comprehension and duration testing remain open. The material has not yet been integrated into the member learning experience or deployed.
 
 ## Source of truth
 
@@ -17,6 +17,9 @@
 
 ## Supporting production documents
 
+- [All 30 lesson visual packages — chart, ChartLab, source data and accessible description](../assets/STUDENT_ASSET_BUILD_LOG.md)
+- [Fillable student worksheet workbook](../assets/worksheets/volume-price-analysis-student-worksheets.html)
+- [Printable worksheet workbook with worked examples](../assets/worksheets/volume-price-analysis-student-worksheets.md)
 - [Asset production brief — lesson visuals, ChartLabs, worksheets and supporting files](../ASSET_PRODUCTION_BRIEF.md)
 - [M01-L01 pilot validation checklist](../assets/PILOT_VALIDATION_CHECKLIST.md)
 - [Chart walkthrough design briefs for all 30 lessons](CHART_WALKTHROUGHS.md)
@@ -37,11 +40,11 @@ The intended delivery target remains 12–16 minutes for a typical lesson, with 
 
 ## Production sequence
 
-1. Review the revised student-first format and spot any substantive teaching gaps.
-2. Build or revise each lesson's visual package and complete ChartLab, including clear feedback and counterexamples.
-3. Test the existing M01-L01 pilot and use it as a benchmark only after browser, accessibility and true-beginner checks pass.
-4. Rehearse the actual learner experience and measure time-on-task, comprehension and usability.
-5. Complete a course-wide editorial, data-source, licensing and accessibility review.
-6. Integrate the approved material into the member learning experience only after the teaching content and assets have been reviewed.
+1. Run source/static consistency checks for all 30 linked asset packages and the five reusable worksheet templates.
+2. Test representative lesson pages—including a normal candle chart, a range-boundary case, a Volume Profile chart and the trade-plan capstone—in a browser at desktop/mobile widths and 200% zoom.
+3. Validate keyboard operation, focus state, screen-reader descriptions and contrast.
+4. Test with true beginners; revise prompts or charts where they need an instructor to explain what's visible.
+5. Time the rendered lesson experience and check comprehension, not merely word count.
+6. Complete the course-wide editorial, data-source, licensing and accessibility review before integrating or publishing.
 
 The course source, website integration and publication are distinct stages. A rewritten manuscript does not imply that a public course has been launched or approved for release.
