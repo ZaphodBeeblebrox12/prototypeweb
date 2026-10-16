@@ -5,7 +5,7 @@
 **Data:** Synthetic OHLCV and volume-at-price bins, not historical data.
 
 ## Description
-The profile is broadest around 100–104 and thinner above 106 in this selected five-session synthetic window. The time-based volume histogram and horizontal profile answer different questions; the profile's shape depends on the window.
+The profile's POC and 70% value-area boundaries are calculated from the displayed synthetic bins for this selected five-session window. The time-based volume histogram and horizontal profile answer different questions; the profile's shape depends on the window.
 
 Each visual aligns a candle/price pane with its time-based volume bars and a horizontal profile on the right. The profile bars are positioned by price level. The POC marks the row with the most assigned profile volume; VAH and VAL mark the selected value-area boundaries. The profile window is stated on each chart. The dashed values are contextual references, not guaranteed support/resistance.
 
