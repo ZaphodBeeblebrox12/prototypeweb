@@ -1,5 +1,5 @@
-from bleach.sanitizer import ALLOWED_PROTOCOLS
 import bleach
+from bleach.sanitizer import ALLOWED_PROTOCOLS
 import markdown as markdown_library
 
 from django import template
