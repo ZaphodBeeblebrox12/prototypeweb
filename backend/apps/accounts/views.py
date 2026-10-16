@@ -591,11 +591,21 @@ class ProfileView(View):
     """User profile view and edit."""
 
     def get(self, request):
+        from apps.bot_integration.models import DiscordAccount, TelegramAccount
+
         preferences = UserPreference.objects.filter(user=request.user).first()
+        telegram_account = TelegramAccount.objects.filter(
+            user=request.user, is_active=True
+        ).first()
+        discord_account = DiscordAccount.objects.filter(
+            user=request.user, is_active=True
+        ).first()
         return render(request, "accounts/profile.html", {
             "user": request.user,
             "preferences": preferences,
-            "telegram_connected": bool(request.user.telegram_id and request.user.telegram_verified),
+            "telegram_account": telegram_account,
+            "discord_account": discord_account,
+            "telegram_connected": telegram_account is not None,
         })
 
     def post(self, request):
