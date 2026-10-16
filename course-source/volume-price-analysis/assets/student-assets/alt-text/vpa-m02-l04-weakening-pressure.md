@@ -1,5 +1,6 @@
 # Accessibility notes — M02-L04
 
+**Figure number:** Figure 2.4; interactive panels use Figure 2.4a–Figure 2.4e.
 **Lesson:** Is the Move Losing Steam? Reading Signs of Weakening Pressure
 **Purpose:** Distinguish slowing progress from structural change.
 **Source:** Synthetic OHLCV. Not historical data or a trading signal.
