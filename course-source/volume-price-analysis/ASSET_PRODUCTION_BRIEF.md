@@ -1,8 +1,8 @@
 # Asset Production Brief — Read Volume. Find Trade Setups.
 ## Course visuals, ChartLabs, worksheets and delivery files
 
-**Status:** Production specification plus one pilot package for M01-L01. The pilot includes an editable SVG chart master/export, synthetic data, accessibility notes, a learner-facing ChartLab prototype, instructor answer notes and a package manifest. The other 29 lesson packages have not yet been produced. No public course pages have been changed.
-**Scope:** Six modules, 30 lessons. This brief consolidates the inline `ASSET` and `CHARTLAB` notes in the lesson scripts into a buildable checklist.
+**Status:** Production specification plus one pilot package for M01-L01. The six module manuscripts have been rewritten into student-facing lessons; this brief now governs the separate visuals, ChartLabs, worksheets and supporting assets. The pilot includes an editable SVG chart master/export, synthetic data, accessibility notes, a learner-facing ChartLab prototype, instructor answer notes and a package manifest. The other 29 lesson asset packages have not yet been produced. No public course pages have been changed.
+**Scope:** Six modules, 30 lessons. Use the student-facing module lessons as the source of teaching content and this brief as the separate production checklist. Internal asset prompts and implementation notes are not part of the lesson a student reads.
 **Audience:** People who are new to reading market charts.
 **Core promise:** Help learners read recorded volume alongside price, recognise useful context, and construct conditional trade plans. This is not a general-indicator course.
 
@@ -126,7 +126,7 @@ Each asset package must include: stable asset ID, linked module/lesson, teaching
 
 ## 5. Required lesson visual and ChartLab inventory
 
-Each item below describes both the visual deliverable and the learning task that depends on it. The matching script comments remain the lesson-level reference; this inventory is the consolidated production checklist.
+Each item below describes both the visual deliverable and the learning task that depends on it. The rewritten student lesson and this inventory together define the learning objective and required visual/interaction; there are no inline asset comments in the student lesson body.
 
 ### Module 1 — Read the Market Behind the Candles
 
@@ -202,7 +202,7 @@ Each item below describes both the visual deliverable and the learning task that
 
 **Difficulty must increase through reasoning, not through extra clutter or unexplained jargon.** Use the same three stage labels and a visible progress indicator across the course. Stage 1 should teach observation; Stage 2 should add comparison and interpretation; Stage 3 should transfer the idea to a new case and require independent conditional reasoning. Do not reveal Stage 3 outcomes before the initial response. An HTML text-length check is a completion aid, not a measure of conceptual correctness; feedback and a model answer must explain the quality of reasoning.
 
-Each lesson script, visual package, ChartLab and Q&A/practice task should use this same progression. The asset inventory below lists the core content; each listed ChartLab must be designed as three related stages rather than one isolated question.
+Each student lesson, visual package, ChartLab and Q&A/practice task should use this same progression. The asset inventory below lists the core content; each listed ChartLab must be designed as three related stages rather than one isolated question.
 
 Every lab must contain all of the following; if the lesson is a guided visual exercise, these can be simple controls rather than a complex application.
 
@@ -239,7 +239,7 @@ Create both **blank learner versions** and **completed teaching versions** of:
 - Pre-trade ticket: entry, invalidation, account/instrument risk calculation, target logic, costs/slippage, cancellation and management rules.
 - Post-trade review: original observation, original plan, actual price behaviour, execution, process quality and lesson learned.
 
-Use the same terms and fields in narration, ChartLabs, Q&A and worksheets. Learners should not have to learn four names for the same concept.
+Use the same terms and fields in lesson text, ChartLabs, Q&A and worksheets. Learners should not have to learn four names for the same concept.
 
 ### Course/module covers (optional for later site use)
 If/when public course pages need thumbnails, create one course cover and six module covers from the same light visual system. Make the course title legible at small sizes. Do not put tiny chart labels into a thumbnail. These images are not substitutes for the lesson-specific teaching visuals above.
@@ -248,11 +248,11 @@ If/when public course pages need thumbnails, create one course cover and six mod
 For each recorded lesson:
 - Provide time-synchronised captions (VTT or SRT).
 - Provide the final transcript in accessible text.
-- Describe meaningful visual actions in the narration or transcript. Do not make the learner depend on seeing a colour-only distinction.
+- Describe meaningful visual actions in the lesson text or accessible transcript. Do not make the learner depend on seeing a colour-only distinction.
 - Verify specialist words, price levels, numbers and chart labels against the final video.
 
 ### Data and provenance records
-For every synthetic chart, retain the OHLCV data file and the script/design source used to produce it. Include a short metadata note: synthetic purpose, timeframe, chosen volume baseline, relevant levels, intended teaching point and alternate outcomes.
+For every synthetic chart, retain the OHLCV data file and the generation/design source used to produce it. Include a short metadata note: synthetic purpose, timeframe, chosen volume baseline, relevant levels, intended teaching point and alternate outcomes.
 For every licensed chart, retain provider/source, data date/session, rights/permission and any edits. Where provider terms require a credit, place it where learners can find it.
 
 ### Q&A and answer notes
@@ -266,7 +266,7 @@ An asset cannot be marked **Approved** until all applicable checks pass:
 
 ### Teaching and accuracy
 - [ ] The teaching purpose is stated in one sentence.
-- [ ] The main idea is visible without requiring the presenter to explain every pixel.
+- [ ] The main idea is understandable without an instructor having to explain every pixel aloud.
 - [ ] The chart is realistic enough to teach but not so cluttered that the key distinction disappears.
 - [ ] There is a contrasting case or alternate outcome wherever the concept is ambiguous.
 - [ ] Observation is clearly separated from interpretation.
@@ -303,7 +303,7 @@ Use only these labels: **Not started**, **In progress**, **Needs revision**, **A
 3. Produce the remaining 29 asset packages module-by-module in lesson order, keeping concepts and terminology consistent.
 4. Build and test ChartLabs alongside the charts, with answer feedback and counterexamples rather than saving all exercises for the end.
 5. Create worksheet masters from the fields already used in Module 6, then reuse those fields in earlier practice.
-6. Record and caption only after the script, visual and interaction behaviour are approved.
+6. Produce any optional recording and captions only after the student lesson, visual and interaction behaviour are approved.
 7. Run a final novice walkthrough and accessibility review before public release.
 
 ## 10. Explicitly out of scope
