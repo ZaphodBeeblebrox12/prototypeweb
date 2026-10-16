@@ -22,6 +22,27 @@
     </div>
   {% else %}<p class="text-muted mb-5">Your courses will appear here after you enrol.</p>{% endif %}
 
+
+  {% if community_accesses %}
+    <section class="mb-5" aria-labelledby="community-access-heading">
+      <h2 id="community-access-heading" class="h4 mb-3">Community access</h2>
+      <p class="text-muted">Community access can be included with a programme and has its own access period.</p>
+      <div class="row g-3">
+        {% for entitlement in community_accesses %}
+          <div class="col-12 col-md-6">
+            <article class="card h-100"><div class="card-body">
+              <p class="text-uppercase small text-muted mb-2">Included community access</p>
+              <h3 class="h5">{{ entitlement.course.title }}</h3>
+              {% if entitlement.community_access_expires_at %}
+                <p class="mb-0">Available until <strong>{{ entitlement.community_access_expires_at|date:"j M Y" }}</strong></p>
+              {% else %}
+                <p class="mb-0">Ongoing community access</p>
+              {% endif %}
+            </div></article>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
   {% if offers %}
     <h2 class="h4 mb-3">Available courses</h2>
     <div class="row g-3">
