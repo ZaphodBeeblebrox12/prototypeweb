@@ -504,6 +504,24 @@ jobs:
                 });
               });
               assert.deepEqual(brokenAnchors, [], route + " contains broken same-page navigation targets: " + JSON.stringify(brokenAnchors));
+              const skipNavigation = await cataloguePage.evaluate(() => {
+                const link = document.querySelector("a.skip-link");
+                if (!link) return { present: false };
+                const href = link.getAttribute("href") || "";
+                const id = href.startsWith("#") ? decodeURIComponent(href.slice(1)) : "";
+                const target = id ? document.getElementById(id) : null;
+                return {
+                  present: true,
+                  href,
+                  targetFound: Boolean(target),
+                  targetTabIndex: target ? target.getAttribute("tabindex") : null,
+                  label: (link.innerText || "").trim()
+                };
+              });
+              assert.ok(skipNavigation.present, route + " is missing the keyboard skip link");
+              assert.ok(skipNavigation.targetFound, route + " skip link points to a missing target: " + JSON.stringify(skipNavigation));
+              assert.equal(skipNavigation.targetTabIndex, "-1", route + " skip target must be focusable for keyboard navigation");
+              assert.equal(skipNavigation.label, "Skip to main content", route + " skip link label should be consistent");
               await cataloguePage.setViewportSize({ width: 1280, height: 900 });
               const desktopLayout = await cataloguePage.evaluate(() => ({
                 viewport: document.documentElement.clientWidth,
