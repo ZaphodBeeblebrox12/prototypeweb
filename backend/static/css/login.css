@@ -499,3 +499,46 @@ input[type="text"]:focus {
     outline: 2px solid var(--color-accent);
     outline-offset: 2px;
 }
+
+
+/* TradeThesis editorial account styling */
+:root {
+    --color-bg: #f7f3e9;
+    --color-surface: #fffdf8;
+    --color-text: #29382e;
+    --color-text-secondary: #4d5b50;
+    --color-text-muted: #687268;
+    --color-accent: #355a46;
+    --color-dark: #254334;
+    --color-muted: #f2ecdf;
+    --color-border: #ded8ca;
+    --color-error: #a33f30;
+    --color-error-bg: #fdf0eb;
+}
+body { background: #f7f3e9; color: #29382e; }
+.brand-side {
+    background: #f2ecdf;
+    color: #29382e;
+    border-right: 1px solid #ded8ca;
+}
+.brand-side::before {
+    background: radial-gradient(circle, rgba(53, 90, 70, 0.10) 0%, transparent 70%);
+}
+.brand-logo { color: #254334; }
+.brand-logo::before { color: #c96f50; }
+.brand-tagline, .form-title { color: #254334; }
+.brand-desc { color: #58665b; }
+.feature-item { color: #46564a; }
+.feature-check { background: #e6edde; color: #355a46; }
+.brand-footer { color: #687268; }
+.form-side { background: #fffdf8; }
+.submit-btn { background: #355a46; color: #fffdf8; border: 1px solid #355a46; }
+.submit-btn:hover { background: #254334; border-color: #254334; }
+.social-btn { color: #355a46; border-color: #ded8ca; background: #fffdf8; }
+.social-btn:hover { background: #f2ecdf; border-color: #c9c1b1; }
+a { color: #355a46; }
+a:hover { color: #254334; }
+input:focus { border-color: #355a46; box-shadow: 0 0 0 3px #355a461f; }
+@media (max-width: 900px) {
+    .brand-side { border-right: 0; border-bottom: 1px solid #ded8ca; }
+}
