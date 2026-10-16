@@ -415,6 +415,23 @@ draw_chart('L05-A-03-reduced-reference', 'L05_A_overmarked_selection', l05, 'ref
            extra_text=[{'x':0.5,'y':103.0,'text':'Nearby marks combined; minor/distant marks omitted for this chart question','fontsize':8.7}],
            alt_text='Reference edit retains a defensible lower reaction area and upper reaction area while omitting redundant nearby marks, a minor fluctuation and a distant level.')
 
+
+# Lesson 5 incremental clutter edits: same synthetic candles and scale throughout.
+draw_chart('L05-A-04-minor-removed', 'L05_A_overmarked_selection', l05, 'incremental edit: remove a minor fluctuation',
+           bands=[l05_all_bands[i] for i in (0,1,2,4,6)],
+           extra_text=[{'x':0.3,'y':104.95,'text':'A','fontsize':8.5},{'x':0.3,'y':102.2,'text':'B','fontsize':8.5},
+                       {'x':0.3,'y':101.83,'text':'C','fontsize':8.5},{'x':0.3,'y':99.78,'text':'E','fontsize':8.5},
+                       {'x':0.3,'y':99.08,'text':'F','fontsize':8.5},{'x':0.3,'y':96.55,'text':'G','fontsize':8.5}],
+           alt_text='Same synthetic chart after candidate D, the minor local fluctuation, is removed; A, B, C, E, F and G remain.')
+draw_chart('L05-A-05-nearby-combined', 'L05_A_overmarked_selection', l05, 'incremental edit: combine nearby marks',
+           bands=[{'low':98.7,'high':99.65,'label':None,'alpha':0.16},
+                  {'low':101.35,'high':102.15,'label':None,'alpha':0.16},
+                  {'low':103.4,'high':104.7,'label':None,'alpha':0.13},
+                  {'low':96.0,'high':96.45,'label':None,'alpha':0.12,'color':'#9BAEC2','edge_color':'#7B8B99'}],
+           extra_text=[{'x':0.3,'y':104.95,'text':'A','fontsize':8.5},{'x':0.3,'y':102.2,'text':'B + C','fontsize':8.5},
+                       {'x':0.3,'y':99.78,'text':'E + F','fontsize':8.5},{'x':0.3,'y':96.55,'text':'G','fontsize':8.5}],
+           alt_text='Same chart with E/F combined into one lower reaction area and B/C combined into one upper-middle area; A and distant G remain.')
+
 # ChartLab 1: Clear W — reference views to accompany the interaction, not a substitute for it.
 cl01_closes = [105.0,103.2,101.2,99.4,98.1,99.3,101.3,103.2,102.1,100.5,98.45,99.5,101.0,102.4,102.1,101.4]
 cl01 = bars_from_closes(cl01_closes, 502, {4:(97.75,None),10:(98.05,None),7:(None,103.8)})

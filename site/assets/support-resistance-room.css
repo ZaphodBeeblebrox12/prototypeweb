@@ -167,3 +167,18 @@
 .sr-room-quiz-submit{margin-top:10px}
 .sr-room-quiz-item-feedback{margin-top:10px}
 @media(max-width:640px){.sr-room-teaching-selection{padding:11px}.sr-room-candidate-toggle{min-width:48px;padding:8px 9px}.sr-room-quiz-item{padding:11px}.sr-room-quiz-question{font-size:12px}}
+
+/* Lesson 5 editing activity and embedded ChartLab */
+.sr-room-teaching-editing{margin:14px 0;padding:13px;border:1px solid #dfe5d9;border-radius:10px;background:#f8faf5}.sr-room-teaching-editing[hidden]{display:none!important}
+.sr-room-edit-list{display:grid;gap:7px;margin:10px 0}.sr-room-edit-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(155px,.6fr);gap:10px;align-items:center;padding:8px 10px;border:1px solid #e4e0d6;border-radius:8px;background:#fff}
+.sr-room-edit-identity{display:grid;gap:2px;min-width:0}.sr-room-edit-identity strong{font-size:11px;color:var(--ink)}.sr-room-edit-identity span{font-size:10px;line-height:1.45;color:var(--muted)}
+.sr-room-edit-select{width:100%;min-width:0;border:1px solid #d8d4c9;border-radius:6px;padding:7px;background:#fffdf8;color:var(--ink);font:inherit;font-size:11px}
+#sr-teaching-editing-rationale{box-sizing:border-box;width:100%;min-width:0;resize:vertical;border:1px solid #ddd8cb;border-radius:7px;padding:10px;background:#fff;color:var(--ink);font:inherit;font-size:12px;line-height:1.6}
+.sr-room-edit-actions{display:flex;justify-content:flex-end;margin-top:9px}.sr-room-edit-actions button{font-size:11px}
+.sr-room-edit-feedback{margin:10px 0 0;padding:10px;border-radius:7px;background:#edf2e8;color:#405741;font-size:11px;line-height:1.6}
+.sr-room-chartlab-panel{margin-top:18px;border:1px solid #ded8ca;border-radius:12px;overflow:hidden;background:#fffdf8}.sr-room-chartlab-panel[hidden]{display:none!important}
+.sr-room-chartlab-intro{padding:17px 18px 12px;border-bottom:1px solid #e5dfd3}.sr-room-chartlab-intro h3{margin:5px 0 7px;font-size:19px;font-weight:600;letter-spacing:-.02em;color:var(--ink)}
+.sr-room-chartlab-intro p{margin:6px 0;color:var(--text);font-size:12px;line-height:1.65}.sr-room-chartlab-intro .sr-room-chartlab-local-note{font-size:10px;color:var(--muted)}
+#sr-chartlab-frame{display:block;width:100%;height:1200px;border:0;background:#f8f5ed}.sr-room-work-grid[hidden]{display:none!important}
+@media(max-width:640px){.sr-room-edit-row{grid-template-columns:minmax(0,1fr);gap:6px}.sr-room-chartlab-intro{padding:13px 12px 9px}.sr-room-chartlab-intro h3{font-size:17px}#sr-chartlab-frame{height:1600px}}
+@media(min-width:641px){.sr-room-edit-row{grid-template-columns:minmax(0,1fr) minmax(170px,.62fr)}}
