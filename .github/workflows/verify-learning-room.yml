@@ -34,6 +34,28 @@ jobs:
           npm install --prefix /tmp/tt-playwright --no-save --no-audit --no-fund playwright
           /tmp/tt-playwright/node_modules/.bin/playwright install chromium --with-deps
 
+      - name: Stage chart images for local browser tests
+        run: |
+          python - <<'PY'
+          import re
+          import shutil
+          from pathlib import Path
+          source = Path("course-content/support-resistance/chart_assets/charts")
+          app = Path("site/assets/support-resistance-room.js").read_text(encoding="utf-8")
+          names = sorted(set(re.findall(r"""["']([A-Za-z0-9_-]+\.png)["']""", app)))
+          names = [name for name in names if name.startswith(("L", "CL"))]
+          missing = [name for name in names if not (source / name).is_file()]
+          if missing:
+              raise SystemExit("Missing learning-room chart assets: " + ", ".join(missing))
+          target = Path("site/assets/support-resistance-charts")
+          if target.exists():
+              shutil.rmtree(target)
+          target.mkdir(parents=True, exist_ok=True)
+          for name in names:
+              shutil.copy2(source / name, target / name)
+          print(f"Staged {len(names)} lesson charts for browser smoke testing.")
+          PY
+
       - name: Run lesson interaction smoke tests
         run: |
           cat > /tmp/learning-room-smoke.cjs <<'JS'
