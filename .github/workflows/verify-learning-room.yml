@@ -464,6 +464,39 @@ jobs:
               "Live-class page has horizontal scrolling on mobile: " + JSON.stringify(publicOverflow));
             console.log("PUBLIC_CTA_PREVIEW_PASS: checkout, programme enquiry and live-class form are honest preview flows.");
 
+            // Sweep the main site journeys for document-level overflow at a narrow mobile width and desktop width.
+            const siteRoutes = [
+              "/index.html",
+              "/courses.html",
+              "/trading-path.html",
+              "/construct.html",
+              "/live-class.html",
+              "/community.html",
+              "/foundations.html",
+              "/member-access.html",
+              "/member-area.html",
+              "/support-resistance-room.html",
+              "/chartlab/clear-w.html"
+            ];
+            for (const route of siteRoutes) {
+              await cataloguePage.setViewportSize({ width: 390, height: 844 });
+              await cataloguePage.goto(server + route, { waitUntil: "load", timeout: 25000 });
+              const mobileLayout = await cataloguePage.evaluate(() => ({
+                viewport: document.documentElement.clientWidth,
+                page: document.documentElement.scrollWidth
+              }));
+              assert.ok(mobileLayout.page <= mobileLayout.viewport + 1,
+                route + " overflows horizontally at mobile width: " + JSON.stringify(mobileLayout));
+              await cataloguePage.setViewportSize({ width: 1280, height: 900 });
+              const desktopLayout = await cataloguePage.evaluate(() => ({
+                viewport: document.documentElement.clientWidth,
+                page: document.documentElement.scrollWidth
+              }));
+              assert.ok(desktopLayout.page <= desktopLayout.viewport + 1,
+                route + " overflows horizontally at desktop width: " + JSON.stringify(desktopLayout));
+            }
+            console.log("SITEWIDE_MOBILE_PASS: " + siteRoutes.length + " primary pages fit mobile and desktop viewports.");
+
             assert.deepEqual(pageErrors, [], "Unexpected browser JavaScript errors");
             assert.deepEqual(consoleErrors, [], "Unexpected browser console errors: " + JSON.stringify(consoleErrors));
             assert.deepEqual(failedRequests, [], "Failed browser requests: " + JSON.stringify(failedRequests));
