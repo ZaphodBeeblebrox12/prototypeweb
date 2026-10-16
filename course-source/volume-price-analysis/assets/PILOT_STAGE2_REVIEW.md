@@ -54,9 +54,11 @@ The following checks were verified against the committed branch files:
 
 A further read-through found two issues in the first navigation patch: clicking an already unlocked progress step changed the visible section without updating `aria-current`, and restarting from the completion screen hid the element that still held keyboard focus. The code now keeps the highest unlocked step separate from the active step, updates the current-step indicator when navigating backward or forward, resets unlock state on restart, and moves focus back to the first stage heading after restart.
 
-### Browser smoke fixture
+### Browser smoke checks
 
-A Chromium/Playwright fixture was exercised successfully via in-memory page content. It mirrors the ChartLab interaction handlers and uses inline stand-in chart images. Twelve checks passed:
+**Pass 1 — interaction fixture with stand-in charts:** A Chromium/Playwright fixture passed 12 interaction/responsiveness checks. This established baseline behaviour but did not validate the chart SVGs.
+
+**Pass 2 — self-contained review build with real chart SVGs:** A separate local Chromium review build embedded the current five mobile SVG exports and exercised the progression with the current interaction rules. Eleven checks passed:
 
 - Initial state and disabled stages.
 - Incorrect Level 1 answer gives feedback but does not unlock the next stage.
@@ -70,8 +72,10 @@ A Chromium/Playwright fixture was exercised successfully via in-memory page cont
 - Rendered fixture has no horizontal overflow at 360px width.
 - Reduced-motion preference is detected.
 - No JavaScript page errors in the fixture at desktop or mobile sizes.
+- All five embedded mobile SVG charts loaded with positive natural dimensions and had non-empty alternative text.
+- The model-reading disclosure appeared only after the outcome reveal and opened/closed correctly, with the expected baseline evidence available.
 
-**Important limit:** this does not test the committed HTML file or its actual SVGs. An attempt to navigate the local file and loopback-hosted page was blocked by execution-environment policy, so the exact branch page still needs to be rendered and inspected in a normal browser. Do not treat fixture results as completed actual-page validation.
+**Important limit:** the self-contained review build was assembled from a recovered copy of the lesson markup, the checked-in interaction behaviour and the current mobile SVG assets. It was not a byte-for-byte render of the committed HTML with its relative `<picture>` source selection. The exact branch page still needs a normal-browser visual/interaction review; the build's results are stronger than a stand-in fixture but do not close that gate.
 
 - The six fixed SVGs contain readable title, description and annotation text (no legacy escapes remaining in those visible nodes).
 - Each SVG in `source/` matches its corresponding `exports/` file.
@@ -81,7 +85,7 @@ A Chromium/Playwright fixture was exercised successfully via in-memory page cont
 
 ### Responsive mobile assets
 
-The standalone HTML uses `<picture>` with a `(max-width: 720px)` source for each chart. Each mobile SVG is separately reflowed, has an accessible title/description, and has a matching editable source/export pair. The comparison case stacks its two panels vertically. Mobile font sizes and volume summaries were increased, the floating reference label was removed from the candle area, and the four single-chart variants were shortened to remove excess blank space below the histogram. Source/export equivalence and file references were verified against the committed branch.
+The standalone HTML uses `<picture>` with a `(max-width: 720px)` source for each chart. Each mobile SVG is separately reflowed, has an accessible title/description, and has a matching editable source/export pair. The comparison case stacks its two panels vertically. Mobile font sizes and volume summaries were increased again for phone-scale readability, the floating reference label was removed from the candle area, and the four single-chart variants were shortened to remove excess blank space below the histogram. Source/export equivalence, accessible title/description nodes and file references were verified against the committed branch.
 
 ## 4. Runtime checkpoint
 
@@ -89,7 +93,7 @@ The main narration in M01-L01 is about 842 words and its extended spoken case an
 
 ## 5. Validation still required
 
-- Open the committed standalone HTML in a normal browser and verify the decoded SVG titles, annotations, larger mobile labels and punctuation visually. Locally rendered preview variants generated from the same CSV/layout were inspected, but exact rendering of the committed page and SVG files has not been completed.
+- Open the committed standalone HTML in a normal browser and verify the decoded SVG titles, annotations, enlarged mobile labels and punctuation visually. A self-contained review build with the current mobile SVGs was visually inspected and exercised at 360px, but exact rendering of the committed page and `<picture>` breakpoints has not been completed.
 - Run all stages end to end: incorrect Level 1 attempt, correct retry, Level 2 submission, Level 3 submission, outcome reveal, opening and closing the model-reading disclosure, reflection and restart.
 - Use keyboard only. Verify unlocked navigation, active-step announcement, visible focus, logical focus order and no keyboard trap.
 - Enable OS/browser reduce-motion and verify that stage/restart scrolling is not smooth.
