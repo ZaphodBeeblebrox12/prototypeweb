@@ -2,7 +2,7 @@
 
 **Target repository:** `ZaphodBeeblebrox12/prototypeweb`  
 **Working branch:** `my-new-branch`  
-**Status:** Django Academy is imported on draft PR #4, which targets `my-new-branch`. Routes, catalogue seed, public-to-backend routing and the end-to-end learner journey are not yet deployed or verified.
+**Status:** Django Academy is imported on draft PR #4, which targets `my-new-branch`. The latest verified CI run passed on Python 3.11 and 3.12 (666 passed, 1 skipped per runtime); all three source-course validators, the Support & Resistance browser smoke test and the integration-target guard also passed. These are isolated checks, not a staging or production sign-off. Catalogue records have not been seeded, public-to-Django routing is not deployed, and the end-to-end learner journey remains unverified.
 
 ## 1. Verified current state
 
@@ -19,7 +19,7 @@ The branch contains the static TradeThesis website, course-room prototype, learn
 - Support & Resistance course: `course-content/support-resistance/`.
 - Existing curriculum metadata: `course-integration/curriculum.json`.
 
-The draft integration PR now includes a self-contained Django project under `backend/` (`backend/manage.py`, `backend/config/`, app code, migrations and tests). Until that PR is integrated and deployed, the member screens on `my-new-branch` remain static previews rather than secure account pages. The imported runtime itself is not yet connected to the public pages or verified in a staging deployment.
+The draft integration PR now includes a self-contained Django project under `backend/` (`backend/manage.py`, `backend/config/`, app code, migrations and tests). Django account and learning templates exist, and `site/member-access.html` links to the real authentication routes rather than accepting credentials in a static form. However, until routing is integrated and deployed, public member screens do not reach the Django runtime and remain previews. The runtime has not yet been verified in staging.
 
 ### Django Academy implementation imported on a draft feature PR
 
@@ -64,7 +64,7 @@ Create explicit Course/Module/Lesson records from the approved source metadata. 
 | ₹999 Trading Path / starter drip | One Course with the 30 ordered daily lessons, checkpoint metadata and its own CourseOffer | One-time payment grants course entitlement only; lifetime access must not imply bot access. Keep drip pacing separate from expiry. |
 | Support & Resistance | One Course, six modules and 18 lessons mapped from `course-content/support-resistance/production/course_content_manifest.json` | Preserve the three approved ChartLab placements. Instructor answer keys and internal feedback must not be added to learner payloads. |
 | Volume Price Analysis | Separate Course and ordered modules/lessons from `course-source/volume-price-analysis/` | Keep it distinct from Support & Resistance and the Trading Path; do not merge curricula just because they share the member area. |
-| CONSTRUCT | Its own Course/offer and curriculum, using `course-source/construct/` as source of truth | ₹17,000 core offer and included 12-month community access are separate entitlements/business rules. The current one-course CourseOffer does not by itself model an included community bundle; add explicit bundle/community entitlement support before selling through this integration. |
+| CONSTRUCT | Its own Course/offer and curriculum, using `course-source/construct/` as source of truth | ₹17,000 core offer and included 12-month community access are separate entitlements/business rules. CourseOffer/CourseEntitlement now model the community term in calendar months independently of course expiry; access-target and dashboard tests cover grant, expiry and refund revocation. Before sale, still seed the dedicated hidden one-time Plan, CourseOffer and channel mappings, then verify purchase/refund/reconciliation in staging. |
 | Six-week live classroom | Separate offer/enrolment path, not a synonym for CONSTRUCT | Do not represent cohort dates, sessions or fulfilment as available until the real delivery workflow is configured. |
 | Future micro-courses | Each course gets its own stable slug, published modules/lessons and explicit offer if sold separately | Catalogue cards, enrolment and access must use backend records, not client-side price or access flags. |
 
@@ -72,14 +72,14 @@ The mapping above is the proposed implementation model; it does not mean these p
 
 ## 4. Frontend changes required
 
-1. **Member access:** replace the preview form behaviour with ordinary links/forms to the real Django login, sign-up and account-recovery routes. Do not display a success message unless the server confirms the action.
-2. **Member area:** replace hard-coded preview enrolments/progress with the authenticated `/learn/` page. Keep the screen orientation and brand language; render courses/progress from backend state.
-3. **Course cards and detail pages:** public pages may preview course names, summaries and public offer metadata. Paid lesson bodies, answer keys, learner submissions and private downloads must only be delivered after server-side permission checks.
-4. **Checkout:** link each CTA to a server-resolved active offer. Never trust an amount/discount supplied by the browser or grant access from a success-return URL alone. Course access follows verified provider payment processing and an idempotent entitlement grant.
-5. **Lesson progress:** use the Django lesson/progress routes with same-origin session and CSRF protection. Show “saved” only after a successful response; preserve a visible error/retry state on failure.
+1. **Member access:** `site/member-access.html` now links to Django login, sign-up and password-reset routes instead of collecting passwords in a static form. Still verify the routes, redirects and recovery flow on the chosen host.
+2. **Member area:** the authenticated `/learn/` page renders courses, progress and separate community access from backend state. `site/member-area.html` remains a prototype until hosting/navigation routes members to Django.
+3. **Course catalogue:** importers validate the Trading Path (30 lessons/four levels), Support & Resistance (18 lessons/six modules) and Volume Price Analysis (30 lessons/six modules). They have not been applied to the database; create-only `--apply` imports remain draft-only and do not create offers.
+4. **Checkout:** the course detail template submits to the server-side payment-start route using a selected active one-time CourseOffer. Real offers, provider/webhook configuration and the staging payment-to-entitlement journey are still unverified.
+5. **Lesson progress:** the authenticated Django progress endpoint applies server-side access checks, and the lesson page reports the response. Verify save/error/retry in the hosted journey with real session and CSRF configuration.
 6. **Drip release:** release eligibility is computed by the backend. The front end presents release state but cannot unlock a lesson by changing JavaScript or DOM state.
-7. **Media and charts:** preserve readability and zoom/open controls. Any confidential reference/answer state must be separately protected at delivery time; CSS-only hiding is not permission enforcement.
-8. **Sitewide UX:** verify public site, login/signup/recovery, member home, course overview, lesson, checkout, locked lesson, progress/error states and mobile view as one continuous journey.
+7. **Media and charts:** preserve readability and zoom/open controls. Required charts/interactive ChartLab assets are not all connected to the Academy records yet. Confidential source, answers and downloads also require private source/storage and delivery.
+8. **Sitewide UX:** still run one hosted desktop/mobile journey across public site, login/signup/recovery, member home, course overview, lesson, checkout, locked lesson and progress/error states.
 
 ## 5. Backend and release gates
 
@@ -90,7 +90,7 @@ The mapping above is the proposed implementation model; it does not mean these p
 - Choose private storage/delivery for paid lesson bodies and protected reference material before learner launch.
 - **Repository privacy blocker:** the current GitHub repository is public and contains paid course source plus internal instructional/reference material. A private Django route does not make copies already committed to a public repository private. Before selling any course, change the source repository's visibility or move confidential course bodies, answer keys and protected assets into a private repository/storage location; verify only appropriate public pages/assets are deployed.
 - Seed and validate products from source manifests; reject missing lessons, unstable slugs, duplicated order positions or references to absent assets.
-- Add acceptance coverage for logged-out access, unpaid user, active entitlement, expired/revoked entitlement, drip-locked lesson, progress save/retry, duplicate payment events and refund/dispute state.
+- Unit/regression coverage now exercises protected lesson access, progress, duplicate payment activation, course refund revocation and the separate community term. It does not substitute for hosted acceptance checks for logged-out access, unpaid users, expired/revoked access, drip release, progress save/retry and provider webhook retries.
 - Run a complete staging journey with test payment credentials before launch; no live payment credentials belong in code or this repository.
 
 ## 6. Work order
