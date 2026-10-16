@@ -2,7 +2,7 @@
 
 **Lesson:** What Candlesticks Don't Tell You: Reading the Volume Behind Price  
 **Asset ID:** VPA-M01-L01-01  
-**Status:** Pass 1 package created; technical file check pending; novice pilot not yet run.
+**Status:** Pass 1 package created; structural checks passed for file presence, chart/data consistency and relative asset paths. A novice usability test, rendered-browser check and formal accessibility review have not yet been run.
 
 ## Contents
 
