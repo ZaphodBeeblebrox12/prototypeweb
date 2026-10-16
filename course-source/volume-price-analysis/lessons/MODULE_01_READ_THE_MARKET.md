@@ -17,12 +17,12 @@ By the end, a learner should be able to describe a candle's price outcome and it
 **Target delivered duration:** 11–15 minutes; never less than 10. The full lesson includes spoken teaching, a narrated chart walkthrough, learner practice, feedback and recap. Rehearse and time the complete lesson. Any lesson longer than 20 minutes needs a clear teaching reason.
 
 ### Outline and timing
-- **0:00–1:00 — The problem:** identical-looking candles can occur under different levels of activity.
-- **1:00–3:00 — Two observations:** what price did and how much activity was recorded.
-- **3:00–5:30 — The relationship:** outcome in context, not a universal candle-to-signal dictionary.
-- **5:30–8:00 — Worked comparison:** same candle shape, contrasting volume and location.
-- **8:00–10:30 — ChartLab:** describe before interpreting; compare competing explanations.
-- **10:30–11:00 — Recap and knowledge check.**
+- **0:00–1:00 — The problem:** identical-looking candles can occur in different contexts.
+- **1:00–2:30 — Level 1, Notice:** identify the candidate candle and compare its activity with a marked baseline before offering an interpretation.
+- **2:30–4:30 — The core idea:** separate what price did from how much activity was recorded; explain why volume is not a stand-alone signal.
+- **4:30–7:00 — Level 2, Compare:** walk through the two matched-size candles on a shared vertical scale; compare prior structure, location and relative activity.
+- **7:00–10:30 — Level 3, Apply:** interpret a new breakout event before showing later bars, then compare continuation and failure outcomes.
+- **10:30–11:30 — Recap and knowledge check: state what is observed, what remains uncertain, and what evidence comes next.**
 
 ### Full narration script
 Look at a candlestick chart for a moment. You can see where price opened, where it traded, and where it closed. The candle also gives you a visual impression of the struggle during that period: a long body, a short body, or a wick showing that price travelled somewhere and did not stay there. Those are useful observations. But the candle does not tell the whole story.
@@ -39,7 +39,7 @@ Now add location. A strong green candle in the middle of a broad, quiet range is
 
 There is another trap: assuming that rising price with high volume must be bullish and rising price with low volume must be bearish. Those shortcuts throw away the important details. High activity can accompany progress, conflict, liquidation, or a climax. Low activity can reflect a lack of opposing interest, a temporary pause, or simply a quieter session. A low volume move can continue; a high volume move can fail. The job is to study the result and what happens next, not to assign a fixed meaning to a colour.
 
-For the first pass through any chart, use this four-part sequence. One: describe the the pattern made by recent highs and lows before the event. Two: describe the candle itself. Three: compare the volume with a reasonable local comparison level. Four: note what price does after the event. The fourth step is essential. Without what happens next, you have an observation and a possible explanation, not proof.
+For the first pass through any chart, use this four-part sequence. One: describe the pattern made by recent highs and lows before the event. Two: describe the candle itself. Three: compare the volume with a reasonable local comparison level. Four: note what price does after the event. The fourth step is essential. Without what happens next, you have an observation and a possible explanation, not proof.
 
 Let's practise with two examples. In Example A, price has pulled back within an established uptrend and prints a green candle on moderate volume. In Example B, price has risen for several sessions and prints a similar green candle on exceptionally high volume near a prior high. Do not decide that A is automatically a buy or B automatically a sell. For A, ask whether the pullback is losing downward progress and whether price can continue. For B, ask whether price can hold above the prior high, whether the candle closes strongly, and whether subsequent bars make progress or stall. The lesson is not to predict from the first bar; it is to ask the right next question.
 
