@@ -1,7 +1,7 @@
 # TradeThesis image readability audit
 
-**Audit base:** `my-new-branch` at `5df97459da7be69d93d5997d978d7864ec6a9726` (16 October 2026)  
-**Implementation branch:** `feat/instructional-image-readability-20261016`  
+**Audit base:** source inventory/audit initiated on `my-new-branch` on 16 October 2026; the viewer and panel-splitting work has since been integrated into `my-new-branch`.  
+**Original implementation branches:** `feat/instructional-image-readability-20261016` and `feat/instructional-image-zoom-audit` (changes were ported selectively because their histories were not safe to merge into the working branch).  
 **Scope:** repository image assets, deployed static-site pages, Learning Room image renderers, V5.2 Lessons 12–14, staged chart activities, and existing CI validation.  
 **Important scope distinction:** repository inventory counts include teaching sources, production files, duplicates, snapshots and other non-public assets; they are not all displayed by the website.
 
@@ -569,6 +569,10 @@ The full appendix below lists all **465** image/vector asset paths found in the 
 
 - Repository, branch, page shell, script references, CSS sizing rules, figure files, figure inventory, and existing Learning Room CI workflow were inspected.
 - The static figure source assets and their visible panel structures were reviewed using representative PNGs (including the multi-panel figures called out above).
-- A reusable inspector and focused Playwright test are included in the proposed feature branch change set.
-- Browser validation should be considered complete only if the new GitHub Actions browser workflow passes. If the workflow cannot run, or cannot visually inspect a source, it must be reported rather than described as verified.
-- No chart, annotation, lesson text, stage filename, model answer, answer gate, legacy route, or activity scoring rule is intentionally modified by this readability work.
+- The reusable inspector is integrated at `site/assets/image-inspector.js` and `site/assets/image-inspector.css`; its Playwright smoke test is at `site/tests/image-inspector-smoke.cjs`.
+- Dense V5.2 comparison figures are split into source-preserving SVG viewBox crops while keeping the complete original figure available in a disclosure. The inspector supports zoom/pan/fit, keyboard/touch inspection, Escape/close, focus restoration and scroll-position restoration.
+- The shared Learning Room chart renderer prefers available SVG variants but preserves the canonical PNG basename for stage-to-model-answer mapping and falls back to PNG if SVG fails. Both preview and browser-test staging include SVG counterparts when they exist.
+- Browser evidence: run [38894876693](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38894876693) passed the learner-room, catalogue, member-preview, responsive, anchor/skip-link and image-inspector smoke tests. Its [image-inspector screenshot artifact](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38894876693/artifacts/12043845706) contains desktop zoom, a representative panel crop, a six-panel stack and the mobile viewer. Run [38894610643](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38894610643) passed the native-dimension inventory generator and published the inventory artifact.
+- A representative screenshot review found a clipped source-text sliver at the top of the first FIG10 crop. This has been corrected by moving the top-row crop start down while keeping the complete original figure available. The correction is being rechecked on `my-new-branch`; the earlier successful run does not certify the newer crop-boundary edit until the follow-up run completes.
+- The audit does not claim every image received pixel-by-pixel visual QA or testing on a physical iOS/Safari device. FIG00 source-quality inspection remains unverified, and single-chart annotations may need additional export/detail-panel review.
+- No chart candles, market-data values, annotations, lesson text, stage filenames, model-answer content, answer gates, legacy routes, or activity scoring rules are intentionally modified by the readability work.
