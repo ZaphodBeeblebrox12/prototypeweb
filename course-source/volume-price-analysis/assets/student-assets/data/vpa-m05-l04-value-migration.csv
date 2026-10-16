@@ -1,0 +1,166 @@
+stage,record_type,bar,open,high,low,close,volume,price_level,profile_volume,metric,value,profile_period
+NOTICE,PRICE_BAR,1,91.45,92.35,91.05,92,320,,,,,earlier session
+NOTICE,PRICE_BAR,2,92,94.55,91.7,94,360,,,,,earlier session
+NOTICE,PRICE_BAR,3,94,96.4,93.4,96,400,,,,,earlier session
+NOTICE,PRICE_BAR,4,96,98.7,95.55,98,450,,,,,earlier session
+NOTICE,PRICE_BAR,5,98,99.35,97.6,99,480,,,,,earlier session
+NOTICE,PRICE_BAR,6,99,100.55,98.7,100,500,,,,,earlier session
+NOTICE,PRICE_BAR,7,100,101.4,99.4,101,520,,,,,earlier session
+NOTICE,PRICE_BAR,8,101,101.7,100.05,100.5,490,,,,,earlier session
+NOTICE,PRICE_BAR,9,100.5,102.35,100.1,102,550,,,,,earlier session
+NOTICE,PRICE_BAR,10,102,103.55,101.7,103,600,,,,,earlier session
+NOTICE,PRICE_BAR,11,103,104.4,102.4,104,630,,,,,earlier session
+NOTICE,PRICE_BAR,12,104,104.7,103.05,103.5,580,,,,,earlier session
+NOTICE,PRICE_BAR,13,103.5,105.35,103.1,105,650,,,,,earlier session
+NOTICE,PRICE_BAR,14,105,106.55,104.7,106,690,,,,,earlier session
+COMPARE_A,PRICE_BAR,1,91.45,92.35,91.05,92,320,,,,,earlier session
+COMPARE_A,PRICE_BAR,2,92,94.55,91.7,94,360,,,,,earlier session
+COMPARE_A,PRICE_BAR,3,94,96.4,93.4,96,400,,,,,earlier session
+COMPARE_A,PRICE_BAR,4,96,98.7,95.55,98,450,,,,,earlier session
+COMPARE_A,PRICE_BAR,5,98,99.35,97.6,99,480,,,,,earlier session
+COMPARE_A,PRICE_BAR,6,99,100.55,98.7,100,500,,,,,earlier session
+COMPARE_A,PRICE_BAR,7,100,101.4,99.4,101,520,,,,,earlier session
+COMPARE_A,PRICE_BAR,8,101,101.7,100.05,100.5,490,,,,,earlier session
+COMPARE_A,PRICE_BAR,9,100.5,102.35,100.1,102,550,,,,,earlier session
+COMPARE_A,PRICE_BAR,10,102,103.55,101.7,103,600,,,,,earlier session
+COMPARE_A,PRICE_BAR,11,103,104.4,102.4,104,630,,,,,earlier session
+COMPARE_A,PRICE_BAR,12,104,104.7,103.05,103.5,580,,,,,earlier session
+COMPARE_A,PRICE_BAR,13,103.5,105.35,103.1,105,650,,,,,earlier session
+COMPARE_A,PRICE_BAR,14,105,106.55,104.7,106,690,,,,,earlier session
+COMPARE_B,PRICE_BAR,1,98.85,99.75,98.45,99.4,208,,,,,later session
+COMPARE_B,PRICE_BAR,2,99.4,100.7,99.1,100.15,306,,,,,later session
+COMPARE_B,PRICE_BAR,3,100.15,100.55,99.4,100,340,,,,,later session
+COMPARE_B,PRICE_BAR,4,100,101.45,99.55,100.75,293,,,,,later session
+COMPARE_B,PRICE_BAR,5,100.75,101.1,100.2,100.6,408,,,,,later session
+COMPARE_B,PRICE_BAR,6,100.6,101.9,100.3,101.35,425,,,,,later session
+COMPARE_B,PRICE_BAR,7,101.35,101.75,100.6,101.2,338,,,,,later session
+COMPARE_B,PRICE_BAR,8,101.2,102.65,100.75,101.95,417,,,,,later session
+COMPARE_B,PRICE_BAR,9,101.95,102.3,101.4,101.8,468,,,,,later session
+COMPARE_B,PRICE_BAR,10,101.8,103.55,101.5,103,600,,,,,later session
+COMPARE_B,PRICE_BAR,11,103,104.4,102.4,104,630,,,,,later session
+COMPARE_B,PRICE_BAR,12,104,104.7,103.05,103.5,580,,,,,later session
+COMPARE_B,PRICE_BAR,13,103.5,105.35,103.1,105,650,,,,,later session
+COMPARE_B,PRICE_BAR,14,105,106.55,104.7,106,690,,,,,later session
+APPLY_INITIAL,PRICE_BAR,1,91.45,92.35,91.05,92,320,,,,,later session
+APPLY_INITIAL,PRICE_BAR,2,92,94.55,91.7,94,360,,,,,later session
+APPLY_INITIAL,PRICE_BAR,3,94,96.4,93.4,96,400,,,,,later session
+APPLY_INITIAL,PRICE_BAR,4,96,98.7,95.55,98,450,,,,,later session
+APPLY_INITIAL,PRICE_BAR,5,98,99.35,97.6,99,480,,,,,later session
+APPLY_INITIAL,PRICE_BAR,6,99,100.55,98.7,100,500,,,,,later session
+APPLY_INITIAL,PRICE_BAR,7,100,101.4,99.4,101,520,,,,,later session
+APPLY_INITIAL,PRICE_BAR,8,101,101.7,100.05,100.5,490,,,,,later session
+APPLY_INITIAL,PRICE_BAR,9,100.5,102.35,100.1,102,550,,,,,later session
+APPLY_INITIAL,PRICE_BAR,10,102,103.55,101.7,103,600,,,,,later session
+APPLY_INITIAL,PRICE_BAR,11,103,104.4,102.4,104,630,,,,,later session
+APPLY_CONTINUATION,PRICE_BAR,1,91.45,92.35,91.05,92,320,,,,,subsequent profile
+APPLY_CONTINUATION,PRICE_BAR,2,92,94.55,91.7,94,360,,,,,subsequent profile
+APPLY_CONTINUATION,PRICE_BAR,3,94,96.4,93.4,96,400,,,,,subsequent profile
+APPLY_CONTINUATION,PRICE_BAR,4,96,98.7,95.55,98,450,,,,,subsequent profile
+APPLY_CONTINUATION,PRICE_BAR,5,98,99.35,97.6,99,480,,,,,subsequent profile
+APPLY_CONTINUATION,PRICE_BAR,6,99,100.55,98.7,100,500,,,,,subsequent profile
+APPLY_CONTINUATION,PRICE_BAR,7,100,101.4,99.4,101,520,,,,,subsequent profile
+APPLY_CONTINUATION,PRICE_BAR,8,101,101.7,100.05,100.5,490,,,,,subsequent profile
+APPLY_CONTINUATION,PRICE_BAR,9,100.5,102.35,100.1,102,550,,,,,subsequent profile
+APPLY_CONTINUATION,PRICE_BAR,10,102,103.55,101.7,103,600,,,,,subsequent profile
+APPLY_CONTINUATION,PRICE_BAR,11,103,104.4,102.4,104,630,,,,,subsequent profile
+APPLY_CONTINUATION,PRICE_BAR,12,104,107.45,103.6,107,700,,,,,subsequent profile
+APPLY_CONTINUATION,PRICE_BAR,13,107,108.45,106.6,108,730,,,,,subsequent profile
+APPLY_CONTINUATION,PRICE_BAR,14,108,109.45,107.6,109,750,,,,,subsequent profile
+APPLY_FAILURE,PRICE_BAR,1,91.45,92.35,91.05,92,320,,,,,return to earlier value
+APPLY_FAILURE,PRICE_BAR,2,92,94.55,91.7,94,360,,,,,return to earlier value
+APPLY_FAILURE,PRICE_BAR,3,94,96.4,93.4,96,400,,,,,return to earlier value
+APPLY_FAILURE,PRICE_BAR,4,96,98.7,95.55,98,450,,,,,return to earlier value
+APPLY_FAILURE,PRICE_BAR,5,98,99.35,97.6,99,480,,,,,return to earlier value
+APPLY_FAILURE,PRICE_BAR,6,99,100.55,98.7,100,500,,,,,return to earlier value
+APPLY_FAILURE,PRICE_BAR,7,100,101.4,99.4,101,520,,,,,return to earlier value
+APPLY_FAILURE,PRICE_BAR,8,101,101.7,100.05,100.5,490,,,,,return to earlier value
+APPLY_FAILURE,PRICE_BAR,9,100.5,102.35,100.1,102,550,,,,,return to earlier value
+APPLY_FAILURE,PRICE_BAR,10,102,103.55,101.7,103,600,,,,,return to earlier value
+APPLY_FAILURE,PRICE_BAR,11,103,104.4,102.4,104,630,,,,,return to earlier value
+APPLY_FAILURE,PRICE_BAR,12,104,104.45,102.6,103,730,,,,,return to earlier value
+APPLY_FAILURE,PRICE_BAR,13,103,103.45,99.6,100,780,,,,,return to earlier value
+APPLY_FAILURE,PRICE_BAR,14,100,100.45,97.6,98,820,,,,,return to earlier value
+NOTICE,PROFILE_BIN,,,,,,,90,80,,,earlier session
+NOTICE,PROFILE_BIN,,,,,,,92,180,,,earlier session
+NOTICE,PROFILE_BIN,,,,,,,94,400,,,earlier session
+NOTICE,PROFILE_BIN,,,,,,,96,850,,,earlier session
+NOTICE,PROFILE_BIN,,,,,,,98,780,,,earlier session
+NOTICE,PROFILE_BIN,,,,,,,100,500,,,earlier session
+NOTICE,PROFILE_BIN,,,,,,,102,300,,,earlier session
+NOTICE,PROFILE_BIN,,,,,,,104,180,,,earlier session
+NOTICE,PROFILE_BIN,,,,,,,106,90,,,earlier session
+NOTICE,PROFILE_BIN,,,,,,,108,50,,,earlier session
+NOTICE,PROFILE_BIN,,,,,,,110,30,,,earlier session
+NOTICE,PROFILE_REFERENCE,,,,,,,,,POC,96,earlier session
+NOTICE,PROFILE_REFERENCE,,,,,,,,,VAH,100,earlier session
+NOTICE,PROFILE_REFERENCE,,,,,,,,,VAL,92,earlier session
+COMPAREA,PROFILE_BIN,,,,,,,90,80,,,earlier session
+COMPAREA,PROFILE_BIN,,,,,,,92,180,,,earlier session
+COMPAREA,PROFILE_BIN,,,,,,,94,400,,,earlier session
+COMPAREA,PROFILE_BIN,,,,,,,96,850,,,earlier session
+COMPAREA,PROFILE_BIN,,,,,,,98,780,,,earlier session
+COMPAREA,PROFILE_BIN,,,,,,,100,500,,,earlier session
+COMPAREA,PROFILE_BIN,,,,,,,102,300,,,earlier session
+COMPAREA,PROFILE_BIN,,,,,,,104,180,,,earlier session
+COMPAREA,PROFILE_BIN,,,,,,,106,90,,,earlier session
+COMPAREA,PROFILE_BIN,,,,,,,108,50,,,earlier session
+COMPAREA,PROFILE_BIN,,,,,,,110,30,,,earlier session
+COMPAREA,PROFILE_REFERENCE,,,,,,,,,POC,96,earlier session
+COMPAREA,PROFILE_REFERENCE,,,,,,,,,VAH,100,earlier session
+COMPAREA,PROFILE_REFERENCE,,,,,,,,,VAL,92,earlier session
+COMPAREB,PROFILE_BIN,,,,,,,90,30,,,later session
+COMPAREB,PROFILE_BIN,,,,,,,92,50,,,later session
+COMPAREB,PROFILE_BIN,,,,,,,94,90,,,later session
+COMPAREB,PROFILE_BIN,,,,,,,96,180,,,later session
+COMPAREB,PROFILE_BIN,,,,,,,98,300,,,later session
+COMPAREB,PROFILE_BIN,,,,,,,100,520,,,later session
+COMPAREB,PROFILE_BIN,,,,,,,102,850,,,later session
+COMPAREB,PROFILE_BIN,,,,,,,104,900,,,later session
+COMPAREB,PROFILE_BIN,,,,,,,106,760,,,later session
+COMPAREB,PROFILE_BIN,,,,,,,108,500,,,later session
+COMPAREB,PROFILE_BIN,,,,,,,110,220,,,later session
+COMPAREB,PROFILE_REFERENCE,,,,,,,,,POC,104,later session
+COMPAREB,PROFILE_REFERENCE,,,,,,,,,VAH,108,later session
+COMPAREB,PROFILE_REFERENCE,,,,,,,,,VAL,100,later session
+APPLY,PROFILE_BIN,,,,,,,90,30,,,later session
+APPLY,PROFILE_BIN,,,,,,,92,50,,,later session
+APPLY,PROFILE_BIN,,,,,,,94,90,,,later session
+APPLY,PROFILE_BIN,,,,,,,96,180,,,later session
+APPLY,PROFILE_BIN,,,,,,,98,300,,,later session
+APPLY,PROFILE_BIN,,,,,,,100,520,,,later session
+APPLY,PROFILE_BIN,,,,,,,102,850,,,later session
+APPLY,PROFILE_BIN,,,,,,,104,900,,,later session
+APPLY,PROFILE_BIN,,,,,,,106,760,,,later session
+APPLY,PROFILE_BIN,,,,,,,108,500,,,later session
+APPLY,PROFILE_BIN,,,,,,,110,220,,,later session
+APPLY,PROFILE_REFERENCE,,,,,,,,,POC,104,later session
+APPLY,PROFILE_REFERENCE,,,,,,,,,VAH,108,later session
+APPLY,PROFILE_REFERENCE,,,,,,,,,VAL,100,later session
+CONTINUATION,PROFILE_BIN,,,,,,,90,20,,,subsequent profile
+CONTINUATION,PROFILE_BIN,,,,,,,92,40,,,subsequent profile
+CONTINUATION,PROFILE_BIN,,,,,,,94,70,,,subsequent profile
+CONTINUATION,PROFILE_BIN,,,,,,,96,120,,,subsequent profile
+CONTINUATION,PROFILE_BIN,,,,,,,98,220,,,subsequent profile
+CONTINUATION,PROFILE_BIN,,,,,,,100,360,,,subsequent profile
+CONTINUATION,PROFILE_BIN,,,,,,,102,570,,,subsequent profile
+CONTINUATION,PROFILE_BIN,,,,,,,104,760,,,subsequent profile
+CONTINUATION,PROFILE_BIN,,,,,,,106,980,,,subsequent profile
+CONTINUATION,PROFILE_BIN,,,,,,,108,1000,,,subsequent profile
+CONTINUATION,PROFILE_BIN,,,,,,,110,780,,,subsequent profile
+CONTINUATION,PROFILE_REFERENCE,,,,,,,,,POC,108,subsequent profile
+CONTINUATION,PROFILE_REFERENCE,,,,,,,,,VAH,110,subsequent profile
+CONTINUATION,PROFILE_REFERENCE,,,,,,,,,VAL,102,subsequent profile
+FAILURE,PROFILE_BIN,,,,,,,90,80,,,return to earlier value
+FAILURE,PROFILE_BIN,,,,,,,92,180,,,return to earlier value
+FAILURE,PROFILE_BIN,,,,,,,94,400,,,return to earlier value
+FAILURE,PROFILE_BIN,,,,,,,96,850,,,return to earlier value
+FAILURE,PROFILE_BIN,,,,,,,98,780,,,return to earlier value
+FAILURE,PROFILE_BIN,,,,,,,100,500,,,return to earlier value
+FAILURE,PROFILE_BIN,,,,,,,102,300,,,return to earlier value
+FAILURE,PROFILE_BIN,,,,,,,104,180,,,return to earlier value
+FAILURE,PROFILE_BIN,,,,,,,106,90,,,return to earlier value
+FAILURE,PROFILE_BIN,,,,,,,108,50,,,return to earlier value
+FAILURE,PROFILE_BIN,,,,,,,110,30,,,return to earlier value
+FAILURE,PROFILE_REFERENCE,,,,,,,,,POC,96,return to earlier value
+FAILURE,PROFILE_REFERENCE,,,,,,,,,VAH,100,return to earlier value
+FAILURE,PROFILE_REFERENCE,,,,,,,,,VAL,92,return to earlier value
