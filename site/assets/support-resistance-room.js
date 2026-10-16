@@ -342,6 +342,32 @@
     saveState();renderChart(l);
   }
 
+  function lessonActivityReady(l){
+    const id=l.id,submitted=(saved.quizItemSubmitted||{})[id]||{};
+    if(![6,7,8,12,13,14].includes(id))return true;
+    if(Array.isArray(l.quizItems)&&l.quizItems.some((_,i)=>submitted[i]===undefined))return false;
+    if(id===6)return !!((((saved.zoneTasks||{})[6]||{})["lesson-6-boundary"]||{}).submitted);
+    if(id===7)return !!((((saved.editingSubmitted||{})[7]||{})["lesson-7-edit"]));
+    if(id===8)return !!((((saved.zoneTasks||{})[8]||{})["uneven-lows-zones"]||{}).submitted);
+    if(id===14&&!((((saved.zoneTasks||{})[14]||{})["wider-neckline-zones"]||{}).submitted))return false;
+    if(id===12||id===13||id===14){
+      const stages=l.chartStages||[],responses=((saved.stageResponses||{})[id]||{}),attempts=((saved.stageAttempts||{})[id]||{});
+      for(let i=0;i<stages.length;i++){
+        if(!stages[i].requiresAttempt)continue;
+        const response=String(responses[i]||"").trim();
+        if(!response&&!attempts[i])return false;
+      }
+    }
+    return true;
+  }
+  function lessonActivityHelp(l){
+    if(l.id===6)return "Submit your proposed boundary and answer every knowledge-check question before marking this lesson complete.";
+    if(l.id===7)return "Submit the candidate edit and answer every knowledge-check question before marking this lesson complete.";
+    if(l.id===8)return "Submit both Uneven Lows zones and answer every knowledge-check question before marking this lesson complete.";
+    if(l.id===12||l.id===13)return "Record the required staged observations and submit every knowledge-check answer before marking this lesson complete.";
+    if(l.id===14)return "Submit both Wider Neckline zones, record the required staged observations and submit every knowledge-check answer before marking this lesson complete.";
+    return "Complete the required lesson activity before marking this lesson complete.";
+  }
   function renderLesson(){
     const l=lessonFor(activeId),m=moduleFor(l.module),state=statusOf(l.id);
     $("sr-lesson-number").textContent="LESSON "+String(l.id).padStart(2,"0")+" / 18";$("sr-lesson-module").textContent=m.name.toUpperCase();
@@ -354,9 +380,10 @@
     renderChart(l);
     restoreStageResponse(l);$("sr-response-save-state").textContent="Saved in this browser only";
     $("sr-lesson-notes").value=saved.notes[l.id]||"";$("sr-notes-save-state").textContent="Saved in this browser only";
-    $("sr-complete-button").textContent=state==="complete"?"Completed ✓ · undo":"Mark complete ✓";$("sr-complete-button").classList.toggle("is-complete",state==="complete");$("sr-complete-button").disabled=l.id===5&&!chartLabCompletedInSession&&state!=="complete";
+    const activityReady=lessonActivityReady(l);
+    $("sr-complete-button").textContent=state==="complete"?"Completed ✓ · undo":"Mark complete ✓";$("sr-complete-button").classList.toggle("is-complete",state==="complete");$("sr-complete-button").disabled=state!=="complete"&&((l.id===5&&!chartLabCompletedInSession)||!activityReady);
     $("sr-previous-button").disabled=l.id===1;$("sr-next-button").textContent=l.id===18?"Back to course outline ↗":"Next lesson →";
-    $("sr-navigation-status").textContent="Lesson "+l.id+" of "+lessons.length;$("sr-bottom-help").textContent=l.pending?"This lesson stays visibly pending until authentic instructor material is supplied.":l.assessment?"Assessment submission, retry and reference gates are not simulated as production-ready.":(l.id===5&&!chartLabCompletedInSession)?"Complete Clear W and its two-question check below before marking this lesson complete.":"Take your time. The point is a reasoned read, not a prediction.";
+    $("sr-navigation-status").textContent="Lesson "+l.id+" of "+lessons.length;$("sr-bottom-help").textContent=l.pending?"This lesson stays visibly pending until authentic instructor material is supplied.":l.assessment?"Assessment submission, retry and reference gates are not simulated as production-ready.":(l.id===5&&!chartLabCompletedInSession)?"Complete Clear W and its two-question check below before marking this lesson complete.":(!activityReady&&[6,7,8,12,13,14].includes(l.id))?lessonActivityHelp(l):"Take your time. The point is a reasoned read, not a prediction.";
     $("sr-resume-button").textContent="Open lesson "+String(l.id).padStart(2,"0")+" ↗";
     renderQuiz(l);renderOutline();renderProgress();setTab(activeTab);
   }

@@ -56,6 +56,9 @@ jobs:
                       raise SystemExit(f"{label} is missing {required}")
               if len(lesson) < 3000:
                   raise SystemExit(f"{label} still looks like a thin placeholder")
+          for required in ("function lessonActivityReady(l)", "function lessonActivityHelp(l)", 'disabled=state!=="complete"&&((l.id===5&&!chartLabCompletedInSession)||!activityReady)'):
+              if required not in js:
+                  raise SystemExit("Missing activity completion gate: " + required)
           root = Path("site/assets")
           figures = (
               "FIG01_breakout_evidence_ladder.png",
