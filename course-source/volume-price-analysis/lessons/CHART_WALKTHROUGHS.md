@@ -1,6 +1,8 @@
 # Chart Walkthrough Scripts — 30 Lessons
 ## Presenter notes and visual narration
 
+> **Progression rule for every lesson:** arrange the learner's on-screen work as Level 1 — Notice (easy recognition), Level 2 — Compare (guided comparison), and Level 3 — Apply (independent transfer to a new chart). Use the lesson-specific progression block in the module script to build all three steps. Keep later bars hidden while learners record the Level 3 initial reading, then show contrasting outcomes and explain what the new evidence changes. The learner should see the three level labels in the practice experience, not just in instructor notes.
+
 > These short segments supplement the full narration scripts in the six module files. Rehearse the chart interaction and pause for learner observation. The normal target for a complete delivered lesson is 12–16 minutes, with a hard minimum of 10 minutes and a usual upper limit of 20 minutes unless the complexity justifies more. Count teaching, narrated chart work, guided practice, feedback and recap—not empty pauses. Each chart should be synthetic or properly licensed, clearly labelled, and designed to teach a process rather than predict a specific trade.
 
 ---
