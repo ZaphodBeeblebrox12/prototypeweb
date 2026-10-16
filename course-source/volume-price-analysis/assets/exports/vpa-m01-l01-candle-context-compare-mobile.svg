@@ -2,8 +2,6 @@
 <title id="title">The same candle, different context</title>
 <desc id="desc">A reflowed mobile comparison stacks the two synthetic price sequences vertically. Both highlighted candidate candles have the same OHLC dimensions; the prior structure, location and relative volume differ.</desc>
 <rect width="720" height="1270" fill="#f6f5f0"/>
-<text x="38" y="44" font-family="Arial,Helvetica,sans-serif" font-size="30" font-weight="700" fill="#252923">The same candle, different context</text>
-<text x="38" y="78" font-family="Arial,Helvetica,sans-serif" font-size="19" fill="#62645f">Stacked for mobile · synthetic teaching examples</text>
 <rect x="22" y="18" width="676" height="585" rx="13" fill="#fffefa" stroke="#d9d7cf" stroke-width="2"/>
 <text x="42" y="56" font-family="Arial,Helvetica,sans-serif" font-size="29" font-weight="700" fill="#252923">A · Recovery after a pullback</text>
 <text x="42" y="86" font-family="Arial,Helvetica,sans-serif" font-size="19" fill="#62645f">Candidate volume is modestly above its local baseline.</text>
