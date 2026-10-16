@@ -1,6 +1,6 @@
 # Temporary Web Image Reference Index — Understand Bollinger Bands
 
-**Purpose:** Backend provenance and replacement index for the temporary image galleries embedded in Module 5. Source credits and image URLs are intentionally kept here instead of in the student-facing captions.
+**Purpose:** Provenance and replacement index for temporary source-linked figures used across Modules 1–6 of the Understand Bollinger Bands preview. The learner-facing figure cards link back to the source page; module 7 calculations, trade-management paths and review tools remain purpose-built diagrams/tables.
 
 **Important status:** These are external, hot-linked reference images, not downloaded image binaries committed to this repository. They require an internet connection and may change or disappear if the host changes its URL. They are research/preview material only. Before public course release, replace them with owned TradingView screenshots or appropriately licensed images, update the Markdown links to local assets, and review the applicable rights. A source listed here is not a claim that its chart is a profitable trade or that every displayed condition matches the exact author method.
 
@@ -90,3 +90,39 @@ These source pages were rechecked while building the first-pass preview. They ar
 - [ ] Replace each external image URL in Module 5 with a local relative path.
 - [ ] Remove references whose use is not cleared; ensure screenshots use data/images the course is allowed to publish.
 - [ ] Open the site preview and check image loading, legibility at mobile width, and zoom/readability before release.
+
+
+## Temporary references currently used by the learner preview
+
+The standalone preview now uses external reference charts only where they illustrate a relevant market behaviour. These are provisional teaching references; hotlink availability, permissions and display can change. Review rights and replace with owned or rights-cleared local images before public release. The caption distinguishes the specific behaviour the learner should inspect from a course-defined trigger.
+
+| Figure | Current source page(s) | Teaching use and limitation |
+|---|---|---|
+| Figure 1.1 | [Bollinger Bands](https://www.bollingerbands.com/bollinger-bands) | Official band layout; inspect the middle line and outer-band frame. |
+| Figure 1.2 | [Trading Setups Review: sideways tags](https://www.tradingsetupsreview.com/reading-price-action-bollinger-bands/) · [Stock Market Watch: band walk](https://thestockmarketwatch.com/learn/docs/indicators/bollinger-bands/) | Contrast repeated tags in a range with sustained progress alongside a band. |
+| Figure 1.3 | [Sahm Capital: Bollinger Bands](https://www.sahmcapital.com/education/article/what-are-bollinger-bands-boll) · [SwingTradeBot: BandWidth](https://swingtradebot.com/blog/using-the-bollinger-band-squeeze-scans) | Band width contraction and expansion, with a separate BandWidth pane. |
+| Figure 1.4 | [Finbold: Bollinger Bands](https://finbold.com/guide/bollinger-bands-explained/) · [Trading Setups Review: squeeze](https://www.tradingsetupsreview.com/bollinger-squeeze/) | Upward resolution compared with a failed first move. |
+| Figure 2.1 | Purpose-built diagram in the preview | Construction equation; not an external market chart. |
+| Figure 2.2 | Purpose-built setting comparison in the preview | Compares short, common, and longer windows without implying one is optimal. |
+| Figure 2.3 | [StockCharts: %B Indicator](https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/b-indicator) | Relative price position, not a direction forecast. |
+| Figure 2.4 | [SwingTradeBot: BandWidth](https://swingtradebot.com/blog/using-the-bollinger-band-squeeze-scans) | BandWidth follows compression and expansion. |
+| Figure 3.1 | [Stock Market Watch: band walk](https://thestockmarketwatch.com/learn/docs/indicators/bollinger-bands/) · [Trading Setups Review: sideways tags](https://www.tradingsetupsreview.com/reading-price-action-bollinger-bands/) | Trend-versus-range contrast; unclear context still needs judgement rather than a forced label. |
+| Figure 3.2 | [Stock Market Watch: band walk](https://thestockmarketwatch.com/learn/docs/indicators/bollinger-bands/) · [Isha Qureshi on LinkedIn](https://www.linkedin.com/pulse/harnessing-market-volatility-mastering-bollinger-band-isha-qureshi-m2hvc) | Upper- and lower-band walk examples, as visual references rather than full validated setups. |
+| Figure 3.3 | [StockCharts: BandWidth](https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/bollinger-bandwidth) · [StockCharts: TTM Squeeze](https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/ttm-squeeze) | Distinguish BandWidth compression from the Bollinger/Keltner squeeze definition. |
+| Figure 3.4 | [Finbold: Bollinger Bands](https://finbold.com/guide/bollinger-bands-explained/) · [ThreeTrader: volatility breakout](https://www.threetrader.com/blog/volatility-breakout) · [StockCharts: head fake](https://stockcharts.com/articles/chartwatchers/2020/07/a-bb-breakout-or-the-dreaded-h-684.html) | Upward, downward and failed outcomes after similar quiet conditions; no direction is inferred from compression alone. |
+| Figure 4.1 | [Trading Setups Review: W-bottom](https://www.tradingsetupsreview.com/5-bollinger-bands-trading-strategies-should-know/) · [Finbold: Bollinger Bands](https://finbold.com/guide/bollinger-bands-explained/) | Two W-bottom references; check second-low relationship and confirmation rather than assuming the shape works. |
+| Figure 4.2 | [Finbold: M-top example](https://finbold.com/guide/bollinger-bands-explained/) | M-top structure and added momentum pane; confirmation remains required. |
+| Figure 4.3 | [Finbold: M-top example](https://finbold.com/guide/bollinger-bands-explained/) · [StockCharts: %B Indicator](https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/b-indicator) | Price and indicator views to prompt comparison; the mismatch is a clue, not a guarantee. |
+| Figure 4.4 | Purpose-built four-state pattern aid in the preview | Candidate, meets stated confirmation, failed, and unclear. |
+| Figure 5.1 | [Finbold: upside squeeze](https://finbold.com/guide/bollinger-bands-explained/) · [ThreeTrader: downside resolution](https://www.threetrader.com/blog/volatility-breakout) · [Trading Setups Review: failed squeeze](https://www.tradingsetupsreview.com/bollinger-squeeze/) | Contrasts upward, downward and failed first moves. |
+| Figure 5.2 | [StockCharts: %B Indicator](https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/b-indicator) | %B and MFI shown together for context; does not verify the current Method II thresholds on the example. |
+| Figure 5.3 | [Bollinger Bands](https://www.bollingerbands.com/bollinger-bands) | Official band example as a starting point for price/indicator comparison. Confirm which volume-indicator variant the lesson is teaching. |
+| Figure 5.4 | [Official Bollinger Method IV notes (PDF)](https://www.bollingerbands.com/_files/ugd/58be43_d09c50b6e8ea4afd9af0523ef94de876.pdf) | Purpose-built rule diagram: squeeze, two consecutive closes beyond the same band, and ADX context. No generic image is mislabeled as a verified Method IV signal. |
+| Figure 5.5 | [Finbold: W-bottom and M-top](https://finbold.com/guide/bollinger-bands-explained/) | Contrasts pattern structures; the source examples do not establish every course-specific volume/confirmation criterion. |
+| Figure 5.6 | [StockCharts: TTM Squeeze](https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/ttm-squeeze) | TTM Squeeze style example; read the source for envelope and momentum definitions. |
+| Figure 6.1 | [Trading Setups Review: failed squeeze](https://www.tradingsetupsreview.com/bollinger-squeeze/) · [StockCharts: head fake](https://stockcharts.com/articles/chartwatchers/2020/07/a-bb-breakout-or-the-dreaded-h-684.html) | Initial breakout versus later contradictory evidence. |
+| Figure 6.2 | [Stock Market Watch: band walk](https://thestockmarketwatch.com/learn/docs/indicators/bollinger-bands/) · [Trading Setups Review: sideways tags](https://www.tradingsetupsreview.com/reading-price-action-bollinger-bands/) | Persistent progress contrasted with range-like movement; the learner still judges the structure. |
+| Figure 6.3 | [Trading Setups Review: sideways tags](https://www.tradingsetupsreview.com/reading-price-action-bollinger-bands/) · [Trading Setups Review: failed squeeze](https://www.tradingsetupsreview.com/bollinger-squeeze/) | Illustrates why an initial poke and a durable break should not be treated as the same event. |
+| Figure 6.4 | Purpose-built skip-condition aid in the preview | Late move, conflicting evidence, gap/liquidity risk, poor room-to-risk trade-off. |
+| Figures 7.1–7.4 | Purpose-built diagrams and tables in the preview | Position sizing, management paths, varied-case review and capstone decision quality should not be represented by unrelated public chart screenshots. |
+

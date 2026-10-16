@@ -2080,16 +2080,58 @@ body { font-size: 15px; line-height: 1.66; }
 }
 
 
-/* Bollinger first-pass figures: keep each locally embedded chart readable in cards and zoom. */
-#roomView .case-card svg { display:block; width:100%; height:auto; margin:12px 0 15px; border:1px solid var(--line); border-radius:9px; background:var(--paper); }
-#roomView .case-card { overflow:hidden; }
-#roomView .case-card .case-number { line-height:1.6; }
-#roomView .chart-shell svg { background:var(--paper); }
-#roomView .article-panel .practice-prompt { max-width:900px; }
-#roomView .article-panel .takeaway-strip p { max-width:none; }
-#roomView .chart-caption { font-size:12px; }
-@media (max-width:790px) { #roomView .case-card svg { margin:10px 0 12px; } }
+/* Figure system: sourced market references where relevant; authored diagrams for decision logic. */
+#roomView .course-figure-stack{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px;align-items:start;margin:20px 0}
+#roomView .course-reference-figure,#roomView .purpose-figure{min-width:0;margin:0;border:1px solid var(--line);border-radius:11px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}
+#roomView .course-reference-head,#roomView .purpose-figure-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--paper-deep);font-size:10px;font-weight:800}
+#roomView .course-reference-head span:last-child,#roomView .purpose-figure-head span:last-child{color:var(--muted);font-size:9px;font-weight:650;text-align:right}
+#roomView .course-reference-image{min-height:150px;display:flex;align-items:center;justify-content:center;background:#fffdf8;padding:8px;overflow:hidden}
+#roomView .course-reference-image img{display:block;width:100%;max-height:470px;object-fit:contain;object-position:center;margin:auto;background:#fffdf8}
+#roomView .course-reference-figure figcaption{padding:12px 13px 5px;font-size:12px;line-height:1.6}
+#roomView .course-reference-figure figcaption strong{display:block;margin-bottom:5px;color:var(--ink)}
+#roomView .course-reference-figure figcaption p{margin:0;color:var(--muted)}
+#roomView .course-reference-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 12px 12px}
+#roomView .course-reference-actions a{color:var(--green);font-size:10px;font-weight:750;text-decoration:underline;text-underline-offset:3px}
+#roomView .course-reference-actions button{border:1px solid var(--line);border-radius:999px;background:var(--paper);padding:7px 10px;color:var(--ink);font-size:10px;font-weight:750}
+#roomView .course-figure-caution{margin:10px 0 20px;color:var(--muted);font-size:11px;line-height:1.7}
+#roomView .course-reference-image.image-unavailable{padding:20px;min-height:170px}
+#roomView .course-reference-image .image-fallback{max-width:440px;margin:0;color:var(--muted);font-size:12px;line-height:1.7}
+#roomView .purpose-figure{margin:20px 0;padding-bottom:13px}
+#roomView .purpose-figure-body{padding:15px}
+#roomView .purpose-card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px}
+#roomView .purpose-card{padding:13px;border:1px solid var(--line);border-radius:9px;background:var(--paper)}
+#roomView .purpose-card .purpose-kicker{display:block;color:var(--green);font-size:9px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+#roomView .purpose-card h4{margin:0 0 6px;font:600 15px/1.25 var(--serif)}
+#roomView .purpose-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.65}
+#roomView .purpose-equation{display:grid;grid-template-columns:1fr;gap:8px;margin:0}
+#roomView .purpose-equation>div{padding:12px 14px;border-left:3px solid var(--green);background:var(--paper);font-size:13px;line-height:1.6}
+#roomView .purpose-equation>div:nth-child(2){border-left-color:var(--gold)}
+#roomView .purpose-equation>div:nth-child(3){border-left-color:var(--red)}
+#roomView .purpose-equation strong{display:block;font-size:12px;margin-bottom:3px}
+#roomView .purpose-figure-note{margin:12px 0 0;color:var(--muted);font-size:11px;line-height:1.7}
+#roomView .purpose-figure table{width:100%;border-collapse:collapse;font-size:11px;line-height:1.6}
+#roomView .purpose-figure th,#roomView .purpose-figure td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+#roomView .purpose-figure th{color:var(--green);font-weight:850;background:var(--paper)}
+#roomView .purpose-figure td:first-child{font-weight:750;white-space:nowrap}
+#roomView .purpose-figure .flow-step{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line)}
+#roomView .purpose-figure .flow-step:last-child{border-bottom:0}
+#roomView .purpose-figure .flow-number{flex:0 0 28px;width:28px;height:28px;display:grid;place-items:center;border-radius:50%;background:var(--green-wash);color:var(--green);font:14px var(--serif)}
+#roomView .purpose-figure .flow-step p{margin:0;font-size:12px;line-height:1.65}
+#roomView .purpose-figure .flow-step strong{display:block;margin-bottom:2px}
+#roomView .chart-shell svg,#roomView .case-card svg{background:var(--paper)}
+#roomView .article-panel .practice-prompt{max-width:900px}
+#roomView .article-panel .takeaway-strip p{max-width:none}
+#roomView .chart-caption{font-size:12px}
+@media(max-width:790px){
+ #roomView .course-reference-head,#roomView .purpose-figure-head{align-items:flex-start}
+ #roomView .course-reference-image{min-height:110px}
+ #roomView .course-reference-actions{align-items:flex-start}
+ #roomView .purpose-figure-body{padding:11px}
+ #roomView .purpose-figure table{font-size:10px}
+ #roomView .purpose-figure th,#roomView .purpose-figure td{padding:7px 6px}
+}
 
+#modalChartHolder img{display:block;max-width:100%;max-height:75vh;width:auto;height:auto;object-fit:contain;margin:auto;background:#fffdf8}#modalChartHolder{display:flex;align-items:center;justify-content:center;min-width:0}
 </style>
 </head>
 <body>
@@ -2195,7 +2237,7 @@ body { font-size: 15px; line-height: 1.66; }
             <article class="method-item"><span class="step">CARTER</span><h3>TTM Squeeze</h3><p>Compare Bollinger Bands with Keltner Channels and use the momentum component for directional context.</p></article>
           </div>
         </div>
-        <p class="cross-course-caption"><span class="caption-dot" aria-hidden="true"></span>Image approach for this first pass: all chart sketches are embedded locally in the preview, not hot-linked. They are visual teaching aids, not historical market-data screenshots.</p>
+        <p class="cross-course-caption"><span class="caption-dot" aria-hidden="true"></span>Image approach for this first pass: use source-linked market charts when they genuinely show the behaviour under discussion. Use purpose-built diagrams for calculations, decision rules and risk management. External images are temporary study references; replace them with owned or rights-cleared images before public release.</p>
       </section>
 
       <section class="section" aria-labelledby="methodTitle">
@@ -2419,6 +2461,155 @@ function lessonProfile(mId, lIdx) {
     take: modules[mId-1].deliverable + '. Keep the reading conditional, and make waiting a valid outcome when the evidence is incomplete.'
   };
 }
+
+const courseReferenceFigures = {
+ '1-0': [{url:'https://static.wixstatic.com/media/252f12_c1ef069183e44feb9b9a00b1b90e23a7~mv2.png/v1/fill/w_450%2Ch_404%2Cal_c%2Cq_85%2Cusm_0.66_1.00_0.01%2Cenc_auto/252f12_c1ef069183e44feb9b9a00b1b90e23a7~mv2.png',page:'https://www.bollingerbands.com/bollinger-bands',publisher:'Bollinger Bands',label:'The adaptive frame around price',alt:'Bollinger Bands around a price series, with the middle line and outer bands showing relative price position.',note:'Use the middle line and the two outer bands to identify the frame. The bands provide relative context; they are not fixed price barriers.'}],
+ '1-1': [
+  {url:'https://www.tradingsetupsreview.com/reading-price-action-bollinger-bands/img/PriceTaggingBollingerBandsInASidewaysMarket_hua582d896299cdf4b0409af3b5f00840f_149059_1280x0_resize_q75_h1_box.webp',page:'https://www.tradingsetupsreview.com/reading-price-action-bollinger-bands/',publisher:'Trading Setups Review',label:'Repeated band tags inside a range',alt:'A chart example of price tagging Bollinger Bands while moving sideways.',note:'Use this as the range example: repeated upper-band contact is not, by itself, enough to infer a sustained breakout.'},
+  {url:'https://thestockmarketwatch.com/learn/wp-content/uploads/2025/07/bollinger-band-band-walk-strategy-1024x683.webp',page:'https://thestockmarketwatch.com/learn/docs/indicators/bollinger-bands/',publisher:'The Stock Market Watch',label:'Price walking alongside a band',alt:'Bollinger Bands chart showing price moving along an outer band during a directional move.',note:'Compare the sustained sequence with the range chart. Repeated contact can accompany a trend rather than an immediate reversal.'}
+ ],
+ '1-2': [
+  {url:'https://static2.sahmcapital.com/public/college/images/2023/02/01/827527850902159361.png',page:'https://www.sahmcapital.com/education/article/what-are-bollinger-bands-boll',publisher:'Sahm Capital',label:'Narrow bands followed by expansion',alt:'Bollinger Bands and BandWidth chart showing a narrow-band period followed by a wider move.',note:'Track when band width contracts and later expands. Width alone does not choose an upward or downward direction.'},
+  {url:'https://swingtradebot.s3.amazonaws.com/blog/SHOP_BBs.png',page:'https://swingtradebot.com/blog/using-the-bollinger-band-squeeze-scans',publisher:'SwingTradeBot',label:'Price bands and BandWidth together',alt:'Price chart with Bollinger Bands and a separate BandWidth indicator beneath the price pane.',note:'The aligned lower pane helps connect the bands in the price chart with a measure of the distance between them.'}
+ ],
+ '1-3': [
+  {url:'https://assets.finbold.com/uploads/2024/08/The-squeeze-and-breakout-to-the-upside-1024x670.jpg',page:'https://finbold.com/guide/bollinger-bands-explained/',publisher:'Finbold',label:'A squeeze followed by an upward break',alt:'Bollinger Band squeeze example with price breaking to the upside.',note:'Observe the breakout as a separate event after compression; the squeeze itself did not select the direction.'},
+  {url:'https://www.tradingsetupsreview.com/bollinger-squeeze/img/BollingerSqueezeFailedExample_huaf734f8d2e5026d9c916f11986949767_86069_1280x0_resize_q75_h1_box.webp',page:'https://www.tradingsetupsreview.com/bollinger-squeeze/',publisher:'Trading Setups Review',label:'A squeeze move that does not follow through',alt:'Bollinger Band squeeze chart used to discuss a failed first move.',note:'Use it as a counterexample. An initial move can fail; do not relabel it as a reverse trade without a new setup.'}
+ ],
+ '2-2': [{url:'https://chartschool.stockcharts.com/~gitbook/image?dpr=4&quality=100&sign=416faa79&sv=2&url=https%3A%2F%2F436553459-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FERtrZrZOhufFzk6ZQO4B%252Fuploads%252F7xDizwYSwg51wo6OqmLj%252Fbbpb-2-qqqqup.png%3Falt%3Dmedia%26token%3Da3311e37-dc9f-471c-9b44-057bf69b6dee&width=768',page:'https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/b-indicator',publisher:'StockCharts ChartSchool',label:'%B as relative price position',alt:'Stock chart with Bollinger Bands and percent B used to relate closing price to the upper and lower bands.',note:'%B describes where price is positioned relative to the bands. It can move below zero or above one when price moves beyond them; it does not predict direction.'}],
+ '2-3': [{url:'https://swingtradebot.s3.amazonaws.com/blog/SHOP_BBs.png',page:'https://swingtradebot.com/blog/using-the-bollinger-band-squeeze-scans',publisher:'SwingTradeBot',label:'BandWidth tracks compression and expansion',alt:'Bollinger Bands with BandWidth shown in a separate aligned lower pane.',note:'Find the low-width area and then trace what happens next. A narrow reading describes volatility relative to the bands, not a directional signal.'}],
+ '3-0': [
+  {url:'https://thestockmarketwatch.com/learn/wp-content/uploads/2025/07/bollinger-band-band-walk-strategy-1024x683.webp',page:'https://thestockmarketwatch.com/learn/docs/indicators/bollinger-bands/',publisher:'The Stock Market Watch',label:'Directional structure and a band walk',alt:'Price advances alongside a Bollinger outer band during a directional move.',note:'Look for continued price progress and swing structure, not only the number of band touches.'},
+  {url:'https://www.tradingsetupsreview.com/reading-price-action-bollinger-bands/img/PriceTaggingBollingerBandsInASidewaysMarket_hua582d896299cdf4b0409af3b5f00840f_149059_1280x0_resize_q75_h1_box.webp',page:'https://www.tradingsetupsreview.com/reading-price-action-bollinger-bands/',publisher:'Trading Setups Review',label:'Sideways price action',alt:'Price moves back and forth while repeatedly reaching Bollinger Bands in a sideways market.',note:'Compare overlap and the lack of sustained directional progress with the band-walk example. Where neither reading is clear, leave the context uncertain.'}
+ ],
+ '3-1': [
+  {url:'https://thestockmarketwatch.com/learn/wp-content/uploads/2025/07/bollinger-band-band-walk-strategy-1024x683.webp',page:'https://thestockmarketwatch.com/learn/docs/indicators/bollinger-bands/',publisher:'The Stock Market Watch',label:'Upper-band walk example',alt:'Bollinger Bands chart showing price progressing along the upper band.',note:'Repeated contact matters because it occurs within a continuing directional sequence, not because a single touch forecasts more upside.'},
+  {url:'https://media.licdn.com/dms/image/v2/D5612AQHeZtpoMd4UeQ/article-cover_image-shrink_423_752/B56ZUf_gMkHoAU-/0/1739998495992?e=2147483647&t=iDw_yf3TvbIsHbtxEuEWEed3wLQwsrMpfSRzlGSG1Vw&v=beta',page:'https://www.linkedin.com/pulse/harnessing-market-volatility-mastering-bollinger-band-isha-qureshi-m2hvc',publisher:'Isha Qureshi on LinkedIn',label:'Lower-band walk after compression',alt:'Illustrated Bollinger Bands chart showing a squeeze, a downward break and price walking along the lower band.',note:'This annotated example illustrates the downside counterpart. It is a reference picture, not verification of a complete trading rule.'}
+ ],
+ '3-2': [
+  {url:'https://blog.kakaocdn.net/dna/bcFAz3/btrUlZzrR5e/AAAAAAAAAAAAAAAAAAAAANfBRIWzQlpHJfCakbjrdQGwUP19gdeoKGA_jwKfTQdn/img.png?allow_ip=&allow_referer=&credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&signature=TRpC3pjwoQVlM3a0vfHOZT%2FfrmA%3D',page:'https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/bollinger-bandwidth',publisher:'StockCharts ChartSchool topic reference',label:'BandWidth-based squeeze example',alt:'Bollinger Bands with a low BandWidth region followed by a move below the lower band.',note:'The lower pane measures BandWidth relative to its history. That is different from Carter’s TTM Squeeze, which compares Bollinger Bands with Keltner Channels.'},
+  {url:'https://pbs.twimg.com/media/E-7bAGwWYAQJr9I.jpg',page:'https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/ttm-squeeze',publisher:'TTM Squeeze visual reference',label:'A separate TTM Squeeze display',alt:'Chart image showing a TTM Squeeze-style momentum display.',note:'Use the companion TTM Squeeze explanation to identify the envelope relationship and momentum display; do not treat this image as source verification of a trade signal.'}
+ ],
+ '3-3': [
+  {url:'https://assets.finbold.com/uploads/2024/08/The-squeeze-and-breakout-to-the-upside-1024x670.jpg',page:'https://finbold.com/guide/bollinger-bands-explained/',publisher:'Finbold',label:'Upward resolution',alt:'Bollinger Bands narrowing before an upward breakout.',note:'The break follows compression; the initial width reading did not predict the direction.'},
+  {url:'https://cdn.prod.website-files.com/65937c46651ff71ad119ee4f/65fe472990b46b4370a0e3f5_Concrete-example-band-and-breakout.jpg',page:'https://www.threetrader.com/blog/volatility-breakout',publisher:'ThreeTrader',label:'Downward resolution and expansion',alt:'A squeeze region followed by a downward price move and widening Bollinger Bands.',note:'The same compression concept can resolve down. Direction comes from the break itself.'},
+  {url:'https://d.stockcharts.com/img/articles/2020/07/17/b37acc7d-dc41-481f-b575-843a9add2700.jpg',page:'https://stockcharts.com/articles/chartwatchers/2020/07/a-bb-breakout-or-the-dreaded-h-684.html',publisher:'StockCharts ChartWatchers',label:'Head-fake counterexample',alt:'Bollinger Band breakout chart discussed as a possible head fake.',note:'The first move can fail. Define what would contradict the breakout thesis before interpreting the later result.'}
+ ],
+ '4-0': [
+  {url:'https://www.tradingsetupsreview.com/5-bollinger-bands-trading-strategies-should-know/img/BollingerBandsW-BottomExample_hu335bd491b6efe5aee31f40a2d85791e4_131237_1280x0_resize_q75_h1_box.webp',page:'https://www.tradingsetupsreview.com/5-bollinger-bands-trading-strategies-should-know/',publisher:'Trading Setups Review',label:'A W-bottom example',alt:'Chart example of a W-bottom using the relationship of two lows to Bollinger Bands.',note:'Inspect the first low relative to the lower band, then compare the second low and the confirmation. A W-like shape alone is not enough.'},
+  {url:'https://assets.finbold.com/uploads/2024/08/Price-will-likely-rise-to-a-new-high-1-1024x842.jpg',page:'https://finbold.com/guide/bollinger-bands-explained/',publisher:'Finbold',label:'An alternative W-bottom illustration',alt:'Bollinger Bands example showing a W-bottom-like low structure and subsequent price behaviour.',note:'Use as a second pattern reference, not as a promise that another similar shape will rise.'}
+ ],
+ '4-1': [{url:'https://assets.finbold.com/uploads/2024/08/Bearish-reversal-1-1024x843.jpg',page:'https://finbold.com/guide/bollinger-bands-explained/',publisher:'Finbold',label:'An M-top and possible divergence',alt:'Chart example of an M-top-like structure with Bollinger Bands and an additional momentum indicator.',note:'Compare the two pushes, the intervening reaction and the later follow-through. The pattern is a hypothesis until confirming evidence appears.'}],
+ '4-2': [
+  {url:'https://assets.finbold.com/uploads/2024/08/Bearish-reversal-1-1024x843.jpg',page:'https://finbold.com/guide/bollinger-bands-explained/',publisher:'Finbold',label:'Price pattern and momentum comparison',alt:'M-top-like price structure with Bollinger Bands and an indicator pane for comparing price and momentum.',note:'A mismatch can be a clue, not a verdict. Check the indicator definition and the price confirmation required by the stated setup.'},
+  {url:'https://chartschool.stockcharts.com/~gitbook/image?dpr=3&quality=100&sign=31f46d65&sv=2&url=https%3A%2F%2F436553459-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FERtrZrZOhufFzk6ZQO4B%252Fuploads%252F7wI3xjQL8XZUYZHaaLpM%252Fbbpb-3-fdxmfi.png%3Falt%3Dmedia%26token%3D2b8a2737-fd58-4830-86ed-8379a4d6d98e&width=768',page:'https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/b-indicator',publisher:'StockCharts ChartSchool',label:'%B and money-flow context',alt:'Price chart with percent B and Money Flow Index panes.',note:'The panels demonstrate how a price-relative measure and a money-flow measure can be viewed alongside price; they are not proof that any exact course threshold has been met.'}
+ ],
+ '5-0': [
+  {url:'https://assets.finbold.com/uploads/2024/08/The-squeeze-and-breakout-to-the-upside-1024x670.jpg',page:'https://finbold.com/guide/bollinger-bands-explained/',publisher:'Finbold',label:'Panel A · Upper-band break',alt:'Bollinger Bands contract before price breaks to the upside.',note:'This illustrates the upside path after compression. Define the close-based trigger and invalidation before the event.'},
+  {url:'https://cdn.prod.website-files.com/65937c46651ff71ad119ee4f/65fe472990b46b4370a0e3f5_Concrete-example-band-and-breakout.jpg',page:'https://www.threetrader.com/blog/volatility-breakout',publisher:'ThreeTrader',label:'Panel B · Lower-band break',alt:'Bollinger Bands squeeze followed by a downward break and wider bands.',note:'The downside path uses the same preparation but resolves in the opposite direction.'},
+  {url:'https://www.tradingsetupsreview.com/bollinger-squeeze/img/BollingerSqueezeFailedExample_huaf734f8d2e5026d9c916f11986949767_86069_1280x0_resize_q75_h1_box.webp',page:'https://www.tradingsetupsreview.com/bollinger-squeeze/',publisher:'Trading Setups Review',label:'Panel C · Failed first move',alt:'A squeeze chart used as a failed-move counterexample.',note:'Keep failure distinct from a new opposite-direction signal. The written plan needs to state what happens when the first move fails.'}
+ ],
+ '5-1': [{url:'https://chartschool.stockcharts.com/~gitbook/image?dpr=3&quality=100&sign=31f46d65&sv=2&url=https%3A%2F%2F436553459-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FERtrZrZOhufFzk6ZQO4B%252Fuploads%252F7wI3xjQL8XZUYZHaaLpM%252Fbbpb-3-fdxmfi.png%3Falt%3Dmedia%26token%3D2b8a2737-fd58-4830-86ed-8379a4d6d98e&width=768',page:'https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/b-indicator',publisher:'StockCharts ChartSchool',label:'Price, %B and money-flow panes',alt:'A historical stock chart with Bollinger Bands, percent B and Money Flow Index.',note:'Read it to understand how these inputs are displayed together. Verify the actual %B/MFI(10) thresholds on the current instrument; this reference is not a certification that Method II has triggered.'}],
+ '5-2': [{url:'https://static.wixstatic.com/media/252f12_c1ef069183e44feb9b9a00b1b90e23a7~mv2.png/v1/fill/w_450%2Ch_404%2Cal_c%2Cq_85%2Cusm_0.66_1.00_0.01%2Cenc_auto/252f12_c1ef069183e44feb9b9a00b1b90e23a7~mv2.png',page:'https://www.bollingerbands.com/bollinger-bands',publisher:'Bollinger Bands',label:'Band relationship with a volume-based companion',alt:'Official Bollinger Bands example chart with the band frame and a companion indicator display.',note:'For Method III, first identify the selected volume-indicator variant. A band extreme plus disagreement is an alert; it still needs the price confirmation stated in the course.'}],
+ '5-4': [
+  {url:'https://assets.finbold.com/uploads/2024/08/Price-will-likely-rise-to-a-new-high-1-1024x842.jpg',page:'https://finbold.com/guide/bollinger-bands-explained/',publisher:'Finbold',label:'Panel A · W-bottom structure',alt:'W-bottom-like structure with Bollinger Bands and price confirmation.',note:'Compare both lows and the confirmation rather than trading the letter shape.'},
+  {url:'https://assets.finbold.com/uploads/2024/08/Bearish-reversal-1-1024x843.jpg',page:'https://finbold.com/guide/bollinger-bands-explained/',publisher:'Finbold',label:'Panel B · M-top structure',alt:'M-top-like structure with Bollinger Bands and a momentum indicator.',note:'Compare the two pushes and the later weakness, but do not assume a reversal is certain.'}
+ ],
+ '5-5': [{url:'https://pbs.twimg.com/media/E-7bAGwWYAQJr9I.jpg',page:'https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/ttm-squeeze',publisher:'TTM Squeeze visual reference',label:'A TTM Squeeze-style momentum display',alt:'Chart image showing a TTM Squeeze-style indicator and momentum context.',note:'Use the TTM definition: Bollinger Bands inside Keltner Channels, then a release plus momentum context. Do not confuse it with a low BandWidth reading.'}],
+ '6-0': [
+  {url:'https://www.tradingsetupsreview.com/bollinger-squeeze/img/BollingerSqueezeFailedExample_huaf734f8d2e5026d9c916f11986949767_86069_1280x0_resize_q75_h1_box.webp',page:'https://www.tradingsetupsreview.com/bollinger-squeeze/',publisher:'Trading Setups Review',label:'A failed squeeze breakout example',alt:'Bollinger squeeze chart showing a move whose follow-through is in question.',note:'Mark the first move, then identify the later evidence that weakens it. Failure does not automatically authorize a reverse trade.'},
+  {url:'https://stockcharts.com/articles/chartwatchers/2020/07/a-bb-breakout-or-the-dreaded-h-684.html',page:'https://stockcharts.com/articles/chartwatchers/2020/07/a-bb-breakout-or-the-dreaded-h-684.html',publisher:'StockCharts ChartWatchers',label:'The breakout or head-fake question',alt:'StockCharts article about Bollinger Band breakouts and head fakes.',note:'Open the source article if the inline chart is blocked. Compare the first breakout evidence with the later head-fake possibility.'}
+ ],
+ '6-1': [
+  {url:'https://thestockmarketwatch.com/learn/wp-content/uploads/2025/07/bollinger-band-band-walk-strategy-1024x683.webp',page:'https://thestockmarketwatch.com/learn/docs/indicators/bollinger-bands/',publisher:'The Stock Market Watch',label:'A persistent band walk',alt:'Price continues to advance alongside an outer Bollinger Band.',note:'This is a persistence example. A band walk can continue longer than a premature fade allows.'},
+  {url:'https://www.tradingsetupsreview.com/reading-price-action-bollinger-bands/img/PriceTaggingBollingerBandsInASidewaysMarket_hua582d896299cdf4b0409af3b5f00840f_149059_1280x0_resize_q75_h1_box.webp',page:'https://www.tradingsetupsreview.com/reading-price-action-bollinger-bands/',publisher:'Trading Setups Review',label:'Range-bound contrast',alt:'Sideways price action repeatedly tags the outer Bollinger Bands.',note:'Compare swing progress and overlap rather than assuming every band contact belongs to one universal pattern.'}
+ ],
+ '6-2': [
+  {url:'https://www.tradingsetupsreview.com/reading-price-action-bollinger-bands/img/PriceTaggingBollingerBandsInASidewaysMarket_hua582d896299cdf4b0409af3b5f00840f_149059_1280x0_resize_q75_h1_box.webp',page:'https://www.tradingsetupsreview.com/reading-price-action-bollinger-bands/',publisher:'Trading Setups Review',label:'A poke inside a broader range',alt:'Bollinger Band tags in a sideways market.',note:'A brief move beyond a familiar boundary can return into the prior structure. Record the range before deciding whether it has changed.'},
+  {url:'https://www.tradingsetupsreview.com/bollinger-squeeze/img/BollingerSqueezeFailedExample_huaf734f8d2e5026d9c916f11986949767_86069_1280x0_resize_q75_h1_box.webp',page:'https://www.tradingsetupsreview.com/bollinger-squeeze/',publisher:'Trading Setups Review',label:'A failed move after compression',alt:'Bollinger squeeze example used to consider a failed first move.',note:'Look for the specific return or lack of follow-through. A false poke and a confirmed range break require different evidence.'}
+ ]
+};
+function purposeFigureFrame(lessonId, title, inner) {
+ return '<section class="purpose-figure"><div class="purpose-figure-head"><strong>Figure '+lessonId+' · '+escapeHTML(title)+'</strong><span>Purpose-built teaching aid</span></div><div class="purpose-figure-body">'+inner+'</div></section>';
+}
+function purposeCard(kicker,title,body){
+ return '<article class="purpose-card"><span class="purpose-kicker">'+kicker+'</span><h4>'+title+'</h4><p>'+body+'</p></article>';
+}
+function renderPurposeFigure(mId,lIdx,lessonId){
+ const key=mId+'-'+lIdx;
+ if(key==='2-0'){
+  return purposeFigureFrame(lessonId,'How the bands are constructed',
+   '<div class="purpose-equation"><div><strong>Upper band</strong>Moving average + selected standard-deviation distance</div><div><strong>Middle line</strong>The moving average of the selected price series (commonly 20 periods)</div><div><strong>Lower band</strong>Moving average − the same selected standard-deviation distance</div></div><p class="purpose-figure-note">The widely used default is 20 periods and 2 standard deviations. A different platform or course rule can use different settings, so always check the inputs shown on the chart.</p>');
+ }
+ if(key==='2-1'){
+  return purposeFigureFrame(lessonId,'What changing the settings changes',
+   '<div class="purpose-card-grid">'+
+   purposeCard('Shorter window','More responsive','The average and bands react to fewer recent bars. They may turn sooner, but also change more often.')+
+   purposeCard('20 periods · 2 deviations','Common baseline','A widely used reference setting, not a proof that these inputs are best for every market or timeframe.')+
+   purposeCard('Longer window','More smoothed','The frame reflects a longer run of data and usually reacts more slowly to a sudden change.')+
+   '</div><p class="purpose-figure-note">Changing the period and changing the deviation multiplier are different decisions. Compare one setting at a time, then test the rule on varied cases rather than choosing the nicest-looking past chart.</p>');
+ }
+ if(key==='4-3'){
+  return purposeFigureFrame(lessonId,'Four possible pattern states',
+   '<div class="purpose-card-grid">'+
+   purposeCard('01 · Candidate','The shape is present','The first visual pattern may be forming, but a key relationship or confirmation can still be missing.')+
+   purposeCard('02 · Meets rule','Confirmation is visible','The specific confirmation written in the course rule has occurred. This does not guarantee follow-through.')+
+   purposeCard('03 · Failed','A contradiction appears','Price behaviour challenges the original pattern thesis. Apply the written invalidation rather than forcing the pattern.')+
+   purposeCard('04 · Unclear','Evidence is mixed','If swings overlap or the rule cannot be applied consistently, keep the reading unresolved and wait.')+
+   '</div><p class="purpose-figure-note">A pattern name describes a possible structure, not a forecast. State the confirming event and the point that would invalidate the interpretation before considering a trade.</p>');
+ }
+ if(key==='5-3'){
+  return purposeFigureFrame(lessonId,'Method IV: separate the required checks',
+   '<div class="purpose-card-grid">'+
+   purposeCard('Check 1 · Setup','A squeeze precedes the event','The compression condition must qualify under the stated BandWidth definition.')+
+   purposeCard('Check 2 · Confirmation','Two consecutive closes','The close must be beyond the same outer band on two consecutive completed bars. One outside close is not the two-close condition.')+
+   purposeCard('Check 3 · Context','Classify with ADX','Use the course rule to classify stronger-trend versus weaker/non-trending conditions. State the chosen threshold before testing; it is not a universal constant.')+
+   purposeCard('Check 4 · Plan','Write the execution rule','Do not infer an entry, stop or risk amount from the condition diagram. Those decisions must be specified and tested separately.')+
+   '</div><p class="purpose-figure-note">Source reference: <a href="https://www.bollingerbands.com/_files/ugd/58be43_d09c50b6e8ea4afd9af0523ef94de876.pdf" target="_blank" rel="noopener noreferrer">Bollinger Method IV notes (PDF) ↗</a>. This diagram summarizes the checks; it is not a market example claiming all conditions occurred on a single chart.</p>');
+ }
+ if(key==='6-3'){
+  return purposeFigureFrame(lessonId,'Conditions that can justify waiting',
+   '<div class="purpose-card-grid">'+
+   purposeCard('Too late','Price already extended','The entry is far from the original trigger and the stop distance leaves little room before the next obstacle.')+
+   purposeCard('Conflicted','Signals do not agree','The band event, swing structure and selected confirmation do not support one clear hypothesis.')+
+   purposeCard('Hard to execute','Gap or thin liquidity','The displayed candles may hide the path through a gap, and expected slippage can make the planned stop unreliable.')+
+   purposeCard('Poor trade-off','Risk outweighs the room','The target area is too close relative to the invalidation distance and costs. A no-trade decision is valid.')+
+   '</div><p class="purpose-figure-note">These are decision filters, not a mechanical score. Record the observable reason for waiting and what evidence would make you reassess.</p>');
+ }
+ if(mId===7 && lIdx===0){
+  return purposeFigureFrame(lessonId,'Cash risk, stop distance and position size',
+   '<div class="purpose-figure-body" style="padding:0"><table><thead><tr><th>Example</th><th>Entry</th><th>Stop</th><th>Risk per unit</th><th>Position at ₹1,000 cash risk</th></tr></thead><tbody><tr><td>A · Tighter</td><td>₹100</td><td>₹95</td><td>₹5</td><td><strong>200 units</strong></td></tr><tr><td>B · Wider</td><td>₹100</td><td>₹90</td><td>₹10</td><td><strong>100 units</strong></td></tr></tbody></table></div><p class="purpose-figure-note">Position size = permitted cash risk ÷ entry-to-stop distance. These are arithmetic examples, not trade recommendations; fees, gaps and slippage can make the realised loss larger.</p>');
+ }
+ if(mId===7 && lIdx===1){
+  return purposeFigureFrame(lessonId,'Choose the action before the trade',
+   '<div class="flow-step"><span class="flow-number">1</span><p><strong>Price reaches the planned target area</strong>Follow the preselected partial-exit, full-exit or trailing rule. Do not invent a new target because the move feels strong.</p></div><div class="flow-step"><span class="flow-number">2</span><p><strong>The invalidation condition occurs</strong>Execute the stop/exit rule. Do not widen the stop simply to avoid recording a loss.</p></div><div class="flow-step"><span class="flow-number">3</span><p><strong>Price has not reached either condition</strong>Continue managing under the written rule and reassess only when the next stated condition occurs.</p></div><p class="purpose-figure-note">A management rule should cover the target, invalidation and unresolved middle path before entry.</p>');
+ }
+ if(mId===7 && lIdx===2){
+  return purposeFigureFrame(lessonId,'Review a varied set of decisions',
+   '<div style="overflow-x:auto"><table><thead><tr><th>Case</th><th>Context and trigger</th><th>Rule outcome</th><th>Review focus</th></tr></thead><tbody><tr><td>Trend</td><td>Band walk; defined continuation trigger</td><td>Won or lost under the same plan</td><td>Was the trigger present and the stop respected?</td></tr><tr><td>Range</td><td>Boundary interaction; range still intact</td><td>Reversal, continuation or no trade</td><td>Was the context classification justified?</td></tr><tr><td>Failed break</td><td>Close outside then return inside</td><td>Original idea weakened</td><td>Did the pre-written invalidation control the decision?</td></tr><tr><td>Unclear</td><td>Mixed structure or conflicting inputs</td><td>Pass</td><td>Was waiting consistent with the rules?</td></tr></tbody></table></div><p class="purpose-figure-note">Use a real, varied sample when you test. This review table is a recording template, not a performance result and not evidence of profitability.</p>');
+ }
+ if(mId===7 && lIdx===3){
+  return purposeFigureFrame(lessonId,'Judge the decision separately from the outcome',
+   '<div class="purpose-card-grid">'+
+   purposeCard('Case A · Loss','Disciplined losing trade','The written setup qualified, risk was sized, and the invalidation was respected. The result was negative; the process can still be sound.')+
+   purposeCard('Case B · Win','Undisciplined winning trade','The trade broke the plan but happened to profit. The outcome does not repair a poor process or justify repeating it.')+
+   purposeCard('Case C · No trade','Defensible pass','A required condition was missing or the risk-to-room trade-off was poor. Waiting preserved the rules despite no realised profit.')+
+   '</div><p class="purpose-figure-note">At the decision point, use only evidence that was actually visible then. Reveal the later outcome separately so hindsight does not rewrite the first reading.</p>');
+ }
+ return purposeFigureFrame(lessonId,'Decision aid',
+  '<p class="purpose-figure-note">Keep the observation separate from the interpretation. Write the evidence that would strengthen the idea, the evidence that would weaken it, and the rule that controls the next action.</p>');
+}
+function renderCourseFigure(mId,lIdx,profile,lessonId){
+ const key=mId+'-'+lIdx;
+ const refs=courseReferenceFigures[key];
+ if(!refs) return renderPurposeFigure(mId,lIdx,lessonId);
+ const panels=refs.map(function(ref,i){
+  const subLabel=refs.length>1?' · '+String.fromCharCode(65+i):'';
+  return '<figure class="course-reference-figure"><div class="course-reference-head"><strong>Figure '+lessonId+subLabel+'</strong><span>Source-linked chart reference</span></div><div class="course-reference-image"><img src="'+ref.url+'" alt="'+escapeHTML(ref.alt)+'" loading="lazy" decoding="async" data-zoomable></div><figcaption><strong>'+escapeHTML(ref.label)+'</strong><p>'+escapeHTML(ref.note)+'</p></figcaption><div class="course-reference-actions"><a href="'+ref.page+'" target="_blank" rel="noopener noreferrer">Source: '+escapeHTML(ref.publisher)+' ↗</a><button type="button" data-enlarge-image>Enlarge image ↗</button></div></figure>';
+ }).join('');
+ return '<div class="course-figure-stack">'+panels+'</div><p class="course-figure-caution">'+escapeHTML(profile.take)+' External reference images illustrate an example; they are not evidence that a setup is profitable or that every course-specific trigger is met. Use the linked source for context and replace these temporary references with owned or rights-cleared images before public release.</p>';
+}
+
 function buildChartSvg(mId,lIdx,variant=0,figureLabel=null) {
   const W=860,H=385,left=54,right=24,top=26,bottom=38,plotW=W-left-right,plotH=H-top-bottom;
   const figLabel = figureLabel || `${mId}.${lIdx+1}`;
@@ -2498,7 +2689,7 @@ function renderLesson() {
  $('.lesson-duration-value strong').textContent=m.id===5?'25–28 min':'13–16 min';
  $('.lesson-duration-value small').textContent=m.id===5?'Setup lesson':'Estimated study time';
  $('#panel-learn').innerHTML=`<div class="eyebrow">${escapeHTML(profile.eyebrow)}</div><h3>${escapeHTML(profile.question)}</h3>${profile.paragraphs.map(p=>`<p>${escapeHTML(p)}</p>`).join('')}<div class="objective-box"><span class="obj-icon" aria-hidden="true">✓</span><div><span class="obj-kicker">By the end, you can</span><p>${escapeHTML(objectiveFor(m.id,activeLessonIndex))}</p></div></div><div class="reasoning-grid">${cases.map(c=>`<article class="reasoning-card"><span class="reasoning-label">${c[0]}</span><h4>${c[1]}</h4><p>${c[2]}</p></article>`).join('')}</div><div class="takeaway-strip"><span class="takeaway-mark">Keep</span><p>${escapeHTML(profile.take)}</p></div><button type="button" class="button" data-article-tab="practice">Work through the chart example ↗</button>`;
- const figures = m.id===5 && activeLessonIndex===0 ? `<div class="case-grid"><article class="case-card"><span class="case-number">FIGURE 5.1.1</span><h4>Compression before a move</h4>${buildChartSvg(5,0,0,'5.1.1')}<p>Track the narrowing bands, then identify the first qualifying upside close. The squeeze is preparation, not an entry.</p></article><article class="case-card"><span class="case-number">FIGURE 5.1.2</span><h4>Downside resolution</h4>${buildChartSvg(5,0,1,'5.1.2')}<p>The same compression can resolve lower. Direction is read from the breakout event, not guessed from the squeeze.</p></article><article class="case-card"><span class="case-number">FIGURE 5.1.3</span><h4>Failed first move</h4>${buildChartSvg(6,0,2,'5.1.3')}<p>A first break can return to the old range. The plan needs an invalidation rule for that case.</p></article></div>` : `<div class="chart-shell" id="teachingChartShell"><div class="chart-head"><div><strong>Figure ${lessonId} · ${escapeHTML(chartTitle(m.id,activeLessonIndex))}</strong><br><span>Static teaching illustration</span></div><button type="button" class="text-button" id="zoomChartButton">Enlarge figure ↗</button></div>${buildChartSvg(m.id,activeLessonIndex)}<div class="chart-caption"><span>${escapeHTML(profile.take)}</span><button type="button" class="text-button" id="toggleChartNotes">Show reading notes ↓</button></div><div class="chart-reading" id="chartReadingNotes"><p><strong>Observe:</strong> describe the band's position and width, plus the price sequence. <strong>Interpret:</strong> consider what this relationship may imply in context and name an alternative. <strong>Test:</strong> state the next condition that would strengthen or weaken the reading. This drawing is illustrative, not historical market data.</p></div></div>`;
+ const figures = renderCourseFigure(m.id,activeLessonIndex,profile,lessonId);
  $('#panel-practice').innerHTML=`<div class="eyebrow">Chart examples · Lesson ${lessonId}</div><h3>${escapeHTML(chartTitle(m.id,activeLessonIndex))}</h3><p>Study the visual before reading the explanation. Focus on the relationship between price, the bands and the market context. Do not infer a trade direction from band position alone.</p>${figures}<div class="practice-prompt"><strong>Before reading the model explanation</strong><p>Write one observable fact, one plausible interpretation, one alternative explanation, and the next condition that would change your view.</p></div><label class="inline-label" for="reflectionInput">Your first reading</label><textarea class="reflection-input" id="reflectionInput" placeholder="I can observe… One possible explanation is… I would revise this view if…"></textarea><div class="small-actions"><button type="button" class="button" id="lockReadingButton">Lock in my reading</button><button type="button" class="button secondary" id="showModelButton">Show model reasoning</button></div><div class="answer-reveal" id="modelReasoning"><strong>A careful model reading</strong><p>${escapeHTML(profile.take)} The observation describes what the chart shows; the interpretation stays conditional; the plan still requires a trigger, invalidation and risk decision where relevant.</p></div><div class="feedback" id="reflectionFeedback" aria-live="polite"></div>`;
  $('#panel-review').innerHTML=`<div class="eyebrow">Test your reading</div><h3>What is the strongest next step?</h3><p>${escapeHTML(lessonTitle)}. Choose the statement that stays closest to the method and the available evidence.</p><div class="practice-step"><div class="practice-step-head"><div><span class="level-label">CHECK YOUR READING</span><h4>${escapeHTML(q.question)}</h4></div><span class="duration">~1 min</span></div><div class="option-list" id="quizOptions">${q.choices.map((choice,i)=>`<button type="button" class="choice" data-correct="${i===q.correct?'true':'false'}"><span class="choice-letter">${String.fromCharCode(65+i)}</span><span>${escapeHTML(choice)}</span></button>`).join('')}</div><div class="feedback" id="quizFeedback" aria-live="polite"></div></div><div class="takeaway-strip"><span class="takeaway-mark">Keep</span><p>${escapeHTML(profile.take)}</p></div>`;
  activateArticleTab(chosenTabs);
@@ -2555,7 +2746,9 @@ function bindChoiceGroup(groupId, feedbackId, correctText, incorrectText) {
 function bindPilotInteractions() {
   const zoom = $('#zoomChartButton');
   if (zoom) zoom.addEventListener('click', openChartModal);
-  const toggleNotes = $('#toggleChartNotes');
+  $('#panel-practice').querySelectorAll('[data-enlarge-image]').forEach(button=>button.addEventListener('click',()=>openChartModal(button.closest('figure')?.querySelector('img'))));
+ $('#panel-practice').querySelectorAll('.course-reference-image img').forEach(img=>img.addEventListener('error',()=>{const holder=img.parentElement;holder.classList.add('image-unavailable');const fallback=document.createElement('p');fallback.className='image-fallback';fallback.textContent='The source image could not be loaded in this preview. Use the source link below the figure to open the reference.';img.hidden=true;holder.appendChild(fallback);},{once:true}));
+ const toggleNotes = $('#toggleChartNotes');
   if (toggleNotes) toggleNotes.addEventListener('click',()=>{const notes=$('#chartReadingNotes');notes.classList.toggle('show');toggleNotes.textContent=notes.classList.contains('show')?'Hide chart reading notes ↑':'Show chart reading notes ↓';});
   const showModel = $('#showModelButton');
   if (showModel) showModel.addEventListener('click',()=>$('#modelReasoning').classList.toggle('show'));
@@ -2602,7 +2795,7 @@ $('#completeLessonButton').addEventListener('click',()=>{
 });
 $('#roomJumpToTask').addEventListener('click',()=>{activateArticleTab('practice');$('#panel-practice').scrollIntoView({behavior:'smooth',block:'start'});});
 const chartModal=$('#chartModal');
-function openChartModal(){const svg=$('#teachingChart').cloneNode(true);svg.removeAttribute('id');$('#modalChartHolder').innerHTML='';$('#modalChartHolder').appendChild(svg);chartModal.classList.add('open');$('#closeChartModal').focus();}
+function openChartModal(sourceNode=null){const node=sourceNode||$('#panel-practice [data-zoomable]')||$('#teachingChart');if(!node)return;const media=node.cloneNode(true);media.removeAttribute('id');media.removeAttribute('tabindex');media.removeAttribute('role');$('#modalChartHolder').innerHTML='';$('#modalChartHolder').appendChild(media);chartModal.classList.add('open');$('#closeChartModal').focus();}
 function closeChartModal(){chartModal.classList.remove('open');const zoom=$('#zoomChartButton');if(zoom)zoom.focus();}
 $('#closeChartModal').addEventListener('click',closeChartModal);
 chartModal.addEventListener('click',e=>{if(e.target===chartModal)closeChartModal();});
