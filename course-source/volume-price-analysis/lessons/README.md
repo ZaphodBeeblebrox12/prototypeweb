@@ -6,7 +6,7 @@
 This folder contains the six-module, 30-lesson manuscript, presenter notes for chart walkthroughs, research/adaptation notes, a beginner-language guide, the second-pass learner-value Q&A bank, and the full asset-production brief. The first pilot asset package for Module 1, Lesson 1.1 is now in [the assets folder](../assets/README.md); it includes an editable SVG comparison chart, synthetic OHLCV data, accessibility notes, a standalone ChartLab prototype and an instructor key. The files have passed a structural check, but a novice pilot and accessibility review are still required.
 
 - [Potential lesson catalog](../POTENTIAL_LESSON_CATALOG.md)
-- [Asset production brief — all lesson visuals, ChartLabs, worksheets and supporting files](../ASSET_PRODUCTION_BRIEF.md)
+- [Asset production brief — all lesson visuals, ChartLabs, worksheets and supporting files](../ASSET_PRODUCTION_BRIEF.md)\n- [M01-L01 pilot validation checklist](../assets/PILOT_VALIDATION_CHECKLIST.md)
 - [Module 1 — Read the Market Behind the Candles](MODULE_01_READ_THE_MARKET.md)
 - [Module 2 — Spot Buying and Selling Pressure](MODULE_02_BUYING_SELLING_PRESSURE.md)
 - [Module 3 — Find Trade Setups at the Levels That Matter](MODULE_03_TRADE_SETUPS.md)
