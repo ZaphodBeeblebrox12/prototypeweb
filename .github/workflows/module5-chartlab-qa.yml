@@ -148,7 +148,7 @@ jobs:
               help: v.help,
               helpUrl: v.helpUrl,
               affectedNodes: v.nodes.length,
-              examples: v.nodes.slice(0, 5).map(n => ({
+              examples: v.nodes.map(n => ({
                 target: n.target,
                 summary: n.failureSummary
               }))
