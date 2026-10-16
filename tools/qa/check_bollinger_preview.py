@@ -53,7 +53,7 @@ for lesson_id, lesson in lesson_manuscripts.items():
     visible = html_lib.unescape(re.sub(r"<[^>]+>", " ", " ".join(
         lesson.get(part, "") for part in ("ideaHtml", "examplesHtml", "practiceHtml")
     )))
-    word_count = len(re.findall(r"\\b[\\w’'-]+\\b", visible))
+    word_count = len(visible.split())
     if word_count < 850:
         raise SystemExit(f"Lesson {lesson_id} is too shallow for the course standard ({word_count} words).")
 if 'function isVolumeAnalysisLesson' not in page:
