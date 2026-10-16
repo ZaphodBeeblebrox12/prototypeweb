@@ -184,8 +184,23 @@ main { max-width: 1320px; margin: 0 auto; padding: 0 28px 68px; }
 .article-panel[hidden] { display: none; }
 .article-panel h3 { margin: 0 0 9px; font: 400 27px/1.12 var(--serif); letter-spacing: -.035em; }
 .article-panel h4 { margin: 25px 0 9px; font: 400 20px var(--serif); }
-.article-panel p { color: var(--muted); font-size: 11px; line-height: 1.9; }
+.article-panel p { margin: 9px 0 13px; color: var(--muted); font-size: 13px; line-height: 1.8; }
 .article-panel p strong { color: var(--ink); font-weight: 700; }
+.article-panel ul, .article-panel ol { margin: 9px 0 16px; padding-left: 24px; color: var(--muted); font-size: 13px; line-height: 1.8; }
+.article-panel li + li { margin-top: 5px; }
+.article-panel blockquote { margin: 16px 0; padding: 10px 16px; border-left: 3px solid var(--gold); background: var(--surface-2); }
+.article-panel blockquote p { margin: 4px 0; color: var(--ink); }
+.article-panel hr { border: 0; border-top: 1px solid var(--line); margin: 22px 0; }
+.article-panel a { color: var(--green); text-underline-offset: 3px; }
+.lesson-manuscript h4, .lesson-example-copy h4, .lesson-review-copy h4 { margin: 24px 0 8px; font: 400 20px/1.2 var(--serif); letter-spacing: -.02em; }
+.lesson-manuscript h4:first-child, .lesson-example-copy h4:first-child, .lesson-review-copy h4:first-child { margin-top: 8px; }
+.lesson-table-wrap { margin: 15px 0; overflow-x: auto; border: 1px solid var(--line); border-radius: 9px; }
+.lesson-table-wrap table { width: 100%; border-collapse: collapse; font-size: 12px; line-height: 1.65; }
+.lesson-table-wrap th, .lesson-table-wrap td { padding: 9px 11px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.lesson-table-wrap th { background: var(--surface-2); color: var(--ink); font-weight: 750; }
+.lesson-table-wrap td { color: var(--muted); }
+.lesson-table-wrap tr:last-child td { border-bottom: 0; }
+.lesson-quiz-intro { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--line); }
 .objective-box { display: flex; gap: 12px; padding: 15px; margin: 16px 0 21px; border: 1px solid light-dark(#c8d8bf, #425b46); background: var(--green-wash); border-radius: 11px; }
 .objective-box .obj-icon { display: grid; place-items: center; width: 30px; height: 30px; flex: 0 0 auto; background: var(--surface); border: 1px solid var(--line); border-radius: 9px; color: var(--green); }
 .objective-box .obj-kicker { color: var(--green); font-size: 8px; font-weight: 850; letter-spacing: .11em; text-transform: uppercase; }
@@ -2317,59 +2332,16 @@ body { font-size: 15px; line-height: 1.66; }
                 <button type="button" class="article-tab" role="tab" aria-selected="false" data-article-tab="review">Test your reading</button>
               </div>
               <section class="article-panel" id="panel-learn" role="tabpanel">
-                <div class="eyebrow">Start with the trading question</div><h3>What do you know—and what are you assuming?</h3>
-                <p>A candle gives you a record of price over a chosen period. Volume gives you a record of activity according to the data source you are using. Neither, by itself, proves why participants acted or what price must do next.</p>
-                <p>The useful habit is to keep three things separate: <strong>the price result</strong>, <strong>the activity recorded</strong>, and <strong>the interpretation you are testing</strong>. Once those are distinct, you can compare similar-looking bars without treating a single one as a signal.</p>
-                <div class="objective-box"><span class="obj-icon" aria-hidden="true">✓</span><div><span class="obj-kicker">By the end, you can</span><p>Describe a candle's price outcome and associated activity separately, then combine them without treating volume as a stand-alone signal.</p></div></div>
-                <div class="reasoning-grid"><article class="reasoning-card"><span class="reasoning-label">OBSERVE</span><h4>What is visible?</h4><p>The bar's range, close location, direction and activity relative to a stated baseline.</p></article><article class="reasoning-card"><span class="reasoning-label">INTERPRET</span><h4>What might it mean?</h4><p>A possible reading in context. Keep at least one plausible alternative open.</p></article><article class="reasoning-card"><span class="reasoning-label">TEST</span><h4>What would change your view?</h4><p>Identify the next observable evidence that would strengthen or weaken the interpretation.</p></article></div>
-                <h4>Read the chart before naming the pattern.</h4><p>Use the chart as an example, not a prediction. Compare price progress, relative activity and where the move occurs in the sequence before deciding which explanation is better supported.</p>
-                <button type="button" class="button" data-article-tab="practice">Work through the chart examples ↗</button>
+                <div class="eyebrow">The idea</div><h3>Choose a lesson to begin.</h3>
+                <p>The full student-facing lesson manuscript will appear here, followed by a relevant Bollinger Bands figure and the skill you will practise.</p>
               </section>
               <section class="article-panel" id="panel-practice" role="tabpanel" hidden>
-                <div class="eyebrow">Chart examples / Lesson 1.1</div><h3>Read the price result alongside activity.</h3><p>Use the same questions each time: What did price accomplish? How unusual was recorded activity relative to this chart's baseline? What else in the sequence might change your interpretation?</p>
-                <div class="chart-shell" id="teachingChartShell">
-                  <div class="chart-head"><div><strong>Price and activity · teaching example</strong><br><span>Figure 1.1 · price and activity example</span></div><button type="button" class="text-button" id="zoomChartButton">Enlarge chart ↗</button></div>
-                  <svg id="teachingChart" viewBox="0 0 860 470" role="img" aria-labelledby="teachingChartTitle teachingChartDesc">
-                    <title id="teachingChartTitle">Price candles and volume bars</title><desc id="teachingChartDesc">An illustrative candle and activity sequence. Grid labels and the activity scale remain visible. This is a teaching illustration, not a historical market-data screenshot.</desc>
-                    <rect width="860" height="470" fill="var(--paper)"/>
-                    <g fill="var(--muted)" font-family="system-ui,sans-serif" font-size="12"><text x="38" y="27" font-weight="700">PRICE · SAME SCALE THROUGHOUT</text><text x="38" y="323" font-weight="700">RECORDED VOLUME</text><text x="816" y="27" text-anchor="end">FIGURE 1.1</text></g>
-                    <g stroke="var(--line)" stroke-width="1" stroke-dasharray="4 6"><path d="M42 61H820 M42 108H820 M42 155H820 M42 202H820 M42 249H820 M42 294H820 M42 362H820 M42 407H820 M42 452H820"/></g>
-                    <g fill="var(--muted)" font-family="system-ui,sans-serif" font-size="10"><text x="12" y="65">105</text><text x="12" y="112">103</text><text x="12" y="159">101</text><text x="12" y="206">99</text><text x="12" y="253">97</text><text x="12" y="298">95</text><text x="12" y="366">5k</text><text x="12" y="411">2.5k</text><text x="12" y="456">0</text></g>
-                    <rect x="464" y="44" width="48" height="259" rx="8" fill="var(--gold-wash)" opacity=".7"/>
-                    <path d="M488 34V300" stroke="var(--gold)" stroke-width="1.5" stroke-dasharray="4 4"/>
-                    <g stroke-linecap="round" stroke-width="2.2">
-                      <path d="M88 246V220 M144 226V194 M200 203V165 M256 182V145 M312 166V124 M368 158V118 M424 175V135 M480 204V156 M536 216V167 M592 193V148 M648 172V125 M704 153V106 M760 139V91" stroke="var(--muted)"/>
-                    </g>
-                    <g stroke-width="1.7">
-                      <rect x="77" y="226" width="22" height="20" rx="1" fill="var(--green)" stroke="var(--green)"/><rect x="133" y="201" width="22" height="21" rx="1" fill="var(--green)" stroke="var(--green)"/><rect x="189" y="175" width="22" height="21" rx="1" fill="var(--green)" stroke="var(--green)"/><rect x="245" y="155" width="22" height="19" rx="1" fill="var(--green)" stroke="var(--green)"/><rect x="301" y="139" width="22" height="23" rx="1" fill="var(--green)" stroke="var(--green)"/><rect x="357" y="139" width="22" height="17" rx="1" fill="var(--red)" stroke="var(--red)"/><rect x="413" y="149" width="22" height="20" rx="1" fill="var(--red)" stroke="var(--red)"/><rect x="469" y="166" width="22" height="34" rx="1" fill="var(--red)" stroke="var(--red)"/><rect x="525" y="185" width="22" height="22" rx="1" fill="var(--red)" stroke="var(--red)"/><rect x="581" y="164" width="22" height="24" rx="1" fill="var(--green)" stroke="var(--green)"/><rect x="637" y="141" width="22" height="23" rx="1" fill="var(--green)" stroke="var(--green)"/><rect x="693" y="120" width="22" height="22" rx="1" fill="var(--green)" stroke="var(--green)"/><rect x="749" y="104" width="22" height="20" rx="1" fill="var(--green)" stroke="var(--green)"/>
-                    </g>
-                    <g opacity=".93">
-                      <rect x="77" y="421" width="22" height="31" rx="2" fill="var(--green)"/><rect x="133" y="426" width="22" height="26" rx="2" fill="var(--green)"/><rect x="189" y="416" width="22" height="36" rx="2" fill="var(--green)"/><rect x="245" y="411" width="22" height="41" rx="2" fill="var(--green)"/><rect x="301" y="418" width="22" height="34" rx="2" fill="var(--green)"/><rect x="357" y="413" width="22" height="39" rx="2" fill="var(--red)"/><rect x="413" y="407" width="22" height="45" rx="2" fill="var(--red)"/><rect x="469" y="354" width="22" height="98" rx="2" fill="var(--gold)"/><rect x="525" y="399" width="22" height="53" rx="2" fill="var(--red)"/><rect x="581" y="416" width="22" height="36" rx="2" fill="var(--green)"/><rect x="637" y="410" width="22" height="42" rx="2" fill="var(--green)"/><rect x="693" y="420" width="22" height="32" rx="2" fill="var(--green)"/><rect x="749" y="423" width="22" height="29" rx="2" fill="var(--green)"/>
-                    </g>
-                    <path d="M502 69H624" stroke="var(--gold)" stroke-width="1.5"/><rect x="617" y="52" width="193" height="34" rx="8" fill="var(--gold-wash)" stroke="var(--gold)" stroke-width=".7"/><text x="713" y="66" text-anchor="middle" font-size="10" font-weight="800" fill="var(--ink)" font-family="system-ui,sans-serif">HIGHER RECORDED ACTIVITY</text><text x="713" y="78" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="system-ui,sans-serif">One clue, not an answer</text>
-                    <g fill="var(--muted)" font-size="10" font-family="system-ui,sans-serif"><text x="88" y="466" text-anchor="middle">01</text><text x="200" y="466" text-anchor="middle">03</text><text x="312" y="466" text-anchor="middle">05</text><text x="424" y="466" text-anchor="middle">07</text><text x="480" y="466" text-anchor="middle">08</text><text x="592" y="466" text-anchor="middle">10</text><text x="704" y="466" text-anchor="middle">12</text></g>
-                  </svg>
-                  <div class="chart-caption"><span>Read the chart at its own baseline; do not compare this bar to a different feed or timeframe.</span><button type="button" class="text-button" id="toggleChartNotes">Show chart reading notes ↓</button></div>
-                  <div class="chart-reading" id="chartReadingNotes"><p><strong>What is visible:</strong> one bar has much higher recorded activity than nearby bars, while its price range and closing location are only part of the evidence. <strong>What is not established:</strong> the identity or intent of participants, whether this is a reversal, or what happens next. The next step is to compare location and follow-through.</p></div>
-                </div>
-                <div class="practice-step" id="noticeStep"><div class="practice-step-head"><div><span class="level-label">FIRST LOOK</span><h4>Describe before you explain.</h4></div><span class="duration">~1.5 min in outline</span></div><p>Which statement stays closest to what the chart shows?</p><div class="option-list" id="noticeOptions">
-                  <button type="button" class="choice" data-correct="false"><span class="choice-letter">A</span><span>The high-volume bar proves that buyers have taken control.</span></button>
-                  <button type="button" class="choice" data-correct="true"><span class="choice-letter">B</span><span>Recorded activity is unusually high relative to nearby bars; I still need price context and follow-through.</span></button>
-                  <button type="button" class="choice" data-correct="false"><span class="choice-letter">C</span><span>High volume means the next candle is likely to continue in the same direction.</span></button>
-                </div><div class="feedback" id="noticeFeedback" aria-live="polite"></div></div>
-                <div class="practice-step"><div class="practice-step-head"><div><span class="level-label">COMPARE</span><h4>Which comparison adds context?</h4></div><span class="duration">~2.5 min</span></div><p>You see the same high-activity bar. What would make your reading more useful?</p><div class="option-list" id="compareOptions">
-                  <button type="button" class="choice" data-correct="false"><span class="choice-letter">A</span><span>Name the bar using a familiar pattern label and stop there.</span></button>
-                  <button type="button" class="choice" data-correct="true"><span class="choice-letter">B</span><span>Compare the range, close location and price progress with recent bars, then place it in the prior structure.</span></button>
-                  <button type="button" class="choice" data-correct="false"><span class="choice-letter">C</span><span>Ignore context and compare its volume with a different instrument.</span></button>
-                </div><div class="feedback" id="compareFeedback" aria-live="polite"></div></div>
-                <div class="practice-step"><div class="practice-step-head"><div><span class="level-label">YOUR READING</span><h4>Write a reading that could change.</h4></div><span class="duration">~4.5 min</span></div><p>Write one observation, one possible interpretation, and one piece of later evidence that would strengthen or weaken it. Record your initial view before any future bars are shown.</p><label class="inline-label" for="reflectionInput">Your first reading</label><textarea class="reflection-input" id="reflectionInput" placeholder="I can observe… One possible explanation is… I would revise this view if…"></textarea><div class="small-actions"><button type="button" class="button" id="lockReadingButton">Lock in my reading</button><button type="button" class="button secondary" id="showModelButton">Show model reasoning</button></div><div class="answer-reveal" id="modelReasoning"><strong>A careful model reading</strong><p>“Recorded activity is unusually high compared with nearby bars. The price result and its location in the sequence need to be assessed together. This could reflect a meaningful change in participation, but the bar alone does not establish direction. I would compare the response over the next bars and keep an alternative scenario open.”</p></div><div class="feedback" id="reflectionFeedback" aria-live="polite"></div></div>
-                <div class="practice-prompt"><strong>Before you reveal the explanation</strong><p>Record what you observe first. Then compare it with the model reasoning and note what evidence would change your view.</p></div>
+                <div class="eyebrow">Chart examples</div><h3>Inspect the worked evidence.</h3>
+                <p>Each lesson includes its own worked comparison and chart examples. Open a lesson from the curriculum or the lesson outline to view its materials.</p>
               </section>
               <section class="article-panel" id="panel-review" role="tabpanel" hidden>
-                <div class="eyebrow">Bring the reasoning together</div><h3>Can you separate evidence from inference?</h3><p>Choose the strongest statement. A good answer should remain accurate even when the next few bars do something unexpected.</p>
-                <div class="practice-step"><div class="practice-step-head"><div><span class="level-label">CHECK YOUR READING</span><h4>What does a high-volume bar establish on its own?</h4></div><span class="duration">~1 min</span></div>
-                  <div class="option-list" id="quizOptions"><button type="button" class="choice" data-correct="false"><span class="choice-letter">A</span><span>Which side caused the move.</span></button><button type="button" class="choice" data-correct="true"><span class="choice-letter">B</span><span>That more activity was recorded, subject to the data source and comparison baseline.</span></button><button type="button" class="choice" data-correct="false"><span class="choice-letter">C</span><span>The next market direction.</span></button></div><div class="feedback" id="quizFeedback" aria-live="polite"></div></div>
-                <div class="takeaway-strip"><span class="takeaway-mark">Keep</span><p>Describe the data before naming it. Identify the next evidence that could support or weaken your reading.</p></div>
+                <div class="eyebrow">Test your reading</div><h3>Practise before checking the model reasoning.</h3>
+                <p>The practice task and knowledge check will match the lesson you selected. Waiting or rejecting an incomplete setup is a valid decision when the evidence does not support a trade.</p>
               </section>
               <div class="complete-row"><div class="complete-copy"><strong id="completeTitle">Finished this preview lesson?</strong><span id="completeDescription">Mark it complete to see the progress model update in this prototype.</span></div><button type="button" class="complete-button" id="completeLessonButton">Mark complete ✓</button></div>
             </article>
@@ -2385,6 +2357,7 @@ body { font-size: 15px; line-height: 1.66; }
   <div class="modal-panel"><div class="modal-head"><strong id="chartModalTitle">Chart inspection · enlarged view</strong><button class="modal-close" type="button" id="closeChartModal" aria-label="Close enlarged chart">×</button></div><div class="modal-body" id="modalChartHolder"></div><p class="modal-note">Static teaching illustration. Use the enlarged view to inspect the bands and price relationship. Historical chart examples in the source package still require local-asset preparation and review before release.</p></div>
 </div>
 
+<script src="../../assets/bollinger-lessons-data.js"></script>
 <script>
 const modules = [
   {id:1,title:"What Bollinger Bands Actually Tell You",short:"Understand the bands",summary:"Build the correct mental model: relative price and changing volatility, not prediction.",deliverable:"Band-reading note",lessons:[
@@ -2712,6 +2685,8 @@ function practiceCases(mId,lIdx){
  return cases[mId];
 }
 function quizFor(mId,lIdx){
+ const manuscriptQuiz = window.BOLLINGER_MANUSCRIPTS && window.BOLLINGER_MANUSCRIPTS[`${mId}.${lIdx+1}`] && window.BOLLINGER_MANUSCRIPTS[`${mId}.${lIdx+1}`].quiz;
+ if (manuscriptQuiz) return manuscriptQuiz;
  const q = [
   {question:'What does a touch of the upper band establish on its own?',choices:['Price must reverse from the upper band.','Price has reached the upper side of the current banded frame; context is still needed.','The instrument is overbought and should be sold.'],correct:1,why:'Correct. The band touch is an observation, not a stand-alone signal. In a strong trend price may continue to walk the upper band.'},
   {question:'What is the best interpretation of %B?',choices:['It guarantees the next direction.','It measures the width of the bands.','It describes price location relative to the upper and lower bands.'],correct:2,why:'Correct. %B describes relative position. Context and other setup conditions still determine whether a trade is justified.'},
@@ -2726,7 +2701,9 @@ function quizFor(mId,lIdx){
 }
 function renderLesson() {
  const m=modules[activeModule-1], lessonTitle=m.lessons[activeLessonIndex], lessonId=`${m.id}.${activeLessonIndex+1}`;
- const profile=lessonProfile(m.id,activeLessonIndex), q=quizFor(m.id,activeLessonIndex), cases=practiceCases(m.id,activeLessonIndex);
+ const profile=lessonProfile(m.id,activeLessonIndex), q=quizFor(m.id,activeLessonIndex);
+ const manuscript=window.BOLLINGER_MANUSCRIPTS && window.BOLLINGER_MANUSCRIPTS[lessonId];
+ const takeaway=manuscript && manuscript.take ? manuscript.take : profile.take;
  const ideaFigure=renderIdeaFigure(m.id,activeLessonIndex,profile,lessonId);
  const relatedVolumeCard=renderRelatedVolumeCourseCard(m.id,activeLessonIndex,lessonTitle,profile);
  const figureAssetCount=lessonFigureAssetCount(m.id,activeLessonIndex);
@@ -2735,18 +2712,33 @@ function renderLesson() {
  $('#activeModuleTag').textContent=m.short;
  $('#activeLessonTag').textContent=`LESSON ${lessonId}`;
  $('#activeLessonTitle').textContent=lessonTitle;
- $('#activeLessonSummary').textContent=profile.take;
+ $('#activeLessonSummary').textContent=takeaway;
  $('#completeTitle').textContent=completed.has(flattenLessonId(m.id,activeLessonIndex))?'Lesson marked complete':'Finished this lesson?';
  $('#completeDescription').textContent=completed.has(flattenLessonId(m.id,activeLessonIndex))?'You can revisit it or continue to the next lesson.':'Mark it complete to update your preview progress.';
  $('#completeLessonButton').textContent=completed.has(flattenLessonId(m.id,activeLessonIndex))?'Completed ✓':'Mark complete ✓';
  $('#completeLessonButton').setAttribute('aria-pressed',String(completed.has(flattenLessonId(m.id,activeLessonIndex))));
  $('.lesson-brief-mark').textContent=String(m.id).padStart(2,'0');
- $('.lesson-duration-value strong').textContent=m.id===5?'25–28 min':'13–16 min';
+ const studyTime=manuscript && manuscript.timeLabel ? manuscript.timeLabel : (m.id===5?'25–28 minutes':'15 minutes');
+ $('.lesson-duration-value strong').textContent=studyTime.replace(/\.$/,'');
  $('.lesson-duration-value small').textContent=m.id===5?'Setup lesson':'Estimated study time';
- $('#panel-learn').innerHTML=`<div class="eyebrow">${escapeHTML(profile.eyebrow)}</div><h3>${escapeHTML(profile.question)}</h3>${profile.paragraphs.map(p=>`<p>${escapeHTML(p)}</p>`).join('')}${ideaFigure}<div class="objective-box"><span class="obj-icon" aria-hidden="true">✓</span><div><span class="obj-kicker">By the end, you can</span><p>${escapeHTML(objectiveFor(m.id,activeLessonIndex))}</p></div></div><div class="reasoning-grid">${cases.map(c=>`<article class="reasoning-card"><span class="reasoning-label">${c[0]}</span><h4>${c[1]}</h4><p>${c[2]}</p></article>`).join('')}</div><div class="takeaway-strip"><span class="takeaway-mark">Keep</span><p>${escapeHTML(profile.take)}</p></div>${relatedVolumeCard}<button type="button" class="button" data-article-tab="practice">Work through the chart examples ↗</button>`;
- const figures = renderCourseFigure(m.id,activeLessonIndex,profile,lessonId);
- $('#panel-practice').innerHTML=`<div class="eyebrow">Chart examples · Lesson ${lessonId}</div><h3>${escapeHTML(chartTitle(m.id,activeLessonIndex))}</h3><p>Study the worked chart, then compare any additional example. Focus on the relationship between price, the bands and the market context. Do not infer a trade direction from band position alone.</p>${figures}<div class="practice-prompt"><strong>Before reading the model explanation</strong><p>Write one observable fact, one plausible interpretation, one alternative explanation, and the next condition that would change your view.</p></div><label class="inline-label" for="reflectionInput">Your first reading</label><textarea class="reflection-input" id="reflectionInput" placeholder="I can observe… One possible explanation is… I would revise this view if…"></textarea><div class="small-actions"><button type="button" class="button" id="lockReadingButton">Lock in my reading</button><button type="button" class="button secondary" id="showModelButton">Show model reasoning</button></div><div class="answer-reveal" id="modelReasoning"><strong>A careful model reading</strong><p>${escapeHTML(profile.take)} The observation describes what the chart shows; the interpretation stays conditional; the plan still requires a trigger, invalidation and risk decision where relevant.</p></div><div class="feedback" id="reflectionFeedback" aria-live="polite"></div>`;
- $('#panel-review').innerHTML=`<div class="eyebrow">Test your reading</div><h3>What is the strongest next step?</h3><p>${escapeHTML(lessonTitle)}. Choose the statement that stays closest to the method and the available evidence.</p><div class="practice-step"><div class="practice-step-head"><div><span class="level-label">CHECK YOUR READING</span><h4>${escapeHTML(q.question)}</h4></div><span class="duration">~1 min</span></div><div class="option-list" id="quizOptions">${q.choices.map((choice,i)=>`<button type="button" class="choice" data-correct="${i===q.correct?'true':'false'}"><span class="choice-letter">${String.fromCharCode(65+i)}</span><span>${escapeHTML(choice)}</span></button>`).join('')}</div><div class="feedback" id="quizFeedback" aria-live="polite"></div></div><div class="takeaway-strip"><span class="takeaway-mark">Keep</span><p>${escapeHTML(profile.take)}</p></div>`;
+ if(manuscript) {
+   let manuscriptIdea=manuscript.ideaHtml || '';
+   const firstParaEnd=manuscriptIdea.indexOf('</p>');
+   if(firstParaEnd>=0) manuscriptIdea=manuscriptIdea.slice(0,firstParaEnd+4)+ideaFigure+manuscriptIdea.slice(firstParaEnd+4);
+   else manuscriptIdea=ideaFigure+manuscriptIdea;
+   const objectiveCard=`<div class="objective-box"><span class="obj-icon" aria-hidden="true">✓</span><div><span class="obj-kicker">By the end, you can</span><p>${escapeHTML(objectiveFor(m.id,activeLessonIndex))}</p></div></div>`;
+   $('#panel-learn').innerHTML=`<div class="eyebrow">The idea · Lesson ${lessonId}</div>${objectiveCard}<div class="lesson-manuscript">${manuscriptIdea}</div>${relatedVolumeCard}<button type="button" class="button" data-article-tab="practice">Work through the chart examples ↗</button>`;
+   const figures=renderCourseFigure(m.id,activeLessonIndex,profile,lessonId);
+   const comparisons=manuscript.examplesHtml ? `<div class="lesson-example-copy">${manuscript.examplesHtml}</div>` : '<p>Use the worked chart to practise the reading. State one observation, one possible interpretation and the evidence that would make you revise it.</p>';
+   $('#panel-practice').innerHTML=`<div class="eyebrow">Chart examples · Lesson ${lessonId}</div><h3>${escapeHTML(chartTitle(m.id,activeLessonIndex))}</h3><p>Study the worked chart before reading the comparison below. The displayed examples explain the question to inspect; they are not forecasts or proof that a setup works.</p>${figures}${comparisons}<div class="takeaway-strip"><span class="takeaway-mark">Compare</span><p>${escapeHTML(takeaway)}</p></div>`;
+   const exercises=manuscript.practiceHtml ? `<div class="lesson-review-copy">${manuscript.practiceHtml}</div>` : '';
+   $('#panel-review').innerHTML=`<div class="eyebrow">Test your reading · Lesson ${lessonId}</div><h3>${escapeHTML(lessonTitle)}</h3><p>Try the lesson-specific task before choosing an answer below. Use the model reasoning to explain why an answer fits the evidence, not just to memorise the correct option.</p>${exercises}<div class="lesson-quiz-intro"><div class="practice-step"><div class="practice-step-head"><div><span class="level-label">CHECK YOUR READING</span><h4>${escapeHTML(q.question)}</h4></div><span class="duration">~1 min</span></div><div class="option-list" id="quizOptions">${q.choices.map((choice,i)=>`<button type="button" class="choice" data-correct="${i===q.correct?'true':'false'}"><span class="choice-letter">${String.fromCharCode(65+i)}</span><span>${escapeHTML(choice)}</span></button>`).join('')}</div><div class="feedback" id="quizFeedback" aria-live="polite"></div></div></div><div class="takeaway-strip"><span class="takeaway-mark">Keep</span><p>${escapeHTML(takeaway)}</p></div>`;
+ } else {
+   $('#panel-learn').innerHTML=`<div class="eyebrow">${escapeHTML(profile.eyebrow)}</div><h3>${escapeHTML(profile.question)}</h3>${profile.paragraphs.map(p=>`<p>${escapeHTML(p)}</p>`).join('')}${ideaFigure}<div class="objective-box"><span class="obj-icon" aria-hidden="true">✓</span><div><span class="obj-kicker">By the end, you can</span><p>${escapeHTML(objectiveFor(m.id,activeLessonIndex))}</p></div></div><div class="takeaway-strip"><span class="takeaway-mark">Keep</span><p>${escapeHTML(takeaway)}</p></div>${relatedVolumeCard}<button type="button" class="button" data-article-tab="practice">Work through the chart examples ↗</button>`;
+   const figures=renderCourseFigure(m.id,activeLessonIndex,profile,lessonId);
+   $('#panel-practice').innerHTML=`<div class="eyebrow">Chart examples · Lesson ${lessonId}</div><h3>${escapeHTML(chartTitle(m.id,activeLessonIndex))}</h3>${figures}`;
+   $('#panel-review').innerHTML=`<div class="eyebrow">Test your reading</div><h3>${escapeHTML(q.question)}</h3><div class="option-list" id="quizOptions">${q.choices.map((choice,i)=>`<button type="button" class="choice" data-correct="${i===q.correct?'true':'false'}"><span class="choice-letter">${String.fromCharCode(65+i)}</span><span>${escapeHTML(choice)}</span></button>`).join('')}</div><div class="feedback" id="quizFeedback" aria-live="polite"></div>`;
+ }
  activateArticleTab(chosenTabs);
  bindPilotInteractions();
  bindChoiceGroup('quizOptions','quizFeedback',q.why,'This answer goes further than the evidence or skips a necessary condition. Separate observation from interpretation, then identify what would need to happen next.');
