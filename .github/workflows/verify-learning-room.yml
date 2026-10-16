@@ -267,6 +267,7 @@ jobs:
               await page.locator("#sr-practice-response").fill("I recorded the visible evidence, my interpretation, and what would change my view.");
               await page.locator("#sr-chart-next").click();
               await page.waitForFunction(n => document.querySelector("#sr-chart-stage-count").textContent.includes("View " + n + " of 4"), stageNumber);
+              assert.equal(await page.locator("#sr-v52-stage-model-answer").evaluate(el => el.hidden), true, "An earlier chart response must not reveal this chart's model answer");
               if (stageNumber < 4) assert.equal(await page.locator("#sr-v52-final-review").evaluate(el => el.hidden), true, "The final review must wait for the last view");
             }
             await page.locator("#sr-practice-response").fill("I recorded the final view and what would weaken my interpretation.");
