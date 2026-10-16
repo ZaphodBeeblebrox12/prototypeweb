@@ -46,7 +46,7 @@
         <div class="sr-room-resume-top"><span>YOUR LEARNING</span><span class="sr-room-preview-tag">Preview</span></div>
         <h2 id="sr-resume-title">Continue where you left off.</h2>
         <p id="sr-resume-copy">Open a lesson to begin exploring the room.</p>
-        <div class="sr-room-progress" aria-label="Course progress"><span id="sr-course-progress-bar"></span></div>
+        <div class="sr-room-progress" role="progressbar" aria-label="Course progress" aria-valuemin="0" aria-valuemax="18" aria-valuenow="0" aria-valuetext="0 of 18 lessons complete"><span id="sr-course-progress-bar"></span></div>
         <div class="sr-room-progress-meta"><span id="sr-course-progress-label">0 of 18 lessons complete</span><span id="sr-course-progress-percent">0%</span></div>
         <button class="button sr-room-primary" id="sr-resume-button" type="button">Open lesson ↗</button>
         <p class="sr-room-storage-note">Progress and notes are saved in this browser only—not to a member account.</p>
@@ -85,7 +85,7 @@
                 <img id="sr-chart-image" alt="" loading="lazy">
               </div>
               <figcaption id="sr-chart-caption">Illustrative chart — not historical market data.</figcaption>
-              <div class="sr-room-chart-controls" id="sr-chart-controls" hidden aria-label="Chart reveal controls">
+              <div class="sr-room-chart-controls" id="sr-chart-controls" role="group" hidden aria-label="Chart reveal controls">
                 <div class="sr-room-chart-control-meta"><span id="sr-chart-stage-status">Observe first</span><span id="sr-chart-stage-count" aria-live="polite">View 1 of 1</span></div>
                 <p id="sr-chart-reveal-guidance" aria-live="polite"></p>
                 <div class="sr-room-chart-control-buttons">

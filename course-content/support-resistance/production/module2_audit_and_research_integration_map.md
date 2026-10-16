@@ -2,7 +2,7 @@
 
 **Module:** 2 — Find the important areas  
 **Lessons:** 3–5  
-**Status:** Lessons 3–5 are integrated in the learning-room preview. The learner-language and chart-led editorial passes for this Module 2 slice are complete and their changes passed isolated browser QA. Shared lesson tabs and the Clear W task have targeted automated keyboard coverage. Manual screen-reader/assistive-technology testing, a broader manual keyboard review and real-learner usability/timing remain outstanding. Learner responses and progress are browser-local, not member-account persistence.  
+**Status:** Lessons 3–5 are integrated in the learning-room preview. The learner-language and chart-led editorial passes for this Module 2 slice are complete and their changes passed isolated browser QA. Shared lesson tabs and the Clear W task have targeted automated keyboard coverage. Four axe-core scans (Lesson 5 initial/classification and Clear W initial/comparison) reported zero violations in the accessibility-focused run. Manual screen-reader/assistive-technology testing, a broader manual keyboard review and real-learner usability/timing remain outstanding. Learner responses and progress are browser-local, not member-account persistence.  
 **Working standard:** `production/MODULE_DEPTH_WORKING_NOTES.md`  
 **Template redesign:** Deferred; not part of this pass.
 
@@ -105,6 +105,8 @@ The run passed the Lesson 5 staged sequence, all seven candidate classifications
 **360px mobile check:** the parent document measured 360px viewport / 360px scroll width, with a 302px-wide embedded ChartLab. Inside the iframe, viewport and document scroll width both measured 302px; the submitted comparison was visible and both comparison SVGs measured 270px wide. No horizontal overflow was detected by the assertions.
 
 **Asset integrity:** the manifest has exactly one row each for `L05-A-04-minor-removed` and `L05-A-05-nearby-combined`. The current regenerated SVGs and their PNG counterparts have one current checksum entry each. The PNGs were visually inspected: A04 removes D only, and A05 combines B/C and E/F while retaining A and distant G. The edits use the same synthetic candles and scale, labelled “Illustrative chart — not historical market data.”
+
+**Automated accessibility check — [isolated QA run](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38857318478):** The run scanned four states with axe-core against WCAG 2 A/AA and WCAG 2.1 A/AA tags: Lesson 5 initial, Lesson 5 candidate-classification, Clear W initial, and Clear W comparison. Each returned `violationCount: 0`. The same run passed an automated keyboard smoke test for lesson-tab arrow navigation, numeric zone creation, support-before-resistance lock order, comparison focus, quiz, and completion. Browser JavaScript and HTTP error assertions also passed. These results are bounded to the tested states and automated checks; they do not establish full WCAG conformance and do not replace a manual keyboard review, screen-reader/assistive-technology testing, or real-learner usability/timing.
 
 **Editorial status:** the learner-language and chart-led passes are complete for the Lesson 3–5 implementation described here. They do not constitute a full-course editorial closeout or replace a real learner test.
 

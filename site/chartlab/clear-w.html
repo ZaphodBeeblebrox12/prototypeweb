@@ -50,7 +50,7 @@ h1,h2,h3,p{margin-top:0}
 .workflow-step:first-child{padding-left:0}.workflow-step:last-child{border-right:0}
 .step-num{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1px solid var(--line-strong);color:var(--muted);font:10px var(--mono);background:var(--surface)}
 .workflow-step strong{display:block;font-size:10px;font-weight:750;line-height:1.25;color:#667064}
-.workflow-step small{display:block;font-size:9px;line-height:1.4;color:#8b9086;margin-top:3px}
+.workflow-step small{display:block;font-size:9px;line-height:1.4;color:#5d665d;margin-top:3px}
 .workflow-step.active .step-num{background:var(--green);border-color:var(--green);color:#fffdf8}
 .workflow-step.done .step-num{background:var(--sage);border-color:var(--sage-line);color:var(--green)}
 .workflow-step.active strong,.workflow-step.done strong{color:var(--green)}
@@ -63,7 +63,7 @@ h1,h2,h3,p{margin-top:0}
 .mini-badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:99px;background:#fffdf8;color:#6f786d;padding:5px 8px;font-size:9px;white-space:nowrap}
 .live-indicator{width:5px;height:5px;border-radius:50%;background:#97a985}
 .chart-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:11px 17px;border-bottom:1px solid #e9e3d8;background:#fbf8f0}
-.tool-label{font-size:9px;letter-spacing:.11em;text-transform:uppercase;font-weight:800;color:#81877d;margin-right:3px}
+.tool-label{font-size:9px;letter-spacing:.11em;text-transform:uppercase;font-weight:800;color:#5d665d;margin-right:3px}
 .tool-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;padding:7px 11px;border:1px solid var(--line);border-radius:9px;background:#fffdf8;color:#59685a;font-size:10px;font-weight:700;transition:background .15s,border .15s,transform .15s}
 .tool-button:hover{border-color:#a9b9a1;transform:translateY(-1px)}
 .tool-button.selected{background:var(--green);border-color:var(--green);color:#fffdf8}
@@ -75,11 +75,11 @@ h1,h2,h3,p{margin-top:0}
 #chartSvg.is-moving{cursor:ns-resize}
 .chart-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 16px;border-top:1px solid var(--line);color:var(--muted);font-size:9px;line-height:1.5;background:#fffdf8}
 .chart-foot span:first-child{display:flex;align-items:center;gap:7px}.legend-swatch{display:inline-block;height:9px;width:13px;border-radius:2px;background:#d9e5d1;border:1px solid #71906c}.legend-swatch.ref{background:#f0c9b9;border-color:#c96f50}
-.chart-instructions{display:flex;align-items:flex-start;gap:9px;padding:12px 16px;background:#f5efe2;border-top:1px solid var(--line);font-size:10px;color:#687265;line-height:1.65}
+.chart-instructions{display:flex;align-items:flex-start;gap:9px;padding:12px 16px;background:#f5efe2;border-top:1px solid var(--line);font-size:10px;color:#5d665d;line-height:1.65}
 .instruction-mark{display:grid;place-items:center;flex:none;width:23px;height:23px;border-radius:50%;background:#e5eadc;color:var(--green);font-size:12px;font-weight:800}
 .task-panel{position:sticky;top:16px;border:1px solid var(--line);background:#fffbf3;border-radius:16px;overflow:hidden}
 .task-panel-top{padding:17px 18px 15px;background:#e7eddf;border-bottom:1px solid #d3dfca}
-.task-counter{font-size:9px;text-transform:uppercase;letter-spacing:.12em;font-weight:850;color:#65765f}
+.task-counter{font-size:9px;text-transform:uppercase;letter-spacing:.12em;font-weight:850;color:#4d6248}
 .task-panel h2{font:400 25px/1.1 var(--serif);letter-spacing:-.025em;color:var(--green);margin:7px 0 7px}
 .task-panel-top p{font-size:11px;line-height:1.7;color:#58685a;margin:0}
 .task-content{padding:16px 17px 18px}
@@ -93,19 +93,19 @@ h1,h2,h3,p{margin-top:0}
 .task-status.good .status-dot{background:#6f9470}
 .task-bottom{padding:13px 17px 17px;border-top:1px solid var(--line);background:#fffdf8}
 .task-bottom .tool-button{width:100%;min-height:42px}
-.task-bottom .secondary-action{width:100%;border:0;background:transparent;color:#6f796d;padding:9px 5px 0;font-size:10px;text-decoration:underline;text-decoration-color:#cfc7b8;text-underline-offset:3px}
-.task-bottom .sub-note{font-size:9px;color:#8b9085;text-align:center;margin:8px 0 0;line-height:1.5}
+.task-bottom .secondary-action{width:100%;border:0;background:transparent;color:#5d665d;padding:9px 5px 0;font-size:10px;text-decoration:underline;text-decoration-color:#cfc7b8;text-underline-offset:3px}
+.task-bottom .sub-note{font-size:9px;color:#5d665d;text-align:center;margin:8px 0 0;line-height:1.5}
 .zone-details{display:none;margin-top:16px;border-top:1px solid var(--line);padding-top:14px}.zone-entry-help{margin:-2px 0 11px;color:var(--muted);font-size:10px;line-height:1.55}#applyNumericZone{width:100%;margin-top:10px}
 .zone-details.visible{display:block}
 .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
-.field{display:grid;gap:5px}.field label{font-size:9px;color:#7a8278;font-weight:750}
+.field{display:grid;gap:5px}.field label{font-size:9px;color:#5d665d;font-weight:750}
 .field input,.reason-note{width:100%;border:1px solid var(--line-strong);border-radius:8px;background:#fffdf8;color:var(--ink);padding:8px 9px;font-size:11px;min-width:0}
-.field small{font-size:8px;color:#97998f}
+.field small{font-size:8px;color:#5d665d}
 .reflection{margin-top:25px;border:1px solid var(--line);border-radius:17px;background:var(--surface);overflow:hidden;box-shadow:0 7px 24px #29382e07}.reflection:focus-visible{outline:3px solid var(--rust);outline-offset:3px}
 .reflection-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:20px 23px 17px;border-bottom:1px solid var(--line);background:#fffaf1}
 .reflection-head h2{font:400 27px/1.1 var(--serif);color:var(--green);margin:8px 0 5px}
 .reflection-head p{margin:0;color:var(--muted);font-size:11px;line-height:1.7;max-width:680px}
-.optional-label{align-self:center;flex:none;border:1px solid var(--line);border-radius:99px;padding:5px 8px;color:#858b80;font-size:9px;white-space:nowrap}
+.optional-label{align-self:center;flex:none;border:1px solid var(--line);border-radius:99px;padding:5px 8px;color:#5d665d;font-size:9px;white-space:nowrap}
 .reflection-body{display:grid;grid-template-columns:1fr 1fr;gap:0}
 .reason-column{padding:20px 23px 22px}.reason-column+ .reason-column{border-left:1px solid var(--line);background:#fcfaf4}
 .reason-column h3{font:400 20px/1.2 var(--serif);color:var(--green);margin:0 0 12px}
@@ -128,16 +128,16 @@ h1,h2,h3,p{margin-top:0}
 .feedback-panel p{font-size:12px;line-height:1.75;color:#536151;margin:0}
 .feedback-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:18px 0 14px}
 .metric{border:1px solid #d2ddca;background:#f9fbf6;border-radius:10px;padding:11px 12px;min-width:0}
-.metric span{display:block;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#7d8978;font-weight:800}
+.metric span{display:block;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#5d665d;font-weight:800}
 .metric strong{display:block;margin-top:3px;font:400 21px/1.1 var(--serif);color:var(--green)}
 .feedback-next{display:flex;gap:10px;align-items:flex-start;border-top:1px solid #cfd9c7;padding-top:13px;margin-top:13px;font-size:11px;line-height:1.65;color:#536151}
 .feedback-next strong{color:var(--green)}
 .complete-banner{display:none;margin-top:18px;padding:19px 21px;border:1px solid #c5d7bf;background:#e7eee2;border-radius:13px;align-items:center;gap:14px}
 .complete-banner.visible{display:flex}
 .complete-check{width:36px;height:36px;border-radius:50%;background:var(--green);color:#fffdf8;display:grid;place-items:center;font-size:17px;flex:none}
-.complete-copy{flex:1;min-width:0}.complete-copy strong{display:block;font:400 21px/1.2 var(--serif);color:var(--green)}.complete-copy span{display:block;color:#637160;font-size:10px;margin-top:4px;line-height:1.6}
+.complete-copy{flex:1;min-width:0}.complete-copy strong{display:block;font:400 21px/1.2 var(--serif);color:var(--green)}.complete-copy span{display:block;color:#5d665d;font-size:10px;margin-top:4px;line-height:1.6}
 .complete-actions{display:flex;gap:8px;align-items:center;flex:none}.complete-actions button{flex:none}
-.footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:29px;padding-top:17px;border-top:1px solid var(--line);color:#858a80;font-size:9px;line-height:1.6}
+.footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:29px;padding-top:17px;border-top:1px solid var(--line);color:#5d665d;font-size:9px;line-height:1.6}
 .footer strong{font-weight:750;color:#586958}
 .toast{position:fixed;left:50%;bottom:24px;z-index:20;transform:translate(-50%,20px);opacity:0;pointer-events:none;max-width:calc(100% - 32px);padding:10px 15px;border:1px solid #ccd9c5;background:#fafff7;color:var(--green);box-shadow:0 10px 25px #192d201a;border-radius:99px;font-size:11px;transition:opacity .2s,transform .2s}
 .toast.show{opacity:1;transform:translate(-50%,0)}
@@ -242,7 +242,7 @@ h1,h2,h3,p{margin-top:0}
 .zone-lesson{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:1px solid var(--line);background:#f8f4ea}
 .zone-lesson article{padding:17px 18px 18px;min-width:0}
 .zone-lesson article+article{border-left:1px solid var(--line)}
-.zone-lesson article>span{font-size:8px;letter-spacing:.1em;font-weight:850;color:#9b6e43}
+.zone-lesson article>span{font-size:8px;letter-spacing:.1em;font-weight:850;color:#805830}
 .zone-lesson h3{font:400 21px/1.16 var(--serif);color:var(--green);margin:7px 0 7px}
 .zone-lesson p{font-size:10px;line-height:1.7;color:#5c685c;margin:0}
 .quiz-body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0}
@@ -322,7 +322,7 @@ body.chartlab-embed .site-shell{min-height:0}body.chartlab-embed main{padding-to
           <div class="chart-title"><strong id="chart-panel-title">Price action · Clear W study</strong><span id="chart-panel-subtitle">35 illustrative candles · two lows and a swing high between them</span></div>
           <div class="chart-badges"><span class="mini-badge"><span class="live-indicator"></span> Synthetic sample</span><span class="mini-badge">Price scale · points</span></div>
         </div>
-        <div class="chart-toolbar" aria-label="Chart tools">
+        <div class="chart-toolbar" role="group" aria-label="Chart tools">
           <span class="tool-label">Your tools</span>
           <button class="tool-button selected" id="drawTool" type="button" aria-pressed="true"><span class="tool-icon" aria-hidden="true">▰</span> Draw zone</button>
           <button class="tool-button" id="undoButton" type="button" disabled><span class="tool-icon" aria-hidden="true">↶</span> Undo</button>
@@ -506,7 +506,7 @@ body.chartlab-embed .site-shell{min-height:0}body.chartlab-embed main{padding-to
     target.appendChild(grid);
     target.appendChild(el('rect', { x: plot.left, y: plot.top, width: plot.right - plot.left, height: plot.bottom - plot.top, fill: 'none', stroke: '#d8d4c9', 'stroke-width': 1 }));
 
-    const candles = el('g', { 'aria-label': 'Sample candlesticks' });
+    const candles = el('g', { 'aria-hidden': 'true' });
     const cell = (plot.right - plot.left) / data.length;
     data.forEach((c, i) => {
       const x = plot.left + (i + .5) * cell;
