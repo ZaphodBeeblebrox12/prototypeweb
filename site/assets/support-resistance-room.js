@@ -290,12 +290,12 @@
       const wrap=document.createElement("label");wrap.className="sr-room-zone-field";
       const label=document.createElement("span");label.textContent=field.label;wrap.append(label);
       const input=document.createElement("input");input.type="number";input.step="any";input.inputMode="decimal";input.required=true;input.value=((entry.fields||{})[field.key]??"");input.setAttribute("aria-label",field.label);inputs[field.key]=input;wrap.append(input);grid.append(wrap);
-      input.addEventListener("input",()=>{const current=getEntry();current.fields=current.fields||{};current.fields[field.key]=input.value;current.submitted=false;setEntry(current);status.textContent="";saveState();refreshSubmit()});
+      input.addEventListener("input",()=>{const current=getEntry();current.fields=current.fields||{};current.fields[field.key]=input.value;current.submitted=false;setEntry(current);status.textContent="";saveState();refreshSubmit();updateChartStageControls(l)});
     });
     panel.append(grid);
     const rationaleLabel=document.createElement("label");rationaleLabel.className="sr-room-zone-rationale";
     const rationaleText=document.createElement("span");rationaleText.textContent=task.rationaleLabel;rationaleLabel.append(rationaleText);rationaleLabel.append(rationale);panel.append(rationaleLabel);
-    rationale.addEventListener("input",()=>{const current=getEntry();current.rationale=rationale.value;current.submitted=false;setEntry(current);status.textContent="";saveState();refreshSubmit()});
+    rationale.addEventListener("input",()=>{const current=getEntry();current.rationale=rationale.value;current.submitted=false;setEntry(current);status.textContent="";saveState();refreshSubmit();updateChartStageControls(l)});
     const actions=document.createElement("div");actions.className="sr-room-zone-actions";
     const submit=document.createElement("button");submit.type="button";submit.className="button sr-room-primary";submit.textContent=task.submitLabel||"Submit zones";
     const status=document.createElement("p");status.className="sr-room-zone-status";status.setAttribute("role","status");
@@ -304,7 +304,7 @@
       if(!validFields()){status.textContent="Enter a numeric value for each boundary before submitting.";return}
       if(!validPairs()){status.textContent="For each band, the lower boundary must be below the upper boundary.";return}
       if(String(current.rationale||"").trim().length<(task.minRationaleLength||12)){status.textContent="Add a short explanation of your boundary choices before submitting.";return}
-      current.submitted=true;setEntry(current);saveState();status.textContent="Submitted in this browser. The next reveal lets you compare the reasoning; this is not a prediction score.";refreshSubmit();
+      current.submitted=true;setEntry(current);saveState();status.textContent="Submitted in this browser. The next reveal lets you compare the reasoning; this is not a prediction score.";refreshSubmit();updateChartStageControls(l);
     });
     actions.append(submit);panel.append(actions);panel.append(status);host.append(panel);
     if(entry.submitted)status.textContent="Your proposed boundaries and rationale are submitted in this browser. The next reveal lets you compare them with one worked reference.";
