@@ -234,6 +234,94 @@ jobs:
             assert.deepEqual(errors,[],"JavaScript errors: "+errors.join("; "));
             assert.deepEqual(bad,[],"HTTP errors: "+bad.join("; "));
             await page.screenshot({path:"module5-clear-w-mobile-qa.png",fullPage:true});
+            // Keyboard smoke audit: roving-tabindex lesson tabs and pointer-free two-zone input.
+            const keyboardPage = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+            keyboardPage.on("pageerror", e => errors.push("keyboard page: " + e.message));
+            keyboardPage.on("response", r => { if (r.status() >= 400) bad.push("keyboard HTTP " + r.status() + " " + r.url()); });
+            await keyboardPage.addInitScript(() => localStorage.clear());
+            await keyboardPage.goto("http://127.0.0.1:4173/support-resistance-room.html");
+            const lessonTab = keyboardPage.locator("#sr-tab-button-lesson");
+            await lessonTab.waitFor();
+            await lessonTab.focus();
+            await keyboardPage.keyboard.press("ArrowRight");
+            assert.equal(await keyboardPage.evaluate(() => document.activeElement.id), "sr-tab-button-notes", "ArrowRight moves focus to Notes");
+            assert.equal(await keyboardPage.locator("#sr-tab-notes").isVisible(), true, "ArrowRight selects Notes panel");
+            await keyboardPage.keyboard.press("ArrowRight");
+            assert.equal(await keyboardPage.evaluate(() => document.activeElement.id), "sr-tab-button-check", "ArrowRight moves focus to Knowledge check");
+            await keyboardPage.keyboard.press("End");
+            assert.equal(await keyboardPage.evaluate(() => document.activeElement.id), "sr-tab-button-check", "End moves focus to the final tab");
+            await keyboardPage.keyboard.press("Home");
+            assert.equal(await keyboardPage.evaluate(() => document.activeElement.id), "sr-tab-button-lesson", "Home returns focus to Learn and practise");
+
+            const keyboardChartPage = await browser.newPage({ viewport: { width: 1024, height: 900 } });
+            keyboardChartPage.on("pageerror", e => errors.push("keyboard ChartLab page: " + e.message));
+            keyboardChartPage.on("response", r => { if (r.status() >= 400) bad.push("keyboard ChartLab HTTP " + r.status() + " " + r.url()); });
+            await keyboardChartPage.addInitScript(() => localStorage.clear());
+            await keyboardChartPage.goto("http://127.0.0.1:4173/chartlab/clear-w.html?embed=1");
+            const keyLab = keyboardChartPage;
+            await keyLab.locator("#upperPrice").waitFor({ state: "visible" });
+            assert.equal(await keyLab.locator("#upperPrice").isDisabled(), false, "Upper edge field is available before pointer drawing");
+            assert.equal(await keyLab.locator("#applyNumericZone").isVisible(), true, "Keyboard zone-creation action is initially visible");
+
+            await keyLab.locator("#drawTool").focus();
+            await keyboardChartPage.keyboard.press("Tab");
+            assert.equal(await keyLab.locator("#upperPrice").evaluate(el => el === document.activeElement), true, "Tab reaches the numeric alternative after unavailable chart tools");
+            await keyboardChartPage.keyboard.type("100.8");
+            await keyboardChartPage.keyboard.press("Tab");
+            assert.equal(await keyLab.locator("#lowerPrice").evaluate(el => el === document.activeElement), true, "Tab reaches the lower edge field");
+            await keyboardChartPage.keyboard.type("98.8");
+            await keyboardChartPage.keyboard.press("Tab");
+            assert.equal(await keyLab.locator("#applyNumericZone").evaluate(el => el === document.activeElement), true, "Tab reaches Set zone from prices");
+            await keyboardChartPage.keyboard.press("Enter");
+            await keyLab.locator("#chartSvg [data-role='support']").waitFor({ state: "attached" });
+            assert.equal(await keyLab.locator("#submitZoneButton").evaluate(el => el === document.activeElement), true, "Zone creation puts focus on Submit");
+            await keyboardChartPage.keyboard.press("Enter");
+            assert.match(await keyLab.locator("#statusText").textContent(), /Support is locked/i, "First submission locks support before resistance");
+
+            // Return through normal keyboard navigation to the numeric fields for resistance.
+            await keyboardChartPage.keyboard.press("Shift+Tab");
+            assert.equal(await keyLab.locator("#applyNumericZone").evaluate(el => el === document.activeElement), true, "Tab returns to numeric-zone entry");
+            await keyboardChartPage.keyboard.press("Shift+Tab");
+            assert.equal(await keyLab.locator("#lowerPrice").evaluate(el => el === document.activeElement), true);
+            await keyboardChartPage.keyboard.press("Shift+Tab");
+            assert.equal(await keyLab.locator("#upperPrice").evaluate(el => el === document.activeElement), true);
+            await keyboardChartPage.keyboard.type("106.2");
+            await keyboardChartPage.keyboard.press("Tab");
+            await keyboardChartPage.keyboard.press("Control+A");
+            await keyboardChartPage.keyboard.type("104.6");
+            await keyboardChartPage.keyboard.press("Tab");
+            assert.equal(await keyLab.locator("#applyNumericZone").evaluate(el => el === document.activeElement), true);
+            await keyboardChartPage.keyboard.press("Enter");
+            await keyLab.locator("#chartSvg [data-role='resistance']").waitFor({ state: "attached" });
+            assert.equal(await keyLab.locator("#submitZoneButton").evaluate(el => el === document.activeElement), true);
+            await keyboardChartPage.keyboard.press("Enter");
+            assert.equal(await keyLab.locator("#comparisonPair").isVisible(), true, "Comparison appears after the second keyboard submission");
+            assert.equal(await keyLab.locator("#reflection").evaluate(el => el === document.activeElement), true, "Focus moves to the revealed comparison, not a hidden button");
+
+            // Keyboard-only completion of the two short knowledge checks.
+            await keyboardChartPage.keyboard.press("Tab");
+            assert.equal(await keyLab.locator('input[name="reading1"][value="correct"]').evaluate(el => el === document.activeElement), true, "Tab enters the first quiz group");
+            await keyboardChartPage.keyboard.press("Space");
+            await keyboardChartPage.keyboard.press("Tab");
+            assert.equal(await keyLab.locator('input[name="reading2"][value="continue"]').evaluate(el => el === document.activeElement), true, "Tab enters the second quiz group");
+            await keyboardChartPage.keyboard.press("ArrowDown");
+            assert.equal(await keyLab.locator('input[name="reading2"][value="break"]').isChecked(), true, "ArrowDown selects the valid second response");
+            await keyboardChartPage.keyboard.press("Tab");
+            assert.equal(await keyLab.locator("#printButton").evaluate(el => el === document.activeElement), true, "Tab reaches Print comparison");
+            await keyboardChartPage.keyboard.press("Tab");
+            assert.equal(await keyLab.locator("#checkUnderstanding").evaluate(el => el === document.activeElement), true, "Tab reaches Check my understanding");
+            await keyboardChartPage.keyboard.press("Enter");
+            await keyLab.locator("#markCompleteButton").waitFor({ state: "visible" });
+            await keyboardChartPage.keyboard.press("Tab");
+            assert.equal(await keyLab.locator("#finishPrintButton").evaluate(el => el === document.activeElement), true);
+            await keyboardChartPage.keyboard.press("Tab");
+            assert.equal(await keyLab.locator("#markCompleteButton").evaluate(el => el === document.activeElement), true, "Keyboard reaches Mark complete after both checks");
+            await keyboardChartPage.keyboard.press("Enter");
+            assert.match(await keyLab.locator("#markCompleteButton").textContent(), /Completed/i, "Keyboard can complete the activity");
+            console.log("KEYBOARD_SMOKE_PASS: lesson-tab arrows, numeric zone creation, lock order, comparison focus, quiz and completion.");
+
+            await keyboardPage.close();
+            await keyboardChartPage.close();
             console.log(JSON.stringify({result:"PASS",lesson5Views:6,candidateClasses:7,gate:"support → resistance → compare → two checks → lesson completion",mobile:{parentLayout,childLayout}},null,2));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
