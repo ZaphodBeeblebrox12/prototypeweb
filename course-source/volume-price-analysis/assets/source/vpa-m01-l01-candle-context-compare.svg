@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" role="img" aria-labelledby="title desc">
-<title id="title">The same candle. Different context.</title><desc id="desc">Two synthetic charts compare similar green candidate candles. Both panels use the same vertical price scale increment (8 price units per grid step).</desc><rect width="1920" height="1080" fill="#f6f5f0"/>
+<title id="title">The same candle. Different context.</title><desc id="desc">Two charts compare similar green candidate candles. Both panels use the same vertical price scale increment (8 price units per grid step).</desc><rect width="1920" height="1080" fill="#f6f5f0"/>
 <text x="42" y="51" font-family="Arial,Helvetica,sans-serif" font-size="40" font-weight="700" fill="#252923">THE SAME CANDLE. DIFFERENT CONTEXT.</text>
 <text x="44" y="86" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#5f625c">Two synthetic charts compare similar green candidate candles. Both panels use the same vertical price scale increment (8 price units per grid step).</text><g class="panel"><rect x="60" y="190" width="870" height="780" rx="14" fill="#fffefa" stroke="#d9d7cf" stroke-width="2"/>
  <text x="90" y="233" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#62645f">A</text>
@@ -66,4 +66,4 @@
  <text x="1827" y="890" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="13" fill="#777870">Latest bar →</text>
  <text x="1020" y="908" font-family="Arial,Helvetica,sans-serif" font-size="14" font-weight="700" fill="#3e463f">Candidate volume: 420   ·   5-bar baseline: 225   ·   1.87× baseline</text>
  <text x="1020" y="938" font-family="Arial,Helvetica,sans-serif" font-size="13" fill="#4d544e">High activity near a prior high; the outcome remains uncertain.</text></g>
-<text x="44" y="1056" font-family="Arial,Helvetica,sans-serif" font-size="17" fill="#5f625c">Both panels use the same price scale increment. Similar candle shape does not determine the next move.</text></svg>
+<text x="44" y="1056" font-family="Arial,Helvetica,sans-serif" font-size="17" fill="#5f625c">Figure 1.2 · Both panels use the same price scale increment. Similar candle shape does not determine the next move.</text></svg>
