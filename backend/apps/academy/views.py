@@ -95,10 +95,22 @@ def academy_home(request):
     )["total"] or 0
     learning_minutes = total_seconds // 60
 
+    telegram_access_state = None
+    if community_accesses:
+        from apps.bot_integration.services.channel_sync import get_telegram_access_state
+
+        telegram_access_state = get_telegram_access_state(request.user)
+    discord_connected = bool(
+        getattr(request.user, "discord_id", None)
+        and getattr(request.user, "discord_verified", False)
+    )
+
     return render(request, "academy/home.html", {
         "course_cards": course_cards,
         "offers": offers,
         "community_accesses": community_accesses,
+        "telegram_access_state": telegram_access_state,
+        "discord_connected": discord_connected,
         "active_course_count": sum(1 for item in course_cards if item["entitlement"]),
         "completed_lesson_count": completed_lessons,
         "learning_minutes": learning_minutes,
