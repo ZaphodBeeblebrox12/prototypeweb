@@ -117,6 +117,29 @@ window.TRADETHESIS_COURSE_DATA = {
       ]
     },
     {
+      id: "volume-price-analysis",
+      catalogueVisibility: "visible",
+      status: "in-development",
+      priority: 3,
+      order: 25,
+      title: "Volume & Price Analysis",
+      category: "Price & volume",
+      art: "volume",
+      price: "Coming soon",
+      level: "Course in development",
+      description: "Learn to read recorded volume alongside price, recognise potential trading situations, evaluate breakouts and failures, and build a structured trade plan.",
+      outcome: "Interpret volume in price context, assess possible buying and selling pressure, evaluate breakouts and use Volume Profile as evidence rather than a standalone signal.",
+      complements: "A natural companion to Bollinger Bands, chart structure and breakout study.",
+      modules: [
+        { title: "Read the Market Behind the Candles", count: "5 lessons", preview: "Understand what volume adds to candle reading and compare activity with price results across different data sources.", points: ["Unusual relative volume", "Candle range and close location", "Data-source limitations"] },
+        { title: "Spot Buying and Selling Pressure", count: "5 lessons", preview: "Study effort versus result, retained progress, stalled moves and price/volume disagreement.", points: ["Activity and price progress", "Limited progress at key areas", "Alternative explanations"] },
+        { title: "Find Trade Setups at the Levels That Matter", count: "5 lessons", preview: "Apply volume and price structure to trends, pullbacks, support/resistance and range boundaries.", points: ["Trend pullbacks", "Reactions around levels", "Setup quality and no-trade decisions"] },
+        { title: "Spot False Breakouts Before You Chase Them", count: "5 lessons", preview: "Evaluate breakouts, failed moves, climactic activity, springs/upthrusts and the evidence needed after a break.", points: ["Breakout quality", "Failure and follow-through", "Climax activity"] },
+        { title: "Find the Price Levels Worth Watching", count: "5 lessons", preview: "Use Volume Profile, Point of Control, Value Area and high/low-volume nodes to describe where activity concentrated.", points: ["Point of Control and Value Area", "High- and low-volume nodes", "Changes in value"] },
+        { title: "Put It All Together: Build a Complete Trading Plan", count: "5 lessons", preview: "Combine context, price/volume evidence, alternative scenarios, trigger, invalidation, risk, execution and review.", points: ["Build a conditional thesis", "Plan entry and invalidation", "Review the process"] }
+      ]
+    },
+    {
       id: "candlestick-patterns",
       catalogueVisibility: "visible",
       priority: 3,
