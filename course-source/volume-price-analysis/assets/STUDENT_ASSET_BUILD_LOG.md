@@ -76,3 +76,17 @@ The source assets have been created and committed. **This is not a claim that br
 - `student-assets/alt-text/`: accessibility descriptions and limitations.
 
 No member-area integration, website deployment or merge into `main` is included in this checkpoint.
+
+
+## Source-level validation checkpoint
+
+The following checks have been performed against the current branch source:
+
+- The asset directories contain 30 primary SVG charts, 30 standalone ChartLabs, 30 source-data CSVs and 30 accessible-description files.
+- All six module manuscripts contain five lesson sections and directly link each lesson to its chart, ChartLab, source data and accessible description. The links were compared with the branch's asset directory listings.
+- The 30 OHLCV CSVs passed basic price-bar integrity checks: open/high/low/close are numeric and highs/lows bracket each candle's open/close. The staged data includes the initial chart and contrasting outcomes.
+- All 30 ChartLab HTML files passed source-level JavaScript parsing and duplicate-element-ID checks. The Notice, Compare and Apply sections exist; outcome panels start hidden until the learner submits an initial response.
+- The two reusable worksheet files are linked from the capstone lessons. The fillable HTML has blank fields, expandable worked examples and print/clear controls.
+- The original M01-L01 pilot remains separately marked as not approved for scaling.
+
+**Still not tested:** exact rendering in a live browser, chart legibility at small widths and 200% zoom, keyboard-only use, assistive-technology output, cross-browser issues, comprehension by a true beginner, or actual lesson duration. No claim of release approval is made.
