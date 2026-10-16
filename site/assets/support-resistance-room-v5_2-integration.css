@@ -14,7 +14,7 @@
 .sr-v52-section code { padding:1px 4px; border-radius:4px; background:#efede5; font-size:.93em; }
 .sr-v52-quote { margin:15px 0 17px; padding:13px 16px; border-left:3px solid var(--green); background:#f2f0e8; font-family:Georgia,"Times New Roman",serif; font-size:16px; line-height:1.6; }
 .sr-v52-figure { margin:17px 0 18px; padding:10px; border:1px solid var(--line); border-radius:11px; background:#fffdf8; }
-.sr-v52-figure img { display:block; width:100%; height:auto; max-height:500px; object-fit:contain; }
+.sr-v52-figure img { display:block; width:100%; height:auto; max-height:none; object-fit:contain; }
 .sr-v52-figure figcaption { margin:9px 2px 1px; color:var(--muted); font-size:11px; line-height:1.6; }
 .sr-v52-table-wrap { max-width:100%; margin:14px 0 18px; overflow-x:auto; border:1px solid var(--line); border-radius:9px; background:#fffdf8; }
 .sr-v52-table-wrap table { width:100%; border-collapse:collapse; font-size:11px; line-height:1.6; }
