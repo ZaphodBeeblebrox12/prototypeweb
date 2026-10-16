@@ -174,7 +174,7 @@ jobs:
             assert.equal(await lab.locator(".study-picker").isVisible().catch(()=>true),false,"Embedded lab should only expose Clear W, not the other practice sets");
             assert.equal(await page.locator("#sr-complete-button").isDisabled(),true,"Lesson completion remains gated before the ChartLab is completed");
             assert.equal(await lab.locator("#comparisonPair").isVisible(),false,"Reference comparison must be hidden initially");
-            assert.doesNotMatch(await lab.locator("body").innerText(), /\\b4H\\b/, "Synthetic teaching candles must not be labelled as a real timeframe");
+            assert.doesNotMatch(await lab.locator("body").innerText(), /(^|[^A-Za-z0-9])4H([^A-Za-z0-9]|$)/, "Synthetic teaching candles must not be labelled as a real timeframe");
             assert.equal(await lab.locator("#metricWidth").textContent(), "Both lows", "Comparison cards name the evidence to inspect, not a score");
             assert.equal(await lab.locator("#metricOverlap").textContent(), "Neckline", "Comparison cards name the neckline evidence, not a percentage");
 
@@ -204,7 +204,7 @@ jobs:
             await lab.locator("#submitZoneButton").click();
             await lab.locator("#comparisonPair").waitFor({state:"visible",timeout:5000});
             assert.match(await lab.locator("#feedbackText").textContent(), /does not score your reasoning/i, "Visual comparison must disclose that it does not grade the learner");
-            assert.doesNotMatch(await lab.locator("#feedbackText").textContent(), /\\d+%/, "The visual feedback must not imply a precision/overlap score");
+            assert.doesNotMatch(await lab.locator("#feedbackText").textContent(), /[0-9]+%/, "The visual feedback must not imply a precision/overlap score");
             assert.equal(await lab.locator("#studentCompareSvg [data-role='support']").count(),1);
             assert.equal(await lab.locator("#studentCompareSvg [data-role='resistance']").count(),1);
             assert.equal(await page.locator("#sr-complete-button").isDisabled(),true,"Two zones alone are not enough to complete the lesson");
@@ -264,7 +264,13 @@ jobs:
             await keyboardPage.keyboard.press("Enter");
             assert.match(await keyboardPage.locator("#sr-lesson-title").textContent(), /Zones, not perfect lines/);
             assert.match(await keyboardPage.locator("#sr-practice-instructions").textContent(), /lowest price each candle reached/i, "Opening prompt uses observable language before candle terminology");
-            assert.match(await keyboardPage.locator("#sr-teaching-body").textContent(), /thin line extending beyond a candle body/i, "First explanatory reveal defines wick, body and close");
+            assert.doesNotMatch(await keyboardPage.locator("#sr-teaching-body").textContent(), /thin line extending beyond a candle body/i, "The initial observation view does not define the terms in advance");
+            await keyboardPage.locator("#sr-practice-response").fill("The three lowest points differ a little, so one exact price would not describe every reaction.");
+            await keyboardPage.locator("#sr-chart-next").focus();
+            assert.equal(await keyboardPage.locator("#sr-chart-next").isDisabled(), false, "A written observation unlocks the next view");
+            await keyboardPage.keyboard.press("Enter");
+            assert.equal(await keyboardPage.locator("#sr-chart-stage-count").textContent(), "View 2 of 11", "The terminology appears on the next view, after observation");
+            assert.match(await keyboardPage.locator("#sr-teaching-body").textContent(), /thin line extending beyond a candle body/i, "The second view defines wick, body and close");
             // Continue to the Lesson 3 keyboard selection test.
             const l3Link = keyboardPage.locator('#sr-lesson-list [data-lesson-id="3"]');
             await l3Link.focus();

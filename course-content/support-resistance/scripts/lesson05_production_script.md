@@ -373,7 +373,7 @@ The check should appear after the ChartLab debrief. Give feedback after each res
 - Student marks and submits support first, then resistance.
 - Lock or clearly mark the submitted support step before allowing the second step; preserve the student's own work.
 - Reveal both reference zones and written rationales only after both submissions.
-- Do not reveal a later outcome as part of scoring.
+- The current synthetic sequence includes the later move above the neckline from the initial view. Do not reveal additional bars or present that move as a reward for drawing a zone; use it in the knowledge check to discuss what a break does not prove.
 - Include undo/reset and touch-friendly zone resizing. The current ChartLab supports pointer-drawn zones and a keyboard-operable alternative: enter upper and lower edges, activate “Set zone from prices,” then submit the zone. The submitted support locks before the resistance step.
 - Show the learner's locked marks beside the reference after both submissions. The current interaction gives a visual comparison and explanatory prompt; it does not grade the learner's written reasoning.
 - Include a two-question knowledge check after the feedback, then a clear completion action.
