@@ -120,6 +120,12 @@ BandWidth is at a six-month low, but price remains inside the recent range. Shou
 
 **Model response:** Not under the basic breakout rule. The squeeze tells me to watch for an expansion; it does not give me an entry or a direction. I would wait for the chosen breakout event.
 
+### Worked comparison: Breakout condition versus a false start
+
+Assume BandWidth has contracted while price remains between 100 and 104. A completed candle then closes at 105, beyond the upper band and range high. Under the course baseline, this is the point to assess the long scenario—not the earlier moment when the bands became narrow. Before entry, check where the setup would be invalidated and whether the distance to the next resistance area leaves adequate room.
+
+A contrasting chart also closes at 105 but the next candle falls back to 102 and closes inside the old range. The first close looked like a breakout, yet follow-through did not appear. A rule that requires a later hold would reject this case; a basic breakout plan still needs its stated stop or failure rule. The return inside is not automatically a short. Reassess and wait for a fresh, separately defined setup.
+
 ### Keep this
 
 > **Method I buys an upside breakout or shorts a downside breakout after unusually quiet conditions. It does not try to guess direction during the squeeze.**
@@ -226,6 +232,12 @@ Panel A shows the long conditions coming together. Panel B shows the mirrored sh
 
 **Model response:** No. Price is in the upper part of the bands, but MFI does not meet the stated strength threshold. I can keep watching, but I should not call it a Method II signal.
 
+### Worked comparison: Price strength and money-flow strength must agree
+
+Suppose the configured Method II rule calls for %B to reach its strength threshold while MFI also meets the method's confirmation condition. Price has been making higher swing lows and the close continues above the relevant level. Both pieces of indicator evidence are aligned, and the context supports investigating the long setup. This still is not a reason to skip the stop, target and risk calculation.
+
+Now imagine %B meets the price-position condition but MFI remains weak or fails the required threshold. That is not “almost the same” signal if the rule requires both. Do not loosen the condition after seeing the chart. Check the correct indicator variant, settings and data, then record whether each condition was present on the completed bar. A confirmation rule is useful only if it is applied consistently to the examples that work and those that fail.
+
 ### Keep this
 
 > **Method II buys strength when %B and MFI both confirm it, and sells weakness when both are weak.**
@@ -322,6 +334,12 @@ Price touches the lower band, but Intraday Intensity is negative and price conti
 
 **Model response:** No. The required indicator disagreement is missing, and price continues to weaken. I would not turn a band tag into a buy signal.
 
+### Worked comparison: Divergence and confirmation are different stages
+
+**Potential long:** Price makes a lower low at the lower band, but the volume-based indicator fails to make a matching low. That disagreement raises a reversal question. The next step is to wait for the price-confirmation condition defined by the method and decide where a long thesis would be wrong.
+
+**Potential short:** Price pushes to a new high near the upper band, while the selected volume indicator is weaker than it was on the prior push. Again, the mismatch is an alert rather than an entry. The move can still continue despite the disagreement. In both directions, label the sequence correctly: band interaction, indicator disagreement, price confirmation, then separate execution and risk decisions. Do not treat a related W-bottom or M-top as proof that the Method III indicator conditions are present; the required evidence must be checked directly.
+
 ### Keep this
 
 > **Method III looks for a band extreme that the volume evidence does not confirm, then waits for price to support the reversal idea.**
@@ -415,6 +433,12 @@ Compare a single close outside a band with two consecutive closes. Then compare 
 **Task:** In each panel, identify whether the confirmed-breakout condition occurred and whether the method classifies it as trend-following or reversal under the ADX state shown.
 
 **Model reasoning:** Two consecutive outside closes after a squeeze meet the confirmation condition. ADX then determines whether the official Method IV interpretation is continuation or the opposite-direction reversal alert. If the two-close condition is missing, do not label it a confirmed breakout under this method.
+
+### Worked comparison: One close is not two-close confirmation
+
+Assume the precondition for the selected Method IV variation has been met. Price closes above the upper band on one completed candle. That is only the first close; the two-close condition is not complete. If the next candle also closes above the same band, the required sequence is present and you can then assess the remaining source-defined conditions, including the ADX context specified by the method.
+
+In a different sequence, the second candle closes back inside the bands. The two consecutive outside closes have not occurred. A chart that shows one dramatic candle may look stronger than a quieter two-candle sequence, but visual size cannot replace the written rule. More confirmation can also mean a later entry and less remaining room before resistance. After checking the setup conditions, do a separate stop-distance and trade-off assessment rather than assuming that confirmation guarantees continuation.
 
 ### Common mistake
 
@@ -522,6 +546,12 @@ The second low in a possible W-bottom is lower than the first in price, but it i
 
 **Model response:** No. Bollinger's approach compares the lows relative to the bands. The second low can be lower in absolute price while still being a higher low relative to the bands. The setup still needs the planned confirmation and risk assessment.
 
+### Worked comparison: A complete pattern still needs a viable trade
+
+Suppose a W-bottom's first low falls outside the lower band and its second low forms inside the band at a higher relative position. Price then breaks the intervening swing high, meeting the confirmation rule chosen for the exercise. If the logical invalidation is below the second low, measure the distance from a possible entry to that point and compare it with the next resistance area. The pattern may be valid yet still offer a poor trade.
+
+For the mirrored M-top, compare the two highs, wait for the stated downside confirmation and define where the bearish idea is wrong. In either direction, do not move the stop closer simply to improve the reward-to-risk ratio on paper. If the structural stop is too far away or the next obstacle is too close, record “valid pattern, no trade.” Setup quality and trade suitability are separate judgements.
+
 ### Keep this
 
 > **For a W or M pattern, read each swing relative to the bands, then wait for the price behaviour that confirms the trade idea.**
@@ -617,6 +647,12 @@ Use Figure 5.6 to mark (a) when the TTM squeeze is on, (b) when it fires, and (c
 The TTM squeeze fires, but the histogram is below zero and rising toward zero. Should you enter long just because the squeeze released?
 
 **Model response:** Not on that evidence alone. The histogram is below zero and rising, so downward momentum may be easing, but it has not shown the common positive-and-rising long condition. I would wait for the direction and price trigger required by the chosen method or skip the trade.
+
+### Worked comparison: The squeeze state and the momentum reading answer different questions
+
+In a possible long case, the Bollinger Bands contract inside the Keltner Channels, so the TTM squeeze condition is active under the selected settings. The momentum histogram is positive and starts to strengthen as the bands release. That combination can support monitoring a long scenario, but price still needs to meet the trigger in your plan. The release and positive momentum do not guarantee follow-through.
+
+In the contrasting case, the same compression resolves downward and the momentum reading is negative. The setup question changes, but risk logic does not: identify the short trigger, invalidation and next support area before entry. If the momentum histogram turns while price remains trapped in the range, the evidence may be mixed. Avoid treating a coloured histogram or a squeeze-release marker as an automatic order; record the actual price event and apply the rule consistently.
 
 ### Keep this
 
