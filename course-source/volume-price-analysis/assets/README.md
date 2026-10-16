@@ -37,6 +37,7 @@ The learner sees consistent stage labels **Notice → Compare → Apply** and ca
 - Stage 2 fixes correct encoded headings/annotations in all three Stage 3 charts and their exports; unlocked progress buttons now navigate, the active-step indicator follows navigation, focus moves to newly revealed content, restart returns focus to the first stage, and scripted scrolling respects reduced-motion preferences.
 - Five reflowed mobile SVG variants were added and connected with `<picture>`/`<source media="(max-width: 720px)">`; the comparison case stacks its panels instead of shrinking the two-column desktop visual.
 - Level 2 feedback now makes clear that response length is not an automatic assessment of reasoning quality.
+- The Stage 3 outcome reveal now includes an optional model-reading section: it restates the visible volume/baseline comparison, gives continuation and failure as competing scenarios, and explains that later price response—not the initial volume spike—distinguishes them.
 - The responsive layout includes visible stage labels and a progress cue; text stays in the open page and is not uploaded or persistently stored.
 - The lesson script, asset brief, editorial language guide and Q&A bank now specify the same easy-to-harder progression for every lesson.
 
