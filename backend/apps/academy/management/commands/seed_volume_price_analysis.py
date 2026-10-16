@@ -208,7 +208,7 @@ def embed_vpa_figures(lesson_number, student_markdown, assets_root, figure_count
                 f"![Figure {figure_number} — {caption}]"
                 f"(/static/academy/vpa/{filename})"
             )
-            figure_caption = f"*Figure {figure_number} — {caption}.*"
+            figure_caption = f"*{caption}.*"
             return f"{match.group(1)}\n\n{image}\n\n{figure_caption}"
 
         student_markdown, replacements = pattern.subn(
