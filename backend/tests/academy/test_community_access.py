@@ -133,8 +133,10 @@ class CourseCommunityAccessTests(TestCase):
 
     def test_community_access_is_shown_after_course_access_expires(self):
         _activated, entitlement = activate_paid_subscription(self.intent)
+        expired_at = timezone.now() - timedelta(seconds=1)
         CourseEntitlement.objects.filter(pk=entitlement.pk).update(
-            expires_at=timezone.now() - timedelta(seconds=1)
+            starts_at=expired_at - timedelta(days=2),
+            expires_at=expired_at,
         )
         self.client.force_login(self.user)
 
