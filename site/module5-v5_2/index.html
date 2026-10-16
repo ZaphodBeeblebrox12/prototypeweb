@@ -4,6 +4,15 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#fbf7ef">
 <title>Breakouts &amp; Failures — TradeThesis Module 5 Review v5.2</title>
+<script>
+  (() => {
+    const requested = Number(new URLSearchParams(window.location.search).get("lesson"));
+    const lesson = [12, 13, 14].includes(requested) ? requested : 12;
+    const target = new URL("../support-resistance-room.html", window.location.href);
+    target.searchParams.set("lesson", String(lesson));
+    window.location.replace(target.href);
+  })();
+</script>
 <link rel="stylesheet" href="assets/module5.css">
 </head>
 <body>

@@ -204,10 +204,4 @@
 .sr-room-zone-field input:focus-visible,.sr-room-zone-rationale textarea:focus-visible{outline:3px solid #294f3e;outline-offset:2px}
 @media(max-width:560px){.sr-room-zone-fields{grid-template-columns:minmax(0,1fr)}.sr-room-zone-task{padding:12px}}
 
-/* Discoverable link to the original full-depth V5.2 lessons */
-.sr-room-full-v52{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:16px 0;padding:15px 16px;border:1px solid var(--line-dark);border-radius:12px;background:#f0eee5}
-.sr-room-full-v52[hidden]{display:none}
-.sr-room-full-v52 strong{display:block;font-size:13px;color:var(--ink)}
-.sr-room-full-v52 p{margin:4px 0 0;font-size:11px;line-height:1.55;color:var(--muted);max-width:760px}
-.sr-room-full-v52 a{flex:none;color:var(--green);font-size:12px;font-weight:800;text-decoration:underline;text-underline-offset:3px}
-@media(max-width:650px){.sr-room-full-v52{align-items:flex-start;flex-direction:column}}
+

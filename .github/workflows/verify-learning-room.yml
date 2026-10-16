@@ -8,6 +8,13 @@ on:
       - "site/**"
       - "course-content/support-resistance/chart_assets/charts/**"
       - ".github/workflows/verify-learning-room.yml"
+  pull_request:
+    branches:
+      - my-new-branch
+    paths:
+      - "site/**"
+      - "course-content/support-resistance/chart_assets/charts/**"
+      - ".github/workflows/verify-learning-room.yml"
 
 permissions:
   contents: read
@@ -27,6 +34,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      - name: Check V5.2 integration script syntax
+        run: node --check site/assets/support-resistance-room-v5_2-integration.js
 
       - name: Install Playwright
         run: |
@@ -68,7 +78,13 @@ jobs:
             const page = await context.newPage();
             const pageErrors = [];
             const badResponses = [];
+            const consoleErrors = [];
+            const failedRequests = [];
             page.on("pageerror", error => pageErrors.push(error.message));
+            page.on("console", message => {
+              if (message.type() === "error") consoleErrors.push(message.text());
+            });
+            page.on("requestfailed", request => failedRequests.push({ url: request.url(), error: request.failure()?.errorText || "unknown" }));
             page.on("response", response => {
               if (response.status() >= 400 && !response.url().includes("favicon")) {
                 badResponses.push({ status: response.status(), url: response.url() });
@@ -210,48 +226,78 @@ jobs:
             assert.equal(await completeQuiz(), 8);
             assert.equal(await page.locator("#sr-complete-button").isDisabled(), false);
 
-            // Full-depth V5.2 reader: preserve the long-form manuscript, diagrams and staged synthetic visuals.
-            await page.goto(server + "/support-resistance-room.html", { waitUntil: "networkidle" });
-            await page.waitForSelector("#sr-lesson-title");
-            await page.locator('[data-lesson-id="13"]').click();
-            await page.waitForFunction(() => document.querySelector("#sr-lesson-title").textContent.includes("Retests and role reversal"));
-            const fullReaderLink = page.locator("#sr-full-v52-anchor");
-            await page.waitForFunction(() => {
-              const link = document.querySelector("#sr-full-v52-anchor");
-              return link && !document.querySelector("#sr-full-v52-link").hidden && link.href.includes("lesson=13");
+            // Integrated V5.2 lesson material must be available in the regular Learning Room.
+            await page.evaluate(() => localStorage.clear());
+            for (const check of [
+              { id: 12, sections: 15, terms: ["The evidence ladder: wick, close, acceptance, follow-through", "Volume: useful context, not a verdict", "The note should preserve the rule you actually used"] },
+              { id: 13, sections: 10, terms: ["The depth of the return matters", "Three responses that share the same name", "Some breakouts never retest the zone", "Role reversal is possible, not automatic"] },
+              { id: 14, sections: 18, terms: ["Range-edge upthrust or false upside break", "Trendline penetration and reclaim", "The first pullback holds; a later pullback fails", "Process and outcome are not the same thing"] }
+            ]) {
+              await page.goto(server + "/support-resistance-room.html?lesson=" + check.id, { waitUntil: "networkidle" });
+              await page.waitForSelector("#sr-v52-longform:not([hidden])");
+              await page.waitForFunction(id => document.querySelector("#sr-lesson-number").textContent.includes(String(id).padStart(2, "0")), check.id);
+              const panel = page.locator("#sr-v52-longform");
+              assert.equal(await panel.locator(".sr-v52-section").count(), check.sections, "Unexpected V5.2 section count for Lesson " + check.id);
+              const lessonText = await panel.innerText();
+              for (const term of check.terms) assert.ok(lessonText.includes(term), "Lesson " + check.id + " is missing: " + term);
+              assert.ok(await panel.locator(".sr-v52-figure img").count() > 0, "Schematic teaching figures are missing for Lesson " + check.id);
+              assert.equal(await panel.locator(".sr-v52-case-study").count(), 1, "Text-only case-study card is missing");
+              assert.equal(await panel.locator(".sr-v52-case-study img").count(), 0, "Historical chart images must remain withheld");
+              assert.equal(await panel.locator(".sr-v52-note-prompt").count(), 4, "V5.2 field-note prompts must be available");
+              assert.ok(await panel.locator("#sr-v52-final-review li").count() > 0, "The V5.2 self-check rubric is missing");
+              assert.equal(await panel.locator("#sr-v52-final-review").evaluate(el => el.hidden), true, "The final review must stay concealed before a final-view attempt");
+            }
+
+            // Lesson notes and the existing synthetic staged chart remain in the same room.
+            await page.evaluate(() => localStorage.clear());
+            await page.goto(server + "/support-resistance-room.html?lesson=13", { waitUntil: "networkidle" });
+            await page.waitForSelector("#sr-v52-longform:not([hidden])");
+            await page.locator("#sr-v52-longform [data-sr-v52-jump='notes']").click();
+            await page.waitForFunction(() => document.querySelector("#sr-tab-notes") && !document.querySelector("#sr-tab-notes").hidden);
+            assert.ok((await page.locator("#sr-lesson-notes").getAttribute("placeholder")).length > 20, "Lesson-specific note prompts were not connected to My notes");
+            await page.locator("#sr-tab-button-lesson").click();
+            await page.locator("#sr-v52-longform [data-sr-v52-jump='chart']").first().click();
+            assert.ok((await page.locator("#sr-chart-image").getAttribute("src")).includes("L13-A-01-break-beyond.png"), "The room should retain its synthetic Lesson 13 chart");
+            await page.locator("#sr-practice-response").fill("The break is visible, but the return and response remain unknown, so I retain an alternative.");
+            await page.waitForSelector("#sr-v52-stage-model-answer:not([hidden])");
+            assert.equal(await page.locator(".sr-v52-model-details[open]").count(), 0, "Model answer should be concealed until explicitly opened");
+            await page.locator(".sr-v52-model-details > summary").click();
+            assert.ok((await page.locator(".sr-v52-model-details").innerText()).length > 40, "The matching stage model answer is empty");
+            for (const stageNumber of [2, 3, 4]) {
+              await page.locator("#sr-practice-response").fill("I recorded the visible evidence, my interpretation, and what would change my view.");
+              await page.locator("#sr-chart-next").click();
+              await page.waitForFunction(n => document.querySelector("#sr-chart-stage-count").textContent.includes("View " + n + " of 4"), stageNumber);
+              assert.equal(await page.locator("#sr-v52-stage-model-answer").evaluate(el => el.hidden), true, "An earlier chart response must not reveal this chart's model answer");
+              if (stageNumber < 4) assert.equal(await page.locator("#sr-v52-final-review").evaluate(el => el.hidden), true, "The final review must wait for the last view");
+            }
+            await page.locator("#sr-practice-response").fill("I recorded the final view and what would weaken my interpretation.");
+            await page.waitForFunction(() => !document.querySelector("#sr-v52-final-review").hidden);
+
+            // Old reader links resolve into the same Learning Room; mobile content must not overflow.
+            await page.goto(server + "/module5-v5_2/index.html?lesson=14", { waitUntil: "networkidle" });
+            await page.waitForFunction(() => window.location.pathname.endsWith("/support-resistance-room.html") && new URLSearchParams(window.location.search).get("lesson") === "14");
+            await page.waitForSelector("#sr-v52-longform:not([hidden])");
+            await page.setViewportSize({ width: 390, height: 844 });
+            await page.goto(server + "/support-resistance-room.html?lesson=13", { waitUntil: "networkidle" });
+            await page.waitForSelector("#sr-v52-longform:not([hidden])");
+            const overflow = await page.evaluate(() => {
+              const viewport = document.documentElement.clientWidth;
+              const nodes = [document.documentElement, document.body, ...document.querySelectorAll("body *")];
+              const offenders = nodes.map(el => {
+                const rect = el.getBoundingClientRect();
+                const style = getComputedStyle(el);
+                return { tag: el.tagName, id: el.id, className: typeof el.className === "string" ? el.className.slice(0, 100) : "", left: Math.round(rect.left), right: Math.round(rect.right), width: Math.round(rect.width), clientWidth: el.clientWidth, scrollWidth: el.scrollWidth, overflowX: style.overflowX, display: style.display, position: style.position };
+              }).filter(el => el.width > 0 && (el.right > viewport + 1 || el.left < -1 || el.scrollWidth > el.clientWidth + 1)).sort((a, b) => Math.max(b.right - viewport, b.scrollWidth - b.clientWidth) - Math.max(a.right - viewport, a.scrollWidth - a.clientWidth)).slice(0, 16);
+              return { viewport, document: document.documentElement.scrollWidth, body: document.body.scrollWidth, offenders };
             });
-            await fullReaderLink.click();
-            await page.waitForFunction(() => document.querySelector("#lesson-title") && document.querySelector("#lesson-title").textContent.includes("Retests and Role Reversal"));
-            const fullLessonText = await page.locator("#reading-sections").innerText();
-            assert.ok(fullLessonText.length > 5000, "Full V5.2 Lesson 13 reading appears truncated");
-            assert.ok(fullLessonText.includes("The depth of the return matters"), "Lesson 13 return-depth section is missing");
-            assert.ok(fullLessonText.includes("Some breakouts never retest the zone"), "Lesson 13 no-retest section is missing");
-            assert.ok(fullLessonText.includes("Role reversal is possible, not automatic"), "Lesson 13 role-reversal section is missing");
-            assert.ok(await page.locator(".case-chart-rights-note").count() > 0, "Historical chart rights notice is missing");
-            assert.equal(await page.locator(".case-chart-figure").count(), 0, "Historical chart images should not render in this public preview");
-            await page.locator('[data-tab="chart"]').click();
-            await page.waitForFunction(() => {
-              const img = document.querySelector("#stage-image");
-              return img && img.complete && img.naturalWidth > 0;
-            });
-            assert.ok((await page.locator("#stage-image").getAttribute("src")).includes("L13-A-01-break-beyond.png"), "Lesson 13 should use the synthetic staged chart");
-            await page.locator("#stage-response").fill("Price breaks above the candidate area; the future return and response remain unknown, so I will retain an alternative.");
-            await page.waitForFunction(() => !document.querySelector("#stage-next").disabled);
-            await page.locator("#stage-next").click();
-            await page.waitForFunction(() => document.querySelector("#stage-title").textContent.includes("Stage 2"));
-            await page.waitForFunction(() => {
-              const img = document.querySelector("#stage-image");
-              return img && img.complete && img.naturalWidth > 0;
-            });
-            assert.ok((await page.locator("#chart-note").innerText()).includes("not historical market data"));
-            await page.locator('[data-lesson="14"]').click();
-            await page.waitForFunction(() => document.querySelector("#lesson-title").textContent.includes("Failed Breakouts and Alternate Outcomes"));
-            const failureLessonText = await page.locator("#reading-sections").innerText();
-            assert.ok(failureLessonText.length > 6000, "Full V5.2 Lesson 14 reading appears truncated");
-            assert.ok((await page.locator("#lesson-hook").innerText()).includes("not an automatic reverse signal"), "Lesson 14 should preserve its central caution");
-            console.log("FULL_V52_READER_PASS: long-form lesson content, staged synthetic charts and historical-image rights notice.");
+            // The site deliberately clips a decorative header pseudo-element off-canvas; assert against document-level horizontal scrolling, not body.scrollWidth.
+            assert.ok(overflow.document <= overflow.viewport + 1, "Mobile page has horizontal scrolling: " + JSON.stringify(overflow));
+            console.log("INTEGRATED_V52_PASS: long-form lesson content, notes, concealed model responses, synthetic charts, legacy routing, and mobile overflow.");
+
 
             assert.deepEqual(pageErrors, [], "Unexpected browser JavaScript errors");
+            assert.deepEqual(consoleErrors, [], "Unexpected browser console errors: " + JSON.stringify(consoleErrors));
+            assert.deepEqual(failedRequests, [], "Failed browser requests: " + JSON.stringify(failedRequests));
             assert.deepEqual(badResponses, [], "HTTP errors while running the room: " + JSON.stringify(badResponses));
             console.log(JSON.stringify({
               result: "PASS",
