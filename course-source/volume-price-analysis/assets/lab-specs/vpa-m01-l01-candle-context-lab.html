@@ -40,6 +40,7 @@ button.secondary{background:transparent;color:var(--ink)}button:disabled{opacity
 summary{font-weight:750;cursor:pointer;padding:9px 0}
 .answer{border-top:1px solid var(--line);padding-top:13px;margin-top:12px}
 .checks label{font-weight:450;display:flex;align-items:flex-start;gap:10px;margin:.7rem 0}
+.fact-check{border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:14px 0;background:#fffefa}.fact-check legend{font-weight:700;padding:0 5px}.fact-check label{display:inline-flex;align-items:flex-start;gap:8px;margin:6px 14px 6px 0;font-weight:450}.fact-check input{margin-top:.35rem;accent-color:var(--green)}
 .checks input{margin-top:.35rem;accent-color:var(--green)}
 .completion{border-left:4px solid var(--green);padding:12px 15px;background:#f1f6f1}
 .foot{border-top:1px solid var(--line);padding-top:16px;margin-top:28px;color:var(--muted)}
@@ -71,8 +72,11 @@ summary{font-weight:750;cursor:pointer;padding:9px 0}
 <source media="(max-width: 720px)" srcset="../exports/vpa-m01-l01-stage1-spot-volume-mobile.svg">
 <img class="chart" src="../exports/vpa-m01-l01-stage1-spot-volume.svg" alt="Six synthetic candles with volume bars below. The final green candidate candle is outlined and its volume is above the dashed average of the five previous bars. The task is to describe the candle and compare the activity without interpreting market direction.">
 </picture>
-<div class="prompt"><strong>Your checklist:</strong> Was the candidate candle green or red? Is the highlighted volume bar above or below the dashed five-bar baseline? What was price doing in the preceding candles?</div>
-<div class="field"><label for="easy">In your own words, what do you observe?</label><textarea id="easy" minlength="25" placeholder="Describe the earlier price movement, the candidate candle and the volume baseline..." required></textarea><p class="hint">One or two careful sentences are enough. State facts before an interpretation.</p></div>
+<div class="prompt"><strong>First, check the visible facts.</strong> Choose the description that matches the highlighted candle, the volume baseline and the bars before it. These checks are about observation, not prediction.</div>
+<fieldset class="fact-check"><legend>1. Candidate candle direction</legend><label><input type="radio" name="candidateDirection" value="green"> Closed above its open (green)</label><label><input type="radio" name="candidateDirection" value="red"> Closed below its open (red)</label></fieldset>
+<fieldset class="fact-check"><legend>2. Candidate volume relative to the dashed baseline</legend><label><input type="radio" name="candidateVolume" value="above"> Above the five-bar average</label><label><input type="radio" name="candidateVolume" value="below"> Below the five-bar average</label></fieldset>
+<fieldset class="fact-check"><legend>3. What was happening before the candidate candle?</legend><label><input type="radio" name="precedingStructure" value="decline"> Price generally declined, with a brief upward candle</label><label><input type="radio" name="precedingStructure" value="rise"> Price rose steadily throughout</label><label><input type="radio" name="precedingStructure" value="flat"> Price stayed almost flat</label></fieldset>
+<div class="field"><label for="easy">In your own words, add one observation the choices do not capture.</label><textarea id="easy" minlength="25" placeholder="Describe another visible detail. Keep observation separate from interpretation..." required></textarea><p class="hint">One or two careful sentences are enough. State facts before an interpretation.</p></div>
 <div id="feedback1" class="feedback" role="status" aria-live="polite" hidden></div>
 <div class="buttons"><button type="button" id="next1">Finish Level 1 and continue</button></div>
 </section>
@@ -182,7 +186,27 @@ function requireText(ids,feedbackId){
  feedback.textContent='Your response is complete. It is not automatically graded; keep your first observations separate from the interpretation you may update later.';
  return true;
 }
-document.getElementById('next1').addEventListener('click',()=>{if(requireText(['easy'],'feedback1'))showStage(1)});
+function validateLevel1(){
+ const groups=[
+  {name:'candidateDirection',expected:'green',label:'candidate candle direction'},
+  {name:'candidateVolume',expected:'above',label:'volume relative to the baseline'},
+  {name:'precedingStructure',expected:'decline',label:'the preceding price sequence'}
+ ];
+ const feedback=document.getElementById('feedback1');
+ const missing=groups.find(group=>!document.querySelector('input[name="'+group.name+'"]:checked'));
+ feedback.hidden=false;feedback.classList.remove('good');
+ if(missing){
+  feedback.textContent='Complete all three observation checks before continuing. Start with '+missing.label+'. This is a chart-reading check, not a prediction test.';
+  document.querySelector('input[name="'+missing.name+'"]')?.focus();return false;
+ }
+ const incorrect=groups.find(group=>document.querySelector('input[name="'+group.name+'"]:checked').value!==group.expected);
+ if(incorrect){
+  feedback.textContent='One or more selections do not match the visible chart. Recheck the highlighted candle, the dashed baseline and the earlier bars, then try again. Focus on what is shown rather than what you think price will do next.';
+  document.querySelector('input[name="'+incorrect.name+'"]:checked')?.focus();return false;
+ }
+ return requireText(['easy'],'feedback1');
+}
+document.getElementById('next1').addEventListener('click',()=>{if(validateLevel1())showStage(1)});
 document.getElementById('next2').addEventListener('click',()=>{if(requireText(['guided','alternative'],'feedback2'))showStage(2)});
 document.getElementById('back2').addEventListener('click',()=>showStage(0));
 document.getElementById('back3').addEventListener('click',()=>showStage(1));
@@ -206,6 +230,7 @@ document.getElementById('completeReview').addEventListener('click',()=>{
 });
 document.getElementById('restart').addEventListener('click',()=>{
  ['easy','guided','alternative','transfer','discipline','outcomeReview'].forEach(id=>document.getElementById(id).value='');
+ document.querySelectorAll('.fact-check input').forEach(el=>el.checked=false);
  document.querySelectorAll('.checks input').forEach(el=>el.checked=false);
  ['feedback1','feedback2','feedback3','feedbackOutcome'].forEach(id=>{const e=document.getElementById(id);e.hidden=true;e.classList.remove('good')});
  document.getElementById('initialTask').hidden=false;
