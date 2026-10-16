@@ -1,12 +1,12 @@
 # Understand Bollinger Bands — First-Pass Production Checkpoint
 
 **Branch:** `my-new-branch`  
-**Current state as of 16 October 2026:** initial course preview checkpointed; not merged or deployed.
+**Current state as of 17 October 2026:** all 30 lesson manuscripts deepened and connected to the first-pass Learning Room; not merged or deployed.
 
 ## Checkpoints saved
 
 1. `course-source/COURSE_TEMPLATE_STANDARD.md` — the shared TradeThesis course template is now the adopted standard for all new courses and the migration target for existing courses.
-2. `course-source/understand-bollinger-bands/preview/first-pass/index.html` — a self-contained 2,614-line first-pass interactive course preview built with the updated Learning Room presentation.
+2. `course-source/understand-bollinger-bands/preview/first-pass/index.html` plus `course-source/understand-bollinger-bands/assets/bollinger-lessons-data.js` — the first-pass Learning Room and its generated student-facing manuscript payload.
 
 ## GitHub checkpoint trail
 
@@ -31,9 +31,33 @@ Each saved point remains on `my-new-branch`; none is merged or deployed.
 ## Focused source checks
 
 - The checkpointed preview contains the seven-module / 30-lesson curriculum.
-- No remote image `src` is required by the preview; its teaching visuals are embedded locally in the HTML.
+- Inline teaching-chart SVGs are generated locally by the preview, but reference-image figures may use temporary remote source URLs and are not all local assets.
 - The chart zoom modal, lesson tabs, lesson outline, learner response area and completion action are present in source.
 - A full browser screenshot smoke test has not completed in this environment. Downloading third-party historical chart binaries also remains blocked by outbound network/DNS restrictions; the internal source index records candidate pages without pretending their images are local files.
+
+
+## Lesson-depth and Learning Room integration — 17 October 2026
+
+### What changed
+
+- Expanded all 30 Markdown lesson manuscripts with lesson-specific worked comparisons. The 24 shorter lessons in Modules 1–4 and 6–7 now contain a second worked comparison in addition to the first; Module 5 retains its longer method/setup instruction and historical case discussions.
+- Added `assets/bollinger-lessons-data.js`, generated from the Markdown manuscripts. It carries the full student-facing content into the preview's three existing tabs, **The idea**, **Chart examples**, and **Test your reading**. The Markdown lesson files remain the content source of truth.
+- Updated `preview/first-pass/index.html` to load that generated file, render the fuller lesson copy, show lesson-specific chart examples and exercise content, and use one unique knowledge-check question per lesson.
+- Increased main lesson paragraph text from 11px to 13px and added rendering for lists, block quotes and Markdown tables. Removed the stale Volume & Price Analysis fallback copy from the initial lesson panels; the explicit related-course cross-link remains where intended.
+- Updated `tools/qa/check_bollinger_preview.py` to verify the data binding, all 30 lesson records, unique quiz prompts, populated idea/example/practice tabs, and a minimum lesson-content size.
+
+### Checkpoint commits
+
+- `d28ee10b886b0688c8f9a4634463cd650848594d`, `9ca95350f475463817a030cf111f13381cf11bf7`, `4d52e2f480c361e5af675663e9612b71017d1d32`, `befb1ebc61529c1d9a68fa2c84564d88fe585828`, `d718d3f528d6e48ae9cedcfe08be589c03d76848`, `e8562c9e602b6ab857c4367b8284d05eee554923` — second worked comparisons added across Modules 1–4 and 6–7.
+- `d1d5b122a7b48068e6ab304d0b5b9d618de6651a` — regenerate the 30-lesson payload from the expanded manuscripts.
+- `b2a00d497cc988e21dbd577caf8418b07b62c579` — connect full manuscripts to the Learning Room and replace its stale fallback panels.
+- `d83e5bcd7806be27069934c520b3ee6c6fda301d`, `9dcb4d3e72f08c4c6e14287411e63c9ce09f16b4` — extend the source QA checks and correct the word-count assertion.
+
+### Validation status
+
+A source-level JavaScript syntax/data check passed after the rendering change: both inline preview scripts and the generated content script compile; the data parses to 30 lessons with 30 distinct quiz questions; each lesson has non-empty idea, chart-example and practice content. The current generated lesson content ranges from approximately 907 to 1,503 words across the three tabs.
+
+**Important:** the previous Chromium/Playwright smoke test was run before this manuscript-rendering change. A fresh browser smoke test and screenshot review have **not** yet been run on the new Learning Room content. Image references also remain provisional. This checkpoint records source validation, not a claim that the new browser UI is fully release-tested.
 
 
 ## First-pass target
