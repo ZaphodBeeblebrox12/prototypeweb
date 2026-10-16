@@ -36,7 +36,7 @@ _ANSWER_HEADING = re.compile(
     re.I,
 )
 _ANSWER_EXAMPLE_LABEL = re.compile(
-    r"^\s*\*\*(?:acceptable response example|model answer|expected response|suggested answer)\*\*\s*:?\s*$",
+    r"^\s*\*\*(?:acceptable response example|model answer|expected response|suggested answer):?\*\*\s*:?\s*$",
     re.I,
 )
 
