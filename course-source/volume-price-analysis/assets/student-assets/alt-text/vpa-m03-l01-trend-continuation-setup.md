@@ -1,5 +1,6 @@
 # Accessibility and source notes — M03-L01
 
+**Figure number:** Figure 3.1; interactive panels use Figure 3.1a–Figure 3.1e.
 **Lesson:** Stop Chasing Price: Finding Potential Setups in an Established Trend
 **Purpose:** Separate a trend continuation setup area from a trigger and invalidation.
 **Data:** Synthetic OHLCV for teaching, not historical prices or a trading signal.
