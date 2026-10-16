@@ -176,3 +176,44 @@ def test_support_resistance_importer_embeds_only_curated_first_view_figures(tmp_
         unchanged, notes = embed_snr_figures(lesson_number, module_position, body, static_root)
         assert unchanged == body
         assert notes == ""
+
+from io import StringIO
+from unittest import mock
+
+from django.core.management import call_command
+from django.core.management.base import CommandError
+
+from apps.academy.models import Course
+
+
+@mock.patch("apps.academy.management.commands.seed_academy_catalogue.call_command")
+def test_catalogue_preflight_validates_all_courses_without_writing(mock_call_command):
+    output = StringIO()
+
+    call_command("seed_academy_catalogue", stdout=output)
+
+    assert [call.args[0] for call in mock_call_command.call_args_list] == [
+        "seed_trading_path",
+        "seed_support_resistance",
+        "seed_volume_price_analysis",
+    ]
+    assert all("apply" not in call.kwargs for call in mock_call_command.call_args_list)
+    assert "Validated 3 canonical course sources: 16 modules and 78 lessons." in output.getvalue()
+    assert Course.objects.count() == 0
+
+
+@mock.patch("apps.academy.management.commands.seed_academy_catalogue.call_command")
+def test_catalogue_apply_refuses_existing_course_before_any_import(mock_call_command):
+    Course.objects.create(title="Existing S&R", slug="support-resistance")
+    output = StringIO()
+
+    try:
+        call_command("seed_academy_catalogue", apply=True, stdout=output)
+    except CommandError as exc:
+        assert "Catalogue import is create-only" in str(exc)
+        assert "support-resistance" in str(exc)
+    else:
+        raise AssertionError("Expected an existing catalogue slug to block import.")
+
+    mock_call_command.assert_not_called()
+
