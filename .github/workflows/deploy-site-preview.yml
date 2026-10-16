@@ -33,6 +33,52 @@ jobs:
       # performs a Pages-site API lookup that is returning 404 in this repo;
       # the upload-pages-artifact + deploy-pages steps are sufficient here.
 
+      - name: Validate integrated learning-room content
+        run: |
+          node --check site/assets/support-resistance-room.js
+          python - <<'PY'
+          from pathlib import Path
+          js = Path("site/assets/support-resistance-room.js").read_text(encoding="utf-8")
+          for lesson_id, module_id, label in (
+              (6, 3, "Draw & evaluate: boundaries"),
+              (7, 3, "Draw & evaluate: editing"),
+              (8, 3, "Draw & evaluate: evaluation"),
+              (12, 5, "Breakout or temporary penetration"),
+              (13, 5, "Retests and role reversal"),
+              (14, 5, "Failed breakouts and alternate outcomes"),
+          ):
+              marker = f'"id":{lesson_id},"module":{module_id}'
+              lesson = next((line for line in js.splitlines() if marker in line), None)
+              if lesson is None:
+                  raise SystemExit(f"Missing lesson data for {label}")
+              for required in ('"chartStages":[', '"teaching":{', '"quizItems":['):
+                  if required not in lesson:
+                      raise SystemExit(f"{label} is missing {required}")
+              if len(lesson) < 3000:
+                  raise SystemExit(f"{label} still looks like a thin placeholder")
+          root = Path("site/assets")
+          figures = (
+              "FIG01_breakout_evidence_ladder.png",
+              "FIG02_filter_tradeoffs.png",
+              "FIG03_context_changes_the_question.png",
+              "FIG05_three_retest_outcomes.png",
+              "FIG06_retest_is_not_owed.png",
+              "FIG07_failure_is_not_reverse_signal.png",
+              "FIG08_volume_context_not_gate.png",
+              "FIG09_decision_record_timeline.png",
+              "FIG10_failed_signal_family.png",
+              "FIG14_failed_failure_reclaim.png",
+              "FIG17_range_vs_trendline_failure.png",
+              "FIG18_neckline_formation_failures.png",
+              "FIG19_simple_break_return_response.png",
+              "FIG20_simple_retest_outcomes.png",
+          )
+          missing = [name for name in figures if not (root / "breakout-failure-figures" / name).is_file()]
+          if missing:
+              raise SystemExit("Missing breakout teaching figures: " + ", ".join(missing))
+          print("Learning-room JavaScript syntax and six expanded lesson payloads validated.")
+          PY
+
       - name: Stage chart images referenced by the learning room
         run: |
           python - <<'PY'
