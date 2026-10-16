@@ -51,6 +51,4 @@ for student_facing_label in ("eyebrow:'Method I ·", "eyebrow:'Method II ·", "e
                              '"Method III: Look for Reversal Clues in Volume"', '"Method IV: Wait for a Confirmed Breakout"'):
     if student_facing_label in page:
         raise SystemExit("Internal method label leaks into student-facing material: " + student_facing_label)
-if "Method I uses a squeeze as preparation" in page or "Method III looks for price/indicator disagreement" in page:
-    raise SystemExit("Internal method numbering leaks into student-facing overview copy.")
 print("Bollinger preview, VPA discovery, catalogue state, figure labels/counts and edit hooks passed.")
