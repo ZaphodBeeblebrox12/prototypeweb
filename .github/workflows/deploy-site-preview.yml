@@ -145,9 +145,14 @@ jobs:
           if target.exists():
               shutil.rmtree(target)
           target.mkdir(parents=True, exist_ok=True)
+          vector_count = 0
           for name in names:
               shutil.copy2(source / name, target / name)
-          print(f"Staged {len(names)} referenced chart images for the preview.")
+              vector_name = Path(name).with_suffix(".svg").name
+              if (source.joinpath(vector_name).is_file():
+                  shutil.copy2(source / vector_name, target / vector_name)
+                  vector_count += 1
+          print(f"Staged {len(names)} referenced PNG chart images and {vector_count} SVG vector variants for the preview.")
           PY
 
       - name: Upload the site folder
