@@ -1,5 +1,7 @@
 # Accessibility and source notes — M01-L04
 
+**Figure number:** Figure 1.4; interactive panels use Figure 1.4a–Figure 1.4e.
+
 **Linked lesson:** When Price Moves on Low Volume: Opportunity or Warning Sign?
 **Asset purpose:** Interpret a quiet pullback alongside structure, location and follow-through.
 **Data:** Synthetic OHLCV generated for instruction. Not historical market data, not a forecast and not a trading signal.
