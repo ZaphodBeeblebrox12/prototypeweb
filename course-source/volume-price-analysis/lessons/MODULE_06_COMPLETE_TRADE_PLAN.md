@@ -1,395 +1,385 @@
 # Module 6 — Put It All Together: Build a Complete Trading Plan
-## Teaching manuscript · First production pass
+## Student lessons
 
-> **Production status:** Draft for editorial review. This is the capstone module: it integrates Modules 1–5 into a repeatable process and should not introduce a large new indicator family.
->
-> **Teaching approach:** Follow the market-context → evidence → scenario → trigger → risk → review sequence. The emphasis on competing scenarios, structural invalidation and review is a course-design adaptation informed by Wyckoff-style analysis and auction context, not a claim that any one author prescribes this exact checklist.
+This final module combines the skills from Modules 1–5 into a repeatable process. It does not introduce a new indicator family or promise a way to predict the market. It teaches you to turn chart observations into a conditional plan that can be checked, challenged and reviewed.
+
+A complete plan should make clear:
+- what the market is doing;
+- what evidence matters now;
+- which scenarios remain plausible;
+- what would trigger consideration of a trade;
+- what would invalidate the idea;
+- how risk and exits would be managed under a defined set of rules;
+- when waiting or taking no trade is the better decision.
+
+A trade plan is not a forecast that must come true. It is a structured response to evidence that may change.
 
 ---
 
 ## Lesson 6.1 — Start With the Bigger Picture: What Is the Market Doing?
 
-### Learning objective
-Create a concise context note identifying regime, relevant structure, important levels, data limitations and the main question the chart currently presents.
+### Why context comes first
 
-**Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
+A candle or volume spike has no fixed meaning in isolation. A wide, high-volume bar near a range boundary raises a different question from a similar bar in the middle of an established trend. Context helps you decide which events matter and which are just activity.
 
-**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
+Start with the chart before adding every indicator you own. The first job is to describe the market's recent structure and location.
 
-### Outline and timing
-- **0:00–1:00 — Opening question:** Why setup hunting starts with context.
-- **1:00–2:30 — Level 1, Notice:** Label the chart as trending, ranging or transitioning and identify the volume source.
-- **2:30–5:00 — Teach and model:** Trend, range and transition; Mark only levels with an explanation.
-- **5:00–7:30 — Level 2, Compare:** Remove unjustified lines, keep a few meaningful zones and explain why each remains.
-- **7:30–11:00 — Level 3, Apply:** Write a context note on an unseen chart with one uncertainty and two competing scenarios before the event is revealed.
-- **11:00–13:00 — Feedback and counterexample:** write a one-screen context note. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
-- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
-### Full narration script
-Before looking for an entry, answer a more basic question: what is the market doing? It is surprisingly easy to skip this step. A trader sees a candle pattern or volume spike and immediately looks for a way to participate. But the same event can have a very different significance depending on whether the market is trending, balanced in a range, or transitioning between the two. Context gives the event meaning and tells you which scenarios are worth considering.
+### Build a one-screen context note
 
-Start with structure. On the timeframe relevant to your trade, identify the recent swing highs and lows. Is price generally making higher highs and higher lows, lower highs and lower lows, or rotating between clear boundaries? You do not need to be able to label every market perfectly. In ambiguous conditions, write “transition” or “unclear” rather than forcing a trend/range label. The purpose is to describe the evidence, not win an argument with the chart.
+Use these five fields:
 
-Then identify the broader areas that matter. These may include a prior range high or low, a meaningful swing point, a previous breakout boundary, or a relevant profile area. Use only a few. If the chart has fifteen horizontal lines, it is difficult to decide which event deserves attention. Every level should have a reason tied to prior structure or a stated analytical method. Treat zones as areas of interest; don't imply that an exact price must hold.
+**1. Market state:** Is price trending, ranging, transitioning or unclear? Support the label with recent swing highs/lows and the way price is moving between them.
 
-Now bring in volume. First, note what your feed measures and which comparison level you use. Are you looking at exchange-traded contracts, shares, or tick-volume data from a retail feed? Are the bars comparable by session and timeframe? This matters because the quality of a volume interpretation depends on data quality. If volume is only a proxy, write that down and avoid giving the measure more certainty than it deserves.
+**2. Relevant structure:** Which range boundaries, swing points or previously tested zones matter to the question you are studying? Keep only the areas you can explain.
 
-Look at recent activity and results. What happened during the last impulse? Did price travel a meaningful distance and hold its progress? What did the pullback achieve? Did unusually high activity produce progress or stall? Did an event occur at a key boundary, or in the middle of a range? If you use Volume Profile, state the period and note where current price sits relative to the profile's concentrations and value boundaries.Keep tools only when they answer a clear question.
+**3. Recent price-volume event:** What happened during the latest meaningful move? Describe the candle outcome and recorded activity against a stated baseline before offering an interpretation.
 
-Your context note should be short enough to reread before a trade. For example: “Market has advanced through a three-day range and is testing the upper edge of the new structure. Latest impulse made good upside progress on elevated activity; the current pullback is shallow so far, but the retest is incomplete. The volume feed is exchange-traded futures contracts. A sustained hold above the former boundary would support continuation; return into the range and failure to reclaim the boundary would challenge it.” Notice that the note does not predict one outcome. It describes where the market stands and the question that remains unresolved.
+**4. Data and conditions:** Which instrument, timeframe, session and volume feed are you using? Is the current period unusual because of a session transition, news, thin activity or a data limitation?
 
-The same discipline works in a range. You might write: “Price has rotated between two clear zones over the last several sessions. Activity is concentrated in the middle; both edges have produced prior rejection (price failing to stay beyond a level and moving back). Current price is near the upper edge after a low-progress advance. A rejection and return inside would support a range-rotation possible explanation; a close beyond the zone followed by acceptance (price staying beyond a level instead of quickly coming back) would support a breakout possible explanation.” That context note directs your attention without telling you to enter immediately.
+**5. Main unresolved question:** What behaviour would help distinguish the plausible scenarios? A useful context note narrows attention; it does not force a directional call.
 
-Do not overlook the broader market environment. A scheduled event, session transition or abnormal volatility can affect behaviour and liquidity (how easily a trade can be made without moving price much). In the first pass, at least flag conditions that make the current bar difficult to compare with normal activity. The purpose is not to predict news but to avoid pretending every volume spike belongs to the same process.
+### Worked example: simplify a cluttered chart
 
-Finally, state what you do not know yet. Maybe the breakout is incomplete, the profile period is not representative, or the last swing structure is ambiguous. Unknowns matter because they tell you what information to wait for. A good context note makes uncertainty visible. It is not a declaration of confidence; it is a map of the evidence and the question that needs to be answered next.
+Imagine price has rotated between 200 and 208 for two sessions. The chart also has old lines at 202.5, 204, 205.7, 206.2 and 207.4. Those lines do not all need equal attention.
 
-Start the final module with a deliberately untidy chart. It has a dozen horizontal lines, several coloured indicators, and candles that move both up and down within a broad area. A beginner may assume that the job is to find the line that predicts the next move. Instead, begin by asking what the chart's recent highs and lows show. Are successive swings making progress in one direction? Are they overlapping between two boundaries? Or has the structure changed enough that the best label is “transitioning” or “unclear”? It is better to use a cautious label with reasons than to force a trend or range label because the lesson asks for one.
+The boundaries near 200 and 208 frame the current range. An old pause at 204 might be relevant if current price interacts with it, but the rest of the lines may not change the central question: will price remain within the range or sustain a move beyond an edge?
 
-Imagine the chart has repeatedly moved between 200 and 208 for two sessions. There are also old lines at 202.5, 204, 205.7, 206.2 and 207.4. Which of these matter now? The upper and lower range areas have a clear job: they frame whether price remains inside balance or begins to hold outside. One earlier pause near 204 may help explain the middle of the range, but the remaining lines may not change the current question. Remove them or mark them as secondary rather than letting every line compete for attention. A level earns its place when you can say what earlier behaviour it represents and what current price action would make it useful.
+Price then approaches 208 on elevated recorded activity but closes at 207.2, inside the range. A context note could be:
 
-Next, add the price-volume event. Price has just moved toward 208 on recorded activity higher than the recent comparable bars, but the candle closes back at 207.2. Your first note should not be “buyers failed” or “breakout incoming.” It should say: “Price approached the upper range area, volume was elevated against the stated baseline, and the candle did not close above 208.” Then add the unresolved question: can price hold above the edge, or will it remain inside? Mention the data source if it affects the volume reading—especially if it is a provider-specific tick-volume feed or a venue-specific cryptocurrency series.
+> **State:** Range, roughly 200–208.  
+> **Location:** Near the upper boundary.  
+> **Event:** Price traded towards the upper edge on elevated activity but did not close above it.  
+> **Limitation:** Volume is from the stated feed and is compared with the preceding comparable bars.  
+> **Question:** Can price hold above 208, or will it return deeper into the range?
 
-A useful context note has five parts. First, describe the current state: trend, range, transition or unclear. Second, identify the most relevant structure and location. Third, record the recent price-volume event without adding motive. Fourth, list one uncertainty or data caveat. Fifth, write two possible scenarios that can be distinguished by future price behaviour. Keep the note short enough to use, but complete enough that another reader can understand why you are watching the chart.
+This is enough context to guide the next observation without pretending to know the outcome.
 
-For the example, the two scenarios might be: “If price closes above 208, holds it on a retest and makes further progress, the range-breakout idea gains support. If price returns inside and cannot reclaim 208, the market remains in or returns to the range.” A no-trade condition is also valid: if price keeps overlapping near 207–208 and no clean trigger or invalidation can be defined, wait. The bigger picture is not there to force a directional answer. It narrows the chart to the few questions that can actually guide your next observation.
+### Consider two scenarios
 
-### Extended spoken case analysis — additional narration
+**Continuation:** Price closes above 208, retests the area and remains above it while making further progress.
 
-This capstone starts by removing the temptation to trade before the context is understood. Hide all indicators except price and the volume feed, then ask the learner to describe the swing structure. Add only those levels that have a clear explanation. Next restore volume and, if appropriate, one profile view. Explain why the profile period is relevant to the specific question. A one-screen note should be brief enough to reread but precise enough that another person can challenge it. It should state regime, important zone, recent price-volume event, data limitation if any, and the main unresolved question. If the learner writes “bullish” but cannot say why, ask them to replace the label with visible evidence. If the market is mixed, write that. The purpose of context is not to force a directional conclusion; it is to decide what events would be meaningful and where the trader can define risk. This becomes the foundation for the next lesson's evidence summary. A trade plan built on a poorly described environment will be difficult to test because its assumptions were never made explicit.
+**Return to range:** Price fails near 208, returns inside and cannot reclaim the boundary.
 
-### Learner progression — Notice → Compare → Apply
+Both are testable. If price keeps overlapping around 207–208 with no clear trigger, the appropriate note may be “unresolved; wait”.
 
-**Level 1 — Notice (easy):** Label the chart as trending, ranging or transitioning and identify the volume source.
+### Try it
 
-**Level 2 — Compare (guided):** Remove unjustified lines, keep a few meaningful zones and explain why each remains.
+Your chart contains many indicators and a dozen lines. Price is moving sideways between two clear boundaries. What should you do first?
 
-**Level 3 — Apply (independent):** Write a context note on an unseen chart with one uncertainty and two competing scenarios before the event is revealed.
+**Feedback:** Describe the recent swing structure, choose the boundaries that answer the current question, and state the volume source. Remove details that do not change your interpretation. More visible information does not necessarily mean more useful evidence.
 
-**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
+### Common mistake
 
-### Knowledge check
-1. Why does regime come before setup selection?
-2. What makes a level worth marking?
-3. What volume-data caveat should be recorded before analysis?
+**Mistake:** Writing “bullish” or “bearish” as the whole context note.
 
--->
-<!-- ASSET: Create a clean, light-style one-screen context worksheet over a synthetic candlestick chart. Include recent swing highs/lows, two or three justified price zones, volume bars, a note for the data source, and empty fields for market state, recent move, current question, and two possible scenarios. Avoid extra indicators and decorative clutter. -->
-<!-- CHARTLAB: Learner receives a chart with excessive indicators/lines. They remove clutter and write a five-sentence context note, including one uncertainty and two competing scenarios. Assessment focuses on justified selection, not prediction. -->
+**Correction:** State what the chart shows, where price is located and which future behaviour would support or weaken each scenario.
+
+### Keep this
+
+> Context tells you which events matter. It should reduce confusion, not force a prediction.
 
 ---
 
 ## Lesson 6.2 — Read the Evidence: What Are Price and Volume Telling You?
 
-### Learning objective
-Combine candle outcome, relative volume, effort/result, structure and profile context into a concise evidence summary with an alternative interpretation.
+With the wider context understood, focus on the event that may change your view. Your evidence note should make it possible for another person to see why you reached your interpretation—even if they disagree with it.
 
-**Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
+### Separate observation from interpretation
 
-**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
+An observation is something visible or measurable on the chart. An interpretation is an explanation for why the event may matter.
 
-### Outline and timing
-- **0:00–1:00 — Opening question:** No single input decides the trade.
-- **1:00–2:30 — Level 1, Notice:** List visible price and volume facts without interpretation.
-- **2:30–5:00 — Teach and model:** Describe the event and baseline; Compare activity with price progress.
-- **5:00–7:30 — Level 2, Compare:** Compare a fact-only note with a possible interpretation and alternative explanation.
-- **7:30–11:00 — Level 3, Apply:** Update a staged analysis after new bars appear, retaining original observations and naming exactly which evidence changed the hypothesis.
-- **11:00–13:00 — Feedback and counterexample:** create an evidence sheet. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
-- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
-### Full narration script
-You have established the context. Now narrow your attention to the event that might create a trade. Your job is to build an evidence summary, not to jump straight from a pattern to an entry. Think of it as a short investigation with four parts: what happened, what the activity was, where it happened, and what competing explanations remain.
+| Observation | Possible interpretation |
+|---|---|
+| Price traded above 56.5 but closed at 55.8, back inside the prior range. | The attempt to hold above the range may have failed. |
+| Recorded volume was 1.8× the average of the previous ten comparable bars. | Activity was elevated relative to that baseline. |
+| The latest meaningful higher low at 53.5 remains intact. | The broader upward swing structure has not yet broken. |
 
-Start by describing the price event in neutral terms. “Price tested the prior range high, traded slightly beyond it, then closed back within the zone.” This description is more useful than “the breakout was trapped,” because it records what is visible before assigning a meaning. Next, write the candle's range and closing position relative to recent bars. Did price make meaningful progress and retain it, or did it give the move back? Was this a broad event or a narrow one?
+The right-hand column is not a fact in the same way as the left. Interpretations must remain open to alternatives.
 
-Then add relative activity. State the comparison level rather than just calling volume high or low. If the current bar is twice the average of the previous twenty comparable bars, record the multiple and method. If the session is unusual or the data source is a proxy, add that caveat. The number becomes a clue; it does not decide the interpretation.
+### An evidence note in four sentences
 
-Compare effort and result. High activity with strong the part of the move price kept by the close may support a continuation interpretation. High activity with little progress may indicate conflict or possible absorption (a lot of activity with little price movement, possibly because the other side is meeting it). Low activity with substantial progress could be consistent with movement through a thin area, or may simply reflect ordinary low-participation conditions. Low activity during a pullback might support a weak move against the current trend in context, but it does not prove the trend will resume. Be precise about what the mismatch suggests and what it cannot establish.
+1. **Event:** What did price do, and where?
+2. **Activity:** How did recorded volume compare with the chosen baseline?
+3. **Primary reading and alternative:** What is one plausible meaning, and what else could explain the same facts?
+4. **Next test:** What observable behaviour would favour one explanation over the other?
 
-Now locate the event. A high-activity, limited-progress bar at a range boundary asks a different question than one in the middle of a balanced market. If a profile is part of your method, note whether the event occurs at a high volume node, low volume node, POC, or value boundary, and state the profile period.Avoid counting every overlapping indicator as independent confirmation. The chart's structure remains the foundation.
+For example:
 
-Create at least one alternative explanation. Suppose price makes a marginal new high with lower volume. Your preferred explanation might be that the extension is losing participation. An alternative is that price moved easily because little opposing interest was present. The next evidence that would favour one over the other may be whether price holds above the old high or quickly returns below it. Without an alternative, it is easy to interpret every new bar as support for the first idea.
+> Price traded above 56.5 but closed at 55.8, back inside the prior range; recorded volume was 1.8× the ten-bar baseline. This may be a failed attempt to leave the range, although the broader swing structure remains upward. Holding above 56 on a later retest would support renewed acceptance, while a break below 53.5 would weaken the continuation case.
 
-A useful evidence summary has four sentences: “Price did X at level Y. Activity was Z relative to comparison level B. This fits with interpretation A because of observations C and D. An alternative is interpretation E; behaviour F would favour A, while behaviour G would favour E.” This can feel formal at first, but with practice it becomes a fast analytical habit. It helps reveal when the idea is actually unsupported.
+That note is more useful than “strong selling” because it identifies the evidence a reader can check.
 
-Do not try to prove your preferred direction. Try to discover whether the evidence is sufficient for a conditional trade scenario. If price and volume are giving conflicting clues, the right conclusion can be “not resolved yet.” That is a valid result. A complete course should teach when to wait, because much of the risk in discretionary chart reading comes from turning uncertainty into false certainty.
+### Compare effort and result
 
-In the ChartLab, learners analyse the same event at three different stages: immediately after the bar, after the next two bars, and after a retest. They must keep the initial observations unchanged and update only the interpretation as new evidence arrives. This shows the difference between changing your mind rationally and rewriting the past. Good analysis is allowed to evolve; the record of what you saw at each point should remain intact.
+A large activity reading with little progress deserves attention, especially near a relevant boundary. But do not automatically call it absorption. It might represent opposing interest, temporary balance, news activity or a pause before continuation.
 
-The aim is an evidence summary that another trader could read and challenge. If it contains only labels like “smart money,” “absorption,” or “weak breakout” without visible evidence, it needs more work. Make the observations explicit, name uncertainty, and identify the next test. Then—and only then—move to a trade scenario.
+Likewise, a small-volume pullback may suggest that the move against the trend is currently less active than the preceding impulse. It does not guarantee that the trend will resume. Tie every interpretation to the price result and the location.
 
-Now we will combine the course's evidence in a way that can be repeated across instruments. Use five separate observations: candle outcome, relative activity, recent structure, location and—where relevant—profile context. Do not start with an interpretation such as “buyers are strong.” Start with the facts that would let another person check your reading.
+### Update without rewriting history
 
-For example, imagine price has moved from 50 to 56 and is testing a prior range high near 56. Volume on the latest candle is 1.8 times the average of the previous ten comparable bars. The candle reaches 56.5 but closes at 55.8 inside the prior range. Recent swing structure is still upward, because the last higher low at 53.5 has not broken. A selected profile shows a broad activity area near 54–55, below current price. These statements describe different pieces of evidence. They do not all point in the same way: the higher swing structure is still intact, but the attempt beyond the range high did not hold and the activity was elevated while price gave back its outside excursion.
+Freeze a chart after the first event and record your observations. Then inspect later bars. If price reclaims the range high and holds it, write a new note explaining why the continuation scenario has gained support. Do not delete the original observation that the first candle closed back inside.
 
-From those facts, one possible reading is that price is testing whether it can leave the range while remaining structurally upward. Another is that the prior high is still acting as a barrier and the high-activity attempt may fail. A third is that the current event is inconclusive because no follow-through has appeared. You do not need to squeeze these alternatives into a single confident label. The point is to say which evidence matters and what would make the balance shift.
+In a different ending, price breaks below 53.5 and fails to reclaim it. Add that new structural evidence and revise the interpretation. It is rational to update a view when the evidence changes. It is not rational to pretend the new evidence was visible earlier.
 
-A useful evidence note can be organised into three sentences. Sentence one is observation: “Price traded above 56.5 but closed at 55.8, back inside the prior range; recorded volume was 1.8 times the ten-bar baseline.” Sentence two is interpretation with an alternative: “This may be a failed attempt to leave the range, although the broader swing structure remains upward.” Sentence three is the test: “Holding above 56 on a later retest would support acceptance; returning toward 54 and breaking 53.5 would weaken the continuation case.” Notice that profile context is not being used to predict a bounce from 54. It simply helps describe where earlier activity concentrated.
+### Try it
 
-Now practise updating without rewriting history. Freeze the chart at the initial event and save the first note. Reveal three more bars. If price reclaims 56, holds above it and makes a higher close, add a new paragraph explaining why the evidence now favours the acceptance scenario. Do not delete the original observation that the first candle closed back inside. In another version, price falls through 53.5 and fails to reclaim it. Update the hypothesis with that new structural evidence. Both endings can begin from the same starting chart, so the initial analysis should explain what remained uncertain.
+The facts are: high relative volume, narrow price range, a close near the midpoint, and no nearby boundary. Write one observation and one alternative explanation.
 
-A common mistake is to treat an outcome that matches the guess as proof that the reasoning was good. Review the evidence and conditions instead. Did you name a suitable baseline? Did you separate fact from interpretation? Did you preserve an alternative? Did you specify evidence that would change your mind? These habits make an analysis reviewable even when the market's future path was uncertain.
+**Feedback:** An observation could be: “Recorded volume was 2× its stated baseline, but the candle's range was narrow and the close was near its midpoint.” One possible explanation is temporary two-sided trade; another is a pause before a later directional move. Without a meaningful location or follow-through, a strong conclusion is not yet justified.
 
-### Extended spoken case analysis — additional narration
+### Common mistake
 
-For the evidence sheet, keep the price event visible and hide the future. The learner should state what happened, how unusual the activity was relative to a defined baseline, where the event occurred, and what remains uncertain. Then ask for a second interpretation. This is where many students discover that their first explanation depends on an assumption they have not stated. For example, high activity with little upside progress near a range high can be consistent with opposing interest, but it could also be a temporary balance before a later breakout. The current bar does not choose between them. The sheet should name the next discriminator: perhaps whether price holds outside the range or falls back inside and fails to reclaim it. After revealing the next bars, let learners update the hypothesis while preserving the original note. This models sound reasoning: the observation remains true even if the first interpretation is abandoned. The aim is not to eliminate uncertainty through more words. It is to identify which evidence is relevant, which explanations remain possible, and what should be watched next.
+**Mistake:** Counting several overlapping indicators as independent confirmation while ignoring conflicting price behaviour.
 
-### Learner progression — Notice → Compare → Apply
+**Correction:** Make the price event, relative activity, location and alternative explicit. More indicators do not automatically mean more independent evidence.
 
-**Level 1 — Notice (easy):** List visible price and volume facts without interpretation.
+### Keep this
 
-**Level 2 — Compare (guided):** Compare a fact-only note with a possible interpretation and alternative explanation.
-
-**Level 3 — Apply (independent):** Update a staged analysis after new bars appear, retaining original observations and naming exactly which evidence changed the hypothesis.
-
-**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
-
-### Knowledge check
-1. Why should observation and interpretation be written separately?
-2. What does the alternative explanation add?
-3. When is “not resolved yet” the best conclusion?
-
-<!-- ASSET: Create an evidence-sheet template with fields for price event, bar range/close, relative-volume method, location, primary interpretation, alternative, next discriminator. -->
-<!-- CHARTLAB: Learners record the initial read, then update after two sequential reveals without editing the original notes. Evaluate whether new evidence—not hindsight—caused each change. -->
+> A useful evidence note can be challenged. It does not need to sound certain.
 
 ---
 
 ## Lesson 6.3 — Build Your Trade Scenario: What Needs to Happen Next?
 
-### Learning objective
-Turn a chart interpretation into a conditional thesis with a trigger, alternative scenario and explicit invalidation before deciding whether a trade is appropriate.
+A scenario is a conditional explanation of what the market might do next and how you will recognise it. It is not a prediction written in advance and defended no matter what happens.
 
-**Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
+### Create competing scenarios
 
-**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
+A useful scenario contains four parts:
+1. **Condition:** What would need to happen?
+2. **Evidence:** Why would that behaviour matter in this location?
+3. **Invalidation:** What would contradict the explanation?
+4. **Decision:** What would you do if the condition appears—or if it does not?
 
-### Outline and timing
-- **0:00–1:00 — Opening question:** A thesis is not a prediction.
-- **1:00–2:30 — Level 1, Notice:** Complete a guided if/then scenario with one trigger and one invalidation.
-- **2:30–5:00 — Teach and model:** State context and evidence; Define the event required for entry.
-- **5:00–7:30 — Level 2, Compare:** Write main and alternative scenarios from the same ambiguous chart, each with its own trigger and invalidation.
-- **7:30–11:00 — Level 3, Apply:** Independently prepare a new scenario sheet including no-trade condition and the price behaviour that would make each scenario wrong.
-- **11:00–13:00 — Feedback and counterexample:** write a two-scenario plan. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
-- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
-### Full narration script
-A trade trade idea explains why a particular setup may be worth considering and what evidence would make it actionable. It is not a prediction that price must move in one direction. The difference is practical: predictions encourage you to defend an outcome; conditional trade ideas tell you what to watch and when to abandon the idea.
+For example, near a range high:
 
-Use a sentence structure: “Because the market is in context X and price and volume evidence Y occurred at level Z, I will consider a trade if condition Q happens. The trade idea is weakened or invalidated if condition R occurs.” This format is simple enough to use consistently and specific enough to review afterward.
+**Continuation scenario:** Price closes above the upper boundary, holds above it on a retest, and makes further progress. A failure to hold above the boundary would weaken this scenario.
 
-For example: “Because price has broken above a multi-session range and the advance the part of the move price kept by the close on elevated activity, I will consider a continuation setup if price retests the former range high and holds above it before reclaiming the local swing structure. A sustained move back into the old range followed by failure to reclaim the boundary weakens the continuation trade idea.” This is not a recommendation to buy every breakout. It is an example of how the context, evidence, trigger and the point where the idea no longer holds fit together.
+**Range-return scenario:** Price fails to hold above the boundary, returns inside and cannot reclaim it. A sustained reclaim and hold above the boundary would weaken this scenario.
 
-Now write the competing scenario. If the breakout fails, what might the chart do? Perhaps price returns into the range, cannot reclaim the boundary, and breaks the latest local low. That can become a separate failed-breakout scenario, but it is not automatically the trade you take instead. The alternative needs its own trigger and the point where the idea no longer holds. The fact that one possible explanation weakens does not prove the opposite is ready.
+These scenarios do not require you to choose a favourite before the next evidence appears.
 
-The trigger must be observable. “When buyers return” is not observable unless you define what you mean. “When price closes above the local lower high and the next bar holds above that swing level” is more concrete, though the details depend on the selected method and timeframe. Avoid a trigger so complicated that it cannot be applied consistently. A simple, repeatable condition is easier to test and review than an elaborate story that changes from chart to chart.
+### Triggers must be observable
 
-the point where the idea no longer holds should be tied to the trade idea. If the setup assumes a range boundary will hold after a breakout retest, the the point where the idea no longer holds may relate to a sustained return inside the range or a break of the swing that was meant to remain intact. If the trade idea is a failed upside breakout, sustained acceptance (price staying beyond a level instead of quickly coming back) above the upper boundary might invalidate it. Do not confuse a stop placement with a complete trade idea, though they interact. The stop must be executable and appropriately sized, while the trade idea says why that location matters.
+Phrases such as “momentum looks strong”, “the candle feels ready” or “buyers seem trapped” are too vague to test reliably. Replace them with specific behaviour. Depending on your method, a trigger might require a close beyond a marked zone, a successful retest, a break of a short-term swing, or a sequence showing that price has retained its progress.
 
-Define what you will do if the trigger never occurs. This is often omitted. You might simply allow the setup to expire if price moves too far away, if a relevant event changes conditions, or if the required structure no longer exists. “No trigger, no trade” prevents a conditional idea from becoming an excuse to enter late. The market may not offer the entry you wanted. That is part of the process.
+No one trigger works for every instrument and timeframe. Choose one consistent with the thesis and define it before the event occurs.
 
-Before the scenario is complete, check whether the potential target area makes sense. If resistance is close overhead, a bullish trigger may still offer little room. If the proposed the point where the idea no longer holds is so distant that the position would need to be extremely small, the setup may not be worth pursuing. The scenario can be analytically plausible but commercially unattractive after risk and reward are considered.
+### Invalidation is not the same as discomfort
 
-A useful written plan names four things: the primary scenario, trigger, the point where the idea no longer holds, and alternative. It also names the evidence that would increase or decrease confidence. It does not say “buy because volume is high.” Instead, it connects the event to a condition and a risk boundary. That is how you move from pattern recognition toward deliberate trade construction.
+A thesis is invalidated when the market's behaviour contradicts the condition on which the idea depends. Discomfort, a small adverse candle or ordinary noise is not automatically invalidation. Conversely, repeatedly moving the invalidation point because you do not want to accept that the idea failed makes the plan meaningless.
 
-For the ChartLab, give learners a chart at a range boundary after an ambiguous breakout bar. Ask them to write an upside-acceptance scenario and a failed-breakout scenario. Each must include context, required next behaviour, entry trigger, the point where the idea no longer holds, and a no-trade condition. Then reveal different chart endings. Both plans should remain understandable even if the market resolves in an unexpected direction.
+If price returns inside a breakout range and cannot reclaim the boundary, a continuation thesis may be weakened or invalidated according to the rule you established. The key is that the condition was written before the trade, not invented after price moved against you.
 
-A plan does not need to be right to be useful. It needs to be explicit enough that the learner can follow it, recognise when its assumptions are broken, and evaluate afterwards whether it was sensible given the information available at the time. That's the discipline a conditional trade idea provides.
+### Worked example
 
-An interpretation is not yet a trade scenario. “Price looks strong” does not say what you need to see, where the idea becomes wrong, or when you will stand aside. A useful scenario uses if/then language and names observable conditions. It should be possible to return to the chart later and check whether those conditions appeared.
+A market trades around 150–154, and price approaches the upper area after a recent advance.
 
-Imagine price is near the top of a range at 75. A candle has closed at 75.4, just outside the range, but the next bar has not appeared. Write two scenarios before revealing the future. Scenario A: if price holds above 75 on a pullback and then makes a higher close beyond the first breakout high, the acceptance hypothesis gains support. The invalidation might be a return into the range followed by a failed reclaim, depending on how the plan is defined. Scenario B: if price returns below 75 and cannot reclaim it, the breakout hypothesis is weakened; a break of the recent internal swing might support a range-return scenario. Each scenario has its own trigger. Neither should be treated as active simply because the first candle was green.
+- **Context:** Price has been rising, but the most recent highs overlap near 154.
+- **Scenario A:** A close above 154 followed by a successful retest and further progress supports continuation.
+- **Scenario B:** A failed close outside 154, return below the area and failure to reclaim it support a range-return reading.
+- **Wait condition:** Price overlaps between 153 and 155 without either scenario developing clearly.
 
-The trigger must be more specific than “when the chart looks good.” For example, “a 15-minute candle closes above 75 and the following pullback holds above the boundary” is observable. If the lesson is about price-volume analysis, you can add a condition for how you will compare activity, but avoid piling on filters without a reason. You are trying to define the evidence that would support the thesis, not design a checklist so complicated that no learner can apply it.
+The wait condition is important. Not every chart must resolve immediately, and not every condition must produce a trade.
 
-The invalidation is equally important. It is the condition that tells you the explanation no longer fits—not a value you move because you do not want to admit the idea failed. For a continuation scenario, invalidation might relate to the swing that supported the trend or the range boundary that was expected to hold. For a failed-breakout scenario, a sustained reclaim beyond the boundary may invalidate the failure interpretation. This means two scenarios from the same chart may have different trigger and invalidation logic. Do not assume there is one universal stop line for every interpretation.
+### Try it
 
-A third state should always remain available: no trade. If price overlaps around 75 without holding either side, neither trigger has occurred. If there is no meaningful structural invalidation, risk cannot be defined. If the distance to the next relevant area leaves too little room relative to risk, even a valid chart reading may not justify a trade. “No trade yet” is a decision supported by missing evidence, not a failure to understand the chart.
+A breakout scenario requires price to hold above 100. Price briefly closes at 101, then closes at 99 and remains below 100 on the next attempt. Which part of the scenario is challenged?
 
-For the lab, have the learner complete four fields for each scenario: condition that activates it, condition that invalidates it, what evidence remains uncertain, and what would make them stay aside. Then reveal a continuation ending and a failure ending. The score should not depend on whether the learner preferred the path that happened. It should depend on whether the conditions were observable before the reveal and whether the later evidence was assessed against those conditions.
+**Feedback:** The condition that price can hold above 100 has not been met; the failed reclaim weakens or invalidates the continuation thesis as previously defined. You do not need to replace it immediately with a short trade. A new scenario must also be built and tested.
 
-A well-formed plan is conditional by design. It makes clear what you expect to observe if an explanation is useful, what would challenge it, and when the safest analytical conclusion is to wait for information that has not yet arrived.
+### Common mistake
 
-### Extended spoken case analysis — additional narration
+**Mistake:** Writing only one scenario and treating every new candle as support for it.
 
-Ask the learner to write a conditional thesis in plain English, then test whether every clause is observable. “I think buyers are strong” is not a full thesis. “Price has held above the former range high for two closes, and the pullback has not broken the latest higher low; I will consider a continuation only if price reclaims the local swing high; a sustained return to the range invalidates the idea” is much more testable. The exact number of closes or swing definitions should be specific to the learner's method and later evaluation, not presented as a universal rule. Require an alternative scenario with its own trigger. Otherwise, learners often treat failure of one idea as proof of its opposite, which can cause rapid flip-flopping. An alternative is a contingency, not a command to reverse. Also require an expiry condition: if price moves too far away or the context changes, the setup may no longer be valid. A thesis must guide both action and restraint. The ChartLab should end with two plausible outcomes and ask whether the original written plan provides a consistent response to each.
+**Correction:** Define at least one plausible alternative and the observable behaviour that would favour it. Allow the market to resolve uncertainty.
 
-### Learner progression — Notice → Compare → Apply
+### Keep this
 
-**Level 1 — Notice (easy):** Complete a guided if/then scenario with one trigger and one invalidation.
-
-**Level 2 — Compare (guided):** Write main and alternative scenarios from the same ambiguous chart, each with its own trigger and invalidation.
-
-**Level 3 — Apply (independent):** Independently prepare a new scenario sheet including no-trade condition and the price behaviour that would make each scenario wrong.
-
-**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
-
-### Knowledge check
-1. How does a conditional thesis differ from a prediction?
-2. Why should the opposite scenario have its own trigger?
-3. What should happen if the intended entry never appears?
-
-<!-- ASSET: Trade-thesis canvas with context, evidence, primary scenario, trigger, invalidation, alternative scenario, no-trade condition and risk notes. Add a completed worked example and a blank worksheet. -->
-<!-- CHARTLAB: Learners write both an acceptance and failure scenario from the same ambiguous breakout chart. Reveal two endings; learners assess which conditional rules activated, rather than scoring the directional guess. -->
+> A scenario becomes useful when you know what would support it, what would weaken it and what you will do if neither occurs.
 
 ---
 
 ## Lesson 6.4 — Plan the Trade Before You Take It
 
-### Learning objective
-Convert a valid scenario into an executable plan by specifying entry condition, invalidation, position risk, target logic, management rules and review criteria.
+Good analysis and good trade construction are connected, but they are not the same thing. A chart may support a direction while the specific trade has unclear invalidation, poor positioning or insufficient room to a plausible objective.
 
-**Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
+This lesson provides an educational checklist. It is not a recommendation to trade a particular instrument, and it cannot determine whether a trade suits your finances or circumstances.
 
-**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
+### The trade plan
 
-### Outline and timing
-- **0:00–1:00 — Opening question:** Analysis is not complete without risk.
-- **1:00–2:30 — Level 1, Notice:** Mark planned entry and the point where the idea fails; identify the distance between them.
-- **2:30–5:00 — Teach and model:** Entry, stop/invalidation and position size; Target logic, liquidity and costs.
-- **5:00–7:30 — Level 2, Compare:** Calculate a hypothetical unit risk using the supplied point/tick/contract value, then relate position size to a pre-set risk limit.
-- **7:30–11:00 — Level 3, Apply:** Re-evaluate the trade ticket after spread/slippage or target-room assumptions change; decide whether to keep, revise or cancel it and explain why.
-- **11:00–13:00 — Feedback and counterexample:** complete a pre-trade ticket. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
-- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
-### Full narration script
-A trade plan is more than a direction and an entry price. It is a set of decisions made before the uncertainty begins to affect you emotionally. By now, you should have a context note, an evidence summary and a conditional trade idea. This lesson turns those into a plan that can be executed and reviewed.
+Before entering, write down:
 
-Start with the entry condition. The plan must state what price behaviour is required, whether the entry is a market order, limit order, stop order or another structure, and what would make the entry stale. If the trigger arrives but price has already travelled too far from the planned risk point, you may need to pass. A missed entry does not become a good entry simply because the original trade idea is still attractive.
+**1. Thesis:** What market behaviour are you responding to? Include the context and the evidence, not only a directional label.
 
-Next define the point where the idea no longer holds. It should correspond to the condition that breaks the trade idea, but it also has to be workable in the instrument and timeframe. Some traders use price-structure stops beyond a swing or range boundary; others incorporate volatility or time-based limits. Those approaches have different trade-offs and should be tested. Avoid placing a stop at an arbitrary distance merely to create a preferred reward-to-risk ratio. The the pattern made by recent highs and lows and your strategy should inform the risk point.
+**2. Entry condition:** Which observable trigger must occur? Distinguish a price area you are watching from the event that would permit entry under your method.
 
-Position size follows from the risk amount and distance to the point where the idea no longer holds, with instrument-specific contract or lot values, tick/point values, currency conversion, fees and slippage taken into account. Do not simply copy a share-based formula into futures, options or FX without checking the contract mechanics. The calculation must reflect what a stop movement costs in the chosen instrument. If the risk-based size is below the minimum tradable amount, the answer may be to reduce the risk, use another instrument, paper-trade the setup or skip it. Do not widen the stop to fit the account.
+**3. Invalidation and stop logic:** Which market behaviour would contradict the thesis? Where does your predefined risk control need to sit in relation to that condition? A stop order and a thesis invalidation may be related, but they are not conceptually identical; execution can also differ from the planned price.
 
-The target also needs a reason. It may be the next relevant structure, the opposite edge of a range, a measured objective under a tested method, or a management rule derived from the strategy. A target is not guaranteed to be reached. If the next opposing zone is very close, the trade may not offer enough room relative to the risk. If the target relies on a prediction rather than a rule, acknowledge that and test the method.Execution conditions matter. Spread, liquidity (how easily a trade can be made without moving price much), partial fills, gaps and event risk can make the realised outcome differ from the theoretical chart distance. This is particularly important in less liquid instruments and around market open, close, expiry or major announcements. Your plan should name the conditions under which you will not enter or will reduce activity. For options and leveraged products, product mechanics and risk can differ significantly from a spot chart; a chart pattern does not eliminate instrument-specific risk.
+**4. Position size and risk:** How much could be lost if the stop is reached, including relevant costs and possible slippage? Position size should follow the risk limit and the instrument's contract or unit value—not the amount needed to make the potential reward look attractive. A planned loss is an estimate, not a guarantee of the realised loss.
 
-Then define trade management. Under what conditions will you move a stop, take partial profits, exit early, or leave the original plan unchanged? Avoid making rules up while the trade is moving. A rule such as “move to breakeven once price advances one R” may sound safe, but it can also cause premature exits if it hasn't been tested. The right management rule depends on the strategy. State it in advance, apply it consistently, and evaluate it over a meaningful sample.
+**5. Objective and exit plan:** What is a reasonable objective under the scenario, and why? Consider nearby structure and whether the potential reward justifies the risk under your own rules. Specify how you would respond if price stalls, reaches the objective or invalidates the idea.
 
-A complete pre-trade ticket could contain: instrument and timeframe; market state; level being tested; evidence supporting the trade idea; entry trigger; order type; the point where the idea no longer holds; account risk amount; calculated size; target logic; cost/slippage estimate; event or liquidity restrictions; management rules; and conditions for cancellation. The ticket need not become a huge form. It should be short enough to complete consistently while containing every decision that could materially change the result.
+**6. No-trade condition:** What would make you pass? Examples include an unclear trigger, a stop that cannot be placed sensibly, price already extended far from the setup area, unreliable data or a market event that makes the evidence hard to compare.
 
-Consider a hypothetical breakout retest. The chart trade idea suggests continuation if price holds above the old range. The trigger appears, but the distance from entry to the point where the idea no longer holds is large, and the next resistance is close. The technical pattern may be real, but the trade ticket reveals poor geometry. The disciplined decision is to skip it or wait for a better structure, not to shrink the stop until it sits inside normal price noise. A plan exists to protect you from attractive but poorly structured ideas.
+### Basic risk arithmetic
 
-Risk management also includes the possibility of no trade. If data is inconsistent, a scheduled event makes the comparison level misleading, the spread widens beyond your rules, or the entry appears too late, cancel the setup. These are not failures; they are rules working as intended. A trader's job is not to maximise the number of entries but to follow a process whose risks are understood.
+For a simple linear instrument, an illustrative estimate of price risk per unit is:
 
-After the trade, record the result in units that support comparison, such as R-multiples where appropriate, while also recording slippage and whether rules were followed. A profitable result can come from a poor process; a losing result can come from a valid one. Reviewing process separately from outcome is what turns experience into learning.
+\[
+\text{Risk per unit}=|\text{Entry price}-\text{Stop price}|\times\text{Value per price unit}
+\]
 
-The trade ticket turns a chart scenario into an execution plan. It should contain more than an entry price. You need the condition that permits entry, the point where the thesis fails, the amount you are willing to risk, the assumptions used to calculate size, the logic for any target or management decision, and a rule for reviewing or cancelling the plan. The numbers are only meaningful when the invalidation has a structural reason.
+A rough position-size estimate can then be constructed from the amount of risk you have permitted under your own plan, divided by risk per unit. Actual calculation depends on the instrument, contract specification, fees, leverage, minimum lot size, currency conversion and potential slippage. Do not use an example from this lesson as a personal risk limit.
 
-Work through a hypothetical calculation. A trade idea has an entry near 250 and an invalidation at 247.5, so the distance is 2.5 points. Suppose the supplied example contract has a value of 10 currency units per point per unit, and the risk budget is 250 currency units. Before added costs, the approximate risk per unit is 2.5 × 10 = 25. The simple maximum size within that budget is 250 ÷ 25 = 10 units. This is a teaching calculation; real contract multipliers, lot increments, currency conversion, margin and product rules must be verified for the actual instrument.
+A trade with a tightly placed stop is not automatically better. If the stop sits where ordinary price noise is likely to reach it, or where the thesis is not actually invalidated, the plan may be poorly constructed.
 
-Now include execution costs. If the combined allowance for spread and slippage is equivalent to 0.3 points per unit, the planned distance becomes 2.8 points and approximate risk per unit becomes 2.8 × 10 = 28. With a 250-unit risk budget, the largest whole size under the simplified model is floor(250 ÷ 28) = 8 units, for estimated risk of 224. Ten units would now imply approximately 280 units of risk and exceed the stated budget. The setup did not become less attractive because the arithmetic changed; the assumptions about execution mean the original size no longer matches the risk limit.
+### Reward relative to risk
 
-Position size calculations can still mislead if an input is wrong. The point value may be per lot rather than per single unit. The stop distance may need to include tick increments. The account currency may differ from the instrument's quote currency. Fees, gaps and slippage can produce a larger realised loss than the estimate. A simple formula does not remove those considerations. It forces you to make the assumptions visible so they can be checked.
+Suppose a hypothetical plan risks 2 units per share or contract to target a possible 4 units before costs. The simple reward-to-risk ratio is 2:1. This ratio does not tell you the chance of success, and it does not make the trade profitable by itself. You must still evaluate whether the target is plausible, whether the trigger is valid under your rules, and how execution costs affect the result.
 
-Target logic should be linked to the scenario and the space available on the chart. If the next relevant boundary is only one point away while invalidation is 2.5 points away, the plan may not offer enough room before costs; the answer is not automatically to invent a farther target. Ask whether the planned target is supported by structure, whether the potential reward relative to the planned risk fits your rules, and whether execution conditions undermine the premise. If the answer is unclear, revise the plan before entry or cancel it.
+A nearby structural barrier may make a distant target unrealistic. A better plan might reduce the target, wait for a different entry, or reject the setup entirely. There is no need to stretch the chart to fit an attractive ratio.
 
-Management rules also need to be written before the trade develops. State what would cause you to reduce, exit, hold or cancel; avoid vague rules such as “move the stop if it feels weak.” Never widen an invalidation merely to keep a losing idea alive. If price reaches the point that makes the thesis wrong, the ticket has done its job. A losing result within a properly defined plan is part of trading uncertainty; an undefined or arbitrarily changed risk is a process problem.
+### Plan the management before the emotion arrives
 
-The final ticket should let someone else understand the planned risk without guessing. Record the instrument and contract specifications, trigger, invalidation, risk budget, point value, expected friction, size calculation, target logic, management conditions and no-trade/cancel rule. If any material input is unverified, label it and resolve it before using real capital.
+Write down what you will do if:
+- price moves in your favour quickly;
+- price stalls without invalidating the thesis;
+- price moves against you but has not yet reached the planned stop;
+- the stop or target is reached;
+- a new event changes the evidence;
+- execution differs from the expected price.
 
-### Extended spoken case analysis — additional narration
+The plan should prevent impulsive rule changes, not remove the need to respond to genuinely new information.
 
-Position size should be a result of the plan, not the other way around. First decide where the thesis is invalidated by price behaviour, then measure the entry-to-invalidation distance. Use the instrument's correct point/tick value, contract size, currency conversion, fees and a realistic allowance for slippage to calculate exposure. The lesson should not suggest one risk percentage suits every person or product; the learner must use a separately defined policy and understand the instrument. Show how the same stop distance costs differently across a share, a futures contract and an option position. For an option, the underlying chart distance does not translate linearly into option P&L, so a product-specific risk model is needed. Then add target logic and the next opposing area. If the intended target is very close, the setup may fail the learner's reward/risk criteria even when the chart thesis is coherent. Finally, introduce execution conditions: spreads widen, orders slip, partial fills occur and gaps can bypass a stop. A plan is not complete until it addresses those practical frictions. A skipped trade can be the best outcome if the position cannot be sized sensibly or the risk cannot be controlled.
+### Try it
 
-### Learner progression — Notice → Compare → Apply
+Your chart thesis is reasonable, but the logical invalidation point is far away and the nearest plausible objective is close. What should you do?
 
-**Level 1 — Notice (easy):** Mark planned entry and the point where the idea fails; identify the distance between them.
+**Feedback:** Do not force the trade merely because the direction looks right. Reconsider whether a different entry, a different plan or no trade is appropriate under your rules. Risk and reward must be assessed, not adjusted until the chart produces a preferred ratio.
 
-**Level 2 — Compare (guided):** Calculate a hypothetical unit risk using the supplied point/tick/contract value, then relate position size to a pre-set risk limit.
+### Common mistake
 
-**Level 3 — Apply (independent):** Re-evaluate the trade ticket after spread/slippage or target-room assumptions change; decide whether to keep, revise or cancel it and explain why.
+**Mistake:** Choosing a desired position size first and then placing a convenient stop that makes the calculation fit.
 
-**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
+**Correction:** Start with the thesis and the point where it fails. Then calculate whether the risk is acceptable under your predetermined rules. If the plan does not fit, pass rather than distort the analysis.
 
-### Knowledge check
-1. Why should position size be calculated after defining the invalidation distance?
-2. Why is a nearby opposing level relevant to target planning?
-3. What is the difference between trade outcome and process quality?
+### Keep this
 
-<!-- ASSET: Design a pre-trade ticket worksheet, plus a fully worked fictional example showing entry, structural invalidation, risk budget, contract-value calculation placeholder, target area, slippage and cancellation criteria. Do not prescribe a universal percentage risk. -->
-<!-- CHARTLAB: Learners complete a trade ticket for a synthetic setup. Provide contract/tick-value data in the exercise, ask them to calculate size, then introduce a spread/slippage change and ask whether the plan still qualifies. -->
+> Build the plan around a testable thesis and defined risk—not around the desire to take a trade.
 
 ---
 
 ## Lesson 6.5 — The Complete Walkthrough: From Chart Analysis to Trade Plan
 
-### Learning objective
-Independently produce a written volume-based trade plan from an unlabelled chart and then review it against the actual outcome without hindsight rewriting.
+This final lesson brings the whole course together. The numbers are **synthetic and for learning only**. The purpose is to demonstrate a transparent process, not to suggest a live position.
 
-**Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
+### The chart situation
 
-**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
+Assume a market has traded in a range between 200 and 208 over the previous two sessions.
 
-### Outline and timing
-- **0:00–1:00 — Opening question:** Explain the capstone standard.
-- **1:00–2:30 — Level 1, Notice:** Annotate the market state, key area and candidate price-volume event on a guided chart.
-- **2:30–5:00 — Teach and model:** Establish context and data quality; Analyse price-volume evidence and alternatives.
-- **5:00–7:30 — Level 2, Compare:** Build the full trade ticket from staged evidence, including two scenarios, trigger, invalidation, risk and management.
-- **7:30–11:00 — Level 3, Apply:** Complete an independent capstone without future bars, then review both alternate outcomes while preserving the original plan and assessing process separately from result.
-- **11:00–13:00 — Feedback and counterexample:** Build risk and trade-management rules. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
-- **13:00–15:00 — Recap and knowledge check:** Review outcome and process.
-### Full narration script
-This final lesson is a complete walkthrough. The objective is not to demonstrate a spectacular winning trade. It is to show how a disciplined trader moves from raw chart information to a plan that can be followed and reviewed. We will work through the same sequence you should use on your own charts, and you will practise it independently after the demonstration.
+The chart provides this information:
+- The recent structure is mostly sideways, with repeated reactions around the lower and upper boundaries.
+- The selected volume feed is known, and relative volume is compared with the previous 20 comparable bars on the same timeframe.
+- A profile over the chosen sessions shows the main concentration of activity around 203–206, with the upper boundary near 208.
+- Price advances from 205 towards 208 on elevated relative volume, trades to 209 and closes at 207.4, back inside the range.
+- The latest event has not yet produced sustained progress above 208.
 
-Step one: identify the instrument, timeframe, session and data source. Before interpreting volume, understand what the feed represents and whether the recent bars are comparable. If this is exchange-traded volume, record the relevant contract or venue. If it is retail FX tick volume, state that limitation. Identify unusual session conditions or data gaps. The point is to know what evidence you have before deciding what it means.
+Do not skip to “buy” or “sell”. Start with the context.
 
-Step two: establish context. Is price trending, ranging or transitioning? Mark a small number of meaningful swing points and zones. Explain why each zone matters. In our fictional example, price has spent several sessions in a range, then traded above the upper boundary. That is a potential change in structure, but not yet a complete breakout thesis. We mark the range as a zone, identify the latest impulse, and note the next opposing area above price.
+### Step 1 — Write the context
 
-Step three: read the event. The breakout bar's range is wider than recent bars, it closes beyond the range boundary, and reported activity is elevated against comparable bars. This is consistent with an upside breakout that occurred amid increased participation. But we also record an alternative: the market may fail to sustain the excursion. The next bars will determine whether the initial progress is retained. We do not write “guaranteed breakout” or assume the volume spike proves institutional buying.
+> Price has been rotating between roughly 200 and 208. It is now near the upper boundary after a high-activity attempt above the range that did not hold by the close. The selected profile shows the main concentration around 203–206. The key question is whether price can sustain trade above 208 or will remain inside the range. The volume reading is relative to the stated 20-bar baseline on the selected feed.
 
-Step four: assess the response. Price pulls back toward the former range high. The first few bars show limited downside progress and activity has declined relative to the breakout. This is consistent with a relatively quiet retest, but the evidence is incomplete. We ask whether price can hold above the boundary and reclaim a nearby local swing. If it returns into the old range and fails to reclaim the boundary, the continuation scenario is weakened. This is our decision point, not a reason to force an entry.
+This note describes the state and the question. It does not claim that price must fall because the first breakout failed.
 
-Step five: write the scenarios before the trigger appears. Primary scenario: price holds the former range high and then closes above the local swing level, supporting a possible continuation setup. Invalidation: price returns into the old range and cannot reclaim the boundary, or breaks a structural level selected in the plan. Alternative scenario: failure at the range edge leads to a rotation back toward the range interior. That alternative has its own trigger and invalidation. If neither activates, there is no trade.
+### Step 2 — Separate the evidence
 
-Step six: test trade geometry. Where would the planned entry be? Where is the relevant invalidation point? What is the actual cash or account risk per unit under the instrument's contract specification? How much size can be taken within the predefined risk limit? Where is the next opposing level, and does it leave enough room? If the reward opportunity is poor or the stop distance makes position sizing impractical, pass. The chart idea does not get to overrule the risk policy.
+**Observed:**
+- Price traded above 208 but closed at 207.4, back inside the range.
+- Recorded volume was elevated against the selected baseline.
+- The prior range boundaries remain useful references.
+- Price has not yet held above 208.
 
-Step seven: set management rules. Define when the setup expires, what would trigger cancellation before entry, and how the trade will be managed if it activates. Avoid changing rules in response to each candle's emotion. The rule may be simple: take no action unless the trigger occurs; cancel on a sustained return inside the range; exit if structural invalidation is reached; and record any execution differences. A real trading plan may need more detail for partial exits or trailing management, but the principle is the same.
+**Possible interpretation A:** The market may be failing to leave the range. The first attempt did not retain its outside progress.
 
-Now consider two possible outcomes. In Outcome A, price holds the boundary, triggers the setup and then advances toward the next resistance before turning lower. The trade may win or lose depending on execution and management, but the plan can still be assessed by whether its conditions were met and risk controlled. In Outcome B, price returns to the range and fails to reclaim the boundary. The primary scenario is invalidated and no trade is taken; price later rises anyway. That missed move does not mean the process was wrong. At the time, the planned condition was absent. A rule is not defective merely because an alternative path would have profited.
+**Possible interpretation B:** The event may be temporary; another attempt could still succeed. The broader structure has not yet shown sustained directional progress.
 
-After the event, write a review in four columns: what I observed; what I planned; what price did; and what I learned. Never replace the original plan with a version that pretends you expected the outcome. If the trade activated, record whether entries, risk and exits followed the rules, including slippage. If no trade activated, record whether you respected the cancellation rule. Review multiple examples before changing a method; one result can be noise.
+Both explanations fit the initial facts. The next price behaviour matters.
 
-That is the complete process: context, evidence, scenarios, trigger, invalidation, risk, execution and review. The course has not taught you a magical volume signal. It has taught you to turn price and volume observations into a defensible, conditional plan. You should finish able to explain not only why you might take a trade, but also why you might pass, what would prove the idea wrong, and how you will evaluate the decision afterward.
+### Step 3 — Define the scenarios before the next bars
 
-Treat the capstone as a rehearsal of the full process, not a prediction contest. You receive an unlabelled chart in stages. You may use candle structure, relative activity, a profile if the question calls for one, and the same conditional rules you have practised throughout the course. Your job is to create a note another person could audit after the outcome—not to guess the next candle correctly.
+**Scenario A: range return.** Price continues to trade below 208, fails to reclaim that zone and begins making downside progress. A break of a nearby short-term low would add evidence. A sustained reclaim above 208 would weaken this scenario.
 
-Stage one: describe the market state. Suppose the chart has rotated between 120 and 126 several times. Price has now closed at 126.4, just outside the top, on activity 1.6 times its recent ten-bar baseline. The prior lows remain intact, and the selected profile has its broadest activity near 123–124. Write these observations without calling the breakout successful. State the volume source and the selected profile window if they matter to your comparison. A possible continuation scenario is that price holds 126 and builds progress; an alternative is a return inside the range and failed reclaim. The no-trade condition is that price remains tangled near 126 with no clear trigger.
+**Scenario B: breakout continuation.** Price closes above 208, holds that area on a retest and makes further progress. A sustained return into the range and failure to reclaim 208 would weaken this scenario.
 
-Stage two: define the plans. For the acceptance scenario, the trigger might be a hold above 126 followed by a higher close beyond the first breakout high. The invalidation should be connected to what would show that the outside move did not hold. For the failure scenario, the trigger may require a return into the old range and a failed reclaim of 126; its invalidation could be a sustained reclaim with follow-through. You should also note the point that would make the risk calculation possible and the next area that might affect target room. At this stage, the plan must be complete even though the outcome is not yet visible.
+**No-trade condition.** Price keeps overlapping from 207 to 209, with no clear trigger, or any proposed entry has poor risk relative to the nearest plausible objective. In that case, the current evidence does not support a well-defined trade plan.
 
-Stage three: reveal one ending. In the continuation version, price retests 126, holds, and moves to 129. Record which condition activated and whether the invalidation remained intact. Do not claim that the price move was guaranteed by the first volume bar. In the alternative version, price returns to 125.5, fails to reclaim 126, breaks a local swing and moves toward the profile's broad activity area. Record the failure condition and the rule that would stop the original continuation idea. The same initial chart can produce either outcome; this is why the scenarios were conditional.
+### Step 4 — Evaluate a hypothetical trigger
 
-After the outcome, complete a separate review. What was observed correctly? What was only a hypothesis? Which new piece of evidence changed the balance? Did the trigger actually occur? Was the invalidation meaningful and defined in advance? Were the position size and costs calculated with the right inputs? Did you follow the rules, or did you alter them after seeing an uncomfortable candle? Keep the pre-outcome note intact so you can compare the actual update with your original reasoning.
+Now suppose price later closes below 206.8, retests 207.5 from below and fails to reclaim it. That behaviour provides more evidence for the range-return scenario than the initial candle did. It still does not automatically create a trade. You would now need to check whether your planned entry, invalidation, target, costs and position size satisfy your rules.
 
-Score the process across distinct criteria: context and location, fact-versus-interpretation discipline, plausible alternatives, trigger and invalidation quality, risk assumptions, and a fair post-event review. A directionally correct guess without these pieces is not a strong submission. A well-defined plan that loses within its risk limit can still demonstrate sound process. The capstone is complete when you can show how the decision was constructed, what evidence would have changed it, and how the review respects what was known at each stage.
+If instead price closes above 208, retests 208 and holds above it, the evidence shifts toward the continuation scenario. The initial close back inside remains part of the history; it is not erased. The newer evidence simply changes the current balance of explanations.
 
-### Learner progression — Notice → Compare → Apply
+### Step 5 — Complete a trade ticket only when the conditions are met
 
-**Level 1 — Notice (easy):** Annotate the market state, key area and candidate price-volume event on a guided chart.
+Use this as a blank planning template. The entries are questions you must answer for the specific case, not values to copy.
 
-**Level 2 — Compare (guided):** Build the full trade ticket from staged evidence, including two scenarios, trigger, invalidation, risk and management.
+| Field | Your note |
+|---|---|
+| Market state and relevant location | What structure and zone matter? |
+| Thesis | Which scenario currently has support, and why? |
+| Trigger | What exact observable event is required? |
+| Entry approach | How will entry be considered if the trigger occurs? |
+| Invalidation | What behaviour contradicts the thesis? |
+| Stop and risk estimate | Where will risk control be placed, what is the estimated loss, and what costs or slippage matter? |
+| Objective | What structure supports the target, and is reward reasonable relative to risk? |
+| Management and exit | What will happen if price progresses, stalls, invalidates or reaches the objective? |
+| No-trade condition | Which missing, conflicting or poor-quality evidence means pass? |
+| Review note | What will be recorded so the decision can be evaluated later? |
 
-**Level 3 — Apply (independent):** Complete an independent capstone without future bars, then review both alternate outcomes while preserving the original plan and assessing process separately from result.
+A completed table with vague entries is not a complete plan. “Stop below support” should become a specific, justified condition tied to the chart and the instrument's risk rules. “Target resistance” should explain which area matters and why that objective is plausible.
 
-**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
+### Step 6 — Review the decision, not just the outcome
 
-### Knowledge check
-1. What are the four main parts of your plan before you decide whether to trade?
-2. Why should you keep your original plan when you review what happened?
-3. How can a no-trade decision show that you followed your rules?
+After the event, ask:
+- Did the observations reflect what was visible before entry?
+- Was the alternative scenario considered honestly?
+- Did the trigger occur as written?
+- Was the planned risk respected?
+- Did the exit follow the plan or an unrecorded emotional change?
+- Which evidence would justify a different decision next time?
 
-### Capstone submission standard
-A learner passes the first-pass exercise when their written plan:
-- identifies the market structure and data limitations;
-- cites specific price-volume observations rather than unsupported participant stories;
-- provides primary and alternative scenarios;
-- defines a trigger, invalidation and cancellation condition;
-- describes risk calculation, target logic and management rules;
-- preserves the original plan for an honest post-event review.
+A trade that makes money can still be poorly planned. A trade that loses money can still follow a sensible, consistently applied process. The review should judge the quality of the reasoning and execution, not just whether the outcome was positive.
 
-<!-- ASSET: Produce a capstone chart sequence with synthetic data and 2 alternate endings. Include the initial range, breakout bar, retest, trigger or failure, next opposing level, and a worksheet that captures the full plan. -->
-<!-- CHARTLAB: Capstone: learners receive an unlabelled chart in staged reveals. They must submit context note, evidence summary, two scenarios, trigger, invalidation, risk/ticket, and post-event review. Score the reasoning and rule clarity rather than whether the chosen direction matched the eventual move. -->
+### Capstone task
 
----
+Use a new chart or a clearly labelled synthetic one. Complete the following in order, before viewing any later bars:
 
-## Module 6 instructor notes
+1. Write a context note with the market state, key zone, relevant price-volume event and one data limitation if applicable.
+2. Record at least two observations.
+3. Write two competing scenarios and the conditions that favour each.
+4. Define one possible trigger, a thesis invalidation condition and a no-trade condition.
+5. Check whether a trade plan could be constructed without violating your risk rules.
+6. Reveal later bars and explain which evidence changed your view. Keep the original note intact.
 
-- Do not make this a recap-only module; learners must perform the full workflow and receive rubric-based feedback.
-- Show a completed trade, a stopped-out trade, and a valid no-trade. Review process independently of outcome.
-- Avoid prescribing a universal risk percentage, stop distance, target multiple or indicator combination.
-- Reference themes: Wyckoff's emphasis on market context and turns; Weis' bar-by-bar analysis; Dalton's market structure and auction context; broader volume-analysis concepts from Coulling and Dormeier.
+**Model-answer standard:** There is no single correct direction for an ambiguous chart. A strong answer uses observable facts, explains why a zone matters, keeps interpretation conditional, names an alternative, states what would change the view and accepts “wait” when a trigger or acceptable risk is missing.
+
+### Common mistake
+
+**Mistake:** Treating the capstone as a puzzle with one hidden correct prediction.
+
+**Correction:** The task is to construct a transparent, testable decision process. A good plan defines what you know, what you do not know, what would matter next and how you will handle risk.
+
+### Final course review
+
+You have worked through six connected stages:
+
+1. **Observe:** read candle outcome and recorded activity carefully.
+2. **Interpret:** assess progress, pressure and effort/result without inventing hidden intent.
+3. **Locate:** use structure and meaningful zones to frame the question.
+4. **Test:** distinguish breakout attempts, failed moves and possible reversals through follow-through.
+5. **Contextualise:** use Volume Profile as a map of past activity with explicit settings and limitations.
+6. **Plan and review:** build competing scenarios, define a trigger and invalidation, assess risk and accept no trade when the evidence is insufficient.
+
+The purpose is not to make every chart tradable. It is to make your reasoning clear enough to explain, test and improve. A disciplined decision to wait is part of a complete trading process.
