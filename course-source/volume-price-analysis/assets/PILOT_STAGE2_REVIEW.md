@@ -29,6 +29,7 @@ The change is limited to text in SVG `title`, `desc` and `text` nodes. Chart geo
 - Level 2 feedback now says “submitted” and explicitly states that the text-length check does not grade reasoning.
 - Unlocked progress buttons update the active-step indicator without locking later steps when the learner navigates backward. Restart resets unlock state and moves focus back to the first-stage heading.
 - Five mobile-specific SVG variants were added. The phone layout uses a stacked comparison for Panels A and B instead of shrinking the desktop side-by-side chart to an unreadable width.
+- Mobile typography was increased for subtitles, axis labels, baseline labels and volume summaries. The floating reference-level callout was removed from the candle area and replaced by a concise legend in the chart header.
 
 ## 2. Existing strengths retained
 
@@ -76,13 +77,17 @@ A Chromium/Playwright fixture was exercised successfully via in-memory page cont
 - All labelled controls, unique IDs, keyboard navigation listeners and reduced-motion handling remain present.
 - The synthetic CSV and all price/volume values are unchanged.
 
-### Responsive mobile assets\n\nThe standalone HTML now uses `<picture>` with a `(max-width: 720px)` source for each chart. Each mobile SVG is separately reflowed, has an accessible title/description, and a matching editable source/export pair. The comparison case stacks its two panels vertically. Source/export equivalence and file references are to be checked once more before scale-up.\n\n## 4. Runtime checkpoint
+### Responsive mobile assets
+
+The standalone HTML uses `<picture>` with a `(max-width: 720px)` source for each chart. Each mobile SVG is separately reflowed, has an accessible title/description, and has a matching editable source/export pair. The comparison case stacks its two panels vertically. Mobile font sizes and volume summaries were increased and the floating reference label was removed from the candle area. Source/export equivalence and file references were verified against the committed branch.
+
+## 4. Runtime checkpoint
 
 The main narration in M01-L01 is about 842 words and its extended spoken case analysis about 217 words. At 120 words per minute, that is roughly 8.8 minutes of narration before learner pauses and practice. The lesson may reach the planned 10–15 minutes when the narrated walkthrough and 4–6 minute ChartLab are integrated as intended, but a timed rehearsal is still required. The outline is not proof of runtime.
 
 ## 5. Validation still required
 
-- Open the committed standalone HTML in a normal browser and verify the decoded SVG titles, annotations and punctuation visually.
+- Open the committed standalone HTML in a normal browser and verify the decoded SVG titles, annotations, larger mobile labels and punctuation visually. Locally rendered preview variants generated from the same CSV/layout were inspected, but exact rendering of the committed page and SVG files has not been completed.
 - Run all stages end to end: incorrect Level 1 attempt, correct retry, Level 2 submission, Level 3 submission, outcome reveal, reflection and restart.
 - Use keyboard only. Verify unlocked navigation, active-step announcement, visible focus, logical focus order and no keyboard trap.
 - Enable OS/browser reduce-motion and verify that stage/restart scrolling is not smooth.
