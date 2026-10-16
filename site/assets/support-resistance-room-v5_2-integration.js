@@ -8,6 +8,7 @@
   let deepPack = null;
   let interactionPack = null;
   let renderedLessonId = null;
+  const attemptedStages = new Set();
   let shouldSyncUrl = new URLSearchParams(window.location.search).has("lesson");
   const byId = id => document.getElementById(id);
   const esc = value => String(value == null ? "" : value).replace(/[&<>"']/g, ch => ({
@@ -149,13 +150,22 @@
     window.history.replaceState(window.history.state, "", url.href);
   }
 
+  function currentChartFilename() {
+    const image = byId("sr-chart-image");
+    if (!image || !image.getAttribute("src")) return "";
+    try { return new URL(image.getAttribute("src"), window.location.href).pathname.split("/").pop(); }
+    catch (_) { return image.getAttribute("src").split("/").pop(); }
+  }
+
+  function currentStageKey(lessonId) {
+    const filename = currentChartFilename();
+    return filename ? String(lessonId) + ":" + filename : "";
+  }
+
   function stageForCurrentChart(lessonId) {
     if (!LESSON_IDS.has(lessonId) || !interactionPack) return null;
-    const image = byId("sr-chart-image");
-    if (!image || !image.getAttribute("src")) return null;
-    let filename = "";
-    try { filename = new URL(image.getAttribute("src"), window.location.href).pathname.split("/").pop(); }
-    catch (_) { filename = image.getAttribute("src").split("/").pop(); }
+    const filename = currentChartFilename();
+    if (!filename) return null;
     const stages = interactionPack[String(lessonId)] && interactionPack[String(lessonId)].stages || [];
     return stages.find(stage => String(stage.image || "").split("/").pop() === filename) || null;
   }
@@ -165,8 +175,8 @@
     const stage = stageForCurrentChart(id);
     const countText = byId("sr-chart-stage-count") ? byId("sr-chart-stage-count").textContent : "";
     const countMatch = countText.match(/View\s+(\d+)\s+of\s+(\d+)/i);
-    const response = (byId("sr-practice-response") && byId("sr-practice-response").value || "").trim();
-    const attempted = !!(byId("sr-attempt-made") && byId("sr-attempt-made").checked);
+    const stageKey = currentStageKey(id);
+    const hasAttempt = !!stageKey && attemptedStages.has(stageKey);
     if (!stage || !countMatch) {
       byId("sr-v52-stage-model-answer")?.remove();
       return;
@@ -207,17 +217,18 @@
       details.append(summary, body);
       panel.append(kicker, details);
     }
-    panel.hidden = !(response.length || attempted);
+    panel.hidden = !hasAttempt;
   }
 
   function updateFinalReview() {
     const panel = byId("sr-v52-final-review");
     if (!panel) return;
     const match = ((byId("sr-chart-stage-count") && byId("sr-chart-stage-count").textContent) || "").match(/View\s+(\d+)\s+of\s+(\d+)/i);
-    const response = (byId("sr-practice-response") && byId("sr-practice-response").value || "").trim();
-    const attempted = !!(byId("sr-attempt-made") && byId("sr-attempt-made").checked);
+    const lessonId = currentLessonId();
+    const stageKey = currentStageKey(lessonId);
+    const hasAttempt = !!stageKey && attemptedStages.has(stageKey);
     const last = match && Number(match[1]) === Number(match[2]);
-    panel.hidden = !LESSON_IDS.has(currentLessonId()) || !last || !(response.length || attempted);
+    panel.hidden = !LESSON_IDS.has(lessonId) || !last || !hasAttempt;
   }
 
   function onJump(event) {
@@ -282,10 +293,20 @@
     const stageObserver = new MutationObserver(() => { updateModelAnswer(); updateFinalReview(); });
     if (byId("sr-chart-stage-count")) stageObserver.observe(byId("sr-chart-stage-count"), { childList: true, characterData: true, subtree: true });
     document.addEventListener("input", event => {
-      if (event.target && event.target.id === "sr-practice-response") { updateModelAnswer(); updateFinalReview(); }
+      if (event.target && event.target.id === "sr-practice-response") {
+        const key = currentStageKey(currentLessonId());
+        if (key && event.target.value.trim()) attemptedStages.add(key);
+        updateModelAnswer();
+        updateFinalReview();
+      }
     });
     document.addEventListener("change", event => {
-      if (event.target && event.target.id === "sr-attempt-made") { updateModelAnswer(); updateFinalReview(); }
+      if (event.target && event.target.id === "sr-attempt-made") {
+        const key = currentStageKey(currentLessonId());
+        if (key && event.target.checked) attemptedStages.add(key);
+        updateModelAnswer();
+        updateFinalReview();
+      }
     });
     document.addEventListener("click", event => {
       onJump(event);
