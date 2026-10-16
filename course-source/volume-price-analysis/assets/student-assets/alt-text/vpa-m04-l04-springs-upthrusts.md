@@ -1,5 +1,6 @@
 # Accessibility and source notes — M04-L04
 
+**Figure number:** Figure 4.4; interactive panels use Figure 4.4a–Figure 4.4e.
 **Lesson:** Springs and Upthrusts: Recognising Failed Moves at Range Boundaries
 **Purpose:** Describe excursions beyond a range that return inside and test whether the return is sustained.
 **Data:** Synthetic OHLCV, not historical prices or a trading signal.
