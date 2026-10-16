@@ -39,16 +39,23 @@ Imagine two events:
 
 The first tells you *when* activity was unusually high. The second tells you *where* activity was concentrated over the selected period. These observations can be combined, but they should not be confused.
 
-### Try it
+### Level 1 — Notice (easy)
 
-A wide profile row is visible around 200. Which interpretation is supported?
+**Task:** What does a conventional volume histogram arrange activity by, and what does a Volume Profile arrange it by?
 
-A. Price will bounce at 200.
-B. More recorded activity was assigned to that price area during the selected period than to narrower rows in the profile.
-C. Every trader agrees that 200 is fair value.
+**Feedback:** The conventional histogram shows activity by time interval; the profile distributes activity across price levels for the chosen period and method.
 
-**Feedback:** B. The profile describes the distribution of the selected activity. The future response and traders' views cannot be inferred with certainty from the row alone.
+### Level 2 — Compare (guided)
 
+**Task:** Change a profile from a one-session window to five sessions and observe a different shape. Does that by itself mean one profile is wrong?
+
+**Feedback:** No. They describe different selected periods. State the window before interpreting or comparing references.
+
+### Level 3 — Apply (independent)
+
+**Task:** A broad row sits at price 200. State what you may say and what you cannot infer.
+
+**Model response:** More activity was assigned to that row during the chosen period than to narrower rows. You cannot infer a required bounce, universal agreement or current resting orders.
 ### Common mistake
 
 **Mistake:** Moving the profile start and end points until the shape supports a preferred trade.
@@ -96,18 +103,23 @@ A session profile can help you review one session. A composite profile that incl
 
 When comparing value areas, keep the profile method and periods in view. Moving from a one-session profile to a multi-week profile can shift the references simply because the underlying dataset changed.
 
-### Try it
+### Level 1 — Notice (easy)
 
-Your profile displays a POC at 75, VAH at 79 and VAL at 71. Price is currently at 82.
+**Task:** A profile shows VAH 112, POC 108 and VAL 104. Define each using the platform's chosen settings.
 
-Which statement is best?
+**Feedback:** VAH/VAL mark the high/low of the selected value area; POC is the row with most assigned activity. All depend on period and calculation rules.
 
-A. Price is overvalued and must return to 79.
-B. Price is above the selected profile's value-area range; assess whether it holds outside that range and what the current price structure shows.
-C. The POC is guaranteed to act as support.
+### Level 2 — Compare (guided)
 
-**Feedback:** B. The current location can be described without predicting a mandatory return. Holding beyond the range and returning inside would carry different implications.
+**Task:** Compare a one-session profile with a multi-week composite whose POC is elsewhere. Which one is correct?
 
+**Feedback:** Neither is universally correct; they answer different questions about different windows. Choose the period that fits the analysis and state it.
+
+### Level 3 — Apply (independent)
+
+**Task:** Price trades above the VAH. Create one scenario for holding outside and one for returning inside.
+
+**Model response:** Holding beyond the VAH and progressing supports sustained trade outside prior value; a return inside and failed reclaim weakens that view. Current location alone does not require a return.
 ### Common mistake
 
 **Mistake:** Treating the POC as a magnetic price or VAH/VAL as hard support and resistance.
@@ -148,12 +160,23 @@ A selected profile shows an HVN between 150 and 154, with a thinner LVN from 155
 
 One possible reading is that price travelled quickly through the thin area. That is a description of the path, not proof of the cause. If price later returns to 155–157 and passes through again, the thin-area interpretation is consistent with another quick move. If it stalls there and builds a new area of activity, the earlier profile is no longer a reliable description of the newly developing market. Profile context should be updated when the market adds new evidence.
 
-### Try it
+### Level 1 — Notice (easy)
 
-Price approaches a high-volume node from below. The first candle has a long upper wick and closes near its low. What can you infer?
+**Task:** Identify a broad node and a thin area in the profile and describe them without forecasting.
 
-**Feedback:** You can record that price tested the area and did not retain the upper excursion on that candle. The HVN supplies historical context. You cannot conclude that the node will force a reversal. Look for follow-through, such as whether price remains below the area, returns into it or moves through it.
+**Feedback:** An HVN is relatively concentrated recorded activity; an LVN is a relatively thin area within the selected profile.
 
+### Level 2 — Compare (guided)
+
+**Task:** Price crosses an LVN quickly in one case but stalls there in another. How should the reading change?
+
+**Feedback:** The profile records historical thinness, but current response takes priority. A stall means the area is not acting as a fast path in this instance.
+
+### Level 3 — Apply (independent)
+
+**Task:** An HVN sits at 150–154. Price enters and overlaps for several bars, then closes above 154. What would support sustained trade above it?
+
+**Model response:** A later hold above 154, a retest that does not fall back into the area and further progress would support that reading. The HVN itself guarantees nothing.
 ### Common mistake
 
 **Mistake:** Calling HVNs permanent barriers and LVNs guaranteed fast lanes.
@@ -199,12 +222,23 @@ A shift in profile shape is not a standalone trade trigger. Before using it, ask
 - Did activity and price outcome change around the new references?
 - Are there session, news or feed factors that complicate the comparison?
 
-### Try it
+### Level 1 — Notice (easy)
 
-A later profile has a lower POC than the previous session, but price has stayed inside the same broad range and the value areas overlap substantially. What is the most careful summary?
+**Task:** Session A has POC 100/value 96–104; Session B has POC 103/value 100–107. What shifted, and how much overlap remains?
 
-**Feedback:** The POC shifted lower, but the broader profiles overlap and price has not established clear directional progress. The shift is evidence to note, not enough by itself to claim a confirmed downtrend.
+**Feedback:** The POC and value area moved higher; the areas overlap from 100 to 104.
 
+### Level 2 — Compare (guided)
+
+**Task:** Compare that with a lower POC but nearly fully overlapping value areas and no directional price progress. Which claim is safer?
+
+**Feedback:** Report the POC change but do not declare a new trend from it alone. Overlap and lack of sustained price progress limit the interpretation.
+
+### Level 3 — Apply (independent)
+
+**Task:** A later profile is centred higher, but price returns to prior value and breaks a nearby swing low. Update the higher-value idea.
+
+**Model response:** The profile's concentration shifted, but price did not sustain the new area. Returning to prior value and breaking structure weakens the idea that higher value is established.
 ### Common mistake
 
 **Mistake:** Interpreting a POC move as a directional signal without comparing the full value area and price structure.
@@ -253,12 +287,23 @@ Price is currently at 417 after a wide upward bar on elevated time-based volume.
 
 This is the right role for profile: it adds context to an evidence-based scenario, rather than replacing the analysis.
 
-### Try it
+### Level 1 — Notice (easy)
 
-Price reaches the POC and pauses. There is no clear directional progress, and the next bars overlap around the reference. What is the best response?
+**Task:** State the profile window, POC/value references and current price location before interpreting the chart.
 
-**Feedback:** Describe the pause and wait for price to show whether it holds, leaves or crosses the area. The POC is a historical reference, not an automatic entry signal.
+**Feedback:** A useful observation specifies the period and relevant calculation/data context. “Price is at support” does not describe what the profile measures.
 
+### Level 2 — Compare (guided)
+
+**Task:** Price pauses at the POC in one case, turns away in another and moves through it in a third. What profile rule guarantees a response?
+
+**Feedback:** None. The POC marks the highest-volume row in the selected period. The current response shows whether price is holding, crossing or moving away now.
+
+### Level 3 — Apply (independent)
+
+**Task:** Price is above the VAH in a thin profile area after elevated activity. Define continuation, return-to-value and no-trade conditions.
+
+**Model response:** Continuation requires a hold above VAH and further progress; return-to-value requires a sustained move inside and failed reclaim. If price overlaps without either, wait.
 ### Common mistake
 
 **Mistake:** Drawing POC, VAH, VAL and every visible node, then treating each one as a potential trade.
