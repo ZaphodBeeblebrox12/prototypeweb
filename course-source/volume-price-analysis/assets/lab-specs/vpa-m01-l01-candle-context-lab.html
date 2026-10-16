@@ -60,9 +60,9 @@ summary{font-weight:750;cursor:pointer;padding:9px 0}
 </header>
 
 <ol class="progress" aria-label="ChartLab progression">
-<li id="progress1" class="current" aria-current="step"><strong>Level 1 · Notice</strong><span>Easy · One chart</span></li>
-<li id="progress2"><strong>Level 2 · Compare</strong><span>Guided · Two contexts</span></li>
-<li id="progress3"><strong>Level 3 · Apply</strong><span>Challenge · New chart</span></li>
+<li id="progress1" class="current" aria-current="step"><strong>Look closely</strong><span>Start with one chart</span></li>
+<li id="progress2"><strong>Compare the cases</strong><span>Inspect two contexts</span></li>
+<li id="progress3"><strong>Try a new case</strong><span>Use a new chart</span></li>
 </ol>
 
 <section class="panel" id="level1" aria-labelledby="level1title">
@@ -78,7 +78,7 @@ summary{font-weight:750;cursor:pointer;padding:9px 0}
 <fieldset class="fact-check"><legend>3. What was happening before the candidate candle?</legend><label><input type="radio" name="precedingStructure" value="decline"> Price generally declined, with a brief upward candle</label><label><input type="radio" name="precedingStructure" value="rise"> Price rose steadily throughout</label><label><input type="radio" name="precedingStructure" value="flat"> Price stayed almost flat</label></fieldset>
 <div class="field"><label for="easy">In your own words, add one observation the choices do not capture.</label><textarea id="easy" minlength="25" placeholder="Describe another visible detail. Keep observation separate from interpretation..." required></textarea><p class="hint">One or two careful sentences are enough. State facts before an interpretation.</p></div>
 <div id="feedback1" class="feedback" role="status" aria-live="polite" hidden></div>
-<div class="buttons"><button type="button" id="next1">Finish Level 1 and continue</button></div>
+<div class="buttons"><button type="button" id="next1">Continue to the comparison</button></div>
 </section>
 
 <section class="panel" id="level2" aria-labelledby="level2title" hidden>
@@ -91,7 +91,7 @@ summary{font-weight:750;cursor:pointer;padding:9px 0}
 <div class="field"><label for="guided">Why are these different situations even though the candidate candles look alike?</label><textarea id="guided" minlength="25" placeholder="Compare prior price structure, location and activity relative to the baseline in each panel..." required></textarea></div>
 <div class="field"><label for="alternative">Give one possible reading and one alternative explanation.</label><textarea id="alternative" minlength="25" placeholder="One possible reading is... Another possibility is..." required></textarea></div>
 <div id="feedback2" class="feedback" role="status" aria-live="polite" hidden></div>
-<div class="buttons"><button type="button" class="secondary" id="back2">Back to Level 1</button><button type="button" id="next2">Finish Level 2 and continue</button></div>
+<div class="buttons"><button type="button" class="secondary" id="back2">Back to the first chart</button><button type="button" id="next2">Continue to the new case</button></div>
 </section>
 
 <section class="panel" id="level3" aria-labelledby="level3title" hidden>
@@ -106,7 +106,7 @@ summary{font-weight:750;cursor:pointer;padding:9px 0}
 <div class="field"><label for="transfer">What is observable about this breakout attempt?</label><textarea id="transfer" minlength="30" placeholder="Describe the close relative to the range high, the price result and the volume comparison..." required></textarea></div>
 <div class="field"><label for="discipline">What are two possible outcomes, and what would you need to see to tell them apart?</label><textarea id="discipline" minlength="30" placeholder="For each possible outcome, name the price behaviour that would support it..." required></textarea></div>
 <div id="feedback3" class="feedback" role="status" aria-live="polite" hidden></div>
-<div class="buttons"><button type="button" class="secondary" id="back3">Back to Level 2</button><button type="button" id="finish">Record my reading and reveal the outcomes</button></div>
+<div class="buttons"><button type="button" class="secondary" id="back3">Back to the comparison</button><button type="button" id="finish">Record my reading and reveal the outcomes</button></div>
 </div>
 
 <div id="outcomesReveal" hidden>
@@ -127,12 +127,12 @@ summary{font-weight:750;cursor:pointer;padding:9px 0}
 <div class="field"><label for="outcomeReview">What new evidence changed or strengthened your reading?</label><textarea id="outcomeReview" minlength="25" placeholder="Point to the later price behaviour and explain why it matters..." required></textarea></div>
 <div id="feedbackOutcome" class="feedback" role="status" aria-live="polite" hidden></div>
 <div class="feedback" role="status">The outcomes are now visible because you recorded an initial view. Keep your first observations intact; update the interpretation using the new evidence.</div>
-<div class="buttons"><button type="button" id="completeReview">Complete Level 3 and review my reasoning</button></div>
+<div class="buttons"><button type="button" id="completeReview">Review my reasoning</button></div>
 </div>
 </section>
 
 <section class="panel" id="review" aria-labelledby="reviewtitle" hidden>
-<div class="completion"><h2 id="reviewtitle" tabindex="-1">All three levels completed</h2><p>Your responses remain only in this page; they are not saved to an account or sent to a server. This prototype checks that a response has been written, but does not automatically grade the meaning of your analysis. Use the self-check and model reasoning below.</p></div>
+<div class="completion"><h2 id="reviewtitle" tabindex="-1">All three parts completed</h2><p>Your responses remain only in this page; they are not saved to an account or sent to a server. This prototype checks that a response has been written, but does not automatically grade the meaning of your analysis. Use the self-check and model reasoning below.</p></div>
 <h3>Self-check</h3>
 <div class="checks">
 <label><input type="checkbox"> I described visible price structure before interpreting a candidate candle.</label>
@@ -144,9 +144,9 @@ summary{font-weight:750;cursor:pointer;padding:9px 0}
 </div>
 <details id="model">
 <summary>Reveal model reasoning and feedback</summary>
-<div class="answer"><h3>Level 1 — Notice</h3><p>The final highlighted candle is green, and its recorded volume is above the average of the five previous bars. The earlier bars show a move down followed by mixed movement before the candidate candle. This is an observation, not a forecast.</p></div>
-<div class="answer"><h3>Level 2 — Compare</h3><p>Panel A shows a green candle during a recovery after a pullback. Candidate volume is 185 compared with a baseline of 157, about 1.18 times that average. Panel B shows a similar-size candle after a longer advance into a prior-high area, with volume 420 against a baseline of 225, about 1.87 times that average. Location and relative activity differ, so the questions we ask are different. Neither chart proves a reversal or identifies participants.</p></div>
-<div class="answer"><h3>Level 3 — Apply</h3><p>The new chart's candidate candle closes above the prior range-high area of 112–113. Its volume is 410 versus a previous-five-bar baseline of 184, about 2.23 times that average. That makes the event worth examining, but does not prove acceptance or continuation.</p><p>In Path A, price holds above the range high and makes further progress. In Path B, price returns below the range high and moves lower. The later price behaviour distinguishes the paths; the first high-volume candle alone could not.</p></div>
+<div class="answer"><h3>What the chart shows</h3><p>The final highlighted candle is green, and its recorded volume is above the average of the five previous bars. The earlier bars show a move down followed by mixed movement before the candidate candle. This is an observation, not a forecast.</p></div>
+<div class="answer"><h3>How the cases differ</h3><p>Panel A shows a green candle during a recovery after a pullback. Candidate volume is 185 compared with a baseline of 157, about 1.18 times that average. Panel B shows a similar-size candle after a longer advance into a prior-high area, with volume 420 against a baseline of 225, about 1.87 times that average. Location and relative activity differ, so the questions we ask are different. Neither chart proves a reversal or identifies participants.</p></div>
+<div class="answer"><h3>Applying the idea to a new case</h3><p>The new chart's candidate candle closes above the prior range-high area of 112–113. Its volume is 410 versus a previous-five-bar baseline of 184, about 2.23 times that average. That makes the event worth examining, but does not prove acceptance or continuation.</p><p>In Path A, price holds above the range high and makes further progress. In Path B, price returns below the range high and moves lower. The later price behaviour distinguishes the paths; the first high-volume candle alone could not.</p></div>
 <div class="answer"><h3>How to improve your answer</h3><p>If you wrote only “bullish” or “bearish,” add the visible facts behind that claim. If you described only volume, add the price result and location. If you chose a direction without a condition, name the later price behaviour that would strengthen or weaken your view.</p></div>
 </details>
 <div class="buttons"><button type="button" class="secondary" id="restart">Restart the practice</button><button type="button" class="secondary" id="openModel">Show model reasoning</button></div>
@@ -223,7 +223,7 @@ document.getElementById('completeReview').addEventListener('click',()=>{
   stages.forEach(el=>el.hidden=true);
   review.hidden=false;
   progress.forEach(el=>{el.classList.add('done');el.classList.remove('current');el.removeAttribute('aria-current')});
-  document.getElementById('progress3').setAttribute('aria-label','Level 3 completed');
+  document.getElementById('progress3').setAttribute('aria-label','Final stage completed');
   document.getElementById('reviewtitle').focus({preventScroll:true});
   scrollTop();
  }
