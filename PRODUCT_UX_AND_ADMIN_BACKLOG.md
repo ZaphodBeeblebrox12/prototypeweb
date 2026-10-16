@@ -23,6 +23,19 @@ Review each relevant flow for:
 
 Record material issues and fixes in the existing review/acceptance notes instead of making untracked visual changes. Recheck public site previews and the learning-room preview after changes.
 
+### 3. Growing catalogue and course development status — ongoing product requirement
+
+The course catalogue is not a fixed or complete list. Course development is ongoing, and additional courses/micro-courses are expected to be added over time. Treat this as a continuing product requirement, not a one-time copy change.
+
+- Keep the catalogue architecture expandable so a new course can be added through data/content records and a reusable page/card template, without redesigning the whole site.
+- Distinguish draft, in-development, preview, published/available, and archived states. Do not imply a course is available to buy or study merely because its card or source files exist.
+- Public pages should communicate that the catalogue is growing and that new courses will be added as they're ready for learners. Course-specific availability and commercial details must remain accurate.
+- Avoid hard-coded counts, filters or category totals that become incorrect when courses are added; derive them from the rendered/published catalogue where possible.
+- Keep each course's curriculum, price, access rules, community inclusion and delivery model separate. New course additions must not accidentally inherit another course's permissions or offer.
+- The eventual admin dashboard should make it straightforward for an authorised editor to create a draft course, add modules/lessons/assets, preview it, complete release checks and publish it without editing JavaScript or HTML manually.
+
+This requirement applies across the public catalogue, member area and future admin workflows.
+
 ### 2. Friendly admin dashboard — explicitly deferred until near the end
 
 Build a user-friendly, purpose-built TradeThesis admin/dashboard experience after the core learner-facing experience, content integration, authentication/entitlement flows and critical UX fixes are stable. This is a planned product milestone, not an immediate implementation task.
