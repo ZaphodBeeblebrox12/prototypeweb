@@ -1,4 +1,5 @@
-{% extends "base.html" %}
+{% extends "academy/base.html" %}
+{% block title %}{{ course.title|default:"My learning" }} · TradeThesis{% endblock %}
 {% block content %}
 <div class="container py-4" style="max-width:980px">
   <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mb-4">
