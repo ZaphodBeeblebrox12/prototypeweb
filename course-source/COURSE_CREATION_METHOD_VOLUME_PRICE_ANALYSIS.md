@@ -7,6 +7,9 @@
 **Working branch:** my-new-branch  
 **Method type:** Student-first self-study course production with practical visual work and progressive transfer.
 
+**Shared visual template standard:** [COURSE_TEMPLATE_STANDARD.md](COURSE_TEMPLATE_STANDARD.md). The updated TradeThesis Learning Room template is the default for every new course and the migration target for all existing courses. Its content sections are flexible teaching functions, not fixed mandatory labels.
+
+
 ---
 
 ## 1. The central teaching philosophy
