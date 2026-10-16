@@ -9,6 +9,11 @@ You will practise keeping three things separate: **the setup area, the trigger, 
 
 ## Lesson 3.1 — Stop Chasing Price: Finding Potential Setups in an Established Trend
 
+![Chart for Stop Chasing Price: Finding Potential Setups in an Established Trend. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m03-l01-trend-continuation-setup.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m03-l01-trend-continuation-setup-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m03-l01-trend-continuation-setup.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m03-l01-trend-continuation-setup.md)
+
 ### Why chasing creates a problem
 
 Imagine a market has risen sharply for several bars. The move is obvious, the candles are green and activity has increased. Buying immediately may feel safer because the chart appears to confirm the direction. Yet the distance from the latest price to a sensible invalidation point may now be large. If the price pauses or pulls back, the trade may have poor risk-to-potential-reward even if the broad trend remains upward.
@@ -78,6 +83,11 @@ Price rallies from 40 to 48 with no nearby structure. Buying at 48 may leave the
 ---
 
 ## Lesson 3.2 — Is the Pullback Running Out of Steam? Reading Moves Against the Trend
+
+![Chart for Is the Pullback Running Out of Steam? Reading Moves Against the Trend. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m03-l02-pullback-pressure.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m03-l02-pullback-pressure-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m03-l02-pullback-pressure.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m03-l02-pullback-pressure.md)
 
 A pullback is a move against the recent directional structure. Traders often look for signs that the pullback is weakening before considering a continuation. The danger is that a few quiet candles can be mistaken for proof that the trend is ready to resume.
 
@@ -150,6 +160,11 @@ In Case A, price retreats from 120 to 117 on smaller ranges, activity declines a
 
 ## Lesson 3.3 — Trading Near Support and Resistance: What to Look for Before Entry
 
+![Chart for Trading Near Support and Resistance: What to Look for Before Entry. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m03-l03-support-resistance-zones.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m03-l03-support-resistance-zones-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m03-l03-support-resistance-zones.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m03-l03-support-resistance-zones.md)
+
 Support and resistance are often drawn as precise lines. Markets rarely respect a line to the last decimal. It is more useful to treat these areas as **zones where price previously changed behaviour**.
 
 ### What earns a zone on the chart?
@@ -219,6 +234,11 @@ An analyst marks 80–82 because price previously turned away there twice. On a 
 
 ## Lesson 3.4 — Finding Opportunities at the Edges of a Trading Range
 
+![Chart for Finding Opportunities at the Edges of a Trading Range. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m03-l04-range-edge-setups.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m03-l04-range-edge-setups-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m03-l04-range-edge-setups.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m03-l04-range-edge-setups.md)
+
 A range is a period where price repeatedly rotates between an upper and lower boundary without sustained directional progress. It can create different questions at its edges than in its middle.
 
 ### Why location changes the question
@@ -277,6 +297,11 @@ Inside a 40–50 range, a bar at 45 may be visually dramatic but is far from eit
 ---
 
 ## Lesson 3.5 — Before You Enter: Separating Promising Setups From Weak Ones
+
+![Chart for Before You Enter: Separating Promising Setups From Weak Ones. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m03-l05-setup-quality-filter.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m03-l05-setup-quality-filter-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m03-l05-setup-quality-filter.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m03-l05-setup-quality-filter.md)
 
 A setup can look compelling and still be unsuitable for a trade. This lesson brings the earlier skills together into a simple readiness check. It is an educational framework, not a recommendation to take any particular position.
 
