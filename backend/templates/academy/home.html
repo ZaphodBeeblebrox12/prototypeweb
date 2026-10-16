@@ -106,7 +106,7 @@
           <div class="tt-community-connection-copy">
             <span class="tt-connection-platform">Discord</span>
             <strong>{% if discord_connected %}Account connected{% else %}Account not connected{% endif %}</strong>
-            <p class="tt-muted mb-0">{% if discord_connected %}Your Discord account is linked.{% else %}Link your account for community access where Discord roles are supported.{% endif %}</p>
+            <p class="tt-muted mb-0">{% if discord_connected %}{% if discord_account.username %}Connected as {{ discord_account.username }}.{% else %}Your Discord account is linked.{% endif %}{% else %}Link your account for community access where Discord roles are supported.{% endif %}</p>
           </div>
           {% if not discord_connected %}<a class="btn btn-outline-primary" href="{% url 'discord_connect' %}">Connect Discord</a>{% endif %}
         </article>
