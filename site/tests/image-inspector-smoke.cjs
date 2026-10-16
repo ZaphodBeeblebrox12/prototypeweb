@@ -26,6 +26,9 @@ const { chromium } = require("playwright");
     "The chart should preserve its canonical PNG stage key for answer-gate mapping");
   const panel = page.locator("#sr-v52-longform .sr-v52-figure-panel").first();
   await panel.waitFor({ state: "visible" });
+  const firstPanelViewBox = (await panel.getAttribute("viewBox")).trim().split(/\s+/).map(Number);
+  assert.equal(firstPanelViewBox[0], 0,
+    "The first comparative panel must retain its left-side price-axis labels in the crop");
   await panel.screenshot({ path: screenshotDir + "/first-panel-crop.png" });
   const sixPanelStack = page.locator(".sr-v52-figure-set").filter({
     has: page.locator('.sr-v52-figure-panel[aria-label^="Panel 1 of 6"]')
@@ -93,6 +96,9 @@ const { chromium } = require("playwright");
   const mobileStageWidth = await mobileStage.evaluate(el => el.clientWidth);
   assert.ok(mobileMediaWidth > mobileStageWidth * 1.4,
     "The initial mobile detail view should enlarge the image beyond the viewport width for closer reading");
+  const mobileStartPosition = await mobileStage.evaluate(el => ({ left: el.scrollLeft, top: el.scrollTop }));
+  assert.deepEqual(mobileStartPosition, { left: 0, top: 0 },
+    "The initial enlarged view should keep the title and left-side price labels in view");
   await mobileDialog.screenshot({ path: screenshotDir + "/mobile-viewer.png" });
   const mobileLayout = await page.evaluate(() => ({
     viewport: document.documentElement.clientWidth,

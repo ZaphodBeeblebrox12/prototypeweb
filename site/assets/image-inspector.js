@@ -109,8 +109,10 @@
       // Whole-chart fit can make chart annotations too small to read on a phone.
       // Start enlarged, but keep Fit available for seeing the complete context.
       setMediaSize(fitScale * 2, false);
-      stage.scrollLeft = Math.max(0, Math.round((stage.scrollWidth - stage.clientWidth) / 2));
-      stage.scrollTop = Math.max(0, Math.round((stage.scrollHeight - stage.clientHeight) / 2));
+      // Keep the title and left-side price labels in the initial viewport.
+      // Other parts of the enlarged chart remain available by dragging to pan.
+      stage.scrollLeft = 0;
+      stage.scrollTop = 0;
       zoomNode.textContent = "Detail · " + Math.round(currentScale / Math.max(fitScale, 0.001) * 100) + "%";
     }
   }

@@ -6,27 +6,27 @@
   const LESSON_IDS = new Set([12, 13, 14]);
   const DATA_BASE = "module5-v5_2/assets/";
   const FIGURE_PANEL_LAYOUTS = {
-    "FIG01_breakout_evidence_ladder.png": { width:2661, height:1209, panels:[["Intrabar excursion",.02,.13,.31,.75],["Close outside",.35,.13,.31,.75],["Follow-through",.68,.13,.31,.75]]},
-    "FIG02_filter_tradeoffs.png": { width:2661, height:1209, panels:[["One close outside",.02,.13,.31,.75],["Two closes outside",.35,.13,.31,.75],["Require a return test",.68,.13,.31,.75]]},
-    "FIG03_context_changes_the_question.png": { width:2501, height:1226, panels:[["Local view",.025,.13,.46,.77],["Wider context",.54,.13,.45,.77]]},
-    "FIG04_break_return_response.png": { width:2923, height:1106, panels:[["Before the break",.02,.13,.23,.80],["The break",.265,.13,.23,.80],["Return to area",.51,.13,.23,.80],["Response develops",.755,.13,.23,.80]]},
-    "FIG05_three_retest_outcomes.png": { width:2695, height:1243, panels:[["Holds beyond",.02,.13,.30,.75],["Re-enters range",.35,.13,.30,.75],["Inconclusive",.68,.13,.30,.75]]},
-    "FIG06_retest_is_not_owed.png": { width:2547, height:1604, panels:[["No retest",.025,.08,.46,.40],["Delayed return",.51,.08,.475,.40],["Shallow return",.025,.49,.46,.43],["Deep return, reclaim",.51,.49,.475,.43]]},
-    "FIG07_failure_is_not_reverse_signal.png": { width:2695, height:1226, panels:[["Continues through range",.02,.13,.31,.75],["Chops around the area",.35,.13,.31,.75],["Reclaims the boundary",.68,.13,.31,.75]]},
-    "FIG08_volume_context_not_gate.png": { width:2847, height:1964, panels:[["Price holds · volume expands",.02,.055,.46,.415],["Price fails · volume expands",.53,.055,.46,.415],["Price holds · volume muted",.02,.53,.46,.425],["Price fails · volume muted",.53,.53,.46,.425]]},
-    "FIG09_decision_record_timeline.png": { width:2923, height:1192, panels:[["Before",.02,.12,.23,.82],["Break",.265,.12,.23,.82],["Contradiction",.51,.12,.23,.82],["Review",.755,.12,.23,.82]]},
-    "FIG10_failed_signal_family.png": { width:3008, height:1792, panels:[["Range-edge upthrust",.02,.09,.31,.415],["Spring / downside failure",.35,.09,.31,.415],["Trendline break reclaimed",.68,.09,.31,.415],["First pullback fails",.02,.515,.31,.42],["Continuation pattern fails",.35,.515,.31,.42],["Prior swing break fails",.68,.515,.31,.42]]},
-    "FIG11_first_pullback_later_failure.png": { width:2551, height:1243, panels:[["First pullback holds",.025,.12,.465,.78],["Later pullback fails",.53,.12,.45,.78]]},
-    "FIG12_after_failure_alternatives.png": { width:2711, height:1209, panels:[["Range travel",.02,.12,.31,.80],["Range interior",.36,.12,.31,.80],["Boundary reclaimed",.70,.12,.29,.80]]},
-    "FIG13_gap_and_spike_failures.png": { width:2567, height:1278, panels:[["Gap beyond, then return",.025,.12,.45,.81],["Wide-range spike, no hold",.515,.12,.46,.81]]},
-    "FIG15_failure_label_checklist.png": { width:2574, height:1295, panels:[["Define signal",.025,.29,.23,.22],["Observe attempt",.265,.29,.23,.22],["Find contradiction",.505,.29,.23,.22],["Check response",.745,.29,.23,.22],["Final wording: describe evidence, not cause",.13,.60,.74,.23]]},
-    "FIG16_retest_depth_and_closes.png": { width:2695, height:1226, panels:[["Shallow / stays outside",.02,.12,.31,.80],["Enters / reclaims",.35,.12,.31,.80],["Closes back inside",.68,.12,.31,.80]]},
-    "FIG17_range_vs_trendline_failure.png": { width:2551, height:1261, panels:[["Range boundary",.025,.12,.455,.82],["Rising trendline",.52,.12,.455,.82]]},
-    "FIG18_neckline_formation_failures.png": { width:2567, height:1261, panels:[["Top formation breakdown reclaims",.025,.12,.455,.82],["Bottom formation breakout fails",.52,.12,.455,.82]]},
+    "FIG01_breakout_evidence_ladder.png": { width:2661, height:1209, panels:[["Intrabar excursion",0,.13,.33,.75],["Close outside",.33,.13,.32,.75],["Follow-through",.66,.13,.32,.75]]},
+    "FIG02_filter_tradeoffs.png": { width:2661, height:1209, panels:[["One close outside",0,.13,.33,.75],["Two closes outside",.33,.13,.32,.75],["Require a return test",.66,.13,.32,.75]]},
+    "FIG03_context_changes_the_question.png": { width:2501, height:1226, panels:[["Local view",0,.13,.485,.77],["Wider context",.515,.13,.475,.77]]},
+    "FIG04_break_return_response.png": { width:2923, height:1106, panels:[["Before the break",0,.13,.25,.80],["The break",.25,.13,.245,.80],["Return to area",.495,.13,.245,.80],["Response develops",.74,.13,.245,.80]]},
+    "FIG05_three_retest_outcomes.png": { width:2695, height:1243, panels:[["Holds beyond",0,.13,.32,.75],["Re-enters range",.32,.13,.33,.75],["Inconclusive",.65,.13,.33,.75]]},
+    "FIG06_retest_is_not_owed.png": { width:2547, height:1604, panels:[["No retest",0,.08,.485,.40],["Delayed return",.485,.08,.50,.40],["Shallow return",0,.49,.485,.43],["Deep return, reclaim",.485,.49,.50,.43]]},
+    "FIG07_failure_is_not_reverse_signal.png": { width:2695, height:1226, panels:[["Continues through range",0,.13,.33,.75],["Chops around the area",.33,.13,.33,.75],["Reclaims the boundary",.66,.13,.33,.75]]},
+    "FIG08_volume_context_not_gate.png": { width:2847, height:1964, panels:[["Price holds · volume expands",0,.055,.48,.415],["Price fails · volume expands",.50,.055,.49,.415],["Price holds · volume muted",0,.53,.48,.425],["Price fails · volume muted",.50,.53,.49,.425]]},
+    "FIG09_decision_record_timeline.png": { width:2923, height:1192, panels:[["Before",0,.12,.25,.82],["Break",.25,.12,.245,.82],["Contradiction",.495,.12,.245,.82],["Review",.74,.12,.245,.82]]},
+    "FIG10_failed_signal_family.png": { width:3008, height:1792, panels:[["Range-edge upthrust",0,.09,.33,.415],["Spring / downside failure",.33,.09,.33,.415],["Trendline break reclaimed",.66,.09,.33,.415],["First pullback fails",0,.515,.33,.42],["Continuation pattern fails",.33,.515,.33,.42],["Prior swing break fails",.66,.515,.33,.42]]},
+    "FIG11_first_pullback_later_failure.png": { width:2551, height:1243, panels:[["First pullback holds",0,.12,.49,.78],["Later pullback fails",.49,.12,.49,.78]]},
+    "FIG12_after_failure_alternatives.png": { width:2711, height:1209, panels:[["Range travel",0,.12,.33,.80],["Range interior",.33,.12,.34,.80],["Boundary reclaimed",.67,.12,.32,.80]]},
+    "FIG13_gap_and_spike_failures.png": { width:2567, height:1278, panels:[["Gap beyond, then return",0,.12,.475,.81],["Wide-range spike, no hold",.475,.12,.50,.81]]},
+    "FIG15_failure_label_checklist.png": { width:2574, height:1295, panels:[["Define signal",0,.29,.255,.22],["Observe attempt",.255,.29,.24,.22],["Find contradiction",.495,.29,.24,.22],["Check response",.735,.29,.24,.22],["Final wording: describe evidence, not cause",.13,.60,.74,.23]]},
+    "FIG16_retest_depth_and_closes.png": { width:2695, height:1226, panels:[["Shallow / stays outside",0,.12,.33,.80],["Enters / reclaims",.33,.12,.33,.80],["Closes back inside",.66,.12,.33,.80]]},
+    "FIG17_range_vs_trendline_failure.png": { width:2551, height:1261, panels:[["Range boundary",0,.12,.48,.82],["Rising trendline",.48,.12,.495,.82]]},
+    "FIG18_neckline_formation_failures.png": { width:2567, height:1261, panels:[["Top formation breakdown reclaims",0,.12,.48,.82],["Bottom formation breakout fails",.48,.12,.495,.82]]},
     "FIG19_simple_break_return_response.png": { width:2103, height:1053, panels:[["Break",.11,.13,.29,.76],["Return",.42,.13,.29,.76],["Response",.71,.13,.285,.76]]},
     "FIG20_simple_retest_outcomes.png": { width:1971, height:1011, panels:[["Hold-like response",.005,.14,.33,.70],["Failure-like response",.335,.14,.33,.70],["Inconclusive response",.665,.14,.333,.70]]},
-    "FIG21_failed_breakout_structural_stop.png": { width:2363, height:1229, panels:[["Failed upside break · hypothetical short",.005,.10,.49,.88],["Failed downside break · hypothetical long",.51,.10,.49,.88]]},
-    "FIG25_continuation_pause_outcomes.png": { width:2721, height:1341, panels:[["Expected break holds",.025,.10,.465,.82],["Pause breaks the wrong way",.55,.10,.445,.82]]}
+    "FIG21_failed_breakout_structural_stop.png": { width:2363, height:1229, panels:[["Failed upside break · hypothetical short",0,.10,.495,.88],["Failed downside break · hypothetical long",.495,.10,.505,.88]]},
+    "FIG25_continuation_pause_outcomes.png": { width:2721, height:1341, panels:[["Expected break holds",0,.10,.49,.82],["Pause breaks the wrong way",.49,.10,.505,.82]]}
   };
   let deepPack = null;
   let interactionPack = null;

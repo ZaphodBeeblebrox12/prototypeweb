@@ -15,7 +15,8 @@ The staged synthetic chart set is 11 images at 2048 × 1152 px. The source dimen
 ## Changes in this follow-up
 
 - **Full-width chart-first layout:** the staged chart now uses the full lesson reading width, with the prompt/response panel beneath it instead of competing for horizontal space beside the chart.
-- **Detail-first mobile inspection:** opening an instructional image on a viewport up to 680 px starts at 200% of its fit scale. Learners can pan around the enlarged image and use **Fit** to return to the whole chart; zoom-in/zoom-out, keyboard controls, pinch/drag, Escape and close remain available.
+- **Detail-first mobile inspection:** opening an instructional image on a viewport up to 680 px starts at 200% of its fit scale, with the image at its top-left so titles and left-side price labels remain in the initial view. Learners can pan around the enlarged image and use **Fit** to return to the whole chart; zoom-in/zoom-out, keyboard controls, pinch/drag, Escape and close remain available.
+- **Panel crop margins:** comparative chart crops were adjusted to preserve left-side price-axis labels that were being clipped from the source panels. The original figure and the educational values remain unchanged; crop windows now include the label margin at the panel's left edge.
 - **Source-quality disclosure:** the viewer identifies vector artwork versus raster sources and reports source dimensions when available. For cropped SVG panel wrappers around PNG charts, it explicitly notes that the panel comes from a raster source and enlargement cannot restore detail absent from the original.
 - **Visible affordance:** educational figure captions get a small “Select image to inspect details” cue, rather than relying on cursor shape alone.
 - **Position preservation:** closing restores both horizontal and vertical page position and returns keyboard focus to the source figure.
