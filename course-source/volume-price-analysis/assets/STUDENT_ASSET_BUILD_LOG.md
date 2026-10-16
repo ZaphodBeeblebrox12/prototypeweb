@@ -16,6 +16,10 @@ Every lesson has its own linked primary chart and independent ChartLab. The stud
 
 Volume Profile lessons use a horizontal histogram aligned to price alongside the candles and time-based volume. Plan-construction lessons show relevant zones and, where appropriate, labelled trigger/invalidation/objective levels. Examples are synthetic, not historical market data or trade recommendations.
 
+## Student-facing figure convention
+
+Primary lesson figures are numbered by module and lesson: Figure 1.1–1.5, Figure 2.1–2.5, continuing through Figure 6.1–6.5. Related ChartLab panels use letter suffixes (a–e). The lesson manuscripts reference the corresponding numbered figure. Internal planning stages are not shown as student-facing “Level 1/2/3” or “easy/guided/independent” labels; the student interface uses natural task headings. Repeated “synthetic data” banners have been removed from the figures. Illustrative/provenance disclosure remains in accompanying lesson/source/alt-text notes, while the CSV records preserve data provenance.
+
 ## Completion by module
 
 | Module | Packages | Source status |
