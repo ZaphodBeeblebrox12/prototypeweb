@@ -22,7 +22,7 @@ Describe an established trend, identify a potential continuation area, and expla
 - **2:30–5:00 — Teach and model:** Define trend structure through swings, not indicator labels alone; Impulse, pause and continuation conditions.
 - **5:00–7:30 — Level 2, Compare:** On a guided chart, mark the setup area separately from the trigger and invalidation.
 - **7:30–11:00 — Level 3, Apply:** Assess a fresh continuation example with two possible outcomes; justify whether to wait, consider or reject it based on location, trigger and risk.
-- **11:00–13:00 — Feedback and counterexample:** ChartLab: mark a setup area without entering early. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **11:00–13:00 — Feedback and counterexample:** mark a setup area without entering early. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
 - **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 A market begins to rise quickly. You notice a sequence of green candles and increasing volume. The move looks convincing, and the natural impulse is to buy immediately because you do not want to miss it. But by the time the move looks obvious, price may already be far from a sensible point of the point where the idea no longer holds. Chasing makes it harder to define risk and easier to enter just as the market pauses.
@@ -82,7 +82,7 @@ Compare a pullback's range, progress, relative volume and structural effect with
 - **2:30–5:00 — Teach and model:** Compare the pullback with the impulse; Progress, range and volume.
 - **5:00–7:30 — Level 2, Compare:** Compare two pullbacks by depth, speed, candle size, relative activity and whether the prior swing structure holds.
 - **7:30–11:00 — Level 3, Apply:** On a new pullback, write continuation and failure scenarios, identify the trigger for the preferred scenario and state what would invalidate it.
-- **11:00–13:00 — Feedback and counterexample:** ChartLab: compare two pullbacks. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **11:00–13:00 — Feedback and counterexample:** compare two pullbacks. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
 - **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 A pullback is a movement against a recent directional move. Traders often want to buy every pullback in an uptrend or sell every rally in a downtrend. That misses the central question: is the move against the current trend move simply pausing the trend, or is it changing the market's structure? Volume and price analysis can help you compare the move against the current direction with the impulse that came before it.
@@ -142,7 +142,7 @@ Treat support and resistance as zones where a question can be tested, and develo
 - **2:30–5:00 — Teach and model:** Select meaningful zones from prior structure; Read approach, test and response.
 - **5:00–7:30 — Level 2, Compare:** Draw zones on a guided chart and compare a rejection, a sustained move beyond the zone and an ambiguous test.
 - **7:30–11:00 — Level 3, Apply:** Build conditional responses to a new zone test; explain which price behaviour favours each scenario and when no trade is appropriate.
-- **11:00–13:00 — Feedback and counterexample:** ChartLab: test a level. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **11:00–13:00 — Feedback and counterexample:** test a level. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
 - **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 Support and resistance are often drawn as lines, but market behaviour rarely respects a line with mathematical precision. A level is better treated as a zone where price previously found acceptance (price staying beyond a level instead of quickly coming back), stalled, reversed, or changed direction. That history makes the area worth watching. It does not guarantee that price will reverse there next time.
@@ -202,7 +202,7 @@ Recognise a balanced range, explain why its edges present different questions fr
 - **2:30–5:00 — Teach and model:** Define the range and its boundaries; Why edges matter more than the middle.
 - **5:00–7:30 — Level 2, Compare:** Classify guided examples as rejection, overshoot, sustained breakout or failed breakout.
 - **7:30–11:00 — Level 3, Apply:** Classify an unlabelled range sequence and state what further evidence is required before building a trade plan.
-- **11:00–13:00 — Feedback and counterexample:** ChartLab: classify range behaviour. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **11:00–13:00 — Feedback and counterexample:** classify range behaviour. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
 - **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 A trading range is a period in which price rotates between an upper and lower area without making sustained directional progress beyond them. It may represent a temporary balance before a trend continues, a pause in a larger move, or a more meaningful transition. The appearance of a range alone does not tell you which it is. Your first task is to identify its boundaries and describe the behaviour inside them.
@@ -260,7 +260,7 @@ Use a consistent checklist to reject poorly located or poorly defined setups and
 - **2:30–5:00 — Teach and model:** Context and location; Evidence, trigger and invalidation.
 - **5:00–7:30 — Level 2, Compare:** Grade a candidate setup and mark missing information as unknown rather than assuming it is favourable.
 - **7:30–11:00 — Level 3, Apply:** Independently assess three contrasting candidates, including a justified no-trade decision, and separate decision quality from the later outcome.
-- **11:00–13:00 — Feedback and counterexample:** ChartLab: grade three candidate setups. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **11:00–13:00 — Feedback and counterexample:** grade three candidate setups. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
 - **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 After learning to recognise trends, pullbacks and range edges, it is tempting to start seeing trade setups everywhere. The chart offers endless movement, and many patterns look obvious once the outcome is known. A useful process must therefore do more than find candidates. It must also reject the ones that are poorly located, unclear, contradicted by evidence, or difficult to risk sensibly.
