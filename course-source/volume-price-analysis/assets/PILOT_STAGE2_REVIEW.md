@@ -37,7 +37,21 @@ The change is limited to text in SVG `title`, `desc` and `text` nodes. Chart geo
 
 ## 3. Source-level validation
 
-The branch changes should pass these checks before browser testing:
+The following checks were verified against the committed branch files:
+
+- The six fixed SVGs contain readable title, description and annotation text (no legacy escapes remain in their visible text nodes).
+- Each SVG in `source/` matches its corresponding `exports/` file.
+- The HTML references all five expected export assets using valid relative paths.
+- The document has labelled controls and unique IDs, and the new navigation, focus and reduced-motion handling is present.
+- The synthetic CSV and all price/volume values are unchanged.
+
+### Follow-up interaction defects found and corrected
+
+A further read-through found two issues in the first navigation patch: clicking an already unlocked progress step changed the visible section without updating `aria-current`, and restarting from the completion screen hid the element that still held keyboard focus. The code now keeps the highest unlocked step separate from the active step, updates the current-step indicator when navigating backward or forward, resets unlock state on restart, and moves focus back to the first stage heading after restart.
+
+### Browser-test limitation
+
+I attempted a headless Chromium run using a local test fixture, but the execution environment blocked both `file://` and loopback HTTP navigation with `ERR_BLOCKED_BY_ADMINISTRATOR` before the page loaded. Therefore **no browser-rendering or browser-interaction test is claimed as passed**. The source-level checks above are not a substitute for a real browser run.
 
 - The six fixed SVGs contain readable title, description and annotation text (no legacy escapes remaining in those visible nodes).
 - Each SVG in `source/` matches its corresponding `exports/` file.
@@ -49,11 +63,11 @@ The branch changes should pass these checks before browser testing:
 
 The main narration in M01-L01 is about 842 words and its extended spoken case analysis about 217 words. At 120 words per minute, that is roughly 8.8 minutes of narration before learner pauses and practice. The lesson may reach the planned 10–15 minutes when the narrated walkthrough and 4–6 minute ChartLab are integrated as intended, but a timed rehearsal is still required. The outline is not proof of runtime.
 
-## 5. Manual validation still required
+## 5. Validation still required
 
-- Open the standalone HTML in a browser and verify the decoded SVG titles, annotations and punctuation visually.
+- Open the committed standalone HTML in a normal browser and verify the decoded SVG titles, annotations and punctuation visually.
 - Run all stages end to end: incorrect Level 1 attempt, correct retry, Level 2 submission, Level 3 submission, outcome reveal, reflection and restart.
-- Use keyboard only. Verify unlocked navigation, visible focus, logical focus order and no keyboard trap.
+- Use keyboard only. Verify unlocked navigation, active-step announcement, visible focus, logical focus order and no keyboard trap.
 - Enable OS/browser reduce-motion and verify that stage/restart scrolling is not smooth.
 - Test narrow mobile layouts and 200% zoom for content loss or horizontal scrolling.
 - Test with at least one screen reader (for example, NVDA with Firefox or VoiceOver with Safari) for headings, chart alternatives, feedback announcements and newly revealed content.
