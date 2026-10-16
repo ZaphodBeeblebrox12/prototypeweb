@@ -60,6 +60,9 @@ jobs:
           python manage.py check
           python -m compileall -q apps config
 
+      - name: Prepare the isolated test database
+        run: python manage.py migrate --noinput
+
       - name: Validate source-course draft import mappings
         run: |
           python manage.py seed_trading_path
