@@ -280,7 +280,15 @@ jobs:
             await page.setViewportSize({ width: 390, height: 844 });
             await page.goto(server + "/support-resistance-room.html?lesson=13", { waitUntil: "networkidle" });
             await page.waitForSelector("#sr-v52-longform:not([hidden])");
-            const overflow = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, document: document.documentElement.scrollWidth, body: document.body.scrollWidth }));
+            const overflow = await page.evaluate(() => {
+              const viewport = document.documentElement.clientWidth;
+              const offenders = Array.from(document.querySelectorAll("body *")).map(el => {
+                const rect = el.getBoundingClientRect();
+                const style = getComputedStyle(el);
+                return { tag: el.tagName, id: el.id, className: typeof el.className === "string" ? el.className.slice(0, 100) : "", left: Math.round(rect.left), right: Math.round(rect.right), width: Math.round(rect.width), display: style.display, position: style.position };
+              }).filter(el => el.width > 0 && (el.right > viewport + 1 || el.left < -1)).sort((a, b) => b.right - a.right).slice(0, 12);
+              return { viewport, document: document.documentElement.scrollWidth, body: document.body.scrollWidth, offenders };
+            });
             assert.ok(overflow.document <= overflow.viewport + 1 && overflow.body <= overflow.viewport + 1, "Mobile page has horizontal overflow: " + JSON.stringify(overflow));
             console.log("INTEGRATED_V52_PASS: long-form lesson content, notes, concealed model responses, synthetic charts, legacy routing, and mobile overflow.");
 
