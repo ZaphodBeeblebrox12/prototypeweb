@@ -8,6 +8,7 @@ on:
       - "site/**"
       - "course-content/support-resistance/chart_assets/charts/**"
       - ".github/workflows/deploy-site-preview.yml"
+      - "tools/qa/**"
   workflow_dispatch:
 
 permissions:
