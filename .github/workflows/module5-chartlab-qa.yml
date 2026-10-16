@@ -38,40 +38,70 @@ jobs:
           python - <<'PY'
           import csv, hashlib, subprocess
           from pathlib import Path
-
+          
           root = Path("course-content/support-resistance/chart_assets")
           manifest_path = root / "asset_manifest.csv"
           sums_path = root / "SHA256SUMS.txt"
           generated_manifest = list(csv.DictReader(manifest_path.open(encoding="utf-8", newline="")))
-          target_ids = {"L05-A-04-minor-removed", "L05-A-05-nearby-combined"}
+          target_order = ["L05-A-04-minor-removed", "L05-A-05-nearby-combined"]
+          target_ids = set(target_order)
           generated_rows = [r for r in generated_manifest if r["asset_id"] in target_ids]
-          if {r["asset_id"] for r in generated_rows} != target_ids:
-              raise SystemExit("Generator did not emit both incremental Lesson 5 chart states.")
-          # Preserve the existing manifest unchanged except for the two new rows.
-          original_manifest = subprocess.check_output(["git", "show", "HEAD:course-content/support-resistance/chart_assets/asset_manifest.csv"], text=True)
-          lines = original_manifest.splitlines()
-          insert_at = next(i for i, line in enumerate(lines) if line.startswith("L05-A-03-reduced-reference,"))
-          new_lines = []
+          generated_by_id = {}
           for row in generated_rows:
-              new_lines.append(",".join([
+              if row["asset_id"] in generated_by_id:
+                  raise SystemExit("Generator emitted a duplicate target manifest row: " + row["asset_id"])
+              generated_by_id[row["asset_id"]] = row
+          if set(generated_by_id) != target_ids:
+              raise SystemExit("Generator did not emit exactly one row for each incremental Lesson 5 chart state.")
+          
+          def manifest_line(row):
+              return ",".join([
                   row["asset_id"], row["dataset_id"], row["state"], row["visible_bars"],
-                  row["format"], row["source_type"], '"' + row["alt_text"].replace('"','""') + '"',
-                  '"' + row["notes"].replace('"','""') + '"'
-              ]))
-          lines[insert_at+1:insert_at+1] = new_lines
+                  row["format"], row["source_type"],
+                  '"' + row["alt_text"].replace('"', '""') + '"',
+                  '"' + row["notes"].replace('"', '""') + '"'
+              ])
+          
+          # Start from the committed manifest, remove any old copies of these target rows,
+          # then insert exactly one fresh row per target after the Lesson 5 reference edit.
+          original_manifest = subprocess.check_output(
+              ["git", "show", "HEAD:course-content/support-resistance/chart_assets/asset_manifest.csv"],
+              text=True
+          )
+          lines = [
+              line for line in original_manifest.splitlines()
+              if not any(line.startswith(asset_id + ",") for asset_id in target_ids)
+          ]
+          insert_at = next(i for i, line in enumerate(lines) if line.startswith("L05-A-03-reduced-reference,"))
+          lines[insert_at + 1:insert_at + 1] = [manifest_line(generated_by_id[asset_id]) for asset_id in target_order]
+          for asset_id in target_order:
+              if sum(line.startswith(asset_id + ",") for line in lines) != 1:
+                  raise SystemExit("Manifest must contain exactly one row for " + asset_id)
           manifest_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-
-          # Preserve existing checksums; append only checksums for the four new files.
-          original_sums = subprocess.check_output(["git", "show", "HEAD:course-content/support-resistance/chart_assets/SHA256SUMS.txt"], text=True).splitlines()
-          for asset_id in sorted(target_ids):
-              for ext in ("png","svg"):
+          
+          # Refresh, rather than merely append, each target checksum. SVG metadata can change
+          # when Matplotlib regenerates a chart, so an existing checksum is not authoritative.
+          original_sums = subprocess.check_output(
+              ["git", "show", "HEAD:course-content/support-resistance/chart_assets/SHA256SUMS.txt"],
+              text=True
+          ).splitlines()
+          target_paths = []
+          for asset_id in target_order:
+              for ext in ("png", "svg"):
                   rel = f"course-content/support-resistance/chart_assets/charts/{asset_id}.{ext}"
+                  target_paths.append(rel)
+                  original_sums = [line for line in original_sums if not line.endswith("  " + rel)]
                   digest = hashlib.sha256(Path(rel).read_bytes()).hexdigest()
-                  if not any(line.endswith("  " + rel) for line in original_sums):
-                      original_sums.append(f"{digest}  {rel}")
+                  original_sums.append(f"{digest}  {rel}")
           sums_path.write_text("\n".join(original_sums) + "\n", encoding="utf-8")
-          print("Generated both incremental edit states; preserved unrelated manifest/checksum rows.")
-          PY
+          
+          # Fail the build if a target path is absent, duplicated, or stale in the checksum file.
+          for rel in target_paths:
+              matches = [line for line in original_sums if line.endswith("  " + rel)]
+              actual = hashlib.sha256(Path(rel).read_bytes()).hexdigest()
+              if len(matches) != 1 or matches[0].split()[0] != actual:
+                  raise SystemExit("Missing, duplicate, or incorrect checksum for " + rel)
+          print("Manifest has one row per incremental chart; all four target checksums match regenerated files.")          PY
 
       - name: Stage charts for the learning-room preview
         run: |
@@ -219,4 +249,17 @@ jobs:
         with:
           name: module5-clear-w-mobile-qa
           path: module5-clear-w-mobile-qa.png
+          if-no-files-found: ignore
+ 
+      - name: Upload Lesson 5 clutter charts for visual QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: module5-clutter-chart-visuals
+          path: |
+            course-content/support-resistance/chart_assets/charts/L05-A-01-overmarked.png
+            course-content/support-resistance/chart_assets/charts/L05-A-02-candidate-ids.png
+            course-content/support-resistance/chart_assets/charts/L05-A-03-reduced-reference.png
+            course-content/support-resistance/chart_assets/charts/L05-A-04-minor-removed.png
+            course-content/support-resistance/chart_assets/charts/L05-A-05-nearby-combined.png
           if-no-files-found: ignore
