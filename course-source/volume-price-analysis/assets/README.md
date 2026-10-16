@@ -2,7 +2,7 @@
 
 **Lesson:** What Candlesticks Don't Tell You: Reading the Volume Behind Price  
 **Asset ID:** VPA-M01-L01-01  
-**Status:** The three-level pilot and responsive mobile variants are implemented. The committed HTML now shows the Level 3 breakout attempt first and keeps continuation/failure charts hidden until the learner submits an initial reading. The page has explicit stage navigation, feedback, a restart control, focus handling and reduced-motion-aware scrolling. The source/data/path checks pass. Earlier fixture tests covered a prior interaction build, not this exact final HTML. Exact-page browser rendering, assistive-technology testing and beginner usability testing remain open.
+**Status:** The three-level pilot and responsive mobile variants are implemented. Level 1 now checks candle direction, candidate volume versus the five-bar baseline, and the preceding price sequence before allowing progression; a short written observation is also required. The committed HTML shows the Level 3 breakout attempt first and keeps continuation/failure charts hidden until the learner submits an initial reading. The page has explicit stage navigation, feedback, a restart control, focus handling and reduced-motion-aware scrolling. Static source/path checks pass. Exact-page browser rendering, assistive-technology testing and beginner usability testing remain open. The pilot is not approved for scaling yet.
 
 ## Learning progression shown to the learner
 
@@ -10,7 +10,7 @@
 2. **Level 2 — Compare (guided):** compare two equal-sized candle shapes in different price contexts using a shared vertical scale and neutral volume bars.
 3. **Level 3 — Apply (independent):** interpret a new breakout before seeing later bars, state two possible outcomes, then review alternate continuation and failure endings.
 
-The learner sees consistent stage labels **Notice → Compare → Apply** and cannot advance from the easy check until the visible facts are identified. Text length is used only as a completion gate; the prototype does not claim to semantically grade free-text reasoning.
+The learner sees consistent stage labels **Notice → Compare → Apply**. Level 1 uses three factual checks for what the chart actually shows and requires a written observation before the next stage opens. The longer Level 2 and Level 3 free-text responses use minimum-length completion gates; they are not semantically graded. Correct factual selections do not mean the learner has mastered the concept.
 
 ## Files
 
@@ -47,7 +47,7 @@ The CSV contains the underlying bars for every staged visual. The six-bar Level 
 - The responsive layout includes visible stage labels and a progress cue; text stays in the open page and is not uploaded or persistently stored.
 - The lesson script, asset brief, editorial language guide and Q&A bank now specify the same easy-to-harder progression for every lesson.
 
-## Remaining validation
+## Validation record\n\nThe current source-level findings and exact manual test sequence are recorded in [PILOT_VALIDATION_CHECKLIST.md](PILOT_VALIDATION_CHECKLIST.md). Static path/ID checks passed after the Level 1 change; no exact-page browser rendering or novice test has yet been recorded.\n\n## Remaining validation
 
 - Open the committed HTML in a browser and verify all real desktop and mobile SVGs render. A separate Chromium fixture passed the interaction smoke checks, but it used stand-in images and is not proof that the committed page renders correctly.
 - Test correct/incorrect retries, stage unlocks, outcome reveal and restart.
