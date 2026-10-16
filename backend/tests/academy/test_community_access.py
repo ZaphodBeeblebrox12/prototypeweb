@@ -4,6 +4,7 @@ from datetime import timedelta
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import TestCase
+from django.urls import reverse
 from django.utils import timezone
 
 from apps.academy.models import Course, CourseEntitlement, CourseOffer
@@ -122,6 +123,20 @@ class CourseCommunityAccessTests(TestCase):
         self.assertFalse(target.has_plan)
         self.assertEqual(target.telegram_ids, set())
         self.assertEqual(target.discord_ids, set())
+
+    def test_community_access_is_shown_after_course_access_expires(self):
+        _activated, entitlement = activate_paid_subscription(self.intent)
+        CourseEntitlement.objects.filter(pk=entitlement.pk).update(
+            expires_at=timezone.now() - timedelta(seconds=1)
+        )
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("academy:home"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Community access")
+        self.assertContains(response, "Available until")
+        self.assertTrue(compute_target_access(self.user.pk).has_plan)
 
     def test_community_term_cannot_be_changed_after_payment_history_exists(self):
         self.offer.community_access_months = 6
