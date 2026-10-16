@@ -192,6 +192,18 @@ Each item below describes both the visual deliverable and the learning task that
 
 ## 6. Shared interactive ChartLab requirements
 
+### Visible difficulty progression in every lesson
+
+**Every lesson must show a three-level progression from easier work to more independent application.** Use consistent learner-facing labels so the learner can see their progress, while adapting the task to the lesson's own concept.
+
+1. **Level 1 — Notice (easy):** identify or label the core evidence with strong scaffolding. Examples include finding a candidate candle, identifying a profile reference, locating a range edge, or comparing a bar with a marked baseline. Do not ask the learner to solve the whole chart yet.
+2. **Level 2 — Compare (guided):** compare two related but meaningfully different examples. Give prompts that focus attention on the defining distinction, and ask the learner to explain what is the same, what differs and why that matters.
+3. **Level 3 — Apply (independent):** present a fresh or less-labelled example. Ask for a reasoned reading, at least one plausible alternative, and the next observable evidence or condition that would strengthen or weaken the reading. Where later bars decide the distinction, hide them until the learner has recorded an initial response, then reveal more than one possible outcome.
+
+**Difficulty must increase through reasoning, not through extra clutter or unexplained jargon.** Use the same three stage labels and a visible progress indicator across the course. Stage 1 should teach observation; Stage 2 should add comparison and interpretation; Stage 3 should transfer the idea to a new case and require independent conditional reasoning. Do not reveal Stage 3 outcomes before the initial response. An HTML text-length check is a completion aid, not a measure of conceptual correctness; feedback and a model answer must explain the quality of reasoning.
+
+Each lesson script, visual package, ChartLab and Q&A/practice task should use this same progression. The asset inventory below lists the core content; each listed ChartLab must be designed as three related stages rather than one isolated question.
+
 Every lab must contain all of the following; if the lesson is a guided visual exercise, these can be simple controls rather than a complex application.
 
 1. **Learning target:** One sentence that says what the learner is practising.
