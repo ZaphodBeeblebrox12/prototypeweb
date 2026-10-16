@@ -4,8 +4,6 @@ from unittest import mock
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
-from apps.academy.models import Course
-
 from apps.academy.management.commands.seed_support_resistance import (
     embed_snr_figures,
     estimate_duration,
@@ -16,6 +14,7 @@ from apps.academy.management.commands.seed_trading_path import (
     embed_existing_figures,
     split_lesson_source,
 )
+from apps.academy.models import Course
 
 
 def test_lesson_segments_separate_bundled_canonical_scripts():
