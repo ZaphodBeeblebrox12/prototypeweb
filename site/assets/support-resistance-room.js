@@ -323,6 +323,7 @@
     const chartFile=stage?stage.file:l.chart;
     const fallbackSrc=chartRoot+chartFile;
     const vectorSrc=/\.png$/i.test(chartFile)?chartRoot+chartFile.replace(/\.png$/i,".svg"):fallbackSrc;
+    img.dataset.chartCanonicalFile=chartFile;
     img.dataset.chartFallbackSrc=fallbackSrc;
     img.dataset.chartFallbackTried="false";
     img.onerror=()=>{
