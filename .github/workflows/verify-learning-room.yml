@@ -248,7 +248,7 @@ jobs:
             await page.waitForFunction(() => document.querySelector("#lesson-title").textContent.includes("Failed Breakouts and Alternate Outcomes"));
             const failureLessonText = await page.locator("#reading-sections").innerText();
             assert.ok(failureLessonText.length > 6000, "Full V5.2 Lesson 14 reading appears truncated");
-            assert.ok(failureLessonText.toLowerCase().includes("not an automatic"), "Lesson 14 should preserve the alternate-outcome caution");
+            assert.ok((await page.locator("#lesson-hook").innerText()).includes("not an automatic reverse signal"), "Lesson 14 should preserve its central caution");
             console.log("FULL_V52_READER_PASS: long-form lesson content, staged synthetic charts and historical-image rights notice.");
 
             assert.deepEqual(pageErrors, [], "Unexpected browser JavaScript errors");
