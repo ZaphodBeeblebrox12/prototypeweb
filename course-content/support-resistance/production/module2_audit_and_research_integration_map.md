@@ -2,13 +2,13 @@
 
 **Module:** 2 — Find the important areas  
 **Lessons:** 3–5  
-**Status:** Lessons 3–5 are integrated in the learning-room preview and browser-tested. Lesson 5 includes an incremental clutter-edit activity and the embedded Clear W two-zone ChartLab. Responses/progress are local to the browser session, not member-account persistence.  
+**Status:** Lessons 3–5 are integrated in the learning-room preview. Lessons 3–4 remain unchanged. Lesson 5's interaction and chart assets have now passed the latest isolated browser QA; the visual and asset-integrity checks are recorded in §6. Progress remains browser-local, not member-account persistence.  
 **Working standard:** `production/MODULE_DEPTH_WORKING_NOTES.md`  
 **Template redesign:** Deferred; not part of this pass.
 
 ## Executive finding
 
-The canonical scripts for Lessons 3–5 provide the teaching sequence, reveal plans, model-answer guidance and assessment intent. Lessons 3–4 expose staged explanations, learner gates and three formative checks each. Lesson 5 now adds a seven-candidate Keep/Combine/Leave-out/Not-sure activity, three incremental edit views, a worked reduction, then the Clear W drawing lab with sequential support/resistance submission, reference feedback and two post-lab checks.
+The canonical scripts for Lessons 3–5 provide the teaching sequence, reveal plans, model-answer guidance and assessment intent. Lessons 3–4 expose staged explanations, learner gates and three formative checks each. Lesson 5 now adds a seven-candidate Keep/Combine/Leave-out/Not-sure activity, two incremental edit states, a worked reduction, then the Clear W drawing lab with sequential support/resistance submission, reference feedback and two post-lab checks.
 
 The corrected asset pack now contains 27 specified Lesson 3–5 / Clear W PNG chart states and their SVG counterparts, including candidate-ID practice for Lesson 3 and two incremental Lesson 5 editing states. Lessons 3–4 use three formative questions each; Clear W includes the two post-lab questions specified in its standalone answer key. The remaining work is a separate keyboard/screen-reader audit and later editorial/template passes—not the core Lesson 5 interaction.
 
@@ -31,11 +31,11 @@ The corrected asset pack now contains 27 specified Lesson 3–5 / Clear W PNG ch
 - Upper-side transfer: `L04-B-01-clean` → `L04-B-02-zone` → `L04-B-03-resistance`
 - Separate practice: `L04-C-01-practice` → `L04-C-02-reference`
 
-**Lesson 5 — three editing views plus the four Clear W states**
-- Editing: `L05-A-01-overmarked` → `L05-A-02-candidate-ids` → `L05-A-03-reduced-reference`
-- Clear W: `CL01-01-clean` → `CL01-02-support-reference` → `CL01-03-resistance-reference` → `CL01-04-combined-reference`
+**Lesson 5 — five clutter-chart states leading into the interactive Clear W exercise**
+- Editing: `L05-A-01-overmarked` → `L05-A-02-candidate-ids` → `L05-A-04-minor-removed` → `L05-A-05-nearby-combined` → `L05-A-03-reduced-reference`
+- Clear W reference assets: `CL01-01-clean` → `CL01-02-support-reference` → `CL01-03-resistance-reference` → `CL01-04-combined-reference`. These images accompany the exercise; they do not replace its sequential drawing interaction.
 
-The file manifest calls these synthetic illustrative OHLC charts. They must remain labelled illustrative, not be passed off as historical market data. Their presence in the repository is not evidence that each reveal, mobile crop, selection interaction or ChartLab submission flow is implemented.
+The asset manifest labels these as synthetic illustrative OHLC charts. Keep the illustrative/not-historical distinction visible. Lesson 5's reveals, real drawing/submission flow, mobile comparison layout and completion gate were tested separately; evidence and the remaining limitations are recorded in §6.
 
 ## 2. Research and curriculum integration
 
@@ -88,5 +88,22 @@ The current catalogue contains **Market Structure**, but its topic substantially
 - [x] The preview labels synthetic charts accurately and does not claim production-secured ChartLab or account persistence.
 - [x] No numeric swing/zone-strength score or universal touch-count/zone-width rule is introduced.
 - [x] Desktop reveal/drawing flow, two-question completion gate and 360px mobile overflow checks passed automated browser QA; keyboard-only and screen-reader QA remain outstanding.
+
+
+## 6. Verification record — 16 October 2026
+
+**Automated browser QA:** [Temporary Lesson 5 Clear W ChartLab workflow, run #7](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38853131152) passed on the isolated QA branch. The temporary workflow remains QA-only and is not part of the development branch.
+
+The end-to-end run verified the six-view Lesson 5 sequence; all seven candidate classifications and a written rationale before the worked edit; actual pointer-drawn support and resistance zones; support locking before the second draw; hiding the reference until both zones are submitted; both post-lab checks; and the parent lesson's completion gate. The run also asserted no browser JavaScript page errors and no HTTP responses with status 400 or higher.
+
+**360px mobile check:** the parent document measured 360px viewport / 360px scroll width, with a 302px-wide embedded ChartLab. Inside the iframe, viewport and document scroll width both measured 302px; the submitted comparison was visible and both comparison SVGs measured 270px wide. No horizontal overflow was detected by the assertions.
+
+**Asset integrity:** the latest generator step produced one manifest row each for `L05-A-04-minor-removed` and `L05-A-05-nearby-combined`. It refreshed and verified exactly one matching SHA-256 entry for each of their four PNG/SVG files. The temporary workflow's source-level hash check passed in the same green run.
+
+**Visual inspection:** the generated Lesson 5 PNG states `L05-A-01` through `L05-A-05` were inspected. `L05-A-04-minor-removed` removes candidate D only; A, B, C, E, F and G remain. `L05-A-05-nearby-combined` combines B/C and E/F while retaining A and G. The incremental images use the same synthetic candle sequence and scale. The images carry the visible label “Illustrative chart — not historical market data.” The two-zone ChartLab comparison and local-only completion notice were also inspected in the mobile screenshot artifact.
+
+**Still outstanding:** keyboard-only testing, screen-reader testing, a live learner-language editorial pass and a chart-led editorial pass. The wider course-template comparison remains deferred. Automated browser checks do not substitute for those reviews.
+
+**Persistence and assessment limits:** learner answers and completion remain local to the browser/prototype; there is no member-account progress persistence or server-secured assessment storage. The reference charts are static assets, not protected answer keys. The synthetic sample is illustrative, not historical data.
 
 **Decision:** Build from the existing scripts/assets. The primary gap is learner-room integration and specific interaction behaviour—not a lack of source material and not a need for a new template.
