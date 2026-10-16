@@ -9,6 +9,11 @@ The core discipline is simple: **define the boundary before the move, record the
 
 ## Lesson 4.1 — Is the Breakout Real? What Volume Can Tell You
 
+![Chart for Is the Breakout Real? What Volume Can Tell You. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m04-l01-breakout-follow-through.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m04-l01-breakout-follow-through-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m04-l01-breakout-follow-through.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m04-l01-breakout-follow-through.md)
+
 ### Define the breakout before judging it
 
 A useful boundary is based on prior price behaviour: repeated stalls, a clear swing high or low, or the edge of a visible range. Mark the zone before evaluating the break. If you draw it only after price has moved through it, hindsight may be doing too much of the work.
@@ -76,6 +81,11 @@ Range high is near 66. A wide candle closes at 67.2 on 1.6× relative volume. In
 
 ## Lesson 4.2 — Breakout or Trap? Reading the Signs of a Failed Move
 
+![Chart for Breakout or Trap? Reading the Signs of a Failed Move. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m04-l02-failed-breakout-sequence.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m04-l02-failed-breakout-sequence-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m04-l02-failed-breakout-sequence.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m04-l02-failed-breakout-sequence.md)
+
 A failed breakout occurs when price moves beyond a previously observed boundary but does not sustain that move and returns inside. Traders sometimes describe the failure as a “trap”, but the word can make the chart sound more deliberate than the evidence supports. The chart cannot tell you that traders were intentionally lured in.
 
 ### What failure looks like
@@ -142,6 +152,11 @@ Price breaks above 100 and closes back inside at 99.4. That is an initial failur
 
 ## Lesson 4.3 — When Volume Explodes at Market Extremes: Understanding Climax Activity
 
+![Chart for When Volume Explodes at Market Extremes: Understanding Climax Activity. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m04-l03-climax-activity.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m04-l03-climax-activity-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m04-l03-climax-activity.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m04-l03-climax-activity.md)
+
 A volume climax is a period of exceptionally high recorded activity relative to a meaningful comparison. It often attracts attention near an extended move, but **an unusually active bar does not, by itself, mark the end of a trend**.
 
 ### Why climax language can mislead
@@ -198,6 +213,11 @@ After an extended rise, price prints the week's highest volume but closes near i
 ---
 
 ## Lesson 4.4 — Springs and Upthrusts: Recognising Failed Moves at Range Boundaries
+
+![Chart for Springs and Upthrusts: Recognising Failed Moves at Range Boundaries. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m04-l04-springs-upthrusts.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m04-l04-springs-upthrusts-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m04-l04-springs-upthrusts.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m04-l04-springs-upthrusts.md)
 
 The terms **spring** and **upthrust** are used in some price-volume approaches for moves beyond a trading-range boundary that return inside. A spring typically refers to a move below the lower boundary that returns into the range; an upthrust typically refers to a move above the upper boundary that returns inside.
 
@@ -263,6 +283,11 @@ A range extends from 50 to 60. Price briefly trades at 48.5 and closes at 51.2. 
 ---
 
 ## Lesson 4.5 — Before Calling a Reversal: What to Look for After the Breakout
+
+![Chart for Before Calling a Reversal: What to Look for After the Breakout. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m04-l05-reversal-confirmation.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m04-l05-reversal-confirmation-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m04-l05-reversal-confirmation.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m04-l05-reversal-confirmation.md)
 
 A failed breakout and a lasting reversal are not the same claim. Price may fail to break out and then settle back into the old range. A reversal requires a broader change in the direction or structure you were tracking.
 
