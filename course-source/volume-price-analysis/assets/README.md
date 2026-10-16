@@ -2,7 +2,7 @@
 
 **Lesson:** What Candlesticks Don't Tell You: Reading the Volume Behind Price  
 **Asset ID:** VPA-M01-L01-01  
-**Status:** Stage 2 source-level fixes and responsive mobile chart variants have been added on `my-new-branch`. Stage 3 SVG text is readable; unlocked navigation updates the active-step indicator; focus and reduced-motion handling have been improved; and mobile screens use reflowed SVGs rather than scaled-down desktop charts. A browser fixture passed 12 interaction/responsiveness smoke checks, but it uses stand-in images and is not a full render of the committed page. Actual page rendering, assistive-technology review and beginner usability testing remain open.
+**Status:** Stage 2 source-level fixes and responsive mobile chart variants have been added on `my-new-branch`. Stage 3 SVG text is readable; unlocked navigation updates the active-step indicator; focus and reduced-motion handling have been improved; and mobile screens use reflowed SVGs with larger label text, compact volume summaries and the reference-level legend moved out of the candle area. A browser fixture passed 12 interaction/responsiveness smoke checks, but it uses stand-in images and is not a full render of the committed page. Actual page rendering, assistive-technology review and beginner usability testing remain open.
 
 ## Learning progression shown to the learner
 
