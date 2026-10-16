@@ -188,9 +188,10 @@
 .sr-room-integration-note{display:flex;flex-direction:column;gap:5px;margin:2px 0 22px;padding:12px 15px;border-left:3px solid var(--green);background:#f0eee5;color:var(--ink);font-size:12px;line-height:1.6}
 .sr-room-integration-note strong{font-size:12px;font-weight:800}
 .sr-room-integration-note span{color:var(--muted)}
-.sr-room-teaching-figure{margin:18px 0 4px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
-.sr-room-teaching-figure img{display:block;width:100%;height:auto;max-height:380px;object-fit:contain}
-.sr-room-teaching-figure figcaption{margin:9px 3px 2px;color:var(--muted);font-size:11px;line-height:1.55}
+.sr-room-teaching-figure,.sr-v52-figure{margin:18px 0 4px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.sr-room-teaching-figure img,.sr-v52-figure img{display:block;width:100%;height:auto;max-height:min(72vh,720px);object-fit:contain;margin-inline:auto}
+.sr-room-teaching-figure figcaption,.sr-v52-figure figcaption{margin:9px 3px 2px;color:var(--muted);font-size:11px;line-height:1.55}
+@media(max-width:640px){.sr-room-teaching-figure,.sr-v52-figure{padding:7px;margin:13px 0 4px}.sr-room-teaching-figure img,.sr-v52-figure img{max-height:none}}
 .sr-room-zone-task{margin:18px 0;padding:16px;border:1px solid var(--line-dark);border-radius:14px;background:#fffdf8}
 .sr-room-zone-task h4{margin:0 0 7px;font-size:15px;color:var(--ink)}
 .sr-room-zone-task>p{margin:0 0 14px;color:var(--muted);font-size:12px;line-height:1.6}
@@ -205,3 +206,9 @@
 @media(max-width:560px){.sr-room-zone-fields{grid-template-columns:minmax(0,1fr)}.sr-room-zone-task{padding:12px}}
 
 
+
+/* Chart-first lesson layout: give instructional evidence the full reading width.
+   The learner's written response follows the image rather than squeezing it into half a column. */
+.sr-room-work-grid{grid-template-columns:minmax(0,1fr)}
+.sr-room-chart-figure{width:100%;min-width:0}
+.sr-room-chart-viewport img{max-height:min(70vh,760px)}

@@ -1,0 +1,169 @@
+/* TradeThesis instructional-image inspection viewer */
+body.image-inspector-open { overflow: hidden !important; overscroll-behavior: none; }
+
+.image-inspector-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  width: 100dvw;
+  height: 100vh;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  color: #f8f7f1;
+  background: #171b18;
+}
+.image-inspector-dialog::backdrop { background: rgba(13, 17, 14, .92); }
+.image-inspector-dialog[open] { display: block; }
+
+.image-inspector-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: #171b18;
+}
+.image-inspector-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid #414842;
+  background: #202621;
+}
+.image-inspector-heading { flex: 1 1 auto; min-width: 0; }
+.image-inspector-heading h2 {
+  margin: 0;
+  color: #f8f7f1;
+  font: 600 14px/1.35 system-ui, -apple-system, "Segoe UI", sans-serif;
+  overflow-wrap: anywhere;
+}
+.image-inspector-help {
+  margin: 3px 0 0;
+  color: #c8cec7;
+  font: 11px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.image-inspector-controls { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+.image-inspector-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  min-height: 40px;
+  padding: 8px 11px;
+  border: 1px solid #59645a;
+  border-radius: 8px;
+  color: #f8f7f1;
+  background: #2c342e;
+  font: 700 13px/1 system-ui, -apple-system, "Segoe UI", sans-serif;
+  cursor: pointer;
+}
+.image-inspector-button:hover { background: #3b473e; border-color: #8ea08e; }
+.image-inspector-button:disabled { opacity: .4; cursor: not-allowed; }
+.image-inspector-button:focus-visible,
+.image-inspector-stage:focus-visible {
+  outline: 3px solid #dfc27a;
+  outline-offset: 3px;
+}
+.image-inspector-button-close {
+  min-width: 42px;
+  font-size: 22px;
+  font-weight: 400;
+}
+.image-inspector-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  padding: 16px;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+  background:
+    radial-gradient(ellipse at center, rgba(255,255,255,.035), transparent 70%),
+    #171b18;
+}
+.image-inspector-stage.is-panning { cursor: grabbing; }
+.image-inspector-image {
+  display: block;
+  flex: 0 0 auto;
+  width: auto;
+  height: auto;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0;
+  border: 0;
+  object-fit: contain;
+  transform-origin: center center;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+  will-change: transform;
+}
+.image-inspector-caption {
+  padding: 9px 16px 11px;
+  border-top: 1px solid #414842;
+  color: #c8cec7;
+  background: #202621;
+  font: 12px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  overflow-wrap: anywhere;
+}
+.image-inspector-caption:empty { display: none; }
+.image-inspector-hint {
+  display: inline-block;
+  margin-left: 9px;
+  color: #71816c;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.image-inspector-dialog .image-inspector-caption .image-inspector-hint { display: none; }
+
+#sr-chart-image,
+.sr-room-teaching-figure img,
+.sr-v52-figure img,
+img[data-image-inspect="true"] {
+  cursor: zoom-in;
+}
+#sr-chart-image:focus-visible,
+.sr-room-teaching-figure img:focus-visible,
+.sr-v52-figure img:focus-visible,
+img[data-image-inspect="true"]:focus-visible {
+  outline: 3px solid #bca86d;
+  outline-offset: 3px;
+}
+
+@media (max-width: 680px) {
+  .image-inspector-toolbar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 9px 10px;
+  }
+  .image-inspector-heading { flex: 1 1 calc(100% - 56px); }
+  .image-inspector-heading h2 { font-size: 13px; }
+  .image-inspector-help { font-size: 10px; }
+  .image-inspector-controls {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .image-inspector-button { min-height: 44px; }
+  .image-inspector-stage { padding: 6px; }
+  .image-inspector-caption { padding: 8px 11px 10px; font-size: 11px; }
+  .image-inspector-hint { display: block; margin: 4px 0 0; white-space: normal; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .image-inspector-dialog *,
+  .image-inspector-dialog *::before,
+  .image-inspector-dialog *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+}

@@ -320,9 +320,21 @@
     if(!l.chart){figure.hidden=true;img.removeAttribute("src");controls.hidden=true;renderTeaching(l,null);return}
     figure.hidden=false;img.hidden=false;fallback.hidden=true;
     img.alt=stage?stage.alt:l.alt;
-    img.onerror=()=>{img.hidden=true;fallback.hidden=false};
+    const chartFile=stage?stage.file:l.chart;
+    const fallbackSrc=chartRoot+chartFile;
+    const vectorSrc=/\.png$/i.test(chartFile)?chartRoot+chartFile.replace(/\.png$/i,".svg"):fallbackSrc;
+    img.dataset.chartCanonicalFile=chartFile;
+    img.dataset.chartFallbackSrc=fallbackSrc;
+    img.dataset.chartFallbackTried="false";
+    img.onerror=()=>{
+      const pngFallback=img.dataset.chartFallbackSrc;
+      if(img.dataset.chartFallbackTried!=="true"&&pngFallback&&img.src!==new URL(pngFallback,window.location.href).href){
+        img.dataset.chartFallbackTried="true";img.src=pngFallback;return;
+      }
+      img.hidden=true;fallback.hidden=false;
+    };
     img.onload=()=>{img.hidden=false;fallback.hidden=true};
-    img.src=chartRoot+(stage?stage.file:l.chart);
+    img.src=vectorSrc;
     $("sr-chart-label").textContent=stage?stage.label:(l.lab?"ChartLab "+l.labNo+" · "+l.lab:"Illustrative chart");
     $("sr-chart-caption").textContent="Illustrative chart — not historical market data. "+(stage?stage.caption:"Use the visible chart as evidence for the prompt; avoid treating it as a prediction.");
     $("sr-practice-prompt").textContent=(stage&&stage.question)||l.prompt;
