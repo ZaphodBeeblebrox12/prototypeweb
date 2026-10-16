@@ -9,6 +9,11 @@ The profile gives you a map of past activity. It does not forecast what price mu
 
 ## Lesson 5.1 — Where Has the Market Traded Most? Introducing Volume Profile
 
+![Chart for Where Has the Market Traded Most? Introducing Volume Profile. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m05-l01-volume-profile-intro.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m05-l01-volume-profile-intro-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m05-l01-volume-profile-intro.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m05-l01-volume-profile-intro.md)
+
 ### Two views of activity
 
 A conventional volume histogram places a bar beneath each candle. Each bar represents the activity recorded during that time interval. The horizontal axis is time.
@@ -73,6 +78,11 @@ A one-session profile may show a POC at 105, while a five-session composite show
 ---
 
 ## Lesson 5.2 — Finding the Market's Reference Point: Point of Control and Value Area
+
+![Chart for Finding the Market's Reference Point: Point of Control and Value Area. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m05-l02-poc-value-area.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m05-l02-poc-value-area-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m05-l02-poc-value-area.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m05-l02-poc-value-area.md)
 
 Once you understand the profile's shape, three commonly used references can help you describe it: the Point of Control, the Value Area High and the Value Area Low.
 
@@ -142,6 +152,11 @@ Two platforms or settings may draw a different value area because the selected p
 
 ## Lesson 5.3 — Where Price May Stall—or Move Quickly: High- and Low-Volume Nodes
 
+![Chart for Where Price May Stall—or Move Quickly: High- and Low-Volume Nodes. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m05-l03-high-low-volume-nodes.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m05-l03-high-low-volume-nodes-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m05-l03-high-low-volume-nodes.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m05-l03-high-low-volume-nodes.md)
+
 A profile often contains broad concentrations and thin sections. These are commonly called **High-Volume Nodes (HVNs)** and **Low-Volume Nodes (LVNs)**.
 
 An HVN is an area where the profile shows relatively high activity. An LVN is an area where relatively less activity was recorded. They are descriptions of the profile's shape; interpreting them requires price context.
@@ -202,6 +217,11 @@ A profile shows an LVN from 155 to 157. Price travels quickly through it during 
 ---
 
 ## Lesson 5.4 — When the Market's Focus Shifts: Reading Changes in Value
+
+![Chart for When the Market's Focus Shifts: Reading Changes in Value. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m05-l04-value-migration.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m05-l04-value-migration-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m05-l04-value-migration.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m05-l04-value-migration.md)
 
 A single profile describes activity over one selected period. Comparing profiles can show how the areas of greatest activity and the value range are changing. This can help you describe whether the market is building value higher, lower or around a similar area.
 
@@ -268,6 +288,11 @@ Session B's POC sits higher than Session A's, but most of their value areas over
 ---
 
 ## Lesson 5.5 — Putting It Together: Reading Volume Profile Alongside Price Action
+
+![Chart for Putting It Together: Reading Volume Profile Alongside Price Action. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m05-l05-profile-with-price-action.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m05-l05-profile-with-price-action-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m05-l05-profile-with-price-action.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m05-l05-profile-with-price-action.md)
 
 Volume Profile is most useful when it adds a clear location to the price-volume question. It becomes less useful when every profile feature is treated as a signal.
 
