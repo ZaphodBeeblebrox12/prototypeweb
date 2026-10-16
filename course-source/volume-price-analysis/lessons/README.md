@@ -16,6 +16,7 @@ This folder contains the six-module, 30-lesson manuscript, presenter notes for c
 - [Chart walkthrough scripts for all 30 lessons](CHART_WALKTHROUGHS.md)
 - [Research and adaptation note](RESEARCH_AND_ADAPTATION_NOTES.md)
 - [Third-pass editorial language guide](EDITORIAL_LANGUAGE_GUIDE.md)
+- [User-perceived duration audit — all 30 lessons, script word counts, runtime estimates and verification criteria](USER_DURATION_AUDIT.md)
 - [Second-pass learner Q&A bank](Q_AND_A_BANK.md)
 
 ## Production standard
