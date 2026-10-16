@@ -3,6 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from apps.accounts.models import UserPreference
+from apps.bot_integration.models import DiscordAccount, TelegramAccount
 
 User = get_user_model()
 
@@ -28,6 +29,29 @@ class ProfilePageTests(TestCase):
         self.assertContains(response, "Connect Discord")
         self.assertContains(response, 'name="timezone"')
         self.assertContains(response, 'name="language"')
+
+    def test_connection_status_uses_active_bot_link_records(self):
+        TelegramAccount.objects.create(
+            user=self.user,
+            chat_id=7654321,
+            telegram_user_id=7654321,
+            username="chartlearner",
+        )
+        DiscordAccount.objects.create(
+            user=self.user,
+            discord_user_id="discord-profile-123",
+            username="chart-learner",
+        )
+
+        response = self.client.get(reverse("profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Connected · @chartlearner")
+        self.assertContains(response, "Connected · chart-learner")
+        self.assertContains(response, "Disconnect Telegram")
+        self.assertContains(response, "Disconnect")
+        self.assertNotContains(response, "Connect Telegram")
+        self.assertNotContains(response, "Connect Discord")
 
     def test_profile_update_persists_personal_details_and_preferences(self):
         response = self.client.post(
