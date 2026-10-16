@@ -9,6 +9,8 @@ The profile gives you a map of past activity. It does not forecast what price mu
 
 ## Lesson 5.1 — Where Has the Market Traded Most? Introducing Volume Profile
 
+As you work through this lesson, refer to **Figure 5.1** for the chart example.
+
 ![Chart for Where Has the Market Traded Most? Introducing Volume Profile. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m05-l01-volume-profile-intro.svg)
 
 **Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m05-l01-volume-profile-intro-lab.html)  
@@ -48,19 +50,19 @@ The first tells you *when* activity was unusually high. The second tells you *wh
 
 A one-session profile may show a POC at 105, while a five-session composite shows its POC at 102 because earlier sessions added more activity below. Neither profile must be wrong. The question is different: the session profile summarises one session; the composite summarises the selected group of sessions. Label the period and avoid mixing references from different windows without explaining why both are relevant.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** What does a conventional volume histogram arrange activity by, and what does a Volume Profile arrange it by?
 
 **Feedback:** The conventional histogram shows activity by time interval; the profile distributes activity across price levels for the chosen period and method.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Change a profile from a one-session window to five sessions and observe a different shape. Does that by itself mean one profile is wrong?
 
 **Feedback:** No. They describe different selected periods. State the window before interpreting or comparing references.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** A broad row sits at price 200. State what you may say and what you cannot infer.
 
@@ -78,6 +80,8 @@ A one-session profile may show a POC at 105, while a five-session composite show
 ---
 
 ## Lesson 5.2 — Finding the Market's Reference Point: Point of Control and Value Area
+
+As you work through this lesson, refer to **Figure 5.2** for the chart example.
 
 ![Chart for Finding the Market's Reference Point: Point of Control and Value Area. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m05-l02-poc-value-area.svg)
 
@@ -121,19 +125,19 @@ When comparing value areas, keep the profile method and periods in view. Moving 
 
 Two platforms or settings may draw a different value area because the selected percentage, row size or calculation rule differs. If the value area contains a selected share of profile volume—often around 70% by default—the boundaries depend on the chosen method. Before treating VAH or VAL as a reference, record the platform/window settings. Price interacting with the line is observable; calling the line “fair value” or guaranteed support is a stronger claim.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** A profile shows VAH 112, POC 108 and VAL 104. Define each using the platform's chosen settings.
 
 **Feedback:** VAH/VAL mark the high/low of the selected value area; POC is the row with most assigned activity. All depend on period and calculation rules.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare a one-session profile with a multi-week composite whose POC is elsewhere. Which one is correct?
 
 **Feedback:** Neither is universally correct; they answer different questions about different windows. Choose the period that fits the analysis and state it.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** Price trades above the VAH. Create one scenario for holding outside and one for returning inside.
 
@@ -151,6 +155,8 @@ Two platforms or settings may draw a different value area because the selected p
 ---
 
 ## Lesson 5.3 — Where Price May Stall—or Move Quickly: High- and Low-Volume Nodes
+
+As you work through this lesson, refer to **Figure 5.3** for the chart example.
 
 ![Chart for Where Price May Stall—or Move Quickly: High- and Low-Volume Nodes. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m05-l03-high-low-volume-nodes.svg)
 
@@ -187,19 +193,19 @@ One possible reading is that price travelled quickly through the thin area. That
 
 A profile shows an LVN from 155 to 157. Price travels quickly through it during one move. On a later return, price overlaps in the same region for several bars. The historical profile did not change, but the current behaviour did. A thin section may be associated with faster travel in some conditions; it is not a permanently empty road. Current price action tests, rather than obeys, the historical map.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** Identify a broad node and a thin area in the profile and describe them without forecasting.
 
 **Feedback:** An HVN is relatively concentrated recorded activity; an LVN is a relatively thin area within the selected profile.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Price crosses an LVN quickly in one case but stalls there in another. How should the reading change?
 
 **Feedback:** The profile records historical thinness, but current response takes priority. A stall means the area is not acting as a fast path in this instance.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** An HVN sits at 150–154. Price enters and overlaps for several bars, then closes above 154. What would support sustained trade above it?
 
@@ -217,6 +223,8 @@ A profile shows an LVN from 155 to 157. Price travels quickly through it during 
 ---
 
 ## Lesson 5.4 — When the Market's Focus Shifts: Reading Changes in Value
+
+As you work through this lesson, refer to **Figure 5.4** for the chart example.
 
 ![Chart for When the Market's Focus Shifts: Reading Changes in Value. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m05-l04-value-migration.svg)
 
@@ -258,19 +266,19 @@ A shift in profile shape is not a standalone trade trigger. Before using it, ask
 
 Session B's POC sits higher than Session A's, but most of their value areas overlap and price remains inside the same broad range. It would be too strong to call this a confirmed upward trend from the POC alone. If successive comparable profiles shift higher, price holds above prior value and swing structure also advances, the wider case for higher development is stronger. Compare the full shape, period and price behaviour rather than isolating one number.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** Session A has POC 100/value 96–104; Session B has POC 103/value 100–107. What shifted, and how much overlap remains?
 
 **Feedback:** The POC and value area moved higher; the areas overlap from 100 to 104.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare that with a lower POC but nearly fully overlapping value areas and no directional price progress. Which claim is safer?
 
 **Feedback:** Report the POC change but do not declare a new trend from it alone. Overlap and lack of sustained price progress limit the interpretation.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** A later profile is centred higher, but price returns to prior value and breaks a nearby swing low. Update the higher-value idea.
 
@@ -288,6 +296,8 @@ Session B's POC sits higher than Session A's, but most of their value areas over
 ---
 
 ## Lesson 5.5 — Putting It Together: Reading Volume Profile Alongside Price Action
+
+As you work through this lesson, refer to **Figure 5.5** for the chart example.
 
 ![Chart for Putting It Together: Reading Volume Profile Alongside Price Action. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m05-l05-profile-with-price-action.svg)
 
@@ -332,19 +342,19 @@ This is the right role for profile: it adds context to an evidence-based scenari
 
 Price moves above the profile's VAH while the time-based volume bar is 1.8× its baseline. The profile tells you that price is outside the selected period's prior value area; the volume bar tells you activity was elevated during this interval. Those facts complement one another but are not duplicates. A sustained hold above VAH supports continuation; a return inside and failed reclaim supports the alternative. If price overlaps around the boundary, there may be no trigger yet.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** State the profile window, POC/value references and current price location before interpreting the chart.
 
 **Feedback:** A useful observation specifies the period and relevant calculation/data context. “Price is at support” does not describe what the profile measures.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Price pauses at the POC in one case, turns away in another and moves through it in a third. What profile rule guarantees a response?
 
 **Feedback:** None. The POC marks the highest-volume row in the selected period. The current response shows whether price is holding, crossing or moving away now.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** Price is above the VAH in a thin profile area after elevated activity. Define continuation, return-to-value and no-trade conditions.
 
