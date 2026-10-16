@@ -119,13 +119,40 @@ def extract_vpa_student_body(segment):
     student_markdown = re.sub(r"<!--.*?-->", "", student_markdown, flags=re.S)
     student_markdown = re.sub(r"\n{3,}", "\n\n", student_markdown).strip()
 
-    if not student_markdown or not re.search(
-        r"(?im)^###\s+Full narration script\s*$", student_markdown
-    ):
+    # The working branch already contains a learner-oriented version of the
+    # VPA modules; the feature branch may instead contain longer teaching
+    # manuscripts. Preserve either canonical structure rather than assuming a
+    # single heading scheme. Native details elements keep existing feedback
+    # available without immediately displaying the answer to the learner.
+    revealed = []
+    learner_lines = []
+    for line in student_markdown.splitlines():
+        feedback = re.match(r"^\s*\*\*Feedback:\*\*\s*(.+)$", line, re.I)
+        if feedback:
+            revealed.append(feedback.group(1).strip())
+            learner_lines.extend([
+                "<details>",
+                "<summary>Feedback</summary>",
+                "",
+                feedback.group(1).strip(),
+                "",
+                "</details>",
+            ])
+        else:
+            learner_lines.append(line)
+    student_markdown = "\n".join(learner_lines).strip()
+
+    has_structure = re.search(r"(?m)^###\s+.+$", student_markdown)
+    if not student_markdown or not has_structure or len(student_markdown) < 120:
         found = [heading for heading, _body in h3_sections(segment)]
         raise CommandError(
-            "A VPA lesson has no extractable teaching narration. "
+            "A VPA lesson has no usable learner-facing content. "
             f"Available section headings: {found!r}"
+        )
+    if revealed:
+        internal_sections.append(
+            "Feedback content is also rendered as learner-controlled disclosure blocks.\n\n"
+            + "\n\n".join(revealed)
         )
     return student_markdown, "\n\n".join(internal_sections)
 
