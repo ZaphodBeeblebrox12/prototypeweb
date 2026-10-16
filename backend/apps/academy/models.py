@@ -125,6 +125,10 @@ class CourseOffer(models.Model):
         null=True, blank=True, validators=[MinValueValidator(1)],
         help_text="Leave blank for permanent course access.",
     )
+    community_access_days = models.PositiveIntegerField(
+        null=True, blank=True, validators=[MinValueValidator(1)],
+        help_text="Optional included community term, separate from course access. Blank means no community access.",
+    )
     is_active = models.BooleanField(default=False)
     position = models.PositiveSmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -172,9 +176,10 @@ class CourseOffer(models.Model):
                     previous.plan_id != self.plan_id
                     or previous.course_id != self.course_id
                     or previous.access_duration_days != self.access_duration_days
+                    or previous.community_access_days != self.community_access_days
                 ) and previous.plan_id and PaymentIntent.objects.filter(plan_id=previous.plan_id).exists():
                     raise ValidationError(
-                        "Course, Plan and access duration are frozen after a payment intent exists. "
+                        "Course, Plan, course access and community access terms are frozen after a payment intent exists. "
                         "Create a new offer for future sales instead."
                     )
 
@@ -208,7 +213,15 @@ class CourseEntitlement(models.Model):
     source = models.CharField(max_length=16, choices=Source.choices, default=Source.PURCHASE)
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.ACTIVE)
     starts_at = models.DateTimeField(default=timezone.now)
-    expires_at = models.DateTimeField(null=True, blank=True, help_text="NULL means permanent access.")
+    expires_at = models.DateTimeField(null=True, blank=True, help_text="NULL means permanent course access.")
+    community_access_granted_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text="Set only when the offer includes a separate community entitlement.",
+    )
+    community_access_expires_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text="Separate expiry for included community access; does not change course access.",
+    )
     revoked_at = models.DateTimeField(null=True, blank=True)
     revocation_reason = models.CharField(max_length=240, blank=True, default="")
     granted_by = models.ForeignKey(
@@ -225,6 +238,11 @@ class CourseEntitlement(models.Model):
             models.CheckConstraint(
                 check=models.Q(expires_at__isnull=True) | models.Q(expires_at__gt=models.F("starts_at")),
                 name="academy_ent_expiry_start_ck",
+            ),
+            models.CheckConstraint(
+                check=models.Q(community_access_expires_at__isnull=True)
+                | models.Q(community_access_granted_at__isnull=False),
+                name="academy_comm_expiry_grant_ck",
             ),
         ]
         indexes = [models.Index(fields=["user", "status", "expires_at"], name="academy_entitlement_access_idx")]
