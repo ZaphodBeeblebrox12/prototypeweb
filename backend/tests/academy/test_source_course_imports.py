@@ -140,6 +140,7 @@ def test_support_resistance_importer_embeds_only_curated_first_view_figures(tmp_
     static_root.mkdir()
     for filename in (
         "L01-A-01-clean.svg",
+        "L02-A-01-clean.svg",
         "L08-A-01-many-crossings.svg",
         "L08-A-02-fewer-interpretable.svg",
         "L15-A-01-clean.svg",
@@ -151,6 +152,12 @@ def test_support_resistance_importer_embeds_only_curated_first_view_figures(tmp_
     assert "![Figure 1.1 — Price revisits a similar lower area in this illustrative sequence; no support boundary is drawn.](/static/academy/support-resistance/L01-A-01-clean.svg)" in lesson_1
     assert "*Repeated lower reactions around a broad area (illustrative chart).*" in lesson_1
     assert "does not implement a response-gated" in notes_1
+
+    lesson_2_body = "## 3. Lesson script and reveal timing\n\nRead structure before drawing."
+    lesson_2, notes_2 = embed_snr_figures(2, 1, lesson_2_body, static_root)
+    assert "/static/academy/support-resistance/L02-A-01-clean.svg" in lesson_2
+    assert "Figure 1.2" in lesson_2
+    assert "Figure 1.2 uses curated static asset" in notes_2
 
     lesson_8, notes_8 = embed_snr_figures(8, 3, opening, static_root)
     assert "/static/academy/support-resistance/L08-A-01-many-crossings.svg" in lesson_8

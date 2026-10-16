@@ -85,16 +85,17 @@ def embed_snr_figures(lesson_number, module_position, learner_markdown, static_r
             f"but its figure numbering expects Module {expected_module}."
         )
 
+    heading_matches = list(_HEADING.finditer(learner_markdown))
     heading = next(
         (
-            match for match in _HEADING.finditer(learner_markdown)
+            match for match in heading_matches
             if "student-facing" in match.group(2).casefold()
         ),
-        None,
+        heading_matches[0] if heading_matches else None,
     )
     if heading is None:
         raise CommandError(
-            f"Support & Resistance Lesson {lesson_number} has no student-facing heading "
+            f"Support & Resistance Lesson {lesson_number} has no heading "
             "for its approved figure."
         )
 
@@ -317,7 +318,7 @@ def build_instructor_notes(item, source_path, manifest_status, extra=""):
         str(item.get("special_rules", "")),
     ]
     if extra.strip():
-        lines.extend(["", "Extracted answer and instructor material:", extra.strip()])
+        lines.extend(["", "Additional instructor and media notes:", extra.strip()])
     lines.extend([
         "",
         "Imported as a draft only. Confirm lesson media, progressive reveal, assessment behavior, "

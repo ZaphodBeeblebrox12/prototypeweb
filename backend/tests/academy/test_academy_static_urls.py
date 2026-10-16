@@ -62,3 +62,14 @@ class StaticAssetUrlTests(SimpleTestCase):
         self.assertIsNone(
             finders.find("academy/support-resistance/L18-B-02-retry-reference-internal.svg")
         )
+
+        for filename in (
+            "L10-A-02-close-away.svg",
+            "L10-A-03-follow-through.svg",
+            "L12-A-02-return-inside.svg",
+            "L13-C1-hold.svg",
+            "L13-C2-fail.svg",
+            "L14-C-01-return-through.svg",
+        ):
+            with self.subTest(hidden_filename=filename):
+                self.assertIsNone(finders.find(f"academy/support-resistance/{filename}"))
