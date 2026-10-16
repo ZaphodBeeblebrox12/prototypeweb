@@ -149,6 +149,21 @@ class CourseCommunityAccessTests(TestCase):
         self.assertContains(response, "Connect Discord")
         self.assertTrue(compute_target_access(self.user.pk).has_plan)
 
+    def test_access_manager_includes_channels_for_course_only_community_access(self):
+        activated, _entitlement = activate_paid_subscription(self.intent)
+        self.assertTrue(activated)
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("manage-subscription"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["community_only_access"])
+        self.assertContains(response, "Community access from a course")
+        self.assertContains(response, "CONSTRUCT community")
+        self.assertContains(response, "CONSTRUCT members")
+        self.assertContains(response, "Connect Telegram")
+        self.assertEqual(len(response.context["channels"]), 2)
+
     def test_community_term_cannot_be_changed_after_payment_history_exists(self):
         self.offer.community_access_months = 6
 
