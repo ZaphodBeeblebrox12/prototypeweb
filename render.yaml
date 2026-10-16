@@ -31,12 +31,36 @@ services:
         value: "3.12"
       - key: WEB_CONCURRENCY
         value: "2"
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_BOT_USERNAME
+        sync: false
+      - key: TELEGRAM_CONTROL_CHANNEL_ID
+        sync: false
+      - key: PROVISION_SHARED_SECRET
+        sync: false
+      - key: PROVISION_BOT_URL
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: MAXMIND_ENABLED
+        value: "False"
       - key: EMAIL_BACKEND
         value: django.core.mail.backends.smtp.EmailBackend
       - key: EMAIL_HOST
         sync: false
       - key: EMAIL_PORT
-        value: "587"
+        sync: false
       - key: EMAIL_USE_TLS
         value: "True"
       - key: EMAIL_HOST_USER
