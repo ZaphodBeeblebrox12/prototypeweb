@@ -16,6 +16,21 @@ from .models import (
 )
 
 
+def _enqueue_community_reconcile(user_id, reason):
+    """Refresh mapped Telegram/Discord access after course access changes."""
+    import logging
+
+    try:
+        from apps.jobs.enqueue import enqueue_reconcile
+        enqueue_reconcile(user_id, reason=reason)
+    except Exception:
+        # Course fulfilment should remain committed; the regular reconcile
+        # sweep can retry if queueing is temporarily unavailable.
+        logging.getLogger(__name__).exception(
+            "Could not queue community access reconciliation for user %s", user_id
+        )
+
+
 def get_active_entitlement(user, course, at=None):
     if not getattr(user, "is_authenticated", False):
         return None
@@ -69,6 +84,11 @@ def grant_course_entitlement(*, user, offer, payment_intent=None, granted_by=Non
         raise ValidationError("Cannot grant access to a draft course.")
     now = timezone.now()
     requested_expiry = now + timedelta(days=offer.access_duration_days) if offer.access_duration_days else None
+    community_granted_at = now if offer.community_access_days else None
+    community_expires_at = (
+        now + timedelta(days=offer.community_access_days)
+        if offer.community_access_days else None
+    )
 
     with transaction.atomic():
         entitlement, created = CourseEntitlement.objects.get_or_create(
@@ -76,7 +96,10 @@ def grant_course_entitlement(*, user, offer, payment_intent=None, granted_by=Non
             defaults={
                 "offer": offer, "payment_intent": payment_intent, "source": source,
                 "status": CourseEntitlement.Status.ACTIVE, "starts_at": now,
-                "expires_at": requested_expiry, "granted_by": granted_by,
+                "expires_at": requested_expiry,
+                "community_access_granted_at": community_granted_at,
+                "community_access_expires_at": community_expires_at,
+                "granted_by": granted_by,
             },
         )
         if created:
@@ -102,19 +125,36 @@ def grant_course_entitlement(*, user, offer, payment_intent=None, granted_by=Non
             entitlement.status = CourseEntitlement.Status.ACTIVE
             entitlement.starts_at = now if not was_active else entitlement.starts_at
             entitlement.expires_at = final_expiry
+            # A bundled community term has its own clock. A repeat grant of
+            # an offer that includes community starts a fresh community term;
+            # an unrelated reactivation must not silently revive an old term.
+            if offer.community_access_days:
+                entitlement.community_access_granted_at = community_granted_at
+                entitlement.community_access_expires_at = community_expires_at
+            elif not was_active:
+                entitlement.community_access_granted_at = None
+                entitlement.community_access_expires_at = None
             entitlement.revoked_at = None
             entitlement.revocation_reason = ""
             entitlement.granted_by = granted_by
             entitlement.save(update_fields=[
                 "offer", "payment_intent", "source", "status", "starts_at", "expires_at",
+                "community_access_granted_at", "community_access_expires_at",
                 "revoked_at", "revocation_reason", "granted_by", "updated_at",
             ])
 
         CourseEntitlementEvent.objects.create(
             entitlement=entitlement, payment_intent=payment_intent, actor=granted_by,
             event_type=event_type, reason=reason,
-            details={"source": source, "offer_id": str(offer.pk),
-                     "expires_at": entitlement.expires_at.isoformat() if entitlement.expires_at else None},
+            details={
+                "source": source,
+                "offer_id": str(offer.pk),
+                "expires_at": entitlement.expires_at.isoformat() if entitlement.expires_at else None,
+                "community_access_expires_at": (
+                    entitlement.community_access_expires_at.isoformat()
+                    if entitlement.community_access_expires_at else None
+                ),
+            },
         )
         return entitlement, True
 
@@ -138,12 +178,19 @@ def revoke_course_entitlement_for_payment(payment_intent, *, reason):
         entitlement.status = CourseEntitlement.Status.REVOKED
         entitlement.revoked_at = timezone.now()
         entitlement.revocation_reason = reason[:240]
+        had_community_access = entitlement.community_access_granted_at is not None
         entitlement.save(update_fields=["status", "revoked_at", "revocation_reason", "updated_at"])
         CourseEntitlementEvent.objects.create(
             entitlement=entitlement, payment_intent=payment_intent,
             event_type=CourseEntitlementEvent.EventType.REVOKED, reason=reason,
             details={"payment_intent_id": str(payment_intent.pk)},
         )
+        if had_community_access:
+            transaction.on_commit(
+                lambda user_id=payment_intent.user_id: _enqueue_community_reconcile(
+                    user_id, "course community access revoked"
+                )
+            )
         return True
 
 
@@ -214,6 +261,12 @@ def activate_course_payment(payment_intent, offer):
                      "entitlement_id": str(entitlement.pk)},
         )
         transaction.on_commit(lambda intent_id=payment_intent.pk: _notify_course_purchase(intent_id))
+        if offer.community_access_days:
+            transaction.on_commit(
+                lambda user_id=payment_intent.user_id: _enqueue_community_reconcile(
+                    user_id, "course community access granted"
+                )
+            )
     return created, entitlement
 
 
