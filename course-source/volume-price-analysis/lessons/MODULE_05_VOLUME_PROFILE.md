@@ -41,6 +41,10 @@ In a chart review, do not begin with a claim like “price must bounce at this n
 
 Volume Profile answers where activity was concentrated in a particular period. It does not, by itself, tell you whether the next move will rise or fall. Its value is in mapping the context in which price will be interpreted. Use it to frame the question, and use current price behaviour to assess the answer.
 
+### Extended spoken case analysis — additional narration
+
+A profile must be read as the result of a selected data series and a selected window. To make that concrete, put the same synthetic price path on screen and build a profile over the first half, then over the entire path. The shapes differ because the question and period differ. Neither is wrong; they describe different sets of activity. Ask students to write the window in the chart note. If they cannot tell what bars were included, they cannot interpret the profile responsibly. Explain the difference between a high-activity price region and a resting-order map: the profile summarises completed activity according to the tool's rules, whereas a live order book, where available, describes currently displayed orders and has its own limitations. The learner should return to price after identifying a node. Does price currently sit within that region, approach its edge, or travel through it? The response matters more than the node's shape alone. This exercise makes the profile a contextual map rather than a forecast machine and prevents the mistake of assuming every broad region must become future support or resistance.
+
 ### Knowledge check
 1. What question does volume through time answer, and what question does Volume Profile answer?
 2. Why must the selected profile period be stated?
@@ -84,6 +88,10 @@ Combine the profile with the price structure. Mark the profile period, POC, Valu
 In the ChartLab, two profiles will be built from different periods of the same synthetic market. The POC and value boundaries will differ. The learner must explain why both can be valid descriptions of their respective windows and why neither can be used as a stand-alone prediction. This helps demonstrate that a profile is contextual information, not an immutable property of the instrument.
 
 Your takeaway is to define these levels correctly before interpreting them. POC tells you the profile's largest concentration row. The Value Area marks a range containing a chosen share of volume under a stated calculation. Their practical meaning comes from the selected period, the wider structure and the market's response when price interacts with them.
+
+### Extended spoken case analysis — additional narration
+
+The POC and Value Area are reference statistics, not universal fair-value markers. The POC answers which row has the highest assigned volume in the selected profile. The Value Area summarises a chosen share of the profile's total activity under a platform's method. If the profile period, row size, volume data or chosen percentage changes, the references may change too. This makes consistency important during study. In the lab, ask learners to compare two periods and explain why their POCs differ. It may be because the market did more business at a different price during the second period, or because the profile window includes new activity. The learner should not immediately infer that the market must revisit one POC or reject the other. Instead, observe the interaction: did price hold beyond the prior value area, return inside it, or move through the POC region without much pause? Keep the focus on how the market is behaving now. The profile provides a set of reference points based on past activity; it does not dictate what future participants will do.
 
 ### Knowledge check
 1. What exactly does the Point of Control identify?
@@ -129,6 +137,10 @@ For a ChartLab, use a profile with two high-volume nodes connected by a low-volu
 
 High- and low-volume nodes can help you organise the chart and identify areas that deserve attention. Their interpretation must remain conditional. Let the profile define the area and let current price action determine whether the market appears to be rotating, rejecting or moving through it.
 
+### Extended spoken case analysis — additional narration
+
+A high-volume node can behave differently depending on whether price arrives from above, below or the middle of the profile. If price approaches from below with sustained upward progress, it may pass through the node and create a new region of activity above it. If it enters with little progress and overlapping bars, it may rotate within the node. If it approaches after a sharp decline, participants may respond differently again. The node itself has no direction. A low-volume area is similar: it can be crossed quickly if directional progress continues, but it can also become a place of hesitation once conditions change. In the exercise, have the learner draw the expected path lightly but not commit to it; then reveal the actual response and ask what evidence required an update. This is a useful place to discuss selection bias: if we look backward across many profile levels, we can usually find a node that appears to explain a past reaction. Before using a level, explain why it was relevant before the outcome. That is how we distinguish a usable reference from an attractive story assembled after the fact.
+
 ### Knowledge check
 1. What does a high-volume node describe?
 2. Why might a low-volume node be crossed quickly, and why is that not guaranteed?
@@ -170,6 +182,10 @@ Value migration can also be incomplete or mixed. The POC may shift up while the 
 In the ChartLab, show three consecutive synthetic session profiles. The first concentrates around a lower range, the second overlaps and extends higher, and the third either continues higher or rotates back. Have learners compare POC, value boundaries, overlap and price swing structure. Reveal two endings so students see that a migrating profile can precede further movement or temporary failure.
 
 Value migration helps answer: where is the market doing more business now relative to before? It can support a reading of acceptance at different prices when combined with structure, but it does not predict future movement by itself. Keep the comparison consistent and let actual price behaviour determine whether the change persists.
+
+### Extended spoken case analysis — additional narration
+
+Value migration is best understood through repeated, comparable observations rather than one moving line. In the three-session example, record POC, value-area overlap, and the price swing structure. A POC shift higher may suggest that the concentration of activity has moved upward, but if the sessions overlap heavily and price remains in a broad range, the change may be modest. If price moves beyond the prior value area and subsequent activity develops there, the evidence for acceptance at higher prices becomes more coherent. Even then, it can reverse. A profile is a record of what occurred during the period; a developing profile may shift before the session closes. Teach learners to distinguish provisional, developing references from completed-session references. Ask them to narrate the chart in neutral language: “The next session's activity is concentrating higher and price has held above prior value,” rather than “the market is definitely bullish.” Then ask what would contradict the reading: return into prior value, failure to hold a higher low, or a fresh range that overlaps the old distribution.
 
 ### Knowledge check
 1. What does a rising POC across comparable sessions describe?
@@ -214,6 +230,10 @@ The other crucial issue is timeframe alignment. A session VWAP is an intraday re
 The ChartLab should ask learners to build a level map and write a conditional scenario—not issue an immediate buy/sell verdict. For example: “Price is above session VWAP but has stalled at the prior range edge near the top of a high-activity area. A sustained hold above the range would support an acceptance hypothesis; return inside and a failed reclaim would support a rejection hypothesis.” This is useful because it respects all the information without pretending the tools can eliminate uncertainty.
 
 Your goal is to make the tools work for the analysis, not to make the analysis obey the tools. Volume Profile tells you where activity was concentrated. VWAP tells you how current price compares with a volume-weighted average over a specified period. Price structure and follow-through show how the market is responding now. Together they can improve context, but the complete trading decision still requires a defined thesis, invalidation and risk plan.
+
+### Extended spoken case analysis — additional narration
+
+To prevent indicator clutter, ask learners to explain each tool's job in one sentence. Volume Profile maps distribution by price over a specified period. VWAP estimates the volume-weighted average price over its reset or anchor period. Swing structure records how price is progressing relative to prior highs and lows. These measures overlap in their inputs, so their agreement should not be counted as three independent confirmations. In the sample chart, price is above VWAP and approaching a profile node at a prior range boundary, but upside progress has stalled. The analyst should preserve all three facts. A simple rule like “above VWAP means long” throws away the resistance evidence. A rule like “node means reversal” ignores the upward context. Use conditional scenarios: acceptance above the boundary would support continuation; return into the prior range with failed reclaim would support rejection. The student should then decide whether a trigger appears and whether there is enough room relative to the invalidation. The value of tools is not in producing a unanimous vote; it is in making the chart's structure and unresolved questions easier to see.
 
 ### Knowledge check
 1. How do Volume Profile and VWAP differ?

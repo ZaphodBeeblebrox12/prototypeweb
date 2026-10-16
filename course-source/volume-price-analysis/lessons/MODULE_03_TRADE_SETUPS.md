@@ -39,6 +39,10 @@ Here is a practical pre-entry checklist. First, is there a recognisable trend st
 
 The skill is not finding a way to enter every trend. It is learning to wait for a location where the thesis and the risk can both be described clearly. You will miss some moves. That is unavoidable. A repeatable process is designed to avoid low-quality decisions, not to participate in every price fluctuation.
 
+### Extended spoken case analysis — additional narration
+
+The most important moment in this lesson is when the student does not enter. On the screen, show the steep impulse and draw the distance from the late breakout candle to the structural invalidation. The stop distance is large because the market has already travelled far. Even if the uptrend remains intact, the trade may have poor geometry. Then rewind to the pullback near a previous breakout zone. Here there is a reason to watch: the price location provides a clear question and a nearby structural reference. Explain that an area of interest is not yet an entry. A trigger might be a recovery through a local swing; a different method might require a retest or bar close. Whatever the method, specify it before the next candle. Compare the two cases using the same risk worksheet. Ask which one gives the student a clearer thesis and where the idea becomes invalid. The answer should be about the quality of the plan, not whether one chart later rose more. The student is learning to wait for conditions that can be described and managed, not to chase whichever chart currently looks strongest.
+
 ### Knowledge check
 1. What is the difference between a setup area and an entry trigger?
 2. Which pullback behaviours might support or weaken a trend-continuation hypothesis?
@@ -80,6 +84,10 @@ A practical comparison is to study two pullbacks that begin after similar upward
 For your own plan, define which structural feature matters. Some methods use the prior swing low; others use a volatility-adjusted or time-based boundary. There is no single invalidation rule for all traders. What matters is that the boundary is chosen before the outcome and is relevant to the thesis. If the pullback exceeds the boundary, do not reclassify it after the fact just to preserve the trade idea.
 
 The real question is not “How far has price pulled back?” It is “What is this pullback doing to the structure and the evidence behind the prior move?” If the countertrend move is making little progress and failing to damage the structure, a continuation scenario may remain plausible. If it is making sustained progress against the trend, you should not ignore that evidence. Both readings must remain open until price resolves the question.
+
+### Extended spoken case analysis — additional narration
+
+A useful pullback comparison must account for both distance and time. A decline that retraces half the impulse over two bars may have a different character from a shallow decline that drifts for ten bars. Neither is automatically better. Add ranges and volume to the comparison. If the impulse made broad upward progress on elevated activity and the pullback consists of smaller bars with subdued activity, a continuation hypothesis may remain plausible. If the pullback starts printing wider downside bars, closes near their lows, and breaks the prior higher low, the counter-move is changing the structure. Do not allow the phrase “buy the dip” to protect the original thesis from evidence. Make students freeze both charts after three pullback bars and write what they currently know, not what the whole chart will later reveal. When more bars appear, they can update the read. This is a useful way to teach real-time reasoning and reduce hindsight bias. The lesson is not to find the most elegant pullback after the event; it is to identify what would need to happen next before committing to a decision.
 
 ### Knowledge check
 1. What is a useful way to compare a pullback with the impulse that preceded it?
@@ -123,6 +131,10 @@ A zone should also be evaluated relative to the intended trade. Where is the nex
 
 For the exercise, mark support and resistance before revealing the next sequence. At each zone, write the test condition, the evidence that would suggest acceptance, the evidence that would suggest rejection, and the invalidation for each scenario. Then reveal the chart's development. A correct process does not require predicting the outcome. It requires defining alternatives clearly enough to respond without improvising.
 
+### Extended spoken case analysis — additional narration
+
+Treat support and resistance as zones that help organise a decision, not as precise prediction lines. When price reaches a zone, the analyst's first job is to examine the approach and response. Did price arrive in a fast impulse or a slow drift? Did the test move through the area and close beyond it, or did price return? What did volume do relative to a comparable baseline? If price rejects the zone, what later evidence would show that the rejection matters? If price accepts beyond it, what would demonstrate that the earlier barrier no longer contains price? These questions keep the learner from entering simply because price touched a line. Another useful point is that a level can be relevant but no longer tradable. If the next opposing zone is very close, a theoretically valid setup may offer little room. If the invalidation point is far away, the risk budget may dictate a much smaller position or no trade. Ask learners to include the next opposing level in every exercise. The quality of a decision depends on the whole nearby structure, not only the level at which a candle happens to react.
+
 ### Knowledge check
 1. Why is a support/resistance zone not a guaranteed reversal point?
 2. What distinguishes rejection from acceptance in the following bars?
@@ -162,6 +174,10 @@ A range can also resolve in the direction of the preceding trend. For instance, 
 Plan a range trade in conditional language. If testing the lower edge, what behaviour would suggest the level is holding? What would show that the range is breaking down? If price tests the upper edge, what would support rejection and what would support an upside breakout? Where would the thesis be invalidated? If price is in the centre, is there a compelling location at all? “No trade in the middle” is not an inflexible law, but it can be a useful filter when the setup depends on range boundaries.
 
 Range analysis also requires patience. Price can overshoot boundaries because markets are dynamic and levels are not exact. It can make several attempts before resolving, or it can produce a false breakout and later break out for real. The goal is not to guess which edge will hold. It is to understand that the edge is where new information becomes most relevant, then assess the response.
+
+### Extended spoken case analysis — additional narration
+
+Range edges matter because they are places where prior price behaviour repeatedly changed, but they are not guaranteed turning points. Use a range that has at least two clear tests at each side and show how the market behaves near the middle versus at the edge. At the edge, there is a defined question: will price be rejected back into the range, or will it be accepted beyond the boundary? At the middle, price may have room to move in either direction but often lacks the same clean reference for invalidation. This does not mean every middle-of-range trade is wrong; it means that a setup based on range-edge behaviour may no longer apply there. Show an upper-edge false break that returns into the range, then show price later breaking out for real. The first failure did not guarantee that price would remain inside the range indefinitely. Ask learners to define a no-trade condition: for example, when price is too close to the middle for the chosen range-edge plan, or when the boundaries are not clear. The point is to match the method to the structure actually present.
 
 ### Knowledge check
 1. Why might the middle of a range offer less attractive conditions than an edge?
@@ -206,6 +222,10 @@ Use a simple grading rubric: context clear; location justified; price-volume evi
 Do not confuse selectivity with perfectionism. No checklist removes uncertainty. The point is to avoid taking trades whose rationale is difficult to explain or whose risk is not controlled. A good process will sometimes lead to a losing trade, and an impulsive process will sometimes make money. Judge the quality of the decision from the information available at the time, not solely from the outcome.
 
 Your most valuable skill may be learning to write: “This is not ready yet.” The market does not owe you a trade. If the level, evidence, trigger or risk is unclear, preserving capital and attention can be the better decision. A potential setup becomes a trade plan only when the conditions are defined well enough to manage uncertainty.
+
+### Extended spoken case analysis — additional narration
+
+A setup-quality checklist should protect the learner from inventing reasons after falling in love with a chart. Have them score each candidate with the same questions and allow an “unknown” answer. Unknown should not be silently counted as yes. For example, the chart might have a clear trend and a pullback zone, but no trigger has appeared. The setup is worth monitoring, not entering. Another chart may have a good-looking breakout but poor room before the next resistance; its pattern may be valid while the trade economics are not. A third may have a strong apparent signal but unreliable volume data; the learner should lower confidence in the volume-specific part of the argument. The exercise needs a debrief on process versus result. A rejected candidate may later make a large move. That does not mean rejecting it was irrational if the predefined conditions were absent. Conversely, an impulsive entry may win by chance. Ask learners to justify decisions using what was visible at the time. Over time, this produces a reviewable process, rather than a collection of anecdotes about charts that would have worked.
 
 ### Knowledge check
 1. Name the five setup filters and explain why each matters.

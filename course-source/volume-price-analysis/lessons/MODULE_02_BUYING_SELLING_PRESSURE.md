@@ -37,6 +37,10 @@ Use an evidence ladder. At the base is the bar description: range, close and act
 
 This is the difference between reading pressure and calling a direction. We are not trying to name the winner before the match is over. We are identifying which side's effort appears to be producing progress, in which location, and whether that result persists. When you use that language consistently, your analysis becomes easier to test and improve.
 
+### Extended spoken case analysis — additional narration
+
+To make “pressure” more than a metaphor, ask the learner to point to the specific progress that supports their statement. If they say buying pressure appears stronger, can they show upward closes near the highs, a break of a relevant swing, or repeated failures of sellers to extend the decline? If they only point to a green candle, their evidence is incomplete. The same standard applies to selling pressure. A red bar with high volume is not enough unless we know what price achieved and where it happened. In a balanced auction, both sides can transact heavily without either pushing the market far. In a directional move, one side's activity may be associated with clearer progress. Use “associated with” because the chart does not identify every buyer's or seller's urgency, nor can it distinguish all order types. The exercise should train students to build an evidence chain: observable bar features, structural location, sequence, then conditional interpretation. If the next bar contradicts the interpretation, the student should update the thesis rather than defend the old label. That's not weakness; it is the discipline required to analyse a market that reveals information gradually.
+
 ### Knowledge check
 1. Why is “buyers are definitely in control” stronger than the chart evidence supports?
 2. What matters in addition to a candle's close location?
@@ -78,6 +82,10 @@ The terms “confirmation” and “support” are often confused. A high-volume
 For this lesson, use a progress audit. Mark the prior level. Measure the bar's range against recent bars. Note the closing position and relative volume. Then study the next three to five bars: did they extend the move, hold the level, or return through it? Do not require a fixed number of bars for all strategies; the exercise uses a fixed window to teach disciplined observation. In real analysis, the relevant horizon should match the timeframe and the structure being studied.
 
 A move supported by volume is not a trade signal by itself. It is a move whose activity and result fit a hypothesis better than some alternatives. The final test is always whether the market behaves in a way that keeps the hypothesis alive.
+
+### Extended spoken case analysis — additional narration
+
+A move supported by volume should be judged by the quality of the result rather than by the volume multiple alone. For the walkthrough, put a ruler on the chart and compare the breakout range with the median of recent ranges. Then note the closing position. Did the bar close well outside the boundary, or did its close return into the prior area? Next, reveal the following bars. A breakout that closes beyond resistance and holds the boundary has a different story from a large bar whose progress is erased almost immediately. Do not make the lesson depend on one ideal candle. Some successful breakouts may begin with modest activity; others may occur during a burst of participation. If a learner insists that every breakout requires a precise multiple of average volume, ask what evidence justifies that threshold and whether it was tested for this instrument and timeframe. In the absence of such testing, it is a rule of thumb, not a law. The robust process asks how price and activity fit together, what happens next, and whether the plan offers sensible risk if the interpretation is wrong.
 
 ### Knowledge check
 1. Why can a breakout succeed without an extraordinary volume spike?
@@ -121,6 +129,10 @@ The same principle applies to large candles with long wicks. A large amount of a
 
 The practical question is not “What hidden story can I tell about this bar?” It is “What explanations fit the evidence, what other explanations remain possible, and what subsequent behaviour would help distinguish them?” Heavy activity with little progress is valuable precisely because it tells you the market encountered something it did not move through easily. It does not yet tell you what will happen next.
 
+### Extended spoken case analysis — additional narration
+
+The word “absorption” is attractive because it supplies a clean explanation for a confusing chart. Use it carefully. What the chart shows may be high relative volume, limited upward progress, a repeated failure near the same zone, and later rejection. Those observations can be consistent with incoming buying being met by available selling interest. But the chart alone does not prove the mechanism or identify the participants involved. A temporary balance, event-related trading, or the limitations of the data feed may also explain the appearance. The instructional goal is to notice the mismatch and construct a testable hypothesis, not to teach students to narrate an invisible order book from OHLCV bars. Have the learner describe the evidence in neutral words first, then use “possible absorption” only as one explanation. To distinguish it from other explanations, look at the next interaction with the level: does price repeatedly fail to advance, or does it later break through and remain beyond the zone? This is where the chart's evolving structure does the work. An honest analyst can say “we do not know yet,” then identify the next observation that would make the reading clearer.
+
 ### Knowledge check
 1. What are the observable features of a high-effort, low-result bar?
 2. Why is absorption a hypothesis rather than something one candle proves?
@@ -163,6 +175,10 @@ For your journal, avoid words like “exhausted” unless you define what you ob
 
 Weakening pressure is best treated as an early warning about the quality of a move. It invites closer examination of structure, follow-through, and risk. It does not compel a prediction. The goal is to be responsive to new evidence without anticipating a reversal simply because the chart has become less comfortable.
 
+### Extended spoken case analysis — additional narration
+
+Weakening pressure is often confused with exhaustion. A series of smaller advances can tell us that upward progress is slowing, but it does not prove the buyers have disappeared or that the market must reverse. To make this distinction concrete, mark the size of each successive price push on a synthetic trend chart. The first covers 12 points, the next 8, and the next 5. Ask students whether this alone defines a short. It does not. It shows diminishing progress over those pushes. Now add the fact that the last two attempts close away from their highs near a prior resistance zone. The warning is more specific. Finally, show price breaking a meaningful higher low and failing to reclaim it. That is a structural change that may support a reversal scenario. Another chart can show smaller advances followed by renewed expansion and a new high; this teaches that weakening can be temporary. Use the language of evidence strength: initial clue, stronger warning, structural change. A student who can tell these apart is less likely to enter a countertrend trade merely because the trend looks tired.
+
 ### Knowledge check
 1. What is the difference between weakening and reversing?
 2. Why should a trader avoid automatically opening a countertrend trade when a trend's progress slows?
@@ -204,6 +220,10 @@ A robust analysis also keeps alternative explanations alive. If you think a brea
 The idea of price-volume disagreement is most valuable when it changes what you examine next. It can tell you to pay attention to a level, compare the current move with prior pushes, or wait for a market response before entering. It should not be turned into a rule such as “new high plus lower volume equals sell.” Any such rule needs an explicit definition, instrument and timeframe, risk rules, and empirical testing across many examples.
 
 Your practical standard is simple: identify the contradiction, explain at least two possible causes, and define a price behaviour that would help distinguish them. If you cannot do those three things, you have a pattern label, not an analysis.
+
+### Extended spoken case analysis — additional narration
+
+A disagreement between price and volume should change the next question you ask. It need not change the direction of your trade immediately. If a new high occurs on lower volume, ask whether price can hold the new territory and whether progress remains easy. If high volume appears with little range expansion, ask whether the market is balancing at a level, reacting to an event, or preparing to continue after a pause. For the lab, require learners to write both a preferred reading and a meaningful alternative—not a silly straw man, but an explanation they could genuinely believe. Then define a discriminator: a later close, a retest, a swing break, or a failure to hold beyond the range. This makes the analysis falsifiable. It also creates a record that can be reviewed after many examples: which observations proved helpful, under what market conditions, and which assumptions were too loose? One case will rarely settle those questions. Repeated chart review will. The learner should leave understanding that “divergence” is a description of a mismatch, not a command to fade the prevailing move.
 
 ### Knowledge check
 1. Why does a new price high on lower volume not automatically signal a reversal?
