@@ -1,0 +1,53 @@
+# TradeThesis Academy staging. This blueprint does not auto-deploy commits.
+# Keep the service at repo root so course sources outside backend/ remain available.
+services:
+  - type: web
+    name: tradethesis-academy-staging
+    runtime: python
+    plan: free
+    branch: feature/tradethesis-academy
+    autoDeployTrigger: off
+    buildCommand: cd backend && bash build.sh
+    startCommand: cd backend && gunicorn config.wsgi:application --workers 2 --threads 4 --timeout 120
+    healthCheckPath: /health/
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: tradethesis-academy-staging.onrender.com
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://tradethesis-academy-staging.onrender.com
+      - key: SITE_BASE_URL
+        value: https://tradethesis-academy-staging.onrender.com
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tradethesis-academy-staging-db
+          property: connectionString
+      - key: PYTHON_VERSION
+        value: "3.12"
+      - key: WEB_CONCURRENCY
+        value: "2"
+      - key: EMAIL_BACKEND
+        value: django.core.mail.backends.smtp.EmailBackend
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USE_TLS
+        value: "True"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+
+databases:
+  - name: tradethesis-academy-staging-db
+    databaseName: tradethesis_academy_staging
+    user: tradethesis_academy
+    plan: free

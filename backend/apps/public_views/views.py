@@ -6,6 +6,7 @@ import logging
 from typing import Optional, Dict, Any, List
 
 from django.conf import settings
+from django.http import HttpResponse
 from django.views.generic import TemplateView
 
 from apps.subscriptions.models import Plan, PlanPrice, GeoPlanPrice
@@ -16,6 +17,11 @@ from apps.subscriptions.services import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def health_check(request):
+    """Minimal unauthenticated endpoint for the hosting platform's health check."""
+    return HttpResponse("ok", content_type="text/plain")
 
 
 class LandingPageView(TemplateView):

@@ -2,7 +2,7 @@
 
 **Target repository:** `ZaphodBeeblebrox12/prototypeweb`  
 **Working branch:** `my-new-branch`  
-**Status:** Django Academy is imported on draft PR #4, which targets `my-new-branch`. The latest verified CI run passed on Python 3.11 and 3.12 (666 passed, 1 skipped per runtime); all three source-course validators, the Support & Resistance browser smoke test and the integration-target guard also passed. These are isolated checks, not a staging or production sign-off. Catalogue records have not been seeded, public-to-Django routing is not deployed, and the end-to-end learner journey remains unverified.
+****Status:** Django Academy is imported on draft PR #4, which targets `my-new-branch`. The latest verified CI run passed on Python 3.11 and 3.12, along with the Support & Resistance browser smoke test and integration-target guard. These are code-level checks only. Catalogue records have not been seeded into a hosted database, routing has not been verified against a live backend, and the end-to-end learner journey remains untested.ngo Academy is imported on draft PR #4, which targets `my-new-branch`. The latest verified CI run passed on Python 3.11 and 3.12; all three source-course validators, the Support & Resistance browser smoke test and the integration-target guard also passed. These are isolated checks, not a staging or production sign-off. Catalogue records have not been seeded, public-to-Django routing is not deployed, and the end-to-end learner journey remains unverified.
 
 ## 1. Verified current state
 
@@ -19,7 +19,7 @@ The branch contains the static TradeThesis website, course-room prototype, learn
 - Support & Resistance course: `course-content/support-resistance/`.
 - Existing curriculum metadata: `course-integration/curriculum.json`.
 
-The draft integration PR now includes a self-contained Django project under `backend/` (`backend/manage.py`, `backend/config/`, app code, migrations and tests). Django account and learning templates exist, and `site/member-access.html` links to the real authentication routes rather than accepting credentials in a static form. However, until routing is integrated and deployed, public member screens do not reach the Django runtime and remain previews. The runtime has not yet been verified in staging.
+The draft integration PR now includes a self-contained Django project under `backend/` (`backend/manage.py`, `backend/config/`, app code, migrations and tests). Django account and learning templates exist, and `site/member-access.html` links to the real authentication routes rather than accepting credentials in a static form. Static preview member screens and Django routes are still separate services. `site/member-access.html` now reads `meta[name="academy-base-url"]`, and `site/assets/academy-routing.js` rewrites account/learning links to that configured backend host. The default is the planned `https://tradethesis-academy-staging.onrender.com`; it must be changed if the actual service hostname differs. This configuration is not evidence that the host has been created or that the journey has been tested.
 
 ### Django Academy implementation imported on a draft feature PR
 
@@ -51,7 +51,7 @@ When adding a course:
 
 Prefer full-page navigation for the first release; do not add cross-origin token authentication or build a new frontend API layer unless the deployment requires it.
 
-**Preferred topology:** serve public marketing pages and Django learner/authentication routes from the same origin, using Django URL routing or a reverse proxy so `/learn/`, `/accounts/`, checkout and required media routes reach Django. If the final host cannot provide that arrangement, use a dedicated learning host with ordinary browser navigation and explicitly configure session/security boundaries. The hosting/domain choice remains a deployment decision, not something inferred from this static repository.
+**Current staging topology:** keep the static marketing site and Django Academy on their existing separate hosts and use ordinary full-page navigation from the public member-access page to Django. The configured base URL is centralized in the page's `academy-base-url` meta tag. Login/session cookies and CSRF protection stay on the Django host; do not add cross-origin token authentication or a new frontend API layer for this first release. A same-origin reverse proxy/custom-domain setup remains a later hosting option, not a prerequisite for the initial hosted test.
 
 The public-site design system should be retained when turning member/auth/academy pages into production routes. Reuse the light TradeThesis palette, typography, content width, navigation and responsive behaviour; do not replace the current product design with an unrelated generic dashboard.
 
@@ -72,13 +72,13 @@ The mapping above is the proposed implementation model; it does not mean these p
 
 ## 4. Frontend changes required
 
-1. **Member access:** `site/member-access.html` now links to Django login, sign-up and password-reset routes instead of collecting passwords in a static form. Still verify the routes, redirects and recovery flow on the chosen host.
+1. **Member access:** `site/member-access.html` keeps the branded static design and sends login, sign-up, password-reset and learner-dashboard links to the configured Academy host through `site/assets/academy-routing.js`. Update its `academy-base-url` meta value to the actual service hostname and verify redirects/recovery in staging.
 2. **Member area:** the authenticated `/learn/` page renders courses, progress and separate community access from backend state. `site/member-area.html` remains a prototype until hosting/navigation routes members to Django.
 3. **Course catalogue:** importers validate the Trading Path (30 lessons/four levels), Support & Resistance (18 lessons/six modules) and Volume Price Analysis (30 lessons/six modules). They have not been applied to the database; create-only `--apply` imports remain draft-only and do not create offers.
 4. **Checkout:** the course detail template submits to the server-side payment-start route using a selected active one-time CourseOffer. Real offers, provider/webhook configuration and the staging payment-to-entitlement journey are still unverified.
 5. **Lesson progress:** the authenticated Django progress endpoint applies server-side access checks, and the lesson page reports the response. Verify save/error/retry in the hosted journey with real session and CSRF configuration.
 6. **Drip release:** release eligibility is computed by the backend. The front end presents release state but cannot unlock a lesson by changing JavaScript or DOM state.
-7. **Media and charts:** preserve readability and zoom/open controls. Required charts/interactive ChartLab assets are not all connected to the Academy records yet. Confidential source, answers and downloads also require private source/storage and delivery.
+7. **Media and charts:** Support & Resistance has its existing image inspector; Django Academy lesson pages now load the same zoom/fit/pan control for Markdown images. Course illustration files and interactive ChartLab assets are not all mapped into Academy lesson records yet, so audit actual displayed figures and add only the lesson-specific assets needed.
 8. **Sitewide UX:** still run one hosted desktop/mobile journey across public site, login/signup/recovery, member home, course overview, lesson, checkout, locked lesson and progress/error states.
 
 ## 5. Backend and release gates
@@ -88,7 +88,7 @@ The mapping above is the proposed implementation model; it does not mean these p
 - Confirm one-time pricing, geo-pricing, checkout evidence/terms, provider webhooks and refund/dispute behaviour end to end.
 - Ensure course entitlement and community entitlement rules are distinct where required.
 - Choose private storage/delivery for paid lesson bodies and protected reference material before learner launch.
-- **Repository privacy blocker:** the current GitHub repository is public and contains paid course source plus internal instructional/reference material. A private Django route does not make copies already committed to a public repository private. Before selling any course, change the source repository's visibility or move confidential course bodies, answer keys and protected assets into a private repository/storage location; verify only appropriate public pages/assets are deployed.
+- Keep paid lesson bodies and instructor-only answers behind server-side authorization. Verify answer keys and non-learner notes never enter learner HTML, and ensure only approved preview figures/resources are linked from the public site.
 - Seed and validate products from source manifests; reject missing lessons, unstable slugs, duplicated order positions or references to absent assets.
 - Unit/regression coverage now exercises protected lesson access, progress, duplicate payment activation, course refund revocation and the separate community term. It does not substitute for hosted acceptance checks for logged-out access, unpaid users, expired/revoked access, drip release, progress save/retry and provider webhook retries.
 - Run a complete staging journey with test payment credentials before launch; no live payment credentials belong in code or this repository.
@@ -124,3 +124,13 @@ The mapping above is the proposed implementation model; it does not mean these p
 - `python manage.py seed_volume_price_analysis` validates the six-module, 30-lesson Volume Price Analysis manuscripts. With `--apply`, it creates six unpublished modules and 30 draft lessons. Learner-controlled native feedback disclosures are used for existing **Feedback** notes; instructor/answer blocks remain separate. Neither importer creates an offer/Plan or publishes course content.
 - These importers preserve the working branch's existing learner-oriented Markdown where present; they do not overwrite an existing course. Run the default validation commands before applying them to a database.
 - Included community access is recorded in calendar months separately from lesson/course access. Both the community-access dashboard state and desired Telegram/Discord permissions use the same active-entitlement rule, and the learner home shows current bundled community access even if course access has a different expiry.
+
+
+## Staging configuration added on the feature branch
+
+- A root-level `render.yaml` defines a separate Academy staging web service and PostgreSQL database, with `DATABASE_URL` wired to that database, a `/health/` endpoint and automatic deployments disabled. It points to the current feature branch for review and is not a live deployment.
+- The service commands run from the repository root and enter `backend/` for Django so the importer can read `course-integration/`, `course-content/` and `course-source/`.
+- The member links use the centralized `academy-base-url` meta setting and the default staging host. Replace it with the real deployed host before trying the links.
+- Validate the three import commands without `--apply` first, then apply once in the intended staging database. The resulting course records remain unpublished drafts with no offers; the backend has no active catalogue data until that explicit step is completed.
+- The Academy lesson page uses the existing accessible image inspector for zoom/pan on inline images. This does not replace the remaining figure-to-lesson mapping and readability audit.
+- No Render service/database was provisioned or deployed from this change, and no hosted payment, email, community-sync or mobile acceptance journey is claimed complete.
