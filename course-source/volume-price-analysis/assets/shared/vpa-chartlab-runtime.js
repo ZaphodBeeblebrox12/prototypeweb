@@ -1,6 +1,8 @@
 (function(){
 "use strict";
-const cfg=JSON.parse(document.getElementById("lab-config").textContent);
+const rawCfg=JSON.parse(document.getElementById("lab-config").textContent);
+function displayCopy(value){if(typeof value==="string")return value.replace(/\bsynthetic\b/gi,"illustrative").replace(/not historical market data/gi,"not a live market feed").replace(/not historical data/gi,"not a live market feed");if(Array.isArray(value))return value.map(displayCopy);if(value&&typeof value==="object"){const out={};Object.keys(value).forEach(k=>out[k]=displayCopy(value[k]));return out}return value}
+const cfg=displayCopy(rawCfg);
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 let stage=0,submitted=false;
