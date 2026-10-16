@@ -322,6 +322,8 @@ jobs:
 
             await keyboardPage.close();
             await keyboardChartPage.close();
+            assert.deepEqual(errors, [], "JavaScript errors across all parent and keyboard test pages: " + errors.join("; "));
+            assert.deepEqual(bad, [], "HTTP errors across all parent and keyboard test pages: " + bad.join("; "));
             console.log(JSON.stringify({result:"PASS",lesson5Views:6,candidateClasses:7,gate:"support → resistance → compare → two checks → lesson completion",mobile:{parentLayout,childLayout}},null,2));
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
