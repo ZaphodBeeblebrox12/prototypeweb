@@ -9,8 +9,15 @@ from django.utils import timezone
 
 from apps.academy.models import Course, CourseEntitlement, CourseOffer
 from apps.bot_integration.access import compute_target_access
-from apps.bot_integration.models import PlanChannelMapping, TelegramAccount, UserChannelAssignment
-from apps.bot_integration.services.channel_sync import build_channel_display, get_telegram_access_state
+from apps.bot_integration.models import (
+    PlanChannelMapping,
+    TelegramAccount,
+    UserChannelAssignment,
+)
+from apps.bot_integration.services.channel_sync import (
+    build_channel_display,
+    get_telegram_access_state,
+)
 from apps.payments.models import PaymentIntent
 from apps.payments.services import activate_paid_subscription, apply_refund_policy
 from apps.subscriptions.models import Plan, PlanPrice
