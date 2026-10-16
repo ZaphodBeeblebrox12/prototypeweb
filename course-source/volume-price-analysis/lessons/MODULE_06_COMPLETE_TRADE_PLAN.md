@@ -62,6 +62,10 @@ This is enough context to guide the next observation without pretending to know 
 
 Both are testable. If price keeps overlapping around 207–208 with no clear trigger, the appropriate note may be “unresolved; wait”.
 
+### Worked comparison — fewer lines can produce a clearer plan
+
+On a cluttered chart, twelve horizontal lines compete for attention. The range boundaries at 200 and 208 are justified by repeated turns; several lines inside the range have no clear current role. Keeping only the structure that changes the immediate question allows the learner to compare “hold beyond 208” with “return inside” without being distracted by every historical pause. Removing lines is not dumbing down analysis. It makes the reasoning easier to inspect and challenge.
+
 ### Level 1 — Notice (easy)
 
 **Task:** Price has ranged 200–208 and closes at 207.4 after trading above 208. Identify state, location and open question.
@@ -131,6 +135,10 @@ Likewise, a small-volume pullback may suggest that the move against the trend is
 Freeze a chart after the first event and record your observations. Then inspect later bars. If price reclaims the range high and holds it, write a new note explaining why the continuation scenario has gained support. Do not delete the original observation that the first candle closed back inside.
 
 In a different ending, price breaks below 53.5 and fails to reclaim it. Add that new structural evidence and revise the interpretation. It is rational to update a view when the evidence changes. It is not rational to pretend the new evidence was visible earlier.
+
+### Worked comparison — separate facts from conclusions
+
+“Price traded above 56.5 but closed at 55.8” and “volume was 1.8× the ten-bar average” are observations. “The breakout failed because large sellers absorbed buying” is a causal explanation that is not directly established by those values. A better evidence note might say that price did not retain the outside excursion, then offer failed breakout and temporary balance as alternatives. This keeps the record useful even if later bars favour a different interpretation.
 
 ### Level 1 — Notice (easy)
 
@@ -203,6 +211,10 @@ A market trades around 150–154, and price approaches the upper area after a re
 - **Wait condition:** Price overlaps between 153 and 155 without either scenario developing clearly.
 
 The wait condition is important. Not every chart must resolve immediately, and not every condition must produce a trade.
+
+### Worked comparison — a scenario without an invalidation is not testable
+
+Scenario A says price should hold above 208 and continue. If price falls back inside and cannot reclaim 208, the continuation case is weakened. Without that condition, the learner can keep explaining every outcome as temporary noise. The alternative scenario should be just as explicit: failure to hold above 208 and a return into the range. If neither scenario develops, “wait” is the decision—not permission to invent a third interpretation after every candle.
 
 ### Level 1 — Notice (easy)
 
@@ -284,6 +296,10 @@ Write down what you will do if:
 - execution differs from the expected price.
 
 The plan should prevent impulsive rule changes, not remove the need to respond to genuinely new information.
+
+### Worked comparison — position size follows risk, not conviction
+
+Assume a hypothetical entry at 50, invalidation/stop at 48 and a value of 2 currency units per price unit. Price risk is 2 × 2 = 4 currency units per unit before costs and slippage. If execution costs or instrument rules change that estimate, the plan must account for them. Do not move the stop closer merely to permit a larger position, and do not assume a favourable reward-to-risk ratio means the scenario has a high chance of success.
 
 ### Level 1 — Notice (easy)
 
@@ -395,6 +411,10 @@ After the event, ask:
 - Which evidence would justify a different decision next time?
 
 A trade that makes money can still be poorly planned. A trade that loses money can still follow a sensible, consistently applied process. The review should judge the quality of the reasoning and execution, not just whether the outcome was positive.
+
+### Worked comparison — judge the process in both outcomes
+
+Imagine a plan's trigger appears exactly as written, the defined risk is respected, and the market then hits the planned stop. The outcome is a loss; the plan may still have been followed correctly. In another case, no trigger appears and price later moves favourably without the planned entry. That missed move is not proof that waiting was wrong. Review the evidence available at decision time, whether rules were followed and what the next observation taught you—not just the final profit/loss.
 
 ### Level 1 — Notice (easy)
 
