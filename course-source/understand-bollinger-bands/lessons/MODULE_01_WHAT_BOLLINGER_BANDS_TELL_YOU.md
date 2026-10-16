@@ -78,6 +78,14 @@ Imagine two charts with price at the upper band. In Chart A, price has been movi
 
 **Case B — Movement expands.** Later, closes spread from around 100 toward 106 and the band gap widens. The widening reflects the larger recent variation, but the direction must still come from the candles and their sequence. If price keeps making higher highs and higher lows, that supports an upward reading; if it falls through a range floor, it supports a different one. The band shape is useful precisely because it describes the change without deciding the trade for you.
 
+### Second worked comparison: A widening band is not necessarily a trend
+
+Consider a market whose middle band remains close to 100. After several quiet candles, one unusually large candle moves from 99 to 106. The outer bands begin widening because the recent calculation now includes a larger price movement. That is a valid observation, but it is too early to say the market has entered a durable uptrend.
+
+Look at the next several bars. If price holds above the previous range, creates a higher swing low and then advances again, the price structure starts to support a continuation reading. If price gives back the entire jump and returns to the old range, the same expansion may simply describe a sharp failed move. The bands are doing their job in both cases: updating the frame to reflect the recent variation.
+
+Use this case to separate three questions. **What changed?** The recent price variation and the band width. **What might it mean?** A stronger directional move or a volatile false start. **What would help decide?** Where price closes next, whether it holds the broken area and whether swing structure develops. Never treat the widening itself as the confirmation.
+
 ### Common mistake
 
 **Mistake:** “The band is resistance, so price should turn.”
@@ -150,6 +158,14 @@ What is missing from that reasoning?
 
 **Case B — Advancing market.** Another market rises from 100 to 103, then 106 and 109. Several closes sit near the upper band while swing lows also rise. Selling simply because the upper band was touched would ignore the persistent progress. The contrast is not that range tags always reverse and trends always continue. It is that you should first compare the touch with structure, then wait for the condition your plan requires.
 
+### Second worked comparison: A lower-band touch can mean weakness, not value
+
+Imagine a market falling from 120 to 115, rebounding to 117 and then falling to 112. The latest candles keep approaching the lower band. A trader calls the instrument “cheap” and buys because it has reached the bottom of the frame. But the visible sequence is still making lower lows, and the rebounds are failing below prior swing highs. The band touch fits continuing downside pressure at least as well as it fits a reversal.
+
+Now compare a market moving between 112 and 120. Price reaches 112 near the lower band, fails to make meaningful additional progress downward, and then closes back above a nearby swing level. Here the band location sits beside evidence that the range may be holding. That creates a different question to investigate, although it still does not guarantee a bounce.
+
+The distinction is not that a range always reverses and a trend never does. The useful habit is to name the price structure, state the interpretation that fits it and identify the next event that would contradict that reading. A band tag can focus attention; price behaviour has to do the confirming.
+
 ### Common mistake
 
 Treating “upper” as sell and “lower” as buy.
@@ -219,6 +235,14 @@ A second chart shows narrow bands, followed by a sudden increase in candle size.
 **Case A — Width contracts.** BandWidth on an instrument falls from a typical 6% reading to about 2.5% while candles overlap inside a compact range. You can describe the market as quieter relative to its own recent history. Mark the range high and low and prepare conditional scenarios. The low reading does not say when the quiet period will end.
 
 **Case B — Width expands.** Price then closes above the range and the bands spread. This is consistent with a move becoming broader, but the first break can still fail. If price quickly returns inside, the expansion may have reflected the failed move rather than durable continuation. A useful reading therefore combines width with the price result after the change. Compare similar conditions across different periods instead of treating one BandWidth number as a universal threshold.
+
+### Second worked comparison: Bands can narrow as older movement leaves the calculation
+
+A rolling indicator does not remember every bar equally. Imagine the current 20-period window still contains a sharp move from several sessions ago. While that move remains inside the window, it contributes to the measured variation and can keep the bands relatively wide. As the older bars roll out and the recent bars are comparatively quiet, the standard deviation may fall and the bands may contract.
+
+The contraction does not require a sudden event on the latest candle. It can be the cumulative result of the calculation window changing. This is why the indicator may narrow gradually even though price looks quite ordinary day to day. Equally, one large new candle can temporarily widen the frame after a quiet period.
+
+When comparing a historical squeeze with a current chart, check the selected period and settings before drawing a conclusion. Then inspect the candles within the same window: are the recent ranges and closes genuinely more contained than earlier movement? Finally, describe the state without adding a direction forecast. The bands can tell you that the recent frame has become narrower; they do not tell you whether the next expansion will be upward, downward or even large enough to trade.
 
 ### Common mistake
 
@@ -295,6 +319,14 @@ A chart shows a close below the lower band after several falling candles. What c
 **Case A — Continuation.** At the end of a candle, price closes above an upper band near 110. The next two candles close around 112 and 114. In hindsight, continuation is visible. At the first close, however, the only justified statement was that price had closed outside the band; the future candles were not yet known.
 
 **Case B — Failure.** A different chart also closes above 110, then returns below the breakout area and falls back into the prior range. That close eventually becomes part of a failed move. The initial candle looked similar in both cases. This is why a decision should be judged using only the evidence available at that time, and why a setup needs a pre-written trigger and invalidation rather than a prediction that the first move will succeed.
+
+### Second worked comparison: Two outside closes do not remove uncertainty
+
+Picture two instruments that both close above the upper band after a period of rising price. At the first close, each chart provides the same immediate fact: the close is outside the upper band. One chart then keeps making progress and the bands widen. The other stalls, returns inside and later falls through the earlier range. In hindsight, the sequences look very different, but neither future path was known at the first close.
+
+This matters when someone describes a two-standard-deviation band as if price has a fixed probability of staying inside it. Financial prices do not reliably follow a stable normal distribution, and the bands themselves move with the calculation. A close outside is not a failed statistical promise; it is an event that needs interpretation.
+
+The practical test is to write down what your method requires before looking at the later candles. Does it enter on the first completed close, require a second close, wait for a retest, or skip if the next obstacle is too close? These are distinct execution choices and should not be mixed together after the outcome is known. Judge the initial decision from the evidence available at that point, then use the later path to review the method—not to pretend the outcome was obvious.
 
 ### Common mistake
 
