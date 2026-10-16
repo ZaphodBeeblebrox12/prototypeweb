@@ -1,4 +1,5 @@
-{% extends "base.html" %}
+{% extends "academy/base.html" %}
+{% block title %}{{ course.title|default:"My learning" }} · TradeThesis{% endblock %}
 {% block content %}
 <div class="container py-4" style="max-width:850px">
   <p class="text-uppercase small text-muted mb-2"><a href="{% url 'academy:home' %}">Academy</a> / <a href="{% url 'academy:course-detail' course.slug %}">{{ course.title }}</a> / {{ module.title }}</p>
