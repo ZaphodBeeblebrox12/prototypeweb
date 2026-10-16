@@ -4,6 +4,21 @@
 
 **Important status:** These are external, hot-linked reference images, not downloaded image binaries committed to this repository. They require an internet connection and may change or disappear if the host changes its URL. They are research/preview material only. Before public course release, replace them with owned TradingView screenshots or appropriately licensed images, update the Markdown links to local assets, and review the applicable rights. A source listed here is not a claim that its chart is a profitable trade or that every displayed condition matches the exact author method.
 
+## First-pass source shortlist reviewed on 16 October 2026
+
+These source pages were rechecked while building the first-pass preview. They are **research candidates only**; their image binaries have not been downloaded into the repository yet. The page below each describes a chart that may be useful for later temporary local reference assets, pending rights/use review and eventual replacement by course-owned TradingView captures.
+
+| Topic | Candidate chart and source page | Intended teaching use | Status |
+|---|---|---|---|
+| BandWidth squeeze / expansion | [StockCharts — Bollinger BandWidth](https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/bollinger-bandwidth) | Show a historically narrow BandWidth reading followed by volatility expansion | Source reviewed; local download blocked in current execution environment |
+| %B + MFI trend following | [StockCharts — %B Indicator](https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/b-indicator) | Historical chart with %B and Money Flow Index context | Source reviewed; local download blocked in current execution environment |
+| W-bottom structure | [Trading Setups Review — Bollinger Band W-Bottom Example](https://www.tradingsetupsreview.com/5-bollinger-bands-trading-strategies-should-know/) | First low beyond the lower band, recovery and second low that stays inside | Source reviewed; local download blocked in current execution environment |
+| M-top / W-bottom comparison | [StockCharts — Bollinger Bands](https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-overlays/bollinger-bands) | Historical Nordstrom / SanDisk W-bottom and ExxonMobil / Pulte Homes M-top examples | Source reviewed; local download blocked in current execution environment |
+| TTM Squeeze | [StockCharts — TTM Squeeze](https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/ttm-squeeze) | Separate Bollinger/Keltner compression and momentum example | Source reviewed; local download blocked in current execution environment |
+| Reversal pattern supplement | [TradingView — Bollinger Bands Part II: Reversal Patterns](https://www.tradingview.com/chart/SPY/LwgRqM25-Bollinger-Bands-Part-II-Reversal-Patterns/) | M-top / W-bottom visual example and contextual discussion | Source reviewed; image use/download not resolved |
+
+**Download constraint noted:** direct network requests from the working container failed with DNS/network errors, and the web image previews do not expose downloadable file bytes in this environment. No external web images have been falsely relabelled as local files. Continue using self-contained preview illustrations until a valid downloadable asset is available; do not leave external hotlinks as a final runtime dependency.
+
 ## Method I — Volatility breakout (Lesson 5.1)
 
 | Example | Image URL | Source page / notes |
