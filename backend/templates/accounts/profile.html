@@ -1,121 +1,126 @@
-{% extends "base.html" %}
-{% load socialaccount %}
-
-{% block title %}Profile - Community Platform{% endblock %}
-{% block page_title %}Profile{% endblock %}
-
+{% extends "academy/base.html" %}
+{% block title %}Account & security · TradeThesis{% endblock %}
 {% block content %}
-<div class="row">
-    <div class="col-md-8">
-        <!-- Profile Form -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <i class="bi bi-person"></i> Profile Information
-            </div>
-            <div class="card-body">
-                <form method="post" action="{% url 'profile' %}">
-                    {% csrf_token %}
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">First Name</label>
-                            <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Last Name</label>
-                            <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" name="email" class="form-control" value="{{ user.email|default:'' }}">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Bio</label>
-                        <textarea name="bio" class="form-control" rows="3">{{ user.bio }}</textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Update Profile</button>
-                </form>
-            </div>
-        </div>
+<div class="tt-dashboard tt-profile-page">
+  <p class="tt-muted small mb-3"><a href="{% url 'academy:home' %}">My learning</a> / Account &amp; security</p>
+  <section class="tt-dashboard-hero" aria-labelledby="profile-title">
+    <div>
+      <p class="tt-kicker mb-2">Your account</p>
+      <h1 id="profile-title">Account &amp; security</h1>
+      <p class="tt-muted mb-0">Keep your details current and manage how you connect to the TradeThesis community.</p>
+    </div>
+    <a class="btn btn-outline-primary" href="{% url 'manage-subscription' %}">Billing &amp; receipts <span aria-hidden="true">↗</span></a>
+  </section>
 
-        <!-- TELEGRAM SECTION (UPDATED) -->
-        <div class="card mb-4" id="telegram">
-            <div class="card-header">
-                <i class="bi bi-telegram"></i> Telegram Connection
-            </div>
-            <div class="card-body">
-                {% if user.telegram_id and user.telegram_verified %}
-                <div class="alert alert-success">
-                    <i class="bi bi-check-circle-fill"></i> 
-                    Connected as @{{ user.telegram_username }}
-                </div>
-                {% else %}
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                    Not connected
-                </div>
-                <a href="{% url 'bot_integration:telegram_connect' %}" class="btn btn-primary">
-                    Connect Telegram
-                </a>
-                {% endif %}
-            </div>
+  <div class="tt-profile-grid">
+    <div class="tt-profile-main">
+      <section class="tt-profile-panel" aria-labelledby="personal-details-title">
+        <div class="tt-section-heading">
+          <div><p class="tt-kicker mb-1">Your profile</p><h2 id="personal-details-title">Personal details</h2></div>
         </div>
+        <form method="post" action="{% url 'profile' %}">
+          {% csrf_token %}
+          <div class="tt-profile-form-grid">
+            <div class="tt-profile-field">
+              <label for="profile-first-name">First name</label>
+              <input id="profile-first-name" type="text" name="first_name" value="{{ user.first_name }}" autocomplete="given-name">
+            </div>
+            <div class="tt-profile-field">
+              <label for="profile-last-name">Last name</label>
+              <input id="profile-last-name" type="text" name="last_name" value="{{ user.last_name }}" autocomplete="family-name">
+            </div>
+            <div class="tt-profile-field tt-field-wide">
+              <label for="profile-email">Email address</label>
+              <input id="profile-email" type="email" name="email" value="{{ user.email|default:'' }}" autocomplete="email">
+              <small>Use an address you can access for account and course updates.</small>
+            </div>
+            <div class="tt-profile-field tt-field-wide">
+              <label for="profile-bio">About you <span class="tt-field-optional">Optional</span></label>
+              <textarea id="profile-bio" name="bio" rows="3">{{ user.bio }}</textarea>
+            </div>
+            <div class="tt-profile-field">
+              <label for="profile-timezone">Time zone</label>
+              <input id="profile-timezone" type="text" name="timezone" value="{{ preferences.timezone|default:'UTC' }}" autocomplete="off">
+              <small>For example, Asia/Kolkata.</small>
+            </div>
+            <div class="tt-profile-field">
+              <label for="profile-language">Language</label>
+              <input id="profile-language" type="text" name="language" value="{{ preferences.language|default:'en' }}" autocomplete="off">
+              <small>For example, en.</small>
+            </div>
+          </div>
+          <div class="tt-profile-form-footer">
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </div>
+        </form>
+      </section>
 
-        <!-- DISCORD SECTION (UPDATED) -->
-        <div class="card mb-4" style="border-left: 4px solid #5865F2;">
-            <div class="card-header">
-                <i class="bi bi-discord"></i> Discord Connection
-            </div>
-            <div class="card-body">
-                {% if user.discord_id and user.discord_verified %}
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    {% if user.discord_avatar %}
-                    <img src="https://cdn.discordapp.com/avatars/{{ user.discord_id }}/{{ user.discord_avatar }}.png" 
-                         alt="Discord Avatar" 
-                         style="width: 48px; height: 48px; border-radius: 50%;">
-                    {% else %}
-                    <div style="width: 48px; height: 48px; border-radius: 50%; background: #5865F2; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 20px;">
-                        {{ user.discord_username|slice:":1"|upper }}
-                    </div>
-                    {% endif %}
-                    <div>
-                        <h5 class="mb-0">{{ user.discord_username }}</h5>
-                        <span class="badge bg-success">Connected</span>
-                    </div>
-                </div>
-                <form method="post" action="{% url 'discord_disconnect' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-outline-danger btn-sm">
-                        Disconnect Discord
-                    </button>
-                </form>
-                {% else %}
-                <div class="alert alert-secondary">
-                    <i class="bi bi-x-circle-fill"></i>
-                    Discord account not connected
-                </div>
-                <p class="text-muted small">Connect your Discord account to join community channels and receive notifications.</p>
-                <a href="{% url 'bot_integration:discord_connect' %}" class="btn btn-primary" style="background: #5865F2; border: none;">
-                    <i class="bi bi-discord"></i> Connect Discord
-                </a>
-                {% endif %}
-            </div>
+      <section class="tt-profile-panel" aria-labelledby="community-connections-title">
+        <div class="tt-section-heading">
+          <div><p class="tt-kicker mb-1">Optional connections</p><h2 id="community-connections-title">Community connections</h2></div>
         </div>
+        <div class="tt-profile-connection">
+          <div class="tt-profile-connection-mark" aria-hidden="true">T</div>
+          <div class="tt-profile-connection-copy">
+            <strong>Telegram</strong>
+            {% if telegram_connected %}
+              <span class="tt-profile-status is-connected">Connected{% if user.telegram_username %} · @{{ user.telegram_username }}{% endif %}</span>
+              <p class="tt-muted mb-0">Your verified Telegram account is linked.</p>
+            {% else %}
+              <span class="tt-profile-status">Not connected</span>
+              <p class="tt-muted mb-0">Connect Telegram to receive any included channel access.</p>
+            {% endif %}
+          </div>
+          {% if not telegram_connected %}
+            <a class="btn btn-outline-primary" href="{% url 'bot_integration:telegram_connect' %}">Connect Telegram</a>
+          {% endif %}
+        </div>
+        <div class="tt-profile-connection">
+          <div class="tt-profile-connection-mark is-discord" aria-hidden="true">D</div>
+          <div class="tt-profile-connection-copy">
+            <strong>Discord</strong>
+            {% if user.discord_id and user.discord_verified %}
+              <span class="tt-profile-status is-connected">Connected · {{ user.discord_username }}</span>
+              <p class="tt-muted mb-0">Your verified Discord account is linked.</p>
+            {% else %}
+              <span class="tt-profile-status">Not connected</span>
+              <p class="tt-muted mb-0">Connect Discord for community access where server roles are supported.</p>
+            {% endif %}
+          </div>
+          {% if user.discord_id and user.discord_verified %}
+            <form method="post" action="{% url 'discord_disconnect' %}" class="m-0">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-secondary">Disconnect</button>
+            </form>
+          {% else %}
+            <a class="btn btn-outline-primary" href="{% url 'bot_integration:discord_connect' %}">Connect Discord</a>
+          {% endif %}
+        </div>
+      </section>
     </div>
 
-    <div class="col-md-4">
-        <!-- Account Info -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <i class="bi bi-info-circle"></i> Account Info
-            </div>
-            <div class="card-body">
-                <div class="mb-2"><strong>Username:</strong> {{ user.username }}</div>
-                <div class="mb-2"><strong>Role:</strong> {{ user.get_role_display }}</div>
-                <div class="mb-2"><strong>Joined:</strong> {{ user.date_joined|date:"M d, Y" }}</div>
-                <div class="mb-2"><strong>Last Login:</strong> {{ user.last_login|date:"M d, Y"|default:"Never" }}</div>
-            </div>
+    <aside class="tt-profile-side">
+      <section class="tt-profile-panel" aria-labelledby="account-details-title">
+        <div class="tt-section-heading">
+          <div><p class="tt-kicker mb-1">Your account</p><h2 id="account-details-title">Account details</h2></div>
         </div>
-    </div>
+        <dl class="tt-account-facts">
+          <div><dt>Username</dt><dd>{{ user.username }}</dd></div>
+          <div><dt>Account type</dt><dd>{{ user.get_role_display }}</dd></div>
+          <div><dt>Joined</dt><dd>{{ user.date_joined|date:"j M Y" }}</dd></div>
+          <div><dt>Last login</dt><dd>{{ user.last_login|date:"j M Y"|default:"Not recorded" }}</dd></div>
+        </dl>
+      </section>
+
+      <section class="tt-profile-panel" aria-labelledby="security-title">
+        <div class="tt-section-heading">
+          <div><p class="tt-kicker mb-1">Sign-in</p><h2 id="security-title">Security</h2></div>
+        </div>
+        <p class="tt-muted small">Use a unique password and keep your sign-in details private.</p>
+        <a class="btn btn-outline-primary w-100" href="{% url 'account_change_password' %}">Change password</a>
+      </section>
+    </aside>
+  </div>
+  <p class="tt-dashboard-footnote"><a href="{% url 'academy:home' %}">Return to My learning</a> · For account help, <a href="{% url 'support:my_tickets' %}">contact support</a>.</p>
 </div>
 {% endblock %}
