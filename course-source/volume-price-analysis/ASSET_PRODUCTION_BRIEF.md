@@ -1,7 +1,7 @@
 # Asset Production Brief — Read Volume. Find Trade Setups.
 ## Course visuals, ChartLabs, worksheets and delivery files
 
-**Status:** Production specification. No assets have been created by this document, and no public course pages have been changed.
+**Status:** Production specification plus one pilot package for M01-L01. The pilot includes an editable SVG chart master/export, synthetic data, accessibility notes, a learner-facing ChartLab prototype, instructor answer notes and a package manifest. The other 29 lesson packages have not yet been produced. No public course pages have been changed.
 **Scope:** Six modules, 30 lessons. This brief consolidates the inline `ASSET` and `CHARTLAB` notes in the lesson scripts into a buildable checklist.
 **Audience:** People who are new to reading market charts.
 **Core promise:** Help learners read recorded volume alongside price, recognise useful context, and construct conditional trade plans. This is not a general-indicator course.
@@ -286,14 +286,13 @@ Use only these labels: **Not started**, **In progress**, **Needs revision**, **A
 
 ## 9. Recommended production order
 
-1. Approve the shared chart design system and one sample asset from Module 1.
-2. Produce one full sample package: chart master, export, synthetic data, alt text, ChartLab, model answer and counterexample. Test it with a true beginner.
-3. Correct the design system based on the pilot before scaling to all 30 lessons.
-4. Produce assets module-by-module in lesson order, so concepts and terminology stay consistent.
-5. Build and test ChartLabs alongside the charts, not as a separate rushed stage at the end.
-6. Create worksheet masters from the fields already used in Module 6, then reuse those fields in earlier practice.
-7. Record and caption only after script, visual and interaction behaviour are approved.
-8. Run a final novice walkthrough and accessibility review before public release.
+1. Review and approve the shared chart design system and the M01-L01 pilot package before scaling.
+2. Test the pilot with a true beginner; validate comprehension, responsive layout, keyboard use and screen-reader description, then revise the package.
+3. Produce the remaining 29 asset packages module-by-module in lesson order, keeping concepts and terminology consistent.
+4. Build and test ChartLabs alongside the charts, with answer feedback and counterexamples rather than saving all exercises for the end.
+5. Create worksheet masters from the fields already used in Module 6, then reuse those fields in earlier practice.
+6. Record and caption only after the script, visual and interaction behaviour are approved.
+7. Run a final novice walkthrough and accessibility review before public release.
 
 ## 10. Explicitly out of scope
 
