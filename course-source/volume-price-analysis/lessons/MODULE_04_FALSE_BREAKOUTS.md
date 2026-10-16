@@ -9,6 +9,8 @@ The core discipline is simple: **define the boundary before the move, record the
 
 ## Lesson 4.1 — Is the Breakout Real? What Volume Can Tell You
 
+As you work through this lesson, refer to **Figure 4.1** for the chart example.
+
 ![Chart for Is the Breakout Real? What Volume Can Tell You. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m04-l01-breakout-follow-through.svg)
 
 **Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m04-l01-breakout-follow-through-lab.html)  
@@ -50,19 +52,19 @@ If price retests 66–67 and holds above it before advancing, the continuation r
 
 Range high is near 66. A wide candle closes at 67.2 on 1.6× relative volume. In one ending, price retests 66–67, holds and reaches 69. In another, price closes at 65.5 and fails to reclaim 66. The first candle is the same in both examples; its quality becomes clearer only through the later behaviour. Your initial note should not pretend to know the ending.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** A range is 60–66; price closes at 67.2 after trading above 66. Identify the boundary, price result and unresolved question.
 
 **Feedback:** Price closed beyond the prior boundary, but it remains unknown whether it will hold outside or return into the range.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare a retest that holds above 66 with a close back inside followed by a failed reclaim.
 
 **Feedback:** A hold and further progress build acceptance evidence; a return inside and failed reclaim weaken the breakout case.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** Price breaks below a range low on modest volume then holds below for three bars. Write a conditional reading.
 
@@ -80,6 +82,8 @@ Range high is near 66. A wide candle closes at 67.2 on 1.6× relative volume. In
 ---
 
 ## Lesson 4.2 — Breakout or Trap? Reading the Signs of a Failed Move
+
+As you work through this lesson, refer to **Figure 4.2** for the chart example.
 
 ![Chart for Breakout or Trap? Reading the Signs of a Failed Move. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m04-l02-failed-breakout-sequence.svg)
 
@@ -121,19 +125,19 @@ The same first candle can lead to either ending. Your initial notes should say w
 
 Price breaks above 100 and closes back inside at 99.4. That is an initial failure to retain the outside excursion. If the next bar reclaims 100 and holds, the failed-break idea weakens. If price tests 100 from below, fails and then breaks a nearby swing low, the failure case strengthens. The failed reclaim is new evidence; the final price direction is not contained in the first candle.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** List the stages in a failed-break sequence from initial boundary to follow-through.
 
 **Feedback:** The boundary exists first; price moves beyond it, returns inside, and later reclaim behaviour helps determine whether the failure matters.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare a failed reclaim after the return inside with a successful reclaim and hold outside.
 
 **Feedback:** A failed reclaim strengthens the view that the outside move was not sustained; a successful reclaim weakens it. A return inside alone does not prove reversal.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** Price breaks above 100, closes at 99.4, fails twice to reclaim 100 and then breaks a nearby swing low. Describe it without “trap”.
 
@@ -151,6 +155,8 @@ Price breaks above 100 and closes back inside at 99.4. That is an initial failur
 ---
 
 ## Lesson 4.3 — When Volume Explodes at Market Extremes: Understanding Climax Activity
+
+As you work through this lesson, refer to **Figure 4.3** for the chart example.
 
 ![Chart for When Volume Explodes at Market Extremes: Understanding Climax Activity. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m04-l03-climax-activity.svg)
 
@@ -183,19 +189,19 @@ If the following bars remain below 344, then break a nearby swing low and fail t
 
 After an extended rise, price prints the week's highest volume but closes near its high. The next bars hold above the candle's midpoint and then make another high. Calling the bar a confirmed selling climax would ignore the retained progress. Contrast that with an equally active bar that closes back below resistance and is followed by a structural break. Volume is extreme in both; price outcome and follow-through distinguish the readings.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** An extended trend prints 3× relative volume. State that fact and two aspects of the price result to inspect.
 
 **Feedback:** Activity was three times the chosen baseline. Inspect range, close location, context and subsequent progress; the ratio alone does not identify a top.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare an extreme-volume bar that closes near its high and is followed by higher prices with one that returns inside a boundary and is followed by a structural break.
 
 **Feedback:** The first is compatible with continuation; the second provides evidence that outside progress was not retained. Follow-through matters.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** The largest volume bar of the week appears after a long decline; it closes near its low and later bars make new lows. What can you conclude?
 
@@ -213,6 +219,8 @@ After an extended rise, price prints the week's highest volume but closes near i
 ---
 
 ## Lesson 4.4 — Springs and Upthrusts: Recognising Failed Moves at Range Boundaries
+
+As you work through this lesson, refer to **Figure 4.4** for the chart example.
 
 ![Chart for Springs and Upthrusts: Recognising Failed Moves at Range Boundaries. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m04-l04-springs-upthrusts.svg)
 
@@ -253,19 +261,19 @@ For either event, keep the sequence explicit:
 
 A range extends from 50 to 60. Price briefly trades at 48.5 and closes at 51.2. This resembles a spring-like excursion because price returned inside. If subsequent bars remain below 50 and repeatedly fail to reclaim it, the return was not sustained and the spring interpretation weakens. If price holds inside and later reclaims a short-term swing high, the failed-downside-break idea gains support. The label is provisional until price shows the role of the boundary.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** Describe a spring-like event and an upthrust-like event in terms of what price did.
 
 **Feedback:** A spring-like event moves below a range low then returns inside; an upthrust-like event moves above a range high then returns inside. Neither label guarantees reversal.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare a break below the range that returns and remains inside with one that stays below for six bars and fails to reclaim the boundary.
 
 **Feedback:** The first supports a failed-breakdown reading more; the second weakens it because price has not sustained the return inside.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** Price trades above a range high and closes inside, then reclaims and holds above the boundary. Update the initial interpretation.
 
@@ -283,6 +291,8 @@ A range extends from 50 to 60. Price briefly trades at 48.5 and closes at 51.2. 
 ---
 
 ## Lesson 4.5 — Before Calling a Reversal: What to Look for After the Breakout
+
+As you work through this lesson, refer to **Figure 4.5** for the chart example.
 
 ![Chart for Before Calling a Reversal: What to Look for After the Breakout. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m04-l05-reversal-confirmation.svg)
 
@@ -317,19 +327,19 @@ The correct interpretation depends on the evidence available at each stage. Wait
 
 Price trades above 200 then closes at 199.5. This is a failed attempt to hold outside at that point. It may remain a range event if price simply overlaps. A stronger reversal case would need further evidence, such as a failed reclaim and a break of meaningful structure followed by continued downside progress. If price instead retakes 200 and holds, the reversal idea loses support. Use the smallest accurate claim the evidence allows.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** Order these events: initial move outside, return inside, failed reclaim, break of nearby structure. Which adds the strongest later evidence?
 
 **Feedback:** The outside move and return are the initial event; failed reclaim strengthens a failure reading and a nearby structural break provides further evidence of changed progress.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare a failed breakout followed by a swing-low break with a return inside followed by sideways overlap and a successful reclaim.
 
 **Feedback:** The structural break supports a broader shift more strongly. Sideways overlap remains unresolved until price shows more sustained progress.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** After a false break, price returns inside but no swing breaks and the market overlaps. State the current status and what you would watch next.
 
