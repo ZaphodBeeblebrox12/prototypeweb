@@ -32,10 +32,31 @@ def _active_entitlements(user, at=None):
     ).filter(Q(expires_at__isnull=True) | Q(expires_at__gt=at)))
 
 
+def _active_community_entitlements(user, at=None):
+    at = at or timezone.now()
+    return (
+        CourseEntitlement.objects.filter(
+            user=user,
+            status=CourseEntitlement.Status.ACTIVE,
+            revoked_at__isnull=True,
+            starts_at__lte=at,
+            community_access_granted_at__isnull=False,
+            community_access_granted_at__lte=at,
+        )
+        .filter(
+            Q(community_access_expires_at__isnull=True)
+            | Q(community_access_expires_at__gt=at)
+        )
+        .select_related("course", "offer")
+        .order_by("community_access_expires_at", "course__title")
+    )
+
+
 @login_required
 def academy_home(request):
     """Member landing page: purchased courses, progress, and available offers."""
     entitlements = list(_active_entitlements(request.user).select_related("course"))
+    community_accesses = list(_active_community_entitlements(request.user))
     entitlements_by_course = {ent.course_id: ent for ent in entitlements}
     courses_by_id = {course.pk: course for course in Course.objects.filter(status=Course.Status.PUBLISHED)}
     for entitlement in entitlements:
@@ -61,6 +82,7 @@ def academy_home(request):
     offers = [o for o in offers if o.is_saleable and o.course_id not in entitlements_by_course]
     return render(request, "academy/home.html", {
         "course_cards": course_cards, "offers": offers,
+        "community_accesses": community_accesses,
     })
 
 
