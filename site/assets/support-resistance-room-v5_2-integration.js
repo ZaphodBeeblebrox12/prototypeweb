@@ -192,6 +192,8 @@
   function currentChartFilename() {
     const image = byId("sr-chart-image");
     if (!image || !image.getAttribute("src")) return "";
+    // SVG is the display source when available, but stage identity remains keyed to the canonical PNG filename.
+    if (image.dataset && image.dataset.chartCanonicalFile) return image.dataset.chartCanonicalFile;
     try { return new URL(image.getAttribute("src"), window.location.href).pathname.split("/").pop(); }
     catch (_) { return image.getAttribute("src").split("/").pop(); }
   }
