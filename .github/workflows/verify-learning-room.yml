@@ -8,6 +8,13 @@ on:
       - "site/**"
       - "course-content/support-resistance/chart_assets/charts/**"
       - ".github/workflows/verify-learning-room.yml"
+  pull_request:
+    branches:
+      - my-new-branch
+    paths:
+      - "site/**"
+      - "course-content/support-resistance/chart_assets/charts/**"
+      - ".github/workflows/verify-learning-room.yml"
 
 permissions:
   contents: read
@@ -27,6 +34,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      - name: Check V5.2 integration script syntax
+        run: node --check site/assets/support-resistance-room-v5_2-integration.js
 
       - name: Install Playwright
         run: |
