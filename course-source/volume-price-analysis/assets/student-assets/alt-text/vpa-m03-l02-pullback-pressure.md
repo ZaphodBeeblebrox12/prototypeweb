@@ -1,5 +1,6 @@
 # Accessibility and source notes — M03-L02
 
+**Figure number:** Figure 3.2; interactive panels use Figure 3.2a–Figure 3.2e.
 **Lesson:** Is the Pullback Running Out of Steam? Reading Moves Against the Trend
 **Purpose:** Compare pullback depth, activity, location and structural result against the prior impulse.
 **Data:** Synthetic OHLCV for teaching, not historical prices or a trading signal.
