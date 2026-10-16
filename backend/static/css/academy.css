@@ -172,3 +172,42 @@ a:hover { color: var(--tt-deep); }
   .tt-payment-actions { width:100%; }
   .tt-payment-actions .btn { flex:1; }
 }
+
+
+/* Account & security page, matching the learner-room editorial system. */
+.tt-profile-grid { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(250px,.85fr); gap:1rem; align-items:start; }
+.tt-profile-main, .tt-profile-side { display:flex; flex-direction:column; gap:1rem; min-width:0; }
+.tt-profile-panel { min-width:0; padding:1.25rem; border:1px solid var(--tt-line); border-radius:15px; background:var(--tt-surface); box-shadow:0 8px 24px #29382e0a; }
+.tt-profile-panel .tt-section-heading { margin-bottom:1.1rem; }
+.tt-profile-panel .tt-section-heading h2 { font-size:1.35rem; }
+.tt-profile-form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
+.tt-profile-field { display:flex; min-width:0; flex-direction:column; gap:.4rem; }
+.tt-profile-field label { color:var(--tt-ink); font-size:.8rem; font-weight:800; }
+.tt-profile-field input, .tt-profile-field textarea { width:100%; padding:.7rem .75rem; border:1px solid var(--tt-line); border-radius:9px; background:#fffefa; color:var(--tt-ink); font:400 .9rem/1.5 Inter,ui-sans-serif,system-ui,sans-serif; }
+.tt-profile-field input:focus, .tt-profile-field textarea:focus { border-color:var(--tt-green); outline:3px solid #355a4620; }
+.tt-profile-field small { color:var(--tt-muted); font-size:.72rem; line-height:1.45; }
+.tt-field-wide { grid-column:1/-1; }
+.tt-field-optional { margin-left:.3rem; color:var(--tt-muted); font-size:.7rem; font-weight:500; }
+.tt-profile-form-footer { display:flex; justify-content:flex-end; margin-top:1.15rem; padding-top:1rem; border-top:1px solid var(--tt-line); }
+.tt-profile-connection { display:flex; align-items:center; gap:.8rem; padding:.9rem 0; }
+.tt-profile-connection + .tt-profile-connection { border-top:1px solid var(--tt-line); }
+.tt-profile-connection-mark { display:grid; flex:0 0 2.5rem; width:2.5rem; height:2.5rem; place-items:center; border-radius:10px; background:#e7f0e3; color:#28513a; font-weight:900; }
+.tt-profile-connection-mark.is-discord { background:#eeedff; color:#5552a5; }
+.tt-profile-connection-copy { display:flex; flex:1; min-width:0; flex-direction:column; gap:.15rem; }
+.tt-profile-connection-copy strong { font-size:.9rem; }
+.tt-profile-connection-copy p { font-size:.75rem; line-height:1.45; }
+.tt-profile-status { color:var(--tt-muted); font-size:.72rem; }
+.tt-profile-status.is-connected { color:var(--tt-green); font-weight:800; }
+.tt-profile-connection .btn { flex-shrink:0; font-size:.77rem; }
+.tt-account-facts { margin:0; }
+.tt-account-facts div { padding:.65rem 0; border-bottom:1px solid var(--tt-line); }
+.tt-account-facts div:last-child { border-bottom:0; }
+.tt-account-facts dt { color:var(--tt-muted); font-size:.72rem; font-weight:700; }
+.tt-account-facts dd { margin:.2rem 0 0; overflow-wrap:anywhere; color:var(--tt-ink); font-size:.88rem; }
+@media (max-width: 760px) {
+  .tt-profile-grid { grid-template-columns:1fr; }
+  .tt-profile-form-grid { grid-template-columns:1fr; }
+  .tt-profile-connection { align-items:flex-start; flex-wrap:wrap; }
+  .tt-profile-connection-copy { min-width:calc(100% - 3.4rem); }
+  .tt-profile-connection .btn, .tt-profile-connection form { margin-left:3.3rem !important; }
+}
