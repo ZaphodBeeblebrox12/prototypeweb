@@ -121,6 +121,7 @@ summary{font-weight:750;cursor:pointer;padding:9px 0}
 </article>
 </div>
 <div class="field"><label for="outcomeReview">What new evidence changed or strengthened your reading?</label><textarea id="outcomeReview" minlength="25" placeholder="Point to the later price behaviour and explain why it matters..." required></textarea></div>
+<div id="feedbackOutcome" class="feedback" role="status" aria-live="polite" hidden></div>
 <div class="feedback" role="status">The outcomes are now visible because you recorded an initial view. Keep your first observations intact; update the interpretation using the new evidence.</div>
 <div class="buttons"><button type="button" id="completeReview">Complete Level 3 and review my reasoning</button></div>
 </div>
@@ -161,6 +162,7 @@ function showStage(index){
  progress.forEach((el,i)=>{
   el.classList.toggle('current',i===index);
   el.classList.toggle('done',i<index);
+  el.removeAttribute('aria-label');
   if(i===index) el.setAttribute('aria-current','step'); else el.removeAttribute('aria-current');
  });
  const heading=stages[index].querySelector('h2');
@@ -193,7 +195,7 @@ document.getElementById('finish').addEventListener('click',()=>{
  }
 });
 document.getElementById('completeReview').addEventListener('click',()=>{
- if(requireText(['outcomeReview'],'feedback3')){
+ if(requireText(['outcomeReview'],'feedbackOutcome')){
   stages.forEach(el=>el.hidden=true);
   review.hidden=false;
   progress.forEach(el=>{el.classList.add('done');el.classList.remove('current');el.removeAttribute('aria-current')});
@@ -205,7 +207,7 @@ document.getElementById('completeReview').addEventListener('click',()=>{
 document.getElementById('restart').addEventListener('click',()=>{
  ['easy','guided','alternative','transfer','discipline','outcomeReview'].forEach(id=>document.getElementById(id).value='');
  document.querySelectorAll('.checks input').forEach(el=>el.checked=false);
- ['feedback1','feedback2','feedback3'].forEach(id=>{const e=document.getElementById(id);e.hidden=true;e.classList.remove('good')});
+ ['feedback1','feedback2','feedback3','feedbackOutcome'].forEach(id=>{const e=document.getElementById(id);e.hidden=true;e.classList.remove('good')});
  document.getElementById('initialTask').hidden=false;
  document.getElementById('outcomesReveal').hidden=true;
  document.getElementById('model').open=false;
