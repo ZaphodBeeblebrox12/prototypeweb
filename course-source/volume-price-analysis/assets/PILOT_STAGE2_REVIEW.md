@@ -27,6 +27,8 @@ The change is limited to text in SVG `title`, `desc` and `text` nodes. Chart geo
 - When a stage is revealed, keyboard focus moves to its heading before scrolling, so the user's location is more apparent.
 - Scripted scrolling and the restart action respect `prefers-reduced-motion`; a CSS fallback is included.
 - Level 2 feedback now says “submitted” and explicitly states that the text-length check does not grade reasoning.
+- The Stage 3 outcome reveal now contains an optional, evidence-based model reading of the initial event and competing continuation/failure explanations. It is hidden until the learner submits a first reading and the two outcomes are revealed.
+- The outcome reveal has a section-level heading, and the newly focused headings have a visible focus outline.
 - Unlocked progress buttons update the active-step indicator without locking later steps when the learner navigates backward. Restart resets unlock state and moves focus back to the first-stage heading.
 - Five mobile-specific SVG variants were added. The phone layout uses a stacked comparison for Panels A and B instead of shrinking the desktop side-by-side chart to an unreadable width.
 - Mobile typography was increased for subtitles, axis labels, baseline labels and volume summaries. The floating reference-level callout was removed from the candle area and replaced by a concise legend in the chart header.
@@ -88,7 +90,7 @@ The main narration in M01-L01 is about 842 words and its extended spoken case an
 ## 5. Validation still required
 
 - Open the committed standalone HTML in a normal browser and verify the decoded SVG titles, annotations, larger mobile labels and punctuation visually. Locally rendered preview variants generated from the same CSV/layout were inspected, but exact rendering of the committed page and SVG files has not been completed.
-- Run all stages end to end: incorrect Level 1 attempt, correct retry, Level 2 submission, Level 3 submission, outcome reveal, reflection and restart.
+- Run all stages end to end: incorrect Level 1 attempt, correct retry, Level 2 submission, Level 3 submission, outcome reveal, opening and closing the model-reading disclosure, reflection and restart.
 - Use keyboard only. Verify unlocked navigation, active-step announcement, visible focus, logical focus order and no keyboard trap.
 - Enable OS/browser reduce-motion and verify that stage/restart scrolling is not smooth.
 - Test narrow mobile layouts and 200% zoom for content loss or horizontal scrolling.
