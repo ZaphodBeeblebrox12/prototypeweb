@@ -72,6 +72,12 @@ Imagine two charts with price at the upper band. In Chart A, price has been movi
 
 **Model response:** In the range, the touch is near a boundary where price has turned before, so a reaction is worth watching. In the rising trend, repeated upper-band interaction may reflect ongoing strength. Neither chart gives an entry from the touch alone.
 
+### Worked chart comparison: Read the frame as it changes
+
+**Case A — Quiet movement.** Imagine the middle band is near 100, the upper band near 104 and the lower band near 96. Several candles fluctuate between 98 and 102 and the outer bands gradually draw closer. The defensible observation is that the recent distribution of prices is becoming tighter. It does not tell you that price is about to rise, fall, or break out immediately.
+
+**Case B — Movement expands.** Later, closes spread from around 100 toward 106 and the band gap widens. The widening reflects the larger recent variation, but the direction must still come from the candles and their sequence. If price keeps making higher highs and higher lows, that supports an upward reading; if it falls through a range floor, it supports a different one. The band shape is useful precisely because it describes the change without deciding the trade for you.
+
 ### Common mistake
 
 **Mistake:** “The band is resistance, so price should turn.”
@@ -138,6 +144,12 @@ What is missing from that reasoning?
 
 **Model response:** The learner has described relative position as if it were value and a reversal signal. The chart may be in a downtrend, with price walking the lower band. The learner needs evidence that the decline is weakening, a clear trigger, and a planned invalidation before considering a long.
 
+### Worked comparison: The same touch, two different readings
+
+**Case A — Range edge.** A market has turned lower from roughly 104 on several earlier attempts. Price now reaches 104 while the upper band is nearby, then closes back at 102. The prior turns make a rejection worth investigating. The close back below the area adds evidence that price has not held above it, but the trader still needs the entry rule and invalidation used for the range plan.
+
+**Case B — Advancing market.** Another market rises from 100 to 103, then 106 and 109. Several closes sit near the upper band while swing lows also rise. Selling simply because the upper band was touched would ignore the persistent progress. The contrast is not that range tags always reverse and trends always continue. It is that you should first compare the touch with structure, then wait for the condition your plan requires.
+
 ### Common mistake
 
 Treating “upper” as sell and “lower” as buy.
@@ -201,6 +213,12 @@ Use Figure 1.3 to match the quiet, expanding, and wide-band sections to their vi
 A second chart shows narrow bands, followed by a sudden increase in candle size. Before choosing a direction, name one price event you would watch for and one condition that would make you reject the first move.
 
 **Model response:** I would first identify a meaningful nearby boundary and watch whether price closes beyond it and meets the rule chosen for the setup. A quick return into the prior range may weaken the first-break idea. Wider bands alone do not choose the direction.
+
+### Worked comparison: Compression is not a countdown
+
+**Case A — Width contracts.** BandWidth on an instrument falls from a typical 6% reading to about 2.5% while candles overlap inside a compact range. You can describe the market as quieter relative to its own recent history. Mark the range high and low and prepare conditional scenarios. The low reading does not say when the quiet period will end.
+
+**Case B — Width expands.** Price then closes above the range and the bands spread. This is consistent with a move becoming broader, but the first break can still fail. If price quickly returns inside, the expansion may have reflected the failed move rather than durable continuation. A useful reading therefore combines width with the price result after the change. Compare similar conditions across different periods instead of treating one BandWidth number as a universal threshold.
 
 ### Common mistake
 
@@ -271,6 +289,12 @@ For each of the four panels in Figure 1.4, write one supported statement and one
 A chart shows a close below the lower band after several falling candles. What can you say without assuming a trade?
 
 **Model response:** Price has closed below the lower band during recent weakness. The move may continue, or it may fail and return inside. I need to judge the trend, nearby structure, and my chosen trigger and invalidation before planning a trade.
+
+### Worked comparison: What was knowable at the close?
+
+**Case A — Continuation.** At the end of a candle, price closes above an upper band near 110. The next two candles close around 112 and 114. In hindsight, continuation is visible. At the first close, however, the only justified statement was that price had closed outside the band; the future candles were not yet known.
+
+**Case B — Failure.** A different chart also closes above 110, then returns below the breakout area and falls back into the prior range. That close eventually becomes part of a failed move. The initial candle looked similar in both cases. This is why a decision should be judged using only the evidence available at that time, and why a setup needs a pre-written trigger and invalidation rather than a prediction that the first move will succeed.
 
 ### Common mistake
 
