@@ -125,9 +125,9 @@ class CourseOffer(models.Model):
         null=True, blank=True, validators=[MinValueValidator(1)],
         help_text="Leave blank for permanent course access.",
     )
-    community_access_days = models.PositiveIntegerField(
+    community_access_months = models.PositiveIntegerField(
         null=True, blank=True, validators=[MinValueValidator(1)],
-        help_text="Optional included community term, separate from course access. Blank means no community access.",
+        help_text="Optional included community term in calendar months, separate from course access. Blank means no community access.",
     )
     is_active = models.BooleanField(default=False)
     position = models.PositiveSmallIntegerField(default=0)
@@ -176,7 +176,7 @@ class CourseOffer(models.Model):
                     previous.plan_id != self.plan_id
                     or previous.course_id != self.course_id
                     or previous.access_duration_days != self.access_duration_days
-                    or previous.community_access_days != self.community_access_days
+                    or previous.community_access_months != self.community_access_months
                 ) and previous.plan_id and PaymentIntent.objects.filter(plan_id=previous.plan_id).exists():
                     raise ValidationError(
                         "Course, Plan, course access and community access terms are frozen after a payment intent exists. "
