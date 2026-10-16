@@ -125,7 +125,7 @@ class CourseOffer(models.Model):
         null=True, blank=True, validators=[MinValueValidator(1)],
         help_text="Leave blank for permanent course access.",
     )
-    community_access_months = models.PositiveIntegerField(
+    community_access_months = models.PositiveSmallIntegerField(
         null=True, blank=True, validators=[MinValueValidator(1)],
         help_text="Optional included community term in calendar months, separate from course access. Blank means no community access.",
     )
