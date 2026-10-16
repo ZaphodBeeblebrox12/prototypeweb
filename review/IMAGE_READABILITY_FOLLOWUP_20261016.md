@@ -30,8 +30,20 @@ The staged synthetic chart set is 11 images at 2048 × 1152 px. The source dimen
 4. **FIG00 overview:** its intrinsic dimensions and full-resolution appearance could not be verified through the repository file endpoint in the previous audit. It remains a source-review item.
 5. **Other content:** interactive ChartLab drawings are intentionally excluded from static image zoom, so inspection does not interfere with drawing gestures or answer gates. Decorative brand images are also excluded.
 
+## Files changed
+
+- `site/assets/image-inspector.js` — mobile detail-first opening, raster/vector source note, visible inspect cue and exact scroll-position restoration.
+- `site/assets/image-inspector.css` — source-quality note and inspection cue styling.
+- `site/assets/support-resistance-room.css` — full-width chart-first practice layout.
+- `site/assets/support-resistance-room-v5_2-integration.js` — label-preserving panel crop margins; canonical filenames and figure content remain unchanged.
+- `site/tests/image-inspector-smoke.cjs` — assertions for full-width layout, axis-label crop bounds, mobile initial zoom/position, source note, inspection interactions and answer-gate preservation.
+- `.github/workflows/verify-learning-room.yml` — enables the non-deploying browser verification workflow on this feature branch.
+- `review/IMAGE_READABILITY_FOLLOWUP_20261016.md` — this report.
+
 ## Validation checkpoint
 
-The feature branch includes additional automated assertions in `site/tests/image-inspector-smoke.cjs`, and the non-deploying Learning Room verification workflow is enabled for this branch. CI results are to be recorded after the run finishes; this report does not claim the new changes have already passed the updated workflow.
+The final code commit, `9e101306c87f139681a7d522ba57f27c88ea8673`, passed the non-deploying [Learning Room browser-verification workflow](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38899908799). That run passed JavaScript syntax checks, staging of the 11 chart assets, lesson interaction tests, the desktop single-column chart layout, left-axis crop preservation, mobile detail-first 200% opening, raster-source disclosure, zoom/pan/Fit, Escape-close, keyboard focus and page-position restoration, unchanged lesson review gate, and browser error checks. It also uploaded screenshots and a fresh native-dimension inventory artifact.
+
+The browser run used Playwright/Chromium at desktop and mobile viewport sizes. It does **not** certify testing on a physical iOS/Safari device. FIG00's source pixels remain unverified, and the single-chart examples FIG14 and FIG22–FIG24 still need a focused high-resolution source review if their annotations are unclear at the enlarged view.
 
 The branch is deliberately not a deployment preview, and no merge, pull request, or deployment has been initiated. Review the branch changes first, then explicitly approve any merge or deployment.
