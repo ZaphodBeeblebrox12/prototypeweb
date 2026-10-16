@@ -57,7 +57,7 @@ The Learning Room preserves the three tabs: **The idea**, **Chart examples**, an
 
 The current generated content has approximately 907–1,503 words per lesson across the three tabs. All 24 shorter lessons in Modules 1–4 and 6–7 now have a second worked comparison in addition to their earlier worked case. The six Module 5 setup lessons retain their deeper setup rules and multiple case discussions. These are content-depth estimates, not measured stopwatch timings; a fresh learner timing and comprehension pass is still required.
 
-The first-pass page and generated content are **review artifacts on `my-new-branch` only**. They have not been integrated into the public course pages, merged to `main`, or deployed.
+The first-pass page and generated content are **review artifacts on `my-new-branch` only**. They have not been integrated into the served course pages or merged to `main`. The separate `Deploy TradeThesis preview` workflow uploads only the `site/` directory; it does not include this `course-source/understand-bollinger-bands/` preview or its generated lesson data.
 
 ## Remaining before release
 
