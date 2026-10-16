@@ -3,7 +3,7 @@
 **Asset ID:** VPA-M01-L01-LAB-01  
 **Linked lesson:** Module 1, Lesson 1.1 — What Candlesticks Don't Tell You: Reading the Volume Behind Price  
 **Estimated learner time:** 5–7 minutes inside the full lesson  
-**Status:** Three-level responsive prototype implemented. Structural checks cover the staged flow, data/baseline consistency and desktop/mobile paths. Exact-page browser rendering, keyboard/screen-reader review and beginner usability remain open.
+**Status:** Three-level responsive prototype implemented. Level 1 requires correct factual selections for candle direction, volume versus the five-bar baseline and preceding price sequence, plus a short written observation. Static checks cover the staged flow and asset paths. Exact-page browser rendering, keyboard/screen-reader review and beginner usability remain open; do not treat the prototype as approved for scaling.
 
 ## Learning target
 Describe candle and volume evidence, compare similar-looking candles in different contexts, and test a new breakout reading against later price action without treating volume as a guaranteed signal.
@@ -14,7 +14,7 @@ Learner identifies the outlined candidate candle's direction, the preceding pric
 
 **Data:** six synthetic bars in `vpa-m01-l01-candle-context-data.csv`, panel `LEVEL1_SPOT`. The first five volumes are 280, 250, 235, 220 and 205, giving a baseline of 238. Candidate volume is 280 (about 1.18× baseline).
 
-**Expected response:** describe the prior price sequence, state that the candidate candle closed above its open, and note that its volume is above the baseline. No directional forecast is required.
+**Expected response:** select green/closed above open, above the five-bar baseline, and a general decline with a brief upward candle in the prior sequence. Then add a written observation beyond the choices. The selection checks validate those specific visible facts; the written response is not semantically graded. No directional forecast is required.
 
 ## Level 2 — Compare (guided)
 **Visual:** `vpa-m01-l01-candle-context-compare.svg`  
@@ -63,7 +63,7 @@ A learner may say “the breakout is worth watching but not yet confirmed,” or
 
 Score: 0 = absent/unsupported; 1 = partly present; 2 = clear and evidence-based. A strong response scores at least 8/10, with no zero in Observation or Next evidence. This is practice feedback, not a trading rule.
 
-## Implementation and validation notes
+## Implementation and validation notes\n\nSee [`../PILOT_VALIDATION_CHECKLIST.md`](../PILOT_VALIDATION_CHECKLIST.md) for the release gate and manual browser-test sequence.
 - Desktop and narrow-screen SVGs are paired through `<picture>`/media sources.
 - The Level 3 outcome charts are hidden until the learner submits an initial reading.
 - The HTML checks whether required text has been written; it does **not** assess the meaning of the answer.
