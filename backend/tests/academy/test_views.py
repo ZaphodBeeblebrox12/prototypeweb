@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from apps.academy.models import Course, CourseModule, Lesson
+from apps.academy.models import Course, CourseModule, Lesson, LessonProgress
 
 User = get_user_model()
 
@@ -51,6 +51,32 @@ class AcademyViewTests(TestCase):
             {"status": "completed"},
         )
         self.assertEqual(response.status_code, 403)
+
+    def test_dashboard_uses_real_learning_progress_and_activity(self):
+        LessonProgress.objects.create(
+            user=self.user,
+            lesson=self.preview_lesson,
+            status=LessonProgress.Status.COMPLETED,
+            time_spent_seconds=245,
+        )
+        response = self.client.get(reverse("academy:home"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["completed_lesson_count"], 1)
+        self.assertEqual(response.context["learning_minutes"], 4)
+        self.assertEqual(response.context["active_course_count"], 0)
+        self.assertEqual(len(response.context["recent_activity"]), 1)
+        self.assertContains(response, "Recent activity")
+        self.assertContains(response, "Preview lesson")
+
+    def test_dashboard_does_not_expose_unpublished_draft_courses(self):
+        Course.objects.create(
+            title="Unpublished VPA draft",
+            slug="unpublished-vpa-draft",
+            status=Course.Status.DRAFT,
+        )
+        response = self.client.get(reverse("academy:home"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Unpublished VPA draft")
 
     def test_learning_room_requires_login(self):
         self.client.logout()
