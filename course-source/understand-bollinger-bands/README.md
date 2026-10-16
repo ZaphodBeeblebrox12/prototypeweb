@@ -1,6 +1,6 @@
 # Understand Bollinger Bands
 
-**Course status:** Draft student-facing manuscripts written; static assets and review remain  
+**Course status:** All 30 student-facing lesson manuscripts deepened and wired into the first-pass Learning Room; visuals and final review remain  
 **Working branch:** my-new-branch  
 **Location:** course-source/understand-bollinger-bands/  
 **Audience:** Intermediate market participants who want a clearer, more practical understanding of Bollinger Bands.
@@ -51,8 +51,18 @@ The course will clearly distinguish Bollinger's BandWidth / low-volatility conce
 
 ## Current checkpoint
 
-The course now has a seven-module architecture and draft student-facing text for all 30 lessons, saved as one Markdown manuscript per module. The lessons include figure references, worked explanations, static-image tasks, model reasoning, common mistakes, transfer prompts, and source notes. The content uses plain language for intermediate traders and now centres the setup module on Bollinger's three named book methods, his later Method IV, his W/M pattern setups, and Carter's separate TTM Squeeze. Source-defined entry conditions are distinguished from course-level risk and execution decisions.
+The seven-module course contains 30 student-facing Markdown lessons, with the first-pass Learning Room now reading its visible lesson content from a generated data asset: [`assets/bollinger-lessons-data.js`](assets/bollinger-lessons-data.js). The Markdown manuscripts remain the source of truth; the JavaScript file is generated output for the static preview, not a second editing system.
 
-The referenced core SVG paths follow the agreed naming scheme, but final course-owned figure assets have **not** been created or visually tested yet. Module 5 now includes 32 temporary historical chart image embeds across six setup lessons, with the image/source map kept in the internal reference index. These are remote embeds, not local image copies, and are intended for replacement before release. The manuscripts are drafts and still need a source-attribution/duplication pass, actual image production, mobile/zoom review, and learner timing/comprehension checks. This work has not been integrated into the public course pages or deployed.
+The Learning Room preserves the three tabs: **The idea**, **Chart examples**, and **Test your reading**. It presents the full lesson text, an appropriate Bollinger Bands figure, worked comparisons, lesson-specific practice, model reasoning, and a unique knowledge-check question for each lesson. The initial Volume & Price Analysis placeholder has been removed from the default lesson panels; its contextual related-course card remains a separate, explicitly in-development cross-link where relevant.
 
-Next: verify exact author-specific pattern details against the book edition, replace the temporary Module 5 web images with course-owned TradingView captures, produce the remaining core figures in a sensible batch workflow, render the manuscripts with the figures, and run a focused readability/content review.
+The current generated content has approximately 907–1,503 words per lesson across the three tabs. All 24 shorter lessons in Modules 1–4 and 6–7 now have a second worked comparison in addition to their earlier worked case. The six Module 5 setup lessons retain their deeper setup rules and multiple case discussions. These are content-depth estimates, not measured stopwatch timings; a fresh learner timing and comprehension pass is still required.
+
+The first-pass page and generated content are **review artifacts on `my-new-branch` only**. They have not been integrated into the public course pages, merged to `main`, or deployed.
+
+## Remaining before release
+
+- Complete the source-attribution and duplication review, and verify author-specific rule details against the relevant book/manual editions.
+- Produce or select course-owned/rights-cleared chart assets. The core final SVG set has not been created or visually tested. Some reference figures still use temporary remote source images and may fail to load; replace them before public release.
+- Run a fresh browser smoke test of all 30 lessons after the manuscript-loader change, including chart zoom, the three tabs, mobile layout, and image fallback behaviour.
+- Check actual learner timing, question clarity and model reasoning with representative lessons before treating the planned durations as measured results.
+- Keep all remaining work on `my-new-branch`; no public integration, merge or deployment without explicit approval.
