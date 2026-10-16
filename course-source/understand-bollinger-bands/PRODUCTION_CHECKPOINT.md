@@ -22,6 +22,12 @@ The following work is committed on `my-new-branch`, in sequence:
 Each saved point remains on `my-new-branch`; none is merged or deployed.
 - `02bcd3f94503654b1d535a31131fc8160b5ed025` — remove the visible “SYNTHETIC DATA” label from the course preview fallback and add module/lesson-based figure numbering inside generated chart illustrations.
 
+## Inline visualization runtime fix — 16 October 2026
+
+- `e163d1c606d0b03da084a9260fcdcf8433327aad` — fixed `practiceCases()` indexing in `preview/first-pass/index.html`. The object stores examples by module IDs 1–7, but the previous lookup used `cases[mId - 1]`; Module 1 therefore received `undefined`, and the lesson renderer failed when calling `.map()`.
+- Corrected lookup: `return cases[mId];`
+- Browser smoke test with Chromium/Playwright: **passed**. Loaded the standalone HTML, navigated all 30 lessons through the lesson-rendering path, checked the practice panel and SVG chart for every lesson, and opened/closed the chart zoom modal. Zero page errors and zero console errors after the fix.
+
 ## Focused source checks
 
 - The checkpointed preview contains the seven-module / 30-lesson curriculum.
