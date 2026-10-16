@@ -418,7 +418,7 @@ draw_chart('L05-A-03-reduced-reference', 'L05_A_overmarked_selection', l05, 'ref
 
 # Lesson 5 incremental clutter edits: same synthetic candles and scale throughout.
 draw_chart('L05-A-04-minor-removed', 'L05_A_overmarked_selection', l05, 'incremental edit: remove a minor fluctuation',
-           bands=[l05_all_bands[i] for i in (0,1,2,4,6)],
+           bands=[l05_all_bands[i] for i in (0,1,2,3,4,6)],
            extra_text=[{'x':0.3,'y':104.95,'text':'A','fontsize':8.5},{'x':0.3,'y':102.2,'text':'B','fontsize':8.5},
                        {'x':0.3,'y':101.83,'text':'C','fontsize':8.5},{'x':0.3,'y':99.78,'text':'E','fontsize':8.5},
                        {'x':0.3,'y':99.08,'text':'F','fontsize':8.5},{'x':0.3,'y':96.55,'text':'G','fontsize':8.5}],
