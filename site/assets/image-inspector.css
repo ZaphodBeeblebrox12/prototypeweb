@@ -1,0 +1,38 @@
+/* Shared instructional image viewer for the TradeThesis learning room. */
+.tt-image-inspector { width:min(96vw,1680px); height:min(94dvh,1100px); max-width:none; max-height:none; margin:auto; padding:0; overflow:hidden; border:1px solid #bfb9ac; border-radius:12px; background:#fbf7ef; color:#29382e; box-shadow:0 24px 80px #07130c55; }
+.tt-image-inspector::backdrop { background:#101a14df; }
+.tt-image-inspector-shell { display:flex; flex-direction:column; width:100%; height:100%; min-height:0; }
+.tt-image-inspector-toolbar { display:flex; flex:0 0 auto; align-items:center; justify-content:space-between; gap:14px; padding:10px 14px; border-bottom:1px solid #ded8ca; background:#fffdf8; }
+.tt-image-inspector-heading { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.tt-image-inspector-heading strong { font:600 14px/1.3 Inter,ui-sans-serif,system-ui,sans-serif; }
+.tt-image-inspector-heading span { max-width:55vw; overflow:hidden; color:#687268; font-size:11px; line-height:1.45; text-overflow:ellipsis; white-space:nowrap; }
+.tt-image-inspector-actions { display:flex; flex:0 0 auto; align-items:center; gap:6px; }
+.tt-image-inspector-actions button { display:inline-grid; place-items:center; min-width:40px; min-height:40px; padding:6px 10px; border:1px solid #c7c0b1; border-radius:7px; background:#fffdf8; color:#29382e; font:600 16px/1 Inter,ui-sans-serif,system-ui,sans-serif; }
+.tt-image-inspector-actions button:hover { border-color:#355a46; background:#edf1e9; }
+.tt-image-inspector-actions .tt-image-inspector-close { min-width:42px; font-size:25px; font-weight:400; }
+.tt-image-inspector-zoom { min-width:76px; color:#536054; font-size:11px; font-variant-numeric:tabular-nums; text-align:center; }
+.tt-image-inspector-stage { position:relative; flex:1 1 auto; min-height:0; overflow:auto; overscroll-behavior:contain; background:#e8e5dd; touch-action:none; cursor:grab; -webkit-overflow-scrolling:touch; }
+.tt-image-inspector-stage:active { cursor:grabbing; }
+.tt-image-inspector-canvas { position:relative; min-width:100%; min-height:100%; margin:0; }
+.tt-image-inspector-media { position:absolute; display:block; max-width:none!important; max-height:none!important; object-fit:fill; border:1px solid #d0c9ba; background:#fffdf8; user-select:none; pointer-events:none; -webkit-user-drag:none; }
+.tt-image-inspector-footer { display:flex; flex:0 0 auto; justify-content:space-between; gap:12px; padding:8px 13px; border-top:1px solid #ded8ca; background:#fffdf8; color:#687268; font-size:10px; line-height:1.5; }
+.tt-image-inspector-image { cursor:zoom-in; }
+.tt-image-inspector-image:focus-visible { outline:3px solid #c96f50; outline-offset:3px; }
+.sr-v52-figure--panel { margin:17px 0; padding:8px; }
+.sr-v52-figure-panel { display:block; width:100%; height:auto; max-width:100%; cursor:zoom-in; }
+.sr-v52-figure--panel figcaption { font-size:12px; font-weight:750; color:#355a46; }
+.sr-v52-figure-panels { display:grid; grid-template-columns:minmax(0,1fr); gap:7px; }
+.sr-v52-figure-set-intro { margin:10px 0 12px; color:#536054; font-size:12px; line-height:1.7; }
+.sr-v52-full-figure { margin:16px 0; border-top:1px solid #ded8ca; padding-top:10px; }
+.sr-v52-full-figure>summary { cursor:pointer; color:#355a46; font-size:12px; font-weight:750; text-underline-offset:3px; }
+.sr-v52-full-figure[open] { padding:10px; border:1px solid #ded8ca; border-radius:8px; background:#fffdf8; }
+@media(max-width:640px) {
+ .tt-image-inspector { width:100vw; height:100dvh; border:0; border-radius:0; }
+ .tt-image-inspector-toolbar { align-items:flex-start; flex-direction:column; gap:8px; padding:9px; }
+ .tt-image-inspector-heading span { max-width:90vw; }
+ .tt-image-inspector-actions { align-self:stretch; justify-content:space-between; width:100%; gap:4px; }
+ .tt-image-inspector-actions button { min-width:39px; min-height:42px; }
+ .tt-image-inspector-zoom { min-width:62px; }
+ .tt-image-inspector-footer { flex-direction:column; gap:3px; padding:6px 9px; font-size:9px; }
+}
+@media(prefers-reduced-motion:reduce) { .tt-image-inspector { scroll-behavior:auto; } }
