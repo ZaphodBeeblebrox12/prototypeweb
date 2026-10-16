@@ -13,6 +13,7 @@ from apps.academy.models import (
     Lesson,
     LessonProgress,
 )
+from apps.payments.models import PaymentIntent
 from apps.subscriptions.models import Plan, PlanPrice
 
 User = get_user_model()
@@ -175,6 +176,51 @@ class AcademyViewTests(TestCase):
             [catalog_course.slug],
         )
         self.assertContains(response, "Course library")
+
+    def test_saleable_course_hands_off_to_secure_checkout_without_granting_access(self):
+        plan = Plan.objects.create(
+            name="Trading Path one-time",
+            tier=Plan.Tier.BASIC,
+            is_active=True,
+            is_hidden=True,
+        )
+        PlanPrice.objects.create(
+            plan=plan,
+            interval=PlanPrice.Interval.ONE_TIME,
+            price_cents=50000,
+            currency="INR",
+            is_active=True,
+        )
+        offer = CourseOffer.objects.create(
+            course=self.course,
+            name="Trading Path course offer",
+            slug="trading-path-course-offer",
+            plan=plan,
+            is_active=True,
+        )
+
+        detail = self.client.get(reverse("academy:course-detail", args=[self.course.slug]))
+        self.assertEqual(detail.status_code, 200)
+        self.assertContains(detail, "data-academy-checkout")
+        self.assertContains(detail, 'value="one_time"')
+
+        checkout = self.client.post(
+            reverse("payment-start"),
+            {"plan_id": str(plan.pk), "interval": "one_time"},
+        )
+        self.assertEqual(checkout.status_code, 200)
+        payload = checkout.json()
+        self.assertEqual(payload["product_type"], "course")
+        self.assertEqual(payload["course_slug"], self.course.slug)
+        self.assertIn("consent_url", payload)
+        self.assertTrue(payload["consent_url"].startswith("/checkout/consent/"))
+
+        intent = PaymentIntent.objects.get(pk=payload["payment_intent_id"])
+        self.assertEqual(intent.status, PaymentIntent.Status.PENDING)
+        self.assertEqual(intent.plan_id, offer.plan_id)
+        self.assertFalse(
+            CourseEntitlement.objects.filter(user=self.user, course=self.course).exists()
+        )
 
     def test_learning_room_requires_login(self):
         self.client.logout()
