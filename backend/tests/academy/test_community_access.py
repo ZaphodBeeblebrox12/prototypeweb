@@ -8,7 +8,8 @@ from django.utils import timezone
 
 from apps.academy.models import Course, CourseEntitlement, CourseOffer
 from apps.bot_integration.access import compute_target_access
-from apps.bot_integration.models import PlanChannelMapping
+from apps.bot_integration.models import PlanChannelMapping, TelegramAccount, UserChannelAssignment
+from apps.bot_integration.services.channel_sync import build_channel_display, get_telegram_access_state
 from apps.payments.models import PaymentIntent
 from apps.payments.services import activate_paid_subscription, apply_refund_policy
 from apps.subscriptions.models import Plan, PlanPrice
@@ -80,6 +81,18 @@ class CourseCommunityAccessTests(TestCase):
         self.assertTrue(target.has_plan)
         self.assertEqual(target.telegram_ids, {"-100-construction-community"})
         self.assertEqual(target.discord_ids, {"construct-member-role"})
+
+        self.assertEqual(get_telegram_access_state(self.user)["state"], "not_linked")
+        TelegramAccount.objects.create(user=self.user, chat_id=987654, telegram_user_id=987654)
+        self.assertEqual(get_telegram_access_state(self.user)["state"], "pending")
+        paid = build_channel_display(self.user)["paid"]
+        community_row = next(row for row in paid if row["name"] == "CONSTRUCT community")
+        self.assertTrue(community_row["entitled"])
+
+        UserChannelAssignment.objects.create(
+            user=self.user, platform="telegram", external_id="-100-construction-community"
+        )
+        self.assertEqual(get_telegram_access_state(self.user)["state"], "ready")
 
     def test_expired_community_term_no_longer_grants_channel_or_role_targets(self):
         _activated, entitlement = activate_paid_subscription(self.intent)
