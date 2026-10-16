@@ -1,5 +1,6 @@
 # Accessibility and source notes — M05-L05
 
+**Figure number:** Figure 5.5; interactive panels use Figure 5.5a–Figure 5.5e.
 **Lesson:** Putting It Together: Reading Volume Profile Alongside Price Action
 **Purpose:** Combine selected profile references with current price-volume behaviour and competing scenarios.
 **Data:** Synthetic OHLCV and profile bins. Not historical data, forecast or recommendation.
