@@ -58,6 +58,12 @@ A chart forms two lows, but the second low closes below the lower band and price
 
 **Model response:** The shape resembles a double bottom, but the expected change has not appeared. The continuing lows support ongoing weakness. I would not treat the shape alone as a buy signal.
 
+### Worked comparison: The relationship between the two lows matters
+
+Suppose the first decline reaches 94 while the lower band is around 96, then price recovers toward 100. Later, price declines again to 96 but remains inside the bands. The second low is higher in relative band terms, which is consistent with the W-bottom concept: the second push has not reproduced the first low's relationship to the lower band. The structure is still a candidate, not a completed trade.
+
+For a contrasting case, the second decline closes below the lower band again and breaks beneath the first low. That does not support the same reading; downside pressure has not shown the expected weakening. In either case, specify the confirmation you are using—such as a break of the intervening swing high in your course-defined practice rule—and the point that invalidates the idea. Do not buy merely because two lows resemble the letter W.
+
 ### Common mistake
 
 Buying every pair of lows that looks like the letter W.
@@ -116,6 +122,12 @@ The second high is inside the upper band, but price then breaks above both highs
 
 **Model response:** The possible M-top did not lead to the expected downside move. The breakout above the highs contradicts the short thesis. The pattern should not be defended simply because it was visible earlier.
 
+### Worked comparison: A weaker second push is only one clue
+
+Suppose the first rally reaches 110 while the upper band is near 108. Price then pulls back toward 104 and rallies again to 109, this time staying closer to or inside the upper band. The second push has a different relationship to the bands, which is worth noting. It does not by itself prove that buyers have lost control or that a reversal has begun.
+
+Compare a chart where the second push also makes a new high, closes firmly beyond the upper band and is followed by further upward progress. A shape that looks like an M can still be part of continuation. For practice, choose a clear structural confirmation and invalidation—such as a break of the swing low between the highs—and apply it consistently. That is a course execution rule, not a claim that every M-top has one universally required entry trigger.
+
 ### Common mistake
 
 Shorting the second high before price has shown a meaningful change.
@@ -171,6 +183,12 @@ Write two possible explanations for the mismatch in Figure 4.3. Then name one fu
 You add three momentum indicators to confirm a possible M-top. All three turn down on the same bars. Have you necessarily added three independent pieces of evidence?
 
 **Model response:** No. If the indicators are closely related, they may repeat much of the same information. More indicators do not automatically create stronger confirmation. I should know what distinct question each tool answers and avoid treating a cluster of similar measures as independent proof.
+
+### Worked comparison: A mismatch raises a question, not a verdict
+
+Imagine price falls to a new low while %B does not reach as low a reading as it did on the previous decline. The two measurements do not move in the same way. This may be a clue that the new price low is less extreme relative to the current bands, but the bands themselves have changed, so the relationship needs careful description. It is not direct proof that selling pressure has ended.
+
+On a second chart, price and %B make new lows together and the decline keeps extending. That sequence offers less support for a reversal interpretation. Neither comparison tells you what happens next. Record the exact mismatch, identify another plausible explanation, and wait for the confirmation condition selected for the setup. A divergence-like relationship is useful because it prompts a closer inspection—not because it makes the next candle predictable.
 
 ### Common mistake
 
@@ -231,6 +249,16 @@ Classify each panel in Figure 4.4 as candidate, confirmed under the stated cours
 A W-bottom candidate has met the course trigger, but the entry is far above the invalidation point and the next resistance area is close. What should you do?
 
 **Model response:** The pattern trigger has occurred, but the trade may have poor reward relative to risk. I can skip it. A valid pattern is not a requirement to trade.
+
+### Worked comparison: Four pattern decisions that look similar at first
+
+**Candidate:** The two lows or highs are visible, but the relative band relationship or confirming price event is missing. Continue observing; do not label it a completed trade.
+
+**Meets the stated rule:** The required relationship and the chosen confirmation are present. The pattern can now be evaluated as a setup, but it still needs a stop, room to the next obstacle and a risk amount that fits the account.
+
+**Failed:** Price crosses the level that invalidates the pattern, or continues in a way that contradicts the premise. Apply the planned invalidation rather than rewriting the pattern after the fact.
+
+**Unclear:** Swings overlap or the evidence can reasonably support more than one interpretation. Keep the case unresolved. A pattern does not become tradable just because a learner can name it; completion, context and execution conditions all matter.
 
 ### Common mistake
 
