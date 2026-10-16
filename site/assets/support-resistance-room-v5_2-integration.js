@@ -152,7 +152,12 @@
 
   function currentChartFilename() {
     const image = byId("sr-chart-image");
-    if (!image || !image.getAttribute("src")) return "";
+    if (!image) return "";
+    // Keep the instructional stage key tied to its canonical PNG name even
+    // when the displayed image uses a sharper paired SVG variant.
+    const canonical = image.dataset.chartCanonicalFile;
+    if (canonical) return canonical.split("/").pop();
+    if (!image.getAttribute("src")) return "";
     try { return new URL(image.getAttribute("src"), window.location.href).pathname.split("/").pop(); }
     catch (_) { return image.getAttribute("src").split("/").pop(); }
   }
