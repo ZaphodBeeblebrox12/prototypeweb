@@ -144,7 +144,14 @@ class Command(BaseCommand):
                         f"{filename} contains Lesson {module_number}.{lesson_position}, "
                         f"but is mapped to module {position}."
                     )
-                learner_body, internal_material = extract_vpa_student_body(segment)
+                try:
+                    learner_body, internal_material = extract_vpa_student_body(segment)
+                except CommandError as exc:
+                    found_sections = [heading for heading, _body in h3_sections(segment)]
+                    raise CommandError(
+                        f"{filename}, Lesson {module_number}.{lesson_position} ({title}): {exc} "
+                        f"Available section headings: {found_sections!r}"
+                    ) from exc
                 parsed_lessons.append({
                     "module_position": position,
                     "lesson_position": lesson_position,
