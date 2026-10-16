@@ -16,6 +16,7 @@
       <g stroke="#cbd3c5" stroke-dasharray="3 5" opacity=".82"><path d="M10 20H210M10 42H210M10 64H210M10 86H210"/><path d="M54 10V92M100 10V92M146 10V92M192 10V92"/></g>
       <g stroke-linecap="round" stroke-width="1.6"><path d="M29 47V79M49 35V60M69 43V72M89 27V52M109 32V61M129 18V45M149 24V55M169 13V38M189 19V47" stroke="#355a46"/><rect x="25" y="54" width="8" height="17" rx="1" fill="#658568"/><rect x="45" y="39" width="8" height="15" rx="1" fill="#c96f50"/><rect x="65" y="49" width="8" height="16" rx="1" fill="#658568"/><rect x="85" y="31" width="8" height="15" rx="1" fill="#658568"/><rect x="105" y="39" width="8" height="14" rx="1" fill="#c96f50"/><rect x="125" y="23" width="8" height="15" rx="1" fill="#658568"/><rect x="145" y="31" width="8" height="17" rx="1" fill="#c96f50"/><rect x="165" y="18" width="8" height="15" rx="1" fill="#658568"/><rect x="185" y="24" width="8" height="14" rx="1" fill="#658568"/></g>`;
     const drawings = {
+      'volume': `${base}<g opacity=".95"><rect x="25" y="69" width="10" height="21" rx="1" fill="#8ea98b"/><rect x="47" y="57" width="10" height="33" rx="1" fill="#8ea98b"/><rect x="69" y="64" width="10" height="26" rx="1" fill="#8ea98b"/><rect x="91" y="42" width="10" height="48" rx="1" fill="#8ea98b"/><rect x="113" y="27" width="10" height="63" rx="1" fill="#c96f50"/><rect x="135" y="51" width="10" height="39" rx="1" fill="#8ea98b"/><rect x="157" y="62" width="10" height="28" rx="1" fill="#8ea98b"/><rect x="179" y="70" width="10" height="20" rx="1" fill="#8ea98b"/></g><path d="M15 48L39 43L61 49L83 31L105 39L127 21L149 34L171 25L205 31" fill="none" stroke="#355a46" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>`,
       'support-resistance': `<rect x="8" y="61" width="204" height="20" rx="3" fill="#b8cbae" opacity=".76"/><path d="M12 66H208M12 81H208" stroke="#789277" stroke-width="1.4" stroke-dasharray="4 4"/>${base}<path d="M15 75L39 65L62 72L86 44L109 55L132 29L156 41L179 21L204 31" fill="none" stroke="#355a46" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`,
       'bollinger': `${base}<path d="M12 50C35 12 56 14 78 28S119 70 145 40S181 16 208 23" fill="none" stroke="#c96f50" stroke-width="1.8"/><path d="M12 26C35 2 56 4 78 11S119 34 145 17S181 5 208 7" fill="none" stroke="#728f70" stroke-width="1.7"/><path d="M12 75C35 58 56 60 78 69S119 89 145 73S181 59 208 65" fill="none" stroke="#728f70" stroke-width="1.7"/>`,
       'candlesticks': `${base}<g stroke-width="1.8" stroke-linecap="round"><path d="M36 19V74M64 31V82M92 14V53M120 24V69M148 13V62M176 20V48" stroke="#355a46"/><rect x="30" y="34" width="12" height="22" rx="1" fill="#658568"/><rect x="58" y="46" width="12" height="20" rx="1" fill="#c96f50"/><rect x="86" y="20" width="12" height="23" rx="1" fill="#658568"/><rect x="114" y="39" width="12" height="18" rx="1" fill="#c96f50"/><rect x="142" y="24" width="12" height="26" rx="1" fill="#658568"/><rect x="170" y="28" width="12" height="13" rx="1" fill="#c96f50"/></g>`,
@@ -92,10 +93,11 @@
       <span class="cc-card-art">${chartArt(course.art)}</span>
       <span class="cc-card-body">
         <span class="cc-card-meta"><span>${escapeHTML(course.category)}</span><span class="cc-card-level">${escapeHTML(course.level)}</span></span>
+        ${course.status === 'in-development' ? '<span class="cc-course-status">Course in development</span>' : ''}
         <span class="cc-card-title-wrap"><span class="cc-card-title">${escapeHTML(course.title)}</span></span>
         <span class="cc-card-description">${escapeHTML(course.description)}</span>
         <span class="cc-card-fit"><span aria-hidden="true">↳</span>${escapeHTML(course.complements)}</span>
-        <span class="cc-card-bottom"><span class="cc-card-price">${escapeHTML(course.price)}</span><span class="cc-card-action">See what's inside <i aria-hidden="true">↗</i></span></span>
+        <span class="cc-card-bottom"><span class="cc-card-price">${escapeHTML(course.price)}</span><span class="cc-card-action">${course.status === 'in-development' ? 'View outline' : "See what's inside"} <i aria-hidden="true">↗</i></span></span>
       </span>
     </button>`;
   }
@@ -116,7 +118,7 @@
     const query = (searchInput?.value || '').trim().toLocaleLowerCase();
     const shown = microCourses.filter(course => {
       const categoryMatches = activeFilter === 'all' || course.category === activeFilter;
-      const searchBlob = [course.title, course.category, course.level, course.description, course.outcome, course.complements].join(' ').toLocaleLowerCase();
+      const searchBlob = [course.title, course.category, course.level, course.status, course.description, course.outcome, course.complements].join(' ').toLocaleLowerCase();
       return categoryMatches && (!query || searchBlob.includes(query));
     });
     microGrid.innerHTML = shown.map(renderMicroCard).join('');
@@ -148,14 +150,14 @@
   function renderModal(course) {
     const lessonCount = course.modules.reduce((sum, item) => sum + (parseInt(item.count, 10) || 1), 0);
     modalScroll.innerHTML = `<div class="cc-modal-top">
-      <div><div class="cc-modal-kicker">Micro-course · ${escapeHTML(course.category)}</div><h2 id="cc-modal-title">${escapeHTML(course.title)}</h2><p id="cc-modal-description" class="cc-modal-deck">${escapeHTML(course.description)}</p><div class="cc-modal-facts"><span>Focused topic</span><span>${course.modules.length} sections</span><span>Approx. ${lessonCount} short lessons</span></div></div>
+      <div><div class="cc-modal-kicker">Micro-course · ${escapeHTML(course.category)}</div><h2 id="cc-modal-title">${escapeHTML(course.title)}</h2><p id="cc-modal-description" class="cc-modal-deck">${escapeHTML(course.description)}</p><div class="cc-modal-facts"><span>Focused topic</span><span>${course.modules.length} sections</span><span>Approx. ${lessonCount} short lessons</span>${course.status === 'in-development' ? '<span>Course in development</span>' : ''} </div></div>
       <div class="cc-modal-art">${chartArt(course.art)}</div>
     </div>
     <div class="cc-modal-outcome"><span aria-hidden="true">✳</span><span><b>What you'll take away</b><br>${escapeHTML(course.outcome)}</span></div>
     <div class="cc-outline-header"><h3>Inside the course</h3><span>Open a section to preview it</span></div>
     <div class="cc-outline" id="cc-outline">${course.modules.map((module, index) => `<section class="cc-outline-item ${index === 0 ? 'is-open' : ''}"><button class="cc-outline-toggle" type="button" aria-expanded="${index === 0 ? 'true' : 'false'}" aria-controls="cc-outline-preview-${escapeHTML(course.id)}-${index}"><span class="cc-outline-num">${String(index + 1).padStart(2, '0')}</span><span class="cc-outline-title">${escapeHTML(module.title)}</span><span class="cc-outline-count">${escapeHTML(module.count)}</span><span class="cc-outline-sign" aria-hidden="true">+</span></button><div class="cc-outline-preview" id="cc-outline-preview-${escapeHTML(course.id)}-${index}" ${index === 0 ? '' : 'hidden'}><p>${escapeHTML(module.preview)}</p><ul>${module.points.map(point => `<li>${escapeHTML(point)}</li>`).join('')}</ul></div></section>`).join('')}</div>
     <p class="cc-modal-fit"><b>Where it fits:</b> ${escapeHTML(course.complements)} This is designed as a standalone micro-course; community access is not included.</p>`;
-    modalFooter.innerHTML = `<div class="cc-modal-price-wrap"><span class="cc-modal-price">${escapeHTML(course.price)}</span><span class="cc-modal-price-note">Indicative price · preview only</span></div><button class="button cc-modal-cta" type="button" data-get-course="${escapeHTML(course.id)}">Preview only <span aria-hidden="true">↗</span></button>`;
+    modalFooter.innerHTML = `<div class="cc-modal-price-wrap"><span class="cc-modal-price">${escapeHTML(course.price)}</span><span class="cc-modal-price-note">${course.status === 'in-development' ? 'Development outline only · no enrolment yet' : 'Indicative price · preview only'}</span></div>${course.status === 'in-development' ? '<button class="button cc-modal-cta" type="button" disabled aria-disabled="true">Course in development</button>' : `<button class="button cc-modal-cta" type="button" data-get-course="${escapeHTML(course.id)}">Preview only <span aria-hidden="true">↗</span></button>`}`;
   }
 
   function openModal(course, opener) {
