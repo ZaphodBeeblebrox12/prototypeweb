@@ -253,6 +253,40 @@ jobs:
             await keyboardPage.keyboard.press("Home");
             assert.equal(await keyboardPage.evaluate(() => document.activeElement.id), "sr-tab-button-lesson", "Home returns focus to Learn and practise");
 
+            // Check the Lesson 3 candidate selector with normal keyboard focus and activation.
+            const l3Link = keyboardPage.locator('#sr-lesson-list [data-lesson-id="3"]');
+            await l3Link.focus();
+            await keyboardPage.keyboard.press("Enter");
+            assert.match(await keyboardPage.locator("#sr-lesson-title").textContent(), /Identify meaningful swing points/);
+            await keyboardPage.locator("#sr-practice-response").focus();
+            await keyboardPage.keyboard.type("I see a broad decline followed by a recovery.");
+            await keyboardPage.locator("#sr-chart-next").focus();
+            assert.equal(await keyboardPage.locator("#sr-chart-next").isDisabled(), false, "A first response unlocks the next lesson view");
+            await keyboardPage.keyboard.press("Enter");
+            await keyboardPage.locator("#sr-teaching-selection-panel").waitFor({state:"visible"});
+            const firstCandidate=keyboardPage.locator('#sr-teaching-selection-options [data-point-id="C1"]');
+            await keyboardPage.locator("#sr-chart-next").focus();
+            await keyboardPage.keyboard.press("Tab");
+            assert.equal(await keyboardPage.locator("#sr-practice-response").evaluate(el => el === document.activeElement), true, "Tab order enters the current-view response");
+            await keyboardPage.keyboard.press("Tab");
+            assert.equal(await keyboardPage.locator("#sr-attempt-made").evaluate(el => el === document.activeElement), true, "Tab order reaches the explicit attempt checkbox");
+            await keyboardPage.keyboard.press("Tab");
+            assert.equal(await firstCandidate.evaluate(el => el === document.activeElement), true, "Tab order reaches the candidate buttons");
+            await keyboardPage.keyboard.press("Space");
+            assert.equal(await firstCandidate.getAttribute("aria-pressed"), "true", "Space toggles a candidate button");
+            for (let i=0;i<3;i++) {
+              await keyboardPage.keyboard.press("Tab");
+              await keyboardPage.keyboard.press("Space");
+            }
+            assert.equal(await keyboardPage.locator("#sr-teaching-selection-count").textContent(), "4 of 4 selected", "Candidate selection enforces the four-point practice limit");
+            assert.equal(await keyboardPage.locator('#sr-teaching-selection-options [data-point-id="C5"]').isDisabled(), true, "Unselected candidate controls disable when the limit is reached");
+            await keyboardPage.keyboard.press("Tab");
+            assert.equal(await keyboardPage.locator("#sr-teaching-selection-note").evaluate(el => el === document.activeElement), true, "Tab skips disabled candidates and reaches the rationale");
+            await keyboardPage.keyboard.type("These turns explain the broad decline and recovery.");
+            await keyboardPage.locator("#sr-chart-next").focus();
+            assert.equal(await keyboardPage.locator("#sr-chart-next").isDisabled(), false, "A rationale unlocks the next chart view");
+            await keyboardPage.keyboard.press("Enter");
+
             const keyboardChartPage = await browser.newPage({ viewport: { width: 1024, height: 900 } });
             keyboardChartPage.on("pageerror", e => errors.push("keyboard ChartLab page: " + e.message));
             keyboardChartPage.on("response", r => { if (r.status() >= 400) bad.push("keyboard ChartLab HTTP " + r.status() + " " + r.url()); });
