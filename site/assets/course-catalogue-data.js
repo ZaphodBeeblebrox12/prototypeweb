@@ -1,6 +1,8 @@
 /*
  * TradeThesis course catalogue content.
  * To add a micro-course, append one object to microCourses, keep priority=3, and set its order.
+ * Set catalogueVisibility to "hidden" while it is still being developed; set to "visible" when it is ready to appear.
+ * Visibility controls catalogue display only; it does not mean an offer has a live checkout or access policy.
  * The visual template and interactions live in courses-catalogue.js / courses.css.
  */
 window.TRADETHESIS_COURSE_DATA = {
@@ -8,6 +10,7 @@ window.TRADETHESIS_COURSE_DATA = {
   programmes: [
     {
       id: "trading-path",
+      catalogueVisibility: "visible",
       priority: 1,
       order: 10,
       theme: "path",
@@ -33,6 +36,7 @@ window.TRADETHESIS_COURSE_DATA = {
     },
     {
       id: "construct",
+      catalogueVisibility: "visible",
       priority: 1,
       order: 20,
       theme: "construct",
@@ -60,6 +64,7 @@ window.TRADETHESIS_COURSE_DATA = {
   ],
   supportingProgrammes: [{
     id: "live-classroom",
+    catalogueVisibility: "visible",
     priority: 2,
     order: 10,
     title: "Trade Construction & Management — Live Classroom",
@@ -71,6 +76,7 @@ window.TRADETHESIS_COURSE_DATA = {
   microCourses: [
     {
       id: "support-resistance",
+      catalogueVisibility: "visible",
       priority: 3,
       order: 10,
       title: "Support & Resistance",
@@ -92,6 +98,7 @@ window.TRADETHESIS_COURSE_DATA = {
     },
     {
       id: "bollinger-bands",
+      catalogueVisibility: "visible",
       priority: 3,
       order: 20,
       title: "Understand Bollinger Bands",
@@ -111,6 +118,7 @@ window.TRADETHESIS_COURSE_DATA = {
     },
     {
       id: "candlestick-patterns",
+      catalogueVisibility: "visible",
       priority: 3,
       order: 30,
       title: "Candlestick Patterns",
@@ -130,6 +138,7 @@ window.TRADETHESIS_COURSE_DATA = {
     },
     {
       id: "risk-management-basics",
+      catalogueVisibility: "visible",
       priority: 3,
       order: 40,
       title: "Risk Management Basics",
@@ -149,6 +158,7 @@ window.TRADETHESIS_COURSE_DATA = {
     },
     {
       id: "moving-averages",
+      catalogueVisibility: "visible",
       priority: 3,
       order: 50,
       title: "Moving Averages",
@@ -168,6 +178,7 @@ window.TRADETHESIS_COURSE_DATA = {
     },
     {
       id: "options-basics",
+      catalogueVisibility: "visible",
       priority: 3,
       order: 60,
       title: "Options Basics",
@@ -187,6 +198,7 @@ window.TRADETHESIS_COURSE_DATA = {
     },
     {
       id: "market-structure",
+      catalogueVisibility: "visible",
       priority: 3,
       order: 70,
       title: "Market Structure",
@@ -206,6 +218,7 @@ window.TRADETHESIS_COURSE_DATA = {
     },
     {
       id: "understanding-adx",
+      catalogueVisibility: "visible",
       priority: 3,
       order: 80,
       title: "Understanding ADX",
