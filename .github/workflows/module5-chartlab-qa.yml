@@ -101,7 +101,8 @@ jobs:
               actual = hashlib.sha256(Path(rel).read_bytes()).hexdigest()
               if len(matches) != 1 or matches[0].split()[0] != actual:
                   raise SystemExit("Missing, duplicate, or incorrect checksum for " + rel)
-          print("Manifest has one row per incremental chart; all four target checksums match regenerated files.")          PY
+          print("Manifest has one row per incremental chart; all four target checksums match regenerated files.")
+          PY
 
       - name: Stage charts for the learning-room preview
         run: |
