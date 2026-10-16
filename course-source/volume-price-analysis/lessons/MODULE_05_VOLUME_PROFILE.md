@@ -1,382 +1,283 @@
 # Module 5 — Find the Price Levels Worth Watching
-## Teaching manuscript · First production pass
+## Student lessons
 
-> **Production status:** Draft for editorial review.
->
-> **Teaching approach:** Introduce volume-at-price as a map of where activity occurred, then interpret it through acceptance, rejection and changing value. The structure draws on the market-profile/auction perspective in Dalton and the broader volume-analysis treatment in Dormeier, while distinguishing profile measures from ordinary volume bars. This is original instructional synthesis.
+The first four modules focused mainly on volume through time: how much activity a data source recorded during each bar. Volume Profile asks a different question: **at which prices was activity concentrated during a selected period?**
+
+The profile gives you a map of past activity. It does not forecast what price must do next. Use it with price structure and current behaviour, and always know which period and data source the profile represents.
 
 ---
 
 ## Lesson 5.1 — Where Has the Market Traded Most? Introducing Volume Profile
 
-### Learning objective
-Explain the difference between volume through time and volume at price, and read a basic profile without treating it as an automatic support/resistance system.
+### Two views of activity
 
-**Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
+A conventional volume histogram places a bar beneath each candle. Each bar represents the activity recorded during that time interval. The horizontal axis is time.
 
-**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
+A Volume Profile reorganises activity by price. It groups recorded volume into price levels or bins for a selected period and displays the distribution horizontally. A broad row means more activity was assigned to that price area than to narrower rows within that same profile. It does not mean all trades happened at one exact price or that price will return there.
 
-### Outline and timing
-- **0:00–1:00 — Opening question:** Why a histogram beneath candles cannot answer every question.
-- **1:00–2:30 — Level 1, Notice:** Identify which display shows activity by time and which shows activity by price.
-- **2:30–5:00 — Teach and model:** Volume through time versus volume distribution by price; What a profile represents and how the period is selected.
-- **5:00–7:30 — Level 2, Compare:** Mark one broad and one thin area in a stated profile window; explain where more or less activity was recorded.
-- **7:30–11:00 — Level 3, Apply:** Use a new profile with price arriving at one area and construct two possible reactions, making clear that the historical profile cannot guarantee either outcome.
-- **11:00–13:00 — Feedback and counterexample:** read a simple profile. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
-- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
-### Full narration script
-So far, we have mainly studied volume through time: a bar tells us how much activity was recorded during a particular interval. That is useful for asking what happened as price moved. But another question matters too: at which prices did the market conduct more or less activity over a chosen period? Volume Profile is a way of showing that distribution. It uses a horizontal shape so you can see which prices had more or less recorded activity during the time period you chose.
+### What the profile depends on
 
-On a conventional chart, volume bars usually sit beneath the candles. The horizontal position of each bar tells you when activity occurred. A volume profile is oriented differently: it groups activity by price level and displays it horizontally. The resulting shape lets you see where more volume was associated with trading, and where less was associated with trading, during the time period you chose and under that platform's calculation rules.
+Before interpreting a profile, identify:
+- **Instrument and data source:** which market or feed was used?
+- **Profile period:** one session, several sessions, or a fixed range chosen on the chart?
+- **Calculation rules:** how does the platform assign volume to price levels, and what bin size is being used?
+- **Comparison:** are you comparing profiles with similar periods and settings?
 
-The distinction is important. A tall volume bar at 10:30 says activity was high during that time interval. A wide profile row around a particular price says more activity was assigned to that price level over the selected profile period. These are related but different questions. One describes activity through time; the other describes its distribution across price.
+A session profile and a profile drawn across a month answer different questions. Changing the start/end points can change the shape and its reference levels. Treat the profile as a view of a chosen dataset, not a timeless map of the market.
 
-The profile depends on settings. You need to know whether you are looking at a session profile, a fixed-range profile drawn across a chosen period, or a composite profile that combines multiple sessions. You also need to know which instrument and volume field the tool uses. Profiles built from exchange-traded volume have a different data basis from profiles derived from tick data or broker-specific feeds. The histogram is a model of the selected data and period, not a complete map of everyone's orders or beliefs.
+### Read the shape before naming its parts
 
-A simple profile commonly shows wider areas where more activity occurred and thinner areas where less activity occurred. The wider regions are often called high volume nodes; thinner regions are called low volume nodes. These terms describe the shape, not a guaranteed future reaction. A high volume area may be associated with extensive two-sided trade and acceptance (price staying beyond a level instead of quickly coming back) during the measured period. A low volume area may represent price levels the market moved through quickly, but the meaning depends on the path and market conditions.
+Look first for broad concentrations and thin areas. Where was activity comparatively concentrated during the chosen period? Where was less activity recorded? Do not start by trying to trade every profile feature. First describe the distribution in ordinary language.
 
-Think of an auction. A price level where many transactions occur has had more activity than a price level the market crossed quickly. Traders sometimes interpret the first as an area of agreement or balance, and the second as an area where the auction found less sustained activity. That is an explanatory model, not proof that every participant agreed on a single fair value. Prices can return to former low volume areas; high volume areas can be crossed decisively when conditions change.
+Suppose a three-session profile shows most activity between 104 and 108, with less activity from 108 to 111. A reasonable observation is that recorded activity was more concentrated in the lower area than in the thinner band above it for those three sessions. This says nothing definite about whether current price will rise or fall.
 
-How should a beginner use this? Begin by selecting a relevant period and asking where the profile is concentrated. Where is the widest region? Are there thinner sections between broader areas? How does current price relate to the profile? Is price inside a region of past activity, testing its edge, or moving away from it? Then return to ordinary price analysis: what do the candles, swings and volume-through-time say at that location?
+### Compare time and price
 
-Avoid drawing too much from a profile that covers an arbitrary period. A profile from the last five sessions tells a different story from one that includes several months. A profile from a single news-driven session may be distorted by temporary conditions. The selection must relate to the question. For a breakout analysis, a profile of the range that preceded the breakout may be useful. For broader context, a longer composite may be worth examining. State your selection and keep it consistent for the exercise.
+Imagine two events:
+- At 10:30, the time-based volume bar is the largest of the morning.
+- In the selected session profile, the widest rows sit near 105.
 
-In a chart review, do not begin with a claim like “price must bounce at this node.” Begin with the map: “This profile has a concentration of activity around the marked zone, and current price is approaching its upper edge.” Then describe the response as price arrives. Does it stall, rotate, break through, or accept beyond it? That is how the profile becomes part of a decision process rather than a collection of lines.
+The first tells you *when* activity was unusually high. The second tells you *where* activity was concentrated over the selected period. These observations can be combined, but they should not be confused.
 
-Volume Profile answers where activity was concentrated in a particular period. It does not, by itself, tell you whether the next move will rise or fall. Its value is in mapping the context in which price will be interpreted. Use it to frame the question, and use current price behaviour to assess the answer.
+### Try it
 
-Let us compare the two most common ways volume appears on a chart. A time-based volume histogram places a bar beneath each candle, so you can ask how much activity the data source recorded during each interval. A Volume Profile groups activity by price level over a selected window. In a horizontal profile, wider rows represent price levels where more of the selected period's activity was assigned; thinner rows represent levels with less activity relative to nearby rows. One display asks “when was activity high?” The other asks “at which prices was activity concentrated during this period?” They are related, but they are not interchangeable.
+A wide profile row is visible around 200. Which interpretation is supported?
 
-Imagine an instrument traded between 100 and 110 during the morning. Price moved quickly from 100 to 103, spent forty minutes rotating between 104 and 106, then briefly traded at 109 and returned to 106. The time-based histogram may show a large volume bar during the move to 109. The profile for the whole morning, however, may be broadest around 104.5–106 because much of the trading took place in that area. Both displays are describing the same selected period from different angles. The tall time-based bar tells you when activity was recorded; the broad profile area tells you where the profile calculation concentrated that activity.
+A. Price will bounce at 200.
+B. More recorded activity was assigned to that price area during the selected period than to narrower rows in the profile.
+C. Every trader agrees that 200 is fair value.
 
-Now ask what such a profile can and cannot tell you. A broad area suggests the selected period had relatively more recorded activity there. It does not mean price must return to that area, or that the area will act as support or resistance if it does. A thinner area shows less activity in that calculation. It does not guarantee a fast move through it in the future. The profile is a map of the chosen past period, not a forecast and not a display of all current resting buy and sell orders.
+**Feedback:** B. The profile describes the distribution of the selected activity. The future response and traders' views cannot be inferred with certainty from the row alone.
 
-The period matters. A profile built from the entire week may look different from a profile built from the morning session. A rolling profile will change as new activity comes in and old activity falls out of the window. Some platforms let you choose row size, value area settings, session boundaries and volume source. These settings can change the shape. When comparing profiles, state the window and method. If the periods differ, explain that the comparison is not exact.
+### Common mistake
 
-Read one profile in three steps. First identify the selected period. Second locate one broad area and one thinner area without guessing what price will do there. Third, mark current price relative to those areas and describe its actual behaviour. Is price approaching the area, pausing in it, rejecting it or moving through it? Those are separate observations. Only after recording them should you write a possible interpretation.
+**Mistake:** Moving the profile start and end points until the shape supports a preferred trade.
 
-Suppose price comes back into the broad 104.5–106 area. If it pauses and then reclaims a nearby swing, a scenario based on a response may gain support. If it moves through the area and holds beyond it, the profile has not acted as a barrier in that instance. Either outcome is useful learning because it teaches the learner to combine the historical distribution with current price behaviour. The wrong lesson would be to memorise “wide profile means bounce.” The better lesson is to use the profile to identify a place to observe carefully, then let the market's actual response inform the next step.
+**Correction:** Choose the period for a stated reason, record it and interpret the result in that context. If you change the period, recognise that you have changed the question.
 
-### Extended spoken case analysis — additional narration
+### Keep this
 
-A profile must be read as the result of a selected data series and a selected window. To make that concrete, put the same synthetic price path on screen and build a profile over the first half, then over the entire path. The shapes differ because the question and period differ. Neither is wrong; they describe different sets of activity. Ask students to write the window in the chart note. If they cannot tell what bars were included, they cannot interpret the profile responsibly. Explain the difference between a high-activity price region and a resting-order map: the profile summarises completed activity according to the tool's rules, whereas a live order book, where available, describes currently displayed orders and has its own limitations. The learner should return to price after identifying a node. Does price currently sit within that region, approach its edge, or travel through it? The response matters more than the node's shape alone. This exercise makes the profile a contextual map rather than a forecast machine and prevents the mistake of assuming every broad region must become future support or resistance.
-
-### Learner progression — Notice → Compare → Apply
-
-**Level 1 — Notice (easy):** Identify which display shows activity by time and which shows activity by price.
-
-**Level 2 — Compare (guided):** Mark one broad and one thin area in a stated profile window; explain where more or less activity was recorded.
-
-**Level 3 — Apply (independent):** Use a new profile with price arriving at one area and construct two possible reactions, making clear that the historical profile cannot guarantee either outcome.
-
-**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
-
-### Knowledge check
-1. What question does volume through time answer, and what question does Volume Profile answer?
-2. Why must the selected profile period be stated?
-3. Why is a high-volume node not automatically support or resistance?
-
-<!-- ASSET: Create a teaching graphic with the same synthetic price series shown once with vertical volume bars (activity by time) and once with a horizontal volume profile (activity by price). Label selected period and data source. -->
-<!-- CHARTLAB: Learner chooses a stated profile window, identifies two concentration areas and one thinner area, then describes current price location without predicting a bounce or breakout. Ask what additional price evidence is needed. -->
+> Volume bars describe activity through time. Volume Profile describes how activity was distributed by price over a selected period.
 
 ---
 
 ## Lesson 5.2 — Finding the Market's Reference Point: Point of Control and Value Area
 
-### Learning objective
-Define the Point of Control and Value Area as profile statistics, explain their dependence on settings, and use them as context rather than fixed trade signals.
+Once you understand the profile's shape, three commonly used references can help you describe it: the Point of Control, the Value Area High and the Value Area Low.
 
-**Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
+### Point of Control (POC)
 
-**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
+The **Point of Control (POC)** is the price level with the greatest volume assigned to it in the selected profile, under the platform's calculation rules. It marks the profile's widest row. It is a reference to past activity—not a guarantee that price will revisit it or turn there.
 
-### Outline and timing
-- **0:00–1:00 — Opening question:** Why the profile needs reference points.
-- **1:00–2:30 — Level 1, Notice:** Point out the Point of Control and Value Area on a labelled profile.
-- **2:30–5:00 — Teach and model:** Point of Control: the price row with the most assigned volume; Value Area: a platform-defined range containing a chosen share of volume.
-- **5:00–7:30 — Level 2, Compare:** Mark these references on two profiles created from different windows and identify what changed.
-- **7:30–11:00 — Level 3, Apply:** Explain how the selected window and platform method affect a new profile reading; justify whether two profiles are comparable.
-- **11:00–13:00 — Feedback and counterexample:** compare two profiles. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
-- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
-### Full narration script
-Once a profile is visible, traders often want a few reference points to help describe its structure. Two commonly used terms are Point of Control (the price row with the most recorded activity) and Value Area. They are useful, but only if we know exactly what they represent and avoid treating them as magical prices.
+### Value Area (VA), VAH and VAL
 
-The Point of Control, or POC, is generally the price row with the greatest volume assigned to it within the selected profile. In everyday language, it is the profile's largest concentration row. This makes it a useful reference for where the most activity occurred in that period. It does not automatically mean that the market will return to that price, that it represents a universally agreed fair value, or that it must act as support or resistance.
+A **Value Area** is a range of prices containing a selected percentage of the profile's volume. Many platforms use a default around 70%, but settings and calculation details can differ. Check your platform rather than assuming every profile uses the same rule.
 
-The Value Area is a range that contains a specified percentage of profile volume according to the platform's method. Many platforms use a convention such as 70 percent, but the percentage and calculation method should be checked rather than assumed. The upper and lower boundaries are commonly called Value Area High and Value Area Low. They outline a central region of activity under that calculation. The area is descriptive: it summarises where volume was concentrated during the chosen period.
+- **Value Area High (VAH):** the top of the selected value-area range.
+- **Value Area Low (VAL):** the bottom of that range.
+- **POC:** the price level with the most volume assigned to it.
 
-These reference points depend on the profile settings. Change the period and the POC may move. Change the data source or row size and the shape can change. A session profile may tell a different story from a composite profile spanning several weeks. The numbers should therefore be used consistently and their origin noted. If you are comparing profiles, do not change the settings midway through the comparison without acknowledging it.
+These terms describe a calculated profile, not a guarantee of fair value or an official boundary accepted by every market participant.
 
-How can these levels inform chart reading? Suppose price is currently inside a value area formed during a multi-session range. That may help you recognise that current price remains within a region of past activity. If price moves above Value Area High and holds outside the area, it may be evidence that the market is exploring prices beyond the earlier concentration. If it repeatedly returns inside, the breakout or acceptance (price staying beyond a level instead of quickly coming back) possible explanation is less compelling. The key is what price does around the boundary—not simply whether it is above or below the line.
+### Work through a simple profile
 
-The POC can be useful as a reference during rotations. If price is trading away from the POC and later returns toward it, you can observe whether activity and price stabilise around the area or pass through it quickly. A return is not guaranteed. Markets can trend away from a previous concentration when information or conditions change. Likewise, the POC can be crossed repeatedly and have little practical significance if the time period you chose is poorly chosen.
+Imagine a profile has:
+- VAH = 112
+- POC = 108
+- VAL = 104
 
-A beginner mistake is to treat Value Area High as resistance and Value Area Low as support in all contexts. Those levels can be reference points, but they are not walls. When a market is balanced, the value-area boundaries may help frame tests and rotations. When a market is trending, the previous value area may be left behind, and its relevance can change. Ask whether the market is currently rotating within a distribution or developing away from it.
+This tells you that, under the chosen settings and period, the selected value area extends from 104 to 112, with the greatest assigned volume at 108.
 
-Combine the profile with the the pattern made by recent highs and lows. Mark the profile period, POC, Value Area High and Value Area Low. Then mark the current swing structure and any obvious prior range boundaries. If the profile and the pattern made by recent highs and lows point to the same zone, that overlap can be worth watching. It is not a mathematical guarantee that the zone is stronger; it simply gives the analyst a coherent reason to pay attention.
+It does **not** tell you that price must rise from 104, fall from 112 or return to 108. It gives you a consistent set of reference points to compare with current price action. The next question is how price behaves when it approaches, trades through or remains beyond these areas.
 
-In the ChartLab, two profiles will be built from different periods of the same synthetic market. The POC and value boundaries will differ. The learner must explain why both can be valid descriptions of their respective windows and why neither can be used as a stand-alone prediction. This helps demonstrate that a profile is contextual information, not an immutable property of the instrument.
+### Use the period that fits the question
 
-Your takeaway is to define these levels correctly before interpreting them. POC tells you the profile's largest concentration row. The Value Area marks a range containing a chosen share of volume under a stated calculation. Their practical meaning comes from the time period you chose, the wider structure and what happens next when price interacts with them.
+A session profile can help you review one session. A composite profile that includes several sessions can provide a broader view. A fixed-range profile can focus on a specific advance, decline or consolidation. These are not interchangeable. A POC from yesterday's session answers a different question from a POC across a month-long range.
 
-Three profile terms appear frequently, so let us make each one precise. The Point of Control, or POC, is the price row with the greatest recorded activity in the selected profile according to the platform's calculation. The Value Area is a region that contains a chosen share of the profile's activity, often displayed with an upper boundary and a lower boundary. The exact percentage and calculation method depend on the platform and settings. These are measurements of the selected distribution. They are not a claim that market participants agree on a fair price, and they are not levels that must hold in the future.
+When comparing value areas, keep the profile method and periods in view. Moving from a one-session profile to a multi-week profile can shift the references simply because the underlying dataset changed.
 
-Use a simple example. A one-hour profile is calculated from 9:00 to 10:00. Its widest row is near 205, so the POC is around 205. The selected Value Area runs from 202 to 208. The first observation is simply that the profile's largest concentration is at 205 and that the specified value region spans 202–208. If current price is at 210, you can state that price is above the selected Value Area. You cannot jump straight to “price is overvalued and must fall.” That would turn a calculation based on the selected period into an unsupported forecast.
+### Try it
 
-Now change the window to 9:30–10:30. During the second half hour, much more activity occurs between 208 and 211. The POC shifts to 209 and the Value Area shifts higher. The new profile has not necessarily “corrected” the earlier profile; it describes a different set of trading. This is why a POC drawn on one chart can differ from a POC on another chart showing the same instrument. The profile may include a different session, a different time range, different row sizes, another percentage for the Value Area, or a different volume feed. Before interpreting a difference as a market change, check whether the calculation basis is comparable.
+Your profile displays a POC at 75, VAH at 79 and VAL at 71. Price is currently at 82.
 
-It is also useful to notice what a POC is not. It is not automatically the day's target, the most important support, or a magnet that price must revisit. It is the row that accumulated the most volume in the profile calculation. It may become a reference when current price returns near it, but the observed response still matters. Price might pause, rotate around it, cross it quickly or never visit it again in the period you study. Each outcome should be read rather than assumed.
+Which statement is best?
 
-For practice, display two profiles created from different windows of the same price history. Ask learners to mark the POC and Value Area on both. Then have them write two columns: “What the profile establishes” and “What it does not establish.” The first might include the selected window's largest activity row and the boundaries of a chosen value region. The second should include any prediction about future direction, certainty that a zone will hold, or claim about the intentions of participants. Finally ask what conditions would make the two profiles comparable: consistent source, similar session boundaries, stated window length and the same calculation settings.
+A. Price is overvalued and must return to 79.
+B. Price is above the selected profile's value-area range; assess whether it holds outside that range and what the current price structure shows.
+C. The POC is guaranteed to act as support.
 
-A useful spoken conclusion is: “In this profile window, the POC is near 205 and the selected Value Area spans 202–208. Price is currently above that region. I will watch whether it holds above, returns into value or traverses the area. The reference helps describe location; it does not decide the trade for me.” This makes POC and Value Area practical tools for asking better questions without treating them as automatic signals.
+**Feedback:** B. The current location can be described without predicting a mandatory return. Holding beyond the range and returning inside would carry different implications.
 
-### Extended spoken case analysis — additional narration
+### Common mistake
 
-The POC and Value Area are reference statistics, not universal fair-value markers. The POC answers which row has the highest assigned volume in the selected profile. The Value Area summarises a chosen share of the profile's total activity under a platform's method. If the profile period, row size, volume data or chosen percentage changes, the references may change too. This makes consistency important during study. In the lab, ask learners to compare two periods and explain why their POCs differ. It may be because the market did more business at a different price during the second period, or because the profile window includes new activity. The learner should not immediately infer that the market must revisit one POC or reject the other. Instead, observe the interaction: did price hold beyond the prior value area, return inside it, or move through the POC region without much pause? Keep the focus on how the market is behaving now. The profile provides a set of reference points based on past activity; it does not dictate what future participants will do.
+**Mistake:** Treating the POC as a magnetic price or VAH/VAL as hard support and resistance.
 
-### Learner progression — Notice → Compare → Apply
+**Correction:** Use them as historical references. The current response determines whether the area is relevant to the present question.
 
-**Level 1 — Notice (easy):** Point out the Point of Control and Value Area on a labelled profile.
+### Keep this
 
-**Level 2 — Compare (guided):** Mark these references on two profiles created from different windows and identify what changed.
-
-**Level 3 — Apply (independent):** Explain how the selected window and platform method affect a new profile reading; justify whether two profiles are comparable.
-
-**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
-
-### Knowledge check
-1. What exactly does the Point of Control identify?
-2. Why can two valid profile windows produce different POCs and Value Areas?
-3. What price behaviour would help you evaluate acceptance outside the Value Area?
-
-<!-- ASSET: Produce a single profile diagram labelling POC, Value Area High/Low and the chosen volume percentage. Add a second panel with a different selected range to show the reference points can change. -->
-<!-- CHARTLAB: Learners mark POC and value boundaries on two profiles using the same synthetic price series but different windows. They answer “What can this tell me?” and “What can it not tell me?” before seeing price continuation. -->
+> POC identifies the profile's highest-volume price level; VAH and VAL mark the selected value-area boundaries. None guarantees the next move.
 
 ---
 
-## Lesson 5.3 — Where Price May Stall — or Move Quickly: High- and Low-Volume Nodes
+## Lesson 5.3 — Where Price May Stall—or Move Quickly: High- and Low-Volume Nodes
 
-### Learning objective
-Interpret high- and low-volume nodes as areas of prior activity concentration or relative thinness, then construct conditional scenarios around them.
+A profile often contains broad concentrations and thin sections. These are commonly called **High-Volume Nodes (HVNs)** and **Low-Volume Nodes (LVNs)**.
 
-**Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
+An HVN is an area where the profile shows relatively high activity. An LVN is an area where relatively less activity was recorded. They are descriptions of the profile's shape; interpreting them requires price context.
 
-**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
+### What broad and thin areas can help you ask
 
-### Outline and timing
-- **0:00–1:00 — Opening question:** Profile shape as a map, not a forecast.
-- **1:00–2:30 — Level 1, Notice:** Identify one high-volume area and one low-volume area on a profile.
-- **2:30–5:00 — Teach and model:** High-volume nodes and concentrated activity; Low-volume nodes and thinner activity.
-- **5:00–7:30 — Level 2, Compare:** Compare two price paths through a low-volume area: rapid traversal and a pause/rejection.
-- **7:30–11:00 — Level 3, Apply:** Write continuation and stall/rejection scenarios for a new node test, with visible conditions that would favour each.
-- **11:00–13:00 — Feedback and counterexample:** map a potential path. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
-- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
-### Full narration script
-A profile often contains broad bulges and thinner sections. The broad bulges are commonly described as high volume nodes; the thinner sections are commonly described as low volume nodes. Their value is not that one means “bounce” and the other means “break through.” Their value is that they summarise how activity was distributed over a particular period and give you useful context for observing current price behaviour.
+An HVN can be associated with a period when considerable trading occurred around that price area. When price revisits the region, it may overlap or spend time there again—but it can also pass through quickly. There is no rule that every HVN must attract price.
 
-A high volume node is a price area where the profile assigns relatively more volume. During the profile period, the market conducted more activity there than at neighbouring price areas. One interpretation is that the market spent time doing business around that zone, perhaps rotating repeatedly as participants were willing to transact there. Such a zone may become an area of attention when price returns. It may slow, rotate, pass through, or reject. None is guaranteed.
+An LVN represents a relatively thin area within the chosen profile. Price may travel through a thin area quickly if the market moves through it again, but that is not guaranteed. Fresh orders, news, a change in volatility or the selected profile period can all alter the response.
 
-A low volume node represents a relatively thinner area in the distribution. It may have formed where price moved through a region quickly or where less activity was recorded. Some traders watch these areas because price can sometimes move rapidly through relatively thin regions until it reaches a broader concentration. But a low volume node is not an empty space, and it does not guarantee acceleration. New information, orders or liquidity (how easily a trade can be made without moving price much) conditions can change the response entirely.
+### Do not turn the profile into a map of guaranteed reactions
 
-The profile also needs a time context. A high volume node that formed months ago may not matter as much to current intraday decisions as one formed in a recent, relevant balance. Conversely, a major composite profile may remain useful for broader structure. The relevance depends on the question and timeframe. Use a profile window that corresponds to the event you are investigating, and do not stack so many profiles that every price becomes surrounded by a supposed node.
+A profile is a summary of past activity. It does not show every resting order or guarantee how much liquidity will be available at a future moment. A thin area does not automatically mean “no sellers” or “no buyers”. A broad area does not automatically mean a wall will stop price.
 
-Consider current price approaching the upper edge of a high volume node after a trend move. One scenario is rotation back through the area if the market returns to prior balance. Another is rejection (price failing to stay beyond a level and moving back) from the node's edge and continuation away. A third is a clean break through the area followed by sustained trade beyond it. The node itself does not choose the scenario. Price behaviour as it enters, travels through and exits the region provides the next evidence.
+Use the node to frame a question:
+- If price enters the area, does it slow, overlap or pass through?
+- If price leaves the area, does it retain the progress?
+- Is the node aligned with a prior swing or range boundary?
+- Does current volume through time support a meaningful observation, or does the data introduce uncertainty?
 
-Now consider a low volume node between two broad areas. If price enters the thin region with a wide directional bar and continues to make progress, movement may be relatively quick. But if price stalls, creates overlapping bars and fails to leave the region, the expected “fast move” is not happening. Update the possible explanation. You should never keep predicting a rapid traverse simply because a profile is thin where price currently sits.
+### Worked example
 
-A helpful framework is to observe four things. First, the profile structure: where does the node begin and end? Second, the approach: is price arriving with strong directional progress or in a compressed range? Third, the response within the node: is price accepted, rejected or moving through? Fourth, the next area: what would be the logical reference if price exits the node? This avoids treating profile lines in isolation and makes your chart notes actionable.
+A selected profile shows an HVN between 150 and 154, with a thinner LVN from 155 to 157. Price rallies from 154 to 158 in two broad bars.
 
-There is another subtlety: the node is a summary of past activity, not a display of current resting orders. It does not tell you that there are still buyers waiting at a high volume node or that no orders remain in a low volume node. Some traders confuse historical trade distribution with order-book depth. They are different forms of information. A profile shows past activity according to its data and calculation rules; it does not reveal every current order or participant's intent.
+One possible reading is that price travelled quickly through the thin area. That is a description of the path, not proof of the cause. If price later returns to 155–157 and passes through again, the thin-area interpretation is consistent with another quick move. If it stalls there and builds a new area of activity, the earlier profile is no longer a reliable description of the newly developing market. Profile context should be updated when the market adds new evidence.
 
-For a ChartLab, use a profile with two high volume nodes connected by a low volume area. Freeze price before it enters the low volume region. Ask the learner to define a scenario if directional progress continues, and an alternative if price stalls. Then show one path where price moves rapidly through and another where it does not. This exercise reinforces that profile shape offers a map of historical activity, not a promise about the future.
+### Try it
 
-High- and low volume nodes can help you organise the chart and identify areas that deserve attention. Their interpretation must remain conditional. Let the profile define the area and let current price action determine whether the market appears to be rotating, rejecting or moving through it.
+Price approaches a high-volume node from below. The first candle has a long upper wick and closes near its low. What can you infer?
 
-High-volume nodes and low-volume nodes describe the shape of a profile. A high-volume node is a region where the selected profile shows a relatively large concentration of activity. A low-volume node is a thinner region between or beside larger concentrations. Start by describing the relative shape, not by assigning the node a fixed role. A high-volume node is not guaranteed support, and a low-volume node does not guarantee that price will accelerate.
+**Feedback:** You can record that price tested the area and did not retain the upper excursion on that candle. The HVN supplies historical context. You cannot conclude that the node will force a reversal. Look for follow-through, such as whether price remains below the area, returns into it or moves through it.
 
-Imagine the profile has two broad areas: one centred near 410 and another near 425. Between them is a thinner area from approximately 416 to 420. The instrument is trading at 415.5 and approaching that thinner section. One hypothesis is that price may move quickly through the area because less activity was concentrated there in the selected period. Another is that current price will slow or reject there because new activity, a nearby swing or an external event matters more than the past distribution. The profile identifies the part of the map we are approaching; it does not dictate which path will occur.
+### Common mistake
 
-Let us see two different outcomes. In the first, price enters at 416, crosses through 420 in three candles and holds above 420 on a small pullback. The move-through scenario gains support because the event occurred and price retained progress. In the second, price reaches 419.8, reverses, and falls back below 416. The expectation of a fast move through the thin area did not develop. That does not make the profile wrong; it means the historical thinness did not prevent a new response from forming. New activity can change the market's behaviour, and the thin area was never a promise of speed.
+**Mistake:** Calling HVNs permanent barriers and LVNs guaranteed fast lanes.
 
-The same caution applies to a high-volume node. A broad concentration around 410 may be a useful reference because a lot of activity in the selected period occurred there. If price returns and rotates around it, that is a response worth describing. But if price crosses the area and continues, it would be wrong to insist that a high-volume node must act as a floor or ceiling. Its usefulness depends on the period, how price approaches it, and what price does there now.
+**Correction:** Use the profile to locate questions and then read the current interaction. Past concentration is context, not a contract.
 
-When analysing a node, distinguish the profile fact from your hypothesis. Fact: “The profile is thinner between 416 and 420 than around 410 and 425.” Hypothesis: “A move through 416 could travel quickly if price is accepted on the other side.” Next condition: “Price must cross the area and hold above 420; if it rejects and returns below 416, the fast-traversal idea is weakened.” This is clearer than “low volume node means fast move” because it defines what would confirm and disprove the idea.
+### Keep this
 
-The profile's construction also matters. Row size can make a thin area appear sharper or smoother. A different selected period can remove or add a concentration. A profile built from a particular session does not describe every venue and every participant. Before drawing too many conclusions, check the window and the method. For the learner exercise, use a profile with clearly marked node boundaries and reveal two contrasting price paths only after the learner has written both the continuation and stall/rejection scenarios. Evaluate the quality of that conditional reasoning, not whether the learner guessed which path was coded into the example.
-
-### Extended spoken case analysis — additional narration
-
-A high-volume node can behave differently depending on whether price arrives from above, below or the middle of the profile. If price approaches from below with sustained upward progress, it may pass through the node and create a new region of activity above it. If it enters with little progress and overlapping bars, it may rotate within the node. If it approaches after a sharp decline, participants may respond differently again. The node itself has no direction. A low-volume area is similar: it can be crossed quickly if directional progress continues, but it can also become a place of hesitation once conditions change. In the exercise, have the learner draw the expected path lightly but not commit to it; then reveal the actual response and ask what evidence required an update. This is a useful place to discuss selection bias: if we look backward across many profile levels, we can usually find a node that appears to explain a past reaction. Before using a level, explain why it was relevant before the outcome. That is how we distinguish a usable reference from an attractive story assembled after the fact.
-
-### Learner progression — Notice → Compare → Apply
-
-**Level 1 — Notice (easy):** Identify one high-volume area and one low-volume area on a profile.
-
-**Level 2 — Compare (guided):** Compare two price paths through a low-volume area: rapid traversal and a pause/rejection.
-
-**Level 3 — Apply (independent):** Write continuation and stall/rejection scenarios for a new node test, with visible conditions that would favour each.
-
-**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
-
-### Knowledge check
-1. What does a high-volume node describe?
-2. Why might a low-volume node be crossed quickly, and why is that not guaranteed?
-3. How does a profile differ from a live order book?
-
-<!-- ASSET: Draw a two-bulge profile with a low-volume connection and an overlaid synthetic price path. Create two alternate outcomes: rapid traversal and failed traversal. -->
-<!-- CHARTLAB: Before revealing the outcome, learners identify node boundaries, write a continuation scenario and a stall/rejection alternative, then list observable evidence that would favour each. Debrief the limits of historical volume distribution. -->
+> Nodes describe where past activity was concentrated or thin. Current price behaviour tells you how the market is interacting with those areas now.
 
 ---
 
 ## Lesson 5.4 — When the Market's Focus Shifts: Reading Changes in Value
 
-### Learning objective
-Compare profiles across periods and describe value migration as evidence of changing activity concentration without treating it as an automatic directional signal.
+A single profile describes activity over one selected period. Comparing profiles can show how the areas of greatest activity and the value range are changing. This can help you describe whether the market is building value higher, lower or around a similar area.
 
-**Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
+### Compare like with like
 
-**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
+Compare profiles with periods that make sense for the question—for example, consecutive sessions using the same session definition and similar settings. If you compare one session with a profile spanning two weeks, differences may mostly reflect the period selected rather than a new change in behaviour.
 
-### Outline and timing
-- **0:00–1:00 — Opening question:** Markets can move their area of activity.
-- **1:00–2:30 — Level 1, Notice:** Mark the Point of Control and Value Area on one session profile.
-- **2:30–5:00 — Teach and model:** Compare profile periods consistently; Value moving higher, lower or remaining balanced.
-- **5:00–7:30 — Level 2, Compare:** Compare profiles from equal-length periods and record whether their value areas overlap or migrate.
-- **7:30–11:00 — Level 3, Apply:** Assess a three-session sequence, separating the observed profile shift from a hypothesis about market acceptance and stating the contrary evidence you would watch for.
-- **11:00–13:00 — Feedback and counterexample:** identify developing change. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
-- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
-### Full narration script
-A market's most active price area does not have to remain fixed. As price moves and trading activity develops, a new profile can form at higher or lower prices. Traders who use Market Profile or Volume Profile often pay attention to this change because it can describe whether activity is being concentrated somewhere different from the previous period. The important point is to treat it as a description of changing behaviour, not as a signal that automatically predicts the next move.
+Record the POC, VAH, VAL and overall shape, but avoid relying on one value alone. The meaning depends on current price structure and how price behaves around the developing reference areas.
 
-Imagine a market spends the morning trading around one price region. Later, price breaks upward and the afternoon's activity becomes concentrated at higher prices. Compared with the morning profile, the centre of activity has migrated upward. That may be consistent with the market accepting higher prices during the later period. But the conclusion is limited: it describes where activity occurred, not whether the price increase is permanent or fundamentally justified. A later session may return to the earlier region.
+### Three broad patterns
 
-value migration (the main area of activity moving over time) requires comparable periods. If you compare a two-hour profile with a full-day profile, the difference might reflect the length of the window rather than a meaningful shift. Try comparing adjacent sessions or consistent intraday segments and record the profile settings. Beware of a new profile that is still forming; its POC and boundaries can move while the session develops. A developing reference is not the same thing as a completed one.
+**Value building higher:** a later comparable profile is centred higher than the prior profile. If price is also making upward progress and holding above prior value, that can support a reading of upward development. If price falls back into the older range, the interpretation needs revision.
 
-Describe the pattern in neutral terms. “The POC has shifted higher over three comparable sessions, and each session has spent more activity in a higher range” is a useful observation. “Buyers have permanently taken control” is an unsupported conclusion. To assess the bullish interpretation, look at the the pattern made by recent highs and lows: are swing highs and lows advancing? Does price hold above the prior value area? Do pullbacks find acceptance (price staying beyond a level instead of quickly coming back) at higher prices or return to the previous distribution? This provides context for what the migrating profile may mean.
+**Value building lower:** the later profile's main concentration and value range have shifted down. If price is also making lower highs and lower lows, the profiles are consistent with a downward development. They do not guarantee further decline.
 
-Downward migration works similarly. If successive profiles concentrate at lower prices, that may be consistent with the market conducting more activity lower over time. Yet value can move lower during a broad range rotation, a temporary event, or an orderly pullback within a larger uptrend. The timeframe matters. A lower intraday value area does not automatically negate a higher-timeframe uptrend. Make sure your conclusion matches the horizon you are analysing.
+**Value overlapping:** profiles occupy much of the same range. The market may be balanced or rotating in a similar area. A directional move can still occur, but it should be evidenced by price behaviour rather than assumed from the overlap.
 
-What if the POC moves but the overall profile overlaps heavily with the previous session? That may be a small shift within an otherwise balanced environment rather than a decisive change in character. Conversely, a profile that develops well outside the prior value area and holds there may be more meaningful, especially if the pattern made by recent highs and lows supports the shift. There is no universal threshold for what counts as a significant migration. Define a consistent comparison method and test it against the instrument and timeframe.
+### Worked example
 
-Value migration can also be incomplete or mixed. The POC may shift up while the Value Area overlaps with the prior period. Or price can move sharply higher but activity later concentrates back lower. Rather than forcing a simple bullish/bearish label, describe what each measure says. Ask whether the market is trending, balancing at a new area, or rotating back into a previous region. The ability to say “mixed evidence” is an analytical skill, not a failure.
+Session A has a POC near 100 and value from 96 to 104. Session B has a POC near 103 and value from 100 to 107. The later profile is positioned higher. During Session B, price also holds above 104 and makes a higher swing high.
 
-In the ChartLab, show three consecutive synthetic session profiles. The first concentrates around a lower range, the second overlaps and extends higher, and the third either continues higher or rotates back. Have learners compare POC, value boundaries, overlap and price swing structure. Reveal two endings so students see that a migrating profile can precede further movement or temporary failure.
+These facts fit a hypothesis that the market is developing higher. Now consider an alternate outcome: the next session falls below 100 and remains inside Session A's value area. That would weaken the idea that higher value had become established. Both the profile comparison and the price response should be retained in the analysis.
 
-Value migration helps answer: where is the market doing more business now relative to before? It can support a reading of acceptance at different prices when combined with structure, but it does not predict future movement by itself. Keep the comparison consistent and let actual price behaviour determine whether the change persists.
+### What changed—and what did not?
 
-Value migration is a way to describe how the profile's activity concentration and selected value region shift from one period to another. Keep observation separate from interpretation. If the POC is higher in the later profile, the direct observation is “the POC shifted higher between these two selected windows.” A possible interpretation is that more of the later period's activity was concentrated at higher prices. That can be consistent with a market accepting higher prices, but the POC shift alone does not prove a continuing uptrend.
+A shift in profile shape is not a standalone trade trigger. Before using it, ask:
+- Were the profile periods comparable?
+- Did price structure move in the same direction?
+- Did price hold outside the earlier value area or return into it?
+- Did activity and price outcome change around the new references?
+- Are there session, news or feed factors that complicate the comparison?
 
-Use three equal-length sessions to make the comparison fair. In Session A, the POC is near 100 and the Value Area spans 98–102. In Session B, the POC is near 102 and the Value Area spans 100–104. In Session C, the POC is near 104 and the Value Area spans 102–106. The references have moved higher, and the value areas overlap only partly. If price also holds above Session A's value area and continues to make higher swing highs and lows, the idea that activity is migrating upward gains additional support. The profile shift and the price structure are telling a consistent story, though future continuation is still uncertain.
+### Try it
 
-Now compare a second three-session sequence. The POC shifts from 100 to 102 in Session B, but Session C returns to 100.5 and its Value Area overlaps much of Session A. Price has also spent much of each session rotating through the prior value. Calling this a persistent upward migration would be too strong. One session's shift may have been temporary or driven by a particular event. The correct observation is that the profile changed and then partially returned; the acceptance thesis is mixed.
+A later profile has a lower POC than the previous session, but price has stayed inside the same broad range and the value areas overlap substantially. What is the most careful summary?
 
-This is a useful place to teach the difference between “where activity occurred” and “what participants intended.” A profile is created from a chosen historical window and data method. It does not reveal why each trade took place. To support a hypothesis of acceptance, look for agreement across the selected profiles, the price's ability to stay outside prior value, and the swing structure. To weaken that hypothesis, watch for price returning into the earlier region, broader overlap between value areas, or a subsequent POC shift in the opposite direction.
+**Feedback:** The POC shifted lower, but the broader profiles overlap and price has not established clear directional progress. The shift is evidence to note, not enough by itself to claim a confirmed downtrend.
 
-Keep the comparison consistent. Session length, start and end times, instrument, venue/feed, row size and Value Area settings should be stated. If you compare a full regular session with a short partial session, the difference may partly reflect the windows rather than a meaningful market change. If the provider changes, say so rather than treating the visual change as evidence about price.
+### Common mistake
 
-For the guided exercise, have the learner fill in a table with four columns: session, POC, Value Area boundaries and price behaviour relative to the prior value. Then require two separate sentences: “What changed in the profile?” and “What might that suggest, and what could contradict it?” This small constraint discourages overconfident conclusions. A good answer might say: “The POC shifted higher in two consecutive equal-length windows, and price held above much of the earlier Value Area. This is consistent with activity concentrating higher; a return into the earlier value region would weaken the acceptance interpretation.” The statement is useful because it gives the idea evidence and a clear way to be wrong.
+**Mistake:** Interpreting a POC move as a directional signal without comparing the full value area and price structure.
 
-### Extended spoken case analysis — additional narration
+**Correction:** Describe what shifted, compare the profile periods and check whether price actually held the new area.
 
-Value migration is best understood through repeated, comparable observations rather than one moving line. In the three-session example, record POC, value-area overlap, and the price swing structure. A POC shift higher may suggest that the concentration of activity has moved upward, but if the sessions overlap heavily and price remains in a broad range, the change may be modest. If price moves beyond the prior value area and subsequent activity develops there, the evidence for acceptance at higher prices becomes more coherent. Even then, it can reverse. A profile is a record of what occurred during the period; a developing profile may shift before the session closes. Teach learners to distinguish provisional, developing references from completed-session references. Ask them to narrate the chart in neutral language: “The next session's activity is concentrating higher and price has held above prior value,” rather than “the market is definitely bullish.” Then ask what would contradict the reading: return into prior value, failure to hold a higher low, or a fresh range that overlaps the old distribution.
+### Keep this
 
-### Learner progression — Notice → Compare → Apply
-
-**Level 1 — Notice (easy):** Mark the Point of Control and Value Area on one session profile.
-
-**Level 2 — Compare (guided):** Compare profiles from equal-length periods and record whether their value areas overlap or migrate.
-
-**Level 3 — Apply (independent):** Assess a three-session sequence, separating the observed profile shift from a hypothesis about market acceptance and stating the contrary evidence you would watch for.
-
-**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
-
-### Knowledge check
-1. What does a rising POC across comparable sessions describe?
-2. Why should profile periods and settings be comparable?
-3. What price behaviour would support the interpretation that higher prices are being accepted?
-
-<!-- ASSET: Three comparable session profiles with POC and value boundaries; create upward-migration, downward-migration and overlapping/balanced variants. -->
-<!-- CHARTLAB: Learners compare sessions by recording POC movement, value-area overlap, price swings, and whether price stayed outside prior value. They must distinguish observation (“value shifted”) from thesis (“market may be accepting higher/lower prices”). -->
+> A developing profile helps describe where activity is building. Price must still show whether that change is being sustained.
 
 ---
 
 ## Lesson 5.5 — Putting It Together: Reading Volume Profile Alongside Price Action
 
-### Learning objective
-Use a simple Volume Profile to mark areas where trading activity took place in the past, then read what price does when it reaches those areas again. The profile helps you ask better questions; it does not predict the answer.
+Volume Profile is most useful when it adds a clear location to the price-volume question. It becomes less useful when every profile feature is treated as a signal.
 
-**Beginner checkpoint:** The learner can point to a profile area, describe the current candles around it, and explain what would support or weaken each possible reading.
+### A repeatable sequence
 
-**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Rehearse the narrated chart, progressive practice and feedback together; outline timings are targets, not proof of runtime.
+**1. State the profile period.** For example: “This is a profile of the last five completed sessions on the selected futures feed.”
 
-### Outline and timing
-- **0:00–1:00 — Opening question:** A profile is a map of past activity, not a forecast.
-- **1:00–2:30 — Level 1, Notice:** Locate current price relative to the profile's broad and thin areas.
-- **2:30–5:00 — Teach and model:** Review the profile period, Point of Control, Value Area and nodes; Bring current candles and recent highs/lows back into view.
-- **5:00–7:30 — Level 2, Compare:** Read the candles and recent swing structure as price approaches one profile area; write an observation before an interpretation.
-- **7:30–11:00 — Level 3, Apply:** Build two if/then scenarios around a new profile area and update them after seeing pause, rejection or move-through alternatives.
-- **11:00–13:00 — Feedback and counterexample:** mark useful areas and write two possible scenarios. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
-- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
-### Full narration script
-This lesson brings two things together: Volume Profile and ordinary price reading. We are not adding another tool. We are practising one useful habit: use the profile to see where activity happened in the past, then watch what price does when it reaches those areas again.
+**2. Mark only the references relevant to the question.** These might include POC, value-area boundaries, a clear HVN/LVN or a previous range boundary. Too many lines make it difficult to decide which event matters.
 
-First, remember what a profile shows. It groups recorded trading activity by price over a time period you choose. The wide parts show prices where more activity took place. The thin parts show prices where less activity was recorded. The Point of Control is the price row with the most recorded activity. The Value Area is a range that contains a chosen share of the profile's activity, based on your platform's settings. These are descriptions of the period you selected. They do not tell you what the market must do next.
+**3. Describe current price behaviour.** Is price approaching the area, passing through it, holding outside it or returning inside?
 
-Before using the profile, write down the period it covers. A profile of yesterday's session can tell a different story from a profile covering a full week. Neither is automatically better. Choose the period that fits your question and keep it the same while you study the example. If you change the period, the profile shape and its reference points may change too.
+**4. Compare effort and result.** What did the candles achieve? How does recorded volume compare with its stated baseline? The profile and the time-based volume answer different questions.
 
-Now look at current price. Imagine price is moving up toward a broad area on the profile where a lot of trading took place. Do not immediately write “resistance.” Instead, ask what price actually does when it reaches the area. There are three simple possibilities. Price may pause and move sideways. It may turn away and move back down. Or it may travel through the area and continue higher. Your job is to observe which behaviour is developing.
+**5. Create at least two possible scenarios.** State what would support each one. If both remain plausible and no trigger is present, “wait” is a legitimate conclusion.
 
-Let's walk through the first case. Price approaches the broad area from below. The candles become smaller and several overlap. Price is not moving through the area easily. That is what we can see: the move has slowed. One possible explanation is that buyers and sellers are doing a lot of business around these prices. But we cannot conclude from the profile alone that the market will turn down. Price may pause and then break through. We need to watch the next candles.
+### Worked case
 
-In the second case, price approaches the same area and then moves back down. The candles close away from their highs, and price cannot return to the area on the next attempt. This is evidence that the market struggled to remain above the area. It may support the idea that higher prices were rejected in that moment. It still does not guarantee a larger decline. The wider chart and the next important low matter as well.
+The selected five-session profile shows:
+- POC around 410;
+- a value area from 405 to 416;
+- a broad activity concentration around 408–412;
+- a thinner section above 416.
 
-In the third case, price moves through the broad area with several strong closes and then stays above it. The profile did not act as a barrier. It showed us where past activity had been concentrated; current price has now moved through that area. A good reader updates their view instead of insisting that the old high-activity area must hold.
+Price is currently at 417 after a wide upward bar on elevated time-based volume.
 
-The same thinking applies to a thin part of the profile. Price sometimes moves quickly through an area where little past activity was recorded. But it can also slow down or turn around. Treat the thin area as a place to pay attention, not a promise that price will race through it. If the market starts to overlap and stops making progress, update your view.
+**Observation:** Price has moved above the selected value-area high and is trading in a relatively thin section of the historical profile. The breakout bar showed elevated activity against the chosen volume baseline.
 
-For a practical chart map, use only a few marks. Write down the profile period. Mark the Point of Control, the Value Area boundaries if your platform shows them, and one or two clear wide or thin areas that matter to current price. Then mark the recent swing highs and lows. Do not cover the chart in lines. Each mark needs a reason: it shows where price may be worth watching, not where price must turn.
+**Scenario A — continued progress:** Price holds above 416 on a retest and makes further progress. That would support the idea that the market is sustaining trade beyond the earlier value range.
 
-Now write two possible scenarios. For example: “If price stays above this high-activity area and continues to make higher highs, the move through the area may be holding.” The other scenario might be: “If price falls back below the area and cannot climb back through it, the attempt to move higher may have failed.” Notice that both statements describe something you can see. Neither says that you must place a trade.
+**Scenario B — return into value:** Price falls back below 416 and cannot reclaim it, then moves towards the prior concentration. That would weaken the continuation case and suggest the outside move was not sustained.
 
-Before acting on either scenario, ask the same questions you have used throughout the course. What is the wider pattern made by the recent highs and lows? What did the candles do as price reached the area? Was the recent volume unusual compared with similar bars? What would show that my preferred idea is wrong? Is there a clear entry condition and a sensible place to exit if the idea fails? The profile adds context, but it does not make these decisions for you.
+**What is missing?** The current bar alone does not tell us which scenario will occur. A trigger, invalidation condition and assessment of the practical risk would be required before considering an actual trade plan.
 
-The main lesson is straightforward. Volume Profile tells you where trading activity was concentrated during a chosen past period. Candles and recent highs and lows show how the market is behaving now. Read them together, describe what you see, and wait for the market to provide the evidence your plan requires.
+This is the right role for profile: it adds context to an evidence-based scenario, rather than replacing the analysis.
 
-Now combine the profile with the parts of the chart you have learned to read. The profile shows where activity was concentrated during a selected period. Candles show the open, high, low and close for each interval. Recent swing highs and lows show price structure. Relative volume describes how the activity in a candle compares with an appropriate baseline. None of these tools replaces the others. The aim is to build a coherent view of the current question, not to stack references until the chart appears certain.
+### Try it
 
-Imagine the profile has a broad activity area between 180 and 184 and a thinner region above 188. Current price is at 187.5, approaching 188 from below. The first job is to state the location: price is near the lower edge of the thin region and above the broad activity area. Next describe the candles: price has made higher closes over the last three bars, but the latest candle has not yet closed beyond 188. Then compare relative activity. Perhaps the last bar is near its recent baseline; perhaps it is elevated. That may be relevant, but the event remains unresolved until price behaviour confirms whether it can sustain the move through the area.
+Price reaches the POC and pauses. There is no clear directional progress, and the next bars overlap around the reference. What is the best response?
 
-Build two scenarios. In the move-through case, price closes above 188, holds it during a later retest and continues higher. This would support the view that price has traversed the thin profile area rather than being rejected at its entrance. In the stall case, price reaches 188.5, closes back below 188, and breaks the latest higher low. That would challenge the move-through idea and suggest the market did not sustain the attempt. Both scenarios start from the same profile. The current price response decides which one receives more support.
+**Feedback:** Describe the pause and wait for price to show whether it holds, leaves or crosses the area. The POC is a historical reference, not an automatic entry signal.
 
-Now include the broad area from 180 to 184 as context, but do not mark every profile row. If price eventually returns to 183, observe whether it pauses, rotates through it or moves below it. The historical concentration may be relevant, but price can travel through a high-volume node. Equally, a thin region can contain a fresh pause or reversal. The profile identifies useful places to observe, while the candle and structure sequence describes the event as it develops.
+### Common mistake
 
-The same logic prevents a common mistake: assuming that every profile node is a target, stop or entry level. Those are separate decisions. A trade plan requires a scenario, trigger, invalidation, room relative to risk, and execution assumptions. The profile can help define the location or the question, but it does not calculate position size or replace the price point at which the scenario fails. If the price response is unclear or the proposed risk point is arbitrary, no trade may be the most defensible answer.
+**Mistake:** Drawing POC, VAH, VAL and every visible node, then treating each one as a potential trade.
 
-In the lab, limit yourself to three profile areas. Write what each area represents in the chosen window. Then circle the area nearest current price and describe how price is behaving relative to it. Make a continuation scenario and a pause/rejection alternative, each with a condition and an invalidation. Only then reveal different outcomes. During the debrief, ask whether the learner updated based on visible price behaviour or merely changed the story to fit the ending. A strong response might say: “Price approached the thin region on moderate activity. A close above 188 and a held retest would support a move-through scenario; a return below it followed by a break of the recent higher low would weaken that view. Until one occurs, the outcome is unresolved.” That is profile reading integrated with price—not a profile-based prediction.
+**Correction:** Choose references because they answer a specific question. Remove levels that do not materially change your analysis.
 
-### Learner progression — Notice → Compare → Apply
+### Module 5 review
 
-**Level 1 — Notice (easy):** Locate current price relative to the profile's broad and thin areas.
+You can now distinguish volume through time from volume at price; read POC, VAH and VAL; interpret high- and low-volume nodes cautiously; compare the development of value; and combine profile context with current price behaviour.
 
-**Level 2 — Compare (guided):** Read the candles and recent swing structure as price approaches one profile area; write an observation before an interpretation.
+### Quick check
 
-**Level 3 — Apply (independent):** Build two if/then scenarios around a new profile area and update them after seeing pause, rejection or move-through alternatives.
+**1. What does a POC identify?**  
+The price level with the greatest volume assigned to it in the chosen profile under the platform's calculation rules.
 
-**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
+**2. What does an LVN guarantee?**  
+Nothing about the future. It identifies a relatively thin area in the selected historical profile. Current price may pass quickly or behave differently.
 
-### Knowledge check
-1. What does Volume Profile show that the volume bars under candles do not?
-2. What are three things price might do when it reaches a high-activity area?
-3. Why should a profile area not be treated as a guaranteed turning point?
+**3. When is a profile comparison meaningful?**  
+When the selected periods and settings are understood and comparable, and the findings are considered alongside current price structure.
 
-<!-- ASSET: Use one clean synthetic chart with the profile period, Point of Control, Value Area and one broad plus one thin profile area clearly marked. Create three alternate price paths: pause, turn away, and move through. Do not add unrelated indicators. -->
-<!-- CHARTLAB: Learners mark at most three useful profile areas, then write two “if/then” scenarios around the area nearest current price. Reveal later bars showing a pause, a turn away, or a move through. Learners update their reading using the new evidence. Score the reasoning, not the direction guessed. -->
-
-
-## Module 5 instructor notes
-
-- Always state profile period, data source and value-area settings.
-- Explain historical profile activity versus current resting liquidity; these are different data types.
-- Do not describe POC, value boundaries or profile nodes as guaranteed support/resistance.
-- Reference themes: Dalton and colleagues on market-generated information, balance and initiative/responsive activity; Dormeier on broader volume analysis and volume-based tools.
+**Transfer task:** Choose one profile period. Write its data source and time window, mark two or three references that matter, and create two price scenarios with a clear condition that would favour each one. If no event currently separates the scenarios, state what you would wait to observe.
