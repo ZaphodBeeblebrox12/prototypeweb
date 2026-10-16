@@ -19,6 +19,37 @@ from apps.academy.models import (
     LessonInstructorMaterial,
 )
 
+_SNR_FIGURES = {
+    1: (
+        ("1.1", "L01-A-01-clean.svg", "Repeated lower reactions around a broad area (illustrative chart).", "Price revisits a similar lower area in this illustrative sequence; no support boundary is drawn."),
+    ),
+    2: (
+        ("1.2", "L02-A-01-clean.svg", "An upward sequence with pullbacks and higher turns (illustrative chart).", "An illustrative rising sequence with pullbacks and generally higher turning points."),
+    ),
+    3: (
+        ("2.1", "L03-A-01-clean.svg", "A price sequence before major swing points are selected (illustrative chart).", "An illustrative chart with major and minor turns, before any candidate points are selected."),
+    ),
+    4: (
+        ("2.2", "L04-A-01-clean.svg", "Lower reactions before zone boundaries are drawn (illustrative chart).", "Related lower reactions with varied wick lows; no zone boundaries are drawn."),
+    ),
+    5: (
+        ("2.3", "L05-A-01-overmarked.svg", "Candidate areas before reducing chart clutter (illustrative chart).", "An illustrative chart with candidate areas, some overlapping or less relevant."),
+    ),
+    6: (
+        ("3.1", "L06-A-01-clean.svg", "Lower-reaction practice with the boundaries hidden (illustrative chart).", "An illustrative chart with three lower reactions and zone boundaries hidden."),
+    ),
+    7: (
+        ("3.2", "L07-A-01-overmarked.svg", "An overmarked chart before redundant areas are removed (illustrative chart).", "An illustrative chart with multiple candidate zones before editing for readability."),
+    ),
+    8: (
+        ("3.3", "L08-A-01-many-crossings.svg", "Frequent crossings and mixed behaviour near an area (illustrative chart).", "Price crosses and revisits a band frequently in this illustrative example."),
+        ("3.4", "L08-A-02-fewer-interpretable.svg", "Fewer visits with clearer contextual reactions (illustrative chart).", "Fewer visits to an area with clearer contextual reactions; this is not a strength score."),
+    ),
+    15: (
+        ("6.1", "L15-A-01-clean.svg", "Price between two contextual areas, with no trade prescribed (illustrative chart).", "Price sits between two candidate reaction areas; no entry or outcome is marked."),
+    ),
+}
+
 _LESSON_HEADING = re.compile(
     r"^#{1,6}\s+(?:LESSON|Lesson)\s+0?(\d{1,2})\b[^\n]*$",
     re.I | re.M,
@@ -39,6 +70,61 @@ _ANSWER_EXAMPLE_LABEL = re.compile(
     r"^\s*\*\*(?:acceptable response example|model answer|expected response|suggested answer):?\*\*\s*:?\s*$",
     re.I,
 )
+
+
+def embed_snr_figures(lesson_number, module_position, learner_markdown, static_root):
+    """Embed only curated, first-view Support & Resistance figures in draft lessons."""
+    figures = _SNR_FIGURES.get(int(lesson_number), ())
+    if not figures:
+        return learner_markdown, ""
+
+    expected_module = int(figures[0][0].split(".", 1)[0])
+    if module_position != expected_module:
+        raise CommandError(
+            f"Support & Resistance Lesson {lesson_number} maps to Module {module_position}, "
+            f"but its figure numbering expects Module {expected_module}."
+        )
+
+    heading = next(
+        (
+            match for match in _HEADING.finditer(learner_markdown)
+            if "student-facing" in match.group(2).casefold()
+        ),
+        None,
+    )
+    if heading is None:
+        raise CommandError(
+            f"Support & Resistance Lesson {lesson_number} has no student-facing heading "
+            "for its approved figure."
+        )
+
+    blocks = []
+    notes = []
+    for figure_number, filename, caption, description in figures:
+        if not (Path(static_root) / filename).is_file():
+            raise CommandError(
+                f"Approved Support & Resistance figure is missing: "
+                f"{Path(static_root) / filename}"
+            )
+        blocks.append(
+            f"![Figure {figure_number} — {description}]"
+            f"(/static/academy/support-resistance/{filename})\n\n*{caption}*"
+        )
+        notes.append(
+            f"Figure {figure_number} uses curated static asset {filename}. It is an "
+            "illustrative first-view image only; it does not implement a response-gated "
+            "reveal or a ChartLab interaction."
+        )
+
+    injected = (
+        learner_markdown[:heading.end()]
+        + "\n\n"
+        + "\n\n".join(blocks)
+        + "\n\n"
+        + learner_markdown[heading.end():]
+    )
+    injected = re.sub(r"\n{3,}", "\n\n", injected).strip()
+    return injected, "\n".join(notes)
 
 
 def lesson_segments(script):
@@ -286,6 +372,7 @@ class Command(BaseCommand):
                 module_for_lesson[lesson_id] = (position, module)
 
         parsed = []
+        static_figure_root = repository_root / "backend" / "static" / "academy" / "support-resistance"
         for item in raw_lessons:
             source_rel = str(item.get("canonical_script_path", ""))
             script = script_texts.get(source_rel)
@@ -303,6 +390,9 @@ class Command(BaseCommand):
             if membership is None:
                 raise CommandError(f"Lesson {item.get('lesson_id')} is not assigned to a module.")
             module_position, module = membership
+            learner_body, media_notes = embed_snr_figures(
+                number, module_position, learner_body, static_figure_root
+            )
             parsed.append({
                 **item,
                 "module_position": module_position,
@@ -310,6 +400,7 @@ class Command(BaseCommand):
                 "source_path": source_rel,
                 "body": learner_body,
                 "answer_key": answer_key,
+                "media_notes": media_notes,
                 "duration_minutes": estimate_duration(segment),
             })
 
@@ -381,6 +472,7 @@ class Command(BaseCommand):
                     answer_key_markdown=item["answer_key"],
                     instructor_notes=build_instructor_notes(
                         item, item["source_path"], str(manifest.get("status", "Draft")),
+                        extra=item["media_notes"],
                     ),
                 )
 

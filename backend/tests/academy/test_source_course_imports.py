@@ -1,4 +1,5 @@
 from apps.academy.management.commands.seed_support_resistance import (
+    embed_snr_figures,
     estimate_duration,
     extract_snr_student_body,
     lesson_segments,
@@ -132,3 +133,39 @@ def test_trading_path_embeds_only_available_charts_as_numbered_figures(tmp_path)
     assert "MUST SHOW:" in embedded_notes
     assert "L1-03-not-available.png" in remaining_notes
     assert counters == {1: 2}
+
+
+def test_support_resistance_importer_embeds_only_curated_first_view_figures(tmp_path):
+    static_root = tmp_path / "support-resistance"
+    static_root.mkdir()
+    for filename in (
+        "L01-A-01-clean.svg",
+        "L08-A-01-many-crossings.svg",
+        "L08-A-02-fewer-interpretable.svg",
+        "L15-A-01-clean.svg",
+    ):
+        (static_root / filename).write_text("<svg/>", encoding="utf-8")
+
+    opening = "## 3. Student-facing lesson script and reveal timing\n\nObserve before interpreting."
+    lesson_1, notes_1 = embed_snr_figures(1, 1, opening, static_root)
+    assert "![Figure 1.1 — Price revisits a similar lower area in this illustrative sequence; no support boundary is drawn.](/static/academy/support-resistance/L01-A-01-clean.svg)" in lesson_1
+    assert "*Repeated lower reactions around a broad area (illustrative chart).*" in lesson_1
+    assert "does not implement a response-gated" in notes_1
+
+    lesson_8, notes_8 = embed_snr_figures(8, 3, opening, static_root)
+    assert "/static/academy/support-resistance/L08-A-01-many-crossings.svg" in lesson_8
+    assert "/static/academy/support-resistance/L08-A-02-fewer-interpretable.svg" in lesson_8
+    assert "Figure 3.3" in lesson_8 and "Figure 3.4" in lesson_8
+    assert "INTERNAL" not in lesson_8
+    assert notes_8.count("Figure 3.") == 2
+
+    lesson_15 = "## Student-facing opening\n\nThink in conditional scenarios."
+    lesson_15, notes_15 = embed_snr_figures(15, 6, lesson_15, static_root)
+    assert "Figure 6.1" in lesson_15
+    assert "L15-A-01-clean.svg" in notes_15
+
+    for lesson_number, module_position in ((9, 4), (16, 6), (17, 6), (18, 6)):
+        body = "## Student-facing opening\n\nCase material remains pending."
+        unchanged, notes = embed_snr_figures(lesson_number, module_position, body, static_root)
+        assert unchanged == body
+        assert notes == ""

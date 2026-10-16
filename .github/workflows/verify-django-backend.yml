@@ -97,12 +97,26 @@ jobs:
               assert all("CHART NEEDED:" not in lesson.content_markdown for lesson in lessons), slug
               assert all("Diagram already made:" not in lesson.content_markdown for lesson in lessons), slug
               figure_names = {
-                  name for lesson in lessons
-                  for name in re.findall(r"/static/academy/course-images/([^\s)]+)", lesson.content_markdown)
+                  f"{directory}/{name}" for lesson in lessons
+                  for directory, name in re.findall(
+                      r"/static/academy/(course-images|support-resistance|vpa)/([^\s)]+)",
+                      lesson.content_markdown,
+                  )
               }
+              assert all((Path("static/academy") / name).is_file() for name in figure_names), slug
               if slug == "trading-path":
-                  assert figure_names, "Trading Path should render its available teaching figures"
-                  assert all((Path("static/academy/course-images") / name).is_file() for name in figure_names), slug
+                  assert any(name.startswith("course-images/") for name in figure_names), slug
+              elif slug == "support-resistance":
+                  assert len(figure_names) == 10, (slug, figure_names)
+                  assert all(name.startswith("support-resistance/") for name in figure_names), slug
+                  assert not any("reference-internal" in name for name in figure_names), slug
+              elif slug == "volume-price-analysis":
+                  expected_vpa = {
+                      "vpa/vpa-m01-l01-stage1-spot-volume-mobile.svg",
+                      "vpa/vpa-m01-l01-candle-context-compare-mobile.svg",
+                  }
+                  assert figure_names == expected_vpa, (slug, figure_names)
+                  assert not any("stage3" in name for name in figure_names), slug
               assert LessonInstructorMaterial.objects.filter(lesson__module__course=course).count() == lesson_count, slug
               assert not CourseOffer.objects.filter(course=course).exists(), slug
               print(f"{slug}: {len(modules)} unpublished modules, {len(lessons)} unpublished lessons, {len(figure_names)} linked figures, separate instructor materials, no offer")

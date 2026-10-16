@@ -33,3 +33,32 @@ class StaticAssetUrlTests(SimpleTestCase):
         for name in names:
             with self.subTest(name=name):
                 self.assertIsNone(finders.find(name))
+
+
+    def test_curated_support_resistance_figures_resolve_and_internal_figures_do_not(self):
+        names = (
+            "L01-A-01-clean.svg",
+            "L02-A-01-clean.svg",
+            "L03-A-01-clean.svg",
+            "L04-A-01-clean.svg",
+            "L05-A-01-overmarked.svg",
+            "L06-A-01-clean.svg",
+            "L07-A-01-overmarked.svg",
+            "L08-A-01-many-crossings.svg",
+            "L08-A-02-fewer-interpretable.svg",
+            "L15-A-01-clean.svg",
+        )
+        for filename in names:
+            name = f"academy/support-resistance/{filename}"
+            with self.subTest(name=name):
+                self.assertEqual(static(name), f"/static/{name}")
+                discovered = finders.find(name)
+                self.assertIsNotNone(discovered)
+                self.assertTrue(Path(discovered).is_file())
+
+        self.assertIsNone(
+            finders.find("academy/support-resistance/L18-A-02-reference-internal.svg")
+        )
+        self.assertIsNone(
+            finders.find("academy/support-resistance/L18-B-02-retry-reference-internal.svg")
+        )
