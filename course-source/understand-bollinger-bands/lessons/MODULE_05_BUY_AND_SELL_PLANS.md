@@ -55,13 +55,46 @@ Use the same logic in the opposite direction. Identify the squeeze first, then w
 
 Notice the important difference from a mean-reversion trade: Method I does **not** sell the upper band or buy the lower band. It looks to trade the move beyond the band after a squeeze.
 
-### What about stops and failed breakouts?
+### From squeeze to executable trade: prepare, trigger, enter, protect
 
-Bollinger warns about the “head fake”: price may make an initial move in the wrong direction before the actual breakout develops. That means you need a rule for what invalidates the first idea. A quick return inside the prior range may be a warning, but it is not an automatic reverse signal.
+The question is fair: **a close-confirmed breakout will usually give you a worse price than buying before the close.** That is the trade-off. Waiting makes the rule easier to reproduce and filters some temporary spikes, but it cannot guarantee that the move has enough room left. Entering early improves the price only if the breakout continues; it also exposes you to more false starts. There is no entry that gives both the earliest price and confirmation.
 
-In the book, Bollinger discusses using a modified Parabolic stop or a tag of the opposite band as a way to manage Method I trades. He also describes a more discretionary way of handling head fakes: take a smaller position after the first strong move opposite to the false break, then add if the real breakout appears. Treat that as a separate, more involved variation—not a requirement for the basic lesson.
+**Before the breakout, prepare these things:**
 
-For your own plan, decide the exit method before entry. A stop must fit the trade's risk, and a target must leave enough room to justify that risk. Neither is guaranteed by the squeeze itself.
+1. Find a genuinely low BandWidth reading relative to that instrument’s own recent history. Mark the current range high and low, the nearby swing levels, and obvious resistance/support beyond the range.
+2. Decide what counts as the breakout before it happens. For this lesson, the primary, repeatable trigger is a completed bar closing beyond the relevant band after the squeeze condition. A wick through the band that closes back inside is not the same event under this classroom rule.
+3. Set alerts around the band/range edge and decide the maximum loss you will accept. The squeeze is the time to plan—not the time to guess long or short.
+
+**Choose and record one entry style before reviewing results:**
+
+- **Close-confirmation entry — the default for this course.** After a squeeze, act only after a completed close beyond the upper band for a long or lower band for a short. The trade is not “too late” by definition, but it can be too extended in a particular chart. Check the stop distance and the next obstacle before accepting the entry.
+- **Earlier breakout entry — an aggressive course variant.** Enter as price crosses a pre-marked breakout level while the bar is still forming. This can get a better price, but the bar can return inside the band before closing. You must define which level is monitored and test the rule without looking ahead; do not call it the same thing as a confirmed-close entry.
+- **Retest entry — a separate course variant.** Let price break out first, then wait for a pullback/retest that holds near the broken range edge or band, and enter only when price resumes through the pullback’s short-term swing. It may reduce chasing, but some breakouts never retest. Do not treat a retest as a requirement of Bollinger’s basic Method I.
+
+**Place the stop where the trade idea is wrong—not at a convenient arbitrary distance.**
+
+For a long, a tight execution stop might sit below the breakout bar’s low; a wider structural stop might sit below the consolidation/range low or the retest swing low. For a short, use the corresponding high. The wider level is less likely to be hit by ordinary noise but increases the cash risk per unit, so position size must fall. Bollinger discusses a modified Parabolic stop or the opposite-band tag as ways to manage an open Method I position; those are management/exit choices, not a universal initial stop that suits every entry.
+
+Calculate quantity from the cash risk you permit divided by the entry-to-stop distance, allowing for costs and slippage. If the valid structural stop is so far away that the position must be tiny, or the next resistance/support gives too little room, **skip it**. The rule can trigger while the trade is still poor.
+
+**Failure clues:** a breakout that quickly closes back in the old range, a failed push followed by a strong move the other way, or no follow-through after the first expansion. These are warnings to follow your prewritten stop/exit rule; they do not automatically authorise a reverse trade.
+
+### Historical chart examples to compare
+
+Treat these as case studies, not a list of guaranteed winners. On each chart, mark where compression ends, the exact qualifying bar, the price you could realistically enter, the structural stop, and the first nearby obstacle. At least one example is included because a first break can fail before price resolves.
+
+![Example 5.1-A: Narrow bands and a subsequent upside expansion.](https://assets.finbold.com/uploads/2024/08/The-squeeze-and-breakout-to-the-upside-1024x670.jpg)
+
+![Example 5.1-B: A historical volatility squeeze followed by a price breakout.](https://images.moneycontrol.com/static-mcnews/2019/03/4-5.png)
+
+![Example 5.1-C: Compression and breakout behaviour on a different chart.](https://miro.medium.com/v2/resize%3Afit%3A1400/1%2A3YU2PrIh3hhuA82Gf5sbBg.png)
+
+![Example 5.1-D: A downside head fake followed by a later resolution.](https://d.stockcharts.com/img/articles/2015/01/1420296072364399053309.png)
+
+![Example 5.1-E: A breakout-versus-head-fake comparison.](https://d.stockcharts.com/img/articles/2020/07/17/b37acc7d-dc41-481f-b575-843a9add2700.jpg)
+
+**Practice prompt:** On each chart, compare a close-confirmation entry with an earlier entry. Which gets a better price? Which would be stopped if the initial move failed? If you cannot point to a stop before entry, the chart is not yet a complete trade plan.
+
 
 ### Read the examples
 
@@ -127,11 +160,35 @@ The published counterpart is:
 
 When both conditions are true, Method II gives a sell/short signal. Price is in the lower part of the bands and MFI confirms weakness.
 
-### Exits and risk
+### From a Method II signal to a trade
 
-In the book's Method II chapter, Bollinger discusses using a modified Parabolic stop or an opposite-band tag as an exit method. These are the author's described options, not a guarantee that one exit is best for every market. Pick the version you are studying before reviewing its results; do not switch between methods just to keep a losing trade open.
+**Early clues:** watch for price pushing into the upper part of the bands while MFI(10) strengthens, or for price pressing into the lower part while MFI weakens. These are watch conditions, not separate signals. The stated Method II example does not require a squeeze.
 
-Before entry, locate the price structure that would invalidate the trend-following idea. Position size should be based on the loss implied by that stop, not on how strong the MFI reading looks. If price has already travelled a long way and the next obstacle is close, the trigger may be present but the trade can still be unattractive.
+**The trigger:** for the long, a completed bar must have %B above 0.8 and MFI(10) above 80. For the short, %B must be below 0.2 and MFI(10) below 20. Use the same bar-close convention consistently so you do not count a threshold that was briefly crossed mid-bar and then disappeared.
+
+**Entry choices:** the simpler course rule is to act at the close of the qualifying bar, if the remaining reward justifies the stop. A more cautious course variant is to wait for price to break the signal bar’s high for a long or low for a short; this avoids some immediate failures but gives up price and can miss the trade. If price has already travelled far from the recent structure, do not chase solely because both readings remain extreme.
+
+**Stop and size:** Bollinger discusses a modified Parabolic stop or an opposite-band tag as exit approaches; the related published strategy notes also mention Parabolic SAR. For a fixed-risk practice plan, mark the recent swing/pullback that would invalidate the continuation idea, and size the trade from that distance. A stop below the signal candle for a long (above for a short) is a tighter course variant, not a universal author rule. If the stop is wide or a nearby resistance/support leaves poor reward relative to risk, pass.
+
+**What weakens it:** the indicators do not agree, the threshold is only touched intrabar, the move is already extended, or price immediately loses the breakout area. A signal is evidence to consider a trade, not an obligation to enter.
+
+### Historical chart examples to compare
+
+These examples deliberately include different outcomes. Check the %B and MFI panes wherever they are shown. A price thrust without both thresholds is a near-miss, while a correct trigger can still fail.
+
+![Example 5.2-A: Price, %B and MFI together during an established uptrend.](https://chartschool.stockcharts.com/~gitbook/image?dpr=3&quality=100&sign=31f46d65&sv=2&url=https%3A%2F%2F436553459-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FERtrZrZOhufFzk6ZQO4B%252Fuploads%252F7wI3xjQL8XZUYZHaaLpM%252Fbbpb-3-fdxmfi.png%3Falt%3Dmedia%26token%3D2b8a2737-fd58-4830-86ed-8379a4d6d98e&width=768)
+
+![Example 5.2-B: A buy and sell sequence with %B and MFI.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FrdSP5k7xjErxo4kFSFp3%2Fts-pbmfi-01-adbe-exam.png?alt=media&token=2eab96e2-65d0-48bf-9fd2-afaa0cd1f6ae)
+
+![Example 5.2-C: A historical long and short signal with a mixed outcome.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FOjnnYuVua2gUDxeZjsc4%2Fts-pbmfi-02-a-buysell.png?alt=media&token=70cd5a2f-522a-42ec-bbe1-daa92e601930)
+
+![Example 5.2-D: A second buy case, including the risk of a failed signal.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FOpk8ssy8J6rDexgug6Zh%2Fts-pbmfi-03-hsy-buy.png?alt=media&token=78077ea8-b8ff-4211-821e-b298fb1192dd)
+
+![Example 5.2-E: A sell setup that follows price and money-flow weakness.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FzRIvgxiSgit0jAmKuyaA%2Fts-pbmfi-04-rrc-sell.png?alt=media&token=7b560551-d484-401b-94bf-4273db4e3222)
+
+![Example 5.2-F: A filtered signal where additional confirmation changes the timing.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FH6Xdz06htJVLFIjiNKax%2Fts-pbmfi-05-pnc-adx.png?alt=media&token=1c0c0797-32cb-4f72-b4fc-e93f973e84df)
+
+**Practice prompt:** For every example, record the first bar where both published thresholds are true, then compare entry-at-close with entry on the signal bar’s break. Did the later confirmation improve the trade, make it too late, or stop a losing signal?
 
 ### Read Figure 5.2
 
@@ -191,11 +248,37 @@ For a short-side reversal, Bollinger gives an example using %B above 0.95 togeth
 
 Bollinger's later official software Method III manual uses another specific implementation: lower-band tag plus positive Intraday Intensity creates a buy alert; upper-band tag plus negative Intraday Intensity creates a sell/short alert. It also recommends waiting for a strong up bar after the buy alert or a strong down bar after the short alert. Treat these as documented variations, not as if every indicator combination were identical.
 
-### Define the risk
+### From reversal alert to executable trade
 
-For a long, the recent low often gives a clear place to decide that the reversal idea has failed. For a short, use the corresponding high. Bollinger discusses the opposite band as a possible target in examples and emphasises that these setups can offer a clearly defined risk when the structure is clean. The target is not automatic: check the distance to it before entry.
+This is a reversal method, so the main danger is acting while the original trend is still strong.
 
-If price is in a strong band walk and there is no clear sign of weakening, an indicator mismatch may be too early. If the volume indicator data is unsuitable or unavailable for the market you are studying, do not pretend the same confirmation exists.
+**Early clues:** price is testing an outer band and the chosen volume-based indicator is not confirming the latest push. Decide which documented indicator variant you are using before looking at the result: for example, the software version using Intraday Intensity, or the book example using the stated %B and volume-indicator conditions. Do not interchange indicator names and keep the same threshold as if nothing changed.
+
+**Long entry sequence:** a lower-band tag plus positive Intraday Intensity creates the documented buy alert in one official implementation. Do not buy solely on the tag. Wait for the specified strong up-bar confirmation. For a repeatable execution plan, choose either entry at the confirmation bar’s close or a course variant that triggers only if price breaks above that bar’s high. If the price continues making lower lows and the confirmation bar never appears, there is no entry.
+
+**Short entry sequence:** an upper-band tag plus negative Intraday Intensity creates the corresponding alert. Wait for a strong down bar, then use its close or a break below its low as the preselected trigger. A weak bar that closes high in its range is not the same confirmation.
+
+**Stop and target:** for a long, define invalidation just below the retest/reversal low; for a short, above the reversal high. A stop beyond the extreme gives the idea room, but that means fewer units for the same cash risk. Bollinger discusses the opposite band as one possible target in examples; first check whether that target gives adequate room. A nearby stop with a distant target is not enough if the signal itself has not confirmed.
+
+**Stand aside when:** the volume indicator agrees with the price move instead of contradicting it, price is persistently walking the band with no sign of failure, the volume feed is unreliable for the instrument, or the confirming bar would force an entry too far from the invalidation level. A divergence-like appearance can last longer than expected.
+
+### Historical chart examples to compare
+
+These charts show reversal clues and indicator disagreement in different markets. Use them to practise locating the extreme, the indicator evidence, the price-confirmation bar and the invalidation point. Not every chart below contains every variable required by the same Method III implementation.
+
+![Example 5.3-A: A lower-band reversal case with a positive volume-indicator clue.](https://d3kvcd8uuqwmxt.cloudfront.net/filecache/upload/images/fx-strategy18-1.png)
+
+![Example 5.3-B: An upper-band reversal case with a weakening volume-indicator clue.](https://d3kvcd8uuqwmxt.cloudfront.net/filecache/upload/images/fx-strategy18-2.png)
+
+![Example 5.3-C: Bollinger Bands, Intraday Intensity and volume displayed for comparison.](https://static.wixstatic.com/media/252f12_c1ef069183e44feb9b9a00b1b90e23a7~mv2.png/v1/fill/w_450%2Ch_404%2Cal_c%2Cq_85%2Cusm_0.66_1.00_0.01%2Cenc_auto/252f12_c1ef069183e44feb9b9a00b1b90e23a7~mv2.png)
+
+![Example 5.3-D: A reversal-shaped price structure that still needs indicator and price confirmation.](https://assets.finbold.com/uploads/2024/08/Bearish-reversal-1-1024x843.jpg)
+
+![Example 5.3-E: A lower-band W-shaped turn for comparison with the reversal rules.](https://www.tradingsetupsreview.com/5-bollinger-bands-trading-strategies-should-know/img/BollingerBandsW-BottomExample_hu335bd491b6efe5aee31f40a2d85791e4_131237_1280x0_resize_q75_h1_box.webp)
+
+**Practice prompt:** For each case, list what the chart actually proves and what is still missing. A pattern shape alone does not prove the volume condition; a volume clue alone does not prove that price has confirmed the reversal.
+
+### Task
 
 ### Task
 
@@ -255,15 +338,35 @@ This creates a useful but less obvious distinction:
 
 This is the method's central twist. A confirmed move outside a band is not interpreted the same way in every market condition. In a strong trend it can support continuation; in a non-trending market the same event can be read as a possible reversal setup.
 
-### Turn the alert into a trade plan
+### From confirmed breakout to a trade plan
 
-For the **long continuation** case, require the squeeze, two consecutive closes above the upper band, and ADX above the selected threshold. Define where the continuation premise would fail, choose a stop around that price structure, and make sure the next likely obstacle leaves enough room for the trade.
+The two-close requirement answers a specific question—did price hold outside the same band for two closes?—but it can make the entry later. That delay is part of the confirmation design. Do not quietly move the entry earlier and still report it as the same rule.
 
-For the **short continuation** case, mirror the rule below the lower band.
+**Prepare:** identify the squeeze and nearby range boundaries first. Set the ADX threshold as part of the implementation you are studying; it is configurable, not a universal number. Then wait for two consecutive closes outside the same band.
 
-When ADX is below the threshold, do not blindly take the continuation trade. Under Method IV, the outside-band move is instead classified as a potential reversal in the opposite direction. That still requires a plan: define the trigger according to the method, state where the reversal idea is wrong, and decide how the trade will be managed.
+**Continuation case:** with ADX above the chosen threshold, two closes above the upper band create the long-continuation reading; two closes below the lower band create the short-continuation reading. A simple course execution plan is to enter after the second close if price is not extended and room remains. A more cautious variant enters only if the next bar breaks the second candle’s high for a long or low for a short. The latter is an added execution filter and can miss a move that immediately accelerates.
 
-The exact platform implementation can display these as “trend” or “reversal” alerts. Check the chart and indicator settings being used, because different software may package the calculation and alert labels differently.
+**Potential reversal case:** with ADX below the configured threshold, the later Method IV implementation reads the confirmed outside-band move as a potential reversal alert in the opposite direction. Do not take the continuation trade automatically. For a course execution rule, wait for price to break back through the confirmed move’s short-term swing (for example, below a two-close-up sequence’s local low for a possible short) rather than shorting just because ADX is low. This is an added confirmation choice and should be tested separately from the indicator’s alert.
+
+**Stop:** for continuation longs, a stop below the second breakout bar’s low or below the latest swing/range retest is a structural choice; for continuation shorts use the corresponding high. For reversal entries, place the invalidation beyond the breakout extreme. The stop belongs where that specific interpretation becomes wrong. Size the position from the entry-to-stop distance; if the distance leaves too little reward to the next level, do not enter.
+
+The linked chart examples are for practicing breakout and head-fake reading. They must not automatically be labelled exact Method IV signals unless you can verify the squeeze, two consecutive outside closes, and the ADX state from the chart data.
+
+### Historical chart examples to compare
+
+For every chart, count the outside-band closes yourself. Then ask whether ADX is above or below the threshold used in the method. These examples help train breakout-versus-head-fake reading; they do not all show the complete Method IV indicator set.
+
+![Example 5.4-A: A squeeze followed by an upside expansion.](https://assets.finbold.com/uploads/2024/08/The-squeeze-and-breakout-to-the-upside-1024x670.jpg)
+
+![Example 5.4-B: A historical compression and breakout sequence.](https://images.moneycontrol.com/static-mcnews/2019/03/4-5.png)
+
+![Example 5.4-C: A breakout sequence to classify bar by bar.](https://miro.medium.com/v2/resize%3Afit%3A1400/1%2A3YU2PrIh3hhuA82Gf5sbBg.png)
+
+![Example 5.4-D: A head-fake sequence—inspect where the first break fails.](https://d.stockcharts.com/img/articles/2020/07/17/b37acc7d-dc41-481f-b575-843a9add2700.jpg)
+
+![Example 5.4-E: Another false-start and later-resolution comparison.](https://d.stockcharts.com/img/articles/2015/01/1420296072364399053309.png)
+
+**Practice prompt:** A chart with one close outside the band is not yet a two-close Method IV confirmation. Mark the second qualifying close, read ADX using the chosen threshold, then write a stop and entry before exposing yourself to the following bars.
 
 ### Inspect Figure 5.4
 
@@ -323,6 +426,38 @@ For the long W, a second low that falls outside the lower band or makes a new re
 
 For the short M-type top, repeated pushes that continue to reach the upper band with strong price and volume progress do not yet show the weakening the setup looks for. If price breaks higher and holds, the short idea should be cancelled or reassessed under the plan.
 
+### From pattern to entry, stop and target
+
+**W-bottom long:** the first low usually reaches or crosses the lower band. After a bounce, the second low should sit at a better relative position against the lower band, even if its absolute price is marginally lower. A weaker second decline can support the reading, but the entry is not simply “buy low two.” Bollinger’s example is to buy strength—such as the first strong up day with range and volume above recent averages. A course variant can wait for a break above that confirmation bar’s high.
+
+Place invalidation below the right-side low. If the low is too distant, the correct response is to reduce size or skip, not to move the stop into ordinary price noise. Look toward the intervening high or upper part of the range as a possible obstacle/target, but accept the trade only if reward relative to risk is sufficient.
+
+**M-top short:** the first push may reach or exceed the upper band; after a pullback, a later push may make a marginal new price high but fail to reach the upper band. Wait for a sign of weakness, such as a down day with above-average range and volume. A more conservative course variant waits for a break under the intervening swing low, then uses a pullback that fails as a short trigger. Put invalidation above the pullback high or top extreme, matching the exact entry you chose.
+
+**Do not force symmetry:** tops may take more pushes and can remain strong for longer than a bottoming formation. If the later push still reaches the upper band with strong upward progress, the evidence for a weakening M-top is incomplete. If support does not break, do not invent a short confirmation.
+
+**No-trade filter:** no strong confirmation, a clear trend continuing in the original direction, an entry too far from the stop, or too little space before the next barrier are valid reasons to pass.
+
+### Historical chart examples to compare
+
+Look first at the position of each swing relative to the bands. Then mark the confirmation and invalidation levels; do not judge the pattern by the W/M shape alone.
+
+![Example 5.5-A: A W-bottom with a second low that improves relative to the lower band.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FJPCjD7v1YEXarURufxNY%2Fbbs-2-jwnwbot.png?alt=media&token=9cc1eef8-5136-4c97-b717-3a6ad2e545b3)
+
+![Example 5.5-B: A second W-bottom for comparison.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FdnSeQseJstPlj65zVFZe%2Fbbs-3-sndkwbot.png?alt=media&token=b56d6325-8bd5-4df6-a1b1-7ce6f5b37db0)
+
+![Example 5.5-C: An M-type top with a later weakening relationship to the upper band.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2Fn8ahD7Ar613AetIru1U0%2Fbbs-4-xommtop.png?alt=media&token=45505439-ead9-41a6-a4c4-6fa6dfd0a3b6)
+
+![Example 5.5-D: Another M-type top to study for the confirmation point.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FN5uWNvDsFS4DB5H7wNEY%2Fbbs-5-phmmtop-1.png?alt=media&token=509c1973-3359-464e-adb1-947f053ab1df)
+
+![Example 5.5-E: A W-bottom-shaped reversal and its later move.](https://www.tradingsetupsreview.com/5-bollinger-bands-trading-strategies-should-know/img/BollingerBandsW-BottomExample_hu335bd491b6efe5aee31f40a2d85791e4_131237_1280x0_resize_q75_h1_box.webp)
+
+![Example 5.5-F: A bearish reversal-shaped pattern.](https://assets.finbold.com/uploads/2024/08/Bearish-reversal-1-1024x843.jpg)
+
+**Practice prompt:** For each panel, circle the swing that changes the interpretation, mark the trigger and stop as if you were trading live, and identify the moment at which the setup is still incomplete.
+
+
+
 ### Task
 
 In Figure 5.5, identify the relative second low in the W-bottom and the weakening final push in the M-top. Mark the confirmation day for the long and the evidence of weakness for the short. Then identify one example that does **not** qualify.
@@ -373,11 +508,33 @@ A common implementation uses 20-period Bollinger Bands with two standard deviati
 
 The short-side reading is the mirror: the squeeze fires and the momentum histogram is below zero and falling, indicating strengthening downward momentum. Again, the compression alone is not the direction signal; the momentum reading and price behaviour supply that part of the decision.
 
-### Exits and failure
+### From squeeze release to entry and risk
 
-In the common TTM treatment described by StockCharts, traders often manage the exit when momentum starts to fade back toward zero; one example is to exit after two consecutive bars show momentum weakening. Treat this as a documented implementation convention, not a universal rule that every trader or platform must use.
+**Before the release:** the TTM squeeze is on while the Bollinger Bands remain inside the Keltner Channels. That is a prepare/watch condition, not an entry by itself. Mark the compression range and recent swing levels while the squeeze is on. A trader who enters before the release is anticipating the setup; label and test that as a separate strategy.
 
-A squeeze may fire and then fail. Momentum can weaken, price can return into the prior range, or the market may go sideways. Define invalidation around the price structure and consider how you will respond if the histogram changes direction. Do not keep holding merely because the squeeze was active earlier.
+**Trigger and entry:** under the common implementation, wait for the squeeze to fire as the bands expand back outside the Keltner Channels. For a long, the momentum histogram should be above zero and rising; for a short, below zero and falling. A repeatable course execution rule enters on the first completed fire bar that also meets the chosen momentum condition. A more cautious variant waits for the next bar to break the fire bar’s high/low. It can miss sharp moves, but the rule is clear and testable.
+
+**Stop:** use the compression boundary or the swing low/high that invalidates the breakout thesis. A long stop below the lower edge of the compressed range gives the idea more room than a stop just below the trigger candle, but it needs a smaller position. For a short, mirror the level. If price has already travelled so far that the stop or next barrier makes the trade unattractive, let the move go.
+
+**Exit:** a common TTM implementation reduces or exits when histogram momentum begins to fade toward zero; some implementations use two consecutive bars of weakening colour. Treat this as a defined management variant, not a promise or a mandatory rule across every platform. Do not change exit logic midway through a losing trade.
+
+**Failure clues:** the fire occurs but price returns to the compression range, momentum fails to expand in the chosen direction, or the first move immediately reverses. Follow the stop/exit you selected before entry. A release gives no guarantee that a durable trend will follow.
+
+### Historical chart examples to compare
+
+Read the squeeze state and the momentum histogram together. A green/fire state by itself is not a direction signal; mark whether the histogram is above zero and increasing or below zero and decreasing.
+
+![Example 5.6-A: A bullish TTM squeeze release with the momentum pane.](https://cdn.simplertrading.com/2022/04/20135651/Compressed-TTM-Squeeze-In-AAPL-1-resized.png)
+
+![Example 5.6-B: A squeeze chart with price and momentum for a second case.](https://chartschool.stockcharts.com/~gitbook/image?dpr=3&quality=100&sign=72608331&sv=2&url=https%3A%2F%2F436553459-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FERtrZrZOhufFzk6ZQO4B%252Fuploads%252FS6sqGU9PaS8hKIAZezZc%252Fsqueeze-shch-exam.png%3Falt%3Dmedia%26token%3D9fa5a304-e044-4cb5-8ff0-23da12f1ad14&width=768)
+
+![Example 5.6-C: A more recent squeeze-release chart to classify.](https://articles.stockcharts.com/content/images/2025/10/data-src-image-238f2538-3ab5-42c8-8ac1-ecb8ca39df4d.png)
+
+![Example 5.6-D: A bearish squeeze case with the channel relationship and momentum.](https://www.tradingsetupsreview.com/bollinger-squeeze/img/BollingerandKeltnerSqueezeExample_hu316a095101dc94fa9e55857437cd5c11_99605_1280x0_resize_q75_h1_box.webp)
+
+![Example 5.6-E: A TTM-style chart showing squeeze state and upward momentum.](https://pbs.twimg.com/media/E-7bAGwWYAQJr9I.jpg)
+
+**Practice prompt:** For every example, record the first fire bar, histogram sign and direction, candidate entry, stop boundary, and first obstacle. Also look for a release that fails; do not count compression as a trade.
 
 ### Do not mix up the two squeeze approaches
 
