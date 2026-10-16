@@ -1,5 +1,7 @@
 # Accessibility and source notes — M01-L02
 
+**Figure number:** Figure 1.2; interactive panels use Figure 1.2a–Figure 1.2e.
+
 **Linked lesson:** Is This Move Significant? Spotting Unusual Volume
 **Asset purpose:** Compute relative volume and inspect whether the baseline is comparable.
 **Data:** Synthetic OHLCV generated for instruction. Not historical market data, not a forecast and not a trading signal.
