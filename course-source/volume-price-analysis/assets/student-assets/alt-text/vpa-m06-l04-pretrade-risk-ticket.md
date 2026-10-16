@@ -1,5 +1,6 @@
 # Accessibility and source notes — M06-L04
 
+**Figure number:** Figure 6.4; interactive panels use Figure 6.4a–Figure 6.4e.
 **Lesson:** Plan the Trade Before You Take It
 **Purpose:** Separate thesis and trigger from risk control, position size, objective and management rules.
 **Data:** Synthetic OHLCV, not historical prices, a forecast or trade recommendation.
