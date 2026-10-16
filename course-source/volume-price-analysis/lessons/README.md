@@ -3,7 +3,7 @@
 
 **Current status:** All six module manuscripts (30 lessons) have been rewritten as student-facing teaching material on `my-new-branch`. The former continuous narration-script format has been removed from the module lesson files. The new format explains the concepts directly, uses worked cases, provides learner tasks with feedback, and ends with practical checks or transfer work.
 
-**Source packages are complete; release validation is not.** All 30 lessons now have direct links to a primary chart, standalone ChartLab, underlying synthetic data and accessible description. The reusable student worksheet workbook is also available. Exact-page browser rendering, accessibility checks, true-beginner comprehension and duration testing remain open. The material has not yet been integrated into the member learning experience or deployed.
+**Student-first manuscripts and source asset packages are complete; release validation is not.** All 30 lessons link to a primary numbered figure, standalone ChartLab, underlying illustrative data and accessible description. The visual uses Figure M.L numbering instead of a repeated synthetic-data banner; provenance is kept in the lesson/source/alt-text notes. Internal practice stages are not presented as student-facing Level 1/2/3 labels. Exact-page browser rendering, accessibility checks, true-beginner comprehension and duration testing remain open. The material has not yet been integrated into the member learning experience or deployed.
 
 ## Source of truth
 
