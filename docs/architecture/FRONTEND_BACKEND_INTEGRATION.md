@@ -111,3 +111,8 @@ The mapping above is the proposed implementation model; it does not mean these p
 - Do not wire static UI to guessed endpoints or fabricate logged-in, payment-success or saved-progress states.
 - Do not mark a route, feature, test or deployment as production-ready without actual runtime evidence.
 - Do not merge or deploy to `main` without explicit approval.
+
+
+## Sitewide instructional-image replacement hook
+
+The shared frontend hook and backend contract are documented in INSTRUCTIONAL_IMAGE_REPLACEMENT.md. The hook is included in the Trading Path, Support & Resistance, and Bollinger Bands course-room templates but intentionally shows no button in the current static preview. Persistent replacement requires server-rendered staff permission, stable media records, a CSRF-protected Django media endpoint and shared storage; the frontend hook is not an active upload backend.

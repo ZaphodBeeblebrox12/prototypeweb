@@ -2133,6 +2133,7 @@ body { font-size: 15px; line-height: 1.66; }
 
 #modalChartHolder img{display:block;max-width:100%;max-height:75vh;width:auto;height:auto;object-fit:contain;margin:auto;background:#fffdf8}#modalChartHolder{display:flex;align-items:center;justify-content:center;min-width:0}
 </style>
+<link rel="stylesheet" href="../../../../site/assets/instructional-image-admin.css">
 </head>
 <body>
 <div class="app-root" id="appRoot">
@@ -2487,7 +2488,7 @@ const courseReferenceFigures = {
   {url:'https://media.licdn.com/dms/image/v2/D5612AQHeZtpoMd4UeQ/article-cover_image-shrink_423_752/B56ZUf_gMkHoAU-/0/1739998495992?e=2147483647&t=iDw_yf3TvbIsHbtxEuEWEed3wLQwsrMpfSRzlGSG1Vw&v=beta',page:'https://www.linkedin.com/pulse/harnessing-market-volatility-mastering-bollinger-band-isha-qureshi-m2hvc',publisher:'Isha Qureshi on LinkedIn',label:'Lower-band walk after compression',alt:'Illustrated Bollinger Bands chart showing a squeeze, a downward break and price walking along the lower band.',note:'This annotated example illustrates the downside counterpart. It is a reference picture, not verification of a complete trading rule.'}
  ],
  '3-2': [
-  {url:'https://blog.kakaocdn.net/dna/bcFAz3/btrUlZzrR5e/AAAAAAAAAAAAAAAAAAAAANfBRIWzQlpHJfCakbjrdQGwUP19gdeoKGA_jwKfTQdn/img.png?allow_ip=&allow_referer=&credential=yqXZFxpELC7KVnFOS48ylbz2pIh7yKj8&expires=1777561199&signature=TRpC3pjwoQVlM3a0vfHOZT%2FfrmA%3D',page:'https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/bollinger-bandwidth',publisher:'StockCharts ChartSchool topic reference',label:'BandWidth-based squeeze example',alt:'Bollinger Bands with a low BandWidth region followed by a move below the lower band.',note:'The lower pane measures BandWidth relative to its history. That is different from Carter’s TTM Squeeze, which compares Bollinger Bands with Keltner Channels.'},
+  {url:'https://static.ifxdb.com/static-content/266/8TNj7_800.jpg',page:'https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/bollinger-bandwidth',publisher:'InstaForex',label:'BandWidth-based squeeze example',alt:'Bollinger Bands with a low BandWidth region followed by a move below the lower band.',note:'The lower pane measures BandWidth relative to its history. That is different from Carter’s TTM Squeeze, which compares Bollinger Bands with Keltner Channels.'},
   {url:'https://pbs.twimg.com/media/E-7bAGwWYAQJr9I.jpg',page:'https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/ttm-squeeze',publisher:'TTM Squeeze visual reference',label:'A separate TTM Squeeze display',alt:'Chart image showing a TTM Squeeze-style momentum display.',note:'Use the companion TTM Squeeze explanation to identify the envelope relationship and momentum display; do not treat this image as source verification of a trade signal.'}
  ],
  '3-3': [
@@ -2518,7 +2519,7 @@ const courseReferenceFigures = {
  '5-5': [{url:'https://pbs.twimg.com/media/E-7bAGwWYAQJr9I.jpg',page:'https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/ttm-squeeze',publisher:'TTM Squeeze visual reference',label:'A TTM Squeeze-style momentum display',alt:'Chart image showing a TTM Squeeze-style indicator and momentum context.',note:'Use the TTM definition: Bollinger Bands inside Keltner Channels, then a release plus momentum context. Do not confuse it with a low BandWidth reading.'}],
  '6-0': [
   {url:'https://www.tradingsetupsreview.com/bollinger-squeeze/img/BollingerSqueezeFailedExample_huaf734f8d2e5026d9c916f11986949767_86069_1280x0_resize_q75_h1_box.webp',page:'https://www.tradingsetupsreview.com/bollinger-squeeze/',publisher:'Trading Setups Review',label:'A failed squeeze breakout example',alt:'Bollinger squeeze chart showing a move whose follow-through is in question.',note:'Mark the first move, then identify the later evidence that weakens it. Failure does not automatically authorize a reverse trade.'},
-  {url:'https://stockcharts.com/articles/chartwatchers/2020/07/a-bb-breakout-or-the-dreaded-h-684.html',page:'https://stockcharts.com/articles/chartwatchers/2020/07/a-bb-breakout-or-the-dreaded-h-684.html',publisher:'StockCharts ChartWatchers',label:'The breakout or head-fake question',alt:'StockCharts article about Bollinger Band breakouts and head fakes.',note:'Open the source article if the inline chart is blocked. Compare the first breakout evidence with the later head-fake possibility.'}
+  {url:'https://d.stockcharts.com/img/articles/2020/07/17/b37acc7d-dc41-481f-b575-843a9add2700.jpg',page:'https://stockcharts.com/articles/chartwatchers/2020/07/a-bb-breakout-or-the-dreaded-h-684.html',publisher:'StockCharts ChartWatchers',label:'The breakout or head-fake question',alt:'StockCharts article about Bollinger Band breakouts and head fakes.',note:'Open the source article if the inline chart is blocked. Compare the first breakout evidence with the later head-fake possibility.'}
  ],
  '6-1': [
   {url:'https://thestockmarketwatch.com/learn/wp-content/uploads/2025/07/bollinger-band-band-walk-strategy-1024x683.webp',page:'https://thestockmarketwatch.com/learn/docs/indicators/bollinger-bands/',publisher:'The Stock Market Watch',label:'A persistent band walk',alt:'Price continues to advance alongside an outer Bollinger Band.',note:'This is a persistence example. A band walk can continue longer than a premature fade allows.'},
@@ -2745,7 +2746,7 @@ function bindChoiceGroup(groupId, feedbackId, correctText, incorrectText) {
 }
 function bindPilotInteractions() {
   const zoom = $('#zoomChartButton');
-  if (zoom) zoom.addEventListener('click', openChartModal);
+  if (zoom) zoom.addEventListener('click',()=>openChartModal());
   $('#panel-practice').querySelectorAll('[data-enlarge-image]').forEach(button=>button.addEventListener('click',()=>openChartModal(button.closest('figure')?.querySelector('img'))));
  $('#panel-practice').querySelectorAll('.course-reference-image img').forEach(img=>img.addEventListener('error',()=>{const holder=img.parentElement;holder.classList.add('image-unavailable');const fallback=document.createElement('p');fallback.className='image-fallback';fallback.textContent='The source image could not be loaded in this preview. Use the source link below the figure to open the reference.';img.hidden=true;holder.appendChild(fallback);},{once:true}));
  const toggleNotes = $('#toggleChartNotes');
@@ -2802,5 +2803,6 @@ chartModal.addEventListener('click',e=>{if(e.target===chartModal)closeChartModal
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&chartModal.classList.contains('open'))closeChartModal();});
 $('#mobileMenuButton').addEventListener('click',()=>{const open=$('#mobileMenuButton').getAttribute('aria-expanded')!=='true';$('#mobileMenuButton').setAttribute('aria-expanded',String(open));if(open){switchToView('room');$('#mobileMenuButton').textContent='Close room ↑';}else{switchToView('overview');$('#mobileMenuButton').textContent='Explore ↓';}});
 </script>
+<script src="../../../../site/assets/instructional-image-admin.js" defer></script>
 </body>
 </html>
