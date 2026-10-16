@@ -9,6 +9,11 @@ By the end of this module, you should be able to describe candle shape in plain 
 
 ## Lesson 1.1 — What Candlesticks Don't Tell You: Reading the Volume Behind Price
 
+![Chart for What Candlesticks Don't Tell You: Reading the Volume Behind Price. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m01-l01-candle-context.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m01-l01-candle-context.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m01-l01-candle-context.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m01-l01-candle-context.md)
+
 ### The question
 
 Two candles are green and similar in size. Does that mean they tell the same story?
@@ -85,6 +90,11 @@ Compare two hypothetical green candles at the same scale. Candle A rises from 10
 
 ## Lesson 1.2 — Is This Move Significant? Spotting Unusual Volume
 
+![Chart for Is This Move Significant? Spotting Unusual Volume. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m01-l02-relative-volume.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m01-l02-relative-volume.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m01-l02-relative-volume.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m01-l02-relative-volume.md)
+
 ### The question
 
 Is a volume reading of 900 high? The number alone cannot answer. It depends on the instrument, timeframe, session and activity that is normal for the comparison period.
@@ -157,6 +167,11 @@ A volume bar of 1,500 appears large. Against a baseline of 500, it is 3×. Again
 ---
 
 ## Lesson 1.3 — Read the Story Inside a Candle: Wicks, Range and Closing Price
+
+![Chart for Read the Story Inside a Candle: Wicks, Range and Closing Price. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m01-l03-candle-wicks-range-close.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m01-l03-candle-wicks-range-close.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m01-l03-candle-wicks-range-close.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m01-l03-candle-wicks-range-close.md)
 
 A candle contains more information than its colour, but it still does not tell the whole story. To read it consistently, separate three features: **range, close location and wicks**.
 
@@ -239,6 +254,11 @@ Two bars both range from 90 to 100. One closes at 99; the other at 92. Their ran
 
 ## Lesson 1.4 — When Price Moves on Low Volume: Opportunity or Warning Sign?
 
+![Chart for When Price Moves on Low Volume: Opportunity or Warning Sign?. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m01-l04-low-volume-pullback.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m01-l04-low-volume-pullback.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m01-l04-low-volume-pullback.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m01-l04-low-volume-pullback.md)
+
 Low volume is often described as though it has a fixed meaning: a quiet pullback is “healthy”, or a move on low activity is “weak”. Neither statement is reliable without context.
 
 The first question is whether the low reading is unusual **for this instrument, timeframe and session**. Once that is established, ask what price achieved while the activity was relatively low.
@@ -301,6 +321,11 @@ Two pullbacks both show falling volume. In the first, price retreats from 110 to
 ---
 
 ## Lesson 1.5 — Which Volume Can You Trust? Understanding Data Across Different Markets
+
+![Chart for Which Volume Can You Trust? Understanding Data Across Different Markets. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m01-l05-volume-data-trust.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m01-l05-volume-data-trust.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m01-l05-volume-data-trust.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m01-l05-volume-data-trust.md)
 
 Volume is not measured in exactly the same way across every market. A reading can only be interpreted responsibly when you know what the feed represents.
 
