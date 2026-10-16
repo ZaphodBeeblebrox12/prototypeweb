@@ -1,131 +1,203 @@
-# Chart Walkthrough Scripts — 30 Lessons
-## Presenter notes and visual narration
+# Chart Walkthrough and ChartLab Design Briefs — 30 Lessons
+## Internal production reference for Read Volume. Find Trade Setups.
 
-> **Progression rule for every lesson:** arrange the learner's on-screen work as Level 1 — Notice (easy recognition), Level 2 — Compare (guided comparison), and Level 3 — Apply (independent transfer to a new chart). Use the lesson-specific progression block in the module script to build all three steps. Keep later bars hidden while learners record the Level 3 initial reading, then show contrasting outcomes and explain what the new evidence changes. The learner should see the three level labels in the practice experience, not just in instructor notes.
+These are **design briefs for building student-facing chart experiences**, not narration scripts and not text for students to read. The module files are the source of the teaching explanation. Use this document to decide what each visual should show, what the learner should do with it, and what feedback should explain.
 
-> These short segments supplement the full narration scripts in the six module files. Rehearse the chart interaction and pause for learner observation. The normal target for a complete delivered lesson is 12–16 minutes, with a hard minimum of 10 minutes and a usual upper limit of 20 minutes unless the complexity justifies more. Count teaching, narrated chart work, guided practice, feedback and recap—not empty pauses. Each chart should be synthetic or properly licensed, clearly labelled, and designed to teach a process rather than predict a specific trade.
+## Shared design rules
+
+- Keep the chart central and the lesson text beside it where the layout allows. Use the site's light, editorial style and readable annotations; do not make chart information depend on colour alone.
+- Use synthetic OHLCV data unless real data has appropriate rights. Clearly label invented examples as synthetic in the delivered experience.
+- Keep instrument, timeframe, profile window, feed and volume baseline visible when they affect the exercise.
+- Present one main distinction per screen. Do not add decorative indicators, extra lines or unlabelled jargon.
+- Where later bars affect the interpretation, freeze the initial chart until the learner records an observation and an initial reading. Then reveal a contrasting outcome and explain what changed.
+- Give the learner feedback on reasoning: visible evidence, location, alternative interpretation and the next condition. Do not score a directional prediction as correct merely because it matched the outcome.
+- For each lesson, create a chart visual, a learner prompt, feedback/model answer and a contrasting case where listed. Verify on desktop and small screens, at 200% zoom and with keyboard navigation before approval.
+- The three practice stages should be visible to learners: **Notice**, **Compare**, **Apply**. These are interaction levels, not headings that replace real instruction.
 
 ---
 
 # Module 1 — Read the Market Behind the Candles
 
-## 1.1 — What Candlesticks Don't Tell You
-**Screen segment target: 5–7 minutes across the three practice levels.**
-- **Level 1 — Notice:** Show the single-chart recognition visual. Ask the learner to identify the candidate candle's direction, prior price movement and volume relative to the five-bar baseline. Do not ask for a directional prediction.
-- **Level 2 — Compare:** Show the paired chart. The candidate candles have the same body/range dimensions and the panels use the same vertical price-scale increment. Compare prior structure, location and candidate volume ratios (about 1.18× versus 1.87×). Ask: “What differs, and what does that change about the question you ask next?”
-- **Level 3 — Apply:** Show the new breakout-attempt chart only. It closes above the prior range-high area at 112–113; candidate activity is 410 versus a 184 baseline (about 2.23×). Freeze here. Ask the learner to record the visible facts, two possible outcomes and the next price behaviour that would distinguish them.
-- **Outcome reveal:** Only after the learner submits the initial reading, show the continuation and failure charts. Say: “The first event is the same. In one path price holds above the range; in the other it returns below. Which later evidence changed your reading?” End by distinguishing the initial observation from the revised interpretation.
+## 1.1 — What Candlesticks Don't Tell You: Reading the Volume Behind Price
+**Visual:** Pair two similar-sized green candles in separate contexts, with the same price-scale increment. Show prior structure, candle range/close and relative volume (for example, 1.18× versus 1.87×).  
+**Learner action:** Notice the facts first; compare how location and activity differ; then read a new breakout attempt frozen before its later outcome.  
+**Reveal and feedback:** Show one continuation and one failure path from the same initial event. Explain why the initial observation was the same but follow-through changed the interpretation.
 
-## 1.2 — Is This Move Significant?
-Show a volume histogram with twenty recent bars and one candidate spike. Calculate the baseline on screen, then display the relative-volume multiple. Next, switch to a similar spike during the opening period to demonstrate a time-of-day effect. Say: “The first comparison tells us it stands out against these bars. The second tells us why our baseline choice matters. A ratio doesn't make the event bullish or bearish; it tells us where to investigate.” Ask the learner to identify the baseline, the unusual event and one reason the interpretation may change. Reveal a contextual price chart only after their answer.
+## 1.2 — Is This Move Significant? Spotting Unusual Volume
+**Visual:** Twenty comparable bars and a candidate bar. Show the baseline calculation and relative-volume multiple. Add a second spike at a different time of day.  
+**Learner action:** Identify the baseline, compute the multiple, and name one reason the comparison could be misleading.  
+**Reveal and feedback:** Show the same spike in surrounding price context. Reinforce that unusual volume tells the learner where to investigate, not whether to buy or sell.
 
-## 1.3 — Read the Story Inside a Candle
-Zoom to one bar and trace the high-low range, body, upper wick, lower wick and close position. Use three synthetic bars with different close locations. Say: “The upper wick tells us price traded above the close or open area and did not finish there. It does not tell us which participant caused the price turning away from the level, or whether price will fall next.” Turn on volume and place the bars at a range high. Ask: “Which description is objective? Which sentence is an inference?” Allow the learner to label all three bars before showing the answer key.
+## 1.3 — Read the Story Inside a Candle: Wicks, Range and Closing Price
+**Visual:** Label open, high, low, close, body, upper/lower wick and range on one candle. Add two comparison candles with different close locations.  
+**Learner action:** Annotate the parts, calculate close position where appropriate, and separate objective description from inferred meaning.  
+**Reveal and feedback:** Place the candles at a range boundary and show different later outcomes. Explain why a wick records an excursion but does not prove the identity or intent of a participant.
 
-## 1.4 — When Price Moves on Low Volume
-Show an uptrend, followed by a modest-volume pullback that holds near a prior breakout area. Freeze. Ask learners whether low activity alone proves continuation. Then reveal a variant in which price drifts lower, breaks the level and continues down. Compare the two sequences side by side. Narrate: “The initial low-volume bars looked similar. The structural result separated the scenarios. Our process is to describe the pullback, identify the level, and state what we need next—not buy simply because volume is low.” End by asking learners to write two possible explanations for the first chart.
+## 1.4 — When Price Moves on Low Volume: Opportunity or Warning Sign?
+**Visual:** Show a trend impulse followed by a low-activity pullback near a prior boundary. Prepare a second case with a similar start that breaks the boundary and continues against the trend.  
+**Learner action:** Describe the activity and price progress; decide what evidence is still missing.  
+**Reveal and feedback:** Compare the two paths. The learner should recognise that low activity can be consistent with a pause but does not guarantee continuation.
 
-## 1.5 — Which Volume Can You Trust?
-Show three chart headers: an exchange-traded future, a retail spot-FX pair with tick volume, and a crypto pair from a named venue. Open a small data-info label for each. Point out the unit or definition, source and session. Say: “These fields are all called volume in everyday charting, but they are not interchangeable. The analyst must know what is counted before drawing a conclusion.” Ask learners to fill the three cells: “what it measures,” “what it doesn't measure,” and “baseline to use.” Reveal the model answer and note where platform documentation must be checked.
+## 1.5 — Which Volume Can You Trust? Understanding Data Across Different Markets
+**Visual:** Three labelled data-source examples: exchange-traded volume, retail FX tick activity and a venue-specific crypto series. Include source, instrument, timeframe and what the field measures.  
+**Learner action:** Complete a comparison of what each source records, what it does not represent and which baseline is appropriate.  
+**Reveal and feedback:** Compare the model responses. Emphasise that a source limitation should qualify the claim, not be hidden in a footnote.
 
 ---
 
 # Module 2 — Spot Buying and Selling Pressure
 
-## 2.1 — Who's Pushing Price?
-Display an upward bar with a close near its high, then an equally active bar with a narrow range and a mid-range close. Mark activity relative to baseline. Narrate: “In the first case, upward progress was retained. In the second, activity was high but the price result was limited. Those are different outcomes, not proof of who was present.” Scroll back to show the prior structure and then forward to show subsequent bars. Ask learners to choose “upward progress,” “limited progress/conflict,” or “inconclusive,” and require evidence for the choice.
+## 2.1 — Who's Pushing Price? Reading Buying and Selling Pressure
+**Visual:** Compare an upward sequence that retains gains with a high-activity, narrow-range sequence. Add prior swing structure.  
+**Learner action:** Classify the progress as upward, downward, limited or unresolved and point to the evidence.  
+**Reveal and feedback:** Add subsequent bars. Reinforce that pressure is shorthand for achieved price progress, not a claim about the identities of buyers or sellers.
 
-## 2.2 — When Volume Supports a Move
-Show a breakout with a broad bar, elevated volume compared with recent bars, close beyond the zone and follow-through. Reset to a high-volume bar that closes back inside a range. Narrate each frame: “Activity supports the event as worth inspecting; retained progress and follow-through are what help the continuation case.” Ask learners to compare both sequences, then hide future bars and ask what they would need next. Emphasise that a high-volume breakout is not mandatory for every successful move and never substitutes for an the point where the idea no longer holds point.
+## 2.2 — When Volume Supports a Move: Recognising Evidence of Strength
+**Visual:** Pair a breakout with elevated activity and follow-through against a similarly active bar that returns inside the range.  
+**Learner action:** Compare price result, relative activity, location and later progress.  
+**Reveal and feedback:** The model explanation should give greater weight to retained progress than to the initial volume ratio alone.
 
-## 2.3 — Heavy Volume, Little Progress
-Place price at a prior resistance zone. Show an unusually active bar with little upside result. Highlight the range and close. Pause and ask learners to write three observations before adding any explanation. Then display two possible continuations: one where price fails and moves down, another where it later breaks above resistance and holds. Narrate: “The first bar identified a problem—activity did not produce much progress. It did not choose the final outcome.” Finish with a worksheet: observations, two possible explanations, evidence still needed, and what would invalidate the preferred interpretation.
+## 2.3 — Heavy Volume, Little Progress: What Is Happening Behind the Move?
+**Visual:** Freeze an unusually active, narrow-range candle near a marked boundary. Build two later outcomes: failure from the level and later continuation through it.  
+**Learner action:** Record three observable facts, two possible explanations and the next discriminator.  
+**Reveal and feedback:** Explain that absorption is one possible interpretation, not something the candle conclusively proves.
 
-## 2.4 — Is the Move Losing Steam?
-Show four successive advances. Use a ruler to compare the price distance of each push, then mark closing positions and volume compared with recent bars. Freeze before a swing break. Ask learners to identify the first warning and separate it from a reversal trigger. Reveal a second chart where price pauses and continues upward. Narrate: “Weakening is a change in the quality of progress; reversing requires further evidence. If we confuse those steps, we enter move against the trend too early.” Learners must name one event that would strengthen and one that would weaken the reversal possible explanation.
+## 2.4 — Is the Move Losing Steam? Reading Signs of Weakening Pressure
+**Visual:** Compare successive advances with shrinking progress against a second case that pauses and then resumes. Mark closes, range and relevant swing levels.  
+**Learner action:** Identify the first sign of slowing, then separately identify whether a meaningful structural change has occurred.  
+**Reveal and feedback:** Explain the difference between weakening progress and a confirmed change in direction.
 
-## 2.5 — When Price and Volume Disagree
-Show a marginal new high with lower volume, then switch to a high-volume/narrow-range bar near resistance. For each, write the neutral description on screen. Ask learners to supply two explanations. Reveal subsequent bars that either hold beyond the high or return inside. Narrate: “The contradiction tells us where to investigate. It is not a ready-made direction signal.” End with a three-part learner response: the mismatch, the alternative explanation, and the next observable event that would separate them.
+## 2.5 — When Price and Volume Disagree: Finding Clues Others May Overlook
+**Visual:** Include a marginal new high on lower activity and an elevated-volume bar with limited price progress. Give each at least two plausible endings.  
+**Learner action:** State the mismatch, a primary reading, an alternative and an observable next condition.  
+**Reveal and feedback:** Reward conditional reasoning. The learner should not treat disagreement as an automatic reversal signal.
 
 ---
 
 # Module 3 — Find Trade Setups at the Levels That Matter
 
-## 3.1 — Stop Chasing Price
-Show a clear uptrend with a sharp impulse and a late entry point. Mark the distance to the structural the point where the idea no longer holds. Then rewind and mark the earlier breakout zone and pullback. Narrate: “The problem with chasing is not that the trend must reverse; it is that the entry may be far from a sensible risk point. A setup area tells us where to watch. A trigger tells us what must happen.” Reveal one pullback that holds and another that breaks structure. Ask learners to write a trigger and the point where the idea no longer holds before either ending is shown.
+## 3.1 — Stop Chasing Price: Finding Potential Setups in an Established Trend
+**Visual:** Show an extended impulse with a late entry location, then mark a prior breakout zone and meaningful pullback area.  
+**Learner action:** Separate setup area, trigger and invalidation. Compare one pullback that holds with one that breaks structure.  
+**Reveal and feedback:** Evaluate the clarity of the conditions, not whether the learner guessed the profitable path.
 
-## 3.2 — Is the Pullback Running Out of Steam?
-Use two charts with similar initial impulses. Compare the depth and speed of the pullback, range contraction/expansion, relative activity, and whether the prior swing structure holds. Pause on bar three of each chart. Ask learners to state whether the evidence supports continuation, challenges it, or remains unclear. Reveal the outcomes. Narrate: “Do not grade the first read by hindsight. Grade it by whether you used the evidence available at the time and knew what you needed next.”
+## 3.2 — Is the Pullback Running Out of Steam? Reading Moves Against the Trend
+**Visual:** Two similar trend impulses followed by pullbacks with different depth, range, relative activity and structural outcome.  
+**Learner action:** Classify each pullback as supportive, challenging or unresolved using the evidence available before the later bars.  
+**Reveal and feedback:** Show both endings and review whether the first interpretation was defensible without hindsight.
 
-## 3.3 — Trading Near Support and Resistance
-Show a clean range with one well-defined upper zone and lower zone. Replay price approaching the upper zone. At each bar, mark the close relative to the zone and note volume compared with baseline. Build three endings: price turning away from the level, price staying beyond the level above the zone, and unresolved multi-bar trade. Say: “A level is a location to ask a question, not a command to enter.” Learners must define the condition that would support both price staying beyond the level and price turning away from the level, and explain where the original idea would be invalidated.
+## 3.3 — Trading Near Support and Resistance: What to Look for Before Entry
+**Visual:** One clearly justified upper zone and lower zone. Build three outcomes at a zone: turn away, sustained trade beyond, and unresolved overlap.  
+**Learner action:** For each outcome, define what it would mean for the current scenario and which condition would weaken the idea.  
+**Reveal and feedback:** Reinforce that a level is an area of interest, not an instruction to enter.
 
-## 3.4 — Finding Opportunities at Range Edges
-Draw the upper and lower boundaries only after revealing the prior swings. Highlight the range middle in a neutral shade and the edges with simple outlines. Show a false break above, a true break with sustained trade outside, and a rotation from the lower edge. Narrate: “At an edge, the market is testing a boundary established by its prior behaviour. In the middle, the same conclusion may be harder to justify.” Ask the learner to label the event, identify the needed evidence, and specify a no-trade condition. Do not score the directional guess.
+## 3.4 — Finding Opportunities at the Edges of a Trading Range
+**Visual:** Show a range with boundaries derived from prior swings. Add an upper-edge failed break, a sustained breakout and a lower-edge rotation.  
+**Learner action:** Identify whether the market is at an edge or in the middle, then state what evidence is needed for rotation versus breakout.  
+**Reveal and feedback:** Treat wait/no-trade as a valid response when price overlaps without clear progress.
 
-## 3.5 — Before You Enter
-Put three candidate charts on screen: a well-defined pullback near a level, a candle pattern in the range middle, and a breakout already extended into the next resistance zone. Use the same six-point checklist for all. Read each factor aloud: context, location, evidence, trigger, the point where the idea no longer holds, risk. Pause after each chart and ask the learner to mark yes/no/unknown. Narrate: “Unknown does not mean yes. A visually attractive candle is not enough.” Reveal the later outcomes only after scoring the decision process.
+## 3.5 — Before You Enter: Separating Promising Setups From Weak Ones
+**Visual:** Three candidate situations: a defined pullback near a meaningful level, a candle pattern in the range middle, and an extended breakout close to the next opposing zone.  
+**Learner action:** Use the same readiness checklist: context, location, evidence, trigger, invalidation and practical risk. Mark each as ready, wait or reject with a short reason.  
+**Reveal and feedback:** Show a model review that explains why an attractive candle is not enough when the trigger or risk structure is missing.
 
 ---
 
 # Module 4 — Spot False Breakouts Before You Chase Them
 
-## 4.1 — Is the Breakout Real?
-Draw a range boundary, then reveal one breakout bar. Stop the chart immediately after that bar and ask the learner to describe it. Add the next three bars showing a hold outside; reset and show a return to the range. Narrate: “The first event is the same kind of event. what happens next supplies the differentiating evidence.” On screen, track boundary, range, close position, volume compared with recent bars and follow-through. The learner must state what would support price staying beyond the level and what would weaken it before the chart outcome is revealed.
+## 4.1 — Is the Breakout Real? What Volume Can Tell You
+**Visual:** Mark a prior range boundary, freeze after the first close beyond it, and prepare one path that holds outside and one that returns inside.  
+**Learner action:** Describe the first event, note relative activity and write the conditions that would support or weaken continuation.  
+**Reveal and feedback:** Compare the two paths, making clear that the initial candle did not settle the question.
 
-## 4.2 — Breakout or Trap?
-Build a four-stage replay: price crosses the range high, falls back inside, attempts to reclaim and fails, then breaks a nearby swing low. Use a second ending where price reclaims the boundary instead. Say: “A failed breakout is an outcome relative to the original thesis, not proof of manipulation.” At each stage ask which evidence has become available. Learners mark earliest warning, stronger failure evidence, and the point where the idea no longer holds. Preserve the first-stage note so that hindsight changes can be audited.
+## 4.2 — Breakout or Trap? Reading the Signs of a Failed Move
+**Visual:** Stage the sequence: cross the boundary, return inside, attempt reclaim, then either fail and break nearby structure or reclaim successfully.  
+**Learner action:** At every stage, record what new evidence appeared and how it changes the thesis. Preserve the first note.  
+**Reveal and feedback:** Make clear that “trap” does not prove deliberate manipulation; assess a failed move relative to the plan that existed before it.
 
-## 4.3 — When Volume Explodes at Market Extremes
-Zoom out to show an extended trend before highlighting the unusually active bar. Compare its full range and close position. Then reveal two different endings: reversal after a structural break and trend continuation after a short pause. Narrate: “The spike is a reason to investigate, especially after an extended move. It is not proof that the top or bottom is in.” Ask the learner to mark what was knowable at the spike and what became knowable only later. Include a data/session check before interpreting the volume multiple.
+## 4.3 — When Volume Explodes at Market Extremes: Understanding Climax Activity
+**Visual:** Show an extended trend, an unusually active bar and two contrasting outcomes: structural reversal and resumed continuation.  
+**Learner action:** Describe relative activity, price result and location before the outcome is revealed. Name the evidence not yet available.  
+**Reveal and feedback:** Explain that a climax label describes exceptional activity; the later price response helps judge its significance.
 
-## 4.4 — Springs and Upthrusts
-Draw the range first. Animate a downward excursion and return inside to explain the observable spring pattern. Mirror it with an upside excursion and return inside for the upthrust. Next show follow-through and failure variants. Narrate: “The named event describes what price did relative to the range. Its significance depends on whether price sustains the return and what structure forms afterward.” Learners label the event only after identifying the boundary. Then they write a condition that would weaken their interpretation.
+## 4.4 — Springs and Upthrusts: Recognising Failed Moves at Range Boundaries
+**Visual:** Mirror a range-low excursion that returns inside with an upper excursion that returns inside. Provide follow-through and failure variants for each.  
+**Learner action:** Mark the original boundary, label the event only after describing it, and state what would weaken the interpretation.  
+**Reveal and feedback:** The term describes the event; it does not guarantee a reversal. Include the case where price remains outside the boundary.
 
-## 4.5 — Before Calling a Reversal
-Present a staged sequence with an initial climax-like bar, then a structural break, then a retest. Pause at each stage. Ask whether the evidence is a warning, structural change or persistence test. Show the alternate outcome where the original trend resumes. Narrate: “We are not trying to catch every extreme. We are identifying when the old pattern of progress changes and what would make a new scenario defensible.” Learners write one the point where the idea no longer holds condition for the reversal thesis and explain why it must be chosen before entry.
+## 4.5 — Before Calling a Reversal: What to Look for After the Breakout
+**Visual:** Stage an initial extreme, a return inside, a possible failed reclaim and a structural break. Include an alternate outcome where the original trend resumes.  
+**Learner action:** Distinguish warning, failed breakout and stronger evidence of changed structure.  
+**Reveal and feedback:** Explain why a rejected excursion is not the same claim as a confirmed reversal.
 
 ---
 
 # Module 5 — Find the Price Levels Worth Watching
 
-## 5.1 — Where Has the Market Traded Most?
-Show the same synthetic price-and-volume data twice: first with vertical volume bars and then with a horizontal volume profile. Align the price axis so the difference is obvious. Point out that the time histogram answers when activity happened, while the profile describes how the data is distributed by price for a selected window. Then change the profile window and show the shape change. Ask learners to identify two concentration areas and one thin area without predicting the next move.
+## 5.1 — Where Has the Market Traded Most? Introducing Volume Profile
+**Visual:** Use the same synthetic data to show time-based volume bars and a horizontal price-based profile. Keep the price scale aligned; then change the profile window to show the dependency on the selected period.  
+**Learner action:** Identify what each view answers, and describe broad and thin areas without forecasting price.  
+**Reveal and feedback:** Explain “when activity occurred” versus “how activity was distributed by price.”
 
-## 5.2 — Point of Control and Value Area
-Highlight the profile row with the largest assigned volume and label it POC. Shade the platform-defined Value Area and mark its high and low boundaries. Show a second period whose profile produces different values. Narrate: “Both can be valid descriptions of different windows; profile references depend on settings.” Ask learners to state the period, value-area convention and data source. Then reveal price interacting with the boundary and ask whether it was accepted, rejected or unresolved.
+## 5.2 — Finding the Market's Reference Point: Point of Control and Value Area
+**Visual:** Mark the profile's POC and platform-defined value-area high/low. Show a second profile period with different references and label the method/settings.  
+**Learner action:** State what the three references measure and what the current price location does—or does not—establish.  
+**Reveal and feedback:** Emphasise that values depend on the selected window and platform rules; they are not guaranteed support or resistance.
 
-## 5.3 — High- and Low-Volume Nodes
-Show two profile bulges linked by a thin node. Draw a live-style price trace entering the thin region. Freeze and ask learners to state what might happen, then reveal fast traversal. Reset the same profile and reveal price stalling. Narrate: “The profile offers a map of historical activity concentration, not a display of current resting orders.” Learners must describe the area, note their conditional expectation, and revise it when the response contradicts the expected fast move.
+## 5.3 — Where Price May Stall—or Move Quickly: High- and Low-Volume Nodes
+**Visual:** A profile has a broad concentration and a thin area. Show price entering the thin area and prepare both a quick traversal and a stall.  
+**Learner action:** Describe the profile area and create a conditional expectation, then update it when the current response differs.  
+**Reveal and feedback:** Reinforce that historical activity does not expose current resting orders or guarantee a fast move.
 
-## 5.4 — When the Market's Focus Shifts
-Place three session profiles side by side. Use identical row size and value-area settings. Mark POC movement and area overlap. Show an upward migration that continues and another that rotates back to previous value. Narrate: “We can observe that activity concentration moved higher; whether that shift persists is a separate question.” Ask learners to report profile migration, structure, overlap and follow-through independently. Avoid phrases such as “the market must now go higher.”
+## 5.4 — When the Market's Focus Shifts: Reading Changes in Value
+**Visual:** Three comparable session profiles side by side using the same row size and settings. Show higher migration, lower migration and substantial overlap.  
+**Learner action:** Report profile movement separately from price structure and follow-through.  
+**Reveal and feedback:** Show how price returning to previous value weakens a directional interpretation based only on the latest POC.
 
 ## 5.5 — Putting It Together: Reading Volume Profile Alongside Price Action
-
-Show one synthetic chart with a clearly stated profile period, Point of Control, Value Area, and one broad and one thin area. Bring the current candles and recent swing highs/lows into view. Explain in plain language: “The profile shows where more or less trading took place during the period we selected. It does not tell us where price must turn.” Walk the learner through three possible outcomes as price reaches the same broad area: it pauses, it turns away, or it moves through and stays beyond it. Freeze the chart before revealing each outcome. Ask learners to describe what they can see before they name an interpretation. Then have them write two “if/then” scenarios and identify what would show each idea is wrong. Do not add unrelated indicators. The learning goal is to read profile context alongside price behaviour—not to stack more tools on the chart.
-
-
-# Module 6 — Put It All Together: Build a Complete Trading Plan
-
-## 6.1 — Start With the Bigger Picture
-Show a chart covered in indicators and arbitrary levels. Remove clutter step by step until only swings, a few justified zones, volume and one relevant profile reference remain. Narrate how to write the context note: regime, structure, key location, recent activity/result and unresolved question. Ask the learner to include one uncertainty. Compare the answer with a model that explains each marked level instead of simply adding more lines.
-
-## 6.2 — Read the Evidence
-Freeze the chart at an ambiguous high-volume bar near a range boundary. Complete the evidence sheet: event description, close/range, relative activity and baseline, location, primary reading and alternative. Reveal two more bars and then a retest. Ask learners to update the possible explanation while preserving the original observations. Narrate: “A good analyst may change the interpretation as evidence arrives, but should not rewrite the record of what was visible earlier.”
-
-## 6.3 — Build Your Trade Scenario
-Use a chart just after a breakout attempt. Create two side-by-side scenario cards: price staying beyond the level beyond the boundary and failed breakout back inside the range. Each card has trigger, the point where the idea no longer holds and no-trade condition. Ask learners to complete the cards before revealing the later candles. Show both endings and discuss whether the rules activated. Score the clarity of the conditions and avoid treating the eventual winning side as inherently the better original analysis.
-
-## 6.4 — Plan the Trade Before You Take It
-Show a fictional pre-trade ticket. Enter trigger, structural the point where the idea no longer holds and target logic; calculate size only after the risk amount and instrument value are specified. Then introduce widened spreads/slippage or a target close to an opposing zone. Ask whether the plan remains acceptable. Narrate: “The pattern does not get to overrule the risk policy.” Do not prescribe a universal risk percentage; use the learner's previously defined policy and correct instrument specifications.
-
-## 6.5 — Complete Walkthrough: From Chart Analysis to Trade Plan
-Run the capstone chart as a staged reveal. Learners submit the context note before seeing the breakout, evidence summary after the first event, two scenarios before the retest, and a complete trade ticket before the outcome. Show two endings: a valid trigger followed by a loss, and no trigger followed by a later favourable move. Review why a valid process can lose and why a disciplined no-trade can miss a profitable move without becoming a mistake. Finish with a structured post-event review.
+**Visual:** A clean price chart with a stated profile period, a POC, value-area boundaries and a single broad/thin area. Show price approaching the same area with different outcomes.  
+**Learner action:** Write two conditional scenarios using price structure, profile location and current volume evidence.  
+**Reveal and feedback:** Explain that profile sets context while current price behaviour tests the scenario; avoid adding unrelated indicators.
 
 ---
 
-## Shared visual-production notes
+# Module 6 — Put It All Together: Build a Complete Trading Plan
 
-<!-- ASSET STANDARD: Prefer clean, light, publication-style charts with consistent typography. Use synthetic OHLCV data for examples unless real data is licensed. Each image needs an editable source, source/data note, timeframe, and alt text. Avoid fabricated broker logos or implying a real chart is a verified historical trade. -->
-<!-- CHARTLAB STANDARD: Each lab should include a learner instruction, input/annotation area, staged reveal of later bars, acceptable reasoning criteria, answer notes, and at least one counterexample. Do not grade an unsupported directional prediction as correct merely because it matched the reveal. -->
+## 6.1 — Start With the Bigger Picture: What Is the Market Doing?
+**Visual:** Begin with a cluttered chart, remove unjustified lines and unrelated indicators, and retain only swings, a few explained zones, the volume field and a relevant profile reference.  
+**Learner action:** Complete a context note with market state, structure, recent event, data limitation and unresolved question.  
+**Reveal and feedback:** Compare against a model note that justifies each retained level instead of adding more lines.
+
+## 6.2 — Read the Evidence: What Are Price and Volume Telling You?
+**Visual:** Freeze on an ambiguous high-volume event near a boundary. Provide fields for event, close/range, relative volume/baseline, location, primary reading and alternative.  
+**Learner action:** Complete the initial evidence sheet before revealing two additional bars and a retest.  
+**Reveal and feedback:** Require the student to preserve the observation and update only the interpretation as new evidence appears.
+
+## 6.3 — Build Your Trade Scenario: What Needs to Happen Next?
+**Visual:** Show two scenario cards beside a frozen breakout attempt: continuation beyond the level and return into the range. Each card needs trigger, invalidation and no-trade condition.  
+**Learner action:** Complete both cards before the outcomes are revealed.  
+**Reveal and feedback:** Compare the scenarios without marking the eventual winner as automatically the better original analysis.
+
+## 6.4 — Plan the Trade Before You Take It
+**Visual:** A fictional pre-trade ticket with trigger, structural invalidation, stop logic, position-size calculation inputs, costs/slippage, objective and management rules. Include an example where the target is too close or execution costs alter the plan.  
+**Learner action:** Check the construction sequence: thesis first, risk rules next, position size after risk per unit is known.  
+**Reveal and feedback:** Do not prescribe a universal risk percentage. Explain why the setup must not override a predetermined risk policy.
+
+## 6.5 — The Complete Walkthrough: From Chart Analysis to Trade Plan
+**Visual:** Use a staged capstone chart. Ask for context before the event, evidence notes after the first event, two scenarios before the retest, and a complete trade ticket before revealing an outcome. Prepare two endings: a valid trigger that later loses and a disciplined no-trade that misses a later favourable move.  
+**Learner action:** Complete each stage in order and retain the original notes.  
+**Reveal and feedback:** Review reasoning, rule adherence and how evidence changed—not just profit/loss or whether the final move matched the learner's guess.
+
+---
+
+## Shared QA checklist
+
+- [ ] Each chart has one clear teaching purpose.
+- [ ] Data is synthetic or appropriately licensed and labelled.
+- [ ] Instrument, timeframe, feed, period and baseline are stated where relevant.
+- [ ] Text, axes, candles, price levels and volume labels remain legible on small screens and at 200% zoom.
+- [ ] Feedback explains the reasoning and its limitations.
+- [ ] A plausible alternative or counterexample is included where it teaches an important distinction.
+- [ ] Learners are not asked to infer hidden participant intent from a chart.
+- [ ] The exercise works without an instructor narrating the instructions aloud.
+- [ ] Keyboard access, focus order, screen-reader description and colour-independent cues are reviewed.
