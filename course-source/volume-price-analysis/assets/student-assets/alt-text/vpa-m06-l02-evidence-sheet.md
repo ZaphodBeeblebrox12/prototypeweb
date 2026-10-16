@@ -1,5 +1,6 @@
 # Accessibility and source notes — M06-L02
 
+**Figure number:** Figure 6.2; interactive panels use Figure 6.2a–Figure 6.2e.
 **Lesson:** Read the Evidence: What Are Price and Volume Telling You?
 **Purpose:** Separate observable facts from interpretations and retain an alternative explanation.
 **Data:** Synthetic OHLCV for instruction, not historical prices or a trade signal.
