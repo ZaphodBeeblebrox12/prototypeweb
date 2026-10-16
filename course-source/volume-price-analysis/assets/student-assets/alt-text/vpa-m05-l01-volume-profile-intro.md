@@ -1,16 +1,16 @@
 # Accessibility and source notes — M05-L01
 
 **Lesson:** Where Has the Market Traded Most? Introducing Volume Profile
-**Purpose:** Distinguish volume through time from the distribution of activity by price.
-**Data:** Synthetic OHLCV and volume-at-price bins, not historical data.
+**Purpose:** Distinguish activity through time from its distribution by price.
+**Data:** Synthetic OHLCV and profile bins, not historical market data.
 
-## Description
-The profile's POC and 70% value-area boundaries are calculated from the displayed synthetic bins for this selected five-session window. The time-based volume histogram and horizontal profile answer different questions; the profile's shape depends on the window.
+## Chart description
+The synthetic chart shows candlesticks with time-based volume beside a horizontal profile. POC is 102, VAL is 100 and VAH is 106; the value area uses a 70% adjacent-bin expansion from POC. This profile describes its selected period, not a prediction.
 
-Each visual aligns a candle/price pane with its time-based volume bars and a horizontal profile on the right. The profile bars are positioned by price level. The POC marks the row with the most assigned profile volume; VAH and VAL mark the selected value-area boundaries. The profile window is stated on each chart. The dashed values are contextual references, not guaranteed support/resistance.
+The left panel shows candles and matching time-based volume. The right panel shows the horizontal volume-at-price distribution for the named five-session composite. The POC is the highest-volume row; VAH/VAL use a 70% adjacent-bin expansion from POC in this synthetic example.
 
 ## Suggested alt text
-“Where Has the Market Traded Most? Introducing Volume Profile. Synthetic candlestick chart and volume-at-price histogram. The profile is broadest around 100–104 and thinner above 106 in this selected five-session synthetic window. The time-based volume histogram and horizontal profile answer different questions; the profile's shape depends on the window. The profile describes activity in the chosen period; current price behaviour must be assessed separately.”
+“Where Has the Market Traded Most? Synthetic candlesticks and time-volume with an aligned horizontal volume profile. The synthetic chart shows candlesticks with time-based volume beside a horizontal profile. POC is 102, VAL is 100 and VAH is 106; the value area uses a 70% adjacent-bin expansion from POC. This profile describes its selected period, not a prediction. The profile does not guarantee how price will respond.”
 
-## Limitations
-Synthetic example. Profile settings can change the output. Text answers are completion-gated but not semantically graded. Browser, zoom, keyboard, screen-reader and novice checks remain open.
+## Validation limits
+The lab completion gate does not semantically grade. Browser, accessibility and beginner checks remain open.
