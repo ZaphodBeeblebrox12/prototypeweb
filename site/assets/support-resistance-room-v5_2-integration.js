@@ -6,8 +6,8 @@
   const LESSON_IDS = new Set([12, 13, 14]);
   const DATA_BASE = "module5-v5_2/assets/";
   const FIGURE_PANEL_LAYOUTS = {
-    "FIG01_breakout_evidence_ladder.png": { width:2661, height:1209, panels:[["Intrabar excursion",0,.13,.33,.75],["Close outside",.33,.13,.32,.75],["Follow-through",.66,.13,.32,.75]]},
-    "FIG02_filter_tradeoffs.png": { width:2661, height:1209, panels:[["One close outside",0,.13,.33,.75],["Two closes outside",.33,.13,.32,.75],["Require a return test",.66,.13,.32,.75]]},
+    "FIG01_breakout_evidence_ladder.png": { width:2661, height:1209, panels:[["Intrabar excursion",0,.13,.33,.75],["Close outside",.33,.13,.33,.75],["Follow-through",.66,.13,.33,.75]]},
+    "FIG02_filter_tradeoffs.png": { width:2661, height:1209, panels:[["One close outside",0,.13,.33,.75],["Two closes outside",.33,.13,.33,.75],["Require a return test",.66,.13,.33,.75]]},
     "FIG03_context_changes_the_question.png": { width:2501, height:1226, panels:[["Local view",0,.13,.485,.77],["Wider context",.515,.13,.475,.77]]},
     "FIG04_break_return_response.png": { width:2923, height:1106, panels:[["Before the break",0,.13,.25,.80],["The break",.25,.13,.245,.80],["Return to area",.495,.13,.245,.80],["Response develops",.74,.13,.245,.80]]},
     "FIG05_three_retest_outcomes.png": { width:2695, height:1243, panels:[["Holds beyond",0,.13,.32,.75],["Re-enters range",.32,.13,.33,.75],["Inconclusive",.65,.13,.33,.75]]},
