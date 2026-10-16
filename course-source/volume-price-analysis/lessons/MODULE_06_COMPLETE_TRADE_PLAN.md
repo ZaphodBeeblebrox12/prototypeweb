@@ -53,6 +53,7 @@ This capstone starts by removing the temptation to trade before the context is u
 3. What volume-data caveat should be recorded before analysis?
 
 -->
+<!-- ASSET: Create a clean, light-style one-screen context worksheet over a synthetic candlestick chart. Include recent swing highs/lows, two or three justified price zones, volume bars, a note for the data source, and empty fields for market state, recent move, current question, and two possible scenarios. Avoid extra indicators and decorative clutter. -->
 <!-- CHARTLAB: Learner receives a chart with excessive indicators/lines. They remove clutter and write a five-sentence context note, including one uncertainty and two competing scenarios. Assessment focuses on justified selection, not prediction. -->
 
 ---
