@@ -3,6 +3,18 @@
 **Repository/branch:** `ZaphodBeeblebrox12/prototypeweb` / `my-new-branch`  
 **Purpose:** Durable product note for implementation planning. Preserve existing course, micro-course, and learning-room work; do not treat these notes as permission to rewrite already-approved content without review.
 
+## Confirmed dashboard split — two distinct experiences
+
+TradeThesis has **two dashboards**, with separate audiences, permissions, navigation, and acceptance checks. Do not collapse these into one dashboard milestone.
+
+1. **User / learner dashboard:** the member-facing experience for a learner's own purchased courses, current access, progress, recent activity, account and billing links, and any community access included with a programme. The static `site/member-area.html` is a preview; the Django-backed Academy home is `/learn/`. Treat the static preview and the authenticated implementation honestly as preview versus live backend functionality. Account and billing screens linked from this area remain part of the user-facing journey, not a third dashboard.
+2. **Admin dashboard:** the staff-only experience for running TradeThesis—course and micro-course catalogue, modules and lessons, publishing/release checks, assets, learner entitlements and progress support, payments/refunds, operational issues, and auditability. The existing Django admin and its operational overview are current administration foundations; the purpose-built friendly admin dashboard remains a later milestone. It must be separately permissioned and must never expose instructor-only answers or paid content through public/client-side hiding.
+
+Track the journeys separately:
+- **User dashboard acceptance:** ordinary authenticated learner; only their own entitlements and progress; course access/locked lesson states; progress persistence; account/billing navigation; included community access where granted; mobile usability and understandable empty/error states.
+- **Admin dashboard acceptance:** staff-only access; role-appropriate actions and read-only restrictions; content draft/preview/publish workflow; accurate operational data; audit trail and confirmations for risky actions; no leakage of learner-private, payment-sensitive, or instructor-only material.
+
+
 ## Confirmed priorities from the product owner
 
 ### 1. Sitewide user experience — ongoing, cross-cutting requirement
