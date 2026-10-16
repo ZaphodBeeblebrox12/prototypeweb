@@ -185,7 +185,25 @@ class CourseOffer(models.Model):
 
     @property
     def is_saleable(self):
-        return bool(self.is_active and self.plan_id and self.course.status == Course.Status.PUBLISHED)
+        if not (
+            self.is_active
+            and self.plan_id
+            and self.course.status == Course.Status.PUBLISHED
+            and self.plan.is_active
+            and self.plan.is_hidden
+        ):
+            return False
+
+        from apps.subscriptions.models import GeoPlanPrice, PlanPrice
+
+        return (
+            PlanPrice.objects.filter(
+                plan_id=self.plan_id, interval="one_time", is_active=True
+            ).exists()
+            or GeoPlanPrice.objects.filter(
+                plan_id=self.plan_id, interval="one_time", is_active=True
+            ).exists()
+        )
 
     def __str__(self):
         return self.name
