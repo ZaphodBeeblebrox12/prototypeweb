@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChartLab — The Same Candle, Different Context</title>
+<style>
+:root{--paper:#f6f5f0;--ink:#252923;--muted:#62645f;--line:#d9d7cf;--green:#27725f;--accent:#dfc65a}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:1100px;margin:0 auto;padding:28px 20px 56px}header{padding:8px 0 20px}h1{font-size:clamp(1.8rem,3.5vw,2.6rem);line-height:1.1;max-width:900px;margin:.5rem 0}h2{font-size:1.22rem;margin:0 0 .6rem}h3{font-size:1rem;margin:1rem 0 .4rem}.eyebrow{letter-spacing:.1em;font-size:.78rem;font-weight:750;color:var(--muted);text-transform:uppercase}.note{color:var(--muted)}.chart{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:12px;background:#fffefa}.panel{background:#fffefa;border:1px solid var(--line);border-radius:12px;padding:20px;margin:18px 0}.prompt{border-left:4px solid var(--accent);padding:8px 14px;background:#fbf9ee}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.field{margin:14px 0}label{display:block;font-weight:650;margin-bottom:6px}textarea,select{width:100%;font:inherit;padding:11px;border:1px solid #aaa99f;border-radius:8px;background:#fffefa;color:var(--ink)}textarea{min-height:110px;resize:vertical}select{min-height:46px}.hint{font-size:.9rem;color:var(--muted);margin:.3rem 0}.checks label{font-weight:450;display:flex;gap:10px;align-items:flex-start;margin:.7rem 0}.checks input{margin-top:.35rem;accent-color:var(--green)}button{font:inherit;font-weight:700;border:0;border-radius:8px;background:var(--ink);color:white;padding:12px 18px;cursor:pointer}button:focus-visible,textarea:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #9e8732;outline-offset:2px}.feedback{padding:16px;border-radius:8px;background:#eef4ef;border:1px solid #bbd1c3;margin-top:14px}.feedback[hidden]{display:none}details{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}summary{font-weight:700;cursor:pointer}.small{font-size:.85rem}.foot{border-top:1px solid var(--line);padding-top:16px;margin-top:28px;color:var(--muted)}@media(max-width:700px){main{padding:18px 12px 40px}.grid{grid-template-columns:1fr}.panel{padding:15px}textarea{min-height:100px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="eyebrow">Read Volume. Find Trade Setups. · Module 1 · Lesson 1.1</div>
+<h1>The same candle. Different context.</h1>
+<p class="note">This practice is about reading what is visible—not predicting the next candle. The chart below is synthetic and is not historical market data.</p>
+</header>
+<img class="chart" src="../exports/vpa-m01-l01-candle-context-compare.svg" alt="Two synthetic candlestick charts with similar green candidate candles. The first follows a controlled pullback with volume near its baseline; the second follows an extended rise near a prior high and has much higher volume.">
+<section class="panel">
+<h2>Your task</h2>
+<p>Study both panels. Before you decide what they may mean, describe what price was doing before each candidate candle, where the candle appears, and how the last volume bar compares with the dashed baseline (the average of the five bars before it).</p>
+<div class="prompt"><strong>Remember:</strong> a candle is an observation, not a complete explanation. Give yourself time to record the evidence before reading the model answer.</div>
+<form id="labForm">
+<div class="grid">
+<div class="field">
+<label for="panelA">Panel A — what do you observe?</label>
+<textarea id="panelA" required minlength="20" placeholder="Describe the prior move, candle and volume baseline..."></textarea>
+<p class="hint">Separate what price did from what you think it may mean.</p>
+</div>
+<div class="field">
+<label for="panelB">Panel B — what do you observe?</label>
+<textarea id="panelB" required minlength="20" placeholder="Describe the prior move, candle and volume baseline..."></textarea>
+<p class="hint">Notice both location and activity, not candle colour alone.</p>
+</div>
+</div>
+<div class="field">
+<label for="compare">Why are the two situations different despite the similar candle shapes?</label>
+<textarea id="compare" required minlength="20" placeholder="Compare location, prior structure and relative volume..."></textarea>
+</div>
+<div class="field">
+<label for="next">What would you watch next in each panel?</label>
+<textarea id="next" required minlength="20" placeholder="Name visible price behaviour that would strengthen or weaken each reading..."></textarea>
+</div>
+<button type="submit">Check my work</button>
+<div id="feedback" class="feedback" role="status" aria-live="polite" hidden></div>
+</form>
+</section>
+<section class="panel">
+<h2>Self-check</h2>
+<p>Before opening the model answer, check each point that your written response covers.</p>
+<div class="checks">
+<label><input type="checkbox"> I described the prior price pattern and candidate candle.</label>
+<label><input type="checkbox"> I compared the candidate volume with the five-bar baseline.</label>
+<label><input type="checkbox"> I explained the location difference between the panels.</label>
+<label><input type="checkbox"> I gave an alternative and named what I would watch next.</label>
+<label><input type="checkbox"> I avoided claiming the chart proves who traded or guarantees the next move.</label>
+</div>
+<details>
+<summary>Reveal model reasoning</summary>
+<h3>Panel A</h3>
+<p>Price advanced, pulled back from a prior swing high and then printed a green candle during a recovery. The latest volume is only modestly above the average of the previous five bars. One possible reading is that the pullback may be pausing; an alternative is that the recovery may fail. Watch whether price regains a nearby short-term high, holds the pullback area or instead breaks lower.</p>
+<h3>Panel B</h3>
+<p>Price advanced for a longer sequence and is testing an area near prior highs. The candle is similarly proportioned, but activity is clearly above the five-bar baseline. This deserves attention, but does not prove a top or identify who is trading. Further progress and holding beyond the area would support one scenario; a stall, return below the area and failed reclaim would support another.</p>
+<h3>What matters</h3>
+<p>The candle shapes are similar, but location and relative activity differ. The next bars help distinguish the possible readings. A strong answer explains the evidence, offers an alternative and states what would change its mind.</p>
+</details>
+</section>
+<p class="foot small">This standalone prototype keeps your text in this page only; it does not submit or store your answers. Use the lesson's own risk and uncertainty standards; this is a learning exercise, not a trading signal.</p>
+</main>
+<script>
+const form=document.getElementById('labForm');
+const feedback=document.getElementById('feedback');
+form.addEventListener('submit',function(event){
+  event.preventDefault();
+  const ids=['panelA','panelB','compare','next'];
+  const incomplete=ids.filter(id=>document.getElementById(id).value.trim().length<20);
+  feedback.hidden=false;
+  if(incomplete.length){
+    feedback.textContent='Keep going: complete each response with at least one specific chart observation. Try naming the prior move, the candidate candle, its volume relative to the baseline, and the evidence you would watch next.';
+    document.getElementById(incomplete[0]).focus();
+  }else{
+    feedback.textContent='Responses recorded for this practice page. Before opening the model answer, use the self-check below: did you describe evidence, compare both context and volume, offer an alternative, and name observable next behaviour? The page does not automatically grade your interpretation.';
+    feedback.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+});
+</script>
+</body>
+</html>
