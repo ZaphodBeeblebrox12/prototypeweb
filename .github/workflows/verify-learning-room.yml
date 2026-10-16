@@ -382,14 +382,14 @@ jobs:
               "Hidden development draft topics must not appear as filters");
             assert.equal(await cataloguePage.locator("#cc-course-filters [data-filter='Emerging topic']").count(), 1,
               "New course topics should automatically add a filter");
-            assert.equal(await cataloguePage.locator('#cc-course-filters [data-count="all"]').innerText(), "9",
+            assert.equal(await cataloguePage.locator('#cc-course-filters [data-count="all"]').innerText(), "10",
               "The all-topics count should be derived from visible course data");
             await cataloguePage.locator("#cc-course-filters [data-filter='Emerging topic']").click();
             assert.equal(await cataloguePage.locator("#cc-micro-grid [data-open-course]").count(), 1,
               "Dynamic topic filter should display only matching courses");
             assert.equal(await cataloguePage.locator("#cc-micro-grid").innerText().then(text => text.includes("Emerging Topic Preview")), true);
             await cataloguePage.locator('#cc-course-filters [data-filter="all"]').click();
-            assert.equal(await cataloguePage.locator("#cc-micro-grid [data-open-course]").count(), 9,
+            assert.equal(await cataloguePage.locator("#cc-micro-grid [data-open-course]").count(), 10,
               "All topics should restore all visible cards, not disclose drafts");
             await cataloguePage.setViewportSize({ width: 390, height: 844 });
             const catalogueOverflow = await cataloguePage.evaluate(() => ({
