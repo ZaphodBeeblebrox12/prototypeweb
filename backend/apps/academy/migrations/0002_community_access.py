@@ -10,10 +10,10 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="courseoffer",
-            name="community_access_days",
-            field=models.PositiveIntegerField(
+            name="community_access_months",
+            field=models.PositiveSmallIntegerField(
                 blank=True,
-                help_text="Optional included community term, separate from course access. Blank means no community access.",
+                help_text="Optional included community term in calendar months, separate from course access. Blank means no community access.",
                 null=True,
                 validators=[django.core.validators.MinValueValidator(1)],
             ),
