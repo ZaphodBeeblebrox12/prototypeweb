@@ -44,16 +44,23 @@ Price later retraces to 45. It pauses, but has not yet resumed upward progress. 
 
 The key is that you made the plan before the trigger occurred. You are not drawing a convenient level around the candles after the outcome is known.
 
-### Try it
+### Level 1 — Notice (easy)
 
-A market is trending upward and has just printed three large green candles. There is no nearby structure to define where the idea would fail. What is the most useful next step?
+**Task:** On an uptrend chart, identify the latest meaningful higher low and describe how extended price is from it.
 
-A. Enter immediately because the trend is strong.
-B. Add more indicators until they agree.
-C. Identify a meaningful structure/area and wait for a situation where the trigger and invalidation can be stated clearly.
+**Feedback:** Point to the swing that defines structure and note the distance to current price. The purpose is to notice whether risk is harder to define after a late entry.
 
-**Feedback:** C. A setup should be testable and risk can be defined. The trend does not remove the need for a plan.
+### Level 2 — Compare (guided)
 
+**Task:** Compare chasing a long impulse with waiting for a pullback to a marked area and a later trigger.
+
+**Feedback:** A setup area says where to pay attention; a trigger is the event required before considering entry; invalidation explains what contradicts the thesis.
+
+### Level 3 — Apply (independent)
+
+**Task:** A market rises from 40 to 48 and the old range boundary is 44–45. State a condition that supports continuation and one that weakens it.
+
+**Model response:** Holding the zone followed by a close above a short-term swing high may support continuation. A break below the pullback low and failed reclaim weakens the idea.
 ### Common mistake
 
 **Mistake:** Calling any pullback in an uptrend a buying opportunity.
@@ -104,12 +111,23 @@ Both examples begin with an uptrend from 200 to 220 and a prior breakout area ar
 
 The useful distinction is not simply “low volume good, high volume bad”. It is how the price result, activity, location and structure fit together.
 
-### Try it
+### Level 1 — Notice (easy)
 
-A pullback moves slowly toward a prior breakout zone on lower activity. It has not produced a new upward trigger. Should the learner treat the continuation as confirmed?
+**Task:** An impulse advances 10 points and the pullback retreats 2 points on smaller ranges. What else should you record?
 
-**Feedback:** No. The evidence may make the pullback worth watching, but confirmation has not occurred. A clear trigger—or a different outcome—has yet to appear.
+**Feedback:** Relative activity, location and whether meaningful swing structure remains intact are relevant; distance alone is not enough.
 
+### Level 2 — Compare (guided)
+
+**Task:** Compare a low-activity pullback that holds an old breakout zone with a higher-activity pullback that breaks the latest higher low and fails to reclaim it.
+
+**Feedback:** The second case more directly challenges continuation because price structure has changed. Low volume does not prove that the first pullback is finished.
+
+### Level 3 — Apply (independent)
+
+**Task:** The pullback reaches a zone but overlaps without a trigger. Write what you will wait for and what would abandon the idea.
+
+**Model response:** Wait for the pre-defined trigger, such as a reclaim of a nearby swing high after the zone holds. A decisive break below the pullback low and failed reclaim weakens the thesis.
 ### Common mistake
 
 **Mistake:** Entering because a pullback “looks tired.”
@@ -158,16 +176,23 @@ A price zone from 80 to 82 is based on several earlier turns. Price approaches i
 
 If the next bars make higher lows and reclaim a nearby short-term swing high, a recovery scenario gains evidence. If price returns below 80 and cannot reclaim it, the zone has not held in the way the recovery scenario required. If bars keep overlapping from 80 to 83, the event remains unresolved.
 
-### Try it
+### Level 1 — Notice (easy)
 
-You have marked a resistance zone at 120–122 because price stalled there twice. Price arrives for a third test. Which statement is best?
+**Task:** A support zone was marked because price turned there twice. What justifies the zone and what can it not guarantee?
 
-A. Three tests guarantee a breakout.
-B. The area is relevant because of the prior stalls; observe the current approach, the response and follow-through before deciding what it means.
-C. The zone must hold because it worked before.
+**Feedback:** Prior turns justify attention to the area. They do not guarantee another bounce or exact-price respect.
 
-**Feedback:** B. Prior behaviour gives a reason to pay attention, not a guarantee about the next test.
+### Level 2 — Compare (guided)
 
+**Task:** Compare price turning away, closing beyond and holding, or overlapping at the zone.
+
+**Feedback:** Turning away is a response; holding beyond may indicate the old role is changing; overlap is unresolved. The zone alone does not choose an outcome.
+
+### Level 3 — Apply (independent)
+
+**Task:** Price approaches a zone from below with expanding ranges and elevated activity. What should you inspect next?
+
+**Model response:** Check whether it closes beyond and holds, trades above but returns inside, or stalls. Those responses distinguish possible readings.
 ### Common mistake
 
 **Mistake:** Drawing zones after a move has occurred so that they conveniently explain the outcome.
@@ -206,12 +231,23 @@ Price has rotated between 40–41 and 49–50 for several sessions. It approache
 
 If a later attempt closes above 50 and holds on a retest, the breakout scenario gains evidence. If price fails at 50 and then breaks a meaningful short-term low, a rotation back through the range becomes more plausible. If it continues overlapping near 50, waiting may be the clearest decision.
 
-### Try it
+### Level 1 — Notice (easy)
 
-Price sits in the middle of a range and prints a single high-volume candle. No range boundary or prior swing is nearby. What is the main limitation?
+**Task:** In a 40–50 range, identify the upper edge, lower edge and middle. Why are these locations different?
 
-**Feedback:** The candle may show unusual activity, but the location provides less context for evaluating a range-edge rejection or breakout. First describe the event and wait for more structure rather than inventing a nearby level.
+**Feedback:** The edges test prior boundaries; the middle may not offer a nearby structural point to distinguish rotation from breakout.
 
+### Level 2 — Compare (guided)
+
+**Task:** Compare a brief break above 50 that returns inside with a close above 50 followed by a successful retest.
+
+**Feedback:** Return inside and failed reclaim support range return; sustained trade above and a successful retest support breakout continuation.
+
+### Level 3 — Apply (independent)
+
+**Task:** Price is in the middle of the range and prints a wide high-volume candle. What is missing for an edge-based setup?
+
+**Model response:** The event has not tested a meaningful boundary, so its relevance to an edge rotation or breakout is unclear. Wait for clearer structure or context.
 ### Common mistake
 
 **Mistake:** Buying every test of the lower edge or selling every test of the upper edge.
@@ -254,12 +290,23 @@ Now suppose price moves above a nearby swing high, but the invalidation point is
 
 **Case B:** Several indicators point up, but the entry is far from a meaningful level, the stop is chosen only to fit a preferred position size, and no clear invalidation condition exists. This is weakly constructed even if price later rises.
 
-### Try it: pass, wait or prepare?
+### Level 1 — Notice (easy)
 
-A breakout bar closes beyond resistance on high volume. The next bar returns inside the range. There is no clear retest, and the proposed entry would be near the centre of the old range. Choose one: prepare a conditional plan, wait for clearer evidence, or reject the idea.
+**Task:** For one candidate setup, write the market state, a relevant zone and one fact that supports watching it.
 
-**Feedback:** Waiting is the most defensible choice from the facts given. The first breakout failed to retain its progress and the proposed entry lacks a useful location. More evidence may appear, but it has not yet appeared in the described case.
+**Feedback:** A useful note explains why the location matters; “it looks bullish” or “there is a line” is not enough.
 
+### Level 2 — Compare (guided)
+
+**Task:** Compare a defined pullback near a level, a candle pattern in the range middle and an extended breakout near opposing resistance using context, location, evidence, trigger, invalidation and risk.
+
+**Feedback:** The pullback may be worth preparing if the trigger/risk are clear; the middle-range pattern has weak location; the extended breakout may leave little room. None is automatically tradable.
+
+### Level 3 — Apply (independent)
+
+**Task:** A breakout closes beyond resistance, returns inside on the next bar and the proposed entry is near the centre of the old range. Decide prepare/wait/reject and explain.
+
+**Model response:** Wait or reject the present entry: the move has not held outside and the entry lacks a useful location. Reassess only if a fresh trigger develops.
 ### Common mistake
 
 **Mistake:** Using more confirming indicators to justify an idea that lacks a testable trigger or invalidation.
