@@ -51,7 +51,7 @@
   function renderProgress(){
     const count=completionCount(),percent=Math.round(count/lessons.length*100);
     $("sr-course-progress-bar").style.width=percent+"%";
-    const progress=$(".sr-room-progress");
+    const progress=document.querySelector(".sr-room-progress");
     progress.setAttribute("aria-valuemax",String(lessons.length));
     progress.setAttribute("aria-valuenow",String(count));
     progress.setAttribute("aria-valuetext",count+" of "+lessons.length+" lessons complete");
