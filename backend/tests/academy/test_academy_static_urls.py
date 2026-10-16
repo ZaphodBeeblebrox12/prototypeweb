@@ -13,7 +13,7 @@ class StaticAssetUrlTests(SimpleTestCase):
         )
 
 
-    def test_vpa_mobile_pilot_figures_resolve_from_the_canonical_export_folder(self):
+    def test_vpa_mobile_pilot_figures_resolve_from_the_approved_static_folder(self):
         names = (
             "academy/vpa/vpa-m01-l01-stage1-spot-volume-mobile.svg",
             "academy/vpa/vpa-m01-l01-candle-context-compare-mobile.svg",
@@ -24,3 +24,12 @@ class StaticAssetUrlTests(SimpleTestCase):
                 discovered = finders.find(name)
                 self.assertIsNotNone(discovered)
                 self.assertTrue(Path(discovered).is_file())
+
+    def test_vpa_later_outcome_figures_are_not_public_static_assets(self):
+        names = (
+            "academy/vpa/vpa-m01-l01-stage3-outcome-continuation-mobile.svg",
+            "academy/vpa/vpa-m01-l01-stage3-outcome-failure-mobile.svg",
+        )
+        for name in names:
+            with self.subTest(name=name):
+                self.assertIsNone(finders.find(name))
