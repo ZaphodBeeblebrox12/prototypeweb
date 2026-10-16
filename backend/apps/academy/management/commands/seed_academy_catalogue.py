@@ -17,7 +17,6 @@ from apps.academy.models import (
     LessonInstructorMaterial,
 )
 
-
 COURSES = (
     ("seed_trading_path", "trading-path", 4, 30),
     ("seed_support_resistance", "support-resistance", 6, 18),
