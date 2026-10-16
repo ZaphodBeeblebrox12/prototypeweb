@@ -50,20 +50,23 @@ Candle B recorded three times the average volume of its recent comparable bars a
 
 That still does **not** confirm a breakout. The next bars may hold above the boundary, return inside the range, or overlap without resolving the question. The first candle gives you a reason to pay attention; the later behaviour helps you judge which explanation fits better.
 
-### Try it: observation before interpretation
+### Level 1 — Notice (easy)
 
-For Candle A, write two sentences:
-- One about the price outcome.
-- One about recorded volume relative to its baseline.
+**Task:** Using Candle B's table, identify the candle direction and relative-volume multiple.
 
-Then choose the strongest conclusion:
+**Feedback:** It closed above its open and recorded 3.00× its stated baseline. Those are facts; they do not identify who traded.
 
-A. Large institutions were buying.
-B. Price rose, and recorded volume was only slightly above its recent average.
-C. The next candle should also rise.
+### Level 2 — Compare (guided)
 
-**Feedback — read after answering:** B is supported by the table. A claims knowledge of participants that the data does not provide. C predicts the future from one bar. A good chart reader can make a precise observation without immediately turning it into a trade idea.
+**Task:** Compare Candles A and B. Which facts differ, and what is the strongest conclusion the data supports?
 
+**Feedback:** B had slightly more price progress and much higher relative volume. The sound conclusion is that more recorded activity accompanied the upward close.
+
+### Level 3 — Apply (independent)
+
+**Task:** A new green candle closes near its high at a prior range boundary on 1.6× relative volume. Give two possible readings and one future discriminator.
+
+**Model response:** It may be a breakout attempt or a temporary excursion. A hold above the boundary supports continuation; a return inside and failed reclaim supports the alternative.
 ### Common mistake
 
 **Mistake:** Treating a green candle as proof of strong demand.
@@ -116,16 +119,23 @@ High activity occurs in both cases. The price outcome differs. Volume cannot rep
 
 A bar closes above a range high on 1.8× its 20-bar average. Record three things: the close is above the boundary; activity was elevated relative to the stated baseline; the event occurred where the market previously stalled. A continuation interpretation is possible, but acceptance outside the range is not yet established. A later close back inside and failure to reclaim the boundary would weaken that interpretation.
 
-### Try it: calculate and interpret
+### Level 1 — Notice (easy)
 
-A bar records 1,200 units of volume. The average of 20 comparable bars is 800.
+**Task:** A bar records 900 units and its baseline is 600. Calculate relative volume.
 
-1. Calculate relative volume.
-2. Write one fact supported by the calculation.
-3. Write one thing the calculation cannot tell you.
+**Feedback:** 900 ÷ 600 = 1.5×, or 50% above the chosen baseline.
 
-**Feedback:** 1,200 ÷ 800 = **1.5×**. You can say activity was 50% above the chosen average. You cannot infer direction, participant identity or the next price move from that ratio alone.
+### Level 2 — Compare (guided)
 
+**Task:** Two bars both show 1.5× relative volume, but one appears at the open and one at midday. Can you assume they are equally unusual?
+
+**Feedback:** Not without checking the usual activity at those times. The calculation may be correct while the baseline remains poorly matched.
+
+### Level 3 — Apply (independent)
+
+**Task:** An up bar records 0.8× the baseline after a long advance. Write a neutral note and one thing to check next.
+
+**Model response:** Price closed above its open with below-baseline activity. Check the location, session, source quality and follow-through before deciding whether the low reading matters.
 ### Common mistake
 
 **Mistake:** Treating “high volume” as a complete interpretation.
@@ -186,16 +196,23 @@ Use this **synthetic** bar:
 
 These facts suggest a wide bar with an upward close in the upper part of the range, but with movement on both sides of the open. The volume shows elevated activity. Whether this matters depends on whether the bar occurred at a relevant level, inside a range, during a trend or in unusual market conditions.
 
-### Try it
+### Level 1 — Notice (easy)
 
-A candle has Open 50, High 55, Low 49, Close 50.5. Recorded volume is 2× the baseline.
+**Task:** For Open 100, High 104, Low 96, Close 102, calculate the range and close position.
 
-1. Did the candle close up or down?
-2. Was the close near the high or near the low?
-3. What is one conclusion you should avoid?
+**Feedback:** The range is 8; close position is (102 − 96) ÷ 8 = 75%.
 
-**Feedback:** It closed slightly above its open, but the close sits near the lower part of the 49–55 range. Activity was elevated, yet the close retained little of the upward excursion. Avoid labelling it automatically as a bullish continuation or a confirmed reversal. The next bars and the event's location are important.
+### Level 2 — Compare (guided)
 
+**Task:** Compare that candle with one using the same high and low but closing at 97. What changed?
+
+**Feedback:** The second close is near the low rather than the upper part of the range. The total range is unchanged, and neither bar identifies participant motives.
+
+### Level 3 — Apply (independent)
+
+**Task:** A wide candle at resistance has a long upper wick and elevated volume. Give an objective description, a possible interpretation and an alternative.
+
+**Model response:** Price traded above its close but did not finish at the high; activity was elevated. A failed attempt is possible, but a pause before another attempt is also possible.
 ### Common mistake
 
 **Mistake:** Memorising “long upper wick means selling” and “long lower wick means buying.”
@@ -238,16 +255,23 @@ An instrument rises from 100 to 110 on expanding activity, then pulls back from 
 
 Do not call this an entry yet. If price stabilises around the area and then retakes a nearby short-term swing high, the continuation idea gains evidence. If price pushes through 106.5 with expanding downside range and fails to reclaim the area, the idea weakens. If price simply overlaps between 107 and 108, the situation may be unresolved.
 
-### Try it
+### Level 1 — Notice (easy)
 
-A quiet pullback reaches a previously marked support zone. The volume bars are smaller than those during the prior advance. Which conclusion is best?
+**Task:** A market rises from 100 to 110, then pulls back to 107 on below-baseline volume. List three observations.
 
-A. The trend must resume.
-B. The pullback is currently less active than the advance; watch how price behaves at the zone.
-C. Volume is low, so the data can be ignored.
+**Feedback:** The advance covered 10 points, the pullback covered 3, and pullback volume is below the selected baseline. Whether the zone holds is unknown.
 
-**Feedback:** B. It preserves the evidence while keeping the outcome open. A is too certain. C throws away information rather than checking its quality and context.
+### Level 2 — Compare (guided)
 
+**Task:** Compare this with a low-volume pullback that breaks a meaningful swing low and continues lower. Why is low volume not enough to call a pullback healthy?
+
+**Feedback:** The price-structure outcome differs. Volume needs to be read alongside progress and location.
+
+### Level 3 — Apply (independent)
+
+**Task:** A quiet pullback reaches a prior breakout area without producing a trigger. State the next evidence to watch and one event that weakens continuation.
+
+**Model response:** A hold followed by a reclaim of a short-term swing high may support continuation. A break below the pullback low and failed reclaim weakens it.
 ### Common mistake
 
 **Mistake:** Treating low volume as proof that the opposing side is absent.
@@ -290,12 +314,23 @@ Before interpreting a volume pattern, be able to complete this sentence:
 
 If you cannot complete the sentence, your analysis may still describe the price behaviour, but its volume claims need qualification.
 
-### Try it
+### Level 1 — Notice (easy)
 
-A trader sees a large volume spike on a retail FX chart and states, “Global FX trading volume has surged.” What is the problem?
+**Task:** A retail FX feed says its volume measure counts tick updates. What does this series measure?
 
-**Feedback:** If the chart shows broker-specific tick volume, the statement makes a global transaction-volume claim that the data does not support. A more accurate statement would be: “Tick activity on this feed was unusually high compared with its recent baseline.”
+**Feedback:** It measures tick activity on that feed, not total traded quantity across the global FX market.
 
+### Level 2 — Compare (guided)
+
+**Task:** Compare retail FX tick activity with exchange-reported futures volume. Why should you not compare their raw numbers directly?
+
+**Feedback:** They may count different things and cover different markets; baselines and numeric thresholds are not automatically transferable.
+
+### Level 3 — Apply (independent)
+
+**Task:** Write a data note for a crypto pair shown on one exchange.
+
+**Model response:** State the venue, instrument, timeframe and method, and clarify that the data does not represent every spot and derivatives venue. Compare activity within that defined series.
 ### Common mistake
 
 **Mistake:** Comparing raw volume numbers from two feeds as if they were measured on the same basis.
