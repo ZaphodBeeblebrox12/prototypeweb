@@ -412,12 +412,13 @@ jobs:
             await cataloguePage.goto(server + "/member-access.html", { waitUntil: "networkidle" });
             assert.equal(await cataloguePage.evaluate(() => getComputedStyle(document.documentElement).colorScheme), "light",
               "Member access should use the TradeThesis light theme");
-            assert.equal(await cataloguePage.locator('#signInPanel a[href="/accounts/login/?next=/learn/"]').count(), 1,
-              "Sign-in should use the Django login route, returning the learner to /learn/");
-            assert.equal(await cataloguePage.locator('#signInPanel a[href="/accounts/password/reset/"]').count(), 1,
-              "Forgot-password should use the server-side password reset flow");
-            assert.equal(await cataloguePage.locator('#createPanel a[href="/accounts/signup/?next=/learn/"]').count(), 1,
-              "Account creation should use the Django signup route");
+            const academyBase = "https://tradethesis-academy-staging.onrender.com";
+            assert.equal(await cataloguePage.locator('#signInPanel a[href="' + academyBase + '/accounts/login/?next=/learn/"]').count(), 1,
+              "Sign-in should use the configured Django login route, returning the learner to /learn/");
+            assert.equal(await cataloguePage.locator('#signInPanel a[href="' + academyBase + '/accounts/password/reset/"]').count(), 1,
+              "Forgot-password should use the configured server-side password reset flow");
+            assert.equal(await cataloguePage.locator('#createPanel a[href="' + academyBase + '/accounts/signup/?next=/learn/"]').count(), 1,
+              "Account creation should use the configured Django signup route");
             assert.equal(await cataloguePage.locator('#signInPanel input, #createPanel input, #signInPanel form, #createPanel form').count(), 0,
               "The static preview must not collect or submit passwords");
             assert.equal(await cataloguePage.locator("#createPanel").isVisible(), false,
