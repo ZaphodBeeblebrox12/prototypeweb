@@ -22,6 +22,7 @@ A trade plan is not a forecast that must come true. It is a structured response 
 
 **Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m06-l01-context-note-lab.html)  
 **Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m06-l01-context-note.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m06-l01-context-note.md)
+**Student worksheet:** [Open fillable context note](../assets/worksheets/volume-price-analysis-student-worksheets.html#context-note) · [Printable text version](../assets/worksheets/volume-price-analysis-student-worksheets.md#context-note)
 
 ### Why context comes first
 
@@ -106,6 +107,7 @@ On a cluttered chart, twelve horizontal lines compete for attention. The range b
 
 **Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m06-l02-evidence-sheet-lab.html)  
 **Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m06-l02-evidence-sheet.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m06-l02-evidence-sheet.md)
+**Student worksheet:** [Open fillable evidence sheet](../assets/worksheets/volume-price-analysis-student-worksheets.html#evidence-sheet) · [Printable text version](../assets/worksheets/volume-price-analysis-student-worksheets.md#evidence-sheet)
 
 With the wider context understood, focus on the event that may change your view. Your evidence note should make it possible for another person to see why you reached your interpretation—even if they disagree with it.
 
@@ -185,6 +187,7 @@ In a different ending, price breaks below 53.5 and fails to reclaim it. Add that
 
 **Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m06-l03-competing-scenarios-lab.html)  
 **Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m06-l03-competing-scenarios.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m06-l03-competing-scenarios.md)
+**Student worksheet:** [Open fillable two-scenario thesis canvas](../assets/worksheets/volume-price-analysis-student-worksheets.html#scenario-canvas) · [Printable text version](../assets/worksheets/volume-price-analysis-student-worksheets.md#scenario-canvas)
 
 A scenario is a conditional explanation of what the market might do next and how you will recognise it. It is not a prediction written in advance and defended no matter what happens.
 
@@ -266,6 +269,7 @@ Scenario A says price should hold above 208 and continue. If price falls back in
 
 **Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m06-l04-pretrade-risk-ticket-lab.html)  
 **Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m06-l04-pretrade-risk-ticket.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m06-l04-pretrade-risk-ticket.md)
+**Student worksheet:** [Open fillable pre-trade ticket](../assets/worksheets/volume-price-analysis-student-worksheets.html#pretrade-ticket) · [Printable text version](../assets/worksheets/volume-price-analysis-student-worksheets.md#pretrade-ticket)
 
 Good analysis and good trade construction are connected, but they are not the same thing. A chart may support a direction while the specific trade has unclear invalidation, poor positioning or insufficient room to a plausible objective.
 
@@ -356,6 +360,7 @@ Assume a hypothetical entry at 50, invalidation/stop at 48 and a value of 2 curr
 
 **Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m06-l05-complete-plan-capstone-lab.html)  
 **Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m06-l05-complete-plan-capstone.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m06-l05-complete-plan-capstone.md)
+**Student worksheet:** [Open fillable capstone review](../assets/worksheets/volume-price-analysis-student-worksheets.html#capstone-review) · [Printable text version](../assets/worksheets/volume-price-analysis-student-worksheets.md#capstone-review)
 
 This final lesson brings the whole course together. The numbers are **synthetic and for learning only**. The purpose is to demonstrate a transparent process, not to suggest a live position.
 
