@@ -8,7 +8,7 @@
 
 The repository tree contains **465 image assets**: **319 PNGs** and **146 SVGs** (including source copies, preview mirrors, brand marks and QA screenshots). The site root currently contains 14 HTML pages, with the Support & Resistance Learning Room using dynamically selected images rather than embedding each chart in the HTML.
 
-The full asset-by-asset inventory is in [IMAGE_ASSET_INVENTORY.csv](IMAGE_ASSET_INVENTORY.csv). It records file path, format, bytes, same-directory SVG pairing, whether the basename appears in the reviewed source files, probable asset role, and the current readability action. Raster pixel dimensions are not exposed by the repository tree metadata; they remain unverified in this pass. The source SVGs preserve vector artwork, but their text can still be too small when the entire chart is scaled down.
+The checked-in baseline inventory is in [IMAGE_ASSET_INVENTORY.csv](IMAGE_ASSET_INVENTORY.csv). It records file path, format, bytes, same-directory SVG pairing, source references, probable asset role and the current readability action. The automated build also reads each tracked PNG header and each SVG root/viewBox and produces a second CSV with native dimensions for all 465 files: [download the native-dimension inventory artifact](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38886318654/artifacts/12039980298). Source dimensions do not, by themselves, prove that labels are comfortably readable at the size where the lesson shows them.
 
 ## Confirmed high-priority findings
 
@@ -26,12 +26,13 @@ The full asset-by-asset inventory is in [IMAGE_ASSET_INVENTORY.csv](IMAGE_ASSET_
 - The viewer includes a viewport-sized dialog; fit, zoom-in and zoom-out controls; drag panning; wheel zoom; touch pointer pinch/pan handling; Escape and close-button dismissal; focus restoration; keyboard open/zoom/pan controls; descriptive captions; and a non-intrusive "click or tap to inspect" hint.
 - The viewer is deliberately scoped to educational figures and charts. Logos and marketing imagery are excluded.
 - Updated the Learning Room's chart loader to prefer the vector `.svg` source when available and fall back to its existing `.png` if needed.
-- Updated the preview workflow to stage SVG companions beside the referenced chart PNGs. This does not merge or deploy the feature branch.
+- Updated both the preview and Playwright staging workflows to stage SVG companions beside the referenced chart PNGs.
+- Kept each stage's canonical PNG filename in `data-chart-canonical-file` while displaying SVG, so V5.2 model-answer lookup and its stage gates continue to use the original mapping.
 
 ## Validation and remaining work
 
-- The existing GitHub Actions browser-smoke workflow uses Playwright and is triggered for pull requests targeting `my-new-branch`; an image-inspector smoke test will be added before requesting review.
+- **GitHub Actions run 27 passed**: [view verification run](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38886318654). It generated the 465-row native-dimension inventory, staged vector chart sources, ran the existing Playwright lesson/answer-gate suite, checked desktop viewer zoom/fit/Escape and position restoration, opened dynamically injected V5.2 figures, and exercised the 390×844 mobile viewer fit and pinch-pointer behavior.
+- The pinch test simulates touch pointer events in Chromium; it is not a real-device Safari/iOS test. Keyboard focus restoration is covered in the implementation, but assistive-technology testing remains outstanding.
 - Pixel-by-pixel visual QA across desktop/mobile has not yet been established by the source-tree inspection alone. I cannot claim that every image's text contrast, cropping or source resolution has been visually confirmed.
-- Raster native dimensions need a browser or binary-asset inspection pass; GitHub file listings expose byte size but not intrinsic width/height.
 - The PNG-only figures require a rendered review to decide exactly which need source re-export, larger annotation typography, or a full-chart-plus-detail layout. Their substantive candle structure, price values, answer mappings and learning gates must remain unchanged.
 - The feature branch will remain unmerged and will not be deployed. Review will be requested only after the checks and audit artifacts are ready.
