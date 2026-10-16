@@ -63,7 +63,7 @@ function getBars(pattern,seed,phase){
  return bars;
 }
 function svgChart(vis){
- if(vis.view==="feeds")return feedCards();
+ if(vis.view==="feeds")return feedCards(vis);
  const bars=getBars(vis.pattern||cfg.pattern,seed+(vis.seed||0),vis.phase||"initial");
  const profile=vis.view==="profile";
  const W=900,H=profile?470:450,px=65,py=62,pw=profile?440:770,ph=220,vy=315,vh=70;
@@ -97,7 +97,7 @@ function svgChart(vis){
  out+='</svg>';
  return '<div class="visual-title">'+esc(vis.title||"Synthetic chart")+'</div>'+out+'<p class="visual-caption">'+esc(vis.caption||"Illustrative synthetic data. Compare visible price behaviour with recorded activity; do not treat this as a signal.")+'</p>';
 }
-function feedCards(){return '<div class="feed-grid"><article class="feed-card"><strong>Exchange-traded futures</strong><p><b>Measure:</b> contract volume reported by the exchange feed.</p><p><b>Limit:</b> confirm the contract, session and data provider; do not mix unlike contracts without a method.</p></article><article class="feed-card"><strong>Retail spot FX</strong><p><b>Measure:</b> often tick volume, a count of price updates from that feed.</p><p><b>Limit:</b> not a consolidated count of every global currency transaction.</p></article><article class="feed-card"><strong>Crypto spot</strong><p><b>Measure:</b> trading activity reported by a particular venue or aggregation provider.</p><p><b>Limit:</b> venues differ; coverage and units may not be directly comparable.</p></article></div>'}
+function feedCards(vis){if(vis&&vis.phase){return '<div class="feed-grid"><article class="feed-card"><strong>'+esc(vis.title||"Outcome") + '</strong><p>'+esc(vis.caption||"A data-source scenario to evaluate.")+'</p><p><b>Review:</b> Check whether the measure and coverage stayed comparable.</p></article><article class="feed-card"><strong>What changed?</strong><p>'+esc(vis.phase==="hold"?"The source/measurement stayed consistent, so the relative comparison remains interpretable.":"The provider or coverage changed, so the apparent volume shift may partly be a data difference.")+'</p><p>Do not compare unlike measures as if they were interchangeable.</p></article></div>'}return '<div class="feed-grid"><article class="feed-card"><strong>Exchange-traded futures</strong><p><b>Measure:</b> contract volume reported by the exchange feed.</p><p><b>Limit:</b> confirm the contract, session and data provider; do not mix unlike contracts without a method.</p></article><article class="feed-card"><strong>Retail spot FX</strong><p><b>Measure:</b> often tick volume, a count of price updates from that feed.</p><p><b>Limit:</b> not a consolidated count of every global currency transaction.</p></article><article class="feed-card"><strong>Crypto spot</strong><p><b>Measure:</b> trading activity reported by a particular venue or aggregation provider.</p><p><b>Limit:</b> venues differ; coverage and units may not be directly comparable.</p></article></div>'}
 function renderVisual(id,vis){const el=$(id);if(!el)return;el.innerHTML=svgChart(vis)}
 function renderChecks(){const host=$("noticeCheck");host.innerHTML='<fieldset class="choices"><legend>'+esc(cfg.check.q)+'</legend>'+cfg.check.options.map((o,i)=>'<label><input type="radio" name="checkAnswer" value="'+esc(o.value)+'" '+(i===-1?"checked":"")+'><span>'+esc(o.label)+'</span></label>').join("")+'</fieldset>'}
 function field(id,label,placeholder,min){return '<div class="field"><label for="'+id+'">'+esc(label)+'</label><textarea id="'+id+'" minlength="'+(min||35)+'" placeholder="'+esc(placeholder||"Use visible evidence, then explain your reasoning.")+'"></textarea><p class="hint">Write enough for another learner to follow your reasoning. This prototype does not semantically grade free text.</p></div>'}
@@ -137,6 +137,8 @@ function boot(){
  $("outcomeReview").placeholder=cfg.reviewPlaceholder||"Say exactly what later evidence changed your reading.";
  renderChecks();
  renderVisual("noticeVisual",{view:cfg.view,pattern:cfg.pattern,title:cfg.visualTitle,caption:cfg.visualCaption,level:cfg.level,levelLabel:cfg.levelLabel});
+ renderVisual("applyVisual",{view:cfg.view,pattern:cfg.pattern,title:cfg.applyVisualTitle||"New case · initial evidence only",caption:cfg.applyVisualCaption||"Later bars are withheld until your initial reading is recorded.",level:cfg.level,levelLabel:cfg.levelLabel,seed:41});
+ $("outcomeATitle").textContent=cfg.outcomeA.title;$("outcomeBTitle").textContent=cfg.outcomeB.title;
  $("compareVisualA").innerHTML=svgChart({view:cfg.view,pattern:cfg.compareA.pattern,title:cfg.compareA.title,caption:cfg.compareA.caption,level:cfg.compareA.level,levelLabel:cfg.compareA.levelLabel,seed:17});
  $("compareVisualB").innerHTML=svgChart({view:cfg.view,pattern:cfg.compareB.pattern,title:cfg.compareB.title,caption:cfg.compareB.caption,level:cfg.compareB.level,levelLabel:cfg.compareB.levelLabel,seed:29});
  if(cfg.riskCalc){
@@ -160,7 +162,7 @@ function boot(){
  });
  $("complete").addEventListener("click",()=>{if(!submitted)return;if(validateFields(["outcomeReview"],"feedbackReview"))showStage(3)});
  $("openModel").addEventListener("click",()=>{$("modelReasoning").open=true;$("modelReasoning").scrollIntoView({behavior:reduced()?"auto":"smooth",block:"nearest"})});
- $("restart").addEventListener("click",()=>{["noticeResponse","compareResponse","alternativeResponse","applyResponse","scenarioResponse","outcomeReview"].forEach(id=>$(id).value="");document.querySelectorAll('input[name="checkAnswer"]').forEach(el=>el.checked=false);document.querySelectorAll(".checks input").forEach(el=>el.checked=false);["feedback1","feedback2","feedback3","feedbackReview"].forEach(id=>{const el=$(id);el.hidden=true;el.className="feedback"});$("initialRead").hidden=false;$("outcomes").hidden=true;$("modelReasoning").open=false;submitted=false;showStage(0)});
+ $("restart").addEventListener("click",()=>{["noticeResponse","compareResponse","alternativeResponse","applyResponse","scenarioResponse","outcomeReview"].forEach(id=>$(id).value="");document.querySelectorAll('input[name="checkAnswer"]').forEach(el=>el.checked=false);document.querySelectorAll(".checks input").forEach(el=>el.checked=false);["feedback1","feedback2","feedback3","feedbackReview"].forEach(id=>{const el=$(id);el.hidden=true;el.className="feedback"});$("initialRead").hidden=false;$("outcomes").hidden=true;$("modelReasoning").open=false;submitted=false;if(cfg.riskCalc){$("riskBudget").value=250;$("stopDistance").value=2.5;$("pointValue").value=10;$("extraCost").value=0;$("riskBudget").dispatchEvent(new Event("input"))}showStage(0)});
  $("dateNote").textContent="Synthetic teaching examples · not historical data, investment advice or trade signals. Responses remain in this browser page; they are not sent to a server or saved to a member account.";
 }
 document.addEventListener("DOMContentLoaded",boot);
