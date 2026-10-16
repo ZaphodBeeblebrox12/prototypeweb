@@ -14,7 +14,7 @@ Evaluate a breakout as a sequence of price behaviour, relative activity and foll
 
 **Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
 
-**Target delivered duration:** 11–15 minutes; never less than 10. The full lesson includes spoken teaching, a narrated chart walkthrough, learner practice, feedback and recap. Rehearse and time the complete lesson. Any lesson longer than 20 minutes needs a clear teaching reason.
+**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
 - **0:00–1:00 — Why the first move is not the whole breakout.**
@@ -74,7 +74,7 @@ Recognise a failed-breakout sequence, distinguish its observable definition from
 
 **Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
 
-**Target delivered duration:** 11–15 minutes; never less than 10. The full lesson includes spoken teaching, a narrated chart walkthrough, learner practice, feedback and recap. Rehearse and time the complete lesson. Any lesson longer than 20 minutes needs a clear teaching reason.
+**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
 - **0:00–1:00 — The trap is defined by failure, not by hindsight.**
@@ -134,7 +134,7 @@ Interpret exceptionally high activity near an extended move as a potential clima
 
 **Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
 
-**Target delivered duration:** 11–15 minutes; never less than 10. The full lesson includes spoken teaching, a narrated chart walkthrough, learner practice, feedback and recap. Rehearse and time the complete lesson. Any lesson longer than 20 minutes needs a clear teaching reason.
+**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
 - **0:00–1:00 — Why extremes attract attention.**
@@ -194,7 +194,7 @@ Define springs and upthrusts in observable price terms and evaluate their signif
 
 **Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
 
-**Target delivered duration:** 11–15 minutes; never less than 10. The full lesson includes spoken teaching, a narrated chart walkthrough, learner practice, feedback and recap. Rehearse and time the complete lesson. Any lesson longer than 20 minutes needs a clear teaching reason.
+**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
 - **0:00–1:00 — Start with range structure.**
@@ -254,7 +254,7 @@ Build a post-event checklist that distinguishes an initial warning from a better
 
 **Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
 
-**Target delivered duration:** 11–15 minutes; never less than 10. The full lesson includes spoken teaching, a narrated chart walkthrough, learner practice, feedback and recap. Rehearse and time the complete lesson. Any lesson longer than 20 minutes needs a clear teaching reason.
+**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
 - **0:00–1:00 — A reversal is a process, not a candle.**

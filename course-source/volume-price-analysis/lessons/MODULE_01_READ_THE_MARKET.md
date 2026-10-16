@@ -14,15 +14,16 @@ By the end, a learner should be able to describe a candle's price outcome and it
 
 **Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
 
-**Target delivered duration:** 11–15 minutes; never less than 10. The full lesson includes spoken teaching, a narrated chart walkthrough, learner practice, feedback and recap. Rehearse and time the complete lesson. Any lesson longer than 20 minutes needs a clear teaching reason.
+**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
 - **0:00–1:00 — The problem:** identical-looking candles can occur in different contexts.
-- **1:00–2:30 — Level 1, Notice:** identify the candidate candle and compare its activity with a marked baseline before offering an interpretation.
-- **2:30–4:30 — The core idea:** separate what price did from how much activity was recorded; explain why volume is not a stand-alone signal.
-- **4:30–7:00 — Level 2, Compare:** walk through the two matched-size candles on a shared vertical scale; compare prior structure, location and relative activity.
-- **7:00–10:30 — Level 3, Apply:** interpret a new breakout event before showing later bars, then compare continuation and failure outcomes.
-- **10:30–11:30 — Recap and knowledge check: state what is observed, what remains uncertain, and what evidence comes next.**
+- **1:00–2:30 — Level 1, Notice:** describe one candidate candle and compare activity with its marked baseline.
+- **2:30–4:30 — Build the method:** separate the price result from recorded activity; explain why volume is not a stand-alone signal.
+- **4:30–7:00 — Level 2, Compare:** compare the matched-size candles using the same vertical scale increment; note prior structure, location and relative activity.
+- **7:00–11:30 — Level 3, Apply:** analyse two possible follow-through paths that begin with the same high-volume candidate. Record an initial reading before seeing outcomes.
+- **11:30–14:00 — Feedback:** compare the learner's observation and interpretation with the model reasoning; discuss what changed when later bars appeared.
+- **14:00–15:00 — Recap and knowledge check:** state what is observed, what remains uncertain, and what evidence comes next.
 
 ### Full narration script
 Look at a candlestick chart for a moment. You can see where price opened, where it traded, and where it closed. The candle also gives you a visual impression of the struggle during that period: a long body, a short body, or a wick showing that price travelled somewhere and did not stay there. Those are useful observations. But the candle does not tell the whole story.
@@ -31,7 +32,7 @@ Imagine two green candles of similar size. The first forms after a quiet pullbac
 
 This is why we read price and volume together. Price shows the move; volume shows how much activity your data source recorded while that move took place. Price records the path and outcome of trading over the chosen interval. Volume, where it is available and meaningful, records the quantity of trading activity according to that market's data source. We are not saying that volume tells us exactly who traded, why they traded, or what they intend to do next. We are asking a more disciplined question: given the activity that occurred, what did price manage to achieve?
 
-Start with two separate sentences. First: “Price rose from the open and closed near the high.” Second: “Reported volume was high relative to the last twenty bars.” Those are observations. Only after writing them do we ask what they might imply. Perhaps buyers were able to move price upward. Perhaps price moved into an area where the other side was less willing to transact. Perhaps there was substantial disagreement, with activity high but progress limited. More than one interpretation can be plausible.
+Start with two separate sentences. First: “Price rose from the open and closed near the high.” Second: “Reported volume was 1.18 times the average of the five bars immediately before it.” Those are observations in our first chart example; the important part is to name the comparison you used. Only after writing them do we ask what they might imply. Perhaps buyers were able to move price upward. Perhaps price moved into an area where the other side was less willing to transact. Perhaps there was substantial disagreement, with activity high but progress limited. More than one interpretation can be plausible.
 
 The key habit is to compare each bar with the bars around it. An absolute volume number is rarely enough. A volume bar of 100,000 contracts could be extraordinary at one time of day and ordinary at another. On a stock chart, the number may be affected by the instrument's liquidity (how easily a trade can be made without moving price much), session, and venue coverage. On a retail spot-FX chart, the displayed measure is often tick volume from one broker or feed, not a consolidated count of global currency transactions. Crypto data can also vary between exchanges. Your first question is therefore not “Is that number big?” but “Is it unusual for this instrument, this timeframe, this session, and this data source?”
 
@@ -64,8 +65,8 @@ Let's slow down the first comparison and treat it as a live reading rather than 
 2. Why does the same candle mean something different near a range boundary than in the middle of a range?
 3. What information does the next sequence of bars add?
 
-<!-- ASSET: Create a clean annotated candlestick chart with the volume histogram beneath it. Label open, high, low, close; show a local volume baseline; avoid bullish/bearish arrows. Need two panels with similar candle shapes but different context and volume. Use synthetic data or properly licensed market data. -->
-<!-- CHARTLAB: “Observe, then interpret.” Give the learner two chart snippets with similar green candles. Ask them to record (a) prior structure, (b) candle outcome, (c) relative volume, (d) what follow-through evidence they would wait for. Reveal two plausible interpretations, not one fixed answer. -->
+<!-- ASSET: Pilot package implemented at ../assets/: source/vpa-m01-l01-candle-context-compare.svg; source/vpa-m01-l01-candle-context-panel-a.svg; source/vpa-m01-l01-candle-context-panel-b.svg; source/vpa-m01-l01-candle-context-outcomes.svg, with matching exports, synthetic CSV and accessibility notes. Panels use a matched vertical scale increment and neutral volume bars. Use these files as the reference visual system for later assets. -->
+<!-- CHARTLAB: Progressive three-level pilot implemented in ../assets/lab-specs/vpa-m01-l01-candle-context-lab.html. Level 1: observe Panel A; Level 2: compare the two matched-size candidates; Level 3: test the same candidate candle against continuation and failure outcomes. Do not expose Level 3 outcomes before the learner records a response. -->
 
 ---
 
@@ -76,7 +77,7 @@ Identify unusual activity relative to an appropriate baseline and explain why �
 
 **Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
 
-**Target delivered duration:** 11–15 minutes; never less than 10. The full lesson includes spoken teaching, a narrated chart walkthrough, learner practice, feedback and recap. Rehearse and time the complete lesson. Any lesson longer than 20 minutes needs a clear teaching reason.
+**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
 - **0:00–1:00 — Hook:** a large number is not automatically unusual.
@@ -138,7 +139,7 @@ Describe a candle's range and closing position and relate that outcome to volume
 
 **Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
 
-**Target delivered duration:** 11–15 minutes; never less than 10. The full lesson includes spoken teaching, a narrated chart walkthrough, learner practice, feedback and recap. Rehearse and time the complete lesson. Any lesson longer than 20 minutes needs a clear teaching reason.
+**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
 - **0:00–1:00 — The candle is an outcome, not a complete story.**
@@ -198,7 +199,7 @@ Explain at least two possible reasons for a price move on low volume and decide 
 
 **Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
 
-**Target delivered duration:** 11–15 minutes; never less than 10. The full lesson includes spoken teaching, a narrated chart walkthrough, learner practice, feedback and recap. Rehearse and time the complete lesson. Any lesson longer than 20 minutes needs a clear teaching reason.
+**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
 - **0:00–1:00 — Challenge the slogan:** low volume is not automatically bearish.
@@ -258,7 +259,7 @@ Describe the basic differences between exchange-traded volume, venue-specific cr
 
 **Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
 
-**Target delivered duration:** 11–15 minutes; never less than 10. The full lesson includes spoken teaching, a narrated chart walkthrough, learner practice, feedback and recap. Rehearse and time the complete lesson. Any lesson longer than 20 minutes needs a clear teaching reason.
+**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
 - **0:00–1:00 — Same word, different data.**

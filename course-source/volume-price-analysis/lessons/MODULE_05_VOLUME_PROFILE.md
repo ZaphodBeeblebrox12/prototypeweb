@@ -14,7 +14,7 @@ Explain the difference between volume through time and volume at price, and read
 
 **Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
 
-**Target delivered duration:** 11–15 minutes; never less than 10. The full lesson includes spoken teaching, a narrated chart walkthrough, learner practice, feedback and recap. Rehearse and time the complete lesson. Any lesson longer than 20 minutes needs a clear teaching reason.
+**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
 - **0:00–1:00 — Why a histogram beneath candles cannot answer every question.**
@@ -76,7 +76,7 @@ Define the Point of Control and Value Area as profile statistics, explain their 
 
 **Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
 
-**Target delivered duration:** 11–15 minutes; never less than 10. The full lesson includes spoken teaching, a narrated chart walkthrough, learner practice, feedback and recap. Rehearse and time the complete lesson. Any lesson longer than 20 minutes needs a clear teaching reason.
+**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
 - **0:00–1:00 — Why the profile needs reference points.**
@@ -138,7 +138,7 @@ Interpret high- and low-volume nodes as areas of prior activity concentration or
 
 **Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
 
-**Target delivered duration:** 11–15 minutes; never less than 10. The full lesson includes spoken teaching, a narrated chart walkthrough, learner practice, feedback and recap. Rehearse and time the complete lesson. Any lesson longer than 20 minutes needs a clear teaching reason.
+**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
 - **0:00–1:00 — Profile shape as a map, not a forecast.**
@@ -200,7 +200,7 @@ Compare profiles across periods and describe value migration as evidence of chan
 
 **Beginner checkpoint:** The learner can explain the main idea in everyday words, point to the evidence on a chart, and say what could change their mind.
 
-**Target delivered duration:** 11–15 minutes; never less than 10. The full lesson includes spoken teaching, a narrated chart walkthrough, learner practice, feedback and recap. Rehearse and time the complete lesson. Any lesson longer than 20 minutes needs a clear teaching reason.
+**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
 - **0:00–1:00 — Markets can move their area of activity.**
@@ -260,7 +260,7 @@ Use a simple Volume Profile to mark areas where trading activity took place in t
 
 **Beginner checkpoint:** The learner can point to a profile area, describe the current candles around it, and explain what would support or weaken each possible reading.
 
-**Target delivered duration:** 11–15 minutes; never less than 10. Rehearse the narrated chart, practice task and feedback together.
+**Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Rehearse the narrated chart, progressive practice and feedback together; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
 - **0:00–1:00 — A profile is a map of past activity, not a forecast.**
