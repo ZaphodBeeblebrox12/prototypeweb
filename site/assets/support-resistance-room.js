@@ -101,12 +101,12 @@
       item.options.forEach((opt,index)=>{
         const button=document.createElement("button");button.type="button";button.className="sr-room-quiz-option";button.setAttribute("aria-pressed",String(choices[itemIndex]===index));
         button.innerHTML='<span class="sr-room-quiz-letter">'+String.fromCharCode(65+index)+'</span><span></span>';button.lastElementChild.textContent=opt;
-        button.addEventListener("click",()=>{saved.quizItemChoices=saved.quizItemChoices||{};saved.quizItemChoices[l.id]={...(saved.quizItemChoices[l.id]||{}),[itemIndex]:index};saved.quizItemSubmitted=saved.quizItemSubmitted||{};const prior={...(saved.quizItemSubmitted[l.id]||{})};delete prior[itemIndex];saved.quizItemSubmitted[l.id]=prior;saveState();renderQuiz(l)});
+        button.addEventListener("click",()=>{saved.quizItemChoices=saved.quizItemChoices||{};saved.quizItemChoices[l.id]={...(saved.quizItemChoices[l.id]||{}),[itemIndex]:index};saved.quizItemSubmitted=saved.quizItemSubmitted||{};const prior={...(saved.quizItemSubmitted[l.id]||{})};delete prior[itemIndex];saved.quizItemSubmitted[l.id]=prior;saveState();renderQuiz(l);refreshLessonCompletionGate(l)});
         options.append(button);
       });
       card.append(options);
       const submit=document.createElement("button");submit.type="button";submit.className="button sr-room-primary sr-room-quiz-submit";submit.textContent=submitted[itemIndex]===undefined?"Submit this answer":"Update answer";
-      submit.addEventListener("click",()=>{const current=(saved.quizItemChoices||{})[l.id]||{};if(!Number.isInteger(current[itemIndex])){const feedback=document.createElement("div");feedback.className="sr-room-feedback sr-room-quiz-item-feedback";feedback.setAttribute("role","status");feedback.textContent="Choose an answer before submitting.";card.append(feedback);return}saved.quizItemSubmitted=saved.quizItemSubmitted||{};saved.quizItemSubmitted[l.id]={...(saved.quizItemSubmitted[l.id]||{}),[itemIndex]:current[itemIndex]};saveState();renderQuiz(l)});
+      submit.addEventListener("click",()=>{const current=(saved.quizItemChoices||{})[l.id]||{};if(!Number.isInteger(current[itemIndex])){const feedback=document.createElement("div");feedback.className="sr-room-feedback sr-room-quiz-item-feedback";feedback.setAttribute("role","status");feedback.textContent="Choose an answer before submitting.";card.append(feedback);return}saved.quizItemSubmitted=saved.quizItemSubmitted||{};saved.quizItemSubmitted[l.id]={...(saved.quizItemSubmitted[l.id]||{}),[itemIndex]:current[itemIndex]};saveState();renderQuiz(l);refreshLessonCompletionGate(l)});
       card.append(submit);
       if(submitted[itemIndex]!==undefined){const correct=submitted[itemIndex]===item.correct,feedback=document.createElement("div");feedback.className="sr-room-feedback sr-room-quiz-item-feedback";feedback.setAttribute("role","status");feedback.textContent=(correct?"That fits the lesson. ":"Review the distinction. ")+item.feedback;card.append(feedback)}
       root.append(card);
@@ -225,13 +225,13 @@
       const placeholder=document.createElement("option");placeholder.value="";placeholder.textContent="Choose…";select.append(placeholder);
       task.choices.forEach(choice=>{const opt=document.createElement("option");opt.value=choice.value;opt.textContent=choice.label;select.append(opt)});
       select.value=choices[option.id]||"";
-      select.addEventListener("change",()=>{saved.editingChoices=saved.editingChoices||{};saved.editingChoices[l.id]={...((saved.editingChoices[l.id]||{})),[option.id]:select.value};saved.editingSubmitted=saved.editingSubmitted||{};saved.editingSubmitted[l.id]={...((saved.editingSubmitted[l.id]||{})),[task.key]:false};const f=$("sr-teaching-editing-feedback");f.hidden=true;f.textContent="";$("sr-teaching-editing-submit").textContent="Submit revised edit";saveState();updateEditingSubmission(l,task)});
+      select.addEventListener("change",()=>{saved.editingChoices=saved.editingChoices||{};saved.editingChoices[l.id]={...((saved.editingChoices[l.id]||{})),[option.id]:select.value};saved.editingSubmitted=saved.editingSubmitted||{};saved.editingSubmitted[l.id]={...((saved.editingSubmitted[l.id]||{})),[task.key]:false};const f=$("sr-teaching-editing-feedback");f.hidden=true;f.textContent="";$("sr-teaching-editing-submit").textContent="Submit revised edit";saveState();updateEditingSubmission(l,task);refreshLessonCompletionGate(l)});
       row.append(select);root.append(row);
     });
     const rationale=$("sr-teaching-editing-rationale");rationale.value=((saved.editingRationale||{})[l.id]||"");
-    rationale.oninput=()=>{saved.editingRationale=saved.editingRationale||{};saved.editingRationale[l.id]=rationale.value;saved.editingSubmitted=saved.editingSubmitted||{};saved.editingSubmitted[l.id]={...((saved.editingSubmitted[l.id]||{})),[task.key]:false};const f=$("sr-teaching-editing-feedback");f.hidden=true;f.textContent="";saveState();updateEditingSubmission(l,task)};
+    rationale.oninput=()=>{saved.editingRationale=saved.editingRationale||{};saved.editingRationale[l.id]=rationale.value;saved.editingSubmitted=saved.editingSubmitted||{};saved.editingSubmitted[l.id]={...((saved.editingSubmitted[l.id]||{})),[task.key]:false};const f=$("sr-teaching-editing-feedback");f.hidden=true;f.textContent="";saveState();updateEditingSubmission(l,task);refreshLessonCompletionGate(l)};
     const submit=$("sr-teaching-editing-submit");submit.textContent=submitted?"Edit submitted ✓ · revise choices":"Submit your edit";
-    submit.onclick=()=>{const selections=((saved.editingChoices||{})[l.id]||{}),text=($("sr-teaching-editing-rationale").value||"").trim(),missing=task.options.filter(o=>!selections[o.id]);if(missing.length||text.length<8){const f=$("sr-teaching-editing-feedback");f.hidden=false;f.textContent=missing.length?"Classify each candidate or choose “Not sure yet” before submitting.":"Add a short reason for your edit before submitting.";return}saved.editingRationale[l.id]=text;saved.editingSubmitted=saved.editingSubmitted||{};saved.editingSubmitted[l.id]={...((saved.editingSubmitted[l.id]||{})),[task.key]:true};saveState();renderEditingTask(l,task);updateChartStageControls(l)};
+    submit.onclick=()=>{const selections=((saved.editingChoices||{})[l.id]||{}),text=($("sr-teaching-editing-rationale").value||"").trim(),missing=task.options.filter(o=>!selections[o.id]);if(missing.length||text.length<8){const f=$("sr-teaching-editing-feedback");f.hidden=false;f.textContent=missing.length?"Classify each candidate or choose “Not sure yet” before submitting.":"Add a short reason for your edit before submitting.";return}saved.editingRationale[l.id]=text;saved.editingSubmitted=saved.editingSubmitted||{};saved.editingSubmitted[l.id]={...((saved.editingSubmitted[l.id]||{})),[task.key]:true};saveState();renderEditingTask(l,task);updateChartStageControls(l);refreshLessonCompletionGate(l)};
     const feedback=$("sr-teaching-editing-feedback");feedback.hidden=!submitted;feedback.textContent=submitted?"Your edit is recorded. Next, compare how each decision affects the chart. This is a reasoning exercise, not a strict score.":"";
     updateEditingSubmission(l,task);
   }
@@ -290,12 +290,12 @@
       const wrap=document.createElement("label");wrap.className="sr-room-zone-field";
       const label=document.createElement("span");label.textContent=field.label;wrap.append(label);
       const input=document.createElement("input");input.type="number";input.step="any";input.inputMode="decimal";input.required=true;input.value=((entry.fields||{})[field.key]??"");input.setAttribute("aria-label",field.label);inputs[field.key]=input;wrap.append(input);grid.append(wrap);
-      input.addEventListener("input",()=>{const current=getEntry();current.fields=current.fields||{};current.fields[field.key]=input.value;current.submitted=false;setEntry(current);status.textContent="";saveState();refreshSubmit();updateChartStageControls(l)});
+      input.addEventListener("input",()=>{const current=getEntry();current.fields=current.fields||{};current.fields[field.key]=input.value;current.submitted=false;setEntry(current);status.textContent="";saveState();refreshSubmit();updateChartStageControls(l);refreshLessonCompletionGate(l)});
     });
     panel.append(grid);
     const rationaleLabel=document.createElement("label");rationaleLabel.className="sr-room-zone-rationale";
     const rationaleText=document.createElement("span");rationaleText.textContent=task.rationaleLabel;rationaleLabel.append(rationaleText);rationaleLabel.append(rationale);panel.append(rationaleLabel);
-    rationale.addEventListener("input",()=>{const current=getEntry();current.rationale=rationale.value;current.submitted=false;setEntry(current);status.textContent="";saveState();refreshSubmit();updateChartStageControls(l)});
+    rationale.addEventListener("input",()=>{const current=getEntry();current.rationale=rationale.value;current.submitted=false;setEntry(current);status.textContent="";saveState();refreshSubmit();updateChartStageControls(l);refreshLessonCompletionGate(l)});
     const actions=document.createElement("div");actions.className="sr-room-zone-actions";
     const submit=document.createElement("button");submit.type="button";submit.className="button sr-room-primary";submit.textContent=task.submitLabel||"Submit zones";
     const status=document.createElement("p");status.className="sr-room-zone-status";status.setAttribute("role","status");
@@ -304,7 +304,7 @@
       if(!validFields()){status.textContent="Enter a numeric value for each boundary before submitting.";return}
       if(!validPairs()){status.textContent="For each band, the lower boundary must be below the upper boundary.";return}
       if(String(current.rationale||"").trim().length<(task.minRationaleLength||12)){status.textContent="Add a short explanation of your boundary choices before submitting.";return}
-      current.submitted=true;setEntry(current);saveState();status.textContent="Submitted in this browser. The next reveal lets you compare the reasoning; this is not a prediction score.";refreshSubmit();updateChartStageControls(l);
+      current.submitted=true;setEntry(current);saveState();status.textContent="Submitted in this browser. The next reveal lets you compare the reasoning; this is not a prediction score.";refreshSubmit();updateChartStageControls(l);refreshLessonCompletionGate(l);
     });
     actions.append(submit);panel.append(actions);panel.append(status);host.append(panel);
     if(entry.submitted)status.textContent="Your proposed boundaries and rationale are submitted in this browser. The next reveal lets you compare them with one worked reference.";
@@ -359,6 +359,14 @@
       }
     }
     return true;
+  }
+  function refreshLessonCompletionGate(l){
+    if(!l||l.id!==activeId)return;
+    const state=statusOf(l.id),ready=lessonActivityReady(l);
+    $("sr-complete-button").disabled=state!=="complete"&&((l.id===5&&!chartLabCompletedInSession)||!ready);
+    if(!ready&&[6,7,8,12,13,14].includes(l.id))$("sr-bottom-help").textContent=lessonActivityHelp(l);
+    else if(l.id===5&&!chartLabCompletedInSession)$("sr-bottom-help").textContent="Complete Clear W and its two-question check below before marking this lesson complete.";
+    else $("sr-bottom-help").textContent="Take your time. The point is a reasoned read, not a prediction.";
   }
   function lessonActivityHelp(l){
     if(l.id===6)return "Submit your proposed boundary and answer every knowledge-check question before marking this lesson complete.";
@@ -421,12 +429,12 @@
   $("sr-practice-response").addEventListener("input",()=>{
     const l=lessonFor(activeId),index=chartStageIndex(l),value=$("sr-practice-response").value;
     saved.responses[activeId]=value;saved.stageResponses=saved.stageResponses||{};saved.stageResponses[activeId]={...((saved.stageResponses[activeId]||{})),[index]:value};
-    markStageAttempt(l,index,!!value.trim()||$("sr-attempt-made").checked);saveState();updateChartStageControls(l)
+    markStageAttempt(l,index,!!value.trim()||$("sr-attempt-made").checked);saveState();updateChartStageControls(l);refreshLessonCompletionGate(l)
   });
   $("sr-attempt-made").addEventListener("change",()=>{
     const l=lessonFor(activeId),index=chartStageIndex(l),checked=$("sr-attempt-made").checked;
     saved.attempts[activeId]=checked;const value=((((saved.stageResponses||{})[activeId]||{})[index])||"");
-    markStageAttempt(l,index,checked||!!value.trim());saveState();updateChartStageControls(l)
+    markStageAttempt(l,index,checked||!!value.trim());saveState();updateChartStageControls(l);refreshLessonCompletionGate(l)
   });
   $("sr-lesson-notes").addEventListener("input",()=>{saved.notes[activeId]=$("sr-lesson-notes").value;saveState()});
   $("sr-clear-notes").addEventListener("click",()=>{if(!confirm("Clear notes for this lesson from this browser?"))return;delete saved.notes[activeId];saveState();$("sr-lesson-notes").value="";$("sr-notes-save-state").textContent="Notes cleared in this browser."});
