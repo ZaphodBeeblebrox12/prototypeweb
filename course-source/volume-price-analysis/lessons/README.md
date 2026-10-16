@@ -24,6 +24,12 @@ Each lesson is intended to deliver **10–20 minutes of actual teaching**, norma
 
 Count narration, narrated chart walkthrough, guided learner practice, feedback and recap. Do not count screen-loading time or empty pauses. Rehearse and time every complete lesson. If it runs under ten minutes, add a worked example, contrasting case or meaningful learner reasoning task—not repetition. A lesson over 20 minutes needs a clear reason tied to complexity or necessary practice.
 
+## Progressive practice standard
+
+Every lesson must visibly progress through three difficulty levels: **Level 1 — Notice (easy), Level 2 — Compare (guided), Level 3 — Apply (independent)**. The level labels should be consistent across the course, while the tasks must be specific to the lesson's learning objective. The first task checks observation; the second adds contextual comparison; the third uses a new or less-labelled case, asks for alternative explanations and observable next conditions, and withholds future bars until the learner has recorded an initial response. Do not increase difficulty by adding jargon or chart clutter.
+
+The M01-L01 pilot provides the first implementation of this pattern. Validate its feedback, responsive design and staged reveal before using it as the template for all 30 lessons.
+
 ## Shared teaching rules
 
 - Describe what the chart shows before naming an interpretation.
