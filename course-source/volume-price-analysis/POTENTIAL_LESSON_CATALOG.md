@@ -44,7 +44,7 @@
 ### Lessons
 
 1. **Stop Chasing Price: Finding Potential Setups in an Established Trend**
-2. **Is the Pullback Running Out of Steam? Reading Countertrend Moves**
+2. **Is the Pullback Running Out of Steam? Reading Moves Against the Trend**
 3. **Trading Near Support and Resistance: What to Look for Before Entry**
 4. **Finding Opportunities at the Edges of a Trading Range**
 5. **Before You Enter: Separating Promising Setups From Weak Ones**
@@ -75,7 +75,7 @@
 2. **Finding the Market's Reference Point: Point of Control and Value Area**
 3. **Where Price May Stall — or Move Quickly: High- and Low-Volume Nodes**
 4. **When the Market's Focus Shifts: Reading Changes in Value**
-5. **Putting It Together: Combining Volume Profile, VWAP and Price Action**
+5. **Putting It Together: Reading Volume Profile Alongside Price Action**
 
 ---
 

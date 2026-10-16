@@ -20,13 +20,13 @@ This folder contains the full first-pass manuscript for all six modules and 30 l
 
 ## Production standard
 
-Each lesson is designed for a **10–12 minute delivered lesson**, not a ten-minute uninterrupted monologue. The timing includes:
+Each lesson is designed for a **10–20 minute delivered lesson, with a hard minimum of 10 minutes**, not a ten-minute uninterrupted monologue. The timing includes:
 1. narrated teaching;
 2. an annotated chart walkthrough with presenter narration;
 3. a short learner pause or ChartLab task;
 4. a recap and knowledge check.
 
-Before recording, check the actual narration word count and rehearse the screen segment. If a lesson runs under ten minutes in rehearsal, add explanation through the chart example or revise the narration; do not pad the lesson with repeated claims. The current scripts are first-pass manuscripts, not yet final recording scripts.
+Before recording, check the actual narration word count and rehearse the screen segment. If a lesson runs under ten minutes in rehearsal, deepen it with a worked example, a counterexample, or a learner reasoning task. Do not pad it with repeated claims. Lessons over 20 minutes need a written reason tied to concept complexity or necessary worked examples. The current scripts are first-pass manuscripts, not yet final recording scripts.
 
 ## Shared teaching rules
 
@@ -36,7 +36,7 @@ Before recording, check the actual narration word count and rehearse the screen 
 - Define confirmation, invalidation, and the no-trade condition in observable terms.
 - Show both a successful and a failed version of similar-looking events.
 - State the market, instrument, volume measure, feed and baseline wherever they materially affect interpretation.
-- Do not represent Volume Profile, VWAP, relative volume, springs, upthrusts, or climaxes as standalone guaranteed signals.
+- Do not treat Volume Profile, volume compared with recent bars, springs, upthrusts, or climaxes as standalone guaranteed signals.
 - When using real chart data, obtain appropriate permissions and label symbol, timeframe, date range, source and any synthetic/edited elements.
 - ChartLabs must evaluate reasoning, not reward a lucky directional guess.
 
@@ -49,3 +49,10 @@ Before recording, check the actual narration word count and rehearse the screen 
 **Pass 4 — Recording edit:** rehearse each lesson to confirm a 10–12 minute runtime; replace written phrasing that sounds unnatural aloud; add transitions, captions and end cards.
 
 **Pass 5 — Pilot review:** test the material with novice learners, collect errors and points of confusion, then revise scripts before public release.
+
+
+## Third pass — beginner language and voice
+
+The intended learner may have only recently opened a chart. Do not assume they already understand trading jargon. Read the [third-pass editorial language guide](EDITORIAL_LANGUAGE_GUIDE.md) before revising or recording. The lesson scripts should sound like a patient, practical teacher explaining one chart to one learner.
+
+The core stays focused on reading volume alongside price and price structure. Do not expand the course into a general indicator tour. The [learner Q&A bank](Q_AND_A_BANK.md) is included for revision and lesson-end checks.
