@@ -1,0 +1,213 @@
+name: Verify Support and Resistance learning room
+
+on:
+  push:
+    branches:
+      - my-new-branch
+    paths:
+      - "site/**"
+      - "course-content/support-resistance/chart_assets/charts/**"
+      - ".github/workflows/verify-learning-room.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: learning-room-smoke
+  cancel-in-progress: true
+
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out preview branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Playwright
+        run: |
+          mkdir -p /tmp/tt-playwright
+          npm install --prefix /tmp/tt-playwright --no-save --no-audit --no-fund playwright
+          /tmp/tt-playwright/node_modules/.bin/playwright install chromium --with-deps
+
+      - name: Run lesson interaction smoke tests
+        run: |
+          cat > /tmp/learning-room-smoke.cjs <<'JS'
+          const assert = require("node:assert/strict");
+          const { chromium } = require("/tmp/tt-playwright/node_modules/playwright");
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+            const page = await context.newPage();
+            const pageErrors = [];
+            const badResponses = [];
+            page.on("pageerror", error => pageErrors.push(error.message));
+            page.on("response", response => {
+              if (response.status() >= 400 && !response.url().includes("favicon")) {
+                badResponses.push({ status: response.status(), url: response.url() });
+              }
+            });
+
+            const server = "http://127.0.0.1:4173";
+            await page.goto(server + "/support-resistance-room.html", { waitUntil: "networkidle" });
+            await page.waitForSelector("#sr-lesson-title");
+
+            async function openLesson(id, expectedTitle) {
+              await page.locator('[data-lesson-id="' + id + '"]').click();
+              await page.waitForFunction(({ id, expectedTitle }) => {
+                const title = document.querySelector("#sr-lesson-title");
+                return title && title.textContent === expectedTitle;
+              }, { id, expectedTitle });
+              await page.waitForFunction(() => {
+                const image = document.querySelector("#sr-chart-image");
+                return image && image.complete && image.naturalWidth > 0;
+              });
+              console.log("OPENED_LESSON_" + id + ": " + expectedTitle);
+            }
+
+            async function advanceWithResponse() {
+              const previous = await page.locator("#sr-chart-stage-count").innerText();
+              await page.locator("#sr-practice-response").fill(
+                "I am recording the visible evidence, a plausible interpretation, and what would change my view."
+              );
+              await page.waitForFunction(() => !document.querySelector("#sr-chart-next").disabled);
+              await page.locator("#sr-chart-next").click();
+              await page.waitForFunction(previous => {
+                return document.querySelector("#sr-chart-stage-count").innerText !== previous;
+              }, previous);
+              await page.waitForFunction(() => {
+                const image = document.querySelector("#sr-chart-image");
+                return image && image.complete && image.naturalWidth > 0;
+              });
+            }
+
+            async function completeQuiz() {
+              const count = await page.locator(".sr-room-quiz-item").count();
+              assert.ok(count > 0, "Expected lesson-specific knowledge-check items");
+              for (let i = 0; i < count; i++) {
+                await page.locator(".sr-room-quiz-item").nth(i).locator(".sr-room-quiz-option").first().click();
+                await page.locator(".sr-room-quiz-item").nth(i).locator(".sr-room-quiz-submit").click();
+              }
+              return count;
+            }
+
+            async function submitZoneTask({ values, rationale, submitText }) {
+              const fields = page.locator(".sr-room-zone-task input");
+              assert.equal(await fields.count(), values.length, "Unexpected number of structured boundary fields");
+              for (let i = 0; i < values.length; i++) await fields.nth(i).fill(String(values[i]));
+              await page.locator(".sr-room-zone-task textarea").fill(rationale);
+              const submit = page.getByRole("button", { name: submitText, exact: true });
+              await page.waitForFunction(() => {
+                const button = document.querySelector(".sr-room-zone-task button");
+                return button && !button.disabled;
+              });
+              await submit.click();
+              await page.waitForFunction(() => {
+                return document.querySelector(".sr-room-zone-task .sr-room-zone-status").textContent.includes("submitted");
+              });
+            }
+
+            // Lesson 6: stage navigation, numeric boundary submission, reference gate and completion gate.
+            await openLesson(6, "Set defensible zone boundaries");
+            for (let i = 0; i < 6; i++) await advanceWithResponse();
+            await submitZoneTask({
+              values: [100, 110],
+              rationale: "The band captures the related lower reactions while keeping the unrelated candles outside.",
+              submitText: "Submit boundary"
+            });
+            await page.locator("#sr-chart-next").click();
+            await page.waitForFunction(() => document.querySelector("#sr-chart-stage-status").textContent.includes("Worked answer"));
+            assert.equal(await page.locator("#sr-complete-button").isDisabled(), true, "Lesson 6 must stay incomplete until its knowledge checks are submitted");
+            const l6Checks = await completeQuiz();
+            assert.equal(l6Checks, 3);
+            assert.equal(await page.locator("#sr-complete-button").isDisabled(), false, "Lesson 6 completion should unlock after activity and checks");
+
+            // Lesson 7: each candidate must be classified and rationale submitted before the first reveal.
+            await openLesson(7, "Keep the chart readable");
+            assert.equal(await page.locator(".sr-room-edit-select").count(), 6);
+            const choices = ["keep", "combine", "combine", "leave-out", "keep", "leave-out"];
+            for (let i = 0; i < choices.length; i++) await page.locator(".sr-room-edit-select").nth(i).selectOption(choices[i]);
+            await page.locator("#sr-teaching-editing-rationale").fill("B and C repeat the same broad region; D is minor for this question, while A and E explain the main structure.");
+            await page.locator("#sr-teaching-editing-submit").click();
+            await page.waitForFunction(() => !document.querySelector("#sr-chart-next").disabled);
+            await page.locator("#sr-chart-next").click();
+            await page.waitForFunction(() => document.querySelector("#sr-chart-stage-count").innerText === "View 2 of 6");
+            assert.equal((await page.locator("#sr-room-top").innerText()).includes("Expanded lesson previews are now wired"), true);
+
+            // Lesson 8: qualitative review, four-boundary submission and gated reference.
+            await openLesson(8, "Evaluate a zone without inventing a magic score");
+            for (let i = 0; i < 4; i++) await advanceWithResponse();
+            await submitZoneTask({
+              values: [100, 110, 130, 140],
+              rationale: "Support captures both lower reactions. Resistance is a separate upper reaction area; neither band needs to predict the next move.",
+              submitText: "Submit zones before reference"
+            });
+            await page.locator("#sr-chart-next").click();
+            await page.waitForFunction(() => document.querySelector("#sr-chart-stage-count").innerText === "View 6 of 8");
+            assert.ok(await page.locator(".sr-room-teaching-figure img").evaluate(img => img.complete && img.naturalWidth > 0));
+            assert.equal((await completeQuiz()), 3);
+            assert.equal(await page.locator("#sr-complete-button").isDisabled(), false, "Lesson 8 completion should unlock after lab submission and checks");
+
+            // Lesson 12: the four evidence stages must be recorded; all seven checks then unlock completion.
+            await openLesson(12, "Breakout or temporary penetration?");
+            for (let i = 0; i < 4; i++) await advanceWithResponse();
+            assert.equal((await page.locator(".sr-room-quiz-item").count()), 7);
+            assert.ok(await page.locator(".sr-room-teaching-figure img").evaluate(img => img.complete && img.naturalWidth > 0));
+            assert.equal(await page.locator("#sr-complete-button").isDisabled(), true, "Lesson 12 completion must await knowledge-check submissions");
+            assert.equal(await completeQuiz(), 7);
+            assert.equal(await page.locator("#sr-complete-button").isDisabled(), false);
+
+            // Lesson 13: compare hold and failed return; all seven checks gate completion.
+            await openLesson(13, "Retests and role reversal");
+            for (let i = 0; i < 3; i++) await advanceWithResponse();
+            assert.equal(await page.locator(".sr-room-quiz-item").count(), 7);
+            assert.equal(await completeQuiz(), 7);
+            assert.equal(await page.locator("#sr-complete-button").isDisabled(), false);
+
+            // Lesson 14: initial thesis, contradiction, contrasting hold, Wider Neckline submission and eight checks.
+            await openLesson(14, "Failed breakouts and alternate outcomes");
+            for (let i = 0; i < 4; i++) await advanceWithResponse();
+            await submitZoneTask({
+              values: [100, 110, 130, 140],
+              rationale: "Support groups the two lower reactions. The neckline frames the upper reaction; price may hold above it or return below it.",
+              submitText: "Submit Wider Neckline zones"
+            });
+            await page.locator("#sr-chart-next").click();
+            await page.waitForFunction(() => document.querySelector("#sr-chart-stage-count").innerText === "View 6 of 8");
+            assert.equal(await page.locator(".sr-room-quiz-item").count(), 8);
+            assert.ok(await page.locator(".sr-room-teaching-figure img").evaluate(img => img.complete && img.naturalWidth > 0));
+            assert.equal(await page.locator("#sr-complete-button").isDisabled(), true);
+            assert.equal(await completeQuiz(), 8);
+            assert.equal(await page.locator("#sr-complete-button").isDisabled(), false);
+
+            assert.deepEqual(pageErrors, [], "Unexpected browser JavaScript errors");
+            assert.deepEqual(badResponses, [], "HTTP errors while running the room: " + JSON.stringify(badResponses));
+            console.log(JSON.stringify({
+              result: "PASS",
+              lessons: [6, 7, 8, 12, 13, 14],
+              chartStages: "navigated and required response gates",
+              activities: "submitted boundary/edit responses before reference reveals",
+              quizCounts: { 6: 3, 8: 3, 12: 7, 13: 7, 14: 8 },
+              completionGates: "activity and quizzes required",
+              browserErrors: pageErrors.length,
+              httpErrors: badResponses.length
+            }, null, 2));
+            await browser.close();
+          })().catch(error => {
+            console.error(error);
+            process.exit(1);
+          });
+          JS
+          python -m http.server 4173 --directory site >/tmp/learning-room-http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4173/support-resistance-room.html >/dev/null; then break; fi
+            sleep 1
+          done
+          NODE_PATH=/tmp/tt-playwright/node_modules node /tmp/learning-room-smoke.cjs
