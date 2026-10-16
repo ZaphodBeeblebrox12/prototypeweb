@@ -60,3 +60,6 @@ a:hover { color: var(--tt-deep); }
   .tt-page { width: min(100% - 1.25rem, 1080px); }
   .list-group-item { align-items: flex-start !important; flex-wrap: wrap; }
 }
+
+.tt-page > .container { max-width: none !important; padding-inline: 0; }
+.tt-page > .container > .text-uppercase:first-child { margin-bottom: 1rem !important; }
