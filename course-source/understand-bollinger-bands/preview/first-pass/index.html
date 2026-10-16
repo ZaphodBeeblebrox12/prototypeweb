@@ -2134,6 +2134,7 @@ body { font-size: 15px; line-height: 1.66; }
 #modalChartHolder img{display:block;max-width:100%;max-height:75vh;width:auto;height:auto;object-fit:contain;margin:auto;background:#fffdf8}#modalChartHolder{display:flex;align-items:center;justify-content:center;min-width:0}
 </style>
 <link rel="stylesheet" href="../../../../site/assets/instructional-image-admin.css">
+<link rel="stylesheet" href="../../../../site/assets/course-template-admin-preview.css">
 </head>
 <body>
 <div class="app-root" id="appRoot">
@@ -2259,7 +2260,12 @@ body { font-size: 15px; line-height: 1.66; }
     </div>
 
     <div id="roomView">
-      <div class="room-topline"><div><div class="eyebrow">TradeThesis / Learning room prototype</div><h1>Work through the evidence.</h1><p>Start with a practical question, study the chart examples, then test your reading. The labels stay simple; the reasoning does the work.</p></div><div class="room-top-actions"><button class="button secondary" type="button" data-view-link="overview">← Course overview</button><button class="button" type="button" id="roomJumpToTask">Test your reading ↓</button></div></div>
+      <div class="room-topline"><div><div class="eyebrow">TradeThesis / Learning room prototype</div><h1>Work through the evidence.</h1><p>Start with a practical question, study the chart examples, then test your reading. The labels stay simple; the reasoning does the work.</p></div><div class="room-top-actions"><button class="button secondary" type="button" data-view-link="overview">← Course overview</button><button class="button" type="button" id="roomJumpToTask">Test your reading ↓</button><button class="button secondary" type="button" id="courseEditorToggle" aria-pressed="false">Edit lesson text &amp; images</button></div></div>
+      <!-- DJANGO HANDOFF: Replace local-only editor with staff-only server-authorised controls. See docs/architecture/COURSE_CONTENT_EDITOR.md. -->
+      <div class="tt-course-editor-toolbar" id="courseEditorToolbar" hidden role="region" aria-label="Course content editor">
+        <div class="tt-course-editor-note"><strong>Prototype editor</strong><span id="courseEditorStatus" role="status" aria-live="polite">Edits are saved only in this browser. Django login and shared saving are not connected in this preview.</span></div>
+        <div class="tt-course-editor-actions"><button type="button" class="button" id="saveCourseTextDraft">Save text draft</button><button type="button" class="button secondary" id="resetCourseTextDraft">Discard saved draft</button><button type="button" class="button secondary" id="closeCourseEditor">Done editing</button></div>
+      </div>
       <div class="room-progress-wrap"><div class="progress-meta"><span id="progressLabel">Your preview progress · 0 of 30 lessons marked complete</span><span id="progressPercent">0%</span></div><div class="progress-track" role="progressbar" aria-label="Preview lesson completion" aria-valuemin="0" aria-valuemax="30" aria-valuenow="0" id="progressBar"><span class="progress-fill" id="progressFill"></span></div></div>
       <div class="room-layout">
         <aside class="room-sidebar" aria-label="Course outline">
@@ -2290,7 +2296,7 @@ body { font-size: 15px; line-height: 1.66; }
             <article class="lesson-article">
               <div class="article-toolbar" role="tablist" aria-label="Lesson sections">
                 <button type="button" class="article-tab active" role="tab" aria-selected="true" data-article-tab="learn">The idea</button>
-                <button type="button" class="article-tab" role="tab" aria-selected="false" data-article-tab="practice">Chart examples</button>
+                <button type="button" class="article-tab" role="tab" aria-selected="false" data-article-tab="practice">Chart examples <span class="article-tab-count" id="chartExamplesAssetCount" aria-hidden="true">2</span></button>
                 <button type="button" class="article-tab" role="tab" aria-selected="false" data-article-tab="review">Test your reading</button>
               </div>
               <section class="article-panel" id="panel-learn" role="tabpanel">
@@ -2600,17 +2606,33 @@ function renderPurposeFigure(mId,lIdx,lessonId){
  return purposeFigureFrame(lessonId,'Decision aid',
   '<p class="purpose-figure-note">Keep the observation separate from the interpretation. Write the evidence that would strengthen the idea, the evidence that would weaken it, and the rule that controls the next action.</p>');
 }
-function renderCourseFigure(mId,lIdx,profile,lessonId){
- const key=mId+'-'+lIdx;
- const refs=courseReferenceFigures[key];
- if(!refs) return renderPurposeFigure(mId,lIdx,lessonId);
- const panels=refs.map(function(ref,i){
-  const subLabel=refs.length>1?' · '+String.fromCharCode(65+i):'';
-  return '<figure class="course-reference-figure"><div class="course-reference-head"><strong>Figure '+lessonId+subLabel+'</strong><span>Source-linked chart reference</span></div><div class="course-reference-image"><img src="'+ref.url+'" alt="'+escapeHTML(ref.alt)+'" loading="lazy" decoding="async" data-zoomable></div><figcaption><strong>'+escapeHTML(ref.label)+'</strong><p>'+escapeHTML(ref.note)+'</p></figcaption><div class="course-reference-actions"><a href="'+ref.page+'" target="_blank" rel="noopener noreferrer">Source: '+escapeHTML(ref.publisher)+' ↗</a><button type="button" data-enlarge-image>Enlarge image ↗</button></div></figure>';
- }).join('');
- return '<div class="course-figure-stack">'+panels+'</div><p class="course-figure-caution">'+escapeHTML(profile.take)+' External reference images illustrate an example; they are not evidence that a setup is profitable or that every course-specific trigger is met. Use the linked source for context and replace these temporary references with owned or rights-cleared images before public release.</p>';
+function renderCourseReferenceFigure(ref,mId,lIdx,lessonId,index,total){
+ const subLabel=total>1?' · '+String.fromCharCode(65+index):'';
+ const assetId='ubb-m'+String(mId).padStart(2,'0')+'-l'+String(lIdx+1).padStart(2,'0')+'-ref'+String(index+1).padStart(2,'0');
+ return '<figure class="course-reference-figure" data-course-asset="'+assetId+'"><div class="course-reference-head"><strong>Figure '+lessonId+subLabel+'</strong><span>Chart reference</span></div><div class="course-reference-image"><img src="'+ref.url+'" alt="'+escapeHTML(ref.alt)+'" loading="lazy" decoding="async" data-zoomable data-media-asset-id="'+assetId+'"></div><figcaption><strong>'+escapeHTML(ref.label)+'</strong><p>'+escapeHTML(ref.note)+'</p></figcaption><div class="course-reference-actions"><a href="'+ref.page+'" target="_blank" rel="noopener noreferrer">Source: '+escapeHTML(ref.publisher)+' ↗</a><button type="button" data-enlarge-image>Enlarge image ↗</button></div></figure>';
 }
-
+function renderIdeaFigure(mId,lIdx,profile,lessonId){
+ const refs=courseReferenceFigures[mId+'-'+lIdx];
+ if(refs&&refs.length) return '<div class="course-idea-figure">'+renderCourseReferenceFigure(refs[0],mId,lIdx,lessonId,0,refs.length)+'</div>';
+ return '<div class="course-idea-figure">'+renderPurposeFigure(mId,lIdx,lessonId)+'</div>';
+}
+function renderCourseFigure(mId,lIdx,profile,lessonId){
+ const refs=courseReferenceFigures[mId+'-'+lIdx]||[];
+ const panels=refs.slice(1).map(function(ref,i){return renderCourseReferenceFigure(ref,mId,lIdx,lessonId,i+1,refs.length);}).join('');
+ const worked='<figure class="course-generated-figure"><div class="course-reference-head"><strong>Figure '+lessonId+' · Worked chart</strong><span>Teaching example</span></div><div class="course-generated-chart">'+buildChartSvg(mId,lIdx,0,lessonId)+'</div><figcaption><strong>'+escapeHTML(chartTitle(mId,lIdx))+'</strong><p>Illustrative chart for practising the reading. It is not a historical market-data screenshot or a forecast.</p></figcaption><div class="course-reference-actions"><button type="button" data-enlarge-image>Enlarge chart ↗</button></div></figure>';
+ const caution=refs.length>1?'<p class="course-figure-caution">'+escapeHTML(profile.take)+' Compare the additional source example with the worked chart. A visual similarity is not a complete setup; confirmation, invalidation and risk still need their own assessment.</p>':'';
+ return '<div class="course-figure-stack">'+worked+panels+'</div>'+caution;
+}
+function lessonFigureAssetCount(mId,lIdx){
+ const refs=courseReferenceFigures[mId+'-'+lIdx];
+ return (refs&&refs.length?refs.length:1)+1;
+}
+function renderRelatedVolumeCourseCard(mId,lIdx,lessonTitle,profile){
+ const refs=courseReferenceFigures[mId+'-'+lIdx]||[];
+ const searchable=[lessonTitle,profile.question,profile.take,...profile.paragraphs,chartTitle(mId,lIdx),...refs.map(r=>[r.label,r.note,r.alt].join(' '))].join(' ');
+ if(!(/\bvolume\b|\bMFI\b|money flow|volume profile|price[\s-]and[\s-]volume|effort\s+(?:versus|vs\.?)\s+result/i.test(searchable))) return '';
+ return '<aside class="related-course-card" aria-label="Related course"><div class="related-course-copy"><span class="related-course-kicker">RELATED MICRO-COURSE · IN DEVELOPMENT</span><h4>Read Volume. Find Trade Setups.</h4><p>Volume &amp; Price Analysis goes deeper into relative activity, effort versus result, price/volume disagreement and Volume Profile. The course outline is available in the catalogue while the lessons are being developed.</p></div><a class="related-course-link" href="../../../../site/courses.html#micro-courses">Explore Volume &amp; Price Analysis ↗</a></aside>';
+}
 function buildChartSvg(mId,lIdx,variant=0,figureLabel=null) {
   const W=860,H=385,left=54,right=24,top=26,bottom=38,plotW=W-left-right,plotH=H-top-bottom;
   const figLabel = figureLabel || `${mId}.${lIdx+1}`;
@@ -2678,6 +2700,11 @@ function quizFor(mId,lIdx){
 function renderLesson() {
  const m=modules[activeModule-1], lessonTitle=m.lessons[activeLessonIndex], lessonId=`${m.id}.${activeLessonIndex+1}`;
  const profile=lessonProfile(m.id,activeLessonIndex), q=quizFor(m.id,activeLessonIndex), cases=practiceCases(m.id,activeLessonIndex);
+ const ideaFigure=renderIdeaFigure(m.id,activeLessonIndex,profile,lessonId);
+ const relatedVolumeCard=renderRelatedVolumeCourseCard(m.id,activeLessonIndex,lessonTitle,profile);
+ const figureAssetCount=lessonFigureAssetCount(m.id,activeLessonIndex);
+ const assetBadge=$('#chartExamplesAssetCount');if(assetBadge)assetBadge.textContent=String(figureAssetCount);
+ const examplesTab=$('.article-tab[data-article-tab="practice"]');if(examplesTab)examplesTab.setAttribute('aria-label','Chart examples; '+figureAssetCount+' visual assets in this lesson');
  $('#activeModuleTag').textContent=`MODULE ${String(m.id).padStart(2,'0')} · ${m.title.toUpperCase()}`;
  $('#activeLessonTag').textContent=`LESSON ${lessonId}`;
  $('#activeLessonTitle').textContent=lessonTitle;
@@ -2689,9 +2716,9 @@ function renderLesson() {
  $('.lesson-brief-mark').textContent=String(m.id).padStart(2,'0');
  $('.lesson-duration-value strong').textContent=m.id===5?'25–28 min':'13–16 min';
  $('.lesson-duration-value small').textContent=m.id===5?'Setup lesson':'Estimated study time';
- $('#panel-learn').innerHTML=`<div class="eyebrow">${escapeHTML(profile.eyebrow)}</div><h3>${escapeHTML(profile.question)}</h3>${profile.paragraphs.map(p=>`<p>${escapeHTML(p)}</p>`).join('')}<div class="objective-box"><span class="obj-icon" aria-hidden="true">✓</span><div><span class="obj-kicker">By the end, you can</span><p>${escapeHTML(objectiveFor(m.id,activeLessonIndex))}</p></div></div><div class="reasoning-grid">${cases.map(c=>`<article class="reasoning-card"><span class="reasoning-label">${c[0]}</span><h4>${c[1]}</h4><p>${c[2]}</p></article>`).join('')}</div><div class="takeaway-strip"><span class="takeaway-mark">Keep</span><p>${escapeHTML(profile.take)}</p></div><button type="button" class="button" data-article-tab="practice">Work through the chart example ↗</button>`;
+ $('#panel-learn').innerHTML=`<div class="eyebrow">${escapeHTML(profile.eyebrow)}</div><h3>${escapeHTML(profile.question)}</h3>${profile.paragraphs.map(p=>`<p>${escapeHTML(p)}</p>`).join('')}${ideaFigure}<div class="objective-box"><span class="obj-icon" aria-hidden="true">✓</span><div><span class="obj-kicker">By the end, you can</span><p>${escapeHTML(objectiveFor(m.id,activeLessonIndex))}</p></div></div><div class="reasoning-grid">${cases.map(c=>`<article class="reasoning-card"><span class="reasoning-label">${c[0]}</span><h4>${c[1]}</h4><p>${c[2]}</p></article>`).join('')}</div><div class="takeaway-strip"><span class="takeaway-mark">Keep</span><p>${escapeHTML(profile.take)}</p></div>${relatedVolumeCard}<button type="button" class="button" data-article-tab="practice">Work through the chart examples ↗</button>`;
  const figures = renderCourseFigure(m.id,activeLessonIndex,profile,lessonId);
- $('#panel-practice').innerHTML=`<div class="eyebrow">Chart examples · Lesson ${lessonId}</div><h3>${escapeHTML(chartTitle(m.id,activeLessonIndex))}</h3><p>Study the visual before reading the explanation. Focus on the relationship between price, the bands and the market context. Do not infer a trade direction from band position alone.</p>${figures}<div class="practice-prompt"><strong>Before reading the model explanation</strong><p>Write one observable fact, one plausible interpretation, one alternative explanation, and the next condition that would change your view.</p></div><label class="inline-label" for="reflectionInput">Your first reading</label><textarea class="reflection-input" id="reflectionInput" placeholder="I can observe… One possible explanation is… I would revise this view if…"></textarea><div class="small-actions"><button type="button" class="button" id="lockReadingButton">Lock in my reading</button><button type="button" class="button secondary" id="showModelButton">Show model reasoning</button></div><div class="answer-reveal" id="modelReasoning"><strong>A careful model reading</strong><p>${escapeHTML(profile.take)} The observation describes what the chart shows; the interpretation stays conditional; the plan still requires a trigger, invalidation and risk decision where relevant.</p></div><div class="feedback" id="reflectionFeedback" aria-live="polite"></div>`;
+ $('#panel-practice').innerHTML=`<div class="eyebrow">Chart examples · Lesson ${lessonId}</div><h3>${escapeHTML(chartTitle(m.id,activeLessonIndex))}</h3><p>Study the worked chart, then compare any additional example. Focus on the relationship between price, the bands and the market context. Do not infer a trade direction from band position alone.</p>${figures}<div class="practice-prompt"><strong>Before reading the model explanation</strong><p>Write one observable fact, one plausible interpretation, one alternative explanation, and the next condition that would change your view.</p></div><label class="inline-label" for="reflectionInput">Your first reading</label><textarea class="reflection-input" id="reflectionInput" placeholder="I can observe… One possible explanation is… I would revise this view if…"></textarea><div class="small-actions"><button type="button" class="button" id="lockReadingButton">Lock in my reading</button><button type="button" class="button secondary" id="showModelButton">Show model reasoning</button></div><div class="answer-reveal" id="modelReasoning"><strong>A careful model reading</strong><p>${escapeHTML(profile.take)} The observation describes what the chart shows; the interpretation stays conditional; the plan still requires a trigger, invalidation and risk decision where relevant.</p></div><div class="feedback" id="reflectionFeedback" aria-live="polite"></div>`;
  $('#panel-review').innerHTML=`<div class="eyebrow">Test your reading</div><h3>What is the strongest next step?</h3><p>${escapeHTML(lessonTitle)}. Choose the statement that stays closest to the method and the available evidence.</p><div class="practice-step"><div class="practice-step-head"><div><span class="level-label">CHECK YOUR READING</span><h4>${escapeHTML(q.question)}</h4></div><span class="duration">~1 min</span></div><div class="option-list" id="quizOptions">${q.choices.map((choice,i)=>`<button type="button" class="choice" data-correct="${i===q.correct?'true':'false'}"><span class="choice-letter">${String.fromCharCode(65+i)}</span><span>${escapeHTML(choice)}</span></button>`).join('')}</div><div class="feedback" id="quizFeedback" aria-live="polite"></div></div><div class="takeaway-strip"><span class="takeaway-mark">Keep</span><p>${escapeHTML(profile.take)}</p></div>`;
  activateArticleTab(chosenTabs);
  bindPilotInteractions();
@@ -2803,6 +2830,8 @@ chartModal.addEventListener('click',e=>{if(e.target===chartModal)closeChartModal
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&chartModal.classList.contains('open'))closeChartModal();});
 $('#mobileMenuButton').addEventListener('click',()=>{const open=$('#mobileMenuButton').getAttribute('aria-expanded')!=='true';$('#mobileMenuButton').setAttribute('aria-expanded',String(open));if(open){switchToView('room');$('#mobileMenuButton').textContent='Close room ↑';}else{switchToView('overview');$('#mobileMenuButton').textContent='Explore ↓';}});
 </script>
+<script>window.TRADETHESIS_MEDIA_PREVIEW_ONLY = true;</script>
 <script src="../../../../site/assets/instructional-image-admin.js" defer></script>
+<script src="../../../../site/assets/course-content-admin-editor.js" defer></script>
 </body>
 </html>
