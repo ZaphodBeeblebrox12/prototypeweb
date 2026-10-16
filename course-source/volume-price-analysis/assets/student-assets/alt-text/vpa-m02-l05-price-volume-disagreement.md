@@ -1,5 +1,6 @@
 # Accessibility notes — M02-L05
 
+**Figure number:** Figure 2.5; interactive panels use Figure 2.5a–Figure 2.5e.
 **Lesson:** When Price and Volume Disagree: Finding Clues Others May Overlook
 **Purpose:** Analyse mismatches using alternatives and a future discriminator.
 **Source:** Synthetic OHLCV. Not historical data or a trading signal.
