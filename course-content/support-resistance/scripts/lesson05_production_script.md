@@ -271,7 +271,7 @@ Do not display whether the drawing “passed” or “failed” at this stage.
 
 **Critical implementation note:** The current interface does not assign an overlap percentage or a pass/fail label to the learner's zones. It displays the learner's marks beside the example and prompts the learner to compare coverage and explain the boundaries. Do not describe this as an automated assessment of analytical skill.
 
-**Outcome control:** Do not reveal a later price extension, breakout, or “what happened next” as a reward for a correct drawing. The point of this study is identifying and defending zones, not predicting a result.
+**Outcome control:** The current full synthetic sequence visibly includes a later move above the neckline from the initial load. Do not reveal additional future bars or use that move as a reward for drawing a zone. The second knowledge check asks what a break does and does not establish; the point of this study is identifying and defending areas, not predicting a result.
 
 ### 13:30–15:15 — ChartLab debrief: what the study was testing
 
@@ -366,7 +366,7 @@ The check should appear after the ChartLab debrief. Give feedback after each res
 **Purpose:** First full support/resistance drawing attempt after concept teaching.
 
 **Requirements:**
-- Use the existing approved ChartLab *Clear W* schematic as the starting reference, subject to a final alignment check against this script.
+- Use the existing ChartLab *Clear W* schematic as the starting reference. Its current lower-area support and intervening-swing-high resistance references were checked against the running interaction and final comparison state.
 - Keep the chart fictional and labelled: *“Illustrative chart — not historical market data.”*
 - Base price action should show a clear W-like sequence with related lower reactions and related upper reactions. The name “Clear W” is the exercise label, not a signal or promise about what happens next.
 - Do not show reference support/resistance zones on initial load.

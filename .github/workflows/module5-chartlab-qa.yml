@@ -174,6 +174,9 @@ jobs:
             assert.equal(await lab.locator(".study-picker").isVisible().catch(()=>true),false,"Embedded lab should only expose Clear W, not the other practice sets");
             assert.equal(await page.locator("#sr-complete-button").isDisabled(),true,"Lesson completion remains gated before the ChartLab is completed");
             assert.equal(await lab.locator("#comparisonPair").isVisible(),false,"Reference comparison must be hidden initially");
+            assert.doesNotMatch(await lab.locator("body").innerText(), /\\b4H\\b/, "Synthetic teaching candles must not be labelled as a real timeframe");
+            assert.equal(await lab.locator("#metricWidth").textContent(), "Both lows", "Comparison cards name the evidence to inspect, not a score");
+            assert.equal(await lab.locator("#metricOverlap").textContent(), "Neckline", "Comparison cards name the neckline evidence, not a percentage");
 
             // Draw support around both troughs. The chart's own SVG coordinate mapping is 1000×520.
             await lab.locator("#chartSvg").scrollIntoViewIfNeeded();
@@ -200,6 +203,8 @@ jobs:
             assert.match(await lab.locator("#zoneReadout").textContent(),/Resistance: \d+\.\d–\d+\.\d/,"Resistance drag did not create a zone");
             await lab.locator("#submitZoneButton").click();
             await lab.locator("#comparisonPair").waitFor({state:"visible",timeout:5000});
+            assert.match(await lab.locator("#feedbackText").textContent(), /does not score your reasoning/i, "Visual comparison must disclose that it does not grade the learner");
+            assert.doesNotMatch(await lab.locator("#feedbackText").textContent(), /\\d+%/, "The visual feedback must not imply a precision/overlap score");
             assert.equal(await lab.locator("#studentCompareSvg [data-role='support']").count(),1);
             assert.equal(await lab.locator("#studentCompareSvg [data-role='resistance']").count(),1);
             assert.equal(await page.locator("#sr-complete-button").isDisabled(),true,"Two zones alone are not enough to complete the lesson");
@@ -253,7 +258,14 @@ jobs:
             await keyboardPage.keyboard.press("Home");
             assert.equal(await keyboardPage.evaluate(() => document.activeElement.id), "sr-tab-button-lesson", "Home returns focus to Learn and practise");
 
-            // Check the Lesson 3 candidate selector with normal keyboard focus and activation.
+            // Learner-language smoke check: first observe the candle lows, then define the terms.
+            const l4Link = keyboardPage.locator('#sr-lesson-list [data-lesson-id="4"]');
+            await l4Link.focus();
+            await keyboardPage.keyboard.press("Enter");
+            assert.match(await keyboardPage.locator("#sr-lesson-title").textContent(), /Zones, not perfect lines/);
+            assert.match(await keyboardPage.locator("#sr-practice-instructions").textContent(), /lowest price each candle reached/i, "Opening prompt uses observable language before candle terminology");
+            assert.match(await keyboardPage.locator("#sr-teaching-body").textContent(), /thin line extending beyond a candle body/i, "First explanatory reveal defines wick, body and close");
+            // Continue to the Lesson 3 keyboard selection test.
             const l3Link = keyboardPage.locator('#sr-lesson-list [data-lesson-id="3"]');
             await l3Link.focus();
             await keyboardPage.keyboard.press("Enter");
