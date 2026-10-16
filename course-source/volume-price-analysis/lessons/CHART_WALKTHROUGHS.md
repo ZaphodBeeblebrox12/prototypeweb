@@ -1,7 +1,7 @@
 # Chart Walkthrough Scripts — 30 Lessons
 ## Presenter notes and visual narration
 
-> These short segments supplement the full narration scripts in the six module files. Rehearse the chart interaction and pause for learner observation; the target is a complete 10–12 minute lesson including explanation, screen walkthrough, learner practice and recap. Each chart should be synthetic or properly licensed, clearly labelled, and designed to teach a process rather than predict a specific trade.
+> These short segments supplement the full narration scripts in the six module files. Rehearse the chart interaction and pause for learner observation. The normal target for a complete delivered lesson is 12–16 minutes, with a hard minimum of 10 minutes and a usual upper limit of 20 minutes unless the complexity justifies more. Count teaching, narrated chart work, guided practice, feedback and recap—not empty pauses. Each chart should be synthetic or properly licensed, clearly labelled, and designed to teach a process rather than predict a specific trade.
 
 ---
 
