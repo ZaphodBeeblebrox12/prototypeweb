@@ -61,9 +61,14 @@ jobs:
           if target.exists():
               shutil.rmtree(target)
           target.mkdir(parents=True, exist_ok=True)
+          vector_count = 0
           for name in names:
               shutil.copy2(source / name, target / name)
-          print(f"Staged {len(names)} lesson charts for browser smoke testing.")
+              vector_name = Path(name).with_suffix(".svg").name
+              if (source / vector_name).is_file():
+                  shutil.copy2(source / vector_name, target / vector_name)
+                  vector_count += 1
+          print(f"Staged {len(names)} lesson PNGs and {vector_count} SVG variants for browser smoke testing.")
           PY
 
       - name: Run lesson interaction smoke tests
@@ -153,6 +158,30 @@ jobs:
               });
             }
 
+            // Image inspection: vector chart loads, zoom controls work, Escape closes, and page state returns.
+            const inspectorChart = page.locator("#sr-chart-image");
+            await page.waitForFunction(() => {
+              const img = document.querySelector("#sr-chart-image");
+              return img && img.complete && img.naturalWidth > 0;
+            });
+            const chartSrc = await inspectorChart.evaluate(img => img.currentSrc || img.src);
+            assert.ok(chartSrc.endsWith(".svg"), "Learning Room should prefer the vector chart source when available: " + chartSrc);
+            const scrollBeforeViewer = await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY }));
+            await inspectorChart.click();
+            const imageDialog = page.locator("dialog.image-inspector-dialog");
+            await imageDialog.waitFor({ state: "visible" });
+            const viewerImage = imageDialog.locator("img.image-inspector-image");
+            assert.ok(await viewerImage.evaluate(img => img.complete && img.naturalWidth > 0), "Viewer should load the selected source image");
+            const transformBeforeZoom = await viewerImage.evaluate(img => getComputedStyle(img).transform);
+            await imageDialog.getByRole("button", { name: "Zoom in" }).click();
+            const transformAfterZoom = await viewerImage.evaluate(img => getComputedStyle(img).transform);
+            assert.notEqual(transformAfterZoom, transformBeforeZoom, "Zoom-in should change the image transform");
+            await imageDialog.getByRole("button", { name: "Fit image to the available screen" }).click();
+            await page.keyboard.press("Escape");
+            await imageDialog.waitFor({ state: "hidden" });
+            assert.equal(await page.locator("body").evaluate(body => body.classList.contains("image-inspector-open")), false, "Closing should restore normal page interaction");
+            assert.deepEqual(await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY })), scrollBeforeViewer, "Closing should preserve page position");
+
             // Lesson 6: stage navigation, numeric boundary submission, reference gate and completion gate.
             await openLesson(6, "Set defensible zone boundaries");
             for (let i = 0; i < 6; i++) await advanceWithResponse();
@@ -235,6 +264,16 @@ jobs:
             ]) {
               await page.goto(server + "/support-resistance-room.html?lesson=" + check.id, { waitUntil: "networkidle" });
               await page.waitForSelector("#sr-v52-longform:not([hidden])");
+            const v52Figure = page.locator(".sr-v52-figure img").first();
+            await v52Figure.waitFor({ state: "visible" });
+            await v52Figure.scrollIntoViewIfNeeded();
+            await v52Figure.click();
+            const figureDialog = page.locator("dialog.image-inspector-dialog");
+            await figureDialog.waitFor({ state: "visible" });
+            assert.ok(await figureDialog.locator("img.image-inspector-image").evaluate(img => img.complete && img.naturalWidth > 0), "V5.2 teaching figure should load in the viewer");
+            await page.keyboard.press("Escape");
+            await figureDialog.waitFor({ state: "hidden" });
+
               await page.waitForFunction(id => document.querySelector("#sr-lesson-number").textContent.includes(String(id).padStart(2, "0")), check.id);
               const panel = page.locator("#sr-v52-longform");
               assert.equal(await panel.locator(".sr-v52-section").count(), check.sections, "Unexpected V5.2 section count for Lesson " + check.id);
