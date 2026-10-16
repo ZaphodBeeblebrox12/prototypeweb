@@ -91,7 +91,7 @@ NOTICE,PROFILE_BIN,,,,,,,108,280,,,five-session composite
 NOTICE,PROFILE_BIN,,,,,,,110,140,,,five-session composite
 NOTICE,PROFILE_REFERENCE,,,,,,,,,POC,102,five-session composite
 NOTICE,PROFILE_REFERENCE,,,,,,,,,VAH,106,five-session composite
-NOTICE,PROFILE_REFERENCE,,,,,,,,,VAL,98,five-session composite
+NOTICE,PROFILE_REFERENCE,,,,,,,,,VAL,100,five-session composite
 COMPAREA,PROFILE_BIN,,,,,,,94,100,,,five sessions
 COMPAREA,PROFILE_BIN,,,,,,,96,180,,,five sessions
 COMPAREA,PROFILE_BIN,,,,,,,98,340,,,five sessions
@@ -103,7 +103,7 @@ COMPAREA,PROFILE_BIN,,,,,,,108,280,,,five sessions
 COMPAREA,PROFILE_BIN,,,,,,,110,140,,,five sessions
 COMPAREA,PROFILE_REFERENCE,,,,,,,,,POC,102,five sessions
 COMPAREA,PROFILE_REFERENCE,,,,,,,,,VAH,106,five sessions
-COMPAREA,PROFILE_REFERENCE,,,,,,,,,VAL,98,five sessions
+COMPAREA,PROFILE_REFERENCE,,,,,,,,,VAL,100,five sessions
 COMPAREB,PROFILE_BIN,,,,,,,96,180,,,one session
 COMPAREB,PROFILE_BIN,,,,,,,98,420,,,one session
 COMPAREB,PROFILE_BIN,,,,,,,100,880,,,one session
@@ -125,7 +125,7 @@ APPLY,PROFILE_BIN,,,,,,,108,280,,,five sessions
 APPLY,PROFILE_BIN,,,,,,,110,140,,,five sessions
 APPLY,PROFILE_REFERENCE,,,,,,,,,POC,102,five sessions
 APPLY,PROFILE_REFERENCE,,,,,,,,,VAH,106,five sessions
-APPLY,PROFILE_REFERENCE,,,,,,,,,VAL,98,five sessions
+APPLY,PROFILE_REFERENCE,,,,,,,,,VAL,100,five sessions
 CONTINUATION,PROFILE_BIN,,,,,,,94,100,,,same historic window
 CONTINUATION,PROFILE_BIN,,,,,,,96,180,,,same historic window
 CONTINUATION,PROFILE_BIN,,,,,,,98,340,,,same historic window
@@ -137,7 +137,7 @@ CONTINUATION,PROFILE_BIN,,,,,,,108,280,,,same historic window
 CONTINUATION,PROFILE_BIN,,,,,,,110,140,,,same historic window
 CONTINUATION,PROFILE_REFERENCE,,,,,,,,,POC,102,same historic window
 CONTINUATION,PROFILE_REFERENCE,,,,,,,,,VAH,106,same historic window
-CONTINUATION,PROFILE_REFERENCE,,,,,,,,,VAL,98,same historic window
+CONTINUATION,PROFILE_REFERENCE,,,,,,,,,VAL,100,same historic window
 FAILURE,PROFILE_BIN,,,,,,,94,100,,,same historic window
 FAILURE,PROFILE_BIN,,,,,,,96,180,,,same historic window
 FAILURE,PROFILE_BIN,,,,,,,98,340,,,same historic window
@@ -149,4 +149,10 @@ FAILURE,PROFILE_BIN,,,,,,,108,280,,,same historic window
 FAILURE,PROFILE_BIN,,,,,,,110,140,,,same historic window
 FAILURE,PROFILE_REFERENCE,,,,,,,,,POC,102,same historic window
 FAILURE,PROFILE_REFERENCE,,,,,,,,,VAH,106,same historic window
-FAILURE,PROFILE_REFERENCE,,,,,,,,,VAL,98,same historic window
+FAILURE,PROFILE_REFERENCE,,,,,,,,,VAL,100,same historic window
+NOTICE,PROFILE_REFERENCE,,,,,,,,,VALUE_AREA_METHOD,70% adjacent-bin expansion from POC,five-session composite
+COMPAREA,PROFILE_REFERENCE,,,,,,,,,VALUE_AREA_METHOD,70% adjacent-bin expansion from POC,five sessions
+COMPAREB,PROFILE_REFERENCE,,,,,,,,,VALUE_AREA_METHOD,70% adjacent-bin expansion from POC,one session
+APPLY,PROFILE_REFERENCE,,,,,,,,,VALUE_AREA_METHOD,70% adjacent-bin expansion from POC,five sessions
+CONTINUATION,PROFILE_REFERENCE,,,,,,,,,VALUE_AREA_METHOD,70% adjacent-bin expansion from POC,same historic window
+FAILURE,PROFILE_REFERENCE,,,,,,,,,VALUE_AREA_METHOD,70% adjacent-bin expansion from POC,same historic window
