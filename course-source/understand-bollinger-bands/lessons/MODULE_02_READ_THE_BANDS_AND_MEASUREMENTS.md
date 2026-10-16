@@ -64,6 +64,14 @@ Suppose the selected moving average is 100 and the standard deviation for the ch
 
 The lesson is not to calculate every band by hand. It is to understand which input changed. A widening band gap may come from more variable prices; a shifting middle line reflects a changing average. If you compare two screenshots, first verify that they use the same instrument, timeframe, price input, period and multiplier. Otherwise you may be comparing two different calculations rather than a true change in market conditions.
 
+### Second worked comparison: The average and the spread can both move
+
+Suppose the middle average is 100 and the standard deviation is 2. With a multiplier of 2, the bands are 96 and 104. Later, a rising sequence shifts the average to 103 while the standard deviation increases to 3. The new bands are 97 and 109. Notice what happened: the centre moved from 100 to 103, and the distance from that centre increased from 4 to 6.
+
+A chart can therefore show the upper band rising partly because the average has risen and partly because recent values are more spread out. Reading only the upper line hides those two contributions. It is more useful to inspect the centre, the outer-band distance and the direction of price separately.
+
+This also explains why bands can look different across timeframes. Twenty hourly periods and twenty daily periods represent different amounts of elapsed time and different sets of observations. Keep instrument, timeframe, price source, moving-average period and multiplier consistent when you compare charts. The formula is simple enough to describe in words: establish a moving centre, measure how spread out recent prices are, and place an equal distance above and below that centre. The calculations adapt; they do not define permanent levels.
+
 ### Common mistake
 
 Thinking the bands are a fixed percentage around price.
@@ -127,6 +135,14 @@ You change the settings after every losing trade, and each new version looks bet
 Imagine the same price chart has a sharp two-candle jump followed by a quiet pullback. A 10-period setting will generally react to the new bars faster than a 20-period setting. That can make the bands turn or widen sooner, but it can also make them respond more often to ordinary short-term noise. A 50-period setting will usually smooth the sequence and react more slowly, which may help with a longer view but can delay a short-term reading.
 
 None of these settings is automatically correct. Choose settings to match a clearly stated purpose, then keep them fixed while reviewing a varied set of examples. If the only reason for changing a period is that a different value made one past trade look perfect, you are fitting the tool to the outcome. Compare one change at a time and record what becomes easier to see—and what becomes harder.
+
+### Second worked comparison: Test settings without choosing the prettiest chart
+
+Assume a trader wants to use the bands to recognise a 15-minute breakout. They compare a 10-period setting with the common 20-period setting. On the same chart, the 10-period bands react earlier to a sudden move. They also turn back inward quickly during the next pullback, creating more changes in appearance. The 20-period bands are slower, but their width changes less with each individual candle.
+
+Neither image answers which setting performs better. That requires an agreed setup rule and a sample of cases—not a visual contest between screenshots. Before testing, state what you are trying to improve: earlier recognition, fewer false starts, or easier classification of a squeeze. Change one input only, and keep the other conditions fixed.
+
+Then review several kinds of chart: an orderly trend, a sideways range, a failed breakout, and a transition where context is unclear. Record every qualifying and non-qualifying case. If the shorter period helps in one trend but generates repeated false starts in a range, that trade-off matters. A parameter can make a chart easier to read while making a trading rule less selective. Treat default settings as a reference point, and evaluate changes on cases you did not use to invent them.
 
 ### Common mistake
 
@@ -198,6 +214,14 @@ Suppose the lower band is 90 and the upper band is 110. The band span is 20. If 
 
 Now compare two charts with %B around 0.9. In one, price is progressing through higher highs and higher lows. In the other, a sharp rally has run into an established resistance area and the next candles fail to hold the high. The number describes a similar relative position; it does not make the two charts the same trade. Use %B to make the observation more precise, then interpret it with structure and the method you intend to test.
 
+### Second worked comparison: The same close can produce a different %B after the bands change
+
+On one chart, the lower band is 90, the upper band is 110 and the close is 105. The %B reading is 0.75. Later, price is still at 105, but the bands have widened to 85 and 115. The new %B is 0.67. Price has not changed in this simple comparison; its relative position has changed because the envelope has become wider.
+
+That is useful information, but it can be misread if the student treats %B as a pure measure of momentum. %B answers where the close sits between the current lower and upper bands. Its value depends on both the close and the current band boundaries. A move from 0.75 to 0.67 does not, by itself, establish that selling pressure increased.
+
+When reading a live chart, note the %B value alongside the price sequence and the bands themselves. Then ask whether the value changed because price moved, the envelope changed, or both. For a trading method that uses a threshold, verify the exact rule and use completed bars consistently. A threshold makes a condition easier to repeat; it does not explain the market on its own.
+
 ### Common mistake
 
 Treating %B above 1 as a sell instruction or below 0 as a buy instruction.
@@ -259,6 +283,14 @@ BandWidth is low, but price is in the centre of a messy range and no clear bound
 Imagine a share normally has a BandWidth reading between 4% and 9%, but the current reading has fallen to 2.2%. That is unusually narrow relative to its own recent behaviour and may justify closer monitoring. Yet price is sitting in the middle of a broad, messy range with no clear boundary nearby. The correct next step is to mark the structure or wait—not to buy just because the width is low.
 
 A different instrument might normally trade with a much smaller percentage width. Comparing the raw width of the two instruments can be misleading. BandWidth is more informative when you compare the same instrument with its own history and use a stated lookback. Once width begins to rise, describe that expansion separately from the direction of price. The width measure tells you about the envelope; the candles and levels help you assess the move.
+
+### Second worked comparison: Compare width relative to its own baseline
+
+Consider two instruments. Instrument A trades near ₹1,000 and has upper and lower bands at ₹1,040 and ₹960. Its total band span is ₹80, or roughly 8% of its middle value. Instrument B trades near ₹100 and has bands at ₹103 and ₹97. Its span is ₹6, or roughly 6% of its middle value. Looking only at the rupee or point gap might make the first instrument appear much wider, but percentage width gives a more comparable scale.
+
+Even percentage width is most useful when interpreted in context. One instrument may routinely fluctuate around 7–10%, while another is rarely above 4%. A 5% reading could be ordinary for the first and unusual for the second. Compare each instrument with its own historical BandWidth and state the lookback used.
+
+Now imagine BandWidth makes a new low while price is stuck in the centre of a large range. The low reading marks compression, but without a nearby boundary it does not define a useful breakout trigger. If width begins rising after price crosses a clear boundary, inspect whether price holds beyond it. The width measure tells you the frame is changing; the price response tells you whether the market is accepting or rejecting the move.
 
 ### Common mistake
 
