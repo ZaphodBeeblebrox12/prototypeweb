@@ -13,7 +13,7 @@ from urllib.parse import unquote, urlsplit
 
 SITE_ROOT = Path("site")
 ATTRIBUTES = {"href", "src", "poster"}
-SKIP_SCHEMES = {"http", "https", "mailto", "tel", "javascript", "data", "blob"}
+SKIP_SCHEMES = {"http", "https", "mailto", "tel", "javascript", "data", "blob", "about"}
 
 
 class LocalReferenceParser(HTMLParser):
