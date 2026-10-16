@@ -1,5 +1,6 @@
 # Accessibility and source notes — M03-L04
 
+**Figure number:** Figure 3.4; interactive panels use Figure 3.4a–Figure 3.4e.
 **Lesson:** Finding Opportunities at the Edges of a Trading Range
 **Purpose:** Distinguish range rotation from a sustained breakout using boundary interaction and follow-through.
 **Data:** Synthetic OHLCV created for instruction, not historical prices or a signal.
