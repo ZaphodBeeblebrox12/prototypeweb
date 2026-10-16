@@ -3,7 +3,7 @@
 <desc id="desc">Six candles with matching volume bars; the final candidate is outlined. The final green candidate candle is outlined. Candidate volume is 280 against the previous-five-bar average of 238, about 1.18 times the baseline.</desc>
 <rect width="720" height="640" fill="#f6f5f0"/>
 <rect x="18" y="16" width="684" height="608" rx="13" fill="#fffefa" stroke="#d9d7cf" stroke-width="2"/>
-<text x="38" y="50" font-family="Arial,Helvetica,sans-serif" font-size="31" font-weight="700" fill="#252923">Level 1 · Spot the candle</text>
+<text x="38" y="50" font-family="Arial,Helvetica,sans-serif" font-size="31" font-weight="700" fill="#252923">Spot the candle</text>
 <text x="38" y="80" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#41443d">Compare the close and volume with the baseline.</text>
 <text x="38" y="116" font-family="Arial,Helvetica,sans-serif" font-size="24" font-weight="700" fill="#41443d">PRICE</text><line x1="98" y1="350" x2="680" y2="350" stroke="#e5e3dc" stroke-width="1.2"/>
  <text x="88" y="355" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#41443d">104</text><line x1="98" y1="309" x2="680" y2="309" stroke="#e5e3dc" stroke-width="1.2"/>
