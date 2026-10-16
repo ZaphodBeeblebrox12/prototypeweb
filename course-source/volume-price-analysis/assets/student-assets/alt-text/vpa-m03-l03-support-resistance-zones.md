@@ -1,5 +1,6 @@
 # Accessibility and source notes — M03-L03
 
+**Figure number:** Figure 3.3; interactive panels use Figure 3.3a–Figure 3.3e.
 **Lesson:** Trading Near Support and Resistance: What to Look for Before Entry
 **Purpose:** Use support/resistance zones as locations to test, not prices that must hold.
 **Data:** Synthetic OHLCV created for instruction, not historical prices or a signal.
