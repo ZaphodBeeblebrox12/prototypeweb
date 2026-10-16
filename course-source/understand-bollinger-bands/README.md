@@ -5,6 +5,10 @@
 **Location:** course-source/understand-bollinger-bands/  
 **Audience:** Intermediate market participants who want a clearer, more practical understanding of Bollinger Bands.
 
+**Shared template:** [TradeThesis Course Template Standard](../COURSE_TEMPLATE_STANDARD.md). This course and all future revisions should use the updated Learning Room template; lesson sections remain flexible, not boilerplate.
+
+**Production checkpoint:** [PRODUCTION_CHECKPOINT.md](PRODUCTION_CHECKPOINT.md) tracks current preview and image replacement status. [First-pass preview source](preview/first-pass/index.html) is a review artifact, not deployed website code.
+
 ## Purpose
 
 Create a student-first self-study course that teaches traders how to interpret Bollinger Bands in context, build conditional trade plans, recognise failed ideas, and decide when not to trade.
