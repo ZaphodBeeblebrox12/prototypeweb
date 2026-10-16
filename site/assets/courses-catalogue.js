@@ -100,6 +100,17 @@
     </button>`;
   }
 
+  function renderFilterButtons() {
+    if (!filterHost) return;
+    const categories = [...new Set(microCourses.map(course => course.category).filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b));
+    const categoryButtons = categories.map(category => {
+      const count = microCourses.filter(course => course.category === category).length;
+      return `<button type="button" data-filter="${escapeHTML(category)}" aria-pressed="false">${escapeHTML(category)} <span data-filter-count="true">${count}</span></button>`;
+    }).join('');
+    filterHost.innerHTML = `<button type="button" class="is-active" data-filter="all" aria-pressed="true">All topics <span data-count="all">${microCourses.length}</span></button>${categoryButtons}`;
+  }
+
   function renderMicroCourses() {
     if (!microGrid) return;
     const query = (searchInput?.value || '').trim().toLocaleLowerCase();
@@ -143,8 +154,8 @@
     <div class="cc-modal-outcome"><span aria-hidden="true">✳</span><span><b>What you'll take away</b><br>${escapeHTML(course.outcome)}</span></div>
     <div class="cc-outline-header"><h3>Inside the course</h3><span>Open a section to preview it</span></div>
     <div class="cc-outline" id="cc-outline">${course.modules.map((module, index) => `<section class="cc-outline-item ${index === 0 ? 'is-open' : ''}"><button class="cc-outline-toggle" type="button" aria-expanded="${index === 0 ? 'true' : 'false'}" aria-controls="cc-outline-preview-${escapeHTML(course.id)}-${index}"><span class="cc-outline-num">${String(index + 1).padStart(2, '0')}</span><span class="cc-outline-title">${escapeHTML(module.title)}</span><span class="cc-outline-count">${escapeHTML(module.count)}</span><span class="cc-outline-sign" aria-hidden="true">+</span></button><div class="cc-outline-preview" id="cc-outline-preview-${escapeHTML(course.id)}-${index}" ${index === 0 ? '' : 'hidden'}><p>${escapeHTML(module.preview)}</p><ul>${module.points.map(point => `<li>${escapeHTML(point)}</li>`).join('')}</ul></div></section>`).join('')}</div>
-    <p class="cc-modal-fit"><b>Where it fits:</b> ${escapeHTML(course.complements)} This is a standalone purchase; it does not include community access.</p>`;
-    modalFooter.innerHTML = `<div class="cc-modal-price-wrap"><span class="cc-modal-price">${escapeHTML(course.price)}</span><span class="cc-modal-price-note">Illustrative price · standalone micro-course</span></div><button class="button cc-modal-cta" type="button" data-get-course="${escapeHTML(course.id)}">Get this course <span aria-hidden="true">↗</span></button>`;
+    <p class="cc-modal-fit"><b>Where it fits:</b> ${escapeHTML(course.complements)} This is designed as a standalone micro-course; community access is not included.</p>`;
+    modalFooter.innerHTML = `<div class="cc-modal-price-wrap"><span class="cc-modal-price">${escapeHTML(course.price)}</span><span class="cc-modal-price-note">Indicative price · preview only</span></div><button class="button cc-modal-cta" type="button" data-get-course="${escapeHTML(course.id)}">Preview only <span aria-hidden="true">↗</span></button>`;
   }
 
   function openModal(course, opener) {
@@ -175,6 +186,7 @@
     toastTimer = window.setTimeout(() => { toast.hidden = true; }, 4800);
   }
 
+  renderFilterButtons();
   if (microGrid) renderMicroCourses();
 
   microGrid?.addEventListener('click', event => {
