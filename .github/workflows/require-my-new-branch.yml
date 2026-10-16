@@ -1,0 +1,22 @@
+name: Enforce my-new-branch as the integration target
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  require-integration-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require pull requests to target my-new-branch
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ "$BASE_REF" != "my-new-branch" ]; then
+            echo "::error::Feature pull requests must target my-new-branch. Do not merge feature work into main."
+            exit 1
+          fi
+          echo "Pull request target is my-new-branch; main is not the feature integration target."
