@@ -50,8 +50,8 @@ def test_vpa_pilot_figures_are_numbered_and_keep_later_outcomes_out(tmp_path):
     asset_root = tmp_path / "exports"
     asset_root.mkdir()
     for filename in (
-        "vpa-m01-l01-stage1-spot-volume.svg",
-        "vpa-m01-l01-candle-context-compare.svg",
+        "vpa-m01-l01-stage1-spot-volume-mobile.svg",
+        "vpa-m01-l01-candle-context-compare-mobile.svg",
     ):
         (asset_root / filename).write_text("<svg/>", encoding="utf-8")
 
