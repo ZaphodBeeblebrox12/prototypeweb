@@ -41,16 +41,23 @@ Price rises from 40 to 46, pulls back to 44, then advances to 47. The pullback d
 
 Now imagine the bar at 47 records unusually high volume but closes near its low, and subsequent bars return to 44. The earlier upward structure remains part of the chart, but the latest attempt has not held. A good reader updates the assessment rather than insisting that all evidence must support the first idea.
 
-### Try it
+### Level 1 — Notice (easy)
 
-Price makes three higher highs, but every advance is followed by a sharp decline that returns price to the previous range. Which description is most precise?
+**Task:** A four-bar sequence makes higher closes but gives back most of each advance on the next bar. Describe progress without assigning motives.
 
-A. Buyers control the market because new highs appeared.
-B. Sellers have definitely absorbed every buy order.
-C. Price has made upward excursions, but it has not consistently retained progress; the sequence remains less decisive than the highs alone suggest.
+**Feedback:** Price makes upward excursions but does not consistently retain them. Avoid saying that a particular participant is in control.
 
-**Feedback:** C. It records both the highs and the failure to retain progress. A ignores the pullbacks. B claims a mechanism the chart does not prove.
+### Level 2 — Compare (guided)
 
+**Task:** Compare it with higher highs, higher closes and shallow pullbacks. What differs?
+
+**Feedback:** The second sequence retains more upward progress and shows clearer structure; this is evidence about price outcome, not participant identity.
+
+### Level 3 — Apply (independent)
+
+**Task:** A sequence makes lower highs/lower closes, then has a high-volume rally that closes mid-range. Give the strongest reading and one uncertainty.
+
+**Model response:** Downward progress remains clearer so far; the rally did not retain much upward progress. Later bars may still reclaim structure.
 ### Common mistake
 
 **Mistake:** Using “buyers” and “sellers” as though the chart reveals actual participants' identities.
@@ -97,12 +104,23 @@ A resistance zone sits around 72–73. Price closes at 74.2 after a wide bar, wi
 
 A careful summary is: “Price has moved beyond the prior zone on elevated recorded activity and has so far held above it. This supports a continuation scenario. A sustained return below the zone would weaken that reading.” It is not necessary to claim that “smart money” entered or that the move cannot fail.
 
-### Try it
+### Level 1 — Notice (easy)
 
-Two breakouts have the same candle shape. Breakout A closes beyond resistance on 1.8× relative volume, then holds above the zone. Breakout B closes beyond resistance on 1.8× relative volume, then falls back inside within two bars. What differs?
+**Task:** A breakout closes above a boundary on 1.7× relative volume. What does that ratio establish?
 
-**Feedback:** The initial activity ratio is identical. The later price behaviour differs: A retains progress; B does not. The follow-through is important evidence that cannot be known from the first bar.
+**Feedback:** Recorded activity was 70% above its chosen baseline; it does not prove a successful breakout or identify traders.
 
+### Level 2 — Compare (guided)
+
+**Task:** Compare it with an equally active bar that closes back inside and fails to reclaim the boundary.
+
+**Feedback:** Follow-through distinguishes the cases. The second attempt did not retain its outside progress.
+
+### Level 3 — Apply (independent)
+
+**Task:** Price clears resistance on modest volume, then holds above the zone for three bars and retests it successfully. Explain why the case still deserves attention.
+
+**Model response:** Price moved beyond the boundary and retained progress. Modest volume is context, not an automatic disqualifier; the scenario remains conditional.
 ### Common mistake
 
 **Mistake:** Equating high volume with confirmation.
@@ -147,16 +165,23 @@ One possible reading is that the range high is still resisting upward progress. 
 
 Notice that the next test is observable. “Institutions are selling” is not.
 
-### Try it
+### Level 1 — Notice (easy)
 
-A candle has twice the recent average volume, a narrow range and a close near its midpoint. It appears halfway through a broad trading range. Which statement is best?
+**Task:** A bar has 2.4× volume, a narrow range and a midpoint close. Write one observation without using “absorption”.
 
-A. Absorption has been confirmed.
-B. High activity produced limited progress; the event may reflect two-sided trade, and its importance depends on what happens next.
-C. Price must reverse.
+**Feedback:** Activity was high relative to baseline, but price made limited net progress and closed near the centre of its range.
 
-**Feedback:** B. It describes the mismatch and preserves plausible alternatives. The location is not especially decisive, and one bar does not establish a reversal mechanism.
+### Level 2 — Compare (guided)
 
+**Task:** Compare that event halfway through a range with one at a repeatedly tested range high.
+
+**Feedback:** The boundary location makes the latter more relevant to a test of the range edge, but neither event proves a cause. The middle-of-range case may simply be two-sided activity.
+
+### Level 3 — Apply (independent)
+
+**Task:** Create two possible endings for the high-activity bar at resistance and a condition favouring each.
+
+**Model response:** Failure to hold the boundary followed by a nearby swing-low break supports a failed-upside attempt. A later close above resistance and successful retest supports continuation.
 ### Common mistake
 
 **Mistake:** Using the word “absorption” as if it were directly visible.
@@ -200,12 +225,23 @@ A market climbs towards a resistance zone around 150.
 
 Path B has a change in structure and failed reclaim, not merely a smaller candle. The conclusion remains conditional: it weakens the continuation thesis; it does not guarantee a sustained decline.
 
-### Try it
+### Level 1 — Notice (easy)
 
-An uptrend prints three smaller green candles, all closing near their highs. Volume gradually declines, but the latest higher low is intact. What can you conclude?
+**Task:** Successive advances cover 6, 4 and 2 points. What changed?
 
-**Feedback:** Upward progress has slowed and activity has declined, but the structure remains intact. You may note a possible pause and watch the next test. You cannot conclude from these facts alone that the trend is over.
+**Feedback:** Upward price progress is slowing. That alone does not confirm a reversal.
 
+### Level 2 — Compare (guided)
+
+**Task:** Compare smaller candles that close near their highs with smaller candles that fail at resistance, leave upper wicks and then break a meaningful higher low.
+
+**Feedback:** The latter includes failed progress and a structural break. The former may simply be a pause.
+
+### Level 3 — Apply (independent)
+
+**Task:** A market makes a slightly lower high but remains above its last higher low. Write a cautious update and your next observation.
+
+**Model response:** The latest advance failed to exceed the prior high, but the structure has not clearly broken. Monitor the higher low and whether price can reclaim the recent high.
 ### Common mistake
 
 **Mistake:** Calling every smaller candle or lower-volume advance “exhaustion”.
@@ -248,12 +284,23 @@ One interpretation is that upward progress is weakening. An alternative is that 
 
 The initial observation remains correct whichever path follows. Good analysis can change as new evidence arrives without rewriting what was visible earlier.
 
-### Try it
+### Level 1 — Notice (easy)
 
-Price falls sharply on elevated volume into a prior demand area, then stops making lower closes. Give one interpretation, one alternative and one piece of future evidence that could help distinguish them.
+**Task:** Price makes a marginal new high on lower relative volume. State the mismatch.
 
-**Feedback:** One possible interpretation is that downside progress is meeting opposition at the area. An alternative is a temporary pause before price continues lower. A sustained reclaim of a nearby lower high would support a recovery scenario; renewed downside progress and a break below the area would support continuation downward. These are examples, not the only valid answers. Your answer should distinguish facts from explanations.
+**Feedback:** Price extended while activity was lower against the stated comparison. This is a question to investigate, not a directional signal.
 
+### Level 2 — Compare (guided)
+
+**Task:** Compare this with high volume and little progress near resistance. What distinct question does each raise?
+
+**Feedback:** The first asks whether price can hold the extension or moved through a thin area; the second asks why substantial activity produced limited progress at that location.
+
+### Level 3 — Apply (independent)
+
+**Task:** Price falls on elevated volume into a prior demand area, then stops making lower closes. Give two explanations and a discriminator.
+
+**Model response:** Price may be meeting opposition or pausing before another decline. A sustained reclaim of a nearby lower high supports recovery; renewed downside progress and a break below the area supports continuation down.
 ### Common mistake
 
 **Mistake:** Treating any disagreement between price and volume as a predictive divergence.
