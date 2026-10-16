@@ -106,17 +106,15 @@ def sync_all_channel_memberships(sleep=0.05):
 
 
 def get_telegram_access_state(user):
-    """Derive the pay->access state machine for the dashboard/manage page.
+    """Derive current paid channel access, including course-bundled community terms.
 
     States: no_subscription | not_linked | ready | pending | needs_action.
-    Pure function of: subscription, TelegramAccount, assignments, grant audit.
     """
-    from apps.subscriptions.models import Subscription
+    from apps.bot_integration.access import get_active_access_plan_ids
 
-    subscription = Subscription.objects.filter(
-        user=user, status=Subscription.Status.ACTIVE, is_active=True).first()
-    if subscription is None:
-        return {"state": "no_subscription", "label": "No active subscription",
+    plan_ids = get_active_access_plan_ids(user.pk)
+    if not plan_ids:
+        return {"state": "no_subscription", "label": "No active access",
                 "cta_url": "/dashboard/", "cta_label": "View plans",
                 "detail": ""}
     account = TelegramAccount.objects.filter(user=user, is_active=True).first()
@@ -124,10 +122,10 @@ def get_telegram_access_state(user):
         return {"state": "not_linked", "label": "Connect Telegram",
                 "cta_url": "/bot/telegram/connect/",
                 "cta_label": "Connect Telegram",
-                "detail": "Your subscription is active. Connect Telegram to "
-                          "unlock your channel access."}
+                "detail": "Your access is active. Connect Telegram to receive any included channel access."}
     entitled = set(PlanChannelMapping.objects.filter(
-        platform="telegram", plan=subscription.plan).values_list("external_id", flat=True))
+        platform="telegram", plan_id__in=plan_ids
+    ).values_list("external_id", flat=True))
     if not entitled:
         return {"state": "ready", "label": "Access ready", "cta_url": "",
                 "cta_label": "", "detail": "No channels are mapped to your plan."}
@@ -154,10 +152,9 @@ def get_telegram_access_state(user):
 
 
 def build_channel_display(user):
-    """Dashboard data: free channels (observed truth) + paid (entitlement).
+    """Dashboard data: observed free channels and currently entitled paid channels.
 
-    Free list  - from ChannelMembershipSnapshot (real Telegram state).
-    Paid list  - from PlanChannelMapping + active subscription + assignments.
+    Course offers may bundle community access independently of course expiry.
     """
     snapshots = {
         s.channel_id: s for s in
@@ -175,9 +172,8 @@ def build_channel_display(user):
             "checked": bool(snap),
             "invite_url": ch.invite_url or "",
         })
-    active_plan_ids = set(Subscription.objects.filter(
-        user=user, status=Subscription.Status.ACTIVE, is_active=True,
-    ).values_list("plan_id", flat=True))
+    from apps.bot_integration.access import get_active_access_plan_ids
+    active_plan_ids = get_active_access_plan_ids(user.pk)
     assigned_ids = set(UserChannelAssignment.objects.filter(
         user=user, platform="telegram", is_active=True,
     ).values_list("external_id", flat=True))
