@@ -1,7 +1,6 @@
 import bleach
-import markdown as markdown_library
-
 from bleach.sanitizer import ALLOWED_PROTOCOLS
+import markdown as markdown_library
 from django import template
 from django.utils.safestring import mark_safe
 
