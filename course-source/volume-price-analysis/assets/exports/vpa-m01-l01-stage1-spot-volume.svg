@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="820" viewBox="0 0 1440 820" role="img" aria-labelledby="t d"><title id="t">Figure 1.1 · Spot the candle and compare volume</title><desc id="d">Six synthetic candles with their volume bars. The final candle is outlined as the candidate. A dashed line in the volume panel marks the average of the five previous volume bars. The task is to identify candle direction and whether candidate volume is above or below that baseline, without interpreting market direction.</desc>
- <rect width="1440" height="820" fill="#f6f5f0"/><text x="55" y="55" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="700" fill="#73756e">LEVEL 1 · NOTICE</text>
+ <rect width="1440" height="820" fill="#f6f5f0"/><text x="55" y="55" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="700" fill="#73756e">Look closely at the candle</text>
  <text x="55" y="97" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="700" fill="#252923">First, spot the facts</text>
  <text x="55" y="131" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#454840">No interpretation yet. Identify the highlighted candle and compare its volume with the dashed baseline.</text>
  <rect x="40" y="160" width="1360" height="600" rx="15" fill="#fffefa" stroke="#d9d7cf" stroke-width="2"/>
