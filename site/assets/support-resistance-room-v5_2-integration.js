@@ -5,6 +5,29 @@
   "use strict";
   const LESSON_IDS = new Set([12, 13, 14]);
   const DATA_BASE = "module5-v5_2/assets/";
+  const FIGURE_PANEL_LAYOUTS = {
+    "FIG01_breakout_evidence_ladder.png": { width:2661, height:1209, panels:[["Intrabar excursion",.02,.13,.31,.75],["Close outside",.35,.13,.31,.75],["Follow-through",.68,.13,.31,.75]]},
+    "FIG02_filter_tradeoffs.png": { width:2661, height:1209, panels:[["One close outside",.02,.13,.31,.75],["Two closes outside",.35,.13,.31,.75],["Require a return test",.68,.13,.31,.75]]},
+    "FIG03_context_changes_the_question.png": { width:2501, height:1226, panels:[["Local view",.025,.13,.46,.77],["Wider context",.54,.13,.45,.77]]},
+    "FIG04_break_return_response.png": { width:2923, height:1106, panels:[["Before the break",.02,.13,.23,.80],["The break",.265,.13,.23,.80],["Return to area",.51,.13,.23,.80],["Response develops",.755,.13,.23,.80]]},
+    "FIG05_three_retest_outcomes.png": { width:2695, height:1243, panels:[["Holds beyond",.02,.13,.30,.75],["Re-enters range",.35,.13,.30,.75],["Inconclusive",.68,.13,.30,.75]]},
+    "FIG06_retest_is_not_owed.png": { width:2547, height:1604, panels:[["No retest",.025,.08,.46,.40],["Delayed return",.51,.08,.475,.40],["Shallow return",.025,.49,.46,.43],["Deep return, reclaim",.51,.49,.475,.43]]},
+    "FIG07_failure_is_not_reverse_signal.png": { width:2695, height:1226, panels:[["Continues through range",.02,.13,.31,.75],["Chops around the area",.35,.13,.31,.75],["Reclaims the boundary",.68,.13,.31,.75]]},
+    "FIG08_volume_context_not_gate.png": { width:2847, height:1964, panels:[["Price holds · volume expands",.02,.055,.46,.415],["Price fails · volume expands",.53,.055,.46,.415],["Price holds · volume muted",.02,.53,.46,.425],["Price fails · volume muted",.53,.53,.46,.425]]},
+    "FIG09_decision_record_timeline.png": { width:2923, height:1192, panels:[["Before",.02,.12,.23,.82],["Break",.265,.12,.23,.82],["Contradiction",.51,.12,.23,.82],["Review",.755,.12,.23,.82]]},
+    "FIG10_failed_signal_family.png": { width:3008, height:1792, panels:[["Range-edge upthrust",.02,.07,.31,.39],["Spring / downside failure",.35,.07,.31,.39],["Trendline break reclaimed",.68,.07,.31,.39],["First pullback fails",.02,.515,.31,.42],["Continuation pattern fails",.35,.515,.31,.42],["Prior swing break fails",.68,.515,.31,.42]]},
+    "FIG11_first_pullback_later_failure.png": { width:2551, height:1243, panels:[["First pullback holds",.025,.12,.465,.78],["Later pullback fails",.53,.12,.45,.78]]},
+    "FIG12_after_failure_alternatives.png": { width:2711, height:1209, panels:[["Range travel",.02,.12,.31,.80],["Range interior",.36,.12,.31,.80],["Boundary reclaimed",.70,.12,.29,.80]]},
+    "FIG13_gap_and_spike_failures.png": { width:2567, height:1278, panels:[["Gap beyond, then return",.025,.12,.45,.81],["Wide-range spike, no hold",.515,.12,.46,.81]]},
+    "FIG15_failure_label_checklist.png": { width:2574, height:1295, panels:[["Define signal",.025,.29,.23,.22],["Observe attempt",.265,.29,.23,.22],["Find contradiction",.505,.29,.23,.22],["Check response",.745,.29,.23,.22],["Final wording: describe evidence, not cause",.13,.60,.74,.23]]},
+    "FIG16_retest_depth_and_closes.png": { width:2695, height:1226, panels:[["Shallow / stays outside",.02,.12,.31,.80],["Enters / reclaims",.35,.12,.31,.80],["Closes back inside",.68,.12,.31,.80]]},
+    "FIG17_range_vs_trendline_failure.png": { width:2551, height:1261, panels:[["Range boundary",.025,.12,.455,.82],["Rising trendline",.52,.12,.455,.82]]},
+    "FIG18_neckline_formation_failures.png": { width:2567, height:1261, panels:[["Top formation breakdown reclaims",.025,.12,.455,.82],["Bottom formation breakout fails",.52,.12,.455,.82]]},
+    "FIG19_simple_break_return_response.png": { width:2103, height:1053, panels:[["Break",.11,.13,.29,.76],["Return",.42,.13,.29,.76],["Response",.71,.13,.285,.76]]},
+    "FIG20_simple_retest_outcomes.png": { width:1971, height:1011, panels:[["Hold-like response",.005,.14,.33,.70],["Failure-like response",.335,.14,.33,.70],["Inconclusive response",.665,.14,.333,.70]]},
+    "FIG21_failed_breakout_structural_stop.png": { width:2363, height:1229, panels:[["Failed upside break · hypothetical short",.005,.10,.49,.88],["Failed downside break · hypothetical long",.51,.10,.49,.88]]},
+    "FIG25_continuation_pause_outcomes.png": { width:2721, height:1341, panels:[["Expected break holds",.025,.10,.465,.82],["Pause breaks the wrong way",.55,.10,.445,.82]]}
+  };
   let deepPack = null;
   let interactionPack = null;
   let renderedLessonId = null;
@@ -79,10 +102,26 @@
       const src = String(block.src || "");
       if (!src.startsWith("assets/figures/")) return '<aside class="sr-v52-figure-note">Figure withheld: this is not an approved schematic asset.</aside>';
       const url = new URL("module5-v5_2/" + src, window.location.href).href;
-      return '<figure class="sr-v52-figure"><img loading="lazy" src="' + esc(url) + '" alt="' + esc(block.alt || "") + '"><figcaption>' +
-        inline(block.caption || block.alt || "Teaching illustration.") + "</figcaption></figure>";
+      const layout = FIGURE_PANEL_LAYOUTS[src.split("/").pop()];
+      if (!layout) {
+        return '<figure class="sr-v52-figure"><img loading="lazy" src="' + esc(url) + '" alt="' + esc(block.alt || "") + '"><figcaption>' +
+          inline(block.caption || block.alt || "Teaching illustration.") + "</figcaption></figure>";
+      }
+      const panels = layout.panels.map((panel, index) => {
+        const label = panel[0], x = Math.round(panel[1] * layout.width), y = Math.round(panel[2] * layout.height);
+        const width = Math.round(panel[3] * layout.width), height = Math.round(panel[4] * layout.height);
+        const panelAlt = "Panel " + (index + 1) + " of " + layout.panels.length + ": " + label + ". " + (block.alt || block.caption || "Schematic teaching illustration.");
+        return '<figure class="sr-v52-figure sr-v52-figure--panel"><svg class="sr-v52-figure-panel" viewBox="' + x + " " + y + " " + width + " " + height +
+          '" width="' + width + '" height="' + height + '" role="img" aria-label="' + esc(panelAlt) + '" data-zoomable="true" focusable="true"><image href="' +
+          esc(url) + '" x="0" y="0" width="' + layout.width + '" height="' + layout.height + '" preserveAspectRatio="none"></image></svg><figcaption>' +
+          inline(label) + "</figcaption></figure>";
+      }).join("");
+      return '<section class="sr-v52-figure-set"><p class="sr-v52-figure-set-intro">' +
+        inline(block.caption || block.alt || "This figure contains several comparisons. Each panel is separated below for easier reading.") +
+        '</p><div class="sr-v52-figure-panels">' + panels + '</div><details class="sr-v52-full-figure"><summary>View the complete original figure</summary>' +
+        '<figure class="sr-v52-figure"><img loading="lazy" src="' + esc(url) + '" alt="' + esc(block.alt || "") + '"><figcaption>Complete original composition. Select it to inspect at full size.</figcaption></figure></details></section>';
     }
-    if (block.type === "caseChart") return textOnlyCase(block, lessonId);
+        if (block.type === "caseChart") return textOnlyCase(block, lessonId);
     return '<aside class="sr-v52-figure-note"><strong>Content block needs review</strong><p>Unsupported source block type: ' + esc(block.type || "(missing type)") + "</p></aside>";
   }
 
