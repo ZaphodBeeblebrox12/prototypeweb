@@ -78,7 +78,7 @@
           <button class="sr-room-tab" type="button" role="tab" aria-selected="false" aria-controls="sr-tab-check" id="sr-tab-button-check" data-sr-tab="check" tabindex="-1">Knowledge check</button>
         </div>
         <div class="sr-room-tab-panel" id="sr-tab-lesson" role="tabpanel" aria-labelledby="sr-tab-button-lesson">
-          <div class="sr-room-work-grid">
+          <div class="sr-room-work-grid" id="sr-work-grid">
             <figure class="sr-room-chart-figure" id="sr-chart-figure" hidden>
               <div class="sr-room-chart-top"><span id="sr-chart-label">Illustrative chart</span><span>CHART EVIDENCE</span></div>
               <div class="sr-room-chart-viewport" id="sr-chart-viewport">
@@ -106,6 +106,12 @@
           <section class="sr-room-teaching" id="sr-teaching-content" hidden aria-labelledby="sr-teaching-title" aria-live="polite">
             <div class="sr-room-teaching-head"><span class="sr-room-eyebrow" id="sr-teaching-kicker">WHAT TO NOTICE</span><h3 id="sr-teaching-title"></h3></div>
             <div class="sr-room-teaching-body" id="sr-teaching-body"></div>
+            <section class="sr-room-teaching-editing" id="sr-teaching-editing-panel" hidden aria-labelledby="sr-teaching-editing-prompt">
+              <p class="sr-room-teaching-selection-prompt" id="sr-teaching-editing-prompt"></p><div class="sr-room-edit-list" id="sr-teaching-editing-options"></div>
+              <label for="sr-teaching-editing-rationale">Why does this edit help explain the chart?</label><textarea id="sr-teaching-editing-rationale" rows="3" placeholder="I kept… I combined… I left out… because…"></textarea>
+              <div class="sr-room-edit-actions"><button class="button sr-room-primary" type="button" id="sr-teaching-editing-submit" disabled>Submit your edit</button></div>
+              <p class="sr-room-edit-feedback" id="sr-teaching-editing-feedback" hidden aria-live="polite"></p>
+            </section>
             <section class="sr-room-teaching-selection" id="sr-teaching-selection-panel" hidden aria-labelledby="sr-teaching-selection-prompt">
               <p class="sr-room-teaching-selection-prompt" id="sr-teaching-selection-prompt"></p>
               <div class="sr-room-candidate-grid" id="sr-teaching-selection-options" role="group" aria-label="Candidate turning points"></div>
@@ -121,6 +127,10 @@
               <pre id="sr-teaching-field-note-template"></pre>
               <p class="sr-room-field-note-help">Use the “My notes” tab to keep your own version.</p>
             </div>
+          </section>
+          <section class="sr-room-chartlab-panel" id="sr-chartlab-panel" hidden aria-labelledby="sr-chartlab-title">
+            <div class="sr-room-chartlab-intro"><span class="sr-room-eyebrow">CHARTLAB 01 · CLEAR W</span><h3 id="sr-chartlab-title">Draw the two areas yourself</h3><p>Submit support around both lows first. It will lock while you draw resistance around the intervening neckline. Reference zones and feedback appear only after both submissions.</p><p class="sr-room-chartlab-local-note">Completion is recorded only for this browser session; it is not connected to member-account progress.</p></div>
+            <iframe id="sr-chartlab-frame" title="ChartLab Clear W: draw support, then resistance, compare and complete the two-question check" src="about:blank" loading="lazy" referrerpolicy="same-origin"></iframe>
           </section>
           <aside class="sr-room-pending" id="sr-pending-material" hidden><span class="sr-room-pending-mark" aria-hidden="true">i</span><div><strong id="sr-pending-title"></strong><p id="sr-pending-copy"></p></div></aside>
           <div class="sr-room-bottom-actions"><span class="sr-room-bottom-note" id="sr-bottom-help">A reasoned read matters more than a prediction.</span><button class="button sr-room-secondary" type="button" id="sr-complete-button">Mark complete ✓</button></div>

@@ -1,0 +1,877 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>ChartLab 01 — Mark the Zone | TradeThesis</title>
+<style>
+:root{
+  --paper:#f8f5ed;--paper-deep:#efe9dc;--surface:#fffdf8;--surface-warm:#f5efe2;
+  --ink:#29382e;--muted:#697368;--green:#355a46;--green-dark:#254334;--sage:#e3ebdc;
+  --sage-line:#cbd8c3;--rust:#c96f50;--ochre:#d6b76b;--line:#ded8ca;--line-strong:#c7c0b1;
+  --shadow:0 14px 40px #29382e0b;--serif:Georgia,"Times New Roman",serif;
+  --sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:"SFMono-Regular",Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:24px}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 var(--sans);letter-spacing:0}
+button,input,textarea{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid var(--rust);outline-offset:3px}
+button:disabled{cursor:not-allowed;opacity:.45}
+.site-shell{min-height:100vh;background:var(--paper)}
+.top-strip{min-height:31px;padding:6px 24px;background:var(--green-dark);color:#f6f2e8;display:flex;align-items:center;justify-content:center;gap:10px;font-size:10px;letter-spacing:.09em;text-transform:uppercase}
+.top-strip .dot{width:5px;height:5px;border-radius:50%;background:var(--ochre)}
+.site-header{height:76px;border-bottom:1px solid var(--line);background:#fbf8f0;display:flex;align-items:center}
+.header-inner{width:min(1440px,100%);margin:auto;padding:0 34px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand-symbol{width:39px;height:39px;display:grid;place-items:center;background:var(--green);color:#f0d38a;border-radius:13px 13px 13px 4px;font:italic 23px var(--serif);transform:rotate(-3deg);flex:none}
+.brand-copy strong{display:block;font:600 19px/1 var(--serif);letter-spacing:.01em}
+.brand-copy small{display:block;margin-top:5px;font-size:8px;line-height:1.2;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+.header-right{display:flex;align-items:center;gap:16px;color:var(--muted);font-size:11px}
+.member-label{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:99px;padding:7px 11px;background:#fffdf8}
+.member-dot{height:7px;width:7px;border-radius:50%;background:#7c9b71}
+main{width:min(1430px,100%);margin:0 auto;padding:25px 34px 64px}
+.breadcrumbs{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--muted);letter-spacing:.02em;margin-bottom:24px}
+.breadcrumbs a{color:var(--green);text-decoration:underline;text-decoration-color:#b3c2ac;text-underline-offset:3px}
+.breadcrumbs span[aria-hidden]{color:#aaa494}
+.intro{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:28px;align-items:end;padding:0 0 23px;border-bottom:1px solid var(--line)}
+.kicker{display:flex;align-items:center;gap:9px;font-size:10px;font-weight:800;letter-spacing:.14em;color:var(--green);text-transform:uppercase}
+.kicker:before{content:"";display:inline-block;width:18px;height:2px;background:var(--rust)}
+h1,h2,h3,p{margin-top:0}
+.intro h1{margin:12px 0 12px;font:400 clamp(38px,4.5vw,59px)/1.02 var(--serif);letter-spacing:-.047em;max-width:850px}
+.intro h1 em{color:var(--green);font-style:normal;text-decoration:underline;text-decoration-color:#ddc17c;text-decoration-thickness:3px;text-underline-offset:6px}
+.intro p{margin:0;color:#5e6a5f;max-width:790px;font-size:14px;line-height:1.8}
+.exercise-stamp{align-self:stretch;border-left:1px solid var(--line);padding:9px 0 6px 21px;display:flex;flex-direction:column;justify-content:end;gap:7px}
+.stamp-number{font:400 32px/1 var(--serif);color:var(--green)}
+.exercise-stamp span{color:var(--muted);font-size:10px;line-height:1.6}
+.workflow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;padding:18px 0 22px;border-bottom:1px solid var(--line);margin-bottom:22px}
+.workflow-step{display:flex;align-items:center;gap:9px;min-width:0;padding:0 11px;border-right:1px solid var(--line)}
+.workflow-step:first-child{padding-left:0}.workflow-step:last-child{border-right:0}
+.step-num{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;border:1px solid var(--line-strong);color:var(--muted);font:10px var(--mono);background:var(--surface)}
+.workflow-step strong{display:block;font-size:10px;font-weight:750;line-height:1.25;color:#667064}
+.workflow-step small{display:block;font-size:9px;line-height:1.4;color:#8b9086;margin-top:3px}
+.workflow-step.active .step-num{background:var(--green);border-color:var(--green);color:#fffdf8}
+.workflow-step.done .step-num{background:var(--sage);border-color:var(--sage-line);color:var(--green)}
+.workflow-step.active strong,.workflow-step.done strong{color:var(--green)}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 294px;gap:19px;align-items:start}
+.chart-panel{min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:17px;box-shadow:var(--shadow);overflow:hidden}
+.chart-panel-head{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 19px;border-bottom:1px solid var(--line);background:linear-gradient(110deg,#fffdf8,#f8f3e9)}
+.chart-title{min-width:0}.chart-title strong{display:block;font:400 21px/1.15 var(--serif);color:var(--green)}
+.chart-title span{display:block;margin-top:4px;color:var(--muted);font-size:10px}
+.chart-badges{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}
+.mini-badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:99px;background:#fffdf8;color:#6f786d;padding:5px 8px;font-size:9px;white-space:nowrap}
+.live-indicator{width:5px;height:5px;border-radius:50%;background:#97a985}
+.chart-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:11px 17px;border-bottom:1px solid #e9e3d8;background:#fbf8f0}
+.tool-label{font-size:9px;letter-spacing:.11em;text-transform:uppercase;font-weight:800;color:#81877d;margin-right:3px}
+.tool-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:34px;padding:7px 11px;border:1px solid var(--line);border-radius:9px;background:#fffdf8;color:#59685a;font-size:10px;font-weight:700;transition:background .15s,border .15s,transform .15s}
+.tool-button:hover{border-color:#a9b9a1;transform:translateY(-1px)}
+.tool-button.selected{background:var(--green);border-color:var(--green);color:#fffdf8}
+.tool-button.primary{background:var(--green);border-color:var(--green);color:#fffdf8;border-radius:99px;padding-inline:15px}
+.tool-button.primary:hover{background:var(--green-dark)}
+.tool-button .tool-icon{font-size:14px;line-height:1;font-weight:500}
+.toolbar-spacer{flex:1}
+#chartSvg{display:block;width:100%;height:auto;aspect-ratio:1000/520;touch-action:none;cursor:crosshair;background:#fffdf8;user-select:none}
+#chartSvg.is-moving{cursor:ns-resize}
+.chart-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 16px;border-top:1px solid var(--line);color:var(--muted);font-size:9px;line-height:1.5;background:#fffdf8}
+.chart-foot span:first-child{display:flex;align-items:center;gap:7px}.legend-swatch{display:inline-block;height:9px;width:13px;border-radius:2px;background:#d9e5d1;border:1px solid #71906c}.legend-swatch.ref{background:#f0c9b9;border-color:#c96f50}
+.chart-instructions{display:flex;align-items:flex-start;gap:9px;padding:12px 16px;background:#f5efe2;border-top:1px solid var(--line);font-size:10px;color:#687265;line-height:1.65}
+.instruction-mark{display:grid;place-items:center;flex:none;width:23px;height:23px;border-radius:50%;background:#e5eadc;color:var(--green);font-size:12px;font-weight:800}
+.task-panel{position:sticky;top:16px;border:1px solid var(--line);background:#fffbf3;border-radius:16px;overflow:hidden}
+.task-panel-top{padding:17px 18px 15px;background:#e7eddf;border-bottom:1px solid #d3dfca}
+.task-counter{font-size:9px;text-transform:uppercase;letter-spacing:.12em;font-weight:850;color:#65765f}
+.task-panel h2{font:400 25px/1.1 var(--serif);letter-spacing:-.025em;color:var(--green);margin:7px 0 7px}
+.task-panel-top p{font-size:11px;line-height:1.7;color:#58685a;margin:0}
+.task-content{padding:16px 17px 18px}
+.task-content h3{font:400 19px/1.2 var(--serif);color:var(--green);margin:0 0 9px}
+.instruction-list{padding:0 0 0 17px;margin:0;color:#5b665b;font-size:11px;line-height:1.7}
+.instruction-list li{padding-left:3px;margin:5px 0}
+.instruction-list li::marker{color:var(--rust)}
+.tip-note{margin-top:14px;padding:11px 12px;background:#f4e8c5;border-radius:2px 10px 10px 10px;color:#655b43;font:italic 14px/1.45 var(--serif)}
+.task-status{display:flex;align-items:center;gap:8px;padding:11px 12px;border-top:1px solid var(--line);font-size:10px;color:#687367;background:#faf5e9}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#c7b981;flex:none}
+.task-status.good .status-dot{background:#6f9470}
+.task-bottom{padding:13px 17px 17px;border-top:1px solid var(--line);background:#fffdf8}
+.task-bottom .tool-button{width:100%;min-height:42px}
+.task-bottom .secondary-action{width:100%;border:0;background:transparent;color:#6f796d;padding:9px 5px 0;font-size:10px;text-decoration:underline;text-decoration-color:#cfc7b8;text-underline-offset:3px}
+.task-bottom .sub-note{font-size:9px;color:#8b9085;text-align:center;margin:8px 0 0;line-height:1.5}
+.zone-details{display:none;margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+.zone-details.visible{display:block}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.field{display:grid;gap:5px}.field label{font-size:9px;color:#7a8278;font-weight:750}
+.field input,.reason-note{width:100%;border:1px solid var(--line-strong);border-radius:8px;background:#fffdf8;color:var(--ink);padding:8px 9px;font-size:11px;min-width:0}
+.field small{font-size:8px;color:#97998f}
+.reflection{margin-top:25px;border:1px solid var(--line);border-radius:17px;background:var(--surface);overflow:hidden;box-shadow:0 7px 24px #29382e07}
+.reflection-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:20px 23px 17px;border-bottom:1px solid var(--line);background:#fffaf1}
+.reflection-head h2{font:400 27px/1.1 var(--serif);color:var(--green);margin:8px 0 5px}
+.reflection-head p{margin:0;color:var(--muted);font-size:11px;line-height:1.7;max-width:680px}
+.optional-label{align-self:center;flex:none;border:1px solid var(--line);border-radius:99px;padding:5px 8px;color:#858b80;font-size:9px;white-space:nowrap}
+.reflection-body{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.reason-column{padding:20px 23px 22px}.reason-column+ .reason-column{border-left:1px solid var(--line);background:#fcfaf4}
+.reason-column h3{font:400 20px/1.2 var(--serif);color:var(--green);margin:0 0 12px}
+.reason-options{display:grid;gap:9px}
+.reason-option{display:flex;align-items:flex-start;gap:9px;font-size:11px;line-height:1.5;color:#59655a;cursor:pointer}
+.reason-option input{margin:2px 0 0;accent-color:var(--green);flex:none}
+.reason-option strong{font-weight:750;color:#3d4c3f}
+.reason-option small{display:block;margin-top:2px;font-size:10px;color:#858b80}
+.reason-note{margin-top:13px;min-height:82px;resize:vertical;font-size:11px;line-height:1.6}
+.reason-note::placeholder{color:#a2a499}
+.reason-hint{font-size:9px;color:#92968d;margin:7px 0 0;line-height:1.5}
+.reflection-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 22px;border-top:1px solid var(--line);background:#f8f4ea}
+.reason-error{font-size:10px;color:#a6533e;line-height:1.5;margin:0;max-width:510px}
+.reflection-actions-right{display:flex;gap:8px;align-items:center;flex:none}
+.feedback-panel{display:none;padding:22px 24px 24px;border-top:1px solid var(--line);background:#edf1e8}
+.feedback-panel.visible{display:block;animation:fade-in .22s ease-out}
+.feedback-top{display:grid;grid-template-columns:46px minmax(0,1fr);gap:12px;align-items:start}
+.feedback-icon{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fffdf8;font:22px var(--serif)}
+.feedback-panel h3{font:400 25px/1.12 var(--serif);color:var(--green);margin:0 0 6px}
+.feedback-panel p{font-size:12px;line-height:1.75;color:#536151;margin:0}
+.feedback-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:18px 0 14px}
+.metric{border:1px solid #d2ddca;background:#f9fbf6;border-radius:10px;padding:11px 12px;min-width:0}
+.metric span{display:block;font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:#7d8978;font-weight:800}
+.metric strong{display:block;margin-top:3px;font:400 21px/1.1 var(--serif);color:var(--green)}
+.feedback-next{display:flex;gap:10px;align-items:flex-start;border-top:1px solid #cfd9c7;padding-top:13px;margin-top:13px;font-size:11px;line-height:1.65;color:#536151}
+.feedback-next strong{color:var(--green)}
+.complete-banner{display:none;margin-top:18px;padding:19px 21px;border:1px solid #c5d7bf;background:#e7eee2;border-radius:13px;align-items:center;gap:14px}
+.complete-banner.visible{display:flex}
+.complete-check{width:36px;height:36px;border-radius:50%;background:var(--green);color:#fffdf8;display:grid;place-items:center;font-size:17px;flex:none}
+.complete-copy{flex:1;min-width:0}.complete-copy strong{display:block;font:400 21px/1.2 var(--serif);color:var(--green)}.complete-copy span{display:block;color:#637160;font-size:10px;margin-top:4px;line-height:1.6}
+.complete-actions{display:flex;gap:8px;align-items:center;flex:none}.complete-actions button{flex:none}
+.footer{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:29px;padding-top:17px;border-top:1px solid var(--line);color:#858a80;font-size:9px;line-height:1.6}
+.footer strong{font-weight:750;color:#586958}
+.toast{position:fixed;left:50%;bottom:24px;z-index:20;transform:translate(-50%,20px);opacity:0;pointer-events:none;max-width:calc(100% - 32px);padding:10px 15px;border:1px solid #ccd9c5;background:#fafff7;color:var(--green);box-shadow:0 10px 25px #192d201a;border-radius:99px;font-size:11px;transition:opacity .2s,transform .2s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.print-summary{display:none}
+@keyframes fade-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:1040px){
+  main{padding-inline:23px}.header-inner{padding-inline:23px}
+  .workspace{grid-template-columns:minmax(0,1fr) 270px;gap:14px}
+  .chart-panel-head{align-items:flex-start;flex-direction:column}.chart-badges{justify-content:flex-start}
+  .workflow-step{padding-inline:7px;gap:6px}.workflow-step strong{font-size:9px}
+}
+@media(max-width:760px){
+  .top-strip{font-size:9px;padding-inline:10px}.site-header{height:65px}.header-inner{padding-inline:16px;gap:12px}.brand-symbol{width:35px;height:35px}.brand-copy strong{font-size:17px}.brand-copy small{font-size:7px}.header-right .header-page{display:none}
+  main{padding:18px 15px 45px}.breadcrumbs{margin-bottom:19px;font-size:9px}.intro{grid-template-columns:1fr;gap:15px;padding-bottom:18px}.intro h1{font-size:clamp(36px,8.4vw,49px)}.intro p{font-size:13px}.exercise-stamp{border-left:0;border-top:1px solid var(--line);padding:12px 0 0;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:3px 12px}.stamp-number{grid-row:span 2;font-size:26px}.exercise-stamp span{font-size:9px}
+  .workflow{grid-template-columns:repeat(5,minmax(68px,1fr));overflow-x:auto;padding:14px 0 17px;margin-bottom:15px;scrollbar-width:thin}.workflow-step{padding:0 7px;display:flex;flex-direction:column;align-items:flex-start;gap:5px;border-right:0}.workflow-step:first-child{padding-left:0}.step-num{width:23px;height:23px;font-size:9px}.workflow-step strong{font-size:9px}.workflow-step small{font-size:8px}
+  .workspace{grid-template-columns:1fr;gap:12px}.chart-panel{border-radius:13px}.chart-panel-head{min-height:0;padding:13px 14px;flex-direction:row;align-items:center}.chart-title strong{font-size:19px}.chart-title span{font-size:9px}.chart-badges .mini-badge:nth-child(2){display:none}.chart-toolbar{gap:6px;padding:9px 10px}.tool-label{width:100%;margin-bottom:1px}.tool-button{min-height:33px;padding:6px 9px;font-size:9px}.toolbar-spacer{display:none}#chartSvg{aspect-ratio:1000/570}.chart-foot{padding:8px 10px;font-size:8px}.chart-instructions{padding:10px 12px;font-size:9px}
+  .task-panel{position:static;order:1;display:grid;grid-template-columns:1fr}.task-panel-top{padding:13px 15px}.task-panel h2{font-size:22px;margin:4px 0}.task-panel-top p{font-size:10px}.task-content{padding:12px 15px}.task-content h3{font-size:17px}.instruction-list{font-size:10px;display:grid;grid-template-columns:1fr 1fr;gap:0 16px}.instruction-list li{margin:3px 0}.tip-note{margin-top:9px;padding:9px 10px;font-size:13px}.task-status{padding:9px 13px}.task-bottom{padding:11px 13px 13px}.task-bottom .tool-button{min-height:40px}.zone-details{margin-top:12px;padding-top:12px}
+  .reflection{margin-top:17px;border-radius:13px}.reflection-head{padding:16px}.reflection-head h2{font-size:23px}.reflection-head p{font-size:10px}.reflection-body{grid-template-columns:1fr}.reason-column{padding:16px}.reason-column+ .reason-column{border-left:0;border-top:1px solid var(--line)}.reason-column h3{font-size:18px}.reason-options{grid-template-columns:1fr 1fr;gap:12px}.reason-option{font-size:10px}.reason-option small{font-size:9px}.reflection-actions{padding:12px 14px;align-items:flex-start;flex-direction:column}.reflection-actions-right{width:100%}.reflection-actions-right .tool-button{flex:1}.reason-error{max-width:none}.feedback-panel{padding:17px}.feedback-panel h3{font-size:22px}.feedback-panel p{font-size:11px}.feedback-metrics{gap:6px}.metric{padding:9px 8px}.metric strong{font-size:18px}.metric span{font-size:7px}.complete-banner{padding:14px;align-items:flex-start;flex-wrap:wrap}.complete-copy strong{font-size:18px}.complete-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}.complete-actions button{width:100%}.footer{font-size:8px;align-items:flex-start}.footer span:last-child{text-align:right}
+}
+@media(max-width:430px){
+ .header-inner{padding-inline:12px}.brand-copy strong{font-size:16px}.member-label{padding:6px 8px;font-size:9px}.intro h1{font-size:36px}.workflow{grid-template-columns:repeat(5,66px)}.chart-badges{gap:4px}.mini-badge{padding:4px 6px;font-size:8px}.chart-title strong{font-size:17px}.reason-options{grid-template-columns:1fr}.reflection-head{gap:8px}.optional-label{font-size:8px;padding:4px 6px}.feedback-metrics{grid-template-columns:1fr 1fr}.metric:last-child{grid-column:span 2}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+@media print{
+ body{background:#fff;color:#111}.top-strip,.site-header,.breadcrumbs,.workflow,.chart-toolbar,.task-panel,.reflection-actions,.footer,.toast,.complete-banner .tool-button{display:none!important}
+ main{padding:0;max-width:none}.intro{padding:0 0 12px}.intro h1{font-size:28px}.intro p{font-size:11px}.exercise-stamp{display:none}.workspace{display:block}.chart-panel{box-shadow:none;border:1px solid #ccc;break-inside:avoid}.chart-panel-head{padding:8px}.chart-title strong{font-size:16px}.chart-foot,.chart-instructions{font-size:8px}.reflection{box-shadow:none;break-inside:avoid}.reflection-head{padding:10px}.reflection-body{grid-template-columns:1fr 1fr}.reason-column{padding:10px}.reason-column+ .reason-column{border-left:1px solid #ccc;border-top:0}.reason-option{font-size:9px}.reason-note{min-height:45px}.feedback-panel.visible{display:block!important}.print-summary{display:block;margin-top:10px;font-size:10px}.complete-banner.visible{display:flex;padding:9px}.complete-banner button{display:none}
+}
+
+/* Practice-set selector: make the three studies feel like part of the learning tool, not raw browser buttons. */
+.study-picker{
+  display:grid;
+  grid-template-columns:max-content repeat(3,max-content) minmax(220px,1fr);
+  align-items:center;
+  gap:8px;
+  margin:15px 0 0;
+  padding:11px 13px;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:#fffaf1;
+}
+.study-picker>strong{
+  color:var(--green);
+  font-size:10px;
+  font-weight:800;
+  line-height:1.4;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  margin-right:3px;
+}
+.study-choice{
+  appearance:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:34px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:7px 11px;
+  background:#fffdf8;
+  color:#59685a;
+  font-size:10px;
+  font-weight:750;
+  line-height:1.25;
+  white-space:nowrap;
+  transition:background .15s,border-color .15s,color .15s;
+}
+.study-choice:hover{border-color:#a9b9a1;background:#f4f7f0}
+.study-choice[aria-pressed="true"]{border-color:var(--green);background:var(--green);color:#fffdf8}
+.study-description{
+  min-width:0;
+  border-left:1px solid var(--line);
+  padding-left:12px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.55;
+}
+@media(max-width:1120px){
+  .study-picker{grid-template-columns:max-content repeat(3,max-content)}
+  .study-description{grid-column:1/-1;border-left:0;border-top:1px solid var(--line);padding:9px 0 0}
+}
+@media(max-width:760px){
+  .study-picker{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:11px;margin-top:12px}
+  .study-picker>strong{grid-column:1/-1;white-space:normal}
+  .study-choice{min-width:0;white-space:normal;text-align:center;padding:7px 5px;min-height:40px;font-size:9px}
+  .study-description{grid-column:1/-1;border-top:1px solid var(--line);border-left:0;padding:8px 0 0;font-size:10px}
+}
+
+/* ChartLab v2 — sequential support/resistance zones and side-by-side review */
+#chartSvg[hidden],#comparisonPair[hidden],#zoneLesson[hidden],#reflection[hidden],#understandingFeedback[hidden],.chart-toolbar[hidden]{display:none!important}
+.comparison-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:#fffdf8;border-bottom:1px solid var(--line)}
+.compare-card{min-width:0;background:#fffdf8}
+.compare-card+.compare-card{border-left:1px solid var(--line)}
+.compare-card-head{display:flex;align-items:center;justify-content:space-between;gap:9px;padding:14px 15px 11px;border-bottom:1px solid var(--line);background:#fbf8f0}
+.compare-card-head b{display:block;font:400 18px/1.2 var(--serif);color:var(--green)}
+.compare-card-head small{display:block;margin-top:4px;font-size:9px;line-height:1.45;color:var(--muted)}
+.compare-key{flex:none;padding:5px 7px;border-radius:99px;font-size:8px;font-weight:850;letter-spacing:.07em}
+.your-key{background:#e5eadc;color:#355a46;border:1px solid #cbd8c3}
+.example-key{background:#f4e8c5;color:#775d2c;border:1px solid #e3d2a4}
+.comparison-pair svg{display:block;width:100%;height:auto;aspect-ratio:1000/520;background:#fffdf8}
+.compare-card-foot{border-top:1px solid #e9e3d8;padding:10px 13px 12px;color:#687265;font-size:10px;line-height:1.6;background:#fbf8f0}
+.zone-lesson{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:1px solid var(--line);background:#f8f4ea}
+.zone-lesson article{padding:17px 18px 18px;min-width:0}
+.zone-lesson article+article{border-left:1px solid var(--line)}
+.zone-lesson article>span{font-size:8px;letter-spacing:.1em;font-weight:850;color:#9b6e43}
+.zone-lesson h3{font:400 21px/1.16 var(--serif);color:var(--green);margin:7px 0 7px}
+.zone-lesson p{font-size:10px;line-height:1.7;color:#5c685c;margin:0}
+.quiz-body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0}
+.quiz-question{margin:0;padding:20px 23px 22px;border:0;min-width:0}
+.quiz-question+ .quiz-question{border-left:1px solid var(--line);background:#fcfaf4}
+.quiz-question legend{font:400 20px/1.25 var(--serif);color:var(--green);padding:0 0 12px;max-width:100%}
+.quiz-option{display:flex;align-items:flex-start;gap:9px;font-size:11px;line-height:1.6;color:#59655a;padding:10px 11px;border:1px solid var(--line);border-radius:9px;background:#fffdf8;margin-top:7px;cursor:pointer}
+.quiz-option input{accent-color:var(--green);margin:3px 0 0;flex:none}
+.quiz-option:has(input:checked){border-color:#93a98b;background:#edf1e8}
+.understanding-feedback{padding:15px 22px;border-top:1px solid #d3dec9;background:#edf1e8;color:#536151;font-size:12px;line-height:1.7}
+.understanding-feedback strong{color:var(--green)}
+.example-swatch{background:#e8ce83;border-color:#ad8d3e;border-style:dashed}
+@media(max-width:760px){
+ .comparison-pair{grid-template-columns:1fr}
+ .compare-card+.compare-card{border-left:0;border-top:1px solid var(--line)}
+ .compare-card-head{padding:12px 13px 10px}
+ .compare-card-head b{font-size:17px}
+ .comparison-pair svg{aspect-ratio:1000/530}
+ .zone-lesson{grid-template-columns:1fr}
+ .zone-lesson article{padding:14px 15px}
+ .zone-lesson article+article{border-left:0;border-top:1px solid var(--line)}
+ .zone-lesson h3{font-size:19px}
+ .zone-lesson p{font-size:11px}
+ .quiz-body{grid-template-columns:1fr}
+ .quiz-question{padding:16px}
+ .quiz-question+ .quiz-question{border-left:0;border-top:1px solid var(--line)}
+ .quiz-question legend{font-size:19px}
+ .quiz-option{font-size:11px}
+}
+
+/* Embedded ChartLab removes duplicate standalone navigation while preserving drawing controls. */
+body.chartlab-embed .top-strip,body.chartlab-embed .site-header,body.chartlab-embed .breadcrumbs,body.chartlab-embed .intro,body.chartlab-embed .study-picker{display:none!important}
+body.chartlab-embed .site-shell{min-height:0}body.chartlab-embed main{padding-top:9px}body.chartlab-embed .workflow{margin-top:0}body.chartlab-embed .workspace{margin-bottom:8px}
+
+</style>
+</head>
+<body>
+<div class="site-shell">
+  <div class="top-strip"><span class="dot"></span> TRADETHESIS LEARNING ROOM <span class="dot"></span> PRACTICE BEFORE EXECUTION</div>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#top" aria-label="TradeThesis ChartLab home" style="color:inherit;text-decoration:none">
+        <span class="brand-symbol" aria-hidden="true">T</span>
+        <span class="brand-copy"><strong>TradeThesis</strong><small>Conviction before execution</small></span>
+      </a>
+      <div class="header-right"><span class="header-page">Support &amp; Resistance&nbsp; / &nbsp;ChartLab 01</span><span class="member-label"><span class="member-dot"></span> Practice workspace</span></div>
+    </div>
+  </header>
+  <main id="top">
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="#top">My learning</a><span aria-hidden="true">/</span><a href="#exercise">Support &amp; Resistance</a><span aria-hidden="true">/</span><span aria-current="page">ChartLab 01</span></nav>
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <div class="kicker">ChartLab 01 <span style="color:#a9a393">·</span> Mark the zone</div>
+        <h1 id="page-title">Find the two areas that <em>matter.</em></h1>
+        <p>This W-shaped price structure has two areas to investigate: support around the repeated lows and resistance near the neckline. Mark them one at a time. Submit your first zone to lock it, then mark the second and compare both with a reasoned example.</p>
+      </div>
+      <aside class="exercise-stamp"><strong class="stamp-number">01</strong><span>FOUNDATIONAL SKILL<br>Approx. 6–8 minutes</span><span>Synthetic illustrative data · not historical market data</span></aside>
+    </section>
+    <section class="study-picker" aria-label="Choose a practice example">
+      <strong>Practice set · <span id="studyCount">1 of 3</span></strong>
+      <button class="study-choice" type="button" data-study="0" aria-pressed="true">01 · Clear W</button>
+      <button class="study-choice" type="button" data-study="1" aria-pressed="false">02 · Uneven lows</button>
+      <button class="study-choice" type="button" data-study="2" aria-pressed="false">03 · Wider neckline</button>
+      <span class="study-description" id="studyDescription">Start with a clear double-bottom structure. Then practise on two less tidy examples.</span>
+    </section>
+    <section class="workflow" aria-label="Activity progress" id="workflow">
+      <div class="workflow-step active" data-step="1"><span class="step-num">01</span><span><strong>Observe</strong><small>Read the W</small></span></div>
+      <div class="workflow-step" data-step="2"><span class="step-num">02</span><span><strong>Support</strong><small>Mark the lows</small></span></div>
+      <div class="workflow-step" data-step="3"><span class="step-num">03</span><span><strong>Resistance</strong><small>Mark the neckline</small></span></div>
+      <div class="workflow-step" data-step="4"><span class="step-num">04</span><span><strong>Compare</strong><small>See both zones</small></span></div>
+      <div class="workflow-step" data-step="5"><span class="step-num">05</span><span><strong>Check</strong><small>Test your reading</small></span></div>
+    </section>
+
+    <section class="workspace" id="exercise" aria-label="ChartLab exercise">
+      <section class="chart-panel" aria-labelledby="chart-panel-title">
+        <div class="chart-panel-head">
+          <div class="chart-title"><strong id="chart-panel-title">Price action · Clear W study</strong><span id="chart-panel-subtitle">35 illustrative 4H candles · a clear double-bottom structure</span></div>
+          <div class="chart-badges"><span class="mini-badge"><span class="live-indicator"></span> Synthetic sample</span><span class="mini-badge">Price scale · points</span></div>
+        </div>
+        <div class="chart-toolbar" aria-label="Chart tools">
+          <span class="tool-label">Your tools</span>
+          <button class="tool-button selected" id="drawTool" type="button" aria-pressed="true"><span class="tool-icon" aria-hidden="true">▰</span> Draw zone</button>
+          <button class="tool-button" id="undoButton" type="button" disabled><span class="tool-icon" aria-hidden="true">↶</span> Undo</button>
+          <button class="tool-button" id="clearButton" type="button" disabled><span class="tool-icon" aria-hidden="true">×</span> Clear</button>
+          <span class="toolbar-spacer"></span>
+
+        </div>
+        <svg id="chartSvg" preserveAspectRatio="none" viewBox="0 0 1000 520" role="img" aria-label="Illustrative candlestick chart. Drag vertically across the chart to draw a support or resistance zone. The right side shows the price scale.">
+          <title>Illustrative W-shaped price structure</title>
+          <desc>Thirty-five sample candles show two troughs near the same area, a swing high between them, then a move above that high. Draw support first, submit to lock it, then draw resistance.</desc>
+        </svg>
+        <div class="comparison-pair" id="comparisonPair" hidden>
+          <article class="compare-card"><div class="compare-card-head"><span><b>Your interpretation</b><small>Your two submitted zones, now locked</small></span><span class="compare-key your-key">YOUR MARKS</span></div><svg id="studentCompareSvg" viewBox="0 0 1000 520" preserveAspectRatio="none" role="img" aria-label="Your submitted support and resistance zones on the W-shaped chart"></svg><div class="compare-card-foot">Notice what your zones capture—and what they leave outside.</div></article>
+          <article class="compare-card"><div class="compare-card-head"><span><b>A reasoned example</b><small>One defensible interpretation, not the only one</small></span><span class="compare-key example-key">REFERENCE</span></div><svg id="answerCompareSvg" viewBox="0 0 1000 520" preserveAspectRatio="none" role="img" aria-label="Reference support zone around the lows and resistance zone around the neckline"></svg><div class="compare-card-foot">Support surrounds the two lows. Resistance marks the intervening swing high, or neckline.</div></article>
+        </div>
+        <div class="zone-lesson" id="zoneLesson" hidden>
+          <article><span>01 / SUPPORT</span><h3>The two lows</h3><p>The troughs form near a similar price area, even though the wick lows are not identical. A zone captures that variation better than a single exact line.</p></article>
+          <article><span>02 / RESISTANCE</span><h3>The neckline</h3><p>The swing high between the two troughs marks an area where the recovery previously stalled. The later move above it is a break through that resistance area in this sample.</p></article>
+          <article><span>03 / THE IMPORTANT DISTINCTION</span><h3>Mark evidence, not certainty</h3><p>Drawing zones does not create support or resistance. Zones are how we mark areas where price has previously reacted. Neither guarantees a bounce, a breakout or a trade.</p></article>
+        </div>
+        <div class="chart-foot"><span><i class="legend-swatch"></i> Support area <i class="legend-swatch ref" style="margin-left:6px"></i> Resistance / neckline <i class="legend-swatch example-swatch" style="margin-left:6px"></i> Reference edge</span><span id="zoneReadout" aria-live="polite">Support: not marked · Resistance: locked until support is submitted</span></div>
+        <div class="chart-instructions"><span class="instruction-mark" aria-hidden="true">i</span><span id="chartHelp">Start with the support area around the two lows. Draw a band—not a single price—and submit it to lock your first mark.</span></div>
+      </section>
+
+      <aside class="task-panel" aria-labelledby="task-title">
+        <div class="task-panel-top"><div class="task-counter" id="taskCounter">STEP 1 · SUPPORT</div><h2 id="task-title">Mark the support area.</h2><p id="taskDescription">Find the area around the two W-shaped troughs. The exact wick lows differ; look for the cluster.</p></div>
+        <div class="task-content">
+          <h3 id="instructionTitle">Start with the lows</h3>
+          <ol class="instruction-list" id="instructionList">
+            <li>Locate the two main troughs.</li>
+            <li>Notice the lows are close, but not identical.</li>
+            <li>Mark a useful price band around both reactions.</li>
+            <li>Submit it to lock your support mark.</li>
+          </ol>
+          <div class="tip-note" id="tipNote">First mark the area price reacted from twice. You will identify the neckline next.</div>
+          <div class="zone-details" id="zoneDetails">
+            <h3 style="margin-bottom:9px">Fine-tune your mark</h3>
+            <div class="field-grid">
+              <div class="field"><label for="upperPrice">Upper edge</label><input id="upperPrice" inputmode="decimal" type="number" step="0.1" min="96" max="114" aria-label="Upper edge of your price zone"><small>Higher price</small></div>
+              <div class="field"><label for="lowerPrice">Lower edge</label><input id="lowerPrice" inputmode="decimal" type="number" step="0.1" min="96" max="114" aria-label="Lower edge of your price zone"><small>Lower price</small></div>
+            </div>
+          </div>
+        </div>
+        <div class="task-status" id="taskStatus" role="status"><span class="status-dot"></span><span id="statusText">Ready when you are. Draw your first zone on the chart.</span></div>
+        <div class="task-bottom"><button class="tool-button primary" id="submitZoneButton" type="button">Submit support zone · lock it <span aria-hidden="true">↗</span></button><button class="secondary-action" id="resetActivity" type="button">Start this exercise again</button><p class="sub-note">Your attempt stays in this open prototype session. Account sync is not connected.</p></div>
+      </aside>
+    </section>
+
+    <section class="reflection" id="reflection" aria-labelledby="reflection-title" hidden>
+      <div class="reflection-head"><div><div class="kicker">Read the structure</div><h2 id="reflection-title">What do the two zones represent?</h2><p>Now that you have compared both charts, check your reading. The aim is to understand what the zones describe—not to turn the W shape into an automatic trade signal.</p></div><span class="optional-label">Quick understanding check</span></div>
+      <section class="feedback-panel visible" id="feedbackPanel" aria-live="polite" aria-labelledby="feedbackTitle">
+        <div class="feedback-top"><div class="feedback-icon" aria-hidden="true">↗</div><div><h3 id="feedbackTitle">Your two zones, reviewed.</h3><p id="feedbackText">Your feedback will appear here.</p></div></div>
+        <div class="feedback-metrics"><div class="metric"><span>Support reference overlap</span><strong id="metricWidth">—</strong></div><div class="metric"><span>Neckline overlap</span><strong id="metricOverlap">—</strong></div><div class="metric"><span>Zones submitted</span><strong id="metricReasons">2 / 2</strong></div></div>
+        <div class="feedback-next"><span aria-hidden="true">✳</span><span id="nextStepText">Compare the two interpretations, then decide what you would change and why.</span></div>
+      </section>
+      <div class="quiz-body">
+        <fieldset class="quiz-question"><legend>01 / Which statement best explains the two zones?</legend>
+          <label class="quiz-option"><input type="radio" name="reading1" value="correct"><span>Support surrounds the two troughs; resistance marks the intervening swing high, or neckline.</span></label>
+          <label class="quiz-option"><input type="radio" name="reading1" value="exact"><span>They are exact prices that must force price to reverse.</span></label>
+          <label class="quiz-option"><input type="radio" name="reading1" value="signal"><span>The zones alone confirm a buy or sell entry.</span></label>
+        </fieldset>
+        <fieldset class="quiz-question"><legend>02 / In this sample, price later closes above the neckline. What can we conclude?</legend>
+          <label class="quiz-option"><input type="radio" name="reading2" value="continue"><span>Price is guaranteed to keep rising.</span></label>
+          <label class="quiz-option"><input type="radio" name="reading2" value="break"><span>Price has moved above the prior resistance area; follow-through is still uncertain.</span></label>
+          <label class="quiz-option"><input type="radio" name="reading2" value="support"><span>The support zone is guaranteed to hold if price returns.</span></label>
+        </fieldset>
+      </div>
+      <div class="reflection-actions"><p class="reason-error" id="quizStatus" aria-live="polite">Answer both questions to check your understanding.</p><div class="reflection-actions-right"><button class="tool-button" id="printButton" type="button">Print comparison</button><button class="tool-button primary" id="checkUnderstanding" type="button" disabled>Check my understanding <span aria-hidden="true">↗</span></button></div></div>
+      <div class="understanding-feedback" id="understandingFeedback" aria-live="polite" hidden></div>
+
+    </section>
+
+    <section class="complete-banner" id="completeBanner" aria-live="polite"><div class="complete-check" aria-hidden="true">✓</div><div class="complete-copy"><strong>Comparison ready.</strong><span>Check your understanding to finish the activity. Completion is local to this prototype session.</span></div><div class="complete-actions"><button class="tool-button" id="finishPrintButton" type="button">Print comparison</button><button class="tool-button primary" id="markCompleteButton" type="button" disabled>Mark complete ✓</button></div></section>
+    <div class="print-summary" id="printSummary"></div>
+    <footer class="footer"><span><strong>TradeThesis</strong> · Conviction before execution</span><span>For learning and practice only · Synthetic illustrative data · Not a trade signal</span></footer>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const EMBED_MODE = new URLSearchParams(window.location.search).get("embed") === "1";
+  if (EMBED_MODE) document.body.classList.add("chartlab-embed");
+  const NS = 'http://www.w3.org/2000/svg';
+  const W = 1000, H = 520, plot = { left: 74, right: 894, top: 42, bottom: 439 };
+  const MIN = 96, MAX = 114;
+  const studies = [
+    { name: 'Clear W', shortDescription: '35 illustrative 4H candles · a clear double-bottom structure', description: 'Start with a clear double-bottom structure. Then practise on two less tidy examples.', support: { lower: 98.5, upper: 100.8 }, resistance: { lower: 104.6, upper: 106.2 }, closes: [110.8,108.9,107.0,105.1,103.4,101.6,99.7,100.8,102.3,104.2,105.3,103.8,101.9,100.1,99.5,100.6,102.7,105.0,106.8,108.0,106.7,108.1,109.4,108.3,110.2,111.1,109.9,111.8,110.7,112.2,111.1,112.4,111.5,112.9,112.1], explanation: 'The two lows cluster near the same area, while the recovery stalls near the swing high between them. The zones need not be identical to the reference; they should capture those two distinct reactions.' },
+    { name: 'Uneven lows', shortDescription: '35 illustrative 4H candles · second trough probes lower', description: 'The second low probes a little deeper. Decide how wide support needs to be without swallowing unrelated price action.', support: { lower: 97.7, upper: 101.0 }, resistance: { lower: 104.1, upper: 105.9 }, closes: [111.1,109.2,107.4,105.6,103.8,101.8,100.3,101.1,102.9,104.4,105.0,103.9,102.0,99.8,98.9,100.1,102.4,104.7,106.2,107.5,106.1,107.8,109.0,108.1,109.7,110.8,109.5,111.3,110.1,111.9,110.7,112.0,111.1,112.4,111.7], explanation: 'The second trough dips below the first, so a single thin line would miss part of the reaction. A useful support zone can include that variation, but should still isolate the lows. The neckline is a separate area around the intervening recovery high.' },
+    { name: 'Wider neckline', shortDescription: '35 illustrative 4H candles · recovery stalls across an area', description: 'The recovery high is less precise. Look for the area of hesitation rather than insisting on one exact wick.', support: { lower: 98.7, upper: 101.0 }, resistance: { lower: 104.0, upper: 106.8 }, closes: [110.5,108.8,107.1,105.0,103.2,101.7,100.0,101.2,102.8,104.6,106.1,104.0,102.0,100.5,99.7,101.0,102.8,104.5,105.7,107.0,106.0,107.6,108.8,108.0,109.8,110.6,109.7,111.5,110.4,111.8,110.9,112.0,111.3,112.6,111.8], explanation: 'The recovery stalls across a broader area rather than at a perfectly clean price. Resistance is best represented as a band around that swing high. Support remains anchored to the two troughs; do not widen it just because the neckline is wider.' }
+  ];
+  let currentStudy = 0;
+  let referenceZones = { support: { ...studies[0].support }, resistance: { ...studies[0].resistance } };
+  // Sample OHLC values are generated from the selected teaching sequence. They are illustrative, not market data.
+  let closes = studies[0].closes;
+  const highWicks = [0.45,0.70,0.35,0.55,0.60,0.40,0.65];
+  const lowWicks = [0.55,0.35,0.80,0.50,0.45,0.70];
+  const lowsWithLongWicks = new Set([5,6,7,12,13,14,15]);
+  let data = closes.map((close, i) => {
+    const open = i === 0 ? 112.1 : closes[i - 1];
+    const high = Math.max(open, close) + highWicks[i % highWicks.length];
+    let wick = lowWicks[i % lowWicks.length];
+    if (lowsWithLongWicks.has(i)) wick += 0.3;
+    return { open, high, low: Math.min(open, close) - wick, close };
+  });
+  function loadStudy(index) {
+    currentStudy = index;
+    const study = studies[index];
+    closes = study.closes;
+    data = closes.map((close, i) => {
+      const open = i === 0 ? close + 1.3 : closes[i - 1];
+      let high = Math.max(open, close) + highWicks[i % highWicks.length];
+      let wick = lowWicks[i % lowWicks.length] + (index === 1 && [6,13,14].includes(i) ? .25 : 0);
+      return { open, high, low: Math.min(open, close) - wick, close };
+    });
+    referenceZones = { support: { ...study.support }, resistance: { ...study.resistance } };
+    $('studyCount').textContent = `${index + 1} of ${studies.length}`;
+    $('studyDescription').textContent = study.description;
+    document.querySelectorAll('[data-study]').forEach(button => button.setAttribute('aria-pressed', String(Number(button.dataset.study) === index)));
+    $('chart-panel-title').textContent = `Price action · ${study.name} study`;
+    $('chart-panel-subtitle').textContent = study.shortDescription;
+    $('page-title').innerHTML = `Find the two areas that <em>matter.</em>`;
+  }
+
+  const yForPrice = price => plot.top + ((MAX - price) / (MAX - MIN)) * (plot.bottom - plot.top);
+  const priceForY = y => MAX - ((y - plot.top) / (plot.bottom - plot.top)) * (MAX - MIN);
+  const round1 = n => Math.round(n * 10) / 10;
+  const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+  const el = (name, attrs = {}, text = null) => {
+    const node = document.createElementNS(NS, name);
+    Object.entries(attrs).forEach(([k, v]) => node.setAttribute(k, String(v)));
+    if (text !== null) node.textContent = text;
+    return node;
+  };
+  const svgText = (parent, x, y, text, attrs = {}) => parent.appendChild(el('text', { x, y, ...attrs }, text));
+  const state = {
+    support: null, resistance: null, supportLocked: false, resistanceLocked: false,
+    activeRole: 'support', submitted: false, quizChecked: false, complete: false,
+    history: [], drag: null, toastTimer: null
+  };
+  function reportProgress(step) { if (EMBED_MODE && window.parent !== window) window.parent.postMessage({ type:'tt-chartlab-progress', step }, window.location.origin); }
+  function reportEmbedHeight() { if (EMBED_MODE && window.parent !== window) window.parent.postMessage({ type:'tt-chartlab-height', height:Math.max(document.body.scrollHeight,document.documentElement.scrollHeight) }, window.location.origin); }
+  const chartSvg = $('chartSvg');
+
+  function activeZone() { return state[state.activeRole]; }
+  function setActiveZone(value) { state[state.activeRole] = value; }
+  function cloneZone(z) { return z ? { upper: z.upper, lower: z.lower } : null; }
+  function activeLocked() { return state.activeRole === 'support' ? state.supportLocked : state.resistanceLocked; }
+  function snap() { state.history.push(cloneZone(activeZone())); if (state.history.length > 30) state.history.shift(); }
+  function toZone(topY, bottomY) {
+    const yTop = Math.min(topY, bottomY), yBottom = Math.max(topY, bottomY);
+    return { upper: round1(priceForY(yTop)), lower: round1(priceForY(yBottom)) };
+  }
+  function zonePixels(zone) {
+    if (!zone) return null;
+    return { topY: yForPrice(zone.upper), bottomY: yForPrice(zone.lower) };
+  }
+  function colorFor(role) { return role === 'support' ? { fill: '#98b68e', stroke: '#527753' } : { fill: '#dfa08a', stroke: '#b55e43' }; }
+
+  function renderChart(target, zones, options = {}) {
+    const { interactive = false, reference = false, title = 'Illustrative W-shaped price structure' } = options;
+    target.replaceChildren();
+    const fontScale = target.clientWidth && target.clientWidth < 600 ? 2.05 : 1;
+    target.appendChild(el('title', {}, title));
+    target.appendChild(el('desc', {}, 'Illustrative 4H candles: two troughs near a similar price area, a swing high between them, then a move above the neckline. These zones are teaching references, not a trade signal.'));
+    target.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: '#fffdf8' }));
+    const grid = el('g', { 'aria-hidden': 'true' });
+    for (let p = MAX; p >= MIN; p -= 2) {
+      const y = yForPrice(p);
+      grid.appendChild(el('line', { x1: plot.left, y1: y, x2: plot.right, y2: y, stroke: '#e8e3d9', 'stroke-width': 1, 'stroke-dasharray': '3 5' }));
+      svgText(grid, plot.right + 19, y + 4, p.toFixed(0), { fill: '#848a7f', 'font-size': 11 * fontScale, 'font-family': 'var(--mono)' });
+    }
+    for (let i = 0; i <= 7; i++) {
+      const x = plot.left + i * (plot.right - plot.left) / 7;
+      grid.appendChild(el('line', { x1: x, y1: plot.top, x2: x, y2: plot.bottom, stroke: '#f0ece4', 'stroke-width': 1, 'stroke-dasharray': '2 7' }));
+      svgText(grid, x, plot.bottom + 21, ['01','05','09','13','17','21','25','29'][i], { fill: '#a0a397', 'font-size': 9 * fontScale, 'text-anchor': 'middle', 'font-family': 'var(--mono)' });
+    }
+    target.appendChild(grid);
+    target.appendChild(el('rect', { x: plot.left, y: plot.top, width: plot.right - plot.left, height: plot.bottom - plot.top, fill: 'none', stroke: '#d8d4c9', 'stroke-width': 1 }));
+
+    const candles = el('g', { 'aria-label': 'Sample candlesticks' });
+    const cell = (plot.right - plot.left) / data.length;
+    data.forEach((c, i) => {
+      const x = plot.left + (i + .5) * cell;
+      const yo = yForPrice(c.open), yc = yForPrice(c.close), yh = yForPrice(c.high), yl = yForPrice(c.low);
+      const col = c.close >= c.open ? '#648366' : '#c96f50';
+      candles.appendChild(el('line', { x1: x, y1: yh, x2: x, y2: yl, stroke: col, 'stroke-width': 1.7, 'stroke-linecap': 'round' }));
+      candles.appendChild(el('rect', { x: x - cell * .24, y: Math.min(yo, yc), width: cell * .48, height: Math.max(2, Math.abs(yo - yc)), rx: .8, fill: col, stroke: col, 'stroke-width': 1 }));
+    });
+    target.appendChild(candles);
+
+    const roles = ['support', 'resistance'];
+    roles.forEach(role => {
+      const z = zones[role];
+      if (!z) return;
+      const { fill, stroke } = colorFor(role);
+      const topY = yForPrice(z.upper), bottomY = yForPrice(z.lower), height = bottomY - topY;
+      const group = el('g', { 'data-role': role });
+      const referenceStroke = reference ? '#ad8d3e' : stroke;
+      const labelColor = role === 'support' ? '#355a46' : '#a4543c';
+      const label = role === 'support' ? (reference ? 'SUPPORT · REPEATED LOWS' : (state.supportLocked ? 'YOUR SUPPORT · LOCKED' : 'YOUR SUPPORT')) : (reference ? 'RESISTANCE · NECKLINE' : (state.resistanceLocked ? 'YOUR RESISTANCE · LOCKED' : 'YOUR RESISTANCE'));
+      group.appendChild(el('rect', { x: plot.left, y: topY, width: plot.right - plot.left, height, fill, 'fill-opacity': reference ? .23 : .28, stroke: referenceStroke, 'stroke-width': reference ? 2 : 1.8, 'stroke-dasharray': reference ? '7 4' : 'none', 'pointer-events': 'none' }));
+      group.appendChild(el('line', { x1: plot.left, y1: topY, x2: plot.right, y2: topY, stroke: referenceStroke, 'stroke-width': 1.4, 'stroke-dasharray': reference ? '5 4' : '4 4', 'pointer-events': 'none' }));
+      group.appendChild(el('line', { x1: plot.left, y1: bottomY, x2: plot.right, y2: bottomY, stroke: referenceStroke, 'stroke-width': 1.4, 'stroke-dasharray': reference ? '5 4' : '4 4', 'pointer-events': 'none' }));
+      if (interactive && !reference && !activeLocked() && state.activeRole === role && !state.submitted) {
+        // The body goes underneath the thin edge handles so a learner can reliably resize a zone.
+        group.appendChild(el('rect', { x: plot.left, y: topY, width: plot.right - plot.left, height, fill: 'transparent', 'data-part': 'body' }));
+        group.appendChild(el('rect', { x: plot.left, y: topY - 6, width: plot.right - plot.left, height: 12, fill: 'transparent', 'data-part': 'top-handle' }));
+        group.appendChild(el('rect', { x: plot.left, y: bottomY - 6, width: plot.right - plot.left, height: 12, fill: 'transparent', 'data-part': 'bottom-handle' }));
+        group.appendChild(el('circle', { cx: plot.right - 8, cy: topY, r: 5, fill: '#fffdf8', stroke, 'stroke-width': 2, 'pointer-events': 'none' }));
+        group.appendChild(el('circle', { cx: plot.right - 8, cy: bottomY, r: 5, fill: '#fffdf8', stroke, 'stroke-width': 2, 'pointer-events': 'none' }));
+      }
+      target.appendChild(group);
+      const textY = Math.max(plot.top + 13, topY - 8);
+      svgText(target, plot.left + 10, textY, `${label}  ${z.upper.toFixed(1)}–${z.lower.toFixed(1)}`, { fill: labelColor, 'font-size': 10 * fontScale, 'font-family': 'var(--mono)', 'font-weight': 750, 'pointer-events': 'none' });
+    });
+    svgText(target, plot.left, 19, reference ? 'REFERENCE STRUCTURE · 4H' : 'PRICE ACTION · 4H', { fill: '#687368', 'font-size': 10 * fontScale, 'font-family': 'var(--mono)', 'letter-spacing': 1.2 * fontScale });
+    svgText(target, plot.left, 504, 'SAMPLE SEQUENCE · NOT LIVE MARKET DATA', { fill: '#979b90', 'font-size': 9 * fontScale, 'font-family': 'var(--mono)', 'letter-spacing': .4 * fontScale });
+    if (interactive && !zones.support && !zones.resistance) {
+      const hint = el('g', { 'pointer-events': 'none' });
+      hint.appendChild(el('rect', { x: plot.left + 222, y: plot.top + 17, width: 300, height: 43, rx: 9, fill: '#f5efe2', stroke: '#ded8ca' }));
+      svgText(hint, plot.left + 372, plot.top + 34, 'START HERE', { fill: '#6d796b', 'font-size': 9 * fontScale, 'font-family': 'var(--mono)', 'font-weight': 700, 'text-anchor': 'middle', 'letter-spacing': 1.1 * fontScale });
+      svgText(hint, plot.left + 372, plot.top + 49, 'Mark the support area around both lows', { fill: '#586759', 'font-size': 11 * fontScale, 'font-family': 'var(--sans)', 'text-anchor': 'middle' });
+      target.appendChild(hint);
+    }
+  }
+
+  function pointFromEvent(event) {
+    const box = chartSvg.getBoundingClientRect();
+    return clamp((event.clientY - box.top) * H / box.height, plot.top, plot.bottom);
+  }
+  function currentZonePixels() { return zonePixels(activeZone()); }
+  function pushUndo() { snap(); }
+  function showToast(message) {
+    const toast = $('toast'); toast.textContent = message; toast.classList.add('show');
+    clearTimeout(state.toastTimer); state.toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+  }
+
+  function updateWorkflow() {
+    const stages = [true, !!state.support, !!state.supportLocked && !!state.resistance, state.submitted, state.quizChecked];
+    const active = state.complete ? 6 : state.quizChecked ? 6 : state.submitted ? 4 : state.supportLocked ? 3 : state.support ? 2 : 1;
+    document.querySelectorAll('.workflow-step').forEach((item, idx) => {
+      item.classList.toggle('done', !!stages[idx] && idx + 1 < active);
+      item.classList.toggle('active', idx + 1 === active && !state.complete);
+    });
+  }
+
+  function updateUI() {
+    // SVG elements do not reflect the HTML `hidden` property consistently; toggle the actual attribute.
+    if (state.submitted) chartSvg.setAttribute('hidden', ''); else chartSvg.removeAttribute('hidden');
+    $('comparisonPair').hidden = !state.submitted;
+    document.querySelector('.chart-toolbar').hidden = state.submitted;
+    renderChart(chartSvg, { support: state.support, resistance: state.resistance }, { interactive: !state.submitted });
+    $('zoneReadout').textContent = state.support
+      ? `Support: ${state.support.upper.toFixed(1)}–${state.support.lower.toFixed(1)}${state.supportLocked ? ' · locked' : ''}   |   Resistance: ${state.resistance ? state.resistance.upper.toFixed(1) + '–' + state.resistance.lower.toFixed(1) + (state.resistanceLocked ? ' · locked' : '') : 'not marked'}`
+      : 'Support: not marked · Resistance: locked until support is submitted';
+    $('undoButton').disabled = state.submitted || activeLocked() || state.history.length === 0;
+    $('clearButton').disabled = state.submitted || activeLocked() || !activeZone();
+    $('drawTool').disabled = state.submitted;
+    $('submitZoneButton').disabled = state.submitted || (!activeZone());
+    $('upperPrice').disabled = state.submitted || activeLocked() || !activeZone();
+    $('lowerPrice').disabled = state.submitted || activeLocked() || !activeZone();
+    // Keep the numeric-edge panel allocated as the learner moves from locked support to resistance.
+    // This prevents the chart / viewport from shifting while the second zone is being drawn.
+    $('zoneDetails').classList.toggle('visible', !state.submitted && (!!activeZone() || (state.supportLocked && state.activeRole === 'resistance')));
+    if (activeZone()) {
+      $('upperPrice').value = activeZone().upper.toFixed(1);
+      $('lowerPrice').value = activeZone().lower.toFixed(1);
+    } else { $('upperPrice').value = ''; $('lowerPrice').value = ''; }
+
+    if (!state.supportLocked) {
+      $('taskCounter').textContent = state.support ? 'STEP 2 · READY TO LOCK SUPPORT' : 'STEP 1 · SUPPORT';
+      $('task-title').textContent = state.support ? 'Review your support zone.' : 'Mark the support area.';
+      $('taskDescription').textContent = state.support ? 'You have marked an area around the lows. Submit to lock this choice; then you will mark resistance.' : 'Find the area around the two W-shaped troughs. The exact wick lows differ; look for the cluster.';
+      $('instructionTitle').textContent = state.support ? 'Check before submitting' : 'Start with the lows';
+      setInstructionList(state.support ? ['Does your zone include both main troughs?','Is it an area rather than a thin line?','Could you explain why the boundary is useful?','Submit to lock it before marking resistance.'] : ['Locate the two main troughs.','Notice the lows are close, but not identical.','Mark a useful price band around both reactions.','Submit it to lock your support mark.']);
+      $('tipNote').textContent = 'A support zone marks an area where declines have previously met a reaction. It does not promise the area will hold next time.';
+      $('submitZoneButton').innerHTML = 'Submit support zone · lock it <span aria-hidden="true">↗</span>';
+      $('statusText').textContent = state.support ? 'Support is marked. Submit it when you are ready to lock this choice.' : 'Draw a band around the two lower reactions, then submit it to move on.';
+    } else if (!state.resistanceLocked) {
+      $('taskCounter').textContent = state.resistance ? 'STEP 3 · READY TO SUBMIT' : 'STEP 2 · RESISTANCE';
+      $('task-title').textContent = state.resistance ? 'Review your resistance zone.' : 'Now mark the neckline.';
+      $('taskDescription').textContent = state.resistance ? 'Your support is locked. Check that your second zone surrounds the swing high between the two lows.' : 'Find the swing high between the two troughs—the W’s neckline. Mark the area around that high, not the later breakout.';
+      $('instructionTitle').textContent = state.resistance ? 'Check the neckline' : 'Look at the intervening high';
+      setInstructionList(state.resistance ? ['Does your zone cover the prior swing high?','Is the area narrow enough to identify a meaningful level?','The support zone is locked and will not move.','Submit to reveal a two-zone comparison.'] : ['Locate the recovery high between the two troughs.','Notice where price hesitated before turning down.','Draw a zone around that prior swing high.','Your support mark stays locked while you draw.']);
+      $('tipNote').textContent = 'Resistance is an area where a rise previously struggled to move through. It is not a ceiling that price must respect.';
+      $('submitZoneButton').innerHTML = 'Submit resistance · compare both <span aria-hidden="true">↗</span>';
+      $('statusText').textContent = state.resistance ? 'Resistance is marked. Submit to lock it and reveal both reference zones.' : 'Support is locked. Draw the neckline zone, then submit your second mark.';
+    } else {
+      $('taskCounter').textContent = state.complete ? 'ACTIVITY COMPLETE' : 'STEP 3 · COMPARE';
+      $('task-title').textContent = state.complete ? 'You’ve reviewed both zones.' : 'Compare the two interpretations.';
+      $('taskDescription').textContent = 'Both of your marks are now locked. Compare your chart with the reasoned example, then check what the zones tell you.';
+      $('instructionTitle').textContent = 'Look for evidence';
+      setInstructionList(['Support surrounds the two troughs.','Resistance marks the intervening swing high, or neckline.','The later move above resistance is a break in this sample.','A break does not guarantee continued movement.']);
+      $('tipNote').textContent = 'The zones represent observed price behaviour. They are not themselves entry signals.';
+      $('submitZoneButton').textContent = state.complete ? 'Completed ✓' : 'Both zones submitted';
+      $('submitZoneButton').disabled = true;
+      $('statusText').textContent = state.complete ? 'Activity marked complete in this prototype session.' : 'Both zones are locked. The reference comparison is shown in the chart panel.';
+    }
+
+    $('submitZoneButton').hidden = state.submitted;
+    $('chartHelp').textContent = !state.supportLocked
+      ? 'Drag vertically across the lower reaction area to draw support. Submit to freeze this mark before moving on.'
+      : !state.submitted
+        ? 'Your support zone is locked in place. Drag vertically around the swing high between the lows to draw the resistance / neckline zone.'
+        : 'Compare both of your locked zones with the instructor’s reasoned example. The two boundaries may differ while still representing the same areas of interest.';
+
+    if (state.submitted) $('chartSvg').setAttribute('hidden', ''); else $('chartSvg').removeAttribute('hidden');
+    $('comparisonPair').hidden = !state.submitted;
+    document.querySelector('.chart-toolbar').hidden = state.submitted;
+    $('zoneLesson').hidden = !state.submitted;
+    if (state.submitted) {
+      renderChart($('studentCompareSvg'), { support: state.support, resistance: state.resistance }, { interactive: false, title: 'Your submitted support and resistance zones' });
+      renderChart($('answerCompareSvg'), referenceZones, { interactive: false, reference: true, title: 'Reasoned reference: support and neckline resistance' });
+      $('chart-panel-title').textContent = 'Two-zone comparison · your marks and the example';
+      $('reflection').hidden = false;
+      $('feedbackPanel').classList.add('visible');
+      $('completeBanner').classList.add('visible');
+    } else {
+      $('chart-panel-title').textContent = `Price action · ${studies[currentStudy].name} study`;
+      $('chart-panel-subtitle').textContent = studies[currentStudy].shortDescription;
+      $('reflection').hidden = true;
+      $('feedbackPanel').classList.remove('visible');
+      $('completeBanner').classList.remove('visible');
+    }
+    $('markCompleteButton').disabled = !state.quizChecked || state.complete;
+    $('checkUnderstanding').disabled = !document.querySelector('input[name="reading1"]:checked') || !document.querySelector('input[name="reading2"]:checked');
+    updateWorkflow();
+  }
+
+  function setInstructionList(items) {
+    const ul = $('instructionList');
+    ul.replaceChildren(...items.map(value => { const li = document.createElement('li'); li.textContent = value; return li; }));
+  }
+
+  function lockActiveZone() {
+    if (state.submitted) return;
+    const z = activeZone();
+    if (!z) { showToast(`Draw the ${state.activeRole} zone before submitting it.`); return; }
+    if (z.upper - z.lower < 0.25) { showToast('That mark is almost a line. Widen it slightly to capture an area.'); return; }
+    if (state.activeRole === 'support') {
+      state.supportLocked = true;
+      reportProgress('support-locked');
+      state.activeRole = 'resistance';
+      state.history = [];
+      updateUI();
+      showToast('Support locked. Now draw resistance around the W neckline.');
+      return;
+    }
+    state.resistanceLocked = true;
+    state.submitted = true;
+    reportProgress('submitted');
+    state.history = [];
+    buildComparisonFeedback();
+    updateUI();
+    $('reflection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    showToast('Both zones submitted. Compare your interpretation with the two-zone example.');
+  }
+
+  function overlapRatio(actual, reference) {
+    const overlap = Math.max(0, Math.min(actual.upper, reference.upper) - Math.max(actual.lower, reference.lower));
+    return overlap / (reference.upper - reference.lower);
+  }
+  function widthQuality(zone, role) {
+    const width = zone.upper - zone.lower;
+    const referenceWidth = referenceZones[role].upper - referenceZones[role].lower;
+    // Relative width warns when a large band overlaps the whole example but also absorbs unrelated price action.
+    return width > referenceWidth * 1.9 ? 'wide' : width < referenceWidth * .35 ? 'narrow' : 'usable';
+  }
+  function buildComparisonFeedback() {
+    const supportRatio = overlapRatio(state.support, referenceZones.support);
+    const resistanceRatio = overlapRatio(state.resistance, referenceZones.resistance);
+    const supportQuality = widthQuality(state.support, 'support'), resistanceQuality = widthQuality(state.resistance, 'resistance');
+    $('metricWidth').textContent = `${Math.round(supportRatio * 100)}%`;
+    $('metricOverlap').textContent = `${Math.round(resistanceRatio * 100)}%`;
+    $('metricReasons').textContent = '2 / 2';
+    let title, text, next;
+    if (supportRatio >= .55 && resistanceRatio >= .5) {
+      title = 'You found both important areas.';
+      text = `Your support zone overlaps the reference area around the two troughs, and your resistance zone overlaps the neckline. That is a useful reading of this ${studies[currentStudy].name.toLowerCase()} structure. The exact boundaries do not need to match pixel for pixel; what matters is whether each zone captures the visible reactions and has a clear reason.`;
+    } else if (supportRatio >= .55) {
+      title = 'You identified support. Revisit the neckline.';
+      text = 'Your support mark captures much of the reference area around the two lows. The resistance mark is farther from the example’s neckline, so inspect the recovery high between the troughs and ask where price previously hesitated before the second decline.';
+    } else if (resistanceRatio >= .5) {
+      title = 'You found the neckline. Revisit the two lows.';
+      text = 'Your resistance mark captures much of the reference neckline. The support zone is farther from the example’s lower reaction area, so look for the two troughs that form near the same price region, allowing for small differences between wick lows.';
+    } else {
+      title = 'Now compare both marks with the W structure.';
+      text = 'The reference highlights two separate areas: the lower cluster formed by the two troughs, and the intervening swing high that acts as the neckline. Compare each of your zones with those reactions and consider whether the mark is shifted, too narrow or too wide.';
+    }
+    if (supportQuality === 'wide') text += ' Your support zone is wide; check that it still isolates the repeated lows rather than much of the chart.';
+    if (supportQuality === 'narrow') text += ' Your support zone is very narrow and may be treating slightly different wick lows as though they should be identical.';
+    if (resistanceQuality === 'wide') text += ' Your resistance zone is wide; consider tightening it around the intervening swing high.';
+    if (resistanceQuality === 'narrow') text += ' Your resistance zone is very narrow; a little room for variation between wicks and closes can be useful.';
+    next = 'Support and resistance are descriptions of areas where price has reacted before—not guarantees. In this sample, the later close above the neckline shows a break of the prior resistance area, but it does not prove that price must continue rising.';
+    text += ` Example note: ${studies[currentStudy].explanation}`;
+    $('feedbackTitle').textContent = title;
+    $('feedbackText').textContent = text;
+    $('nextStepText').textContent = next;
+  }
+
+  function beginPointer(event) {
+    if (event.button !== undefined && event.button !== 0) return;
+    if (state.submitted || activeLocked()) return;
+    const y = pointFromEvent(event);
+    const current = currentZonePixels();
+    const part = event.target?.getAttribute?.('data-part');
+    if (state.activeRole === 'resistance' && state.supportLocked && !state.resistance && state.support) {
+      const supportPx = zonePixels(state.support);
+      if (y >= supportPx.topY && y <= supportPx.bottomY) {
+        showToast('Support is locked. Draw your second zone around the neckline, above the lows.');
+        return;
+      }
+    }
+    snap();
+    let kind = 'draw';
+    if (current && part === 'top-handle') kind = 'top';
+    else if (current && part === 'bottom-handle') kind = 'bottom';
+    else if (current && part === 'body' && y >= current.topY && y <= current.bottomY) kind = 'move';
+    state.drag = { kind, startY: y, original: cloneZone(activeZone()), originalPixels: current };
+    try { chartSvg.setPointerCapture(event.pointerId); } catch (_) {}
+    chartSvg.classList.add('is-moving');
+    if (kind === 'draw') setActiveZone(toZone(y, y + 1));
+    updateUI(); event.preventDefault();
+  }
+  function movePointer(event) {
+    if (!state.drag || state.submitted || activeLocked()) return;
+    const y = pointFromEvent(event), drag = state.drag;
+    if (drag.kind === 'draw') setActiveZone(toZone(drag.startY, y));
+    else {
+      const p = drag.originalPixels;
+      if (drag.kind === 'top') setActiveZone(toZone(y, p.bottomY));
+      if (drag.kind === 'bottom') setActiveZone(toZone(p.topY, y));
+      if (drag.kind === 'move') {
+        const delta = y - drag.startY;
+        const height = p.bottomY - p.topY;
+        const top = clamp(p.topY + delta, plot.top, plot.bottom - height);
+        setActiveZone(toZone(top, top + height));
+      }
+    }
+    updateUI(); event.preventDefault();
+  }
+  function endPointer() {
+    if (!state.drag) return;
+    const zone = activeZone();
+    if (zone && zone.upper - zone.lower < .3) {
+      const centre = (zone.upper + zone.lower) / 2;
+      setActiveZone({ upper: round1(clamp(centre + .25, MIN + .1, MAX)), lower: round1(clamp(centre - .25, MIN, MAX - .1)) });
+    }
+    state.drag = null; chartSvg.classList.remove('is-moving'); updateUI();
+  }
+  chartSvg.addEventListener('pointerdown', beginPointer);
+  chartSvg.addEventListener('pointermove', movePointer);
+  chartSvg.addEventListener('pointerup', endPointer);
+  chartSvg.addEventListener('pointercancel', endPointer);
+
+  $('undoButton').addEventListener('click', () => {
+    if (!state.history.length || state.submitted || activeLocked()) return;
+    setActiveZone(state.history.pop()); updateUI(); showToast(activeZone() ? 'Last drawing change undone.' : 'Your zone was removed.');
+  });
+  $('clearButton').addEventListener('click', () => {
+    if (!activeZone() || state.submitted || activeLocked()) return;
+    snap(); setActiveZone(null); updateUI(); showToast('Current zone cleared.');
+  });
+  $('drawTool').addEventListener('click', () => {
+    showToast(state.activeRole === 'support' ? 'Draw around both lows; submit to lock support.' : 'Draw around the intervening swing high; submit to compare both zones.');
+  });
+  $('submitZoneButton').addEventListener('click', lockActiveZone);
+
+  function updateNumericEdge(which) {
+    const z = activeZone(); if (!z || state.submitted || activeLocked()) return;
+    const next = { ...z };
+    const raw = Number($(which).value);
+    if (!Number.isFinite(raw)) { updateUI(); return; }
+    snap();
+    if (which === 'upperPrice') next.upper = round1(clamp(raw, next.lower + .2, MAX));
+    else next.lower = round1(clamp(raw, MIN, next.upper - .2));
+    setActiveZone(next); updateUI();
+  }
+  $('upperPrice').addEventListener('change', () => updateNumericEdge('upperPrice'));
+  $('lowerPrice').addEventListener('change', () => updateNumericEdge('lowerPrice'));
+
+  document.querySelectorAll('[data-study]').forEach(button => button.addEventListener('click', () => {
+    if (state.support || state.resistance || state.submitted) {
+      const ok = window.confirm('Switch practice example? Your current marks will be reset.');
+      if (!ok) return;
+    }
+    resetCurrentAttempt(); loadStudy(Number(button.dataset.study)); updateUI(); showToast(`Example ${currentStudy + 1} loaded: ${studies[currentStudy].name}.`);
+  }));
+
+  function resetCurrentAttempt() {
+    state.support = null; state.resistance = null; state.supportLocked = false; state.resistanceLocked = false;
+    state.activeRole = 'support'; state.submitted = false; state.quizChecked = false; state.complete = false; state.history = []; state.drag = null;
+    document.querySelectorAll('input[name="reading1"],input[name="reading2"]').forEach(input => { input.checked = false; });
+    $('understandingFeedback').hidden = true;
+    $('feedbackTitle').textContent = 'Your two zones, reviewed.';
+    $('feedbackText').textContent = 'Your feedback will appear here.';
+    $('metricWidth').textContent = '—'; $('metricOverlap').textContent = '—'; $('metricReasons').textContent = '2 / 2'; $('nextStepText').textContent = 'Compare the two interpretations, then decide what you would change and why.';
+    $('checkUnderstanding').disabled = true; $('quizStatus').textContent = 'Answer both questions to check your understanding.';
+    $('markCompleteButton').disabled = true; $('markCompleteButton').textContent = 'Mark complete ✓';
+    updateUI();
+  }
+  $('resetActivity').addEventListener('click', () => { resetCurrentAttempt(); window.scrollTo({ top: 0, behavior: 'smooth' }); showToast('Exercise reset. Start with the support area.'); });
+
+  function checkQuizAvailability() {
+    state.quizChecked = false;
+    $('understandingFeedback').hidden = true;
+    $('markCompleteButton').disabled = true;
+    $('quizStatus').textContent = 'Answer both questions to check your understanding.';
+    updateUI();
+  }
+  document.querySelectorAll('input[name="reading1"],input[name="reading2"]').forEach(input => input.addEventListener('change', checkQuizAvailability));
+  $('checkUnderstanding').addEventListener('click', () => {
+    const first = document.querySelector('input[name="reading1"]:checked')?.value;
+    const second = document.querySelector('input[name="reading2"]:checked')?.value;
+    if (!first || !second) { showToast('Choose one answer for each question first.'); return; }
+    state.quizChecked = true;
+    reportProgress('quiz-checked');
+    const allCorrect = first === 'correct' && second === 'break';
+    const box = $('understandingFeedback');
+    box.innerHTML = allCorrect
+      ? '<strong>Well read.</strong> Support is the area around the two lows; resistance is the neckline. The close above it shows a break in this sample, not a promise of continued movement.'
+      : '<strong>Review the distinction.</strong> The zones describe areas where price previously reacted. A W shape and a close beyond resistance provide context, but neither guarantees the next move. The neckline is the intervening swing high; a break needs follow-through to be assessed further.';
+    box.hidden = false;
+    $('quizStatus').textContent = allCorrect ? 'Both answers are right. You have separated structure from prediction.' : 'Use the explanation, adjust your answers if needed, and check again.';
+    $('markCompleteButton').disabled = false;
+    updateWorkflow();
+    showToast(allCorrect ? 'Good reading. You can mark the activity complete.' : 'Feedback shown. Review it and try the check again.');
+  });
+  $('markCompleteButton').addEventListener('click', () => {
+    if (!state.quizChecked) { showToast('Check your understanding before finishing.'); return; }
+    state.complete = true;
+    reportProgress('complete');
+    $('completeBanner').querySelector('.complete-copy strong').textContent = 'ChartLab 01 marked complete.';
+    $('completeBanner').querySelector('.complete-copy span').textContent = 'You marked support and resistance, compared both zones, and checked your understanding. This completion is local to this prototype session only.';
+    $('markCompleteButton').textContent = 'Completed ✓'; $('markCompleteButton').disabled = true;
+    updateUI(); showToast('Activity marked complete in this prototype session.');
+  });
+  $('printButton').addEventListener('click', () => window.print());
+  $('finishPrintButton').addEventListener('click', () => window.print());
+
+  loadStudy(0);
+  updateUI();
+  if (EMBED_MODE) { reportEmbedHeight(); if ('ResizeObserver' in window) new ResizeObserver(reportEmbedHeight).observe(document.body); window.addEventListener('load',reportEmbedHeight); window.addEventListener('resize',reportEmbedHeight); }
+})();
+</script>
+</body>
+</html>
+
+</body>
+</html>

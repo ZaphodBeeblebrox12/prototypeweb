@@ -2,15 +2,15 @@
 
 **Module:** 2 — Find the important areas  
 **Lessons:** 3–5  
-**Status:** Lessons 3–4 implemented in the learning-room preview and browser-tested. Lesson 5 remains pending implementation of its editing activity and two-zone ChartLab. The production scripts remain the canonical lesson source; this map records how the current preview implements them.  
+**Status:** Lessons 3–5 are integrated in the learning-room preview and browser-tested. Lesson 5 includes an incremental clutter-edit activity and the embedded Clear W two-zone ChartLab. Responses/progress are local to the browser session, not member-account persistence.  
 **Working standard:** `production/MODULE_DEPTH_WORKING_NOTES.md`  
 **Template redesign:** Deferred; not part of this pass.
 
 ## Executive finding
 
-The canonical scripts for Lessons 3–5 contain a coherent teaching sequence, example-by-example reveal plans, model-answer guidance and assessment intent. Lessons 3–4 now expose those core teaching sequences in the learning room: staged explanations, chart evidence, learner response gates, model reasoning and three formative checks per lesson. Lesson 5 still renders only its initial chart and does not yet provide the required editing choices or two-zone drawing/submission workflow.
+The canonical scripts for Lessons 3–5 provide the teaching sequence, reveal plans, model-answer guidance and assessment intent. Lessons 3–4 expose staged explanations, learner gates and three formative checks each. Lesson 5 now adds a seven-candidate Keep/Combine/Leave-out/Not-sure activity, three incremental edit views, a worked reduction, then the Clear W drawing lab with sequential support/resistance submission, reference feedback and two post-lab checks.
 
-The required chart material was already in the repository and is now wired for Lessons 3–4. The corrected asset pack now contains 25 specified Lesson 3–5 / Clear W PNG chart states and their SVG counterparts, including a new candidate-ID view for independent swing-point practice. The internal knowledge-check bank contains three checks each for Lessons 3 and 4 plus two checks after the Lesson 5 ChartLab. The remaining major gap is Lesson 5's editing and drawing interaction—not source material or a new template.
+The corrected asset pack now contains 27 specified Lesson 3–5 / Clear W PNG chart states and their SVG counterparts, including candidate-ID practice for Lesson 3 and two incremental Lesson 5 editing states. Lessons 3–4 use three formative questions each; Clear W includes the two post-lab questions specified in its standalone answer key. The remaining work is a separate keyboard/screen-reader audit and later editorial/template passes—not the core Lesson 5 interaction.
 
 ## 1. Lesson-by-lesson gap matrix
 
@@ -18,7 +18,7 @@ The required chart material was already in the repository and is now wired for L
 |---|---|---|---|
 | **3 — Identify meaningful swing points** | The three judgement filters: relative prominence, structural role and relevance to the current question. Keep this qualitative—not a numeric “swing strength” score—and accept evidence-based alternatives. | Implemented as 10 staged views: unmarked path, neutral candidate IDs, three reasoning filters, a four-point reference, simplified view, independent clean/candidate states and an alternative-tolerant model answer with field-note transfer. The four-point reference set was regenerated to match the explicit exercise constraint. | The accessible candidate buttons allow up to four selections; rationale is required before reveal unless the learner explicitly chooses “I am not sure yet.” Selection and notes are browser-local. Desktop and 360px mobile browser QA passed. Keyboard-only/screen-reader testing remains a separate check. |
 | **4 — Zones, not perfect lines** | Keep the distinction between related reactions as an area and one exact price. Wicks, bodies and closes inform boundary decisions; none is a universal rule. Keep this as boundary judgement, not a ChartLab. | Implemented as 11 staged views: lower reactions, broad bracket, too-narrow band, defensible band, too-broad band and same-scale comparison; upper-side transfer; and independent practice/reference with field-note transfer. | Each fresh practice view requires a new attempt. The boundary sequence explicitly teaches what each band includes/excludes and does not use pixel-perfect scoring. The three formative checks per lesson are wired with explanatory feedback. Desktop and 360px mobile browser QA passed. |
-| **5 — Choose the right areas and reduce clutter** | The progression from editing a cluttered chart to the first complete drawing attempt. Keep ChartLab Study 1 **Clear W** here, after Lessons 1–4. The “three or four primary areas” constraint is a practice aid, never a universal maximum. | On the over-marked chart, reveal keep/combine/leave-out decisions one at a time, each with a reason tied to the actual drawing. Make clear that “leave out for this reading” does not mean “never relevant.” Then hand off to Clear W, with separate reasoning for the lower support area and intervening upper resistance area. | The selection task needs a real Keep / Combine / Leave out / Not sure interaction, an editable first attempt and a submission step. Clear W requires an actual zone-drawing interaction: submit support first, preserve it while drawing resistance, submit the second zone, and only then unlock reference comparison and tailored feedback. The current page merely displays `CL01-01-clean.png`; the “ChartLab” label is not a working drawing lab. Do not simulate this with a static reference image or claim that submission, persistence or secure answer gating exists before it is implemented and tested. |
+| **5 — Choose the right areas and reduce clutter** | Keep the transition from editing a crowded chart to a first full two-zone drawing. Keep the “three or four primary areas” limit as an exercise constraint, not a universal maximum. | Implemented as six staged views: unclassified clutter, candidate IDs with incremental Keep/Combine/Leave-out/Not-sure classification, remove one minor mark, combine nearby bands, show the worked two-area edit, then hand off to Clear W. | The editing form requires a classification for each of seven candidates plus a short rationale before revealing the model edit. Clear W is embedded from the existing self-contained ChartLab prototype. The learner draws/submits support, which locks; draws/submits resistance while support remains visible; only then sees reference comparison and tailored feedback. The two post-lab questions and a completion gate are active. Browser QA passed the complete desktop flow and mobile overflow checks. This remains a preview, not account-backed progress or secure server-side assessment. |
 
 ### Existing asset sequences to wire in
 
@@ -63,9 +63,9 @@ The current catalogue contains **Market Structure**, but its topic substantially
 |---|---|
 | Lesson 3 staged charts / selectable swing points | Implemented and browser-tested: 10 views, selectable candidate IDs, four-point exercise cap, rationale/uncertainty gate, independent practice and reference. |
 | Lesson 4 boundary comparisons / upper-side transfer / independent practice | Implemented and browser-tested: 11 views, same-scale width comparisons, upper-side transfer, independent practice and reference. |
-| Lesson 5 keep/combine/leave-out interaction | Not implemented. The over-marked chart states exist but are not connected to the lesson UI. |
-| Clear W drawing and submission state machine | Not implemented. The page displays the initial Clear W image and does not yet provide a real two-zone drawing/submission task. |
-| Formative question set | Lessons 3 and 4 each show three formative multiple-choice checks with per-question explanatory feedback, matching the internal bank. Lesson 5's two post-lab checks remain deferred with ChartLab. |
+| Lesson 5 keep/combine/leave-out interaction | Implemented and browser-tested: seven candidate classifications, a short rationale, and staged remove/combine/omit/reduction reveals. This is a reasoning exercise, not a strict score. |
+| Clear W drawing and submission state machine | Implemented and browser-tested inside the learning room using the standalone ChartLab prototype: support locks first; resistance is drawn second; the first mark stays visible; reference comparison and feedback wait until both are submitted. |
+| Formative question set | Lessons 3 and 4 each show three multiple-choice checks with feedback. Clear W shows its two post-lab checks and reports session completion back to the parent lesson. |
 | Answer/reveal security and persistence | Still preview-grade. Responses, selections and progress are browser-local, not account-backed or secured against direct inspection of static reference assets. |
 
 ## 4. Recommended implementation order
@@ -73,8 +73,8 @@ The current catalogue contains **Market Structure**, but its topic substantially
 1. **Completed — Lesson 3:** wired the staged charts and accessible candidate selection, capped the exercise at four points, added rationale/uncertainty handling and revealed an independent practice/reference pair. The reference chart set was regenerated and checksums updated.
 2. **Completed — Lesson 4:** wired all 11 existing views, the same-scale boundary comparisons, upper-side transfer and independent practice/reference.
 3. **Completed — formative checks and browser QA:** integrated three formative checks for each lesson; automated desktop browser flow and 360px mobile layout checks passed. Keyboard-only/screen-reader testing and live learner editorial review remain outstanding.
-4. **Next — Lesson 5:** build the keep/combine/leave-out activity, then implement the actual two-zone Clear W ChartLab with required submission gates and preservation of the first drawing. Do not mark Lesson 5 complete merely because its chart is visible.
-5. After Lesson 5, run the learner-language and chart-led editorial passes. The separate site-template comparison remains deferred.
+4. **Completed — Lesson 5:** added the Keep/Combine/Leave-out/Not-sure interaction and stepwise chart edits, then embedded the existing Clear W drawing prototype. Support must be submitted and locked before resistance; both must be submitted before reference reveal; both knowledge checks must be completed before the parent lesson completion action unlocks.
+5. **Next:** run the keyboard-only/screen-reader audit, then the learner-language and chart-led editorial passes. The separate site-template comparison remains deferred.
 
 ## 5. Acceptance checklist for Module 2
 
@@ -82,11 +82,11 @@ The current catalogue contains **Market Structure**, but its topic substantially
 - [x] Lesson 3's four-point limit is explicitly an exercise constraint, not a universal market rule.
 - [x] Lesson 4 compares boundary widths against the same underlying candles and discusses what each includes/excludes.
 - [x] Lesson 4 accepts defensible alternative widths and does not use pixel-perfect matching as the sole score.
-- [ ] Lesson 5 editing rationales are integrated and match the synthetic chart geometry.
-- [ ] Clear W preserves the first submission while the second zone is drawn, with reference comparison gated until both are submitted.
+- [x] Lesson 5 editing rationales are integrated and match the synthetic chart geometry; seven candidate classifications gate the worked edit.
+- [x] Clear W preserves the first submitted zone while the second is drawn, and reference comparison stays gated until both are submitted.
 - [x] Three formative knowledge checks and explanatory feedback are integrated for each of Lessons 3 and 4.
 - [x] The preview labels synthetic charts accurately and does not claim production-secured ChartLab or account persistence.
 - [x] No numeric swing/zone-strength score or universal touch-count/zone-width rule is introduced.
-- [x] Desktop reveal flow and 360px mobile layout passed automated browser checks; keyboard-only and screen-reader QA remains outstanding.
+- [x] Desktop reveal/drawing flow, two-question completion gate and 360px mobile overflow checks passed automated browser QA; keyboard-only and screen-reader QA remain outstanding.
 
 **Decision:** Build from the existing scripts/assets. The primary gap is learner-room integration and specific interaction behaviour—not a lack of source material and not a need for a new template.
