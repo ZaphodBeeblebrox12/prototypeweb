@@ -74,6 +74,8 @@ Keep the answer private.
     assert "Choose a defensible interpretation." in body
     assert "Do not show future candles" not in body
     assert "Price returns to the zone" not in body
+    assert "Price returns to the zone" in answers
+    assert "Q1. Does every breakout retest?" in body
     assert "Correct: No." not in body
     assert "Correct: No." in answers
     assert "Keep the answer private." not in body
