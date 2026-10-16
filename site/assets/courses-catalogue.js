@@ -6,7 +6,7 @@
   if (!data) return;
 
   const $ = (selector, scope = document) => scope.querySelector(selector);
-  const $ = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
+  const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
   // Hidden records remain available as drafts but are excluded from public cards and counts.
   const isCatalogueVisible = item => item && item.catalogueVisibility !== 'hidden';
   const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
