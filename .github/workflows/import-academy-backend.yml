@@ -47,6 +47,9 @@ jobs:
             --exclude='venv/' \
             --exclude='node_modules/' \
             --exclude='*.pyc' \
+            --exclude='*.exe' \
+            --exclude='ci_test_results.txt' \
+            --exclude='file_tree.txt' \
             source-repo/ backend/
           if [ -f backend/README.md ]; then
             cp backend/README.md backend/UPSTREAM_README.md
