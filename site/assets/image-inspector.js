@@ -178,7 +178,7 @@
     baseHeight = viewerImage.naturalHeight * fitScale;
     viewerImage.style.width = baseWidth + "px";
     viewerImage.style.height = baseHeight + "px";
-    maxScale = isVectorSource() ? 8 : Math.max(1, 1 / fitScale);
+    maxScale = isVectorSource() ? 8 : Math.max(2, 1 / fitScale);
     scale = 1;
     translateX = 0;
     translateY = 0;
