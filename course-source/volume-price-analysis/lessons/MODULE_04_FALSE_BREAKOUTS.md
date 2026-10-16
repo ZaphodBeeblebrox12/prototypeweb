@@ -47,6 +47,16 @@ In your chart notes, write: “Boundary, breakout bar, activity, close position,
 
 Do not let the word “real” imply that we can know a breakout's final fate in advance. In this lesson it means the market is showing evidence consistent with sustained acceptance beyond the earlier boundary. Make the learner mark the range zone before replaying the breakout, otherwise the line will be influenced by the move. After the first candle, record range, close and relative activity, then stop. Ask: what is known, what remains unknown, and what would you need next? Reveal three bars. If price remains above the old range and the pullbacks are contained, the acceptance scenario gains support. In the alternate path, price closes back inside and cannot reclaim the boundary; the continuation thesis weakens. Ask students to see how high volume adds context but does not decide between the paths. Also explain that a breakout can occur without a volume surge, particularly where price moves through a region with limited opposing activity. The robust method is to define a boundary, read the event, observe the response, and plan risk. It is not to insist that every valid breakout look like one ideal example from a textbook.
 
+### Learner progression — Notice → Compare → Apply
+
+**Level 1 — Notice (easy):** Mark the range boundary and the first candle that closes beyond it.
+
+**Level 2 — Compare (guided):** Compare a sustained break, a wick outside that closes inside, and a close outside that quickly returns.
+
+**Level 3 — Apply (independent):** Freeze a new chart after the first break, write continuation and failure scenarios, then reveal later bars and explain what changed.
+
+**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
+
 ### Knowledge check
 1. What evidence would make a breakout more credible than a brief excursion?
 2. Why can high volume accompany a failed breakout?
@@ -96,6 +106,16 @@ Do not claim that you can spot every trap before it happens. A failed breakout i
 ### Extended spoken case analysis — additional narration
 
 A failed breakout is easier to recognise in hindsight, so structure the exercise to prevent that advantage. Freeze the chart immediately after the first move outside the boundary and ask learners to write the initial thesis. They should not label it a trap yet. Once price returns into the range, they can add that the breakout's ability to hold has been challenged. If a later attempt to reclaim the boundary fails, the evidence for rejection becomes stronger. Keep the original note visible beside the new one so learners can see the update. Explain that the word “trap” is market shorthand; it does not establish that anyone deliberately engineered the move. The failure can arise from many participants updating their views, event volatility or a breakout that simply did not attract enough continuation. For trade planning, define the invalidation of the failure thesis too. A sustained recovery beyond the boundary may prove that the rejection interpretation was premature. An analytically sound plan must be able to state both what supports it and what would show it no longer fits.
+
+### Learner progression — Notice → Compare → Apply
+
+**Level 1 — Notice (easy):** Identify the point where price returns inside a range after an attempted breakout.
+
+**Level 2 — Compare (guided):** Follow a staged example and mark the failed reclaim separately from the first warning.
+
+**Level 3 — Apply (independent):** Evaluate a new failed-breakout case using observation, alternative explanation, next evidence and a condition that would invalidate the failure reading.
+
+**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
 
 ### Knowledge check
 1. What sequence makes a failed upside breakout more credible?
@@ -147,6 +167,16 @@ a burst of activity near an extended move matters because markets can change cha
 
 The climax idea is most useful when a student thinks in terms of unusually large effort at a contextually important point. Have the learner compare the event's volume with a suitable recent baseline and its range with recent bars. Then zoom out and describe the preceding trend. A volume spike inside a routine intraday chop may be less significant than a comparable event after a sustained move into a major level. Even then, the spike is a clue rather than a top or bottom call. Explain the possible paths: price may stall and reverse, move sideways as positions are adjusted, or pause before continuing. What distinguishes them is subsequent progress and structural behaviour. If price breaks a meaningful swing in the opposite direction and fails to reclaim it, the reversal hypothesis gets support. If the trend resumes and sustains new extremes, the climax hypothesis weakens. Learners should practise identifying the earliest moment the old trend behaviour changed, rather than pointing to the final high/low after seeing the outcome. This encourages careful interpretation and discourages overconfident claims that every exceptional volume bar marks exhaustion.
 
+### Learner progression — Notice → Compare → Apply
+
+**Level 1 — Notice (easy):** Find an unusually high volume bar and compare it with a stated recent baseline.
+
+**Level 2 — Compare (guided):** Compare a late-stage spike followed by structural change with a spike followed by continuation.
+
+**Level 3 — Apply (independent):** Assess an unseen high-activity event without declaring a top or bottom; say what later evidence would strengthen or weaken the possible-climax reading.
+
+**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
+
 ### Knowledge check
 1. What features may lead you to investigate a climax hypothesis?
 2. Why is extreme volume not automatically a reversal signal?
@@ -197,6 +227,16 @@ These patterns are worth learning because they focus attention on failed accepta
 
 The range must be well defined before a spring or upthrust can be named. In the walkthrough, ask the learner to mark the boundaries using the visible prior swings, then hide the future bars. A brief move outside the zone and return inside is an observable event. Its significance remains uncertain until the market's response develops. A spring-like event that is followed by a test, a hold and a break of nearby local structure provides more support for the failed-downside-break hypothesis than a single wick does. If price promptly breaks lower again, the initial recovery may have been temporary. Mirror this logic for an upthrust. Also discuss boundary tolerance: markets can overshoot a level by small amounts, and different traders will draw zones differently. The analysis must therefore focus on whether price sustains trade beyond the zone, not on a single tick crossing a line. A label such as “spring” should summarise the event after it is defined, not replace the reasoning. This gives learners a concrete way to use classic terminology without turning the course into pattern superstition.
 
+### Learner progression — Notice → Compare → Apply
+
+**Level 1 — Notice (easy):** Mark the range high/low and identify an excursion beyond one boundary.
+
+**Level 2 — Compare (guided):** Classify guided examples as a possible spring or upthrust only after identifying the excursion and return inside.
+
+**Level 3 — Apply (independent):** Compare a spring/upthrust that develops with one that fails; write the confirmation still needed and the condition that would disprove the preferred idea.
+
+**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
+
 ### Knowledge check
 1. Define a spring in observable terms.
 2. What does a retest add to the analysis?
@@ -246,6 +286,16 @@ Reversals are among the most tempting patterns because they promise entry near a
 ### Extended spoken case analysis — additional narration
 
 For this walkthrough, keep a simple timeline visible: initial warning, structural change, test of the new behaviour. A long upper wick at resistance may be a warning. A subsequent close back inside the range and a break of nearby support provide stronger evidence that the prior advance is losing control. A failed rally back to the boundary can test whether that change persists. If the market instead reclaims the high and sustains prices above it, the reversal scenario is challenged. The timing of the evidence matters. Students should not pretend to know at the first wick that a reversal is underway, and they should not criticise themselves for not entering at the extreme. Explain the trade-off between an earlier entry with less confirmation and a later entry with clearer structure but potentially less room. The learner's method must specify the acceptable trade-off and the position risk. Many good decisions will not capture the entire move. The objective is not to mark tops and bottoms perfectly; it is to react to a change in evidence with a plan that states where the new idea fails.
+
+### Learner progression — Notice → Compare → Apply
+
+**Level 1 — Notice (easy):** Separate an early warning from a confirmed structural change in a simple example.
+
+**Level 2 — Compare (guided):** Mark the sequence of warning, structure break, retest and resolution in a guided chart.
+
+**Level 3 — Apply (independent):** Review a staged chart with two possible endings, preserve the original reading and state which later evidence would invalidate each scenario.
+
+**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
 
 ### Knowledge check
 1. What is the difference between a warning and structural evidence?
