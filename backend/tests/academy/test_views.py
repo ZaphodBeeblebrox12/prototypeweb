@@ -1,8 +1,13 @@
 from django.contrib.auth import get_user_model
+from datetime import timedelta
+
 from django.test import TestCase
+from django.utils import timezone
 from django.urls import reverse
 
-from apps.academy.models import Course, CourseModule, Lesson, LessonProgress
+from apps.academy.models import (
+    Course, CourseEntitlement, CourseModule, Lesson, LessonProgress,
+)
 
 User = get_user_model()
 
@@ -77,6 +82,55 @@ class AcademyViewTests(TestCase):
         response = self.client.get(reverse("academy:home"))
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "Unpublished VPA draft")
+
+    def test_entitled_learner_can_complete_lesson_and_see_dashboard_update(self):
+        CourseEntitlement.objects.create(
+            user=self.user,
+            course=self.course,
+            source=CourseEntitlement.Source.ADMIN,
+        )
+        lesson_url = reverse("academy:lesson", args=[self.course.slug, self.paid_lesson.pk])
+        response = self.client.get(lesson_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "SECRET PAID LESSON BODY")
+
+        progress_response = self.client.post(
+            reverse("academy:lesson-progress", args=[self.paid_lesson.pk]),
+            {"status": "completed", "seconds_delta": "310"},
+        )
+        self.assertEqual(progress_response.status_code, 200)
+        self.assertEqual(progress_response.json()["status"], LessonProgress.Status.COMPLETED)
+        saved = LessonProgress.objects.get(user=self.user, lesson=self.paid_lesson)
+        self.assertEqual(saved.time_spent_seconds, 310)
+        self.assertIsNotNone(saved.completed_at)
+
+        dashboard = self.client.get(reverse("academy:home"))
+        self.assertEqual(dashboard.status_code, 200)
+        self.assertEqual(dashboard.context["active_course_count"], 1)
+        self.assertEqual(dashboard.context["completed_lesson_count"], 1)
+        self.assertEqual(dashboard.context["learning_minutes"], 5)
+        card = next(row for row in dashboard.context["course_cards"] if row["course"] == self.course)
+        self.assertEqual(card["progress_percent"], 50)
+
+    def test_expired_entitlement_cannot_open_or_complete_paid_lesson(self):
+        now = timezone.now()
+        CourseEntitlement.objects.create(
+            user=self.user,
+            course=self.course,
+            source=CourseEntitlement.Source.ADMIN,
+            starts_at=now - timedelta(days=3),
+            expires_at=now - timedelta(days=1),
+        )
+        lesson_response = self.client.get(
+            reverse("academy:lesson", args=[self.course.slug, self.paid_lesson.pk])
+        )
+        self.assertEqual(lesson_response.status_code, 403)
+        progress_response = self.client.post(
+            reverse("academy:lesson-progress", args=[self.paid_lesson.pk]),
+            {"status": "completed"},
+        )
+        self.assertEqual(progress_response.status_code, 403)
+        self.assertFalse(LessonProgress.objects.filter(user=self.user, lesson=self.paid_lesson).exists())
 
     def test_learning_room_requires_login(self):
         self.client.logout()
