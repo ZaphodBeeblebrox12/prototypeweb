@@ -3,97 +3,164 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ChartLab — Notice, Compare, Apply</title>
+<title>ChartLab — The Same Candle, Different Context</title>
 <style>
-:root{--paper:#f6f5f0;--ink:#252923;--muted:#62645f;--line:#d9d7cf;--green:#27725f;--gold:#c6a63a;--pale:#eeede6}
-*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:1120px;margin:0 auto;padding:26px 18px 60px}
-h1{font-size:clamp(1.9rem,4vw,2.8rem);line-height:1.08;margin:.45rem 0 .7rem;max-width:850px}h2{font-size:1.28rem;margin:0 0 .65rem}h3{font-size:1rem;margin:1rem 0 .35rem}.eyebrow{text-transform:uppercase;letter-spacing:.1em;font-size:.75rem;font-weight:800;color:var(--muted)}.muted{color:var(--muted)}.intro{max-width:820px}
-.progress{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:22px 0}.progress button{font:inherit;text-align:left;color:var(--ink);background:#e6e4db;border:1px solid #d1cfc5;border-radius:10px;padding:13px;cursor:pointer}.progress button[aria-current="step"]{background:#fffefa;border:2px solid var(--ink);padding:12px}.progress strong{display:block;font-size:.95rem}.progress small{display:block;color:var(--muted);margin-top:3px}.progress .done{border-color:#789887}
-.panel{background:#fffefa;border:1px solid var(--line);border-radius:14px;padding:22px;margin:18px 0}.level{display:inline-block;border-radius:5px;background:var(--pale);padding:4px 8px;font-size:.75rem;font-weight:800;letter-spacing:.05em;color:#4e554d}.chart-picture{display:block;width:100%;margin:16px 0}
-.chart{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:9px;background:#fffefa;margin:0}.prompt{border-left:4px solid var(--gold);padding:10px 14px;background:#fbf9ee;margin:14px 0}label{display:block;font-weight:650;margin:12px 0 6px}textarea,select{width:100%;font:inherit;padding:11px;border:1px solid #aaa99f;border-radius:8px;background:#fffefa;color:var(--ink)}textarea{min-height:95px;resize:vertical}select{min-height:46px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.hint{font-size:.9rem;color:var(--muted);margin:4px 0 10px}button.action{font:inherit;font-weight:750;border:0;border-radius:8px;background:var(--ink);color:white;padding:12px 18px;cursor:pointer;margin-top:14px}button.secondary{background:#e6e4db;color:var(--ink);border:1px solid #d1cfc5}.feedback{padding:14px;border-radius:8px;background:#edf3ee;border:1px solid #bfd0c3;margin:14px 0}.feedback.warning{background:#faf5e5;border-color:#dfd1a3}.feedback[hidden],section[hidden],.outcomes[hidden]{display:none!important}details{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}summary{font-weight:750;cursor:pointer}.outcomes{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.outcomes-heading,.outcomes-intro,.outcomes .model-answer{grid-column:1 / -1}.outcomes-intro{margin:0 0 4px;color:var(--muted)}.model-answer-body{padding:6px 0}.model-answer-body p{margin:.55rem 0}.outcome{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fbfaf6}.reflection{background:#eeede6;padding:14px;border-radius:10px}.foot{font-size:.85rem;border-top:1px solid var(--line);margin-top:28px;padding-top:14px;color:var(--muted)}button:focus-visible,textarea:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #9e8732;outline-offset:2px}
-h2[tabindex="-1"]:focus,h3[tabindex="-1"]:focus{outline:3px solid #9e8732;outline-offset:4px;border-radius:2px}
-@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-@media(max-width:720px){main{padding:18px 12px 42px}.progress{gap:5px}.progress button{padding:9px 7px}.progress button[aria-current="step"]{padding:8px 6px}.progress strong{font-size:.8rem}.progress small{font-size:.72rem}.panel{padding:15px}.grid,.outcomes{grid-template-columns:1fr}textarea{min-height:100px}}
+:root{--paper:#f6f5f0;--ink:#252923;--muted:#62645f;--line:#d9d7cf;--green:#27725f;--gold:#b28a23;--soft:#fffefa;--soft-green:#eef4ef}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+main{max-width:1120px;margin:0 auto;padding:28px 20px 56px}
+header{padding:8px 0 20px}
+h1{font-size:clamp(1.8rem,3.5vw,2.6rem);line-height:1.1;max-width:940px;margin:.5rem 0}
+h2{font-size:1.25rem;margin:0 0 .6rem}h3{font-size:1rem;margin:1rem 0 .4rem}
+p{margin:.55rem 0 1rem}.eyebrow,.tag{letter-spacing:.08em;font-size:.78rem;font-weight:750;color:var(--muted);text-transform:uppercase}
+.note,.hint{color:var(--muted)}.note{max-width:820px}.hint{font-size:.9rem;margin:.3rem 0}
+.chart{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:12px;background:var(--soft);margin:16px 0}
+.progress{display:flex;gap:8px;list-style:none;padding:0;margin:18px 0 22px}
+.progress li{flex:1;min-width:0;border:1px solid var(--line);border-radius:9px;padding:11px 13px;background:rgba(255,254,250,.7);color:var(--muted)}
+.progress li.current{border-color:var(--ink);background:var(--soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.progress li.done{border-color:#94b6a2;color:#244b3a;background:#f1f6f1}
+.progress strong{display:block;font-size:.9rem}.progress span{display:block;font-size:.8rem}
+.panel{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:22px;margin:18px 0}
+.panel[hidden]{display:none}.level-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.level-num{width:40px;height:40px;flex:0 0 auto;display:grid;place-items:center;border-radius:9px;background:#ebe9e0;font-weight:800}
+.prompt{border-left:4px solid var(--gold);padding:9px 14px;background:#fbf8eb;margin:14px 0}
+.field{margin:15px 0}.field label{display:block;font-weight:680;margin-bottom:6px}
+textarea{width:100%;min-height:105px;resize:vertical;font:inherit;padding:12px;border:1px solid #aaa99f;border-radius:8px;background:#fffefa;color:var(--ink)}
+textarea:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{outline:3px solid #9b8225;outline-offset:2px}
+.buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:17px}
+button{font:inherit;font-weight:720;border:1px solid var(--ink);border-radius:8px;background:var(--ink);color:white;padding:11px 17px;cursor:pointer}
+button.secondary{background:transparent;color:var(--ink)}button:disabled{opacity:.45;cursor:not-allowed}
+.feedback{padding:13px 15px;border-radius:8px;background:#eeeae0;border:1px solid #d6d0bf;margin-top:14px}
+.feedback[hidden]{display:none}.feedback.good{background:var(--soft-green);border-color:#bbd1c3}
+summary{font-weight:750;cursor:pointer;padding:9px 0}
+.answer{border-top:1px solid var(--line);padding-top:13px;margin-top:12px}
+.checks label{font-weight:450;display:flex;align-items:flex-start;gap:10px;margin:.7rem 0}
+.checks input{margin-top:.35rem;accent-color:var(--green)}
+.completion{border-left:4px solid var(--green);padding:12px 15px;background:#f1f6f1}
+.foot{border-top:1px solid var(--line);padding-top:16px;margin-top:28px;color:var(--muted)}
+.small{font-size:.86rem}
+@media(max-width:700px){
+ main{padding:18px 12px 40px}.panel{padding:15px}.progress{flex-direction:column}.progress li{display:flex;gap:10px;align-items:center}.progress strong{min-width:112px}.progress span{font-size:.82rem}.buttons button{flex:1 1 100%}textarea{min-height:120px}
+}
 </style>
 </head>
-<body><main>
+<body>
+<main>
 <header>
 <div class="eyebrow">Read Volume. Find Trade Setups. · Module 1 · Lesson 1.1</div>
-<h1>Notice. Compare. Apply.</h1>
-<p class="muted intro">You'll start with a simple observation, compare two similar candles, then work through a new breakout case before seeing what happened next. Each stage asks a little more of you. This is practice in reading evidence—not a trading signal.</p>
+<h1>The same candle. Different context.</h1>
+<p class="note">Work through three levels. Start by describing what you can see, then compare two charts, and finally use later price action to test your reading. These charts use synthetic data; they are not historical market examples or trade signals.</p>
 </header>
-<nav class="progress" aria-label="Lesson practice progression">
-<button id="nav1" aria-current="step" type="button"><strong>Level 1 · Notice</strong><small>Identify the facts</small></button>
-<button id="nav2" type="button" disabled><strong>Level 2 · Compare</strong><small>Use context</small></button>
-<button id="nav3" type="button" disabled><strong>Level 3 · Apply</strong><small>Reason before reveal</small></button>
-</nav>
-<section class="panel" id="stage1">
-<span class="level">LEVEL 1 OF 3 · EASY</span><h2>Spot the facts</h2>
-<p>First, do not explain why the candle formed. Just identify its price result and compare its volume with the dashed line.</p>
-<picture class="chart-picture"><source media="(max-width: 720px)" srcset="../exports/vpa-m01-l01-stage1-spot-volume-mobile.svg" type="image/svg+xml"><img class="chart" src="../exports/vpa-m01-l01-stage1-spot-volume.svg" alt="Six synthetic candles with volume bars. The final candidate candle is outlined; a dashed line shows the average volume of the previous five bars."></picture>
-<form id="form1">
-<div class="grid"><div><label for="direction">Did the candidate candle close above or below its open?</label><select id="direction" required><option value="">Choose one…</option><option value="up">Above its open</option><option value="down">Below its open</option><option value="equal">At its open</option></select></div>
-<div><label for="relative">Is its volume above, below or close to the dashed baseline?</label><select id="relative" required><option value="">Choose one…</option><option value="above">Above the baseline</option><option value="below">Below the baseline</option><option value="near">About the same as the baseline</option></select></div></div>
-<button class="action" type="submit">Check Level 1</button><div id="feedback1" class="feedback" hidden role="status" aria-live="polite"></div>
-</form>
+
+<ol class="progress" aria-label="ChartLab progression">
+<li id="progress1" class="current" aria-current="step"><strong>Level 1 · Observe</strong><span>Easy · One chart</span></li>
+<li id="progress2"><strong>Level 2 · Compare</strong><span>Guided · Two contexts</span></li>
+<li id="progress3"><strong>Level 3 · Transfer</strong><span>Challenge · New outcomes</span></li>
+</ol>
+
+<section class="panel" id="level1" aria-labelledby="level1title">
+<div class="level-head"><div class="level-num" aria-hidden="true">1</div><div><div class="tag">Easy · Guided observation</div><h2 id="level1title">First, describe one chart</h2></div></div>
+<p>Do not decide whether the candle is bullish or bearish. Describe what happened first.</p>
+<img class="chart" src="../exports/vpa-m01-l01-candle-context-panel-a.svg" alt="One synthetic price chart after a pullback, with a green candidate candle and neutral volume bars. A dashed line marks the average volume of the five bars before the candidate.">
+<div class="prompt"><strong>Look for three things:</strong> the prior price move, what the candidate candle did, and how its volume compares with the dashed baseline. The chart gives you the baseline and ratio so you can focus on the reasoning.</div>
+<div class="field"><label for="easy">In your own words, what do you observe in Panel A?</label><textarea id="easy" minlength="25" placeholder="For example, start with what price did before the candle. Then describe the candle and its volume..." required></textarea><p class="hint">Aim for observations first. One or two careful sentences are enough.</p></div>
+<div id="feedback1" class="feedback" role="status" aria-live="polite" hidden></div>
+<div class="buttons"><button type="button" id="next1">Finish Level 1 and continue</button></div>
 </section>
-<section class="panel" id="stage2" hidden>
-<span class="level">LEVEL 2 OF 3 · GUIDED COMPARISON</span><h2>Compare the same candle in two contexts</h2>
-<p>The price axes use a shared vertical scale; the highlighted candidate candles have the same OHLC dimensions.</p>
-<picture class="chart-picture"><source media="(max-width: 720px)" srcset="../exports/vpa-m01-l01-candle-context-compare-mobile.svg" type="image/svg+xml"><img class="chart" src="../exports/vpa-m01-l01-candle-context-compare.svg" alt="Two synthetic candlestick charts with a shared vertical scale. Both candidate candles have identical dimensions, but one follows a pullback with volume modestly above its baseline, while the other is near a prior-high area after an extended advance with much higher relative volume."></picture>
-<form id="form2">
-<label for="obsA">Panel A — what happened before the candidate candle, and how does its volume compare with the baseline?</label><textarea id="obsA" required minlength="25" placeholder="Describe price structure and relative activity…"></textarea>
-<label for="obsB">Panel B — what happened before the candidate candle, and how does its volume compare with the baseline?</label><textarea id="obsB" required minlength="25" placeholder="Describe prior move, location and activity…"></textarea>
-<label for="difference">Why are these two situations not identical, even though the candidate candles have the same dimensions?</label><textarea id="difference" required minlength="25" placeholder="Explain what changes when you include context…"></textarea>
-<div class="prompt"><strong>Helpful rule:</strong> Write what you can see first. Your explanation should come after the observations.</div>
-<button class="action" type="submit">Complete Level 2</button><div id="feedback2" class="feedback" hidden role="status" aria-live="polite"></div>
-</form>
+
+<section class="panel" id="level2" aria-labelledby="level2title" hidden>
+<div class="level-head"><div class="level-num" aria-hidden="true">2</div><div><div class="tag">Medium · Guided comparison</div><h2 id="level2title">Now compare the contexts</h2></div></div>
+<p>The candidate candles have the same price range and body size. Both charts use the same vertical price-scale increment. What changes is the surrounding price structure and the activity recorded.</p>
+<img class="chart" src="../exports/vpa-m01-l01-candle-context-compare.svg" alt="Side-by-side synthetic charts. Panel A shows a green candle during a recovery after a pullback with volume 1.18 times its baseline. Panel B shows a similar-size candle near a prior-high area after an extended advance, with volume 1.87 times its baseline. Volume bars are neutral grey with the candidate bar highlighted.">
+<div class="field"><label for="guided">Why are these different situations even though the candidate candles look alike?</label><textarea id="guided" minlength="25" placeholder="Compare location, earlier price structure and activity relative to each chart's baseline..." required></textarea></div>
+<div class="field"><label for="alternative">Give one possible reading for either chart and one alternative explanation.</label><textarea id="alternative" minlength="25" placeholder="One possible reading is... Another possibility is..." required></textarea></div>
+<div id="feedback2" class="feedback" role="status" aria-live="polite" hidden></div>
+<div class="buttons"><button type="button" class="secondary" id="back2">Back to Level 1</button><button type="button" id="next2">Finish Level 2 and continue</button></div>
 </section>
-<section class="panel" id="stage3" hidden>
-<span class="level">LEVEL 3 OF 3 · INDEPENDENT APPLICATION</span><h2>Make a reading before the outcome is known</h2>
-<p>This is a new case. Price has moved above a prior range high on elevated volume. Before seeing later bars, record the visible evidence, two possible explanations and what would help you tell them apart.</p>
-<picture class="chart-picture"><source media="(max-width: 720px)" srcset="../exports/vpa-m01-l01-stage3-breakout-initial-mobile.svg" type="image/svg+xml"><img class="chart" src="../exports/vpa-m01-l01-stage3-breakout-initial.svg" alt="A synthetic price series that has closed above a prior range high. The candidate breakout candle is outlined and has high volume relative to the average of the previous five bars. Future bars are not shown yet."></picture>
-<form id="form3">
-<label for="observations3">1. What do you observe? (Describe price and activity; avoid naming a hidden motive.)</label><textarea id="observations3" required minlength="30" placeholder="Record the range boundary, close, relative volume and prior structure…"></textarea>
-<label for="explanations3">2. What are two plausible explanations for this event?</label><textarea id="explanations3" required minlength="40" placeholder="Give two outcomes that could still happen…"></textarea>
-<label for="next3">3. What would you need to see next to favour one explanation over the other?</label><textarea id="next3" required minlength="30" placeholder="Describe observable price behaviour…"></textarea>
-<button class="action" type="submit">Submit my first reading and reveal the alternatives</button><div id="feedback3" class="feedback" hidden role="status" aria-live="polite"></div>
-</form>
-<div id="outcomes" class="outcomes" hidden>
-<h2 id="outcomes-heading" class="outcomes-heading">Compare the two outcomes</h2>
-<p class="outcomes-intro">The first breakout candle was identical in both cases. The difference is the price behaviour that followed—not a change in what the first candle showed.</p>
-<div class="outcome"><h3>Alternative ending A</h3><picture class="chart-picture"><source media="(max-width: 720px)" srcset="../exports/vpa-m01-l01-stage3-outcome-continuation-mobile.svg" type="image/svg+xml"><img class="chart" src="../exports/vpa-m01-l01-stage3-outcome-continuation.svg" alt="The same breakout followed by price holding above the range high and continuing upward."></picture><p>Price holds outside the range and makes further upward progress.</p></div>
-<div class="outcome"><h3>Alternative ending B</h3><picture class="chart-picture"><source media="(max-width: 720px)" srcset="../exports/vpa-m01-l01-stage3-outcome-failure-mobile.svg" type="image/svg+xml"><img class="chart" src="../exports/vpa-m01-l01-stage3-outcome-failure.svg" alt="The same breakout followed by price closing back inside the range and continuing lower."></picture><p>Price returns below the range high and makes further downward progress.</p></div>
-<details class="model-answer">
-<summary>Compare your notes with a model reading</summary>
-<div class="model-answer-body">
-<p><strong>What was visible before the reveal:</strong> price closed above the prior range high. Reported volume was 410 compared with a five-bar baseline of 184, about 2.23 times that baseline.</p>
-<p><strong>Continuation is one plausible explanation:</strong> price may hold above the former range high and continue making upward progress.</p>
-<p><strong>Failure is another plausible explanation:</strong> price may return inside the range, fail to regain the boundary and then make downward progress.</p>
-<p><strong>The key distinction:</strong> high activity makes the event worth examining; it does not decide between the two explanations. The later price response supplies the discriminating evidence. A strong reading describes the facts, gives both scenarios and names what would support or weaken each—without claiming to know the participants' motives.</p>
+
+<section class="panel" id="level3" aria-labelledby="level3title" hidden>
+<div class="level-head"><div class="level-num" aria-hidden="true">3</div><div><div class="tag">Challenge · Apply the idea</div><h2 id="level3title">Use the next bars to test your reading</h2></div></div>
+<p>Both paths start with the same high-volume green candidate candle near the prior-high area. Watch what happens afterward. The later sequence—not the volume spike alone—changes the evidence.</p>
+<img class="chart" src="../exports/vpa-m01-l01-candle-context-outcomes.svg" alt="Two synthetic follow-through paths beginning with the same high-volume candidate candle. In one path price holds above the prior-high zone and advances. In the other, price returns below the zone and continues lower.">
+<div class="field"><label for="transfer">What evidence separates the two outcomes? What would you watch before favouring either scenario on a new chart?</label><textarea id="transfer" minlength="30" placeholder="Explain what price does after the candidate candle, what each path suggests, and what would make your reading change..." required></textarea></div>
+<div class="field"><label for="discipline">What can the volume spike tell you—and what can it not tell you?</label><textarea id="discipline" minlength="20" placeholder="Describe the recorded activity and the limits of the conclusion..." required></textarea></div>
+<div id="feedback3" class="feedback" role="status" aria-live="polite" hidden></div>
+<div class="buttons"><button type="button" class="secondary" id="back3">Back to Level 2</button><button type="button" id="finish">Finish all three levels</button></div>
+</section>
+
+<section class="panel" id="review" aria-labelledby="reviewtitle" hidden>
+<div class="completion"><h2 id="reviewtitle">All three levels completed</h2><p>Your responses remain only in this page and are not saved to an account or sent to a server. This prototype checks that you have written a response; it does not automatically grade the meaning of your analysis. Use the points below to review your reasoning.</p></div>
+<h3>Self-check</h3>
+<div class="checks">
+<label><input type="checkbox"> I described prior price structure before interpreting the candidate candle.</label>
+<label><input type="checkbox"> I compared volume with the stated five-bar baseline.</label>
+<label><input type="checkbox"> I explained why location can change the question we ask of a candle.</label>
+<label><input type="checkbox"> I offered an alternative explanation rather than claiming certainty.</label>
+<label><input type="checkbox"> I used the follow-through path to identify new evidence.</label>
+<label><input type="checkbox"> I did not claim the chart identifies who traded or guarantees the next move.</label>
 </div>
+<details id="model">
+<summary>Reveal model reasoning and feedback</summary>
+<div class="answer"><h3>Level 1 — Observe</h3><p>Price advanced, pulled back from a prior swing high and then printed a green candle during a recovery. Candidate volume is 185 compared with a baseline of 157, or about 1.18 times that baseline. This is a description, not proof that the pullback has ended.</p></div>
+<div class="answer"><h3>Level 2 — Compare</h3><p>Panel A shows a recovery after a pullback with volume only modestly above its local baseline. Panel B shows a similar-size green candle after a longer advance into a prior-high area, with candidate volume 420 against a baseline of 225, or about 1.87 times the baseline. The second event deserves attention because both location and relative activity differ. Neither chart proves a reversal or identifies who traded.</p></div>
+<div class="answer"><h3>Level 3 — Transfer</h3><p>In the continuation path, price stays above the prior-high zone and makes further upward progress. In the failure path, it returns below the zone and continues lower. The initial high-volume candle is the same, so it cannot by itself determine which path will occur. A strong answer names the follow-through that supports each reading and states what would change the interpretation.</p></div>
+<div class="answer"><h3>How to improve an answer</h3><p>If you wrote only “bullish” or “bearish,” add the visible facts that led you there. If you only described volume, add the price result and location. If you chose an outcome without a condition, name the later price behaviour that would strengthen or weaken your view.</p></div>
 </details>
-</div>
-<div id="reflection" class="reflection" hidden>
-<label for="reflectionText">After seeing both endings, what additional evidence changed your reading? What would you avoid concluding from the first candle alone?</label><textarea id="reflectionText" minlength="20" placeholder="Reflect on what became clearer after the reveal…"></textarea>
-<button class="action" id="finish3" type="button">Check my reflection</button><div id="finalFeedback" class="feedback" hidden role="status" aria-live="polite"></div>
-</div>
+<div class="buttons"><button type="button" class="secondary" id="revisit">Review Level 1</button><button type="button" class="secondary" id="openModel">Show model reasoning</button></div>
 </section>
-<section class="panel" id="completion" hidden><span class="level">PRACTICE COMPLETE</span><h2>You moved from noticing to applying</h2><p>You first identified the candle and its volume, then compared context, then formed a reading before seeing two possible outcomes. The goal is not to have guessed the winner. It is to describe evidence, consider alternatives and know what you need to see next.</p><button class="action secondary" id="restart" type="button">Start again</button></section>
-<p class="foot">Synthetic teaching data only. Your responses stay in this open page; they are not uploaded, saved or automatically graded. This prototype provides guided self-check feedback, not a semantic assessment or a trading recommendation.</p>
+
+<p class="foot small">Progression rule: each step adds a reasoning demand, not clutter or unexplained jargon. This is a learning exercise—not a trading signal. The standalone prototype does not save answers or connect to the website's member system.</p>
 </main>
 <script>
-const $=id=>document.getElementById(id);
-let highestUnlockedStep=1;
-function activate(n){highestUnlockedStep=Math.max(highestUnlockedStep,n);for(let i=1;i<=3;i++){const b=$('nav'+i);b.removeAttribute('aria-current');b.disabled=i>highestUnlockedStep;b.classList.toggle('done',i<n);}$('nav'+n).setAttribute('aria-current','step');}
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-function show(id){const target=$(id);target.hidden=false;const focusTarget=target.querySelector('h2,h3')||target;focusTarget.setAttribute('tabindex','-1');focusTarget.focus({preventScroll:true});focusTarget.scrollIntoView({behavior:reducedMotion?'auto':'smooth',block:'start'});}
-[1,2,3].forEach(i=>$('nav'+i).addEventListener('click',()=>{const target=$('stage'+i);if(target&&!target.hidden){show('stage'+i);activate(i);}}));
-$('form1').addEventListener('submit',e=>{e.preventDefault();const d=$('direction').value,r=$('relative').value,fb=$('feedback1');fb.hidden=false;fb.classList.remove('warning');if(d==='up'&&r==='above'){fb.textContent='Correct. The candidate candle closed above its open, and its volume bar is above the recent baseline. You have described two observable facts without explaining why they happened. Level 2 is now unlocked.';show('stage2');activate(2);}else{fb.classList.add('warning');fb.textContent=(d!=='up'?'Look at where the candidate candle closes relative to its open. ':'')+(r!=='above'?'Compare the top of the highlighted volume bar with the dashed baseline. ':'')+'Try again. You are only identifying what is visible at this stage.';}});
-$('form2').addEventListener('submit',e=>{e.preventDefault();const ids=['obsA','obsB','difference'],missing=ids.filter(id=>$(id).value.trim().length<25),fb=$('feedback2');fb.hidden=false;fb.classList.remove('warning');if(missing.length){fb.classList.add('warning');fb.textContent='Add a specific observation to each field. Name the prior move or location and compare volume with the dashed five-bar baseline; do not rely on labels like bullish or bearish alone.';$(missing[0]).focus();return;}fb.textContent='Level 2 submitted. This text-length check does not grade your reasoning. Self-check: did you mention the pullback in A, the extended rise/prior-high area in B, and the different relative activity? You can still offer more than one interpretation. Level 3 is now unlocked.';show('stage3');activate(3);});
-$('form3').addEventListener('submit',e=>{e.preventDefault();const ids=['observations3','explanations3','next3'],missing=ids.filter(id=>$(id).value.trim().length<Number($(id).getAttribute('minlength'))),fb=$('feedback3');fb.hidden=false;fb.classList.remove('warning');if(missing.length){fb.classList.add('warning');fb.textContent='Your first reading needs a little more detail. Record visible evidence, two plausible explanations and an observable condition that could favour one over the other.';$(missing[0]).focus();return;}fb.textContent='Your first reading is ready for comparison. The text-length check does not grade your reasoning. Review your notes against the two alternate endings; do not treat an ending as proof that the first interpretation was foolish.';$('outcomes').hidden=false;$('reflection').hidden=false;show('outcomes');});
-$('finish3').addEventListener('click',()=>{const fb=$('finalFeedback');fb.hidden=false;if($('reflectionText').value.trim().length<20){fb.classList.add('warning');fb.textContent='Add one specific sentence about which new price behaviour changed your reading.';return;}fb.classList.remove('warning');fb.textContent='Practice complete. A strong review identifies what the first candle showed, what remained uncertain, and how later price behaviour supported one scenario and challenged the other. A lucky guess is not required for a good process.';show('completion');});
-$('restart').addEventListener('click',()=>{['form1','form2','form3'].forEach(id=>$(id).reset());['stage2','stage3','completion'].forEach(id=>$(id).hidden=true);['feedback1','feedback2','feedback3','finalFeedback'].forEach(id=>$(id).hidden=true);$('outcomes').hidden=true;$('reflection').hidden=true;highestUnlockedStep=1;activate(1);show('stage1');});
+const stages=[document.getElementById('level1'),document.getElementById('level2'),document.getElementById('level3')];
+const progress=[document.getElementById('progress1'),document.getElementById('progress2'),document.getElementById('progress3')];
+function showStage(index){
+ stages.forEach((el,i)=>el.hidden=i!==index);
+ document.getElementById('review').hidden=true;
+ progress.forEach((el,i)=>{
+  el.classList.toggle('current',i===index);
+  el.classList.toggle('done',i<index);
+  if(i===index) el.setAttribute('aria-current','step'); else el.removeAttribute('aria-current');
+ });
+ const heading=stages[index].querySelector('h2');
+ heading.setAttribute('tabindex','-1'); heading.focus({preventScroll:true});
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+function getText(id){return document.getElementById(id).value.trim()}
+function requireText(ids,feedbackId){
+ const missing=ids.find(id=>getText(id).length<Number(document.getElementById(id).getAttribute('minlength')||20));
+ const feedback=document.getElementById(feedbackId);
+ feedback.hidden=false; feedback.classList.remove('good');
+ if(missing){
+  feedback.textContent='Add a specific chart observation before continuing. Try naming the price behaviour, the relevant context and what evidence you would look for next. This checks completion, not whether your interpretation is correct.';
+  document.getElementById(missing).focus(); return false;
+ }
+ feedback.classList.add('good');
+ feedback.textContent='Response completed. This step is not automatically graded; compare the visible evidence with the next level before deciding what it means.';
+ return true;
+}
+document.getElementById('next1').addEventListener('click',()=>{
+ if(requireText(['easy'],'feedback1')) showStage(1);
+});
+document.getElementById('next2').addEventListener('click',()=>{
+ if(requireText(['guided','alternative'],'feedback2')) showStage(2);
+});
+document.getElementById('back2').addEventListener('click',()=>showStage(0));
+document.getElementById('back3').addEventListener('click',()=>showStage(1));
+document.getElementById('finish').addEventListener('click',()=>{
+ if(requireText(['transfer','discipline'],'feedback3')){
+  stages.forEach(el=>el.hidden=true);
+  document.getElementById('review').hidden=false;
+  progress.forEach((el,i)=>{el.classList.add('done');el.classList.remove('current');el.removeAttribute('aria-current')});
+  document.getElementById('progress3').setAttribute('aria-label','Level 3 completed');
+  document.getElementById('reviewtitle').focus();
+  window.scrollTo({top:0,behavior:'smooth'});
+ }
+});
+document.getElementById('revisit').addEventListener('click',()=>showStage(0));
+document.getElementById('openModel').addEventListener('click',()=>{
+ const d=document.getElementById('model');d.open=true;d.scrollIntoView({behavior:'smooth',block:'nearest'});
+});
 </script>
-</body></html>
+</body>
+</html>

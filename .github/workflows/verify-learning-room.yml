@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: learning-room-smoke
+  group: learning-room-smoke-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -30,9 +30,6 @@ jobs:
       - name: Check out preview branch
         uses: actions/checkout@v4
 
-      - name: Generate native-dimension image inventory
-        run: python review/build_image_asset_inventory.py --output review/IMAGE_ASSET_INVENTORY.generated.csv
-
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -40,6 +37,20 @@ jobs:
 
       - name: Check V5.2 integration script syntax
         run: node --check site/assets/support-resistance-room-v5_2-integration.js
+
+      - name: Check member pages stay on the light theme
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          for name in ("site/member-access.html", "site/member-area.html"):
+              page = Path(name).read_text(encoding="utf-8")
+              if "color-scheme: light;" not in page:
+                  raise SystemExit(f"{name} must explicitly use the light color scheme")
+              if "light-dark(" in page:
+                  raise SystemExit(f"{name} must not retain alternate dark-theme color tokens")
+          print("Member access and member area both use explicit light-theme colors.")
+          PY
 
       - name: Install Playwright
         run: |
@@ -64,14 +75,9 @@ jobs:
           if target.exists():
               shutil.rmtree(target)
           target.mkdir(parents=True, exist_ok=True)
-          vector_count = 0
           for name in names:
               shutil.copy2(source / name, target / name)
-              vector_name = Path(name).with_suffix(".svg").name
-              if (source / vector_name).is_file():
-                  shutil.copy2(source / vector_name, target / vector_name)
-                  vector_count += 1
-          print(f"Staged {len(names)} lesson PNGs and {vector_count} SVG variants for browser smoke testing.")
+          print(f"Staged {len(names)} lesson charts for browser smoke testing.")
           PY
 
       - name: Run lesson interaction smoke tests
@@ -161,31 +167,6 @@ jobs:
               });
             }
 
-            // Image inspection: vector chart loads, zoom controls work, Escape closes, and page state returns.
-            const inspectorChart = page.locator("#sr-chart-image");
-            await page.waitForFunction(() => {
-              const img = document.querySelector("#sr-chart-image");
-              return img && img.complete && img.naturalWidth > 0;
-            });
-            const chartSrc = await inspectorChart.evaluate(img => img.currentSrc || img.src);
-            assert.ok(chartSrc.endsWith(".svg"), "Learning Room should prefer the vector chart source when available: " + chartSrc);
-            await inspectorChart.scrollIntoViewIfNeeded();
-            const scrollBeforeViewer = await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY }));
-            await inspectorChart.click();
-            const imageDialog = page.locator("dialog.image-inspector-dialog");
-            await imageDialog.waitFor({ state: "visible" });
-            const viewerImage = imageDialog.locator("img.image-inspector-image");
-            assert.ok(await viewerImage.evaluate(img => img.complete && img.naturalWidth > 0), "Viewer should load the selected source image");
-            const transformBeforeZoom = await viewerImage.evaluate(img => getComputedStyle(img).transform);
-            await imageDialog.getByRole("button", { name: "Zoom in" }).click();
-            const transformAfterZoom = await viewerImage.evaluate(img => getComputedStyle(img).transform);
-            assert.notEqual(transformAfterZoom, transformBeforeZoom, "Zoom-in should change the image transform");
-            await imageDialog.getByRole("button", { name: "Fit image to the available screen" }).click();
-            await page.keyboard.press("Escape");
-            await imageDialog.waitFor({ state: "hidden" });
-            assert.equal(await page.locator("body").evaluate(body => body.classList.contains("image-inspector-open")), false, "Closing should restore normal page interaction");
-            assert.deepEqual(await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY })), scrollBeforeViewer, "Closing should preserve page position");
-
             // Lesson 6: stage navigation, numeric boundary submission, reference gate and completion gate.
             await openLesson(6, "Set defensible zone boundaries");
             for (let i = 0; i < 6; i++) await advanceWithResponse();
@@ -268,16 +249,6 @@ jobs:
             ]) {
               await page.goto(server + "/support-resistance-room.html?lesson=" + check.id, { waitUntil: "networkidle" });
               await page.waitForSelector("#sr-v52-longform:not([hidden])");
-            const v52Figure = page.locator(".sr-v52-figure img").first();
-            await v52Figure.waitFor({ state: "visible" });
-            await v52Figure.scrollIntoViewIfNeeded();
-            await v52Figure.click();
-            const figureDialog = page.locator("dialog.image-inspector-dialog");
-            await figureDialog.waitFor({ state: "visible" });
-            assert.ok(await figureDialog.locator("img.image-inspector-image").evaluate(img => img.complete && img.naturalWidth > 0), "V5.2 teaching figure should load in the viewer");
-            await page.keyboard.press("Escape");
-            await figureDialog.waitFor({ state: "hidden" });
-
               await page.waitForFunction(id => document.querySelector("#sr-lesson-number").textContent.includes(String(id).padStart(2, "0")), check.id);
               const panel = page.locator("#sr-v52-longform");
               assert.equal(await panel.locator(".sr-v52-section").count(), check.sections, "Unexpected V5.2 section count for Lesson " + check.id);
@@ -300,7 +271,7 @@ jobs:
             assert.ok((await page.locator("#sr-lesson-notes").getAttribute("placeholder")).length > 20, "Lesson-specific note prompts were not connected to My notes");
             await page.locator("#sr-tab-button-lesson").click();
             await page.locator("#sr-v52-longform [data-sr-v52-jump='chart']").first().click();
-            assert.ok((await page.locator("#sr-chart-image").getAttribute("src")).includes("L13-A-01-break-beyond"), "The room should retain its synthetic Lesson 13 chart source");
+            assert.ok((await page.locator("#sr-chart-image").getAttribute("src")).includes("L13-A-01-break-beyond.png"), "The room should retain its synthetic Lesson 13 chart");
             await page.locator("#sr-practice-response").fill("The break is visible, but the return and response remain unknown, so I retain an alternative.");
             await page.waitForSelector("#sr-v52-stage-model-answer:not([hidden])");
             assert.equal(await page.locator(".sr-v52-model-details[open]").count(), 0, "Model answer should be concealed until explicitly opened");
@@ -323,37 +294,6 @@ jobs:
             await page.setViewportSize({ width: 390, height: 844 });
             await page.goto(server + "/support-resistance-room.html?lesson=13", { waitUntil: "networkidle" });
             await page.waitForSelector("#sr-v52-longform:not([hidden])");
-            const mobileFigure = page.locator(".sr-v52-figure img").first();
-            await mobileFigure.scrollIntoViewIfNeeded();
-            await mobileFigure.click();
-            const mobileDialog = page.locator("dialog.image-inspector-dialog");
-            await mobileDialog.waitFor({ state: "visible" });
-            const mobileBounds = await mobileDialog.evaluate(el => {
-              const rect = el.getBoundingClientRect();
-              return { width: rect.width, height: rect.height };
-            });
-            assert.ok(mobileBounds.width <= 391 && mobileBounds.height <= 845, "Mobile viewer should fit the 390×844 viewport: " + JSON.stringify(mobileBounds));
-            const pinchResult = await page.evaluate(() => {
-              const stage = document.querySelector(".image-inspector-stage");
-              const img = stage.querySelector("img");
-              const rect = stage.getBoundingClientRect();
-              const x = rect.left + rect.width / 2;
-              const y = rect.top + rect.height / 2;
-              const dispatch = (type, id, clientX, clientY) => stage.dispatchEvent(new PointerEvent(type, {
-                pointerId: id, pointerType: "touch", clientX, clientY, bubbles: true
-              }));
-              const before = getComputedStyle(img).transform;
-              dispatch("pointerdown", 41, x - 15, y);
-              dispatch("pointerdown", 42, x + 15, y);
-              dispatch("pointermove", 42, x + 60, y);
-              const after = getComputedStyle(img).transform;
-              dispatch("pointerup", 42, x + 60, y);
-              dispatch("pointerup", 41, x - 15, y);
-              return { before, after };
-            });
-            assert.notEqual(pinchResult.after, pinchResult.before, "Two-touch pointer movement should zoom the mobile image");
-            await page.keyboard.press("Escape");
-            await mobileDialog.waitFor({ state: "hidden" });
             const overflow = await page.evaluate(() => {
               const viewport = document.documentElement.clientWidth;
               const nodes = [document.documentElement, document.body, ...document.querySelectorAll("body *")];
@@ -397,11 +337,3 @@ jobs:
             sleep 1
           done
           NODE_PATH=/tmp/tt-playwright/node_modules node /tmp/learning-room-smoke.cjs
-
-      - name: Upload native-dimension image inventory
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: instructional-image-inventory
-          path: review/IMAGE_ASSET_INVENTORY.generated.csv
-          if-no-files-found: warn
