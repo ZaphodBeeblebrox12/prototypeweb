@@ -17,13 +17,13 @@ Evaluate a breakout as a sequence of price behaviour, relative activity and foll
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — Why the first move is not the whole breakout.**
-- **1:00–3:00 — Define the prior boundary and the closing condition.**
-- **3:00–5:00 — Relative volume, range and location.**
-- **5:00–7:30 — Acceptance, retest and failure alternatives.**
-- **7:30–10:30 — ChartLab: compare breakout sequences.**
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** Why the first move is not the whole breakout.
+- **1:00–2:30 — Level 1, Notice:** Mark the range boundary and the first candle that closes beyond it.
+- **2:30–5:00 — Teach and model:** Define the prior boundary and the closing condition; Relative volume, range and location.
+- **5:00–7:30 — Level 2, Compare:** Compare a sustained break, a wick outside that closes inside, and a close outside that quickly returns.
+- **7:30–11:00 — Level 3, Apply:** Freeze a new chart after the first break, write continuation and failure scenarios, then reveal later bars and explain what changed.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: compare breakout sequences. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 Breakouts are attractive because the chart seems to offer a clear event: price has moved beyond a level that previously contained it. But the first move beyond a boundary may represent a sustained change, a temporary excursion, or a false break that returns to the prior range. Rather than trying to label a breakout immediately, define what you mean by a breakout and what evidence you need before relying on it.
 
@@ -77,13 +77,13 @@ Recognise a failed-breakout sequence, distinguish its observable definition from
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — The trap is defined by failure, not by hindsight.**
-- **1:00–3:00 — Break, return, failed reclaim.**
-- **3:00–5:00 — Volume and the quality of progress.**
-- **5:00–7:30 — Alternative explanations and risk boundaries.**
-- **7:30–10:30 — ChartLab: map a failed breakout.**
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** The trap is defined by failure, not by hindsight.
+- **1:00–2:30 — Level 1, Notice:** Identify the point where price returns inside a range after an attempted breakout.
+- **2:30–5:00 — Teach and model:** Break, return, failed reclaim; Volume and the quality of progress.
+- **5:00–7:30 — Level 2, Compare:** Follow a staged example and mark the failed reclaim separately from the first warning.
+- **7:30–11:00 — Level 3, Apply:** Evaluate a new failed-breakout case using observation, alternative explanation, next evidence and a condition that would invalidate the failure reading.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: map a failed breakout. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 A false breakout can feel personal. Price crosses a level, you enter because the move looks confirmed, and then the market falls back into the range. It is easy afterward to say the breakout was a trap. The challenge is to define the evidence early enough that you are not relying on hindsight.
 
@@ -137,13 +137,13 @@ Interpret exceptionally high activity near an extended move as a potential clima
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — Why extremes attract attention.**
-- **1:00–3:00 — Climax observations: activity, range and location.**
-- **3:00–5:00 — Buying climax and selling climax as hypotheses.**
-- **5:00–7:30 — What happens afterward.**
-- **7:30–10:30 — ChartLab: climax or continuation?**
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** Why extremes attract attention.
+- **1:00–2:30 — Level 1, Notice:** Find an unusually high volume bar and compare it with a stated recent baseline.
+- **2:30–5:00 — Teach and model:** Climax observations: activity, range and location; Buying climax and selling climax as hypotheses.
+- **5:00–7:30 — Level 2, Compare:** Compare a late-stage spike followed by structural change with a spike followed by continuation.
+- **7:30–11:00 — Level 3, Apply:** Assess an unseen high-activity event without declaring a top or bottom; say what later evidence would strengthen or weaken the possible-climax reading.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: climax or continuation?. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 At some points in a market move, volume expands dramatically. Price may travel a long distance in a short time, make a fresh extreme, and then struggle to continue. These moments attract labels such as buying climax or selling climax. The labels can be useful if they prompt a careful study of an unusually active event near an extended move. They become dangerous when treated as a promise that price must reverse.
 
@@ -197,13 +197,13 @@ Define springs and upthrusts in observable price terms and evaluate their signif
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — Start with range structure.**
-- **1:00–3:00 — Spring: break below and return inside.**
-- **3:00–5:00 — Upthrust: break above and return inside.**
-- **5:00–7:30 — Test, confirmation and common misreads.**
-- **7:30–10:30 — ChartLab: contrast valid-looking and failed examples.**
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** Start with range structure.
+- **1:00–2:30 — Level 1, Notice:** Mark the range high/low and identify an excursion beyond one boundary.
+- **2:30–5:00 — Teach and model:** Spring: break below and return inside; Upthrust: break above and return inside.
+- **5:00–7:30 — Level 2, Compare:** Classify guided examples as a possible spring or upthrust only after identifying the excursion and return inside.
+- **7:30–11:00 — Level 3, Apply:** Compare a spring/upthrust that develops with one that fails; write the confirmation still needed and the condition that would disprove the preferred idea.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: contrast valid-looking and failed examples. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 Springs and upthrusts are classic concepts in the Wyckoff tradition. They describe price moving beyond a trading-range boundary and then returning inside. The appeal is easy to understand: the market briefly moved beyond a level, failed to sustain the move, and returned to the prior area of balance. But the label should come after the structure is clear, not before. Not every wick outside a range is a meaningful spring or upthrust.
 
@@ -257,13 +257,13 @@ Build a post-event checklist that distinguishes an initial warning from a better
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — A reversal is a process, not a candle.**
-- **1:00–3:00 — Return inside, failed reclaim and swing structure.**
-- **3:00–5:00 — Volume and progress during the response.**
-- **5:00–7:30 — Define confirmation and invalidation in advance.**
-- **7:30–10:30 — ChartLab: staged reveal of a potential reversal.**
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** A reversal is a process, not a candle.
+- **1:00–2:30 — Level 1, Notice:** Separate an early warning from a confirmed structural change in a simple example.
+- **2:30–5:00 — Teach and model:** Return inside, failed reclaim and swing structure; Volume and progress during the response.
+- **5:00–7:30 — Level 2, Compare:** Mark the sequence of warning, structure break, retest and resolution in a guided chart.
+- **7:30–11:00 — Level 3, Apply:** Review a staged chart with two possible endings, preserve the original reading and state which later evidence would invalidate each scenario.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: staged reveal of a potential reversal. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 A common trading mistake is to call a reversal too early. Price reaches a high, volume spikes, a large wick appears, and the trader immediately expects the market to turn. Sometimes it does. Sometimes it pauses and continues in the original direction. The difference is not whether the first bar looked dramatic; it is whether subsequent price behaviour demonstrates that the previous structure is changing.
 
