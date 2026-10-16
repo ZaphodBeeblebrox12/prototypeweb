@@ -38,6 +38,20 @@ jobs:
       - name: Check V5.2 integration script syntax
         run: node --check site/assets/support-resistance-room-v5_2-integration.js
 
+      - name: Check member pages stay on the light theme
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          for name in ("site/member-access.html", "site/member-area.html"):
+              page = Path(name).read_text(encoding="utf-8")
+              if "color-scheme: light;" not in page:
+                  raise SystemExit(f"{name} must explicitly use the light color scheme")
+              if "light-dark(" in page:
+                  raise SystemExit(f"{name} must not retain alternate dark-theme color tokens")
+          print("Member access and member area both use explicit light-theme colors.")
+          PY
+
       - name: Install Playwright
         run: |
           mkdir -p /tmp/tt-playwright
