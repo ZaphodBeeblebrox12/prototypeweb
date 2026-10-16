@@ -106,7 +106,7 @@ The mapping above is the proposed implementation model; it does not mean these p
 ## 7. Guardrails
 
 - Work from `prototypeweb/my-new-branch` for website/product/content changes.
-- All feature branches and pull requests target `my-new-branch`; any approved merge goes into `my-new-branch` only. Do not merge into `main`. The target-branch rule alone is not approval to merge an individual draft PR.
+- All feature branches and pull requests target `my-new-branch`; any approved merge goes into `my-new-branch` only. Do not merge into `main`. A CI guard fails PR checks targeting another base branch; repository settings must require that check for a hard merge block. This policy is not approval to merge an individual draft PR.
 - Preserve existing micro-course source and its product boundaries.
 - Do not wire static UI to guessed endpoints or fabricate logged-in, payment-success or saved-progress states.
 - Do not mark a route, feature, test or deployment as production-ready without actual runtime evidence.
