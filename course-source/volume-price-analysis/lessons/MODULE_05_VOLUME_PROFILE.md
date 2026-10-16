@@ -39,6 +39,10 @@ Imagine two events:
 
 The first tells you *when* activity was unusually high. The second tells you *where* activity was concentrated over the selected period. These observations can be combined, but they should not be confused.
 
+### Worked comparison — the profile question changes with the window
+
+A one-session profile may show a POC at 105, while a five-session composite shows its POC at 102 because earlier sessions added more activity below. Neither profile must be wrong. The question is different: the session profile summarises one session; the composite summarises the selected group of sessions. Label the period and avoid mixing references from different windows without explaining why both are relevant.
+
 ### Level 1 — Notice (easy)
 
 **Task:** What does a conventional volume histogram arrange activity by, and what does a Volume Profile arrange it by?
@@ -103,6 +107,10 @@ A session profile can help you review one session. A composite profile that incl
 
 When comparing value areas, keep the profile method and periods in view. Moving from a one-session profile to a multi-week profile can shift the references simply because the underlying dataset changed.
 
+### Worked comparison — profile references are calculated, not universal
+
+Two platforms or settings may draw a different value area because the selected percentage, row size or calculation rule differs. If the value area contains a selected share of profile volume—often around 70% by default—the boundaries depend on the chosen method. Before treating VAH or VAL as a reference, record the platform/window settings. Price interacting with the line is observable; calling the line “fair value” or guaranteed support is a stronger claim.
+
 ### Level 1 — Notice (easy)
 
 **Task:** A profile shows VAH 112, POC 108 and VAL 104. Define each using the platform's chosen settings.
@@ -159,6 +167,10 @@ Use the node to frame a question:
 A selected profile shows an HVN between 150 and 154, with a thinner LVN from 155 to 157. Price rallies from 154 to 158 in two broad bars.
 
 One possible reading is that price travelled quickly through the thin area. That is a description of the path, not proof of the cause. If price later returns to 155–157 and passes through again, the thin-area interpretation is consistent with another quick move. If it stalls there and builds a new area of activity, the earlier profile is no longer a reliable description of the newly developing market. Profile context should be updated when the market adds new evidence.
+
+### Worked comparison — a thin area can still stall price
+
+A profile shows an LVN from 155 to 157. Price travels quickly through it during one move. On a later return, price overlaps in the same region for several bars. The historical profile did not change, but the current behaviour did. A thin section may be associated with faster travel in some conditions; it is not a permanently empty road. Current price action tests, rather than obeys, the historical map.
 
 ### Level 1 — Notice (easy)
 
@@ -221,6 +233,10 @@ A shift in profile shape is not a standalone trade trigger. Before using it, ask
 - Did price hold outside the earlier value area or return into it?
 - Did activity and price outcome change around the new references?
 - Are there session, news or feed factors that complicate the comparison?
+
+### Worked comparison — value migration versus one shifting POC
+
+Session B's POC sits higher than Session A's, but most of their value areas overlap and price remains inside the same broad range. It would be too strong to call this a confirmed upward trend from the POC alone. If successive comparable profiles shift higher, price holds above prior value and swing structure also advances, the wider case for higher development is stronger. Compare the full shape, period and price behaviour rather than isolating one number.
 
 ### Level 1 — Notice (easy)
 
@@ -286,6 +302,10 @@ Price is currently at 417 after a wide upward bar on elevated time-based volume.
 **What is missing?** The current bar alone does not tell us which scenario will occur. A trigger, invalidation condition and assessment of the practical risk would be required before considering an actual trade plan.
 
 This is the right role for profile: it adds context to an evidence-based scenario, rather than replacing the analysis.
+
+### Worked comparison — profile and candle volume answer different questions
+
+Price moves above the profile's VAH while the time-based volume bar is 1.8× its baseline. The profile tells you that price is outside the selected period's prior value area; the volume bar tells you activity was elevated during this interval. Those facts complement one another but are not duplicates. A sustained hold above VAH supports continuation; a return inside and failed reclaim supports the alternative. If price overlaps around the boundary, there may be no trigger yet.
 
 ### Level 1 — Notice (easy)
 
