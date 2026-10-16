@@ -206,3 +206,9 @@
 @media(max-width:560px){.sr-room-zone-fields{grid-template-columns:minmax(0,1fr)}.sr-room-zone-task{padding:12px}}
 
 
+
+/* Chart-first lesson layout: give instructional evidence the full reading width.
+   The learner's written response follows the image rather than squeezing it into half a column. */
+.sr-room-work-grid{grid-template-columns:minmax(0,1fr)}
+.sr-room-chart-figure{width:100%;min-width:0}
+.sr-room-chart-viewport img{max-height:min(70vh,760px)}
