@@ -60,7 +60,7 @@ class LessonInstructorMaterialAdmin(admin.ModelAdmin):
 
 @admin.register(CourseOffer)
 class CourseOfferAdmin(admin.ModelAdmin):
-    list_display = ("name", "course", "plan", "access_duration_days", "is_active", "position")
+    list_display = ("name", "course", "plan", "access_duration_days", "community_access_days", "is_active", "position")
     list_filter = ("is_active", "course")
     search_fields = ("name", "slug", "course__title", "plan__name")
     prepopulated_fields = {"slug": ("name",)}
@@ -80,7 +80,7 @@ class CourseEntitlementEventInline(admin.TabularInline):
 
 @admin.register(CourseEntitlement)
 class CourseEntitlementAdmin(admin.ModelAdmin):
-    list_display = ("user", "course", "status", "starts_at", "expires_at", "source", "payment_intent")
+    list_display = ("user", "course", "status", "starts_at", "expires_at", "community_access_expires_at", "source", "payment_intent")
     list_filter = ("status", "source", "course")
     search_fields = ("user__username", "user__email", "course__title", "payment_intent__provider_reference")
     readonly_fields = tuple(f.name for f in CourseEntitlement._meta.fields)
