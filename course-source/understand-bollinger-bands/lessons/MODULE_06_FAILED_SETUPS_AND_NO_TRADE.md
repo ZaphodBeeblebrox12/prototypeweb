@@ -1,0 +1,243 @@
+# Module 6 — Recognise Failed Setups and Know When to Wait
+
+A trading idea can be reasonable and still fail. The goal is not to predict every failure before it happens. The goal is to know what would weaken the idea, what would invalidate it, and when to stop acting as if the original plan is still valid.
+
+By the end, you should be able to recognise failed starts after a squeeze, avoid fading persistent band walks, identify when a range-fade premise has broken, and skip trades with poor location, conflicting evidence, or unsuitable conditions.
+
+---
+
+## Lesson 6.1 — The False Start After a Squeeze
+
+**Estimated time:** 16 minutes — read 7, inspect the figure 3, task 4, review 2.  
+**Figure:** Figure 6.1 — an initial breakout that returns into the prior range, with the point where the first plan weakens marked.
+![Figure 6.1: an initial breakout that returns into the prior range, with the point where the first plan weakens marked](../assets/student-assets/svg/bb-m06-f01.svg)
+
+### The question
+
+What if price breaks upward after a squeeze, then quickly falls back into the prior range?
+
+A quiet period can be followed by a stronger move, but not every first move lasts. Bollinger discusses the possibility of **head-fakes** around squeezes: an initial move in one direction can fail before price develops a clearer move. The term names a type of failure; it does not mean it can always be forecast in advance.
+
+### The danger of treating the first break as proof
+
+Imagine price has been moving in a narrow consolidation. Your plan says a completed close above the range high is the trigger for a potential long. Price closes above it. This is evidence that the trigger occurred. It is not proof that the breakout will continue.
+
+The next bar returns inside the prior range and price cannot regain the boundary under your chosen confirmation rule. Now the evidence has changed. If your plan required a hold above the boundary, the condition has failed. The correct response is to cancel or manage the original idea according to the plan, not keep insisting that price must recover.
+
+A failed upside break does not automatically become a short. The original long condition has weakened, but a short needs its own context, trigger, invalidation, stop, and target. If the downside move has not produced those conditions, waiting is still reasonable.
+
+### Plan the failure before the entry
+
+For each squeeze-breakout idea, write down:
+
+- What boundary must price cross?
+- What counts as the trigger?
+- Does the method require a hold or another confirmation?
+- What event invalidates the breakout idea?
+- If it fails, what evidence would be needed before considering the opposite direction?
+
+Defining failure in advance helps you avoid changing the rules to fit the latest candle.
+
+### Inspect Figure 6.1
+
+Find the first close beyond the range. Then locate the return inside. The key question is not “Was the breakout fake from the start?” That answer is usually unknowable. Ask instead: “At what point did the price behaviour fail the conditions of the plan?”
+
+### Task
+
+Mark the initial trigger, the evidence that weakens the continuation idea, and the point at which the chosen rule says to stop treating it as valid.
+
+**Model reasoning:** The first close beyond the boundary activates the course-defined trigger. The quick return inside and failure to hold weaken the continuation case. If the plan specified that this behaviour invalidates the setup, the original plan should be cancelled. No reverse trade should be assumed without a separate trigger.
+
+### Try a new case
+
+Price breaks down after a squeeze, then quickly recovers above the lower boundary of the prior range. What is the mirror-image lesson?
+
+**Model response:** The downside breakout may have failed. The original short condition should be reviewed against its invalidation rule. A long requires its own evidence; it is not automatic simply because the short idea weakened.
+
+### Common mistake
+
+Reversing position immediately after a failed breakout without waiting for a new plan.
+
+### Keep this
+
+> **A failed breakout is evidence that the original idea may no longer fit—not an automatic signal to trade the other way.**
+
+**Source note:** The squeeze and head-fake concept is associated with John Bollinger's *Bollinger on Bollinger Bands*, particularly the Squeeze discussion. The precise invalidation rule used in this lesson is course-defined. See [Bollinger's official rules](https://www.bollingerbands.com/bollinger-band-rules).
+
+---
+
+## Lesson 6.2 — When a Band Walk Traps Reversal Traders
+
+**Estimated time:** 15 minutes — read 7, inspect the figure 3, task 3, review 2.  
+**Figure:** Figure 6.2 — persistent band walks compared with a sequence where structure begins to weaken.
+![Figure 6.2: persistent band walks compared with a sequence where structure begins to weaken](../assets/student-assets/svg/bb-m06-f02.svg)
+
+### The question
+
+What evidence warns you that price may keep moving along the band instead of reversing?
+
+A common failure is to decide that price has moved “too far” simply because it touches the upper band repeatedly. In a strong uptrend, price can walk the upper band and keep moving higher. In a strong downtrend, it can walk the lower band and keep moving lower.
+
+### Read the progress, not just the location
+
+Compare three things:
+
+**Band interaction:** Is price touching the same band once, or repeatedly over a sequence?
+
+**Swing structure:** Are highs and lows still progressing in the trend direction, or are the swings starting to fail?
+
+**Middle band:** Does it continue to slope in the trend direction, or has it flattened or changed? This is supporting context, not a stand-alone signal.
+
+A persistent upper-band walk alongside rising swing highs and lows is different from a chart where price repeatedly touches the upper band but fails to make further progress. The second situation may deserve closer examination for a change in behaviour, but it still does not guarantee reversal.
+
+### Why mean reversion can fail
+
+A mean-reversion idea assumes that price may return toward the middle or move away from an extreme. That idea can struggle when a strong trend continues. If you keep selling the upper band during an uptrend, the trade may be stopped repeatedly while price walks higher. If you keep buying the lower band during a downtrend, the same problem can occur in reverse.
+
+Before taking a reversal, identify what would show that the current trend is weakening or structure is changing. That could involve a break of a meaningful swing, a failure to make further progress, or a clearly defined pattern confirmation. Choose the rule before the outcome, and keep it consistent while testing.
+
+### Inspect Figure 6.2
+
+Panel A shows persistent directional progress alongside repeated band interaction. Panel B shows a walk where the structure begins to weaken. Notice that “beginning to weaken” is not the same as “reversal confirmed.” You still need the chosen trigger.
+
+### Task
+
+Which panel is less suitable for fading the trend immediately? Point to two facts that support your decision.
+
+**Model reasoning:** The panel with ongoing directional progress and intact swing structure is less suitable for a countertrend trade. Repeated band interaction is part of the trend context, not proof of overextension. The weakening panel may be worth watching but still requires a clear trigger.
+
+### Try a new case
+
+In a downtrend, price has closed near the lower band for five bars and made a fresh low. Is the fifth touch a long signal?
+
+**Model response:** No. The chart still shows directional progress down. The trader needs evidence of a change in behaviour and a planned trigger before considering a long.
+
+### Common mistake
+
+Confusing “price is far from the average” with “price must reverse now.”
+
+### Keep this
+
+> **Before fading a band walk, look for a real change in price behaviour. A feeling that price is stretched is not enough.**
+
+**Source note:** John Bollinger's discussion of walking the bands and Official Rule 7. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
+
+---
+
+## Lesson 6.3 — When a Range Trade Stops Being a Range Trade
+
+**Estimated time:** 15 minutes — read 7, inspect the figure 3, task 3, review 2.  
+**Figure:** Figure 6.3 — a false poke beyond a range boundary beside a range that breaks and begins trending.
+![Figure 6.3: a false poke beyond a range boundary beside a range that breaks and begins trending](../assets/student-assets/svg/bb-m06-f03.svg)
+
+### The question
+
+If price crosses a range boundary and continues moving away, what happens to a plan that expected a bounce?
+
+A range-fade trade depends on the range continuing to hold. If price begins to stay beyond the boundary and make directional progress, the original premise may no longer fit.
+
+The challenge is that a brief move outside the range can happen before price returns inside. That is why a single wick beyond the boundary and a sustained break should not automatically be treated as the same event.
+
+### Separate a false poke from a changing market
+
+In the first panel of Figure 6.3, price moves beyond the boundary but returns into the range. If your plan required a close or hold outside the boundary to invalidate the range, the first move may not have met that condition. You still need to follow the exact rule you selected.
+
+In the second panel, price moves beyond the boundary, remains there under the stated example rule, and begins progressing away. If the range-fade plan said that acceptance outside the boundary invalidates the idea, the original trade is no longer valid once the condition occurs.
+
+You do not have to label the event perfectly in real time. The purpose of a rule is to define what you will do when the observed behaviour no longer supports your premise.
+
+### Do not defend the old plan
+
+A frequent mistake is to average into a losing range trade because price “should come back.” But the range was an assumption based on past behaviour. It is not a promise. When price violates the invalidation condition, your plan needs to change—usually by closing or managing the trade according to the rules, then reassessing from a neutral position.
+
+A new breakout trade may become possible, but it is a separate decision. It needs a new trigger and a sensible risk/reward. Do not turn a failed fade into an impulsive breakout entry just to recover the loss.
+
+### Inspect Figure 6.3
+
+Mark the prior range high/low, the first excursion beyond the boundary, and the later behaviour. Ask what the original plan required and where that condition was met or failed.
+
+### Task
+
+For each panel, explain whether the range-fade premise remains intact under the example rule. State one thing you would do if the premise is invalidated.
+
+**Model reasoning:** In the false-poke example, price returns into the prior range and may not have met the stated invalidation condition. In the sustained-break example, price remains outside and progresses, so the range premise is weakened or invalidated under the rule. The trader should stop treating the old fade as valid and avoid adding risk to defend it.
+
+### Try a new case
+
+You are short at the top of a range. Price closes above the range high twice and then pulls back toward it. What should happen next?
+
+**Model response:** If the plan defined the sustained closes above the boundary as invalidation, the short premise has failed. The pullback may later offer a breakout-retest setup, but that requires a separate plan; it should not be used to justify holding the old short.
+
+### Common mistake
+
+Treating a trading range as permanent because it has held several times before.
+
+### Keep this
+
+> **When the condition that justified your range trade no longer holds, stop managing the trade as if it still does.**
+
+**Source note:** Bollinger's rules warn against treating band tags as signals and emphasise setup-based use. The range-break and acceptance examples are course-designed market-structure rules, not a Bollinger-specific named system.
+
+---
+
+## Lesson 6.4 — Late Entries, Conflicting Evidence, and No-Trade Conditions
+
+**Estimated time:** 16 minutes — read 7, inspect the figure 3, task 4, review 2.  
+**Figure:** Figure 6.4 — late expansion, conflicting evidence, a gap/liquidity-risk case, and an unattractive reward-to-risk case.
+![Figure 6.4: late expansion, conflicting evidence, a gap/liquidity-risk case, and an unattractive reward-to-risk case](../assets/student-assets/svg/bb-m06-f04.svg)
+
+### The question
+
+What if the breakout is real, but most of the move has already happened?
+
+Being right about direction does not guarantee that a trade at the current price makes sense. If price has already travelled far from the original boundary, the stop may need to be wide and the next target may be close. The remaining opportunity can be poor even if the overall trend continues.
+
+### Four reasons to wait
+
+**1. The move is late.** The bands have already widened and price has moved far beyond the original setup area. Chasing may create a poor entry relative to the logical invalidation point. You do not have to participate in every move.
+
+**2. The evidence conflicts.** Price may be testing a boundary while the swing structure remains unclear, or the selected confirmation may disagree with the price action. Conflicting evidence does not always mean the market will reverse. It may mean you do not yet have a clear trade.
+
+**3. The instrument or conditions are unsuitable.** Thin liquidity, large spreads, gaps, sudden event-driven movement, or unreliable data can make the chart-based stop and the actual fill behave differently. Bollinger Bands do not account for these risks. A chart alone may not show the full execution problem.
+
+**4. There is too little room to target.** If the next major price area is close while invalidation is far away, the trade may offer too little potential reward for its planned loss. Do not squeeze the stop into an arbitrary position just to make the ratio look better.
+
+### No-trade is a decision, not a lack of skill
+
+A useful no-trade statement says why the setup does not qualify. For example: “The breakout has already expanded too far from the boundary; the nearest resistance leaves too little room before the planned target.” That is more useful than “I don't like it.”
+
+A no-trade condition should be concrete enough to apply consistently. Examples include: the required trigger has not occurred; price structure is mixed; the original premise is invalidated; execution conditions are poor; or the stop and target do not produce acceptable planned risk.
+
+No single checklist can make every situation safe. The point is to avoid taking a trade when the conditions you said you required are missing.
+
+### Inspect Figure 6.4
+
+Each panel is a reason to pause, but for a different reason. Identify whether the problem is location, disagreement, execution risk, or insufficient room to target.
+
+### Task
+
+Choose which cases should be skipped and write the specific reason. Do not use only “it looks risky”; identify the visible condition.
+
+**Model reasoning:** A late move may have poor entry location; conflicting evidence may leave the thesis unresolved; gaps or poor liquidity may make execution risk hard to control; and insufficient room to target can make the planned reward unattractive. Any one may justify waiting under the trader's rules.
+
+### Try a new case
+
+The bands are wide and price is moving strongly upward. The breakout itself is clear, but price is far from the original boundary and just below a prior high. Do you have to buy?
+
+**Model response:** No. The trend may be strong, but the entry may be late and the nearby high may limit the available target. I can wait for a better setup or skip it.
+
+### Common mistake
+
+Believing that missing a move is worse than entering a low-quality trade.
+
+### Keep this
+
+> **A good setup is not just a direction. It also needs a suitable entry, a clear point of failure, manageable risk, and enough room to make sense.**
+
+**Source note:** Bollinger's Official Rule 22 says bands identify setups rather than provide continuous advice. The execution and reward-to-risk filters here are general course risk principles. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
+
+---
+
+## Module 6 source notes
+
+Primary source: John Bollinger, *Bollinger on Bollinger Bands*, particularly the Squeeze and Walking the Bands chapters, plus Official Rules 7, 8 and 22. Failure labels in the lessons are descriptive explanations of possible outcomes; they are not claimed to be perfectly predictable signals.

@@ -7,6 +7,7 @@
 
 - Internal asset IDs use BB-M[module]-F[number], for example BB-M1-F01.
 - Student-facing labels use Figure [module].[figure], for example Figure 1.1.
+- Expected image path: `assets/student-assets/svg/bb-m01-f01.svg` for BB-M1-F01; manuscript embeds use `../assets/student-assets/svg/bb-m01-f01.svg`. Use lowercase, zero-padded module and figure numbers for all assets.
 - Do not print internal asset IDs on the image itself.
 - Never print “synthetic data” or production labels inside a figure. If an illustrative chart needs clarification, say so in the nearby lesson caption.
 - Make price and band lines visually distinct and labels large enough to read on mobile and at 200% zoom. Avoid tiny annotations, unnecessary indicators, crowded legends, and colour-only distinctions.
