@@ -51,12 +51,12 @@ _VPA_FIGURES = {
     "1.1": (
         (
             "**Level 1 — Notice (easy):**",
-            "vpa-m01-l01-stage1-spot-volume.svg",
+            "vpa-m01-l01-stage1-spot-volume-mobile.svg",
             "Candidate candle and its local volume baseline",
         ),
         (
             "**Level 2 — Compare (guided):**",
-            "vpa-m01-l01-candle-context-compare.svg",
+            "vpa-m01-l01-candle-context-compare-mobile.svg",
             "Similar candle shapes in different contexts",
         ),
     ),
