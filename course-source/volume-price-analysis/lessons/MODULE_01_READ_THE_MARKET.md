@@ -65,8 +65,8 @@ Let's slow down the first comparison and treat it as a live reading rather than 
 2. Why does the same candle mean something different near a range boundary than in the middle of a range?
 3. What information does the next sequence of bars add?
 
-<!-- ASSET: Pilot package implemented at ../assets/: source/vpa-m01-l01-candle-context-compare.svg; source/vpa-m01-l01-candle-context-panel-a.svg; source/vpa-m01-l01-candle-context-panel-b.svg; source/vpa-m01-l01-candle-context-outcomes.svg, with matching exports, synthetic CSV and accessibility notes. Panels use a matched vertical scale increment and neutral volume bars. Use these files as the reference visual system for later assets. -->
-<!-- CHARTLAB: Progressive three-level pilot implemented in ../assets/lab-specs/vpa-m01-l01-candle-context-lab.html. Level 1: observe Panel A; Level 2: compare the two matched-size candidates; Level 3: test the same candidate candle against continuation and failure outcomes. Do not expose Level 3 outcomes before the learner records a response. -->
+<!-- ASSET: Pilot assets implemented under ../assets/: Level 1 source/exports/vpa-m01-l01-stage1-spot-volume.svg; Level 2 source/exports/vpa-m01-l01-candle-context-compare.svg; Level 3 initial breakout plus separate continuation/failure outcomes. Responsive mobile variants, underlying synthetic OHLCV data and accessibility descriptions are supplied. -->
+<!-- CHARTLAB: The progressive three-level pilot is ../assets/lab-specs/vpa-m01-l01-candle-context-lab.html. Level 1 observes one chart; Level 2 compares matched-size candidates with a shared scale increment and neutral volume bars; Level 3 shows a fresh breakout attempt and holds outcome charts until an initial reading is submitted. Use this progression as the reference pattern for future lesson assets. -->
 
 ---
 
