@@ -55,7 +55,7 @@ class Command(BaseCommand):
                     f"exist: {', '.join(sorted(existing))}. No rows were changed."
                 )
 
-        
+
         for command_name, _slug, _modules, _lessons in COURSES:
             try:
                 call_command(command_name, stdout=self.stdout)
