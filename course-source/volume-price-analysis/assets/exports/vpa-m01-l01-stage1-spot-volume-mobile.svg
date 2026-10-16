@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="720" height="640" viewBox="0 0 720 640" role="img" aria-labelledby="title desc">
-<title id="title">Level 1 · Spot the candle</title>
-<desc id="desc">Six synthetic candles matching the desktop Level 1 chart, with their volume bars. The final green candidate candle is outlined. Candidate volume is 280 against the previous-five-bar average of 238, about 1.18 times the baseline.</desc>
+<title id="title">Spot the candle</title>
+<desc id="desc">Six candles with matching volume bars; the final candidate is outlined. The final green candidate candle is outlined. Candidate volume is 280 against the previous-five-bar average of 238, about 1.18 times the baseline.</desc>
 <rect width="720" height="640" fill="#f6f5f0"/>
 <rect x="18" y="16" width="684" height="608" rx="13" fill="#fffefa" stroke="#d9d7cf" stroke-width="2"/>
 <text x="38" y="50" font-family="Arial,Helvetica,sans-serif" font-size="31" font-weight="700" fill="#252923">Level 1 · Spot the candle</text>
@@ -21,4 +21,4 @@
 <text x="98" y="423" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#41443d">Average of five bars before candidate: 238</text>
 <line x1="98" y1="464.7" x2="680" y2="464.7" stroke="#62645f" stroke-width="2" stroke-dasharray="8 6"/><rect x="131.5" y="450" width="30" height="98" rx="1" fill="#a5aaa3"/><rect x="228.5" y="460.5" width="30" height="87.5" rx="1" fill="#a5aaa3"/><rect x="325.5" y="465.75" width="30" height="82.25" rx="1" fill="#a5aaa3"/><rect x="422.5" y="471" width="30" height="77" rx="1" fill="#a5aaa3"/><rect x="519.5" y="476.25" width="30" height="71.75" rx="1" fill="#a5aaa3"/><rect x="616.5" y="450" width="30" height="98" rx="1" fill="#c6a63a"/><line x1="631.5" y1="142" x2="631.5" y2="553" stroke="#555d56" stroke-width="1.4" stroke-dasharray="4 4"/>
 <text x="38" y="591" font-family="Arial,Helvetica,sans-serif" font-size="24" font-weight="700" fill="#252923">Candidate 280 · Baseline 238 · 1.18×</text>
-<text x="38" y="614" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#41443d">Synthetic teaching data · no real instrument represented</text></svg>
+<text x="38" y="614" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#41443d">Figure 1.1 · Candle and relative-volume example</text></svg>
