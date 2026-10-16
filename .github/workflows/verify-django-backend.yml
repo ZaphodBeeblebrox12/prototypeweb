@@ -63,17 +63,12 @@ jobs:
       - name: Prepare the isolated test database
         run: python manage.py migrate --noinput
 
-      - name: Validate source-course draft import mappings
-        run: |
-          python manage.py seed_trading_path
-          python manage.py seed_support_resistance
-          python manage.py seed_volume_price_analysis
+      - name: Validate the complete source-course catalogue
+        run: python manage.py seed_academy_catalogue
 
       - name: Smoke-test draft imports against isolated CI database
         run: |
-          python manage.py seed_trading_path --apply
-          python manage.py seed_support_resistance --apply
-          python manage.py seed_volume_price_analysis --apply
+          python manage.py seed_academy_catalogue --apply
           python manage.py shell <<'PY'
           from pathlib import Path
           import re
