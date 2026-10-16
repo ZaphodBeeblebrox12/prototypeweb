@@ -147,8 +147,6 @@
         createTab.setAttribute('aria-selected', String(create));
         signInPanel.hidden = create;
         createPanel.hidden = !create;
-        document.getElementById('formTitle')?.setAttribute('id', 'signInFormTitle');
-        if (!create) document.getElementById('signInFormTitle')?.setAttribute('id', 'formTitle');
       }
       signInTab.type = 'button';
       createTab.type = 'button';
@@ -157,7 +155,7 @@
       [signInTab, createTab].forEach((tab, index) => tab.addEventListener('keydown', event => {
         if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
         event.preventDefault();
-        const next = event.key === 'ArrowRight' ? 1 - index : 1 - index;
+        const next = 1 - index;
         const tabs = [signInTab, createTab];
         tabs[next].focus();
         setMode(next === 1);
