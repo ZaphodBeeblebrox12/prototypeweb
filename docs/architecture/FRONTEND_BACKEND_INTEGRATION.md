@@ -33,6 +33,20 @@ The current Academy implementation lives in `ZaphodBeeblebrox12/test`, branch `f
 
 The learner views are server-rendered Django pages, not a published public JSON API. Their URL names and same-origin CSRF/session behaviour should be used rather than guessing API endpoints from static HTML.
 
+## Catalogue lifecycle and future expansion
+
+The catalogue is intentionally still in development and should grow as additional courses become ready. Do not design it as a fixed set of hard-coded products. The current static content file `site/assets/course-catalogue-data.js` separates course data from reusable display templates, which is a useful prototype pattern; in production, published course/offer data should come from the authoritative backend/catalogue records.
+
+Represent lifecycle states deliberately (at minimum draft, in development, published/available, and archived). Draft and in-development material should not be represented as purchasable or enrolled course content. The public page now communicates that development is ongoing; keep this status statement accurate and revise it only when the product owner changes the message.
+
+When adding a course:
+1. Create its own stable identifier/slug and course/module/lesson records from the approved source manifest.
+2. Verify the course summary, learning outcomes, estimated time, course level, offer price, one-time/subscription semantics, access duration, included community or support, delivery mode and availability state.
+3. Keep curriculum and entitlements separate from other course products unless an explicit bundle relationship has been implemented and tested.
+4. Include it in the public catalogue only when the intended preview/published state allows it; derive category filters and counts from available catalogue data rather than fixed numbers.
+5. Check desktop/mobile presentation, search/filter behaviour, empty states and all affected member/checkout journeys.
+6. Add the new product to admin workflows and regression fixtures so future additions do not require a site redesign.
+
 ## 2. Proposed integration approach
 
 Prefer full-page navigation for the first release; do not add cross-origin token authentication or build a new frontend API layer unless the deployment requires it.
