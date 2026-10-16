@@ -1,88 +1,90 @@
-# Third Pass — Editorial Language and Beginner Voice Guide
+# Editorial Language and Beginner Voice Guide
 ## Read Volume. Find Trade Setups.
 
-**Purpose:** Revise the six-module, 30-lesson manuscript so a person who has only recently started looking at markets can follow it without losing the analytical depth.
+**Purpose:** Keep the six-module, 30-lesson course clear, practical and appropriately deep for learners who recognise basic charts but may be new to reading price and volume together.
 
-**Audience assumption:** The learner may recognise candles and basic price charts, but may not know terms such as relative volume, absorption, acceptance, value area, or invalidation. Never confuse knowing a trading word with understanding the idea.
+**Primary format:** These are student-facing lessons, not narration scripts. Follow [the Student-First Lesson Standard](STUDENT_LESSON_STANDARD.md). The teacher's voice should come through the quality and sequence of the teaching, not through the imitation of a presenter reading paragraphs aloud.
 
 ## The voice
 
-Calm, encouraging, plain-spoken and specific. Sound like a patient educator sitting beside the learner and walking through one chart. Respect beginners; do not talk down to them, use hype, or suggest there is a secret signal they have been missing.
+Calm, warm, patient, plain-spoken and precise. Respect beginners; never talk down to them, use hype or imply that there is a secret signal they have been missing. Help the learner understand how to reason, not merely what label to remember.
 
 ## Editorial rules
 
-1. **Explain the everyday meaning before the technical label.** For example: “Volume compared with recent bars is often called relative volume.” Then use the shorter term where it helps.
-2. **Teach one new idea at a time.** Avoid putting three unfamiliar terms in one sentence.
-3. **Use the chart as the anchor.** Explain what price did, what the volume data shows, where the event happened, and what happened next.
-4. **Separate what we see from what we think it may mean.** Use the pattern: “Here is what we see. One possible reading is this. Here is what would support or weaken that reading.”
-5. **Use short, active sentences.** Prefer “Price returned inside the range” over “A return into the prior range provides evidence inconsistent with the continuation thesis.”
-6. **Turn abstract ideas into a small example.** Use simple numbers, one clearly marked price area, or two similar-looking charts with different outcomes.
-7. **Show a counterexample.** The learner should see that a similar candle or volume event can lead to a different result.
-8. **Avoid insider stories.** A chart rarely proves that an institution or group of traders deliberately caused a move. Do not claim to know hidden motives from a candle.
-9. **Avoid certainty.** Do not call a pattern a guaranteed signal. Explain what would support the idea, what would challenge it, and when “wait” is sensible.
-10. **Make the learner's next action clear.** Each lesson should end with something the learner can point to, describe, compare, or mark on a chart.
-11. **Explain abbreviations and specialist terms on first use.** For example, define Point of Control before shortening it to POC.
-12. **Do not pad.** Keep examples only if they teach a distinction, show a counterexample, or help the learner practise.
+1. **Write to the learner.** Explain the idea directly. Remove presenter directions, timestamped narration plans and phrases such as “now we will look at”.
+2. **Explain everyday meaning before the technical label.** Define specialist terms when the student first needs them.
+3. **Teach one main idea at a time.** Avoid stacking several unfamiliar terms in the same sentence.
+4. **Anchor explanations in chart evidence.** State what price did, what the data records, where the event happened and what happened next.
+5. **Separate observation from interpretation.** First say what is visible, then give a possible reading, an alternative and a future condition that could help distinguish them.
+6. **Use compact, active sentences and helpful visual structure.** Short paragraphs, a small comparison table or a labelled example are welcome when they help learning; bullets should not replace clear explanation wholesale.
+7. **Show a contrasting case.** A similar-looking candle or event may have a different outcome. Use that difference to teach what matters.
+8. **Avoid unsupported stories about market participants.** A chart does not identify the person or institution behind a move or reveal hidden intent.
+9. **Keep claims conditional.** Explain what would strengthen or weaken the idea and when waiting or no trade is appropriate.
+10. **Finish with usable practice.** Ask the learner to observe, compare, annotate, explain or build a conditional scenario—not merely repeat a definition.
+11. **Give feedback that teaches.** Explain why an answer is supported, what its limits are and what evidence is still needed. Do not reward a directional guess solely because it matches a later outcome.
+12. **Preserve analytical depth, remove repetition.** A second example should clarify a distinction or expose an alternative, not restate the same paragraph.
+13. **Keep production notes separate.** Asset prompts, ChartLab implementation specs, instructor-only answer notes and research provenance belong in production documents, not in the lesson a student reads.
+14. **Do not claim tested duration without a timed test.** Reading, chart inspection, practice and feedback may take different amounts of time in the rendered experience; word count alone is not a validation.
 
 ## Plain-language definitions to use consistently
 
-- **Volume:** the amount of trading activity recorded by the data source for that period. The exact meaning depends on the market and feed.
+- **Volume:** the amount of trading activity recorded by the data source for that period. Its meaning depends on the market and feed.
 - **Relative volume:** current volume compared with a stated group of similar recent bars.
 - **Candle range:** the distance from the candle's high to its low.
-- **Close near the high/low:** where price finished within that candle's range.
-- **Price structure:** the pattern made by recent highs and lows; it helps describe whether price is moving up, moving down, or staying in a range.
-- **Support/resistance zone:** an area where price previously stopped, turned, or changed behaviour—not a line that must hold.
+- **Close near the high/low:** where price finished within the candle's range.
+- **Price structure:** the pattern made by recent highs and lows; it helps describe whether price is progressing, declining or rotating in a range.
+- **Support/resistance zone:** an area where price previously stopped, turned or changed behaviour—not a line that must hold.
 - **Effort versus result:** compare how much activity was recorded with how far price actually moved.
 - **Buying/selling pressure:** shorthand for price making progress up or down. It does not prove who traded or why.
-- **Absorption:** a possible explanation for high activity with little price movement. One candle cannot prove it.
+- **Absorption:** one possible explanation for high activity with little price movement. A candle cannot prove it.
 - **Breakout:** price moving beyond a previously observed range or level.
 - **Failed breakout:** price moves beyond a boundary but then returns inside and cannot sustain the move outside.
 - **Follow-through:** what price does after the first event.
 - **Acceptance:** price staying beyond a level rather than quickly coming back through it.
 - **Rejection:** price failing to stay beyond an area and moving back away from it.
 - **Spring/upthrust:** a move below/above a trading-range boundary that returns inside. The name does not guarantee a reversal.
-- **Point of Control (POC):** the price row with the most recorded activity in the chosen profile.
-- **Value Area:** the range that contains a chosen share of a profile's activity, according to the platform's method.
-- **High-/low-volume node:** an area with relatively more/less recorded activity on a profile.
-- **Trigger:** the exact price behaviour required before taking the trade.
-- **Invalidation:** the price or condition that tells you the trade idea no longer fits.
+- **Point of Control (POC):** the price row with the most recorded activity in the chosen profile, according to the platform's rules.
+- **Value Area:** the range containing a selected share of a profile's activity under the platform's method.
+- **High-/low-volume node:** an area with relatively more/less recorded activity in a profile.
+- **Trigger:** the observable price behaviour required before considering a trade under a defined method.
+- **Invalidation:** the price behaviour or condition that shows a particular idea no longer fits.
+- **No-trade condition:** a defined missing, conflicting or unsuitable condition under which the plan should not be acted on.
 
 ## Scope guard
 
-Keep the course about reading volume alongside price and price structure, with Volume Profile used where it directly helps the analysis. Do not expand the core into a general indicator survey. Extra tools are not automatically extra value. If a concept does not help the learner read a price-volume event or build the final plan, leave it out.
+Keep the course about volume alongside price and price structure, with Volume Profile used where it directly helps the analysis. Do not expand it into a general indicator survey. Extra tools are not automatically extra value. If a concept does not help the learner read a price-volume event or build the final plan, leave it out.
 
-Do not add specialist vocabulary just because it appears in a reference book. Include an author's distinctive concept only when it answers a clear question in the current lesson, and teach it with a beginner-friendly example and a counterexample.
+Include a specialist term only when it answers a clear question in the lesson. Explain it with a beginner-friendly example and, where appropriate, a counterexample.
 
-## Learning progression within every lesson
+## Practice progression
 
-Every lesson should give the learner a visible and achievable path from simple recognition to independent application. Use the same progression labels throughout the course:
+Use the following progression consistently, but let the activity fit the lesson:
 
-1. **Level 1 — Notice (easy):** identify the evidence or term with direct guidance. Ask “What can you point to?” before asking “What does it mean?”
-2. **Level 2 — Compare (guided):** compare two similar examples, with one important difference. Ask the learner to explain how that difference affects the reading.
-3. **Level 3 — Apply (independent):** use the idea on a fresh or less-labelled chart, state a possible reading and alternative, and identify the next evidence or invalidating condition. Reveal later bars only after the first reading has been recorded.
+1. **Notice:** identify observable facts with direct guidance.
+2. **Compare:** distinguish similar examples and explain how the differences affect the reading.
+3. **Apply:** analyse a new case, state a possible interpretation and an alternative, and identify what future evidence would change the view.
 
-The difficulty should increase through observation, comparison and transfer—not through chart clutter, jargon or a sudden jump into a full trade plan. Provide a visible progress cue, actionable feedback and a model explanation. When possible, use a counterexample so learners see why the rule is not automatic. Each lesson's Q&A should reinforce this sequence: foundational understanding, comparison/explanation, then application to a new chart.
+Difficulty should increase through observation, comparison and transfer—not through jargon, chart clutter or an abrupt jump to a full trading plan. Give visible, actionable feedback. When later bars affect the interpretation, let the learner record the initial reading before showing those bars.
 
 ## Lesson-length rule
 
-- **Hard minimum:** 10 minutes, measured in a full rehearsal.
+- **Hard minimum:** 10 minutes, measured in a complete rendered lesson with a learner.
 - **Normal target:** 12–16 minutes.
-- **Allowed range:** 10–20 minutes.
-- **Over 20 minutes:** allowed only when the lesson genuinely needs an extended worked example or a difficult concept requires more teaching. Record the reason; do not use repetition to fill time.
-- Count delivered teaching: narration, narrated chart walkthrough, guided practice, answer explanation and recap. Do not count screen-loading time or empty pauses as teaching.
-- A lesson that is too short needs a worked example, a counterexample, or a properly explained exercise—not a longer introduction.
-- Time the actual recording/rehearsal. Timings in the outline are targets, not proof that the runtime is achieved.
+- **Ordinary upper range:** 20 minutes unless complexity or meaningful practice justifies more.
+- Count actual teaching, inspecting charts, meaningful practice, feedback and recap. Do not count screen-loading time or empty pauses.
+- If a lesson feels short, add a worked example, counterexample or genuine reasoning task—not repeated explanation.
+- A timing target or an estimated read time is not proof. Time the delivered experience.
 
-## Third-pass reviewer checklist
+## Reviewer checklist
 
 Before approving a lesson, ask:
-
-- Would a new learner understand the first two minutes without looking up terms?
-- Is every important new word explained when it first matters?
-- Does the teacher show what to look at on the chart, rather than only describing the concept?
-- Is there one worked example and a contrasting example?
-- Does the script say what the chart shows, what it might mean, and what could change the reading?
-- Can the learner complete the ChartLab without guessing what the instructor meant?
-- Does the voice sound natural when spoken aloud?
-- Has the complete lesson been timed, and is it at least 10 minutes?
-- Has off-topic material and any unrelated tool tour been removed?
+- Is the student addressed directly rather than given a narration script?
+- Is the purpose clear early in the lesson?
+- Are the key terms explained when needed?
+- Can the student follow a worked example without instructor assistance?
+- Does the lesson distinguish visible evidence from possible explanation?
+- Is there meaningful practice with explanatory feedback?
+- Is there a contrasting case or plausible alternative when uncertainty matters?
+- Is the next learner action clear?
+- Are internal production instructions outside the student-facing text?
+- Have timing, chart readability, accessibility and novice comprehension been tested separately?
