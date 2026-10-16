@@ -33,7 +33,9 @@ A second lesson begins.
     assert "Describe price outcome" in body
     assert "Start by describing the candle" in body
     assert "Record what changed." in body
-    assert "Knowledge check" not in body
+    assert "Knowledge check" in body
+    assert "Is volume a stand-alone signal?" in body
+    assert "Answer: No." not in body
     assert "Answer: No." in internal
     assert "A second lesson begins" not in body
 
