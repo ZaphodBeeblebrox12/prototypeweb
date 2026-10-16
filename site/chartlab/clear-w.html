@@ -95,13 +95,13 @@ h1,h2,h3,p{margin-top:0}
 .task-bottom .tool-button{width:100%;min-height:42px}
 .task-bottom .secondary-action{width:100%;border:0;background:transparent;color:#6f796d;padding:9px 5px 0;font-size:10px;text-decoration:underline;text-decoration-color:#cfc7b8;text-underline-offset:3px}
 .task-bottom .sub-note{font-size:9px;color:#8b9085;text-align:center;margin:8px 0 0;line-height:1.5}
-.zone-details{display:none;margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+.zone-details{display:none;margin-top:16px;border-top:1px solid var(--line);padding-top:14px}.zone-entry-help{margin:-2px 0 11px;color:var(--muted);font-size:10px;line-height:1.55}#applyNumericZone{width:100%;margin-top:10px}
 .zone-details.visible{display:block}
 .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .field{display:grid;gap:5px}.field label{font-size:9px;color:#7a8278;font-weight:750}
 .field input,.reason-note{width:100%;border:1px solid var(--line-strong);border-radius:8px;background:#fffdf8;color:var(--ink);padding:8px 9px;font-size:11px;min-width:0}
 .field small{font-size:8px;color:#97998f}
-.reflection{margin-top:25px;border:1px solid var(--line);border-radius:17px;background:var(--surface);overflow:hidden;box-shadow:0 7px 24px #29382e07}
+.reflection{margin-top:25px;border:1px solid var(--line);border-radius:17px;background:var(--surface);overflow:hidden;box-shadow:0 7px 24px #29382e07}.reflection:focus-visible{outline:3px solid var(--rust);outline-offset:3px}
 .reflection-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:20px 23px 17px;border-bottom:1px solid var(--line);background:#fffaf1}
 .reflection-head h2{font:400 27px/1.1 var(--serif);color:var(--green);margin:8px 0 5px}
 .reflection-head p{margin:0;color:var(--muted);font-size:11px;line-height:1.7;max-width:680px}
@@ -330,7 +330,7 @@ body.chartlab-embed .site-shell{min-height:0}body.chartlab-embed main{padding-to
           <span class="toolbar-spacer"></span>
 
         </div>
-        <svg id="chartSvg" preserveAspectRatio="none" viewBox="0 0 1000 520" role="img" aria-label="Illustrative candlestick chart. Drag vertically across the chart to draw a support or resistance zone. The right side shows the price scale.">
+        <svg id="chartSvg" preserveAspectRatio="none" viewBox="0 0 1000 520" role="img" aria-describedby="chartHelp zoneEntryHelp" aria-label="Illustrative candlestick chart. Drag vertically across the chart or use the adjacent keyboard-accessible price fields to set a support or resistance zone. The right side shows the price scale.">
           <title>Illustrative W-shaped price structure</title>
           <desc>Thirty-five sample candles show two troughs near the same area, a swing high between them, then a move above that high. Draw support first, submit to lock it, then draw resistance.</desc>
         </svg>
@@ -358,12 +358,14 @@ body.chartlab-embed .site-shell{min-height:0}body.chartlab-embed main{padding-to
             <li>Submit it to lock your support mark.</li>
           </ol>
           <div class="tip-note" id="tipNote">First mark the area price reacted from twice. You will identify the neckline next.</div>
-          <div class="zone-details" id="zoneDetails">
-            <h3 style="margin-bottom:9px">Fine-tune your mark</h3>
+          <div class="zone-details" id="zoneDetails" role="group" aria-labelledby="zone-entry-title">
+            <h3 id="zone-entry-title" style="margin-bottom:9px">Set or fine-tune your zone</h3>
+            <p class="zone-entry-help" id="zoneEntryHelp">Keyboard alternative: enter an upper and lower edge, then activate “Set zone from prices”. You can also draw a band on the chart.</p>
             <div class="field-grid">
-              <div class="field"><label for="upperPrice">Upper edge</label><input id="upperPrice" inputmode="decimal" type="number" step="0.1" min="96" max="114" aria-label="Upper edge of your price zone"><small>Higher price</small></div>
-              <div class="field"><label for="lowerPrice">Lower edge</label><input id="lowerPrice" inputmode="decimal" type="number" step="0.1" min="96" max="114" aria-label="Lower edge of your price zone"><small>Lower price</small></div>
+              <div class="field"><label for="upperPrice">Upper edge</label><input id="upperPrice" inputmode="decimal" type="number" step="0.1" min="96" max="114" aria-describedby="zoneEntryHelp"><small>Higher price</small></div>
+              <div class="field"><label for="lowerPrice">Lower edge</label><input id="lowerPrice" inputmode="decimal" type="number" step="0.1" min="96" max="114" aria-describedby="zoneEntryHelp"><small>Lower price</small></div>
             </div>
+            <button class="tool-button" id="applyNumericZone" type="button">Set zone from prices</button>
           </div>
         </div>
         <div class="task-status" id="taskStatus" role="status"><span class="status-dot"></span><span id="statusText">Ready when you are. Draw your first zone on the chart.</span></div>
@@ -584,11 +586,12 @@ body.chartlab-embed .site-shell{min-height:0}body.chartlab-embed main{padding-to
     $('clearButton').disabled = state.submitted || activeLocked() || !activeZone();
     $('drawTool').disabled = state.submitted;
     $('submitZoneButton').disabled = state.submitted || (!activeZone());
-    $('upperPrice').disabled = state.submitted || activeLocked() || !activeZone();
-    $('lowerPrice').disabled = state.submitted || activeLocked() || !activeZone();
-    // Keep the numeric-edge panel allocated as the learner moves from locked support to resistance.
-    // This prevents the chart / viewport from shifting while the second zone is being drawn.
-    $('zoneDetails').classList.toggle('visible', !state.submitted && (!!activeZone() || (state.supportLocked && state.activeRole === 'resistance')));
+    $('upperPrice').disabled = state.submitted || activeLocked();
+    $('lowerPrice').disabled = state.submitted || activeLocked();
+    $('applyNumericZone').hidden = state.submitted || activeLocked() || !!activeZone();
+    // Keep the numeric-edge panel available before drawing so keyboard users can create
+    // the first zone without a pointer. It remains available for the second zone too.
+    $('zoneDetails').classList.toggle('visible', !state.submitted && !activeLocked());
     if (activeZone()) {
       $('upperPrice').value = activeZone().upper.toFixed(1);
       $('lowerPrice').value = activeZone().lower.toFixed(1);
@@ -679,6 +682,8 @@ body.chartlab-embed .site-shell{min-height:0}body.chartlab-embed main{padding-to
     state.history = [];
     buildComparisonFeedback();
     updateUI();
+    $('reflection').setAttribute('tabindex', '-1');
+    $('reflection').focus({ preventScroll: true });
     $('reflection').scrollIntoView({ behavior: 'smooth', block: 'start' });
     showToast('Both zones submitted. Compare your interpretation with the two-zone example.');
   }
@@ -805,6 +810,31 @@ body.chartlab-embed .site-shell{min-height:0}body.chartlab-embed main{padding-to
   }
   $('upperPrice').addEventListener('change', () => updateNumericEdge('upperPrice'));
   $('lowerPrice').addEventListener('change', () => updateNumericEdge('lowerPrice'));
+  function applyNumericZoneFromFields() {
+    if (state.submitted || activeLocked() || activeZone()) return;
+    const upperText = $('upperPrice').value.trim(), lowerText = $('lowerPrice').value.trim();
+    const upperRaw = Number(upperText), lowerRaw = Number(lowerText);
+    const minPrice = Number($('upperPrice').min), maxPrice = Number($('upperPrice').max);
+    if (!upperText || !lowerText || !Number.isFinite(upperRaw) || !Number.isFinite(lowerRaw)) {
+      $('statusText').textContent = 'Enter both an upper and lower edge, then choose Set zone from prices.';
+      return;
+    }
+    if (upperRaw < minPrice || upperRaw > maxPrice || lowerRaw < minPrice || lowerRaw > maxPrice) {
+      $('statusText').textContent = 'Enter both edges between ' + minPrice + ' and ' + maxPrice + ' points.';
+      return;
+    }
+    const upper = round1(upperRaw), lower = round1(lowerRaw);
+    if (upper - lower < .3) {
+      $('statusText').textContent = 'Keep the upper edge at least 0.3 points above the lower edge so the mark is an area, not a line.';
+      return;
+    }
+    snap();
+    setActiveZone({ upper, lower });
+    updateUI();
+    $('statusText').textContent = (state.activeRole === 'support' ? 'Support' : 'Resistance') + ' zone set from the entered prices. Review it before submitting.';
+    $('submitZoneButton').focus({ preventScroll: true });
+  }
+  $('applyNumericZone').addEventListener('click', applyNumericZoneFromFields);
 
   document.querySelectorAll('[data-study]').forEach(button => button.addEventListener('click', () => {
     if (state.support || state.resistance || state.submitted) {

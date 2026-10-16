@@ -321,7 +321,19 @@
   $("sr-complete-button").addEventListener("click",()=>{saved.statuses[activeId]=statusOf(activeId)==="complete"?"in-progress":"complete";saveState();renderLesson()});
   $("sr-chart-prev").addEventListener("click",()=>moveChartStage(-1));
   $("sr-chart-next").addEventListener("click",()=>moveChartStage(1));
-  document.querySelectorAll("[data-sr-tab]").forEach(btn=>btn.addEventListener("click",()=>setTab(btn.dataset.srTab)));
+  document.querySelectorAll("[data-sr-tab]").forEach(btn=>{
+    btn.addEventListener("click",()=>setTab(btn.dataset.srTab));
+    btn.addEventListener("keydown",event=>{
+      const tabs=[...document.querySelectorAll("[data-sr-tab]")];
+      const index=tabs.indexOf(event.currentTarget);
+      let targetIndex=null;
+      if(event.key==="ArrowRight")targetIndex=(index+1)%tabs.length;
+      else if(event.key==="ArrowLeft")targetIndex=(index-1+tabs.length)%tabs.length;
+      else if(event.key==="Home")targetIndex=0;
+      else if(event.key==="End")targetIndex=tabs.length-1;
+      if(targetIndex!==null){event.preventDefault();const next=tabs[targetIndex];setTab(next.dataset.srTab);next.focus()}
+    });
+  });
   $("sr-lesson-search").addEventListener("input",renderOutline);$("sr-module-filter").addEventListener("change",renderOutline);$("sr-status-filter").addEventListener("change",renderOutline);
   $("sr-practice-response").addEventListener("input",()=>{
     const l=lessonFor(activeId),index=chartStageIndex(l),value=$("sr-practice-response").value;
