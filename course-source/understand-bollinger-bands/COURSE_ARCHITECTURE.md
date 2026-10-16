@@ -1,6 +1,6 @@
 # Understand Bollinger Bands — Course Architecture
 
-**Status:** Working curriculum plan; research and source verification continue  
+**Status:** Full-text draft complete; detailed source verification, final figures, and learner testing remain  
 **Working branch:** my-new-branch  
 **Audience:** Intermediate market participants  
 **Design reference:** [Reusable Course Creation Method](../COURSE_CREATION_METHOD_VOLUME_PRICE_ANALYSIS.md)
@@ -50,6 +50,19 @@ By the end, students should be able to:
 **Expected total learning time:** approximately 7–8 hours, based on lesson estimates below. This is a planning estimate, not a measured completion time.
 
 ## Teaching and language standards
+
+### The course-wide reasoning habit: Observe → Interpret → Test
+
+Use this as the visible reasoning routine across the course, not as a separate indicator or a rigid form.
+
+- **Observe:** State what the chart shows without guessing at hidden causes. Describe price relative to the bands, band width, swing structure and the sequence of price behaviour.
+- **Interpret:** Explain what the evidence may mean in context, then name at least one plausible alternative.
+- **Test:** State what further evidence or pre-defined condition would strengthen or weaken the interpretation. When the lesson concerns a trade, translate this into a trigger and an invalidation condition.
+
+“Test” must not imply that a learner can prove the next move. A single chart example illustrates a concept; it does not validate a trading strategy. Strategy testing across a varied set of cases remains a separate activity in Module 7. When evidence is insufficient, “wait” or “no trade” is a complete, reasoned decision.
+
+Every lesson should practise this sequence in a way that fits its topic. Do not mechanically repeat the same three questions or add boilerplate that does not help the learner. The examples, counterexamples, tasks and model answers should collectively make all three steps visible.
+
 
 Write for an independent learner, not as a presenter script. A lesson should start with a practical question, explain the idea plainly, put the visual evidence in front of the student, walk through the reasoning, compare a different or ambiguous case, give the learner a short task, explain the model reasoning, address a common mistake, and end with a useful takeaway.
 

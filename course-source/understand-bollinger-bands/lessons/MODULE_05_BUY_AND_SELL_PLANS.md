@@ -1,16 +1,20 @@
 # Module 5 — Build Buy and Sell Plans
 
-So far, you have learned what the bands measure, how to read the market context, and how to assess common patterns. This module turns that reading into a trading plan. The plans here are **course-designed frameworks inspired by Bollinger's principles**. They are not presented as a set of exact rules prescribed by Bollinger, and they are not guaranteed to work.
+So far, you have learned what the bands measure, how to read the market context, and how to assess common patterns. This module turns that reading into a trading plan. The plans here are **practical frameworks used in this course, inspired by Bollinger's principles**. They are not presented as a set of exact rules prescribed by Bollinger, and they are not guaranteed to work.
 
 By the end, you should be able to write a long or short plan with context, trigger, confirmation, invalidation, stop logic, exit management, position risk, and conditions that make you skip the trade.
+
+As you work through this module, use **Observe → Interpret → Test**: describe what the chart shows, consider what it may mean and what else could explain it, then name the evidence or condition that would strengthen or weaken the reading.
 
 ---
 
 ## Lesson 5.1 — From Chart Reading to a Trade Plan
 
-**Estimated time:** 15 minutes — read 7, inspect the figure 3, task 3, review 2.  
-**Figure:** Figure 5.1 — compare a complete plan with one that identifies an entry but leaves risk and exit undefined.
-![Figure 5.1: compare a complete plan with one that identifies an entry but leaves risk and exit undefined](../assets/student-assets/svg/bb-m05-f01.svg)
+**Estimated study time:** 15 minutes.
+
+As you work through this lesson, refer to **Figure 5.1**.
+
+![Figure 5.1: A trade-plan diagram compares a complete plan with one missing trigger, invalidation, risk or exit rules.](../assets/student-assets/svg/bb-m05-f01.svg)
 
 ### The question
 
@@ -42,13 +46,13 @@ The trigger is the event that activates your plan. Confirmation is supporting ev
 
 Compare the complete and incomplete plans. The incomplete plan says where to enter but cannot explain when the idea is wrong, how the loss is controlled, or what would cause the trader to pass. That is not a complete plan.
 
-### Task
+### Apply the framework: Complete the trade plan
 
 Fill the missing fields in the incomplete plan shown in Figure 5.1. If the figure does not provide enough information to choose an entry or stop, say what must be defined first.
 
 **Model reasoning:** The student should not invent a stop from the band alone. They should identify the structure the trade depends on, define invalidation relative to that structure, then calculate size from the allowed cash risk and stop distance. If the chart does not support a clear plan, the missing fields are a valid reason to wait.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 A squeeze appears, but price remains inside its recent range and your plan has no boundary trigger yet. What do you do?
 
@@ -62,15 +66,17 @@ Choosing an entry first and deciding how to control risk only after price moves.
 
 > **A setup becomes a plan only when you know what must happen, what would prove the idea wrong, and how you will control the risk.**
 
-**Source note:** The structure of the plan is a TradeThesis teaching framework. It draws on Bollinger's distinction between identifying a setup and providing continuous advice, but the template is not a verbatim Bollinger method.
+**Source and further reading:** The structure of the plan is a TradeThesis teaching framework. It draws on Bollinger's distinction between identifying a setup and providing continuous advice, but the template is not a verbatim Bollinger method.
 
 ---
 
 ## Lesson 5.2 — Plan a Squeeze Breakout in Either Direction
 
-**Estimated time:** 18 minutes — read 8, inspect the figure 4, task 4, review 2.  
-**Figure:** Figure 5.2 — mirrored long and short examples, showing compression, a price boundary, trigger, invalidation and a planned exit area.
-![Figure 5.2: mirrored long and short examples, showing compression, a price boundary, trigger, invalidation and a planned exit area](../assets/student-assets/svg/bb-m05-f02.svg)
+**Estimated study time:** 18 minutes.
+
+As you work through this lesson, refer to **Figure 5.2**.
+
+![Figure 5.2: Mirrored long and short squeeze-breakout charts mark compression, range boundaries, triggers, invalidation areas and planned exits.](../assets/student-assets/svg/bb-m05-f02.svg)
 
 ### The question
 
@@ -78,7 +84,7 @@ How can you prepare for a move without guessing which way price will break?
 
 A squeeze is a quiet-volatility condition. It does not select a direction. To build a trade plan, combine the volatility context with a price level that matters and a rule for what counts as a breakout.
 
-The following is a **course-defined framework**. Its purpose is to turn the idea into something clear enough to test, not to claim that every trader should use these exact conditions.
+The practical framework below turns the idea into something clear enough to test. It is an example, not a set of conditions every trader must use. Its purpose is to turn the idea into something clear enough to test, not to claim that every trader should use these exact conditions.
 
 ### Long plan: an upward break
 
@@ -113,11 +119,17 @@ An outside-band close is relevant to Bollinger's method, but it is not automatic
 
 Study the long and short panels. Find the compression area, selected boundary, trigger candle, point where the idea fails, and planned exit area. If one panel lacks a clear boundary or offers little room to the target, it may not qualify as a trade.
 
-### Task
+### Observe and test: Build mirrored breakout plans
 
 Write the long and short conditions using the same fields. Then identify which case you would reject if price breaks the boundary but immediately returns to the prior range.
 
 **Model reasoning:** Each side needs the same kind of evidence in its own direction. A quick return inside the range weakens or invalidates the continuation case if that condition was defined in advance. It does not automatically create a reverse trade; the new direction needs its own trigger and risk plan.
+
+### Test: What happens if the first break fails?
+
+Suppose price closes above the selected boundary, but the next candle returns inside the range. Does the long plan remain active, and can you automatically open a short?
+
+**Model response:** That depends on the hold/confirmation rule selected before the move. If the plan requires price to hold above the boundary, the condition has failed and the long idea should be cancelled or reassessed. A short needs its own trigger and risk plan; it is not automatic.
 
 ### Common mistake
 
@@ -127,15 +139,17 @@ Treating every squeeze release or every close outside a band as permission to en
 
 > **The squeeze highlights a condition. The price boundary creates a testable trigger, and the plan controls the risk.**
 
-**Source note:** Bollinger discusses BandWidth and the Squeeze, as well as volatility-breakout methods, in *Bollinger on Bollinger Bands*. This lesson's boundary, confirmation, stop and exit rules are course-designed and require testing. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
+**Source and further reading:** Bollinger discusses BandWidth and the Squeeze, as well as volatility-breakout methods, in *Bollinger on Bollinger Bands*. The boundary, confirmation, stop and exit rules in this lesson are examples for practice and require testing. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
 
 ---
 
 ## Lesson 5.3 — Plan a Range Trade Without Fighting a Trend
 
-**Estimated time:** 18 minutes — read 8, inspect the figure 4, task 4, review 2.  
-**Figure:** Figure 5.3 — a range that continues to hold its boundaries beside a range that begins to break into a trend.
-![Figure 5.3: a range that continues to hold its boundaries beside a range that begins to break into a trend](../assets/student-assets/svg/bb-m05-f03.svg)
+**Estimated study time:** 18 minutes.
+
+As you work through this lesson, refer to **Figure 5.3**.
+
+![Figure 5.3: A range that continues to hold its boundaries is compared with a range that breaks and begins to trend.](../assets/student-assets/svg/bb-m05-f03.svg)
 
 ### The question
 
@@ -171,13 +185,13 @@ The outer bands help describe relative price position. They may help you notice 
 
 The first panel shows a range where previous boundaries have mattered. The second shows price moving outside a boundary and beginning to make directional progress. Compare the swing structure and what happens after the boundary test.
 
-### Task
+### Apply the framework: Choose the range case
 
 Which panel supports a range-fade plan under the lesson's rules? For the other panel, write the condition that would make you stop treating it as a range.
 
 **Model reasoning:** The first panel can qualify if the boundaries and return-inside trigger are clear. The second should not be faded merely because it touches an outer band; continued progress outside the range can invalidate the premise. If the distinction is uncertain, wait for more evidence.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 Price reaches the lower band in a market with falling swing highs and lows and expanding bands. Is the range-long framework appropriate?
 
@@ -191,15 +205,17 @@ Building a range trade around the bands without first proving that price is rang
 
 > **Range strategies need a range. The band can help you read the location, but the price structure must support the premise.**
 
-**Source note:** The context distinction and warning against band-touch signals follow Bollinger's official Rules 6 and 7. Entry, stop and target rules in this lesson are course-designed examples, not a universal Bollinger setup.
+**Source and further reading:** The context distinction and warning against band-touch signals follow Bollinger's official Rules 6 and 7. The entry, stop and target rules in this lesson are examples for practice, not a universal Bollinger setup.
 
 ---
 
 ## Lesson 5.4 — Plan a Possible W-Bottom or M-Top Reversal
 
-**Estimated time:** 18 minutes — read 8, inspect the figure 4, task 4, review 2.  
-**Figure:** Figure 5.4 — a candidate W-bottom and a candidate M-top annotated with trigger, invalidation, stop reference and target area.
-![Figure 5.4: a candidate W-bottom and a candidate M-top annotated with trigger, invalidation, stop reference and target area](../assets/student-assets/svg/bb-m05-f04.svg)
+**Estimated study time:** 18 minutes.
+
+As you work through this lesson, refer to **Figure 5.4**.
+
+![Figure 5.4: A W-bottom long scenario and an M-top short scenario are annotated with trigger, invalidation, stop reference and target area.](../assets/student-assets/svg/bb-m05-f04.svg)
 
 ### The question
 
@@ -211,7 +227,7 @@ A W-bottom or M-top gives you a way to study the relationship between two lows o
 
 Start with the two lows and their relationship to the lower band. Is the second low showing a different relative position from the first? Is the shape complete enough to study, or is another low still developing?
 
-For this course's example, use a break above the intervening swing high as the trigger. This is a **course-defined confirmation rule**, chosen because it can be identified and tested consistently. Do not say that Bollinger prescribed this exact entry for every W-bottom unless you have verified that specific claim from the text.
+For this course's example, use a break above the intervening swing high as the trigger. This rule can be identified and tested consistently. It is a practical teaching rule, not an entry that should be attributed to Bollinger as a universal W-bottom rule.
 
 Set invalidation where the structure behind the long case fails. If price falls and breaks the second-low area under the plan's rule, the long thesis may no longer fit. The stop should reflect that invalidation area, with allowance for the instrument and trading method. Calculate position size from the stop distance and allowed cash risk.
 
@@ -229,13 +245,13 @@ A well-formed candidate may still fail. Price might break the intervening high a
 
 A pattern can also be technically valid but still offer poor reward relative to risk. If the target is close and the invalidation point is far away, you can reject the trade even after the trigger occurs.
 
-### Task
+### Apply the framework: Build long and short pattern plans
 
 Use Figure 5.4 to write a long plan for the W-bottom and a short plan for the M-top. For each, mark context, trigger, invalidation, stop reference, target area, and one reason to skip the trade.
 
 **Model reasoning:** A valid answer states the conditions in advance and keeps the two directions symmetrical. It should not claim that a band touch or pattern shape is enough. A missing trigger, unclear structure or inadequate room to target is a defensible reason to stand aside.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 A W-bottom meets the example trigger, but price is already close to a major resistance zone. The stop must sit below a distant swing low. What is the decision?
 
@@ -249,15 +265,17 @@ Assuming a recognisable reversal pattern has to be traded.
 
 > **A pattern suggests a possibility. The trigger makes it testable; invalidation and risk determine whether the trade is acceptable.**
 
-**Source note:** John Bollinger's W-type bottom and M-type top discussions are in Chapters 12 and 13 of *Bollinger on Bollinger Bands*. The trigger, stop and exit template used here is a course framework unless an exact author rule is specifically verified.
+**Source and further reading:** John Bollinger's W-type bottom and M-type top discussions are in Chapters 12 and 13 of *Bollinger on Bollinger Bands*. The trigger, stop and exit template is used here to make the idea testable. It should not be read as Bollinger's prescribed rule unless the same rule is verified in his text.
 
 ---
 
 ## Lesson 5.5 — Which Plan Fits This Chart—or None?
 
-**Estimated time:** 14 minutes — read 6, inspect the figure 3, task 3, review 2.  
-**Figure:** Figure 5.5 — a trend continuation candidate, a range candidate, a reversal candidate, and an unclear/no-trade case.
-![Figure 5.5: a trend continuation candidate, a range candidate, a reversal candidate, and an unclear/no-trade case](../assets/student-assets/svg/bb-m05-f05.svg)
+**Estimated study time:** 14 minutes.
+
+As you work through this lesson, refer to **Figure 5.5**.
+
+![Figure 5.5: Four chart examples show a trend-continuation candidate, a range candidate, a reversal candidate and an unclear no-trade case.](../assets/student-assets/svg/bb-m05-f05.svg)
 
 ### The question
 
@@ -290,13 +308,13 @@ Before choosing a setup, ask:
 
 If you cannot answer these questions, you do not need to invent an answer. You can wait until the evidence improves or move to another chart.
 
-### Task
+### Apply the framework: Choose a plan—or no trade
 
 For each panel in Figure 5.5, choose **long framework**, **short framework**, or **no trade**. Give one visible reason and one condition that is still missing or would cancel the idea.
 
 **Model reasoning:** A sound answer links the chosen framework to the context shown. If a trend is present, do not use a range-fade just because a band is touched. If the pattern lacks a trigger, wait. If the chart is unclear or the risk is unattractive, no trade is reasonable. More than one answer may be defensible if it follows the evidence and states the remaining uncertainty.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 The chart is trending upward, price is well above the middle band, and the bands are widening. The move has already travelled far, and the next price barrier is close. What is the best response?
 
@@ -310,10 +328,10 @@ Forcing a chart into the setup that feels most familiar.
 
 > **A good trader does not need a trade on every chart. The framework must fit the context, and the risk must fit the opportunity.**
 
-**Source note:** This lesson combines the previous course frameworks and Bollinger's Official Rule 22: bands help identify setups rather than provide continuous advice. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
+**Source and further reading:** This lesson brings together the methods introduced earlier and Bollinger's Official Rule 22: bands help identify setups rather than provide continuous advice. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
 
 ---
 
-## Module 5 source notes
+## References and further reading
 
-This module is an educational synthesis. It uses Bollinger's documented concepts—relative high/low, band tags, continuation, %B, BandWidth, W-bottoms and M-tops—as source principles. The exact entry triggers, confirmation options, stops, exits and no-trade filters are explicitly course-designed examples that must be tested; they should not be presented as verbatim rules from *Bollinger on Bollinger Bands*.
+This module is an educational synthesis. It uses Bollinger's documented concepts—relative high/low, band tags, continuation, %B, BandWidth, W-bottoms and M-tops—as source principles. The exact entry triggers, confirmation options, stops, exits and no-trade filters are examples used in this course and must be tested. They are not presented as verbatim rules from *Bollinger on Bollinger Bands*.

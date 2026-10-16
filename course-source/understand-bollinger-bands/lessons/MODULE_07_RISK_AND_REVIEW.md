@@ -4,13 +4,17 @@ This final module connects chart interpretation with a disciplined trading proce
 
 The module also serves as the course capstone. The goal is not to predict every chart correctly. It is to build a clear, conditional plan and know when no trade is the better decision.
 
+As you work through this module, use **Observe → Interpret → Test**: describe what the chart shows, consider what it may mean and what else could explain it, then name the evidence or condition that would strengthen or weaken the reading.
+
 ---
 
 ## Lesson 7.1 — Size the Trade From the Point Where the Idea Fails
 
-**Estimated time:** 16 minutes — read 8, inspect the figure 2, task 4, review 2.  
-**Figure:** Figure 7.1 — a worked size example with two different stop distances and the same planned cash risk.
-![Figure 7.1: a worked size example with two different stop distances and the same planned cash risk](../assets/student-assets/svg/bb-m07-f01.svg)
+**Estimated study time:** 16 minutes.
+
+As you work through this lesson, refer to **Figure 7.1**.
+
+![Figure 7.1: A worked position-sizing example compares two stop distances under the same planned cash risk.](../assets/student-assets/svg/bb-m07-f01.svg)
 
 ### The question
 
@@ -42,13 +46,13 @@ The Bollinger Bands do not decide your risk allowance. The bands can help you re
 
 Compare the two examples. They use the same allowed cash risk but different entry-to-stop distances. Notice how the wider stop corresponds to a smaller position under the simplified calculation.
 
-### Task
+### Observe and calculate: Work out the position size
 
 In Figure 7.1, calculate the position size for each example using the given allowed cash risk and per-unit loss. Then state one reason the realised loss may differ from the planned amount.
 
 **Model reasoning:** Divide the permitted cash loss by the planned loss per unit. The wider stop allows fewer units for the same planned risk. Actual loss may be higher because of gaps, slippage, fees, or incorrect assumptions about the instrument's value.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 Two traders have the same account and same planned cash risk. One has a stop twice as far away as the other. If all other instrument details are the same, what happens to the position size?
 
@@ -62,15 +66,17 @@ Using the same position size on every setup even when the stop distance changes.
 
 > **First decide where the idea fails. Then calculate a position size that fits the loss you are prepared to risk.**
 
-**Source note:** This is general risk-management teaching, not a position-sizing rule prescribed by John Bollinger. Adapt the arithmetic to the instrument's contract specifications, costs, and account currency.
+**Source and further reading:** This is general risk-management teaching, not a position-sizing rule prescribed by John Bollinger. Adapt the arithmetic to the instrument's contract specifications, costs, and account currency.
 
 ---
 
 ## Lesson 7.2 — Decide How You Will Manage the Trade Before Entry
 
-**Estimated time:** 15 minutes — read 7, inspect the figure 3, task 3, review 2.  
-**Figure:** Figure 7.2 — target, invalidation, and unresolved-price paths linked to prewritten actions.
-![Figure 7.2: target, invalidation, and unresolved-price paths linked to prewritten actions](../assets/student-assets/svg/bb-m07-f02.svg)
+**Estimated study time:** 15 minutes.
+
+As you work through this lesson, refer to **Figure 7.2**.
+
+![Figure 7.2: A trade-management diagram links target, invalidation and unresolved price paths to decisions chosen in advance.](../assets/student-assets/svg/bb-m07-f02.svg)
 
 ### The question
 
@@ -98,13 +104,13 @@ A crossing of the middle band can be informative in a particular method, but it 
 
 Figure 7.2 shows three possible paths after entry: price reaches the planned target, price reaches the invalidation condition, or price moves without resolving the idea. Each path should lead to an action that was selected before the outcome. That helps keep the management process consistent.
 
-### Task
+### Apply the plan: Choose the response in each path
 
 For each path in Figure 7.2, state the action prescribed by the sample plan. Identify which action would change if you were testing a different setup.
 
 **Model reasoning:** A target path leads to the planned exit; an invalidation path leads to exit or predefined risk reduction; an unresolved path follows the rule for managing no progress. Another setup may have a different target or management rule, but it should still be decided in advance.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 You planned a range trade to exit near the middle of the range, but price is still far from the target. You feel tempted to move the target farther away because the candle looks strong. What should you check?
 
@@ -118,15 +124,17 @@ Deciding exits from emotion after entry rather than from the trade's original re
 
 > **Choose management rules that fit the setup, and write them before price tests your discipline.**
 
-**Source note:** The idea of treating bands as setup tools rather than continuous advice follows Bollinger's Official Rule 22. The exit examples in this lesson are course-designed and should be tested. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
+**Source and further reading:** The idea of treating bands as setup tools rather than continuous advice follows Bollinger's Official Rule 22. The exit examples in this lesson are used in this course and should be tested. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
 
 ---
 
 ## Lesson 7.3 — Test the Idea Without Fitting It to the Past
 
-**Estimated time:** 16 minutes — read 7, inspect the figure 3, task 4, review 2.  
-**Figure:** Figure 7.3 — a mixed review table across trend, range, failed-breakout and unclear conditions.
-![Figure 7.3: a mixed review table across trend, range, failed-breakout and unclear conditions](../assets/student-assets/svg/bb-m07-f03.svg)
+**Estimated study time:** 16 minutes.
+
+As you work through this lesson, refer to **Figure 7.3**.
+
+![Figure 7.3: A review table compares examples from trending, ranging, failed-breakout and unclear conditions.](../assets/student-assets/svg/bb-m07-f03.svg)
 
 ### The question
 
@@ -160,13 +168,13 @@ The results should not be reduced to win rate alone. Review whether the entry wa
 
 The table includes several contexts. Look for the difference between reviewing many varied cases and selecting only the cases that make a setup look attractive. The second approach leaves important failure modes unseen.
 
-### Task
+### Observe and interpret: Read the review table
 
 Name two reasons the cherry-picked sample may give a misleading impression. Then state one change you would make to improve the review.
 
 **Model reasoning:** The sample excludes difficult cases and may over-represent the exact conditions where the method looked best. A better review uses a consistent rule set and includes varied contexts, failures, and no-trade cases. The sample may still be too small to support a strong conclusion, and that limitation should be stated.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 A modified band setting produces better results on the examples you just reviewed but performs worse on a different period. What should you do?
 
@@ -180,15 +188,17 @@ Changing the method after every losing example until the history looks clean.
 
 > **A useful test includes the trades that failed, the cases you skipped, and the conditions that were difficult—not just the wins.**
 
-**Source note:** Bollinger's Official Rules 9 and 11 caution against treating defaults or parameter choices as universal. The review process here is a course-designed method for testing consistency, not a promise of future performance. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
+**Source and further reading:** Bollinger's Official Rules 9 and 11 caution against treating defaults or parameter choices as universal. The review process here is a method used in this course to test consistency, not a promise of future performance. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
 
 ---
 
 ## Lesson 7.4 — Review the Decision, Not Just the Result
 
-**Estimated time:** 18 minutes — read 7, inspect the figure 4, task 5, review 2.  
-**Figure:** Figure 7.4 — a disciplined losing trade, an undisciplined winning trade, and a defensible no-trade decision.
-![Figure 7.4: a disciplined losing trade, an undisciplined winning trade, and a defensible no-trade decision](../assets/student-assets/svg/bb-m07-f04.svg)
+**Estimated study time:** 18 minutes.
+
+As you work through this lesson, refer to **Figure 7.4**.
+
+![Figure 7.4: Three cases compare a disciplined losing trade, an undisciplined winning trade and a defensible no-trade decision.](../assets/student-assets/svg/bb-m07-f04.svg)
 
 ### The question
 
@@ -222,14 +232,14 @@ In Figure 7.4, the disciplined losing trade has a clear setup, trigger, invalida
 
 The examples are not a lesson in excusing every loss. If the trader made a calculation error, ignored a condition, or used an untested rule as if it were proven, that needs to be recorded. The point is to find the cause rather than use the outcome as the only verdict.
 
-### The final assignment
+### Test: Complete the final assignment
 
 Use the supplied cases to write:
 1. One complete long plan.
 2. One complete short plan.
 3. One no-trade decision.
 
-For each, state the context, visible evidence, interpretation, alternative explanation, trigger, invalidation, stop/size logic, and exit rule. If the chart does not offer enough evidence, say what is missing. Do not invent a trade merely to complete the assignment.
+For each, make your reasoning visible in three moves: **observe** the facts, **interpret** them while naming an alternative, and **test** the reading against the planned trigger, invalidation, or evidence you would wait for. Include the context, trigger, stop/size logic and exit rule where a trade is justified. If the chart does not offer enough evidence, say what is missing. Do not invent a trade merely to complete the assignment.
 
 ### Assessment standard
 
@@ -252,10 +262,10 @@ Calling the analysis good because a trade won, or bad simply because it lost.
 
 > **Judge the process by the evidence and rules available at the decision point. The outcome is important feedback, but it is not the whole review.**
 
-**Source note:** This lesson synthesises the course's evidence-first approach. It is a TradeThesis assessment framework, not a Bollinger-prescribed grading system.
+**Source and further reading:** This lesson synthesises the course's evidence-first approach. It is a TradeThesis assessment framework, not a Bollinger-prescribed grading system.
 
 ---
 
-## Module 7 source notes
+## References and further reading
 
 This module's position-sizing, trade-management, testing and review guidance is general educational risk practice. It is intentionally not attributed to Bollinger as a specific trading system. Bollinger's own rules remind readers that the bands identify setups rather than provide continuous advice, and that parameters should not be treated as universal laws. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).

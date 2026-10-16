@@ -4,13 +4,17 @@ This module explains the core settings and the two measurements most closely ass
 
 By the end, you should be able to explain the usual settings, recognise the effect of changing them, read %B as a measure of relative position, and use BandWidth to compare how narrow or wide the bands are.
 
+As you work through this module, use **Observe → Interpret → Test**: describe what the chart shows, consider what it may mean and what else could explain it, then name the evidence or condition that would strengthen or weaken the reading.
+
 ---
 
 ## Lesson 2.1 — How the Bands Are Built
 
-**Estimated time:** 16 minutes — read 8, inspect the figure 3, task 3, review 2.  
-**Figure:** Figure 2.1 — a simple diagram showing the middle average, the distance above it, and the distance below it.
-![Figure 2.1: a simple diagram showing the middle average, the distance above it, and the distance below it](../assets/student-assets/svg/bb-m02-f01.svg)
+**Estimated study time:** 16 minutes.
+
+As you work through this lesson, refer to **Figure 2.1**.
+
+![Figure 2.1: A simple diagram shows the moving average in the middle and the distance used to place the upper and lower bands.](../assets/student-assets/svg/bb-m02-f01.svg)
 
 ### The question
 
@@ -48,7 +52,7 @@ Use the diagram to identify which element controls the centre and which element 
 
 The bands are often described in statistical language, but price movements are not guaranteed to follow a normal distribution. Do not assume that two standard deviations means the same fixed percentage of price bars will always stay inside the bands. It is a calculation setting, not a promise about what the market will do.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 Recent candles become larger and the prices move farther away from their average. Without changing any settings, what would you generally expect the bands to do?
 
@@ -62,15 +66,17 @@ Thinking the bands are a fixed percentage around price.
 
 > **The middle band gives the moving average; standard deviation gives the outer bands their changing distance.**
 
-**Source note:** John Bollinger's official Rules 9 and 14 and the Construction and Statistics chapters of *Bollinger on Bollinger Bands*. [Publisher contents](https://www.mheducation.com/highered/mhp/product/bollinger-bollinger-bands).
+**Source and further reading:** John Bollinger's official Rules 9 and 14 and the Construction and Statistics chapters of *Bollinger on Bollinger Bands*. [Publisher contents](https://www.mheducation.com/highered/mhp/product/bollinger-bollinger-bands).
 
 ---
 
 ## Lesson 2.2 — Why 20 and 2 Are Defaults, Not Laws
 
-**Estimated time:** 14 minutes — read 7, inspect the figure 2, task 3, review 2.  
-**Figure:** Figure 2.2 — one price series shown with three clearly labelled band settings.
-![Figure 2.2: one price series shown with three clearly labelled band settings](../assets/student-assets/svg/bb-m02-f02.svg)
+**Estimated study time:** 14 minutes.
+
+As you work through this lesson, refer to **Figure 2.2**.
+
+![Figure 2.2: The same price history is shown with three Bollinger Band settings so the reader can compare faster and slower responses.](../assets/student-assets/svg/bb-m02-f02.svg)
 
 ### The question
 
@@ -98,13 +104,13 @@ A common trap is to move settings until they fit a trade you wish you had taken.
 
 A fair test keeps the rules stable while you review a varied sample. If you decide to test a new setting, treat it as a new version of the method and compare it against the old one under the same conditions. Do not keep changing parameters after every loss.
 
-### Task
+### Observe: Read how the bands are built
 
 Look at the three versions in Figure 2.2. Which reacts most quickly to a sudden price change? Which looks smoother? Does either picture prove which setting will perform better in the future?
 
 **Model reasoning:** The shorter period should react more quickly; the longer period should look smoother. The picture alone cannot prove future performance. That requires consistent testing across different market conditions.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 You change the settings after every losing trade, and each new version looks better on the examples you just reviewed. What is the problem?
 
@@ -118,15 +124,17 @@ Treating the default as magic—or assuming a custom setting is superior because
 
 > **Choose settings for a clear reason, then test them consistently. Do not let hindsight choose them for you.**
 
-**Source note:** John Bollinger's official Rules 9, 11 and 12. His suggested adjustments are examples, not universal recommendations. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
+**Source and further reading:** John Bollinger's official Rules 9, 11 and 12. His suggested adjustments are examples, not universal recommendations. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
 
 ---
 
 ## Lesson 2.3 — Use %B to Describe Price Position
 
-**Estimated time:** 15 minutes — read 7, inspect the figure 3, task 3, review 2.  
-**Figure:** Figure 2.3 — a %B scale paired with a diagram showing price at different locations between the bands.
-![Figure 2.3: a %B scale paired with a diagram showing price at different locations between the bands](../assets/student-assets/svg/bb-m02-f03.svg)
+**Estimated study time:** 15 minutes.
+
+As you work through this lesson, refer to **Figure 2.3**.
+
+![Figure 2.3: A %B scale links values below zero, zero, one-half, one and above one to price positions relative to the bands.](../assets/student-assets/svg/bb-m02-f03.svg)
 
 ### The question
 
@@ -160,13 +168,13 @@ In the range, you might inspect whether the range edge is holding and whether pr
 
 Bollinger also discusses using %B in pattern recognition and indicator comparison. If you use it to look for divergence—where price makes a new high or low but the indicator does not show the same behaviour—treat the mismatch as a reason to investigate, not a guarantee of reversal. Divergences can persist while a trend continues.
 
-### Task
+### Observe and interpret: Compare the settings
 
 Using Figure 2.3, match the readings 0, 0.5, 1, -0.2 and 1.2 to their positions.
 
 **Model reasoning:** 0 is the lower band, 0.5 is halfway, and 1 is the upper band. -0.2 is below the lower band, and 1.2 is above the upper band.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 Price is above the upper band and %B is 1.15. Write one fact, one possible interpretation, and one thing you still need to know.
 
@@ -180,15 +188,17 @@ Treating %B above 1 as a sell instruction or below 0 as a buy instruction.
 
 > **%B describes where price is relative to the bands. The market context decides what that location may mean.**
 
-**Source note:** John Bollinger's official Rules 15–17 and the %B discussion in *Bollinger on Bollinger Bands*. A secondary formula reference is [StockCharts %B](https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/b-indicator).
+**Source and further reading:** John Bollinger's official Rules 15–17 and the %B discussion in *Bollinger on Bollinger Bands*. A secondary formula reference is [StockCharts %B](https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/b-indicator).
 
 ---
 
 ## Lesson 2.4 — Use BandWidth to See When the Bands Are Narrow or Wide
 
-**Estimated time:** 15 minutes — read 7, inspect the figure 3, task 3, review 2.  
-**Figure:** Figure 2.4 — price with the bands above a BandWidth line aligned to the same time axis.
-![Figure 2.4: price with the bands above a BandWidth line aligned to the same time axis](../assets/student-assets/svg/bb-m02-f04.svg)
+**Estimated study time:** 15 minutes.
+
+As you work through this lesson, refer to **Figure 2.4**.
+
+![Figure 2.4: A price chart with Bollinger Bands is aligned with a BandWidth line showing narrow, widening and wide-band periods.](../assets/student-assets/svg/bb-m02-f04.svg)
 
 ### The question
 
@@ -214,13 +224,13 @@ On a crowded chart, it can be difficult to compare the width of today's bands wi
 
 BandWidth is not a countdown clock. It does not say that a breakout must occur in the next bar or that a narrow period will resolve in a particular direction. It helps you recognise a condition worth monitoring.
 
-### Task
+### Observe: Match %B to price position
 
 Use Figure 2.4 to identify the narrowest period shown, then find where BandWidth begins to rise. What changes in the price chart during that time?
 
 **Model reasoning:** The low point in BandWidth corresponds to relatively narrow bands. When BandWidth rises, the outer bands spread farther apart. Price may also begin moving more broadly, but direction must be judged from the candles and structure.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 BandWidth is low, but price is in the centre of a messy range and no clear boundary is nearby. Should the low reading alone trigger a trade?
 
@@ -234,4 +244,4 @@ Using one BandWidth value as a universal squeeze threshold across all markets.
 
 > **BandWidth helps you see when the bands are unusually narrow or widening. It does not tell you which way to trade.**
 
-**Source note:** John Bollinger's official Rules 18–19 and the BandWidth and Squeeze chapters of *Bollinger on Bollinger Bands*. See also [StockCharts BandWidth](https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/bollinger-bandwidth).
+**Source and further reading:** John Bollinger's official Rules 18–19 and the BandWidth and Squeeze chapters of *Bollinger on Bollinger Bands*. See also [StockCharts BandWidth](https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/bollinger-bandwidth).

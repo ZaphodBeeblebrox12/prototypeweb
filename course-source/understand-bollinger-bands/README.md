@@ -33,6 +33,7 @@ The course follows the principles in [the reusable TradeThesis course-creation m
 - Give each figure a persistent asset ID and a student-facing module figure label such as Figure 1.1. Keep labels large, simple, and readable when zoomed or viewed on mobile.
 - Do not put internal production labels such as “synthetic data” on figures. Explain illustrative examples in nearby lesson text or captions when needed.
 - Separate John Bollinger's documented guidance from course-designed trading frameworks and contributions from other authors.
+- Use **Observe → Interpret → Test** as the recurring student-facing reasoning habit: record the facts, consider a plausible meaning and alternative, then identify evidence or a condition that would strengthen or weaken the reading.
 - Treat no-trade and wait-for-more-evidence decisions as valid outcomes.
 - Keep student-facing titles free of internal level labels and production notes.
 - Do not change the website course integration or deploy this research package as part of this phase.

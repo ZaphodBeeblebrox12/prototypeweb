@@ -4,13 +4,25 @@ This module establishes the course's first habit: describe what the bands show b
 
 By the end, you should be able to explain the middle and outer bands in plain language, read a band touch without turning it into an automatic signal, recognise changing volatility, and state the limits of what the bands can tell you.
 
+## A three-step habit for reading any chart: Observe → Interpret → Test
+
+Use this simple routine throughout the course:
+
+- **Observe:** Describe what is actually visible. Where is price relative to the bands? Are the bands narrow or wide? What have the recent highs, lows and closes done? Avoid predicting in this first step.
+- **Interpret:** Explain what those facts might mean in this market context. Also name one other explanation that could fit the evidence. For example, a close above the upper band may fit continuation, but the move can still fail.
+- **Test:** Decide what evidence would strengthen or weaken your reading. For a possible trade, set the trigger and the condition that would invalidate the idea before acting.
+
+Here, “test” does not mean prove what price will do next. It means checking your reading against a clearly stated condition or later evidence. Testing whether a trading method holds up across many examples is a separate job covered in Module 7. If the available evidence does not help you choose between reasonable explanations, waiting is a valid decision.
+
 ---
 
 ## Lesson 1.1 — What Are the Bands Showing You?
 
-**Estimated time:** 15 minutes — read 8, inspect the figure 2, task 3, review 2.  
-**Figure:** Figure 1.1 — use the chart with the labelled middle, upper, and lower bands. The example is illustrative; it is not presented as a historical market record.
-![Figure 1.1: use the chart with the labelled middle, upper, and lower bands](../assets/student-assets/svg/bb-m01-f01.svg)
+**Estimated study time:** 15 minutes.
+
+As you work through this lesson, refer to **Figure 1.1**.
+
+![Figure 1.1: Three Bollinger Bands surround a price chart: the middle moving average, upper band and lower band. The figure marks places where the bands are narrow and wider.](../assets/student-assets/svg/bb-m01-f01.svg)
 
 ### The question
 
@@ -46,13 +58,13 @@ When a band interaction catches your eye, ask three things:
 
 These questions prevent a common mistake: treating the indicator as if it had one meaning in every market.
 
-### Look closely at the evidence
+### Observe: Start with what you can see
 
 **Task:** Using Figure 1.1, point to one section where the bands are relatively narrow and one where they are wider. Identify the middle, upper, and lower lines.
 
 **Model reasoning:** The three lines can be identified by their positions around price. If the distance between the outer bands changes, the indicator is responding to a change in recent price variation. That observation alone does not identify the next direction.
 
-### Compare and apply
+### Interpret: What might the evidence mean?
 
 Imagine two charts with price at the upper band. In Chart A, price has been moving back and forth between fairly stable boundaries. In Chart B, price has been making higher highs and higher lows for several periods. The same visible band touch sits in two different market stories. Chart A may deserve a closer look for a range-edge reaction; Chart B may be showing trend strength.
 
@@ -70,15 +82,17 @@ Imagine two charts with price at the upper band. In Chart A, price has been movi
 
 > **The bands help you describe where price is relative to recent behaviour. The market context helps you decide what that observation might mean.**
 
-**Source note:** This mental model follows John Bollinger's official rules, especially Rules 1, 6, 7 and 22, and the construction discussion in *Bollinger on Bollinger Bands*. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
+**Source and further reading:** This mental model follows John Bollinger's official rules, especially Rules 1, 6, 7 and 22, and the construction discussion in *Bollinger on Bollinger Bands*. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
 
 ---
 
 ## Lesson 1.2 — When Price Reaches a Band, What Does It Mean?
 
-**Estimated time:** 14 minutes — read 7, inspect the figure 2, task 3, review 2.  
-**Figure:** Figure 1.2 — compare an upper-band touch in a range with repeated upper-band interaction during a rising trend.
-![Figure 1.2: compare an upper-band touch in a range with repeated upper-band interaction during a rising trend](../assets/student-assets/svg/bb-m01-f02.svg)
+**Estimated study time:** 14 minutes.
+
+As you work through this lesson, refer to **Figure 1.2**.
+
+![Figure 1.2: Two price charts compare an upper-band touch inside a sideways range with repeated upper-band interaction during a rising trend.](../assets/student-assets/svg/bb-m01-f02.svg)
 
 ### The question
 
@@ -106,17 +120,17 @@ Use the following language when describing a chart:
 
 That may sound slower than instantly labelling a buy or sell signal. It is also more honest about what the chart has actually shown.
 
-### How to inspect Figure 1.2
+### Read the comparison
 
 In the range panel, look for earlier turns near the same area. In the trend panel, follow the swing structure and the sequence of interactions with the upper band. Do not count band touches in isolation. Look at what price did before and after them.
 
-### Task
+### Observe and interpret: What does the touch tell you?
 
 For each panel, finish this sentence: “The band touch tells me ___, but it does not yet tell me ___.”
 
 **Model reasoning:** For the range, the touch shows price is near the upper side of its recent banded range; it does not prove that the range will hold or that a short trade is ready. For the trend, the touch shows price is at a relatively high position; it does not prove price is overextended or due to fall.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 The lower band is touched after several candles have made lower lows. A learner says, “This is cheap, so I will buy.”
 
@@ -132,15 +146,17 @@ Treating “upper” as sell and “lower” as buy.
 
 > **A band touch is a reason to inspect the chart, not a complete trading plan.**
 
-**Source note:** John Bollinger's Official Rule 6 says tags of the bands are just that—tags, not signals. Rules 7 and 22 reinforce the need for context and setup-based decisions. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
+**Source and further reading:** John Bollinger's Official Rule 6 says tags of the bands are just that—tags, not signals. Rules 7 and 22 reinforce the need for context and setup-based decisions. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
 
 ---
 
 ## Lesson 1.3 — Why the Bands Keep Changing
 
-**Estimated time:** 15 minutes — read 8, inspect the figure 2, task 3, review 2.  
-**Figure:** Figure 1.3 — show quiet, expanding, and wide-band phases.
-![Figure 1.3: show quiet, expanding, and wide-band phases](../assets/student-assets/svg/bb-m01-f03.svg)
+**Estimated study time:** 15 minutes.
+
+As you work through this lesson, refer to **Figure 1.3**.
+
+![Figure 1.3: A price chart marks quieter movement, widening bands and a later period of wide bands.](../assets/student-assets/svg/bb-m01-f03.svg)
 
 ### The question
 
@@ -174,11 +190,17 @@ Suppose price breaks above a range and the bands widen. That pairing is consiste
 
 Read the price result alongside the width change. Did price move beyond a boundary? Did it hold there? Are the swing highs and lows supporting the same direction? If the evidence conflicts, the correct response may be to wait.
 
-### Task
+### Observe and interpret: Match width to price movement
 
 Use Figure 1.3 to match the quiet, expanding, and wide-band sections to their visible price behaviour. Then name one conclusion that cannot be drawn from band width alone.
 
 **Model reasoning:** The narrower section shows less recent variation, the widening section shows variation increasing, and the wide section shows broader recent movement. Band width alone cannot identify the next direction or guarantee a breakout.
+
+### Test: What evidence would you wait for next?
+
+A second chart shows narrow bands, followed by a sudden increase in candle size. Before choosing a direction, name one price event you would watch for and one condition that would make you reject the first move.
+
+**Model response:** I would first identify a meaningful nearby boundary and watch whether price closes beyond it and meets the rule chosen for the setup. A quick return into the prior range may weaken the first-break idea. Wider bands alone do not choose the direction.
 
 ### Common mistake
 
@@ -190,15 +212,17 @@ Assuming narrow bands must be followed immediately by a big move, or assuming wi
 
 > **Narrower bands mean recent price movement has been quieter; wider bands mean it has been broader. Neither state chooses a direction for you.**
 
-**Source note:** This follows the construction and volatility-cycle discussion in *Bollinger on Bollinger Bands* and official Rules 9, 18 and 19. A secondary, accessible explanation is available from [StockCharts](https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-overlays/bollinger-bands).
+**Source and further reading:** This follows the construction and volatility-cycle discussion in *Bollinger on Bollinger Bands* and official Rules 9, 18 and 19. A secondary, accessible explanation is available from [StockCharts](https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-overlays/bollinger-bands).
 
 ---
 
 ## Lesson 1.4 — What the Bands Cannot Tell You
 
-**Estimated time:** 13 minutes — read 6, inspect the figure 2, task 3, review 2.  
-**Figure:** Figure 1.4 — compare band touches and closes outside the bands with different later outcomes.
-![Figure 1.4: compare band touches and closes outside the bands with different later outcomes](../assets/student-assets/svg/bb-m01-f04.svg)
+**Estimated study time:** 13 minutes.
+
+As you work through this lesson, refer to **Figure 1.4**.
+
+![Figure 1.4: Four chart panels compare a band touch followed by reversal, a band touch followed by continuation, and two different outcomes after a close outside a band.](../assets/student-assets/svg/bb-m01-f04.svg)
 
 ### The question
 
@@ -236,13 +260,13 @@ They cannot answer on their own:
 - Whether the trade has enough room to a target.
 - Whether a setup has a positive result across a range of historical cases.
 
-### Task
+### Observe and interpret: Separate facts from claims
 
 For each of the four panels in Figure 1.4, write one supported statement and one unsupported conclusion.
 
 **Model reasoning:** “Price closed outside the upper band” is supported by the chart. “Price must reverse next” is not. “Price closed outside and later continued” is supported after the later bars appear, but it was not certain at the first close. Keep the decision-time evidence separate from hindsight.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 A chart shows a close below the lower band after several falling candles. What can you say without assuming a trade?
 
@@ -256,10 +280,10 @@ Using the bands as a prediction device.
 
 > **Bollinger Bands describe relative price and volatility. They do not remove uncertainty, and they do not replace a trading plan.**
 
-**Source note:** John Bollinger's official Rules 7, 8, 14 and 22, and the book's chapter on statistics. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
+**Source and further reading:** John Bollinger's official Rules 7, 8, 14 and 22, and the book's chapter on statistics. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
 
 ---
 
-## Module 1 source notes
+## References and further reading
 
 Primary reference: John Bollinger, *Bollinger on Bollinger Bands*, McGraw Hill, especially chapters on construction, statistics, band tags, continuation and the basic rules. See the [publisher's book page and table of contents](https://www.mheducation.com/highered/mhp/product/bollinger-bollinger-bands). This module uses original teaching explanations; no book text is reproduced.

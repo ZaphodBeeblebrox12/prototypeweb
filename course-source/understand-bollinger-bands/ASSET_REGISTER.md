@@ -13,6 +13,7 @@
 - Make price and band lines visually distinct and labels large enough to read on mobile and at 200% zoom. Avoid tiny annotations, unnecessary indicators, crowded legends, and colour-only distinctions.
 - Where charts are illustrative, they must not be presented as actual historical data. Keep construction/provenance notes in the course source and figure caption.
 - Every final asset should include meaningful alt text and, for complex comparisons, a longer description.
+- Design each figure to support a clear learner action: observe a visible fact, compare plausible interpretations, or identify the evidence/condition that would test a reading. Where practical, comparative panels should make the difference in evidence easy to see.
 
 ## Module 1 — What Bollinger Bands Actually Tell You
 

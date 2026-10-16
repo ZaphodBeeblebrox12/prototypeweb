@@ -4,13 +4,17 @@ This module teaches you to identify the kind of market you are looking at before
 
 By the end, you should be able to make a reasonable first classification of trend, range, or unclear conditions; recognise a band walk; distinguish Bollinger's BandWidth-based squeeze concept from the TTM Squeeze; and wait for price evidence before choosing a breakout direction.
 
+As you work through this module, use **Observe → Interpret → Test**: describe what the chart shows, consider what it may mean and what else could explain it, then name the evidence or condition that would strengthen or weaken the reading.
+
 ---
 
 ## Lesson 3.1 — First Decide: Trend or Range?
 
-**Estimated time:** 17 minutes — read 8, inspect the figure 3, task 4, review 2.  
-**Figure:** Figure 3.1 — a rising trend, a clear range, and a mixed/transitioning market.
-![Figure 3.1: a rising trend, a clear range, and a mixed/transitioning market](../assets/student-assets/svg/bb-m03-f01.svg)
+**Estimated study time:** 17 minutes.
+
+As you work through this lesson, refer to **Figure 3.1**.
+
+![Figure 3.1: Three chart panels show a rising trend, a sideways range, and mixed price structure that is not yet clear.](../assets/student-assets/svg/bb-m03-f01.svg)
 
 ### The question
 
@@ -36,13 +40,13 @@ Read the middle band alongside swing structure. If the middle band is rising and
 
 Panel A shows a rising trend. Panel B shows price rotating between a high and low area. Panel C is deliberately mixed. Do not force Panel C into a trend or range just because the task asks you to classify it; the “unclear” answer may be the best supported.
 
-### Task
+### Observe and interpret: Classify the market
 
 For each panel, choose **trend**, **range**, or **unclear**. Name two visible facts that support your answer.
 
 **Model reasoning:** A series of higher highs and higher lows supports an uptrend. Repeated turns within relatively stable boundaries support a range. Overlapping swings, a recent boundary break without follow-through, or conflicting structure can justify “unclear.” The answer depends on what the figure actually shows, not on guessing the later outcome.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 A market has been moving sideways for several bars, but then one large candle closes above the range high. The bands begin widening. Is the market definitely in an uptrend?
 
@@ -56,15 +60,17 @@ Calling every pause in a rising market a range and then selling the upper band.
 
 > **Decide whether price is trending, ranging, or unclear before you decide what a band touch might mean.**
 
-**Source note:** This is a course context-reading framework built around Bollinger's emphasis on price structure and his rule that bands do not give continuous advice. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
+**Source and further reading:** This is a course context-reading framework built around Bollinger's emphasis on price structure and his rule that bands do not give continuous advice. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
 
 ---
 
 ## Lesson 3.2 — When Price Walks Along a Band
 
-**Estimated time:** 15 minutes — read 7, inspect the figure 3, task 3, review 2.  
-**Figure:** Figure 3.2 — an upper-band walk, a lower-band walk, and an isolated band touch for comparison.
-![Figure 3.2: an upper-band walk, a lower-band walk, and an isolated band touch for comparison](../assets/student-assets/svg/bb-m03-f02.svg)
+**Estimated study time:** 15 minutes.
+
+As you work through this lesson, refer to **Figure 3.2**.
+
+![Figure 3.2: An upper-band walk and a lower-band walk are compared with an isolated band touch.](../assets/student-assets/svg/bb-m03-f02.svg)
 
 ### The question
 
@@ -94,13 +100,13 @@ These terms can be misleading when used as automatic trade instructions. Price n
 
 If you want to consider a reversal, look for evidence that the prior trend is weakening or that price structure is changing. Do not use the band touch alone as the trigger.
 
-### Task
+### Observe and interpret: Identify the band walk
 
 Compare the isolated touch with the band walk in Figure 3.2. Which panel gives stronger evidence of a persistent directional move? Point to the visible features that support your answer.
 
 **Model reasoning:** The band walk should show repeated interaction with one band while price keeps progressing in the same direction. The isolated touch does not establish that sequence. Neither panel guarantees the next move.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 Price has closed near the lower band for four bars while swing highs and lows continue falling. A learner says, “It is stretched, so I will buy now.”
 
@@ -114,15 +120,17 @@ Fading a band walk because the market looks extended.
 
 > **A band walk can be a sign of trend strength. Do not trade against it simply because price is near an outer band.**
 
-**Source note:** John Bollinger's discussion of walking the bands and Official Rule 7 in [the official rules](https://www.bollingerbands.com/bollinger-band-rules).
+**Source and further reading:** John Bollinger's discussion of walking the bands and Official Rule 7 in [the official rules](https://www.bollingerbands.com/bollinger-band-rules).
 
 ---
 
 ## Lesson 3.3 — Two Ways Traders Talk About a “Squeeze”
 
-**Estimated time:** 16 minutes — read 8, inspect the figure 3, task 3, review 2.  
-**Figure:** Figure 3.3 — compare low Bollinger BandWidth with Bollinger Bands contracting inside Keltner Channels.
-![Figure 3.3: compare low Bollinger BandWidth with Bollinger Bands contracting inside Keltner Channels](../assets/student-assets/svg/bb-m03-f03.svg)
+**Estimated study time:** 16 minutes.
+
+As you work through this lesson, refer to **Figure 3.3**.
+
+![Figure 3.3: Two diagrams compare unusually narrow Bollinger Bands measured by BandWidth with Bollinger Bands contracting inside Keltner Channels.](../assets/student-assets/svg/bb-m03-f03.svg)
 
 ### The question
 
@@ -154,7 +162,7 @@ If a trader uses momentum with a squeeze, that is additional information. Do not
 
 In Panel A, look at the BandWidth measure relative to its previous values. In Panel B, look at the relative positions of the Bollinger Bands and Keltner Channels. Describe the difference without assuming one method must always be better.
 
-### Task
+### Observe and interpret: Distinguish the squeeze definitions
 
 Complete the following:
 - Bollinger BandWidth measures ___.
@@ -162,6 +170,10 @@ Complete the following:
 - Neither squeeze definition alone tells you ___.
 
 **Model response:** BandWidth measures relative band width; the TTM Squeeze checks whether Bollinger Bands are inside Keltner Channels; neither alone tells you the direction of the next move.
+
+**Test the reading:** The bands are narrow, but price is still inside its range. What would you need to see before choosing a long or short scenario?
+
+**Model response:** I would need a defined price boundary and a price event that meets a stated trigger. I would also decide what would invalidate the idea. The squeeze definition alone provides neither direction nor an entry.
 
 ### Common mistake
 
@@ -171,15 +183,17 @@ Using “Bollinger Squeeze” and “TTM Squeeze” as if they are always the sa
 
 > **Know which squeeze you are reading. Both describe contraction, but they define it in different ways.**
 
-**Source note:** John Bollinger's official Rule 19 and the Squeeze chapter of *Bollinger on Bollinger Bands*. John Carter discusses the TTM Squeeze in *Mastering the Trade*. The [thinkorswim TTM Squeeze reference](https://toslc.thinkorswim.com/center/reference/Tech-Indicators/studies-library/T-U/TTM-Squeeze.html) describes the Bollinger Band/Keltner Channel relationship. This lesson distinguishes the concepts rather than attributing Carter's implementation to Bollinger.
+**Source and further reading:** John Bollinger's official Rule 19 and the Squeeze chapter of *Bollinger on Bollinger Bands*. John Carter discusses the TTM Squeeze in *Mastering the Trade*. The [thinkorswim TTM Squeeze reference](https://toslc.thinkorswim.com/center/reference/Tech-Indicators/studies-library/T-U/TTM-Squeeze.html) describes the Bollinger Band/Keltner Channel relationship. This lesson distinguishes the concepts rather than attributing Carter's implementation to Bollinger.
 
 ---
 
 ## Lesson 3.4 — A Squeeze Does Not Choose the Direction
 
-**Estimated time:** 15 minutes — read 7, inspect the figure 3, task 3, review 2.  
-**Figure:** Figure 3.4 — similar quiet conditions followed by an upward break, a downward break, and a failed first move.
-![Figure 3.4: similar quiet conditions followed by an upward break, a downward break, and a failed first move](../assets/student-assets/svg/bb-m03-f04.svg)
+**Estimated study time:** 15 minutes.
+
+As you work through this lesson, refer to **Figure 3.4**.
+
+![Figure 3.4: Three similar quiet periods are followed by an upward break, a downward break, and an initial breakout that fails.](../assets/student-assets/svg/bb-m03-f04.svg)
 
 ### The question
 
@@ -209,7 +223,7 @@ The disciplined response is to define what your breakout plan requires and what 
 
 The three panels begin with similar quiet conditions, then follow different paths. Compare what happens after the initial boundary is crossed. The visual is designed to make one important point clear: the narrow bands alone do not distinguish the outcomes.
 
-### Task
+### Observe and interpret: Compare the outcomes
 
 For the three outcomes, write:
 1. What would support a long scenario?
@@ -218,7 +232,7 @@ For the three outcomes, write:
 
 **Model reasoning:** A long requires the chosen upward trigger and any pre-planned confirmation; a short requires the mirrored downside trigger. A quick return into the range or a failure to meet the stated hold condition can weaken the first-break case. The exact rule depends on the method being tested.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 BandWidth has reached a low reading, but price is in the middle of a broad range with no clear nearby boundary. What is a reasonable decision?
 
@@ -232,10 +246,10 @@ Entering just because the bands are narrow, or because price has made its first 
 
 > **A squeeze tells you to pay attention to changing volatility. Price must still show which scenario, if any, is developing.**
 
-**Source note:** John Bollinger's Official Rules 8 and 19 and *Bollinger on Bollinger Bands*, chapter on the Squeeze. Specific boundary, confirmation and invalidation rules are course frameworks, not claims that Bollinger prescribed one universal entry system. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
+**Source and further reading:** John Bollinger's Official Rules 8 and 19 and *Bollinger on Bollinger Bands*, chapter on the Squeeze. Specific boundary, confirmation and invalidation rules in this lesson are examples used in this course, not claims that Bollinger prescribed one universal entry system. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
 
 ---
 
-## Module 3 source notes
+## References and further reading
 
 John Bollinger's *Bollinger on Bollinger Bands* has separate discussions of walking the bands and the Squeeze. John Carter's TTM Squeeze is a distinct approach based on Bollinger Bands relative to Keltner Channels with a momentum component. See [Bollinger's official rules](https://www.bollingerbands.com/bollinger-band-rules), the [publisher's book contents](https://www.mheducation.com/highered/mhp/product/bollinger-bollinger-bands), and [the TTM Squeeze reference](https://toslc.thinkorswim.com/center/reference/Tech-Indicators/studies-library/T-U/TTM-Squeeze.html).

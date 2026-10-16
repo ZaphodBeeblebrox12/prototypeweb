@@ -4,13 +4,17 @@ This module focuses on two patterns John Bollinger discusses in detail: W-type b
 
 By the end, you should be able to explain the logic of a W-bottom and M-top, recognise an incomplete lookalike, use indicator disagreement cautiously, and separate a pattern candidate from a complete trade plan.
 
+As you work through this module, use **Observe → Interpret → Test**: describe what the chart shows, consider what it may mean and what else could explain it, then name the evidence or condition that would strengthen or weaken the reading.
+
 ---
 
 ## Lesson 4.1 — Reading a W-Bottom
 
-**Estimated time:** 17 minutes — read 8, inspect the figure 3, task 4, review 2.  
-**Figure:** Figure 4.1 — compare a W-bottom candidate with a similar-looking but incomplete pair of lows.
-![Figure 4.1: compare a W-bottom candidate with a similar-looking but incomplete pair of lows](../assets/student-assets/svg/bb-m04-f01.svg)
+**Estimated study time:** 17 minutes.
+
+As you work through this lesson, refer to **Figure 4.1**.
+
+![Figure 4.1: Two double-low patterns compare the relationship of each low to the lower band and whether price confirms a possible recovery.](../assets/student-assets/svg/bb-m04-f01.svg)
 
 ### The question
 
@@ -34,7 +38,7 @@ It is still only a candidate. Price can remain weak, make another low, or move s
 
 ### What confirmation means here
 
-For the lessons in this course, we will use a clear, testable confirmation example: price moves above the intervening swing high between the two lows. This is a **course-defined trigger** used to turn a pattern observation into a testable plan. Do not mislabel it as a universal rule prescribed in exactly this form by Bollinger.
+For practice, we will use a clear confirmation rule: price moves above the intervening swing high between the two lows. This gives the setup a condition that can be identified and tested consistently. It is an example rule for this course, not a universal rule that Bollinger prescribed in this exact form.
 
 The trigger does not guarantee success. It simply makes the decision specific: the learner can identify what event must occur, where the idea is invalidated, and how much risk the plan permits.
 
@@ -42,13 +46,13 @@ The trigger does not guarantee success. It simply makes the decision specific: t
 
 In the second panel, the two lows look similar but the important relationship or confirming move is missing. The correct answer may be “candidate, but not confirmed” or “unclear,” rather than forcing the W-bottom label.
 
-### Task
+### Observe and interpret: Compare the two lows
 
 In Figure 4.1, mark the two lows, describe how each sits relative to the lower band, and identify what event would confirm the course's example long plan.
 
 **Model reasoning:** The first low provides the initial reference. The second low's relationship to the lower band may show a change in relative weakness. A break above the intervening swing high is the chosen course trigger. If it never occurs, the plan remains inactive.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 A chart forms two lows, but the second low closes below the lower band and price then continues making lower lows. What is the cautious reading?
 
@@ -62,15 +66,17 @@ Buying every pair of lows that looks like the letter W.
 
 > **The W shape starts the question. The relationship to the bands and the later price evidence help you judge whether a reversal plan is justified.**
 
-**Source note:** John Bollinger discusses W-type bottoms in *Bollinger on Bollinger Bands*, Chapter 12, and refers to the use of the bands to clarify common patterns. See the [publisher's contents](https://www.mheducation.com/highered/mhp/product/bollinger-bollinger-bands). The intervening-swing trigger in this lesson is a teaching framework, not presented as a verbatim author rule.
+**Source and further reading:** John Bollinger discusses W-type bottoms in *Bollinger on Bollinger Bands*, Chapter 12, and refers to the use of the bands to clarify common patterns. See the [publisher's contents](https://www.mheducation.com/highered/mhp/product/bollinger-bollinger-bands). The intervening-swing trigger in this lesson is a teaching framework, not presented as a verbatim author rule.
 
 ---
 
 ## Lesson 4.2 — Reading an M-Top
 
-**Estimated time:** 17 minutes — read 8, inspect the figure 3, task 4, review 2.  
-**Figure:** Figure 4.2 — compare an M-top candidate with two highs that occur during a continuing uptrend.
-![Figure 4.2: compare an M-top candidate with two highs that occur during a continuing uptrend](../assets/student-assets/svg/bb-m04-f02.svg)
+**Estimated study time:** 17 minutes.
+
+As you work through this lesson, refer to **Figure 4.2**.
+
+![Figure 4.2: Two double-high patterns compare the highs' relationship to the upper band and the price behaviour that follows.](../assets/student-assets/svg/bb-m04-f02.svg)
 
 ### The question
 
@@ -88,9 +94,9 @@ Now compare the second high with the bands. If the second high cannot reach the 
 
 But several alternatives remain possible. The market could be consolidating before another push upward. It could form a wider range. The apparent second high may be too incomplete to interpret. The M shape alone does not tell you which explanation will win.
 
-### A course-defined confirmation example
+### A confirmation rule for practice
 
-For practice, this course uses a break below the intervening swing low as one possible confirmation trigger for a short scenario. This makes the rule observable and testable. It is a course framework, not a claim that every M-top must be traded this way.
+For practice, this course uses a break below the intervening swing low as one possible confirmation trigger for a short scenario. This makes the rule observable and testable. It is a framework used in this course, not a claim that every M-top must be traded this way.
 
 Before a trade, define the point that would show the idea is wrong, such as price reclaiming the high area under your plan. Set the stop around the invalidating structure rather than placing it at an arbitrary band line. Then check whether the available distance to a reasonable target justifies the risk.
 
@@ -98,13 +104,13 @@ Before a trade, define the point that would show the idea is wrong, such as pric
 
 Figure 4.2 shows two similar highs in an uptrend. If price continues making higher lows, holds above the middle band much of the time, and breaks upward again, the bearish interpretation weakens. The second high's relationship to the band may prompt attention, but price behaviour must still be respected.
 
-### Task
+### Observe and interpret: Compare the two highs
 
 Mark the two highs and the intervening swing low in Figure 4.2. Explain what makes the first panel a possible M-top and what remains missing from the second.
 
 **Model reasoning:** A different relationship between the two highs and the upper band can support a candidate M-top. The chosen confirmation event and invalidation condition decide whether the candidate becomes a testable plan. A similar-looking pair of highs without those conditions is not enough.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 The second high is inside the upper band, but price then breaks above both highs and continues rising. What should you conclude?
 
@@ -118,15 +124,17 @@ Shorting the second high before price has shown a meaningful change.
 
 > **A possible M-top warns you to examine the second high carefully. It does not give you permission to short without a plan.**
 
-**Source note:** John Bollinger discusses M-type tops in *Bollinger on Bollinger Bands*, Chapter 13. The course's intervening-low trigger is a testable teaching implementation, not an author-attributed universal rule.
+**Source and further reading:** John Bollinger discusses M-type tops in *Bollinger on Bollinger Bands*, Chapter 13. The course's intervening-low trigger is a testable teaching implementation, not an author-attributed universal rule.
 
 ---
 
 ## Lesson 4.3 — When Price and an Indicator Tell Different Stories
 
-**Estimated time:** 15 minutes — read 7, inspect the figure 3, task 3, review 2.  
-**Figure:** Figure 4.3 — price and %B show a mismatch, with a second panel showing that the trend can still continue.
-![Figure 4.3: price and %B show a mismatch, with a second panel showing that the trend can still continue](../assets/student-assets/svg/bb-m04-f03.svg)
+**Estimated study time:** 15 minutes.
+
+As you work through this lesson, refer to **Figure 4.3**.
+
+![Figure 4.3: A price chart and %B panel show a mismatch between a new price high and relative band position; a second panel shows that price can still continue upward.](../assets/student-assets/svg/bb-m04-f03.svg)
 
 ### The question
 
@@ -152,13 +160,13 @@ You do not need a crowded chart. One additional measure is enough if you can exp
 
 In the first panel, identify the new price high and compare the %B reading at the two highs. In the alternative panel, notice that price continues upward after a similar mismatch. The purpose is to show why divergence-like evidence deserves attention but should not be treated as a timer.
 
-### Task
+### Observe and interpret: Describe the mismatch
 
 Write two possible explanations for the mismatch in Figure 4.3. Then name one future price event that would support a short scenario and one that would weaken it.
 
 **Model reasoning:** Possible explanations include weakening relative movement or a temporary pause within a continuing trend. A break below a meaningful swing low may support the downside case under a defined plan; a fresh high with continued upward structure may weaken it. The precise trigger depends on the chosen method.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 You add three momentum indicators to confirm a possible M-top. All three turn down on the same bars. Have you necessarily added three independent pieces of evidence?
 
@@ -172,15 +180,17 @@ Treating divergence as a guaranteed reversal signal.
 
 > **A mismatch is a reason to investigate. Confirmation and invalidation still need to come from a defined plan.**
 
-**Source note:** John Bollinger's Official Rules 3–5 and 16 discuss combining Bollinger Bands with other indicators and using %B for pattern recognition. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
+**Source and further reading:** John Bollinger's Official Rules 3–5 and 16 discuss combining Bollinger Bands with other indicators and using %B for pattern recognition. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
 
 ---
 
 ## Lesson 4.4 — Is the Pattern Complete Enough to Trade?
 
-**Estimated time:** 14 minutes — read 7, inspect the figure 2, task 3, review 2.  
-**Figure:** Figure 4.4 — candidate, confirmed under a stated course rule, failed, and unclear pattern examples.
-![Figure 4.4: candidate, confirmed under a stated course rule, failed, and unclear pattern examples](../assets/student-assets/svg/bb-m04-f04.svg)
+**Estimated study time:** 14 minutes.
+
+As you work through this lesson, refer to **Figure 4.4**.
+
+![Figure 4.4: Four panels show a pattern candidate, a pattern that meets the stated example rule, a failed pattern, and an unclear case.](../assets/student-assets/svg/bb-m04-f04.svg)
 
 ### The question
 
@@ -210,13 +220,13 @@ A course confirmation rule can help make the exercise testable. For example, thi
 
 Even a pattern that has met its chosen trigger can be a poor trade. The stop may need to be too far away, the next obstacle may be too close, or a major event may create risks the chart does not show. The correct decision may still be no trade.
 
-### Task
+### Observe and interpret: Classify the pattern
 
 Classify each panel in Figure 4.4 as candidate, confirmed under the stated course rule, failed, or unclear. For each answer, point to one visible reason.
 
 **Model reasoning:** The label must follow the rule given with the figure. A candidate lacks the trigger, a confirmed example has met it, a failed case contradicts the plan, and an unclear case lacks enough reliable structure to decide. If two readings remain reasonable, explain the ambiguity rather than guessing.
 
-### Try a new case
+### Test: Apply the reading to a new case
 
 A W-bottom candidate has met the course trigger, but the entry is far above the invalidation point and the next resistance area is close. What should you do?
 
@@ -230,10 +240,10 @@ Assuming that once a pattern is identified, an entry must follow.
 
 > **A pattern is one part of a plan. It does not replace context, a trigger, invalidation, or risk assessment.**
 
-**Source note:** Pattern categories and the W/M treatments are grounded in John Bollinger's *Bollinger on Bollinger Bands*, Chapters 10–13. The state labels and confirmation rules are course-designed learning frameworks.
+**Source and further reading:** Pattern categories and the W/M treatments are grounded in John Bollinger's *Bollinger on Bollinger Bands*, Chapters 10–13. The state labels and confirmation rules are teaching frameworks used in this course.
 
 ---
 
-## Module 4 source notes
+## References and further reading
 
 Primary reference: John Bollinger, *Bollinger on Bollinger Bands*, Chapters 10–13, especially the W-Type Bottoms and M-Type Tops chapters. The publisher's [table of contents](https://www.mheducation.com/highered/mhp/product/bollinger-bollinger-bands) confirms the book's dedicated treatment of those subjects. The course uses original wording and clearly labels any operational confirmation rule that is not verified as a direct author rule.
