@@ -145,6 +145,8 @@ class CourseCommunityAccessTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Community access")
         self.assertContains(response, "Available until")
+        self.assertContains(response, "Connect Telegram")
+        self.assertContains(response, "Connect Discord")
         self.assertTrue(compute_target_access(self.user.pk).has_plan)
 
     def test_community_term_cannot_be_changed_after_payment_history_exists(self):
