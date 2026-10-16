@@ -1,5 +1,6 @@
 # Accessibility and source notes — M02-L03
 
+**Figure number:** Figure 2.3; interactive panels use Figure 2.3a–Figure 2.3e.
 **Linked lesson:** Heavy Volume, Little Progress: What Is Happening Behind the Move?
 **Purpose:** Identify effort/result mismatch and distinguish possible explanations.
 **Data:** Synthetic OHLCV for instruction, not historical prices or a signal.
