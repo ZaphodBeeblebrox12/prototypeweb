@@ -49,6 +49,16 @@ Your first volume-analysis skill is therefore humble but powerful: see the event
 
 Let's slow down the first comparison and treat it as a live reading rather than a pattern quiz. On the left chart, mark the last swing high and the higher low that formed during the pullback. The green candle appears near a place where continuation would make sense, but you still need a trigger. Ask: did this candle actually reclaim a short-term swing, or did it only close green? Those are different things. On the right chart, mark the previous high and the distance already travelled. A similar green body after an extended run may simply be another upward bar, or it may appear in a location where buyers need to do more work to sustain the move. Only subsequent bars can clarify the difference. In both cases, avoid using the volume bar as a hidden-motive detector. Say what activity was recorded, compare it with the baseline, and describe the price result. The habit to practise is precise language: “supports a continuation hypothesis” is better than “buyers are definitely accumulating.” At the end of the lesson, have the learner explain the same chart to a partner using only observations for the first thirty seconds. Then invite an interpretation. This small delay exposes how quickly our brains jump from seeing a bar to telling a story about it.
 
+### Learner progression — Notice → Compare → Apply
+
+**Level 1 — Notice (easy):** Identify the outlined candidate candle and say whether it closed above or below its open; compare its volume bar with the dashed baseline.
+
+**Level 2 — Compare (guided):** Compare the two similar candles. Describe prior price structure, location and relative volume separately before interpreting either one.
+
+**Level 3 — Apply (independent):** On a new chart with a candidate candle near a level, write two plausible readings and the next visible price behaviour that would help distinguish them. Do this before seeing later bars.
+
+**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
+
 ### Knowledge check
 1. What is the difference between observing high volume and concluding that buyers are in control?
 2. Why does the same candle mean something different near a range boundary than in the middle of a range?
@@ -101,6 +111,16 @@ Your takeaway: volume is most useful when compared with an appropriate reference
 
 When we call a bar unusual, we should be able to show our work. For example, if the last ten bars were 80, 90, 85, 95, 100, 92, 88, 91, 86 and 98 units, a current bar of 180 is plainly larger than the recent group. But if the last two bars were event spikes of 240 and 220, the same bar is no longer unusual relative to the immediate past. Neither baseline is automatically right: one may describe normal conditions, while the other may capture a new volatility regime. For a first-pass lesson, the point is not to find one perfect formula. It is to choose a baseline deliberately and record it. Watch how one extreme value can pull a simple average upward and make later bars look less remarkable. If the market has changed character, the old baseline may be slow to adapt; if the lookback is too short, one noisy cluster can distort the measure. These are reasons to treat relative volume as a flag for inspection rather than a mechanical trigger. Ask the learner to explain why the bar qualified as unusual before asking what it means. The first answer can be mathematical; the second must include structure and subsequent behaviour.
 
+### Learner progression — Notice → Compare → Apply
+
+**Level 1 — Notice (easy):** Pick the largest-looking volume bar and compare it with the immediately preceding bars.
+
+**Level 2 — Compare (guided):** Compare the same event with an appropriate baseline, including a time-of-day-matched comparison when session activity changes.
+
+**Level 3 — Apply (independent):** Choose a baseline for an unfamiliar synthetic market/session, justify why it is fair, then explain how a different baseline could change the label.
+
+**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
+
 ### Knowledge check
 1. Why can an opening-bar volume spike be misleading if compared with midday bars?
 2. What could distort a twenty-bar average?
@@ -150,6 +170,16 @@ Candle reading is not a contest to memorise more shapes. It is a method for reco
 ### Extended spoken case analysis — additional narration
 
 Here is a useful way to prevent candle vocabulary from replacing analysis. Describe a candle using its geometry first: “The range is wider than the previous five bars; the close is in the lower quarter; the upper wick is about half the total range.” That is precise. Then add the activity and location: “Relative volume is elevated, and price is at the upper boundary of a three-day range.” Only after those details do we say what the bar might mean. At resistance, the failure to retain the high is a clue to inspect for rejection; in the middle of a volatile session, it might be an ordinary two-sided bar. Have learners label the geometry without knowing what happens next, then reveal subsequent bars and ask them to update their interpretation. This separates the skill of reading a bar from the skill of building a trade thesis. The first is descriptive and should be repeatable. The second is contextual and should remain open to revision. A good assessment therefore does not punish a learner for failing to predict the final direction when the first bar is ambiguous. It checks whether the learner described the evidence correctly, identified the uncertainty, and named a sensible next observation.
+
+### Learner progression — Notice → Compare → Apply
+
+**Level 1 — Notice (easy):** Identify the candle's open, high, low and close; mark its range and wick(s).
+
+**Level 2 — Compare (guided):** Compare two candles with different close locations, then describe both without predicting the next move.
+
+**Level 3 — Apply (independent):** Read an unlabeled candle near a prior level, record one interpretation and one alternative, and name what later price behaviour would alter the reading.
+
+**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
 
 ### Knowledge check
 1. What does an upper wick actually establish, and what does it not establish?
@@ -201,6 +231,16 @@ The core lesson is that low volume is not inherently good or bad. It changes the
 
 Consider the phrase “low-volume pullback.” It can describe several different environments. In an orderly trend, price may drift toward a previously broken level on smaller bars and lower reported activity; sellers are not producing a large counter-move, so a continuation scenario remains plausible. In a quiet midday session, the same volume decline may simply reflect the clock. In a weak market, price can also fall on low activity for many bars and gradually damage structure. These are not contradictory readings—the volume data answers a limited question, while structure and time context answer others. A worthwhile chart exercise should include a moment where the learner is asked to choose “wait” rather than a directional label. In practice, if the level is holding but no trigger has appeared, the learner should not invent one. If the level fails, the original thesis should be revised. Explain that waiting is not a prediction that the market will do nothing; it is a decision to defer action until the plan's conditions are visible. This is a core part of reading volume responsibly: it gives us questions to investigate, not permission to ignore price behaviour that contradicts our expectations.
 
+### Learner progression — Notice → Compare → Apply
+
+**Level 1 — Notice (easy):** Identify which bars have lower recorded volume than the recent comparison bars.
+
+**Level 2 — Compare (guided):** Compare low-volume movement in a trend pullback with low-volume movement at a range boundary.
+
+**Level 3 — Apply (independent):** Write hold and failure scenarios for a new low-volume pullback and specify which price condition would weaken continuation.
+
+**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
+
 ### Knowledge check
 1. Give two different interpretations for an upward move on low volume.
 2. What behaviour could support a continuation thesis after a quiet pullback?
@@ -250,6 +290,16 @@ As you move into the rest of the course, apply this rule: know the instrument, k
 ### Extended spoken case analysis — additional narration
 
 Make the data-quality note a standard part of the learner's chart template, not an optional footnote. Imagine the student sees a dramatic tick-volume burst on a spot-FX chart and concludes that “the whole market traded heavily.” The data does not support that universal claim; it reports activity from the source or feed defined by that platform. The safer statement is “tick activity on this feed rose sharply relative to its recent baseline.” That may still be useful, provided the learner compares the same source consistently. For exchange-traded contracts, they must be alert to session settings, contract rolls, and whether the chart displays the intended contract. For crypto, the venue and pair matter; a spot pair on one exchange is not the entire crypto market. Ask students to read the platform's volume definition before the lab and write one limitation. If they cannot find the definition, mark it unknown and reduce the strength of any volume-based claim. Good data hygiene will not make a strategy profitable by itself, but it prevents confident conclusions from being built on a misunderstood measurement.
+
+### Learner progression — Notice → Compare → Apply
+
+**Level 1 — Notice (easy):** Read the instrument and provider labels and identify the displayed volume field.
+
+**Level 2 — Compare (guided):** Compare exchange-reported volume, retail spot-FX tick volume and venue-specific crypto volume, stating what each measure represents.
+
+**Level 3 — Apply (independent):** Choose a suitable volume baseline for an unfamiliar instrument and write the source limitation that must accompany your analysis.
+
+**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
 
 ### Knowledge check
 1. Why is retail spot-FX tick volume not the same as global traded volume?
