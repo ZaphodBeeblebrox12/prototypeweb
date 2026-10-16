@@ -320,6 +320,37 @@ jobs:
             await page.setViewportSize({ width: 390, height: 844 });
             await page.goto(server + "/support-resistance-room.html?lesson=13", { waitUntil: "networkidle" });
             await page.waitForSelector("#sr-v52-longform:not([hidden])");
+            const mobileFigure = page.locator(".sr-v52-figure img").first();
+            await mobileFigure.scrollIntoViewIfNeeded();
+            await mobileFigure.click();
+            const mobileDialog = page.locator("dialog.image-inspector-dialog");
+            await mobileDialog.waitFor({ state: "visible" });
+            const mobileBounds = await mobileDialog.evaluate(el => {
+              const rect = el.getBoundingClientRect();
+              return { width: rect.width, height: rect.height };
+            });
+            assert.ok(mobileBounds.width <= 391 && mobileBounds.height <= 845, "Mobile viewer should fit the 390×844 viewport: " + JSON.stringify(mobileBounds));
+            const pinchResult = await page.evaluate(() => {
+              const stage = document.querySelector(".image-inspector-stage");
+              const img = stage.querySelector("img");
+              const rect = stage.getBoundingClientRect();
+              const x = rect.left + rect.width / 2;
+              const y = rect.top + rect.height / 2;
+              const dispatch = (type, id, clientX, clientY) => stage.dispatchEvent(new PointerEvent(type, {
+                pointerId: id, pointerType: "touch", clientX, clientY, bubbles: true
+              }));
+              const before = getComputedStyle(img).transform;
+              dispatch("pointerdown", 41, x - 15, y);
+              dispatch("pointerdown", 42, x + 15, y);
+              dispatch("pointermove", 42, x + 60, y);
+              const after = getComputedStyle(img).transform;
+              dispatch("pointerup", 42, x + 60, y);
+              dispatch("pointerup", 41, x - 15, y);
+              return { before, after };
+            });
+            assert.notEqual(pinchResult.after, pinchResult.before, "Two-touch pointer movement should zoom the mobile image");
+            await page.keyboard.press("Escape");
+            await mobileDialog.waitFor({ state: "hidden" });
             const overflow = await page.evaluate(() => {
               const viewport = document.documentElement.clientWidth;
               const nodes = [document.documentElement, document.body, ...document.querySelectorAll("body *")];
