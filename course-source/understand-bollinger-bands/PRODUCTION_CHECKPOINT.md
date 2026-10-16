@@ -1,7 +1,7 @@
 # Understand Bollinger Bands — First-Pass Production Checkpoint
 
 **Branch:** `my-new-branch`  
-**Current state as of 17 October 2026:** all 30 lesson manuscripts deepened and connected to the first-pass Learning Room; not merged or deployed.
+**Current state as of 17 October 2026:** all 30 lesson manuscripts deepened and connected to the first-pass Learning Room; not merged into `main` or integrated into served course pages.
 
 ## Checkpoints saved
 
@@ -58,6 +58,8 @@ Each saved point remains on `my-new-branch`; none is merged or deployed.
 A source-level JavaScript syntax/data check passed after the rendering change: both inline preview scripts and the generated content script compile; the data parses to 30 lessons with 30 distinct quiz questions; each lesson has non-empty idea, chart-example and practice content. The current generated lesson content ranges from approximately 907 to 1,503 words across the three tabs.
 
 **Important:** the previous Chromium/Playwright smoke test was run before this manuscript-rendering change. A fresh browser smoke test and screenshot review have **not** yet been run on the new Learning Room content. Image references also remain provisional. This checkpoint records source validation, not a claim that the new browser UI is fully release-tested.
+
+The repository's separate `Deploy TradeThesis preview` workflow is triggered by changes under `tools/qa/**`, but its upload step packages only the `site/` directory. It does not package this `course-source/understand-bollinger-bands/` preview or the generated lesson-data asset.
 
 
 ## First-pass target
