@@ -3,7 +3,7 @@
 <desc id="desc">The original twelve-bar breakout example followed by three bars that hold above the former range high and make further progress.</desc>
 <rect width="720" height="640" fill="#f6f5f0"/>
 <rect x="22" y="18" width="676" height="600" rx="13" fill="#fffefa" stroke="#d9d7cf" stroke-width="2"/>
-<text x="42" y="56" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="700" fill="#252923">Outcome A · Price holds above the range</text>
+<text x="42" y="56" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="700" fill="#252923">Figure 1.1d · Price holds above the range</text>
 <text x="42" y="86" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#41443d">The same initial breakout, followed by further upward progress.</text>
 <text x="43" y="120" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700" fill="#41443d">PRICE · dashed line = reference</text>
 <line x1="78" y1="134" x2="680" y2="134" stroke="#d9d7cf" stroke-width="1.3"/>
