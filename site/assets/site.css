@@ -437,7 +437,7 @@ body{font-family:var(--sans);font-size:15px;line-height:1.65;letter-spacing:0}
 .chart-slot p{font-size:11px;line-height:1.75;color:var(--muted);margin:0 0 9px}
 .chart-slot code{font-size:10px;line-height:1.5;white-space:normal;overflow-wrap:anywhere;color:var(--green-deep);background:#e5eadc;border-radius:5px;padding:4px 6px;display:inline-block}
 .generated-figure{margin:22px 0 0;padding:13px;background:#fffdf8;border:1px solid var(--line);border-radius:16px}
-.generated-figure img{display:block;width:100%;height:auto;max-height:340px;object-fit:contain;background:white;border-radius:8px}
+.generated-figure img{display:block;width:100%;height:auto;max-height:none;object-fit:contain;background:white;border-radius:8px}
 .generated-figure figcaption{font-size:10px;line-height:1.7;color:var(--muted);padding:10px 3px 1px}
 .module-next-step{margin-top:25px;padding:26px 28px;border-radius:19px;background:#e5eadc;border:1px solid #cddac5;display:flex;align-items:center;justify-content:space-between;gap:20px}
 .module-next-step h2{font:400 29px/1.12 var(--serif);margin:8px 0}
