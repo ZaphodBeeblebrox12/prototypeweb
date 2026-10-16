@@ -69,7 +69,7 @@
 .sr-room-tab-panel[hidden]{display:none!important}.sr-room-tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin:0 0 17px;overflow-x:auto}
 .sr-room-tab{padding:10px 12px;margin-bottom:-1px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--muted);font-size:10px;font-weight:750;white-space:nowrap}
 .sr-room-tab[aria-selected=true]{border-bottom-color:var(--green);color:var(--green)}
-.sr-room-work-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(255px,.9fr);gap:14px;align-items:start}
+.sr-room-work-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
 .sr-room-chart-figure{min-width:0;margin:0;border:1px solid var(--line);border-radius:11px;background:#fffdf8;overflow:hidden}.sr-room-chart-figure[hidden]{display:none}
 .sr-room-chart-top{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid #eee6d8;color:#59685a;font-size:8px;font-weight:850;letter-spacing:.08em}
 .sr-room-chart-top span:last-child{color:#766447}.sr-room-chart-viewport{width:100%;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - my-new-branch
+      - feat/image-readability-audit-20261016
     paths:
       - "site/**"
       - "course-content/support-resistance/chart_assets/charts/**"

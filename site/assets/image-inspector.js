@@ -12,7 +12,7 @@
   dialog.setAttribute("aria-label", "Instructional image inspector");
   dialog.innerHTML = [
     '<div class="tt-image-inspector-shell">',
-    '<header class="tt-image-inspector-toolbar"><div class="tt-image-inspector-heading"><strong>Image inspection</strong><span data-tt-image-title aria-live="polite"></span></div>',
+    '<header class="tt-image-inspector-toolbar"><div class="tt-image-inspector-heading"><strong>Image inspection</strong><span data-tt-image-title aria-live="polite"></span><small class="tt-image-inspector-source" data-tt-image-source></small></div>',
     '<div class="tt-image-inspector-actions"><button type="button" data-tt-action="zoom-out" aria-label="Zoom out" title="Zoom out (−)">−</button>',
     '<span class="tt-image-inspector-zoom" data-tt-zoom aria-live="polite">Fit</span>',
     '<button type="button" data-tt-action="zoom-in" aria-label="Zoom in" title="Zoom in (+)">+</button>',
@@ -28,8 +28,9 @@
   const canvas = dialog.querySelector("[data-tt-canvas]");
   const titleNode = dialog.querySelector("[data-tt-image-title]");
   const zoomNode = dialog.querySelector("[data-tt-zoom]");
+  const sourceNode = dialog.querySelector("[data-tt-image-source]");
   let trigger = null, media = null, naturalWidth = 0, naturalHeight = 0;
-  let fitScale = 1, currentScale = 1, scrollBeforeOpen = 0;
+  let fitScale = 1, currentScale = 1, scrollBeforeOpen = { left: 0, top: 0 };
   let pointers = new Map(), dragOrigin = null, pinchOrigin = null;
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
   const isSvg = el => el instanceof SVGElement;
@@ -39,6 +40,41 @@
     return (el.closest("figure")?.querySelector("figcaption")?.textContent || "").trim() || "Instructional chart or diagram";
   };
   const sourceFor = el => el instanceof HTMLImageElement ? (el.currentSrc || el.src) : "";
+  function sourceDetailText(el) {
+    if (isSvg(el)) {
+      const embeddedRaster = Array.from(el.querySelectorAll("image")).find(imageNode => {
+        const href = imageNode.getAttribute("href") ||
+          imageNode.getAttributeNS("http://www.w3.org/1999/xlink", "href") || "";
+        return /\.(?:png|jpe?g|webp|gif|avif)(?:[?#].*)?$/i.test(href);
+      });
+      if (embeddedRaster) {
+        const width = Number(embeddedRaster.getAttribute("width")) || 0;
+        const height = Number(embeddedRaster.getAttribute("height")) || 0;
+        const dimensions = width > 0 && height > 0
+          ? " · original figure " + width.toLocaleString() + " × " + height.toLocaleString() + " px"
+          : "";
+        return "Cropped panel from a raster chart" + dimensions +
+          ". Enlargement cannot restore detail missing from the source.";
+      }
+      return "Vector diagram. Lines and labels stay sharp when enlarged.";
+    }
+    const src = sourceFor(el);
+    if (/\.svg(?:[?#].*)?$/i.test(src)) {
+      return "Vector SVG. Lines and labels stay sharp when enlarged.";
+    }
+    const width = el instanceof HTMLImageElement
+      ? (el.naturalWidth || (media && media.naturalWidth) || naturalWidth) : naturalWidth;
+    const height = el instanceof HTMLImageElement
+      ? (el.naturalHeight || (media && media.naturalHeight) || naturalHeight) : naturalHeight;
+    if (width > 0 && height > 0) {
+      return "Raster source · " + width.toLocaleString() + " × " + height.toLocaleString() +
+        " px. Enlargement reveals stored detail; it cannot recreate detail absent from the file.";
+    }
+    return "Source dimensions are not available yet. The original file determines how much detail can be inspected.";
+  }
+  function updateSourceDetail(el) {
+    sourceNode.textContent = sourceDetailText(el);
+  }
   function setMediaSize(nextScale, keepViewport = true) {
     if (!media || !naturalWidth || !naturalHeight) return;
     const previousScale = currentScale || nextScale;
@@ -62,13 +98,21 @@
       stage.scrollTop = Math.max(0, centerY * ratio - stage.clientHeight / 2);
     }
   }
-  function fitToScreen() {
+  function fitToScreen(startInMobileDetail = false) {
     if (!media || !naturalWidth || !naturalHeight) return;
     fitScale = Math.min(1, Math.max(1, stage.clientWidth - 28) / naturalWidth, Math.max(1, stage.clientHeight - 28) / naturalHeight);
     currentScale = fitScale;
     setMediaSize(fitScale, false);
     stage.scrollLeft = 0; stage.scrollTop = 0;
     zoomNode.textContent = "Fit · 100%";
+    if (startInMobileDetail && window.matchMedia("(max-width: 680px)").matches) {
+      // Whole-chart fit can make chart annotations too small to read on a phone.
+      // Start enlarged, but keep Fit available for seeing the complete context.
+      setMediaSize(fitScale * 2, false);
+      stage.scrollLeft = Math.max(0, Math.round((stage.scrollWidth - stage.clientWidth) / 2));
+      stage.scrollTop = Math.max(0, Math.round((stage.scrollHeight - stage.clientHeight) / 2));
+      zoomNode.textContent = "Detail · " + Math.round(currentScale / Math.max(fitScale, 0.001) * 100) + "%";
+    }
   }
   function svgDimensions(el) {
     const vb = el.viewBox?.baseVal;
@@ -86,6 +130,7 @@
       const dims = svgDimensions(el);
       naturalWidth = dims.width; naturalHeight = dims.height;
       canvas.append(media);
+      updateSourceDetail(el);
       return;
     }
     media = document.createElement("img");
@@ -93,24 +138,29 @@
     media.alt = labelFor(el); media.draggable = false; media.decoding = "async";
     media.addEventListener("load", () => {
       naturalWidth = media.naturalWidth; naturalHeight = media.naturalHeight;
-      fitToScreen();
+      fitToScreen(true);
+      updateSourceDetail(el);
     }, { once: true });
     media.addEventListener("error", () => { titleNode.textContent = "This image could not be loaded at full size."; }, { once: true });
     canvas.append(media);
     media.src = sourceFor(el);
     if (media.complete && media.naturalWidth > 0) {
       naturalWidth = media.naturalWidth; naturalHeight = media.naturalHeight;
-    } else zoomNode.textContent = "Loading…";
+      updateSourceDetail(el);
+    } else {
+      zoomNode.textContent = "Loading…";
+      sourceNode.textContent = "Loading source dimensions…";
+    }
   }
   function openInspector(el) {
     if (!el || dialog.open) return;
-    trigger = el; scrollBeforeOpen = window.scrollY;
+    trigger = el; scrollBeforeOpen = { left: window.scrollX, top: window.scrollY };
     pointers = new Map(); dragOrigin = null; pinchOrigin = null;
     prepareMedia(el);
     dialog.showModal();
     requestAnimationFrame(() => {
       if (!media) return;
-      if (isSvg(el) || (media.complete && media.naturalWidth > 0)) fitToScreen();
+      if (isSvg(el) || (media.complete && media.naturalWidth > 0)) fitToScreen(true);
       dialog.querySelector('[data-tt-action="close"]').focus();
     });
   }
@@ -124,6 +174,14 @@
     el.setAttribute("role", "button");
     el.setAttribute("aria-label", labelFor(el) + ". Open image inspector.");
     el.setAttribute("title", "Select to inspect this image at a larger size");
+    const figure = el.closest("figure");
+    const figcaption = figure && figure.querySelector("figcaption");
+    if (figcaption && !figcaption.querySelector(".tt-image-inspector-hint")) {
+      const hint = document.createElement("span");
+      hint.className = "tt-image-inspector-hint";
+      hint.textContent = "Select image to inspect details";
+      figcaption.append(hint);
+    }
     el.addEventListener("click", event => { if (!event.defaultPrevented) openInspector(el); });
     el.addEventListener("keydown", event => {
       if (event.target === el && ["Enter", " "].includes(event.key)) { event.preventDefault(); openInspector(el); }
@@ -145,7 +203,10 @@
   dialog.addEventListener("close", () => {
     canvas.replaceChildren(); media = null; naturalWidth = 0; naturalHeight = 0;
     if (trigger?.isConnected) trigger.focus({ preventScroll: true });
-    if (Math.abs(window.scrollY - scrollBeforeOpen) > 2) window.scrollTo(0, scrollBeforeOpen);
+    if (Math.abs(window.scrollY - scrollBeforeOpen.top) > 2 ||
+        Math.abs(window.scrollX - scrollBeforeOpen.left) > 2) {
+      window.scrollTo({ left: scrollBeforeOpen.left, top: scrollBeforeOpen.top, behavior: "auto" });
+    }
     trigger = null;
   });
   stage.addEventListener("keydown", event => {

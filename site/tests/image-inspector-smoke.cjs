@@ -17,6 +17,9 @@ const { chromium } = require("playwright");
     return img && img.complete && img.naturalWidth > 0;
   });
   const coreChart = page.locator("#sr-chart-image");
+  const desktopGridTracks = await page.locator("#sr-work-grid").evaluate(el => getComputedStyle(el).gridTemplateColumns);
+  assert.equal(desktopGridTracks.trim().split(/\s+/).length, 1,
+    "Instructional chart should get the full reading width, with the response panel beneath it");
   const chartSource = await coreChart.evaluate(img => img.currentSrc || img.src);
   assert.ok(chartSource.endsWith(".svg"), "Core lesson charts should prefer vector sources when available: " + chartSource);
   assert.ok((await coreChart.getAttribute("data-chart-canonical-file") || "").endsWith(".png"),
@@ -77,6 +80,19 @@ const { chromium } = require("playwright");
   await mobilePanel.click();
   const mobileDialog = page.locator("dialog.tt-image-inspector[open]");
   await mobileDialog.waitFor();
+  await page.waitForFunction(() => {
+    const el = document.querySelector("dialog.tt-image-inspector [data-tt-zoom]");
+    return el && el.textContent.startsWith("Detail ·");
+  });
+  assert.match(await mobileDialog.locator("[data-tt-zoom]").innerText(), /^Detail · 200%$/,
+    "Mobile image inspection should open enlarged instead of starting with tiny fit-to-screen annotations");
+  assert.match(await mobileDialog.locator("[data-tt-image-source]").innerText(), /raster chart/i,
+    "The inspector should explain when a panel is cropped from a raster source");
+  const mobileStage = mobileDialog.locator("[data-tt-stage]");
+  const mobileMediaWidth = await mobileDialog.locator(".tt-image-inspector-media").evaluate(el => parseFloat(el.style.width));
+  const mobileStageWidth = await mobileStage.evaluate(el => el.clientWidth);
+  assert.ok(mobileMediaWidth > mobileStageWidth * 1.4,
+    "The initial mobile detail view should enlarge the image beyond the viewport width for closer reading");
   await mobileDialog.screenshot({ path: screenshotDir + "/mobile-viewer.png" });
   const mobileLayout = await page.evaluate(() => ({
     viewport: document.documentElement.clientWidth,
