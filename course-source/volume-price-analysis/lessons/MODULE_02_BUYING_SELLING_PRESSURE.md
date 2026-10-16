@@ -17,13 +17,13 @@ Infer the balance of price progress and resistance from bars and sequences, whil
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — Introduce the question:** which side appears to be making progress?
-- **1:00–3:00 — Price progress, close location, range and relative volume.**
-- **3:00–5:00 — Pressure over a sequence, not one bar.**
-- **5:00–7:30 — Compare a successful advance and a stalled advance.**
-- **7:30–10:30 — ChartLab: evidence ladder.**
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** Introduce the question: which side appears to be making progress?.
+- **1:00–2:30 — Level 1, Notice:** Mark whether a short sequence makes upward progress, downward progress or little progress.
+- **2:30–5:00 — Teach and model:** Price progress, close location, range and relative volume; Pressure over a sequence, not one bar.
+- **5:00–7:30 — Level 2, Compare:** Compare three sequences and support each label with specific candle closes and highs/lows.
+- **7:30–11:00 — Level 3, Apply:** Analyse an unfamiliar sequence using observed facts, one possible reading, one alternative and a condition that would weaken your reading.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: evidence ladder. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 When traders talk about buying pressure and selling pressure, it can sound as though the chart tells us exactly who is placing orders and what those people intend to do. It does not. A price chart and its volume field give us evidence of transactions or activity as defined by the feed. From that evidence, we can make reasoned interpretations about which side appears to be achieving its immediate objective. This distinction matters because it keeps our analysis honest.
 
@@ -75,13 +75,13 @@ Assess whether an advance or decline is making progress in a way that is consist
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — Define strength as progress, not colour.**
-- **1:00–3:00 — Volume, range and close location together.**
-- **3:00–5:00 — Initiative move versus context.**
-- **5:00–7:30 — What follow-through adds.**
-- **7:30–10:30 — ChartLab: progress audit.**
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** Define strength as progress, not colour.
+- **1:00–2:30 — Level 1, Notice:** Mark the range boundary and identify the candle that first closes beyond it.
+- **2:30–5:00 — Teach and model:** Volume, range and close location together; Initiative move versus context.
+- **5:00–7:30 — Level 2, Compare:** Compare two breakouts using candle close, relative activity and the next three to five bars.
+- **7:30–11:00 — Level 3, Apply:** Evaluate a new breakout as supporting continuation, challenging continuation or inconclusive; state the next trigger and the condition that would invalidate the idea.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: progress audit. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 A price move can look strong because it is fast, because the candles are large, or because volume is elevated. Those clues are useful, but they answer different questions. Speed tells us how quickly price travelled. Range tells us how much distance a bar covered. Volume tells us about activity as reported by the data source. Strength, for this lesson, means that price is achieving and retaining meaningful progress relative to its context.
 
@@ -135,13 +135,13 @@ Recognise the mismatch between high activity and limited price progress and expl
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — The key mismatch.**
-- **1:00–3:00 — Effort versus result.**
-- **3:00–5:00 — Resistance, absorption hypothesis and two-sided trade.**
-- **5:00–7:30 — Location and follow-through.**
-- **7:30–10:30 — ChartLab: distinguish the observations from the story.**
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** The key mismatch.
+- **1:00–2:30 — Level 1, Notice:** Point to a bar with high recorded activity and limited price progress.
+- **2:30–5:00 — Teach and model:** Effort versus result; Resistance, absorption hypothesis and two-sided trade.
+- **5:00–7:30 — Level 2, Compare:** Compare two high-activity examples at different locations and list plausible reasons for the limited progress.
+- **7:30–11:00 — Level 3, Apply:** Write an evidence note for a new case: observation, two explanations and the next price behaviour that would help distinguish them.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: distinguish the observations from the story. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 One of the most useful questions in volume analysis is this: what happened when activity was high but price did not travel very far? This is a version of the effort-versus-result idea found across several volume-analysis traditions. The “effort” is the activity represented by volume; the “result” is the price progress achieved. When effort is substantial but the result is limited, the relationship deserves attention.
 
@@ -195,13 +195,13 @@ Identify measurable changes in progress and activity that may indicate a move is
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — Weakening is not reversing.**
-- **1:00–3:00 — Less distance, failed extensions, changed closing positions.**
-- **3:00–5:00 — Volume context and trend maturity.**
-- **5:00–7:30 — Continuation and reversal alternatives.**
-- **7:30–10:30 — ChartLab: build an evidence timeline.**
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** Weakening is not reversing.
+- **1:00–2:30 — Level 1, Notice:** Mark where successive pushes make less progress or close farther from their extremes.
+- **2:30–5:00 — Teach and model:** Less distance, failed extensions, changed closing positions; Volume context and trend maturity.
+- **5:00–7:30 — Level 2, Compare:** Compare a move that pauses and continues with one that later breaks structure; separate early warning from structural change.
+- **7:30–11:00 — Level 3, Apply:** On an unseen sequence, mark warning, structural evidence, trigger and invalidation without using later bars prematurely.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: build an evidence timeline. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 A market move does not have to reverse the moment it begins to weaken. Often the first useful information is a change in character: price covers less distance, repeated attempts to extend fail, closes become less decisive, or high activity produces smaller results. These are reasons to reassess a continuation trade idea, not proof that the opposite direction is now in control.
 
@@ -255,13 +255,13 @@ Recognise price-volume disagreement, explain why it is contextual rather than au
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — Disagreement is a question, not an answer.**
-- **1:00–3:00 — Common mismatches: high effort/low result, low activity/large move.**
-- **3:00–5:00 — Location, data and sequence.**
-- **5:00–7:30 — Work through alternate interpretations.**
-- **7:30–10:30 — ChartLab: write two readings and a discriminator.**
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** Disagreement is a question, not an answer.
+- **1:00–2:30 — Level 1, Notice:** Identify a specific mismatch between price progress and recorded activity.
+- **2:30–5:00 — Teach and model:** Common mismatches: high effort/low result, low activity/large move; Location, data and sequence.
+- **5:00–7:30 — Level 2, Compare:** Compare two plausible explanations for that mismatch instead of giving it an automatic bullish or bearish label.
+- **7:30–11:00 — Level 3, Apply:** Write an if/then note defining the next observable behaviour that would favour each explanation; leave the case inconclusive when neither appears.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: write two readings and a discriminator. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 Price and volume do not always seem to tell the same story. Price may make a new high while activity fails to expand; volume may surge while price barely moves; or price may decline on modest activity after an extended advance. These mismatches are often described as divergence or contradiction, but the label can make them sound like automatic reversal signals. Our goal is more careful: identify the mismatch, place it in context, and decide what evidence would distinguish the possible explanations.
 
