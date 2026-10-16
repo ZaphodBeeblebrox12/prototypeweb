@@ -33,6 +33,8 @@ for key in ("'4-2'", "'5-1'", "'5-2'", "'6-0'"):
         raise SystemExit("Expected editorial cross-course placement missing: " + key)
 if "const href='../../../../site/courses.html#micro-courses';" not in page:
     raise SystemExit("Lesson cross-link should resolve to catalogue for repository-root local review.")
+if "https://zaphodbeeblebrox12.github.io/prototypeweb/courses.html#micro-courses" in page:
+    raise SystemExit("The lesson preview must not hard-code the hosted catalogue origin.")
 if "return 1+Math.max(0,refs.length-1);" not in page or "const figureAssetCount=lessonFigureAssetCount" not in page:
     raise SystemExit("Chart-example count not data-driven.")
 if "const subLabel=total>1&&index>0?String.fromCharCode(64+index):'';" not in page:
