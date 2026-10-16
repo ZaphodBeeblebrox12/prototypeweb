@@ -17,13 +17,13 @@ Create a concise context note identifying regime, relevant structure, important 
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — Why setup hunting starts with context.**
-- **1:00–3:00 — Trend, range and transition.**
-- **3:00–5:00 — Mark only levels with an explanation.**
-- **5:00–7:30 — Add volume/profile context without clutter.**
-- **7:30–10:30 — ChartLab: write a one-screen context note.**
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** Why setup hunting starts with context.
+- **1:00–2:30 — Level 1, Notice:** Label the chart as trending, ranging or transitioning and identify the volume source.
+- **2:30–5:00 — Teach and model:** Trend, range and transition; Mark only levels with an explanation.
+- **5:00–7:30 — Level 2, Compare:** Remove unjustified lines, keep a few meaningful zones and explain why each remains.
+- **7:30–11:00 — Level 3, Apply:** Write a context note on an unseen chart with one uncertainty and two competing scenarios before the event is revealed.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: write a one-screen context note. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 Before looking for an entry, answer a more basic question: what is the market doing? It is surprisingly easy to skip this step. A trader sees a candle pattern or volume spike and immediately looks for a way to participate. But the same event can have a very different significance depending on whether the market is trending, balanced in a range, or transitioning between the two. Context gives the event meaning and tells you which scenarios are worth considering.
 
@@ -78,13 +78,13 @@ Combine candle outcome, relative volume, effort/result, structure and profile co
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — No single input decides the trade.**
-- **1:00–3:00 — Describe the event and baseline.**
-- **3:00–5:00 — Compare activity with price progress.**
-- **5:00–7:30 — Integrate location/profile and alternative explanations.**
-- **7:30–10:30 — ChartLab: create an evidence sheet.**
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** No single input decides the trade.
+- **1:00–2:30 — Level 1, Notice:** List visible price and volume facts without interpretation.
+- **2:30–5:00 — Teach and model:** Describe the event and baseline; Compare activity with price progress.
+- **5:00–7:30 — Level 2, Compare:** Compare a fact-only note with a possible interpretation and alternative explanation.
+- **7:30–11:00 — Level 3, Apply:** Update a staged analysis after new bars appear, retaining original observations and naming exactly which evidence changed the hypothesis.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: create an evidence sheet. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 You have established the context. Now narrow your attention to the event that might create a trade. Your job is to build an evidence summary, not to jump straight from a pattern to an entry. Think of it as a short investigation with four parts: what happened, what the activity was, where it happened, and what competing explanations remain.
 
@@ -140,13 +140,13 @@ Turn a chart interpretation into a conditional thesis with a trigger, alternativ
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — A thesis is not a prediction.**
-- **1:00–3:00 — State context and evidence.**
-- **3:00–5:00 — Define the event required for entry.**
-- **5:00–7:30 — Specify alternatives and invalidation.**
-- **7:30–10:30 — ChartLab: write a two-scenario plan.**
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** A thesis is not a prediction.
+- **1:00–2:30 — Level 1, Notice:** Complete a guided if/then scenario with one trigger and one invalidation.
+- **2:30–5:00 — Teach and model:** State context and evidence; Define the event required for entry.
+- **5:00–7:30 — Level 2, Compare:** Write main and alternative scenarios from the same ambiguous chart, each with its own trigger and invalidation.
+- **7:30–11:00 — Level 3, Apply:** Independently prepare a new scenario sheet including no-trade condition and the price behaviour that would make each scenario wrong.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: write a two-scenario plan. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 A trade trade idea explains why a particular setup may be worth considering and what evidence would make it actionable. It is not a prediction that price must move in one direction. The difference is practical: predictions encourage you to defend an outcome; conditional trade ideas tell you what to watch and when to abandon the idea.
 
@@ -204,13 +204,13 @@ Convert a valid scenario into an executable plan by specifying entry condition, 
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — Analysis is not complete without risk.**
-- **1:00–3:00 — Entry, stop/invalidation and position size.**
-- **3:00–5:00 — Target logic, liquidity and costs.**
-- **5:00–7:30 — Managing changing evidence.**
-- **7:30–10:30 — ChartLab: complete a pre-trade ticket.**
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** Analysis is not complete without risk.
+- **1:00–2:30 — Level 1, Notice:** Mark planned entry and the point where the idea fails; identify the distance between them.
+- **2:30–5:00 — Teach and model:** Entry, stop/invalidation and position size; Target logic, liquidity and costs.
+- **5:00–7:30 — Level 2, Compare:** Calculate a hypothetical unit risk using the supplied point/tick/contract value, then relate position size to a pre-set risk limit.
+- **7:30–11:00 — Level 3, Apply:** Re-evaluate the trade ticket after spread/slippage or target-room assumptions change; decide whether to keep, revise or cancel it and explain why.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: complete a pre-trade ticket. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 A trade plan is more than a direction and an entry price. It is a set of decisions made before the uncertainty begins to affect you emotionally. By now, you should have a context note, an evidence summary and a conditional trade idea. This lesson turns those into a plan that can be executed and reviewed.
 
@@ -266,13 +266,13 @@ Independently produce a written volume-based trade plan from an unlabelled chart
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — Explain the capstone standard.**
-- **1:00–3:00 — Establish context and data quality.**
-- **3:00–5:00 — Analyse price-volume evidence and alternatives.**
-- **5:00–7:00 — Write scenarios, trigger and invalidation.**
-- **7:00–9:30 — Build risk and trade-management rules.**
-- **9:30–11:30 — Review outcome and process.**
-
+- **0:00–1:00 — Opening question:** Explain the capstone standard.
+- **1:00–2:30 — Level 1, Notice:** Annotate the market state, key area and candidate price-volume event on a guided chart.
+- **2:30–5:00 — Teach and model:** Establish context and data quality; Analyse price-volume evidence and alternatives.
+- **5:00–7:30 — Level 2, Compare:** Build the full trade ticket from staged evidence, including two scenarios, trigger, invalidation, risk and management.
+- **7:30–11:00 — Level 3, Apply:** Complete an independent capstone without future bars, then review both alternate outcomes while preserving the original plan and assessing process separately from result.
+- **11:00–13:00 — Feedback and counterexample:** Build risk and trade-management rules. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review outcome and process.
 ### Full narration script
 This final lesson is a complete walkthrough. The objective is not to demonstrate a spectacular winning trade. It is to show how a disciplined trader moves from raw chart information to a plan that can be followed and reviewed. We will work through the same sequence you should use on your own charts, and you will practise it independently after the demonstration.
 
