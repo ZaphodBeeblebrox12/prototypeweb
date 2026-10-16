@@ -6,7 +6,9 @@
   if (!data) return;
 
   const $ = (selector, scope = document) => scope.querySelector(selector);
-  const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
+  const $ = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
+  // Hidden records remain available as drafts but are excluded from public cards and counts.
+  const isCatalogueVisible = item => item && item.catalogueVisibility !== 'hidden';
   const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 
   const chartArt = type => {
@@ -55,11 +57,11 @@
   const microGrid = $('#cc-micro-grid');
   const programmeGrid = $('#cc-primary-programmes');
   if (programmeGrid) {
-    const orderedProgrammes = [...data.programmes].sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
+    const orderedProgrammes = data.programmes.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
     programmeGrid.innerHTML = orderedProgrammes.map(renderProgramme).join('');
   }
 
-  const supportingProgrammes = [...(data.supportingProgrammes || [])].sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
+  const supportingProgrammes = [...(data.supportingProgrammes || [])].filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
   const supportHost = $('#cc-supporting-programme');
   if (supportHost && supportingProgrammes.length) {
     supportHost.innerHTML = supportingProgrammes.map(support => `<article class="cc-live-card" id="${escapeHTML(support.id)}">
@@ -83,7 +85,7 @@
   let lastFocus = null;
   let toastTimer = null;
 
-  const microCourses = [...data.microCourses].sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
+  const microCourses = data.microCourses.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
 
   function renderMicroCard(course) {
     return `<button class="cc-micro-card" type="button" data-open-course="${escapeHTML(course.id)}" aria-label="Preview ${escapeHTML(course.title)}, ${escapeHTML(course.price)}">
