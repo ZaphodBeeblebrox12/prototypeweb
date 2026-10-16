@@ -80,13 +80,13 @@ Identify unusual activity relative to an appropriate baseline and explain why �
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — Hook:** a large number is not automatically unusual.
-- **1:00–3:00 — Relative volume:** compare with relevant recent bars.
-- **3:00–5:00 — Baseline choices:** session, timeframe, liquidity, events and instrument.
-- **5:00–7:30 — Worked example:** same volume bar in two different contexts.
-- **7:30–10:30 — ChartLab:** rank activity and test interpretation.
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** Hook: a large number is not automatically unusual..
+- **1:00–2:30 — Level 1, Notice:** Pick the largest-looking volume bar and compare it with the immediately preceding bars.
+- **2:30–5:00 — Teach and model:** Relative volume: compare with relevant recent bars.; Baseline choices: session, timeframe, liquidity, events and instrument..
+- **5:00–7:30 — Level 2, Compare:** Compare the same event with an appropriate baseline, including a time-of-day-matched comparison when session activity changes.
+- **7:30–11:00 — Level 3, Apply:** Choose a baseline for an unfamiliar synthetic market/session, justify why it is fair, then explain how a different baseline could change the label.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: rank activity and test interpretation.. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 A volume bar can look impressive and still tell you very little unless you know what is normal for that market. Think of traffic on a road. One hundred cars may be busy on a quiet village street and almost nothing on a major highway. Volume needs the same reference point. Its value is often comparative.
 
@@ -142,13 +142,13 @@ Describe a candle's range and closing position and relate that outcome to volume
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — The candle is an outcome, not a complete story.**
-- **1:00–3:00 — Range, body, upper and lower wick, close location.**
-- **3:00–5:00 — Large versus small range and the importance of context.**
-- **5:00–7:30 — Compare candle outcome with activity.**
-- **7:30–10:30 — ChartLab: classify bars without naming a trade.**
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** The candle is an outcome, not a complete story.
+- **1:00–2:30 — Level 1, Notice:** Identify the candle's open, high, low and close; mark its range and wick(s).
+- **2:30–5:00 — Teach and model:** Range, body, upper and lower wick, close location; Large versus small range and the importance of context.
+- **5:00–7:30 — Level 2, Compare:** Compare two candles with different close locations, then describe both without predicting the next move.
+- **7:30–11:00 — Level 3, Apply:** Read an unlabeled candle near a prior level, record one interpretation and one alternative, and name what later price behaviour would alter the reading.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: classify bars without naming a trade. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 A candlestick compresses a period of price movement into four key values: open, high, low and close. We often focus on the colour or body size, but an informed reading also asks how far price travelled, where it finished within that range, and whether its path left evidence of rejection (price failing to stay beyond a level and moving back). Those features become more useful when combined with volume and location.
 
@@ -202,13 +202,13 @@ Explain at least two possible reasons for a price move on low volume and decide 
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — Challenge the slogan:** low volume is not automatically bearish.
-- **1:00–3:00 — What low activity may represent.**
-- **3:00–5:00 — Trend pullbacks, quiet advances and market location.**
-- **5:00–7:30 — Contrast scenarios.**
-- **7:30–10:30 — ChartLab: continuation or warning?**
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** Challenge the slogan: low volume is not automatically bearish..
+- **1:00–2:30 — Level 1, Notice:** Identify which bars have lower recorded volume than the recent comparison bars.
+- **2:30–5:00 — Teach and model:** What low activity may represent; Trend pullbacks, quiet advances and market location.
+- **5:00–7:30 — Level 2, Compare:** Compare low-volume movement in a trend pullback with low-volume movement at a range boundary.
+- **7:30–11:00 — Level 3, Apply:** Write hold and failure scenarios for a new low-volume pullback and specify which price condition would weaken continuation.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: continuation or warning?. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 You will often hear a simple rule: rising price on low volume is weak, while falling price on low volume is harmless. Those statements are too broad to serve as trading rules. Low volume describes a lower level of measured activity relative to a comparison level. It does not tell us automatically why fewer trades or quote updates occurred, which side was more motivated, or what price will do next.
 
@@ -262,13 +262,13 @@ Describe the basic differences between exchange-traded volume, venue-specific cr
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — Same word, different data.**
-- **1:00–3:30 — Exchange volume and instrument-specific measures.**
-- **3:30–5:30 — Spot FX, CFDs and tick volume.**
-- **5:30–7:30 — Crypto fragmentation and comparisons.**
-- **7:30–10:30 — ChartLab: write a data-quality note.**
-- **10:30–11:00 — Recap.**
-
+- **0:00–1:00 — Opening question:** Same word, different data.
+- **1:00–2:30 — Level 1, Notice:** Read the instrument and provider labels and identify the displayed volume field.
+- **2:30–5:00 — Teach and model:** Exchange volume and instrument-specific measures; Spot FX, CFDs and tick volume.
+- **5:00–7:30 — Level 2, Compare:** Compare exchange-reported volume, retail spot-FX tick volume and venue-specific crypto volume, stating what each measure represents.
+- **7:30–11:00 — Level 3, Apply:** Choose a suitable volume baseline for an unfamiliar instrument and write the source limitation that must accompany your analysis.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: write a data-quality note. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 Before we learn to interpret a volume bar, we need to know what the bar measures. Traders use the word “volume” as though it were one consistent quantity across all markets. It is not. Data definitions vary by instrument, the pattern made by recent highs and lows and provider, and those differences influence what we can responsibly conclude.
 
