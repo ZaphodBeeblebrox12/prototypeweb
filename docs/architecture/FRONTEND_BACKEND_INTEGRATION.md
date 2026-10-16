@@ -2,7 +2,7 @@
 
 **Target repository:** `ZaphodBeeblebrox12/prototypeweb`  
 **Working branch:** `my-new-branch`  
-**Status:** Integration map for the existing UI and Django Academy implementation. Not a claim that the backend has been deployed or connected.
+**Status:** Django Academy is imported on draft PR #4, which targets `my-new-branch`. Routes, catalogue seed, public-to-backend routing and the end-to-end learner journey are not yet deployed or verified.
 
 ## 1. Verified current state
 
@@ -19,11 +19,11 @@ The branch contains the static TradeThesis website, course-room prototype, learn
 - Support & Resistance course: `course-content/support-resistance/`.
 - Existing curriculum metadata: `course-integration/curriculum.json`.
 
-There is no Django project runtime in this repository at present: no `manage.py`, root `config/` package, dependency lock/requirements for the web backend, or production database configuration. The member screens are preview HTML, not secure account pages.
+The draft integration PR now includes a self-contained Django project under `backend/` (`backend/manage.py`, `backend/config/`, app code, migrations and tests). Until that PR is integrated and deployed, the member screens on `my-new-branch` remain static previews rather than secure account pages. The imported runtime itself is not yet connected to the public pages or verified in a staging deployment.
 
-### Existing Django implementation: separate repository
+### Django Academy implementation imported on a draft feature PR
 
-The current Academy implementation lives in `ZaphodBeeblebrox12/test`, branch `feature/tradethesis-academy`. It has the Academy models, protected learner views, course-offer/payment hooks, progress handling and templates. Its route set includes:
+The source implementation remains in `ZaphodBeeblebrox12/test`, branch `feature/tradethesis-academy`. A copy has been imported into this repository's `backend/` on draft [PR #4](https://github.com/ZaphodBeeblebrox12/prototypeweb/pull/4), targeting `my-new-branch`. It includes Academy models, protected learner views, course-offer/payment hooks, progress handling and templates. Its route set includes:
 
 - `/learn/` — authenticated learning home;
 - `/learn/course/<course_slug>/` — course overview and access state;
@@ -88,6 +88,7 @@ The mapping above is the proposed implementation model; it does not mean these p
 - Confirm one-time pricing, geo-pricing, checkout evidence/terms, provider webhooks and refund/dispute behaviour end to end.
 - Ensure course entitlement and community entitlement rules are distinct where required.
 - Choose private storage/delivery for paid lesson bodies and protected reference material before learner launch.
+- **Repository privacy blocker:** the current GitHub repository is public and contains paid course source plus internal instructional/reference material. A private Django route does not make copies already committed to a public repository private. Before selling any course, change the source repository's visibility or move confidential course bodies, answer keys and protected assets into a private repository/storage location; verify only appropriate public pages/assets are deployed.
 - Seed and validate products from source manifests; reject missing lessons, unstable slugs, duplicated order positions or references to absent assets.
 - Add acceptance coverage for logged-out access, unpaid user, active entitlement, expired/revoked entitlement, drip-locked lesson, progress save/retry, duplicate payment events and refund/dispute state.
 - Run a complete staging journey with test payment credentials before launch; no live payment credentials belong in code or this repository.
@@ -95,7 +96,7 @@ The mapping above is the proposed implementation model; it does not mean these p
 ## 6. Work order
 
 1. Preserve the product/content source and improve the existing frontend UX continuously.
-2. Confirm hosting and same-origin route strategy, then select the actual Django runtime repository/deployment artifact. Do not duplicate a partial Django app into this static repository and call it a runnable backend.
+2. Confirm hosting and same-origin route strategy, then verify the imported `backend/` runtime in staging. The presence of code in the draft PR is not evidence of a working deployment.
 3. Reconcile the complete course catalogue and each product's entitlement rules, especially CONSTRUCT's included community access.
 4. Integrate the branded login/member/learning screens with the authenticated server routes.
 5. Import course content from manifests and implement secure lesson/progress delivery.
@@ -110,4 +111,5 @@ The mapping above is the proposed implementation model; it does not mean these p
 - Preserve existing micro-course source and its product boundaries.
 - Do not wire static UI to guessed endpoints or fabricate logged-in, payment-success or saved-progress states.
 - Do not mark a route, feature, test or deployment as production-ready without actual runtime evidence.
+- Keep this integration PR in draft while CI is red or release gates are outstanding; a passing syntax check is not a substitute for a staging purchase-to-progress test.
 - Do not merge or deploy to `main` without explicit approval.
