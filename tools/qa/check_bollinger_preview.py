@@ -11,7 +11,7 @@ renderer = (ROOT / "site/assets/courses-catalogue.js").read_text(encoding="utf-8
 catalogue = (ROOT / "site/courses.html").read_text(encoding="utf-8")
 media_editor = (ROOT / "site/assets/instructional-image-admin.js").read_text(encoding="utf-8")
 
-if len(re.findall(r'id:\\s*"volume-price-analysis"', data)) != 1:
+if len(re.findall(r'id:\s*"volume-price-analysis"', data)) != 1:
     raise SystemExit("Expected one Volume & Price Analysis record.")
 start = data.index('id: "volume-price-analysis"')
 end = data.index('id: "candlestick-patterns"', start)
