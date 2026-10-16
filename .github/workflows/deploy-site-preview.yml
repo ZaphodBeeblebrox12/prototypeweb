@@ -144,28 +144,46 @@ jobs:
             const ids = items.map(item => item.id);
             if (ids.some(id => typeof id !== 'string' || !id.trim())) throw new Error('Missing stable ID in ' + key);
             if (new Set(ids).size !== ids.length) throw new Error('Duplicate stable ID in ' + key);
+            if (items.some(item => !['visible', 'hidden'].includes(item.catalogueVisibility))) {
+              throw new Error('Each item must explicitly declare catalogueVisibility in ' + key);
+            }
           }
           const renderer = fs.readFileSync('site/assets/courses-catalogue.js', 'utf8');
-          for (const required of [
-            'const microCourses = [...data.microCourses]',
-            'microCourses.length',
+          const required = [
+            "const isCatalogueVisible = item => item && item.catalogueVisibility !== 'hidden'",
+            'data.programmes.filter(isCatalogueVisible)',
+            '[...(data.supportingProgrammes || [])].filter(isCatalogueVisible)',
+            'const microCourses = data.microCourses.filter(isCatalogueVisible)',
+            'function renderFilterButtons()',
+            'const categories = [...new Set(microCourses.map(course => course.category).filter(Boolean))]',
             'microCourses.filter(course => course.category === key).length',
             'shown.length'
-          ]) {
-            if (!renderer.includes(required)) throw new Error('Catalogue is no longer data-driven: missing ' + required);
+          ];
+          for (const fragment of required) {
+            if (!renderer.includes(fragment)) throw new Error('Catalogue is no longer draft-safe and data-driven: missing ' + fragment);
           }
-          console.log('Catalogue data parsed; stable IDs are unique and micro-course counts are data-driven.');
+          const visible = item => item && item.catalogueVisibility !== 'hidden';
+          const draftFixture = { id: '__future-draft__', catalogueVisibility: 'hidden' };
+          if (visible(draftFixture)) throw new Error('Hidden development drafts must not appear in the public catalogue');
+          console.log('Catalogue arrays, stable IDs, draft visibility and dynamic topic filters validated.');
           JS
           python - <<'PY'
           from pathlib import Path
 
           page = Path("site/courses.html").read_text(encoding="utf-8")
           styles = Path("site/assets/courses.css").read_text(encoding="utf-8")
+          renderer = Path("site/assets/courses-catalogue.js").read_text(encoding="utf-8")
           if "Course development is ongoing" not in page or "add new courses as they’re ready for learners" not in page:
               raise SystemExit("The public catalogue must set expectations that development is ongoing.")
           if ".cc-development-note" not in styles or "cc-development-note{margin-top:10px;font-size:11px}" not in styles:
               raise SystemExit("The course-development note needs desktop and mobile styling.")
-          print("Public course-development message and responsive styling validated.")
+          if 'data-filter="Chart reading"' in page or 'data-filter="Indicators"' in page:
+              raise SystemExit("Topic filter buttons should be generated from the catalogue data.")
+          if "Development ongoing · Prices indicative · No community access included" not in page:
+              raise SystemExit("Micro-course availability and indicative pricing must be explicit.")
+          if 'data-get-course="${escapeHTML(course.id)}">Preview only' not in renderer or "Indicative price · preview only" not in renderer:
+              raise SystemExit("Micro-course preview must not imply checkout is live.")
+          print("Public development message, honest preview pricing and responsive styling validated.")
           PY
 
       - name: Stage chart images referenced by the learning room
