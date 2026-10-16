@@ -3,7 +3,7 @@ import json
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db.models import Prefetch, Q
+from django.db.models import Prefetch, Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
@@ -90,11 +90,10 @@ def academy_home(request):
     completed_lessons = LessonProgress.objects.filter(
         user=request.user, status=LessonProgress.Status.COMPLETED
     ).count()
-    learning_minutes = sum(
-        LessonProgress.objects.filter(user=request.user).values_list(
-            "time_spent_seconds", flat=True
-        )
-    ) // 60
+    total_seconds = LessonProgress.objects.filter(user=request.user).aggregate(
+        total=Sum("time_spent_seconds")
+    )["total"] or 0
+    learning_minutes = total_seconds // 60
 
     return render(request, "academy/home.html", {
         "course_cards": course_cards,
