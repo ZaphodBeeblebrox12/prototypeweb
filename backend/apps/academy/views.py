@@ -58,9 +58,9 @@ def academy_home(request):
     entitlements = list(_active_entitlements(request.user).select_related("course"))
     community_accesses = list(_active_community_entitlements(request.user))
     entitlements_by_course = {ent.course_id: ent for ent in entitlements}
-    courses_by_id = {course.pk: course for course in Course.objects.filter(status=Course.Status.PUBLISHED)}
-    for entitlement in entitlements:
-        courses_by_id.setdefault(entitlement.course_id, entitlement.course)
+    # Keep enrolled courses separate from purchasable catalogue offers.
+    # Showing every published course here would duplicate saleable offers below.
+    courses_by_id = {ent.course_id: ent.course for ent in entitlements}
 
     course_cards = []
     for course in sorted(courses_by_id.values(), key=lambda c: (c.position, c.title.casefold())):
