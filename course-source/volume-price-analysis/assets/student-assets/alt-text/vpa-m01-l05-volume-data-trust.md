@@ -1,5 +1,7 @@
 # Accessibility and source notes — M01-L05
 
+**Figure number:** Figure 1.5; interactive panels use Figure 1.5a–Figure 1.5e.
+
 **Linked lesson:** Which Volume Can You Trust? Understanding Data Across Different Markets
 **Asset purpose:** Keep volume claims within the limits of the named market feed.
 **Data:** Synthetic OHLCV generated for instruction. Not historical market data, not a forecast and not a trading signal.
