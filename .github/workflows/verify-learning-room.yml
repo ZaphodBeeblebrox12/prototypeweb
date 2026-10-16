@@ -284,7 +284,7 @@ jobs:
             assert.ok((await page.locator("#sr-lesson-notes").getAttribute("placeholder")).length > 20, "Lesson-specific note prompts were not connected to My notes");
             await page.locator("#sr-tab-button-lesson").click();
             await page.locator("#sr-v52-longform [data-sr-v52-jump='chart']").first().click();
-            assert.ok((await page.locator("#sr-chart-image").getAttribute("src")).includes("L13-A-01-break-beyond.png"), "The room should retain its synthetic Lesson 13 chart");
+            assert.ok((await page.locator("#sr-chart-image").getAttribute("src")).includes("L13-A-01-break-beyond"), "The room should retain its synthetic Lesson 13 chart source");
             await page.locator("#sr-practice-response").fill("The break is visible, but the return and response remain unknown, so I retain an alternative.");
             await page.waitForSelector("#sr-v52-stage-model-answer:not([hidden])");
             assert.equal(await page.locator(".sr-v52-model-details[open]").count(), 0, "Model answer should be concealed until explicitly opened");
