@@ -1,5 +1,6 @@
 # Accessibility and source notes — M04-L05
 
+**Figure number:** Figure 4.5; interactive panels use Figure 4.5a–Figure 4.5e.
 **Lesson:** Before Calling a Reversal: What to Look for After the Breakout
 **Purpose:** Separate an initial failed breakout from stronger evidence of a reversal in price structure.
 **Data:** Synthetic OHLCV; not historical market data or a trading recommendation.
