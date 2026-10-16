@@ -126,7 +126,7 @@ jobs:
 
       - name: Install Chromium
         run: |
-          npm install --no-save playwright
+          npm install --no-save playwright @axe-core/playwright
           npx playwright install chromium
 
       - name: Test editing sequence, real two-zone drawing and completion gate
@@ -136,6 +136,37 @@ jobs:
           node <<'JS'
           const assert = require("node:assert/strict");
           const { chromium } = require("playwright");
+          const AxeBuilder = require("@axe-core/playwright").default;
+
+          async function runA11yScan(target, label) {
+            const results = await new AxeBuilder({ page: target })
+              .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+              .analyze();
+            const violations = results.violations.map(v => ({
+              id: v.id,
+              impact: v.impact,
+              help: v.help,
+              helpUrl: v.helpUrl,
+              affectedNodes: v.nodes.length,
+              examples: v.nodes.slice(0, 5).map(n => ({
+                target: n.target,
+                summary: n.failureSummary
+              }))
+            }));
+            console.log("AXE_A11Y_" + label + ": " + JSON.stringify({
+              url: target.url(),
+              violationCount: violations.length,
+              violations
+            }));
+            const blockers = results.violations.filter(v =>
+              v.impact === "critical" || v.impact === "serious"
+            );
+            assert.deepEqual(
+              blockers.map(v => ({ id: v.id, impact: v.impact, nodes: v.nodes.length })),
+              [],
+              label + " has critical/serious accessibility violations; inspect the AXE_A11Y log."
+            );
+          }
 
           (async () => {
             const browser = await chromium.launch({headless:true});
@@ -151,11 +182,13 @@ jobs:
               await page.waitForFunction(t=>document.querySelector("#sr-lesson-title").textContent.includes(t),title);
             }
             await page.waitForFunction(()=>{const i=document.querySelector("#sr-chart-image");return i&&i.complete&&i.naturalWidth>0&&i.getAttribute("src").endsWith("L05-A-01-overmarked.png")});
+            await runA11yScan(page, "LESSON5_INITIAL");
             assert.equal(await page.locator("#sr-chart-stage-count").textContent(),"View 1 of 6");
             assert.equal(await page.locator("#sr-chart-next").isDisabled(),true,"Initial clutter view requires a learner attempt");
             await page.locator("#sr-practice-response").fill("The chart has a broad path with a lower reaction region and a later upper reaction; not every candidate mark adds information.");
             await page.locator("#sr-chart-next").click();
             await page.waitForFunction(()=>document.querySelector("#sr-chart-image").getAttribute("src").endsWith("L05-A-02-candidate-ids.png"));
+            await runA11yScan(page, "LESSON5_CLASSIFICATION");
             assert.equal(await page.locator(".sr-room-edit-select").count(),7);
             assert.equal(await page.locator("#sr-chart-next").isDisabled(),true,"Candidates must be classified and submitted before reveals");
             const classifications=["keep","combine","combine","leave","combine","combine","leave"];
@@ -169,6 +202,23 @@ jobs:
             for(const file of laterViews){await page.locator("#sr-chart-next").click();await page.waitForFunction(f=>document.querySelector("#sr-chart-image").getAttribute("src").endsWith(f),file);}
             await page.locator("#sr-chart-next").click();
             await page.waitForFunction(()=>!document.querySelector("#sr-chartlab-panel").hidden);
+            const axeLabPage = await browser.newPage({viewport:{width:1280,height:950}});
+            axeLabPage.on("pageerror", e => errors.push("axe ChartLab page: " + e.message));
+            axeLabPage.on("response", r => { if (r.status() >= 400) bad.push("axe ChartLab HTTP " + r.status() + " " + r.url()); });
+            await axeLabPage.goto("http://127.0.0.1:4173/chartlab/clear-w.html?embed=1", {waitUntil:"networkidle"});
+            await runA11yScan(axeLabPage, "CLEAR_W_INITIAL");
+            async function enterZone(upper, lower) {
+              await axeLabPage.locator("#upperPrice").fill(String(upper));
+              await axeLabPage.locator("#lowerPrice").fill(String(lower));
+              await axeLabPage.locator("#applyNumericZone").click();
+              await axeLabPage.locator("#submitZoneButton").click();
+            }
+            await enterZone(100.8, 98.8);
+            await enterZone(106.2, 104.6);
+            await axeLabPage.locator("#comparisonPair").waitFor({state:"visible"});
+            await runA11yScan(axeLabPage, "CLEAR_W_COMPARISON");
+            await axeLabPage.close();
+
             const lab=page.frameLocator("#sr-chartlab-frame");
             await lab.locator("#chartSvg").waitFor();
             assert.equal(await lab.locator(".study-picker").isVisible().catch(()=>true),false,"Embedded lab should only expose Clear W, not the other practice sets");
