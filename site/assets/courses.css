@@ -329,3 +329,7 @@
  .courses-catalogue-page .cc-outline-count{display:none}
 }
 @media(prefers-reduced-motion:reduce){.courses-catalogue-page .cc-route,.courses-catalogue-page .cc-micro-card,.courses-catalogue-page .cc-programme-card,.courses-catalogue-page .cc-programme-cta,.courses-catalogue-page .cc-card-action i{transition:none!important}}
+
+
+/* Volume & Price Analysis development card status. */
+.cc-course-status{display:inline-flex;align-self:flex-start;margin:4px 0 1px;padding:4px 7px;border:1px solid #d9c58a;border-radius:999px;background:#fbf5e6;color:#705a28;font-size:9px;font-weight:800;letter-spacing:.04em}
