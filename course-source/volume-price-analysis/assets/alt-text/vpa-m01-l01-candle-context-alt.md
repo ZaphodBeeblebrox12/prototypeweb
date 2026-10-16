@@ -1,24 +1,27 @@
-# Accessibility and source notes — M01-L01
+# Accessibility and data notes — M01-L01 progression assets
 
-**Asset ID:** VPA-M01-L01-01  
-**Purpose:** Teach that similarly shaped candles may appear in different price contexts and with different activity levels.
+All files contain synthetic teaching data, not historical market data.
 
-## Alt text
-Two side-by-side synthetic candlestick charts show similar green final candles. In Panel A, the candle appears after a controlled pullback and its volume is near the baseline from the previous five bars. In Panel B, it appears after an extended advance near a prior-high area and volume is well above the same type of baseline. The comparison shows why candle shape alone is insufficient.
+## Main comparison chart
+**Alt text:** Two side-by-side candlestick charts use the same vertical price scale and show equal-sized candidate candles. Panel A follows a pullback with candidate volume of 185 against a five-bar baseline of 157; Panel B is near a prior-high area after a longer rise, with candidate volume of 420 against a baseline of 225. Volume bars are neutral grey and the candidate bars are highlighted.
 
-## Extended description
-Both panels show 12 synthetic candles, with volume bars beneath the price chart. A dashed line in each volume panel marks the average volume of the five bars immediately before the highlighted candidate candle. In Panel A, price rose, pulled back from a prior swing high and then printed a green candle; the last candle's recorded volume is only modestly above the five-bar baseline. In Panel B, price rose for longer into an area near previous highs and printed a similarly proportioned green candle, but the volume bar is much higher than the five-bar baseline. This does not prove buyers or sellers are in control and does not predict the next move. Learners should consider location and subsequent price behaviour.
+**Extended description:** Both candidate candles have identical OHLC dimensions: a body of 3 illustrative price units and a full high-to-low range of 5. Panel A shows an advance, pullback and recovery, with candidate volume about 1.18 times the preceding-five-bar average. Panel B shows a longer advance into a marked prior-high area, with candidate volume about 1.87 times its baseline. The price axis is shared so equal price ranges occupy equal visual space. Neither case proves who traded or predicts what happens next.
 
-## Key teaching point
-Describe the candle and relative activity separately. Consider chart location and the prior price pattern before forming an interpretation. State what additional price behaviour you would watch for next.
+## Level 1 — Notice
+**Alt text:** A simple six-candle sequence with volume bars below. The final candidate candle is outlined, its volume bar is highlighted, and a dashed line marks the average volume of the previous five bars. The learner identifies the candle's direction and whether its volume is above or below the baseline.
 
-## Data and licensing
-- Synthetic OHLCV teaching data, created for this exercise; not historical market data.
-- 12 bars per panel. OHLC values are illustrative price units.
-- Baseline in the visual: mean volume of bars 7–11 (the five bars immediately before bar 12).
+## Level 3 — Apply, before outcome reveal
+**Alt text:** A synthetic price series has closed above a prior range high. The candidate breakout candle is outlined and has high volume relative to the average of the previous five bars. No later bars are visible, so the learner must record an initial reading before the outcome is revealed.
+
+## Alternate endings
+- **Continuation:** After the same initial breakout, later candles hold above the prior range high and make further upward progress.
+- **Failed breakout:** After the same initial breakout, later candles close back below the prior range high and make further downward progress.
+
+## Data and provenance
 - Source data: `../data/vpa-m01-l01-candle-context-data.csv`.
+- OHLCV rows are synthetic, in illustrative price and volume units.
+- Candidate baselines use the arithmetic mean of the five immediately preceding volume bars.
+- Main comparison: Panel A candidate volume = 185, baseline = 157, ratio = 1.18×; Panel B candidate = 420, baseline = 225, ratio = 1.87×.
+- Level 3 candidate volume = 410; pre-event baseline = 184; ratio = 2.23×.
 - No broker, exchange or real instrument is represented.
-- Export/master is vector SVG, 1920 × 1080, with editable text, shapes and labels.
-
-## Usage cautions
-Do not publish this chart as a historical trade, signal or forecast. The candidate candle is marked for comparison only; the outline is not an entry marker.
+- Chart files are vector SVGs, editable as text/shapes and designed to scale to the intended export size.
