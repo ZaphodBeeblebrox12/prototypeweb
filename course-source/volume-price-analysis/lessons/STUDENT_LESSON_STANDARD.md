@@ -31,7 +31,7 @@ Combine or omit a section when it does not help that particular lesson. Do not r
 - Include at least one meaningful learner task and explanatory feedback. A task specification alone is not a completed exercise.
 - Include a counterexample or plausible alternative where interpretations are uncertain.
 - Explain what would strengthen or weaken an interpretation; do not present patterns as guaranteed signals.
-- Make any synthetic data visibly identifiable as synthetic in the final visual asset.
+- Keep the figure visually clean: use its module/lesson figure number, not a repeated synthetic-data banner. State in the surrounding lesson or source/alt-text notes that illustrative examples are synthetic rather than historical data.
 - Define the data source, timeframe, session and comparison baseline wherever they change the interpretation.
 - Use compact headings, short paragraphs, comparison tables and readable charts where they improve understanding. Do not turn every sentence into a bullet.
 - Preserve useful analytical depth. Remove repetition, not nuance.
@@ -61,11 +61,9 @@ Do not make “bullish”, “bearish”, “absorption”, “rejection”, “
 
 ## Practice progression
 
-- **Notice:** identify observable facts.
-- **Compare:** compare similar-looking cases or distinguish evidence from interpretation.
-- **Apply:** work through an unfamiliar case, retain uncertainty where appropriate and state what evidence would change the view.
+Use **Notice → Compare → Apply** as an internal design scaffold for increasing learner responsibility. Do not expose those as numbered levels or internal difficulty labels in student-facing headings. Prefer natural task headings such as “Look closely at the evidence”, “Compare the cases” and “Try a new case”.
 
-Difficulty should increase through reasoning, not jargon or chart clutter.
+The underlying progression is: identify observable facts; compare similar-looking cases or distinguish evidence from interpretation; then work through an unfamiliar case, retain uncertainty where appropriate and state what evidence would change the view. Difficulty should increase through reasoning, not jargon or chart clutter.
 
 ## Review gate
 
