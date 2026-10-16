@@ -80,6 +80,7 @@ jobs:
             await page.waitForSelector("#sr-lesson-title");
 
             async function openLesson(id, expectedTitle) {
+              await page.locator("#sr-tab-button-lesson").click();
               await page.locator('[data-lesson-id="' + id + '"]').click();
               await page.waitForFunction(({ id, expectedTitle }) => {
                 const title = document.querySelector("#sr-lesson-title");
@@ -109,12 +110,14 @@ jobs:
             }
 
             async function completeQuiz() {
+              await page.locator("#sr-tab-button-check").click();
               const count = await page.locator(".sr-room-quiz-item").count();
               assert.ok(count > 0, "Expected lesson-specific knowledge-check items");
               for (let i = 0; i < count; i++) {
                 await page.locator(".sr-room-quiz-item").nth(i).locator(".sr-room-quiz-option").first().click();
                 await page.locator(".sr-room-quiz-item").nth(i).locator(".sr-room-quiz-submit").click();
               }
+              await page.locator("#sr-tab-button-lesson").click();
               return count;
             }
 
