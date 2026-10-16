@@ -1,0 +1,62 @@
+:root {
+  color-scheme: light;
+  --tt-paper: #f7f3e9;
+  --tt-surface: #fffdf8;
+  --tt-soft: #f2ecdf;
+  --tt-sage: #e6edde;
+  --tt-ink: #29382e;
+  --tt-muted: #687268;
+  --tt-line: #ded8ca;
+  --tt-green: #355a46;
+  --tt-deep: #254334;
+  --tt-tomato: #c96f50;
+  --tt-butter: #f0d38a;
+}
+html { background: var(--tt-paper); }
+body { background: var(--tt-paper); color: var(--tt-ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+a { color: var(--tt-green); text-underline-offset: .18em; }
+a:hover { color: var(--tt-deep); }
+:focus-visible { outline: 3px solid var(--tt-tomato) !important; outline-offset: 3px; }
+.tt-header { background: var(--tt-surface); border-bottom: 1px solid var(--tt-line); }
+.tt-brand { color: var(--tt-deep); font: 600 1.45rem/1 Georgia, "Times New Roman", serif; letter-spacing: -.035em; text-decoration: none; }
+.tt-brand:hover { color: var(--tt-green); }
+.tt-brand small { display: block; margin-top: .4rem; color: var(--tt-muted); font: 700 .59rem/1.2 Inter, ui-sans-serif, system-ui, sans-serif; letter-spacing: .13em; text-transform: uppercase; }
+.tt-header-link { color: var(--tt-muted); font-size: .9rem; text-decoration: none; }
+.tt-header-link:hover { color: var(--tt-green); }
+.tt-page { width: min(1080px, calc(100% - 2rem)); margin-inline: auto; padding-block: clamp(1.75rem, 4vw, 3.25rem); }
+.tt-kicker { color: var(--tt-green); font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.tt-page h1, .tt-page h2, .tt-page h3 { color: var(--tt-ink); font-family: Georgia, "Times New Roman", serif; letter-spacing: -.025em; }
+.tt-page h1 { font-size: clamp(2rem, 4vw, 3rem); line-height: 1.08; }
+.tt-page h2 { font-size: clamp(1.3rem, 2.4vw, 1.7rem); }
+.tt-page p { line-height: 1.7; }
+.tt-muted { color: var(--tt-muted) !important; }
+.card { border: 1px solid var(--tt-line); border-radius: 15px; background: var(--tt-surface); box-shadow: 0 8px 24px #29382e0a; }
+.card-body { padding: clamp(1rem, 2.5vw, 1.5rem); }
+.card h3 { font-size: 1.35rem; }
+.btn { border-radius: 999px; font-weight: 700; }
+.btn-primary { background: var(--tt-green); border-color: var(--tt-green); color: #fffdf8; }
+.btn-primary:hover, .btn-primary:focus { background: var(--tt-deep); border-color: var(--tt-deep); color: #fffdf8; }
+.btn-outline-primary { color: var(--tt-green); border-color: var(--tt-line); }
+.btn-outline-primary:hover { background: var(--tt-soft); color: var(--tt-deep); border-color: var(--tt-line); }
+.btn-outline-secondary { color: var(--tt-muted); border-color: var(--tt-line); }
+.btn-outline-secondary:hover { background: var(--tt-soft); color: var(--tt-ink); border-color: var(--tt-line); }
+.text-primary { color: var(--tt-green) !important; }
+.text-muted { color: var(--tt-muted) !important; }
+.bg-primary, .progress-bar { background-color: var(--tt-green) !important; }
+.progress { height: .45rem; background: var(--tt-soft); border-radius: 999px; }
+.badge.text-bg-success { color: #254334 !important; background: var(--tt-sage) !important; }
+.badge.text-bg-secondary { color: #4e5d51 !important; background: var(--tt-soft) !important; }
+.list-group { border-radius: 12px; overflow: hidden; }
+.list-group-item { border-color: var(--tt-line); background: var(--tt-surface); padding: 1rem; }
+.alert-info { color: var(--tt-ink); background: var(--tt-soft); border-color: var(--tt-line); }
+.alert-success { color: var(--tt-deep); background: var(--tt-sage); border-color: var(--tt-line); }
+.alert-danger { color: #873d2d; background: #f9e9e1; border-color: #e9c9bb; }
+.tt-footer { padding: 1.25rem 1rem; border-top: 1px solid var(--tt-line); color: var(--tt-muted); font-size: .8rem; text-align: center; }
+.tt-skip { position: absolute; z-index: 20; top: .5rem; left: .5rem; transform: translateY(-180%); padding: .6rem .85rem; border-radius: .5rem; color: white; background: var(--tt-deep); }
+.tt-skip:focus { transform: translateY(0); }
+@media (max-width: 575.98px) {
+  .tt-header .container { align-items: flex-start !important; }
+  .tt-header-actions { gap: .7rem !important; }
+  .tt-page { width: min(100% - 1.25rem, 1080px); }
+  .list-group-item { align-items: flex-start !important; flex-wrap: wrap; }
+}
