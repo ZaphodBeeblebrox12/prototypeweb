@@ -7,7 +7,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "Sign In" %} - TradeAdmin</title>
+    <title>{% trans "Sign In" %} - TradeThesis</title>
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
 </head>
 <body>
@@ -15,32 +15,20 @@
         <!-- Brand Side -->
         <div class="brand-side">
             <div class="brand-header">
-                <a href="{% url 'index' %}" class="brand-logo">TradeAdmin</a>
+                <a href="{% url 'index' %}" class="brand-logo">TradeThesis</a>
             </div>
             <div class="brand-content">
-                <h1 class="brand-tagline">Stop guessing.<br>Start trading with confidence.</h1>
-                <p class="brand-desc">Join thousands of traders who never miss an update. Real-time guidance from entry to exit.</p>
+                <h1 class="brand-tagline">Read the market.<br>Build your process.</h1>
+                <p class="brand-desc">A practical learning space for chart reading, trade construction, risk management and thoughtful review.</p>
                 <ul class="feature-list">
-                    <li class="feature-item">
-                        <span class="feature-check">✓</span>
-                        Timestamped trade updates
-                    </li>
-                    <li class="feature-item">
-                        <span class="feature-check">✓</span>
-                        Breakeven guidance in real-time
-                    </li>
-                    <li class="feature-item">
-                        <span class="feature-check">✓</span>
-                        Clear exit plans, never hindsight
-                    </li>
-                    <li class="feature-item">
-                        <span class="feature-check">✓</span>
-                        7-day trial for $7
-                    </li>
+                    <li class="feature-item"><span class="feature-check">✓</span>Self-paced trading lessons</li>
+                    <li class="feature-item"><span class="feature-check">✓</span>Charts, exercises and practical tools</li>
+                    <li class="feature-item"><span class="feature-check">✓</span>Risk, planning and review</li>
+                    <li class="feature-item"><span class="feature-check">✓</span>Your courses in one place</li>
                 </ul>
             </div>
             <div class="brand-footer">
-                © {% now "Y" %} TradeAdmin. All rights reserved.
+                © {% now "Y" %} TradeThesis. All rights reserved.
             </div>
         </div>
 
@@ -51,7 +39,7 @@
                     <h2 class="form-title">{% trans "Welcome back" %}</h2>
                     <p class="form-subtitle">
                         {% trans "Don't have an account?" %} 
-                        <a href="{% url 'account_signup' %}">{% trans "Start free trial" %}</a>
+                        <a href="{% url 'account_signup' %}">{% trans "Create an account" %}</a>
                     </p>
                 </div>
 
@@ -102,16 +90,10 @@
                     </div>
 
                     {# Submit Button #}
-                    <button type="submit" class="submit-btn">{% trans "Sign In to Dashboard" %}</button>
+                    <button type="submit" class="submit-btn">{% trans "Sign in to learning" %}</button>
                 </form>
 
-                <div class="divider">{% trans "or continue with" %}</div>
-
                 <div class="social-login">
-                    <a href="#" class="social-btn">
-                        <span style="font-size: 1.25rem;">✈</span>
-                        {% trans "Continue with Telegram" %}
-                    </a>
                     {% get_providers as social_providers %}
                     {% for p in social_providers %}{% if p.id == 'google' %}
                     <a href="{% provider_login_url 'google' %}" class="social-btn">
