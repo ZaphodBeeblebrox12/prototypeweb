@@ -44,6 +44,25 @@ _SELECTED_SECTIONS = (
 _INTERNAL_SECTIONS = ("knowledge check", "answer key", "instructor notes", "model answer")
 
 
+# Only the first two VPA pilot figures are static lesson illustrations. The later
+# continuation/failure outcomes must stay out of the lesson until a real,
+# submission-gated reveal is implemented.
+_VPA_FIGURES = {
+    "1.1": (
+        (
+            "**Level 1 — Notice (easy):**",
+            "vpa-m01-l01-stage1-spot-volume.svg",
+            "Candidate candle and its local volume baseline",
+        ),
+        (
+            "**Level 2 — Compare (guided):**",
+            "vpa-m01-l01-candle-context-compare.svg",
+            "Similar candle shapes in different contexts",
+        ),
+    ),
+}
+
+
 def lesson_segments(module_markdown):
     """Yield lesson number, sequence, title, and manuscript section."""
     matches = list(_LESSON_HEADER.finditer(module_markdown))
@@ -165,6 +184,51 @@ def estimate_duration(segment):
     return 15
 
 
+def embed_vpa_figures(lesson_number, student_markdown, assets_root, figure_counters):
+    """Embed the selected, approved static SVG figures in their lesson positions."""
+    specs = _VPA_FIGURES.get(str(lesson_number), ())
+    if not specs:
+        return student_markdown, ""
+
+    module_number = int(str(lesson_number).split(".", 1)[0])
+    media_notes = []
+    for anchor, filename, caption in specs:
+        if not (Path(assets_root) / filename).is_file():
+            raise CommandError(
+                f"Required VPA lesson figure is missing: "
+                f"{Path(assets_root) / filename}"
+            )
+
+        pattern = re.compile(rf"(?m)^({re.escape(anchor)}[^\n]*)$")
+
+        def add_figure(match):
+            figure_counters[module_number] = figure_counters.get(module_number, 0) + 1
+            figure_number = f"{module_number}.{figure_counters[module_number]}"
+            image = (
+                f"![Figure {figure_number} — {caption}]"
+                f"(/static/academy/vpa/{filename})"
+            )
+            figure_caption = f"*Figure {figure_number} — {caption}.*"
+            return f"{match.group(1)}\n\n{image}\n\n{figure_caption}"
+
+        student_markdown, replacements = pattern.subn(
+            add_figure, student_markdown, count=1
+        )
+        if replacements != 1:
+            raise CommandError(
+                f"Cannot place VPA figure {filename}: lesson {lesson_number} is missing "
+                f"the expected learner progression line {anchor!r}."
+            )
+        media_notes.append(
+            f"Figure {module_number}.{figure_counters[module_number]} uses {filename}. "
+            "It is a static explanatory figure, not a submitted activity. The later "
+            "continuation/failure outcomes remain excluded until learner-response-gated "
+            "reveal is implemented."
+        )
+
+    return student_markdown, "\n".join(media_notes)
+
+
 class Command(BaseCommand):
     help = "Validate or create unpublished Volume Price Analysis course drafts."
 
@@ -183,6 +247,10 @@ class Command(BaseCommand):
 
         modules = []
         parsed_lessons = []
+        figure_counters = {}
+        figure_assets_root = (
+            repository_root / "course-source" / "volume-price-analysis" / "assets" / "exports"
+        )
         for position, filename in enumerate(_MODULE_FILES, start=1):
             source_path = (lessons_root / filename).resolve()
             if lessons_root.resolve() not in source_path.parents or not source_path.is_file():
@@ -212,6 +280,12 @@ class Command(BaseCommand):
                     )
                 try:
                     learner_body, internal_material = extract_vpa_student_body(segment)
+                    learner_body, media_notes = embed_vpa_figures(
+                        f"{module_number}.{lesson_position}",
+                        learner_body,
+                        figure_assets_root,
+                        figure_counters,
+                    )
                 except CommandError as exc:
                     found_sections = [heading for heading, _body in h3_sections(segment)]
                     raise CommandError(
@@ -226,6 +300,7 @@ class Command(BaseCommand):
                     "segment": segment,
                     "body": learner_body,
                     "internal_material": internal_material,
+                    "media_notes": media_notes,
                     "duration_minutes": estimate_duration(segment),
                     "source_path": str(source_path.relative_to(repository_root)),
                 })
@@ -301,6 +376,10 @@ class Command(BaseCommand):
                         f"Lesson number: {number}\n\n"
                         "Knowledge-check material is stored separately from learner narration. "
                         "Confirm answer-feedback design, chart media and timing before publication."
+                        + (
+                            f"\n\nMedia / production notes:\n{item['media_notes']}"
+                            if item["media_notes"] else ""
+                        )
                     ),
                 )
 
