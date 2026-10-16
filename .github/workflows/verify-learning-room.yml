@@ -402,24 +402,32 @@ jobs:
               "The public catalogue should explain that new courses will be added");
             console.log("EXPANDING_CATALOGUE_PASS: dynamic topics, hidden drafts, visible counts, preview state and mobile fit.");
 
-            // Member experience browser regression: preview forms stay honest and both member views remain light/mobile-safe.
+            // Member experience regression: the static page links to real server-side
+            // auth routes and deliberately does not collect credentials in a preview.
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
             await cataloguePage.goto(server + "/member-access.html", { waitUntil: "networkidle" });
             assert.equal(await cataloguePage.evaluate(() => getComputedStyle(document.documentElement).colorScheme), "light",
               "Member access should use the TradeThesis light theme");
-            await cataloguePage.locator("#loginEmail").fill("learner@example.test");
-            await cataloguePage.locator("#loginPassword").fill("preview-only-password");
-            await cataloguePage.locator('#signInPanel button[type="submit"]').click();
-            assert.ok((await cataloguePage.locator("#feedback").innerText()).includes("these details have not been sent or saved"),
-              "Preview sign-in must not imply a real authentication request or saved credentials");
+            assert.equal(await cataloguePage.locator('#signInPanel a[href="/accounts/login/?next=/learn/"]').count(), 1,
+              "Sign-in should use the Django login route, returning the learner to /learn/");
+            assert.equal(await cataloguePage.locator('#signInPanel a[href="/accounts/password/reset/"]').count(), 1,
+              "Forgot-password should use the server-side password reset flow");
+            assert.equal(await cataloguePage.locator('#createPanel a[href="/accounts/signup/?next=/learn/"]').count(), 1,
+              "Account creation should use the Django signup route");
+            assert.equal(await cataloguePage.locator('#signInPanel input, #createPanel input, #signInPanel form, #createPanel form').count(), 0,
+              "The static preview must not collect or submit passwords");
+            assert.equal(await cataloguePage.locator("#createPanel").isVisible(), false,
+              "The create-account panel should start hidden");
             await cataloguePage.locator("#createTab").click();
-            await cataloguePage.locator("#createName").fill("Preview Learner");
-            await cataloguePage.locator("#createEmail").fill("new-learner@example.test");
-            await cataloguePage.locator("#createPassword").fill("preview-only-password");
-            await cataloguePage.locator('#createPanel input[name="terms"]').check();
-            await cataloguePage.locator('#createPanel button[type="submit"]').click();
-            assert.ok((await cataloguePage.locator("#feedback").innerText()).includes("account creation is not active"),
-              "Preview account creation must not claim a real account was created");
+            assert.equal(await cataloguePage.locator("#createPanel").isVisible(), true,
+              "Create-account tab should reveal the server-routed CTA");
+            assert.equal(await cataloguePage.locator("#signInPanel").isVisible(), false,
+              "Switching tabs should hide the sign-in panel");
+            await cataloguePage.locator("#signInTab").click();
+            assert.equal(await cataloguePage.locator("#signInPanel").isVisible(), true,
+              "Sign-in tab should restore the sign-in panel");
+            assert.equal(await cataloguePage.locator('header a[href="/learn/"]').count(), 2,
+              "Desktop and mobile member dashboard CTAs should use the authenticated learning route");
             await cataloguePage.setViewportSize({ width: 390, height: 844 });
             const accessOverflow = await cataloguePage.evaluate(() => ({
               viewport: document.documentElement.clientWidth,

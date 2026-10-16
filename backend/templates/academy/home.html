@@ -1,0 +1,151 @@
+{% extends "academy/base.html" %}
+{% block title %}My learning · TradeThesis{% endblock %}
+{% block content %}
+<div class="tt-dashboard">
+  <section class="tt-dashboard-hero" aria-labelledby="dashboard-title">
+    <div>
+      <p class="tt-kicker mb-2">Your TradeThesis desk</p>
+      <h1 id="dashboard-title">Welcome back{% if user.first_name %}, {{ user.first_name }}{% endif %}.</h1>
+      <p class="tt-muted mb-0">A clear view of your learning, progress and access.</p>
+    </div>
+    <a class="btn btn-outline-primary" href="{% url 'dashboard' %}">Account &amp; billing <span aria-hidden="true">↗</span></a>
+  </section>
+
+  <nav class="tt-dashboard-nav" aria-label="Dashboard sections">
+    <a href="#my-learning">My learning</a>
+    <a href="#community-access">Community access</a>
+    <a href="#recent-activity">Recent activity</a>
+    {% if offers %}<a href="#course-library">Course library</a>{% endif %}
+    <a href="{% url 'manage-subscription' %}">Billing &amp; receipts</a>
+    <a href="{% url 'profile' %}">Account &amp; security</a>
+    <a href="{% url 'support:my_tickets' %}">Help</a>
+  </nav>
+
+  <section class="tt-stat-grid" aria-label="Learning summary">
+    <article class="tt-stat">
+      <span class="tt-stat-label">Active courses</span>
+      <strong>{{ active_course_count }}</strong>
+      <span class="tt-stat-note">Courses you can access</span>
+    </article>
+    <article class="tt-stat">
+      <span class="tt-stat-label">Lessons completed</span>
+      <strong>{{ completed_lesson_count }}</strong>
+      <span class="tt-stat-note">Across your learning</span>
+    </article>
+    <article class="tt-stat">
+      <span class="tt-stat-label">Time learning</span>
+      <strong>{{ learning_minutes }}<small> min</small></strong>
+      <span class="tt-stat-note">Recorded lesson time</span>
+    </article>
+  </section>
+
+  <section id="my-learning" class="tt-dashboard-section" aria-labelledby="my-learning-title">
+    <div class="tt-section-heading">
+      <div><p class="tt-kicker mb-1">Your work in progress</p><h2 id="my-learning-title">My learning</h2></div>
+      <span class="tt-section-count">{{ active_course_count }} active</span>
+    </div>
+    {% if course_cards %}
+      <div class="tt-course-grid">
+        {% for item in course_cards %}
+          <article class="tt-course-card">
+            <div class="tt-course-card-top">
+              <span class="tt-status-pill {% if item.entitlement %}is-active{% else %}is-preview{% endif %}">
+                {% if item.entitlement %}Enrolled{% else %}Course overview{% endif %}
+              </span>
+              {% if item.entitlement %}<span class="tt-course-progress-label">{{ item.progress_percent }}%</span>{% endif %}
+            </div>
+            <h3>{{ item.course.title }}</h3>
+            <p class="tt-muted">{{ item.course.summary|default:item.course.description|truncatechars:150 }}</p>
+            {% if item.entitlement %}
+              <div class="tt-progress-meta"><span>{{ item.completed_lessons }} of {{ item.total_lessons }} lessons</span><span>{{ item.progress_percent }}%</span></div>
+              <div class="progress mb-3" role="progressbar" aria-label="{{ item.course.title }} progress" aria-valuenow="{{ item.progress_percent }}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width:{{ item.progress_percent }}%"></div></div>
+              <a class="btn btn-primary" href="{% url 'academy:course-detail' item.course.slug %}">Continue learning <span aria-hidden="true">→</span></a>
+            {% else %}
+              <a class="btn btn-outline-primary" href="{% url 'academy:course-detail' item.course.slug %}">Explore course <span aria-hidden="true">→</span></a>
+            {% endif %}
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="tt-empty-state"><h3>Your learning starts here.</h3><p class="tt-muted mb-0">When you enrol in a course, it will appear here with your progress and a direct link to continue.</p></div>
+    {% endif %}
+  </section>
+
+  <section id="community-access" class="tt-dashboard-section" aria-labelledby="community-access-title">
+    <div class="tt-section-heading">
+      <div><p class="tt-kicker mb-1">Kept separate from course access</p><h2 id="community-access-title">Community access</h2></div>
+    </div>
+    {% if community_accesses %}
+      <div class="tt-access-list">
+        {% for entitlement in community_accesses %}
+          <article class="tt-access-row">
+            <div class="tt-access-mark" aria-hidden="true">↗</div>
+            <div class="tt-access-copy"><h3>{{ entitlement.course.title }}</h3><p class="tt-muted mb-0">Included with your programme</p></div>
+            <div class="tt-access-expiry">
+              {% if entitlement.community_access_expires_at %}<span class="tt-muted">Available until</span><strong>{{ entitlement.community_access_expires_at|date:"j M Y" }}</strong>{% else %}<strong>Ongoing access</strong>{% endif %}
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="tt-empty-inline"><strong>No active included community access</strong><p class="tt-muted mb-0">If a programme includes community access, its current term will appear here separately from your course access.</p></div>
+    {% endif %}
+    {% if community_accesses %}
+      <div class="tt-community-connections" aria-label="Community connection status">
+        {% if telegram_access_state %}
+          <article class="tt-community-connection">
+            <div class="tt-community-connection-copy">
+              <span class="tt-connection-platform">Telegram</span>
+              <strong>{{ telegram_access_state.label }}</strong>
+              {% if telegram_access_state.detail %}<p class="tt-muted mb-0">{{ telegram_access_state.detail }}</p>{% endif %}
+            </div>
+            {% if telegram_access_state.cta_url %}<a class="btn btn-outline-primary" href="{{ telegram_access_state.cta_url }}">{{ telegram_access_state.cta_label }}</a>{% endif %}
+          </article>
+        {% endif %}
+        <article class="tt-community-connection">
+          <div class="tt-community-connection-copy">
+            <span class="tt-connection-platform">Discord</span>
+            <strong>{% if discord_connected %}Account connected{% else %}Account not connected{% endif %}</strong>
+            <p class="tt-muted mb-0">{% if discord_connected %}{% if discord_account.username %}Connected as {{ discord_account.username }}.{% else %}Your Discord account is linked.{% endif %}{% else %}Link your account for community access where Discord roles are supported.{% endif %}</p>
+          </div>
+          {% if not discord_connected %}<a class="btn btn-outline-primary" href="{% url 'discord_connect' %}">Connect Discord</a>{% endif %}
+        </article>
+      </div>
+    {% endif %}
+  </section>
+
+  <section id="recent-activity" class="tt-dashboard-section" aria-labelledby="recent-activity-title">
+    <div class="tt-section-heading"><div><p class="tt-kicker mb-1">Your latest steps</p><h2 id="recent-activity-title">Recent activity</h2></div></div>
+    {% if recent_activity %}
+      <div class="tt-activity-list">
+        {% for activity in recent_activity %}
+          <a class="tt-activity-row" href="{% url 'academy:course-detail' activity.lesson.module.course.slug %}">
+            <span class="tt-activity-dot" aria-hidden="true"></span>
+            <span class="tt-activity-copy"><strong>{{ activity.lesson.title }}</strong><small>{{ activity.lesson.module.course.title }} · {% if activity.status == "completed" %}Completed{% else %}In progress{% endif %}</small></span>
+            <time datetime="{{ activity.updated_at|date:'c' }}">{{ activity.updated_at|date:"j M" }}</time>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="tt-empty-inline"><strong>Your learning activity will show here.</strong><p class="tt-muted mb-0">Open a lesson and your recent progress will be recorded here.</p></div>
+    {% endif %}
+  </section>
+
+  {% if offers %}
+    <section id="course-library" class="tt-dashboard-section" aria-labelledby="course-library-title">
+      <div class="tt-section-heading"><div><p class="tt-kicker mb-1">Continue building your craft</p><h2 id="course-library-title">Course library</h2></div></div>
+      <div class="tt-course-grid">
+        {% for offer in offers %}
+          <article class="tt-course-card tt-library-card">
+            <span class="tt-status-pill is-preview">Available</span>
+            <h3>{{ offer.name }}</h3>
+            <p class="tt-muted">{{ offer.course.summary|default:offer.course.description|truncatechars:150 }}</p>
+            <a class="btn btn-outline-primary" href="{% url 'academy:course-detail' offer.course.slug %}">View course <span aria-hidden="true">→</span></a>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+  <p class="tt-dashboard-footnote">Course access and included community access are tracked separately. For help with your account or billing, use Account &amp; billing above.</p>
+</div>
+{% endblock %}

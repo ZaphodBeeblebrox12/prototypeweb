@@ -1,0 +1,446 @@
+{% extends "base.html" %}
+{% load socialaccount %}
+
+{% block title %}Dashboard - TradeAdmin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    {% if show_connect_banner %}
+    <div class="col-12">
+        <div class="alert alert-warning d-flex justify-content-between align-items-center mb-4">
+            {% if telegram_access_state.state == 'needs_action' %}
+            <span><i class="bi bi-exclamation-triangle-fill"></i> <strong>Telegram access needs action:</strong> {{ telegram_access_state.detail }}</span>
+            <a href="{{ telegram_access_state.cta_url }}" class="btn btn-sm btn-danger">{{ telegram_access_state.cta_label }}</a>
+            {% else %}
+            <span><i class="bi bi-telegram"></i> <strong>One more step:</strong> {{ telegram_access_state.detail }}</span>
+            <a href="{% url 'bot_integration:telegram_connect' %}" class="btn btn-sm btn-primary">Connect Telegram</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    <!-- Welcome Card -->
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h4>Welcome back, {{ user.first_name|default:user.username }}!</h4>
+                <p class="text-muted mb-0">Here's what's happening with your account today.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Status -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-shield-check"></i> Account Status
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Status</span>
+                    {% if user.is_banned %}
+                    <span class="badge bg-danger">Banned</span>
+                    {% else %}
+                    <span class="badge bg-success">Active</span>
+                    {% endif %}
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span>Role</span>
+                    <span class="badge bg-info">{{ user.get_role_display }}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>Member Since</span>
+                    <span>{{ user.date_joined|date:"M d, Y" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Telegram Status -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-telegram"></i> Telegram</span>
+                {% if telegram_connected %}<span class="badge bg-success">Connected</span>{% endif %}
+            </div>
+            <div class="card-body">
+                {% if telegram_connected %}
+                <div class="d-flex align-items-center mb-3">
+                    {% if telegram_account.avatar %}
+                    <img src="{{ telegram_account.avatar.url }}" alt="Telegram avatar" class="rounded-circle me-3" width="48" height="48" style="object-fit:cover;">
+                    {% else %}
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style="width:48px;height:48px;font-weight:600;font-size:18px;">{{ telegram_account.display_name|slice:":1"|upper }}</div>
+                    {% endif %}
+                    <div class="overflow-hidden">
+                        <div class="fw-bold text-truncate">{{ telegram_account.display_name }}</div>
+                        {% if telegram_account.username %}<div class="text-muted small text-truncate">@{{ telegram_account.username }}</div>{% endif %}
+                        <div class="text-muted small">ID {{ telegram_account.chat_id }}</div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between small text-muted mb-3">
+                    <span>Linked {{ telegram_account.linked_at|date:"M d, Y" }}</span>
+                    {% if telegram_channel_count %}<span>{{ telegram_channel_count }} channel{{ telegram_channel_count|pluralize }}</span>{% endif %}
+                </div>
+                {% if telegram_channels.free or telegram_channels.paid %}
+                <div class="list-group list-group-flush small mb-2">
+                    {% for ch in telegram_channels.free %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-1">
+                        <span class="text-truncate"><i class="bi bi-hash"></i> {{ ch.name }}</span>
+                        {% if ch.is_member %}
+                        <span class="badge bg-success">Member</span>
+                        {% elif ch.invite_url %}
+                        <a href="{{ ch.invite_url }}" target="_blank" rel="noopener" class="badge text-bg-primary text-decoration-none">Join</a>
+                        {% else %}
+                        <span class="badge bg-secondary">Not a member</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    {% for ch in telegram_channels.paid %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-1">
+                        <span class="text-truncate"><i class="bi bi-star-fill text-warning"></i> {{ ch.name }}</span>
+                        {% if ch.entitled %}
+                        <span class="badge bg-success">{% if ch.assigned %}Member{% else %}Included{% endif %}</span>
+                        {% else %}
+                        <span class="badge bg-secondary"><i class="bi bi-lock-fill"></i> {{ ch.plan_name }}</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <a href="{% url 'bot_integration:telegram_unlink' %}" class="btn btn-sm btn-outline-danger w-100">Disconnect</a>
+                {% else %}
+                <div class="text-center">
+                    <span class="status-badge status-disconnected mb-3">
+                        <i class="bi bi-x-circle-fill"></i> Not Connected
+                    </span>
+                    <p class="text-muted small">Connect your Telegram account for notifications and channel access</p>
+                    <a href="{% url 'bot_integration:telegram_connect' %}" class="btn btn-sm btn-outline-primary">
+                        Connect Now
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Discord Status (UPDATED BUTTON) -->
+    <div class="col-md-4 mb-4">
+        <div class="card h-100" style="border-left: 4px solid #5865F2;">
+            <div class="card-header">
+                <i class="bi bi-discord"></i> Discord Connection
+            </div>
+            <div class="card-body">
+                {% if user.discord_id and user.discord_verified %}
+                <div class="text-center">
+                    <span class="badge bg-success mb-2">
+                        <i class="bi bi-check-circle-fill"></i> Connected
+                    </span>
+                    {% if user.discord_username %}
+                    <p class="text-muted">{{ user.discord_username }}</p>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="text-center">
+                    <span class="badge bg-secondary mb-2">
+                        <i class="bi bi-x-circle-fill"></i> Not Connected
+                    </span>
+                    <p class="text-muted small">Connect your Discord account for community access</p>
+                    <a href="{% url 'bot_integration:discord_connect' %}" class="btn btn-sm btn-primary" style="background: #5865F2; border: none;">
+                        Connect Now
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== PLAN & BILLING (redesign v3, product-aware) =====================
+         One card per active subscription (per product). Explore section
+         shows products/plans the user does NOT hold. Upgrade-only rule per
+         product. Ungrouped plans keep the legacy single-hierarchy rule. -->
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <span class="fw-bold"><i class="bi bi-credit-card-2-front"></i> Plan &amp; Billing</span>
+            </div>
+            <div class="card-body">
+                {% if ended_subscription %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill"></i> Your <strong>{{ ended_subscription.plan_name }}</strong> plan{% if ended_subscription.ended_at %} ended on {{ ended_subscription.ended_at|date:"M d, Y" }}{% endif %}. Choose a plan below to regain access.
+                </div>
+                {% endif %}
+                <div class="row g-4">
+                    <!-- Left column: your subscriptions (one per product) -->
+                    <div class="col-lg-4">
+                        {% for card in subscription_cards %}
+                        <div class="border rounded-3 p-3 mb-3 {% if card.billing.is_expired %}border-danger{% elif card.billing.is_expiring %}border-warning{% else %}border-primary{% endif %}">
+                            {% if card.product %}
+                            <div class="small text-uppercase text-muted fw-bold mb-1">{{ card.product.name }}</div>
+                            {% endif %}
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="mb-0">{{ card.plan.name }}</h5>
+                                {% if card.billing.is_expired %}
+                                <span class="badge bg-danger"><i class="bi bi-x-circle-fill"></i> Expired</span>
+                                {% elif card.billing.is_expiring %}
+                                <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle-fill"></i> Expiring soon</span>
+                                {% elif card.billing.is_trial %}
+                                <span class="badge bg-info text-dark"><i class="bi bi-gift-fill"></i> Trial</span>
+                                {% elif card.billing.is_complimentary %}
+                                <span class="badge bg-secondary"><i class="bi bi-award-fill"></i> Complimentary</span>
+                                {% else %}
+                                <span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Active</span>
+                                {% endif %}
+                            </div>
+
+                            {% if card.billing.price_display %}
+                            <div class="mb-1">
+                                <span class="fs-3 fw-bold">{{ card.billing.price_display }}</span>
+                                {% if card.billing.interval_display %}<span class="text-muted">/ {{ card.billing.interval_display|lower }}</span>{% endif %}
+                            </div>
+                            {% endif %}
+
+                            {% if card.billing.period_end %}
+                            <div class="small text-muted mb-1">
+                                {% if card.billing.is_expired %}Ended{% elif card.billing.is_trial %}Trial ends{% elif card.billing.is_recurring %}Renews{% else %}Access until{% endif %}
+                                <strong>{{ card.billing.period_end|date:"M d, Y" }}</strong>
+                                {% if not card.billing.is_expired and card.billing.days_remaining is not None and card.billing.days_remaining >= 0 %}&middot; {{ card.billing.days_remaining }} day{{ card.billing.days_remaining|pluralize }} left{% endif %}
+                            </div>
+                            {% if card.billing.period_percent is not None and not card.billing.is_expired %}
+                            <div class="progress mb-3" style="height: 6px;">
+                                <div class="progress-bar {% if card.billing.is_expiring %}bg-warning{% else %}bg-primary{% endif %}" role="progressbar" style="width: {{ card.billing.period_percent }}%;" aria-valuenow="{{ card.billing.period_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            {% else %}
+                            <div class="mb-3"></div>
+                            {% endif %}
+                            {% else %}
+                            <div class="mb-3"></div>
+                            {% endif %}
+
+                            {% if card.plan.description_html %}
+                            <div class="small text-muted mb-3">{{ card.plan.description_html|safe }}</div>
+                            {% endif %}
+
+                            {% if card.features %}
+                            <h6 class="small fw-bold">Included in your plan:</h6>
+                            <ul class="list-unstyled small mb-3">
+                                {% for f in card.features %}
+                                <li{% if f.disabled %} class="text-muted"{% endif %}><i class="bi {% if f.disabled %}bi-x-circle{% else %}bi-check-circle-fill text-success{% endif %} me-1"></i> {{ f.text }}</li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+
+                            <div class="d-grid gap-2">
+                                {% if card.upgrade_candidates %}
+                                <a href="{% url 'upgrade-page' %}" class="btn btn-primary btn-sm"><i class="bi bi-arrow-up-circle"></i> Upgrade plan</a>
+                                {% endif %}
+                                <a href="{% url 'manage-subscription' %}" class="btn btn-outline-secondary btn-sm">Manage subscription</a>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="border rounded-3 p-3 border-secondary bg-light">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="mb-0">Free plan</h5>
+                                <span class="badge bg-secondary">Current</span>
+                            </div>
+                            <p class="text-muted small mb-3">You're on the free plan with limited features. Upgrade anytime to unlock full access.</p>
+                            <a href="#available-plans" class="btn btn-primary btn-sm w-100"><i class="bi bi-arrow-down-circle"></i> See plans below</a>
+                        </div>
+                        {% endfor %}
+
+                        <!-- Trial offers — one per product without an active sub -->
+                        {% for offer in trial_offers %}
+                        <div class="border rounded-3 p-3 mt-3 border-success bg-success bg-opacity-10">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-gift-fill fs-5 text-success me-2"></i>
+                                <div>
+                                    {% if offer.product %}<div class="small text-uppercase text-muted fw-bold">{{ offer.product.name }}</div>{% endif %}
+                                    <div class="fw-bold">Try {{ offer.plan.name }}</div>
+                                    <div class="small text-muted">{{ offer.duration_days }} days free</div>
+                                </div>
+                            </div>
+                            <form method="post" action="{% url 'subscriptions:purchase-plan' %}" class="m-0">
+                                {% csrf_token %}
+                                <input type="hidden" name="plan_id" value="{{ offer.plan.id }}">
+                                <button type="submit" class="btn btn-success btn-sm w-100">Start free trial</button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <!-- Right column: explore products + ungrouped plans -->
+                    <div class="col-lg-8" id="available-plans">
+                        {% if user_country %}<div class="small text-muted mb-2"><i class="bi bi-geo-alt"></i> Prices for {{ user_country }}</div>{% endif %}
+
+                        {% for group in explore_products %}
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold mb-0">{{ group.product.name }}</h6>
+                                {% if group.product.description %}<span class="small text-muted text-end ms-3">{{ group.product.description }}</span>{% endif %}
+                            </div>
+                            <div class="row g-3">
+                                {% for plan in group.plans %}
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 p-3 h-100 d-flex flex-column">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="mb-0">{{ plan.name }}</h6>
+                                            {% if not plan.price_display %}<span class="badge bg-warning text-dark"><i class="bi bi-lock-fill"></i> Invite only</span>{% endif %}
+                                        </div>
+                                        {% if plan.price_display %}
+                                        <div class="mb-1"><span class="fs-4 fw-bold">{{ plan.price_display }}</span> <span class="text-muted">/ {{ plan.display_interval_label|lower }}</span></div>
+                                        {% if plan.interval_prices %}<div class="small text-muted mb-2">{% for ip in plan.interval_prices %}{{ ip.price_display }} / {{ ip.interval_display|lower }}{% if not forloop.last %} &middot; {% endif %}{% endfor %}</div>{% endif %}
+                                        {% else %}
+                                        <div class="fs-6 fw-bold text-muted mb-2">Custom pricing</div>
+                                        {% endif %}
+                                        {% if plan.features %}
+                                        <ul class="list-unstyled small mb-3">
+                                            {% for f in plan.features %}<li><i class="bi bi-check-circle-fill text-success me-1"></i> {{ f.text }}</li>{% endfor %}
+                                            {% if plan.feature_count > plan.features|length %}<li class="text-muted"><i class="bi bi-plus-circle me-1"></i> {{ plan.feature_count|add:"-6" }} more</li>{% endif %}
+                                        </ul>
+                                        {% endif %}
+                                        <div class="mt-auto d-grid">
+                                            {% if plan.price_display %}
+                                            <a href="{% url 'payment-start' %}?plan_id={{ plan.id }}&interval={{ plan.display_interval|default:'monthly' }}" class="btn btn-primary btn-sm">Get started</a>
+                                            {% else %}
+                                            <a href="{% url 'support:request_ticket' %}" class="btn btn-outline-warning btn-sm"><i class="bi bi-lock-fill"></i> Request access</a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        {% if ungrouped_cards %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold mb-0">{% if subscription_cards %}Upgrade options{% else %}Available plans{% endif %}</h6>
+                        </div>
+                        <div class="row g-3">
+                            {% for plan in ungrouped_cards %}
+                            <div class="col-md-6">
+                                <div class="border rounded-3 p-3 h-100 d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="mb-0">{{ plan.name }}</h6>
+                                        {% if not plan.price_display %}<span class="badge bg-warning text-dark"><i class="bi bi-lock-fill"></i> Invite only</span>{% endif %}
+                                    </div>
+                                    {% if plan.price_display %}
+                                    <div class="mb-1"><span class="fs-4 fw-bold">{{ plan.price_display }}</span> <span class="text-muted">/ {{ plan.display_interval_label|lower }}</span></div>
+                                    {% if plan.interval_prices %}<div class="small text-muted mb-2">{% for ip in plan.interval_prices %}{{ ip.price_display }} / {{ ip.interval_display|lower }}{% if not forloop.last %} &middot; {% endif %}{% endfor %}</div>{% endif %}
+                                    {% else %}
+                                    <div class="fs-6 fw-bold text-muted mb-2">Custom pricing</div>
+                                    {% endif %}
+                                    {% if plan.features %}
+                                    <ul class="list-unstyled small mb-3">
+                                        {% for f in plan.features %}<li><i class="bi bi-check-circle-fill text-success me-1"></i> {{ f.text }}</li>{% endfor %}
+                                        {% if plan.feature_count > plan.features|length %}<li class="text-muted"><i class="bi bi-plus-circle me-1"></i> {{ plan.feature_count|add:"-6" }} more</li>{% endif %}
+                                    </ul>
+                                    {% endif %}
+                                    <div class="mt-auto d-grid">
+                                        {% if not plan.price_display %}
+                                        <a href="{% url 'support:request_ticket' %}" class="btn btn-outline-warning btn-sm"><i class="bi bi-lock-fill"></i> Request access</a>
+                                        {% elif subscription_cards %}
+                                        <a href="{% url 'upgrade-page' %}" class="btn btn-primary btn-sm"><i class="bi bi-arrow-up-circle"></i> Upgrade</a>
+                                        {% else %}
+                                        <a href="{% url 'payment-start' %}?plan_id={{ plan.id }}&interval={{ plan.display_interval|default:'monthly' }}" class="btn btn-primary btn-sm">Get started</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% elif subscription_cards and not explore_products %}
+                        <p class="text-muted small mb-0">You're on our highest plan — there's nothing above it. Thanks for being a top-tier member.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🚀 REFERRAL CREDITS CARD (INTEGRATED) -->
+    {% include "growth/partials/referral_card.html" %}
+
+    <!-- Recent Activity -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-clock-history"></i> Recent Activity</span>
+                <a href="{% url 'activity' %}" class="btn btn-sm btn-link">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_activity %}
+                <ul class="list-group list-group-flush">
+                    {% for activity in recent_activity %}
+                    <li class="list-group-item px-0">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <i class="bi bi-circle-fill text-primary small me-2"></i>
+                                {{ activity.action|title }}
+                            </div>
+                            <small class="text-muted">{{ activity.created_at|timesince }} ago</small>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted text-center mb-0">No recent activity</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Notifications -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-bell"></i> Recent Notifications</span>
+                <a href="{% url 'notifications' %}" class="btn btn-sm btn-link">View All</a>
+            </div>
+            <div class="card-body">
+                {% if recent_notifications %}
+                <ul class="list-group list-group-flush">
+                    {% for notification in recent_notifications %}
+                    <li class="list-group-item px-0 {% if not notification.is_read %}bg-light{% endif %}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>{{ notification.title }}</strong>
+                                <p class="text-muted small mb-0">{{ notification.message|truncatechars:30 }}</p>
+                            </div>
+                            {% if not notification.is_read %}
+                            <span class="badge bg-primary">New</span>
+                            {% endif %}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted text-center mb-0">No notifications</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 💳 PAYMENT HISTORY (billing) -->
+    {% include "payments/partials/payment_history_card.html" %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Referral celebration script -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Check for newly unlocked rewards
+    {% if newly_unlocked_reward %}
+    setTimeout(function() {
+        if (typeof celebrateReferralReward === 'function') {
+            celebrateReferralReward('{{ newly_unlocked_reward.amount_display }}', {{ newly_unlocked_reward.extra_days }});
+        } else if (typeof showReferralToast === 'function') {
+            showReferralToast(
+                '🎉 ${{ newly_unlocked_reward.amount_display }} credit unlocked! +{{ newly_unlocked_reward.extra_days }} days added',
+                'success'
+            );
+        }
+    }, 1000);
+    {% endif %}
+});
+</script>
+{% endblock %}
