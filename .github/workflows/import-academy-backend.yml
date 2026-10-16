@@ -1,0 +1,86 @@
+name: Import Django Academy source into integration branch
+
+on:
+  push:
+    branches:
+      - feature/tradethesis-academy
+    paths:
+      - ".github/workflows/import-academy-backend.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: academy-import-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  import-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the product feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/tradethesis-academy
+          fetch-depth: 1
+
+      - name: Fetch Academy backend source branch
+        run: |
+          git clone --depth 1 --branch feature/tradethesis-academy https://github.com/ZaphodBeeblebrox12/test.git source-repo
+
+      - name: Import Django runtime as a self-contained backend project
+        run: |
+          mkdir -p backend
+          rsync -a --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='.env' \
+            --exclude='.env.*' \
+            --exclude='*.sqlite3' \
+            --exclude='db.sqlite3' \
+            --exclude='*.mmdb' \
+            --exclude='__pycache__/' \
+            --exclude='.pytest_cache/' \
+            --exclude='.mypy_cache/' \
+            --exclude='.ruff_cache/' \
+            --exclude='.venv/' \
+            --exclude='venv/' \
+            --exclude='node_modules/' \
+            --exclude='*.pyc' \
+            source-repo/ backend/
+          if [ -f backend/README.md ]; then
+            cp backend/README.md backend/UPSTREAM_README.md
+          fi
+          cat > backend/README.md <<'EOF'
+          # TradeThesis Django backend
+
+          This directory contains the Django runtime imported from the preserved upstream source branch ZaphodBeeblebrox12/test / feature/tradethesis-academy. The product repository's integration branch is based on prototypeweb/my-new-branch; the only intended merge target is my-new-branch, never main.
+
+          ## Local commands
+
+          Run commands from this directory so Django's BASE_DIR, templates, static assets and project configuration resolve relative to the backend project root:
+
+          ~~~bash
+          python -m venv .venv
+          . .venv/bin/activate
+          pip install -r requirements.txt
+          python manage.py check
+          ~~~
+
+          Supply environment configuration through your deployment environment or an ignored local .env file. Secrets, database files and the GeoLite2 MMDB binary are intentionally not copied from the upstream repository. Configure GeoIP fallback/availability as documented in the upstream code before enabling geo-pricing in production.
+
+          This import does not itself connect the static member-area preview to live login, checkout, lesson delivery or persisted progress. That integration still requires route/deployment configuration and an end-to-end test run. Do not treat a static preview, a passing syntax check or an unconfigured local environment as proof of production readiness.
+          EOF
+          git status --short backend | head -80
+
+      - name: Commit imported backend source to this feature branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add backend/
+          if git diff --cached --quiet; then
+            echo "No backend source changes to import."
+            exit 0
+          fi
+          git commit -m "Import Django Academy runtime into product branch"
+          git push origin HEAD:feature/tradethesis-academy
