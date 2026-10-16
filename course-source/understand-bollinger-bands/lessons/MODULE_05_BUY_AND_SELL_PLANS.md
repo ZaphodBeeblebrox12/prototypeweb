@@ -79,19 +79,31 @@ Calculate quantity from the cash risk you permit divided by the entry-to-stop di
 
 **Failure clues:** a breakout that quickly closes back in the old range, a failed push followed by a strong move the other way, or no follow-through after the first expansion. These are warnings to follow your prewritten stop/exit rule; they do not automatically authorise a reverse trade.
 
+> **Temporary reference gallery:** These charts are hot-linked from external sites for private review and will be replaced with course-owned TradingView captures. The source map is kept in the internal asset index.
+
 ### Historical chart examples to compare
 
 Treat these as case studies, not a list of guaranteed winners. On each chart, mark where compression ends, the exact qualifying bar, the price you could realistically enter, the structural stop, and the first nearby obstacle. At least one example is included because a first break can fail before price resolves.
 
-![Example 5.1-A: Narrow bands and a subsequent upside expansion.](https://assets.finbold.com/uploads/2024/08/The-squeeze-and-breakout-to-the-upside-1024x670.jpg)
+**Figure 5.1.1 — Narrow bands and a subsequent upside expansion.**
 
-![Example 5.1-B: A historical volatility squeeze followed by a price breakout.](https://images.moneycontrol.com/static-mcnews/2019/03/4-5.png)
+![Figure 5.1.1: Narrow bands and a subsequent upside expansion.](https://assets.finbold.com/uploads/2024/08/The-squeeze-and-breakout-to-the-upside-1024x670.jpg)
 
-![Example 5.1-C: Compression and breakout behaviour on a different chart.](https://miro.medium.com/v2/resize%3Afit%3A1400/1%2A3YU2PrIh3hhuA82Gf5sbBg.png)
+**Figure 5.1.2 — A historical volatility squeeze followed by a price breakout.**
 
-![Example 5.1-D: A downside head fake followed by a later resolution.](https://d.stockcharts.com/img/articles/2015/01/1420296072364399053309.png)
+![Figure 5.1.2: A historical volatility squeeze followed by a price breakout.](https://images.moneycontrol.com/static-mcnews/2019/03/4-5.png)
 
-![Example 5.1-E: A breakout-versus-head-fake comparison.](https://d.stockcharts.com/img/articles/2020/07/17/b37acc7d-dc41-481f-b575-843a9add2700.jpg)
+**Figure 5.1.3 — Compression and breakout behaviour on a different chart.**
+
+![Figure 5.1.3: Compression and breakout behaviour on a different chart.](https://miro.medium.com/v2/resize%3Afit%3A1400/1%2A3YU2PrIh3hhuA82Gf5sbBg.png)
+
+**Figure 5.1.4 — A downside head fake followed by a later resolution.**
+
+![Figure 5.1.4: A downside head fake followed by a later resolution.](https://d.stockcharts.com/img/articles/2015/01/1420296072364399053309.png)
+
+**Figure 5.1.5 — A breakout-versus-head-fake comparison.**
+
+![Figure 5.1.5: A breakout-versus-head-fake comparison.](https://d.stockcharts.com/img/articles/2020/07/17/b37acc7d-dc41-481f-b575-843a9add2700.jpg)
 
 **Practice prompt:** On each chart, compare a close-confirmation entry with an earlier entry. Which gets a better price? Which would be stopped if the initial move failed? If you cannot point to a stop before entry, the chart is not yet a complete trade plan.
 
@@ -176,17 +188,29 @@ When both conditions are true, Method II gives a sell/short signal. Price is in 
 
 These examples deliberately include different outcomes. Check the %B and MFI panes wherever they are shown. A price thrust without both thresholds is a near-miss, while a correct trigger can still fail.
 
-![Example 5.2-A: Price, %B and MFI together during an established uptrend.](https://chartschool.stockcharts.com/~gitbook/image?dpr=3&quality=100&sign=31f46d65&sv=2&url=https%3A%2F%2F436553459-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FERtrZrZOhufFzk6ZQO4B%252Fuploads%252F7wI3xjQL8XZUYZHaaLpM%252Fbbpb-3-fdxmfi.png%3Falt%3Dmedia%26token%3D2b8a2737-fd58-4830-86ed-8379a4d6d98e&width=768)
+**Figure 5.2.1 — Price, %B and MFI together during an established uptrend.**
 
-![Example 5.2-B: A buy and sell sequence with %B and MFI.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FrdSP5k7xjErxo4kFSFp3%2Fts-pbmfi-01-adbe-exam.png?alt=media&token=2eab96e2-65d0-48bf-9fd2-afaa0cd1f6ae)
+![Figure 5.2.1: Price, %B and MFI together during an established uptrend.](https://chartschool.stockcharts.com/~gitbook/image?dpr=3&quality=100&sign=31f46d65&sv=2&url=https%3A%2F%2F436553459-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FERtrZrZOhufFzk6ZQO4B%252Fuploads%252F7wI3xjQL8XZUYZHaaLpM%252Fbbpb-3-fdxmfi.png%3Falt%3Dmedia%26token%3D2b8a2737-fd58-4830-86ed-8379a4d6d98e&width=768)
 
-![Example 5.2-C: A historical long and short signal with a mixed outcome.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FOjnnYuVua2gUDxeZjsc4%2Fts-pbmfi-02-a-buysell.png?alt=media&token=70cd5a2f-522a-42ec-bbe1-daa92e601930)
+**Figure 5.2.2 — A buy and sell sequence with %B and MFI.**
 
-![Example 5.2-D: A second buy case, including the risk of a failed signal.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FOpk8ssy8J6rDexgug6Zh%2Fts-pbmfi-03-hsy-buy.png?alt=media&token=78077ea8-b8ff-4211-821e-b298fb1192dd)
+![Figure 5.2.2: A buy and sell sequence with %B and MFI.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FrdSP5k7xjErxo4kFSFp3%2Fts-pbmfi-01-adbe-exam.png?alt=media&token=2eab96e2-65d0-48bf-9fd2-afaa0cd1f6ae)
 
-![Example 5.2-E: A sell setup that follows price and money-flow weakness.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FzRIvgxiSgit0jAmKuyaA%2Fts-pbmfi-04-rrc-sell.png?alt=media&token=7b560551-d484-401b-94bf-4273db4e3222)
+**Figure 5.2.3 — A historical long and short signal with a mixed outcome.**
 
-![Example 5.2-F: A filtered signal where additional confirmation changes the timing.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FH6Xdz06htJVLFIjiNKax%2Fts-pbmfi-05-pnc-adx.png?alt=media&token=1c0c0797-32cb-4f72-b4fc-e93f973e84df)
+![Figure 5.2.3: A historical long and short signal with a mixed outcome.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FOjnnYuVua2gUDxeZjsc4%2Fts-pbmfi-02-a-buysell.png?alt=media&token=70cd5a2f-522a-42ec-bbe1-daa92e601930)
+
+**Figure 5.2.4 — A second buy case, including the risk of a failed signal.**
+
+![Figure 5.2.4: A second buy case, including the risk of a failed signal.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FOpk8ssy8J6rDexgug6Zh%2Fts-pbmfi-03-hsy-buy.png?alt=media&token=78077ea8-b8ff-4211-821e-b298fb1192dd)
+
+**Figure 5.2.5 — A sell setup that follows price and money-flow weakness.**
+
+![Figure 5.2.5: A sell setup that follows price and money-flow weakness.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FzRIvgxiSgit0jAmKuyaA%2Fts-pbmfi-04-rrc-sell.png?alt=media&token=7b560551-d484-401b-94bf-4273db4e3222)
+
+**Figure 5.2.6 — A filtered signal where additional confirmation changes the timing.**
+
+![Figure 5.2.6: A filtered signal where additional confirmation changes the timing.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FH6Xdz06htJVLFIjiNKax%2Fts-pbmfi-05-pnc-adx.png?alt=media&token=1c0c0797-32cb-4f72-b4fc-e93f973e84df)
 
 **Practice prompt:** For every example, record the first bar where both published thresholds are true, then compare entry-at-close with entry on the signal bar’s break. Did the later confirmation improve the trade, make it too late, or stop a losing signal?
 
@@ -266,19 +290,27 @@ This is a reversal method, so the main danger is acting while the original trend
 
 These charts show reversal clues and indicator disagreement in different markets. Use them to practise locating the extreme, the indicator evidence, the price-confirmation bar and the invalidation point. Not every chart below contains every variable required by the same Method III implementation.
 
-![Example 5.3-A: A lower-band reversal case with a positive volume-indicator clue.](https://d3kvcd8uuqwmxt.cloudfront.net/filecache/upload/images/fx-strategy18-1.png)
+**Figure 5.3.1 — A lower-band reversal case with a positive volume-indicator clue.**
 
-![Example 5.3-B: An upper-band reversal case with a weakening volume-indicator clue.](https://d3kvcd8uuqwmxt.cloudfront.net/filecache/upload/images/fx-strategy18-2.png)
+![Figure 5.3.1: A lower-band reversal case with a positive volume-indicator clue.](https://d3kvcd8uuqwmxt.cloudfront.net/filecache/upload/images/fx-strategy18-1.png)
 
-![Example 5.3-C: Bollinger Bands, Intraday Intensity and volume displayed for comparison.](https://static.wixstatic.com/media/252f12_c1ef069183e44feb9b9a00b1b90e23a7~mv2.png/v1/fill/w_450%2Ch_404%2Cal_c%2Cq_85%2Cusm_0.66_1.00_0.01%2Cenc_auto/252f12_c1ef069183e44feb9b9a00b1b90e23a7~mv2.png)
+**Figure 5.3.2 — An upper-band reversal case with a weakening volume-indicator clue.**
 
-![Example 5.3-D: A reversal-shaped price structure that still needs indicator and price confirmation.](https://assets.finbold.com/uploads/2024/08/Bearish-reversal-1-1024x843.jpg)
+![Figure 5.3.2: An upper-band reversal case with a weakening volume-indicator clue.](https://d3kvcd8uuqwmxt.cloudfront.net/filecache/upload/images/fx-strategy18-2.png)
 
-![Example 5.3-E: A lower-band W-shaped turn for comparison with the reversal rules.](https://www.tradingsetupsreview.com/5-bollinger-bands-trading-strategies-should-know/img/BollingerBandsW-BottomExample_hu335bd491b6efe5aee31f40a2d85791e4_131237_1280x0_resize_q75_h1_box.webp)
+**Figure 5.3.3 — Bollinger Bands, Intraday Intensity and volume displayed for comparison.**
+
+![Figure 5.3.3: Bollinger Bands, Intraday Intensity and volume displayed for comparison.](https://static.wixstatic.com/media/252f12_c1ef069183e44feb9b9a00b1b90e23a7~mv2.png/v1/fill/w_450%2Ch_404%2Cal_c%2Cq_85%2Cusm_0.66_1.00_0.01%2Cenc_auto/252f12_c1ef069183e44feb9b9a00b1b90e23a7~mv2.png)
+
+**Figure 5.3.4 — A reversal-shaped price structure that still needs indicator and price confirmation.**
+
+![Figure 5.3.4: A reversal-shaped price structure that still needs indicator and price confirmation.](https://assets.finbold.com/uploads/2024/08/Bearish-reversal-1-1024x843.jpg)
+
+**Figure 5.3.5 — A lower-band W-shaped turn for comparison with the reversal rules.**
+
+![Figure 5.3.5: A lower-band W-shaped turn for comparison with the reversal rules.](https://www.tradingsetupsreview.com/5-bollinger-bands-trading-strategies-should-know/img/BollingerBandsW-BottomExample_hu335bd491b6efe5aee31f40a2d85791e4_131237_1280x0_resize_q75_h1_box.webp)
 
 **Practice prompt:** For each case, list what the chart actually proves and what is still missing. A pattern shape alone does not prove the volume condition; a volume clue alone does not prove that price has confirmed the reversal.
-
-### Task
 
 ### Task
 
@@ -356,15 +388,25 @@ The linked chart examples are for practicing breakout and head-fake reading. The
 
 For every chart, count the outside-band closes yourself. Then ask whether ADX is above or below the threshold used in the method. These examples help train breakout-versus-head-fake reading; they do not all show the complete Method IV indicator set.
 
-![Example 5.4-A: A squeeze followed by an upside expansion.](https://assets.finbold.com/uploads/2024/08/The-squeeze-and-breakout-to-the-upside-1024x670.jpg)
+**Figure 5.4.1 — A squeeze followed by an upside expansion.**
 
-![Example 5.4-B: A historical compression and breakout sequence.](https://images.moneycontrol.com/static-mcnews/2019/03/4-5.png)
+![Figure 5.4.1: A squeeze followed by an upside expansion.](https://assets.finbold.com/uploads/2024/08/The-squeeze-and-breakout-to-the-upside-1024x670.jpg)
 
-![Example 5.4-C: A breakout sequence to classify bar by bar.](https://miro.medium.com/v2/resize%3Afit%3A1400/1%2A3YU2PrIh3hhuA82Gf5sbBg.png)
+**Figure 5.4.2 — A historical compression and breakout sequence.**
 
-![Example 5.4-D: A head-fake sequence—inspect where the first break fails.](https://d.stockcharts.com/img/articles/2020/07/17/b37acc7d-dc41-481f-b575-843a9add2700.jpg)
+![Figure 5.4.2: A historical compression and breakout sequence.](https://images.moneycontrol.com/static-mcnews/2019/03/4-5.png)
 
-![Example 5.4-E: Another false-start and later-resolution comparison.](https://d.stockcharts.com/img/articles/2015/01/1420296072364399053309.png)
+**Figure 5.4.3 — A breakout sequence to classify bar by bar.**
+
+![Figure 5.4.3: A breakout sequence to classify bar by bar.](https://miro.medium.com/v2/resize%3Afit%3A1400/1%2A3YU2PrIh3hhuA82Gf5sbBg.png)
+
+**Figure 5.4.4 — A head-fake sequence—inspect where the first break fails.**
+
+![Figure 5.4.4: A head-fake sequence—inspect where the first break fails.](https://d.stockcharts.com/img/articles/2020/07/17/b37acc7d-dc41-481f-b575-843a9add2700.jpg)
+
+**Figure 5.4.5 — Another false-start and later-resolution comparison.**
+
+![Figure 5.4.5: Another false-start and later-resolution comparison.](https://d.stockcharts.com/img/articles/2015/01/1420296072364399053309.png)
 
 **Practice prompt:** A chart with one close outside the band is not yet a two-close Method IV confirmation. Mark the second qualifying close, read ADX using the chosen threshold, then write a stop and entry before exposing yourself to the following bars.
 
@@ -442,17 +484,29 @@ Place invalidation below the right-side low. If the low is too distant, the corr
 
 Look first at the position of each swing relative to the bands. Then mark the confirmation and invalidation levels; do not judge the pattern by the W/M shape alone.
 
-![Example 5.5-A: A W-bottom with a second low that improves relative to the lower band.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FJPCjD7v1YEXarURufxNY%2Fbbs-2-jwnwbot.png?alt=media&token=9cc1eef8-5136-4c97-b717-3a6ad2e545b3)
+**Figure 5.5.1 — A W-bottom with a second low that improves relative to the lower band.**
 
-![Example 5.5-B: A second W-bottom for comparison.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FdnSeQseJstPlj65zVFZe%2Fbbs-3-sndkwbot.png?alt=media&token=b56d6325-8bd5-4df6-a1b1-7ce6f5b37db0)
+![Figure 5.5.1: A W-bottom with a second low that improves relative to the lower band.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FJPCjD7v1YEXarURufxNY%2Fbbs-2-jwnwbot.png?alt=media&token=9cc1eef8-5136-4c97-b717-3a6ad2e545b3)
 
-![Example 5.5-C: An M-type top with a later weakening relationship to the upper band.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2Fn8ahD7Ar613AetIru1U0%2Fbbs-4-xommtop.png?alt=media&token=45505439-ead9-41a6-a4c4-6fa6dfd0a3b6)
+**Figure 5.5.2 — A second W-bottom for comparison.**
 
-![Example 5.5-D: Another M-type top to study for the confirmation point.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FN5uWNvDsFS4DB5H7wNEY%2Fbbs-5-phmmtop-1.png?alt=media&token=509c1973-3359-464e-adb1-947f053ab1df)
+![Figure 5.5.2: A second W-bottom for comparison.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FdnSeQseJstPlj65zVFZe%2Fbbs-3-sndkwbot.png?alt=media&token=b56d6325-8bd5-4df6-a1b1-7ce6f5b37db0)
 
-![Example 5.5-E: A W-bottom-shaped reversal and its later move.](https://www.tradingsetupsreview.com/5-bollinger-bands-trading-strategies-should-know/img/BollingerBandsW-BottomExample_hu335bd491b6efe5aee31f40a2d85791e4_131237_1280x0_resize_q75_h1_box.webp)
+**Figure 5.5.3 — An M-type top with a later weakening relationship to the upper band.**
 
-![Example 5.5-F: A bearish reversal-shaped pattern.](https://assets.finbold.com/uploads/2024/08/Bearish-reversal-1-1024x843.jpg)
+![Figure 5.5.3: An M-type top with a later weakening relationship to the upper band.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2Fn8ahD7Ar613AetIru1U0%2Fbbs-4-xommtop.png?alt=media&token=45505439-ead9-41a6-a4c4-6fa6dfd0a3b6)
+
+**Figure 5.5.4 — Another M-type top to study for the confirmation point.**
+
+![Figure 5.5.4: Another M-type top to study for the confirmation point.](https://436553459-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FERtrZrZOhufFzk6ZQO4B%2Fuploads%2FN5uWNvDsFS4DB5H7wNEY%2Fbbs-5-phmmtop-1.png?alt=media&token=509c1973-3359-464e-adb1-947f053ab1df)
+
+**Figure 5.5.5 — A W-bottom-shaped reversal and its later move.**
+
+![Figure 5.5.5: A W-bottom-shaped reversal and its later move.](https://www.tradingsetupsreview.com/5-bollinger-bands-trading-strategies-should-know/img/BollingerBandsW-BottomExample_hu335bd491b6efe5aee31f40a2d85791e4_131237_1280x0_resize_q75_h1_box.webp)
+
+**Figure 5.5.6 — A bearish reversal-shaped pattern.**
+
+![Figure 5.5.6: A bearish reversal-shaped pattern.](https://assets.finbold.com/uploads/2024/08/Bearish-reversal-1-1024x843.jpg)
 
 **Practice prompt:** For each panel, circle the swing that changes the interpretation, mark the trigger and stop as if you were trading live, and identify the moment at which the setup is still incomplete.
 
@@ -524,15 +578,25 @@ The short-side reading is the mirror: the squeeze fires and the momentum histogr
 
 Read the squeeze state and the momentum histogram together. A green/fire state by itself is not a direction signal; mark whether the histogram is above zero and increasing or below zero and decreasing.
 
-![Example 5.6-A: A bullish TTM squeeze release with the momentum pane.](https://cdn.simplertrading.com/2022/04/20135651/Compressed-TTM-Squeeze-In-AAPL-1-resized.png)
+**Figure 5.6.1 — A bullish TTM squeeze release with the momentum pane.**
 
-![Example 5.6-B: A squeeze chart with price and momentum for a second case.](https://chartschool.stockcharts.com/~gitbook/image?dpr=3&quality=100&sign=72608331&sv=2&url=https%3A%2F%2F436553459-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FERtrZrZOhufFzk6ZQO4B%252Fuploads%252FS6sqGU9PaS8hKIAZezZc%252Fsqueeze-shch-exam.png%3Falt%3Dmedia%26token%3D9fa5a304-e044-4cb5-8ff0-23da12f1ad14&width=768)
+![Figure 5.6.1: A bullish TTM squeeze release with the momentum pane.](https://cdn.simplertrading.com/2022/04/20135651/Compressed-TTM-Squeeze-In-AAPL-1-resized.png)
 
-![Example 5.6-C: A more recent squeeze-release chart to classify.](https://articles.stockcharts.com/content/images/2025/10/data-src-image-238f2538-3ab5-42c8-8ac1-ecb8ca39df4d.png)
+**Figure 5.6.2 — A squeeze chart with price and momentum for a second case.**
 
-![Example 5.6-D: A bearish squeeze case with the channel relationship and momentum.](https://www.tradingsetupsreview.com/bollinger-squeeze/img/BollingerandKeltnerSqueezeExample_hu316a095101dc94fa9e55857437cd5c11_99605_1280x0_resize_q75_h1_box.webp)
+![Figure 5.6.2: A squeeze chart with price and momentum for a second case.](https://chartschool.stockcharts.com/~gitbook/image?dpr=3&quality=100&sign=72608331&sv=2&url=https%3A%2F%2F436553459-files.gitbook.io%2F~%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252FERtrZrZOhufFzk6ZQO4B%252Fuploads%252FS6sqGU9PaS8hKIAZezZc%252Fsqueeze-shch-exam.png%3Falt%3Dmedia%26token%3D9fa5a304-e044-4cb5-8ff0-23da12f1ad14&width=768)
 
-![Example 5.6-E: A TTM-style chart showing squeeze state and upward momentum.](https://pbs.twimg.com/media/E-7bAGwWYAQJr9I.jpg)
+**Figure 5.6.3 — A more recent squeeze-release chart to classify.**
+
+![Figure 5.6.3: A more recent squeeze-release chart to classify.](https://articles.stockcharts.com/content/images/2025/10/data-src-image-238f2538-3ab5-42c8-8ac1-ecb8ca39df4d.png)
+
+**Figure 5.6.4 — A bearish squeeze case with the channel relationship and momentum.**
+
+![Figure 5.6.4: A bearish squeeze case with the channel relationship and momentum.](https://www.tradingsetupsreview.com/bollinger-squeeze/img/BollingerandKeltnerSqueezeExample_hu316a095101dc94fa9e55857437cd5c11_99605_1280x0_resize_q75_h1_box.webp)
+
+**Figure 5.6.5 — A TTM-style chart showing squeeze state and upward momentum.**
+
+![Figure 5.6.5: A TTM-style chart showing squeeze state and upward momentum.](https://pbs.twimg.com/media/E-7bAGwWYAQJr9I.jpg)
 
 **Practice prompt:** For every example, record the first fire bar, histogram sign and direction, candidate entry, stop boundary, and first obstacle. Also look for a release that fails; do not count compression as a trade.
 
