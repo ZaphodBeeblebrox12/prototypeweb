@@ -20,6 +20,15 @@ The following work is committed on `my-new-branch`, in sequence:
 - `92b4346129d1b497872df1d65853ed625b53e915` — record an updated web-source shortlist and clearly mark download status.
 
 Each saved point remains on `my-new-branch`; none is merged or deployed.
+- `02bcd3f94503654b1d535a31131fc8160b5ed025` — remove the visible “SYNTHETIC DATA” label from the course preview fallback and add module/lesson-based figure numbering inside generated chart illustrations.
+
+## Focused source checks
+
+- The checkpointed preview contains the seven-module / 30-lesson curriculum.
+- No remote image `src` is required by the preview; its teaching visuals are embedded locally in the HTML.
+- The chart zoom modal, lesson tabs, lesson outline, learner response area and completion action are present in source.
+- A full browser screenshot smoke test has not completed in this environment. Downloading third-party historical chart binaries also remains blocked by outbound network/DNS restrictions; the internal source index records candidate pages without pretending their images are local files.
+
 
 ## First-pass target
 
