@@ -542,3 +542,9 @@ input:focus { border-color: #355a46; box-shadow: 0 0 0 3px #355a461f; }
 @media (max-width: 900px) {
     .brand-side { border-right: 0; border-bottom: 1px solid #ded8ca; }
 }
+
+.trial-banner { background: #f2ecdf; border: 1px solid #ded8ca; border-left: 3px solid #c96f50; border-radius: 0 10px 10px 0; }
+.trial-title { color: #254334; }
+.trial-text { color: #687268; }
+.form-subtitle { color: #687268; }
+.submit-btn:focus-visible, .social-btn:focus-visible { outline: 3px solid #c96f50; outline-offset: 3px; }
