@@ -60,10 +60,10 @@ The following sitewide foundations have been implemented on `my-new-branch` and 
 - Light-only theme in the member access and member area previews; a CI check prevents dark colour tokens from returning there.
 - Course catalogue development note, visible/hidden catalogue entry state, hidden-draft exclusion, and dynamically generated topic filters and counts.
 - Keyboard skip-to-main-content links and focusable main landmarks on the main public pages, learning room, ChartLab, and member pages.
-- Playwright checks for the public preview-only checkout/enquiry states, member preview clarity, mobile/desktop horizontal overflow, same-page anchor targets, skip-link targets, and future course/draft filtering.
+- Playwright checks for the public preview-only checkout/enquiry states, member preview clarity, mobile/desktop horizontal overflow across the primary pages, same-page anchor targets, focusable skip-link targets, future course/draft filtering, and the micro-course preview dialog's keyboard open/focus/outline/escape-close/focus-restore behaviour.
 - Static deployment audit for local asset and page references.
 
-**Verification evidence:** learning-room/browser verification run [38892811511](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38892811511) passed. Preview deployment run [38892765713](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38892765713) passed.
+**Verification evidence:** learning-room/browser verification run [38893349456](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38893349456) passed after the expanded responsive and modal checks. Preview deployment run [38892765713](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38892765713) passed with the keyboard skip links.
 
 This evidence is limited to the static preview and automated checks. It is **not** proof of connected authentication, payments, server-side enrolment, saved progress, secure lesson delivery, or production accessibility on physical devices. The instructional image-inspector/readability work remains in draft PRs targeting `my-new-branch`; the code has not been integrated into the working branch. Do not begin the admin-dashboard implementation merely because these visual QA checks pass. The dashboard remains gated on real backend integration and core purchase-to-learning flows.
 
