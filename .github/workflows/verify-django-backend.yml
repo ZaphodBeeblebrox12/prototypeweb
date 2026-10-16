@@ -98,7 +98,7 @@ jobs:
               assert all("Diagram already made:" not in lesson.content_markdown for lesson in lessons), slug
               figure_names = {
                   name for lesson in lessons
-                  for name in re.findall(r"/static/academy/course-images/([^\\s)]+)", lesson.content_markdown)
+                  for name in re.findall(r"/static/academy/course-images/([^\s)]+)", lesson.content_markdown)
               }
               if slug == "trading-path":
                   assert figure_names, "Trading Path should render its available teaching figures"
