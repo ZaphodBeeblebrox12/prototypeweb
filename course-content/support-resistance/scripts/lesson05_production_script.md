@@ -152,35 +152,39 @@ The following is the proposed learner-facing copy. The chart states and producti
 
 ### 6:30–8:45 — Worked example: combine, retain, omit
 
-**Show:** L05-A again with a clean base chart and one candidate overlay at a time. The final clean version should normally contain three or four broad, defensible areas at most, provided that is what the final schematic supports. The exact number is chart-specific.
+**Show:** Keep the same synthetic candle sequence and scale throughout. The current learning-room flow uses five clutter-chart states before the separate Clear W drawing task:
 
-**State 1 — Combine nearby areas**
+1. **Observe:** the over-marked chart appears without candidate IDs.
+2. **Classify:** A–G receive candidate IDs. The learner chooses Keep, Combine, Leave out for this reading, or Not sure yet for every candidate and provides a short rationale before revealing the edit.
+3. **Omit one minor mark:** remove candidate D only. A, B, C, E, F and G remain.
+4. **Combine nearby areas:** combine B/C and E/F into broader areas while retaining A and distant G.
+5. **Compare the worked edit:** show the lower reaction area and upper reaction area in the reduced reference.
 
-**On screen — explanation:**
+The final view retains two primary areas for this particular chart. Do not pad the chart to meet a number, and do not treat two, three or four as a universal target or maximum for other charts.
 
-> These two candidate areas overlap and describe related reactions. I can represent that shared area with one zone, while keeping its boundaries focused on the behaviour I am trying to describe.
-
-**Production rationale:** The final zone must cover the relevant reaction cluster without expanding so far that it includes unrelated movement. The final drawing may use slightly different boundaries if the same reasoning remains clear.
-
-**State 2 — Retain a major area**
-
-**On screen — explanation:**
-
-> I am keeping this area because it helps describe a major turning point or the edge of the broad range. It gives the chart useful structural context.
-
-**State 3 — Omit a minor area**
+**Edit 1 — Omit candidate D**
 
 **On screen — explanation:**
 
-> I am leaving this smaller area unmarked because it adds little to the current reading. That does not mean the price movement never mattered; it means I do not need a separate zone for it in this explanation.
+> Candidate D adds a small local fluctuation. Leaving it unmarked makes the chart easier to read without removing the larger path or the other candidates that still need review.
 
-**State 4 — Compare**
+**Production rationale:** This edit removes D only. The candles, scale and all other candidates remain unchanged so the learner can isolate the effect of removing one low-value mark.
 
-Show the cluttered version beside or toggled against the simplified version, with the candles and scale fixed.
+**Edit 2 — Combine nearby areas**
 
-**On screen — summary:**
+**On screen — explanation:**
 
-> The simplified chart is easier to read because each remaining area has a reason to be there. The reference is one defensible interpretation, not the only possible drawing.
+> B/C and E/F describe nearby, related reactions. I can combine each pair into a broader area while keeping the boundaries focused on the behaviour I am explaining.
+
+**Production rationale:** The combined view keeps A and G and combines B/C and E/F. Do not merge areas merely because they look close on screen; the broader band must still explain a related group of reactions.
+
+**Worked edit — retain the two primary areas**
+
+**On screen — explanation:**
+
+> The reduced reference keeps a lower reaction area and an upper reaction area. Each remains because it helps explain the structure of this chart. The example is one defensible reading, not a universal rule about how many areas every chart needs.
+
+**Comparison:** Learners can use the Previous view control to revisit the same-scale clutter and edit states. The current interface reveals one view at a time; do not describe it as a side-by-side L05-A comparison.
 
 **Instructor note:** Ensure the final annotation is justified by the chart geometry that was actually created. Do not write answer rationales before the asset is final and then force the chart to fit them.
 
@@ -242,34 +246,32 @@ Do not display whether the drawing “passed” or “failed” at this stage.
 
 #### Step C — Compare the reference
 
-**Show:** Learner support and resistance beside/under the corresponding reference zones. If the existing ChartLab prototype uses an overlay/toggle rather than a side-by-side layout, ensure the student can switch between them without losing their own submitted work.
+**Show:** The current ChartLab displays the learner's two submitted zones beside a reasoned example. Preserve the learner's marks and keep both versions visible during comparison.
 
 **On screen — comparison introduction:**
 
 > Compare the coverage and reasoning, not just the exact edges. Your zone may be slightly wider or narrower and still be defensible.
 
-**Reference support rationale — asset writer to finalise against the finished chart:**
+**Reference support rationale — current Clear W example:**
 
-> The reference support zone groups the related lower reactions while allowing for the differences between their wick extremes. Its width is intended to capture that cluster without absorbing a large amount of unrelated movement.
+> The support area surrounds the two lower reactions. Their wick lows are close but not identical, so the band allows for that variation while staying focused on the repeated-lows area.
 
-**Reference resistance rationale — asset writer to finalise against the finished chart:**
+**Reference resistance rationale — current Clear W example:**
 
-> The reference resistance zone captures the related upper reactions as an area rather than an exact price. The boundary is a reasoned representation of this example, not a promise that price will turn there again.
+> The resistance area surrounds the intervening swing high, or neckline, where the recovery previously stalled. It describes that part of this synthetic sequence; it does not promise that price will turn there again.
 
 **Comparison prompts:**
 - Does your support zone capture the lower reaction cluster you intended to describe?
 - Does your resistance zone cover the relevant upper reactions without becoming unnecessarily broad?
 - Can you explain what each boundary includes and excludes?
 
-**Feedback states:**
+**Current comparison feedback:**
 
-- **Close to the reference:** “Your zone captures the same broad reaction area as the reference. Review the reasoning to see why these boundaries are defensible.”
-- **Reasonable alternative:** “Your boundaries differ from the reference, but they appear to capture the relevant reaction area. Compare what your version includes and excludes. A different drawing can be reasonable when the reasoning is consistent.”
-- **Review boundary choice:** “Your zone may be missing part of the related reaction cluster or including too much unrelated movement. Compare the coverage, adjust if you wish, and review the reference explanation.”
+> Look at both drawings side by side. Does your support area surround both troughs without absorbing much unrelated movement? Does your resistance area cover the intervening swing high (the neckline)? The example is one defensible interpretation, not an exact answer key. Different boundaries can be reasonable when they capture the relevant reactions and you can explain what they include and exclude.
 
-**Critical implementation note:** These states should be based on an explained comparison, not an arbitrary precision percentage or a narrow pixel-perfect threshold. If the current tool cannot reliably assess the user's written rationale, call the result a visual comparison, not an automated assessment of analytical skill.
+**Critical implementation note:** The current interface does not assign an overlap percentage or a pass/fail label to the learner's zones. It displays the learner's marks beside the example and prompts the learner to compare coverage and explain the boundaries. Do not describe this as an automated assessment of analytical skill.
 
-**Outcome control:** Do not reveal a later price extension, breakout, or “what happened next” as a reward for a correct drawing. The point of this study is identifying and defending zones, not predicting a result.
+**Outcome control:** The current full synthetic sequence visibly includes a later move above the neckline from the initial load. Do not reveal additional future bars or use that move as a reward for drawing a zone. The second knowledge check asks what a break does and does not establish; the point of this study is identifying and defending areas, not predicting a result.
 
 ### 13:30–15:15 — ChartLab debrief: what the study was testing
 
@@ -364,15 +366,16 @@ The check should appear after the ChartLab debrief. Give feedback after each res
 **Purpose:** First full support/resistance drawing attempt after concept teaching.
 
 **Requirements:**
-- Use the existing approved ChartLab *Clear W* schematic as the starting reference, subject to a final alignment check against this script.
+- Use the existing ChartLab *Clear W* schematic as the starting reference. Its current lower-area support and intervening-swing-high resistance references were checked against the running interaction and final comparison state.
 - Keep the chart fictional and labelled: *“Illustrative chart — not historical market data.”*
 - Base price action should show a clear W-like sequence with related lower reactions and related upper reactions. The name “Clear W” is the exercise label, not a signal or promise about what happens next.
 - Do not show reference support/resistance zones on initial load.
 - Student marks and submits support first, then resistance.
 - Lock or clearly mark the submitted support step before allowing the second step; preserve the student's own work.
 - Reveal both reference zones and written rationales only after both submissions.
-- Do not reveal a later outcome as part of scoring.
-- Include undo/reset, touch-friendly zone resizing, keyboard-accessible controls where supported, legible mobile candles, and a way to compare the learner's work with the reference.
+- The current synthetic sequence includes the later move above the neckline from the initial view. Do not reveal additional bars or present that move as a reward for drawing a zone; use it in the knowledge check to discuss what a break does not prove.
+- Include undo/reset and touch-friendly zone resizing. The current ChartLab supports pointer-drawn zones and a keyboard-operable alternative: enter upper and lower edges, activate “Set zone from prices,” then submit the zone. The submitted support locks before the resistance step.
+- Show the learner's locked marks beside the reference after both submissions. The current interaction gives a visual comparison and explanatory prompt; it does not grade the learner's written reasoning.
 - Include a two-question knowledge check after the feedback, then a clear completion action.
 
 **Reference-key authoring rule:** Finalise the answer rationales against the actual chart and overlay positions. The reference support area should capture the lower-reaction cluster; the reference resistance area should capture the relevant upper-reaction cluster. If the final chart supports multiple boundary choices, document the acceptable alternative rather than forcing a single exact answer.
@@ -456,31 +459,31 @@ Do not request or insert these personal assets into Lesson 5. This note is only 
 
 ## 9. Lesson 5 production checklist
 
-- [ ] L05-A cluttered chart is created and reviewed with an unlabelled initial state.
-- [ ] Major structure, overlapping candidates and a low-value minor area are visually distinguishable.
-- [ ] Combined reference zone captures the intended cluster without becoming too broad.
-- [ ] The final simplified chart has written reasons for every retained, combined or omitted candidate.
-- [ ] ChartLab *Clear W* uses fictional illustrative data and is labelled as such.
-- [ ] Support and resistance are submitted as separate steps.
-- [ ] Neither reference zones nor later outcome are revealed before both steps are submitted.
-- [ ] Reference explanations are written against the final chart geometry, not a draft geometry.
-- [ ] Comparison allows a defensible alternative and does not imply exact boundaries are universal.
-- [ ] Two-question check follows the ChartLab debrief and provides explanatory feedback.
-- [ ] Mobile candles and zone handles remain readable; controls are not drag-only where avoidable.
-- [ ] No personal chart, signal, entry, stop, target or numeric zone-strength score appears.
-- [ ] No website/repository edits, implementation claims or commits are included in this content task.
+- [x] L05-A cluttered chart starts with seven unlabeled candidate areas and has been visually reviewed.
+- [x] Candidate IDs and edit states make the major areas, overlapping pairs and low-value minor mark distinguishable.
+- [x] The combined state merges B/C and E/F while retaining A and G on the same candle sequence and scale.
+- [x] The final L05-A reference presents two chart-specific primary areas and explains why other marks are omitted or combined.
+- [x] ChartLab *Clear W* uses synthetic illustrative data and labels it as not historical market data.
+- [x] Support and resistance are separate submissions, and the first mark remains locked while the second is drawn.
+- [x] Reference zones and explanations stay hidden until both submissions; the full synthetic candle sequence is visible from the initial view rather than revealed as a reward.
+- [x] Reference explanations match the current lower-trough support and intervening-neckline resistance geometry.
+- [x] The comparison presents one defensible example and tells learners to reason about inclusion/exclusion rather than match exact boundaries.
+- [x] Two-question check follows the comparison/debrief and provides explanatory feedback.
+- [x] 360px browser testing found no horizontal overflow; a keyboard-operable numeric alternative to pointer drawing is available and automated keyboard testing passed.
+- [x] No personal chart, trading signal, entry, stop, target or numeric zone-strength score appears.
+- [ ] Real-learner timing/usability and manual screen-reader/assistive-technology review remain publication prerequisites.
 
 ## 10. Production asset register for Lesson 5
 
 | Asset ID | Asset | Required states | Purpose |
 |---|---|---|---|
-| L05-A | Cluttered chart and prioritisation demonstration | Candidate zones → major structure highlighted → overlapping zones combined → minor area omitted → clean comparison | Teach the selection hierarchy and why marks should have a purpose |
-| L05-B | ChartLab Study 1 — Clear W | Plain chart → support attempt submitted → resistance attempt submitted → reference comparison → reasoning/debrief | First complete support/resistance drawing practice |
-| L05-C | Clear W reference and feedback layers | Support reference → resistance reference → coverage explanations → acceptable-alternative/review guidance | Show the reasoning behind a defensible drawing without demanding pixel-perfect matching |
+| L05-A | Cluttered chart and prioritisation demonstration | Over-marked chart → A–G classification → remove D → combine B/C and E/F while keeping A/G → two-area worked reference | Teach the selection hierarchy and why marks should have a purpose |
+| L05-B | ChartLab Study 1 — Clear W | Synthetic W-shaped chart → submit/lock support → submit resistance → side-by-side visual comparison → reasoning/debrief | First complete support/resistance drawing practice |
+| L05-C | Clear W reference and feedback layers | Lower-trough support reference → intervening-neckline resistance reference → visual comparison prompts → two-question check | Compare coverage and boundaries without grading written reasoning or demanding pixel-perfect matching |
 | L05-D | Lesson knowledge check | Two questions with feedback and retry | Reinforce prioritisation and combination of redundant areas |
 
 ---
 
 ## Publication note
 
-Before publication, test the timing with a real learner and confirm that the existing ChartLab *Clear W* interaction matches the sequence described here. If the implementation differs, update either the tool or this script before release; do not imply that a feature exists merely because it is specified in this production brief.
+The current ChartLab interaction and the five L05-A chart states were checked against this script during the automated browser and visual QA recorded on 16 October 2026. Real-learner timing/usability and manual screen-reader/assistive-technology review have not been performed and remain publication prerequisites. Recheck the sequence if the implementation or chart assets change; do not imply that a feature exists merely because it is specified in this production brief.
