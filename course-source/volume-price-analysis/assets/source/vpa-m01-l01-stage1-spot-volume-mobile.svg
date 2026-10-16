@@ -4,21 +4,21 @@
 <rect width="720" height="640" fill="#f6f5f0"/>
 <rect x="18" y="16" width="684" height="608" rx="13" fill="#fffefa" stroke="#d9d7cf" stroke-width="2"/>
 <text x="38" y="50" font-family="Arial,Helvetica,sans-serif" font-size="31" font-weight="700" fill="#252923">Level 1 · Spot the candle</text>
-<text x="38" y="80" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#62645f">Compare the close and volume with the baseline.</text>
-<text x="38" y="116" font-family="Arial,Helvetica,sans-serif" font-size="19" font-weight="700" fill="#62645f">PRICE</text><line x1="98" y1="350" x2="680" y2="350" stroke="#e5e3dc" stroke-width="1.2"/>
- <text x="88" y="355" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#62645f">104</text><line x1="98" y1="309" x2="680" y2="309" stroke="#e5e3dc" stroke-width="1.2"/>
- <text x="88" y="314" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#62645f">106</text><line x1="98" y1="268" x2="680" y2="268" stroke="#e5e3dc" stroke-width="1.2"/>
- <text x="88" y="273" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#62645f">108</text><line x1="98" y1="227" x2="680" y2="227" stroke="#e5e3dc" stroke-width="1.2"/>
- <text x="88" y="232" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#62645f">110</text><line x1="98" y1="186" x2="680" y2="186" stroke="#e5e3dc" stroke-width="1.2"/>
- <text x="88" y="191" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#62645f">112</text><line x1="98" y1="145" x2="680" y2="145" stroke="#e5e3dc" stroke-width="1.2"/>
- <text x="88" y="150" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="#62645f">114</text><line x1="146.5" y1="165.5" x2="146.5" y2="247.5" stroke="#be6b61" stroke-width="3.5"/>
+<text x="38" y="80" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#41443d">Compare the close and volume with the baseline.</text>
+<text x="38" y="116" font-family="Arial,Helvetica,sans-serif" font-size="24" font-weight="700" fill="#41443d">PRICE</text><line x1="98" y1="350" x2="680" y2="350" stroke="#e5e3dc" stroke-width="1.2"/>
+ <text x="88" y="355" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#41443d">104</text><line x1="98" y1="309" x2="680" y2="309" stroke="#e5e3dc" stroke-width="1.2"/>
+ <text x="88" y="314" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#41443d">106</text><line x1="98" y1="268" x2="680" y2="268" stroke="#e5e3dc" stroke-width="1.2"/>
+ <text x="88" y="273" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#41443d">108</text><line x1="98" y1="227" x2="680" y2="227" stroke="#e5e3dc" stroke-width="1.2"/>
+ <text x="88" y="232" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#41443d">110</text><line x1="98" y1="186" x2="680" y2="186" stroke="#e5e3dc" stroke-width="1.2"/>
+ <text x="88" y="191" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#41443d">112</text><line x1="98" y1="145" x2="680" y2="145" stroke="#e5e3dc" stroke-width="1.2"/>
+ <text x="88" y="150" text-anchor="end" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#41443d">114</text><line x1="146.5" y1="165.5" x2="146.5" y2="247.5" stroke="#be6b61" stroke-width="3.5"/>
  <rect x="131.5" y="186" width="30" height="41" rx="1" fill="#be6b61"/><line x1="243.5" y1="206.5" x2="243.5" y2="288.5" stroke="#be6b61" stroke-width="3.5"/>
  <rect x="228.5" y="227" width="30" height="41" rx="1" fill="#be6b61"/><line x1="340.5" y1="227" x2="340.5" y2="309" stroke="#27725f" stroke-width="3.5"/>
  <rect x="325.5" y="247.5" width="30" height="20.5" rx="1" fill="#27725f"/><line x1="437.5" y1="227" x2="437.5" y2="309" stroke="#be6b61" stroke-width="3.5"/>
  <rect x="422.5" y="247.5" width="30" height="41" rx="1" fill="#be6b61"/><line x1="534.5" y1="268" x2="534.5" y2="329.5" stroke="#be6b61" stroke-width="3.5"/>
  <rect x="519.5" y="288.5" width="30" height="20.5" rx="1" fill="#be6b61"/><rect x="609.5" y="198.5" width="44" height="118.5" rx="4" fill="none" stroke="#252923" stroke-width="2" stroke-dasharray="5 4"/><line x1="631.5" y1="206.5" x2="631.5" y2="309" stroke="#27725f" stroke-width="3.5"/>
- <rect x="616.5" y="227" width="30" height="61.5" rx="1" fill="#27725f"/><text x="38" y="390" font-family="Arial,Helvetica,sans-serif" font-size="19" font-weight="700" fill="#62645f">RECORDED VOLUME</text>
-<text x="98" y="423" font-family="Arial,Helvetica,sans-serif" font-size="17" fill="#62645f">Average of five bars before candidate: 238</text>
+ <rect x="616.5" y="227" width="30" height="61.5" rx="1" fill="#27725f"/><text x="38" y="390" font-family="Arial,Helvetica,sans-serif" font-size="24" font-weight="700" fill="#41443d">RECORDED VOLUME</text>
+<text x="98" y="423" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#41443d">Average of five bars before candidate: 238</text>
 <line x1="98" y1="464.7" x2="680" y2="464.7" stroke="#62645f" stroke-width="2" stroke-dasharray="8 6"/><rect x="131.5" y="450" width="30" height="98" rx="1" fill="#a5aaa3"/><rect x="228.5" y="460.5" width="30" height="87.5" rx="1" fill="#a5aaa3"/><rect x="325.5" y="465.75" width="30" height="82.25" rx="1" fill="#a5aaa3"/><rect x="422.5" y="471" width="30" height="77" rx="1" fill="#a5aaa3"/><rect x="519.5" y="476.25" width="30" height="71.75" rx="1" fill="#a5aaa3"/><rect x="616.5" y="450" width="30" height="98" rx="1" fill="#c6a63a"/><line x1="631.5" y1="142" x2="631.5" y2="553" stroke="#555d56" stroke-width="1.4" stroke-dasharray="4 4"/>
-<text x="38" y="591" font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="700" fill="#252923">Candidate 280 · Baseline 238 · 1.18×</text>
-<text x="38" y="614" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="#62645f">Synthetic teaching data · no real instrument represented</text></svg>
+<text x="38" y="591" font-family="Arial,Helvetica,sans-serif" font-size="24" font-weight="700" fill="#252923">Candidate 280 · Baseline 238 · 1.18×</text>
+<text x="38" y="614" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#41443d">Synthetic teaching data · no real instrument represented</text></svg>
