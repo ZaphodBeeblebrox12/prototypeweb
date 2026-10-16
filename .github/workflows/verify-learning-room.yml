@@ -375,9 +375,9 @@ jobs:
             assert.equal(await cataloguePage.locator("#cc-micro-grid [data-open-course]").count(), 1,
               "Dynamic topic filter should display only matching courses");
             assert.equal(await cataloguePage.locator("#cc-micro-grid").innerText().then(text => text.includes("Emerging Topic Preview")), true);
-            await cataloguePage.locator(".cc-clear-search").click();
+            await cataloguePage.locator('#cc-course-filters [data-filter="all"]').click();
             assert.equal(await cataloguePage.locator("#cc-micro-grid [data-open-course]").count(), 9,
-              "Clear search should restore the selected visible category, not disclose drafts");
+              "All topics should restore all visible cards, not disclose drafts");
             await cataloguePage.setViewportSize({ width: 390, height: 844 });
             const catalogueOverflow = await cataloguePage.evaluate(() => ({
               viewport: document.documentElement.clientWidth,
