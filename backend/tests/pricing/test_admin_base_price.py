@@ -21,7 +21,7 @@ PLAN = {"name": "Pro", "tier": "pro", "display_order": "1",
 EMPTY_FEATURES_FORMSET = {
     "features-TOTAL_FORMS": "1", "features-INITIAL_FORMS": "0",
     "features-MIN_NUM_FORMS": "0", "features-MAX_NUM_FORMS": "1000",
-    "features-0-id": "",
+    "features-0-id": "", "features-0-position": "", "features-0-text": "",
 }
 
 
