@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - my-new-branch
+      - feature/tradethesis-academy
     paths:
       - "site/**"
       - "course-content/support-resistance/chart_assets/charts/**"
@@ -43,6 +44,9 @@ jobs:
 
       - name: Check image inspector and smoke test syntax
         run: |
+          node --check site/assets/academy-routing.js
+          node --check site/tests/academy-routing-smoke.cjs
+          node site/tests/academy-routing-smoke.cjs
           node --check site/assets/image-inspector.js
           node --check site/tests/image-inspector-smoke.cjs
 
