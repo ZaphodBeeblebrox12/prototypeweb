@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="850" viewBox="0 0 720 850" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="640" viewBox="0 0 720 640" role="img" aria-labelledby="title desc">
 <title id="title">Level 1 · Spot the candle</title>
 <desc id="desc">Six synthetic bars. The final candidate candle closes above its open and its reported volume exceeds the average of the five preceding bars.</desc>
-<rect width="720" height="850" fill="#f6f5f0"/>
-<rect x="22" y="18" width="676" height="790" rx="13" fill="#fffefa" stroke="#d9d7cf" stroke-width="2"/>
+<rect width="720" height="640" fill="#f6f5f0"/>
+<rect x="22" y="18" width="676" height="600" rx="13" fill="#fffefa" stroke="#d9d7cf" stroke-width="2"/>
 <text x="42" y="56" font-family="Arial,Helvetica,sans-serif" font-size="29" font-weight="700" fill="#252923">Level 1 · Spot the candle</text>
 <text x="42" y="86" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#62645f">Compare close direction and volume with the baseline.</text>
 <text x="43" y="120" font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="700" fill="#62645f">PRICE</text>
@@ -39,5 +39,5 @@
 <rect x="418.17" y="451.52" width="22" height="76.48" rx="1" fill="#a5aaa3"/>
 <rect x="518.50" y="441.65" width="22" height="86.35" rx="1" fill="#a5aaa3"/>
 <rect x="618.83" y="434.25" width="22" height="93.75" rx="1" fill="#c6a63a"/>
-<text x="42" y="788" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#252923">Volume 190 · 5-bar baseline 145 · 1.31×</text>
+<text x="42" y="598" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#252923">Volume 190 · 5-bar baseline 145 · 1.31×</text>
 </svg>

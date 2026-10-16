@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="720" height="850" viewBox="0 0 720 850" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="640" viewBox="0 0 720 640" role="img" aria-labelledby="title desc">
 <title id="title">Outcome A · Price holds above the range</title>
 <desc id="desc">The original twelve-bar breakout example followed by three bars that hold above the former range high and make further progress.</desc>
-<rect width="720" height="850" fill="#f6f5f0"/>
-<rect x="22" y="18" width="676" height="790" rx="13" fill="#fffefa" stroke="#d9d7cf" stroke-width="2"/>
+<rect width="720" height="640" fill="#f6f5f0"/>
+<rect x="22" y="18" width="676" height="600" rx="13" fill="#fffefa" stroke="#d9d7cf" stroke-width="2"/>
 <text x="42" y="56" font-family="Arial,Helvetica,sans-serif" font-size="29" font-weight="700" fill="#252923">Outcome A · Price holds above the range</text>
 <text x="42" y="86" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#62645f">The same initial breakout, followed by further upward progress.</text>
 <text x="43" y="120" font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="700" fill="#62645f">PRICE · dashed line = reference</text>
@@ -70,5 +70,5 @@
 <rect x="568.83" y="459.40" width="21.67" height="68.60" rx="1" fill="#a5aaa3"/>
 <rect x="608.96" y="463.98" width="21.67" height="64.02" rx="1" fill="#a5aaa3"/>
 <rect x="649.10" y="470.84" width="21.67" height="57.16" rx="1" fill="#a5aaa3"/>
-<text x="42" y="788" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#252923">Volume 410 · 5-bar baseline 184 · 2.23×</text>
+<text x="42" y="598" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#252923">Volume 410 · 5-bar baseline 184 · 2.23×</text>
 </svg>
