@@ -18,6 +18,11 @@ A trade plan is not a forecast that must come true. It is a structured response 
 
 ## Lesson 6.1 — Start With the Bigger Picture: What Is the Market Doing?
 
+![Chart for Start With the Bigger Picture: What Is the Market Doing?. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m06-l01-context-note.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m06-l01-context-note-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m06-l01-context-note.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m06-l01-context-note.md)
+
 ### Why context comes first
 
 A candle or volume spike has no fixed meaning in isolation. A wide, high-volume bar near a range boundary raises a different question from a similar bar in the middle of an established trend. Context helps you decide which events matter and which are just activity.
@@ -97,6 +102,11 @@ On a cluttered chart, twelve horizontal lines compete for attention. The range b
 
 ## Lesson 6.2 — Read the Evidence: What Are Price and Volume Telling You?
 
+![Chart for Read the Evidence: What Are Price and Volume Telling You?. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m06-l02-evidence-sheet.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m06-l02-evidence-sheet-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m06-l02-evidence-sheet.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m06-l02-evidence-sheet.md)
+
 With the wider context understood, focus on the event that may change your view. Your evidence note should make it possible for another person to see why you reached your interpretation—even if they disagree with it.
 
 ### Separate observation from interpretation
@@ -170,6 +180,11 @@ In a different ending, price breaks below 53.5 and fails to reclaim it. Add that
 ---
 
 ## Lesson 6.3 — Build Your Trade Scenario: What Needs to Happen Next?
+
+![Chart for Build Your Trade Scenario: What Needs to Happen Next?. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m06-l03-competing-scenarios.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m06-l03-competing-scenarios-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m06-l03-competing-scenarios.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m06-l03-competing-scenarios.md)
 
 A scenario is a conditional explanation of what the market might do next and how you will recognise it. It is not a prediction written in advance and defended no matter what happens.
 
@@ -246,6 +261,11 @@ Scenario A says price should hold above 208 and continue. If price falls back in
 ---
 
 ## Lesson 6.4 — Plan the Trade Before You Take It
+
+![Chart for Plan the Trade Before You Take It. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m06-l04-pretrade-risk-ticket.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m06-l04-pretrade-risk-ticket-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m06-l04-pretrade-risk-ticket.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m06-l04-pretrade-risk-ticket.md)
 
 Good analysis and good trade construction are connected, but they are not the same thing. A chart may support a direction while the specific trade has unclear invalidation, poor positioning or insufficient room to a plausible objective.
 
@@ -331,6 +351,11 @@ Assume a hypothetical entry at 50, invalidation/stop at 48 and a value of 2 curr
 ---
 
 ## Lesson 6.5 — The Complete Walkthrough: From Chart Analysis to Trade Plan
+
+![Chart for The Complete Walkthrough: From Chart Analysis to Trade Plan. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m06-l05-complete-plan-capstone.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m06-l05-complete-plan-capstone-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m06-l05-complete-plan-capstone.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m06-l05-complete-plan-capstone.md)
 
 This final lesson brings the whole course together. The numbers are **synthetic and for learning only**. The purpose is to demonstrate a transparent process, not to suggest a live position.
 
