@@ -2,7 +2,7 @@
 
 **Lesson:** What Candlesticks Don't Tell You: Reading the Volume Behind Price  
 **Asset ID:** VPA-M01-L01-01  
-**Status:** Stage 2 source-level fixes and responsive mobile chart variants have been added on `my-new-branch`. Stage 3 SVG text is readable; unlocked navigation updates the active-step indicator; focus and reduced-motion handling have been improved; and mobile screens use reflowed SVGs with larger label text, compact volume summaries, the reference-level legend moved out of the candle area, and reduced-height single-chart cards. The stand-in-image fixture passed 12 interaction/responsiveness checks. A separate self-contained Chromium review build embedding the current mobile SVGs passed 11 rendering/interaction checks, including chart decoding, progression, model-answer disclosure, restart and a 360px viewport. That review build mirrors the checked-in interactions but is not a byte-for-byte rendering of the repository HTML. Full exact-page review, assistive-technology testing and beginner usability testing remain open.
+**Status:** The three-level pilot and responsive mobile variants are implemented. The committed HTML now shows the Level 3 breakout attempt first and keeps continuation/failure charts hidden until the learner submits an initial reading. The page has explicit stage navigation, feedback, a restart control, focus handling and reduced-motion-aware scrolling. The source/data/path checks pass. Earlier fixture tests covered a prior interaction build, not this exact final HTML. Exact-page browser rendering, assistive-technology testing and beginner usability testing remain open.
 
 ## Learning progression shown to the learner
 
@@ -23,18 +23,22 @@ The learner sees consistent stage labels **Notice → Compare → Apply** and ca
 - Five `*-mobile.svg` files in `source/` and `exports/` — reflowed narrow-screen versions of the pilot charts. The two-panel context comparison is stacked vertically for phone screens.
 - The four single-chart mobile variants use a shorter viewBox and card height, placing the volume summary closer to the histogram and avoiding excess blank space on phones.
 - The mobile charts use larger headings, axis labels, bar numbers and baseline labels to improve readability at phone scale.
-- `data/vpa-m01-l01-candle-context-data.csv` — synthetic OHLCV data for the visual stages and alternative endings.
+- `data/vpa-m01-l01-candle-context-data.csv` — 72 synthetic OHLCV rows covering Level 1, both Level 2 comparison panels, the initial Level 3 breakout and both alternate endings.
 - `alt-text/vpa-m01-l01-candle-context-alt.md` — alt text, extended descriptions and provenance notes.
 - `lab-specs/vpa-m01-l01-candle-context-lab.html` — standalone responsive three-level practice page.
 - `lab-specs/vpa-m01-l01-candle-context-lab.md` — teaching logic, model responses, acceptable alternatives, feedback, rubric and validation checklist.
+
+## Source-data consistency
+
+The CSV contains the underlying bars for every staged visual. The six-bar Level 1 exercise has a five-bar volume baseline of 238 and candidate volume 280 (1.18×). The Level 2 comparison uses A: 185 vs 157 (1.18×), and B: 420 vs 225 (1.87×). The Level 3 breakout uses 410 vs 184 (2.23×); its continuation and failure versions share the same initial 12 bars and candidate before diverging.
 
 ## Changes from the first pilot
 
 - Both comparison panels use a common vertical price scale, so the matching candidate candles render at equivalent dimensions.
 - Volume bars are neutral grey rather than inheriting candle colour; only the candidate bar is highlighted.
 - The comparison chart displays candidate volume, its baseline and the relative multiple.
-- The exercise progresses from a simple recognition check to a guided comparison, then a new case with later bars withheld.
-- Two alternate outcomes are revealed only after the learner records an initial reading.
+- The exercise progresses from a simple recognition check to a guided comparison, then a new breakout case with later bars withheld.
+- Two alternate outcomes are revealed only after the learner records an initial reading and two possible paths.
 - Stage 2 fixes correct encoded headings/annotations in all three Stage 3 charts and their exports; unlocked progress buttons now navigate, the active-step indicator follows navigation, focus moves to newly revealed content, restart returns focus to the first stage, and scripted scrolling respects reduced-motion preferences.
 - Five reflowed mobile SVG variants were added and connected with `<picture>`/`<source media="(max-width: 720px)">`; the comparison case stacks its panels instead of shrinking the two-column desktop visual.
 - Level 2 feedback now makes clear that response length is not an automatic assessment of reasoning quality.
