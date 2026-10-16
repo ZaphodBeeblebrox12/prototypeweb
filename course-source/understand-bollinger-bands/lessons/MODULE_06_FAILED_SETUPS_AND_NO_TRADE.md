@@ -64,6 +64,14 @@ Price compresses between 100 and 104, then closes at 105. A plan that requires a
 
 Now compare a chart where price closes above 104, holds above the boundary and continues making higher highs. The first candle alone did not distinguish the cases. The difference emerges in what happens next and in the conditions the plan required. After a failed break, do not immediately sell. A separate short setup needs its own price trigger and risk plan; otherwise the failure simply means the original long idea is no longer supported.
 
+### Second worked comparison: A gap can make the planned breakout entry different from the chart signal
+
+Suppose a market compresses between 100 and 104. Under a first-close rule, a candle closes at 105 and creates a possible long trigger. Before a normal entry can be considered, the trader checks where the chosen invalidation sits and how much room remains to the next obstacle. The next session opens at 109, already close to a resistance area near 111. The original trigger has occurred, but the realistic entry price is now much worse and a structural stop may be far away.
+
+A disciplined plan can define a maximum acceptable distance from the trigger or a rule not to chase a gap. If price remains beyond the breakout boundary, the trader can wait for a retest that meets a separately defined condition. If no retest arrives, no trade is a valid result. Do not rewrite the original rule by widening the acceptable entry after seeing the move.
+
+This example also shows why signal validity and execution quality are separate. The chart may confirm the event you were waiting for; it does not guarantee that the next available price offers a sensible trade. Costs, spread and slippage matter most when price moves quickly. Decide in advance how the method handles them.
+
 ### Common mistake
 
 Reversing position immediately after a failed breakout without waiting for a new plan.
@@ -130,6 +138,14 @@ Price falls from 120 to 114, rebounds to 116 and then moves to 110. Several clos
 
 In a second chart, price tags the lower band, fails to make another meaningful low, reclaims a prior swing level and begins forming higher lows. That is a different set of facts and may justify evaluating a reversal setup if it meets the plan's conditions. It still does not guarantee a sustained recovery. The useful distinction is the change in structure, not merely the number of times price touched the band. If no change appears, waiting is more defensible than fading the trend.
 
+### Second worked comparison: One strong candle may not be enough to declare the walk over
+
+Price has been moving down beside the lower band, with falling swing highs and lows. A large green candle then closes near its high and moves price back toward the middle band. It is tempting to call this the reversal. However, the earlier sequence may still be intact: the recent swing high remains above the current price, and the new candle has not yet broken that level. The candle shows a recovery attempt; it does not yet establish a new uptrend.
+
+If a later candle takes out the intervening swing high and a pullback holds above the recent low, the evidence for a structural change improves. If price stalls below that high and returns to a new low, the large green candle becomes a rebound inside the decline. The exact trigger depends on the reversal method being tested, but it should be specified before entering.
+
+Do not require every chart to confirm in the same number of candles. Instead, identify the level that must break for the prior sequence to weaken and the level that would invalidate the reversal idea. This turns “price looks stretched” into a testable question. If the change in structure never appears, remaining out of the trade is consistent with the evidence.
+
 ### Common mistake
 
 Confusing “price is far from the average” with “price must reverse now.”
@@ -193,6 +209,14 @@ You are short at the top of a range. Price closes above the range high twice and
 A range has repeatedly turned near 104, and a trader is watching an upper-band tag for a possible short back toward the middle. Price instead closes above 104 with a broad candle and the next period holds above the former ceiling. The old range-reversal premise has been challenged. Continuing to expect the same bounce because it worked before is not evidence; it is attachment to the prior idea.
 
 Contrast that with a brief wick above 104 that closes back inside and is followed by a return toward the middle of the range. That behaviour may fit a failed probe, although the short still needs its own trigger. The two cases should not be classified just by the first excursion. Decide which close/hold condition your method uses, then apply it consistently. When the boundary has changed role or the range premise has failed, reassess instead of defending the old target.
+
+### Second worked comparison: A boundary that held before may have changed role
+
+A range has turned near 104 several times. Price then closes above 104 and holds around 105 on a pullback. A trader who was waiting to short the upper range boundary may still be expecting the old rotation back toward 100. But if the old ceiling now acts as support and price advances again, the range premise has been challenged. A rule based on repeated rejection at 104 no longer applies in the same way without fresh evidence.
+
+Compare a brief wick to 105 that closes back at 103, followed by renewed movement inside the range. That first poke may fit a failed breakout rather than a sustained change. The distinguishing information comes from the close, the next response and the structure around the boundary—not the fact that price touched 105.
+
+Before trading a range edge, write what would make you stop treating it as a range. That can be a closing/holding condition or another clearly stated structural rule. Apply it without hindsight. When the old condition fails, cancel or reassess the plan instead of moving the target farther away and hoping the range returns. A fresh continuation idea needs its own trigger, invalidation and risk calculation.
 
 ### Common mistake
 
@@ -259,6 +283,14 @@ The bands are wide and price is moving strongly upward. The breakout itself is c
 Price breaks above 104 and travels quickly to 110 while the bands widen. If a trader waits until 109 to enter, places the invalidation at 105 and sees a potential resistance area near 111, the setup has only about 2 points of nearby room for roughly 4 points of stop distance before costs. The breakout may be real, but the trade-off is unattractive.
 
 A different setup breaks above 104, holds near 105 and has clear room toward 111 while its structural invalidation sits near 102. That case may deserve assessment because entry, risk and available room have not deteriorated in the same way. Neither example proves profitability. It shows why “direction correct” and “entry worthwhile” are different questions. Waiting for a better location or skipping the trade are decisions, not missed obligations.
+
+### Second worked comparison: Calculate the room before deciding whether to chase
+
+A breakout moves from 104 to 110 while the bands widen. You notice the move late and consider entering at 109. The structural invalidation would be at 105, creating 4 points of price risk before costs. A clear resistance area sits near 111, leaving only about 2 points of immediate room. Even if the market continues briefly, the location offers less room than the stop distance and can be a poor trade-off.
+
+Now compare an earlier close above 104 at 105, with the same invalidation at 102 and the next obstacle near 111. The risk distance and potential room are different. This does not prove that the earlier trade will win; it shows that entry location changes the quality of the plan even when the direction is the same.
+
+Use this simple check only after you have a valid setup and a structurally meaningful stop. Do not force the stop closer merely to make the calculation attractive. Include realistic costs and slippage, especially on a fast expansion candle. A chart can be moving exactly as expected while the right decision is to wait for a pullback or pass entirely.
 
 ### Common mistake
 
