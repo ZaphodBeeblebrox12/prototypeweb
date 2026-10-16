@@ -99,7 +99,11 @@ def remove_internal_blocks(markdown_text):
         if _ANSWER_EXAMPLE_LABEL.match(stripped):
             collected = [line]
             index += 1
-            while index < len(lines) and lines[index].strip():
+            while (
+                index < len(lines)
+                and lines[index].strip()
+                and not _HEADING.match(lines[index])
+            ):
                 collected.append(lines[index])
                 index += 1
             answer_lines.append("\n".join(collected).strip())
