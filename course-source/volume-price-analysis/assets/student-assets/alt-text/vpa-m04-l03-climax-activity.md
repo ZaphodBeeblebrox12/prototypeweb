@@ -1,5 +1,6 @@
 # Accessibility and source notes — M04-L03
 
+**Figure number:** Figure 4.3; interactive panels use Figure 4.3a–Figure 4.3e.
 **Lesson:** When Volume Explodes at Market Extremes: Understanding Climax Activity
 **Purpose:** Interpret an exceptional volume bar using price result, location and later behaviour.
 **Data:** Synthetic OHLCV, not historical prices or a trading signal.
