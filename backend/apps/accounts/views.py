@@ -591,8 +591,10 @@ class ProfileView(View):
     """User profile view and edit."""
 
     def get(self, request):
+        preferences = UserPreference.objects.filter(user=request.user).first()
         return render(request, "accounts/profile.html", {
             "user": request.user,
+            "preferences": preferences,
             "telegram_connected": bool(request.user.telegram_id and request.user.telegram_verified),
         })
 
