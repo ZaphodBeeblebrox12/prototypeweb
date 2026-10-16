@@ -58,6 +58,12 @@ Two traders have the same account and same planned cash risk. One has a stop twi
 
 **Model response:** The trader using the wider stop should generally use about half the size to keep the same planned cash risk, before costs and execution differences.
 
+### Worked calculation: Let the stop distance determine size
+
+Imagine an account of ₹2,00,000 and a chosen maximum planned risk of 0.5%, or ₹1,000. A possible entry is ₹250 and the structural stop is ₹242, so the planned distance is ₹8 per share. The arithmetic gives ₹1,000 ÷ ₹8 = 125 shares before transaction costs and slippage. A cautious plan may round down further to leave a buffer. The example is a sizing calculation, not a recommendation to trade that instrument.
+
+If the structural stop were at ₹234, the distance would be ₹16 and the same cash-risk limit would allow at most 62 shares before costs. Do not move the stop to ₹242 just to permit a larger position if ₹234 is where the structure actually invalidates the idea. For futures or contracts, include the lot size and point value in the calculation. Gaps and slippage can cause actual loss to exceed the planned amount.
+
 ### Common mistake
 
 Using the same position size on every setup even when the stop distance changes.
@@ -115,6 +121,12 @@ For each path in Figure 7.2, state the action prescribed by the sample plan. Ide
 You planned a range trade to exit near the middle of the range, but price is still far from the target. You feel tempted to move the target farther away because the candle looks strong. What should you check?
 
 **Model response:** I should follow the rules I chose before entry, unless my plan explicitly allows a defined adjustment. A strong candle does not automatically justify changing the target. If I want to test a different management rule, I should evaluate it separately.
+
+### Worked comparison: Decide what to do before each path appears
+
+A long breakout plan enters after a defined close above 104, uses a structural invalidation below 102 and identifies a resistance area around 110. If price advances steadily toward 110, the preselected target or partial-exit rule controls the decision. If price falls through 102, the invalidation controls it. If price stalls at 107 without reaching either point, the written management rule—not impatience—decides whether to hold, reduce or exit.
+
+A poor plan says “I will see how it feels.” It can lead to widening stops after a loss or exiting too early because a candle looks intimidating. The middle band may be useful information, but it is not a universal exit for every method. A breakout, a range reversal and a squeeze-release trade have different reasons for entry. Match the management rule to that reason and apply it consistently while the outcome is still unknown.
 
 ### Common mistake
 
@@ -179,6 +191,12 @@ Name two reasons the cherry-picked sample may give a misleading impression. Then
 A modified band setting produces better results on the examples you just reviewed but performs worse on a different period. What should you do?
 
 **Model response:** I should not declare the modification superior from the first sample. I need a consistent comparison and additional cases not used to tune the settings. I should also consider whether the rules are too fitted to a particular market condition.
+
+### Worked comparison: A fair review includes uncomfortable examples
+
+Suppose you have a set of 40 candidate cases. Do not keep only the cleanest breakouts. Separate cases by context—trend, range, compression, failed first move and unclear structure—and record every case that met the stated rules, including those that stopped out or never offered a viable entry. This does not make 40 cases a guarantee of statistical certainty; it is a practical way to expose whether the rule only looks convincing in selected screenshots.
+
+If the rule performs differently in trending and ranging conditions, note the difference before changing it. Then test any proposed filter against cases that were not used to invent the filter. Keep entries, costs, stop logic and exit rules consistent during the first pass. If you change several inputs together, you will not know which change mattered. The aim is to learn where the method's conditions hold up, not to find a perfect-looking setting for the past.
 
 ### Common mistake
 
@@ -253,6 +271,14 @@ A strong answer:
 - accepts “no trade” when the required conditions are absent.
 
 The assignment is not graded by whether you guessed the next price direction. It is about whether you made a defensible decision from the information available.
+
+### Worked comparison: A loss can be disciplined; a win can be careless
+
+**Case A — Disciplined loss.** The defined setup appears, the entry follows the rule, the position is sized from the structural stop, and the trade exits at invalidation. The market then reverses. The result is negative, but the record shows a coherent decision made from the evidence available at entry.
+
+**Case B — Undisciplined win.** The trader enters before confirmation, moves the stop farther away when price goes against the trade, and eventually exits at a profit after a sudden rally. The result is positive, but it does not show that the process was sound or repeatable.
+
+**Case C — No trade.** A required condition is missing or the next obstacle leaves too little room. The trader passes and records why. Review each case without letting the final price path rewrite what could have been known at the decision point.
 
 ### Common mistake
 
