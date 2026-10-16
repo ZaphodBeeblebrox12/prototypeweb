@@ -15,7 +15,10 @@
     <a href="#my-learning">My learning</a>
     <a href="#community-access">Community access</a>
     <a href="#recent-activity">Recent activity</a>
-    <a href="#course-library">Course library</a>
+    {% if offers %}<a href="#course-library">Course library</a>{% endif %}
+    <a href="{% url 'manage-subscription' %}">Billing &amp; receipts</a>
+    <a href="{% url 'profile' %}">Account &amp; security</a>
+    <a href="{% url 'support:my_tickets' %}">Help</a>
   </nav>
 
   <section class="tt-stat-grid" aria-label="Learning summary">
@@ -86,6 +89,28 @@
       </div>
     {% else %}
       <div class="tt-empty-inline"><strong>No active included community access</strong><p class="tt-muted mb-0">If a programme includes community access, its current term will appear here separately from your course access.</p></div>
+    {% endif %}
+    {% if community_accesses %}
+      <div class="tt-community-connections" aria-label="Community connection status">
+        {% if telegram_access_state %}
+          <article class="tt-community-connection">
+            <div class="tt-community-connection-copy">
+              <span class="tt-connection-platform">Telegram</span>
+              <strong>{{ telegram_access_state.label }}</strong>
+              {% if telegram_access_state.detail %}<p class="tt-muted mb-0">{{ telegram_access_state.detail }}</p>{% endif %}
+            </div>
+            {% if telegram_access_state.cta_url %}<a class="btn btn-outline-primary" href="{{ telegram_access_state.cta_url }}">{{ telegram_access_state.cta_label }}</a>{% endif %}
+          </article>
+        {% endif %}
+        <article class="tt-community-connection">
+          <div class="tt-community-connection-copy">
+            <span class="tt-connection-platform">Discord</span>
+            <strong>{% if discord_connected %}Account connected{% else %}Account not connected{% endif %}</strong>
+            <p class="tt-muted mb-0">{% if discord_connected %}Your Discord account is linked.{% else %}Link your account for community access where Discord roles are supported.{% endif %}</p>
+          </div>
+          {% if not discord_connected %}<a class="btn btn-outline-primary" href="{% url 'discord_connect' %}">Connect Discord</a>{% endif %}
+        </article>
+      </div>
     {% endif %}
   </section>
 
