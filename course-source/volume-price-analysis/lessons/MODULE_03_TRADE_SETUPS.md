@@ -9,6 +9,8 @@ You will practise keeping three things separate: **the setup area, the trigger, 
 
 ## Lesson 3.1 — Stop Chasing Price: Finding Potential Setups in an Established Trend
 
+As you work through this lesson, refer to **Figure 3.1** for the chart example.
+
 ![Chart for Stop Chasing Price: Finding Potential Setups in an Established Trend. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m03-l01-trend-continuation-setup.svg)
 
 **Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m03-l01-trend-continuation-setup-lab.html)  
@@ -53,19 +55,19 @@ The key is that you made the plan before the trigger occurred. You are not drawi
 
 Price rallies from 40 to 48 with no nearby structure. Buying at 48 may leave the next sensible invalidation point far away. If price later pulls back toward the old range boundary at 44–45, you can evaluate whether the area holds and whether a trigger forms. The second location does not guarantee a better trade; it gives a more structured place to ask the question. A setup is defined by evidence and risk logic, not by being earlier or later alone.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** On an uptrend chart, identify the latest meaningful higher low and describe how extended price is from it.
 
 **Feedback:** Point to the swing that defines structure and note the distance to current price. The purpose is to notice whether risk is harder to define after a late entry.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare chasing a long impulse with waiting for a pullback to a marked area and a later trigger.
 
 **Feedback:** A setup area says where to pay attention; a trigger is the event required before considering entry; invalidation explains what contradicts the thesis.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** A market rises from 40 to 48 and the old range boundary is 44–45. State a condition that supports continuation and one that weakens it.
 
@@ -83,6 +85,8 @@ Price rallies from 40 to 48 with no nearby structure. Buying at 48 may leave the
 ---
 
 ## Lesson 3.2 — Is the Pullback Running Out of Steam? Reading Moves Against the Trend
+
+As you work through this lesson, refer to **Figure 3.2** for the chart example.
 
 ![Chart for Is the Pullback Running Out of Steam? Reading Moves Against the Trend. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m03-l02-pullback-pressure.svg)
 
@@ -129,19 +133,19 @@ The useful distinction is not simply “low volume good, high volume bad”. It 
 
 In Case A, price retreats from 120 to 117 on smaller ranges, activity declines and the prior higher low at 115 remains intact. In Case B, price falls from 120 to 112 on expanding ranges and breaks 115, then cannot reclaim it. The first case may be a pause worth watching. The second challenges continuation. Volume contributes context, but the difference in achieved price progress and structure is decisive.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** An impulse advances 10 points and the pullback retreats 2 points on smaller ranges. What else should you record?
 
 **Feedback:** Relative activity, location and whether meaningful swing structure remains intact are relevant; distance alone is not enough.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare a low-activity pullback that holds an old breakout zone with a higher-activity pullback that breaks the latest higher low and fails to reclaim it.
 
 **Feedback:** The second case more directly challenges continuation because price structure has changed. Low volume does not prove that the first pullback is finished.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** The pullback reaches a zone but overlaps without a trigger. Write what you will wait for and what would abandon the idea.
 
@@ -159,6 +163,8 @@ In Case A, price retreats from 120 to 117 on smaller ranges, activity declines a
 ---
 
 ## Lesson 3.3 — Trading Near Support and Resistance: What to Look for Before Entry
+
+As you work through this lesson, refer to **Figure 3.3** for the chart example.
 
 ![Chart for Trading Near Support and Resistance: What to Look for Before Entry. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m03-l03-support-resistance-zones.svg)
 
@@ -203,19 +209,19 @@ If the next bars make higher lows and reclaim a nearby short-term swing high, a 
 
 An analyst marks 80–82 because price previously turned away there twice. On a later test, price trades to 81 and closes at 83, then holds above the area. The old resistance may be changing role, but that claim needs the hold and follow-through. If price instead closes back below 80 and fails to reclaim the zone, the idea that it has become support is weakened. The mark is useful because it sets up a test, not because it predicts the answer.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** A support zone was marked because price turned there twice. What justifies the zone and what can it not guarantee?
 
 **Feedback:** Prior turns justify attention to the area. They do not guarantee another bounce or exact-price respect.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare price turning away, closing beyond and holding, or overlapping at the zone.
 
 **Feedback:** Turning away is a response; holding beyond may indicate the old role is changing; overlap is unresolved. The zone alone does not choose an outcome.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** Price approaches a zone from below with expanding ranges and elevated activity. What should you inspect next?
 
@@ -233,6 +239,8 @@ An analyst marks 80–82 because price previously turned away there twice. On a 
 ---
 
 ## Lesson 3.4 — Finding Opportunities at the Edges of a Trading Range
+
+As you work through this lesson, refer to **Figure 3.4** for the chart example.
 
 ![Chart for Finding Opportunities at the Edges of a Trading Range. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m03-l04-range-edge-setups.svg)
 
@@ -267,19 +275,19 @@ If a later attempt closes above 50 and holds on a retest, the breakout scenario 
 
 Inside a 40–50 range, a bar at 45 may be visually dramatic but is far from either boundary. A similar bar at 50 directly tests the area where price previously stopped. At 50, the questions “hold outside or return inside?” are easier to frame. At 45, there may be no nearby structural discriminator. Strong activity in the middle is still evidence; it simply may not create a well-defined range-edge setup.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** In a 40–50 range, identify the upper edge, lower edge and middle. Why are these locations different?
 
 **Feedback:** The edges test prior boundaries; the middle may not offer a nearby structural point to distinguish rotation from breakout.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare a brief break above 50 that returns inside with a close above 50 followed by a successful retest.
 
 **Feedback:** Return inside and failed reclaim support range return; sustained trade above and a successful retest support breakout continuation.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** Price is in the middle of the range and prints a wide high-volume candle. What is missing for an edge-based setup?
 
@@ -297,6 +305,8 @@ Inside a 40–50 range, a bar at 45 may be visually dramatic but is far from eit
 ---
 
 ## Lesson 3.5 — Before You Enter: Separating Promising Setups From Weak Ones
+
+As you work through this lesson, refer to **Figure 3.5** for the chart example.
 
 ![Chart for Before You Enter: Separating Promising Setups From Weak Ones. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m03-l05-setup-quality-filter.svg)
 
@@ -335,19 +345,19 @@ Now suppose price moves above a nearby swing high, but the invalidation point is
 
 Setup A has a valid continuation trigger, an invalidation linked to a clear swing and enough room before the next relevant opposing area. Setup B has a similarly bullish-looking candle, but the stop is arbitrary and a nearby resistance zone leaves little room for the proposed target. The direction might be plausible in both, yet only A is clearly constructed under the stated plan. A chart view and a decision to trade are separate judgements.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** For one candidate setup, write the market state, a relevant zone and one fact that supports watching it.
 
 **Feedback:** A useful note explains why the location matters; “it looks bullish” or “there is a line” is not enough.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare a defined pullback near a level, a candle pattern in the range middle and an extended breakout near opposing resistance using context, location, evidence, trigger, invalidation and risk.
 
 **Feedback:** The pullback may be worth preparing if the trigger/risk are clear; the middle-range pattern has weak location; the extended breakout may leave little room. None is automatically tradable.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** A breakout closes beyond resistance, returns inside on the next bar and the proposed entry is near the centre of the old range. Decide prepare/wait/reject and explain.
 
