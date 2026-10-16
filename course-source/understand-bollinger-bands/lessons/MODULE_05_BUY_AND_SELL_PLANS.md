@@ -25,7 +25,7 @@ These methods do not all answer the same question. The first two focus on volati
 
 ## Lesson 5.1 — Bollinger Method I: Trade the Volatility Breakout
 
-**Estimated study time:** 18 minutes.
+**Estimated study time:** 28 minutes.
 
 As you work through this lesson, refer to **Figure 5.1**.
 
@@ -79,8 +79,6 @@ Calculate quantity from the cash risk you permit divided by the entry-to-stop di
 
 **Failure clues:** a breakout that quickly closes back in the old range, a failed push followed by a strong move the other way, or no follow-through after the first expansion. These are warnings to follow your prewritten stop/exit rule; they do not automatically authorise a reverse trade.
 
-> **Temporary reference gallery:** These charts are hot-linked from external sites for private review and will be replaced with course-owned TradingView captures. The source map is kept in the internal asset index.
-
 ### Historical chart examples to compare
 
 Treat these as case studies, not a list of guaranteed winners. On each chart, mark where compression ends, the exact qualifying bar, the price you could realistically enter, the structural stop, and the first nearby obstacle. At least one example is included because a first break can fail before price resolves.
@@ -132,7 +130,7 @@ BandWidth is at a six-month low, but price remains inside the recent range. Shou
 
 ## Lesson 5.2 — Bollinger Method II: Follow Strength Confirmed by MFI
 
-**Estimated study time:** 18 minutes.
+**Estimated study time:** 28 minutes.
 
 As you work through this lesson, refer to **Figure 5.2**.
 
@@ -238,7 +236,7 @@ Panel A shows the long conditions coming together. Panel B shows the mirrored sh
 
 ## Lesson 5.3 — Bollinger Method III: Look for Reversal Clues in Volume
 
-**Estimated study time:** 18 minutes.
+**Estimated study time:** 28 minutes.
 
 As you work through this lesson, refer to **Figure 5.3**.
 
@@ -334,7 +332,7 @@ Price touches the lower band, but Intraday Intensity is negative and price conti
 
 ## Lesson 5.4 — Bollinger Method IV: Wait for a Confirmed Breakout
 
-**Estimated study time:** 18 minutes.
+**Estimated study time:** 27 minutes.
 
 As you work through this lesson, refer to **Figure 5.4**.
 
@@ -432,7 +430,7 @@ Treating Method IV as “wait for any two large candles.” The rule concerns tw
 
 ## Lesson 5.5 — Trade the W-Bottom and M-Top, Not Just the Shape
 
-**Estimated study time:** 18 minutes.
+**Estimated study time:** 28 minutes.
 
 As you work through this lesson, refer to **Figure 5.5**.
 
@@ -534,7 +532,7 @@ The second low in a possible W-bottom is lower than the first in price, but it i
 
 ## Lesson 5.6 — John Carter's TTM Squeeze: Use Momentum for Direction
 
-**Estimated study time:** 17 minutes.
+**Estimated study time:** 25 minutes.
 
 As you work through this lesson, refer to **Figure 5.6**.
 

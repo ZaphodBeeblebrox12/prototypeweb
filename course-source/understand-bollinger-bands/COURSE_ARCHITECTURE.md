@@ -42,12 +42,12 @@ By the end, students should be able to:
 | 2. Read the Bands and Their Measurements | Understand construction, settings, %B, and BandWidth. | 4 |
 | 3. Read the Market Before Reading the Signal | Learn trend/range context, band walks, compression, expansion, and directional evidence. | 4 |
 | 4. Read Bollinger's Signature Patterns | Understand M-tops and W-bottoms and judge when a pattern is incomplete or ambiguous. | 4 |
-| 5. Build Buy and Sell Plans | Turn patterns and market context into practical, symmetrical, testable plans. | 5 |
+| 5. Build Buy and Sell Plans | Apply six author-based methods with explicit triggers, entry choices, stops, skip rules, and historical chart comparisons. | 6 |
 | 6. Recognise Failed Setups and Know When to Wait | Study the traps that make otherwise attractive setups fail. | 4 |
 | 7. Manage Risk and Review the Process | Size, manage, test, journal, and apply the full reasoning process. | 4 |
 
 **Planned lesson count:** 30  
-**Expected total learning time:** approximately 7.5–8.5 hours, based on lesson estimates below. This is a planning estimate, not a measured completion time.
+**Expected total learning time:** approximately 8.75–9.25 hours, based on the current lesson estimates below. The estimates sum to about 8 hours 54 minutes; this is a planning estimate, not a measured completion time.
 
 ## Teaching and language standards
 
@@ -79,7 +79,7 @@ Do not repeat the same full explanation in later modules. Introduce the concept 
 
 ## Lesson architecture
 
-Timings include reading, inspecting the supplied figure, completing the task, and reviewing feedback. All tasks use the named static figures; there is no ChartLab or external chart-finding activity.
+Timings include reading, inspecting the supplied static figures and the provided case examples, completing the task, and reviewing model reasoning. There is no ChartLab or activity requiring learners to find their own charts. Module 5 currently embeds temporary historical chart references; those must be replaced with course-owned or rights-cleared local images before public release.
 
 ### Module 1 — What Bollinger Bands Actually Tell You
 
@@ -278,45 +278,45 @@ Timings include reading, inspecting the supplied figure, completing the task, an
 *Module purpose:* Make the course's market angle concrete by teaching the methods John Bollinger wrote about, his later official confirmed-breakout extension, and John Carter's distinct TTM Squeeze. Students learn the author's conditions first, then add a clear risk plan without confusing course additions with source rules.
 
 #### 5.1 — Method I: Trade the Volatility Breakout
-**Time:** 18 minutes.  
+**Time:** 28 minutes.  
 **Outcome:** Identify historically narrow BandWidth conditions and construct long and short plans triggered by a breakout beyond the corresponding band.  
 **Author's rule:** The Squeeze is the setup; the first breakout is the directional event. The book warns about head fakes and discusses using a Parabolic-style or opposite-band stop. The later official software implementation uses a 125-period BandWidth low and a recent-squeeze lookback.  
-**Figure/task:** Figure 5.1 compares an upper-band breakout, lower-band breakout, and a false first move. Students classify the setup and state what would invalidate the first idea.  
+**Figure/task:** Figure 5.1 is paired with a five-chart historical gallery. Students compare earlier, close-confirmed, and retest entries; mark structural stops, nearby obstacles, and head-fake risk.  
 **Source:** John Bollinger, *Bollinger on Bollinger Bands*, Chapter 16; official Method I manual.
 
 #### 5.2 — Method II: Follow Strength Confirmed by MFI
-**Time:** 18 minutes.  
+**Time:** 28 minutes.  
 **Outcome:** Use Bollinger's published %B/MFI conditions to recognise trend-following long and short setups.  
 **Author's rule:** Buy when %B is above 0.8 and MFI(10) is above 80; sell/short when %B is below 0.2 and MFI(10) is below 20. The method does not require a squeeze. Bollinger discusses a modified Parabolic stop or an opposite-band tag as exit choices.  
-**Figure/task:** Figure 5.2 shows long, short and near-miss cases. Students identify which required condition is missing in non-qualifying panels.  
+**Figure/task:** Figure 5.2 is paired with six historical %B/MFI cases, including failed and filtered signals. Students mark when both thresholds first agree, compare entry timing, and choose an invalidation level.  
 **Source:** John Bollinger, *Bollinger on Bollinger Bands*, Chapter 19; official Method II manual.
 
 #### 5.3 — Method III: Look for Reversal Clues in Volume
-**Time:** 18 minutes.  
+**Time:** 28 minutes.  
 **Outcome:** Identify Bollinger's band-tag/volume-indicator reversal alert and distinguish it from a confirmed entry.  
 **Author's rule:** The book gives examples such as %B below 0.05 with positive Intraday Intensity for a long, and %B above 0.95 with negative Accumulation/Distribution for a short. Bollinger's official software manual also documents a band-tag/Intraday Intensity alert and recommends waiting for a strong up/down price bar. These are documented variants; indicator choice must be stated.  
-**Figure/task:** Figure 5.3 pairs band tags with indicator readings and subsequent price confirmation. Students mark alert, confirmation, and invalidation.  
+**Figure/task:** Figure 5.3 is paired with five reversal examples. Students distinguish band alert from price confirmation, specify the indicator variant, and place invalidation beyond the swing extreme.  
 **Source:** John Bollinger, *Bollinger on Bollinger Bands*, Chapter 20; official Method III manual.
 
 #### 5.4 — Method IV: Wait for a Confirmed Breakout
-**Time:** 18 minutes.  
+**Time:** 27 minutes.  
 **Outcome:** Apply the later official Method IV rule: squeeze context, two consecutive closes outside the same band, and ADX to distinguish trend-following from reversal treatment.  
 **Author's rule:** Two outside closes confirm the breakout condition. When ADX is above the chosen threshold, the break is treated as trend-following; when ADX is below it, the method treats the outside-band event as a potential reversal in the opposite direction. The threshold is configurable, not universal.  
-**Figure/task:** Figure 5.4 contrasts single and consecutive outside closes and illustrates both ADX regimes. Students classify each event using the stated rule.  
+**Figure/task:** Figure 5.4 is paired with five breakout/head-fake cases. Students independently verify the squeeze, two consecutive closes, and ADX context before calling a case a Method IV signal.  
 **Source:** John Bollinger, official Method IV manual (developed after the book).
 
 #### 5.5 — Trade the W-Bottom and M-Top, Not Just the Shape
-**Time:** 18 minutes.  
+**Time:** 28 minutes.  
 **Outcome:** Apply the author's band-relative pattern rules and identify a price-confirmation event for a potential reversal.  
 **Author's rule:** For a classic W-bottom, the first low is usually at/outside the lower band and the retest is relatively higher inside the band; a lower absolute price on the retest does not automatically invalidate it. Bollinger describes buying strength on a rally day with above-average range and volume, with a stop below the right-side low. Tops may take longer and include repeated pushes, with later highs failing to reach the upper band; wait for a sign of weakness and define risk around the pullback.  
-**Figure/task:** Figure 5.5 compares qualifying and failing W/M structures. Students identify the relative swing, source-style confirmation, stop reference, and a no-trade reason.  
+**Figure/task:** Figure 5.5 is paired with six W/M chart cases. Students mark the relative swing, confirmation trigger, invalidation level, and a no-trade reason.  
 **Source:** John Bollinger, *Bollinger on Bollinger Bands*, Chapters 12–13.
 
 #### 5.6 — Carter's TTM Squeeze: Use Momentum for Direction
-**Time:** 17 minutes.  
+**Time:** 25 minutes.  
 **Outcome:** Distinguish Carter's two-envelope squeeze from Bollinger's BandWidth squeeze, then read a common TTM release/momentum setup.  
 **Source method:** In the common TTM implementation, the squeeze is on when Bollinger Bands fit inside Keltner Channels; it fires when they expand back outside. A positive, rising momentum histogram is the common long-side reading; a negative, falling histogram is the short-side reading. Treat specific settings and histogram exits as an implementation, not universal rules for every platform.  
-**Figure/task:** Figure 5.6 shows a squeeze on, a release, long/short momentum readings, and a failed release. Students identify whether the setup has fired and what would weaken the first move.  
+**Figure/task:** Figure 5.6 is paired with five TTM examples. Students identify squeeze-on, fire, histogram direction, entry trigger, stop boundary, and at least one failed or ambiguous release.  
 **Source:** John F. Carter, *Mastering the Trade*, Third Edition; StockCharts TTM Squeeze technical reference.
 
 ### Module 6 — Recognise Failed Setups and Know When to Wait

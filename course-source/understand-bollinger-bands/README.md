@@ -15,6 +15,7 @@ The course follows the principles in [the reusable TradeThesis course-creation m
 
 - [Course architecture](COURSE_ARCHITECTURE.md) — course promise, progression, lesson map, practice design, source map, and release criteria.
 - [Static-image asset register](ASSET_REGISTER.md) — figure labels, internal asset IDs, image briefs, and lesson references.
+- [Module 5 temporary image source index](assets/reference-examples/IMAGE_SOURCE_INDEX.md) — internal provenance and replacement map for the historical chart examples embedded in the setup lessons.
 - [Module 1 manuscript](lessons/MODULE_01_WHAT_BOLLINGER_BANDS_TELL_YOU.md) — the mental model and limits of the bands.
 - [Module 2 manuscript](lessons/MODULE_02_READ_THE_BANDS_AND_MEASUREMENTS.md) — construction, settings, %B and BandWidth.
 - [Module 3 manuscript](lessons/MODULE_03_READ_MARKET_CONTEXT.md) — trend/range context, band walks and squeeze types.
@@ -28,8 +29,8 @@ The course follows the principles in [the reusable TradeThesis course-creation m
 - Assume learners know basic candles, trends, support/resistance, entries, stops, and trading risk. Do not reteach the basics of financial markets.
 - Explain Bollinger-specific terms in everyday language when students first need them.
 - Use short, clear sentences and intuitive examples. Avoid academic phrasing and unexplained jargon.
-- Target 10–20 minutes for each lesson including reading, figure inspection, a short task, and reviewing the model reasoning.
-- Use supplied static charts and diagrams only. No ChartLab, interactive chart tasks, coding, or tasks that require students to find their own charts.
+- Most lessons target 10–20 minutes. The six setup lessons in Module 5 target 25–28 minutes because they include more detailed trade planning and multiple historical chart comparisons.
+- Use supplied static charts and diagrams only. No ChartLab, interactive chart tasks, coding, or tasks that require students to find their own charts. The current Module 5 galleries are temporary external image references and must be replaced with course-owned/rights-cleared local images before public release.
 - Give each figure a persistent asset ID and a student-facing module figure label such as Figure 1.1. Keep labels large, simple, and readable when zoomed or viewed on mobile.
 - Do not put internal production labels such as “synthetic data” on figures. Explain illustrative examples in nearby lesson text or captions when needed.
 - Separate John Bollinger's documented guidance from course-designed trading frameworks and contributions from other authors.
@@ -48,6 +49,6 @@ The course will clearly distinguish Bollinger's BandWidth / low-volatility conce
 
 The course now has a seven-module architecture and draft student-facing text for all 30 lessons, saved as one Markdown manuscript per module. The lessons include figure references, worked explanations, static-image tasks, model reasoning, common mistakes, transfer prompts, and source notes. The content uses plain language for intermediate traders and now centres the setup module on Bollinger's three named book methods, his later Method IV, his W/M pattern setups, and Carter's separate TTM Squeeze. Source-defined entry conditions are distinguished from course-level risk and execution decisions.
 
-The referenced SVG paths follow the agreed naming scheme, but the final image assets have **not** been created or visually tested yet. The manuscripts are drafts and still need a source-attribution/duplication pass, actual image production, mobile/zoom review, and learner timing/comprehension checks. This work has not been integrated into the public course pages or deployed.
+The referenced core SVG paths follow the agreed naming scheme, but final course-owned figure assets have **not** been created or visually tested yet. Module 5 now includes 32 temporary historical chart image embeds across six setup lessons, with the image/source map kept in the internal reference index. These are remote embeds, not local image copies, and are intended for replacement before release. The manuscripts are drafts and still need a source-attribution/duplication pass, actual image production, mobile/zoom review, and learner timing/comprehension checks. This work has not been integrated into the public course pages or deployed.
 
-Next: verify exact author-specific pattern details against the book edition, produce the 30 figures in a sensible batch workflow, render the manuscripts with the figures, and run a focused review.
+Next: verify exact author-specific pattern details against the book edition, replace the temporary Module 5 web images with course-owned TradingView captures, produce the remaining core figures in a sensible batch workflow, render the manuscripts with the figures, and run a focused readability/content review.

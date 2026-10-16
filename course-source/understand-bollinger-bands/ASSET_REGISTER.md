@@ -80,6 +80,10 @@
 | BB-M7-F03 | Figure 7.3 | Simple review table across several conditions: trend, range, failed break, and unclear context. Columns record setup, trigger, stop/exit rule, outcome, rule adherence, and limitation. | 7.3 |
 | BB-M7-F04 | Figure 7.4 | Three capstone cases: a disciplined losing trade, an undisciplined winning trade, and a defensible no-trade decision. Show only information available at the decision point first; later outcome can be shown in a separate panel. | 7.4 and final assignment |
 
+## Temporary web references for Module 5
+
+The setup manuscript currently embeds 32 remote historical chart examples to support private research and lesson design. Their source URLs and method-by-method notes are stored in [`assets/reference-examples/IMAGE_SOURCE_INDEX.md`](assets/reference-examples/IMAGE_SOURCE_INDEX.md). They are not the final course assets; replace them with approved local TradingView captures or other rights-cleared images before public release.
+
 ## Visual quality checklist
 
 - [ ] Main chart or diagram communicates one teaching point.
