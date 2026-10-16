@@ -2,14 +2,18 @@ from datetime import timedelta
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from django.utils import timezone
 from django.urls import reverse
-
-from apps.subscriptions.models import Plan, PlanPrice
+from django.utils import timezone
 
 from apps.academy.models import (
-    Course, CourseEntitlement, CourseModule, CourseOffer, Lesson, LessonProgress,
+    Course,
+    CourseEntitlement,
+    CourseModule,
+    CourseOffer,
+    Lesson,
+    LessonProgress,
 )
+from apps.subscriptions.models import Plan, PlanPrice
 
 User = get_user_model()
 
