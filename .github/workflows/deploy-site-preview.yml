@@ -209,6 +209,9 @@ jobs:
           print(f"Staged {len(names)} referenced chart images for the preview.")
           PY
 
+      - name: Audit internal static-site links
+        run: python tools/qa/check_static_site_links.py
+
       - name: Upload the site folder
         uses: actions/upload-pages-artifact@v3
         with:
