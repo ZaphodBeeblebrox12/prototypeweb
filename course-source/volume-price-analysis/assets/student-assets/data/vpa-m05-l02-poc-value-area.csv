@@ -1,0 +1,189 @@
+stage,record_type,bar,open,high,low,close,volume,price_level,profile_volume,metric,value,profile_period
+NOTICE,PRICE_BAR,1,100.45,101.35,100.05,101,300,,,,,current session
+NOTICE,PRICE_BAR,2,101,103.55,100.7,103,340,,,,,current session
+NOTICE,PRICE_BAR,3,103,105.4,102.4,105,390,,,,,current session
+NOTICE,PRICE_BAR,4,105,107.7,104.55,107,440,,,,,current session
+NOTICE,PRICE_BAR,5,107,108.35,106.6,108,510,,,,,current session
+NOTICE,PRICE_BAR,6,108,109.55,107.7,109,570,,,,,current session
+NOTICE,PRICE_BAR,7,109,109.4,106.4,107,520,,,,,current session
+NOTICE,PRICE_BAR,8,107,107.7,105.55,106,480,,,,,current session
+NOTICE,PRICE_BAR,9,106,108.35,105.6,108,560,,,,,current session
+NOTICE,PRICE_BAR,10,108,110.55,107.7,110,620,,,,,current session
+NOTICE,PRICE_BAR,11,110,111.4,109.4,111,590,,,,,current session
+NOTICE,PRICE_BAR,12,111,112.7,110.55,112,650,,,,,current session
+NOTICE,PRICE_BAR,13,112,112.35,109.6,110,610,,,,,current session
+NOTICE,PRICE_BAR,14,110,113.55,109.7,113,680,,,,,current session
+COMPARE_A,PRICE_BAR,1,100.45,101.35,100.05,101,300,,,,,current session
+COMPARE_A,PRICE_BAR,2,101,103.55,100.7,103,340,,,,,current session
+COMPARE_A,PRICE_BAR,3,103,105.4,102.4,105,390,,,,,current session
+COMPARE_A,PRICE_BAR,4,105,107.7,104.55,107,440,,,,,current session
+COMPARE_A,PRICE_BAR,5,107,108.35,106.6,108,510,,,,,current session
+COMPARE_A,PRICE_BAR,6,108,109.55,107.7,109,570,,,,,current session
+COMPARE_A,PRICE_BAR,7,109,109.4,106.4,107,520,,,,,current session
+COMPARE_A,PRICE_BAR,8,107,107.7,105.55,106,480,,,,,current session
+COMPARE_A,PRICE_BAR,9,106,108.35,105.6,108,560,,,,,current session
+COMPARE_A,PRICE_BAR,10,108,110.55,107.7,110,620,,,,,current session
+COMPARE_A,PRICE_BAR,11,110,111.4,109.4,111,590,,,,,current session
+COMPARE_A,PRICE_BAR,12,111,112.7,110.55,112,650,,,,,current session
+COMPARE_A,PRICE_BAR,13,112,112.35,109.6,110,610,,,,,current session
+COMPARE_A,PRICE_BAR,14,110,113.55,109.7,113,680,,,,,current session
+COMPARE_B,PRICE_BAR,1,104.85,105.75,104.45,105.4,195,,,,,previous composite
+COMPARE_B,PRICE_BAR,2,105.4,106.7,105.1,106.15,289,,,,,previous composite
+COMPARE_B,PRICE_BAR,3,106.15,106.55,105.4,106,332,,,,,previous composite
+COMPARE_B,PRICE_BAR,4,106,107.45,105.55,106.75,286,,,,,previous composite
+COMPARE_B,PRICE_BAR,5,106.75,107.1,106.2,106.6,434,,,,,previous composite
+COMPARE_B,PRICE_BAR,6,106.6,107.9,106.3,107.35,485,,,,,previous composite
+COMPARE_B,PRICE_BAR,7,107.35,107.75,106.6,107.2,338,,,,,previous composite
+COMPARE_B,PRICE_BAR,8,107.2,108.65,106.75,107.95,408,,,,,previous composite
+COMPARE_B,PRICE_BAR,9,107.95,108.3,107.4,107.8,476,,,,,previous composite
+COMPARE_B,PRICE_BAR,10,107.8,110.55,107.5,110,620,,,,,previous composite
+COMPARE_B,PRICE_BAR,11,110,111.4,109.4,111,590,,,,,previous composite
+COMPARE_B,PRICE_BAR,12,111,112.7,110.55,112,650,,,,,previous composite
+COMPARE_B,PRICE_BAR,13,112,112.35,109.6,110,610,,,,,previous composite
+COMPARE_B,PRICE_BAR,14,110,113.55,109.7,113,680,,,,,previous composite
+APPLY_INITIAL,PRICE_BAR,1,100.45,101.35,100.05,101,300,,,,,current session
+APPLY_INITIAL,PRICE_BAR,2,101,103.55,100.7,103,340,,,,,current session
+APPLY_INITIAL,PRICE_BAR,3,103,105.4,102.4,105,390,,,,,current session
+APPLY_INITIAL,PRICE_BAR,4,105,107.7,104.55,107,440,,,,,current session
+APPLY_INITIAL,PRICE_BAR,5,107,108.35,106.6,108,510,,,,,current session
+APPLY_INITIAL,PRICE_BAR,6,108,109.55,107.7,109,570,,,,,current session
+APPLY_INITIAL,PRICE_BAR,7,109,109.4,106.4,107,520,,,,,current session
+APPLY_INITIAL,PRICE_BAR,8,107,107.7,105.55,106,480,,,,,current session
+APPLY_INITIAL,PRICE_BAR,9,106,108.35,105.6,108,560,,,,,current session
+APPLY_INITIAL,PRICE_BAR,10,108,110.55,107.7,110,620,,,,,current session
+APPLY_INITIAL,PRICE_BAR,11,110,111.4,109.4,111,590,,,,,current session
+APPLY_CONTINUATION,PRICE_BAR,1,100.45,101.35,100.05,101,300,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,2,101,103.55,100.7,103,340,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,3,103,105.4,102.4,105,390,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,4,105,107.7,104.55,107,440,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,5,107,108.35,106.6,108,510,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,6,108,109.55,107.7,109,570,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,7,109,109.4,106.4,107,520,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,8,107,107.7,105.55,106,480,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,9,106,108.35,105.6,108,560,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,10,108,110.55,107.7,110,620,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,11,110,111.4,109.4,111,590,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,12,111,114.45,110.6,114,690,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,13,114,115.45,113.6,115,720,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,14,115,116.45,114.6,116,740,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,1,100.45,101.35,100.05,101,300,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,2,101,103.55,100.7,103,340,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,3,103,105.4,102.4,105,390,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,4,105,107.7,104.55,107,440,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,5,107,108.35,106.6,108,510,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,6,108,109.55,107.7,109,570,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,7,109,109.4,106.4,107,520,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,8,107,107.7,105.55,106,480,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,9,106,108.35,105.6,108,560,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,10,108,110.55,107.7,110,620,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,11,110,111.4,109.4,111,590,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,12,111,111.45,110.6,111,720,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,13,111,111.45,108.6,109,760,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,14,109,109.45,106.6,107,800,,,,,same historic window
+NOTICE,PROFILE_BIN,,,,,,,101,120,,,current session
+NOTICE,PROFILE_BIN,,,,,,,102,220,,,current session
+NOTICE,PROFILE_BIN,,,,,,,103,360,,,current session
+NOTICE,PROFILE_BIN,,,,,,,104,520,,,current session
+NOTICE,PROFILE_BIN,,,,,,,105,620,,,current session
+NOTICE,PROFILE_BIN,,,,,,,106,740,,,current session
+NOTICE,PROFILE_BIN,,,,,,,107,850,,,current session
+NOTICE,PROFILE_BIN,,,,,,,108,1000,,,current session
+NOTICE,PROFILE_BIN,,,,,,,109,820,,,current session
+NOTICE,PROFILE_BIN,,,,,,,110,720,,,current session
+NOTICE,PROFILE_BIN,,,,,,,111,610,,,current session
+NOTICE,PROFILE_BIN,,,,,,,112,480,,,current session
+NOTICE,PROFILE_BIN,,,,,,,113,300,,,current session
+NOTICE,PROFILE_BIN,,,,,,,114,190,,,current session
+NOTICE,PROFILE_BIN,,,,,,,115,100,,,current session
+NOTICE,PROFILE_REFERENCE,,,,,,,,,POC,108,current session
+NOTICE,PROFILE_REFERENCE,,,,,,,,,VAH,112,current session
+NOTICE,PROFILE_REFERENCE,,,,,,,,,VAL,104,current session
+COMPAREA,PROFILE_BIN,,,,,,,101,120,,,current session
+COMPAREA,PROFILE_BIN,,,,,,,102,220,,,current session
+COMPAREA,PROFILE_BIN,,,,,,,103,360,,,current session
+COMPAREA,PROFILE_BIN,,,,,,,104,520,,,current session
+COMPAREA,PROFILE_BIN,,,,,,,105,620,,,current session
+COMPAREA,PROFILE_BIN,,,,,,,106,740,,,current session
+COMPAREA,PROFILE_BIN,,,,,,,107,850,,,current session
+COMPAREA,PROFILE_BIN,,,,,,,108,1000,,,current session
+COMPAREA,PROFILE_BIN,,,,,,,109,820,,,current session
+COMPAREA,PROFILE_BIN,,,,,,,110,720,,,current session
+COMPAREA,PROFILE_BIN,,,,,,,111,610,,,current session
+COMPAREA,PROFILE_BIN,,,,,,,112,480,,,current session
+COMPAREA,PROFILE_BIN,,,,,,,113,300,,,current session
+COMPAREA,PROFILE_BIN,,,,,,,114,190,,,current session
+COMPAREA,PROFILE_BIN,,,,,,,115,100,,,current session
+COMPAREA,PROFILE_REFERENCE,,,,,,,,,POC,108,current session
+COMPAREA,PROFILE_REFERENCE,,,,,,,,,VAH,112,current session
+COMPAREA,PROFILE_REFERENCE,,,,,,,,,VAL,104,current session
+COMPAREB,PROFILE_BIN,,,,,,,99,120,,,previous composite
+COMPAREB,PROFILE_BIN,,,,,,,100,260,,,previous composite
+COMPAREB,PROFILE_BIN,,,,,,,101,440,,,previous composite
+COMPAREB,PROFILE_BIN,,,,,,,102,650,,,previous composite
+COMPAREB,PROFILE_BIN,,,,,,,103,780,,,previous composite
+COMPAREB,PROFILE_BIN,,,,,,,104,940,,,previous composite
+COMPAREB,PROFILE_BIN,,,,,,,105,1000,,,previous composite
+COMPAREB,PROFILE_BIN,,,,,,,106,910,,,previous composite
+COMPAREB,PROFILE_BIN,,,,,,,107,740,,,previous composite
+COMPAREB,PROFILE_BIN,,,,,,,108,610,,,previous composite
+COMPAREB,PROFILE_BIN,,,,,,,109,420,,,previous composite
+COMPAREB,PROFILE_BIN,,,,,,,110,300,,,previous composite
+COMPAREB,PROFILE_BIN,,,,,,,111,180,,,previous composite
+COMPAREB,PROFILE_BIN,,,,,,,112,100,,,previous composite
+COMPAREB,PROFILE_REFERENCE,,,,,,,,,POC,105,previous composite
+COMPAREB,PROFILE_REFERENCE,,,,,,,,,VAH,110,previous composite
+COMPAREB,PROFILE_REFERENCE,,,,,,,,,VAL,102,previous composite
+APPLY,PROFILE_BIN,,,,,,,101,120,,,current session
+APPLY,PROFILE_BIN,,,,,,,102,220,,,current session
+APPLY,PROFILE_BIN,,,,,,,103,360,,,current session
+APPLY,PROFILE_BIN,,,,,,,104,520,,,current session
+APPLY,PROFILE_BIN,,,,,,,105,620,,,current session
+APPLY,PROFILE_BIN,,,,,,,106,740,,,current session
+APPLY,PROFILE_BIN,,,,,,,107,850,,,current session
+APPLY,PROFILE_BIN,,,,,,,108,1000,,,current session
+APPLY,PROFILE_BIN,,,,,,,109,820,,,current session
+APPLY,PROFILE_BIN,,,,,,,110,720,,,current session
+APPLY,PROFILE_BIN,,,,,,,111,610,,,current session
+APPLY,PROFILE_BIN,,,,,,,112,480,,,current session
+APPLY,PROFILE_BIN,,,,,,,113,300,,,current session
+APPLY,PROFILE_BIN,,,,,,,114,190,,,current session
+APPLY,PROFILE_BIN,,,,,,,115,100,,,current session
+APPLY,PROFILE_REFERENCE,,,,,,,,,POC,108,current session
+APPLY,PROFILE_REFERENCE,,,,,,,,,VAH,112,current session
+APPLY,PROFILE_REFERENCE,,,,,,,,,VAL,104,current session
+CONTINUATION,PROFILE_BIN,,,,,,,101,120,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,102,220,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,103,360,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,104,520,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,105,620,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,106,740,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,107,850,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,108,1000,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,109,820,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,110,720,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,111,610,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,112,480,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,113,300,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,114,190,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,115,100,,,same historic window
+CONTINUATION,PROFILE_REFERENCE,,,,,,,,,POC,108,same historic window
+CONTINUATION,PROFILE_REFERENCE,,,,,,,,,VAH,112,same historic window
+CONTINUATION,PROFILE_REFERENCE,,,,,,,,,VAL,104,same historic window
+FAILURE,PROFILE_BIN,,,,,,,101,120,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,102,220,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,103,360,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,104,520,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,105,620,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,106,740,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,107,850,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,108,1000,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,109,820,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,110,720,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,111,610,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,112,480,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,113,300,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,114,190,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,115,100,,,same historic window
+FAILURE,PROFILE_REFERENCE,,,,,,,,,POC,108,same historic window
+FAILURE,PROFILE_REFERENCE,,,,,,,,,VAH,112,same historic window
+FAILURE,PROFILE_REFERENCE,,,,,,,,,VAL,104,same historic window
