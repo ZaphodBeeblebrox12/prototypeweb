@@ -41,6 +41,10 @@ Price rises from 40 to 46, pulls back to 44, then advances to 47. The pullback d
 
 Now imagine the bar at 47 records unusually high volume but closes near its low, and subsequent bars return to 44. The earlier upward structure remains part of the chart, but the latest attempt has not held. A good reader updates the assessment rather than insisting that all evidence must support the first idea.
 
+### Worked comparison — progress has to be retained
+
+Consider closes of 50, 52, 53, 51, 54 and 55. Despite the pullback to 51, the sequence makes progress and later moves beyond the earlier high. Now consider 50, 52, 49, 52, 48, 51. It contains upward candles too, but the sequence repeatedly loses ground and makes lower lows. A green candle alone cannot describe pressure; the path and retained progress give it meaning.
+
 ### Level 1 — Notice (easy)
 
 **Task:** A four-bar sequence makes higher closes but gives back most of each advance on the next bar. Describe progress without assigning motives.
@@ -104,6 +108,10 @@ A resistance zone sits around 72–73. Price closes at 74.2 after a wide bar, wi
 
 A careful summary is: “Price has moved beyond the prior zone on elevated recorded activity and has so far held above it. This supports a continuation scenario. A sustained return below the zone would weaken that reading.” It is not necessary to claim that “smart money” entered or that the move cannot fail.
 
+### Worked comparison — volume is not the trigger
+
+One breakout records 2× relative volume and holds above the old range high. Another records 2× relative volume but closes back in the range and fails to reclaim the boundary. The same multiple appears in both. What matters for the continuation thesis is not the multiple by itself but whether price retains progress outside the range. Volume can make an event worth examining; it cannot replace a price condition.
+
 ### Level 1 — Notice (easy)
 
 **Task:** A breakout closes above a boundary on 1.7× relative volume. What does that ratio establish?
@@ -165,6 +173,10 @@ One possible reading is that the range high is still resisting upward progress. 
 
 Notice that the next test is observable. “Institutions are selling” is not.
 
+### Worked comparison — limited progress at two locations
+
+A narrow high-volume bar halfway through a range may reflect two-sided trade without a clear directional test. The same bar at the upper boundary asks a more specific question: why did the attempt to move beyond the edge retain so little progress? The second location may make the event more relevant, but still does not prove absorption or a reversal. Later holds, failures and structural changes must distinguish the possible explanations.
+
 ### Level 1 — Notice (easy)
 
 **Task:** A bar has 2.4× volume, a narrow range and a midpoint close. Write one observation without using “absorption”.
@@ -225,6 +237,10 @@ A market climbs towards a resistance zone around 150.
 
 Path B has a change in structure and failed reclaim, not merely a smaller candle. The conclusion remains conditional: it weakens the continuation thesis; it does not guarantee a sustained decline.
 
+### Worked comparison — a pause is not a reversal
+
+An uptrend's pushes cover 8, 5 and 3 points. Progress is slowing. If pullbacks remain shallow and prior higher lows hold, the trend may simply be pausing. If a later advance fails at the same high, price breaks the latest meaningful higher low and a reclaim attempt fails, the structure has changed more clearly. Record the early slowdown as a warning; reserve stronger language for stronger evidence.
+
 ### Level 1 — Notice (easy)
 
 **Task:** Successive advances cover 6, 4 and 2 points. What changed?
@@ -283,6 +299,10 @@ Price makes a marginal new high at 210. Volume is lower than on the previous adv
 One interpretation is that upward progress is weakening. An alternative is that price travelled above the old high through an area with little opposing activity and may still hold the extension. A hold above 210 followed by another advance would support the second reading; a quick return below the old high and failure to reclaim it would support the first.
 
 The initial observation remains correct whichever path follows. Good analysis can change as new evidence arrives without rewriting what was visible earlier.
+
+### Worked comparison — two mismatches, two questions
+
+A marginal new high on low relative volume raises the question of whether price can hold the extension or is moving through a thin area. High activity with a narrow bar near resistance raises a different question: why did much recorded activity produce so little upside progress at this location? These readings are not interchangeable. For each, write the observable mismatch first, then two explanations that fit it and a future event that would help distinguish them.
 
 ### Level 1 — Notice (easy)
 
