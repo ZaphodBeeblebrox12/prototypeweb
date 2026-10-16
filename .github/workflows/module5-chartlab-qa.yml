@@ -1,0 +1,216 @@
+name: Temporary Lesson 5 Clear W ChartLab QA
+
+on:
+  push:
+    branches:
+      - automation/module5-chartlab-qa-20261016
+    paths:
+      - "site/**"
+      - "course-content/support-resistance/chart_assets/source/build_chart_assets.py"
+      - ".github/workflows/module5-chartlab-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - name: Check out QA branch
+        uses: actions/checkout@v4
+        with:
+          ref: automation/module5-chartlab-qa-20261016
+
+      - name: Set up Python and Node
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Regenerate synthetic teaching charts
+        run: |
+          python -m pip install --upgrade pip matplotlib
+          python course-content/support-resistance/chart_assets/source/build_chart_assets.py
+          python - <<'PY'
+          import csv, hashlib, subprocess
+          from pathlib import Path
+
+          root = Path("course-content/support-resistance/chart_assets")
+          manifest_path = root / "asset_manifest.csv"
+          sums_path = root / "SHA256SUMS.txt"
+          generated_manifest = list(csv.DictReader(manifest_path.open(encoding="utf-8", newline="")))
+          target_ids = {"L05-A-04-minor-removed", "L05-A-05-nearby-combined"}
+          generated_rows = [r for r in generated_manifest if r["asset_id"] in target_ids]
+          if {r["asset_id"] for r in generated_rows} != target_ids:
+              raise SystemExit("Generator did not emit both incremental Lesson 5 chart states.")
+          # Preserve the existing manifest unchanged except for the two new rows.
+          original_manifest = subprocess.check_output(["git", "show", "HEAD:course-content/support-resistance/chart_assets/asset_manifest.csv"], text=True)
+          lines = original_manifest.splitlines()
+          insert_at = next(i for i, line in enumerate(lines) if line.startswith("L05-A-03-reduced-reference,"))
+          new_lines = []
+          for row in generated_rows:
+              new_lines.append(",".join([
+                  row["asset_id"], row["dataset_id"], row["state"], row["visible_bars"],
+                  row["format"], row["source_type"], '"' + row["alt_text"].replace('"','""') + '"',
+                  '"' + row["notes"].replace('"','""') + '"'
+              ]))
+          lines[insert_at+1:insert_at+1] = new_lines
+          manifest_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+          # Preserve existing checksums; append only checksums for the four new files.
+          original_sums = subprocess.check_output(["git", "show", "HEAD:course-content/support-resistance/chart_assets/SHA256SUMS.txt"], text=True).splitlines()
+          for asset_id in sorted(target_ids):
+              for ext in ("png","svg"):
+                  rel = f"course-content/support-resistance/chart_assets/charts/{asset_id}.{ext}"
+                  digest = hashlib.sha256(Path(rel).read_bytes()).hexdigest()
+                  if not any(line.endswith("  " + rel) for line in original_sums):
+                      original_sums.append(f"{digest}  {rel}")
+          sums_path.write_text("\n".join(original_sums) + "\n", encoding="utf-8")
+          print("Generated both incremental edit states; preserved unrelated manifest/checksum rows.")
+          PY
+
+      - name: Stage charts for the learning-room preview
+        run: |
+          python - <<'PY'
+          import re, shutil
+          from pathlib import Path
+          source = Path("course-content/support-resistance/chart_assets/charts")
+          app = Path("site/assets/support-resistance-room.js").read_text(encoding="utf-8")
+          names = sorted(set(re.findall(r"([A-Za-z0-9_-]+[.]png)", app)))
+          names = [n for n in names if n.startswith(("L","CL"))]
+          missing = [n for n in names if not (source / n).is_file()]
+          if missing: raise SystemExit("Missing chart assets: " + ", ".join(missing))
+          target = Path("site/assets/support-resistance-charts")
+          if target.exists(): shutil.rmtree(target)
+          target.mkdir(parents=True, exist_ok=True)
+          for name in names: shutil.copy2(source/name, target/name)
+          if not (Path("site/chartlab/clear-w.html").is_file()):
+              raise SystemExit("Embedded Clear W ChartLab page is missing from the site.")
+          print(f"Staged {len(names)} referenced chart images.")
+          PY
+
+      - name: Install Chromium
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium
+
+      - name: Test editing sequence, real two-zone drawing and completion gate
+        run: |
+          python -m http.server 4173 --directory site >/tmp/lesson5-site.log 2>&1 &
+          for i in {1..30}; do curl -fsS http://127.0.0.1:4173/support-resistance-room.html >/dev/null && break; sleep 1; done
+          node <<'JS'
+          const assert = require("node:assert/strict");
+          const { chromium } = require("playwright");
+
+          (async () => {
+            const browser = await chromium.launch({headless:true});
+            const page = await browser.newPage({viewport:{width:1365,height:950}});
+            const errors=[],bad=[];
+            page.on("pageerror",e=>errors.push(e.message));
+            page.on("response",r=>{if(r.status()>=400)bad.push(r.status()+" "+r.url())});
+            await page.goto("http://127.0.0.1:4173/support-resistance-room.html",{waitUntil:"networkidle"});
+            await page.evaluate(()=>localStorage.clear());
+            await page.reload({waitUntil:"networkidle"});
+            for (const title of ["Read structure before drawing","Identify meaningful swing points","Zones, not perfect lines","Choose the right areas and reduce clutter"]) {
+              await page.locator("#sr-next-button").click();
+              await page.waitForFunction(t=>document.querySelector("#sr-lesson-title").textContent.includes(t),title);
+            }
+            await page.waitForFunction(()=>{const i=document.querySelector("#sr-chart-image");return i&&i.complete&&i.naturalWidth>0&&i.getAttribute("src").endsWith("L05-A-01-overmarked.png")});
+            assert.equal(await page.locator("#sr-chart-stage-count").textContent(),"View 1 of 6");
+            assert.equal(await page.locator("#sr-chart-next").isDisabled(),true,"Initial clutter view requires a learner attempt");
+            await page.locator("#sr-practice-response").fill("The chart has a broad path with a lower reaction region and a later upper reaction; not every candidate mark adds information.");
+            await page.locator("#sr-chart-next").click();
+            await page.waitForFunction(()=>document.querySelector("#sr-chart-image").getAttribute("src").endsWith("L05-A-02-candidate-ids.png"));
+            assert.equal(await page.locator(".sr-room-edit-select").count(),7);
+            assert.equal(await page.locator("#sr-chart-next").isDisabled(),true,"Candidates must be classified and submitted before reveals");
+            const classifications=["keep","combine","combine","leave","combine","combine","leave"];
+            for(let i=0;i<classifications.length;i++) await page.locator(".sr-room-edit-select").nth(i).selectOption(classifications[i]);
+            await page.locator("#sr-teaching-editing-rationale").fill("I kept the major upper and lower areas, combined nearby marks, and left out a minor fluctuation and the distant band for this question.");
+            assert.equal(await page.locator("#sr-teaching-editing-submit").isDisabled(),false);
+            await page.locator("#sr-teaching-editing-submit").click();
+            assert.equal(await page.locator("#sr-teaching-editing-feedback").isVisible(),true);
+            assert.equal(await page.locator("#sr-chart-next").isDisabled(),false);
+            const laterViews=["L05-A-04-minor-removed.png","L05-A-05-nearby-combined.png","L05-A-03-reduced-reference.png"];
+            for(const file of laterViews){await page.locator("#sr-chart-next").click();await page.waitForFunction(f=>document.querySelector("#sr-chart-image").getAttribute("src").endsWith(f),file);}
+            await page.locator("#sr-chart-next").click();
+            await page.waitForFunction(()=>!document.querySelector("#sr-chartlab-panel").hidden);
+            const lab=page.frameLocator("#sr-chartlab-frame");
+            await lab.locator("#chartSvg").waitFor();
+            assert.equal(await lab.locator(".study-picker").isVisible().catch(()=>true),false,"Embedded lab should only expose Clear W, not the other practice sets");
+            assert.equal(await page.locator("#sr-complete-button").isDisabled(),true,"Lesson completion remains gated before the ChartLab is completed");
+            assert.equal(await lab.locator("#comparisonPair").isVisible(),false,"Reference comparison must be hidden initially");
+
+            // Draw support around both troughs. The chart's own SVG coordinate mapping is 1000×520.
+            let box=await lab.locator("#chartSvg").boundingBox();
+            const sx=box.x+((74+0.48*(894-74))/1000)*box.width;
+            const sy=p=>box.y+((42+((114-p)/18)*(439-42))/520)*box.height;
+            await page.mouse.move(sx,sy(100.7));await page.mouse.down();
+            await page.mouse.move(sx,sy(98.6),{steps:6});await page.mouse.up();
+            await lab.locator("#submitZoneButton").click();
+            await lab.getByText(/Support locked|support is marked/i).waitFor({timeout:5000}).catch(()=>{});
+            assert.match(await lab.locator("#zoneReadout").textContent(),/Support: .*locked/);
+            assert.equal(await lab.locator("#comparisonPair").isVisible(),false,"Reference stays hidden after support alone");
+
+            // Draw the intervening neckline as a separate resistance zone.
+            box=await lab.locator("#chartSvg").boundingBox();
+            const x2=box.x+((74+0.6*(894-74))/1000)*box.width;
+            const y2=p=>box.y+((42+((114-p)/18)*(439-42))/520)*box.height;
+            await page.mouse.move(x2,y2(106.1));await page.mouse.down();
+            await page.mouse.move(x2,y2(104.5),{steps:6});await page.mouse.up();
+            await lab.locator("#submitZoneButton").click();
+            await lab.locator("#comparisonPair").waitFor({state:"visible",timeout:5000});
+            assert.equal(await lab.locator("#studentCompareSvg [data-role='support']").count(),1);
+            assert.equal(await lab.locator("#studentCompareSvg [data-role='resistance']").count(),1);
+            assert.equal(await page.locator("#sr-complete-button").isDisabled(),true,"Two zones alone are not enough to complete the lesson");
+
+            await lab.locator('input[name="reading1"][value="correct"]').check();
+            await lab.locator('input[name="reading2"][value="break"]').check();
+            await lab.locator("#checkUnderstanding").click();
+            await lab.locator("#markCompleteButton").click();
+            await page.waitForFunction(()=>document.querySelector("#sr-complete-button").disabled===false,{timeout:5000});
+            assert.equal(await page.locator("#sr-complete-button").isDisabled(),false,"Lesson completion unlocks only after ChartLab completion is reported");
+            await page.locator("#sr-complete-button").click();
+            await page.waitForFunction(()=>document.querySelector("#sr-lesson-state").textContent.includes("COMPLETE"));
+
+            // Mobile: both the course page and the embedded chart must fit the viewport without horizontal overflow.
+            await page.setViewportSize({width:360,height:800});
+            await page.waitForTimeout(500);
+            const parentLayout=await page.evaluate(()=>({viewport:innerWidth,scroll:document.documentElement.scrollWidth,labWidth:document.querySelector("#sr-chartlab-frame").getBoundingClientRect().width}));
+            const childLayout=await lab.locator("body").evaluate(()=>({viewport:innerWidth,scroll:document.documentElement.scrollWidth,chartWidth:document.querySelector("#chartSvg").getBoundingClientRect().width}));
+            assert.ok(parentLayout.scroll<=parentLayout.viewport+1,"Parent page overflows on mobile: "+JSON.stringify(parentLayout));
+            assert.ok(childLayout.scroll<=childLayout.viewport+1,"ChartLab overflows on mobile: "+JSON.stringify(childLayout));
+            assert.ok(childLayout.chartWidth<=childLayout.viewport+1,"Chart width exceeds viewport: "+JSON.stringify(childLayout));
+            assert.deepEqual(errors,[],"JavaScript errors: "+errors.join("; "));
+            assert.deepEqual(bad,[],"HTTP errors: "+bad.join("; "));
+            await page.screenshot({path:"module5-clear-w-mobile-qa.png",fullPage:true});
+            console.log(JSON.stringify({result:"PASS",lesson5Views:6,candidateClasses:7,gate:"support → resistance → compare → two checks → lesson completion",mobile:{parentLayout,childLayout}},null,2));
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+
+      - name: Commit the two new Lesson 5 incremental charts
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            course-content/support-resistance/chart_assets/charts/L05-A-04-minor-removed.png \
+            course-content/support-resistance/chart_assets/charts/L05-A-04-minor-removed.svg \
+            course-content/support-resistance/chart_assets/charts/L05-A-05-nearby-combined.png \
+            course-content/support-resistance/chart_assets/charts/L05-A-05-nearby-combined.svg \
+            course-content/support-resistance/chart_assets/asset_manifest.csv \
+            course-content/support-resistance/chart_assets/SHA256SUMS.txt
+          git commit -m "Add incremental Lesson 5 clutter-edit chart states [skip ci]" || exit 0
+          git push origin HEAD:automation/module5-chartlab-qa-20261016
+
+      - name: Upload mobile QA screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: module5-clear-w-mobile-qa
+          path: module5-clear-w-mobile-qa.png
+          if-no-files-found: ignore
