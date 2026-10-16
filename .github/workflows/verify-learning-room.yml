@@ -38,6 +38,11 @@ jobs:
       - name: Check V5.2 integration script syntax
         run: node --check site/assets/support-resistance-room-v5_2-integration.js
 
+      - name: Check image inspector and smoke test syntax
+        run: |
+          node --check site/assets/image-inspector.js
+          node --check site/tests/image-inspector-smoke.cjs
+
       - name: Check member pages stay on the light theme
         run: |
           python - <<'PY'
@@ -593,3 +598,13 @@ jobs:
             sleep 1
           done
           NODE_PATH=/tmp/tt-playwright/node_modules node /tmp/learning-room-smoke.cjs
+          NODE_PATH=/tmp/tt-playwright/node_modules node site/tests/image-inspector-smoke.cjs
+
+      - name: Upload image inspector screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-inspector-visual-checks
+          path: /tmp/tradethesis-image-inspector/*.png
+          if-no-files-found: warn
+          retention-days: 5
