@@ -38,7 +38,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** Record the location, the candle's high-to-low range and close, volume compared with a suitable group of recent bars, and the price structure immediately before it. Then write one possible explanation and one alternative. This order makes it harder to confuse something you can see with something you are guessing.
 
-**Level 3 — Apply on a new chart (practice):**** Find two similar-looking candles in different chart locations. For each one, write one observation, one possible interpretation, and one thing you would watch next.
+**Level 3 — Apply on a new chart (practice):** Find two similar-looking candles in different chart locations. For each one, write one observation, one possible interpretation, and one thing you would watch next.
 
 **A strong response includes:** A clear distinction between candle appearance and chart context; no claim that the candle predicts the next move.
 
@@ -54,7 +54,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** Check what price did during the bar, where it appeared, how close price finished to the high or low, and whether the next bars kept or gave back the move. Confirm that the volume feed and session are comparable too. A spike tells you that reported activity was high; it does not, by itself, tell you the direction or outcome.
 
-**Level 3 — Apply on a new chart (practice):**** Choose a possible volume spike. Note your comparison bars, explain why they are a fair baseline, and describe the price result without using “bullish” or “bearish.”
+**Level 3 — Apply on a new chart (practice):** Choose a possible volume spike. Note your comparison bars, explain why they are a fair baseline, and describe the price result without using “bullish” or “bearish.”
 
 **A strong response includes:** A stated baseline, a description of price progress, and a reminder that the spike alone is not an entry signal.
 
@@ -70,7 +70,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** Not from range and volume alone. Price travelled a long distance and the feed recorded substantial activity, but the close in the middle means the candle did not retain all its progress in either direction. Describe that mixed result, then inspect its location and subsequent bars before choosing an interpretation.
 
-**Level 3 — Apply on a new chart (practice):**** On three candles, mark the high, low, open, close and close location. For each, finish the sentence: “The candle shows ___; it does not yet prove ___.”
+**Level 3 — Apply on a new chart (practice):** On three candles, mark the high, low, open, close and close location. For each, finish the sentence: “The candle shows ___; it does not yet prove ___.”
 
 **A strong response includes:** Accurate labels and a separation between the observed candle result and a forecast.
 
@@ -86,7 +86,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** A clear move through the level that was supposed to hold, followed by continued progress lower or an unsuccessful attempt to reclaim the level, would weaken the continuation idea. Low volume does not cancel that price evidence. The lesson is to define in advance what would make your first reading less credible.
 
-**Level 3 — Apply on a new chart (practice):**** Compare a quiet pullback that holds a level with one that breaks it. Write down the first visible difference that matters and the condition that would make you stop favouring continuation.
+**Level 3 — Apply on a new chart (practice):** Compare a quiet pullback that holds a level with one that breaks it. Write down the first visible difference that matters and the condition that would make you stop favouring continuation.
 
 **A strong response includes:** The level being tested, the actual price behaviour and an observable condition that would challenge the initial idea.
 
@@ -102,7 +102,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** Record the market and instrument, data provider, what its volume field measures, timeframe/session, and the bars or period used as a baseline. For crypto, note the specific venue; for exchange-traded instruments, confirm the contract and session. If you cannot verify what is counted, state that limitation rather than making a stronger claim than the data supports.
 
-**Level 3 — Apply on a new chart (practice):**** Make a small “volume data card” for one instrument: source, definition, timeframe, baseline and one limitation.
+**Level 3 — Apply on a new chart (practice):** Make a small “volume data card” for one instrument: source, definition, timeframe, baseline and one limitation.
 
 **A strong response includes:** The source and definition of the volume measure, and a recognition that different feeds may not be directly comparable.
 
@@ -122,7 +122,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** One candle may be a brief event that is reversed immediately. A sequence shows whether progress is continuing, stalling or changing. Looking at several bars also helps distinguish an early warning from a meaningful change in price structure.
 
-**Level 3 — Apply on a new chart (practice):**** Label a five-bar sequence as upward progress, downward progress, limited progress or inconclusive. Point to at least two bars that support your label.
+**Level 3 — Apply on a new chart (practice):** Label a five-bar sequence as upward progress, downward progress, limited progress or inconclusive. Point to at least two bars that support your label.
 
 **A strong response includes:** Evidence from the sequence and language that describes the price result without inventing a hidden story.
 
@@ -138,7 +138,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** No. Activity must be judged against the instrument, session and baseline. A sustained move on ordinary activity may still be meaningful, while a high-volume move can fail. Describe the price behaviour and use volume as supporting context, not as a universal pass/fail threshold.
 
-**Level 3 — Apply on a new chart (practice):**** Review two breakouts. For each, record the boundary, close location, volume comparison and first three to five bars afterward. Decide whether the evidence supports continuation, challenges it or remains unclear.
+**Level 3 — Apply on a new chart (practice):** Review two breakouts. For each, record the boundary, close location, volume comparison and first three to five bars afterward. Decide whether the evidence supports continuation, challenges it or remains unclear.
 
 **A strong response includes:** A clear reference level and post-breakout behaviour, not a conclusion based only on a volume spike.
 
@@ -154,7 +154,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** Look for price to move back below the area, fail to regain it, and then make further progress lower. If price instead returns above the area and stays there, the rejection idea weakens. The next price response is more useful than trying to name unseen participants.
 
-**Level 3 — Apply on a new chart (practice):**** Find a high-volume candle with little price progress. Write three columns: “what I see,” “possible explanations,” and “what I need to see next.”
+**Level 3 — Apply on a new chart (practice):** Find a high-volume candle with little price progress. Write three columns: “what I see,” “possible explanations,” and “what I need to see next.”
 
 **A strong response includes:** The effort-versus-result mismatch, more than one plausible explanation and a condition that could weaken the preferred explanation.
 
@@ -170,7 +170,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** A warning tells you to pay attention and update the possible scenarios. A trigger is the observable condition your plan requires before you consider entering. Treating a warning as a trigger can lead you to trade before there is enough evidence.
 
-**Level 3 — Apply on a new chart (practice):**** Mark the first warning of a weakening advance, the first structural change and one condition that would invalidate your reversal idea.
+**Level 3 — Apply on a new chart (practice):** Mark the first warning of a weakening advance, the first structural change and one condition that would invalidate your reversal idea.
 
 **A strong response includes:** Three distinct stages—warning, structural evidence and an observable trigger or invalidation.
 
@@ -186,7 +186,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** Write the observation, list at least two explanations, then identify which future price behaviour would favour each. If neither condition appears, the correct classification can remain “inconclusive.” This gives you a plan for gathering evidence instead of feeling forced to choose a direction.
 
-**Level 3 — Apply on a new chart (practice):**** Choose a mismatch and complete: “I observe ___. One explanation is ___. Another is ___. I would favour the first if ___. I would favour the second if ___.”
+**Level 3 — Apply on a new chart (practice):** Choose a mismatch and complete: “I observe ___. One explanation is ___. Another is ___. I would favour the first if ___. I would favour the second if ___.”
 
 **A strong response includes:** A neutral observation, two reasonable explanations and clear conditions that help distinguish them.
 
@@ -206,7 +206,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** The setup area is a location worth watching because it has a reason to matter, such as a former range boundary or pullback zone. The trigger is the specific price behaviour you decided to wait for before considering the trade. Reaching the area is not the same as satisfying the trigger.
 
-**Level 3 — Apply on a new chart (practice):**** Mark one potential setup area on a trend chart. Then write a separate trigger and invalidation; do not enter just because price reaches the area.
+**Level 3 — Apply on a new chart (practice):** Mark one potential setup area on a trend chart. Then write a separate trigger and invalidation; do not enter just because price reaches the area.
 
 **A strong response includes:** A reason for the area, a visible trigger and a separate point where the idea would no longer make sense.
 
@@ -222,7 +222,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** Price breaking the level that was expected to hold, continuing to make progress against the original trend, or failing to reclaim the broken area would weaken the continuation idea. Decide which of those observations matters for your chosen timeframe before the event develops.
 
-**Level 3 — Apply on a new chart (practice):**** Compare two pullbacks after similar advances. For each, mark depth, speed, relative activity, the important level and the first observation that would support or weaken continuation.
+**Level 3 — Apply on a new chart (practice):** Compare two pullbacks after similar advances. For each, mark depth, speed, relative activity, the important level and the first observation that would support or weaken continuation.
 
 **A strong response includes:** More than a low-volume label; it uses structure and explains what must happen next.
 
@@ -238,7 +238,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** Price may fail to stay above the zone and move away, or it may move through the zone and sustain the new prices. The candles and subsequent bars help distinguish these cases. Write the trigger and invalidation for each scenario separately; the alternative should not automatically become a trade just because the first idea fails.
 
-**Level 3 — Apply on a new chart (practice):**** Draw one support zone and one resistance zone from previous price behaviour. For the zone nearest current price, write a rejection scenario, a sustained-break scenario and a no-trade condition.
+**Level 3 — Apply on a new chart (practice):** Draw one support zone and one resistance zone from previous price behaviour. For the zone nearest current price, write a rejection scenario, a sustained-break scenario and a no-trade condition.
 
 **A strong response includes:** A justified zone, alternative outcomes and conditions that could be observed on the chart.
 
@@ -254,7 +254,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** Ask whether price can reclaim and hold above the boundary or whether attempts to return above it fail. A quick return inside is evidence that the first move did not hold; later behaviour tells you whether the failure is developing into a wider reversal or simply a temporary fluctuation.
 
-**Level 3 — Apply on a new chart (practice):**** Label five events on a range chart: upper rejection, lower rejection, ambiguous overshoot, sustained breakout and failed breakout. For each, state what evidence you would wait for next.
+**Level 3 — Apply on a new chart (practice):** Label five events on a range chart: upper rejection, lower rejection, ambiguous overshoot, sustained breakout and failed breakout. For each, state what evidence you would wait for next.
 
 **A strong response includes:** The boundary, close/return behaviour and post-event evidence; not an automatic trade at the edge.
 
@@ -270,7 +270,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** Not necessarily. If the plan required a trigger and it did not occur, skipping the trade followed the rule. Review whether the rule was clear and sensible across examples; do not judge the decision only by what price did afterward.
 
-**Level 3 — Apply on a new chart (practice):**** Score three candidate charts as “consider,” “wait,” or “reject.” Beside each decision, list the strongest evidence, the missing information and the condition that would change your answer.
+**Level 3 — Apply on a new chart (practice):** Score three candidate charts as “consider,” “wait,” or “reject.” Beside each decision, list the strongest evidence, the missing information and the condition that would change your answer.
 
 **A strong response includes:** Reasons tied to the checklist and a defensible no-trade or wait decision when information is missing.
 
@@ -290,7 +290,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** Do not reject it solely because volume was ordinary. Check whether the comparison was appropriate and whether price can maintain its progress. The quality of the price response matters; volume is context rather than a universal threshold.
 
-**Level 3 — Apply on a new chart (practice):**** Freeze a chart after its first breakout candle. Write what is known, two possible outcomes and the specific behaviour that would support each before revealing later bars.
+**Level 3 — Apply on a new chart (practice):** Freeze a chart after its first breakout candle. Write what is known, two possible outcomes and the specific behaviour that would support each before revealing later bars.
 
 **A strong response includes:** A factual description of the breakout candle, an alternative scenario and a future condition that can be checked.
 
@@ -306,7 +306,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** No. It shows a move beyond the boundary that did not hold. It does not prove anyone's intention. Describe the observable sequence and plan around the price conditions rather than attributing a hidden motive.
 
-**Level 3 — Apply on a new chart (practice):**** On a staged chart, mark the first warning, the stronger failure evidence and the condition that would invalidate the failed-breakout reading.
+**Level 3 — Apply on a new chart (practice):** On a staged chart, mark the first warning, the stronger failure evidence and the condition that would invalidate the failed-breakout reading.
 
 **A strong response includes:** A sequence of observed events and a willingness to update if price reclaims the area.
 
@@ -322,7 +322,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** No. The spike was still an unusually active event; it simply did not develop into the reversal scenario. A good method allows that outcome. Review whether the original interpretation was appropriately cautious and whether the conditions you required for a reversal ever appeared.
 
-**Level 3 — Apply on a new chart (practice):**** Compare two high-volume events after long moves—one followed by a structure change, one by continuation. For each, separate the initial warning from the later evidence.
+**Level 3 — Apply on a new chart (practice):** Compare two high-volume events after long moves—one followed by a structure change, one by continuation. For each, separate the initial warning from the later evidence.
 
 **A strong response includes:** A reason to investigate the event, a counterexample and no claim that a climax guarantees reversal.
 
@@ -338,7 +338,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** An upthrust is a move above a range high that returns inside. It becomes a weaker failure interpretation if price reclaims the upper boundary and holds above it, or if the supposed range was not well defined in the first place. Define the range before naming the event.
 
-**Level 3 — Apply on a new chart (practice):**** Compare one apparent spring and one apparent upthrust with examples that fail. First mark the range boundaries, then the excursion and return, then the later evidence.
+**Level 3 — Apply on a new chart (practice):** Compare one apparent spring and one apparent upthrust with examples that fail. First mark the range boundaries, then the excursion and return, then the later evidence.
 
 **A strong response includes:** A clearly defined range, a correct description of the excursion and return, and a condition that could disprove the preferred idea.
 
@@ -354,7 +354,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** It prevents the plan from changing every time a new candle appears. Invalidation tells you which price behaviour no longer fits the idea you started with. If that condition occurs, reassess rather than moving the rules simply to preserve the trade thesis.
 
-**Level 3 — Apply on a new chart (practice):**** Create two staged outcomes from the same initial breakout warning: a reversal develops, or the original trend resumes. At each stage, note whether you have a warning, confirmation, trigger or invalidation.
+**Level 3 — Apply on a new chart (practice):** Create two staged outcomes from the same initial breakout warning: a reversal develops, or the original trend resumes. At each stage, note whether you have a warning, confirmation, trigger or invalidation.
 
 **A strong response includes:** Correctly staged evidence and a pre-defined invalidation condition.
 
@@ -374,7 +374,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** No. The area shows that relatively more activity was recorded there during the selected period. Price may pause, turn away or move through. Use current candle behaviour and nearby structure to decide which scenario is gaining support.
 
-**Level 3 — Apply on a new chart (practice):**** On one chart, identify one broad and one thin profile area. Describe each area's past activity, then list two possible ways price might behave when it returns.
+**Level 3 — Apply on a new chart (practice):** On one chart, identify one broad and one thin profile area. Describe each area's past activity, then list two possible ways price might behave when it returns.
 
 **A strong response includes:** A correct description of the profile, its chosen period and the limit that historical activity does not guarantee future behaviour.
 
@@ -390,7 +390,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** Changing the selected window changes which price activity is included, so a different row or range may contain the largest or chosen share of activity. Before comparing profiles, keep the settings and windows comparable or explain the difference. A changed level may reflect changed inputs as well as changed market behaviour.
 
-**Level 3 — Apply on a new chart (practice):**** Make two profiles from the same data with different windows. Mark POC and Value Area on each, then describe what changed and which conclusions remain uncertain.
+**Level 3 — Apply on a new chart (practice):** Make two profiles from the same data with different windows. Mark POC and Value Area on each, then describe what changed and which conclusions remain uncertain.
 
 **A strong response includes:** A correct definition, a stated profile window and an explanation of why settings matter.
 
@@ -406,7 +406,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** No. Less recorded activity was associated with that area in the selected period, which may mean price can sometimes move through it quickly. But conditions may have changed, and price can pause or turn. Watch the current price path rather than treating the profile as a script for what happens next.
 
-**Level 3 — Apply on a new chart (practice):**** Mark one high-volume area and one low-volume area. For each, write a continuation possibility, a stall/rejection possibility and the price behaviour that would distinguish them.
+**Level 3 — Apply on a new chart (practice):** Mark one high-volume area and one low-volume area. For each, write a continuation possibility, a stall/rejection possibility and the price behaviour that would distinguish them.
 
 **A strong response includes:** A careful description of the historic distribution and a testable scenario rather than certainty.
 
@@ -422,7 +422,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** They include different spans of market activity, so their shapes and reference points may differ for that reason alone. Compare similar windows when you want to evaluate change over time. If windows must differ, state the limitation before explaining what the difference might mean.
 
-**Level 3 — Apply on a new chart (practice):**** Compare three equal-length synthetic sessions. Record POC movement, overlap between value areas and price's position relative to prior value. Only after those observations, write a possible interpretation.
+**Level 3 — Apply on a new chart (practice):** Compare three equal-length synthetic sessions. Record POC movement, overlap between value areas and price's position relative to prior value. Only after those observations, write a possible interpretation.
 
 **A strong response includes:** A comparable-window method and a clear distinction between observed migration and a hypothesis about acceptance.
 
@@ -438,7 +438,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** Update the analysis. The profile describes past activity; it does not force current price to respond in a particular way. Check whether your original trigger appeared, whether invalidation occurred and which new area or structure matters next. Do not reinterpret the plan after the fact as if the move through the level had always been expected.
 
-**Level 3 — Apply on a new chart (practice):**** On a chart with one broad and one thin profile area, write two if/then scenarios around the nearest area. Reveal a pause, a rejection and a clean move-through as separate possible endings; update the reading for each.
+**Level 3 — Apply on a new chart (practice):** On a chart with one broad and one thin profile area, write two if/then scenarios around the nearest area. Reveal a pause, a rejection and a clean move-through as separate possible endings; update the reading for each.
 
 **A strong response includes:** Profile context, current price evidence, alternative outcomes and willingness to revise the scenario.
 
@@ -458,7 +458,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** More markings can obscure the question being investigated and make it easier to find a reason for any outcome. Keep only the levels that have a clear basis in price structure or the selected profile. You should be able to explain why every line is there and what decision it helps you make.
 
-**Level 3 — Apply on a new chart (practice):**** Simplify an over-marked chart to a few meaningful levels, visible volume and any relevant profile references. Write a five-sentence context note including one uncertainty and two possible scenarios.
+**Level 3 — Apply on a new chart (practice):** Simplify an over-marked chart to a few meaningful levels, visible volume and any relevant profile references. Write a five-sentence context note including one uncertainty and two possible scenarios.
 
 **A strong response includes:** A clear market description, justified levels, a known data source and a question the chart has not answered yet.
 
@@ -474,7 +474,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** Update your interpretation, but preserve what you originally observed. A sound process allows the hypothesis to change as new evidence arrives; it does not rewrite history to make the first guess look right. Keep the original note, add the new event and explain why the new evidence changed—or did not change—your view.
 
-**Level 3 — Apply on a new chart (practice):**** Record an initial reading, reveal two more bars, and write an update separately. Highlight the exact new observation that affected your interpretation.
+**Level 3 — Apply on a new chart (practice):** Record an initial reading, reveal two more bars, and write an update separately. Highlight the exact new observation that affected your interpretation.
 
 **A strong response includes:** Factual initial notes, an explicit update based on new evidence and no hindsight rewriting.
 
@@ -490,7 +490,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** No. The first scenario becoming weaker does not automatically satisfy the opposite setup's trigger. The alternative needs its own supporting evidence, entry condition and invalidation. If neither scenario meets its rules, waiting is a complete decision.
 
-**Level 3 — Apply on a new chart (practice):**** From an ambiguous breakout chart, write a continuation scenario, a failure scenario and a no-trade condition. Make each trigger and invalidation observable.
+**Level 3 — Apply on a new chart (practice):** From an ambiguous breakout chart, write a continuation scenario, a failure scenario and a no-trade condition. Make each trigger and invalidation observable.
 
 **A strong response includes:** Two distinct scenarios, separate triggers and a condition under which no trade is taken.
 
@@ -506,7 +506,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** It may not be. The chart idea can be coherent while the actual trade has poor reward relative to risk or unacceptable execution costs. Estimate risk, potential target room and likely costs before entry; skip or redesign the setup if it no longer meets the plan. The course does not prescribe one risk percentage for everyone or every instrument.
 
-**Level 3 — Apply on a new chart (practice):**** Complete a trade ticket for a synthetic setup using the supplied contract/tick value. Then increase the spread or slippage and decide whether the plan still qualifies. Explain the decision.
+**Level 3 — Apply on a new chart (practice):** Complete a trade ticket for a synthetic setup using the supplied contract/tick value. Then increase the spread or slippage and decide whether the plan still qualifies. Explain the decision.
 
 **A strong response includes:** An invalidation-based risk calculation, target logic, costs and a willingness to cancel a technically attractive setup.
 
@@ -522,7 +522,7 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** Not automatically. If the trigger never appeared, you followed the process you had defined. Review whether the condition was clear and whether it makes sense across a collection of examples. Do not judge the quality of a decision only by whether a hypothetical position would have made money.
 
-**Level 3 — Apply on a new chart (practice):**** Complete the context note, evidence sheet, two scenarios, trigger, invalidation, risk ticket and post-event review on a staged capstone chart. Keep the original notes visible when the later outcome is revealed.
+**Level 3 — Apply on a new chart (practice):** Complete the context note, evidence sheet, two scenarios, trigger, invalidation, risk ticket and post-event review on a staged capstone chart. Keep the original notes visible when the later outcome is revealed.
 
 **A strong response includes:** A complete conditional plan, risk controls, an honest record of what was known at each stage and process-based review.
 
