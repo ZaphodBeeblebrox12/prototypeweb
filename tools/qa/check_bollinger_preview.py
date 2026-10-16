@@ -15,9 +15,10 @@ media_editor = (ROOT / "site/assets/instructional-image-admin.js").read_text(enc
 lesson_data_path = ROOT / "course-source/understand-bollinger-bands/assets/bollinger-lessons-data.js"
 lesson_data_source = lesson_data_path.read_text(encoding="utf-8")
 lesson_data_prefix = "window.BOLLINGER_MANUSCRIPTS = "
-if not lesson_data_source.startswith(lesson_data_prefix):
+lesson_data_assignment = lesson_data_source.find(lesson_data_prefix)
+if lesson_data_assignment < 0:
     raise SystemExit("Generated Bollinger manuscript data file is missing its expected payload.")
-lesson_data_payload = lesson_data_source[len(lesson_data_prefix):].strip()
+lesson_data_payload = lesson_data_source[lesson_data_assignment + len(lesson_data_prefix):].strip()
 if lesson_data_payload.endswith(";"):
     lesson_data_payload = lesson_data_payload[:-1]
 try:
