@@ -4,7 +4,7 @@
 **Pilot:** Module 1, Lesson 1.1 — *What Candlesticks Don't Tell You: Reading the Volume Behind Price*  
 **Branch:** `my-new-branch`  
 **Review type:** Source-level inspection and targeted remediation.  
-**Status:** The source-level fixes below have been applied. The pilot is **not yet approved for scale-up** because browser rendering, assistive-technology and novice usability checks remain outstanding.
+**Status:** The source-level fixes and reflowed mobile SVG variants below have been added. A Chromium smoke fixture passed 12 functional/responsive checks, but used stand-in images and mirrored interaction markup. The committed page with its actual chart SVGs has not been fully browser-validated. The pilot is **not yet approved for scale-up** because actual-page visual review, assistive-technology and novice usability checks remain outstanding.
 
 ## 1. Source-level issues corrected
 
@@ -27,6 +27,8 @@ The change is limited to text in SVG `title`, `desc` and `text` nodes. Chart geo
 - When a stage is revealed, keyboard focus moves to its heading before scrolling, so the user's location is more apparent.
 - Scripted scrolling and the restart action respect `prefers-reduced-motion`; a CSS fallback is included.
 - Level 2 feedback now says “submitted” and explicitly states that the text-length check does not grade reasoning.
+- Unlocked progress buttons update the active-step indicator without locking later steps when the learner navigates backward. Restart resets unlock state and moves focus back to the first-stage heading.
+- Five mobile-specific SVG variants were added. The phone layout uses a stacked comparison for Panels A and B instead of shrinking the desktop side-by-side chart to an unreadable width.
 
 ## 2. Existing strengths retained
 
@@ -49,9 +51,24 @@ The following checks were verified against the committed branch files:
 
 A further read-through found two issues in the first navigation patch: clicking an already unlocked progress step changed the visible section without updating `aria-current`, and restarting from the completion screen hid the element that still held keyboard focus. The code now keeps the highest unlocked step separate from the active step, updates the current-step indicator when navigating backward or forward, resets unlock state on restart, and moves focus back to the first stage heading after restart.
 
-### Browser-test limitation
+### Browser smoke fixture
 
-I attempted a headless Chromium run using a local test fixture, but the execution environment blocked both `file://` and loopback HTTP navigation with `ERR_BLOCKED_BY_ADMINISTRATOR` before the page loaded. Therefore **no browser-rendering or browser-interaction test is claimed as passed**. The source-level checks above are not a substitute for a real browser run.
+A Chromium/Playwright fixture was exercised successfully via in-memory page content. It mirrors the ChartLab interaction handlers and uses inline stand-in chart images. Twelve checks passed:
+
+- Initial state and disabled stages.
+- Incorrect Level 1 answer gives feedback but does not unlock the next stage.
+- Correct retry unlocks Level 2 and moves focus.
+- Back/forward navigation updates the active-step indicator while preserving unlocked stages.
+- Level 2 submission unlocks Level 3 and states that response length is not semantic grading.
+- Revisited lower stages do not lock the higher unlocked stage.
+- Level 3 submission reveals both alternative outcomes.
+- Reflection feedback prevents empty completion.
+- Restart resets forms, outcomes and unlock state.
+- Rendered fixture has no horizontal overflow at 360px width.
+- Reduced-motion preference is detected.
+- No JavaScript page errors in the fixture at desktop or mobile sizes.
+
+**Important limit:** this does not test the committed HTML file or its actual SVGs. An attempt to navigate the local file and loopback-hosted page was blocked by execution-environment policy, so the exact branch page still needs to be rendered and inspected in a normal browser. Do not treat fixture results as completed actual-page validation.
 
 - The six fixed SVGs contain readable title, description and annotation text (no legacy escapes remaining in those visible nodes).
 - Each SVG in `source/` matches its corresponding `exports/` file.
@@ -59,7 +76,7 @@ I attempted a headless Chromium run using a local test fixture, but the executio
 - All labelled controls, unique IDs, keyboard navigation listeners and reduced-motion handling remain present.
 - The synthetic CSV and all price/volume values are unchanged.
 
-## 4. Runtime checkpoint
+### Responsive mobile assets\n\nThe standalone HTML now uses `<picture>` with a `(max-width: 720px)` source for each chart. Each mobile SVG is separately reflowed, has an accessible title/description, and a matching editable source/export pair. The comparison case stacks its two panels vertically. Source/export equivalence and file references are to be checked once more before scale-up.\n\n## 4. Runtime checkpoint
 
 The main narration in M01-L01 is about 842 words and its extended spoken case analysis about 217 words. At 120 words per minute, that is roughly 8.8 minutes of narration before learner pauses and practice. The lesson may reach the planned 10–15 minutes when the narrated walkthrough and 4–6 minute ChartLab are integrated as intended, but a timed rehearsal is still required. The outline is not proof of runtime.
 
