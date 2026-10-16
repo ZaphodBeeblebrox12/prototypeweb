@@ -44,4 +44,7 @@ for token in ('id="courseEditorToggle"', 'course-content-admin-editor.js', 'data
         raise SystemExit("Preview editing/figure interaction missing: " + token)
 if "not uploaded or saved" not in media_editor:
     raise SystemExit("Local-only image replacement must be explicitly labelled.")
+for student_facing_label in ("Method I ·", "Method II ·", "Method III ·", "Method IV ·"):
+    if student_facing_label in page:
+        raise SystemExit("Internal lesson method label leaks into student-facing preview: " + student_facing_label)
 print("Bollinger preview, VPA discovery, catalogue state, figure labels/counts and edit hooks passed.")
