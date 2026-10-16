@@ -79,7 +79,7 @@ A Chromium/Playwright fixture was exercised successfully via in-memory page cont
 
 ### Responsive mobile assets
 
-The standalone HTML uses `<picture>` with a `(max-width: 720px)` source for each chart. Each mobile SVG is separately reflowed, has an accessible title/description, and has a matching editable source/export pair. The comparison case stacks its two panels vertically. Mobile font sizes and volume summaries were increased and the floating reference label was removed from the candle area. Source/export equivalence and file references were verified against the committed branch.
+The standalone HTML uses `<picture>` with a `(max-width: 720px)` source for each chart. Each mobile SVG is separately reflowed, has an accessible title/description, and has a matching editable source/export pair. The comparison case stacks its two panels vertically. Mobile font sizes and volume summaries were increased, the floating reference label was removed from the candle area, and the four single-chart variants were shortened to remove excess blank space below the histogram. Source/export equivalence and file references were verified against the committed branch.
 
 ## 4. Runtime checkpoint
 
