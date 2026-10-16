@@ -431,14 +431,14 @@ jobs:
 
             // Public course and enquiry journeys must clearly identify static-preview behaviour.
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
-            await cataloguePage.goto(server + "/index.html", { waitUntil: "networkidle" });
+            await cataloguePage.goto(server + "/trading-path.html", { waitUntil: "networkidle" });
             await cataloguePage.locator("[data-preview-checkout]").first().click();
             assert.ok((await cataloguePage.locator("#previewModal").getAttribute("class")).includes("open"),
-              "Homepage course CTA should open its preview disclosure");
+              "Trading Path checkout CTA should open its preview disclosure");
             assert.ok((await cataloguePage.locator("#previewModal").innerText()).includes("Checkout is not connected yet."),
-              "Homepage course CTA must not imply a live checkout");
+              "Trading Path checkout CTA must not imply a live checkout");
             assert.ok((await cataloguePage.locator("#previewModal").innerText()).includes("No payment has been taken."),
-              "Homepage course CTA must explicitly state that no payment was taken");
+              "Trading Path checkout CTA must explicitly state that no payment was taken");
             await cataloguePage.locator("#previewModal .close").click();
 
             await cataloguePage.goto(server + "/construct.html", { waitUntil: "networkidle" });
