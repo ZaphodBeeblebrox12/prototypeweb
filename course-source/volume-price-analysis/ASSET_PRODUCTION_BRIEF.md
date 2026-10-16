@@ -71,7 +71,7 @@ Do not create all 30 charts and then invent a marketing theme around them. First
 
 ### Synthetic data, licensing and honest labelling
 - Use **synthetic OHLCV data by default**. Make the chart realistic enough to teach structure but simple enough that a learner can follow it.
-- Label synthetic examples visibly as **“Synthetic teaching example — not historical market data.”**
+- Number lesson figures consistently by module/lesson (Figure 1.1–1.5, Figure 2.1–2.5, etc.; use letter suffixes for related interactive panels). Do not place repeated “synthetic data” banners inside the image. Keep provenance in the surrounding lesson, source-data, or alt-text notes so an illustrative figure is not mistaken for historical market evidence.
 - For licensed or historical data, record source/provider, instrument, timeframe, date range, timezone/session, rights/permission, and any edits or omissions. Keep the underlying unedited data if edits are made for teaching.
 - Never fabricate broker logos, transaction prints, order-flow details, named institutions or precise historical claims.
 - For retail spot-FX tick volume, state that the chart may count price updates from that provider rather than all market trades. For crypto, identify the venue and its data definition. Do not imply that different feeds' volume values are directly interchangeable.
@@ -202,7 +202,7 @@ Each item below describes both the visual deliverable and the learning task that
 
 **Difficulty must increase through reasoning, not through extra clutter or unexplained jargon.** Use the same three stage labels and a visible progress indicator across the course. Stage 1 should teach observation; Stage 2 should add comparison and interpretation; Stage 3 should transfer the idea to a new case and require independent conditional reasoning. Do not reveal Stage 3 outcomes before the initial response. An HTML text-length check is a completion aid, not a measure of conceptual correctness; feedback and a model answer must explain the quality of reasoning.
 
-Each student lesson, visual package, ChartLab and Q&A/practice task should use this same progression. The asset inventory below lists the core content; each listed ChartLab must be designed as three related stages rather than one isolated question.
+Each student lesson, visual package, ChartLab and Q&A/practice task should use the internal practice progression while exposing natural, task-oriented headings to students; do not show internal level labels such as “Level 1/2/3”, “easy”, “guided” or “independent”. The asset inventory below lists the core content; each listed ChartLab must be designed as three related stages rather than one isolated question.
 
 Every lab must contain all of the following; if the lesson is a guided visual exercise, these can be simple controls rather than a complex application.
 
