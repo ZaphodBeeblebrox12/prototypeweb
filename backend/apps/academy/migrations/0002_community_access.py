@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(
             model_name="courseentitlement",
             constraint=models.CheckConstraint(
-                condition=models.Q(("community_access_expires_at__isnull", True), ("community_access_granted_at__isnull", False), _connector="OR"),
+                check=models.Q(("community_access_expires_at__isnull", True), ("community_access_granted_at__isnull", False), _connector="OR"),
                 name="academy_comm_expiry_grant_ck",
             ),
         ),
