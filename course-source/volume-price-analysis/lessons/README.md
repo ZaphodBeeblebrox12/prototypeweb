@@ -1,14 +1,12 @@
 # Read Volume. Find Trade Setups.
-## Volume Price Analysis — first-pass teaching manuscript
+## Volume Price Analysis — working teaching manuscript
 
-**Status:** Draft 1 for editorial review.  
-**Use:** Source teaching material only. This content has not been added to public-facing website pages or course delivery.  
-**Catalog:** [Potential lesson catalog](../POTENTIAL_LESSON_CATALOG.md)
+**Status:** Source teaching material and production specifications. The course has not been integrated into public-facing website pages or course delivery. The scripts remain working manuscripts; visual assets, interactive ChartLabs, final rehearsal timings, recording and novice pilot review are still required.
 
-This folder contains the full first-pass manuscript for all six modules and 30 lessons. Each lesson includes a learner outcome, timed outline, narration script, knowledge check, and inline editorial comments specifying illustrations and ChartLabs. The companion [chart-walkthrough guide](CHART_WALKTHROUGHS.md) adds presenter language for the visual segments. The [research and adaptation note](RESEARCH_AND_ADAPTATION_NOTES.md) explains how the reference works informed the course without reproducing their text.
+This folder contains the six-module, 30-lesson manuscript, presenter notes for chart walkthroughs, research/adaptation notes, a beginner-language guide, the second-pass learner-value Q&A bank, and the full asset-production brief.
 
-## Files
-
+- [Potential lesson catalog](../POTENTIAL_LESSON_CATALOG.md)
+- [Asset production brief — all lesson visuals, ChartLabs, worksheets and supporting files](../ASSET_PRODUCTION_BRIEF.md)
 - [Module 1 — Read the Market Behind the Candles](MODULE_01_READ_THE_MARKET.md)
 - [Module 2 — Spot Buying and Selling Pressure](MODULE_02_BUYING_SELLING_PRESSURE.md)
 - [Module 3 — Find Trade Setups at the Levels That Matter](MODULE_03_TRADE_SETUPS.md)
@@ -17,42 +15,35 @@ This folder contains the full first-pass manuscript for all six modules and 30 l
 - [Module 6 — Put It All Together: Build a Complete Trading Plan](MODULE_06_COMPLETE_TRADE_PLAN.md)
 - [Chart walkthrough scripts for all 30 lessons](CHART_WALKTHROUGHS.md)
 - [Research and adaptation note](RESEARCH_AND_ADAPTATION_NOTES.md)
+- [Third-pass editorial language guide](EDITORIAL_LANGUAGE_GUIDE.md)
+- [Second-pass learner Q&A bank](Q_AND_A_BANK.md)
 
 ## Production standard
 
-Each lesson is designed for a **10–20 minute delivered lesson, with a hard minimum of 10 minutes**, not a ten-minute uninterrupted monologue. The timing includes:
-1. narrated teaching;
-2. an annotated chart walkthrough with presenter narration;
-3. a short learner pause or ChartLab task;
-4. a recap and knowledge check.
+Each lesson is intended to deliver **10–20 minutes of actual teaching**, normally **12–16 minutes**, with a hard minimum of 10 minutes. The per-lesson outlines currently include timing targets; they do not prove the final runtime.
 
-Before recording, check the actual narration word count and rehearse the screen segment. If a lesson runs under ten minutes in rehearsal, deepen it with a worked example, a counterexample, or a learner reasoning task. Do not pad it with repeated claims. Lessons over 20 minutes need a written reason tied to concept complexity or necessary worked examples. The current scripts are first-pass manuscripts, not yet final recording scripts.
+Count narration, narrated chart walkthrough, guided learner practice, feedback and recap. Do not count screen-loading time or empty pauses. Rehearse and time every complete lesson. If it runs under ten minutes, add a worked example, contrasting case or meaningful learner reasoning task—not repetition. A lesson over 20 minutes needs a clear reason tied to complexity or necessary practice.
 
 ## Shared teaching rules
 
 - Describe what the chart shows before naming an interpretation.
-- Distinguish evidence from hypothesis; avoid claiming to know participant identity or hidden intent from a candle.
-- Explain at least one alternative reading for ambiguous examples.
-- Define confirmation, invalidation, and the no-trade condition in observable terms.
-- Show both a successful and a failed version of similar-looking events.
-- State the market, instrument, volume measure, feed and baseline wherever they materially affect interpretation.
-- Do not treat Volume Profile, volume compared with recent bars, springs, upthrusts, or climaxes as standalone guaranteed signals.
-- When using real chart data, obtain appropriate permissions and label symbol, timeframe, date range, source and any synthetic/edited elements.
-- ChartLabs must evaluate reasoning, not reward a lucky directional guess.
+- Distinguish observation from hypothesis; do not claim to know participant identity or hidden intent from a candle.
+- Explain an alternative reading when the evidence is ambiguous.
+- Define the relevant trigger, invalidation and no-trade condition in observable terms.
+- Show both a successful and a failed version of similar-looking events where the concept requires it.
+- State the market, instrument, volume measure, feed, time period and comparison baseline wherever they affect interpretation.
+- Do not treat volume spikes, Volume Profile, springs, upthrusts or climactic activity as standalone guaranteed signals.
+- Use synthetic chart data unless suitable data rights are confirmed. Label synthetic examples as synthetic.
+- Keep the course about volume alongside price and price structure, using Volume Profile where it directly adds context. Do not expand the course into a general indicator tour.
+- Make the learner Q&A useful: for every question, ask what practical chart-reading skill a correct answer demonstrates.
 
-## Recommended next production passes
+## Current production sequence
 
-**Pass 2 — Research and instructional audit:** fact-check concepts; confirm the source-data limitations; identify overlap; ensure definitions are consistent across the 30 lessons.
+1. **Pilot one full lesson package.** Start with a Module 1 lesson and produce the chart master, export, data/source note, alt text, ChartLab, model feedback and counterexample. Test it with a beginner before scaling.
+2. **Build the remaining 30 lesson asset packages and ChartLabs.** Use [the asset production brief](../ASSET_PRODUCTION_BRIEF.md) as the checklist; preserve editable sources and data provenance.
+3. **Finish learner materials.** Complete the reusable context/evidence worksheets, trade-thesis canvas, pre-trade ticket, capstone review and model-answer notes.
+4. **Rehearse and time every lesson.** Revise spoken phrasing, verify examples and confirm the hard minimum before recording.
+5. **Prepare the release package.** Produce captions/transcripts, check accessibility and rights, then run novice testing and revise confusing explanations.
+6. **Integrate into the website only after teaching content and assets have been reviewed and approved.**
 
-**Pass 3 — Chart and exercise production:** create or license the visuals specified in comments; build the ChartLabs with staged reveals; create answer keys and scoring rubrics.
-
-**Pass 4 — Recording edit:** rehearse each lesson to confirm a 10–12 minute runtime; replace written phrasing that sounds unnatural aloud; add transitions, captions and end cards.
-
-**Pass 5 — Pilot review:** test the material with novice learners, collect errors and points of confusion, then revise scripts before public release.
-
-
-## Third pass — beginner language and voice
-
-The intended learner may have only recently opened a chart. Do not assume they already understand trading jargon. Read the [third-pass editorial language guide](EDITORIAL_LANGUAGE_GUIDE.md) before revising or recording. The lesson scripts should sound like a patient, practical teacher explaining one chart to one learner.
-
-The core stays focused on reading volume alongside price and price structure. Do not expand the course into a general indicator tour. The [learner Q&A bank](Q_AND_A_BANK.md) is included for revision and lesson-end checks.
+The teaching materials and the public website are separate at this stage. Do not describe the course as published or production-ready until the remaining work above is complete.
