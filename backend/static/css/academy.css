@@ -141,3 +141,16 @@ a:hover { color: var(--tt-deep); }
   .tt-dashboard-nav { gap:.15rem; }
   .tt-dashboard-nav a { padding:.4rem .55rem; font-size:.78rem; }
 }
+
+
+.tt-community-connections { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.8rem; margin-top:1rem; }
+.tt-community-connection { display:flex; align-items:center; justify-content:space-between; gap:1rem; min-width:0; padding:1rem; border:1px solid var(--tt-line); border-radius:13px; background:var(--tt-surface); }
+.tt-community-connection-copy { display:flex; flex:1; min-width:0; flex-direction:column; gap:.25rem; }
+.tt-connection-platform { color:var(--tt-muted); font-size:.72rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.tt-community-connection-copy strong { font-size:.9rem; }
+.tt-community-connection-copy p { font-size:.76rem; line-height:1.5; }
+.tt-community-connection .btn { flex-shrink:0; font-size:.78rem; }
+@media (max-width: 640px) {
+  .tt-community-connections { grid-template-columns:1fr; }
+  .tt-community-connection { align-items:flex-start; flex-direction:column; }
+}
