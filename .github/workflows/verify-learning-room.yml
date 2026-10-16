@@ -210,6 +210,47 @@ jobs:
             assert.equal(await completeQuiz(), 8);
             assert.equal(await page.locator("#sr-complete-button").isDisabled(), false);
 
+            // Full-depth V5.2 reader: preserve the long-form manuscript, diagrams and staged synthetic visuals.
+            await page.goto(server + "/support-resistance-room.html", { waitUntil: "networkidle" });
+            await page.waitForSelector("#sr-lesson-title");
+            await page.locator('[data-lesson-id="13"]').click();
+            await page.waitForFunction(() => document.querySelector("#sr-lesson-title").textContent.includes("Retests and role reversal"));
+            const fullReaderLink = page.locator("#sr-full-v52-anchor");
+            await page.waitForFunction(() => {
+              const link = document.querySelector("#sr-full-v52-anchor");
+              return link && !document.querySelector("#sr-full-v52-link").hidden && link.href.includes("lesson=13");
+            });
+            await fullReaderLink.click();
+            await page.waitForFunction(() => document.querySelector("#lesson-title") && document.querySelector("#lesson-title").textContent.includes("Retests and Role Reversal"));
+            const fullLessonText = await page.locator("#reading-sections").innerText();
+            assert.ok(fullLessonText.length > 5000, "Full V5.2 Lesson 13 reading appears truncated");
+            assert.ok(fullLessonText.includes("The depth of the return matters"), "Lesson 13 return-depth section is missing");
+            assert.ok(fullLessonText.includes("Some breakouts never retest the zone"), "Lesson 13 no-retest section is missing");
+            assert.ok(fullLessonText.includes("Role reversal is possible, not automatic"), "Lesson 13 role-reversal section is missing");
+            assert.ok(await page.locator(".case-chart-rights-note").count() > 0, "Historical chart rights notice is missing");
+            assert.equal(await page.locator(".case-chart-figure").count(), 0, "Historical chart images should not render in this public preview");
+            await page.locator('[data-tab="chart"]').click();
+            await page.waitForFunction(() => {
+              const img = document.querySelector("#stage-image");
+              return img && img.complete && img.naturalWidth > 0;
+            });
+            assert.ok((await page.locator("#stage-image").getAttribute("src")).includes("L13-A-01-break-beyond.png"), "Lesson 13 should use the synthetic staged chart");
+            await page.locator("#stage-response").fill("Price breaks above the candidate area; the future return and response remain unknown, so I will retain an alternative.");
+            await page.waitForFunction(() => !document.querySelector("#stage-next").disabled);
+            await page.locator("#stage-next").click();
+            await page.waitForFunction(() => document.querySelector("#stage-title").textContent.includes("Stage 2"));
+            await page.waitForFunction(() => {
+              const img = document.querySelector("#stage-image");
+              return img && img.complete && img.naturalWidth > 0;
+            });
+            assert.ok((await page.locator("#chart-note").innerText()).includes("not historical market data"));
+            await page.locator('[data-lesson="14"]').click();
+            await page.waitForFunction(() => document.querySelector("#lesson-title").textContent.includes("Failed Breakouts and Alternate Outcomes"));
+            const failureLessonText = await page.locator("#reading-sections").innerText();
+            assert.ok(failureLessonText.length > 6000, "Full V5.2 Lesson 14 reading appears truncated");
+            assert.ok(failureLessonText.toLowerCase().includes("not an automatic"), "Lesson 14 should preserve the alternate-outcome caution");
+            console.log("FULL_V52_READER_PASS: long-form lesson content, staged synthetic charts and historical-image rights notice.");
+
             assert.deepEqual(pageErrors, [], "Unexpected browser JavaScript errors");
             assert.deepEqual(badResponses, [], "HTTP errors while running the room: " + JSON.stringify(badResponses));
             console.log(JSON.stringify({

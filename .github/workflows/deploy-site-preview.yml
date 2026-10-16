@@ -118,8 +118,8 @@ jobs:
               raise SystemExit("Missing synthetic lesson charts: " + ", ".join(sorted(missing_charts)))
           if "Original historical chart visual withheld pending data-redistribution rights review" not in main:
               raise SystemExit("Historical case image rights notice is missing")
-          if "<img src=\"\u0024{escapeText(block.src)}\"" in main:
-              raise SystemExit("Historical case chart may still be rendered as an image")
+          if "case-chart-rights-note" not in main or "case-chart-figure" in main:
+              raise SystemExit("Historical case chart must be replaced by the rights-review notice")
           if not all(name in deep for name in ("The depth of the return matters", "Some breakouts never retest", "Role reversal is possible")):
               raise SystemExit("Expected long-form Lesson 13 sections are missing from the deep content source")
           if not (root / "BREAKOUTS_FAILURES_AUTHOR_RESEARCH.md").is_file():
