@@ -1,5 +1,6 @@
 # Accessibility and source notes — M03-L05
 
+**Figure number:** Figure 3.5; interactive panels use Figure 3.5a–Figure 3.5e.
 **Lesson:** Before You Enter: Separating Promising Setups From Weak Ones
 **Purpose:** Assess context, location, evidence, trigger, invalidation and practical risk before considering a trade.
 **Data:** Synthetic OHLCV for learning, not historical prices or a signal.
