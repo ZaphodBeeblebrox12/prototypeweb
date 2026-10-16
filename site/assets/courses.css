@@ -12,6 +12,7 @@
 .courses-catalogue-page .cc-text-link{display:inline-flex;align-items:center;gap:8px;color:var(--green);font-size:12px;font-weight:800;text-underline-offset:4px}
 .courses-catalogue-page .cc-text-link:hover{text-decoration:underline}
 .courses-catalogue-page .cc-reassurance{display:flex;align-items:flex-start;gap:9px;max-width:525px;margin-top:23px;color:var(--muted);font-size:11px;line-height:1.65}
+.courses-catalogue-page .cc-development-note{max-width:535px;margin:13px 0 0;padding-left:12px;border-left:2px solid var(--tomato);color:var(--muted);font-size:11px;line-height:1.7}
 .courses-catalogue-page .cc-reassurance>span{flex:0 0 19px;display:grid;place-items:center;height:19px;border-radius:50%;background:#e7eadc;color:var(--green);font-size:12px}
 .courses-catalogue-page .cc-hero-art{position:relative;min-width:0;padding:18px 16px 17px;background:#ebe6d7;border:1px solid #ddd4c1;border-radius:24px 24px 9px 24px;box-shadow:0 20px 44px #29382e10;transform:rotate(.45deg)}
 .courses-catalogue-page .cc-art-paper{position:absolute;right:25px;top:52px;display:flex;gap:6px;flex-direction:column;z-index:0;transform:rotate(5deg)}
@@ -234,6 +235,7 @@
  .courses-catalogue-page .cc-art-topline{font-size:7px}
  .courses-catalogue-page .cc-art-note{margin-top:1px;font-size:12px}
  .courses-catalogue-page .cc-reassurance{font-size:11px;margin-top:17px}
+ .courses-catalogue-page .cc-development-note{margin-top:10px;font-size:11px}
  .courses-catalogue-page .cc-route-picker{grid-template-columns:1fr;gap:7px;margin-top:19px}
  .courses-catalogue-page .cc-route{align-items:center;padding:11px 13px}
  .courses-catalogue-page .cc-route-copy b{font-size:12px}
