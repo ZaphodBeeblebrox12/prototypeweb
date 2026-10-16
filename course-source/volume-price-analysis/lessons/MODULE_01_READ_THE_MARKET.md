@@ -9,6 +9,8 @@ By the end of this module, you should be able to describe candle shape in plain 
 
 ## Lesson 1.1 — What Candlesticks Don't Tell You: Reading the Volume Behind Price
 
+As you work through this lesson, refer to **Figure 1.1** for the chart example.
+
 ![Chart for What Candlesticks Don't Tell You: Reading the Volume Behind Price. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m01-l01-candle-context.svg)
 
 **Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m01-l01-candle-context.html)  
@@ -59,19 +61,19 @@ That still does **not** confirm a breakout. The next bars may hold above the bou
 
 Compare two hypothetical green candles at the same scale. Candle A rises from 100 to 103 on 1.1× relative volume and occurs after a quiet pullback. Candle B rises from 100 to 104, records 3× relative volume and appears after an extended advance near the prior high. Both closed up. B had more recorded activity and slightly more progress, but its location makes the unresolved test different: can price sustain itself above the high, or does it return inside? The example is deliberately inconclusive until follow-through appears.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** Using Candle B's table, identify the candle direction and relative-volume multiple.
 
 **Feedback:** It closed above its open and recorded 3.00× its stated baseline. Those are facts; they do not identify who traded.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare Candles A and B. Which facts differ, and what is the strongest conclusion the data supports?
 
 **Feedback:** B had slightly more price progress and much higher relative volume. The sound conclusion is that more recorded activity accompanied the upward close.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** A new green candle closes near its high at a prior range boundary on 1.6× relative volume. Give two possible readings and one future discriminator.
 
@@ -89,6 +91,8 @@ Compare two hypothetical green candles at the same scale. Candle A rises from 10
 ---
 
 ## Lesson 1.2 — Is This Move Significant? Spotting Unusual Volume
+
+As you work through this lesson, refer to **Figure 1.2** for the chart example.
 
 ![Chart for Is This Move Significant? Spotting Unusual Volume. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m01-l02-relative-volume.svg)
 
@@ -137,19 +141,19 @@ A bar closes above a range high on 1.8× its 20-bar average. Record three things
 
 A volume bar of 1,500 appears large. Against a baseline of 500, it is 3×. Against a baseline of 1,300, it is only about 1.15×. The bar did not change; the comparison did. This is why you should inspect whether the baseline uses comparable bars and whether a session-opening burst is normal. Relative volume is a measure built from a choice, so record the choice as part of the analysis.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** A bar records 900 units and its baseline is 600. Calculate relative volume.
 
 **Feedback:** 900 ÷ 600 = 1.5×, or 50% above the chosen baseline.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Two bars both show 1.5× relative volume, but one appears at the open and one at midday. Can you assume they are equally unusual?
 
 **Feedback:** Not without checking the usual activity at those times. The calculation may be correct while the baseline remains poorly matched.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** An up bar records 0.8× the baseline after a long advance. Write a neutral note and one thing to check next.
 
@@ -167,6 +171,8 @@ A volume bar of 1,500 appears large. Against a baseline of 500, it is 3×. Again
 ---
 
 ## Lesson 1.3 — Read the Story Inside a Candle: Wicks, Range and Closing Price
+
+As you work through this lesson, refer to **Figure 1.3** for the chart example.
 
 ![Chart for Read the Story Inside a Candle: Wicks, Range and Closing Price. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m01-l03-candle-wicks-range-close.svg)
 
@@ -223,19 +229,19 @@ These facts suggest a wide bar with an upward close in the upper part of the ran
 
 Two bars both range from 90 to 100. One closes at 99; the other at 92. Their ranges are identical, but the first close is 90% of the way from low to high and the second is only 20%. The close location describes how much of the range was retained by the end of the interval. Neither number alone says whether the next bar will rise or fall; location and subsequent price behaviour still matter.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** For Open 100, High 104, Low 96, Close 102, calculate the range and close position.
 
 **Feedback:** The range is 8; close position is (102 − 96) ÷ 8 = 75%.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare that candle with one using the same high and low but closing at 97. What changed?
 
 **Feedback:** The second close is near the low rather than the upper part of the range. The total range is unchanged, and neither bar identifies participant motives.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** A wide candle at resistance has a long upper wick and elevated volume. Give an objective description, a possible interpretation and an alternative.
 
@@ -253,6 +259,8 @@ Two bars both range from 90 to 100. One closes at 99; the other at 92. Their ran
 ---
 
 ## Lesson 1.4 — When Price Moves on Low Volume: Opportunity or Warning Sign?
+
+As you work through this lesson, refer to **Figure 1.4** for the chart example.
 
 ![Chart for When Price Moves on Low Volume: Opportunity or Warning Sign?. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m01-l04-low-volume-pullback.svg)
 
@@ -291,19 +299,19 @@ Do not call this an entry yet. If price stabilises around the area and then reta
 
 Two pullbacks both show falling volume. In the first, price retreats from 110 to 107, holds a prior breakout zone near 106–107 and later reclaims a short-term high. In the second, price slips through the zone, breaks a meaningful swing low and fails to reclaim it. The starting clue—lower activity—was similar. The structural result differed. A volume-only rule would miss that distinction and could encourage a trade before price has shown what the pullback means.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** A market rises from 100 to 110, then pulls back to 107 on below-baseline volume. List three observations.
 
 **Feedback:** The advance covered 10 points, the pullback covered 3, and pullback volume is below the selected baseline. Whether the zone holds is unknown.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare this with a low-volume pullback that breaks a meaningful swing low and continues lower. Why is low volume not enough to call a pullback healthy?
 
 **Feedback:** The price-structure outcome differs. Volume needs to be read alongside progress and location.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** A quiet pullback reaches a prior breakout area without producing a trigger. State the next evidence to watch and one event that weakens continuation.
 
@@ -321,6 +329,8 @@ Two pullbacks both show falling volume. In the first, price retreats from 110 to
 ---
 
 ## Lesson 1.5 — Which Volume Can You Trust? Understanding Data Across Different Markets
+
+As you work through this lesson, refer to **Figure 1.5** for the chart example.
 
 ![Chart for Which Volume Can You Trust? Understanding Data Across Different Markets. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m01-l05-volume-data-trust.svg)
 
@@ -359,19 +369,19 @@ If you cannot complete the sentence, your analysis may still describe the price 
 
 Suppose a currency chart's tick activity is twice its own recent baseline. That supports the statement “tick activity on this feed is unusually high.” It does not establish that total global FX turnover doubled. Similarly, a crypto venue's reported volume describes that venue/instrument series, not every market where the asset trades. A credible note names the feed and keeps the conclusion within what the data actually measures.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** A retail FX feed says its volume measure counts tick updates. What does this series measure?
 
 **Feedback:** It measures tick activity on that feed, not total traded quantity across the global FX market.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare retail FX tick activity with exchange-reported futures volume. Why should you not compare their raw numbers directly?
 
 **Feedback:** They may count different things and cover different markets; baselines and numeric thresholds are not automatically transferable.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** Write a data note for a crypto pair shown on one exchange.
 
