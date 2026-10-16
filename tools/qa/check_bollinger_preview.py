@@ -2,6 +2,8 @@
 """Focused smoke checks for the Bollinger Bands preview and Volume & Price Analysis discovery."""
 from __future__ import annotations
 import re
+import json
+import html as html_lib
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -10,6 +12,18 @@ data = (ROOT / "site/assets/course-catalogue-data.js").read_text(encoding="utf-8
 renderer = (ROOT / "site/assets/courses-catalogue.js").read_text(encoding="utf-8")
 catalogue = (ROOT / "site/courses.html").read_text(encoding="utf-8")
 media_editor = (ROOT / "site/assets/instructional-image-admin.js").read_text(encoding="utf-8")
+lesson_data_path = ROOT / "course-source/understand-bollinger-bands/assets/bollinger-lessons-data.js"
+lesson_data_source = lesson_data_path.read_text(encoding="utf-8")
+lesson_data_prefix = "window.BOLLINGER_MANUSCRIPTS = "
+if not lesson_data_source.startswith(lesson_data_prefix):
+    raise SystemExit("Generated Bollinger manuscript data file is missing its expected payload.")
+lesson_data_payload = lesson_data_source[len(lesson_data_prefix):].strip()
+if lesson_data_payload.endswith(";"):
+    lesson_data_payload = lesson_data_payload[:-1]
+try:
+    lesson_manuscripts = json.loads(lesson_data_payload)
+except json.JSONDecodeError as exc:
+    raise SystemExit(f"Generated Bollinger manuscript data is invalid JSON: {exc}") from exc
 
 if len(re.findall(r'id:\s*"volume-price-analysis"', data)) != 1:
     raise SystemExit("Expected one Volume & Price Analysis record.")
@@ -25,6 +39,23 @@ if 'Course in development</button>' not in renderer:
     raise SystemExit("The development course must not offer enrolment.")
 if 'course-catalogue-data.js' not in catalogue or 'courses-catalogue.js' not in catalogue:
     raise SystemExit("Catalogue data/renderer not linked from site/courses.html.")
+if '<script src="../../assets/bollinger-lessons-data.js"></script>' not in page:
+    raise SystemExit("Learning Room must load the generated lesson manuscripts.")
+if "window.BOLLINGER_MANUSCRIPTS[lessonId]" not in page:
+    raise SystemExit("Learning Room must render student-facing Markdown manuscript content.")
+if len(lesson_manuscripts) != 30:
+    raise SystemExit(f"Expected 30 generated lesson records, found {len(lesson_manuscripts)}.")
+if len({item.get("quiz", {}).get("question") for item in lesson_manuscripts.values()}) != 30:
+    raise SystemExit("Each Bollinger lesson must have its own knowledge-check question.")
+for lesson_id, lesson in lesson_manuscripts.items():
+    if not all(lesson.get(part, "").strip() for part in ("ideaHtml", "examplesHtml", "practiceHtml")):
+        raise SystemExit(f"Lesson {lesson_id} must have idea, chart examples, and practice content.")
+    visible = html_lib.unescape(re.sub(r"<[^>]+>", " ", " ".join(
+        lesson.get(part, "") for part in ("ideaHtml", "examplesHtml", "practiceHtml")
+    )))
+    word_count = len(re.findall(r"\\b[\\w’'-]+\\b", visible))
+    if word_count < 850:
+        raise SystemExit(f"Lesson {lesson_id} is too shallow for the course standard ({word_count} words).")
 if 'function isVolumeAnalysisLesson' not in page:
     raise SystemExit("Intentional related-course placement map is missing.")
 placement = page[page.index("function isVolumeAnalysisLesson"):page.index("function renderRelatedVolumeCourseCard")]
@@ -51,4 +82,4 @@ for student_facing_label in ("eyebrow:'Method I ·", "eyebrow:'Method II ·", "e
                              '"Method III: Look for Reversal Clues in Volume"', '"Method IV: Wait for a Confirmed Breakout"'):
     if student_facing_label in page:
         raise SystemExit("Internal method label leaks into student-facing material: " + student_facing_label)
-print("Bollinger preview, VPA discovery, catalogue state, figure labels/counts and edit hooks passed.")
+print("Bollinger lesson depth, all 30 unique quizzes, Learning Room rendering, VPA discovery, catalogue state, figure labels/counts and edit hooks passed.")
