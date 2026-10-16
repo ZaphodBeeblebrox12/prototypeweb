@@ -6,9 +6,9 @@
 
 ## Inventory snapshot
 
-The repository contains **465 image assets**: **319 PNGs** and **146 SVGs** (including source copies, preview mirrors, brand marks and QA screenshots). The site root currently contains 14 HTML pages, with the Support & Resistance Learning Room using dynamically selected images rather than embedding each chart in the HTML. The dimensioned inventory confirms **126 paired PNG/SVG chart states** in the core Support & Resistance source library.
+The repository contains **471 image assets**: **319 PNGs** and **152 SVGs** (including source copies, preview mirrors, brand marks and QA screenshots). The site root currently contains 14 HTML pages, with the Support & Resistance Learning Room using dynamically selected images rather than embedding each chart in the HTML. The dimensioned inventory confirms **126 paired PNG/SVG chart states** in the core Support & Resistance source library.
 
-The checked-in baseline inventory is in [IMAGE_ASSET_INVENTORY.csv](IMAGE_ASSET_INVENTORY.csv). It records file path, format, bytes, same-directory SVG pairing, source references, probable asset role and the current readability action. The automated build also reads each tracked PNG header and each SVG root/viewBox and produces a second CSV with native dimensions for all 465 files: [download the native-dimension inventory artifact](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38886741765/artifacts/12038949908). Source dimensions do not, by themselves, prove that labels are comfortably readable at the size where the lesson shows them.
+The checked-in [IMAGE_ASSET_INVENTORY.csv](IMAGE_ASSET_INVENTORY.csv) now records all 471 assets with native PNG dimensions or SVG viewport/viewBox dimensions, file bytes, same-directory vector/raster pairing, source references, asset role and a first-pass readability action. The CI run also publishes the generated inventory as an artifact for reproducibility: [download the latest dimensioned inventory artifact](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38887348146/artifacts/12040346661). Source dimensions do not, by themselves, prove that labels are comfortably readable at the size where the lesson shows them.
 
 ## Confirmed high-priority findings
 
@@ -32,7 +32,7 @@ The checked-in baseline inventory is in [IMAGE_ASSET_INVENTORY.csv](IMAGE_ASSET_
 
 ## Validation and remaining work
 
-- **Post-sync GitHub Actions run 30 passed**: [view verification run](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38886741765). It generated the 465-row native-dimension inventory, staged vector chart sources, ran the existing Playwright lesson/answer-gate suite, checked desktop viewer zoom/fit/Escape and position restoration, opened dynamically injected V5.2 figures, and exercised the 390×844 mobile viewer fit and pinch-pointer behavior.
+- **Post-sync GitHub Actions run 42 passed**: [view verification run](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38887348146). It generated the 471-row native-dimension inventory, passed the preserved member light-theme check, staged vector chart sources, ran the existing Playwright lesson/answer-gate suite, checked desktop viewer zoom/fit/Escape and position restoration, opened dynamically injected V5.2 figures, and exercised the 390×844 mobile viewer fit and pinch-pointer behavior.
 - The pinch test simulates touch pointer events in Chromium; it is not a real-device Safari/iOS test. Keyboard focus restoration is covered in the implementation, but assistive-technology testing remains outstanding.
 - Pixel-by-pixel visual QA across desktop/mobile has not yet been established by the source-tree inspection alone. I cannot claim that every image's text contrast, cropping or source resolution has been visually confirmed.
 - The PNG-only figures require a rendered review to decide exactly which need source re-export, larger annotation typography, or a full-chart-plus-detail layout. Their substantive candle structure, price values, answer mappings and learning gates must remain unchanged.
