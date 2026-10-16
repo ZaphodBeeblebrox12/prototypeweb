@@ -48,7 +48,7 @@ def lesson_segments(module_markdown):
     """Yield lesson number, sequence, title, and manuscript section."""
     matches = list(_LESSON_HEADER.finditer(module_markdown))
     result = []
-    for match in matches:
+    for index, match in enumerate(matches):
         end = matches[index + 1].start() if index + 1 < len(matches) else len(module_markdown)
         segment = module_markdown[match.start():end].strip()
         segment = re.split(r"^##\s+Module\s+\d+\s+instructor notes\b", segment, maxsplit=1, flags=re.I | re.M)[0].strip()
