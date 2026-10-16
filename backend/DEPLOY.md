@@ -1,69 +1,35 @@
-# DEPLOYING TO RENDER (free plan)
+# TradeThesis Django deployment notes
 
-## What this pack contains
-| File | Action |
-|---|---|
-| `config/settings/production.py` | NEW |
-| `config/wsgi.py` | REPLACE (defaults to production settings) |
-| `build.sh` | NEW — repo root |
-| `render.yaml` | NEW — repo root (Render Blueprint) |
-| `requirements.txt` | REPLACE (adds gunicorn + psycopg3) |
+**Status: not approved for production deployment.** The Django backend is being integrated through draft PR #4 into `ZaphodBeeblebrox12/prototypeweb`. The learner journey, catalogue seed, payment/access lifecycle, content protection and production routing have not been verified end to end.
 
-## Why Postgres is mandatory
-Render free web services have an EPHEMERAL filesystem: anything written
-to disk (including db.sqlite3) disappears on every deploy/restart. SQLite
-is therefore not an option. base.py already reads DATABASE_URL via
-django-environ, and render.yaml provisions a free PostgreSQL and injects
-DATABASE_URL automatically.
+## Repository and branch rules
 
-## Steps
-1. Copy the 5 files into the repo (wsgi.py + requirements.txt replace).
-2. Commit + push to main.
-3. render.com -> Dashboard -> New + -> Blueprint -> connect the repo.
-   Render reads render.yaml, creates the Postgres DB and the web service,
-   and deploys. First deploy takes ~3-5 min (pip + collectstatic + migrate).
-4. After deploy: Dashboard -> tradeadmin -> Environment -> fill in the
-   `sync: false` secrets (Telegram tokens, Stripe/Razorpay keys, SMTP).
-5. Create the admin account:
-       Render shell -> python manage.py createsuperuser
-   (or: python manage.py shell -c "from django.contrib.auth import get_user_model; get_user_model().objects.create_superuser('admin','a@b.c','PASS')")
-6. Recreate your plans/products/Prices in the admin — the production DB
-   starts EMPTY (your dev SQLite data does not travel).
+- During this integration, work on `feature/tradethesis-academy` and keep PR #4 targeted to `my-new-branch`.
+- The only permitted integration target is `my-new-branch`.
+- Do not push, merge, or deploy feature work to `main`.
+- Do not treat the existence of `render.yaml`, a successful Django check, or a preview page as evidence of a live service.
 
-## MUST-DO before opening registration
-ACCOUNT_EMAIL_VERIFICATION = "mandatory" in base.py. Without working SMTP,
-verification emails go nowhere and nobody can sign up. Set EMAIL_* env vars
-(Gmail: enable 2FA -> create an App Password; or SendGrid free tier, 100
-emails/day). Test with the "forgot password" flow yourself first.
-No SMTP and want to launch anyway? Temporarily set env:
-    EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
-(verification links appear in Render logs — fine for a private beta.)
+## Before deployment
 
-## Free-tier realities (plan around these)
-- SPIN-DOWN: after ~15 min idle the service sleeps; first request takes
-  ~30-60s. Upgrade or live with it.
-- 750 INSTANCE HOURS/month total. ONE always-on service fits; TWO
-  always-on services (e.g. web + a background jobs worker) do NOT.
-  The jobs worker (python manage.py runjobs --loop) that runs reconcile/
-  sweeps is a SEPARATE process — on free you either skip it (web requests
-  still trigger reconcile for that user) or run it briefly when needed.
-- FREE POSTGRES EXPIRES: Render's free database is time-limited (they
-  email before). Back up with pg_dump / django dumpdata before expiry
-  and restore into a new free DB. (Verify current terms on render.com.)
-- MEDIA FILES (avatars, ticket attachments) are on the ephemeral disk and
-  are LOST on redeploy. Acceptable for launch; move to Cloudinary/S3 later.
-- Geo pricing: CF-IPCountry headers won't exist on Render; set
-  MAXMIND_ENABLED=True (db already committed in data/) and test geo prices
-  with the DEBUG-only ?test_country=IN param — but DEBUG is False in prod,
-  so instead add real GeoPlanPrice rows and verify from an Indian IP/VPN.
-- Stripe/Razorpay webhooks: point them at https://<app>.onrender.com/
-  (check apps/payments/urls.py for the exact webhook paths) — localhost
-  webhook secrets from dev are invalid there.
-- Telegram Login Widget: the widget verifies against the bot's configured
-  domain — your Render URL must be registered with @BotFather (/setdomain).
+1. **Choose and verify routing.** The preferred setup serves the public TradeThesis site and Django `/learn/`, `/accounts/`, checkout and protected media routes on one origin. A separate learning host is possible, but session cookies, redirects, CSRF, allowed hosts and callback URLs must then be configured and tested explicitly. The production host/domain is not established by this repository.
+2. **Protect source material.** This GitHub repository is currently public and contains paid course source and internal instructional material. Private lesson bodies, answer keys and protected downloads cannot be secured merely by adding Django views while the source stays publicly readable. Before selling, make the source repository private or move confidential source/assets into private storage and verify the public build excludes them.
+3. **Use production infrastructure.** Configure persistent PostgreSQL, production settings, HTTPS, secure session/CSRF cookies, allowed hosts, static/media storage and backups. Do not use a local SQLite database or an ephemeral filesystem for learner/payment records.
+4. **Configure real services using deployment secrets.** Set `SECRET_KEY`, `DATABASE_URL`, email delivery, payment provider credentials and verified webhooks, OAuth credentials and any bot integrations that are actually required. Do not commit secrets or reuse development webhook secrets.
+5. **Configure catalogue and offers.** Reconcile approved course manifests against Django records. Keep Trading Path, Support & Resistance, Volume Price Analysis, CONSTRUCT, live classroom and micro-courses distinct. Do not activate offers for drafts or incomplete material. CONSTRUCT must not be sold through Academy until its included 12-month community access is granted and revoked correctly alongside the purchase lifecycle.
+6. **Exercise the full staging journey.** Check signup and email verification, login/logout/password recovery, payment success/failure/webhook retries, entitlement grants, expired/revoked access, refund/chargeback handling, lesson release, persisted progress, protected media and mobile rendering. Use test payment credentials first.
+7. **Check operational tasks.** Decide how scheduled jobs/reconciliation run, confirm database/media backups, create an initial staff account through the host's secure console, and verify logs/error handling without exposing personal or payment data.
 
-## Post-deploy smoke test
-/ -> landing renders (plans from empty DB -> create them first)
-/admin -> Jazzmin login -> Plans/Products visible
-/accounts/signup/ -> email arrives -> confirm -> /dashboard/ renders
-python manage.py check --deploy   (from Render shell; fix any warnings)
+## Local checks
+
+Run from this directory, using environment values appropriate to a local test environment:
+
+~~~bash
+python -m venv .venv
+. .venv/bin/activate
+pip install -r requirements.txt
+python manage.py check
+python -m compileall -q apps config
+pytest
+~~~
+
+The regression suite currently has one known failure in `tests/pricing/test_admin_base_price.py::test_global_plus_geo_overrides_save`; resolve and rerun it before considering this backend integration verified. A local check or static preview does not prove deployment readiness.
