@@ -282,11 +282,12 @@ jobs:
             await page.waitForSelector("#sr-v52-longform:not([hidden])");
             const overflow = await page.evaluate(() => {
               const viewport = document.documentElement.clientWidth;
-              const offenders = Array.from(document.querySelectorAll("body *")).map(el => {
+              const nodes = [document.documentElement, document.body, ...document.querySelectorAll("body *")];
+              const offenders = nodes.map(el => {
                 const rect = el.getBoundingClientRect();
                 const style = getComputedStyle(el);
-                return { tag: el.tagName, id: el.id, className: typeof el.className === "string" ? el.className.slice(0, 100) : "", left: Math.round(rect.left), right: Math.round(rect.right), width: Math.round(rect.width), display: style.display, position: style.position };
-              }).filter(el => el.width > 0 && (el.right > viewport + 1 || el.left < -1)).sort((a, b) => b.right - a.right).slice(0, 12);
+                return { tag: el.tagName, id: el.id, className: typeof el.className === "string" ? el.className.slice(0, 100) : "", left: Math.round(rect.left), right: Math.round(rect.right), width: Math.round(rect.width), clientWidth: el.clientWidth, scrollWidth: el.scrollWidth, overflowX: style.overflowX, display: style.display, position: style.position };
+              }).filter(el => el.width > 0 && (el.right > viewport + 1 || el.left < -1 || el.scrollWidth > el.clientWidth + 1)).sort((a, b) => Math.max(b.right - viewport, b.scrollWidth - b.clientWidth) - Math.max(a.right - viewport, a.scrollWidth - a.clientWidth)).slice(0, 16);
               return { viewport, document: document.documentElement.scrollWidth, body: document.body.scrollWidth, offenders };
             });
             assert.ok(overflow.document <= overflow.viewport + 1 && overflow.body <= overflow.viewport + 1, "Mobile page has horizontal overflow: " + JSON.stringify(overflow));
