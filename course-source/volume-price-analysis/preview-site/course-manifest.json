@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "course": "Read Volume. Find Trade Setups.",
+  "brand": "TradeThesis",
+  "branch": "my-new-branch",
+  "preview_entry": "course-source/volume-price-analysis/preview-site/index.html",
+  "source_root": "course-source/volume-price-analysis/",
+  "purpose": "Parallel development preview for the VPA course; not yet integrated into the public course catalogue.",
+  "learner_promise": "Read recorded volume alongside price, recognise useful context, and build conditional trade plans.",
+  "production_status": {
+    "manuscript": "Six modules and thirty lesson manuscripts are present; drafts still require review as scheduled in the source workflow.",
+    "chartlab": "One pilot ChartLab exists at assets/lab-specs/vpa-m01-l01-candle-context-lab.html.",
+    "runtime": "12–16 minutes is a target; learner-perceived duration has not been verified across the full course.",
+    "integration": "Not integrated into site/ or the public course catalogue."
+  },
+  "modules": [
+    {
+      "id": 1,
+      "title": "Read the Market Behind the Candles",
+      "summary": "Separate price outcome from recorded activity. Compare candles with a baseline and state what the data can—and cannot—tell you.",
+      "source": "lessons/MODULE_01_READ_THE_MARKET.md",
+      "takeaway": {
+        "title": "Evidence observation note",
+        "description": "Record what the chart shows, what you think it might suggest, and what evidence would strengthen or weaken your interpretation. Build on this reasoning in later lessons as you work towards a complete trade plan."
+      },
+      "lessons": [
+        {
+          "id": "1.1",
+          "title": "What Candlesticks Don't Tell You: Reading the Volume Behind Price"
+        },
+        {
+          "id": "1.2",
+          "title": "Is This Move Significant? Spotting Unusual Volume"
+        },
+        {
+          "id": "1.3",
+          "title": "Read the Story Inside a Candle: Wicks, Range and Closing Price"
+        },
+        {
+          "id": "1.4",
+          "title": "When Price Moves on Low Volume: Opportunity or Warning Sign?"
+        },
+        {
+          "id": "1.5",
+          "title": "Which Volume Can You Trust? Understanding Data Across Different Markets"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Spot Buying and Selling Pressure",
+      "summary": "Assess progress, effort and response across a sequence without claiming to know who traded or why.",
+      "source": "lessons/MODULE_02_BUYING_SELLING_PRESSURE.md",
+      "takeaway": {
+        "title": "Price–volume comparison",
+        "description": "Compare the move price made with the activity recorded around it. Keep the observation separate from the explanation, and identify a reasonable alternative."
+      },
+      "lessons": [
+        {
+          "id": "2.1",
+          "title": "Who's Pushing Price? Reading Buying and Selling Pressure"
+        },
+        {
+          "id": "2.2",
+          "title": "When Volume Supports a Move: Recognising Evidence of Strength"
+        },
+        {
+          "id": "2.3",
+          "title": "Heavy Volume, Little Progress: What Is Happening Behind the Move?"
+        },
+        {
+          "id": "2.4",
+          "title": "Is the Move Losing Steam? Reading Signs of Weakening Pressure"
+        },
+        {
+          "id": "2.5",
+          "title": "When Price and Volume Disagree: Finding Clues Others May Overlook"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Find Trade Setups at the Levels That Matter",
+      "summary": "Use market structure and important areas to frame potential setups, then separate an interesting location from a trade ready to be planned.",
+      "source": "lessons/MODULE_03_TRADE_SETUPS.md",
+      "takeaway": {
+        "title": "Conditional setup brief",
+        "description": "Describe the location, the evidence that makes it worth watching, and the condition that would make the idea more or less plausible. A location alone is not an entry signal."
+      },
+      "lessons": [
+        {
+          "id": "3.1",
+          "title": "Stop Chasing Price: Finding Potential Setups in an Established Trend"
+        },
+        {
+          "id": "3.2",
+          "title": "Is the Pullback Running Out of Steam? Reading Moves Against the Trend"
+        },
+        {
+          "id": "3.3",
+          "title": "Trading Near Support and Resistance: What to Look for Before Entry"
+        },
+        {
+          "id": "3.4",
+          "title": "Finding Opportunities at the Edges of a Trading Range"
+        },
+        {
+          "id": "3.5",
+          "title": "Before You Enter: Separating Promising Setups From Weak Ones"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Spot False Breakouts Before You Chase Them",
+      "summary": "Treat breakouts and turning points as evolving hypotheses. Inspect the break, return, response and subsequent evidence.",
+      "source": "lessons/MODULE_04_FALSE_BREAKOUTS.md",
+      "takeaway": {
+        "title": "Break / fail scenario map",
+        "description": "Record what would support continuation, what would suggest failure, and what later price behaviour would help distinguish the two. Don't decide the outcome from the first event alone."
+      },
+      "lessons": [
+        {
+          "id": "4.1",
+          "title": "Is the Breakout Real? What Volume Can Tell You"
+        },
+        {
+          "id": "4.2",
+          "title": "Breakout or Trap? Reading the Signs of a Failed Move"
+        },
+        {
+          "id": "4.3",
+          "title": "When Volume Explodes at Market Extremes: Understanding Climax Activity"
+        },
+        {
+          "id": "4.4",
+          "title": "Springs and Upthrusts: Recognising Failed Moves at Range Boundaries"
+        },
+        {
+          "id": "4.5",
+          "title": "Before Calling a Reversal: What to Look for After the Breakout"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Find the Price Levels Worth Watching",
+      "summary": "Read volume-at-price as a map of past activity and combine it with current price behaviour. Profile levels are context, not automatic support or resistance.",
+      "source": "lessons/MODULE_05_VOLUME_PROFILE.md",
+      "takeaway": {
+        "title": "Volume Profile context note",
+        "description": "Mark the relevant profile reference, explain what it describes about past activity, and note how current price behaves around it. Treat it as context to test, not a prediction."
+      },
+      "lessons": [
+        {
+          "id": "5.1",
+          "title": "Where Has the Market Traded Most? Introducing Volume Profile"
+        },
+        {
+          "id": "5.2",
+          "title": "Finding the Market's Reference Point: Point of Control and Value Area"
+        },
+        {
+          "id": "5.3",
+          "title": "Where Price May Stall — or Move Quickly: High- and Low-Volume Nodes"
+        },
+        {
+          "id": "5.4",
+          "title": "When the Market's Focus Shifts: Reading Changes in Value"
+        },
+        {
+          "id": "5.5",
+          "title": "Putting It Together: Reading Volume Profile Alongside Price Action"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Put It All Together: Build a Complete Trading Plan",
+      "summary": "Integrate context, price–volume evidence and competing scenarios into a conditional plan with trigger, invalidation, risk and review.",
+      "source": "lessons/MODULE_06_COMPLETE_TRADE_PLAN.md",
+      "takeaway": {
+        "title": "Complete conditional trade plan",
+        "description": "Bring context, evidence, alternatives, a trigger, invalidation, risk and review criteria into one plan. Make clear what would change your view before the outcome is known."
+      },
+      "lessons": [
+        {
+          "id": "6.1",
+          "title": "Start With the Bigger Picture: What Is the Market Doing?"
+        },
+        {
+          "id": "6.2",
+          "title": "Read the Evidence: What Are Price and Volume Telling You?"
+        },
+        {
+          "id": "6.3",
+          "title": "Build Your Trade Scenario: What Needs to Happen Next?"
+        },
+        {
+          "id": "6.4",
+          "title": "Plan the Trade Before You Take It"
+        },
+        {
+          "id": "6.5",
+          "title": "The Complete Walkthrough: From Chart Analysis to Trade Plan"
+        }
+      ]
+    }
+  ]
+}
