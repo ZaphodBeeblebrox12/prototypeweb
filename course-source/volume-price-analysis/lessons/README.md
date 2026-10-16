@@ -3,7 +3,7 @@
 
 **Status:** Source teaching material and production specifications. The course has not been integrated into public-facing website pages or course delivery. The scripts remain working manuscripts; visual assets, interactive ChartLabs, final rehearsal timings, recording and novice pilot review are still required.
 
-This folder contains the six-module, 30-lesson manuscript, presenter notes for chart walkthroughs, research/adaptation notes, a beginner-language guide, the second-pass learner-value Q&A bank, and the full asset-production brief.
+This folder contains the six-module, 30-lesson manuscript, presenter notes for chart walkthroughs, research/adaptation notes, a beginner-language guide, the second-pass learner-value Q&A bank, and the full asset-production brief. The first pilot asset package for Module 1, Lesson 1.1 is now in [the assets folder](../assets/README.md); it includes an editable SVG comparison chart, synthetic OHLCV data, accessibility notes, a standalone ChartLab prototype and an instructor key. The files have passed a structural check, but a novice pilot and accessibility review are still required.
 
 - [Potential lesson catalog](../POTENTIAL_LESSON_CATALOG.md)
 - [Asset production brief — all lesson visuals, ChartLabs, worksheets and supporting files](../ASSET_PRODUCTION_BRIEF.md)
@@ -39,8 +39,8 @@ Count narration, narrated chart walkthrough, guided learner practice, feedback a
 
 ## Current production sequence
 
-1. **Pilot one full lesson package.** Start with a Module 1 lesson and produce the chart master, export, data/source note, alt text, ChartLab, model feedback and counterexample. Test it with a beginner before scaling.
-2. **Build the remaining 30 lesson asset packages and ChartLabs.** Use [the asset production brief](../ASSET_PRODUCTION_BRIEF.md) as the checklist; preserve editable sources and data provenance.
+1. **Review and test the pilot package.** Check the M01-L01 chart, data, accessible description and standalone ChartLab with a true beginner. Revise it before scaling.
+2. **Build the remaining 29 lesson asset packages and ChartLabs.** Use [the asset production brief](../ASSET_PRODUCTION_BRIEF.md) as the checklist; preserve editable sources and data provenance.
 3. **Finish learner materials.** Complete the reusable context/evidence worksheets, trade-thesis canvas, pre-trade ticket, capstone review and model-answer notes.
 4. **Rehearse and time every lesson.** Revise spoken phrasing, verify examples and confirm the hard minimum before recording.
 5. **Prepare the release package.** Produce captions/transcripts, check accessibility and rights, then run novice testing and revise confusing explanations.
