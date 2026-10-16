@@ -80,12 +80,12 @@ Identify unusual activity relative to an appropriate baseline and explain why �
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — Opening question:** Hook: a large number is not automatically unusual..
+- **0:00–1:00 — Opening question:** Hook: a large number is not automatically unusual.
 - **1:00–2:30 — Level 1, Notice:** Pick the largest-looking volume bar and compare it with the immediately preceding bars.
-- **2:30–5:00 — Teach and model:** Relative volume: compare with relevant recent bars.; Baseline choices: session, timeframe, liquidity, events and instrument..
+- **2:30–5:00 — Teach and model:** Relative volume: compare with relevant recent bars; Baseline choices: session, timeframe, liquidity, events and instrument.
 - **5:00–7:30 — Level 2, Compare:** Compare the same event with an appropriate baseline, including a time-of-day-matched comparison when session activity changes.
 - **7:30–11:00 — Level 3, Apply:** Choose a baseline for an unfamiliar synthetic market/session, justify why it is fair, then explain how a different baseline could change the label.
-- **11:00–13:00 — Feedback and counterexample:** ChartLab: rank activity and test interpretation.. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **11:00–13:00 — Feedback and counterexample:** ChartLab: rank activity and test interpretation. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
 - **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 A volume bar can look impressive and still tell you very little unless you know what is normal for that market. Think of traffic on a road. One hundred cars may be busy on a quiet village street and almost nothing on a major highway. Volume needs the same reference point. Its value is often comparative.
@@ -202,7 +202,7 @@ Explain at least two possible reasons for a price move on low volume and decide 
 **Target delivered duration:** 12–16 minutes normally; hard minimum 10 minutes, usual upper limit 20 unless the concept requires more. Include narration, a narrated chart walkthrough, progressive learner practice, feedback and recap. Rehearse and time the complete lesson; outline timings are targets, not proof of runtime.
 
 ### Outline and timing
-- **0:00–1:00 — Opening question:** Challenge the slogan: low volume is not automatically bearish..
+- **0:00–1:00 — Opening question:** Challenge the slogan: low volume is not automatically bearish.
 - **1:00–2:30 — Level 1, Notice:** Identify which bars have lower recorded volume than the recent comparison bars.
 - **2:30–5:00 — Teach and model:** What low activity may represent; Trend pullbacks, quiet advances and market location.
 - **5:00–7:30 — Level 2, Compare:** Compare low-volume movement in a trend pullback with low-volume movement at a range boundary.
