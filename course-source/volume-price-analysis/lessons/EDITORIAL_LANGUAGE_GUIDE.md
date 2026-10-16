@@ -53,6 +53,16 @@ Keep the course about reading volume alongside price and price structure, with V
 
 Do not add specialist vocabulary just because it appears in a reference book. Include an author's distinctive concept only when it answers a clear question in the current lesson, and teach it with a beginner-friendly example and a counterexample.
 
+## Learning progression within every lesson
+
+Every lesson should give the learner a visible and achievable path from simple recognition to independent application. Use the same progression labels throughout the course:
+
+1. **Level 1 — Notice (easy):** identify the evidence or term with direct guidance. Ask “What can you point to?” before asking “What does it mean?”
+2. **Level 2 — Compare (guided):** compare two similar examples, with one important difference. Ask the learner to explain how that difference affects the reading.
+3. **Level 3 — Apply (independent):** use the idea on a fresh or less-labelled chart, state a possible reading and alternative, and identify the next evidence or invalidating condition. Reveal later bars only after the first reading has been recorded.
+
+The difficulty should increase through observation, comparison and transfer—not through chart clutter, jargon or a sudden jump into a full trade plan. Provide a visible progress cue, actionable feedback and a model explanation. When possible, use a counterexample so learners see why the rule is not automatic. Each lesson's Q&A should reinforce this sequence: foundational understanding, comparison/explanation, then application to a new chart.
+
 ## Lesson-length rule
 
 - **Hard minimum:** 10 minutes, measured in a full rehearsal.
