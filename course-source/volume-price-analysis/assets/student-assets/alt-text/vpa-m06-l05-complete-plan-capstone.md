@@ -1,5 +1,6 @@
 # Accessibility and source notes — M06-L05
 
+**Figure number:** Figure 6.5; interactive panels use Figure 6.5a–Figure 6.5e.
 **Lesson:** The Complete Walkthrough: From Chart Analysis to Trade Plan
 **Purpose:** Integrate context, evidence, competing scenarios, trigger, invalidation, risk and review in one staged chart case.
 **Data:** Synthetic OHLCV only. Not historical prices, forecast, recommendation or trading signal.
