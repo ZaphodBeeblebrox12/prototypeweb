@@ -1,5 +1,6 @@
 # Accessibility and source notes — M05-L04
 
+**Figure number:** Figure 5.4; interactive panels use Figure 5.4a–Figure 5.4e.
 **Lesson:** When the Market's Focus Shifts: Reading Changes in Value
 **Purpose:** Compare similarly constructed profiles and check whether profile migration is supported by current price structure.
 **Data:** Synthetic OHLCV and profile bins. Not historical data, forecast or recommendation.
