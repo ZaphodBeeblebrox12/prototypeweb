@@ -431,7 +431,7 @@ jobs:
             await cataloguePage.locator("#signInTab").click();
             assert.equal(await cataloguePage.locator("#signInPanel").isVisible(), true,
               "Sign-in tab should restore the sign-in panel");
-            assert.equal(await cataloguePage.locator('header a[href="/learn/"]').count(), 2,
+            assert.equal(await cataloguePage.locator('header a[href="https://tradethesis-academy-staging.onrender.com/learn/"]').count(), 2,
               "Desktop and mobile member dashboard CTAs should use the authenticated learning route");
             await cataloguePage.setViewportSize({ width: 390, height: 844 });
             const accessOverflow = await cataloguePage.evaluate(() => ({
