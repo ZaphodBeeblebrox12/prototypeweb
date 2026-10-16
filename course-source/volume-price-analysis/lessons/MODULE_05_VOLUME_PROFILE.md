@@ -22,7 +22,7 @@ Explain the difference between volume through time and volume at price, and read
 - **2:30–5:00 — Teach and model:** Volume through time versus volume distribution by price; What a profile represents and how the period is selected.
 - **5:00–7:30 — Level 2, Compare:** Mark one broad and one thin area in a stated profile window; explain where more or less activity was recorded.
 - **7:30–11:00 — Level 3, Apply:** Use a new profile with price arriving at one area and construct two possible reactions, making clear that the historical profile cannot guarantee either outcome.
-- **11:00–13:00 — Feedback and counterexample:** ChartLab: read a simple profile. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **11:00–13:00 — Feedback and counterexample:** read a simple profile. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
 - **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 So far, we have mainly studied volume through time: a bar tells us how much activity was recorded during a particular interval. That is useful for asking what happened as price moved. But another question matters too: at which prices did the market conduct more or less activity over a chosen period? Volume Profile is a way of showing that distribution. It uses a horizontal shape so you can see which prices had more or less recorded activity during the time period you chose.
@@ -84,7 +84,7 @@ Define the Point of Control and Value Area as profile statistics, explain their 
 - **2:30–5:00 — Teach and model:** Point of Control: the price row with the most assigned volume; Value Area: a platform-defined range containing a chosen share of volume.
 - **5:00–7:30 — Level 2, Compare:** Mark these references on two profiles created from different windows and identify what changed.
 - **7:30–11:00 — Level 3, Apply:** Explain how the selected window and platform method affect a new profile reading; justify whether two profiles are comparable.
-- **11:00–13:00 — Feedback and counterexample:** ChartLab: compare two profiles. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **11:00–13:00 — Feedback and counterexample:** compare two profiles. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
 - **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 Once a profile is visible, traders often want a few reference points to help describe its structure. Two commonly used terms are Point of Control (the price row with the most recorded activity) and Value Area. They are useful, but only if we know exactly what they represent and avoid treating them as magical prices.
@@ -146,7 +146,7 @@ Interpret high- and low-volume nodes as areas of prior activity concentration or
 - **2:30–5:00 — Teach and model:** High-volume nodes and concentrated activity; Low-volume nodes and thinner activity.
 - **5:00–7:30 — Level 2, Compare:** Compare two price paths through a low-volume area: rapid traversal and a pause/rejection.
 - **7:30–11:00 — Level 3, Apply:** Write continuation and stall/rejection scenarios for a new node test, with visible conditions that would favour each.
-- **11:00–13:00 — Feedback and counterexample:** ChartLab: map a potential path. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **11:00–13:00 — Feedback and counterexample:** map a potential path. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
 - **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 A profile often contains broad bulges and thinner sections. The broad bulges are commonly described as high volume nodes; the thinner sections are commonly described as low volume nodes. Their value is not that one means “bounce” and the other means “break through.” Their value is that they summarise how activity was distributed over a particular period and give you useful context for observing current price behaviour.
@@ -208,7 +208,7 @@ Compare profiles across periods and describe value migration as evidence of chan
 - **2:30–5:00 — Teach and model:** Compare profile periods consistently; Value moving higher, lower or remaining balanced.
 - **5:00–7:30 — Level 2, Compare:** Compare profiles from equal-length periods and record whether their value areas overlap or migrate.
 - **7:30–11:00 — Level 3, Apply:** Assess a three-session sequence, separating the observed profile shift from a hypothesis about market acceptance and stating the contrary evidence you would watch for.
-- **11:00–13:00 — Feedback and counterexample:** ChartLab: identify developing change. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **11:00–13:00 — Feedback and counterexample:** identify developing change. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
 - **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 A market's most active price area does not have to remain fixed. As price moves and trading activity develops, a new profile can form at higher or lower prices. Traders who use Market Profile or Volume Profile often pay attention to this change because it can describe whether activity is being concentrated somewhere different from the previous period. The important point is to treat it as a description of changing behaviour, not as a signal that automatically predicts the next move.
@@ -268,7 +268,7 @@ Use a simple Volume Profile to mark areas where trading activity took place in t
 - **2:30–5:00 — Teach and model:** Review the profile period, Point of Control, Value Area and nodes; Bring current candles and recent highs/lows back into view.
 - **5:00–7:30 — Level 2, Compare:** Read the candles and recent swing structure as price approaches one profile area; write an observation before an interpretation.
 - **7:30–11:00 — Level 3, Apply:** Build two if/then scenarios around a new profile area and update them after seeing pause, rejection or move-through alternatives.
-- **11:00–13:00 — Feedback and counterexample:** ChartLab: mark useful areas and write two possible scenarios. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
+- **11:00–13:00 — Feedback and counterexample:** mark useful areas and write two possible scenarios. Reveal the later bars or outcome only after the learner records an initial response, then explain what changed or remains uncertain.
 - **13:00–15:00 — Recap and knowledge check:** Review the core idea, answer one knowledge-check question and name the next evidence to watch.
 ### Full narration script
 This lesson brings two things together: Volume Profile and ordinary price reading. We are not adding another tool. We are practising one useful habit: use the profile to see where activity happened in the past, then watch what price does when it reaches those areas again.
