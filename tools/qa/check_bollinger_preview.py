@@ -46,7 +46,9 @@ if "not uploaded or saved" not in media_editor:
     raise SystemExit("Local-only image replacement must be explicitly labelled.")
 if 'Django login and shared saving are not connected in this preview' not in page:
     raise SystemExit("Preview must disclose that backend shared editing is not connected.")
-for student_facing_label in ("eyebrow:'Method I ·", "eyebrow:'Method II ·", "eyebrow:'Method III ·", "eyebrow:'Method IV ·"):
+for student_facing_label in ("eyebrow:'Method I ·", "eyebrow:'Method II ·", "eyebrow:'Method III ·", "eyebrow:'Method IV ·",
+                             '"Method I: Trade the Volatility Breakout"', '"Method II: Follow Strength Confirmed by MFI"',
+                             '"Method III: Look for Reversal Clues in Volume"', '"Method IV: Wait for a Confirmed Breakout"'):
     if student_facing_label in page:
-        raise SystemExit("Internal lesson method label leaks into student-facing eyebrow: " + student_facing_label)
+        raise SystemExit("Internal method label leaks into student-facing material: " + student_facing_label)
 print("Bollinger preview, VPA discovery, catalogue state, figure labels/counts and edit hooks passed.")
