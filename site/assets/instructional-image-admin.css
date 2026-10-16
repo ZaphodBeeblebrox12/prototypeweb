@@ -1,0 +1,10 @@
+/* Shared staff-only instructional media edit control. */
+.tt-media-replace-control{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:10px 0 2px;padding:9px 10px;border:1px dashed #b7c5b0;border-radius:9px;background:#f4f7f0;color:#2f4d3a;font:inherit}
+.tt-media-replace-button{min-height:35px;padding:7px 12px;border:1px solid #8da58a;border-radius:999px;background:#fffdf8;color:#294c39;font-size:12px;font-weight:750;cursor:pointer}
+.tt-media-replace-button:hover{background:#e8f0e4}
+.tt-media-replace-button:focus-visible{outline:3px solid #b48635;outline-offset:3px}
+.tt-media-replace-button:disabled{opacity:.6;cursor:wait}
+.tt-media-replace-status{font-size:11px;line-height:1.5;color:#536b56}
+.tt-media-replace-status[data-state=error]{color:#9b3f32}
+.tt-media-replace-status:empty{display:none}
+@media(max-width:560px){.tt-media-replace-control{align-items:flex-start}.tt-media-replace-status{flex-basis:100%}}
