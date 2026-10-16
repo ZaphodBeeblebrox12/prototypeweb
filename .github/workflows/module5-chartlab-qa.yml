@@ -139,6 +139,8 @@ jobs:
           const AxeBuilder = require("@axe-core/playwright").default;
 
           async function runA11yScan(target, label) {
+            // Wait for any CSS reveal/fade animation to settle before measuring contrast.
+            await target.waitForTimeout(300);
             const results = await new AxeBuilder({ page: target })
               .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
               .analyze();
