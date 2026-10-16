@@ -52,6 +52,12 @@ A market has been moving sideways for several bars, but then one large candle cl
 
 **Model response:** Not yet. This is a breakout attempt. It may develop into an uptrend if price holds and makes further progress, or it may fail and return to the range. I would keep the context provisional until follow-through clarifies it.
 
+### Worked comparison: Trend, range or not yet clear?
+
+**Case A — Trend.** Over a sequence of swings, the highs progress from 102 to 105 to 108 and the pullback lows rise from 98 to 101 to 104. The middle band also slopes upward. Together, those facts support a rising-trend reading. An upper-band touch in this sequence should not automatically be treated as a short.
+
+**Case B — Range or transition.** Another chart has repeated turns around 104 and 98, with price crossing the middle band several times. That is more consistent with a range. If the next candle suddenly closes at 106, the context does not become a confirmed uptrend by that close alone. It is a breakout attempt. Follow-through, a return into the range, or a retest may help clarify the reading. When the visible structure is mixed, write “unclear for now” and keep the trade conditional rather than forcing a label.
+
 ### Common mistake
 
 Calling every pause in a rising market a range and then selling the upper band.
@@ -111,6 +117,12 @@ Compare the isolated touch with the band walk in Figure 3.2. Which panel gives s
 Price has closed near the lower band for four bars while swing highs and lows continue falling. A learner says, “It is stretched, so I will buy now.”
 
 **Model response:** The chart shows persistent downside movement, not a confirmed reversal. I would avoid buying solely from the lower-band position. I would wait for a change in structure and a defined long trigger, or stand aside.
+
+### Worked comparison: Count the progress between touches
+
+**Case A — Band walk.** Price closes near the upper band on four occasions, but each touch is accompanied by new highs and pullbacks that remain relatively shallow. The middle band slopes upward. The sequence shows continuing progress, so an automatic short at the fourth touch would be a bet against the existing structure.
+
+**Case B — Isolated contact.** Price reaches the upper band once, then falls back toward the middle band and continues to overlap earlier candles. There is no comparable sequence of higher highs and higher lows. The two charts both contain an upper-band touch, but only the first shows evidence of a sustained directional move. Even then, the band walk does not promise another leg. If considering a reversal, identify the actual change in structure and a defined trigger; do not substitute the word “overbought” for that evidence.
 
 ### Common mistake
 
@@ -175,6 +187,12 @@ Complete the following:
 
 **Model response:** I would need a defined price boundary and a price event that meets a stated trigger. I would also decide what would invalidate the idea. The squeeze definition alone provides neither direction nor an entry.
 
+### Worked comparison: Check which squeeze you are using
+
+**Case A — BandWidth.** Bollinger Bands narrow until the BandWidth pane is near the low end of its own recent range. The squeeze description comes from how narrow the Bollinger envelope is relative to its centre and history. Price may be quiet, but no direction is established.
+
+**Case B — TTM Squeeze.** A chart instead marks a squeeze when the Bollinger Bands are inside the Keltner Channels. That is a relationship between two envelopes. A platform may also display a momentum histogram; its direction is additional information, not part of the definition of BandWidth. It is possible for a trader to call both situations “compression” while the exact indicator conditions differ. Before copying a rule from a lesson or trading platform, check the calculation and settings. Keep the squeeze label, momentum reading and price trigger as three distinct pieces of information.
+
 ### Common mistake
 
 Using “Bollinger Squeeze” and “TTM Squeeze” as if they are always the same indicator.
@@ -237,6 +255,12 @@ For the three outcomes, write:
 BandWidth has reached a low reading, but price is in the middle of a broad range with no clear nearby boundary. What is a reasonable decision?
 
 **Model response:** Wait. Low BandWidth draws attention to a quiet period, but without a clear boundary there is no well-defined breakout trigger. I can keep monitoring without making a directional prediction.
+
+### Worked comparison: Prepare both sides before the break
+
+Assume price has spent time between 100 and 104 while BandWidth contracts. Before price leaves the range, write two conditional plans. For an upside scenario, identify what completed close would qualify above 104 and whether your method requires a further hold. For a downside scenario, define the mirrored condition below 100. State in advance what would count as failure—for example, a quick return inside the range if holding outside is part of your rule.
+
+Now compare three outcomes: a close at 105 followed by continued closes above 104; a close at 99 followed by further weakness; and a close at 105 that is immediately followed by a return to 102. They start from similar compression, but the outcomes differ. The correct response is not to predict which one must happen. It is to follow the scenario that meets the written conditions and stand aside if neither develops clearly.
 
 ### Common mistake
 
