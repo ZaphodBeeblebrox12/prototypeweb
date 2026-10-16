@@ -8,3 +8,4 @@
 .tt-media-replace-status[data-state=error]{color:#9b3f32}
 .tt-media-replace-status:empty{display:none}
 @media(max-width:560px){.tt-media-replace-control{align-items:flex-start}.tt-media-replace-status{flex-basis:100%}}
+/* Admin image controls remain labelled as local-only unless Django has authorised server config. */
