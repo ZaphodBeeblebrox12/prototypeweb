@@ -197,6 +197,7 @@ jobs:
             await imageDialog.getByRole("button", { name: "Fit image to the available screen" }).click();
             await page.keyboard.press("Escape");
             await imageDialog.waitFor({ state: "hidden" });
+            await page.waitForFunction(() => !document.body.classList.contains("image-inspector-open"));
             assert.equal(await page.locator("body").evaluate(body => body.classList.contains("image-inspector-open")), false, "Closing should restore normal page interaction");
             assert.deepEqual(await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY })), scrollBeforeViewer, "Closing should preserve page position");
 
