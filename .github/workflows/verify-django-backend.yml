@@ -60,6 +60,12 @@ jobs:
           python manage.py check
           python -m compileall -q apps config
 
+      - name: Validate source-course draft import mappings
+        run: |
+          python manage.py seed_trading_path
+          python manage.py seed_support_resistance
+          python manage.py seed_volume_price_analysis
+
       - name: Lint Academy implementation
         run: ruff check apps/academy/ tests/academy/
 
