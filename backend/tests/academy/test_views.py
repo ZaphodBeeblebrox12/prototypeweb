@@ -1,4 +1,5 @@
 from datetime import timedelta
+from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -218,6 +219,109 @@ class AcademyViewTests(TestCase):
         intent = PaymentIntent.objects.get(pk=payload["payment_intent_id"])
         self.assertEqual(intent.status, PaymentIntent.Status.PENDING)
         self.assertEqual(intent.plan_id, offer.plan_id)
+        self.assertFalse(
+            CourseEntitlement.objects.filter(user=self.user, course=self.course).exists()
+        )
+
+    def test_verified_course_payment_grants_access_once(self):
+        plan = Plan.objects.create(
+            name="Verified Trading Path one-time",
+            tier=Plan.Tier.BASIC,
+            is_active=True,
+            is_hidden=True,
+        )
+        price = PlanPrice.objects.create(
+            plan=plan,
+            interval=PlanPrice.Interval.ONE_TIME,
+            price_cents=50000,
+            currency="INR",
+            is_active=True,
+        )
+        CourseOffer.objects.create(
+            course=self.course,
+            name="Verified Trading Path offer",
+            slug="verified-trading-path-offer",
+            plan=plan,
+            is_active=True,
+        )
+        intent = PaymentIntent.objects.create(
+            user=self.user,
+            plan=plan,
+            plan_price=price,
+            amount=50000,
+            currency="INR",
+            provider=PaymentIntent.Provider.RAZORPAY,
+            status=PaymentIntent.Status.PENDING,
+            provider_reference="test-order-course-1",
+        )
+
+        with mock.patch(
+            "apps.payments.views.providers.verify_provider_payment", return_value=True
+        ) as verify:
+            response = self.client.post(
+                reverse("payment-confirm"),
+                {"payment_intent_id": str(intent.pk)},
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json()["status"], "success")
+            self.assertEqual(response.json()["course_access"], "active")
+
+            repeated = self.client.post(
+                reverse("payment-confirm"),
+                {"payment_intent_id": str(intent.pk)},
+            )
+
+        self.assertEqual(repeated.status_code, 200)
+        self.assertTrue(repeated.json()["already_processed"])
+        self.assertEqual(verify.call_count, 1)
+        self.assertEqual(PaymentIntent.objects.get(pk=intent.pk).status, PaymentIntent.Status.SUCCESS)
+        self.assertEqual(
+            CourseEntitlement.objects.filter(user=self.user, course=self.course).count(), 1
+        )
+
+    def test_failed_course_payment_does_not_grant_access(self):
+        plan = Plan.objects.create(
+            name="Failed Trading Path one-time",
+            tier=Plan.Tier.BASIC,
+            is_active=True,
+            is_hidden=True,
+        )
+        price = PlanPrice.objects.create(
+            plan=plan,
+            interval=PlanPrice.Interval.ONE_TIME,
+            price_cents=50000,
+            currency="INR",
+            is_active=True,
+        )
+        CourseOffer.objects.create(
+            course=self.course,
+            name="Failed Trading Path offer",
+            slug="failed-trading-path-offer",
+            plan=plan,
+            is_active=True,
+        )
+        intent = PaymentIntent.objects.create(
+            user=self.user,
+            plan=plan,
+            plan_price=price,
+            amount=50000,
+            currency="INR",
+            provider=PaymentIntent.Provider.RAZORPAY,
+            status=PaymentIntent.Status.PENDING,
+            provider_reference="test-order-course-failed",
+        )
+
+        with mock.patch(
+            "apps.payments.views.providers.verify_provider_payment", return_value=False
+        ):
+            response = self.client.post(
+                reverse("payment-confirm"),
+                {"payment_intent_id": str(intent.pk)},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["status"], "failed")
+        self.assertEqual(PaymentIntent.objects.get(pk=intent.pk).status, PaymentIntent.Status.FAILED)
         self.assertFalse(
             CourseEntitlement.objects.filter(user=self.user, course=self.course).exists()
         )
