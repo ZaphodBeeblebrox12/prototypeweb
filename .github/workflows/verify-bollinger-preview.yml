@@ -1,0 +1,50 @@
+name: Verify Bollinger preview and VPA catalogue
+
+on:
+  push:
+    branches:
+      - my-new-branch
+    paths:
+      - "course-source/understand-bollinger-bands/preview/first-pass/index.html"
+      - "site/assets/course-content-admin-editor.js"
+      - "site/assets/instructional-image-admin.js"
+      - "site/assets/course-catalogue-data.js"
+      - "site/assets/courses-catalogue.js"
+      - "site/courses.html"
+      - "tools/qa/check_bollinger_preview.py"
+      - ".github/workflows/verify-bollinger-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Check shared scripts and catalogue contracts
+        run: |
+          node --check site/assets/course-content-admin-editor.js
+          node --check site/assets/instructional-image-admin.js
+          node --check site/assets/courses-catalogue.js
+          python tools/qa/check_bollinger_preview.py
+      - name: Check inline course JavaScript syntax
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          page = Path("course-source/understand-bollinger-bands/preview/first-pass/index.html").read_text(encoding="utf-8")
+          blocks = re.findall(r"<script(?:\s[^>]*)?>([\s\S]*?)</script>", page, flags=re.I)
+          inline = [s for s in blocks if s.strip() and not re.search(r"^\s*window\.TRADETHESIS_MEDIA_PREVIEW_ONLY\s*=", s)]
+          if not inline:
+              raise SystemExit("No inline course script found.")
+          Path("/tmp/bollinger-preview.js").write_text("\n".join(inline), encoding="utf-8")
+          PY
+          node --check /tmp/bollinger-preview.js
