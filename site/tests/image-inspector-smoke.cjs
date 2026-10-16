@@ -1,7 +1,10 @@
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
 const { chromium } = require("playwright");
 
 (async () => {
+  const screenshotDir = "/tmp/tradethesis-image-inspector";
+  fs.mkdirSync(screenshotDir, { recursive: true });
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   const pageErrors = [];
@@ -11,6 +14,12 @@ const { chromium } = require("playwright");
   await page.waitForSelector("#sr-v52-longform:not([hidden])");
   const panel = page.locator("#sr-v52-longform .sr-v52-figure-panel").first();
   await panel.waitFor({ state: "visible" });
+  await panel.screenshot({ path: screenshotDir + "/first-panel-crop.png" });
+  const sixPanelStack = page.locator(".sr-v52-figure-set").filter({
+    has: page.locator('.sr-v52-figure-panel[aria-label^="Panel 1 of 6"]')
+  }).first();
+  await sixPanelStack.waitFor({ state: "visible" });
+  await sixPanelStack.screenshot({ path: screenshotDir + "/six-panel-stack.png" });
   assert.equal(await panel.getAttribute("role"), "button", "Inline chart crops should be keyboard-accessible buttons");
   assert.ok(await panel.getAttribute("aria-label"), "Chart crops should have an accessible description");
 
@@ -30,6 +39,7 @@ const { chromium } = require("playwright");
   const mediaWidth = await dialog.locator(".tt-image-inspector-media").evaluate(el => parseFloat(el.style.width));
   assert.ok(mediaWidth > 0, "Zoom controls should size the image explicitly");
   assert.notEqual(await zoom.innerText(), beforeZoom, "Zoom status should update after zooming");
+  await dialog.screenshot({ path: screenshotDir + "/desktop-viewer-zoom.png" });
 
   const stage = dialog.locator("[data-tt-stage]");
   const stageBox = await stage.boundingBox();
@@ -58,6 +68,7 @@ const { chromium } = require("playwright");
   await mobilePanel.click();
   const mobileDialog = page.locator("dialog.tt-image-inspector[open]");
   await mobileDialog.waitFor();
+  await mobileDialog.screenshot({ path: screenshotDir + "/mobile-viewer.png" });
   const mobileLayout = await page.evaluate(() => ({
     viewport: document.documentElement.clientWidth,
     pageWidth: document.documentElement.scrollWidth,
