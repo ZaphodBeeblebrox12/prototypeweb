@@ -66,29 +66,56 @@ def h3_sections(markdown_text):
 
 
 def extract_vpa_student_body(segment):
-    """Keep the objective, narration and practice progression; isolate knowledge checks."""
-    sections = h3_sections(segment)
-    student_sections = []
+    """Keep the lesson manuscript intact while removing clearly internal blocks.
+
+    The teaching manuscripts use the same Markdown heading level for some
+    subheadings inside narration and for the outer lesson sections. Splitting
+    every H3 therefore truncates the lesson body on nested case-analysis titles.
+    Work directly with the already isolated lesson segment instead.
+    """
+    lesson_heading = _LESSON_HEADER.match(segment)
+    if lesson_heading is None:
+        raise CommandError("A VPA lesson segment has no lesson heading.")
+
+    student_markdown = segment[lesson_heading.end():].strip()
     internal_sections = []
-    for heading, body in sections:
-        lowered = heading.casefold()
-        if any(term in lowered for term in _INTERNAL_SECTIONS):
-            internal_sections.append(f"### {heading}\n\n{body}")
-            continue
-        if any(term in lowered for term in _SELECTED_SECTIONS):
-            student_sections.append((heading, body))
 
-    if not student_sections:
-        raise CommandError("A VPA lesson has no extractable teaching narration.")
-
-    student_markdown = "\n\n".join(
-        f"### {heading}\n\n{body}" for heading, body in student_sections if body
+    # Remove only explicitly instructor-only/answer sections, preserving the
+    # knowledge-check questions in the learner experience.
+    internal_heading = re.compile(
+        r"^###\s+(?:instructor notes|answer key|model answers?|answer explanations?)\b.*$",
+        re.I | re.M,
     )
-    student_markdown = re.sub(r"\n{3,}", "\n\n", student_markdown).strip()
-    if not student_markdown:
-        raise CommandError("A VPA lesson produced an empty learner manuscript.")
-    return student_markdown, "\n\n".join(internal_sections)
+    matches = list(internal_heading.finditer(student_markdown))
+    for index, match in enumerate(matches):
+        next_heading = re.search(r"^###\s+", student_markdown[match.end():], re.M)
+        end = match.end() + next_heading.start() if next_heading else len(student_markdown)
+        internal_sections.append(student_markdown[match.start():end].strip())
 
+    for match in reversed(matches):
+        next_heading = re.search(r"^###\s+", student_markdown[match.end():], re.M)
+        end = match.end() + next_heading.start() if next_heading else len(student_markdown)
+        student_markdown = student_markdown[:match.start()] + student_markdown[end:]
+
+    # These production-only metadata lines are not part of the actual lesson.
+    student_markdown = re.sub(
+        r"(?im)^\*\*(?:beginner checkpoint|target delivered duration):\*\*[^\n]*(?:\n|$)",
+        "",
+        student_markdown,
+    )
+    # Asset manifest and ChartLab implementation comments are not lesson prose.
+    student_markdown = re.sub(r"<!--.*?-->", "", student_markdown, flags=re.S)
+    student_markdown = re.sub(r"\n{3,}", "\n\n", student_markdown).strip()
+
+    if not student_markdown or not re.search(
+        r"(?im)^###\s+Full narration script\s*$", student_markdown
+    ):
+        found = [heading for heading, _body in h3_sections(segment)]
+        raise CommandError(
+            "A VPA lesson has no extractable teaching narration. "
+            f"Available section headings: {found!r}"
+        )
+    return student_markdown, "\n\n".join(internal_sections)
 
 def estimate_duration(segment):
     match = _DURATION.search(segment)
