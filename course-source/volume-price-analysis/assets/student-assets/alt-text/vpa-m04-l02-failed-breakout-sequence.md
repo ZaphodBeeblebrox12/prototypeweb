@@ -1,5 +1,6 @@
 # Accessibility and source notes — M04-L02
 
+**Figure number:** Figure 4.2; interactive panels use Figure 4.2a–Figure 4.2e.
 **Lesson:** Breakout or Trap? Reading the Signs of a Failed Move
 **Purpose:** Track excursion, return, failed reclaim and structural follow-through without claiming manipulation.
 **Data:** Synthetic OHLCV, not historical prices or a recommendation.
