@@ -62,12 +62,23 @@ This is enough context to guide the next observation without pretending to know 
 
 Both are testable. If price keeps overlapping around 207–208 with no clear trigger, the appropriate note may be “unresolved; wait”.
 
-### Try it
+### Level 1 — Notice (easy)
 
-Your chart contains many indicators and a dozen lines. Price is moving sideways between two clear boundaries. What should you do first?
+**Task:** Price has ranged 200–208 and closes at 207.4 after trading above 208. Identify state, location and open question.
 
-**Feedback:** Describe the recent swing structure, choose the boundaries that answer the current question, and state the volume source. Remove details that do not change your interpretation. More visible information does not necessarily mean more useful evidence.
+**Feedback:** The market has ranged; price is near the upper boundary after an attempt that did not hold at the close. Whether price sustains above 208 remains unresolved.
 
+### Level 2 — Compare (guided)
+
+**Task:** Compare “bullish, high volume” with a note that includes state, location, event, data limits and uncertainty. What makes the second better?
+
+**Feedback:** It shows why the chart matters, states what was measured, and identifies what would change the reading. A directional label alone cannot be tested.
+
+### Level 3 — Apply (independent)
+
+**Task:** Write a five-field context note for a new chart with a trend, a justified zone, an elevated-volume event and uncertain follow-through.
+
+**Model response:** Include the state, reason for the zone, price/volume facts, any data caveat and two competing scenarios. “Unclear” is appropriate when the structure is mixed.
 ### Common mistake
 
 **Mistake:** Writing “bullish” or “bearish” as the whole context note.
@@ -121,12 +132,23 @@ Freeze a chart after the first event and record your observations. Then inspect 
 
 In a different ending, price breaks below 53.5 and fails to reclaim it. Add that new structural evidence and revise the interpretation. It is rational to update a view when the evidence changes. It is not rational to pretend the new evidence was visible earlier.
 
-### Try it
+### Level 1 — Notice (easy)
 
-The facts are: high relative volume, narrow price range, a close near the midpoint, and no nearby boundary. Write one observation and one alternative explanation.
+**Task:** Classify: “price closed back inside the range”; “sellers absorbed the breakout”; “volume was 1.8× the ten-bar baseline”. Which are observable facts?
 
-**Feedback:** An observation could be: “Recorded volume was 2× its stated baseline, but the candle's range was narrow and the close was near its midpoint.” One possible explanation is temporary two-sided trade; another is a pause before a later directional move. Without a meaningful location or follow-through, a strong conclusion is not yet justified.
+**Feedback:** The close location and volume comparison are facts if the chart and baseline are available. “Sellers absorbed the breakout” is an interpretation.
 
+### Level 2 — Compare (guided)
+
+**Task:** Compare “buyers failed” with “activity was elevated but the candle retained limited upside progress” for a high-volume candle near a range high.
+
+**Feedback:** The second sentence reports the measured outcome without claiming who acted or why. The first is a hypothesis that needs context.
+
+### Level 3 — Apply (independent)
+
+**Task:** Write a four-sentence evidence note for an intrabar break above a prior high that closes below it on 2× relative volume while the broader trend remains up.
+
+**Model response:** Describe the excursion and close, then the relative activity. Offer failed extension and trend pause as alternative readings; define a later hold above the high versus failed reclaim/structure break as the discriminator.
 ### Common mistake
 
 **Mistake:** Counting several overlapping indicators as independent confirmation while ignoring conflicting price behaviour.
@@ -182,12 +204,23 @@ A market trades around 150–154, and price approaches the upper area after a re
 
 The wait condition is important. Not every chart must resolve immediately, and not every condition must produce a trade.
 
-### Try it
+### Level 1 — Notice (easy)
 
-A breakout scenario requires price to hold above 100. Price briefly closes at 101, then closes at 99 and remains below 100 on the next attempt. Which part of the scenario is challenged?
+**Task:** For the range near 200–208, name one observable condition supporting continuation and one supporting a return into the range.
 
-**Feedback:** The condition that price can hold above 100 has not been met; the failed reclaim weakens or invalidates the continuation thesis as previously defined. You do not need to replace it immediately with a short trade. A new scenario must also be built and tested.
+**Feedback:** Continuation could require close above 208, retest and further progress; return could require a sustained move inside and failed reclaim.
 
+### Level 2 — Compare (guided)
+
+**Task:** Compare a scenario with trigger and invalidation against “buy if bullish”. What does the vague plan lack?
+
+**Feedback:** It lacks an observable activation event, a condition that contradicts the thesis and a no-trade state.
+
+### Level 3 — Apply (independent)
+
+**Task:** Build two competing scenarios for a new chart, stating condition, evidence, invalidation and what to do if neither develops.
+
+**Model response:** A strong answer is testable in both directions. If the chart remains ambiguous, it explicitly permits waiting rather than forcing a trade.
 ### Common mistake
 
 **Mistake:** Writing only one scenario and treating every new candle as support for it.
@@ -252,12 +285,23 @@ Write down what you will do if:
 
 The plan should prevent impulsive rule changes, not remove the need to respond to genuinely new information.
 
-### Try it
+### Level 1 — Notice (easy)
 
-Your chart thesis is reasonable, but the logical invalidation point is far away and the nearest plausible objective is close. What should you do?
+**Task:** Entry 50, stop 48, value per price unit 2 currency units: estimate price risk per unit before costs.
 
-**Feedback:** Do not force the trade merely because the direction looks right. Reconsider whether a different entry, a different plan or no trade is appropriate under your rules. Risk and reward must be assessed, not adjusted until the chart produces a preferred ratio.
+**Feedback:** The price difference is 2; multiplied by 2 units of currency per price unit, estimated risk is 4 per unit before fees/slippage.
 
+### Level 2 — Compare (guided)
+
+**Task:** Compare a clear structural stop with a nearby target against a vague stop chosen to fit a preferred size. Why might either need rethinking?
+
+**Feedback:** The first may offer unattractive room relative to risk; the second lacks a defensible risk point. Directional plausibility does not fix either issue.
+
+### Level 3 — Apply (independent)
+
+**Task:** A setup looks attractive, but invalidation is far and the next opposing zone is close. State the no-trade reasoning.
+
+**Model response:** The entry/risk profile may not fit the predefined rules. Do not distort the stop; wait for a better entry or pass.
 ### Common mistake
 
 **Mistake:** Choosing a desired position size first and then placing a convenient stop that makes the calculation fit.
@@ -352,19 +396,23 @@ After the event, ask:
 
 A trade that makes money can still be poorly planned. A trade that loses money can still follow a sensible, consistently applied process. The review should judge the quality of the reasoning and execution, not just whether the outcome was positive.
 
-### Capstone task
+### Level 1 — Notice (easy)
 
-Use a new chart or a clearly labelled synthetic one. Complete the following in order, before viewing any later bars:
+**Task:** Before revealing later bars, record the market state, relevant range boundaries, the initial breakout attempt, its close back inside and the selected profile's activity area.
 
-1. Write a context note with the market state, key zone, relevant price-volume event and one data limitation if applicable.
-2. Record at least two observations.
-3. Write two competing scenarios and the conditions that favour each.
-4. Define one possible trigger, a thesis invalidation condition and a no-trade condition.
-5. Check whether a trade plan could be constructed without violating your risk rules.
-6. Reveal later bars and explain which evidence changed your view. Keep the original note intact.
+**Feedback:** A strong observation names the range, states that price traded above 208 but closed at 207.4, and describes the chosen profile period. It does not claim a reversal from the first candle.
 
-**Model-answer standard:** There is no single correct direction for an ambiguous chart. A strong answer uses observable facts, explains why a zone matters, keeps interpretation conditional, names an alternative, states what would change the view and accepts “wait” when a trigger or acceptable risk is missing.
+### Level 2 — Compare (guided)
 
+**Task:** Complete the continuation and range-return scenario cards before the next bars are revealed. Each needs a trigger, a condition that weakens it and a no-trade condition.
+
+**Feedback:** Continuation requires a hold above 208 and further progress; range return requires a sustained move inside and failed reclaim. If price overlaps around 207–209 without either trigger, neither scenario is active.
+
+### Level 3 — Apply (independent)
+
+**Task:** Complete the trade ticket only if a valid trigger appears and the plan fits your predefined risk rules. Then review two possible endings: a correctly triggered plan that loses, or a no-trade that misses a later favourable move. Keep your original analysis intact.
+
+**Model-answer standard:** Judge the quality of the observations, scenarios, trigger, risk controls and review against the plan. A disciplined plan can lose; a disciplined no-trade can miss a move. The outcome alone does not determine whether the process was sound.
 ### Common mistake
 
 **Mistake:** Treating the capstone as a puzzle with one hidden correct prediction.
