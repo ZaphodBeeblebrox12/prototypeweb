@@ -44,6 +44,10 @@ Price later retraces to 45. It pauses, but has not yet resumed upward progress. 
 
 The key is that you made the plan before the trigger occurred. You are not drawing a convenient level around the candles after the outcome is known.
 
+### Worked comparison — the distance to invalidation matters
+
+Price rallies from 40 to 48 with no nearby structure. Buying at 48 may leave the next sensible invalidation point far away. If price later pulls back toward the old range boundary at 44–45, you can evaluate whether the area holds and whether a trigger forms. The second location does not guarantee a better trade; it gives a more structured place to ask the question. A setup is defined by evidence and risk logic, not by being earlier or later alone.
+
 ### Level 1 — Notice (easy)
 
 **Task:** On an uptrend chart, identify the latest meaningful higher low and describe how extended price is from it.
@@ -111,6 +115,10 @@ Both examples begin with an uptrend from 200 to 220 and a prior breakout area ar
 
 The useful distinction is not simply “low volume good, high volume bad”. It is how the price result, activity, location and structure fit together.
 
+### Worked comparison — pullback activity needs structure
+
+In Case A, price retreats from 120 to 117 on smaller ranges, activity declines and the prior higher low at 115 remains intact. In Case B, price falls from 120 to 112 on expanding ranges and breaks 115, then cannot reclaim it. The first case may be a pause worth watching. The second challenges continuation. Volume contributes context, but the difference in achieved price progress and structure is decisive.
+
 ### Level 1 — Notice (easy)
 
 **Task:** An impulse advances 10 points and the pullback retreats 2 points on smaller ranges. What else should you record?
@@ -176,6 +184,10 @@ A price zone from 80 to 82 is based on several earlier turns. Price approaches i
 
 If the next bars make higher lows and reclaim a nearby short-term swing high, a recovery scenario gains evidence. If price returns below 80 and cannot reclaim it, the zone has not held in the way the recovery scenario required. If bars keep overlapping from 80 to 83, the event remains unresolved.
 
+### Worked comparison — a zone has evidence behind it
+
+An analyst marks 80–82 because price previously turned away there twice. On a later test, price trades to 81 and closes at 83, then holds above the area. The old resistance may be changing role, but that claim needs the hold and follow-through. If price instead closes back below 80 and fails to reclaim the zone, the idea that it has become support is weakened. The mark is useful because it sets up a test, not because it predicts the answer.
+
 ### Level 1 — Notice (easy)
 
 **Task:** A support zone was marked because price turned there twice. What justifies the zone and what can it not guarantee?
@@ -230,6 +242,10 @@ The first event alone may not distinguish these possibilities. It is often bette
 Price has rotated between 40–41 and 49–50 for several sessions. It approaches 50 on elevated volume and closes at 50.3. The next candle closes at 49.6, back inside the range. This weakens the idea that the first close established sustained acceptance above the range. It does not, by itself, prove a downward move. Price may test the boundary again.
 
 If a later attempt closes above 50 and holds on a retest, the breakout scenario gains evidence. If price fails at 50 and then breaks a meaningful short-term low, a rotation back through the range becomes more plausible. If it continues overlapping near 50, waiting may be the clearest decision.
+
+### Worked comparison — edge versus middle
+
+Inside a 40–50 range, a bar at 45 may be visually dramatic but is far from either boundary. A similar bar at 50 directly tests the area where price previously stopped. At 50, the questions “hold outside or return inside?” are easier to frame. At 45, there may be no nearby structural discriminator. Strong activity in the middle is still evidence; it simply may not create a well-defined range-edge setup.
 
 ### Level 1 — Notice (easy)
 
@@ -289,6 +305,10 @@ Now suppose price moves above a nearby swing high, but the invalidation point is
 **Case A:** A meaningful zone, a clear trigger, an invalidation level tied to structure, and enough room to a plausible objective. The thesis includes a condition that would weaken it. This is a well-defined candidate—not a guaranteed winner.
 
 **Case B:** Several indicators point up, but the entry is far from a meaningful level, the stop is chosen only to fit a preferred position size, and no clear invalidation condition exists. This is weakly constructed even if price later rises.
+
+### Worked comparison — direction and trade quality are separate
+
+Setup A has a valid continuation trigger, an invalidation linked to a clear swing and enough room before the next relevant opposing area. Setup B has a similarly bullish-looking candle, but the stop is arbitrary and a nearby resistance zone leaves little room for the proposed target. The direction might be plausible in both, yet only A is clearly constructed under the stated plan. A chart view and a decision to trade are separate judgements.
 
 ### Level 1 — Notice (easy)
 
