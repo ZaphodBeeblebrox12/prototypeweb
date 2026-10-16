@@ -398,16 +398,23 @@ def manage_subscription_page(request):
                             is_active=True)
                     .select_related("plan", "plan_price")
                     .order_by("-expires_at").first())
+    from apps.bot_integration.access import get_active_access_plan_ids
+
+    # Include access from both recurring subscriptions and course offers that
+    # bundle a separate community term (for example, CONSTRUCT).
+    active_access_plan_ids = get_active_access_plan_ids(request.user.pk)
     channels = []
-    if subscription is not None:
+    if active_access_plan_ids:
         assigned = set(UserChannelAssignment.objects.filter(
             user=request.user, is_active=True).values_list("platform", "external_id"))
         for m in (PlanChannelMapping.objects
-                  .filter(plan=subscription.plan)
-                  .order_by("platform", "name")):
+                  .filter(plan_id__in=active_access_plan_ids)
+                  .select_related("plan")
+                  .order_by("platform", "plan__display_order", "name")):
             channels.append({
                 "name": m.name or m.external_id,
                 "platform": m.platform,
+                "plan_name": m.plan.name,
                 "granted": (m.platform, m.external_id) in assigned,
             })
     intents = (PaymentIntent.objects.filter(user=request.user)
@@ -422,6 +429,7 @@ def manage_subscription_page(request):
     return render(request, "payments/manage_subscription.html", {
         "subscription": subscription, "channels": channels,
         "receipts": receipts, "access_state": access_state,
+        "community_only_access": bool(active_access_plan_ids and subscription is None),
         "telegram_linked": bool(tg and tg.is_active),
         "connect_url": "/bot/telegram/connect/",
         "renew_url": "/dashboard/",
