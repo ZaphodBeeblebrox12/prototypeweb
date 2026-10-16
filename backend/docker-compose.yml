@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.development
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key}
+      - DEBUG=${DEBUG:-True}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///db.sqlite3}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+    volumes:
+      - .:/app
+      - sqlite_data:/app/data
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+
+  worker:
+    build: .
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.development
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key}
+      - DEBUG=${DEBUG:-True}
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///db.sqlite3}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+    volumes:
+      - .:/app
+      - sqlite_data:/app/data
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runjobs --loop"
+
+volumes:
+  sqlite_data:

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load socialaccount %}
+
+{% block title %}Profile - Community Platform{% endblock %}
+{% block page_title %}Profile{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <!-- Profile Form -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-person"></i> Profile Information
+            </div>
+            <div class="card-body">
+                <form method="post" action="{% url 'profile' %}">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">First Name</label>
+                            <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" value="{{ user.email|default:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Bio</label>
+                        <textarea name="bio" class="form-control" rows="3">{{ user.bio }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- TELEGRAM SECTION (UPDATED) -->
+        <div class="card mb-4" id="telegram">
+            <div class="card-header">
+                <i class="bi bi-telegram"></i> Telegram Connection
+            </div>
+            <div class="card-body">
+                {% if user.telegram_id and user.telegram_verified %}
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle-fill"></i> 
+                    Connected as @{{ user.telegram_username }}
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    Not connected
+                </div>
+                <a href="{% url 'bot_integration:telegram_connect' %}" class="btn btn-primary">
+                    Connect Telegram
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- DISCORD SECTION (UPDATED) -->
+        <div class="card mb-4" style="border-left: 4px solid #5865F2;">
+            <div class="card-header">
+                <i class="bi bi-discord"></i> Discord Connection
+            </div>
+            <div class="card-body">
+                {% if user.discord_id and user.discord_verified %}
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    {% if user.discord_avatar %}
+                    <img src="https://cdn.discordapp.com/avatars/{{ user.discord_id }}/{{ user.discord_avatar }}.png" 
+                         alt="Discord Avatar" 
+                         style="width: 48px; height: 48px; border-radius: 50%;">
+                    {% else %}
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background: #5865F2; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 20px;">
+                        {{ user.discord_username|slice:":1"|upper }}
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h5 class="mb-0">{{ user.discord_username }}</h5>
+                        <span class="badge bg-success">Connected</span>
+                    </div>
+                </div>
+                <form method="post" action="{% url 'discord_disconnect' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                        Disconnect Discord
+                    </button>
+                </form>
+                {% else %}
+                <div class="alert alert-secondary">
+                    <i class="bi bi-x-circle-fill"></i>
+                    Discord account not connected
+                </div>
+                <p class="text-muted small">Connect your Discord account to join community channels and receive notifications.</p>
+                <a href="{% url 'bot_integration:discord_connect' %}" class="btn btn-primary" style="background: #5865F2; border: none;">
+                    <i class="bi bi-discord"></i> Connect Discord
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Account Info -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-info-circle"></i> Account Info
+            </div>
+            <div class="card-body">
+                <div class="mb-2"><strong>Username:</strong> {{ user.username }}</div>
+                <div class="mb-2"><strong>Role:</strong> {{ user.get_role_display }}</div>
+                <div class="mb-2"><strong>Joined:</strong> {{ user.date_joined|date:"M d, Y" }}</div>
+                <div class="mb-2"><strong>Last Login:</strong> {{ user.last_login|date:"M d, Y"|default:"Never" }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
