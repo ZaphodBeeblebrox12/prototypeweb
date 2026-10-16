@@ -1,59 +1,119 @@
-<!DOCTYPE html>
-<html><head><meta charset='utf-8'><title>Manage Subscription</title><style>
-body{font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#f4f6f8;margin:0;padding:32px 16px;color:#1f2937}
-.wrap{max-width:680px;margin:0 auto}
-.card{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:24px;margin-bottom:18px}
-h1{font-size:20px}h2{font-size:15px;margin:0 0 12px}
-.badge{display:inline-block;padding:3px 12px;border-radius:12px;font-size:12px;font-weight:600}
-.b-ok{background:#dcfce7;color:#16a34a}.b-off{background:#fee2e2;color:#dc2626}.b-mut{background:#f3f4f6;color:#6b7280}
-table{width:100%;border-collapse:collapse;font-size:13px}
-td,th{padding:8px 0;border-bottom:1px solid #eef0f3;text-align:left}th{color:#6b7280;font-weight:500;font-size:12px}
-a{color:#2563eb;text-decoration:none}.btn{display:inline-block;background:#2563eb;color:#fff;padding:10px 22px;border-radius:6px;font-size:14px;text-decoration:none}
-.warn{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px 18px;margin-bottom:18px;font-size:14px}
-.back{font-size:13px;color:#6b7280}
-</style></head><body><div class='wrap'>
-<h1>Manage Subscription <span class='back'>&middot; <a href='/dashboard/'>&larr; dashboard</a></span></h1>
+{% extends "academy/base.html" %}
+{% block title %}Access &amp; billing · TradeThesis{% endblock %}
+{% block content %}
+<div class="tt-dashboard tt-access-manager">
+  <p class="tt-muted small mb-3"><a href="{% url 'academy:home' %}">My learning</a> / Access &amp; billing</p>
+  <section class="tt-dashboard-hero" aria-labelledby="access-billing-title">
+    <div>
+      <p class="tt-kicker mb-2">Your account</p>
+      <h1 id="access-billing-title">Access &amp; billing</h1>
+      <p class="tt-muted mb-0">Review your current access, community connections and payment receipts.</p>
+    </div>
+    <a class="btn btn-outline-primary" href="{% url 'academy:home' %}">Back to learning <span aria-hidden="true">↗</span></a>
+  </section>
 
-{% if subscription %}
-<div class='card'><h2>{{ subscription.plan.name }} <span class='badge b-ok'>Active</span></h2>
-<p style='font-size:14px;margin:6px 0'>Renews by repurchase &middot; expires <strong>{{ subscription.expires_at|date:"M d, Y" }}</strong></p>
-<a class='btn' href='{{ renew_url }}'>Renew / Extend</a>
-&nbsp;<a class='btn' style='background:#7c3aed' href='/upgrade/'>Upgrade plan</a></div>
-{% else %}
-<div class='card'><h2>No active subscription <span class='badge b-off'>Expired</span></h2>
-<a class='btn' href='{{ renew_url }}'>View plans</a></div>
-{% endif %}
+  <section class="tt-dashboard-section" aria-labelledby="plan-status-title">
+    <div class="tt-section-heading">
+      <div><p class="tt-kicker mb-1">Your current arrangement</p><h2 id="plan-status-title">Plan status</h2></div>
+    </div>
+    {% if subscription %}
+      <article class="tt-payment-card">
+        <div>
+          <span class="tt-status-pill is-active">Active subscription</span>
+          <h3>{{ subscription.plan.name }}</h3>
+          <p class="tt-muted mb-0">Subscription access expires {{ subscription.expires_at|date:"j M Y" }}. Renewals are handled as a new purchase.</p>
+        </div>
+        <div class="tt-payment-actions">
+          <a class="btn btn-primary" href="{{ renew_url }}">Renew / extend</a>
+          <a class="btn btn-outline-primary" href="/upgrade/">View upgrades</a>
+        </div>
+      </article>
+    {% elif community_only_access %}
+      <article class="tt-payment-card">
+        <div>
+          <span class="tt-status-pill is-active">Included access active</span>
+          <h3>Community access from a course</h3>
+          <p class="tt-muted mb-0">Your community access is included with a course purchase. It is tracked separately and does not create a recurring subscription; check its term on <a href="{% url 'academy:home' %}">My learning</a>.</p>
+        </div>
+      </article>
+    {% else %}
+      <article class="tt-payment-card">
+        <div>
+          <span class="tt-status-pill is-preview">No active subscription</span>
+          <h3>No recurring subscription is active</h3>
+          <p class="tt-muted mb-0">Course access you already own is managed separately from subscriptions.</p>
+        </div>
+        <a class="btn btn-primary" href="{{ renew_url }}">View plans</a>
+      </article>
+    {% endif %}
+  </section>
 
-{% if access_state.state == 'ready' %}
-<div class='card' style='border-color:#bbf7d0;background:#f0fdf4'><h2>&#9989; {{ access_state.label }}</h2>
-<p style='font-size:14px;margin:0'>{{ access_state.detail }}</p></div>
-{% elif access_state.state == 'pending' %}
-<div class='card' style='border-color:#fde68a;background:#fffbeb'><h2>&#9203; {{ access_state.label }}</h2>
-<p style='font-size:14px;margin:0'>{{ access_state.detail }}</p></div>
-{% elif access_state.state == 'needs_action' %}
-<div class='card' style='border-color:#fecaca;background:#fef2f2'><h2>&#9888;&#65039; {{ access_state.label }}</h2>
-<p style='font-size:14px;margin:0 0 10px'>{{ access_state.detail }}</p>
-<a class='btn' style='background:#dc2626' href='{{ access_state.cta_url }}'>{{ access_state.cta_label }}</a></div>
-{% elif access_state.state == 'not_linked' %}
-<div class='warn'>&#9888;&#65039; <strong>Connect Telegram</strong> to receive channel access and notifications.
-<a href='{{ access_state.cta_url }}'>{{ access_state.cta_label }} &rarr;</a></div>
-{% endif %}
+  <section class="tt-dashboard-section" aria-labelledby="connections-title">
+    <div class="tt-section-heading">
+      <div><p class="tt-kicker mb-1">Telegram and community delivery</p><h2 id="connections-title">Access &amp; connections</h2></div>
+    </div>
+    {% if access_state.state == 'ready' %}
+      <div class="alert alert-success" role="status"><strong>{{ access_state.label }}</strong><p class="mb-0">{{ access_state.detail }}</p></div>
+    {% elif access_state.state == 'pending' %}
+      <div class="alert alert-info" role="status"><strong>{{ access_state.label }}</strong><p class="mb-0">{{ access_state.detail }}</p></div>
+    {% elif access_state.state == 'needs_action' %}
+      <div class="alert alert-danger" role="status"><strong>{{ access_state.label }}</strong><p class="mb-2">{{ access_state.detail }}</p><a href="{{ access_state.cta_url }}">{{ access_state.cta_label }} →</a></div>
+    {% elif access_state.state == 'not_linked' %}
+      <div class="tt-empty-inline"><strong>Connect Telegram</strong><p class="tt-muted">Your community entitlement is active, but Telegram is not linked to this account yet.</p><a class="btn btn-primary" href="{{ access_state.cta_url }}">{{ access_state.cta_label }} →</a></div>
+    {% else %}
+      <div class="tt-empty-inline"><strong>No active channel access</strong><p class="tt-muted mb-0">When a current subscription or included community term grants channel access, its status will appear here.</p></div>
+    {% endif %}
 
-<div class='card'><h2>Included channels</h2>
-{% if channels %}<table>{% for ch in channels %}
-<tr><td>{{ ch.name }}</td><td style='text-transform:capitalize'>{{ ch.platform }}</td>
-<td>{% if ch.granted %}<span class='badge b-ok'>Access granted</span>{% else %}<span class='badge b-mut'>Pending</span>{% endif %}</td></tr>
-{% endfor %}</table>
-{% else %}<p class='back'>No channels are mapped to your plan yet.</p>{% endif %}</div>
+    <h3 class="tt-subsection-title">Included channels</h3>
+    {% if channels %}
+      <div class="tt-billing-table-wrap">
+        <table class="table table-sm align-middle tt-billing-table">
+          <thead><tr><th scope="col">Channel</th><th scope="col">Included with</th><th scope="col">Platform</th><th scope="col">Status</th></tr></thead>
+          <tbody>
+          {% for channel in channels %}
+            <tr>
+              <td>{{ channel.name }}</td>
+              <td>{{ channel.plan_name }}</td>
+              <td>{{ channel.platform|title }}</td>
+              <td>{% if channel.granted %}<span class="tt-status-pill is-active">Access granted</span>{% else %}<span class="tt-status-pill is-preview">Not yet granted</span>{% endif %}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="tt-muted small mb-0">No channels are mapped to your current access plan yet.</p>
+    {% endif %}
+  </section>
 
-<div class='card'><h2>Receipts</h2>
-{% if receipts %}<table><tr><th>Date</th><th>Plan</th><th>Amount</th><th>Status</th><th></th></tr>
-{% for r in receipts %}<tr><td>{{ r.date|date:"M d, Y" }}</td><td>{{ r.plan_name }}</td>
-<td>{{ r.amount_display }}</td><td>{{ r.status }}</td>
-<td>{% if r.status == 'success' %}<a href='{{ r.url }}'>Receipt</a>{% endif %}</td></tr>
-{% endfor %}</table>
-{% else %}<p class='back'>No payments yet.</p>{% endif %}
-<p style='margin-top:14px'><a href="/support/">Need help? Contact support</a> &middot;
-<a href="/policies/refund/">Refund policy</a></p></div>
+  <section class="tt-dashboard-section" aria-labelledby="receipts-title">
+    <div class="tt-section-heading">
+      <div><p class="tt-kicker mb-1">Payment records</p><h2 id="receipts-title">Receipts</h2></div>
+    </div>
+    {% if receipts %}
+      <div class="tt-billing-table-wrap">
+        <table class="table table-sm align-middle tt-billing-table">
+          <thead><tr><th scope="col">Date</th><th scope="col">Plan or purchase</th><th scope="col">Amount</th><th scope="col">Status</th><th scope="col">Receipt</th></tr></thead>
+          <tbody>
+          {% for receipt in receipts %}
+            <tr>
+              <td>{{ receipt.date|date:"j M Y" }}</td>
+              <td>{{ receipt.plan_name }}</td>
+              <td>{{ receipt.amount_display }}</td>
+              <td>{{ receipt.status|title }}</td>
+              <td>{% if receipt.status == "success" %}<a href="{{ receipt.url }}">View receipt</a>{% else %}<span class="tt-muted">Not available</span>{% endif %}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="tt-empty-inline"><strong>No payments yet</strong><p class="tt-muted mb-0">Successful purchases and their receipts will appear here.</p></div>
+    {% endif %}
+  </section>
 
-</div></body></html>
+  <footer class="tt-dashboard-footnote">
+    Need help? <a href="{% url 'support:my_tickets' %}">Contact support</a> · <a href="/policies/refund/">Refund policy</a>
+  </footer>
+</div>
+{% endblock %}
