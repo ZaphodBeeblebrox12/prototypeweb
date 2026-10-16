@@ -1,3 +1,4 @@
+from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -14,6 +15,12 @@ class ProfilePageTests(TestCase):
             username="profile-learner",
             email="profile@example.test",
             password="test-password-123!",
+        )
+        EmailAddress.objects.create(
+            user=self.user,
+            email=self.user.email,
+            primary=True,
+            verified=True,
         )
         self.client.force_login(self.user)
 
@@ -66,7 +73,8 @@ class ProfilePageTests(TestCase):
             },
         )
 
-        self.assertRedirects(response, reverse("profile"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("profile"))
         self.user.refresh_from_db()
         self.assertEqual(self.user.first_name, "Course")
         self.assertEqual(self.user.last_name, "Learner")
