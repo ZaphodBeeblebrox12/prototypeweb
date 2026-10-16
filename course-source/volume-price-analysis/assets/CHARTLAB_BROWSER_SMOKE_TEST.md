@@ -13,6 +13,7 @@
 - Level 2 submission: Level 3 unlocks and grading limitation is disclosed.
 - Revisiting a lower stage does not relock Level 3.
 - Level 3 submission: both alternate outcomes become visible only after submission.
+- Source inspection confirms the outcome reveal includes a collapsed optional model-reading disclosure; opening and closing that disclosure still needs direct browser testing on the committed page.
 - Reflection: corrective feedback is shown for a response under the minimum length; completion follows a longer response.
 - Restart: forms, outcomes and unlock state reset; Level 1 becomes current.
 - At 360px viewport width, the rendered fixture has no horizontal overflow.
@@ -29,4 +30,4 @@
 - Test with a true beginner without coaching and record confusion, pauses and errors.
 - Rehearse the entire narrated lesson and record actual runtime.
 
-The fixture checks interaction behaviour and basic responsive layout only. It does not establish that the actual page and charts render correctly, that learner reasoning is semantically graded, or that the course has been validated with novice learners.
+The fixture checks interaction behaviour and basic responsive layout only. It does not establish that the actual page and charts render correctly, that the new model-reading disclosure has been interactively tested, that learner reasoning is semantically graded, or that the course has been validated with novice learners.
