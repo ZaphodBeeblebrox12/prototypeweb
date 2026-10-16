@@ -103,6 +103,18 @@ def extract_vpa_student_body(segment):
         "",
         student_markdown,
     )
+    # Keep learner questions visible, but never leak explicitly labelled answers.
+    learner_lines = []
+    for line in student_markdown.splitlines():
+        if re.match(
+            r"^\s*(?:[-*]\s*)?(?:\*\*)?(?:answer|correct answer|model answer|expected answer)(?:\*\*)?\s*[:—-]",
+            line,
+            re.I,
+        ):
+            internal_sections.append(line.strip())
+        else:
+            learner_lines.append(line)
+    student_markdown = "\n".join(learner_lines)
     # Asset manifest and ChartLab implementation comments are not lesson prose.
     student_markdown = re.sub(r"<!--.*?-->", "", student_markdown, flags=re.S)
     student_markdown = re.sub(r"\n{3,}", "\n\n", student_markdown).strip()
