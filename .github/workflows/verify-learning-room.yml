@@ -429,6 +429,41 @@ jobs:
               "Member-area sample data must be clearly identified as a preview");
             console.log("MEMBER_UX_PASS: preview-only auth copy, light theme and mobile fit.");
 
+            // Public course and enquiry journeys must clearly identify static-preview behaviour.
+            await cataloguePage.setViewportSize({ width: 1280, height: 900 });
+            await cataloguePage.goto(server + "/index.html", { waitUntil: "networkidle" });
+            await cataloguePage.locator("[data-preview-checkout]").first().click();
+            assert.ok((await cataloguePage.locator("#previewModal").getAttribute("class")).includes("open"),
+              "Homepage course CTA should open its preview disclosure");
+            assert.ok((await cataloguePage.locator("#previewModal").innerText()).includes("Checkout is not connected yet."),
+              "Homepage course CTA must not imply a live checkout");
+            assert.ok((await cataloguePage.locator("#previewModal").innerText()).includes("No payment has been taken."),
+              "Homepage course CTA must explicitly state that no payment was taken");
+            await cataloguePage.locator("#previewModal .close").click();
+
+            await cataloguePage.goto(server + "/construct.html", { waitUntil: "networkidle" });
+            await cataloguePage.locator("[data-preview-enquiry]").first().click();
+            assert.ok((await cataloguePage.locator("#previewModal").getAttribute("class")).includes("open"),
+              "CONSTRUCT enquiry CTA should open its preview disclosure");
+            assert.ok((await cataloguePage.locator("#modalCopy").innerText()).includes("not connected to an enquiry form or checkout yet"),
+              "CONSTRUCT enquiry CTA must be honest about its preview-only status");
+            await cataloguePage.locator("#previewModal .modal-close").click();
+
+            await cataloguePage.goto(server + "/live-class.html", { waitUntil: "networkidle" });
+            await cataloguePage.locator("#liveName").fill("Preview Learner");
+            await cataloguePage.locator("#liveEmail").fill("learner@example.test");
+            await cataloguePage.locator('#liveEnquiryForm button[type="submit"]').click();
+            assert.ok((await cataloguePage.locator("#liveEnquiryResult").innerText()).includes("Nothing has been sent or saved."),
+              "Live-class enquiry preview must not imply delivery or storage");
+            await cataloguePage.setViewportSize({ width: 390, height: 844 });
+            const publicOverflow = await cataloguePage.evaluate(() => ({
+              viewport: document.documentElement.clientWidth,
+              document: document.documentElement.scrollWidth
+            }));
+            assert.ok(publicOverflow.document <= publicOverflow.viewport + 1,
+              "Live-class page has horizontal scrolling on mobile: " + JSON.stringify(publicOverflow));
+            console.log("PUBLIC_CTA_PREVIEW_PASS: checkout, programme enquiry and live-class form are honest preview flows.");
+
             assert.deepEqual(pageErrors, [], "Unexpected browser JavaScript errors");
             assert.deepEqual(consoleErrors, [], "Unexpected browser console errors: " + JSON.stringify(consoleErrors));
             assert.deepEqual(failedRequests, [], "Failed browser requests: " + JSON.stringify(failedRequests));
