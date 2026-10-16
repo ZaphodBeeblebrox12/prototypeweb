@@ -1,3 +1,4 @@
+from calendar import monthrange
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
@@ -37,7 +38,7 @@ class CourseCommunityAccessTests(TestCase):
         self.offer = CourseOffer.objects.create(
             course=self.course, name="CONSTRUCT", slug="construct",
             plan=self.plan, access_duration_days=None,
-            community_access_days=365, is_active=True,
+            community_access_months=12, is_active=True,
         )
         self.offer.full_clean()
         self.intent = PaymentIntent.objects.create(
@@ -55,7 +56,7 @@ class CourseCommunityAccessTests(TestCase):
             external_id="construct-member-role", name="CONSTRUCT members",
         )
 
-    def test_verified_purchase_grants_a_separate_365_day_community_term(self):
+    def test_verified_purchase_grants_a_separate_12_calendar_month_community_term(self):
         self.assertFalse(compute_target_access(self.user.pk).has_plan)
 
         activated, entitlement = activate_paid_subscription(self.intent)
@@ -64,9 +65,16 @@ class CourseCommunityAccessTests(TestCase):
         entitlement.refresh_from_db()
         self.assertIsNone(entitlement.expires_at, "Course access remains permanent.")
         self.assertIsNotNone(entitlement.community_access_granted_at)
+        granted = entitlement.community_access_granted_at
+        expiry = entitlement.community_access_expires_at
+        self.assertEqual((expiry.year, expiry.month), (granted.year + 1, granted.month))
         self.assertEqual(
-            entitlement.community_access_expires_at - entitlement.community_access_granted_at,
-            timedelta(days=365),
+            expiry.day,
+            min(granted.day, monthrange(expiry.year, expiry.month)[1]),
+        )
+        self.assertEqual(
+            (expiry.hour, expiry.minute, expiry.second),
+            (granted.hour, granted.minute, granted.second),
         )
         target = compute_target_access(self.user.pk)
         self.assertTrue(target.has_plan)
@@ -103,7 +111,7 @@ class CourseCommunityAccessTests(TestCase):
         self.assertEqual(target.discord_ids, set())
 
     def test_community_term_cannot_be_changed_after_payment_history_exists(self):
-        self.offer.community_access_days = 30
+        self.offer.community_access_months = 6
 
         with self.assertRaises(ValidationError) as caught:
             self.offer.full_clean()
