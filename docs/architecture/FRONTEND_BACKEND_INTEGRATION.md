@@ -113,3 +113,11 @@ The mapping above is the proposed implementation model; it does not mean these p
 - Do not mark a route, feature, test or deployment as production-ready without actual runtime evidence.
 - Keep this integration PR in draft while CI is red or release gates are outstanding; a passing syntax check is not a substitute for a staging purchase-to-progress test.
 - Do not merge or deploy to `main` without explicit approval.
+
+
+## Draft content integration added on `feature/tradethesis-academy`
+
+- The learner lesson page now renders Markdown tables, headings, lists and code with a sanitizer allowlist; arbitrary script/event attributes are stripped before output.
+- `python manage.py seed_trading_path` validates the 30 Trading Path lesson sources and makes **no database changes**. `python manage.py seed_trading_path --apply` creates the course, four modules, 30 lessons and separate instructor answer/media notes. It is intentionally create-only, draft-only, marks all modules and lessons unpublished, and creates no Plan or CourseOffer.
+- Quiz answer keys and chart-production notes are split out of the learner body. This import does not publish the course, provision Telegram delivery, attach missing chart assets, or configure checkout. The import is not a launch approval.
+- Included community access is recorded in calendar months separately from lesson/course access. Both the community-access dashboard state and desired Telegram/Discord permissions use the same active-entitlement rule, and the learner home shows current bundled community access even if course access has a different expiry.
