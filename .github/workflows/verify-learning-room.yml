@@ -389,6 +389,46 @@ jobs:
               "The public catalogue should explain that new courses will be added");
             console.log("EXPANDING_CATALOGUE_PASS: dynamic topics, hidden drafts, visible counts, preview state and mobile fit.");
 
+            // Member experience browser regression: preview forms stay honest and both member views remain light/mobile-safe.
+            await cataloguePage.setViewportSize({ width: 1280, height: 900 });
+            await cataloguePage.goto(server + "/member-access.html", { waitUntil: "networkidle" });
+            assert.equal(await cataloguePage.evaluate(() => getComputedStyle(document.documentElement).colorScheme), "light",
+              "Member access should use the TradeThesis light theme");
+            await cataloguePage.locator("#loginEmail").fill("learner@example.test");
+            await cataloguePage.locator("#loginPassword").fill("preview-only-password");
+            await cataloguePage.locator('#signInPanel button[type="submit"]').click();
+            assert.ok((await cataloguePage.locator("#feedback").innerText()).includes("these details have not been sent or saved"),
+              "Preview sign-in must not imply a real authentication request or saved credentials");
+            await cataloguePage.locator("#createTab").click();
+            await cataloguePage.locator("#createName").fill("Preview Learner");
+            await cataloguePage.locator("#createEmail").fill("new-learner@example.test");
+            await cataloguePage.locator("#createPassword").fill("preview-only-password");
+            await cataloguePage.locator('#createPanel input[name="terms"]').check();
+            await cataloguePage.locator('#createPanel button[type="submit"]').click();
+            assert.ok((await cataloguePage.locator("#feedback").innerText()).includes("account creation is not active"),
+              "Preview account creation must not claim a real account was created");
+            await cataloguePage.setViewportSize({ width: 390, height: 844 });
+            const accessOverflow = await cataloguePage.evaluate(() => ({
+              viewport: document.documentElement.clientWidth,
+              document: document.documentElement.scrollWidth
+            }));
+            assert.ok(accessOverflow.document <= accessOverflow.viewport + 1,
+              "Member-access page has horizontal scrolling on mobile: " + JSON.stringify(accessOverflow));
+
+            await cataloguePage.goto(server + "/member-area.html", { waitUntil: "networkidle" });
+            assert.equal(await cataloguePage.evaluate(() => getComputedStyle(document.documentElement).colorScheme), "light",
+              "Member area should use the TradeThesis light theme");
+            await cataloguePage.waitForSelector(".app");
+            const memberOverflow = await cataloguePage.evaluate(() => ({
+              viewport: document.documentElement.clientWidth,
+              document: document.documentElement.scrollWidth
+            }));
+            assert.ok(memberOverflow.document <= memberOverflow.viewport + 1,
+              "Member-area preview has horizontal scrolling on mobile: " + JSON.stringify(memberOverflow));
+            assert.ok((await cataloguePage.locator("body").innerText()).toLowerCase().includes("preview"),
+              "Member-area sample data must be clearly identified as a preview");
+            console.log("MEMBER_UX_PASS: preview-only auth copy, light theme and mobile fit.");
+
             assert.deepEqual(pageErrors, [], "Unexpected browser JavaScript errors");
             assert.deepEqual(consoleErrors, [], "Unexpected browser console errors: " + JSON.stringify(consoleErrors));
             assert.deepEqual(failedRequests, [], "Failed browser requests: " + JSON.stringify(failedRequests));
