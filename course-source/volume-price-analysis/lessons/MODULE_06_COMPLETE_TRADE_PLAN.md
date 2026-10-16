@@ -18,6 +18,8 @@ A trade plan is not a forecast that must come true. It is a structured response 
 
 ## Lesson 6.1 — Start With the Bigger Picture: What Is the Market Doing?
 
+As you work through this lesson, refer to **Figure 6.1** for the chart example.
+
 ![Chart for Start With the Bigger Picture: What Is the Market Doing?. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m06-l01-context-note.svg)
 
 **Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m06-l01-context-note-lab.html)  
@@ -72,19 +74,19 @@ Both are testable. If price keeps overlapping around 207–208 with no clear tri
 
 On a cluttered chart, twelve horizontal lines compete for attention. The range boundaries at 200 and 208 are justified by repeated turns; several lines inside the range have no clear current role. Keeping only the structure that changes the immediate question allows the learner to compare “hold beyond 208” with “return inside” without being distracted by every historical pause. Removing lines is not dumbing down analysis. It makes the reasoning easier to inspect and challenge.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** Price has ranged 200–208 and closes at 207.4 after trading above 208. Identify state, location and open question.
 
 **Feedback:** The market has ranged; price is near the upper boundary after an attempt that did not hold at the close. Whether price sustains above 208 remains unresolved.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare “bullish, high volume” with a note that includes state, location, event, data limits and uncertainty. What makes the second better?
 
 **Feedback:** It shows why the chart matters, states what was measured, and identifies what would change the reading. A directional label alone cannot be tested.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** Write a five-field context note for a new chart with a trend, a justified zone, an elevated-volume event and uncertain follow-through.
 
@@ -102,6 +104,8 @@ On a cluttered chart, twelve horizontal lines compete for attention. The range b
 ---
 
 ## Lesson 6.2 — Read the Evidence: What Are Price and Volume Telling You?
+
+As you work through this lesson, refer to **Figure 6.2** for the chart example.
 
 ![Chart for Read the Evidence: What Are Price and Volume Telling You?. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m06-l02-evidence-sheet.svg)
 
@@ -152,19 +156,19 @@ In a different ending, price breaks below 53.5 and fails to reclaim it. Add that
 
 “Price traded above 56.5 but closed at 55.8” and “volume was 1.8× the ten-bar average” are observations. “The breakout failed because large sellers absorbed buying” is a causal explanation that is not directly established by those values. A better evidence note might say that price did not retain the outside excursion, then offer failed breakout and temporary balance as alternatives. This keeps the record useful even if later bars favour a different interpretation.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** Classify: “price closed back inside the range”; “sellers absorbed the breakout”; “volume was 1.8× the ten-bar baseline”. Which are observable facts?
 
 **Feedback:** The close location and volume comparison are facts if the chart and baseline are available. “Sellers absorbed the breakout” is an interpretation.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare “buyers failed” with “activity was elevated but the candle retained limited upside progress” for a high-volume candle near a range high.
 
 **Feedback:** The second sentence reports the measured outcome without claiming who acted or why. The first is a hypothesis that needs context.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** Write a four-sentence evidence note for an intrabar break above a prior high that closes below it on 2× relative volume while the broader trend remains up.
 
@@ -182,6 +186,8 @@ In a different ending, price breaks below 53.5 and fails to reclaim it. Add that
 ---
 
 ## Lesson 6.3 — Build Your Trade Scenario: What Needs to Happen Next?
+
+As you work through this lesson, refer to **Figure 6.3** for the chart example.
 
 ![Chart for Build Your Trade Scenario: What Needs to Happen Next?. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m06-l03-competing-scenarios.svg)
 
@@ -234,19 +240,19 @@ The wait condition is important. Not every chart must resolve immediately, and n
 
 Scenario A says price should hold above 208 and continue. If price falls back inside and cannot reclaim 208, the continuation case is weakened. Without that condition, the learner can keep explaining every outcome as temporary noise. The alternative scenario should be just as explicit: failure to hold above 208 and a return into the range. If neither scenario develops, “wait” is the decision—not permission to invent a third interpretation after every candle.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** For the range near 200–208, name one observable condition supporting continuation and one supporting a return into the range.
 
 **Feedback:** Continuation could require close above 208, retest and further progress; return could require a sustained move inside and failed reclaim.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare a scenario with trigger and invalidation against “buy if bullish”. What does the vague plan lack?
 
 **Feedback:** It lacks an observable activation event, a condition that contradicts the thesis and a no-trade state.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** Build two competing scenarios for a new chart, stating condition, evidence, invalidation and what to do if neither develops.
 
@@ -264,6 +270,8 @@ Scenario A says price should hold above 208 and continue. If price falls back in
 ---
 
 ## Lesson 6.4 — Plan the Trade Before You Take It
+
+As you work through this lesson, refer to **Figure 6.4** for the chart example.
 
 ![Chart for Plan the Trade Before You Take It. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m06-l04-pretrade-risk-ticket.svg)
 
@@ -325,19 +333,19 @@ The plan should prevent impulsive rule changes, not remove the need to respond t
 
 Assume a hypothetical entry at 50, invalidation/stop at 48 and a value of 2 currency units per price unit. Price risk is 2 × 2 = 4 currency units per unit before costs and slippage. If execution costs or instrument rules change that estimate, the plan must account for them. Do not move the stop closer merely to permit a larger position, and do not assume a favourable reward-to-risk ratio means the scenario has a high chance of success.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** Entry 50, stop 48, value per price unit 2 currency units: estimate price risk per unit before costs.
 
 **Feedback:** The price difference is 2; multiplied by 2 units of currency per price unit, estimated risk is 4 per unit before fees/slippage.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare a clear structural stop with a nearby target against a vague stop chosen to fit a preferred size. Why might either need rethinking?
 
 **Feedback:** The first may offer unattractive room relative to risk; the second lacks a defensible risk point. Directional plausibility does not fix either issue.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** A setup looks attractive, but invalidation is far and the next opposing zone is close. State the no-trade reasoning.
 
@@ -355,6 +363,8 @@ Assume a hypothetical entry at 50, invalidation/stop at 48 and a value of 2 curr
 ---
 
 ## Lesson 6.5 — The Complete Walkthrough: From Chart Analysis to Trade Plan
+
+As you work through this lesson, refer to **Figure 6.5** for the chart example.
 
 ![Chart for The Complete Walkthrough: From Chart Analysis to Trade Plan. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m06-l05-complete-plan-capstone.svg)
 
@@ -446,19 +456,19 @@ A trade that makes money can still be poorly planned. A trade that loses money c
 
 Imagine a plan's trigger appears exactly as written, the defined risk is respected, and the market then hits the planned stop. The outcome is a loss; the plan may still have been followed correctly. In another case, no trigger appears and price later moves favourably without the planned entry. That missed move is not proof that waiting was wrong. Review the evidence available at decision time, whether rules were followed and what the next observation taught you—not just the final profit/loss.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** Before revealing later bars, record the market state, relevant range boundaries, the initial breakout attempt, its close back inside and the selected profile's activity area.
 
 **Feedback:** A strong observation names the range, states that price traded above 208 but closed at 207.4, and describes the chosen profile period. It does not claim a reversal from the first candle.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Complete the continuation and range-return scenario cards before the next bars are revealed. Each needs a trigger, a condition that weakens it and a no-trade condition.
 
 **Feedback:** Continuation requires a hold above 208 and further progress; range return requires a sustained move inside and failed reclaim. If price overlaps around 207–209 without either trigger, neither scenario is active.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** Complete the trade ticket only if a valid trigger appears and the plan fits your predefined risk rules. Then review two possible endings: a correctly triggered plan that loses, or a no-trade that misses a later favourable move. Keep your original analysis intact.
 
