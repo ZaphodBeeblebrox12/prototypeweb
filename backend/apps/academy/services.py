@@ -1,4 +1,5 @@
 """Server-side course access, release timing, entitlement and progress rules."""
+from calendar import monthrange
 from datetime import timedelta
 
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -14,6 +15,15 @@ from .models import (
     Lesson,
     LessonProgress,
 )
+
+
+def _add_calendar_months(value, months):
+    """Add calendar months, clamping the day when the target month is shorter."""
+    month_index = value.month - 1 + months
+    year = value.year + month_index // 12
+    month = month_index % 12 + 1
+    day = min(value.day, monthrange(year, month)[1])
+    return value.replace(year=year, month=month, day=day)
 
 
 def _enqueue_community_reconcile(user_id, reason):
@@ -84,10 +94,10 @@ def grant_course_entitlement(*, user, offer, payment_intent=None, granted_by=Non
         raise ValidationError("Cannot grant access to a draft course.")
     now = timezone.now()
     requested_expiry = now + timedelta(days=offer.access_duration_days) if offer.access_duration_days else None
-    community_granted_at = now if offer.community_access_days else None
+    community_granted_at = now if offer.community_access_months else None
     community_expires_at = (
-        now + timedelta(days=offer.community_access_days)
-        if offer.community_access_days else None
+        _add_calendar_months(now, offer.community_access_months)
+        if offer.community_access_months else None
     )
 
     with transaction.atomic():
@@ -128,7 +138,7 @@ def grant_course_entitlement(*, user, offer, payment_intent=None, granted_by=Non
             # A bundled community term has its own clock. A repeat grant of
             # an offer that includes community starts a fresh community term;
             # an unrelated reactivation must not silently revive an old term.
-            if offer.community_access_days:
+            if offer.community_access_months:
                 entitlement.community_access_granted_at = community_granted_at
                 entitlement.community_access_expires_at = community_expires_at
             elif not was_active:
@@ -261,7 +271,7 @@ def activate_course_payment(payment_intent, offer):
                      "entitlement_id": str(entitlement.pk)},
         )
         transaction.on_commit(lambda intent_id=payment_intent.pk: _notify_course_purchase(intent_id))
-        if offer.community_access_days:
+        if offer.community_access_months:
             transaction.on_commit(
                 lambda user_id=payment_intent.user_id: _enqueue_community_reconcile(
                     user_id, "course community access granted"
