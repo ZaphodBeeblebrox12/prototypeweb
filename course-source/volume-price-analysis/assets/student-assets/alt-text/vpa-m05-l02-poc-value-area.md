@@ -1,5 +1,6 @@
 # Accessibility and source notes — M05-L02
 
+**Figure number:** Figure 5.2; interactive panels use Figure 5.2a–Figure 5.2e.
 **Lesson:** Finding the Market's Reference Point: Point of Control and Value Area
 **Purpose:** Interpret POC, VAH and VAL in relation to the selected profile window and current price.
 **Data:** Synthetic OHLCV and volume-at-price bins, not historical data.
