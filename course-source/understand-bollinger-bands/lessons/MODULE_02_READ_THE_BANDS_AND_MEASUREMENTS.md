@@ -58,6 +58,12 @@ Recent candles become larger and the prices move farther away from their average
 
 **Model response:** The bands would generally widen as the calculation reflects greater recent variation. The wider bands would describe the change in volatility; they would not tell me whether to buy or sell.
 
+### Worked calculation: See what the numbers mean
+
+Suppose the selected moving average is 100 and the standard deviation for the chosen window is 2. With a multiplier of 2, the upper band is 104 and the lower band is 96. If price values become more spread out and the calculated standard deviation rises to 3 while the average remains near 100, the bands move to about 106 and 94. The middle line can move too, because it is recalculated as new periods enter and older ones leave the window.
+
+The lesson is not to calculate every band by hand. It is to understand which input changed. A widening band gap may come from more variable prices; a shifting middle line reflects a changing average. If you compare two screenshots, first verify that they use the same instrument, timeframe, price input, period and multiplier. Otherwise you may be comparing two different calculations rather than a true change in market conditions.
+
 ### Common mistake
 
 Thinking the bands are a fixed percentage around price.
@@ -115,6 +121,12 @@ Look at the three versions in Figure 2.2. Which reacts most quickly to a sudden 
 You change the settings after every losing trade, and each new version looks better on the examples you just reviewed. What is the problem?
 
 **Model response:** I am repeatedly fitting the settings to past outcomes. The result may describe the sample rather than produce a repeatable method. I should choose rules deliberately, test them on a varied set, and evaluate a new version separately.
+
+### Worked comparison: Faster is not automatically more useful
+
+Imagine the same price chart has a sharp two-candle jump followed by a quiet pullback. A 10-period setting will generally react to the new bars faster than a 20-period setting. That can make the bands turn or widen sooner, but it can also make them respond more often to ordinary short-term noise. A 50-period setting will usually smooth the sequence and react more slowly, which may help with a longer view but can delay a short-term reading.
+
+None of these settings is automatically correct. Choose settings to match a clearly stated purpose, then keep them fixed while reviewing a varied set of examples. If the only reason for changing a period is that a different value made one past trade look perfect, you are fitting the tool to the outcome. Compare one change at a time and record what becomes easier to see—and what becomes harder.
 
 ### Common mistake
 
@@ -180,6 +192,12 @@ Price is above the upper band and %B is 1.15. Write one fact, one possible inter
 
 **Model response:** Fact: price is above the upper band and %B is above 1. Possible reading: price is moving strongly relative to its recent range. I still need to know whether the market is trending, whether price holds its progress, and what would invalidate a trade idea.
 
+### Worked calculation: Turn %B into a description
+
+Suppose the lower band is 90 and the upper band is 110. The band span is 20. If the close is 105, %B is (105 − 90) ÷ 20 = 0.75. Price is three-quarters of the way from the lower band toward the upper band. If the close is 110, %B is 1; if it closes at 112, %B is 1.1, meaning price is above the upper band.
+
+Now compare two charts with %B around 0.9. In one, price is progressing through higher highs and higher lows. In the other, a sharp rally has run into an established resistance area and the next candles fail to hold the high. The number describes a similar relative position; it does not make the two charts the same trade. Use %B to make the observation more precise, then interpret it with structure and the method you intend to test.
+
 ### Common mistake
 
 Treating %B above 1 as a sell instruction or below 0 as a buy instruction.
@@ -235,6 +253,12 @@ Use Figure 2.4 to identify the narrowest period shown, then find where BandWidth
 BandWidth is low, but price is in the centre of a messy range and no clear boundary is nearby. Should the low reading alone trigger a trade?
 
 **Model response:** No. It identifies quieter conditions, not an entry or direction. I should identify a meaningful price boundary, define what would count as a trigger, and decide in advance what would invalidate the plan.
+
+### Worked comparison: Is the width unusually small for this market?
+
+Imagine a share normally has a BandWidth reading between 4% and 9%, but the current reading has fallen to 2.2%. That is unusually narrow relative to its own recent behaviour and may justify closer monitoring. Yet price is sitting in the middle of a broad, messy range with no clear boundary nearby. The correct next step is to mark the structure or wait—not to buy just because the width is low.
+
+A different instrument might normally trade with a much smaller percentage width. Comparing the raw width of the two instruments can be misleading. BandWidth is more informative when you compare the same instrument with its own history and use a stated lookback. Once width begins to rise, describe that expansion separately from the direction of price. The width measure tells you about the envelope; the candles and levels help you assess the move.
 
 ### Common mistake
 
