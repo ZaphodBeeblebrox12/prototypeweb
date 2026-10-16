@@ -379,7 +379,7 @@
   function renderLesson(){
     const l=lessonFor(activeId),m=moduleFor(l.module),state=statusOf(l.id);
     $("sr-lesson-number").textContent="LESSON "+String(l.id).padStart(2,"0")+" / 18";$("sr-lesson-module").textContent=m.name.toUpperCase();
-    $("sr-lesson-title").textContent=l.title;$("sr-lesson-summary").textContent=l.summary;$("sr-lesson-outcome").textContent=l.outcome;
+    $("sr-lesson-title").textContent=l.title;const fullV52=$("sr-full-v52-link"),fullV52Anchor=$("sr-full-v52-anchor");if(fullV52){fullV52.hidden=![12,13,14].includes(l.id);if(fullV52Anchor)fullV52Anchor.href="module5-v5_2/index.html?lesson="+l.id;}$("sr-lesson-summary").textContent=l.summary;$("sr-lesson-outcome").textContent=l.outcome;
     $("sr-lesson-state").textContent=state.replace("-"," ").toUpperCase();$("sr-lesson-state").dataset.state=state;
     const tags=[l.duration+" · estimated"];if(l.lab)tags.push("ChartLab "+l.labNo+" · "+l.lab);if(l.pending)tags.push("Authentic material pending");if(l.assessment)tags.push("Assessment shell only");
     $("sr-lesson-tags").innerHTML=tags.map(t=>'<span class="sr-room-tag'+(t.startsWith("ChartLab")?" is-lab":"")+'">'+t+'</span>').join("");
