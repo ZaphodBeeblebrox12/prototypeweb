@@ -480,7 +480,9 @@ jobs:
             ];
             for (const route of siteRoutes) {
               await cataloguePage.setViewportSize({ width: 390, height: 844 });
-              await cataloguePage.goto(server + route, { waitUntil: "load", timeout: 25000 });
+              console.log("SITE_ROUTE_MOBILE_CHECK: " + route);
+              await cataloguePage.goto(server + route, { waitUntil: "networkidle", timeout: 30000 });
+              await cataloguePage.waitForLoadState("networkidle");
               const mobileLayout = await cataloguePage.evaluate(() => ({
                 viewport: document.documentElement.clientWidth,
                 page: document.documentElement.scrollWidth
