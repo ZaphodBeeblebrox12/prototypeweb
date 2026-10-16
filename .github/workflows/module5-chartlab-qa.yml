@@ -217,10 +217,20 @@ jobs:
             await page.setViewportSize({width:360,height:800});
             await page.waitForTimeout(500);
             const parentLayout=await page.evaluate(()=>({viewport:innerWidth,scroll:document.documentElement.scrollWidth,labWidth:document.querySelector("#sr-chartlab-frame").getBoundingClientRect().width}));
-            const childLayout=await lab.locator("body").evaluate(()=>({viewport:innerWidth,scroll:document.documentElement.scrollWidth,chartWidth:document.querySelector("#chartSvg").getBoundingClientRect().width}));
+            const childLayout=await lab.locator("body").evaluate(()=>({
+              viewport:innerWidth,
+              scroll:document.documentElement.scrollWidth,
+              comparisonVisible:!document.querySelector("#comparisonPair").hidden,
+              studentChartWidth:document.querySelector("#studentCompareSvg").getBoundingClientRect().width,
+              answerChartWidth:document.querySelector("#answerCompareSvg").getBoundingClientRect().width
+            }));
             assert.ok(parentLayout.scroll<=parentLayout.viewport+1,"Parent page overflows on mobile: "+JSON.stringify(parentLayout));
             assert.ok(childLayout.scroll<=childLayout.viewport+1,"ChartLab overflows on mobile: "+JSON.stringify(childLayout));
-            assert.ok(childLayout.chartWidth<=childLayout.viewport+1,"Chart width exceeds viewport: "+JSON.stringify(childLayout));
+            assert.ok(childLayout.comparisonVisible,"Submitted comparison is not visible on mobile: "+JSON.stringify(childLayout));
+            assert.ok(childLayout.studentChartWidth>0,"Student comparison chart is hidden or has zero width: "+JSON.stringify(childLayout));
+            assert.ok(childLayout.answerChartWidth>0,"Reference comparison chart is hidden or has zero width: "+JSON.stringify(childLayout));
+            assert.ok(childLayout.studentChartWidth<=childLayout.viewport+1,"Student comparison chart exceeds viewport: "+JSON.stringify(childLayout));
+            assert.ok(childLayout.answerChartWidth<=childLayout.viewport+1,"Reference comparison chart exceeds viewport: "+JSON.stringify(childLayout));
             assert.deepEqual(errors,[],"JavaScript errors: "+errors.join("; "));
             assert.deepEqual(bad,[],"HTTP errors: "+bad.join("; "));
             await page.screenshot({path:"module5-clear-w-mobile-qa.png",fullPage:true});
