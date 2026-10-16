@@ -32,14 +32,14 @@ The learner sees consistent stage labels **Notice → Compare → Apply** and ca
 - The comparison chart displays candidate volume, its baseline and the relative multiple.
 - The exercise progresses from a simple recognition check to a guided comparison, then a new case with later bars withheld.
 - Two alternate outcomes are revealed only after the learner records an initial reading.
-- Stage 2 fixes correct encoded headings/annotations in all three Stage 3 charts and their exports; unlocked progress buttons now navigate, focus moves to newly revealed content, and scripted scrolling respects reduced-motion preferences.
+- Stage 2 fixes correct encoded headings/annotations in all three Stage 3 charts and their exports; unlocked progress buttons now navigate, the active-step indicator follows navigation, focus moves to newly revealed content, restart returns focus to the first stage, and scripted scrolling respects reduced-motion preferences.
 - Level 2 feedback now makes clear that response length is not an automatic assessment of reasoning quality.
 - The responsive layout includes visible stage labels and a progress cue; text stays in the open page and is not uploaded or persistently stored.
 - The lesson script, asset brief, editorial language guide and Q&A bank now specify the same easy-to-harder progression for every lesson.
 
 ## Remaining validation
 
-- Open the HTML in a browser and verify all relative images and stage interactions render.
+- Open the HTML in a browser and verify all relative images and stage interactions render. A headless browser attempt in the current execution environment was blocked before navigation, so this has not been marked complete.
 - Test correct/incorrect retries, stage unlocks, outcome reveal and restart.
 - Check keyboard/focus order, zoom, screen-reader semantics, contrast and mobile layout.
 - Run a beginner usability test and revise unclear instructions or visuals.
