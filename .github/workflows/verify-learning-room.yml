@@ -309,6 +309,86 @@ jobs:
             console.log("INTEGRATED_V52_PASS: long-form lesson content, notes, concealed model responses, synthetic charts, legacy routing, and mobile overflow.");
 
 
+            // Expanding catalogue regression: visible future courses add their own topic filters; hidden drafts stay out.
+            const cataloguePage = await context.newPage();
+            cataloguePage.on("pageerror", error => pageErrors.push(error.message));
+            cataloguePage.on("console", message => {
+              if (message.type() === "error") consoleErrors.push(message.text());
+            });
+            cataloguePage.on("requestfailed", request => failedRequests.push({ url: request.url(), error: request.failure()?.errorText || "unknown" }));
+            cataloguePage.on("response", response => {
+              if (response.status() >= 400 && !response.url().includes("favicon")) {
+                badResponses.push({ status: response.status(), url: response.url() });
+              }
+            });
+            await cataloguePage.addInitScript(() => {
+              let catalogueData;
+              Object.defineProperty(window, "TRADETHESIS_COURSE_DATA", {
+                configurable: true,
+                get() { return catalogueData; },
+                set(value) {
+                  value.microCourses.push({
+                    id: "ci-future-visible-course",
+                    catalogueVisibility: "visible",
+                    priority: 3,
+                    order: 990,
+                    title: "Emerging Topic Preview",
+                    category: "Emerging topic",
+                    art: "structure",
+                    price: "₹100",
+                    level: "Browser test fixture",
+                    description: "A test-only visible course proves the catalogue expands from data.",
+                    outcome: "The new topic is present only for this browser test.",
+                    complements: "Test fixture only.",
+                    modules: [{ title: "Test section", count: "1 lesson", preview: "Preview text", points: ["Test point"] }]
+                  });
+                  value.microCourses.push({
+                    id: "ci-future-hidden-draft",
+                    catalogueVisibility: "hidden",
+                    priority: 3,
+                    order: 991,
+                    title: "Hidden Draft Must Not Appear",
+                    category: "Hidden draft topic",
+                    art: "structure",
+                    price: "₹1",
+                    level: "Draft",
+                    description: "This draft must not be rendered.",
+                    outcome: "Hidden",
+                    complements: "Hidden",
+                    modules: []
+                  });
+                  catalogueData = value;
+                }
+              });
+            });
+            await cataloguePage.goto(server + "/courses.html", { waitUntil: "networkidle" });
+            await cataloguePage.waitForSelector("#cc-micro-grid [data-open-course='ci-future-visible-course']");
+            assert.equal(await cataloguePage.locator("#cc-micro-grid [data-open-course='ci-future-hidden-draft']").count(), 0,
+              "Hidden development drafts must not appear as public course cards");
+            assert.equal(await cataloguePage.locator("#cc-course-filters [data-filter='Hidden draft topic']").count(), 0,
+              "Hidden development draft topics must not appear as filters");
+            assert.equal(await cataloguePage.locator("#cc-course-filters [data-filter='Emerging topic']").count(), 1,
+              "New course topics should automatically add a filter");
+            assert.equal(await cataloguePage.locator('#cc-course-filters [data-count="all"]').innerText(), "9",
+              "The all-topics count should be derived from visible course data");
+            await cataloguePage.locator("#cc-course-filters [data-filter='Emerging topic']").click();
+            assert.equal(await cataloguePage.locator("#cc-micro-grid [data-open-course]").count(), 1,
+              "Dynamic topic filter should display only matching courses");
+            assert.equal(await cataloguePage.locator("#cc-micro-grid").innerText().then(text => text.includes("Emerging Topic Preview")), true);
+            await cataloguePage.locator(".cc-clear-search").click();
+            assert.equal(await cataloguePage.locator("#cc-micro-grid [data-open-course]").count(), 9,
+              "Clear search should restore the selected visible category, not disclose drafts");
+            await cataloguePage.setViewportSize({ width: 390, height: 844 });
+            const catalogueOverflow = await cataloguePage.evaluate(() => ({
+              viewport: document.documentElement.clientWidth,
+              document: document.documentElement.scrollWidth
+            }));
+            assert.ok(catalogueOverflow.document <= catalogueOverflow.viewport + 1,
+              "Mobile catalogue has horizontal page scrolling: " + JSON.stringify(catalogueOverflow));
+            assert.ok((await cataloguePage.locator(".cc-development-note").innerText()).includes("catalogue will continue to grow"),
+              "The public catalogue should explain that new courses will be added");
+            console.log("EXPANDING_CATALOGUE_PASS: dynamic topics, hidden drafts, visible counts, preview state and mobile fit.");
+
             assert.deepEqual(pageErrors, [], "Unexpected browser JavaScript errors");
             assert.deepEqual(consoleErrors, [], "Unexpected browser console errors: " + JSON.stringify(consoleErrors));
             assert.deepEqual(failedRequests, [], "Failed browser requests: " + JSON.stringify(failedRequests));
