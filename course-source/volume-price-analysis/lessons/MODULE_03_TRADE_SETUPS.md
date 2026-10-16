@@ -47,6 +47,16 @@ The skill is not finding a way to enter every trend. It is learning to wait for 
 
 The most important moment in this lesson is when the student does not enter. On the screen, show the steep impulse and draw the distance from the late breakout candle to the structural invalidation. The stop distance is large because the market has already travelled far. Even if the uptrend remains intact, the trade may have poor geometry. Then rewind to the pullback near a previous breakout zone. Here there is a reason to watch: the price location provides a clear question and a nearby structural reference. Explain that an area of interest is not yet an entry. A trigger might be a recovery through a local swing; a different method might require a retest or bar close. Whatever the method, specify it before the next candle. Compare the two cases using the same risk worksheet. Ask which one gives the student a clearer thesis and where the idea becomes invalid. The answer should be about the quality of the plan, not whether one chart later rose more. The student is learning to wait for conditions that can be described and managed, not to chase whichever chart currently looks strongest.
 
+### Learner progression — Notice → Compare → Apply
+
+**Level 1 — Notice (easy):** Identify the recent swing highs/lows and mark a location where a pullback might be worth watching.
+
+**Level 2 — Compare (guided):** On a guided chart, mark the setup area separately from the trigger and invalidation.
+
+**Level 3 — Apply (independent):** Assess a fresh continuation example with two possible outcomes; justify whether to wait, consider or reject it based on location, trigger and risk.
+
+**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
+
 ### Knowledge check
 1. What is the difference between a setup area and an entry trigger?
 2. Which pullback behaviours might support or weaken a trend-continuation hypothesis?
@@ -96,6 +106,16 @@ The real question is not “How far has price pulled back?” It is “What is t
 ### Extended spoken case analysis — additional narration
 
 A useful pullback comparison must account for both distance and time. A decline that retraces half the impulse over two bars may have a different character from a shallow decline that drifts for ten bars. Neither is automatically better. Add ranges and volume to the comparison. If the impulse made broad upward progress on elevated activity and the pullback consists of smaller bars with subdued activity, a continuation hypothesis may remain plausible. If the pullback starts printing wider downside bars, closes near their lows, and breaks the prior higher low, the counter-move is changing the structure. Do not allow the phrase “buy the dip” to protect the original thesis from evidence. Make students freeze both charts after three pullback bars and write what they currently know, not what the whole chart will later reveal. When more bars appear, they can update the read. This is a useful way to teach real-time reasoning and reduce hindsight bias. The lesson is not to find the most elegant pullback after the event; it is to identify what would need to happen next before committing to a decision.
+
+### Learner progression — Notice → Compare → Apply
+
+**Level 1 — Notice (easy):** Mark the prior impulse and the pullback that follows it.
+
+**Level 2 — Compare (guided):** Compare two pullbacks by depth, speed, candle size, relative activity and whether the prior swing structure holds.
+
+**Level 3 — Apply (independent):** On a new pullback, write continuation and failure scenarios, identify the trigger for the preferred scenario and state what would invalidate it.
+
+**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
 
 ### Knowledge check
 1. What is a useful way to compare a pullback with the impulse that preceded it?
@@ -147,6 +167,16 @@ For the exercise, mark support and resistance before revealing the next sequence
 
 Treat support and resistance as zones that help organise a decision, not as precise prediction lines. When price reaches a zone, the analyst's first job is to examine the approach and response. Did price arrive in a fast impulse or a slow drift? Did the test move through the area and close beyond it, or did price return? What did volume do relative to a comparable baseline? If price rejects the zone, what later evidence would show that the rejection matters? If price accepts beyond it, what would demonstrate that the earlier barrier no longer contains price? These questions keep the learner from entering simply because price touched a line. Another useful point is that a level can be relevant but no longer tradable. If the next opposing zone is very close, a theoretically valid setup may offer little room. If the invalidation point is far away, the risk budget may dictate a much smaller position or no trade. Ask learners to include the next opposing level in every exercise. The quality of a decision depends on the whole nearby structure, not only the level at which a candle happens to react.
 
+### Learner progression — Notice → Compare → Apply
+
+**Level 1 — Notice (easy):** Identify two earlier areas where price paused or changed direction.
+
+**Level 2 — Compare (guided):** Draw zones on a guided chart and compare a rejection, a sustained move beyond the zone and an ambiguous test.
+
+**Level 3 — Apply (independent):** Build conditional responses to a new zone test; explain which price behaviour favours each scenario and when no trade is appropriate.
+
+**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
+
 ### Knowledge check
 1. Why is a support/resistance zone not a guaranteed reversal point?
 2. What distinguishes rejection from acceptance in the following bars?
@@ -194,6 +224,16 @@ Range analysis also requires patience. Price can overshoot boundaries because ma
 ### Extended spoken case analysis — additional narration
 
 Range edges matter because they are places where prior price behaviour repeatedly changed, but they are not guaranteed turning points. Use a range that has at least two clear tests at each side and show how the market behaves near the middle versus at the edge. At the edge, there is a defined question: will price be rejected back into the range, or will it be accepted beyond the boundary? At the middle, price may have room to move in either direction but often lacks the same clean reference for invalidation. This does not mean every middle-of-range trade is wrong; it means that a setup based on range-edge behaviour may no longer apply there. Show an upper-edge false break that returns into the range, then show price later breaking out for real. The first failure did not guarantee that price would remain inside the range indefinitely. Ask learners to define a no-trade condition: for example, when price is too close to the middle for the chosen range-edge plan, or when the boundaries are not clear. The point is to match the method to the structure actually present.
+
+### Learner progression — Notice → Compare → Apply
+
+**Level 1 — Notice (easy):** Draw the upper and lower boundaries of a clear trading range.
+
+**Level 2 — Compare (guided):** Classify guided examples as rejection, overshoot, sustained breakout or failed breakout.
+
+**Level 3 — Apply (independent):** Classify an unlabelled range sequence and state what further evidence is required before building a trade plan.
+
+**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
 
 ### Knowledge check
 1. Why might the middle of a range offer less attractive conditions than an edge?
@@ -246,6 +286,16 @@ Your most valuable skill may be learning to write: “This is not ready yet.” 
 ### Extended spoken case analysis — additional narration
 
 A setup-quality checklist should protect the learner from inventing reasons after falling in love with a chart. Have them score each candidate with the same questions and allow an “unknown” answer. Unknown should not be silently counted as yes. For example, the chart might have a clear trend and a pullback zone, but no trigger has appeared. The setup is worth monitoring, not entering. Another chart may have a good-looking breakout but poor room before the next resistance; its pattern may be valid while the trade economics are not. A third may have a strong apparent signal but unreliable volume data; the learner should lower confidence in the volume-specific part of the argument. The exercise needs a debrief on process versus result. A rejected candidate may later make a large move. That does not mean rejecting it was irrational if the predefined conditions were absent. Conversely, an impulsive entry may win by chance. Ask learners to justify decisions using what was visible at the time. Over time, this produces a reviewable process, rather than a collection of anecdotes about charts that would have worked.
+
+### Learner progression — Notice → Compare → Apply
+
+**Level 1 — Notice (easy):** Use a short checklist to identify context, location, evidence, trigger and invalidation.
+
+**Level 2 — Compare (guided):** Grade a candidate setup and mark missing information as unknown rather than assuming it is favourable.
+
+**Level 3 — Apply (independent):** Independently assess three contrasting candidates, including a justified no-trade decision, and separate decision quality from the later outcome.
+
+**Reveal rule:** Keep later bars or the model outcome hidden until the learner has recorded the initial evidence and next condition.
 
 ### Knowledge check
 1. Name the five setup filters and explain why each matters.
