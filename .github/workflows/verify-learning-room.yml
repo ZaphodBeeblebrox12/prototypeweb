@@ -130,7 +130,7 @@ jobs:
               });
               await submit.click();
               await page.waitForFunction(() => {
-                return document.querySelector(".sr-room-zone-task .sr-room-zone-status").textContent.includes("submitted");
+                return document.querySelector(".sr-room-zone-task .sr-room-zone-status").textContent.toLowerCase().includes("submitted");
               });
             }
 
@@ -164,6 +164,7 @@ jobs:
             // Lesson 8: qualitative review, four-boundary submission and gated reference.
             await openLesson(8, "Evaluate a zone without inventing a magic score");
             for (let i = 0; i < 4; i++) await advanceWithResponse();
+            assert.ok(await page.locator(".sr-room-teaching-figure img").evaluate(img => img.complete && img.naturalWidth > 0));
             await submitZoneTask({
               values: [100, 110, 130, 140],
               rationale: "Support captures both lower reactions. Resistance is a separate upper reaction area; neither band needs to predict the next move.",
@@ -171,7 +172,6 @@ jobs:
             });
             await page.locator("#sr-chart-next").click();
             await page.waitForFunction(() => document.querySelector("#sr-chart-stage-count").innerText === "View 6 of 8");
-            assert.ok(await page.locator(".sr-room-teaching-figure img").evaluate(img => img.complete && img.naturalWidth > 0));
             assert.equal((await completeQuiz()), 3);
             assert.equal(await page.locator("#sr-complete-button").isDisabled(), false, "Lesson 8 completion should unlock after lab submission and checks");
 
@@ -194,6 +194,7 @@ jobs:
             // Lesson 14: initial thesis, contradiction, contrasting hold, Wider Neckline submission and eight checks.
             await openLesson(14, "Failed breakouts and alternate outcomes");
             for (let i = 0; i < 4; i++) await advanceWithResponse();
+            assert.ok(await page.locator(".sr-room-teaching-figure img").evaluate(img => img.complete && img.naturalWidth > 0));
             await submitZoneTask({
               values: [100, 110, 130, 140],
               rationale: "Support groups the two lower reactions. The neckline frames the upper reaction; price may hold above it or return below it.",
@@ -202,7 +203,6 @@ jobs:
             await page.locator("#sr-chart-next").click();
             await page.waitForFunction(() => document.querySelector("#sr-chart-stage-count").innerText === "View 6 of 8");
             assert.equal(await page.locator(".sr-room-quiz-item").count(), 8);
-            assert.ok(await page.locator(".sr-room-teaching-figure img").evaluate(img => img.complete && img.naturalWidth > 0));
             assert.equal(await page.locator("#sr-complete-button").isDisabled(), true);
             assert.equal(await completeQuiz(), 8);
             assert.equal(await page.locator("#sr-complete-button").isDisabled(), false);
