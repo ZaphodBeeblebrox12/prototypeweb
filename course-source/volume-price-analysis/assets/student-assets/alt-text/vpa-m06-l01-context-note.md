@@ -1,5 +1,6 @@
 # Accessibility and source notes — M06-L01
 
+**Figure number:** Figure 6.1; interactive panels use Figure 6.1a–Figure 6.1e.
 **Lesson:** Start With the Bigger Picture: What Is the Market Doing?
 **Purpose:** Build a concise context note that identifies state, structure, location, recent price-volume event and the unresolved question.
 **Data:** Synthetic OHLCV for instruction, not historical prices or a trade signal.
