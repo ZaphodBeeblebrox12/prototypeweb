@@ -17,6 +17,8 @@ Course pages use two connected views:
 - **Course overview:** clear promise, who the course is for, measurable learning outcomes, curriculum with lesson titles, practical outputs and a clear route into the learning room.
 - **Learning room:** searchable or scannable course outline, a distinctive but compact lesson header, concise lesson summary, estimated study time and a brief sense of what the learner will do.
 - **Lesson navigation:** use the template's integrated, restrained tabs—**The idea**, **Chart examples**, and **Test your reading**—as the default. Rename only where a subject makes more natural wording clearer.
+- **Figure placement:** show the first relevant visual in **The idea** beside the explanation it supports. Put additional figures in **Chart examples** so examples can be compared.
+- **Asset count:** show a numerical count beside **Chart examples**, computed from the lesson's actual figure data. Count the lead figure in **The idea**, additional references and the worked chart.
 - **Lesson body:** readable editorial article surface with enough text margin, a restrained hierarchy, clear figure sizing and an uncomplicated completion/next action.
 - **Responsive use:** course outline and lesson content must remain useful on mobile. Figures must remain readable and have an enlarged view when fine details or annotations require it.
 
@@ -52,6 +54,7 @@ Section functions are reusable, not fixed names:
 - Give figures persistent internal asset IDs in production records and simple student-facing labels such as **Figure 1.1**, **Figure 1.2**, **Figure 2.1**. Number figures by module and keep references in lesson text only when helpful.
 - Never place internal asset IDs, difficulty/level labels, “synthetic data” banners or production-state labels inside learner-facing charts. If an image is illustrative or not historical data, explain that in a nearby caption where it matters.
 - Keep image-source, copyright/licence, download provenance and replacement notes in an internal asset register, not in the main lesson narrative.
+- Give each replaceable image a stable asset ID and a server-authorised replacement route when rendered by Django.
 - During first-pass production, externally sourced chart images may be used as temporary visual references when their origin is recorded. They must be replaced with course-owned TradingView captures or images cleared for the intended use before public release. A source URL alone does not satisfy the downloaded-asset requirement.
 - Add useful alt text. Keep annotations legible on mobile and when enlarged; use simple static comparisons rather than introducing ChartLab unless explicitly requested.
 
@@ -62,3 +65,12 @@ Every existing course should be migrated to the shared visual and navigation sta
 ## Current first-pass target
 
 The initial application pass is **Understand Bollinger Bands**. Its seven-module manuscripts remain the source of truth. The first preview will use the updated Learning Room structure, locally stored visual assets for review, simple module-based figure labels and explicit notes that temporary web-sourced images are placeholders to be replaced by the user's own TradingView captures before release.
+
+
+## Admin editing and Django handoff
+
+The standalone Bollinger preview contains local-only controls for reviewing image replacement and in-place text editing. Text drafts are saved in the current browser; image changes last only for the open preview session. Neither action saves shared course content.
+
+**When this template is included in Django, remove the local-only preview mode.** Render controls only for authenticated staff with the correct content/media permission, inject server-checked configuration, stable content IDs, CSRF tokens and save/upload routes. The server must re-check permission on every request and validate/sanitise content. Text saving must update shared content in the existing course system; shared images must use persistent media records and storage.
+
+See `docs/architecture/COURSE_CONTENT_EDITOR.md` and `docs/architecture/INSTRUCTIONAL_IMAGE_REPLACEMENT.md`.
