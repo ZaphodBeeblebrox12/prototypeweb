@@ -78,7 +78,7 @@ This evidence is limited to the static preview and automated checks. It is **not
 ## Non-negotiable working rules
 
 - Source of truth for current work: `prototypeweb` branch `my-new-branch`. Do not continue feature development on the separate `test` repository as the target.
-- All feature branches and pull requests must target `my-new-branch`. Any approved merges happen into `my-new-branch` only; never merge into `main` or change `main`. This destination rule does not by itself approve merging a particular draft PR.
+- All feature branches and pull requests must target `my-new-branch`. Any approved merges happen into `my-new-branch` only; never merge into `main` or change `main`. The `require-my-new-branch.yml` workflow fails PR checks aimed at other bases; hard blocking depends on repository settings requiring that status check. Do not merge a particular draft PR without approval of its changes.
 - Preserve the existing course curriculum, micro-course assets, lesson source and agreed product positioning.
 - Do not expose paid content or instructor-only keys in a public static deployment.
 - Do not claim authentication, persistence, access control, payment handling, scheduling, grading or admin actions are production-ready until verified.
