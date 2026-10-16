@@ -41,16 +41,23 @@ A range extends from 60 to 66. A wide candle closes at 67.2 with 1.6× relative 
 
 If price retests 66–67 and holds above it before advancing, the continuation reading gains support. If it closes back inside the range and later fails to reclaim 66, the first break has not sustained itself. If price keeps crossing the boundary without progress, do not force a verdict.
 
-### Try it
+### Level 1 — Notice (easy)
 
-Price closes slightly above a well-marked range high on elevated volume. The next candle closes back inside the range. Which statement best describes the evidence?
+**Task:** A range is 60–66; price closes at 67.2 after trading above 66. Identify the boundary, price result and unresolved question.
 
-A. The first candle proved a valid breakout.
-B. The breakout attempt did not retain its initial progress; more evidence is needed to determine whether the range will hold or a new attempt will succeed.
-C. A reversal is guaranteed.
+**Feedback:** Price closed beyond the prior boundary, but it remains unknown whether it will hold outside or return into the range.
 
-**Feedback:** B. It reports the failure to hold outside without predicting the next move.
+### Level 2 — Compare (guided)
 
+**Task:** Compare a retest that holds above 66 with a close back inside followed by a failed reclaim.
+
+**Feedback:** A hold and further progress build acceptance evidence; a return inside and failed reclaim weaken the breakout case.
+
+### Level 3 — Apply (independent)
+
+**Task:** Price breaks below a range low on modest volume then holds below for three bars. Write a conditional reading.
+
+**Model response:** Price moved below the range and has retained that position. Modest volume does not erase this behaviour; a return inside and failed stay below would weaken the downside-break scenario.
 ### Common mistake
 
 **Mistake:** Treating the first close outside a range as a completed breakout thesis.
@@ -96,12 +103,23 @@ What changed? The first close showed a return inside the range. The failed recla
 
 The same first candle can lead to either ending. Your initial notes should say what was known at that time, not pretend you could already see the ending.
 
-### Try it
+### Level 1 — Notice (easy)
 
-Price moves above a range high, closes back inside, then immediately retakes the high and holds above it. Was the first event definitely a failed breakout?
+**Task:** List the stages in a failed-break sequence from initial boundary to follow-through.
 
-**Feedback:** No. The initial move did not hold at first, but the later reclaim changed the evidence. A disciplined analysis updates as new bars arrive rather than freezing the first interpretation.
+**Feedback:** The boundary exists first; price moves beyond it, returns inside, and later reclaim behaviour helps determine whether the failure matters.
 
+### Level 2 — Compare (guided)
+
+**Task:** Compare a failed reclaim after the return inside with a successful reclaim and hold outside.
+
+**Feedback:** A failed reclaim strengthens the view that the outside move was not sustained; a successful reclaim weakens it. A return inside alone does not prove reversal.
+
+### Level 3 — Apply (independent)
+
+**Task:** Price breaks above 100, closes at 99.4, fails twice to reclaim 100 and then breaks a nearby swing low. Describe it without “trap”.
+
+**Model response:** Price exceeded the boundary but closed back inside; two reclaim attempts failed before a nearby structural break. This supports a failed-upside-break reading but does not prove manipulation.
 ### Common mistake
 
 **Mistake:** Calling a move a trap because price later reverses, then using the eventual reversal as proof that it was obvious.
@@ -138,12 +156,23 @@ Price has climbed from 300 to 340. Near a prior high, a candle trades from 334 t
 
 If the following bars remain below 344, then break a nearby swing low and fail to reclaim it, the idea that the upward push has weakened gains support. If price consolidates and later closes above 344 while holding the breakout area, the continuation interpretation gains support instead.
 
-### Try it
+### Level 1 — Notice (easy)
 
-An extended uptrend prints its highest-volume candle of the week. The candle closes near its high, and later bars hold above its range. What should you conclude?
+**Task:** An extended trend prints 3× relative volume. State that fact and two aspects of the price result to inspect.
 
-**Feedback:** Activity was exceptionally high and price made an upward result that was retained by later bars. Those facts fit continuation at least as well as an immediate reversal. Calling it a confirmed selling climax would ignore the subsequent price behaviour.
+**Feedback:** Activity was three times the chosen baseline. Inspect range, close location, context and subsequent progress; the ratio alone does not identify a top.
 
+### Level 2 — Compare (guided)
+
+**Task:** Compare an extreme-volume bar that closes near its high and is followed by higher prices with one that returns inside a boundary and is followed by a structural break.
+
+**Feedback:** The first is compatible with continuation; the second provides evidence that outside progress was not retained. Follow-through matters.
+
+### Level 3 — Apply (independent)
+
+**Task:** The largest volume bar of the week appears after a long decline; it closes near its low and later bars make new lows. What can you conclude?
+
+**Model response:** Activity was extreme, but price retained downside progress and continued lower. The bar alone does not confirm a reversal.
 ### Common mistake
 
 **Mistake:** Assuming that the largest volume bar must mark exhaustion.
@@ -188,12 +217,23 @@ For either event, keep the sequence explicit:
 4. Observe whether price returns inside.
 5. Look for a retest, reclaim or structural change before deciding whether the failed-move interpretation has gained support.
 
-### Try it
+### Level 1 — Notice (easy)
 
-Price moves below a clear range low, closes back inside, then spends the next six bars below the range and fails every reclaim attempt. Is the spring interpretation strengthening or weakening?
+**Task:** Describe a spring-like event and an upthrust-like event in terms of what price did.
 
-**Feedback:** It is weakening. The market is not sustaining the return inside; instead, price remains below the boundary and cannot reclaim it. A brief return alone did not establish a durable failed-breakdown scenario.
+**Feedback:** A spring-like event moves below a range low then returns inside; an upthrust-like event moves above a range high then returns inside. Neither label guarantees reversal.
 
+### Level 2 — Compare (guided)
+
+**Task:** Compare a break below the range that returns and remains inside with one that stays below for six bars and fails to reclaim the boundary.
+
+**Feedback:** The first supports a failed-breakdown reading more; the second weakens it because price has not sustained the return inside.
+
+### Level 3 — Apply (independent)
+
+**Task:** Price trades above a range high and closes inside, then reclaims and holds above the boundary. Update the initial interpretation.
+
+**Model response:** The first close did not retain the excursion, but the later reclaim and hold weaken the failed-upside interpretation. Include the newer evidence.
 ### Common mistake
 
 **Mistake:** Treating the terms “spring” and “upthrust” as automatic reversal signals.
@@ -232,12 +272,23 @@ A range has a high near 200. Price breaks to 204 on elevated activity but closes
 
 The correct interpretation depends on the evidence available at each stage. Waiting is a valid response when the sequence is incomplete.
 
-### Try it
+### Level 1 — Notice (easy)
 
-After a false break above resistance, price returns into the range but then trades sideways. No swing low breaks, and no reclaim of the boundary succeeds or fails decisively. What is the strongest justified label?
+**Task:** Order these events: initial move outside, return inside, failed reclaim, break of nearby structure. Which adds the strongest later evidence?
 
-**Feedback:** The initial breakout attempt failed to hold, but a broader reversal is not established. “Failed attempt; current direction unresolved” is more accurate than “downtrend confirmed.”
+**Feedback:** The outside move and return are the initial event; failed reclaim strengthens a failure reading and a nearby structural break provides further evidence of changed progress.
 
+### Level 2 — Compare (guided)
+
+**Task:** Compare a failed breakout followed by a swing-low break with a return inside followed by sideways overlap and a successful reclaim.
+
+**Feedback:** The structural break supports a broader shift more strongly. Sideways overlap remains unresolved until price shows more sustained progress.
+
+### Level 3 — Apply (independent)
+
+**Task:** After a false break, price returns inside but no swing breaks and the market overlaps. State the current status and what you would watch next.
+
+**Model response:** The initial attempt failed to hold, but a broader reversal is not established. Wait for stronger structural change or for price to reclaim and hold beyond the boundary.
 ### Common mistake
 
 **Mistake:** Confusing a rejected price excursion with a confirmed reversal.
