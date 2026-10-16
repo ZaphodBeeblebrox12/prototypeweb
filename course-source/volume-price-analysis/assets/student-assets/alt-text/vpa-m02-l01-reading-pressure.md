@@ -1,5 +1,6 @@
 # Accessibility and source notes — M02-L01
 
+**Figure number:** Figure 2.1; interactive panels use Figure 2.1a–Figure 2.1e.
 **Linked lesson:** Who's Pushing Price? Reading Buying and Selling Pressure
 **Purpose:** Describe directional progress and how much price retains it across a sequence.
 **Data:** Synthetic OHLCV created for instruction, not historical market data, a forecast or trading signal.
