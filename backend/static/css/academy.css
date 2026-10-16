@@ -63,3 +63,17 @@ a:hover { color: var(--tt-deep); }
 
 .tt-page > .container { max-width: none !important; padding-inline: 0; }
 .tt-page > .container > .text-uppercase:first-child { margin-bottom: 1rem !important; }
+
+.lesson-body { overflow-wrap: anywhere; }
+.lesson-body h2, .lesson-body h3, .lesson-body h4 { margin: 1.6rem 0 .65rem; }
+.lesson-body p, .lesson-body ul, .lesson-body ol { margin-bottom: 1rem; }
+.lesson-body ul, .lesson-body ol { padding-left: 1.35rem; }
+.lesson-body blockquote { margin: 1.25rem 0; padding: .8rem 1rem; border-left: 3px solid var(--tt-tomato); background: var(--tt-soft); }
+.lesson-body table { width: 100%; margin: 1.25rem 0; border-collapse: collapse; display: block; overflow-x: auto; }
+.lesson-body th, .lesson-body td { border: 1px solid var(--tt-line); padding: .6rem .75rem; text-align: left; vertical-align: top; }
+.lesson-body th { background: var(--tt-soft); }
+.lesson-body img { max-width: 100%; height: auto; border-radius: 8px; }
+.lesson-body pre { max-width: 100%; overflow-x: auto; padding: 1rem; border: 1px solid var(--tt-line); border-radius: 10px; background: var(--tt-soft); }
+.lesson-body code { overflow-wrap: anywhere; }
+.lesson-body a { text-decoration-thickness: 1px; }
+.lesson-body hr { border-color: var(--tt-line); margin: 1.5rem 0; }
