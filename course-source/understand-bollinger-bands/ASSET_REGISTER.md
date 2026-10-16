@@ -51,15 +51,16 @@
 | BB-M4-F03 | Figure 4.3 | Price pane and %B or one independently justified indicator pane showing a divergence-like mismatch. Add an alternative continuation outcome in a second panel. | 4.3 |
 | BB-M4-F04 | Figure 4.4 | Four compact, legible pattern states: candidate, confirmed under an explicitly stated course rule, failed, and unclear. Show the decision point, not only the completed history. | 4.4 |
 
-## Module 5 — Build Buy and Sell Plans
+## Module 5 — Build and Trade Bollinger Setups
 
 | Asset ID | Figure | Brief and required elements | Used in |
 |---|---|---|---|
-| BB-M5-F01 | Figure 5.1 | One-page trade-plan diagram with context, trigger, confirmation, invalidation, stop, position risk, exit, and no-trade condition. Include a completed example and a deliberately incomplete example. | 5.1 |
-| BB-M5-F02 | Figure 5.2 | Mirrored long/short squeeze breakout cases with compression context, range boundary, closed-bar trigger, optional confirmation, invalidation level, stop and planned exit zone. Keep labels on chart sparse and legible. | 5.2 |
-| BB-M5-F03 | Figure 5.3 | Established range case with potential long from lower boundary and short from upper boundary; beside it, a range that breaks and trends. Show the condition that cancels a range fade. | 5.3 |
-| BB-M5-F04 | Figure 5.4 | Candidate W-bottom and M-top with the same trade-plan annotations used in the lesson: trigger, invalidation, stop reference, and target area. Include one pattern that does not confirm. | 5.4 |
-| BB-M5-F05 | Figure 5.5 | Four case cards: trend continuation candidate, range setup candidate, reversal candidate, and no-trade/unclear chart. Each card must state one piece of evidence and one missing/failed condition. | 5.5 |
+| BB-M5-F01 | Figure 5.1 | Three-panel setup comparison: (A) squeeze then close above the upper band, (B) squeeze then close below the lower band, (C) first move fails before a later resolution. Show BandWidth relative to its own history and the exact breakout bar. Do not suggest the squeeze picks direction. | 5.1 |
+| BB-M5-F02 | Figure 5.2 | Four labelled panels comparing one outside-band close with two consecutive outside closes, then trending ADX versus non-trending ADX. Show the Method IV classification: trend-following in strong ADX conditions and potential opposite-direction reversal in weak ADX conditions. Keep the threshold stated as the implementation's chosen value, not a universal constant. | 5.2 |
+| BB-M5-F03 | Figure 5.3 | Three panels for Bollinger Method II: (A) %B > 0.8 and MFI(10) > 80 long; (B) %B < 0.2 and MFI(10) < 20 short; (C) near-miss where one input fails the threshold. Display %B and MFI labels clearly. | 5.3 |
+| BB-M5-F04 | Figure 5.4 | Method III long and short examples pairing band tags with an independently chosen volume indicator. Include one positive lower-band alert, one negative upper-band alert, a price-confirmation bar, and one failed/unsupported alert. State which indicator variant each panel uses. | 5.4 |
+| BB-M5-F05 | Figure 5.5 | Side-by-side W-bottom and M-type top. For W: first low at/outside lower band, relatively higher second low inside, volume softer on retest, then strong up day with above-average range/volume. For M/top: repeated upward pushes with a later weaker band relationship and a clear sign-of-weakness example. Include a failed pattern. | 5.5 |
+| BB-M5-F06 | Figure 5.6 | TTM Squeeze: show Bollinger Bands inside Keltner Channels, the release when bands move outside, and a positive/rising versus negative/falling momentum histogram. Include a release that fails. Keep visual conventions separate from the BandWidth-based Bollinger Squeeze in Figure 5.1. | 5.6 |
 
 ## Module 6 — Recognise Failed Setups and Know When to Wait
 

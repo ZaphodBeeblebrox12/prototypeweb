@@ -19,7 +19,7 @@ The course follows the principles in [the reusable TradeThesis course-creation m
 - [Module 2 manuscript](lessons/MODULE_02_READ_THE_BANDS_AND_MEASUREMENTS.md) — construction, settings, %B and BandWidth.
 - [Module 3 manuscript](lessons/MODULE_03_READ_MARKET_CONTEXT.md) — trend/range context, band walks and squeeze types.
 - [Module 4 manuscript](lessons/MODULE_04_BOLLINGER_SIGNATURE_PATTERNS.md) — W-bottoms, M-tops and confirmation.
-- [Module 5 manuscript](lessons/MODULE_05_BUY_AND_SELL_PLANS.md) — long/short trade-plan frameworks.
+- [Module 5 manuscript](lessons/MODULE_05_BUY_AND_SELL_PLANS.md) — Bollinger Methods I–IV, W/M pattern setups, and Carter's TTM Squeeze.
 - [Module 6 manuscript](lessons/MODULE_06_FAILED_SETUPS_AND_NO_TRADE.md) — failure cases and when to wait.
 - [Module 7 manuscript](lessons/MODULE_07_RISK_AND_REVIEW.md) — position sizing, management, testing and final assignment.
 
@@ -46,8 +46,8 @@ The course will clearly distinguish Bollinger's BandWidth / low-volatility conce
 
 ## Current checkpoint
 
-The course now has a seven-module architecture and draft student-facing text for all 29 lessons, saved as one Markdown manuscript per module. The lessons include figure references, worked explanations, static-image tasks, model reasoning, common mistakes, transfer prompts, and source notes. The content uses plain language for intermediate traders and separates John Bollinger's documented principles from course-designed trading frameworks.
+The course now has a seven-module architecture and draft student-facing text for all 30 lessons, saved as one Markdown manuscript per module. The lessons include figure references, worked explanations, static-image tasks, model reasoning, common mistakes, transfer prompts, and source notes. The content uses plain language for intermediate traders and now centres the setup module on Bollinger's three named book methods, his later Method IV, his W/M pattern setups, and Carter's separate TTM Squeeze. Source-defined entry conditions are distinguished from course-level risk and execution decisions.
 
 The referenced SVG paths follow the agreed naming scheme, but the final image assets have **not** been created or visually tested yet. The manuscripts are drafts and still need a source-attribution/duplication pass, actual image production, mobile/zoom review, and learner timing/comprehension checks. This work has not been integrated into the public course pages or deployed.
 
-Next: verify exact author-specific pattern details against the book edition, produce the 29 figures in a sensible batch workflow, render the manuscripts with the figures, and run a focused review.
+Next: verify exact author-specific pattern details against the book edition, produce the 30 figures in a sensible batch workflow, render the manuscripts with the figures, and run a focused review.
