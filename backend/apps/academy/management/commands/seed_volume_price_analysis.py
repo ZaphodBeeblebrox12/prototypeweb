@@ -201,7 +201,7 @@ def embed_vpa_figures(lesson_number, student_markdown, assets_root, figure_count
 
         pattern = re.compile(rf"(?m)^({re.escape(anchor)}[^\n]*)$")
 
-        def add_figure(match):
+        def add_figure(match, filename=filename, caption=caption):
             figure_counters[module_number] = figure_counters.get(module_number, 0) + 1
             figure_number = f"{module_number}.{figure_counters[module_number]}"
             image = (
