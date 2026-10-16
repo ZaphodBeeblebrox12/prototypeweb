@@ -46,7 +46,22 @@ def test_global_plus_geo_overrides_save(client):
     }
     r = client.post(reverse("admin:subscriptions_plan_add"), data, follow=True)
     from apps.subscriptions.models import Plan, PlanPrice, GeoPlanPrice
-    assert Plan.objects.filter(name="Pro").exists(), "valid global+geo config must save"
+    if not Plan.objects.filter(name="Pro").exists():
+        context = r.context[-1] if r.context else {}
+        admin_form = context.get("adminform")
+        form_errors = admin_form.form.errors if admin_form else "admin form unavailable"
+        inline_errors = []
+        for inline in context.get("inline_admin_formsets", []):
+            if inline.formset.errors or inline.formset.non_form_errors():
+                inline_errors.append({
+                    "inline": str(inline.opts.verbose_name_plural),
+                    "errors": inline.formset.errors,
+                    "non_form_errors": list(inline.formset.non_form_errors()),
+                })
+        pytest.fail(
+            f"Valid global+geo config was rejected (HTTP {r.status_code}). "
+            f"Plan form errors: {form_errors}; inline errors: {inline_errors}"
+        )
     assert PlanPrice.objects.filter(plan__name="Pro").count() == 1
     assert GeoPlanPrice.objects.filter(plan__name="Pro").count() == 2
 
