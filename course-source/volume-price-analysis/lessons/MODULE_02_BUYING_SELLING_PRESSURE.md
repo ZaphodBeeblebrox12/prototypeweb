@@ -9,6 +9,8 @@ Module 1 taught you to separate price outcome from recorded activity. This modul
 
 ## Lesson 2.1 — Who's Pushing Price? Reading Buying and Selling Pressure
 
+As you work through this lesson, refer to **Figure 2.1** for the chart example.
+
 ![Chart for Who's Pushing Price? Reading Buying and Selling Pressure. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m02-l01-reading-pressure.svg)
 
 **Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m02-l01-reading-pressure.html)  
@@ -50,19 +52,19 @@ Now imagine the bar at 47 records unusually high volume but closes near its low,
 
 Consider closes of 50, 52, 53, 51, 54 and 55. Despite the pullback to 51, the sequence makes progress and later moves beyond the earlier high. Now consider 50, 52, 49, 52, 48, 51. It contains upward candles too, but the sequence repeatedly loses ground and makes lower lows. A green candle alone cannot describe pressure; the path and retained progress give it meaning.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** A four-bar sequence makes higher closes but gives back most of each advance on the next bar. Describe progress without assigning motives.
 
 **Feedback:** Price makes upward excursions but does not consistently retain them. Avoid saying that a particular participant is in control.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare it with higher highs, higher closes and shallow pullbacks. What differs?
 
 **Feedback:** The second sequence retains more upward progress and shows clearer structure; this is evidence about price outcome, not participant identity.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** A sequence makes lower highs/lower closes, then has a high-volume rally that closes mid-range. Give the strongest reading and one uncertainty.
 
@@ -80,6 +82,8 @@ Consider closes of 50, 52, 53, 51, 54 and 55. Despite the pullback to 51, the se
 ---
 
 ## Lesson 2.2 — When Volume Supports a Move: Recognising Evidence of Strength
+
+As you work through this lesson, refer to **Figure 2.2** for the chart example.
 
 ![Chart for When Volume Supports a Move: Recognising Evidence of Strength. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m02-l02-volume-supports-move.svg)
 
@@ -122,19 +126,19 @@ A careful summary is: “Price has moved beyond the prior zone on elevated recor
 
 One breakout records 2× relative volume and holds above the old range high. Another records 2× relative volume but closes back in the range and fails to reclaim the boundary. The same multiple appears in both. What matters for the continuation thesis is not the multiple by itself but whether price retains progress outside the range. Volume can make an event worth examining; it cannot replace a price condition.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** A breakout closes above a boundary on 1.7× relative volume. What does that ratio establish?
 
 **Feedback:** Recorded activity was 70% above its chosen baseline; it does not prove a successful breakout or identify traders.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare it with an equally active bar that closes back inside and fails to reclaim the boundary.
 
 **Feedback:** Follow-through distinguishes the cases. The second attempt did not retain its outside progress.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** Price clears resistance on modest volume, then holds above the zone for three bars and retests it successfully. Explain why the case still deserves attention.
 
@@ -152,6 +156,8 @@ One breakout records 2× relative volume and holds above the old range high. Ano
 ---
 
 ## Lesson 2.3 — Heavy Volume, Little Progress: What Is Happening Behind the Move?
+
+As you work through this lesson, refer to **Figure 2.3** for the chart example.
 
 ![Chart for Heavy Volume, Little Progress: What Is Happening Behind the Move?. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m02-l03-heavy-volume-little-progress.svg)
 
@@ -192,19 +198,19 @@ Notice that the next test is observable. “Institutions are selling” is not.
 
 A narrow high-volume bar halfway through a range may reflect two-sided trade without a clear directional test. The same bar at the upper boundary asks a more specific question: why did the attempt to move beyond the edge retain so little progress? The second location may make the event more relevant, but still does not prove absorption or a reversal. Later holds, failures and structural changes must distinguish the possible explanations.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** A bar has 2.4× volume, a narrow range and a midpoint close. Write one observation without using “absorption”.
 
 **Feedback:** Activity was high relative to baseline, but price made limited net progress and closed near the centre of its range.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare that event halfway through a range with one at a repeatedly tested range high.
 
 **Feedback:** The boundary location makes the latter more relevant to a test of the range edge, but neither event proves a cause. The middle-of-range case may simply be two-sided activity.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** Create two possible endings for the high-activity bar at resistance and a condition favouring each.
 
@@ -222,6 +228,8 @@ A narrow high-volume bar halfway through a range may reflect two-sided trade wit
 ---
 
 ## Lesson 2.4 — Is the Move Losing Steam? Reading Signs of Weakening Pressure
+
+As you work through this lesson, refer to **Figure 2.4** for the chart example.
 
 ![Chart for Is the Move Losing Steam? Reading Signs of Weakening Pressure. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m02-l04-weakening-pressure.svg)
 
@@ -261,19 +269,19 @@ Path B has a change in structure and failed reclaim, not merely a smaller candle
 
 An uptrend's pushes cover 8, 5 and 3 points. Progress is slowing. If pullbacks remain shallow and prior higher lows hold, the trend may simply be pausing. If a later advance fails at the same high, price breaks the latest meaningful higher low and a reclaim attempt fails, the structure has changed more clearly. Record the early slowdown as a warning; reserve stronger language for stronger evidence.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** Successive advances cover 6, 4 and 2 points. What changed?
 
 **Feedback:** Upward price progress is slowing. That alone does not confirm a reversal.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare smaller candles that close near their highs with smaller candles that fail at resistance, leave upper wicks and then break a meaningful higher low.
 
 **Feedback:** The latter includes failed progress and a structural break. The former may simply be a pause.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** A market makes a slightly lower high but remains above its last higher low. Write a cautious update and your next observation.
 
@@ -291,6 +299,8 @@ An uptrend's pushes cover 8, 5 and 3 points. Progress is slowing. If pullbacks r
 ---
 
 ## Lesson 2.5 — When Price and Volume Disagree: Finding Clues Others May Overlook
+
+As you work through this lesson, refer to **Figure 2.5** for the chart example.
 
 ![Chart for When Price and Volume Disagree: Finding Clues Others May Overlook. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m02-l05-price-volume-disagreement.svg)
 
@@ -329,19 +339,19 @@ The initial observation remains correct whichever path follows. Good analysis ca
 
 A marginal new high on low relative volume raises the question of whether price can hold the extension or is moving through a thin area. High activity with a narrow bar near resistance raises a different question: why did much recorded activity produce so little upside progress at this location? These readings are not interchangeable. For each, write the observable mismatch first, then two explanations that fit it and a future event that would help distinguish them.
 
-### Level 1 — Notice (easy)
+### Look closely at the evidence
 
 **Task:** Price makes a marginal new high on lower relative volume. State the mismatch.
 
 **Feedback:** Price extended while activity was lower against the stated comparison. This is a question to investigate, not a directional signal.
 
-### Level 2 — Compare (guided)
+### Compare the cases
 
 **Task:** Compare this with high volume and little progress near resistance. What distinct question does each raise?
 
 **Feedback:** The first asks whether price can hold the extension or moved through a thin area; the second asks why substantial activity produced limited progress at that location.
 
-### Level 3 — Apply (independent)
+### Try a new case
 
 **Task:** Price falls on elevated volume into a prior demand area, then stops making lower closes. Give two explanations and a discriminator.
 
