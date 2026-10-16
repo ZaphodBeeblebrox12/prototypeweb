@@ -4,7 +4,6 @@ This is a small orchestration command for the three courses with canonical
 lesson importers. It deliberately creates no commerce Plans or CourseOffers,
 does not publish content, and refuses to overwrite existing course records.
 """
-from io import StringIO
 
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
@@ -56,10 +55,10 @@ class Command(BaseCommand):
                     f"exist: {', '.join(sorted(existing))}. No rows were changed."
                 )
 
-        captured = StringIO()
+        
         for command_name, _slug, _modules, _lessons in COURSES:
             try:
-                call_command(command_name, stdout=captured)
+                call_command(command_name, stdout=self.stdout)
             except CommandError as exc:
                 raise CommandError(
                     f"Catalogue preflight failed in {command_name}: {exc}"
@@ -79,7 +78,7 @@ class Command(BaseCommand):
         with transaction.atomic():
             for command_name, _slug, _modules, _lessons in COURSES:
                 try:
-                    call_command(command_name, apply=True, stdout=captured)
+                    call_command(command_name, apply=True, stdout=self.stdout)
                 except CommandError as exc:
                     raise CommandError(
                         f"Catalogue import failed in {command_name}; all catalogue "
