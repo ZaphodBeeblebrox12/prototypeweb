@@ -6,13 +6,13 @@ These are **design briefs for building student-facing chart experiences**, not n
 ## Shared design rules
 
 - Keep the chart central and the lesson text beside it where the layout allows. Use the site's light, editorial style and readable annotations; do not make chart information depend on colour alone.
-- Use synthetic OHLCV data unless real data has appropriate rights. Clearly label invented examples as synthetic in the delivered experience.
+- Use synthetic OHLCV data unless real data has appropriate rights. Keep figure artwork clean and use the module/lesson figure number. Disclose that examples are illustrative in the surrounding lesson, source-data note and accessible description—not as a repeated banner inside the chart.
 - Keep instrument, timeframe, profile window, feed and volume baseline visible when they affect the exercise.
 - Present one main distinction per screen. Do not add decorative indicators, extra lines or unlabelled jargon.
 - Where later bars affect the interpretation, freeze the initial chart until the learner records an observation and an initial reading. Then reveal a contrasting outcome and explain what changed.
 - Give the learner feedback on reasoning: visible evidence, location, alternative interpretation and the next condition. Do not score a directional prediction as correct merely because it matched the outcome.
 - For each lesson, create a chart visual, a learner prompt, feedback/model answer and a contrasting case where listed. Verify on desktop and small screens, at 200% zoom and with keyboard navigation before approval.
-- The three practice stages should be visible to learners: **Notice**, **Compare**, **Apply**. These are interaction levels, not headings that replace real instruction.
+- Use **Notice → Compare → Apply** internally to design increasing learner responsibility. In the student interface, use natural headings such as “Look closely at the evidence”, “Compare the cases” and “Try a new case”; do not expose internal stage/level labels.
 
 ---
 
