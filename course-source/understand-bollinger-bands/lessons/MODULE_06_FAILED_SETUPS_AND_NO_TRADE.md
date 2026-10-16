@@ -58,6 +58,12 @@ Price breaks down after a squeeze, then quickly recovers above the lower boundar
 
 **Model response:** The downside breakout may have failed. The original short condition should be reviewed against its invalidation rule. A long requires its own evidence; it is not automatic simply because the short idea weakened.
 
+### Worked comparison: Define what counts as failure before the breakout
+
+Price compresses between 100 and 104, then closes at 105. A plan that requires a second close above the upper band may not be active yet; a plan that enters on the first completed close may be active but must already have an invalidation rule. The following candle falls below 104 and returns to 102. Depending on the written plan, this may invalidate the breakout or trigger a managed exit.
+
+Now compare a chart where price closes above 104, holds above the boundary and continues making higher highs. The first candle alone did not distinguish the cases. The difference emerges in what happens next and in the conditions the plan required. After a failed break, do not immediately sell. A separate short setup needs its own price trigger and risk plan; otherwise the failure simply means the original long idea is no longer supported.
+
 ### Common mistake
 
 Reversing position immediately after a failed breakout without waiting for a new plan.
@@ -118,6 +124,12 @@ In a downtrend, price has closed near the lower band for five bars and made a fr
 
 **Model response:** No. The chart still shows directional progress down. The trader needs evidence of a change in behaviour and a planned trigger before considering a long.
 
+### Worked comparison: A lower-band touch inside a downtrend
+
+Price falls from 120 to 114, rebounds to 116 and then moves to 110. Several closes cluster near the lower band, while each rebound fails below the prior swing high. The lower-band location may look stretched, but the sequence still shows downside progress. Buying because “it cannot go lower” would ignore the evidence in the swings.
+
+In a second chart, price tags the lower band, fails to make another meaningful low, reclaims a prior swing level and begins forming higher lows. That is a different set of facts and may justify evaluating a reversal setup if it meets the plan's conditions. It still does not guarantee a sustained recovery. The useful distinction is the change in structure, not merely the number of times price touched the band. If no change appears, waiting is more defensible than fading the trend.
+
 ### Common mistake
 
 Confusing “price is far from the average” with “price must reverse now.”
@@ -175,6 +187,12 @@ For each panel, explain whether the range-fade premise remains intact under the 
 You are short at the top of a range. Price closes above the range high twice and then pulls back toward it. What should happen next?
 
 **Model response:** If the plan defined the sustained closes above the boundary as invalidation, the short premise has failed. The pullback may later offer a breakout-retest setup, but that requires a separate plan; it should not be used to justify holding the old short.
+
+### Worked comparison: When the old range thesis no longer fits
+
+A range has repeatedly turned near 104, and a trader is watching an upper-band tag for a possible short back toward the middle. Price instead closes above 104 with a broad candle and the next period holds above the former ceiling. The old range-reversal premise has been challenged. Continuing to expect the same bounce because it worked before is not evidence; it is attachment to the prior idea.
+
+Contrast that with a brief wick above 104 that closes back inside and is followed by a return toward the middle of the range. That behaviour may fit a failed probe, although the short still needs its own trigger. The two cases should not be classified just by the first excursion. Decide which close/hold condition your method uses, then apply it consistently. When the boundary has changed role or the range premise has failed, reassess instead of defending the old target.
 
 ### Common mistake
 
@@ -235,6 +253,12 @@ Choose which cases should be skipped and write the specific reason. Do not use o
 The bands are wide and price is moving strongly upward. The breakout itself is clear, but price is far from the original boundary and just below a prior high. Do you have to buy?
 
 **Model response:** No. The trend may be strong, but the entry may be late and the nearby high may limit the available target. I can wait for a better setup or skip it.
+
+### Worked comparison: A real move can still be a poor entry
+
+Price breaks above 104 and travels quickly to 110 while the bands widen. If a trader waits until 109 to enter, places the invalidation at 105 and sees a potential resistance area near 111, the setup has only about 2 points of nearby room for roughly 4 points of stop distance before costs. The breakout may be real, but the trade-off is unattractive.
+
+A different setup breaks above 104, holds near 105 and has clear room toward 111 while its structural invalidation sits near 102. That case may deserve assessment because entry, risk and available room have not deteriorated in the same way. Neither example proves profitability. It shows why “direction correct” and “entry worthwhile” are different questions. Waiting for a better location or skipping the trade are decisions, not missed obligations.
 
 ### Common mistake
 
