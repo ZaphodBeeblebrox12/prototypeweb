@@ -1,5 +1,6 @@
 # Accessibility and source notes — M04-L01
 
+**Figure number:** Figure 4.1; interactive panels use Figure 4.1a–Figure 4.1e.
 **Lesson:** Is the Breakout Real? What Volume Can Tell You
 **Purpose:** Judge breakout quality through boundary, close, relative activity and follow-through.
 **Data:** Synthetic OHLCV, not historical prices or a recommendation.
