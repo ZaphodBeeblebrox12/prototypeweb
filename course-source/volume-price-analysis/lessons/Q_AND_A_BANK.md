@@ -534,37 +534,37 @@ If the answer is only “remember a definition,” strengthen the question or ad
 
 **Model answer:** No. It tells you about activity recorded by a specific data source. Price helps you describe the result of that activity, but the chart normally cannot identify every participant or explain their private reasons. Use careful wording: “price made upward progress on elevated recorded activity” is a stronger analysis than “institutions bought here” when the chart cannot establish that claim.
 
-**Transfer practice — Apply (Level 3):**** Rewrite one confident participant story as an observation, a possible explanation and a condition that would change your view.
+**Transfer practice — Apply (Level 3):** Rewrite one confident participant story as an observation, a possible explanation and a condition that would change your view.
 
 ## 2. Is high volume always bullish and low volume always bearish?
 
 **Model answer:** No. A high-volume bar can accompany progress, stalled price or a failed move. Low volume can occur in a pause, an ordinary quiet period or a move through an area with little activity. Ask what price did, where it happened and what the next bars confirmed.
 
-**Transfer practice — Apply (Level 3):**** Find one high-volume bar with progress and one with little progress. Describe the difference without labelling volume itself as bullish or bearish.
+**Transfer practice — Apply (Level 3):** Find one high-volume bar with progress and one with little progress. Describe the difference without labelling volume itself as bullish or bearish.
 
 ## 3. Does this course give guaranteed entry signals?
 
 **Model answer:** No. It teaches a process for reading evidence and forming conditional trade scenarios. A valid-looking setup can fail, and an outcome cannot be known with certainty in advance. A plan should state what would support the idea, what would weaken it, where it fails and when to stand aside.
 
-**Transfer practice — Apply (Level 3):**** Explain one chart setup that you would watch but not yet enter, and name the missing trigger.
+**Transfer practice — Apply (Level 3):** Explain one chart setup that you would watch but not yet enter, and name the missing trigger.
 
 ## 4. Is skipping a trade a failure?
 
 **Model answer:** No. If the evidence is mixed, the trigger is missing, data quality is poor or the risk no longer fits your rules, skipping can be the disciplined decision. The purpose of the process is not to generate constant activity; it is to make decisions you can explain and review.
 
-**Transfer practice — Apply (Level 3):**** Identify one condition that would make you cancel a setup even when the chart still looks attractive.
+**Transfer practice — Apply (Level 3):** Identify one condition that would make you cancel a setup even when the chart still looks attractive.
 
 ## 5. Can I copy a course example directly onto a live market?
 
 **Model answer:** Use examples to learn the reasoning, not as a ready-made live signal. Instruments, sessions, volume feeds, costs and price structure differ. Repeat the process on the chart in front of you, verify what its data means and use your own defined risk rules.
 
-**Transfer practice — Apply (Level 3):**** List three things you would verify before applying a lesson to a new instrument or market.
+**Transfer practice — Apply (Level 3):** List three things you would verify before applying a lesson to a new instrument or market.
 
 ## 6. How do I know I have truly understood a lesson?
 
 **Model answer:** You can explain the central idea in your own words, point to the chart evidence on a new example, give at least one reasonable alternative, and say what you would watch next. You should also be able to recognise a counterexample where the same initial clue leads to a different outcome. Memorising the name of a pattern is not enough.
 
-**Transfer practice — Apply (Level 3):**** Choose an unfamiliar chart and teach its price-volume story aloud in one minute, using only observations you can point to.
+**Transfer practice — Apply (Level 3):** Choose an unfamiliar chart and teach its price-volume story aloud in one minute, using only observations you can point to.
 
 ---
 
