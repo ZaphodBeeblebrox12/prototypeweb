@@ -1,5 +1,6 @@
 # Accessibility and source notes — M02-L02
 
+**Figure number:** Figure 2.2; interactive panels use Figure 2.2a–Figure 2.2e.
 **Linked lesson:** When Volume Supports a Move: Recognising Evidence of Strength
 **Purpose:** Combine breakout close, relative activity and follow-through without treating volume as confirmation alone.
 **Data:** Synthetic OHLCV created for instruction, not historical market data, a forecast or trading signal.
