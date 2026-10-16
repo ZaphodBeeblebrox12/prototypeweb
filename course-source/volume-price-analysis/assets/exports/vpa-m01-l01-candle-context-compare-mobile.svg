@@ -3,7 +3,7 @@
 <desc id="desc">A reflowed mobile comparison stacks the two synthetic price sequences vertically. Both highlighted candidate candles have the same OHLC dimensions; the prior structure, location and relative volume differ.</desc>
 <rect width="720" height="1270" fill="#f6f5f0"/>
 <rect x="22" y="18" width="676" height="585" rx="13" fill="#fffefa" stroke="#d9d7cf" stroke-width="2"/>
-<text x="42" y="56" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="700" fill="#252923">A · Recovery after a pullback</text>
+<text x="42" y="56" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="700" fill="#252923">Figure 1.1a · Recovery after a pullback</text>
 <text x="42" y="86" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#41443d">Candidate volume is modestly above its local baseline.</text>
 <text x="43" y="120" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700" fill="#41443d">PRICE · dashed line = reference</text>
 <line x1="78" y1="134" x2="680" y2="134" stroke="#d9d7cf" stroke-width="1.3"/>
@@ -62,7 +62,7 @@
 <rect x="643.92" y="439.06" width="22" height="88.94" rx="1" fill="#c6a63a"/>
 <text x="42" y="583" font-family="Arial,Helvetica,sans-serif" font-size="23" fill="#252923">Volume 185 · 5-bar baseline 157 · 1.18×</text>
 <rect x="22" y="630" width="676" height="585" rx="13" fill="#fffefa" stroke="#d9d7cf" stroke-width="2"/>
-<text x="42" y="668" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="700" fill="#252923">B · Extended rise near prior highs</text>
+<text x="42" y="668" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="700" fill="#252923">Figure 1.1b · Extended rise near prior highs</text>
 <text x="42" y="698" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#41443d">Candidate activity is higher relative to its baseline.</text>
 <text x="43" y="732" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700" fill="#41443d">PRICE · dashed line = reference</text>
 <line x1="78" y1="746" x2="680" y2="746" stroke="#d9d7cf" stroke-width="1.3"/>
