@@ -1,5 +1,6 @@
 # Accessibility and source notes — M06-L03
 
+**Figure number:** Figure 6.3; interactive panels use Figure 6.3a–Figure 6.3e.
 **Lesson:** Build Your Trade Scenario: What Needs to Happen Next?
 **Purpose:** Build conditional, competing scenarios with triggers, invalidation and a no-trade condition.
 **Data:** Synthetic OHLCV, not historical prices, a forecast or trade recommendation.
