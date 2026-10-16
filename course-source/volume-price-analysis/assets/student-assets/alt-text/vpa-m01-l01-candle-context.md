@@ -1,5 +1,7 @@
 # Accessibility and source notes — M01-L01
 
+**Figure number:** Figure 1.1; interactive panels use Figure 1.1a–Figure 1.1e.
+
 **Linked lesson:** What Candlesticks Don't Tell You: Reading the Volume Behind Price
 **Asset purpose:** Compare a candle's price result with recorded activity and context.
 **Data:** Synthetic OHLCV generated for instruction. Not historical market data, not a forecast and not a trading signal.
