@@ -64,6 +64,14 @@ Suppose the first decline reaches 94 while the lower band is around 96, then pri
 
 For a contrasting case, the second decline closes below the lower band again and breaks beneath the first low. That does not support the same reading; downside pressure has not shown the expected weakening. In either case, specify the confirmation you are using—such as a break of the intervening swing high in your course-defined practice rule—and the point that invalidates the idea. Do not buy merely because two lows resemble the letter W.
 
+### Second worked comparison: The second price low can be lower and still improve relative to the bands
+
+Suppose the first low is ₹100 while the lower band is ₹102, placing price beyond the lower band. Price rebounds to ₹106. On the next decline, the market falls to ₹99, which is a slightly lower absolute price, but the lower band has moved down to ₹97. The second low now sits inside the band. The price low is lower, yet its position relative to the current band is stronger than it was at the first low.
+
+That relationship is central to Bollinger's W-bottom reading. It does not mean the market is guaranteed to rise, and it does not mean the lower band itself caused the change. The calculation and price have both moved. Inspect the two lows, the intervening recovery and the current swing structure before giving the candidate a pattern name.
+
+For a course practice rule, you may wait for a break above the intervening swing high or the high of a strong confirmation day. Whichever rule you select, write it before testing examples. Define invalidation below the right-side low and check whether there is enough room to the next obstacle. The pattern can qualify structurally while still failing the separate trade-risk test.
+
 ### Common mistake
 
 Buying every pair of lows that looks like the letter W.
@@ -128,6 +136,14 @@ Suppose the first rally reaches 110 while the upper band is near 108. Price then
 
 Compare a chart where the second push also makes a new high, closes firmly beyond the upper band and is followed by further upward progress. A shape that looks like an M can still be part of continuation. For practice, choose a clear structural confirmation and invalidation—such as a break of the swing low between the highs—and apply it consistently. That is a course execution rule, not a claim that every M-top has one universally required entry trigger.
 
+### Second worked comparison: A higher second high does not automatically reject an M-top
+
+The first rally reaches ₹210, above an upper band at ₹207. Price then pulls back toward ₹202. On the next rally, it reaches ₹211, a marginally higher absolute high, while the upper band has moved to ₹213. The second push remains inside the band. This is a different relative relationship from the first high and can be a clue that the new extreme is weaker within the adaptive frame.
+
+That difference still needs context. If price breaks above ₹211 and continues to hold, the bearish interpretation is not confirmed just because the second push failed to reach the upper band. If price instead loses the swing low between the two highs, the pattern premise has more price-structure support. For a practice setup, specify whether that break is the chosen confirmation; do not silently change the trigger from one chart to another.
+
+The stop should be placed where the actual short thesis becomes invalid, often above the right-side high or the pullback high used for entry. If the level is too far away, reduce the quantity or pass. Reading the pattern and deciding whether to risk money on it are separate tasks.
+
 ### Common mistake
 
 Shorting the second high before price has shown a meaningful change.
@@ -189,6 +205,14 @@ You add three momentum indicators to confirm a possible M-top. All three turn do
 Imagine price falls to a new low while %B does not reach as low a reading as it did on the previous decline. The two measurements do not move in the same way. This may be a clue that the new price low is less extreme relative to the current bands, but the bands themselves have changed, so the relationship needs careful description. It is not direct proof that selling pressure has ended.
 
 On a second chart, price and %B make new lows together and the decline keeps extending. That sequence offers less support for a reversal interpretation. Neither comparison tells you what happens next. Record the exact mismatch, identify another plausible explanation, and wait for the confirmation condition selected for the setup. A divergence-like relationship is useful because it prompts a closer inspection—not because it makes the next candle predictable.
+
+### Second worked comparison: Not every apparent divergence is the same measurement
+
+Imagine price makes a lower low at 94 after previously reaching 95. %B, however, is lower on the earlier low and higher on the latest one. That mismatch may be meaningful, but remember that the upper and lower bands also changed between the two lows. %B expresses the close relative to the current envelope; it is not a direct measurement of volume or the number of traders buying.
+
+Now compare a second chart where the later low is accompanied by a lower %B reading and the bands are widening as downside candles grow. That sequence offers less support for the idea that the decline is weakening. Neither chart proves a reversal. A trader should be able to state exactly which observations disagree before describing the case as divergence.
+
+If the chosen Method III uses Intraday Intensity, MFI or another volume-based measure, check that indicator's actual condition too. A %B mismatch is not a substitute for a rule that specifically requires a volume-indicator threshold. After the alert, wait for the method's stated price confirmation and define invalidation. This keeps a visual clue from quietly becoming a different setup than the one you intended to test.
 
 ### Common mistake
 
@@ -259,6 +283,14 @@ A W-bottom candidate has met the course trigger, but the entry is far above the 
 **Failed:** Price crosses the level that invalidates the pattern, or continues in a way that contradicts the premise. Apply the planned invalidation rather than rewriting the pattern after the fact.
 
 **Unclear:** Swings overlap or the evidence can reasonably support more than one interpretation. Keep the case unresolved. A pattern does not become tradable just because a learner can name it; completion, context and execution conditions all matter.
+
+### Second worked comparison: The pattern can be valid while the trade is not
+
+A W-bottom candidate forms after a first low beyond the lower band and a second low inside it. Price then breaks the high between the lows, meeting the confirmation rule selected for the exercise. On structure alone, the candidate may now qualify. But suppose the entry is 101, the logical stop is 96 and the next substantial resistance sits at 103. The potential room is roughly 2 points against 5 points of stop distance, before costs. The setup can be correctly identified and still be unsuitable to trade.
+
+In another case, confirmation occurs at 101, the invalidation is 98 and the next obstacle is 108. There is more room relative to the stop distance, though that alone does not establish that the trade has an edge. You would still assess execution, costs and the broader market context.
+
+Use a four-part decision: candidate, confirmed under the chosen rule, invalidated, or unclear. Then add a separate risk judgement: viable or not viable. These are not the same labels. If the evidence is mixed or the trade-off is poor, record why you passed and what would need to change. The lesson is complete when you can explain the decision, not when you find a reason to enter.
 
 ### Common mistake
 
