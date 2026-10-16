@@ -1,7 +1,7 @@
 # Asset Production Brief — Read Volume. Find Trade Setups.
 ## Course visuals, ChartLabs, worksheets and delivery files
 
-**Status:** Production specification plus one pilot package for M01-L01. The six module manuscripts have been rewritten into student-facing lessons; this brief now governs the separate visuals, ChartLabs, worksheets and supporting assets. The pilot includes an editable SVG chart master/export, synthetic data, accessibility notes, a learner-facing ChartLab prototype, instructor answer notes and a package manifest. The other 29 lesson asset packages have not yet been produced. No public course pages have been changed.
+**Status:** Source asset packages have now been created for all 30 student-facing lessons and linked into the six module manuscripts. This brief governs the separate visuals, ChartLabs, worksheets and supporting assets. The M01-L01 pilot package remains a separate reference for its own browser/learner test. Source assets are complete; browser rendering, accessibility, timed-lesson and beginner validation are still pending. No public course pages have been changed.
 **Scope:** Six modules, 30 lessons. Use the student-facing module lessons as the source of teaching content and this brief as the separate production checklist. Internal asset prompts and implementation notes are not part of the lesson a student reads.
 **Audience:** People who are new to reading market charts.
 **Core promise:** Help learners read recorded volume alongside price, recognise useful context, and construct conditional trade plans. This is not a general-indicator course.
