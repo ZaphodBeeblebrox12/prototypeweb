@@ -1,0 +1,25 @@
+panel,bar,open,high,low,close,volume,baseline_previous_5_bars,relative_volume_to_baseline,context_note,synthetic
+A,1,100,103,99,102,125,,,"controlled pullback within prior advance",true
+A,2,102,105,101,104,145,,,"controlled pullback within prior advance",true
+A,3,104,106,102,103,150,,,"controlled pullback within prior advance",true
+A,4,103,107,102,106,160,,,"controlled pullback within prior advance",true
+A,5,106,110,105,109,175,,,"controlled pullback within prior advance",true
+A,6,109,113,108,112,195,,,"controlled pullback within prior advance",true
+A,7,112,113,109,110,185,165.0,1.12,"controlled pullback within prior advance",true
+A,8,110,111,107,108,165,173.0,0.95,"controlled pullback within prior advance",true
+A,9,108,110,106,109,155,176.0,0.88,"controlled pullback within prior advance",true
+A,10,109,110,106,107,145,175.0,0.83,"controlled pullback within prior advance",true
+A,11,107,108,105,106,135,169.0,0.80,"controlled pullback within prior advance",true
+A,12,107,111,106,110,185,157.0,1.18,"controlled pullback within prior advance",true
+B,1,110,113,109,112,130,,,"extended advance near prior high area",true
+B,2,112,116,111,115,150,,,"extended advance near prior high area",true
+B,3,115,119,114,118,160,,,"extended advance near prior high area",true
+B,4,118,122,117,121,175,,,"extended advance near prior high area",true
+B,5,121,125,120,124,190,,,"extended advance near prior high area",true
+B,6,124,128,123,127,200,,,"extended advance near prior high area",true
+B,7,127,130,126,129,220,175.0,1.26,"extended advance near prior high area",true
+B,8,129,132,128,131,230,189.0,1.22,"extended advance near prior high area",true
+B,9,131,133,130,132,240,203.0,1.18,"extended advance near prior high area",true
+B,10,132,133,129,130,220,216.0,1.02,"extended advance near prior high area",true
+B,11,130,132,128,129,215,222.0,0.97,"extended advance near prior high area",true
+B,12,129,133,128,132,420,225.0,1.87,"extended advance near prior high area",true
