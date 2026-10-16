@@ -1,6 +1,6 @@
 from apps.academy.management.commands.seed_support_resistance import (
-    extract_snr_student_body,
     estimate_duration,
+    extract_snr_student_body,
     lesson_segments,
 )
 
