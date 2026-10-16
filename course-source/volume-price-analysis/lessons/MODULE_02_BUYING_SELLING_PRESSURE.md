@@ -9,6 +9,11 @@ Module 1 taught you to separate price outcome from recorded activity. This modul
 
 ## Lesson 2.1 — Who's Pushing Price? Reading Buying and Selling Pressure
 
+![Chart for Who's Pushing Price? Reading Buying and Selling Pressure. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m02-l01-reading-pressure.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m02-l01-reading-pressure.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m02-l01-reading-pressure.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m02-l01-reading-pressure.md)
+
 ### Start with progress, not a story
 
 Every completed transaction has both a buyer and a seller. So when chart readers say “buyers are in control”, they are not saying that buyers exist and sellers do not. They are describing an apparent imbalance in the result: price is advancing, holding gains and making progress upward, or it is declining and retaining downside progress.
@@ -75,6 +80,11 @@ Consider closes of 50, 52, 53, 51, 54 and 55. Despite the pullback to 51, the se
 ---
 
 ## Lesson 2.2 — When Volume Supports a Move: Recognising Evidence of Strength
+
+![Chart for When Volume Supports a Move: Recognising Evidence of Strength. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m02-l02-volume-supports-move.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m02-l02-volume-supports-move-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m02-l02-volume-supports-move.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m02-l02-volume-supports-move.md)
 
 Volume is most useful when it helps you ask whether the activity and the price result fit together. A move that makes meaningful progress while activity rises may deserve attention. But “supports” does not mean “guarantees”.
 
@@ -143,6 +153,11 @@ One breakout records 2× relative volume and holds above the old range high. Ano
 
 ## Lesson 2.3 — Heavy Volume, Little Progress: What Is Happening Behind the Move?
 
+![Chart for Heavy Volume, Little Progress: What Is Happening Behind the Move?. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m02-l03-heavy-volume-little-progress.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m02-l03-heavy-volume-little-progress-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m02-l03-heavy-volume-little-progress.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m02-l03-heavy-volume-little-progress.md)
+
 Sometimes a market records substantial activity but travels very little. This is an effort/result mismatch: much activity was recorded, yet the price result was limited. The mismatch is a useful question to investigate, not proof of a specific mechanism.
 
 ### What could explain it?
@@ -208,6 +223,11 @@ A narrow high-volume bar halfway through a range may reflect two-sided trade wit
 
 ## Lesson 2.4 — Is the Move Losing Steam? Reading Signs of Weakening Pressure
 
+![Chart for Is the Move Losing Steam? Reading Signs of Weakening Pressure. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m02-l04-weakening-pressure.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m02-l04-weakening-pressure-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m02-l04-weakening-pressure.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m02-l04-weakening-pressure.md)
+
 A trend does not usually announce its end with certainty. Momentum can fade, pause, resume or fail. The aim here is to notice when progress becomes less convincing without calling every slowdown a reversal.
 
 ### Look for a change, not a magic pattern
@@ -271,6 +291,11 @@ An uptrend's pushes cover 8, 5 and 3 points. Progress is slowing. If pullbacks r
 ---
 
 ## Lesson 2.5 — When Price and Volume Disagree: Finding Clues Others May Overlook
+
+![Chart for When Price and Volume Disagree: Finding Clues Others May Overlook. Synthetic teaching example; see the linked notes for data limitations.](../assets/student-assets/svg/vpa-m02-l05-price-volume-disagreement.svg)
+
+**Interactive practice:** [Open the Notice → Compare → Apply ChartLab](../assets/chartlabs/vpa-m02-l05-price-volume-disagreement-lab.html)  
+**Source and accessible description:** [Synthetic OHLCV / profile data](../assets/student-assets/data/vpa-m02-l05-price-volume-disagreement.csv) · [Chart description and limitations](../assets/student-assets/alt-text/vpa-m02-l05-price-volume-disagreement.md)
 
 Price and volume will not always tell a neat, matching story. A disagreement is not automatically an opportunity; it is a prompt to investigate what is unclear.
 
