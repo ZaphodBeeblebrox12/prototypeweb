@@ -1,5 +1,6 @@
 # Accessibility and source notes — M05-L01
 
+**Figure number:** Figure 5.1; interactive panels use Figure 5.1a–Figure 5.1e.
 **Lesson:** Where Has the Market Traded Most? Introducing Volume Profile
 **Purpose:** Distinguish activity through time from its distribution by price.
 **Data:** Synthetic OHLCV and profile bins, not historical market data.
