@@ -58,6 +58,14 @@ A market has been moving sideways for several bars, but then one large candle cl
 
 **Case B — Range or transition.** Another chart has repeated turns around 104 and 98, with price crossing the middle band several times. That is more consistent with a range. If the next candle suddenly closes at 106, the context does not become a confirmed uptrend by that close alone. It is a breakout attempt. Follow-through, a return into the range, or a retest may help clarify the reading. When the visible structure is mixed, write “unclear for now” and keep the trade conditional rather than forcing a label.
 
+### Second worked comparison: A breakout attempt changes the question, not the label instantly
+
+A market has repeatedly moved between 98 and 104, with its middle band mostly flat. A candle then closes at 105, above the range ceiling. It is tempting to call the market an uptrend immediately. A more precise description is that price has attempted to leave the range. The old range classification is under pressure, but a single close has not yet shown whether the break will hold.
+
+Suppose the next candle pulls back to 103 and closes inside the range. The first break has weakened, and a return to the earlier rotation is possible. In a second case, price holds around 105, the pullback low remains above the old ceiling, and another advance creates a higher high. The second sequence gives better evidence of a transition into an uptrend.
+
+The goal is not to wait for perfect certainty. It is to use a provisional label and update it when the evidence changes. Mark the old boundary, state what a successful hold would look like, and define what would make the breakout idea fail. If the chart is mixed, that is a useful classification because it keeps you from applying a range-fade rule after the range premise has already been challenged.
+
 ### Common mistake
 
 Calling every pause in a rising market a range and then selling the upper band.
@@ -123,6 +131,14 @@ Price has closed near the lower band for four bars while swing highs and lows co
 **Case A — Band walk.** Price closes near the upper band on four occasions, but each touch is accompanied by new highs and pullbacks that remain relatively shallow. The middle band slopes upward. The sequence shows continuing progress, so an automatic short at the fourth touch would be a bet against the existing structure.
 
 **Case B — Isolated contact.** Price reaches the upper band once, then falls back toward the middle band and continues to overlap earlier candles. There is no comparable sequence of higher highs and higher lows. The two charts both contain an upper-band touch, but only the first shows evidence of a sustained directional move. Even then, the band walk does not promise another leg. If considering a reversal, identify the actual change in structure and a defined trigger; do not substitute the word “overbought” for that evidence.
+
+### Second worked comparison: One pullback does not automatically end a band walk
+
+Price rises from 100 through 104 to 108, repeatedly closing near the upper band. It then pulls back to 105, closer to the middle band, before rising again to 110. The pullback is deeper than the earlier pauses, but price has not yet broken the sequence of higher swing lows. Treating the first move away from the upper band as an automatic short would confuse a change in location with a confirmed change in structure.
+
+Now consider the next bars. If price forms a lower high, breaks the prior swing low and cannot recover above it, the case for a trend weakening is stronger. If price instead holds above the prior low and makes another high, the sequence continues to support the band-walk interpretation. A single candle may be important, but it cannot substitute for the sequence.
+
+Do not invent a universal rule such as “three upper-band closes means trend” or “the first close inside the band means reversal.” Those rules may be tested as explicit strategies, but they are not built into the band itself. Describe the progress and pullbacks you can see, then decide which structural event your chosen method requires before the interpretation changes.
 
 ### Common mistake
 
@@ -193,6 +209,14 @@ Complete the following:
 
 **Case B — TTM Squeeze.** A chart instead marks a squeeze when the Bollinger Bands are inside the Keltner Channels. That is a relationship between two envelopes. A platform may also display a momentum histogram; its direction is additional information, not part of the definition of BandWidth. It is possible for a trader to call both situations “compression” while the exact indicator conditions differ. Before copying a rule from a lesson or trading platform, check the calculation and settings. Keep the squeeze label, momentum reading and price trigger as three distinct pieces of information.
 
+### Second worked comparison: The two squeeze definitions can disagree
+
+Suppose Bollinger BandWidth is low compared with its six-month history, so a trader describes conditions as compressed under the BandWidth approach. On the same chart, however, the Keltner Channels are very narrow and the Bollinger Bands are not fully inside them. Under a common TTM Squeeze definition, the squeeze-on condition may therefore be absent.
+
+The reverse can also happen. The Bollinger Bands may be inside the Keltner Channels even though the current BandWidth is not at its own historical low. The two methods answer different measurement questions. One compares the current band span with a history of Bollinger BandWidth; the other compares the Bollinger envelope with the Keltner envelope.
+
+Before testing a rule, record the indicator name, settings and exact condition. If you combine low BandWidth with a momentum histogram or a Keltner comparison, document which part is the setup and which part is an extra confirmation. This prevents a common review error: counting a chart as a squeeze trade even though it did not meet the squeeze definition selected for that test. Compression is the shared idea; the actual rules are not interchangeable.
+
 ### Common mistake
 
 Using “Bollinger Squeeze” and “TTM Squeeze” as if they are always the same indicator.
@@ -261,6 +285,14 @@ BandWidth has reached a low reading, but price is in the middle of a broad range
 Assume price has spent time between 100 and 104 while BandWidth contracts. Before price leaves the range, write two conditional plans. For an upside scenario, identify what completed close would qualify above 104 and whether your method requires a further hold. For a downside scenario, define the mirrored condition below 100. State in advance what would count as failure—for example, a quick return inside the range if holding outside is part of your rule.
 
 Now compare three outcomes: a close at 105 followed by continued closes above 104; a close at 99 followed by further weakness; and a close at 105 that is immediately followed by a return to 102. They start from similar compression, but the outcomes differ. The correct response is not to predict which one must happen. It is to follow the scenario that meets the written conditions and stand aside if neither develops clearly.
+
+### Second worked comparison: Write the trade decision before the breakout candle
+
+Price has spent twenty bars between 100 and 104 while BandWidth contracts. Before anything happens, you mark 104 as the upper boundary and 100 as the lower boundary. You then write two conditional scenarios. A long assessment requires the chosen completed close above 104; the short assessment requires its mirror below 100. You also choose an invalidation rule, such as rejecting the first break if price closes back inside the old range.
+
+Now three paths become easy to classify. Price closes at 105, holds above 104 and advances: the long scenario meets your stated hold condition. Price closes at 99 and continues lower: the short scenario is the one to assess. Price closes at 105, then falls to 102: the long scenario has failed the hold condition and should not be defended simply because the bands are still relatively narrow.
+
+This process does not predict which path will occur. It reduces the temptation to invent a rule while the market is moving quickly. You still need to measure the stop distance and check the next obstacle. A valid trigger can arrive at a poor price, and a squeeze can resolve in a move too small or too erratic to justify a trade.
 
 ### Common mistake
 
