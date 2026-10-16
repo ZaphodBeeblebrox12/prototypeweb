@@ -145,22 +145,28 @@ jobs:
             assert.equal(await lab.locator("#comparisonPair").isVisible(),false,"Reference comparison must be hidden initially");
 
             // Draw support around both troughs. The chart's own SVG coordinate mapping is 1000×520.
-            let box=await lab.locator("#chartSvg").boundingBox();
-            const sx=box.x+((74+0.48*(894-74))/1000)*box.width;
-            const sy=p=>box.y+((42+((114-p)/18)*(439-42))/520)*box.height;
+            await lab.locator("#chartSvg").scrollIntoViewIfNeeded();
+            let frameBox=await page.locator("#sr-chartlab-frame").boundingBox();
+            let svgRect=await lab.locator("#chartSvg").evaluate(svg=>{const r=svg.getBoundingClientRect();return {left:r.left,top:r.top,width:r.width,height:r.height}});
+            const sx=frameBox.x+svgRect.left+svgRect.width*0.48;
+            const sy=p=>frameBox.y+svgRect.top+((42+((114-p)/18)*(439-42))/520)*svgRect.height;
             await page.mouse.move(sx,sy(100.7));await page.mouse.down();
             await page.mouse.move(sx,sy(98.6),{steps:6});await page.mouse.up();
+            assert.match(await lab.locator("#zoneReadout").textContent(),/Support: \d+\.\d–\d+\.\d/,"Support drag did not create a zone");
             await lab.locator("#submitZoneButton").click();
             await lab.getByText(/Support locked|support is marked/i).waitFor({timeout:5000}).catch(()=>{});
             assert.match(await lab.locator("#zoneReadout").textContent(),/Support: .*locked/);
             assert.equal(await lab.locator("#comparisonPair").isVisible(),false,"Reference stays hidden after support alone");
 
             // Draw the intervening neckline as a separate resistance zone.
-            box=await lab.locator("#chartSvg").boundingBox();
-            const x2=box.x+((74+0.6*(894-74))/1000)*box.width;
-            const y2=p=>box.y+((42+((114-p)/18)*(439-42))/520)*box.height;
+            await lab.locator("#chartSvg").scrollIntoViewIfNeeded();
+            frameBox=await page.locator("#sr-chartlab-frame").boundingBox();
+            svgRect=await lab.locator("#chartSvg").evaluate(svg=>{const r=svg.getBoundingClientRect();return {left:r.left,top:r.top,width:r.width,height:r.height}});
+            const x2=frameBox.x+svgRect.left+svgRect.width*0.60;
+            const y2=p=>frameBox.y+svgRect.top+((42+((114-p)/18)*(439-42))/520)*svgRect.height;
             await page.mouse.move(x2,y2(106.1));await page.mouse.down();
             await page.mouse.move(x2,y2(104.5),{steps:6});await page.mouse.up();
+            assert.match(await lab.locator("#zoneReadout").textContent(),/Resistance: \d+\.\d–\d+\.\d/,"Resistance drag did not create a zone");
             await lab.locator("#submitZoneButton").click();
             await lab.locator("#comparisonPair").waitFor({state:"visible",timeout:5000});
             assert.equal(await lab.locator("#studentCompareSvg [data-role='support']").count(),1);
