@@ -26,9 +26,14 @@ _ANSWER_DETAILS = re.compile(
 )
 _ANSWER_LINES = re.compile(r"^Answers?:[^\n]*(?:\n(?!#{1,6}\s).*)*", re.I | re.M)
 _CHART_NOTES = re.compile(
-    r"^📊[ \t]*(?:CHART NEEDED:|No chart needed today[^\n]*|Diagram already made:).*?(?=\n{2,}|\Z)",
+    r"^(?:📊[ \t]*(?:CHART NEEDED:|No chart needed today[^\n]*|Diagram already made:)|✅[ \t]*Diagram already made:).*?(?=\n{2,}|\Z)",
     re.I | re.M | re.S,
 )
+_FIGURE_MARKER = re.compile(
+    r"^(?:📊[ \t]*CHART NEEDED:|✅[ \t]*Diagram already made:)",
+    re.I,
+)
+_CHART_PATH = re.compile(r"charts/(?:generated/)?([A-Za-z0-9_-]+\.png)", re.I)
 
 
 def split_lesson_source(source):
@@ -50,6 +55,56 @@ def split_lesson_source(source):
     body = re.sub(r"\n{3,}", "\n\n", body).strip()
     return body, "\n\n".join(answers).strip(), "\n\n".join(notes).strip()
 
+
+
+def embed_existing_figures(source, generated_root, static_root, module_number, counters):
+    """Replace chart markers only when an exact-named image is ready for Django staticfiles."""
+    lines = source.splitlines()
+    output = []
+    production_notes = []
+    index = 0
+
+    while index < len(lines):
+        line = lines[index]
+        marker = _FIGURE_MARKER.match(line)
+        path_match = _CHART_PATH.search(line) if marker else None
+        if marker is None or path_match is None:
+            output.append(line)
+            index += 1
+            continue
+
+        block = [line]
+        index += 1
+        while index < len(lines) and lines[index].strip():
+            block.append(lines[index])
+            index += 1
+
+        filename = Path(path_match.group(1)).name
+        source_image = Path(generated_root) / filename
+        static_image = Path(static_root) / filename
+        if not source_image.is_file() or not static_image.is_file():
+            output.extend(block)
+            continue
+
+        counters[module_number] = counters.get(module_number, 0) + 1
+        figure_number = f"{module_number}.{counters[module_number]}"
+        caption = re.sub(r"^L\d+-\d+-", "", Path(filename).stem, flags=re.I)
+        caption = caption.replace("-", " ").strip().capitalize()
+        image_url = f"/static/academy/course-images/{filename}"
+        output.extend([
+            "",
+            f"![Figure {figure_number} — {caption}]({image_url})",
+            "",
+            f"*Figure {figure_number} — {caption}.*",
+            "",
+        ])
+        production_notes.append(
+            f"Embedded Figure {figure_number} from {filename}. Source chart marker and production brief:\n\n"
+            + "\n".join(block)
+        )
+
+    learner_source = re.sub(r"\n{3,}", "\n\n", "\n".join(output)).strip()
+    return learner_source, "\n\n".join(production_notes).strip()
 
 def lesson_summary(body, fallback):
     match = re.search(
@@ -100,6 +155,9 @@ class Command(BaseCommand):
             )
 
         parsed = []
+        figure_counters = {}
+        generated_root = source_root / "charts" / "generated"
+        static_figure_root = repository_root / "backend" / "static" / "academy" / "course-images"
         source_root_resolved = source_root.resolve()
         for item in lessons:
             relative = Path(str(item.get("source_file", "")))
@@ -107,7 +165,17 @@ class Command(BaseCommand):
             if source_root_resolved not in source_path.parents or not source_path.is_file():
                 raise CommandError(f"Lesson source is missing or outside the course folder: {relative}")
             source = source_path.read_text(encoding="utf-8")
-            learner_body, answer_key, media_notes = split_lesson_source(source)
+            source_with_figures, embedded_media_notes = embed_existing_figures(
+                source,
+                generated_root,
+                static_figure_root,
+                int(item["level"]),
+                figure_counters,
+            )
+            learner_body, answer_key, media_notes = split_lesson_source(source_with_figures)
+            media_notes = "\n\n".join(
+                value for value in (media_notes, embedded_media_notes) if value
+            )
             if not learner_body:
                 raise CommandError(f"Lesson has no learner-facing content: {relative}")
             parsed.append({

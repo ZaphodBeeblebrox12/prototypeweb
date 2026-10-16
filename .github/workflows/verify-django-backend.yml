@@ -75,6 +75,8 @@ jobs:
           python manage.py seed_support_resistance --apply
           python manage.py seed_volume_price_analysis --apply
           python manage.py shell <<'PY'
+          from pathlib import Path
+          import re
           from apps.academy.models import Course, CourseModule, CourseOffer, Lesson, LessonInstructorMaterial
 
           expected = {
@@ -92,9 +94,18 @@ jobs:
               assert all(not module.is_published for module in modules), slug
               assert all(not lesson.is_published for lesson in lessons), slug
               assert all(lesson.content_markdown.strip() for lesson in lessons), slug
+              assert all("CHART NEEDED:" not in lesson.content_markdown for lesson in lessons), slug
+              assert all("Diagram already made:" not in lesson.content_markdown for lesson in lessons), slug
+              figure_names = {
+                  name for lesson in lessons
+                  for name in re.findall(r"/static/academy/course-images/([^\\s)]+)", lesson.content_markdown)
+              }
+              if slug == "trading-path":
+                  assert figure_names, "Trading Path should render its available teaching figures"
+                  assert all((Path("static/academy/course-images") / name).is_file() for name in figure_names), slug
               assert LessonInstructorMaterial.objects.filter(lesson__module__course=course).count() == lesson_count, slug
               assert not CourseOffer.objects.filter(course=course).exists(), slug
-              print(f"{slug}: {len(modules)} unpublished modules, {len(lessons)} unpublished lessons, separate instructor materials, no offer")
+              print(f"{slug}: {len(modules)} unpublished modules, {len(lessons)} unpublished lessons, {len(figure_names)} linked figures, separate instructor materials, no offer")
 
           assert Course.objects.filter(slug__in=expected).count() == len(expected)
           PY

@@ -3,6 +3,10 @@ from apps.academy.management.commands.seed_support_resistance import (
     extract_snr_student_body,
     lesson_segments,
 )
+from apps.academy.management.commands.seed_trading_path import (
+    embed_existing_figures,
+    split_lesson_source,
+)
 
 
 def test_lesson_segments_separate_bundled_canonical_scripts():
@@ -84,3 +88,47 @@ Keep the answer private.
 def test_duration_uses_the_lower_bound_and_falls_back_safely():
     assert estimate_duration("**Estimated duration:** 25–30 minutes") == 25
     assert estimate_duration("No declared time.") == 15
+
+
+def test_trading_path_embeds_only_available_charts_as_numbered_figures(tmp_path):
+    generated = tmp_path / "generated"
+    static = tmp_path / "static"
+    generated.mkdir()
+    static.mkdir()
+    available = ("L1-03-candle-anatomy.png", "L1-03-volume-spike.png")
+    for filename in available:
+        (generated / filename).write_bytes(b"test-image")
+        (static / filename).write_bytes(b"test-image")
+
+    tick = chr(96)
+    source = "\n".join([
+        "# Day 3 — Reading Charts",
+        "",
+        "Read the candle.",
+        "",
+        "✅ Diagram already made: " + tick + "charts/generated/L1-03-candle-anatomy.png" + tick,
+        "",
+        "Look at volume.",
+        "",
+        "📊 CHART NEEDED: " + tick + "charts/L1-03-volume-spike.png" + tick,
+        "MUST SHOW:",
+        "  - a volume spike",
+        "",
+        "📊 CHART NEEDED: " + tick + "charts/generated/L1-03-not-available.png" + tick,
+        "MUST SHOW:",
+        "  - an unavailable image",
+    ])
+    counters = {}
+    embedded, embedded_notes = embed_existing_figures(
+        source, generated, static, 1, counters
+    )
+    body, _answers, remaining_notes = split_lesson_source(embedded)
+
+    assert "![Figure 1.1 — Candle anatomy](/static/academy/course-images/L1-03-candle-anatomy.png)" in body
+    assert "*Figure 1.2 — Volume spike.*" in body
+    assert "Diagram already made:" not in body
+    assert "CHART NEEDED:" not in body
+    assert "Figure 1.1" in embedded_notes
+    assert "MUST SHOW:" in embedded_notes
+    assert "L1-03-not-available.png" in remaining_notes
+    assert counters == {1: 2}
