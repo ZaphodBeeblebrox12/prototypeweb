@@ -2,7 +2,7 @@
 
 **Lesson:** What Candlesticks Don't Tell You: Reading the Volume Behind Price  
 **Asset ID:** VPA-M01-L01-01  
-**Status:** Revised pilot includes the progressive interaction and visual assets. Structural file checks have been run; rendered-browser testing, accessibility review and beginner usability testing remain open.
+**Status:** Stage 2 source-level fixes have been applied on `my-new-branch`: Stage 3 SVG text is readable, ChartLab stage navigation and focus handling have been improved, reduced-motion preferences are respected, and feedback wording accurately describes the self-check. Rendered-browser testing, assistive-technology review and beginner usability testing remain open.
 
 ## Learning progression shown to the learner
 
@@ -32,6 +32,8 @@ The learner sees consistent stage labels **Notice → Compare → Apply** and ca
 - The comparison chart displays candidate volume, its baseline and the relative multiple.
 - The exercise progresses from a simple recognition check to a guided comparison, then a new case with later bars withheld.
 - Two alternate outcomes are revealed only after the learner records an initial reading.
+- Stage 2 fixes correct encoded headings/annotations in all three Stage 3 charts and their exports; unlocked progress buttons now navigate, focus moves to newly revealed content, and scripted scrolling respects reduced-motion preferences.
+- Level 2 feedback now makes clear that response length is not an automatic assessment of reasoning quality.
 - The responsive layout includes visible stage labels and a progress cue; text stays in the open page and is not uploaded or persistently stored.
 - The lesson script, asset brief, editorial language guide and Q&A bank now specify the same easy-to-harder progression for every lesson.
 
