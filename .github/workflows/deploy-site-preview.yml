@@ -127,6 +127,47 @@ jobs:
           print(f"V5.2 reader validated: {len(figure_refs)} schematic figures, {len(stage_refs)} synthetic staged charts, full reading and source notes present.")
           PY
 
+      - name: Validate expandable course catalogue
+        run: |
+          node --check site/assets/course-catalogue-data.js
+          node --check site/assets/courses-catalogue.js
+          node <<'JS'
+          const fs = require('node:fs');
+          const vm = require('node:vm');
+          const sandbox = { window: {} };
+          vm.runInNewContext(fs.readFileSync('site/assets/course-catalogue-data.js', 'utf8'), sandbox);
+          const data = sandbox.window.TRADETHESIS_COURSE_DATA;
+          if (!data) throw new Error('Course catalogue data was not registered');
+          for (const key of ['programmes', 'supportingProgrammes', 'microCourses']) {
+            const items = data[key];
+            if (!Array.isArray(items)) throw new Error('Missing catalogue array: ' + key);
+            const ids = items.map(item => item.id);
+            if (ids.some(id => typeof id !== 'string' || !id.trim())) throw new Error('Missing stable ID in ' + key);
+            if (new Set(ids).size !== ids.length) throw new Error('Duplicate stable ID in ' + key);
+          }
+          const renderer = fs.readFileSync('site/assets/courses-catalogue.js', 'utf8');
+          for (const required of [
+            'const microCourses = [...data.microCourses]',
+            'microCourses.length',
+            'microCourses.filter(course => course.category === key).length',
+            'shown.length'
+          ]) {
+            if (!renderer.includes(required)) throw new Error('Catalogue is no longer data-driven: missing ' + required);
+          }
+          console.log('Catalogue data parsed; stable IDs are unique and micro-course counts are data-driven.');
+          JS
+          python - <<'PY'
+          from pathlib import Path
+
+          page = Path("site/courses.html").read_text(encoding="utf-8")
+          styles = Path("site/assets/courses.css").read_text(encoding="utf-8")
+          if "Course development is ongoing" not in page or "added as they’re ready for learners" not in page:
+              raise SystemExit("The public catalogue must set expectations that development is ongoing.")
+          if ".cc-development-note" not in styles or "cc-development-note{margin-top:10px;font-size:11px}" not in styles:
+              raise SystemExit("The course-development note needs desktop and mobile styling.")
+          print("Public course-development message and responsive styling validated.")
+          PY
+
       - name: Stage chart images referenced by the learning room
         run: |
           python - <<'PY'
