@@ -2132,9 +2132,26 @@ body { font-size: 15px; line-height: 1.66; }
 }
 
 #modalChartHolder img{display:block;max-width:100%;max-height:75vh;width:auto;height:auto;object-fit:contain;margin:auto;background:#fffdf8}#modalChartHolder{display:flex;align-items:center;justify-content:center;min-width:0}
+
+/* Related-course discovery card and local-only edit controls */
+.related-course-card{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:24px 0;padding:17px 18px;border:1px solid #cbd7c4;border-left:4px solid var(--green);border-radius:10px;background:var(--surface-2)}
+.related-course-copy{min-width:0}
+.related-course-kicker{display:block;margin-bottom:5px;color:var(--green);font-size:9px;font-weight:850;letter-spacing:.11em}
+.related-course-card h4{margin:0 0 6px!important;font-size:16px!important}
+.related-course-card p{max-width:680px;margin:0!important;color:var(--muted);font-size:12px;line-height:1.65}
+.related-course-link{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;padding:9px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--green);font-size:11px;font-weight:800;text-decoration:none}
+.related-course-link:hover{background:var(--green-wash)}
+.tt-course-editor-toolbar[hidden]{display:none!important}
+#roomView .tt-media-replace-control{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:9px 0;padding:8px 9px;background:var(--paper-deep);border:1px dashed var(--line);border-radius:8px}
+#roomView .tt-media-replace-button{min-height:32px;padding:6px 10px;border:1px solid var(--green);border-radius:999px;background:var(--surface);color:var(--green);font-size:11px;font-weight:750}
+#roomView .tt-media-replace-status{font-size:10px;color:var(--muted)}
+#roomView .tt-content-editable{outline:1px dashed var(--gold);outline-offset:3px;border-radius:2px;cursor:text}
+#roomView .tt-content-editable:focus{outline:2px solid var(--gold);outline-offset:3px;background:var(--gold-wash)}
+@media(max-width:680px){.related-course-card{align-items:stretch;flex-direction:column}.related-course-link{align-self:flex-start}}
 </style>
 <link rel="stylesheet" href="../../../../site/assets/instructional-image-admin.css">
 <link rel="stylesheet" href="../../../../site/assets/course-template-admin-preview.css">
+<meta name="robots" content="noindex,nofollow">
 </head>
 <body>
 <div class="app-root" id="appRoot">
@@ -2296,7 +2313,7 @@ body { font-size: 15px; line-height: 1.66; }
             <article class="lesson-article">
               <div class="article-toolbar" role="tablist" aria-label="Lesson sections">
                 <button type="button" class="article-tab active" role="tab" aria-selected="true" data-article-tab="learn">The idea</button>
-                <button type="button" class="article-tab" role="tab" aria-selected="false" data-article-tab="practice">Chart examples <span class="article-tab-count" id="chartExamplesAssetCount" aria-hidden="true">2</span></button>
+                <button type="button" class="article-tab" role="tab" aria-selected="false" data-article-tab="practice">Chart examples <span class="article-tab-count" id="chartExamplesAssetCount" aria-hidden="true">0</span></button>
                 <button type="button" class="article-tab" role="tab" aria-selected="false" data-article-tab="review">Test your reading</button>
               </div>
               <section class="article-panel" id="panel-learn" role="tabpanel">
@@ -2451,10 +2468,10 @@ function lessonProfile(mId, lIdx) {
     '3-1': {eyebrow:'Read the market before the indicator', question:'Is price behaving like a trend or a range?', paragraphs:["The same band interaction can mean different things in a trend and in a trading range. Start with the sequence of swings, how price advances or overlaps, and whether pullbacks respect the prior direction. Then read the band location against that structure.","Do not use a band touch to overrule the chart's structure. If the evidence is mixed, keep both interpretations open until another observable condition helps distinguish them."], take:'Context comes first. The bands refine a reading; they do not replace it.'},
     '4-0': {eyebrow:'Structure before pattern name', question:'What makes a W-bottom more than a letter shape?', paragraphs:["In Bollinger's W-bottom setup, the first low commonly pushes outside the lower band, while the second low forms at a higher relative position—often inside the bands. That difference can suggest that the second decline has less downside force than the first.","The visual shape alone is not enough. Inspect the band relationships, the distance and timing between the lows, and the confirmation condition. A similar-looking pattern without the relevant evidence remains only a candidate."], take:'Use the relationship between the two lows and the bands—not the letter W by itself.'},
     '4-1': {eyebrow:'Structure before pattern name', question:'What makes an M-top more than a letter shape?', paragraphs:["An M-top compares two pushes toward a high. The first high may reach or exceed the upper band; the second push is judged by its relative position and the evidence around the two highs. A weaker second push can be informative, but it is not confirmation on its own.","The setup must still be read against the wider trend and its confirming condition. If the two highs do not tell a clear story, or price has not confirmed the idea, waiting is preferable to forcing a reversal trade."], take:'A possible M-top is a question about relative strength and confirmation, not a forecast.'},
-    '5-0': {eyebrow:'Method I · volatility breakout', question:'Why look for a breakout after a squeeze?', paragraphs:["Method I looks for a volatility expansion after unusually quiet conditions. BandWidth is used to identify a squeeze relative to the instrument's own history. The squeeze is preparation: it does not select long or short, and it is not an entry by itself.","The course's repeatable baseline is a completed close beyond the relevant band after the squeeze. An earlier entry may improve price but carries more false starts; a retest is a separate execution variant, not a requirement of the basic method."], take:'Prepare during compression; act only when your pre-defined breakout rule occurs—and only if the remaining risk and room are acceptable.'},
-    '5-1': {eyebrow:'Method II · %B and MFI', question:'Does price strength have indicator confirmation?', paragraphs:["Method II combines %B, which describes price position inside the bands, with the Money Flow Index (MFI), a volume-based indicator. The rule looks for strength in price position accompanied by strong MFI, or weakness accompanied by weak MFI.","This is a confirmation approach. Check the thresholds from the source method, make sure the data and settings match, and assess where the signal occurs in the wider chart. Indicator alignment does not remove the need for an invalidation level or risk plan."], take:'The method asks for price strength and money-flow strength to agree; the trade still needs context and risk controls.'},
-    '5-2': {eyebrow:'Method III · price and indicator disagreement', question:'What if the price extreme and the volume indicator disagree?', paragraphs:["Method III looks for a price move to an outer band that is not confirmed by a volume-based indicator. The disagreement can raise a reversal question: price has made an extreme, but the supporting indicator has not followed in the same way.","Divergence is a clue, not a trigger. Look for the setup's price confirmation, consider the possibility that the trend continues, and define the point where the reversal idea is wrong before risking money."], take:'Disagreement starts an investigation. Price confirmation and a defined invalidation are still required.'},
-    '5-3': {eyebrow:'Method IV · confirmed breakout', question:'What changes when you require two closes outside a band?', paragraphs:["Method IV is a later confirmed-breakout variation on the squeeze idea. It waits for two consecutive closes beyond the same outer band, rather than treating the first close as the complete confirmation. ADX helps distinguish trending and non-trending conditions because the same sequence can have different implications in different markets.","More confirmation usually means a later signal and a potentially worse price. It does not guarantee follow-through. Follow the precise source rule, then independently assess stop distance, the next obstacle and the amount of risk you are willing to take."], take:'Method IV trades confirmation, not the first band excursion. Extra confirmation still needs a risk test.'},
+    '5-0': {eyebrow:'Volatility breakout', question:'Why look for a breakout after a squeeze?', paragraphs:["Method I looks for a volatility expansion after unusually quiet conditions. BandWidth is used to identify a squeeze relative to the instrument's own history. The squeeze is preparation: it does not select long or short, and it is not an entry by itself.","The course's repeatable baseline is a completed close beyond the relevant band after the squeeze. An earlier entry may improve price but carries more false starts; a retest is a separate execution variant, not a requirement of the basic method."], take:'Prepare during compression; act only when your pre-defined breakout rule occurs—and only if the remaining risk and room are acceptable.'},
+    '5-1': {eyebrow:'%B and MFI confirmation', question:'Does price strength have indicator confirmation?', paragraphs:["Method II combines %B, which describes price position inside the bands, with the Money Flow Index (MFI), a volume-based indicator. The rule looks for strength in price position accompanied by strong MFI, or weakness accompanied by weak MFI.","This is a confirmation approach. Check the thresholds from the source method, make sure the data and settings match, and assess where the signal occurs in the wider chart. Indicator alignment does not remove the need for an invalidation level or risk plan."], take:'The method asks for price strength and money-flow strength to agree; the trade still needs context and risk controls.'},
+    '5-2': {eyebrow:'Price and indicator disagreement', question:'What if the price extreme and the volume indicator disagree?', paragraphs:["Method III looks for a price move to an outer band that is not confirmed by a volume-based indicator. The disagreement can raise a reversal question: price has made an extreme, but the supporting indicator has not followed in the same way.","Divergence is a clue, not a trigger. Look for the setup's price confirmation, consider the possibility that the trend continues, and define the point where the reversal idea is wrong before risking money."], take:'Disagreement starts an investigation. Price confirmation and a defined invalidation are still required.'},
+    '5-3': {eyebrow:'Confirmed breakout', question:'What changes when you require two closes outside a band?', paragraphs:["Method IV is a later confirmed-breakout variation on the squeeze idea. It waits for two consecutive closes beyond the same outer band, rather than treating the first close as the complete confirmation. ADX helps distinguish trending and non-trending conditions because the same sequence can have different implications in different markets.","More confirmation usually means a later signal and a potentially worse price. It does not guarantee follow-through. Follow the precise source rule, then independently assess stop distance, the next obstacle and the amount of risk you are willing to take."], take:'Method IV trades confirmation, not the first band excursion. Extra confirmation still needs a risk test.'},
     '5-4': {eyebrow:'W-bottoms and M-tops', question:'Has the pattern earned a trade plan?', paragraphs:["A W-bottom or M-top gives you a framework for judging a possible reversal, not a command to enter. Use the bands to compare the two price pushes, check whether the pattern is complete, and identify the confirmation condition described by the source method.","If the pattern has not confirmed, or if the valid stop would make the trade unattractive, the correct outcome is to wait. Do not invent an entry simply because the shape looks familiar."], take:'A named pattern is a candidate. Confirmation, invalidation and acceptable risk determine whether it becomes a plan.'},
     '5-5': {eyebrow:"Carter's TTM Squeeze · a separate method", question:'What is compressed in the TTM Squeeze?', paragraphs:["Carter's TTM Squeeze is not another name for low Bollinger BandWidth alone. It compares Bollinger Bands with Keltner Channels; the squeeze state occurs when the Bollinger Bands are inside the Keltner Channel. A momentum component is then used to help interpret direction.","Keep the definitions separate. BandWidth describes the width of the Bollinger Bands relative to the middle band; Carter's squeeze uses the relationship between two envelopes. In either case, compression warns you to prepare—not to guess the direction."], take:'Know which squeeze definition you are using. Similar language does not make the methods identical.'},
     '6-0': {eyebrow:'When the first move fails', question:'What will you do if the breakout comes back inside?', paragraphs:["A squeeze can be followed by an initial break that quickly fails. The failed first move is not proof that a reversal trade should be taken in the opposite direction. It is evidence that the original breakout hypothesis has weakened or failed under the rule you selected.","Decide in advance how your entry and stop respond to a return into the old range. Then reassess from the new evidence rather than immediately flipping direction."], take:'A failed setup invalidates the original plan. It does not automatically create a trade in the opposite direction.'},
@@ -2607,7 +2624,7 @@ function renderPurposeFigure(mId,lIdx,lessonId){
   '<p class="purpose-figure-note">Keep the observation separate from the interpretation. Write the evidence that would strengthen the idea, the evidence that would weaken it, and the rule that controls the next action.</p>');
 }
 function renderCourseReferenceFigure(ref,mId,lIdx,lessonId,index,total){
- const subLabel=total>1?' · '+String.fromCharCode(65+index):'';
+ const subLabel=total>1&&index>0?String.fromCharCode(64+index):'';
  const assetId='ubb-m'+String(mId).padStart(2,'0')+'-l'+String(lIdx+1).padStart(2,'0')+'-ref'+String(index+1).padStart(2,'0');
  return '<figure class="course-reference-figure" data-course-asset="'+assetId+'"><div class="course-reference-head"><strong>Figure '+lessonId+subLabel+'</strong><span>Chart reference</span></div><div class="course-reference-image"><img src="'+ref.url+'" alt="'+escapeHTML(ref.alt)+'" loading="lazy" decoding="async" data-zoomable data-media-asset-id="'+assetId+'"></div><figcaption><strong>'+escapeHTML(ref.label)+'</strong><p>'+escapeHTML(ref.note)+'</p></figcaption><div class="course-reference-actions"><a href="'+ref.page+'" target="_blank" rel="noopener noreferrer">Source: '+escapeHTML(ref.publisher)+' ↗</a><button type="button" data-enlarge-image>Enlarge image ↗</button></div></figure>';
 }
@@ -2624,14 +2641,24 @@ function renderCourseFigure(mId,lIdx,profile,lessonId){
  return '<div class="course-figure-stack">'+worked+panels+'</div>'+caution;
 }
 function lessonFigureAssetCount(mId,lIdx){
- const refs=courseReferenceFigures[mId+'-'+lIdx];
- return (refs&&refs.length?refs.length:1)+1;
+ const refs=courseReferenceFigures[mId+'-'+lIdx]||[];
+ // The lead visual belongs to “The idea”; count the worked chart and comparison figures here.
+ return 1+Math.max(0,refs.length-1);
+}
+function isVolumeAnalysisLesson(mId,lIdx){
+ const placements={
+  '4-2':'This lesson compares price with an indicator and benefits from broader study of price/volume disagreement.',
+  '5-1':'This lesson introduces a volume-based indicator alongside %B; the separate course extends volume-context reading beyond one indicator.',
+  '5-2':'This lesson directly examines price/indicator disagreement and needs a deeper companion study.',
+  '6-0':'This lesson reviews a failed squeeze move; the separate course explores breakout quality, failure and follow-through.'
+ };
+ return placements[mId+'-'+lIdx]||'';
 }
 function renderRelatedVolumeCourseCard(mId,lIdx,lessonTitle,profile){
- const refs=courseReferenceFigures[mId+'-'+lIdx]||[];
- const searchable=[lessonTitle,profile.question,profile.take,...profile.paragraphs,chartTitle(mId,lIdx),...refs.map(r=>[r.label,r.note,r.alt].join(' '))].join(' ');
- if(!(/\bvolume\b|\bMFI\b|money flow|volume profile|price[\s-]and[\s-]volume|effort\s+(?:versus|vs\.?)\s+result/i.test(searchable))) return '';
- return '<aside class="related-course-card" aria-label="Related course"><div class="related-course-copy"><span class="related-course-kicker">RELATED MICRO-COURSE · IN DEVELOPMENT</span><h4>Read Volume. Find Trade Setups.</h4><p>Volume &amp; Price Analysis goes deeper into relative activity, effort versus result, price/volume disagreement and Volume Profile. The course outline is available in the catalogue while the lessons are being developed.</p></div><a class="related-course-link" href="https://zaphodbeeblebrox12.github.io/prototypeweb/courses.html#micro-courses">Explore Volume &amp; Price Analysis ↗</a></aside>';
+ const reason=isVolumeAnalysisLesson(mId,lIdx);
+ if(!reason) return '';
+ const href='../../../../site/courses.html#micro-courses';
+ return '<aside class="related-course-card" aria-label="Related course"><div class="related-course-copy"><span class="related-course-kicker">SEPARATE COURSE · IN DEVELOPMENT</span><h4>Volume &amp; Price Analysis</h4><p>'+escapeHTML(reason)+' The companion course explores relative volume, effort versus result, price/volume disagreement, breakout failures and Volume Profile. It is in development and is not yet open for enrolment.</p></div><a class="related-course-link" href="'+href+'">View course outline ↗</a></aside>';
 }
 function buildChartSvg(mId,lIdx,variant=0,figureLabel=null) {
   const W=860,H=385,left=54,right=24,top=26,bottom=38,plotW=W-left-right,plotH=H-top-bottom;
@@ -2705,7 +2732,7 @@ function renderLesson() {
  const figureAssetCount=lessonFigureAssetCount(m.id,activeLessonIndex);
  const assetBadge=$('#chartExamplesAssetCount');if(assetBadge)assetBadge.textContent=String(figureAssetCount);
  const examplesTab=$('.article-tab[data-article-tab="practice"]');if(examplesTab)examplesTab.setAttribute('aria-label','Chart examples; '+figureAssetCount+' visual assets in this lesson');
- $('#activeModuleTag').textContent=`MODULE ${String(m.id).padStart(2,'0')} · ${m.title.toUpperCase()}`;
+ $('#activeModuleTag').textContent=m.short;
  $('#activeLessonTag').textContent=`LESSON ${lessonId}`;
  $('#activeLessonTitle').textContent=lessonTitle;
  $('#activeLessonSummary').textContent=profile.take;
