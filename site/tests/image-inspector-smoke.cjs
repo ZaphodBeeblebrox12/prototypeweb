@@ -12,6 +12,15 @@ const { chromium } = require("playwright");
 
   await page.goto("http://127.0.0.1:4173/support-resistance-room.html?lesson=14", { waitUntil: "networkidle" });
   await page.waitForSelector("#sr-v52-longform:not([hidden])");
+  await page.waitForFunction(() => {
+    const img = document.querySelector("#sr-chart-image");
+    return img && img.complete && img.naturalWidth > 0;
+  });
+  const coreChart = page.locator("#sr-chart-image");
+  const chartSource = await coreChart.evaluate(img => img.currentSrc || img.src);
+  assert.ok(chartSource.endsWith(".svg"), "Core lesson charts should prefer vector sources when available: " + chartSource);
+  assert.ok((await coreChart.getAttribute("data-chart-canonical-file") || "").endsWith(".png"),
+    "The chart should preserve its canonical PNG stage key for answer-gate mapping");
   const panel = page.locator("#sr-v52-longform .sr-v52-figure-panel").first();
   await panel.waitFor({ state: "visible" });
   await panel.screenshot({ path: screenshotDir + "/first-panel-crop.png" });
