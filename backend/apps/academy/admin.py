@@ -60,7 +60,7 @@ class LessonInstructorMaterialAdmin(admin.ModelAdmin):
 
 @admin.register(CourseOffer)
 class CourseOfferAdmin(admin.ModelAdmin):
-    list_display = ("name", "course", "plan", "access_duration_days", "community_access_days", "is_active", "position")
+    list_display = ("name", "course", "plan", "access_duration_days", "community_access_months", "is_active", "position")
     list_filter = ("is_active", "course")
     search_fields = ("name", "slug", "course__title", "plan__name")
     prepopulated_fields = {"slug": ("name",)}
