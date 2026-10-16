@@ -64,8 +64,12 @@
           <div class="tt-profile-connection-copy">
             <strong>Telegram</strong>
             {% if telegram_connected %}
-              <span class="tt-profile-status is-connected">Connected{% if user.telegram_username %} · @{{ user.telegram_username }}{% endif %}</span>
-              <p class="tt-muted mb-0">Your verified Telegram account is linked.</p>
+              <span class="tt-profile-status is-connected">Connected{% if telegram_account.username %} · @{{ telegram_account.username }}{% elif telegram_account.first_name %} · {{ telegram_account.first_name }}{% endif %}</span>
+              <p class="tt-muted mb-0">Your Telegram account is linked for community access.</p>
+              <form method="post" action="{% url 'bot_integration:telegram_unlink' %}" class="mt-2">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-secondary">Disconnect Telegram</button>
+              </form>
             {% else %}
               <span class="tt-profile-status">Not connected</span>
               <p class="tt-muted mb-0">Connect Telegram to receive any included channel access.</p>
@@ -79,16 +83,16 @@
           <div class="tt-profile-connection-mark is-discord" aria-hidden="true">D</div>
           <div class="tt-profile-connection-copy">
             <strong>Discord</strong>
-            {% if user.discord_id and user.discord_verified %}
-              <span class="tt-profile-status is-connected">Connected · {{ user.discord_username }}</span>
-              <p class="tt-muted mb-0">Your verified Discord account is linked.</p>
+            {% if discord_account %}
+              <span class="tt-profile-status is-connected">Connected{% if discord_account.username %} · {{ discord_account.username }}{% endif %}</span>
+              <p class="tt-muted mb-0">Your Discord account is linked for community access.</p>
             {% else %}
               <span class="tt-profile-status">Not connected</span>
               <p class="tt-muted mb-0">Connect Discord for community access where server roles are supported.</p>
             {% endif %}
           </div>
-          {% if user.discord_id and user.discord_verified %}
-            <form method="post" action="{% url 'discord_disconnect' %}" class="m-0">
+          {% if discord_account %}
+            <form method="post" action="{% url 'bot_integration:discord_unlink' %}" class="m-0">
               {% csrf_token %}
               <button type="submit" class="btn btn-outline-secondary">Disconnect</button>
             </form>
