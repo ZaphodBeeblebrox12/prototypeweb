@@ -6,6 +6,7 @@
 
 - Repository: `ZaphodBeeblebrox12/prototypeweb`
 - Working branch: `my-new-branch`
+- **Owner's merge rule (2026-10-16):** all feature PRs target `my-new-branch`; all approved merges go into `my-new-branch` only. Do not merge into `main`. This rule does not automatically approve any specific draft PR.
 - Course source root: `course-content/support-resistance/`
 - This is a source/content checkpoint. No website or course-room implementation was performed by these commits.
 - Current work style: continue the first pass; defer full cross-document editorial review to the second pass. Add precise entries to `production/second_pass_review_register.md/.csv` when an issue needs revisiting. Do not interrupt the first pass for general polishing unless it blocks correctness or a downstream task.
