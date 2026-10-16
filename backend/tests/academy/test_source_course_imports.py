@@ -1,3 +1,11 @@
+from io import StringIO
+from unittest import mock
+
+from django.core.management import call_command
+from django.core.management.base import CommandError
+
+from apps.academy.models import Course
+
 from apps.academy.management.commands.seed_support_resistance import (
     embed_snr_figures,
     estimate_duration,
@@ -176,14 +184,6 @@ def test_support_resistance_importer_embeds_only_curated_first_view_figures(tmp_
         unchanged, notes = embed_snr_figures(lesson_number, module_position, body, static_root)
         assert unchanged == body
         assert notes == ""
-
-from io import StringIO
-from unittest import mock
-
-from django.core.management import call_command
-from django.core.management.base import CommandError
-
-from apps.academy.models import Course
 
 
 @mock.patch("apps.academy.management.commands.seed_academy_catalogue.call_command")
