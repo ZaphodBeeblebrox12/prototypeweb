@@ -41,6 +41,10 @@ A range extends from 60 to 66. A wide candle closes at 67.2 with 1.6× relative 
 
 If price retests 66–67 and holds above it before advancing, the continuation reading gains support. If it closes back inside the range and later fails to reclaim 66, the first break has not sustained itself. If price keeps crossing the boundary without progress, do not force a verdict.
 
+### Worked comparison — first break, different endings
+
+Range high is near 66. A wide candle closes at 67.2 on 1.6× relative volume. In one ending, price retests 66–67, holds and reaches 69. In another, price closes at 65.5 and fails to reclaim 66. The first candle is the same in both examples; its quality becomes clearer only through the later behaviour. Your initial note should not pretend to know the ending.
+
 ### Level 1 — Notice (easy)
 
 **Task:** A range is 60–66; price closes at 67.2 after trading above 66. Identify the boundary, price result and unresolved question.
@@ -103,6 +107,10 @@ What changed? The first close showed a return inside the range. The failed recla
 
 The same first candle can lead to either ending. Your initial notes should say what was known at that time, not pretend you could already see the ending.
 
+### Worked comparison — return inside versus failed reclaim
+
+Price breaks above 100 and closes back inside at 99.4. That is an initial failure to retain the outside excursion. If the next bar reclaims 100 and holds, the failed-break idea weakens. If price tests 100 from below, fails and then breaks a nearby swing low, the failure case strengthens. The failed reclaim is new evidence; the final price direction is not contained in the first candle.
+
 ### Level 1 — Notice (easy)
 
 **Task:** List the stages in a failed-break sequence from initial boundary to follow-through.
@@ -155,6 +163,10 @@ A climax-like event becomes more interesting when the price result appears small
 Price has climbed from 300 to 340. Near a prior high, a candle trades from 334 to 344 but closes at 337 while recording 3× the recent average volume. The high activity and limited retained upside progress make the bar worth investigating. A possible reading is that the market struggled to sustain the push. An alternative is that volatility temporarily widened while the larger trend remains intact.
 
 If the following bars remain below 344, then break a nearby swing low and fail to reclaim it, the idea that the upward push has weakened gains support. If price consolidates and later closes above 344 while holding the breakout area, the continuation interpretation gains support instead.
+
+### Worked comparison — an extreme bar can continue the trend
+
+After an extended rise, price prints the week's highest volume but closes near its high. The next bars hold above the candle's midpoint and then make another high. Calling the bar a confirmed selling climax would ignore the retained progress. Contrast that with an equally active bar that closes back below resistance and is followed by a structural break. Volume is extreme in both; price outcome and follow-through distinguish the readings.
 
 ### Level 1 — Notice (easy)
 
@@ -217,6 +229,10 @@ For either event, keep the sequence explicit:
 4. Observe whether price returns inside.
 5. Look for a retest, reclaim or structural change before deciding whether the failed-move interpretation has gained support.
 
+### Worked comparison — the boundary return must hold
+
+A range extends from 50 to 60. Price briefly trades at 48.5 and closes at 51.2. This resembles a spring-like excursion because price returned inside. If subsequent bars remain below 50 and repeatedly fail to reclaim it, the return was not sustained and the spring interpretation weakens. If price holds inside and later reclaims a short-term swing high, the failed-downside-break idea gains support. The label is provisional until price shows the role of the boundary.
+
 ### Level 1 — Notice (easy)
 
 **Task:** Describe a spring-like event and an upthrust-like event in terms of what price did.
@@ -271,6 +287,10 @@ A range has a high near 200. Price breaks to 204 on elevated activity but closes
 - **Path C:** Price overlaps between 197 and 201 for several bars. There is no decisive progress. The best conclusion may be “unresolved”.
 
 The correct interpretation depends on the evidence available at each stage. Waiting is a valid response when the sequence is incomplete.
+
+### Worked comparison — a rejected excursion is not a complete reversal
+
+Price trades above 200 then closes at 199.5. This is a failed attempt to hold outside at that point. It may remain a range event if price simply overlaps. A stronger reversal case would need further evidence, such as a failed reclaim and a break of meaningful structure followed by continued downside progress. If price instead retakes 200 and holds, the reversal idea loses support. Use the smallest accurate claim the evidence allows.
 
 ### Level 1 — Notice (easy)
 
