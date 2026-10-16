@@ -53,6 +53,20 @@ The intended dashboard should make routine work easy for a non-technical site ad
 
 This is a planning scope, not a commitment that each item is already backed by the current static prototype. Do not expose answer keys, instructor-only notes or paid lesson bodies through client-side hiding. Only show live metrics/actions when connected to verified backend data; label placeholders/demo data honestly. Prefer extending the eventual production stack and its existing admin/auth conventions rather than inventing a disconnected second source of truth.
 
+## Current UX QA checkpoint — 16 October 2026
+
+The following sitewide foundations have been implemented on `my-new-branch` and covered by GitHub Actions:
+
+- Light-only theme in the member access and member area previews; a CI check prevents dark colour tokens from returning there.
+- Course catalogue development note, visible/hidden catalogue entry state, hidden-draft exclusion, and dynamically generated topic filters and counts.
+- Keyboard skip-to-main-content links and focusable main landmarks on the main public pages, learning room, ChartLab, and member pages.
+- Playwright checks for the public preview-only checkout/enquiry states, member preview clarity, mobile/desktop horizontal overflow, same-page anchor targets, skip-link targets, and future course/draft filtering.
+- Static deployment audit for local asset and page references.
+
+**Verification evidence:** learning-room/browser verification run [38892811511](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38892811511) passed. Preview deployment run [38892765713](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/38892765713) passed.
+
+This evidence is limited to the static preview and automated checks. It is **not** proof of connected authentication, payments, server-side enrolment, saved progress, secure lesson delivery, or production accessibility on physical devices. The instructional image-inspector/readability work remains in draft PRs targeting `my-new-branch`; the code has not been integrated into the working branch. Do not begin the admin-dashboard implementation merely because these visual QA checks pass. The dashboard remains gated on real backend integration and core purchase-to-learning flows.
+
 ## Suggested order of work
 
 1. Continue core course/learning-room and content integration work on `my-new-branch`; preserve existing micro-course material.
