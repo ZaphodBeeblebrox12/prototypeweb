@@ -66,7 +66,8 @@ def test_vpa_pilot_figures_are_numbered_and_keep_later_outcomes_out(tmp_path):
     counters = {}
     body, media_notes = embed_vpa_figures("1.1", source, asset_root, counters)
 
-    assert "![Figure 1.1 — Candidate candle and its local volume baseline](/static/academy/vpa/vpa-m01-l01-stage1-spot-volume.svg)" in body
+    assert "![Figure 1.1 — Candidate candle and its local volume baseline](/static/academy/vpa/vpa-m01-l01-stage1-spot-volume-mobile.svg)" in body
+    assert "![Figure 1.2 — Similar candle shapes in different contexts](/static/academy/vpa/vpa-m01-l01-candle-context-compare-mobile.svg)" in body
     assert "*Figure 1.2 — Similar candle shapes in different contexts.*" in body
     assert body.index("Figure 1.1") < body.index("Level 2") < body.index("Figure 1.2") < body.index("Level 3")
     assert "stage3-outcome" not in body
