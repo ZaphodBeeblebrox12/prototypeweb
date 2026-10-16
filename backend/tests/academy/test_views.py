@@ -5,8 +5,10 @@ from django.test import TestCase
 from django.utils import timezone
 from django.urls import reverse
 
+from apps.subscriptions.models import Plan, PlanPrice
+
 from apps.academy.models import (
-    Course, CourseEntitlement, CourseModule, Lesson, LessonProgress,
+    Course, CourseEntitlement, CourseModule, CourseOffer, Lesson, LessonProgress,
 )
 
 User = get_user_model()
@@ -131,6 +133,44 @@ class AcademyViewTests(TestCase):
         )
         self.assertEqual(progress_response.status_code, 403)
         self.assertFalse(LessonProgress.objects.filter(user=self.user, lesson=self.paid_lesson).exists())
+
+    def test_unpurchased_course_appears_in_library_not_my_learning(self):
+        catalog_course = Course.objects.create(
+            title="Separate catalogue course",
+            slug="separate-catalogue-course",
+            status=Course.Status.PUBLISHED,
+            summary="A saleable course not yet enrolled in.",
+        )
+        plan = Plan.objects.create(
+            name="Separate course offer",
+            tier=Plan.Tier.BASIC,
+            is_active=True,
+            is_hidden=True,
+        )
+        PlanPrice.objects.create(
+            plan=plan,
+            interval=PlanPrice.Interval.ONE_TIME,
+            price_cents=50000,
+            currency="INR",
+            is_active=True,
+        )
+        CourseOffer.objects.create(
+            course=catalog_course,
+            name="Separate catalogue course",
+            slug="separate-catalogue-course-offer",
+            plan=plan,
+            is_active=True,
+        )
+
+        response = self.client.get(reverse("academy:home"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["course_cards"], [])
+        self.assertEqual(
+            [offer.course.slug for offer in response.context["offers"]],
+            [catalog_course.slug],
+        )
+        self.assertContains(response, "Course library")
 
     def test_learning_room_requires_login(self):
         self.client.logout()
