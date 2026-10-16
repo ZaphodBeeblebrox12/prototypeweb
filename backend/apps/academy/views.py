@@ -80,9 +80,30 @@ def academy_home(request):
         plan__is_active=True,
     ).select_related("course", "plan").order_by("position", "name")
     offers = [o for o in offers if o.is_saleable and o.course_id not in entitlements_by_course]
+
+    recent_activity = list(
+        LessonProgress.objects.filter(user=request.user)
+        .select_related("lesson", "lesson__module", "lesson__module__course")
+        .exclude(status=LessonProgress.Status.NOT_STARTED)
+        .order_by("-updated_at")[:5]
+    )
+    completed_lessons = LessonProgress.objects.filter(
+        user=request.user, status=LessonProgress.Status.COMPLETED
+    ).count()
+    learning_minutes = sum(
+        LessonProgress.objects.filter(user=request.user).values_list(
+            "time_spent_seconds", flat=True
+        )
+    ) // 60
+
     return render(request, "academy/home.html", {
-        "course_cards": course_cards, "offers": offers,
+        "course_cards": course_cards,
+        "offers": offers,
         "community_accesses": community_accesses,
+        "active_course_count": sum(1 for item in course_cards if item["entitlement"]),
+        "completed_lesson_count": completed_lessons,
+        "learning_minutes": learning_minutes,
+        "recent_activity": recent_activity,
     })
 
 
