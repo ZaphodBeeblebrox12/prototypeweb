@@ -166,6 +166,7 @@ jobs:
             });
             const chartSrc = await inspectorChart.evaluate(img => img.currentSrc || img.src);
             assert.ok(chartSrc.endsWith(".svg"), "Learning Room should prefer the vector chart source when available: " + chartSrc);
+            await inspectorChart.scrollIntoViewIfNeeded();
             const scrollBeforeViewer = await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY }));
             await inspectorChart.click();
             const imageDialog = page.locator("dialog.image-inspector-dialog");
