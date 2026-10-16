@@ -87,7 +87,7 @@ def extract_vpa_student_body(segment):
         re.I | re.M,
     )
     matches = list(internal_heading.finditer(student_markdown))
-    for index, match in enumerate(matches):
+    for match in matches:
         next_heading = re.search(r"^###\s+", student_markdown[match.end():], re.M)
         end = match.end() + next_heading.start() if next_heading else len(student_markdown)
         internal_sections.append(student_markdown[match.start():end].strip())
