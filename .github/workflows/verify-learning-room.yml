@@ -489,6 +489,13 @@ jobs:
               }));
               assert.ok(mobileLayout.page <= mobileLayout.viewport + 1,
                 route + " overflows horizontally at mobile width: " + JSON.stringify(mobileLayout));
+              await cataloguePage.setViewportSize({ width: 320, height: 740 });
+              const narrowLayout = await cataloguePage.evaluate(() => ({
+                viewport: document.documentElement.clientWidth,
+                page: document.documentElement.scrollWidth
+              }));
+              assert.ok(narrowLayout.page <= narrowLayout.viewport + 1,
+                route + " overflows horizontally at narrow 320px width: " + JSON.stringify(narrowLayout));
               const brokenAnchors = await cataloguePage.evaluate(() => {
                 const names = [...document.querySelectorAll("[name]")].map(el => el.getAttribute("name"));
                 return [...document.querySelectorAll("a[href]")].flatMap(anchor => {
