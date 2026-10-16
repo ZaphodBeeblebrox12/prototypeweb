@@ -74,4 +74,5 @@ databases:
   - name: tradethesis-academy-staging-db
     databaseName: tradethesis_academy_staging
     user: tradethesis_academy
-    plan: free
+    plan: 0.1c-256mb
+    diskSizeGB: 1
