@@ -284,26 +284,26 @@ Timings include reading, inspecting the supplied figure, completing the task, an
 **Figure/task:** Figure 5.1 compares an upper-band breakout, lower-band breakout, and a false first move. Students classify the setup and state what would invalidate the first idea.  
 **Source:** John Bollinger, *Bollinger on Bollinger Bands*, Chapter 16; official Method I manual.
 
-#### 5.2 — Method IV: Wait for a Confirmed Breakout
-**Time:** 18 minutes.  
-**Outcome:** Apply the later official Method IV rule: squeeze context, two consecutive closes outside the same band, and ADX to distinguish trend-following from reversal treatment.  
-**Author's rule:** Two outside closes confirm the breakout condition. When ADX is above the chosen threshold, the break is treated as trend-following; when ADX is below it, the method treats the outside-band event as a potential reversal in the opposite direction. The threshold is configurable, not universal.  
-**Figure/task:** Figure 5.2 contrasts single and consecutive outside closes and illustrates both ADX regimes. Students classify each event using the stated rule.  
-**Source:** John Bollinger, official Method IV manual (developed after the book).
-
-#### 5.3 — Method II: Follow Strength Confirmed by MFI
+#### 5.2 — Method II: Follow Strength Confirmed by MFI
 **Time:** 18 minutes.  
 **Outcome:** Use Bollinger's published %B/MFI conditions to recognise trend-following long and short setups.  
 **Author's rule:** Buy when %B is above 0.8 and MFI(10) is above 80; sell/short when %B is below 0.2 and MFI(10) is below 20. The method does not require a squeeze. Bollinger discusses a modified Parabolic stop or an opposite-band tag as exit choices.  
-**Figure/task:** Figure 5.3 shows long, short and near-miss cases. Students identify which required condition is missing in non-qualifying panels.  
+**Figure/task:** Figure 5.2 shows long, short and near-miss cases. Students identify which required condition is missing in non-qualifying panels.  
 **Source:** John Bollinger, *Bollinger on Bollinger Bands*, Chapter 19; official Method II manual.
 
-#### 5.4 — Method III: Look for Reversal Clues in Volume
+#### 5.3 — Method III: Look for Reversal Clues in Volume
 **Time:** 18 minutes.  
 **Outcome:** Identify Bollinger's band-tag/volume-indicator reversal alert and distinguish it from a confirmed entry.  
 **Author's rule:** The book gives examples such as %B below 0.05 with positive Intraday Intensity for a long, and %B above 0.95 with negative Accumulation/Distribution for a short. Bollinger's official software manual also documents a band-tag/Intraday Intensity alert and recommends waiting for a strong up/down price bar. These are documented variants; indicator choice must be stated.  
-**Figure/task:** Figure 5.4 pairs band tags with indicator readings and subsequent price confirmation. Students mark alert, confirmation, and invalidation.  
+**Figure/task:** Figure 5.3 pairs band tags with indicator readings and subsequent price confirmation. Students mark alert, confirmation, and invalidation.  
 **Source:** John Bollinger, *Bollinger on Bollinger Bands*, Chapter 20; official Method III manual.
+
+#### 5.4 — Method IV: Wait for a Confirmed Breakout
+**Time:** 18 minutes.  
+**Outcome:** Apply the later official Method IV rule: squeeze context, two consecutive closes outside the same band, and ADX to distinguish trend-following from reversal treatment.  
+**Author's rule:** Two outside closes confirm the breakout condition. When ADX is above the chosen threshold, the break is treated as trend-following; when ADX is below it, the method treats the outside-band event as a potential reversal in the opposite direction. The threshold is configurable, not universal.  
+**Figure/task:** Figure 5.4 contrasts single and consecutive outside closes and illustrates both ADX regimes. Students classify each event using the stated rule.  
+**Source:** John Bollinger, official Method IV manual (developed after the book).
 
 #### 5.5 — Trade the W-Bottom and M-Top, Not Just the Shape
 **Time:** 18 minutes.  
@@ -422,9 +422,9 @@ The setup module is built around author-published methods rather than mostly gen
 | Method | Author/source-defined core | Decisions the student must still make |
 |---|---|---|
 | Bollinger Method I — Volatility Breakout | A squeeze is the setup; the first upside breakout beyond the upper band or downside break below the lower band provides direction. Bollinger warns about head fakes and describes stop-management approaches. | Define the squeeze lookback implementation, decide how to handle failed first moves, locate structural invalidation, size the position and choose a tested exit. |
-| Bollinger Method IV — Confirmed Breakout | Later official method: squeeze followed by two consecutive closes outside the same band; ADX distinguishes trend-following from reversal treatment. | Use a declared ADX threshold from the implementation being studied, define invalidation, and test the method on the intended market/timeframe. |
 | Bollinger Method II — Trend Following | In the book's example, buy when %B > 0.8 and MFI(10) > 80; sell/short when %B < 0.2 and MFI(10) < 20. No squeeze is required. | Choose the source-described exit option, define size/risk, and test the published thresholds rather than assuming they fit every market. |
 | Bollinger Method III — Reversals | Band tag plus a volume-based indicator pointing the other way; published examples include %B < 0.05 with positive Intraday Intensity for long, or %B > 0.95 with negative Accumulation/Distribution for short. Later official software describes another Intraday Intensity variant. | State which indicator variant is being used, wait for the source-recommended price confirmation, and define structural invalidation. |
+| Bollinger Method IV — Confirmed Breakout | Later official method: squeeze followed by two consecutive closes outside the same band; ADX distinguishes trend-following from reversal treatment. | Use a declared ADX threshold from the implementation being studied, define invalidation, and test the method on the intended market/timeframe. |
 | Bollinger W-bottom / M-top | Relative band position clarifies the pattern. The book's W-bottom example buys a strong rally day with above-average range and volume, with a stop below the right-side low. Top formations need evidence of weakness and often take longer. | Decide whether the pattern truly meets the author's description, check space to target, and define an exit/stop plan that fits the instrument. |
 | Carter TTM Squeeze | Common implementation: Bollinger Bands contract inside Keltner Channels, then release; the momentum histogram helps choose direction. | Verify platform settings, require the release and stated momentum condition, and define how to manage a failed release. |
 

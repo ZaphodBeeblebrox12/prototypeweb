@@ -85,81 +85,13 @@ BandWidth is at a six-month low, but price remains inside the recent range. Shou
 
 ---
 
-## Lesson 5.2 — Bollinger Method IV: Wait for a Confirmed Breakout
+## Lesson 5.2 — Bollinger Method II: Follow Strength Confirmed by MFI
 
 **Estimated study time:** 18 minutes.
 
 As you work through this lesson, refer to **Figure 5.2**.
 
-![Figure 5.2: A squeeze is followed by two consecutive closes above or below a Bollinger Band; paired panels show how ADX changes the interpretation.](../assets/student-assets/svg/bb-m05-f02.svg)
-
-### The question
-
-What if you want more evidence than the first close outside a band?
-
-Bollinger's later Method IV, called **Confirmed Breakouts**, is a variation on Method I. Instead of alerting on the initial outside-band close, it waits for two consecutive closes beyond a band after a squeeze. It also uses the Average Directional Index, or ADX, to help decide whether the move is occurring in a trending or non-trending market.
-
-This method was developed after *Bollinger on Bollinger Bands*. It should be taught as Bollinger's later extension, not as one of the book's original three methods.
-
-### The shared starting condition
-
-First identify a squeeze using BandWidth. The official software manual uses a 125-period low as the default squeeze definition. Then watch for two consecutive closes outside the same band.
-
-- **Upper-band case:** two closes in a row above the upper band.
-- **Lower-band case:** two closes in a row below the lower band.
-
-A wick beyond a band followed by a close back inside does not count as two consecutive outside closes. The definition is specific, so avoid quietly changing it when reviewing examples.
-
-### Why ADX changes the reading
-
-ADX is used to estimate how strong a trend is. The Method IV manual uses an ADX threshold to distinguish a trending condition from a non-trending one. The threshold is configurable; the method documentation does not establish one number as universally correct for every market.
-
-This creates a useful but less obvious distinction:
-
-| Confirmed move after a squeeze | ADX above the chosen threshold | ADX below the chosen threshold |
-|---|---|---|
-| Two closes above the upper band | Treat as a trend-following buy alert. | Treat as a potential reversal alert in the opposite direction. |
-| Two closes below the lower band | Treat as a trend-following short alert. | Treat as a potential reversal alert in the opposite direction. |
-
-This is the method's central twist. A confirmed move outside a band is not interpreted the same way in every market condition. In a strong trend it can support continuation; in a non-trending market the same event can be read as a possible reversal setup.
-
-### Turn the alert into a trade plan
-
-For the **long continuation** case, require the squeeze, two consecutive closes above the upper band, and ADX above the selected threshold. Define where the continuation premise would fail, choose a stop around that price structure, and make sure the next likely obstacle leaves enough room for the trade.
-
-For the **short continuation** case, mirror the rule below the lower band.
-
-When ADX is below the threshold, do not blindly take the continuation trade. Under Method IV, the outside-band move is instead classified as a potential reversal in the opposite direction. That still requires a plan: define the trigger according to the method, state where the reversal idea is wrong, and decide how the trade will be managed.
-
-The exact platform implementation can display these as “trend” or “reversal” alerts. Check the chart and indicator settings being used, because different software may package the calculation and alert labels differently.
-
-### Inspect Figure 5.2
-
-Compare a single close outside a band with two consecutive closes. Then compare the ADX contexts. Figure 5.2 is designed to show that “confirmed breakout” describes a specific condition and that the method's interpretation also depends on the regime filter.
-
-**Task:** In each panel, identify whether the confirmed-breakout condition occurred and whether the method classifies it as trend-following or reversal under the ADX state shown.
-
-**Model reasoning:** Two consecutive outside closes after a squeeze meet the confirmation condition. ADX then determines whether the official Method IV interpretation is continuation or the opposite-direction reversal alert. If the two-close condition is missing, do not label it a confirmed breakout under this method.
-
-### Common mistake
-
-Treating Method IV as “wait for any two large candles.” The rule concerns two consecutive closes outside the same Bollinger Band after a squeeze, with ADX used in the method's interpretation.
-
-### Keep this
-
-> **Method IV asks for two outside closes after a squeeze, then uses ADX to decide whether to read the move as continuation or a potential reversal.**
-
-**Source and further reading:** [Bollinger Bands Confirmed Breakouts (Method IV) Manual](https://www.bollingerbands.com/_files/ugd/58be43_d09c50b6e8ea4afd9af0523ef94de876.pdf). This is Bollinger's later method, published after the first edition of his book.
-
----
-
-## Lesson 5.3 — Bollinger Method II: Follow Strength Confirmed by MFI
-
-**Estimated study time:** 18 minutes.
-
-As you work through this lesson, refer to **Figure 5.3**.
-
-![Figure 5.3: Long and short examples show %B reaching the upper or lower part of the bands while the Money Flow Index confirms strength or weakness.](../assets/student-assets/svg/bb-m05-f03.svg)
+![Figure 5.2: Long and short examples show %B reaching the upper or lower part of the bands while the Money Flow Index confirms strength or weakness.](../assets/student-assets/svg/bb-m05-f02.svg)
 
 ### The question
 
@@ -201,7 +133,7 @@ In the book's Method II chapter, Bollinger discusses using a modified Parabolic 
 
 Before entry, locate the price structure that would invalidate the trend-following idea. Position size should be based on the loss implied by that stop, not on how strong the MFI reading looks. If price has already travelled a long way and the next obstacle is close, the trigger may be present but the trade can still be unattractive.
 
-### Read Figure 5.3
+### Read Figure 5.2
 
 Panel A shows the long conditions coming together. Panel B shows the mirrored short conditions. Panel C shows a tempting price move where MFI does not confirm; it is included to make the missing condition visible.
 
@@ -223,13 +155,13 @@ Panel A shows the long conditions coming together. Panel B shows the mirrored sh
 
 ---
 
-## Lesson 5.4 — Bollinger Method III: Look for Reversal Clues in Volume
+## Lesson 5.3 — Bollinger Method III: Look for Reversal Clues in Volume
 
 **Estimated study time:** 18 minutes.
 
-As you work through this lesson, refer to **Figure 5.4**.
+As you work through this lesson, refer to **Figure 5.3**.
 
-![Figure 5.4: A lower-band tag with a positive volume indicator is compared with an upper-band tag and a weakening volume indicator; both show a later price-confirmation bar.](../assets/student-assets/svg/bb-m05-f04.svg)
+![Figure 5.3: A lower-band tag with a positive volume indicator is compared with an upper-band tag and a weakening volume indicator; both show a later price-confirmation bar.](../assets/student-assets/svg/bb-m05-f03.svg)
 
 ### The question
 
@@ -267,7 +199,7 @@ If price is in a strong band walk and there is no clear sign of weakening, an in
 
 ### Task
 
-Use Figure 5.4 to identify the band tag, the volume-indicator reading, and the later price-confirmation bar. Which case creates a buy alert, and which creates a sell/short alert under the stated version of Method III?
+Use Figure 5.3 to identify the band tag, the volume-indicator reading, and the later price-confirmation bar. Which case creates a buy alert, and which creates a sell/short alert under the stated version of Method III?
 
 **Model reasoning:** A lower-band tag with positive Intraday Intensity fits the buy-alert example. An upper-band tag with a negative indicator fits the short-alert example. The later price bar matters because the alert is not an instruction to enter immediately.
 
@@ -282,6 +214,74 @@ Price touches the lower band, but Intraday Intensity is negative and price conti
 > **Method III looks for a band extreme that the volume evidence does not confirm, then waits for price to support the reversal idea.**
 
 **Source and further reading:** John Bollinger, *Bollinger on Bollinger Bands*, Chapter 20, “Method III: Reversals”; [official Method III manual](https://www.bollingerbands.com/_files/ugd/58be43_377f4254baa04a19aaadb1735b45b6f0.pdf).
+
+---
+
+## Lesson 5.4 — Bollinger Method IV: Wait for a Confirmed Breakout
+
+**Estimated study time:** 18 minutes.
+
+As you work through this lesson, refer to **Figure 5.4**.
+
+![Figure 5.4: A squeeze is followed by two consecutive closes above or below a Bollinger Band; paired panels show how ADX changes the interpretation.](../assets/student-assets/svg/bb-m05-f04.svg)
+
+### The question
+
+What if you want more evidence than the first close outside a band?
+
+Bollinger's later Method IV, called **Confirmed Breakouts**, is a variation on Method I. Instead of alerting on the initial outside-band close, it waits for two consecutive closes beyond a band after a squeeze. It also uses the Average Directional Index, or ADX, to help decide whether the move is occurring in a trending or non-trending market.
+
+This method was developed after *Bollinger on Bollinger Bands*. It should be taught as Bollinger's later extension, not as one of the book's original three methods.
+
+### The shared starting condition
+
+First identify a squeeze using BandWidth. The official software manual uses a 125-period low as the default squeeze definition. Then watch for two consecutive closes outside the same band.
+
+- **Upper-band case:** two closes in a row above the upper band.
+- **Lower-band case:** two closes in a row below the lower band.
+
+A wick beyond a band followed by a close back inside does not count as two consecutive outside closes. The definition is specific, so avoid quietly changing it when reviewing examples.
+
+### Why ADX changes the reading
+
+ADX is used to estimate how strong a trend is. The Method IV manual uses an ADX threshold to distinguish a trending condition from a non-trending one. The threshold is configurable; the method documentation does not establish one number as universally correct for every market.
+
+This creates a useful but less obvious distinction:
+
+| Confirmed move after a squeeze | ADX above the chosen threshold | ADX below the chosen threshold |
+|---|---|---|
+| Two closes above the upper band | Treat as a trend-following buy alert. | Treat as a potential reversal alert in the opposite direction. |
+| Two closes below the lower band | Treat as a trend-following short alert. | Treat as a potential reversal alert in the opposite direction. |
+
+This is the method's central twist. A confirmed move outside a band is not interpreted the same way in every market condition. In a strong trend it can support continuation; in a non-trending market the same event can be read as a possible reversal setup.
+
+### Turn the alert into a trade plan
+
+For the **long continuation** case, require the squeeze, two consecutive closes above the upper band, and ADX above the selected threshold. Define where the continuation premise would fail, choose a stop around that price structure, and make sure the next likely obstacle leaves enough room for the trade.
+
+For the **short continuation** case, mirror the rule below the lower band.
+
+When ADX is below the threshold, do not blindly take the continuation trade. Under Method IV, the outside-band move is instead classified as a potential reversal in the opposite direction. That still requires a plan: define the trigger according to the method, state where the reversal idea is wrong, and decide how the trade will be managed.
+
+The exact platform implementation can display these as “trend” or “reversal” alerts. Check the chart and indicator settings being used, because different software may package the calculation and alert labels differently.
+
+### Inspect Figure 5.4
+
+Compare a single close outside a band with two consecutive closes. Then compare the ADX contexts. Figure 5.4 is designed to show that “confirmed breakout” describes a specific condition and that the method's interpretation also depends on the regime filter.
+
+**Task:** In each panel, identify whether the confirmed-breakout condition occurred and whether the method classifies it as trend-following or reversal under the ADX state shown.
+
+**Model reasoning:** Two consecutive outside closes after a squeeze meet the confirmation condition. ADX then determines whether the official Method IV interpretation is continuation or the opposite-direction reversal alert. If the two-close condition is missing, do not label it a confirmed breakout under this method.
+
+### Common mistake
+
+Treating Method IV as “wait for any two large candles.” The rule concerns two consecutive closes outside the same Bollinger Band after a squeeze, with ADX used in the method's interpretation.
+
+### Keep this
+
+> **Method IV asks for two outside closes after a squeeze, then uses ADX to decide whether to read the move as continuation or a potential reversal.**
+
+**Source and further reading:** [Bollinger Bands Confirmed Breakouts (Method IV) Manual](https://www.bollingerbands.com/_files/ugd/58be43_d09c50b6e8ea4afd9af0523ef94de876.pdf). This is Bollinger's later method, published after the first edition of his book.
 
 ---
 
