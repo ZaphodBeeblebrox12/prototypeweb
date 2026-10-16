@@ -1,5 +1,7 @@
 # Accessibility and source notes — M01-L03
 
+**Figure number:** Figure 1.3; interactive panels use Figure 1.3a–Figure 1.3e.
+
 **Linked lesson:** Read the Story Inside a Candle: Wicks, Range and Closing Price
 **Asset purpose:** Describe range, close location and wicks without assigning hidden motives.
 **Data:** Synthetic OHLCV generated for instruction. Not historical market data, not a forecast and not a trading signal.
