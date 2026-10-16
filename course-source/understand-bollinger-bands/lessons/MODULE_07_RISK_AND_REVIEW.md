@@ -64,6 +64,14 @@ Imagine an account of ₹2,00,000 and a chosen maximum planned risk of 0.5%, or 
 
 If the structural stop were at ₹234, the distance would be ₹16 and the same cash-risk limit would allow at most 62 shares before costs. Do not move the stop to ₹242 just to permit a larger position if ₹234 is where the structure actually invalidates the idea. For futures or contracts, include the lot size and point value in the calculation. Gaps and slippage can cause actual loss to exceed the planned amount.
 
+### Second worked comparison: Convert points into cash risk for a contract
+
+For a share, the simple calculation is permitted cash risk divided by entry-to-stop distance. For a futures or other lot-based contract, the distance alone is not the whole answer; you also need the value per point and the contract's lot size. If one lot changes by ₹50 for each point and your stop is 12 points away, the planned price risk is ₹600 per lot before costs. With a ₹1,200 risk allowance, two lots would use the full allowance before fees or slippage, so a smaller position may be more appropriate.
+
+The numbers are illustrative. Always verify the actual point value, lot size, tick size and contract specifications for the instrument you are trading. Do not assume that one point has the same rupee value across stocks, indices, futures and options.
+
+If the stop distance is too large to fit the risk limit at the smallest available size, skip the trade or choose a different setup. Never move a structural stop closer simply so that one lot fits the account. Position sizing is a way to adapt quantity to the trade's risk; it is not a way to make an unsuitable level suitable.
+
 ### Common mistake
 
 Using the same position size on every setup even when the stop distance changes.
@@ -127,6 +135,14 @@ You planned a range trade to exit near the middle of the range, but price is sti
 A long breakout plan enters after a defined close above 104, uses a structural invalidation below 102 and identifies a resistance area around 110. If price advances steadily toward 110, the preselected target or partial-exit rule controls the decision. If price falls through 102, the invalidation controls it. If price stalls at 107 without reaching either point, the written management rule—not impatience—decides whether to hold, reduce or exit.
 
 A poor plan says “I will see how it feels.” It can lead to widening stops after a loss or exiting too early because a candle looks intimidating. The middle band may be useful information, but it is not a universal exit for every method. A breakout, a range reversal and a squeeze-release trade have different reasons for entry. Match the management rule to that reason and apply it consistently while the outcome is still unknown.
+
+### Second worked comparison: Do not make up a new exit because the middle band was reached
+
+A breakout trade is entered after a qualifying close above the upper band. The plan uses a structural stop and a target near a prior resistance area. Price then returns to the middle band but does not reach the planned stop or target. Is that a reason to exit? Only if the management rule says so. The middle line is a useful moving reference, but it is not the universal exit for a breakout, a W-bottom or a range trade.
+
+For a range-reversal setup, a return toward the middle of the range may be the planned objective. For a continuation setup, that same event may be an ordinary pullback. The difference comes from the reason for the entry and the tested method, not the line itself.
+
+Before entry, specify what happens at the target, at invalidation and during a pause between the two. If the method calls for a trailing stop, state the exact rule. If it calls for a fixed target, decide whether any partial exits are allowed. A plan that only says “manage actively” leaves the hardest decision until emotions and an open position are involved.
 
 ### Common mistake
 
@@ -197,6 +213,14 @@ A modified band setting produces better results on the examples you just reviewe
 Suppose you have a set of 40 candidate cases. Do not keep only the cleanest breakouts. Separate cases by context—trend, range, compression, failed first move and unclear structure—and record every case that met the stated rules, including those that stopped out or never offered a viable entry. This does not make 40 cases a guarantee of statistical certainty; it is a practical way to expose whether the rule only looks convincing in selected screenshots.
 
 If the rule performs differently in trending and ranging conditions, note the difference before changing it. Then test any proposed filter against cases that were not used to invent the filter. Keep entries, costs, stop logic and exit rules consistent during the first pass. If you change several inputs together, you will not know which change mattered. The aim is to learn where the method's conditions hold up, not to find a perfect-looking setting for the past.
+
+### Second worked comparison: Keep rule discovery separate from the test sample
+
+Suppose you record 40 candidate charts to evaluate a squeeze breakout. While reviewing them, you notice that results seem weaker when price breaks directly into an older resistance level. You develop a possible filter: skip signals with less than a stated minimum distance to the next obstacle. That is a reasonable hypothesis to test—but if you immediately judge the filter only on the same 40 cases and keep adjusting the distance until the result looks good, the apparent improvement may be specific to that sample.
+
+A better review records the original result and the reason for proposing the filter, then tests the rule on new cases that were not used to develop it. Keep the base settings, entry definition, stops, exits and costs stable while comparing the results. Also check whether the filter simply removes many trades rather than improves decision quality.
+
+Forty examples can help reveal obvious weaknesses, but they do not guarantee statistical confidence or future performance. The goal is to make the test fairer and the assumptions visible. Record cases that fail, cases that do not qualify and cases you pass on. A rule should have to survive the difficult charts as well as the memorable winners.
 
 ### Common mistake
 
@@ -279,6 +303,14 @@ The assignment is not graded by whether you guessed the next price direction. It
 **Case B — Undisciplined win.** The trader enters before confirmation, moves the stop farther away when price goes against the trade, and eventually exits at a profit after a sudden rally. The result is positive, but it does not show that the process was sound or repeatable.
 
 **Case C — No trade.** A required condition is missing or the next obstacle leaves too little room. The trader passes and records why. Review each case without letting the final price path rewrite what could have been known at the decision point.
+
+### Second worked comparison: Use a consistent post-trade review
+
+Imagine a long setup qualifies under the written rule. You enter at the planned location, size the position from the structural stop and exit when that invalidation is reached. Record the loss, but do not label the trade a process failure without further inspection. Ask whether the context, trigger and position size followed the plan, and whether the loss arose from a known failure mode the sample has already exposed.
+
+Now imagine a trade that wins even though the entry happened before confirmation and the stop was moved farther away during the decline. Record the profit, but also record the rule violations. If the journal celebrates only the positive outcome, it may reward behaviour that is dangerous to repeat.
+
+A practical review can use four questions: What evidence was visible at entry? Which rule qualified or disqualified the setup? Was the risk and management plan followed? What single observation should be retained for the next test? Keep later price action separate from what was knowable at the decision point. The purpose is not to excuse every loss or criticise every win; it is to improve the quality and consistency of the process.
 
 ### Common mistake
 
