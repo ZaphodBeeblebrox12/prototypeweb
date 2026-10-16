@@ -1,6 +1,6 @@
 # Sitewide instructional-image replacement
 
-Status: The shared frontend hook is prepared on prototypeweb/my-new-branch. Persistent image replacement is not connected to a live backend.
+Status: The standalone learning-room preview exposes a local-only image replacement control. Production replacement remains a Django backend task; server upload is enabled only by authenticated server-rendered configuration.
 
 ## Intended experience
 
@@ -10,7 +10,7 @@ Shared frontend assets:
 - site/assets/instructional-image-admin.js
 - site/assets/instructional-image-admin.css
 
-They are included in the Trading Path and Support & Resistance learning-room templates. They remain inert in this static preview because there is no authenticated user context, stable media record, or upload endpoint. No browser-only/local-storage substitute is used.
+They are included in the Trading Path and Support & Resistance learning-room templates. The standalone preview uses a labelled local image chooser for layout testing; it only changes the open preview session. It does not upload or persist media. Production controls must be gated by Django permissions, never a query parameter or client-side role flag.
 
 ## Server contract
 
@@ -39,4 +39,4 @@ Backend acceptance requirements:
 6. Keep the old file available for recovery until the new image is verified.
 7. Test staff success; learner/anonymous denial; CSRF failures; unsupported/oversized files; storage failure; repeated use of one asset; and the learner view after replacement.
 
-Release boundary: The frontend hook and template integration are checkpointed, but persistent replacement is not production-ready until backend storage, permissions, records, endpoint and acceptance tests exist. Do not present the static preview as an active upload demo.
+Release boundary: shared upload is not production-ready until backend storage, permissions, records, endpoint and acceptance tests exist. The local preview flag is not authentication and must not ship as a production editing gate.
