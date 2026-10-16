@@ -30,6 +30,9 @@ jobs:
       - name: Check out preview branch
         uses: actions/checkout@v4
 
+      - name: Generate native-dimension image inventory
+        run: python review/build_image_asset_inventory.py --output review/IMAGE_ASSET_INVENTORY.generated.csv
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -394,3 +397,11 @@ jobs:
             sleep 1
           done
           NODE_PATH=/tmp/tt-playwright/node_modules node /tmp/learning-room-smoke.cjs
+
+      - name: Upload native-dimension image inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: instructional-image-inventory
+          path: review/IMAGE_ASSET_INVENTORY.generated.csv
+          if-no-files-found: warn
