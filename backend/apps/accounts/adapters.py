@@ -88,13 +88,13 @@ class CustomAccountAdapter(DefaultAccountAdapter):
     """Custom account adapter with email verification support."""
 
     def clean_email(self, email):
-        """Reject duplicate email addresses before the unique DB constraint is hit."""
-        email = super().clean_email(email)
-        if email and User.objects.filter(email__iexact=email).exists():
-            raise forms.ValidationError(
-                "An account with this email address already exists."
-            )
-        return email
+        """Normalize an email without blocking password recovery for existing users.
+
+        Allauth's signup form enforces ACCOUNT_UNIQUE_EMAIL during registration.
+        This adapter hook is also used by password-reset and email-management
+        forms, where an existing address is expected and must remain usable.
+        """
+        return super().clean_email(email)
 
 
     def pre_login(
