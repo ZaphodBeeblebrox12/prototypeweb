@@ -97,3 +97,43 @@ Next asset pass:
 - Production Django integration has **not** been implemented by these documentation commits. The current static preview's local editing/image behaviour remains preview-only; persistent edits require the separate Academy app, administrator-only permission checks, CSRF, validated database writes, persistent media storage and tests.
 - Work remains on `my-new-branch`. No `main` merge or deployment is authorised.
 
+
+
+## Shared template integration checkpoint — 17 October 2026
+
+**Reviewed source head:** `38159a54d6759d050653d9cc98746985c9ad0aad` — “Document source-linked image slots and administrator overrides”. This section is a source audit checkpoint; it does not change the approved template design or perform Django integration.
+
+### Template decision
+
+- The shared course standard is `course-source/COURSE_TEMPLATE_STANDARD.md`.
+- The canonical design reference is `preview/first-pass/index.html` in this course package.
+- The schema-v1 manifest and authored Markdown remain the structured course and lesson sources; `assets/bollinger-lessons-data.js` is generated preview data, not a second authoring source.
+- The implementation contract is `course-integration/MICROCOURSE_TEMPLATE_DJANGO_HANDOFF.md`.
+- **Decision:** the layout, lesson tabs, notebook treatment, manifest shape, and content handoff are sufficiently defined for extraction into reusable Django templates. The source template is ready for Django integration. This is not a public-release approval.
+
+### Source-level checks completed for this checkpoint
+
+- Parsed the manifest and confirmed schema version 1, seven modules and 30 lessons.
+- Confirmed module and lesson slugs are unique and every manifest lesson's source ID and exact title match a heading in its Markdown source.
+- Parsed the generated `window.BOLLINGER_MANUSCRIPTS` payload as JSON: 30 records, 30 distinct knowledge-check questions, and populated idea, chart-example and practice content for every record.
+- Verified lesson copy ranges from 907 to 1,503 words across those three tabs.
+- Compiled the two inline JavaScript blocks from the current preview for syntax validation.
+- Confirmed the three lesson tabs, notebook styling, chart enlargement controls, removal of the retired “By the end, you can” card, and the notice that browser-local edits are not shared or persistent.
+- Verified the site catalogue’s development-course handling and that the preview/admin-editor source discloses that local image changes are not uploaded or saved.
+
+These are source-content and static syntax checks from this audit; the full Python QA script was not executed as a local test run.
+
+### Assets and checks still outstanding
+
+- The Markdown contains 62 image references: 30 relative local paths and 32 external references in Module 5.
+- The representative expected asset `assets/student-assets/svg/bb-m01-f01.svg` is absent. The asset register states that the figure entries are briefs, not finished or visually QA-approved image files.
+- Inline illustrative charts in the preview are useful for reviewing lesson flow, but they do not mean the finished asset register has been produced.
+- A fresh browser interaction run and screenshot review have not been completed after the expanded 30-lesson manuscript payload was wired into the Learning Room. Earlier browser smoke-test results predate that content-rendering change.
+- No current GitHub status checks were returned for the reviewed source head.
+
+### Handoff boundary
+
+- Django must render this design through the existing Academy base shell and real sitewide navigation; do not ship the standalone preview as the production page.
+- Editing controls inside the HTML preview are review-only. Shared, persistent lesson-text and image changes must be implemented through the Django admin workflow, with authorisation restricted to superusers or the explicitly designated content-admin role—not ordinary staff or learners.
+- Keep course-specific media review visible. Missing local figures and temporary remote references must be resolved and visually checked before public course release.
+- No branch merge, deployment, or public release was performed in this checkpoint.
