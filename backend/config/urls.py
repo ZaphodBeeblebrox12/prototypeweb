@@ -16,6 +16,14 @@ urlpatterns = [
     # Growth admin views - MUST be first to avoid catch_all_view interception
     path("admin/", include("apps.growth.admin_urls", namespace="growth_admin")),
 
+    # Keep one authentication screen: Django admin requests use the same
+    # TradeThesis sign-in page and preserve their requested destination.
+    path(
+        "admin/login/",
+        RedirectView.as_view(url="/accounts/login/", permanent=False, query_string=True),
+        name="admin-login-bridge",
+    ),
+
     # Django admin (default) - comes after so growth URLs take precedence
     path("admin/", admin.site.urls),
     # Academy routes are explicit and must be resolved before public catch-all routes.
