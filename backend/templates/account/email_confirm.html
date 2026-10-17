@@ -1,46 +1,29 @@
-{% extends "base.html" %}
-
-{% block title %}Confirm Email - Community Platform{% endblock %}
-
-{% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Email Confirmation</h4>
-                </div>
-                <div class="card-body">
-                    {% if confirmation %}
-                        <p class="lead">Please confirm your email address: <strong>{{ confirmation.email_address.email }}</strong></p>
-
-                        <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
-                            {% csrf_token %}
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-success btn-lg">
-                                    <i class="bi bi-check-circle"></i> Confirm Email Address
-                                </button>
-                            </div>
-                        </form>
-
-                        <hr class="my-4">
-
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle"></i>
-                            <strong>Note:</strong> Once confirmed, you will be able to access your dashboard and profile.
-                        </div>
-                    {% else %}
-                        <div class="alert alert-danger">
-                            <i class="bi bi-exclamation-triangle"></i>
-                            <strong>Error:</strong> This confirmation link is invalid or has expired.
-                        </div>
-                        <p>
-                            <a href="{% url 'account_login' %}" class="btn btn-primary">Go to Login</a>
-                        </p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+{% extends "auth/account-flow-base.html" %}
+{% block title %}Confirm email · TradeThesis{% endblock %}
+{% block eyebrow %}Account verification{% endblock %}
+{% block heading %}{% if confirmation and can_confirm %}Confirm your email address.{% elif confirmation %}This email is already linked.{% else %}That confirmation link needs replacing.{% endif %}{% endblock %}
+{% block intro %}
+  {% if confirmation and can_confirm %}
+    Confirm <strong>{{ confirmation.email_address.email }}</strong> to complete account verification.
+  {% elif confirmation %}
+    This address has already been confirmed by another account.
+  {% else %}
+    This confirmation link is invalid or has expired. Request a new confirmation link from your account.
+  {% endif %}
+{% endblock %}
+{% block panel_content %}
+  {% if confirmation and can_confirm %}
+    <form class="auth-form" method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+      {% csrf_token %}
+      <button class="primary" type="submit">Confirm email ↗</button>
+    </form>
+  {% endif %}
+  <div class="actions">
+    {% if user.is_authenticated %}
+      <a class="primary" href="{% url 'account_email' %}">Manage email address ↗</a>
+      <a class="secondary" href="{% url 'academy:home' %}">My learning</a>
+    {% else %}
+      <a class="primary" href="{% url 'account_login' %}?next=%2Flearn%2F">Back to sign in ↗</a>
+    {% endif %}
+  </div>
 {% endblock %}
