@@ -1,0 +1,267 @@
+name: One-time Django runtime consolidation
+
+on:
+  push:
+    branches:
+      - my-new-branch
+    paths:
+      - .github/workflows/consolidate-django-runtime.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: tradethesis-django-consolidation
+  cancel-in-progress: false
+
+jobs:
+  consolidate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the integration branch
+        uses: actions/checkout@v4
+        with:
+          ref: my-new-branch
+          fetch-depth: 0
+
+      - name: Clone the approved Django source branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --single-branch --branch feature/tradethesis-academy https://github.com/ZaphodBeeblebrox12/test.git "$RUNNER_TEMP/tradethesis-django"
+          echo "SOURCE_SHA=$(git -C "$RUNNER_TEMP/tradethesis-django" rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Import the Django runtime into backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_DIR="$RUNNER_TEMP/tradethesis-django"
+          mkdir -p backend
+          for path in apps config integrations services static tasks templates tests utils docs data; do
+            if [[ -d "$SOURCE_DIR/$path" ]]; then
+              rm -rf "backend/$path"
+              cp -a "$SOURCE_DIR/$path" backend/
+            fi
+          done
+          for path in .env.example .gitignore .python-version DEPLOY.md Dockerfile Makefile README.md REFACTOR_NOTES.md docker-compose.yml manage.py pyproject.toml pytest.ini requirements.txt; do
+            if [[ -f "$SOURCE_DIR/$path" ]]; then
+              cp "$SOURCE_DIR/$path" "backend/$path"
+            fi
+          done
+          find backend -type d -name __pycache__ -prune -exec rm -rf {} +
+          find backend -type f \( -name '*.pyc' -o -name '*.pyo' \) -delete
+          rm -f backend/db.sqlite3 backend/db.sqlite3-journal backend/ngrok.exe
+
+          # Retain the safe, opt-in staging superuser bootstrap used by the existing staging setup.
+          cat > backend/build.sh <<'BUILD'
+          #!/usr/bin/env bash
+          set -o errexit
+          pip install -r requirements.txt
+          python manage.py collectstatic --noinput
+          python manage.py migrate --noinput
+
+          if [[ "${BOOTSTRAP_STAGING_ADMIN:-false}" =~ ^(1|true|TRUE|yes|YES)$ ]]; then
+            : "${STAGING_ADMIN_USERNAME:?STAGING_ADMIN_USERNAME is required for admin bootstrap}"
+            : "${STAGING_ADMIN_EMAIL:?STAGING_ADMIN_EMAIL is required for admin bootstrap}"
+            : "${STAGING_ADMIN_PASSWORD:?STAGING_ADMIN_PASSWORD is required for admin bootstrap}"
+            python manage.py shell -c '
+          import os
+          from django.contrib.auth import get_user_model
+          User = get_user_model()
+          username = os.environ["STAGING_ADMIN_USERNAME"].strip()
+          email = os.environ["STAGING_ADMIN_EMAIL"].strip()
+          password = os.environ["STAGING_ADMIN_PASSWORD"]
+          existing = User.objects.filter(username=username).first()
+          if existing:
+              if existing.is_superuser and existing.is_staff:
+                  print("Staging admin bootstrap skipped: requested superuser already exists.")
+              else:
+                  raise SystemExit("Staging admin bootstrap stopped: username exists but is not a superuser.")
+          else:
+              User.objects.create_superuser(username=username, email=email, password=password)
+              print("Staging superuser created.")
+          '
+          fi
+          BUILD
+          chmod +x backend/build.sh
+
+      - name: Update the architecture handoff
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("docs/architecture/FRONTEND_BACKEND_INTEGRATION.md")
+          text = path.read_text(encoding="utf-8")
+          text = text.replace(
+              "There is no Django project runtime in this repository at present: no `manage.py`, root `config/` package, dependency lock/requirements for the web backend, or production database configuration. The member screens are preview HTML, not secure account pages.",
+              "The Django runtime is now consolidated under `backend/` on `prototypeweb/my-new-branch`. The public member screens remain static design previews; authenticated account, checkout, and course access must be validated through the Django runtime before being treated as production flows."
+          )
+          start = text.find("### Existing Django implementation: separate repository")
+          end = text.find("## Reusable micro-course template and Django handoff", start)
+          if start < 0 or end < 0:
+              raise SystemExit("Could not locate the expected Django section in the integration handoff; aborting rather than overwriting an unexpected document.")
+          replacement = """### Django runtime and rollback source
+
+The runnable Django application is now under `backend/` in this repository, on `prototypeweb/my-new-branch`. It was copied from `ZaphodBeeblebrox12/test` / `feature/tradethesis-academy` at source commit `""" + "${SOURCE_SHA}" + """`.
+
+The source repository and its feature branch remain unchanged as the rollback/source reference until staging verification is complete. Do not merge this work into `main`.
+
+Runtime paths now live under `backend/`: `manage.py`, `config/`, `apps/`, migrations, templates, static assets, dependencies, and tests. Key Academy routes include:
+
+- `/learn/` — authenticated learning home;
+- `/learn/course/<course_slug>/` — course overview and access state;
+- `/learn/course/<course_slug>/lesson/<lesson_uuid>/` — authorized lesson detail;
+- `/learn/lesson/<lesson_uuid>/progress/` — authenticated POST for progress;
+- `/accounts/login/` and `/accounts/signup/` — Django Allauth pages.
+
+Render's existing staging services still need to be pointed at `my-new-branch` after CI validation. The consolidation workflow does not alter Render configuration or deploy services.
+
+"""
+          text = text[:start] + replacement + text[end:]
+          path.write_text(text, encoding="utf-8")
+          PY
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("README.md")
+          text = path.read_text(encoding="utf-8")
+          old = "This is a **design and content review package**, not a production backend. Checkout, authenticated learner accounts, server-side progress, scheduled daily release and production Telegram delivery are not connected."
+          new = "The website and standalone course-room previews remain design/content-review surfaces. The Django runtime now lives under `backend/`; checkout, authenticated learner accounts, server-side progress, scheduled daily release and production Telegram delivery still require end-to-end staging verification before launch."
+          if old in text:
+              text = text.replace(old, new)
+          note = "\n\n## Django runtime consolidation\n\nThe Django runtime is maintained under `backend/` on `my-new-branch`. See [the consolidation handoff](backend/CONSOLIDATION_HANDOFF.md) and [frontend/backend integration map](docs/architecture/FRONTEND_BACKEND_INTEGRATION.md). The prior `test/feature/tradethesis-academy` source branch remains intact as the rollback reference until staging is verified.\n"
+          if "## Django runtime consolidation" not in text:
+              text += note
+          path.write_text(text, encoding="utf-8")
+          PY
+
+      - name: Add the consolidated runtime handoff
+        shell: bash
+        run: |
+          cat > backend/CONSOLIDATION_HANDOFF.md <<EOF
+          # Django runtime consolidation checkpoint
+
+          - Target repository: `ZaphodBeeblebrox12/prototypeweb`
+          - Target branch: `my-new-branch`
+          - Runtime directory: `backend/`
+          - Source repository: `ZaphodBeeblebrox12/test`
+          - Source branch: `feature/tradethesis-academy`
+          - Imported source commit: `$SOURCE_SHA`
+
+          ## Scope copied
+
+          The application packages, settings, migrations, Django templates, static files, tests, management commands, integration packages, required dependencies, GeoLite database, and deployment notes were copied into `backend/`. The existing website, course-content and course-source directories remain at the repository root.
+
+          ## Explicit exclusions
+
+          The import does not copy a local database, environment secrets, generated Python bytecode, one-off live test scripts, temporary patch artifacts, or the source repository's Render Blueprint (whose service names and main-branch instructions are not appropriate for this repository).
+
+          ## Deployment status
+
+          No Render settings were modified by this workflow and no Render deployment was triggered. Before staging validation, configure the public static staging service and Academy staging service to use `prototypeweb` / `my-new-branch`; the Academy service build/start commands should continue to run from `backend/`. Keep the existing `tradeadmin` service unchanged until staging has been checked.
+
+          ## Verification
+
+          This workflow runs the Academy-focused lint, formatting and type checks, the micro-course image-slot regression test, and the full Django test suite before committing the consolidation. Formatting/type-check warnings are advisory as in the source CI configuration.
+          EOF
+
+      - name: Add consolidated backend CI workflow
+        shell: bash
+        run: |
+          mkdir -p .github/workflows
+          cat > .github/workflows/academy-backend-ci.yml <<'YAML'
+          name: Academy backend CI
+
+          on:
+            push:
+              branches: [my-new-branch]
+              paths:
+                - "backend/**"
+                - ".github/workflows/academy-backend-ci.yml"
+            pull_request:
+              branches: [my-new-branch]
+              paths:
+                - "backend/**"
+                - ".github/workflows/academy-backend-ci.yml"
+
+          permissions:
+            contents: read
+
+          jobs:
+            test:
+              runs-on: ubuntu-latest
+              strategy:
+                fail-fast: false
+                matrix:
+                  python-version: ["3.11", "3.12"]
+              defaults:
+                run:
+                  working-directory: backend
+              steps:
+                - uses: actions/checkout@v4
+
+                - name: Set up Python
+                  uses: actions/setup-python@v5
+                  with:
+                    python-version: ${{ matrix.python-version }}
+
+                - name: Install dependencies
+                  run: |
+                    python -m pip install --upgrade pip
+                    pip install -r requirements.txt
+                    python -m pip install ruff black mypy django-stubs pytest pytest-cov pytest-django
+
+                - name: Run linting with ruff
+                  run: ruff check apps/academy/ tests/academy/
+
+                - name: Check formatting with black
+                  continue-on-error: true
+                  run: black --check apps/academy/ tests/academy/
+
+                - name: Run type checking with mypy
+                  continue-on-error: true
+                  run: mypy apps/academy/
+
+                - name: Run focused micro-course image-slot regressions
+                  run: pytest tests/academy/test_course_import_workflow.py
+
+                - name: Run full test suite
+                  run: pytest --cov=apps --cov=integrations --cov-report=xml
+          YAML
+
+      - name: Verify the consolidated backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m pip install ruff black mypy django-stubs pytest pytest-cov pytest-django
+          ruff check apps/academy/ tests/academy/
+          black --check apps/academy/ tests/academy/ || echo "::warning::Black check is advisory, consistent with the source CI configuration."
+          mypy apps/academy/ || echo "::warning::Mypy check is advisory, consistent with the source CI configuration."
+          pytest tests/academy/test_course_import_workflow.py
+          pytest --cov=apps --cov=integrations --cov-report=xml
+        working-directory: backend
+
+      - name: Commit consolidated code to my-new-branch only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git rm .github/workflows/consolidate-django-runtime.yml
+          git add backend README.md docs/architecture/FRONTEND_BACKEND_INTEGRATION.md .github/workflows/academy-backend-ci.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Consolidate Django runtime under backend on my-new-branch"
+          git push origin HEAD:my-new-branch
+          {
+            echo "## Django runtime consolidation"
+            echo ""
+            echo "- Source: `test/feature/tradethesis-academy` at `$SOURCE_SHA`"
+            echo "- Target: `prototypeweb/my-new-branch`"
+            echo "- Runtime directory: `backend/`"
+            echo "- Lint, focused Academy tests and full tests completed before commit."
+            echo "- Render configuration and deployments were not touched."
+          } >> "$GITHUB_STEP_SUMMARY"
