@@ -1,4 +1,5 @@
 """Tests for support-ticket account isolation."""
+from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -20,6 +21,9 @@ class SupportTicketUserScopeTests(TestCase):
             username="ticket-other",
             email="ticket-other@example.test",
             password="test-password-123!",
+        )
+        EmailAddress.objects.create(
+            user=self.owner, email=self.owner.email, primary=True, verified=True
         )
         self.own_ticket = SupportTicket.objects.create(
             user=self.owner,

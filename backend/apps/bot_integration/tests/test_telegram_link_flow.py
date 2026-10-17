@@ -14,6 +14,7 @@ import time
 import uuid
 from unittest import mock
 
+from allauth.account.models import EmailAddress
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -226,6 +227,9 @@ class AccountUnlinkMethodTests(TestCase):
 
     def setUp(self):
         self.user = make_user("unlink-learner")
+        EmailAddress.objects.create(
+            user=self.user, email=self.user.email, primary=True, verified=True
+        )
         self.client.force_login(self.user)
 
     def test_telegram_unlink_rejects_get_without_removing_connection(self):
