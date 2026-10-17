@@ -39,6 +39,9 @@ jobs:
           pip install -r requirements.txt
           python -m pip install ruff black mypy django-stubs pytest pytest-cov pytest-django
 
+      - name: Validate Render build script syntax
+        run: bash -n build.sh
+
       - name: Check Django migration state
         run: python manage.py makemigrations --check --dry-run
 
