@@ -1,3 +1,6 @@
+from datetime import datetime, timezone
+from types import SimpleNamespace
+
 from django.template.loader import get_template
 from django.test import SimpleTestCase
 
@@ -7,7 +10,17 @@ class MemberDeskTemplateContractTests(SimpleTestCase):
 
     def test_live_member_desk_template_compiles_and_renders(self):
         template = get_template("accounts/member_desk.html")
-        rendered = template.render({})
+        user = SimpleNamespace(
+            username="test-member",
+            first_name="Test",
+            email="test@example.com",
+            date_joined=datetime(2026, 1, 1, tzinfo=timezone.utc),
+            last_login=None,
+            telegram_username="",
+            discord_username="",
+            get_full_name=lambda: "Test Member",
+        )
+        rendered = template.render({"user": user})
 
         self.assertIn("TradeThesis", rendered)
         self.assertIn('id="page-overview"', rendered)
