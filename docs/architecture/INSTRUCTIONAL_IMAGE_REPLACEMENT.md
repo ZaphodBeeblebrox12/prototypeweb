@@ -4,7 +4,7 @@ Status: The standalone learning-room preview exposes a local-only image replacem
 
 ## Intended experience
 
-An authorised staff member opens a lesson, selects Replace image beside a figure, uploads a JPG, PNG or WebP, and receives a clear success/error message. The update applies to every displayed use of the same stable asset, and learners then receive the newest shared image. Students and ordinary learners do not see editing controls.
+An authorised administrator opens a lesson, selects Replace image beside a figure, uploads a JPG, PNG or WebP, and receives a clear success/error message. The update applies to every displayed use of the same stable asset, and learners then receive the newest shared image. Students and ordinary learners do not see editing controls.
 
 Shared frontend assets:
 - site/assets/instructional-image-admin.js
@@ -33,7 +33,7 @@ The current prototypeweb repository is static and does not contain the Django ru
 Backend acceptance requirements:
 1. Add a shared media record with stable ID, persistent image storage, alt text, course/lesson association as needed, and who/when audit fields.
 2. Render the same media record in every use with stable ID and authorised replacement URL.
-3. Use a CSRF-protected POST endpoint restricted to authenticated staff with the specific media-edit permission. The hidden button is not security.
+3. Use a CSRF-protected POST endpoint restricted to authenticated administrators with a dedicated media-edit permission assigned only to administrators. The hidden button is not security.
 4. Validate the decoded image server-side; allow JPEG/PNG/WebP, enforce file-size limits and safe generated filenames. Do not accept SVG uploads as user content.
 5. Store to persistent shared storage and return a versioned/cache-safe URL only after the storage and database update succeed.
 6. Keep the old file available for recovery until the new image is verified.
