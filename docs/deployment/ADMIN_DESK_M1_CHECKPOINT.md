@@ -4,10 +4,13 @@
 **Branch:** `my-new-branch`  
 **Original implementation baseline:** `ae1f93add560109e365ea8e7a194a400baea6bfe`  
 **Route:** `/staff/admin-desk/`  
-**Status:** Implemented and verified in backend CI.
+**Status:** Deployed to staging; CI green. Authenticated browser acceptance remains pending.
 **Code commit verified by CI:** `00f208d7b3238903603f7daa361a1551fdf98260`.
 **CI:** [Run 39070357094](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39070357094) — success on Python 3.11 and 3.12. Each full suite: 699 passed, 213 warnings, 11 subtests passed. The focused Academy regression: 15 passed, 9 warnings, 4 subtests passed.
-**Deployment/staging browser check:** not performed.
+**Render staging service:** `tradethesis-academy-staging` (`srv-db9ioke1egvs73feb8ag`).  
+**Deployment:** `dep-db9uic61egvs738ma45g`, status `live`, from branch head `1329867c081cdd1ac5b96dab833b57d4ce402f69`. Started `2026-10-17T21:31:28Z`, finished `2026-10-17T21:33:14Z`.  
+**Server health:** new instance started Gunicorn and Render logged `GET /health/` HTTP 200 at `2026-10-17T21:33:17Z`. No error/warning-level app logs were returned in the `21:33–21:35Z` check window.  
+**Browser limitation:** this execution environment could not resolve/access the public Render hostname. I could not independently verify authenticated HTML rendering of `/staff/admin-desk/`, `/staff/ops/` or `/admin/`; a logged-in browser spot-check remains pending.
 
 ## What this milestone adds
 
@@ -31,4 +34,4 @@ The pre-existing `/staff/ops/` payments operations cockpit is intentionally unch
 - Admin Desk regression tests for access control and real counts.
 - Full backend CI passed on code commit `00f208d7b3238903603f7daa361a1551fdf98260`, across Python 3.11 and 3.12.
 - The existing `/staff/ops/` payments cockpit tests pass after the Admin Desk route was separated.
-- Staging/manual browser verification is deliberately separate and has not been performed. No deployment was triggered.
+- Render staging deployment is live and health-probe checks passed. Authenticated route and visual acceptance remain a manual follow-up because the public host was inaccessible from this execution environment.

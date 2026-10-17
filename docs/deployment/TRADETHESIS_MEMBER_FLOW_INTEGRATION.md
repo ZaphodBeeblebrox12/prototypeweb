@@ -40,3 +40,12 @@ The former `index` URL name is preserved for backwards-compatible URL reversing,
 - The owner has confirmed the new dashboard visual is visible. Automated tests cover the member journey and connection-action security; a final manual spot-check of resume behavior on the owner's own account remains useful. No live payment/provider transaction was performed as part of this milestone.
 - Advisory limitation: Black and mypy are `continue-on-error` in CI. The mypy step reports existing typing findings (18 errors in 8 files, including constraint keyword typings, `timezone.timedelta` annotations and Telegram result typing). They do not fail required CI but remain technical debt.
 - The public static-site service was not redeployed; `main` and the separate legacy `tradeadmin` service remain untouched.
+
+
+### Admin Desk staging deployment checkpoint — 2026-10-18
+
+- Admin Desk code passed [backend CI run 39070357094](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39070357094): 699 passed, 213 warnings and 11 subtests passed on each of Python 3.11 and 3.12.
+- Render Academy staging service `tradethesis-academy-staging` (`srv-db9ioke1egvs73feb8ag`) is now live on branch head `1329867c081cdd1ac5b96dab833b57d4ce402f69`, deployment `dep-db9uic61egvs738ma45g`. Render recorded the rollout complete at `2026-10-17T21:33:14Z`.
+- The new instance started Gunicorn successfully; Render health probes recorded HTTP 200 on `/health/` after rollout. The service log query found no error- or warning-level entries in the checked rollout window.
+- Public URL: https://tradethesis-academy-staging.onrender.com. This execution environment could not resolve/access the public Render hostname, so authenticated route rendering for `/staff/admin-desk/`, continued operation of `/staff/ops/`, and Django admin visual acceptance still need a browser check by the owner.
+- The separate static-site service was not redeployed. The legacy `tradeadmin` service and `main` branch remain untouched.
