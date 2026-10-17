@@ -6,7 +6,7 @@ Mocks the HTTP boundary (requests.post) only - no real Telegram traffic.
 from unittest import mock
 
 import requests
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, override_settings
 
 from apps.bot_integration.services import telegram_transport as tmod
 from apps.bot_integration.services.telegram import TelegramBotService
@@ -34,6 +34,20 @@ class FakeResponse:
 
 def make_transport(**kw):
     return TelegramMessageTransport(token=kw.pop("token", TOKEN), **kw)
+
+
+class EnvironmentCredentialTests(SimpleTestCase):
+    @override_settings(TELEGRAM_BOT_TOKEN="environment-token")
+    @mock.patch.object(TelegramBotService, "_get_config")
+    def test_bot_token_comes_from_environment(self, config_mock):
+        self.assertEqual(TelegramBotService._get_token(), "environment-token")
+        config_mock.assert_not_called()
+
+    @override_settings(TELEGRAM_BOT_TOKEN="")
+    @mock.patch.object(TelegramBotService, "_get_config")
+    def test_missing_environment_token_is_not_loaded_from_database(self, config_mock):
+        self.assertEqual(TelegramBotService._get_token(), "")
+        config_mock.assert_not_called()
 
 
 class SuccessTests(SimpleTestCase):
