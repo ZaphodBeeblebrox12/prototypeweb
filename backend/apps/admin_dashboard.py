@@ -9,7 +9,9 @@ index via templates/admin/dashboard.html.
 import datetime
 
 from django.contrib import admin
-from django.db.models import Count
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.db.models import Count, Q
 from django.db.models.functions import TruncDate
 from django.shortcuts import render
 from django.urls import reverse
@@ -113,3 +115,78 @@ def operational_dashboard(request):
     # from apps/__init__.py during app loading, before the registry is ready.
     return render(request, "admin/dashboard.html",
                   _subscription_dashboard_context(request))
+
+
+@login_required
+def staff_ops_dashboard(request):
+    """Read-only, permission-aware operational desk for Django staff users."""
+    if not request.user.is_active or not request.user.is_staff:
+        raise PermissionDenied
+
+    from apps.academy.permissions import is_course_content_admin
+
+    context = _subscription_dashboard_context(request)
+    context["django_admin_url"] = reverse("admin:index")
+    context["can_manage_course_content"] = is_course_content_admin(request.user)
+
+    if context["can_manage_course_content"]:
+        from django.contrib.auth import get_user_model
+        from apps.academy.models import (
+            Course, CourseEntitlement, CourseImport, CourseModule, CourseOffer,
+            Lesson, LessonProgress,
+        )
+
+        now = timezone.now()
+        course_counts = Course.objects.aggregate(
+            courses_total=Count("id"),
+            draft_courses=Count("id", filter=Q(status=Course.Status.DRAFT)),
+            published_courses=Count("id", filter=Q(status=Course.Status.PUBLISHED)),
+            archived_courses=Count("id", filter=Q(status=Course.Status.ARCHIVED)),
+        )
+        course_counts.update({
+            "published_lessons": Lesson.objects.filter(
+                is_published=True,
+                module__is_published=True,
+                module__course__status=Course.Status.PUBLISHED,
+            ).count(),
+            "active_offers": CourseOffer.objects.filter(
+                is_active=True,
+                course__status=Course.Status.PUBLISHED,
+                plan__isnull=False,
+                plan__is_active=True,
+            ).count(),
+            "imports_awaiting_review": CourseImport.objects.filter(
+                status=CourseImport.Status.REVIEW,
+            ).count(),
+            "active_entitlements": CourseEntitlement.objects.filter(
+                status=CourseEntitlement.Status.ACTIVE, starts_at__lte=now,
+            ).filter(Q(expires_at__isnull=True) | Q(expires_at__gt=now)).count(),
+            "completed_lessons": LessonProgress.objects.filter(
+                status=LessonProgress.Status.COMPLETED,
+                lesson__is_published=True,
+                lesson__module__is_published=True,
+                lesson__module__course__status=Course.Status.PUBLISHED,
+            ).count(),
+            "active_learners": get_user_model().objects.filter(
+                is_active=True, is_staff=False,
+            ).count(),
+        })
+        context["course_metrics"] = course_counts
+        link_models = {
+            "courses": Course,
+            "modules": CourseModule,
+            "lessons": Lesson,
+            "offers": CourseOffer,
+            "imports": CourseImport,
+            "entitlements": CourseEntitlement,
+        }
+        course_links = {}
+        for key, model in link_models.items():
+            model_admin = admin.site._registry.get(model)
+            if model_admin and model_admin.has_view_permission(request):
+                course_links[key] = reverse(
+                    f"admin:{model._meta.app_label}_{model._meta.model_name}_changelist"
+                )
+        context["course_links"] = course_links
+
+    return render(request, "admin/desk.html", context)
