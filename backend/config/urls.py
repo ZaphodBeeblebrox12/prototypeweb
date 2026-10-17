@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.decorators.cache import never_cache
 
 # Use allauth's views for login and signup
 from allauth.account.views import LoginView, SignupView
@@ -26,14 +27,15 @@ urlpatterns = [
     path("learn/", include("apps.academy.urls")),
     path('', include('apps.public_views.urls')),
 
-    # Custom auth views using allauth (with your custom templates)
-    path("accounts/login/", LoginView.as_view(
+    # Custom auth views using your templates. Never cache auth pages: stale
+    # HTML can carry a CSRF token that no longer matches the browser's cookie.
+    path("accounts/login/", never_cache(LoginView.as_view(
         template_name="auth/tradethesis_login.html",
-    ), name="account_login"),
+    )), name="account_login"),
 
-    path("accounts/signup/", SignupView.as_view(
+    path("accounts/signup/", never_cache(SignupView.as_view(
         template_name="auth/tradethesis_signup.html",
-    ), name="account_signup"),
+    )), name="account_signup"),
 
     path("accounts/", include("allauth.urls")),
     path("api/auth/telegram/", TelegramCallbackView.as_view(), name="api_telegram_auth"),
