@@ -1,7 +1,7 @@
-"""PlanFeature: landing-page feature bullets are DB-driven with fallback."""
+"""Plan feature cards remain data-driven without a Django landing page."""
 from django.test import RequestFactory, TestCase
 
-from apps.public_views.views import LandingPageView
+from apps.subscriptions.services.plan_catalogue_pricing import PlanCataloguePricing
 from apps.subscriptions.models import Plan, PlanFeature, PlanPrice
 
 
@@ -15,7 +15,7 @@ class PlanFeatureLandingTests(TestCase):
 
     def _card(self, plan, request=None):
         request = request or RequestFactory().get("/")
-        tiers = LandingPageView()._get_tiered_plans(request)
+        tiers = PlanCataloguePricing()._get_tiered_plans(request)
         return next(t for t in tiers if t["plan"].pk == plan.pk)
 
     def test_db_features_render_in_position_order(self):
@@ -31,7 +31,7 @@ class PlanFeatureLandingTests(TestCase):
         plan = self._paid_plan()
         card = self._card(plan)
         self.assertEqual(card["features"],
-                         LandingPageView()._get_features_for_tier("basic"))
+                         PlanCataloguePricing()._get_features_for_tier("basic"))
 
     def test_db_features_replace_fallback_entirely(self):
         plan = self._paid_plan()
