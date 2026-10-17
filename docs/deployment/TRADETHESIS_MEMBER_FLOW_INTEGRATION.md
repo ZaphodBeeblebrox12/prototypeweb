@@ -5,7 +5,7 @@
 - Public marketing, courses overview and editorial pages are served by the static TradeThesis site in `site/`.
 - Academy root (`/`) redirects to `TRADETHESIS_PUBLIC_SITE_URL`, defaulting to `https://tradethesis-public-staging.onrender.com/`. The legacy TradeAdmin landing page is no longer a route target.
 - Django/allauth owns login, signup, password reset, email verification and sessions. The login/signup routes explicitly use `auth/tradethesis_login.html` and `auth/tradethesis_signup.html`.
-- The protected `/dashboard/` route renders `accounts/member_desk.html` using authenticated user data: the published Academy catalogue, active course entitlements, saved lesson progress, account subscriptions, payment records and notifications.
+- The protected `/dashboard/` route renders `accounts/member_desk.html` using authenticated user data: the published Academy catalogue, active course entitlements, saved lesson progress, account subscriptions, payment records and notifications. The live template uses the approved light, compact mock-style dashboard, with real account values and functional seven-section navigation; the static preview remains visual-only.
 - The static `site/member-area-preview.html` is visual-only and contains sample data; it is not the live dashboard.
 
 ## Legacy cleanup

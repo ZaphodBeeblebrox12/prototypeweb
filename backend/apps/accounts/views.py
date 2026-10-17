@@ -4,6 +4,7 @@ Account views for community platform.
 import hashlib
 import hmac
 import json
+import os
 from datetime import datetime
 from decimal import Decimal
 
@@ -565,13 +566,39 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
                 ),
             })
 
+        telegram_account = getattr(user, "telegram_account", None)
+        discord_account = getattr(user, "discord_account", None)
+        discord_connected = bool(discord_account and discord_account.is_active)
+        public_site_url = os.environ.get(
+            "TRADETHESIS_PUBLIC_SITE_URL",
+            "https://tradethesis-public-staging.onrender.com/",
+        ).strip()
+        if (
+            not public_site_url.startswith("https://")
+            or any(ord(char) < 32 for char in public_site_url)
+        ):
+            public_site_url = "https://tradethesis-public-staging.onrender.com/"
+        public_site_url = public_site_url.rstrip("/")
+
         context.update({
             "member_course_cards": member_course_cards,
+            "member_owned_courses": [
+                card for card in member_course_cards if card["entitlement"] is not None
+            ],
             "member_courses_total": len(member_course_cards),
             "member_lessons_completed": sum(
                 card["completed_lessons"] for card in member_course_cards
             ),
             "member_active_entitlements": len(active_entitlements),
+            "member_access_record_count": len(active_entitlements) + len(active_subs),
+            "telegram_account": telegram_account,
+            "discord_account": discord_account,
+            "discord_connected": discord_connected,
+            "member_connected_accounts": (
+                int(bool(telegram_account and telegram_account.is_active))
+                + int(discord_connected)
+            ),
+            "public_site_url": public_site_url,
         })
         return render(request, "accounts/member_desk.html", context)
 
