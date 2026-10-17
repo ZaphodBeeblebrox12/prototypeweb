@@ -255,8 +255,11 @@ class TestPasswordRecovery:
             "action": "change password",
         })
         assert changed.status_code == 302
-        assert changed["Location"].endswith(
-            reverse("account_reset_password_from_key_done")
-        )
+        # This project logs the user in after a successful reset and sends
+        # them to the normal learner dashboard.
+        assert changed["Location"].endswith("/learn/")
+        dashboard = client.get("/learn/")
+        assert dashboard.status_code == 200
+        assert b"Your TradeThesis desk" in dashboard.content
         user.refresh_from_db()
         assert user.check_password(new_password)
