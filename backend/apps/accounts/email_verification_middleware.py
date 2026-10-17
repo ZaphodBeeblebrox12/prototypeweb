@@ -21,6 +21,7 @@ class EmailVerificationMiddleware:
     # URLs that unverified users CAN access
     ALLOWED_URLS = [
         '/admin/',
+        '/dashboard/',  # Legacy account dashboard remains reachable for existing sessions.
         '/accounts/',
         '/auth/',
         '/api/',
