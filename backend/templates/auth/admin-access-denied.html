@@ -1,0 +1,9 @@
+{% extends "auth/account-flow-base.html" %}
+{% block title %}Admin access required · TradeThesis{% endblock %}
+{% block eyebrow %}Restricted area{% endblock %}
+{% block heading %}Admin access is restricted.{% endblock %}
+{% block intro %}This account can access TradeThesis learning, but it does not have staff permission for Django administration. You do not need to sign in again to continue learning.{% endblock %}
+{% block panel_content %}
+<div class="note">If you believe you should have staff access, ask an existing administrator to review your account permissions.</div>
+<div class="actions"><a class="primary" href="{% url 'academy:home' %}">Return to learning ↗</a><a class="secondary" href="{{ PUBLIC_SITE_URL }}/">Back to TradeThesis</a></div>
+{% endblock %}
