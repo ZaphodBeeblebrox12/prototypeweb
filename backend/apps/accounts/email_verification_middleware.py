@@ -101,7 +101,9 @@ class EmailVerificationMiddleware:
         try:
             resolver = resolve(path)
             url_name = resolver.url_name
-            if url_name in self.ALLOWED_URL_NAMES:
+            # The Academy namespace also has a route named "home". Do not
+            # treat that learner dashboard as the public home-page exception.
+            if url_name in self.ALLOWED_URL_NAMES and resolver.namespace != "academy":
                 return True
         except:
             pass
