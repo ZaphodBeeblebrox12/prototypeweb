@@ -12,24 +12,30 @@ Before a hosted staging run, configure SMTP credentials and a provider-supported
 
 The static website's `site/member-access.html` reads `meta[name="academy-base-url"]`; `site/assets/academy-routing.js` uses it to send login, signup, password-reset and learner-dashboard links to Django. The default points to the planned staging hostname, not proof that a live service exists. Update that single meta value once the actual Academy host is known. Navigation is full-page, so no cross-origin API or token-auth layer is needed for the first release.
 
+## Free-tier staging plan
+
+The Render web service remains on the **Free** compute plan. The Blueprint intentionally does not provision Render Postgres, because this workspace already uses its single active free Postgres slot for the separate TradeAdmin database. Do not delete, repurpose, or point Academy at TradeAdmin.
+
+For a no-cost staging trial, create a separate free-tier PostgreSQL project with a provider that supports external connections (for example, Supabase Free) and set its connection URI as the Academy service's `DATABASE_URL` environment variable in Render. The Blueprint marks this value `sync: false`; keep credentials in the hosting dashboard, never in GitHub. Supabase Free currently allows up to two active free projects and 500 MB database storage per project, but inactive projects can pause after a week and the free plan has no automatic database backups. This is suitable for a temporary QA environment, not durable production data. See the [Supabase pricing](https://supabase.com/pricing) and [project pausing](https://supabase.com/docs/guides/platform/free-project-pausing) documentation.
+
+There is an email constraint too: Render Free web services cannot send outbound SMTP traffic on ports 25, 465 or 587. Account-verification and password-reset acceptance cannot be considered complete until the staging app uses an email delivery path supported on Free compute (such as an HTTPS email API backend) or the web service is deliberately upgraded. Do not add billing or upgrade resources without the product owner's approval.
+
 ## One-time staging catalogue import
 
-The three importers are deliberately create-only and draft-only. They create no pricing Plan or CourseOffer, publish no lessons, and do not provision delivery channels. First validate all source packages without making database changes:
+The three importers are deliberately create-only and draft-only. They create no pricing Plan or CourseOffer, publish no lessons, and do not provision delivery channels. First validate the whole catalogue without making database changes:
 
 ```bash
 cd backend
-python manage.py seed_trading_path
-python manage.py seed_support_resistance
-python manage.py seed_volume_price_analysis
+python manage.py seed_academy_catalogue
 ```
 
-Only after those validations pass and the intended staging database is confirmed, run each importer **once** against that database:
+Only after validation passes and the intended dedicated staging database is confirmed, import the complete catalogue **once**:
 
 ```bash
-python manage.py seed_trading_path --apply
-python manage.py seed_support_resistance --apply
-python manage.py seed_volume_price_analysis --apply
+python manage.py seed_academy_catalogue --apply
 ```
+
+This orchestration command preflights the three canonical source importers, refuses to overwrite any of the three course slugs, and imports all three courses in a single database transaction. If the post-import checks fail, the complete batch rolls back. Expected total: 16 unpublished modules, 78 unpublished lessons, and 78 separate instructor-material records, with no course offers created.
 
 Expected draft content: Trading Path (4 modules / 30 lessons), Support & Resistance (6 modules / 18 lessons), and Volume Price Analysis (6 modules / 30 lessons). These are source/importer expectations, not claims that records already exist in a deployed database. The commands refuse to overwrite a course slug that already exists; inspect the current catalogue before retrying after any partial/manual import.
 
