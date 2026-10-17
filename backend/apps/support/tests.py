@@ -37,8 +37,8 @@ class SupportTicketUserScopeTests(TestCase):
         response = self.client.get(reverse("support:my_tickets"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "MY_PRIVATE_TICKET")
-        self.assertNotContains(response, "SOMEONE_ELSES_PRIVATE_TICKET")
+        self.assertContains(response, str(self.own_ticket.short_id))
+        self.assertNotContains(response, str(self.other_ticket.short_id))
         self.assertEqual(
             list(response.context["tickets"].values_list("pk", flat=True)),
             [self.own_ticket.pk],
