@@ -1,7 +1,7 @@
 import base64
+import requests
 from unittest.mock import Mock, patch
 
-import requests
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import EmailMultiAlternatives
 from django.test import SimpleTestCase, override_settings
