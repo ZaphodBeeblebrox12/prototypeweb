@@ -18,9 +18,8 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.accounts.models import User
-    BotConfig, DiscordAccount, TelegramAccount, TelegramVerificationToken)
 from apps.bot_integration.models import (
-    BotConfig, TelegramAccount, TelegramVerificationToken)
+    BotConfig, DiscordAccount, TelegramAccount, TelegramVerificationToken)
 from apps.bot_integration.provision_auth import sign_payload
 
 # Mirrors PROVISION_SHARED_SECRET in config.settings.test_provision
