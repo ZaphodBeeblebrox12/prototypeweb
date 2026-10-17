@@ -26,7 +26,7 @@ The ₹999 Trading Path and ₹17,000 CONSTRUCT offers now share a course-card s
 
 ## Important status and access notes
 
-This is a **design and content review package**, not a production backend. Checkout, authenticated learner accounts, server-side progress, scheduled daily release and production Telegram delivery are not connected. The course-room prototype deliberately has all 30 lessons available for review. The ₹999 Trading Path does **not** include trading-bot access; delivery of course lessons through Telegram is separate from access to any trading bot.
+The website and standalone course-room previews remain design/content-review surfaces. The Django runtime now lives under `backend/`; checkout, authenticated learner accounts, server-side progress, scheduled daily release and production Telegram delivery still require end-to-end staging verification before launch. The course-room prototype deliberately has all 30 lessons available for review. The ₹999 Trading Path does **not** include trading-bot access; delivery of course lessons through Telegram is separate from access to any trading bot.
 
 Do not publish the entire package to a public web server. The `course-source/` folder contains full paid-course content and internal delivery/production materials. Publish only the appropriate website pages and implement authenticated access and scheduled release before selling the course. The prototype's locally available lesson files are not access-controlled.
 
@@ -68,3 +68,8 @@ The complete written first-pass source and production handoff are maintained und
 ## Product priorities: sitewide UX and admin dashboard
 
 See [Product UX and Admin Backlog](PRODUCT_UX_AND_ADMIN_BACKLOG.md) for the enduring requirements. Sitewide user experience is a continuous requirement across public pages, micro-courses, account/member area, checkout, lesson content, charts and the learning room. A friendly purpose-built admin dashboard is planned for near the end, after core learning and access flows are stable. Continue working on `prototypeweb` / `my-new-branch`; preserve the existing micro-course content and keep production/security limitations explicit. For the current route/data integration map, see [Frontend / Django Backend Integration](docs/architecture/FRONTEND_BACKEND_INTEGRATION.md).
+
+
+## Django runtime consolidation
+
+The Django runtime is maintained under `backend/` on `my-new-branch`. See [the consolidation handoff](backend/CONSOLIDATION_HANDOFF.md) and [frontend/backend integration map](docs/architecture/FRONTEND_BACKEND_INTEGRATION.md). The prior `test/feature/tradethesis-academy` source branch remains intact as the rollback reference until staging is verified.
