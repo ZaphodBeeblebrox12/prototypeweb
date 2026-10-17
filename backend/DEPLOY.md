@@ -1,5 +1,14 @@
 # TradeThesis Academy staging and deployment notes
 
+## Centralised environment configuration
+
+- `backend/.env.example` is the safe, complete template for local configuration. Copy it to `backend/.env` and add local values there. The real `.env` file is git-ignored; do not commit credential values.
+- The Render staging service consumes one shared Environment Group: `tradethesis-academy-staging-config`. The root `render.yaml` lists the environment variable names and non-secret defaults, and attaches the group to the service. Secret values are entered only in the Render Dashboard.
+- Before syncing/creating the Blueprint, create or confirm that group in Render's Environment Groups dashboard and fill in its values. At minimum, staging requires `DATABASE_URL` (a dedicated Supabase PostgreSQL **Session Pooler** URI) and `RESEND_API_KEY`. Keep the remaining Telegram/payment/provisioning fields blank until those integrations are being tested. `SECRET_KEY` must have a strong random value.
+- The Supabase project URL and publishable client key are optional for direct PostgreSQL access. Django connects via `DATABASE_URL`; the database password belongs only inside that private connection URI, not in the publishable key or GitHub.
+- Keep staging and production values separate. When production is needed, create a separate production Environment Group; never point staging at a production database or payment credentials.
+
+
 **Current state (17 October 2026):** the Django Academy code is on open draft PR [#4](https://github.com/ZaphodBeeblebrox12/prototypeweb/pull/4), targeting `my-new-branch`. Backend CI on Python 3.11 and 3.12 previously passed at [run 39006601474](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39006601474) with 695 tests passed and 1 skipped per runtime. Since that verified checkpoint, production settings were hardened to reject missing and SQLite database URLs, and regression tests were added; consult PR #4 for the current CI result. No hosted runtime, staging catalogue data, or live checkout-to-lesson journey has been verified.
 
 ## Deployment configuration
