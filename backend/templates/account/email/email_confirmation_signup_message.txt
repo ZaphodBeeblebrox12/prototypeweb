@@ -1,0 +1,10 @@
+Hello {{ user.first_name|default:user.email }},
+
+Thank you for joining TradeThesis. Confirm your email address to complete account setup:
+
+{{ activate_url }}
+
+The link expires after three days. If you did not create this account, you can ignore this message.
+
+TradeThesis
+Conviction before execution
