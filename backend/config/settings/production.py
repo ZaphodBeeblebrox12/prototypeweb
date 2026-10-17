@@ -8,20 +8,16 @@ from .base import *
 
 DEBUG = env("DEBUG", default=False)
 
-# Hosts: comma-separated env. MUST be a list (Django rejects a plain
-# string, and this override replaces base.py's list conversion).
-ALLOWED_HOSTS = [
-    h.strip() for h in
-    env("ALLOWED_HOSTS", default=".onrender.com").split(",")
-    if h.strip()
-]
+# Env is configured in base.py with ALLOWED_HOSTS cast to list, so env()
+# already returns a list here. Use env.list() consistently for comma-separated
+# host/origin settings instead of calling .split() on the parsed list.
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[".onrender.com"])
 
-# CSRF: same list requirement.
-CSRF_TRUSTED_ORIGINS = [
-    o.strip() for o in
-    env("CSRF_TRUSTED_ORIGINS", default="https://*.onrender.com").split(",")
-    if o.strip()
-]
+# CSRF trusted origins are also provided as a comma-separated environment
+# variable. Keep the default as a list to match Django's expected setting.
+CSRF_TRUSTED_ORIGINS = env.list(
+    "CSRF_TRUSTED_ORIGINS", default=["https://*.onrender.com"]
+)
 
 # --- Security hardening ---------------------------------------------------
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
