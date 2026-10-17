@@ -35,3 +35,31 @@ class LoginPageSocialProviderTest(TestCase):
         r = self.client.get("/accounts/login/")
         assert r.status_code == 200
         assert "google" in r.content.decode().lower()
+
+
+    def test_login_and_signup_share_one_branded_access_screen(self):
+        login = self.client.get("/accounts/login/?next=/learn/")
+        signup = self.client.get("/accounts/signup/?next=/learn/")
+
+        assert login.status_code == 200
+        assert signup.status_code == 200
+        login_html = login.content.decode()
+        signup_html = signup.content.decode()
+        assert 'data-auth-mode="login"' in login_html
+        assert 'data-auth-mode="signup"' in signup_html
+        assert "Your place to learn, connect and" in login_html
+        assert "Your place to learn, connect and" in signup_html
+        assert 'name="login"' in login_html
+        assert 'name="password1"' in signup_html
+        assert 'name="password2"' in signup_html
+
+    def test_django_root_redirects_to_public_tradethesis_site(self):
+        from django.conf import settings
+
+        response = self.client.get("/")
+        assert response.status_code == 302
+        assert response["Location"] == f"{settings.PUBLIC_SITE_URL}/"
+
+        health = self.client.get("/health/")
+        assert health.status_code == 200
+        assert health.content.decode() == "ok"
