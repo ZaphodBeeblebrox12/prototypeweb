@@ -52,6 +52,18 @@ Expected draft content: Trading Path (4 modules / 30 lessons), Support & Resista
 
 Do not make a course saleable merely because it imported. Review lesson bodies, media and figure readability first. For each approved product, create its own dedicated hidden one-time Plan and CourseOffer, confirm the exact displayed price/currency and provider routing, and only then publish the approved course/modules/lessons and activate its offer. Keep CONSTRUCT's 12-calendar-month community term separate from course access, and add the required channel mappings only when the actual destination IDs are confirmed.
 
+## Create the first staging administrator (Render Free)
+
+Render Free web services do not provide Dashboard Shell/SSH access, so the build script includes a guarded one-time staging admin bootstrap. To create the first superuser:
+
+1. In Render, open Environment Groups → `tradethesis-academy-staging-config`.
+2. Temporarily add/set `BOOTSTRAP_STAGING_ADMIN=true`, `STAGING_ADMIN_USERNAME`, `STAGING_ADMIN_EMAIL`, and `STAGING_ADMIN_PASSWORD`. Choose a unique username and a strong, unique password. Enter these directly in Render; never commit or send them in chat.
+3. Trigger a manual deploy of the `tradethesis-academy-staging` web service. The build runs migrations first, then creates the Django superuser only if that username does not already exist. If it exists as a non-superuser, the build stops safely instead of changing its privileges.
+4. After logs confirm `Staging superuser created.`, immediately remove all four temporary bootstrap variables from the Environment Group, save the group, and trigger another manual deploy. This leaves the account in PostgreSQL but removes the password from the service's environment.
+5. Sign in at `https://tradethesis-academy-staging.onrender.com/admin/`. The operational dashboard is on the Django admin index; the read-only dashboard route is `/admin/dashboard/`.
+
+Do not leave the bootstrap variables configured after the first successful deploy. This path is only intended for staging; production administrator creation should use the hosting provider's secure one-off command/console.
+
 ## Staging acceptance sequence
 
 1. Confirm `/health/` returns HTTP 200. Independently confirm the configured database connection from the service shell with `python manage.py shell -c "from django.db import connection; connection.ensure_connection(); print(connection.vendor)"`; it must report `postgresql`.
