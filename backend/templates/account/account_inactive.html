@@ -1,0 +1,6 @@
+{% extends "auth/account-flow-base.html" %}
+{% block title %}Account inactive · TradeThesis{% endblock %}
+{% block eyebrow %}Account status{% endblock %}
+{% block heading %}This account isn’t active yet.{% endblock %}
+{% block intro %}If you recently registered, check for your confirmation email. If you still cannot sign in, contact support for help with your account.{% endblock %}
+{% block panel_content %}<div class="actions"><a class="primary" href="{% url 'account_login' %}">Return to sign in ↗</a><a class="secondary" href="{{ PUBLIC_SITE_URL }}/community.html">Support and community</a></div>{% endblock %}
