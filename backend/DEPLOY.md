@@ -10,7 +10,7 @@
 - Keep staging and production values separate. When production is needed, create a separate production Environment Group; never point staging at a production database or payment credentials.
 
 
-**Current state (17 October 2026):** the Django Academy code is on open draft PR [#4](https://github.com/ZaphodBeeblebrox12/prototypeweb/pull/4), targeting `my-new-branch`. Backend CI on Python 3.11 and 3.12 previously passed at [run 39006601474](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39006601474) with 695 tests passed and 1 skipped per runtime. Since that verified checkpoint, production settings were hardened to reject missing and SQLite database URLs, and regression tests were added; consult PR #4 for the current CI result. No hosted runtime, staging catalogue data, or live checkout-to-lesson journey has been verified.
+**Current state (17 October 2026):** the Django Academy code is on open draft PR [#4](https://github.com/ZaphodBeeblebrox12/prototypeweb/pull/4), targeting `my-new-branch`. The Free Django staging service `tradethesis-academy-staging` is live at `https://tradethesis-academy-staging.onrender.com`; its build completed Django migrations against the separate Supabase staging database and Render's `/health/` check returned HTTP 200. The static TradeThesis site is live at `https://tradethesis-public-staging.onrender.com` from `./site`. No staging superuser has been provisioned yet, course catalogue data has not been imported, and email, Telegram bot-bridge verification, and the checkout-to-lesson journey have not been acceptance-tested. Recent CI for the admin bootstrap and environment-first Telegram changes is running on PR #4; use the PR checks for the latest result.
 
 ## Deployment configuration
 
