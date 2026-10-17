@@ -9,7 +9,7 @@ The canonical starter implementation is understand-bollinger-bands/course-manife
 - Give each course, module and lesson a stable lowercase slug. Do not regenerate slugs from titles after a course has been imported; titles may be edited without changing the lesson identity.
 - Each module defines a Markdown source path relative to the manifest folder.
 - Each lesson's source_id must match a Markdown heading in the form: Lesson 1.1 — Lesson title. The title must match too. The importer rejects missing or mismatched lesson headings instead of silently importing a partial module.
-- Relative Markdown images become stable asset references. Prefer course-owned JPEG, PNG or WebP. External image URLs, missing images and unsupported types are flagged; incomplete assets prevent publication. The administrator may upload a replacement in the draft's asset list.
+- Every Markdown image reference becomes a stable asset slot. External HTTP(S) URLs are retained as the default image. A course administrator can upload a JPEG, PNG or WebP replacement to override that reference without editing Markdown. Missing local files remain visible as missing slots and require an uploaded replacement before publication.
 - Notebook prompts are course-specific and can be overridden for a lesson.
 
 ## Deployment semantics
