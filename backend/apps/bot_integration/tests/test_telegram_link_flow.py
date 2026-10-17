@@ -14,7 +14,7 @@ import time
 import uuid
 from unittest import mock
 
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from apps.accounts.models import User
@@ -80,8 +80,9 @@ class BotConfigUsernameNormalizationTests(TestCase):
                          "inderjeetbot")
 
 
+@override_settings(TELEGRAM_BOT_USERNAME="inderjeetbot")
 class TelegramConnectDeepLinkTests(TestCase):
-    """GET /bot/telegram/connect/ must 302 to a VALID t.me deep link."""
+    """GET /bot/telegram/connect/ must use the shared env bot username."""
 
     def assert_valid_deep_link(self, response):
         self.assertEqual(response.status_code, 302)
