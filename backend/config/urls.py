@@ -5,6 +5,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import RedirectView
 
 # Use allauth's views for login and signup
 from allauth.account.views import LoginView, SignupView
@@ -19,15 +20,20 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     # Academy routes are explicit and must be resolved before public catch-all routes.
     path("learn/", include("apps.academy.urls")),
+    # The public TradeThesis website is canonical; never render the legacy
+    # TradeAdmin landing template from the Django service root.
+    path("", RedirectView.as_view(
+        url=f"{settings.PUBLIC_SITE_URL}/", permanent=False
+    ), name="public-home"),
     path('', include('apps.public_views.urls')),
 
     # Custom auth views using allauth (with your custom templates)
     path("accounts/login/", LoginView.as_view(
-        template_name="auth/login.html",
+        template_name="auth/access.html",
     ), name="account_login"),
 
     path("accounts/signup/", SignupView.as_view(
-        template_name="auth/signup.html",
+        template_name="auth/access.html",
     ), name="account_signup"),
 
     path("accounts/", include("allauth.urls")),
