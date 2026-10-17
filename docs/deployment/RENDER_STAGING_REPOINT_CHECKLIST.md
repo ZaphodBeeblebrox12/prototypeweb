@@ -28,7 +28,7 @@
 - Root directory: repository root (empty)
 - Build command: `cd backend && bash build.sh`
 - Start command: `cd backend && gunicorn config.wsgi:application --workers 2 --threads 4 --timeout 120`
-- Health check: `/health/`
+- Health check: `/health/` (implemented on `my-new-branch`; returns 200 when Django and the primary database respond, 503 when the database is unavailable)
 - Desired branch: `my-new-branch`
 - Desired auto-deploy: on commit
 
@@ -47,7 +47,7 @@ Do not repoint or redeploy this service as part of staging consolidation.
 1. Open the Public website staging service and select `my-new-branch` as the deployed branch. Enable auto-deploy on commit; retain publish path `./site`.
 2. Open Django Academy staging and select `my-new-branch`. Enable auto-deploy on commit; retain the repository-root root directory and the build/start commands listed above.
 3. Before the first deploy, confirm the Academy service still has its required database URL and application environment variables. Do not print secret values in logs or notes.
-4. Confirm the resulting deploy is built from the then-current `prototypeweb/my-new-branch` head, health check passes, and admin login works.
+4. Confirm the resulting deploy is built from the then-current `prototypeweb/my-new-branch` head, `/health/` returns 200, and admin login works. The readiness endpoint also checks primary-database connectivity and returns 503 without exposing the underlying exception.
 5. Test an admin image upload, publish/preview, protected media retrieval, and entitlement denial before considering uploaded media production-safe.
 
 ## Important limitations
