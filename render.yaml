@@ -15,3 +15,11 @@ services:
     healthCheckPath: /health/
     envVars:
       - fromGroup: tradethesis-academy-staging-config
+
+  - type: web
+    name: tradethesis-public-staging
+    runtime: static
+    branch: feature/tradethesis-academy
+    autoDeployTrigger: off
+    buildCommand: echo "Publishing the TradeThesis static website"
+    staticPublishPath: ./site
