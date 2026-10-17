@@ -12,6 +12,8 @@ from apps.accounts import views as accounts_views
 from apps.accounts.telegram_views import TelegramCallbackView
 
 urlpatterns = [
+    # Render readiness probe: confirm Django and its primary database respond.
+    path("health/", health_check, name="health_check"),
     # Growth admin views - MUST be first to avoid catch_all_view interception
     path("admin/", include("apps.growth.admin_urls", namespace="growth_admin")),
 
