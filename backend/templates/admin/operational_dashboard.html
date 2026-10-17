@@ -206,7 +206,7 @@
               {% for member in recent_members %}
                 <div class="tt-admin-activity-row">
                   <span class="tt-admin-avatar" aria-hidden="true">{{ member.username|first|upper }}</span>
-                  <span class="tt-admin-activity-copy"><strong>{{ member.get_full_name|default:member.username }}</strong><small>{{ member.email|default:"No email recorded" }}</small></span>
+                  <span class="tt-admin-activity-copy"><strong>{% if member.full_name %}{{ member.full_name }}{% else %}{{ member.username }}{% endif %}</strong><small>{{ member.email|default:"No email recorded" }}</small></span>
                   <time datetime="{{ member.date_joined|date:'c' }}">{{ member.date_joined|date:"j M" }}</time>
                 </div>
               {% endfor %}

@@ -246,8 +246,14 @@ def _growth_dashboard_context(request):
         # saved price/currency snapshot and a recurring billing interval.
         monthly_totals = {}
         month_divisors = {"monthly": 1, "quarterly": 3, "yearly": 12}
-        for subscription in active_subscriptions.select_related(
-            "plan_price", "geo_plan_price"
+        for subscription in active_subscriptions.exclude(
+            is_gift=True,
+        ).exclude(
+            is_admin_grant=True,
+        ).exclude(
+            plan__is_trial=True,
+        ).select_related(
+            "plan", "plan_price", "geo_plan_price"
         ):
             price_cents = subscription.price_cents
             interval = (
