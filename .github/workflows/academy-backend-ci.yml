@@ -39,6 +39,12 @@ jobs:
           pip install -r requirements.txt
           python -m pip install ruff black mypy django-stubs pytest pytest-cov pytest-django
 
+      # Temporary non-blocking diagnostic: expose the exact model/migration drift
+      # reported by Render before creating corrective migration files.
+      - name: Diagnose model migration drift
+        continue-on-error: true
+        run: python manage.py makemigrations --check --dry-run --verbosity 3
+
       - name: Run linting with ruff
         run: ruff check apps/academy/ tests/academy/
 
