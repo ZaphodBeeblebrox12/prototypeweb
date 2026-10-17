@@ -63,32 +63,38 @@ GitHub Actions run [39052070511](https://github.com/ZaphodBeeblebrox12/prototype
 
 Email delivery is separately configured: base settings default to Django's console email backend and production requires email verification. Configure a real SMTP/email provider in Render before relying on signup/verification emails. Never store secrets in Git or paste them into chat.
 
-## Staging admin login recovery — code committed, reset not yet run
+## Staging admin login recovery — reset completed; login test pending
 
-The intended staging admin username already exists and is a Django superuser. The prior one-time bootstrap explicitly skipped existing superusers and did not change their password. The website login page uses email authentication, and the project's custom adapter checks verification via allauth `EmailAddress` rows. A superuser created by the custom user manager may have no such row, which can block the email-based login path.
+The intended staging admin username already exists and is a Django superuser. The prior one-time bootstrap skipped existing superusers and did not change their password. The website login uses email authentication, and the custom adapter relies on allauth `EmailAddress` records for verification. The existing admin had to be recovered so both the account password and verified primary email would be aligned.
 
-A guarded reset/verification path has now been added to `backend/build.sh` on `my-new-branch`, in commit `9e4570aa36f5d66802c7ce4d5a6cfedcfc38d197`:
+### Code and validation
 
-- It is **separate** from `BOOTSTRAP_STAGING_ADMIN`.
-- It runs only when `RESET_STAGING_ADMIN_PASSWORD=true`.
-- It will only alter the named account if it already exists and is an active superuser.
-- It refuses to reset if the requested email belongs to another User account.
-- It sets that account's password from `STAGING_ADMIN_PASSWORD`, synchronizes the User email, and creates/marks the matching allauth EmailAddress as verified and primary.
-- It logs only a success/failure message; it does not print credentials.
-- CI now validates `bash -n build.sh`; the workflow run for commit `b3eb083` is still in progress at the last check.
+A separate guarded recovery path was added to `backend/build.sh` on `my-new-branch`, commit `9e4570aa36f5d66802c7ce4d5a6cfedcfc38d197`:
 
-Next:
-1. Wait for CI on latest commit `b3eb0833c1069199be8d6561f172943bf7e6e68c` to pass before deploying.
-2. In the Academy Render web service's **service-level Environment Variables**, add `RESET_STAGING_ADMIN_PASSWORD=true`. Leave `BOOTSTRAP_STAGING_ADMIN=false`. The existing username/email/password values stay private in Render.
-3. Save and deploy latest commit manually (auto-deploy is off). Check logs for `Staging admin password reset and email verification completed.`
-4. Immediately set `RESET_STAGING_ADMIN_PASSWORD=false` and save, then wait for the cleanup deployment to reach Live.
-5. Sign in to `https://tradethesis-academy-staging.onrender.com/admin/` using the configured username/password; for the website login, use the configured email/password.
-6. After login is verified, remove `STAGING_ADMIN_USERNAME`, `STAGING_ADMIN_EMAIL`, and `STAGING_ADMIN_PASSWORD` and keep both one-time flags false. Never share or commit their values.
+- Runs only when `RESET_STAGING_ADMIN_PASSWORD=true`.
+- Only modifies the named account if it already exists as an active superuser.
+- Refuses the reset if the supplied email belongs to another Django User.
+- Updates the existing account password from `STAGING_ADMIN_PASSWORD`, synchronizes the User email, and creates/marks the matching allauth EmailAddress as verified and primary.
+- Does not log credentials.
 
-Previous recovery history:
-- `BOOTSTRAP_STAGING_ADMIN` is currently false.
-- Latest deployment `dep-db9r5t7avr4c73f4im40` is Live and its build succeeded.
-- No password reset occurred during the prior bootstrap because the existing superuser was skipped.
+GitHub Actions run [39056557130](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39056557130) passed on Python 3.11 and 3.12, including `bash -n build.sh`, `makemigrations --check --dry-run`, focused Academy regressions and the full test suites.
+
+### Reset performed in Render
+
+- Reset-enabled deployment: `dep-db9rj8gm7kps73eg1rh0`; it reached Live.
+- Build log explicitly confirmed: `Staging admin password reset and email verification completed.`
+- Reset-disabled cleanup deployment: `dep-db9rk4brjlhs73fu28o0`; status `live` as of 2026-10-17 18:12:18 UTC.
+- The cleanup instance returned HTTP 200 for `/health/`.
+- `RESET_STAGING_ADMIN_PASSWORD` has been set back to `false`. `BOOTSTRAP_STAGING_ADMIN` remains `false`.
+- No credential values were read into Git, logs, or chat.
+
+### Next
+
+1. Test the website login at `https://tradethesis-academy-staging.onrender.com/accounts/login/` using `STAGING_ADMIN_EMAIL` and the password now stored in `STAGING_ADMIN_PASSWORD` in Render. Do not paste either value into chat.
+2. For Django's direct admin login at `/admin/`, use `STAGING_ADMIN_USERNAME` with that same reset password.
+3. If sign-in works, remove `STAGING_ADMIN_USERNAME`, `STAGING_ADMIN_EMAIL`, and `STAGING_ADMIN_PASSWORD` from Academy's Render service variables. Keep both one-time flags false. Save the change and allow the resulting deployment to finish.
+4. If the website login still fails, record only the on-screen error text; do not repeat the reset unless logs show the reset action failed.
+
 
 ## Next workflow tests
 
