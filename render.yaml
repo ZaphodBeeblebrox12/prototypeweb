@@ -55,18 +55,13 @@ services:
         sync: false
       - key: MAXMIND_ENABLED
         value: "False"
+      # HTTPS API email backend works on Render Free; no SMTP port is used.
       - key: EMAIL_BACKEND
-        value: django.core.mail.backends.smtp.EmailBackend
-      - key: EMAIL_HOST
+        value: apps.core.email_backends.ResendEmailBackend
+      - key: RESEND_API_KEY
         sync: false
-      - key: EMAIL_PORT
-        sync: false
-      - key: EMAIL_USE_TLS
-        value: "True"
-      - key: EMAIL_HOST_USER
-        sync: false
-      - key: EMAIL_HOST_PASSWORD
-        sync: false
+      - key: RESEND_API_TIMEOUT
+        value: "10"
       - key: DEFAULT_FROM_EMAIL
         sync: false
 
