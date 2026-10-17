@@ -27,7 +27,11 @@
       <a href="{{ PUBLIC_SITE_URL }}/community.html">Community</a>
       <a href="{{ PUBLIC_SITE_URL }}/index.html#desk">The Desk</a>
     </nav>
-    <a class="nav-cta" href="{% url 'academy:home' %}">Open member dashboard ↗</a>
+    {% if user.is_authenticated %}
+      <a class="nav-cta" href="{% url 'academy:home' %}">Open member dashboard ↗</a>
+    {% else %}
+      <a class="nav-cta" href="{{ PUBLIC_SITE_URL }}/courses.html">Explore courses ↗</a>
+    {% endif %}
   </header>
   <main class="layout" id="main-content" tabindex="-1">
     <section class="story">
