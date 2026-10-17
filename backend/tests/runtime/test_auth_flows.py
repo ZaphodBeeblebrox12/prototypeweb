@@ -21,11 +21,40 @@ class TestLoginPage:
     def test_login_get_200_without_socialapp(self, client):
         assert client.get("/accounts/login/").status_code == 200
 
-    def test_login_valid_credentials(self, client):
-        _mk_superuser()
+    def test_login_valid_staff_credentials_reaches_requested_admin_dashboard(self, client):
+        from django.core import mail
+
+        user = _mk_superuser()
+        mail.outbox.clear()
+        r = client.post("/accounts/login/?next=/admin/dashboard/", {
+            "login": user.email, "password": "pass12345!"})
+
+        assert r.status_code == 302
+        assert r["Location"].endswith("/admin/dashboard/")
+        # An unverified bootstrap superuser must not be forced into a mail loop.
+        assert len(mail.outbox) == 0
+        assert client.get("/admin/").status_code == 200
+        assert client.get("/admin/dashboard/").status_code == 200
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_unverified_learner_login_sends_confirmation_instead_of_500(self, client):
+        from django.core import mail
+
+        user = User.objects.create_user(
+            username="learner",
+            email="learner@example.com",
+            password="Str0ng!Pass9",
+        )
+        mail.outbox.clear()
         r = client.post("/accounts/login/", {
-            "login": "root", "password": "pass12345!"})
-        assert r.status_code in (200, 302)
+            "login": user.email, "password": "Str0ng!Pass9"})
+
+        assert r.status_code == 302
+        assert r["Location"] == reverse("account_email_verification_sent")
+        assert len(mail.outbox) == 1
+        assert "TradeThesis" in mail.outbox[0].subject
+        assert "activate_url" not in mail.outbox[0].body
+        assert "http" in mail.outbox[0].body
 
     def test_login_invalid_credentials(self, client):
         _mk_superuser()
@@ -40,13 +69,21 @@ class TestSignupPage:
     def test_signup_get_200_without_socialapp(self, client):
         assert client.get("/accounts/signup/").status_code == 200
 
-    def test_signup_valid_no_oauth(self, client):
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_signup_sends_confirmation_without_500(self, client):
+        from django.core import mail
+
+        mail.outbox.clear()
         r = client.post("/accounts/signup/", {
             "email": "new@x.com",
             "password1": "Str0ng!Pass9", "password2": "Str0ng!Pass9"})
-        assert r.status_code in (200, 302)
-        # email-based signup: username is auto-generated, user is created
+
+        assert r.status_code == 302
+        assert r["Location"] == reverse("account_email_verification_sent")
+        # Email-based signup: username is generated and user is created.
         assert User.objects.filter(email="new@x.com").exists()
+        assert len(mail.outbox) == 1
+        assert "TradeThesis" in mail.outbox[0].subject
 
     def test_signup_duplicate_rejected(self, client):
         User.objects.create_user(username="existsemail", email="dup@x.com", password="pass12345!")
@@ -102,3 +139,39 @@ class TestBannedUser:
         client.force_login(u)
         # ban middleware returns 403
         assert client.get("/dashboard/").status_code == 403
+
+
+@pytest.mark.django_db
+class TestUnifiedAdminEntry:
+    def test_admin_login_url_uses_trade_thesis_auth_and_preserves_next(self, client):
+        from urllib.parse import parse_qs, urlsplit
+
+        response = client.get("/admin/login/?next=/admin/dashboard/")
+
+        assert response.status_code == 302
+        target = urlsplit(response["Location"])
+        assert target.path == reverse("account_login")
+        assert parse_qs(target.query).get("next") == ["/admin/dashboard/"]
+
+    def test_regular_user_cannot_open_operational_admin_dashboard(self, client):
+        user = User.objects.create_user(
+            username="regular", email="regular@example.com", password="Str0ng!Pass9"
+        )
+        client.force_login(user)
+
+        response = client.get("/admin/dashboard/", follow=True)
+
+        assert response.status_code == 200
+        assert response.request["PATH_INFO"] == reverse("account_login")
+        assert response.request["QUERY_STRING"].find("admin/dashboard") >= 0
+
+    def test_unverified_regular_user_cannot_use_legacy_dashboard(self, client):
+        user = User.objects.create_user(
+            username="unverified", email="unverified@example.com", password="Str0ng!Pass9"
+        )
+        client.force_login(user)
+
+        response = client.get("/dashboard/")
+
+        assert response.status_code == 302
+        assert response["Location"] == reverse("account_email_verification_sent")
