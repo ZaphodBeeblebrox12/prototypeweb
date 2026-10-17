@@ -30,4 +30,13 @@ The former `index` URL name is preserved for backwards-compatible URL reversing,
 - The Render build collected static files, and post-rollout `/health/` probes returned HTTP 200.
 - The public static-site service was not redeployed as part of this dashboard fix. The separate legacy `tradeadmin` service and `main` branch remain untouched.
 - **Owner visual acceptance confirmed on 2026-10-18:** the user signed in and confirmed the newly deployed mock-style member dashboard is visible, rather than the legacy dashboard. The authenticated landing/visual acceptance issue is closed.
-- Member-journey hardening in progress on 2026-10-18: opening an accessible lesson creates an in-progress resume point; resume selection prioritizes the last visited unfinished accessible lesson and never selects a locked lesson; reopening a completed lesson cannot downgrade it; lesson counts exclude unpublished lessons; Telegram/Discord unlink actions require POST; regression tests cover these boundaries. CI and staging acceptance results will be appended after this code checkpoint validates.
+### Member journey acceptance checkpoint — 2026-10-18
+
+- Latest tested/deployed application revision: `057c372af7e658d5e49f367be717ae1515578ea3` on `my-new-branch`.
+- Academy staging service: `srv-db9ioke1egvs73feb8ag`; deployment `dep-db9tf9bbc2fs73d5rchg`; status `live`; finished at `2026-10-17T20:18:22Z`.
+- Backend CI: [run 39065727801](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39065727801) — green on Python 3.11 and 3.12, each with 686 passing tests, 200 warnings and 11 subtests passed. Focused Academy regressions report 15 passing tests, 9 warnings and 4 subtests per version.
+- Member journey improvements: opening an accessible lesson writes an in-progress resume point; completed progress cannot regress; dashboard and Academy resume links target the most recently visited unfinished lesson the member can access; progress totals exclude unpublished lessons; expired-entitlement denial is covered; Telegram/Discord unlink mutations require POST.
+- Render build completed, Gunicorn started at approximately `2026-10-17T20:18:06Z`, and repeated post-rollout `/health/` requests returned HTTP 200.
+- The owner has confirmed the new dashboard visual is visible. Automated tests cover the member journey and connection-action security; a final manual spot-check of resume behavior on the owner's own account remains useful. No live payment/provider transaction was performed as part of this milestone.
+- Advisory limitation: Black and mypy are `continue-on-error` in CI. The mypy step reports existing typing findings (18 errors in 8 files, including constraint keyword typings, `timezone.timedelta` annotations and Telegram result typing). They do not fail required CI but remain technical debt.
+- The public static-site service was not redeployed; `main` and the separate legacy `tradeadmin` service remain untouched.
