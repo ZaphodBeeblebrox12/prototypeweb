@@ -21,7 +21,8 @@
   <script>
     (() => {
       const meta = document.querySelector('meta[name="academy-base-url"]');
-      const base = (meta?.content || "https://tradethesis-academy-staging.onrender.com").trim().replace(/\\/+$/, "");
+      let base = (meta?.content || "https://tradethesis-academy-staging.onrender.com").trim();
+      while (base.endsWith("/")) base = base.slice(0, -1);
       const requested = new URLSearchParams(window.location.search).get("next") || "/learn/";
       const next = requested.startsWith("/") && !requested.startsWith("//") ? requested : "/learn/";
       const destination = new URL("/accounts/login/", base);
