@@ -120,7 +120,7 @@ jobs:
           PY
 
       - name: Lint Academy and email backend implementation
-        run: ruff check apps/academy/ tests/academy/ apps/core/email_backends.py tests/test_email_backends.py tests/runtime/test_production_settings.py
+        run: ruff check apps/academy/ tests/academy/ apps/core/email_backends.py tests/test_email_backends.py tests/runtime/test_production_settings.py tests/runtime/test_sitewide_branding.py
 
       - name: Check Academy and email backend formatting
         continue-on-error: true

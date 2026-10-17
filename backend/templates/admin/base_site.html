@@ -1,0 +1,13 @@
+{% extends "admin/base.html" %}
+{% load static i18n %}
+{% block title %}{{ title }} | TradeThesis administration{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin-sitewide.css' %}">{% endblock %}
+{% block dark-mode-vars %}{% endblock %}
+{% block branding %}
+<div class="tt-admin-branding">
+<a class="tt-admin-brand" href="{{ PUBLIC_SITE_URL }}/index.html" aria-label="TradeThesis home"><img src="{{ PUBLIC_SITE_URL }}/assets/tradethesis-horizontal.png" alt="TradeThesis — Conviction before execution"></a>
+<nav class="tt-admin-site-nav" aria-label="Main navigation">
+<a href="{{ PUBLIC_SITE_URL }}/index.html#approach">Our approach</a><a href="{{ PUBLIC_SITE_URL }}/courses.html">Courses</a><a href="{{ PUBLIC_SITE_URL }}/community.html">Community</a><a href="{{ PUBLIC_SITE_URL }}/index.html#desk">The Desk</a><a class="tt-admin-nav-cta" href="/admin/dashboard/">Business overview ↗</a>
+</nav>
+</div>
+{% endblock %}

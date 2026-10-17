@@ -13,16 +13,20 @@
 <body>
   <a class="tt-skip" href="#main-content">Skip to main content</a>
   <header class="tt-header">
-    <div class="container d-flex align-items-center justify-content-between gap-3 py-3">
-      <a class="tt-brand" href="{{ PUBLIC_SITE_URL }}/" aria-label="TradeThesis home">
-        TradeThesis
-        <small>Conviction before execution</small>
+    <div class="tt-header-inner">
+      <a class="tt-brand" href="{{ PUBLIC_SITE_URL }}/index.html" aria-label="TradeThesis home">
+        <img class="tt-brand-logo" src="{{ PUBLIC_SITE_URL }}/assets/tradethesis-horizontal.png" alt="TradeThesis — Conviction before execution">
       </a>
-      <nav class="tt-header-actions d-flex align-items-center gap-3" aria-label="Learning navigation">
-        <a class="tt-header-link" href="{{ PUBLIC_SITE_URL }}/courses.html">Courses</a>
+      <nav class="tt-site-nav" aria-label="Main navigation">
+        <a href="{{ PUBLIC_SITE_URL }}/index.html#approach">Our approach</a>
+        <a href="{{ PUBLIC_SITE_URL }}/courses.html">Courses</a>
+        <a href="{{ PUBLIC_SITE_URL }}/community.html">Community</a>
+        <a href="{{ PUBLIC_SITE_URL }}/index.html#desk">The Desk</a>
+      </nav>
+      <div class="tt-auth-actions">
         {% if user.is_authenticated %}
           <a class="btn btn-primary btn-sm px-3" href="{% url 'academy:home' %}">My learning</a>
-          {% if user.is_staff %}<a class="tt-header-link" href="/admin/dashboard/">Administration</a>{% endif %}
+          {% if user.is_staff %}<a class="btn btn-outline-primary btn-sm px-3" href="{% url 'admin:operational_dashboard' %}">Administration</a>{% endif %}
           <form method="post" action="{% url 'account_logout' %}" class="m-0">
             {% csrf_token %}
             <button class="btn btn-outline-secondary btn-sm px-3" type="submit">Sign out</button>
@@ -30,7 +34,7 @@
         {% else %}
           <a class="btn btn-primary btn-sm px-3" href="{% url 'account_login' %}?next=/learn/">Sign in</a>
         {% endif %}
-      </nav>
+      </div>
     </div>
   </header>
   <main id="main-content" class="tt-page" tabindex="-1">

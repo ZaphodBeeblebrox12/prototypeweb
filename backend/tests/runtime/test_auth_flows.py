@@ -19,7 +19,12 @@ def _mk_superuser(username="root"):
 @pytest.mark.django_db
 class TestLoginPage:
     def test_login_get_200_without_socialapp(self, client):
-        assert client.get("/accounts/login/").status_code == 200
+        login_page = client.get("/accounts/login/")
+        assert login_page.status_code == 200
+        assert b'class="skip-link" href="#main-content"' in login_page.content
+        assert b"translateY(-180%)" in login_page.content
+        assert b"tradethesis-horizontal.png" in login_page.content
+        assert b"Main navigation" in login_page.content
         assert client.get(reverse("account_reset_password")).status_code == 200
 
     @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
@@ -41,6 +46,10 @@ class TestLoginPage:
         assert b"Business overview" in admin_dashboard.content
         assert b"Open Django Admin" in admin_dashboard.content
         assert b"Business growth" in admin_dashboard.content
+        assert b"tradethesis-horizontal.png" in admin_dashboard.content
+        assert b"Our approach" in admin_dashboard.content
+        assert b"Community" in admin_dashboard.content
+        assert b"The Desk" in admin_dashboard.content
         ranged_dashboard = client.get("/admin/dashboard/?range=7")
         assert ranged_dashboard.status_code == 200
         assert b'value="7" selected' in ranged_dashboard.content
@@ -115,7 +124,15 @@ class TestSuperuserAdmin:
     def test_superuser_reaches_admin(self, client):
         _mk_superuser()
         client.login(username="root", password="pass12345!")
-        assert client.get("/admin/").status_code == 200
+        admin_page = client.get("/admin/")
+        assert admin_page.status_code == 200
+        assert b"tradethesis-horizontal.png" in admin_page.content
+        assert b'href="#content-start" class="skip-to-content-link"' in admin_page.content
+        assert b"tt-admin-skip" not in admin_page.content
+        assert b"Main navigation" in admin_page.content
+        assert b"Our approach" in admin_page.content
+        assert b"Community" in admin_page.content
+        assert b"The Desk" in admin_page.content
 
     def test_normal_user_denied_admin(self, client):
         u = User.objects.create_user(username="norm", email="n@x.com",
