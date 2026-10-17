@@ -23,13 +23,13 @@ if not database_url.lower().startswith(("postgres://", "postgresql://")):
 
 DEBUG = env("DEBUG", default=False)
 
-# Hosts: comma-separated env. MUST be a list (Django rejects a plain
-# string, and this override replaces base.py's list conversion).
-ALLOWED_HOSTS = [
-    h.strip() for h in
-    env("ALLOWED_HOSTS", default=".onrender.com").split(",")
-    if h.strip()
-]
+# Django-environ casts ALLOWED_HOSTS to a list (declared in base.py).
+# Accept a string too, so a future settings change cannot reintroduce the
+# list.split startup failure.
+allowed_hosts = env("ALLOWED_HOSTS", default=".onrender.com")
+if isinstance(allowed_hosts, str):
+    allowed_hosts = allowed_hosts.split(",")
+ALLOWED_HOSTS = [host.strip() for host in allowed_hosts if host.strip()]
 
 # CSRF: same list requirement.
 CSRF_TRUSTED_ORIGINS = [
