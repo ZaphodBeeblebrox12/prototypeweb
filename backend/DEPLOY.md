@@ -1,12 +1,12 @@
 # TradeThesis Academy staging and deployment notes
 
-**Current state:** the Django Academy code is on draft PR #4 targeting `my-new-branch`. Backend CI (Python 3.11 and 3.12), the Support & Resistance browser smoke test, and the integration-target guard passed at `607924fdd73725edf2fbe711aea35044466a353d`. No hosted runtime, staging catalogue data, or live checkout-to-lesson journey has been verified.
+**Current state (17 October 2026):** the Django Academy code is on open draft PR [#4](https://github.com/ZaphodBeeblebrox12/prototypeweb/pull/4), targeting `my-new-branch`. Backend CI on Python 3.11 and 3.12 previously passed at [run 39006601474](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39006601474) with 695 tests passed and 1 skipped per runtime. Since that verified checkpoint, production settings were hardened to reject missing and SQLite database URLs, and regression tests were added; consult PR #4 for the current CI result. No hosted runtime, staging catalogue data, or live checkout-to-lesson journey has been verified.
 
 ## Deployment configuration
 
 The repository-root `render.yaml` is the staging Blueprint. It intentionally has automatic deploys turned off and points at `feature/tradethesis-academy` for this review stage. It runs commands from the repository root and changes into `backend/` for Django; this is important because draft importers read course material stored outside the backend directory.
 
-The Blueprint defines a staging web service, PostgreSQL connection through `DATABASE_URL`, and a `/health/` check. Do not create or deploy the services automatically as part of CI. When the code is approved and integrated into `my-new-branch`, update the service's linked branch deliberately before enabling any automatic deploy behaviour.
+The Blueprint defines a **Free staging web service** and a `/health/` endpoint; automatic deploys are turned off. It does **not** provision PostgreSQL. Supply a dedicated external PostgreSQL connection as `DATABASE_URL` through Render's dashboard before deploying. The `/health/` endpoint is a basic liveness check and does not prove the database is reachable. Do not create or deploy services automatically as part of CI. When the code is approved and integrated into `my-new-branch`, update the service's linked branch deliberately before enabling any automatic deploy behaviour.
 
 The staging Blueprint uses the custom `apps.core.email_backends.ResendEmailBackend`, which sends through the Resend HTTPS API rather than SMTP. In Render's environment settings, provide `RESEND_API_KEY` and a valid `DEFAULT_FROM_EMAIL`; the sender address/domain must be verified with the email provider before sending to ordinary recipients. Keep the API key out of GitHub. Render Free blocks outbound SMTP on ports 25, 465 and 587, and a free Render Postgres database expires 30 days after creation. Payment-provider credentials must be test-mode keys and webhook endpoints/secrets must point to the staging host. Leave integrations that are not being exercised unconfigured. Set `SITE_BASE_URL`, `ALLOWED_HOSTS`, and `CSRF_TRUSTED_ORIGINS` to the actual deployed host if its service name or domain differs from the Blueprint default.
 
@@ -43,7 +43,7 @@ Do not make a course saleable merely because it imported. Review lesson bodies, 
 
 ## Staging acceptance sequence
 
-1. Confirm `/health/` returns HTTP 200 and the application is connected to its staging PostgreSQL database.
+1. Confirm `/health/` returns HTTP 200. Independently confirm the configured database connection from the service shell with `python manage.py shell -c "from django.db import connection; connection.ensure_connection(); print(connection.vendor)"`; it must report `postgresql`.
 2. Configure and verify signup email, login/logout, email confirmation and password recovery.
 3. Inspect all imported draft courses in Django admin; verify lesson count/order, learner-facing content and separate instructor notes/answer keys.
 4. Check preview/locked/paid/expired lesson behaviour, Markdown rendering, image zoom on desktop/mobile and saved progress.
