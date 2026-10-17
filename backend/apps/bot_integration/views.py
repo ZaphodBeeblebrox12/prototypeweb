@@ -40,6 +40,7 @@ def start_telegram_connect(request):
 
 
 @login_required
+@require_POST
 def unlink_telegram(request):
     """Disconnect Telegram account from user profile."""
     try:
@@ -62,6 +63,7 @@ def unlink_telegram(request):
 
 
 @login_required
+@require_POST
 def unlink_discord(request):
     """Disconnect Discord account from user profile."""
     try:

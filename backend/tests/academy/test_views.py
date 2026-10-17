@@ -7,7 +7,9 @@ from django.test import TestCase
 from django.urls import reverse
 from PIL import Image
 
-from apps.academy.models import Course, CourseMediaAsset, CourseModule, Lesson
+from apps.academy.models import (
+    Course, CourseEntitlement, CourseMediaAsset, CourseModule, Lesson, LessonProgress,
+)
 from apps.academy.storage import course_asset_storage
 
 User = get_user_model()
@@ -166,6 +168,63 @@ class AcademyViewTests(TestCase):
         response = self.client.post(
             reverse("academy:lesson-progress", args=[self.paid_lesson.pk]),
             {"status": "completed"},
+        )
+        self.assertEqual(response.status_code, 403)
+
+
+    def test_opening_accessible_lesson_saves_an_in_progress_resume_point(self):
+        response = self.client.get(
+            reverse("academy:lesson", args=[self.course.slug, self.preview_lesson.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        progress = LessonProgress.objects.get(user=self.user, lesson=self.preview_lesson)
+        self.assertEqual(progress.status, LessonProgress.Status.IN_PROGRESS)
+        self.assertIsNotNone(progress.started_at)
+        self.assertIsNotNone(progress.last_seen_at)
+
+    def test_completed_lesson_remains_completed_when_reopened(self):
+        self.client.post(
+            reverse("academy:lesson-progress", args=[self.preview_lesson.pk]),
+            {"status": LessonProgress.Status.COMPLETED},
+        )
+        response = self.client.get(
+            reverse("academy:lesson", args=[self.course.slug, self.preview_lesson.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+        progress = LessonProgress.objects.get(user=self.user, lesson=self.preview_lesson)
+        self.assertEqual(progress.status, LessonProgress.Status.COMPLETED)
+        self.assertIsNotNone(progress.completed_at)
+
+    def test_progress_status_cannot_regress_from_completed(self):
+        endpoint = reverse("academy:lesson-progress", args=[self.preview_lesson.pk])
+        completed = self.client.post(endpoint, {"status": LessonProgress.Status.COMPLETED})
+        self.assertEqual(completed.status_code, 200)
+        for status in (LessonProgress.Status.IN_PROGRESS, LessonProgress.Status.NOT_STARTED):
+            response = self.client.post(endpoint, {"status": status})
+            self.assertEqual(response.status_code, 200)
+        progress = LessonProgress.objects.get(user=self.user, lesson=self.preview_lesson)
+        self.assertEqual(progress.status, LessonProgress.Status.COMPLETED)
+
+    def test_progress_endpoint_is_post_only(self):
+        response = self.client.get(
+            reverse("academy:lesson-progress", args=[self.preview_lesson.pk])
+        )
+        self.assertEqual(response.status_code, 405)
+
+    def test_expired_entitlement_does_not_open_paid_lesson(self):
+        from datetime import timedelta
+        from django.utils import timezone
+
+        now = timezone.now()
+        CourseEntitlement.objects.create(
+            user=self.user,
+            course=self.course,
+            status=CourseEntitlement.Status.ACTIVE,
+            starts_at=now - timedelta(days=3),
+            expires_at=now - timedelta(days=1),
+        )
+        response = self.client.get(
+            reverse("academy:lesson", args=[self.course.slug, self.paid_lesson.pk])
         )
         self.assertEqual(response.status_code, 403)
 

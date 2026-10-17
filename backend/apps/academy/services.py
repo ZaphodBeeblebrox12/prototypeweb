@@ -46,6 +46,63 @@ def can_access_lesson(user, lesson, at=None):
     entitlement = get_active_entitlement(user, course, at)
     return bool(entitlement and lesson_release_at(entitlement, lesson) <= at)
 
+def choose_resume_lesson(user, lessons, progress_by_lesson, at=None):
+    """Choose the last visited unfinished accessible lesson, then the next available one."""
+    at = at or timezone.now()
+    ordered_lessons = list(lessons)
+    in_progress = [
+        lesson for lesson in ordered_lessons
+        if (
+            lesson.pk in progress_by_lesson
+            and progress_by_lesson[lesson.pk].status == LessonProgress.Status.IN_PROGRESS
+        )
+    ]
+    in_progress.sort(
+        key=lambda lesson: (
+            progress_by_lesson[lesson.pk].last_seen_at
+            or progress_by_lesson[lesson.pk].updated_at,
+            progress_by_lesson[lesson.pk].updated_at,
+        ),
+        reverse=True,
+    )
+    for lesson in in_progress:
+        if can_access_lesson(user, lesson, at):
+            return lesson
+
+    for lesson in ordered_lessons:
+        progress = progress_by_lesson.get(lesson.pk)
+        if progress and progress.status == LessonProgress.Status.COMPLETED:
+            continue
+        if can_access_lesson(user, lesson, at):
+            return lesson
+    return None
+
+
+def get_resume_lesson(user, course, at=None):
+    """Return the next lesson a member can actually open, respecting release and entitlement rules."""
+    at = at or timezone.now()
+    lessons = list(
+        Lesson.objects.filter(
+            module__course=course,
+            module__is_published=True,
+            is_published=True,
+        )
+        .select_related("module__course")
+        .order_by("module__position", "position", "title")
+    )
+    if not lessons:
+        return None
+    progress_by_lesson = {
+        progress.lesson_id: progress
+        for progress in LessonProgress.objects.filter(
+            user=user,
+            lesson_id__in=[lesson.pk for lesson in lessons],
+        )
+    }
+    return choose_resume_lesson(user, lessons, progress_by_lesson, at)
+
+
+
 
 def grant_course_entitlement(*, user, offer, payment_intent=None, granted_by=None,
                              source=CourseEntitlement.Source.PURCHASE, reason=""):
@@ -160,7 +217,15 @@ def update_lesson_progress(*, user, lesson, status=None, response_json=None, sec
         raise ValidationError("response_json must be an object.")
     progress, _created = LessonProgress.objects.get_or_create(user=user, lesson=lesson)
     if status is not None:
-        progress.status = status
+        rank = {
+            LessonProgress.Status.NOT_STARTED: 0,
+            LessonProgress.Status.IN_PROGRESS: 1,
+            LessonProgress.Status.COMPLETED: 2,
+        }
+        # Progress is monotonic: revisiting a lesson or a stale client must not
+        # undo a completion record.
+        if rank[status] >= rank[progress.status]:
+            progress.status = status
         if status in (LessonProgress.Status.IN_PROGRESS, LessonProgress.Status.COMPLETED) and not progress.started_at:
             progress.started_at = at
         if status == LessonProgress.Status.COMPLETED:

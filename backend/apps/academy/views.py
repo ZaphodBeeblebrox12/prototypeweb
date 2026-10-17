@@ -25,6 +25,7 @@ from .permissions import is_course_content_admin
 from .services import (
     can_access_lesson,
     get_active_entitlement,
+    get_resume_lesson,
     lesson_release_at,
     update_lesson_progress,
 )
@@ -49,14 +50,19 @@ def academy_home(request):
     course_cards = []
     for course in sorted(courses_by_id.values(), key=lambda c: (c.position, c.title.casefold())):
         entitlement = entitlements_by_course.get(course.pk)
-        total = Lesson.objects.filter(module__course=course, module__is_published=True, is_published=True).count()
+        visible_lesson_ids = list(Lesson.objects.filter(
+            module__course=course, module__is_published=True, is_published=True,
+        ).values_list("pk", flat=True))
+        total = len(visible_lesson_ids)
         done = LessonProgress.objects.filter(
-            user=request.user, lesson__module__course=course, status=LessonProgress.Status.COMPLETED,
+            user=request.user, lesson_id__in=visible_lesson_ids,
+            status=LessonProgress.Status.COMPLETED,
         ).count()
         course_cards.append({
             "course": course, "entitlement": entitlement,
             "total_lessons": total, "completed_lessons": done,
             "progress_percent": round(done * 100 / total) if total else 0,
+            "resume_lesson": get_resume_lesson(request.user, course),
         })
 
     offers = CourseOffer.objects.filter(
@@ -105,8 +111,11 @@ def course_detail(request, course_slug):
     ).select_related("plan", "course").first()
     if offer is not None and not offer.is_saleable:
         offer = None
+    visible_lesson_ids = Lesson.objects.filter(
+        module__course=course, module__is_published=True, is_published=True,
+    ).values_list("pk", flat=True)
     completed = LessonProgress.objects.filter(
-        user=request.user, lesson__module__course=course,
+        user=request.user, lesson_id__in=visible_lesson_ids,
         status=LessonProgress.Status.COMPLETED,
     ).count()
     total = Lesson.objects.filter(module__course=course, module__is_published=True, is_published=True).count()
@@ -129,7 +138,13 @@ def lesson_detail(request, course_slug, lesson_id):
     if not can_access_lesson(request.user, lesson):
         raise PermissionDenied("You do not have access to this lesson yet.")
     entitlement = get_active_entitlement(request.user, course)
-    progress = LessonProgress.objects.filter(user=request.user, lesson=lesson).first()
+    # A successful lesson visit establishes an in-progress resume point. The
+    # service preserves completed status on revisits and rechecks access.
+    progress = update_lesson_progress(
+        user=request.user,
+        lesson=lesson,
+        status=LessonProgress.Status.IN_PROGRESS,
+    )
     asset_ids = lesson.content_json.get("asset_ids", []) if isinstance(lesson.content_json, dict) else []
     media_assets = CourseMediaAsset.objects.filter(course=course, pk__in=asset_ids)
     asset_urls = {}

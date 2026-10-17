@@ -14,7 +14,7 @@
             <h3 class="h5">{{ item.course.title }}</h3>
             <p class="text-muted">{{ item.course.summary }}</p>
             {% if item.entitlement %}<p class="small mb-2">{{ item.completed_lessons }} of {{ item.total_lessons }} lessons complete · {{ item.progress_percent }}%</p><div class="progress mb-3" role="progressbar" aria-valuenow="{{ item.progress_percent }}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width:{{ item.progress_percent }}%"></div></div>{% endif %}
-            <a class="btn btn-primary" href="{% url 'academy:course-detail' item.course.slug %}">{% if item.entitlement %}Continue learning{% else %}Explore course{% endif %}</a>
+            {% if item.resume_lesson %}<a class="btn btn-primary" href="{% url 'academy:lesson' item.course.slug item.resume_lesson.id %}">{% if item.entitlement %}Continue learning{% else %}Open preview lesson{% endif %} ↗</a>{% else %}<a class="btn btn-primary" href="{% url 'academy:course-detail' item.course.slug %}">{% if item.entitlement %}Review course{% else %}Explore course{% endif %} ↗</a>{% endif %}
           </div></article>
         </div>
       {% endfor %}

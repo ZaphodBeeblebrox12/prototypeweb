@@ -517,6 +517,7 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
         # TradeThesis Member Desk: build the course cards from this account's
         # published catalogue, active entitlements, and saved lesson progress.
         from apps.academy.models import Course, CourseEntitlement, Lesson, LessonProgress
+        from apps.academy.services import get_resume_lesson
 
         now = timezone.now()
         active_entitlements = list(
@@ -545,14 +546,15 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
             courses_by_id.values(),
             key=lambda item: (item.position, item.title.casefold()),
         ):
-            total_lessons = Lesson.objects.filter(
+            visible_lesson_ids = list(Lesson.objects.filter(
                 module__course=course,
                 module__is_published=True,
                 is_published=True,
-            ).count()
+            ).values_list("pk", flat=True))
+            total_lessons = len(visible_lesson_ids)
             completed_lessons = LessonProgress.objects.filter(
                 user=user,
-                lesson__module__course=course,
+                lesson_id__in=visible_lesson_ids,
                 status=LessonProgress.Status.COMPLETED,
             ).count()
             member_course_cards.append({
@@ -564,6 +566,7 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
                     round(completed_lessons * 100 / total_lessons)
                     if total_lessons else 0
                 ),
+                "resume_lesson": get_resume_lesson(user, course, now),
             })
 
         telegram_account = getattr(user, "telegram_account", None)
