@@ -1,4 +1,5 @@
 import re
+from datetime import timedelta
 from io import BytesIO
 
 from django.contrib.auth import get_user_model
@@ -212,9 +213,6 @@ class AcademyViewTests(TestCase):
         self.assertEqual(response.status_code, 405)
 
     def test_expired_entitlement_does_not_open_paid_lesson(self):
-        from datetime import timedelta
-        from django.utils import timezone
-
         now = timezone.now()
         CourseEntitlement.objects.create(
             user=self.user,
