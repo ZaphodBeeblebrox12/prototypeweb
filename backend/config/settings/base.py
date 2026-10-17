@@ -106,6 +106,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.core.context_processors.public_site",
             ],
         },
     },
@@ -319,6 +320,8 @@ RAZORPAY_KEY_ID = os.environ.get("RAZORPAY_KEY_ID", "")
 RAZORPAY_KEY_SECRET = os.environ.get("RAZORPAY_KEY_SECRET", "")
 # Base URL used to build provider success/cancel redirects.
 SITE_BASE_URL = os.environ.get("SITE_BASE_URL", "http://127.0.0.1:8000")
+# Public marketing site URL; login/signup branding links should never target the legacy Django root.
+PUBLIC_SITE_URL = env("PUBLIC_SITE_URL", default="https://tradethesis-public-staging.onrender.com").rstrip("/")
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
 RAZORPAY_WEBHOOK_SECRET = os.environ.get("RAZORPAY_WEBHOOK_SECRET", "")
 
