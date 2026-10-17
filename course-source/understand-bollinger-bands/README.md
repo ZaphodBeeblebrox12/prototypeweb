@@ -5,7 +5,9 @@
 **Location:** course-source/understand-bollinger-bands/  
 **Audience:** Intermediate market participants who want a clearer, more practical understanding of Bollinger Bands.
 
-**Shared template:** [TradeThesis Course Template Standard](../COURSE_TEMPLATE_STANDARD.md). This course and all future revisions should use the updated Learning Room template; lesson sections remain flexible, not boilerplate.
+**Shared template:** [TradeThesis Course Template Standard](../COURSE_TEMPLATE_STANDARD.md). The canonical visual/interaction reference for every micro-course is this course's [first-pass Learning Room preview](preview/first-pass/index.html); reuse its design rather than copying a separate page for each new course. Lesson sections remain flexible, not boilerplate.
+
+**Django integration:** See [the reusable micro-course/Django handoff](../../course-integration/MICROCOURSE_TEMPLATE_DJANGO_HANDOFF.md). The static preview is not the production runtime, and its local-only edit controls are not a shared content store.
 
 **Production checkpoint:** [PRODUCTION_CHECKPOINT.md](PRODUCTION_CHECKPOINT.md) tracks current preview and image replacement status. [First-pass preview source](preview/first-pass/index.html) is a review artifact, not deployed website code.
 
