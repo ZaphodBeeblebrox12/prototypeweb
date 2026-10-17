@@ -8,12 +8,17 @@ from django.core.exceptions import ImproperlyConfigured
 
 from .base import *
 
-# Production must never silently use the local SQLite fallback. On Render Free
-# the filesystem is ephemeral, so that would lose users and learning progress.
-if not env("DATABASE_URL", default="").strip():
+# Production must use persistent PostgreSQL. Render Free's filesystem is
+# ephemeral, so SQLite could silently lose user accounts and learning progress.
+database_url = env("DATABASE_URL", default="").strip()
+if not database_url:
     raise ImproperlyConfigured(
         "DATABASE_URL is required in production. Configure the dedicated "
         "staging PostgreSQL connection before deploying."
+    )
+if not database_url.lower().startswith(("postgres://", "postgresql://")):
+    raise ImproperlyConfigured(
+        "DATABASE_URL must use PostgreSQL in production; SQLite is not supported."
     )
 
 DEBUG = env("DEBUG", default=False)
