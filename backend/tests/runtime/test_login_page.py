@@ -14,6 +14,13 @@ class LoginPageSocialProviderTest(TestCase):
         """No SocialApp configured -> page must still render (no 500)."""
         r = self.client.get("/accounts/login/")
         assert r.status_code == 200
+        html = r.content.decode()
+        assert (
+            'href="https://tradethesis-public-staging.onrender.com/" '
+            'class="brand-logo"' in html
+        )
+        assert 'href="/" class="brand-logo"' not in html
+        assert "{% endfor %}" not in html
 
     def test_login_page_200_with_google_socialapp(self):
         """A configured SocialApp -> page renders and Google button present."""
