@@ -36,3 +36,52 @@ else:
     print("Staging superuser created.")
 '
 fi
+
+# Explicit one-time reset for an existing staging superuser. This is separate
+# from the create-only bootstrap above so setting BOOTSTRAP_STAGING_ADMIN=true
+# cannot silently overwrite an existing account's password.
+if [[ "${RESET_STAGING_ADMIN_PASSWORD:-false}" =~ ^(1|true|TRUE|yes|YES)$ ]]; then
+  : "${STAGING_ADMIN_USERNAME:?STAGING_ADMIN_USERNAME is required for password reset}"
+  : "${STAGING_ADMIN_EMAIL:?STAGING_ADMIN_EMAIL is required for password reset}"
+  : "${STAGING_ADMIN_PASSWORD:?STAGING_ADMIN_PASSWORD is required for password reset}"
+
+  python manage.py shell -c '
+import os
+from django.contrib.auth import get_user_model
+from allauth.account.models import EmailAddress
+
+User = get_user_model()
+username = os.environ["STAGING_ADMIN_USERNAME"].strip()
+email = os.environ["STAGING_ADMIN_EMAIL"].strip()
+password = os.environ["STAGING_ADMIN_PASSWORD"]
+
+user = User.objects.filter(username=username).first()
+if user is None:
+    raise SystemExit("Staging admin password reset stopped: requested username does not exist.")
+if not (user.is_superuser and user.is_staff and user.is_active):
+    raise SystemExit("Staging admin password reset stopped: requested account is not an active superuser.")
+if not email or not password:
+    raise SystemExit("Staging admin password reset stopped: email/password cannot be empty.")
+if User.objects.filter(email__iexact=email).exclude(pk=user.pk).exists():
+    raise SystemExit("Staging admin password reset stopped: email belongs to a different account.")
+
+# The project uses email-based allauth login. Keep the custom User email and
+# allauth EmailAddress record aligned, verified, and primary for this admin.
+user.email = email
+user.set_password(password)
+user.save(update_fields=["email", "password"])
+
+EmailAddress.objects.filter(user=user).update(primary=False)
+address, _ = EmailAddress.objects.get_or_create(
+    user=user,
+    email=email,
+    defaults={"verified": True, "primary": True},
+)
+address.email = email
+address.verified = True
+address.primary = True
+address.save(update_fields=["email", "verified", "primary"])
+
+print("Staging admin password reset and email verification completed.")
+'
+fi
