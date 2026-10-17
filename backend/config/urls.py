@@ -10,6 +10,7 @@ from django.conf.urls.static import static
 from allauth.account.views import LoginView, SignupView
 from apps.accounts import views as accounts_views
 from apps.accounts.telegram_views import TelegramCallbackView
+from apps.core.views import health_check
 
 urlpatterns = [
     # Render readiness probe: confirm Django and its primary database respond.
