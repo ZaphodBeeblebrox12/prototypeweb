@@ -23,10 +23,10 @@ services:
         value: https://tradethesis-academy-staging.onrender.com
       - key: SITE_BASE_URL
         value: https://tradethesis-academy-staging.onrender.com
+      # Supply a dedicated free-tier PostgreSQL connection in Render's
+      # environment settings. Do not point this at the TradeAdmin database.
       - key: DATABASE_URL
-        fromDatabase:
-          name: tradethesis-academy-staging-db
-          property: connectionString
+        sync: false
       - key: PYTHON_VERSION
         value: "3.12"
       - key: WEB_CONCURRENCY
@@ -70,9 +70,3 @@ services:
       - key: DEFAULT_FROM_EMAIL
         sync: false
 
-databases:
-  - name: tradethesis-academy-staging-db
-    databaseName: tradethesis_academy_staging
-    user: tradethesis_academy
-    plan: 0.1c-256mb
-    diskSizeGB: 1
