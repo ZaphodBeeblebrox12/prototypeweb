@@ -19,19 +19,23 @@ The branch contains the static TradeThesis website, course-room prototype, learn
 - Support & Resistance course: `course-content/support-resistance/`.
 - Existing curriculum metadata: `course-integration/curriculum.json`.
 
-There is no Django project runtime in this repository at present: no `manage.py`, root `config/` package, dependency lock/requirements for the web backend, or production database configuration. The member screens are preview HTML, not secure account pages.
+The Django runtime is now consolidated under `backend/` on `prototypeweb/my-new-branch`. The public member screens remain static design previews; authenticated account, checkout, and course access must be validated through the Django runtime before being treated as production flows.
 
-### Existing Django implementation: separate repository
+### Django runtime and rollback source
 
-The current Academy implementation lives in `ZaphodBeeblebrox12/test`, branch `feature/tradethesis-academy`. It has the Academy models, protected learner views, course-offer/payment hooks, progress handling and templates. Its route set includes:
+The runnable Django application is now under `backend/` in this repository, on `prototypeweb/my-new-branch`. It was copied from `ZaphodBeeblebrox12/test` / `feature/tradethesis-academy` at source commit `e7bef974e1227f094c7c7044c0d64785c17b2fdd`.
+
+The source repository and its feature branch remain unchanged as the rollback/source reference until staging verification is complete. Do not merge this work into `main`.
+
+Runtime paths now live under `backend/`: `manage.py`, `config/`, `apps/`, migrations, templates, static assets, dependencies, and tests. Key Academy routes include:
 
 - `/learn/` — authenticated learning home;
 - `/learn/course/<course_slug>/` — course overview and access state;
 - `/learn/course/<course_slug>/lesson/<lesson_uuid>/` — authorized lesson detail;
 - `/learn/lesson/<lesson_uuid>/progress/` — authenticated POST for progress;
-- `/accounts/login/` and `/accounts/signup/` — existing Django Allauth pages.
+- `/accounts/login/` and `/accounts/signup/` — Django Allauth pages.
 
-The learner views are server-rendered Django pages, not a published public JSON API. Their URL names and same-origin CSRF/session behaviour should be used rather than guessing API endpoints from static HTML.
+Render's existing staging services still need to be pointed at `my-new-branch` after CI validation. The consolidation workflow does not alter Render configuration or deploy services.
 
 ## Reusable micro-course template and Django handoff
 
