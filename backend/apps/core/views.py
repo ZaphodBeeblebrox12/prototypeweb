@@ -1,14 +1,12 @@
-"""
-Core views for community platform.
-"""
+"""Core service views for TradeThesis Academy."""
 from django.db import DatabaseError, connections
 from django.http import JsonResponse
-from django.shortcuts import render
+
+from apps.public_views.urls import public_front_door
 
 
-def index(request):
-    """Home page view."""
-    return render(request, "index.html")
+# Keep reverse("index") compatible, but do not render a legacy marketing page.
+index = public_front_door
 
 
 def health_check(request):

@@ -26,11 +26,11 @@ urlpatterns = [
 
     # Custom auth views using allauth (with your custom templates)
     path("accounts/login/", LoginView.as_view(
-        template_name="auth/login.html",
+        template_name="auth/tradethesis_login.html",
     ), name="account_login"),
 
     path("accounts/signup/", SignupView.as_view(
-        template_name="auth/signup.html",
+        template_name="auth/tradethesis_signup.html",
     ), name="account_signup"),
 
     path("accounts/", include("allauth.urls")),

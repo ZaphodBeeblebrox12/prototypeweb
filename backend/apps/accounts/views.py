@@ -513,7 +513,67 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
             }
         # ===== END REFERRAL INTEGRATION =====
 
-        return render(request, "accounts/dashboard.html", context)
+        # TradeThesis Member Desk: build the course cards from this account's
+        # published catalogue, active entitlements, and saved lesson progress.
+        from apps.academy.models import Course, CourseEntitlement, Lesson, LessonProgress
+
+        now = timezone.now()
+        active_entitlements = list(
+            CourseEntitlement.objects.filter(
+                user=user,
+                status=CourseEntitlement.Status.ACTIVE,
+                starts_at__lte=now,
+            ).select_related("course")
+        )
+        active_entitlements = [
+            entitlement for entitlement in active_entitlements
+            if entitlement.expires_at is None or entitlement.expires_at > now
+        ]
+        entitlements_by_course = {
+            entitlement.course_id: entitlement for entitlement in active_entitlements
+        }
+        courses_by_id = {
+            course.pk: course
+            for course in Course.objects.filter(status=Course.Status.PUBLISHED)
+        }
+        for entitlement in active_entitlements:
+            courses_by_id.setdefault(entitlement.course_id, entitlement.course)
+
+        member_course_cards = []
+        for course in sorted(
+            courses_by_id.values(),
+            key=lambda item: (item.position, item.title.casefold()),
+        ):
+            total_lessons = Lesson.objects.filter(
+                module__course=course,
+                module__is_published=True,
+                is_published=True,
+            ).count()
+            completed_lessons = LessonProgress.objects.filter(
+                user=user,
+                lesson__module__course=course,
+                status=LessonProgress.Status.COMPLETED,
+            ).count()
+            member_course_cards.append({
+                "course": course,
+                "entitlement": entitlements_by_course.get(course.pk),
+                "total_lessons": total_lessons,
+                "completed_lessons": completed_lessons,
+                "progress_percent": (
+                    round(completed_lessons * 100 / total_lessons)
+                    if total_lessons else 0
+                ),
+            })
+
+        context.update({
+            "member_course_cards": member_course_cards,
+            "member_courses_total": len(member_course_cards),
+            "member_lessons_completed": sum(
+                card["completed_lessons"] for card in member_course_cards
+            ),
+            "member_active_entitlements": len(active_entitlements),
+        })
+        return render(request, "accounts/member_desk.html", context)
 
 
 # ===== REFERRAL DASHBOARD VIEW (with forced fallbacks) =====
