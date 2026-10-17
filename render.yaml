@@ -1,53 +1,7 @@
 # TradeThesis Academy staging. This Blueprint does not auto-deploy commits.
 # Keep the service at repo root so course sources outside backend/ remain available.
-#
-# Runtime values live in the Render Environment Group named below; never put
-# API keys, database passwords, or other credentials in this file.
-envVarGroups:
-  - name: tradethesis-academy-staging-config
-    envVars:
-      - key: DJANGO_SETTINGS_MODULE
-        value: config.settings.production
-      - key: DEBUG
-        value: "False"
-      - key: SECRET_KEY
-        generateValue: true
-      - key: ALLOWED_HOSTS
-        value: tradethesis-academy-staging.onrender.com
-      - key: CSRF_TRUSTED_ORIGINS
-        value: https://tradethesis-academy-staging.onrender.com
-      - key: SITE_BASE_URL
-        value: https://tradethesis-academy-staging.onrender.com
-      # Add the full Supabase Session Pooler URI in the Render Dashboard.
-      - key: DATABASE_URL
-      - key: PYTHON_VERSION
-        value: "3.12"
-      - key: WEB_CONCURRENCY
-        value: "2"
-      - key: TELEGRAM_BOT_TOKEN
-      - key: TELEGRAM_BOT_USERNAME
-      - key: TELEGRAM_CONTROL_CHANNEL_ID
-      - key: PROVISION_SHARED_SECRET
-      - key: PROVISION_BOT_URL
-      - key: STRIPE_SECRET_KEY
-      - key: STRIPE_PUBLISHABLE_KEY
-      - key: STRIPE_WEBHOOK_SECRET
-      - key: RAZORPAY_KEY_ID
-      - key: RAZORPAY_KEY_SECRET
-      - key: RAZORPAY_WEBHOOK_SECRET
-      - key: MAXMIND_ENABLED
-        value: "False"
-      # HTTPS API email backend works on Render Free; it does not use SMTP.
-      - key: EMAIL_BACKEND
-        value: apps.core.email_backends.ResendEmailBackend
-      - key: RESEND_API_KEY
-      - key: RESEND_API_TIMEOUT
-        value: "10"
-      - key: DEFAULT_FROM_EMAIL
-        value: onboarding@resend.dev
-      # Reserved for optional direct Supabase client use; Django itself uses DATABASE_URL.
-      - key: SUPABASE_URL
-      - key: SUPABASE_PUBLISHABLE_KEY
+# Secrets and environment values live in the existing Render Environment Group;
+# never put API keys, database passwords, or other credentials in this file.
 
 services:
   - type: web
