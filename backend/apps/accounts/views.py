@@ -46,7 +46,7 @@ def check_banned(view_func):
         if request.user.is_authenticated and request.user.is_banned:
             return render(request, "accounts/banned.html", {
                 "ban_reason": request.user.ban_reason
-            })
+            }, status=403)
         return view_func(request, *args, **kwargs)
     return wrapper
 
