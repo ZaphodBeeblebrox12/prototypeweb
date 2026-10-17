@@ -1,7 +1,10 @@
 # TradeThesis Course Template Standard
 
-**Status:** Adopted standard for all new courses and the migration target for every existing course.  
-**Design reference:** The saved **TradeThesis Course Template — Updated Learning Room** preview (16 October 2026).  
+**Status:** Binding standard for every new TradeThesis micro-course and the migration target for existing courses.  
+**Canonical visual/interaction reference:** [Understand Bollinger Bands first-pass Learning Room](understand-bollinger-bands/preview/first-pass/index.html). This is the concrete approved template reference, including the **Your Trading Notebook** section and excluding the former green **“By the end, you can”** objective card.  
+**Design approval checkpoint:** `030e473e33563499d57b1a8836559ce4501c138b` on `my-new-branch` (17 October 2026).  
+**Content authority:** Each course's authored Markdown lessons and course architecture; generated preview payloads are build outputs, not editing sources.  
+**Django runtime:** Separate Academy repository, currently documented as `ZaphodBeeblebrox12/test` on `feature/tradethesis-academy`; verify the actual branch state before implementation.  
 **Implementation branch:** `my-new-branch`. Do not merge to `main` or deploy without explicit approval.
 
 ## Decision
@@ -44,7 +47,8 @@ Use **Observe → Interpret → Test** as the recurring reasoning habit where it
 
 Section functions are reusable, not fixed names:
 - A production or editorial note is normally internal; it may become student-facing context only when the content genuinely helps the learner.
-- An objective can be a brief “By the end, you can…” statement, placed once where it helps.
+- **Do not reintroduce the removed green “By the end, you can” objective card.** State a lesson outcome naturally in the summary or opening explanation if it helps the learner; do not add a duplicate objective box.
+- Preserve the current **Your Trading Notebook** editorial callout treatment as the shared reflective/checklist pattern. Adapt its prompts to the course topic rather than forcing Bollinger-specific wording into unrelated subjects.
 - Concept and transfer sections should have topic-specific student-facing headings rather than repeatedly showing the same generic labels.
 - Internal level labels, production states, build instructions and asset-status notices do not belong in the normal learner view.
 
@@ -67,10 +71,60 @@ Every existing course should be migrated to the shared visual and navigation sta
 The initial application pass is **Understand Bollinger Bands**. Its seven-module manuscripts remain the source of truth. The first preview will use the updated Learning Room structure, locally stored visual assets for review, simple module-based figure labels and explicit notes that temporary web-sourced images are placeholders to be replaced by the user's own TradingView captures before release.
 
 
+## Source-of-truth hierarchy and rapid deployment
+
+Use these layers deliberately; do not let the same lesson text become independently maintained in multiple places.
+
+1. **This standard** defines the reusable teaching, visual, accessibility, image, migration and security rules.
+2. **Canonical design reference:** `course-source/understand-bollinger-bands/preview/first-pass/index.html`. It is the approved concrete reference for spacing, typography, overview-to-learning-room flow, lesson navigation, notebook callout, content width, figure handling and responsive behaviour. Treat it as a reference for extraction into shared Django templates—not as the production Django page to copy wholesale.
+3. **Course-specific authoring source:** the course's `README.md`, `COURSE_ARCHITECTURE.md`, lesson Markdown and `ASSET_REGISTER.md`. Markdown lessons are the student-content editing authority unless a course explicitly records a different approved source.
+4. **Structured manifest:** each course should have a stable manifest (or the project's existing equivalent) describing course metadata, ordered modules/lessons, stable slugs/IDs, durations, learning outcomes, lesson source paths and asset IDs. Reuse existing manifest formats when compatible; do not create a second competing manifest.
+5. **Generated preview output:** generated lesson-data JavaScript and preview HTML/assets are derived artifacts. Regenerate them from their authoritative sources; do not manually patch generated lesson text and then treat it as canonical.
+6. **Published Django content:** the database and persistent media storage become the runtime source for what learners actually see. Seed/import from approved source files with a repeatable, idempotent command; editing a published lesson in the approved admin workflow updates shared content, not only a browser-local draft.
+
+### Standard course package
+
+For a new micro-course, follow the nearest existing course's structure and add only what that course needs. The default structure is:
+
+```text
+course-source/<course-slug>/
+  README.md
+  COURSE_ARCHITECTURE.md
+  ASSET_REGISTER.md
+  lessons/
+    MODULE_01_<topic>.md
+    ...
+  assets/
+  preview/
+    first-pass/
+      index.html              # generated/reviewable preview, not the Django runtime
+```
+
+Add a manifest or use the existing project's manifest convention for stable course/module/lesson IDs, ordering, durations, learning outcomes, content source paths, and asset IDs. Keep source figures and provenance in the course asset register. Do not add empty directories or boilerplate files that do not help authoring or production.
+
+### Rapid deployment workflow
+
+1. Define the learner, course promise, scope, course outcomes and module progression in `COURSE_ARCHITECTURE.md`.
+2. Write reviewed student-facing lesson Markdown and prepare/record course-owned or rights-cleared images.
+3. Validate the manifest against the lesson files, unique slugs/order values and asset register.
+4. Build the static preview/data payload from the source files. Preview generation must never overwrite authored Markdown.
+5. Run source validation and browser checks at desktop and mobile widths, including lesson switching, all tabs, image enlargement, accessibility/keyboard use and missing-media fallbacks.
+6. Import or update Django records idempotently from the manifest. Preserve existing course/lesson primary keys, progress, enrolments, offers and access rules when updating content.
+7. Verify the learner sees database-backed current content and the administrator can edit permitted text/images persistently. Only then mark the course ready; publishing and deploy remain separate, explicit actions.
+
+### Django extraction contract
+
+- Extract the canonical Learning Room into reusable Django templates/partials and shared static CSS/JS, using the existing Academy site's real base template, navigation, logo and design tokens. Do not duplicate a header, use the wrong logo, or introduce a parallel login/page shell.
+- Keep the core page layout and interactions in code; pass course-specific curriculum, lesson fields, figure metadata and practice/review data through the existing Academy models/context. Never fork the full monolithic Bollinger HTML for every new course.
+- Inspect the existing Django models and migrations before proposing schema changes. Extend/reuse the Academy course/module/lesson/content/media models; do not build a general-purpose CMS if existing models can serve.
+- The approved notebook pattern is reusable, but text inside it is course/lesson data. The removed green objective card is not part of the template.
+- The admin edit/upload controls are **administrator-only**. A client-side flag, hidden button or `is_staff` check by itself is not permission enforcement. Use a dedicated permission or administrator group assigned only to admins and re-check it on every write.
+- All shared text saves and image replacements must persist through Django and shared storage, with CSRF protection, server-side validation, stable database-backed content/media IDs and audit history. Preview localStorage/Data-URL behaviour must not be enabled in production.
+
 ## Admin editing and Django handoff
 
 The standalone Bollinger preview contains local-only controls for reviewing image replacement and in-place text editing. Text drafts are saved in the current browser; image changes last only for the open preview session. Neither action saves shared course content.
 
-**When this template is included in Django, remove the local-only preview mode.** Render controls only for authenticated staff with the correct content/media permission, inject server-checked configuration, stable content IDs, CSRF tokens and save/upload routes. The server must re-check permission on every request and validate/sanitise content. Text saving must update shared content in the existing course system; shared images must use persistent media records and storage.
+**When this template is included in Django, remove the local-only preview mode.** Render text/image editing controls only for an authenticated administrator who has the dedicated content/media-edit permission. Do not grant this capability to learners, instructors, ordinary staff or all users with `is_staff` by default. Inject server-checked configuration, stable database-backed content IDs, CSRF tokens and save/upload routes. Re-check administrator permission on every write; validate and sanitise content server-side. Text saving must update shared content in the existing course system, while shared images must use persistent media records/storage and retain audit history.
 
 See `docs/architecture/COURSE_CONTENT_EDITOR.md` and `docs/architecture/INSTRUCTIONAL_IMAGE_REPLACEMENT.md`.
