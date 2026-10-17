@@ -406,40 +406,37 @@ jobs:
               "The public catalogue should explain that new courses will be added");
             console.log("EXPANDING_CATALOGUE_PASS: dynamic topics, hidden drafts, visible counts, preview state and mobile fit.");
 
-            // Member experience regression: the static page links to real server-side
-            // auth routes and deliberately does not collect credentials in a preview.
+            // Member access is a lightweight bridge to the single Django-served
+            // TradeThesis auth screen; it must not collect credentials itself.
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
             await cataloguePage.goto(server + "/member-access.html", { waitUntil: "networkidle" });
             assert.equal(await cataloguePage.evaluate(() => getComputedStyle(document.documentElement).colorScheme), "light",
-              "Member access should use the TradeThesis light theme");
+              "Member access bridge should use the TradeThesis light theme");
             const academyBase = "https://tradethesis-academy-staging.onrender.com";
-            assert.equal(await cataloguePage.locator('#signInPanel a[href="' + academyBase + '/accounts/login/?next=/learn/"]').count(), 1,
-              "Sign-in should use the configured Django login route, returning the learner to /learn/");
-            assert.equal(await cataloguePage.locator('#signInPanel a[href="' + academyBase + '/accounts/password/reset/"]').count(), 1,
-              "Forgot-password should use the configured server-side password reset flow");
-            assert.equal(await cataloguePage.locator('#createPanel a[href="' + academyBase + '/accounts/signup/?next=/learn/"]').count(), 1,
-              "Account creation should use the configured Django signup route");
-            assert.equal(await cataloguePage.locator('#signInPanel input, #createPanel input, #signInPanel form, #createPanel form').count(), 0,
-              "The static preview must not collect or submit passwords");
-            assert.equal(await cataloguePage.locator("#createPanel").isVisible(), false,
-              "The create-account panel should start hidden");
-            await cataloguePage.locator("#createTab").click();
-            assert.equal(await cataloguePage.locator("#createPanel").isVisible(), true,
-              "Create-account tab should reveal the server-routed CTA");
-            assert.equal(await cataloguePage.locator("#signInPanel").isVisible(), false,
-              "Switching tabs should hide the sign-in panel");
-            await cataloguePage.locator("#signInTab").click();
-            assert.equal(await cataloguePage.locator("#signInPanel").isVisible(), true,
-              "Sign-in tab should restore the sign-in panel");
-            assert.equal(await cataloguePage.locator('header a[href="https://tradethesis-academy-staging.onrender.com/learn/"]').count(), 2,
-              "Desktop and mobile member dashboard CTAs should use the authenticated learning route");
+            assert.equal(await cataloguePage.locator('meta[name="academy-base-url"]').getAttribute("content"), academyBase,
+              "Member access should use the configured Academy host");
+            assert.equal(await cataloguePage.locator("#continue").count(), 1,
+              "Member access should provide one fallback sign-in link");
+            const continueTarget = await cataloguePage.locator("#continue").evaluate(element => {
+              const target = new URL(element.href);
+              return { origin: target.origin, pathname: target.pathname, next: target.searchParams.get("next") };
+            });
+            assert.deepEqual(continueTarget, {
+              origin: academyBase, pathname: "/accounts/login/", next: "/learn/"
+            }, "Fallback sign-in link should open the one branded auth screen and return learners to /learn/");
+            assert.equal(await cataloguePage.locator("input, form").count(), 0,
+              "The static bridge must not collect or submit credentials");
+            assert.ok((await cataloguePage.locator("body").innerText()).includes("Opening your secure sign-in"),
+              "The bridge should explain that it is opening secure sign-in");
+            assert.ok((await cataloguePage.content()).includes("window.location.replace(destination.href)"),
+              "Hosted member access should immediately redirect to the shared Django auth screen");
             await cataloguePage.setViewportSize({ width: 390, height: 844 });
             const accessOverflow = await cataloguePage.evaluate(() => ({
               viewport: document.documentElement.clientWidth,
               document: document.documentElement.scrollWidth
             }));
             assert.ok(accessOverflow.document <= accessOverflow.viewport + 1,
-              "Member-access page has horizontal scrolling on mobile: " + JSON.stringify(accessOverflow));
+              "Member-access bridge has horizontal scrolling on mobile: " + JSON.stringify(accessOverflow));
 
             await cataloguePage.goto(server + "/member-area.html", { waitUntil: "networkidle" });
             assert.equal(await cataloguePage.evaluate(() => getComputedStyle(document.documentElement).colorScheme), "light",
