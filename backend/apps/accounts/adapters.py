@@ -3,6 +3,7 @@ Custom allauth adapter for Google authentication.
 """
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.account.adapter import DefaultAccountAdapter
+from allauth.account.app_settings import EmailVerificationMethod
 from django import forms
 from django.conf import settings
 from allauth.exceptions import ImmediateHttpResponse
@@ -96,14 +97,50 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         return email
 
 
+    def pre_login(
+        self,
+        request,
+        user,
+        *,
+        email_verification,
+        signal_kwargs,
+        email,
+        signup,
+        redirect_url,
+    ):
+        """Keep staff access recoverable while enforcing verification for learners.
+
+        Allauth's mandatory email verification gate runs before the session is
+        created. A newly bootstrapped Django superuser may not yet have an
+        EmailAddress row, so they would otherwise be unable to enter /admin/.
+        Staff/superusers use the normal password check but skip the learner
+        email-verification gate; protected learner routes remain governed by
+        the app's verification middleware.
+        """
+        if user.is_staff or user.is_superuser:
+            email_verification = EmailVerificationMethod.OPTIONAL
+        return super().pre_login(
+            request,
+            user,
+            email_verification=email_verification,
+            signal_kwargs=signal_kwargs,
+            email=email,
+            signup=signup,
+            redirect_url=redirect_url,
+        )
+
     def get_login_redirect_url(self, request):
-        """Redirect after login - check if email is verified."""
+        """Honor the requested destination after login."""
         user = request.user
 
-        # Check if user needs email verification
-        if user.email and not self._is_email_verified(user):
-            # Redirect to verification sent page
-            return reverse('account_email_verification_sent')
+        # Staff need to access Django admin to resolve account/configuration
+        # problems. Learner verification remains mandatory for ordinary users.
+        if (
+            user.email
+            and not (user.is_staff or user.is_superuser)
+            and not self._is_email_verified(user)
+        ):
+            return reverse("account_email_verification_sent")
 
         # Honour a safe ``next`` target supplied by allauth; otherwise use
         # LOGIN_REDIRECT_URL, which points to the TradeThesis learner dashboard.
@@ -115,8 +152,11 @@ class CustomAccountAdapter(DefaultAccountAdapter):
     def _is_email_verified(self, user):
         """Check if user's email is verified."""
         try:
-            email_address = EmailAddress.objects.filter(user=user, verified=True).first()
-            return email_address is not None
+            return EmailAddress.objects.filter(
+                user=user,
+                email__iexact=user.email,
+                verified=True,
+            ).exists()
         except:
             return False
 
@@ -133,6 +173,6 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         if signup:
             email_template = 'account/email/email_confirmation_signup'
         else:
-            email_template = 'account/email/email_confirmation_message'
+            email_template = 'account/email/email_confirmation'
 
         self.send_mail(email_template, emailconfirmation.email_address.email, ctx)
