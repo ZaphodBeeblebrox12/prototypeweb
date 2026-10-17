@@ -63,27 +63,32 @@ GitHub Actions run [39052070511](https://github.com/ZaphodBeeblebrox12/prototype
 
 Email delivery is separately configured: base settings default to Django's console email backend and production requires email verification. Configure a real SMTP/email provider in Render before relying on signup/verification emails. Never store secrets in Git or paste them into chat.
 
-## Staging admin bootstrap — account exists; login verification pending
+## Staging admin login recovery — code committed, reset not yet run
 
-The guarded bootstrap in `backend/build.sh` requires four non-empty variables: `BOOTSTRAP_STAGING_ADMIN`, `STAGING_ADMIN_USERNAME`, `STAGING_ADMIN_EMAIL`, and `STAGING_ADMIN_PASSWORD`.
+The intended staging admin username already exists and is a Django superuser. The prior one-time bootstrap explicitly skipped existing superusers and did not change their password. The website login page uses email authentication, and the project's custom adapter checks verification via allauth `EmailAddress` rows. A superuser created by the custom user manager may have no such row, which can block the email-based login path.
 
-A bootstrap-enabled build on 2026-10-17 succeeded and logged:
+A guarded reset/verification path has now been added to `backend/build.sh` on `my-new-branch`, in commit `9e4570aa36f5d66802c7ce4d5a6cfedcfc38d197`:
 
-- `Staging admin bootstrap skipped: requested superuser already exists.`
-
-This confirms that the username supplied by the current service environment already maps to a Django superuser. The script **does not reset that user's password** when it finds an existing superuser, so the `STAGING_ADMIN_PASSWORD` just entered in Render is not guaranteed to be the current login password.
-
-Recovery / current state:
-- `BOOTSTRAP_STAGING_ADMIN` has been set back to `false`.
-- The follow-up build succeeded; deployment `dep-db9r5t7avr4c73f4im40` had its replacement instance returning HTTP 200 from `/health/`, but Render's deploy API still showed `update_in_progress` at the last recorded check.
-- No password reset occurred; no existing account was modified.
-- Do not remove the other temporary variables until the administrator has successfully signed in.
+- It is **separate** from `BOOTSTRAP_STAGING_ADMIN`.
+- It runs only when `RESET_STAGING_ADMIN_PASSWORD=true`.
+- It will only alter the named account if it already exists and is an active superuser.
+- It refuses to reset if the requested email belongs to another User account.
+- It sets that account's password from `STAGING_ADMIN_PASSWORD`, synchronizes the User email, and creates/marks the matching allauth EmailAddress as verified and primary.
+- It logs only a success/failure message; it does not print credentials.
+- CI now validates `bash -n build.sh`; the workflow run for commit `b3eb083` is still in progress at the last check.
 
 Next:
-1. Open `https://tradethesis-academy-staging.onrender.com/admin/`.
-2. Sign in using the configured username and the **existing password for that account** (not necessarily the password currently stored in `STAGING_ADMIN_PASSWORD`).
-3. If login succeeds, immediately remove `STAGING_ADMIN_USERNAME`, `STAGING_ADMIN_EMAIL`, and `STAGING_ADMIN_PASSWORD` from the service and leave `BOOTSTRAP_STAGING_ADMIN=false`. Save and allow the redeploy to finish.
-4. If the existing password is unknown or login fails, stop and perform an explicit, controlled password reset for this staging superuser; do not repeatedly enable the bootstrap. Any code change should be confined to `my-new-branch`.
+1. Wait for CI on latest commit `b3eb0833c1069199be8d6561f172943bf7e6e68c` to pass before deploying.
+2. In the Academy Render web service's **service-level Environment Variables**, add `RESET_STAGING_ADMIN_PASSWORD=true`. Leave `BOOTSTRAP_STAGING_ADMIN=false`. The existing username/email/password values stay private in Render.
+3. Save and deploy latest commit manually (auto-deploy is off). Check logs for `Staging admin password reset and email verification completed.`
+4. Immediately set `RESET_STAGING_ADMIN_PASSWORD=false` and save, then wait for the cleanup deployment to reach Live.
+5. Sign in to `https://tradethesis-academy-staging.onrender.com/admin/` using the configured username/password; for the website login, use the configured email/password.
+6. After login is verified, remove `STAGING_ADMIN_USERNAME`, `STAGING_ADMIN_EMAIL`, and `STAGING_ADMIN_PASSWORD` and keep both one-time flags false. Never share or commit their values.
+
+Previous recovery history:
+- `BOOTSTRAP_STAGING_ADMIN` is currently false.
+- Latest deployment `dep-db9r5t7avr4c73f4im40` is Live and its build succeeded.
+- No password reset occurred during the prior bootstrap because the existing superuser was skipped.
 
 ## Next workflow tests
 
