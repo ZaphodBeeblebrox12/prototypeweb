@@ -251,9 +251,14 @@ SOCIALACCOUNT_PROVIDERS = {
 
 EMAIL_BACKEND = env(
     "EMAIL_BACKEND",
-    default="django.core.mail.backends.console.EmailBackend"
+    default="django.core.mail.backends.console.EmailBackend",
 )
 
+# Resend uses HTTPS, which is available from Render Free web services.
+RESEND_API_KEY = env("RESEND_API_KEY", default="")
+RESEND_API_TIMEOUT = env("RESEND_API_TIMEOUT", default=10)
+
+# Retained for deployments that deliberately choose Django's SMTP backend.
 EMAIL_HOST = env("EMAIL_HOST", default="")
 EMAIL_PORT = env("EMAIL_PORT", default=587)
 EMAIL_USE_TLS = env("EMAIL_USE_TLS", default=True)
