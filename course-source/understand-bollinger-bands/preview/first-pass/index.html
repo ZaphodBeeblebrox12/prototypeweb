@@ -1911,95 +1911,6 @@ body { font-size: 15px; line-height: 1.66; }
 }
 
 
-/* Trading notebook: quiet editorial emphasis, matching the course's existing paper-and-ink palette. */
-#roomView .trading-notebook {
-  display: grid;
-  grid-template-columns: 68px minmax(0, 1fr);
-  gap: 18px;
-  margin: 28px 0 8px;
-  padding: 21px 22px 22px 17px;
-  border-top: 2px solid #66845f;
-  border-bottom: 1px solid #d8ddcf;
-  background: light-dark(#faf8f0, #202720);
-}
-#roomView .notebook-index {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 12px;
-  min-height: 100%;
-  padding: 5px 13px 0 0;
-  border-right: 1px solid #cbd5c3;
-  text-align: center;
-}
-#roomView .notebook-index span {
-  color: #6c7565;
-  font-size: 8px;
-  line-height: 1.35;
-  letter-spacing: .08em;
-}
-#roomView .notebook-index strong {
-  color: #c36b4d;
-  font: 400 25px/1 var(--serif);
-}
-#roomView .notebook-content { min-width: 0; }
-#roomView .notebook-kicker {
-  margin: 2px 0 7px;
-  color: #48664f;
-  font-size: 8px;
-  font-weight: 850;
-  letter-spacing: .17em;
-}
-#roomView .notebook-content h4 {
-  margin: 0 0 10px;
-  color: #24503c;
-  font: 400 clamp(21px, 2.1vw, 27px)/1.15 var(--serif);
-  letter-spacing: -.035em;
-}
-#roomView .notebook-content ol {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-#roomView .notebook-content li {
-  display: grid;
-  grid-template-columns: 25px minmax(0, 1fr);
-  gap: 8px;
-  align-items: start;
-  padding: 8px 0;
-  border-top: 1px solid #d5dbce;
-}
-#roomView .notebook-number {
-  padding-top: 2px;
-  color: #bd664b;
-  font: 400 9px/1.5 var(--sans);
-}
-#roomView .notebook-content li p {
-  margin: 0;
-  color: #304b3b;
-  font-size: 11px;
-  line-height: 1.6;
-}
-#roomView .notebook-content li p strong {
-  color: #254f3b;
-  font-weight: 800;
-}
-@media (max-width: 560px) {
-  #roomView .trading-notebook {
-    grid-template-columns: 48px minmax(0, 1fr);
-    gap: 12px;
-    margin-top: 22px;
-    padding: 17px 12px 18px 10px;
-  }
-  #roomView .notebook-index { padding-right: 8px; }
-  #roomView .notebook-index span { font-size: 7px; }
-  #roomView .notebook-index strong { font-size: 22px; }
-  #roomView .notebook-content h4 { font-size: 22px; }
-  #roomView .notebook-content li { grid-template-columns: 20px minmax(0,1fr); gap: 5px; }
-  #roomView .notebook-content li p { font-size: 11px; }
-}
-
 /* Visual balance pass: integrate navigation and give the teaching room a calm reading rhythm. */
 #roomView .lesson-content-grid {
   max-width: 1080px;
@@ -2822,9 +2733,9 @@ function renderLesson() {
    const comparisons=manuscript.examplesHtml ? `<div class="lesson-example-copy">${manuscript.examplesHtml}</div>` : '<p>Use the worked chart to practise the reading. State one observation, one possible interpretation and the evidence that would make you revise it.</p>';
    $('#panel-practice').innerHTML=`<div class="eyebrow">Chart examples · Lesson ${lessonId}</div><h3>${escapeHTML(chartTitle(m.id,activeLessonIndex))}</h3><p>Study the worked chart before reading the comparison below. The displayed examples explain the question to inspect; they are not forecasts or proof that a setup works.</p>${figures}${comparisons}<div class="takeaway-strip"><span class="takeaway-mark">Compare</span><p>${escapeHTML(takeaway)}</p></div>`;
    const exercises=manuscript.practiceHtml ? `<div class="lesson-review-copy">${manuscript.practiceHtml}</div>` : '';
-   $('#panel-review').innerHTML=`<div class="eyebrow">Test your reading · Lesson ${lessonId}</div><h3>${escapeHTML(lessonTitle)}</h3><p>Try the lesson-specific task before choosing an answer below. Use the model reasoning to explain why an answer fits the evidence, not just to memorise the correct option.</p>${exercises}<div class="lesson-quiz-intro"><div class="practice-step"><div class="practice-step-head"><div><span class="level-label">CHECK YOUR READING</span><h4>${escapeHTML(q.question)}</h4></div><span class="duration">~1 min</span></div><div class="option-list" id="quizOptions">${q.choices.map((choice,i)=>`<button type="button" class="choice" data-correct="${i===q.correct?'true':'false'}"><span class="choice-letter">${String.fromCharCode(65+i)}</span><span>${escapeHTML(choice)}</span></button>`).join('')}</div><div class="feedback" id="quizFeedback" aria-live="polite"></div></div></div><section class="trading-notebook" aria-label="Your trading notebook"><aside class="notebook-index"><span>KEEP<br>IN VIEW</span><strong>01</strong></aside><div class="notebook-content"><div class="notebook-kicker">YOUR TRADING NOTEBOOK</div><h4>Before treating a touch as a setup</h4><ol><li><span class="notebook-number">01</span><p><strong>Describe.</strong> Where is price relative to the bands and middle line?</p></li><li><span class="notebook-number">02</span><p><strong>Interpret.</strong> Does the structure look like a range, a trend or a transition? What is your alternative explanation?</p></li><li><span class="notebook-number">03</span><p><strong>Test.</strong> What future price behaviour would strengthen or weaken your view?</p></li></ol></div></section>`;
+   $('#panel-review').innerHTML=`<div class="eyebrow">Test your reading · Lesson ${lessonId}</div><h3>${escapeHTML(lessonTitle)}</h3><p>Try the lesson-specific task before choosing an answer below. Use the model reasoning to explain why an answer fits the evidence, not just to memorise the correct option.</p>${exercises}<div class="lesson-quiz-intro"><div class="practice-step"><div class="practice-step-head"><div><span class="level-label">CHECK YOUR READING</span><h4>${escapeHTML(q.question)}</h4></div><span class="duration">~1 min</span></div><div class="option-list" id="quizOptions">${q.choices.map((choice,i)=>`<button type="button" class="choice" data-correct="${i===q.correct?'true':'false'}"><span class="choice-letter">${String.fromCharCode(65+i)}</span><span>${escapeHTML(choice)}</span></button>`).join('')}</div><div class="feedback" id="quizFeedback" aria-live="polite"></div></div></div><div class="takeaway-strip"><span class="takeaway-mark">Keep</span><p>${escapeHTML(takeaway)}</p></div>`;
  } else {
-   $('#panel-learn').innerHTML=`<div class="eyebrow">${escapeHTML(profile.eyebrow)}</div><h3>${escapeHTML(profile.question)}</h3>${profile.paragraphs.map(p=>`<p>${escapeHTML(p)}</p>`).join('')}${ideaFigure}<div class="objective-box"><span class="obj-icon" aria-hidden="true">✓</span><div><span class="obj-kicker">By the end, you can</span><p>${escapeHTML(objectiveFor(m.id,activeLessonIndex))}</p></div></div><section class="trading-notebook" aria-label="Your trading notebook"><aside class="notebook-index"><span>KEEP<br>IN VIEW</span><strong>01</strong></aside><div class="notebook-content"><div class="notebook-kicker">YOUR TRADING NOTEBOOK</div><h4>Before treating a touch as a setup</h4><ol><li><span class="notebook-number">01</span><p><strong>Describe.</strong> Where is price relative to the bands and middle line?</p></li><li><span class="notebook-number">02</span><p><strong>Interpret.</strong> Does the structure look like a range, a trend or a transition? What is your alternative explanation?</p></li><li><span class="notebook-number">03</span><p><strong>Test.</strong> What future price behaviour would strengthen or weaken your view?</p></li></ol></div></section>${relatedVolumeCard}<button type="button" class="button" data-article-tab="practice">Work through the chart examples ↗</button>`;
+   $('#panel-learn').innerHTML=`<div class="eyebrow">${escapeHTML(profile.eyebrow)}</div><h3>${escapeHTML(profile.question)}</h3>${profile.paragraphs.map(p=>`<p>${escapeHTML(p)}</p>`).join('')}${ideaFigure}<div class="objective-box"><span class="obj-icon" aria-hidden="true">✓</span><div><span class="obj-kicker">By the end, you can</span><p>${escapeHTML(objectiveFor(m.id,activeLessonIndex))}</p></div></div><div class="takeaway-strip"><span class="takeaway-mark">Keep</span><p>${escapeHTML(takeaway)}</p></div>${relatedVolumeCard}<button type="button" class="button" data-article-tab="practice">Work through the chart examples ↗</button>`;
    const figures=renderCourseFigure(m.id,activeLessonIndex,profile,lessonId);
    $('#panel-practice').innerHTML=`<div class="eyebrow">Chart examples · Lesson ${lessonId}</div><h3>${escapeHTML(chartTitle(m.id,activeLessonIndex))}</h3>${figures}`;
    $('#panel-review').innerHTML=`<div class="eyebrow">Test your reading</div><h3>${escapeHTML(q.question)}</h3><div class="option-list" id="quizOptions">${q.choices.map((choice,i)=>`<button type="button" class="choice" data-correct="${i===q.correct?'true':'false'}"><span class="choice-letter">${String.fromCharCode(65+i)}</span><span>${escapeHTML(choice)}</span></button>`).join('')}</div><div class="feedback" id="quizFeedback" aria-live="polite"></div>`;
