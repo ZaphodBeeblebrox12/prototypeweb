@@ -168,18 +168,16 @@ class TestUnifiedAdminEntry:
 
         response = client.get("/admin/dashboard/", follow=True)
 
-        assert response.status_code == 200
-        assert response.request["PATH_INFO"] == reverse("account_login")
-        from urllib.parse import parse_qs
-        assert parse_qs(response.request["QUERY_STRING"]).get("next") == ["/admin/dashboard/"]
+        assert response.status_code == 403
+        assert b"does not have staff permission" in response.content
 
-    def test_unverified_regular_user_cannot_use_legacy_dashboard(self, client):
+    def test_unverified_regular_user_is_stopped_at_learning_dashboard(self, client):
         user = User.objects.create_user(
             username="unverified", email="unverified@example.com", password="Str0ng!Pass9"
         )
         client.force_login(user)
 
-        response = client.get("/dashboard/")
+        response = client.get("/learn/")
 
         assert response.status_code == 302
         assert response["Location"] == reverse("account_email_verification_sent")
@@ -245,12 +243,13 @@ class TestPasswordRecovery:
             if "/accounts/password/reset/key/" in line
         )
         reset_path = urlsplit(reset_url).path
-        reset_page = client.get(reset_path)
+        reset_page = client.get(reset_path, follow=True)
         assert reset_page.status_code == 200
         assert b"Choose a new password" in reset_page.content
+        canonical_reset_path = reset_page.request["PATH_INFO"]
 
         new_password = "CompletelyNew!P4ssword2026"
-        changed = client.post(reset_path, {
+        changed = client.post(canonical_reset_path, {
             "password1": new_password,
             "password2": new_password,
             "action": "change password",
