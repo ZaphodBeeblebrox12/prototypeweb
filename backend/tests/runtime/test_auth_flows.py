@@ -20,6 +20,7 @@ def _mk_superuser(username="root"):
 class TestLoginPage:
     def test_login_get_200_without_socialapp(self, client):
         assert client.get("/accounts/login/").status_code == 200
+        assert client.get(reverse("account_reset_password")).status_code == 200
 
     @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
     def test_login_valid_staff_credentials_reaches_requested_admin_dashboard(self, client):
@@ -56,6 +57,9 @@ class TestLoginPage:
         assert "TradeThesis" in mail.outbox[0].subject
         assert "activate_url" not in mail.outbox[0].body
         assert "http" in mail.outbox[0].body
+        sent_page = client.get(r["Location"])
+        assert sent_page.status_code == 200
+        assert b"Check your inbox." in sent_page.content
 
     def test_login_invalid_credentials(self, client):
         _mk_superuser()
@@ -201,3 +205,7 @@ class TestUnifiedAdminEntry:
         dashboard = client.get("/learn/")
         assert dashboard.status_code == 200
         assert b"Your TradeThesis desk" in dashboard.content
+
+        logout = client.post(reverse("account_logout"))
+        assert logout.status_code == 302
+        assert logout["Location"].startswith("https://tradethesis-public-staging.onrender.com/")
