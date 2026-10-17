@@ -51,13 +51,13 @@ jobs:
           python - <<'PY'
           from pathlib import Path
 
-          for name in ("site/member-access.html", "site/member-area.html"):
+          for name in ("site/member-access.html", "site/member-area-preview.html"):
               page = Path(name).read_text(encoding="utf-8")
               if "color-scheme: light;" not in page:
                   raise SystemExit(f"{name} must explicitly use the light color scheme")
               if "light-dark(" in page:
                   raise SystemExit(f"{name} must not retain alternate dark-theme color tokens")
-          print("Member access and member area both use explicit light-theme colors.")
+          print("Member access and the sample dashboard preview both use explicit light-theme colors.")
           PY
 
       - name: Install Playwright
