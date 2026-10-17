@@ -50,7 +50,7 @@ class AdminDeskTests(TestCase):
         )
         self.client.force_login(admin)
 
-        response = self.client.get(reverse("staff_ops_dashboard"))
+        response = self.client.get(reverse("staff_admin_desk"))
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Admin Desk")
@@ -77,7 +77,7 @@ class AdminDeskTests(TestCase):
         )
         self.client.force_login(learner)
 
-        response = self.client.get(reverse("staff_ops_dashboard"))
+        response = self.client.get(reverse("staff_admin_desk"))
 
         self.assertEqual(response.status_code, 403)
         self.assertNotContains(response, "Admin Desk", status_code=403)
@@ -93,7 +93,7 @@ class AdminDeskTests(TestCase):
         )
         self.client.force_login(operator)
 
-        response = self.client.get(reverse("staff_ops_dashboard"))
+        response = self.client.get(reverse("staff_admin_desk"))
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context["can_manage_course_content"])

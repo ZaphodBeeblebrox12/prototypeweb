@@ -118,7 +118,7 @@ def operational_dashboard(request):
 
 
 @login_required
-def staff_ops_dashboard(request):
+def staff_admin_desk(request):
     """Read-only, permission-aware operational desk for Django staff users."""
     if not request.user.is_active or not request.user.is_staff:
         raise PermissionDenied

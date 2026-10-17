@@ -10,13 +10,13 @@ from django.conf.urls.static import static
 from allauth.account.views import LoginView, SignupView
 from apps.accounts import views as accounts_views
 from apps.accounts.telegram_views import TelegramCallbackView
-from apps.admin_dashboard import staff_ops_dashboard
+from apps.admin_dashboard import staff_admin_desk
 from apps.core.views import health_check
 
 urlpatterns = [
     # Render readiness probe: confirm Django and its primary database respond.
     path("health/", health_check, name="health_check"),
-    path("staff/ops/", staff_ops_dashboard, name="staff_ops_dashboard"),
+    path("staff/admin-desk/", staff_admin_desk, name="staff_admin_desk"),
     # Growth admin views - MUST be first to avoid catch_all_view interception
     path("admin/", include("apps.growth.admin_urls", namespace="growth_admin")),
 
