@@ -402,24 +402,22 @@ jobs:
               "The public catalogue should explain that new courses will be added");
             console.log("EXPANDING_CATALOGUE_PASS: dynamic topics, hidden drafts, visible counts, preview state and mobile fit.");
 
-            // Member experience browser regression: preview forms stay honest and both member views remain light/mobile-safe.
+            // Member entry points must hand off to real Django/allauth routes, never collect credentials on the static site.
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
             await cataloguePage.goto(server + "/member-access.html", { waitUntil: "networkidle" });
             assert.equal(await cataloguePage.evaluate(() => getComputedStyle(document.documentElement).colorScheme), "light",
               "Member access should use the TradeThesis light theme");
-            await cataloguePage.locator("#loginEmail").fill("learner@example.test");
-            await cataloguePage.locator("#loginPassword").fill("preview-only-password");
-            await cataloguePage.locator('#signInPanel button[type="submit"]').click();
-            assert.ok((await cataloguePage.locator("#feedback").innerText()).includes("these details have not been sent or saved"),
-              "Preview sign-in must not imply a real authentication request or saved credentials");
+            assert.equal(await cataloguePage.locator('input[type="password"]').count(), 0,
+              "The public static site must not collect member passwords");
+            const loginHref = await cataloguePage.locator("#signInPanel a.primary").getAttribute("href");
+            assert.match(loginHref || "", /^https:\/\/tradethesis-academy-staging\.onrender\.com\/accounts\/login\//,
+              "Sign-in CTA must lead to the server-side Django login");
+            assert.equal(await cataloguePage.locator('a[href^="https://tradethesis-academy-staging.onrender.com/accounts/password/reset/"]').count(), 1,
+              "Password reset must route to Django/allauth");
             await cataloguePage.locator("#createTab").click();
-            await cataloguePage.locator("#createName").fill("Preview Learner");
-            await cataloguePage.locator("#createEmail").fill("new-learner@example.test");
-            await cataloguePage.locator("#createPassword").fill("preview-only-password");
-            await cataloguePage.locator('#createPanel input[name="terms"]').check();
-            await cataloguePage.locator('#createPanel button[type="submit"]').click();
-            assert.ok((await cataloguePage.locator("#feedback").innerText()).includes("account creation is not active"),
-              "Preview account creation must not claim a real account was created");
+            const signupHref = await cataloguePage.locator("#createPanel a.primary").getAttribute("href");
+            assert.match(signupHref || "", /^https:\/\/tradethesis-academy-staging\.onrender\.com\/accounts\/signup\//,
+              "Sign-up CTA must lead to the server-side Django signup");
             await cataloguePage.setViewportSize({ width: 390, height: 844 });
             const accessOverflow = await cataloguePage.evaluate(() => ({
               viewport: document.documentElement.clientWidth,
@@ -428,7 +426,7 @@ jobs:
             assert.ok(accessOverflow.document <= accessOverflow.viewport + 1,
               "Member-access page has horizontal scrolling on mobile: " + JSON.stringify(accessOverflow));
 
-            await cataloguePage.goto(server + "/member-area.html", { waitUntil: "networkidle" });
+            await cataloguePage.goto(server + "/member-area-preview.html", { waitUntil: "networkidle" });
             assert.equal(await cataloguePage.evaluate(() => getComputedStyle(document.documentElement).colorScheme), "light",
               "Member area should use the TradeThesis light theme");
             await cataloguePage.waitForSelector(".app");
@@ -487,7 +485,7 @@ jobs:
               "/community.html",
               "/foundations.html",
               "/member-access.html",
-              "/member-area.html",
+              "/member-area-preview.html",
               "/support-resistance-room.html",
               "/chartlab/clear-w.html"
             ];
