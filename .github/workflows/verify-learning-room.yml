@@ -406,37 +406,24 @@ jobs:
               "The public catalogue should explain that new courses will be added");
             console.log("EXPANDING_CATALOGUE_PASS: dynamic topics, hidden drafts, visible counts, preview state and mobile fit.");
 
-            // Member access is a lightweight bridge to the single Django-served
-            // TradeThesis auth screen; it must not collect credentials itself.
-            await cataloguePage.setViewportSize({ width: 1280, height: 900 });
-            await cataloguePage.goto(server + "/member-access.html", { waitUntil: "networkidle" });
-            assert.equal(await cataloguePage.evaluate(() => getComputedStyle(document.documentElement).colorScheme), "light",
-              "Member access bridge should use the TradeThesis light theme");
+            // Member access redirects immediately, so verify its delivered HTML without
+            // navigating the browser away from the local test server.
+            const accessResponse = await fetch(server + "/member-access.html");
+            assert.equal(accessResponse.status, 200, "Member access bridge should be served");
+            const accessHtml = await accessResponse.text();
             const academyBase = "https://tradethesis-academy-staging.onrender.com";
-            assert.equal(await cataloguePage.locator('meta[name="academy-base-url"]').getAttribute("content"), academyBase,
+            assert.ok(accessHtml.includes('http-equiv="refresh"'),
+              "Member access needs an immediate redirect fallback if JavaScript is unavailable");
+            assert.ok(accessHtml.includes(academyBase + "/accounts/login/?next=%2Flearn%2F"),
+              "Member access must redirect directly to the shared sign-in page and then /learn/");
+            assert.ok(accessHtml.includes("window.location.replace(destination.href)"),
+              "Member access should keep its JavaScript redirect for hosted browsers");
+            assert.ok(accessHtml.includes('name="academy-base-url" content="' + academyBase + '"'),
               "Member access should use the configured Academy host");
-            assert.equal(await cataloguePage.locator("#continue").count(), 1,
+            assert.ok(accessHtml.includes('id="continue"'),
               "Member access should provide one fallback sign-in link");
-            const continueTarget = await cataloguePage.locator("#continue").evaluate(element => {
-              const target = new URL(element.href);
-              return { origin: target.origin, pathname: target.pathname, next: target.searchParams.get("next") };
-            });
-            assert.deepEqual(continueTarget, {
-              origin: academyBase, pathname: "/accounts/login/", next: "/learn/"
-            }, "Fallback sign-in link should open the one branded auth screen and return learners to /learn/");
-            assert.equal(await cataloguePage.locator("input, form").count(), 0,
+            assert.ok(!/<form\\b|<input\\b/i.test(accessHtml),
               "The static bridge must not collect or submit credentials");
-            assert.ok((await cataloguePage.locator("body").innerText()).includes("Opening your secure sign-in"),
-              "The bridge should explain that it is opening secure sign-in");
-            assert.ok((await cataloguePage.content()).includes("window.location.replace(destination.href)"),
-              "Hosted member access should immediately redirect to the shared Django auth screen");
-            await cataloguePage.setViewportSize({ width: 390, height: 844 });
-            const accessOverflow = await cataloguePage.evaluate(() => ({
-              viewport: document.documentElement.clientWidth,
-              document: document.documentElement.scrollWidth
-            }));
-            assert.ok(accessOverflow.document <= accessOverflow.viewport + 1,
-              "Member-access bridge has horizontal scrolling on mobile: " + JSON.stringify(accessOverflow));
 
             await cataloguePage.goto(server + "/member-area.html", { waitUntil: "networkidle" });
             assert.equal(await cataloguePage.evaluate(() => getComputedStyle(document.documentElement).colorScheme), "light",
@@ -496,7 +483,6 @@ jobs:
               "/live-class.html",
               "/community.html",
               "/foundations.html",
-              "/member-access.html",
               "/member-area.html",
               "/support-resistance-room.html",
               "/chartlab/clear-w.html"
