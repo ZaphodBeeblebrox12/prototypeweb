@@ -293,7 +293,7 @@ MAXMIND_UPDATE_INTERVAL_DAYS = env("MAXMIND_UPDATE_INTERVAL_DAYS", default=7)
 # LOGIN REDIRECTS
 # ============================================================
 
-LOGIN_REDIRECT_URL = "/dashboard/"
+LOGIN_REDIRECT_URL = "/learn/"
 ACCOUNT_LOGOUT_REDIRECT_URL = "/"
 
 # ---- Provision Contract v1 (Telegram bot bridge integration) ----
