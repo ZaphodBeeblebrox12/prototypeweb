@@ -2,6 +2,7 @@
 from datetime import timedelta
 from unittest.mock import patch
 
+from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -57,6 +58,9 @@ class MemberDashboardJourneyTests(TestCase):
             position=3,
             is_published=False,
             content_markdown="Do not count this lesson",
+        )
+        EmailAddress.objects.create(
+            user=self.user, email=self.user.email, primary=True, verified=True
         )
         self.client.force_login(self.user)
 
@@ -156,6 +160,9 @@ class MemberConnectionActionSecurityTests(TestCase):
             username="connection-member",
             email="connection-member@example.com",
             password="Test-password-123!",
+        )
+        EmailAddress.objects.create(
+            user=self.user, email=self.user.email, primary=True, verified=True
         )
         self.client.force_login(self.user)
 
