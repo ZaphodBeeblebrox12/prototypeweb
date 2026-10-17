@@ -33,7 +33,6 @@ class EmailVerificationMiddleware:
         '/confirm-email',
         '/password',
         '/telegram/',
-        '/dashboard/',
         '/auth/telegram/',
     ]
 
