@@ -1,0 +1,270 @@
+"""
+Accounts models for community platform.
+"""
+import uuid
+
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+
+from .managers import UserManager
+
+
+class User(AbstractBaseUser, PermissionsMixin):
+    """Custom User model with Telegram and Discord integration."""
+
+    class Role(models.TextChoices):
+        ADMIN = "admin", _("Admin")
+        STAFF = "staff", _("Staff")
+        USER = "user", _("User")
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    # Standard username field
+    username = models.CharField(
+        max_length=255,
+        unique=True,
+        help_text=_("Unique username for login")
+    )
+
+    # Telegram fields (optional, for Telegram auth)
+    telegram_id = models.BigIntegerField(
+        null=True,
+        blank=True,
+        unique=True,
+        help_text=_("Telegram user ID (optional)")
+    )
+    telegram_username = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text=_("Telegram username without @")
+    )
+    telegram_verified = models.BooleanField(
+        default=False,
+        help_text=_("Whether Telegram has been verified via widget")
+    )
+
+    # Discord fields (optional, for Discord auth)
+    discord_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        unique=True,
+        help_text=_("Discord user ID")
+    )
+    discord_username = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text=_("Discord username")
+    )
+    discord_avatar = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text=_("Discord avatar hash")
+    )
+    discord_verified = models.BooleanField(
+        default=False,
+        help_text=_("Whether Discord has been verified via OAuth")
+    )
+
+    # Profile fields
+    first_name = models.CharField(max_length=255, blank=True)
+    last_name = models.CharField(max_length=255, blank=True)
+    email = models.EmailField(blank=True, null=True, unique=True)
+    bio = models.TextField(blank=True, help_text=_("User biography"))
+    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
+
+    # NEW: Display name for gifts/emails
+    nickname = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name='Display Name',
+        help_text='Custom display name shown in gift emails. Falls back to first name if empty.',
+    )
+
+    # Role and permissions
+    role = models.CharField(
+        max_length=10,
+        choices=Role.choices,
+        default=Role.USER,
+    )
+    is_staff_approved = models.BooleanField(
+        default=False,
+        help_text=_("Designates whether staff role has been approved by admin")
+    )
+
+    # Ban system
+    is_banned = models.BooleanField(default=False)
+    ban_reason = models.TextField(blank=True)
+    banned_at = models.DateTimeField(null=True, blank=True)
+
+    # Django fields
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    date_joined = models.DateTimeField(default=timezone.now)
+    last_login = models.DateTimeField(null=True, blank=True)
+
+    objects = UserManager()
+
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = []
+
+    class Meta:
+        verbose_name = _("user")
+        verbose_name_plural = _("users")
+        ordering = ["-date_joined"]
+
+    def __str__(self) -> str:
+        return self.username
+
+    @property
+    def full_name(self) -> str:
+        return f"{self.first_name} {self.last_name}".strip()
+
+    @property
+    def is_admin(self) -> bool:
+        return self.role == self.Role.ADMIN or self.is_superuser
+
+    def ban(self, reason: str = "") -> None:
+        """Ban the user."""
+        self.is_banned = True
+        self.ban_reason = reason
+        self.banned_at = timezone.now()
+        self.save(update_fields=["is_banned", "ban_reason", "banned_at"])
+
+    def unban(self) -> None:
+        """Unban the user."""
+        self.is_banned = False
+        self.ban_reason = ""
+        self.banned_at = None
+        self.save(update_fields=["is_banned", "ban_reason", "banned_at"])
+
+    def approve_staff(self) -> None:
+        """Approve staff role."""
+        self.is_staff_approved = True
+        self.is_staff = True
+        self.save(update_fields=["is_staff_approved", "is_staff"])
+
+    def can_subscribe(self) -> bool:
+        """Check if user can create subscriptions."""
+        return not self.is_banned and self.is_active
+
+
+class UserPreference(models.Model):
+    """User preferences and settings."""
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="preferences",
+        primary_key=True,
+    )
+    timezone = models.CharField(max_length=50, default="UTC")
+    language = models.CharField(max_length=10, default="en")
+    notifications_enabled = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("user preference")
+        verbose_name_plural = _("user preferences")
+
+    def __str__(self) -> str:
+        return f"Preferences for {self.user}"
+
+
+class Profile(models.Model):
+    """User profile extension (legacy, merged into User)."""
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="profile_legacy",
+        primary_key=True,
+    )
+    timezone = models.CharField(max_length=50, default="UTC")
+    language = models.CharField(max_length=10, default="en")
+    avatar_url = models.URLField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _("profile")
+        verbose_name_plural = _("profiles")
+
+    def __str__(self) -> str:
+        return f"Profile for {self.user}"
+
+
+# Discord Admin Configuration Model
+class DiscordAppConfig(models.Model):
+    """Discord OAuth2 application configuration."""
+
+    name = models.CharField(max_length=100, default="Community Platform")
+    client_id = models.CharField(max_length=255, help_text="Discord Application Client ID")
+    client_secret = models.CharField(max_length=255, help_text="Discord Application Client Secret")
+    redirect_uri = models.URLField(
+        default="http://localhost:8000/auth/discord/callback/",
+        help_text="Must match Discord app settings"
+    )
+    is_active = models.BooleanField(default=True, help_text="Enable Discord login")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Discord App Configuration"
+        verbose_name_plural = "Discord App Configuration"
+
+    def __str__(self):
+        return f"Discord App: {self.name} ({'Active' if self.is_active else 'Inactive'})"
+
+
+@receiver(post_save, sender=User)
+def create_user_preferences(sender, instance, created, **kwargs):
+    """Automatically create UserPreference when a new user is created."""
+    if created:
+        UserPreference.objects.get_or_create(user=instance)
+
+
+class SecurityEvent(models.Model):
+    """Append-only login/security trail (ATO defense in dispute timelines).
+
+    Volume: ~1 row per login. No update/delete code paths. Raw IPs are
+    restricted; retention 13 months per the evidence plan.
+    """
+
+    class EventType(models.TextChoices):
+        LOGIN_OK = "login_ok", "Login succeeded"
+        LOGIN_FAILED = "login_failed", "Login failed"
+        PASSWORD_CHANGED = "password_changed", "Password changed"
+        EMAIL_VERIFIED = "email_verified", "Email verified"
+        MFA_ENABLED = "mfa_enabled", "MFA enabled"
+        ATO_FLAG = "ato_flag", "Account-takeover pattern flagged"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             related_name="security_events")
+    event_type = models.CharField(max_length=30, choices=EventType.choices)
+    ip_address = models.GenericIPAddressField()
+    user_agent = models.TextField(blank=True, default="")
+    occurred_at = models.DateTimeField(default=timezone.now)
+    detail = models.JSONField(default=dict, blank=True,
+                              help_text="e.g. failure reason. No passwords/tokens.")
+
+    class Meta:
+        indexes = [models.Index(fields=["user", "occurred_at"]),
+                   models.Index(fields=["event_type", "occurred_at"])]
+
+    def save(self, *args, **kwargs):
+        if self.pk and not kwargs.get("force_insert"):
+            raise RuntimeError("SecurityEvent is append-only.")
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.user} {self.event_type} @ {self.occurred_at}"

@@ -1,0 +1,79 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label='growth' %}">Growth</a>
+    &rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <fieldset class="module aligned">
+            <h2>Send Gift Subscription</h2>
+
+            {% if form.non_field_errors %}
+            <div class="errornote">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            <div class="form-row{% if form.recipient_email.errors %} errors{% endif %}">
+                <div>
+                    <label for="id_recipient_email" class="required">Recipient Email:</label>
+                    {{ form.recipient_email }}
+                    {% if form.recipient_email.errors %}
+                    <div class="errorlist">{{ form.recipient_email.errors }}</div>
+                    {% endif %}
+                    <div class="help">{{ form.recipient_email.help_text }}</div>
+                </div>
+            </div>
+
+            <div class="form-row{% if form.plan.errors %} errors{% endif %}">
+                <div>
+                    <label for="id_plan" class="required">Plan:</label>
+                    {{ form.plan }}
+                    {% if form.plan.errors %}
+                    <div class="errorlist">{{ form.plan.errors }}</div>
+                    {% endif %}
+                    <div class="help">{{ form.plan.help_text }}</div>
+                </div>
+            </div>
+
+            <div class="form-row{% if form.duration_days.errors %} errors{% endif %}">
+                <div>
+                    <label for="id_duration_days" class="required">Duration:</label>
+                    {{ form.duration_days }}
+                    {% if form.duration_days.errors %}
+                    <div class="errorlist">{{ form.duration_days.errors }}</div>
+                    {% endif %}
+                    <div class="help">{{ form.duration_days.help_text }}</div>
+                </div>
+            </div>
+
+            <div class="form-row{% if form.message.errors %} errors{% endif %}">
+                <div>
+                    <label for="id_message">Message:</label>
+                    {{ form.message }}
+                    {% if form.message.errors %}
+                    <div class="errorlist">{{ form.message.errors }}</div>
+                    {% endif %}
+                    <div class="help">{{ form.message.help_text }}</div>
+                </div>
+            </div>
+        </fieldset>
+
+        <div class="submit-row">
+            <input type="submit" value="Send Gift" class="default" name="_save">
+            <a href="{% url 'admin:index' %}" class="button" style="padding: 10px 15px; text-decoration: none; margin-left: 10px;">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
