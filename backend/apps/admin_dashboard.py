@@ -111,5 +111,8 @@ def _subscription_dashboard_context(request):
 def operational_dashboard(request):
     # Model imports are deferred to request time: this module is imported
     # from apps/__init__.py during app loading, before the registry is ready.
-    return render(request, "admin/dashboard.html",
-                  _subscription_dashboard_context(request))
+    return render(
+        request,
+        "admin/operational_dashboard.html",
+        _subscription_dashboard_context(request),
+    )
