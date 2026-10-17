@@ -90,7 +90,7 @@
       <a href="community.html">Community</a>
       <a href="index.html#desk">The Desk</a>
     </nav>
-    <a class="button" href="member-area.html">Open member dashboard ↗</a>
+    <a class="button" href="https://tradethesis-academy-staging.onrender.com/dashboard/">Open member dashboard ↗</a>
     <button aria-expanded="false" aria-label="Open navigation" class="mobile-toggle" type="button">☰</button>
   </div>
   <nav aria-label="Mobile navigation" class="wrap mobilelinks">
@@ -98,7 +98,7 @@
     <a href="courses.html">Courses</a>
     <a href="community.html">Community</a>
     <a href="index.html#desk">The Desk</a>
-    <a class="mobile-menu-cta" href="member-area.html">Open member dashboard ↗</a>
+    <a class="mobile-menu-cta" href="https://tradethesis-academy-staging.onrender.com/dashboard/">Open member dashboard ↗</a>
   </nav>
 </header>
   <main class="layout" id="main-content" tabindex="-1">
@@ -119,25 +119,22 @@
         <button class="tab" id="signInTab" role="tab" aria-selected="true" aria-controls="signInPanel">Sign in</button>
         <button class="tab" id="createTab" role="tab" aria-selected="false" aria-controls="createPanel">Create account</button>
       </div>
-      <form id="signInPanel" role="tabpanel" aria-labelledby="signInTab">
+      <div id="signInPanel" role="tabpanel" aria-labelledby="signInTab">
         <h2 id="formTitle" class="form-title">Welcome back.</h2>
         <p class="form-intro">Sign in to find your purchases, learning access and connected communities.</p>
-        <div class="field"><label for="loginEmail">Email address</label><input id="loginEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
-        <div class="field"><label for="loginPassword">Password</label><input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="Your password" required></div>
-        <div class="form-row"><label class="remember"><input type="checkbox" name="remember"> Remember me</label><button type="button" class="text-button" id="forgot">Forgot password?</button></div>
-        <button class="primary" type="submit">Sign in ↗</button>
-        <p class="form-note">Secure sign-in will be connected before launch. No credentials are sent or stored in this preview.</p>
-      </form>
-      <form id="createPanel" role="tabpanel" aria-labelledby="createTab" hidden>
+        <p class="form-note">Continue to the secure TradeThesis Academy sign-in page. This public website does not ask for or handle your password.</p>
+        <a class="primary" href="https://tradethesis-academy-staging.onrender.com/accounts/login/?next=/dashboard/">Continue to secure sign in ↗</a>
+        <div class="form-row">
+          <span class="remember">Having trouble getting in?</span>
+          <a class="text-button" href="https://tradethesis-academy-staging.onrender.com/accounts/password/reset/">Reset password</a>
+        </div>
+      </div>
+      <div id="createPanel" role="tabpanel" aria-labelledby="createTab" hidden>
         <h2 class="form-title">Make it yours.</h2>
         <p class="form-intro">Create one account to keep your courses, purchases and member connections together.</p>
-        <div class="field"><label for="createName">Your name</label><input id="createName" name="name" autocomplete="name" placeholder="Full name" required></div>
-        <div class="field"><label for="createEmail">Email address</label><input id="createEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
-        <div class="field"><label for="createPassword">Create a password</label><input id="createPassword" name="password" type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters" required></div>
-        <div class="form-row"><label class="remember"><input type="checkbox" name="terms" required> I agree to the terms</label></div>
-        <button class="primary" type="submit">Create account ↗</button>
-        <p class="form-note">This form is a visual prototype. Account creation is not active yet.</p>
-      </form>
+        <p class="form-note">Account creation and email verification take place on TradeThesis Academy, not on this static preview page.</p>
+        <a class="primary" href="https://tradethesis-academy-staging.onrender.com/accounts/signup/?next=/dashboard/">Create your account ↗</a>
+      </div>
       <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
       <div class="account-preview"><span>Review the member dashboard<br>with sample account data.</span><a href="member-area.html">Open dashboard preview →</a></div>
     </section>
@@ -149,37 +146,14 @@
       const createTab = document.getElementById('createTab');
       const signInPanel = document.getElementById('signInPanel');
       const createPanel = document.getElementById('createPanel');
-      const feedback = document.getElementById('feedback');
       function setMode(create) {
         signInPanel.hidden = create;
         createPanel.hidden = !create;
         signInTab.setAttribute('aria-selected', String(!create));
         createTab.setAttribute('aria-selected', String(create));
-        feedback.classList.remove('show');
       }
       signInTab.addEventListener('click', () => setMode(false));
       createTab.addEventListener('click', () => setMode(true));
-      function show(message, includeDashboard = false) {
-        feedback.textContent = '';
-        feedback.append(document.createTextNode(message));
-        if (includeDashboard) {
-          feedback.append(document.createElement('br'));
-          const link = document.createElement('a');
-          link.href = 'member-area.html';
-          link.textContent = 'Open the dashboard preview →';
-          feedback.append(link);
-        }
-        feedback.classList.add('show');
-      }
-      signInPanel.addEventListener('submit', event => {
-        event.preventDefault();
-        if (signInPanel.reportValidity()) show('Preview only: authentication is not connected, and these details have not been sent or saved.', true);
-      });
-      createPanel.addEventListener('submit', event => {
-        event.preventDefault();
-        if (createPanel.reportValidity()) show('Preview only: account creation is not active, and these details have not been sent or saved.', true);
-      });
-      document.getElementById('forgot').addEventListener('click', () => show('Password recovery will use a verified email flow when authentication is connected. No reset email has been sent.'));
     })();
   </script>
 <script>
