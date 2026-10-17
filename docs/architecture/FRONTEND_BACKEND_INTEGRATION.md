@@ -33,6 +33,14 @@ The current Academy implementation lives in `ZaphodBeeblebrox12/test`, branch `f
 
 The learner views are server-rendered Django pages, not a published public JSON API. Their URL names and same-origin CSRF/session behaviour should be used rather than guessing API endpoints from static HTML.
 
+## Reusable micro-course template and Django handoff
+
+The approved concrete design reference is [the Understand Bollinger Bands first-pass Learning Room](../../course-source/understand-bollinger-bands/preview/first-pass/index.html), governed by [the shared course-template standard](../../course-source/COURSE_TEMPLATE_STANDARD.md). The implementation-specific notes and copy-ready prompt are in [MICROCOURSE_TEMPLATE_DJANGO_HANDOFF.md](../../course-integration/MICROCOURSE_TEMPLATE_DJANGO_HANDOFF.md).
+
+When integrating the template, extract a reusable Django Learning Room that inherits the real sitewide base template/navigation/logo. Do not ship the static preview as-is or duplicate its entire HTML for each micro-course. Course content must be driven by the existing Academy records and validated source manifest; lesson Markdown is authoring source and generated preview payloads are outputs.
+
+**Only administrators may edit shared lesson text or images.** Re-check a dedicated administrator content/media permission on every save or upload; do not treat hidden controls, client-side configuration or `is_staff` alone as authorization. Persistent text/media updates, audit trail, storage and CSRF checks are backend work, not capabilities supplied by the static preview.
+
 ## Catalogue lifecycle and future expansion
 
 The catalogue is intentionally still in development and should grow as additional courses become ready. Do not design it as a fixed set of hard-coded products. The current static content file `site/assets/course-catalogue-data.js` separates course data from reusable display templates, which is a useful prototype pattern; in production, published course/offer data should come from the authoritative backend/catalogue records.
