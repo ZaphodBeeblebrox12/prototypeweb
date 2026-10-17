@@ -1,0 +1,6 @@
+{% extends "auth/account-flow-base.html" %}
+{% block title %}Registration unavailable · TradeThesis{% endblock %}
+{% block eyebrow %}Registration{% endblock %}
+{% block heading %}Registration is temporarily closed.{% endblock %}
+{% block intro %}You can still sign in if you already have a TradeThesis account. Please check the public website for course availability.{% endblock %}
+{% block panel_content %}<div class="actions"><a class="primary" href="{% url 'account_login' %}">Sign in ↗</a><a class="secondary" href="{{ PUBLIC_SITE_URL }}/courses.html">Explore courses</a></div>{% endblock %}
