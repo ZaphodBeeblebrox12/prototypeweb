@@ -45,7 +45,7 @@ def check_banned(view_func):
     def wrapper(request, *args, **kwargs):
         if request.user.is_authenticated and request.user.is_banned:
             return render(request, "accounts/banned.html", {
-                "ban_reason": user.ban_reason
+                "ban_reason": request.user.ban_reason
             })
         return view_func(request, *args, **kwargs)
     return wrapper
@@ -53,7 +53,6 @@ def check_banned(view_func):
 
 @method_decorator(login_required, name="dispatch")
 @method_decorator(check_banned, name="dispatch")
-@method_decorator(login_required, name='dispatch')
 class DashboardView(View):
     """User dashboard view."""
 
