@@ -422,7 +422,7 @@ jobs:
               "Member access should use the configured Academy host");
             assert.ok(accessHtml.includes('id="continue"'),
               "Member access should provide one fallback sign-in link");
-            assert.ok(!/<form\\b|<input\\b/i.test(accessHtml),
+            assert.ok(!accessHtml.includes("<form") && !accessHtml.includes("<input"),
               "The static bridge must not collect or submit credentials");
 
             await cataloguePage.goto(server + "/member-area.html", { waitUntil: "networkidle" });
