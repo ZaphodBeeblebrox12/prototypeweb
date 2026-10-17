@@ -8,7 +8,7 @@
       <h1 id="dashboard-title">Welcome back{% if user.first_name %}, {{ user.first_name }}{% endif %}.</h1>
       <p class="tt-muted mb-0">A clear view of your learning, progress and access.</p>
     </div>
-    <a class="btn btn-outline-primary" href="{% url 'dashboard' %}">Account &amp; billing <span aria-hidden="true">↗</span></a>
+    <a class="btn btn-outline-primary" href="{% url 'manage-subscription' %}">Manage billing <span aria-hidden="true">↗</span></a>
   </section>
 
   <nav class="tt-dashboard-nav" aria-label="Dashboard sections">
