@@ -21,6 +21,7 @@ class TestLoginPage:
     def test_login_get_200_without_socialapp(self, client):
         assert client.get("/accounts/login/").status_code == 200
 
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
     def test_login_valid_staff_credentials_reaches_requested_admin_dashboard(self, client):
         from django.core import mail
 
@@ -163,7 +164,8 @@ class TestUnifiedAdminEntry:
 
         assert response.status_code == 200
         assert response.request["PATH_INFO"] == reverse("account_login")
-        assert response.request["QUERY_STRING"].find("admin/dashboard") >= 0
+        from urllib.parse import parse_qs
+        assert parse_qs(response.request["QUERY_STRING"]).get("next") == ["/admin/dashboard/"]
 
     def test_unverified_regular_user_cannot_use_legacy_dashboard(self, client):
         user = User.objects.create_user(
@@ -175,3 +177,27 @@ class TestUnifiedAdminEntry:
 
         assert response.status_code == 302
         assert response["Location"] == reverse("account_email_verification_sent")
+
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_verified_learner_login_reaches_rendered_learning_dashboard(self, client):
+        from allauth.account.models import EmailAddress
+
+        user = User.objects.create_user(
+            username="verifiedlearner",
+            email="verifiedlearner@example.com",
+            password="Str0ng!Pass9",
+        )
+        EmailAddress.objects.create(
+            user=user, email=user.email, primary=True, verified=True
+        )
+
+        response = client.post("/accounts/login/?next=/learn/", {
+            "login": user.email, "password": "Str0ng!Pass9"
+        })
+        assert response.status_code == 302
+        assert response["Location"].endswith("/learn/")
+
+        dashboard = client.get("/learn/")
+        assert dashboard.status_code == 200
+        assert b"Your TradeThesis desk" in dashboard.content
