@@ -4,7 +4,10 @@
 **Branch:** `my-new-branch`  
 **Original implementation baseline:** `ae1f93add560109e365ea8e7a194a400baea6bfe`  
 **Route:** `/staff/admin-desk/`  
-**Deployment:** not performed.
+**Status:** Implemented and verified in backend CI.
+**Code commit verified by CI:** `00f208d7b3238903603f7daa361a1551fdf98260`.
+**CI:** [Run 39070357094](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39070357094) — success on Python 3.11 and 3.12. Each full suite: 699 passed, 213 warnings, 11 subtests passed. The focused Academy regression: 15 passed, 9 warnings, 4 subtests passed.
+**Deployment/staging browser check:** not performed.
 
 ## What this milestone adds
 
@@ -26,5 +29,6 @@ The pre-existing `/staff/ops/` payments operations cockpit is intentionally unch
 
 - Python syntax compilation for changed Python files.
 - Admin Desk regression tests for access control and real counts.
-- Full backend CI on the final commit, across Python 3.11 and 3.12.
+- Full backend CI passed on code commit `00f208d7b3238903603f7daa361a1551fdf98260`, across Python 3.11 and 3.12.
+- The existing `/staff/ops/` payments cockpit tests pass after the Admin Desk route was separated.
 - Staging/manual browser verification is deliberately separate and has not been performed. No deployment was triggered.
