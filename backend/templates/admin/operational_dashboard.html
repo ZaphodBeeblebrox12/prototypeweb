@@ -1,0 +1,20 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}Operational dashboard | {{ site_title|default:"TradeThesis administration" }}{% endblock %}
+{% block content %}
+<div id="content-main">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:24px;">
+    <div>
+      <h1 style="margin-bottom:8px;">Operational dashboard</h1>
+      <p style="max-width:680px;color:var(--body-quiet-color,#687268);font-size:13px;line-height:1.7;">
+        Review current subscriptions, payment exceptions, Telegram access operations and background jobs.
+        Counts are read-only; use the links to open the related admin records.
+      </p>
+    </div>
+    <a href="{% url 'admin:index' %}" style="font-weight:600;">Back to administration ↗</a>
+  </div>
+
+  {% include "admin/dashboard.html" %}
+</div>
+{% endblock %}
