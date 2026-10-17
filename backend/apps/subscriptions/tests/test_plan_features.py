@@ -1,7 +1,7 @@
 """Plan feature cards remain data-driven without a Django landing page."""
 from django.test import RequestFactory, TestCase
 
-from apps.subscriptions.services.plan_catalogue_pricing import PlanCataloguePricing
+from apps.subscriptions.plan_catalogue_pricing import PlanCataloguePricing
 from apps.subscriptions.models import Plan, PlanFeature, PlanPrice
 
 
