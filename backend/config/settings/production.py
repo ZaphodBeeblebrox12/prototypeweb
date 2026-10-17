@@ -4,7 +4,17 @@ Production settings — used on Render (and any real deployment).
 Overrides base with security hardening, env-driven hosts, Postgres via
 DATABASE_URL (handled in base), and whitenoise manifest storage.
 """
+from django.core.exceptions import ImproperlyConfigured
+
 from .base import *
+
+# Production must never silently use the local SQLite fallback. On Render Free
+# the filesystem is ephemeral, so that would lose users and learning progress.
+if not env("DATABASE_URL", default="").strip():
+    raise ImproperlyConfigured(
+        "DATABASE_URL is required in production. Configure the dedicated "
+        "staging PostgreSQL connection before deploying."
+    )
 
 DEBUG = env("DEBUG", default=False)
 
