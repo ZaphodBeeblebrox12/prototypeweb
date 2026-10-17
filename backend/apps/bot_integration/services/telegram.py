@@ -5,6 +5,7 @@ from datetime import timedelta
 from functools import wraps
 from typing import Optional, Dict, Any
 from django.utils import timezone
+from django.conf import settings
 
 from .telegram_transport import (
     ERR_CONFIG,
@@ -48,7 +49,9 @@ class TelegramBotService:
 
     @classmethod
     def _get_token(cls):
-        return cls._get_config().telegram_bot_token
+        # Hosted/staging credentials come from the shared environment group.
+        # Do not store the Telegram bot token in the application's database.
+        return (getattr(settings, "TELEGRAM_BOT_TOKEN", "") or "").strip()
 
     @classmethod
     @retry_on_flood()
