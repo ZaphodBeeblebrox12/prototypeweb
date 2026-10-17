@@ -1,32 +1,13 @@
-{% extends "base.html" %}
-
-{% block title %}Logout - Community Platform{% endblock %}
-
-{% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-secondary text-white">
-                    <h4 class="mb-0"><i class="bi bi-box-arrow-right"></i> Logout</h4>
-                </div>
-                <div class="card-body">
-                    <p class="lead">Are you sure you want to log out?</p>
-
-                    <form method="post" action="{% url 'account_logout' %}">
-                        {% csrf_token %}
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-danger">
-                                <i class="bi bi-box-arrow-right"></i> Yes, Log Out
-                            </button>
-                            <a href="{% url 'index' %}" class="btn btn-outline-secondary">
-                                <i class="bi bi-x-circle"></i> Cancel
-                            </a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+{% extends "auth/account-flow-base.html" %}
+{% block title %}Sign out · TradeThesis{% endblock %}
+{% block eyebrow %}Your account{% endblock %}
+{% block heading %}Ready to sign out?{% endblock %}
+{% block intro %}You can sign out of TradeThesis on this device. Your saved course progress remains attached to your account.{% endblock %}
+{% block panel_content %}
+<form class="auth-form" method="post" action="{% url 'account_logout' %}">
+  {% csrf_token %}
+  {% if redirect_field_value %}<input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">{% endif %}
+  <button class="primary" type="submit">Sign out ↗</button>
+</form>
+<div class="actions"><a class="secondary" href="{% url 'academy:home' %}">Stay signed in</a></div>
 {% endblock %}
