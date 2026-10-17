@@ -3,7 +3,7 @@
 ## Centralised environment configuration
 
 - `backend/.env.example` is the safe, complete template for local configuration. Copy it to `backend/.env` and add local values there. The real `.env` file is git-ignored; do not commit credential values.
-- The Render staging service consumes one shared Environment Group: `tradethesis-academy-staging-config`. The root `render.yaml` lists the environment variable names and non-secret defaults, and attaches the group to the service. Secret values are entered only in the Render Dashboard.
+- The Render staging service consumes the workspace-level Environment Group `tradethesis-academy-staging-config`, which is created and maintained in the Render Dashboard. The root `render.yaml` references that existing group using `fromGroup` rather than declaring a second Blueprint-managed copy. Secret values are entered only in the Render Dashboard.
 - Before syncing/creating the Blueprint, create or confirm that group in Render's Environment Groups dashboard and fill in its values. At minimum, staging requires `DATABASE_URL` (a dedicated Supabase PostgreSQL **Session Pooler** URI) and `RESEND_API_KEY`. Keep the remaining Telegram/payment/provisioning fields blank until those integrations are being tested. `SECRET_KEY` must have a strong random value.
 - The Supabase project URL and publishable client key are optional for direct PostgreSQL access. Django connects via `DATABASE_URL`; the database password belongs only inside that private connection URI, not in the publishable key or GitHub.
 - Keep staging and production values separate. When production is needed, create a separate production Environment Group; never point staging at a production database or payment credentials.
