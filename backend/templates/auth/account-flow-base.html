@@ -1,0 +1,33 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f3e9">
+  <title>{% block title %}Account security · TradeThesis{% endblock %}</title>
+  <style>
+    :root{color-scheme:light;--paper:#f7f3e9;--surface:#fffdf8;--soft:#f2ecdf;--ink:#29382e;--muted:#687268;--line:#ded8ca;--green:#355a46;--deep:#254334;--tomato:#c96f50;--serif:Georgia,"Times New Roman",serif;--sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    *{box-sizing:border-box}body{min-height:100vh;margin:0;display:flex;flex-direction:column;background:var(--paper);color:var(--ink);font-family:var(--sans)}a{color:inherit;text-decoration:none}a:hover{color:var(--green)}button,input{font:inherit}.site-header{min-height:68px;padding:14px clamp(18px,5vw,66px);display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--surface);border-bottom:1px solid var(--line)}.brand{font:600 21px/1 Georgia,serif;letter-spacing:.13em;text-transform:uppercase;color:var(--deep)}.brand small{display:block;margin-top:6px;color:var(--muted);font:700 7px/1.2 var(--sans);letter-spacing:.17em}.nav-link{font-size:12px;font-weight:750;color:var(--green)}.layout{width:min(680px,calc(100% - 32px));margin:auto;padding:clamp(34px,6vw,64px) 0;flex:1}.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:clamp(22px,5vw,42px);box-shadow:0 22px 60px #29382e0a}.eyebrow{display:flex;align-items:center;gap:9px;text-transform:uppercase;letter-spacing:.14em;font-size:9px;font-weight:850;color:var(--green)}.eyebrow:before{content:"";height:2px;width:18px;background:var(--tomato)}h1{font:400 clamp(34px,6vw,50px)/1.04 var(--serif);letter-spacing:-.045em;color:var(--deep);margin:19px 0 12px}.intro,.copy{color:var(--muted);font-size:13px;line-height:1.8}.note{margin:20px 0;padding:14px 16px;border-left:2px solid var(--tomato);background:var(--soft);font-size:12px;line-height:1.7;color:var(--muted)}.auth-form{margin-top:18px}.auth-form p{display:grid;gap:7px;margin:14px 0;color:var(--ink);font-size:12px}.auth-form label{font-weight:750}.auth-form input:not([type=checkbox]){width:100%;min-height:44px;padding:11px 13px;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);font-size:12px}.auth-form ul.errorlist{margin:0;padding:0;list-style:none;color:#873d2d;font-size:11px}.primary,.secondary{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:11px 18px;border-radius:99px;font-size:11px;font-weight:800;cursor:pointer}.primary{border:1px solid var(--green);background:var(--green);color:var(--surface)}.primary:hover{background:var(--deep);color:var(--surface)}.secondary{border:1px solid var(--line);color:var(--green)}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}.form-error{margin:15px 0;padding:12px;border:1px solid #e9c9bb;border-radius:9px;background:#f9e9e1;color:#873d2d;font-size:12px;line-height:1.6}.footer{padding:17px 24px;border-top:1px solid var(--line);font-size:9px;color:var(--muted);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    @media(max-width:480px){.site-header{align-items:flex-start}.brand{font-size:18px}.nav-link{font-size:11px;text-align:right}.layout{width:calc(100% - 28px)}}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="{{ PUBLIC_SITE_URL }}/">TradeThesis<small>Conviction before execution</small></a>
+    <a class="nav-link" href="{{ PUBLIC_SITE_URL }}/courses.html">Back to TradeThesis ↗</a>
+  </header>
+  <main class="layout">
+    <article class="card">
+      <div class="eyebrow">{% block eyebrow %}Your account{% endblock %}</div>
+      <h1>{% block heading %}Account security{% endblock %}</h1>
+      <p class="intro">{% block intro %}Manage your TradeThesis account securely.{% endblock %}</p>
+      {% if form.non_field_errors %}
+        <div class="form-error" role="alert">{{ form.non_field_errors }}</div>
+      {% endif %}
+      {% block panel_content %}{% endblock %}
+    </article>
+  </main>
+  <footer class="footer"><span>TradeThesis · Conviction before execution</span><span>For educational purposes only. Trading involves risk.</span></footer>
+</body>
+</html>
