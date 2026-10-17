@@ -18,6 +18,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.accounts.models import User
+    BotConfig, DiscordAccount, TelegramAccount, TelegramVerificationToken)
 from apps.bot_integration.models import (
     BotConfig, TelegramAccount, TelegramVerificationToken)
 from apps.bot_integration.provision_auth import sign_payload
@@ -220,3 +221,36 @@ class TelegramWebhookVerifyFlowTests(TestCase):
         r = self._post_start("/start")
         self.assertEqual(r.status_code, 200)
         self.assertFalse(TelegramAccount.objects.exists())
+
+class AccountUnlinkMethodTests(TestCase):
+    """Connection removal is state-changing and must not be reachable via GET."""
+
+    def setUp(self):
+        self.user = make_user("unlink-learner")
+        self.client.force_login(self.user)
+
+    def test_telegram_unlink_rejects_get_without_removing_connection(self):
+        account = TelegramAccount.objects.create(
+            user=self.user,
+            chat_id=987654321,
+            telegram_user_id=987654321,
+            username="unlink_learner",
+        )
+
+        response = self.client.get(reverse("bot_integration:telegram_unlink"))
+
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue(TelegramAccount.objects.filter(pk=account.pk).exists())
+
+    def test_discord_unlink_rejects_get_without_removing_connection(self):
+        account = DiscordAccount.objects.create(
+            user=self.user,
+            discord_user_id="discord-unlink-user",
+            username="unlink_learner",
+        )
+
+        response = self.client.get(reverse("bot_integration:discord_unlink"))
+
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue(DiscordAccount.objects.filter(pk=account.pk).exists())
+

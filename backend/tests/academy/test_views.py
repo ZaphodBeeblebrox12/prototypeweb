@@ -232,6 +232,104 @@ class AcademyViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 403)
 
+
+    def test_unpublished_lesson_and_module_cannot_be_opened_directly(self):
+        lesson_url = reverse("academy:lesson", args=[self.course.slug, self.paid_lesson.pk])
+
+        self.paid_lesson.is_published = False
+        self.paid_lesson.save(update_fields=["is_published", "updated_at"])
+        self.assertEqual(self.client.get(lesson_url).status_code, 404)
+
+        self.paid_lesson.is_published = True
+        self.paid_lesson.save(update_fields=["is_published", "updated_at"])
+        self.module.is_published = False
+        self.module.save(update_fields=["is_published", "updated_at"])
+        self.assertEqual(self.client.get(lesson_url).status_code, 404)
+
+    def test_draft_course_does_not_expose_even_a_preview_lesson(self):
+        self.course.status = Course.Status.DRAFT
+        self.course.save(update_fields=["status", "updated_at"])
+
+        response = self.client.get(
+            reverse("academy:lesson", args=[self.course.slug, self.preview_lesson.pk])
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertNotContains(response, "Public preview content.", status_code=403)
+
+    def test_revoked_entitlement_denies_lesson_and_progress_endpoint(self):
+        now = timezone.now()
+        CourseEntitlement.objects.create(
+            user=self.user,
+            course=self.course,
+            status=CourseEntitlement.Status.REVOKED,
+            starts_at=now - timedelta(days=3),
+            expires_at=None,
+        )
+
+        lesson_url = reverse("academy:lesson", args=[self.course.slug, self.paid_lesson.pk])
+        self.assertEqual(self.client.get(lesson_url).status_code, 403)
+
+        progress_url = reverse("academy:lesson-progress", args=[self.paid_lesson.pk])
+        response = self.client.post(progress_url, {"status": LessonProgress.Status.COMPLETED})
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(
+            LessonProgress.objects.filter(user=self.user, lesson=self.paid_lesson).exists()
+        )
+
+    def test_unreleased_lesson_denies_direct_access_and_progress_updates(self):
+        now = timezone.now()
+        CourseEntitlement.objects.create(
+            user=self.user,
+            course=self.course,
+            status=CourseEntitlement.Status.ACTIVE,
+            starts_at=now - timedelta(hours=1),
+            expires_at=None,
+        )
+        self.paid_lesson.release_day = 2
+        self.paid_lesson.save(update_fields=["release_day", "updated_at"])
+
+        lesson_url = reverse("academy:lesson", args=[self.course.slug, self.paid_lesson.pk])
+        self.assertEqual(self.client.get(lesson_url).status_code, 403)
+        progress_url = reverse("academy:lesson-progress", args=[self.paid_lesson.pk])
+        response = self.client.post(progress_url, {"status": LessonProgress.Status.COMPLETED})
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(
+            LessonProgress.objects.filter(user=self.user, lesson=self.paid_lesson).exists()
+        )
+
+    def test_course_progress_excludes_unpublished_lessons_and_other_users(self):
+        other_user = User.objects.create_user(
+            username="other-learner", password="Test-password-123!"
+        )
+        hidden_lesson = Lesson.objects.create(
+            module=self.module,
+            title="Unpublished lesson",
+            slug="unpublished-lesson",
+            position=3,
+            is_published=False,
+            content_markdown="Must not contribute to visible progress.",
+        )
+        LessonProgress.objects.create(
+            user=self.user, lesson=self.preview_lesson,
+            status=LessonProgress.Status.COMPLETED,
+        )
+        LessonProgress.objects.create(
+            user=other_user, lesson=self.paid_lesson,
+            status=LessonProgress.Status.COMPLETED,
+        )
+        LessonProgress.objects.create(
+            user=self.user, lesson=hidden_lesson,
+            status=LessonProgress.Status.COMPLETED,
+        )
+
+        response = self.client.get(
+            reverse("academy:course-detail", args=[self.course.slug])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["total_lessons"], 2)
+        self.assertEqual(response.context["completed_lessons"], 1)
+        self.assertEqual(response.context["progress_percent"], 50)
+
     def test_learning_room_requires_login(self):
         self.client.logout()
         response = self.client.get(reverse("academy:home"))

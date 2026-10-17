@@ -13,6 +13,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from apps.academy.models import Course, CourseModule, Lesson, LessonProgress
 from apps.subscriptions.models import (
     GeoPlanPrice, Plan, PlanFeature, PlanPrice, Product, Subscription,
 )
@@ -226,3 +227,87 @@ class MultiProductDashboardTests(TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertContains(r, "Start free trial")  # terminal has no sub
         self.assertContains(r, "Trade Terminal")    # labeled with product
+
+class MemberCourseDashboardDataTests(TestCase):
+    """The live member desk must use the current user's published learning data."""
+
+    def setUp(self):
+        self.user = make_user("course_learner")
+        self.client.force_login(self.user)
+        self.course = Course.objects.create(
+            title="Dashboard Course",
+            slug="dashboard-course",
+            status=Course.Status.PUBLISHED,
+        )
+        self.module = CourseModule.objects.create(
+            course=self.course,
+            title="Module One",
+            slug="module-one",
+            position=1,
+            is_published=True,
+        )
+        self.completed_lesson = Lesson.objects.create(
+            module=self.module,
+            title="Completed Preview",
+            slug="completed-preview",
+            position=1,
+            is_preview=True,
+            is_published=True,
+        )
+        self.resume_lesson = Lesson.objects.create(
+            module=self.module,
+            title="Resume Preview",
+            slug="resume-preview",
+            position=2,
+            is_preview=True,
+            is_published=True,
+        )
+        self.unpublished_lesson = Lesson.objects.create(
+            module=self.module,
+            title="Unpublished lesson",
+            slug="unpublished-lesson",
+            position=3,
+            is_preview=True,
+            is_published=False,
+        )
+
+    def test_dashboard_progress_and_resume_are_user_scoped_and_published_only(self):
+        other_user = make_user("other_course_learner")
+        LessonProgress.objects.create(
+            user=self.user,
+            lesson=self.completed_lesson,
+            status=LessonProgress.Status.COMPLETED,
+        )
+        LessonProgress.objects.create(
+            user=self.user,
+            lesson=self.resume_lesson,
+            status=LessonProgress.Status.IN_PROGRESS,
+        )
+        # These records must not affect the current learner's dashboard totals.
+        LessonProgress.objects.create(
+            user=other_user,
+            lesson=self.resume_lesson,
+            status=LessonProgress.Status.COMPLETED,
+        )
+        LessonProgress.objects.create(
+            user=self.user,
+            lesson=self.unpublished_lesson,
+            status=LessonProgress.Status.COMPLETED,
+        )
+
+        response = self.client.get(reverse("dashboard"))
+        self.assertEqual(response.status_code, 200)
+        card = next(
+            item for item in response.context["member_course_cards"]
+            if item["course"].pk == self.course.pk
+        )
+        self.assertEqual(card["total_lessons"], 2)
+        self.assertEqual(card["completed_lessons"], 1)
+        self.assertEqual(card["progress_percent"], 50)
+        self.assertEqual(card["resume_lesson"].pk, self.resume_lesson.pk)
+        self.assertContains(
+            response,
+            reverse("academy:lesson", args=[self.course.slug, self.resume_lesson.pk]),
+        )
+        self.assertEqual(response.context["member_lessons_completed"], 1)
+
