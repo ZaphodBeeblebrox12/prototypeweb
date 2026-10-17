@@ -1,0 +1,13 @@
+{% extends "auth/account-flow-base.html" %}
+{% block title %}Confirm account access · TradeThesis{% endblock %}
+{% block eyebrow %}Account security{% endblock %}
+{% block heading %}Confirm it’s you.{% endblock %}
+{% block intro %}For your security, enter your password to continue with this sensitive account action.{% endblock %}
+{% block panel_content %}
+<form class="auth-form" method="post" action="{% url 'account_reauthenticate' %}">
+  {% csrf_token %}
+  {{ form.as_p }}
+  {% if redirect_field_value %}<input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">{% endif %}
+  <button class="primary" type="submit">Confirm access ↗</button>
+</form>
+{% endblock %}
