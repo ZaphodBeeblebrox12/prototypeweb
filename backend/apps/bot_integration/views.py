@@ -23,9 +23,12 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def start_telegram_connect(request):
-    """Generate a deep link and redirect immediately to Telegram."""
-    config = BotConfig.get_config()
-    if not config.telegram_bot_username:
+    """Generate a deep link using the centrally configured Telegram bot."""
+    # Use the site-wide environment group as the source of truth. The bot
+    # username is public configuration, but keep it beside the token so the
+    # staging setup remains centralised and predictable.
+    bot_username = (getattr(settings, "TELEGRAM_BOT_USERNAME", "") or "").strip().lstrip("@")
+    if not bot_username:
         messages.error(request, "Telegram bot is not configured.")
         return redirect('profile')
 
@@ -33,7 +36,7 @@ def start_telegram_connect(request):
     TelegramVerificationToken.objects.filter(user=request.user).delete()
 
     token = TelegramVerificationToken.create_token(request.user)
-    deep_link = f"https://t.me/{config.telegram_bot_username}?start=verify_{token.token}"
+    deep_link = f"https://t.me/{bot_username}?start=verify_{token.token}"
     
     # Redirect directly to Telegram (no intermediate page)
     return redirect(deep_link)
