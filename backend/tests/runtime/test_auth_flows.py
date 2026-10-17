@@ -38,7 +38,12 @@ class TestLoginPage:
         assert client.get("/admin/").status_code == 200
         admin_dashboard = client.get("/admin/dashboard/")
         assert admin_dashboard.status_code == 200
-        assert b"Operational dashboard" in admin_dashboard.content
+        assert b"Business overview" in admin_dashboard.content
+        assert b"Open Django Admin" in admin_dashboard.content
+        assert b"Business growth" in admin_dashboard.content
+        ranged_dashboard = client.get("/admin/dashboard/?range=7")
+        assert ranged_dashboard.status_code == 200
+        assert b'value="7" selected' in ranged_dashboard.content
 
     @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
     def test_unverified_learner_login_sends_confirmation_instead_of_500(self, client):
