@@ -36,7 +36,9 @@ class TestLoginPage:
         # An unverified bootstrap superuser must not be forced into a mail loop.
         assert len(mail.outbox) == 0
         assert client.get("/admin/").status_code == 200
-        assert client.get("/admin/dashboard/").status_code == 200
+        admin_dashboard = client.get("/admin/dashboard/")
+        assert admin_dashboard.status_code == 200
+        assert b"Operational dashboard" in admin_dashboard.content
 
     @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
     def test_unverified_learner_login_sends_confirmation_instead_of_500(self, client):
@@ -209,3 +211,53 @@ class TestUnifiedAdminEntry:
         logout = client.post(reverse("account_logout"))
         assert logout.status_code == 302
         assert logout["Location"].startswith("https://tradethesis-public-staging.onrender.com/")
+
+
+@pytest.mark.django_db
+class TestPasswordRecovery:
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_password_reset_email_link_opens_and_updates_password(self, client):
+        from urllib.parse import urlsplit
+        from django.core import mail
+        from allauth.account.models import EmailAddress
+
+        user = User.objects.create_user(
+            username="resetuser",
+            email="resetuser@example.com",
+            password="OldPass!2026",
+        )
+        EmailAddress.objects.create(
+            user=user, email=user.email, primary=True, verified=True
+        )
+        mail.outbox.clear()
+
+        response = client.post(reverse("account_reset_password"), {
+            "email": user.email
+        })
+        assert response.status_code == 302
+        assert response["Location"].endswith(reverse("account_reset_password_done"))
+        assert len(mail.outbox) == 1
+        assert "TradeThesis" in mail.outbox[0].subject
+
+        reset_url = next(
+            line.strip()
+            for line in mail.outbox[0].body.splitlines()
+            if "/accounts/password/reset/key/" in line
+        )
+        reset_path = urlsplit(reset_url).path
+        reset_page = client.get(reset_path)
+        assert reset_page.status_code == 200
+        assert b"Choose a new password" in reset_page.content
+
+        new_password = "CompletelyNew!P4ssword2026"
+        changed = client.post(reset_path, {
+            "password1": new_password,
+            "password2": new_password,
+            "action": "change password",
+        })
+        assert changed.status_code == 302
+        assert changed["Location"].endswith(
+            reverse("account_reset_password_from_key_done")
+        )
+        user.refresh_from_db()
+        assert user.check_password(new_password)
