@@ -4,6 +4,7 @@ Account views for community platform.
 import hashlib
 import hmac
 import json
+from urllib.parse import urlencode
 from datetime import datetime
 from decimal import Decimal
 
@@ -13,6 +14,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
+from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -39,6 +42,31 @@ from apps.subscriptions.services import (
 )
 from apps.subscriptions.models import GeoPlanPrice
 
+
+
+def admin_login_bridge(request):
+    """Use the shared TradeThesis sign-in without looping authenticated learners.
+
+    Anonymous users are sent to allauth with a same-host destination. An
+    authenticated staff member already has a session and goes straight to the
+    operational dashboard. A normal learner receives a clear 403 because
+    signing in again as the same user cannot grant Django staff permissions.
+    """
+    if request.user.is_authenticated:
+        if request.user.is_active and request.user.is_staff:
+            return redirect("/admin/dashboard/")
+        return render(request, "auth/admin-access-denied.html", status=403)
+
+    next_url = request.GET.get("next") or "/admin/dashboard/"
+    if not url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        next_url = "/admin/dashboard/"
+
+    query = urlencode({"next": next_url})
+    return redirect(f"{reverse('account_login')}?{query}")
 
 def check_banned(view_func):
     """Decorator to check if user is banned."""
