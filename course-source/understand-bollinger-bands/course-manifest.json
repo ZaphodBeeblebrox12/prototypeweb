@@ -1,0 +1,393 @@
+{
+  "schema_version": 1,
+  "manifest_version": "1.0",
+  "course": {
+    "title": "Understand Bollinger Bands",
+    "slug": "understand-bollinger-bands",
+    "summary": "Read Bollinger Bands in context, compare documented methods, and make conditional trading plans without treating an indicator as a signal.",
+    "description": "A practical, evidence-led course on band construction, market context, signature patterns, documented methods, failure cases and risk. The course teaches observation, interpretation and conditional testing; it does not provide trading signals.",
+    "position": 20
+  },
+  "notebook": {
+    "title": "Make the reading conditional",
+    "prompts": [
+      {
+        "label": "Describe",
+        "text": "Where is price relative to the bands and middle line? State only what is visible."
+      },
+      {
+        "label": "Interpret",
+        "text": "Does the structure look like a trend, a range or a transition? Name a reasonable alternative."
+      },
+      {
+        "label": "Test",
+        "text": "What future price behaviour would strengthen or weaken your reading?"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "slug": "what-bollinger-bands-actually-tell-you",
+      "title": "What Bollinger Bands Actually Tell You",
+      "summary": "Build an intuitive mental model of the bands before treating them as trading signals.",
+      "position": 1,
+      "source": "lessons/MODULE_01_WHAT_BOLLINGER_BANDS_TELL_YOU.md",
+      "lessons": [
+        {
+          "source_id": "1.1",
+          "title": "What Are the Bands Showing You?",
+          "slug": "what-are-the-bands-showing-you",
+          "position": 1,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "1.2",
+          "title": "When Price Reaches a Band, What Does It Mean?",
+          "slug": "when-price-reaches-a-band-what-does-it-mean",
+          "position": 2,
+          "duration_minutes": 14,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "1.3",
+          "title": "Why the Bands Keep Changing",
+          "slug": "why-the-bands-keep-changing",
+          "position": 3,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "1.4",
+          "title": "What the Bands Cannot Tell You",
+          "slug": "what-the-bands-cannot-tell-you",
+          "position": 4,
+          "duration_minutes": 12,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        }
+      ]
+    },
+    {
+      "slug": "read-the-bands-and-their-measurements",
+      "title": "Read the Bands and Their Measurements",
+      "summary": "Understand the calculation and use band position and width as descriptions rather than forecasts.",
+      "position": 2,
+      "source": "lessons/MODULE_02_READ_THE_BANDS_AND_MEASUREMENTS.md",
+      "lessons": [
+        {
+          "source_id": "2.1",
+          "title": "How the Bands Are Built",
+          "slug": "how-the-bands-are-built",
+          "position": 1,
+          "duration_minutes": 14,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "2.2",
+          "title": "Why 20 and 2 Are Defaults, Not Laws",
+          "slug": "why-20-and-2-are-defaults-not-laws",
+          "position": 2,
+          "duration_minutes": 13,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "2.3",
+          "title": "Use %B to Describe Price Position",
+          "slug": "use-percent-b-to-describe-price-position",
+          "position": 3,
+          "duration_minutes": 14,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "2.4",
+          "title": "Use BandWidth to See When the Bands Are Narrow or Wide",
+          "slug": "use-bandwidth-to-see-when-the-bands-are-narrow-or-wide",
+          "position": 4,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        }
+      ]
+    },
+    {
+      "slug": "read-the-market-before-reading-the-signal",
+      "title": "Read the Market Before Reading the Signal",
+      "summary": "Classify the market context and compare trend, range and transition before interpreting a band interaction.",
+      "position": 3,
+      "source": "lessons/MODULE_03_READ_MARKET_CONTEXT.md",
+      "lessons": [
+        {
+          "source_id": "3.1",
+          "title": "First Decide: Trend or Range?",
+          "slug": "first-decide-trend-or-range",
+          "position": 1,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "3.2",
+          "title": "When Price Walks Along a Band",
+          "slug": "when-price-walks-along-a-band",
+          "position": 2,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "3.3",
+          "title": "Two Ways Traders Talk About a “Squeeze”",
+          "slug": "two-ways-traders-talk-about-a-squeeze",
+          "position": 3,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "3.4",
+          "title": "A Squeeze Does Not Choose the Direction",
+          "slug": "a-squeeze-does-not-choose-the-direction",
+          "position": 4,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        }
+      ]
+    },
+    {
+      "slug": "read-bollinger-s-signature-patterns",
+      "title": "Read Bollinger's Signature Patterns",
+      "summary": "Study W-bottoms, M-tops and indicator disagreements without treating a shape as a complete trade.",
+      "position": 4,
+      "source": "lessons/MODULE_04_BOLLINGER_SIGNATURE_PATTERNS.md",
+      "lessons": [
+        {
+          "source_id": "4.1",
+          "title": "Reading a W-Bottom",
+          "slug": "reading-a-w-bottom",
+          "position": 1,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "4.2",
+          "title": "Reading an M-Top",
+          "slug": "reading-an-m-top",
+          "position": 2,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "4.3",
+          "title": "When Price and an Indicator Tell Different Stories",
+          "slug": "when-price-and-an-indicator-tell-different-stories",
+          "position": 3,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "4.4",
+          "title": "Is the Pattern Complete Enough to Trade?",
+          "slug": "is-the-pattern-complete-enough-to-trade",
+          "position": 4,
+          "duration_minutes": 12,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        }
+      ]
+    },
+    {
+      "slug": "use-the-setups-the-authors-actually-wrote",
+      "title": "Use the Setups the Authors Actually Wrote",
+      "summary": "Compare documented Bollinger and TTM Squeeze methods, their conditions, and their failure cases.",
+      "position": 5,
+      "source": "lessons/MODULE_05_BUY_AND_SELL_PLANS.md",
+      "lessons": [
+        {
+          "source_id": "5.1",
+          "title": "Bollinger Method I: Trade the Volatility Breakout",
+          "slug": "bollinger-method-i-volatility-breakout",
+          "position": 1,
+          "duration_minutes": 25,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "5.2",
+          "title": "Bollinger Method II: Follow Strength Confirmed by MFI",
+          "slug": "bollinger-method-ii-strength-confirmed-by-mfi",
+          "position": 2,
+          "duration_minutes": 25,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "5.3",
+          "title": "Bollinger Method III: Look for Reversal Clues in Volume",
+          "slug": "bollinger-method-iii-reversal-clues-in-volume",
+          "position": 3,
+          "duration_minutes": 25,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "5.4",
+          "title": "Bollinger Method IV: Wait for a Confirmed Breakout",
+          "slug": "bollinger-method-iv-confirmed-breakout",
+          "position": 4,
+          "duration_minutes": 25,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "5.5",
+          "title": "Trade the W-Bottom and M-Top, Not Just the Shape",
+          "slug": "trade-the-w-bottom-and-m-top-not-just-the-shape",
+          "position": 5,
+          "duration_minutes": 25,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "5.6",
+          "title": "John Carter's TTM Squeeze: Use Momentum for Direction",
+          "slug": "john-carters-ttm-squeeze-use-momentum-for-direction",
+          "position": 6,
+          "duration_minutes": 25,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        }
+      ]
+    },
+    {
+      "slug": "recognise-failed-setups-and-know-when-to-wait",
+      "title": "Recognise Failed Setups and Know When to Wait",
+      "summary": "Recognise failed breakouts, premature reversals and conditions where a trade should be skipped.",
+      "position": 6,
+      "source": "lessons/MODULE_06_FAILED_SETUPS_AND_NO_TRADE.md",
+      "lessons": [
+        {
+          "source_id": "6.1",
+          "title": "The False Start After a Squeeze",
+          "slug": "the-false-start-after-a-squeeze",
+          "position": 1,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "6.2",
+          "title": "When a Band Walk Traps Reversal Traders",
+          "slug": "when-a-band-walk-traps-reversal-traders",
+          "position": 2,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "6.3",
+          "title": "When a Range Trade Stops Being a Range Trade",
+          "slug": "when-a-range-trade-stops-being-a-range-trade",
+          "position": 3,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "6.4",
+          "title": "Late Entries, Conflicting Evidence, and No-Trade Conditions",
+          "slug": "late-entries-conflicting-evidence-and-no-trade-conditions",
+          "position": 4,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        }
+      ]
+    },
+    {
+      "slug": "manage-risk-and-review-the-process",
+      "title": "Manage Risk and Review the Process",
+      "summary": "Turn a trade idea into a conditional plan with risk, invalidation and a review process.",
+      "position": 7,
+      "source": "lessons/MODULE_07_RISK_AND_REVIEW.md",
+      "lessons": [
+        {
+          "source_id": "7.1",
+          "title": "Size the Trade From the Point Where the Idea Fails",
+          "slug": "size-the-trade-from-the-point-where-the-idea-fails",
+          "position": 1,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "7.2",
+          "title": "Decide How You Will Manage the Trade Before Entry",
+          "slug": "decide-how-you-will-manage-the-trade-before-entry",
+          "position": 2,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "7.3",
+          "title": "Test the Idea Without Fitting It to the Past",
+          "slug": "test-the-idea-without-fitting-it-to-the-past",
+          "position": 3,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        },
+        {
+          "source_id": "7.4",
+          "title": "Review the Decision, Not Just the Result",
+          "slug": "review-the-decision-not-just-the-result",
+          "position": 4,
+          "duration_minutes": 15,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading"
+        }
+      ]
+    }
+  ]
+}
