@@ -21,4 +21,12 @@ The former `index` URL name is preserved for backwards-compatible URL reversing,
 - Public static-site service and Django Academy service are configured for manual deployment (auto-deploy disabled).
 - Deployment remains a separate explicit action; do not touch the separate legacy `tradeadmin` service on `ZaphodBeeblebrox12/test` / `main`.
 
-Update this section with the final commit, CI results, deployment IDs and verified public/auth/dashboard paths after rollout. Do not describe browser login as verified unless a real login journey was tested.
+### Current staging checkpoint — 2026-10-17
+
+- Branch: `my-new-branch`.
+- Application code and live member desk template deployed from commit `92dbfed6acd3186bc71df76f0d13d9042413a93d`.
+- Academy staging service: `srv-db9ioke1egvs73feb8ag`; deployment `dep-db9t3hrbc2fs73d4nbv0`; status `live`; finished at `2026-10-17T19:53:30Z`.
+- Backend CI: [run 39063976526](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39063976526) — successful on Python 3.11 and 3.12, each with 673 passing tests, 187 warnings and 11 subtests passed.
+- The Render build collected static files, and post-rollout `/health/` probes returned HTTP 200.
+- The public static-site service was not redeployed as part of this dashboard fix. The separate legacy `tradeadmin` service and `main` branch remain untouched.
+- **Authenticated browser verification remains outstanding.** The staging host could not be independently opened through the available browser verification path, and credentials were not supplied. The account owner should sign in and confirm the seven-section dashboard in a real session. Do not mark the authenticated user journey as verified until that check is completed.
