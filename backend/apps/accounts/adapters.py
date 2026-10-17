@@ -4,6 +4,7 @@ Custom allauth adapter for Google authentication.
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.account.adapter import DefaultAccountAdapter
 from django import forms
+from django.conf import settings
 from allauth.exceptions import ImmediateHttpResponse
 from allauth.account.models import EmailAddress
 from django.contrib import messages
@@ -104,10 +105,12 @@ class CustomAccountAdapter(DefaultAccountAdapter):
             # Redirect to verification sent page
             return reverse('account_email_verification_sent')
 
-        return "/dashboard/"
+        # Honour a safe ``next`` target supplied by allauth; otherwise use
+        # LOGIN_REDIRECT_URL, which points to the TradeThesis learner dashboard.
+        return super().get_login_redirect_url(request)
 
     def get_logout_redirect_url(self, request):
-        return "/"
+        return f"{settings.PUBLIC_SITE_URL}/"
 
     def _is_email_verified(self, user):
         """Check if user's email is verified."""
