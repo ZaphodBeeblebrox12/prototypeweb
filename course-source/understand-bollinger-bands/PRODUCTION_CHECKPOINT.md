@@ -86,3 +86,14 @@ Next asset pass:
 - Clearly distinguish author/source trigger rules from course-designed execution and risk-management options.
 - No ChartLab for this course; use supplied static visuals and learner reasoning tasks.
 - No merge to `main`, no deployment, and no production website integration without the user's explicit approval.
+
+
+## Shared micro-course template source of truth and Django handoff — 17 October 2026
+
+- The approved concrete visual/interaction reference is `course-source/understand-bollinger-bands/preview/first-pass/index.html` on `my-new-branch`. Its current template state preserves **Your Trading Notebook** and removes the green **“By the end, you can”** objective card. Design-reference checkpoint: `030e473e33563499d57b1a8836559ce4501c138b`.
+- Updated `course-source/COURSE_TEMPLATE_STANDARD.md` to make the hierarchy explicit: shared design rules → canonical HTML reference → each course's authored Markdown/architecture/assets → validated manifest → generated preview output → published Django records.
+- Added `course-integration/MICROCOURSE_TEMPLATE_DJANGO_HANDOFF.md` with the recommended reusable-template/import approach, backend security requirements, acceptance checklist and a copy-ready implementation prompt.
+- Updated `docs/architecture/COURSE_CONTENT_EDITOR.md` and `docs/architecture/INSTRUCTIONAL_IMAGE_REPLACEMENT.md` to make text and image editing administrator-only. Updated `docs/architecture/FRONTEND_BACKEND_INTEGRATION.md` and the Bollinger Bands README to cross-link the approved reference and handoff.
+- Production Django integration has **not** been implemented by these documentation commits. The current static preview's local editing/image behaviour remains preview-only; persistent edits require the separate Academy app, administrator-only permission checks, CSRF, validated database writes, persistent media storage and tests.
+- Work remains on `my-new-branch`. No `main` merge or deployment is authorised.
+
