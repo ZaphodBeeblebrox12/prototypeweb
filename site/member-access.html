@@ -9,11 +9,12 @@
   <style>
     :root{color-scheme: light;--paper:#f7f3e9;--ink:#29382e;--muted:#687268;--green:#355a46}
     *{box-sizing:border-box}body{min-height:100vh;margin:0;display:grid;place-items:center;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;text-align:center}
-    main{padding:30px;max-width:480px}h1{font:400 32px/1.1 Georgia,"Times New Roman",serif}p{color:var(--muted);font-size:14px;line-height:1.7}a{display:inline-flex;margin-top:12px;padding:12px 20px;border-radius:99px;background:var(--green);color:white;text-decoration:none;font-size:12px;font-weight:750}
+    main{padding:30px;max-width:480px}h1{font:400 32px/1.1 Georgia,"Times New Roman",serif}p{color:var(--muted);font-size:14px;line-height:1.7}a{display:inline-flex;margin-top:12px;padding:12px 20px;border-radius:99px;background:var(--green);color:white;text-decoration:none;font-size:12px;font-weight:750}.skip-link{position:absolute;z-index:2;top:8px;left:8px;transform:translateY(-180%);padding:10px 14px;background:var(--green);color:white}.skip-link:focus{transform:translateY(0)}
   </style>
 </head>
 <body>
-  <main>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <main id="main-content" tabindex="-1">
     <h1>TradeThesis member desk</h1>
     <p>Opening your secure sign-in and account page…</p>
     <a id="continue" href="https://tradethesis-academy-staging.onrender.com/accounts/login/?next=%2Flearn%2F">Continue to sign in</a>
