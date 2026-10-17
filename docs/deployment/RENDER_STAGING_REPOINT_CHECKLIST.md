@@ -1,8 +1,8 @@
 # Render staging repoint — handoff checklist
 
-**Status: current Academy runtime is live and healthy; code tests and migration-state checks pass. The latest schema migrations are committed but deliberately not deployed until the actual database configuration is verified. Admin and course/media workflows still need live validation.**
+**Status (2026-10-17): Academy staging is live and healthy on the Supabase PostgreSQL URL supplied by the linked environment group. The six corrective schema migrations were applied successfully. Auth email templates are deployed. The one-time admin bootstrap is disabled again because the required username value was empty/missing; admin sign-in and course/media workflows remain to be verified.**
 
-## Current verified deployment (2026-10-17)
+## Current verified deployment
 
 ### Public website staging
 
@@ -22,34 +22,22 @@
 - Dashboard: https://dashboard.render.com/web/srv-db9ioke1egvs73feb8ag
 - Repository: `ZaphodBeeblebrox12/prototypeweb`
 - Branch: `my-new-branch`
-- Current live commit: `121a81b65cf964d6163404d9eee6ee495b1d5cb7` — auth-template fix and staging checkpoint.
-- Current live deployment ID: `dep-db9ql4m1egvs73897700`; status `live`; deploy event succeeded at 2026-10-17 17:06 UTC.
-- Latest Git branch commit at this checkpoint: `40e4d123c8f5bf310661a7a7b8e2edf579f02d12`. It includes six migration files and the now-required CI migration check; those migration changes are not yet deployed to Render.
+- Current live commit: `bd192e6cd699a03194509c755f7ca8818b9c7da0`
+- Latest successful deployment: `dep-db9r053rjlhs73frrt6g` — status `live`; its runtime was healthy after rollout.
+- Prior migration deployment: `dep-db9qualg1s2s739nqj20` — status `live`; deployed commit `bd192e6cd699a03194509c755f7ca8818b9c7da0`.
 - Build command: `cd backend && bash build.sh`
 - Start command: `cd backend && gunicorn config.wsgi:application --workers 2 --threads 4 --timeout 120`
 - Health check path: `/health/`
-- Health verification: Render logs on the current live deployment showed repeated `GET /health/ HTTP/1.1` responses with status `200` after the new instance started.
-- The previous live build applied `academy.0002_course_import_review_workflow` and `academy.0003_course_asset_original_url`.
+- Runtime health: logs show repeated `GET /health/ HTTP/1.1` with status `200` from the replacement instance after both successful deployments.
+- Database: `DATABASE_URL` is provided via the linked Render environment group `tradethesis-academy-staging-config`. The user observed a Supabase pooler hostname with path `/postgres` (region appears to be ap-northeast-1). Do not copy the full URL into chat or Git. Database connectivity is proven by the successful migrations and database-aware `/health/` checks. Render service is in Oregon; Supabase region is likely Tokyo, which works but adds cross-region latency.
 - Auto-deploy: off (manual deploy only)
 - Plan: Free; one instance.
 
-## Authentication email templates — fixed and deployed
+## Schema migrations — deployed successfully
 
-Render logs from the earlier deployment recorded HTTP 500 for a login attempt involving an unverified account because Allauth could not find custom confirmation email subject/body templates. The following have now been added on `my-new-branch` and included in the live commit `121a81b`:
+GitHub Actions run [39052768361](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39052768361) passed on Python 3.11 and 3.12. Both migration checks reported `No changes detected`; each complete test suite reported 671 passed, 1 skipped, 188 warnings, and 4 subtests passed.
 
-- `backend/templates/account/email/email_confirmation_message_subject.txt`
-- `backend/templates/account/email/email_confirmation_message.txt`
-- `backend/templates/account/email/email_confirmation_signup_subject.txt`
-- `backend/templates/account/email/email_confirmation_signup.txt`
-- Regression test: `backend/tests/test_email_confirmation_templates.py`
-
-GitHub Actions run [39052070511](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39052070511) passed on Python 3.11 and 3.12 with 671 passed, 1 skipped, 188 warnings, and 4 subtests passed. The confirmation template regression tests passed. A user login/confirmation flow has not yet been manually re-tested on the live site.
-
-Email delivery itself is still a separate configuration requirement: base settings default to Django's console email backend and production makes email verification mandatory. Configure a real SMTP/email provider in Render before relying on signup/verification emails. Never store secrets in Git or paste them into chat.
-
-## Django migration drift — corrected in Git, waiting for safe deployment
-
-Render's build warned that model changes were missing migrations in six apps. A GitHub Actions diagnostic captured the exact Django-generated migrations, and these have been added to `my-new-branch`:
+The following generated migrations have been applied to the configured Supabase PostgreSQL database, each logged as `OK` by Render:
 
 - `apps/accounts/migrations/0010_rename_accounts_se_user_ts_accounts_se_user_id_7c771c_idx_and_more.py`
 - `apps/disputes/migrations/0004_rename_disputes_d_status_disputes_di_status_124397_idx_and_more.py`
@@ -58,19 +46,54 @@ Render's build warned that model changes were missing migrations in six apps. A 
 - `apps/subscriptions/migrations/0019_alter_geoplanprice_interval_alter_planprice_interval.py`
 - `apps/support/migrations/0005_rename_support_tm_ticket_ts_support_tic_ticket__0cd9bd_idx.py`
 
-The generated operations consist of index renames plus an explicit `card_fingerprint` field update and billing interval-choice updates. The CI workflow now requires `python manage.py makemigrations --check --dry-run` (no longer advisory).
+Operations are index renames plus the `card_fingerprint` field update and subscription interval-choice updates. The CI workflow now requires `python manage.py makemigrations --check --dry-run`.
 
-GitHub Actions run [39052768361](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39052768361) succeeded on Python 3.11 and 3.12. Both migration checks reported `No changes detected`, and each complete test suite reported 671 passed, 1 skipped, 188 warnings, and 4 subtests passed. The migration files are committed and tested but should not be deployed until Academy's `DATABASE_URL` is confirmed.
+## Authentication email templates — fixed and deployed
 
-## Next required checks
+Render logs from an earlier deployment recorded HTTP 500 for a login attempt involving an unverified account because Allauth could not find custom confirmation email subject/body templates. The following are committed on `my-new-branch` and included in the live build:
 
-1. **Confirm database identity before deploying the new migrations.** In Academy staging's Render Environment page, check that `DATABASE_URL` exists and is sourced from the intended durable PostgreSQL database. Do not share or commit the value. If absent, the code falls back to SQLite under the backend directory, which is not a reliable database on an ephemeral service.
-2. The Render workspace currently lists one PostgreSQL instance, `tradeadmin-db`, on the Free plan, with expiry shown as 2026-10-26. Do not assume Academy uses it until the service's `DATABASE_URL` is checked. A read-only query through the connected Render integration was blocked because the DB IP allowlist is empty; do not weaken the allowlist just for this check.
-3. After database configuration is verified, deploy the latest `my-new-branch` commit manually to Academy staging, watch the six new migrations apply, then recheck `/health/` and deploy status.
-4. Test `/admin/` login on Academy staging and test login for an unverified account after the template fix is live. Do not assume a superuser exists. If necessary, use the guarded one-time bootstrap described in `backend/build.sh`; set the required variables privately, confirm the admin exists, then remove the bootstrap variables immediately.
-5. Test admin editing/upload of lesson images, preview, protected-media access, and entitlement denial before treating this as production-ready.
-6. Decide on durable private-media storage. Academy staging runs on Render Free and files saved on the container filesystem are not durable across restarts/redeploys. Use object storage or an appropriate persistent hosting setup while preserving private media access controls.
-7. Both staging services currently have auto-deploy off, so new commits need a manual deploy. The existing `tradeadmin` service must remain untouched on `ZaphodBeeblebrox12/test` / `main`.
+- `backend/templates/account/email/email_confirmation_message_subject.txt`
+- `backend/templates/account/email/email_confirmation_message.txt`
+- `backend/templates/account/email/email_confirmation_signup_subject.txt`
+- `backend/templates/account/email/email_confirmation_signup.txt`
+- Regression test: `backend/tests/test_email_confirmation_templates.py`
+
+GitHub Actions run [39052070511](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39052070511) passed both Python versions with 671 passed, 1 skipped, 188 warnings, and 4 subtests passed; template regression tests passed. Manually testing login and confirmation on the live service remains outstanding.
+
+Email delivery is separately configured: base settings default to Django's console email backend and production requires email verification. Configure a real SMTP/email provider in Render before relying on signup/verification emails. Never store secrets in Git or paste them into chat.
+
+## Staging admin bootstrap — outstanding
+
+The guarded bootstrap in `backend/build.sh` requires all four non-empty service-level variables:
+
+- `BOOTSTRAP_STAGING_ADMIN`
+- `STAGING_ADMIN_USERNAME`
+- `STAGING_ADMIN_EMAIL`
+- `STAGING_ADMIN_PASSWORD`
+
+A deploy was triggered with `BOOTSTRAP_STAGING_ADMIN=true`, but it failed before creating the admin because Render's build log reported `STAGING_ADMIN_USERNAME is required for admin bootstrap`. The user-facing environment page previously showed masked rows for the four variables, but the username value reaching the build was empty or absent; this must be corrected directly in the **Academy web service's Environment Variables**, not by sharing values in chat.
+
+Recovery already completed:
+- `BOOTSTRAP_STAGING_ADMIN` was set back to `false`.
+- The resulting deployment `dep-db9r053rjlhs73frrt6g` succeeded and is Live.
+- The code/schema deployment remains healthy; no new migration work is needed.
+- No superuser creation was confirmed.
+
+Next:
+1. In Academy service Environment (not just the linked config group), edit the service-level variables and enter a non-empty, intended username, email, and a strong password. Keep them private.
+2. Set `BOOTSTRAP_STAGING_ADMIN=true` only after the three values are populated.
+3. Save/trigger deployment and confirm the build log says `Staging superuser created.` or `requested superuser already exists`. If it fails, do not keep repeatedly redeploying; inspect the precise error.
+4. Sign in at `https://tradethesis-academy-staging.onrender.com/admin/` using the chosen credentials.
+5. Only after successful login, remove all four bootstrap variables (or at minimum disable the flag and remove the credentials), save, and deploy again.
+
+## Next workflow tests
+
+After admin login is verified:
+1. Test updating lesson text in Academy admin.
+2. Add several URL-backed lesson images, then replace one with an uploaded file; verify preview/learning room renders the selected images only in the intended tab.
+3. Test protected media access while logged out and with a user lacking entitlement.
+4. Decide on durable private-media storage. Academy runs on Render Free, and uploaded files on its container filesystem are not durable across restarts/redeployments. Use object storage or a suitable persistent hosting setup while preserving private-media access controls.
+5. Both staging services have auto-deploy off and need manual deploys. Leave the existing `tradeadmin` service untouched on `ZaphodBeeblebrox12/test` / `main`.
 
 ## Existing application to leave unchanged
 
@@ -82,8 +105,7 @@ GitHub Actions run [39052768361](https://github.com/ZaphodBeeblebrox12/prototype
 
 Do not repoint or redeploy this service as part of staging consolidation.
 
-## Current deployment notes
+## Security notes
 
-- Both public-site and Academy deploys have been triggered manually.
-- The production settings fix uses `env.list()` for comma-separated host/origin settings instead of calling `.split()` on the list returned by django-environ.
-- No secrets were read into the checkpoint, added to Git, or printed into the logs.
+- No database URL, password, API key, or bootstrap password was committed to Git or copied into this checkpoint.
+- The `DATABASE_URL` should remain in the linked Render environment group; don't unlink the group or paste its secret value into chat.
