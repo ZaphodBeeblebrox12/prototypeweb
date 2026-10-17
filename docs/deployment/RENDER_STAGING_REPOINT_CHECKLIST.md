@@ -1,6 +1,6 @@
 # Render staging repoint — handoff checklist
 
-**Status (2026-10-17): Academy staging is live and healthy on the Supabase PostgreSQL URL supplied by the linked environment group. The six corrective schema migrations were applied successfully. Auth email templates are deployed. The one-time admin bootstrap is disabled again because the required username value was empty/missing; admin sign-in and course/media workflows remain to be verified.**
+**Status (2026-10-17): Academy staging is healthy on the Supabase PostgreSQL URL supplied by the linked environment group. The six corrective schema migrations were applied successfully. Auth email templates are deployed. The requested staging username already exists as a superuser. The bootstrap flag has been returned to false; admin login and course/media workflows remain to be verified.**
 
 ## Current verified deployment
 
@@ -22,8 +22,9 @@
 - Dashboard: https://dashboard.render.com/web/srv-db9ioke1egvs73feb8ag
 - Repository: `ZaphodBeeblebrox12/prototypeweb`
 - Branch: `my-new-branch`
-- Current live commit: `bd192e6cd699a03194509c755f7ca8818b9c7da0`
-- Latest successful deployment: `dep-db9r053rjlhs73frrt6g` — status `live`; its runtime was healthy after rollout.
+- Latest branch commit / deployment commit: `95824385ce64e1b1bd562bb849039fb76eee6d61` — staging checkpoint update.
+- Prior live deployment: `dep-db9r53jbc2fs73cugb90` — status `live`; build and runtime were healthy.
+- Bootstrap-disabled deployment: `dep-db9r5t7avr4c73f4im40`; build succeeded and the replacement instance repeatedly returned HTTP 200 for `/health/`. Render's deploy API still reported `update_in_progress` at the last check, although the instance was serving health checks.
 - Prior migration deployment: `dep-db9qualg1s2s739nqj20` — status `live`; deployed commit `bd192e6cd699a03194509c755f7ca8818b9c7da0`.
 - Build command: `cd backend && bash build.sh`
 - Start command: `cd backend && gunicorn config.wsgi:application --workers 2 --threads 4 --timeout 120`
@@ -62,29 +63,27 @@ GitHub Actions run [39052070511](https://github.com/ZaphodBeeblebrox12/prototype
 
 Email delivery is separately configured: base settings default to Django's console email backend and production requires email verification. Configure a real SMTP/email provider in Render before relying on signup/verification emails. Never store secrets in Git or paste them into chat.
 
-## Staging admin bootstrap — outstanding
+## Staging admin bootstrap — account exists; login verification pending
 
-The guarded bootstrap in `backend/build.sh` requires all four non-empty service-level variables:
+The guarded bootstrap in `backend/build.sh` requires four non-empty variables: `BOOTSTRAP_STAGING_ADMIN`, `STAGING_ADMIN_USERNAME`, `STAGING_ADMIN_EMAIL`, and `STAGING_ADMIN_PASSWORD`.
 
-- `BOOTSTRAP_STAGING_ADMIN`
-- `STAGING_ADMIN_USERNAME`
-- `STAGING_ADMIN_EMAIL`
-- `STAGING_ADMIN_PASSWORD`
+A bootstrap-enabled build on 2026-10-17 succeeded and logged:
 
-A deploy was triggered with `BOOTSTRAP_STAGING_ADMIN=true`, but it failed before creating the admin because Render's build log reported `STAGING_ADMIN_USERNAME is required for admin bootstrap`. The user-facing environment page previously showed masked rows for the four variables, but the username value reaching the build was empty or absent; this must be corrected directly in the **Academy web service's Environment Variables**, not by sharing values in chat.
+- `Staging admin bootstrap skipped: requested superuser already exists.`
 
-Recovery already completed:
-- `BOOTSTRAP_STAGING_ADMIN` was set back to `false`.
-- The resulting deployment `dep-db9r053rjlhs73frrt6g` succeeded and is Live.
-- The code/schema deployment remains healthy; no new migration work is needed.
-- No superuser creation was confirmed.
+This confirms that the username supplied by the current service environment already maps to a Django superuser. The script **does not reset that user's password** when it finds an existing superuser, so the `STAGING_ADMIN_PASSWORD` just entered in Render is not guaranteed to be the current login password.
+
+Recovery / current state:
+- `BOOTSTRAP_STAGING_ADMIN` has been set back to `false`.
+- The follow-up build succeeded; deployment `dep-db9r5t7avr4c73f4im40` had its replacement instance returning HTTP 200 from `/health/`, but Render's deploy API still showed `update_in_progress` at the last recorded check.
+- No password reset occurred; no existing account was modified.
+- Do not remove the other temporary variables until the administrator has successfully signed in.
 
 Next:
-1. In Academy service Environment (not just the linked config group), edit the service-level variables and enter a non-empty, intended username, email, and a strong password. Keep them private.
-2. Set `BOOTSTRAP_STAGING_ADMIN=true` only after the three values are populated.
-3. Save/trigger deployment and confirm the build log says `Staging superuser created.` or `requested superuser already exists`. If it fails, do not keep repeatedly redeploying; inspect the precise error.
-4. Sign in at `https://tradethesis-academy-staging.onrender.com/admin/` using the chosen credentials.
-5. Only after successful login, remove all four bootstrap variables (or at minimum disable the flag and remove the credentials), save, and deploy again.
+1. Open `https://tradethesis-academy-staging.onrender.com/admin/`.
+2. Sign in using the configured username and the **existing password for that account** (not necessarily the password currently stored in `STAGING_ADMIN_PASSWORD`).
+3. If login succeeds, immediately remove `STAGING_ADMIN_USERNAME`, `STAGING_ADMIN_EMAIL`, and `STAGING_ADMIN_PASSWORD` from the service and leave `BOOTSTRAP_STAGING_ADMIN=false`. Save and allow the redeploy to finish.
+4. If the existing password is unknown or login fails, stop and perform an explicit, controlled password reset for this staging superuser; do not repeatedly enable the bootstrap. Any code change should be confined to `my-new-branch`.
 
 ## Next workflow tests
 
