@@ -152,7 +152,7 @@ def _subscription_dashboard_context(request):
     if can_edit_billing_settings:
         from apps.payments.models import BillingSettings
 
-        billing = BillingSettings.get_solo()
+        billing = BillingSettings.objects.filter(pk=1).first() or BillingSettings()
         business_fields = (
             ("legal_name", "Legal seller name", billing.legal_name.strip()),
             ("address", "Business address", billing.address.strip()),
