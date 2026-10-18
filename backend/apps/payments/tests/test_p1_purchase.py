@@ -57,6 +57,12 @@ def make_plan(interval="monthly", price_cents=999, currency="USD"):
     return plan, pp
 
 
+def _post_test_consent(client, intent):
+    _ensure_checkout_test_policies()
+    return client.post(
+        reverse("checkout-consent", args=[intent.id]), {"agree": "on"})
+
+
 @mock.patch("apps.payments.views.providers")
 @mock.patch("apps.payments.views.get_pricing_country", return_value="US")
 class PurchaseFlowTests(APITestCase):
@@ -70,9 +76,7 @@ class PurchaseFlowTests(APITestCase):
 
     def _consent(self, intent):
         """The agreement moment: ONE checkbox -> evidence -> provider handoff."""
-        _ensure_checkout_test_policies()
-        return self.client.post(
-            reverse("checkout-consent", args=[intent.id]), {"agree": "on"})
+        return _post_test_consent(self.client, intent)
 
     def _confirm(self, intent_id):
         return self.client.post(reverse("payment-confirm"), {
@@ -394,7 +398,10 @@ class CtaFlowTests(APITestCase):
         self.user = User.objects.create_user(username="cta", password="pw")
         self.client.force_authenticate(self.user)
 
-    def test_get_start_carries_plan_and_interval(self, _geo, prov):
+    def _consent(self, intent):
+        return _post_test_consent(self.client, intent)
+
+    def test_get_start_carries_plan_and_interval(self, _geo, prov)
         plan, _ = make_plan("quarterly")
         prov.create_hosted_checkout.return_value = providers.CreatedCheckout(
             provider_reference="cs_cta", checkout_url="https://pay.example")
