@@ -90,7 +90,7 @@ Next asset pass:
 
 ## Shared micro-course template source of truth and Django handoff — 17 October 2026
 
-- The approved concrete visual/interaction reference is `course-source/understand-bollinger-bands/preview/first-pass/index.html` on `my-new-branch`. Its current template state preserves **Your Trading Notebook** and removes the green **“By the end, you can”** objective card. Design-reference checkpoint: `030e473e33563499d57b1a8836559ce4501c138b`.
+- The selected concrete visual/interaction reference is `course-source/understand-bollinger-bands/preview/template-reference/index.html` on `my-new-branch`. It preserves **Your Trading Notebook** and omits the green **“By the end, you can”** objective card. The content-rich `preview/first-pass/index.html` remains a separate manuscript/QA preview.
 - Updated `course-source/COURSE_TEMPLATE_STANDARD.md` to make the hierarchy explicit: shared design rules → canonical HTML reference → each course's authored Markdown/architecture/assets → validated manifest → generated preview output → published Django records.
 - Added `course-integration/MICROCOURSE_TEMPLATE_DJANGO_HANDOFF.md` with the recommended reusable-template/import approach, backend security requirements, acceptance checklist and a copy-ready implementation prompt.
 - Updated `docs/architecture/COURSE_CONTENT_EDITOR.md` and `docs/architecture/INSTRUCTIONAL_IMAGE_REPLACEMENT.md` to make text and image editing administrator-only. Updated `docs/architecture/FRONTEND_BACKEND_INTEGRATION.md` and the Bollinger Bands README to cross-link the approved reference and handoff.
@@ -106,7 +106,7 @@ Next asset pass:
 ### Template decision
 
 - The shared course standard is `course-source/COURSE_TEMPLATE_STANDARD.md`.
-- The canonical design reference is `preview/first-pass/index.html` in this course package.
+- The canonical design reference is `preview/template-reference/index.html` in this course package; `preview/first-pass/index.html` remains the content-rich course preview.
 - The schema-v1 manifest and authored Markdown remain the structured course and lesson sources; `assets/bollinger-lessons-data.js` is generated preview data, not a second authoring source.
 - The implementation contract is `course-integration/MICROCOURSE_TEMPLATE_DJANGO_HANDOFF.md`.
 - **Decision:** the layout, lesson tabs, notebook treatment, manifest shape, and content handoff are sufficiently defined for extraction into reusable Django templates. The source template is ready for Django integration. This is not a public-release approval.
@@ -137,3 +137,12 @@ These are source-content and static syntax checks from this audit; the full Pyth
 - Editing controls inside the HTML preview are review-only. Shared, persistent lesson-text and image changes must be implemented through the Django admin workflow, with authorisation restricted to superusers or the explicitly designated content-admin role—not ordinary staff or learners.
 - Keep course-specific media review visible. Missing local figures and temporary remote references must be resolved and visually checked before public course release.
 - No branch merge, deployment, or public release was performed in this checkpoint.
+
+
+## Canonical Learning Room template selected — 18 October 2026
+
+- The Foundation Review iteration selected in chat is now stored on `my-new-branch` at `preview/template-reference/index.html` and is the canonical visual/interaction reference.
+- It loads the generated manuscript payload from `assets/bollinger-lessons-data.js`, displays the actual 30 lesson titles across seven modules, and uses each lesson's authored knowledge-check question and rationale.
+- `preview/first-pass/index.html` has been kept unchanged as the content-rich first-pass preview with its existing review/editor hooks and QA contract. It is not being treated as the canonical visual design after this checkpoint.
+- Markdown lesson manuscripts and the manifest remain the content/structure authority; the generated JavaScript remains derivative preview data. The new HTML is a visual/interaction reference for extraction into the existing Django Academy base shell, not production Django code.
+- No branch merge or deployment was performed. Browser-wide responsive/interaction verification remains a separate release check.

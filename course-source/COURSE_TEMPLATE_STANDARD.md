@@ -1,7 +1,7 @@
 # TradeThesis Course Template Standard
 
 **Status:** Binding standard for every new TradeThesis micro-course and the migration target for existing courses.  
-**Canonical visual/interaction reference:** [Understand Bollinger Bands first-pass Learning Room](understand-bollinger-bands/preview/first-pass/index.html). This is the concrete approved template reference, including the **Your Trading Notebook** section and excluding the former green **“By the end, you can”** objective card.  
+**Canonical visual/interaction reference:** [TradeThesis Learning Room template (Bollinger Bands reference)](understand-bollinger-bands/preview/template-reference/index.html). This is the approved visual and interaction source of truth. The content-rich `preview/first-pass/index.html` remains a separate course-preview and QA artifact. The template retains the **Your Trading Notebook** treatment and omits the former green **“By the end, you can”** objective card.  
 **Design approval checkpoint:** `030e473e33563499d57b1a8836559ce4501c138b` on `my-new-branch` (17 October 2026).  
 **Content authority:** Each course's authored Markdown lessons and course architecture; generated preview payloads are build outputs, not editing sources.  
 **Django runtime:** Separate Academy repository, currently documented as `ZaphodBeeblebrox12/test` on `feature/tradethesis-academy`; verify the actual branch state before implementation.  
@@ -76,7 +76,7 @@ The initial application pass is **Understand Bollinger Bands**. Its seven-module
 Use these layers deliberately; do not let the same lesson text become independently maintained in multiple places.
 
 1. **This standard** defines the reusable teaching, visual, accessibility, image, migration and security rules.
-2. **Canonical design reference:** `course-source/understand-bollinger-bands/preview/first-pass/index.html`. It is the approved concrete reference for spacing, typography, overview-to-learning-room flow, lesson navigation, notebook callout, content width, figure handling and responsive behaviour. Treat it as a reference for extraction into shared Django templates—not as the production Django page to copy wholesale.
+2. **Canonical design reference:** `course-source/understand-bollinger-bands/preview/template-reference/index.html`. It is the selected reference for spacing, typography, overview-to-learning-room flow, lesson navigation, notebook treatment, content width, figure handling and responsive behaviour. Treat it as a reference for extraction into shared Django templates—not as the production Django page to copy wholesale. The content-rich `preview/first-pass/index.html` remains available for its existing course-content and editor QA checks.
 3. **Course-specific authoring source:** the course's `README.md`, `COURSE_ARCHITECTURE.md`, lesson Markdown and `ASSET_REGISTER.md`. Markdown lessons are the student-content editing authority unless a course explicitly records a different approved source.
 4. **Structured manifest:** each course should have a stable manifest (or the project's existing equivalent) describing course metadata, ordered modules/lessons, stable slugs/IDs, durations, learning outcomes, lesson source paths and asset IDs. Reuse existing manifest formats when compatible; do not create a second competing manifest.
 5. **Generated preview output:** generated lesson-data JavaScript and preview HTML/assets are derived artifacts. Regenerate them from their authoritative sources; do not manually patch generated lesson text and then treat it as canonical.

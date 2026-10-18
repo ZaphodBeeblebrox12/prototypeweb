@@ -83,4 +83,32 @@ for student_facing_label in ("eyebrow:'Method I ·", "eyebrow:'Method II ·", "e
                              '"Method III: Look for Reversal Clues in Volume"', '"Method IV: Wait for a Confirmed Breakout"'):
     if student_facing_label in page:
         raise SystemExit("Internal method label leaks into student-facing material: " + student_facing_label)
+
+
+# Canonical visual template checks: preserve the selected design while using real course data.
+template_page_path = ROOT / "course-source/understand-bollinger-bands/preview/template-reference/index.html"
+template_page = template_page_path.read_text(encoding="utf-8")
+if '<script src="../../assets/bollinger-lessons-data.js"></script>' not in template_page:
+    raise SystemExit("Canonical Learning Room template must load the Markdown-derived lesson payload.")
+if "window.BOLLINGER_MANUSCRIPTS?.[lesson.id]" not in template_page:
+    raise SystemExit("Canonical Learning Room template must bind selected lessons to the generated payload.")
+if "const item=manuscript?.quiz?" not in template_page or "data-why=" not in template_page:
+    raise SystemExit("Canonical Learning Room template must use lesson-specific quiz content and rationale.")
+if "setView('room');setTab('idea');" not in template_page:
+    raise SystemExit("Canonical Learning Room template startup initialisation is missing.")
+module_match = re.search(r"const modules = \[(.*?)\n\];", template_page, re.S)
+if not module_match:
+    raise SystemExit("Canonical Learning Room template module list is missing.")
+lesson_lists = re.findall(r"lessons:\[([^\]]*)\]", module_match.group(1), re.S)
+lesson_count = sum(
+    len(re.findall(r"""'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*" """.strip(), lesson_list))
+    for lesson_list in lesson_lists
+)
+if len(lesson_lists) != 7 or lesson_count != 30:
+    raise SystemExit(f"Canonical template must list seven modules and 30 lessons; found {len(lesson_lists)} modules and {lesson_count} lessons.")
+for lesson_id, lesson in lesson_manuscripts.items():
+    if lesson.get("title") not in module_match.group(1):
+        raise SystemExit(f"Canonical template title list is missing the authored title for lesson {lesson_id}.")
+print("Canonical Learning Room template, seven modules, all 30 lesson titles, and lesson-specific quizzes passed.")
+
 print("Bollinger lesson depth, all 30 unique quizzes, Learning Room rendering, VPA discovery, catalogue state, figure labels/counts and edit hooks passed.")

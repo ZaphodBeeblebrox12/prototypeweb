@@ -6,6 +6,8 @@ on:
       - my-new-branch
     paths:
       - "course-source/understand-bollinger-bands/preview/first-pass/index.html"
+      - "course-source/understand-bollinger-bands/preview/template-reference/index.html"
+      - "course-source/understand-bollinger-bands/assets/bollinger-lessons-data.js"
       - "site/assets/course-content-admin-editor.js"
       - "site/assets/instructional-image-admin.js"
       - "site/assets/course-catalogue-data.js"
@@ -40,11 +42,14 @@ jobs:
           python - <<'PY'
           import re
           from pathlib import Path
-          page = Path("course-source/understand-bollinger-bands/preview/first-pass/index.html").read_text(encoding="utf-8")
-          blocks = re.findall(r"<script(?:\s[^>]*)?>([\s\S]*?)</script>", page, flags=re.I)
-          inline = [s for s in blocks if s.strip() and not re.search(r"^\s*window\.TRADETHESIS_MEDIA_PREVIEW_ONLY\s*=", s)]
-          if not inline:
-              raise SystemExit("No inline course script found.")
-          Path("/tmp/bollinger-preview.js").write_text("\n".join(inline), encoding="utf-8")
+          for name in ("first-pass", "template-reference"):
+              path = Path(f"course-source/understand-bollinger-bands/preview/{name}/index.html")
+              page = path.read_text(encoding="utf-8")
+              blocks = re.findall(r"<script(?:\s[^>]*)?>([\s\S]*?)</script>", page, flags=re.I)
+              inline = [s for s in blocks if s.strip() and not re.search(r"^\s*window\.TRADETHESIS_MEDIA_PREVIEW_ONLY\s*=", s)]
+              if not inline:
+                  raise SystemExit(f"No inline course script found in {path}.")
+              Path(f"/tmp/bollinger-{name}-preview.js").write_text("\n".join(inline), encoding="utf-8")
           PY
-          node --check /tmp/bollinger-preview.js
+          node --check /tmp/bollinger-first-pass-preview.js
+          node --check /tmp/bollinger-template-reference-preview.js
