@@ -6,7 +6,8 @@ from django.utils.html import format_html
 from .models import (
     BotConfig, TelegramAccount, DiscordAccount, PlanChannelMapping,
     UserChannelAssignment, BotAccessAudit, TelegramVerificationToken,
-    CommunityChannel, ChannelMembershipSnapshot
+    CommunityChannel, ChannelMembershipSnapshot, ChannelMesh,
+    ChannelMeshDestination, PlanMeshMapping, UserMeshAssignment,
 )
 from .services.telegram import TelegramBotService
 
@@ -207,6 +208,94 @@ class TelegramVerificationTokenAdmin(admin.ModelAdmin):
         return False
 
     def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+class ChannelMeshDestinationInline(admin.TabularInline):
+    model = ChannelMeshDestination
+    extra = 0
+    fields = ("name", "external_id", "chat_type", "is_active", "created_at")
+    readonly_fields = ("external_id", "created_at")
+    show_change_link = True
+
+    # Spawn IDs are immutable once registered. Add new spawn rows via the
+    # dedicated admin instead of editing existing Telegram identities inline.
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(ChannelMesh)
+class ChannelMeshAdmin(admin.ModelAdmin):
+    list_display = ("name", "key", "source_chat_id", "is_active", "spawn_count", "updated_at")
+    list_filter = ("is_active",)
+    search_fields = ("name", "key", "source_chat_id", "source_name")
+    readonly_fields = ("created_at", "updated_at")
+    inlines = (ChannelMeshDestinationInline,)
+    fieldsets = (
+        ("Mesh", {"fields": ("key", "name", "is_active", "notes")}),
+        ("Canonical publishing source", {
+            "fields": ("source_chat_id", "source_name"),
+            "description": (
+                "The source is for publishing. Members are assigned to a spawn, "
+                "not to the source. Enable only after verifying the bot's rights."
+            ),
+        }),
+        ("Timestamps", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+    )
+
+    def get_readonly_fields(self, request, obj=None):
+        fields = list(super().get_readonly_fields(request, obj))
+        if obj is not None:
+            fields.append("source_chat_id")
+        return fields
+
+    @admin.display(description="Spawns")
+    def spawn_count(self, obj):
+        return obj.destinations.count()
+
+
+@admin.register(ChannelMeshDestination)
+class ChannelMeshDestinationAdmin(admin.ModelAdmin):
+    list_display = ("name", "external_id", "mesh", "chat_type", "is_active", "updated_at")
+    list_filter = ("mesh", "chat_type", "is_active")
+    search_fields = ("name", "external_id", "mesh__name", "mesh__key")
+    readonly_fields = ("created_at", "updated_at")
+    fieldsets = (
+        ("Spawn destination", {
+            "fields": ("mesh", "name", "external_id", "chat_type", "is_active")
+        }),
+        ("Timestamps", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
+    )
+
+    def get_readonly_fields(self, request, obj=None):
+        fields = list(super().get_readonly_fields(request, obj))
+        if obj is not None:
+            fields.extend(("mesh", "external_id"))
+        return fields
+
+
+@admin.register(PlanMeshMapping)
+class PlanMeshMappingAdmin(admin.ModelAdmin):
+    list_display = ("plan", "mesh", "is_active", "updated_at")
+    list_filter = ("is_active", "mesh")
+    search_fields = ("plan__name", "mesh__name", "mesh__key")
+    readonly_fields = ("created_at", "updated_at")
+
+
+@admin.register(UserMeshAssignment)
+class UserMeshAssignmentAdmin(admin.ModelAdmin):
+    list_display = ("user", "mesh", "destination", "is_active", "assigned_at", "revoked_at")
+    list_filter = ("mesh", "is_active")
+    search_fields = ("user__username", "mesh__name", "destination__external_id")
+    readonly_fields = tuple(field.name for field in UserMeshAssignment._meta.fields)
+
+    def has_add_permission(self, request):
         return False
 
     def has_delete_permission(self, request, obj=None):

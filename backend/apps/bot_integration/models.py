@@ -145,15 +145,238 @@ class PlanChannelMapping(models.Model):
 
     def clean(self):
         super().clean()
+        self.external_id = str(self.external_id or "").strip()
         control = str(
             getattr(settings, "PROVISION_CONTROL_CHANNEL_ID", "") or ""
         ).strip()
-        if control and str(self.external_id).strip() == control:
+        if control and self.external_id == control:
             raise ValidationError({
                 "external_id": (
                     "This is the control/admin channel — it cannot be a subscriber target."
                 )
             })
+        if self.platform == "telegram" and self.external_id:
+            if ChannelMesh.objects.filter(source_chat_id=self.external_id).exists():
+                raise ValidationError({
+                    "external_id": (
+                        "A Channel Mesh source is a publishing channel, not a direct "
+                        "membership destination. Map the plan to the Mesh instead."
+                    )
+                })
+            if ChannelMeshDestination.objects.filter(external_id=self.external_id).exists():
+                raise ValidationError({
+                    "external_id": (
+                        "A Mesh spawn must not also be configured as an ordinary direct "
+                        "channel. Attach the plan to its Channel Mesh instead."
+                    )
+                })
+
+
+class ChannelMesh(models.Model):
+    """Canonical Telegram source plus a pool of member-facing spawn destinations."""
+
+    key = models.SlugField(
+        max_length=64, unique=True,
+        help_text="Stable internal key, e.g. forex-mesh-a.",
+    )
+    name = models.CharField(max_length=255)
+    source_chat_id = models.CharField(
+        max_length=255, unique=True,
+        help_text="Canonical Telegram source chat ID. Members are not assigned here.",
+    )
+    source_name = models.CharField(max_length=255, blank=True)
+    is_active = models.BooleanField(
+        default=False,
+        help_text="Enable only after source/destinations and bot permissions have been verified.",
+    )
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name", "key"]
+        verbose_name = "Channel Mesh"
+        verbose_name_plural = "Channel Meshes"
+
+    def clean(self):
+        super().clean()
+        self.key = (self.key or "").strip()
+        self.source_chat_id = str(self.source_chat_id or "").strip()
+        if self.source_chat_id:
+            if ChannelMeshDestination.objects.filter(
+                external_id=self.source_chat_id
+            ).exists():
+                raise ValidationError({
+                    "source_chat_id": "A Mesh source cannot also be a spawn destination."
+                })
+            if PlanChannelMapping.objects.filter(
+                platform="telegram", external_id=self.source_chat_id
+            ).exists():
+                raise ValidationError({
+                    "source_chat_id": (
+                        "This chat is already mapped as a direct membership destination. "
+                        "Remove that mapping before configuring it as a Mesh source."
+                    )
+                })
+
+    def __str__(self):
+        return f"{self.name} ({self.key})"
+
+
+class ChannelMeshDestination(models.Model):
+    """One pre-created Telegram spawn which can receive mirrored posts and members."""
+
+    CHAT_TYPE_CHANNEL = "channel"
+    CHAT_TYPE_GROUP = "group"
+    CHAT_TYPE_CHOICES = [
+        (CHAT_TYPE_CHANNEL, "Channel"),
+        (CHAT_TYPE_GROUP, "Group / supergroup"),
+    ]
+
+    mesh = models.ForeignKey(
+        ChannelMesh, on_delete=models.CASCADE, related_name="destinations"
+    )
+    external_id = models.CharField(
+        max_length=255, unique=True,
+        help_text="Telegram chat ID for this spawn. Keep each spawn in exactly one Mesh.",
+    )
+    name = models.CharField(max_length=255, blank=True)
+    chat_type = models.CharField(
+        max_length=16, choices=CHAT_TYPE_CHOICES, default=CHAT_TYPE_CHANNEL
+    )
+    is_active = models.BooleanField(
+        default=False,
+        help_text="Only enable after the bot's rights and destination are verified.",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["mesh__name", "name", "external_id"]
+        verbose_name = "Channel Mesh Spawn"
+        verbose_name_plural = "Channel Mesh Spawns"
+
+    def clean(self):
+        super().clean()
+        self.external_id = str(self.external_id or "").strip()
+        if not self.external_id:
+            return
+        if ChannelMesh.objects.filter(source_chat_id=self.external_id).exists():
+            raise ValidationError({
+                "external_id": "A Mesh source cannot also be a spawn destination."
+            })
+        if PlanChannelMapping.objects.filter(
+            platform="telegram", external_id=self.external_id
+        ).exists():
+            raise ValidationError({
+                "external_id": (
+                    "This chat is mapped as a direct destination. Remove that direct "
+                    "mapping before registering it as a Mesh spawn."
+                )
+            })
+
+    def __str__(self):
+        label = self.name or self.external_id
+        return f"{self.mesh.key} → {label}"
+
+
+class PlanMeshMapping(models.Model):
+    """Associates a subscription plan with a Mesh, independently of direct channels."""
+
+    plan = models.ForeignKey(
+        "subscriptions.Plan", on_delete=models.CASCADE, related_name="mesh_mappings"
+    )
+    mesh = models.ForeignKey(
+        ChannelMesh, on_delete=models.PROTECT, related_name="plan_mappings"
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["plan", "mesh"], name="plan_mesh_mapping_unique"
+            )
+        ]
+        ordering = ["plan__name", "mesh__name"]
+        verbose_name = "Plan Channel Mesh Mapping"
+        verbose_name_plural = "Plan Channel Mesh Mappings"
+
+    def clean(self):
+        super().clean()
+        if not self.plan_id or not self.mesh_id:
+            return
+        mesh = self.mesh
+        mesh_ids = {mesh.source_chat_id}
+        mesh_ids.update(mesh.destinations.values_list("external_id", flat=True))
+        conflict = PlanChannelMapping.objects.filter(
+            plan_id=self.plan_id, platform="telegram",
+            external_id__in=mesh_ids,
+        ).exists()
+        if conflict:
+            raise ValidationError({
+                "mesh": (
+                    "This plan directly maps to the Mesh source or one of its spawns. "
+                    "Remove the overlapping direct mapping; Mesh destinations are managed "
+                    "through the Mesh association."
+                )
+            })
+
+    def __str__(self):
+        return f"{self.plan.name} → Mesh: {self.mesh.name}"
+
+
+class UserMeshAssignment(models.Model):
+    """Records the single spawn chosen for a user within a configured Mesh.
+
+    Spawn selection is owned by the existing allocation policy. Django records
+    its result here and feeds the selected spawn into normal durable grant/revoke.
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name="channel_mesh_assignments",
+    )
+    mesh = models.ForeignKey(
+        ChannelMesh, on_delete=models.PROTECT, related_name="member_assignments"
+    )
+    destination = models.ForeignKey(
+        ChannelMeshDestination, on_delete=models.PROTECT,
+        related_name="member_assignments",
+    )
+    is_active = models.BooleanField(default=True)
+    assigned_at = models.DateTimeField(default=timezone.now)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "mesh"], name="mesh_assignment_user_mesh_unique"
+            )
+        ]
+        ordering = ["mesh__name", "user_id"]
+        verbose_name = "User Channel Mesh Assignment"
+        verbose_name_plural = "User Channel Mesh Assignments"
+
+    def clean(self):
+        super().clean()
+        if self.mesh_id and self.destination_id:
+            if self.destination.mesh_id != self.mesh_id:
+                raise ValidationError({
+                    "destination": "The selected spawn must belong to the selected Mesh."
+                })
+            if self.is_active and (
+                not self.mesh.is_active or not self.destination.is_active
+            ):
+                raise ValidationError(
+                    "A new active assignment requires an active Mesh and active spawn."
+                )
+
+    def __str__(self):
+        status = "active" if self.is_active else "revoked"
+        return f"{self.user} → {self.mesh.key}/{self.destination.external_id} ({status})"
 
 
 class UserChannelAssignment(models.Model):
