@@ -16,8 +16,10 @@ from ..models import (
     ChannelMembershipSnapshot,
     CommunityChannel,
     PlanChannelMapping,
+    PlanMeshMapping,
     TelegramAccount,
     UserChannelAssignment,
+    UserMeshAssignment,
 )
 from .telegram import TelegramBotService
 from apps.subscriptions.models import Subscription
@@ -106,51 +108,134 @@ def sync_all_channel_memberships(sleep=0.05):
 
 
 def get_telegram_access_state(user):
-    """Derive the pay->access state machine for the dashboard/manage page.
+    """Derive the pay->access state machine, including direct and Mesh targets.
 
-    States: no_subscription | not_linked | ready | pending | needs_action.
-    Pure function of: subscription, TelegramAccount, assignments, grant audit.
+    The Mesh's source and unassigned spawns are never considered member access.
+    An active Mesh plan with no recorded allocator assignment stays pending.
     """
-    from apps.subscriptions.models import Subscription
+    active_subscriptions = Subscription.objects.filter(
+        user=user, status=Subscription.Status.ACTIVE, is_active=True
+    )
+    plan_ids = set(active_subscriptions.values_list("plan_id", flat=True))
+    if not plan_ids:
+        return {
+            "state": "no_subscription",
+            "label": "No active subscription",
+            "cta_url": "/dashboard/",
+            "cta_label": "View plans",
+            "detail": "",
+        }
 
-    subscription = Subscription.objects.filter(
-        user=user, status=Subscription.Status.ACTIVE, is_active=True).first()
-    if subscription is None:
-        return {"state": "no_subscription", "label": "No active subscription",
-                "cta_url": "/dashboard/", "cta_label": "View plans",
-                "detail": ""}
     account = TelegramAccount.objects.filter(user=user, is_active=True).first()
     if account is None:
-        return {"state": "not_linked", "label": "Connect Telegram",
-                "cta_url": "/bot/telegram/connect/",
-                "cta_label": "Connect Telegram",
-                "detail": "Your subscription is active. Connect Telegram to "
-                          "unlock your channel access."}
-    entitled = set(PlanChannelMapping.objects.filter(
-        platform="telegram", plan=subscription.plan).values_list("external_id", flat=True))
-    if not entitled:
-        return {"state": "ready", "label": "Access ready", "cta_url": "",
-                "cta_label": "", "detail": "No channels are mapped to your plan."}
-    granted = set(UserChannelAssignment.objects.filter(
-        user=user, platform="telegram", is_active=True).values_list("external_id", flat=True))
-    if entitled <= granted:
-        return {"state": "ready", "label": "Access ready", "cta_url": "",
-                "cta_label": "",
-                "detail": "Your Telegram access is active. Check Telegram."}
-    failed_recently = BotAccessAudit.objects.filter(
-        user=user, action="grant", platform="telegram", status="failed",
-        created_at__gte=timezone.now() - timezone.timedelta(hours=24)).exists()
-    if failed_recently:
-        return {"state": "needs_action", "label": "Needs action",
-                "cta_url": "/support/",
-                "cta_label": "Get help",
-                "detail": "We couldn't add you to a channel. Open the bot and "
-                          "press Start, check Telegram privacy settings, or "
-                          "contact support."}
-    return {"state": "pending", "label": "Connecting now", "cta_url": "",
+        return {
+            "state": "not_linked",
+            "label": "Connect Telegram",
+            "cta_url": "/bot/telegram/connect/",
+            "cta_label": "Connect Telegram",
+            "detail": (
+                "Your subscription is active. Connect Telegram to unlock "
+                "your channel access."
+            ),
+        }
+
+    direct_targets = set(
+        PlanChannelMapping.objects.filter(
+            platform="telegram", plan_id__in=plan_ids
+        ).values_list("external_id", flat=True)
+    )
+    mapped_mesh_ids = set(
+        PlanMeshMapping.objects.filter(
+            plan_id__in=plan_ids, is_active=True
+        ).values_list("mesh_id", flat=True)
+    )
+    active_mesh_ids = set(
+        PlanMeshMapping.objects.filter(
+            plan_id__in=plan_ids, is_active=True, mesh__is_active=True
+        ).values_list("mesh_id", flat=True)
+    )
+    mesh_assignments = list(
+        UserMeshAssignment.objects.filter(
+            user=user,
+            mesh_id__in=active_mesh_ids,
+            is_active=True,
+            mesh__is_active=True,
+            destination__is_active=True,
+        ).values_list("mesh_id", "destination__external_id")
+    )
+    assigned_mesh_ids = {mesh_id for mesh_id, _ in mesh_assignments}
+    assigned_spawn_targets = {
+        destination_id for _, destination_id in mesh_assignments
+    }
+    required_targets = direct_targets | assigned_spawn_targets
+    unresolved_mesh_ids = mapped_mesh_ids - assigned_mesh_ids
+
+    if not direct_targets and not mapped_mesh_ids:
+        return {
+            "state": "ready",
+            "label": "Access ready",
+            "cta_url": "",
             "cta_label": "",
-            "detail": "We're connecting your Telegram access now - usually "
-                      "within a few minutes."}
+            "detail": "No community destinations are mapped to your active plans.",
+        }
+
+    granted = set(
+        UserChannelAssignment.objects.filter(
+            user=user, platform="telegram", is_active=True
+        ).values_list("external_id", flat=True)
+    )
+    missing_targets = required_targets - granted
+    failed_recently = BotAccessAudit.objects.filter(
+        user=user,
+        action="grant",
+        platform="telegram",
+        status="failed",
+        target__in=missing_targets,
+        created_at__gte=timezone.now() - timezone.timedelta(hours=24),
+    ).exists()
+    if failed_recently:
+        return {
+            "state": "needs_action",
+            "label": "Needs action",
+            "cta_url": "/support/",
+            "cta_label": "Get help",
+            "detail": (
+                "We couldn't add you to a community destination. Open the bot "
+                "and press Start, check Telegram privacy settings, or contact support."
+            ),
+        }
+
+    if unresolved_mesh_ids:
+        return {
+            "state": "pending",
+            "label": "Assigning community access",
+            "cta_url": "",
+            "cta_label": "",
+            "detail": (
+                "Your course includes Channel Mesh access. Your spawn assignment "
+                "is waiting for the configured Mesh and allocation process."
+            ),
+        }
+
+    if missing_targets:
+        return {
+            "state": "pending",
+            "label": "Connecting now",
+            "cta_url": "",
+            "cta_label": "",
+            "detail": (
+                "We're connecting your Telegram access now - usually within "
+                "a few minutes."
+            ),
+        }
+
+    return {
+        "state": "ready",
+        "label": "Access ready",
+        "cta_url": "",
+        "cta_label": "",
+        "detail": "Your Telegram access is active. Check Telegram.",
+    }
 
 
 def build_channel_display(user):
