@@ -94,7 +94,12 @@ The existing trading bot can run on the owner's computer while Django runs on a 
 
 The current Django branch contains a provisioning client and a signed bridge contract. Review/reuse that bridge rather than adding an unauthenticated public endpoint. Since a home computer normally cannot receive incoming HTTPS requests, prefer the local bot securely polling/claiming pending jobs from Django over HTTPS, or a suitably authenticated outbound connection. Preserve the current bot's single Telegram update receiver: do not start a second independent long-polling process with the same bot token.
 
-Django now exposes a signed POST endpoint named `bot_integration:mesh_assign` at `api/mesh/assign/` for the allocator to report a placement decision. It expects `telegram_user_id`, `mesh_key`, and `spawn_chat_id`, authenticated with the existing HMAC bridge headers and shared secret. The endpoint resolves a uniquely linked Telegram account and verifies active entitlement, Mesh, and spawn before recording the assignment. It **does not choose a spawn**. The existing allocator caller still has to be wired to invoke this endpoint; do not mark Mesh allocation end-to-end until that is tested.
+Django exposes two signed POST endpoints for the existing allocator/integration process:
+
+- `bot_integration:mesh_inventory` at `api/mesh/inventory/` returns only active Meshes and active spawn IDs (optionally filtered by `mesh_key`). It does not expose member data and does not allocate anyone.
+- `bot_integration:mesh_assign` at `api/mesh/assign/` accepts `telegram_user_id`, `mesh_key`, and `spawn_chat_id` after the allocator has made its placement decision.
+
+Both use the existing HMAC bridge headers and shared secret with timestamp/nonce replay protection. The assignment endpoint resolves a uniquely linked Telegram account and verifies active entitlement, Mesh, and spawn before recording the assignment. It **does not choose a spawn**. The existing allocator caller still has to be wired to fetch the inventory and invoke the assignment endpoint; do not mark Mesh allocation end-to-end until that is implemented and tested.
 
 For dependable production enforcement, an always-on bot/provisioning host is preferable to a personal PC, but the two processes do not need to share a server.
 
