@@ -8,6 +8,7 @@ class JobsConfig(AppConfig):
     def ready(self):
         # Start the admin-managed periodic scheduler only in long-lived server
         # processes; skip one-shot management commands (migrate/test/shell...).
+        import os
         import sys
 
         skip_commands = {
@@ -19,7 +20,12 @@ class JobsConfig(AppConfig):
         # pytest-django invokes Django setup from the pytest process rather
         # than `manage.py test`; the scheduler must not start before pytest
         # creates its test database and runs migrations.
-        if "pytest" in sys.modules or set(sys.argv) & skip_commands:
+        command_name = os.path.basename(sys.argv[0]).lower() if sys.argv else ""
+        if (
+            command_name in skip_commands
+            or "pytest" in sys.modules
+            or set(sys.argv) & skip_commands
+        ):
             return
         try:
             from .scheduler import start_scheduler
