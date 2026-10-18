@@ -46,9 +46,18 @@ def _base_context(intent):
         invoice_url = base + reverse("payment-receipt", args=[intent.pk])
     except Exception:
         invoice_url = ""
+    invoice_number = ""
+    try:
+        from .models import Invoice
+        invoice = Invoice.objects.filter(payment_intent_id=intent.pk).only("invoice_number").first()
+        if invoice:
+            invoice_number = invoice.invoice_number
+    except Exception:
+        logger.exception("could not resolve invoice number for PaymentIntent %s", intent.pk)
     context = {
         "username": intent.user.username,
         "invoice_url": invoice_url,
+        "invoice_number": invoice_number,
         "plan_name": product_label,
         "product_label": product_label,
         "product_type": product_type,
