@@ -214,6 +214,127 @@ def verify_provider_payment(intent) -> Optional[bool]:
 
 
 # ---------------------------------------------------------------------------
+# Payment method capture (billing display)
+# ---------------------------------------------------------------------------
+
+_PAYMENT_METHOD_ALIASES = {
+    "card": "card",
+    "credit_card": "card",
+    "debit_card": "card",
+    "upi": "upi",
+    "netbanking": "netbanking",
+    "net_banking": "netbanking",
+    "wallet": "wallet",
+    "link": "wallet",
+    "apple_pay": "wallet",
+    "google_pay": "wallet",
+    "cashapp": "wallet",
+    "alipay": "wallet",
+    "wechat_pay": "wallet",
+    "amazon_pay": "wallet",
+    "paypal": "wallet",
+    "emi": "emi",
+    "cardless_emi": "emi",
+    "paylater": "pay_later",
+    "pay_later": "pay_later",
+    "klarna": "pay_later",
+    "affirm": "pay_later",
+    "afterpay_clearpay": "pay_later",
+    "bank_transfer": "bank_transfer",
+    "banktransfer": "bank_transfer",
+    "us_bank_account": "bank_debit",
+    "ach_debit": "bank_debit",
+    "acss_debit": "bank_debit",
+    "sepa_debit": "bank_debit",
+    "bacs_debit": "bank_debit",
+    "ideal": "bank_redirect",
+    "bancontact": "bank_redirect",
+    "eps": "bank_redirect",
+    "giropay": "bank_redirect",
+    "p24": "bank_redirect",
+    "sofort": "bank_redirect",
+    "cash": "cash",
+}
+_PAYMENT_METHOD_VALUES = {
+    "card", "upi", "netbanking", "wallet", "emi", "pay_later",
+    "bank_transfer", "bank_debit", "bank_redirect", "cash", "other",
+}
+
+
+def normalize_payment_method(value, details=None):
+    """Normalize a provider payment-method type without storing credentials."""
+    raw = str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
+    if not raw:
+        return ""
+
+    # A wallet-funded card is more useful to label by the wallet used.
+    details = details or {}
+    if raw == "card":
+        card = details.get("card") or {}
+        wallet = card.get("wallet") or {}
+        if wallet.get("type"):
+            raw = str(wallet["type"]).strip().lower().replace("-", "_").replace(" ", "_")
+
+    normalized = _PAYMENT_METHOD_ALIASES.get(raw, raw)
+    return normalized if normalized in _PAYMENT_METHOD_VALUES else "other"
+
+
+def fetch_payment_method(intent) -> str:
+    """Fetch the actual captured payment instrument from the payment provider.
+
+    Only a non-sensitive category is returned (UPI, card, net banking, etc.).
+    Card numbers, UPI addresses, bank details and payment credentials are not
+    persisted. Missing provider data returns an empty string rather than a guess.
+    """
+    if not intent.provider_reference:
+        return ""
+
+    try:
+        if intent.provider == "razorpay":
+            payments = _razorpay_client().order.payments(intent.provider_reference)
+            items = (payments or {}).get("items") or []
+            captured = [p for p in items if p.get("status") == "captured"]
+            if not captured:
+                captured = [
+                    p for p in items
+                    if p.get("status") in {"authorized", "processed"}
+                ]
+            if not captured:
+                return ""
+            # Prefer the newest eligible payment if the order has retry attempts.
+            payment = max(captured, key=lambda p: p.get("created_at") or 0)
+            return normalize_payment_method(payment.get("method"))
+
+        if intent.provider == "stripe":
+            stripe = _stripe()
+            session = stripe.checkout.Session.retrieve(intent.provider_reference)
+            payment_intent_id = session.get("payment_intent")
+            if not payment_intent_id:
+                return ""
+            charges = stripe.Charge.list(payment_intent=payment_intent_id, limit=10)
+            for charge in charges.auto_paging_iter():
+                if not (charge.get("paid") or charge.get("status") == "succeeded"):
+                    continue
+                details = charge.get("payment_method_details") or {}
+                method_type = details.get("type") or ""
+                if not method_type:
+                    method_type = next(
+                        (key for key, value in details.items()
+                         if key not in {"type", "created"} and isinstance(value, dict)),
+                        "",
+                    )
+                if method_type:
+                    return normalize_payment_method(method_type, details)
+            return ""
+
+        return ""
+    except ProviderError:
+        raise
+    except Exception as exc:
+        raise ProviderError(f"payment method lookup failed: {exc}") from exc
+
+
+# ---------------------------------------------------------------------------
 # Payment-authentication backfill (evidence layer)
 # ---------------------------------------------------------------------------
 
