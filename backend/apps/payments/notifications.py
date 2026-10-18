@@ -104,6 +104,10 @@ def _base_context(intent):
 def notify_payment_succeeded(payment_intent, subscription=None):
     """Issue an invoice snapshot and send the payment-success email."""
     try:
+        # Fulfilment claims SUCCESS with a queryset update, so the instance
+        # passed from the caller can still be stale. Refresh before invoice
+        # creation, which deliberately refuses non-successful payments.
+        payment_intent.refresh_from_db()
         from .invoicing import issue_invoice
         issue_invoice(payment_intent)
     except Exception:
