@@ -209,5 +209,5 @@ class MemberConnectionActionSecurityTests(TestCase):
         )
         response = self.client.post(reverse("bot_integration:discord_unlink"))
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], reverse("profile"))
+        self.assertEqual(response["Location"], f"{reverse('dashboard')}#connections")
         self.assertFalse(DiscordAccount.objects.filter(pk=account.pk).exists())

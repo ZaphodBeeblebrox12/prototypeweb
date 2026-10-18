@@ -65,6 +65,23 @@ class SchedulerRunDueTests(TestCase):
         self.assertEqual(self.job.last_status, PeriodicJob.Status.OK)
         self.assertIsNotNone(self.job.last_run_at)
 
+    def test_due_job_is_reserved_before_handler_starts(self):
+        def assert_claim_saved(job_arg):
+            stored = PeriodicJob.objects.get(pk=self.job.pk)
+            self.assertIsNotNone(stored.last_run_at)
+            self.assertEqual(job_arg.pk, self.job.pk)
+
+        with mock.patch(
+                "apps.bot_integration.services.channel_sync."
+                "sync_channel_memberships_window",
+                side_effect=assert_claim_saved) as fn:
+            ran = scheduler._run_due()
+
+        self.assertEqual(ran, 1)
+        fn.assert_called_once()
+        self.job.refresh_from_db()
+        self.assertIsNotNone(self.job.last_run_at)
+
     def test_handler_error_marked_and_swallowed(self):
         with mock.patch(
                 "apps.bot_integration.services.channel_sync."

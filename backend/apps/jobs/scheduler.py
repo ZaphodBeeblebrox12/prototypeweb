@@ -12,7 +12,7 @@ import threading
 import time
 
 from django.core.cache import cache
-from django.db import connections
+from django.db import connections, transaction
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -32,19 +32,47 @@ PERIODIC_HANDLERS = {
 }
 
 
+def _claim_due_periodic_job(job_id):
+    """Reserve a due periodic job in the database before running its handler.
+
+    The scheduler starts in each Gunicorn worker. The default Django cache is
+    process-local, so a cache lock alone cannot prevent duplicate runs across
+    workers. The row lock and committed last_run_at reservation provide
+    cross-worker exclusion without requiring a shared cache service.
+    """
+    from .models import PeriodicJob
+
+    with transaction.atomic():
+        try:
+            job = PeriodicJob.objects.select_for_update().get(
+                pk=job_id, enabled=True,
+            )
+        except PeriodicJob.DoesNotExist:
+            return None
+        if not job.is_due():
+            return None
+        job.last_run_at = timezone.now()
+        job.save(update_fields=["last_run_at"])
+        return job
+
+
 def _run_due():
     from .models import PeriodicJob
 
     ran = 0
-    for job in PeriodicJob.objects.filter(enabled=True):
-        if not job.is_due():
+    job_ids = list(
+        PeriodicJob.objects.filter(enabled=True).values_list("pk", flat=True)
+    )
+    for job_id in job_ids:
+        # Save the claim before any external API call or outbound message.
+        job = _claim_due_periodic_job(job_id)
+        if job is None:
             continue
-        job.last_run_at = timezone.now()
         path = PERIODIC_HANDLERS.get(job.name)
         if path is None:
             job.last_status = PeriodicJob.Status.ERROR
             job.last_error = "no handler registered for {!r}".format(job.name)
-            job.save(update_fields=["last_run_at", "last_status", "last_error"])
+            job.save(update_fields=["last_status", "last_error"])
             continue
         try:
             module_path, attr = path.rsplit(".", 1)
@@ -55,10 +83,9 @@ def _run_due():
             logger.exception("periodic job %s failed", job.name)
             job.last_status = PeriodicJob.Status.ERROR
             job.last_error = str(exc)[:500]
-        job.save(update_fields=["last_run_at", "last_status", "last_error"])
+        job.save(update_fields=["last_status", "last_error"])
         ran += 1
     return ran
-
 
 _handlers_registered = False
 
