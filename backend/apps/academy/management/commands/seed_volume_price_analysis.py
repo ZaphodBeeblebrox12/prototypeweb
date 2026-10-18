@@ -44,25 +44,23 @@ _SELECTED_SECTIONS = (
 _INTERNAL_SECTIONS = ("knowledge check", "answer key", "instructor notes", "model answer")
 
 
-# Only the first two VPA pilot figures are static lesson illustrations. The later
-# continuation/failure outcomes must stay out of the lesson until a real,
-# submission-gated reveal is implemented.
+# Only the first two VPA pilot figures are static lesson illustrations. The newer
+# learner-facing manuscripts use prose section headings; support both those headings
+# and the older scripted progression labels without rewriting the course source.
 _VPA_FIGURES = {
     "1.1": (
         (
-            "**Level 1 — Notice (easy):**",
+            ("**Level 1 — Notice (easy):**", "### Begin with the facts"),
             "vpa-m01-l01-stage1-spot-volume-mobile.svg",
             "Candidate candle and its local volume baseline",
         ),
         (
-            "**Level 2 — Compare (guided):**",
+            ("**Level 2 — Compare (guided):**", "### Worked comparison — same colour, different evidence"),
             "vpa-m01-l01-candle-context-compare-mobile.svg",
             "Similar candle shapes in different contexts",
         ),
     ),
 }
-
-
 def lesson_segments(module_markdown):
     """Yield lesson number, sequence, title, and manuscript section."""
     matches = list(_LESSON_HEADER.finditer(module_markdown))
@@ -185,39 +183,46 @@ def estimate_duration(segment):
 
 
 def embed_vpa_figures(lesson_number, student_markdown, assets_root, figure_counters):
-    """Embed the selected, approved static SVG figures in their lesson positions."""
+    """Embed selected, approved static SVG figures at stable teaching anchors."""
     specs = _VPA_FIGURES.get(str(lesson_number), ())
     if not specs:
         return student_markdown, ""
 
     module_number = int(str(lesson_number).split(".", 1)[0])
     media_notes = []
-    for anchor, filename, caption in specs:
+    for anchors, filename, caption in specs:
         if not (Path(assets_root) / filename).is_file():
             raise CommandError(
                 f"Required VPA lesson figure is missing: "
                 f"{Path(assets_root) / filename}"
             )
 
-        pattern = re.compile(rf"(?m)^({re.escape(anchor)}[^\n]*)$")
+        if isinstance(anchors, str):
+            anchors = (anchors,)
+        placed = False
+        for anchor in anchors:
+            pattern = re.compile(rf"(?m)^({re.escape(anchor)}[^\\n]*)$")
 
-        def add_figure(match, filename=filename, caption=caption):
-            figure_counters[module_number] = figure_counters.get(module_number, 0) + 1
-            figure_number = f"{module_number}.{figure_counters[module_number]}"
-            image = (
-                f"![Figure {figure_number} — {caption}]"
-                f"(/static/academy/vpa/{filename})"
+            def add_figure(match, filename=filename, caption=caption):
+                figure_counters[module_number] = figure_counters.get(module_number, 0) + 1
+                figure_number = f"{module_number}.{figure_counters[module_number]}"
+                image = (
+                    f"![Figure {figure_number} — {caption}]"
+                    f"(/static/academy/vpa/{filename})"
+                )
+                figure_caption = f"*{caption}.*"
+                return f"{match.group(1)}\\n\\n{image}\\n\\n{figure_caption}"
+
+            student_markdown, replacements = pattern.subn(
+                add_figure, student_markdown, count=1
             )
-            figure_caption = f"*{caption}.*"
-            return f"{match.group(1)}\n\n{image}\n\n{figure_caption}"
-
-        student_markdown, replacements = pattern.subn(
-            add_figure, student_markdown, count=1
-        )
-        if replacements != 1:
+            if replacements == 1:
+                placed = True
+                break
+        if not placed:
             raise CommandError(
-                f"Cannot place VPA figure {filename}: lesson {lesson_number} is missing "
-                f"the expected learner progression line {anchor!r}."
+                f"Cannot place VPA figure {filename}: lesson {lesson_number} "
+                f"does not contain any supported anchor from {anchors!r}."
             )
         media_notes.append(
             f"Figure {module_number}.{figure_counters[module_number]} uses {filename}. "
@@ -226,7 +231,7 @@ def embed_vpa_figures(lesson_number, student_markdown, assets_root, figure_count
             "reveal is implemented."
         )
 
-    return student_markdown, "\n".join(media_notes)
+    return student_markdown, "\\n".join(media_notes)
 
 
 class Command(BaseCommand):
