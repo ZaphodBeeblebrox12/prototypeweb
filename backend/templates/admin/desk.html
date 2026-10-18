@@ -123,6 +123,15 @@
         </ul>
       </div>
       {% endif %}
+      {% if invoicing %}
+      <div class="panel">
+        <h2>Invoices &amp; business settings</h2>
+        <ul class="signal-list" style="margin-top:12px">
+          {% if invoicing.links.invoices %}<li><a href="{{ invoicing.links.invoices }}">Invoice register</a><span class="signal-count">{{ invoicing.count }}</span></li>{% endif %}
+          {% if invoicing.links.settings %}<li><a href="{{ invoicing.links.settings }}">Business details &amp; tax settings</a><span class="signal-count">Edit</span></li>{% endif %}
+        </ul>
+      </div>
+      {% endif %}
       {% if telegram %}
       <div class="panel">
         <h2>Community access</h2>
@@ -151,7 +160,7 @@
         </ul>
       </div>
       {% endif %}
-      {% if not payments and not telegram and not jobs and not subscriptions %}
+      {% if not payments and not invoicing and not telegram and not jobs and not subscriptions %
       <div class="panel"><p class="note">No operational metrics are available for your current permissions. Use Django administration to review the records you are authorised to access.</p></div>
       {% endif %}
     </div>

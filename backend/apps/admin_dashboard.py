@@ -118,6 +118,26 @@ def _subscription_dashboard_context(request):
             },
         }
 
+    can_view_invoices = _has_model_perm(request, "payments", "invoice")
+    can_edit_billing_settings = _has_model_perm(
+        request, "payments", "billingsettings", "change"
+    )
+    if can_view_invoices or can_edit_billing_settings:
+        from apps.payments.models import Invoice
+        ctx["invoicing"] = {
+            "count": Invoice.objects.count() if can_view_invoices else None,
+            "links": {
+                "invoices": (
+                    reverse("admin:payments_invoice_changelist")
+                    if can_view_invoices else ""
+                ),
+                "settings": (
+                    reverse("admin:payments_billingsettings_changelist")
+                    if can_edit_billing_settings else ""
+                ),
+            },
+        }
+
     if _has_model_perm(request, "bot_integration", "botaccessaudit"):
         ctx["telegram"] = {
             "recent_failed": BotAccessAudit.objects.filter(

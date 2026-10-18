@@ -11,19 +11,39 @@ td{padding:9px 0;border-bottom:1px solid #eef0f3}td:last-child{text-align:right;
 @media print{.noprint{display:none}body{background:#fff}}
 </style></head><body><div class='rc'>
 <h1>{{ site_name }}</h1>
-<div class='ok'>&#10003; Payment successful</div>
+{% if invoice %}
+<p style="margin:5px 0 0;color:#6b7280;font-size:13px;">Invoice / payment receipt</p>
+<p style="margin:12px 0 0;font-size:14px;"><strong>{{ invoice.invoice_number }}</strong> · {{ invoice.issue_date|date:"M d, Y" }}</p>
+{% if invoice.seller_legal_name or invoice.seller_address or invoice.seller_tax_registration_number %}
+<div style="margin-top:16px;font-size:13px;line-height:1.6;">
+  <strong>{{ invoice.seller_legal_name|default:invoice.seller_name }}</strong><br>
+  {% if invoice.seller_address %}{{ invoice.seller_address|linebreaksbr }}<br>{% endif %}
+  {% if invoice.seller_country %}{{ invoice.seller_country }}<br>{% endif %}
+  {% if invoice.seller_support_email %}{{ invoice.seller_support_email }}<br>{% endif %}
+  {% if invoice.seller_tax_registration_number %}Tax registration: {{ invoice.seller_tax_registration_number }}{% endif %}
+</div>
+{% endif %}
+<div style="margin-top:14px;color:#6b7280;font-size:13px;">Billed to: {{ invoice.customer_name }}{% if invoice.customer_email %} · {{ invoice.customer_email }}{% endif %}</div>
+{% endif %}
+<div class='ok' style="margin-top:18px;">&#10003; Payment successful</div>
 <table>
-<tr><td>Plan</td><td>{{ intent.plan.name }}</td></tr>
-<tr><td>Date</td><td>{{ intent.created_at|date:"M d, Y" }}</td></tr>
+<tr><td>{% if invoice %}Item{% else %}Plan{% endif %}</td><td>{% if invoice %}{{ invoice.description }}{% else %}{{ intent.plan.name }}{% endif %}</td></tr>
+<tr><td>Date</td><td>{% if invoice %}{{ invoice.issue_date|date:"M d, Y" }}{% else %}{{ intent.created_at|date:"M d, Y" }}{% endif %}</td></tr>
 <tr><td>Payment method</td><td>{{ intent.get_provider_display }}</td></tr>
-<tr><td>Transaction ID</td><td>{{ intent.provider_reference }}</td></tr>
+<tr><td>Transaction ID</td><td>{{ intent.provider_payment_id|default:intent.provider_reference }}</td></tr>
 {% if intent.applied_coupon_code %}<tr><td>Coupon</td><td>{{ intent.applied_coupon_code }}</td></tr>{% endif %}
+{% if invoice %}
+<tr><td>Subtotal</td><td>{{ invoice.subtotal_display }}</td></tr>
+{% if invoice.tax_enabled %}<tr><td>{{ invoice.tax_label }} ({{ invoice.tax_rate_percentage }}%){% if invoice.tax_inclusive %} included{% endif %}</td><td>{{ invoice.tax_display }}</td></tr>{% endif %}
+<tr class='total'><td>Total paid</td><td>{{ invoice.total_display }}</td></tr>
+{% else %}
 <tr class='total'><td>Total paid</td><td>{{ intent.currency }} {{ intent.amount_dollars|floatformat:2 }}</td></tr>
+{% endif %}
 </table>
 {% if refunds %}
 <p style='font-size:13px;color:#b45309'>Refunded: {% for r in refunds %}{{ r.currency }} {{ r.amount_dollars|floatformat:2 }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
 {% endif %}
-<p class='muted'>Receipt reference: {{ intent.id }}. Questions? <a href="/support/">Contact support</a>.</p>
+<p class='muted'>Receipt reference: {{ intent.id }}.{% if invoice %} Invoice details are a snapshot of the business and pricing settings at issue time.{% endif %} Questions? <a href="/support/">Contact support</a>.</p>
 <div class='noprint'><a class='btn' href="javascript:window.print()">Print / Save as PDF</a>
 &nbsp;<a class='btn' style='background:#6b7280' href='/dashboard/'>Dashboard</a></div>
 </div></body></html>

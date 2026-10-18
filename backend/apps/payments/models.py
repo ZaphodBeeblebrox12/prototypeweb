@@ -2,8 +2,11 @@
 Payment models: PaymentIntent (financial snapshot), Refund, WebhookEvent.
 """
 import uuid
+from decimal import Decimal
 
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.models import User
@@ -34,6 +37,13 @@ class PaymentIntent(models.Model):
         related_name="payment_intents",
         help_text=_("Price selected for the plan"))
     base_amount_cents = models.PositiveIntegerField(default=0)
+    # Net commercial subtotal after discounts, excluding configured tax.
+    subtotal_cents = models.PositiveIntegerField(default=0)
+    tax_enabled = models.BooleanField(default=False)
+    tax_rate_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("0.00"))
+    tax_label = models.CharField(max_length=30, blank=True, default="GST")
+    tax_amount_cents = models.PositiveIntegerField(default=0)
+    tax_inclusive = models.BooleanField(default=False)
     amount = models.PositiveIntegerField(help_text=_("Amount in cents"))
     currency = models.CharField(max_length=3, default="USD",
                                 help_text=_("ISO 4217 currency code"))
@@ -197,3 +207,96 @@ class WebhookEvent(models.Model):
 
     def __str__(self):
         return f"{self.provider}:{self.event_type}:{self.provider_event_id}"
+
+
+class BillingSettings(models.Model):
+    """Single editable set of business details and simple percentage-tax settings."""
+    id = models.PositiveSmallIntegerField(primary_key=True, default=1, editable=False)
+    seller_name = models.CharField(max_length=150, default="TradeThesis")
+    legal_name = models.CharField(max_length=255, blank=True, default="")
+    address = models.TextField(blank=True, default="")
+    country = models.CharField(max_length=2, blank=True, default="")
+    support_email = models.EmailField(blank=True, default="")
+    tax_registration_number = models.CharField(max_length=100, blank=True, default="")
+    invoice_prefix = models.CharField(max_length=20, default="TT")
+    tax_enabled = models.BooleanField(
+        default=False,
+        help_text="Leave disabled until your accountant confirms whether and how tax applies to your sales.",
+    )
+    tax_label = models.CharField(max_length=30, default="GST")
+    tax_rate_percentage = models.DecimalField(
+        max_digits=5, decimal_places=2, default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00")), MaxValueValidator(Decimal("100.00"))],
+        help_text="Simple fixed percentage applied to all new checkouts while tax is enabled. Not a jurisdiction-aware tax engine.",
+    )
+    tax_inclusive = models.BooleanField(
+        default=False,
+        help_text="When enabled, treat the listed price as tax-inclusive. Confirm this treatment before enabling tax.",
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "business and tax setting"
+        verbose_name_plural = "business and tax settings"
+
+    @classmethod
+    def get_solo(cls):
+        obj, _created = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return "Business and tax settings"
+
+
+class Invoice(models.Model):
+    """Invoice snapshot for one verified successful payment; snapshots do not change with settings."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    invoice_number = models.CharField(max_length=50, unique=True)
+    payment_intent = models.OneToOneField(
+        PaymentIntent, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="invoice",
+    )
+    issue_date = models.DateField(default=timezone.localdate)
+    issued_at = models.DateTimeField(default=timezone.now)
+    currency = models.CharField(max_length=3, default="USD")
+    seller_name = models.CharField(max_length=150)
+    seller_legal_name = models.CharField(max_length=255, blank=True, default="")
+    seller_address = models.TextField(blank=True, default="")
+    seller_country = models.CharField(max_length=2, blank=True, default="")
+    seller_support_email = models.EmailField(blank=True, default="")
+    seller_tax_registration_number = models.CharField(max_length=100, blank=True, default="")
+    customer_name = models.CharField(max_length=255, blank=True, default="")
+    customer_email = models.EmailField(blank=True, default="")
+    description = models.CharField(max_length=255)
+    subtotal_cents = models.PositiveIntegerField(default=0)
+    tax_enabled = models.BooleanField(default=False)
+    tax_rate_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("0.00"))
+    tax_label = models.CharField(max_length=30, blank=True, default="")
+    tax_amount_cents = models.PositiveIntegerField(default=0)
+    tax_inclusive = models.BooleanField(default=False)
+    total_cents = models.PositiveIntegerField(default=0)
+    transaction_reference = models.CharField(max_length=255, blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-issue_date", "-issued_at"]
+        permissions = [("export_invoice", "Can export invoice register")]
+
+    def __str__(self):
+        return self.invoice_number
+
+    @property
+    def subtotal_display(self):
+        return f"{self.currency} {self.subtotal_cents / 100:,.2f}"
+
+    @property
+    def tax_display(self):
+        return f"{self.currency} {self.tax_amount_cents / 100:,.2f}"
+
+    @property
+    def total_display(self):
+        return f"{self.currency} {self.total_cents / 100:,.2f}"

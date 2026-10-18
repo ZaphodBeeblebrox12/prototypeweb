@@ -63,6 +63,7 @@
   <tr>
     <td class="px" style="padding:16px 32px 34px 32px;">
       {% if product_type == "course" %}{% include "emails/partials/button.html" with url=learning_url label="Open course" %}{% else %}{% include "emails/partials/button.html" with url=dashboard_url label="View subscription" %}{% endif %}
+      {% if invoice_url %}<p style="margin:18px 0 0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;color:#6b7280;">Your invoice / payment receipt: <a href="{{ invoice_url }}" style="color:#315b43;font-weight:600;">View invoice</a> · You can print it or save it as a PDF.</p>{% endif %}
     </td>
   </tr>
 </table>

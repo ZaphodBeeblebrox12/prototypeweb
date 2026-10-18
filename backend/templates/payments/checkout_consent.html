@@ -10,6 +10,15 @@
         {% for f in features %}<li>&#10003; {{ f }}</li>{% endfor %}
       </ul>
       {% endif %}
+      {% if tax_enabled %}
+      <div class="small text-muted mt-3" aria-label="Price breakdown">
+        <div class="d-flex justify-content-between"><span>Subtotal</span><span>{{ subtotal_display }}</span></div>
+        <div class="d-flex justify-content-between">
+          <span>{{ tax_label }} ({{ tax_rate_display }}%){% if intent.tax_inclusive %} included{% endif %}</span>
+          <span>{{ tax_display }}</span>
+        </div>
+      </div>
+      {% endif %}
       <hr>
       <p>You will be charged <strong>{{ price_display }}</strong> today.</p>
       {% if trial_disclosure %}

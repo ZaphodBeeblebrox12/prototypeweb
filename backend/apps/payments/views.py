@@ -16,8 +16,9 @@ from apps.subscriptions.models import Plan, Subscription
 from apps.subscriptions.services import resolve_plan_price, get_pricing_country, split_resolved_price
 
 from . import providers
-from .models import PaymentIntent, WebhookEvent
+from .models import BillingSettings, Invoice, PaymentIntent, WebhookEvent
 from .notifications import notify_payment_failed
+from .invoicing import calculate_price_breakdown
 from .services import activate_paid_subscription
 
 from apps.growth.services.referrals import ReferralService
@@ -111,6 +112,11 @@ def payment_start(request):
     else:
         applied_coupon, coupon_discount = None, 0
 
+    # Tax stays disabled by default. If the owner explicitly enables the
+    # simple fixed rate, snapshot the breakdown before provider handoff.
+    billing_settings = BillingSettings.get_solo()
+    price_breakdown = calculate_price_breakdown(final_amount, billing_settings)
+
     with transaction.atomic():
         fk = split_resolved_price(resolved_price)
         payment_intent = PaymentIntent.objects.create(
@@ -118,7 +124,13 @@ def payment_start(request):
             plan=plan,
             plan_price=fk["plan_price"],
             geo_plan_price=fk["geo_plan_price"],
-            amount=final_amount,
+            subtotal_cents=price_breakdown["subtotal_cents"],
+            tax_enabled=price_breakdown["tax_enabled"],
+            tax_rate_percentage=price_breakdown["tax_rate_percentage"],
+            tax_label=price_breakdown["tax_label"],
+            tax_amount_cents=price_breakdown["tax_amount_cents"],
+            tax_inclusive=price_breakdown["tax_inclusive"],
+            amount=price_breakdown["total_cents"],
             currency=fk["price_currency"],
             provider=provider,
             status=PaymentIntent.Status.PENDING,
@@ -142,6 +154,9 @@ def payment_start(request):
         "checkout_url": checkout_url,
         "consent_url": consent_url,
         "amount": payment_intent.amount,
+        "subtotal": payment_intent.subtotal_cents,
+        "tax_amount": payment_intent.tax_amount_cents,
+        "tax_enabled": payment_intent.tax_enabled,
         "original_amount": resolved_price.price_cents,
         "discount_applied": applied_referral is not None,
         "discount_percent": discount_info["discount_percent"] if discount_info["has_discount"] else 0,
@@ -381,10 +396,12 @@ def payment_receipt(request, pk):
     subscription = Subscription.objects.filter(
         user=request.user, plan=intent.plan,
         status=Subscription.Status.ACTIVE, is_active=True).first()
+    invoice = Invoice.objects.filter(payment_intent=intent).first()
     return render(request, "payments/receipt.html", {
         "intent": intent, "subscription": subscription,
+        "invoice": invoice,
         "refunds": list(intent.refunds.all()),
-        "site_name": getattr(settings, "SITE_NAME", "TradeAdmin"),
+        "site_name": getattr(settings, "SITE_NAME", "TradeThesis"),
     })
 
 
@@ -843,9 +860,15 @@ def _consent_response(request, pk, error=None):
     interval = ("one_time" if course_offer is not None
                 else getattr(intent.plan_price or intent.geo_plan_price, "interval", "monthly"))
     interval_label = "one-time payment" if interval == "one_time" else interval
+    subtotal_cents = intent.subtotal_cents or max(intent.amount - intent.tax_amount_cents, 0)
     return render(request, "payments/checkout_consent.html", {
         "intent": intent, "plan": intent.plan, "course_offer": course_offer,
         "price_display": format_price(intent.amount, intent.currency),
+        "subtotal_display": format_price(subtotal_cents, intent.currency),
+        "tax_display": format_price(intent.tax_amount_cents, intent.currency),
+        "tax_enabled": intent.tax_enabled,
+        "tax_label": intent.tax_label,
+        "tax_rate_display": intent.tax_rate_percentage,
         "interval": interval, "interval_label": interval_label,
         "features": features,
         "trial_disclosure": _trial_disclosure(intent),

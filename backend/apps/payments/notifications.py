@@ -42,8 +42,13 @@ def _base_context(intent):
     product_type = "course" if offer else "subscription"
     product_label = offer.course.title if offer else intent.plan.name
     learning_url = (base + f"/learn/course/{offer.course.slug}/") if offer and base else ""
+    try:
+        invoice_url = base + reverse("payment-receipt", args=[intent.pk])
+    except Exception:
+        invoice_url = ""
     context = {
         "username": intent.user.username,
+        "invoice_url": invoice_url,
         "plan_name": product_label,
         "product_label": product_label,
         "product_type": product_type,
@@ -85,7 +90,13 @@ def _base_context(intent):
 
 
 def notify_payment_succeeded(payment_intent, subscription=None):
-    """Send a receipt after the payment and its product access are committed."""
+    """Issue an invoice snapshot and send the payment-success email."""
+    try:
+        from .invoicing import issue_invoice
+        issue_invoice(payment_intent)
+    except Exception:
+        # Email or invoice issues must not undo a verified payment/access grant.
+        logger.exception("invoice creation failed for PaymentIntent %s", payment_intent.pk)
     context = _base_context(payment_intent)
     product_label = context["product_label"]
     product_noun = "Course" if context["product_type"] == "course" else "Plan"

@@ -8,7 +8,7 @@ import uuid
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import PaymentIntent, Refund, WebhookEvent
+from .models import BillingSettings, Invoice, PaymentIntent, Refund, WebhookEvent
 
 
 class RefundInline(admin.TabularInline):
@@ -180,3 +180,59 @@ class RefundAdmin(admin.ModelAdmin):
     def amount_display(self, obj):
         return f"{obj.currency} {obj.amount_dollars:.2f}"
     amount_display.short_description = "Amount"
+
+
+@admin.register(BillingSettings)
+class BillingSettingsAdmin(admin.ModelAdmin):
+    """One editable settings row; financial snapshots remain read-only."""
+    list_display = [
+        "seller_name", "country", "tax_enabled", "tax_label",
+        "tax_rate_percentage", "tax_inclusive", "updated_at",
+    ]
+    fieldsets = [
+        ("Business identity", {
+            "fields": (
+                "seller_name", "legal_name", "address", "country",
+                "support_email", "tax_registration_number", "invoice_prefix",
+            ),
+        }),
+        ("Tax configuration", {
+            "fields": ("tax_enabled", "tax_label", "tax_rate_percentage", "tax_inclusive"),
+            "description": (
+                "Tax is disabled by default. Enable it only after confirming "
+                "the applicable rate and treatment with your accountant. The "
+                "current implementation applies one fixed percentage to all "
+                "new checkouts; it is not a jurisdiction-aware tax engine."
+            ),
+        }),
+        ("System", {"fields": ("updated_at",)}),
+    ]
+    readonly_fields = ["updated_at"]
+
+    def has_add_permission(self, request):
+        return not BillingSettings.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+@admin.register(Invoice)
+class InvoiceAdmin(admin.ModelAdmin):
+    list_display = [
+        "invoice_number", "issue_date", "customer_name", "description",
+        "currency", "total_display", "tax_amount_cents", "tax_enabled",
+    ]
+    list_filter = ["issue_date", "currency", "tax_enabled", "tax_label"]
+    search_fields = [
+        "invoice_number", "customer_name", "customer_email", "description",
+        "transaction_reference", "payment_intent__provider_reference",
+    ]
+    readonly_fields = [field.name for field in Invoice._meta.fields]
+    list_select_related = ["payment_intent"]
+    date_hierarchy = "issue_date"
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
