@@ -874,7 +874,6 @@ class DiscordOAuthFlowTests(TestCase):
         self.assertIn("guilds.join", response["Location"])
         self.assertIn("identify", response["Location"])
 
-    @mock.patch("apps.jobs.enqueue.enqueue_reconcile")
     @mock.patch("apps.bot_integration.reconcile.DiscordBotService.get_member_roles", return_value=[])
     @mock.patch("apps.bot_integration.reconcile.DiscordBotService.add_role", return_value=True)
     @mock.patch("apps.bot_integration.views.DiscordBotService.add_member", return_value=True)
@@ -928,6 +927,7 @@ class DiscordOAuthFlowTests(TestCase):
         add_role.assert_called_once_with("discord-e2e", "role-e2e")
         get_member_roles.assert_called_once_with("discord-e2e")
 
+    @mock.patch("apps.jobs.enqueue.enqueue_reconcile")
     @mock.patch("apps.bot_integration.views.DiscordBotService.add_member", return_value=True)
     @mock.patch("requests.get")
     @mock.patch("requests.post")
