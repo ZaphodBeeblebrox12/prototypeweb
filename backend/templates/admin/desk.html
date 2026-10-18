@@ -208,7 +208,7 @@
         </ul>
       </div>
       {% endif %}
-      {% if not payments and not invoicing and not telegram and not jobs and not subscriptions and not policy_readiness %}
+      {% if not payments and not invoicing and not telegram and not jobs and not subscriptions and not policy_readiness and not business_readiness and not runtime_readiness %}
       <div class="panel"><p class="note">No operational metrics are available for your current permissions. Use Django administration to review the records you are authorised to access.</p></div>
       {% endif %}
     </div>

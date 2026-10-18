@@ -47,7 +47,7 @@ class BillingEmailTemplateTests(TestCase):
 
     def test_billing_templates_have_cta_button(self):
         html = render_to_string("payments/email/payment_success_body.html", BASE_CTX)
-        self.assertIn("View subscription", html)
+        self.assertIn("View membership access", html)
         self.assertIn("https://example.com/dashboard/", html)
 
     def test_reminder_templates_render(self):
@@ -71,7 +71,7 @@ class BillingEmailTemplateTests(TestCase):
             "a@example.com", "payments/email/payment_chargedback",
             "Disputed", dict(BASE_CTX))
         self.assertEqual(len(mail.outbox), 1)
-        self.assertTrue(any("subscription cancelled" in alt[0].lower()
+        self.assertTrue(any("membership access ended" in alt[0].lower()
                             for alt in msg_alternatives(mail.outbox[0])))
 
 

@@ -70,7 +70,9 @@ Use your actual public HTTPS host; do not use localhost. After test transactions
 - Confirm the current production plan prices and currencies in the production database.
 - Verify that production uses a durable database, that records survive a restart/redeploy, and that a recent backup can be restored. Do not assume the separate legacy `tradeadmin` database is the Academy database.
 - Replace and publish approved versions of all public policy pages (Terms, Refund & Cancellation, Cancellation, Risk Disclosure and Privacy). The policy admin flags placeholder or missing versions, and paid checkout refuses required placeholder consent documents.
-- Confirm `SITE_BASE_URL` is the correct public HTTPS URL in the Render service environment; keep provider and email secrets in Render, never in Git.
+- Confirm `SITE_BASE_URL` is the correct public HTTPS URL in the Academy Render environment; keep provider and email secrets in Render, never in Git.
+- The public staging Trading Path buttons now lead to `/buy/course/trading-path/` on Academy staging. A matching active published `CourseOffer` with a dedicated hidden Plan and active `one_time` price must exist in the Academy database, otherwise the route deliberately shows “not available yet”.
+- `site/assets/checkout-config.js` maps only the public staging hostname to the Academy staging service. Configure the production Academy URL for the production public hostname before launching the production marketing site; unknown hosts are not sent to staging.
 - Populate Business and Tax Settings with your correct legal/seller details and support email.
 - Leave tax disabled until your CA confirms whether and how to charge it. The current configurable rate is a single fixed percentage, not a GST place-of-supply engine.
 - Keep invoice records and payment records intact; they are audit data and are intentionally read-only in Django Admin.
