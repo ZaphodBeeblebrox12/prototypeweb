@@ -169,7 +169,18 @@ def _reconcile_discord(user_id, account, target):
     active_assignments = set(UserChannelAssignment.objects.filter(
         user_id=user_id, platform="discord", is_active=True,
     ).values_list("external_id", flat=True))
-    managed_roles = set(account.roles or []) | active_assignments | set(target.discord_ids)
+    # Plan-mapped Discord roles are wholly managed by this integration.
+    # Including them lets reconciliation correct a stale/missing local cache
+    # while still preserving unrelated roles managed manually in the server.
+    mapped_roles = set(PlanChannelMapping.objects.filter(
+        platform="discord",
+    ).values_list("external_id", flat=True))
+    managed_roles = (
+        set(account.roles or [])
+        | active_assignments
+        | mapped_roles
+        | set(target.discord_ids)
+    )
     actual_roles = set(actual_roles)
     current = managed_roles & actual_roles
     failed = False
