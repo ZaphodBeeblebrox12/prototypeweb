@@ -6,7 +6,8 @@ Product: {{ plan_name }}
 Amount paid: {{ amount_display }}
 Date: {{ date_display }}
 {% if invoice_number %}Invoice number: {{ invoice_number }}
-{% endif %}Payment provider: {{ provider_display }}
+{% endif %}Payment method: {{ payment_method_display }}
+Payment provider: {{ provider_display }}
 {% if provider_payment_id %}Payment transaction ID: {{ provider_payment_id }}
 {% endif %}{% if provider_reference %}Order / checkout reference: {{ provider_reference }}
 {% endif %}
