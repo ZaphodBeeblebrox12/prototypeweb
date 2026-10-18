@@ -278,4 +278,45 @@ def build_channel_display(user):
             "entitled": entitled,
             "assigned": m.external_id in assigned_ids,
         })
-    return {"free": free, "paid": paid}
+    mesh_mappings = list(
+        PlanMeshMapping.objects.filter(
+            plan_id__in=active_plan_ids,
+            is_active=True,
+        ).select_related("plan", "mesh").order_by(
+            "plan__display_order", "mesh__name"
+        )
+    )
+    assignments = UserMeshAssignment.objects.filter(
+        user=user,
+        mesh_id__in=[mapping.mesh_id for mapping in mesh_mappings],
+        is_active=True,
+    ).select_related("destination", "mesh").order_by("assigned_at", "pk")
+    assignment_by_mesh = {}
+    for assignment in assignments:
+        assignment_by_mesh.setdefault(assignment.mesh_id, assignment)
+
+    meshes = []
+    for mapping in mesh_mappings:
+        assignment = assignment_by_mesh.get(mapping.mesh_id)
+        usable_assignment = bool(
+            assignment
+            and mapping.mesh.is_active
+            and assignment.destination.is_active
+        )
+        if not mapping.mesh.is_active:
+            status = "Mesh setup pending"
+        elif usable_assignment:
+            status = "Spawn assigned"
+        else:
+            status = "Spawn assignment pending"
+        meshes.append({
+            "name": mapping.mesh.name,
+            "plan_name": mapping.plan.name,
+            "assigned": usable_assignment,
+            "spawn_name": (
+                assignment.destination.name or "Assigned spawn"
+                if usable_assignment else ""
+            ),
+            "status": status,
+        })
+    return {"free": free, "paid": paid, "meshes": meshes}
