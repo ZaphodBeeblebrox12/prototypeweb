@@ -9,7 +9,7 @@ from django.contrib.auth.forms import PasswordResetForm
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Max, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -94,35 +94,149 @@ def admin_desk_accounts(request):
 
 @login_required
 def admin_desk_account_detail(request, user_id):
+    """Show a learner's account, course progress, access and permitted finance records."""
     _guard(request, "accounts.view_user")
     User = get_user_model()
     account = get_object_or_404(User, pk=user_id, is_staff=False, is_superuser=False)
-    from apps.payments.models import PaymentIntent
+
+    from apps.academy.models import Course, CourseEntitlement, LessonProgress
+    from apps.payments.models import Invoice, PaymentIntent
     from apps.subscriptions.models import Subscription, SubscriptionHistory
 
     can_view_subscriptions = _allowed(request.user, "subscriptions.view_subscription")
     can_view_payments = _allowed(request.user, "payments.view_paymentintent")
+    can_view_invoices = _allowed(request.user, "payments.view_invoice")
+    can_view_academy_records = (
+        _allowed(request.user, "academy.view_courseentitlement")
+        and _allowed(request.user, "academy.view_lessonprogress")
+    )
+
     subscriptions = (
-        Subscription.objects.filter(user=account).select_related("plan").order_by("-created_at")[:30]
+        Subscription.objects.filter(user=account)
+        .select_related("plan")
+        .order_by("-created_at")[:30]
         if can_view_subscriptions else []
     )
     history = (
-        SubscriptionHistory.objects.filter(user=account).select_related("subscription", "subscription__plan").order_by("-created_at")[:20]
+        SubscriptionHistory.objects.filter(user=account)
+        .select_related("subscription", "subscription__plan")
+        .order_by("-created_at")[:20]
         if can_view_subscriptions else []
     )
     payments = (
-        PaymentIntent.objects.filter(user=account).select_related("plan").order_by("-created_at")[:20]
+        PaymentIntent.objects.filter(user=account)
+        .select_related("plan")
+        .order_by("-created_at")[:20]
         if can_view_payments else []
     )
+    invoices = (
+        Invoice.objects.filter(payment_intent__user=account)
+        .select_related("payment_intent")
+        .order_by("-issued_at")[:30]
+        if can_view_invoices else []
+    )
+
+    course_entitlements = []
+    course_progress = []
+    if can_view_academy_records:
+        now = timezone.now()
+        course_entitlements = list(
+            CourseEntitlement.objects.filter(user=account)
+            .select_related("course", "offer", "payment_intent", "granted_by")
+            .order_by("-created_at")[:30]
+        )
+        for entitlement in course_entitlements:
+            if entitlement.status == CourseEntitlement.Status.REVOKED:
+                entitlement.access_state = "Revoked"
+            elif entitlement.starts_at > now:
+                entitlement.access_state = "Scheduled"
+            elif entitlement.expires_at is not None and entitlement.expires_at <= now:
+                entitlement.access_state = "Expired"
+            else:
+                entitlement.access_state = "Active"
+
+        # Include entitled courses even before the learner opens their first
+        # lesson, plus any public preview courses where we have tracked activity.
+        progress_course_ids = set(
+            CourseEntitlement.objects.filter(
+                user=account, course__status=Course.Status.PUBLISHED,
+            ).values_list("course_id", flat=True)
+        )
+        progress_course_ids.update(
+            LessonProgress.objects.filter(
+                user=account,
+                lesson__is_published=True,
+                lesson__module__is_published=True,
+                lesson__module__course__status=Course.Status.PUBLISHED,
+            )
+            .values_list("lesson__module__course_id", flat=True)
+            .distinct()
+        )
+        course_progress = list(
+            Course.objects.filter(
+                pk__in=progress_course_ids,
+                status=Course.Status.PUBLISHED,
+            )
+            .annotate(
+                total_lessons=Count(
+                    "modules__lessons",
+                    filter=Q(
+                        modules__is_published=True,
+                        modules__lessons__is_published=True,
+                    ),
+                    distinct=True,
+                ),
+                completed_lessons=Count(
+                    "modules__lessons",
+                    filter=Q(
+                        modules__is_published=True,
+                        modules__lessons__is_published=True,
+                        modules__lessons__learner_progress__user=account,
+                        modules__lessons__learner_progress__status=LessonProgress.Status.COMPLETED,
+                    ),
+                    distinct=True,
+                ),
+                time_spent_seconds=Sum(
+                    "modules__lessons__learner_progress__time_spent_seconds",
+                    filter=Q(
+                        modules__is_published=True,
+                        modules__lessons__is_published=True,
+                        modules__lessons__learner_progress__user=account,
+                    ),
+                ),
+                last_activity=Max(
+                    "modules__lessons__learner_progress__last_seen_at",
+                    filter=Q(
+                        modules__is_published=True,
+                        modules__lessons__is_published=True,
+                        modules__lessons__learner_progress__user=account,
+                    ),
+                ),
+            )
+            .order_by("-last_activity", "title")
+        )
+        for item in course_progress:
+            item.progress_percent = (
+                round(item.completed_lessons * 100 / item.total_lessons)
+                if item.total_lessons else 0
+            )
+            item.time_spent_minutes = round((item.time_spent_seconds or 0) / 60)
+
     return render(request, "admin/desk_accounts.html", {
-        "account": account, "subscriptions": subscriptions,
-        "payments": payments, "history": history,
+        "account": account,
+        "subscriptions": subscriptions,
+        "payments": payments,
+        "history": history,
+        "invoices": invoices,
+        "course_entitlements": course_entitlements,
+        "course_progress": course_progress,
         "can_change_accounts": _allowed(request.user, "accounts.change_user"),
         "can_view_account_subscriptions": can_view_subscriptions,
         "can_view_account_payments": can_view_payments,
+        "can_view_account_invoices": can_view_invoices,
+        "can_view_academy_records": can_view_academy_records,
         "desk_nav": _nav(request),
     })
-
 
 @login_required
 @require_POST
