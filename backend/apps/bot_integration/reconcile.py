@@ -4,13 +4,12 @@ Invariant: actual platform access converges to the access dictated by the
 user's current subscription. Diff-based and idempotent — re-running with no
 change produces zero platform calls and zero audit rows.
 
-Fixes vs. the removed sync.py:
-- Discord roles are now REVOKED on lapse (old code silently did nothing).
-- Telegram channels from a PREVIOUS plan are now banned (plan-change drift).
-- No-op reconciles are silent (old code re-unbanned + audited every target
-  channel on every run).
-- Per-user cache lock serializes concurrent reconciles (no duplicate invites);
-  failed ops stay retryable because the diff re-evaluates them next run.
+The durable worker uses this diff engine plus the provisioning state machine.
+The legacy synchronous entry point shares the same live Discord role reconciler.
+- Discord roles are granted/revoked on entitlement changes and lapse.
+- Telegram channels from a previous plan are revoked on plan change.
+- No-op reconciles are silent.
+- Discord failures are surfaced and queued for retry rather than reported as success.
 """
 import logging
 from django.core.cache import cache
@@ -45,8 +44,17 @@ def reconcile_user_access(user_id):
             _reconcile_telegram(user_id, tg, target)
 
         dc = DiscordAccount.objects.filter(user_id=user_id, is_active=True).first()
-        if dc:
-            _reconcile_discord(user_id, dc, target)
+        if dc and not _reconcile_discord(user_id, dc, target):
+            # Keep the older synchronous entry point honest too: it must not
+            # swallow a Discord API failure just because the durable worker is
+            # the preferred path.
+            from apps.jobs.enqueue import enqueue_reconcile
+            try:
+                enqueue_reconcile(user_id, reason="discord_direct_reconcile_retry")
+            except Exception:
+                logger.exception("could not queue retry for Discord reconciliation user=%s", user_id)
+            return False
+        return True
     finally:
         cache.delete(lock_key)
 
@@ -72,7 +80,7 @@ def _reconcile_telegram(user_id, account, target):
 # ─────────────────── Provision Contract v1 transport ───────────────────
 # Django no longer calls the Telegram Bot API directly. Grant/revoke are
 # intent-level operations executed by the self-registered bot bridge.
-# (Discord branch above is unchanged.)
+# Discord roles are reconciled from live guild state in _reconcile_discord below.
 
 from django.conf import settings as _settings
 from .services.provision_client import ProvisionClient
