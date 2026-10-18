@@ -151,18 +151,40 @@ def _tg_revoke(user_id, account, channel_id):
 
 
 def _reconcile_discord(user_id, account, target):
-    """Drive this account's managed Discord roles toward its current entitlements.
+    """Drive live Discord roles toward the member's current entitlements.
 
-    Returns False if any Discord mutation failed so the durable worker can retry.
-    The assignment table is included as a recovery source for role-cache drift.
+    Returns False if platform state cannot be read or a mutation fails, allowing
+    the durable worker to retry rather than marking a partial sync successful.
+    Only roles known to this integration are changed; unrelated server roles
+    are preserved.
     """
-    current = set(account.roles or [])
-    current.update(UserChannelAssignment.objects.filter(
+    actual_roles = DiscordBotService.get_member_roles(account.discord_user_id)
+    if actual_roles is None:
+        _audit(
+            user_id, "sync", "discord", account.discord_user_id, False,
+            "Unable to verify live Discord member roles.",
+        )
+        return False
+
+    active_assignments = set(UserChannelAssignment.objects.filter(
         user_id=user_id, platform="discord", is_active=True,
     ).values_list("external_id", flat=True))
+    managed_roles = set(account.roles or []) | active_assignments | set(target.discord_ids)
+    actual_roles = set(actual_roles)
+    current = managed_roles & actual_roles
     failed = False
 
-    for role_id in sorted(target.discord_ids - current):
+    # If a previously managed role has already disappeared externally and is
+    # not currently entitled, clear the stale local assignment without trying
+    # to revoke something Discord confirms is absent.
+    stale_absent = managed_roles - actual_roles - set(target.discord_ids)
+    if stale_absent:
+        UserChannelAssignment.objects.filter(
+            user_id=user_id, platform="discord",
+            external_id__in=stale_absent, is_active=True,
+        ).update(is_active=False, revoked_at=timezone.now())
+
+    for role_id in sorted(set(target.discord_ids) - current):
         ok = DiscordBotService.add_role(account.discord_user_id, role_id)
         if ok:
             current.add(role_id)
@@ -170,7 +192,7 @@ def _reconcile_discord(user_id, account, target):
             failed = True
         _audit(user_id, "grant", "discord", role_id, ok)
 
-    for role_id in sorted(current - target.discord_ids):
+    for role_id in sorted(current - set(target.discord_ids)):
         ok = DiscordBotService.remove_role(account.discord_user_id, role_id)
         if ok:
             current.discard(role_id)
@@ -182,10 +204,10 @@ def _reconcile_discord(user_id, account, target):
             failed = True
         _audit(user_id, "revoke", "discord", role_id, ok)
 
-    # Keep the persistent assignment ledger aligned with every role that is
-    # in the target set and still known to be applied. Reactivate a prior
-    # assignment instead of letting get_or_create leave it marked revoked.
-    for role_id in sorted(target.discord_ids & current):
+    # Align the assignment ledger with roles which are now present and wanted.
+    # Reactivate old rows rather than allowing get_or_create to preserve the
+    # revoked flag after a renewed subscription.
+    for role_id in sorted(set(target.discord_ids) & current):
         assignment, created = UserChannelAssignment.objects.get_or_create(
             user_id=user_id, platform="discord", external_id=role_id,
             defaults={"is_active": True},
