@@ -88,6 +88,30 @@ class DiscordBotService:
         return result.get("ok") is True
 
     @classmethod
+    def get_member_roles(cls, user_id):
+        """Read the member's live guild roles; return None if state is unknown."""
+        guild_id = cls._guild_id()
+        if not guild_id:
+            return None
+        result = cls._api_request(
+            f"/guilds/{guild_id}/members/{user_id}",
+            method="GET",
+        )
+        if result.get("ok") is True:
+            roles = result.get("roles")
+            if isinstance(roles, list):
+                return [str(role_id) for role_id in roles]
+            return None
+        # A missing member has no roles. If entitlement still exists, the
+        # subsequent grant will fail/retry until the user rejoins via OAuth.
+        if (
+            result.get("status_code") == 404
+            and result.get("discord_code") == _UNKNOWN_MEMBER
+        ):
+            return []
+        return None
+
+    @classmethod
     def add_role(cls, user_id, role_id):
         guild_id = cls._guild_id()
         if not guild_id:
