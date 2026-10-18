@@ -1,7 +1,5 @@
 """Signed allocator-to-Django API tests for Channel Mesh assignments."""
 
-import hashlib
-import hmac
 import json
 import time
 import uuid
