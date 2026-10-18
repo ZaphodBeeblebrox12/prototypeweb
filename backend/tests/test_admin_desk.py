@@ -1,7 +1,9 @@
 """Tests for the permission-aware, read-only TradeThesis Admin Desk."""
+from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 from allauth.account.models import EmailAddress
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -12,6 +14,14 @@ User = get_user_model()
 
 
 class AdminDeskTests(TestCase):
+    def test_shared_footer_wordmark_is_available_to_collectstatic(self):
+        """The shared site footer is rendered on member pages in production."""
+        wordmark = Path(settings.BASE_DIR) / "static" / "brand" / "tradethesis-wordmark.png"
+        self.assertTrue(
+            wordmark.is_file(),
+            "Shared footer logo must exist under backend/static for collectstatic.",
+        )
+
     def test_superuser_sees_live_course_metrics_and_management_links(self):
         admin = User.objects.create_superuser(
             username="desk-owner",
