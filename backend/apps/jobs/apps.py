@@ -11,10 +11,10 @@ class JobsConfig(AppConfig):
         import sys
 
         skip_commands = {
-            "migrate", "makemigrations", "test", "shell", "dbshell",
-            "collectstatic", "check", "loaddata", "dumpdata", "diffsettings",
-            "sendtestemail", "createsuperuser", "makemessages", "compilemessages",
-            "sync_channel_memberships",
+            "migrate", "makemigrations", "test", "pytest", "mypy", "ruff",
+            "black", "shell", "dbshell", "collectstatic", "check", "loaddata",
+            "dumpdata", "diffsettings", "sendtestemail", "createsuperuser",
+            "makemessages", "compilemessages", "sync_channel_memberships",
         }
         # pytest-django invokes Django setup from the pytest process rather
         # than `manage.py test`; the scheduler must not start before pytest
