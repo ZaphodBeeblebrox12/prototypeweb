@@ -37,7 +37,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          python -m pip install ruff black mypy django-stubs pytest pytest-cov pytest-django
+          python -m pip install ruff black pytest pytest-cov pytest-django "django-stubs[compatible-mypy]==5.0.0"
 
       - name: Validate Render build script syntax
         run: bash -n build.sh

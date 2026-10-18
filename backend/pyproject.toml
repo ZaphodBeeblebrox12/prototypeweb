@@ -11,7 +11,6 @@ extend-exclude = '''
 
 [tool.mypy]
 python_version = "3.11"
-django_settings_module = "config.settings.development"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
