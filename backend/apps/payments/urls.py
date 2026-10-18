@@ -9,6 +9,8 @@ from apps.policies.views import terms_page, refund_page, risk_page, privacy_page
 from . import views, webhook_views
 
 urlpatterns = [
+    path("buy/course/<slug:offer_slug>/", views.course_purchase_start,
+         name="course-purchase-start"),
     path("start/", views.payment_start, name="payment-start"),
     path("confirm/", views.payment_confirm, name="payment-confirm"),
     path("status/<uuid:payment_intent_id>/", views.payment_status, name="payment-status"),

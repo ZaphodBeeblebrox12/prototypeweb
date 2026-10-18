@@ -15,6 +15,7 @@ from rest_framework.test import APITestCase
 
 from apps.payments import providers
 from apps.payments.models import PaymentIntent
+from apps.academy.models import Course, CourseOffer
 from apps.subscriptions.models import (
     Plan, PlanPrice, Subscription, SubscriptionHistory)
 
@@ -81,6 +82,51 @@ class PurchaseFlowTests(APITestCase):
     def _confirm(self, intent_id):
         return self.client.post(reverse("payment-confirm"), {
             "payment_intent_id": str(intent_id)}, format="json")
+
+    def _saleable_course_offer(self, slug="trading-path"):
+        course = Course.objects.create(
+            title="TradeThesis Trading Path", slug=slug,
+            status=Course.Status.PUBLISHED,
+        )
+        plan, _price = make_plan("one_time", price_cents=99900, currency="INR")
+        plan.is_hidden = True
+        plan.save(update_fields=["is_hidden"])
+        return CourseOffer.objects.create(
+            course=course, name="TradeThesis Trading Path", slug=slug,
+            plan=plan, is_active=True, access_duration_days=None,
+        )
+
+    def test_course_purchase_page_requires_saleable_offer_and_has_no_side_effect(self, _geo, prov):
+        self.client.force_login(self.user)
+        unavailable = self.client.get(reverse(
+            "course-purchase-start", kwargs={"offer_slug": "not-published"}))
+        self.assertEqual(unavailable.status_code, 404)
+        self.assertContains(unavailable, "not available yet", status_code=404)
+        self.assertEqual(PaymentIntent.objects.count(), 0)
+
+        offer = self._saleable_course_offer()
+        response = self.client.get(reverse(
+            "course-purchase-start", kwargs={"offer_slug": offer.slug}))
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "TradeThesis Trading Path")
+        self.assertContains(response, "One-time payment")
+        self.assertContains(response, "Lifetime course access")
+        self.assertContains(response, "₹999")
+        self.assertEqual(PaymentIntent.objects.count(), 0)
+
+    def test_course_offer_payment_start_resolves_one_time_product(self, _geo, prov):
+        offer = self._saleable_course_offer()
+        response = self.client.get(reverse("payment-start"), {
+            "plan_id": str(offer.plan_id), "interval": "one_time",
+        })
+        self.assertEqual(response.status_code, 200, response.data)
+        self.assertEqual(response.data["product_type"], "course")
+        self.assertEqual(response.data["course_slug"], "trading-path")
+        self.assertTrue(response.data["consent_url"].startswith("/checkout/consent/"))
+        intent = PaymentIntent.objects.get()
+        self.assertEqual(intent.plan_price.interval, "one_time")
+        self.assertEqual(intent.amount, 99900)
+        self.assertEqual(intent.provider_reference, "")
 
     def test_monthly_checkout_discloses_one_time_charge_and_fixed_access(self, _geo, prov):
         plan, _ = make_plan("monthly")

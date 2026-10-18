@@ -6,14 +6,17 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.utils import timezone
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.subscriptions.models import Plan, Subscription
-from apps.subscriptions.services import resolve_plan_price, get_pricing_country, split_resolved_price
+from apps.subscriptions.models import Plan, PlanPrice, Subscription
+from apps.subscriptions.services import (
+    resolve_plan_price, get_pricing_country, split_resolved_price, format_price,
+)
 
 from . import providers
 from .models import BillingSettings, Invoice, PaymentIntent, WebhookEvent
@@ -31,6 +34,52 @@ def get_provider_for_country(country_code: str) -> str:
     if country_code and country_code.upper() == "IN":
         return PaymentIntent.Provider.RAZORPAY
     return PaymentIntent.Provider.STRIPE
+
+
+@login_required
+def course_purchase_start(request, offer_slug):
+    """Render checkout for a published course offer without creating a payment intent."""
+    from apps.academy.models import CourseOffer
+    from apps.academy.services import get_active_entitlement
+
+    offer = (
+        CourseOffer.objects.select_related("course", "plan")
+        .filter(slug=offer_slug, is_active=True)
+        .first()
+    )
+    if (
+        offer is None
+        or not offer.is_saleable
+        or offer.plan is None
+        or not offer.plan.is_active
+        or not offer.plan.is_hidden
+    ):
+        return render(
+            request, "payments/course_purchase_unavailable.html", status=404,
+        )
+
+    if get_active_entitlement(request.user, offer.course):
+        return redirect("academy:course-detail", course_slug=offer.course.slug)
+
+    # An offer is saleable only when an active one-time price resolves for this visitor.
+    try:
+        price = resolve_plan_price(offer.plan, "one_time", request)
+    except PlanPrice.DoesNotExist:
+        return render(
+            request, "payments/course_purchase_unavailable.html", status=404,
+        )
+
+    access_description = (
+        "Lifetime course access"
+        if offer.access_duration_days is None
+        else f"{offer.access_duration_days} days of course access"
+    )
+    return render(request, "payments/course_purchase_start.html", {
+        "offer": offer,
+        "price_display": format_price(price.price_cents, price.currency),
+        "access_description": access_description,
+        "payment_start_url": reverse("payment-start"),
+    })
 
 
 @api_view(["GET", "POST"])
