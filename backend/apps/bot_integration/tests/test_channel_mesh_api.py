@@ -78,7 +78,10 @@ class ChannelMeshAssignmentEndpointTests(TestCase):
             [item["mesh_key"] for item in response.json()["meshes"]],
             ["mesh-api"],
         )
-        spawns = response.json()["meshes"][0]["spawns"]
+        mesh_payload = response.json()["meshes"][0]
+        self.assertEqual(mesh_payload["source_chat_id"], "-100700")
+        self.assertEqual(mesh_payload["source_name"], "")
+        spawns = mesh_payload["spawns"]
         self.assertEqual([item["spawn_chat_id"] for item in spawns], ["-100701"])
         self.assertNotIn(self.mesh.source_chat_id, {
             item["spawn_chat_id"] for item in spawns
