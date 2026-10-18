@@ -34,9 +34,11 @@
         <tr><td style="padding:8px 20px 2px 20px;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
             {% if product_type == "course" %}{% include "emails/partials/detail_row.html" with label="Course" value=plan_name %}{% else %}{% include "emails/partials/detail_row.html" with label="Plan" value=plan_name %}{% endif %}
+            {% if invoice_number %}{% include "emails/partials/detail_row.html" with label="Invoice number" value=invoice_number %}{% endif %}
             {% include "emails/partials/detail_row.html" with label="Date" value=date_display %}
-            {% include "emails/partials/detail_row.html" with label="Payment method" value=provider_display %}
-            {% if provider_reference %}{% include "emails/partials/detail_row.html" with label="Transaction ID" value=provider_reference %}{% endif %}
+            {% include "emails/partials/detail_row.html" with label="Payment provider" value=provider_display %}
+            {% if provider_payment_id %}{% include "emails/partials/detail_row.html" with label="Payment transaction ID" value=provider_payment_id %}{% endif %}
+            {% if provider_reference %}{% include "emails/partials/detail_row.html" with label="Order / checkout reference" value=provider_reference %}{% endif %}
             {% if coupon_label %}{% include "emails/partials/detail_row.html" with label="Coupon" value=coupon_label %}{% endif %}
           </table>
         </td></tr>
@@ -66,7 +68,7 @@
   <tr>
     <td class="px" style="padding:16px 32px 34px 32px;">
       {% if product_type == "course" %}{% include "emails/partials/button.html" with url=learning_url label="Open course" %}{% else %}{% include "emails/partials/button.html" with url=dashboard_url label="View membership access" %}{% endif %}
-      {% if invoice_url %}<p style="margin:18px 0 0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;color:#6b7280;">Your invoice / payment receipt: <a href="{{ invoice_url }}" style="color:#315b43;font-weight:600;">View invoice</a> · You can print it or save it as a PDF.</p>{% endif %}
+      {% if invoice_url %}<p style="margin:18px 0 0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:13px;line-height:20px;color:#6b7280;">{% if invoice_number %}Invoice <strong>{{ invoice_number }}</strong> is ready. {% endif %}<a href="{{ invoice_url }}" style="color:#315b43;font-weight:600;">View invoice / payment receipt</a> · You can print it or save it as a PDF.</p>{% endif %}
     </td>
   </tr>
 </table>
