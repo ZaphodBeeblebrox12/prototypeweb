@@ -2,6 +2,7 @@ import json
 import secrets
 import logging
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.http import JsonResponse
 from django.utils import timezone
 from django.http import HttpResponse
@@ -12,9 +13,10 @@ from django.contrib import messages
 from django.conf import settings
 from .models import (
     BotConfig, TelegramAccount, TelegramVerificationToken,
-    DiscordAccount, BotAccessAudit
+    DiscordAccount, BotAccessAudit, UserChannelAssignment
 )
 from .services.telegram import TelegramBotService
+from .services.discord import DiscordBotService
 from .services.profile_sync import sync_telegram_profile_for_user
 from .services.channel_sync import sync_channel_memberships_for_user
 
@@ -72,25 +74,71 @@ def unlink_telegram(request):
     return redirect('dashboard')
 
 
+def _discord_connections_redirect():
+    """Return members to the canonical Connections section of the Member Desk."""
+    return redirect(f"{reverse('dashboard')}#connections")
+
+
 @login_required
 @require_POST
 def unlink_discord(request):
-    """Disconnect Discord account from user profile."""
-    try:
-        dc = DiscordAccount.objects.get(user=request.user)
-        old_id = dc.discord_user_id
-        dc.delete()
-        BotAccessAudit.objects.create(
-            user=request.user,
-            action='unlink',
-            platform='discord',
-            target=old_id,
-            status='success'
+    """Remove managed Discord roles before disconnecting the linked account."""
+    dc = DiscordAccount.objects.filter(user=request.user).first()
+    if dc is None:
+        messages.info(request, "No Discord account is currently linked.")
+        return _discord_connections_redirect()
+
+    role_ids = set(dc.roles or [])
+    role_ids.update(UserChannelAssignment.objects.filter(
+        user=request.user, platform="discord", is_active=True,
+    ).values_list("external_id", flat=True))
+
+    failed_roles = []
+    remaining_roles = set(dc.roles or [])
+    for role_id in sorted(role_ids):
+        if DiscordBotService.remove_role(dc.discord_user_id, role_id):
+            remaining_roles.discard(role_id)
+            UserChannelAssignment.objects.filter(
+                user=request.user, platform="discord", external_id=role_id,
+                is_active=True,
+            ).update(is_active=False, revoked_at=timezone.now())
+        else:
+            failed_roles.append(role_id)
+            BotAccessAudit.objects.create(
+                user=request.user,
+                action="revoke",
+                platform="discord",
+                target=role_id,
+                status="failed",
+                error_message="Role removal failed during Discord disconnect.",
+            )
+
+    dc.roles = sorted(remaining_roles)
+    dc.save(update_fields=["roles"])
+
+    if failed_roles:
+        # Keep the association so a later attempt still knows which Discord
+        # identity needs revocation. Never claim a disconnect completed while
+        # a managed paid role may still be present.
+        messages.error(
+            request,
+            "Some Discord roles could not be removed. Your account remains "
+            "linked so access removal can be retried; please try again or "
+            "contact support.",
         )
-        messages.success(request, "Discord account unlinked.")
-    except DiscordAccount.DoesNotExist:
-        pass
-    return redirect('profile')
+        return _discord_connections_redirect()
+
+    old_id = dc.discord_user_id
+    dc.delete()
+    BotAccessAudit.objects.create(
+        user=request.user,
+        action="unlink",
+        platform="discord",
+        target=old_id,
+        status="success",
+    )
+    messages.success(request, "Discord disconnected and managed roles removed.")
+    return _discord_connections_redirect()
 
 
 @csrf_exempt
@@ -183,105 +231,195 @@ def telegram_webhook(request):
         return JsonResponse({"ok": False})
 
 
+@login_required
 def discord_oauth_start(request):
-    """Redirect user to Discord OAuth2 authorization page."""
+    """Begin a session-bound OAuth flow for linking and joining the community."""
     config = BotConfig.get_config()
-    if not config.discord_client_id or not config.discord_redirect_uri:
-        messages.error(request, "Discord OAuth not configured.")
-        return redirect('profile')
+    required_config = (
+        config.discord_client_id,
+        config.discord_client_secret,
+        config.discord_redirect_uri,
+        config.discord_bot_token,
+        config.discord_guild_id,
+    )
+    if not config.is_active or not all(required_config):
+        messages.error(
+            request,
+            "Discord is not fully configured yet. Please contact support.",
+        )
+        return _discord_connections_redirect()
 
     state = secrets.token_urlsafe(32)
-    request.session['discord_oauth_state'] = state
+    request.session["discord_oauth_state"] = state
 
-    auth_url = (
-        f"https://discord.com/api/oauth2/authorize"
-        f"?client_id={config.discord_client_id}"
-        f"&redirect_uri={config.discord_redirect_uri}"
-        f"&response_type=code"
-        f"&scope=identify%20guilds"
-        f"&state={state}"
-    )
+    from urllib.parse import urlencode
+
+    auth_url = "https://discord.com/api/oauth2/authorize?" + urlencode({
+        "client_id": config.discord_client_id,
+        "redirect_uri": config.discord_redirect_uri,
+        "response_type": "code",
+        "scope": "identify guilds.join",
+        "state": state,
+    })
     return redirect(auth_url)
 
 
+@login_required
 def discord_oauth_callback(request):
-    """Handle Discord OAuth2 callback and link the user's Discord account."""
-    code = request.GET.get('code')
-    state = request.GET.get('state')
-    error = request.GET.get('error')
+    """Validate OAuth, join the configured guild, link the account, then sync roles."""
+    import requests
+    from urllib.parse import urlencode  # noqa: F401 - keeps URL construction explicit above
 
-    session_state = request.session.pop('discord_oauth_state', None)
-    if error or not code or state != session_state:
-        messages.error(request, "Discord authentication failed.")
-        return redirect('profile')
+    code = request.GET.get("code")
+    state = request.GET.get("state")
+    error = request.GET.get("error")
+    session_state = request.session.pop("discord_oauth_state", None)
+
+    if (
+        error
+        or not code
+        or not state
+        or not session_state
+        or not secrets.compare_digest(state, session_state)
+    ):
+        messages.error(request, "Discord authentication failed. Please try connecting again.")
+        return _discord_connections_redirect()
 
     config = BotConfig.get_config()
-    if not config.discord_client_id or not config.discord_client_secret:
-        messages.error(request, "Discord OAuth not configured.")
-        return redirect('profile')
-
-    import requests
-    token_data = {
-        'client_id': config.discord_client_id,
-        'client_secret': config.discord_client_secret,
-        'grant_type': 'authorization_code',
-        'code': code,
-        'redirect_uri': config.discord_redirect_uri,
-    }
-    resp = requests.post('https://discord.com/api/oauth2/token', data=token_data, timeout=10)
-    if resp.status_code != 200:
-        messages.error(request, "Failed to exchange Discord code.")
-        return redirect('profile')
-
-    access_token = resp.json().get('access_token')
-    if not access_token:
-        messages.error(request, "No access token from Discord.")
-        return redirect('profile')
-
-    user_resp = requests.get(
-        'https://discord.com/api/users/@me',
-        headers={'Authorization': f'Bearer {access_token}'},
-        timeout=10,
+    required_config = (
+        config.discord_client_id,
+        config.discord_client_secret,
+        config.discord_redirect_uri,
+        config.discord_bot_token,
+        config.discord_guild_id,
     )
-    if user_resp.status_code != 200:
-        messages.error(request, "Failed to fetch Discord user info.")
-        return redirect('profile')
+    if not config.is_active or not all(required_config):
+        messages.error(request, "Discord is not fully configured yet. Please contact support.")
+        return _discord_connections_redirect()
 
-    user_info = user_resp.json()
-    discord_id = user_info.get('id')
-    username = user_info.get('username')
+    token_data = {
+        "client_id": config.discord_client_id,
+        "client_secret": config.discord_client_secret,
+        "grant_type": "authorization_code",
+        "code": code,
+        "redirect_uri": config.discord_redirect_uri,
+    }
+    try:
+        token_response = requests.post(
+            "https://discord.com/api/oauth2/token",
+            data=token_data,
+            timeout=10,
+        )
+    except requests.RequestException:
+        logger.warning("Discord OAuth token exchange request failed")
+        messages.error(request, "Discord could not be reached. Please try again.")
+        return _discord_connections_redirect()
 
+    if token_response.status_code != 200:
+        messages.error(request, "Discord authorization expired or was rejected. Please try again.")
+        return _discord_connections_redirect()
+    try:
+        token_payload = token_response.json()
+    except ValueError:
+        token_payload = {}
+    access_token = token_payload.get("access_token") if isinstance(token_payload, dict) else None
+    if not access_token:
+        messages.error(request, "Discord did not return a usable access token. Please try again.")
+        return _discord_connections_redirect()
+
+    try:
+        user_response = requests.get(
+            "https://discord.com/api/users/@me",
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=10,
+        )
+    except requests.RequestException:
+        logger.warning("Discord OAuth profile request failed")
+        messages.error(request, "Discord could not return your profile. Please try again.")
+        return _discord_connections_redirect()
+
+    if user_response.status_code != 200:
+        messages.error(request, "Discord could not verify your account. Please try again.")
+        return _discord_connections_redirect()
+    try:
+        user_info = user_response.json()
+    except ValueError:
+        user_info = {}
+    if not isinstance(user_info, dict):
+        user_info = {}
+
+    discord_id = str(user_info.get("id") or "").strip()
+    username = str(user_info.get("username") or "").strip()[:255]
     if not discord_id:
-        messages.error(request, "No Discord ID received.")
-        return redirect('profile')
+        messages.error(request, "Discord did not return an account ID. Please try again.")
+        return _discord_connections_redirect()
 
-    if DiscordAccount.objects.filter(discord_user_id=discord_id).exclude(user=request.user).exists():
-        messages.error(request, "This Discord account is already linked to another user.")
-        return redirect('profile')
+    if DiscordAccount.objects.filter(discord_user_id=discord_id).exclude(
+        user=request.user
+    ).exists():
+        messages.error(request, "This Discord account is already linked to another TradeThesis account.")
+        return _discord_connections_redirect()
+
+    current_account = DiscordAccount.objects.filter(user=request.user).first()
+    if current_account and current_account.discord_user_id != discord_id:
+        messages.error(
+            request,
+            "A different Discord account is already linked. Disconnect it before linking another account.",
+        )
+        return _discord_connections_redirect()
+
+    # This endpoint adds the user to the configured guild if needed. If it
+    # fails, do not save a link that cannot receive the planned role sync.
+    if not DiscordBotService.add_member(discord_id, access_token):
+        BotAccessAudit.objects.create(
+            user=request.user,
+            action="link",
+            platform="discord",
+            target=discord_id,
+            status="failed",
+            error_message="Discord guild join failed; account was not linked.",
+        )
+        messages.error(
+            request,
+            "Discord could not add you to the TradeThesis server. Please try again "
+            "or contact support if the problem continues.",
+        )
+        return _discord_connections_redirect()
 
     DiscordAccount.objects.update_or_create(
         user=request.user,
         defaults={
-            'discord_user_id': discord_id,
-            'guild_id': config.discord_guild_id,
-            'username': username,
-            'is_active': True
-        }
+            "discord_user_id": discord_id,
+            "guild_id": config.discord_guild_id,
+            "username": username,
+            "is_active": True,
+        },
     )
-
     BotAccessAudit.objects.create(
         user=request.user,
-        action='link',
-        platform='discord',
+        action="link",
+        platform="discord",
         target=discord_id,
-        status='success'
+        status="success",
     )
 
-    messages.success(request, "Discord account linked successfully!")
-    from apps.jobs.enqueue import enqueue_reconcile
-    enqueue_reconcile(request.user.id, reason="discord_link")
+    try:
+        from apps.jobs.enqueue import enqueue_reconcile
+        enqueue_reconcile(request.user.pk, reason="discord_link")
+    except Exception:
+        logger.exception("Discord account linked but role-sync enqueue failed")
+        messages.warning(
+            request,
+            "Discord is linked, but automatic role syncing could not be queued. "
+            "Please contact support before relying on community access.",
+        )
+    else:
+        messages.success(
+            request,
+            "Discord connected. Your active community roles will sync shortly.",
+        )
+    return _discord_connections_redirect()
 
-    return redirect('profile')
 
 # ════════════════════════════════════════════════════════════════════════════
 # Bot bridge self-registration / heartbeat  (Provision Contract v1)
