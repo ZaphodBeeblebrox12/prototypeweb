@@ -719,6 +719,32 @@ class DiscordWorkerFlowTests(TestCase):
         )
         self.assertFalse(assignment.is_active)
 
+    @mock.patch("apps.bot_integration.reconcile.DiscordBotService.get_member_roles", return_value=["role-from-old-plan"])
+    @mock.patch("apps.bot_integration.reconcile.DiscordBotService.remove_role", return_value=True)
+    @mock.patch("apps.bot_integration.reconcile.DiscordBotService.add_role", return_value=True)
+    def test_worker_removes_mapped_role_missing_from_local_account_cache(
+        self, add_role, remove_role, get_member_roles
+    ):
+        stale_plan = Plan.objects.create(
+            name="Previous entitlement", tier="basic", display_order=99
+        )
+        PlanChannelMapping.objects.create(
+            plan=stale_plan, platform="discord", external_id="role-from-old-plan"
+        )
+        # Live Discord state has the old mapped role, but both local caches
+        # are empty. Live state + the mapping must still be sufficient to
+        # detect and revoke the stale paid role.
+        run_user_reconcile(self.user.id, transport=FakeTransport())
+
+        remove_role.assert_called_once_with(
+            "discord-user-1", "role-from-old-plan"
+        )
+        assignment = UserChannelAssignment.objects.filter(
+            user=self.user, platform="discord",
+            external_id="role-from-old-plan", is_active=True,
+        )
+        self.assertFalse(assignment.exists())
+
     @mock.patch("apps.bot_integration.reconcile.DiscordBotService.get_member_roles", return_value=[])
     @mock.patch("apps.bot_integration.reconcile.DiscordBotService.add_role")
     def test_worker_raises_so_failed_role_grant_is_retried(self, add_role, get_member_roles):
