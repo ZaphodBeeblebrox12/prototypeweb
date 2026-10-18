@@ -577,6 +577,55 @@ def bot_heartbeat(request):
 
 @csrf_exempt
 @require_POST
+def bot_mesh_inventory(request):
+    """Return enabled Mesh spawn inventory to the authenticated allocator.
+
+    The response lists only registered, active Meshes and active spawns.
+    It does not include members or assign anyone to a destination.
+    """
+    body, err = verify_signed_request(request)
+    if err:
+        return JsonResponse({"ok": False, "error": "unauthorized"}, status=401)
+
+    try:
+        data = _json.loads(body.decode() or "{}")
+    except (UnicodeDecodeError, ValueError):
+        return JsonResponse({"ok": False, "error": "malformed JSON"}, status=400)
+    if not isinstance(data, dict):
+        return JsonResponse({"ok": False, "error": "JSON object required"}, status=400)
+
+    mesh_key = str(data.get("mesh_key") or "").strip()
+    meshes = ChannelMesh.objects.filter(is_active=True).prefetch_related(
+        __import__("django.db.models", fromlist=["Prefetch"]).Prefetch(
+            "destinations",
+            queryset=ChannelMeshDestination.objects.filter(is_active=True).order_by(
+                "name", "external_id"
+            ),
+        )
+    ).order_by("key")
+    if mesh_key:
+        meshes = meshes.filter(key=mesh_key)
+
+    inventory = [
+        {
+            "mesh_key": mesh.key,
+            "mesh_name": mesh.name,
+            "spawns": [
+                {
+                    "spawn_chat_id": destination.external_id,
+                    "name": destination.name,
+                    "chat_type": destination.chat_type,
+                }
+                for destination in mesh.destinations.all()
+            ],
+        }
+        for mesh in meshes
+    ]
+    return JsonResponse({"ok": True, "meshes": inventory}, status=200)
+
+
+@csrf_exempt
+@require_POST
 def bot_mesh_assignment(request):
     """Accept a spawn decision from the existing allocator over the signed bridge.
 
