@@ -9,7 +9,7 @@
       <h1 style="font-size:1.5rem">{{ offer.name }}</h1>
       <p class="text-muted">{{ offer.course.title }}</p>
       <p class="h2">{{ price_display }}</p>
-      <p><strong>{{ access_description }}</strong>. This is a one-time payment; it will not renew automatically.</p>
+      <p><strong>{{ access_description }}</strong>. One-time payment; it will not renew automatically.</p>
       <p class="text-muted small">You will review the final total, any configured tax, and the required terms before being sent to the secure payment provider.</p>
       <button type="button" class="btn btn-primary w-100" id="continue-to-secure-checkout"
               data-plan-id="{{ offer.plan_id }}" data-payment-start-url="{{ payment_start_url }}">
