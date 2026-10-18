@@ -159,6 +159,6 @@
   window.addEventListener('hashchange',function(){const page=window.location.hash.slice(1);if(pages.includes(page))activate(page,false)});
 })();
 </script>
-<script src="{{ public_site_url }}/assets/sitewide-nav.js" defer></script>
+<script src="{% static 'js/sitewide-nav.js' %}" defer></script>
 </body>
 </html>
