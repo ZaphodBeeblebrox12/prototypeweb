@@ -401,7 +401,7 @@ class CtaFlowTests(APITestCase):
     def _consent(self, intent):
         return _post_test_consent(self.client, intent)
 
-    def test_get_start_carries_plan_and_interval(self, _geo, prov)
+    def test_get_start_carries_plan_and_interval(self, _geo, prov):
         plan, _ = make_plan("quarterly")
         prov.create_hosted_checkout.return_value = providers.CreatedCheckout(
             provider_reference="cs_cta", checkout_url="https://pay.example")
