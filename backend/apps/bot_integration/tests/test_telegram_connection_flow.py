@@ -49,6 +49,7 @@ class TelegramConnectionFlowTests(TestCase):
         follow = self.client.get(response["Location"])
         self.assertEqual(follow.status_code, 200)
         self.assertContains(follow, "Telegram connection is not configured yet")
+        self.assertContains(follow, "member-flash-error")
         self.assertNotEqual(response["Location"], reverse("profile"))
 
     def test_environment_bot_username_is_used_when_database_username_is_blank(self):
