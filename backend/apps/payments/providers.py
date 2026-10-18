@@ -7,7 +7,7 @@ No webhooks, no recurring engine -- see architecture review phase plan.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, Optional
 
 from django.conf import settings
 
@@ -261,7 +261,7 @@ _PAYMENT_METHOD_VALUES = {
 }
 
 
-def normalize_payment_method(value, details=None):
+def normalize_payment_method(value: object, details: Optional[dict[str, Any]] = None) -> str:
     """Normalize a provider payment-method type without storing credentials."""
     raw = str(value or "").strip().lower().replace("-", "_").replace(" ", "_")
     if not raw:
