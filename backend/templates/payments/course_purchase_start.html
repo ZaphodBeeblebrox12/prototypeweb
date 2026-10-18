@@ -11,10 +11,14 @@
       <p class="h2">{{ price_display }}</p>
       <p><strong>{{ access_description }}</strong>. One-time payment; it will not renew automatically.</p>
       <p class="text-muted small">You will review the final total, any configured tax, and the required terms before being sent to the secure payment provider.</p>
-      <button type="button" class="btn btn-primary w-100" id="continue-to-secure-checkout"
-              data-plan-id="{{ offer.plan_id }}" data-payment-start-url="{{ payment_start_url }}">
-        Continue to secure checkout
-      </button>
+      <form method="post" id="start-checkout-form" action="{{ payment_start_url }}">
+        {% csrf_token %}
+        <input type="hidden" name="plan_id" value="{{ offer.plan_id }}">
+        <input type="hidden" name="interval" value="one_time">
+        <button type="button" class="btn btn-primary w-100" id="continue-to-secure-checkout">
+          Continue to secure checkout
+        </button>
+      </form>
       <p class="small text-muted mt-3" id="checkout-status" role="status" aria-live="polite">No payment is created until you continue.</p>
       <p class="small mt-3"><a href="/">Back to TradeThesis</a></p>
     </div>
@@ -22,21 +26,21 @@
 </div>
 <script>
 (function () {
+  const form = document.getElementById("start-checkout-form");
   const button = document.getElementById("continue-to-secure-checkout");
   const status = document.getElementById("checkout-status");
-  if (!button || !status) return;
+  if (!form || !button || !status) return;
 
   button.addEventListener("click", async function () {
     if (button.disabled) return;
     button.disabled = true;
     status.textContent = "Preparing your secure checkout…";
     try {
-      const url = new URL(button.dataset.paymentStartUrl, window.location.origin);
-      url.searchParams.set("plan_id", button.dataset.planId);
-      url.searchParams.set("interval", "one_time");
-      const response = await fetch(url.toString(), {
+      const response = await fetch(form.action, {
+        method: "POST",
         credentials: "same-origin",
-        headers: {"Accept": "application/json"}
+        headers: {"Accept": "application/json"},
+        body: new FormData(form)
       });
       const result = await response.json();
       if (!response.ok || !result.consent_url) {

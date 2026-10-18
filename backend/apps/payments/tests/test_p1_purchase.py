@@ -152,9 +152,9 @@ class PurchaseFlowTests(APITestCase):
 
     def test_course_offer_payment_start_resolves_one_time_product(self, _geo, prov):
         offer = self._saleable_course_offer()
-        response = self.client.get(reverse("payment-start"), {
+        response = self.client.post(reverse("payment-start"), {
             "plan_id": str(offer.plan_id), "interval": "one_time",
-        })
+        }, format="json")
         self.assertEqual(response.status_code, 200, response.data)
         self.assertEqual(response.data["product_type"], "course")
         self.assertEqual(response.data["course_slug"], "trading-path")
