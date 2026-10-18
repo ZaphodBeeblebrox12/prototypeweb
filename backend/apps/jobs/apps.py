@@ -16,7 +16,10 @@ class JobsConfig(AppConfig):
             "sendtestemail", "createsuperuser", "makemessages", "compilemessages",
             "sync_channel_memberships",
         }
-        if set(sys.argv) & skip_commands:
+        # pytest-django invokes Django setup from the pytest process rather
+        # than `manage.py test`; the scheduler must not start before pytest
+        # creates its test database and runs migrations.
+        if "pytest" in sys.modules or set(sys.argv) & skip_commands:
             return
         try:
             from .scheduler import start_scheduler
