@@ -151,19 +151,23 @@ def _tg_revoke(user_id, account, channel_id):
 
 
 def _reconcile_discord(user_id, account, target):
-    # Authoritative set = the account's cached roles, driven to the target.
-    # Symmetric with Telegram: roles not permitted by the current plan are
-    # removed (fixes the old lapse no-op). Roles are only written by the
-    # reconcile, so this is safe and drift-correcting.
+    """Drive this account's managed Discord roles toward its current entitlements.
+
+    Returns False if any Discord mutation failed so the durable worker can retry.
+    The assignment table is included as a recovery source for role-cache drift.
+    """
     current = set(account.roles or [])
+    current.update(UserChannelAssignment.objects.filter(
+        user_id=user_id, platform="discord", is_active=True,
+    ).values_list("external_id", flat=True))
+    failed = False
 
     for role_id in sorted(target.discord_ids - current):
         ok = DiscordBotService.add_role(account.discord_user_id, role_id)
         if ok:
             current.add(role_id)
-            UserChannelAssignment.objects.get_or_create(
-                user_id=user_id, platform="discord", external_id=role_id,
-                defaults={"is_active": True})
+        else:
+            failed = True
         _audit(user_id, "grant", "discord", role_id, ok)
 
     for role_id in sorted(current - target.discord_ids):
@@ -172,9 +176,26 @@ def _reconcile_discord(user_id, account, target):
             current.discard(role_id)
             UserChannelAssignment.objects.filter(
                 user_id=user_id, platform="discord", external_id=role_id,
-                is_active=True).update(is_active=False, revoked_at=timezone.now())
+                is_active=True,
+            ).update(is_active=False, revoked_at=timezone.now())
+        else:
+            failed = True
         _audit(user_id, "revoke", "discord", role_id, ok)
+
+    # Keep the persistent assignment ledger aligned with every role that is
+    # in the target set and still known to be applied. Reactivate a prior
+    # assignment instead of letting get_or_create leave it marked revoked.
+    for role_id in sorted(target.discord_ids & current):
+        assignment, created = UserChannelAssignment.objects.get_or_create(
+            user_id=user_id, platform="discord", external_id=role_id,
+            defaults={"is_active": True},
+        )
+        if not created and not assignment.is_active:
+            assignment.is_active = True
+            assignment.revoked_at = None
+            assignment.save(update_fields=["is_active", "revoked_at"])
 
     if set(account.roles or []) != current:
         account.roles = sorted(current)
         account.save(update_fields=["roles"])
+    return not failed
