@@ -7,6 +7,7 @@ current user lacks model permission for are omitted.  Rendered into the admin
 index via templates/admin/dashboard.html.
 """
 import datetime
+from urllib.parse import urlencode
 
 from django.contrib import admin
 from django.contrib.auth.decorators import login_required
@@ -25,6 +26,8 @@ def _has_model_perm(request, app_label, model_name, perm="view"):
 
 def _changelist(app_label, model_name, query=""):
     base = reverse(f"admin:{app_label}_{model_name}_changelist")
+    if isinstance(query, dict):
+        query = urlencode(query, doseq=True)
     return f"{base}?{query}" if query else base
 
 
@@ -39,6 +42,25 @@ def _subscription_dashboard_context(request):
     soon = now + datetime.timedelta(days=7)
     recent = now - datetime.timedelta(days=7)
 
+    # Customer counts are separate from course-content permissions. Only show
+    # them when the current staff member can view the user changelist.
+    from django.contrib.auth import get_user_model
+
+    user_model = get_user_model()
+    if _has_model_perm(request, "accounts", "user"):
+        user_admin = admin.site._registry.get(user_model)
+        if user_admin and user_admin.has_view_permission(request):
+            ctx["accounts"] = {
+                # Exclude staff accounts so this represents learner/customer
+                # accounts, not the administrators themselves.
+                "active_learners": user_model.objects.filter(
+                    is_active=True, is_staff=False,
+                ).count(),
+                "links": {
+                    "users": reverse("admin:accounts_user_changelist"),
+                },
+            }
+
     if _has_model_perm(request, "subscriptions", "subscription"):
         ctx["subscriptions"] = {
             "active": Subscription.objects.filter(
@@ -48,14 +70,26 @@ def _subscription_dashboard_context(request):
                 expires_at__gt=now, expires_at__lte=soon).count(),
             "recently_expired": Subscription.objects.filter(
                 status=Subscription.Status.EXPIRED,
-                expires_at__gte=recent).count(),
+                expires_at__gte=recent, expires_at__lte=now).count(),
             "recently_canceled": Subscription.objects.filter(
                 canceled_at__gte=recent).count(),
             "links": {
+                "all": _changelist("subscriptions", "subscription"),
                 "expiring_soon": _changelist(
                     "subscriptions", "subscription",
-                    "is_active__exact=1&status__exact=active"
-                    "&expires_at__gte=&expires_at__lte="),
+                    {
+                        "is_active__exact": "1",
+                        "status__exact": Subscription.Status.ACTIVE,
+                        "expires_at__gt": now.isoformat(),
+                        "expires_at__lte": soon.isoformat(),
+                    }),
+                "recently_expired": _changelist(
+                    "subscriptions", "subscription",
+                    {
+                        "status__exact": Subscription.Status.EXPIRED,
+                        "expires_at__gte": recent.isoformat(),
+                        "expires_at__lte": now.isoformat(),
+                    }),
             },
         }
         # Trend: signups per day for the last 14 days (single grouped query).
@@ -89,8 +123,12 @@ def _subscription_dashboard_context(request):
             "recent_failed": BotAccessAudit.objects.filter(
                 status="failed", created_at__gte=recent).count(),
             "links": {
-                "failed": _changelist("bot_integration", "botaccessaudit",
-                                      "status__exact=failed"),
+                "failed": _changelist(
+                    "bot_integration", "botaccessaudit",
+                    {
+                        "status__exact": "failed",
+                        "created_at__gte": recent.isoformat(),
+                    }),
             },
         }
 
@@ -104,7 +142,16 @@ def _subscription_dashboard_context(request):
                 attempts__gte=3,
                 status__in=[Job.STATUS_RUNNING, Job.STATUS_PENDING]).count(),
             "links": {
-                "failed": _changelist("jobs", "job", "status__exact=failed"),
+                "pending": _changelist(
+                    "jobs", "job", {"status__exact": Job.STATUS_PENDING}),
+                "failed": _changelist(
+                    "jobs", "job",
+                    {
+                        "status__exact": Job.STATUS_FAILED,
+                        "updated_at__gte": recent.isoformat(),
+                    }),
+                "stalled": _changelist(
+                    "jobs", "job", {"queue_state": "stalled"}),
             },
         }
     return ctx
@@ -130,7 +177,6 @@ def staff_admin_desk(request):
     context["can_manage_course_content"] = is_course_content_admin(request.user)
 
     if context["can_manage_course_content"]:
-        from django.contrib.auth import get_user_model
         from apps.academy.models import (
             Course, CourseEntitlement, CourseImport, CourseModule, CourseOffer,
             Lesson, LessonProgress,
@@ -166,9 +212,6 @@ def staff_admin_desk(request):
                 lesson__is_published=True,
                 lesson__module__is_published=True,
                 lesson__module__course__status=Course.Status.PUBLISHED,
-            ).count(),
-            "active_learners": get_user_model().objects.filter(
-                is_active=True, is_staff=False,
             ).count(),
         })
         context["course_metrics"] = course_counts

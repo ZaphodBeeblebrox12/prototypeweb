@@ -47,12 +47,34 @@
     <a class="btn" href="{{ django_admin_url }}">Open Django administration ↗</a>
   </header>
 
+  {% if accounts or subscriptions or course_metrics %}
+  <section class="section" aria-labelledby="business-overview-heading">
+    <div class="section-head">
+      <h2 id="business-overview-heading">Business overview</h2>
+      <p>Current counts from records you are permitted to view</p>
+    </div>
+    <div class="metrics">
+      {% if accounts %}
+      <div class="metric"><span class="value">{{ accounts.active_learners }}</span><span class="label">Active learner accounts</span></div>
+      {% endif %}
+      {% if subscriptions %}
+      <div class="metric"><span class="value">{{ subscriptions.active }}</span><span class="label">Active subscriptions</span></div>
+      {% endif %}
+      {% if course_metrics %}
+      <div class="metric"><span class="value">{{ course_metrics.published_courses }}</span><span class="label">Published courses</span></div>
+      <div class="metric"><span class="value">{{ course_metrics.active_entitlements }}</span><span class="label">Active course accesses</span></div>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
   {% if course_metrics %}
   <section class="section" aria-labelledby="courses-heading">
     <div class="section-head"><h2 id="courses-heading">Courses &amp; learning</h2><p>Live catalogue and learner records</p></div>
     <div class="metrics">
       <div class="metric"><span class="value">{{ course_metrics.published_courses }}</span><span class="label">Published courses</span></div>
       <div class="metric"><span class="value">{{ course_metrics.draft_courses }}</span><span class="label">Draft courses</span></div>
+      <div class="metric"><span class="value">{{ course_metrics.archived_courses }}</span><span class="label">Archived courses</span></div>
       <div class="metric"><span class="value">{{ course_metrics.published_lessons }}</span><span class="label">Published lessons</span></div>
       <div class="metric"><span class="value">{{ course_metrics.active_offers }}</span><span class="label">Active course offers</span></div>
       <div class="metric"><span class="value">{{ course_metrics.active_entitlements }}</span><span class="label">Active course accesses</span></div>
@@ -75,6 +97,17 @@
   <section class="section panel" aria-labelledby="course-restricted-heading">
     <h2 id="course-restricted-heading">Course content</h2>
     <p class="note">Course publishing tools are visible only to administrators authorised to manage shared course content.</p>
+  </section>
+  {% endif %}
+
+  {% if accounts or subscriptions %}
+  <section class="section" aria-labelledby="membership-heading">
+    <div class="section-head"><h2 id="membership-heading">Membership &amp; learners</h2><p>Open existing management screens</p></div>
+    <ul class="link-list">
+      {% if accounts.links.users %}<li><a href="{{ accounts.links.users }}">Manage learner accounts →</a></li>{% endif %}
+      {% if subscriptions.links.all %}<li><a href="{{ subscriptions.links.all }}">Manage subscriptions →</a></li>{% endif %}
+      {% if subscriptions.links.expiring_soon %}<li><a href="{{ subscriptions.links.expiring_soon }}">Review subscriptions expiring in 7 days ({{ subscriptions.expiring_soon }}) →</a></li>{% endif %}
+    </ul>
   </section>
   {% endif %}
 
@@ -103,8 +136,8 @@
         <h2>Background work</h2>
         <ul class="signal-list" style="margin-top:12px">
           <li><a href="{{ jobs.links.failed }}">Failed jobs (7 days)</a><span class="signal-count">{{ jobs.failed }}</span></li>
-          <li><span>Pending jobs</span><span class="signal-count">{{ jobs.pending }}</span></li>
-          <li><span>Stalled jobs (3+ attempts)</span><span class="signal-count">{{ jobs.stalled }}</span></li>
+          <li><a href="{{ jobs.links.pending }}">Pending jobs</a><span class="signal-count">{{ jobs.pending }}</span></li>
+          <li><a href="{{ jobs.links.stalled }}">Stalled jobs (3+ attempts)</a><span class="signal-count">{{ jobs.stalled }}</span></li>
         </ul>
       </div>
       {% endif %}
@@ -114,7 +147,7 @@
         <ul class="signal-list" style="margin-top:12px">
           <li><a href="{{ subscriptions.links.expiring_soon }}">Expiring in 7 days</a><span class="signal-count">{{ subscriptions.expiring_soon }}</span></li>
           <li><span>Active subscriptions</span><span class="signal-count">{{ subscriptions.active }}</span></li>
-          <li><span>Recently expired (7 days)</span><span class="signal-count">{{ subscriptions.recently_expired }}</span></li>
+          <li><a href="{{ subscriptions.links.recently_expired }}">Recently expired (7 days)</a><span class="signal-count">{{ subscriptions.recently_expired }}</span></li>
         </ul>
       </div>
       {% endif %}

@@ -4,6 +4,24 @@ from django.contrib import admin
 from .models import Job, PeriodicJob
 
 
+class StalledJobFilter(admin.SimpleListFilter):
+    """Show only pending/running jobs that have already retried three times."""
+
+    title = "queue state"
+    parameter_name = "queue_state"
+
+    def lookups(self, request, model_admin):
+        return (("stalled", "Stalled (3+ attempts)"),)
+
+    def queryset(self, request, queryset):
+        if self.value() == "stalled":
+            return queryset.filter(
+                attempts__gte=3,
+                status__in=[Job.STATUS_RUNNING, Job.STATUS_PENDING],
+            )
+        return queryset
+
+
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
     """Read-mostly view of the durable-jobs queue.  Do not hand-edit job
@@ -13,7 +31,7 @@ class JobAdmin(admin.ModelAdmin):
         "id", "kind", "status", "attempts", "max_attempts",
         "next_attempt_at", "locked_at", "created_at",
     ]
-    list_filter = ["kind", "status", "created_at"]
+    list_filter = ["kind", "status", "created_at", "updated_at", StalledJobFilter]
     search_fields = ["kind", "idempotency_key", "payload"]
     ordering = ["-created_at"]
     date_hierarchy = "created_at"

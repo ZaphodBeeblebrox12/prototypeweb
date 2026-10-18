@@ -154,7 +154,7 @@ class UserChannelAssignmentAdmin(admin.ModelAdmin):
 class BotAccessAuditAdmin(admin.ModelAdmin):
     # Access audit trail: fully read-only, never add/change/delete.
     list_display = ['user', 'action', 'platform', 'status', 'created_at']
-    list_filter = ['action', 'platform', 'status']
+    list_filter = ['action', 'platform', 'status', 'created_at']
     raw_id_fields = ['user']
     readonly_fields = [f.name for f in BotAccessAudit._meta.fields]
 

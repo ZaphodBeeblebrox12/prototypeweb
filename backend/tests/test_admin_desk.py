@@ -1,4 +1,6 @@
 """Tests for the permission-aware, read-only TradeThesis Admin Desk."""
+from urllib.parse import parse_qs, urlsplit
+
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -102,3 +104,74 @@ class AdminDeskTests(TestCase):
             response,
             "Course publishing tools are visible only to administrators",
         )
+        self.assertNotIn("accounts", response.context)
+
+    def test_business_overview_and_operational_links_use_real_filters(self):
+        admin = User.objects.create_superuser(
+            username="desk-owner-2",
+            email="desk-owner-2@example.test",
+            password="test-password-123!",
+        )
+        EmailAddress.objects.create(
+            user=admin, email=admin.email, verified=True, primary=True
+        )
+        self.client.force_login(admin)
+
+        response = self.client.get(reverse("staff_admin_desk"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("accounts", response.context)
+        self.assertIn("subscriptions", response.context)
+        self.assertIn("jobs", response.context)
+        self.assertIn("telegram", response.context)
+        self.assertEqual(
+            response.context["accounts"]["links"]["users"],
+            reverse("admin:accounts_user_changelist"),
+        )
+
+        expiring = parse_qs(urlsplit(
+            response.context["subscriptions"]["links"]["expiring_soon"]
+        ).query)
+        self.assertEqual(expiring["is_active__exact"], ["1"])
+        self.assertEqual(expiring["status__exact"], ["active"])
+        self.assertTrue(expiring["expires_at__gt"][0])
+        self.assertTrue(expiring["expires_at__lte"][0])
+
+        recently_expired = parse_qs(urlsplit(
+            response.context["subscriptions"]["links"]["recently_expired"]
+        ).query)
+        self.assertEqual(recently_expired["status__exact"], ["expired"])
+        self.assertTrue(recently_expired["expires_at__gte"][0])
+        self.assertTrue(recently_expired["expires_at__lte"][0])
+
+        failed_access = parse_qs(urlsplit(
+            response.context["telegram"]["links"]["failed"]
+        ).query)
+        self.assertEqual(failed_access["status__exact"], ["failed"])
+        self.assertTrue(failed_access["created_at__gte"][0])
+
+        failed_jobs = parse_qs(urlsplit(
+            response.context["jobs"]["links"]["failed"]
+        ).query)
+        self.assertEqual(failed_jobs["status__exact"], ["failed"])
+        self.assertTrue(failed_jobs["updated_at__gte"][0])
+
+        stalled_jobs = parse_qs(urlsplit(
+            response.context["jobs"]["links"]["stalled"]
+        ).query)
+        self.assertEqual(stalled_jobs["queue_state"], ["stalled"])
+
+        # Exercise destinations, not only their query strings. These requests
+        # surface invalid Django Admin lookups and missing permissions.
+        destinations = [
+            response.context["subscriptions"]["links"]["expiring_soon"],
+            response.context["subscriptions"]["links"]["recently_expired"],
+            response.context["telegram"]["links"]["failed"],
+            response.context["jobs"]["links"]["pending"],
+            response.context["jobs"]["links"]["failed"],
+            response.context["jobs"]["links"]["stalled"],
+        ]
+        for destination in destinations:
+            with self.subTest(destination=destination):
+                self.assertEqual(self.client.get(destination).status_code, 200)
+

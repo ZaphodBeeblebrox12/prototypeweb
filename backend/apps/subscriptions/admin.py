@@ -573,6 +573,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
         "is_gift",
         "is_admin_grant",
         "is_trial",
+        "expires_at",
     ]
     search_fields = [
         "user__username",
