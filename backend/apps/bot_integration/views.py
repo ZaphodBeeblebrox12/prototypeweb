@@ -88,6 +88,11 @@ def unlink_discord(request):
         messages.info(request, "No Discord account is currently linked.")
         return _discord_connections_redirect()
 
+    # Pause grants before any outbound role-removal request. This closes the
+    # race where the background worker could re-grant a role during disconnect.
+    dc.is_active = False
+    dc.save(update_fields=["is_active"])
+
     role_ids = set(dc.roles or [])
     role_ids.update(UserChannelAssignment.objects.filter(
         user=request.user, platform="discord", is_active=True,
@@ -131,14 +136,7 @@ def unlink_discord(request):
             )
 
     dc.roles = sorted(remaining_roles)
-    if failed_roles:
-        # Pause normal reconciliation while disconnect is pending; otherwise
-        # an active entitlement could re-grant a role the member is trying to
-        # remove before their next retry.
-        dc.is_active = False
-        dc.save(update_fields=["roles", "is_active"])
-    else:
-        dc.save(update_fields=["roles"])
+    dc.save(update_fields=["roles"])
 
     if failed_roles:
         # Keep the association so a later attempt still knows which Discord
