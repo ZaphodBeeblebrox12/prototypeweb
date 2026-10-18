@@ -36,6 +36,7 @@
             {% if product_type == "course" %}{% include "emails/partials/detail_row.html" with label="Course" value=plan_name %}{% else %}{% include "emails/partials/detail_row.html" with label="Plan" value=plan_name %}{% endif %}
             {% if invoice_number %}{% include "emails/partials/detail_row.html" with label="Invoice number" value=invoice_number %}{% endif %}
             {% include "emails/partials/detail_row.html" with label="Date" value=date_display %}
+            {% include "emails/partials/detail_row.html" with label="Payment method" value=payment_method_display %}
             {% include "emails/partials/detail_row.html" with label="Payment provider" value=provider_display %}
             {% if provider_payment_id %}{% include "emails/partials/detail_row.html" with label="Payment transaction ID" value=provider_payment_id %}{% endif %}
             {% if provider_reference %}{% include "emails/partials/detail_row.html" with label="Order / checkout reference" value=provider_reference %}{% endif %}
