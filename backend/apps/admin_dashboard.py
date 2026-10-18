@@ -101,6 +101,16 @@ def _subscription_dashboard_context(request):
         )
         ctx["recent_signups"] = list(trend)
 
+    if _has_model_perm(request, "policies", "policyversion"):
+        from apps.policies.models import PolicyVersion
+        policy_admin = admin.site._registry.get(PolicyVersion)
+        if policy_admin and policy_admin.has_view_permission(request):
+            from apps.policies.services import sales_policy_readiness
+
+            readiness = sales_policy_readiness()
+            readiness["url"] = reverse("admin:policies_policyversion_changelist")
+            ctx["policy_readiness"] = readiness
+
     if _has_model_perm(request, "payments", "paymentintent"):
         ctx["payments"] = {
             "pending": PaymentIntent.objects.filter(

@@ -7,7 +7,8 @@ from django.utils import timezone
 
 from apps.policies.models import PolicyAcceptance, PolicyVersion
 from apps.policies.services import (
-    CHECKOUT_POLICY_TYPES, record_acceptance, record_checkout_acceptances)
+    CHECKOUT_POLICY_TYPES, is_placeholder_policy, record_acceptance,
+    record_checkout_acceptances)
 
 from .fingerprint import (
     FINGERPRINT_VERSION, collect_from_request, compute_fingerprint,
@@ -107,6 +108,12 @@ def capture_checkout_evidence(intent, request, client_signals=None,
         raise RuntimeError(
             f"No ACTIVE policy versions for {missing}; refusing to capture "
             "checkout evidence without the agreement record.")
+    placeholders = [pt for pt, version in versions.items()
+                    if is_placeholder_policy(version)]
+    if placeholders:
+        raise RuntimeError(
+            f"Active policy versions for {placeholders} contain launch "
+            "placeholders. Publish approved legal text before checkout.")
 
 
     signals = client_signals or collect_from_request(request)

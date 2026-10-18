@@ -87,6 +87,21 @@ class CaptureTests(TestCase):
             capture_checkout_evidence(self.intent, _rf(self.user),
                                       client_signals={})
 
+    def test_capture_refuses_active_placeholder_policy_content(self):
+        policy = PolicyVersion.active("terms")
+        policy.content_html = (
+            "<p>PLACEHOLDER v1.0 — not final legal text. "
+            "Replace with approved legal content.</p>")
+        policy.save()
+
+        with self.assertRaisesRegex(RuntimeError, "placeholders"):
+            capture_checkout_evidence(
+                self.intent, _rf(self.user), client_signals={})
+
+        self.assertFalse(
+            CheckoutEvidence.objects.filter(payment_intent=self.intent).exists()
+        )
+
     def test_evidence_immutable(self):
         ev = capture_checkout_evidence(self.intent, _rf(self.user),
                                        client_signals={})

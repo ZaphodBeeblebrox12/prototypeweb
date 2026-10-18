@@ -23,6 +23,9 @@
       <p style="margin:0; font-family:-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:14px; line-height:22px; color:#374151;">
         Hi {{ username }}, your payment went through. Here is your receipt.
       </p>
+      <p style="margin:10px 0 0; font-family:-apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:13px; line-height:20px; color:#6b7280;">
+        {{ billing_disclosure|default:"This was a one-time payment. Access does not renew automatically." }}
+      </p>
     </td>
   </tr>
   <tr>

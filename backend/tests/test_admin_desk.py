@@ -134,6 +134,13 @@ class AdminDeskTests(TestCase):
         self.assertIn("subscriptions", response.context)
         self.assertIn("jobs", response.context)
         self.assertIn("telegram", response.context)
+        self.assertIn("policy_readiness", response.context)
+        self.assertFalse(response.context["policy_readiness"]["ready"])
+        self.assertTrue(any(
+            item["reason"] == "Placeholder content must be replaced and approved"
+            for item in response.context["policy_readiness"]["items"]
+        ))
+        self.assertContains(response, "Checkout consent is blocked")
         self.assertEqual(
             response.context["accounts"]["links"]["users"],
             reverse("admin:accounts_user_changelist"),

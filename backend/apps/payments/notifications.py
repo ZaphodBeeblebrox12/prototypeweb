@@ -54,6 +54,9 @@ def _base_context(intent):
         "product_type": product_type,
         "learning_url": learning_url,
         "is_lifetime_course": bool(offer and offer.access_duration_days is None),
+        "billing_disclosure": (
+            "This was a one-time payment. Access does not renew automatically."
+        ),
         "amount_display": _amount(intent),
         "currency": intent.currency,
         "provider_display": intent.get_provider_display(),

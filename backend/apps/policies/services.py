@@ -45,6 +45,62 @@ def active_versions(policy_types=CHECKOUT_POLICY_TYPES):
     return {pt: PolicyVersion.active(pt) for pt in policy_types}
 
 
+LAUNCH_POLICY_TYPES = (
+    PolicyVersion.PolicyType.TERMS,
+    PolicyVersion.PolicyType.REFUND,
+    PolicyVersion.PolicyType.CANCELLATION,
+    PolicyVersion.PolicyType.RISK,
+    PolicyVersion.PolicyType.PRIVACY,
+)
+
+_PLACEHOLDER_MARKERS = (
+    "placeholder v1.0",
+    "structural placeholder",
+    "not final legal text",
+    "replace with approved legal content",
+)
+
+
+def is_placeholder_policy(policy_version: PolicyVersion | None) -> bool:
+    """True when a policy version still contains the repository's seed text."""
+    if policy_version is None:
+        return False
+    content = f"{policy_version.title}\n{policy_version.content_html}".casefold()
+    return any(marker in content for marker in _PLACEHOLDER_MARKERS)
+
+
+def sales_policy_readiness() -> dict:
+    """Summarize public policy pages using one bounded database query."""
+    labels = dict(PolicyVersion.PolicyType.choices)
+    active = {
+        version.policy_type: version
+        for version in PolicyVersion.objects.filter(
+            policy_type__in=LAUNCH_POLICY_TYPES,
+            status=PolicyVersion.Status.ACTIVE,
+        )
+    }
+    items = []
+    for policy_type in LAUNCH_POLICY_TYPES:
+        version = active.get(policy_type)
+        if version is None:
+            reason = "No active version"
+            ready = False
+        elif is_placeholder_policy(version):
+            reason = "Placeholder content must be replaced and approved"
+            ready = False
+        else:
+            reason = "Active content is present"
+            ready = True
+        items.append({
+            "policy_type": policy_type,
+            "label": labels.get(policy_type, policy_type),
+            "version": version.version if version else "",
+            "ready": ready,
+            "reason": reason,
+        })
+    return {"ready": all(item["ready"] for item in items), "items": items}
+
+
 def session_ref_for_request(request) -> str:
     key = request.session.session_key or ""
     salt = getattr(dj_settings, "RISK_DEVICE_SALT",

@@ -3,8 +3,9 @@
 <div class="container py-4" style="max-width:560px">
   <div class="card">
     <div class="card-body">
-      <h4>{{ plan.name }}</h4>
-      <h2>{{ price_display }} <small class="text-muted">/ {{ interval }}</small></h2>
+      <h4>{% if course_offer %}{{ course_offer.name }}{% else %}{{ plan.name }}{% endif %}</h4>
+      <h2>{{ price_display }}</h2>
+      <p class="small text-muted"><strong>{{ billing_disclosure }}</strong></p>
       {% if features %}
       <ul class="list-unstyled mt-3">
         {% for f in features %}<li>&#10003; {{ f }}</li>{% endfor %}
@@ -21,12 +22,11 @@
       {% endif %}
       <hr>
       <p>You will be charged <strong>{{ price_display }}</strong> today.</p>
-      {% if trial_disclosure %}
-      <p class="text-warning"><strong>{{ trial_disclosure }}</strong></p>
-      {% endif %}
-
       {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
-      {% if expired and not already_captured %}
+      {% if trial_disallowed %}
+        <div class="alert alert-warning">Trial-to-renewal checkout is disabled. Choose a one-time purchase with a fixed access period instead.</div>
+        <a class="btn btn-outline-primary" href="/plans/">Back to plans</a>
+      {% elif expired and not already_captured %}
         <div class="alert alert-warning">This checkout has expired or already
         completed. Please start again from the plan page - your agreement is
         tied to one specific checkout and is never reused.</div>

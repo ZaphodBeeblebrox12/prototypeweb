@@ -40,6 +40,7 @@ td{padding:9px 0;border-bottom:1px solid #eef0f3}td:last-child{text-align:right;
 <tr class='total'><td>Total paid</td><td>{{ intent.currency }} {{ intent.amount_dollars|floatformat:2 }}</td></tr>
 {% endif %}
 </table>
+<p class="muted">This was a one-time payment. Access does not renew automatically.</p>
 {% if refunds %}
 <p style='font-size:13px;color:#b45309'>Refunded: {% for r in refunds %}{{ r.currency }} {{ r.amount_dollars|floatformat:2 }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
 {% endif %}

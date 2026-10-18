@@ -26,6 +26,7 @@ BASE_CTX = {
     "refunded_amount": "USD 5.00",
     "fully_refunded": False,
     "expires_display": "Oct 22, 2026",
+    "billing_disclosure": "This was a one-time payment. Access does not renew automatically.",
 }
 
 
@@ -37,6 +38,12 @@ class BillingEmailTemplateTests(TestCase):
             self.assertIn("TradeAdmin", html)          # branding
             self.assertIn("USD 9.99", html)            # payment data present
             self.assertIn("alice", html)               # personalization
+
+    def test_payment_success_discloses_one_time_billing(self):
+        html = render_to_string(
+            "payments/email/payment_success_body.html", BASE_CTX)
+        self.assertIn("one-time payment", html)
+        self.assertIn("does not renew automatically", html)
 
     def test_billing_templates_have_cta_button(self):
         html = render_to_string("payments/email/payment_success_body.html", BASE_CTX)

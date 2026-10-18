@@ -47,7 +47,7 @@
     <a class="btn" href="{{ django_admin_url }}">Open Django administration ↗</a>
   </header>
 
-  {% if accounts or subscriptions or course_metrics %}
+  {% if accounts or subscriptions %}
   <section class="section" aria-labelledby="business-overview-heading">
     <div class="section-head">
       <h2 id="business-overview-heading">Business overview</h2>
@@ -59,10 +59,6 @@
       {% endif %}
       {% if subscriptions %}
       <div class="metric"><span class="value">{{ subscriptions.active }}</span><span class="label">Active subscriptions</span></div>
-      {% endif %}
-      {% if course_metrics %}
-      <div class="metric"><span class="value">{{ course_metrics.published_courses }}</span><span class="label">Published courses</span></div>
-      <div class="metric"><span class="value">{{ course_metrics.active_entitlements }}</span><span class="label">Active course accesses</span></div>
       {% endif %}
     </div>
   </section>
@@ -114,6 +110,26 @@
   <section class="section" aria-labelledby="attention-heading">
     <div class="section-head"><h2 id="attention-heading">Items to check</h2><p>Only metrics allowed by your account permissions are shown</p></div>
     <div class="columns">
+      {% if policy_readiness %}
+      <div class="panel">
+        <h2>Sales readiness · legal policies</h2>
+        {% if policy_readiness.ready %}
+          <p class="note" style="margin-top:10px">All public policy pages have active, non-placeholder versions.</p>
+        {% else %}
+          <p class="note" style="margin-top:10px">Checkout consent is blocked while required policy versions are missing or still contain placeholders.</p>
+          <ul class="signal-list" style="margin-top:12px">
+            {% for item in policy_readiness.items %}
+              {% if not item.ready %}
+              <li>
+                <a href="{{ policy_readiness.url }}">Fix {{ item.label }}{% if item.version %} (v{{ item.version }}){% endif %} →</a>
+                <span class="note">{{ item.reason }}</span>
+              </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+      {% endif %}
       {% if payments %}
       <div class="panel">
         <h2>Payments</h2>
@@ -136,7 +152,7 @@
       <div class="panel">
         <h2>Community access</h2>
         <ul class="signal-list" style="margin-top:12px">
-          <li><a href="{{ telegram.links.failed }}">Failed Telegram/access operations (7 days)</a><span class="signal-count">{{ telegram.recent_failed }}</span></li>
+          <li><a href="{{ telegram.links.failed }}">Failed community-access operations (Telegram &amp; Discord, 7 days)</a><span class="signal-count">{{ telegram.recent_failed }}</span></li>
         </ul>
       </div>
       {% endif %}
@@ -160,7 +176,7 @@
         </ul>
       </div>
       {% endif %}
-      {% if not payments and not invoicing and not telegram and not jobs and not subscriptions %}
+      {% if not payments and not invoicing and not telegram and not jobs and not subscriptions and not policy_readiness %}
       <div class="panel"><p class="note">No operational metrics are available for your current permissions. Use Django administration to review the records you are authorised to access.</p></div>
       {% endif %}
     </div>

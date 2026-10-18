@@ -9,6 +9,9 @@ This is the small-creator go-live procedure for the Django payment flow. The app
 - The Django app verifies the Razorpay order server-side before marking the payment successful and granting access. Webhooks also use the common idempotent payment-activation flow.
 - A successful payment issues the saved invoice snapshot and sends the payment-success email via the existing notification service.
 - Tax remains off by default. Do not enable a tax percentage until the applicable treatment is confirmed.
+- Paid checkout is one-time only. Monthly, quarterly and yearly plans mean 30, 90 or 365 days of access bought once; they do not create a recurring provider subscription or charge the customer automatically again. Course offers are one-off purchases and may grant permanent or explicitly limited access.
+- Paid trial plans that advertise a later automatic conversion are blocked from checkout while recurring billing is unsupported.
+- Checkout consent is deliberately blocked if any required active policy still contains the seeded placeholder text. Publish the owner-approved versions before testing a real sale.
 
 This is hosted UPI through Razorpay. A separate manual UPI QR/VPA transfer flow with proof uploads and manual reconciliation is not implemented or needed for this checkout path.
 
@@ -65,6 +68,9 @@ Use your actual public HTTPS host; do not use localhost. After test transactions
 ## Before public sales
 
 - Confirm the current production plan prices and currencies in the production database.
+- Verify that production uses a durable database, that records survive a restart/redeploy, and that a recent backup can be restored. Do not assume the separate legacy `tradeadmin` database is the Academy database.
+- Replace and publish approved versions of all public policy pages (Terms, Refund & Cancellation, Cancellation, Risk Disclosure and Privacy). The policy admin flags placeholder or missing versions, and paid checkout refuses required placeholder consent documents.
+- Confirm `SITE_BASE_URL` is the correct public HTTPS URL in the Render service environment; keep provider and email secrets in Render, never in Git.
 - Populate Business and Tax Settings with your correct legal/seller details and support email.
 - Leave tax disabled until your CA confirms whether and how to charge it. The current configurable rate is a single fixed percentage, not a GST place-of-supply engine.
 - Keep invoice records and payment records intact; they are audit data and are intentionally read-only in Django Admin.

@@ -18,6 +18,33 @@ from apps.payments.models import PaymentIntent
 from apps.subscriptions.models import (
     Plan, PlanPrice, Subscription, SubscriptionHistory)
 
+
+def _ensure_checkout_test_policies():
+    """Publish clearly test-only non-placeholder policy versions for consent tests."""
+    from django.utils import timezone
+    from apps.policies.models import PolicyVersion
+    from apps.policies.services import (
+        CHECKOUT_POLICY_TYPES, is_placeholder_policy, publish,
+    )
+
+    titles = dict(PolicyVersion.PolicyType.choices)
+    for policy_type in CHECKOUT_POLICY_TYPES:
+        active = PolicyVersion.active(policy_type)
+        if active is not None and not is_placeholder_policy(active):
+            continue
+        test_version = PolicyVersion.objects.create(
+            policy_type=policy_type,
+            version="test-2.0",
+            title=titles[policy_type],
+            content_html=(
+                f"<p>Automated test policy for {policy_type}. "
+                "Not production legal copy.</p>"
+            ),
+            status=PolicyVersion.Status.DRAFT,
+            effective_from=timezone.now(),
+        )
+        publish(test_version)
+
 User = get_user_model()
 
 
@@ -43,12 +70,50 @@ class PurchaseFlowTests(APITestCase):
 
     def _consent(self, intent):
         """The agreement moment: ONE checkbox -> evidence -> provider handoff."""
+        _ensure_checkout_test_policies()
         return self.client.post(
             reverse("checkout-consent", args=[intent.id]), {"agree": "on"})
 
     def _confirm(self, intent_id):
         return self.client.post(reverse("payment-confirm"), {
             "payment_intent_id": str(intent_id)}, format="json")
+
+    def test_monthly_checkout_discloses_one_time_charge_and_fixed_access(self, _geo, prov):
+        plan, _ = make_plan("monthly")
+        started = self._start(plan.id, "monthly")
+        self.assertEqual(started.status_code, 200, started.data)
+        intent = PaymentIntent.objects.get()
+        response = self.client.get(reverse("checkout-consent", args=[intent.id]))
+
+        self.assertContains(response, "One-time payment for 30 days of access")
+        self.assertContains(response, "No automatic renewal")
+
+    def test_trial_conversion_plan_is_rejected_by_paid_checkout(self, _geo, prov):
+        plan, _ = make_plan("monthly")
+        plan.is_trial = True
+        plan.trial_duration_days = 7
+        plan.save(update_fields=["is_trial", "trial_duration_days"])
+
+        response = self._start(plan.id, "monthly")
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Trial-to-renewal checkout is disabled", response.data["detail"])
+        self.assertFalse(PaymentIntent.objects.filter(plan=plan).exists())
+        prov.create_hosted_checkout.assert_not_called()
+
+    def test_checkout_refuses_placeholder_policy_content(self, _geo, prov):
+        plan, _ = make_plan("monthly")
+        self._start(plan.id, "monthly")
+        intent = PaymentIntent.objects.get()
+
+        response = self.client.post(
+            reverse("checkout-consent", args=[intent.id]), {"agree": "on"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "launch placeholders")
+        prov.create_hosted_checkout.assert_not_called()
+        intent.refresh_from_db()
+        self.assertEqual(intent.provider_reference, "")
 
     def test_monthly_purchase_expires_in_30_days(self, _geo, prov):
         plan, _ = make_plan("monthly")
@@ -317,8 +382,7 @@ class CtaFlowTests(APITestCase):
         intent = PaymentIntent.objects.get()
         self.assertEqual(intent.plan_price.interval, "quarterly")
         self.assertEqual(intent.provider_reference, "")  # consent-first
-        self.client.post(reverse("checkout-consent", args=[intent.id]),
-                         {"agree": "on"})
+        self._consent(intent)
         intent.refresh_from_db()
         self.assertEqual(intent.provider_reference, "cs_cta")
 

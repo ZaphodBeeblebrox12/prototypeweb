@@ -19,7 +19,7 @@ from . import providers
 from .models import BillingSettings, Invoice, PaymentIntent, WebhookEvent
 from .notifications import notify_payment_failed
 from .invoicing import calculate_price_breakdown
-from .services import activate_paid_subscription
+from .services import activate_paid_subscription, interval_days_for
 
 from apps.growth.services.referrals import ReferralService
 
@@ -64,6 +64,14 @@ def payment_start(request):
     from apps.academy.models import CourseOffer
     course_offer = (CourseOffer.objects.filter(plan=plan)
                     .select_related("course").first())
+    if plan.is_trial:
+        return Response(
+            {"detail": (
+                "Trial-to-renewal checkout is disabled. Choose a one-time "
+                "purchase with a fixed access period instead."
+            )},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
     if course_offer is not None:
         if not course_offer.is_saleable:
             return Response({"detail": "This course offer is not available for purchase."},
@@ -768,23 +776,6 @@ def upgrade_start(request):
 import json as _json
 
 
-def _trial_disclosure(intent) -> str:
-    """Plain-language billing disclosure shown ABOVE the consent checkbox -
-    never hidden inside the Terms."""
-    plan = intent.plan
-    pp = intent.plan_price
-    if getattr(plan, "is_trial", False):
-        days = getattr(plan, "trial_duration_days", None) or 7
-        # base_amount = full commercial base (the PlanPrice row on a trial
-        # plan is the trial fee, not the conversion price).
-        conv = intent.base_amount_cents or 0
-        return (f"${intent.amount / 100:.0f} for the first "
-                f"{days} days, then renews at ${conv / 100:.0f}/"
-                f"{getattr(pp, 'interval', 'monthly')} unless cancelled "
-                f"before the trial ends.")
-    return ""
-
-
 class CheckoutConsentView(APIView):
     """The agreement moment. ONE affirmative checkbox; granular records.
 
@@ -804,6 +795,12 @@ class CheckoutConsentView(APIView):
         intent = get_object_or_404(
             PaymentIntent, pk=pk, user=request.user,
             status=PaymentIntent.Status.PENDING)
+        if intent.plan.is_trial:
+            return _consent_response(
+                request, pk,
+                error=("Trial-to-renewal checkout is disabled. "
+                       "Choose a one-time purchase instead."),
+            )
         agreed = request.data.get("agree") in ("on", "true", "1", True)
         if not agreed:
             return _consent_response(
@@ -853,7 +850,11 @@ def _consent_response(request, pk, error=None):
     from apps.policies.services import active_versions
     from apps.subscriptions.services import format_price
     intent = get_object_or_404(PaymentIntent, pk=pk, user=request.user)
-    already = CheckoutEvidence.objects.filter(payment_intent=intent).exists()
+    trial_disallowed = bool(intent.plan.is_trial)
+    already = (
+        CheckoutEvidence.objects.filter(payment_intent=intent).exists()
+        and not trial_disallowed
+    )
     expired = intent.status != PaymentIntent.Status.PENDING
     policies = active_versions()
     features = []
@@ -863,9 +864,27 @@ def _consent_response(request, pk, error=None):
         if line:
             features.append(line)
     course_offer = _course_offer_for_payment(intent)
-    interval = ("one_time" if course_offer is not None
-                else getattr(intent.plan_price or intent.geo_plan_price, "interval", "monthly"))
-    interval_label = "one-time payment" if interval == "one_time" else interval
+    if trial_disallowed:
+        billing_disclosure = (
+            "Trial-to-renewal checkout is disabled. This offer cannot be purchased here."
+        )
+    elif course_offer is not None:
+        duration_days = course_offer.access_duration_days
+        if duration_days is None:
+            billing_disclosure = (
+                "One-time payment. Permanent course access; it will not renew automatically."
+            )
+        else:
+            billing_disclosure = (
+                f"One-time payment. Course access lasts {duration_days} days; "
+                "it will not renew automatically."
+            )
+    else:
+        access_days = interval_days_for(intent)
+        billing_disclosure = (
+            f"One-time payment for {access_days} days of access. "
+            "No automatic renewal."
+        )
     subtotal_cents = intent.subtotal_cents or max(intent.amount - intent.tax_amount_cents, 0)
     return render(request, "payments/checkout_consent.html", {
         "intent": intent, "plan": intent.plan, "course_offer": course_offer,
@@ -875,9 +894,9 @@ def _consent_response(request, pk, error=None):
         "tax_enabled": intent.tax_enabled,
         "tax_label": intent.tax_label,
         "tax_rate_display": intent.tax_rate_percentage,
-        "interval": interval, "interval_label": interval_label,
+        "billing_disclosure": billing_disclosure,
+        "trial_disallowed": trial_disallowed,
         "features": features,
-        "trial_disclosure": _trial_disclosure(intent),
         "policies": policies,
         "already_captured": already,
         "expired": expired,
