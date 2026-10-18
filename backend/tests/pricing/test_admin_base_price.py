@@ -28,6 +28,21 @@ EMPTY_FEATURES_FORMSET = {
     "features-0-id": "",
 }
 
+# New optional delivery inlines must submit management forms even when a plan
+# remains in the legacy direct-only configuration.
+EMPTY_CHANNEL_MAPPINGS_FORMSET = {
+    "bot_channel_mappings-TOTAL_FORMS": "0",
+    "bot_channel_mappings-INITIAL_FORMS": "0",
+    "bot_channel_mappings-MIN_NUM_FORMS": "0",
+    "bot_channel_mappings-MAX_NUM_FORMS": "1000",
+}
+EMPTY_MESH_MAPPINGS_FORMSET = {
+    "mesh_mappings-TOTAL_FORMS": "0",
+    "mesh_mappings-INITIAL_FORMS": "0",
+    "mesh_mappings-MIN_NUM_FORMS": "0",
+    "mesh_mappings-MAX_NUM_FORMS": "1000",
+}
+
 
 @pytest.mark.django_db
 def test_global_plus_geo_overrides_save(client):
@@ -35,6 +50,7 @@ def test_global_plus_geo_overrides_save(client):
     _admin(client)
     data = {
         **PLAN, **EMPTY_FEATURES_FORMSET,
+        **EMPTY_CHANNEL_MAPPINGS_FORMSET, **EMPTY_MESH_MAPPINGS_FORMSET,
         "prices-TOTAL_FORMS": "1", "prices-INITIAL_FORMS": "0",
         "prices-MIN_NUM_FORMS": "0", "prices-MAX_NUM_FORMS": "1000",
         "prices-0-id": "", "prices-0-interval": "monthly",
@@ -80,6 +96,7 @@ def test_duplicate_global_base_is_inline_error_not_500(client):
     _admin(client)
     data = {
         **PLAN, **EMPTY_FEATURES_FORMSET,
+        **EMPTY_CHANNEL_MAPPINGS_FORMSET, **EMPTY_MESH_MAPPINGS_FORMSET,
         "prices-TOTAL_FORMS": "2", "prices-INITIAL_FORMS": "0",
         "prices-MIN_NUM_FORMS": "0", "prices-MAX_NUM_FORMS": "1000",
         "prices-0-id": "", "prices-1-id": "",
