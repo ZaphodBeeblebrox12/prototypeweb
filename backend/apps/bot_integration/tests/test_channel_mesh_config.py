@@ -21,19 +21,22 @@ class FakeMeshTransport:
     def __init__(self):
         self.grants = []
         self.revokes = []
+        self.membership = {}
 
     def create_invite_link(self, telegram_user_id, channel_id, idempotency_key=None):
         self.grants.append((telegram_user_id, channel_id, idempotency_key))
+        self.membership.setdefault(channel_id, True)
         return "https://t.me/+test-mesh"
 
     def send_invite_dm(self, telegram_user_id, channel_id, invite_link):
         return True
 
     def is_member(self, telegram_user_id, channel_id):
-        return True
+        return self.membership.get(channel_id, True)
 
     def revoke(self, telegram_user_id, channel_id, idempotency_key=None):
         self.revokes.append((telegram_user_id, channel_id, idempotency_key))
+        self.membership[channel_id] = False
         return mock.Mock(ok=True, retryable=False)
 
 
