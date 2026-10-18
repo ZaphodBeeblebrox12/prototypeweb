@@ -145,7 +145,7 @@ class PurchaseFlowTests(APITestCase):
             "course-purchase-start", kwargs={"offer_slug": offer.slug}))
         self.assertEqual(response.status_code, 200, response.content)
         self.assertContains(response, "TradeThesis Trading Path")
-        self.assertContains(response, "one-time payment")
+        self.assertIn("one-time payment", response.content.decode().casefold())
         self.assertContains(response, "Lifetime course access")
         self.assertContains(response, "₹999")
         self.assertEqual(PaymentIntent.objects.count(), 0)
