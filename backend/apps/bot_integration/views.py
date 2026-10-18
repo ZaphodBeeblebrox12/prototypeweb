@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError
+from django.db.models import Prefetch
 from django.utils import timezone
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -596,7 +597,7 @@ def bot_mesh_inventory(request):
 
     mesh_key = str(data.get("mesh_key") or "").strip()
     meshes = ChannelMesh.objects.filter(is_active=True).prefetch_related(
-        __import__("django.db.models", fromlist=["Prefetch"]).Prefetch(
+        Prefetch(
             "destinations",
             queryset=ChannelMeshDestination.objects.filter(is_active=True).order_by(
                 "name", "external_id"
