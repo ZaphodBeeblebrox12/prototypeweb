@@ -6,7 +6,7 @@ network request is made.
 from urllib.parse import parse_qs, urlsplit
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from apps.bot_integration.models import BotConfig, TelegramVerificationToken
@@ -37,20 +37,32 @@ class TelegramConnectionFlowTests(TestCase):
     def test_member_desk_connect_button_uses_deep_link_route(self):
         response = self.client.get(reverse("dashboard"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(
-            response,
-            f'href="{reverse("bot_integration:telegram_connect")}"',
-        )
+        connect_path = reverse("bot_integration:telegram_connect")
+        self.assertContains(response, f'href="{connect_path}"')
 
     def test_missing_bot_username_returns_to_member_desk_not_legacy_profile(self):
         self.configure_bot("")
-        response = self.client.get(reverse("bot_integration:telegram_connect"))
+        with override_settings(TELEGRAM_BOT_USERNAME=""):
+            response = self.client.get(reverse("bot_integration:telegram_connect"))
 
         self.assertRedirects(response, reverse("dashboard"), fetch_redirect_response=False)
         follow = self.client.get(response["Location"])
         self.assertEqual(follow.status_code, 200)
-        self.assertContains(follow, "Telegram bot is not configured")
+        self.assertContains(follow, "Telegram connection is not configured yet")
         self.assertNotEqual(response["Location"], reverse("profile"))
+
+    def test_environment_bot_username_is_used_when_database_username_is_blank(self):
+        self.configure_bot("")
+        with override_settings(TELEGRAM_BOT_USERNAME="@tradethesis_env_bot"):
+            response = self.client.get(reverse("bot_integration:telegram_connect"))
+
+        self.assertEqual(response.status_code, 302)
+        parsed = urlsplit(response["Location"])
+        self.assertEqual(parsed.netloc, "t.me")
+        self.assertEqual(parsed.path, "/tradethesis_env_bot")
+        self.assertTrue(
+            parse_qs(parsed.query).get("start", [""])[0].startswith("verify_")
+        )
 
     def test_connect_generates_verification_token_and_redirects_to_telegram(self):
         self.configure_bot("tradethesis_test_bot")
