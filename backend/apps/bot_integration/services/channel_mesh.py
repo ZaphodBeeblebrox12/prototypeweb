@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
+from apps.jobs.enqueue import enqueue_reconcile
 from apps.subscriptions.models import Subscription
 from ..models import (
     ChannelMesh,
@@ -75,6 +76,13 @@ def assign_user_to_mesh_spawn(user, mesh, destination):
             and assignment.is_active
             and assignment.revoked_at is None
         ):
+            # An idempotent allocator retry also repairs a missing/coalesced
+            # reconciliation request without creating a duplicate assignment.
+            transaction.on_commit(
+                lambda: enqueue_reconcile(
+                    user_id, reason="channel_mesh_assignment_confirmed"
+                )
+            )
             return assignment
 
         # Do not free the previous spawn in the allocator's ledger while a
