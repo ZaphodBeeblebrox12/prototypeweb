@@ -288,13 +288,18 @@ def staff_admin_desk(request):
     context = _subscription_dashboard_context(request)
     context["django_admin_url"] = reverse("admin:index")
     context["can_manage_course_content"] = is_course_content_admin(request.user)
+    from apps.payments.models import BillingSettings
+    billing_settings_exist = BillingSettings.objects.filter(pk=1).exists()
     context["desk_access"] = {
         "accounts": _has_model_perm(request, "accounts", "user"),
         "subscriptions": _has_model_perm(request, "subscriptions", "subscription"),
         "finance": (_has_model_perm(request, "payments", "paymentintent")
                     or _has_model_perm(request, "payments", "invoice")),
-        "business": (_has_model_perm(request, "payments", "billingsettings", "change")
-                     or _has_model_perm(request, "payments", "billingsettings", "add")),
+        "business": (
+            _has_model_perm(request, "payments", "billingsettings", "change")
+            if billing_settings_exist
+            else _has_model_perm(request, "payments", "billingsettings", "add")
+        ),
     }
 
     if context["can_manage_course_content"]:

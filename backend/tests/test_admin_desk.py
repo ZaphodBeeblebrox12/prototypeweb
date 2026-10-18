@@ -66,7 +66,7 @@ class AdminDeskTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Admin Desk")
-        self.assertContains(response, "Open Django administration")
+        self.assertContains(response, "Advanced administration (rare use)")
         self.assertEqual(response.context["course_metrics"]["draft_courses"], 1)
         self.assertEqual(response.context["course_metrics"]["published_courses"], 1)
         self.assertEqual(response.context["course_metrics"]["published_lessons"], 1)

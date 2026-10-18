@@ -36,6 +36,14 @@ def _audit(action, actor, object_type, object_id, metadata=None):
 
 
 def _nav(request):
+    from apps.payments.models import BillingSettings
+
+    settings_exist = BillingSettings.objects.filter(pk=1).exists()
+    business_allowed = (
+        _allowed(request.user, "payments.change_billingsettings")
+        if settings_exist
+        else _allowed(request.user, "payments.add_billingsettings")
+    )
     return {
         "accounts": _allowed(request.user, "accounts.view_user"),
         "subscriptions": _allowed(request.user, "subscriptions.view_subscription"),
@@ -43,10 +51,7 @@ def _nav(request):
             _allowed(request.user, "payments.view_paymentintent")
             or _allowed(request.user, "payments.view_invoice")
         ),
-        "business": (
-            _allowed(request.user, "payments.change_billingsettings")
-            or _allowed(request.user, "payments.add_billingsettings")
-        ),
+        "business": business_allowed,
     }
 
 
@@ -364,10 +369,15 @@ class BusinessSettingsForm(forms.Form):
 @login_required
 def admin_desk_business(request):
     _guard(request)
-    if not (_allowed(request.user, "payments.change_billingsettings") or _allowed(request.user, "payments.add_billingsettings")):
-        raise PermissionDenied
     from apps.payments.models import BillingSettings, Invoice
-    instance = BillingSettings.objects.filter(pk=1).first() or BillingSettings(pk=1)
+
+    instance = BillingSettings.objects.filter(pk=1).first()
+    if instance is None:
+        if not _allowed(request.user, "payments.add_billingsettings"):
+            raise PermissionDenied
+        instance = BillingSettings(pk=1)
+    elif not _allowed(request.user, "payments.change_billingsettings"):
+        raise PermissionDenied
     form = BusinessSettingsForm(request.POST if request.method == "POST" else None, instance=instance)
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
