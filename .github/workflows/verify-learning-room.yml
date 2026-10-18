@@ -440,16 +440,17 @@ jobs:
               "Member-area sample data must be clearly identified as a preview");
             console.log("MEMBER_UX_PASS: preview-only auth copy, light theme and mobile fit.");
 
-            // Public course and enquiry journeys must clearly identify static-preview behaviour.
+            // The Trading Path now targets Academy checkout. Local preview hosts are
+            // deliberately unmapped and must stop safely without creating a payment.
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
             await cataloguePage.goto(server + "/trading-path.html", { waitUntil: "networkidle" });
-            await cataloguePage.locator("[data-preview-checkout]").first().click();
+            await cataloguePage.locator("[data-course-purchase]").first().click();
             assert.ok((await cataloguePage.locator("#previewModal").getAttribute("class")).includes("open"),
-              "Trading Path checkout CTA should open its preview disclosure");
-            assert.ok((await cataloguePage.locator("#previewModal").innerText()).includes("Checkout is not connected yet."),
-              "Trading Path checkout CTA must not imply a live checkout");
+              "Unconfigured Trading Path checkout should show a helpful configuration disclosure");
+            assert.ok((await cataloguePage.locator("#previewModal").innerText()).includes("Checkout is not configured yet."),
+              "Local preview hosts must not be routed to a live or staging checkout");
             assert.ok((await cataloguePage.locator("#previewModal").innerText()).includes("No payment has been taken."),
-              "Trading Path checkout CTA must explicitly state that no payment was taken");
+              "Unconfigured checkout must explicitly state that no payment was taken");
             await cataloguePage.locator("#previewModal .close").click();
 
             await cataloguePage.goto(server + "/construct.html", { waitUntil: "networkidle" });
