@@ -46,7 +46,10 @@ class PaymentSuccessEmailInvoiceTests(TestCase):
         self.assertEqual(self.payment.status, PaymentIntent.Status.PENDING)
 
         # Keep the test focused on email preparation, not external delivery.
-        with patch("apps.payments.notifications._send") as send:
+        with (
+            patch("apps.payments.notifications._send") as send,
+            patch("apps.payments.providers.fetch_payment_method", return_value="upi"),
+        ):
             notify_payment_succeeded(self.payment)
 
         self.assertEqual(self.payment.status, PaymentIntent.Status.SUCCESS)
@@ -54,6 +57,7 @@ class PaymentSuccessEmailInvoiceTests(TestCase):
         context = send.call_args.args[3]
 
         self.assertEqual(context["invoice_number"], invoice.invoice_number)
+        self.assertEqual(context["payment_method_display"], "UPI")
         self.assertTrue(context["invoice_url"])
         self.assertEqual(context["provider_payment_id"], "pay_test_transaction")
         self.assertEqual(context["provider_reference"], "order_test_reference")
@@ -67,7 +71,9 @@ class PaymentSuccessEmailInvoiceTests(TestCase):
                 self.assertIn(context["invoice_url"], body)
                 self.assertIn("pay_test_transaction", body)
                 self.assertIn("order_test_reference", body)
+                self.assertIn("UPI", body)
 
+        self.assertIn("Payment method", html)
         self.assertIn("Payment transaction ID", html)
         self.assertIn("Order / checkout reference", html)
         self.assertIn("Invoice number", html)
