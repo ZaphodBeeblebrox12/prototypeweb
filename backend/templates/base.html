@@ -7,192 +7,72 @@
     <title>{% block title %}TradeThesis · Trading Education{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-
-    <!-- Referral UI CSS -->
+    <link rel="stylesheet" href="{% static 'css/sitewide-nav.css' %}">
     <link rel="stylesheet" href="{% static 'css/referral.css' %}">
-
     <style>
         :root {
-            --sidebar-width: 224px;
-            --tt-paper: #fbfaf6;
-            --tt-surface: #fffefa;
-            --tt-ink: #26342f;
-            --tt-muted: #68736c;
-            --tt-line: #dedfd5;
-            --tt-green: #456653;
-            --tt-green-pale: #edf2ed;
+            --tt-paper: #f8f2e8;
+            --tt-surface: #fffdf9;
+            --tt-ink: #29382e;
+            --tt-muted: #687268;
+            --tt-line: #ded8ca;
+            --tt-green: #355a46;
+            --tt-green-pale: #e6edde;
         }
-        body { min-height: 100vh; background: var(--tt-paper); color: var(--tt-ink); }
+        body { min-height: 100vh; margin: 0; background: var(--tt-paper); color: var(--tt-ink); }
         .tt-skip-link { position: absolute; top: 8px; left: 8px; z-index: 2000; transform: translateY(-160%); padding: 9px 12px; background: #fff; color: #203e2f; border: 2px solid var(--tt-green); }
         .tt-skip-link:focus { transform: translateY(0); }
-        .sidebar { width: var(--sidebar-width); height: 100vh; position: fixed; top: 0; left: 0; background: var(--tt-surface); color: var(--tt-ink); border-right: 1px solid var(--tt-line); padding-top: 12px; z-index: 1000; overflow-y: auto; }
-        .sidebar-brand { padding: 14px 17px 17px; border-bottom: 1px solid var(--tt-line); margin-bottom: 12px; }
-        .sidebar-brand-link { display: block; }
-        .sidebar-brand img { display: block; width: 170px; max-width: 100%; height: auto; }
-        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
-        .sidebar-menu li { margin: 3px 0; }
-        .sidebar-menu a { display: flex; align-items: center; padding: 10px 15px; border-left: 3px solid transparent; color: #48594e; text-decoration: none; transition: background-color .15s ease; }
-        .sidebar-menu a:hover, .sidebar-menu a.active { background: var(--tt-green-pale); border-left-color: #77947c; color: #284a35; }
-        .sidebar-menu i { margin-right: 10px; font-size: 1.05rem; }
-        .main-content { margin-left: var(--sidebar-width); padding: 22px clamp(14px, 2.4vw, 32px); min-height: 100vh; background: var(--tt-paper); }
-        .top-navbar { display: flex; justify-content: space-between; align-items: center; gap: 18px; background: var(--tt-surface); border: 1px solid var(--tt-line); border-radius: 3px; padding: 12px 18px; margin-bottom: 20px; box-shadow: none; }
-        .user-menu { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-        .user-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; }
-        .card { border: 1px solid var(--tt-line); border-radius: 3px; box-shadow: none; background: var(--tt-surface); }
-        .card-header { background: #f5f5ef; border-bottom: 1px solid var(--tt-line); font-weight: 650; }
-        .btn-primary { background: var(--tt-green); border: 1px solid var(--tt-green); }
+        .main-content { width: min(1500px, 100%); margin: 0 auto; padding: 24px clamp(16px, 3.5vw, 42px) 48px; min-height: calc(100vh - 76px); }
+        .page-context { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin: 0 0 22px; padding: 0 0 18px; border-bottom: 1px solid var(--tt-line); }
+        .page-context h1 { margin: 0; color: var(--tt-ink); font: 400 clamp(25px, 3vw, 34px)/1.12 Georgia, "Times New Roman", serif; letter-spacing: -.025em; }
+        .page-context p { margin: 7px 0 0; color: var(--tt-muted); font-size: 12px; }
+        .page-context-status { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
+        .page-context-status .badge { font-weight: 600; }
+        .card { border: 1px solid var(--tt-line); border-radius: 5px; box-shadow: none; background: var(--tt-surface); }
+        .card-header { background: #f5f1e8; border-bottom: 1px solid var(--tt-line); font-weight: 650; }
+        .btn-primary { background: var(--tt-green); border-color: var(--tt-green); }
         .btn-primary:hover, .btn-primary:focus { background: #304b39; border-color: #304b39; }
-        .status-badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; font-size: .85rem; font-weight: 500; }
-        .status-connected { background: #e6efe5; color: #30513b; }
-        .status-disconnected { background: #f8e9e7; color: #8b3f39; }
         .telegram-widget-container { margin: 20px 0; }
-        .tt-nav-toggle { display: none; margin: 0 0 14px; padding: 8px 12px; border: 1px solid var(--tt-line); background: var(--tt-surface); color: var(--tt-ink); border-radius: 3px; font: inherit; }
-        .sidebar-scrim { display: none; }
-        @media (max-width: 768px) {
-            .sidebar { transform: translateX(-105%); transition: transform .2s ease; box-shadow: 6px 0 22px rgba(26, 39, 30, .08); }
-            .sidebar.show { transform: translateX(0); }
-            .main-content { margin-left: 0; padding: 15px 13px 26px; }
-            .top-navbar { align-items: flex-start; flex-direction: column; padding: 12px; }
-            .tt-nav-toggle { display: inline-flex; align-items: center; gap: 8px; }
-            .sidebar-scrim:not([hidden]) { display: block; position: fixed; inset: 0; padding: 0; margin: 0; border: 0; background: rgba(31, 43, 34, .25); z-index: 999; }
+        .messages { margin-bottom: 18px; }
+        @media (max-width: 820px) {
+            .main-content { padding: 18px 16px 34px; }
+            .page-context { gap: 12px; }
         }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     <a class="tt-skip-link" href="#mainContent">Skip to main content</a>
-    <!-- Sidebar -->
-    <nav class="sidebar" id="siteSidebar" aria-label="Main navigation">
-        <div class="sidebar-brand">
-            <a class="sidebar-brand-link" href="/" aria-label="TradeThesis home">
-                <img src="{% static 'brand/tradethesis-horizontal.png' %}" alt="TradeThesis">
-            </a>
-        </div>
-        <ul class="sidebar-menu">
-            {% if user.is_authenticated %}
-            <li>
-                <a href="{% url 'dashboard' %}" class="{% if request.path == '/dashboard/' %}active{% endif %}">
-                    <i class="bi bi-speedometer2"></i> Dashboard
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'profile' %}" class="{% if request.path == '/profile/' %}active{% endif %}">
-                    <i class="bi bi-person"></i> Profile
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'notifications' %}" class="{% if request.path == '/notifications/' %}active{% endif %}">
-                    <i class="bi bi-bell"></i> Notifications
-                    {% if unread_count > 0 %}
-                    <span class="badge bg-danger ms-auto">{{ unread_count }}</span>
-                    {% endif %}
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'activity' %}" class="{% if request.path == '/activity/' %}active{% endif %}">
-                    <i class="bi bi-clock-history"></i> Activity
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'support:my_tickets' %}" class="{% if '/support/' in request.path %}active{% endif %}">
-                    <i class="bi bi-headset"></i> Support
-                </a>
-            </li>
-            <!-- REFERRAL LINK IN SIDEBAR with credit badge -->
-            <li>
-                {% include "growth/partials/navbar_badge.html" with nav_type="sidebar" %}
-            </li>
-            <li class="mt-auto">
-                <a href="{% url 'account_logout' %}">
-                    <i class="bi bi-box-arrow-right"></i> Logout
-                </a>
-            </li>
-            {% else %}
-            <li>
-                <a href="{% url 'account_login' %}">
-                    <i class="bi bi-box-arrow-in-right"></i> Login
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'account_signup' %}">
-                    <i class="bi bi-person-plus"></i> Sign Up
-                </a>
-            </li>
-            {% endif %}
-        </ul>
-    </nav>
-    <button class="sidebar-scrim" type="button" data-sidebar-scrim hidden aria-label="Close navigation"></button>
-
-    <!-- Main Content -->
+    {% include "partials/sitewide_nav.html" %}
     <main class="main-content" id="mainContent" tabindex="-1">
-        <button class="tt-nav-toggle" type="button" data-sidebar-toggle aria-controls="siteSidebar" aria-expanded="false">
-            <i class="bi bi-list" aria-hidden="true"></i> Menu
-        </button>
         {% if user.is_authenticated %}
-        <div class="top-navbar d-flex justify-content-between align-items-center">
+        <header class="page-context">
             <div>
-                <h5 class="mb-0">{% block page_title %}Dashboard{% endblock %}</h5>
-                <small class="text-muted">Welcome back, {{ user.first_name|default:user.username }}</small>
+                <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+                <p>Welcome back, {{ user.first_name|default:user.username }}</p>
             </div>
-            <div class="user-menu">
-                {% if user.is_banned %}
-                <span class="badge bg-danger">BANNED</span>
-                {% endif %}
-                {% if user.telegram_verified %}
-                <span class="badge bg-success"><i class="bi bi-telegram"></i> Connected</span>
-                {% endif %}
-                <!-- REFERRAL BADGE IN TOP NAVBAR -->
-                {% include "growth/partials/navbar_badge.html" %}
-                <div class="dropdown">
-                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
-                        {% if user.avatar %}
-                        <img src="{{ user.avatar.url }}" alt="Avatar" class="user-avatar">
-                        {% else %}
-                        <div class="user-avatar bg-primary d-flex align-items-center justify-content-center text-white">
-                            {{ user.username|first|upper }}
-                        </div>
-                        {% endif %}
-                        <span class="ms-2">{{ user.username }}</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{% url 'profile' %}"><i class="bi bi-person"></i> Profile</a></li>
-                        <!-- REFERRAL IN DROPDOWN -->
-                        <li>
-                            <a class="dropdown-item" href="{% url 'growth:referral_dashboard' %}">
-                                <i class="bi bi-gift text-success"></i> Referral Credits
-                                {% if referral_stats.total_rewards_available_cents > 0 %}
-                                <span class="badge bg-success ms-2">{{ referral_stats.total_rewards_available_display }}</span>
-                                {% endif %}
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="{% url 'account_logout' %}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
-                    </ul>
-                </div>
+            <div class="page-context-status">
+                {% if user.is_banned %}<span class="badge bg-danger">BANNED</span>{% endif %}
+                {% if user.telegram_verified %}<span class="badge bg-success"><i class="bi bi-telegram"></i> Telegram connected</span>{% endif %}
             </div>
-        </div>
+        </header>
         {% endif %}
-
         {% if messages %}
         <div class="messages">
             {% for message in messages %}
             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                 {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Dismiss"></button>
             </div>
             {% endfor %}
         </div>
         {% endif %}
-
         {% block content %}{% endblock %}
     </main>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Confetti library (MUST be before referral-celebrations.js) -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- Referral celebrations script -->
     <script src="{% static 'js/referral-celebrations.js' %}"></script>
-    <script src="{% static 'js/site-navigation.js' %}" defer></script>
+    <script src="{% static 'js/sitewide-nav.js' %}" defer></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>
