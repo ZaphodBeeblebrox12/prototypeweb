@@ -16,8 +16,11 @@ from django.core.cache import cache
 from django.utils import timezone
 
 from .access import compute_target_access
-from .models import (TelegramAccount, DiscordAccount, PlanChannelMapping,
-                     UserChannelAssignment, BotAccessAudit)
+from .models import (
+    TelegramAccount, DiscordAccount, PlanChannelMapping,
+    ChannelMeshDestination, UserChannelAssignment, BotAccessAudit,
+)
+from .services.channel_mesh import deactivate_revoked_mesh_assignments
 from .services.discord import DiscordBotService
 
 logger = logging.getLogger(__name__)
@@ -42,6 +45,7 @@ def reconcile_user_access(user_id):
         tg = TelegramAccount.objects.filter(user_id=user_id, is_active=True).first()
         if tg:
             _reconcile_telegram(user_id, tg, target)
+            deactivate_revoked_mesh_assignments(user_id, target)
 
         dc = DiscordAccount.objects.filter(user_id=user_id, is_active=True).first()
         if dc and not _reconcile_discord(user_id, dc, target):
@@ -101,7 +105,12 @@ def _tg_notify_grant(account, channel_id, ok, error_message=""):
         from .services.telegram import TelegramBotService
         name = (PlanChannelMapping.objects
                 .filter(platform="telegram", external_id=str(channel_id))
-                .values_list("name", flat=True).first()) or str(channel_id)
+                .values_list("name", flat=True).first())
+        if not name:
+            name = (ChannelMeshDestination.objects
+                    .filter(external_id=str(channel_id))
+                    .values_list("name", flat=True).first())
+        name = name or str(channel_id)
         if ok:
             text = "\u2705 You're in! You now have access to {}.".format(name)
         else:
