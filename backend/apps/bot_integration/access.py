@@ -6,7 +6,7 @@ all mapped channels/roles rather than the mappings for only the newest plan.
 """
 from dataclasses import dataclass, field
 
-from .models import PlanChannelMapping
+from .models import PlanChannelMapping, PlanMeshMapping, UserMeshAssignment
 from apps.subscriptions.models import Subscription
 
 
@@ -15,6 +15,7 @@ class AccessTarget:
     has_plan: bool = False
     telegram_ids: set = field(default_factory=set)
     discord_ids: set = field(default_factory=set)
+    mesh_ids: set = field(default_factory=set)
 
 
 def get_active_plans(user_id):
@@ -51,4 +52,25 @@ def compute_target_access(user_id) -> AccessTarget:
             target.telegram_ids.add(external_id)
         elif platform == "discord":
             target.discord_ids.add(external_id)
+
+    # A Mesh plan grants only the member's selected spawn. Never grant the
+    # Mesh source or every configured spawn merely because the plan references
+    # a Mesh. Spawn selection is persisted separately by the allocation policy.
+    target.mesh_ids = set(
+        PlanMeshMapping.objects.filter(
+            plan_id__in=plan_ids,
+            is_active=True,
+            mesh__is_active=True,
+        ).values_list("mesh_id", flat=True)
+    )
+    if target.mesh_ids:
+        assigned_spawn_ids = UserMeshAssignment.objects.filter(
+            user_id=user_id,
+            mesh_id__in=target.mesh_ids,
+            is_active=True,
+            mesh__is_active=True,
+            destination__is_active=True,
+        ).values_list("destination__external_id", flat=True)
+        target.telegram_ids.update(assigned_spawn_ids)
+
     return target
