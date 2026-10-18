@@ -243,6 +243,13 @@ class AdminDeskAccessTest(TestCase):
             email="desk-member@example.com",
             is_staff=False,
         )
+        from allauth.account.models import EmailAddress
+        EmailAddress.objects.create(
+            user=self.member_user,
+            email=self.member_user.email,
+            primary=True,
+            verified=True,
+        )
 
     def test_staff_admin_desk_uses_shared_header_and_single_page_heading(self):
         self.client.force_login(self.staff_user)
