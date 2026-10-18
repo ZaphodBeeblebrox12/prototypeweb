@@ -117,6 +117,10 @@ def unlink_discord(request):
             )
         else:
             failed_roles.append(role_id)
+            # Persist every failed managed role even if the account/assignment
+            # caches were stale, so it remains retryable if the plan mapping is
+            # later edited or removed.
+            remaining_roles.add(role_id)
             BotAccessAudit.objects.create(
                 user=request.user,
                 action="revoke",
@@ -127,7 +131,14 @@ def unlink_discord(request):
             )
 
     dc.roles = sorted(remaining_roles)
-    dc.save(update_fields=["roles"])
+    if failed_roles:
+        # Pause normal reconciliation while disconnect is pending; otherwise
+        # an active entitlement could re-grant a role the member is trying to
+        # remove before their next retry.
+        dc.is_active = False
+        dc.save(update_fields=["roles", "is_active"])
+    else:
+        dc.save(update_fields=["roles"])
 
     if failed_roles:
         # Keep the association so a later attempt still knows which Discord
@@ -247,6 +258,16 @@ def telegram_webhook(request):
 @login_required
 def discord_oauth_start(request):
     """Begin a session-bound OAuth flow for linking and joining the community."""
+    if DiscordAccount.objects.filter(
+        user=request.user, is_active=False
+    ).exists():
+        messages.error(
+            request,
+            "A previous Discord disconnect is still pending. Retry disconnecting "
+            "from Connections before linking Discord again.",
+        )
+        return _discord_connections_redirect()
+
     config = BotConfig.get_config()
     required_config = (
         config.discord_client_id,
@@ -373,6 +394,14 @@ def discord_oauth_callback(request):
         return _discord_connections_redirect()
 
     current_account = DiscordAccount.objects.filter(user=request.user).first()
+    if current_account and not current_account.is_active:
+        messages.error(
+            request,
+            "A previous Discord disconnect is still pending. Retry disconnecting "
+            "from Connections before linking Discord again.",
+        )
+        return _discord_connections_redirect()
+
     if current_account and current_account.discord_user_id != discord_id:
         messages.error(
             request,
