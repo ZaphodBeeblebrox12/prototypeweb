@@ -4,7 +4,9 @@ from django.test import TestCase
 from django.utils import timezone
 
 from apps.bot_integration.models import (
-    BotAccessAudit, PlanChannelMapping, TelegramAccount, UserChannelAssignment)
+    BotAccessAudit, ChannelMesh, ChannelMeshDestination, PlanChannelMapping,
+    PlanMeshMapping, TelegramAccount, UserChannelAssignment, UserMeshAssignment,
+)
 from apps.bot_integration.services.channel_sync import get_telegram_access_state
 from apps.subscriptions.models import Plan, Subscription
 
@@ -69,6 +71,73 @@ class AccessStateTests(TestCase):
         st = get_telegram_access_state(self.user)
         self.assertEqual(st["state"], "needs_action")
         self.assertEqual(st["cta_url"], "/support/")
+
+    def _mesh_mapping(self):
+        mesh = ChannelMesh.objects.create(
+            key="access-state-mesh",
+            name="Access State Mesh",
+            source_chat_id="-100801",
+            is_active=True,
+        )
+        destination = ChannelMeshDestination.objects.create(
+            mesh=mesh,
+            external_id="-100802",
+            name="Access State Spawn",
+            is_active=True,
+        )
+        PlanMeshMapping.objects.create(
+            plan=self.plan, mesh=mesh, is_active=True
+        )
+        return mesh, destination
+
+    def test_mesh_plan_without_allocator_assignment_stays_pending(self):
+        self._sub()
+        TelegramAccount.objects.create(
+            user=self.user, chat_id=1, telegram_user_id=1
+        )
+        self._mesh_mapping()
+
+        state = get_telegram_access_state(self.user)
+
+        self.assertEqual(state["state"], "pending")
+        self.assertIn("spawn assignment", state["detail"].lower())
+
+    def test_mesh_plan_ready_only_after_assigned_spawn_is_provisioned(self):
+        self._sub()
+        TelegramAccount.objects.create(
+            user=self.user, chat_id=1, telegram_user_id=1
+        )
+        mesh, destination = self._mesh_mapping()
+        UserMeshAssignment.objects.create(
+            user=self.user, mesh=mesh, destination=destination, is_active=True
+        )
+        UserChannelAssignment.objects.create(
+            user=self.user, platform="telegram",
+            external_id=destination.external_id, is_active=True,
+        )
+
+        state = get_telegram_access_state(self.user)
+
+        self.assertEqual(state["state"], "ready")
+
+    def test_direct_access_does_not_hide_missing_mesh_assignment(self):
+        self._sub()
+        TelegramAccount.objects.create(
+            user=self.user, chat_id=1, telegram_user_id=1
+        )
+        PlanChannelMapping.objects.create(
+            plan=self.plan, platform="telegram", external_id="-100803", name="Direct"
+        )
+        UserChannelAssignment.objects.create(
+            user=self.user, platform="telegram",
+            external_id="-100803", is_active=True,
+        )
+        self._mesh_mapping()
+
+        state = get_telegram_access_state(self.user)
+
+        self.assertEqual(state["state"], "pending")
+        self.assertIn("spawn assignment", state["detail"].lower())
 
     def test_old_failure_does_not_block(self):
         self._sub()
