@@ -187,7 +187,7 @@ class MemberConnectionActionSecurityTests(TestCase):
         )
         response = self.client.post(reverse("bot_integration:telegram_unlink"))
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], reverse("profile"))
+        self.assertEqual(response["Location"], reverse("dashboard"))
         self.assertFalse(TelegramAccount.objects.filter(pk=account.pk).exists())
         enqueue_reconcile.assert_called_once()
 
