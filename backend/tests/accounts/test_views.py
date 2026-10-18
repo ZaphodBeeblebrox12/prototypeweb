@@ -228,6 +228,39 @@ class DashboardAccessTest(TestCase):
         self.assertEqual(response.status_code, 403)
 
 
+class AdminDeskAccessTest(TestCase):
+    """Staff administration shares the global site navigation and remains protected."""
+
+    def setUp(self):
+        self.client = Client()
+        self.staff_user = User.objects.create(
+            username="desk_admin",
+            email="desk-admin@example.com",
+            is_staff=True,
+        )
+        self.member_user = User.objects.create(
+            username="desk_member",
+            email="desk-member@example.com",
+            is_staff=False,
+        )
+
+    def test_staff_admin_desk_uses_shared_header_and_single_page_heading(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.get("/staff/admin-desk/")
+
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+        self.assertEqual(html.count('class="sitewide-header'), 1)
+        self.assertIn("Admin Desk", html)
+        self.assertNotIn("<h1>Admin Desk</h1>", html)
+        self.assertIn("/assets/sitewide-nav.css", html)
+
+    def test_non_staff_user_cannot_open_admin_desk(self):
+        self.client.force_login(self.member_user)
+        response = self.client.get("/staff/admin-desk/")
+        self.assertEqual(response.status_code, 403)
+
+
 class NotificationAPITest(APITestCase):
     """Test notification API endpoints."""
 
