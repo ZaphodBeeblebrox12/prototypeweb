@@ -11,7 +11,7 @@ from django.db.models.signals import pre_save, post_save, post_delete
 from django.dispatch import receiver
 
 from apps.subscriptions.models import Subscription
-from .models import PlanChannelMapping, TelegramAccount, UserChannelAssignment
+from .models import PlanChannelMapping, TelegramAccount
 from apps.jobs.enqueue import enqueue_reconcile
 
 logger = logging.getLogger(__name__)
