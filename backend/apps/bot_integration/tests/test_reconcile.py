@@ -6,14 +6,17 @@ ProvisionTransport is mocked (no network, no real Telegram calls).
 Discord behavior is unchanged (direct service)."""
 from unittest import mock
 from django.test import TestCase
+from django.urls import reverse
 
 from apps.accounts.models import User
 from apps.bot_integration.models import (
-    TelegramAccount, DiscordAccount, PlanChannelMapping,
+    BotConfig, TelegramAccount, DiscordAccount, PlanChannelMapping,
     UserChannelAssignment, BotAccessAudit)
 from apps.bot_integration.reconcile_jobs import run_user_reconcile
 from apps.jobs.models import ProvisioningOperation
-from apps.subscriptions.models import Plan, Subscription
+from apps.subscriptions.models import Plan, Product, Subscription
+from apps.bot_integration.access import compute_target_access
+from apps.bot_integration.services.discord import DiscordBotService
 
 
 def make_user(u):
@@ -656,3 +659,244 @@ class MembershipRecoveryTests(TestCase):
         self.assertEqual(a.last_invite_sent_at, expired)  # released, unchanged
         self.assertEqual(len(t2.dms), 0)
         self.assertEqual(len(t2.grants), 0)
+
+class DiscordWorkerFlowTests(TestCase):
+    """Exercise Discord through the same durable worker used after purchases."""
+
+    def setUp(self):
+        self.user = make_user("discord-worker")
+        self.plan = Plan.objects.create(
+            name="Discord Pro", tier="pro", display_order=1
+        )
+        PlanChannelMapping.objects.create(
+            plan=self.plan, platform="discord", external_id="role-paid"
+        )
+        self.account = DiscordAccount.objects.create(
+            user=self.user, discord_user_id="discord-user-1",
+            guild_id="guild-1", username="trader", roles=[], is_active=True,
+        )
+        self.subscription = Subscription.objects.create(
+            user=self.user, plan=self.plan,
+            status=Subscription.Status.ACTIVE, is_active=True,
+        )
+
+    @mock.patch("apps.bot_integration.reconcile.DiscordBotService.add_role")
+    def test_worker_grants_role_without_telegram_account(self, add_role):
+        add_role.return_value = True
+        run_user_reconcile(self.user.id, transport=FakeTransport())
+
+        add_role.assert_called_once_with("discord-user-1", "role-paid")
+        self.account.refresh_from_db()
+        self.assertEqual(self.account.roles, ["role-paid"])
+        assignment = UserChannelAssignment.objects.get(
+            user=self.user, platform="discord", external_id="role-paid"
+        )
+        self.assertTrue(assignment.is_active)
+
+    @mock.patch("apps.bot_integration.reconcile.DiscordBotService.remove_role")
+    @mock.patch("apps.bot_integration.reconcile.DiscordBotService.add_role")
+    def test_worker_revokes_role_after_subscription_lapses(self, add_role, remove_role):
+        add_role.return_value = True
+        run_user_reconcile(self.user.id, transport=FakeTransport())
+        self.subscription.status = Subscription.Status.CANCELED
+        self.subscription.is_active = False
+        self.subscription.save()
+
+        remove_role.return_value = True
+        run_user_reconcile(self.user.id, transport=FakeTransport())
+
+        remove_role.assert_called_once_with("discord-user-1", "role-paid")
+        self.account.refresh_from_db()
+        self.assertEqual(self.account.roles, [])
+        assignment = UserChannelAssignment.objects.get(
+            user=self.user, platform="discord", external_id="role-paid"
+        )
+        self.assertFalse(assignment.is_active)
+
+    @mock.patch("apps.bot_integration.reconcile.DiscordBotService.add_role")
+    def test_worker_raises_so_failed_role_grant_is_retried(self, add_role):
+        add_role.return_value = False
+        with self.assertRaisesRegex(RuntimeError, "Discord role reconciliation failed"):
+            run_user_reconcile(self.user.id, transport=FakeTransport())
+        self.assertFalse(
+            UserChannelAssignment.objects.filter(
+                user=self.user, platform="discord", external_id="role-paid",
+                is_active=True,
+            ).exists()
+        )
+
+    def test_target_unions_mappings_from_all_active_products(self):
+        product_a = Product.objects.create(name="Course", slug="discord-course")
+        product_b = Product.objects.create(name="Community", slug="discord-community")
+        plan_a = Plan.objects.create(
+            name="Course Plus", tier="pro", product=product_a, display_order=1
+        )
+        plan_b = Plan.objects.create(
+            name="Community Plus", tier="pro", product=product_b, display_order=2
+        )
+        PlanChannelMapping.objects.create(
+            plan=plan_a, platform="discord", external_id="role-course"
+        )
+        PlanChannelMapping.objects.create(
+            plan=plan_b, platform="discord", external_id="role-community"
+        )
+        Subscription.objects.create(
+            user=self.user, plan=plan_a, status=Subscription.Status.ACTIVE, is_active=True
+        )
+        Subscription.objects.create(
+            user=self.user, plan=plan_b, status=Subscription.Status.ACTIVE, is_active=True
+        )
+
+        target = compute_target_access(self.user.id)
+        self.assertEqual(target.discord_ids, {"role-course", "role-community", "role-paid"})
+
+
+class DiscordRestServiceTests(TestCase):
+    def setUp(self):
+        config = BotConfig.get_config()
+        config.discord_bot_token = "test-bot-token"
+        config.discord_guild_id = "guild-1"
+        config.save()
+
+    @mock.patch("apps.bot_integration.services.discord.requests.request")
+    def test_role_403_is_not_reported_as_success(self, request):
+        response = mock.Mock(status_code=403)
+        response.json.return_value = {"message": "Missing Permissions", "code": 50013}
+        request.return_value = response
+
+        self.assertFalse(DiscordBotService.remove_role("member-1", "role-1"))
+
+    @mock.patch("apps.bot_integration.services.discord.requests.request")
+    def test_unknown_member_removal_is_idempotently_successful(self, request):
+        response = mock.Mock(status_code=404)
+        response.json.return_value = {"message": "Unknown Member", "code": 10007}
+        request.return_value = response
+
+        self.assertTrue(DiscordBotService.remove_role("member-1", "role-1"))
+
+    @mock.patch("apps.bot_integration.services.discord.requests.request")
+    def test_role_put_204_is_successful(self, request):
+        request.return_value = mock.Mock(status_code=204)
+
+        self.assertTrue(DiscordBotService.add_role("member-1", "role-1"))
+
+
+class DiscordOAuthFlowTests(TestCase):
+    def setUp(self):
+        self.user = make_user("discord-oauth")
+        config = BotConfig.get_config()
+        config.discord_client_id = "client-id"
+        config.discord_client_secret = "client-secret"
+        config.discord_bot_token = "bot-token"
+        config.discord_guild_id = "guild-id"
+        config.discord_redirect_uri = (
+            "https://tradethesis-academy-staging.onrender.com"
+            + reverse("bot_integration:discord_callback")
+        )
+        config.is_active = True
+        config.save()
+
+    def _store_state(self, value="state-once"):
+        session = self.client.session
+        session["discord_oauth_state"] = value
+        session.save()
+
+    def test_start_and_callback_require_authenticated_member(self):
+        start = self.client.get(reverse("bot_integration:discord_connect"))
+        callback = self.client.get(
+            reverse("bot_integration:discord_callback"),
+            {"code": "nope", "state": "not-authenticated"},
+        )
+        self.assertEqual(start.status_code, 302)
+        self.assertEqual(callback.status_code, 302)
+        self.assertFalse(DiscordAccount.objects.exists())
+
+    def test_oauth_requests_guild_join_scope(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("bot_integration:discord_connect"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("guilds.join", response["Location"])
+        self.assertIn("identify", response["Location"])
+
+    @mock.patch("apps.jobs.enqueue.enqueue_reconcile")
+    @mock.patch("apps.bot_integration.views.DiscordBotService.add_member", return_value=True)
+    @mock.patch("requests.get")
+    @mock.patch("requests.post")
+    def test_callback_joins_guild_links_account_and_queues_role_sync(
+        self, token_post, profile_get, add_member, enqueue
+    ):
+        self.client.force_login(self.user)
+        self._store_state()
+        token_response = mock.Mock(status_code=200)
+        token_response.json.return_value = {"access_token": "one-time-oauth-token"}
+        token_post.return_value = token_response
+        profile_response = mock.Mock(status_code=200)
+        profile_response.json.return_value = {"id": "discord-987", "username": "chartreader"}
+        profile_get.return_value = profile_response
+
+        response = self.client.get(
+            reverse("bot_integration:discord_callback"),
+            {"code": "authorization-code", "state": "state-once"},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response["Location"].endswith("#connections"))
+        add_member.assert_called_once_with("discord-987", "one-time-oauth-token")
+        enqueue.assert_called_once_with(self.user.pk, reason="discord_link")
+        account = DiscordAccount.objects.get(user=self.user)
+        self.assertEqual(account.discord_user_id, "discord-987")
+        self.assertEqual(account.username, "chartreader")
+
+    @mock.patch("apps.bot_integration.views.DiscordBotService.add_member", return_value=False)
+    @mock.patch("requests.get")
+    @mock.patch("requests.post")
+    def test_failed_guild_join_does_not_persist_account_link(
+        self, token_post, profile_get, add_member
+    ):
+        self.client.force_login(self.user)
+        self._store_state()
+        token_response = mock.Mock(status_code=200)
+        token_response.json.return_value = {"access_token": "one-time-oauth-token"}
+        token_post.return_value = token_response
+        profile_response = mock.Mock(status_code=200)
+        profile_response.json.return_value = {"id": "discord-not-joined", "username": "reader"}
+        profile_get.return_value = profile_response
+
+        self.client.get(
+            reverse("bot_integration:discord_callback"),
+            {"code": "authorization-code", "state": "state-once"},
+        )
+        self.assertFalse(DiscordAccount.objects.filter(user=self.user).exists())
+
+    @mock.patch("apps.bot_integration.views.DiscordBotService.remove_role", return_value=True)
+    def test_disconnect_removes_managed_roles_before_deleting_link(self, remove_role):
+        self.client.force_login(self.user)
+        account = DiscordAccount.objects.create(
+            user=self.user, discord_user_id="discord-987",
+            guild_id="guild-id", roles=["role-paid"], is_active=True,
+        )
+        UserChannelAssignment.objects.create(
+            user=self.user, platform="discord", external_id="role-paid", is_active=True
+        )
+
+        response = self.client.post(reverse("bot_integration:discord_unlink"))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(DiscordAccount.objects.filter(pk=account.pk).exists())
+        remove_role.assert_called_once_with("discord-987", "role-paid")
+        assignment = UserChannelAssignment.objects.get(
+            user=self.user, platform="discord", external_id="role-paid"
+        )
+        self.assertFalse(assignment.is_active)
+
+    @mock.patch("apps.bot_integration.views.DiscordBotService.remove_role", return_value=False)
+    def test_disconnect_failure_keeps_link_for_safe_retry(self, remove_role):
+        self.client.force_login(self.user)
+        account = DiscordAccount.objects.create(
+            user=self.user, discord_user_id="discord-987",
+            guild_id="guild-id", roles=["role-paid"], is_active=True,
+        )
+        self.client.post(reverse("bot_integration:discord_unlink"))
+
+        self.assertTrue(DiscordAccount.objects.filter(pk=account.pk).exists())
+
