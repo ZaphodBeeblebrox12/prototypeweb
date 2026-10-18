@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - my-new-branch
-      - integration/academy-reconcile-2026-10-18
     paths:
       - "backend/**"
       - ".github/workflows/verify-django-backend.yml"
