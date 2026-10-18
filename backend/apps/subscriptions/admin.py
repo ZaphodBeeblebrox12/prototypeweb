@@ -11,7 +11,9 @@ from django.utils.safestring import mark_safe
 from django import forms
 from django.core.exceptions import ValidationError
 
-from apps.bot_integration.models import UserChannelAssignment
+from apps.bot_integration.models import (
+    UserChannelAssignment, PlanChannelMapping, PlanMeshMapping,
+)
 from .models import (
     Plan, PlanFeature, PlanPrice, Subscription, SubscriptionHistory,
     UpgradeHistory, GiftSubscription, GeoPlanPrice, UserTrialUsage
@@ -261,6 +263,28 @@ class PlanFeatureInline(admin.TabularInline):
     verbose_name_plural = "Landing Page Features (empty = hardcoded tier defaults)"
 
 
+class PlanChannelMappingInline(admin.TabularInline):
+    """Direct channel/role targets attached to the plan."""
+
+    model = PlanChannelMapping
+    extra = 0
+    fields = ("platform", "external_id", "name")
+    verbose_name = "Direct Channel / Role"
+    verbose_name_plural = (
+        "Direct Channels / Roles (existing delivery; may be combined with Mesh)"
+    )
+
+
+class PlanMeshMappingInline(admin.TabularInline):
+    """Mesh destination association, separate from direct membership targets."""
+
+    model = PlanMeshMapping
+    extra = 0
+    fields = ("mesh", "is_active")
+    verbose_name = "Channel Mesh"
+    verbose_name_plural = "Channel Meshes (members are assigned to a spawn)"
+
+
 # =============================================================================
 # MAIN PLAN ADMIN (Unified Interface with Trial Support)
 # =============================================================================
@@ -315,12 +339,16 @@ class PlanAdmin(admin.ModelAdmin):
         "max_storage_mb",
         "created_at",
         "pricing_summary",
+        "delivery_summary",
     ]
     list_filter = ["tier", "is_active", "is_trial"]
     search_fields = ["name", "description"]
     ordering = ["display_order", "tier"]
 
-    inlines = [PlanPriceInline, GeoPlanPriceInline, PlanFeatureInline]
+    inlines = [
+        PlanPriceInline, GeoPlanPriceInline, PlanFeatureInline,
+        PlanChannelMappingInline, PlanMeshMappingInline,
+    ]
 
     fieldsets = (
         ("Plan Information", {
@@ -341,6 +369,12 @@ class PlanAdmin(admin.ModelAdmin):
             "classes": ("collapse",)
         }),
     )
+
+    def delivery_summary(self, obj):
+        direct_count = obj.bot_channel_mappings.count()
+        mesh_count = obj.mesh_mappings.filter(is_active=True).count()
+        return format_html("{} direct mapping(s) | {} Mesh(es)", direct_count, mesh_count)
+    delivery_summary.short_description = "Telegram / community delivery"
 
     def trial_badge(self, obj):
         """Display trial status badge."""
