@@ -109,6 +109,27 @@ class ChannelMeshAccessTests(TestCase):
         with self.assertRaises(ValidationError):
             assign_user_to_mesh_spawn(self.user, self.mesh, other_spawn)
 
+    def test_reassignment_waits_until_previous_spawn_grant_is_revoked(self):
+        assignment = assign_user_to_mesh_spawn(self.user, self.mesh, self.spawn_one)
+        UserChannelAssignment.objects.create(
+            user=self.user, platform="telegram",
+            external_id=self.spawn_one.external_id, is_active=True,
+        )
+
+        with self.assertRaisesRegex(ValidationError, "Finish its revocation"):
+            assign_user_to_mesh_spawn(self.user, self.mesh, self.spawn_two)
+
+        assignment.refresh_from_db()
+        self.assertEqual(assignment.destination_id, self.spawn_one.pk)
+
+        UserChannelAssignment.objects.filter(
+            user=self.user, platform="telegram",
+            external_id=self.spawn_one.external_id,
+        ).update(is_active=False)
+
+        assignment = assign_user_to_mesh_spawn(self.user, self.mesh, self.spawn_two)
+        self.assertEqual(assignment.destination_id, self.spawn_two.pk)
+
     def test_direct_and_mesh_access_use_existing_durable_provisioning_and_expiry(self):
         transport = FakeMeshTransport()
         assign_user_to_mesh_spawn(self.user, self.mesh, self.spawn_one)
