@@ -1,8 +1,9 @@
-{% extends "admin/base_site.html" %}
+{% extends "base.html" %}
 
-{% block title %}Admin Desk | {{ site_title|default:"TradeThesis" }}{% endblock %}
+{% block title %}Admin Desk | TradeThesis{% endblock %}
+{% block page_title %}Site operations{% endblock %}
 
-{% block extrastyle %}
+{% block extra_css %}
 {{ block.super }}
 <style>
   .tt-desk { --td-ink:#26342f; --td-muted:#68736c; --td-line:#dedfd5; --td-paper:#fbfaf6; --td-surface:#fffefa; --td-green:#456653; color:var(--td-ink); max-width:1440px; }
@@ -38,7 +39,7 @@
 {% endblock %}
 
 {% block content %}
-<main class="tt-desk" id="content-main">
+<div class="tt-desk">
   <header class="desk-head">
     <div>
       <p class="eyebrow">TradeThesis · Site operations</p>
@@ -124,5 +125,5 @@
       {% endif %}
     </div>
   </section>
-</main>
+</div>
 {% endblock %}
