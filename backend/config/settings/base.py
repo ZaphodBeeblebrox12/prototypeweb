@@ -258,6 +258,10 @@ EMAIL_BACKEND = env(
     default="django.core.mail.backends.console.EmailBackend"
 )
 
+# Resend is optional; set EMAIL_BACKEND to apps.core.email_backends.ResendEmailBackend in hosting config.
+RESEND_API_KEY = env("RESEND_API_KEY", default="")
+RESEND_API_TIMEOUT = env("RESEND_API_TIMEOUT", default=10)
+
 EMAIL_HOST = env("EMAIL_HOST", default="")
 EMAIL_PORT = env("EMAIL_PORT", default=587)
 EMAIL_USE_TLS = env("EMAIL_USE_TLS", default=True)
