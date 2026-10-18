@@ -86,20 +86,6 @@ def assign_user_to_mesh_spawn(user, mesh, destination):
     return assignment
 
 
-@transaction.atomic
-def deactivate_user_mesh_assignment(user, mesh):
-    """Release a user's recorded spawn assignment; reconciliation revokes access."""
-    assignment = UserMeshAssignment.objects.select_for_update().filter(
-        user_id=_pk(user), mesh_id=_pk(mesh), is_active=True
-    ).first()
-    if assignment is None:
-        return None
-    assignment.is_active = False
-    assignment.revoked_at = timezone.now()
-    assignment.save(update_fields=["is_active", "revoked_at", "updated_at"])
-    return assignment
-
-
 def deactivate_revoked_mesh_assignments(user_id, target):
     """Release stale allocator assignments only after spawn access is revoked.
 
@@ -121,4 +107,4 @@ def deactivate_revoked_mesh_assignments(user_id, target):
         if not still_provisioned:
             UserMeshAssignment.objects.filter(
                 pk=assignment.pk, is_active=True
-            ).update(is_active=False, revoked_at=timezone.now())
+            ).update(is_active=False, revoked_at=timezone.now(), updated_at=timezone.now())
