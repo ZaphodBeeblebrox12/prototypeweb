@@ -268,7 +268,6 @@ def discord_oauth_start(request):
 def discord_oauth_callback(request):
     """Validate OAuth, join the configured guild, link the account, then sync roles."""
     import requests
-    from urllib.parse import urlencode  # noqa: F401 - keeps URL construction explicit above
 
     code = request.GET.get("code")
     state = request.GET.get("state")
