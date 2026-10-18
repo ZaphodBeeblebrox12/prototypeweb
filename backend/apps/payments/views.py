@@ -706,14 +706,16 @@ def ops_payments_csv(request):
     resp["Content-Disposition"] = 'attachment; filename="payments.csv"'
     w = csv.writer(resp)
     w.writerow(["date", "user", "email", "plan", "amount_cents", "currency",
-                "provider", "status", "refunded_cents", "chargeback",
-                "provider_reference"])
+                "payment_method", "provider", "status", "refunded_cents", "chargeback",
+                "provider_reference", "provider_payment_id"])
     for pi in (PaymentIntent.objects.select_related("user", "plan")
                .order_by("-created_at")[:10000]):
         w.writerow([pi.created_at.isoformat(), pi.user.username, pi.user.email,
-                    pi.plan.name, pi.amount, pi.currency, pi.provider, pi.status,
-                    pi.refunded_cents, pi.chargeback_confirmed,
-                    pi.provider_reference])
+                    pi.plan.name, pi.amount, pi.currency,
+                    pi.get_payment_method_display() or "Not reported",
+                    pi.provider, pi.status, pi.refunded_cents,
+                    pi.chargeback_confirmed, pi.provider_reference,
+                    pi.provider_payment_id])
     return resp
 
 
