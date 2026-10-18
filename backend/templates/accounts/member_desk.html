@@ -18,27 +18,11 @@
 @media(max-width:860px){.navlinks{display:none}.mobile-toggle{display:inline-flex;margin-left:0}.wrap.mobilelinks{width:100%;padding:0 18px 12px;background:var(--surface);grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.wrap.mobilelinks.open{display:grid}.wrap.mobilelinks a{display:block;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:10px;color:var(--muted)}.wrap.mobilelinks a:hover{color:var(--green);background:var(--surface-soft)}.wrap.nav{min-height:70px}.header.sitewide-header{min-height:70px}.header-visit{margin-left:auto}.sidebar{width:218px}.main{margin-left:218px}.topbar{min-height:70px}.overview-masthead{grid-template-columns:1fr}.masthead-art{min-height:155px}.billing-layout{grid-template-columns:1fr}}
 @media(max-width:650px){.side-menu{display:grid}.wrap.mobilelinks.open{grid-template-columns:1fr}.sidebar{width:min(300px,86vw);transform:translateX(-104%);transition:transform .22s ease;box-shadow:0 0 0 100vmax #0000}.sidebar.open{transform:translateX(0);box-shadow:0 0 0 100vmax #0a130d66}.main{margin-left:0}.topbar{min-height:64px;padding:0 16px}.content{padding:25px 16px 42px}.page-head{align-items:flex-start;flex-direction:column;gap:14px}.page-head-actions{width:100%;justify-content:flex-start;flex-wrap:wrap}.overview-actions{align-items:flex-start;flex-direction:column}.stats{gap:10px}.stat{padding:13px}.stat-value{font-size:22px}.card-head{padding:17px 16px 0}.portfolio-list,.plan-body{padding-left:16px;padding-right:16px}.integration-list{padding:12px 16px 16px}.payment-list{padding:6px 16px 12px}.table-demo{padding:0 16px 14px}.purchase-model-strip{grid-template-columns:1fr}.purchase-cards{grid-template-columns:1fr}.purchase-section-head{align-items:flex-start;flex-direction:column}.learning-card{grid-template-columns:52px minmax(0,1fr);padding:16px;gap:12px}.learning-card>.btn{grid-column:2;justify-self:start}.stats{grid-template-columns:1fr 1fr}.stat-value{font-size:20px}.integration{flex-wrap:wrap}.integration .btn{margin-left:51px}.payment-row{grid-template-columns:1fr auto}.payment-row .paid{grid-column:2}.subscription-panel{grid-template-columns:1fr}.subscription-visual{min-height:82px;flex-direction:row}.subscription-actions{grid-column:1}.subscription-facts{grid-template-columns:1fr}.account-grid{grid-template-columns:1fr}.account-fact{grid-template-columns:110px minmax(0,1fr)}.plan-grid{grid-template-columns:1fr}.top-actions{gap:6px}.header-status{display:none}.brand-logo-header{width:155px;max-width:45vw}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
-</style>
+</style><link rel="stylesheet" href="{% static 'css/sitewide-nav.css' %}">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
-<header class="header sitewide-header">
-  <div class="wrap nav">
-    <a class="brand" href="{{ public_site_url }}/index.html" aria-label="TradeThesis home"><img class="brand-logo brand-logo-header" src="{% static 'brand/tradethesis-horizontal.png' %}" alt="TradeThesis — Conviction before execution"></a>
-    <nav aria-label="Main navigation" class="navlinks">
-      <a href="{{ public_site_url }}/index.html#approach">Our approach</a><a href="{{ public_site_url }}/courses.html">Courses</a><a href="{{ public_site_url }}/community.html">Community</a><a href="{{ public_site_url }}/index.html#desk">The Desk</a>
-    </nav>
-    <a class="header-visit" href="{{ public_site_url }}/index.html">Visit website ↗</a>
-    <button class="mobile-toggle" id="siteMenuBtn" type="button" aria-expanded="false" aria-label="Open website navigation">☰</button>
-  </div>
-  <nav aria-label="Mobile website navigation" class="wrap mobilelinks" id="siteMobileLinks">
-    <a href="{{ public_site_url }}/index.html#approach">Our approach</a>
-    <a href="{{ public_site_url }}/courses.html">Courses</a>
-    <a href="{{ public_site_url }}/community.html">Community</a>
-    <a href="{{ public_site_url }}/index.html#desk">The Desk</a>
-    <a class="mobile-menu-cta" href="{{ public_site_url }}/index.html">Visit website ↗</a>
-  </nav>
-</header>
+{% include "partials/sitewide_nav.html" %}
 <div class="app">
 <aside class="sidebar" id="sidebar" aria-label="Member dashboard navigation">
   <a class="brand dashboard-brand" href="{% url 'dashboard' %}" aria-label="TradeThesis member desk home"><img class="sidebar-logo" src="{% static 'brand/tradethesis-horizontal.png' %}" alt="TradeThesis — Conviction before execution"></a>
@@ -167,8 +151,6 @@
   const tabs=Array.from(document.querySelectorAll('[data-page]'));
   const sidebar=document.getElementById('sidebar');
   const menuBtn=document.getElementById('menuBtn');
-  const siteMenuBtn=document.getElementById('siteMenuBtn');
-  const siteMobileLinks=document.getElementById('siteMobileLinks');
   function activate(name,changeHash){
     if(!pages.includes(name)) name='overview';
     sections.forEach(function(section){section.classList.toggle('active',section.getAttribute('data-view')===name)});
@@ -182,8 +164,6 @@
   tabs.forEach(function(tab){tab.addEventListener('click',function(){activate(tab.getAttribute('data-page'),true)})});
   document.querySelectorAll('[data-goto]').forEach(function(button){button.addEventListener('click',function(){activate(button.getAttribute('data-goto'),true)})});
   if(menuBtn)menuBtn.addEventListener('click',function(){const open=sidebar.classList.toggle('open');menuBtn.setAttribute('aria-expanded',open?'true':'false')});
-  if(siteMenuBtn&&siteMobileLinks)siteMenuBtn.addEventListener('click',function(){const open=siteMobileLinks.classList.toggle('open');siteMenuBtn.setAttribute('aria-expanded',open?'true':'false');siteMenuBtn.setAttribute('aria-label',open?'Close website navigation':'Open website navigation')});
-  if(siteMobileLinks)siteMobileLinks.querySelectorAll('a').forEach(function(link){link.addEventListener('click',function(){siteMobileLinks.classList.remove('open');if(siteMenuBtn){siteMenuBtn.setAttribute('aria-expanded','false');siteMenuBtn.setAttribute('aria-label','Open website navigation')}})});
   const initial=window.location.hash.slice(1);activate(pages.includes(initial)?initial:'overview',false);
   window.addEventListener('hashchange',function(){const page=window.location.hash.slice(1);if(pages.includes(page))activate(page,false)});
 })();
