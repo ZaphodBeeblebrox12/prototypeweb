@@ -7,7 +7,7 @@
     <title>{% block title %}TradeThesis · Trading Education{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-nav.css">
+    <link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-nav.css?v=20261018-admin-desk-nav">
     <link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-footer.css">
     <link rel="stylesheet" href="{% static 'css/referral.css' %}">
     <style>
@@ -26,6 +26,7 @@
         .main-content { width: min(1500px, 100%); margin: 0 auto; padding: 24px clamp(16px, 3.5vw, 42px) 48px; min-height: calc(100vh - 76px); }
         .page-context { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin: 0 0 22px; padding: 0 0 18px; border-bottom: 1px solid var(--tt-line); }
         .page-context h1 { margin: 0; color: var(--tt-ink); font: 400 clamp(25px, 3vw, 34px)/1.12 Georgia, "Times New Roman", serif; letter-spacing: -.025em; }
+        .page-context--site-grid { width: 100%; max-width: 1160px; margin-left: auto; margin-right: auto; }
         .page-context p { margin: 7px 0 0; color: var(--tt-muted); font-size: 12px; }
         .page-context-status { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
         .page-context-status .badge { font-weight: 600; }
@@ -47,7 +48,7 @@
     {% include "partials/sitewide_nav.html" %}
     <main class="main-content" id="mainContent" tabindex="-1">
         {% if user.is_authenticated %}
-        <header class="page-context">
+        <header class="page-context{% if request.resolver_match.url_name == 'staff_admin_desk' %} page-context--site-grid{% endif %}">
             <div>
                 <h1>{% block page_title %}Dashboard{% endblock %}</h1>
                 <p>Welcome back, {{ user.first_name|default:user.username }}</p>
