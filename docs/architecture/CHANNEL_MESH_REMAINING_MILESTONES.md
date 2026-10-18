@@ -59,9 +59,9 @@ Telegram does not supply a general Bot API event for arbitrary manual deletion o
 ## Branch cleanup performed/planned
 
 - The changes from `feature/channel-mesh` were copied to `my-new-branch`.
-- Original draft PR #5 targets `my-new-branch`; it is now obsolete and should be closed.
+- Original draft PR #5 targeted `my-new-branch` and is now closed (not merged).
+- The remote `feature/channel-mesh` branch still exists as of this handoff. The connected GitHub actions in this session expose no branch-delete operation, and the local shell cannot reach GitHub. Delete the exact `feature/channel-mesh` ref in the repository's GitHub Branches UI; do not replace it with a fake-empty branch.
 - `main` must remain untouched.
-- Delete the remote `feature/channel-mesh` ref after closing the PR if the current GitHub connection supports branch deletion. If not, delete it in GitHub's Branches UI; do not replace it with a fake-empty branch.
 - Resume remaining work from `my-new-branch`, not the old feature branch.
 
 No staging test or deployment has been performed as part of this handoff.
