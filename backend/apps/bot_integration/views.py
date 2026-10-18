@@ -611,6 +611,8 @@ def bot_mesh_inventory(request):
         {
             "mesh_key": mesh.key,
             "mesh_name": mesh.name,
+            "source_chat_id": mesh.source_chat_id,
+            "source_name": mesh.source_name,
             "spawns": [
                 {
                     "spawn_chat_id": destination.external_id,
