@@ -1,6 +1,7 @@
 from decimal import Decimal
 from unittest import mock
 
+from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -52,6 +53,9 @@ class InvoiceIssueTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
             username="invoice-buyer", email="buyer@example.test", password="test-password"
+        )
+        EmailAddress.objects.create(
+            user=self.user, email=self.user.email, verified=True, primary=True
         )
         self.plan = Plan.objects.create(
             name="Support & Resistance", tier="basic", is_active=True, display_order=1
@@ -118,6 +122,9 @@ class InvoiceIssueTests(TestCase):
         self.assertContains(response, "TradeThesis Learning")
 
         stranger = User.objects.create_user(username="stranger", password="test-password")
+        EmailAddress.objects.create(
+            user=stranger, email="stranger@example.test", verified=True, primary=True
+        )
         self.client.force_login(stranger)
         response = self.client.get(reverse("payment-receipt", args=[intent.pk]))
         self.assertEqual(response.status_code, 404)
