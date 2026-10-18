@@ -15,6 +15,7 @@ from django.utils import timezone
 
 from apps.bot_integration.models import (
     BotAccessAudit, DiscordAccount, TelegramAccount, UserChannelAssignment)
+from apps.bot_integration.services.channel_mesh import deactivate_revoked_mesh_assignments
 from apps.bot_integration.reconcile import (
     _audit, _control_channel_guard, _reconcile_discord, compute_target_access)
 from apps.jobs.models import ProvisioningOperation
@@ -275,6 +276,7 @@ def run_user_reconcile(user_id: int, transport=None) -> None:
 
         account.last_synced_at = timezone.now()
         account.save(update_fields=["last_synced_at"])
+        deactivate_revoked_mesh_assignments(user_id, target)
 
     discord_account = DiscordAccount.objects.filter(
         user_id=user_id, is_active=True
