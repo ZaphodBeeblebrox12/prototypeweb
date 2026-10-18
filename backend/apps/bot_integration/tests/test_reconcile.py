@@ -160,6 +160,7 @@ class DiscordReconcileTests(TestCase):
         from apps.bot_integration.reconcile import reconcile_user_access
         svc.add_role.return_value = True
         svc.remove_role.return_value = True
+        svc.get_member_roles.side_effect = [[], ["111"]]
         sub = Subscription.objects.create(user=self.user, plan=self.plan,
                                           status="active", is_active=True)
         reconcile_user_access(self.user.id)
@@ -680,8 +681,9 @@ class DiscordWorkerFlowTests(TestCase):
             status=Subscription.Status.ACTIVE, is_active=True,
         )
 
+    @mock.patch("apps.bot_integration.reconcile.DiscordBotService.get_member_roles", return_value=[])
     @mock.patch("apps.bot_integration.reconcile.DiscordBotService.add_role")
-    def test_worker_grants_role_without_telegram_account(self, add_role):
+    def test_worker_grants_role_without_telegram_account(self, add_role, get_member_roles):
         add_role.return_value = True
         run_user_reconcile(self.user.id, transport=FakeTransport())
 
@@ -693,9 +695,13 @@ class DiscordWorkerFlowTests(TestCase):
         )
         self.assertTrue(assignment.is_active)
 
+    @mock.patch("apps.bot_integration.reconcile.DiscordBotService.get_member_roles")
     @mock.patch("apps.bot_integration.reconcile.DiscordBotService.remove_role")
     @mock.patch("apps.bot_integration.reconcile.DiscordBotService.add_role")
-    def test_worker_revokes_role_after_subscription_lapses(self, add_role, remove_role):
+    def test_worker_revokes_role_after_subscription_lapses(
+        self, add_role, remove_role, get_member_roles
+    ):
+        get_member_roles.side_effect = [[], ["role-paid"]]
         add_role.return_value = True
         run_user_reconcile(self.user.id, transport=FakeTransport())
         self.subscription.status = Subscription.Status.CANCELED
@@ -713,8 +719,9 @@ class DiscordWorkerFlowTests(TestCase):
         )
         self.assertFalse(assignment.is_active)
 
+    @mock.patch("apps.bot_integration.reconcile.DiscordBotService.get_member_roles", return_value=[])
     @mock.patch("apps.bot_integration.reconcile.DiscordBotService.add_role")
-    def test_worker_raises_so_failed_role_grant_is_retried(self, add_role):
+    def test_worker_raises_so_failed_role_grant_is_retried(self, add_role, get_member_roles):
         add_role.return_value = False
         with self.assertRaisesRegex(RuntimeError, "Discord role reconciliation failed"):
             run_user_reconcile(self.user.id, transport=FakeTransport())
