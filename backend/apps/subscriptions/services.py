@@ -686,47 +686,52 @@ def cancel_subscription(subscription, now=None, actor="user"):
 
 
 def extend_subscription(subscription, days, actor="admin"):
-    """Extend an ACTIVE subscription's entitlement by `days`, from TODAY.
+    """Add days after the later of current expiry or today without shortening access.
 
-    Fills the small operational gap left by cancel/expire/grant.  No new
-    payment is created and no PaymentIntent is touched -- this is an admin
-    entitlement extension, not a purchase.  Uses the same atomic conditional
-    claim as expire/cancel so it is idempotent and race-safe.  Records the
-    extension with the EXISTING SubscriptionHistory.EventType.RENEWED
-    ("Renewed"), which is the semantically correct event for extending an
-    entitlement period without a new payment (the audit model has no separate
-    "extended" event, and inventing one would break future reporting).
-
-    Only ACTIVE subscriptions can be extended; canceled/expired rows are left
-    untouched (returns False).  The plan/price/payment snapshot is unchanged.
+    A row lock and an original-expiry comparison prevent an extension from
+    overwriting a concurrent cancellation or other lifecycle update.
     """
     from apps.jobs.enqueue import enqueue_reconcile
 
-    new_expiry = timezone.now() + timezone.timedelta(days=days)
-    claimed = Subscription.objects.filter(
-        pk=subscription.pk,
-        is_active=True,
-        status=Subscription.Status.ACTIVE,
-    ).update(expires_at=new_expiry)
-    if not claimed:
-        return False
+    if not isinstance(days, int) or days < 1 or days > 365:
+        raise ValueError("Extension must be between 1 and 365 days.")
+
     with transaction.atomic():
+        current = (
+            Subscription.objects.select_for_update()
+            .filter(pk=subscription.pk, is_active=True, status=Subscription.Status.ACTIVE)
+            .first()
+        )
+        if current is None:
+            return False
+
+        now = timezone.now()
+        base_expiry = current.expires_at
+        if base_expiry is None or base_expiry < now:
+            base_expiry = now
+        new_expiry = base_expiry + timezone.timedelta(days=days)
+        updated = Subscription.objects.filter(
+            pk=current.pk, is_active=True, status=Subscription.Status.ACTIVE,
+            expires_at=current.expires_at,
+        ).update(expires_at=new_expiry)
+        if not updated:
+            return False
+
         SubscriptionHistory.objects.create(
-            subscription_id=subscription.pk,
-            user_id=subscription.user_id,
+            subscription_id=current.pk, user_id=current.user_id,
             event_type=SubscriptionHistory.EventType.RENEWED,
             previous_status=Subscription.Status.ACTIVE,
             new_status=Subscription.Status.ACTIVE,
-            notes=f"Subscription extended by {days} day(s) by {actor}.",
+            notes=f"Access extended by {days} day(s) by {actor}.",
         )
-    # Entitlement unchanged (still active) but reconcile is cheap/idempotent;
-    # enqueue so any access drift is healed.
+        subscription.expires_at = new_expiry
+        subscription.updated_at = timezone.now()
+
     record_event(
         "renewal.completed",
-        dedupe_key=f"renewal.completed:{subscription.pk}:{subscription.expires_at.isoformat()}",
-        user_id=subscription.user_id,
-        object_ref=f"subscription:{subscription.pk}",
-        payload={"subscription_id": str(subscription.pk), "days": days},
+        dedupe_key=f"renewal.completed:{current.pk}:{new_expiry.isoformat()}",
+        user_id=current.user_id, object_ref=f"subscription:{current.pk}",
+        payload={"subscription_id": str(current.pk), "days": days, "expires_at": new_expiry.isoformat()},
     )
-    enqueue_reconcile(subscription.user_id, reason="subscription_extended")
+    enqueue_reconcile(current.user_id, reason="subscription_extended")
     return True

@@ -42,10 +42,20 @@
   <header class="desk-head">
     <div>
       <p class="eyebrow">TradeThesis · Site operations</p>
-      <p class="intro">A calm overview of course publishing and operational items that may need attention. Counts come from existing Django records; use the links to manage the underlying records.</p>
+      <p class="intro">Your day-to-day workspace for learner accounts, access, payments and business settings, with operational checks when something needs attention.</p>
     </div>
-    <a class="btn" href="{{ django_admin_url }}">Open Django administration ↗</a>
+    <a class="btn secondary" href="{{ django_admin_url }}">Advanced administration (rare use) ↗</a>
   </header>
+
+  <section class="section" aria-labelledby="daily-management-heading">
+    <div class="section-head"><h2 id="daily-management-heading">Everyday management</h2><p>Routine creator tasks, without opening Django Admin.</p></div>
+    <ul class="link-list">
+      {% if desk_access.accounts %}<li><a href="{% url 'staff_admin_desk_accounts' %}">Manage learner accounts →</a></li>{% endif %}
+      {% if desk_access.subscriptions %}<li><a href="{% url 'staff_admin_desk_subscriptions' %}">Manage subscriptions &amp; access →</a></li>{% endif %}
+      {% if desk_access.finance %}<li><a href="{% url 'staff_admin_desk_finance' %}">Payments &amp; invoice register →</a></li>{% endif %}
+      {% if desk_access.business %}<li><a href="{% url 'staff_admin_desk_business' %}">Business details &amp; tax settings →</a></li>{% endif %}
+    </ul>
+  </section>
 
   {% if accounts or subscriptions %}
   <section class="section" aria-labelledby="business-overview-heading">
@@ -79,7 +89,7 @@
   </section>
 
   <section class="section" aria-labelledby="course-actions-heading">
-    <div class="section-head"><h2 id="course-actions-heading">Course management</h2><p>Existing Django forms remain the source of truth</p></div>
+    <div class="section-head"><h2 id="course-actions-heading">Course content &amp; authoring</h2><p>The creator-friendly course editor is a separate workstream; advanced record tools remain available in Django for now.</p></div>
     <ul class="link-list">
       {% if course_links.courses %}<li><a href="{{ course_links.courses }}">Manage courses →</a></li>{% endif %}
       {% if course_links.modules %}<li><a href="{{ course_links.modules }}">Manage modules →</a></li>{% endif %}

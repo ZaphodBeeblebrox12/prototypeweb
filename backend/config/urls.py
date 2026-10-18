@@ -12,12 +12,25 @@ from allauth.account.views import LoginView, SignupView
 from apps.accounts import views as accounts_views
 from apps.accounts.telegram_views import TelegramCallbackView
 from apps.admin_dashboard import staff_admin_desk
+from apps.admin_desk_views import (
+    admin_desk_accounts, admin_desk_account_detail, admin_desk_account_action,
+    admin_desk_subscriptions, admin_desk_subscription_action,
+    admin_desk_business, admin_desk_finance, admin_desk_invoice_detail,
+)
 from apps.core.views import health_check
 
 urlpatterns = [
     # Render readiness probe: confirm Django and its primary database respond.
     path("health/", health_check, name="health_check"),
     path("staff/admin-desk/", staff_admin_desk, name="staff_admin_desk"),
+    path("staff/admin-desk/accounts/", admin_desk_accounts, name="staff_admin_desk_accounts"),
+    path("staff/admin-desk/accounts/<uuid:user_id>/", admin_desk_account_detail, name="staff_admin_desk_account_detail"),
+    path("staff/admin-desk/accounts/<uuid:user_id>/action/", admin_desk_account_action, name="staff_admin_desk_account_action"),
+    path("staff/admin-desk/subscriptions/", admin_desk_subscriptions, name="staff_admin_desk_subscriptions"),
+    path("staff/admin-desk/subscriptions/<uuid:subscription_id>/action/", admin_desk_subscription_action, name="staff_admin_desk_subscription_action"),
+    path("staff/admin-desk/business/", admin_desk_business, name="staff_admin_desk_business"),
+    path("staff/admin-desk/finance/", admin_desk_finance, name="staff_admin_desk_finance"),
+    path("staff/admin-desk/invoices/<uuid:invoice_id>/", admin_desk_invoice_detail, name="staff_admin_desk_invoice_detail"),
     # Growth admin views - MUST be first to avoid catch_all_view interception
     path("admin/", include("apps.growth.admin_urls", namespace="growth_admin")),
 

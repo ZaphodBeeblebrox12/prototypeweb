@@ -58,7 +58,7 @@ def _subscription_dashboard_context(request):
                     is_active=True, is_staff=False,
                 ).count(),
                 "links": {
-                    "users": reverse("admin:accounts_user_changelist"),
+                    "users": reverse("staff_admin_desk_accounts"),
                 },
             }
 
@@ -75,22 +75,9 @@ def _subscription_dashboard_context(request):
             "recently_canceled": Subscription.objects.filter(
                 canceled_at__gte=recent).count(),
             "links": {
-                "all": _changelist("subscriptions", "subscription"),
-                "expiring_soon": _changelist(
-                    "subscriptions", "subscription",
-                    {
-                        "is_active__exact": "1",
-                        "status__exact": Subscription.Status.ACTIVE,
-                        "expires_at__gt": now.isoformat(),
-                        "expires_at__lte": soon.isoformat(),
-                    }),
-                "recently_expired": _changelist(
-                    "subscriptions", "subscription",
-                    {
-                        "status__exact": Subscription.Status.EXPIRED,
-                        "expires_at__gte": recent.isoformat(),
-                        "expires_at__lte": now.isoformat(),
-                    }),
+                "all": reverse("staff_admin_desk_subscriptions"),
+                "expiring_soon": reverse("staff_admin_desk_subscriptions") + "?status=active&expiring=1",
+                "recently_expired": reverse("staff_admin_desk_subscriptions") + "?status=expired&recent=1",
             },
         }
         # Trend: signups per day for the last 14 days (single grouped query).
@@ -122,10 +109,8 @@ def _subscription_dashboard_context(request):
                 status=PaymentIntent.Status.SUCCESS,
                 created_at__gte=recent).count(),
             "links": {
-                "pending": _changelist("payments", "paymentintent",
-                                       "status__exact=pending"),
-                "failed": _changelist("payments", "paymentintent",
-                                      "status__exact=failed"),
+                "pending": reverse("staff_admin_desk_finance") + "?tab=payments&payment_status=pending",
+                "failed": reverse("staff_admin_desk_finance") + "?tab=payments&payment_status=failed",
             },
         }
 
@@ -139,11 +124,11 @@ def _subscription_dashboard_context(request):
             "count": Invoice.objects.count() if can_view_invoices else None,
             "links": {
                 "invoices": (
-                    reverse("admin:payments_invoice_changelist")
+                    reverse("staff_admin_desk_finance") + "?tab=invoices"
                     if can_view_invoices else ""
                 ),
                 "settings": (
-                    reverse("admin:payments_billingsettings_changelist")
+                    reverse("staff_admin_desk_business")
                     if can_edit_billing_settings else ""
                 ),
             },
@@ -167,7 +152,7 @@ def _subscription_dashboard_context(request):
         ctx["business_readiness"] = {
             "ready": not missing_business,
             "items": missing_business,
-            "url": reverse("admin:payments_billingsettings_changelist"),
+            "url": reverse("staff_admin_desk_business"),
         }
 
         database_engine = settings.DATABASES.get("default", {}).get("ENGINE", "")
@@ -243,7 +228,7 @@ def _subscription_dashboard_context(request):
                     "required": False,
                 },
             ],
-            "url": reverse("admin:payments_billingsettings_changelist"),
+            "url": reverse("staff_admin_desk_business"),
         }
 
     if _has_model_perm(request, "bot_integration", "botaccessaudit"):
@@ -303,6 +288,14 @@ def staff_admin_desk(request):
     context = _subscription_dashboard_context(request)
     context["django_admin_url"] = reverse("admin:index")
     context["can_manage_course_content"] = is_course_content_admin(request.user)
+    context["desk_access"] = {
+        "accounts": _has_model_perm(request, "accounts", "user"),
+        "subscriptions": _has_model_perm(request, "subscriptions", "subscription"),
+        "finance": (_has_model_perm(request, "payments", "paymentintent")
+                    or _has_model_perm(request, "payments", "invoice")),
+        "business": (_has_model_perm(request, "payments", "billingsettings", "change")
+                     or _has_model_perm(request, "payments", "billingsettings", "add")),
+    }
 
     if context["can_manage_course_content"]:
         from apps.academy.models import (
