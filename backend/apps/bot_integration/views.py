@@ -92,6 +92,12 @@ def unlink_discord(request):
     role_ids.update(UserChannelAssignment.objects.filter(
         user=request.user, platform="discord", is_active=True,
     ).values_list("external_id", flat=True))
+    # Every role mapped to a TradeThesis plan is integration-managed. Include
+    # mappings as a recovery source if a previous partial failure left local
+    # account/assignment caches out of date.
+    role_ids.update(PlanChannelMapping.objects.filter(
+        platform="discord",
+    ).values_list("external_id", flat=True))
 
     failed_roles = []
     remaining_roles = set(dc.roles or [])
@@ -102,6 +108,13 @@ def unlink_discord(request):
                 user=request.user, platform="discord", external_id=role_id,
                 is_active=True,
             ).update(is_active=False, revoked_at=timezone.now())
+            BotAccessAudit.objects.create(
+                user=request.user,
+                action="revoke",
+                platform="discord",
+                target=role_id,
+                status="success",
+            )
         else:
             failed_roles.append(role_id)
             BotAccessAudit.objects.create(
@@ -385,38 +398,44 @@ def discord_oauth_callback(request):
         )
         return _discord_connections_redirect()
 
-    DiscordAccount.objects.update_or_create(
-        user=request.user,
-        defaults={
-            "discord_user_id": discord_id,
-            "guild_id": config.discord_guild_id,
-            "username": username,
-            "is_active": True,
-        },
-    )
-    BotAccessAudit.objects.create(
-        user=request.user,
-        action="link",
-        platform="discord",
-        target=discord_id,
-        status="success",
-    )
-
     try:
-        from apps.jobs.enqueue import enqueue_reconcile
-        enqueue_reconcile(request.user.pk, reason="discord_link")
+        from django.db import transaction
+
+        with transaction.atomic():
+            DiscordAccount.objects.update_or_create(
+                user=request.user,
+                defaults={
+                    "discord_user_id": discord_id,
+                    "guild_id": config.discord_guild_id,
+                    "username": username,
+                    "is_active": True,
+                },
+            )
+            BotAccessAudit.objects.create(
+                user=request.user,
+                action="link",
+                platform="discord",
+                target=discord_id,
+                status="success",
+            )
+            # The account link, audit event and durable sync job form one
+            # database transaction. Never leave a saved link without a job.
+            from apps.jobs.enqueue import enqueue_reconcile
+            enqueue_reconcile(request.user.pk, reason="discord_link")
     except Exception:
-        logger.exception("Discord account linked but role-sync enqueue failed")
-        messages.warning(
+        logger.exception("Discord link transaction failed after guild join")
+        messages.error(
             request,
-            "Discord is linked, but automatic role syncing could not be queued. "
-            "Please contact support before relying on community access.",
+            "Discord added you to the server, but TradeThesis could not finish "
+            "linking the account. Please try connecting again; no account link "
+            "was saved.",
         )
-    else:
-        messages.success(
-            request,
-            "Discord connected. Your active community roles will sync shortly.",
-        )
+        return _discord_connections_redirect()
+
+    messages.success(
+        request,
+        "Discord connected. Your active community roles will sync shortly.",
+    )
     return _discord_connections_redirect()
 
 
