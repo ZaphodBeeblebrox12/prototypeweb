@@ -115,6 +115,8 @@ class AdminDeskTests(TestCase):
             "Course publishing tools are visible only to administrators",
         )
         self.assertNotIn("accounts", response.context)
+        self.assertNotIn("business_readiness", response.context)
+        self.assertNotIn("runtime_readiness", response.context)
 
     def test_business_overview_and_operational_links_use_real_filters(self):
         admin = User.objects.create_superuser(
@@ -136,6 +138,11 @@ class AdminDeskTests(TestCase):
         self.assertIn("telegram", response.context)
         self.assertIn("policy_readiness", response.context)
         self.assertFalse(response.context["policy_readiness"]["ready"])
+        self.assertIn("business_readiness", response.context)
+        self.assertFalse(response.context["business_readiness"]["ready"])
+        self.assertIn("runtime_readiness", response.context)
+        self.assertContains(response, "Business &amp; invoice setup")
+        self.assertContains(response, "Launch configuration")
         self.assertTrue(any(
             item["reason"] == "Placeholder content must be replaced and approved"
             for item in response.context["policy_readiness"]["items"]

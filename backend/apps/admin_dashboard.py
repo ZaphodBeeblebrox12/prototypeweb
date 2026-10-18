@@ -9,6 +9,7 @@ index via templates/admin/dashboard.html.
 import datetime
 from urllib.parse import urlencode
 
+from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -146,6 +147,103 @@ def _subscription_dashboard_context(request):
                     if can_edit_billing_settings else ""
                 ),
             },
+        }
+
+    if can_edit_billing_settings:
+        from apps.payments.models import BillingSettings
+
+        billing = BillingSettings.get_solo()
+        business_fields = (
+            ("legal_name", "Legal seller name", billing.legal_name.strip()),
+            ("address", "Business address", billing.address.strip()),
+            ("country", "Seller country (ISO code)", billing.country.strip()),
+            ("support_email", "Customer support email", billing.support_email.strip()),
+            ("invoice_prefix", "Invoice number prefix", billing.invoice_prefix.strip()),
+        )
+        missing_business = [
+            {"field": field, "label": label}
+            for field, label, value in business_fields if not value
+        ]
+        ctx["business_readiness"] = {
+            "ready": not missing_business,
+            "items": missing_business,
+            "url": reverse("admin:payments_billingsettings_changelist"),
+        }
+
+        database_engine = settings.DATABASES.get("default", {}).get("ENGINE", "")
+        site_base_url = (getattr(settings, "SITE_BASE_URL", "") or "").strip()
+        email_backend = getattr(settings, "EMAIL_BACKEND", "")
+        default_from_email = (getattr(settings, "DEFAULT_FROM_EMAIL", "") or "").strip()
+        smtp_ready = (
+            "console.EmailBackend" not in email_backend
+            and bool(getattr(settings, "EMAIL_HOST", "").strip())
+            and bool(default_from_email)
+            and "example.com" not in default_from_email.casefold()
+        )
+        razorpay_ready = all((
+            bool(getattr(settings, "RAZORPAY_KEY_ID", "")),
+            bool(getattr(settings, "RAZORPAY_KEY_SECRET", "")),
+            bool(getattr(settings, "RAZORPAY_WEBHOOK_SECRET", "")),
+        ))
+        stripe_ready = all((
+            bool(getattr(settings, "STRIPE_SECRET_KEY", "")),
+            bool(getattr(settings, "STRIPE_PUBLISHABLE_KEY", "")),
+            bool(getattr(settings, "STRIPE_WEBHOOK_SECRET", "")),
+        ))
+        ctx["runtime_readiness"] = {
+            "items": [
+                {
+                    "label": "Database engine",
+                    "ready": "sqlite3" not in database_engine.casefold(),
+                    "reason": (
+                        "Uses a server database engine; backup and restore still require a separate check."
+                        if "sqlite3" not in database_engine.casefold()
+                        else "SQLite is configured. Confirm a durable production database before accepting sales."
+                    ),
+                    "required": True,
+                },
+                {
+                    "label": "Public HTTPS base URL",
+                    "ready": site_base_url.startswith("https://"),
+                    "reason": (
+                        "HTTPS base URL is configured."
+                        if site_base_url.startswith("https://")
+                        else "Set SITE_BASE_URL to the deployed public HTTPS URL."
+                    ),
+                    "required": True,
+                },
+                {
+                    "label": "Transactional email",
+                    "ready": smtp_ready,
+                    "reason": (
+                        "Email settings appear configured; send a real delivery test."
+                        if smtp_ready
+                        else "Configure a real email backend, SMTP host and sender address."
+                    ),
+                    "required": True,
+                },
+                {
+                    "label": "Razorpay + webhook",
+                    "ready": razorpay_ready,
+                    "reason": (
+                        "Credentials are present; confirm test/live mode and webhook events."
+                        if razorpay_ready
+                        else "Set the Razorpay key ID, API secret and webhook secret in Render."
+                    ),
+                    "required": True,
+                },
+                {
+                    "label": "Stripe + webhook (international pricing)",
+                    "ready": stripe_ready,
+                    "reason": (
+                        "Credentials are present; complete a Stripe test purchase."
+                        if stripe_ready
+                        else "Required only for non-India pricing; set Stripe API, publishable and webhook keys if in scope."
+                    ),
+                    "required": False,
+                },
+            ],
+            "url": reverse("admin:payments_billingsettings_changelist"),
         }
 
     if _has_model_perm(request, "bot_integration", "botaccessaudit"):

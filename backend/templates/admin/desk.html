@@ -130,6 +130,38 @@
         {% endif %}
       </div>
       {% endif %}
+      {% if business_readiness %}
+      <div class="panel">
+        <h2>Business &amp; invoice setup</h2>
+        {% if business_readiness.ready %}
+          <p class="note" style="margin-top:10px">Required seller and invoice fields are present. Confirm the values are accurate.</p>
+        {% else %}
+          <p class="note" style="margin-top:10px">Complete these details before issuing real customer invoices.</p>
+          <ul class="signal-list" style="margin-top:12px">
+            {% for item in business_readiness.items %}
+            <li><a href="{{ business_readiness.url }}">Add {{ item.label }} →</a></li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+      {% endif %}
+      {% if runtime_readiness %}
+      <div class="panel">
+        <h2>Launch configuration</h2>
+        <ul class="signal-list" style="margin-top:12px">
+          {% for item in runtime_readiness.items %}
+          <li>
+            <span>
+              {{ item.label }}
+              {% if not item.ready %}<small class="note" style="display:block;margin-top:3px">{{ item.reason }}</small>{% endif %}
+            </span>
+            <span class="signal-count" aria-label="{% if item.ready %}Configured{% else %}Needs attention{% endif %}">{% if item.ready %}✓{% else %}{% if item.required %}!{% else %}Optional{% endif %}{% endif %}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        <p class="note" style="margin-top:12px">This checks configuration presence only, not successful payments, email delivery or backup restoration. Secrets are never displayed here.</p>
+      </div>
+      {% endif %}
       {% if payments %}
       <div class="panel">
         <h2>Payments</h2>
