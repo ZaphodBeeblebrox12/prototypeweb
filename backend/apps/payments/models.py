@@ -25,6 +25,19 @@ class PaymentIntent(models.Model):
         STRIPE = "stripe", _("Stripe")
         RAZORPAY = "razorpay", _("Razorpay")
 
+    class PaymentMethod(models.TextChoices):
+        CARD = "card", _("Card")
+        UPI = "upi", _("UPI")
+        NETBANKING = "netbanking", _("Net banking")
+        WALLET = "wallet", _("Wallet")
+        EMI = "emi", _("EMI / cardless EMI")
+        PAY_LATER = "pay_later", _("Pay later")
+        BANK_TRANSFER = "bank_transfer", _("Bank transfer")
+        BANK_DEBIT = "bank_debit", _("Bank debit")
+        BANK_REDIRECT = "bank_redirect", _("Bank redirect")
+        CASH = "cash", _("Cash")
+        OTHER = "other", _("Other")
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="payment_intents",
@@ -49,6 +62,13 @@ class PaymentIntent(models.Model):
                                 help_text=_("ISO 4217 currency code"))
     provider = models.CharField(max_length=20, choices=Provider.choices,
                                 help_text=_("Payment provider"))
+    payment_method = models.CharField(
+        max_length=24,
+        choices=PaymentMethod.choices,
+        blank=True,
+        default="",
+        help_text=_("Verified payment instrument type from the provider; blank means not reported."),
+    )
     status = models.CharField(max_length=20, choices=Status.choices,
                               default=Status.PENDING,
                               help_text=_("Payment status"))
