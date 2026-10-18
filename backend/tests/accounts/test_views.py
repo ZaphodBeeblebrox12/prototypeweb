@@ -252,7 +252,7 @@ class AdminDeskAccessTest(TestCase):
         html = response.content.decode()
         self.assertEqual(html.count('class="sitewide-header'), 1)
         self.assertIn("Admin Desk", html)
-        self.assertNotIn("<h1>Admin Desk</h1>", html)
+        self.assertEqual(html.count("<h1>Admin Desk</h1>"), 1)
         self.assertIn("/assets/sitewide-nav.css", html)
 
     def test_non_staff_user_cannot_open_admin_desk(self):
