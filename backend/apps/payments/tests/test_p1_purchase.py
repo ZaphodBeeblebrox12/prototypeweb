@@ -65,8 +65,6 @@ def _post_test_consent(client, intent):
         reverse("checkout-consent", args=[intent.id]), {"agree": "on"})
 
 
-@mock.patch("apps.payments.views.providers")
-@mock.patch("apps.payments.views.get_pricing_country", return_value="US")
 class StripeCheckoutBillingDisclosureTests(TestCase):
     @override_settings(STRIPE_SECRET_KEY="sk_test_checkout_mode")
     @mock.patch("stripe.checkout.Session.create")
