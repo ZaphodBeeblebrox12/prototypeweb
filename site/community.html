@@ -486,10 +486,11 @@ main{overflow:clip}.section{padding:73px 0}.section-heading{display:flex;align-i
 
 </style>
   <link href="assets/sitewide-nav.css" rel="stylesheet"/>
+  <link href="assets/sitewide-footer.css" rel="stylesheet">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to main content</a>
-<header class="header sitewide-header">
+<header class="header sitewide-header" data-sitewide-nav>
   <div class="wrap nav">
     <a class="brand" href="index.html" aria-label="TradeThesis home"><img class="brand-logo brand-logo-header" src="assets/tradethesis-horizontal.png" alt="TradeThesis — Conviction before execution"></a>
     <nav class="navlinks" aria-label="Main navigation">
@@ -499,9 +500,9 @@ main{overflow:clip}.section{padding:73px 0}.section-heading{display:flex;align-i
       <a href="index.html#desk">The Desk</a>
     </nav>
     <a class="button member-area-link" href="member-access.html">Open member dashboard ↗</a>
-    <button class="mobile-toggle" type="button" aria-expanded="false" aria-label="Open navigation">☰</button>
+    <button class="mobile-toggle" type="button" aria-expanded="false" aria-label="Open navigation" data-sitewide-toggle>☰</button>
   </div>
-  <nav class="wrap mobilelinks" aria-label="Mobile navigation">
+  <nav class="wrap mobilelinks" aria-label="Mobile navigation" data-sitewide-mobile>
     <a href="index.html#approach">Our approach</a>
     <a href="courses.html">Courses</a>
     <a class="active" aria-current="page" href="community.html">Community</a>
@@ -611,32 +612,39 @@ main{overflow:clip}.section{padding:73px 0}.section-heading{display:flex;align-i
 </section>
 <section class="community-signoff"><div class="wrap signoff-inner"><div class="signoff-wordmark" aria-hidden="true">COMMUNITY<span>↗</span></div><div class="signoff-copy"><div class="eyebrow">A little something extra</div><h2>Your plan might come <em>with good company.</em></h2><p>Selected TradeThesis plans include community access. Find the one that fits.</p><a class="signoff-link" href="courses.html">Explore plans <span aria-hidden="true">↗</span></a></div></div></section>
 </main>
-<footer><div class="wrap"><div class="footer-main"><div><a class="brand brand-footer" href="index.html" aria-label="TradeThesis home"><img class="brand-logo brand-logo-footer" src="assets/tradethesis-wordmark.png" alt="TradeThesis — Conviction before execution"></a><p class="footer-copy">Trading education for people who want to understand the decision, not just copy the entry.</p></div><nav class="footer-links" aria-label="Footer navigation"><a href="index.html#approach">Our approach</a><a href="courses.html">Courses</a><a href="live-class.html">Live class</a><a href="community.html" aria-current="page">Community</a><a href="index.html#desk">Free learning</a><a href="#main-content">Back to top ↑</a></nav></div><div class="footer-bottom"><div class="disclaimer">For educational purposes only. Nothing on this website is investment advice or a recommendation to buy or sell any financial instrument. Trading involves risk, including the possible loss of capital. Chart examples are illustrative, not live trading signals.</div><span>© TradeThesis · Website preview</span></div></div></footer>
+<footer class="sitewide-footer">
+  <div class="sitewide-footer__inner">
+    <div class="sitewide-footer__main">
+      <div class="sitewide-footer__brand-block">
+        <a class="sitewide-footer__brand" href="index.html" aria-label="TradeThesis home">
+          <img src="assets/tradethesis-wordmark.png" alt="TradeThesis — Conviction before execution">
+        </a>
+        <p class="sitewide-footer__copy">Trading education for people who want to understand the decision, not just copy the entry.</p>
+      </div>
+      <nav class="sitewide-footer__links" aria-label="Footer navigation">
+        <a href="index.html#approach">Our approach</a>
+        <a href="courses.html">Courses</a>
+        <a href="live-class.html">Live class</a>
+        <a href="community.html">Community</a>
+        <a href="index.html#desk">Free learning</a>
+        <a href="#">Back to top ↑</a>
+      </nav>
+    </div>
+    <div class="sitewide-footer__bottom">
+      <p class="sitewide-footer__disclaimer">For educational purposes only. Nothing on this website is investment advice or a recommendation to buy or sell any financial instrument. Trading involves risk, including the possible loss of capital. Chart examples are illustrative, not live trading signals.</p>
+      <span>© TradeThesis · Website preview</span>
+    </div>
+  </div>
+</footer>
 <div class="page-note" id="pageNote" role="status" aria-live="polite"></div>
 <script>
-(()=>{
- const toggle=document.querySelector('.mobile-toggle');
- const mobile=document.querySelector('.mobilelinks');
- if(toggle && mobile){
-   toggle.addEventListener('click',()=>{
-     const open=mobile.classList.toggle('open');
-     toggle.setAttribute('aria-expanded',String(open));
-     toggle.setAttribute('aria-label',open?'Close navigation':'Open navigation');
-     toggle.textContent=open?'×':'☰';
-   });
-   mobile.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
-     mobile.classList.remove('open');
-     toggle.setAttribute('aria-expanded','false');
-     toggle.setAttribute('aria-label','Open navigation');
-     toggle.textContent='☰';
-   }));
- }
- const links=document.querySelectorAll('a[href="#community-preview"],a[href="#how-it-feels"]');
+(()=>{ const links=document.querySelectorAll('a[href="#community-preview"],a[href="#how-it-feels"]');
  links.forEach(link=>link.addEventListener('click',()=>{
    const destination=document.querySelector(link.getAttribute('href'));
    if(destination) destination.setAttribute('data-arrived','true');
  }));
 })();
 </script>
+  <script src="assets/sitewide-nav.js" defer></script>
 </body>
 </html>

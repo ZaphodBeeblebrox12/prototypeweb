@@ -9,6 +9,7 @@
   <link href="assets/site.css" rel="stylesheet">
   <link href="assets/courses.css" rel="stylesheet">
   <link href="assets/sitewide-nav.css" rel="stylesheet"/>
+  <link href="assets/sitewide-footer.css" rel="stylesheet">
 </head>
 <body class="courses-catalogue-page" data-page-key="courses">
   <a class="skip-link" href="#course-catalogue">Skip to main content</a>
@@ -18,7 +19,7 @@
     <a href="construct.html" class="topline-link"><span class="topline-link-full">Explore CONSTRUCT ↗</span><span class="topline-link-short">Explore ↗</span></a>
   </div>
 
-  <header class="header sitewide-header">
+  <header class="header sitewide-header" data-sitewide-nav>
   <div class="wrap nav">
     <a class="brand" href="index.html" aria-label="TradeThesis home"><img class="brand-logo brand-logo-header" src="assets/tradethesis-horizontal.png" alt="TradeThesis — Conviction before execution"></a>
     <nav class="navlinks" aria-label="Main navigation">
@@ -28,9 +29,9 @@
       <a href="index.html#desk">The Desk</a>
     </nav>
     <a class="button member-area-link" href="member-access.html">Open member dashboard ↗</a>
-    <button class="mobile-toggle" type="button" aria-expanded="false" aria-label="Open navigation">☰</button>
+    <button class="mobile-toggle" type="button" aria-expanded="false" aria-label="Open navigation" data-sitewide-toggle>☰</button>
   </div>
-  <nav class="wrap mobilelinks" aria-label="Mobile navigation">
+  <nav class="wrap mobilelinks" aria-label="Mobile navigation" data-sitewide-mobile>
     <a href="index.html#approach">Our approach</a>
     <a class="active" aria-current="page" href="courses.html">Courses</a>
     <a href="community.html">Community</a>
@@ -127,15 +128,30 @@
     </section>
   </main>
 
-  <footer>
-    <div class="wrap">
-      <div class="footer-main">
-        <div><a class="brand brand-footer" href="index.html"><img class="brand-logo brand-logo-footer" src="assets/tradethesis-wordmark.png" alt="TradeThesis — Conviction before execution"></a><p class="footer-copy">A calm, practical approach to learning the markets.</p></div>
-        <nav class="footer-links" aria-label="Footer navigation"><a href="index.html">Home</a><a href="trading-path.html">The Trading Path</a><a href="construct.html">CONSTRUCT · 70 days</a><a href="live-class.html">Live Classroom</a><a href="index.html#desk">Free learning</a></nav>
+  <footer class="sitewide-footer">
+  <div class="sitewide-footer__inner">
+    <div class="sitewide-footer__main">
+      <div class="sitewide-footer__brand-block">
+        <a class="sitewide-footer__brand" href="index.html" aria-label="TradeThesis home">
+          <img src="assets/tradethesis-wordmark.png" alt="TradeThesis — Conviction before execution">
+        </a>
+        <p class="sitewide-footer__copy">Trading education for people who want to understand the decision, not just copy the entry.</p>
       </div>
-      <div class="footer-bottom"><div class="disclaimer">For educational purposes only. Trading involves risk, including the possible loss of capital. No course can guarantee profits.</div><span>© TradeThesis · Website preview</span></div>
+      <nav class="sitewide-footer__links" aria-label="Footer navigation">
+        <a href="index.html#approach">Our approach</a>
+        <a href="courses.html">Courses</a>
+        <a href="live-class.html">Live class</a>
+        <a href="community.html">Community</a>
+        <a href="index.html#desk">Free learning</a>
+        <a href="#">Back to top ↑</a>
+      </nav>
     </div>
-  </footer>
+    <div class="sitewide-footer__bottom">
+      <p class="sitewide-footer__disclaimer">For educational purposes only. Nothing on this website is investment advice or a recommendation to buy or sell any financial instrument. Trading involves risk, including the possible loss of capital. Chart examples are illustrative, not live trading signals.</p>
+      <span>© TradeThesis · Website preview</span>
+    </div>
+  </div>
+</footer>
 
   <div class="cc-modal" id="cc-course-modal" hidden aria-hidden="true">
     <div class="cc-modal-backdrop" data-modal-dismiss></div>
@@ -149,23 +165,7 @@
 
   <script src="assets/course-catalogue-data.js"></script>
   <script src="assets/courses-catalogue.js" defer></script>
-  <script>
-    const menuToggle = document.querySelector('.mobile-toggle');
-    const mobileMenu = document.querySelector('.mobilelinks');
-    if (menuToggle && mobileMenu) {
-      menuToggle.addEventListener('click', () => {
-        const isOpen = mobileMenu.classList.toggle('open');
-        menuToggle.setAttribute('aria-expanded', String(isOpen));
-        menuToggle.setAttribute('aria-label', isOpen ? 'Close navigation' : 'Open navigation');
-        menuToggle.textContent = isOpen ? '×' : '☰';
-      });
-      mobileMenu.querySelectorAll('a').forEach(link => link.addEventListener('click', () => {
-        mobileMenu.classList.remove('open');
-        menuToggle.setAttribute('aria-expanded', 'false');
-        menuToggle.setAttribute('aria-label', 'Open navigation');
-        menuToggle.textContent = '☰';
-      }));
-    }
-  </script>
+  
+  <script src="assets/sitewide-nav.js" defer></script>
 </body>
 </html>

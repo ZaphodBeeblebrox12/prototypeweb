@@ -11,11 +11,12 @@
   <link href="assets/site.css" rel="stylesheet"/>
   <meta content="v17-course-family-2026-10-13" name="tradethesis-build"/>
    <link href="assets/sitewide-nav.css" rel="stylesheet"/>
+  <link href="assets/sitewide-footer.css" rel="stylesheet">
 </head>
  <body>
   <a class="skip-link" href="#home">Skip to main content</a>
   <div class="topline"><span class="topline-message">The TradeThesis Trading Path · 30 lessons · four connected stages ·</span><span class="topline-short">30 lessons · 4 connected stages</span><a href="courses.html" class="topline-link"><span class="topline-link-full">Explore the course</span><span class="topline-link-short">Explore ↗</span></a></div>
-  <header class="header sitewide-header">
+  <header class="header sitewide-header" data-sitewide-nav>
   <div class="wrap nav">
     <a class="brand" href="index.html" aria-label="TradeThesis home"><img class="brand-logo brand-logo-header" src="assets/tradethesis-horizontal.png" alt="TradeThesis — Conviction before execution"></a>
     <nav class="navlinks" aria-label="Main navigation">
@@ -25,9 +26,9 @@
       <a href="index.html#desk">The Desk</a>
     </nav>
     <a class="button member-area-link" href="member-access.html">Open member dashboard ↗</a>
-    <button class="mobile-toggle" type="button" aria-expanded="false" aria-label="Open navigation">☰</button>
+    <button class="mobile-toggle" type="button" aria-expanded="false" aria-label="Open navigation" data-sitewide-toggle>☰</button>
   </div>
-  <nav class="wrap mobilelinks" aria-label="Mobile navigation">
+  <nav class="wrap mobilelinks" aria-label="Mobile navigation" data-sitewide-mobile>
     <a href="index.html#approach">Our approach</a>
     <a href="courses.html">Courses</a>
     <a href="community.html">Community</a>
@@ -611,54 +612,35 @@
     </div>
    </section>
   </main>
-  <footer>
-   <div class="wrap">
-    <div class="footer-main">
-     <div>
-      <a class="brand brand-footer" href="index.html"><img class="brand-logo brand-logo-footer" src="assets/tradethesis-wordmark.png" alt="TradeThesis — Conviction before execution"></a>
-      <p class="footer-copy">
-       Trading education for people who want to understand the decision, not just copy the entry.
-      </p>
-     </div>
-     <nav class="footer-links">
-      <a href="#approach">
-       Our approach
-      </a>
-      <a href="courses.html">
-       Courses
-      </a>
-      <a href="live-class.html">
-       Live class
-      </a>
-      <a href="community.html">
-       Community
-      </a>
-      <a href="#desk">
-       Free learning
-      </a>
-      <a href="#home">
-       Back to top ↑
-      </a>
-     </nav>
+  <footer class="sitewide-footer">
+  <div class="sitewide-footer__inner">
+    <div class="sitewide-footer__main">
+      <div class="sitewide-footer__brand-block">
+        <a class="sitewide-footer__brand" href="index.html" aria-label="TradeThesis home">
+          <img src="assets/tradethesis-wordmark.png" alt="TradeThesis — Conviction before execution">
+        </a>
+        <p class="sitewide-footer__copy">Trading education for people who want to understand the decision, not just copy the entry.</p>
+      </div>
+      <nav class="sitewide-footer__links" aria-label="Footer navigation">
+        <a href="index.html#approach">Our approach</a>
+        <a href="courses.html">Courses</a>
+        <a href="live-class.html">Live class</a>
+        <a href="community.html">Community</a>
+        <a href="index.html#desk">Free learning</a>
+        <a href="#">Back to top ↑</a>
+      </nav>
     </div>
-    <div class="footer-bottom">
-     <div class="disclaimer">
-      For educational purposes only. Nothing on this website is investment advice or a recommendation to buy or sell any financial instrument. Trading involves risk, including the possible loss of capital. Chart examples are illustrative, not live trading signals.
-     </div>
-     <span>
-      © TradeThesis · Website preview
-     </span>
+    <div class="sitewide-footer__bottom">
+      <p class="sitewide-footer__disclaimer">For educational purposes only. Nothing on this website is investment advice or a recommendation to buy or sell any financial instrument. Trading involves risk, including the possible loss of capital. Chart examples are illustrative, not live trading signals.</p>
+      <span>© TradeThesis · Website preview</span>
     </div>
-   </div>
-  </footer>
-  <script>
-   const toggle=document.querySelector('.mobile-toggle');
-const mobile=document.querySelector('.mobilelinks');
-if(toggle&&mobile){toggle.addEventListener('click',()=>{const open=mobile.classList.toggle('open');toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'Close navigation':'Open navigation');toggle.textContent=open?'×':'☰'});mobile.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{mobile.classList.remove('open');toggle.setAttribute('aria-expanded','false');toggle.textContent='☰'}));}
-const answerText={context:'Good instinct. Before getting attached to a move, ask what price is doing and where the chart sits in the bigger picture.',risk:'That question belongs near the start, not as an afterthought. What would prove your idea wrong, and what might that cost you?',both:'Exactly. Context and risk belong in the same conversation. A trade idea is incomplete until you can explain both what supports it and what would invalidate it.'};
+  </div>
+</footer>
+  <script>const answerText={context:'Good instinct. Before getting attached to a move, ask what price is doing and where the chart sits in the bigger picture.',risk:'That question belongs near the start, not as an afterthought. What would prove your idea wrong, and what might that cost you?',both:'Exactly. Context and risk belong in the same conversation. A trade idea is incomplete until you can explain both what supports it and what would invalidate it.'};
 document.querySelectorAll('[data-answer]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-answer]').forEach(item=>item.setAttribute('aria-pressed','false'));button.setAttribute('aria-pressed','true');const copy=document.getElementById('answerCopy');if(copy)copy.textContent=answerText[button.dataset.answer]}));
 const modal=document.getElementById('previewModal');
 if(modal){const close=modal.querySelector('.close');let previousFocus=null;function showModal(title,body){previousFocus=document.activeElement;modal.querySelector('[data-modal-title]').textContent=title;modal.querySelector('[data-modal-copy]').textContent=body;modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.classList.add('no-scroll');close.focus()}function hideModal(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.classList.remove('no-scroll');if(previousFocus&&previousFocus.focus)previousFocus.focus()}document.querySelectorAll('[data-preview-checkout]').forEach(el=>el.addEventListener('click',()=>showModal('Checkout is not connected yet.','This is a visual website preview. The next step would be to connect this button to your account, checkout and course-access flow. No payment has been taken.')));document.querySelectorAll('[data-preview-enquiry]').forEach(el=>el.addEventListener('click',()=>showModal('Ask for the class details.','This preview has no live enquiry delivery. Before publishing, connect this action to your enquiry form or email workflow so people can receive confirmed dates, fees and the full outline.')));close.addEventListener('click',hideModal);modal.addEventListener('click',e=>{if(e.target===modal)hideModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))hideModal()});}
   </script>
- </body>
+   <script src="assets/sitewide-nav.js" defer></script>
+</body>
 </html>

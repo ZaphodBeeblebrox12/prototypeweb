@@ -11,11 +11,12 @@
   <link href="assets/site.css" rel="stylesheet"/>
   <meta content="v16-construct-2026-10-13" name="tradethesis-build"/>
    <link href="assets/sitewide-nav.css" rel="stylesheet"/>
+  <link href="assets/sitewide-footer.css" rel="stylesheet">
 </head>
  <body data-page-key="live-class">
   <a class="skip-link" href="#live-class-page">Skip to main content</a>
   <div class="topline"><span class="topline-message">Trade Construction &amp; Management · six-week live classroom ·</span><span class="topline-short">Six-week live classroom</span><a href="#class-path" class="topline-link"><span class="topline-link-full">See the learning path ↗</span><span class="topline-link-short">Learning path ↗</span></a></div>
-  <header class="header sitewide-header">
+  <header class="header sitewide-header" data-sitewide-nav>
   <div class="wrap nav">
     <a class="brand" href="index.html" aria-label="TradeThesis home"><img class="brand-logo brand-logo-header" src="assets/tradethesis-horizontal.png" alt="TradeThesis — Conviction before execution"></a>
     <nav class="navlinks" aria-label="Main navigation">
@@ -25,9 +26,9 @@
       <a href="index.html#desk">The Desk</a>
     </nav>
     <a class="button member-area-link" href="member-access.html">Open member dashboard ↗</a>
-    <button class="mobile-toggle" type="button" aria-expanded="false" aria-label="Open navigation">☰</button>
+    <button class="mobile-toggle" type="button" aria-expanded="false" aria-label="Open navigation" data-sitewide-toggle>☰</button>
   </div>
-  <nav class="wrap mobilelinks" aria-label="Mobile navigation">
+  <nav class="wrap mobilelinks" aria-label="Mobile navigation" data-sitewide-mobile>
     <a href="index.html#approach">Our approach</a>
     <a class="active" aria-current="page" href="courses.html">Courses</a>
     <a href="community.html">Community</a>
@@ -844,40 +845,30 @@
     </div>
    </section>
   </main>
-  <footer>
-   <div class="wrap">
-    <div class="footer-main">
-     <div>
-      <a class="brand brand-footer" href="index.html"><img class="brand-logo brand-logo-footer" src="assets/tradethesis-wordmark.png" alt="TradeThesis — Conviction before execution"></a>
-      <p class="footer-copy">
-       Trading education for people who want to understand the decision, not just copy the entry.
-      </p>
-     </div>
-     <nav class="footer-links">
-      <a href="index.html">
-       Home
-      </a>
-      <a href="courses.html">
-       All courses
-      </a>
-      <a href="trading-path.html">
-       The Trading Path
-      </a>
-      <a href="community.html">
-       Community
-      </a>
-     </nav>
+  <footer class="sitewide-footer">
+  <div class="sitewide-footer__inner">
+    <div class="sitewide-footer__main">
+      <div class="sitewide-footer__brand-block">
+        <a class="sitewide-footer__brand" href="index.html" aria-label="TradeThesis home">
+          <img src="assets/tradethesis-wordmark.png" alt="TradeThesis — Conviction before execution">
+        </a>
+        <p class="sitewide-footer__copy">Trading education for people who want to understand the decision, not just copy the entry.</p>
+      </div>
+      <nav class="sitewide-footer__links" aria-label="Footer navigation">
+        <a href="index.html#approach">Our approach</a>
+        <a href="courses.html">Courses</a>
+        <a href="live-class.html">Live class</a>
+        <a href="community.html">Community</a>
+        <a href="index.html#desk">Free learning</a>
+        <a href="#">Back to top ↑</a>
+      </nav>
     </div>
-    <div class="footer-bottom">
-     <div class="disclaimer">
-      For educational purposes only. Trading involves risk, including the possible loss of capital. No course can guarantee profits.
-     </div>
-     <span>
-      © TradeThesis · Website preview
-     </span>
+    <div class="sitewide-footer__bottom">
+      <p class="sitewide-footer__disclaimer">For educational purposes only. Nothing on this website is investment advice or a recommendation to buy or sell any financial instrument. Trading involves risk, including the possible loss of capital. Chart examples are illustrative, not live trading signals.</p>
+      <span>© TradeThesis · Website preview</span>
     </div>
-   </div>
-  </footer>
+  </div>
+</footer>
   <div aria-hidden="true" aria-modal="true" class="modal" id="previewModal" role="dialog">
    <div class="modal-box">
     <button aria-label="Close dialog" class="close">
@@ -897,11 +888,7 @@
     </p>
    </div>
   </div>
-  <script>
-   const toggle=document.querySelector('.mobile-toggle');
-const mobile=document.querySelector('.mobilelinks');
-if(toggle&&mobile){toggle.addEventListener('click',()=>{const open=mobile.classList.toggle('open');toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'Close navigation':'Open navigation');toggle.textContent=open?'×':'☰'});mobile.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{mobile.classList.remove('open');toggle.setAttribute('aria-expanded','false');toggle.textContent='☰'}));}
-const sampleResponses={
+  <script>const sampleResponses={
  observation:{correct:true,text:'That is the strongest observation of the three. It describes the visible price path without claiming the marked area will hold or break. The next step is to ask how price reacts there, what the broader context shows, and what would invalidate a future thesis.'},
  prediction:{correct:false,text:'A marked area does not confirm a breakout by itself. That statement predicts an outcome. Ask what evidence would count as acceptance above the area, what might count as rejection, and what remains unknown.'},
  signal:{correct:false,text:'A chart fragment cannot establish a guaranteed opportunity. There is no guaranteed outcome. A reasoned plan would still need context, conditions, invalidation, costs and an explicit risk decision.'}
@@ -939,5 +926,6 @@ if(enquiry){
  });
 }
   </script>
- </body>
+   <script src="assets/sitewide-nav.js" defer></script>
+</body>
 </html>

@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-nav.css">
+    <link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-footer.css">
     <link rel="stylesheet" href="{% static 'css/referral.css' %}">
     <style>
         :root {
@@ -69,6 +70,7 @@
         {% endif %}
         {% block content %}{% endblock %}
     </main>
+    {% include "partials/sitewide_footer.html" %}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="{% static 'js/referral-celebrations.js' %}"></script>

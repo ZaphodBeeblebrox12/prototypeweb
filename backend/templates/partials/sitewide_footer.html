@@ -1,0 +1,25 @@
+{% load static %}
+<footer class="sitewide-footer">
+  <div class="sitewide-footer__inner">
+    <div class="sitewide-footer__main">
+      <div class="sitewide-footer__brand-block">
+        <a class="sitewide-footer__brand" href="{{ public_site_url }}/index.html" aria-label="TradeThesis home">
+          <img src="{% static 'brand/tradethesis-wordmark.png' %}" alt="TradeThesis — Conviction before execution">
+        </a>
+        <p class="sitewide-footer__copy">Trading education for people who want to understand the decision, not just copy the entry.</p>
+      </div>
+      <nav class="sitewide-footer__links" aria-label="Footer navigation">
+        <a href="{{ public_site_url }}/index.html#approach">Our approach</a>
+        <a href="{{ public_site_url }}/courses.html">Courses</a>
+        <a href="{{ public_site_url }}/live-class.html">Live class</a>
+        <a href="{{ public_site_url }}/community.html">Community</a>
+        <a href="{{ public_site_url }}/index.html#desk">Free learning</a>
+        <a href="#">Back to top ↑</a>
+      </nav>
+    </div>
+    <div class="sitewide-footer__bottom">
+      <p class="sitewide-footer__disclaimer">For educational purposes only. Nothing on this website is investment advice or a recommendation to buy or sell any financial instrument. Trading involves risk, including the possible loss of capital. Chart examples are illustrative, not live trading signals.</p>
+      <span>© TradeThesis · Website preview</span>
+    </div>
+  </div>
+</footer>

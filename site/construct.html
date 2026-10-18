@@ -7,11 +7,12 @@
 <link rel="icon" type="image/png" sizes="192x192" href="assets/tradethesis-icon.png">
 <link href="assets/site.css" rel="stylesheet"/>
   <link href="assets/sitewide-nav.css" rel="stylesheet"/>
+  <link href="assets/sitewide-footer.css" rel="stylesheet">
 </head>
 <body class="construct-page">
   <a class="skip-link" href="#main-content">Skip to main content</a>
 <div class="topline"><strong>CONSTRUCT</strong> · ₹17,000 · 70 days of lessons, review and guided practice · 12 months of The Wobbling Candle community included</div>
-<header class="header sitewide-header">
+<header class="header sitewide-header" data-sitewide-nav>
   <div class="wrap nav">
     <a class="brand" href="index.html" aria-label="TradeThesis home"><img class="brand-logo brand-logo-header" src="assets/tradethesis-horizontal.png" alt="TradeThesis — Conviction before execution"></a>
     <nav class="navlinks" aria-label="Main navigation">
@@ -21,9 +22,9 @@
       <a href="index.html#desk">The Desk</a>
     </nav>
     <a class="button member-area-link" href="member-access.html">Open member dashboard ↗</a>
-    <button class="mobile-toggle" type="button" aria-expanded="false" aria-label="Open navigation">☰</button>
+    <button class="mobile-toggle" type="button" aria-expanded="false" aria-label="Open navigation" data-sitewide-toggle>☰</button>
   </div>
-  <nav class="wrap mobilelinks" aria-label="Mobile navigation">
+  <nav class="wrap mobilelinks" aria-label="Mobile navigation" data-sitewide-mobile>
     <a href="index.html#approach">Our approach</a>
     <a class="active" aria-current="page" href="courses.html">Courses</a>
     <a href="community.html">Community</a>
@@ -83,10 +84,32 @@
 </div></div></section>
 <section class="section" id="ask"><div class="wrap"><div class="cta-panel"><div><div class="eyebrow">Take the next step</div><h2>Bring your questions about CONSTRUCT.</h2><p>At ₹17,000, CONSTRUCT combines independent study with scheduled review and feedback, plus 12 months in The Wobbling Candle community at no extra charge. It is a learning programme—not a trading bot or a signal service.</p></div><button class="button" data-preview-enquiry>Ask about CONSTRUCT ↗</button></div></div></section>
 </main>
-<footer class="footer"><div class="wrap"><div class="footer-inner"><div><a href="index.html"><img class="footer-logo" src="assets/tradethesis-wordmark.png" alt="TradeThesis — Conviction before execution"></a><p class="footer-note">Conviction before execution. Learn the process, then review the evidence.</p></div><nav class="footer-links"><a href="index.html">Home</a><a href="courses.html">All courses</a><a href="trading-path.html">The Trading Path</a><a href="live-class.html">Six-week live classroom</a><a href="index.html#desk">The Desk</a></nav></div><div class="footer-bottom"><span>TradeThesis · Educational material, not a promise of trading results.</span><span>CONSTRUCT · Self-paced lessons. Guided execution.</span></div></div></footer>
+<footer class="sitewide-footer">
+  <div class="sitewide-footer__inner">
+    <div class="sitewide-footer__main">
+      <div class="sitewide-footer__brand-block">
+        <a class="sitewide-footer__brand" href="index.html" aria-label="TradeThesis home">
+          <img src="assets/tradethesis-wordmark.png" alt="TradeThesis — Conviction before execution">
+        </a>
+        <p class="sitewide-footer__copy">Trading education for people who want to understand the decision, not just copy the entry.</p>
+      </div>
+      <nav class="sitewide-footer__links" aria-label="Footer navigation">
+        <a href="index.html#approach">Our approach</a>
+        <a href="courses.html">Courses</a>
+        <a href="live-class.html">Live class</a>
+        <a href="community.html">Community</a>
+        <a href="index.html#desk">Free learning</a>
+        <a href="#">Back to top ↑</a>
+      </nav>
+    </div>
+    <div class="sitewide-footer__bottom">
+      <p class="sitewide-footer__disclaimer">For educational purposes only. Nothing on this website is investment advice or a recommendation to buy or sell any financial instrument. Trading involves risk, including the possible loss of capital. Chart examples are illustrative, not live trading signals.</p>
+      <span>© TradeThesis · Website preview</span>
+    </div>
+  </div>
+</footer>
 <div class="modal" id="previewModal" aria-hidden="true"><div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-close" aria-label="Close dialog">×</button><div class="eyebrow">Programme enquiry</div><h2 id="modalTitle">Enquiry not connected yet</h2><p id="modalCopy">This is a static review page. Before launch, connect this action to an enquiry form or email workflow so the team can confirm fees, dates and available support.</p></div></div>
-<script>
-const toggle=document.querySelector('.mobile-toggle');const mobile=document.querySelector('.mobilelinks');if(toggle&&mobile){toggle.addEventListener('click',()=>{const open=mobile.classList.toggle('open');toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'Close navigation':'Open navigation');toggle.textContent=open?'×':'☰'});mobile.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{mobile.classList.remove('open');toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','Open navigation');toggle.textContent='☰'}));}
-const modal=document.getElementById('previewModal');if(modal){const close=modal.querySelector('.modal-close');const copy=modal.querySelector('#modalCopy');const heading=modal.querySelector('#modalTitle');let previousFocus=null;document.querySelectorAll('[data-preview-enquiry]').forEach(el=>el.addEventListener('click',()=>{previousFocus=document.activeElement;heading.textContent='Programme enquiry is not connected yet';copy.textContent='CONSTRUCT is priced at ₹17,000, including 12 months of The Wobbling Candle community at no separate fee. This preview button is not connected to an enquiry form or checkout yet; connect it before launch.';modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';close.focus()}));function hide(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.style.overflow='';if(previousFocus)previousFocus.focus()}close.addEventListener('click',hide);modal.addEventListener('click',e=>{if(e.target===modal)hide()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))hide()})}
+<script>const modal=document.getElementById('previewModal');if(modal){const close=modal.querySelector('.modal-close');const copy=modal.querySelector('#modalCopy');const heading=modal.querySelector('#modalTitle');let previousFocus=null;document.querySelectorAll('[data-preview-enquiry]').forEach(el=>el.addEventListener('click',()=>{previousFocus=document.activeElement;heading.textContent='Programme enquiry is not connected yet';copy.textContent='CONSTRUCT is priced at ₹17,000, including 12 months of The Wobbling Candle community at no separate fee. This preview button is not connected to an enquiry form or checkout yet; connect it before launch.';modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';close.focus()}));function hide(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.style.overflow='';if(previousFocus)previousFocus.focus()}close.addEventListener('click',hide);modal.addEventListener('click',e=>{if(e.target===modal)hide()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))hide()})}
 </script>
+  <script src="assets/sitewide-nav.js" defer></script>
 </body></html>
