@@ -849,6 +849,59 @@ class DiscordOAuthFlowTests(TestCase):
         self.assertIn("identify", response["Location"])
 
     @mock.patch("apps.jobs.enqueue.enqueue_reconcile")
+    @mock.patch("apps.bot_integration.reconcile.DiscordBotService.get_member_roles", return_value=[])
+    @mock.patch("apps.bot_integration.reconcile.DiscordBotService.add_role", return_value=True)
+    @mock.patch("apps.bot_integration.views.DiscordBotService.add_member", return_value=True)
+    @mock.patch("requests.get")
+    @mock.patch("requests.post")
+    def test_oauth_to_durable_job_to_paid_role_end_to_end(
+        self, token_post, profile_get, add_member, add_role, get_member_roles
+    ):
+        plan = Plan.objects.create(name="End-to-end Discord", tier="pro")
+        PlanChannelMapping.objects.create(
+            plan=plan, platform="discord", external_id="role-e2e"
+        )
+        Subscription.objects.create(
+            user=self.user, plan=plan,
+            status=Subscription.Status.ACTIVE, is_active=True,
+        )
+
+        self.client.force_login(self.user)
+        self._store_state()
+        token_response = mock.Mock(status_code=200)
+        token_response.json.return_value = {"access_token": "one-time-oauth-token"}
+        token_post.return_value = token_response
+        profile_response = mock.Mock(status_code=200)
+        profile_response.json.return_value = {
+            "id": "discord-e2e", "username": "endtoend"
+        }
+        profile_get.return_value = profile_response
+
+        response = self.client.get(
+            reverse("bot_integration:discord_callback"),
+            {"code": "authorization-code", "state": "state-once"},
+        )
+        self.assertEqual(response.status_code, 302)
+        add_member.assert_called_once_with("discord-e2e", "one-time-oauth-token")
+
+        # Drive the same durable queue used by the web scheduler / runjobs
+        # worker, rather than calling the reconciler directly.
+        from apps.jobs.worker import claim_next, process_job
+
+        job = claim_next(kind="reconcile")
+        self.assertIsNotNone(job)
+        process_job(job)
+
+        account = DiscordAccount.objects.get(user=self.user)
+        self.assertEqual(account.discord_user_id, "discord-e2e")
+        self.assertEqual(account.roles, ["role-e2e"])
+        assignment = UserChannelAssignment.objects.get(
+            user=self.user, platform="discord", external_id="role-e2e"
+        )
+        self.assertTrue(assignment.is_active)
+        add_role.assert_called_once_with("discord-e2e", "role-e2e")
+        get_member_roles.assert_called_once_with("discord-e2e")
+
     @mock.patch("apps.bot_integration.views.DiscordBotService.add_member", return_value=True)
     @mock.patch("requests.get")
     @mock.patch("requests.post")
