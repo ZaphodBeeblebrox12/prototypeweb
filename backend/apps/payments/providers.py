@@ -53,7 +53,25 @@ def create_stripe_checkout(intent, success_url: str, cancel_url: str) -> Created
     except Exception:
         course_offer = None
     product_name = course_offer.name if course_offer else intent.plan.name
-    product_description = "Course access" if course_offer else "Subscription"
+    if course_offer is not None:
+        if course_offer.access_duration_days is None:
+            product_description = (
+                "One-time payment for lifetime course access; "
+                "no automatic renewal."
+            )
+        else:
+            product_description = (
+                f"One-time payment for {course_offer.access_duration_days} days "
+                "of course access; no automatic renewal."
+            )
+    else:
+        from apps.payments.services import interval_days_for
+
+        access_days = interval_days_for(intent)
+        product_description = (
+            f"One-time payment for {access_days} days of membership access; "
+            "no automatic renewal."
+        )
     try:
         session = stripe.checkout.Session.create(
             mode="payment",

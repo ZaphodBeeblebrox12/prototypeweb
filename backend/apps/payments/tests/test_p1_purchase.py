@@ -10,6 +10,7 @@ import datetime
 from unittest import mock
 
 from django.contrib.auth import get_user_model
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
@@ -62,6 +63,41 @@ def _post_test_consent(client, intent):
     _ensure_checkout_test_policies()
     return client.post(
         reverse("checkout-consent", args=[intent.id]), {"agree": "on"})
+
+
+@mock.patch("apps.payments.views.providers")
+@mock.patch("apps.payments.views.get_pricing_country", return_value="US")
+class StripeCheckoutBillingDisclosureTests(TestCase):
+    @override_settings(STRIPE_SECRET_KEY="sk_test_checkout_mode")
+    @mock.patch("stripe.checkout.Session.create")
+    def test_stripe_session_is_single_charge_and_labels_fixed_access(self, create_session):
+        user = User.objects.create_user(username="stripe-buyer", password="pw")
+        plan, price = make_plan("monthly", price_cents=999, currency="USD")
+        intent = PaymentIntent.objects.create(
+            user=user,
+            plan=plan,
+            plan_price=price,
+            amount=price.price_cents,
+            currency=price.currency,
+            provider="stripe",
+            status=PaymentIntent.Status.PENDING,
+        )
+        create_session.return_value = {
+            "id": "cs_test_one_time",
+            "url": "https://checkout.stripe.com/test",
+        }
+
+        providers.create_stripe_checkout(
+            intent,
+            success_url="https://example.com/confirm/",
+            cancel_url="https://example.com/cancel/",
+        )
+
+        kwargs = create_session.call_args.kwargs
+        self.assertEqual(kwargs["mode"], "payment")
+        product = kwargs["line_items"][0]["price_data"]["product_data"]
+        self.assertIn("One-time payment for 30 days", product["description"])
+        self.assertIn("no automatic renewal", product["description"])
 
 
 @mock.patch("apps.payments.views.providers")
