@@ -41,13 +41,13 @@ class ChannelMeshAssignmentEndpointTests(TestCase):
             chat_id=7654321, is_active=True,
         )
 
-    def signed_post(self, payload, secret="mesh-test-secret"):
+    def signed_post(self, payload, secret="mesh-test-secret", url_name="mesh_assign"):
         body = json.dumps(payload, separators=(",", ":")).encode()
         timestamp = str(int(time.time()))
         nonce = uuid.uuid4().hex
         signature = sign_payload(secret, timestamp, nonce, body)
         return self.client.post(
-            reverse("bot_integration:mesh_assign"),
+            reverse(f"bot_integration:{url_name}"),
             data=body,
             content_type="application/json",
             HTTP_X_BOT_INSTANCE="existing-trading-bot",
@@ -55,6 +55,34 @@ class ChannelMeshAssignmentEndpointTests(TestCase):
             HTTP_X_BOT_NONCE=nonce,
             HTTP_X_BOT_SIGNATURE=signature,
         )
+
+    def test_signed_inventory_returns_only_active_meshes_and_spawns(self):
+        ChannelMeshDestination.objects.create(
+            mesh=self.mesh, external_id="-100702", name="Inactive Spawn",
+            is_active=False,
+        )
+        inactive_mesh = ChannelMesh.objects.create(
+            key="inactive-mesh", name="Inactive Mesh",
+            source_chat_id="-100720", is_active=False,
+        )
+        ChannelMeshDestination.objects.create(
+            mesh=inactive_mesh, external_id="-100721", name="Inactive Mesh Spawn",
+            is_active=True,
+        )
+
+        response = self.signed_post({}, url_name="mesh_inventory")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["ok"])
+        self.assertEqual(
+            [item["mesh_key"] for item in response.json()["meshes"]],
+            ["mesh-api"],
+        )
+        spawns = response.json()["meshes"][0]["spawns"]
+        self.assertEqual([item["spawn_chat_id"] for item in spawns], ["-100701"])
+        self.assertNotIn(self.mesh.source_chat_id, {
+            item["spawn_chat_id"] for item in spawns
+        })
 
     def test_signed_allocator_choice_is_saved_and_returns_assignment(self):
         response = self.signed_post({
