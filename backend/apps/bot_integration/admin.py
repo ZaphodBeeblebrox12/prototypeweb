@@ -218,8 +218,16 @@ class ChannelMeshDestinationInline(admin.TabularInline):
     model = ChannelMeshDestination
     extra = 0
     fields = ("name", "external_id", "chat_type", "is_active", "created_at")
-    readonly_fields = ("created_at",)
+    readonly_fields = ("external_id", "created_at")
     show_change_link = True
+
+    # Spawn IDs are immutable once registered. Add new spawn rows via the
+    # dedicated admin instead of editing existing Telegram identities inline.
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(ChannelMesh)
