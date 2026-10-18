@@ -101,7 +101,7 @@ class PurchaseFlowTests(APITestCase):
         unavailable = self.client.get(reverse(
             "course-purchase-start", kwargs={"offer_slug": "not-published"}))
         self.assertEqual(unavailable.status_code, 404)
-        self.assertContains(unavailable, "not available yet", status_code=404)
+        self.assertContains(unavailable, "not available to purchase yet", status_code=404)
         self.assertEqual(PaymentIntent.objects.count(), 0)
 
         offer = self._saleable_course_offer()
