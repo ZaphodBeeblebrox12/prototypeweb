@@ -26,8 +26,8 @@ def start_telegram_connect(request):
     """Generate a deep link and redirect immediately to Telegram."""
     config = BotConfig.get_config()
     if not config.telegram_bot_username:
-        messages.error(request, "Telegram bot is not configured.")
-        return redirect('profile')
+        messages.error(request, "Telegram bot is not configured. Please contact support so the bot connection can be enabled.")
+        return redirect('dashboard')
 
     # Delete old unused tokens for this user
     TelegramVerificationToken.objects.filter(user=request.user).delete()
@@ -59,7 +59,7 @@ def unlink_telegram(request):
         messages.success(request, "Telegram account unlinked.")
     except TelegramAccount.DoesNotExist:
         pass
-    return redirect('profile')
+    return redirect('dashboard')
 
 
 @login_required
@@ -380,8 +380,8 @@ def bot_heartbeat(request):
 
 @login_required
 def sync_telegram_channels(request):
-    """On-demand membership snapshot refresh; returns to the dashboard."""
+    """On-demand membership snapshot refresh; return to the current member desk."""
     sync_channel_memberships_for_user(request.user.id)
     messages.success(request, 'Channel membership refreshed.')
-    return redirect('profile')
+    return redirect('dashboard')
 
