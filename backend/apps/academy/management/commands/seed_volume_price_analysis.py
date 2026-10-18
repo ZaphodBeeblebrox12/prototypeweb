@@ -201,7 +201,7 @@ def embed_vpa_figures(lesson_number, student_markdown, assets_root, figure_count
             anchors = (anchors,)
         placed = False
         for anchor in anchors:
-            pattern = re.compile(rf"(?m)^({re.escape(anchor)}[^\\n]*)$")
+            pattern = re.compile(rf"(?m)^({re.escape(anchor)}[^\n]*)$")
 
             def add_figure(match, filename=filename, caption=caption):
                 figure_counters[module_number] = figure_counters.get(module_number, 0) + 1
@@ -211,7 +211,7 @@ def embed_vpa_figures(lesson_number, student_markdown, assets_root, figure_count
                     f"(/static/academy/vpa/{filename})"
                 )
                 figure_caption = f"*{caption}.*"
-                return f"{match.group(1)}\\n\\n{image}\\n\\n{figure_caption}"
+                return f"{match.group(1)}\n\n{image}\n\n{figure_caption}"
 
             student_markdown, replacements = pattern.subn(
                 add_figure, student_markdown, count=1
@@ -231,7 +231,7 @@ def embed_vpa_figures(lesson_number, student_markdown, assets_root, figure_count
             "reveal is implemented."
         )
 
-    return student_markdown, "\\n".join(media_notes)
+    return student_markdown, "\n".join(media_notes)
 
 
 class Command(BaseCommand):
