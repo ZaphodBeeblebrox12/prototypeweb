@@ -423,8 +423,7 @@ class CtaFlowTests(APITestCase):
         self.assertEqual(r.status_code, 200, r.data)
         intent = PaymentIntent.objects.get()
         self.assertEqual(intent.plan_price.interval, "monthly")
-        self.client.post(reverse("checkout-consent", args=[intent.id]),
-                         {"agree": "on"})
+        self._consent(intent)
         intent.refresh_from_db()
         self.assertEqual(intent.provider_reference, "cs_m")
 
