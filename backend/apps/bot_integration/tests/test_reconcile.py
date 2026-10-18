@@ -1042,13 +1042,43 @@ class DiscordOAuthFlowTests(TestCase):
         self.assertFalse(DiscordAccount.objects.filter(user=self.user).exists())
 
     @mock.patch("apps.bot_integration.views.DiscordBotService.remove_role", return_value=False)
-    def test_disconnect_failure_keeps_link_for_safe_retry(self, remove_role):
+    def test_disconnect_failure_keeps_link_paused_for_safe_retry(self, remove_role):
         self.client.force_login(self.user)
+        plan = Plan.objects.create(name="Disconnect pending plan", tier="pro")
+        PlanChannelMapping.objects.create(
+            plan=plan, platform="discord", external_id="role-paid"
+        )
+        Subscription.objects.create(
+            user=self.user, plan=plan,
+            status=Subscription.Status.ACTIVE, is_active=True,
+        )
         account = DiscordAccount.objects.create(
             user=self.user, discord_user_id="discord-987",
             guild_id="guild-id", roles=["role-paid"], is_active=True,
         )
         self.client.post(reverse("bot_integration:discord_unlink"))
 
+        account.refresh_from_db()
         self.assertTrue(DiscordAccount.objects.filter(pk=account.pk).exists())
+        self.assertFalse(account.is_active)
+        self.assertEqual(account.roles, ["role-paid"])
+
+    @mock.patch("apps.bot_integration.reconcile.DiscordBotService.add_role")
+    def test_pending_disconnect_is_not_regranted_by_background_reconciliation(self, add_role):
+        plan = Plan.objects.create(name="Paused access plan", tier="pro")
+        PlanChannelMapping.objects.create(
+            plan=plan, platform="discord", external_id="role-paused"
+        )
+        Subscription.objects.create(
+            user=self.user, plan=plan,
+            status=Subscription.Status.ACTIVE, is_active=True,
+        )
+        DiscordAccount.objects.create(
+            user=self.user, discord_user_id="discord-paused",
+            guild_id="guild-id", roles=["role-paused"], is_active=False,
+        )
+
+        run_user_reconcile(self.user.id, transport=FakeTransport())
+
+        add_role.assert_not_called()
 
