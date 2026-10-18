@@ -80,6 +80,25 @@ class AdminDeskManagementTests(TestCase):
         ).exists())
         self.assertTrue(AuditLog.objects.filter(action="admin.subscription.extend").exists())
 
+    def test_subscription_extension_never_limits_permanent_access(self):
+        plan = Plan.objects.create(
+            name="Permanent Access", tier=Plan.Tier.BASIC, is_active=True,
+        )
+        subscription = Subscription.objects.create(
+            user=self.learner, plan=plan, status=Subscription.Status.ACTIVE,
+            is_active=True, started_at=timezone.now(), expires_at=None,
+        )
+        response = self.client.post(
+            reverse("staff_admin_desk_subscription_action", args=[subscription.pk]),
+            {"action": "extend", "days": "30", "reason": "Goodwill access extension"},
+        )
+        self.assertEqual(response.status_code, 302)
+        subscription.refresh_from_db()
+        self.assertIsNone(subscription.expires_at)
+        self.assertFalse(SubscriptionHistory.objects.filter(
+            subscription=subscription, event_type=SubscriptionHistory.EventType.RENEWED,
+        ).exists())
+
     def test_subscription_cancel_and_complimentary_grant_use_audited_services(self):
         plan = Plan.objects.create(
             name="Management Basic", tier=Plan.Tier.BASIC, is_active=True,

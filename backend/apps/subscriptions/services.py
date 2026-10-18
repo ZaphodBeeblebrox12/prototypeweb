@@ -706,8 +706,12 @@ def extend_subscription(subscription, days, actor="admin"):
             return False
 
         now = timezone.now()
+        # No expiry means permanent access, not a missing date. Never turn
+        # permanent entitlement into a time-limited one via this action.
+        if current.expires_at is None:
+            return False
         base_expiry = current.expires_at
-        if base_expiry is None or base_expiry < now:
+        if base_expiry < now:
             base_expiry = now
         new_expiry = base_expiry + timezone.timedelta(days=days)
         updated = Subscription.objects.filter(
