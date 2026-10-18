@@ -29,8 +29,10 @@ td{padding:9px 0;border-bottom:1px solid #eef0f3}td:last-child{text-align:right;
 <table>
 <tr><td>{% if invoice %}Item{% else %}Plan{% endif %}</td><td>{% if invoice %}{{ invoice.description }}{% else %}{{ intent.plan.name }}{% endif %}</td></tr>
 <tr><td>Date</td><td>{% if invoice %}{{ invoice.issue_date|date:"M d, Y" }}{% else %}{{ intent.created_at|date:"M d, Y" }}{% endif %}</td></tr>
-<tr><td>Payment method</td><td>{{ intent.get_provider_display }}</td></tr>
-<tr><td>Transaction ID</td><td>{{ intent.provider_payment_id|default:intent.provider_reference }}</td></tr>
+<tr><td>Payment method</td><td>{{ intent.get_payment_method_display|default:"Not reported" }}</td></tr>
+<tr><td>Payment provider</td><td>{{ intent.get_provider_display }}</td></tr>
+{% if intent.provider_payment_id %}<tr><td>Payment transaction ID</td><td>{{ intent.provider_payment_id }}</td></tr>{% endif %}
+{% if intent.provider_reference %}<tr><td>Order / checkout reference</td><td>{{ intent.provider_reference }}</td></tr>{% endif %}
 {% if intent.applied_coupon_code %}<tr><td>Coupon</td><td>{{ intent.applied_coupon_code }}</td></tr>{% endif %}
 {% if invoice %}
 <tr><td>Subtotal</td><td>{{ invoice.subtotal_display }}</td></tr>
