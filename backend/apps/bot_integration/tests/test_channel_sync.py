@@ -6,10 +6,14 @@ from django.test import TestCase
 
 from apps.bot_integration.models import (
     ChannelMembershipSnapshot,
+    ChannelMesh,
+    ChannelMeshDestination,
     CommunityChannel,
     PlanChannelMapping,
+    PlanMeshMapping,
     TelegramAccount,
     UserChannelAssignment,
+    UserMeshAssignment,
 )
 from apps.bot_integration.services import channel_sync
 from apps.subscriptions.models import Plan, Subscription
@@ -103,3 +107,50 @@ class ChannelDisplayTests(TestCase):
         data = channel_sync.build_channel_display(self.user)
         self.assertTrue(data["paid"][0]["entitled"])
         self.assertTrue(data["paid"][0]["assigned"])
+
+
+
+class ChannelMeshDisplayTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="meshdisplay", password="x")
+        self.plan = Plan.objects.create(
+            name="Mesh plan", tier="pro", is_active=True, display_order=1
+        )
+        Subscription.objects.create(
+            user=self.user, plan=self.plan,
+            status=Subscription.Status.ACTIVE, is_active=True,
+            price_cents=1000, price_currency="USD",
+        )
+        self.mesh = ChannelMesh.objects.create(
+            key="display-mesh", name="Forex Mesh",
+            source_chat_id="-100901", is_active=True,
+        )
+        self.spawn = ChannelMeshDestination.objects.create(
+            mesh=self.mesh, external_id="-100902",
+            name="Forex Members A", is_active=True,
+        )
+        PlanMeshMapping.objects.create(
+            plan=self.plan, mesh=self.mesh, is_active=True
+        )
+
+    def test_mesh_plan_display_shows_spawn_assignment_not_source(self):
+        UserMeshAssignment.objects.create(
+            user=self.user, mesh=self.mesh, destination=self.spawn,
+            is_active=True,
+        )
+
+        data = channel_sync.build_channel_display(self.user)
+
+        self.assertEqual(len(data["meshes"]), 1)
+        self.assertEqual(data["meshes"][0]["name"], "Forex Mesh")
+        self.assertEqual(data["meshes"][0]["plan_name"], "Mesh plan")
+        self.assertTrue(data["meshes"][0]["assigned"])
+        self.assertEqual(data["meshes"][0]["spawn_name"], "Forex Members A")
+        self.assertNotIn(self.mesh.source_chat_id, str(data["meshes"]))
+
+    def test_mesh_plan_display_shows_assignment_pending(self):
+        data = channel_sync.build_channel_display(self.user)
+
+        self.assertEqual(len(data["meshes"]), 1)
+        self.assertFalse(data["meshes"][0]["assigned"])
+        self.assertEqual(data["meshes"][0]["status"], "Spawn assignment pending")
