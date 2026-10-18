@@ -25,15 +25,25 @@ logger = logging.getLogger(__name__)
 def start_telegram_connect(request):
     """Generate a deep link and redirect immediately to Telegram."""
     config = BotConfig.get_config()
-    if not config.telegram_bot_username:
-        messages.error(request, "Telegram bot is not configured. Please contact support so the bot connection can be enabled.")
-        return redirect('dashboard')
+    # Prefer the admin-managed BotConfig, but honour the supported environment
+    # setting when the database field has not been populated on this deployment.
+    bot_username = (
+        config.telegram_bot_username
+        or getattr(settings, "TELEGRAM_BOT_USERNAME", "")
+        or ""
+    ).strip().lstrip("@")
+    if not bot_username:
+        messages.error(
+            request,
+            "Telegram connection is not configured yet. Please contact support.",
+        )
+        return redirect("dashboard")
 
     # Delete old unused tokens for this user
     TelegramVerificationToken.objects.filter(user=request.user).delete()
 
     token = TelegramVerificationToken.create_token(request.user)
-    deep_link = f"https://t.me/{config.telegram_bot_username}?start=verify_{token.token}"
+    deep_link = f"https://t.me/{bot_username}?start=verify_{token.token}"
     
     # Redirect directly to Telegram (no intermediate page)
     return redirect(deep_link)
