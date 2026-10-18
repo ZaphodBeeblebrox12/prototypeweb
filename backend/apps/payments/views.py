@@ -291,6 +291,12 @@ def _checkout_response(request, pk):
     if intent.provider == "razorpay":
         context["razorpay_key_id"] = settings.RAZORPAY_KEY_ID
         context["razorpay_order_id"] = intent.provider_reference
+        # Prefill identity only; the customer can change these details in
+        # Razorpay Checkout. Do not collect/store bank or UPI PIN credentials.
+        context["razorpay_customer_name"] = (
+            getattr(intent.user, "full_name", "") or intent.user.username
+        )
+        context["razorpay_customer_email"] = intent.user.email or ""
     else:
         url = None
         if intent.provider_reference:

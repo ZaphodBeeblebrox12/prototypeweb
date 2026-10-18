@@ -1,23 +1,65 @@
-{% extends "base.html" %}{% block content %}
-<h2>Checkout — {{ plan.name }}</h2>
-<p>Total: {{ amount }} {{ currency }}</p>
-{% if canceled %}<p><strong>Payment canceled.</strong> You can try again below.</p>{% endif %}
-{% if intent.provider == "razorpay" %}
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<button id="rzp-pay">Pay with Razorpay</button>
-<script>
-document.getElementById('rzp-pay').onclick = function () {
-  new Razorpay({
-    key: "{{ razorpay_key_id }}", order_id: "{{ razorpay_order_id }}",
-    amount: "{{ amount }}", currency: "{{ currency }}", name: "{{ plan.name }}",
-    handler: function () { window.location = "{% url 'confirm-page' intent.id %}"; }
-  }).open();
-};
-</script>
-{% else %}
-{% if stripe_checkout_url %}
-<script>window.location = "{{ stripe_checkout_url }}";</script>
-<p><a href="{{ stripe_checkout_url }}">Continue to secure payment</a></p>
-{% else %}<p>Checkout unavailable. <a href="{% url 'checkout-page' intent.id %}">Retry</a>.</p>{% endif %}
-{% endif %}
+{% extends "base.html" %}
+{% block content %}
+<section class="container py-4" style="max-width:620px">
+  <h2>Checkout — {{ plan.name }}</h2>
+  <p class="lead">Total: <strong>{{ amount }} {{ currency }}</strong></p>
+  {% if canceled %}<p class="alert alert-warning"><strong>Payment canceled.</strong> You can try again below.</p>{% endif %}
+  {% if intent.provider == "razorpay" %}
+    <div class="card">
+      <div class="card-body">
+        <h3 class="h5">Pay securely with Razorpay</h3>
+        <p class="mb-3">Choose UPI, a supported UPI app or ID, card, netbanking or wallet in the secure checkout. Options depend on the payment methods enabled for this Razorpay account.</p>
+        <p class="small text-muted">Your payment is verified with Razorpay before access is activated. Do not share your UPI PIN or banking password with TradeThesis.</p>
+        <button id="rzp-pay" class="btn btn-primary">Choose UPI or another payment method</button>
+        <p id="rzp-checkout-note" class="small text-muted mt-3 mb-0" aria-live="polite"></p>
+      </div>
+    </div>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+    (function () {
+      var button = document.getElementById("rzp-pay");
+      var note = document.getElementById("rzp-checkout-note");
+      if (!button || typeof Razorpay === "undefined") {
+        if (note) note.textContent = "Secure checkout could not load. Refresh this page or contact support.";
+        if (button) button.disabled = true;
+        return;
+      }
+      button.onclick = function () {
+        button.disabled = true;
+        var checkout = new Razorpay({
+          key: "{{ razorpay_key_id|escapejs }}",
+          order_id: "{{ razorpay_order_id|escapejs }}",
+          amount: "{{ amount|escapejs }}",
+          currency: "{{ currency|escapejs }}",
+          name: "TradeThesis",
+          description: "{{ plan.name|escapejs }}",
+          prefill: {
+            name: "{{ razorpay_customer_name|escapejs }}",
+            email: "{{ razorpay_customer_email|escapejs }}"
+          },
+          theme: { color: "#456653" },
+          handler: function () {
+            // The return page verifies the Razorpay order server-side.
+            window.location = "{% url 'confirm-page' intent.id %}";
+          },
+          modal: {
+            ondismiss: function () {
+              button.disabled = false;
+              note.textContent = "Checkout closed. If you completed a payment, check its status before trying again.";
+            }
+          }
+        });
+        checkout.open();
+      };
+    })();
+    </script>
+  {% else %}
+    {% if stripe_checkout_url %}
+      <script>window.location = "{{ stripe_checkout_url|escapejs }}";</script>
+      <p><a href="{{ stripe_checkout_url }}">Continue to secure payment</a></p>
+    {% else %}
+      <p>Checkout unavailable. <a href="{% url 'checkout-page' intent.id %}">Retry</a>.</p>
+    {% endif %}
+  {% endif %}
+</section>
 {% endblock %}

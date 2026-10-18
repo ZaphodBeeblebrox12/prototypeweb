@@ -132,6 +132,34 @@ class PurchaseFlowTests(APITestCase):
         intent.refresh_from_db()
         self.assertEqual(intent.provider_reference, "order_in")
 
+    def test_razorpay_checkout_offers_upi_and_prefills_customer(self, geo, prov):
+        """India's Razorpay checkout should leave UPI available with other methods."""
+        geo.return_value = "IN"
+        self.user.email = "buyer@example.test"
+        self.user.first_name = "Asha"
+        self.user.last_name = "Buyer"
+        self.user.save(update_fields=["email", "first_name", "last_name"])
+        plan, _ = make_plan("monthly", 99900, "INR")
+        prov.create_hosted_checkout.return_value = providers.CreatedCheckout(
+            provider_reference="order_upi_test", checkout_url=None)
+
+        started = self._start(plan.id, "monthly")
+        self.assertEqual(started.status_code, 200, started.data)
+        intent = PaymentIntent.objects.get(user=self.user)
+        consent = self._consent(intent)
+        self.assertEqual(consent.status_code, 302)
+        response = self.client.get(reverse("checkout-page", args=[intent.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Choose UPI or another payment method")
+        self.assertContains(response, "Choose UPI, a supported UPI app or ID")
+        self.assertContains(response, 'name: "Asha Buyer"')
+        self.assertContains(response, 'email: "buyer@example.test"')
+        self.assertContains(response, 'order_id: "order_upi_test"')
+        # No checkout method allow-list is passed, so Razorpay can show every
+        # payment type enabled in the merchant dashboard, including UPI.
+        self.assertNotContains(response, "method:")
+
     def test_failed_verification_does_not_activate(self, _geo, prov):
         plan, _ = make_plan()
         prov.create_hosted_checkout.return_value = providers.CreatedCheckout(
