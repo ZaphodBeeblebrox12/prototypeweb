@@ -22,6 +22,29 @@ def _amount(intent):
     return f"{intent.currency} {intent.amount_dollars:.2f}"
 
 
+def _capture_payment_method(intent):
+    """Best-effort capture of the provider-reported method after verified payment."""
+    if intent.status != "success" or intent.payment_method:
+        return
+    try:
+        from .models import PaymentIntent
+        from .providers import fetch_payment_method
+
+        method = fetch_payment_method(intent)
+        if not method:
+            return
+        PaymentIntent.objects.filter(
+            pk=intent.pk,
+            status=PaymentIntent.Status.SUCCESS,
+            payment_method="",
+        ).update(payment_method=method)
+        intent.refresh_from_db(fields=["payment_method"])
+    except Exception:
+        # Method display is useful metadata, but must never interrupt fulfilment
+        # or suppress the invoice/email for an already verified payment.
+        logger.exception("payment method capture failed for PaymentIntent %s", intent.pk)
+
+
 def _base_context(intent):
     """Shared branding + payment context for every billing email."""
     from django.conf import settings
@@ -69,6 +92,10 @@ def _base_context(intent):
         "amount_display": _amount(intent),
         "currency": intent.currency,
         "provider_display": intent.get_provider_display(),
+        "payment_method_display": (
+            intent.get_payment_method_display() if intent.payment_method
+            else "Not reported by provider"
+        ),
         "provider_reference": intent.provider_reference,
         "provider_payment_id": intent.provider_payment_id,
         "date_display": _tz.localtime(intent.created_at).strftime("%b %d, %Y"),
@@ -108,6 +135,7 @@ def notify_payment_succeeded(payment_intent, subscription=None):
         # passed from the caller can still be stale. Refresh before invoice
         # creation, which deliberately refuses non-successful payments.
         payment_intent.refresh_from_db()
+        _capture_payment_method(payment_intent)
         from .invoicing import issue_invoice
         issue_invoice(payment_intent)
     except Exception:
