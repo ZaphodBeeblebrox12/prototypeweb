@@ -4,7 +4,6 @@ Custom allauth adapter for Google authentication.
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.account.adapter import DefaultAccountAdapter
 from django import forms
-from allauth.exceptions import ImmediateHttpResponse
 from allauth.account.models import EmailAddress
 from django.contrib import messages
 from django.http import HttpResponseRedirect

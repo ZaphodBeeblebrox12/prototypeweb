@@ -56,6 +56,9 @@ jobs:
         continue-on-error: true
         run: mypy apps/academy/
 
+      - name: Collect static assets for test environment
+        run: python manage.py collectstatic --noinput
+
       - name: Run focused micro-course image-slot regressions
         run: pytest tests/academy/test_course_import_workflow.py
 

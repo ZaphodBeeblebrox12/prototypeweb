@@ -1,6 +1,6 @@
 """Dispute ingestion, state machine and evidence services."""
 import logging
-from datetime import timedelta
+from datetime import timedelta, timezone as datetime_timezone
 
 from django.db import transaction
 from django.utils import timezone
@@ -117,7 +117,7 @@ def _ts(value):
     from django.utils.dateparse import parse_datetime
     if isinstance(value, (int, float)):
         from datetime import datetime as dt
-        return dt.fromtimestamp(value, tz=timezone.utc)
+        return dt.fromtimestamp(value, tz=datetime_timezone.utc)
     if isinstance(value, str):
         return parse_datetime(value)
     return None
