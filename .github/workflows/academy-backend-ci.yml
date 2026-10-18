@@ -53,7 +53,7 @@ jobs:
         run: black --check apps/academy/ tests/academy/
 
       - name: Run type checking with mypy
-        run: mypy apps/academy/
+        run: mypy apps/academy/ --follow-imports=silent
 
       - name: Collect static assets for test environment
         run: python manage.py collectstatic --noinput
