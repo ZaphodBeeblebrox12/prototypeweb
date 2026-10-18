@@ -13,7 +13,7 @@ from django.contrib import messages
 from django.conf import settings
 from .models import (
     BotConfig, TelegramAccount, TelegramVerificationToken,
-    DiscordAccount, BotAccessAudit, UserChannelAssignment
+    DiscordAccount, BotAccessAudit, PlanChannelMapping, UserChannelAssignment
 )
 from .services.telegram import TelegramBotService
 from .services.discord import DiscordBotService
