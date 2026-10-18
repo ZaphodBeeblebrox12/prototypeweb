@@ -1,69 +1,58 @@
-# DEPLOYING TO RENDER (free plan)
+# TradeThesis Academy — deployment and staging runbook
 
-## What this pack contains
-| File | Action |
-|---|---|
-| `config/settings/production.py` | NEW |
-| `config/wsgi.py` | REPLACE (defaults to production settings) |
-| `build.sh` | NEW — repo root |
-| `render.yaml` | NEW — repo root (Render Blueprint) |
-| `requirements.txt` | REPLACE (adds gunicorn + psycopg3) |
+## Source-of-truth and safety boundaries
 
-## Why Postgres is mandatory
-Render free web services have an EPHEMERAL filesystem: anything written
-to disk (including db.sqlite3) disappears on every deploy/restart. SQLite
-is therefore not an option. base.py already reads DATABASE_URL via
-django-environ, and render.yaml provisions a free PostgreSQL and injects
-DATABASE_URL automatically.
+- Active website/backend integration target: `ZaphodBeeblebrox12/prototypeweb` on `my-new-branch`.
+- Academy feature integration must target `my-new-branch` only. Do not merge or deploy this work to `main`.
+- Do not modify the legacy `tradeadmin` service or its database. Academy staging must use its own dedicated PostgreSQL database and separate test-mode payment credentials.
+- Do not assume a GitHub push deploys staging. The last confirmed Render checkpoint had automatic deploys disabled and a previously live staging instance. Verify the currently linked branch and latest deployment in Render before any manual deploy; this PR does not change Render services or environment variables.
+- A `/health/` HTTP 200 is only a liveness check. It does not prove database connectivity, authentication, email, course access, checkout, or hosted persistence.
 
-## Steps
-1. Copy the 5 files into the repo (wsgi.py + requirements.txt replace).
-2. Commit + push to main.
-3. render.com -> Dashboard -> New + -> Blueprint -> connect the repo.
-   Render reads render.yaml, creates the Postgres DB and the web service,
-   and deploys. First deploy takes ~3-5 min (pip + collectstatic + migrate).
-4. After deploy: Dashboard -> tradeadmin -> Environment -> fill in the
-   `sync: false` secrets (Telegram tokens, Stripe/Razorpay keys, SMTP).
-5. Create the admin account:
-       Render shell -> python manage.py createsuperuser
-   (or: python manage.py shell -c "from django.contrib.auth import get_user_model; get_user_model().objects.create_superuser('admin','a@b.c','PASS')")
-6. Recreate your plans/products/Prices in the admin — the production DB
-   starts EMPTY (your dev SQLite data does not travel).
+## Environment configuration
 
-## MUST-DO before opening registration
-ACCOUNT_EMAIL_VERIFICATION = "mandatory" in base.py. Without working SMTP,
-verification emails go nowhere and nobody can sign up. Set EMAIL_* env vars
-(Gmail: enable 2FA -> create an App Password; or SendGrid free tier, 100
-emails/day). Test with the "forgot password" flow yourself first.
-No SMTP and want to launch anyway? Temporarily set env:
-    EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
-(verification links appear in Render logs — fine for a private beta.)
+Keep local secrets in `backend/.env` (git-ignored) and hosted secrets in the Render Environment Group. Never commit provider credentials.
 
-## Free-tier realities (plan around these)
-- SPIN-DOWN: after ~15 min idle the service sleeps; first request takes
-  ~30-60s. Upgrade or live with it.
-- 750 INSTANCE HOURS/month total. ONE always-on service fits; TWO
-  always-on services (e.g. web + a background jobs worker) do NOT.
-  The jobs worker (python manage.py runjobs --loop) that runs reconcile/
-  sweeps is a SEPARATE process — on free you either skip it (web requests
-  still trigger reconcile for that user) or run it briefly when needed.
-- FREE POSTGRES EXPIRES: Render's free database is time-limited (they
-  email before). Back up with pg_dump / django dumpdata before expiry
-  and restore into a new free DB. (Verify current terms on render.com.)
-- MEDIA FILES (avatars, ticket attachments) are on the ephemeral disk and
-  are LOST on redeploy. Acceptable for launch; move to Cloudinary/S3 later.
-- Geo pricing: CF-IPCountry headers won't exist on Render; set
-  MAXMIND_ENABLED=True (db already committed in data/) and test geo prices
-  with the DEBUG-only ?test_country=IN param — but DEBUG is False in prod,
-  so instead add real GeoPlanPrice rows and verify from an Indian IP/VPN.
-- Stripe/Razorpay webhooks: point them at https://<app>.onrender.com/
-  (check apps/payments/urls.py for the exact webhook paths) — localhost
-  webhook secrets from dev are invalid there.
-- Telegram Login Widget: the widget verifies against the bot's configured
-  domain — your Render URL must be registered with @BotFather (/setdomain).
+For local development and tests, the default console email backend is acceptable. For hosted signup verification and password-recovery acceptance testing, configure:
 
-## Post-deploy smoke test
-/ -> landing renders (plans from empty DB -> create them first)
-/admin -> Jazzmin login -> Plans/Products visible
-/accounts/signup/ -> email arrives -> confirm -> /dashboard/ renders
-python manage.py check --deploy   (from Render shell; fix any warnings)
+- `EMAIL_BACKEND=apps.core.email_backends.ResendEmailBackend`
+- `RESEND_API_KEY` with the Resend API key stored in the hosting dashboard
+- `RESEND_API_TIMEOUT=10` (or another deliberate timeout)
+- `DEFAULT_FROM_EMAIL` using an address/domain verified with Resend
+
+The backend sends over HTTPS; it does not require outbound SMTP. Do not count verification or recovery email as accepted until a real message is delivered and its link has been tested. Keep staging and production provider credentials separate.
+
+The production configuration requires a PostgreSQL `DATABASE_URL`. Confirm that Academy points to its own dedicated database; never reuse the legacy TradeAdmin database. The application configuration alone does not provision a database or create a backup/restore policy.
+
+## Validate and import the course catalogue
+
+The catalogue command is create-only and draft-only. It imports Trading Path, Support & Resistance, and Volume Price Analysis from the repository's canonical source material, keeps instructor-only notes separate, creates no offers, and does not publish lessons.
+
+First validate sources without writing to the database:
+
+```bash
+cd backend
+python manage.py seed_academy_catalogue
+```
+
+Only after confirming that `DATABASE_URL` points to the intended dedicated staging database, and checking that none of the three course slugs already exists, run the import once:
+
+```bash
+python manage.py seed_academy_catalogue --apply
+```
+
+Expected import: 16 unpublished modules, 78 unpublished lessons, 78 instructor-material records, and no `CourseOffer` records. The command verifies the full batch and rolls back if the import fails validation. It refuses to overwrite existing course slugs, so inspect the catalogue before retrying after any previous or partial/manual import.
+
+After import, inspect all three drafts in Django Admin: lesson order/count, learner-facing text, figure readability, and the separation of answers and instructor notes. Do not publish lessons or make a course saleable merely because import passed. Publishing and creating a hidden Plan/CourseOffer are separate, deliberate admin steps that require content, product terms, prices, access rules and payment routing to be reviewed first.
+
+## Staging acceptance gates
+
+Before considering the Academy release ready for learners, perform authenticated tests against the deployed candidate version:
+
+1. Confirm the service is running the intended branch/commit and that the database connection reports PostgreSQL.
+2. Test signup, verification email delivery, login/logout, password recovery and permission denial for non-staff accounts.
+3. Review the imported draft catalogue, image/media loading, Markdown rendering, saved lesson progress, locked/preview/paid/expired access and desktop/mobile layout.
+4. Use test-mode payment credentials to exercise successful and failed checkout, duplicate webhook delivery, idempotency, refund/revocation, and resulting course access.
+5. Verify Telegram/Discord account linking, course-specific channel mappings, access grant/revocation, and reconciliation without changing real community access unexpectedly.
+6. Confirm the public website's member links route to the intended Academy host.
+
+Record any failed gate with the deployed commit and a reproducible example. CI and `/health/` alone do not pass these live acceptance gates.
