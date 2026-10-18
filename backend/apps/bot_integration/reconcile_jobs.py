@@ -14,9 +14,9 @@ from django.db.models import Q
 from django.utils import timezone
 
 from apps.bot_integration.models import (
-    BotAccessAudit, TelegramAccount, UserChannelAssignment)
+    BotAccessAudit, DiscordAccount, TelegramAccount, UserChannelAssignment)
 from apps.bot_integration.reconcile import (
-    _audit, _control_channel_guard, compute_target_access)
+    _audit, _control_channel_guard, _reconcile_discord, compute_target_access)
 from apps.jobs.models import ProvisioningOperation
 from apps.jobs.operations import execute_operation
 
@@ -205,72 +205,83 @@ def _recover_membership(user_id, telegram_user_id, channel_id, transport):
 
 
 def run_user_reconcile(user_id: int, transport=None) -> None:
-    """Job handler: diff -> operations -> state machine -> finalization.
+    """Reconcile Telegram and Discord access for every active entitlement.
 
-    Idempotent and convergence-friendly: re-runs recompute the diff; open
-    operations are reused; terminal outcomes re-apply harmlessly.
+    Discord is intentionally independent of Telegram account linkage: members
+    may use Discord only. Failed Discord mutations raise so the durable job
+    worker applies its normal backoff/retry policy.
     """
-    from apps.bot_integration.models import TelegramAccount
-    account = TelegramAccount.objects.filter(user_id=user_id, is_active=True).first()
-    if not account or not account.telegram_user_id:
-        return
-    tg_id = account.telegram_user_id
-
     target = compute_target_access(user_id)
-    existing = set(UserChannelAssignment.objects.filter(
-        user_id=user_id, platform="telegram", is_active=True,
-    ).values_list("external_id", flat=True))
+    account = TelegramAccount.objects.filter(
+        user_id=user_id, is_active=True
+    ).first()
+    if account and account.telegram_user_id:
+        tg_id = account.telegram_user_id
 
-    wanted = set(target.telegram_ids) if target.has_plan else set()
-    guard = _control_channel_guard
-    transport = transport or ProvisionTransport()
+        existing = set(UserChannelAssignment.objects.filter(
+            user_id=user_id, platform="telegram", is_active=True,
+        ).values_list("external_id", flat=True))
 
-    # Revokes first (drop access), then grants.
-    for channel_id in sorted(existing - wanted):
-        if guard(channel_id):
-            _audit(user_id, "revoke", "telegram", channel_id, False, guard(channel_id))
-            continue
-        op = _get_or_create_operation(user_id, channel_id,
-                                      ProvisioningOperation.OP_REVOKE, tg_id)
-        execute_operation(op, transport)
-        if op.state == ProvisioningOperation.ST_COMPLETED:
-            _finalize_revoke(user_id, channel_id)
-            # A completed revoke ENDS the grant lifecycle: a later re-grant
-            # must run the FULL grant path (ProvisionClient.grant ->
-            # /provision/v1/access -> bot do_grant), which performs the
-            # unban.  An old ST_SENT grant must NOT be reused for that.
-            _supersede_open_grants(user_id, channel_id)
-        elif op.state == ProvisioningOperation.ST_FAILED:
-            _audit(user_id, "revoke", "telegram", channel_id, False, op.last_error[:500])
+        wanted = set(target.telegram_ids) if target.has_plan else set()
+        guard = _control_channel_guard
+        transport = transport or ProvisionTransport()
 
-    for channel_id in sorted(wanted - existing):
-        if guard(channel_id):
-            _audit(user_id, "grant", "telegram", channel_id, False, guard(channel_id))
-            continue
-        op = _get_or_create_operation(user_id, channel_id,
-                                      ProvisioningOperation.OP_GRANT, tg_id)
-        execute_operation(op, transport)
-        if op.state in (ProvisioningOperation.ST_COMPLETED,
-                        ProvisioningOperation.ST_SENT):
-            # COMPLETED: the user joined.  SENT: the invite was created and
-            # the DM delivered, but the user has not joined yet.  Both mean
-            # the entitlement is provisioned, so the assignment becomes/stays
-            # active: is_active means "entitled/authorized", NOT "currently a
-            # Telegram member".  The operation may legitimately remain
-            # ST_SENT while membership is pending; later runs converge it.
-            _finalize_grant(user_id, channel_id)
-            if op.state == ProvisioningOperation.ST_SENT:
-                _stamp_invite_sent(user_id, channel_id)
-        elif op.state == ProvisioningOperation.ST_FAILED:
-            _audit(user_id, "grant", "telegram", channel_id, False, op.last_error[:500])
+        # Revokes first (drop access), then grants.
+        for channel_id in sorted(existing - wanted):
+            if guard(channel_id):
+                _audit(user_id, "revoke", "telegram", channel_id, False, guard(channel_id))
+                continue
+            op = _get_or_create_operation(user_id, channel_id,
+                                          ProvisioningOperation.OP_REVOKE, tg_id)
+            execute_operation(op, transport)
+            if op.state == ProvisioningOperation.ST_COMPLETED:
+                _finalize_revoke(user_id, channel_id)
+                # A completed revoke ENDS the grant lifecycle: a later re-grant
+                # must run the FULL grant path (ProvisionClient.grant ->
+                # /provision/v1/access -> bot do_grant), which performs the
+                # unban.  An old ST_SENT grant must NOT be reused for that.
+                _supersede_open_grants(user_id, channel_id)
+            elif op.state == ProvisioningOperation.ST_FAILED:
+                _audit(user_id, "revoke", "telegram", channel_id, False, op.last_error[:500])
 
-    # Membership recovery: entitlement AND active assignment exist, but the
-    # user may no longer be in the channel.  Recover access without touching
-    # the assignment (the entitlement still exists).
-    for channel_id in sorted(wanted & existing):
-        if guard(channel_id):
-            continue
-        _recover_membership(user_id, tg_id, channel_id, transport)
+        for channel_id in sorted(wanted - existing):
+            if guard(channel_id):
+                _audit(user_id, "grant", "telegram", channel_id, False, guard(channel_id))
+                continue
+            op = _get_or_create_operation(user_id, channel_id,
+                                          ProvisioningOperation.OP_GRANT, tg_id)
+            execute_operation(op, transport)
+            if op.state in (ProvisioningOperation.ST_COMPLETED,
+                            ProvisioningOperation.ST_SENT):
+                # COMPLETED: the user joined.  SENT: the invite was created and
+                # the DM delivered, but the user has not joined yet.  Both mean
+                # the entitlement is provisioned, so the assignment becomes/stays
+                # active: is_active means "entitled/authorized", NOT "currently a
+                # Telegram member".  The operation may legitimately remain
+                # ST_SENT while membership is pending; later runs converge it.
+                _finalize_grant(user_id, channel_id)
+                if op.state == ProvisioningOperation.ST_SENT:
+                    _stamp_invite_sent(user_id, channel_id)
+            elif op.state == ProvisioningOperation.ST_FAILED:
+                _audit(user_id, "grant", "telegram", channel_id, False, op.last_error[:500])
 
-    account.last_synced_at = timezone.now()
-    account.save(update_fields=["last_synced_at"])
+        # Membership recovery: entitlement AND active assignment exist, but the
+        # user may no longer be in the channel.  Recover access without touching
+        # the assignment (the entitlement still exists).
+        for channel_id in sorted(wanted & existing):
+            if guard(channel_id):
+                continue
+            _recover_membership(user_id, tg_id, channel_id, transport)
+
+        account.last_synced_at = timezone.now()
+        account.save(update_fields=["last_synced_at"])
+
+    discord_account = DiscordAccount.objects.filter(
+        user_id=user_id, is_active=True
+    ).first()
+    if discord_account and not _reconcile_discord(
+        user_id, discord_account, target
+    ):
+        raise RuntimeError(
+            f"Discord role reconciliation failed for user {user_id}; retry scheduled"
+        )
