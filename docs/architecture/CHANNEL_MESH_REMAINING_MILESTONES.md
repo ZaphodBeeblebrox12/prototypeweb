@@ -31,13 +31,21 @@ Do not invent a new allocation algorithm or hook allocation into the signal-rout
 
 Milestone A is complete only when that real call-site is connected and tested.
 
-## Milestone B — install bot-side publisher patch
+## Milestone B — bot runtime patch prepared (not installed)
 
-- Apply the reviewed patch to the actual tracked bot repository (do not start a second polling process on the same bot token).
-- Configure Django base URL and the shared HMAC secret through environment variables; never commit secrets.
-- Persist the bot's SQLite message-map/retry database across restarts.
-- Verify polling update types include `channel_post` and `edited_channel_post`.
-- Preserve normal direct signal routing; Mesh spawn destinations must not also be ordinary signal destinations.
+- Updated artifact: `channel_mesh_bot_patch.zip`. It includes the companion `channel_mesh_bridge.py`, a snapshot-derived `main.py`, a reviewable `main_channel_mesh.patch`, an `.env.txt.example`, and offline tests.
+- The patch uses the existing bot process and its single polling loop; it does not start a second process or change the reference `TelegramTwitterBot` repository.
+- Python compilation passed; all 15 offline tests passed; the unified patch passed a dry-run and applied cleanly to the supplied `main(20261018-142924).py` snapshot; ZIP integrity check passed.
+- Added deterministic relative-path handling for the SQLite mapping/retry store and graceful flushing of buffered source albums on shutdown.
+- The user supplied `https://github.com/ZaphodBeeblebrox12/TelegramTwitterBot` as reference only and explicitly prohibited changes there. The connected GitHub access returned 404 for that repository, so its current HEAD could not be reviewed from this session. The downloadable patch is based on the uploaded source snapshot, not a verified checkout of current repository HEAD.
+- Do not overwrite a possibly newer bot working tree blindly. Before installing, compare `main_channel_mesh.patch` with the actual local working copy and carry the hooks over any intervening changes. The package has not been installed, configured with real secrets, deployed, or tested against live Telegram staging.
+
+### Still required when installation is authorized
+
+- Configure `CHANNEL_MESH_DJANGO_BASE_URL` and the same `PROVISION_SHARED_SECRET` as Django through environment variables; never commit the real secret.
+- Set `CHANNEL_MESH_MIRROR_DB` to an absolute path on persistent storage for any hosted/container runtime.
+- Verify the bot administrator rights in the private source and spawn channels.
+- Preserve normal direct signal routing; route into the Mesh Source only and do not also register spawn destinations as regular signal destinations.
 - Use existing/pre-created source and spawn channels for the first release.
 
 ## Milestone C — spawn provisioning approach
