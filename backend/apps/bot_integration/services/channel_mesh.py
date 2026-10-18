@@ -76,6 +76,24 @@ def assign_user_to_mesh_spawn(user, mesh, destination):
             and assignment.revoked_at is None
         ):
             return assignment
+
+        # Do not free the previous spawn in the allocator's ledger while a
+        # Telegram grant for it is still active. Reconciliation must finish
+        # revoking the old destination before this assignment can be moved.
+        if assignment.destination_id != destination_obj.pk:
+            previous_chat_id = assignment.destination.external_id
+            old_access_is_active = UserChannelAssignment.objects.filter(
+                user_id=user_id,
+                platform="telegram",
+                external_id=previous_chat_id,
+                is_active=True,
+            ).exists()
+            if old_access_is_active:
+                raise ValidationError(
+                    "The user's current spawn still has an active access grant. "
+                    "Finish its revocation before reallocating the member."
+                )
+
         assignment.destination = destination_obj
         assignment.is_active = True
         assignment.assigned_at = timezone.now()
