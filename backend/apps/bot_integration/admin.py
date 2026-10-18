@@ -21,7 +21,14 @@ class BotConfigAdmin(admin.ModelAdmin):
                            '(e.g. inderjeetbot). A leading @ is removed automatically.'
         }),
         ('Discord', {
-            'fields': ('discord_bot_token', 'discord_guild_id', 'discord_client_id', 'discord_client_secret', 'discord_redirect_uri')
+            'fields': ('discord_bot_token', 'discord_guild_id', 'discord_client_id', 'discord_client_secret', 'discord_redirect_uri'),
+            'description': (
+                'Use credentials from the same Discord Application. Register the exact '
+                'public callback URL in Developer Portal: https://<academy-host>/bot/discord/callback/. '
+                'The bot must be in this guild, have CREATE_INSTANT_INVITE and MANAGE_ROLES, '
+                'and its highest role must be above every role mapped to a plan. '
+                'OAuth linking uses identify and guilds.join.'
+            ),
         }),
         ('Status', {'fields': ('is_active',)}),
         ('Bot Actions', {
