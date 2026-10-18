@@ -106,7 +106,8 @@ class OpsRevenueAndCsvTests(TestCase):
         PaymentIntent.objects.create(
             user=self.user, plan=self.plan, amount=5000, currency="USD",
             provider="stripe", status="success", country="US",
-            provider_reference="cs_9")
+            provider_reference="cs_9", provider_payment_id="pi_9",
+            payment_method=PaymentIntent.PaymentMethod.CARD)
         self.client.force_login(self.staff)
 
     def test_revenue_rendered(self):
@@ -118,6 +119,9 @@ class OpsRevenueAndCsvTests(TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r["Content-Type"], "text/csv")
         self.assertIn(b"cs_9", r.content)
+        self.assertIn(b"Card", r.content)
+        self.assertIn(b"pi_9", r.content)
+        self.assertIn(b"payment_method", r.content)
 
     def test_user360(self):
         r = self.client.get(reverse("ops-user-detail", args=[self.user.pk]))
