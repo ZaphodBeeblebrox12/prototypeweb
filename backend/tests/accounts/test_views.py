@@ -190,6 +190,26 @@ class DashboardAccessTest(TestCase):
         response = self.client.get('/dashboard/')
         self.assertEqual(response.status_code, 200)
 
+    def test_dashboard_uses_one_global_header_and_preserves_member_sections(self):
+        """The member desk uses the shared public header, not a duplicate app shell."""
+        self.client.force_login(self.user)
+        response = self.client.get('/dashboard/')
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode()
+
+        self.assertEqual(html.count('class="sitewide-header'), 1)
+        self.assertIn('/assets/sitewide-nav.css', html)
+        self.assertNotIn('id="sidebar"', html)
+        self.assertNotIn('class="topbar"', html)
+        self.assertNotIn('Visit website', html)
+
+        for section in (
+            'overview', 'purchases', 'connections', 'billing',
+            'learning', 'profile', 'help',
+        ):
+            self.assertIn(f'data-page="{section}"', html)
+            self.assertIn(f'data-view="{section}"', html)
+
     def test_banned_user_blocked_from_dashboard(self):
         """Test that banned users cannot access dashboard."""
         self.user.ban("Violation of terms")
