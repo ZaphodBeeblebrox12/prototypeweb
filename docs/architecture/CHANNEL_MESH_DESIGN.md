@@ -1,8 +1,8 @@
 # Channel Mesh — Design Note
 
-**Status:** Django control-plane models, plan configuration, and assigned-spawn access reconciliation are implemented on this branch. Bot-side post mirroring and connection of the existing allocator to the Django assignment service remain pending. Do not treat the full Mesh feature as production-ready until end-to-end staging tests pass.  
-**Working branch:** `feature/channel-mesh`  
-**Branch base:** `my-new-branch`  
+**Status:** Django control-plane models, plan configuration, signed inventory/assignment APIs, and assigned-spawn access reconciliation are committed on `my-new-branch`. A companion bot mirroring patch has passed offline tests but has not yet been integrated into the bot's tracked repository/runtime. The existing allocator call-site is still unresolved because it is not present in the bot source reviewed for this change. Do not treat the full Mesh feature as production-ready until that allocator integration and end-to-end staging tests pass.  
+**Django integration branch:** `my-new-branch`  
+**Companion bot patch:** supplied separately as `channel_mesh_bot_patch.zip`  
 **Product scope:** Existing Telegram trading bot + Django access-control integration.
 
 ## Purpose
