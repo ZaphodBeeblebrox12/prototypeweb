@@ -70,15 +70,19 @@ def admin_desk_accounts(request):
         qs = qs.filter(is_active=False)
     elif state == "banned":
         qs = qs.filter(is_banned=True)
-    qs = qs.annotate(active_subscription_count=Count(
-        "subscriptions",
-        filter=Q(subscriptions__status="active", subscriptions__is_active=True),
-        distinct=True,
-    )).order_by("-date_joined")
+    can_view_subscriptions = _allowed(request.user, "subscriptions.view_subscription")
+    if can_view_subscriptions:
+        qs = qs.annotate(active_subscription_count=Count(
+            "subscriptions",
+            filter=Q(subscriptions__status="active", subscriptions__is_active=True),
+            distinct=True,
+        ))
+    qs = qs.order_by("-date_joined")
     return render(request, "admin/desk_accounts.html", {
         "accounts_page": Paginator(qs, 25).get_page(request.GET.get("page")),
         "query": query, "state": state,
         "can_change_accounts": _allowed(request.user, "accounts.change_user"),
+        "can_view_account_subscriptions": can_view_subscriptions,
         "desk_nav": _nav(request),
     })
 
@@ -91,12 +95,26 @@ def admin_desk_account_detail(request, user_id):
     from apps.payments.models import PaymentIntent
     from apps.subscriptions.models import Subscription, SubscriptionHistory
 
+    can_view_subscriptions = _allowed(request.user, "subscriptions.view_subscription")
+    can_view_payments = _allowed(request.user, "payments.view_paymentintent")
+    subscriptions = (
+        Subscription.objects.filter(user=account).select_related("plan").order_by("-created_at")[:30]
+        if can_view_subscriptions else []
+    )
+    history = (
+        SubscriptionHistory.objects.filter(user=account).select_related("subscription", "subscription__plan").order_by("-created_at")[:20]
+        if can_view_subscriptions else []
+    )
+    payments = (
+        PaymentIntent.objects.filter(user=account).select_related("plan").order_by("-created_at")[:20]
+        if can_view_payments else []
+    )
     return render(request, "admin/desk_accounts.html", {
-        "account": account,
-        "subscriptions": Subscription.objects.filter(user=account).select_related("plan").order_by("-created_at")[:30],
-        "payments": PaymentIntent.objects.filter(user=account).select_related("plan").order_by("-created_at")[:20],
-        "history": SubscriptionHistory.objects.filter(user=account).select_related("subscription", "subscription__plan").order_by("-created_at")[:20],
+        "account": account, "subscriptions": subscriptions,
+        "payments": payments, "history": history,
         "can_change_accounts": _allowed(request.user, "accounts.change_user"),
+        "can_view_account_subscriptions": can_view_subscriptions,
+        "can_view_account_payments": can_view_payments,
         "desk_nav": _nav(request),
     })
 
