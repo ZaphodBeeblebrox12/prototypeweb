@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}Admin Desk | TradeThesis{% endblock %}
-{% block page_title %}Site operations{% endblock %}
+{% block page_title %}Admin Desk{% endblock %}
 
 {% block extra_css %}
 {{ block.super }}
@@ -11,7 +11,6 @@
   .tt-desk a { color:#315b43; text-underline-offset:3px; }
   .tt-desk .desk-head { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; flex-wrap:wrap; margin:8px 0 24px; }
   .tt-desk .eyebrow { margin:0 0 6px; color:var(--td-muted); font-size:11px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; }
-  .tt-desk h1 { margin:0; color:var(--td-ink); font-size:clamp(25px,3vw,34px); font-weight:650; letter-spacing:-.025em; }
   .tt-desk .intro { max-width:720px; margin:8px 0 0; color:var(--td-muted); font-size:14px; }
   .tt-desk .btn { display:inline-flex; align-items:center; justify-content:center; min-height:38px; padding:9px 13px; border:1px solid #456653; border-radius:4px; background:#456653; color:#fff; font-weight:650; text-decoration:none; }
   .tt-desk .btn.secondary { background:var(--td-surface); color:#315b43; }
@@ -43,7 +42,6 @@
   <header class="desk-head">
     <div>
       <p class="eyebrow">TradeThesis · Site operations</p>
-      <h1>Admin Desk</h1>
       <p class="intro">A calm overview of course publishing and operational items that may need attention. Counts come from existing Django records; use the links to manage the underlying records.</p>
     </div>
     <a class="btn" href="{{ django_admin_url }}">Open Django administration ↗</a>
