@@ -32,7 +32,7 @@ class PaymentSuccessEmailInvoiceTests(TestCase):
             subtotal_cents=99900,
             currency="INR",
             provider=PaymentIntent.Provider.RAZORPAY,
-            status=PaymentIntent.Status.SUCCESS,
+            status=PaymentIntent.Status.PENDING,
             provider_reference="order_test_reference",
             provider_payment_id="pay_test_transaction",
         )
