@@ -60,7 +60,10 @@ class TelegramBotService:
         try:
             resp = requests.post(url, json=params or {}, timeout=(5, 10))
             resp.raise_for_status()
-            return resp.json()
+            payload = resp.json()
+            if not isinstance(payload, dict):
+                return {"ok": False, "error": "Unexpected response from Telegram API"}
+            return payload
         except requests.exceptions.Timeout:
             return {"ok": False, "error": "Request timeout"}
         except requests.exceptions.RequestException as e:
@@ -121,7 +124,11 @@ class TelegramBotService:
             "member_limit": 1,
         })
         if result.get("ok"):
-            return result["result"]["invite_link"]
+            result_payload = result.get("result")
+            if isinstance(result_payload, dict):
+                invite_link = result_payload.get("invite_link")
+                if isinstance(invite_link, str):
+                    return invite_link
         logger.error(f"Failed to create invite link for {channel_id}: {result}")
         return None
 

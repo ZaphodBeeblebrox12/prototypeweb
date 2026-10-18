@@ -6,6 +6,7 @@ import secrets
 import hashlib
 import string
 from decimal import Decimal
+from datetime import timedelta
 
 from django.db import models
 from django.utils import timezone
@@ -88,7 +89,7 @@ class GiftInvite(models.Model):
         if self.email_resend_count >= 5:
             return False
         if self.last_email_sent_at:
-            return timezone.now() > (self.last_email_sent_at + timezone.timedelta(hours=1))
+            return timezone.now() > (self.last_email_sent_at + timedelta(hours=1))
         return True
 
     @classmethod
@@ -136,7 +137,7 @@ class PendingGiftClaim(models.Model):
 
     @property
     def is_stale(self) -> bool:
-        return timezone.now() > (self.created_at + timezone.timedelta(days=7))
+        return timezone.now() > (self.created_at + timedelta(days=7))
 
 
 # ============================================================================

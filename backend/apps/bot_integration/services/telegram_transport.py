@@ -186,6 +186,15 @@ class TelegramMessageTransport:
                 if sleep_for > 0:
                     time.sleep(sleep_for)
 
+        # Defensive fallback: if retries were configured as zero, no attempt ran.
+        if last_rejection is None:
+            return TelegramMessageResult(
+                outcome=OUTCOME_INDETERMINATE,
+                error_code=ERR_MALFORMED_RESPONSE,
+                error_message="No Telegram response was available after configured retries",
+                attempts=attempts,
+            )
+
         # Persistent 429 after all retries: still a definite provider answer.
         last_rejection.error_code = ERR_RATE_LIMITED
         last_rejection.error_message = (

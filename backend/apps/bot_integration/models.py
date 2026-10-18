@@ -3,6 +3,7 @@ import secrets
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
 
 class BotConfig(models.Model):
@@ -141,6 +142,18 @@ class PlanChannelMapping(models.Model):
 
     def __str__(self):
         return f"{self.plan.name} → {self.platform}: {self.external_id}"
+
+    def clean(self):
+        super().clean()
+        control = str(
+            getattr(settings, "PROVISION_CONTROL_CHANNEL_ID", "") or ""
+        ).strip()
+        if control and str(self.external_id).strip() == control:
+            raise ValidationError({
+                "external_id": (
+                    "This is the control/admin channel — it cannot be a subscriber target."
+                )
+            })
 
 
 class UserChannelAssignment(models.Model):
@@ -290,15 +303,4 @@ class ChannelMembershipSnapshot(models.Model):
         return f'{self.user} - {self.channel}: member={self.is_member}'
 
 
-from django.conf import settings as _provision_settings
-from django.core.exceptions import ValidationError
 
-
-def _plan_channel_mapping_clean(self):
-    control = str(getattr(_provision_settings, "PROVISION_CONTROL_CHANNEL_ID", "") or "").strip()
-    if control and str(self.external_id).strip() == control:
-        raise ValidationError({"external_id": "This is the control/admin channel — "
-                                               "it cannot be a subscriber target."})
-
-
-PlanChannelMapping.clean = _plan_channel_mapping_clean
