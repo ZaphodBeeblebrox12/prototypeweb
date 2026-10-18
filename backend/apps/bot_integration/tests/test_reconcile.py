@@ -5,6 +5,8 @@ diff -> ProvisioningOperation state machine -> UserChannelAssignment finalizatio
 ProvisionTransport is mocked (no network, no real Telegram calls).
 Discord behavior is unchanged (direct service)."""
 from unittest import mock
+
+from allauth.account.models import EmailAddress
 from django.test import TestCase
 from django.urls import reverse
 
@@ -840,6 +842,12 @@ class DiscordRestServiceTests(TestCase):
 class DiscordOAuthFlowTests(TestCase):
     def setUp(self):
         self.user = make_user("discord-oauth")
+        EmailAddress.objects.create(
+            user=self.user,
+            email=self.user.email,
+            verified=True,
+            primary=True,
+        )
         config = BotConfig.get_config()
         config.discord_client_id = "client-id"
         config.discord_client_secret = "client-secret"
@@ -856,6 +864,24 @@ class DiscordOAuthFlowTests(TestCase):
         session = self.client.session
         session["discord_oauth_state"] = value
         session.save()
+
+    def test_unverified_member_can_still_disconnect_discord(self):
+        """Revoking a community connection must not be blocked by email verification."""
+        user = make_user("discord-unverified-disconnect")
+        account = DiscordAccount.objects.create(
+            user=user,
+            discord_user_id="discord-unverified-1001",
+            guild_id="guild-id",
+            roles=[],
+            is_active=True,
+        )
+        self.client.force_login(user)
+
+        response = self.client.post(reverse("bot_integration:discord_unlink"))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response["Location"].endswith("#connections"))
+        self.assertFalse(DiscordAccount.objects.filter(pk=account.pk).exists())
 
     def test_start_and_callback_require_authenticated_member(self):
         start = self.client.get(reverse("bot_integration:discord_connect"))
