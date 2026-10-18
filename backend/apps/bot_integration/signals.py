@@ -7,11 +7,11 @@ deactivation edge, so routine field updates no longer trigger platform calls.
 """
 import logging
 
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import pre_save, post_save, post_delete
 from django.dispatch import receiver
 
 from apps.subscriptions.models import Subscription
-from .models import TelegramAccount
+from .models import PlanChannelMapping, TelegramAccount, UserChannelAssignment
 from apps.jobs.enqueue import enqueue_reconcile
 
 logger = logging.getLogger(__name__)
@@ -20,23 +20,93 @@ logger = logging.getLogger(__name__)
 @receiver(pre_save, sender=Subscription)
 def _stash_old_status(sender, instance, **kwargs):
     instance._old_status = None
+    instance._old_is_active = False
+    instance._old_plan_id = None
     if instance.pk:
-        instance._old_status = Subscription.objects.filter(
-            pk=instance.pk).values_list("status", flat=True).first()
+        previous = Subscription.objects.filter(pk=instance.pk).values(
+            "status", "is_active", "plan_id"
+        ).first()
+        if previous:
+            instance._old_status = previous["status"]
+            instance._old_is_active = previous["is_active"]
+            instance._old_plan_id = previous["plan_id"]
+
+
+def _queue_reconcile_after_commit(user_id, reason):
+    """Queue only after the surrounding write commits and the user still exists."""
+    from django.contrib.auth import get_user_model
+    from django.db import transaction
+
+    def enqueue_if_user_exists():
+        if get_user_model().objects.filter(pk=user_id).exists():
+            enqueue_reconcile(user_id, reason=reason)
+
+    transaction.on_commit(enqueue_if_user_exists)
 
 
 @receiver(post_save, sender=Subscription)
 def provision_on_transition(sender, instance, created, **kwargs):
-    now_active = instance.status == "active" and instance.is_active
-    was_active = getattr(instance, "_old_status", None) == "active"
-    if (now_active and not was_active) or (was_active and not now_active):
-        # Durability without querying uncommitted state: the job insert runs
-        # after this save's transaction commits (same-transaction outbox is
-        # guaranteed at the service layer; here we avoid uncommitted-state
-        # races inside the signal).
-        from django.db import transaction as _tx
-        _tx.on_commit(lambda: enqueue_reconcile(
-            instance.user_id, reason="subscription_transition"))
+    now_active = instance.status == Subscription.Status.ACTIVE and instance.is_active
+    old_status = getattr(instance, "_old_status", None)
+    old_is_active = getattr(instance, "_old_is_active", False)
+    was_active = old_status == Subscription.Status.ACTIVE and old_is_active
+    plan_changed = (
+        getattr(instance, "_old_plan_id", None) is not None
+        and getattr(instance, "_old_plan_id", None) != instance.plan_id
+    )
+
+    if now_active != was_active or (now_active and was_active and plan_changed):
+        _queue_reconcile_after_commit(
+            instance.user_id, reason="subscription_transition"
+        )
+
+
+@receiver(post_delete, sender=Subscription)
+def provision_after_subscription_delete(sender, instance, **kwargs):
+    _queue_reconcile_after_commit(
+        instance.user_id, reason="subscription_deleted"
+    )
+
+
+@receiver(pre_save, sender=PlanChannelMapping)
+def _stash_old_mapping_plan(sender, instance, **kwargs):
+    instance._old_plan_id = None
+    if instance.pk:
+        instance._old_plan_id = PlanChannelMapping.objects.filter(
+            pk=instance.pk
+        ).values_list("plan_id", flat=True).first()
+
+
+def _queue_plan_mapping_users(plan_ids):
+    plan_ids = {plan_id for plan_id in plan_ids if plan_id}
+    if not plan_ids:
+        return
+    user_ids = (
+        Subscription.objects.filter(
+            plan_id__in=plan_ids,
+            status=Subscription.Status.ACTIVE,
+            is_active=True,
+        )
+        .values_list("user_id", flat=True)
+        .distinct()
+    )
+    for user_id in user_ids:
+        _queue_reconcile_after_commit(
+            user_id, reason="community_role_mapping_changed"
+        )
+
+
+@receiver(post_save, sender=PlanChannelMapping)
+def provision_after_mapping_change(sender, instance, **kwargs):
+    _queue_plan_mapping_users((
+        getattr(instance, "_old_plan_id", None),
+        instance.plan_id,
+    ))
+
+
+@receiver(post_delete, sender=PlanChannelMapping)
+def provision_after_mapping_delete(sender, instance, **kwargs):
+    _queue_plan_mapping_users((instance.plan_id,))
 
 
 # ── Stage 2: transactional/system messages on the same durable edges ──────
@@ -72,7 +142,7 @@ def transactional_message_on_transition(sender, instance, created, **kwargs):
     old_status = getattr(instance, "_old_status", None)
     new_status = instance.status
     now_active = new_status == "active" and instance.is_active
-    was_active = old_status == "active"
+    was_active = old_status == "active" and getattr(instance, "_old_is_active", False)
     if now_active == was_active and not created:
         return
     from django.db import transaction as _tx
