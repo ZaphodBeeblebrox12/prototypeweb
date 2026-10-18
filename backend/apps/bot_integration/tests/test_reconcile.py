@@ -787,6 +787,29 @@ class DiscordRestServiceTests(TestCase):
 
         self.assertTrue(DiscordBotService.add_role("member-1", "role-1"))
 
+    @mock.patch("apps.bot_integration.services.discord.requests.request")
+    def test_member_join_uses_bot_auth_and_oauth_access_token(self, request):
+        response = mock.Mock(status_code=201)
+        response.json.return_value = {"user": {"id": "member-1"}}
+        request.return_value = response
+
+        self.assertTrue(DiscordBotService.add_member("member-1", "short-lived-token"))
+        args, kwargs = request.call_args
+        self.assertEqual(args[0], "PUT")
+        self.assertIn("/guilds/guild-1/members/member-1", args[1])
+        self.assertEqual(kwargs["json"], {"access_token": "short-lived-token"})
+        self.assertEqual(
+            kwargs["headers"]["Authorization"], "Bot test-bot-token"
+        )
+
+    @mock.patch("apps.bot_integration.services.discord.requests.request")
+    def test_live_roles_returns_unknown_on_permission_failure(self, request):
+        response = mock.Mock(status_code=403)
+        response.json.return_value = {"message": "Missing Access", "code": 50001}
+        request.return_value = response
+
+        self.assertIsNone(DiscordBotService.get_member_roles("member-1"))
+
 
 class DiscordOAuthFlowTests(TestCase):
     def setUp(self):
@@ -895,6 +918,49 @@ class DiscordOAuthFlowTests(TestCase):
             user=self.user, platform="discord", external_id="role-paid"
         )
         self.assertFalse(assignment.is_active)
+
+    @mock.patch("apps.bot_integration.views.DiscordBotService.remove_role", return_value=True)
+    def test_disconnect_removes_plan_mapped_role_even_if_local_cache_is_missing(self, remove_role):
+        self.client.force_login(self.user)
+        account = DiscordAccount.objects.create(
+            user=self.user, discord_user_id="discord-987",
+            guild_id="guild-id", roles=[], is_active=True,
+        )
+        plan = Plan.objects.create(name="Paid community", tier="pro")
+        PlanChannelMapping.objects.create(
+            plan=plan, platform="discord", external_id="role-from-plan"
+        )
+
+        self.client.post(reverse("bot_integration:discord_unlink"))
+
+        self.assertFalse(DiscordAccount.objects.filter(pk=account.pk).exists())
+        remove_role.assert_called_once_with("discord-987", "role-from-plan")
+        self.assertTrue(BotAccessAudit.objects.filter(
+            user=self.user, action="revoke", platform="discord",
+            target="role-from-plan", status="success",
+        ).exists())
+
+    @mock.patch("apps.jobs.enqueue.enqueue_reconcile", side_effect=RuntimeError("queue unavailable"))
+    @mock.patch("apps.bot_integration.views.DiscordBotService.add_member", return_value=True)
+    @mock.patch("requests.get")
+    @mock.patch("requests.post")
+    def test_callback_does_not_persist_link_if_reconcile_enqueue_fails(
+        self, token_post, profile_get, add_member, enqueue
+    ):
+        self.client.force_login(self.user)
+        self._store_state()
+        token_response = mock.Mock(status_code=200)
+        token_response.json.return_value = {"access_token": "one-time-oauth-token"}
+        token_post.return_value = token_response
+        profile_response = mock.Mock(status_code=200)
+        profile_response.json.return_value = {"id": "discord-no-job", "username": "reader"}
+        profile_get.return_value = profile_response
+
+        self.client.get(
+            reverse("bot_integration:discord_callback"),
+            {"code": "authorization-code", "state": "state-once"},
+        )
+        self.assertFalse(DiscordAccount.objects.filter(user=self.user).exists())
 
     @mock.patch("apps.bot_integration.views.DiscordBotService.remove_role", return_value=False)
     def test_disconnect_failure_keeps_link_for_safe_retry(self, remove_role):
