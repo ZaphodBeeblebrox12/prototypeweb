@@ -265,6 +265,12 @@ class ChannelMeshDestinationAdmin(admin.ModelAdmin):
         ("Timestamps", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
     )
 
+    def get_readonly_fields(self, request, obj=None):
+        fields = list(super().get_readonly_fields(request, obj))
+        if obj is not None:
+            fields.extend(("mesh", "external_id"))
+        return fields
+
 
 @admin.register(PlanMeshMapping)
 class PlanMeshMappingAdmin(admin.ModelAdmin):
