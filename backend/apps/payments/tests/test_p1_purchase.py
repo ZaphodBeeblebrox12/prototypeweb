@@ -101,6 +101,28 @@ class PurchaseFlowTests(APITestCase):
         self.assertFalse(PaymentIntent.objects.filter(plan=plan).exists())
         prov.create_hosted_checkout.assert_not_called()
 
+    def test_legacy_trial_intent_cannot_reach_provider_checkout(self, _geo, prov):
+        plan, price = make_plan("monthly")
+        plan.is_trial = True
+        plan.trial_duration_days = 7
+        plan.save(update_fields=["is_trial", "trial_duration_days"])
+        intent = PaymentIntent.objects.create(
+            user=self.user,
+            plan=plan,
+            plan_price=price,
+            amount=price.price_cents,
+            currency=price.currency,
+            provider="stripe",
+            provider_reference="cs_legacy_trial",
+            status=PaymentIntent.Status.PENDING,
+        )
+
+        response = self.client.get(reverse("checkout-page", args=[intent.id]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Trial-to-renewal checkout is disabled")
+        prov.get_stripe_checkout_url.assert_not_called()
+
     def test_checkout_refuses_placeholder_policy_content(self, _geo, prov):
         plan, _ = make_plan("monthly")
         self._start(plan.id, "monthly")

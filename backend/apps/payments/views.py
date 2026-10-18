@@ -48,11 +48,10 @@ def payment_start(request):
         plan_id = request.data.get("plan_id")
         interval = request.data.get("interval", "monthly")
     if not plan_id:
-        return Response({"detail": "plan_id required"},
-                       status=status.HTTP_400_BAD_REQUEST)
-
-    if not plan_id:
-        return Response({"detail": "plan_id is required."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"detail": "plan_id is required."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     try:
         plan = Plan.objects.get(id=plan_id, is_active=True)
@@ -288,6 +287,12 @@ class CheckoutPageView(APIView):
 
 def _checkout_response(request, pk):
     intent = get_object_or_404(PaymentIntent, pk=pk, user=request.user)
+    if intent.plan.is_trial:
+        return _consent_response(
+            request, pk,
+            error=("Trial-to-renewal checkout is disabled. "
+                   "Choose a one-time purchase instead."),
+        )
     from apps.evidence.models import CheckoutEvidence
     if intent.status == PaymentIntent.Status.PENDING and not \
             CheckoutEvidence.objects.filter(payment_intent=intent).exists():
