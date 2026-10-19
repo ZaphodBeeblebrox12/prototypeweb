@@ -305,6 +305,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   let academyReady = false;
   let academySaveTimer = null;
   let academySaving = false;
+  let academySavePending = false;
   const csrfValue = () => {
     const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
     return match ? decodeURIComponent(match[1]) : '';
@@ -327,7 +328,11 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     return payload;
   }
   function queueAcademySave() {
-    if (!academyReady || academySaving) return;
+    if (!academyReady) return;
+    if (academySaving) {
+      academySavePending = true;
+      return;
+    }
     clearTimeout(academySaveTimer);
     academySaveTimer = setTimeout(async () => {
       try { await saveCurrentToAcademy(false); }
@@ -380,6 +385,10 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       return result;
     } finally {
       academySaving = false;
+      if (academySavePending) {
+        academySavePending = false;
+        queueAcademySave();
+      }
     }
   }
   persist = function(showToast=false) {
