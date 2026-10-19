@@ -4,8 +4,6 @@ import logging
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import JsonResponse
-from django.core.exceptions import ValidationError
-from django.db.models import Prefetch
 from django.utils import timezone
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -16,7 +14,6 @@ from django.conf import settings
 from .models import (
     BotConfig, TelegramAccount, TelegramVerificationToken,
     DiscordAccount, BotAccessAudit, PlanChannelMapping, UserChannelAssignment,
-    ChannelMesh, ChannelMeshDestination,
 )
 from .services.telegram import TelegramBotService
 from .services.discord import DiscordBotService
@@ -29,7 +26,7 @@ logger = logging.getLogger(__name__)
 @login_required
 def start_telegram_connect(request):
     """Generate a deep link to the existing TradeThesis Telegram bot."""
-    # Verification and channel/Mesh management must share one bot identity.
+    # Verification and normal channel access share one bot identity.
     # BotConfig is the canonical credential source used by TelegramBotService.
     config = BotConfig.get_config()
     bot_username = (config.telegram_bot_username or "").strip().lstrip("@")
@@ -568,146 +565,6 @@ def bot_heartbeat(request):
     return JsonResponse({"ok": True, "instance_id": state.instance_id})
 
 
-
-
-@csrf_exempt
-@require_POST
-def bot_mesh_inventory(request):
-    """Return enabled Mesh spawn inventory to the authenticated allocator.
-
-    The response lists only registered, active Meshes and active spawns.
-    It does not include members or assign anyone to a destination.
-    """
-    body, err = verify_signed_request(request)
-    if err:
-        return JsonResponse({"ok": False, "error": "unauthorized"}, status=401)
-
-    try:
-        data = _json.loads(body.decode() or "{}")
-    except (UnicodeDecodeError, ValueError):
-        return JsonResponse({"ok": False, "error": "malformed JSON"}, status=400)
-    if not isinstance(data, dict):
-        return JsonResponse({"ok": False, "error": "JSON object required"}, status=400)
-
-    mesh_key = str(data.get("mesh_key") or "").strip()
-    meshes = ChannelMesh.objects.filter(is_active=True).prefetch_related(
-        Prefetch(
-            "destinations",
-            queryset=ChannelMeshDestination.objects.filter(is_active=True).order_by(
-                "name", "external_id"
-            ),
-        )
-    ).order_by("key")
-    if mesh_key:
-        meshes = meshes.filter(key=mesh_key)
-
-    inventory = [
-        {
-            "mesh_key": mesh.key,
-            "mesh_name": mesh.name,
-            "source_chat_id": mesh.source_chat_id,
-            "source_name": mesh.source_name,
-            "spawns": [
-                {
-                    "spawn_chat_id": destination.external_id,
-                    "name": destination.name,
-                    "chat_type": destination.chat_type,
-                }
-                for destination in mesh.destinations.all()
-            ],
-        }
-        for mesh in meshes
-    ]
-    return JsonResponse({"ok": True, "meshes": inventory}, status=200)
-
-
-@csrf_exempt
-@require_POST
-def bot_mesh_assignment(request):
-    """Accept a spawn decision from the existing allocator over the signed bridge.
-
-    This endpoint records the allocator's selected spawn; it never chooses one.
-    The Telegram user ID is resolved to a linked Django account before checking
-    active entitlement and the Mesh/spawn configuration.
-    """
-    body, err = verify_signed_request(request)
-    if err:
-        return JsonResponse({"ok": False, "error": "unauthorized"}, status=401)
-
-    try:
-        data = _json.loads(body.decode() or "{}")
-    except (UnicodeDecodeError, ValueError):
-        return JsonResponse({"ok": False, "error": "malformed JSON"}, status=400)
-    if not isinstance(data, dict):
-        return JsonResponse({"ok": False, "error": "JSON object required"}, status=400)
-
-    raw_telegram_id = data.get("telegram_user_id")
-    if isinstance(raw_telegram_id, bool) or not str(raw_telegram_id or "").isdigit():
-        return JsonResponse(
-            {"ok": False, "error": "positive telegram_user_id required"}, status=400
-        )
-    telegram_user_id = int(raw_telegram_id)
-    if telegram_user_id <= 0:
-        return JsonResponse(
-            {"ok": False, "error": "positive telegram_user_id required"}, status=400
-        )
-
-    mesh_key = str(data.get("mesh_key") or "").strip()
-    spawn_chat_id = str(data.get("spawn_chat_id") or "").strip()
-    if not mesh_key or not spawn_chat_id:
-        return JsonResponse(
-            {"ok": False, "error": "mesh_key and spawn_chat_id are required"},
-            status=400,
-        )
-
-    accounts = TelegramAccount.objects.filter(
-        telegram_user_id=telegram_user_id, is_active=True
-    ).select_related("user")
-    if accounts.count() != 1:
-        return JsonResponse(
-            {"ok": False, "error": "linked Telegram account not found or ambiguous"},
-            status=404 if not accounts.exists() else 409,
-        )
-    account = accounts.first()
-
-    mesh = ChannelMesh.objects.filter(key=mesh_key, is_active=True).first()
-    if mesh is None:
-        return JsonResponse(
-            {"ok": False, "error": "active Mesh not found"}, status=404
-        )
-    destination = ChannelMeshDestination.objects.filter(
-        mesh=mesh, external_id=spawn_chat_id, is_active=True
-    ).first()
-    if destination is None:
-        return JsonResponse(
-            {"ok": False, "error": "active spawn not found in the requested Mesh"},
-            status=404,
-        )
-
-    from .services.channel_mesh import assign_user_to_mesh_spawn
-
-    try:
-        assignment = assign_user_to_mesh_spawn(account.user, mesh, destination)
-    except ValidationError as exc:
-        return JsonResponse(
-            {"ok": False, "error": "; ".join(exc.messages)}, status=409
-        )
-    except Exception:
-        logger.exception(
-            "Channel Mesh assignment failed for linked Telegram user %s", telegram_user_id
-        )
-        return JsonResponse(
-            {"ok": False, "error": "assignment could not be saved"}, status=500
-        )
-
-    return JsonResponse({
-        "ok": True,
-        "assignment": {
-            "mesh_key": assignment.mesh.key,
-            "spawn_chat_id": assignment.destination.external_id,
-            "active": assignment.is_active,
-        },
-    }, status=200)
 
 
 @login_required

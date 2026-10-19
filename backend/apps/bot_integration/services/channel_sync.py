@@ -16,10 +16,8 @@ from ..models import (
     ChannelMembershipSnapshot,
     CommunityChannel,
     PlanChannelMapping,
-    PlanMeshMapping,
     TelegramAccount,
     UserChannelAssignment,
-    UserMeshAssignment,
 )
 from .telegram import TelegramBotService
 from apps.subscriptions.models import Subscription
@@ -108,10 +106,9 @@ def sync_all_channel_memberships(sleep=0.05):
 
 
 def get_telegram_access_state(user):
-    """Derive the pay->access state machine, including direct and Mesh targets.
+    """Derive the pay->access state machine, for direct channel targets.
 
-    The Mesh's source and unassigned spawns are never considered member access.
-    An active Mesh plan with no recorded allocator assignment stays pending.
+    Access is derived only from active direct plan-to-channel mappings.
     """
     active_subscriptions = Subscription.objects.filter(
         user=user, status=Subscription.Status.ACTIVE, is_active=True
@@ -144,33 +141,9 @@ def get_telegram_access_state(user):
             platform="telegram", plan_id__in=plan_ids
         ).values_list("external_id", flat=True)
     )
-    mapped_mesh_ids = set(
-        PlanMeshMapping.objects.filter(
-            plan_id__in=plan_ids, is_active=True
-        ).values_list("mesh_id", flat=True)
-    )
-    active_mesh_ids = set(
-        PlanMeshMapping.objects.filter(
-            plan_id__in=plan_ids, is_active=True, mesh__is_active=True
-        ).values_list("mesh_id", flat=True)
-    )
-    mesh_assignments = list(
-        UserMeshAssignment.objects.filter(
-            user=user,
-            mesh_id__in=active_mesh_ids,
-            is_active=True,
-            mesh__is_active=True,
-            destination__is_active=True,
-        ).values_list("mesh_id", "destination__external_id")
-    )
-    assigned_mesh_ids = {mesh_id for mesh_id, _ in mesh_assignments}
-    assigned_spawn_targets = {
-        destination_id for _, destination_id in mesh_assignments
-    }
-    required_targets = direct_targets | assigned_spawn_targets
-    unresolved_mesh_ids = mapped_mesh_ids - assigned_mesh_ids
+    required_targets = direct_targets
 
-    if not direct_targets and not mapped_mesh_ids:
+    if not direct_targets:
         return {
             "state": "ready",
             "label": "Access ready",
@@ -202,18 +175,6 @@ def get_telegram_access_state(user):
             "detail": (
                 "We couldn't add you to a community destination. Open the bot "
                 "and press Start, check Telegram privacy settings, or contact support."
-            ),
-        }
-
-    if unresolved_mesh_ids:
-        return {
-            "state": "pending",
-            "label": "Assigning community access",
-            "cta_url": "",
-            "cta_label": "",
-            "detail": (
-                "Your course includes Channel Mesh access. Your spawn assignment "
-                "is waiting for the configured Mesh and allocation process."
             ),
         }
 
@@ -278,45 +239,4 @@ def build_channel_display(user):
             "entitled": entitled,
             "assigned": m.external_id in assigned_ids,
         })
-    mesh_mappings = list(
-        PlanMeshMapping.objects.filter(
-            plan_id__in=active_plan_ids,
-            is_active=True,
-        ).select_related("plan", "mesh").order_by(
-            "plan__display_order", "mesh__name"
-        )
-    )
-    assignments = UserMeshAssignment.objects.filter(
-        user=user,
-        mesh_id__in=[mapping.mesh_id for mapping in mesh_mappings],
-        is_active=True,
-    ).select_related("destination", "mesh").order_by("assigned_at", "pk")
-    assignment_by_mesh = {}
-    for assignment in assignments:
-        assignment_by_mesh.setdefault(assignment.mesh_id, assignment)
-
-    meshes = []
-    for mapping in mesh_mappings:
-        assignment = assignment_by_mesh.get(mapping.mesh_id)
-        usable_assignment = bool(
-            assignment
-            and mapping.mesh.is_active
-            and assignment.destination.is_active
-        )
-        if not mapping.mesh.is_active:
-            status = "Mesh setup pending"
-        elif usable_assignment:
-            status = "Spawn assigned"
-        else:
-            status = "Spawn assignment pending"
-        meshes.append({
-            "name": mapping.mesh.name,
-            "plan_name": mapping.plan.name,
-            "assigned": usable_assignment,
-            "spawn_name": (
-                assignment.destination.name or "Assigned spawn"
-                if usable_assignment else ""
-            ),
-            "status": status,
-        })
-    return {"free": free, "paid": paid, "meshes": meshes}
+    return {"free": free, "paid": paid}
