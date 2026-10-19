@@ -48,6 +48,20 @@
     <main class="tt-lesson-main">
       <article class="tt-lesson-article">
         {% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook only %}
+        {% if related_courses %}
+        <section class="tt-related-courses" aria-labelledby="tt-related-courses-heading" style="margin:24px 0;padding:18px;border:1px solid #dce1d7;border-radius:10px;background:#f7f4ec">
+          <p style="margin:0 0 6px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#667269">Continue learning</p>
+          <h2 id="tt-related-courses-heading" style="margin:0 0 12px;font-size:20px">Related courses</h2>
+          <div style="display:grid;gap:10px">
+            {% for related in related_courses %}
+            <a href="{% url 'academy:course-detail' related.slug %}" style="display:block;padding:12px;border:1px solid #dce1d7;border-radius:8px;background:#fff;color:#355a46;text-decoration:none">
+              <strong>{{ related.title }}</strong>{% if related.summary %}<span style="display:block;margin-top:4px;font-size:12px;line-height:1.5;color:#667269">{{ related.summary }}</span>{% endif %}
+            </a>
+            {% endfor %}
+          </div>
+          <p style="margin:12px 0 0;font-size:11px;color:#667269">Course references do not grant access or include a purchase.</p>
+        </section>
+        {% endif %}
         <div class="tt-completion">
           <div><strong>{% if progress and progress.status == "completed" %}Lesson completed{% else %}Finished this lesson?{% endif %}</strong><p>Your progress is saved to your account.</p></div>
           <form method="post" action="{% url 'academy:lesson-progress' lesson.id %}" data-lesson-complete>
