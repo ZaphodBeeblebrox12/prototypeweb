@@ -125,6 +125,35 @@ class CourseBuilderApiTests(TestCase):
         saved = record.payload["modules"][0]["lessons"][0]["content_json"]["related_course_ids"]
         self.assertEqual(saved, [str(related.pk)])
 
+    def test_notebook_reflections_are_saved_to_learner_progress(self):
+        from .models import LessonProgress
+
+        course = Course.objects.create(
+            title="Notebook course", slug="notebook-course",
+            status=Course.Status.PUBLISHED,
+        )
+        module = CourseModule.objects.create(
+            course=course, title="Module One", slug="module-one",
+            position=1, is_published=True,
+        )
+        lesson = Lesson.objects.create(
+            module=module, title="Lesson One", slug="lesson-one",
+            position=1, is_preview=True, is_published=True,
+            content_json={"notebook": {"title": "Notebook", "prompts": [
+                {"label": "Observe", "text": "What is visible?"}
+            ]}},
+        )
+        response = self.client.post(
+            reverse("academy:lesson-notebook-submit", args=[lesson.pk]),
+            data={"prompt_0": "Price held the prior support zone."},
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        progress = LessonProgress.objects.get(user=self.admin, lesson=lesson)
+        self.assertEqual(
+            progress.response_json["notebook_responses"],
+            ["Price held the prior support zone."],
+        )
+
     def test_course_builder_is_not_available_to_regular_staff(self):
         staff = User.objects.create_user(
             username="ordinary-staff",
