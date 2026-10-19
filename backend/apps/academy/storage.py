@@ -10,7 +10,6 @@ continues through Django's authenticated/entitlement-checked views; no GitHub
 download URL is exposed to learners.
 """
 import base64
-import json
 import logging
 from pathlib import Path
 from urllib.parse import quote
@@ -19,7 +18,6 @@ import requests
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
-from django.core.files.storage.base import Storage
 from django.core.exceptions import SuspiciousFileOperation
 from django.utils.deconstruct import deconstructible
 from django.utils.encoding import force_str
@@ -44,7 +42,7 @@ class PrivateCourseAssetStorage(FileSystemStorage):
         super().__init__(location=str(location), base_url=settings.MEDIA_URL)
         self.repository = getattr(settings, "ACADEMY_GITHUB_ASSET_REPOSITORY", "").strip()
         self.token = getattr(settings, "ACADEMY_GITHUB_ASSET_TOKEN", "").strip()
-        self.branch = getattr(settings, "ACADEMY_GITHUB_ASSET_BRANCH", "course-assets").strip()
+        self.branch = getattr(settings, "ACADEMY_GITHUB_ASSET_BRANCH", "main").strip()
         self.path_prefix = getattr(settings, "ACADEMY_GITHUB_ASSET_PATH_PREFIX", "course-assets").strip("/")
         self.timeout = int(getattr(settings, "ACADEMY_GITHUB_ASSET_TIMEOUT", 15))
         self.github_enabled = bool(self.repository and self.token)
