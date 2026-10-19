@@ -12,7 +12,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from apps.bot_integration.models import (
-    UserChannelAssignment, PlanChannelMapping, PlanMeshMapping,
+    UserChannelAssignment, PlanChannelMapping,
 )
 from .models import (
     Plan, PlanFeature, PlanPrice, Subscription, SubscriptionHistory,
@@ -270,19 +270,7 @@ class PlanChannelMappingInline(admin.TabularInline):
     extra = 0
     fields = ("platform", "external_id", "name")
     verbose_name = "Direct Channel / Role"
-    verbose_name_plural = (
-        "Direct Channels / Roles (existing delivery; may be combined with Mesh)"
-    )
-
-
-class PlanMeshMappingInline(admin.TabularInline):
-    """Mesh destination association, separate from direct membership targets."""
-
-    model = PlanMeshMapping
-    extra = 0
-    fields = ("mesh", "is_active")
-    verbose_name = "Channel Mesh"
-    verbose_name_plural = "Channel Meshes (members are assigned to a spawn)"
+    verbose_name_plural = "Direct Channels / Roles"
 
 
 # =============================================================================
@@ -347,7 +335,7 @@ class PlanAdmin(admin.ModelAdmin):
 
     inlines = [
         PlanPriceInline, GeoPlanPriceInline, PlanFeatureInline,
-        PlanChannelMappingInline, PlanMeshMappingInline,
+        PlanChannelMappingInline,
     ]
 
     fieldsets = (
@@ -372,8 +360,7 @@ class PlanAdmin(admin.ModelAdmin):
 
     def delivery_summary(self, obj):
         direct_count = obj.bot_channel_mappings.count()
-        mesh_count = obj.mesh_mappings.filter(is_active=True).count()
-        return format_html("{} direct mapping(s) | {} Mesh(es)", direct_count, mesh_count)
+        return format_html("{} direct mapping(s)", direct_count)
     delivery_summary.short_description = "Telegram / community delivery"
 
     def trial_badge(self, obj):

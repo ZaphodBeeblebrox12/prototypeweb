@@ -106,10 +106,7 @@ def sync_all_channel_memberships(sleep=0.05):
 
 
 def get_telegram_access_state(user):
-    """Derive the pay->access state machine, for direct channel targets.
-
-    Access is derived only from active direct plan-to-channel mappings.
-    """
+    """Derive the pay-to-access state machine for direct channel targets."""
     active_subscriptions = Subscription.objects.filter(
         user=user, status=Subscription.Status.ACTIVE, is_active=True
     )
