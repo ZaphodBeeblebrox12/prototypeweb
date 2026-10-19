@@ -33,7 +33,10 @@ def start_telegram_connect(request):
     bot_username = (
         getattr(settings, "TELEGRAM_VERIFICATION_BOT_USERNAME", "") or ""
     ).strip().lstrip("@")
-    if not bot_username:
+    bot_token = (
+        getattr(settings, "TELEGRAM_VERIFICATION_BOT_TOKEN", "") or ""
+    ).strip()
+    if not bot_username or not bot_token:
         messages.error(
             request,
             "Telegram verification is not configured yet. Please contact support.",

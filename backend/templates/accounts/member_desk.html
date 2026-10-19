@@ -286,6 +286,30 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
   tabs.forEach(function(tab){tab.addEventListener('click',function(){activate(tab.getAttribute('data-page'),true)})});
   document.querySelectorAll('[data-goto]').forEach(function(button){button.addEventListener('click',function(){activate(button.getAttribute('data-goto'),true)})});
   const initial=window.location.hash.slice(1);activate(pages.includes(initial)?initial:'overview',false);
+  // Telegram opens outside this page. Refresh once when a member returns so
+  // the server-rendered Connected status reflects the account link just made.
+  const telegramConnectKey='tt-telegram-connect-started-at';
+  document.querySelectorAll('a[href*="/bot/telegram/connect/"]').forEach(function(link){
+    link.addEventListener('click',function(){
+      try{sessionStorage.setItem(telegramConnectKey,String(Date.now()))}catch(_error){}
+    });
+  });
+  function refreshAfterTelegramReturn(){
+    let startedAt=0;
+    try{startedAt=Number(sessionStorage.getItem(telegramConnectKey)||0)}catch(_error){}
+    if(!startedAt)return;
+    if(Date.now()-startedAt>10*60*1000){
+      try{sessionStorage.removeItem(telegramConnectKey)}catch(_error){}
+      return;
+    }
+    if(document.visibilityState && document.visibilityState!=='visible')return;
+    try{sessionStorage.removeItem(telegramConnectKey)}catch(_error){}
+    window.location.reload();
+  }
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible')refreshAfterTelegramReturn();
+  });
+  window.addEventListener('pageshow',refreshAfterTelegramReturn);
   window.addEventListener('hashchange',function(){const page=window.location.hash.slice(1);if(pages.includes(page))activate(page,false)});
 })();
 </script>

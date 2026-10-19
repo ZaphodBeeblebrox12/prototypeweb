@@ -15,7 +15,7 @@ import uuid
 from unittest import mock
 
 from allauth.account.models import EmailAddress
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from apps.accounts.models import User
@@ -81,6 +81,10 @@ class BotConfigUsernameNormalizationTests(TestCase):
                          "inderjeetbot")
 
 
+@override_settings(
+    TELEGRAM_VERIFICATION_BOT_USERNAME="inderjeetbot",
+    TELEGRAM_VERIFICATION_BOT_TOKEN="test-verification-token",
+)
 class TelegramConnectDeepLinkTests(TestCase):
     """GET /bot/telegram/connect/ must 302 to a VALID t.me deep link."""
 
@@ -95,6 +99,7 @@ class TelegramConnectDeepLinkTests(TestCase):
             TelegramVerificationToken.objects.filter(token=token_str).exists())
         return url
 
+    @override_settings(TELEGRAM_VERIFICATION_BOT_USERNAME="@inderjeetbot")
     def test_config_saved_with_at_sign(self):
         make_config("@inderjeetbot")
         user = make_user("normal1")   # NORMAL user: proves no superuser special-casing
@@ -139,6 +144,7 @@ class TelegramConnectDeepLinkTests(TestCase):
         self.assertIn("/accounts/login/", r["Location"])
 
 
+@override_settings(TELEGRAM_VERIFICATION_BOT_TOKEN="test-verification-token")
 class TelegramWebhookVerifyFlowTests(TestCase):
     """/start verify_<token> -> TelegramAccount -> reconcile (E2E-ish, mocked)."""
 
@@ -186,7 +192,7 @@ class TelegramWebhookVerifyFlowTests(TestCase):
         self.assertFalse(TelegramAccount.objects.exists())
 
     @mock.patch("apps.jobs.enqueue.enqueue_reconcile")
-    @mock.patch("apps.bot_integration.views.TelegramBotService")
+    @mock.patch("apps.bot_integration.views.TelegramVerificationBotService")
     def test_valid_token_creates_account_and_reconciles(self, svc, task):
         r = self._post_start(f"/start verify_{self.token.token}")
         self.assertEqual(r.status_code, 200)
@@ -198,7 +204,7 @@ class TelegramWebhookVerifyFlowTests(TestCase):
         task.assert_called_once_with(self.user.id, reason="telegram_link")
         svc.send_message.assert_called_once()    # confirmation DM sent
 
-    @mock.patch("apps.bot_integration.views.TelegramBotService")
+    @mock.patch("apps.bot_integration.views.TelegramVerificationBotService")
     def test_invalid_token_rejected_no_account(self, svc):
         r = self._post_start("/start verify_doesnotexist")
         self.assertEqual(r.status_code, 200)
@@ -206,7 +212,7 @@ class TelegramWebhookVerifyFlowTests(TestCase):
         self.assertFalse(TelegramAccount.objects.exists())
         svc.send_message.assert_called_once()   # user is told the code is invalid
 
-    @mock.patch("apps.bot_integration.views.TelegramBotService")
+    @mock.patch("apps.bot_integration.views.TelegramVerificationBotService")
     def test_expired_token_rejected_no_account(self, svc):
         from django.utils import timezone as tz
         TelegramVerificationToken.objects.filter(pk=self.token.pk).update(
@@ -216,7 +222,7 @@ class TelegramWebhookVerifyFlowTests(TestCase):
         self.assertEqual(r.json(), {"ok": False})
         self.assertFalse(TelegramAccount.objects.exists())
 
-    @mock.patch("apps.bot_integration.views.TelegramBotService")
+    @mock.patch("apps.bot_integration.views.TelegramVerificationBotService")
     def test_non_verify_message_ignored(self, svc):
         r = self._post_start("/start")
         self.assertEqual(r.status_code, 200)

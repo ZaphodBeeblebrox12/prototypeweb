@@ -9,6 +9,9 @@ from django.urls import reverse
 
 from apps.bot_integration import reconcile
 from apps.bot_integration.models import PlanChannelMapping, TelegramAccount
+from apps.bot_integration.services.telegram_verification import (
+    TelegramVerificationBotService,
+)
 from apps.bot_integration.services.telegram import TelegramBotService
 from apps.notifications.models import Notification
 from apps.payments.models import PaymentIntent
@@ -69,7 +72,7 @@ class BotStartFallbackTests(TestCase):
             "from": {"id": 555}, "chat": {"id": 555, "type": "private"}}}
         with mock.patch("apps.bot_integration.provision_auth.verify_signed_request",
                         return_value=(json.dumps(payload).encode(), None)), \
-             mock.patch.object(TelegramBotService, "send_message") as send:
+             mock.patch.object(TelegramVerificationBotService, "send_message") as send:
             r = self.client.post(
                 reverse("bot_integration:telegram_webhook"),
                 data=json.dumps(payload), content_type="application/json")

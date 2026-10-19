@@ -41,20 +41,45 @@ class TelegramConnectionFlowTests(TestCase):
         self.assertContains(response, f'href="{connect_path}"')
 
     def test_missing_bot_username_returns_to_member_desk_not_legacy_profile(self):
-        self.configure_bot("")
-        with override_settings(TELEGRAM_BOT_USERNAME=""):
+        # A configured channel/mesh bot must not be a fallback for verification.
+        self.configure_bot("main_channel_bot")
+        with override_settings(
+            TELEGRAM_VERIFICATION_BOT_USERNAME="",
+            TELEGRAM_VERIFICATION_BOT_TOKEN="",
+            TELEGRAM_BOT_USERNAME="main_channel_bot",
+        ):
             response = self.client.get(reverse("bot_integration:telegram_connect"))
 
         self.assertRedirects(response, reverse("dashboard"), fetch_redirect_response=False)
         follow = self.client.get(response["Location"])
         self.assertEqual(follow.status_code, 200)
-        self.assertContains(follow, "Telegram connection is not configured yet")
+        self.assertContains(follow, "Telegram verification is not configured yet")
         self.assertContains(follow, "member-flash-error")
         self.assertNotEqual(response["Location"], reverse("profile"))
 
+    def test_missing_verification_token_does_not_use_main_bot(self):
+        self.configure_bot("main_channel_bot")
+        with override_settings(
+            TELEGRAM_VERIFICATION_BOT_USERNAME="verification_bot",
+            TELEGRAM_VERIFICATION_BOT_TOKEN="",
+            TELEGRAM_BOT_USERNAME="main_channel_bot",
+        ):
+            response = self.client.get(reverse("bot_integration:telegram_connect"))
+
+        self.assertRedirects(response, reverse("dashboard"), fetch_redirect_response=False)
+        follow = self.client.get(response["Location"])
+        self.assertContains(follow, "Telegram verification is not configured yet")
+        self.assertFalse(
+            TelegramVerificationToken.objects.filter(user=self.user).exists()
+        )
+
     def test_environment_bot_username_is_used_when_database_username_is_blank(self):
         self.configure_bot("")
-        with override_settings(TELEGRAM_BOT_USERNAME="@tradethesis_env_bot"):
+        with override_settings(
+            TELEGRAM_VERIFICATION_BOT_USERNAME="@tradethesis_env_bot",
+            TELEGRAM_VERIFICATION_BOT_TOKEN="test-verification-token",
+            TELEGRAM_BOT_USERNAME="main_channel_bot",
+        ):
             response = self.client.get(reverse("bot_integration:telegram_connect"))
 
         self.assertEqual(response.status_code, 302)
@@ -69,7 +94,11 @@ class TelegramConnectionFlowTests(TestCase):
         self.configure_bot("tradethesis_test_bot")
         old_token = TelegramVerificationToken.create_token(self.user)
 
-        response = self.client.get(reverse("bot_integration:telegram_connect"))
+        with override_settings(
+            TELEGRAM_VERIFICATION_BOT_USERNAME="@tradethesis_test_bot",
+            TELEGRAM_VERIFICATION_BOT_TOKEN="test-verification-token",
+        ):
+            response = self.client.get(reverse("bot_integration:telegram_connect"))
 
         self.assertEqual(response.status_code, 302)
         location = response["Location"]
