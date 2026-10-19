@@ -113,6 +113,14 @@ class CourseBuilderApiTests(TestCase):
             slug="related-published-course",
             status=Course.Status.PUBLISHED,
         )
+        related_module = CourseModule.objects.create(
+            course=related, title="Related module", slug="related-module",
+            position=1, is_published=True,
+        )
+        Lesson.objects.create(
+            module=related_module, title="Related lesson", slug="related-lesson",
+            position=1, is_published=True, content_markdown="A related lesson.",
+        )
         payload = self.draft_payload("course-with-related-reference")
         payload["course"]["modules"][0]["lessons"][0]["relatedCourseIds"] = [str(related.pk)]
         response = self.client.post(
