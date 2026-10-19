@@ -1,10 +1,16 @@
-Hello {{ username }},
+Hi {{ username }},
 
-Your payment of {{ amount }} for {{ plan_name }} was disputed through your payment provider, and the dispute was confirmed.
+Your payment for {{ plan_name }} was disputed through the payment provider, and the dispute was confirmed. As a result, paid access linked to that payment has been revoked.
 
-{% if product_type == "course" %}- Access to the purchased course has been revoked.{% else %}- Your subscription has been cancelled.
-- Paid access, including Telegram channel access, has been revoked.{% endif %}
+Product: {{ plan_name }}
+Disputed amount: {{ amount_display }}
+{% if date_display %}Payment date: {{ date_display }}{% endif %}
+{% if provider_payment_id %}Payment transaction ID: {{ provider_payment_id }}{% endif %}
+{% if provider_reference %}Order / checkout reference: {{ provider_reference }}{% endif %}
 
-If you believe this is a mistake, please contact support.
+{% if product_type == 'course' %}Course access revoked: access to {{ plan_name }} is no longer available on this account.{% else %}Membership access ended: paid membership access, including any paid channel access, has ended.{% endif %}
 
-— TradeAdmin
+{% if support_url %}If you believe this is a mistake, contact support: {{ support_url }}{% else %}Review your account: {{ dashboard_url }}{% endif %}
+
+TradeThesis
+Conviction before execution

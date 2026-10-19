@@ -1,7 +1,8 @@
 Hi {{ username }},
 
-Your {{ plan_name }} access has ended.
+Your {{ plan_name }} access has expired, so paid membership access has been paused. You can review renewal options any time to restore access.
 
-Renew anytime to restore access to all channels.
+Review renewal options: {{ dashboard_url }}
 
-— The Team
+TradeThesis
+Conviction before execution

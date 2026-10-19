@@ -1,11 +1,12 @@
 {% autoescape off %}
-Hello {{ user.get_username }},
+Hi {{ user.get_username }},
 
 You tried to sign in to TradeThesis, but this email address has not been confirmed yet. Confirm it using the secure link below, then return to sign in:
 
 {{ activate_url }}
 
-If you did not try to sign in, you can ignore this message.
+This link expires in 3 days. If you did not try to sign in, you can ignore this message.
 
-— TradeThesis
+TradeThesis
+Conviction before execution
 {% endautoescape %}

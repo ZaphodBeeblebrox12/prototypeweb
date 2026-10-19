@@ -1,7 +1,8 @@
 Hi {{ username }},
 
-Your {{ plan_name }} subscription expires in {{ days }} days.
+Your {{ plan_name }} access expires in {{ days }} day{{ days|pluralize:'s' }}. Renew if you would like to keep uninterrupted access.
 
-Renew before it expires to keep uninterrupted access to all channels.
+Review membership: {{ dashboard_url }}
 
-— The Team
+TradeThesis
+Conviction before execution

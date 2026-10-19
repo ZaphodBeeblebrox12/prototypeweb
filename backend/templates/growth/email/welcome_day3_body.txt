@@ -1,8 +1,9 @@
-Hello {{ username }},
+Hi {{ username }},
 
-Quick check-in: if you've been meaning to set up but got stuck, it takes two minutes:
-Dashboard -> Connect Telegram -> choose a plan.
+Just checking in. If you have not finished setting up TradeThesis, you can connect Telegram from your account dashboard, or contact support and we will help you work through it.
 
-Or just reply to this email / visit https://yourdomain/support/ and we'll help personally.
+Connect Telegram: {{ connect_url }}
+Open your dashboard: {{ dashboard_url }}
 
-— TradeAdmin
+TradeThesis
+Conviction before execution

@@ -1,11 +1,12 @@
 {% autoescape off %}
-Hello {{ user.get_username }},
+Hi {{ user.get_username }},
 
-Thank you for creating a TradeThesis account. Please confirm that this email address belongs to you to finish setting up your account:
+Welcome to TradeThesis. Please confirm your email address to finish setting up your account:
 
 {{ activate_url }}
 
-If you did not create a TradeThesis account, you can ignore this message.
+For security, this link expires in 3 days. If you did not create a TradeThesis account, you can ignore this message.
 
-— TradeThesis
+TradeThesis
+Conviction before execution
 {% endautoescape %}
