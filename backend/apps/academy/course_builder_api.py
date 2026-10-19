@@ -127,12 +127,23 @@ def _build_import_payload(course_state, course_slug):
                 content = figure_ref.sub(lambda match: match.group(1) + "\n\n" + caption, content)
             asset_ids = sorted(set(_ASSET_REF.findall(content)))
             questions = lesson.get("questions") if isinstance(lesson.get("questions"), list) else []
+            learner_questions = []
+            for question_index, question in enumerate(questions, start=1):
+                if not isinstance(question, dict):
+                    continue
+                options = question.get("options") if isinstance(question.get("options"), list) else []
+                learner_questions.append({
+                    "id": str(question.get("id") or f"question-{module_index}-{lesson_index}-{question_index}"),
+                    "prompt": str(question.get("prompt") or "").strip()[:2000],
+                    "options": [str(option)[:1000] for option in options[:8]],
+                })
             related_ids = lesson.get("relatedCourseIds") if isinstance(lesson.get("relatedCourseIds"), list) else []
             content_json = {
                 "schema_version": 1,
                 "source_id": f"{module_index}.{lesson_index}",
                 "asset_ids": asset_ids,
                 "related_course_ids": [str(value) for value in related_ids if _valid_uuid(value)],
+                "questions": learner_questions,
                 "notebook": {},
             }
             lessons.append({
