@@ -251,7 +251,7 @@ def _draft_response(record, request):
                 image["data"] = reverse("staff_course_builder_asset", args=[record.pk, stable_id]) if stable_id else ""
             lesson["image"] = deepcopy(images[0]) if images else None
     state["serverDraftId"] = str(record.pk)
-    state["serverUpdatedAt"] = record.imported_at.isoformat()
+    state["serverUpdatedAt"] = record.updated_at.isoformat()
     state["status"] = "draft"
     return state
 
@@ -262,7 +262,7 @@ def course_builder_api(request):
     _require_admin(request)
     if request.method == "GET":
         drafts = []
-        for record in CourseImport.objects.filter(status=CourseImport.Status.REVIEW).order_by("-imported_at"):
+        for record in CourseImport.objects.filter(status=CourseImport.Status.DRAFT).order_by("-updated_at"):
             if record.payload.get("builder_state"):
                 drafts.append(_draft_response(record, request))
         related_courses = list(Course.objects.filter(status=Course.Status.PUBLISHED).order_by("position", "title").values("id", "title", "slug", "summary"))
@@ -293,20 +293,28 @@ def course_builder_api(request):
                 validate_markdown_source(lesson["content_markdown"])
         encoded = json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
         digest = hashlib.sha256(encoded).hexdigest()
+        mode = body.get("mode", "save")
+        if mode not in {"save", "submit"}:
+            return JsonResponse({"detail": "Unsupported draft action."}, status=400)
+
         with transaction.atomic():
-            record = CourseImport.objects.filter(course_slug=slug, content_hash=digest).first()
-            if record is not None and record.status == CourseImport.Status.PUBLISHED:
-                return JsonResponse({
-                    "detail": "This exact course version is already published. Make a change before creating a new draft revision."
-                }, status=409)
-            if record is not None and record.status != CourseImport.Status.REVIEW:
+            draft = CourseImport.objects.filter(
+                course_slug=slug, status=CourseImport.Status.DRAFT,
+            ).first()
+            conflicting = CourseImport.objects.filter(
+                course_slug=slug, content_hash=digest,
+            )
+            if draft is not None:
+                conflicting = conflicting.exclude(pk=draft.pk)
+            conflict = conflicting.first()
+            if conflict is not None:
+                # The same content may already have been reviewed or published.
+                # A new editable draft needs its own immutable hash identity.
                 payload["builder_revision"] = str(uuid.uuid4())
                 encoded = json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
                 digest = hashlib.sha256(encoded).hexdigest()
-                record = None
-            created = record is None
-            if created:
-                CourseImport.objects.filter(course_slug=slug, status=CourseImport.Status.REVIEW).update(status=CourseImport.Status.SUPERSEDED)
+
+            if draft is None:
                 record = CourseImport.objects.create(
                     course_slug=slug,
                     title=title,
@@ -314,10 +322,26 @@ def course_builder_api(request):
                     content_hash=digest,
                     source_manifest=f"builder://{slug}",
                     payload=payload,
-                    status=CourseImport.Status.REVIEW,
+                    status=CourseImport.Status.DRAFT,
                     imported_by=request.user,
                 )
-                for spec in payload["assets"]:
+            else:
+                record = draft
+                record.title = title
+                record.manifest_version = "course-builder-v1"
+                record.content_hash = digest
+                record.source_manifest = f"builder://{slug}"
+                record.payload = payload
+                record.imported_by = request.user
+                record.save(update_fields=[
+                    "title", "manifest_version", "content_hash", "source_manifest",
+                    "payload", "imported_by", "updated_at",
+                ])
+
+            existing_assets = {asset.asset_key: asset for asset in record.assets.all()}
+            for spec in payload["assets"]:
+                asset = existing_assets.pop(spec["asset_key"], None)
+                if asset is None:
                     CourseImportAsset.objects.create(
                         course_import=record,
                         asset_key=spec["asset_key"],
@@ -327,19 +351,41 @@ def course_builder_api(request):
                         original_url="",
                         source_error="",
                     )
+                else:
+                    asset.stable_asset_id = spec["stable_asset_id"]
+                    asset.alt_text = spec.get("alt_text", "")
+                    asset.source_error = ""
+                    asset.save(update_fields=["stable_asset_id", "alt_text", "source_error", "updated_at"])
+            for removed_asset in existing_assets.values():
+                if removed_asset.file:
+                    removed_asset.file.delete(save=False)
+                removed_asset.delete()
+
             _store_images(record, image_sources)
-        errors = validate_import_for_publish(record)
+            errors = validate_import_for_publish(record)
+            if mode == "submit" and errors:
+                return JsonResponse({
+                    "detail": "The draft needs attention before it can be submitted.",
+                    "publish_errors": errors,
+                }, status=400)
+            if mode == "submit":
+                CourseImport.objects.filter(
+                    course_slug=slug, status=CourseImport.Status.REVIEW,
+                ).exclude(pk=record.pk).update(status=CourseImport.Status.SUPERSEDED)
+                record.status = CourseImport.Status.REVIEW
+                record.save(update_fields=["status", "updated_at"])
+
         review_url = reverse("admin:academy_courseimport_review", args=[record.pk])
-        if body.get("mode") == "submit":
+        if mode == "submit":
             return JsonResponse({
                 "ok": True, "submitted": True, "record_id": str(record.pk),
-                "review_url": review_url, "publish_errors": errors,
+                "review_url": review_url, "publish_errors": [],
                 "draft": _draft_response(record, request),
-                "message": "Draft saved. Review it before publishing to the course catalogue.",
+                "message": "Draft submitted. Review it before publishing to the course catalogue.",
             })
         return JsonResponse({
             "ok": True, "submitted": False, "record_id": str(record.pk),
-            "updated_at": record.imported_at.isoformat(),
+            "updated_at": record.updated_at.isoformat(),
             "draft": _draft_response(record, request),
             "message": "Draft saved to the Academy. You can reopen it from any computer.",
         })
