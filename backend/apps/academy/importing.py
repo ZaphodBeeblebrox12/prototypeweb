@@ -25,6 +25,7 @@ from .models import (
     CourseMediaAsset,
     CourseModule,
     Lesson,
+    LessonInstructorMaterial,
 )
 
 User = get_user_model()
@@ -512,6 +513,41 @@ def publish_course_import(record, *, user):
                 for field, value in next_fields.items():
                     setattr(lesson, field, value)
                 lesson.save()
+                # Course Builder answer keys stay in the instructor-only table and never enter learner JSON.
+                private_material = lesson_data.get("instructor_material")
+                if isinstance(private_material, dict):
+                    questions = private_material.get("questions", [])
+                    if not isinstance(questions, list):
+                        questions = []
+                    answer_lines = []
+                    for question_index, question in enumerate(questions, start=1):
+                        if not isinstance(question, dict):
+                            continue
+                        prompt = str(question.get("prompt", "")).strip()
+                        options = question.get("options", [])
+                        correct_index = question.get("correctIndex", 0)
+                        explanation = str(question.get("explanation", "")).strip()
+                        try:
+                            correct_index = int(correct_index)
+                        except (TypeError, ValueError):
+                            correct_index = -1
+                        correct_answer = (
+                            str(options[correct_index])
+                            if isinstance(options, list) and 0 <= correct_index < len(options)
+                            else ""
+                        )
+                        answer_lines.append(
+                            f"Question {question_index}: {prompt}\\n"
+                            f"Correct answer: {correct_answer}\\n"
+                            f"Explanation: {explanation}"
+                        )
+                    LessonInstructorMaterial.objects.update_or_create(
+                        lesson=lesson,
+                        defaults={
+                            "answer_key_markdown": "\\n\\n".join(answer_lines),
+                            "rubric_json": {"questions": questions},
+                        },
+                    )
             # Rows removed from the source are kept (including their UUIDs and progress) but hidden.
             module.lessons.exclude(slug__in=lesson_slugs).update(is_published=False)
             module.position = module_data["position"]
