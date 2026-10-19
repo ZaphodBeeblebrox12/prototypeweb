@@ -17,11 +17,10 @@ _PREVIEW_FILE = Path(__file__).with_name("course_builder_preview.html")
 @login_required
 @require_GET
 def course_builder_preview(request):
-    """Serve the prototype only to users authorised to edit shared course content.
+    """Serve the in-progress builder to authorised course-content administrators.
 
-    This page is intentionally still a browser-local prototype. It does not write
-    course records or images to Django, and its Preview Publish button cannot
-    publish to the actual course catalogue.
+    Drafts are persisted as reviewable Academy imports. Publication still goes
+    through the existing import-review workflow; pricing and checkout are separate.
     """
     if not request.user.is_active or not is_course_content_admin(request.user):
         raise PermissionDenied
