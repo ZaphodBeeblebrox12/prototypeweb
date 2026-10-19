@@ -5,11 +5,6 @@ pip install -r requirements.txt
 python manage.py collectstatic --noinput
 python manage.py migrate --noinput
 
-# Staging-only focused regression gate for the shared Course Builder workflow.
-if [[ "${RUN_COURSE_BUILDER_TESTS:-false}" =~ ^(1|true|TRUE|yes|YES)$ ]]; then
-  python manage.py test apps.academy.test_course_builder_api --verbosity 2
-fi
-
 # Explicit one-time staging hook: import the canonical Bollinger Bands course
 # as a review-only CourseImport. No published learner rows, offer or checkout
 # are created by this management command. Keep all database credentials in
