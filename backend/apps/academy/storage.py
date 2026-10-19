@@ -18,7 +18,6 @@ import requests
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.utils import validate_file_name
-from django.core.files.utils import validate_file_name
 from django.core.files.storage import FileSystemStorage
 from django.core.exceptions import SuspiciousFileOperation
 from django.utils.deconstruct import deconstructible
@@ -74,14 +73,12 @@ class PrivateCourseAssetStorage(FileSystemStorage):
                 method, url, headers=self._headers(), timeout=self.timeout, **kwargs
             )
         except requests.RequestException as exc:
-            from django.core.files.storage import StorageError
-            raise StorageError("Private course image storage is temporarily unavailable.") from exc
+                        raise OSError("Private course image storage is temporarily unavailable.") from exc
         if response.status_code >= 400:
             if response.status_code == 404:
                 return None
-            from django.core.files.storage import StorageError
-            logger.warning("GitHub course asset request failed with status %s", response.status_code)
-            raise StorageError(
+                        logger.warning("GitHub course asset request failed with status %s", response.status_code)
+            raise OSError(
                 f"Private course image storage returned HTTP {response.status_code}."
             )
         return response
@@ -104,12 +101,10 @@ class PrivateCourseAssetStorage(FileSystemStorage):
                 f"{self.api_root}/repos/{self.repository}/git/blobs/{metadata['sha']}",
             )
             if blob is None:
-                from django.core.files.storage import StorageError
-                raise StorageError("The private course image could not be read.")
+                                raise OSError("The private course image could not be read.")
             encoded = blob.json().get("content", "").strip()
         if not encoded:
-            from django.core.files.storage import StorageError
-            raise StorageError("GitHub returned no content for the course image.")
+                        raise OSError("GitHub returned no content for the course image.")
         return ContentFile(base64.b64decode(encoded), name=name)
 
     def _save(self, name, content):
@@ -124,8 +119,7 @@ class PrivateCourseAssetStorage(FileSystemStorage):
         }
         response = self._request("PUT", self._url(path), json=payload)
         if response is None:
-            from django.core.files.storage import StorageError
-            raise StorageError("GitHub could not store the course image.")
+                        raise OSError("GitHub could not store the course image.")
         return name
 
     def exists(self, name):
@@ -151,8 +145,7 @@ class PrivateCourseAssetStorage(FileSystemStorage):
                 },
             )
             if response is None:
-                from django.core.files.storage import StorageError
-                raise StorageError("GitHub could not remove the course image.")
+                                raise OSError("GitHub could not remove the course image.")
             return
         # Compatibility with assets saved to local disk before GitHub was enabled.
         super().delete(name)
