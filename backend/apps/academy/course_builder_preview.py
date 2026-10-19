@@ -4,6 +4,7 @@ from pathlib import Path
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
+from django.middleware.csrf import get_token
 from django.utils.cache import add_never_cache_headers
 from django.views.decorators.http import require_GET
 
@@ -34,6 +35,7 @@ def course_builder_preview(request):
             content_type="text/plain; charset=utf-8",
         )
 
+    get_token(request)  # Ensure the authenticated builder receives a CSRF cookie for JSON saves.
     response = HttpResponse(document, content_type="text/html; charset=utf-8")
     add_never_cache_headers(response)
     response["X-Frame-Options"] = "DENY"
