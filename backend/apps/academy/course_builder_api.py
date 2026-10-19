@@ -63,9 +63,17 @@ def _clean_image_payload(course_state, course_slug):
                 asset_key = f"builder/{image_id}"
                 stable_id = _asset_uuid(course_slug, image_id)
                 source_data = str(image.get("data") or "")
+                digest = str(image.get("sha256") or "")
+                if source_data.startswith("data:"):
+                    try:
+                        _header, encoded = source_data.split(",", 1)
+                        digest = hashlib.sha256(base64.b64decode(encoded, validate=True)).hexdigest()
+                    except (ValueError, binascii.Error) as exc:
+                        raise ValidationError(f"Image {image.get('name') or image_id} has invalid encoded data.") from exc
                 images_by_key[asset_key] = source_data
                 image["assetKey"] = asset_key
                 image["assetUuid"] = stable_id
+                image["sha256"] = digest
                 image["data"] = ""
                 specs_by_key[asset_key] = {
                     "asset_key": asset_key,
@@ -74,7 +82,7 @@ def _clean_image_payload(course_state, course_slug):
                     "source_path": "",
                     "original_url": "",
                     "source_error": "",
-                    "sha256": "",
+                    "sha256": digest,
                 }
             lesson["image"] = deepcopy(images[0]) if images else None
     return snapshot, images_by_key, specs_by_key
