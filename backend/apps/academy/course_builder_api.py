@@ -43,6 +43,8 @@ def _asset_uuid(course_slug, asset_id):
 def _clean_image_payload(course_state, course_slug):
     """Remove binary data from the JSON snapshot and return upload sources separately."""
     snapshot = deepcopy(course_state)
+    for transient in ("serverDraftId", "serverUpdatedAt", "serverCourseId"):
+        snapshot.pop(transient, None)
     images_by_key = {}
     specs_by_key = {}
 
@@ -267,9 +269,16 @@ def course_builder_api(request):
         encoded = json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
         digest = hashlib.sha256(encoded).hexdigest()
         with transaction.atomic():
-            record = CourseImport.objects.filter(
-                course_slug=slug, content_hash=digest, status=CourseImport.Status.REVIEW
-            ).first()
+            record = CourseImport.objects.filter(course_slug=slug, content_hash=digest).first()
+            if record is not None and record.status == CourseImport.Status.PUBLISHED:
+                return JsonResponse({
+                    "detail": "This exact course version is already published. Make a change before creating a new draft revision."
+                }, status=409)
+            if record is not None and record.status != CourseImport.Status.REVIEW:
+                payload["builder_revision"] = str(uuid.uuid4())
+                encoded = json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+                digest = hashlib.sha256(encoded).hexdigest()
+                record = None
             created = record is None
             if created:
                 CourseImport.objects.filter(course_slug=slug, status=CourseImport.Status.REVIEW).update(status=CourseImport.Status.SUPERSEDED)
@@ -300,11 +309,13 @@ def course_builder_api(request):
             return JsonResponse({
                 "ok": True, "submitted": True, "record_id": str(record.pk),
                 "review_url": review_url, "publish_errors": errors,
+                "draft": _draft_response(record, request),
                 "message": "Draft saved. Review it before publishing to the course catalogue.",
             })
         return JsonResponse({
             "ok": True, "submitted": False, "record_id": str(record.pk),
             "updated_at": record.imported_at.isoformat(),
+            "draft": _draft_response(record, request),
             "message": "Draft saved to the Academy. You can reopen it from any computer.",
         })
     except (json.JSONDecodeError, UnicodeDecodeError):
