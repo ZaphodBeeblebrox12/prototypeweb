@@ -13,6 +13,7 @@ from apps.accounts import views as accounts_views
 from apps.accounts.member_access import member_access_login, member_entry
 from apps.accounts.telegram_views import TelegramCallbackView
 from apps.admin_dashboard import staff_admin_desk
+from apps.academy.course_builder_preview import course_builder_preview
 from apps.admin_desk_views import (
     admin_desk_accounts, admin_desk_account_detail, admin_desk_account_action,
     admin_desk_subscriptions, admin_desk_subscription_action,
@@ -23,6 +24,7 @@ from apps.core.views import health_check
 urlpatterns = [
     # Render readiness probe: confirm Django and its primary database respond.
     path("health/", health_check, name="health_check"),
+    path("staff/course-builder/", course_builder_preview, name="staff_course_builder_preview"),
     path("staff/admin-desk/", staff_admin_desk, name="staff_admin_desk"),
     path("staff/admin-desk/accounts/", admin_desk_accounts, name="staff_admin_desk_accounts"),
     path("staff/admin-desk/accounts/<uuid:user_id>/", admin_desk_account_detail, name="staff_admin_desk_account_detail"),
