@@ -54,6 +54,14 @@ def render_safe_markdown(source, asset_urls=None):
         extensions=["tables", "sane_lists", "smarty"],
         output_format="html",
     )
+    # Course Builder stores a figure caption as the paragraph immediately after its image.
+    # Group that pair semantically so captions remain attached and accessible in the Learning Room.
+    rendered = re.sub(
+        r"<p>(<img\\b[^>]*>)</p>\\s*<p>(.*?)</p>",
+        r"<figure>\\1<figcaption>\\2</figcaption></figure>",
+        rendered,
+        flags=re.DOTALL,
+    )
     return bleach.clean(
         rendered,
         tags=_ALLOWED_TAGS,
