@@ -39,7 +39,7 @@
     {% csrf_token %}
     <ol>
       {% for prompt in notebook.prompts %}
-      <li><label for="notebook-prompt-{{ forloop.counter0 }}"><strong>{{ prompt.label }}</strong></label><p>{{ prompt.text }}</p><textarea id="notebook-prompt-{{ forloop.counter0 }}" name="prompt_{{ forloop.counter0 }}" rows="3" maxlength="4000" placeholder="Write your reflection…">{{ notebook_responses|get_item:forloop.counter0 }}</textarea></li>
+      <li><label for="notebook-prompt-{{ forloop.counter0 }}"><strong>{{ prompt.label }}</strong></label><p>{{ prompt.text }}</p><textarea id="notebook-prompt-{{ forloop.counter0 }}" name="prompt_{{ forloop.counter0 }}" rows="3" maxlength="4000" placeholder="Write your reflection…">{{ prompt.response }}</textarea></li>
       {% endfor %}
     </ol>
     <button class="tt-notebook-save" type="submit">Save reflection</button>
