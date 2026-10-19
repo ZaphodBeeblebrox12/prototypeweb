@@ -8,6 +8,10 @@ on:
       - "course-source/understand-bollinger-bands/preview/first-pass/index.html"
       - "course-source/understand-bollinger-bands/preview/template-reference/index.html"
       - "course-source/understand-bollinger-bands/assets/bollinger-lessons-data.js"
+      - "course-source/understand-bollinger-bands/assets/student-assets/svg/**"
+      - "backend/apps/academy/importing.py"
+      - "backend/apps/academy/models.py"
+      - "backend/tests/academy/test_course_import_workflow.py"
       - "site/assets/course-content-admin-editor.js"
       - "site/assets/instructional-image-admin.js"
       - "site/assets/course-catalogue-data.js"
@@ -53,3 +57,27 @@ jobs:
           PY
           node --check /tmp/bollinger-first-pass-preview.js
           node --check /tmp/bollinger-template-reference-preview.js
+      - name: Validate authored Bollinger figure assets
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          root = Path("course-source/understand-bollinger-bands/assets/student-assets/svg")
+          figures = [root / f"bb-m{m:02d}-f{f:02d}.svg" for m in range(1, 8) for f in range(1, (7 if m == 5 else 5))]
+          if len(figures) != 30:
+              raise SystemExit(f"Expected 30 figure assets, found {len(figures)}")
+          forbidden = ("<script", "<foreignObject", "href=", "style=", "<image", "<use", "url(", "javascript:", "data:")
+          for path in figures:
+              if not path.is_file():
+                  raise SystemExit(f"Missing authored figure: {path}")
+              source = path.read_text(encoding="utf-8").lower()
+              if any(token in source for token in forbidden):
+                  raise SystemExit(f"Potentially active/external SVG content found in {path}")
+              svg = ET.parse(path).getroot()
+              if svg.tag.rsplit("}", 1)[-1] != "svg" or "viewBox" not in svg.attrib:
+                  raise SystemExit(f"Invalid SVG root or viewBox: {path}")
+              tags = {node.tag.rsplit("}", 1)[-1] for node in svg}
+              if not {"title", "desc"}.issubset(tags):
+                  raise SystemExit(f"Missing accessible title/description: {path}")
+          print("All 30 source SVG figures exist, parse as XML and include accessible metadata.")
+          PY

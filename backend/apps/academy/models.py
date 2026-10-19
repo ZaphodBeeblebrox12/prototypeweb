@@ -300,7 +300,7 @@ class LessonProgress(models.Model):
 
 def course_import_asset_upload_to(instance, filename):
     suffix = Path(filename).suffix.lower()
-    if suffix not in {".jpg", ".jpeg", ".png", ".webp"}:
+    if suffix not in {".jpg", ".jpeg", ".png", ".webp", ".svg"}:
         suffix = ".png"
     return f"academy/course-imports/{instance.course_import_id}/{uuid.uuid4().hex}{suffix}"
 

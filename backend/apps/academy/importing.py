@@ -3,6 +3,7 @@ import hashlib
 import json
 import re
 import uuid
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from django.contrib.auth import get_user_model
@@ -34,6 +35,16 @@ _LESSON_HEADING = re.compile(
 _IMAGE = re.compile(r"!\[(?P<alt>[^\]]*)\]\((?P<path>[^)\s]+)(?:\s+[^)]*)?\)")
 _ALLOWED_FORMATS = {"JPEG": ".jpg", "PNG": ".png", "WEBP": ".webp"}
 _MAX_IMAGE_BYTES = 10 * 1024 * 1024
+# SVG is accepted only for checked-in course source figures, never as an admin upload.
+_SVG_TAGS = {"svg", "title", "desc", "g", "rect", "text", "tspan", "line", "path", "circle", "ellipse", "polyline", "polygon"}
+_SVG_ATTRIBUTES = {
+    "xmlns", "width", "height", "viewBox", "x", "y", "x1", "y1", "x2", "y2",
+    "cx", "cy", "r", "rx", "ry", "d", "points", "fill", "fill-opacity",
+    "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin", "stroke-dasharray",
+    "stroke-dashoffset", "opacity", "font-family", "font-size", "font-weight",
+    "text-anchor", "dominant-baseline", "transform", "id", "version",
+}
+_SVG_FORBIDDEN_TOKENS = ("<!DOCTYPE", "<!ENTITY", "<script", "<foreignObject", "<image", "<use", "href=", "style=", "url(", "javascript:", "data:")
 
 
 def _sha(data):
@@ -72,11 +83,47 @@ def _split_module_markdown(source, source_path):
     return lessons
 
 
+def _inspect_svg(path):
+    """Validate checked-in course SVGs; do not enable SVG uploads from administrators."""
+    data = path.read_bytes()
+    if len(data) > _MAX_IMAGE_BYTES:
+        return None, "source SVG exceeds 10 MB"
+    try:
+        source = data.decode("utf-8")
+    except UnicodeDecodeError:
+        return None, "source SVG must be UTF-8"
+    lowered = source.lower()
+    if any(token.lower() in lowered for token in _SVG_FORBIDDEN_TOKENS):
+        return None, "source SVG contains active, linked or externally loaded content"
+    try:
+        root = ET.fromstring(source)
+    except ET.ParseError:
+        return None, "source SVG is not well-formed XML"
+    if root.tag.rsplit("}", 1)[-1] != "svg" or not root.attrib.get("viewBox"):
+        return None, "source SVG needs an svg root and viewBox"
+    for element in root.iter():
+        name = element.tag.rsplit("}", 1)[-1]
+        if name not in _SVG_TAGS:
+            return None, f"source SVG uses unsupported element: {name}"
+        for attribute, value in element.attrib.items():
+            key = attribute.rsplit("}", 1)[-1]
+            if key not in _SVG_ATTRIBUTES or key.lower().startswith("on"):
+                return None, f"source SVG uses unsupported attribute: {key}"
+            if key != "xmlns" and any(token in value.lower() for token in ("url(", "javascript:", "data:", "http://", "https://")):
+                return None, f"source SVG contains an external or executable reference in {key}"
+    children = {child.tag.rsplit("}", 1)[-1] for child in root}
+    if not {"title", "desc"}.issubset(children):
+        return None, "source SVG needs an accessible title and description"
+    return {"format": "SVG", "sha256": _sha(data)}, None
+
+
 def _inspect_image(path):
     if not path.is_file():
         return None, "source image is missing"
     if path.stat().st_size > _MAX_IMAGE_BYTES:
         return None, "source image exceeds 10 MB"
+    if path.suffix.lower() == ".svg":
+        return _inspect_svg(path)
     try:
         with Image.open(path) as image:
             image.verify()
@@ -309,9 +356,15 @@ def stage_course_import(*, manifest_path, payload, asset_sources, warnings, impo
             )
             source_file = asset_sources.get(spec["asset_key"])
             if source_file:
-                ext = source_file.suffix.lower()
-                safe_ext = _ALLOWED_FORMATS.get(Image.open(source_file).format)
-                if not safe_ext or ext not in {safe_ext, ".jpeg" if safe_ext == ".jpg" else safe_ext}:
+                image_info, image_error = _inspect_image(source_file)
+                if not image_info:
+                    asset.source_error = image_error or "Source image is invalid."
+                    asset.save(update_fields=["source_error"])
+                    stage_warnings.append(spec["asset_key"] + ": " + asset.source_error)
+                    continue
+                safe_ext = ".svg" if image_info["format"] == "SVG" else _ALLOWED_FORMATS[image_info["format"]]
+                allowed_suffixes = {".jpg", ".jpeg"} if safe_ext == ".jpg" else {safe_ext}
+                if source_file.suffix.lower() not in allowed_suffixes:
                     asset.source_error = "Source file extension does not match its decoded image format."
                     asset.save(update_fields=["source_error"])
                     stage_warnings.append(spec["asset_key"] + ": filename extension does not match the decoded image.")
@@ -345,6 +398,18 @@ def validate_import_for_publish(record):
         live_has_file = bool(live_asset and live_asset.file)
         source_url = (stage_asset.original_url if stage_asset else "") or (live_asset.original_url if live_asset else "")
         has_source_url = bool(re.match(r"^https?://", source_url, re.IGNORECASE))
+        if (
+            record.course_slug == "understand-bollinger-bands"
+            and stage_asset is not None
+            and stage_asset.asset_key.startswith("remote/")
+            and not staged_has_file
+            and not live_has_file
+        ):
+            errors.append(
+                "Temporary external Bollinger Bands chart reference "
+                + stage_asset.asset_key
+                + " must be replaced with an approved local chart before publishing."
+            )
         if not staged_has_file and not live_has_file and not has_source_url:
             key = stage_asset.asset_key if stage_asset else asset_id
             errors.append(

@@ -99,4 +99,8 @@ The setup manuscript currently embeds 32 remote historical chart examples to sup
 - [ ] An illustrative chart is not presented as historical evidence.
 - [ ] Rendered output has been visually inspected; file existence alone does not count as QA.
 
-**Current status:** Figure briefs are written. No finished image assets have been created or visually tested yet.
+## First-pass source asset state — 19 October 2026
+
+The 30 numbered figure paths now have first-pass, TradeThesis-authored SVG diagrams under `assets/student-assets/svg/`. These are original conceptual teaching drawings, not historical market charts. Each SVG includes title and description metadata and is constrained to a safe, static SVG subset by the Academy source importer.
+
+**Release status remains review-only.** Browser visual review at desktop/mobile widths and 200% zoom is still required before publishing. The 32 remote historical examples in Module 5 remain temporary references and must be replaced with course-owned TradingView captures or rights-cleared local chart images in the Academy import review before publication is permitted.

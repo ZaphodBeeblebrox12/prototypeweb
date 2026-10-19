@@ -5,6 +5,7 @@ from pathlib import Path
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.test import Client, TestCase
@@ -431,3 +432,92 @@ class CourseImportAdminPreviewTests(TestCase):
         self.assertContains(response, "Using URL for now")
         self.assertContains(response, "Open source")
         self.assertContains(response, "Approve and publish course")
+
+
+class CourseSourceSvgAndReleaseGateTests(TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        (self.root / "lessons").mkdir()
+        (self.root / "assets").mkdir()
+        self.source = self.root / "lessons" / "module-01.md"
+        self.manifest_path = self.root / "course-manifest.json"
+
+    def write_package(self, slug, image_markdown):
+        newline = chr(10)
+        source_lines = [
+            "## Lesson 1.1 — Read the evidence", "",
+            "### The question", "",
+            "Read the chart in context.", "",
+            image_markdown, "",
+        ]
+        self.source.write_text(newline.join(source_lines), encoding="utf-8")
+        self.manifest_path.write_text(json.dumps({
+            "schema_version": 1,
+            "manifest_version": "test-v1",
+            "course": {
+                "title": "Source Asset Test Course",
+                "slug": slug,
+                "summary": "Testing reviewed source assets.",
+                "description": "A staged-only test.",
+                "position": 50,
+            },
+            "modules": [{
+                "title": "Foundations",
+                "slug": "foundations",
+                "position": 1,
+                "source": "lessons/module-01.md",
+                "lessons": [{
+                    "source_id": "1.1",
+                    "title": "Read the evidence",
+                    "slug": "read-the-evidence",
+                    "position": 1,
+                    "duration_minutes": 12,
+                    "release_day": 1,
+                }],
+            }],
+        }), encoding="utf-8")
+        call_command("import_microcourse", manifest=str(self.manifest_path), verbosity=0)
+        return CourseImport.objects.get(course_slug=slug, status=CourseImport.Status.REVIEW)
+
+    def test_checked_in_svg_is_staged_as_svg_source_asset(self):
+        svg = (
+            '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80" viewBox="0 0 120 80">'
+            '<title>Example chart</title><desc>A simple chart illustration.</desc>'
+            '<rect x="1" y="1" width="118" height="78" fill="#fbf7ef"/>'
+            '<path d="M10 60 L40 35 L70 45 L110 15" stroke="#26392f" stroke-width="3" fill="none"/>'
+            '</svg>'
+        )
+        (self.root / "assets" / "figure.svg").write_text(svg, encoding="utf-8")
+        record = self.write_package("svg-source-test", "![Example figure](../assets/figure.svg)")
+        asset = record.assets.get(asset_key="assets/figure.svg")
+        self.assertTrue(asset.file.name.endswith(".svg"))
+        self.assertFalse(asset.source_error)
+        self.assertIn("asset://", record.payload["modules"][0]["lessons"][0]["content_markdown"])
+
+    def test_scripted_svg_is_not_staged_as_an_image(self):
+        (self.root / "assets" / "figure.svg").write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10">'
+            '<title>Unsafe</title><desc>Unsafe example</desc><script>alert(1)</script></svg>',
+            encoding="utf-8",
+        )
+        record = self.write_package("svg-unsafe-test", "![Example figure](../assets/figure.svg)")
+        asset = record.assets.get(asset_key="assets/figure.svg")
+        self.assertFalse(asset.file)
+        self.assertIn("active, linked or externally loaded", asset.source_error)
+
+    def test_bollinger_remote_example_blocks_publish_until_replaced(self):
+        record = self.write_package(
+            "understand-bollinger-bands",
+            "![Temporary historical chart](https://example.com/chart.png)",
+        )
+        errors = validate_import_for_publish(record)
+        self.assertTrue(any("Temporary external Bollinger Bands chart reference" in error for error in errors))
+        asset = record.assets.get(asset_key__startswith="remote/")
+        stream = BytesIO()
+        Image.new("RGB", (20, 20), "white").save(stream, format="PNG")
+        stream.seek(0)
+        asset.file.save("replacement.png", File(stream), save=True)
+        errors = validate_import_for_publish(record)
+        self.assertFalse(any("Temporary external Bollinger Bands chart reference" in error for error in errors))
