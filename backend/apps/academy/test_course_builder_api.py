@@ -74,6 +74,27 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(record.payload["modules"][0]["lessons"][0]["content_markdown"], "## Notice\n\nDescribe what is visible before drawing a conclusion.")
         self.assertNotIn("correctIndex", record.payload["modules"][0]["lessons"][0]["content_json"])
 
+    def test_published_quiz_keeps_answer_key_private(self):
+        from .importing import publish_course_import
+        from .models import LessonInstructorMaterial
+
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(self.draft_payload("private-quiz-course")),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        record = CourseImport.objects.get(pk=response.json()["record_id"])
+        course = publish_course_import(record, user=self.admin)
+        lesson = Lesson.objects.get(module__course=course)
+
+        self.assertEqual(lesson.content_json["questions"][0]["options"][0], "Visible evidence")
+        self.assertNotIn("correctIndex", json.dumps(lesson.content_json))
+        self.assertNotIn("explanation", json.dumps(lesson.content_json))
+        instructor = LessonInstructorMaterial.objects.get(lesson=lesson)
+        self.assertEqual(instructor.rubric_json["questions"][0]["correctIndex"], 0)
+        self.assertIn("Start with what can be observed.", instructor.answer_key_markdown)
+
     def test_course_builder_is_not_available_to_regular_staff(self):
         staff = User.objects.create_user(
             username="ordinary-staff",
