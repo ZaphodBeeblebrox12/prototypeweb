@@ -79,3 +79,34 @@ class MemberAccessLoginTests(TestCase):
     def test_endpoint_only_accepts_post(self):
         response = self.client.get(reverse("member_access_login"))
         self.assertEqual(response.status_code, 405)
+
+
+@override_settings(
+    TRADETHESIS_PUBLIC_SITE_URL=PUBLIC_ORIGIN,
+    TRADETHESIS_MEMBER_LOGIN_ORIGINS=[PUBLIC_ORIGIN],
+)
+class MemberEntryTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="member_entry_test",
+            email="member-entry@example.com",
+            password=LOGIN_PASSWORD,
+        )
+
+    def test_authenticated_member_goes_directly_to_dashboard(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("member_entry"))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("dashboard"))
+        self.assertEqual(response["Cache-Control"], "no-store")
+
+    def test_anonymous_member_returns_to_the_same_access_room(self):
+        response = self.client.get(reverse("member_entry"))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response["Location"],
+            f"{PUBLIC_ORIGIN}/member-access.html",
+        )
+        self.assertEqual(response["Cache-Control"], "no-store")
