@@ -138,13 +138,31 @@ def _build_import_payload(course_state, course_slug):
                     "options": [str(option)[:1000] for option in options[:8]],
                 })
             related_ids = lesson.get("relatedCourseIds") if isinstance(lesson.get("relatedCourseIds"), list) else []
+            notebook = lesson.get("notebook") if isinstance(lesson.get("notebook"), dict) else {}
+            prompts = notebook.get("prompts") if isinstance(notebook.get("prompts"), list) else []
+            clean_prompts = []
+            for prompt in prompts[:6]:
+                if not isinstance(prompt, dict):
+                    continue
+                label = str(prompt.get("label") or "").strip()[:80]
+                text = str(prompt.get("text") or "").strip()[:1000]
+                if label and text:
+                    clean_prompts.append({"label": label, "text": text})
+            notebook_payload = {
+                "title": str(notebook.get("title") or "Your Trading Notebook").strip()[:160],
+                "prompts": clean_prompts,
+            }
+            video_url = str(lesson.get("videoUrl") or "").strip()[:1000]
+            if video_url and not video_url.startswith(("https://", "http://")):
+                raise ValidationError(f"{title}: video URL must use HTTPS or HTTP.")
             content_json = {
                 "schema_version": 1,
                 "source_id": f"{module_index}.{lesson_index}",
                 "asset_ids": asset_ids,
                 "related_course_ids": [str(value) for value in related_ids if _valid_uuid(value)],
                 "questions": learner_questions,
-                "notebook": {},
+                "notebook": notebook_payload,
+                "video_url": video_url,
             }
             lessons.append({
                 "source_id": f"{module_index}.{lesson_index}",
@@ -176,6 +194,10 @@ def _build_import_payload(course_state, course_slug):
             "slug": course_slug,
             "summary": str(snapshot.get("summary") or "").strip()[:360],
             "description": str(snapshot.get("description") or "").strip(),
+            "category": str(snapshot.get("category") or "").strip()[:80],
+            "level": str(snapshot.get("level") or "").strip()[:40],
+            "estimated_duration": str(snapshot.get("duration") or "").strip()[:80],
+            "learning_outcomes": [str(value).strip()[:500] for value in (snapshot.get("outcomes") or []) if str(value).strip()][:20],
             "position": 0,
         },
         "notebook": {},
