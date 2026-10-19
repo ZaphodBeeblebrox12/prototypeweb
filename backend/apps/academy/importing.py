@@ -436,6 +436,9 @@ def publish_course_import(record, *, user):
             course = Course.objects.create(
                 title=course_data["title"], slug=course_data["slug"],
                 summary=course_data.get("summary", ""), description=course_data.get("description", ""),
+                category=course_data.get("category", ""), level=course_data.get("level", ""),
+                estimated_duration=course_data.get("estimated_duration", ""),
+                learning_outcomes=course_data.get("learning_outcomes", []),
                 position=course_data.get("position", 0), status=Course.Status.DRAFT,
             )
         else:
@@ -445,8 +448,15 @@ def publish_course_import(record, *, user):
         course.title = course_data["title"]
         course.summary = course_data.get("summary", "")
         course.description = course_data.get("description", "")
+        course.category = course_data.get("category", "")
+        course.level = course_data.get("level", "")
+        course.estimated_duration = course_data.get("estimated_duration", "")
+        course.learning_outcomes = course_data.get("learning_outcomes", [])
         course.position = course_data.get("position", 0)
-        course.save(update_fields=["title", "summary", "description", "position", "updated_at"])
+        course.save(update_fields=[
+            "title", "summary", "description", "category", "level",
+            "estimated_duration", "learning_outcomes", "position", "updated_at",
+        ])
 
         module_slugs = {item["slug"] for item in payload["modules"]}
         all_modules = list(course.modules.all())
