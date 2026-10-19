@@ -28,8 +28,19 @@ class MemberDeskTemplateContractTests(SimpleTestCase):
         self.assertIn('id="page-connections"', rendered)
         self.assertIn('id="page-billing"', rendered)
         self.assertIn('id="page-learning"', rendered)
+        self.assertIn("Your learning, when you are ready.", rendered)
+        self.assertIn("Nothing to resume just yet", rendered)
+        self.assertIn('class="learning-empty-state"', rendered)
         self.assertIn('id="page-profile"', rendered)
         self.assertIn('id="page-help"', rendered)
+
+    def test_my_learning_uses_access_aware_empty_state_and_return_action(self):
+        source = get_template("accounts/member_desk.html").template.source
+        self.assertIn("{% if member_course_cards %}", source)
+        self.assertIn("Course cards and saved lesson progress will appear here once your account has access.", source)
+        self.assertIn("Explore the course catalogue", source)
+        self.assertIn('data-goto="overview"', source)
+        self.assertIn("Saved progress · no active entitlement", source)
 
     def test_live_member_desk_contains_no_mock_account_or_payment_records(self):
         template = get_template("accounts/member_desk.html")

@@ -82,6 +82,49 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 .no-purchase-notice strong{color:var(--ink)}
 @media(prefers-reduced-motion:reduce){.no-purchase-choice-card:hover{transform:none}}
 
+
+/* My learning — match the approved member-course empty-state reference. */
+.learning-page-head{display:grid;grid-template-columns:minmax(125px,.38fr) minmax(340px,1.38fr) minmax(300px,1.18fr);align-items:center;gap:18px;min-height:180px;padding:30px 0 28px;border-bottom:1px solid var(--line);margin:0}
+.learning-page-brand .kicker{font-size:10px;line-height:1.55;letter-spacing:.14em}
+.learning-page-head h1{max-width:560px;margin:0;font:400 clamp(37px,3.45vw,47px)/1.12 var(--serif);letter-spacing:-.045em}
+.learning-page-head>p{max-width:510px;margin:0;color:var(--muted);font-size:14px;line-height:1.8}
+.learning-empty-state{display:grid;place-items:center;min-height:337px;margin:0;padding:34px 24px;border:1px solid var(--line);border-radius:17px;background:var(--surface);text-align:center;box-shadow:none}
+.learning-empty-content{width:min(100%,600px)}
+.learning-empty-icon{display:grid;place-items:center;width:58px;height:58px;margin:0 auto 16px;border-radius:17px;background:var(--surface-green);color:var(--green)}
+.learning-empty-icon svg{display:block;width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round}
+.learning-empty-content h2{margin:0 0 10px;font:400 32px/1.18 var(--serif);letter-spacing:-.025em;color:var(--ink)}
+.learning-empty-content p{max-width:570px;margin:0 auto 19px;color:var(--muted);font-size:14px;line-height:1.8}
+.learning-empty-actions{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap}
+.learning-empty-actions .btn{min-height:46px;padding:12px 19px;font-size:12px}
+.learning-list{overflow:hidden;border:1px solid var(--line);border-radius:17px;background:var(--surface);box-shadow:none}
+.learning-list-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px 24px;border-bottom:1px solid var(--line)}
+.learning-list-heading h2{margin:5px 0 0;font:400 26px/1.2 var(--serif);letter-spacing:-.025em}
+.learning-list-heading .kicker{font-size:9px}
+.learning-card{grid-template-columns:60px minmax(0,1fr) auto;padding:20px 24px;gap:18px}
+.learning-copy p{max-width:700px;font-size:12px;line-height:1.7}
+.learning-meta{margin-top:9px;font-size:10px}
+.progress-track{height:6px}
+.course-access-state{font-size:9px}
+@media(max-width:900px){
+  .learning-page-head{grid-template-columns:minmax(105px,.35fr) minmax(0,1.4fr);gap:12px;min-height:0;padding:25px 0 23px}
+  .learning-page-head>p{grid-column:2}
+  .learning-page-head h1{font-size:clamp(35px,4.4vw,43px)}
+  .learning-list-heading{padding:19px}
+  .learning-card{padding:18px 19px}
+}
+@media(max-width:620px){
+  .learning-page-head{grid-template-columns:minmax(0,1fr);gap:9px;padding:23px 0 19px}
+  .learning-page-head>p{grid-column:auto;font-size:13px}
+  .learning-page-head h1{max-width:520px;font-size:clamp(35px,10vw,42px)}
+  .learning-empty-state{min-height:290px;padding:27px 17px}
+  .learning-empty-content h2{font-size:28px}
+  .learning-empty-content p{font-size:13px;line-height:1.75}
+  .learning-empty-actions{flex-direction:column}
+  .learning-empty-actions .btn{width:min(100%,285px);white-space:normal}
+  .learning-list-heading{align-items:flex-start;flex-direction:column;padding:18px 16px}
+  .learning-card{grid-template-columns:48px minmax(0,1fr);gap:12px;padding:17px 16px}
+  .learning-card>.btn{grid-column:2;justify-self:start}
+}
 </style><link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-nav.css">
 <link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-footer.css">
 </head>
@@ -247,11 +290,33 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
     </section>
 
     <section class="page" id="page-learning" data-view="learning">
-      <div class="page-head"><div><div class="kicker">TRADETHESIS ACADEMY</div><h1>Your learning, at your pace.</h1><p>Return to a course, continue from your saved progress, or explore the published learning catalogue.</p></div><div class="page-head-actions"><a class="btn secondary" href="{% url 'academy:home' %}">Open course library ↗</a></div></div>
-      <article class="card learning-list">
-        {% for item in member_course_cards %}<div class="learning-card"><div class="course-mark">{{ item.course.title|slice:":2"|upper }}</div><div class="learning-copy"><h3>{{ item.course.title }}</h3><p>{{ item.course.summary|default:item.course.description|truncatechars:180 }}</p><div class="learning-meta">{{ item.completed_lessons }} of {{ item.total_lessons }} lessons complete · {{ item.progress_percent }}%</div><div class="progress-track" role="progressbar" aria-label="{{ item.course.title }} progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ item.progress_percent }}"><div class="progress-fill" style="width:{{ item.progress_percent }}%"></div></div><span class="course-access-state{% if not item.entitlement %} explore{% endif %}">{% if item.entitlement %}Access active{% else %}Explore published course{% endif %}</span></div>{% if item.resume_lesson %}<a class="btn{% if not item.entitlement %} secondary{% endif %}" href="{% url 'academy:lesson' item.course.slug item.resume_lesson.id %}">{% if item.entitlement %}Continue learning ↗{% else %}Open preview ↗{% endif %}</a>{% else %}<a class="btn secondary" href="{% url 'academy:course-detail' item.course.slug %}">{% if item.entitlement %}Review course ↗{% else %}View course ↗{% endif %}</a>{% endif %}</div>{% empty %}<div class="empty-state" style="margin:18px">There are no published courses to display yet. When a course is published or access is granted, it will appear here.</div>{% endfor %}
+      <div class="learning-page-head">
+        <div class="learning-page-brand"><div class="kicker">TRADETHESIS<br>ACADEMY</div></div>
+        <h1>Your learning, when you are ready.</h1>
+        <p>Course cards and saved lesson progress will appear here once your account has access.</p>
+      </div>
+      {% if member_course_cards %}
+      <article class="card learning-list" aria-label="Your courses and saved progress">
+        <div class="learning-list-heading">
+          <div><div class="kicker">YOUR LEARNING</div><h2>Pick up where you left off.</h2></div>
+          <a class="btn secondary" href="{% url 'academy:home' %}">Explore more courses ↗</a>
+        </div>
+        {% for item in member_course_cards %}<div class="learning-card"><div class="course-mark">{{ item.course.title|slice:":2"|upper }}</div><div class="learning-copy"><h3>{{ item.course.title }}</h3><p>{{ item.course.summary|default:item.course.description|truncatechars:180 }}</p><div class="learning-meta">{{ item.completed_lessons }} of {{ item.total_lessons }} lessons complete · {{ item.progress_percent }}%</div><div class="progress-track" role="progressbar" aria-label="{{ item.course.title }} progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ item.progress_percent }}"><div class="progress-fill" style="width:{{ item.progress_percent }}%"></div></div><span class="course-access-state{% if not item.entitlement %} explore{% endif %}">{% if item.entitlement %}Access active{% else %}Saved progress · no active entitlement{% endif %}</span></div>{% if item.resume_lesson %}<a class="btn{% if not item.entitlement %} secondary{% endif %}" href="{% url 'academy:lesson' item.course.slug item.resume_lesson.id %}">{% if item.entitlement %}Continue learning ↗{% else %}Open preview ↗{% endif %}</a>{% else %}<a class="btn secondary" href="{% url 'academy:course-detail' item.course.slug %}">{% if item.entitlement %}Review course ↗{% else %}View course ↗{% endif %}</a>{% endif %}</div>{% endfor %}
       </article>
       <div class="notice"><span aria-hidden="true">ⓘ</span><span><b>Progress is account-specific.</b> Completed lessons are calculated from your saved lesson records. A visible course is not the same thing as an active entitlement; each course page enforces its own access rules.</span></div>
+      {% else %}
+      <article class="learning-empty-state" aria-labelledby="learning-empty-title">
+        <div class="learning-empty-content">
+          <div class="learning-empty-icon" aria-hidden="true"><svg viewBox="0 0 28 28" role="presentation"><path d="M5 20 8 7h15l-3 13Z"></path></svg></div>
+          <h2 id="learning-empty-title">Nothing to resume just yet</h2>
+          <p>You have no active course access or saved learning progress in this preview. Explore the catalogue to find a suitable starting point; the dashboard should never invent a lesson or completion percentage.</p>
+          <div class="learning-empty-actions">
+            <a class="btn" href="{% url 'academy:home' %}">Explore the course catalogue ↗</a>
+            <button class="btn secondary" type="button" data-goto="overview">Back to overview</button>
+          </div>
+        </div>
+      </article>
+      {% endif %}
     </section>
 
     <section class="page" id="page-profile" data-view="profile">

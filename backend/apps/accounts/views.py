@@ -534,9 +534,17 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
         entitlements_by_course = {
             entitlement.course_id: entitlement for entitlement in active_entitlements
         }
+        saved_progress_course_ids = set(
+            LessonProgress.objects.filter(
+                user=user,
+                lesson__is_published=True,
+                lesson__module__is_published=True,
+                lesson__module__course__status=Course.Status.PUBLISHED,
+            ).values_list("lesson__module__course_id", flat=True).distinct()
+        )
         courses_by_id = {
             course.pk: course
-            for course in Course.objects.filter(status=Course.Status.PUBLISHED)
+            for course in Course.objects.filter(pk__in=saved_progress_course_ids)
         }
         for entitlement in active_entitlements:
             courses_by_id.setdefault(entitlement.course_id, entitlement.course)

@@ -13,7 +13,9 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.academy.models import Course, CourseModule, Lesson, LessonProgress
+from apps.academy.models import (
+    Course, CourseEntitlement, CourseModule, Lesson, LessonProgress,
+)
 from apps.subscriptions.models import (
     GeoPlanPrice, Plan, PlanFeature, PlanPrice, Product, Subscription,
 )
@@ -270,6 +272,28 @@ class MemberCourseDashboardDataTests(TestCase):
             is_preview=True,
             is_published=False,
         )
+
+    def test_course_without_access_or_saved_progress_uses_empty_state(self):
+        response = self.client.get(reverse("dashboard"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["member_course_cards"], [])
+        self.assertContains(response, "Nothing to resume just yet")
+        self.assertContains(response, "Explore the course catalogue")
+
+    def test_active_entitlement_shows_course_without_prior_progress(self):
+        CourseEntitlement.objects.create(
+            user=self.user,
+            course=self.course,
+            status=CourseEntitlement.Status.ACTIVE,
+        )
+        response = self.client.get(reverse("dashboard"))
+        self.assertEqual(response.status_code, 200)
+        cards = response.context["member_course_cards"]
+        self.assertEqual(len(cards), 1)
+        self.assertEqual(cards[0]["course"].pk, self.course.pk)
+        self.assertIsNotNone(cards[0]["entitlement"])
+        self.assertContains(response, "Access active")
+        self.assertNotContains(response, "Nothing to resume just yet")
 
     def test_dashboard_progress_and_resume_are_user_scoped_and_published_only(self):
         other_user = make_user("other_course_learner")
