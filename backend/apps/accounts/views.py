@@ -583,11 +583,22 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
             public_site_url = "https://tradethesis-public-staging.onrender.com/"
         public_site_url = public_site_url.rstrip("/")
 
+        # Distinguish a genuinely new member from one whose purchased access has ended.
+        member_has_purchase_history = (
+            _PaymentIntent.objects.filter(
+                user=user, status=_PaymentIntent.Status.SUCCESS
+            ).exists()
+            or CourseEntitlement.objects.filter(
+                user=user, source=CourseEntitlement.Source.PURCHASE
+            ).exists()
+        )
+
         context.update({
             "member_course_cards": member_course_cards,
             "member_owned_courses": [
                 card for card in member_course_cards if card["entitlement"] is not None
             ],
+            "member_has_purchase_history": member_has_purchase_history,
             "member_courses_total": len(member_course_cards),
             "member_lessons_completed": sum(
                 card["completed_lessons"] for card in member_course_cards

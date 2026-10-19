@@ -113,7 +113,7 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
     </nav>
     <section class="page active" id="page-overview" data-view="overview">
 
-      {% if not member_owned_courses and not subscription_cards %}
+      {% if not member_owned_courses and not subscription_cards and not member_has_purchase_history and not recent_payments and not ended_subscription %}
       <div class="no-purchase-overview">
         <div class="no-purchase-hero-grid">
           <article class="no-purchase-hero">

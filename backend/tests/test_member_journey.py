@@ -73,6 +73,27 @@ class MemberDashboardJourneyTests(TestCase):
             expires_at=None,
         )
 
+    def test_new_member_sees_no_purchase_welcome_state(self):
+        response = self.client.get(reverse("dashboard"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'class="no-purchase-overview"')
+        self.assertContains(response, "Your trading education starts")
+
+    def test_expired_purchased_entitlement_is_not_treated_as_never_purchased(self):
+        now = timezone.now()
+        CourseEntitlement.objects.create(
+            user=self.user,
+            course=self.course,
+            status=CourseEntitlement.Status.REVOKED,
+            starts_at=now - timedelta(days=4),
+            expires_at=now - timedelta(days=1),
+            revoked_at=now,
+        )
+        response = self.client.get(reverse("dashboard"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'class="no-purchase-overview"')
+        self.assertContains(response, "Your access portfolio")
+
     def test_dashboard_resumes_latest_accessible_in_progress_lesson(self):
         self.grant_permanent_access()
         now = timezone.now()
