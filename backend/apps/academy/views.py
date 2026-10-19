@@ -170,11 +170,17 @@ def lesson_detail(request, course_slug, lesson_id):
         if rows and module_row.is_published:
             outline_modules.append({"module": module_row, "lessons": rows})
     notebook = lesson.content_json.get("notebook", {}) if isinstance(lesson.content_json, dict) else {}
+    related_ids = lesson.content_json.get("related_course_ids", []) if isinstance(lesson.content_json, dict) else []
+    related_ids = [value for value in related_ids if isinstance(value, str) and len(value) == 36 and value.count("-") == 4]
+    related_courses = Course.objects.filter(
+        pk__in=related_ids, status=Course.Status.PUBLISHED,
+    ).exclude(pk=course.pk).order_by("position", "title")
     return render(request, "academy/lesson.html", {
         "course": course, "lesson": lesson, "module": lesson.module,
         "entitlement": entitlement, "progress": progress,
         "lesson_sections": build_lesson_sections(lesson.content_markdown, asset_urls),
         "notebook": notebook, "outline_modules": outline_modules,
+        "related_courses": related_courses,
     })
 
 
