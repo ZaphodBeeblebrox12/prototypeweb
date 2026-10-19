@@ -63,6 +63,37 @@ class PlanSectionRenderTests(TestCase):
         # (root include, no namespace -> bare name)
         return self.client.get(reverse("dashboard"))
 
+    def test_successful_payment_shows_account_owned_invoice_and_receipt_link(self):
+        from apps.payments.models import Invoice, PaymentIntent
+
+        intent = PaymentIntent.objects.create(
+            user=self.user,
+            plan=self.basic,
+            plan_price=PlanPrice.objects.get(plan=self.basic),
+            amount=233,
+            currency="USD",
+            provider=PaymentIntent.Provider.STRIPE,
+            status=PaymentIntent.Status.SUCCESS,
+            country="US",
+        )
+        Invoice.objects.create(
+            payment_intent=intent,
+            invoice_number="TT-TEST-0001",
+            seller_name="TradeThesis",
+            description="Basic plan",
+            subtotal_cents=233,
+            total_cents=233,
+            currency="USD",
+        )
+
+        response = self._get()
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            f'href="{reverse("payment-receipt", args=[intent.pk])}"',
+        )
+        self.assertContains(response, "Invoice TT-TEST-0001 · view receipt")
+
     # ---------- free user ----------
     def test_free_user_sees_all_purchasable_plans(self):
         r = self._get()

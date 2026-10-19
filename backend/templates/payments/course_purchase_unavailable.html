@@ -1,4 +1,10 @@
 {% extends "base.html" %}
+{% block page_context %}
+<div class="page-context-status page-context-status--standalone" aria-label="Account status">
+{% if user.is_banned %}<span class="badge bg-danger">BANNED</span>{% endif %}
+{% if user.telegram_verified %}<span class="badge bg-success"><i class="bi bi-telegram"></i> Telegram connected</span>{% endif %}
+</div>
+{% endblock %}
 {% block title %}Course purchase unavailable | TradeThesis{% endblock %}
 {% block page_title %}Course purchase unavailable{% endblock %}
 {% block content %}

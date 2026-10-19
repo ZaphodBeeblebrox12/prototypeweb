@@ -1,4 +1,10 @@
 {% extends "base.html" %}
+{% block page_context %}
+<div class="page-context-status page-context-status--standalone" aria-label="Account status">
+{% if user.is_banned %}<span class="badge bg-danger">BANNED</span>{% endif %}
+{% if user.telegram_verified %}<span class="badge bg-success"><i class="bi bi-telegram"></i> Telegram connected</span>{% endif %}
+</div>
+{% endblock %}
 {% block content %}
 <div class="container py-4" style="max-width:920px">
   <p class="text-uppercase text-muted small mb-2"><a href="{% url 'academy:home' %}">Academy</a> / Course</p>

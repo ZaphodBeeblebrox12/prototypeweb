@@ -359,7 +359,7 @@ class DashboardView(View):
         from apps.payments.models import PaymentIntent as _PaymentIntent
         recent_payments = []
         for _p in (_PaymentIntent.objects.filter(user=user)
-                   .select_related("plan")
+                   .select_related("plan", "invoice")
                    .prefetch_related("refunds")
                    .order_by("-created_at")[:10]):
             if _p.is_fully_refunded:
@@ -374,6 +374,7 @@ class DashboardView(View):
                 _chargeback_label = "Disputed"
             else:
                 _chargeback_label = ""
+            _invoice = getattr(_p, "invoice", None)
             recent_payments.append({
                 "pk": _p.pk,
                 "date": _p.created_at,
@@ -387,6 +388,7 @@ class DashboardView(View):
                     if _p.coupon_discount_cents else ""),
                 "refund_label": _refund_label,
                 "chargeback_label": _chargeback_label,
+                "invoice_number": _invoice.invoice_number if _invoice else "",
             })
 
         context = {

@@ -41,6 +41,7 @@
             .page-context { gap: 12px; }
         }
     </style>
+    <link rel="stylesheet" href="{% static 'css/tradethesis-design-system.css' %}">
     {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -48,7 +49,8 @@
     {% include "partials/sitewide_nav.html" %}
     <main class="main-content" id="mainContent" tabindex="-1">
         {% if user.is_authenticated %}
-        <header class="page-context{% if request.resolver_match.url_name == 'staff_admin_desk' %} page-context--site-grid{% endif %}">
+        {% block page_context %}
+<header class="page-context{% if request.resolver_match.url_name == 'staff_admin_desk' %} page-context--site-grid{% endif %}">
             <div>
                 <h1>{% block page_title %}Dashboard{% endblock %}</h1>
                 <p>Welcome back, {{ user.first_name|default:user.username }}</p>
@@ -58,6 +60,7 @@
                 {% if user.telegram_verified %}<span class="badge bg-success"><i class="bi bi-telegram"></i> Telegram connected</span>{% endif %}
             </div>
         </header>
+{% endblock %}
         {% endif %}
         {% if messages %}
         <div class="messages">
