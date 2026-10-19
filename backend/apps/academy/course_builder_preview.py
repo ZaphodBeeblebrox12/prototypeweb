@@ -43,6 +43,7 @@ def course_builder_preview(request):
         "script-src 'self' 'unsafe-inline'; "
         "style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: blob:; "
+        "media-src 'self' https: http: blob:; "
         "object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
     )
     return response
