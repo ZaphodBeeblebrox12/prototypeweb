@@ -81,7 +81,7 @@ jobs:
           for name in pages:
               html = Path(name).read_text(encoding="utf-8")
               links = re.findall(
-                  r'<a\\b[^>]*>\\s*Open member dashboard ↗\\s*</a>',
+                  r'<a\b[^>]*>\s*Open member dashboard ↗\s*</a>',
                   html,
                   flags=re.IGNORECASE,
               )
