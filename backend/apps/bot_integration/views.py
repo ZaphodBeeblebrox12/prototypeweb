@@ -19,6 +19,7 @@ from .models import (
     ChannelMesh, ChannelMeshDestination,
 )
 from .services.telegram import TelegramBotService
+from .services.telegram_verification import TelegramVerificationBotService
 from .services.discord import DiscordBotService
 from .services.profile_sync import sync_telegram_profile_for_user
 from .services.channel_sync import sync_channel_memberships_for_user
@@ -28,31 +29,23 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def start_telegram_connect(request):
-    """Generate a deep link and redirect immediately to Telegram."""
-    config = BotConfig.get_config()
-    # Prefer the admin-managed BotConfig, but honour the supported environment
-    # setting when the database field has not been populated on this deployment.
+    """Generate a deep link to the dedicated Telegram verification bot."""
     bot_username = (
-        config.telegram_bot_username
-        or getattr(settings, "TELEGRAM_BOT_USERNAME", "")
-        or ""
+        getattr(settings, "TELEGRAM_VERIFICATION_BOT_USERNAME", "") or ""
     ).strip().lstrip("@")
     if not bot_username:
         messages.error(
             request,
-            "Telegram connection is not configured yet. Please contact support.",
+            "Telegram verification is not configured yet. Please contact support.",
         )
         return redirect("dashboard")
 
-    # Delete old unused tokens for this user
+    # Delete old unused tokens for this user.
     TelegramVerificationToken.objects.filter(user=request.user).delete()
 
     token = TelegramVerificationToken.create_token(request.user)
     deep_link = f"https://t.me/{bot_username}?start=verify_{token.token}"
-    
-    # Redirect directly to Telegram (no intermediate page)
     return redirect(deep_link)
-
 
 @login_required
 @require_POST
@@ -171,7 +164,7 @@ def unlink_discord(request):
 def telegram_webhook(request):
     """Handle Telegram bot updates (deep link verification).
 
-    Updates arrive via the signal bot's polling loop, which forwards
+    Updates arrive via the dedicated verification bot's polling loop, which forwards
     /start verify_<token> updates here over HTTP (Option 1 architecture —
     Django runs on localhost and cannot receive Telegram webhooks directly).
     Requests must carry the Provision Contract v1 HMAC signature; native
@@ -186,7 +179,7 @@ def telegram_webhook(request):
     except json.JSONDecodeError:
         return HttpResponse(status=400)
 
-    logger.info(f"Telegram webhook received: {data}")
+    logger.info("Telegram webhook received update_id=%s", data.get("update_id"))
 
     if 'message' not in data or 'text' not in data['message']:
         return JsonResponse({"ok": True})
@@ -201,7 +194,7 @@ def telegram_webhook(request):
 
     parts = text.split()
     if len(parts) != 2 or not parts[1].startswith('verify_'):
-        TelegramBotService.send_message(
+        TelegramVerificationBotService.send_message(
             chat_id,
             "\U0001f44b Hi! To link your account: open the website, go to"
             " Dashboard and press Connect Telegram. Already paid? Connecting"
@@ -213,7 +206,7 @@ def telegram_webhook(request):
     try:
         token = TelegramVerificationToken.objects.select_related('user').get(token=token_str)
         if not token.is_valid():
-            TelegramBotService.send_message(chat_id, "❌ Verification link expired. Please request a new one on the website.")
+            TelegramVerificationBotService.send_message(chat_id, "❌ Verification link expired. Please request a new one on the website.")
             token.delete()
             return JsonResponse({"ok": False})
 
@@ -247,12 +240,12 @@ def telegram_webhook(request):
             _tx.on_commit(lambda: sync_telegram_profile_for_user(user.id))
             _tx.on_commit(lambda: sync_channel_memberships_for_user(user.id))
 
-        TelegramBotService.send_message(chat_id, "✅ Your account is now linked! We'll sync your subscription access shortly.")
+        TelegramVerificationBotService.send_message(chat_id, "✅ Your account is now linked! We'll sync your subscription access shortly.")
 
         return JsonResponse({"ok": True})
 
     except TelegramVerificationToken.DoesNotExist:
-        TelegramBotService.send_message(chat_id, "❌ Invalid verification code.")
+        TelegramVerificationBotService.send_message(chat_id, "❌ Invalid verification code.")
         return JsonResponse({"ok": False})
 
 
