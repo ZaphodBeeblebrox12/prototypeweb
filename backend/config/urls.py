@@ -10,7 +10,7 @@ from django.views.decorators.cache import never_cache
 # Use allauth's views for login and signup
 from allauth.account.views import LoginView, SignupView
 from apps.accounts import views as accounts_views
-from apps.accounts.member_access import member_access_login
+from apps.accounts.member_access import member_access_login, member_entry
 from apps.accounts.telegram_views import TelegramCallbackView
 from apps.admin_dashboard import staff_admin_desk
 from apps.admin_desk_views import (
@@ -42,6 +42,7 @@ urlpatterns = [
     path('', include('apps.public_views.urls')),
 
     # The public member-access room posts here and lands directly on the dashboard.
+    path("accounts/member-entry/", member_entry, name="member_entry"),
     path("accounts/login/from-member-access/", member_access_login, name="member_access_login"),
 
     # Custom auth views using your templates. Never cache auth pages: stale
