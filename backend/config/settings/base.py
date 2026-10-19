@@ -187,6 +187,10 @@ REST_FRAMEWORK = {
 TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN", default="")
 TELEGRAM_BOT_USERNAME = env("TELEGRAM_BOT_USERNAME", default="")
 
+# Dedicated account-linking bot; keep the channel/mesh bot config separate.
+TELEGRAM_VERIFICATION_BOT_TOKEN = env("TELEGRAM_VERIFICATION_BOT_TOKEN", default="")
+TELEGRAM_VERIFICATION_BOT_USERNAME = env("TELEGRAM_VERIFICATION_BOT_USERNAME", default="")
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
