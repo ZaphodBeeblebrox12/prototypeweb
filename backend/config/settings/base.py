@@ -26,6 +26,17 @@ DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 
+# The public website is static while Django owns the authenticated session.
+# Keep the exact origin used to render the member-access form allowlisted.
+TRADETHESIS_PUBLIC_SITE_URL = env(
+    "TRADETHESIS_PUBLIC_SITE_URL",
+    default="https://tradethesis-public-staging.onrender.com",
+).rstrip("/")
+TRADETHESIS_MEMBER_LOGIN_ORIGINS = env.list(
+    "TRADETHESIS_MEMBER_LOGIN_ORIGINS",
+    default=[TRADETHESIS_PUBLIC_SITE_URL],
+)
+
 # Application definition
 DJANGO_APPS = [
     "apps.admin_config.DashboardAdminConfig",
