@@ -1,17 +1,20 @@
 {% extends "emails/base_email.html" %}
-{% block preheader %}Two-minute setup, or we help personally{% endblock %}
+{% block title %}Need a hand getting set up? | TradeThesis{% endblock %}
+{% block preheader %}Connect Telegram or contact TradeThesis support for help getting set up.{% endblock %}
 {% block header_tagline %}Getting started{% endblock %}
 {% block content %}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-  <tr><td class="px" style="padding:34px 32px 6px 32px; border-top:4px solid #28533F; border-radius:8px 8px 0 0;">
-    <div style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:20px; font-weight:700; color:#20352A;">Need a hand getting set up?</div>
-    <div style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:13px; color:#718075; padding-top:3px;">Two-minute setup, or we help personally</div>
-  </td></tr>
-  <tr><td class="px" style="padding:18px 32px 8px 32px;">
-    <p style="margin:0; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:14px; line-height:22px; color:#536259;">Hi {{ username }}, stuck anywhere? Connect Telegram and choose a plan from your dashboard - or reply here and a human will help.</p>
-  </td></tr>
-  <tr><td class="px" style="padding:16px 32px 34px 32px;">
-    {% include "emails/partials/button.html" with url=connect_url label="Connect Telegram" %}
-  </td></tr>
+  <tr>
+    <td class="px" style="padding:34px 32px 8px;border-top:4px solid #28533F;border-radius:8px 8px 0 0;">
+      <h1 style="margin:0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:22px;line-height:29px;color:#20352A;">Need a hand getting set up?</h1>
+      <p style="margin:10px 0 0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#536259;">Hi {{ username }}, if you have not finished setting up TradeThesis, you can connect Telegram from your dashboard. If anything is unclear, our <a href="{{ support_url }}" style="color:#28533F;text-decoration:underline;">support team</a> can help.</p>
+    </td>
+  </tr>
+  <tr>
+    <td class="px" style="padding:16px 32px 28px;">
+      {% include "emails/partials/button.html" with url=connect_url label="Connect Telegram" %}
+      <p style="margin:12px 0 0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:19px;color:#718075;">You can also <a href="{{ dashboard_url }}" style="color:#28533F;text-decoration:underline;">open your dashboard</a> to review your account and plan.</p>
+    </td>
+  </tr>
 </table>
 {% endblock %}

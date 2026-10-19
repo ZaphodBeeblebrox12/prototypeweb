@@ -6,7 +6,7 @@ tests are the guard that the branded emails actually go out as HTML.
 """
 from django.core import mail
 from django.template.loader import render_to_string
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from apps.notifications.services import NotificationService
 
@@ -65,6 +65,27 @@ class BillingEmailTemplateTests(TestCase):
         self.assertTrue(any("Payment successful" in alt[0]
                             for alt in msg.alternatives),
                         "HTML alternative missing — template silently dropped")
+
+    @override_settings(
+        EMAIL_LOGO_URL="https://assets.example.test/tradethesis-horizontal.png",
+        SITE_BASE_URL="https://academy.example.test",
+    )
+    def test_notification_service_supplies_brand_logo_and_common_links(self):
+        context = dict(BASE_CTX)
+        for key in ("site_name", "logo_url", "dashboard_url", "support_url"):
+            context.pop(key, None)
+
+        NotificationService.send_email(
+            "a@example.com", "payments/email/payment_success",
+            "Receipt", context)
+
+        self.assertEqual(len(mail.outbox), 1)
+        html = next(alt[0] for alt in mail.outbox[0].alternatives)
+        self.assertIn(
+            "https://assets.example.test/tradethesis-horizontal.png", html)
+        self.assertIn("https://academy.example.test/dashboard/", html)
+        self.assertIn("https://academy.example.test/support/", html)
+        self.assertIn("TradeThesis", html)
 
     def test_notification_service_html_for_chargeback(self):
         NotificationService.send_email(

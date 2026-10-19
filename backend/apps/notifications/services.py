@@ -64,12 +64,18 @@ class NotificationService:
         try:
             site = Site.objects.get_current()
             context['site'] = site
-            context['site_name'] = site.name
         except Site.DoesNotExist:
-            context['site_name'] = 'TradeThesis'
+            pass
 
-        context.setdefault("brand_name", "TradeThesis")
+        # Keep customer-facing branding stable even if the Django Site row is legacy.
+        context["site_name"] = "TradeThesis"
         context.setdefault("logo_url", getattr(settings, "EMAIL_LOGO_URL", ""))
+
+        # Several transactional templates share these links. Explicit caller values win.
+        site_base_url = str(getattr(settings, "SITE_BASE_URL", "") or "").rstrip("/")
+        if site_base_url:
+            context.setdefault("dashboard_url", f"{site_base_url}/dashboard/")
+            context.setdefault("support_url", f"{site_base_url}/support/")
 
         # Render templates
         try:
