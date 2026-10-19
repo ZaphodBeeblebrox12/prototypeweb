@@ -3,6 +3,7 @@ import base64
 from unittest.mock import Mock, patch
 
 from django.core.files.base import ContentFile
+from django.core.files.storage import FileSystemStorage
 from django.test import SimpleTestCase, override_settings
 
 from apps.academy.storage import PrivateCourseAssetStorage
@@ -58,9 +59,8 @@ class PrivateCourseAssetStorageTests(SimpleTestCase):
 
     def test_open_falls_back_to_local_storage_when_github_asset_is_absent(self):
         with patch.object(self.storage, "_metadata", return_value=None), patch.object(
-            self.storage, "_open", wraps=super(PrivateCourseAssetStorage, self.storage)._open
+            FileSystemStorage, "_open", side_effect=FileNotFoundError
         ) as local_open:
-            # Local fallback is delegated to FileSystemStorage for legacy files.
             with self.assertRaises(FileNotFoundError):
                 self.storage._open("missing.png")
-            local_open.assert_called_once_with("missing.png", "rb")
+            local_open.assert_called_once_with(self.storage, "missing.png", "rb")
