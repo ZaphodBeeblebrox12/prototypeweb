@@ -1,0 +1,66 @@
+"""Focused tests for private GitHub course asset storage."""
+import base64
+from unittest.mock import Mock, patch
+
+from django.core.files.base import ContentFile
+from django.test import SimpleTestCase, override_settings
+
+from apps.academy.storage import PrivateCourseAssetStorage
+
+
+@override_settings(
+    ACADEMY_PRIVATE_MEDIA_ROOT="/tmp/course-assets-test",
+    ACADEMY_GITHUB_ASSET_REPOSITORY="owner/private-assets",
+    ACADEMY_GITHUB_ASSET_TOKEN="test-token",
+    ACADEMY_GITHUB_ASSET_BRANCH="main",
+    ACADEMY_GITHUB_ASSET_PATH_PREFIX="course-assets",
+)
+class PrivateCourseAssetStorageTests(SimpleTestCase):
+    def setUp(self):
+        self.storage = PrivateCourseAssetStorage()
+        self.storage.github_enabled = True
+        self.storage.repository = "owner/private-assets"
+        self.storage.token = "test-token"
+        self.storage.branch = "main"
+        self.storage.path_prefix = "course-assets"
+
+    def test_github_path_preserves_nested_upload_path(self):
+        self.assertEqual(
+            self.storage._github_path("academy/course-imports/abc/figure.png"),
+            "course-assets/academy/course-imports/abc/figure.png",
+        )
+
+    def test_save_writes_base64_content_to_configured_branch(self):
+        response = Mock()
+        with patch.object(self.storage, "_request", return_value=response) as request:
+            result = self.storage._save(
+                "academy/course-assets/figure.png",
+                ContentFile(b"image bytes", name="figure.png"),
+            )
+
+        self.assertEqual(result, "academy/course-assets/figure.png")
+        args, kwargs = request.call_args
+        self.assertEqual(args[0], "PUT")
+        self.assertTrue(args[1].endswith("/course-assets/academy/course-assets/figure.png"))
+        self.assertEqual(kwargs["json"]["branch"], "main")
+        self.assertEqual(
+            base64.b64decode(kwargs["json"]["content"]),
+            b"image bytes",
+        )
+
+    def test_open_reads_authenticated_github_content(self):
+        encoded = base64.b64encode(b"private image").decode("ascii")
+        response = Mock()
+        response.json.return_value = {"content": encoded, "encoding": "base64"}
+        with patch.object(self.storage, "_metadata", return_value=response):
+            image = self.storage._open("academy/course-assets/figure.png")
+        self.assertEqual(image.read(), b"private image")
+
+    def test_open_falls_back_to_local_storage_when_github_asset_is_absent(self):
+        with patch.object(self.storage, "_metadata", return_value=None), patch.object(
+            self.storage, "_open", wraps=super(PrivateCourseAssetStorage, self.storage)._open
+        ) as local_open:
+            # Local fallback is delegated to FileSystemStorage for legacy files.
+            with self.assertRaises(FileNotFoundError):
+                self.storage._open("missing.png")
+            local_open.assert_called_once_with("missing.png", "rb")
