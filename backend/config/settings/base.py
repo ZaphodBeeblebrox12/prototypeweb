@@ -191,6 +191,10 @@ TELEGRAM_BOT_USERNAME = env("TELEGRAM_BOT_USERNAME", default="")
 TELEGRAM_VERIFICATION_BOT_TOKEN = env("TELEGRAM_VERIFICATION_BOT_TOKEN", default="")
 TELEGRAM_VERIFICATION_BOT_USERNAME = env("TELEGRAM_VERIFICATION_BOT_USERNAME", default="")
 
+# YouTube live status is checked server-side; keep the API key out of browser code.
+YOUTUBE_API_KEY = env("YOUTUBE_API_KEY", default="")
+YOUTUBE_CHANNEL_ID = env("YOUTUBE_CHANNEL_ID", default="")
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

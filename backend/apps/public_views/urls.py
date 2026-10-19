@@ -4,6 +4,8 @@ import os
 from django.http import HttpResponseRedirect
 from django.urls import path
 
+from .youtube_live import youtube_live_status
+
 
 PUBLIC_SITE_URL_DEFAULT = "https://tradethesis-public-staging.onrender.com/"
 
@@ -21,5 +23,6 @@ def public_front_door(request):
 
 
 urlpatterns = [
+    path("api/youtube/live-status/", youtube_live_status, name="youtube_live_status"),
     path("", public_front_door, name="landing"),
 ]

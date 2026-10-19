@@ -10,6 +10,19 @@
       <a href="{{ public_site_url }}/community.html">Community</a>
       <a href="{{ public_site_url }}/index.html#desk">The Desk</a>
     </nav>
+    <div class="tt-live-control" data-youtube-live-control data-youtube-live-status-url="/api/youtube/live-status/" hidden>
+      <button class="tt-live-pill" type="button" aria-label="TradeThesis is live on YouTube" aria-expanded="false" aria-controls="ttYoutubeLivePopover" data-youtube-live-toggle>
+        <span class="tt-live-dot" aria-hidden="true"></span>
+        <span class="tt-live-pill-label">LIVE</span>
+        <span class="tt-live-pill-context">ON YOUTUBE</span>
+      </button>
+      <div class="tt-live-popover" id="ttYoutubeLivePopover" data-youtube-live-popover role="region" aria-label="TradeThesis YouTube live stream" hidden>
+        <div class="tt-live-popover-eyebrow"><span class="tt-live-dot" aria-hidden="true"></span> LIVE NOW</div>
+        <p class="tt-live-popover-title">TradeThesis is live on YouTube.</p>
+        <p class="tt-live-popover-copy">Join the session while it’s in progress.</p>
+        <a class="tt-live-watch-link" href="https://www.youtube.com/" data-youtube-live-watch target="_blank" rel="noopener noreferrer">Watch on YouTube <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
     {% if user.is_authenticated %}
       <a class="button member-area-link" href="{% url 'dashboard' %}">Open member dashboard ↗</a>
     {% elif request.path == '/accounts/login/' %}
