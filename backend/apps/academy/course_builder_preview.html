@@ -295,6 +295,22 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   const basePreviewFields = previewFields;
   previewFields = function(c) { const html=basePreviewFields(c); const l=currentLesson(); if(!l)return html; const images=Array.isArray(l.images)?l.images:(l.image?[l.image]:[]); if(!images.length)return html; const figs=`<div>${images.map(im=>`<figure style="margin:24px 0"><img src="${im.data}" alt="${esc(im.alt||'')}" style="display:block;max-width:100%;max-height:460px;margin:auto;border-radius:8px"><figcaption style="font-size:11px;color:var(--muted);line-height:1.6;margin-top:8px;text-align:center">${esc(im.caption||'')}</figcaption></figure>`).join('')}</div>`; return html.replace('</article>',`${figs}</article>`); };
   renderMarkdown = function(src) { const inline=s=>esc(s).replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/~~(.+?)~~/g,'<del>$1</del>').replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'); return String(src||'').split(/\n{2,}/).map(block=>{const t=block.trim();if(!t)return '';const h=t.match(/^(#{1,6})\s+(.+)$/);if(h){const n=h[1].length;return `<h${n}>${inline(h[2])}</h${n}>`;}if(/^---+$/.test(t))return '<hr>';if(/^>\s?/m.test(t))return `<blockquote>${t.split('\n').map(x=>inline(x.replace(/^>\s?/,''))).join('<br>')}</blockquote>`;if(/^[-*+]\s/m.test(t))return `<ul>${t.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>`<li>${inline(x.replace(/^[-*+]\s+/,''))}</li>`).join('')}</ul>`;if(/^\d+[.)]\s/m.test(t))return `<ol>${t.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>`<li>${inline(x.replace(/^\d+[.)]\s+/,''))}</li>`).join('')}</ol>`;return `<p>${inline(t).replace(/\n/g,'<br>')}</p>`;}).join(''); };
+  const baseMarkdownRenderer = renderMarkdown;
+  renderMarkdown = function(src) {
+    const lesson = currentLesson();
+    const images = Array.isArray(lesson?.images) ? lesson.images : (lesson?.image ? [lesson.image] : []);
+    const figures = [];
+    const prepared = String(src || '').replace(/!\[([^\]]*)\]\(asset:\/\/([^)]+)\)/g, function(match, alt, id) {
+      const image = images.find(function(item) { return item.id === id || item.assetUuid === id; });
+      if (!image) return '';
+      const token = 'TTFIGURETOKEN' + figures.length + 'END';
+      figures.push('<figure style="margin:22px 0"><img data-figure-zoom src="' + image.data + '" alt="' + esc(image.alt || alt || '') + '" style="display:block;max-width:100%;max-height:460px;margin:auto;border-radius:8px;cursor:zoom-in"><figcaption style="font-size:11px;color:var(--muted);line-height:1.6;margin-top:8px;text-align:center">' + esc(image.caption || '') + '</figcaption></figure>');
+      return '\n\n' + token + '\n\n';
+    });
+    let html = baseMarkdownRenderer(prepared);
+    figures.forEach(function(figure, index) { html = html.replace('<p>TTFIGURETOKEN' + index + 'END</p>', figure); });
+    return html;
+  };
   const baseHandleAction = handleAction;
   handleAction = function(action,el) { const l=currentLesson(); if(l&&action==='remove-figure'){if(!Array.isArray(l.images))l.images=l.image?[l.image]:[];l.images=l.images.filter(im=>im.id!==el.dataset.id);l.image=l.images[0]||null;persist(false);renderEditor();return;} if(l&&action==='insert-figure'){if(!Array.isArray(l.images))l.images=l.image?[l.image]:[];const im=l.images.find(x=>x.id===el.dataset.id);if(im){l.content+=`\n\n![${(im.alt||'Course figure').replace(/\]/g,'')}](${`asset://${im.id}`})\n`;state.tab='lesson';persist(false);renderEditor();toast('Figure reference added to Markdown.');}return;} baseHandleAction(action,el); };
   document.addEventListener('input',event=>{const el=event.target;if(!el.matches('[data-image-item][data-field]'))return;const l=currentLesson();if(!l)return;if(!Array.isArray(l.images))l.images=l.image?[l.image]:[];const im=l.images.find(x=>x.id===el.dataset.imageItem);if(im){im[el.dataset.field]=el.value;l.image=l.images[0]||null;schedulePersist();}});
