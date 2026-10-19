@@ -19,6 +19,7 @@ from .models import (
     CourseModule,
     CourseOffer,
     Lesson,
+    LessonInstructorMaterial,
     LessonProgress,
 )
 from .permissions import is_course_content_admin
@@ -170,6 +171,9 @@ def lesson_detail(request, course_slug, lesson_id):
         if rows and module_row.is_published:
             outline_modules.append({"module": module_row, "lessons": rows})
     notebook = lesson.content_json.get("notebook", {}) if isinstance(lesson.content_json, dict) else {}
+    practice_questions = lesson.content_json.get("questions", []) if isinstance(lesson.content_json, dict) else []
+    if not isinstance(practice_questions, list):
+        practice_questions = []
     related_ids = lesson.content_json.get("related_course_ids", []) if isinstance(lesson.content_json, dict) else []
     related_ids = [value for value in related_ids if isinstance(value, str) and len(value) == 36 and value.count("-") == 4]
     related_courses = Course.objects.filter(
@@ -180,8 +184,58 @@ def lesson_detail(request, course_slug, lesson_id):
         "entitlement": entitlement, "progress": progress,
         "lesson_sections": build_lesson_sections(lesson.content_markdown, asset_urls),
         "notebook": notebook, "outline_modules": outline_modules,
-        "related_courses": related_courses,
+        "related_courses": related_courses, "practice_questions": practice_questions,
     })
+
+
+@login_required
+@require_POST
+def lesson_quiz_submit(request, lesson_id):
+    """Grade practice questions server-side; answer keys never enter the learner page."""
+    lesson = get_object_or_404(
+        Lesson.objects.select_related("module__course"),
+        pk=lesson_id, is_published=True, module__is_published=True,
+    )
+    if not can_access_lesson(request.user, lesson):
+        raise PermissionDenied("You do not have access to this lesson yet.")
+    try:
+        payload = json.loads(request.body.decode("utf-8") or "{}")
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({"detail": "The request body must be valid JSON."}, status=400)
+    answers = payload.get("answers", {}) if isinstance(payload, dict) else {}
+    if not isinstance(answers, dict):
+        return JsonResponse({"detail": "Answers must be an object keyed by question ID."}, status=400)
+    material = LessonInstructorMaterial.objects.filter(lesson=lesson).first()
+    questions = material.rubric_json.get("questions", []) if material and isinstance(material.rubric_json, dict) else []
+    if not questions:
+        return JsonResponse({"detail": "Practice questions are not configured for this lesson."}, status=404)
+
+    results = []
+    score = 0
+    for index, question in enumerate(questions):
+        if not isinstance(question, dict):
+            continue
+        question_id = str(question.get("id") or f"question-{index + 1}")
+        options = question.get("options", [])
+        try:
+            selected = int(answers.get(question_id, -1))
+            correct_index = int(question.get("correctIndex", -2))
+        except (TypeError, ValueError):
+            selected, correct_index = -1, -2
+        correct = 0 <= selected < len(options) and selected == correct_index
+        if correct:
+            score += 1
+        results.append({
+            "id": question_id,
+            "correct": correct,
+            "explanation": str(question.get("explanation", ""))[:3000],
+        })
+    update_lesson_progress(
+        user=request.user,
+        lesson=lesson,
+        response_json={"quiz_answers": answers, "quiz_score": score, "quiz_total": len(results)},
+    )
+    return JsonResponse({"ok": True, "score": score, "total": len(results), "results": results})
 
 
 @login_required
