@@ -12,8 +12,7 @@ from django.dispatch import receiver
 
 from apps.subscriptions.models import Subscription
 from .models import (
-    ChannelMesh, ChannelMeshDestination, PlanChannelMapping,
-    PlanMeshMapping, TelegramAccount, UserMeshAssignment,
+    PlanChannelMapping, TelegramAccount,
 )
 from apps.jobs.enqueue import enqueue_reconcile
 
@@ -111,71 +110,6 @@ def provision_after_mapping_change(sender, instance, **kwargs):
 def provision_after_mapping_delete(sender, instance, **kwargs):
     _queue_plan_mapping_users((instance.plan_id,))
 
-
-
-
-@receiver(pre_save, sender=PlanMeshMapping)
-def _stash_old_mesh_mapping_plan(sender, instance, **kwargs):
-    instance._old_plan_id = None
-    if instance.pk:
-        instance._old_plan_id = PlanMeshMapping.objects.filter(
-            pk=instance.pk
-        ).values_list("plan_id", flat=True).first()
-
-
-@receiver(post_save, sender=PlanMeshMapping)
-def provision_after_mesh_mapping_change(sender, instance, **kwargs):
-    _queue_plan_mapping_users((
-        getattr(instance, "_old_plan_id", None),
-        instance.plan_id,
-    ))
-
-
-@receiver(post_delete, sender=PlanMeshMapping)
-def provision_after_mesh_mapping_delete(sender, instance, **kwargs):
-    _queue_plan_mapping_users((instance.plan_id,))
-
-
-def _queue_mesh_users(mesh_ids):
-    mesh_ids = {mesh_id for mesh_id in mesh_ids if mesh_id}
-    if not mesh_ids:
-        return
-    plan_ids = PlanMeshMapping.objects.filter(
-        mesh_id__in=mesh_ids
-    ).values_list("plan_id", flat=True)
-    user_ids = set(
-        Subscription.objects.filter(
-            plan_id__in=plan_ids,
-            status=Subscription.Status.ACTIVE,
-            is_active=True,
-        ).values_list("user_id", flat=True).distinct()
-    )
-    user_ids.update(
-        UserMeshAssignment.objects.filter(
-            mesh_id__in=mesh_ids
-        ).values_list("user_id", flat=True).distinct()
-    )
-    for user_id in user_ids:
-        _queue_reconcile_after_commit(
-            user_id, reason="channel_mesh_configuration_changed"
-        )
-
-
-@receiver(post_save, sender=ChannelMesh)
-def provision_after_mesh_configuration_change(sender, instance, **kwargs):
-    _queue_mesh_users((instance.pk,))
-
-
-@receiver(post_save, sender=ChannelMeshDestination)
-def provision_after_mesh_destination_change(sender, instance, **kwargs):
-    _queue_mesh_users((instance.mesh_id,))
-
-
-@receiver(post_save, sender=UserMeshAssignment)
-def provision_after_mesh_assignment_change(sender, instance, **kwargs):
-    _queue_reconcile_after_commit(
-        instance.user_id, reason="channel_mesh_assignment_changed"
-    )
 
 # ── Stage 2: transactional/system messages on the same durable edges ──────
 # Reuses the _old_status stash above. TRANSACTIONAL, not marketing: no
