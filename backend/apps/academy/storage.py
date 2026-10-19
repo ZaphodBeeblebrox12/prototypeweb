@@ -18,6 +18,7 @@ import requests
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.utils import validate_file_name
+from django.core.files.utils import validate_file_name
 from django.core.files.storage import FileSystemStorage
 from django.core.exceptions import SuspiciousFileOperation
 from django.utils.deconstruct import deconstructible
@@ -50,9 +51,10 @@ class PrivateCourseAssetStorage(FileSystemStorage):
         self.api_root = "https://api.github.com"
 
     def _github_path(self, name):
-        clean_name = self.get_valid_name(force_str(name)).replace("\\", "/").lstrip("/")
+        clean_name = force_str(name).replace("\\", "/").lstrip("/")
         if not clean_name or any(part in {".", ".."} for part in clean_name.split("/")):
             raise SuspiciousFileOperation("Invalid course asset path.")
+        validate_file_name(clean_name, allow_relative_path=True)
         return "/".join(part for part in (self.path_prefix, clean_name) if part)
 
     def _headers(self):
