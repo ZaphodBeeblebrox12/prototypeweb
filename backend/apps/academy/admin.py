@@ -1,7 +1,9 @@
 import logging
 import mimetypes
 import uuid
+from pathlib import Path
 
+from django.conf import settings
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -447,24 +449,54 @@ class CourseImportAdmin(admin.ModelAdmin):
         return render(request, "academy/course_review.html", context)
 
     def asset_view(self, request, object_id, asset_id):
-        if not self._is_authorized(request):
+        if not self._is_authorized(request.user):
             return HttpResponseForbidden("Administrator course-content access is required.")
         record = get_object_or_404(CourseImport, pk=object_id)
         staged = record.assets.filter(stable_asset_id=asset_id).first()
-        file_field = staged.file if staged and staged.file else None
-        if not file_field:
+
+        # Render a stored copy only when it is actually present. Render Free's
+        # filesystem is ephemeral across deploys, so a saved FileField name may
+        # outlive its local file. The review-only fallback below reads only a
+        # checked-in asset path contained within this course's source package.
+        file_field = None
+        if staged and staged.file and staged.file.storage.exists(staged.file.name):
+            file_field = staged.file
+
+        if file_field is None:
             live = CourseMediaAsset.objects.filter(pk=asset_id).first()
-            file_field = live.file if live and live.file else None
-        if not file_field:
-            from django.http import Http404
-            raise Http404("This course image has not been uploaded yet.")
-        response = FileResponse(
-            file_field.open("rb"),
-            content_type=mimetypes.guess_type(file_field.name)[0] or "application/octet-stream",
-        )
-        response["Cache-Control"] = "private, no-store"
-        response["X-Content-Type-Options"] = "nosniff"
-        return response
+            if live and live.file and live.file.storage.exists(live.file.name):
+                file_field = live.file
+
+        if file_field is not None:
+            response = FileResponse(
+                file_field.open("rb"),
+                content_type=mimetypes.guess_type(file_field.name)[0] or "application/octet-stream",
+            )
+            response["Cache-Control"] = "private, no-store"
+            response["X-Content-Type-Options"] = "nosniff"
+            return response
+
+        if staged and staged.source_path:
+            source_root = (
+                Path(settings.BASE_DIR).parent / "course-source" / record.course_slug
+            ).resolve()
+            source_path = (source_root / staged.source_path).resolve()
+            allowed_suffixes = {".svg", ".png", ".jpg", ".jpeg", ".webp"}
+            if (
+                source_root in source_path.parents
+                and source_path.is_file()
+                and source_path.suffix.lower() in allowed_suffixes
+            ):
+                response = FileResponse(
+                    source_path.open("rb"),
+                    content_type=mimetypes.guess_type(source_path.name)[0] or "application/octet-stream",
+                )
+                response["Cache-Control"] = "private, no-store"
+                response["X-Content-Type-Options"] = "nosniff"
+                return response
+
+        from django.http import Http404
+        raise Http404("This course image has not been uploaded or found in the checked-in course source.")
 
     def publish_view(self, request, object_id):
         if not self._is_authorized(request):
