@@ -15,7 +15,7 @@ import uuid
 from unittest import mock
 
 from allauth.account.models import EmailAddress
-from django.test import Client, TestCase, override_settings
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from apps.accounts.models import User
