@@ -313,8 +313,9 @@ def course_media_asset_upload_to(instance, filename):
 
 
 class CourseImport(models.Model):
-    """Immutable, reviewable import snapshot. Staging never mutates live course rows."""
+    """Editable builder draft until submitted; reviewable snapshots never mutate live course rows."""
     class Status(models.TextChoices):
+        DRAFT = "draft", _("Builder draft")
         REVIEW = "review", _("Awaiting review")
         PUBLISHED = "published", _("Published")
         REJECTED = "rejected", _("Rejected")
@@ -332,6 +333,7 @@ class CourseImport(models.Model):
     imported_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="academy_course_imports")
     reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="academy_course_imports_reviewed")
     imported_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     published_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
