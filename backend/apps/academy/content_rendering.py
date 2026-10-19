@@ -12,7 +12,7 @@ _ALLOWED_TAGS = {
 }
 _ALLOWED_ATTRIBUTES = {
     "a": ["href", "title", "rel"],
-    "img": ["src", "alt", "title", "loading", "width", "height"],
+    "img": ["src", "alt", "title", "loading", "width", "height", "tabindex", "role", "aria-label"],
     "th": ["align"], "td": ["align"],
 }
 _IMAGE_REF = re.compile(r"asset://([0-9a-fA-F-]{36})")
@@ -56,6 +56,7 @@ def render_safe_markdown(source, asset_urls=None):
     )
     # Course Builder stores a figure caption as the paragraph immediately after its image.
     # Group that pair semantically so captions remain attached and accessible in the Learning Room.
+    rendered = re.sub(r"<img\b", '<img tabindex="0" role="button" aria-label="Enlarge course figure"', rendered)
     rendered = re.sub(
         r"<p>(<img\b[^>]*>)</p>\s*<p>(.*?)</p>",
         r"<figure>\1<figcaption>\2</figcaption></figure>",
