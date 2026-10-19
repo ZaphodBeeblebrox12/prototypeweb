@@ -9,7 +9,7 @@ payments/support flows (no duplicated business logic in the UI).
 import datetime
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -271,6 +271,35 @@ class MemberCourseDashboardDataTests(TestCase):
             position=3,
             is_preview=True,
             is_published=False,
+        )
+
+    @override_settings(
+        TELEGRAM_VERIFICATION_BOT_USERNAME="",
+        TELEGRAM_VERIFICATION_BOT_TOKEN="",
+    )
+    def test_missing_telegram_verification_config_is_explained_in_connections(self):
+        response = self.client.get(reverse("dashboard"))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context["telegram_verification_configured"])
+        self.assertContains(response, "Telegram verification is not ready on this server.")
+        self.assertContains(response, "TELEGRAM_VERIFICATION_BOT_USERNAME")
+        self.assertContains(response, 'aria-disabled="true">Telegram setup required</span>')
+        self.assertNotContains(
+            response,
+            f'href="{reverse("bot_integration:telegram_connect")}"',
+        )
+
+    @override_settings(
+        TELEGRAM_VERIFICATION_BOT_USERNAME="verification_bot",
+        TELEGRAM_VERIFICATION_BOT_TOKEN="test-verification-token",
+    )
+    def test_configured_telegram_verification_keeps_connect_links_available(self):
+        response = self.client.get(reverse("dashboard"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["telegram_verification_configured"])
+        self.assertContains(
+            response,
+            f'href="{reverse("bot_integration:telegram_connect")}"',
         )
 
     def test_course_without_access_or_saved_progress_uses_empty_state(self):

@@ -591,6 +591,11 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
             public_site_url = "https://tradethesis-public-staging.onrender.com/"
         public_site_url = public_site_url.rstrip("/")
 
+        telegram_verification_configured = bool(
+            (getattr(settings, "TELEGRAM_VERIFICATION_BOT_USERNAME", "") or "").strip()
+            and (getattr(settings, "TELEGRAM_VERIFICATION_BOT_TOKEN", "") or "").strip()
+        )
+
         # Distinguish a genuinely new member from one whose purchased access has ended.
         member_has_purchase_history = (
             _PaymentIntent.objects.filter(
@@ -614,6 +619,7 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
             "member_active_entitlements": len(active_entitlements),
             "member_access_record_count": len(active_entitlements) + len(active_subs),
             "telegram_account": telegram_account,
+            "telegram_verification_configured": telegram_verification_configured,
             "discord_account": discord_account,
             "discord_connected": discord_connected,
             "member_connected_accounts": (

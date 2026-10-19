@@ -34,6 +34,10 @@ class TelegramConnectionFlowTests(TestCase):
         )
         return config
 
+    @override_settings(
+        TELEGRAM_VERIFICATION_BOT_USERNAME="verification_bot",
+        TELEGRAM_VERIFICATION_BOT_TOKEN="test-verification-token",
+    )
     def test_member_desk_connect_button_uses_deep_link_route(self):
         response = self.client.get(reverse("dashboard"))
         self.assertEqual(response.status_code, 200)
