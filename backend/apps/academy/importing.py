@@ -537,14 +537,14 @@ def publish_course_import(record, *, user):
                             else ""
                         )
                         answer_lines.append(
-                            f"Question {question_index}: {prompt}\\n"
-                            f"Correct answer: {correct_answer}\\n"
+                            f"Question {question_index}: {prompt}\n"
+                            f"Correct answer: {correct_answer}\n"
                             f"Explanation: {explanation}"
                         )
                     LessonInstructorMaterial.objects.update_or_create(
                         lesson=lesson,
                         defaults={
-                            "answer_key_markdown": "\\n\\n".join(answer_lines),
+                            "answer_key_markdown": "\n\n".join(answer_lines),
                             "rubric_json": {"questions": questions},
                         },
                     )
