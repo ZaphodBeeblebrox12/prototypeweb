@@ -107,6 +107,24 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(instructor.rubric_json["questions"][0]["correctIndex"], 0)
         self.assertIn("Start with what can be observed.", instructor.answer_key_markdown)
 
+    def test_related_course_uses_published_course_uuid(self):
+        related = Course.objects.create(
+            title="Related published course",
+            slug="related-published-course",
+            status=Course.Status.PUBLISHED,
+        )
+        payload = self.draft_payload("course-with-related-reference")
+        payload["course"]["modules"][0]["lessons"][0]["relatedCourseIds"] = [str(related.pk)]
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        record = CourseImport.objects.get(pk=response.json()["record_id"])
+        saved = record.payload["modules"][0]["lessons"][0]["content_json"]["related_course_ids"]
+        self.assertEqual(saved, [str(related.pk)])
+
     def test_course_builder_is_not_available_to_regular_staff(self):
         staff = User.objects.create_user(
             username="ordinary-staff",
