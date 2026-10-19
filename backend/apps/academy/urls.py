@@ -10,5 +10,6 @@ urlpatterns = [
     path("course/<slug:course_slug>/lesson/<uuid:lesson_id>/", views.lesson_detail, name="lesson"),
     path("lesson/<uuid:lesson_id>/progress/", views.lesson_progress, name="lesson-progress"),
     path("lesson/<uuid:lesson_id>/quiz/submit/", views.lesson_quiz_submit, name="lesson-quiz-submit"),
+    path("lesson/<uuid:lesson_id>/notebook/", views.lesson_notebook_submit, name="lesson-notebook-submit"),
     path("media/<uuid:asset_id>/", views.media_asset, name="media-asset"),
 ]
