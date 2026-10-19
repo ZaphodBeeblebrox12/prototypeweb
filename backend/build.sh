@@ -5,6 +5,27 @@ pip install -r requirements.txt
 python manage.py collectstatic --noinput
 python manage.py migrate --noinput
 
+# Explicit one-time staging hook: import the canonical Bollinger Bands course
+# as a review-only CourseImport. No published learner rows, offer or checkout
+# are created by this management command. Keep all database credentials in
+# Render environment variables; never put them in source control.
+if [[ "${STAGE_BOLLINGER_BANDS_REVIEW_IMPORT:-false}" =~ ^(1|true|TRUE|yes|YES)$ ]]; then
+  if [[ "${RENDER_SERVICE_ID:-}" != "srv-db9ioke1egvs73feb8ag" ]]; then
+    echo "Refusing Bollinger Bands import: this is not the Academy staging service." >&2
+    exit 1
+  fi
+  if [[ ! "${DATABASE_URL:-}" =~ ^postgres(ql)?:// ]]; then
+    echo "Refusing Bollinger Bands import: DATABASE_URL must target PostgreSQL." >&2
+    exit 1
+  fi
+
+  python manage.py import_microcourse \
+    --manifest ../course-source/understand-bollinger-bands/course-manifest.json \
+    --dry-run
+  python manage.py import_microcourse \
+    --manifest ../course-source/understand-bollinger-bands/course-manifest.json
+fi
+
 # One-time staging superuser bootstrap for Render Free, which has no service shell.
 # Enable only deliberately with BOOTSTRAP_STAGING_ADMIN=true, then remove the
 # four bootstrap variables from Render after the account has been created.
