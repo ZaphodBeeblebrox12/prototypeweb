@@ -171,6 +171,9 @@ def lesson_detail(request, course_slug, lesson_id):
         if rows and module_row.is_published:
             outline_modules.append({"module": module_row, "lessons": rows})
     notebook = lesson.content_json.get("notebook", {}) if isinstance(lesson.content_json, dict) else {}
+    video_url = lesson.content_json.get("video_url", "") if isinstance(lesson.content_json, dict) else ""
+    video_url = video_url if isinstance(video_url, str) and video_url.startswith(("https://", "http://")) else ""
+    video_is_file = video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
     practice_questions = lesson.content_json.get("questions", []) if isinstance(lesson.content_json, dict) else []
     if not isinstance(practice_questions, list):
         practice_questions = []
@@ -179,12 +182,29 @@ def lesson_detail(request, course_slug, lesson_id):
     related_courses = Course.objects.filter(
         pk__in=related_ids, status=Course.Status.PUBLISHED,
     ).exclude(pk=course.pk).order_by("position", "title")
+    ordered_lessons = list(Lesson.objects.filter(
+        module__course=course, module__is_published=True, is_published=True,
+    ).select_related("module").order_by("module__position", "position", "title"))
+    accessible_lessons = [item for item in ordered_lessons if can_access_lesson(request.user, item, now)]
+    current_index = next((i for i, item in enumerate(accessible_lessons) if item.pk == lesson.pk), -1)
+    previous_lesson = accessible_lessons[current_index - 1] if current_index > 0 else None
+    next_lesson = accessible_lessons[current_index + 1] if 0 <= current_index < len(accessible_lessons) - 1 else None
+    total_lessons = len(ordered_lessons)
+    completed_lessons = LessonProgress.objects.filter(
+        user=request.user, lesson_id__in=[item.pk for item in ordered_lessons],
+        status=LessonProgress.Status.COMPLETED,
+    ).count()
+    course_progress_percent = round(completed_lessons * 100 / total_lessons) if total_lessons else 0
     return render(request, "academy/lesson.html", {
         "course": course, "lesson": lesson, "module": lesson.module,
         "entitlement": entitlement, "progress": progress,
         "lesson_sections": build_lesson_sections(lesson.content_markdown, asset_urls),
         "notebook": notebook, "outline_modules": outline_modules,
         "related_courses": related_courses, "practice_questions": practice_questions,
+        "video_url": video_url, "video_is_file": video_is_file,
+        "previous_lesson": previous_lesson, "next_lesson": next_lesson,
+        "course_progress_percent": course_progress_percent,
+        "completed_lessons": completed_lessons, "total_lessons": total_lessons,
     })
 
 
