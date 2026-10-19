@@ -1,27 +1,55 @@
 <section class="tt-lesson-tabs" data-learning-tabs>
   <div class="tt-tab-list" role="tablist" aria-label="Lesson sections">
-    <button class="tt-tab is-active" type="button" role="tab" aria-selected="true" data-tab-name="idea">The idea</button>
-    <button class="tt-tab" type="button" role="tab" aria-selected="false" data-tab-name="examples">Chart examples <span class="tt-tab-count">{{ lesson_sections.figure_count }}</span></button>
-    <button class="tt-tab" type="button" role="tab" aria-selected="false" data-tab-name="practice">Test your reading</button>
+    <button class="tt-tab is-active" id="tab-idea" type="button" role="tab" aria-selected="true" aria-controls="panel-idea" data-tab-name="idea">The idea</button>
+    <button class="tt-tab" id="tab-examples" type="button" role="tab" aria-selected="false" aria-controls="panel-examples" data-tab-name="examples">Chart examples <span class="tt-tab-count">{{ lesson_sections.figure_count }}</span></button>
+    <button class="tt-tab" id="tab-practice" type="button" role="tab" aria-selected="false" aria-controls="panel-practice" data-tab-name="practice">Test your reading{% if practice_questions %} <span class="tt-tab-count">{{ practice_questions|length }}</span>{% endif %}</button>
   </div>
-  <div class="tt-tab-panel" role="tabpanel" data-tab-panel="idea">{{ lesson_sections.idea_html|safe }}</div>
-  <div class="tt-tab-panel" role="tabpanel" data-tab-panel="examples" hidden>{{ lesson_sections.examples_html|safe }}</div>
-  <div class="tt-tab-panel" role="tabpanel" data-tab-panel="practice" hidden>{{ lesson_sections.practice_html|safe }}</div>
+  <div class="tt-tab-panel" id="panel-idea" role="tabpanel" aria-labelledby="tab-idea" data-tab-panel="idea">{{ lesson_sections.idea_html|safe }}</div>
+  <div class="tt-tab-panel" id="panel-examples" role="tabpanel" aria-labelledby="tab-examples" data-tab-panel="examples" hidden>{{ lesson_sections.examples_html|safe }}</div>
+  <div class="tt-tab-panel" id="panel-practice" role="tabpanel" aria-labelledby="tab-practice" data-tab-panel="practice" hidden>
+    {{ lesson_sections.practice_html|safe }}
+    {% if practice_questions %}
+    <section class="tt-practice-questions" aria-labelledby="tt-practice-heading">
+      <p class="tt-eyebrow">Apply what you noticed</p>
+      <h2 id="tt-practice-heading">Practice questions</h2>
+      <form method="post" action="{% url 'academy:lesson-quiz-submit' lesson.id %}" data-practice-quiz>
+        {% csrf_token %}
+        {% for question in practice_questions %}
+        <fieldset class="tt-question">
+          <legend>{{ question.prompt }}</legend>
+          {% for option in question.options %}
+          <label class="tt-answer-option"><input type="radio" name="{{ question.id }}" value="{{ forloop.counter0 }}"><span>{{ option }}</span></label>
+          {% endfor %}
+          <p class="tt-quiz-feedback" data-quiz-feedback="{{ question.id }}" role="status" aria-live="polite"></p>
+        </fieldset>
+        {% endfor %}
+        <button class="tt-publish-button" type="submit">Check answers</button>
+        <p class="tt-quiz-score" data-quiz-score role="status" aria-live="polite"></p>
+      </form>
+      <p class="tt-practice-note">Feedback is checked by the Academy after submission. Correct answers are not included in the page beforehand.</p>
+    </section>
+    {% endif %}
+  </div>
 </section>
 <aside class="tt-notebook" aria-label="Your Trading Notebook">
   <div class="tt-notebook-kicker">YOUR TRADING NOTEBOOK</div>
   <h3>{{ notebook.title|default:"Your Trading Notebook" }}</h3>
   {% if notebook.prompts %}
+  <form method="post" action="{% url 'academy:lesson-notebook-submit' lesson.id %}" data-notebook-response>
+    {% csrf_token %}
     <ol>
       {% for prompt in notebook.prompts %}
-        <li><strong>{{ prompt.label }}</strong><p>{{ prompt.text }}</p></li>
+      <li><label for="notebook-prompt-{{ forloop.counter0 }}"><strong>{{ prompt.label }}</strong></label><p>{{ prompt.text }}</p><textarea id="notebook-prompt-{{ forloop.counter0 }}" name="prompt_{{ forloop.counter0 }}" rows="3" maxlength="4000" placeholder="Write your reflection…">{{ notebook_responses|get_item:forloop.counter0 }}</textarea></li>
       {% endfor %}
     </ol>
+    <button class="tt-notebook-save" type="submit">Save reflection</button>
+    <span data-notebook-feedback role="status" aria-live="polite"></span>
+  </form>
   {% else %}
-    <ol>
-      <li><strong>Observe</strong><p>Describe what the chart actually shows.</p></li>
-      <li><strong>Interpret</strong><p>Write one possible explanation and one reasonable alternative.</p></li>
-      <li><strong>Test</strong><p>Identify the next evidence that would strengthen or weaken your reading.</p></li>
-    </ol>
+  <ol>
+    <li><strong>Observe</strong><p>Describe what the chart actually shows.</p></li>
+    <li><strong>Interpret</strong><p>Write one possible explanation and one reasonable alternative.</p></li>
+    <li><strong>Test</strong><p>Identify the next evidence that would strengthen or weaken your reading.</p></li>
+  </ol>
   {% endif %}
 </aside>
