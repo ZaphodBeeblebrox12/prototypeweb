@@ -1,53 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>You've received a gift!</title>
-    <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { text-align: center; padding: 30px 0; }
-        .gift-icon { font-size: 64px; }
-        .content { background: #f9f9f9; padding: 30px; border-radius: 8px; }
-        .message { background: #fff; padding: 20px; border-left: 4px solid #007bff; margin: 20px 0; }
-        .button { display: inline-block; padding: 15px 30px; background: #007bff; color: #fff; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="gift-icon">🎁</div>
-            <h1>You've Received a Gift!</h1>
-        </div>
-
-        <div class="content">
-            <p>Hi there!</p>
-
-            <p><strong>{{ sender_name }}</strong> has gifted you a <strong>{{ plan_name }}</strong> subscription for <strong>{{ duration_days }} days</strong>.</p>
-
-            {% if message %}
-            <div class="message">
-                <p><em>"{{ message }}"</em></p>
-                <p style="text-align: right; margin-bottom: 0;">— {{ sender_name }}</p>
-            </div>
-            {% endif %}
-
-            <p style="text-align: center;">
-                <a href="{{ claim_url }}" class="button">Claim Your Gift</a>
-            </p>
-
-            <p style="font-size: 12px; color: #666;">
-                This gift link will expire on {{ expires_at|date:"F d, Y" }}. 
-                If you don't have an account yet, you'll be able to create one when you click the link.
-            </p>
-        </div>
-
-        <div class="footer">
-            <p>If the button doesn't work, copy and paste this link into your browser:<br>
-            {{ claim_url }}</p>
-        </div>
-    </div>
-</body>
-</html>
+{% extends "emails/base_email.html" %}
+{% block title %}You've received a gift | TradeThesis{% endblock %}
+{% block preheader %}Someone has gifted you a TradeThesis subscription.{% endblock %}
+{% block header_tagline %}A gift for you{% endblock %}
+{% block content %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+<tr><td class="px" style="padding:34px 32px 8px;font-family:Arial,sans-serif;color:#20352A;">
+<h1 style="margin:0 0 12px;font-size:26px;line-height:1.25;">A thoughtful gift, for your next step</h1>
+<p style="font-size:15px;line-height:1.7;color:#536259;">Hello, {{ sender_name }} has gifted you a <strong style="color:#20352A;">{{ plan_name }}</strong> subscription for {{ duration_days }} days.</p>
+{% if message %}<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F6F0E3;border-left:4px solid #B89048;"><tr><td style="padding:16px 18px;font-size:14px;line-height:1.7;color:#536259;">{{ message }}</td></tr></table>{% endif %}
+<p style="font-size:15px;line-height:1.7;color:#536259;">Claim your gift using the button below. If you are new to TradeThesis, you can create your account as part of the process.</p>
+{% include "emails/partials/button.html" with url=claim_url label="Claim your gift" color="#28533F" %}
+<p style="font-size:12px;line-height:1.6;color:#718075;margin-top:20px;">This gift link expires on {{ expires_at|date:"F d, Y" }}. If you were not expecting this email, you can ignore it.</p>
+</td></tr></table>
+{% endblock %}

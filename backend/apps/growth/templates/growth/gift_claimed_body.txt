@@ -1,19 +1,13 @@
-{% load i18n %}
-{% blocktrans %}Hi {{ user.username }},{% endblocktrans %}
+Hi {{ user.username }},
 
-{% blocktrans with plan_name=plan_name duration_days=duration_days %}
-Your gift subscription to {{ plan_name }} has been activated for {{ duration_days }} days!
-{% endblocktrans %}
+Your gift subscription to {{ plan_name }} has been activated for {{ duration_days }} days.
 
-{% blocktrans with subscription_expires=subscription_expires|date:"F j, Y" %}
-Your subscription is now active and will expire on {{ subscription_expires }}.
-{% endblocktrans %}
-
-{% blocktrans with sender_name=sender_name %}
+Your subscription is active and expires on {{ subscription_expires|date:"F j, Y" }}.
 This gift was from {{ sender_name }}.
-{% endblocktrans %}
 
-{% blocktrans %}Enjoy your subscription!{% endblocktrans %}
+Enjoy your access and take the learning at your own pace.
 
----
-{{ site_name }}
+TradeThesis
+Conviction before execution
+
+Trading involves risk. TradeThesis content is for educational purposes and is not investment advice.

@@ -4,6 +4,7 @@ Custom allauth adapter for Google authentication.
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.account.adapter import DefaultAccountAdapter
 from django import forms
+from django.conf import settings
 from allauth.account.models import EmailAddress
 from django.contrib import messages
 from django.http import HttpResponseRedirect
@@ -108,6 +109,15 @@ class CustomAccountAdapter(DefaultAccountAdapter):
     def get_logout_redirect_url(self, request):
         return "/"
 
+    def send_mail(self, template_prefix, email, context):
+        """Add TradeThesis branding and absolute account links to Allauth mail."""
+        context.setdefault("logo_url", getattr(settings, "EMAIL_LOGO_URL", ""))
+        base_url = str(getattr(settings, "SITE_BASE_URL", "") or "").rstrip("/")
+        if base_url:
+            context.setdefault("dashboard_url", f"{base_url}/dashboard/")
+            context.setdefault("support_url", f"{base_url}/support/")
+        return super().send_mail(template_prefix, email, context)
+
     def _is_email_verified(self, user):
         """Check if user's email is verified."""
         try:
@@ -129,6 +139,7 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         if signup:
             email_template = 'account/email/email_confirmation_signup'
         else:
-            email_template = 'account/email/email_confirmation_message'
+            # Allauth appends _message.{html,txt} to this prefix.
+            email_template = 'account/email/email_confirmation'
 
         self.send_mail(email_template, emailconfirmation.email_address.email, ctx)

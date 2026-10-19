@@ -66,7 +66,10 @@ class NotificationService:
             context['site'] = site
             context['site_name'] = site.name
         except Site.DoesNotExist:
-            context['site_name'] = 'Community Platform'
+            context['site_name'] = 'TradeThesis'
+
+        context.setdefault("brand_name", "TradeThesis")
+        context.setdefault("logo_url", getattr(settings, "EMAIL_LOGO_URL", ""))
 
         # Render templates
         try:

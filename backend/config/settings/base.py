@@ -287,6 +287,10 @@ EMAIL_USE_TLS = env("EMAIL_USE_TLS", default=True)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@example.com")
+EMAIL_LOGO_URL = os.environ.get(
+    "EMAIL_LOGO_URL",
+    f"{TRADETHESIS_PUBLIC_SITE_URL}/assets/tradethesis-horizontal.png",
+).strip()
 
 SITE_ID = 1
 

@@ -1,1 +1,1 @@
-{% autoescape off %}Confirm your TradeThesis email address{% endautoescape %}
+Confirm your TradeThesis email address

@@ -6,6 +6,8 @@ Event dedupe (once per user per step). No new frameworks.
 """
 import logging
 
+from django.conf import settings
+
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
@@ -38,18 +40,24 @@ def _offered(user, step):
     return created
 
 
+def _site_url(path):
+    """Build absolute URLs for email CTAs using the configured Django origin."""
+    base_url = str(getattr(settings, "SITE_BASE_URL", "") or "").rstrip("/")
+    return f"{base_url}/{path.lstrip('/')}" if base_url else path
+
+
 def _day1(user):
     if not _offered(user, DAY1):
         return False
     _send(user, "growth/email/welcome_day1",
           "Welcome! Tips to get the most from your account",
-          {"username": user.username, "dashboard_url": "/dashboard/",
-           "support_url": "/support/"},
+          {"username": user.username, "dashboard_url": _site_url("/dashboard/"),
+           "support_url": _site_url("/support/")},
           ("\U0001f44b Welcome, {}!\n\n"
            "3 quick things:\n"
            "1. Connect Telegram (dashboard) for channel access + alerts\n"
            "2. Pick a plan when you're ready\n"
-           "3. Questions? /support/").format(user.username))
+           "3. Questions? {}").format(user.username, _site_url("/support/")))
     return True
 
 
@@ -66,12 +74,13 @@ def _day3(user):
         return False
     _send(user, "growth/email/welcome_day3",
           "Need a hand getting set up?",
-          {"username": user.username, "support_url": "/support/",
-           "connect_url": "/bot/telegram/connect/"},
+          {"username": user.username, "dashboard_url": _site_url("/dashboard/"),
+           "connect_url": _site_url("/bot/telegram/connect/"),
+           "support_url": _site_url("/support/")},
           ("\U0001f9e9 Hi {}, stuck? Two-minute setup:\n"
-           "Dashboard -> Connect Telegram -> pick a plan.\n"
-           "Or just reply here / see /support/ and we'll help.").format(
-               user.username))
+           "Dashboard -> Connect Telegram -> pick a plan: {}\n"
+           "Need a hand? {}").format(
+               user.username, _site_url("/bot/telegram/connect/"), _site_url("/support/")))
     return True
 
 
