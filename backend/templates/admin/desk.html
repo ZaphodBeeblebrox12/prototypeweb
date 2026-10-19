@@ -91,6 +91,7 @@
   <section class="section" aria-labelledby="course-actions-heading">
     <div class="section-head"><h2 id="course-actions-heading">Course content &amp; authoring</h2><p>The creator-friendly course editor is a separate workstream; advanced record tools remain available in Django for now.</p></div>
     <ul class="link-list">
+      <li><a href="{% url 'staff_course_builder_preview' %}">Open Course Builder preview →</a> <span class="note">Prototype · saves in this browser only</span></li>
       {% if course_links.courses %}<li><a href="{{ course_links.courses }}">Manage courses →</a></li>{% endif %}
       {% if course_links.modules %}<li><a href="{{ course_links.modules }}">Manage modules →</a></li>{% endif %}
       {% if course_links.lessons %}<li><a href="{{ course_links.lessons }}">Manage lessons &amp; release dates →</a></li>{% endif %}
