@@ -111,6 +111,12 @@ def _build_import_payload(course_state, course_slug):
                     image_by_id[str(image["id"])] = str(image.get("assetUuid") or _asset_uuid(course_slug, str(image["id"])))
             for old_id, new_id in image_by_id.items():
                 content = content.replace(f"asset://{old_id}", f"asset://{new_id}")
+            for image in lesson.get("images") or []:
+                if not isinstance(image, dict) or not image.get("caption") or not image.get("assetUuid"):
+                    continue
+                figure_ref = re.compile(r"(!\\[[^\\]]*\\]\\(asset://" + re.escape(str(image["assetUuid"])) + r"\\))")
+                caption = str(image.get("caption", "")).strip()
+                content = figure_ref.sub(lambda match: match.group(1) + "\\n\\n" + caption, content)
             asset_ids = sorted(set(_ASSET_REF.findall(content)))
             questions = lesson.get("questions") if isinstance(lesson.get("questions"), list) else []
             related_ids = lesson.get("relatedCourseIds") if isinstance(lesson.get("relatedCourseIds"), list) else []
