@@ -591,9 +591,13 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
             public_site_url = "https://tradethesis-public-staging.onrender.com/"
         public_site_url = public_site_url.rstrip("/")
 
-        telegram_verification_configured = bool(
-            (getattr(settings, "TELEGRAM_VERIFICATION_BOT_USERNAME", "") or "").strip()
-            and (getattr(settings, "TELEGRAM_VERIFICATION_BOT_TOKEN", "") or "").strip()
+        # Use the same bot configuration as channel access and Mesh operations.
+        from apps.bot_integration.models import BotConfig
+        telegram_bot_config = BotConfig.get_config()
+        telegram_bot_configured = bool(
+            telegram_bot_config.is_active
+            and (telegram_bot_config.telegram_bot_username or "").strip()
+            and (telegram_bot_config.telegram_bot_token or "").strip()
         )
 
         # Distinguish a genuinely new member from one whose purchased access has ended.
@@ -619,7 +623,9 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
             "member_active_entitlements": len(active_entitlements),
             "member_access_record_count": len(active_entitlements) + len(active_subs),
             "telegram_account": telegram_account,
-            "telegram_verification_configured": telegram_verification_configured,
+            "telegram_bot_configured": telegram_bot_configured,
+            # Backward-compatible alias for templates/integrations not yet updated.
+            "telegram_verification_configured": telegram_bot_configured,
             "discord_account": discord_account,
             "discord_connected": discord_connected,
             "member_connected_accounts": (

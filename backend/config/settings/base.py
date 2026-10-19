@@ -187,9 +187,6 @@ REST_FRAMEWORK = {
 TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN", default="")
 TELEGRAM_BOT_USERNAME = env("TELEGRAM_BOT_USERNAME", default="")
 
-# Dedicated account-linking bot; keep the channel/mesh bot config separate.
-TELEGRAM_VERIFICATION_BOT_TOKEN = env("TELEGRAM_VERIFICATION_BOT_TOKEN", default="")
-TELEGRAM_VERIFICATION_BOT_USERNAME = env("TELEGRAM_VERIFICATION_BOT_USERNAME", default="")
 
 # YouTube live status is checked server-side; keep the API key out of browser code.
 YOUTUBE_API_KEY = env("YOUTUBE_API_KEY", default="")
