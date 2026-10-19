@@ -86,7 +86,7 @@
   let lastFocus = null;
   let toastTimer = null;
 
-  const microCourses = data.microCourses.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
+  let microCourses = data.microCourses.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
 
   function renderMicroCard(course) {
     return `<button class="cc-micro-card" type="button" data-open-course="${escapeHTML(course.id)}" aria-label="Preview ${escapeHTML(course.title)}, ${escapeHTML(course.price)}">
@@ -190,6 +190,47 @@
 
   renderFilterButtons();
   if (microGrid) renderMicroCourses();
+  // Published Academy courses are fetched from Django; curated static content remains unchanged.
+  const baseRenderModal = renderModal;
+  renderModal = function(course) {
+    baseRenderModal(course);
+    if (course && course.academyUrl) {
+      const link = document.createElement('a');
+      link.className = 'button cc-modal-cta';
+      link.href = course.academyUrl;
+      link.textContent = 'Open in Academy ↗';
+      modalFooter.replaceChildren(link);
+      const note = document.createElement('span');
+      note.className = 'cc-modal-price-note';
+      note.textContent = 'Published in the Academy · access and pricing configured separately';
+      modalFooter.prepend(note);
+    }
+  };
+  fetch("https://tradethesis-academy-staging.onrender.com/api/academy/catalogue/", {headers: {"Accept":"application/json"}})
+    .then(response => { if (!response.ok) throw new Error("Academy catalogue unavailable"); return response.json(); })
+    .then(payload => {
+      const known = new Set(microCourses.map(course => course.id));
+      const published = (payload.courses || []).filter(course => course && course.status === "published" && course.academyUrl && !known.has(course.id));
+      for (const course of published) {
+        microCourses.push({
+          ...course, priority: 3, order: 1000 + microCourses.length,
+          category: course.category || "TradeThesis courses",
+          level: course.level || "Self-paced",
+          art: course.art || "structure",
+          modules: Array.isArray(course.modules) ? course.modules : [],
+          outcome: course.outcome || course.description || "",
+          complements: course.complements || "Explore this published course in the TradeThesis Academy.",
+          price: course.price || ""
+        });
+      }
+      if (published.length) {
+        renderFilterButtons();
+        renderMicroCourses();
+      }
+    })
+    .catch(() => {
+      // The curated catalogue remains usable if Academy is temporarily unavailable.
+    });
 
   microGrid?.addEventListener('click', event => {
     const opener = event.target.closest('[data-open-course]');
