@@ -92,7 +92,7 @@
       <a href="community.html">Community</a>
       <a href="index.html#desk">The Desk</a>
     </nav>
-    <a class="button member-area-link" href="https://tradethesis-academy-staging.onrender.com/dashboard/">Open member dashboard ↗</a>
+    <a class="button member-area-link" href="#signInPanel">Sign in / member dashboard ↗</a>
     <button class="mobile-toggle" type="button" aria-expanded="false" aria-label="Open navigation" data-sitewide-toggle>☰</button>
   </div>
   <nav class="wrap mobilelinks" aria-label="Mobile navigation" data-sitewide-mobile>
@@ -124,12 +124,22 @@
       <div id="signInPanel" role="tabpanel" aria-labelledby="signInTab">
         <h2 id="formTitle" class="form-title">Welcome back.</h2>
         <p class="form-intro">Sign in to find your purchases, learning access and connected communities.</p>
-        <p class="form-note">Continue to the secure TradeThesis Academy sign-in page. This public website does not ask for or handle your password.</p>
-        <a class="primary" href="https://tradethesis-academy-staging.onrender.com/accounts/login/?next=/dashboard/">Continue to secure sign in ↗</a>
-        <div class="form-row">
-          <span class="remember">Having trouble getting in?</span>
-          <a class="text-button" href="https://tradethesis-academy-staging.onrender.com/accounts/password/reset/">Reset password</a>
-        </div>
+        <p class="form-note">Sign in here. Your credentials are sent directly to TradeThesis Academy for secure verification, then you go straight to your member dashboard.</p>
+        <form id="memberLoginForm" method="post" action="https://tradethesis-academy-staging.onrender.com/accounts/login/from-member-access/">
+          <div class="field">
+            <label for="memberLoginEmail">Email address</label>
+            <input id="memberLoginEmail" name="login" type="email" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="memberLoginPassword">Password</label>
+            <input id="memberLoginPassword" name="password" type="password" autocomplete="current-password" required>
+          </div>
+          <div class="form-row">
+            <label class="remember"><input type="checkbox" name="remember" value="on" checked> Remember me</label>
+            <a class="text-button" href="https://tradethesis-academy-staging.onrender.com/accounts/password/reset/">Reset password</a>
+          </div>
+          <button class="primary" type="submit">Sign in and open dashboard ↗</button>
+        </form>
       </div>
       <div id="createPanel" role="tabpanel" aria-labelledby="createTab" hidden>
         <h2 class="form-title">Make it yours.</h2>
@@ -179,6 +189,13 @@
       }
       signInTab.addEventListener('click', () => setMode(false));
       createTab.addEventListener('click', () => setMode(true));
+
+      const feedback = document.getElementById('feedback');
+      const loginState = new URLSearchParams(window.location.search).get('login');
+      if (loginState === 'invalid') {
+        feedback.textContent = 'We could not sign you in. Check your email and password, then try again. You can also reset your password.';
+        feedback.classList.add('show');
+      }
     })();
   </script>
 
