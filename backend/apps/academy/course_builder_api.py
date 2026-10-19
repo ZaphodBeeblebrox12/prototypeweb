@@ -3,6 +3,7 @@ import base64
 import binascii
 import hashlib
 import json
+import mimetypes
 import re
 import uuid
 from copy import deepcopy
@@ -323,7 +324,7 @@ def course_builder_asset(request, import_id, asset_id):
         raise Http404
     response = FileResponse(
         asset.file.open("rb"),
-        content_type=asset.file.file.content_type if hasattr(asset.file.file, "content_type") else "application/octet-stream",
+        content_type=mimetypes.guess_type(asset.file.name)[0] or "application/octet-stream",
     )
     response["Cache-Control"] = "private, no-store"
     response["X-Content-Type-Options"] = "nosniff"
