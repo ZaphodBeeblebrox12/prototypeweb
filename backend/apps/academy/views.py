@@ -171,6 +171,11 @@ def lesson_detail(request, course_slug, lesson_id):
         if rows and module_row.is_published:
             outline_modules.append({"module": module_row, "lessons": rows})
     notebook = lesson.content_json.get("notebook", {}) if isinstance(lesson.content_json, dict) else {}
+    saved_responses = progress.response_json.get("notebook_responses", []) if isinstance(progress.response_json, dict) else []
+    if isinstance(notebook, dict) and isinstance(notebook.get("prompts"), list):
+        for prompt_index, prompt in enumerate(notebook["prompts"]):
+            if isinstance(prompt, dict):
+                prompt["response"] = saved_responses[prompt_index] if isinstance(saved_responses, list) and prompt_index < len(saved_responses) else ""
     video_url = lesson.content_json.get("video_url", "") if isinstance(lesson.content_json, dict) else ""
     video_url = video_url if isinstance(video_url, str) and video_url.startswith(("https://", "http://")) else ""
     video_is_file = video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
@@ -199,7 +204,7 @@ def lesson_detail(request, course_slug, lesson_id):
         "course": course, "lesson": lesson, "module": lesson.module,
         "entitlement": entitlement, "progress": progress,
         "lesson_sections": build_lesson_sections(lesson.content_markdown, asset_urls),
-        "notebook": notebook, "outline_modules": outline_modules,
+        "notebook": notebook, "notebook_responses": saved_responses, "outline_modules": outline_modules,
         "related_courses": related_courses, "practice_questions": practice_questions,
         "video_url": video_url, "video_is_file": video_is_file,
         "previous_lesson": previous_lesson, "next_lesson": next_lesson,
