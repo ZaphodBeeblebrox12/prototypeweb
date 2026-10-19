@@ -73,6 +73,7 @@
           <span data-progress-feedback role="status" aria-live="polite"></span>
         </div>
         <nav class="tt-lesson-navigation" aria-label="Lesson navigation">{% if previous_lesson %}<a class="tt-lesson-nav-link" href="{% url 'academy:lesson' course.slug previous_lesson.id %}"><span>← Previous lesson</span><strong>{{ previous_lesson.title }}</strong></a>{% else %}<span class="tt-lesson-nav-placeholder">You are at the first available lesson.</span>{% endif %}{% if next_lesson %}<a class="tt-lesson-nav-link tt-lesson-nav-next" href="{% url 'academy:lesson' course.slug next_lesson.id %}"><span>Next lesson →</span><strong>{{ next_lesson.title }}</strong></a>{% else %}<a class="tt-lesson-nav-link tt-lesson-nav-next" href="{% url 'academy:course-detail' course.slug %}"><span>Course overview →</span><strong>Return to course</strong></a>{% endif %}</nav>
+        <dialog class="tt-figure-dialog" data-figure-dialog><button type="button" data-figure-close>Close</button><img data-figure-dialog-image alt=""><p data-figure-dialog-caption></p></dialog>
       </article>
     </main>
   </div>
