@@ -449,7 +449,7 @@ class CourseImportAdmin(admin.ModelAdmin):
         return render(request, "academy/course_review.html", context)
 
     def asset_view(self, request, object_id, asset_id):
-        if not self._is_authorized(request.user):
+        if not self._is_authorized(request):
             return HttpResponseForbidden("Administrator course-content access is required.")
         record = get_object_or_404(CourseImport, pk=object_id)
         staged = record.assets.filter(stable_asset_id=asset_id).first()
