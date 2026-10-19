@@ -45,9 +45,15 @@
   });
 
   document.addEventListener("keydown", event => {
-    if (event.key !== "Escape") return;
-    const dialog = document.querySelector("[data-figure-dialog]");
-    if (dialog?.open) dialog.close();
+    if ((event.key === "Enter" || event.key === " ") && event.target.matches?.(".tt-tab-panel img[role='button']")) {
+      event.preventDefault();
+      event.target.click();
+      return;
+    }
+    if (event.key === "Escape") {
+      const dialog = document.querySelector("[data-figure-dialog]");
+      if (dialog?.open) dialog.close();
+    }
   });
 
   document.addEventListener("input", event => {
