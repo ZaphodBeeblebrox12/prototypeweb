@@ -59,7 +59,7 @@ class PrivateCourseAssetStorageTests(SimpleTestCase):
 
     def test_open_falls_back_to_local_storage_when_github_asset_is_absent(self):
         with patch.object(self.storage, "_metadata", return_value=None), patch.object(
-            FileSystemStorage, "_open", side_effect=FileNotFoundError
+            FileSystemStorage, "_open", autospec=True, side_effect=FileNotFoundError
         ) as local_open:
             with self.assertRaises(FileNotFoundError):
                 self.storage._open("missing.png")
