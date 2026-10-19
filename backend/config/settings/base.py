@@ -164,6 +164,13 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 32 * 1024 * 1024
 # Private instructional images must live outside MEDIA_ROOT (which can be served directly in DEBUG).
 # In production, point this at a durable mounted volume.
 ACADEMY_PRIVATE_MEDIA_ROOT = env("ACADEMY_PRIVATE_MEDIA_ROOT", default=str(BASE_DIR / "private_course_media"))
+# Optional private GitHub repository for temporary shared course-image storage.
+# Leave the repository/token unset to use local private filesystem storage.
+ACADEMY_GITHUB_ASSET_REPOSITORY = env("ACADEMY_GITHUB_ASSET_REPOSITORY", default="")
+ACADEMY_GITHUB_ASSET_TOKEN = env("ACADEMY_GITHUB_ASSET_TOKEN", default="")
+ACADEMY_GITHUB_ASSET_BRANCH = env("ACADEMY_GITHUB_ASSET_BRANCH", default="course-assets")
+ACADEMY_GITHUB_ASSET_PATH_PREFIX = env("ACADEMY_GITHUB_ASSET_PATH_PREFIX", default="course-assets")
+ACADEMY_GITHUB_ASSET_TIMEOUT = env.int("ACADEMY_GITHUB_ASSET_TIMEOUT", default=15)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
