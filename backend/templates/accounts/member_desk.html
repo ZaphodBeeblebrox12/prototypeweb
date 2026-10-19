@@ -371,10 +371,26 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
     try{sessionStorage.removeItem(telegramConnectKey)}catch(_error){}
     window.location.reload();
   }
+  function isHistoryNavigation(){
+    const navigation=performance.getEntriesByType('navigation')[0];
+    return Boolean(navigation&&navigation.type==='back_forward');
+  }
   document.addEventListener('visibilitychange',function(){
-    if(document.visibilityState==='visible')refreshAfterTelegramReturn();
+    if(document.visibilityState==='visible'&&isHistoryNavigation())refreshAfterTelegramReturn();
   });
-  window.addEventListener('pageshow',refreshAfterTelegramReturn);
+  window.addEventListener('pageshow',function(event){
+    const navigation=performance.getEntriesByType('navigation')[0];
+    const returnedFromExternalFlow=Boolean(event&&event.persisted)||Boolean(navigation&&navigation.type==='back_forward');
+    if(returnedFromExternalFlow){
+      refreshAfterTelegramReturn();
+      return;
+    }
+    // A fresh navigation to #connections is the configuration-error path from
+    // the Connect endpoint; clear its marker but preserve the visible message.
+    if(window.location.hash==='#connections'){
+      try{sessionStorage.removeItem(telegramConnectKey)}catch(_error){}
+    }
+  });
   window.addEventListener('hashchange',function(){const page=window.location.hash.slice(1);if(pages.includes(page))activate(page,false)});
 })();
 </script>

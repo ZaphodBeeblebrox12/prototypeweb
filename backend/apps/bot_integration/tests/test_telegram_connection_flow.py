@@ -50,8 +50,8 @@ class TelegramConnectionFlowTests(TestCase):
         ):
             response = self.client.get(reverse("bot_integration:telegram_connect"))
 
-        self.assertRedirects(response, reverse("dashboard"), fetch_redirect_response=False)
-        follow = self.client.get(response["Location"])
+        self.assertEqual(response["Location"], f"{reverse('dashboard')}#connections")
+        follow = self.client.get(reverse("dashboard"))
         self.assertEqual(follow.status_code, 200)
         self.assertContains(follow, "Telegram verification is not configured yet")
         self.assertContains(follow, "member-flash-error")
@@ -66,8 +66,8 @@ class TelegramConnectionFlowTests(TestCase):
         ):
             response = self.client.get(reverse("bot_integration:telegram_connect"))
 
-        self.assertRedirects(response, reverse("dashboard"), fetch_redirect_response=False)
-        follow = self.client.get(response["Location"])
+        self.assertEqual(response["Location"], f"{reverse('dashboard')}#connections")
+        follow = self.client.get(reverse("dashboard"))
         self.assertContains(follow, "Telegram verification is not configured yet")
         self.assertFalse(
             TelegramVerificationToken.objects.filter(user=self.user).exists()

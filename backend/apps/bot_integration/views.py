@@ -41,7 +41,7 @@ def start_telegram_connect(request):
             request,
             "Telegram verification is not configured yet. Please contact support.",
         )
-        return redirect("dashboard")
+        return redirect(f"{reverse('dashboard')}#connections")
 
     # Delete old unused tokens for this user.
     TelegramVerificationToken.objects.filter(user=request.user).delete()

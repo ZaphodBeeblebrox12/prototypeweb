@@ -42,6 +42,13 @@ class MemberDeskTemplateContractTests(SimpleTestCase):
         self.assertIn('data-goto="overview"', source)
         self.assertIn("Saved progress · no active entitlement", source)
 
+    def test_telegram_return_refresh_only_runs_after_history_navigation(self):
+        source = get_template("accounts/member_desk.html").template.source
+        self.assertIn("event.persisted", source)
+        self.assertIn("navigation.type==='back_forward'", source)
+        self.assertIn("returnedFromExternalFlow", source)
+        self.assertIn("window.location.hash==='#connections'", source)
+
     def test_live_member_desk_contains_no_mock_account_or_payment_records(self):
         template = get_template("accounts/member_desk.html")
         source = template.template.source
