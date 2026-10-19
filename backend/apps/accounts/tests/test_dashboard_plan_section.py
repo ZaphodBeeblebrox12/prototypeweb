@@ -16,6 +16,7 @@ from django.utils import timezone
 from apps.academy.models import (
     Course, CourseEntitlement, CourseModule, Lesson, LessonProgress,
 )
+from apps.bot_integration.models import BotConfig
 from apps.subscriptions.models import (
     GeoPlanPrice, Plan, PlanFeature, PlanPrice, Product, Subscription,
 )
@@ -273,30 +274,29 @@ class MemberCourseDashboardDataTests(TestCase):
             is_published=False,
         )
 
-    @override_settings(
-        TELEGRAM_VERIFICATION_BOT_USERNAME="",
-        TELEGRAM_VERIFICATION_BOT_TOKEN="",
-    )
-    def test_missing_telegram_verification_config_is_explained_in_connections(self):
+    def test_missing_telegram_bot_config_is_explained_in_connections(self):
         response = self.client.get(reverse("dashboard"))
         self.assertEqual(response.status_code, 200)
-        self.assertFalse(response.context["telegram_verification_configured"])
-        self.assertContains(response, "Telegram verification is not ready on this server.")
-        self.assertContains(response, "TELEGRAM_VERIFICATION_BOT_USERNAME")
+        self.assertFalse(response.context["telegram_bot_configured"])
+        self.assertContains(response, "The TradeThesis Telegram bot is not configured yet.")
         self.assertContains(response, 'aria-disabled="true">Telegram setup required</span>')
         self.assertNotContains(
             response,
             f'href="{reverse("bot_integration:telegram_connect")}"',
         )
 
-    @override_settings(
-        TELEGRAM_VERIFICATION_BOT_USERNAME="verification_bot",
-        TELEGRAM_VERIFICATION_BOT_TOKEN="test-verification-token",
-    )
-    def test_configured_telegram_verification_keeps_connect_links_available(self):
+    def test_configured_telegram_bot_keeps_connect_links_available(self):
+        BotConfig.objects.update_or_create(
+            pk=1,
+            defaults={
+                "telegram_bot_username": "tradethesis_test_bot",
+                "telegram_bot_token": "test-main-bot-token",
+                "is_active": True,
+            },
+        )
         response = self.client.get(reverse("dashboard"))
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context["telegram_verification_configured"])
+        self.assertTrue(response.context["telegram_bot_configured"])
         self.assertContains(
             response,
             f'href="{reverse("bot_integration:telegram_connect")}"',
