@@ -48,6 +48,30 @@
     <main class="tt-lesson-main">
       <article class="tt-lesson-article">
         {% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook only %}
+        {% if practice_questions %}
+        <section class="tt-practice-questions" aria-labelledby="tt-practice-heading" style="margin:24px 0;padding:18px;border:1px solid #dce1d7;border-radius:10px;background:#f7f4ec">
+          <p style="margin:0 0 6px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#667269">Apply what you noticed</p>
+          <h2 id="tt-practice-heading" style="margin:0 0 14px;font-size:20px">Practice questions</h2>
+          <form method="post" action="{% url 'academy:lesson-quiz-submit' lesson.id %}" data-practice-quiz>
+            {% csrf_token %}
+            {% for question in practice_questions %}
+            <fieldset style="margin:0 0 18px;padding:0;border:0">
+              <legend style="font-weight:700;margin-bottom:8px">{{ question.prompt }}</legend>
+              {% for option in question.options %}
+              <label style="display:flex;gap:8px;align-items:flex-start;margin:8px 0;font-size:13px;line-height:1.5">
+                <input type="radio" name="{{ question.id }}" value="{{ forloop.counter0 }}" style="margin-top:4px">
+                <span>{{ option }}</span>
+              </label>
+              {% endfor %}
+              <p data-quiz-feedback="{{ question.id }}" role="status" aria-live="polite" style="margin:8px 0 0;font-size:12px"></p>
+            </fieldset>
+            {% endfor %}
+            <button type="submit" style="padding:10px 14px;border:0;border-radius:7px;background:#355a46;color:#fff;font-weight:700">Check answers</button>
+            <p data-quiz-score role="status" aria-live="polite" style="margin:10px 0 0;font-size:12px"></p>
+          </form>
+          <p style="margin:12px 0 0;font-size:11px;color:#667269">Feedback is checked by the Academy after you submit. Correct answers are not included in the page before submission.</p>
+        </section>
+        {% endif %}
         {% if related_courses %}
         <section class="tt-related-courses" aria-labelledby="tt-related-courses-heading" style="margin:24px 0;padding:18px;border:1px solid #dce1d7;border-radius:10px;background:#f7f4ec">
           <p style="margin:0 0 6px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#667269">Continue learning</p>
@@ -78,6 +102,41 @@
 <script src="{% static 'academy/learning-room.js' %}" defer></script>
 <script>
 (() => {
+  const quizForm = document.querySelector("[data-practice-quiz]");
+  if (quizForm) {
+    quizForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const button = quizForm.querySelector('button[type="submit"]');
+      const score = quizForm.querySelector("[data-quiz-score]");
+      const answers = {};
+      quizForm.querySelectorAll('input[type="radio"]:checked').forEach(input => { answers[input.name] = input.value; });
+      button.disabled = true;
+      score.textContent = "Checking your answers…";
+      try {
+        const response = await fetch(quizForm.action, {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": quizForm.querySelector('[name="csrfmiddlewaretoken"]').value
+          },
+          body: JSON.stringify({answers})
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.detail || "Answers could not be checked.");
+        for (const result of payload.results || []) {
+          const feedback = quizForm.querySelector('[data-quiz-feedback="' + CSS.escape(result.id) + '"]');
+          if (feedback) feedback.textContent = (result.correct ? "Correct. " : "Review this answer. ") + (result.explanation || "");
+        }
+        score.textContent = "You got " + payload.score + " of " + payload.total + " correct.";
+      } catch (error) {
+        score.textContent = error.message || "Answers could not be checked.";
+      } finally {
+        button.disabled = false;
+      }
+    });
+  }
+
   const form = document.querySelector("[data-lesson-complete]");
   if (!form) return;
   form.addEventListener("submit", async event => {
