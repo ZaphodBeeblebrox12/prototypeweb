@@ -220,7 +220,7 @@
           modules: Array.isArray(course.modules) ? course.modules : [],
           outcome: course.outcome || course.description || "",
           complements: course.complements || "Explore this published course in the TradeThesis Academy.",
-          price: course.price || ""
+          price: course.price || "View in Academy"
         });
       }
       if (published.length) {
