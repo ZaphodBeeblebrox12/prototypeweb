@@ -287,7 +287,11 @@ def course_builder_api(request):
         for record in CourseImport.objects.filter(status=CourseImport.Status.DRAFT).order_by("-updated_at"):
             if record.payload.get("builder_state"):
                 drafts.append(_draft_response(record, request))
-        related_courses = list(Course.objects.filter(status=Course.Status.PUBLISHED).order_by("position", "title").values("id", "title", "slug", "summary"))
+        related_courses = list(Course.objects.filter(
+            status=Course.Status.PUBLISHED,
+            modules__is_published=True,
+            modules__lessons__is_published=True,
+        ).distinct().order_by("position", "title").values("id", "title", "slug", "summary"))
         return JsonResponse({"drafts": drafts, "related_courses": related_courses})
 
     try:
