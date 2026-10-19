@@ -35,6 +35,7 @@ class TelegramConnectionFlowTests(TestCase):
         return config
 
     def test_member_desk_connect_button_uses_deep_link_route(self):
+        self.configure_bot("verification_bot")
         response = self.client.get(reverse("dashboard"))
         self.assertEqual(response.status_code, 200)
         connect_path = reverse("bot_integration:telegram_connect")
