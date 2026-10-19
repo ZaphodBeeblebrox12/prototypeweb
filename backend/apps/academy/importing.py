@@ -448,10 +448,10 @@ def publish_course_import(record, *, user):
         course.title = course_data["title"]
         course.summary = course_data.get("summary", "")
         course.description = course_data.get("description", "")
-        course.category = course_data.get("category", "")
-        course.level = course_data.get("level", "")
-        course.estimated_duration = course_data.get("estimated_duration", "")
-        course.learning_outcomes = course_data.get("learning_outcomes", [])
+        course.category = course_data.get("category", course.category)
+        course.level = course_data.get("level", course.level)
+        course.estimated_duration = course_data.get("estimated_duration", course.estimated_duration)
+        course.learning_outcomes = course_data.get("learning_outcomes", course.learning_outcomes)
         course.position = course_data.get("position", 0)
         course.save(update_fields=[
             "title", "summary", "description", "category", "level",
