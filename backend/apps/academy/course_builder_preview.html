@@ -211,7 +211,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       <button class="btn secondary" id="publishButton" type="button">Publish course</button>
     </div>
   </header>
-  <div class="notice"><strong>Prototype workspace</strong><span>Drafts and publishing are interactive in this preview and saved in this browser only. The production builder will use shared Django storage, administrator permissions and the site's real course catalogue; nothing here publishes to the live website.</span></div>
+  <div class="notice"><strong>Academy workspace</strong><span>Course drafts are saved to the shared Academy database when you save. Submit a course for review before publishing it to the Courses catalogue. Pricing and checkout remain separate. Staging image files still need durable object storage before production use.</span></div>
   <section class="page-head">
     <div><div class="eyebrow">Course operations / Content studio</div><h1>Build a course, one lesson at a time.</h1><p>Create the structure, write and revise lesson content, add figures, set practice questions, then preview the learner experience before publishing it to the course catalogue.</p><div class="page-meta"><span class="pill">Reuse the Learning Room template</span><span class="pill">Save and return later</span><span class="pill">Draft → review → publish</span></div></div>
   </section>
@@ -244,13 +244,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   const makeLesson = (n=1) => ({id:uid('lesson'),title:`Lesson 1.${n} — Start with a question`,summary:'A practical introduction to the decision this lesson will help you make.',minutes:12,format:'reading',content:`## Start with the decision\n\nBegin with a practical question a trader may encounter. Describe what can be observed before offering an interpretation.\n\n### What to notice\n\nSeparate the visible evidence from the conclusion you may draw from it. Name the limits of the observation and consider a reasonable alternative.\n\n### Compare the possibilities\n\nUse a second case to show how similar-looking conditions can lead to different outcomes. Explain which detail changes the interpretation.\n\n### Take it into practice\n\nWrite down what would strengthen your reading, what would weaken it, and what would make waiting the better decision.`,questions:[defaultQuestion()],image:null,relatedCourseIds:[]});
   const makeModule = (n=1) => ({id:uid('module'),title:`Module ${String(n).padStart(2,'0')} — Foundations`,description:'The main ideas and decisions covered in this module.',lessons:[makeLesson(1)]});
   const makeCourse = (title='Untitled course') => ({id:uid('course'),title,slug:slugify(title),summary:'A clear, practical description of what learners will study and why it matters.',description:'Explain who the course is for, what it covers and how learners will use it. Keep the promise realistic and specific.',category:'Technical analysis',level:'Intermediate',duration:'Self-paced',price:'',priceNote:'Pricing and checkout are configured separately.',status:'draft',createdAt:nowText(),updatedAt:'Not saved yet',publishedAt:null,publishedSnapshot:null,modules:[makeModule(1)],outcomes:['Describe the evidence before interpreting it.','Compare alternatives and identify invalidation.','Build a clear, conditional decision process.']});
-  const demoOffers = [
-    {id:'trading-path',title:'The TradeThesis Trading Path',category:'BEGINNER PROGRAMME',summary:'A guided introduction to markets, charts and trading decisions.',price:'₹999',state:'Published catalogue item'},
-    {id:'construct',title:'CONSTRUCT',category:'TRADE CONSTRUCTION & MANAGEMENT',summary:'Build a repeatable process from market context through risk, management and review.',price:'₹17,000',state:'Published catalogue item'},
-    {id:'support-resistance',title:'Support & Resistance',category:'CHART READING',summary:'Mark meaningful price zones, read reactions and avoid drawing lines without a reason.',price:'₹599',state:'Published catalogue item'},
-    {id:'understand-bollinger-bands',title:'Understand Bollinger Bands',category:'INDICATORS & VOLATILITY',summary:'Understand band behaviour, context and common interpretation mistakes.',price:'₹599',state:'Published catalogue item'},
-    {id:'volume-analysis',title:'Volume Analysis',category:'MARKET PARTICIPATION',summary:'A related-course placeholder for volume concepts; confirm availability in the live catalogue before linking.',price:'',state:'Reference candidate — verify availability'}
-  ];
+  let demoOffers = [];
   function getSeed() { const c=makeCourse('New micro-course draft'); c.summary='Add a concise course promise here.'; c.description='Describe the learner, what the course covers and what they can practise after completing it.'; c.modules[0].title='Module 01 — Foundations'; c.modules[0].lessons[0].title='Lesson 1.1 — First principles'; return {courses:[c],selectedCourseId:c.id,selectedModuleId:c.modules[0].id,selectedLessonId:c.modules[0].lessons[0].id,view:'overview',tab:'overview'}; }
   function load() { try { const raw=localStorage.getItem(STORAGE_KEY); if(raw){const v=JSON.parse(raw); if(v && Array.isArray(v.courses) && v.courses.length) return v;} } catch(e){} return getSeed(); }
   let state=load(); let toastTimer=null; let saveTimer=null; let previewMode=false;
@@ -288,9 +282,9 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   $('#courseSearch').addEventListener('input',renderSidebar);
   $('#newCourseButton').addEventListener('click',()=>handleAction('new-course',{}));
   $('#duplicateCourseButton').addEventListener('click',duplicateCourse);
-  $('#saveButton').addEventListener('click',saveDraft);
+  $('#saveButton').addEventListener('click',()=>saveDraft());
   $('#previewButton').addEventListener('click',()=>{state.tab='preview';renderEditor();$('#workspace').scrollIntoView({behavior:'smooth',block:'start'});});
-  $('#publishButton').addEventListener('click',publishCourse);
+  $('#publishButton').addEventListener('click',()=>publishCourse());
   $('#backToBuilder').addEventListener('click',()=>$('#workspace').scrollIntoView({behavior:'smooth',block:'start'}));
   document.addEventListener('change',event=>{if(event.target.id!=='imageUpload')return;const file=event.target.files&&event.target.files[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)){toast('Choose a JPG, PNG or WebP image.');event.target.value='';return;}if(file.size>1.5*1024*1024){toast('This preview limits images to 1.5 MB.');event.target.value='';return;}const reader=new FileReader();reader.onload=()=>{const l=currentLesson();if(!l)return;l.image={id:uid('asset'),name:file.name,alt:$('#imageAlt')?.value||'',data:String(reader.result)};persist(false);renderEditor();toast('Image added to this lesson draft.');};reader.onerror=()=>toast('The image could not be read.');reader.readAsDataURL(file);});
   // Authoring enhancements: Markdown reference, multi-image upload, alt text and captions.
@@ -306,10 +300,135 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   document.addEventListener('input',event=>{const el=event.target;if(!el.matches('[data-image-item][data-field]'))return;const l=currentLesson();if(!l)return;if(!Array.isArray(l.images))l.images=l.image?[l.image]:[];const im=l.images.find(x=>x.id===el.dataset.imageItem);if(im){im[el.dataset.field]=el.value;l.image=l.images[0]||null;schedulePersist();}});
   document.addEventListener('change',event=>{const el=event.target;if(el.id!=='multiImageUpload')return;const files=Array.from(el.files||[]);const l=currentLesson();if(!l||!files.length)return;if(!Array.isArray(l.images))l.images=l.image?[l.image]:[];const valid=files.filter(f=>['image/jpeg','image/png','image/webp'].includes(f.type)&&f.size<=1.5*1024*1024);if(valid.length!==files.length)toast('Skipped files that are not JPG, PNG or WebP under 1.5 MB.');let left=valid.length;if(!left)return;valid.forEach(file=>{const reader=new FileReader();reader.onload=()=>{l.images.push({id:uid('asset'),name:file.name,alt:'',caption:'',data:String(reader.result)});if(--left===0){l.image=l.images[0]||null;persist(false);renderEditor();toast(`${valid.length} image${valid.length===1?'':'s'} added.`);}};reader.readAsDataURL(file);});});
   document.addEventListener('change',event=>{const el=event.target;if(!el.matches('[data-related-course]'))return;const l=currentLesson();if(!l)return;if(!Array.isArray(l.relatedCourseIds))l.relatedCourseIds=[];const id=el.dataset.relatedCourse;if(el.checked&&!l.relatedCourseIds.includes(id))l.relatedCourseIds.push(id);if(!el.checked)l.relatedCourseIds=l.relatedCourseIds.filter(x=>x!==id);persist(false);toast('Related-course reference saved in this preview.');});
-  // Keep a user-entered draft available between sessions in this browser.
-  if(!state.savedAt)persist(false);
+  // Shared Academy integration. Local storage remains a convenience cache, not the source of truth.
+  const hadLocalDraft = Boolean(localStorage.getItem(STORAGE_KEY));
+  let academyReady = false;
+  let academySaveTimer = null;
+  let academySaving = false;
+  const csrfValue = () => {
+    const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : '';
+  };
+  async function academyRequest(method, body) {
+    const headers = {'Accept':'application/json'};
+    if (method !== 'GET') {
+      headers['Content-Type'] = 'application/json';
+      headers['X-CSRFToken'] = csrfValue();
+    }
+    const response = await fetch('/staff/course-builder/api/', {
+      method, credentials:'same-origin', headers,
+      ...(body ? {body:JSON.stringify(body)} : {})
+    });
+    const payload = await response.json().catch(()=>({detail:'The Academy returned an unreadable response.'}));
+    if (!response.ok) {
+      const detail = Array.isArray(payload.detail) ? payload.detail.join(' ') : (payload.detail || 'The Academy request failed.');
+      throw new Error(detail);
+    }
+    return payload;
+  }
+  function queueAcademySave() {
+    if (!academyReady || academySaving) return;
+    clearTimeout(academySaveTimer);
+    academySaveTimer = setTimeout(async () => {
+      try { await saveCurrentToAcademy(false); }
+      catch (error) { toast('Local changes are kept in this browser, but the Academy save failed: ' + error.message); }
+    }, 900);
+  }
+  async function saveCurrentToAcademy(submit) {
+    const course = currentCourse();
+    if (!course) return;
+    academySaving = true;
+    try {
+      const result = await academyRequest('POST', {course, mode:submit?'submit':'save'});
+      course.serverDraftId = result.record_id;
+      course.serverUpdatedAt = result.updated_at || new Date().toISOString();
+      state.savedAt = nowText();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+      renderHeaderState();
+      if (submit) {
+        toast('Draft saved. Opening the review checklist…');
+        window.location.assign(result.review_url);
+      } else {
+        const indicator = $('#saveIndicator');
+        if (indicator) indicator.innerHTML = '<span class="dot"></span><span>Saved to Academy · ' + esc(nowText()) + '</span>';
+        if (result.message) toast(result.message);
+      }
+      return result;
+    } finally {
+      academySaving = false;
+    }
+  }
+  persist = function(showToast=false) {
+    try {
+      state.savedAt = nowText();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      state.storageAvailable = true;
+      if (showToast) toast('Saving draft to the Academy…');
+      renderSidebar();
+      renderHeaderState();
+      queueAcademySave();
+    } catch (error) {
+      state.storageAvailable = false;
+      toast('Browser cache is full. The Academy save will still be attempted.');
+      queueAcademySave();
+    }
+  };
+  saveDraft = function() {
+    if (!currentCourse()) return;
+    clearTimeout(academySaveTimer);
+    saveCurrentToAcademy(false).catch(error => toast('Could not save to Academy: ' + error.message));
+  };
+  publishCourse = function() {
+    const course = currentCourse();
+    if (!course) return;
+    if (!course.title.trim() || !course.summary.trim() || !course.modules.length || !allLessons(course).length || allLessons(course).some(lesson=>!lesson.title.trim()||!lesson.content.trim())) {
+      toast('Add a title, summary, at least one module, and complete lesson content before submitting.');
+      state.tab = !course.title.trim() || !course.summary.trim() ? 'overview' : 'lesson';
+      renderEditor();
+      return;
+    }
+    clearTimeout(academySaveTimer);
+    saveCurrentToAcademy(true).catch(error => toast('Could not submit for review: ' + error.message));
+  };
+  async function syncAcademy() {
+    try {
+      const result = await academyRequest('GET');
+      demoOffers = (result.related_courses || []).map(course => ({
+        id:String(course.id), title:course.title, category:'PUBLISHED COURSE',
+        summary:course.summary || 'Open this course in the TradeThesis Academy.',
+        price:'', state:'Published in Academy', slug:course.slug
+      }));
+      const remoteDrafts = result.drafts || [];
+      for (const remote of remoteDrafts) {
+        const index = state.courses.findIndex(local => local.serverDraftId === remote.serverDraftId || local.slug === remote.slug);
+        if (index >= 0) {
+          const local = state.courses[index];
+          if (local.serverDraftId && local.serverDraftId === remote.serverDraftId) state.courses[index] = remote;
+          else if (!hadLocalDraft) state.courses[index] = remote;
+        } else {
+          state.courses.push(remote);
+        }
+      }
+      if (!hadLocalDraft && remoteDrafts.length) {
+        const latest = remoteDrafts[0];
+        state.selectedCourseId = latest.id;
+        state.selectedModuleId = latest.modules?.[0]?.id || null;
+        state.selectedLessonId = latest.modules?.[0]?.lessons?.[0]?.id || null;
+      }
+      academyReady = true;
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+      render();
+      if (remoteDrafts.length) toast('Connected to Academy. Shared drafts are available across devices.');
+      else toast('Connected to Academy. Save your first draft to make it available across devices.');
+    } catch (error) {
+      academyReady = false;
+      toast('Could not connect to the Academy draft service: ' + error.message);
+    }
+  }
+  // Use real published courses for lesson cross-references; never invent catalogue entries.
+  if (!state.savedAt) persist(false);
   render();
-})();
+  syncAcademy();
 </script>
 </body>
 </html>
