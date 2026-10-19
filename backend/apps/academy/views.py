@@ -255,12 +255,37 @@ def lesson_quiz_submit(request, lesson_id):
             "correct": correct,
             "explanation": str(question.get("explanation", ""))[:3000],
         })
+    existing_progress = LessonProgress.objects.filter(user=request.user, lesson=lesson).first()
+    saved_response = dict(existing_progress.response_json or {}) if existing_progress and isinstance(existing_progress.response_json, dict) else {}
+    saved_response.update({"quiz_answers": answers, "quiz_score": score, "quiz_total": len(results)})
     update_lesson_progress(
         user=request.user,
         lesson=lesson,
-        response_json={"quiz_answers": answers, "quiz_score": score, "quiz_total": len(results)},
+        response_json=saved_response,
     )
     return JsonResponse({"ok": True, "score": score, "total": len(results), "results": results})
+
+
+@login_required
+@require_POST
+def lesson_notebook_submit(request, lesson_id):
+    """Persist learner reflections without exposing or altering instructor materials."""
+    lesson = get_object_or_404(
+        Lesson.objects.select_related("module__course"),
+        pk=lesson_id, is_published=True, module__is_published=True,
+    )
+    if not can_access_lesson(request.user, lesson):
+        raise PermissionDenied("You do not have access to this lesson yet.")
+    notebook = lesson.content_json.get("notebook", {}) if isinstance(lesson.content_json, dict) else {}
+    prompts = notebook.get("prompts", []) if isinstance(notebook, dict) else []
+    responses = []
+    for index, _prompt in enumerate(prompts[:6]):
+        responses.append(str(request.POST.get(f"prompt_{index}", "")).strip()[:4000])
+    existing_progress = LessonProgress.objects.filter(user=request.user, lesson=lesson).first()
+    saved_response = dict(existing_progress.response_json or {}) if existing_progress and isinstance(existing_progress.response_json, dict) else {}
+    saved_response["notebook_responses"] = responses
+    update_lesson_progress(user=request.user, lesson=lesson, response_json=saved_response)
+    return JsonResponse({"ok": True, "saved": True})
 
 
 @login_required
