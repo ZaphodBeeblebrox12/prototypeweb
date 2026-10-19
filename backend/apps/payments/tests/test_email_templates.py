@@ -11,7 +11,7 @@ from django.test import TestCase
 from apps.notifications.services import NotificationService
 
 BASE_CTX = {
-    "site_name": "TradeAdmin",
+    "site_name": "TradeThesis",
     "username": "alice",
     "plan_name": "Pro",
     "amount_display": "USD 9.99",
@@ -35,7 +35,7 @@ class BillingEmailTemplateTests(TestCase):
         for name in ("payment_success", "payment_failed",
                      "payment_refunded", "payment_chargedback"):
             html = render_to_string(f"payments/email/{name}_body.html", BASE_CTX)
-            self.assertIn("TradeAdmin", html)          # branding
+            self.assertIn("TradeThesis", html)         # branding
             self.assertIn("USD 9.99", html)            # payment data present
             self.assertIn("alice", html)               # personalization
 
@@ -54,7 +54,7 @@ class BillingEmailTemplateTests(TestCase):
         ctx = dict(BASE_CTX, days=3)
         for name in ("reminder_pre_expiry", "reminder_post_expiry"):
             html = render_to_string(f"subscriptions/email/{name}_body.html", ctx)
-            self.assertIn("TradeAdmin", html)
+            self.assertIn("TradeThesis", html)
 
     def test_notification_service_attaches_html(self):
         NotificationService.send_email(
