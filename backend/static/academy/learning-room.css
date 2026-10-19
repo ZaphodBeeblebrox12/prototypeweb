@@ -153,3 +153,6 @@
   .tt-practice-questions { padding: 13px; }
   [data-notebook-feedback] { display: block; margin: 10px 0 0; }
 }
+
+.tt-tab-panel img[role="button"] { cursor: zoom-in; }
+.tt-tab-panel img[role="button"]:focus-visible { outline: 3px solid var(--tt-gold); outline-offset: 4px; }
