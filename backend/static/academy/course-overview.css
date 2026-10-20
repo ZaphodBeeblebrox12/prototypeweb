@@ -337,3 +337,18 @@ a.tt-overview-lesson-title:hover { color: var(--tt-co-green); text-decoration: u
   .tt-overview-lesson-item { grid-template-columns: minmax(0, 1fr); }
   .tt-overview-lesson-state { justify-content: flex-start; max-width: none; padding-left: 33px; text-align: left; }
 }
+
+.tt-overview-admin-preview-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--tt-co-green);
+  font-size: 8px;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.tt-overview-admin-preview-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
