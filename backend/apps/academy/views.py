@@ -599,6 +599,9 @@ def lesson_quiz_submit(request, lesson_id):
         results.append({
             "id": question_id,
             "correct": correct,
+            # Reveal option indexes only after the learner submits an attempt.
+            "selected_index": selected if 0 <= selected < len(options) else None,
+            "correct_index": correct_index if 0 <= correct_index < len(options) else None,
             "explanation": str(question.get("explanation", ""))[:3000],
         })
     existing_progress = LessonProgress.objects.filter(user=request.user, lesson=lesson).first()
