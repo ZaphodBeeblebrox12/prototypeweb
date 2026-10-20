@@ -68,6 +68,46 @@ class AcademyViewTests(TestCase):
         self.assertContains(response, "Enrolment is not available right now")
         self.assertNotContains(response, 'class="alert alert-info"')
 
+    def test_admin_can_preview_locked_lesson_without_creating_progress(self):
+        admin = User.objects.create_user(
+            username="course-content-admin",
+            password="Test-password-123!",
+            role="admin",
+            is_staff=True,
+        )
+        self.client.force_login(admin)
+
+        overview = self.client.get(
+            reverse("academy:course-detail", args=[self.course.slug])
+        )
+        self.assertEqual(overview.status_code, 200)
+        preview_url = reverse(
+            "academy:admin-lesson-preview",
+            args=[self.course.slug, self.paid_lesson.pk],
+        )
+        self.assertContains(overview, preview_url)
+        self.assertContains(overview, "Admin preview")
+
+        response = self.client.get(preview_url)
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "ADMIN PREVIEW")
+        self.assertContains(response, "LOCKED ACCESS BYPASSED FOR REVIEW ONLY")
+        self.assertContains(response, "SECRET PAID LESSON BODY")
+        self.assertContains(response, "Course outline")
+        self.assertNotContains(response, "Mark complete")
+        self.assertNotContains(response, "Save reflection")
+        self.assertNotContains(response, "Check answers")
+        self.assertFalse(
+            LessonProgress.objects.filter(user=admin, lesson=self.paid_lesson).exists()
+        )
+
+    def test_locked_lesson_preview_is_for_course_content_admins_only(self):
+        response = self.client.get(
+            reverse("academy:admin-lesson-preview", args=[self.course.slug, self.paid_lesson.pk])
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertNotContains(response, "SECRET PAID LESSON BODY", status_code=403)
+
     def test_paid_lesson_is_not_retrievable_without_entitlement(self):
         response = self.client.get(reverse("academy:lesson", args=[self.course.slug, self.paid_lesson.pk]))
         self.assertEqual(response.status_code, 403)
