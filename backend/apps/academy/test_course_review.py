@@ -128,6 +128,136 @@ class CourseReviewTemplateTests(TestCase):
         self.assertContains(response, "Stage Understand Bollinger Bands for review")
         self.assertContains(response, "csrfmiddlewaretoken")
 
+    def _website_preview_record(self):
+        return CourseImport.objects.create(
+            course_slug="website-preview-course",
+            title="Website Preview Course",
+            manifest_version="1.0",
+            content_hash="d" * 64,
+            source_manifest="builder://website-preview-course",
+            status=CourseImport.Status.REVIEW,
+            imported_by=self.admin,
+            payload={
+                "course": {
+                    "title": "Website Preview Course",
+                    "slug": "website-preview-course",
+                    "summary": "A short promise for the course.",
+                    "description": "A course description for the learner-facing page.",
+                },
+                "notebook": {
+                    "title": "Evidence notebook",
+                    "prompts": [{"label": "Observe", "text": "What evidence is visible?"}],
+                },
+                "assets": [],
+                "modules": [{
+                    "slug": "foundations",
+                    "title": "Foundations",
+                    "summary": "Start by observing the chart.",
+                    "position": 1,
+                    "lessons": [
+                        {
+                            "source_id": "1.1",
+                            "slug": "first-principles",
+                            "title": "First principles",
+                            "summary": "Begin with visible evidence.",
+                            "position": 1,
+                            "duration_minutes": 12,
+                            "content_markdown": (
+                                "## The idea\n\nAuthored lesson text for the website preview.\n\n"
+                                "## Chart examples\n\nCompare the two cases.\n\n"
+                                "## Test your reading\n\nWhat evidence would change your view?"
+                            ),
+                            "content_json": {
+                                "asset_ids": [],
+                                "notebook": {
+                                    "title": "Evidence notebook",
+                                    "prompts": [{
+                                        "label": "Observe",
+                                        "text": "What evidence is visible?",
+                                    }],
+                                },
+                            },
+                        },
+                        {
+                            "source_id": "1.2",
+                            "slug": "second-principles",
+                            "title": "Second principles",
+                            "summary": "",
+                            "position": 2,
+                            "duration_minutes": 13,
+                            "content_markdown": "## The idea\n\nSecond lesson body.",
+                            "content_json": {"asset_ids": []},
+                        },
+                    ],
+                }],
+            },
+        )
+
+    def test_website_preview_uses_shared_shell_and_shows_full_curriculum(self):
+        record = self._website_preview_record()
+        response = self.client.get(
+            reverse("academy:course-import-preview", args=[record.pk])
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "Website Preview Course")
+        self.assertContains(response, "A short promise for the course.")
+        self.assertContains(response, 'class="tt-course-overview')
+        self.assertContains(response, "ADMIN PREVIEW")
+        self.assertContains(response, "First principles")
+        self.assertContains(response, "Second principles")
+        self.assertContains(response, "Content review")
+        self.assertNotContains(response, "data-notebook-response")
+        self.assertNotContains(response, "data-practice-quiz")
+        self.assertIsNone(response.context["selected_lesson"])
+
+    def test_website_preview_renders_lesson_tabs_read_only(self):
+        record = self._website_preview_record()
+        response = self.client.get(
+            reverse("academy:course-import-preview", args=[record.pk]),
+            {"lesson": "1.1"},
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "tt-admin-learning-preview")
+        self.assertContains(response, "The idea")
+        self.assertContains(response, "Chart examples")
+        self.assertContains(response, "Test your reading")
+        self.assertContains(response, "Authored lesson text for the website preview.")
+        self.assertContains(response, "Evidence notebook")
+        self.assertContains(response, "What evidence is visible?")
+        self.assertNotContains(response, "data-notebook-response")
+        self.assertNotContains(response, "data-practice-quiz")
+        self.assertNotContains(response, "Mark complete")
+        self.assertEqual(response.context["selected_lesson"]["source_id"], "1.1")
+
+    def test_website_preview_is_for_course_content_admins_only(self):
+        record = self._website_preview_record()
+        learner = User.objects.create_user(
+            username="website-preview-learner",
+            password="test-password",
+            role="learner",
+        )
+        self.client.force_login(learner)
+
+        response = self.client.get(
+            reverse("academy:course-import-preview", args=[record.pk])
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_content_review_links_to_website_preview(self):
+        record = self._website_preview_record()
+        response = self.client.get(
+            reverse("admin:academy_courseimport_review", args=[record.pk])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            reverse("academy:course-import-preview", args=[record.pk]),
+        )
+        self.assertContains(response, "View website preview")
+
     def test_shared_tabs_keep_notebook_form_for_a_real_lesson(self):
         lesson_id = uuid.uuid4()
         rendered = render_to_string(
