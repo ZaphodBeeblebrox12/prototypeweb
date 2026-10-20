@@ -184,7 +184,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
             },
             module_label="Module 5 · Build and trade setups",
         )
-        figure_index = rendered.index('class="tt-image-group-figure"')
+        figure_index = rendered.index("tt-image-group-figure")
         self.assertLess(rendered.index("Text before the group."), figure_index)
         self.assertLess(figure_index, rendered.index("Text after the group."))
         self.assertIn("Method II: price position and money flow", rendered)
