@@ -146,6 +146,7 @@ def course_detail(request, course_slug):
         "total_study_hours": total_study_minutes // 60,
         "total_study_minutes_remainder": total_study_minutes % 60,
         "first_accessible_lesson": first_accessible_lesson,
+        "is_course_content_admin": is_course_content_admin(request.user),
         "progress_percent": round(completed * 100 / total) if total else 0,
     })
 
@@ -236,6 +237,112 @@ def lesson_detail(request, course_slug, lesson_id):
         "previous_lesson": previous_lesson, "next_lesson": next_lesson,
         "course_progress_percent": course_progress_percent,
         "completed_lessons": completed_lessons, "total_lessons": total_lessons,
+    })
+
+
+@login_required
+def admin_lesson_preview(request, course_slug, lesson_id):
+    """Show a real locked lesson to course admins without altering learner state."""
+    if not is_course_content_admin(request.user):
+        raise PermissionDenied("Administrator course-content access is required.")
+
+    lesson = get_object_or_404(
+        Lesson.objects.select_related("module__course"),
+        pk=lesson_id,
+        module__course__slug=course_slug,
+        module__course__status=Course.Status.PUBLISHED,
+        module__is_published=True,
+        is_published=True,
+    )
+    course = lesson.module.course
+    entitlement = get_active_entitlement(request.user, course)
+    content_json = lesson.content_json if isinstance(lesson.content_json, dict) else {}
+    asset_ids = content_json.get("asset_ids", [])
+    if not isinstance(asset_ids, list):
+        asset_ids = []
+    media_assets = CourseMediaAsset.objects.filter(course=course, pk__in=asset_ids)
+    asset_urls = {}
+    for asset in media_assets:
+        if asset.file:
+            asset_urls[str(asset.pk)] = reverse("academy:media-asset", args=[asset.pk])
+        elif isinstance(asset.original_url, str) and asset.original_url.startswith(("https://", "http://")):
+            asset_urls[str(asset.pk)] = asset.original_url
+
+    now = timezone.now()
+    modules = CourseModule.objects.filter(
+        course=course,
+        is_published=True,
+    ).prefetch_related(
+        Prefetch(
+            "lessons",
+            queryset=Lesson.objects.filter(is_published=True).order_by("position", "title"),
+        )
+    ).order_by("position", "title")
+    outline_modules = []
+    ordered_lessons = []
+    for module_row in modules:
+        rows = []
+        for outline_lesson in module_row.lessons.all():
+            ordered_lessons.append(outline_lesson)
+            rows.append({
+                "lesson": outline_lesson,
+                "accessible": can_access_lesson(request.user, outline_lesson, now),
+                "current": outline_lesson.pk == lesson.pk,
+                "progress": None,
+                "admin_preview_url": reverse(
+                    "academy:admin-lesson-preview",
+                    args=[course.slug, outline_lesson.pk],
+                ),
+            })
+        if rows:
+            outline_modules.append({"module": module_row, "lessons": rows})
+
+    current_index = next(
+        (index for index, item in enumerate(ordered_lessons) if item.pk == lesson.pk),
+        -1,
+    )
+    previous_lesson = ordered_lessons[current_index - 1] if current_index > 0 else None
+    next_lesson = (
+        ordered_lessons[current_index + 1]
+        if 0 <= current_index < len(ordered_lessons) - 1
+        else None
+    )
+    notebook = content_json.get("notebook", {})
+    if not isinstance(notebook, dict):
+        notebook = {}
+    practice_questions = content_json.get("questions", [])
+    if not isinstance(practice_questions, list):
+        practice_questions = []
+    video_url = content_json.get("video_url", "")
+    if not isinstance(video_url, str) or not video_url.startswith(("https://", "http://")):
+        video_url = ""
+    video_is_file = video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
+
+    return render(request, "academy/lesson.html", {
+        "course": course,
+        "lesson": lesson,
+        "module": lesson.module,
+        "entitlement": entitlement,
+        "progress": None,
+        "admin_preview": True,
+        "lesson_sections": build_lesson_sections(
+            lesson.content_markdown,
+            asset_urls,
+            user=request.user,
+            admin_preview=True,
+        ),
+        "notebook": notebook,
+        "notebook_responses": [],
+        "outline_modules": outline_modules,
+        "related_courses": Course.objects.none(),
+        "practice_questions": practice_questions,
+        "video_url": video_url,
+        "video_is_file": video_is_file,
+        "previous_lesson": previous_lesson,
+        "next_lesson": next_lesson,
+        "course_progress_percent": 0,
+        "completed_lessons": 0,
+        "total_lessons": len(ordered_lessons),
     })
 
 
