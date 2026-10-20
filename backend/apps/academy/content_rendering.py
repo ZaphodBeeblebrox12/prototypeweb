@@ -26,6 +26,7 @@ _ALLOWED_ATTRIBUTES = {
 _IMAGE_REF = re.compile(r"asset://([0-9a-fA-F-]{36})")
 _IMAGE_MARKDOWN = re.compile(r"!\[([^\]]*)\]\(asset://([0-9a-fA-F-]{36})(?:\s+[^)]*)?\)")
 _TEACHING_FIGURE_TOKEN = re.compile(r"\[\[teaching-figure:([A-Za-z0-9_-]{1,120})\]\]")
+_IMAGE_GROUP_TOKEN = re.compile(r"\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]")
 _LESSON_REF = re.compile(r"\[\[(lesson|lesson-card):([0-9a-fA-F-]{36})\]\]")
 _HEADING = re.compile(r"^(#{3,6})\s+(.+?)\s*$")
 _DANGEROUS_MARKDOWN = re.compile(
@@ -137,8 +138,9 @@ def render_safe_markdown(
     admin_preview=False,
     figure_metadata=None,
     figure_prefix=None,
+    module_label="",
 ):
-    """Render sanitised Markdown and structured inline figures using stable asset IDs."""
+    """Render sanitised Markdown and titled figures/groups using stable asset IDs."""
     from html import escape
 
     source = validate_markdown_source(source or "")
@@ -148,6 +150,30 @@ def render_safe_markdown(
     asset_urls = asset_urls or {}
     figure_metadata = figure_metadata if isinstance(figure_metadata, dict) else {}
     figure_frames = {}
+    module_title = str(module_label or "LEARNING ROOM").strip()
+    if not module_title.upper().startswith("MODULE"):
+        module_title = f"MODULE · {module_title}"
+    safe_module_title = escape(module_title, quote=True)
+
+    def figure_header(title):
+        safe_title = escape(str(title or "Chart").strip())
+        return (
+            '<span class="tt-purpose-figure-head">'
+            '<span class="tt-purpose-figure-header-top">'
+            '<span class="tt-purpose-figure-brand">TRADETHESIS · LEARNING ROOM</span>'
+            f'<span class="tt-purpose-figure-module">{safe_module_title}</span>'
+            '</span>'
+            f'<strong class="tt-purpose-figure-title">{safe_title}</strong>'
+            '</span>'
+        )
+
+    def display_image_title(metadata):
+        raw_title = str(metadata.get("title") or "").strip()
+        # Older drafts sometimes stored a filename as the title. Never display that
+        # implementation detail as the authored heading in the learner-facing figure.
+        if raw_title and re.search(r"\.(?:jpe?g|png|webp|gif|svg)$", raw_title, re.IGNORECASE):
+            return "Chart"
+        return raw_title or "Chart"
 
     def replace_structured_figure(match):
         alt_from_markdown, asset_id = match.groups()
@@ -155,13 +181,10 @@ def render_safe_markdown(
         if not isinstance(metadata, dict):
             return match.group(0)
 
-        alt = str(metadata.get("alt") or alt_from_markdown or metadata.get("title") or "Course figure").strip()
-        title = str(metadata.get("title") or metadata.get("caption") or alt or "Course figure").strip()
+        alt = str(metadata.get("alt") or alt_from_markdown or "Course image").strip()
+        title = display_image_title(metadata)
         caption = str(metadata.get("caption") or "").strip()
-        if figure_prefix and not title.casefold().startswith("figure "):
-            title = f"Figure {figure_prefix} · {title}"
 
-        safe_title = escape(title)
         safe_alt = escape(alt, quote=True)
         safe_asset_id = escape(asset_id, quote=True)
         safe_caption = escape(caption)
@@ -183,13 +206,71 @@ def render_safe_markdown(
         caption_markup = f'<figcaption><p>{safe_caption}</p></figcaption>' if safe_caption else ""
         markup = (
             f'<figure class="tt-purpose-figure" data-figure-id="{safe_asset_id}">'
-            f'<span class="tt-purpose-figure-head"><strong>{safe_title}</strong>'
-            '<span>Purpose-built teaching aid</span></span>'
+            f'{figure_header(title)}'
             f'<span class="tt-purpose-figure-body">{body}</span>{caption_markup}</figure>'
         )
         token = f"TTSTRUCTUREDFIGURE{len(figure_frames)}END"
         figure_frames[token] = markup
         return token
+
+    def replace_image_group(match):
+        group_id = match.group(1)
+        metadata = figure_metadata.get(group_id)
+        if not isinstance(metadata, dict) or metadata.get("type") != "image-group":
+            return match.group(0)
+
+        title = display_image_title(metadata)
+        safe_group_id = escape(group_id, quote=True)
+        raw_ids = metadata.get("image_ids", [])
+        if not isinstance(raw_ids, list):
+            raw_ids = []
+        items = []
+        for raw_id in raw_ids[:12]:
+            asset_id = str(raw_id)
+            image_metadata = figure_metadata.get(asset_id, {})
+            if not isinstance(image_metadata, dict):
+                image_metadata = {}
+            alt = str(image_metadata.get("alt") or "Course image").strip()
+            image_title = display_image_title(image_metadata)
+            caption = str(image_metadata.get("caption") or "").strip()
+            image_url = asset_urls.get(asset_id, "")
+            if image_url:
+                image = (
+                    f'<span class="tt-purpose-figure-image">'
+                    f'<img src="{escape(str(image_url), quote=True)}" alt="{escape(alt, quote=True)}" '
+                    'loading="lazy" decoding="async" tabindex="0" role="button" '
+                    'aria-label="Enlarge course figure"></span>'
+                )
+            else:
+                image = (
+                    '<span class="tt-purpose-figure-missing" role="status">'
+                    '<strong>Image unavailable</strong></span>'
+                )
+            caption_markup = (
+                f'<span class="tt-image-group-caption">{escape(caption)}</span>' if caption else ""
+            )
+            items.append(
+                '<span class="tt-image-group-item">'
+                f'{image}<strong class="tt-image-group-item-title">{escape(image_title)}</strong>'
+                f'{caption_markup}</span>'
+            )
+
+        if len(items) < 2:
+            return '<span class="tt-purpose-figure-missing">This image group needs at least two uploaded images.</span>'
+        note = str(metadata.get("note") or "").strip()
+        note_markup = f'<span class="tt-purpose-figure-note">{escape(note)}</span>' if note else ""
+        markup = (
+            f'<figure class="tt-purpose-figure tt-image-group-figure" data-figure-id="{safe_group_id}">'
+            f'{figure_header(title)}'
+            '<span class="tt-purpose-figure-body">'
+            f'<span class="tt-image-group-grid">{"".join(items)}</span>'
+            f'{note_markup}</span></figure>'
+        )
+        token = f"TTSTRUCTUREDFIGURE{len(figure_frames)}END"
+        figure_frames[token] = markup
+        return token
+
+    source = _IMAGE_GROUP_TOKEN.sub(replace_image_group, source)
 
     # Replace only Markdown image references that have saved figure metadata. The placeholder
     # preserves the exact text/image/text position and prevents Markdown from stripping the frame.
@@ -201,10 +282,7 @@ def render_safe_markdown(
         if not isinstance(metadata, dict) or metadata.get("type") != "comparison-cards":
             return match.group(0)
 
-        title = str(metadata.get("title") or "Comparison").strip()
-        if figure_prefix and not title.casefold().startswith("figure "):
-            title = f"Figure {figure_prefix} · {title}"
-        safe_title = escape(title)
+        title = display_image_title(metadata)
         safe_id = escape(figure_id, quote=True)
         cards = metadata.get("cards", [])
         if not isinstance(cards, list):
@@ -229,8 +307,7 @@ def render_safe_markdown(
         note_markup = f'<span class="tt-purpose-figure-note">{note}</span>' if note else ""
         markup = (
             f'<figure class="tt-purpose-figure tt-comparison-figure" data-figure-id="{safe_id}">'
-            f'<span class="tt-purpose-figure-head"><strong>{safe_title}</strong>'
-            '<span>Purpose-built teaching aid</span></span>'
+            f'{figure_header(title)}'
             '<span class="tt-purpose-figure-body">'
             f'<span class="tt-comparison-cards">{"".join(card_markup)}</span>'
             f'{note_markup}</span></figure>'
@@ -276,6 +353,7 @@ def build_lesson_sections(
     admin_preview=False,
     figure_metadata=None,
     figure_prefix=None,
+    module_label="",
 ):
     """Group source headings into the three reusable Learning Room tabs."""
     lines = (source or "").splitlines()
@@ -347,6 +425,7 @@ def build_lesson_sections(
         "idea_html": render_safe_markdown(
             rendered["idea"], asset_urls, user=user, admin_preview=admin_preview,
             figure_metadata=figure_metadata, figure_prefix=figure_prefix,
+            module_label=module_label,
         ),
         "examples_html": render_safe_markdown(
             rendered["examples"], asset_urls, user=user, admin_preview=admin_preview,
