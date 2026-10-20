@@ -11,7 +11,7 @@ from .models import Course, Lesson
 
 _ALLOWED_TAGS = {
     "a", "aside", "blockquote", "br", "code", "del", "em", "figcaption", "figure",
-    "h1", "h2", "h3", "h4", "h5", "hr", "img", "li", "ol", "p", "pre",
+    "h1", "h2", "h3", "h4", "h5", "h6", "hr", "img", "li", "ol", "p", "pre",
     "s", "span", "strong", "sub", "sup", "table", "tbody", "td", "th", "thead", "tr", "ul",
 }
 _ALLOWED_ATTRIBUTES = {
