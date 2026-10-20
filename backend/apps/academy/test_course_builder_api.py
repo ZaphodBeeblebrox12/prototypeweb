@@ -9,7 +9,14 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from .models import Course, CourseImport, CourseImportAsset, CourseModule, Lesson, LessonInstructorMaterial
+from .models import (
+    Course,
+    CourseImport,
+    CourseImportAsset,
+    CourseModule,
+    Lesson,
+    LessonInstructorMaterial,
+)
 
 User = get_user_model()
 
