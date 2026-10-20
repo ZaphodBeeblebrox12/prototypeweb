@@ -55,9 +55,9 @@ class AcademyViewTests(TestCase):
 
     def test_course_overview_renders_markdown_description_as_heading_and_list(self):
         self.course.description = (
-            "### What learners will practise\\n\\n"
-            "- Describe the evidence before interpreting it.\\n"
-            "- Compare alternatives and identify invalidation.\\n"
+            "### What learners will practise\n\n"
+            "- Describe the evidence before interpreting it.\n"
+            "- Compare alternatives and identify invalidation.\n"
             "- Build a clear, conditional decision process."
         )
         self.course.save(update_fields=["description", "updated_at"])
@@ -142,9 +142,9 @@ class AcademyViewTests(TestCase):
                     "slug": "preview-course",
                     "summary": "A course used to test the website preview.",
                     "description": (
-                        "### What learners will practise\\n\\n"
-                        "- Describe the evidence before interpreting it.\\n"
-                        "- Compare alternatives and identify invalidation.\\n"
+                        "### What learners will practise\n\n"
+                        "- Describe the evidence before interpreting it.\n"
+                        "- Compare alternatives and identify invalidation.\n"
                         "- Build a clear, conditional decision process."
                     ),
                 },
@@ -191,10 +191,15 @@ class AcademyViewTests(TestCase):
             {"lesson": "1.1"},
         )
 
+        overview_response = self.client.get(reverse("academy:course-import-preview", args=[record.pk]))
+        self.assertEqual(overview_response.status_code, 200, overview_response.content)
+        self.assertContains(overview_response, "<h3>What learners will practise</h3>")
+        self.assertContains(overview_response, "<ul>")
+        self.assertContains(overview_response, "<li>Describe the evidence before interpreting it.</li>")
+        self.assertNotContains(overview_response, "### What learners will practise")
+        self.assertNotContains(overview_response, "- Describe the evidence before interpreting it.")
+
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertContains(response, "<h3>What learners will practise</h3>")
-        self.assertContains(response, "<ul>")
-        self.assertContains(response, "<li>Describe the evidence before interpreting it.</li>")
         self.assertContains(response, "How should the observation be used?")
         self.assertContains(response, "As evidence to assess in context")
         self.assertContains(
