@@ -31,6 +31,33 @@ class GoogleDriveCourseStorageTests(SimpleTestCase):
     def test_oauth_client_without_authorization_keeps_drive_disabled(self):
         self.assertFalse(self.storage._drive_asset_enabled)
 
+    def test_status_reports_configured_drive_as_durable(self):
+        self.assertEqual(
+            self.storage.status(),
+            {
+                "backend": "google_drive",
+                "label": "Google Drive",
+                "durable": True,
+                "writes_enabled": True,
+            },
+        )
+
+    @override_settings(
+        ACADEMY_GOOGLE_DRIVE_REFRESH_TOKEN="refresh-test",
+        ACADEMY_GOOGLE_DRIVE_CLIENT_ID="",
+        ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET="",
+        ACADEMY_GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON="",
+        ACADEMY_GITHUB_ASSET_REPOSITORY="",
+        ACADEMY_GITHUB_ASSET_TOKEN="",
+        ACADEMY_REQUIRE_DURABLE_ASSETS=True,
+        DEBUG=False,
+    )
+    def test_incomplete_drive_oauth_does_not_fall_back_to_ephemeral_writes(self):
+        storage = GoogleDrivePrivateCourseAssetStorage()
+        self.assertFalse(storage._drive_asset_enabled)
+        self.assertFalse(storage.status()["durable"])
+        self.assertFalse(storage.status()["writes_enabled"])
+
     def test_drive_save_uses_stable_key_and_folder(self):
         with patch.object(self.storage, "_write_drive_bytes", return_value={"id": "drive-file"}) as write:
             name = self.storage.save(
