@@ -230,6 +230,11 @@ def lesson_detail(request, course_slug, lesson_id):
             lesson.content_markdown,
             asset_urls,
             user=request.user,
+            figure_metadata=(
+                lesson.content_json.get("figures", {})
+                if isinstance(lesson.content_json, dict) else {}
+            ),
+            figure_prefix=f"{lesson.module.position}.{lesson.position}",
         ),
         "notebook": notebook, "notebook_responses": saved_responses, "outline_modules": outline_modules,
         "related_courses": related_courses, "practice_questions": practice_questions,
@@ -330,6 +335,8 @@ def admin_lesson_preview(request, course_slug, lesson_id):
             asset_urls,
             user=request.user,
             admin_preview=True,
+            figure_metadata=content_json.get("figures", {}),
+            figure_prefix=f"{lesson.module.position}.{lesson.position}",
         ),
         "notebook": notebook,
         "notebook_responses": [],
@@ -422,11 +429,16 @@ def course_import_website_preview(request, import_id):
     selected_notebook = {}
     selected_practice_questions = []
     if selected_lesson is not None:
+        selected_content_json = selected_lesson.get("content_json", {})
+        if not isinstance(selected_content_json, dict):
+            selected_content_json = {}
         selected_sections = build_lesson_sections(
             selected_lesson.get("content_markdown", ""),
             asset_urls,
             user=request.user,
             admin_preview=True,
+            figure_metadata=selected_content_json.get("figures", {}),
+            figure_prefix=str(selected_lesson.get("source_id", "")),
         )
         content_json = selected_lesson.get("content_json", {})
         if not isinstance(content_json, dict):
