@@ -176,7 +176,6 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .preview-body .tt-purpose-figure { display:block; min-width:0; margin:22px 0; overflow:hidden; border:1px solid var(--line); border-radius:11px; background:var(--panel); }
 .preview-body .tt-purpose-figure-head { display:block; padding:11px 13px 13px; border-bottom:1px solid var(--line); background:var(--panel-soft); color:var(--site-primary); }
 .preview-body .tt-purpose-figure-header-top { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
-.preview-body .tt-purpose-figure-brand { color:var(--muted); font-size:8px; font-weight:850; letter-spacing:.12em; line-height:1.5; text-transform:uppercase; }
 .preview-body .tt-purpose-figure-module { color:var(--muted); font-size:8px; font-weight:750; letter-spacing:.06em; line-height:1.5; text-align:right; text-transform:uppercase; }
 .preview-body .tt-purpose-figure-title { display:block; margin-top:7px; color:var(--site-primary); font:500 clamp(20px,2.3vw,28px)/1.2 var(--site-font-heading); letter-spacing:-.025em; }
 .preview-body .tt-purpose-figure-body { display:block; padding:14px; }
@@ -311,7 +310,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .preview-body td { background:var(--panel); }
 .preview-body .tt-purpose-figure { border-radius:16px; margin:32px 0; box-shadow:0 10px 28px rgba(39,56,46,.07); }
 .preview-body .tt-purpose-figure-head { padding:17px 21px 19px; background:linear-gradient(120deg,#e5ecdf,#f1ead8); }
-.preview-body .tt-purpose-figure-brand,.preview-body .tt-purpose-figure-module { font-size:10px; letter-spacing:.13em; }
+.preview-body .tt-purpose-figure-module { font-size:10px; letter-spacing:.13em; }
 .preview-body .tt-purpose-figure-title { font-size:clamp(25px,2.8vw,37px); letter-spacing:-.035em; margin-top:10px; }
 .preview-body .tt-purpose-figure-body { padding:clamp(16px,2.3vw,28px); }
 .preview-body .tt-purpose-figure-image img { max-height:620px; }
@@ -420,9 +419,8 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   padding: 11px 15px 12px;
   background: linear-gradient(110deg, #e8eee3, #f2ecdc);
 }
-.preview-body .tt-purpose-figure-header-top { gap: 10px; align-items: center; }
-.preview-body .tt-purpose-figure-brand,
-.preview-body .tt-purpose-figure-module { font-size: 8px; letter-spacing: .11em; line-height: 1.45; }
+.preview-body .tt-purpose-figure-header-top { gap: 10px; align-items: center; justify-content: flex-start; }
+.preview-body .tt-purpose-figure-module { font-size: 8px; letter-spacing: .11em; line-height: 1.45; text-align: left; }
 .preview-body .tt-purpose-figure-title {
   margin-top: 6px;
   font-size: clamp(21px, 2.3vw, 28px);
@@ -943,8 +941,7 @@ Describe the evidence first.
     const figureHeader = title =>
       '<span class="tt-purpose-figure-head">' +
         '<span class="tt-purpose-figure-header-top">' +
-          '<span class="tt-purpose-figure-brand">TRADETHESIS · LEARNING ROOM</span>' +
-          '<span class="tt-purpose-figure-module">' + esc(moduleLabel) + '</span>' +
+            '<span class="tt-purpose-figure-module">' + esc(moduleLabel) + '</span>' +
         '</span>' +
         '<strong class="tt-purpose-figure-title">' + esc(title || 'Chart') + '</strong>' +
       '</span>';
