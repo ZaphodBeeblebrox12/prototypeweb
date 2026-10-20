@@ -203,7 +203,11 @@ def lesson_detail(request, course_slug, lesson_id):
     return render(request, "academy/lesson.html", {
         "course": course, "lesson": lesson, "module": lesson.module,
         "entitlement": entitlement, "progress": progress,
-        "lesson_sections": build_lesson_sections(lesson.content_markdown, asset_urls),
+        "lesson_sections": build_lesson_sections(
+            lesson.content_markdown,
+            asset_urls,
+            user=request.user,
+        ),
         "notebook": notebook, "notebook_responses": saved_responses, "outline_modules": outline_modules,
         "related_courses": related_courses, "practice_questions": practice_questions,
         "video_url": video_url, "video_is_file": video_is_file,
