@@ -466,16 +466,15 @@ def _store_images(record, image_sources):
         elif asset.file:
             storage = asset.file.storage
             storage_status = storage.status()
-            if storage_status.get("durable"):
+            if storage_status.get("durable") and not storage.remote_exists(asset.file.name):
                 # The usual exists() intentionally includes local fallback for
                 # compatibility. Check remote providers separately so a local file
                 # is migrated instead of being mistaken for a durable upload.
-                if not storage.remote_exists(asset.file.name):
-                    if not _copy_existing_asset(asset.stable_asset_id, asset):
-                        raise ValidationError(
-                            f"Image {asset.asset_key} is only present in temporary storage. "
-                            "Re-upload it before relying on this lesson."
-                        )
+                if not _copy_existing_asset(asset.stable_asset_id, asset):
+                    raise ValidationError(
+                        f"Image {asset.asset_key} is only present in temporary storage. "
+                        "Re-upload it before relying on this lesson."
+                    )
             elif not storage.exists(asset.file.name):
                 _copy_existing_asset(asset.stable_asset_id, asset)
         else:
