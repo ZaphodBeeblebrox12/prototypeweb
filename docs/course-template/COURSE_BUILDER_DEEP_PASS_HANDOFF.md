@@ -111,7 +111,11 @@ Verification on revision `776e1d2900b99d5230c82366dd7305bc66054918` completed su
 - [Academy backend CI](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39468574740): Python 3.11 and 3.12 jobs passed focused regressions, linting, formatting, type checks, migration-state checks and the full test suite.
 - [Verify Django Academy backend](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39468574843): Python 3.11 and 3.12 backend regression jobs passed.
 
-The fix is committed on `my-new-branch`; it has not yet been deployed. Next step: update this handoff commit, manually deploy the current branch to Academy staging only (auto-deploy remains disabled), then verify the real logged-in preview. No merge to `main`, production deployment, course publication or database content mutation is authorized by this work.
+The fixes are committed on `my-new-branch`. Manual staging deploy `dep-dbbqilg473hc738g88l0` for commit `a68d28fd276bc0e687cf4515fc772e6c2c89f587` completed successfully and Render marked it `live` at 17:49:53 UTC on 20 October 2026. The new instance returned HTTP 200 for `/health/`. The authenticated visual result has not yet been inspected directly in this tool session; reload the builder in the browser to exercise the new client renderer.
+
+After the new instance started, the active browser continued receiving HTTP 409 from `/staff/course-builder/api/` for the same slug collision. This indicates the current browser state is not carrying a matching saved `CourseImport` draft ID for that slug. If this is a new course, open **Course details → Course URL slug** and give it a unique value before saving (for example, `new-micro-course-draft11-inline-test`); if the slug is meant to belong to an existing course, edit that course instead of creating a second one. This collision does not prevent testing the local Learner preview after refreshing, but the real server-backed website preview requires a successful save.
+
+No merge to `main`, production deployment, course publication or database content mutation is authorized by this work. Render auto-deploy remains disabled.
 
 ### Remaining
 
