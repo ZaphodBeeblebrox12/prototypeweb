@@ -324,8 +324,6 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   // Authoring enhancements: Markdown reference, multi-image upload, alt text and captions.
   const baseLessonFields = lessonFields;
   lessonFields = function(l) { const html=baseLessonFields(l); return !l ? html : html + `<section class="markdown-guide"><h4>Markdown help — headings and formatting</h4><p>Use these patterns in the lesson body. The template should preserve the full hierarchy and formatting in the learner view.</p><ul><li><code># Heading 1</code> through <code>###### Heading 6</code> — all six heading levels. Use <code>##</code> for main sections and <code>###</code> for subsections.</li><li><code>**bold**</code>, <code>*italic*</code>, <code>~~strikethrough~~</code>, <code>&#96;inline code&#96;</code>.</li><li><code>- bullet</code> for unordered lists; <code>1. step</code> for numbered lists.</li><li><code>&gt; note</code> for blockquotes; <code>---</code> for a horizontal divider.</li><li><code>[link text](https://example.com)</code> for links. Only safe, trusted URLs should be allowed.</li><li><code>![Alt text](asset://figure-id)</code> for a figure reference. Add the figure in Images, then insert its reference where it belongs.</li></ul><pre>## Notice · Describe the evidence first. · ### Compare · - Observation A · - Observation B · > A useful caution. · **Key point:** keep conclusions conditional. · --- · ### Apply · 1. State what would confirm the idea. · 2. Name what would invalidate it.</pre><p><strong>TradeThesis lesson rhythm:</strong> Notice → Compare → Apply → Review. Keep answer keys and rubrics in protected instructor-only material.</p></section>`; };
-  const baseMediaFields = mediaFields;
-  mediaFields = function(l) { if(!l)return baseMediaFields(l); if(!Array.isArray(l.images))l.images=l.image?[l.image]:[]; return `<div class="section-intro"><h3>Lesson figures</h3><p>Add multiple images to a lesson. Every image has its own alt text and caption.</p></div><div class="field"><label for="multiImageUpload">Choose one or more images</label><input class="input" id="multiImageUpload" type="file" accept="image/jpeg,image/png,image/webp" multiple><span class="help">JPG, PNG or WebP, up to 1.5 MB per image in this preview. Production must use shared persistent media storage.</span></div><div class="media-grid" style="margin-top:16px">${l.images.map((im,i)=>`<article class="media-card"><div class="media-preview"><img src="${im.data}" alt="${esc(im.alt||'')}" loading="lazy"></div><div class="media-meta"><strong style="font-size:11px">Figure ${i+1} · ${esc(im.name||'Course image')}</strong><label>Alt text</label><input class="input" data-image-item="${esc(im.id)}" data-field="alt" value="${esc(im.alt||'')}" placeholder="Describe the image"><label>Caption</label><input class="input" data-image-item="${esc(im.id)}" data-field="caption" value="${esc(im.caption||'')}" placeholder="Caption shown below the image"><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn small" type="button" data-action="insert-figure" data-id="${esc(im.id)}">Insert reference</button><button class="btn small danger" type="button" data-action="remove-figure" data-id="${esc(im.id)}">Remove</button></div></div></article>`).join('')}</div>${l.images.length?'':'<p class="media-empty">No images yet. Select multiple files above to add them together.</p>'}<div class="helper-note">Captions give context; alt text describes the figure for accessibility.</div>`; };
   const basePreviewFields = previewFields;
   previewFields = function(c) {
     let html = basePreviewFields(c);
@@ -351,7 +349,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     const lesson = currentLesson();
     const images = Array.isArray(lesson?.images) ? lesson.images : (lesson?.image ? [lesson.image] : []);
     const figures = [];
-    const prepared = String(src || '').replace(/!\\[([^\\]]*)\\]\\(asset:\\/\\/([^)]+)\\)/g, function(match, alt, id) {
+    const prepared = String(src || '').replace(/!\[([^\]]*)\]\(asset:\/\/([^)]+)\)/g, function(match, alt, id) {
       const image = images.find(function(item) { return item.id === id || item.assetUuid === id; });
       if (!image) return match;
       const token = 'TTFIGURETOKEN' + figures.length + 'END';
@@ -360,7 +358,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       const module = currentModule();
       const moduleNumber = Math.max(1, (course?.modules || []).findIndex(item => item.id === module?.id) + 1);
       const lessonNumber = Math.max(1, (module?.lessons || []).findIndex(item => item.id === lesson?.id) + 1);
-      const title = /^figure\\s/i.test(titleText) ? titleText : 'Figure ' + moduleNumber + '.' + lessonNumber + ' · ' + titleText;
+      const title = /^figure\s/i.test(titleText) ? titleText : 'Figure ' + moduleNumber + '.' + lessonNumber + ' · ' + titleText;
       const imageHtml = image.data
         ? '<span class="tt-purpose-figure-image"><img data-figure-zoom src="' + esc(image.data) + '" alt="' + esc(image.alt || alt || titleText) + '" loading="lazy" style="max-width:100%;max-height:460px"></span>'
         : '<span class="tt-purpose-figure-missing">Image saved; preview source is not available in this browser.</span>';
