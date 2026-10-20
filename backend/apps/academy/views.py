@@ -420,6 +420,7 @@ def course_import_website_preview(request, import_id):
 
     selected_sections = None
     selected_notebook = {}
+    selected_practice_questions = []
     if selected_lesson is not None:
         selected_sections = build_lesson_sections(
             selected_lesson.get("content_markdown", ""),
@@ -433,6 +434,9 @@ def course_import_website_preview(request, import_id):
         selected_notebook = content_json.get("notebook") or payload.get("notebook", {})
         if not isinstance(selected_notebook, dict):
             selected_notebook = {}
+        practice_questions = content_json.get("questions", [])
+        if isinstance(practice_questions, list):
+            selected_practice_questions = practice_questions
 
     return render(request, "academy/course_import_website_preview.html", {
         "import_record": record,
@@ -450,6 +454,7 @@ def course_import_website_preview(request, import_id):
         "selected_module": selected_module,
         "selected_sections": selected_sections,
         "selected_notebook": selected_notebook,
+        "selected_practice_questions": selected_practice_questions,
     })
 
 
