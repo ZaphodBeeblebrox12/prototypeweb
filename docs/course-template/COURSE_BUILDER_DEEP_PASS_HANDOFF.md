@@ -156,6 +156,11 @@ Important verification boundary: this CI validates the storage logic, but the li
 
 No merge to `main`, production deployment, publication or edits to live course catalogue content are part of this task. Render auto-deploy remains disabled.
 
+Staging rollout result: set Render env var `ACADEMY_REQUIRE_DURABLE_ASSETS=True` (merge-only environment update; no secrets were read or changed). Render deployed commit `0d07630d8c43ac79379a0200374e6be1497c793d` as deploy `dep-dbbrgrjl9sls739cqh60`; Render marked it `live` at 18:54:32 UTC on 20 October 2026. The build event succeeded and the new instance's `/health/` endpoint returned HTTP 200 repeatedly.
+
+Live-provider verification remains pending: Render logs show no authenticated `GET /staff/course-builder/api/` since that deployment, so the new admin-only `asset_storage` response has not yet been emitted in logs. Ask the author to refresh the Course Builder while signed in; then inspect the `Course Builder asset storage configured: backend=... durable=... writes_enabled=...` log entry and on-screen banner. Do not report Drive/GitHub storage as verified until that entry confirms a durable provider. If it reports local filesystem or writes disabled, image uploads will be blocked by design; configure Google Drive OAuth/service-account credentials/folders or a GitHub contents-write token in Render before relying on images.
+
+
 ### Remaining
 
 1. Add test coverage for native comparison-card teaching figures: stable token, title, cards, note, authored placement and escaping.
