@@ -86,6 +86,58 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(record.payload["course"]["learning_outcomes"], ["Describe evidence before interpreting it."])
         self.assertNotIn("correctIndex", saved_lesson["content_json"])
 
+    def test_existing_saved_builder_draft_can_be_resaved_when_course_slug_is_taken(self):
+        slug = "builder-draft-slug-collision"
+        first = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(self.draft_payload(slug)),
+            content_type="application/json",
+        )
+        self.assertEqual(first.status_code, 200, first.content)
+        record_id = first.json()["record_id"]
+
+        # Simulate a pre-existing Academy Course row with the same slug. Saving
+        # the already-owned CourseImport draft must update that draft, not fail
+        # the slug check or silently edit the existing Course.
+        Course.objects.create(
+            title="Existing Academy course",
+            slug=slug,
+            status=Course.Status.DRAFT,
+        )
+        payload = self.draft_payload(slug)
+        payload["course"]["serverDraftId"] = record_id
+        payload["course"]["summary"] = "Updated without changing the existing course."
+
+        second = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+
+        self.assertEqual(second.status_code, 200, second.content)
+        self.assertEqual(second.json()["record_id"], record_id)
+        record = CourseImport.objects.get(pk=record_id)
+        self.assertEqual(
+            record.payload["builder_state"]["summary"],
+            "Updated without changing the existing course.",
+        )
+        self.assertEqual(Course.objects.get(slug=slug).title, "Existing Academy course")
+
+    def test_new_builder_draft_still_rejects_an_existing_course_slug(self):
+        slug = "existing-academy-course-slug"
+        Course.objects.create(
+            title="Existing Academy course",
+            slug=slug,
+            status=Course.Status.DRAFT,
+        )
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(self.draft_payload(slug)),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 409)
+        self.assertIn("unique slug", response.json()["detail"])
+
     @override_settings(
         ACADEMY_GITHUB_ASSET_REPOSITORY="ZaphodBeeblebrox12/prototypeweb",
         ACADEMY_GITHUB_ASSET_TOKEN="test-token",
