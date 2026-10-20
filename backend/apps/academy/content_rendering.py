@@ -150,9 +150,18 @@ def render_safe_markdown(
     asset_urls = asset_urls or {}
     figure_metadata = figure_metadata if isinstance(figure_metadata, dict) else {}
     figure_frames = {}
-    module_title = str(module_label or "LEARNING ROOM").strip()
-    if not module_title.upper().startswith("MODULE"):
-        module_title = f"MODULE · {module_title}"
+    raw_module_label = str(module_label or "LEARNING ROOM").strip()
+    module_match = re.match(r"^module\s*(\d+)\s*[·—–:-]\s*(.*)$", raw_module_label, re.IGNORECASE)
+    if module_match:
+        module_number, module_name = module_match.groups()
+        module_name = re.sub(
+            r"^module\s*\d*\s*[·—–:-]?\s*", "", module_name, flags=re.IGNORECASE,
+        ).strip()
+        module_title = f"MODULE {int(module_number)} · {module_name}" if module_name else f"MODULE {int(module_number)}"
+    elif raw_module_label.upper().startswith("MODULE"):
+        module_title = raw_module_label
+    else:
+        module_title = f"MODULE · {raw_module_label}"
     safe_module_title = escape(module_title, quote=True)
 
     def figure_header(title):
