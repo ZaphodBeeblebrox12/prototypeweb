@@ -715,7 +715,23 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   document.addEventListener('change',event=>{if(event.target.id!=='imageUpload')return;const file=event.target.files&&event.target.files[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)){toast('Choose a JPG, PNG or WebP image.');event.target.value='';return;}if(file.size>1.5*1024*1024){toast('This preview limits images to 1.5 MB.');event.target.value='';return;}const reader=new FileReader();reader.onload=()=>{const l=currentLesson();if(!l)return;l.image={id:uid('asset'),name:file.name,alt:$('#imageAlt')?.value||'',data:String(reader.result)};persist(false);renderEditor();toast('Image added to this lesson draft.');};reader.onerror=()=>toast('The image could not be read.');reader.readAsDataURL(file);});
   // Authoring enhancements: Markdown reference, multi-image upload, alt text and captions.
   const baseLessonFields = lessonFields;
-  lessonFields = function(l) { const html=baseLessonFields(l); return !l ? html : html + `<section class="markdown-guide"><h4>Markdown help — headings and formatting</h4><p>Use these patterns in the lesson body. The template should preserve the full hierarchy and formatting in the learner view.</p><ul><li><code># Heading 1</code> through <code>###### Heading 6</code> — all six heading levels. Use <code>##</code> for main sections and <code>###</code> for subsections.</li><li><code>**bold**</code>, <code>*italic*</code>, <code>~~strikethrough~~</code>, <code>&#96;inline code&#96;</code>.</li><li><code>- bullet</code> for unordered lists; <code>1. step</code> for numbered lists.</li><li><code>&gt; note</code> for blockquotes; <code>---</code> for a horizontal divider.</li><li><code>[link text](https://example.com)</code> for links. Only safe, trusted URLs should be allowed.</li><li><strong>Information tables:</strong> use a header row, a separator row and then one row per case, such as <code>| Context | Evidence | Decision |</code> followed by <code>| --- | --- | --- |</code>. The preview keeps wide tables horizontally scrollable on mobile.</li><li><code>![Alt text](asset://figure-id)</code> for a figure reference. Add the figure in Images, then insert its reference where it belongs.</li></ul><pre>## Notice · Describe the evidence first. · ### Compare · - Observation A · - Observation B · > A useful caution. · **Key point:** keep conclusions conditional. · --- · ### Apply · 1. State what would confirm the idea. · 2. Name what would invalidate it.</pre><p><strong>TradeThesis lesson rhythm:</strong> Notice → Compare → Apply → Review. Keep answer keys and rubrics in protected instructor-only material.</p></section>`; };
+  lessonFields = function(l) { const html=baseLessonFields(l); return !l ? html : html + `<section class="markdown-guide"><h4>Markdown help — headings and formatting</h4><p>Use these patterns in the lesson body. The template should preserve the full hierarchy and formatting in the learner view.</p><ul><li><code># Heading 1</code> through <code>###### Heading 6</code> — all six heading levels. Use <code>##</code> for main sections and <code>###</code> for subsections.</li><li><code>**bold**</code>, <code>*italic*</code>, <code>~~strikethrough~~</code>, <code>&#96;inline code&#96;</code>.</li><li><code>- bullet</code> for unordered lists; <code>1. step</code> for numbered lists.</li><li><code>&gt; note</code> for blockquotes; <code>---</code> for a horizontal divider.</li><li><code>[link text](https://example.com)</code> for links. Only safe, trusted URLs should be allowed.</li><li><strong>Information tables:</strong> use a header row, a separator row and then one row per case, such as <code>| Context | Evidence | Decision |</code> followed by <code>| --- | --- | --- |</code>. The preview keeps wide tables horizontally scrollable on mobile.</li><li><code>![Alt text](asset://figure-id)</code> for a figure reference. Add the figure in Images, then insert its reference where it belongs.</li></ul><p>Copy the structure below into a lesson, then replace the example wording. Keep each heading, list item, quote and table row on its own line; blank lines between different block types make the structure clear.</p>
+<pre>## Notice
+Describe the evidence first.
+
+### Compare
+- Observation A
+- Observation B
+
+> A useful caution.
+
+**Key point:** keep conclusions conditional.
+
+---
+
+### Apply
+1. State what would confirm the idea.
+2. Name what would invalidate it.</pre><p><strong>TradeThesis lesson rhythm:</strong> Notice → Compare → Apply → Review. Keep answer keys and rubrics in protected instructor-only material.</p></section>`; };
   const basePreviewFields = previewFields;
   previewFields = function(c) {
     let html = basePreviewFields(c);
