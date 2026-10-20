@@ -18,6 +18,9 @@ class CourseDeletionAdminTests(TestCase):
         )
         self.request = RequestFactory().post("/admin/academy/course/")
         self.request.user = self.user
+        self.site = AdminSite()
+        self.site.register(Course, CourseAdmin)
+        self.site.register(CourseMediaAsset, CourseMediaAssetAdmin)
         self.course = Course.objects.create(
             title="Disposable draft course",
             slug="disposable-draft-course",
@@ -29,7 +32,7 @@ class CourseDeletionAdminTests(TestCase):
         )
 
     def test_course_delete_confirmation_allows_owned_media_for_content_admin(self):
-        course_admin = CourseAdmin(Course, AdminSite())
+        course_admin = self.site._registry[Course]
         deletable, model_count, perms_needed, protected = course_admin.get_deleted_objects(
             Course.objects.filter(pk=self.course.pk),
             self.request,
@@ -41,11 +44,10 @@ class CourseDeletionAdminTests(TestCase):
         self.assertTrue(deletable)
 
     def test_deleting_course_removes_its_media_record_but_direct_asset_delete_stays_disabled(self):
-        site = AdminSite()
-        media_admin = CourseMediaAssetAdmin(CourseMediaAsset, site)
+        media_admin = self.site._registry[CourseMediaAsset]
         self.assertFalse(media_admin.has_delete_permission(self.request, self.asset))
 
-        course_admin = CourseAdmin(Course, site)
+        course_admin = self.site._registry[Course]
         course_admin.delete_queryset(
             self.request,
             Course.objects.filter(pk=self.course.pk),
