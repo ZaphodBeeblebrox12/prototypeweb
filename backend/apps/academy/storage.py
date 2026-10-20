@@ -113,6 +113,11 @@ class PrivateCourseAssetStorage(FileSystemStorage):
 
     def _save(self, name, content):
         if not self.github_enabled:
+            if getattr(settings, "ACADEMY_REQUIRE_DURABLE_ASSETS", not settings.DEBUG):
+                raise OSError(
+                    "Durable course image storage is not configured. Connect Google Drive "
+                    "or set ACADEMY_GITHUB_ASSET_TOKEN before uploading lesson images."
+                )
             return super()._save(name, content)
         path = self._github_path(name)
         raw = b"".join(content.chunks())
@@ -160,6 +165,36 @@ class GoogleDrivePrivateCourseAssetStorage(GoogleDriveStorageMixin, PrivateCours
     """Google Drive primary storage with legacy GitHub/local reads."""
 
     pass
+
+
+class GoogleDrivePrivateCourseAssetStorageStatusMixin:
+    """Shared, credential-free status for the builder image-storage notice."""
+
+    def status(self):
+        try:
+            drive_enabled = self._drive_asset_enabled
+        except Exception:
+            # Never expose provider or credential exception details through the UI.
+            drive_enabled = False
+        if drive_enabled:
+            backend = "google_drive"
+            label = "Google Drive"
+            durable = True
+        elif self.github_enabled:
+            backend = "github"
+            label = "private GitHub repository"
+            durable = True
+        else:
+            backend = "local_filesystem"
+            label = "local filesystem"
+            durable = False
+        required = bool(getattr(settings, "ACADEMY_REQUIRE_DURABLE_ASSETS", not settings.DEBUG))
+        return {
+            "backend": backend,
+            "label": label,
+            "durable": durable,
+            "writes_enabled": durable or not required,
+        }
 
 
 course_asset_storage = GoogleDrivePrivateCourseAssetStorage()
