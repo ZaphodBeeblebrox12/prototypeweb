@@ -1,9 +1,9 @@
 """Authenticated learner views for TradeThesis Academy."""
 import json
 import mimetypes
-from uuid import UUID
 from contextlib import suppress
 from urllib.parse import quote
+from uuid import UUID
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
