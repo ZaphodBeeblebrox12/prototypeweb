@@ -575,7 +575,8 @@ class CourseBuilderApiTests(TestCase):
         )
         self.assertEqual(deleted.status_code, 200, deleted.content)
         self.assertEqual(deleted.json()["deleted_id"], record_id)
-        self.assertFalse(CourseImport.objects.filter(pk=record_id).exists())
+        record = CourseImport.objects.get(pk=record_id)
+        self.assertEqual(record.status, CourseImport.Status.DELETED)
 
         refreshed = self.client.get(reverse("staff_course_builder_api"))
         self.assertEqual(refreshed.status_code, 200, refreshed.content)
@@ -599,3 +600,40 @@ class CourseBuilderApiTests(TestCase):
         )
         self.assertEqual(deleted.status_code, 404)
         self.assertTrue(CourseImport.objects.filter(pk=record.pk).exists())
+
+
+    def test_stale_browser_copy_cannot_recreate_a_deleted_builder_draft(self):
+        payload = self.draft_payload("builder-delete-stale-copy")
+        saved = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(saved.status_code, 200, saved.content)
+        record_id = saved.json()["record_id"]
+
+        deleted = self.client.delete(
+            reverse("staff_course_builder_api"),
+            data=json.dumps({"serverDraftId": record_id}),
+            content_type="application/json",
+        )
+        self.assertEqual(deleted.status_code, 200, deleted.content)
+
+        # Simulate a second open tab that still holds the old serverDraftId.
+        payload["course"]["serverDraftId"] = record_id
+        stale_save = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(stale_save.status_code, 410, stale_save.content)
+        self.assertTrue(stale_save.json()["draft_deleted"])
+        self.assertEqual(
+            CourseImport.objects.get(pk=record_id).status,
+            CourseImport.Status.DELETED,
+        )
+        refreshed = self.client.get(reverse("staff_course_builder_api"))
+        self.assertNotIn(
+            record_id,
+            [draft["serverDraftId"] for draft in refreshed.json()["drafts"]],
+        )

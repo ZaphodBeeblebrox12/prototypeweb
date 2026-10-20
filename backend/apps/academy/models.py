@@ -354,6 +354,7 @@ class CourseImport(models.Model):
         PUBLISHED = "published", _("Published")
         REJECTED = "rejected", _("Rejected")
         SUPERSEDED = "superseded", _("Superseded by a newer import")
+        DELETED = "deleted", _("Deleted by an administrator")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     course_slug = models.SlugField(max_length=160, db_index=True)

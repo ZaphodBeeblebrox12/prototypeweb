@@ -25,6 +25,7 @@ from django.views.decorators.http import require_http_methods
 from PIL import Image, UnidentifiedImageError
 
 from .importing import validate_import_for_publish
+from .course_builder_lifecycle import mark_builder_draft_deleted
 from .models import (
     Course,
     CourseImport,
@@ -521,15 +522,9 @@ def course_builder_api(request):
                 pk=draft_id,
                 status=CourseImport.Status.DRAFT,
             )
-            for asset in record.assets.all():
-                if asset.file:
-                    storage = asset.file.storage
-                    name = asset.file.name
-                    transaction.on_commit(
-                        lambda storage=storage, name=name: storage.delete(name),
-                        robust=True,
-                    )
-            record.delete()
+            if not record.payload.get("builder_state"):
+                return JsonResponse({"detail": "Only Course Builder drafts can be deleted here."}, status=404)
+            mark_builder_draft_deleted(record)
         return JsonResponse({"ok": True, "deleted_id": str(draft_id)})
 
     if request.method == "GET":
@@ -592,6 +587,19 @@ def course_builder_api(request):
         slug = slugify(str(course_state.get("slug") or title))[:160]
         if not title or not slug:
             return JsonResponse({"detail": "Add a course title before saving."}, status=400)
+        server_draft_id = str(course_state.get("serverDraftId") or "").strip()
+        server_draft_uuid = None
+        if server_draft_id:
+            if not _valid_uuid(server_draft_id):
+                return JsonResponse({"detail": "The saved draft ID is invalid."}, status=400)
+            server_draft_uuid = uuid.UUID(server_draft_id)
+            if not CourseImport.objects.filter(
+                pk=server_draft_uuid, status=CourseImport.Status.DRAFT,
+            ).exists():
+                return JsonResponse({
+                    "detail": "This saved draft was deleted or is no longer editable. Refresh the Course Builder before saving again.",
+                    "draft_deleted": True,
+                }, status=410)
         existing_course = Course.objects.exclude(status=Course.Status.ARCHIVED).filter(slug=slug).first()
         if existing_course and course_state.get("serverCourseId") != str(existing_course.pk):
             # Re-saving an already-created Course Builder draft must remain possible
@@ -627,10 +635,28 @@ def course_builder_api(request):
             return JsonResponse({"detail": "Unsupported draft action."}, status=400)
 
         with transaction.atomic():
-            # Lock an existing draft so overlapping submissions serialize.
-            draft = CourseImport.objects.select_for_update().filter(
-                course_slug=slug, status=CourseImport.Status.DRAFT,
-            ).first()
+            # Lock the exact draft the browser believes it is editing. A deleted
+            # or submitted draft must never be silently recreated by a stale tab.
+            if server_draft_uuid:
+                draft = CourseImport.objects.select_for_update().filter(
+                    pk=server_draft_uuid, status=CourseImport.Status.DRAFT,
+                ).first()
+                if draft is None:
+                    return JsonResponse({
+                        "detail": "This saved draft was deleted or is no longer editable. Refresh the Course Builder before saving again.",
+                        "draft_deleted": True,
+                    }, status=410)
+                conflicting_slug_draft = CourseImport.objects.select_for_update().filter(
+                    course_slug=slug, status=CourseImport.Status.DRAFT,
+                ).exclude(pk=draft.pk).exists()
+                if conflicting_slug_draft and draft.course_slug != slug:
+                    return JsonResponse({
+                        "detail": "Another saved draft already uses this course URL slug. Choose a unique slug.",
+                    }, status=409)
+            else:
+                draft = CourseImport.objects.select_for_update().filter(
+                    course_slug=slug, status=CourseImport.Status.DRAFT,
+                ).first()
             if mode == "submit" and draft is None:
                 # The browser may retry after the server accepted a submission
                 # but the redirect to the review page failed. Reuse an identical
@@ -682,6 +708,7 @@ def course_builder_api(request):
                 )
             else:
                 record = draft
+                record.course_slug = slug
                 record.title = title
                 record.manifest_version = "course-builder-v1"
                 record.content_hash = digest
@@ -689,7 +716,7 @@ def course_builder_api(request):
                 record.payload = payload
                 record.imported_by = request.user
                 record.save(update_fields=[
-                    "title", "manifest_version", "content_hash", "source_manifest",
+                    "course_slug", "title", "manifest_version", "content_hash", "source_manifest",
                     "payload", "imported_by", "updated_at",
                 ])
 

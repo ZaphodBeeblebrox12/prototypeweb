@@ -13,6 +13,7 @@ from django.urls import path, reverse
 from django.utils.html import format_html
 
 from .content_rendering import build_lesson_sections
+from .course_builder_lifecycle import mark_builder_draft_deleted
 from .forms import (
     CourseImportAssetAdminForm,
     CourseMediaAssetAdminForm,
@@ -45,6 +46,20 @@ from .storage import course_asset_storage
 logger = logging.getLogger(__name__)
 
 
+def _retire_builder_drafts_for_course_slugs(slugs):
+    """Retire editable builder drafts when an administrator deletes their course."""
+    normalized_slugs = {str(slug) for slug in slugs if slug}
+    if not normalized_slugs:
+        return
+    drafts = CourseImport.objects.select_for_update().filter(
+        course_slug__in=normalized_slugs,
+        status=CourseImport.Status.DRAFT,
+    ).order_by("pk")
+    for draft in drafts:
+        if draft.payload.get("builder_state"):
+            mark_builder_draft_deleted(draft)
+
+
 class CourseModuleInline(admin.TabularInline):
     model = CourseModule
     extra = 0
@@ -74,6 +89,20 @@ class CourseAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return is_course_content_admin(request.user)
+
+    def delete_model(self, request, obj):
+        # Builder drafts are separate records and may not have target_course set
+        # (older Builder saves predate the published Course row). Retire them by
+        # slug so they cannot reappear after this Course is deleted.
+        with transaction.atomic():
+            _retire_builder_drafts_for_course_slugs([obj.slug])
+            super().delete_model(request, obj)
+
+    def delete_queryset(self, request, queryset):
+        with transaction.atomic():
+            courses = list(queryset)
+            _retire_builder_drafts_for_course_slugs(course.slug for course in courses)
+            super().delete_queryset(request, queryset)
 
     def get_deleted_objects(self, objs, request):
         """Allow owned media to be removed only as part of deleting its course.

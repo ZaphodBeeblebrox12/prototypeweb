@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase
 
 from apps.academy.admin import CourseAdmin, CourseMediaAssetAdmin
-from apps.academy.models import Course, CourseMediaAsset
+from apps.academy.models import Course, CourseImport, CourseMediaAsset
 
 User = get_user_model()
 
@@ -47,10 +47,62 @@ class CourseDeletionAdminTests(TestCase):
         self.assertFalse(media_admin.has_delete_permission(self.request, self.asset))
 
         course_admin = self.site._registry[Course]
+        draft = CourseImport.objects.create(
+            course_slug=self.course.slug,
+            title=self.course.title,
+            manifest_version="course-builder-v1",
+            content_hash="d" * 64,
+            source_manifest=f"builder://{self.course.slug}",
+            payload={"builder_state": {"title": self.course.title}},
+            status=CourseImport.Status.DRAFT,
+        )
         course_admin.delete_queryset(
             self.request,
             Course.objects.filter(pk=self.course.pk),
         )
 
+        draft.refresh_from_db()
+        self.assertEqual(draft.status, CourseImport.Status.DELETED)
         self.assertFalse(Course.objects.filter(pk=self.course.pk).exists())
         self.assertFalse(CourseMediaAsset.objects.filter(pk=self.asset.pk).exists())
+
+
+    def test_course_delete_retires_matching_builder_draft_but_keeps_review_history(self):
+        draft = CourseImport.objects.create(
+            course_slug=self.course.slug,
+            title=self.course.title,
+            manifest_version="course-builder-v1",
+            content_hash="a" * 64,
+            source_manifest=f"builder://{self.course.slug}",
+            payload={"builder_state": {"title": self.course.title}},
+            status=CourseImport.Status.DRAFT,
+        )
+        review = CourseImport.objects.create(
+            course_slug=self.course.slug,
+            title=self.course.title,
+            manifest_version="1",
+            content_hash="b" * 64,
+            source_manifest=f"manifest://{self.course.slug}",
+            payload={"course": {"slug": self.course.slug}},
+            status=CourseImport.Status.REVIEW,
+        )
+        unrelated = CourseImport.objects.create(
+            course_slug="unrelated-builder-draft",
+            title="Unrelated draft",
+            manifest_version="course-builder-v1",
+            content_hash="c" * 64,
+            source_manifest="builder://unrelated-builder-draft",
+            payload={"builder_state": {"title": "Unrelated draft"}},
+            status=CourseImport.Status.DRAFT,
+        )
+
+        course_admin = self.site._registry[Course]
+        course_admin.delete_model(self.request, self.course)
+
+        draft.refresh_from_db()
+        review.refresh_from_db()
+        unrelated.refresh_from_db()
+        self.assertEqual(draft.status, CourseImport.Status.DELETED)
+        self.assertEqual(review.status, CourseImport.Status.REVIEW)
+        self.assertEqual(unrelated.status, CourseImport.Status.DRAFT)
+        self.assertFalse(Course.objects.filter(pk=self.course.pk).exists())
