@@ -257,6 +257,33 @@ def _build_import_payload(course_state, course_slug):
                 and image.get("assetUuid")
                 and str(image.get("assetUuid")) in referenced_assets
             }
+            # Purpose-built comparison-card figures are authored content blocks, not image files.
+            # Keep their data beside the stable token so the same renderer can show them in every view.
+            for figure in lesson.get("teachingFigures") or []:
+                if not isinstance(figure, dict):
+                    continue
+                figure_id = str(figure.get("id") or "").strip()
+                if not figure_id or not re.search(
+                    r"\\[\\[teaching-figure:" + re.escape(figure_id) + r"\\]\\]",
+                    content,
+                ):
+                    continue
+                cards = []
+                raw_cards = figure.get("cards") if isinstance(figure.get("cards"), list) else []
+                for card in raw_cards[:4]:
+                    if not isinstance(card, dict):
+                        continue
+                    cards.append({
+                        "kicker": str(card.get("kicker") or "").strip()[:100],
+                        "title": str(card.get("title") or "").strip()[:240],
+                        "body": str(card.get("body") or "").strip()[:1000],
+                    })
+                figures[figure_id] = {
+                    "type": "comparison-cards",
+                    "title": str(figure.get("title") or "Comparison").strip()[:240],
+                    "cards": cards,
+                    "note": str(figure.get("note") or "").strip()[:1500],
+                }
             questions = lesson.get("questions") if isinstance(lesson.get("questions"), list) else []
             learner_questions = []
             for question_index, question in enumerate(questions, start=1):
