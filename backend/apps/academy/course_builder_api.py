@@ -188,12 +188,15 @@ def _clean_image_payload(course_state, course_slug):
                 image["assetKey"] = asset_key
                 image["assetUuid"] = stable_id
                 image["sha256"] = digest
-                image["title"] = str(
-                    image.get("title") or image.get("caption") or image.get("alt")
-                    or image.get("name") or "Course figure"
-                ).strip()[:240]
                 image["alt"] = str(image.get("alt") or "").strip()[:500]
                 image["caption"] = str(image.get("caption") or "").strip()[:500]
+                display_title = str(
+                    image.get("title") or image.get("caption") or image.get("alt") or ""
+                ).strip()
+                if display_title and display_title == str(image.get("name") or "").strip():
+                    display_title = str(image.get("caption") or image.get("alt") or "").strip()
+                # Never substitute the uploaded filename for an author-written figure title.
+                image["title"] = display_title[:240]
                 image["data"] = ""
                 specs_by_key[asset_key] = {
                     "asset_key": asset_key,
@@ -239,15 +242,38 @@ def _build_import_payload(course_state, course_slug):
                     image_by_id[str(image["id"])] = str(image.get("assetUuid") or _asset_uuid(course_slug, str(image["id"])))
             for old_id, new_id in image_by_id.items():
                 content = content.replace(f"asset://{old_id}", f"asset://{new_id}")
+            # Grouped images are referenced by a semantic token instead of individual
+            # Markdown image tokens. Resolve group membership to stable asset UUIDs, and
+            # count those assets as lesson references for delivery/access checks.
+            image_group_asset_ids = {}
+            for image_group in lesson.get("imageGroups") or []:
+                if not isinstance(image_group, dict):
+                    continue
+                group_id = str(image_group.get("id") or "").strip()
+                if not group_id or not re.search(
+                    r"\[\[image-group:" + re.escape(group_id) + r"\]\]", content,
+                ):
+                    continue
+                stable_ids = []
+                raw_ids = image_group.get("imageIds") if isinstance(image_group.get("imageIds"), list) else []
+                for raw_id in raw_ids:
+                    stable_id = image_by_id.get(str(raw_id))
+                    if stable_id and stable_id not in stable_ids:
+                        stable_ids.append(stable_id)
+                if len(stable_ids) >= 2:
+                    image_group_asset_ids[group_id] = stable_ids
+
             # Keep figure placement inside the authored Markdown. Titles, alt text and captions
-            # travel separately with the stable asset UUID; do not append captions to the prose.
-            asset_ids = sorted(set(_ASSET_REF.findall(content)))
+            # travel separately with stable asset UUIDs; do not append captions to the prose.
+            asset_ids = sorted(
+                set(_ASSET_REF.findall(content))
+                | {asset_id for group_ids in image_group_asset_ids.values() for asset_id in group_ids}
+            )
             referenced_assets = set(asset_ids)
             figures = {
                 str(image.get("assetUuid")): {
                     "title": str(
-                        image.get("title") or image.get("caption") or image.get("alt")
-                        or image.get("name") or "Course figure"
+                        image.get("title") or image.get("caption") or image.get("alt") or ""
                     ).strip()[:240],
                     "alt": str(image.get("alt") or "").strip()[:500],
                     "caption": str(image.get("caption") or "").strip()[:500],
@@ -257,6 +283,20 @@ def _build_import_payload(course_state, course_slug):
                 and image.get("assetUuid")
                 and str(image.get("assetUuid")) in referenced_assets
             }
+            # Multi-image groups render as one named figure with a module label
+            # and a responsive image grid. Individual image titles/captions remain editable.
+            for group_id, stable_ids in image_group_asset_ids.items():
+                image_group = next(
+                    item for item in (lesson.get("imageGroups") or [])
+                    if isinstance(item, dict) and str(item.get("id") or "").strip() == group_id
+                )
+                figures[group_id] = {
+                    "type": "image-group",
+                    "title": str(image_group.get("title") or "").strip()[:240],
+                    "image_ids": stable_ids,
+                    "note": str(image_group.get("note") or "").strip()[:1500],
+                }
+
             # Purpose-built comparison-card figures are authored content blocks, not image files.
             # Keep their data beside the stable token so the same renderer can show them in every view.
             for figure in lesson.get("teachingFigures") or []:
