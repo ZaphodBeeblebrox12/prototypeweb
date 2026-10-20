@@ -1581,7 +1581,7 @@ Describe the evidence first.
       render();
       if (!course.serverDraftId) {
         clearTimeout(academySaveTimer);
-        await saveCurrentToAcademy(false, true);
+        await saveCurrentToAcademy(false, false);
         toast('Published course loaded as a revision. The live course stays unchanged until the revision is approved and published.');
       } else {
         toast('Reopened your saved revision. The currently published course remains live until approval.');

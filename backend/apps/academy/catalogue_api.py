@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils.cache import patch_vary_headers
 from django.views.decorators.http import require_GET
 
-from .models import Course
+from .models import Course, CourseImport
 
 
 @require_GET
@@ -42,6 +42,33 @@ def public_course_catalogue(request):
             "art": "structure",
             "modules": modules,
             "academyUrl": request.build_absolute_uri(reverse("academy:course-detail", args=[course.slug])),
+        })
+    # Teasers are metadata-only and never expose unpublished lesson content.
+    published_slugs = set(Course.objects.filter(status=Course.Status.PUBLISHED).values_list("slug", flat=True))
+    seen_teaser_slugs = set()
+    teasers = CourseImport.objects.filter(
+        status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REVIEW],
+        target_course__isnull=True,
+    ).order_by("-updated_at")
+    for record in teasers:
+        state = (record.payload or {}).get("builder_state") or {}
+        if not state.get("comingSoon") or record.course_slug in published_slugs or record.course_slug in seen_teaser_slugs:
+            continue
+        seen_teaser_slugs.add(record.course_slug)
+        rows.append({
+            "id": "coming-soon-" + str(record.pk), "slug": record.course_slug,
+            "title": str(state.get("title") or record.title)[:200],
+            "category": str(state.get("category") or "TradeThesis courses")[:80],
+            "level": str(state.get("level") or "Self-paced")[:40],
+            "description": str(state.get("summary") or state.get("description") or "")[:360],
+            "outcome": "Course details and enrolment will be announced closer to launch.",
+            "complements": "This course is being prepared. Full details will be shared closer to launch.",
+            "price": "Coming soon", "status": "coming-soon", "art": "structure",
+            "modules": [{
+                "title": "Course outline", "count": "Coming soon",
+                "preview": "The full course outline will be shared closer to launch.",
+                "points": ["Content is being prepared."],
+            }],
         })
     response = JsonResponse({"courses": rows})
     response["Access-Control-Allow-Origin"] = "*"

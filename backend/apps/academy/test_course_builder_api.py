@@ -9,7 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from .models import Course, CourseImport, CourseImportAsset, CourseModule, Lesson
+from .models import Course, CourseImport, CourseImportAsset, CourseModule, Lesson, LessonInstructorMaterial
 
 User = get_user_model()
 
@@ -731,3 +731,130 @@ class CourseBuilderApiTests(TestCase):
         self.assertNotIn(record_id, [draft["serverDraftId"] for draft in refreshed.json()["drafts"]])
         record.refresh_from_db()
         self.assertEqual(record.status, CourseImport.Status.DELETED)
+
+
+    def test_published_course_can_be_loaded_into_builder_as_a_separate_review_revision(self):
+        course = Course.objects.create(
+            title="Published Edit Course",
+            slug="published-edit-course",
+            summary="Live summary",
+            description="Live description",
+            category="Chart reading",
+            level="Intermediate",
+            estimated_duration="Self-paced",
+            learning_outcomes=["Keep a written process."],
+            position=7,
+            status=Course.Status.PUBLISHED,
+        )
+        module = CourseModule.objects.create(
+            course=course, title="Foundations", slug="foundations",
+            description="Live module description", position=1, is_published=True,
+        )
+        lesson = Lesson.objects.create(
+            module=module, title="Lesson One", slug="lesson-one",
+            summary="Live lesson summary", format="reading",
+            content_markdown="## Live lesson\n\nOriginal published lesson content.",
+            content_json={
+                "schema_version": 1, "source_id": "1.1", "asset_ids": [], "figures": {},
+                "related_course_ids": [],
+                "questions": [{
+                    "id": "question-live", "prompt": "Which option is correct?",
+                    "options": ["First option", "Second option"],
+                }],
+                "notebook": {"title": "My notebook", "prompts": []}, "video_url": "",
+            },
+            position=1, is_published=True,
+        )
+        LessonInstructorMaterial.objects.create(
+            lesson=lesson,
+            rubric_json={"questions": [{
+                "id": "question-live", "prompt": "Which option is correct?",
+                "options": ["First option", "Second option"], "correctIndex": 1,
+                "explanation": "The second option matches the evidence.", "imageId": "",
+            }]},
+        )
+        loaded = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps({"action": "begin_edit_published_course", "courseId": str(course.pk)}),
+            content_type="application/json",
+        )
+        self.assertEqual(loaded.status_code, 200, loaded.content)
+        state = loaded.json()["course"]
+        self.assertEqual(state["serverCourseId"], str(course.pk))
+        self.assertEqual(state["modules"][0]["id"], str(module.pk))
+        self.assertEqual(state["modules"][0]["lessons"][0]["id"], str(lesson.pk))
+        self.assertEqual(state["modules"][0]["lessons"][0]["content"], "## Live lesson\n\nOriginal published lesson content.")
+        self.assertEqual(state["modules"][0]["lessons"][0]["questions"][0]["correctIndex"], 1)
+
+        state["summary"] = "Revised summary"
+        state["modules"][0]["lessons"][0]["content"] = "## Live lesson\n\nReviewed replacement content."
+        saved = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps({"course": state, "mode": "save", "sync_source": False}),
+            content_type="application/json",
+        )
+        self.assertEqual(saved.status_code, 200, saved.content)
+        record = CourseImport.objects.get(pk=saved.json()["record_id"])
+        self.assertEqual(record.target_course_id, course.pk)
+        course.refresh_from_db()
+        lesson.refresh_from_db()
+        self.assertEqual(course.summary, "Live summary")
+        self.assertIn("Original published lesson content.", lesson.content_markdown)
+        self.assertEqual(record.status, CourseImport.Status.DRAFT)
+
+        revision_state = saved.json()["draft"]
+        revision_state["summary"] = "Revised summary"
+        revision_state["modules"][0]["lessons"][0]["content"] = "## Live lesson\n\nReviewed replacement content."
+        submitted = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps({"course": revision_state, "mode": "submit", "sync_source": False}),
+            content_type="application/json",
+        )
+        self.assertEqual(submitted.status_code, 200, submitted.content)
+        record.refresh_from_db()
+        self.assertEqual(record.target_course_id, course.pk)
+        self.assertEqual(record.status, CourseImport.Status.REVIEW)
+
+        from .importing import publish_course_import
+        published_again = publish_course_import(record, user=self.admin)
+        self.assertEqual(published_again.pk, course.pk)
+        self.assertEqual(Course.objects.filter(slug="published-edit-course").count(), 1)
+        self.assertEqual(Course.objects.get(pk=course.pk).summary, "Revised summary")
+        self.assertEqual(CourseModule.objects.get(pk=module.pk).pk, module.pk)
+        self.assertEqual(Lesson.objects.get(pk=lesson.pk).content_markdown, "## Live lesson\n\nReviewed replacement content.")
+        self.assertEqual(CourseImport.objects.get(pk=record.pk).status, CourseImport.Status.PUBLISHED)
+
+    def test_coming_soon_catalogue_entry_exposes_only_announcement_metadata(self):
+        CourseImport.objects.create(
+            course_slug="coming-soon-options-course", title="Options Course",
+            manifest_version="course-builder-v1", content_hash="a" * 64,
+            source_manifest="builder://coming-soon-options-course",
+            status=CourseImport.Status.DRAFT,
+            payload={
+                "builder_state": {
+                    "title": "Options Course", "slug": "coming-soon-options-course",
+                    "summary": "A practical options course is nearly ready.",
+                    "description": "A longer internal draft description.",
+                    "category": "Options", "level": "Intermediate", "comingSoon": True,
+                },
+                "modules": [{
+                    "title": "Secret module title",
+                    "lessons": [{
+                        "title": "Private lesson body",
+                        "content_markdown": "PRIVATE LESSON TEXT THAT MUST NOT LEAK",
+                        "instructor_material": {"questions": [{"prompt": "SECRET ANSWER KEY"}]},
+                    }],
+                }],
+            },
+        )
+        self.client.logout()
+        response = self.client.get(reverse("academy_public_catalogue"))
+        self.assertEqual(response.status_code, 200, response.content)
+        teaser = next(item for item in response.json()["courses"] if item["status"] == "coming-soon")
+        self.assertEqual(teaser["title"], "Options Course")
+        self.assertEqual(teaser["description"], "A practical options course is nearly ready.")
+        self.assertEqual(teaser["modules"][0]["title"], "Course outline")
+        body = json.dumps(teaser)
+        self.assertNotIn("PRIVATE LESSON TEXT", body)
+        self.assertNotIn("SECRET ANSWER KEY", body)
+        self.assertNotIn("Secret module title", body)

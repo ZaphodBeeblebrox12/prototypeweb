@@ -35,6 +35,7 @@ from .models import (
     CourseMediaAsset,
     GoogleDriveCredential,
     Lesson,
+    LessonInstructorMaterial,
 )
 from .permissions import is_course_content_admin
 from .storage import course_asset_storage
@@ -571,6 +572,119 @@ def _retire_legacy_drafts_for_deleted_courses(records):
     return retired_ids
 
 
+def _builder_state_from_published_course(course):
+    """Hydrate published learner content and private authoring material for a revision."""
+    all_assets = {str(asset.pk): asset for asset in course.media_assets.all()}
+    modules = []
+    for module in course.modules.filter(is_published=True).order_by("position", "title"):
+        lessons = []
+        for lesson in module.lessons.filter(is_published=True).order_by("position", "title"):
+            content_json = lesson.content_json if isinstance(lesson.content_json, dict) else {}
+            figures = content_json.get("figures") if isinstance(content_json.get("figures"), dict) else {}
+            asset_ids = {str(value) for value in content_json.get("asset_ids", []) if value}
+            asset_ids.update(_ASSET_REF.findall(lesson.content_markdown or ""))
+            image_groups, teaching_figures = [], []
+            for figure_id, figure in figures.items():
+                if not isinstance(figure, dict):
+                    continue
+                if figure.get("type") == "image-group":
+                    group_ids = [str(value) for value in figure.get("image_ids", []) if value]
+                    asset_ids.update(group_ids)
+                    image_groups.append({
+                        "id": str(figure_id), "title": str(figure.get("title") or ""),
+                        "imageIds": group_ids, "note": str(figure.get("note") or ""),
+                    })
+                elif figure.get("type") == "comparison-cards":
+                    teaching_figures.append({
+                        "id": str(figure_id), "title": str(figure.get("title") or "Comparison"),
+                        "cards": deepcopy(figure.get("cards") or []), "note": str(figure.get("note") or ""),
+                    })
+                elif str(figure_id) in all_assets:
+                    asset_ids.add(str(figure_id))
+            images = []
+            for asset_id in sorted(asset_ids):
+                asset = all_assets.get(asset_id)
+                if asset is None:
+                    continue
+                metadata = figures.get(asset_id, {}) if isinstance(figures.get(asset_id), dict) else {}
+                stored_name = asset.file.name if asset.file else asset.source_path
+                images.append({
+                    "id": asset_id, "assetUuid": asset_id, "assetKey": asset.asset_key,
+                    "name": stored_name.rsplit("/", 1)[-1] if stored_name else asset.asset_key.rsplit("/", 1)[-1],
+                    "title": str(metadata.get("title") or ""),
+                    "alt": str(metadata.get("alt") or asset.alt_text or ""),
+                    "caption": str(metadata.get("caption") or ""), "data": "",
+                })
+            public_questions = [
+                item for item in content_json.get("questions", []) if isinstance(item, dict)
+            ] if isinstance(content_json.get("questions"), list) else []
+            try:
+                instructor_material = lesson.instructor_material
+            except LessonInstructorMaterial.DoesNotExist:
+                instructor_material = None
+            rubric = instructor_material.rubric_json if instructor_material and isinstance(instructor_material.rubric_json, dict) else {}
+            saved_questions = rubric.get("questions")
+            if isinstance(saved_questions, list):
+                questions = deepcopy(saved_questions)
+            else:
+                questions = [{
+                    "id": str(item.get("id") or f"question-{lesson.pk}-{index}"),
+                    "prompt": str(item.get("prompt") or ""), "options": list(item.get("options") or []),
+                    "correctIndex": -1, "explanation": "",
+                    "imageId": str(item.get("image_asset_id") or ""),
+                } for index, item in enumerate(public_questions, start=1)]
+            normalized_questions = []
+            for index, item in enumerate(questions, start=1):
+                if not isinstance(item, dict):
+                    continue
+                row = deepcopy(item)
+                row["id"] = str(row.get("id") or f"question-{lesson.pk}-{index}")
+                row["prompt"] = str(row.get("prompt") or "")
+                row["options"] = [str(value) for value in row.get("options", [])] if isinstance(row.get("options"), list) else []
+                try:
+                    row["correctIndex"] = int(row.get("correctIndex", -1))
+                except (TypeError, ValueError):
+                    row["correctIndex"] = -1
+                row["explanation"] = str(row.get("explanation") or "")
+                public_match = next((
+                    candidate for candidate in public_questions
+                    if candidate.get("id") and str(candidate.get("id")) == row["id"]
+                ), public_questions[index - 1] if index <= len(public_questions) else {})
+                row["imageId"] = str(public_match.get("image_asset_id") or row.get("imageId") or "") if isinstance(public_match, dict) else str(row.get("imageId") or "")
+                normalized_questions.append(row)
+            notebook = content_json.get("notebook") if isinstance(content_json.get("notebook"), dict) else {}
+            lessons.append({
+                "id": str(lesson.pk), "title": lesson.title, "summary": lesson.summary,
+                "minutes": lesson.duration_minutes, "format": lesson.format,
+                "videoUrl": str(content_json.get("video_url") or ""),
+                "notebook": deepcopy(notebook) or {
+                    "title": "Your Trading Notebook",
+                    "prompts": [
+                        {"label": "Observe", "text": "Describe the evidence visible in the chart."},
+                        {"label": "Interpret", "text": "State one possible reading and a reasonable alternative."},
+                        {"label": "Test", "text": "Name the next evidence that would strengthen or weaken your reading."},
+                    ],
+                },
+                "content": lesson.content_markdown or "", "questions": normalized_questions,
+                "images": images, "image": deepcopy(images[0]) if images else None,
+                "imageGroups": image_groups, "teachingFigures": teaching_figures,
+                "relatedCourseIds": [str(value) for value in content_json.get("related_course_ids", [])],
+            })
+        if lessons:
+            modules.append({"id": str(module.pk), "title": module.title, "description": module.description, "lessons": lessons})
+    return {
+        "id": "published-" + str(course.pk), "serverCourseId": str(course.pk),
+        "title": course.title, "slug": course.slug, "summary": course.summary,
+        "description": course.description, "category": course.category or "Technical analysis",
+        "level": course.level or "Intermediate", "duration": course.estimated_duration or "Self-paced",
+        "price": "", "priceNote": "Pricing and checkout are configured separately.",
+        "status": "draft-update", "comingSoon": False, "position": course.position,
+        "createdAt": course.created_at.isoformat(), "updatedAt": course.updated_at.isoformat(),
+        "publishedAt": course.updated_at.isoformat(), "publishedSnapshot": None,
+        "outcomes": list(course.learning_outcomes or []), "modules": modules,
+    }
+
+
 def _draft_response(record, request):
     state = deepcopy(record.payload.get("builder_state") or {})
     for module in state.get("modules", []):
@@ -582,7 +696,9 @@ def _draft_response(record, request):
             lesson["image"] = deepcopy(images[0]) if images else None
     state["serverDraftId"] = str(record.pk)
     state["serverUpdatedAt"] = record.updated_at.isoformat()
-    state["status"] = "draft"
+    state["status"] = "draft-update" if record.target_course_id else "draft"
+    if record.target_course_id:
+        state["serverCourseId"] = str(record.target_course_id)
     return state
 
 
@@ -668,15 +784,54 @@ def course_builder_api(request):
             asset_storage_status["durable"],
             asset_storage_status["writes_enabled"],
         )
+        coming_soon_courses = []
+        published_slugs = set(Course.objects.filter(status=Course.Status.PUBLISHED).values_list("slug", flat=True))
+        seen_teaser_slugs = set()
+        teaser_records = CourseImport.objects.filter(
+            status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REVIEW],
+            target_course__isnull=True,
+        ).order_by("-updated_at")
+        for teaser in teaser_records:
+            builder_state = (teaser.payload or {}).get("builder_state") or {}
+            if not builder_state.get("comingSoon") or teaser.course_slug in published_slugs or teaser.course_slug in seen_teaser_slugs:
+                continue
+            seen_teaser_slugs.add(teaser.course_slug)
+            coming_soon_courses.append({
+                "id": "coming-soon-" + str(teaser.pk), "slug": teaser.course_slug,
+                "title": str(builder_state.get("title") or teaser.title)[:200],
+                "category": str(builder_state.get("category") or "TradeThesis courses")[:80],
+                "level": str(builder_state.get("level") or "Self-paced")[:40],
+                "description": str(builder_state.get("summary") or builder_state.get("description") or "")[:360],
+                "outcome": "Course details and enrolment will be announced closer to launch.",
+                "complements": "This course is being prepared. Full details will be shared closer to launch.",
+                "price": "Coming soon", "status": "coming-soon", "art": "structure",
+                "modules": [{
+                    "title": "Course outline", "count": "Coming soon",
+                    "preview": "The full course outline will be shared closer to launch.",
+                    "points": ["Content is being prepared."],
+                }],
+            })
         return JsonResponse({
-            "drafts": drafts,
-            "related_courses": related_courses,
-            "lesson_references": lesson_references,
+            "drafts": drafts, "related_courses": related_courses,
+            "lesson_references": lesson_references, "coming_soon_courses": coming_soon_courses,
             "asset_storage": asset_storage_status,
         })
 
     try:
         body = json.loads(request.body.decode("utf-8"))
+        if not isinstance(body, dict):
+            return JsonResponse({"detail": "The request body must be a JSON object."}, status=400)
+        if body.get("action") == "begin_edit_published_course":
+            raw_course_id = str(body.get("courseId") or "").strip()
+            if not _valid_uuid(raw_course_id):
+                return JsonResponse({"detail": "A valid published course ID is required."}, status=400)
+            published_course = Course.objects.filter(pk=uuid.UUID(raw_course_id), status=Course.Status.PUBLISHED).first()
+            if published_course is None:
+                return JsonResponse({"detail": "That course is no longer published. Refresh the Course Builder and try again."}, status=404)
+            existing_edit = CourseImport.objects.filter(target_course=published_course, status=CourseImport.Status.DRAFT).order_by("-updated_at").first()
+            if existing_edit and existing_edit.payload.get("builder_state"):
+                return JsonResponse({"ok": True, "draft": _draft_response(existing_edit, request), "reused": True})
+            return JsonResponse({"ok": True, "course": _builder_state_from_published_course(published_course), "reused": False})
         course_state = body.get("course")
         if not isinstance(course_state, dict):
             return JsonResponse({"detail": "A course draft is required."}, status=400)
@@ -697,23 +852,27 @@ def course_builder_api(request):
                     "detail": "This saved draft was deleted or is no longer editable. Refresh the Course Builder before saving again.",
                     "draft_deleted": True,
                 }, status=410)
+        server_course_id = str(course_state.get("serverCourseId") or "").strip()
+        server_course = None
+        if server_course_id:
+            if not _valid_uuid(server_course_id):
+                return JsonResponse({"detail": "The published course ID is invalid."}, status=400)
+            server_course = Course.objects.filter(pk=uuid.UUID(server_course_id), status=Course.Status.PUBLISHED).first()
+            if server_course is None:
+                return JsonResponse({"detail": "The published course could not be found or is no longer published. Refresh the Builder before saving."}, status=409)
         existing_course = Course.objects.exclude(status=Course.Status.ARCHIVED).filter(slug=slug).first()
-        if existing_course and course_state.get("serverCourseId") != str(existing_course.pk):
-            # Re-saving an already-created Course Builder draft must remain possible
-            # even if a Course row with this slug now exists. A matching draft ID is
-            # proof that this request is updating its own draft, not creating a second
-            # import against an existing Academy course.
-            server_draft_id = str(course_state.get("serverDraftId") or "")
+        if server_course and existing_course and existing_course.pk != server_course.pk:
+            return JsonResponse({"detail": "That URL slug already belongs to another course. Choose a unique slug before saving."}, status=409)
+        if existing_course and server_course is None:
             owns_existing_draft = (
                 _valid_uuid(server_draft_id)
                 and CourseImport.objects.filter(
-                    pk=server_draft_id,
-                    course_slug=slug,
-                    status=CourseImport.Status.DRAFT,
+                    pk=server_draft_id, course_slug=slug,
+                    status=CourseImport.Status.DRAFT, target_course__isnull=True,
                 ).exists()
             )
             if not owns_existing_draft:
-                return JsonResponse({"detail": "A course with this URL slug already exists. Choose a unique slug or edit the existing course in the Academy."}, status=409)
+                return JsonResponse({"detail": "A course with this URL slug already exists. Choose a unique slug or use Edit published course."}, status=409)
         course_state["slug"] = slug
         payload, image_sources = _build_import_payload(course_state, slug)
         if not payload["modules"]:
@@ -743,6 +902,10 @@ def course_builder_api(request):
                         "detail": "This saved draft was deleted or is no longer editable. Refresh the Course Builder before saving again.",
                         "draft_deleted": True,
                     }, status=410)
+                if server_course and draft.target_course_id != server_course.pk:
+                    return JsonResponse({"detail": "This draft is not linked to the selected published course. Reload it from Edit published course."}, status=409)
+                if draft.target_course_id and not server_course:
+                    return JsonResponse({"detail": "Reload this published-course revision from Edit published course before saving."}, status=409)
                 conflicting_slug_draft = CourseImport.objects.select_for_update().filter(
                     course_slug=slug, status=CourseImport.Status.DRAFT,
                 ).exclude(pk=draft.pk).exists()
@@ -750,9 +913,13 @@ def course_builder_api(request):
                     return JsonResponse({
                         "detail": "Another saved draft already uses this course URL slug. Choose a unique slug.",
                     }, status=409)
+            elif server_course:
+                draft = CourseImport.objects.select_for_update().filter(
+                    course_slug=slug, status=CourseImport.Status.DRAFT, target_course=server_course,
+                ).first()
             else:
                 draft = CourseImport.objects.select_for_update().filter(
-                    course_slug=slug, status=CourseImport.Status.DRAFT,
+                    course_slug=slug, status=CourseImport.Status.DRAFT, target_course__isnull=True,
                 ).first()
             if mode == "submit" and draft is None:
                 # The browser may retry after the server accepted a submission
@@ -801,10 +968,13 @@ def course_builder_api(request):
                     source_manifest=f"builder://{slug}",
                     payload=payload,
                     status=CourseImport.Status.DRAFT,
+                    target_course=server_course,
                     imported_by=request.user,
                 )
             else:
                 record = draft
+                if server_course:
+                    record.target_course = server_course
                 record.course_slug = slug
                 record.title = title
                 record.manifest_version = "course-builder-v1"
@@ -814,7 +984,7 @@ def course_builder_api(request):
                 record.imported_by = request.user
                 record.save(update_fields=[
                     "course_slug", "title", "manifest_version", "content_hash", "source_manifest",
-                    "payload", "imported_by", "updated_at",
+                    "target_course", "payload", "imported_by", "updated_at",
                 ])
 
             existing_assets = {asset.asset_key: asset for asset in record.assets.all()}
@@ -955,12 +1125,20 @@ def course_builder_api(request):
 def course_builder_asset(request, import_id, asset_id):
     _require_admin(request)
     record = get_object_or_404(CourseImport, pk=import_id)
-    asset = get_object_or_404(CourseImportAsset, course_import=record, stable_asset_id=asset_id)
-    if not asset.file or not asset.file.storage.exists(asset.file.name):
+    staged = record.assets.filter(stable_asset_id=asset_id).first()
+    file_field = staged.file if staged and staged.file and staged.file.storage.exists(staged.file.name) else None
+    if file_field is None and record.target_course_id:
+        live_asset = CourseMediaAsset.objects.filter(pk=asset_id, course_id=record.target_course_id).first()
+        if live_asset and live_asset.file and live_asset.file.storage.exists(live_asset.file.name):
+            file_field = live_asset.file
+        elif live_asset and re.match(r"^https?://", live_asset.original_url or "", re.IGNORECASE):
+            from django.http import HttpResponseRedirect
+            return HttpResponseRedirect(live_asset.original_url)
+    if file_field is None:
         raise Http404
     response = FileResponse(
-        asset.file.open("rb"),
-        content_type=mimetypes.guess_type(asset.file.name)[0] or "application/octet-stream",
+        file_field.open("rb"),
+        content_type=mimetypes.guess_type(file_field.name)[0] or "application/octet-stream",
     )
     response["Cache-Control"] = "private, no-store"
     response["X-Content-Type-Options"] = "nosniff"

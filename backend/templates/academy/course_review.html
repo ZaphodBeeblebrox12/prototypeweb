@@ -16,6 +16,12 @@
     <h1>{{ import_record.title }}</h1>
     <p class="tt-lesson-summary">Preview the staged course as learners will read it. Publishing is a separate, explicit action.</p>
     <div class="tt-lesson-meta"><span>{{ import_record.course_slug }}</span><span>Manifest {{ import_record.manifest_version }}</span><span>Imported {{ import_record.imported_at|date:"j M Y, H:i" }}</span></div>
+    {% if import_record.target_course %}
+      <aside class="tt-lesson-summary" role="note">
+        <strong>Revision to an existing published course: {{ import_record.target_course.title }}</strong>
+        The live version remains unchanged while this revision is under review. Approving it updates the existing course and preserves its course identity and matching lesson records.
+      </aside>
+    {% endif %}
   </header>
   <section class="tt-review-actions">
     <div><h2>Before publishing</h2><p>Fix missing figures below, check lesson content, then publish this exact staged version.</p></div>

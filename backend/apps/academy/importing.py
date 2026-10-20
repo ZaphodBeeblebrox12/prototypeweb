@@ -389,6 +389,20 @@ def validate_import_for_publish(record):
         for lesson in module.get("lessons", []):
             if not lesson.get("title") or not lesson.get("content_markdown", "").strip():
                 errors.append("Lesson " + str(lesson.get("title", lesson.get("source_id", ""))) + " is missing a title or lesson text.")
+            if record.target_course_id:
+                instructor_material = lesson.get("instructor_material") if isinstance(lesson.get("instructor_material"), dict) else {}
+                questions = instructor_material.get("questions") if isinstance(instructor_material.get("questions"), list) else []
+                for question_index, question in enumerate(questions, start=1):
+                    if not isinstance(question, dict) or not str(question.get("prompt") or "").strip():
+                        errors.append("Lesson " + str(lesson.get("title", "")) + " question " + str(question_index) + " needs a prompt.")
+                        continue
+                    options = question.get("options") if isinstance(question.get("options"), list) else []
+                    try:
+                        correct_index = int(question.get("correctIndex", -1))
+                    except (TypeError, ValueError):
+                        correct_index = -1
+                    if len(options) < 2 or correct_index < 0 or correct_index >= len(options):
+                        errors.append("Lesson " + str(lesson.get("title", "")) + " question " + str(question_index) + " needs at least two choices and a correct answer selected.")
             referenced_asset_ids.update(lesson.get("content_json", {}).get("asset_ids", []))
     staged = {str(asset.stable_asset_id): asset for asset in record.assets.all()}
     live = {str(asset.pk): asset for asset in CourseMediaAsset.objects.filter(pk__in=referenced_asset_ids)}
@@ -431,7 +445,13 @@ def publish_course_import(record, *, user):
             raise ValidationError("Only a draft import awaiting review can be published.")
         payload = record.payload
         course_data = payload["course"]
-        course = Course.objects.filter(slug=record.course_slug).first()
+        course = None
+        if record.target_course_id:
+            course = Course.objects.select_for_update().filter(pk=record.target_course_id).first()
+            if course is None or course.status != Course.Status.PUBLISHED:
+                raise ValidationError("The published course attached to this revision is no longer available.")
+        if course is None:
+            course = Course.objects.filter(slug=record.course_slug).first()
         if course is None:
             course = Course.objects.create(
                 title=course_data["title"], slug=course_data["slug"],
@@ -446,6 +466,7 @@ def publish_course_import(record, *, user):
                 module.position = 30000 + index
                 module.save(update_fields=["position"])
         course.title = course_data["title"]
+        course.slug = course_data["slug"]
         course.summary = course_data.get("summary", "")
         course.description = course_data.get("description", "")
         course.category = course_data.get("category", course.category)
@@ -454,7 +475,7 @@ def publish_course_import(record, *, user):
         course.learning_outcomes = course_data.get("learning_outcomes", course.learning_outcomes)
         course.position = course_data.get("position", 0)
         course.save(update_fields=[
-            "title", "summary", "description", "category", "level",
+            "title", "slug", "summary", "description", "category", "level",
             "estimated_duration", "learning_outcomes", "position", "updated_at",
         ])
 
