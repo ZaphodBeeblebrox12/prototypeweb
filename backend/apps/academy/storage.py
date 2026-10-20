@@ -91,6 +91,10 @@ class PrivateCourseAssetStorage(FileSystemStorage):
         path = self._github_path(name)
         return self._request("GET", self._url(path), params={"ref": self.branch})
 
+    def remote_exists(self, name):
+        """Return whether an asset exists in GitHub, excluding any local fallback."""
+        return bool(self.github_enabled and self._metadata(name) is not None)
+
     def _open(self, name, mode="rb"):
         if not self.github_enabled:
             return super()._open(name, mode)
