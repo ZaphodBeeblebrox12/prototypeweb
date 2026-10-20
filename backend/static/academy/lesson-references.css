@@ -1,0 +1,41 @@
+.tt-inline-lesson-link {
+  color: var(--tt-green, #456653);
+  font-weight: 650;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.tt-inline-lesson-card {
+  margin: 1.25rem 0;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--tt-line, #dedfd5);
+  border-left: 3px solid var(--tt-gold, #a78034);
+  border-radius: 10px;
+  background: var(--tt-surface, #fffefa);
+}
+
+.tt-inline-lesson-card p {
+  margin: 0.35rem 0;
+}
+
+.tt-inline-lesson-card p:first-child {
+  color: var(--tt-muted, #68736c);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+}
+
+.tt-inline-lesson-card a {
+  color: var(--tt-green, #456653);
+  text-decoration: none;
+}
+
+.tt-inline-lesson-card a:hover,
+.tt-inline-lesson-card a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.tt-lesson-reference-unavailable {
+  color: var(--tt-muted, #68736c);
+  font-style: italic;
+}
