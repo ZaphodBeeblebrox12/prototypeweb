@@ -38,6 +38,7 @@ def _require_admin(request):
     if not request.user.is_active or not is_course_content_admin(request.user):
         raise PermissionDenied
 
+
 def _sync_course_source_to_github(payload, course_slug):
     """Write the current authoring snapshot to this repo on the feature branch.
 
@@ -65,7 +66,7 @@ def _sync_course_source_to_github(payload, course_slug):
         body = {
             "message": f"Save Course Builder source: {course_slug}",
             "content": base64.b64encode(
-                (json.dumps(payload, ensure_ascii=False, indent=2) + "\\n").encode("utf-8")
+                (json.dumps(payload, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
             ).decode("ascii"),
             "branch": branch,
         }
@@ -77,7 +78,6 @@ def _sync_course_source_to_github(payload, course_slug):
     except requests.RequestException as exc:
         raise ValidationError("GitHub could not be reached to save the course source.") from exc
     return True
-
 
 
 def _asset_uuid(course_slug, asset_id):
