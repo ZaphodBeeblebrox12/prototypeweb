@@ -1,6 +1,7 @@
 """Authenticated learner views for TradeThesis Academy."""
 import json
 import mimetypes
+from contextlib import suppress
 from urllib.parse import quote
 
 from django.contrib.auth.decorators import login_required
@@ -300,10 +301,8 @@ def course_import_website_preview(request, import_id):
             }
             lesson_rows.append(row)
             total_lessons += 1
-            try:
+            with suppress(TypeError, ValueError):
                 total_study_minutes += max(0, int(lesson_data.get("duration_minutes", 0)))
-            except (TypeError, ValueError):
-                pass
             if total_lessons == 1 and source_id:
                 first_preview_url = lesson_url
             if row["current"]:
