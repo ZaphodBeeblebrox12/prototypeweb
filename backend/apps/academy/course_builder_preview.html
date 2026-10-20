@@ -417,7 +417,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       figures.push('<figure class="tt-purpose-figure" data-figure-id="' + esc(id) + '"><span class="tt-purpose-figure-head"><strong>' + esc(title) + '</strong><span>Purpose-built teaching aid</span></span><span class="tt-purpose-figure-body">' + imageHtml + '</span>' + caption + '</figure>');
       return '\\n\\n' + token + '\\n\\n';
     });
-    prepared = prepared.replace(/\\[\\[teaching-figure:([A-Za-z0-9_-]{1,120})\\]\\]/g, function(match, id) {
+    prepared = prepared.replace(/\[\[teaching-figure:([A-Za-z0-9_-]{1,120})\]\]/g, function(match, id) {
       const block = (lesson?.teachingFigures || []).find(item => String(item.id) === id);
       if (!block) return match;
       const token = 'TTFIGURETOKEN' + figures.length + 'END';
@@ -669,7 +669,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     }
     if (lesson && action === 'remove-teaching-figure') {
       const id = String(el.dataset.id || '');
-      lesson.content = String(lesson.content || '').split(`[[teaching-figure:${id}]]`).join('').replace(/\\n{3,}/g, '\\n\\n');
+      lesson.content = String(lesson.content || '').split(\`[[teaching-figure:\${id}]]\`).join('').replace(/\n{3,}/g, '\n\n');
       lesson.teachingFigures = (lesson.teachingFigures || []).filter(item => String(item.id) !== id);
       persist(false);
       renderEditor();
