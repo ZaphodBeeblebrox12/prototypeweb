@@ -296,10 +296,14 @@ Staging was subsequently deployed successfully at `ea8a3159fb6428fab9caec52cc963
 
 The first table test exposed that Python-Markdown emits table alignment using a `style="text-align: …"` attribute, which the sanitiser correctly strips. The table remained safe and readable, but author-specified left/centre/right alignment was lost in the live Learning Room even though the Course Builder preview retained it.
 
-The renderer now translates only the Markdown table extension's exact `left`, `center` or `right` table-cell alignment style into an `align` attribute before sanitisation. The existing allowlist already permits `align` on `th` and `td`; the change does not allow inline CSS. Regression tests now assert all three alignments survive sanitisation. This correction is on `my-new-branch`, awaiting fresh CI. It has not been deployed.
+The renderer now translates only the Markdown table extension's exact `left`, `center` or `right` table-cell alignment style into an `align` attribute before sanitisation. The existing allowlist already permits `align` on `th` and `td`; the change does not allow inline CSS. Regression tests now assert all three alignments survive sanitisation. This correction was committed on `my-new-branch` in `db113e4fc95ab088445046b28f3bd83de8d97f68` and both CI workflows are green. It has not been deployed.
 
-The initial table fix and test correction both passed:
-- [Academy backend CI](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39484413882): Python 3.11 and 3.12 full suites, 881 passed and 36 subtests passed per matrix job.
+The initial table fix and test correction passed at `81fcbb96943b5f5a9e86ec5347a539379bcdd99b`:
+- [Academy backend CI](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39484413882): Python 3.11 and 3.12 full suites passed, with 881 tests and 36 subtests per version.
 - [Verify Django Academy backend](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39484413991): both Python versions passed.
 
-Staging was later confirmed live at commit `ea8a3159fb6428fab9caec52cc963c0d620bcce7`, which descends from the table fix. Browser screenshot comparison is still outstanding; the staging deployment status is not proof of visual acceptance.
+The alignment-normalisation follow-up at `db113e4fc95ab088445046b28f3bd83de8d97f68` is also green:
+- [Academy backend CI](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39486735236): Python 3.11 and 3.12 each passed 881 tests and 36 subtests.
+- [Verify Django Academy backend](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39486735125): Python 3.11 and 3.12 each passed 881 tests and 36 subtests; each job reported 306 warnings, with no failures.
+
+Staging was confirmed live at commit `ea8a3159fb6428fab9caec52cc963c0d620bcce7`, which includes the information-table renderer and both style files. A file-SHA comparison confirms the staged `learning-room.css` and `course_builder_preview.html` match the branch; the staged `content_rendering.py` does not contain the new table-alignment normalisation yet. Browser screenshot comparison is still outstanding; deployment status and green CI do not prove visual acceptance.
