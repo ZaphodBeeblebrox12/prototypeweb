@@ -12,6 +12,7 @@ from PIL import Image
 from apps.academy.models import (
     Course,
     CourseEntitlement,
+    CourseImport,
     CourseMediaAsset,
     CourseModule,
     Lesson,
@@ -100,6 +101,82 @@ class AcademyViewTests(TestCase):
         self.assertFalse(
             LessonProgress.objects.filter(user=admin, lesson=self.paid_lesson).exists()
         )
+
+    def test_staged_course_preview_displays_structured_questions_read_only(self):
+        admin = User.objects.create_user(
+            username="preview-content-admin",
+            password="Test-password-123!",
+            role="admin",
+            is_staff=True,
+        )
+        self.client.force_login(admin)
+        record = CourseImport.objects.create(
+            course_slug="preview-course",
+            title="Preview course",
+            manifest_version="1.0",
+            content_hash="a" * 64,
+            source_manifest="{}",
+            payload={
+                "course": {
+                    "title": "Preview course",
+                    "slug": "preview-course",
+                    "summary": "A course used to test the website preview.",
+                    "description": "Preview-only content.",
+                },
+                "modules": [{
+                    "title": "Foundations",
+                    "slug": "foundations",
+                    "position": 1,
+                    "summary": "Start with the evidence.",
+                    "lessons": [{
+                        "source_id": "1.1",
+                        "title": "Read the evidence",
+                        "slug": "read-the-evidence",
+                        "position": 1,
+                        "duration_minutes": 12,
+                        "summary": "A structured preview lesson.",
+                        "content_markdown": (
+                            "### The question\\n\\n"
+                            "Start by describing what is visible."
+                        ),
+                        "content_json": {
+                            "questions": [{
+                                "id": "q1",
+                                "prompt": "How should the observation be used?",
+                                "options": [
+                                    "As evidence to assess in context",
+                                    "As an automatic signal",
+                                ],
+                            }],
+                            "notebook": {
+                                "title": "Your Trading Notebook",
+                                "prompts": [{
+                                    "label": "Observe",
+                                    "text": "Record the evidence you can see.",
+                                }],
+                            },
+                        },
+                    }],
+                }],
+            },
+        )
+
+        response = self.client.get(
+            reverse("academy:course-import-preview", args=[record.pk]),
+            {"lesson": "1.1"},
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "How should the observation be used?")
+        self.assertContains(response, "As evidence to assess in context")
+        self.assertContains(
+            response,
+            "Administrator preview only. Answer submission is disabled in this view.",
+        )
+        self.assertContains(response, '<fieldset class="tt-question tt-admin-question" disabled>')
+        self.assertContains(response, "Record the evidence you can see.")
+        self.assertNotContains(response, "Check answers")
+        self.assertNotContains(response, "Save reflection")
 
     def test_locked_lesson_preview_is_for_course_content_admins_only(self):
         response = self.client.get(
