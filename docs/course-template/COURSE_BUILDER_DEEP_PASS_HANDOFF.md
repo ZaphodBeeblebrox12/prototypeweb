@@ -117,6 +117,24 @@ After the new instance started, the active browser continued receiving HTTP 409 
 
 No merge to `main`, production deployment, course publication or database content mutation is authorized by this work. Render auto-deploy remains disabled.
 
+### Follow-up: Named, grouped image figures (20 October 2026)
+
+The author requested grouping two or more uploaded images beneath one user-entered title, matching the reference layout with a small “TRADETHESIS · LEARNING ROOM” line, the active module label, and a large serif group title. The uploaded filename must not be promoted into the title and the previous “Purpose-built teaching aid” badge was removed from all shared-renderer image/comparison figures.
+
+Implemented on `my-new-branch`:
+- Course Builder Images tab now includes “Create image group from first two images” after multiple images are uploaded. The group has an editable title, checkboxes for member images, an optional group note, and “Insert group at cursor” / “Remove group” actions. A group requires at least two uploaded images.
+- Each image remains separately editable for its own title, alt text and caption. Filenames are no longer used as the visible title; missing titles render as “Chart”.
+- Group data is stored in builder state and saved as an `image-group` entry under the stable figure metadata map. Member assets are included in `content_json.asset_ids`, keeping them reachable by the same private, permission-checked asset delivery logic.
+- Shared renderer handles `[[image-group:<id>]]` as one figure, renders the chosen images side by side in a responsive grid, and uses the actual module name with the manually entered group title. The same header style is used for existing uploaded-image figures and native comparison-card figures.
+- The local learner preview recognises group members as placed, so it will not append copies of grouped images at the bottom of the preview. Mobile styles stack the module/header labels and the image grid.
+- Added renderer and API regression tests for title/module branding, image/caption placement, stable asset identities, group persistence, filename suppression, and duplicate fallback behaviour. Course Builder inline JavaScript syntax was also checked by parsing the script with the JavaScript runtime.
+
+Verification on revision `4cf4cb2e9832e24eb2bfe73012ce656e64545dd3`:
+- [Academy backend CI](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39473218565) passed on Python 3.11 and 3.12, including focused image-slot regressions, migration-state checks, linting, formatting/type checks and the full test suites.
+- [Verify Django Academy backend](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39473218729) passed on Python 3.11 and 3.12.
+
+Next step: deploy to Academy staging only, then visually confirm the new Image groups UI and real website preview using an authenticated browser session. The visual review has not been done in this tool session. Do not merge into `main`, deploy production or publish any course.
+
 ### Remaining
 
 1. Add test coverage for native comparison-card teaching figures: stable token, title, cards, note, authored placement and escaping.
