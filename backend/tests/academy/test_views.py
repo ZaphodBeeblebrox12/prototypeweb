@@ -50,6 +50,24 @@ class AcademyViewTests(TestCase):
         self.assertContains(response, "Private lesson")
         self.assertNotContains(response, "SECRET PAID LESSON BODY")
 
+    def test_course_overview_uses_content_rich_layout_and_live_course_counts(self):
+        response = self.client.get(reverse("academy:course-detail", args=[self.course.slug]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'class="tt-course-overview"')
+        self.assertContains(response, 'class="tt-overview-hero"')
+        self.assertContains(response, 'class="tt-overview-curriculum-grid"')
+        self.assertContains(response, 'academy/course-overview.css')
+        self.assertEqual(response.context["total_modules"], 1)
+        self.assertEqual(response.context["total_lessons"], 2)
+        self.assertEqual(response.context["total_study_minutes"], 20)
+        self.assertEqual(response.context["first_accessible_lesson"], self.preview_lesson)
+
+    def test_course_overview_keeps_checkout_unavailable_note_without_bootstrap_alert(self):
+        response = self.client.get(reverse("academy:course-detail", args=[self.course.slug]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Enrolment is not available right now")
+        self.assertNotContains(response, 'class="alert alert-info"')
+
     def test_paid_lesson_is_not_retrievable_without_entitlement(self):
         response = self.client.get(reverse("academy:lesson", args=[self.course.slug, self.paid_lesson.pk]))
         self.assertEqual(response.status_code, 403)
