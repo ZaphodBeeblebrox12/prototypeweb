@@ -5,11 +5,11 @@
 **Location:** course-source/understand-bollinger-bands/  
 **Audience:** Intermediate market participants who want a clearer, more practical understanding of Bollinger Bands.
 
-**Shared template:** [TradeThesis Course Template Standard](../COURSE_TEMPLATE_STANDARD.md). The canonical visual/interaction reference for every micro-course is this course's [Learning Room template reference](preview/template-reference/index.html); reuse its design rather than copying a separate page for each new course. Lesson sections remain flexible, not boilerplate. The content-rich [first-pass preview](preview/first-pass/index.html) remains available for course manuscript and editor QA.
+**Shared template:** [TradeThesis Course Template Standard](../COURSE_TEMPLATE_STANDARD.md). The canonical content-rich visual/interaction reference for every micro-course is this course's [first-pass Learning Room](preview/first-pass/index.html); use it to guide the reusable experience rather than copying a separate page for each course. Lesson sections remain flexible, not boilerplate. [The earlier template-reference preview](preview/template-reference/index.html) is retained as a historical design iteration, not the active source of truth.
 
 **Django integration:** See [the reusable micro-course/Django handoff](../../course-integration/MICROCOURSE_TEMPLATE_DJANGO_HANDOFF.md). The static preview is not the production runtime, and its local-only edit controls are not a shared content store.
 
-**Production checkpoint:** [PRODUCTION_CHECKPOINT.md](PRODUCTION_CHECKPOINT.md) tracks template and image replacement status. [Canonical Learning Room template](preview/template-reference/index.html) defines the visual reference; [first-pass preview source](preview/first-pass/index.html) remains a course-content review artifact. Neither is deployed website code.
+**Production checkpoint:** [PRODUCTION_CHECKPOINT.md](PRODUCTION_CHECKPOINT.md) tracks template and image replacement status. The [content-rich first-pass preview](preview/first-pass/index.html) is the approved visual/interaction reference; the earlier [template-reference preview](preview/template-reference/index.html) is retained for history. Neither standalone HTML file is deployed website code.
 
 ## Purpose
 
