@@ -5,7 +5,6 @@ from django.test import RequestFactory, TestCase
 from apps.academy.admin import CourseAdmin, CourseMediaAssetAdmin
 from apps.academy.models import Course, CourseMediaAsset
 
-
 User = get_user_model()
 
 
