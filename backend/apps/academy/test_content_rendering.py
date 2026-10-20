@@ -148,8 +148,8 @@ class SharedLessonRenderingTests(SimpleTestCase):
         first_id = "6a51e8ac-35e2-489c-9a18-48221818e5d9"
         second_id = "7b62f9bd-46f3-4ae0-8b13-59332929f6ea"
         source = (
-            "Text before the group.\\n\\n"
-            f"[[image-group:{group_id}]]\\n\\n"
+            "Text before the group.\n\n"
+            f"[[image-group:{group_id}]]\n\n"
             "Text after the group."
         )
         rendered = render_safe_markdown(
