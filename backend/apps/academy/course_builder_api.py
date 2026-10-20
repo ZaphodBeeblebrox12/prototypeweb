@@ -190,12 +190,11 @@ def _clean_image_payload(course_state, course_slug):
                 image["sha256"] = digest
                 image["alt"] = str(image.get("alt") or "").strip()[:500]
                 image["caption"] = str(image.get("caption") or "").strip()[:500]
-                display_title = str(
-                    image.get("title") or image.get("caption") or image.get("alt") or ""
-                ).strip()
+                display_title = str(image.get("title") or "").strip()
                 if display_title and display_title == str(image.get("name") or "").strip():
-                    display_title = str(image.get("caption") or image.get("alt") or "").strip()
-                # Never substitute the uploaded filename for an author-written figure title.
+                    display_title = ""
+                # The visible heading is author-entered metadata only; alt text and
+                # captions remain separate and a filename is never promoted to a title.
                 image["title"] = display_title[:240]
                 image["data"] = ""
                 specs_by_key[asset_key] = {
@@ -272,9 +271,7 @@ def _build_import_payload(course_state, course_slug):
             referenced_assets = set(asset_ids)
             figures = {
                 str(image.get("assetUuid")): {
-                    "title": str(
-                        image.get("title") or image.get("caption") or image.get("alt") or ""
-                    ).strip()[:240],
+                    "title": str(image.get("title") or "").strip()[:240],
                     "alt": str(image.get("alt") or "").strip()[:500],
                     "caption": str(image.get("caption") or "").strip()[:500],
                 }
