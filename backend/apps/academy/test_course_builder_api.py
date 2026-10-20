@@ -297,3 +297,41 @@ class CourseBuilderApiTests(TestCase):
         self.assertIn("Published API Course", titles)
         self.assertNotIn("Private Draft Course", titles)
         self.assertEqual(response["Access-Control-Allow-Origin"], "*")
+
+    def test_builder_preserves_inline_figure_metadata_with_stable_asset_id(self):
+        from .course_builder_api import _build_import_payload
+
+        state = self.draft_payload("builder-figure-contract")["course"]
+        lesson = state["modules"][0]["lessons"][0]
+        image_id = "builder-image-01"
+        caption = "Compare one setting at a time before making a judgement."
+        lesson["content"] = (
+            "Text before the figure.\\n\\n"
+            f"![Band comparison](asset://{image_id})\\n\\n"
+            "Text after the figure."
+        )
+        lesson["images"] = [{
+            "id": image_id,
+            "name": "band-comparison.png",
+            "title": "What changing the settings changes",
+            "alt": "Three cards compare shorter, baseline and longer Bollinger Band windows.",
+            "caption": caption,
+            "data": "data:image/png;base64," + base64.b64encode(b"fake image bytes").decode("ascii"),
+        }]
+        lesson["image"] = lesson["images"][0]
+
+        imported, image_sources = _build_import_payload(state, "builder-figure-contract")
+        saved_lesson = imported["modules"][0]["lessons"][0]
+        figure_ids = saved_lesson["content_json"]["figures"]
+        self.assertEqual(len(figure_ids), 1)
+        stable_id, metadata = next(iter(figure_ids.items()))
+        self.assertEqual(metadata["title"], "What changing the settings changes")
+        self.assertEqual(metadata["alt"], "Three cards compare shorter, baseline and longer Bollinger Band windows.")
+        self.assertEqual(metadata["caption"], caption)
+        self.assertIn(f"asset://{stable_id}", saved_lesson["content_markdown"])
+        self.assertIn(stable_id, saved_lesson["content_json"]["asset_ids"])
+        self.assertNotIn(caption, saved_lesson["content_markdown"])
+        self.assertIn("Text before the figure.", saved_lesson["content_markdown"])
+        self.assertIn("Text after the figure.", saved_lesson["content_markdown"])
+        self.assertIn("builder/builder-image-01", image_sources)
+
