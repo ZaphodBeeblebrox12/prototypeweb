@@ -1,12 +1,13 @@
 import base64
 import json
+from pathlib import Path
 import uuid
 from unittest.mock import Mock, patch
 
 from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
 from .models import (
@@ -920,3 +921,15 @@ class CourseBuilderApiTests(TestCase):
         self.assertNotIn("PRIVATE LESSON TEXT", body)
         self.assertNotIn("SECRET ANSWER KEY", body)
         self.assertNotIn("Secret module title", body)
+
+
+class CourseBuilderPreviewWiringTests(SimpleTestCase):
+    def test_new_course_button_passes_a_real_element_to_the_action_handler(self):
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("const id=el?.dataset?.id;", source)
+        self.assertIn(
+            "$('#newCourseButton').addEventListener('click',event=>handleAction('new-course',event.currentTarget));",
+            source,
+        )
