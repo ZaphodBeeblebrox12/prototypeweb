@@ -2,8 +2,9 @@ from django.contrib.admin.sites import AdminSite
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase
 
-from .models import Course, CourseMediaAsset
 from .admin import CourseAdmin, CourseMediaAssetAdmin
+
+from .models import Course, CourseMediaAsset
 
 
 User = get_user_model()
