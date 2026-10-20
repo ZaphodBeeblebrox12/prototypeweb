@@ -13,6 +13,18 @@ Use the updated TradeThesis course template as the default for every new course 
 
 This is a flexible teaching template, not a form with mandatory labels. Reuse the purpose of a section when useful, rename it in student-facing language, combine sections, or omit one when it adds no learning value. Do not force every lesson into identical cards or repeat explanatory text to fill a layout.
 
+## Inline cross-course and cross-lesson references
+
+Lessons must be able to link to another relevant TradeThesis lesson **at the point where the topic is discussed**, not only through a related-course list at the end.
+
+- In the Course Builder, the author can place the cursor in lesson content, search the existing Academy catalogue by course or lesson title/topic, select an exact destination, and insert a contextual inline lesson link/card at that position.
+- Store a stable destination reference (course and lesson IDs/slugs) rather than copying lesson text or depending on a manually typed URL. Render the destination title and a concise, authored or catalogue-backed description so learners understand why it is relevant.
+- Inline references are optional, can appear multiple times in a lesson, and should read naturally within the surrounding explanation. Offer an inline link for a brief mention and a compact related-lesson card when a more prominent explanation is useful; avoid turning every mention into a large card.
+- Resolve destinations from the live Academy data when rendering. If a destination is renamed or moved, the reference should continue to resolve by stable ID. If it is unpublished, unavailable, or access-restricted for the learner, do not leak its lesson body; show an appropriate preview or access route under the existing entitlement rules.
+- The Builder must make the insertion position visible, let the author edit/remove the reference, and preserve it when saving, reopening, previewing and publishing a draft.
+- References must be keyboard accessible, visually consistent with the light TradeThesis editorial style, responsive on mobile, and included in server-side validation/rendering tests.
+- This is separate from the current course-level `relatedCourseIds` selection. That existing association does not satisfy inline in-context lesson linking by itself.
+
 ## Shared course experience
 
 Course pages use two connected views:
