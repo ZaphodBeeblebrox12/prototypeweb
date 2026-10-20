@@ -1,4 +1,7 @@
 {% extends "base.html" %}
+{% load static %}
+{% block title %}{{ course.title }} · TradeThesis Academy{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'academy/course-overview.css' %}">{% endblock %}
 {% block page_context %}
 <div class="page-context-status page-context-status--standalone" aria-label="Account status">
 {% if user.is_banned %}<span class="badge bg-danger">BANNED</span>{% endif %}
@@ -6,43 +9,158 @@
 </div>
 {% endblock %}
 {% block content %}
-<div class="container py-4" style="max-width:920px">
-  <p class="text-uppercase text-muted small mb-2"><a href="{% url 'academy:home' %}">Academy</a> / Course</p>
-  <div class="d-flex justify-content-between align-items-start gap-4 flex-wrap mb-4">
-    <div><h1>{{ course.title }}</h1><p class="text-muted">{{ course.summary }}</p><p>{{ course.description }}</p>
-      {% if course.category or course.level or course.estimated_duration %}<p class="small text-muted mb-2">{% if course.category %}<span>{{ course.category }}</span>{% endif %}{% if course.level %}<span> · {{ course.level }}</span>{% endif %}{% if course.estimated_duration %}<span> · {{ course.estimated_duration }}</span>{% endif %}</p>{% endif %}
-      {% if course.learning_outcomes %}<section class="mt-3" aria-labelledby="course-outcomes-heading"><h2 id="course-outcomes-heading" class="h5">What you will learn</h2><ul>{% for outcome in course.learning_outcomes %}<li>{{ outcome }}</li>{% endfor %}</ul></section>{% endif %}
+<div class="tt-course-overview">
+  <nav class="tt-overview-breadcrumb" aria-label="Breadcrumb">
+    <a href="{% url 'academy:home' %}">Academy</a><span aria-hidden="true">/</span><span aria-current="page">{{ course.title }}</span>
+  </nav>
+
+  <section class="tt-overview-hero" aria-labelledby="tt-course-title">
+    <div class="tt-overview-hero-copy">
+      <p class="tt-overview-eyebrow">{% if course.category %}{{ course.category }}{% else %}TRADETHESIS MICRO-COURSE{% endif %}{% if course.level %} · {{ course.level }}{% endif %}</p>
+      <h1 id="tt-course-title">{{ course.title }}</h1>
+      {% if course.summary %}<p class="tt-overview-lede">{{ course.summary }}</p>{% endif %}
+      {% if course.description %}<p class="tt-overview-description">{{ course.description|linebreaksbr }}</p>{% endif %}
+
+      <div class="tt-overview-meta" aria-label="Course facts">
+        <span class="tt-overview-meta-pill"><strong>{{ total_modules|stringformat:"02d" }}</strong> modules</span>
+        <span class="tt-overview-meta-pill"><strong>{{ total_lessons|stringformat:"02d" }}</strong> lessons</span>
+        {% if total_study_minutes %}
+          <span class="tt-overview-meta-pill"><strong>{% if total_study_hours %}{{ total_study_hours }} hr{% if total_study_minutes_remainder %} {{ total_study_minutes_remainder }} min{% endif %}{% else %}{{ total_study_minutes }} min{% endif %}</strong> planned study</span>
+        {% elif course.estimated_duration %}
+          <span class="tt-overview-meta-pill"><strong>{{ course.estimated_duration }}</strong> study time</span>
+        {% endif %}
+        {% if course.category %}<span class="tt-overview-meta-pill">{{ course.category }}</span>{% endif %}
+      </div>
+
+      <div class="tt-overview-actions">
+        {% if first_accessible_lesson %}
+          <a class="tt-overview-button" href="{% url 'academy:lesson' course.slug first_accessible_lesson.id %}">{% if entitlement %}Continue learning{% else %}Explore a preview lesson{% endif %} <span aria-hidden="true">↗</span></a>
+        {% else %}
+          <a class="tt-overview-button" href="#tt-course-curriculum">Explore curriculum <span aria-hidden="true">↓</span></a>
+        {% endif %}
+        <a class="tt-overview-button tt-overview-button--secondary" href="#tt-course-curriculum">View curriculum ↓</a>
+      </div>
+      <p class="tt-overview-hero-note">Work through the material at your own pace. Lesson availability follows your course access and release schedule.</p>
+
+      {% if entitlement %}
+      <div class="tt-overview-progress" aria-label="Course progress">
+        <div class="tt-overview-progress-row"><span>YOUR COURSE PROGRESS</span><strong>{{ completed_lessons }} of {{ total_lessons }} lessons · {{ progress_percent }}%</strong></div>
+        <div class="tt-overview-progress-track" role="progressbar" aria-label="Course progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ progress_percent }}"><span style="width:{{ progress_percent }}%"></span></div>
+      </div>
+      {% endif %}
     </div>
-    {% if entitlement %}<div class="text-end"><span class="badge text-bg-success">Access active</span><p class="small text-muted mt-2">{% if entitlement.expires_at %}Access until {{ entitlement.expires_at|date:"M j, Y" }}{% else %}Lifetime course access{% endif %}</p><p class="small">{{ completed_lessons }} of {{ total_lessons }} lessons complete · {{ progress_percent }}%</p></div>{% endif %}
-  </div>
+
+    <div class="tt-overview-art" aria-label="The TradeThesis learning method">
+      <div class="tt-overview-art-card">
+        <div class="tt-overview-art-top"><span>THE TRADETHESIS METHOD</span><span class="tt-overview-status">Context before conclusion</span></div>
+        <h2>From understanding to thoughtful application.</h2>
+        <p class="tt-overview-art-copy">Study one idea, compare it with the evidence, practise using it, then review what you learned. The lesson content remains specific to this course.</p>
+        <div class="tt-overview-method-path">
+          <div class="tt-overview-method-step"><small>01 · NOTICE</small><strong>Observe</strong><span>Start with what is present.</span></div>
+          <div class="tt-overview-method-step"><small>02 · COMPARE</small><strong>Question</strong><span>Consider another explanation.</span></div>
+          <div class="tt-overview-method-step"><small>03 · APPLY</small><strong>Practise</strong><span>Use the idea in context.</span></div>
+          <div class="tt-overview-method-step"><small>04 · REVIEW</small><strong>Reflect</strong><span>Record the evidence and result.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   {% if offer and not entitlement %}
-    <section class="card mb-4"><div class="card-body">
-      <h2 class="h5">Get the full course</h2><p class="text-muted">Secure one-time checkout. Course access is granted only after the payment provider confirms payment.</p>
-      <form action="{% url 'payment-start' %}" method="post" data-academy-checkout>
-        {% csrf_token %}<input type="hidden" name="plan_id" value="{{ offer.plan_id }}"><input type="hidden" name="interval" value="one_time">
-        <button type="submit" class="btn btn-primary">Continue to secure checkout</button>
-        <p class="small text-danger mt-2 mb-0" data-checkout-error role="status"></p>
-      </form>
-    </div></section>
+  <section class="tt-overview-access" aria-labelledby="tt-course-access-title">
+    <div><h2 id="tt-course-access-title">Get the full course</h2><p>Use secure checkout to enrol. Course access is granted only after the payment provider confirms payment.</p></div>
+    <form action="{% url 'payment-start' %}" method="post" data-academy-checkout>
+      {% csrf_token %}<input type="hidden" name="plan_id" value="{{ offer.plan_id }}"><input type="hidden" name="interval" value="one_time">
+      <button type="submit" class="tt-overview-button">Continue to secure checkout ↗</button>
+      <p class="tt-overview-checkout-error" data-checkout-error role="status"></p>
+    </form>
+  </section>
   {% elif not entitlement %}
-    <p class="alert alert-info">This course has no active checkout offer at the moment.</p>
+  <aside class="tt-overview-access-note" role="status">
+    <span class="tt-overview-note-mark" aria-hidden="true">i</span>
+    <div><strong>Enrolment is not available right now</strong><p>This course has no active checkout offer at the moment. You can still review the curriculum and open any lessons marked as previews.</p></div>
+  </aside>
   {% endif %}
 
-  {% for row in module_rows %}
-    <section class="mb-4"><h2 class="h5 border-bottom pb-2">{{ row.module.position|stringformat:"02d" }} · {{ row.module.title }}</h2>
-      <div class="list-group">
-        {% for item in row.lessons %}
-          <div class="list-group-item d-flex justify-content-between align-items-center gap-3">
-            <div><strong>{{ item.lesson.title }}</strong>{% if item.lesson.summary %}<p class="small text-muted mb-0">{{ item.lesson.summary }}</p>{% endif %}
-              {% if item.progress and item.progress.status == "completed" %}<span class="badge text-bg-success mt-1">Complete</span>{% elif item.lesson.is_preview %}<span class="badge text-bg-secondary mt-1">Preview</span>{% elif item.release_at and not item.accessible %}<span class="small text-muted d-block mt-1">Available {{ item.release_at|date:"M j, Y, H:i" }}</span>{% endif %}
-            </div>
-            {% if item.accessible %}<a class="btn btn-sm btn-outline-primary" href="{% url 'academy:lesson' course.slug item.lesson.id %}">Open lesson</a>{% else %}<span class="text-muted small" aria-label="Lesson locked">Locked</span>{% endif %}
-          </div>
-        {% endfor %}
+  {% if course.learning_outcomes %}
+  <section class="tt-overview-section" aria-labelledby="tt-course-outcomes-title">
+    <div class="tt-overview-section-head">
+      <div><p class="tt-overview-eyebrow">WHAT YOU WILL BE ABLE TO DO</p><h2 id="tt-course-outcomes-title">Skills to develop through the course.</h2></div>
+      <p>Use these outcomes to orient your study. Work through the lessons and examples, then return to them as you review your understanding.</p>
+    </div>
+    <div class="tt-overview-outcome-grid">
+      {% for outcome in course.learning_outcomes %}
+      <article class="tt-overview-outcome"><span class="tt-overview-outcome-number">{{ forloop.counter|stringformat:"02d" }}</span><p>{{ outcome }}</p></article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="tt-overview-section" aria-labelledby="tt-course-journey-title">
+    <div class="tt-overview-journey">
+      <div class="tt-overview-section-head">
+        <div><p class="tt-overview-eyebrow">A PRACTICAL LEARNING RHYTHM</p><h2 id="tt-course-journey-title">Notice. Compare. Apply. Review.</h2></div>
+        <p>Each lesson should help you see what matters, weigh alternatives, use the idea in context and review the reasoning—not simply memorise a label.</p>
       </div>
-    </section>
-  {% empty %}<p class="text-muted">Course lessons are being prepared.</p>{% endfor %}
+      <div class="tt-overview-journey-grid">
+        <article class="tt-overview-journey-card"><small>01 · NOTICE</small><h3>Observe</h3><p>Describe what is visible before deciding what it means.</p></article>
+        <article class="tt-overview-journey-card"><small>02 · COMPARE</small><h3>Consider alternatives</h3><p>Look for evidence that supports or weakens an interpretation.</p></article>
+        <article class="tt-overview-journey-card"><small>03 · APPLY</small><h3>Use the idea</h3><p>Practise the lesson in context and identify what would invalidate it.</p></article>
+        <article class="tt-overview-journey-card"><small>04 · REVIEW</small><h3>Reflect</h3><p>Record what you learned and what you would check next time.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="tt-course-curriculum" class="tt-overview-section tt-overview-curriculum" aria-labelledby="tt-course-curriculum-title">
+    <div class="tt-overview-section-head">
+      <div><p class="tt-overview-eyebrow">INSIDE THE COURSE</p><h2 id="tt-course-curriculum-title">Work through the curriculum.</h2></div>
+      <p>Browse the modules and their lessons. Open lessons when they are available to your account; locked lessons remain protected until access and release conditions allow them.</p>
+    </div>
+
+    <div class="tt-overview-curriculum-grid">
+      {% for row in module_rows %}
+      <article class="tt-overview-module">
+        <header class="tt-overview-module-head">
+          <span class="tt-overview-module-number">{{ row.module.position|stringformat:"02d" }}</span>
+          <div><span class="tt-overview-module-kicker">MODULE {{ row.module.position|stringformat:"02d" }}</span><h3>{{ row.module.title }}</h3></div>
+        </header>
+        {% if row.module.description %}<p class="tt-overview-module-description">{{ row.module.description }}</p>{% else %}<p class="tt-overview-module-description">Work through these lessons in order, using the examples and practice to reinforce the core ideas.</p>{% endif %}
+        <p class="tt-overview-module-count"><strong>{{ row.lessons|length }}</strong> {% if row.lessons|length == 1 %}lesson{% else %}lessons{% endif %} in this module</p>
+        <ul class="tt-overview-lesson-list">
+          {% for item in row.lessons %}
+          <li class="tt-overview-lesson-item">
+            <div class="tt-overview-lesson-main">
+              <span class="tt-overview-lesson-number">{{ row.module.position }}.{{ item.lesson.position }}</span>
+              <div>
+                {% if item.accessible %}<a class="tt-overview-lesson-title" href="{% url 'academy:lesson' course.slug item.lesson.id %}">{{ item.lesson.title }}</a>{% else %}<span class="tt-overview-lesson-title">{{ item.lesson.title }}</span>{% endif %}
+                {% if item.lesson.summary %}<span class="tt-overview-lesson-summary">{{ item.lesson.summary }}</span>{% endif %}
+              </div>
+            </div>
+            <div class="tt-overview-lesson-state">
+              {% if item.progress and item.progress.status == "completed" %}<span class="tt-overview-chip">Complete</span>{% endif %}
+              {% if item.lesson.is_preview %}<span class="tt-overview-chip tt-overview-chip--preview">Preview</span>{% elif item.release_at and not item.accessible %}<span>Available {{ item.release_at|date:"M j, Y" }}</span>{% elif not item.accessible %}<span class="tt-overview-chip tt-overview-chip--locked">Locked</span>{% elif item.progress and item.progress.status != "completed" %}<span>In progress</span>{% endif %}
+              {% if item.accessible %}<a href="{% url 'academy:lesson' course.slug item.lesson.id %}" aria-label="Open {{ item.lesson.title }}">↗</a>{% endif %}
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        <div class="tt-overview-module-footer">
+          {% with first_item=row.lessons.0 %}
+            {% if first_item.accessible %}<a href="{% url 'academy:lesson' course.slug first_item.lesson.id %}">Start this module ↗</a>{% else %}Lessons open according to your course access and release schedule.{% endif %}
+          {% endwith %}
+        </div>
+      </article>
+      {% empty %}
+      <p class="tt-overview-module-description">Course lessons are being prepared.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="tt-overview-bottom-note" aria-label="Course study reminder">
+    <div><h2>Take the time to build the reasoning.</h2><p>Use the examples and practice prompts to check your reading. Course progress is saved to your account, and access rules remain in place for each lesson.</p></div>
+    {% if first_accessible_lesson %}<a class="tt-overview-button" href="{% url 'academy:lesson' course.slug first_accessible_lesson.id %}">{% if entitlement %}Continue learning{% else %}Open preview lesson{% endif %} ↗</a>{% else %}<a class="tt-overview-button tt-overview-button--secondary" href="#tt-course-curriculum">Review curriculum ↑</a>{% endif %}
+  </section>
 </div>
+
 <script>
 (() => {
   document.querySelectorAll("[data-academy-checkout]").forEach(form => {
