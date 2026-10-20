@@ -458,7 +458,7 @@ def _store_images(record, image_sources):
                 asset.alt_text = asset.alt_text[:500]
                 asset.source_error = ""
                 asset.save(update_fields=["alt_text", "source_error", "updated_at"])
-            except (ValueError, binascii.Error, UnidentifiedImageError, OSError) as exc:
+            except (ImproperlyConfigured, ValueError, binascii.Error, UnidentifiedImageError, OSError) as exc:
                 raise ValidationError(f"Could not save image {asset.asset_key}: {exc}") from exc
         elif not (asset.file and asset.file.storage.exists(asset.file.name)):
             _copy_existing_asset(asset.stable_asset_id, asset)
