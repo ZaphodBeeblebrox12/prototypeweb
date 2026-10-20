@@ -447,9 +447,16 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     }
     const images = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
     const authoredContent = String(lesson.content || '');
+    const imageGroups = Array.isArray(lesson.imageGroups) ? lesson.imageGroups : [];
     const unplaced = images.filter(function(image) {
-      const ids = [image.id, image.assetUuid].filter(Boolean);
-      return !ids.some(function(id) { return authoredContent.includes('asset://' + id); });
+      const ids = [image.id, image.assetUuid].filter(Boolean).map(String);
+      const directReference = ids.some(function(id) { return authoredContent.includes('asset://' + id); });
+      const groupedReference = imageGroups.some(function(group) {
+        return authoredContent.includes('[[image-group:' + group.id + ']]')
+          && (Array.isArray(group.imageIds) ? group.imageIds : [])
+            .some(function(groupImageId) { return ids.includes(String(groupImageId)); });
+      });
+      return !directReference && !groupedReference;
     });
     if (unplaced.length) {
       const figures = '<div>' + unplaced.map(function(image) { return '<figure style="margin:24px 0"><img src="' + image.data + '" alt="' + esc(image.alt || '') + '" style="display:block;max-width:100%;max-height:460px;margin:auto;border-radius:8px"><figcaption style="font-size:11px;color:var(--muted);line-height:1.6;margin-top:8px;text-align:center">' + esc(image.caption || '') + '</figcaption></figure>'; }).join('') + '</div>';
