@@ -164,22 +164,41 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 32 * 1024 * 1024
 # Private instructional images must live outside MEDIA_ROOT (which can be served directly in DEBUG).
 # In production, point this at a durable mounted volume.
 ACADEMY_PRIVATE_MEDIA_ROOT = env("ACADEMY_PRIVATE_MEDIA_ROOT", default=str(BASE_DIR / "private_course_media"))
+# Hosted deployments must use a durable provider rather than silently writing to ephemeral disk.
+ACADEMY_REQUIRE_DURABLE_ASSETS = env.bool("ACADEMY_REQUIRE_DURABLE_ASSETS", default=not DEBUG)
 # Course Builder source and image assets live in this repository, on the feature branch.
 # Keep the write token in the hosting environment; never commit it.
 ACADEMY_GITHUB_ASSET_REPOSITORY = "ZaphodBeeblebrox12/prototypeweb"
-ACADEMY_GITHUB_ASSET_TOKEN = env("ACADEMY_GITHUB_ASSET_TOKEN", default="")
+ACADEMY_GITHUB_ASSET_TOKEN = env(
+    "ACADEMY_GITHUB_ASSET_TOKEN", default=env("GITHUB_TOKEN", default=env("GH_TOKEN", default=""))
+)
 ACADEMY_GITHUB_ASSET_BRANCH = "my-new-branch"
 ACADEMY_GITHUB_ASSET_PATH_PREFIX = env("ACADEMY_GITHUB_ASSET_PATH_PREFIX", default="course-assets")
 ACADEMY_GITHUB_ASSET_TIMEOUT = env.int("ACADEMY_GITHUB_ASSET_TIMEOUT", default=15)
 # Google Drive is the preferred durable store. Keep all credentials in Render env vars.
-ACADEMY_GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON = env("ACADEMY_GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON", default="")
-ACADEMY_GOOGLE_DRIVE_CLIENT_ID = env("ACADEMY_GOOGLE_DRIVE_CLIENT_ID", default="")
-ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET = env("ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET", default="")
-ACADEMY_GOOGLE_DRIVE_REDIRECT_URI = env("ACADEMY_GOOGLE_DRIVE_REDIRECT_URI", default="")
-ACADEMY_GOOGLE_DRIVE_REFRESH_TOKEN = env("ACADEMY_GOOGLE_DRIVE_REFRESH_TOKEN", default="")
+ACADEMY_GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON = env(
+    "ACADEMY_GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON",
+    default=env("GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON", default=""),
+)
+ACADEMY_GOOGLE_DRIVE_CLIENT_ID = env(
+    "ACADEMY_GOOGLE_DRIVE_CLIENT_ID", default=env("GOOGLE_DRIVE_CLIENT_ID", default="")
+)
+ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET = env(
+    "ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET", default=env("GOOGLE_DRIVE_CLIENT_SECRET", default="")
+)
+ACADEMY_GOOGLE_DRIVE_REDIRECT_URI = env(
+    "ACADEMY_GOOGLE_DRIVE_REDIRECT_URI", default=env("GOOGLE_DRIVE_REDIRECT_URI", default="")
+)
+ACADEMY_GOOGLE_DRIVE_REFRESH_TOKEN = env(
+    "ACADEMY_GOOGLE_DRIVE_REFRESH_TOKEN", default=env("GOOGLE_DRIVE_REFRESH_TOKEN", default="")
+)
 ACADEMY_GOOGLE_DRIVE_TOKEN_URI = env("ACADEMY_GOOGLE_DRIVE_TOKEN_URI", default="https://oauth2.googleapis.com/token")
-ACADEMY_GOOGLE_DRIVE_ASSET_FOLDER_ID = env("ACADEMY_GOOGLE_DRIVE_ASSET_FOLDER_ID", default="")
-ACADEMY_GOOGLE_DRIVE_SOURCE_FOLDER_ID = env("ACADEMY_GOOGLE_DRIVE_SOURCE_FOLDER_ID", default="")
+ACADEMY_GOOGLE_DRIVE_ASSET_FOLDER_ID = env(
+    "ACADEMY_GOOGLE_DRIVE_ASSET_FOLDER_ID", default=env("GOOGLE_DRIVE_ASSET_FOLDER_ID", default="")
+)
+ACADEMY_GOOGLE_DRIVE_SOURCE_FOLDER_ID = env(
+    "ACADEMY_GOOGLE_DRIVE_SOURCE_FOLDER_ID", default=env("GOOGLE_DRIVE_SOURCE_FOLDER_ID", default="")
+)
 ACADEMY_GOOGLE_DRIVE_TIMEOUT = env.int("ACADEMY_GOOGLE_DRIVE_TIMEOUT", default=20)
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
