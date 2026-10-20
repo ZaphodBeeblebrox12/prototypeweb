@@ -156,3 +156,142 @@
 
 .tt-tab-panel img[role="button"] { cursor: zoom-in; }
 .tt-tab-panel img[role="button"]:focus-visible { outline: 3px solid var(--tt-gold); outline-offset: 4px; }
+
+
+/* Approved content-rich lesson header shared by learner and administrator previews. */
+.tt-course-header--depth {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(270px, .7fr);
+  align-items: center;
+  gap: clamp(22px, 4vw, 46px);
+  padding: clamp(25px, 3.5vw, 44px) clamp(24px, 4vw, 46px);
+  overflow: hidden;
+  border: 1px solid var(--tt-line);
+  border-left: 4px solid var(--tt-green);
+  border-radius: 15px;
+  background: var(--tt-surface);
+  margin-bottom: 18px;
+}
+.tt-course-header--depth::after {
+  content: "";
+  position: absolute;
+  width: 210px;
+  height: 210px;
+  right: -110px;
+  top: -140px;
+  border: 1px solid var(--tt-line);
+  border-radius: 50%;
+  box-shadow: 0 0 0 20px var(--tt-surface), 0 0 0 21px var(--tt-line), 0 0 0 43px var(--tt-surface), 0 0 0 44px var(--tt-line);
+  opacity: .32;
+  pointer-events: none;
+}
+.tt-course-header-copy { position: relative; z-index: 1; min-width: 0; }
+.tt-course-header-tags { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 25px; }
+.tt-course-header-tag {
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--tt-line);
+  background: var(--tt-paper);
+  color: var(--tt-green);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.tt-course-header--depth .tt-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #9a641f;
+  margin-bottom: 11px;
+}
+.tt-heading-rule { width: 22px; height: 2px; display: inline-block; background: var(--tt-gold); }
+.tt-course-header--depth h1 {
+  max-width: 720px;
+  margin: 0 0 12px;
+  font: 400 clamp(36px, 4vw, 51px)/1.03 Georgia, "Times New Roman", serif;
+  letter-spacing: -.04em;
+  color: var(--tt-ink);
+}
+.tt-course-header--depth .tt-lesson-summary { max-width: 740px; font-size: 13px; line-height: 1.75; color: var(--tt-muted); margin: 0 0 14px; }
+.tt-course-header--depth .tt-lesson-meta { font-size: 10px; }
+.tt-course-header--depth .tt-course-progress { grid-column: 1 / -1; }
+.tt-lesson-plan {
+  position: relative;
+  z-index: 1;
+  align-self: stretch;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--tt-line);
+  border-radius: 12px;
+  background: var(--tt-paper);
+}
+.tt-lesson-plan-top { display: flex; justify-content: space-between; gap: 12px; align-items: center; border-bottom: 1px solid var(--tt-line); padding-bottom: 12px; color: var(--tt-green); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
+.tt-lesson-plan-top span { display: grid; place-items: center; min-width: 25px; height: 25px; border: 1px solid var(--tt-line); border-radius: 50%; font-size: 10px; letter-spacing: 0; }
+.tt-lesson-plan-kicker { margin: 11px 0 4px; color: var(--tt-green); font-size: 8px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+.tt-lesson-plan-time { display: flex; flex-wrap: wrap; align-items: baseline; gap: 7px; }
+.tt-lesson-plan-time strong { font: 400 24px/1.3 Georgia, serif; color: var(--tt-ink); }
+.tt-lesson-plan-time span { font-size: 9px; color: var(--tt-muted); }
+.tt-lesson-plan-divider { height: 1px; background: var(--tt-line); margin: 10px 0; }
+.tt-lesson-plan-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; border-top: 3px solid var(--tt-green); padding-top: 8px; }
+.tt-lesson-plan-steps > div { display: grid; gap: 6px; }
+.tt-lesson-plan-steps > div:nth-child(2) { border-top: 3px solid #648c69; margin-top: -11px; padding-top: 8px; }
+.tt-lesson-plan-steps > div:nth-child(3) { border-top: 3px solid #9e6c22; margin-top: -11px; padding-top: 8px; }
+.tt-lesson-plan-steps span { font-size: 8px; font-weight: 800; color: var(--tt-gold); }
+.tt-lesson-plan-steps strong { font: 400 12px Georgia, serif; color: var(--tt-ink); }
+
+/* Purpose-built figures match the accepted numbered teaching-aid treatment. */
+.tt-tab-panel .tt-purpose-figure,
+.tt-tab-panel .tt-course-figure {
+  display: block;
+  margin: 20px 0;
+  min-width: 0;
+  border: 1px solid var(--tt-line);
+  border-radius: 11px;
+  overflow: hidden;
+  background: var(--tt-surface);
+}
+.tt-tab-panel .tt-purpose-figure-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--tt-line);
+  background: #e9eee5;
+  color: #254f3b;
+  font-size: 10px;
+  line-height: 1.5;
+  font-weight: 800;
+}
+.tt-tab-panel .tt-purpose-figure-head span { color: #667269; font-size: 9px; font-weight: 650; text-align: right; }
+.tt-tab-panel .tt-purpose-figure-body { display: block; padding: 14px; }
+.tt-tab-panel .tt-purpose-figure-image { display: grid; place-items: center; min-height: 100px; }
+.tt-tab-panel .tt-purpose-figure-image img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  max-height: 480px;
+  object-fit: contain;
+  margin: 0 auto;
+  border: 0;
+  background: var(--tt-surface);
+}
+.tt-tab-panel .tt-purpose-figure figcaption { display: block; padding: 0 14px 14px; color: var(--tt-muted); font-size: 12px; line-height: 1.75; }
+.tt-tab-panel .tt-purpose-figure figcaption p { margin: 0; }
+.tt-tab-panel .tt-purpose-figure-missing { display: block; max-width: 520px; margin: 0 auto; padding: 20px; border: 1px dashed #d2c7ad; background: #faf7ef; color: #6f6653; font-size: 12px; line-height: 1.7; }
+.tt-tab-panel h6 { font-size: .92rem; letter-spacing: .02em; }
+@media (max-width: 900px) {
+  .tt-course-header--depth { grid-template-columns: minmax(0, 1fr); }
+  .tt-lesson-plan { max-width: 500px; }
+}
+@media (max-width: 620px) {
+  .tt-course-header--depth { padding: 20px 15px; }
+  .tt-course-header-tags { margin-bottom: 18px; }
+  .tt-course-header--depth h1 { font-size: clamp(31px, 8.5vw, 38px); }
+  .tt-lesson-plan { padding: 13px; }
+  .tt-tab-panel .tt-purpose-figure-head { align-items: flex-start; flex-direction: column; }
+  .tt-tab-panel .tt-purpose-figure-body { padding: 10px; }
+  .tt-tab-panel .tt-purpose-figure figcaption { padding: 0 10px 12px; }
+}
