@@ -10,13 +10,14 @@ from django.urls import reverse
 from .models import Course, Lesson
 
 _ALLOWED_TAGS = {
-    "a", "aside", "blockquote", "br", "code", "del", "em", "figcaption", "figure",
+    "a", "aside", "blockquote", "br", "code", "del", "div", "em", "figcaption", "figure",
     "h1", "h2", "h3", "h4", "h5", "h6", "hr", "img", "li", "ol", "p", "pre",
     "s", "span", "strong", "sub", "sup", "table", "tbody", "td", "th", "thead", "tr", "ul",
 }
 _ALLOWED_ATTRIBUTES = {
     "a": ["href", "title", "rel", "class"],
     "aside": ["class", "aria-label"],
+    "div": ["class", "role", "aria-label", "tabindex"],
     "figure": ["class", "data-figure-id"],
     "figcaption": ["class"],
     "img": ["src", "alt", "title", "loading", "width", "height", "tabindex", "role", "aria-label"],
@@ -332,6 +333,31 @@ def render_safe_markdown(
         resolved,
         extensions=["tables", "sane_lists", "smarty"],
         output_format="html",
+    )
+
+    # Match the approved course template: information tables sit in a framed,
+    # horizontally scrollable wrapper so the header and cells remain readable
+    # on narrow screens. Avoid nesting the wrapper when the author already used it.
+    def wrap_information_table(match):
+        prefix = rendered[:match.start()]
+        last_open = prefix.rfind("<div")
+        last_close = prefix.rfind("</div>")
+        if last_open > last_close:
+            opening_tag_end = prefix.find(">", last_open)
+            opening_tag = prefix[last_open:opening_tag_end + 1]
+            if re.search(r'class=["\'][^"\']*\blesson-table-wrap\b[^"\']*["\']', opening_tag, re.IGNORECASE):
+                return match.group(0)
+        return (
+            '<div class="lesson-table-wrap" role="region" '
+            'aria-label="Scrollable information table" tabindex="0">'
+            + match.group(0) + '</div>'
+        )
+
+    rendered = re.sub(
+        r"<table\b[^>]*>.*?</table>",
+        wrap_information_table,
+        rendered,
+        flags=re.IGNORECASE | re.DOTALL,
     )
     # Existing authored image-plus-caption pairs continue to work for old course content.
     rendered = re.sub(r"<img\b", '<img tabindex="0" role="button" aria-label="Enlarge course figure"', rendered)

@@ -348,6 +348,47 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   .preview-body .tt-comparison-cards { grid-template-columns:minmax(0,1fr); }
 }
 
+
+/* Canonical lesson information tables: accessible, framed and horizontally scrollable. */
+.preview-body .lesson-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  margin: 1.25em 0 1.5em;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+}
+.preview-body .lesson-table-wrap:focus-visible { outline: 2px solid var(--site-secondary); outline-offset: 3px; }
+.preview-body .lesson-table-wrap table {
+  width: 100%;
+  min-width: 560px;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 0;
+  overflow: visible;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.preview-body .lesson-table-wrap th,
+.preview-body .lesson-table-wrap td {
+  padding: 11px 13px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.preview-body .lesson-table-wrap th { background: #e9eee5; color: #254f3b; font-weight: 750; }
+.preview-body .lesson-table-wrap td { background: var(--panel); color: var(--ink); }
+.preview-body .lesson-table-wrap tr:last-child td { border-bottom: 0; }
+.preview-body .lesson-table-wrap th[align="center"],
+.preview-body .lesson-table-wrap td[align="center"] { text-align: center; }
+.preview-body .lesson-table-wrap th[align="right"],
+.preview-body .lesson-table-wrap td[align="right"] { text-align: right; }
+
 </style>
 </head>
 <body>
@@ -543,7 +584,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   document.addEventListener('change',event=>{if(event.target.id!=='imageUpload')return;const file=event.target.files&&event.target.files[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)){toast('Choose a JPG, PNG or WebP image.');event.target.value='';return;}if(file.size>1.5*1024*1024){toast('This preview limits images to 1.5 MB.');event.target.value='';return;}const reader=new FileReader();reader.onload=()=>{const l=currentLesson();if(!l)return;l.image={id:uid('asset'),name:file.name,alt:$('#imageAlt')?.value||'',data:String(reader.result)};persist(false);renderEditor();toast('Image added to this lesson draft.');};reader.onerror=()=>toast('The image could not be read.');reader.readAsDataURL(file);});
   // Authoring enhancements: Markdown reference, multi-image upload, alt text and captions.
   const baseLessonFields = lessonFields;
-  lessonFields = function(l) { const html=baseLessonFields(l); return !l ? html : html + `<section class="markdown-guide"><h4>Markdown help — headings and formatting</h4><p>Use these patterns in the lesson body. The template should preserve the full hierarchy and formatting in the learner view.</p><ul><li><code># Heading 1</code> through <code>###### Heading 6</code> — all six heading levels. Use <code>##</code> for main sections and <code>###</code> for subsections.</li><li><code>**bold**</code>, <code>*italic*</code>, <code>~~strikethrough~~</code>, <code>&#96;inline code&#96;</code>.</li><li><code>- bullet</code> for unordered lists; <code>1. step</code> for numbered lists.</li><li><code>&gt; note</code> for blockquotes; <code>---</code> for a horizontal divider.</li><li><code>[link text](https://example.com)</code> for links. Only safe, trusted URLs should be allowed.</li><li><code>![Alt text](asset://figure-id)</code> for a figure reference. Add the figure in Images, then insert its reference where it belongs.</li></ul><pre>## Notice · Describe the evidence first. · ### Compare · - Observation A · - Observation B · > A useful caution. · **Key point:** keep conclusions conditional. · --- · ### Apply · 1. State what would confirm the idea. · 2. Name what would invalidate it.</pre><p><strong>TradeThesis lesson rhythm:</strong> Notice → Compare → Apply → Review. Keep answer keys and rubrics in protected instructor-only material.</p></section>`; };
+  lessonFields = function(l) { const html=baseLessonFields(l); return !l ? html : html + `<section class="markdown-guide"><h4>Markdown help — headings and formatting</h4><p>Use these patterns in the lesson body. The template should preserve the full hierarchy and formatting in the learner view.</p><ul><li><code># Heading 1</code> through <code>###### Heading 6</code> — all six heading levels. Use <code>##</code> for main sections and <code>###</code> for subsections.</li><li><code>**bold**</code>, <code>*italic*</code>, <code>~~strikethrough~~</code>, <code>&#96;inline code&#96;</code>.</li><li><code>- bullet</code> for unordered lists; <code>1. step</code> for numbered lists.</li><li><code>&gt; note</code> for blockquotes; <code>---</code> for a horizontal divider.</li><li><code>[link text](https://example.com)</code> for links. Only safe, trusted URLs should be allowed.</li><li><strong>Information tables:</strong> use a header row, a separator row and then one row per case, such as <code>| Context | Evidence | Decision |</code> followed by <code>| --- | --- | --- |</code>. The preview keeps wide tables horizontally scrollable on mobile.</li><li><code>![Alt text](asset://figure-id)</code> for a figure reference. Add the figure in Images, then insert its reference where it belongs.</li></ul><pre>## Notice · Describe the evidence first. · ### Compare · - Observation A · - Observation B · > A useful caution. · **Key point:** keep conclusions conditional. · --- · ### Apply · 1. State what would confirm the idea. · 2. Name what would invalidate it.</pre><p><strong>TradeThesis lesson rhythm:</strong> Notice → Compare → Apply → Review. Keep answer keys and rubrics in protected instructor-only material.</p></section>`; };
   const basePreviewFields = previewFields;
   previewFields = function(c) {
     let html = basePreviewFields(c);
@@ -574,7 +615,64 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     }
     return html;
   };
-  renderMarkdown = function(src) { const inline=s=>esc(s).replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/~~(.+?)~~/g,'<del>$1</del>').replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'); return String(src||'').split(/\n{2,}/).map(block=>{const t=block.trim();if(!t)return '';const h=t.match(/^(#{1,6})\s+(.+)$/);if(h){const n=h[1].length;return `<h${n}>${inline(h[2])}</h${n}>`;}if(/^---+$/.test(t))return '<hr>';if(/^>\s?/m.test(t))return `<blockquote>${t.split('\n').map(x=>inline(x.replace(/^>\s?/,''))).join('<br>')}</blockquote>`;if(/^[-*+]\s/m.test(t))return `<ul>${t.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>`<li>${inline(x.replace(/^[-*+]\s+/,''))}</li>`).join('')}</ul>`;if(/^\d+[.)]\s/m.test(t))return `<ol>${t.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>`<li>${inline(x.replace(/^\d+[.)]\s+/,''))}</li>`).join('')}</ol>`;return `<p>${inline(t).replace(/\n/g,'<br>')}</p>`;}).join(''); };
+  renderMarkdown = function(src) {
+    const inline = value => esc(String(value ?? ''))
+      .replace(/\x60([^\x60]+)\x60/g, '<code>$1</code>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/~~(.+?)~~/g, '<del>$1</del>')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    const splitTableRow = row => row.trim()
+      .replace(/^\|/, '')
+      .replace(/\|$/, '')
+      .replace(/\\\|/g, '\uE000')
+      .split('|')
+      .map(cell => cell.replace(/\uE000/g, '|').trim());
+    const isTableDivider = row => {
+      const cells = splitTableRow(row);
+      return cells.length > 1 && cells.every(cell => /^:?-{3,}:?$/.test(cell));
+    };
+    const renderTable = block => {
+      const rows = block.split('\n').map(row => row.trim()).filter(Boolean);
+      if (rows.length < 2 || !rows[0].includes('|') || !isTableDivider(rows[1])) return '';
+      const headers = splitTableRow(rows[0]);
+      const dividers = splitTableRow(rows[1]);
+      if (headers.length < 2 || headers.length !== dividers.length) return '';
+      const alignments = dividers.map(cell =>
+        cell.startsWith(':') && cell.endsWith(':') ? 'center' :
+        cell.endsWith(':') ? 'right' :
+        cell.startsWith(':') ? 'left' : ''
+      );
+      const cellHtml = (cell, tag, index) => {
+        const align = alignments[index] ? ' align="' + alignments[index] + '"' : '';
+        return '<' + tag + align + '>' + inline(cell) + '</' + tag + '>';
+      };
+      const head = '<thead><tr>' + headers.map((cell, i) => cellHtml(cell, 'th', i)).join('') + '</tr></thead>';
+      const bodyRows = rows.slice(2).map(row => {
+        const cells = splitTableRow(row);
+        while (cells.length < headers.length) cells.push('');
+        return '<tr>' + headers.map((_, i) => cellHtml(cells[i] ?? '', 'td', i)).join('') + '</tr>';
+      }).join('');
+      const body = bodyRows ? '<tbody>' + bodyRows + '</tbody>' : '';
+      return '<div class="lesson-table-wrap" role="region" aria-label="Scrollable information table" tabindex="0"><table>' + head + body + '</table></div>';
+    };
+    return String(src || '').replace(/\r\n?/g, '\n').split(/\n{2,}/).map(block => {
+      const t = block.trim();
+      if (!t) return '';
+      const table = renderTable(t);
+      if (table) return table;
+      const h = t.match(/^(#{1,6})\s+(.+)$/);
+      if (h) {
+        const n = h[1].length;
+        return '<h' + n + '>' + inline(h[2]) + '</h' + n + '>';
+      }
+      if (/^---+$/.test(t)) return '<hr>';
+      if (/^>\s?/m.test(t)) return '<blockquote>' + t.split('\n').map(x => inline(x.replace(/^>\s?/, ''))).join('<br>') + '</blockquote>';
+      if (/^[-*+]\s/m.test(t)) return '<ul>' + t.split('\n').map(x => x.trim()).filter(Boolean).map(x => '<li>' + inline(x.replace(/^[-*+]\s+/, '')) + '</li>').join('') + '</ul>';
+      if (/^\d+[.)]\s/m.test(t)) return '<ol>' + t.split('\n').map(x => x.trim()).filter(Boolean).map(x => '<li>' + inline(x.replace(/^\d+[.)]\s+/, '')) + '</li>').join('') + '</ol>';
+      return '<p>' + inline(t).replace(/\n/g, '<br>') + '</p>';
+    }).join('');
+  };
   const baseMarkdownRenderer = renderMarkdown;
   renderMarkdown = function(src) {
     const lesson = currentLesson();

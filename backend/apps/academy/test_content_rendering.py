@@ -219,3 +219,31 @@ class SharedLessonRenderingTests(SimpleTestCase):
         )
         self.assertIn('<strong class="tt-purpose-figure-title">Chart</strong>', rendered)
         self.assertNotIn("BANKNIFTY_2023-08-06_16-51-56_bd975.png", rendered)
+
+    def test_information_table_uses_accessible_scrollable_reference_wrapper(self):
+        source = (
+            "| Confirmed move | ADX above threshold | ADX below threshold |\n"
+            "| :--- | :---: | ---: |\n"
+            "| Two closes above the upper band | Trend-following buy alert | Reversal context only |\n"
+            "| Two closes below the lower band | Trend-following short alert | Reversal context only |"
+        )
+        rendered = render_safe_markdown(source)
+        self.assertIn('class="lesson-table-wrap"', rendered)
+        self.assertIn('role="region"', rendered)
+        self.assertIn('aria-label="Scrollable information table"', rendered)
+        self.assertIn('tabindex="0"', rendered)
+        self.assertIn("<table>", rendered)
+        self.assertIn("<thead>", rendered)
+        self.assertIn("<tbody>", rendered)
+        self.assertIn("<th align=", rendered)
+        self.assertIn("Two closes above the upper band", rendered)
+        self.assertIn("Trend-following short alert", rendered)
+        self.assertNotIn("| Confirmed move |", rendered)
+
+    def test_course_builder_preview_has_markdown_information_table_support(self):
+        preview = (Path(__file__).resolve().parent / "course_builder_preview.html").read_text()
+        self.assertIn("const renderTable = block =>", preview)
+        self.assertIn("isTableDivider", preview)
+        self.assertIn('class="lesson-table-wrap" role="region"', preview)
+        self.assertIn("Information tables:", preview)
+

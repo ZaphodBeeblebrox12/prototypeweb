@@ -1,6 +1,6 @@
 # Course Builder & Learning Room Deep-Pass Handoff
 
-Updated: 20 October 2026
+Updated: 21 October 2026
 Working branch: my-new-branch
 Canonical visual reference: course-source/understand-bollinger-bands/preview/first-pass/index.html
 Course under inspection: Understand Bollinger Bands (7 modules, 30 lessons)
@@ -236,3 +236,17 @@ Review boundary:
 - CI run [Academy backend CI](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39481529214) and [Verify Django Academy backend](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39481529290) were still running at the latest check. Both workflows had passed setup, migration/configuration validation, lint, formatting/type checks (where applicable), static collection/catalogue and draft-import smoke checks; their full regression suites were still running. Do not mark CI passed until GitHub reports terminal success.
 - Staging service inspection confirms Academy staging tracks `my-new-branch` with auto-deploy disabled. No deployment was triggered. Staging therefore remains on the last verified deployment commit until CI passes and an explicitly approved staging deploy is requested.
 - Visual acceptance is still outstanding: no browser screenshots were taken in this tool session, so there is no claim of pixel parity. After CI success and staging deployment approval, compare the real saved-draft website preview to the canonical first-pass reference at wide desktop, tablet, and narrow mobile widths, then adjust any observed mismatches. Include figures with long titles/captions, two- and three-image groups, and the native comparison-card figure.
+
+## Follow-up audit — information tables (21 October 2026)
+
+A targeted comparison against the approved Bollinger Bands reference exposed one functional gap that the preceding styling pass did not catch: the table styling existed, but the Course Builder's client-side Markdown renderer did not parse pipe tables. The backend renderer already uses Python-Markdown's \`tables\` extension, while its sanitizer stripped the reference's \`div.lesson-table-wrap\` wrapper. On small screens this meant the builder preview could show raw pipe syntax instead of a table, and runtime tables lost the reference's horizontal-scroll treatment.
+
+This pass addresses the gap in both views:
+
+- The Course Builder's learner preview now recognises pipe tables, renders semantic \`thead\`/\`tbody\` markup and alignment, and places them in an accessible, horizontally scrollable \`lesson-table-wrap\`.
+- The server-side Learning Room wraps rendered Markdown tables in the same pattern and permits only safe wrapper attributes through sanitisation; no styles, scripts, event handlers or arbitrary attributes were added to the allowlist.
+- Both previews now use the reference's framed header row, fine dividers, readable cell spacing and narrow-screen scrolling.
+- The Markdown help section explicitly documents information-table authoring.
+- Added regression tests cover table HTML, accessibility wrapper attributes, and builder-preview table support.
+
+No course content, authentication, billing, saving, review or publishing logic was changed. Nothing was deployed. CI and browser-level visual acceptance remain pending; the visual review should include a three-column/long-cell table at desktop and mobile widths.
