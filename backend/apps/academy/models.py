@@ -408,7 +408,7 @@ class CourseImportAsset(models.Model):
 class CourseMediaAsset(models.Model):
     """Shared course asset with a stable ID and protected delivery route."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name="media_assets")
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="media_assets")
     asset_key = models.CharField(max_length=512)
     file = models.ImageField(storage=course_asset_storage, upload_to=course_media_asset_upload_to, blank=True)
     alt_text = models.CharField(max_length=500, blank=True)
