@@ -314,7 +314,8 @@
   .tt-course-header-tags { margin-bottom: 18px; }
   .tt-course-header--depth h1 { font-size: clamp(31px, 8.5vw, 38px); }
   .tt-lesson-plan { padding: 13px; }
-  .tt-tab-panel .tt-purpose-figure-head { align-items: flex-start; flex-direction: column; }
+  .tt-tab-panel .tt-purpose-figure-header-top { align-items: flex-start; flex-direction: column; gap: 4px; }
+  .tt-tab-panel .tt-purpose-figure-module { text-align: left; }
   .tt-tab-panel .tt-purpose-figure-body { padding: 10px; }
   .tt-tab-panel .tt-purpose-figure figcaption { padding: 0 10px 12px; }
 }
