@@ -444,6 +444,26 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   let lessonContentCaret = null;
   let pendingLessonCaret = null;
   function getSeed() { const c=makeCourse('New micro-course draft'); c.summary='Add a concise course promise here.'; c.description='Describe the learner, what the course covers and what they can practise after completing it.'; c.modules[0].title='Module 01 — Foundations'; c.modules[0].lessons[0].title='Lesson 1.1 — First principles'; return {courses:[c],selectedCourseId:c.id,selectedModuleId:c.modules[0].id,selectedLessonId:c.modules[0].lessons[0].id,view:'overview',tab:'overview'}; }
+  function starterComparable(course) {
+    const copy = JSON.parse(JSON.stringify(course));
+    delete copy.id;
+    delete copy.createdAt;
+    delete copy.serverDraftId;
+    delete copy.serverUpdatedAt;
+    delete copy._previousTitle;
+    for (const mod of copy.modules || []) {
+      delete mod.id;
+      for (const lesson of mod.lessons || []) {
+        delete lesson.id;
+        for (const question of lesson.questions || []) delete question.id;
+      }
+    }
+    return JSON.stringify(copy);
+  }
+  function isUntouchedStarterDraft(course) {
+    if (!course || course.serverDraftId || course.serverUpdatedAt) return false;
+    return starterComparable(course) === starterComparable(getSeed().courses[0]);
+  }
   function load() { try { const raw=localStorage.getItem(STORAGE_KEY); if(raw){const v=JSON.parse(raw); if(v && Array.isArray(v.courses)) return v;} } catch(e){} return getSeed(); }
   let state=load(); let toastTimer=null; let saveTimer=null; let previewMode=false;
   let hasUnsavedChanges=false; let editRevision=0; let suppressDirtyTracking=true;
@@ -1279,6 +1299,9 @@ button:disabled { cursor: not-allowed; opacity: .45; }
         return (serverId && liveServerDraftIds.has(serverId)) ||
           (local.slug && liveServerDraftSlugs.has(String(local.slug)));
       });
+      // A default seed is created for a first-time author. If real Academy
+      // drafts exist, do not keep that untouched starter as an extra course card.
+      if (remoteDrafts.length) state.courses = state.courses.filter(local => !isUntouchedStarterDraft(local));
       for (const remote of remoteDrafts) {
         // The server is the shared source of truth for saved drafts. Replace a
         // stale browser copy by server ID or slug so another device's latest
