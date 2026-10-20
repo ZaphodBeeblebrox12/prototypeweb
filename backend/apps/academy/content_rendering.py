@@ -171,7 +171,6 @@ def render_safe_markdown(
         return (
             '<span class="tt-purpose-figure-head">'
             '<span class="tt-purpose-figure-header-top">'
-            '<span class="tt-purpose-figure-brand">TRADETHESIS · LEARNING ROOM</span>'
             f'<span class="tt-purpose-figure-module">{safe_module_title}</span>'
             '</span>'
             f'<strong class="tt-purpose-figure-title">{safe_title}</strong>'
