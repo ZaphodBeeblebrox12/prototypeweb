@@ -407,7 +407,7 @@ class CourseImportAdmin(admin.ModelAdmin):
                 notebook = lesson_data.get("content_json", {}).get("notebook") or record.payload.get("notebook", {})
                 review_lessons.append({
                     "lesson": lesson_data,
-                    "sections": build_lesson_sections(lesson_data.get("content_markdown", ""), asset_urls),
+                    "sections": build_lesson_sections(lesson_data.get("content_markdown", ""), asset_urls, user=request.user, admin_preview=True),
                     "notebook": notebook,
                 })
             review_modules.append({"module": module, "lessons": review_lessons})
