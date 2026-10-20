@@ -378,7 +378,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     if (!course) return;
     academySaving = true;
     try {
-      const result = await academyRequest('POST', {course, mode:submit?'submit':'save'});
+      const result = await academyRequest('POST', {course, mode:submit?'submit':'save', sync_source:notify || submit});
       course.serverDraftId = result.record_id;
       course.serverUpdatedAt = result.updated_at || new Date().toISOString();
       // Replace only the image payloads with their protected server URLs. Do not overwrite
@@ -413,7 +413,10 @@ button:disabled { cursor: not-allowed; opacity: .45; }
         window.location.assign(result.review_url);
       } else {
         const indicator = $('#saveIndicator');
-        if (indicator) indicator.innerHTML = '<span class="dot"></span><span>Saved to Academy · ' + esc(nowText()) + '</span>';
+        if (indicator) {
+          const sourceStatus = result.github_source_synced === true ? ' · GitHub source synced' : '';
+          indicator.innerHTML = '<span class="dot"></span><span>Saved to Academy · ' + esc(nowText()) + sourceStatus + '</span>';
+        }
         if (notify) toast(result.message || 'Draft saved to the Academy.');
       }
       return result;
@@ -467,14 +470,15 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       }));
       const remoteDrafts = result.drafts || [];
       for (const remote of remoteDrafts) {
-        const index = state.courses.findIndex(local => local.serverDraftId === remote.serverDraftId || local.slug === remote.slug);
-        if (index >= 0) {
-          const local = state.courses[index];
-          if (local.serverDraftId && local.serverDraftId === remote.serverDraftId) state.courses[index] = remote;
-          else if (!hadLocalDraft) state.courses[index] = remote;
-        } else {
-          state.courses.push(remote);
-        }
+        // The server is the shared source of truth for saved drafts. Replace a
+        // stale browser copy by server ID or slug so another device's latest
+        // saved edits are not hidden by an old localStorage entry.
+        const index = state.courses.findIndex(local =>
+          (local.serverDraftId && local.serverDraftId === remote.serverDraftId) ||
+          (local.slug && local.slug === remote.slug)
+        );
+        if (index >= 0) state.courses[index] = remote;
+        else state.courses.push(remote);
       }
       if (!hadLocalDraft && remoteDrafts.length) {
         const latest = remoteDrafts[0];
