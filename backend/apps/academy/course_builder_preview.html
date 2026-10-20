@@ -447,40 +447,73 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     const lesson = currentLesson();
     const images = Array.isArray(lesson?.images) ? lesson.images : (lesson?.image ? [lesson.image] : []);
     const figures = [];
+    const course = currentCourse();
+    const module = currentModule();
+    const moduleIndex = Math.max(0, (course?.modules || []).findIndex(item => item.id === module?.id));
+    const moduleNumber = moduleIndex + 1;
+    const moduleTitle = String(module?.title || 'Learning Room').replace(/^module\s*\d*\s*[·—–:-]?\s*/i, '').trim();
+    const moduleLabel = 'MODULE ' + moduleNumber + ' · ' + moduleTitle;
+    const figureHeader = title =>
+      '<span class="tt-purpose-figure-head">' +
+        '<span class="tt-purpose-figure-header-top">' +
+          '<span class="tt-purpose-figure-brand">TRADETHESIS · LEARNING ROOM</span>' +
+          '<span class="tt-purpose-figure-module">' + esc(moduleLabel) + '</span>' +
+        '</span>' +
+        '<strong class="tt-purpose-figure-title">' + esc(title || 'Chart') + '</strong>' +
+      '</span>';
+    const displayTitle = image => {
+      const title = String(image?.title || '').trim();
+      const filename = String(image?.name || '').trim();
+      return title && title !== filename && !/\.(jpe?g|png|webp|gif|svg)$/i.test(title) ? title : 'Chart';
+    };
     let prepared = String(src || '').replace(/!\[([^\]]*)\]\(asset:\/\/([^)]+)\)/g, function(match, alt, id) {
       const image = images.find(function(item) { return item.id === id || item.assetUuid === id; });
       if (!image) return match;
       const token = 'TTFIGURETOKEN' + figures.length + 'END';
-      const titleText = String(image.title || image.caption || image.name || alt || 'Course figure');
-      const course = currentCourse();
-      const module = currentModule();
-      const moduleNumber = Math.max(1, (course?.modules || []).findIndex(item => item.id === module?.id) + 1);
-      const lessonNumber = Math.max(1, (module?.lessons || []).findIndex(item => item.id === lesson?.id) + 1);
-      const title = /^figure\s/i.test(titleText) ? titleText : 'Figure ' + moduleNumber + '.' + lessonNumber + ' · ' + titleText;
+      const title = displayTitle(image);
       const imageHtml = image.data
-        ? '<span class="tt-purpose-figure-image"><img data-figure-zoom src="' + esc(image.data) + '" alt="' + esc(image.alt || alt || titleText) + '" loading="lazy" style="max-width:100%;max-height:460px"></span>'
+        ? '<span class="tt-purpose-figure-image"><img data-figure-zoom src="' + esc(image.data) + '" alt="' + esc(image.alt || alt || title) + '" loading="lazy" style="max-width:100%;max-height:460px"></span>'
         : '<span class="tt-purpose-figure-missing">Image saved; preview source is not available in this browser.</span>';
       const caption = image.caption ? '<figcaption><p>' + esc(image.caption) + '</p></figcaption>' : '';
-      figures.push('<figure class="tt-purpose-figure" data-figure-id="' + esc(id) + '"><span class="tt-purpose-figure-head"><strong>' + esc(title) + '</strong><span>Purpose-built teaching aid</span></span><span class="tt-purpose-figure-body">' + imageHtml + '</span>' + caption + '</figure>');
+      figures.push('<figure class="tt-purpose-figure" data-figure-id="' + esc(id) + '">' + figureHeader(title) + '<span class="tt-purpose-figure-body">' + imageHtml + '</span>' + caption + '</figure>');
+      return '\n\n' + token + '\n\n';
+    });
+    prepared = prepared.replace(/\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]/g, function(match, id) {
+      const group = (lesson?.imageGroups || []).find(item => String(item.id) === id);
+      if (!group) return match;
+      const token = 'TTFIGURETOKEN' + figures.length + 'END';
+      const groupedImages = (group.imageIds || [])
+        .map(imageId => images.find(item => item.id === imageId || item.assetUuid === imageId))
+        .filter(Boolean);
+      const items = groupedImages.map(image => {
+        const title = displayTitle(image);
+        const imageHtml = image.data
+          ? '<span class="tt-purpose-figure-image"><img data-figure-zoom src="' + esc(image.data) + '" alt="' + esc(image.alt || title) + '" loading="lazy"></span>'
+          : '<span class="tt-purpose-figure-missing">Image saved; preview source is not available in this browser.</span>';
+        const caption = image.caption ? '<span class="tt-image-group-caption">' + esc(image.caption) + '</span>' : '';
+        return '<span class="tt-image-group-item">' + imageHtml + '<strong class="tt-image-group-item-title">' + esc(title) + '</strong>' + caption + '</span>';
+      }).join('');
+      const note = group.note ? '<span class="tt-purpose-figure-note">' + esc(group.note) + '</span>' : '';
+      const groupMarkup = groupedImages.length >= 2
+        ? '<figure class="tt-purpose-figure tt-image-group-figure" data-figure-id="' + esc(id) + '">' + figureHeader(group.title || 'Image group') + '<span class="tt-purpose-figure-body"><span class="tt-image-group-grid">' + items + '</span>' + note + '</span></figure>'
+        : '<p class="tt-purpose-figure-missing">Select at least two uploaded images in the Images tab to complete this group.</p>';
+      figures.push(groupMarkup);
       return '\n\n' + token + '\n\n';
     });
     prepared = prepared.replace(/\[\[teaching-figure:([A-Za-z0-9_-]{1,120})\]\]/g, function(match, id) {
       const block = (lesson?.teachingFigures || []).find(item => String(item.id) === id);
       if (!block) return match;
       const token = 'TTFIGURETOKEN' + figures.length + 'END';
-      const course = currentCourse();
-      const module = currentModule();
-      const moduleNumber = Math.max(1, (course?.modules || []).findIndex(item => item.id === module?.id) + 1);
-      const lessonNumber = Math.max(1, (module?.lessons || []).findIndex(item => item.id === lesson?.id) + 1);
-      const titleText = String(block.title || 'Comparison');
-      const title = /^figure\s/i.test(titleText) ? titleText : 'Figure ' + moduleNumber + '.' + lessonNumber + ' · ' + titleText;
+      const title = String(block.title || 'Comparison');
       const cards = (block.cards || []).map(card => '<span class="tt-comparison-card"><span class="tt-comparison-kicker">' + esc(card.kicker || '') + '</span><strong>' + esc(card.title || '') + '</strong><span class="tt-comparison-copy">' + esc(card.body || '') + '</span></span>').join('');
       const note = block.note ? '<span class="tt-purpose-figure-note">' + esc(block.note) + '</span>' : '';
-      figures.push('<figure class="tt-purpose-figure tt-comparison-figure" data-figure-id="' + esc(id) + '"><span class="tt-purpose-figure-head"><strong>' + esc(title) + '</strong><span>Purpose-built teaching aid</span></span><span class="tt-purpose-figure-body"><span class="tt-comparison-cards">' + cards + '</span>' + note + '</span></figure>');
+      figures.push('<figure class="tt-purpose-figure tt-comparison-figure" data-figure-id="' + esc(id) + '">' + figureHeader(title) + '<span class="tt-purpose-figure-body"><span class="tt-comparison-cards">' + cards + '</span>' + note + '</span></figure>');
       return '\n\n' + token + '\n\n';
     });
     let html = baseMarkdownRenderer(prepared);
-    figures.forEach(function(figure, index) { html = html.replace('<p>TTFIGURETOKEN' + index + 'END</p>', figure); });
+    figures.forEach(function(figure, index) {
+      html = html.replace('<p>TTFIGURETOKEN' + index + 'END</p>', figure);
+    });
     return html;
   };
   const baseHandleAction = handleAction;
