@@ -25,6 +25,7 @@ _ALLOWED_ATTRIBUTES = {
 }
 _IMAGE_REF = re.compile(r"asset://([0-9a-fA-F-]{36})")
 _IMAGE_MARKDOWN = re.compile(r"!\[([^\]]*)\]\(asset://([0-9a-fA-F-]{36})(?:\s+[^)]*)?\)")
+_TEACHING_FIGURE_TOKEN = re.compile(r"\[\[teaching-figure:([A-Za-z0-9_-]{1,120})\]\]")
 _LESSON_REF = re.compile(r"\[\[(lesson|lesson-card):([0-9a-fA-F-]{36})\]\]")
 _HEADING = re.compile(r"^(#{3,6})\s+(.+?)\s*$")
 _DANGEROUS_MARKDOWN = re.compile(
@@ -193,6 +194,52 @@ def render_safe_markdown(
     # Replace only Markdown image references that have saved figure metadata. The placeholder
     # preserves the exact text/image/text position and prevents Markdown from stripping the frame.
     source = _IMAGE_MARKDOWN.sub(replace_structured_figure, source)
+
+    def replace_teaching_figure(match):
+        figure_id = match.group(1)
+        metadata = figure_metadata.get(figure_id)
+        if not isinstance(metadata, dict) or metadata.get("type") != "comparison-cards":
+            return match.group(0)
+
+        title = str(metadata.get("title") or "Comparison").strip()
+        if figure_prefix and not title.casefold().startswith("figure "):
+            title = f"Figure {figure_prefix} · {title}"
+        safe_title = escape(title)
+        safe_id = escape(figure_id, quote=True)
+        cards = metadata.get("cards", [])
+        if not isinstance(cards, list):
+            cards = []
+        card_markup = []
+        for card in cards[:4]:
+            if not isinstance(card, dict):
+                continue
+            kicker = escape(str(card.get("kicker") or "").strip())
+            card_title = escape(str(card.get("title") or "").strip())
+            body = escape(str(card.get("body") or "").strip())
+            if not (kicker or card_title or body):
+                continue
+            card_markup.append(
+                '<span class="tt-comparison-card">'
+                f'<span class="tt-comparison-kicker">{kicker}</span>'
+                f'<strong>{card_title}</strong>'
+                f'<span class="tt-comparison-copy">{body}</span>'
+                '</span>'
+            )
+        note = escape(str(metadata.get("note") or "").strip())
+        note_markup = f'<span class="tt-purpose-figure-note">{note}</span>' if note else ""
+        markup = (
+            f'<figure class="tt-purpose-figure tt-comparison-figure" data-figure-id="{safe_id}">'
+            f'<span class="tt-purpose-figure-head"><strong>{safe_title}</strong>'
+            '<span>Purpose-built teaching aid</span></span>'
+            '<span class="tt-purpose-figure-body">'
+            f'<span class="tt-comparison-cards">{"".join(card_markup)}</span>'
+            f'{note_markup}</span></figure>'
+        )
+        token = f"TTSTRUCTUREDFIGURE{len(figure_frames)}END"
+        figure_frames[token] = markup
+        return token
+
+    source = _TEACHING_FIGURE_TOKEN.sub(replace_teaching_figure, source)
     resolved = _resolve_asset_refs(source, asset_urls)
     rendered = markdown_library.markdown(
         resolved,
