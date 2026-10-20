@@ -86,6 +86,25 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(record.payload["course"]["learning_outcomes"], ["Describe evidence before interpreting it."])
         self.assertNotIn("correctIndex", saved_lesson["content_json"])
 
+    @patch(
+        "apps.academy.course_builder_api.course_asset_storage.status",
+        return_value={
+            "backend": "github", "label": "private GitHub repository",
+            "durable": True, "writes_enabled": True,
+        },
+    )
+    def test_builder_api_exposes_durable_asset_storage_status(self, storage_status):
+        response = self.client.get(reverse("staff_course_builder_api"))
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(
+            response.json()["asset_storage"],
+            {
+                "backend": "github", "label": "private GitHub repository",
+                "durable": True, "writes_enabled": True,
+            },
+        )
+        storage_status.assert_called_once_with()
+
     def test_existing_saved_builder_draft_can_be_resaved_when_course_slug_is_taken(self):
         slug = "builder-draft-slug-collision"
         first = self.client.post(
