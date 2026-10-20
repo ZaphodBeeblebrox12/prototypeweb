@@ -8,7 +8,19 @@
   <div class="tt-tab-panel" id="panel-examples" role="tabpanel" aria-labelledby="tab-examples" data-tab-panel="examples" hidden>{{ lesson_sections.examples_html|safe }}</div>
   <div class="tt-tab-panel" id="panel-practice" role="tabpanel" aria-labelledby="tab-practice" data-tab-panel="practice" hidden>
     {{ lesson_sections.practice_html|safe }}
-    {% if practice_questions and lesson %}
+    {% if practice_questions and admin_preview %}
+    <section class="tt-practice-questions" aria-labelledby="tt-practice-heading">
+      <p class="tt-eyebrow">Apply what you noticed</p>
+      <h2 id="tt-practice-heading">Practice questions</h2>
+      {% for question in practice_questions %}
+      <fieldset class="tt-question tt-admin-question" disabled>
+        <legend>{{ question.prompt }}</legend>
+        <ul>{% for option in question.options %}<li>{{ option }}</li>{% endfor %}</ul>
+      </fieldset>
+      {% endfor %}
+      <p class="tt-practice-note">Administrator preview only. Answer submission is disabled in this view.</p>
+    </section>
+    {% elif practice_questions and lesson %}
     <section class="tt-practice-questions" aria-labelledby="tt-practice-heading">
       <p class="tt-eyebrow">Apply what you noticed</p>
       <h2 id="tt-practice-heading">Practice questions</h2>
