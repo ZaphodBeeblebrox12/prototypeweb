@@ -659,6 +659,7 @@ def course_builder_api(request):
         return JsonResponse({
             "ok": True, "submitted": False, "record_id": str(record.pk),
             "updated_at": record.updated_at.isoformat(),
+            "website_preview_url": reverse("academy:course-import-preview", args=[record.pk]),
             "draft": _draft_response(record, request),
             "github_source_synced": github_source_synced,
             "source_snapshot_backend": source_snapshot_backend,
