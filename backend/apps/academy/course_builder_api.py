@@ -163,6 +163,8 @@ def _asset_uuid(course_slug, asset_id):
 def _clean_image_payload(course_state, course_slug):
     """Remove binary data from the JSON snapshot and return upload sources separately."""
     snapshot = deepcopy(course_state)
+    server_draft_id = str(course_state.get("serverDraftId") or "").strip()
+    server_course_id = str(course_state.get("serverCourseId") or "").strip()
     for transient in ("serverDraftId", "serverUpdatedAt", "serverCourseId"):
         snapshot.pop(transient, None)
     images_by_key = {}
@@ -181,7 +183,18 @@ def _clean_image_payload(course_state, course_slug):
                 image_id = str(image.get("id") or uuid.uuid4())
                 image["id"] = image_id
                 asset_key = f"builder/{image_id}"
-                stable_id = _asset_uuid(course_slug, image_id)
+                requested_stable_id = str(image.get("assetUuid") or "")
+                may_reuse_stable_id = False
+                if _valid_uuid(requested_stable_id):
+                    if server_course_id and _valid_uuid(server_course_id):
+                        may_reuse_stable_id = CourseMediaAsset.objects.filter(
+                            pk=requested_stable_id, course_id=server_course_id,
+                        ).exists()
+                    if not may_reuse_stable_id and server_draft_id and _valid_uuid(server_draft_id):
+                        may_reuse_stable_id = CourseImportAsset.objects.filter(
+                            course_import_id=server_draft_id, stable_asset_id=requested_stable_id,
+                        ).exists()
+                stable_id = requested_stable_id if may_reuse_stable_id else _asset_uuid(course_slug, image_id)
                 source_data = str(image.get("data") or "")
                 digest = str(image.get("sha256") or "")
                 if source_data.startswith("data:"):
@@ -422,7 +435,7 @@ def _build_import_payload(course_state, course_slug):
             "level": str(snapshot.get("level") or "").strip()[:40],
             "estimated_duration": str(snapshot.get("duration") or "").strip()[:80],
             "learning_outcomes": [str(value).strip()[:500] for value in (snapshot.get("outcomes") or []) if str(value).strip()][:20],
-            "position": 0,
+            "position": max(0, min(32767, int(snapshot.get("position") or 0))),
         },
         "notebook": {},
         "modules": modules,
