@@ -13,6 +13,7 @@ from .models import (
     Course,
     CourseImport,
     CourseImportAsset,
+    CourseMediaAsset,
     CourseModule,
     Lesson,
     LessonInstructorMaterial,
@@ -416,6 +417,60 @@ class CourseBuilderApiTests(TestCase):
         self.assertIn("Published API Course", titles)
         self.assertNotIn("Private Draft Course", titles)
         self.assertEqual(response["Access-Control-Allow-Origin"], "*")
+
+    def test_published_course_editor_hydrates_saved_question_image_url(self):
+        from .course_builder_api import _builder_state_from_published_course
+
+        course = Course.objects.create(
+            title="Published Image Course",
+            slug="published-image-course",
+            status=Course.Status.PUBLISHED,
+        )
+        module = CourseModule.objects.create(
+            course=course, title="Module One", slug="module-one",
+            position=1, is_published=True,
+        )
+        lesson = Lesson.objects.create(
+            module=module, title="Lesson One", slug="lesson-one",
+            position=1, is_published=True,
+            content_json={"questions": [{
+                "id": "question-chart",
+                "prompt": "What does this chart show?",
+                "options": ["Rejection", "Breakout"],
+                "image_asset_id": "",
+            }]},
+        )
+        asset = CourseMediaAsset.objects.create(
+            course=course,
+            asset_key="builder/question-chart",
+            file="academy/course-media/question-chart.png",
+            alt_text="Price rejecting resistance",
+        )
+        lesson.content_json = {
+            "asset_ids": [str(asset.pk)],
+            "figures": {str(asset.pk): {
+                "title": "Resistance test",
+                "alt": "Price rejecting resistance",
+                "caption": "Compare the closes near resistance.",
+            }},
+            "questions": [{
+                "id": "question-chart",
+                "prompt": "What does this chart show?",
+                "options": ["Rejection", "Breakout"],
+                "image_asset_id": str(asset.pk),
+            }],
+        }
+        lesson.save(update_fields=["content_json", "updated_at"])
+
+        state = _builder_state_from_published_course(course)
+        hydrated_lesson = state["modules"][0]["lessons"][0]
+        question = hydrated_lesson["questions"][0]
+        hydrated_image = next(image for image in hydrated_lesson["images"] if image["id"] == str(asset.pk))
+
+        self.assertEqual(question["imageId"], str(asset.pk))
+        self.assertEqual(hydrated_image["data"], reverse("academy:media-asset", args=[asset.pk]))
+        self.assertEqual(hydrated_image["title"], "Resistance test")
+        self.assertEqual(hydrated_image["alt"], "Price rejecting resistance")
 
     def test_builder_question_image_is_saved_as_learner_safe_figure_reference(self):
         from .course_builder_api import _asset_uuid, _build_import_payload
