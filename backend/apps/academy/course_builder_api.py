@@ -613,7 +613,8 @@ def _builder_state_from_published_course(course):
                     "name": stored_name.rsplit("/", 1)[-1] if stored_name else asset.asset_key.rsplit("/", 1)[-1],
                     "title": str(metadata.get("title") or ""),
                     "alt": str(metadata.get("alt") or asset.alt_text or ""),
-                    "caption": str(metadata.get("caption") or ""), "data": "",
+                    "caption": str(metadata.get("caption") or ""),
+                    "data": reverse("academy:media-asset", args=[asset.pk]) if asset.file else "",
                 })
             public_questions = [
                 item for item in content_json.get("questions", []) if isinstance(item, dict)
