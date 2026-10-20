@@ -7,16 +7,17 @@
 {% endblock %}
 {% load static %}
 {% block title %}{{ lesson.title }} · {{ course.title }}{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'academy/learning-room.css' %}"><link rel="stylesheet" href="{% static 'academy/lesson-references.css' %}">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'academy/learning-room.css' %}"><link rel="stylesheet" href="{% static 'academy/lesson-references.css' %}">{% if admin_preview %}<link rel="stylesheet" href="{% static 'academy/admin-lesson-preview.css' %}">{% endif %}{% endblock %}
 {% block content %}
-<div class="tt-learning-room">
+<div class="tt-learning-room{% if admin_preview %} tt-admin-lesson-preview{% endif %}">
+  {% if admin_preview %}<aside class="tt-admin-lesson-preview-banner" role="status"><strong>ADMIN PREVIEW · LOCKED ACCESS BYPASSED FOR REVIEW ONLY</strong><span>This read-only view does not unlock the lesson for learners, save progress, or submit notebook and quiz responses.</span><a href="{% url 'academy:course-detail' course.slug %}">Back to course overview ↗</a></aside>{% endif %}
   <div class="tt-breadcrumb"><a href="{% url 'academy:home' %}">Academy</a><span>/</span><a href="{% url 'academy:course-detail' course.slug %}">{{ course.title }}</a><span>/</span><span>{{ module.title }}</span></div>
   <header class="tt-course-header">
     <p class="tt-eyebrow">{{ module.position|stringformat:"02d" }} · {{ module.title }} &nbsp; / &nbsp; LESSON {{ lesson.position|stringformat:"02d" }}</p>
     <h1>{{ lesson.title }}</h1>
     {% if lesson.summary %}<p class="tt-lesson-summary">{{ lesson.summary }}</p>{% endif %}
-    <div class="tt-lesson-meta"><span>{{ lesson.duration_minutes }} min estimated study</span>{% if lesson.is_preview %}<span class="tt-preview-label">Preview lesson</span>{% endif %}<span>{{ completed_lessons }} of {{ total_lessons }} lessons complete</span></div>
-    <div class="tt-course-progress" role="progressbar" aria-label="Course progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ course_progress_percent }}"><span style="width:{{ course_progress_percent }}%"></span></div>
+    {% if admin_preview %}<div class="tt-lesson-meta"><span>{{ lesson.duration_minutes }} min estimated study</span><span class="tt-preview-label">Administrator preview</span><span>{% if lesson.is_preview %}Learner preview lesson{% else %}Locked lesson preview{% endif %}</span></div>{% else %}<div class="tt-lesson-meta"><span>{{ lesson.duration_minutes }} min estimated study</span>{% if lesson.is_preview %}<span class="tt-preview-label">Preview lesson</span>{% endif %}<span>{{ completed_lessons }} of {{ total_lessons }} lessons complete</span></div>
+    <div class="tt-course-progress" role="progressbar" aria-label="Course progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ course_progress_percent }}"><span style="width:{{ course_progress_percent }}%"></span></div>{% endif %}
   </header>
 
   <div class="tt-room-grid">
@@ -30,7 +31,12 @@
             <ul>
               {% for item in group.lessons %}
                 <li class="tt-outline-item" data-outline-item>
-                  {% if item.accessible %}
+                  {% if admin_preview %}
+                    <a href="{{ item.admin_preview_url }}" {% if item.current %}aria-current="page" class="is-current"{% endif %}>
+                      <span>{{ item.lesson.title }}</span>
+                      {% if not item.accessible %}<span class="tt-admin-locked-label">LOCKED</span>{% endif %}
+                    </a>
+                  {% elif item.accessible %}
                     <a href="{% url 'academy:lesson' course.slug item.lesson.id %}" {% if item.current %}aria-current="page" class="is-current"{% endif %}>
                       <span>{{ item.lesson.title }}</span>
                       {% if item.progress and item.progress.status == "completed" %}<span class="tt-complete-mark" aria-label="Completed">✓</span>{% endif %}
@@ -49,7 +55,7 @@
     <main class="tt-lesson-main">
       <article class="tt-lesson-article">
         {% if video_url %}<section class="tt-video-lesson" aria-label="Lesson video">{% if video_is_file %}<video controls preload="metadata" src="{{ video_url }}">Your browser does not support video playback.</video>{% else %}<a href="{{ video_url }}" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a><p class="small text-muted">This video opens in a new tab.</p>{% endif %}</section>{% endif %}
-        {% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook lesson=lesson practice_questions=practice_questions only %}
+        {% if admin_preview %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook practice_questions=practice_questions admin_preview=True only %}{% else %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook lesson=lesson practice_questions=practice_questions only %}{% endif %}
         {% if related_courses %}
         <section class="tt-related-courses" aria-labelledby="tt-related-courses-heading" style="margin:24px 0;padding:18px;border:1px solid #dce1d7;border-radius:10px;background:#f7f4ec">
           <p style="margin:0 0 6px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#667269">Continue learning</p>
@@ -64,6 +70,7 @@
           <p style="margin:12px 0 0;font-size:11px;color:#667269">Course references do not grant access or include a purchase.</p>
         </section>
         {% endif %}
+{% if not admin_preview %}
         <div class="tt-completion">
           <div><strong>{% if progress and progress.status == "completed" %}Lesson completed{% else %}Finished this lesson?{% endif %}</strong><p>Your progress is saved to your account.</p></div>
           <form method="post" action="{% url 'academy:lesson-progress' lesson.id %}" data-lesson-complete>
@@ -73,6 +80,12 @@
           <span data-progress-feedback role="status" aria-live="polite"></span>
         </div>
         <nav class="tt-lesson-navigation" aria-label="Lesson navigation">{% if previous_lesson %}<a class="tt-lesson-nav-link" href="{% url 'academy:lesson' course.slug previous_lesson.id %}"><span>← Previous lesson</span><strong>{{ previous_lesson.title }}</strong></a>{% else %}<span class="tt-lesson-nav-placeholder">You are at the first available lesson.</span>{% endif %}{% if next_lesson %}<a class="tt-lesson-nav-link tt-lesson-nav-next" href="{% url 'academy:lesson' course.slug next_lesson.id %}"><span>Next lesson →</span><strong>{{ next_lesson.title }}</strong></a>{% else %}<a class="tt-lesson-nav-link tt-lesson-nav-next" href="{% url 'academy:course-detail' course.slug %}"><span>Course overview →</span><strong>Return to course</strong></a>{% endif %}</nav>
+        {% else %}
+        <nav class="tt-lesson-navigation" aria-label="Administrator preview lesson navigation">
+          {% if previous_lesson %}<a class="tt-lesson-nav-link" href="{% url 'academy:admin-lesson-preview' course.slug previous_lesson.id %}"><span>← Previous lesson</span><strong>{{ previous_lesson.title }}</strong></a>{% else %}<span class="tt-lesson-nav-placeholder">First lesson in this course.</span>{% endif %}
+          {% if next_lesson %}<a class="tt-lesson-nav-link tt-lesson-nav-next" href="{% url 'academy:admin-lesson-preview' course.slug next_lesson.id %}"><span>Next lesson →</span><strong>{{ next_lesson.title }}</strong></a>{% else %}<a class="tt-lesson-nav-link tt-lesson-nav-next" href="{% url 'academy:course-detail' course.slug %}"><span>Course overview →</span><strong>Return to course</strong></a>{% endif %}
+        </nav>
+        {% endif %}
         <dialog class="tt-figure-dialog" data-figure-dialog><button type="button" data-figure-close>Close</button><img data-figure-dialog-image alt=""><p data-figure-dialog-caption></p></dialog>
       </article>
     </main>
