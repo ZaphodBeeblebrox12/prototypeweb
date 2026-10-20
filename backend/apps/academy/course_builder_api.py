@@ -24,13 +24,21 @@ from django.views.decorators.http import require_http_methods
 from PIL import Image, UnidentifiedImageError
 
 from .importing import validate_import_for_publish
-from .models import Course, CourseImport, CourseImportAsset, CourseMediaAsset, GoogleDriveCredential
+from .models import (
+    Course,
+    CourseImport,
+    CourseImportAsset,
+    CourseMediaAsset,
+    GoogleDriveCredential,
+    Lesson,
+)
 from .permissions import is_course_content_admin
 from .storage import course_asset_storage
 
 _MAX_IMAGE_BYTES = 10 * 1024 * 1024
 _ALLOWED_IMAGES = {"image/jpeg": ("JPEG", ".jpg"), "image/png": ("PNG", ".png"), "image/webp": ("WEBP", ".webp")}
 _ASSET_REF = re.compile(r"asset://([A-Za-z0-9-]+)")
+_LESSON_REF_TOKEN = re.compile(r"\[\[(?:lesson|lesson-card):([0-9a-fA-F-]{36})\]\]")
 
 
 def _require_admin(request):
@@ -265,6 +273,11 @@ def _build_import_payload(course_state, course_slug):
                 "schema_version": 1,
                 "source_id": f"{module_index}.{lesson_index}",
                 "asset_ids": asset_ids,
+                "lesson_reference_ids": sorted({
+                    str(uuid.UUID(value))
+                    for value in _LESSON_REF_TOKEN.findall(content)
+                    if _valid_uuid(value)
+                }),
                 "related_course_ids": [str(value) for value in related_ids if _valid_uuid(value)],
                 "questions": learner_questions,
                 "notebook": notebook_payload,
@@ -398,7 +411,38 @@ def course_builder_api(request):
             modules__is_published=True,
             modules__lessons__is_published=True,
         ).distinct().order_by("position", "title").values("id", "title", "slug", "summary"))
-        return JsonResponse({"drafts": drafts, "related_courses": related_courses})
+        # Return catalogue metadata only (never lesson bodies or instructor
+        # answer keys). This lets the Builder search references after drafts
+        # are reopened on another device without persisting copied lesson text.
+        lesson_references = []
+        published_lessons = Lesson.objects.filter(
+            module__course__status=Course.Status.PUBLISHED,
+            module__is_published=True,
+            is_published=True,
+        ).select_related("module__course", "module").order_by(
+            "module__course__position", "module__position", "position", "title",
+        )
+        for lesson in published_lessons:
+            topics = re.findall(
+                r"^#{1,6}\s+(.+?)\s*$",
+                lesson.content_markdown or "",
+                re.MULTILINE,
+            )[:8]
+            lesson_references.append({
+                "id": str(lesson.pk),
+                "title": lesson.title,
+                "summary": lesson.summary,
+                "module_title": lesson.module.title,
+                "course_id": str(lesson.module.course_id),
+                "course_title": lesson.module.course.title,
+                "course_slug": lesson.module.course.slug,
+                "topics": topics,
+            })
+        return JsonResponse({
+            "drafts": drafts,
+            "related_courses": related_courses,
+            "lesson_references": lesson_references,
+        })
 
     try:
         body = json.loads(request.body.decode("utf-8"))
