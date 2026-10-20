@@ -3,6 +3,7 @@ import base64
 import binascii
 import hashlib
 import json
+import logging
 import mimetypes
 import re
 import uuid
@@ -34,6 +35,8 @@ from .models import (
 )
 from .permissions import is_course_content_admin
 from .storage import course_asset_storage
+
+logger = logging.getLogger(__name__)
 
 _MAX_IMAGE_BYTES = 10 * 1024 * 1024
 _ALLOWED_IMAGES = {"image/jpeg": ("JPEG", ".jpg"), "image/png": ("PNG", ".png"), "image/webp": ("WEBP", ".webp")}
@@ -520,11 +523,18 @@ def course_builder_api(request):
                 "course_slug": lesson.module.course.slug,
                 "topics": topics,
             })
+        asset_storage_status = course_asset_storage.status()
+        logger.info(
+            "Course Builder asset storage configured: backend=%s durable=%s writes_enabled=%s",
+            asset_storage_status["backend"],
+            asset_storage_status["durable"],
+            asset_storage_status["writes_enabled"],
+        )
         return JsonResponse({
             "drafts": drafts,
             "related_courses": related_courses,
             "lesson_references": lesson_references,
-            "asset_storage": course_asset_storage.status(),
+            "asset_storage": asset_storage_status,
         })
 
     try:
