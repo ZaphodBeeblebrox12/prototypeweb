@@ -642,7 +642,7 @@ class CourseBuilderApiTests(TestCase):
 
 
     def test_get_retires_legacy_builder_draft_after_course_was_deleted_in_admin(self):
-        payload = self.draft_payload("builder-course-deleted-in-admin")
+        payload = self.draft_payload()
         saved = self.client.post(
             reverse("staff_course_builder_api"),
             data=json.dumps(payload),

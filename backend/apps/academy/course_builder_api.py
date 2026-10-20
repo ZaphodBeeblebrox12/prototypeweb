@@ -26,8 +26,8 @@ from django.utils.text import slugify
 from django.views.decorators.http import require_http_methods
 from PIL import Image, UnidentifiedImageError
 
-from .importing import validate_import_for_publish
 from .course_builder_lifecycle import mark_builder_draft_deleted
+from .importing import validate_import_for_publish
 from .models import (
     Course,
     CourseImport,

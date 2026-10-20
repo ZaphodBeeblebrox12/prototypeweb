@@ -12,8 +12,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import path, reverse
 from django.utils.html import format_html
 
-from .content_rendering import build_lesson_sections
 from .course_builder_lifecycle import mark_builder_draft_deleted
+from .content_rendering import build_lesson_sections
 from .forms import (
     CourseImportAssetAdminForm,
     CourseMediaAssetAdminForm,
