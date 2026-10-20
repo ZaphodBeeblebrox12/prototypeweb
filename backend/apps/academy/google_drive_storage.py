@@ -8,7 +8,6 @@ import mimetypes
 import uuid
 from pathlib import Path
 
-import requests
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.files.base import ContentFile
@@ -122,7 +121,7 @@ class GoogleDriveStorageMixin:
             raise OSError("Google Drive course storage is temporarily unavailable.") from exc
         if response.status_code not in expected:
             logger.warning("Google Drive request failed (method=%s status=%s).", method, response.status_code)
-            raise OSError("Google Drive course storage returned HTTP %s." % response.status_code)
+            raise OSError(f"Google Drive course storage returned HTTP {response.status_code}.")
         return response
 
     @staticmethod

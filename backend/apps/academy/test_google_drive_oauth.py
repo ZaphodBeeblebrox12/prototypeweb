@@ -1,13 +1,13 @@
 """Mocked tests for the Google Drive OAuth flow."""
-from urllib.parse import parse_qs, urlsplit
 from unittest.mock import Mock, patch
+from urllib.parse import parse_qs, urlsplit
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from .models import GoogleDriveCredential
 from .google_drive_oauth import STATE_SESSION_KEY
+from .models import GoogleDriveCredential
 
 User = get_user_model()
 REDIRECT_URI = "https://tradethesis-academy-staging.onrender.com/staff/google-drive/oauth/callback/"

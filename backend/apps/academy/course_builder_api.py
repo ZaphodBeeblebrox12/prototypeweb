@@ -13,7 +13,7 @@ from urllib.parse import quote
 import requests
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import ImproperlyConfigured, PermissionDenied, ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
 from django.http import FileResponse, Http404, JsonResponse
@@ -26,6 +26,7 @@ from PIL import Image, UnidentifiedImageError
 from .importing import validate_import_for_publish
 from .models import Course, CourseImport, CourseImportAsset, CourseMediaAsset, GoogleDriveCredential
 from .permissions import is_course_content_admin
+from .storage import course_asset_storage
 
 _MAX_IMAGE_BYTES = 10 * 1024 * 1024
 _ALLOWED_IMAGES = {"image/jpeg": ("JPEG", ".jpg"), "image/png": ("PNG", ".png"), "image/webp": ("WEBP", ".webp")}
@@ -106,9 +107,6 @@ class CourseSourceSyncError(Exception):
 
 def _sync_course_source_to_storage(payload, course_slug):
     """Prefer Google Drive for durable source snapshots; keep GitHub as migration fallback."""
-    from django.core.exceptions import ImproperlyConfigured
-    from .storage import course_asset_storage
-
     service_account_ready = bool(
         getattr(settings, "ACADEMY_GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON", "")
         and getattr(settings, "ACADEMY_GOOGLE_DRIVE_ASSET_FOLDER_ID", "")

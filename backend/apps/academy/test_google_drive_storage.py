@@ -49,15 +49,15 @@ class GoogleDriveCourseStorageTests(SimpleTestCase):
 
     def test_source_snapshot_requires_configured_folder(self):
         storage = GoogleDrivePrivateCourseAssetStorage()
-        with override_settings(ACADEMY_GOOGLE_DRIVE_SOURCE_FOLDER_ID=""):
-            with self.assertRaises(ImproperlyConfigured):
-                storage.save_source_snapshot({"modules": []}, "missing-folder")
+        with override_settings(ACADEMY_GOOGLE_DRIVE_SOURCE_FOLDER_ID=""), self.assertRaises(ImproperlyConfigured):
+            storage.save_source_snapshot({"modules": []}, "missing-folder")
 
     def test_drive_errors_do_not_disclose_credentials(self):
         session = Mock()
         session.request.return_value = Mock(status_code=403)
-        with patch.object(self.storage, "_drive_session", return_value=session):
-            with self.assertRaisesRegex(OSError, "HTTP 403") as raised:
-                self.storage._drive_request("GET", "https://www.googleapis.com/drive/v3/files")
+        with patch.object(self.storage, "_drive_session", return_value=session), self.assertRaisesRegex(
+            OSError, "HTTP 403"
+        ) as raised:
+            self.storage._drive_request("GET", "https://www.googleapis.com/drive/v3/files")
         self.assertNotIn("secret-test", str(raised.exception))
         self.assertNotIn("refresh-test", str(raised.exception))

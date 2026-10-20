@@ -22,7 +22,9 @@ class GoogleDriveCredential(models.Model):
 
     @staticmethod
     def _cipher():
-        import base64, hashlib
+        import base64
+        import hashlib
+
         from cryptography.fernet import Fernet
         key = hashlib.sha256((settings.SECRET_KEY + "|tradethesis-drive-token-v1").encode()).digest()
         return Fernet(base64.urlsafe_b64encode(key))
