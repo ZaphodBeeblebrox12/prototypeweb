@@ -3,6 +3,14 @@
 **Branch:** `my-new-branch`  
 **Current state as of 17 October 2026:** all 30 lesson manuscripts deepened and connected to the first-pass Learning Room; not merged into `main` or integrated into served course pages.
 
+## Current canonical template decision — 20 October 2026
+
+- The approved canonical visual/interaction reference is `course-source/understand-bollinger-bands/preview/first-pass/index.html` (the content-rich first-pass Learning Room).
+- This decision supersedes the older 17–18 October 2026 entries later in this file that selected `preview/template-reference/index.html`. Those entries are retained as historical audit records; do not use them as the current template instruction.
+- The course's authored Markdown and manifest remain the content and structure authorities. Use the first-pass HTML as the rich visual/interaction reference for reusable Django implementation, not as a production page to copy wholesale. Keep its preview-only editing controls out of learner-facing production pages.
+- The active Django Academy runtime is under `backend/` in this same repository and branch. Older external-repository references elsewhere in this checkpoint are historical source/rollback notes.
+- Work remains on `my-new-branch`; no merge to `main` or deployment is authorised by this clarification.
+
 ## Checkpoints saved
 
 1. `course-source/COURSE_TEMPLATE_STANDARD.md` — the shared TradeThesis course template is now the adopted standard for all new courses and the migration target for existing courses.
