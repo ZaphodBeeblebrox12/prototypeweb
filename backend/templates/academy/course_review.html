@@ -21,6 +21,7 @@
     <div><h2>Before publishing</h2><p>Fix missing figures below, check lesson content, then publish this exact staged version.</p></div>
     <div class="tt-review-action-buttons">
       <a class="tt-secondary-button" href="{{ changelist_url }}">Back to imports</a>
+      <a class="tt-secondary-button" href="{% url 'academy:course-import-preview' import_record.pk %}">View website preview ↗</a>
       {% if import_record.status == "review" and not publish_errors %}
         <form method="post" action="{{ publish_url }}" onsubmit="return confirm('Publish this course version to learners?');">
           {% csrf_token %}<button class="tt-publish-button" type="submit">Approve and publish course</button>
