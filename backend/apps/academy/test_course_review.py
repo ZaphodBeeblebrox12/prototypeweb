@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 """Regression tests for read-only course-import review and learner lesson tabs."""
 import uuid
 from types import SimpleNamespace
@@ -73,6 +75,59 @@ class CourseReviewTemplateTests(TestCase):
         self.assertNotContains(response, "data-notebook-response")
         self.assertNotContains(response, "lesson-notebook-submit")
         self.assertNotContains(response, "data-practice-quiz")
+
+    def test_staging_authored_bollinger_source_creates_review_only_preview(self):
+        slug = "understand-bollinger-bands"
+        record = CourseImport.objects.create(
+            course_slug=slug,
+            title="Understand Bollinger Bands",
+            manifest_version="1.0",
+            content_hash="b" * 64,
+            source_manifest=f"course-source/{slug}/course-manifest.json",
+            status=CourseImport.Status.REVIEW,
+            imported_by=self.admin,
+            payload={
+                "course": {"title": "Understand Bollinger Bands", "slug": slug},
+                "assets": [],
+                "modules": [],
+            },
+        )
+        payload = {
+            "course": {"title": "Understand Bollinger Bands", "slug": slug},
+            "assets": [],
+            "modules": [],
+        }
+        with (
+            patch("apps.academy.admin.inspect_manifest", return_value=(payload, {}, [])) as inspect,
+            patch("apps.academy.admin.stage_course_import", return_value=(record, True, [])) as stage,
+        ):
+            response = self.client.post(
+                reverse("admin:academy_courseimport_stage_bollinger")
+            )
+
+        self.assertRedirects(
+            response,
+            reverse("admin:academy_courseimport_review", args=[record.pk]),
+            fetch_redirect_response=False,
+        )
+        inspect.assert_called_once()
+        stage.assert_called_once()
+        self.assertEqual(stage.call_args.kwargs["imported_by"], self.admin)
+        self.assertEqual(record.status, CourseImport.Status.REVIEW)
+
+    def test_staging_authored_bollinger_source_requires_post(self):
+        with patch("apps.academy.admin.inspect_manifest") as inspect:
+            response = self.client.get(
+                reverse("admin:academy_courseimport_stage_bollinger")
+            )
+        self.assertEqual(response.status_code, 405)
+        inspect.assert_not_called()
+
+    def test_course_import_changelist_offers_secure_canonical_staging_action(self):
+        response = self.client.get(reverse("admin:academy_courseimport_changelist"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Stage Understand Bollinger Bands for review")
+        self.assertContains(response, "csrfmiddlewaretoken")
 
     def test_shared_tabs_keep_notebook_form_for_a_real_lesson(self):
         lesson_id = uuid.uuid4()
