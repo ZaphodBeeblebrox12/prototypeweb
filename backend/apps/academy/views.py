@@ -107,6 +107,20 @@ def course_detail(request, course_slug):
         if rows:
             module_rows.append({"module": module, "lessons": rows})
 
+    first_accessible_lesson = next(
+        (
+            item["lesson"]
+            for row in module_rows
+            for item in row["lessons"]
+            if item["accessible"]
+        ),
+        None,
+    )
+    total_study_minutes = sum(
+        item["lesson"].duration_minutes
+        for row in module_rows
+        for item in row["lessons"]
+    )
     offer = CourseOffer.objects.filter(
         course=course, is_active=True, plan__is_active=True,
     ).select_related("plan", "course").first()
@@ -124,6 +138,11 @@ def course_detail(request, course_slug):
         "course": course, "entitlement": entitlement, "offer": offer,
         "module_rows": module_rows, "completed_lessons": completed,
         "total_lessons": total,
+        "total_modules": len(module_rows),
+        "total_study_minutes": total_study_minutes,
+        "total_study_hours": total_study_minutes // 60,
+        "total_study_minutes_remainder": total_study_minutes % 60,
+        "first_accessible_lesson": first_accessible_lesson,
         "progress_percent": round(completed * 100 / total) if total else 0,
     })
 
