@@ -200,10 +200,10 @@ def render_safe_markdown(
         output_format="html",
     )
     # Existing authored image-plus-caption pairs continue to work for old course content.
-    rendered = re.sub(r"<img\\b", '<img tabindex="0" role="button" aria-label="Enlarge course figure"', rendered)
+    rendered = re.sub(r"<img\b", '<img tabindex="0" role="button" aria-label="Enlarge course figure"', rendered)
     rendered = re.sub(
-        r"<p>(<img\\b[^>]*>)</p>\\s*<p>(.*?)</p>",
-        r'<figure class="tt-course-figure">\\1<figcaption>\\2</figcaption></figure>',
+        r"<p>(<img\b[^>]*>)</p>\s*<p>(.*?)</p>",
+        r'<figure class="tt-course-figure">\1<figcaption>\2</figcaption></figure>',
         rendered,
         flags=re.DOTALL,
     )
