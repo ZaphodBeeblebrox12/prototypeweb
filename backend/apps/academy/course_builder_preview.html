@@ -722,6 +722,45 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   const baseHandleActionWithFigures = handleAction;
   handleAction = function(action, el) {
     const lesson = currentLesson();
+    if (lesson && action === 'add-image-group') {
+      const images = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
+      if (images.length < 2) {
+        toast('Upload at least two images before creating an image group.');
+        return;
+      }
+      if (!Array.isArray(lesson.imageGroups)) lesson.imageGroups = [];
+      lesson.imageGroups.push({
+        id: uid('image-group'),
+        title: 'New image group',
+        imageIds: images.slice(0, 2).map(image => image.id),
+        note: ''
+      });
+      persist(false);
+      renderEditor();
+      toast('Image group created. Type its title and choose the images to show together.');
+      return;
+    }
+    if (lesson && action === 'insert-image-group') {
+      const group = (lesson.imageGroups || []).find(item => String(item.id) === String(el.dataset.id));
+      const images = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
+      const selectedImages = (group?.imageIds || []).filter(imageId => images.some(image => image.id === imageId || image.assetUuid === imageId));
+      if (!group || selectedImages.length < 2) {
+        toast('Choose at least two uploaded images for this group.');
+        return;
+      }
+      insertLessonContentAtCaret(lesson, `[[image-group:${group.id}]]`, true);
+      toast('Image group inserted at the saved cursor position.');
+      return;
+    }
+    if (lesson && action === 'remove-image-group') {
+      const id = String(el.dataset.id || '');
+      lesson.content = String(lesson.content || '').split(`[[image-group:${id}]]`).join('').replace(/\n{3,}/g, '\n\n');
+      lesson.imageGroups = (lesson.imageGroups || []).filter(group => String(group.id) !== id);
+      persist(false);
+      renderEditor();
+      toast('Image group and its content reference were removed.');
+      return;
+    }
     if (lesson && action === 'add-teaching-figure') {
       if (!Array.isArray(lesson.teachingFigures)) lesson.teachingFigures = [];
       lesson.teachingFigures.push({
@@ -811,12 +850,32 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       if(card){card[el.dataset.field]=el.value;schedulePersist();}
       return;
     }
+    if(el.matches('[data-image-group][data-field]')){
+      const group=(l.imageGroups||[]).find(item=>String(item.id)===el.dataset.imageGroup);
+      if(group){group[el.dataset.field]=el.value;schedulePersist();}
+      return;
+    }
     if(!el.matches('[data-image-item][data-field]'))return;
     if(!Array.isArray(l.images))l.images=l.image?[l.image]:[];
     const im=l.images.find(x=>x.id===el.dataset.imageItem);
     if(im){im[el.dataset.field]=el.value;l.image=l.images[0]||null;schedulePersist();}
   });
   document.addEventListener('change',event=>{const el=event.target;if(el.id!=='multiImageUpload')return;const files=Array.from(el.files||[]);const l=currentLesson();if(!l||!files.length)return;if(!Array.isArray(l.images))l.images=l.image?[l.image]:[];const valid=files.filter(f=>['image/jpeg','image/png','image/webp'].includes(f.type)&&f.size<=1.5*1024*1024);if(valid.length!==files.length)toast('Skipped files that are not JPG, PNG or WebP under 1.5 MB.');let left=valid.length;if(!left)return;valid.forEach(file=>{const reader=new FileReader();reader.onload=()=>{l.images.push({id:uid('asset'),name:file.name,title:'',alt:'',caption:'',data:String(reader.result)});if(--left===0){l.image=l.images[0]||null;persist(false);renderEditor();toast(`${valid.length} image${valid.length===1?'':'s'} added.`);}};reader.readAsDataURL(file);});});
+  document.addEventListener('change',event=>{
+    const el=event.target;
+    if(!el.matches('[data-image-group-member]'))return;
+    const l=currentLesson();
+    if(!l)return;
+    const group=(l.imageGroups||[]).find(item=>String(item.id)===String(el.dataset.imageGroupMember));
+    if(!group)return;
+    if(!Array.isArray(group.imageIds))group.imageIds=[];
+    const imageId=String(el.dataset.imageId||'');
+    if(el.checked&&!group.imageIds.includes(imageId))group.imageIds.push(imageId);
+    if(!el.checked)group.imageIds=group.imageIds.filter(id=>id!==imageId);
+    const help=el.closest('.image-group-editor')?.querySelector('.help');
+    if(help)help.textContent=group.imageIds.length+' selected. Choose at least two images; each image can have its own title and caption.';
+    persist(false);
+  });
   document.addEventListener('input',event=>{const el=event.target;if(!el.matches('[data-related-course-search]'))return;const query=el.value.trim().toLowerCase();const box=el.parentElement;box.querySelectorAll('.related-course-item').forEach(item=>{item.hidden=query!==''&&!item.textContent.toLowerCase().includes(query);});});
   document.addEventListener('change',event=>{const el=event.target;if(!el.matches('[data-related-course]'))return;const l=currentLesson();if(!l)return;if(!Array.isArray(l.relatedCourseIds))l.relatedCourseIds=[];const id=el.dataset.relatedCourse;if(el.checked&&!l.relatedCourseIds.includes(id))l.relatedCourseIds.push(id);if(!el.checked)l.relatedCourseIds=l.relatedCourseIds.filter(x=>x!==id);persist(false);toast('Related-course reference saved in this preview.');});
   // Shared Academy integration. Local storage remains a convenience cache, not the source of truth.
