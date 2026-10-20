@@ -89,13 +89,13 @@ Implementation is underway on my-new-branch. Recent changes are committed; no pr
 - Added API regression coverage for stable uploaded-image metadata and website-preview URL, and created shared-rendering tests for heading hierarchy, structured figure placement, metadata escaping and legacy figure compatibility.
 - Durable notes remain in this file; the supporting handoff itself is committed at docs/course-template/COURSE_BUILDER_DEEP_PASS_HANDOFF.md.
 
-### Current verification (latest update: 20 October 2026)
+### Current verification (20 October 2026 — completed on revision e74dcb09556ddba8cf64ff5cf8d041b7cb563996)
 
-- The corrected revision is `e74dcb09556ddba8cf64ff5cf8d041b7cb563996`. GitHub Actions runs: [Academy backend CI](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39462398438) and [Verify Django Academy backend](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39462398417).
-- Python 3.12 `Verify Django Academy backend` has passed its full backend regression-test step and uploaded test coverage. Python 3.11's backend regression-test step is still in progress.
-- In the prior code revision, the new rendering tests exposed three test-fixture issues: literal backslash-n sequences instead of paragraph separators and an over-broad XSS assertion that matched the text inside a correctly escaped alt attribute. These tests were corrected. The corrected revision includes native comparison-card renderer and API round-trip coverage.
-- On both Python versions the Academy backend CI run had passed dependency installation, Render build-script syntax, migration-state checks, Ruff, Black, mypy, collectstatic and focused image-slot regressions; the full test-suite steps remain in progress at the time of this note.
-- Do not deploy or call the pass complete until the full suite and Python 3.11 backend regressions finish, final source readback is clean, and staging is explicitly checked.
+- [Academy backend CI](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39462398438): **success on Python 3.11 and 3.12**. Each full-suite job reports `863 passed, 36 subtests passed`; focused image-slot regressions report `19 passed, 4 subtests passed`.
+- [Verify Django Academy backend](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39462398417): **success on Python 3.11 and 3.12**. Each backend regression suite reports `863 passed, 302 warnings, 36 subtests passed`; coverage artifacts uploaded.
+- Both workflows passed Render build-script syntax checks, migration-state checks, Ruff, Black, mypy and static collection before the test steps.
+- An earlier revision failed three new rendering-test assertions because the fixtures used literal backslash-n strings rather than paragraph breaks, and one XSS assertion was broader than the security condition it needed to check. The fixture/test assertions were corrected; the later revision passed both test workflows.
+- The current branch is not deployed to staging yet. After verifying the latest tree and test files, the next milestone is a controlled Academy staging deployment and authenticated desktop/mobile inspection of the live preview routes. Production is out of scope; do not merge to main or publish the draft.
 
 ### Remaining
 
