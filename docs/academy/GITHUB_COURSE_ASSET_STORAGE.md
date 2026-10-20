@@ -1,4 +1,7 @@
-# Course Builder GitHub storage
+# Legacy Course Builder GitHub storage
+
+> **Current direction:** Google Drive is the preferred durable store for course assets and source snapshots.
+> This document describes the legacy GitHub-backed path retained for migration/read compatibility. See [Google Drive Course Storage](GOOGLE_DRIVE_COURSE_STORAGE.md) for current configuration and cutover rules.
 
 The Course Builder uses the existing `ZaphodBeeblebrox12/prototypeweb` repository on `my-new-branch`. No separate image repository is required.
 

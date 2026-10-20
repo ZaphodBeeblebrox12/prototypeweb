@@ -15,6 +15,7 @@ from apps.accounts.telegram_views import TelegramCallbackView
 from apps.admin_dashboard import staff_admin_desk
 from apps.academy.course_builder_preview import course_builder_preview
 from apps.academy.course_builder_api import course_builder_api, course_builder_asset
+from apps.academy.google_drive_oauth import google_drive_oauth_start, google_drive_oauth_callback
 from apps.academy.catalogue_api import public_course_catalogue
 from apps.admin_desk_views import (
     admin_desk_accounts, admin_desk_account_detail, admin_desk_account_action,
@@ -27,6 +28,8 @@ urlpatterns = [
     # Render readiness probe: confirm Django and its primary database respond.
     path("health/", health_check, name="health_check"),
     path("staff/course-builder/api/", course_builder_api, name="staff_course_builder_api"),
+    path("staff/google-drive/connect/", google_drive_oauth_start, name="academy_google_drive_oauth_start"),
+    path("staff/google-drive/oauth/callback/", google_drive_oauth_callback, name="academy_google_drive_oauth_callback"),
     path("staff/course-builder/assets/<uuid:import_id>/<uuid:asset_id>/", course_builder_asset, name="staff_course_builder_asset"),
     path("staff/course-builder/", course_builder_preview, name="staff_course_builder_preview"),
     path("api/academy/catalogue/", public_course_catalogue, name="academy_public_catalogue"),

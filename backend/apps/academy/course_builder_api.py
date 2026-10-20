@@ -24,7 +24,7 @@ from django.views.decorators.http import require_http_methods
 from PIL import Image, UnidentifiedImageError
 
 from .importing import validate_import_for_publish
-from .models import Course, CourseImport, CourseImportAsset, CourseMediaAsset
+from .models import Course, CourseImport, CourseImportAsset, CourseMediaAsset, GoogleDriveCredential
 from .permissions import is_course_content_admin
 
 _MAX_IMAGE_BYTES = 10 * 1024 * 1024
@@ -72,13 +72,76 @@ def _sync_course_source_to_github(payload, course_slug):
             "branch": branch,
         }
         if current.status_code == 200:
-            body["sha"] = current.json()["sha"]
+            try:
+                current_payload = current.json()
+            except (ValueError, AttributeError) as exc:
+                raise ValidationError("GitHub returned an unreadable course source response.") from exc
+            current_sha = current_payload.get("sha") if isinstance(current_payload, dict) else None
+            if not current_sha:
+                raise ValidationError("GitHub returned an incomplete course source response.")
+            body["sha"] = current_sha
         saved = requests.put(url, headers=headers, json=body, timeout=20)
         if saved.status_code not in {200, 201}:
             raise ValidationError("GitHub could not save the course source. The draft was not confirmed as synced.")
+        try:
+            saved_payload = saved.json()
+        except (ValueError, AttributeError) as exc:
+            raise ValidationError("GitHub returned an unreadable save confirmation.") from exc
+        if (
+            not isinstance(saved_payload, dict)
+            or not isinstance(saved_payload.get("content"), dict)
+            or not saved_payload["content"].get("sha")
+            or not isinstance(saved_payload.get("commit"), dict)
+            or not saved_payload["commit"].get("sha")
+        ):
+            raise ValidationError("GitHub did not confirm the saved course source.")
     except requests.RequestException as exc:
         raise ValidationError("GitHub could not be reached to save the course source.") from exc
     return True
+
+
+class CourseSourceSyncError(Exception):
+    """Safe, retryable failure from the external course-source backup."""
+
+
+def _sync_course_source_to_storage(payload, course_slug):
+    """Prefer Google Drive for durable source snapshots; keep GitHub as migration fallback."""
+    from django.core.exceptions import ImproperlyConfigured
+    from .storage import course_asset_storage
+
+    service_account_ready = bool(
+        getattr(settings, "ACADEMY_GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON", "")
+        and getattr(settings, "ACADEMY_GOOGLE_DRIVE_ASSET_FOLDER_ID", "")
+        and getattr(settings, "ACADEMY_GOOGLE_DRIVE_SOURCE_FOLDER_ID", "")
+    )
+    oauth_ready = bool(
+        getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_ID", "")
+        and getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET", "")
+        and ((getattr(settings, "ACADEMY_GOOGLE_DRIVE_REFRESH_TOKEN", "")
+              and getattr(settings, "ACADEMY_GOOGLE_DRIVE_ASSET_FOLDER_ID", "")
+              and getattr(settings, "ACADEMY_GOOGLE_DRIVE_SOURCE_FOLDER_ID", ""))
+             or GoogleDriveCredential.objects.filter(
+                 pk=1, encrypted_refresh_token__gt="", asset_folder_id__gt="", source_folder_id__gt=""
+             ).exists())
+    )
+    if service_account_ready or oauth_ready:
+        try:
+            course_asset_storage.save_source_snapshot(payload, course_slug)
+            return "google_drive"
+        except (ImproperlyConfigured, OSError, ValueError, TypeError) as exc:
+            raise CourseSourceSyncError(
+                "Google Drive could not confirm the course source snapshot. "
+                "The latest draft remains saved in the Academy as a draft; please retry."
+            ) from exc
+    try:
+        _sync_course_source_to_github(payload, course_slug)
+        return "github"
+    except ValidationError as exc:
+        messages = getattr(exc, "messages", None)
+        message = " ".join(str(value) for value in messages) if messages else "GitHub source sync failed."
+        raise CourseSourceSyncError(
+            f"{message} The latest draft remains saved in the Academy as a draft; please retry."
+        ) from exc
 
 
 def _asset_uuid(course_slug, asset_id):
@@ -395,6 +458,8 @@ def course_builder_api(request):
                         "review_url": review_url,
                         "publish_errors": [],
                         "github_source_synced": None,
+                        "source_snapshot_backend": None,
+                        "source_snapshot_synced": False,
                         "message": "This course version is already awaiting review. No duplicate submission was created.",
                     })
             conflicting = CourseImport.objects.filter(
@@ -452,15 +517,16 @@ def course_builder_api(request):
                     asset.alt_text = spec.get("alt_text", "")
                     asset.source_error = ""
                     asset.save(update_fields=["stable_asset_id", "alt_text", "source_error", "updated_at"])
-            for removed_asset in existing_assets.values():
-                if removed_asset.file:
-                    storage = removed_asset.file.storage
-                    name = removed_asset.file.name
-                    transaction.on_commit(
-                        lambda storage=storage, name=name: storage.delete(name),
-                        robust=True,
-                    )
-                removed_asset.delete()
+            if not sync_source_requested:
+                for removed_asset in existing_assets.values():
+                    if removed_asset.file:
+                        storage = removed_asset.file.storage
+                        name = removed_asset.file.name
+                        transaction.on_commit(
+                            lambda storage=storage, name=name: storage.delete(name),
+                            robust=True,
+                        )
+                    removed_asset.delete()
 
             _store_images(record, image_sources)
             errors = validate_import_for_publish(record)
@@ -469,17 +535,49 @@ def course_builder_api(request):
                     "detail": "The draft needs attention before it can be submitted.",
                     "publish_errors": errors,
                 }, status=400)
+            # Keep review transitions and stale-asset deletion until after a
+            # requested remote source snapshot has been confirmed.
+
+        source_snapshot_backend = (
+            _sync_course_source_to_storage(payload, slug)
+            if sync_source_requested else None
+        )
+        github_source_synced = (
+            source_snapshot_backend == "github"
+            if source_snapshot_backend is not None else None
+        )
+
+        # Re-lock the record and make sure the content did not change while
+        # the remote request was in flight. Do not mark a stale version for review.
+        with transaction.atomic():
+            current_record = CourseImport.objects.select_for_update().get(pk=record.pk)
+            if current_record.content_hash != digest:
+                return JsonResponse({
+                    "detail": "The draft changed while its source snapshot was being saved. The latest draft remains saved; retry the save or submission.",
+                    "retryable": True,
+                    "draft_preserved": True,
+                }, status=409)
+            desired_asset_keys = {
+                str(item.get("asset_key"))
+                for item in (current_record.payload.get("assets") or [])
+                if isinstance(item, dict) and item.get("asset_key")
+            }
+            for stale_asset in current_record.assets.exclude(asset_key__in=desired_asset_keys):
+                if stale_asset.file:
+                    storage = stale_asset.file.storage
+                    name = stale_asset.file.name
+                    transaction.on_commit(
+                        lambda storage=storage, name=name: storage.delete(name),
+                        robust=True,
+                    )
+                stale_asset.delete()
             if mode == "submit":
                 CourseImport.objects.filter(
                     course_slug=slug, status=CourseImport.Status.REVIEW,
-                ).exclude(pk=record.pk).update(status=CourseImport.Status.SUPERSEDED)
-                record.status = CourseImport.Status.REVIEW
-                record.save(update_fields=["status", "updated_at"])
-
-            github_source_synced = (
-                _sync_course_source_to_github(payload, slug)
-                if sync_source_requested else None
-            )
+                ).exclude(pk=current_record.pk).update(status=CourseImport.Status.SUPERSEDED)
+                current_record.status = CourseImport.Status.REVIEW
+                current_record.save(update_fields=["status", "updated_at"])
+            record = current_record
 
         review_url = reverse("admin:academy_courseimport_review", args=[record.pk])
         if mode == "submit":
@@ -488,10 +586,14 @@ def course_builder_api(request):
                 "review_url": review_url, "publish_errors": [],
                 "draft": _draft_response(record, request),
                 "github_source_synced": github_source_synced,
+                "source_snapshot_backend": source_snapshot_backend,
+                "source_snapshot_synced": source_snapshot_backend is not None,
                 "message": (
-                    "Draft submitted and source saved to GitHub. Review it before publishing to the course catalogue."
-                    if github_source_synced else
-                    "Draft submitted to the Academy, but GitHub source sync is not configured. Add ACADEMY_GITHUB_ASSET_TOKEN to enable repository saves."
+                    "Draft submitted and source snapshot saved to Google Drive. Review it before publishing to the course catalogue."
+                    if source_snapshot_backend == "google_drive" else
+                    "Draft submitted and source snapshot synced to GitHub. Review it before publishing to the course catalogue."
+                    if source_snapshot_backend == "github" else
+                    "Draft submitted to the Academy. No external source snapshot was requested."
                 ),
             })
         return JsonResponse({
@@ -499,14 +601,29 @@ def course_builder_api(request):
             "updated_at": record.updated_at.isoformat(),
             "draft": _draft_response(record, request),
             "github_source_synced": github_source_synced,
+            "source_snapshot_backend": source_snapshot_backend,
+            "source_snapshot_synced": source_snapshot_backend is not None,
             "message": (
-                "Draft saved to the Academy and source synced to the existing GitHub repository."
-                if github_source_synced is True else
-                "Draft saved to the Academy, but GitHub source sync is not configured. Add ACADEMY_GITHUB_ASSET_TOKEN to enable repository saves."
-                if github_source_synced is False else
-                "Draft autosaved to the Academy. Use Save draft to create a versioned GitHub source snapshot."
+                "Draft saved to the Academy and source snapshot saved to Google Drive."
+                if source_snapshot_backend == "google_drive" else
+                "Draft saved to the Academy and source snapshot synced to GitHub."
+                if source_snapshot_backend == "github" else
+                "Draft autosaved to the Academy. Use Save draft to create a source snapshot."
             ),
         })
+    except CourseSourceSyncError as exc:
+        return JsonResponse({
+            "detail": str(exc),
+            "retryable": True,
+            "draft_preserved": True,
+            "record_id": str(record.pk),
+        }, status=503)
+    except OSError:
+        return JsonResponse({
+            "detail": "Course storage is temporarily unavailable. Any previously saved draft remains unchanged; please retry.",
+            "retryable": True,
+            "draft_preserved": bool(draft is not None),
+        }, status=503)
     except (json.JSONDecodeError, UnicodeDecodeError):
         return JsonResponse({"detail": "The request body must be valid JSON."}, status=400)
     except (ValidationError, ValueError, TypeError) as exc:

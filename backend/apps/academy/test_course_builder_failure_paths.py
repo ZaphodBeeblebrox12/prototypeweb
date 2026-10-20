@@ -82,12 +82,12 @@ class CourseBuilderGitHubFailureTests(TestCase):
             content_type="application/json",
         )
 
-    def assert_prior_draft_preserved(self, record):
+    def assert_draft_persisted(self, record):
         record.refresh_from_db()
         self.assertEqual(record.status, CourseImport.Status.DRAFT)
         self.assertEqual(
             record.payload["builder_state"]["summary"],
-            "Original saved summary",
+            "Changed summary",
         )
 
     def test_repeated_identical_submission_returns_the_existing_review_record(self):
@@ -131,10 +131,10 @@ class CourseBuilderGitHubFailureTests(TestCase):
                 ), patch("apps.academy.course_builder_api.requests.put") as github_put:
                     response = self.submit_changed_draft(slug)
 
-                self.assertEqual(response.status_code, 400, response.content)
+                self.assertEqual(response.status_code, 503, response.content)
                 self.assertIn("GitHub", str(response.json().get("detail", "")))
                 github_put.assert_not_called()
-                self.assert_prior_draft_preserved(record)
+                self.assert_draft_persisted(record)
 
     def test_failed_submit_does_not_delete_an_existing_draft_image(self):
         slug = "github-failure-preserves-image"
@@ -153,11 +153,11 @@ class CourseBuilderGitHubFailureTests(TestCase):
         ), patch("apps.academy.course_builder_api.requests.put"):
             response = self.submit_changed_draft(slug)
 
-        self.assertEqual(response.status_code, 400, response.content)
+        self.assertEqual(response.status_code, 503, response.content)
         storage_delete.assert_not_called()
         asset.refresh_from_db()
         self.assertEqual(asset.file.name, "legacy-image.png")
-        self.assert_prior_draft_preserved(record)
+        self.assert_draft_persisted(record)
 
     def test_github_timeout_preserves_the_last_saved_draft(self):
         slug = "github-timeout-course"
@@ -168,10 +168,10 @@ class CourseBuilderGitHubFailureTests(TestCase):
         ), patch("apps.academy.course_builder_api.requests.put") as github_put:
             response = self.submit_changed_draft(slug)
 
-        self.assertEqual(response.status_code, 400, response.content)
+        self.assertEqual(response.status_code, 503, response.content)
         self.assertIn("could not be reached", str(response.json().get("detail", "")).lower())
         github_put.assert_not_called()
-        self.assert_prior_draft_preserved(record)
+        self.assert_draft_persisted(record)
 
     def test_github_write_failure_preserves_the_last_saved_draft(self):
         slug = "github-write-failure-course"
@@ -185,9 +185,9 @@ class CourseBuilderGitHubFailureTests(TestCase):
         ):
             response = self.submit_changed_draft(slug)
 
-        self.assertEqual(response.status_code, 400, response.content)
+        self.assertEqual(response.status_code, 503, response.content)
         self.assertIn("could not save", str(response.json().get("detail", "")).lower())
-        self.assert_prior_draft_preserved(record)
+        self.assert_draft_persisted(record)
 
     @override_settings(ACADEMY_GITHUB_ASSET_TOKEN="")
     def test_missing_token_blocks_submission_and_preserves_the_saved_draft(self):
@@ -202,6 +202,6 @@ class CourseBuilderGitHubFailureTests(TestCase):
             content_type="application/json",
         )
 
-        self.assertEqual(response.status_code, 400, response.content)
+        self.assertEqual(response.status_code, 503, response.content)
         self.assertIn("not configured", str(response.json().get("detail", "")).lower())
-        self.assert_prior_draft_preserved(record)
+        self.assert_draft_persisted(record)

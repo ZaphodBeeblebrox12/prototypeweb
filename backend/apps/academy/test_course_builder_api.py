@@ -92,6 +92,9 @@ class CourseBuilderApiTests(TestCase):
     def test_explicit_save_syncs_source_snapshot_to_existing_repo(self, github_get, github_put):
         github_get.return_value = Mock(status_code=404)
         github_put.return_value = Mock(status_code=201)
+        github_put.return_value.json.return_value = {
+            "content": {"sha": "blob-sha"}, "commit": {"sha": "commit-sha"}
+        }
         payload = self.draft_payload("github-source-course")
         payload["sync_source"] = True
 

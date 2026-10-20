@@ -354,7 +354,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       method, credentials:'same-origin', headers,
       ...(body ? {body:JSON.stringify(body)} : {})
     });
-    const payload = await response.json().catch(()=>({detail:'The Academy returned an unreadable response.'}));
+    const payload = await response.json().catch(()=>({detail:`The Academy returned a non-JSON response (HTTP ${response.status}). Your browser draft cache has not been cleared.`}));
     if (!response.ok) {
       const detail = Array.isArray(payload.detail) ? payload.detail.join(' ') : (payload.detail || 'The Academy request failed.');
       throw new Error(detail);
@@ -414,7 +414,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       } else {
         const indicator = $('#saveIndicator');
         if (indicator) {
-          const sourceStatus = result.github_source_synced === true ? ' · GitHub source synced' : '';
+          const sourceStatus = result.source_snapshot_backend === 'google_drive' ? ' · Google Drive backup saved' : (result.source_snapshot_backend === 'github' ? ' · GitHub source synced' : '');
           indicator.innerHTML = '<span class="dot"></span><span>Saved to Academy · ' + esc(nowText()) + sourceStatus + '</span>';
         }
         if (notify) toast(result.message || 'Draft saved to the Academy.');

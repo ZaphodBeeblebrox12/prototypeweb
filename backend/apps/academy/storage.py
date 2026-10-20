@@ -22,6 +22,8 @@ from django.core.files.utils import validate_file_name
 from django.utils.deconstruct import deconstructible
 from django.utils.encoding import force_str
 
+from .google_drive_storage import GoogleDriveStorageMixin
+
 logger = logging.getLogger(__name__)
 
 
@@ -153,4 +155,11 @@ class PrivateCourseAssetStorage(FileSystemStorage):
         super().delete(name)
 
 
-course_asset_storage = PrivateCourseAssetStorage()
+@deconstructible
+class GoogleDrivePrivateCourseAssetStorage(GoogleDriveStorageMixin, PrivateCourseAssetStorage):
+    """Google Drive primary storage with legacy GitHub/local reads."""
+
+    pass
+
+
+course_asset_storage = GoogleDrivePrivateCourseAssetStorage()

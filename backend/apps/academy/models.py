@@ -12,6 +12,34 @@ from django.utils.translation import gettext_lazy as _
 from .storage import course_asset_storage
 
 
+class GoogleDriveCredential(models.Model):
+    """Single staging Drive connection; OAuth refresh token is encrypted at rest."""
+    id = models.PositiveSmallIntegerField(primary_key=True, default=1, editable=False)
+    encrypted_refresh_token = models.TextField(blank=True)
+    asset_folder_id = models.CharField(max_length=255, blank=True)
+    source_folder_id = models.CharField(max_length=255, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @staticmethod
+    def _cipher():
+        import base64, hashlib
+        from cryptography.fernet import Fernet
+        key = hashlib.sha256((settings.SECRET_KEY + "|tradethesis-drive-token-v1").encode()).digest()
+        return Fernet(base64.urlsafe_b64encode(key))
+
+    def set_refresh_token(self, token):
+        self.encrypted_refresh_token = self._cipher().encrypt(token.encode()).decode()
+
+    def get_refresh_token(self):
+        if not self.encrypted_refresh_token:
+            return ""
+        return self._cipher().decrypt(self.encrypted_refresh_token.encode()).decode()
+
+    class Meta:
+        verbose_name = "Google Drive credential"
+        verbose_name_plural = "Google Drive credentials"
+
+
 class Course(models.Model):
     class Status(models.TextChoices):
         DRAFT = "draft", _("Draft")
