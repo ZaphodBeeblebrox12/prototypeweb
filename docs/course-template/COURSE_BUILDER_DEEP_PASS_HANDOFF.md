@@ -89,11 +89,13 @@ Implementation is underway on my-new-branch. Recent changes are committed; no pr
 - Added API regression coverage for stable uploaded-image metadata and website-preview URL, and created shared-rendering tests for heading hierarchy, structured figure placement, metadata escaping and legacy figure compatibility.
 - Durable notes remain in this file; the supporting handoff itself is committed at docs/course-template/COURSE_BUILDER_DEEP_PASS_HANDOFF.md.
 
-### Current verification
+### Current verification (latest update: 20 October 2026)
 
-- Latest GitHub Actions runs on the current code revision: Academy backend CI and Verify Django Academy backend.
-- Both Python 3.11 and 3.12 jobs have passed dependency installation, build-script syntax, migration-state checks, lint, formatting checks, type checks and focused image-slot regressions. The full suite (Academy backend CI) and backend regression tests (Verify Django Academy backend) are still running at the time of this note.
-- Do not call this pass complete until the full tests finish, comparison-card rendering tests are added and pass, final file reads confirm the latest source, and staging is exercised.
+- The corrected revision is `e74dcb09556ddba8cf64ff5cf8d041b7cb563996`. GitHub Actions runs: [Academy backend CI](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39462398438) and [Verify Django Academy backend](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39462398417).
+- Python 3.12 `Verify Django Academy backend` has passed its full backend regression-test step and uploaded test coverage. Python 3.11's backend regression-test step is still in progress.
+- In the prior code revision, the new rendering tests exposed three test-fixture issues: literal backslash-n sequences instead of paragraph separators and an over-broad XSS assertion that matched the text inside a correctly escaped alt attribute. These tests were corrected. The corrected revision includes native comparison-card renderer and API round-trip coverage.
+- On both Python versions the Academy backend CI run had passed dependency installation, Render build-script syntax, migration-state checks, Ruff, Black, mypy, collectstatic and focused image-slot regressions; the full test-suite steps remain in progress at the time of this note.
+- Do not deploy or call the pass complete until the full suite and Python 3.11 backend regressions finish, final source readback is clean, and staging is explicitly checked.
 
 ### Remaining
 
