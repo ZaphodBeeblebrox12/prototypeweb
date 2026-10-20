@@ -131,21 +131,21 @@
             <div class="tt-overview-lesson-main">
               <span class="tt-overview-lesson-number">{{ row.module.position }}.{{ item.lesson.position }}</span>
               <div>
-                {% if item.accessible %}<a class="tt-overview-lesson-title" href="{% url 'academy:lesson' course.slug item.lesson.id %}">{{ item.lesson.title }}</a>{% else %}<span class="tt-overview-lesson-title">{{ item.lesson.title }}</span>{% endif %}
+                {% if item.accessible %}<a class="tt-overview-lesson-title" href="{% url 'academy:lesson' course.slug item.lesson.id %}">{{ item.lesson.title }}</a>{% elif is_course_content_admin %}<a class="tt-overview-lesson-title" href="{% url 'academy:admin-lesson-preview' course.slug item.lesson.id %}">{{ item.lesson.title }}</a>{% else %}<span class="tt-overview-lesson-title">{{ item.lesson.title }}</span>{% endif %}
                 {% if item.lesson.summary %}<span class="tt-overview-lesson-summary">{{ item.lesson.summary }}</span>{% endif %}
               </div>
             </div>
             <div class="tt-overview-lesson-state">
               {% if item.progress and item.progress.status == "completed" %}<span class="tt-overview-chip">Complete</span>{% endif %}
               {% if item.lesson.is_preview %}<span class="tt-overview-chip tt-overview-chip--preview">Preview</span>{% elif item.release_at and not item.accessible %}<span>Available {{ item.release_at|date:"M j, Y" }}</span>{% elif not item.accessible %}<span class="tt-overview-chip tt-overview-chip--locked">Locked</span>{% elif item.progress and item.progress.status != "completed" %}<span>In progress</span>{% endif %}
-              {% if item.accessible %}<a href="{% url 'academy:lesson' course.slug item.lesson.id %}" aria-label="Open {{ item.lesson.title }}">↗</a>{% endif %}
+              {% if item.accessible %}<a href="{% url 'academy:lesson' course.slug item.lesson.id %}" aria-label="Open {{ item.lesson.title }}">↗</a>{% elif is_course_content_admin %}<a class="tt-overview-admin-preview-link" href="{% url 'academy:admin-lesson-preview' course.slug item.lesson.id %}" aria-label="Preview locked lesson {{ item.lesson.title }}">Admin preview ↗</a>{% endif %}
             </div>
           </li>
           {% endfor %}
         </ul>
         <div class="tt-overview-module-footer">
           {% with first_item=row.lessons.0 %}
-            {% if first_item.accessible %}<a href="{% url 'academy:lesson' course.slug first_item.lesson.id %}">Start this module ↗</a>{% else %}Lessons open according to your course access and release schedule.{% endif %}
+            {% if first_item.accessible %}<a href="{% url 'academy:lesson' course.slug first_item.lesson.id %}">Start this module ↗</a>{% elif is_course_content_admin %}<a href="{% url 'academy:admin-lesson-preview' course.slug first_item.lesson.id %}">Preview module as admin ↗</a>{% else %}Lessons open according to your course access and release schedule.{% endif %}
           {% endwith %}
         </div>
       </article>
