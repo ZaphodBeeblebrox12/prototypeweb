@@ -78,6 +78,13 @@ class PrivateCourseAssetStorageTests(SimpleTestCase):
             with self.assertRaisesRegex(OSError, "Durable course image storage is not configured"):
                 storage._save("academy/course-assets/figure.png", ContentFile(b"image bytes"))
 
+    def test_remote_exists_does_not_count_local_fallback_as_durable(self):
+        with patch.object(self.storage, "_metadata", return_value=None), patch.object(
+            FileSystemStorage, "exists", autospec=True, return_value=True
+        ):
+            self.assertTrue(self.storage.exists("legacy-local-image.png"))
+            self.assertFalse(self.storage.remote_exists("legacy-local-image.png"))
+
     def test_request_timeout_uses_safe_error_without_credentials(self):
         with (
             patch(
