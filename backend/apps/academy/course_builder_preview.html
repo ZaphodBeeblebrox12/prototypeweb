@@ -43,6 +43,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .brand-title { font-family:var(--site-font-heading); font-size:calc(22px * var(--site-heading-scale)); line-height:1.05; }
 .brand-subtitle { font-size:11px; letter-spacing:.14em; text-transform:uppercase; opacity:.75; margin-top:5px; }
 .top-actions { display:flex; align-items:center; gap:9px; flex-wrap:wrap; justify-content:flex-end; }
+.top-actions a { text-decoration:none; white-space:nowrap; }
 .eyebrow { font-size:10px; letter-spacing:.15em; text-transform:uppercase; font-weight:800; color:var(--muted); }
 .topbar .eyebrow { color:#DBE3D8; }
 .btn { border:1px solid var(--line); background:var(--panel); color:var(--ink); padding:10px 14px; border-radius:calc(9px * var(--site-radius-scale)); font-size:12px; font-weight:750; transition:transform .12s ease, background .12s ease; }
@@ -396,6 +397,8 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   <header class="topbar">
     <div class="brand"><div class="brand-mark" aria-hidden="true">T</div><div><div class="brand-title">TradeThesis</div><div class="brand-subtitle">Course Builder · Admin workspace</div></div></div>
     <div class="top-actions">
+      <a class="btn dark-outline" href="/learn/" data-exit-link>← Back to Academy</a>
+      <a class="btn dark-outline" href="/staff/admin-desk/" data-exit-link>Admin dashboard ↗</a>
       <span class="eyebrow">Authoring preview</span>
       <button class="btn dark-outline" id="previewButton" type="button">Preview course ↗</button>
       <button class="btn dark-outline" id="saveButton" type="button">Save draft</button>
@@ -441,8 +444,10 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   let lessonContentCaret = null;
   let pendingLessonCaret = null;
   function getSeed() { const c=makeCourse('New micro-course draft'); c.summary='Add a concise course promise here.'; c.description='Describe the learner, what the course covers and what they can practise after completing it.'; c.modules[0].title='Module 01 — Foundations'; c.modules[0].lessons[0].title='Lesson 1.1 — First principles'; return {courses:[c],selectedCourseId:c.id,selectedModuleId:c.modules[0].id,selectedLessonId:c.modules[0].lessons[0].id,view:'overview',tab:'overview'}; }
-  function load() { try { const raw=localStorage.getItem(STORAGE_KEY); if(raw){const v=JSON.parse(raw); if(v && Array.isArray(v.courses) && v.courses.length) return v;} } catch(e){} return getSeed(); }
+  function load() { try { const raw=localStorage.getItem(STORAGE_KEY); if(raw){const v=JSON.parse(raw); if(v && Array.isArray(v.courses)) return v;} } catch(e){} return getSeed(); }
   let state=load(); let toastTimer=null; let saveTimer=null; let previewMode=false;
+  let hasUnsavedChanges=false; let editRevision=0; let suppressDirtyTracking=true;
+  function markDirty(){hasUnsavedChanges=true;editRevision++;}
   const currentCourse=()=>state.courses.find(c=>c.id===state.selectedCourseId)||state.courses[0];
   const currentModule=()=>{const c=currentCourse(); return c.modules.find(m=>m.id===state.selectedModuleId)||c.modules[0];};
   const currentLesson=()=>{const m=currentModule(); return m.lessons.find(l=>l.id===state.selectedLessonId)||m.lessons[0];};
@@ -450,7 +455,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   const activeStatus=c=>c.status==='published'?'Published':c.status==='draft-update'?'Draft changes':'Draft';
   function toast(message){const el=$('#toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2800);}
   function persist(showToast=false){try{state.savedAt=nowText();localStorage.setItem(STORAGE_KEY,JSON.stringify(state));state.storageAvailable=true;if(showToast)toast('Draft saved in this browser. Come back to this preview to continue.');renderSidebar();renderHeaderState();}catch(e){state.storageAvailable=false;toast('Browser storage is full. Reduce image size and try saving again.');}}
-  function schedulePersist(){clearTimeout(saveTimer);$('#saveIndicator')?.classList.add('saving');if(state.view==='preview')return;saveTimer=setTimeout(()=>{persist(false);const el=$('#saveIndicator');if(el)el.classList.remove('saving');},500);}
+  function schedulePersist(){markDirty();clearTimeout(saveTimer);$('#saveIndicator')?.classList.add('saving');if(state.view==='preview')return;saveTimer=setTimeout(()=>{persist(false);const el=$('#saveIndicator');if(el)el.classList.remove('saving');},500);}
   function renderHeaderState(){const c=currentCourse();const save=$('#saveButton');if(save)save.textContent=state.savedAt?'Save draft':'Save draft';const pub=$('#publishButton');if(pub)pub.textContent='Submit for review';}
   function renderSidebar(){const list=$('#courseList');if(!list)return;const query=($('#courseSearch')?.value||'').trim().toLowerCase();const courses=state.courses.filter(c=>c.title.toLowerCase().includes(query));$('#courseCount').textContent=`${state.courses.length} ${state.courses.length===1?'course':'courses'}`;list.innerHTML=courses.map(c=>`<button type="button" class="course-item ${c.id===state.selectedCourseId?'active':''}" data-action="select-course" data-id="${esc(c.id)}"><span class="course-item-title"><span>${esc(c.title||'Untitled course')}</span><span class="mini-status ${c.status==='published'?'live':''}"></span></span><span class="course-item-meta"><span class="pill ${c.status==='published'?'published':'status'}">${esc(activeStatus(c))}</span><span>${allLessons(c).length} lessons</span></span></button>`).join('')||'<div class="empty-state"><p>No courses match that search.</p></div>';}
   function courseFields(c){return `<div class="section-intro"><h3>Course details</h3><p>Write the public-facing promise first. Save a shared draft at any stage, then submit it for review. Approved and published courses appear in the website Courses tab.</p></div><div class="form-grid"><div class="field full"><label for="courseTitle">Course title</label><input class="input" id="courseTitle" data-entity="course" data-field="title" value="${esc(c.title)}" maxlength="200" placeholder="e.g. Understand Market Structure"></div><div class="field"><label for="courseSlug">Course URL slug</label><input class="input" id="courseSlug" data-entity="course" data-field="slug" value="${esc(c.slug)}" maxlength="150"><span class="help">Keep stable after a course is published.</span></div><div class="field"><label for="courseCategory">Topic / category</label><input class="input" id="courseCategory" data-entity="course" data-field="category" value="${esc(c.category)}" placeholder="Chart reading"></div><div class="field full"><label for="courseSummary">Short summary</label><textarea class="textarea" id="courseSummary" data-entity="course" data-field="summary" maxlength="360" placeholder="One or two sentences for the course card.">${esc(c.summary)}</textarea><span class="help">Used in the catalogue card. Aim for a concise, clear promise.</span></div><div class="field full"><label for="courseDescription">Course description</label><textarea class="textarea" id="courseDescription" data-entity="course" data-field="description" placeholder="Who is this for, what is included, and how will they use it?">${esc(c.description)}</textarea></div><div class="field"><label for="courseLevel">Level</label><select class="select" id="courseLevel" data-entity="course" data-field="level">${['Beginner','Foundational','Intermediate','Advanced','Mixed experience'].map(v=>`<option ${v===c.level?'selected':''}>${v}</option>`).join('')}</select></div><div class="field"><label for="courseDuration">Expected study time</label><input class="input" id="courseDuration" data-entity="course" data-field="duration" value="${esc(c.duration)}" placeholder="e.g. 4 hours"></div><div class="field full"><label>Learning outcomes</label><div id="outcomesList">${c.outcomes.map((v,i)=>`<div class="option-row"><span class="pill">${String(i+1).padStart(2,'0')}</span><input class="input" data-entity="outcome" data-index="${i}" value="${esc(v)}" aria-label="Learning outcome ${i+1}"><button class="icon-btn" type="button" data-action="remove-outcome" data-index="${i}" aria-label="Remove outcome">×</button></div>`).join('')}</div><button class="btn small" type="button" data-action="add-outcome">＋ Add outcome</button></div><div class="field"><label for="coursePrice">Display price (optional)</label><input class="input" id="coursePrice" data-entity="course" data-field="price" value="${esc(c.price)}" placeholder="e.g. ₹999"><span class="help">Display text only. It does not create or activate checkout.</span></div><div class="field"><label for="coursePriceNote">Price note</label><input class="input" id="coursePriceNote" data-entity="course" data-field="priceNote" value="${esc(c.priceNote)}"></div></div><div class="helper-note"><strong>Course state:</strong> ${c.status==='published'?'This course already has a published version. Save your edits as a draft revision; the live catalogue version remains until you publish the updates.':c.status==='draft-update'?'Unpublished changes are saved separately; the current published catalogue card remains live.':'This is a private draft. It will not appear in Courses offered until you publish it.'}</div>`;}
@@ -558,7 +563,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       }).join('') || '<article class="media-card"><div class="media-empty">No image groups yet. Create one after uploading at least two images.</div></article>'}</div>
       <div class="helper-note"><strong>Inline authoring:</strong> place the cursor in the lesson body before opening Images, then insert a single image or a complete image group. The group title and order stay with the inserted block.</div>`;
   }
-  function renderEditor(){const c=currentCourse();if(!c){$('#workspace').innerHTML='<div class="empty-state"><h3>Create your first course</h3><button class="btn primary" data-action="new-course">＋ New course</button></div>';return;}const tab=state.tab||'overview';const tabDefs=[['overview','Course details'],['curriculum','Curriculum'],['lesson','Lesson content'],['questions','Practice & Q&A'],['media','Images'],['preview','Learner preview']];let panel='';const m=currentModule(), l=currentLesson();if(tab==='overview')panel=courseFields(c);else if(tab==='curriculum')panel=curriculumFields(c);else if(tab==='lesson')panel=lessonFields(l);else if(tab==='questions')panel=questionFields(l);else if(tab==='media')panel=mediaFields(l);else panel=previewFields(c);$('#workspace').innerHTML=`<div class="workspace-toolbar"><div class="breadcrumb">Courses <span aria-hidden="true">/</span> ${esc(c.title||'Untitled course')} <span aria-hidden="true">/</span> ${esc(tabDefs.find(x=>x[0]===tab)?.[1]||'Editor')}</div><div class="toolbar-right"><span class="save-state" id="saveIndicator"><span class="dot"></span><span>${state.savedAt?'Saved '+esc(state.savedAt):'Unsaved draft'}</span></span><button class="btn small" type="button" data-action="save-draft">Save draft</button></div></div><div class="editor-shell"><header class="editor-header"><div><div class="eyebrow">${esc(c.slug||'course-slug')}</div><h2>${esc(c.title||'Untitled course')}</h2><p>${esc(c.summary||'Add a course summary to help learners understand what they will study.')}</p></div><div class="header-mark" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="18" stroke="currentColor" stroke-width="1.5"/><path d="M11 27.5 17 21l5 4 10-11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 14h5v5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></header><nav class="tabs" aria-label="Course editing steps">${tabDefs.map(([id,label])=>`<button class="tab ${tab===id?'active':''}" type="button" role="tab" aria-selected="${tab===id}" data-action="tab" data-tab="${id}">${label}</button>`).join('')}</nav><div class="tab-panel" role="tabpanel">${panel}</div></div>`;}
+  function renderEditor(){const c=currentCourse();if(!c){$('#workspace').innerHTML='<div class="empty-state"><h3>Create your first course</h3><button class="btn primary" data-action="new-course">＋ New course</button></div>';return;}const tab=state.tab||'overview';const tabDefs=[['overview','Course details'],['curriculum','Curriculum'],['lesson','Lesson content'],['questions','Practice & Q&A'],['media','Images'],['preview','Learner preview']];let panel='';const m=currentModule(), l=currentLesson();if(tab==='overview')panel=courseFields(c);else if(tab==='curriculum')panel=curriculumFields(c);else if(tab==='lesson')panel=lessonFields(l);else if(tab==='questions')panel=questionFields(l);else if(tab==='media')panel=mediaFields(l);else panel=previewFields(c);$('#workspace').innerHTML=`<div class="workspace-toolbar"><div class="breadcrumb">Courses <span aria-hidden="true">/</span> ${esc(c.title||'Untitled course')} <span aria-hidden="true">/</span> ${esc(tabDefs.find(x=>x[0]===tab)?.[1]||'Editor')}</div><div class="toolbar-right"><span class="save-state" id="saveIndicator"><span class="dot"></span><span>${state.savedAt?'Saved '+esc(state.savedAt):'Unsaved draft'}</span></span><button class="btn small" type="button" data-action="save-draft">Save draft</button><button class="btn small danger" type="button" data-action="delete-course">Delete draft</button></div></div><div class="editor-shell"><header class="editor-header"><div><div class="eyebrow">${esc(c.slug||'course-slug')}</div><h2>${esc(c.title||'Untitled course')}</h2><p>${esc(c.summary||'Add a course summary to help learners understand what they will study.')}</p></div><div class="header-mark" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="18" stroke="currentColor" stroke-width="1.5"/><path d="M11 27.5 17 21l5 4 10-11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 14h5v5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></header><nav class="tabs" aria-label="Course editing steps">${tabDefs.map(([id,label])=>`<button class="tab ${tab===id?'active':''}" type="button" role="tab" aria-selected="${tab===id}" data-action="tab" data-tab="${id}">${label}</button>`).join('')}</nav><div class="tab-panel" role="tabpanel">${panel}</div></div>`;}
   function previewFields(c){const mods=c.modules.map((m,mi)=>({m,mi}));const lesson=currentLesson();return `<div class="section-intro"><h3>Preview as a learner</h3><p>Review the latest editing state before you publish. This preview is deliberately separate from the live member course.</p></div><div class="preview-split"><article class="preview-article"><div class="course-chip">${esc(c.category)} · ${esc(c.level)}</div><h2>${esc(c.title)}</h2><p class="summary">${esc(c.summary)}</p><div class="pill">${allLessons(c).length} lessons · ${esc(c.duration)}</div>${c.outcomes?.length?`<section class="preview-outcomes"><h3>What learners will practise</h3><ul>${c.outcomes.map(outcome=>`<li>${esc(outcome)}</li>`).join("")}</ul></section>`:""}${lesson?`<hr style="border:0;border-top:1px solid var(--line);margin:24px 0"><div class="eyebrow">${esc(currentModule()?.title||'Module')} / Lesson</div><h2 style="font-size:28px">${esc(lesson.title)}</h2><p class="summary">${esc(lesson.summary)}</p><div class="preview-body">${renderMarkdown(lesson.content)}</div>${lesson.questions.length?`<div class="practice-preview"><h4>Test your reading</h4>${lesson.questions.map((q,qi)=>`<div style="margin-bottom:16px"><strong style="font-size:11px">${esc(q.prompt)}</strong>${q.options.map((op,oi)=>`<label><input type="radio" name="pv-${esc(q.id)}" value="${oi}" data-preview-question="${esc(q.id)}"> <span>${esc(op)}</span></label>`).join('')}<button class="btn small" type="button" data-action="check-preview" data-id="${esc(q.id)}">Check answer</button><div class="feedback" id="feedback-${esc(q.id)}"></div></div>`).join('')}</div>`:''}`:'<p class="summary">No lesson selected yet.</p>'}</article><aside class="preview-lesson-nav"><h4>Course outline</h4><div>${mods.map(({m,mi})=>`<div style="font-size:10px;font-weight:800;color:var(--muted);padding:9px 6px 4px">${esc(m.title)}</div>${m.lessons.map((item,li)=>`<button type="button" class="${item.id===lesson?.id?'selected':''}" data-action="preview-select-lesson" data-module-id="${esc(m.id)}" data-id="${esc(item.id)}">${mi+1}.${li+1} ${esc(item.title)}</button>`).join('')}`).join('')}</div><div class="helper-note">Draft preview only. Lesson access, authentication, progress and paid content protection are enforced by Django in production.</div></aside></div>`;}
   function renderMarkdown(src){const safe=esc(src);return safe.split(/\n{2,}/).map(block=>{const t=block.trim();if(!t)return'';const h=t.match(/^(#{1,4})\s+(.+)$/);if(h)return `<h3>${h[2]}</h3>`;if(/^[-*]\s/m.test(t))return `<ul>${t.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>`<li>${x.replace(/^[-*]\s+/,'')}</li>`).join('')}</ul>`;return `<p>${t.replace(/\n/g,'<br>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>')}</p>`;}).join('');}
   function renderCatalogue(){const cards=[...demoOffers];state.courses.filter(c=>c.publishedSnapshot).forEach(c=>{const p=c.publishedSnapshot;cards.push({id:c.id,title:p.title,category:p.category||'MICRO-COURSE',summary:p.summary,price:p.price||'Price not configured',state:'Published from builder'});});$('#catalogueGrid').innerHTML=cards.map(item=>`<article class="offer-card"><div class="offer-art"></div><div class="offer-body"><div class="offer-kicker">${esc(item.category)}</div><h3>${esc(item.title)}</h3><p>${esc(item.summary)}</p><div class="offer-bottom"><div><div class="offer-price">${esc(item.price||'Details soon')}</div><div class="offer-state">${esc(item.state)}</div></div><span class="pill published">Published</span></div></div></article>`).join('');}
@@ -568,7 +573,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   function publishCourse(){const c=currentCourse();if(!c)return;const errs=[];if(!c.title.trim())errs.push('Add a course title.');if(!c.summary.trim())errs.push('Add a short course summary.');if(!c.modules.length)errs.push('Add at least one module.');if(!allLessons(c).length)errs.push('Add at least one lesson.');if(allLessons(c).some(l=>!l.title.trim()||!l.content.trim()))errs.push('Every lesson needs a title and lesson content.');if(errs.length){toast(errs[0]);if(!c.title.trim()||!c.summary.trim())state.tab='overview';else if(!allLessons(c).length)state.tab='curriculum';else state.tab='lesson';render();return;}const snapshot=JSON.parse(JSON.stringify(c));snapshot.status='published';snapshot.publishedSnapshot=null;snapshot.updatedAt=nowText();c.status='published';c.publishedAt=nowText();c.updatedAt=nowText();c.publishedSnapshot=snapshot;persist(false);state.tab='overview';render();$('#catalogueSection').scrollIntoView({behavior:'smooth',block:'start'});toast('Published in this preview. The course now appears under Courses offered.');}
   function duplicateCourse(){const c=currentCourse();if(!c)return;const copy=JSON.parse(JSON.stringify(c));copy.id=uid('course');copy.title=(c.title||'Untitled course')+' — Copy';copy.slug=slugify(copy.title);copy.status='draft';copy.publishedAt=null;copy.publishedSnapshot=null;copy.createdAt=nowText();copy.updatedAt='Not saved yet';copy.modules.forEach(m=>{m.id=uid('module');m.lessons.forEach(l=>{l.id=uid('lesson');l.questions.forEach(q=>q.id=uid('q'));});});state.courses.unshift(copy);state.selectedCourseId=copy.id;state.selectedModuleId=copy.modules[0]?.id||null;state.selectedLessonId=copy.modules[0]?.lessons[0]?.id||null;state.tab='overview';persist(false);render();toast('Course duplicated as a new draft.');}
   function moveItem(arr,id,direction){const i=arr.findIndex(x=>x.id===id);const j=i+direction;if(i<0||j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];}
-  function handleAction(action,el){const c=currentCourse();if(!c)return;const m=currentModule();const l=currentLesson();const id=el.dataset.id;switch(action){case'select-course':selectCourse(id);break;case'tab':state.tab=el.dataset.tab;renderEditor();renderHeaderState();break;case'save-draft':saveDraft();break;case'new-course':{const nc=makeCourse();state.courses.unshift(nc);state.selectedCourseId=nc.id;state.selectedModuleId=nc.modules[0].id;state.selectedLessonId=nc.modules[0].lessons[0].id;state.tab='overview';persist(false);render();toast('New draft created. Add details and save when ready.');break;}case'add-module':{const nm=makeModule(c.modules.length+1);nm.title=`Module ${String(c.modules.length+1).padStart(2,'0')} — New module`;c.modules.push(nm);state.selectedModuleId=nm.id;state.selectedLessonId=nm.lessons[0].id;state.tab='curriculum';persist(false);render();break;}case'select-module':state.selectedModuleId=id;state.selectedLessonId=currentModule()?.lessons[0]?.id||null;renderEditor();break;case'select-lesson':state.selectedModuleId=el.dataset.moduleId;state.selectedLessonId=id;state.tab='curriculum';renderEditor();break;case'add-lesson':{const mod=c.modules.find(x=>x.id===id);if(!mod)break;const nl=makeLesson(mod.lessons.length+1);nl.title=`Lesson ${c.modules.indexOf(mod)+1}.${mod.lessons.length+1} — New lesson`;mod.lessons.push(nl);state.selectedModuleId=mod.id;state.selectedLessonId=nl.id;state.tab='curriculum';persist(false);render();break;}case'delete-module':{if(c.modules.length<=1)break;const i=c.modules.findIndex(x=>x.id===id);c.modules.splice(i,1);state.selectedModuleId=c.modules[0]?.id||null;state.selectedLessonId=c.modules[0]?.lessons[0]?.id||null;persist(false);render();break;}case'delete-lesson':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);if(!mod||mod.lessons.length<=1)break;mod.lessons=mod.lessons.filter(x=>x.id!==id);state.selectedLessonId=mod.lessons[0].id;state.selectedModuleId=mod.id;persist(false);render();break;}case'move-module-up':moveItem(c.modules,id,-1);persist(false);render();break;case'move-module-down':moveItem(c.modules,id,1);persist(false);render();break;case'move-lesson-up':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);moveItem(mod.lessons,id,-1);persist(false);render();break;}case'move-lesson-down':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);moveItem(mod.lessons,id,1);persist(false);render();break;}case'go-lesson':state.tab='lesson';renderEditor();break;case'go-questions':state.tab='questions';renderEditor();break;case'go-curriculum':state.tab='curriculum';renderEditor();break;case'add-outcome':c.outcomes.push('New learning outcome');persist(false);renderEditor();break;case'remove-outcome':c.outcomes.splice(Number(el.dataset.index),1);persist(false);renderEditor();break;case'add-question':l.questions.push(defaultQuestion());persist(false);renderEditor();break;case'remove-question':if(l.questions.length>1)l.questions=l.questions.filter(q=>q.id!==id);persist(false);renderEditor();break;case'correct-option':{const q=l.questions.find(q=>q.id===el.dataset.qid);if(q)q.correctIndex=Number(el.dataset.index);schedulePersist();break;}case'insert-image-reference':if(l.image){l.content+=`\n\n![${l.image.alt||'Course figure'}](asset://${l.image.id||uid('asset')})\n`;state.tab='lesson';persist(false);renderEditor();toast('Image reference added to lesson Markdown.');}break;case'remove-image':l.image=null;persist(false);renderEditor();break;case'preview-select-lesson':state.selectedModuleId=el.dataset.moduleId;state.selectedLessonId=id;renderEditor();break;case'check-preview':{const q=l.questions.find(q=>q.id===id);const checked=$(`input[name="pv-${CSS.escape(id)}"]:checked`);const box=$(`#feedback-${CSS.escape(id)}`);if(!checked){toast('Select an answer first.');break;}box.classList.add('show');const isRight=Number(checked.value)===Number(q.correctIndex);box.textContent=(isRight?'That is the intended answer. ':'Not quite. Revisit the evidence. ')+q.explanation;break;}}
+  function handleAction(action,el){const c=currentCourse();if(!c&&action!=='new-course')return;const m=c?currentModule():null;const l=c?currentLesson():null;const id=el.dataset.id;switch(action){case'delete-course':if(c)deleteCourse(c);break;case'select-course':selectCourse(id);break;case'tab':state.tab=el.dataset.tab;renderEditor();renderHeaderState();break;case'save-draft':saveDraft();break;case'new-course':{const nc=makeCourse();state.courses.unshift(nc);state.selectedCourseId=nc.id;state.selectedModuleId=nc.modules[0].id;state.selectedLessonId=nc.modules[0].lessons[0].id;state.tab='overview';persist(false);render();toast('New draft created. Add details and save when ready.');break;}case'add-module':{const nm=makeModule(c.modules.length+1);nm.title=`Module ${String(c.modules.length+1).padStart(2,'0')} — New module`;c.modules.push(nm);state.selectedModuleId=nm.id;state.selectedLessonId=nm.lessons[0].id;state.tab='curriculum';persist(false);render();break;}case'select-module':state.selectedModuleId=id;state.selectedLessonId=currentModule()?.lessons[0]?.id||null;renderEditor();break;case'select-lesson':state.selectedModuleId=el.dataset.moduleId;state.selectedLessonId=id;state.tab='curriculum';renderEditor();break;case'add-lesson':{const mod=c.modules.find(x=>x.id===id);if(!mod)break;const nl=makeLesson(mod.lessons.length+1);nl.title=`Lesson ${c.modules.indexOf(mod)+1}.${mod.lessons.length+1} — New lesson`;mod.lessons.push(nl);state.selectedModuleId=mod.id;state.selectedLessonId=nl.id;state.tab='curriculum';persist(false);render();break;}case'delete-module':{if(c.modules.length<=1)break;const i=c.modules.findIndex(x=>x.id===id);c.modules.splice(i,1);state.selectedModuleId=c.modules[0]?.id||null;state.selectedLessonId=c.modules[0]?.lessons[0]?.id||null;persist(false);render();break;}case'delete-lesson':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);if(!mod||mod.lessons.length<=1)break;mod.lessons=mod.lessons.filter(x=>x.id!==id);state.selectedLessonId=mod.lessons[0].id;state.selectedModuleId=mod.id;persist(false);render();break;}case'move-module-up':moveItem(c.modules,id,-1);persist(false);render();break;case'move-module-down':moveItem(c.modules,id,1);persist(false);render();break;case'move-lesson-up':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);moveItem(mod.lessons,id,-1);persist(false);render();break;}case'move-lesson-down':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);moveItem(mod.lessons,id,1);persist(false);render();break;}case'go-lesson':state.tab='lesson';renderEditor();break;case'go-questions':state.tab='questions';renderEditor();break;case'go-curriculum':state.tab='curriculum';renderEditor();break;case'add-outcome':c.outcomes.push('New learning outcome');persist(false);renderEditor();break;case'remove-outcome':c.outcomes.splice(Number(el.dataset.index),1);persist(false);renderEditor();break;case'add-question':l.questions.push(defaultQuestion());persist(false);renderEditor();break;case'remove-question':if(l.questions.length>1)l.questions=l.questions.filter(q=>q.id!==id);persist(false);renderEditor();break;case'correct-option':{const q=l.questions.find(q=>q.id===el.dataset.qid);if(q)q.correctIndex=Number(el.dataset.index);schedulePersist();break;}case'insert-image-reference':if(l.image){l.content+=`\n\n![${l.image.alt||'Course figure'}](asset://${l.image.id||uid('asset')})\n`;state.tab='lesson';persist(false);renderEditor();toast('Image reference added to lesson Markdown.');}break;case'remove-image':l.image=null;persist(false);renderEditor();break;case'preview-select-lesson':state.selectedModuleId=el.dataset.moduleId;state.selectedLessonId=id;renderEditor();break;case'check-preview':{const q=l.questions.find(q=>q.id===id);const checked=$(`input[name="pv-${CSS.escape(id)}"]:checked`);const box=$(`#feedback-${CSS.escape(id)}`);if(!checked){toast('Select an answer first.');break;}box.classList.add('show');const isRight=Number(checked.value)===Number(q.correctIndex);box.textContent=(isRight?'That is the intended answer. ':'Not quite. Revisit the evidence. ')+q.explanation;break;}}
   }
   function updateField(el){const entity=el.dataset.entity;const field=el.dataset.field;const c=currentCourse();const m=currentModule();const l=currentLesson();const val=el.type==='number'?Math.max(1,Number(el.value)||1):el.value;if(entity==='course'){c[field]=val;if(field==='title'&&(!c.slug||c.slug===slugify(c._previousTitle||'')))c.slug=slugify(val);if(field==='title'){c._previousTitle=val;const slugInput=$('[data-entity=\"course\"][data-field=\"slug\"]');if(slugInput&&document.activeElement!==slugInput)slugInput.value=c.slug;}}else if(entity==='module'&&m)m[field]=val;else if(entity==='lesson'&&l)l[field]=val;else if(entity==='question'&&l){const q=l.questions.find(q=>q.id===el.dataset.qid);if(q)q[field]=val;}else if(entity==='option'&&l){const q=l.questions.find(q=>q.id===el.dataset.qid);if(q)q.options[Number(el.dataset.index)]=val;}else if(entity==='image'&&l.image)l.image[field]=val;else if(entity==='outcome')c.outcomes[Number(el.dataset.index)]=val;else if(entity==='notebook'&&l){if(!l.notebook)l.notebook={title:'Your Trading Notebook',prompts:[]};l.notebook[field]=val;}else if(entity==='notebook-prompt'&&l){if(!l.notebook)l.notebook={title:'Your Trading Notebook',prompts:[]};const prompt=l.notebook.prompts[Number(el.dataset.index)];if(prompt)prompt[field]=val;}if(entity==='course'&&field==='title'){const title=$('#workspace h2');if(title)title.textContent=val||'Untitled course';}schedulePersist();}
   document.addEventListener('click',e=>{const el=e.target.closest('[data-action]');if(el){e.preventDefault();handleAction(el.dataset.action,el);}});
@@ -1153,6 +1158,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     if (!course) return;
     academySaving = true;
     try {
+      const revisionAtStart=editRevision;
       const result = await academyRequest('POST', {course, mode:submit?'submit':'save', sync_source:notify || submit});
       course.serverDraftId = result.record_id;
       course.serverUpdatedAt = result.updated_at || new Date().toISOString();
@@ -1182,6 +1188,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       }
       state.savedAt = nowText();
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+      if(editRevision===revisionAtStart)hasUnsavedChanges=false;
       renderHeaderState();
       if (submit) {
         toast('Draft saved. Opening the review checklist…');
@@ -1205,6 +1212,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   }
   persist = function(showToast=false) {
     try {
+      if(!suppressDirtyTracking)markDirty();
       state.savedAt = nowText();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       state.storageAvailable = true;
@@ -1236,6 +1244,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     saveCurrentToAcademy(true).catch(error => toast('Could not submit for review: ' + error.message));
   };
   async function syncAcademy() {
+    const revisionAtStart=editRevision;
     try {
       const result = await academyRequest('GET');
       const storageNotice = document.querySelector('[data-image-storage-status]');
@@ -1257,7 +1266,19 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       demoLessonRefs = Array.isArray(result.lesson_references) ? result.lesson_references : [];
       lessonReferenceIndex.clear();
       demoLessonRefs.forEach(ref => lessonReferenceIndex.set(String(ref.id), ref));
-      const remoteDrafts = result.drafts || [];
+      const remoteDrafts = Array.isArray(result.drafts) ? result.drafts : [];
+      // The server's draft list is authoritative for drafts previously loaded
+      // from the Academy. Clear deleted/submitted drafts from localStorage,
+      // while preserving genuinely local-only unsaved work.
+      const liveServerDraftIds = new Set(remoteDrafts.map(remote => String(remote.serverDraftId || remote.id || '')));
+      const liveServerDraftSlugs = new Set(remoteDrafts.map(remote => String(remote.slug || '')));
+      state.courses = state.courses.filter(local => {
+        const serverId = String(local.serverDraftId || '');
+        const serverBacked = Boolean(serverId || local.serverUpdatedAt);
+        if (!serverBacked) return true;
+        return (serverId && liveServerDraftIds.has(serverId)) ||
+          (local.slug && liveServerDraftSlugs.has(String(local.slug)));
+      });
       for (const remote of remoteDrafts) {
         // The server is the shared source of truth for saved drafts. Replace a
         // stale browser copy by server ID or slug so another device's latest
@@ -1275,7 +1296,14 @@ button:disabled { cursor: not-allowed; opacity: .45; }
         state.selectedModuleId = latest.modules?.[0]?.id || null;
         state.selectedLessonId = latest.modules?.[0]?.lessons?.[0]?.id || null;
       }
+      if (!state.courses.some(course => course.id === state.selectedCourseId)) {
+        const fallback = state.courses[0] || remoteDrafts[0] || null;
+        state.selectedCourseId = fallback?.id || null;
+        state.selectedModuleId = fallback?.modules?.[0]?.id || null;
+        state.selectedLessonId = fallback?.modules?.[0]?.lessons?.[0]?.id || null;
+      }
       academyReady = true;
+      if (editRevision === revisionAtStart) hasUnsavedChanges = false;
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
       render();
       if (remoteDrafts.length) toast('Connected to Academy. Shared drafts are available across devices.');
@@ -1289,8 +1317,63 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   }
   // Use real published courses for lesson cross-references; never invent catalogue entries.
   if (!state.savedAt) persist(false);
+  suppressDirtyTracking = false;
   render();
   syncAcademy();
+
+  // Clean exits navigate immediately. If edits or a save are pending, offer to
+  // save the draft to the shared Academy first; Cancel keeps the editor open.
+  document.addEventListener('click', event => {
+    const link = event.target.closest('a[data-exit-link]');
+    if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (!hasUnsavedChanges && !academySaving && !academySavePending) return;
+    event.preventDefault();
+    const destination = link.href;
+    if (!window.confirm('Your latest edits may not have finished saving. Save the draft to the Academy and leave this page? Choose Cancel to stay here.')) return;
+    clearTimeout(saveTimer);
+    clearTimeout(academySaveTimer);
+    saveCurrentToAcademy(false, true)
+      .then(() => {
+        if (hasUnsavedChanges) {
+          toast('New edits are still waiting to save. Please save them before leaving.');
+          return;
+        }
+        window.location.assign(destination);
+      })
+      .catch(error => toast('Could not save before leaving: ' + error.message));
+  });
+  window.addEventListener('beforeunload', event => {
+    if (!hasUnsavedChanges && !academySaving && !academySavePending) return;
+    event.preventDefault();
+    event.returnValue = '';
+  });
+
+  async function deleteCourse(course) {
+    const title = String(course.title || 'Untitled course');
+    if (!window.confirm('Delete the draft "' + title + '"? This removes its saved builder draft and uploaded draft media. It does not delete a published course.')) return;
+    clearTimeout(saveTimer);
+    clearTimeout(academySaveTimer);
+    try {
+      if (course.serverDraftId) await academyRequest('DELETE', {serverDraftId: course.serverDraftId});
+      state.courses = state.courses.filter(item =>
+        item.id !== course.id &&
+        (!course.serverDraftId || String(item.serverDraftId || '') !== String(course.serverDraftId))
+      );
+      if (!state.courses.some(item => item.id === state.selectedCourseId)) {
+        const fallback = state.courses[0] || null;
+        state.selectedCourseId = fallback?.id || null;
+        state.selectedModuleId = fallback?.modules?.[0]?.id || null;
+        state.selectedLessonId = fallback?.modules?.[0]?.lessons?.[0]?.id || null;
+        state.tab = 'overview';
+      }
+      hasUnsavedChanges = state.courses.some(item => !item.serverDraftId && !item.serverUpdatedAt);
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+      render();
+      toast(course.serverDraftId ? 'Saved Academy draft deleted.' : 'Local-only draft removed from this browser.');
+    } catch (error) {
+      toast('Could not delete draft: ' + error.message);
+    }
+  }
 } )();
 </script>
 </body>

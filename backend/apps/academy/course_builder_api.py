@@ -497,9 +497,41 @@ def _draft_response(record, request):
 
 
 @login_required
-@require_http_methods(["GET", "POST"])
+@require_http_methods(["GET", "POST", "DELETE"])
 def course_builder_api(request):
     _require_admin(request)
+    if request.method == "DELETE":
+        try:
+            body = json.loads(request.body.decode("utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return JsonResponse({"detail": "The request body must be valid JSON."}, status=400)
+        raw_id = body.get("serverDraftId") or body.get("id")
+        if not raw_id:
+            return JsonResponse({"detail": "A saved draft ID is required."}, status=400)
+        try:
+            draft_id = uuid.UUID(str(raw_id))
+        except (ValueError, TypeError, AttributeError):
+            return JsonResponse({"detail": "The saved draft ID is invalid."}, status=400)
+
+        # Only builder drafts may be deleted here. Submitted/reviewed items and
+        # actual published Course rows are intentionally outside this endpoint.
+        with transaction.atomic():
+            record = get_object_or_404(
+                CourseImport.objects.select_for_update(),
+                pk=draft_id,
+                status=CourseImport.Status.DRAFT,
+            )
+            for asset in record.assets.all():
+                if asset.file:
+                    storage = asset.file.storage
+                    name = asset.file.name
+                    transaction.on_commit(
+                        lambda storage=storage, name=name: storage.delete(name),
+                        robust=True,
+                    )
+            record.delete()
+        return JsonResponse({"ok": True, "deleted_id": str(draft_id)})
+
     if request.method == "GET":
         drafts = []
         for record in CourseImport.objects.filter(status=CourseImport.Status.DRAFT).order_by("-updated_at"):

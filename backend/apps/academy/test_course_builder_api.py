@@ -556,3 +556,46 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(figure["cards"][1]["title"], "Common baseline")
         self.assertEqual(figure["cards"][2]["title"], "More smoothed")
         self.assertEqual(figure["note"], "Compare one setting at a time.")
+
+
+    def test_admin_can_delete_saved_builder_draft_and_it_disappears_from_the_list(self):
+        saved = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(self.draft_payload("builder-delete-course")),
+            content_type="application/json",
+        )
+        self.assertEqual(saved.status_code, 200, saved.content)
+        record_id = saved.json()["record_id"]
+        self.assertTrue(CourseImport.objects.filter(pk=record_id).exists())
+
+        deleted = self.client.delete(
+            reverse("staff_course_builder_api"),
+            data=json.dumps({"serverDraftId": record_id}),
+            content_type="application/json",
+        )
+        self.assertEqual(deleted.status_code, 200, deleted.content)
+        self.assertEqual(deleted.json()["deleted_id"], record_id)
+        self.assertFalse(CourseImport.objects.filter(pk=record_id).exists())
+
+        refreshed = self.client.get(reverse("staff_course_builder_api"))
+        self.assertEqual(refreshed.status_code, 200, refreshed.content)
+        self.assertNotIn(record_id, [draft["serverDraftId"] for draft in refreshed.json()["drafts"]])
+
+    def test_course_builder_delete_does_not_remove_a_submitted_review_item(self):
+        saved = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(self.draft_payload("builder-delete-review-guard")),
+            content_type="application/json",
+        )
+        self.assertEqual(saved.status_code, 200, saved.content)
+        record = CourseImport.objects.get(pk=saved.json()["record_id"])
+        record.status = CourseImport.Status.REVIEW
+        record.save(update_fields=["status"])
+
+        deleted = self.client.delete(
+            reverse("staff_course_builder_api"),
+            data=json.dumps({"serverDraftId": str(record.pk)}),
+            content_type="application/json",
+        )
+        self.assertEqual(deleted.status_code, 404)
+        self.assertTrue(CourseImport.objects.filter(pk=record.pk).exists())
