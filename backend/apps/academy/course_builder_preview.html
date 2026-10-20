@@ -245,6 +245,10 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   const makeModule = (n=1) => ({id:uid('module'),title:`Module ${String(n).padStart(2,'0')} — Foundations`,description:'The main ideas and decisions covered in this module.',lessons:[makeLesson(1)]});
   const makeCourse = (title='Untitled course') => ({id:uid('course'),title,slug:slugify(title),summary:'A clear, practical description of what learners will study and why it matters.',description:'Explain who the course is for, what it covers and how learners will use it. Keep the promise realistic and specific.',category:'Technical analysis',level:'Intermediate',duration:'Self-paced',price:'',priceNote:'Pricing and checkout are configured separately.',status:'draft',createdAt:nowText(),updatedAt:'Not saved yet',publishedAt:null,publishedSnapshot:null,modules:[makeModule(1)],outcomes:['Describe the evidence before interpreting it.','Compare alternatives and identify invalidation.','Build a clear, conditional decision process.']});
   let demoOffers = [];
+  let demoLessonRefs = [];
+  const lessonReferenceIndex = new Map();
+  let lessonContentCaret = null;
+  let pendingLessonCaret = null;
   function getSeed() { const c=makeCourse('New micro-course draft'); c.summary='Add a concise course promise here.'; c.description='Describe the learner, what the course covers and what they can practise after completing it.'; c.modules[0].title='Module 01 — Foundations'; c.modules[0].lessons[0].title='Lesson 1.1 — First principles'; return {courses:[c],selectedCourseId:c.id,selectedModuleId:c.modules[0].id,selectedLessonId:c.modules[0].lessons[0].id,view:'overview',tab:'overview'}; }
   function load() { try { const raw=localStorage.getItem(STORAGE_KEY); if(raw){const v=JSON.parse(raw); if(v && Array.isArray(v.courses) && v.courses.length) return v;} } catch(e){} return getSeed(); }
   let state=load(); let toastTimer=null; let saveTimer=null; let previewMode=false;
@@ -329,7 +333,253 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     return html;
   };
   const baseHandleAction = handleAction;
+  function lessonReferencePickerMarkup() {
+    return `<section class="related-course-box lesson-reference-picker" data-lesson-reference-picker>
+      <h4>Link to another lesson</h4>
+      <p>Search published Academy lessons by title, course, module or topic. Choose an inline link for a brief mention or a card for a more prominent explanation. References keep a stable lesson ID and never copy the destination lesson body.</p>
+      <label for="lessonReferenceSearch">Find a lesson</label>
+      <input class="input" id="lessonReferenceSearch" type="search" data-lesson-reference-search placeholder="e.g. relative volume, support, value area" aria-label="Search published lessons">
+      <div data-lesson-reference-results role="status" aria-live="polite"><p>Enter at least two characters to search the published lesson catalogue.</p></div>
+    </section>`;
+  }
+
+  function renderLessonReferenceResults(query, container) {
+    if (!container) return;
+    const term = String(query || '').trim().toLowerCase();
+    if (term.length < 2) {
+      container.innerHTML = '<p>Enter at least two characters to search the published lesson catalogue.</p>';
+      return;
+    }
+    const results = demoLessonRefs.filter(ref => [
+      ref.title, ref.summary, ref.module_title, ref.course_title,
+      ...(Array.isArray(ref.topics) ? ref.topics : [])
+    ].join(' ').toLowerCase().includes(term)).slice(0, 15);
+    results.forEach(ref => lessonReferenceIndex.set(String(ref.id), ref));
+    if (!results.length) {
+      container.innerHTML = '<p>No published lessons matched that search.</p>';
+      return;
+    }
+    container.innerHTML = results.map(ref => `<article class="related-course-item" style="margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:8px">
+      <strong>${esc(ref.title)}</strong>
+      <span>${esc(ref.course_title)} · ${esc(ref.module_title)}</span>
+      <span>${esc(ref.summary || (ref.topics || []).slice(0,3).join(' · '))}</span>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:9px">
+        <button class="btn small" type="button" data-action="insert-inline-lesson-reference" data-id="${esc(ref.id)}">Insert inline link</button>
+        <button class="btn small" type="button" data-action="insert-lesson-reference-card" data-id="${esc(ref.id)}">Insert lesson card</button>
+      </div>
+    </article>`).join('');
+  }
+
+  function rememberLessonContentCaret(target) {
+    if (!target || !target.matches('textarea[data-entity="lesson"][data-field="content"]')) return;
+    const lesson = currentLesson();
+    if (!lesson) return;
+    const save = () => {
+      if (!target.isConnected || currentLesson()?.id !== lesson.id) return;
+      lessonContentCaret = {
+        lessonId: lesson.id,
+        start: Number(target.selectionStart) || 0,
+        end: Number(target.selectionEnd) || 0
+      };
+    };
+    save();
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(save);
+  }
+  ['click', 'keyup', 'select', 'input', 'mouseup'].forEach(eventName => {
+    document.addEventListener(eventName, event => rememberLessonContentCaret(event.target), true);
+  });
+
+  function insertLessonContentAtCaret(lesson, token, isBlock) {
+    if (!lesson) return;
+    const content = String(lesson.content || '');
+    const saved = lessonContentCaret && lessonContentCaret.lessonId === lesson.id
+      ? lessonContentCaret : {start:content.length,end:content.length};
+    const start = Math.max(0, Math.min(content.length, Number(saved.start) || 0));
+    const end = Math.max(start, Math.min(content.length, Number(saved.end) || start));
+    const before = content.slice(0, start);
+    const after = content.slice(end);
+    let prefix = '';
+    let suffix = '';
+    if (isBlock) {
+      if (before && !before.endsWith('\n\n')) prefix = before.endsWith('\n') ? '\n' : '\n\n';
+      if (after && !after.startsWith('\n\n')) suffix = after.startsWith('\n') ? '\n' : '\n\n';
+    } else {
+      if (before && !/\s$/.test(before)) prefix = ' ';
+      if (after && !/^\s/.test(after)) suffix = ' ';
+    }
+    lesson.content = before + prefix + token + suffix + after;
+    pendingLessonCaret = {lessonId:lesson.id, position:before.length + prefix.length + token.length};
+    lessonContentCaret = null;
+    state.tab = 'lesson';
+    persist(false);
+    renderEditor();
+  }
+
+  function moveFigureReference(lesson, id, direction) {
+    const paragraphs = String(lesson.content || '').split(/\n\s*\n/);
+    const index = paragraphs.findIndex(paragraph => paragraph.includes('asset://' + id));
+    const next = index + direction;
+    if (index < 0) {
+      toast('Insert this figure into the lesson before reordering it.');
+      return;
+    }
+    if (next < 0 || next >= paragraphs.length) {
+      toast('The figure is already at that end of the lesson.');
+      return;
+    }
+    [paragraphs[index], paragraphs[next]] = [paragraphs[next], paragraphs[index]];
+    lesson.content = paragraphs.join('\n\n');
+    persist(false);
+    renderEditor();
+    toast('Figure moved in the lesson content.');
+  }
+
+  const renderMarkdownWithFigures = renderMarkdown;
+  renderMarkdown = function(src) {
+    let output = renderMarkdownWithFigures(src);
+    output = output.replace(/<p>\[\[lesson-card:([0-9a-fA-F-]{36})\]\]<\/p>/g, (match, id) => {
+      const ref = demoLessonRefs.find(item => String(item.id) === id);
+      if (!ref) return '<p>Related lesson unavailable.</p>';
+      return '<aside class="tt-inline-lesson-card" style="margin:18px 0;padding:14px;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:9px;background:var(--paper)"><p style="font-size:10px;letter-spacing:.1em">RELATED LESSON</p><p><strong>' + esc(ref.title) + '</strong></p><p>' + esc(ref.course_title) + ' · ' + esc(ref.module_title) + '</p><p>' + esc(ref.summary || (ref.topics || []).slice(0,3).join(' · ')) + '</p></aside>';
+    });
+    output = output.replace(/\[\[lesson:([0-9a-fA-F-]{36})\]\]/g, (match, id) => {
+      const ref = demoLessonRefs.find(item => String(item.id) === id);
+      return ref ? '<a href="/learn/course/' + encodeURIComponent(ref.course_slug) + '/lesson/' + encodeURIComponent(ref.id) + '/">' + esc(ref.title) + '</a>' : 'Related lesson unavailable.';
+    });
+    return output;
+  };
+
+  const renderEditorBeforeReferenceAndMediaEnhancements = renderEditor;
+  renderEditor = function() {
+    renderEditorBeforeReferenceAndMediaEnhancements();
+    if (state.tab === 'lesson') {
+      const textarea = $('#workspace textarea[data-entity="lesson"][data-field="content"]');
+      const field = textarea && textarea.closest('.field');
+      if (field && !$('#workspace [data-lesson-reference-picker]')) {
+        field.insertAdjacentHTML('afterend', lessonReferencePickerMarkup());
+      }
+      if (pendingLessonCaret && currentLesson()?.id === pendingLessonCaret.lessonId && textarea) {
+        const caret = pendingLessonCaret.position;
+        pendingLessonCaret = null;
+        requestAnimationFrame(() => {
+          const currentTextarea = $('#workspace textarea[data-entity="lesson"][data-field="content"]');
+          if (currentTextarea) {
+            currentTextarea.focus();
+            currentTextarea.setSelectionRange(caret, caret);
+            rememberLessonContentCaret(currentTextarea);
+          }
+        });
+      }
+    }
+    if (state.tab === 'media') {
+      $('#workspace')?.querySelectorAll('[data-action="remove-figure"]').forEach(removeButton => {
+        const id = removeButton.dataset.id;
+        const actions = removeButton.parentElement;
+        if (!id || !actions || actions.querySelector('[data-replace-image]')) return;
+        const replacement = document.createElement('input');
+        replacement.type = 'file';
+        replacement.accept = 'image/jpeg,image/png,image/webp';
+        replacement.dataset.replaceImage = id;
+        replacement.setAttribute('aria-label', 'Replace this image while keeping its asset identity');
+        replacement.style.maxWidth = '100%';
+        const replacementLabel = document.createElement('label');
+        replacementLabel.className = 'help';
+        replacementLabel.textContent = 'Replace image (JPG, PNG or WebP, max 1.5 MB)';
+        replacementLabel.appendChild(replacement);
+        actions.insertBefore(replacementLabel, removeButton);
+        [['Move earlier','move-figure-up'], ['Move later','move-figure-down']].forEach(([label, action]) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'btn small';
+          button.textContent = label;
+          button.dataset.action = action;
+          button.dataset.id = id;
+          actions.insertBefore(button, removeButton);
+        });
+      });
+    }
+  };
+
+  document.addEventListener('input', event => {
+    const input = event.target;
+    if (!input.matches('[data-lesson-reference-search]')) return;
+    const picker = input.closest('[data-lesson-reference-picker]');
+    renderLessonReferenceResults(input.value, picker?.querySelector('[data-lesson-reference-results]'));
+  });
+
+  document.addEventListener('change', event => {
+    const input = event.target;
+    if (!input.matches('[data-replace-image]')) return;
+    const file = input.files && input.files[0];
+    const lesson = currentLesson();
+    if (!file || !lesson) return;
+    if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 1.5 * 1024 * 1024) {
+      toast('Choose a JPG, PNG or WebP image no larger than 1.5 MB.');
+      input.value = '';
+      return;
+    }
+    const images = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
+    const image = images.find(item => item.id === input.dataset.replaceImage);
+    if (!image) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      image.data = String(reader.result);
+      image.name = file.name;
+      lesson.images = images;
+      lesson.image = images[0] || null;
+      persist(false);
+      renderEditor();
+      toast('Image replaced. Its stable asset ID and all lesson references were preserved.');
+    };
+    reader.onerror = () => toast('The replacement image could not be read.');
+    reader.readAsDataURL(file);
+  });
+
   handleAction = function(action,el) { const l=currentLesson(); if(l&&action==='remove-figure'){if(!Array.isArray(l.images))l.images=l.image?[l.image]:[];l.images=l.images.filter(im=>im.id!==el.dataset.id);l.image=l.images[0]||null;persist(false);renderEditor();return;} if(l&&action==='insert-figure'){if(!Array.isArray(l.images))l.images=l.image?[l.image]:[];const im=l.images.find(x=>x.id===el.dataset.id);if(im){l.content+=`\n\n![${(im.alt||'Course figure').replace(/\]/g,'')}](${`asset://${im.id}`})\n`;state.tab='lesson';persist(false);renderEditor();toast('Figure reference added to Markdown.');}return;} baseHandleAction(action,el); };
+
+  const baseHandleActionWithFigures = handleAction;
+  handleAction = function(action, el) {
+    const lesson = currentLesson();
+    if (lesson && action === 'insert-figure') {
+      const images = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
+      const image = images.find(item => item.id === el.dataset.id);
+      if (!image) return;
+      const alt = String(image.alt || 'Course figure').replace(/\]/g, '');
+      insertLessonContentAtCaret(lesson, `![${alt}](asset://${image.id})`, true);
+      toast('Figure inserted at the saved cursor position.');
+      return;
+    }
+    if (lesson && action === 'remove-figure') {
+      const id = String(el.dataset.id || '');
+      const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      lesson.content = String(lesson.content || '')
+        .replace(new RegExp('!\\[[^\\]]*\\]\\(asset://' + escapedId + '(?:\\s+[^)]*)?\\)', 'g'), '')
+        .replace(/\n{3,}/g, '\n\n');
+      lesson.images = (Array.isArray(lesson.images) ? lesson.images : []).filter(image => image.id !== id);
+      lesson.image = lesson.images[0] || null;
+      persist(false);
+      renderEditor();
+      toast('Figure and its Markdown references were removed.');
+      return;
+    }
+    if (lesson && (action === 'move-figure-up' || action === 'move-figure-down')) {
+      moveFigureReference(lesson, String(el.dataset.id || ''), action === 'move-figure-up' ? -1 : 1);
+      return;
+    }
+    if (lesson && (action === 'insert-inline-lesson-reference' || action === 'insert-lesson-reference-card')) {
+      const ref = lessonReferenceIndex.get(String(el.dataset.id || ''));
+      if (!ref) {
+        toast('That lesson is no longer in the published catalogue. Search again.');
+        return;
+      }
+      const token = action === 'insert-lesson-reference-card'
+        ? `[[lesson-card:${ref.id}]]` : `[[lesson:${ref.id}]]`;
+      insertLessonContentAtCaret(lesson, token, action === 'insert-lesson-reference-card');
+      toast(action === 'insert-lesson-reference-card' ? 'Lesson card inserted at the saved cursor position.' : 'Lesson link inserted at the saved cursor position.');
+      return;
+    }
+    baseHandleActionWithFigures(action, el);
+  };
   document.addEventListener('input',event=>{const el=event.target;if(!el.matches('[data-image-item][data-field]'))return;const l=currentLesson();if(!l)return;if(!Array.isArray(l.images))l.images=l.image?[l.image]:[];const im=l.images.find(x=>x.id===el.dataset.imageItem);if(im){im[el.dataset.field]=el.value;l.image=l.images[0]||null;schedulePersist();}});
   document.addEventListener('change',event=>{const el=event.target;if(el.id!=='multiImageUpload')return;const files=Array.from(el.files||[]);const l=currentLesson();if(!l||!files.length)return;if(!Array.isArray(l.images))l.images=l.image?[l.image]:[];const valid=files.filter(f=>['image/jpeg','image/png','image/webp'].includes(f.type)&&f.size<=1.5*1024*1024);if(valid.length!==files.length)toast('Skipped files that are not JPG, PNG or WebP under 1.5 MB.');let left=valid.length;if(!left)return;valid.forEach(file=>{const reader=new FileReader();reader.onload=()=>{l.images.push({id:uid('asset'),name:file.name,alt:'',caption:'',data:String(reader.result)});if(--left===0){l.image=l.images[0]||null;persist(false);renderEditor();toast(`${valid.length} image${valid.length===1?'':'s'} added.`);}};reader.readAsDataURL(file);});});
   document.addEventListener('input',event=>{const el=event.target;if(!el.matches('[data-related-course-search]'))return;const query=el.value.trim().toLowerCase();const box=el.parentElement;box.querySelectorAll('.related-course-item').forEach(item=>{item.hidden=query!==''&&!item.textContent.toLowerCase().includes(query);});});
@@ -468,6 +718,9 @@ button:disabled { cursor: not-allowed; opacity: .45; }
         summary:course.summary || 'Open this course in the TradeThesis Academy.',
         price:'', state:'Published in Academy', slug:course.slug
       }));
+      demoLessonRefs = Array.isArray(result.lesson_references) ? result.lesson_references : [];
+      lessonReferenceIndex.clear();
+      demoLessonRefs.forEach(ref => lessonReferenceIndex.set(String(ref.id), ref));
       const remoteDrafts = result.drafts || [];
       for (const remote of remoteDrafts) {
         // The server is the shared source of truth for saved drafts. Replace a
