@@ -123,7 +123,7 @@
         <p class="tt-overview-eyebrow">TRADETHESIS MICRO-COURSE · TEMPLATE PREVIEW</p>
         <h1 id="tt-preview-course-title">{{ course.title }}</h1>
         {% if course.summary %}<p class="tt-overview-lede">{{ course.summary }}</p>{% endif %}
-        {% if course.description %}<p class="tt-overview-description">{{ course.description|linebreaksbr }}</p>{% endif %}
+        {% if course.description %}<div class="tt-overview-description tt-markdown-description">{{ course_description_html|safe }}</div>{% endif %}
         <div class="tt-overview-meta" aria-label="Course facts">
           <span class="tt-overview-meta-pill"><strong>{{ total_modules|stringformat:"02d" }}</strong> modules</span>
           <span class="tt-overview-meta-pill"><strong>{{ total_lessons|stringformat:"02d" }}</strong> lessons</span>

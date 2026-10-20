@@ -1,3 +1,4 @@
+import json
 import re
 from datetime import timedelta
 from io import BytesIO
@@ -16,6 +17,7 @@ from apps.academy.models import (
     CourseMediaAsset,
     CourseModule,
     Lesson,
+    LessonInstructorMaterial,
     LessonProgress,
 )
 from apps.academy.storage import course_asset_storage
@@ -50,6 +52,24 @@ class AcademyViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Private lesson")
         self.assertNotContains(response, "SECRET PAID LESSON BODY")
+
+    def test_course_overview_renders_markdown_description_as_heading_and_list(self):
+        self.course.description = (
+            "### What learners will practise\\n\\n"
+            "- Describe the evidence before interpreting it.\\n"
+            "- Compare alternatives and identify invalidation.\\n"
+            "- Build a clear, conditional decision process."
+        )
+        self.course.save(update_fields=["description", "updated_at"])
+
+        response = self.client.get(reverse("academy:course-detail", args=[self.course.slug]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "<h3>What learners will practise</h3>")
+        self.assertContains(response, "<ul>")
+        self.assertContains(response, "<li>Describe the evidence before interpreting it.</li>")
+        self.assertNotContains(response, "### What learners will practise")
+        self.assertNotContains(response, "- Describe the evidence before interpreting it.")
 
     def test_course_overview_uses_content_rich_layout_and_live_course_counts(self):
         response = self.client.get(reverse("academy:course-detail", args=[self.course.slug]))
@@ -121,7 +141,12 @@ class AcademyViewTests(TestCase):
                     "title": "Preview course",
                     "slug": "preview-course",
                     "summary": "A course used to test the website preview.",
-                    "description": "Preview-only content.",
+                    "description": (
+                        "### What learners will practise\\n\\n"
+                        "- Describe the evidence before interpreting it.\\n"
+                        "- Compare alternatives and identify invalidation.\\n"
+                        "- Build a clear, conditional decision process."
+                    ),
                 },
                 "modules": [{
                     "title": "Foundations",
@@ -167,6 +192,9 @@ class AcademyViewTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "<h3>What learners will practise</h3>")
+        self.assertContains(response, "<ul>")
+        self.assertContains(response, "<li>Describe the evidence before interpreting it.</li>")
         self.assertContains(response, "How should the observation be used?")
         self.assertContains(response, "As evidence to assess in context")
         self.assertContains(
@@ -194,6 +222,43 @@ class AcademyViewTests(TestCase):
         response = self.client.get(reverse("academy:lesson", args=[self.course.slug, self.preview_lesson.pk]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Public preview content.")
+
+    def test_quiz_submit_returns_indices_for_red_green_feedback_after_submission(self):
+        self.preview_lesson.content_json = {
+            "questions": [{
+                "id": "question-1",
+                "prompt": "What does the chart show?",
+                "options": ["Breakout", "Rejection"],
+            }],
+        }
+        self.preview_lesson.save(update_fields=["content_json", "updated_at"])
+        LessonInstructorMaterial.objects.create(
+            lesson=self.preview_lesson,
+            rubric_json={"questions": [{
+                "id": "question-1",
+                "options": ["Breakout", "Rejection"],
+                "correctIndex": 1,
+                "explanation": "The repeated rejection is the key evidence.",
+            }]},
+        )
+
+        page = self.client.get(reverse("academy:lesson", args=[self.course.slug, self.preview_lesson.pk]))
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, 'data-question-option="question-1"')
+        self.assertNotContains(page, "correct_index")
+        self.assertNotContains(page, "The repeated rejection is the key evidence.")
+
+        response = self.client.post(
+            reverse("academy:lesson-quiz-submit", args=[self.preview_lesson.pk]),
+            data=json.dumps({"answers": {"question-1": 0}}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        result = response.json()["results"][0]
+        self.assertFalse(result["correct"])
+        self.assertEqual(result["selected_index"], 0)
+        self.assertEqual(result["correct_index"], 1)
+        self.assertIn("The repeated rejection is the key evidence.", result["explanation"])
 
     def test_published_preview_renders_multiple_images_in_selected_learning_room_tabs(self):
         placements = [

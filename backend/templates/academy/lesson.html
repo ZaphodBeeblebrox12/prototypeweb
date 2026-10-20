@@ -110,6 +110,22 @@
 (() => {
   const quizForm = document.querySelector("[data-practice-quiz]");
   if (quizForm) {
+    quizForm.addEventListener("change", event => {
+      if (!event.target.matches('input[type="radio"]')) return;
+      const questionId = event.target.name;
+      quizForm.querySelectorAll('[data-question-option="' + CSS.escape(questionId) + '"]').forEach(label => {
+        label.classList.remove("is-correct", "is-incorrect");
+        const marker = label.querySelector("[data-answer-marker]");
+        if (marker) marker.textContent = "";
+      });
+      const feedback = quizForm.querySelector('[data-quiz-feedback="' + CSS.escape(questionId) + '"]');
+      if (feedback) {
+        feedback.classList.remove("is-correct", "is-incorrect");
+        feedback.textContent = "";
+      }
+      const currentScore = quizForm.querySelector("[data-quiz-score]");
+      if (currentScore) currentScore.textContent = "";
+    });
     quizForm.addEventListener("submit", async event => {
       event.preventDefault();
       const button = quizForm.querySelector('button[type="submit"]');
@@ -132,7 +148,26 @@
         if (!response.ok) throw new Error(payload.detail || "Answers could not be checked.");
         for (const result of payload.results || []) {
           const feedback = quizForm.querySelector('[data-quiz-feedback="' + CSS.escape(result.id) + '"]');
-          if (feedback) feedback.textContent = (result.correct ? "Correct. " : "Review this answer. ") + (result.explanation || "");
+          if (feedback) {
+            feedback.classList.remove("is-correct", "is-incorrect");
+            feedback.classList.add(result.correct ? "is-correct" : "is-incorrect");
+            const lead = result.correct ? "Correct. " : (result.selected_index === null ? "No answer selected. The correct answer is highlighted in green. " : "Incorrect. Your answer is red; the correct answer is green. ");
+            feedback.textContent = lead + (result.explanation || "");
+          }
+          const choices = quizForm.querySelectorAll('[data-question-option="' + CSS.escape(result.id) + '"]');
+          choices.forEach(label => {
+            const optionIndex = Number(label.dataset.optionIndex);
+            const marker = label.querySelector("[data-answer-marker]");
+            label.classList.remove("is-correct", "is-incorrect");
+            if (marker) marker.textContent = "";
+            if (result.correct_index !== null && Number(result.correct_index) === optionIndex) {
+              label.classList.add("is-correct");
+              if (marker) marker.textContent = "✓ Correct answer";
+            } else if (result.selected_index !== null && Number(result.selected_index) === optionIndex) {
+              label.classList.add("is-incorrect");
+              if (marker) marker.textContent = "✕ Your answer";
+            }
+          });
         }
         score.textContent = "You got " + payload.score + " of " + payload.total + " correct.";
       } catch (error) {

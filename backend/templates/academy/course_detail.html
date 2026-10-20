@@ -19,7 +19,7 @@
       <p class="tt-overview-eyebrow">{% if course.category %}{{ course.category }}{% else %}TRADETHESIS MICRO-COURSE{% endif %}{% if course.level %} · {{ course.level }}{% endif %}</p>
       <h1 id="tt-course-title">{{ course.title }}</h1>
       {% if course.summary %}<p class="tt-overview-lede">{{ course.summary }}</p>{% endif %}
-      {% if course.description %}<p class="tt-overview-description">{{ course.description|linebreaksbr }}</p>{% endif %}
+      {% if course.description %}<div class="tt-overview-description tt-markdown-description">{{ course_description_html|safe }}</div>{% endif %}
 
       <div class="tt-overview-meta" aria-label="Course facts">
         <span class="tt-overview-meta-pill"><strong>{{ total_modules|stringformat:"02d" }}</strong> modules</span>

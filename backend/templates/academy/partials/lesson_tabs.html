@@ -32,7 +32,7 @@
           <legend>{{ question.prompt }}</legend>
           {% if question.image_url %}<figure class="tt-question-figure" style="margin:12px 0"><img src="{{ question.image_url }}" alt="{{ question.image_alt|default:question.image_title }}" loading="lazy" style="display:block;max-width:100%;max-height:420px;width:auto;height:auto;margin:0 auto;border-radius:6px"><figcaption style="padding:8px 0;color:var(--tt-muted);font-size:.82rem;line-height:1.5"><strong>{{ question.image_title|default:"Chart" }}</strong>{% if question.image_caption %}<span> · {{ question.image_caption }}</span>{% endif %}</figcaption></figure>{% endif %}
           {% for option in question.options %}
-          <label class="tt-answer-option"><input type="radio" name="{{ question.id }}" value="{{ forloop.counter0 }}"><span>{{ option }}</span></label>
+          <label class="tt-answer-option" data-question-option="{{ question.id }}" data-option-index="{{ forloop.counter0 }}"><input type="radio" name="{{ question.id }}" value="{{ forloop.counter0 }}"><span class="tt-answer-text">{{ option }}</span><span class="tt-answer-result" data-answer-marker aria-hidden="true"></span></label>
           {% endfor %}
           <p class="tt-quiz-feedback" data-quiz-feedback="{{ question.id }}" role="status" aria-live="polite"></p>
         </fieldset>

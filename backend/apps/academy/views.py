@@ -14,7 +14,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from .content_rendering import build_lesson_sections
+from .content_rendering import build_lesson_sections, render_safe_markdown
 from .models import (
     Course,
     CourseEntitlement,
@@ -57,6 +57,26 @@ def _practice_questions_with_images(questions, asset_urls, figure_metadata):
         question["image_caption"] = str(metadata.get("caption") or "")[:500]
         hydrated.append(question)
     return hydrated
+
+
+def _render_course_description(source, user=None, admin_preview=False):
+    """Render a course overview description as safe, semantic Markdown HTML."""
+    from django.utils.html import escape
+
+    text = source if isinstance(source, str) else str(source or "")
+    if not text.strip():
+        return ""
+    try:
+        return render_safe_markdown(
+            text,
+            user=user,
+            admin_preview=admin_preview,
+            module_label="Course overview",
+        )
+    except ValidationError:
+        # Keep rejected legacy markup readable as escaped text rather than passing
+        # it through to the page without sanitisation.
+        return "<p>" + escape(text).replace("\n", "<br>") + "</p>"
 
 
 def _active_entitlements(user, at=None):
@@ -162,7 +182,9 @@ def course_detail(request, course_slug):
     ).count()
     total = Lesson.objects.filter(module__course=course, module__is_published=True, is_published=True).count()
     return render(request, "academy/course_detail.html", {
-        "course": course, "entitlement": entitlement, "offer": offer,
+        "course": course,
+        "course_description_html": _render_course_description(course.description, user=request.user),
+        "entitlement": entitlement, "offer": offer,
         "module_rows": module_rows, "completed_lessons": completed,
         "total_lessons": total,
         "total_modules": len(module_rows),
@@ -514,6 +536,9 @@ def course_import_website_preview(request, import_id):
     return render(request, "academy/course_import_website_preview.html", {
         "import_record": record,
         "course": course,
+        "course_description_html": _render_course_description(
+            course.get("description", ""), user=request.user, admin_preview=True,
+        ),
         "preview_modules": preview_modules,
         "total_modules": len(preview_modules),
         "total_lessons": total_lessons,
