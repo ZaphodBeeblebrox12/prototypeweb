@@ -2,9 +2,9 @@
 
 **Status:** Approved source-of-truth contract; Django integration is the next implementation task.  
 **Website/content repository:** `ZaphodBeeblebrox12/prototypeweb`, branch `my-new-branch`.  
-**Canonical preview:** [TradeThesis Learning Room template — Bollinger Bands reference](../course-source/understand-bollinger-bands/preview/template-reference/index.html).  
+**Canonical preview:** [Content-rich Bollinger Bands Learning Room](../course-source/understand-bollinger-bands/preview/first-pass/index.html).  
 **Template rules:** [Course Template Standard](../course-source/COURSE_TEMPLATE_STANDARD.md).  
-**Django repository recorded in the current integration map:** `ZaphodBeeblebrox12/test`, branch `feature/tradethesis-academy`. Re-check the actual branch head and project structure before implementation.
+**Django runtime:** `backend/` in `ZaphodBeeblebrox12/prototypeweb`, branch `my-new-branch`. The external `test` / `feature/tradethesis-academy` repository is the earlier source/rollback snapshot, not the default code target.
 
 ## Goal
 
@@ -14,11 +14,11 @@ The production flow should be:
 
 **Course Markdown + manifest + owned assets → validated preview → idempotent Django import/update → administrator review/edit → authorised learner delivery.**
 
-The source repository is a content and static-preview repository. It does not contain the Django runtime. Production model, view, URL, permission and template changes belong in the actual Academy/Django repository after that repo and branch have been verified.
+The active repo contains the Django Academy runtime under `backend/` on `my-new-branch`. Implement model, view, URL, permission and template changes there after verifying the current staging commit; do not modify the external source/rollback snapshot by default.
 
 ## Canonical template rules
 
-Use `course-source/understand-bollinger-bands/preview/template-reference/index.html` as the canonical visual/interaction reference. Preserve its structure and styling during integration; the separate `preview/first-pass/index.html` remains the content-rich preview/QA artifact.
+Use `course-source/understand-bollinger-bands/preview/first-pass/index.html` as the canonical content-rich visual/interaction reference. Preserve the useful lesson flow, full-content treatment, figures, exercises, chart interactions, tabs and notebook behaviour during integration. `preview/template-reference/index.html` is an earlier design iteration, not the active reference.
 
 - Keep the compact, light TradeThesis visual language: warm paper surfaces, muted green/gold accents, editorial serif headings, readable sans-serif body copy, restrained borders, clear hierarchy and mobile-ready spacing.
 - Preserve the course overview to Learning Room journey, lesson outline, compact lesson header, integrated underline-style lesson tabs, readable article surface, figure count, figure enlargement where relevant, and clear lesson completion/progress actions.
@@ -31,7 +31,7 @@ Use `course-source/understand-bollinger-bands/preview/template-reference/index.h
 ## Source-of-truth rules
 
 1. `course-source/COURSE_TEMPLATE_STANDARD.md` defines the reusable standard.
-2. `course-source/understand-bollinger-bands/preview/template-reference/index.html` is the current concrete visual reference, not the final Django template. `preview/first-pass/index.html` remains the existing content-rich preview and retains its course-specific QA/editor hooks.
+2. `course-source/understand-bollinger-bands/preview/first-pass/index.html` is the current concrete, content-rich visual/interaction reference—not the final Django template. The Markdown lessons and manifest remain the course authoring/structure sources. Extract shared layout and interactions; do not ship the preview shell or its preview-only editing controls.
 3. Each course's authored lesson Markdown, architecture and asset register are its authoring source. Generated lesson-data JavaScript and static preview files are outputs; regenerate them rather than editing them as the content authority.
 4. A course manifest (or compatible existing manifest format) defines stable course/module/lesson slugs, ordering, display metadata, duration, source paths and asset IDs. Reuse existing formats where possible; do not create competing manifests.
 5. Django's persisted course content and media records become the production runtime authority after import. Import/update must be repeatable and idempotent and must not wipe learner progress, enrolments, offer relations or other live state.
@@ -40,9 +40,9 @@ Use `course-source/understand-bollinger-bands/preview/template-reference/index.h
 
 ### 1. Audit before editing
 
-Inspect the actual Academy repository/branch first. Read its current models, migrations, URLs, views, templates, static asset conventions, admin registrations, permissions, tests, settings and existing course import/seed process. Confirm which models already represent courses, modules, lessons, lesson content, progress and media. The existing integration notes identify the learner route patterns as `/learn/`, `/learn/course/<course_slug>/` and `/learn/course/<course_slug>/lesson/<lesson_uuid>/`; verify current names and access checks from code instead of inventing routes.
+Inspect the active `backend/` Academy runtime on `prototypeweb/my-new-branch` first. Read its current models, migrations, URLs, views, templates, static asset conventions, admin registrations, permissions, tests, settings and existing course import/seed process. Confirm which models already represent courses, modules, lessons, lesson content, progress and media. Verify the current staging commit, route names and access checks from code instead of inventing routes.
 
-Do not duplicate the Django runtime in `prototypeweb`, create a generic page builder, or introduce parallel course models until the audit proves a specific gap.
+Do not create a second Django runtime elsewhere, create a generic page builder, or introduce parallel course models until the audit proves a specific gap.
 
 ### 2. Extract a reusable Learning Room
 
@@ -100,20 +100,20 @@ Continue the existing TradeThesis micro-course and Django Academy work. Do not r
 SOURCE OF TRUTH
 - Website/content repository: https://github.com/ZaphodBeeblebrox12/prototypeweb/tree/my-new-branch
 - Course template standard: course-source/COURSE_TEMPLATE_STANDARD.md
-- Canonical visual/interaction reference: course-source/understand-bollinger-bands/preview/template-reference/index.html
+- Canonical content-rich visual/interaction reference: course-source/understand-bollinger-bands/preview/first-pass/index.html
 - Django integration notes: docs/architecture/FRONTEND_BACKEND_INTEGRATION.md
 - Admin text contract: docs/architecture/COURSE_CONTENT_EDITOR.md
 - Admin image contract: docs/architecture/INSTRUCTIONAL_IMAGE_REPLACEMENT.md
 - This handoff: course-integration/MICROCOURSE_TEMPLATE_DJANGO_HANDOFF.md
-- Django Academy repository/branch recorded in the notes: ZaphodBeeblebrox12/test, feature/tradethesis-academy. Verify that repo, branch head and current model/template state before changing anything.
+- Django runtime: `backend/` in `ZaphodBeeblebrox12/prototypeweb`, branch `my-new-branch`. Earlier source snapshot: `ZaphodBeeblebrox12/test`, `feature/tradethesis-academy`. Verify the deployed commit and active feature-branch state before editing.
 
 GOAL
 Integrate the approved TradeThesis course template into the existing Django Academy so all future micro-courses can be added quickly from approved Markdown/content manifests and assets, while sharing one reusable Learning Room instead of copying a monolithic HTML page for every course.
 
-FIRST: inspect the actual branch and code. Read the existing Django models, migrations, views, URL patterns, templates, static assets, admin setup, permissions, tests and any seed/import commands. Report the real current state and propose a minimal implementation map before editing. Reuse the existing Academy course/module/lesson/content/media models wherever possible. Do not invent endpoints or duplicate the Django app in prototypeweb.
+FIRST: inspect the active `backend/` runtime on `my-new-branch`. Read its models, migrations, views, URLs, templates, static assets, admin setup, permissions, tests and import commands. Report actual state before editing. Reuse existing Academy models; do not create a second Academy app or modify the external rollback/source snapshot by default.
 
 DESIGN CONTRACT
-Use the canonical template-reference HTML as the approved concrete design reference, not as a production page to paste in wholesale. Keep the existing light TradeThesis look, typography, spacing, course navigation, readable lesson body, responsive layout, figure handling, lesson tabs and progress/completion interaction. Keep the “Your Trading Notebook” callout style but make its wording course-specific. Do not reintroduce the removed green “By the end, you can” objective card. Use the real sitewide Django base template, navigation and correct logo; do not create a second header, old login route or separate site shell.
+Use the canonical content-rich first-pass HTML as the approved concrete design and interaction reference, not as a production page to paste in wholesale. Preserve its rich lesson flow, light TradeThesis look, typography, spacing, course navigation, readable lesson body, figures, exercises, chart interactions, tabs and progress/completion interaction. Keep the “Your Trading Notebook” callout style but make its wording course-specific. Do not reintroduce the removed green “By the end, you can” objective card. Use the real sitewide Django base template, navigation and correct logo; do not create a second header, old login route or separate site shell.
 
 RAPID COURSE DEPLOYMENT
 Make the page layout reusable and drive course-specific content from the existing Academy models and an approved manifest/source package. Keep authored Markdown as the source content and treat generated preview JS/HTML as build output. Add/adapt one validated, idempotent import/update command that preserves stable IDs, progress, enrolments, offers and access relationships. Document how to create, preview, validate and import the next micro-course. Do not manually fork the full Bollinger HTML per course.
