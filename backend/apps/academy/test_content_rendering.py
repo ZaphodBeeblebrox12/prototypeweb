@@ -248,4 +248,11 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("isTableDivider", preview)
         self.assertIn('class="lesson-table-wrap" role="region"', preview)
         self.assertIn("Information tables:", preview)
+        self.assertIn("const headingMatch = line =>", preview)
+        self.assertIn("const isFence = line =>", preview)
+        self.assertIn("output.push('<h' + level", preview)
+        self.assertIn("output.push('<pre><code' + language", preview)
+        self.assertIn("Compact figure treatment:", preview)
+        self.assertIn("margin: 19px 0", preview)
+        self.assertIn("max-height: min(56vh, 500px)", preview)
 
