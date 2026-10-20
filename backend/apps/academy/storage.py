@@ -15,10 +15,10 @@ from urllib.parse import quote
 
 import requests
 from django.conf import settings
-from django.core.files.base import ContentFile
-from django.core.files.utils import validate_file_name
-from django.core.files.storage import FileSystemStorage
 from django.core.exceptions import SuspiciousFileOperation
+from django.core.files.base import ContentFile
+from django.core.files.storage import FileSystemStorage
+from django.core.files.utils import validate_file_name
 from django.utils.deconstruct import deconstructible
 from django.utils.encoding import force_str
 

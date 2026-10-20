@@ -8,8 +8,9 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from .models import CourseImport, CourseImportAsset
 from apps.academy.storage import course_asset_storage
+
+from .models import CourseImport, CourseImportAsset
 
 User = get_user_model()
 

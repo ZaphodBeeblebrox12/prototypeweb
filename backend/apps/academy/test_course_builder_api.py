@@ -8,7 +8,6 @@ from django.urls import reverse
 
 from .models import Course, CourseImport, CourseModule, Lesson
 
-
 User = get_user_model()
 
 

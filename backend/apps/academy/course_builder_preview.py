@@ -10,7 +10,6 @@ from django.views.decorators.http import require_GET
 
 from .permissions import is_course_content_admin
 
-
 _PREVIEW_FILE = Path(__file__).with_name("course_builder_preview.html")
 
 

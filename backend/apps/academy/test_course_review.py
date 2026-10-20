@@ -1,6 +1,6 @@
 """Regression tests for read-only course-import review and learner lesson tabs."""
-from types import SimpleNamespace
 import uuid
+from types import SimpleNamespace
 
 from django.contrib.auth import get_user_model
 from django.template.loader import render_to_string

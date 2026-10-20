@@ -7,10 +7,10 @@ import mimetypes
 import re
 import uuid
 from copy import deepcopy
+from io import BytesIO
 from urllib.parse import quote
 
 import requests
-from io import BytesIO
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -20,7 +20,6 @@ from django.db import transaction
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.text import slugify
 from django.views.decorators.http import require_http_methods
 from PIL import Image, UnidentifiedImageError
@@ -171,7 +170,7 @@ def _build_import_payload(course_state, course_slug):
                     continue
                 figure_ref = re.compile(r"(!\[[^\]]*\]\(asset://" + re.escape(str(image["assetUuid"])) + r"\))")
                 caption = str(image.get("caption", "")).strip()
-                content = figure_ref.sub(lambda match: match.group(1) + "\n\n" + caption, content)
+                content = figure_ref.sub(lambda match, caption=caption: match.group(1) + "\n\n" + caption, content)
             asset_ids = sorted(set(_ASSET_REF.findall(content)))
             questions = lesson.get("questions") if isinstance(lesson.get("questions"), list) else []
             learner_questions = []
@@ -268,17 +267,17 @@ def _copy_existing_asset(stable_id, target):
     previous = CourseImportAsset.objects.filter(stable_asset_id=stable_id).exclude(file="").order_by("-updated_at").first()
     if previous and previous.file and previous.file.storage.exists(previous.file.name):
         with previous.file.open("rb") as stream:
-            target.file.save(PathName(previous.file.name), ContentFile(stream.read()), save=True)
+            target.file.save(path_name(previous.file.name), ContentFile(stream.read()), save=True)
         return True
     live = CourseMediaAsset.objects.filter(pk=stable_id).exclude(file="").first()
     if live and live.file and live.file.storage.exists(live.file.name):
         with live.file.open("rb") as stream:
-            target.file.save(PathName(live.file.name), ContentFile(stream.read()), save=True)
+            target.file.save(path_name(live.file.name), ContentFile(stream.read()), save=True)
         return True
     return False
 
 
-def PathName(value):
+def path_name(value):
     return str(value).rsplit("/", 1)[-1] or "course-figure"
 
 
