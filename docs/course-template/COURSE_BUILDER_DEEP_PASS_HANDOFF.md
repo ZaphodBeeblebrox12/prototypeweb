@@ -161,6 +161,30 @@ Staging rollout result: set Render env var `ACADEMY_REQUIRE_DURABLE_ASSETS=True`
 Live-provider verification remains pending: Render logs show no authenticated `GET /staff/course-builder/api/` since that deployment, so the new admin-only `asset_storage` response has not yet been emitted in logs. Ask the author to refresh the Course Builder while signed in; then inspect the `Course Builder asset storage configured: backend=... durable=... writes_enabled=...` log entry and on-screen banner. Do not report Drive/GitHub storage as verified until that entry confirms a durable provider. If it reports local filesystem or writes disabled, image uploads will be blocked by design; configure Google Drive OAuth/service-account credentials/folders or a GitHub contents-write token in Render before relying on images.
 
 
+### Follow-up: Course deletion blocked by Course Media Asset permission (20 October 2026)
+
+The user hit Django Admin's cascade deletion confirmation error:
+> Deleting the selected courses would result in deleting related objects, but your account doesn't have permission to delete the following types of objects: course media asset
+
+Root cause:
+- `CourseAdmin.has_delete_permission` correctly allows content admins to delete courses.
+- `CourseMediaAssetAdmin.has_delete_permission` intentionally returns `False` to prohibit deleting individual assets.
+- `CourseMediaAsset.course` used `on_delete=PROTECT`, which blocks deletion of a course while owned media records exist.
+
+Fix committed on `my-new-branch`:
+- Changed `CourseMediaAsset.course` to `on_delete=CASCADE`, with migration `0008_course_media_asset_cascade.py`, so course-owned media records are removed only when the owning course is deleted.
+- CourseAdmin's `get_deleted_objects` now removes the child media model's permission from the delete-confirmation blocker only for a user who passes `is_course_content_admin`. Other protected relations and deletion permissions remain unchanged.
+- Direct deletion of a `CourseMediaAsset` from its own admin remains denied.
+- Added `test_course_deletion.py` regression tests for delete-confirmation permissions and owned asset cleanup. CI needed several test-import formatting corrections; the final tested branch revision is `81fcbb96943b5f5a9e86ec5347a539379bcdd99b`.
+- [Academy backend CI](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39484413882) and [Verify Django Academy backend](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39484413991) both succeeded.
+
+Staging deployment:
+- Manually deployed Academy staging service `tradethesis-academy-staging` only, deploy ID `dep-dbbs84nf3r2c73bl272g`, deployed commit `ea8a3159fb6428fab9caec52cc963c0d620bcce7` (handoff update on top of the tested code) at 19:43:56 UTC on 20 October 2026.
+- Render confirmed status `live`; the deployment event reported success and the new instance returned HTTP 200 from `/health/`.
+- No production deployment, main-branch merge or course publication occurred.
+
+Observed during handover: the browser made requests to `/learn/course/new-micro-course-draft11/lesson/8a6835cd-f150-424a-a903-b07769b1aa28/admin-preview/` which returned HTTP 404 after deploy. This appeared to be an existing/stale draft-preview URL; it does not affect the health check or deployment status, but if the author reports preview navigation problems, confirm the saved draft/lesson identifiers and preview route before diagnosing further.
+
 ### Remaining
 
 1. Add test coverage for native comparison-card teaching figures: stable token, title, cards, note, authored placement and escaping.
