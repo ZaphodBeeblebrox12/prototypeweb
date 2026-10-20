@@ -43,7 +43,13 @@ class GoogleDriveStorageMixin:
         if configured:
             return configured
         record = self._credential_record()
-        return record.get_refresh_token() if record and record.encrypted_refresh_token else ""
+        if not record or not record.encrypted_refresh_token:
+            return ""
+        try:
+            return record.get_refresh_token()
+        except Exception:
+            logger.warning("Stored Google Drive credential could not be decrypted; using another configured storage backend if available.")
+            return ""
 
     @property
     def _asset_folder_id(self):
