@@ -136,7 +136,7 @@ class AcademyViewTests(TestCase):
                         "duration_minutes": 12,
                         "summary": "A structured preview lesson.",
                         "content_markdown": (
-                            "### The question\\n\\n"
+                            "### The question\n\n"
                             "Start by describing what is visible."
                         ),
                         "content_json": {
