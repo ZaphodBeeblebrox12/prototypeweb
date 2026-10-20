@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Website preview · {{ course.title }} · TradeThesis Academy{% endblock %}
+{% block page_context %}
+<div class="page-context-status page-context-status--standalone" aria-label="Account status">
+  <span class="badge bg-warning text-dark">ADMIN PREVIEW</span>
+  {% if user.telegram_verified %}<span class="badge bg-success"><i class="bi bi-telegram"></i> Telegram connected</span>{% endif %}
+</div>
+{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'academy/course-overview.css' %}">
+<link rel="stylesheet" href="{% static 'academy/learning-room.css' %}">
+<link rel="stylesheet" href="{% static 'academy/lesson-references.css' %}">
+<link rel="stylesheet" href="{% static 'academy/course-import-preview.css' %}">
+{% endblock %}
+{% block content %}
+<div class="tt-admin-course-preview">
+  <aside class="tt-admin-preview-banner" role="status" aria-label="Administrator-only website preview">
+    <span class="tt-admin-preview-mark">PREVIEW</span>
+    <div class="tt-admin-preview-copy">
+      <strong>Unpublished course · administrator-only website preview</strong>
+      <p>You are viewing the learner-facing template using this staged course's actual content. Nothing here publishes the course or changes learner access or progress.</p>
+    </div>
+    <div class="tt-admin-preview-actions">
+      <a href="{{ admin_review_url }}">Content review ↗</a>
+      {% if selected_lesson %}<a href="{{ overview_url }}">Course overview</a>{% endif %}
+    </div>
+  </aside>
+
+  {% if selected_lesson %}
+  <div class="tt-learning-room tt-admin-learning-preview">
+    <div class="tt-breadcrumb">
+      <a href="{{ overview_url }}">Academy</a><span>/</span>
+      <a href="{{ overview_url }}">{{ course.title }}</a><span>/</span>
+      <span>{{ selected_module.title }}</span>
+    </div>
+    <header class="tt-course-header">
+      <p class="tt-eyebrow">MODULE {{ selected_module.position|stringformat:"02d" }} · {{ selected_module.title }} &nbsp; / &nbsp; LESSON {{ selected_lesson.source_id }}</p>
+      <h1>{{ selected_lesson.title }}</h1>
+      {% if selected_lesson.summary %}<p class="tt-lesson-summary">{{ selected_lesson.summary }}</p>{% endif %}
+      <div class="tt-lesson-meta">
+        <span>{{ selected_lesson.duration_minutes }} min estimated study</span>
+        <span class="tt-preview-label">Admin template preview</span>
+        <span>{{ total_lessons }} lessons in this course</span>
+      </div>
+    </header>
+
+    <div class="tt-room-grid">
+      <aside class="tt-outline" aria-label="Course lesson outline">
+        <div class="tt-outline-heading"><h2>Course outline</h2><span>{{ course.title }}</span></div>
+        <label class="tt-outline-search"><span class="visually-hidden">Search lessons</span><input type="search" placeholder="Find a lesson…" data-outline-search></label>
+        <nav>
+          {% for group in preview_modules %}
+          <section class="tt-outline-module">
+            <h3>{{ group.module.position|stringformat:"02d" }} · {{ group.module.title }}</h3>
+            <ul>
+              {% for item in group.lessons %}
+              <li class="tt-outline-item" data-outline-item>
+                <a href="{{ item.preview_url }}"{% if item.current %} aria-current="page" class="is-current"{% endif %}>
+                  <span>{{ item.lesson.title }}</span>
+                  {% if item.current %}<span class="tt-complete-mark" aria-label="Current lesson">●</span>{% endif %}
+                </a>
+              </li>
+              {% endfor %}
+            </ul>
+          </section>
+          {% endfor %}
+        </nav>
+      </aside>
+
+      <main class="tt-lesson-main">
+        <article class="tt-lesson-article">
+          {% include "academy/partials/lesson_tabs.html" with lesson_sections=selected_sections notebook=selected_notebook only %}
+          <dialog class="tt-figure-dialog" data-figure-dialog><button type="button" data-figure-close>Close</button><img data-figure-dialog-image alt=""><p data-figure-dialog-caption></p></dialog>
+          <nav class="tt-lesson-navigation" aria-label="Preview lesson navigation">
+            <a class="tt-lesson-nav-link" href="{{ overview_url }}"><span>← Course overview</span><strong>Explore all modules</strong></a>
+            <a class="tt-lesson-nav-link tt-lesson-nav-next" href="{{ admin_review_url }}"><span>Content review →</span><strong>Return to review controls</strong></a>
+          </nav>
+        </article>
+      </main>
+    </div>
+  </div>
+  {% else %}
+  <div class="tt-course-overview tt-admin-course-overview">
+    <nav class="tt-overview-breadcrumb" aria-label="Breadcrumb">
+      <a href="{% url 'academy:home' %}">Academy</a><span aria-hidden="true">/</span><span aria-current="page">{{ course.title }}</span>
+    </nav>
+
+    <section class="tt-overview-hero" aria-labelledby="tt-preview-course-title">
+      <div class="tt-overview-hero-copy">
+        <p class="tt-overview-eyebrow">TRADETHESIS MICRO-COURSE · TEMPLATE PREVIEW</p>
+        <h1 id="tt-preview-course-title">{{ course.title }}</h1>
+        {% if course.summary %}<p class="tt-overview-lede">{{ course.summary }}</p>{% endif %}
+        {% if course.description %}<p class="tt-overview-description">{{ course.description|linebreaksbr }}</p>{% endif %}
+        <div class="tt-overview-meta" aria-label="Course facts">
+          <span class="tt-overview-meta-pill"><strong>{{ total_modules|stringformat:"02d" }}</strong> modules</span>
+          <span class="tt-overview-meta-pill"><strong>{{ total_lessons|stringformat:"02d" }}</strong> lessons</span>
+          {% if total_study_minutes %}
+          <span class="tt-overview-meta-pill"><strong>{% if total_study_hours %}{{ total_study_hours }} hr{% if total_study_minutes_remainder %} {{ total_study_minutes_remainder }} min{% endif %}{% else %}{{ total_study_minutes }} min{% endif %}</strong> planned study</span>
+          {% endif %}
+        </div>
+        <div class="tt-overview-actions">
+          {% if preview_modules.0.lessons.0 %}<a class="tt-overview-button" href="{{ preview_modules.0.lessons.0.preview_url }}">Open first lesson ↗</a>{% endif %}
+          <a class="tt-overview-button tt-overview-button--secondary" href="#tt-preview-curriculum">Explore curriculum ↓</a>
+        </div>
+        <p class="tt-overview-hero-note">This is an unpublished source preview. Checkout, learner progress and access controls are intentionally omitted from this administrator-only view.</p>
+      </div>
+
+      <div class="tt-overview-art" aria-label="The TradeThesis learning method">
+        <div class="tt-overview-art-card">
+          <div class="tt-overview-art-top"><span>THE TRADETHESIS METHOD</span><span class="tt-overview-status">Context before conclusion</span></div>
+          <h2>From understanding to thoughtful application.</h2>
+          <p class="tt-overview-art-copy">Study one idea, compare it with the evidence, practise using it, then review what you learned.</p>
+          <div class="tt-overview-method-path">
+            <div class="tt-overview-method-step"><small>01 · NOTICE</small><strong>Observe</strong><span>Start with what is present.</span></div>
+            <div class="tt-overview-method-step"><small>02 · COMPARE</small><strong>Question</strong><span>Consider another explanation.</span></div>
+            <div class="tt-overview-method-step"><small>03 · APPLY</small><strong>Practise</strong><span>Use the idea in context.</span></div>
+            <div class="tt-overview-method-step"><small>04 · REVIEW</small><strong>Reflect</strong><span>Record the evidence and result.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tt-preview-curriculum" class="tt-overview-section tt-overview-curriculum" aria-labelledby="tt-preview-curriculum-title">
+      <div class="tt-overview-section-head">
+        <div><p class="tt-overview-eyebrow">INSIDE THE COURSE</p><h2 id="tt-preview-curriculum-title">Explore the curriculum.</h2></div>
+        <p>Choose any lesson to see the learner-facing Learning Room design, including full teaching content, chart examples, practice and notebook prompts.</p>
+      </div>
+      <div class="tt-overview-curriculum-grid">
+        {% for group in preview_modules %}
+        <article class="tt-overview-module">
+          <header class="tt-overview-module-head">
+            <span class="tt-overview-module-number">{{ group.module.position|stringformat:"02d" }}</span>
+            <div><span class="tt-overview-module-kicker">MODULE {{ group.module.position|stringformat:"02d" }}</span><h3>{{ group.module.title }}</h3></div>
+          </header>
+          {% if group.module.summary %}<p class="tt-overview-module-description">{{ group.module.summary }}</p>{% else %}<p class="tt-overview-module-description">Read the lessons and work through each example to develop a clearer, evidence-led understanding.</p>{% endif %}
+          <p class="tt-overview-module-count"><strong>{{ group.lessons|length }}</strong> {% if group.lessons|length == 1 %}lesson{% else %}lessons{% endif %} in this module</p>
+          <ul class="tt-overview-lesson-list">
+            {% for item in group.lessons %}
+            <li class="tt-overview-lesson-item">
+              <div class="tt-overview-lesson-main">
+                <span class="tt-overview-lesson-number">{{ group.module.position }}.{{ item.lesson.position }}</span>
+                <div><a class="tt-overview-lesson-title" href="{{ item.preview_url }}">{{ item.lesson.title }}</a>
+                  {% if item.lesson.summary %}<span class="tt-overview-lesson-summary">{{ item.lesson.summary }}</span>{% endif %}
+                </div>
+              </div>
+              <div class="tt-overview-lesson-state"><span class="tt-overview-chip tt-overview-chip--preview">Preview lesson</span><a href="{{ item.preview_url }}" aria-label="Preview {{ item.lesson.title }}">↗</a></div>
+            </li>
+            {% endfor %}
+          </ul>
+          <div class="tt-overview-module-footer"><a href="{{ group.lessons.0.preview_url }}">Preview this module ↗</a></div>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+    <section class="tt-overview-bottom-note" aria-label="Administrator preview note">
+      <div><h2>Review the content in its intended setting.</h2><p>Use the lesson outline to move between lessons. Return to Content review to replace figures or inspect publishing checks; this preview does not make the course visible to learners.</p></div>
+      <a class="tt-overview-button tt-overview-button--secondary" href="{{ admin_review_url }}">Back to content review ↗</a>
+    </section>
+  </div>
+  {% endif %}
+</div>
+<script src="{% static 'academy/learning-room.js' %}" defer></script>
+{% endblock %}
