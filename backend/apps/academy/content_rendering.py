@@ -17,6 +17,8 @@ _ALLOWED_TAGS = {
 _ALLOWED_ATTRIBUTES = {
     "a": ["href", "title", "rel", "class"],
     "aside": ["class", "aria-label"],
+    "figure": ["class", "data-figure-id"],
+    "figcaption": ["class"],
     "img": ["src", "alt", "title", "loading", "width", "height", "tabindex", "role", "aria-label"],
     "span": ["class", "aria-label"],
     "th": ["align"], "td": ["align"],
@@ -127,27 +129,86 @@ def _resolve_lesson_references(source, user=None, admin_preview=False):
     return _LESSON_REF.sub(replace_reference, source or ""), replacements
 
 
-def render_safe_markdown(source, asset_urls=None, user=None, admin_preview=False):
-    """Render sanitised Markdown, resolving stable lesson links using live Academy records."""
+def render_safe_markdown(
+    source,
+    asset_urls=None,
+    user=None,
+    admin_preview=False,
+    figure_metadata=None,
+    figure_prefix=None,
+):
+    """Render sanitised Markdown and structured inline figures using stable asset IDs."""
+    from html import escape
+
     source = validate_markdown_source(source or "")
     source, lesson_references = _resolve_lesson_references(
         source, user=user, admin_preview=admin_preview,
     )
-    resolved = _resolve_asset_refs(source, asset_urls or {})
+    asset_urls = asset_urls or {}
+    figure_metadata = figure_metadata if isinstance(figure_metadata, dict) else {}
+    figure_frames = {}
+
+    def replace_structured_figure(match):
+        alt_from_markdown, asset_id = match.groups()
+        metadata = figure_metadata.get(asset_id)
+        if not isinstance(metadata, dict):
+            return match.group(0)
+
+        alt = str(metadata.get("alt") or alt_from_markdown or metadata.get("title") or "Course figure").strip()
+        title = str(metadata.get("title") or metadata.get("caption") or alt or "Course figure").strip()
+        caption = str(metadata.get("caption") or "").strip()
+        if figure_prefix and not title.casefold().startswith("figure "):
+            title = f"Figure {figure_prefix} · {title}"
+
+        safe_title = escape(title)
+        safe_alt = escape(alt, quote=True)
+        safe_asset_id = escape(asset_id, quote=True)
+        safe_caption = escape(caption)
+        image_url = asset_urls.get(asset_id, "")
+        if image_url:
+            safe_url = escape(str(image_url), quote=True)
+            body = (
+                f'<span class="tt-purpose-figure-image"><img src="{safe_url}" alt="{safe_alt}" '
+                'loading="lazy" decoding="async" tabindex="0" role="button" '
+                'aria-label="Enlarge course figure"></span>'
+            )
+        else:
+            body = (
+                '<span class="tt-purpose-figure-missing" role="status">'
+                '<strong>Figure awaiting upload</strong>'
+                '<span>The image for this figure is not available in this preview.</span>'
+                '</span>'
+            )
+        caption_markup = f'<figcaption><p>{safe_caption}</p></figcaption>' if safe_caption else ""
+        markup = (
+            f'<figure class="tt-purpose-figure" data-figure-id="{safe_asset_id}">'
+            f'<span class="tt-purpose-figure-head"><strong>{safe_title}</strong>'
+            '<span>Purpose-built teaching aid</span></span>'
+            f'<span class="tt-purpose-figure-body">{body}</span>{caption_markup}</figure>'
+        )
+        token = f"TTSTRUCTUREDFIGURE{len(figure_frames)}END"
+        figure_frames[token] = markup
+        return token
+
+    # Replace only Markdown image references that have saved figure metadata. The placeholder
+    # preserves the exact text/image/text position and prevents Markdown from stripping the frame.
+    source = _IMAGE_MARKDOWN.sub(replace_structured_figure, source)
+    resolved = _resolve_asset_refs(source, asset_urls)
     rendered = markdown_library.markdown(
         resolved,
         extensions=["tables", "sane_lists", "smarty"],
         output_format="html",
     )
-    # Course Builder stores a figure caption as the paragraph immediately after its image.
-    # Group that pair semantically so captions remain attached and accessible in the Learning Room.
-    rendered = re.sub(r"<img\b", '<img tabindex="0" role="button" aria-label="Enlarge course figure"', rendered)
+    # Existing authored image-plus-caption pairs continue to work for old course content.
+    rendered = re.sub(r"<img\\b", '<img tabindex="0" role="button" aria-label="Enlarge course figure"', rendered)
     rendered = re.sub(
-        r"<p>(<img\b[^>]*>)</p>\s*<p>(.*?)</p>",
-        r"<figure>\1<figcaption>\2</figcaption></figure>",
+        r"<p>(<img\\b[^>]*>)</p>\\s*<p>(.*?)</p>",
+        r'<figure class="tt-course-figure">\\1<figcaption>\\2</figcaption></figure>',
         rendered,
         flags=re.DOTALL,
     )
+    for token, markup in figure_frames.items():
+        rendered = rendered.replace(f"<p>{token}</p>", markup).replace(token, markup)
     for token, markup in lesson_references.items():
         rendered = rendered.replace(f"<p>{token}</p>", markup)
         rendered = rendered.replace(token, markup)
@@ -160,7 +221,15 @@ def render_safe_markdown(source, asset_urls=None, user=None, admin_preview=False
     )
 
 
-def build_lesson_sections(source, asset_urls=None, user=None, admin_preview=False):
+
+def build_lesson_sections(
+    source,
+    asset_urls=None,
+    user=None,
+    admin_preview=False,
+    figure_metadata=None,
+    figure_prefix=None,
+):
     """Group source headings into the three reusable Learning Room tabs."""
     lines = (source or "").splitlines()
     groups = {"idea": [], "examples": [], "practice": []}
@@ -174,7 +243,8 @@ def build_lesson_sections(source, asset_urls=None, user=None, admin_preview=Fals
             return
         text = "\n".join(current_lines).strip()
         if current_heading:
-            text = "### " + current_heading + "\n\n" + text
+            # Keep the full authored heading marker instead of flattening H4-H6 to H3.
+            text = current_heading + ("\n\n" + text if text else "")
         groups[current_group].append(text)
         current_lines = []
         current_heading = None
@@ -183,8 +253,8 @@ def build_lesson_sections(source, asset_urls=None, user=None, admin_preview=Fals
         match = _HEADING.match(line)
         if match:
             finish_section()
-            current_heading = match.group(2)
-            heading = current_heading.casefold()
+            current_heading = line.strip()
+            heading = match.group(2).casefold()
             # Admin-added headings encode the selected Learning Room tab;
             # handle those exact prefixes before generic content heuristics.
             if heading.startswith("additional concept figure"):
@@ -229,12 +299,15 @@ def build_lesson_sections(source, asset_urls=None, user=None, admin_preview=Fals
     return {
         "idea_html": render_safe_markdown(
             rendered["idea"], asset_urls, user=user, admin_preview=admin_preview,
+            figure_metadata=figure_metadata, figure_prefix=figure_prefix,
         ),
         "examples_html": render_safe_markdown(
             rendered["examples"], asset_urls, user=user, admin_preview=admin_preview,
+            figure_metadata=figure_metadata, figure_prefix=figure_prefix,
         ),
         "practice_html": render_safe_markdown(
             rendered["practice"], asset_urls, user=user, admin_preview=admin_preview,
+            figure_metadata=figure_metadata, figure_prefix=figure_prefix,
         ),
         "figure_count": figure_count,
     }
