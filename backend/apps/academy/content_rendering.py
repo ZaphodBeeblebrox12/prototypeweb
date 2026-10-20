@@ -21,6 +21,7 @@ _ALLOWED_ATTRIBUTES = {
     "figcaption": ["class"],
     "img": ["src", "alt", "title", "loading", "width", "height", "tabindex", "role", "aria-label"],
     "span": ["class", "aria-label"],
+    "strong": ["class"],
     "th": ["align"], "td": ["align"],
 }
 _IMAGE_REF = re.compile(r"asset://([0-9a-fA-F-]{36})")
