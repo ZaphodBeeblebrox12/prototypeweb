@@ -73,6 +73,32 @@ The author must be able to write text, insert a figure between paragraphs, then 
 - No answer keys or draft content leak to learners; no learner progress is changed by admin preview.
 - Test/deploy status is reported honestly.
 
-## Current status
+## Current status (updated 20 October 2026)
 
-Research and the target code seams are identified. Implementation commits for this deep pass have not yet been made. Continue from section A and make durable commits as each coherent part is completed.
+Implementation is underway on my-new-branch. Recent changes are committed; no production deploy or merge has occurred.
+
+### Implemented in this pass
+
+- Shared renderer now accepts optional figure metadata and a figure prefix, renders uploaded image references as a safe, titled semantic figure frame, preserves legacy image-plus-caption Markdown, and keeps the authored heading markers for H3-H6 instead of flattening them to H3. H6 is included in the safe Markdown allowlist.
+- Builder asset normalization persists title, alt text, caption, stable asset UUID and digest. The import payload stores an asset-UUID-keyed figures map in content_json and no longer appends captions as stray adjacent paragraphs.
+- Published lesson, locked-lesson admin preview and unpublished CourseImport website preview pass figure metadata into the same renderer.
+- The learner and unpublished website preview share the content-rich lesson header: module/lesson labels, large serif title, summary, study-time panel and “In this lesson” steps. Shared Learning Room CSS includes responsive header and figure-frame styling.
+- Course Builder's “Preview course” action saves the shared draft and opens the server-returned, administrator-only Academy website preview in a new tab.
+- Removed a legacy image-insertion handler that appended figures at the end of the lesson. The active builder has multi-image metadata fields and cursor-based image insertion.
+- Added native editable comparison-card teaching figures using a stable teaching-figure token. Cards have kicker, title and body fields plus an overall title/note; default content mirrors the accepted three-card “What changing the settings changes” example. The shared renderer and builder's local preview both understand these blocks.
+- Added API regression coverage for stable uploaded-image metadata and website-preview URL, and created shared-rendering tests for heading hierarchy, structured figure placement, metadata escaping and legacy figure compatibility.
+- Durable notes remain in this file; the supporting handoff itself is committed at docs/course-template/COURSE_BUILDER_DEEP_PASS_HANDOFF.md.
+
+### Current verification
+
+- Latest GitHub Actions runs on the current code revision: Academy backend CI and Verify Django Academy backend.
+- Both Python 3.11 and 3.12 jobs have passed dependency installation, build-script syntax, migration-state checks, lint, formatting checks, type checks and focused image-slot regressions. The full suite (Academy backend CI) and backend regression tests (Verify Django Academy backend) are still running at the time of this note.
+- Do not call this pass complete until the full tests finish, comparison-card rendering tests are added and pass, final file reads confirm the latest source, and staging is exercised.
+
+### Remaining
+
+1. Add test coverage for native comparison-card teaching figures: stable token, title, cards, note, authored placement and escaping.
+2. Review Actions result for the current commit; resolve any regressions, then rerun after the comparison-card test is added.
+3. Ensure native comparison-card data survives save/reopen through the shared builder API, and check old single-image draft compatibility.
+4. Verify actual authenticated administrator website preview at desktop and mobile sizes, including a locked lesson and the unpublished Bollinger Bands course.
+5. Deploy to Academy staging only after the above checks. No production deployment, merge to main or course publication without explicit approval.
