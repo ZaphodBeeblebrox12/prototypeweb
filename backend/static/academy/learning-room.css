@@ -295,3 +295,12 @@
   .tt-tab-panel .tt-purpose-figure-body { padding: 10px; }
   .tt-tab-panel .tt-purpose-figure figcaption { padding: 0 10px 12px; }
 }
+
+/* Editable comparison-card figures, matching the accepted Figure 2.2 teaching aid. */
+.tt-tab-panel .tt-comparison-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tt-tab-panel .tt-comparison-card { display: block; min-width: 0; padding: 12px; border: 1px solid var(--tt-line); border-radius: 9px; background: #f3f4ed; }
+.tt-tab-panel .tt-comparison-kicker { display: block; color: var(--tt-green); font-size: 9px; font-weight: 850; letter-spacing: .08em; }
+.tt-tab-panel .tt-comparison-card strong { display: block; margin: 6px 0; color: var(--tt-green); font: 500 16px/1.3 Georgia, serif; }
+.tt-tab-panel .tt-comparison-copy { display: block; color: var(--tt-muted); font-size: 11px; line-height: 1.7; }
+.tt-tab-panel .tt-purpose-figure-note { display: block; margin: 12px 0 0; color: var(--tt-muted); font-size: 11px; line-height: 1.7; }
+@media (max-width: 700px) { .tt-tab-panel .tt-comparison-cards { grid-template-columns: minmax(0, 1fr); } }
