@@ -63,15 +63,15 @@ class GoogleDriveStorageMixin:
 
     @property
     def _drive_auth_configured(self):
+        # Prefer service-account credentials when configured. Partial OAuth setup must
+        # not crash uploads: fall back to another durable backend, or fail closed in
+        # hosted mode if no durable provider is configured.
+        if self._service_account_json:
+            return True
         refresh_token = self._refresh_token
         client_id = str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_ID", "") or "").strip()
         client_secret = str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET", "") or "").strip()
-        # A partially entered client configuration must not disable legacy storage.
-        if not refresh_token and not self._service_account_json:
-            return False
-        if refresh_token and not (client_id and client_secret):
-            raise ImproperlyConfigured("Google Drive refresh token is missing its OAuth client credentials.")
-        return bool(self._service_account_json or (refresh_token and client_id and client_secret))
+        return bool(refresh_token and client_id and client_secret)
 
     @property
     def _drive_asset_enabled(self):
@@ -83,14 +83,16 @@ class GoogleDriveStorageMixin:
             return self._drive_session_cache
         try:
             from google.auth.transport.requests import AuthorizedSession
-            if self._refresh_token:
+            client_id = str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_ID", "") or "").strip()
+            client_secret = str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET", "") or "").strip()
+            if self._refresh_token and client_id and client_secret:
                 from google.oauth2.credentials import Credentials
                 credentials = Credentials(
                     token=None,
                     refresh_token=self._refresh_token,
                     token_uri=str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_TOKEN_URI", "https://oauth2.googleapis.com/token")),
-                    client_id=str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_ID", "") or "").strip(),
-                    client_secret=str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET", "") or "").strip(),
+                    client_id=client_id,
+                    client_secret=client_secret,
                     scopes=[DRIVE_SCOPE],
                 )
             elif self._service_account_json:
