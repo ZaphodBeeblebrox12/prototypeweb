@@ -1,6 +1,7 @@
 """Authenticated learner views for TradeThesis Academy."""
 import json
 import mimetypes
+from urllib.parse import quote
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -15,6 +16,7 @@ from .content_rendering import build_lesson_sections
 from .models import (
     Course,
     CourseEntitlement,
+    CourseImport,
     CourseMediaAsset,
     CourseModule,
     CourseOffer,
@@ -233,6 +235,115 @@ def lesson_detail(request, course_slug, lesson_id):
         "previous_lesson": previous_lesson, "next_lesson": next_lesson,
         "course_progress_percent": course_progress_percent,
         "completed_lessons": completed_lessons, "total_lessons": total_lessons,
+    })
+
+
+@login_required
+def course_import_website_preview(request, import_id):
+    """Render an unpublished CourseImport in the real Academy shell for admins only."""
+    if not is_course_content_admin(request.user):
+        raise PermissionDenied("Administrator course-content access is required.")
+
+    record = get_object_or_404(CourseImport, pk=import_id)
+    payload = record.payload if isinstance(record.payload, dict) else {}
+    course = payload.get("course") if isinstance(payload.get("course"), dict) else {}
+    modules = payload.get("modules") if isinstance(payload.get("modules"), list) else []
+    raw_assets = list(record.assets.all())
+    live_assets = {
+        str(asset.pk): asset
+        for asset in CourseMediaAsset.objects.filter(
+            pk__in=[item.stable_asset_id for item in raw_assets]
+        )
+    }
+    asset_urls = {}
+    for asset in raw_assets:
+        live_asset = live_assets.get(str(asset.stable_asset_id))
+        review_asset_url = reverse(
+            "admin:academy_courseimport_asset",
+            args=[record.pk, asset.stable_asset_id],
+        )
+        if asset.file or asset.source_path or (live_asset and live_asset.file):
+            asset_urls[str(asset.stable_asset_id)] = review_asset_url
+        elif asset.original_url.startswith(("https://", "http://")):
+            asset_urls[str(asset.stable_asset_id)] = asset.original_url
+        elif live_asset and live_asset.original_url.startswith(("https://", "http://")):
+            asset_urls[str(asset.stable_asset_id)] = live_asset.original_url
+
+    overview_url = reverse("academy:course-import-preview", args=[record.pk])
+    admin_review_url = reverse("admin:academy_courseimport_review", args=[record.pk])
+    preview_modules = []
+    selected_lesson = None
+    selected_module = None
+    requested_source_id = str(request.GET.get("lesson", "")).strip()
+    total_lessons = 0
+    total_study_minutes = 0
+    first_preview_url = overview_url
+
+    for module_data in modules:
+        if not isinstance(module_data, dict):
+            continue
+        lessons_data = module_data.get("lessons", [])
+        if not isinstance(lessons_data, list):
+            lessons_data = []
+        lesson_rows = []
+        for lesson_data in lessons_data:
+            if not isinstance(lesson_data, dict):
+                continue
+            source_id = str(lesson_data.get("source_id", "")).strip()
+            lesson_url = overview_url
+            if source_id:
+                lesson_url = overview_url + "?lesson=" + quote(source_id, safe="")
+            row = {
+                "lesson": lesson_data,
+                "preview_url": lesson_url,
+                "current": bool(source_id and source_id == requested_source_id),
+            }
+            lesson_rows.append(row)
+            total_lessons += 1
+            try:
+                total_study_minutes += max(0, int(lesson_data.get("duration_minutes", 0)))
+            except (TypeError, ValueError):
+                pass
+            if total_lessons == 1 and source_id:
+                first_preview_url = lesson_url
+            if row["current"]:
+                selected_lesson = lesson_data
+                selected_module = module_data
+        if lesson_rows:
+            preview_modules.append({"module": module_data, "lessons": lesson_rows})
+
+    selected_sections = None
+    selected_notebook = {}
+    if selected_lesson is not None:
+        selected_sections = build_lesson_sections(
+            selected_lesson.get("content_markdown", ""),
+            asset_urls,
+            user=request.user,
+            admin_preview=True,
+        )
+        content_json = selected_lesson.get("content_json", {})
+        if not isinstance(content_json, dict):
+            content_json = {}
+        selected_notebook = content_json.get("notebook") or payload.get("notebook", {})
+        if not isinstance(selected_notebook, dict):
+            selected_notebook = {}
+
+    return render(request, "academy/course_import_website_preview.html", {
+        "import_record": record,
+        "course": course,
+        "preview_modules": preview_modules,
+        "total_modules": len(preview_modules),
+        "total_lessons": total_lessons,
+        "total_study_minutes": total_study_minutes,
+        "total_study_hours": total_study_minutes // 60,
+        "total_study_minutes_remainder": total_study_minutes % 60,
+        "overview_url": overview_url,
+        "first_preview_url": first_preview_url,
+        "admin_review_url": admin_review_url,
+        "selected_lesson": selected_lesson,
+        "selected_module": selected_module,
+        "selected_sections": selected_sections,
+        "selected_notebook": selected_notebook,
     })
 
 
