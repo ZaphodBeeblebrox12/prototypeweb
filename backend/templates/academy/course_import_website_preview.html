@@ -34,23 +34,7 @@
       <a href="{{ overview_url }}">{{ course.title }}</a><span>/</span>
       <span>{{ selected_module.title }}</span>
     </div>
-    <header class="tt-course-header tt-course-header--depth">
-      <div class="tt-course-header-copy">
-        <div class="tt-course-header-tags"><span class="tt-course-header-tag">{{ selected_module.title }}</span><span class="tt-course-header-tag">Lesson {{ selected_lesson.source_id }}</span></div>
-        <p class="tt-eyebrow"><span class="tt-heading-rule" aria-hidden="true"></span> The question behind the chart</p>
-        <h1>{{ selected_lesson.title }}</h1>
-        {% if selected_lesson.summary %}<p class="tt-lesson-summary">{{ selected_lesson.summary }}</p>{% endif %}
-        <div class="tt-lesson-meta"><span>{{ selected_lesson.duration_minutes }} minutes</span><span class="tt-preview-label">Administrator preview</span></div>
-      </div>
-      <aside class="tt-lesson-plan" aria-label="In this lesson">
-        <div class="tt-lesson-plan-top"><strong>In this lesson</strong><span>{{ selected_lesson.source_id }}</span></div>
-        <p class="tt-lesson-plan-kicker">Study time</p>
-        <div class="tt-lesson-plan-time"><strong>{{ selected_lesson.duration_minutes }} minutes</strong><span>Estimated study time</span></div>
-        <div class="tt-lesson-plan-divider"></div>
-        <p class="tt-lesson-plan-kicker">You will work through</p>
-        <div class="tt-lesson-plan-steps"><div><span>01</span><strong>Example</strong></div><div><span>02</span><strong>Contrast</strong></div><div><span>03</span><strong>Decide</strong></div></div>
-      </aside>
-    </header>
+
 
     <div class="tt-room-grid">
       <aside class="tt-outline" aria-label="Course lesson outline">
@@ -76,6 +60,23 @@
       </aside>
 
       <main class="tt-lesson-main">
+      <header class="tt-course-header tt-course-header--depth">
+        <div class="tt-course-header-copy">
+          <div class="tt-course-header-tags"><span class="tt-course-header-tag">{{ selected_module.title }}</span><span class="tt-course-header-tag">Lesson {{ selected_lesson.source_id }}</span></div>
+          <p class="tt-eyebrow"><span class="tt-heading-rule" aria-hidden="true"></span> The question behind the chart</p>
+          <h1>{{ selected_lesson.title }}</h1>
+          {% if selected_lesson.summary %}<p class="tt-lesson-summary">{{ selected_lesson.summary }}</p>{% endif %}
+          <div class="tt-lesson-meta"><span>{{ selected_lesson.duration_minutes }} minutes</span><span class="tt-preview-label">Administrator preview</span></div>
+        </div>
+        <aside class="tt-lesson-plan" aria-label="In this lesson">
+          <div class="tt-lesson-plan-top"><strong>In this lesson</strong><span>{{ selected_lesson.source_id }}</span></div>
+          <p class="tt-lesson-plan-kicker">Study time</p>
+          <div class="tt-lesson-plan-time"><strong>{{ selected_lesson.duration_minutes }} minutes</strong><span>Estimated study time</span></div>
+          <div class="tt-lesson-plan-divider"></div>
+          <p class="tt-lesson-plan-kicker">You will work through</p>
+          <div class="tt-lesson-plan-steps"><div><span>01</span><strong>Example</strong></div><div><span>02</span><strong>Contrast</strong></div><div><span>03</span><strong>Decide</strong></div></div>
+        </aside>
+      </header>
         <article class="tt-lesson-article">
           {% if selected_video_url %}
           <section class="tt-video-lesson" aria-label="Lesson video">

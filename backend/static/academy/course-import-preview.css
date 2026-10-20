@@ -45,3 +45,11 @@
   .tt-admin-preview-actions { grid-column: 1 / -1; justify-content: flex-start; padding-top: 2px; }
   .tt-admin-preview-copy p { font-size: 11px; }
 }
+
+/* Keep the admin preview aligned to the source template's available content width. */
+.tt-admin-course-preview { padding: 10px clamp(12px, 2.2vw, 30px) 32px; }
+.tt-admin-preview-banner { margin-bottom: 14px; padding: 12px 15px; }
+.tt-admin-learning-preview { padding-top: 4px; }
+.tt-admin-learning-preview .tt-lesson-main { min-width: 0; width: 100%; }
+.tt-admin-learning-preview .tt-lesson-article { max-width: none; width: 100%; margin: 0; }
+.tt-admin-learning-preview .tt-lesson-navigation { margin-top: 16px; }

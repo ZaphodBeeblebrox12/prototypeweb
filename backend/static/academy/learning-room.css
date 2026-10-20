@@ -584,3 +584,126 @@
 .tt-learning-room .tt-tab-panel .lesson-table-wrap td[align="center"] { text-align: center; }
 .tt-learning-room .tt-tab-panel .lesson-table-wrap th[align="right"],
 .tt-learning-room .tt-tab-panel .lesson-table-wrap td[align="right"] { text-align: right; }
+
+/* Density alignment pass — match the approved first-pass template.
+   The lesson header shares the main column with the outline; retain hierarchy without excess blank space. */
+.tt-learning-room { padding: clamp(16px, 2.2vw, 30px); }
+.tt-learning-room .tt-breadcrumb { margin-bottom: 15px; padding-bottom: 0; }
+.tt-learning-room .tt-room-grid { grid-template-columns: 258px minmax(0, 1fr); gap: 22px; }
+.tt-learning-room .tt-course-header { border: 0; margin: 0; padding: 0; }
+.tt-learning-room .tt-course-header--depth {
+  display: grid;
+  grid-template-columns: minmax(0, 1.48fr) minmax(220px, .72fr);
+  align-items: center;
+  gap: clamp(19px, 2.3vw, 30px);
+  margin: 0 0 18px;
+  padding: clamp(19px, 2.1vw, 28px);
+  border: 1px solid var(--tt-line);
+  border-left: 4px solid var(--tt-green);
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--tt-surface) 0%, var(--tt-surface) 57%, var(--tt-green-wash) 100%);
+  box-shadow: 0 9px 24px #29382e0a, inset 0 1px 0 #ffffffb5;
+}
+.tt-learning-room .tt-course-header--depth::after {
+  width: 270px; height: 270px; right: -145px; top: -150px; opacity: .35;
+  box-shadow: 0 0 0 17px var(--tt-surface), 0 0 0 18px var(--tt-line),
+              0 0 0 36px var(--tt-surface), 0 0 0 37px var(--tt-line),
+              0 0 0 58px var(--tt-surface), 0 0 0 59px var(--tt-line);
+}
+.tt-learning-room .tt-course-header-copy { min-width: 0; padding: 0; }
+.tt-learning-room .tt-course-header-tags { gap: 8px; margin-bottom: 18px; }
+.tt-learning-room .tt-course-header-tag { padding: 6px 8px; border-radius: 7px; font-size: 8px; letter-spacing: .09em; }
+.tt-learning-room .tt-course-header--depth .tt-eyebrow { margin: 0 0 9px; font-size: 8px; letter-spacing: .12em; }
+.tt-learning-room .tt-course-header--depth .tt-heading-rule { width: 22px; }
+.tt-learning-room .tt-course-header--depth h1 {
+  max-width: 720px; margin: 12px 0 10px;
+  font-size: clamp(34px, 3.45vw, 47px); line-height: 1.015; letter-spacing: -.05em;
+}
+.tt-learning-room .tt-course-header--depth .tt-lesson-summary {
+  max-width: 670px; margin: 0 0 12px; font-size: 14px; line-height: 1.68;
+}
+.tt-learning-room .tt-course-header--depth .tt-lesson-meta { gap: 9px 12px; font-size: 11px; }
+.tt-learning-room .tt-lesson-plan {
+  align-self: stretch; padding: 16px 16px 15px; border-radius: 11px;
+  box-shadow: inset 0 1px 0 #ffffff9c, 0 4px 12px #29382e05;
+}
+.tt-learning-room .tt-lesson-plan-top { gap: 10px; padding-bottom: 11px; font-size: 8px; letter-spacing: .12em; }
+.tt-learning-room .tt-lesson-plan-top span { min-width: 24px; width: 24px; height: 24px; font-size: 11px; }
+.tt-learning-room .tt-lesson-plan-kicker { margin: 12px 0 4px; font-size: 8px; letter-spacing: .1em; }
+.tt-learning-room .tt-lesson-plan-time { gap: 5px 8px; }
+.tt-learning-room .tt-lesson-plan-time strong { font-size: 23px; line-height: 1.2; }
+.tt-learning-room .tt-lesson-plan-time span { font-size: 9px; }
+.tt-learning-room .tt-lesson-plan-divider { margin: 11px 0; }
+.tt-learning-room .tt-lesson-plan-steps { gap: 7px; padding-top: 8px; }
+.tt-learning-room .tt-lesson-plan-steps strong { font-size: 11px; }
+.tt-learning-room .tt-lesson-plan-steps span { font-size: 7px; }
+.tt-learning-room .tt-tab-panel { padding: clamp(18px, 2.2vw, 28px) 4px; font-size: 1rem; line-height: 1.78; }
+.tt-learning-room .tt-tab-panel h2 { margin: 1.15em 0 .45em; font-size: clamp(1.45rem, 2.5vw, 2.1rem); line-height: 1.12; }
+.tt-learning-room .tt-tab-panel h3 { margin: 1.15em 0 .45em; font-size: clamp(1.25rem, 2vw, 1.65rem); line-height: 1.18; }
+.tt-learning-room .tt-tab-panel p { margin-bottom: .9em; }
+.tt-learning-room .tt-tab-panel .tt-purpose-figure,
+.tt-learning-room .tt-tab-panel .tt-course-figure {
+  margin: 20px 0; border-radius: 11px; box-shadow: 0 5px 14px #29382e09;
+}
+.tt-learning-room .tt-tab-panel .tt-purpose-figure-head { padding: 11px 13px 13px; background: linear-gradient(120deg, #e5ecdf, #f1ead8); }
+.tt-learning-room .tt-tab-panel .tt-purpose-figure-header-top { gap: 10px; align-items: center; }
+.tt-learning-room .tt-tab-panel .tt-purpose-figure-brand { font-size: 8px; letter-spacing: .12em; }
+.tt-learning-room .tt-tab-panel .tt-purpose-figure-module { font-size: 8px; letter-spacing: .06em; }
+.tt-learning-room .tt-tab-panel .tt-purpose-figure-title { margin-top: 7px; font-size: clamp(20px, 2.3vw, 28px); line-height: 1.2; }
+.tt-learning-room .tt-tab-panel .tt-purpose-figure-body { padding: 14px; }
+.tt-learning-room .tt-tab-panel .tt-purpose-figure-image img { max-height: 470px; }
+.tt-learning-room .tt-tab-panel .tt-purpose-figure figcaption { padding: 12px 13px 5px; font-size: 12px; line-height: 1.6; }
+.tt-learning-room .tt-tab-panel .tt-image-group-grid { gap: 14px; }
+.tt-learning-room .tt-tab-panel .tt-image-group-item { padding: 10px; border-radius: 9px; }
+.tt-learning-room .tt-tab-panel .tt-image-group-item .tt-purpose-figure-image img { max-height: 250px; }
+.tt-learning-room .tt-tab-panel .tt-image-group-item-title { font-size: 16px; line-height: 1.35; }
+.tt-learning-room .tt-tab-panel .tt-image-group-caption { font-size: 11px; line-height: 1.6; }
+.tt-learning-room .tt-tab-panel .tt-comparison-cards { gap: 10px; }
+.tt-learning-room .tt-tab-panel .tt-comparison-card { padding: 12px; border-radius: 9px; }
+.tt-learning-room .tt-tab-panel .tt-comparison-card strong { margin: 6px 0; font-size: 16px; line-height: 1.3; }
+.tt-learning-room .tt-tab-panel .tt-comparison-copy { font-size: 11px; line-height: 1.7; }
+@media (max-width: 1120px) {
+  .tt-learning-room .tt-room-grid { grid-template-columns: 235px minmax(0, 1fr); gap: 17px; }
+  .tt-learning-room .tt-course-header--depth { grid-template-columns: minmax(0, 1.2fr) minmax(215px, .8fr); gap: 18px; padding: 20px; }
+  .tt-learning-room .tt-course-header--depth h1 { font-size: clamp(33px, 3.6vw, 42px); }
+  .tt-learning-room .tt-lesson-plan { padding: 15px 13px 14px; }
+  .tt-learning-room .tt-lesson-plan-time strong { font-size: 21px; }
+}
+@media (max-width: 900px) {
+  .tt-learning-room .tt-room-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .tt-learning-room .tt-outline { position: static; max-height: 380px; }
+  .tt-learning-room .tt-course-header--depth { grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 20px 18px; }
+  .tt-learning-room .tt-course-header--depth h1 { font-size: clamp(34px, 5.8vw, 43px); }
+  .tt-learning-room .tt-lesson-plan {
+    display: grid; grid-template-columns: minmax(130px, .8fr) minmax(0, 1.2fr);
+    align-items: center; column-gap: 22px; row-gap: 8px; padding: 14px 16px;
+  }
+  .tt-learning-room .tt-lesson-plan-top { grid-column: 1 / -1; }
+  .tt-learning-room .tt-lesson-plan-divider { display: none; }
+  .tt-learning-room .tt-lesson-plan-time { margin-top: 0; }
+}
+@media (max-width: 620px) {
+  .tt-learning-room { padding: 15px 12px 22px; }
+  .tt-learning-room .tt-breadcrumb { margin-bottom: 11px; font-size: .76rem; gap: 7px; }
+  .tt-learning-room .tt-course-header--depth { padding: 17px 14px 14px; border-radius: 14px; }
+  .tt-learning-room .tt-course-header-tags { gap: 5px; margin-bottom: 12px; }
+  .tt-learning-room .tt-course-header-tag { padding: 5px 6px; font-size: 7px; letter-spacing: .06em; }
+  .tt-learning-room .tt-course-header--depth .tt-eyebrow { font-size: 7px; letter-spacing: .09em; }
+  .tt-learning-room .tt-course-header--depth h1 { margin: 9px 0 8px; font-size: clamp(31px, 8.5vw, 37px); line-height: 1.03; }
+  .tt-learning-room .tt-course-header--depth .tt-lesson-summary { font-size: 13px; line-height: 1.65; }
+  .tt-learning-room .tt-lesson-plan { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 10px 12px; padding: 12px; }
+  .tt-learning-room .tt-lesson-plan-time strong { display: block; font-size: 21px; }
+  .tt-learning-room .tt-lesson-plan-time span { display: block; margin-top: 2px; }
+  .tt-learning-room .tt-lesson-plan-steps { gap: 5px; }
+  .tt-learning-room .tt-lesson-plan-steps strong { font-size: 10px; }
+  .tt-learning-room .tt-lesson-plan-steps span { font-size: 7px; }
+  .tt-learning-room .tt-tab-list { gap: 14px; }
+  .tt-learning-room .tt-tab { font-size: .83rem; padding: 11px 0 12px; }
+  .tt-learning-room .tt-tab-panel { padding: 19px 0; font-size: .98rem; line-height: 1.72; }
+  .tt-learning-room .tt-tab-panel .tt-purpose-figure-head { padding: 10px 11px 11px; }
+  .tt-learning-room .tt-tab-panel .tt-purpose-figure-header-top { align-items: flex-start; flex-direction: column; gap: 4px; }
+  .tt-learning-room .tt-tab-panel .tt-purpose-figure-title { font-size: 21px; }
+  .tt-learning-room .tt-tab-panel .tt-purpose-figure-body { padding: 10px; }
+  .tt-learning-room .tt-tab-panel .tt-purpose-figure figcaption { padding: 10px 11px 5px; }
+  .tt-learning-room .tt-tab-panel .tt-comparison-cards { grid-template-columns: minmax(0, 1fr); }
+}

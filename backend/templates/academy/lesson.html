@@ -12,26 +12,7 @@
 <div class="tt-learning-room{% if admin_preview %} tt-admin-lesson-preview{% endif %}">
   {% if admin_preview %}<aside class="tt-admin-lesson-preview-banner" role="status"><strong>ADMIN PREVIEW · LOCKED ACCESS BYPASSED FOR REVIEW ONLY</strong><span>This read-only view does not unlock the lesson for learners, save progress, or submit notebook and quiz responses.</span><a href="{% url 'academy:course-detail' course.slug %}">Back to course overview ↗</a></aside>{% endif %}
   <div class="tt-breadcrumb"><a href="{% url 'academy:home' %}">Academy</a><span>/</span><a href="{% url 'academy:course-detail' course.slug %}">{{ course.title }}</a><span>/</span><span>{{ module.title }}</span></div>
-  <header class="tt-course-header tt-course-header--depth">
-    <div class="tt-course-header-copy">
-      <div class="tt-course-header-tags"><span class="tt-course-header-tag">{{ module.title }}</span><span class="tt-course-header-tag">Lesson {{ module.position|stringformat:"02d" }}.{{ lesson.position|stringformat:"02d" }}</span></div>
-      <p class="tt-eyebrow"><span class="tt-heading-rule" aria-hidden="true"></span> The question behind the chart</p>
-      <h1>{{ lesson.title }}</h1>
-      {% if lesson.summary %}<p class="tt-lesson-summary">{{ lesson.summary }}</p>{% endif %}
-      <div class="tt-lesson-meta"><span>{{ lesson.duration_minutes }} minutes</span>{% if admin_preview %}<span class="tt-preview-label">Administrator preview</span>{% elif lesson.is_preview %}<span class="tt-preview-label">Lesson preview</span>{% endif %}</div>
-    </div>
-    <aside class="tt-lesson-plan" aria-label="In this lesson">
-      <div class="tt-lesson-plan-top"><strong>In this lesson</strong><span>{{ module.position|stringformat:"02d" }}.{{ lesson.position|stringformat:"02d" }}</span></div>
-      <p class="tt-lesson-plan-kicker">Study time</p>
-      <div class="tt-lesson-plan-time"><strong>{{ lesson.duration_minutes }} minutes</strong><span>Estimated study time</span></div>
-      <div class="tt-lesson-plan-divider"></div>
-      <p class="tt-lesson-plan-kicker">You will work through</p>
-      <div class="tt-lesson-plan-steps"><div><span>01</span><strong>Example</strong></div><div><span>02</span><strong>Contrast</strong></div><div><span>03</span><strong>Decide</strong></div></div>
-    </aside>
-    {% if not admin_preview %}
-    <div class="tt-course-progress" role="progressbar" aria-label="Course progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ course_progress_percent }}"><span style="width:{{ course_progress_percent }}%"></span></div>
-    {% endif %}
-  </header>
+
 
   <div class="tt-room-grid">
     <aside class="tt-outline" aria-label="Course lesson outline">
@@ -66,6 +47,26 @@
     </aside>
 
     <main class="tt-lesson-main">
+    <header class="tt-course-header tt-course-header--depth">
+      <div class="tt-course-header-copy">
+        <div class="tt-course-header-tags"><span class="tt-course-header-tag">{{ module.title }}</span><span class="tt-course-header-tag">Lesson {{ module.position|stringformat:"02d" }}.{{ lesson.position|stringformat:"02d" }}</span></div>
+        <p class="tt-eyebrow"><span class="tt-heading-rule" aria-hidden="true"></span> The question behind the chart</p>
+        <h1>{{ lesson.title }}</h1>
+        {% if lesson.summary %}<p class="tt-lesson-summary">{{ lesson.summary }}</p>{% endif %}
+        <div class="tt-lesson-meta"><span>{{ lesson.duration_minutes }} minutes</span>{% if admin_preview %}<span class="tt-preview-label">Administrator preview</span>{% elif lesson.is_preview %}<span class="tt-preview-label">Lesson preview</span>{% endif %}</div>
+      </div>
+      <aside class="tt-lesson-plan" aria-label="In this lesson">
+        <div class="tt-lesson-plan-top"><strong>In this lesson</strong><span>{{ module.position|stringformat:"02d" }}.{{ lesson.position|stringformat:"02d" }}</span></div>
+        <p class="tt-lesson-plan-kicker">Study time</p>
+        <div class="tt-lesson-plan-time"><strong>{{ lesson.duration_minutes }} minutes</strong><span>Estimated study time</span></div>
+        <div class="tt-lesson-plan-divider"></div>
+        <p class="tt-lesson-plan-kicker">You will work through</p>
+        <div class="tt-lesson-plan-steps"><div><span>01</span><strong>Example</strong></div><div><span>02</span><strong>Contrast</strong></div><div><span>03</span><strong>Decide</strong></div></div>
+      </aside>
+      {% if not admin_preview %}
+      <div class="tt-course-progress" role="progressbar" aria-label="Course progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ course_progress_percent }}"><span style="width:{{ course_progress_percent }}%"></span></div>
+      {% endif %}
+    </header>
       <article class="tt-lesson-article">
         {% if video_url %}<section class="tt-video-lesson" aria-label="Lesson video">{% if video_is_file %}<video controls preload="metadata" src="{{ video_url }}">Your browser does not support video playback.</video>{% else %}<a href="{{ video_url }}" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a><p class="small text-muted">This video opens in a new tab.</p>{% endif %}</section>{% endif %}
         {% if admin_preview %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook practice_questions=practice_questions admin_preview=True only %}{% else %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook lesson=lesson practice_questions=practice_questions only %}{% endif %}
