@@ -141,6 +141,12 @@ class SharedLessonRenderingTests(SimpleTestCase):
         # It should not also be appended to the end of the preview as unplaced.
         self.assertIn("[image.id, image.assetUuid]", preview)
         self.assertIn("authoredContent.includes('asset://' + id)", preview)
+        self.assertIn('data-action="add-image-group"', preview)
+        self.assertIn('data-action="insert-image-group"', preview)
+        self.assertIn('data-image-group-member', preview)
+        self.assertIn(r"[[image-group:", preview)
+        self.assertIn("TRADETHESIS · LEARNING ROOM", preview)
+        self.assertIn("tt-purpose-figure-module", preview)
 
 
     def test_titled_image_group_renders_multiple_images_with_module_heading_in_place(self):
