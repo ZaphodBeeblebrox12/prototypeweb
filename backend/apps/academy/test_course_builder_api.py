@@ -171,6 +171,65 @@ class CourseBuilderApiTests(TestCase):
         saved = record.payload["modules"][0]["lessons"][0]["content_json"]["related_course_ids"]
         self.assertEqual(saved, [str(related.pk)])
 
+    def test_builder_persists_stable_inline_lesson_reference_ids(self):
+        destination = Course.objects.create(
+            title="Volume and Price Analysis",
+            slug="volume-price-analysis",
+            summary="Read participation alongside price.",
+            status=Course.Status.PUBLISHED,
+        )
+        module = CourseModule.objects.create(
+            course=destination, title="Volume context", slug="volume-context",
+            position=1, is_published=True,
+        )
+        lesson = Lesson.objects.create(
+            module=module, title="Read relative volume", slug="read-relative-volume",
+            position=1, is_published=True, is_preview=True,
+            content_markdown="## Compare volume\n\nPrivate destination body is not copied.",
+        )
+        payload = self.draft_payload("course-with-inline-lesson-reference")
+        payload["course"]["modules"][0]["lessons"][0]["content"] += (
+            f"\n\n[[lesson:{lesson.pk}]]"
+        )
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        record = CourseImport.objects.get(pk=response.json()["record_id"])
+        saved_lesson = record.payload["modules"][0]["lessons"][0]
+        self.assertEqual(
+            saved_lesson["content_json"]["lesson_reference_ids"],
+            [str(lesson.pk)],
+        )
+        self.assertNotIn("Private destination body", json.dumps(saved_lesson))
+
+    def test_builder_catalogue_includes_only_published_lesson_destinations(self):
+        course = Course.objects.create(
+            title="Volume Profile", slug="volume-profile",
+            status=Course.Status.PUBLISHED,
+        )
+        module = CourseModule.objects.create(
+            course=course, title="Value areas", slug="value-areas",
+            position=1, is_published=True,
+        )
+        Lesson.objects.create(
+            module=module, title="Read the value area", slug="read-value-area",
+            summary="Understand value migration and acceptance.",
+            content_markdown="## Value area\n\nVolume profile helps describe acceptance.",
+            position=1, is_published=True,
+        )
+        Lesson.objects.create(
+            module=module, title="Unpublished draft lesson", slug="draft-lesson",
+            position=2, is_published=False,
+        )
+        response = self.client.get(reverse("staff_course_builder_api"))
+        self.assertEqual(response.status_code, 200, response.content)
+        references = response.json()["lesson_references"]
+        self.assertEqual([item["title"] for item in references], ["Read the value area"])
+        self.assertIn("Value area", references[0]["topics"])
+
     def test_notebook_reflections_are_saved_to_learner_progress(self):
         from .models import LessonProgress
 
