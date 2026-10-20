@@ -145,6 +145,8 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn('data-action="insert-image-group"', preview)
         self.assertIn('data-image-group-member', preview)
         self.assertIn(r"[[image-group:", preview)
+        self.assertIn("groupedReference", preview)
+        self.assertIn("imageGroups.some", preview)
         self.assertIn("TRADETHESIS · LEARNING ROOM", preview)
         self.assertIn("tt-purpose-figure-module", preview)
 
