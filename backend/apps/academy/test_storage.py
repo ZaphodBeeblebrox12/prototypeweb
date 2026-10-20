@@ -67,6 +67,17 @@ class PrivateCourseAssetStorageTests(SimpleTestCase):
             local_open.assert_called_once_with(self.storage, "missing.png", "rb")
 
 
+    def test_missing_remote_provider_refuses_hosted_image_writes(self):
+        with override_settings(
+            ACADEMY_GITHUB_ASSET_REPOSITORY="owner/private-assets",
+            ACADEMY_GITHUB_ASSET_TOKEN="",
+            ACADEMY_REQUIRE_DURABLE_ASSETS=True,
+            DEBUG=False,
+        ):
+            storage = PrivateCourseAssetStorage()
+            with self.assertRaisesRegex(OSError, "Durable course image storage is not configured"):
+                storage._save("academy/course-assets/figure.png", ContentFile(b"image bytes"))
+
     def test_request_timeout_uses_safe_error_without_credentials(self):
         with (
             patch(
