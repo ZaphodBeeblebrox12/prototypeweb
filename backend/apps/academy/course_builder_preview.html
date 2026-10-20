@@ -140,6 +140,13 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .media-empty { color:var(--muted); font-size:11px; text-align:center; padding:24px; }
 .media-meta { padding:12px; display:grid; gap:8px; }
 .media-meta label { font-size:10px; font-weight:800; }
+.image-group-checklist { display:grid; gap:7px; max-height:260px; overflow:auto; padding:10px; border:1px solid var(--line); border-radius:8px; background:var(--panel-soft); }
+.image-group-option { display:flex; align-items:flex-start; gap:8px; margin:0; color:var(--ink); font-size:11px!important; font-weight:600!important; line-height:1.45; }
+.image-group-option input { flex:0 0 auto; margin-top:2px; accent-color:var(--site-primary); }
+.image-group-option span { min-width:0; overflow-wrap:anywhere; }
+.image-group-create { margin-top:18px; }
+.image-group-list { margin-top:12px; }
+.image-group-editor .figure-inline-actions { display:flex; flex-wrap:wrap; gap:8px; }
 .media-tip { margin-top:15px; }
 .preview-split { display:grid; grid-template-columns:minmax(0,1fr) 250px; gap:22px; }
 .preview-article { background:var(--panel); border:1px solid var(--line); padding:clamp(22px,4vw,45px); border-radius:11px; }
@@ -176,7 +183,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .preview-body .tt-image-group-item-title { display:block; margin-top:9px; color:var(--site-primary); font:500 16px/1.35 var(--site-font-heading); }
 .preview-body .tt-image-group-caption { display:block; margin-top:5px; color:var(--muted); font-size:11px; line-height:1.6; }
 .preview-body .tt-purpose-figure-missing { display:block; padding:18px; border:1px dashed var(--line); color:var(--muted); font-size:11px; }
-@media(max-width:620px) { .preview-body .tt-purpose-figure-head { align-items:flex-start; flex-direction:column; } .preview-body .tt-purpose-figure-body { padding:10px; } .preview-body .tt-purpose-figure figcaption { padding:0 10px 12px; } }
+@media(max-width:620px) { .preview-body .tt-purpose-figure-header-top { align-items:flex-start; flex-direction:column; gap:4px; } .preview-body .tt-purpose-figure-module { text-align:left; } .preview-body .tt-purpose-figure-body { padding:10px; } .preview-body .tt-purpose-figure figcaption { padding:0 10px 12px; } .media-grid { grid-template-columns:minmax(0,1fr); } }
 .practice-preview { border:1px solid var(--line); border-radius:10px; background:var(--panel-soft); padding:16px; margin-top:18px; }
 .practice-preview h4 { margin:0 0 11px; font-size:12px; }
 .practice-preview label { display:flex; align-items:flex-start; gap:8px; margin:8px 0; font-size:11px; line-height:1.5; }
