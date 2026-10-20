@@ -188,6 +188,12 @@ def _clean_image_payload(course_state, course_slug):
                 image["assetKey"] = asset_key
                 image["assetUuid"] = stable_id
                 image["sha256"] = digest
+                image["title"] = str(
+                    image.get("title") or image.get("caption") or image.get("alt")
+                    or image.get("name") or "Course figure"
+                ).strip()[:240]
+                image["alt"] = str(image.get("alt") or "").strip()[:500]
+                image["caption"] = str(image.get("caption") or "").strip()[:500]
                 image["data"] = ""
                 specs_by_key[asset_key] = {
                     "asset_key": asset_key,
@@ -233,13 +239,24 @@ def _build_import_payload(course_state, course_slug):
                     image_by_id[str(image["id"])] = str(image.get("assetUuid") or _asset_uuid(course_slug, str(image["id"])))
             for old_id, new_id in image_by_id.items():
                 content = content.replace(f"asset://{old_id}", f"asset://{new_id}")
-            for image in lesson.get("images") or []:
-                if not isinstance(image, dict) or not image.get("caption") or not image.get("assetUuid"):
-                    continue
-                figure_ref = re.compile(r"(!\[[^\]]*\]\(asset://" + re.escape(str(image["assetUuid"])) + r"\))")
-                caption = str(image.get("caption", "")).strip()
-                content = figure_ref.sub(lambda match, caption=caption: match.group(1) + "\n\n" + caption, content)
+            # Keep figure placement inside the authored Markdown. Titles, alt text and captions
+            # travel separately with the stable asset UUID; do not append captions to the prose.
             asset_ids = sorted(set(_ASSET_REF.findall(content)))
+            referenced_assets = set(asset_ids)
+            figures = {
+                str(image.get("assetUuid")): {
+                    "title": str(
+                        image.get("title") or image.get("caption") or image.get("alt")
+                        or image.get("name") or "Course figure"
+                    ).strip()[:240],
+                    "alt": str(image.get("alt") or "").strip()[:500],
+                    "caption": str(image.get("caption") or "").strip()[:500],
+                }
+                for image in lesson.get("images") or []
+                if isinstance(image, dict)
+                and image.get("assetUuid")
+                and str(image.get("assetUuid")) in referenced_assets
+            }
             questions = lesson.get("questions") if isinstance(lesson.get("questions"), list) else []
             learner_questions = []
             for question_index, question in enumerate(questions, start=1):
@@ -273,6 +290,7 @@ def _build_import_payload(course_state, course_slug):
                 "schema_version": 1,
                 "source_id": f"{module_index}.{lesson_index}",
                 "asset_ids": asset_ids,
+                "figures": figures,
                 "lesson_reference_ids": sorted({
                     str(uuid.UUID(value))
                     for value in _LESSON_REF_TOKEN.findall(content)
