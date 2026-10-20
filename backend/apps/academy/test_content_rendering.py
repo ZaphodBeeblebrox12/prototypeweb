@@ -256,5 +256,5 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("margin: 19px 0", preview)
         self.assertIn("max-height: min(56vh, 500px)", preview)
         self.assertIn("Copy the structure below into a lesson", preview)
-        self.assertIn("## Notice\\nDescribe the evidence first.\\n\\n### Compare", preview)
+        self.assertIn("## Notice\nDescribe the evidence first.\n\n### Compare", preview)
 
