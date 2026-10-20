@@ -18,6 +18,7 @@ class CourseReviewTemplateTests(TestCase):
             username="course-review-author",
             password="test-password",
             role="admin",
+            is_staff=True,
         )
         self.client.force_login(self.admin)
 

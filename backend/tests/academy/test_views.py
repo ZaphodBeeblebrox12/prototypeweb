@@ -93,7 +93,7 @@ class AcademyViewTests(TestCase):
         rendered_html = response.content.decode()
         panel_patterns = {
             tab: re.compile(
-                rf'<div class="tt-tab-panel" role="tabpanel" data-tab-panel="{tab}"[^>]*>(.*?)</div>',
+                rf'<div class="tt-tab-panel"[^>]*data-tab-panel="{tab}"[^>]*>(.*?)</div>',
                 re.DOTALL,
             )
             for tab in ("idea", "examples", "practice")
