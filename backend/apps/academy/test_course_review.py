@@ -1,8 +1,7 @@
-from unittest.mock import patch
-
 """Regression tests for read-only course-import review and learner lesson tabs."""
 import uuid
 from types import SimpleNamespace
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.template.loader import render_to_string
