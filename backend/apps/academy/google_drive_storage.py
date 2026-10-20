@@ -219,6 +219,12 @@ class GoogleDriveStorageMixin:
         )
         return name
 
+    def remote_exists(self, name):
+        """Check configured durable providers without treating local fallback as remote."""
+        if self._drive_asset_enabled and self._find_drive_file(name, self._asset_folder_id):
+            return True
+        return super().remote_exists(name)
+
     def exists(self, name):
         if self._drive_asset_enabled and self._find_drive_file(name, self._asset_folder_id):
             return True
