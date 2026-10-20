@@ -77,6 +77,16 @@
 
       <main class="tt-lesson-main">
         <article class="tt-lesson-article">
+          {% if selected_video_url %}
+          <section class="tt-video-lesson" aria-label="Lesson video">
+            {% if selected_video_is_file %}
+            <video controls preload="metadata" src="{{ selected_video_url }}">Your browser does not support video playback.</video>
+            {% else %}
+            <a href="{{ selected_video_url }}" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a>
+            <p class="small text-muted">This video opens in a new tab.</p>
+            {% endif %}
+          </section>
+          {% endif %}
           {% include "academy/partials/lesson_tabs.html" with lesson_sections=selected_sections notebook=selected_notebook practice_questions=selected_practice_questions admin_preview=True only %}
           <dialog class="tt-figure-dialog" data-figure-dialog><button type="button" data-figure-close>Close</button><img data-figure-dialog-image alt=""><p data-figure-dialog-caption></p></dialog>
           <nav class="tt-lesson-navigation" aria-label="Preview lesson navigation">

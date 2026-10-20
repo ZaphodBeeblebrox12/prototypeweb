@@ -430,6 +430,8 @@ def course_import_website_preview(request, import_id):
     selected_sections = None
     selected_notebook = {}
     selected_practice_questions = []
+    selected_video_url = ""
+    selected_video_is_file = False
     if selected_lesson is not None:
         selected_content_json = selected_lesson.get("content_json", {})
         if not isinstance(selected_content_json, dict):
@@ -453,6 +455,17 @@ def course_import_website_preview(request, import_id):
         if isinstance(practice_questions, list):
             selected_practice_questions = practice_questions
 
+        # Match the learner lesson view: render only ordinary HTTP(S) video
+        # destinations, and use the native player only for supported file types.
+        raw_video_url = content_json.get("video_url", "")
+        if isinstance(raw_video_url, str):
+            raw_video_url = raw_video_url.strip()
+            if raw_video_url.startswith(("https://", "http://")):
+                selected_video_url = raw_video_url
+                selected_video_is_file = raw_video_url.lower().split("?", 1)[0].endswith(
+                    (".mp4", ".webm", ".ogg")
+                )
+
     return render(request, "academy/course_import_website_preview.html", {
         "import_record": record,
         "course": course,
@@ -470,6 +483,8 @@ def course_import_website_preview(request, import_id):
         "selected_sections": selected_sections,
         "selected_notebook": selected_notebook,
         "selected_practice_questions": selected_practice_questions,
+        "selected_video_url": selected_video_url,
+        "selected_video_is_file": selected_video_is_file,
     })
 
 

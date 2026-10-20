@@ -128,7 +128,7 @@ class CourseReviewTemplateTests(TestCase):
         self.assertContains(response, "Stage Understand Bollinger Bands for review")
         self.assertContains(response, "csrfmiddlewaretoken")
 
-    def _website_preview_record(self):
+    def _website_preview_record(self, video_url=None):
         return CourseImport.objects.create(
             course_slug="website-preview-course",
             title="Website Preview Course",
@@ -169,6 +169,7 @@ class CourseReviewTemplateTests(TestCase):
                             ),
                             "content_json": {
                                 "asset_ids": [],
+                                "video_url": video_url,
                                 "notebook": {
                                     "title": "Evidence notebook",
                                     "prompts": [{
@@ -230,6 +231,47 @@ class CourseReviewTemplateTests(TestCase):
         self.assertNotContains(response, "data-practice-quiz")
         self.assertNotContains(response, "Mark complete")
         self.assertEqual(response.context["selected_lesson"]["source_id"], "1.1")
+
+    def test_website_preview_renders_mp4_video_inline_before_lesson_tabs(self):
+        video_url = "https://media.example.test/lesson.mp4?token=preview"
+        record = self._website_preview_record(video_url=video_url)
+        response = self.client.get(
+            reverse("academy:course-import-preview", args=[record.pk]),
+            {"lesson": "1.1"},
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, 'class="tt-video-lesson"')
+        self.assertContains(response, '<video controls preload="metadata"')
+        self.assertContains(response, f'src="{video_url}"')
+        self.assertTrue(response.context["selected_video_is_file"])
+        self.assertLess(
+            response.content.index(b'class="tt-video-lesson"'),
+            response.content.index(b'id="tab-idea"'),
+        )
+
+    def test_website_preview_links_external_video_and_ignores_unsafe_url(self):
+        external_url = "https://video.example.test/lesson/123"
+        record = self._website_preview_record(video_url=external_url)
+        response = self.client.get(
+            reverse("academy:course-import-preview", args=[record.pk]),
+            {"lesson": "1.1"},
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, f'href="{external_url}"')
+        self.assertContains(response, "Open lesson video")
+        self.assertFalse(response.context["selected_video_is_file"])
+
+        unsafe_record = self._website_preview_record(video_url="javascript:alert(1)")
+        unsafe_response = self.client.get(
+            reverse("academy:course-import-preview", args=[unsafe_record.pk]),
+            {"lesson": "1.1"},
+        )
+
+        self.assertEqual(unsafe_response.status_code, 200, unsafe_response.content)
+        self.assertNotContains(unsafe_response, 'class="tt-video-lesson"')
+        self.assertEqual(unsafe_response.context["selected_video_url"], "")
 
     def test_website_preview_is_for_course_content_admins_only(self):
         record = self._website_preview_record()

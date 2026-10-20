@@ -307,3 +307,15 @@ The alignment-normalisation follow-up at `db113e4fc95ab088445046b28f3bd83de8d97f
 - [Verify Django Academy backend](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39486735125): Python 3.11 and 3.12 each passed 881 tests and 36 subtests; each job reported 306 warnings, with no failures.
 
 Staging was confirmed live at commit `ea8a3159fb6428fab9caec52cc963c0d620bcce7`, which includes the information-table renderer and both style files. A file-SHA comparison confirms the staged `learning-room.css` and `course_builder_preview.html` match the branch; the staged `content_rendering.py` does not contain the new table-alignment normalisation yet. Browser screenshot comparison is still outstanding; deployment status and green CI do not prove visual acceptance.
+
+## Follow-up audit — video field in website preview (21 October 2026)
+
+A further end-to-end audit found a non-styling mismatch: the Course Builder editor and its local preview support a lesson `videoUrl`, and `course_builder_api.py` correctly persists that value as `content_json.video_url`. The normal learner lesson page renders this field, but the real administrator-only website preview used by the builder did not. An author could therefore see a video locally and then lose it when checking the same draft in the website template.
+
+Implemented on `my-new-branch`:
+- The website-preview view now reads `content_json.video_url`, accepts only HTTP(S) URLs, and identifies supported `.mp4`, `.webm`, and `.ogg` files as native-player media.
+- The website-preview template renders the video block before lesson tabs, matching the real lesson page. File URLs use the native player; non-file URLs use a clearly labelled external link.
+- Added regression coverage for native file playback, external video destinations, ordering before the lesson tabs, and rejection of unsafe URL schemes.
+- The existing shared `.tt-video-lesson` styles are reused. No authentication, course-access, media-storage, submission, or publication rules were loosened.
+
+This video-parity change is awaiting its own CI run. It has not been deployed. Keep it separate from the live staging revision until CI succeeds and the user explicitly approves the next staging deployment. Browser screenshot acceptance remains outstanding.
