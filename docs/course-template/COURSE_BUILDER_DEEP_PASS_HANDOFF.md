@@ -168,3 +168,34 @@ Live-provider verification remains pending: Render logs show no authenticated `G
 3. Ensure native comparison-card data survives save/reopen through the shared builder API, and check old single-image draft compatibility.
 4. Verify actual authenticated administrator website preview at desktop and mobile sizes, including a locked lesson and the unpublished Bollinger Bands course.
 5. Deploy to Academy staging only after the above checks. No production deployment, merge to main or course publication without explicit approval.
+
+
+### Follow-up: Verify live image-storage provider and grouped-image test status (21 October 2026)
+
+Repository and staging were inspected after the durable-storage rollout. Work remained on `my-new-branch`; no merge, production deployment, or course publication was performed.
+
+Verified against the live Render service **tradethesis-academy-staging** (`srv-db9ioke1egvs73feb8ag`):
+- Active deployment `dep-dbbrgrjl9sls739cqh60` is `live`, built from commit `0d07630d8c43ac79379a0200374e6be1497c793d`. The Render service is configured to track `my-new-branch`, with auto-deploy disabled.
+- Render log entry at `2026-10-20T18:58:40.447Z`: `Course Builder asset storage configured: backend=google_drive durable=True writes_enabled=True`.
+- The corresponding authenticated request to `GET /staff/course-builder/api/` returned HTTP 200 (14,598-byte response), referring from `/staff/course-builder/`. This confirms **Google Drive is the active durable image-storage provider**. Private GitHub storage remains the fallback provider in code, not the active backend reported by staging.
+- Both relevant workflows completed successfully on source commit `52d89489e8ef6434c89a8058fb85e50bda1a9320`: [Academy backend CI](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39477719586) and [Verify Django Academy backend](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39477719675). These passed before the staging deployment was recorded.
+- Current branch head subsequently advanced to `bdd407cd15f6bc03fcf6b49ef009a9903ab65a68` to record the deployment/provider-verification handoff. Staging intentionally remains on deployed commit `0d07630d8c43ac79379a0200374e6be1497c793d`; the handoff-only commit did not change runtime code.
+
+Grouped-image implementation was inspected in `backend/apps/academy/course_builder_preview.html`, `backend/apps/academy/course_builder_api.py`, `backend/apps/academy/content_rendering.py`, and `backend/apps/academy/storage.py`:
+- Builder supports multi-file JPEG/PNG/WebP uploads, individually authored image title/alt/caption fields, image groups with a typed title and editable membership of two or more assets, optional group note, and insertion at the lesson editor caret.
+- Saving maps temporary builder IDs to stable asset UUIDs; figure/group metadata is stored alongside the draft content, including group member UUIDs in the asset list. The shared server renderer emits the titled, module-branded image-group frame with responsive grid, per-image titles/captions and escaped text. Authenticated asset delivery remains permission checked.
+- The live provider-status line proves configuration, but **does not prove a new file can be uploaded, persisted, read back, and rendered**. Render logs show no image-upload POST or asset-delivery GET associated with an end-to-end upload test in the inspected interval. Thus the live upload/round-trip and desktop/mobile visual acceptance tests remain pending; do not mark them passed.
+
+### Exact manual acceptance sequence still required
+
+Using the authenticated Course Builder at https://tradethesis-academy-staging.onrender.com/staff/course-builder/:
+
+1. Reload the page and confirm the notice says lesson images use durable private storage via **Google Drive**.
+2. Use an existing saved draft or a new uniquely-slugged test draft (do not publish or submit for review). In one lesson, upload two small test images. Give each a distinct manually typed title, alt text, and caption; use filenames that are deliberately unhelpful (e.g. `upload-a.png`) to check that filenames are not used as display titles.
+3. Type a paragraph, place the caret after it, switch to Images, create a group, change its title to a phrase such as “Compare the two test charts,” choose the two uploaded images, add a note, and use **Insert group at cursor**. Add a second paragraph after the token.
+4. Save draft, reload the draft (or reopen it from another browser/device), and verify that the group title, selected members, per-image captions, and text-before/group/text-after order survive.
+5. Confirm the server-backed website preview renders one group frame with the entered group title, both images, image titles/captions and group note; filenames should not be the visible figure title and no “Purpose-built teaching aid” label should appear.
+6. Inspect desktop and a narrow mobile viewport: both images should be side by side when space permits and stack responsively on mobile; neither should be duplicated at the bottom. Verify images are readable after the page reload, confirming retrieval from persistent storage rather than browser-only data.
+7. In Render logs, confirm the save and asset requests succeed without image-storage errors. Do not click **Submit for review** or publish the course as part of this validation.
+
+No code/runtime changes or new deployment were made in this follow-up because authenticated browser automation is not available in this tool session. The provider verification is complete; actual upload persistence and visual grouped-rendering acceptance need the above browser session. Keep production, main branch, and course publication untouched.
