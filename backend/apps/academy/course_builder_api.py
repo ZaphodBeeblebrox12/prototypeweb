@@ -7,6 +7,9 @@ import mimetypes
 import re
 import uuid
 from copy import deepcopy
+from urllib.parse import quote
+
+import requests
 from io import BytesIO
 
 from django.conf import settings
@@ -34,6 +37,47 @@ _ASSET_REF = re.compile(r"asset://([A-Za-z0-9-]+)")
 def _require_admin(request):
     if not request.user.is_active or not is_course_content_admin(request.user):
         raise PermissionDenied
+
+def _sync_course_source_to_github(payload, course_slug):
+    """Write the current authoring snapshot to this repo on the feature branch.
+
+    PostgreSQL remains the operational draft store; this versioned JSON source
+    snapshot makes the saved course easy to review and recover in GitHub.
+    """
+    token = getattr(settings, "ACADEMY_GITHUB_ASSET_TOKEN", "").strip()
+    repository = getattr(settings, "ACADEMY_GITHUB_ASSET_REPOSITORY", "").strip()
+    branch = getattr(settings, "ACADEMY_GITHUB_ASSET_BRANCH", "my-new-branch").strip()
+    if not token or not repository:
+        return False
+
+    path = f"course-source/builder-drafts/{course_slug}.json"
+    encoded_path = "/".join(quote(part, safe="") for part in path.split("/"))
+    url = f"https://api.github.com/repos/{repository}/contents/{encoded_path}"
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {token}",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    try:
+        current = requests.get(url, headers=headers, params={"ref": branch}, timeout=15)
+        if current.status_code not in {200, 404}:
+            raise ValidationError("GitHub could not check the course source file.")
+        body = {
+            "message": f"Save Course Builder source: {course_slug}",
+            "content": base64.b64encode(
+                (json.dumps(payload, ensure_ascii=False, indent=2) + "\\n").encode("utf-8")
+            ).decode("ascii"),
+            "branch": branch,
+        }
+        if current.status_code == 200:
+            body["sha"] = current.json()["sha"]
+        saved = requests.put(url, headers=headers, json=body, timeout=20)
+        if saved.status_code not in {200, 201}:
+            raise ValidationError("GitHub could not save the course source. The draft was not confirmed as synced.")
+    except requests.RequestException as exc:
+        raise ValidationError("GitHub could not be reached to save the course source.") from exc
+    return True
+
 
 
 def _asset_uuid(course_slug, asset_id):
@@ -401,19 +445,31 @@ def course_builder_api(request):
                 record.status = CourseImport.Status.REVIEW
                 record.save(update_fields=["status", "updated_at"])
 
+            github_source_synced = _sync_course_source_to_github(payload, slug)
+
         review_url = reverse("admin:academy_courseimport_review", args=[record.pk])
         if mode == "submit":
             return JsonResponse({
                 "ok": True, "submitted": True, "record_id": str(record.pk),
                 "review_url": review_url, "publish_errors": [],
                 "draft": _draft_response(record, request),
-                "message": "Draft submitted. Review it before publishing to the course catalogue.",
+                "github_source_synced": github_source_synced,
+                "message": (
+                    "Draft submitted and source saved to GitHub. Review it before publishing to the course catalogue."
+                    if github_source_synced else
+                    "Draft submitted to the Academy, but GitHub source sync is not configured. Add ACADEMY_GITHUB_ASSET_TOKEN to enable repository saves."
+                ),
             })
         return JsonResponse({
             "ok": True, "submitted": False, "record_id": str(record.pk),
             "updated_at": record.updated_at.isoformat(),
             "draft": _draft_response(record, request),
-            "message": "Draft saved to the Academy. You can reopen it from any computer.",
+            "github_source_synced": github_source_synced,
+            "message": (
+                "Draft saved to the Academy and source synced to the existing GitHub repository."
+                if github_source_synced else
+                "Draft saved to the Academy, but GitHub source sync is not configured. Add ACADEMY_GITHUB_ASSET_TOKEN to enable repository saves."
+            ),
         })
     except (json.JSONDecodeError, UnicodeDecodeError):
         return JsonResponse({"detail": "The request body must be valid JSON."}, status=400)
