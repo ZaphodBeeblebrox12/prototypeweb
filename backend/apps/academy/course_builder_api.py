@@ -264,7 +264,7 @@ def _build_import_payload(course_state, course_slug):
                     continue
                 figure_id = str(figure.get("id") or "").strip()
                 if not figure_id or not re.search(
-                    r"\\[\\[teaching-figure:" + re.escape(figure_id) + r"\\]\\]",
+                    r"\[\[teaching-figure:" + re.escape(figure_id) + r"\]\]",
                     content,
                 ):
                     continue
