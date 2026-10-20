@@ -524,6 +524,7 @@ def course_builder_api(request):
             "drafts": drafts,
             "related_courses": related_courses,
             "lesson_references": lesson_references,
+            "asset_storage": course_asset_storage.status(),
         })
 
     try:
