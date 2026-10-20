@@ -19,7 +19,12 @@ from .forms import (
     LessonAdminForm,
     LessonFigureAdminForm,
 )
-from .importing import publish_course_import, validate_import_for_publish
+from .importing import (
+    inspect_manifest,
+    publish_course_import,
+    stage_course_import,
+    validate_import_for_publish,
+)
 from .models import (
     Course,
     CourseContentRevision,
@@ -345,6 +350,7 @@ class LessonProgressAdmin(admin.ModelAdmin):
 
 @admin.register(CourseImport)
 class CourseImportAdmin(admin.ModelAdmin):
+    change_list_template = "admin/academy/courseimport/change_list.html"
     list_display = ("title", "course_slug", "status", "manifest_version", "imported_at", "review_link")
     list_filter = ("status", "imported_at")
     search_fields = ("title", "course_slug", "content_hash")
@@ -374,6 +380,11 @@ class CourseImportAdmin(admin.ModelAdmin):
 
     def get_urls(self):
         custom = [
+            path(
+                "stage-canonical-bollinger/",
+                self.admin_site.admin_view(self.stage_canonical_bollinger_view),
+                name="academy_courseimport_stage_bollinger",
+            ),
             path("<uuid:object_id>/review/", self.admin_site.admin_view(self.review_view), name="academy_courseimport_review"),
             path("<uuid:object_id>/publish/", self.admin_site.admin_view(self.publish_view), name="academy_courseimport_publish"),
             path("<uuid:object_id>/asset/<uuid:asset_id>/", self.admin_site.admin_view(self.asset_view), name="academy_courseimport_asset"),
@@ -382,6 +393,60 @@ class CourseImportAdmin(admin.ModelAdmin):
 
     def _is_authorized(self, request):
         return is_course_content_admin(request.user)
+
+    def stage_canonical_bollinger_view(self, request):
+        """Stage the checked-in authored course as a review-only import."""
+        if not self._is_authorized(request):
+            return HttpResponseForbidden("Administrator course-content access is required.")
+        if request.method != "POST":
+            return HttpResponseNotAllowed(["POST"])
+
+        manifest_path = (
+            Path(settings.BASE_DIR).parent
+            / "course-source"
+            / "understand-bollinger-bands"
+            / "course-manifest.json"
+        ).resolve()
+        try:
+            payload, asset_sources, warnings = inspect_manifest(manifest_path)
+            record, created, stage_warnings = stage_course_import(
+                manifest_path=manifest_path,
+                payload=payload,
+                asset_sources=asset_sources,
+                warnings=warnings,
+                imported_by=request.user,
+            )
+        except (OSError, ValueError, KeyError) as exc:
+            logger.warning("Could not stage canonical Bollinger Bands source: %s", exc)
+            messages.error(request, f"Could not prepare the authored course: {exc}")
+            return redirect("admin:academy_courseimport_changelist")
+        except Exception:
+            logger.exception("Failed to stage canonical Bollinger Bands source")
+            messages.error(
+                request,
+                "Could not prepare the authored course. Check the server logs for details.",
+            )
+            return redirect("admin:academy_courseimport_changelist")
+
+        if created:
+            messages.success(
+                request,
+                "Understand Bollinger Bands is staged for administrator review only. "
+                "Nothing was published to learners.",
+            )
+        else:
+            messages.info(
+                request,
+                "An import for this exact source version already exists. "
+                "Opening it for review; nothing new was published to learners.",
+            )
+        combined_warnings = list(dict.fromkeys([*warnings, *stage_warnings]))
+        if combined_warnings:
+            messages.warning(
+                request,
+                f"{len(combined_warnings)} asset/source warning(s) need review before publication.",
+            )
+        return redirect("admin:academy_courseimport_review", object_id=record.pk)
 
     def review_view(self, request, object_id):
         if not self._is_authorized(request):
