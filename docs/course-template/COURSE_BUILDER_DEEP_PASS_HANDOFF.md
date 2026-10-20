@@ -247,10 +247,10 @@ Changes prepared on `my-new-branch`:
 - `backend/apps/academy/course_builder_preview.html`: append separate CSS-only overrides for the local learner preview and authoring workbench typography, editor card spacing, form controls, preview header/body, figure frames, grouped-image panels, comparison cards, and mobile layout. Existing JavaScript, save APIs, stable asset IDs, draft flow, and publish/review buttons are unchanged.
 
 Review boundary:
-- This is a visual styling pass, not a full rewrite of the template or a change to content rendering semantics.
+- This is a visual styling pass, not a full rewrite of the template. The later information-table follow-up changes rendering semantics narrowly so Markdown pipe tables display in both previews.
 - No lesson/course content, storage provider configuration, learner permissions, auth rules, question-answer handling, draft IDs, or publication workflow were changed.
-- Do not deploy automatically. The current staging service has auto-deploy disabled; user asked for deep style work but did not approve a staging deployment in this turn.
-- These changes still require committing to the feature branch, CI and static/template checks, then a desktop/mobile side-by-side screenshot review against the canonical file. Do not claim pixel parity or visual acceptance without screenshots.
+- Do not deploy automatically. Staging has auto-deploy disabled. The API-triggered staging deployment at commit `ea8a3159fb6428fab9caec52cc963c0d620bcce7` included the information-table support; the alignment normalisation below still requires CI and explicit approval before another deployment.
+- The styling/table changes are committed on the feature branch and the table fix has reached staging, but desktop/mobile side-by-side screenshot review against the canonical file remains outstanding. Do not claim pixel parity or visual acceptance without screenshots.
 
 
 ### Follow-up: Visual parity pass validation snapshot (21 October 2026)
@@ -263,17 +263,17 @@ Review boundary:
 
 ## Follow-up audit — information tables (21 October 2026)
 
-A targeted comparison against the approved Bollinger Bands reference exposed one functional gap that the preceding styling pass did not catch: the table styling existed, but the Course Builder's client-side Markdown renderer did not parse pipe tables. The backend renderer already uses Python-Markdown's \`tables\` extension, while its sanitizer stripped the reference's \`div.lesson-table-wrap\` wrapper. On small screens this meant the builder preview could show raw pipe syntax instead of a table, and runtime tables lost the reference's horizontal-scroll treatment.
+A targeted comparison against the approved Bollinger Bands reference exposed one functional gap that the preceding styling pass did not catch: the table styling existed, but the Course Builder's client-side Markdown renderer did not parse pipe tables. The backend renderer already uses Python-Markdown's `tables` extension, while its sanitizer stripped the reference's `div.lesson-table-wrap` wrapper. On small screens this meant the builder preview could show raw pipe syntax instead of a table, and runtime tables lost the reference's horizontal-scroll treatment.
 
 This pass addresses the gap in both views:
 
-- The Course Builder's learner preview now recognises pipe tables, renders semantic \`thead\`/\`tbody\` markup and alignment, and places them in an accessible, horizontally scrollable \`lesson-table-wrap\`.
+- The Course Builder's learner preview now recognises pipe tables, renders semantic `thead`/`tbody` markup and alignment, and places them in an accessible, horizontally scrollable `lesson-table-wrap`.
 - The server-side Learning Room wraps rendered Markdown tables in the same pattern and permits only safe wrapper attributes through sanitisation; no styles, scripts, event handlers or arbitrary attributes were added to the allowlist.
 - Both previews now use the reference's framed header row, fine dividers, readable cell spacing and narrow-screen scrolling.
 - The Markdown help section explicitly documents information-table authoring.
 - Added regression tests cover table HTML, accessibility wrapper attributes, and builder-preview table support.
 
-No course content, authentication, billing, saving, review or publishing logic was changed. Nothing was deployed. CI and browser-level visual acceptance remain pending; the visual review should include a three-column/long-cell table at desktop and mobile widths.
+No course content, authentication, billing, saving, review or publishing logic was changed. The core table wrapper is included in the staging deployment noted below. Browser-level visual acceptance remained pending; inspect a three-column/long-cell table at desktop and mobile widths. The follow-up alignment-normalisation change described below is not deployed pending CI and approval.
 
 ### Follow-up: Fix Django Admin course deletion blocked by Course Media Asset (20 October 2026)
 
@@ -290,5 +290,16 @@ CI at current tested revision `81fcbb96943b5f5a9e86ec5347a539379bcdd99b` is gree
 - [Verify Django Academy backend](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39484413991) passed on Python 3.11 and 3.12.
 - Migration state, Ruff, Black, focused image regressions and the full suite passed.
 
-Next: manually deploy the tested branch head to the Academy staging service only, verify Render marks it live and `/health/` returns HTTP 200, then ask the author to retry deleting a disposable draft course with a media asset. Do not delete any live/published course as part of verification. No merge to `main`, production deployment or course publication is authorized.
+Staging was subsequently deployed successfully at `ea8a3159fb6428fab9caec52cc963c0d620bcce7` and Render marked that deploy live. Do not trigger another deployment for the later table-alignment change until CI is green and the user explicitly approves it. If deletion verification remains necessary, use only a disposable draft course with a media asset; do not delete live/published courses. No merge to `main`, production deployment or course publication is authorized.
+  
+### Follow-up: Preserve information-table alignment through sanitisation (21 October 2026)
 
+The first table test exposed that Python-Markdown emits table alignment using a `style="text-align: …"` attribute, which the sanitiser correctly strips. The table remained safe and readable, but author-specified left/centre/right alignment was lost in the live Learning Room even though the Course Builder preview retained it.
+
+The renderer now translates only the Markdown table extension's exact `left`, `center` or `right` table-cell alignment style into an `align` attribute before sanitisation. The existing allowlist already permits `align` on `th` and `td`; the change does not allow inline CSS. Regression tests now assert all three alignments survive sanitisation. This correction is on `my-new-branch`, awaiting fresh CI. It has not been deployed.
+
+The initial table fix and test correction both passed:
+- [Academy backend CI](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39484413882): Python 3.11 and 3.12 full suites, 881 passed and 36 subtests passed per matrix job.
+- [Verify Django Academy backend](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39484413991): both Python versions passed.
+
+Staging was later confirmed live at commit `ea8a3159fb6428fab9caec52cc963c0d620bcce7`, which descends from the table fix. Browser screenshot comparison is still outstanding; the staging deployment status is not proof of visual acceptance.

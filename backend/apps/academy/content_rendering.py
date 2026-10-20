@@ -335,6 +335,17 @@ def render_safe_markdown(
         output_format="html",
     )
 
+    # Python-Markdown expresses table alignment as inline CSS. The sanitizer
+    # intentionally strips style attributes, so convert only its known safe
+    # left/center/right table-cell alignment into the already-allowed align
+    # attribute before sanitising the final HTML.
+    rendered = re.sub(
+        r'(<(?:th|td)\b[^>]*?)\sstyle="text-align:\s*(left|center|right)\s*;?"',
+        r'\1 align="\2"',
+        rendered,
+        flags=re.IGNORECASE,
+    )
+
     # Match the approved course template: information tables sit in a framed,
     # horizontally scrollable wrapper so the header and cells remain readable
     # on narrow screens. Avoid nesting the wrapper when the author already used it.
