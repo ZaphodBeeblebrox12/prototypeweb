@@ -1,12 +1,13 @@
 import base64
 import json
+import uuid
 from unittest.mock import Mock, patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from .models import Course, CourseImport, CourseModule, Lesson
+from .models import Course, CourseImport, CourseImportAsset, CourseModule, Lesson
 
 User = get_user_model()
 
@@ -104,6 +105,40 @@ class CourseBuilderApiTests(TestCase):
             },
         )
         storage_status.assert_called_once_with()
+
+    def test_local_only_existing_asset_is_migrated_when_durable_storage_is_configured(self):
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(self.draft_payload("builder-migrate-local-image")),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        record = CourseImport.objects.get(pk=response.json()["record_id"])
+        stable_id = uuid.uuid4()
+        asset = CourseImportAsset.objects.create(
+            course_import=record,
+            asset_key="builder/legacy-local-image",
+            stable_asset_id=stable_id,
+            file="academy/course-imports/legacy-local-image.png",
+        )
+        with patch(
+            "apps.academy.course_builder_api.course_asset_storage.status",
+            return_value={"backend": "github", "label": "private GitHub repository", "durable": True, "writes_enabled": True},
+        ), patch(
+            "apps.academy.course_builder_api.course_asset_storage.remote_exists",
+            return_value=False,
+        ), patch(
+            "apps.academy.course_builder_api._copy_existing_asset",
+            return_value=True,
+        ) as migrate_asset:
+            from .course_builder_api import _store_images
+
+            _store_images(record, {})
+
+        migrate_asset.assert_called_once()
+        migrated_id, migrated_asset = migrate_asset.call_args.args
+        self.assertEqual(migrated_id, stable_id)
+        self.assertEqual(migrated_asset.pk, asset.pk)
 
     def test_existing_saved_builder_draft_can_be_resaved_when_course_slug_is_taken(self):
         slug = "builder-draft-slug-collision"
