@@ -399,11 +399,12 @@ class CourseBuilderApiTests(TestCase):
         first_id = "builder-image-long"
         second_id = "builder-image-near-miss"
         group_id = "image-group-method-two"
-        lesson["content"] = (
+        source = (
             "Introduce the comparison.\\n\\n"
             f"[[image-group:{group_id}]]\\n\\n"
             "Explain what differs between the cases."
         )
+        lesson["content"] = source
         lesson["images"] = [
             {
                 "id": first_id,
@@ -434,17 +435,15 @@ class CourseBuilderApiTests(TestCase):
         saved_lesson = imported["modules"][0]["lessons"][0]
         figure_map = saved_lesson["content_json"]["figures"]
         group = figure_map[group_id]
-        stable_first = saved_lesson["content_json"]["asset_ids"]
-        self.assertEqual(saved_lesson["content_markdown"], lesson["content"].replace(
-            "Introduce the comparison.\\n\\n", "Introduce the comparison.\\n\\n"
-        ))
+        asset_ids = saved_lesson["content_json"]["asset_ids"]
+        self.assertEqual(saved_lesson["content_markdown"], source)
         self.assertEqual(group["type"], "image-group")
         self.assertEqual(group["title"], "Method II: price position and money flow")
         self.assertEqual(group["note"], "Read both inputs together.")
         self.assertEqual(len(group["image_ids"]), 2)
-        self.assertIn(first_id, image_sources and "builder/" + first_id)
-        self.assertIn(second_id, image_sources and "builder/" + second_id)
-        self.assertTrue(set(group["image_ids"]).issubset(set(stable_first)))
+        self.assertIn("builder/" + first_id, image_sources)
+        self.assertIn("builder/" + second_id, image_sources)
+        self.assertTrue(set(group["image_ids"]).issubset(set(asset_ids)))
         self.assertEqual(figure_map[group["image_ids"][0]]["title"], "Long candidate")
         self.assertEqual(figure_map[group["image_ids"][1]]["title"], "Near miss")
         self.assertNotIn("chart-long-candidate.png", group["title"])
