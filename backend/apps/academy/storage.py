@@ -162,13 +162,7 @@ class PrivateCourseAssetStorage(FileSystemStorage):
 
 @deconstructible
 class GoogleDrivePrivateCourseAssetStorage(GoogleDriveStorageMixin, PrivateCourseAssetStorage):
-    """Google Drive primary storage with legacy GitHub/local reads."""
-
-    pass
-
-
-class GoogleDrivePrivateCourseAssetStorageStatusMixin:
-    """Shared, credential-free status for the builder image-storage notice."""
+    """Google Drive primary storage with private GitHub/local compatibility."""
 
     def status(self):
         try:
@@ -177,17 +171,11 @@ class GoogleDrivePrivateCourseAssetStorageStatusMixin:
             # Never expose provider or credential exception details through the UI.
             drive_enabled = False
         if drive_enabled:
-            backend = "google_drive"
-            label = "Google Drive"
-            durable = True
+            backend, label, durable = "google_drive", "Google Drive", True
         elif self.github_enabled:
-            backend = "github"
-            label = "private GitHub repository"
-            durable = True
+            backend, label, durable = "github", "private GitHub repository", True
         else:
-            backend = "local_filesystem"
-            label = "local filesystem"
-            durable = False
+            backend, label, durable = "local_filesystem", "local filesystem", False
         required = bool(getattr(settings, "ACADEMY_REQUIRE_DURABLE_ASSETS", not settings.DEBUG))
         return {
             "backend": backend,
