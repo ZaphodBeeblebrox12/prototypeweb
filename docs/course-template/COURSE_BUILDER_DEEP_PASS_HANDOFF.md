@@ -135,6 +135,27 @@ Verification on revision `4cf4cb2e9832e24eb2bfe73012ce656e64545dd3`:
 
 Next step: deploy to Academy staging only, then visually confirm the new Image groups UI and real website preview using an authenticated browser session. The visual review has not been done in this tool session. Do not merge into `main`, deploy production or publish any course.
 
+### Follow-up: Durable lesson-image storage hardening (20 October 2026)
+
+The builder previously defaulted to private local filesystem storage when neither remote provider was usable. Render's service disk is ephemeral unless a persistent disk is explicitly configured, so that fallback could make uploaded lesson images disappear on restart/redeploy. This has been hardened on `my-new-branch` before staging rollout.
+
+Implemented:
+- Production/hosted settings default `ACADEMY_REQUIRE_DURABLE_ASSETS=True`; local development explicitly defaults it to false so development fixtures and local imports can still use local files.
+- When Google Drive and GitHub durable storage are both unavailable, hosted image writes now fail closed with a safe, actionable error rather than silently writing a new file to ephemeral disk.
+- Added environment-variable compatibility for the previously used unprefixed `GOOGLE_DRIVE_*` and `GITHUB_TOKEN`/`GH_TOKEN` names, while preferring the canonical `ACADEMY_*` names. Blank canonical values do not mask a configured legacy alias.
+- Google Drive auth is now considered active only when complete service-account credentials or complete OAuth credentials plus a refresh token are available. Partial/stale OAuth credentials can fall back to another configured durable provider; credential details are not exposed in UI errors.
+- The authenticated Course Builder API reports the active storage mode (Google Drive, private GitHub repository, or local filesystem), whether it is durable, and whether writes are enabled. The builder notice reflects the server's status instead of showing a fixed ephemeral-storage warning.
+- Existing local-only assets are now distinguished from remote assets. On save, when a durable provider is configured, the API attempts to migrate an accessible legacy local file to that provider instead of mistaking the local fallback for a remote copy. If the local source has already disappeared, the save asks the author to re-upload the missing image instead of claiming it is safely stored.
+- Added tests for hosted fail-closed writes, provider-status reporting, incomplete Drive authorization, remote-only existence checks, and local-to-durable asset migration.
+
+Verification at code revision `52d89489e8ef6434c89a8058fb85e50bda1a9320`:
+- [Academy backend CI](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39477719586) succeeded on Python 3.11 and 3.12, including lint/type/migration checks, focused image regressions and both full test suites.
+- [Verify Django Academy backend](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39477719675) succeeded on Python 3.11 and 3.12.
+
+Important verification boundary: this CI validates the storage logic, but the live staging provider can only be confirmed after deployment by reading the authenticated builder's `asset_storage` response/log entry and checking that it reports a durable provider. If staging has no usable Drive credentials, stored Drive credential, or GitHub write token, hosted uploads will remain blocked; do not override the fail-closed guard or claim assets are durable. The next step is to pin `ACADEMY_REQUIRE_DURABLE_ASSETS=True` on the staging service, deploy the current branch to Academy staging only, verify the deployment is live and the health check returns HTTP 200, then inspect the provider-status log on the next authenticated Course Builder load. If the provider reports local filesystem or writes disabled, configure the existing Google Drive OAuth/service-account connection or a GitHub contents-write token before treating image upload as ready.
+
+No merge to `main`, production deployment, publication or edits to live course catalogue content are part of this task. Render auto-deploy remains disabled.
+
 ### Remaining
 
 1. Add test coverage for native comparison-card teaching figures: stable token, title, cards, note, authored placement and escaping.
