@@ -1,9 +1,8 @@
-"""Private storage for course images, optionally backed by a private GitHub repo.
+"""Course image storage backed by the existing TradeThesis GitHub repository.
 
-Set ACADEMY_GITHUB_ASSET_REPOSITORY (owner/repo), ACADEMY_GITHUB_ASSET_TOKEN,
-and optionally ACADEMY_GITHUB_ASSET_BRANCH in the Django environment to store
-new assets in a private repository. Without those settings, local private
-filesystem storage remains the default for development.
+The repository and branch are configured in Django settings; the write token
+comes from the hosting environment. Without a token, local private filesystem
+storage remains available for development.
 
 GitHub's authenticated Contents API is used only server-side. Image delivery
 continues through Django's authenticated/entitlement-checked views; no GitHub
@@ -43,7 +42,7 @@ class PrivateCourseAssetStorage(FileSystemStorage):
         super().__init__(location=str(location), base_url=settings.MEDIA_URL)
         self.repository = getattr(settings, "ACADEMY_GITHUB_ASSET_REPOSITORY", "").strip()
         self.token = getattr(settings, "ACADEMY_GITHUB_ASSET_TOKEN", "").strip()
-        self.branch = getattr(settings, "ACADEMY_GITHUB_ASSET_BRANCH", "main").strip()
+        self.branch = getattr(settings, "ACADEMY_GITHUB_ASSET_BRANCH", "my-new-branch").strip()
         self.path_prefix = getattr(settings, "ACADEMY_GITHUB_ASSET_PATH_PREFIX", "course-assets").strip("/")
         self.timeout = int(getattr(settings, "ACADEMY_GITHUB_ASSET_TIMEOUT", 15))
         self.github_enabled = bool(self.repository and self.token)
