@@ -400,8 +400,8 @@ class CourseBuilderApiTests(TestCase):
         second_id = "builder-image-near-miss"
         group_id = "image-group-method-two"
         source = (
-            "Introduce the comparison.\\n\\n"
-            f"[[image-group:{group_id}]]\\n\\n"
+            "Introduce the comparison.\n\n"
+            f"[[image-group:{group_id}]]\n\n"
             "Explain what differs between the cases."
         )
         lesson["content"] = source
