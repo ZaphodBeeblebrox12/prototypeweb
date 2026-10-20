@@ -40,11 +40,15 @@ class SharedLessonRenderingTests(SimpleTestCase):
                 }
             },
             figure_prefix="2.2",
+            module_label="Module 5 · Build and trade setups",
         )
         self.assertLess(rendered.index("Text before the figure."), rendered.index('class="tt-purpose-figure"'))
         self.assertLess(rendered.index('class="tt-purpose-figure"'), rendered.index("Text after the figure."))
-        self.assertIn("Figure 2.2 · What changing the settings changes", rendered)
-        self.assertIn("Purpose-built teaching aid", rendered)
+        self.assertIn("What changing the settings changes", rendered)
+        self.assertIn("MODULE 5 · Build and trade setups", rendered)
+        self.assertIn("TRADETHESIS · LEARNING ROOM", rendered)
+        self.assertNotIn("Figure 2.2 ·", rendered)
+        self.assertNotIn("Purpose-built teaching aid", rendered)
         self.assertIn('alt="Three cards compare shorter, baseline and longer windows."', rendered)
         self.assertIn(caption, rendered)
         self.assertIn('src="/media/band-comparison.png"', rendered)
@@ -113,11 +117,15 @@ class SharedLessonRenderingTests(SimpleTestCase):
                 }
             },
             figure_prefix="2.2",
+            module_label="Module 5 · Build and trade setups",
         )
         self.assertLess(rendered.index("Text before the figure."), rendered.index('class="tt-purpose-figure'))
         self.assertLess(rendered.index('class="tt-purpose-figure'), rendered.index("Text after the figure."))
-        self.assertIn("Figure 2.2 · What changing the settings changes", rendered)
-        self.assertIn("Purpose-built teaching aid", rendered)
+        self.assertIn("What changing the settings changes", rendered)
+        self.assertIn("MODULE 5 · Build and trade setups", rendered)
+        self.assertIn("TRADETHESIS · LEARNING ROOM", rendered)
+        self.assertNotIn("Figure 2.2 ·", rendered)
+        self.assertNotIn("Purpose-built teaching aid", rendered)
         self.assertIn("SHORTER WINDOW", rendered)
         self.assertIn("More responsive", rendered)
         self.assertIn("Common baseline", rendered)
@@ -133,3 +141,70 @@ class SharedLessonRenderingTests(SimpleTestCase):
         # It should not also be appended to the end of the preview as unplaced.
         self.assertIn("[image.id, image.assetUuid]", preview)
         self.assertIn("authoredContent.includes('asset://' + id)", preview)
+
+
+    def test_titled_image_group_renders_multiple_images_with_module_heading_in_place(self):
+        group_id = "image-group-method-two"
+        first_id = "6a51e8ac-35e2-489c-9a18-48221818e5d9"
+        second_id = "7b62f9bd-46f3-4ae0-8b13-59332929f6ea"
+        source = (
+            "Text before the group.\\n\\n"
+            f"[[image-group:{group_id}]]\\n\\n"
+            "Text after the group."
+        )
+        rendered = render_safe_markdown(
+            source,
+            asset_urls={
+                first_id: "/media/long-candidate.png",
+                second_id: "/media/near-miss.png",
+            },
+            figure_metadata={
+                group_id: {
+                    "type": "image-group",
+                    "title": "Method II: price position and money flow",
+                    "image_ids": [first_id, second_id],
+                    "note": "Both conditions must hold.",
+                },
+                first_id: {
+                    "title": "Long candidate",
+                    "alt": "Price rises along the upper band.",
+                    "caption": "Both conditions must hold.",
+                },
+                second_id: {
+                    "title": "Near miss",
+                    "alt": "Price moves sideways while one condition fails.",
+                    "caption": "One condition is not met.",
+                },
+            },
+            module_label="Module 5 · Build and trade setups",
+        )
+        figure_index = rendered.index('class="tt-image-group-figure"')
+        self.assertLess(rendered.index("Text before the group."), figure_index)
+        self.assertLess(figure_index, rendered.index("Text after the group."))
+        self.assertIn("Method II: price position and money flow", rendered)
+        self.assertIn("MODULE 5 · Build and trade setups", rendered)
+        self.assertIn("Long candidate", rendered)
+        self.assertIn("Near miss", rendered)
+        self.assertIn('src="/media/long-candidate.png"', rendered)
+        self.assertIn('src="/media/near-miss.png"', rendered)
+        self.assertIn("Both conditions must hold.", rendered)
+        self.assertIn("One condition is not met.", rendered)
+        self.assertNotIn("Purpose-built teaching aid", rendered)
+        self.assertNotIn("Figure 2.2 ·", rendered)
+        self.assertEqual(rendered.count('class="tt-image-group-item"'), 2)
+
+    def test_filename_is_not_used_as_a_figure_title(self):
+        rendered = render_safe_markdown(
+            f"![Chart](asset://{self.ASSET_ID})",
+            asset_urls={self.ASSET_ID: "/media/banknifty.png"},
+            figure_metadata={
+                self.ASSET_ID: {
+                    "title": "BANKNIFTY_2023-08-06_16-51-56_bd975.png",
+                    "alt": "BANKNIFTY price chart",
+                    "caption": "Price tested the level twice.",
+                }
+            },
+            module_label="Module 5 · Build and trade setups",
+        )
+        self.assertIn('<strong class="tt-purpose-figure-title">Chart</strong>', rendered)
+        self.assertNotIn("BANKNIFTY_2023-08-06_16-51-56_bd975.png", rendered)
