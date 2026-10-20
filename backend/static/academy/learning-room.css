@@ -265,17 +265,9 @@
 }
 .tt-tab-panel .tt-purpose-figure-header-top {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: flex-start;
   gap: 12px;
-}
-.tt-tab-panel .tt-purpose-figure-brand {
-  color: #55745e;
-  font-size: 8px;
-  font-weight: 850;
-  letter-spacing: .12em;
-  line-height: 1.5;
-  text-transform: uppercase;
 }
 .tt-tab-panel .tt-purpose-figure-module {
   color: #667269;
@@ -283,7 +275,7 @@
   font-weight: 750;
   letter-spacing: .06em;
   line-height: 1.5;
-  text-align: right;
+  text-align: left;
   text-transform: uppercase;
 }
 .tt-tab-panel .tt-purpose-figure-title {
@@ -493,9 +485,8 @@
   padding: 17px 21px 20px;
   background: linear-gradient(120deg, #e5ecdf, #f1ead8);
 }
-.tt-learning-room .tt-tab-panel .tt-purpose-figure-header-top { gap: 18px; align-items: center; }
-.tt-learning-room .tt-tab-panel .tt-purpose-figure-brand { font-size: 10px; letter-spacing: .15em; }
-.tt-learning-room .tt-tab-panel .tt-purpose-figure-module { font-size: 10px; letter-spacing: .08em; }
+.tt-learning-room .tt-tab-panel .tt-purpose-figure-header-top { gap: 10px; align-items: center; justify-content: flex-start; }
+.tt-learning-room .tt-tab-panel .tt-purpose-figure-module { font-size: 10px; letter-spacing: .08em; text-align: left; }
 .tt-learning-room .tt-tab-panel .tt-purpose-figure-title { font-size: clamp(25px, 2.6vw, 36px); margin-top: 10px; letter-spacing: -.035em; }
 .tt-learning-room .tt-tab-panel .tt-purpose-figure-body { padding: clamp(15px, 2.2vw, 26px); }
 .tt-learning-room .tt-tab-panel .tt-purpose-figure-image img { max-height: 620px; }
@@ -650,9 +641,8 @@
   margin: 20px 0; border-radius: 11px; box-shadow: 0 5px 14px #29382e09;
 }
 .tt-learning-room .tt-tab-panel .tt-purpose-figure-head { padding: 11px 13px 13px; background: linear-gradient(120deg, #e5ecdf, #f1ead8); }
-.tt-learning-room .tt-tab-panel .tt-purpose-figure-header-top { gap: 10px; align-items: center; }
-.tt-learning-room .tt-tab-panel .tt-purpose-figure-brand { font-size: 8px; letter-spacing: .12em; }
-.tt-learning-room .tt-tab-panel .tt-purpose-figure-module { font-size: 8px; letter-spacing: .06em; }
+.tt-learning-room .tt-tab-panel .tt-purpose-figure-header-top { gap: 10px; align-items: center; justify-content: flex-start; }
+.tt-learning-room .tt-tab-panel .tt-purpose-figure-module { font-size: 8px; letter-spacing: .06em; text-align: left; }
 .tt-learning-room .tt-tab-panel .tt-purpose-figure-title { margin-top: 7px; font-size: clamp(20px, 2.3vw, 28px); line-height: 1.2; }
 .tt-learning-room .tt-tab-panel .tt-purpose-figure-body { padding: 14px; }
 .tt-learning-room .tt-tab-panel .tt-purpose-figure-image img { max-height: 470px; }
