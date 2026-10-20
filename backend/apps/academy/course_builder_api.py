@@ -11,7 +11,6 @@ from io import BytesIO
 from urllib.parse import quote
 
 import requests
-
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
