@@ -318,7 +318,11 @@ Implemented on `my-new-branch`:
 - Added regression coverage for native file playback, external video destinations, ordering before the lesson tabs, and rejection of unsafe URL schemes.
 - The existing shared `.tt-video-lesson` styles are reused. No authentication, course-access, media-storage, submission, or publication rules were loosened.
 
-This video-parity change is awaiting its own CI run. It has not been deployed. Keep it separate from the live staging revision until CI succeeds and the user explicitly approves the next staging deployment. Browser screenshot acceptance remains outstanding.
+The video-parity change, the compact-header/layout pass, and the published-only related-course preview all passed CI at feature-branch revision `5281af9cc1de6103d948c75a8f913ee0e5f7b949`:
+- [Academy backend CI](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39489146913) passed on Python 3.11 and 3.12.
+- [Verify Django Academy backend](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39489146770) passed on Python 3.11 and 3.12.
+
+These changes have not been deployed. The staging service remains on its earlier live revision `ea8a3159fb6428fab9caec52cc963c0d620bcce7`; do not deploy the new head without explicit staging approval. Browser screenshot acceptance remains outstanding.
 
 ## Follow-up visual pass — compact header and figure spacing (21 October 2026)
 
@@ -333,4 +337,4 @@ This pass corrects the structure and aligns sizing with the canonical preview:
 - The same audit also found that selected related-course references were stored but omitted from the admin website preview. That preview now shows only existing published courses; the references remain read-only and do not grant access.
 - Regression tests cover header/grid placement, native and external video, unsafe video URLs and published-only related courses.
 
-No course body, access/entitlement logic, answer keys, billing or publish state was changed. This pass is committed to `my-new-branch` and has not been deployed. CI must pass on the latest branch head before any staging deployment is considered. Browser screenshots at wide desktop, compact desktop, tablet and mobile widths are still required to verify the visual result against the source file.
+No course body, access/entitlement logic, answer keys, billing or publish state was changed. The compact layout, video-parity and related-course-preview code changes are committed on `my-new-branch` and passed both CI workflows on the Python 3.11 and 3.12 matrix at `5281af9cc1de6103d948c75a8f913ee0e5f7b949`. The staging service remains at `ea8a3159fb6428fab9caec52cc963c0d620bcce7`; nothing from this pass has been deployed. Do not trigger staging deployment until explicitly approved. Browser screenshots at wide desktop, compact desktop, tablet and mobile widths are still required to verify the visual result against the source file.
