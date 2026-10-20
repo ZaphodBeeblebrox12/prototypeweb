@@ -128,9 +128,9 @@ class CourseReviewTemplateTests(TestCase):
         self.assertContains(response, "Stage Understand Bollinger Bands for review")
         self.assertContains(response, "csrfmiddlewaretoken")
 
-    def _website_preview_record(self, video_url=None):
+    def _website_preview_record(self, video_url=None, course_slug="website-preview-course"):
         return CourseImport.objects.create(
-            course_slug="website-preview-course",
+            course_slug=course_slug,
             title="Website Preview Course",
             manifest_version="1.0",
             content_hash="d" * 64,
@@ -263,7 +263,10 @@ class CourseReviewTemplateTests(TestCase):
         self.assertContains(response, "Open lesson video")
         self.assertFalse(response.context["selected_video_is_file"])
 
-        unsafe_record = self._website_preview_record(video_url="javascript:alert(1)")
+        unsafe_record = self._website_preview_record(
+            video_url="javascript:alert(1)",
+            course_slug="website-preview-unsafe-video",
+        )
         unsafe_response = self.client.get(
             reverse("academy:course-import-preview", args=[unsafe_record.pk]),
             {"lesson": "1.1"},
