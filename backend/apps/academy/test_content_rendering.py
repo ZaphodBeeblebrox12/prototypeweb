@@ -149,6 +149,9 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("imageGroups.some", preview)
         self.assertIn("TRADETHESIS · LEARNING ROOM", preview)
         self.assertIn("tt-purpose-figure-module", preview)
+        self.assertIn("data-image-storage-status", preview)
+        self.assertIn("result.asset_storage", preview)
+        self.assertIn("Image uploads are blocked because no durable image provider is configured", preview)
 
 
     def test_titled_image_group_renders_multiple_images_with_module_heading_in_place(self):
