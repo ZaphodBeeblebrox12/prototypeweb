@@ -199,3 +199,31 @@ Using the authenticated Course Builder at https://tradethesis-academy-staging.on
 7. In Render logs, confirm the save and asset requests succeed without image-storage errors. Do not click **Submit for review** or publish the course as part of this validation.
 
 No code/runtime changes or new deployment were made in this follow-up because authenticated browser automation is not available in this tool session. The provider verification is complete; actual upload persistence and visual grouped-rendering acceptance need the above browser session. Keep production, main branch, and course publication untouched.
+
+
+### Follow-up: Deep visual-parity pass against the approved Bollinger Bands template (21 October 2026)
+
+Source of truth reviewed:
+- User-provided full HTML: `course-source/understand-bollinger-bands/preview/first-pass/index.html` (same canonical reference noted at top of this file).
+- Runtime learner template: `backend/templates/academy/lesson.html` and `backend/templates/academy/partials/lesson_tabs.html`.
+- Unpublished admin website preview: `backend/templates/academy/course_import_website_preview.html`.
+- Shared lesson styling: `backend/static/academy/learning-room.css`.
+- Authoring workbench/local learner preview: `backend/apps/academy/course_builder_preview.html`.
+
+Diagnosis: The canonical reference is a much more fully art-directed learning experience than the editor UI, so copying its entire standalone document into Django would be incorrect. The standalone HTML includes a public course overview, interactions and a self-contained example learning room; the production-like Django templates already supply shared navigation, auth/entitlement, administrator-only preview, actual course data, structured lesson sections and safe server-rendered figures. The correct integration seam is to bring the shared learner-facing visual language closer to the reference without replacing that Django/runtime contract.
+
+Visual gaps targeted:
+- The learner heading, module tags, study-time panel and “In this lesson” section existed but were smaller/flatter, with less generous rhythm and card depth than the approved reference.
+- Course outline and lesson content region were too tight; tab and heading hierarchies did not sufficiently carry the reference's larger editorial typography and generous reading line-height.
+- Figures and group figures existed structurally, but headers/body spacing, image size and frame treatment were more restrained than the reference. Image groups needed to feel like intentional chart comparison panels, not small generic cards.
+- The builder's local Learner preview has its own inline CSS distinct from the Django website-preview styles; improving only the shared stylesheet would leave the in-editor preview visibly behind. This pass styles both surfaces separately.
+
+Changes prepared on `my-new-branch`:
+- `backend/static/academy/learning-room.css`: append scoped reference-parity overrides for paper/cream surfaces, deep TradeThesis green and muted gold, larger editorial title/summary, more spacious lesson header and study panel, stronger outline navigation, clearer active tabs, more readable Markdown hierarchy, improved notebook/practice/navigation panels, and substantially richer structured figure/image-group/comparison-card frames. Mobile breakpoints remain explicit, with the outline and groups stacking at narrow sizes. Overrides are scoped under `.tt-learning-room` to minimise impact on unrelated admin/course pages.
+- `backend/apps/academy/course_builder_preview.html`: append separate CSS-only overrides for the local learner preview and authoring workbench typography, editor card spacing, form controls, preview header/body, figure frames, grouped-image panels, comparison cards, and mobile layout. Existing JavaScript, save APIs, stable asset IDs, draft flow, and publish/review buttons are unchanged.
+
+Review boundary:
+- This is a visual styling pass, not a full rewrite of the template or a change to content rendering semantics.
+- No lesson/course content, storage provider configuration, learner permissions, auth rules, question-answer handling, draft IDs, or publication workflow were changed.
+- Do not deploy automatically. The current staging service has auto-deploy disabled; user asked for deep style work but did not approve a staging deployment in this turn.
+- These changes still require committing to the feature branch, CI and static/template checks, then a desktop/mobile side-by-side screenshot review against the canonical file. Do not claim pixel parity or visual acceptance without screenshots.
