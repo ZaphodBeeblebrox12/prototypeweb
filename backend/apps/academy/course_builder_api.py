@@ -268,11 +268,24 @@ def _build_import_payload(course_state, course_slug):
                 if len(stable_ids) >= 2:
                     image_group_asset_ids[group_id] = stable_ids
 
-            # Keep figure placement inside the authored Markdown. Titles, alt text and captions
-            # travel separately with stable asset UUIDs; do not append captions to the prose.
+            # Images assigned to practice questions are instructional assets too, even though
+            # their placement is outside the lesson Markdown body.
+            questions = lesson.get("questions") if isinstance(lesson.get("questions"), list) else []
+            question_image_ids = set()
+            for question in questions:
+                if not isinstance(question, dict):
+                    continue
+                builder_image_id = str(question.get("imageId") or "").strip()
+                stable_image_id = image_by_id.get(builder_image_id)
+                if stable_image_id:
+                    question_image_ids.add(stable_image_id)
+
+            # Keep figure placement inside authored Markdown; questions may reference the same
+            # assets independently. Titles, alt text and captions travel in figure metadata.
             asset_ids = sorted(
                 set(_ASSET_REF.findall(content))
                 | {asset_id for group_ids in image_group_asset_ids.values() for asset_id in group_ids}
+                | question_image_ids
             )
             referenced_assets = set(asset_ids)
             figures = {
@@ -327,17 +340,21 @@ def _build_import_payload(course_state, course_slug):
                     "cards": cards,
                     "note": str(figure.get("note") or "").strip()[:1500],
                 }
-            questions = lesson.get("questions") if isinstance(lesson.get("questions"), list) else []
             learner_questions = []
             for question_index, question in enumerate(questions, start=1):
                 if not isinstance(question, dict):
                     continue
                 options = question.get("options") if isinstance(question.get("options"), list) else []
-                learner_questions.append({
+                public_question = {
                     "id": str(question.get("id") or f"question-{module_index}-{lesson_index}-{question_index}"),
                     "prompt": str(question.get("prompt") or "").strip()[:2000],
                     "options": [str(option)[:1000] for option in options[:8]],
-                })
+                }
+                builder_image_id = str(question.get("imageId") or "").strip()
+                stable_image_id = image_by_id.get(builder_image_id)
+                if stable_image_id:
+                    public_question["image_asset_id"] = stable_image_id
+                learner_questions.append(public_question)
             related_ids = lesson.get("relatedCourseIds") if isinstance(lesson.get("relatedCourseIds"), list) else []
             notebook = lesson.get("notebook") if isinstance(lesson.get("notebook"), dict) else {}
             prompts = notebook.get("prompts") if isinstance(notebook.get("prompts"), list) else []

@@ -126,6 +126,10 @@
 .tt-practice-questions h2 { margin: 6px 0 18px; font: 500 1.45rem Georgia,serif; }
 .tt-question { border: 0; border-bottom: 1px solid var(--tt-line); margin: 0 0 18px; padding: 0 0 16px; }
 .tt-question legend { float: none; width: 100%; margin-bottom: 10px; font-weight: 700; line-height: 1.5; }
+.tt-question-figure { max-width: 100%; margin: 12px 0 16px; padding: 10px; border: 1px solid var(--tt-line); border-radius: 6px; background: #fff; }
+.tt-question-figure img { display: block; width: auto; max-width: 100%; max-height: 440px; height: auto; margin: 0 auto; object-fit: contain; }
+.tt-question-figure figcaption { display: flex; flex-direction: column; gap: 3px; margin-top: 8px; color: var(--tt-muted); font-size: .82rem; line-height: 1.5; }
+.tt-question-figure figcaption strong { color: var(--tt-ink); font-size: .9rem; }
 .tt-answer-option { display: flex; gap: 9px; align-items: flex-start; margin: 9px 0; font-size: .9rem; line-height: 1.55; }
 .tt-answer-option input { margin-top: .3rem; accent-color: var(--tt-green); }
 .tt-quiz-feedback,.tt-quiz-score { margin: 8px 0 0; font-size: .85rem; line-height: 1.6; }

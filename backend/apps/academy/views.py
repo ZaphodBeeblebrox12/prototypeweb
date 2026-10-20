@@ -36,6 +36,29 @@ from .services import (
 )
 
 
+def _practice_questions_with_images(questions, asset_urls, figure_metadata):
+    """Add permission-checked asset URLs and harmless display metadata to learner questions."""
+    if not isinstance(questions, list):
+        return []
+    asset_urls = asset_urls if isinstance(asset_urls, dict) else {}
+    figure_metadata = figure_metadata if isinstance(figure_metadata, dict) else {}
+    hydrated = []
+    for raw_question in questions:
+        if not isinstance(raw_question, dict):
+            continue
+        question = dict(raw_question)
+        asset_id = str(question.get("image_asset_id") or "")
+        metadata = figure_metadata.get(asset_id, {})
+        if not isinstance(metadata, dict):
+            metadata = {}
+        question["image_url"] = str(asset_urls.get(asset_id) or "") if asset_id else ""
+        question["image_title"] = str(metadata.get("title") or "Chart")[:240]
+        question["image_alt"] = str(metadata.get("alt") or question["image_title"])[:500]
+        question["image_caption"] = str(metadata.get("caption") or "")[:500]
+        hydrated.append(question)
+    return hydrated
+
+
 def _active_entitlements(user, at=None):
     at = at or timezone.now()
     return (CourseEntitlement.objects.filter(
@@ -204,8 +227,11 @@ def lesson_detail(request, course_slug, lesson_id):
     video_url = video_url if isinstance(video_url, str) and video_url.startswith(("https://", "http://")) else ""
     video_is_file = video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
     practice_questions = lesson.content_json.get("questions", []) if isinstance(lesson.content_json, dict) else []
-    if not isinstance(practice_questions, list):
-        practice_questions = []
+    practice_questions = _practice_questions_with_images(
+        practice_questions,
+        asset_urls,
+        lesson.content_json.get("figures", {}) if isinstance(lesson.content_json, dict) else {},
+    )
     related_ids = lesson.content_json.get("related_course_ids", []) if isinstance(lesson.content_json, dict) else []
     related_ids = [value for value in related_ids if isinstance(value, str) and len(value) == 36 and value.count("-") == 4]
     related_courses = Course.objects.filter(
@@ -317,9 +343,11 @@ def admin_lesson_preview(request, course_slug, lesson_id):
     notebook = content_json.get("notebook", {})
     if not isinstance(notebook, dict):
         notebook = {}
-    practice_questions = content_json.get("questions", [])
-    if not isinstance(practice_questions, list):
-        practice_questions = []
+    practice_questions = _practice_questions_with_images(
+        content_json.get("questions", []),
+        asset_urls,
+        content_json.get("figures", {}),
+    )
     video_url = content_json.get("video_url", "")
     if not isinstance(video_url, str) or not video_url.startswith(("https://", "http://")):
         video_url = ""
@@ -453,9 +481,11 @@ def course_import_website_preview(request, import_id):
         selected_notebook = content_json.get("notebook") or payload.get("notebook", {})
         if not isinstance(selected_notebook, dict):
             selected_notebook = {}
-        practice_questions = content_json.get("questions", [])
-        if isinstance(practice_questions, list):
-            selected_practice_questions = practice_questions
+        selected_practice_questions = _practice_questions_with_images(
+            content_json.get("questions", []),
+            asset_urls,
+            content_json.get("figures", {}),
+        )
 
         raw_related_ids = content_json.get("related_course_ids", [])
         related_ids = []

@@ -410,6 +410,63 @@ class CourseBuilderApiTests(TestCase):
         self.assertNotIn("Private Draft Course", titles)
         self.assertEqual(response["Access-Control-Allow-Origin"], "*")
 
+    def test_builder_question_image_is_saved_as_learner_safe_figure_reference(self):
+        from .course_builder_api import _asset_uuid, _build_import_payload
+
+        state = self.draft_payload("builder-question-image")["course"]
+        lesson = state["modules"][0]["lessons"][0]
+        image_id = "question-chart-01"
+        lesson["images"] = [{
+            "id": image_id,
+            "name": "resistance-chart.png",
+            "title": "Repeated resistance test",
+            "alt": "Price testing the same resistance area three times",
+            "caption": "Notice the closes around the marked zone.",
+            "data": "data:image/png;base64," + base64.b64encode(b"fake image bytes").decode("ascii"),
+        }]
+        lesson["image"] = lesson["images"][0]
+        lesson["questions"][0]["imageId"] = image_id
+
+        imported, image_sources = _build_import_payload(state, "builder-question-image")
+        saved_lesson = imported["modules"][0]["lessons"][0]
+        stable_id = _asset_uuid("builder-question-image", image_id)
+        question = saved_lesson["content_json"]["questions"][0]
+
+        self.assertEqual(question["image_asset_id"], stable_id)
+        self.assertIn(stable_id, saved_lesson["content_json"]["asset_ids"])
+        self.assertEqual(
+            saved_lesson["content_json"]["figures"][stable_id],
+            {
+                "title": "Repeated resistance test",
+                "alt": "Price testing the same resistance area three times",
+                "caption": "Notice the closes around the marked zone.",
+            },
+        )
+        self.assertIn("builder/" + image_id, image_sources)
+        self.assertNotIn("correctIndex", json.dumps(saved_lesson["content_json"]))
+        self.assertNotIn("explanation", json.dumps(saved_lesson["content_json"]))
+
+    def test_practice_question_image_hydration_uses_resolved_asset_url(self):
+        from .views import _practice_questions_with_images
+
+        questions = [{
+            "id": "question-1",
+            "prompt": "What does this chart show?",
+            "options": ["A", "B"],
+            "image_asset_id": "asset-uuid",
+        }]
+        hydrated = _practice_questions_with_images(
+            questions,
+            {"asset-uuid": "/academy/media/asset-uuid/"},
+            {"asset-uuid": {"title": "Chart A", "alt": "A price chart", "caption": "Look at the retest."}},
+        )
+
+        self.assertEqual(hydrated[0]["image_url"], "/academy/media/asset-uuid/")
+        self.assertEqual(hydrated[0]["image_title"], "Chart A")
+        self.assertEqual(hydrated[0]["image_alt"], "A price chart")
+        self.assertEqual(hydrated[0]["image_caption"], "Look at the retest.")
+        self.assertNotIn("image_url", questions[0])
+
     def test_builder_preserves_inline_figure_metadata_with_stable_asset_id(self):
         from .course_builder_api import _build_import_payload
 
