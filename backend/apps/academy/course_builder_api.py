@@ -498,9 +498,22 @@ def course_builder_api(request):
         slug = slugify(str(course_state.get("slug") or title))[:160]
         if not title or not slug:
             return JsonResponse({"detail": "Add a course title before saving."}, status=400)
-        if Course.objects.exclude(status=Course.Status.ARCHIVED).filter(slug=slug).exists():
-            existing_course = Course.objects.get(slug=slug)
-            if course_state.get("serverCourseId") != str(existing_course.pk):
+        existing_course = Course.objects.exclude(status=Course.Status.ARCHIVED).filter(slug=slug).first()
+        if existing_course and course_state.get("serverCourseId") != str(existing_course.pk):
+            # Re-saving an already-created Course Builder draft must remain possible
+            # even if a Course row with this slug now exists. A matching draft ID is
+            # proof that this request is updating its own draft, not creating a second
+            # import against an existing Academy course.
+            server_draft_id = str(course_state.get("serverDraftId") or "")
+            owns_existing_draft = (
+                _valid_uuid(server_draft_id)
+                and CourseImport.objects.filter(
+                    pk=server_draft_id,
+                    course_slug=slug,
+                    status=CourseImport.Status.DRAFT,
+                ).exists()
+            )
+            if not owns_existing_draft:
                 return JsonResponse({"detail": "A course with this URL slug already exists. Choose a unique slug or edit the existing course in the Academy."}, status=409)
         course_state["slug"] = slug
         payload, image_sources = _build_import_payload(course_state, slug)
