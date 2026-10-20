@@ -235,6 +235,7 @@ def lesson_detail(request, course_slug, lesson_id):
                 if isinstance(lesson.content_json, dict) else {}
             ),
             figure_prefix=f"{lesson.module.position}.{lesson.position}",
+            module_label=f"Module {lesson.module.position} · {lesson.module.title}",
         ),
         "notebook": notebook, "notebook_responses": saved_responses, "outline_modules": outline_modules,
         "related_courses": related_courses, "practice_questions": practice_questions,
@@ -337,6 +338,7 @@ def admin_lesson_preview(request, course_slug, lesson_id):
             admin_preview=True,
             figure_metadata=content_json.get("figures", {}),
             figure_prefix=f"{lesson.module.position}.{lesson.position}",
+            module_label=f"Module {lesson.module.position} · {lesson.module.title}",
         ),
         "notebook": notebook,
         "notebook_responses": [],
@@ -439,6 +441,7 @@ def course_import_website_preview(request, import_id):
             admin_preview=True,
             figure_metadata=selected_content_json.get("figures", {}),
             figure_prefix=str(selected_lesson.get("source_id", "")),
+            module_label=f"Module {selected_module.get('position', '')} · {selected_module.get('title', '')}",
         )
         content_json = selected_lesson.get("content_json", {})
         if not isinstance(content_json, dict):
