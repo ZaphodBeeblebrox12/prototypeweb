@@ -75,6 +75,17 @@ class CourseBuilderApiTests(TestCase):
             "mode": "save",
         }
 
+    def test_builder_learner_preview_includes_trading_notebook_block(self):
+        response = self.client.get(reverse("staff_course_builder_preview"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "function notebookPreviewMarkup(lesson)")
+        self.assertContains(response, 'class="preview-trading-notebook"')
+        self.assertContains(response, "KEEP<br>IN VIEW")
+        self.assertContains(response, "YOUR TRADING NOTEBOOK")
+        self.assertContains(response, "notebookPreviewMarkup(lesson)")
+        self.assertContains(response, "Notebook heading")
+
     def test_admin_can_save_shared_draft(self):
         response = self.client.post(
             reverse("staff_course_builder_api"),
