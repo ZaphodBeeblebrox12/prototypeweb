@@ -1,7 +1,8 @@
-from django.contrib import admin
+from django.contrib.admin.sites import AdminSite
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase
 
+from .admin import CourseAdmin, CourseMediaAssetAdmin
 from .models import Course, CourseMediaAsset
 
 
@@ -28,7 +29,7 @@ class CourseDeletionAdminTests(TestCase):
         )
 
     def test_course_delete_confirmation_allows_owned_media_for_content_admin(self):
-        course_admin = admin.site._registry[Course]
+        course_admin = CourseAdmin(Course, AdminSite())
         deletable, model_count, perms_needed, protected = course_admin.get_deleted_objects(
             Course.objects.filter(pk=self.course.pk),
             self.request,
@@ -40,10 +41,11 @@ class CourseDeletionAdminTests(TestCase):
         self.assertTrue(deletable)
 
     def test_deleting_course_removes_its_media_record_but_direct_asset_delete_stays_disabled(self):
-        media_admin = admin.site._registry[CourseMediaAsset]
+        site = AdminSite()
+        media_admin = CourseMediaAssetAdmin(CourseMediaAsset, site)
         self.assertFalse(media_admin.has_delete_permission(self.request, self.asset))
 
-        course_admin = admin.site._registry[Course]
+        course_admin = CourseAdmin(Course, site)
         course_admin.delete_queryset(
             self.request,
             Course.objects.filter(pk=self.course.pk),
