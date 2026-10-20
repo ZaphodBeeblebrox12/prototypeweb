@@ -13,6 +13,7 @@ from django.urls import reverse
 from PIL import Image
 
 from apps.academy.content_rendering import build_lesson_sections, validate_markdown_source
+from apps.academy.forms import validate_upload_image
 from apps.academy.importing import publish_course_import, validate_import_for_publish
 from apps.academy.models import (
     Course,
@@ -50,6 +51,11 @@ class CourseImportWorkflowTests(TestCase):
 
     def tearDown(self):
         self.tmp.cleanup()
+
+    def test_image_validator_accepts_clear_checkbox_value(self):
+        # Optional Django file fields return False when their clear checkbox is selected.
+        self.assertIsNone(validate_upload_image(False))
+        self.assertIsNone(validate_upload_image(None))
 
     def write_source(self, body):
         self.source.write_text(

@@ -14,7 +14,8 @@ _MAX_IMAGE_BYTES = 10 * 1024 * 1024
 
 
 def validate_upload_image(upload):
-    if upload is None:
+    # Django's clearable file widget returns False when its clear checkbox is selected.
+    if upload is None or upload is False:
         return
     if upload.size > _MAX_IMAGE_BYTES:
         raise ValidationError("Images must be 10 MB or smaller.")
