@@ -128,7 +128,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
         preview = (Path(__file__).resolve().parent / "course_builder_preview.html").read_text()
         # Placeholder separators must be actual Markdown blank lines, not literal
         # backslash-n text, or headings and figure tokens leak into the preview.
-        self.assertIn(r"return '\\n\\n' + token + '\\n\\n';", preview)
+        self.assertIn(r"return '\n\n' + token + '\n\n';", preview)
         # A placed asset may use either its builder ID or its stable asset UUID.
         # It should not also be appended to the end of the preview as unplaced.
         self.assertIn("[image.id, image.assetUuid]", preview)
