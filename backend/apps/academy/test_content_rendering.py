@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from django.test import SimpleTestCase
 
 from .content_rendering import build_lesson_sections, render_safe_markdown
@@ -121,3 +123,13 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("Common baseline", rendered)
         self.assertIn("LONGER WINDOW", rendered)
         self.assertIn("Compare one setting at a time.", rendered)
+
+    def test_course_builder_preview_keeps_each_figure_at_its_markdown_position(self):
+        preview = (Path(__file__).resolve().parent / "course_builder_preview.html").read_text()
+        # Placeholder separators must be actual Markdown blank lines, not literal
+        # backslash-n text, or headings and figure tokens leak into the preview.
+        self.assertIn(r"return '\\n\\n' + token + '\\n\\n';", preview)
+        # A placed asset may use either its builder ID or its stable asset UUID.
+        # It should not also be appended to the end of the preview as unplaced.
+        self.assertIn("[image.id, image.assetUuid]", preview)
+        self.assertIn("authoredContent.includes('asset://' + id)", preview)
