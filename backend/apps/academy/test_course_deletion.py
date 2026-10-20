@@ -3,7 +3,6 @@ from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase
 
 from .admin import CourseAdmin, CourseMediaAssetAdmin
-
 from .models import Course, CourseMediaAsset
 
 
