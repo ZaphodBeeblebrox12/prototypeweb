@@ -97,6 +97,22 @@ Implementation is underway on my-new-branch. Recent changes are committed; no pr
 - An earlier revision failed three new rendering-test assertions because the fixtures used literal backslash-n strings rather than paragraph breaks, and one XSS assertion was broader than the security condition it needed to check. The fixture/test assertions were corrected; the later revision passed both test workflows.
 - Manual deployment to Academy staging was triggered after both test workflows passed. Render build `bld-dbbq8ron3acc73c8jat0` succeeded at 17:28:12 UTC and deploy `dep-dbbq8ron3acc73c8jasg` was confirmed `live` at 17:29:09 UTC on 20 October 2026. The service health endpoint repeatedly returned HTTP 200. Staging logs show the administrator website-preview route returning HTTP 200 with a 35,862-byte HTML response, and the builder admin-preview route was also requested successfully. No warning/error-level logs were found for the deployment window. Remaining acceptance work: visually inspect authenticated desktop/mobile layout, compare the header to the agreed Bollinger Bands reference, and verify image/caption placement and native comparison-card figures. This tool session cannot access the authenticated browser UI directly, so do not claim visual acceptance until an authenticated browser inspection is performed. Production is out of scope; do not merge to main or publish the draft.
 
+### Follow-up: Inline image placement and draft-save slug collision (20 October 2026)
+
+The author's latest staging screenshots exposed two separate regressions:
+
+- In the builder's local “Learner preview”, the inline figure renderer inserted literal backslash-n text around its figure tokens. This prevented Markdown block parsing, leaked `TTFIGURETOKEN` placeholders into the page, and made nearby headings look like raw Markdown. The renderer now inserts actual paragraph separators, so repeated references to the same asset render at the reference positions.
+- The “unplaced image” fallback checked only the transient builder asset ID. If the body referenced that ID but the image metadata also carried a different stable asset UUID, the preview could treat a placed image as unplaced and append another copy at the bottom. The fallback now checks both IDs.
+- Draft save rejected a course slug before checking whether the request was re-saving its own existing CourseImport draft. The API now allows the collision only when the request includes a valid `serverDraftId` that resolves to a draft with the same slug. It still returns HTTP 409 for a genuinely new draft trying to use a slug already owned by an Academy Course. If the author is making a new course and has no matching saved draft, the URL slug must be changed to an unused one; this preserves the existing-course uniqueness rule.
+
+Regression coverage was added for inline preview token separators and ID-aware fallback, re-saving an existing draft alongside a same-slug Course row, and rejecting a new draft that conflicts with an existing Course row.
+
+Verification on revision `776e1d2900b99d5230c82366dd7305bc66054918` completed successfully:
+- [Academy backend CI](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39468574740): Python 3.11 and 3.12 jobs passed focused regressions, linting, formatting, type checks, migration-state checks and the full test suite.
+- [Verify Django Academy backend](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39468574843): Python 3.11 and 3.12 backend regression jobs passed.
+
+The fix is committed on `my-new-branch`; it has not yet been deployed. Next step: update this handoff commit, manually deploy the current branch to Academy staging only (auto-deploy remains disabled), then verify the real logged-in preview. No merge to `main`, production deployment, course publication or database content mutation is authorized by this work.
+
 ### Remaining
 
 1. Add test coverage for native comparison-card teaching figures: stable token, title, cards, note, authored placement and escaping.
