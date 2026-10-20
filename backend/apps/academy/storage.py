@@ -72,11 +72,14 @@ class PrivateCourseAssetStorage(FileSystemStorage):
                 method, url, headers=self._headers(), timeout=self.timeout, **kwargs
             )
         except requests.RequestException as exc:
-                        raise OSError("Private course image storage is temporarily unavailable.") from exc
+            raise OSError("Private course image storage is temporarily unavailable.") from exc
         if response.status_code >= 400:
             if response.status_code == 404:
                 return None
-                        logger.warning("GitHub course asset request failed with status %s", response.status_code)
+            logger.warning(
+                "GitHub course asset request failed with status %s",
+                response.status_code,
+            )
             raise OSError(
                 f"Private course image storage returned HTTP {response.status_code}."
             )
@@ -100,10 +103,10 @@ class PrivateCourseAssetStorage(FileSystemStorage):
                 f"{self.api_root}/repos/{self.repository}/git/blobs/{metadata['sha']}",
             )
             if blob is None:
-                                raise OSError("The private course image could not be read.")
+                raise OSError("The private course image could not be read.")
             encoded = blob.json().get("content", "").strip()
         if not encoded:
-                        raise OSError("GitHub returned no content for the course image.")
+            raise OSError("GitHub returned no content for the course image.")
         return ContentFile(base64.b64decode(encoded), name=name)
 
     def _save(self, name, content):
@@ -118,7 +121,7 @@ class PrivateCourseAssetStorage(FileSystemStorage):
         }
         response = self._request("PUT", self._url(path), json=payload)
         if response is None:
-                        raise OSError("GitHub could not store the course image.")
+            raise OSError("GitHub could not store the course image.")
         return name
 
     def exists(self, name):
@@ -144,7 +147,7 @@ class PrivateCourseAssetStorage(FileSystemStorage):
                 },
             )
             if response is None:
-                                raise OSError("GitHub could not remove the course image.")
+                raise OSError("GitHub could not remove the course image.")
             return
         # Compatibility with assets saved to local disk before GitHub was enabled.
         super().delete(name)

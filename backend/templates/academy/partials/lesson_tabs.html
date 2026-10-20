@@ -8,7 +8,7 @@
   <div class="tt-tab-panel" id="panel-examples" role="tabpanel" aria-labelledby="tab-examples" data-tab-panel="examples" hidden>{{ lesson_sections.examples_html|safe }}</div>
   <div class="tt-tab-panel" id="panel-practice" role="tabpanel" aria-labelledby="tab-practice" data-tab-panel="practice" hidden>
     {{ lesson_sections.practice_html|safe }}
-    {% if practice_questions %}
+    {% if practice_questions and lesson %}
     <section class="tt-practice-questions" aria-labelledby="tt-practice-heading">
       <p class="tt-eyebrow">Apply what you noticed</p>
       <h2 id="tt-practice-heading">Practice questions</h2>
@@ -35,16 +35,24 @@
   <div class="tt-notebook-kicker">YOUR TRADING NOTEBOOK</div>
   <h3>{{ notebook.title|default:"Your Trading Notebook" }}</h3>
   {% if notebook.prompts %}
-  <form method="post" action="{% url 'academy:lesson-notebook-submit' lesson.id %}" data-notebook-response>
-    {% csrf_token %}
-    <ol>
+    {% if lesson %}
+    <form method="post" action="{% url 'academy:lesson-notebook-submit' lesson.id %}" data-notebook-response>
+      {% csrf_token %}
+      <ol>
+        {% for prompt in notebook.prompts %}
+        <li><label for="notebook-prompt-{{ forloop.counter0 }}"><strong>{{ prompt.label }}</strong></label><p>{{ prompt.text }}</p><textarea id="notebook-prompt-{{ forloop.counter0 }}" name="prompt_{{ forloop.counter0 }}" rows="3" maxlength="4000" placeholder="Write your reflection…">{{ prompt.response }}</textarea></li>
+        {% endfor %}
+      </ol>
+      <button class="tt-notebook-save" type="submit">Save reflection</button>
+      <span data-notebook-feedback role="status" aria-live="polite"></span>
+    </form>
+    {% else %}
+    <ol class="tt-notebook-prompts-readonly">
       {% for prompt in notebook.prompts %}
-      <li><label for="notebook-prompt-{{ forloop.counter0 }}"><strong>{{ prompt.label }}</strong></label><p>{{ prompt.text }}</p><textarea id="notebook-prompt-{{ forloop.counter0 }}" name="prompt_{{ forloop.counter0 }}" rows="3" maxlength="4000" placeholder="Write your reflection…">{{ prompt.response }}</textarea></li>
+      <li><strong>{{ prompt.label }}</strong><p>{{ prompt.text }}</p></li>
       {% endfor %}
     </ol>
-    <button class="tt-notebook-save" type="submit">Save reflection</button>
-    <span data-notebook-feedback role="status" aria-live="polite"></span>
-  </form>
+    {% endif %}
   {% else %}
   <ol>
     <li><strong>Observe</strong><p>Describe what the chart actually shows.</p></li>

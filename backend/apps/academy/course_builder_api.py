@@ -49,7 +49,10 @@ def _sync_course_source_to_github(payload, course_slug):
     repository = getattr(settings, "ACADEMY_GITHUB_ASSET_REPOSITORY", "").strip()
     branch = getattr(settings, "ACADEMY_GITHUB_ASSET_BRANCH", "my-new-branch").strip()
     if not token or not repository:
-        return False
+        raise ValidationError(
+            "GitHub source sync is not configured; set ACADEMY_GITHUB_ASSET_TOKEN "
+            "and verify ACADEMY_GITHUB_ASSET_REPOSITORY."
+        )
 
     path = f"course-source/builder-drafts/{course_slug}.json"
     encoded_path = "/".join(quote(part, safe="") for part in path.split("/"))
@@ -369,9 +372,33 @@ def course_builder_api(request):
             return JsonResponse({"detail": "Unsupported draft action."}, status=400)
 
         with transaction.atomic():
-            draft = CourseImport.objects.filter(
+            # Lock an existing draft so overlapping submissions serialize.
+            draft = CourseImport.objects.select_for_update().filter(
                 course_slug=slug, status=CourseImport.Status.DRAFT,
             ).first()
+            if mode == "submit" and draft is None:
+                # The browser may retry after the server accepted a submission
+                # but the redirect to the review page failed. Reuse an identical
+                # review record rather than creating a duplicate import.
+                existing_review = CourseImport.objects.filter(
+                    course_slug=slug,
+                    content_hash=digest,
+                    status=CourseImport.Status.REVIEW,
+                ).order_by("-imported_at").first()
+                if existing_review is not None:
+                    review_url = reverse(
+                        "admin:academy_courseimport_review",
+                        args=[existing_review.pk],
+                    )
+                    return JsonResponse({
+                        "ok": True,
+                        "submitted": True,
+                        "record_id": str(existing_review.pk),
+                        "review_url": review_url,
+                        "publish_errors": [],
+                        "github_source_synced": None,
+                        "message": "This course version is already awaiting review. No duplicate submission was created.",
+                    })
             conflicting = CourseImport.objects.filter(
                 course_slug=slug, content_hash=digest,
             )
@@ -429,7 +456,12 @@ def course_builder_api(request):
                     asset.save(update_fields=["stable_asset_id", "alt_text", "source_error", "updated_at"])
             for removed_asset in existing_assets.values():
                 if removed_asset.file:
-                    removed_asset.file.delete(save=False)
+                    storage = removed_asset.file.storage
+                    name = removed_asset.file.name
+                    transaction.on_commit(
+                        lambda storage=storage, name=name: storage.delete(name),
+                        robust=True,
+                    )
                 removed_asset.delete()
 
             _store_images(record, image_sources)

@@ -2,6 +2,8 @@
 import base64
 from unittest.mock import Mock, patch
 
+import requests
+
 from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
 from django.test import SimpleTestCase, override_settings
@@ -64,3 +66,27 @@ class PrivateCourseAssetStorageTests(SimpleTestCase):
             with self.assertRaises(FileNotFoundError):
                 self.storage._open("missing.png")
             local_open.assert_called_once_with(self.storage, "missing.png", "rb")
+
+
+    def test_request_timeout_uses_safe_error_without_credentials(self):
+        with patch(
+            "apps.academy.storage.requests.request",
+            side_effect=requests.Timeout("test-token must never appear in a public error"),
+        ):
+            with self.assertRaisesRegex(OSError, "temporarily unavailable") as raised:
+                self.storage._request("GET", "https://api.github.com/example")
+
+        self.assertNotIn("test-token", str(raised.exception))
+
+    def test_request_rejects_authorization_errors_without_logging_credentials(self):
+        for status_code in (401, 403):
+            with self.subTest(status_code=status_code):
+                with self.assertLogs("apps.academy.storage", level="WARNING") as logs:
+                    with patch(
+                        "apps.academy.storage.requests.request",
+                        return_value=Mock(status_code=status_code),
+                    ):
+                        with self.assertRaisesRegex(OSError, f"HTTP {status_code}"):
+                            self.storage._request("GET", "https://api.github.com/example")
+
+                self.assertNotIn("test-token", "\n".join(logs.output))

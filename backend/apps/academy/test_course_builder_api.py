@@ -121,6 +121,7 @@ class CourseBuilderApiTests(TestCase):
 
         payload = self.draft_payload("private-quiz-course")
         payload["mode"] = "submit"
+        payload["sync_source"] = False
         response = self.client.post(
             reverse("staff_course_builder_api"),
             data=json.dumps(payload),
