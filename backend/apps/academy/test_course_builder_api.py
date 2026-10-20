@@ -1,7 +1,7 @@
 import base64
 import json
-from pathlib import Path
 import uuid
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 from django.contrib.admin.models import DELETION, LogEntry
