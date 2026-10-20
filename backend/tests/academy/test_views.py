@@ -251,6 +251,7 @@ class AcademyViewTests(TestCase):
         self.assertEqual(page.status_code, 200)
         self.assertContains(page, 'data-question-option="question-1"')
         self.assertNotContains(page, '"correct_index": 1')
+        self.assertNotContains(page, '"selected_index": 0')
         self.assertNotContains(page, "The repeated rejection is the key evidence.")
 
         response = self.client.post(
