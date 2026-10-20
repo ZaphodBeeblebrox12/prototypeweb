@@ -1,7 +1,9 @@
+import base64
 import json
+from unittest.mock import Mock, patch
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from .models import Course, CourseImport, CourseModule, Lesson
@@ -70,6 +72,7 @@ class CourseBuilderApiTests(TestCase):
         )
         self.assertEqual(response.status_code, 200, response.content)
         self.assertTrue(response.json()["ok"])
+        self.assertIsNone(response.json()["github_source_synced"])
         record = CourseImport.objects.get(pk=response.json()["record_id"])
         self.assertEqual(record.status, CourseImport.Status.DRAFT)
         self.assertEqual(record.payload["builder_state"]["title"], "Builder API Course")
@@ -79,6 +82,38 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(saved_lesson["content_json"]["notebook"]["title"], "A useful notebook")
         self.assertEqual(record.payload["course"]["learning_outcomes"], ["Describe evidence before interpreting it."])
         self.assertNotIn("correctIndex", saved_lesson["content_json"])
+
+    @override_settings(
+        ACADEMY_GITHUB_ASSET_REPOSITORY="ZaphodBeeblebrox12/prototypeweb",
+        ACADEMY_GITHUB_ASSET_TOKEN="test-token",
+        ACADEMY_GITHUB_ASSET_BRANCH="my-new-branch",
+    )
+    @patch("apps.academy.course_builder_api.requests.put")
+    @patch("apps.academy.course_builder_api.requests.get")
+    def test_explicit_save_syncs_source_snapshot_to_existing_repo(self, github_get, github_put):
+        github_get.return_value = Mock(status_code=404)
+        github_put.return_value = Mock(status_code=201)
+        payload = self.draft_payload("github-source-course")
+        payload["sync_source"] = True
+
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertTrue(response.json()["github_source_synced"])
+        self.assertIn(
+            "/course-source/builder-drafts/github-source-course.json",
+            github_put.call_args.args[0],
+        )
+        saved_json = json.loads(base64.b64decode(github_put.call_args.kwargs["json"]["content"]))
+        self.assertEqual(
+            saved_json["modules"][0]["lessons"][0]["content_markdown"],
+            "## Notice\\n\\nDescribe what is visible before drawing a conclusion.",
+        )
+        self.assertEqual(github_put.call_args.kwargs["json"]["branch"], "my-new-branch")
 
     def test_published_quiz_keeps_answer_key_private(self):
         from .importing import publish_course_import
