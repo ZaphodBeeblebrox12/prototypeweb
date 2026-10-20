@@ -75,6 +75,22 @@ class CourseAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return is_course_content_admin(request.user)
 
+    def get_deleted_objects(self, objs, request):
+        """Allow owned media to be removed only as part of deleting its course.
+
+        CourseMediaAssetAdmin intentionally disables direct media deletion. Django's
+        delete confirmation checks each related object's ModelAdmin permission too,
+        so we waive only that child permission for a course-content admin deleting
+        the owning Course. Other related-object permissions and protected relations
+        remain enforced.
+        """
+        deleted_objects, model_count, perms_needed, protected = super().get_deleted_objects(
+            objs, request
+        )
+        if is_course_content_admin(request.user):
+            perms_needed.discard(CourseMediaAsset._meta.verbose_name)
+        return deleted_objects, model_count, perms_needed, protected
+
 
 @admin.register(CourseModule)
 class CourseModuleAdmin(admin.ModelAdmin):
