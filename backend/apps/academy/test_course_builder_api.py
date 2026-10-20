@@ -73,6 +73,10 @@ class CourseBuilderApiTests(TestCase):
         self.assertTrue(response.json()["ok"])
         self.assertIsNone(response.json()["github_source_synced"])
         record = CourseImport.objects.get(pk=response.json()["record_id"])
+        self.assertEqual(
+            response.json()["website_preview_url"],
+            reverse("academy:course-import-preview", args=[record.pk]),
+        )
         self.assertEqual(record.status, CourseImport.Status.DRAFT)
         self.assertEqual(record.payload["builder_state"]["title"], "Builder API Course")
         self.assertEqual(record.payload["modules"][0]["lessons"][0]["content_markdown"], "## Notice\n\nDescribe what is visible before drawing a conclusion.")
