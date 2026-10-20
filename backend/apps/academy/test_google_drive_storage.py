@@ -5,7 +5,7 @@ from django.core.exceptions import ImproperlyConfigured, SuspiciousFileOperation
 from django.core.files.base import ContentFile
 from django.test import SimpleTestCase, override_settings
 
-from apps.academy.storage import GoogleDrivePrivateCourseAssetStorage
+from apps.academy.storage import GoogleDrivePrivateCourseAssetStorage, PrivateCourseAssetStorage
 
 
 @override_settings(
@@ -57,6 +57,12 @@ class GoogleDriveCourseStorageTests(SimpleTestCase):
         self.assertFalse(storage._drive_asset_enabled)
         self.assertFalse(storage.status()["durable"])
         self.assertFalse(storage.status()["writes_enabled"])
+
+    def test_remote_exists_checks_remote_providers_without_local_fallback(self):
+        with patch.object(self.storage, "_find_drive_file", return_value=None), patch.object(
+            PrivateCourseAssetStorage, "remote_exists", return_value=False
+        ):
+            self.assertFalse(self.storage.remote_exists("legacy-local-image.png"))
 
     def test_drive_save_uses_stable_key_and_folder(self):
         with patch.object(self.storage, "_write_drive_bytes", return_value={"id": "drive-file"}) as write:
