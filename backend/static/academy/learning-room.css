@@ -253,19 +253,42 @@
   background: var(--tt-surface);
 }
 .tt-tab-panel .tt-purpose-figure-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
+  display: block;
+  padding: 11px 13px 13px;
   border-bottom: 1px solid var(--tt-line);
   background: #e9eee5;
   color: #254f3b;
-  font-size: 10px;
-  line-height: 1.5;
-  font-weight: 800;
 }
-.tt-tab-panel .tt-purpose-figure-head span { color: #667269; font-size: 9px; font-weight: 650; text-align: right; }
+.tt-tab-panel .tt-purpose-figure-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.tt-tab-panel .tt-purpose-figure-brand {
+  color: #55745e;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: .12em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+.tt-tab-panel .tt-purpose-figure-module {
+  color: #667269;
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: .06em;
+  line-height: 1.5;
+  text-align: right;
+  text-transform: uppercase;
+}
+.tt-tab-panel .tt-purpose-figure-title {
+  display: block;
+  margin-top: 7px;
+  color: #254f3b;
+  font: 500 clamp(20px, 2.3vw, 28px)/1.2 Georgia, "Times New Roman", serif;
+  letter-spacing: -.025em;
+}
 .tt-tab-panel .tt-purpose-figure-body { display: block; padding: 14px; }
 .tt-tab-panel .tt-purpose-figure-image { display: grid; place-items: center; min-height: 100px; }
 .tt-tab-panel .tt-purpose-figure-image img {
@@ -296,6 +319,17 @@
   .tt-tab-panel .tt-purpose-figure figcaption { padding: 0 10px 12px; }
 }
 
+.tt-tab-panel .tt-image-group-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 215px), 1fr)); gap: 12px; align-items: stretch; }
+.tt-tab-panel .tt-image-group-item { display: block; min-width: 0; padding: 10px; border: 1px solid var(--tt-line); border-radius: 9px; background: #fffdf8; }
+.tt-tab-panel .tt-image-group-item .tt-purpose-figure-image { min-height: 0; overflow: hidden; border: 1px solid #eee9dc; border-radius: 7px; background: #fff; }
+.tt-tab-panel .tt-image-group-item .tt-purpose-figure-image img { width: 100%; max-height: 250px; aspect-ratio: 4 / 3; object-fit: contain; }
+.tt-tab-panel .tt-image-group-item-title { display: block; margin-top: 9px; color: var(--tt-green); font: 500 16px/1.35 Georgia, serif; }
+.tt-tab-panel .tt-image-group-caption { display: block; margin-top: 5px; color: var(--tt-muted); font-size: 11px; line-height: 1.6; }
+@media (max-width: 620px) {
+  .tt-tab-panel .tt-purpose-figure-header-top { flex-direction: column; gap: 4px; }
+  .tt-tab-panel .tt-purpose-figure-module { text-align: left; }
+  .tt-tab-panel .tt-image-group-grid { grid-template-columns: minmax(0, 1fr); }
+}
 /* Editable comparison-card figures, matching the accepted Figure 2.2 teaching aid. */
 .tt-tab-panel .tt-comparison-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .tt-tab-panel .tt-comparison-card { display: block; min-width: 0; padding: 12px; border: 1px solid var(--tt-line); border-radius: 9px; background: #f3f4ed; }
