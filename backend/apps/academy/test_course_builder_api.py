@@ -310,8 +310,8 @@ class CourseBuilderApiTests(TestCase):
         image_id = "builder-image-01"
         caption = "Compare one setting at a time before making a judgement."
         lesson["content"] = (
-            "Text before the figure.\\n\\n"
-            f"![Band comparison](asset://{image_id})\\n\\n"
+            "Text before the figure.\n\n"
+            f"![Band comparison](asset://{image_id})\n\n"
             "Text after the figure."
         )
         lesson["images"] = [{
@@ -326,9 +326,9 @@ class CourseBuilderApiTests(TestCase):
 
         imported, image_sources = _build_import_payload(state, "builder-figure-contract")
         saved_lesson = imported["modules"][0]["lessons"][0]
-        figure_ids = saved_lesson["content_json"]["figures"]
-        self.assertEqual(len(figure_ids), 1)
-        stable_id, metadata = next(iter(figure_ids.items()))
+        figure_map = saved_lesson["content_json"]["figures"]
+        self.assertEqual(len(figure_map), 1)
+        stable_id, metadata = next(iter(figure_map.items()))
         self.assertEqual(metadata["title"], "What changing the settings changes")
         self.assertEqual(metadata["alt"], "Three cards compare shorter, baseline and longer Bollinger Band windows.")
         self.assertEqual(metadata["caption"], caption)
@@ -339,3 +339,38 @@ class CourseBuilderApiTests(TestCase):
         self.assertIn("Text after the figure.", saved_lesson["content_markdown"])
         self.assertIn("builder/builder-image-01", image_sources)
 
+    def test_builder_persists_native_comparison_figures_by_stable_token(self):
+        from .course_builder_api import _build_import_payload
+
+        state = self.draft_payload("builder-native-figure")["course"]
+        lesson = state["modules"][0]["lessons"][0]
+        figure_id = "figure-block-01"
+        source = (
+            "Text before the comparison.\n\n"
+            f"[[teaching-figure:{figure_id}]]\n\n"
+            "Text after the comparison."
+        )
+        lesson["content"] = source
+        lesson["teachingFigures"] = [{
+            "id": figure_id,
+            "type": "comparison-cards",
+            "title": "What changing the settings changes",
+            "cards": [
+                {"kicker": "SHORTER WINDOW", "title": "More responsive", "body": "Reacts to fewer recent bars."},
+                {"kicker": "20 PERIODS · 2 DEVIATIONS", "title": "Common baseline", "body": "A reference, not a law."},
+                {"kicker": "LONGER WINDOW", "title": "More smoothed", "body": "Usually reacts more slowly."},
+            ],
+            "note": "Compare one setting at a time.",
+        }]
+
+        imported, image_sources = _build_import_payload(state, "builder-native-figure")
+        saved_lesson = imported["modules"][0]["lessons"][0]
+        self.assertEqual(saved_lesson["content_markdown"], source)
+        self.assertEqual(image_sources, {})
+        figure = saved_lesson["content_json"]["figures"][figure_id]
+        self.assertEqual(figure["type"], "comparison-cards")
+        self.assertEqual(figure["title"], "What changing the settings changes")
+        self.assertEqual(figure["cards"][0]["kicker"], "SHORTER WINDOW")
+        self.assertEqual(figure["cards"][1]["title"], "Common baseline")
+        self.assertEqual(figure["cards"][2]["title"], "More smoothed")
+        self.assertEqual(figure["note"], "Compare one setting at a time.")
