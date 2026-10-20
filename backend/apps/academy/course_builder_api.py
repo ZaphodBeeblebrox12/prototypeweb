@@ -364,6 +364,7 @@ def course_builder_api(request):
         encoded = json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
         digest = hashlib.sha256(encoded).hexdigest()
         mode = body.get("mode", "save")
+        sync_source_requested = bool(body.get("sync_source", mode == "submit"))
         if mode not in {"save", "submit"}:
             return JsonResponse({"detail": "Unsupported draft action."}, status=400)
 
@@ -445,7 +446,10 @@ def course_builder_api(request):
                 record.status = CourseImport.Status.REVIEW
                 record.save(update_fields=["status", "updated_at"])
 
-            github_source_synced = _sync_course_source_to_github(payload, slug)
+            github_source_synced = (
+                _sync_course_source_to_github(payload, slug)
+                if sync_source_requested else None
+            )
 
         review_url = reverse("admin:academy_courseimport_review", args=[record.pk])
         if mode == "submit":
@@ -467,8 +471,10 @@ def course_builder_api(request):
             "github_source_synced": github_source_synced,
             "message": (
                 "Draft saved to the Academy and source synced to the existing GitHub repository."
-                if github_source_synced else
+                if github_source_synced is True else
                 "Draft saved to the Academy, but GitHub source sync is not configured. Add ACADEMY_GITHUB_ASSET_TOKEN to enable repository saves."
+                if github_source_synced is False else
+                "Draft autosaved to the Academy. Use Save draft to create a versioned GitHub source snapshot."
             ),
         })
     except (json.JSONDecodeError, UnicodeDecodeError):
