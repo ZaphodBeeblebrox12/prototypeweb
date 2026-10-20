@@ -707,3 +707,49 @@
   .tt-learning-room .tt-tab-panel .tt-purpose-figure figcaption { padding: 10px 11px 5px; }
   .tt-learning-room .tt-tab-panel .tt-comparison-cards { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Compact related-course references, shared by learner and administrator preview. */
+.tt-learning-room .tt-related-courses {
+  margin: 18px 0 0;
+  padding: 15px 16px;
+  border: 1px solid var(--tt-line);
+  border-left: 3px solid var(--tt-green);
+  border-radius: 12px;
+  background: linear-gradient(145deg, var(--tt-surface), var(--tt-surface-2));
+}
+.tt-learning-room .tt-related-courses > p:first-child {
+  margin: 0 0 5px;
+  color: var(--tt-green);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+.tt-learning-room .tt-related-courses h2 {
+  margin: 0 0 10px;
+  font: 500 21px/1.2 Georgia, "Times New Roman", serif;
+}
+.tt-learning-room .tt-related-course-list { display: grid; gap: 8px; }
+.tt-learning-room .tt-related-course-link {
+  display: block;
+  padding: 11px 12px;
+  border: 1px solid var(--tt-line);
+  border-radius: 8px;
+  background: var(--tt-surface);
+  color: var(--tt-green);
+  text-decoration: none;
+}
+.tt-learning-room .tt-related-course-link strong { display: block; font-size: 13px; }
+.tt-learning-room .tt-related-course-link span {
+  display: block;
+  margin-top: 4px;
+  color: var(--tt-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+.tt-learning-room .tt-related-courses .tt-related-course-note {
+  margin: 9px 0 0;
+  color: var(--tt-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}

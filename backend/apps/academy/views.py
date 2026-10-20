@@ -1,6 +1,7 @@
 """Authenticated learner views for TradeThesis Academy."""
 import json
 import mimetypes
+from uuid import UUID
 from contextlib import suppress
 from urllib.parse import quote
 
@@ -432,6 +433,7 @@ def course_import_website_preview(request, import_id):
     selected_practice_questions = []
     selected_video_url = ""
     selected_video_is_file = False
+    selected_related_courses = Course.objects.none()
     if selected_lesson is not None:
         selected_content_json = selected_lesson.get("content_json", {})
         if not isinstance(selected_content_json, dict):
@@ -454,6 +456,19 @@ def course_import_website_preview(request, import_id):
         practice_questions = content_json.get("questions", [])
         if isinstance(practice_questions, list):
             selected_practice_questions = practice_questions
+
+        raw_related_ids = content_json.get("related_course_ids", [])
+        related_ids = []
+        if isinstance(raw_related_ids, list):
+            for raw_id in raw_related_ids[:20]:
+                if isinstance(raw_id, str):
+                    with suppress(ValueError, TypeError, AttributeError):
+                        related_ids.append(UUID(raw_id))
+        if related_ids:
+            selected_related_courses = Course.objects.filter(
+                pk__in=related_ids,
+                status=Course.Status.PUBLISHED,
+            ).exclude(pk=record.target_course_id).order_by("position", "title")
 
         # Match the learner lesson view: render only ordinary HTTP(S) video
         # destinations, and use the native player only for supported file types.
@@ -485,6 +500,7 @@ def course_import_website_preview(request, import_id):
         "selected_practice_questions": selected_practice_questions,
         "selected_video_url": selected_video_url,
         "selected_video_is_file": selected_video_is_file,
+        "selected_related_courses": selected_related_courses,
     })
 
 

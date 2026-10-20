@@ -71,17 +71,17 @@
         {% if video_url %}<section class="tt-video-lesson" aria-label="Lesson video">{% if video_is_file %}<video controls preload="metadata" src="{{ video_url }}">Your browser does not support video playback.</video>{% else %}<a href="{{ video_url }}" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a><p class="small text-muted">This video opens in a new tab.</p>{% endif %}</section>{% endif %}
         {% if admin_preview %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook practice_questions=practice_questions admin_preview=True only %}{% else %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook lesson=lesson practice_questions=practice_questions only %}{% endif %}
         {% if related_courses %}
-        <section class="tt-related-courses" aria-labelledby="tt-related-courses-heading" style="margin:24px 0;padding:18px;border:1px solid #dce1d7;border-radius:10px;background:#f7f4ec">
-          <p style="margin:0 0 6px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#667269">Continue learning</p>
-          <h2 id="tt-related-courses-heading" style="margin:0 0 12px;font-size:20px">Related courses</h2>
-          <div style="display:grid;gap:10px">
+        <section class="tt-related-courses" aria-labelledby="tt-related-courses-heading">
+          <p>Continue learning</p>
+          <h2 id="tt-related-courses-heading">Related courses</h2>
+          <div class="tt-related-course-list">
             {% for related in related_courses %}
-            <a href="{% url 'academy:course-detail' related.slug %}" style="display:block;padding:12px;border:1px solid #dce1d7;border-radius:8px;background:#fff;color:#355a46;text-decoration:none">
-              <strong>{{ related.title }}</strong>{% if related.summary %}<span style="display:block;margin-top:4px;font-size:12px;line-height:1.5;color:#667269">{{ related.summary }}</span>{% endif %}
+            <a class="tt-related-course-link" href="{% url 'academy:course-detail' related.slug %}">
+              <strong>{{ related.title }}</strong>{% if related.summary %}<span>{{ related.summary }}</span>{% endif %}
             </a>
             {% endfor %}
           </div>
-          <p style="margin:12px 0 0;font-size:11px;color:#667269">Course references do not grant access or include a purchase.</p>
+          <p class="tt-related-course-note">Course references do not grant access or include a purchase.</p>
         </section>
         {% endif %}
 {% if not admin_preview %}

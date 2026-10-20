@@ -8,7 +8,7 @@ from django.template.loader import render_to_string
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import CourseImport
+from .models import Course, CourseImport
 
 User = get_user_model()
 
@@ -128,7 +128,7 @@ class CourseReviewTemplateTests(TestCase):
         self.assertContains(response, "Stage Understand Bollinger Bands for review")
         self.assertContains(response, "csrfmiddlewaretoken")
 
-    def _website_preview_record(self, video_url=None, course_slug="website-preview-course"):
+    def _website_preview_record(self, video_url=None, course_slug="website-preview-course", related_course_ids=None):
         return CourseImport.objects.create(
             course_slug=course_slug,
             title="Website Preview Course",
@@ -170,6 +170,7 @@ class CourseReviewTemplateTests(TestCase):
                             "content_json": {
                                 "asset_ids": [],
                                 "video_url": video_url,
+                                "related_course_ids": related_course_ids or [],
                                 "notebook": {
                                     "title": "Evidence notebook",
                                     "prompts": [{
@@ -275,6 +276,55 @@ class CourseReviewTemplateTests(TestCase):
         self.assertEqual(unsafe_response.status_code, 200, unsafe_response.content)
         self.assertNotContains(unsafe_response, 'class="tt-video-lesson"')
         self.assertEqual(unsafe_response.context["selected_video_url"], "")
+
+    def test_website_preview_renders_published_related_courses_only(self):
+        published = Course.objects.create(
+            title="Volume and Price Analysis",
+            slug="volume-and-price-analysis",
+            summary="Study effort, result and volume context.",
+            status=Course.Status.PUBLISHED,
+        )
+        unpublished = Course.objects.create(
+            title="Unpublished Draft Course",
+            slug="unpublished-draft-course",
+            summary="This must not appear in a learner-facing reference.",
+            status=Course.Status.DRAFT,
+        )
+        record = self._website_preview_record(
+            related_course_ids=[str(published.pk), str(unpublished.pk), "not-a-uuid"],
+        )
+        response = self.client.get(
+            reverse("academy:course-import-preview", args=[record.pk]),
+            {"lesson": "1.1"},
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "Continue learning")
+        self.assertContains(response, "Volume and Price Analysis")
+        self.assertContains(response, "Study effort, result and volume context.")
+        self.assertContains(response, reverse("academy:course-detail", args=[published.slug]))
+        self.assertNotContains(response, "Unpublished Draft Course")
+        self.assertNotContains(response, "This must not appear in a learner-facing reference.")
+        self.assertEqual(list(response.context["selected_related_courses"]), [published])
+
+    def test_website_preview_places_lesson_header_in_main_column(self):
+        record = self._website_preview_record()
+        response = self.client.get(
+            reverse("academy:course-import-preview", args=[record.pk]),
+            {"lesson": "1.1"},
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        content = response.content
+        grid_index = content.index(b'class="tt-room-grid"')
+        outline_index = content.index(b'class="tt-outline"')
+        main_index = content.index(b'<main class="tt-lesson-main">')
+        header_index = content.index(b'<header class="tt-course-header tt-course-header--depth">')
+        article_index = content.index(b'<article class="tt-lesson-article">')
+        self.assertLess(grid_index, outline_index)
+        self.assertLess(outline_index, main_index)
+        self.assertLess(main_index, header_index)
+        self.assertLess(header_index, article_index)
 
     def test_website_preview_is_for_course_content_admins_only(self):
         record = self._website_preview_record()

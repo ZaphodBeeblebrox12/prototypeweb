@@ -319,3 +319,18 @@ Implemented on `my-new-branch`:
 - The existing shared `.tt-video-lesson` styles are reused. No authentication, course-access, media-storage, submission, or publication rules were loosened.
 
 This video-parity change is awaiting its own CI run. It has not been deployed. Keep it separate from the live staging revision until CI succeeds and the user explicitly approves the next staging deployment. Browser screenshot acceptance remains outstanding.
+
+## Follow-up visual pass — compact header and figure spacing (21 October 2026)
+
+The user's screenshots showed visible wasted space around the lesson header and chart figures. A source-to-runtime comparison found a structural mismatch, not only oversized CSS: the canonical first-pass template puts the lesson header inside the main lesson column beside the outline, while the Django learner and admin preview templates had placed the header before the two-column grid. That made the banner consume full-page width and left the outline starting below it.
+
+This pass corrects the structure and aligns sizing with the canonical preview:
+
+- Moved the lesson header inside `tt-lesson-main` in both the real lesson template and administrator website preview, so the outline sits beside the header on desktop.
+- Reduced the header from `30–54px` padding and `42–64px` title sizing to the canonical `19–28px` padding and `34–47px` title scale. Reduced the title-to-summary, study-card, tag-row and header-to-content gaps.
+- Reduced figure frames to `20px` vertical margins, smaller figure headings and inner padding, and a `470px` max height rather than `620px` for single figures. Image groups and comparison cards use similarly tighter spacing.
+- Removed the administrator preview's `900px` article cap so lesson content can use the available main-column width instead of leaving a blank strip.
+- The same audit also found that selected related-course references were stored but omitted from the admin website preview. That preview now shows only existing published courses; the references remain read-only and do not grant access.
+- Regression tests cover header/grid placement, native and external video, unsafe video URLs and published-only related courses.
+
+No course body, access/entitlement logic, answer keys, billing or publish state was changed. This pass is committed to `my-new-branch` and has not been deployed. CI must pass on the latest branch head before any staging deployment is considered. Browser screenshots at wide desktop, compact desktop, tablet and mobile widths are still required to verify the visual result against the source file.

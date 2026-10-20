@@ -89,6 +89,20 @@
           </section>
           {% endif %}
           {% include "academy/partials/lesson_tabs.html" with lesson_sections=selected_sections notebook=selected_notebook practice_questions=selected_practice_questions admin_preview=True only %}
+          {% if selected_related_courses %}
+          <section class="tt-related-courses" aria-labelledby="tt-related-courses-heading">
+            <p>Continue learning</p>
+            <h2 id="tt-related-courses-heading">Related courses</h2>
+            <div class="tt-related-course-list">
+              {% for related in selected_related_courses %}
+              <a class="tt-related-course-link" href="{% url 'academy:course-detail' related.slug %}">
+                <strong>{{ related.title }}</strong>{% if related.summary %}<span>{{ related.summary }}</span>{% endif %}
+              </a>
+              {% endfor %}
+            </div>
+            <p class="tt-related-course-note">Course references do not grant access or include a purchase.</p>
+          </section>
+          {% endif %}
           <dialog class="tt-figure-dialog" data-figure-dialog><button type="button" data-figure-close>Close</button><img data-figure-dialog-image alt=""><p data-figure-dialog-caption></p></dialog>
           <nav class="tt-lesson-navigation" aria-label="Preview lesson navigation">
             <a class="tt-lesson-nav-link" href="{{ overview_url }}"><span>← Course overview</span><strong>Explore all modules</strong></a>
