@@ -1,29 +1,26 @@
-# Temporary GitHub storage for course images
+# Course Builder GitHub storage
 
-The Academy's `course_asset_storage` can store new course-builder and lesson images in a **separate private GitHub repository**. PostgreSQL continues to store course/draft metadata and asset names. Django continues to deliver images through its authenticated, permission-checked routes; the browser never receives a GitHub token or a direct GitHub file URL.
+The Course Builder uses the existing `ZaphodBeeblebrox12/prototypeweb` repository on `my-new-branch`. No separate image repository is required.
 
-## Configure it
+## What gets saved
 
-1. Create a dedicated **private** repository for course assets. Do not use a public repository and do not use the application source repository for uploaded images.
-2. Create a fine-grained personal access token limited to that one repository, with **Contents: Read and write**. Store it only in your hosting environment's secret/environment-variable settings.
-3. Ensure the configured branch exists (the default is `main`).
-4. Set these environment variables for the Django service:
+- Course Builder images are stored under `course-assets/` in this repository.
+- Each saved course source snapshot is versioned at `course-source/builder-drafts/<course-slug>.json`. It contains the course manifest data and lesson Markdown, not embedded image bytes.
+- Django/PostgreSQL continues to store operational drafts, review status, permissions and publication state.
+- The learner-facing site continues to render published courses through the shared Django Learning Room template. Saving a draft does not publish it automatically.
 
-| Variable | Example / default | Purpose |
-| --- | --- | --- |
-| `ACADEMY_GITHUB_ASSET_REPOSITORY` | `your-account/private-course-assets` | Private repository in `owner/repo` form |
-| `ACADEMY_GITHUB_ASSET_TOKEN` | Secret value | Fine-grained token; never commit it |
-| `ACADEMY_GITHUB_ASSET_BRANCH` | `main` | Existing branch to receive asset commits |
-| `ACADEMY_GITHUB_ASSET_PATH_PREFIX` | `course-assets` | Directory prefix within that repository |
-| `ACADEMY_GITHUB_ASSET_TIMEOUT` | `15` | HTTP timeout in seconds |
+## Configure the host
 
-If the repository and token are not both configured, storage stays on the local private filesystem. Local reads are also attempted when a GitHub object is absent, which supports gradual migration of older local files.
+Set `ACADEMY_GITHUB_ASSET_TOKEN` in the Django service's environment to a GitHub token with **Contents: read and write** access to `ZaphodBeeblebrox12/prototypeweb`. Do not commit the token or expose it to browser JavaScript.
 
-## Operational notes
+The configured repository and branch are intentionally fixed in Django settings to the existing application repository and `my-new-branch`, so Course Builder writes do not target `main`. If the token is missing, the Django database draft can still be saved, but the API response will explicitly report that the GitHub source snapshot was not synced. Image uploads use local private storage until the token is configured.
 
-- GitHub's Contents API creates a commit when an image is saved or deleted. Multi-image drafts therefore create multiple asset commits; this is a temporary bridge, not a high-volume media architecture.
-- Keep the repository private and restrict token access to it. Never put the token in JavaScript, browser requests, course Markdown, or committed settings.
-- The application validates image MIME/type and upload size before storage, and serves assets through Django's protected endpoints. Do not expose GitHub `download_url` values.
-- Deleting an asset through Django removes the corresponding GitHub file, creating another commit. Git history can retain old binary contents, so periodically review repository growth and retention.
-- No hosting configuration or deployment is performed by this code change. After setting the environment variables, test draft save/reopen, multiple images, authorized delivery, and unauthorized access before relying on it.
-- Later, the storage backend can be replaced with object storage without changing the course-builder API or asset metadata model.
+## Workflow
+
+1. Edit the course in the Course Builder.
+2. **Save draft** stores the working draft in Django and writes a versioned JSON source snapshot to GitHub.
+3. **Preview** renders the saved course through the shared learner preview.
+4. **Submit for review** stores the snapshot and opens the existing Academy review checklist.
+5. An administrator publishes it through the existing review workflow; the public catalogue reads published Django course records.
+
+This keeps source control, draft workflow and learner delivery in one application without creating per-course hand-coded HTML pages or a second repository.
