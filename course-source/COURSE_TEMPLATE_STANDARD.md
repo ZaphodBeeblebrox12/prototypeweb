@@ -1,10 +1,10 @@
 # TradeThesis Course Template Standard
 
 **Status:** Binding standard for every new TradeThesis micro-course and the migration target for existing courses.  
-**Canonical visual/interaction reference:** [TradeThesis Learning Room template (Bollinger Bands reference)](understand-bollinger-bands/preview/template-reference/index.html). This is the approved visual and interaction source of truth. The content-rich `preview/first-pass/index.html` remains a separate course-preview and QA artifact. The template retains the **Your Trading Notebook** treatment and omits the former green **“By the end, you can”** objective card.  
+**Canonical visual/interaction reference:** [Content-rich Bollinger Bands Learning Room](understand-bollinger-bands/preview/first-pass/index.html). This is the approved visual and interaction source of truth, including its full lesson content, figures, exercises, chart interactions, tabs and notebook flow. `preview/template-reference/index.html` is an earlier design iteration, not the active reference. The canonical content-rich preview retains the **Your Trading Notebook** treatment and omits the former green **“By the end, you can”** objective card.  
 **Design approval checkpoint:** `030e473e33563499d57b1a8836559ce4501c138b` on `my-new-branch` (17 October 2026).  
 **Content authority:** Each course's authored Markdown lessons and course architecture; generated preview payloads are build outputs, not editing sources.  
-**Django runtime:** Separate Academy repository, currently documented as `ZaphodBeeblebrox12/test` on `feature/tradethesis-academy`; verify the actual branch state before implementation.  
+**Django runtime:** The active Academy runtime is `backend/` in this repository on `my-new-branch`. `ZaphodBeeblebrox12/test` / `feature/tradethesis-academy` is the earlier source/rollback snapshot, not the default implementation target.  
 **Implementation branch:** `my-new-branch`. Do not merge to `main` or deploy without explicit approval.
 
 ## Decision
@@ -88,7 +88,7 @@ The initial application pass is **Understand Bollinger Bands**. Its seven-module
 Use these layers deliberately; do not let the same lesson text become independently maintained in multiple places.
 
 1. **This standard** defines the reusable teaching, visual, accessibility, image, migration and security rules.
-2. **Canonical design reference:** `course-source/understand-bollinger-bands/preview/template-reference/index.html`. It is the selected reference for spacing, typography, overview-to-learning-room flow, lesson navigation, notebook treatment, content width, figure handling and responsive behaviour. Treat it as a reference for extraction into shared Django templates—not as the production Django page to copy wholesale. The content-rich `preview/first-pass/index.html` remains available for its existing course-content and editor QA checks.
+2. **Canonical visual/interaction reference:** `course-source/understand-bollinger-bands/preview/first-pass/index.html`. Use this content-rich reference for lesson flow, spacing, typography, overview-to-learning-room navigation, tabs, figures, chart interactions, exercises, notebook treatment and responsive behaviour. Extract the reusable experience into shared Django templates; do not copy the standalone preview shell wholesale or ship its preview-only editor. `preview/template-reference/index.html` is an earlier design iteration, not the active source of truth.
 3. **Course-specific authoring source:** the course's `README.md`, `COURSE_ARCHITECTURE.md`, lesson Markdown and `ASSET_REGISTER.md`. Markdown lessons are the student-content editing authority unless a course explicitly records a different approved source.
 4. **Structured manifest:** each course should have a stable manifest (or the project's existing equivalent) describing course metadata, ordered modules/lessons, stable slugs/IDs, durations, learning outcomes, lesson source paths and asset IDs. Reuse existing manifest formats when compatible; do not create a second competing manifest.
 5. **Generated preview output:** generated lesson-data JavaScript and preview HTML/assets are derived artifacts. Regenerate them from their authoritative sources; do not manually patch generated lesson text and then treat it as canonical.
