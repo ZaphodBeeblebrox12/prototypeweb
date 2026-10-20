@@ -391,6 +391,83 @@ class CourseBuilderApiTests(TestCase):
         self.assertIn("Text after the figure.", saved_lesson["content_markdown"])
         self.assertIn("builder/builder-image-01", image_sources)
 
+    def test_builder_persists_titled_image_groups_with_stable_asset_ids(self):
+        from .course_builder_api import _build_import_payload
+
+        state = self.draft_payload("builder-image-group")["course"]
+        lesson = state["modules"][0]["lessons"][0]
+        first_id = "builder-image-long"
+        second_id = "builder-image-near-miss"
+        group_id = "image-group-method-two"
+        lesson["content"] = (
+            "Introduce the comparison.\\n\\n"
+            f"[[image-group:{group_id}]]\\n\\n"
+            "Explain what differs between the cases."
+        )
+        lesson["images"] = [
+            {
+                "id": first_id,
+                "name": "chart-long-candidate.png",
+                "title": "Long candidate",
+                "alt": "Price rises alongside the upper band.",
+                "caption": "Both conditions must hold.",
+                "data": "data:image/png;base64," + base64.b64encode(b"fake first image").decode("ascii"),
+            },
+            {
+                "id": second_id,
+                "name": "chart-near-miss.png",
+                "title": "Near miss",
+                "alt": "Price moves sideways while one condition fails.",
+                "caption": "One condition is not met.",
+                "data": "data:image/png;base64," + base64.b64encode(b"fake second image").decode("ascii"),
+            },
+        ]
+        lesson["image"] = lesson["images"][0]
+        lesson["imageGroups"] = [{
+            "id": group_id,
+            "title": "Method II: price position and money flow",
+            "imageIds": [first_id, second_id],
+            "note": "Read both inputs together.",
+        }]
+
+        imported, image_sources = _build_import_payload(state, "builder-image-group")
+        saved_lesson = imported["modules"][0]["lessons"][0]
+        figure_map = saved_lesson["content_json"]["figures"]
+        group = figure_map[group_id]
+        stable_first = saved_lesson["content_json"]["asset_ids"]
+        self.assertEqual(saved_lesson["content_markdown"], lesson["content"].replace(
+            "Introduce the comparison.\\n\\n", "Introduce the comparison.\\n\\n"
+        ))
+        self.assertEqual(group["type"], "image-group")
+        self.assertEqual(group["title"], "Method II: price position and money flow")
+        self.assertEqual(group["note"], "Read both inputs together.")
+        self.assertEqual(len(group["image_ids"]), 2)
+        self.assertIn(first_id, image_sources and "builder/" + first_id)
+        self.assertIn(second_id, image_sources and "builder/" + second_id)
+        self.assertTrue(set(group["image_ids"]).issubset(set(stable_first)))
+        self.assertEqual(figure_map[group["image_ids"][0]]["title"], "Long candidate")
+        self.assertEqual(figure_map[group["image_ids"][1]]["title"], "Near miss")
+        self.assertNotIn("chart-long-candidate.png", group["title"])
+        self.assertNotIn("Purpose-built teaching aid", saved_lesson["content_markdown"])
+
+    def test_legacy_filename_title_is_cleared_when_cleaning_image_metadata(self):
+        from .course_builder_api import _clean_image_payload
+
+        state = self.draft_payload("builder-filename-title")["course"]
+        lesson = state["modules"][0]["lessons"][0]
+        lesson["images"] = [{
+            "id": "legacy-image",
+            "name": "BANKNIFTY_2023-08-06_16-51-56_bd975.png",
+            "title": "BANKNIFTY_2023-08-06_16-51-56_bd975.png",
+            "alt": "BANKNIFTY price chart",
+            "caption": "",
+            "data": "",
+        }]
+        cleaned, _image_sources, _asset_specs = _clean_image_payload(state, "builder-filename-title")
+        cleaned_image = cleaned["modules"][0]["lessons"][0]["images"][0]
+        self.assertEqual(cleaned_image["title"], "")
+        self.assertEqual(cleaned_image["name"], "BANKNIFTY_2023-08-06_16-51-56_bd975.png")
+
     def test_builder_persists_native_comparison_figures_by_stable_token(self):
         from .course_builder_api import _build_import_payload
 
