@@ -111,7 +111,7 @@ class CourseBuilderApiTests(TestCase):
         saved_json = json.loads(base64.b64decode(github_put.call_args.kwargs["json"]["content"]))
         self.assertEqual(
             saved_json["modules"][0]["lessons"][0]["content_markdown"],
-            "## Notice\\n\\nDescribe what is visible before drawing a conclusion.",
+            "## Notice\n\nDescribe what is visible before drawing a conclusion.",
         )
         self.assertEqual(github_put.call_args.kwargs["json"]["branch"], "my-new-branch")
 
