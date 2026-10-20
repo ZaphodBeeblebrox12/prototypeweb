@@ -3,7 +3,9 @@ import json
 import uuid
 from unittest.mock import Mock, patch
 
+from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
@@ -637,3 +639,38 @@ class CourseBuilderApiTests(TestCase):
             record_id,
             [draft["serverDraftId"] for draft in refreshed.json()["drafts"]],
         )
+
+
+    def test_get_retires_legacy_builder_draft_after_course_was_deleted_in_admin(self):
+        payload = self.draft_payload("builder-course-deleted-in-admin")
+        saved = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(saved.status_code, 200, saved.content)
+        record_id = saved.json()["record_id"]
+        record = CourseImport.objects.get(pk=record_id)
+
+        course = Course.objects.create(
+            title=payload["course"]["title"],
+            slug=payload["course"]["slug"],
+            status=Course.Status.PUBLISHED,
+        )
+        LogEntry.objects.create(
+            user=self.admin,
+            content_type=ContentType.objects.get_for_model(Course),
+            object_id=str(course.pk),
+            object_repr=course.title,
+            action_flag=DELETION,
+            change_message="Deleted course in Django Admin",
+        )
+        # Simulate a legacy deletion that happened before the new CourseAdmin
+        # cleanup hook was deployed.
+        Course.objects.filter(pk=course.pk).delete()
+
+        refreshed = self.client.get(reverse("staff_course_builder_api"))
+        self.assertEqual(refreshed.status_code, 200, refreshed.content)
+        self.assertNotIn(record_id, [draft["serverDraftId"] for draft in refreshed.json()["drafts"]])
+        record.refresh_from_db()
+        self.assertEqual(record.status, CourseImport.Status.DELETED)

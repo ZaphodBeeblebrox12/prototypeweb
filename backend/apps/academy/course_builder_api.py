@@ -13,7 +13,9 @@ from urllib.parse import quote
 
 import requests
 from django.conf import settings
+from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.auth.decorators import login_required
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured, PermissionDenied, ValidationError
 from django.core.files.base import ContentFile
 from django.db import transaction
@@ -482,6 +484,63 @@ def _store_images(record, image_sources):
             _copy_existing_asset(asset.stable_asset_id, asset)
 
 
+def _retire_legacy_drafts_for_deleted_courses(records):
+    """Retire old builder drafts left behind by pre-fix Django Admin deletions.
+
+    Course deletion is recorded in Django's admin log. Legacy Builder drafts
+    were not linked to the Course row, so older deletions left their imports
+    active. Only reconcile an absent Course whose title-derived slug and exact
+    deleted title match a logged deletion that occurred after the draft began.
+    """
+    builder_records = [
+        record for record in records
+        if record.payload.get("builder_state")
+        and slugify(record.title) == record.course_slug
+    ]
+    if not builder_records:
+        return set()
+
+    slugs = {record.course_slug for record in builder_records}
+    active_slugs = set(
+        Course.objects.filter(slug__in=slugs).values_list("slug", flat=True)
+    )
+    candidate_titles = {
+        record.title for record in builder_records
+        if record.course_slug not in active_slugs
+    }
+    if not candidate_titles:
+        return set()
+
+    course_content_type = ContentType.objects.get_for_model(Course)
+    deletion_rows = LogEntry.objects.filter(
+        content_type=course_content_type,
+        action_flag=DELETION,
+        object_repr__in=candidate_titles,
+    ).values_list("object_repr", "action_time")
+
+    latest_deletion_by_title = {}
+    for title, action_time in deletion_rows:
+        if title not in latest_deletion_by_title or action_time > latest_deletion_by_title[title]:
+            latest_deletion_by_title[title] = action_time
+
+    retired_ids = set()
+    for record in builder_records:
+        deleted_at = latest_deletion_by_title.get(record.title)
+        if (
+            record.course_slug not in active_slugs
+            and deleted_at is not None
+            and deleted_at >= record.imported_at
+        ):
+            with transaction.atomic():
+                locked = CourseImport.objects.select_for_update().filter(
+                    pk=record.pk, status=CourseImport.Status.DRAFT,
+                ).first()
+                if locked and locked.payload.get("builder_state"):
+                    mark_builder_draft_deleted(locked)
+                    retired_ids.add(str(locked.pk))
+    return retired_ids
+
+
 def _draft_response(record, request):
     state = deepcopy(record.payload.get("builder_state") or {})
     for module in state.get("modules", []):
@@ -529,8 +588,16 @@ def course_builder_api(request):
 
     if request.method == "GET":
         drafts = []
-        for record in CourseImport.objects.filter(status=CourseImport.Status.DRAFT).order_by("-updated_at"):
-            if record.payload.get("builder_state"):
+        builder_records = list(
+            CourseImport.objects.filter(status=CourseImport.Status.DRAFT).order_by("-updated_at")
+        )
+        retired_ids = _retire_legacy_drafts_for_deleted_courses(builder_records)
+        for record in builder_records:
+            if (
+                record.payload.get("builder_state")
+                and str(record.pk) not in retired_ids
+                and record.status == CourseImport.Status.DRAFT
+            ):
                 drafts.append(_draft_response(record, request))
         related_courses = list(Course.objects.filter(
             status=Course.Status.PUBLISHED,
