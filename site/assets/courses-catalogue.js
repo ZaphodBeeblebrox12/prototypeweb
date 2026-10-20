@@ -89,15 +89,15 @@
   let microCourses = data.microCourses.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
 
   function renderMicroCard(course) {
-    return `<button class="cc-micro-card" type="button" data-open-course="${escapeHTML(course.id)}" aria-label="Preview ${escapeHTML(course.title)}, ${escapeHTML(course.price)}">
+    return `<button class="cc-micro-card" type="button" data-open-course="${escapeHTML(course.id)}" aria-label="Preview ${escapeHTML(course.title)}, ${escapeHTML(course.price || course.status)}">
       <span class="cc-card-art">${chartArt(course.art)}</span>
       <span class="cc-card-body">
         <span class="cc-card-meta"><span>${escapeHTML(course.category)}</span><span class="cc-card-level">${escapeHTML(course.level)}</span></span>
-        ${course.status === 'in-development' ? '<span class="cc-course-status">Course in development</span>' : ''}
+        ${course.status === 'coming-soon' ? '<span class="cc-course-status">Coming soon</span>' : (course.status === 'in-development' ? '<span class="cc-course-status">Course in development</span>' : '')}
         <span class="cc-card-title-wrap"><span class="cc-card-title">${escapeHTML(course.title)}</span></span>
         <span class="cc-card-description">${escapeHTML(course.description)}</span>
         <span class="cc-card-fit"><span aria-hidden="true">↳</span>${escapeHTML(course.complements)}</span>
-        <span class="cc-card-bottom"><span class="cc-card-price">${escapeHTML(course.price)}</span><span class="cc-card-action">${course.status === 'in-development' ? 'View outline' : "See what's inside"} <i aria-hidden="true">↗</i></span></span>
+        <span class="cc-card-bottom"><span class="cc-card-price">${escapeHTML(course.price || (course.status === 'coming-soon' ? 'Coming soon' : ''))}</span><span class="cc-card-action">${course.status === 'coming-soon' ? 'Coming soon' : (course.status === 'in-development' ? 'View outline' : "See what's inside")} <i aria-hidden="true">↗</i></span></span>
       </span>
     </button>`;
   }
@@ -148,16 +148,16 @@
   }
 
   function renderModal(course) {
-    const lessonCount = course.modules.reduce((sum, item) => sum + (parseInt(item.count, 10) || 1), 0);
+    const lessonCount = course.modules.reduce((sum, item) => sum + (parseInt(item.count, 10) || 0), 0);
     modalScroll.innerHTML = `<div class="cc-modal-top">
-      <div><div class="cc-modal-kicker">Micro-course · ${escapeHTML(course.category)}</div><h2 id="cc-modal-title">${escapeHTML(course.title)}</h2><p id="cc-modal-description" class="cc-modal-deck">${escapeHTML(course.description)}</p><div class="cc-modal-facts"><span>Focused topic</span><span>${course.modules.length} sections</span><span>Approx. ${lessonCount} short lessons</span>${course.status === 'in-development' ? '<span>Course in development</span>' : ''} </div></div>
+      <div><div class="cc-modal-kicker">Micro-course · ${escapeHTML(course.category)}</div><h2 id="cc-modal-title">${escapeHTML(course.title)}</h2><p id="cc-modal-description" class="cc-modal-deck">${escapeHTML(course.description)}</p><div class="cc-modal-facts"><span>Focused topic</span><span>${course.modules.length} sections</span>${course.status === 'coming-soon' ? '<span>Full outline to be announced</span>' : `<span>Approx. ${lessonCount} short lessons</span>`}${course.status === 'coming-soon' ? '<span>Coming soon · no enrolment yet</span>' : (course.status === 'in-development' ? '<span>Course in development</span>' : '')} </div></div>
       <div class="cc-modal-art">${chartArt(course.art)}</div>
     </div>
     <div class="cc-modal-outcome"><span aria-hidden="true">✳</span><span><b>What you'll take away</b><br>${escapeHTML(course.outcome)}</span></div>
     <div class="cc-outline-header"><h3>Inside the course</h3><span>Open a section to preview it</span></div>
     <div class="cc-outline" id="cc-outline">${course.modules.map((module, index) => `<section class="cc-outline-item ${index === 0 ? 'is-open' : ''}"><button class="cc-outline-toggle" type="button" aria-expanded="${index === 0 ? 'true' : 'false'}" aria-controls="cc-outline-preview-${escapeHTML(course.id)}-${index}"><span class="cc-outline-num">${String(index + 1).padStart(2, '0')}</span><span class="cc-outline-title">${escapeHTML(module.title)}</span><span class="cc-outline-count">${escapeHTML(module.count)}</span><span class="cc-outline-sign" aria-hidden="true">+</span></button><div class="cc-outline-preview" id="cc-outline-preview-${escapeHTML(course.id)}-${index}" ${index === 0 ? '' : 'hidden'}><p>${escapeHTML(module.preview)}</p><ul>${module.points.map(point => `<li>${escapeHTML(point)}</li>`).join('')}</ul></div></section>`).join('')}</div>
     <p class="cc-modal-fit"><b>Where it fits:</b> ${escapeHTML(course.complements)} This is designed as a standalone micro-course; community access is not included.</p>`;
-    modalFooter.innerHTML = `<div class="cc-modal-price-wrap"><span class="cc-modal-price">${escapeHTML(course.price)}</span><span class="cc-modal-price-note">${course.status === 'in-development' ? 'Development outline only · no enrolment yet' : 'Indicative price · preview only'}</span></div>${course.status === 'in-development' ? '<button class="button cc-modal-cta" type="button" disabled aria-disabled="true">Course in development</button>' : `<button class="button cc-modal-cta" type="button" data-get-course="${escapeHTML(course.id)}">Preview only <span aria-hidden="true">↗</span></button>`}`;
+    modalFooter.innerHTML = `<div class="cc-modal-price-wrap"><span class="cc-modal-price">${escapeHTML(course.price)}</span><span class="cc-modal-price-note">${course.status === 'coming-soon' ? 'No enrolment yet · launch details to follow' : (course.status === 'in-development' ? 'Development outline only · no enrolment yet' : 'Indicative price · preview only')}</span></div>${course.status === 'coming-soon' ? '<button class="button cc-modal-cta" type="button" disabled aria-disabled="true">Coming soon</button>' : (course.status === 'in-development' ? '<button class="button cc-modal-cta" type="button" disabled aria-disabled="true">Course in development</button>' : `<button class="button cc-modal-cta" type="button" data-get-course="${escapeHTML(course.id)}">Preview only <span aria-hidden="true">↗</span></button>`)}`;
   }
 
   function openModal(course, opener) {
@@ -210,8 +210,10 @@
     .then(response => { if (!response.ok) throw new Error("Academy catalogue unavailable"); return response.json(); })
     .then(payload => {
       const known = new Set(microCourses.map(course => course.id));
-      const published = (payload.courses || []).filter(course => course && course.status === "published" && course.academyUrl && !known.has(course.id));
-      for (const course of published) {
+      const academyEntries = (payload.courses || []).filter(course => course && (
+        (course.status === "published" && course.academyUrl) || course.status === "coming-soon"
+      ) && !known.has(course.id));
+      for (const course of academyEntries) {
         microCourses.push({
           ...course, priority: 3, order: 1000 + microCourses.length,
           category: course.category || "TradeThesis courses",
@@ -219,11 +221,13 @@
           art: course.art || "structure",
           modules: Array.isArray(course.modules) ? course.modules : [],
           outcome: course.outcome || course.description || "",
-          complements: course.complements || "Explore this published course in the TradeThesis Academy.",
-          price: course.price || "View in Academy"
+          complements: course.complements || (course.status === "coming-soon"
+            ? "This course is being prepared. Full details will be shared closer to launch."
+            : "Explore this published course in the TradeThesis Academy."),
+          price: course.price || (course.status === "coming-soon" ? "Coming soon" : "View in Academy")
         });
       }
-      if (published.length) {
+      if (academyEntries.length) {
         renderFilterButtons();
         renderMicroCourses();
       }
