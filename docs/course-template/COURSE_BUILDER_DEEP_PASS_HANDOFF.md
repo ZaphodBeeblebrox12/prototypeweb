@@ -250,3 +250,21 @@ This pass addresses the gap in both views:
 - Added regression tests cover table HTML, accessibility wrapper attributes, and builder-preview table support.
 
 No course content, authentication, billing, saving, review or publishing logic was changed. Nothing was deployed. CI and browser-level visual acceptance remain pending; the visual review should include a three-column/long-cell table at desktop and mobile widths.
+
+### Follow-up: Fix Django Admin course deletion blocked by Course Media Asset (20 October 2026)
+
+The author reported Django Admin's “Cannot delete courses” message naming `course media asset`. The Academy content-admin permission policy allows a role=`admin` user to delete a Course, but `CourseMediaAssetAdmin.has_delete_permission` intentionally returns false; Django's delete confirmation therefore treats the related media record as a missing permission. The model's course FK also used `PROTECT`, so course-owned media records would continue blocking deletion even if the permission message were bypassed.
+
+Implemented on `my-new-branch`:
+- Changed `CourseMediaAsset.course` from `on_delete=PROTECT` to `CASCADE` and added migration `0008_course_media_asset_cascade.py`. Course-owned media metadata records are now deleted with their parent course.
+- Overrode `CourseAdmin.get_deleted_objects()` to waive only the `CourseMediaAsset` child-permission item when a course-content admin deletes the owning Course. Direct deletion of an individual Course Media Asset remains disabled in its own admin page.
+- Other protected course relationships are unchanged. Courses with protected offers or entitlements may still be blocked from hard deletion; archive such courses rather than bypassing those safeguards.
+- Added `test_course_deletion.py` regression tests covering the confirmation permission list, cascade deletion of the owned media record, and continued denial of direct asset deletion.
+
+CI at current tested revision `81fcbb96943b5f5a9e86ec5347a539379bcdd99b` is green:
+- [Academy backend CI](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39484413882) passed on Python 3.11 and 3.12; each full suite reported 881 passed and 36 subtests passed.
+- [Verify Django Academy backend](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/39484413991) passed on Python 3.11 and 3.12.
+- Migration state, Ruff, Black, focused image regressions and the full suite passed.
+
+Next: manually deploy the tested branch head to the Academy staging service only, verify Render marks it live and `/health/` returns HTTP 200, then ask the author to retry deleting a disposable draft course with a media asset. Do not delete any live/published course as part of verification. No merge to `main`, production deployment or course publication is authorized.
+
