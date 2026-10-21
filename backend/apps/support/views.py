@@ -25,6 +25,10 @@ class RequestTicketView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("support:my_tickets")
 
     def dispatch(self, request, *args, **kwargs):
+        # Authenticate before using request.user in an FK lookup; AnonymousUser
+        # cannot be queried as a SupportTicket.user and would otherwise raise 500.
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
         existing = SupportTicket.objects.filter(
             user=request.user, status=SupportTicket.Status.PENDING).first()
         if existing:

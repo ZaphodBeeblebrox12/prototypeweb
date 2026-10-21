@@ -77,6 +77,13 @@ class SupportTicketSubmissionTests(TestCase):
         )
         self.client.force_login(self.user)
 
+    def test_anonymous_user_is_redirected_before_pending_ticket_lookup(self):
+        self.client.logout()
+        response = self.client.get(reverse("support:request_ticket"))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response["Location"])
+
     @patch("apps.support.views.send_ticket_confirmation")
     def test_billing_ticket_can_be_submitted_and_appears_in_ticket_list(self, send_confirmation):
         response = self.client.post(
