@@ -1769,6 +1769,7 @@ Describe the evidence first.
         return nextIndex < lines.length && /^#{2,6}\s+/.test(lines[nextIndex]);
       }).join('\n');
       updated = updated.replace(/\n{3,}/g, '\n\n').replace(/^[ \t]*\n+|\n+[ \t]*$/g, '');
+      const duplicateCardsRemoved = Math.max(0, cards.length - 1);
       lesson.content = updated;
       state.tab = 'lesson';
       persist(false);
@@ -1776,7 +1777,7 @@ Describe the evidence first.
       renderEditor();
       saveCurrentToAcademy(false, false).then(() => {
         toast('Saved to Academy. Kept one companion card at its final placement; removed ' +
-          (cards.length - 1) + ' duplicate card reference' + (cards.length - 1 === 1 ? '' : 's') +
+          duplicateCardsRemoved + ' duplicate card reference' + (duplicateCardsRemoved === 1 ? '' : 's') +
           ', ' + lessonReferences.length + ' inline lesson reference' + (lessonReferences.length === 1 ? '' : 's') +
           ', and misplaced tab markers.', 7500);
       }).catch(error => {
