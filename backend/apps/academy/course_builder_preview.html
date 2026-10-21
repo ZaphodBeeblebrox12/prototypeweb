@@ -732,16 +732,31 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   function notebookPreviewMarkup(lesson) {
     if (!lesson) return '';
     const notebook = lesson.notebook && typeof lesson.notebook === 'object' ? lesson.notebook : {};
+    const isBollingerCourse = currentCourse()?.slug === 'understand-bollinger-bands';
     let heading = String(notebook.title || '').trim();
-    if (!heading || heading === 'Your Trading Notebook') heading = 'Before you make the call';
+    const genericHeadings = ['', 'Your Trading Notebook', 'Before you make the call', 'Before treating a touch as a setup'];
+    if (genericHeadings.includes(heading)) {
+      heading = isBollingerCourse ? 'Before treating a touch as a setup' : 'Before you make the call';
+    }
     const defaultPrompts = [
       {label:'Observe',text:'Describe the evidence visible in the chart.'},
       {label:'Interpret',text:'State one possible reading and a reasonable alternative.'},
       {label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}
     ];
-    const prompts = Array.isArray(notebook.prompts) && notebook.prompts.length
+    const bollingerPrompts = [
+      {label:'Describe',text:'Where is price relative to the bands and middle line?'},
+      {label:'Interpret',text:'Does the structure look like a range, a trend or a transition? What is your alternative explanation?'},
+      {label:'Test',text:'What future price behaviour would strengthen or weaken your view?'}
+    ];
+    const hasPrompts = Array.isArray(notebook.prompts) && notebook.prompts.length > 0;
+    let prompts = hasPrompts
       ? notebook.prompts.filter(prompt => prompt && typeof prompt === 'object')
       : defaultPrompts;
+    const matchesGenericDefaults = prompts.length === defaultPrompts.length && prompts.every((prompt,index) =>
+      String(prompt.label || '').trim().replace(/[.:]+$/, '') === defaultPrompts[index].label &&
+      String(prompt.text || '').trim() === defaultPrompts[index].text
+    );
+    if (isBollingerCourse && (!hasPrompts || matchesGenericDefaults)) prompts = bollingerPrompts;
     return '<section class="preview-trading-notebook" aria-label="Your Trading Notebook">' +
       '<aside class="preview-notebook-index"><span>KEEP<br>IN VIEW</span><strong>01</strong></aside>' +
       '<div class="preview-notebook-content">' +
