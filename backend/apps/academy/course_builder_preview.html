@@ -1741,9 +1741,12 @@ Describe the evidence first.
       const source = String(lesson.content || '');
       const courseCardPattern = /\[\[course-card:(?:coming-soon:)?[0-9a-fA-F-]{36}\]\]/g;
       const lessonReferencePattern = /\[\[(?:lesson|lesson-card):[0-9a-fA-F-]{36}\]\]/g;
+      const routeMarkerPattern = /^[ \t]*\[\[lesson-tab:(?:idea|examples|practice)\]\][ \t]*$/i;
       const cards = [...source.matchAll(courseCardPattern)];
       const lessonReferences = [...source.matchAll(lessonReferencePattern)];
-      const anchorReference = cards[0] || lessonReferences[0];
+      // Preserve the last authored placement, which is where the intended companion
+      // card sits after "Compare the possibilities" in the current lesson.
+      const anchorReference = cards[cards.length - 1] || lessonReferences[lessonReferences.length - 1];
       if (!anchorReference) {
         insertLessonContentAtCaret(lesson, token, true);
         toast('Companion course card inserted. No old lesson links needed removal.');
@@ -1753,15 +1756,29 @@ Describe the evidence first.
       let updated = source.slice(0, anchorReference.index) + marker +
         source.slice(anchorReference.index + anchorReference[0].length);
       updated = updated.replace(courseCardPattern, '').replace(lessonReferencePattern, '');
-      updated = updated.replace(marker, token).replace(/\n{3,}/g, '\n\n').replace(/^[ \t]*\n+|\n+[ \t]*$/g, '');
+      updated = updated.replace(marker, token);
+
+      // Only retain explicit route markers that are immediately associated with a
+      // heading. Markers accidentally inserted between a heading and its paragraph
+      // are stale instructions and should not affect the lesson's content grouping.
+      const routeLines = updated.split(/\r?\n/);
+      updated = routeLines.filter((line, index, lines) => {
+        if (!routeMarkerPattern.test(line)) return true;
+        let nextIndex = index + 1;
+        while (nextIndex < lines.length && !lines[nextIndex].trim()) nextIndex += 1;
+        return nextIndex < lines.length && /^#{2,6}\s+/.test(lines[nextIndex]);
+      }).join('\n');
+      updated = updated.replace(/\n{3,}/g, '\n\n').replace(/^[ \t]*\n+|\n+[ \t]*$/g, '');
       lesson.content = updated;
       state.tab = 'lesson';
       persist(false);
       clearTimeout(academySaveTimer);
       renderEditor();
       saveCurrentToAcademy(false, false).then(() => {
-        toast('Saved to Academy. Removed ' + lessonReferences.length + ' inline lesson reference' +
-          (lessonReferences.length === 1 ? '' : 's') + ' and replaced the previous course card.', 6500);
+        toast('Saved to Academy. Kept one companion card at its final placement; removed ' +
+          (cards.length - 1) + ' duplicate card reference' + (cards.length - 1 === 1 ? '' : 's') +
+          ', ' + lessonReferences.length + ' inline lesson reference' + (lessonReferences.length === 1 ? '' : 's') +
+          ', and misplaced tab markers.', 7500);
       }).catch(error => {
         toast('The editor was updated, but the Academy save failed: ' + String(error?.message || error), 9000);
       });
