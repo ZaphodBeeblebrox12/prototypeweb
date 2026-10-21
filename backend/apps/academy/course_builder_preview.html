@@ -1800,18 +1800,28 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       const unordered = /^\s*[-*+]\s+/.test(line);
       const ordered = /^\s*\d+[.)]\s+/.test(line);
       if (unordered || ordered) {
+        const listStart = index;
         const items = [];
         while (index < lines.length) {
           const current = lines[index];
+          // Empty list items are valid editor output. Capturing (.*), rather than
+          // (.+), keeps the recogniser aligned with the prefix test above.
           const item = unordered
-            ? current.match(/^\s*[-*+]\s+(.+)$/)
-            : current.match(/^\s*\d+[.)]\s+(.+)$/);
+            ? current.match(/^\s*[-*+]\s+(.*)$/)
+            : current.match(/^\s*\d+[.)]\s+(.*)$/);
           if (!item) break;
           items.push('<li>' + inline(item[1]) + '</li>');
           index += 1;
         }
-        const tag = ordered ? 'ol' : 'ul';
-        output.push('<' + tag + '>' + items.join('') + '</' + tag + '>');
+        if (index === listStart) {
+          // Defensive progress guarantee: malformed Markdown must never leave the
+          // outer parser on the same line forever.
+          output.push(renderParagraph([lines[index]]));
+          index += 1;
+        } else {
+          const tag = ordered ? 'ol' : 'ul';
+          output.push('<' + tag + '>' + items.join('') + '</' + tag + '>');
+        }
         continue;
       }
 
