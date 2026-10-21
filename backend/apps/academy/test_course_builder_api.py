@@ -97,6 +97,7 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "Route to Chart examples")
         self.assertContains(response, "Manage inserted lesson references")
         self.assertContains(response, "lessonQualityMarkup")
+        self.assertContains(response, "previewFieldsBeforeQualityChecks")
 
     def test_admin_can_save_shared_draft(self):
         response = self.client.post(
