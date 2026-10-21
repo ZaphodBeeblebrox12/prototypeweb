@@ -250,7 +250,7 @@ class CourseReviewTemplateTests(TestCase):
         self.assertTrue(response.context["selected_video_is_file"])
         self.assertLess(
             response.content.index(b'class="tt-video-lesson"'),
-            response.content.index(b'id="tab-idea"'),
+            response.content.index(b'id="lesson-tab-idea"'),
         )
 
     def test_website_preview_links_external_video_and_ignores_unsafe_url(self):
