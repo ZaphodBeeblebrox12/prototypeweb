@@ -31,6 +31,7 @@ from .models import (
 from .regional_content import (
     CONTENT_COUNTRY_TO_REGION,
     REGIONAL_CONTENT_CODES,
+    contains_external_regional_image,
     regional_block_asset_ids,
     regional_block_values,
 )
@@ -427,7 +428,7 @@ def validate_import_for_publish(record):
             regional_asset_ids.update(lesson_regional_asset_ids)
             for regional_block in regional_block_values(content_json):
                 base_content = str(regional_block.get("base_content", regional_block.get("baseContent", "")) or "")
-                if re.search(r"!\[[^\]]*\]\(\s*https?://|<img\b[^>]*\bsrc\s*=\s*['\"]https?://", base_content, re.IGNORECASE):
+                if contains_external_regional_image(base_content):
                     errors.append("Lesson " + str(lesson.get("title", "")) + " regional content must use managed asset references for images; external image URLs cannot be region-locked.")
                 variants = regional_block.get("variants") if isinstance(regional_block.get("variants"), list) else []
                 seen_targets = set()
@@ -447,7 +448,7 @@ def validate_import_for_publish(record):
                     elif scope not in {"country", "region"}:
                         errors.append("Lesson " + str(lesson.get("title", "")) + " has an invalid regional variant scope.")
                     variant_content = str(variant.get("content") or "")
-                    if re.search(r"!\[[^\]]*\]\(\s*https?://|<img\b[^>]*\bsrc\s*=\s*['\"]https?://", variant_content, re.IGNORECASE):
+                    if contains_external_regional_image(variant_content):
                         errors.append("Lesson " + str(lesson.get("title", "")) + " regional content must use managed asset references for images; external image URLs cannot be region-locked.")
                     if not bool(variant.get("hidden", False)) and not variant_content.strip():
                         errors.append("Lesson " + str(lesson.get("title", "")) + " has an empty regional variant for " + code + ". Add content or explicitly mark the variant hidden.")

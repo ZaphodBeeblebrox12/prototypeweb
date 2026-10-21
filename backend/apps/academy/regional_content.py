@@ -11,6 +11,34 @@ REGIONAL_CONTENT_CODES = frozenset({"APAC", "EU", "NA", "LATAM", "MENA", "SSA"})
 ASSET_REFERENCE_RE = re.compile(r"asset://([0-9a-fA-F-]{36})")
 IMAGE_GROUP_REFERENCE_RE = re.compile(r"\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]")
 
+# Remote image embeds cannot be access-controlled by the lesson media endpoint.
+_REGIONAL_EXTERNAL_MARKDOWN_IMAGE_RE = re.compile(
+    r"!\[[^\]]*\]\(\s*https?://[^)]*\)",
+    re.IGNORECASE,
+)
+_REGIONAL_EXTERNAL_HTML_IMAGE_RE = re.compile(
+    r"<img\b(?=[^>]*\bsrc\s*=\s*(?:['\"]\s*https?://|https?://))[^>]*>",
+    re.IGNORECASE,
+)
+
+
+def contains_external_regional_image(content):
+    """Whether a regional block embeds an image outside protected course storage."""
+    source = str(content or "")
+    return bool(
+        _REGIONAL_EXTERNAL_MARKDOWN_IMAGE_RE.search(source)
+        or _REGIONAL_EXTERNAL_HTML_IMAGE_RE.search(source)
+    )
+
+
+def strip_external_regional_images(content):
+    """Remove remote Markdown/HTML image embeds from regional content at render time."""
+    source = str(content or "")
+    source = _REGIONAL_EXTERNAL_MARKDOWN_IMAGE_RE.sub("", source)
+    return _REGIONAL_EXTERNAL_HTML_IMAGE_RE.sub("", source)
+
+
+
 # ISO 3166-1 alpha-2 audience codes, grouped by the six Course Builder regions.
 # Existing pricing-region assignments are preserved, but this map is for lesson
 # content only. Antarctica (AQ) is not an intended learner market.

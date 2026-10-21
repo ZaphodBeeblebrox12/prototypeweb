@@ -51,6 +51,48 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("North American notice.", us["idea_html"])
         self.assertNotIn("Global notice.", us["idea_html"])
 
+    def test_regional_blocks_never_render_unprotected_remote_images(self):
+        source = "## Regional disclosure\n\n[[regional-block:notice]]"
+        blocks = {
+            "notice": {
+                "base_content": (
+                    "Global text ![remote](https://example.test/global.png) "
+                    "and <img alt='legacy' src='https://example.test/legacy.png'> tail."
+                ),
+                "variants": [
+                    {
+                        "scope": "country",
+                        "code": "IN",
+                        "content": (
+                            "India text ![remote](https://example.test/india.png) "
+                            "and <img src=https://example.test/india-legacy.png alt='x'> tail."
+                        ),
+                        "hidden": False,
+                    }
+                ],
+            }
+        }
+
+        india = build_lesson_sections(
+            source, regional_blocks=blocks, country_code="IN", region_code="APAC"
+        )["idea_html"]
+        global_view = build_lesson_sections(
+            source, regional_blocks=blocks, country_code="ZZ", region_code=None
+        )["idea_html"]
+
+        for url in (
+            "https://example.test/global.png",
+            "https://example.test/legacy.png",
+            "https://example.test/india.png",
+            "https://example.test/india-legacy.png",
+        ):
+            self.assertNotIn(url, india)
+        self.assertNotIn("https://example.test/global.png", global_view)
+        self.assertNotIn("https://example.test/legacy.png", global_view)
+        self.assertIn("India text", india)
+        self.assertIn("tail.", india)
+        self.assertIn("Global text", global_view)
+
     def test_misplaced_tab_route_markers_do_not_hide_section_copy(self):
         source = "\n".join([
             "## Start with the decision",
