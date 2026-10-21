@@ -317,18 +317,21 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertEqual(rendered.count('class="tt-image-group-case-id"'), 2)
         self.assertIn("tt-image-group-item-heading", rendered)
 
-    def test_image_groups_use_one_shared_case_comparison_frame_in_builder_and_learner(self):
+    def test_image_groups_use_borderless_compact_layout_in_builder_and_learner(self):
         root = Path(__file__).resolve().parents[2]
         learner_css = (root / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
         builder_html = (root / "apps" / "academy" / "course_builder_preview.html").read_text(encoding="utf-8")
 
-        self.assertIn("Image-group Option 2 — compact shared comparison frame", learner_css)
-        self.assertIn("Image-group Option 2 — compact shared comparison frame, matching the learner view.", builder_html)
+        self.assertIn("Image-group Option 3 — borderless, compact chart group", learner_css)
+        self.assertIn("Image-group Option 3 — borderless compact chart group, matching the learner view.", builder_html)
         self.assertIn("const courseTitleLabel = String(course?.title || 'Course')", builder_html)
         self.assertIn("text-overflow:ellipsis", builder_html)
         self.assertIn("text-overflow:ellipsis", learner_css)
 
         for source in (learner_css, builder_html):
+            self.assertIn("border:0", source)
+            self.assertIn("aspect-ratio:auto", source)
+            self.assertIn("height:auto", source)
             self.assertIn("grid-template-columns:repeat(2,minmax(0,1fr))", source)
             self.assertIn("counter-reset:image-group-case", source)
             self.assertIn("content:counter(image-group-case, upper-alpha)", source)
@@ -339,6 +342,9 @@ class SharedLessonRenderingTests(SimpleTestCase):
             self.assertIn(".tt-image-group-context", source)
             self.assertIn("grid-template-columns:minmax(0,1fr)", source)
             self.assertIn(".tt-image-group-item:not(:last-child)", source)
+            self.assertNotIn(".tt-image-group-item:nth-child(odd) { border-right:1px solid", source)
+            self.assertNotIn(".tt-image-group-item:nth-child(n+3) { border-top:1px solid", source)
+            self.assertNotIn(".tt-image-group-item:not(:last-child) { border-bottom:1px solid", source)
 
     def test_filename_is_not_used_as_a_figure_title(self):
         rendered = render_safe_markdown(
