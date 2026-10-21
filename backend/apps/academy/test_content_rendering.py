@@ -307,3 +307,20 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertLess(lesson_body, notebook)
         self.assertLess(notebook, questions)
         self.assertEqual(preview.count("notebookPreviewMarkup(lesson)"), 1)
+
+    def test_builder_notebook_chart_examples_shortcut_is_present_and_wired(self):
+        builder = Path(__file__).resolve().parent / "course_builder_preview.html"
+        source = builder.read_text(encoding="utf-8")
+        start = source.index("function notebookPreviewMarkup(lesson)")
+        end = source.index("function previewFields(c)", start)
+        notebook_renderer = source[start:end]
+
+        section_close = notebook_renderer.index("'</section>'")
+        action_button = notebook_renderer.index('data-action="preview-chart-examples"')
+        self.assertLess(section_close, action_button)
+        self.assertIn("preview-notebook-examples-button", notebook_renderer)
+        self.assertIn("data-preview-lesson-content", source)
+        self.assertIn("action === 'preview-chart-examples'", source)
+        self.assertIn("querySelector('.tt-purpose-figure, .tt-image-group-figure, .tt-comparison-figure')", source)
+        self.assertIn("target.scrollIntoView({behavior:'smooth', block:'start'})", source)
+        self.assertIn(".preview-notebook-examples-button {", source)
