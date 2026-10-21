@@ -69,7 +69,7 @@
     </header>
       <article class="tt-lesson-article">
         {% if video_url %}<section class="tt-video-lesson" aria-label="Lesson video">{% if video_is_file %}<video controls preload="metadata" src="{{ video_url }}">Your browser does not support video playback.</video>{% else %}<a href="{{ video_url }}" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a><p class="small text-muted">This video opens in a new tab.</p>{% endif %}</section>{% endif %}
-        {% if admin_preview %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook practice_questions=practice_questions admin_preview=True only %}{% else %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook lesson=lesson practice_questions=practice_questions only %}{% endif %}
+        {% if admin_preview %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook course_slug=course.slug practice_questions=practice_questions admin_preview=True only %}{% else %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook lesson=lesson course_slug=course.slug practice_questions=practice_questions only %}{% endif %}
         {% if related_courses %}
         <section class="tt-related-courses" aria-labelledby="tt-related-courses-heading">
           <p>Continue learning</p>
