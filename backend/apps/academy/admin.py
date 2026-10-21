@@ -613,6 +613,7 @@ class CourseImportAdmin(admin.ModelAdmin):
         # time out while checking or reading an image; that must not prevent us from
         # trying the checked-in source path or original URL below.
         file_field = None
+        storage_unavailable = False
         live = CourseMediaAsset.objects.filter(pk=asset_id).first()
 
         if staged and staged.file:
@@ -620,17 +621,21 @@ class CourseImportAdmin(admin.ModelAdmin):
                 if staged.file.storage.exists(staged.file.name):
                     file_field = staged.file
             except OSError as exc:
+                storage_unavailable = True
                 logger.warning(
                     "Staged image storage check failed; trying preview fallbacks (asset=%s, error=%s).",
                     asset_id,
                     exc.__class__.__name__,
                 )
 
-        if file_field is None and live and live.file:
+        # Both image models use the same configured storage backend. If its
+        # availability check just timed out, do not repeat the same remote call.
+        if file_field is None and live and live.file and not storage_unavailable:
             try:
                 if live.file.storage.exists(live.file.name):
                     file_field = live.file
             except OSError as exc:
+                storage_unavailable = True
                 logger.warning(
                     "Live image storage check failed; trying preview fallbacks (asset=%s, error=%s).",
                     asset_id,
