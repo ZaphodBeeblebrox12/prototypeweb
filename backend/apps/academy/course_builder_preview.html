@@ -647,7 +647,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   const currentLesson=()=>{const m=currentModule(); return m.lessons.find(l=>l.id===state.selectedLessonId)||m.lessons[0];};
   const allLessons=c=>c.modules.flatMap(m=>m.lessons);
   const activeStatus=c=>c.status==='published'?'Published':c.status==='draft-update'?'Draft changes':'Draft';
-  function toast(message, duration){const el=$('#toast');const text=String(message??'');const isValidationError=text.includes('\\n');el.textContent=text;el.classList.toggle('validation-error',isValidationError);el.setAttribute('role',isValidationError?'alert':'status');el.setAttribute('aria-live',isValidationError?'assertive':'polite');el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),duration||(isValidationError?15000:2800));}
+  function toast(message, duration){const el=$('#toast');const text=String(message??'');const isValidationError=text.includes('\n');el.textContent=text;el.classList.toggle('validation-error',isValidationError);el.setAttribute('role',isValidationError?'alert':'status');el.setAttribute('aria-live',isValidationError?'assertive':'polite');el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),duration||(isValidationError?15000:2800));}
   function persist(showToast=false){try{state.savedAt=nowText();localStorage.setItem(STORAGE_KEY,JSON.stringify(state));state.storageAvailable=true;if(showToast)toast('Draft saved in this browser. Come back to this preview to continue.');renderSidebar();renderHeaderState();}catch(e){state.storageAvailable=false;toast('Browser storage is full. Reduce image size and try saving again.');}}
   function schedulePersist(){markDirty();clearTimeout(saveTimer);$('#saveIndicator')?.classList.add('saving');if(state.view==='preview')return;saveTimer=setTimeout(()=>{persist(false);const el=$('#saveIndicator');if(el)el.classList.remove('saving');},500);}
   function renderHeaderState(){const c=currentCourse();const save=$('#saveButton');if(save)save.textContent=state.savedAt?'Save draft':'Save draft';const pub=$('#publishButton');if(pub)pub.textContent='Submit for review';}
@@ -1884,7 +1884,7 @@ Describe the evidence first.
         ? payload.publish_errors.map(item => String(item || '').trim()).filter(Boolean)
         : [];
       const message = publishErrors.length
-        ? [detail, 'What needs attention:', ...publishErrors.map((item, index) => `${index + 1}. ${item}`)].filter(Boolean).join('\\n\\n')
+        ? [detail, 'What needs attention:', ...publishErrors.map((item, index) => `${index + 1}. ${item}`)].filter(Boolean).join('\n\n')
         : detail;
       const error = new Error(message);
       error.publishErrors = publishErrors;
