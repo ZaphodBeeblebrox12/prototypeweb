@@ -145,6 +145,23 @@ class CoursePublicationReadinessTests(TestCase):
         self.assertIn("Related lesson unavailable", lesson_link)
 
 
+    def test_take_it_into_practice_content_is_preserved_in_practice_tab(self):
+        from .content_rendering import build_lesson_sections
+
+        sections = build_lesson_sections(
+            "## Start with the decision\\n\\nDescribe the visible evidence.\\n\\n"
+            "### What to notice\\n\\nSeparate observation from interpretation.\\n\\n"
+            "### Compare the possibilities\\n\\nCompare two outcomes.\\n\\n"
+            "### Take it into practice\\n\\n"
+            "Write down what would strengthen your reading, what would weaken it, "
+            "and what would make waiting the better decision."
+        )
+
+        self.assertNotIn("Take it into practice", sections["idea_html"])
+        self.assertIn("Take it into practice", sections["practice_html"])
+        self.assertIn("what would make waiting the better decision", sections["practice_html"])
+
+
 class OptionFourCardParityTests(SimpleTestCase):
     def test_builder_and_learning_room_use_the_same_option_four_css(self):
         root = Path(__file__).resolve().parents[2]
