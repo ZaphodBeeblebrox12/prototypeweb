@@ -31,18 +31,17 @@ class CourseAssetProviderRoutingTests(SimpleTestCase):
         )
 
     def test_configured_provider_writes_reads_and_keeps_logical_name(self):
-        with TemporaryDirectory() as target_root, TemporaryDirectory() as legacy_root:
-            with self._settings(target_root, legacy_root):
-                storage = GoogleDrivePrivateCourseAssetStorage()
-                name = "academy/course-assets/figure.png"
-                self.assertEqual(
-                    storage.save(name, ContentFile(b"figure bytes", name="figure.png")), name
-                )
-                self.assertEqual(storage.status()["backend"], "django_storage")
-                self.assertTrue(storage.status()["durable"])
-                self.assertTrue(storage.remote_exists(name))
-                with storage.open(name, "rb") as stream:
-                    self.assertEqual(stream.read(), b"figure bytes")
+        with TemporaryDirectory() as target_root, TemporaryDirectory() as legacy_root, self._settings(target_root, legacy_root):
+            storage = GoogleDrivePrivateCourseAssetStorage()
+            name = "academy/course-assets/figure.png"
+            self.assertEqual(
+                storage.save(name, ContentFile(b"figure bytes", name="figure.png")), name
+            )
+            self.assertEqual(storage.status()["backend"], "django_storage")
+            self.assertTrue(storage.status()["durable"])
+            self.assertTrue(storage.remote_exists(name))
+            with storage.open(name, "rb") as stream:
+                self.assertEqual(stream.read(), b"figure bytes")
 
     def test_legacy_private_local_file_remains_readable_before_copy(self):
         with TemporaryDirectory() as target_root, TemporaryDirectory() as legacy_root:
@@ -58,22 +57,20 @@ class CourseAssetProviderRoutingTests(SimpleTestCase):
                 self.assertFalse(storage.remote_exists(name))
 
     def test_source_snapshots_use_content_addressed_paths_and_are_verified(self):
-        with TemporaryDirectory() as target_root, TemporaryDirectory() as legacy_root:
-            with self._settings(target_root, legacy_root):
-                storage = GoogleDrivePrivateCourseAssetStorage()
-                payload = {"course": "example", "modules": [{"title": "A module"}]}
-                self.assertTrue(storage.save_source_snapshot(payload, "example-course"))
-                snapshots = list(Path(target_root, "course-source", "builder-drafts", "example-course").glob("*.json"))
-                self.assertEqual(len(snapshots), 1)
-                raw = snapshots[0].read_bytes()
-                self.assertEqual(json.loads(raw.decode("utf-8")), payload)
-                self.assertEqual(snapshots[0].stem, hashlib.sha256(raw).hexdigest())
+        with TemporaryDirectory() as target_root, TemporaryDirectory() as legacy_root, self._settings(target_root, legacy_root):
+            storage = GoogleDrivePrivateCourseAssetStorage()
+            payload = {"course": "example", "modules": [{"title": "A module"}]}
+            self.assertTrue(storage.save_source_snapshot(payload, "example-course"))
+            snapshots = list(Path(target_root, "course-source", "builder-drafts", "example-course").glob("*.json"))
+            self.assertEqual(len(snapshots), 1)
+            raw = snapshots[0].read_bytes()
+            self.assertEqual(json.loads(raw.decode("utf-8")), payload)
+            self.assertEqual(snapshots[0].stem, hashlib.sha256(raw).hexdigest())
 
     def test_generic_provider_must_be_explicitly_marked_durable(self):
-        with TemporaryDirectory() as target_root, TemporaryDirectory() as legacy_root:
-            with self._settings(target_root, legacy_root, durable=False):
-                storage = GoogleDrivePrivateCourseAssetStorage()
-                self.assertFalse(storage.status()["durable"])
-                self.assertFalse(storage.status()["writes_enabled"])
-                with self.assertRaisesRegex(OSError, "not enabled for writes"):
-                    storage.save("academy/course-assets/blocked.png", ContentFile(b"no write"))
+        with TemporaryDirectory() as target_root, TemporaryDirectory() as legacy_root, self._settings(target_root, legacy_root, durable=False):
+            storage = GoogleDrivePrivateCourseAssetStorage()
+            self.assertFalse(storage.status()["durable"])
+            self.assertFalse(storage.status()["writes_enabled"])
+            with self.assertRaisesRegex(OSError, "not enabled for writes"):
+                storage.save("academy/course-assets/blocked.png", ContentFile(b"no write"))

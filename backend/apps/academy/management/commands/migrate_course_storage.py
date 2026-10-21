@@ -7,8 +7,8 @@ import base64
 import hashlib
 import json
 import re
+from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
-from datetime import datetime, timezone
 from urllib.parse import quote
 
 import requests
@@ -188,7 +188,7 @@ class Command(BaseCommand):
         active = str(getattr(settings, "ACADEMY_ASSET_STORAGE_BACKEND", "google_drive")).strip().lower()
         report = {
             "schema_version": 1,
-            "started_at": datetime.now(timezone.utc).isoformat(),
+            "started_at": datetime.now(UTC).isoformat(),
             "target_alias": target_alias,
             "mode": "apply" if apply else "dry_run",
             "active_provider": active,
@@ -438,14 +438,14 @@ class Command(BaseCommand):
                 f'{counts["records_without_file_or_external_url"]} asset records have neither a stored file nor an external URL. '
                 "Review these records and confirm they are intentional placeholders before cutover."
             )
-        report["finished_at"] = datetime.now(timezone.utc).isoformat()
+        report["finished_at"] = datetime.now(UTC).isoformat()
         report["complete"] = not report["errors"]
 
         manifest_path = None
         if apply:
             manifest_path = (
                 "course-source/storage-migrations/migration-"
-                + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+                + datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
                 + ".json"
             )
             report["manifest_path"] = manifest_path

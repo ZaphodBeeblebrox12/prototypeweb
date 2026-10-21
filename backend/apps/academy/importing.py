@@ -28,7 +28,6 @@ from .models import (
     Lesson,
     LessonInstructorMaterial,
 )
-
 from .regional_content import (
     CONTENT_COUNTRY_TO_REGION,
     REGIONAL_CONTENT_CODES,
