@@ -1,8 +1,8 @@
 import json
 import re
 from datetime import timedelta
-from urllib.parse import parse_qs, urlparse
 from io import BytesIO
+from urllib.parse import parse_qs, urlparse
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
