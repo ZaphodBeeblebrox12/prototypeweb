@@ -153,6 +153,30 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   .preview-notebook-number { padding-top:2px; color:#bd664b; font:400 9px/1.5 Arial, sans-serif; }
   .preview-notebook-content li p { margin:0; color:#304b3b; font-size:11px; line-height:1.6; }
   .preview-notebook-content li p strong { color:#254f3b; font-weight:800; }
+.preview-notebook-examples-button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  min-height:49px;
+  max-width:100%;
+  margin-top:10px;
+  padding:13px 20px;
+  border:1px solid #285a43;
+  border-radius:999px;
+  background:#285a43;
+  color:#fffefa;
+  font-size:14px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 5px 12px #285a431c;
+}
+.preview-notebook-examples-button:hover { background:#1e4935; border-color:#1e4935; }
+.preview-notebook-examples-button:focus-visible { outline:3px solid #a78034; outline-offset:3px; }
+@media(max-width:620px) {
+  .preview-notebook-examples-button { min-height:45px; padding:12px 15px; font-size:13px; text-align:left; }
+}
+
   .notebook-editor-preview { margin:16px 0 20px; padding:15px; border:1px solid var(--line); border-radius:10px; background:var(--paper); }
   .notebook-editor-preview h4 { margin:0 0 5px; color:var(--ink); font-size:13px; }
   .notebook-editor-preview > p { margin:0 0 8px; color:var(--muted); font-size:11px; line-height:1.5; }
