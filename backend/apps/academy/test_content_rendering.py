@@ -51,13 +51,18 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("North American notice.", us["idea_html"])
         self.assertNotIn("Global notice.", us["idea_html"])
 
-    def test_regional_blocks_never_render_unprotected_remote_images(self):
+    def test_regional_blocks_never_render_unmanaged_images(self):
+        from .regional_content import contains_unmanaged_regional_image
+
         source = "## Regional disclosure\n\n[[regional-block:notice]]"
         blocks = {
             "notice": {
                 "base_content": (
                     "Global text ![remote](https://example.test/global.png) "
-                    "and <img alt='legacy' src='https://example.test/legacy.png'> tail."
+                    "![proxy](//cdn.example.test/proxy.png) "
+                    "![static](/static/global.png) "
+                    "and <img alt='legacy' src='https://example.test/legacy.png'> "
+                    "plus <img src=//cdn.example.test/legacy-proxy.png alt='x'> tail."
                 ),
                 "variants": [
                     {
@@ -65,6 +70,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
                         "code": "IN",
                         "content": (
                             "India text ![remote](https://example.test/india.png) "
+                            "![static](/static/india.png) "
                             "and <img src=https://example.test/india-legacy.png alt='x'> tail."
                         ),
                         "hidden": False,
@@ -82,16 +88,21 @@ class SharedLessonRenderingTests(SimpleTestCase):
 
         for url in (
             "https://example.test/global.png",
+            "//cdn.example.test/proxy.png",
+            "/static/global.png",
             "https://example.test/legacy.png",
+            "//cdn.example.test/legacy-proxy.png",
             "https://example.test/india.png",
+            "/static/india.png",
             "https://example.test/india-legacy.png",
         ):
             self.assertNotIn(url, india)
-        self.assertNotIn("https://example.test/global.png", global_view)
-        self.assertNotIn("https://example.test/legacy.png", global_view)
+            self.assertNotIn(url, global_view)
         self.assertIn("India text", india)
         self.assertIn("tail.", india)
         self.assertIn("Global text", global_view)
+        self.assertFalse(contains_unmanaged_regional_image(f"![managed](asset://{self.ASSET_ID})"))
+        self.assertTrue(contains_unmanaged_regional_image("![site-relative](/static/example.png)"))
 
     def test_misplaced_tab_route_markers_do_not_hide_section_copy(self):
         source = "\n".join([

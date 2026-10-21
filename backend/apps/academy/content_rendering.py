@@ -14,7 +14,7 @@ from .course_card_utils import (
     is_course_card_recommendable,
 )
 from .models import Course, CourseImport, Lesson
-from .regional_content import strip_external_regional_images
+from .regional_content import strip_unmanaged_regional_images
 
 _ALLOWED_TAGS = {
     "a", "aside", "blockquote", "br", "code", "del", "div", "em", "figcaption", "figure",
@@ -368,8 +368,8 @@ def resolve_regional_blocks(source, regional_blocks=None, country_code=None, reg
         if selected is not None:
             if bool(selected.get("hidden", False)):
                 return ""
-            return strip_external_regional_images(selected.get("content") or "")
-        return strip_external_regional_images(
+            return strip_unmanaged_regional_images(selected.get("content") or "")
+        return strip_unmanaged_regional_images(
             block.get("base_content", block.get("baseContent", "")) or ""
         )
 

@@ -11,31 +11,58 @@ REGIONAL_CONTENT_CODES = frozenset({"APAC", "EU", "NA", "LATAM", "MENA", "SSA"})
 ASSET_REFERENCE_RE = re.compile(r"asset://([0-9a-fA-F-]{36})")
 IMAGE_GROUP_REFERENCE_RE = re.compile(r"\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]")
 
-# Remote image embeds cannot be access-controlled by the lesson media endpoint.
-_REGIONAL_EXTERNAL_MARKDOWN_IMAGE_RE = re.compile(
-    r"!\[[^\]]*\]\(\s*https?://[^)]*\)",
+# Regional images must use managed asset references so permissions can be enforced.
+_REGIONAL_MARKDOWN_IMAGE_RE = re.compile(
+    r"!\[[^\]]*\]\(\s*(?P<src>[^)\s]+)(?:\s+[^)]*)?\)",
     re.IGNORECASE,
 )
-_REGIONAL_EXTERNAL_HTML_IMAGE_RE = re.compile(
-    r"<img\b(?=[^>]*\bsrc\s*=\s*(?:['\"]\s*https?://|https?://))[^>]*>",
+_REGIONAL_HTML_IMAGE_RE = re.compile(r"<img\b[^>]*>", re.IGNORECASE)
+_REGIONAL_HTML_IMAGE_SRC_RE = re.compile(
+    r"""\bsrc\s*=\s*(?:"(?P<double>[^"]*)"|'(?P<single>[^']*)'|(?P<bare>[^\s>]+))""",
     re.IGNORECASE,
 )
 
 
-def contains_external_regional_image(content):
-    """Whether a regional block embeds an image outside protected course storage."""
+def _is_managed_regional_image_source(source):
+    """Only a complete asset://UUID reference is eligible for regional image rendering."""
+    from html import unescape
+
+    return bool(ASSET_REFERENCE_RE.fullmatch(unescape(str(source or "")).strip()))
+
+
+def contains_unmanaged_regional_image(content):
+    """Whether a regional block embeds any image outside protected course storage."""
     source = str(content or "")
-    return bool(
-        _REGIONAL_EXTERNAL_MARKDOWN_IMAGE_RE.search(source)
-        or _REGIONAL_EXTERNAL_HTML_IMAGE_RE.search(source)
+    for match in _REGIONAL_MARKDOWN_IMAGE_RE.finditer(source):
+        if not _is_managed_regional_image_source(match.group("src")):
+            return True
+    for match in _REGIONAL_HTML_IMAGE_RE.finditer(source):
+        src_match = _REGIONAL_HTML_IMAGE_SRC_RE.search(match.group(0))
+        if not src_match:
+            return True
+        source_url = next((value for value in src_match.groupdict().values() if value is not None), "")
+        if not _is_managed_regional_image_source(source_url):
+            return True
+    return False
+
+
+def strip_unmanaged_regional_images(content):
+    """Remove unmanaged Markdown/HTML image embeds from regional content at render time."""
+    source = str(content or "")
+    source = _REGIONAL_MARKDOWN_IMAGE_RE.sub(
+        lambda match: match.group(0)
+        if _is_managed_regional_image_source(match.group("src")) else "",
+        source,
     )
 
+    def keep_managed_html_image(match):
+        src_match = _REGIONAL_HTML_IMAGE_SRC_RE.search(match.group(0))
+        if not src_match:
+            return ""
+        source_url = next((value for value in src_match.groupdict().values() if value is not None), "")
+        return match.group(0) if _is_managed_regional_image_source(source_url) else ""
 
-def strip_external_regional_images(content):
-    """Remove remote Markdown/HTML image embeds from regional content at render time."""
-    source = str(content or "")
-    source = _REGIONAL_EXTERNAL_MARKDOWN_IMAGE_RE.sub("", source)
-    return _REGIONAL_EXTERNAL_HTML_IMAGE_RE.sub("", source)
+    return _REGIONAL_HTML_IMAGE_RE.sub(keep_managed_html_image, source)
 
 
 
