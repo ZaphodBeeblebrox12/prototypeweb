@@ -1,5 +1,6 @@
 """Tests for safe, idempotent checksum copies."""
 from io import BytesIO
+from tempfile import TemporaryDirectory
 from types import SimpleNamespace
 
 from django.core.management.base import CommandError
@@ -33,16 +34,18 @@ class MemoryStorage:
 
 class StorageMigrationCopyTests(SimpleTestCase):
     def test_rejects_filesystem_storage_overlapping_public_media_root(self):
-        with TemporaryDirectory() as public_root:
-            with override_settings(MEDIA_ROOT=public_root, STATIC_ROOT=""):
-                target = SimpleNamespace(location=public_root)
-                with self.assertRaisesRegex(CommandError, "overlaps MEDIA_ROOT"):
-                    _ensure_target_filesystem_is_private(target)
+        with TemporaryDirectory() as public_root, override_settings(MEDIA_ROOT=public_root, STATIC_ROOT=""):
+            target = SimpleNamespace(location=public_root)
+            with self.assertRaisesRegex(CommandError, "overlaps MEDIA_ROOT"):
+                _ensure_target_filesystem_is_private(target)
 
     def test_accepts_private_filesystem_storage_outside_public_roots(self):
-        with TemporaryDirectory() as private_root, TemporaryDirectory() as public_root:
-            with override_settings(MEDIA_ROOT=public_root, STATIC_ROOT=""):
-                _ensure_target_filesystem_is_private(SimpleNamespace(location=private_root))
+        with (
+            TemporaryDirectory() as private_root,
+            TemporaryDirectory() as public_root,
+            override_settings(MEDIA_ROOT=public_root, STATIC_ROOT=""),
+        ):
+            _ensure_target_filesystem_is_private(SimpleNamespace(location=private_root))
 
     def test_google_drive_url_detection_blocks_known_drive_hosts(self):
         self.assertTrue(_is_google_drive_url("https://drive.google.com/file/d/123/view"))
