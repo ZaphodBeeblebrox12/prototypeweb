@@ -47,6 +47,29 @@ def _read_storage(storage, name):
         return stream.read()
 
 
+def _ensure_target_filesystem_is_private(storage):
+    """Reject filesystem targets that overlap website-served media/static roots."""
+    location = getattr(storage, "location", None)
+    if not location:
+        return
+    target_root = Path(location).resolve()
+    for setting_name in ("MEDIA_ROOT", "STATIC_ROOT"):
+        public_value = getattr(settings, setting_name, None)
+        if not public_value:
+            continue
+        public_root = Path(public_value).resolve()
+        overlaps = (
+            target_root == public_root
+            or target_root in public_root.parents
+            or public_root in target_root.parents
+        )
+        if overlaps:
+            raise CommandError(
+                f"Migration target overlaps {setting_name}; private course media must not be "
+                "copied into website-served directories."
+            )
+
+
 def _copy_to_target(target, target_name, raw, *, apply):
     """Copy idempotently. Never overwrite different bytes and verify every write."""
     expected = _sha256(raw)
@@ -244,8 +267,8 @@ class Command(BaseCommand):
             target = storages[target_alias]
         except Exception as exc:
             raise CommandError(f"Django storage alias {target_alias!r} is not configured.") from exc
+        _ensure_target_filesystem_is_private(target)
 
-        active = str(getattr(settings, "ACADEMY_ASSET_STORAGE_BACKEND", "google_drive")).strip().lower()
         report = {
             "schema_version": 1,
             "started_at": datetime.now(UTC).isoformat(),
