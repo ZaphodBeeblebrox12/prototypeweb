@@ -1727,8 +1727,8 @@ Describe the evidence first.
       updated = updated.replace(marker, token).replace(/\n{3,}/g, '\n\n').replace(/^[ \t]*\n+|\n+[ \t]*$/g, '');
       lesson.content = updated;
       state.tab = 'lesson';
-      markDirty();
       persist(false);
+      clearTimeout(academySaveTimer);
       renderEditor();
       saveCurrentToAcademy(false, false).then(() => {
         toast('Saved to Academy. Removed ' + lessonReferences.length + ' inline lesson reference' +
