@@ -1727,10 +1727,15 @@ Describe the evidence first.
       updated = updated.replace(marker, token).replace(/\n{3,}/g, '\n\n').replace(/^[ \t]*\n+|\n+[ \t]*$/g, '');
       lesson.content = updated;
       state.tab = 'lesson';
+      markDirty();
       persist(false);
       renderEditor();
-      toast('Companion card updated. Removed ' + lessonReferences.length + ' inline lesson reference' +
-        (lessonReferences.length === 1 ? '' : 's') + ' and replaced the previous course card.', 6000);
+      saveCurrentToAcademy(false, false).then(() => {
+        toast('Saved to Academy. Removed ' + lessonReferences.length + ' inline lesson reference' +
+          (lessonReferences.length === 1 ? '' : 's') + ' and replaced the previous course card.', 6500);
+      }).catch(error => {
+        toast('The editor was updated, but the Academy save failed: ' + String(error?.message || error), 9000);
+      });
       return;
     }
     if (lesson && action === 'insert-course-card') {
