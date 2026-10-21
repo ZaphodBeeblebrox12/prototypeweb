@@ -68,7 +68,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
         cleaned = _deduplicate_course_card_refs(source)
 
         self.assertEqual(cleaned.count(card), 1)
-        self.assertGreater(cleaned.index("Compare the possibilities"), cleaned.index(card))
+        self.assertLess(cleaned.index("Compare the possibilities"), cleaned.index(card))
         self.assertIn("Compare two outcomes.", cleaned)
 
     def test_authored_heading_levels_are_not_flattened(self):
@@ -213,6 +213,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertNotIn("TRADETHESIS · LEARNING ROOM", preview)
         self.assertIn("tt-purpose-figure-module", preview)
         self.assertIn("data-image-storage-status", preview)
+        self.assertIn("compactDuplicateCourseCards(String(src || '')", preview)
         self.assertIn("result.asset_storage", preview)
         self.assertIn("Image uploads are blocked because no durable image provider is configured", preview)
 
