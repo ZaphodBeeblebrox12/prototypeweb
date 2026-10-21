@@ -122,10 +122,31 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "previewAudienceSelect")
         self.assertContains(response, "data-regional-variant")
 
+    def test_regional_asset_remapping_matches_full_image_ids(self):
+        from .course_builder_api import _remap_regional_asset_refs
+
+        short_id = "image-a"
+        long_id = "image-ab"
+        stable_short = "11111111-1111-4111-8111-111111111111"
+        stable_long = "22222222-2222-4222-8222-222222222222"
+        referenced = set()
+
+        result = _remap_regional_asset_refs(
+            "![Short](asset://image-a) ![Long](asset://image-ab)",
+            {short_id: stable_short, long_id: stable_long},
+            referenced,
+        )
+
+        self.assertEqual(
+            result,
+            f"![Short](asset://{stable_short}) ![Long](asset://{stable_long})",
+        )
+        self.assertEqual(referenced, {stable_short, stable_long})
+
     def test_regional_content_is_persisted_in_publish_payload_and_builder_snapshot(self):
         payload = self.draft_payload("regional-content-course")
         lesson = payload["course"]["modules"][0]["lessons"][0]
-        lesson["content"] += "\\n\\n[[regional-block:risk-note]]"
+        lesson["content"] += "\n\n[[regional-block:risk-note]]"
         lesson["regionalBlocks"] = [{
             "id": "risk-note",
             "title": "Risk disclosure",

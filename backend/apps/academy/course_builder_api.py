@@ -51,6 +51,19 @@ _ALLOWED_CONTENT_REGIONS = {"APAC", "EU", "NA", "LATAM", "MENA", "SSA"}
 _LESSON_REF_TOKEN = re.compile(r"\[\[(?:lesson|lesson-card):([0-9a-fA-F-]{36})\]\]")
 
 
+def _remap_regional_asset_refs(value, image_mapping, referenced_asset_ids):
+    """Remap exact builder image references and collect their stable asset IDs."""
+    value = str(value or "")[:40000]
+
+    def replace_reference(match):
+        stable_id = image_mapping.get(match.group(1))
+        return f"asset://{stable_id}" if stable_id else match.group(0)
+
+    value = _ASSET_REF.sub(replace_reference, value)
+    referenced_asset_ids.update(_ASSET_REF.findall(value))
+    return value
+
+
 def _require_admin(request):
     if not request.user.is_active or not is_course_content_admin(request.user):
         raise PermissionDenied
@@ -300,13 +313,6 @@ def _build_import_payload(course_state, course_slug):
             # Regional content blocks occupy an explicit marker in the lesson body.
             # Store country/region alternatives in learner-safe JSON, and allow their
             # assets through the same publication and protected-media authorization path.
-            def remap_regional_assets(value, image_mapping, referenced_asset_ids):
-                value = str(value or "")[:40000]
-                for old_id, stable_id in image_mapping.items():
-                    value = value.replace(f"asset://{old_id}", f"asset://{stable_id}")
-                referenced_asset_ids.update(_ASSET_REF.findall(value))
-                return value
-
             regional_blocks_payload = {}
             regional_block_asset_ids = set()
             raw_regional_blocks = lesson.get("regionalBlocks") if isinstance(lesson.get("regionalBlocks"), list) else []
@@ -323,7 +329,7 @@ def _build_import_payload(course_state, course_slug):
                     # Keep unused authoring blocks in builder_state, not learner JSON.
                     continue
 
-                base_content = remap_regional_assets(
+                base_content = _remap_regional_asset_refs(
                     block.get("baseContent", ""), image_by_id, regional_block_asset_ids
                 )
                 variants = []
@@ -353,7 +359,7 @@ def _build_import_payload(course_state, course_slug):
                         "id": variant_id,
                         "scope": scope,
                         "code": code,
-                        "content": remap_regional_assets(variant.get("content", ""), image_by_id, regional_block_asset_ids),
+                        "content": _remap_regional_asset_refs(variant.get("content", ""), image_by_id, regional_block_asset_ids),
                         "hidden": bool(variant.get("hidden", False)),
                     })
                 regional_blocks_payload[block_id] = {

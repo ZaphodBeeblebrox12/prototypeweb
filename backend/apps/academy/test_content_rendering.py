@@ -14,7 +14,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
     ASSET_ID = "8c0f08ab-c9be-45d2-9cde-1f5a0a1c9031"
 
     def test_regional_block_country_override_precedes_region_and_global_fallback(self):
-        source = "## Disclosure\\n\\n[[regional-block:risk-note]]"
+        source = "## Disclosure\n\n[[regional-block:risk-note]]"
         blocks = {
             "risk-note": {
                 "id": "risk-note",
@@ -34,7 +34,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertNotIn("[[regional-block:", india["idea_html"])
 
     def test_regional_block_can_be_explicitly_hidden_for_a_matching_country(self):
-        source = "## Disclosure\\n\\nBefore.\\n\\n[[regional-block:notice]]\\n\\nAfter."
+        source = "## Disclosure\n\nBefore.\n\n[[regional-block:notice]]\n\nAfter."
         blocks = {"notice": {"id": "notice", "base_content": "Global notice.", "variants": [
             {"scope": "country", "code": "CA", "content": "unused", "hidden": True}
         ]}}
