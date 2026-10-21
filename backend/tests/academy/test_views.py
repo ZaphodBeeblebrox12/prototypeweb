@@ -122,6 +122,108 @@ class AcademyViewTests(TestCase):
             LessonProgress.objects.filter(user=admin, lesson=self.paid_lesson).exists()
         )
 
+    def test_regional_audience_preview_uses_saved_blocks_in_learning_room(self):
+        admin = User.objects.create_user(
+            username="regional-preview-admin",
+            password="Test-password-123!",
+            role="admin",
+            is_staff=True,
+        )
+        self.client.force_login(admin)
+        record = CourseImport.objects.create(
+            course_slug="regional-preview-course",
+            title="Regional preview course",
+            manifest_version="1.0",
+            content_hash="b" * 64,
+            source_manifest="{}",
+            payload={
+                "course": {
+                    "title": "Regional preview course",
+                    "slug": "regional-preview-course",
+                    "summary": "A saved draft for audience preview tests.",
+                    "description": "Preview each authored version in the Learning Room.",
+                },
+                "modules": [{
+                    "title": "Foundations",
+                    "slug": "foundations",
+                    "position": 1,
+                    "lessons": [{
+                        "source_id": "1.1",
+                        "title": "Audience-specific disclosure",
+                        "slug": "audience-specific-disclosure",
+                        "position": 1,
+                        "duration_minutes": 5,
+                        "content_markdown": (
+                            "### The question\\n\\nObserve first.\\n\\n"
+                            "[[regional-block:risk-note]]"
+                        ),
+                        "content_json": {
+                            "regional_blocks": {
+                                "risk-note": {
+                                    "id": "risk-note",
+                                    "title": "Country disclosure",
+                                    "base_content": "Global disclosure.",
+                                    "variants": [
+                                        {
+                                            "scope": "country", "code": "IN",
+                                            "content": "India-specific disclosure.",
+                                            "hidden": False,
+                                        },
+                                        {
+                                            "scope": "region", "code": "APAC",
+                                            "content": "APAC-specific disclosure.",
+                                            "hidden": False,
+                                        },
+                                        {
+                                            "scope": "country", "code": "US",
+                                            "content": "US-only hidden disclosure.",
+                                            "hidden": True,
+                                        },
+                                    ],
+                                },
+                            },
+                        },
+                    }],
+                }],
+            },
+        )
+        preview_url = reverse("academy:course-import-preview", args=[record.pk])
+        cases = [
+            (
+                {"lesson": "1.1", "preview_audience": "IN"},
+                "India-specific disclosure.",
+                ("APAC-specific disclosure.", "Global disclosure.", "US-only hidden disclosure."),
+            ),
+            (
+                {"lesson": "1.1", "preview_audience": "REGION:APAC"},
+                "APAC-specific disclosure.",
+                ("India-specific disclosure.", "Global disclosure.", "US-only hidden disclosure."),
+            ),
+            (
+                {"lesson": "1.1"},
+                "Global disclosure.",
+                ("India-specific disclosure.", "APAC-specific disclosure.", "US-only hidden disclosure."),
+            ),
+            (
+                {"lesson": "1.1", "preview_audience": "US"},
+                None,
+                (
+                    "India-specific disclosure.",
+                    "APAC-specific disclosure.",
+                    "Global disclosure.",
+                    "US-only hidden disclosure.",
+                ),
+            ),
+        ]
+        for params, expected, absent in cases:
+            with self.subTest(audience=params.get("preview_audience", "GLOBAL")):
+                response = self.client.get(preview_url, params)
+                self.assertEqual(response.status_code, 200, response.content)
+                if expected:
+                    self.assertContains(response, expected)
+                for phrase in absent:
+                    self.assertNotContains(response, phrase)
+
     def test_staged_course_preview_displays_structured_questions_read_only(self):
         admin = User.objects.create_user(
             username="preview-content-admin",
