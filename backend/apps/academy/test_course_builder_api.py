@@ -98,6 +98,9 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "Manage inserted lesson references")
         self.assertContains(response, "lessonQualityMarkup")
         self.assertContains(response, "previewFieldsBeforeQualityChecks")
+        self.assertContains(response, "payload.publish_errors")
+        self.assertContains(response, "What needs attention:")
+        self.assertContains(response, "validation-error")
 
     def test_admin_can_save_shared_draft(self):
         response = self.client.post(
