@@ -477,6 +477,7 @@ def admin_lesson_preview(request, course_slug, lesson_id):
             figure_metadata=content_json.get("figures", {}),
             figure_prefix=f"{lesson.module.position}.{lesson.position}",
             module_label=f"Module {lesson.module.position} · {lesson.module.title}",
+            course_title=course.title,
         ),
         "notebook": notebook,
         "notebook_responses": [],

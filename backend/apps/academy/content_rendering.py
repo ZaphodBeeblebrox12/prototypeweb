@@ -731,12 +731,12 @@ def build_lesson_sections(
         "examples_html": render_safe_markdown(
             rendered["examples"], asset_urls, user=user, admin_preview=admin_preview,
             figure_metadata=figure_metadata, figure_prefix=figure_prefix,
-            module_label=module_label,
+            module_label=module_label, course_title=course_title,
         ),
         "practice_html": render_safe_markdown(
             rendered["practice"], asset_urls, user=user, admin_preview=admin_preview,
             figure_metadata=figure_metadata, figure_prefix=figure_prefix,
-            module_label=module_label,
+            module_label=module_label, course_title=course_title,
         ),
         "figure_count": figure_count,
     }
