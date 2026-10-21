@@ -862,6 +862,8 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   function courseFields(c){return `<div class="section-intro"><h3>Course details</h3><p>Write the public-facing promise first. Save a shared draft at any stage, then submit it for review. Approved and published courses appear in the website Courses tab.</p></div><div class="form-grid"><div class="field full"><label for="courseTitle">Course title</label><input class="input" id="courseTitle" data-entity="course" data-field="title" value="${esc(c.title)}" maxlength="200" placeholder="e.g. Understand Market Structure"></div><div class="field"><label for="courseSlug">Course URL slug</label><input class="input" id="courseSlug" data-entity="course" data-field="slug" value="${esc(c.slug)}" maxlength="150"><span class="help">Keep stable after a course is published.</span></div><div class="field"><label for="courseCategory">Topic / category</label><input class="input" id="courseCategory" data-entity="course" data-field="category" value="${esc(c.category)}" placeholder="Chart reading"></div><div class="field full"><label for="courseSummary">Short summary</label><textarea class="textarea" id="courseSummary" data-entity="course" data-field="summary" maxlength="360" placeholder="One or two sentences for the course card.">${esc(c.summary)}</textarea><span class="help">Used in the catalogue card. Aim for a concise, clear promise.</span></div><div class="field full"><label for="courseDescription">Course description</label><textarea class="textarea" id="courseDescription" data-entity="course" data-field="description" placeholder="Who is this for, what is included, and how will they use it?">${esc(c.description)}</textarea><span class="help">Write a clear, practical course description. Check how it reads in the learner preview below.</span></div><div class="field"><label for="courseLevel">Level</label><select class="select" id="courseLevel" data-entity="course" data-field="level">${['Beginner','Foundational','Intermediate','Advanced','Mixed experience'].map(v=>`<option ${v===c.level?'selected':''}>${v}</option>`).join('')}</select></div><div class="field"><label for="courseDuration">Expected study time</label><input class="input" id="courseDuration" data-entity="course" data-field="duration" value="${esc(c.duration)}" placeholder="e.g. 4 hours"></div><div class="field full"><label>Learning outcomes</label><div id="outcomesList">${c.outcomes.map((v,i)=>`<div class="option-row"><span class="pill">${String(i+1).padStart(2,'0')}</span><input class="input" data-entity="outcome" data-index="${i}" value="${esc(v)}" aria-label="Learning outcome ${i+1}"><button class="icon-btn" type="button" data-action="remove-outcome" data-index="${i}" aria-label="Remove outcome">×</button></div>`).join('')}</div><button class="btn small" type="button" data-action="add-outcome">＋ Add outcome</button></div><div class="field"><label for="coursePrice">Display price (optional)</label><input class="input" id="coursePrice" data-entity="course" data-field="price" value="${esc(c.price)}" placeholder="e.g. ₹999"><span class="help">Display text only. It does not create or activate checkout.</span></div><div class="field"><label for="coursePriceNote">Price note</label><input class="input" id="coursePriceNote" data-entity="course" data-field="priceNote" value="${esc(c.priceNote)}"></div><div class="field full coming-soon-field"><label class="checkbox-row" for="courseComingSoon"><input id="courseComingSoon" type="checkbox" data-entity="course" data-field="comingSoon" ${c.comingSoon?'checked':''}> Announce this course publicly as “Coming soon”</label><span class="help">After you save, the public Courses catalogue can show the title and short summary. Lessons, answer keys and enrolment stay unavailable until you publish the course.</span></div></div><div class="helper-note"><strong>Course state:</strong> ${c.status==='published'?'This course already has a published version. Save your edits as a draft revision; the live catalogue version remains until you publish the updates.':c.status==='draft-update'?'Unpublished changes are saved separately; the current published catalogue card remains live.':'This is a private draft. It will not appear in Courses offered until you publish it.'}</div>`;}
   function curriculumFields(c){const m=currentModule()||c.modules[0];const l=currentLesson()||m?.lessons[0];return `<div class="section-intro"><h3>Build the curriculum</h3><p>Keep the structure easy to scan. Add modules, then add lessons within each module. Reordering controls here are functional in this preview; the production version will save their positions to Django.</p></div><div class="curriculum-layout"><div class="outline-panel"><div class="outline-panel-head"><strong>Course outline</strong><button class="btn small" data-action="add-module" type="button">＋ Module</button></div><div id="curriculumTree">${c.modules.map((mod,mi)=>`<div class="module-block"><div class="module-row"><button class="module-select ${m?.id===mod.id?'active':''}" type="button" data-action="select-module" data-id="${esc(mod.id)}">${String(mi+1).padStart(2,'0')} · ${esc(mod.title)}</button><button class="icon-btn" type="button" data-action="move-module-up" data-id="${esc(mod.id)}" aria-label="Move module up" ${mi===0?'disabled':''}>↑</button><button class="icon-btn" type="button" data-action="move-module-down" data-id="${esc(mod.id)}" aria-label="Move module down" ${mi===c.modules.length-1?'disabled':''}>↓</button></div>${mod.lessons.map((lesson,li)=>`<div class="lesson-row"><button class="lesson-select ${l?.id===lesson.id?'active':''}" type="button" data-action="select-lesson" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}">${String(mi+1)}.${li+1} ${esc(lesson.title)}</button><button class="icon-btn" type="button" data-action="move-lesson-up" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}" aria-label="Move lesson up" ${li===0?'disabled':''}>↑</button><button class="icon-btn" type="button" data-action="move-lesson-down" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}" aria-label="Move lesson down" ${li===mod.lessons.length-1?'disabled':''}>↓</button></div>`).join('')}<div style="padding:6px 7px 3px"><button class="btn small" type="button" data-action="add-lesson" data-id="${esc(mod.id)}">＋ Add lesson</button><button class="btn small danger" type="button" data-action="delete-module" data-id="${esc(mod.id)}" ${c.modules.length===1?'disabled':''}>Remove</button></div></div>`).join('')}</div></div><div class="lesson-editor-card">${m&&l?`<h4>Edit selected lesson</h4><p class="microcopy">Changing titles or order does not disturb other lessons. Lesson UUIDs and student progress are preserved in the production Academy when a course is updated.</p><div class="field"><label>Module title</label><input class="input" data-entity="module" data-field="title" value="${esc(m.title)}"></div><div class="field" style="margin-top:11px"><label>Module summary</label><textarea class="textarea" data-entity="module" data-field="description">${esc(m.description)}</textarea></div><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><div class="field"><label>Lesson title</label><input class="input" data-entity="lesson" data-field="title" value="${esc(l.title)}"></div><div class="field" style="margin-top:11px"><label>Short lesson summary</label><textarea class="textarea" data-entity="lesson" data-field="summary">${esc(l.summary)}</textarea></div><div class="lesson-meta-grid" style="margin-top:11px"><div class="field"><label>Lesson format</label><select class="select" data-entity="lesson" data-field="format">${['reading','video','interactive','quiz'].map(v=>`<option value="${v}" ${l.format===v?'selected':''}>${v[0].toUpperCase()+v.slice(1)}</option>`).join('')}</select></div><div class="field"><label>Minutes</label><input class="input" type="number" min="1" max="360" data-entity="lesson" data-field="minutes" value="${Number(l.minutes)||12}"></div></div><div class="q-actions"><button class="btn small" type="button" data-action="delete-lesson" data-id="${esc(l.id)}" data-module-id="${esc(m.id)}" ${m.lessons.length===1?'disabled':''}>Remove lesson</button><button class="btn small primary" type="button" data-action="go-lesson">Edit lesson content →</button></div>`:'<div class="empty-state"><p>Create a module and lesson to start editing.</p></div>'}</div></div>`;}
   let richEditorRange = null;
+  let visualEditorSyncTimer = null;
+  let pendingVisualEditorSync = null;
   function richTokenIsBlock(token) {
     return !String(token || '').startsWith('[[lesson:');
   }
@@ -1005,8 +1007,14 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       markdownToVisualEditor(value) + '</div></div>';
   }
   function syncVisualEditorToModel(editor) {
+    if (!editor) return;
+    if (pendingVisualEditorSync === editor) {
+      if (visualEditorSyncTimer !== null) clearTimeout(visualEditorSyncTimer);
+      visualEditorSyncTimer = null;
+      pendingVisualEditorSync = null;
+    }
     const lesson = currentLesson();
-    if (!lesson || !editor) return;
+    if (!lesson) return;
     const markdown = visualEditorToMarkdown(editor);
     const kind = editor.dataset.visualKind;
     if (kind === 'main') lesson.content = markdown;
@@ -1019,6 +1027,21 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       if (variant) variant.content = markdown;
     }
     schedulePersist();
+  }
+  function scheduleVisualEditorSync(editor) {
+    if (!editor) return;
+    pendingVisualEditorSync = editor;
+    if (visualEditorSyncTimer !== null) clearTimeout(visualEditorSyncTimer);
+    // Serialising the whole rich-text tree per keystroke causes avoidable main-thread work.
+    // Wait for a short pause, while explicit saves and editor navigation flush immediately.
+    visualEditorSyncTimer = setTimeout(flushVisualEditorSync, 300);
+  }
+  function flushVisualEditorSync() {
+    const editor = pendingVisualEditorSync;
+    if (visualEditorSyncTimer !== null) clearTimeout(visualEditorSyncTimer);
+    visualEditorSyncTimer = null;
+    pendingVisualEditorSync = null;
+    if (editor && editor.isConnected) syncVisualEditorToModel(editor);
   }
   function restoreRichEditorSelection(editor) {
     if (!editor) return;
@@ -1043,19 +1066,24 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     const anchor = range.commonAncestorContainer.nodeType === 1 ? range.commonAncestorContainer : range.commonAncestorContainer.parentElement;
     const editor = anchor?.closest?.('[data-visual-editor]');
     if (!editor || !editor.contains(range.startContainer)) return;
+    // Keep the live insertion point cheaply. Do not clone and serialise the text before
+    // the caret on every selectionchange; that work grows with lesson length.
     richEditorRange = {editor,range:range.cloneRange()};
-    if (editor.dataset.visualKind === 'main') {
-      const prefixRange = document.createRange();
-      prefixRange.selectNodeContents(editor);
-      try { prefixRange.setEnd(range.startContainer,range.startOffset); } catch (_) { return; }
-      const prefix = document.createElement('div');
-      prefix.appendChild(prefixRange.cloneContents());
-      const lesson = currentLesson();
-      if (lesson) {
-        const offset = visualEditorToMarkdown(prefix).length;
-        lessonContentCaret = {lessonId:lesson.id,start:offset,end:offset};
-      }
-    }
+  }
+  function rememberRichEditorCaretOffset() {
+    const saved = richEditorRange;
+    const editor = saved?.editor;
+    const range = saved?.range;
+    if (!editor?.isConnected || editor.dataset.visualKind !== 'main' || !range) return;
+    const lesson = currentLesson();
+    if (!lesson) return;
+    const prefixRange = document.createRange();
+    prefixRange.selectNodeContents(editor);
+    try { prefixRange.setEnd(range.startContainer, range.startOffset); } catch (_) { return; }
+    const prefix = document.createElement('div');
+    prefix.appendChild(prefixRange.cloneContents());
+    const offset = visualEditorToMarkdown(prefix).length;
+    lessonContentCaret = {lessonId:lesson.id,start:offset,end:offset};
   }
   function insertVisualTokenAtCursor(editor, token, isBlock) {
     if (!editor) return;
@@ -2665,12 +2693,39 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     }
     if (el.id === 'previewAudienceSelect' && state.tab === 'preview') renderEditor();
   });
+  document.addEventListener('click', event => {
+    const target = event.target;
+    const savedEditor = richEditorRange?.editor;
+    if (
+      state.tab === 'lesson' &&
+      savedEditor?.isConnected &&
+      savedEditor.dataset.visualKind === 'main' &&
+      target instanceof Node &&
+      !savedEditor.contains(target)
+    ) {
+      // Save the legacy Markdown offset only when leaving the visual editor, not on every
+      // cursor movement. Media/figure actions still insert at the correct lesson position.
+      rememberRichEditorCaretOffset();
+    }
+    const pendingEditor = pendingVisualEditorSync;
+    if (pendingEditor?.isConnected && target instanceof Node && !pendingEditor.contains(target)) {
+      flushVisualEditorSync();
+    }
+  }, true);
+  document.addEventListener('focusout', event => {
+    const editor = event.target.closest?.('[data-visual-editor]');
+    if (!editor) return;
+    if (pendingVisualEditorSync === editor) flushVisualEditorSync();
+    if (state.tab === 'lesson' && editor.dataset.visualKind === 'main' && richEditorRange?.editor === editor) {
+      rememberRichEditorCaretOffset();
+    }
+  }, true);
   document.addEventListener('selectionchange', captureRichEditorRange);
   document.addEventListener('input', event => {
     const editor = event.target.closest?.('[data-visual-editor]');
     if (!editor) return;
     captureRichEditorRange();
-    syncVisualEditorToModel(editor);
+    scheduleVisualEditorSync(editor);
   });
   document.addEventListener('mousedown', event => {
     if (event.target.closest?.('[data-rich-command], [data-rich-format]')) event.preventDefault();
@@ -2768,6 +2823,8 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   async function saveCurrentToAcademy(submit, notify=false) {
     const course = currentCourse();
     if (!course) return;
+    // A manual save must include text that is still waiting in the rich-editor debounce.
+    flushVisualEditorSync();
     academySaving = true;
     try {
       const revisionAtStart=editRevision;
