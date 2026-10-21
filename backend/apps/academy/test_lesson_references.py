@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from .content_rendering import render_safe_markdown
-from .models import Course, CourseModule, Lesson
+from .models import Course, CourseImport, CourseModule, Lesson
 
 User = get_user_model()
 
@@ -83,3 +83,111 @@ class LessonReferenceRenderingTests(TestCase):
         self.assertIn("Related lesson unavailable.", rendered)
         self.assertNotIn("Read relative volume", rendered)
         self.assertNotIn("PRIVATE_DESTINATION_BODY", rendered)
+
+
+
+class CourseCardReferenceRenderingTests(TestCase):
+    def setUp(self):
+        self.course = Course.objects.create(
+            title="Volume and Price Analysis",
+            slug="volume-price-analysis-card-test",
+            summary="Read activity alongside price progress.",
+            category="Volume analysis",
+            level="Intermediate",
+            estimated_duration="3 hours",
+            learning_outcomes=["Compare activity with price progress.", "Identify when volume does not confirm the move."],
+            status=Course.Status.PUBLISHED,
+        )
+
+    def test_inline_course_card_uses_live_catalogue_fields_and_keeps_position(self):
+        rendered = render_safe_markdown(
+            "Before the card.\n\n[[course-card:" + str(self.course.pk) + "]]\n\nAfter the card."
+        )
+        expected_url = reverse("academy:course-detail", args=[self.course.slug])
+        card_index = rendered.index('class="tt-inline-course-card"')
+        self.assertLess(rendered.index("Before the card."), card_index)
+        self.assertLess(card_index, rendered.index("After the card."))
+        self.assertIn(self.course.title, rendered)
+        self.assertIn(self.course.summary, rendered)
+        self.assertIn("Volume analysis", rendered)
+        self.assertIn("Intermediate", rendered)
+        self.assertIn("3 hours", rendered)
+        self.assertIn("Compare activity with price progress.", rendered)
+        self.assertIn(f'href="{expected_url}"', rendered)
+
+    def test_course_card_does_not_expose_a_draft_course(self):
+        self.course.status = Course.Status.DRAFT
+        self.course.save(update_fields=["status"])
+        rendered = render_safe_markdown("[[course-card:" + str(self.course.pk) + "]]")
+        self.assertIn("Course currently unavailable", rendered)
+        self.assertNotIn(self.course.title, rendered)
+        self.assertNotIn(self.course.summary, rendered)
+
+    def test_explicitly_announced_coming_soon_card_uses_builder_catalogue_fields(self):
+        teaser = CourseImport.objects.create(
+            course_slug="order-flow-volume-coming-soon",
+            title="Order Flow and Volume",
+            content_hash="a" * 64,
+            source_manifest="{}",
+            payload={"builder_state": {
+                "comingSoon": True,
+                "title": "Order Flow and Volume",
+                "summary": "Understand activity in context.",
+                "category": "Volume analysis",
+                "level": "Intermediate",
+                "duration": "2 hours",
+                "outcomes": ["Compare volume with price progress."],
+            }},
+            status=CourseImport.Status.DRAFT,
+        )
+        rendered = render_safe_markdown("[[course-card:coming-soon:" + str(teaser.pk) + "]]")
+        self.assertIn('class="tt-inline-course-card tt-inline-course-card--coming-soon"', rendered)
+        self.assertIn("Order Flow and Volume", rendered)
+        self.assertIn("Understand activity in context.", rendered)
+        self.assertIn("Compare volume with price progress.", rendered)
+        self.assertIn("COMING SOON", rendered)
+        self.assertNotIn("course-detail", rendered)
+
+    def test_private_builder_draft_is_not_exposed_as_a_course_card(self):
+        teaser = CourseImport.objects.create(
+            course_slug="private-draft-card-test",
+            title="Private draft course title",
+            content_hash="b" * 64,
+            source_manifest="{}",
+            payload={"builder_state": {
+                "comingSoon": False,
+                "title": "Private draft course title",
+                "summary": "Private draft summary.",
+            }},
+            status=CourseImport.Status.DRAFT,
+        )
+        rendered = render_safe_markdown("[[course-card:coming-soon:" + str(teaser.pk) + "]]")
+        self.assertIn("Course currently unavailable", rendered)
+        self.assertNotIn("Private draft course title", rendered)
+        self.assertNotIn("Private draft summary.", rendered)
+
+    def test_coming_soon_reference_automatically_uses_live_course_after_publication(self):
+        teaser = CourseImport.objects.create(
+            course_slug=self.course.slug,
+            title="Old teaser title",
+            content_hash="c" * 64,
+            source_manifest="{}",
+            payload={"builder_state": {"comingSoon": True, "title": "Old teaser title"}},
+            status=CourseImport.Status.PUBLISHED,
+            target_course=self.course,
+        )
+        rendered = render_safe_markdown("[[course-card:coming-soon:" + str(teaser.pk) + "]]")
+        expected_url = reverse("academy:course-detail", args=[self.course.slug])
+        self.assertIn(self.course.title, rendered)
+        self.assertIn(f'href="{expected_url}"', rendered)
+        self.assertNotIn("Old teaser title", rendered)
+
+    def test_course_card_escapes_catalogue_copy(self):
+        self.course.title = '<script>alert("x")</script>'
+        self.course.summary = '<img src=x onerror="alert(1)">'
+        self.course.save(update_fields=["title", "summary"])
+        rendered = render_safe_markdown("[[course-card:" + str(self.course.pk) + "]]")
+        self.assertNotIn("<script>", rendered)
+        self.assertNotIn('<img src=x onerror=', rendered)
+        self.assertIn("&lt;script&gt;", rendered)
+        self.assertIn("&lt;img src=x onerror=", rendered)

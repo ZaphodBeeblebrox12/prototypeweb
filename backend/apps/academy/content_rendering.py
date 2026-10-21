@@ -7,7 +7,7 @@ import bleach
 import markdown as markdown_library
 from django.urls import reverse
 
-from .models import Course, Lesson
+from .models import Course, CourseImport, Lesson
 
 _ALLOWED_TAGS = {
     "a", "aside", "blockquote", "br", "code", "del", "div", "em", "figcaption", "figure",
@@ -30,6 +30,7 @@ _IMAGE_MARKDOWN = re.compile(r"!\[([^\]]*)\]\(asset://([0-9a-fA-F-]{36})(?:\s+[^
 _TEACHING_FIGURE_TOKEN = re.compile(r"\[\[teaching-figure:([A-Za-z0-9_-]{1,120})\]\]")
 _IMAGE_GROUP_TOKEN = re.compile(r"\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]")
 _LESSON_REF = re.compile(r"\[\[(lesson|lesson-card):([0-9a-fA-F-]{36})\]\]")
+_COURSE_CARD_REF = re.compile(r"\[\[course-card:(?:(coming-soon):)?([0-9a-fA-F-]{36})\]\]")
 _HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
 _DANGEROUS_MARKDOWN = re.compile(
     r"<\s*/?\s*(?:script|style|iframe|object|embed|form|input|button|svg|math)\b"
@@ -133,6 +134,150 @@ def _resolve_lesson_references(source, user=None, admin_preview=False):
     return _LESSON_REF.sub(replace_reference, source or ""), replacements
 
 
+def _resolve_course_cards(source):
+    """Resolve stable course-card references to current published or announced catalogue data."""
+    from html import escape
+
+    references = []
+    for kind, raw_id in _COURSE_CARD_REF.findall(source or ""):
+        try:
+            references.append((kind, str(uuid.UUID(raw_id))))
+        except (TypeError, ValueError, AttributeError):
+            continue
+    if not references:
+        return source or "", {}
+
+    all_ids = {stable_id for _kind, stable_id in references}
+    teaser_ids = {stable_id for kind, stable_id in references if kind == "coming-soon"}
+    courses_by_id = {
+        str(course.pk): course
+        for course in Course.objects.filter(pk__in=all_ids, status=Course.Status.PUBLISHED)
+    }
+    teasers_by_id = {
+        str(teaser.pk): teaser
+        for teaser in CourseImport.objects.filter(pk__in=teaser_ids).select_related("target_course")
+    } if teaser_ids else {}
+    teaser_slugs = {teaser.course_slug for teaser in teasers_by_id.values()}
+    published_by_slug = {
+        course.slug: course
+        for course in Course.objects.filter(slug__in=teaser_slugs, status=Course.Status.PUBLISHED)
+    } if teaser_slugs else {}
+
+    def metadata_text(category, level, duration):
+        return " · ".join(
+            str(value).strip() for value in (category, level, duration)
+            if str(value or "").strip()
+        )
+
+    def safe_outcomes(raw):
+        if not isinstance(raw, list):
+            return []
+        return [str(value).strip() for value in raw if isinstance(value, str) and value.strip()][:3]
+
+    def render_outcomes(values):
+        values = safe_outcomes(values)
+        if not values:
+            return ""
+        items = "".join(f"<li>{escape(value)}</li>" for value in values)
+        return (
+            '<div class="tt-inline-course-card__outcomes-label">Inside this course</div>'
+            f'<ul class="tt-inline-course-card__outcomes">{items}</ul>'
+        )
+
+    def render_meta(category, level, duration):
+        value = metadata_text(category, level, duration)
+        return f'<div class="tt-inline-course-card__meta">{escape(value)}</div>' if value else ""
+
+    def render_published_course(course):
+        destination = escape(reverse("academy:course-detail", args=[course.slug]), quote=True)
+        title = escape(str(course.title or "Course"))
+        summary = escape(str(course.summary or "Explore the course outline and practical learning outcomes."))
+        outcomes = render_outcomes(course.learning_outcomes)
+        metadata = render_meta(course.category, course.level, course.estimated_duration)
+        return (
+            '<aside class="tt-inline-course-card" aria-label="Explore a related TradeThesis course">'
+            '<div class="tt-inline-course-card__body">'
+            '<span class="tt-inline-course-card__eyebrow">GO DEEPER</span>'
+            f'<h3><a href="{destination}" rel="noopener noreferrer">{title}</a></h3>'
+            f'<p>{summary}</p>{outcomes}{metadata}'
+            '</div><div class="tt-inline-course-card__action">'
+            f'<a class="tt-inline-course-card__cta" href="{destination}" rel="noopener noreferrer">'
+            'Explore course <span aria-hidden="true">↗</span></a>'
+            '</div></aside>'
+        )
+
+    def render_coming_soon(teaser, builder_state):
+        title = escape(str(builder_state.get("title") or teaser.title or "Course"))
+        summary = escape(str(
+            builder_state.get("summary") or builder_state.get("description")
+            or "Course details will be shared closer to launch."
+        )[:360])
+        category = str(builder_state.get("category") or "TradeThesis courses")[:80]
+        level = str(builder_state.get("level") or "Self-paced")[:40]
+        duration = str(builder_state.get("duration") or "")[:80]
+        outcomes = render_outcomes(builder_state.get("outcomes"))
+        metadata = render_meta(category, level, duration)
+        return (
+            '<aside class="tt-inline-course-card tt-inline-course-card--coming-soon" '
+            'aria-label="TradeThesis course coming soon">'
+            '<div class="tt-inline-course-card__body">'
+            '<span class="tt-inline-course-card__eyebrow">COMING SOON</span>'
+            f'<h3>{title}</h3><p>{summary}</p>{outcomes}{metadata}'
+            '</div><div class="tt-inline-course-card__action">'
+            '<span class="tt-inline-course-card__cta" aria-label="Course not yet available">'
+            'In preparation</span></div></aside>'
+        )
+
+    def unavailable_card():
+        return (
+            '<aside class="tt-inline-course-card tt-inline-course-card--unavailable" '
+            'aria-label="Course currently unavailable">'
+            '<div class="tt-inline-course-card__body">'
+            '<span class="tt-inline-course-card__eyebrow">KEEP LEARNING</span>'
+            '<h3>Course currently unavailable</h3>'
+            '<p>This course is not in the published catalogue right now.</p>'
+            '</div></aside>'
+        )
+
+    replacements = {}
+
+    def replace_reference(match):
+        kind, stable_id = match.groups()
+        course = courses_by_id.get(stable_id) if not kind else None
+        coming_soon_data = None
+
+        if kind == "coming-soon":
+            teaser = teasers_by_id.get(stable_id)
+            if teaser is not None:
+                target = teaser.target_course
+                if target is not None and target.status == Course.Status.PUBLISHED:
+                    course = target
+                else:
+                    course = published_by_slug.get(teaser.course_slug)
+                if course is None and (
+                    teaser.status in (CourseImport.Status.DRAFT, CourseImport.Status.REVIEW)
+                    and teaser.target_course_id is None
+                    and isinstance(teaser.payload, dict)
+                ):
+                    builder_state = teaser.payload.get("builder_state")
+                    if isinstance(builder_state, dict) and builder_state.get("comingSoon"):
+                        coming_soon_data = (teaser, builder_state)
+
+        if course is not None:
+            markup = render_published_course(course)
+        elif coming_soon_data is not None:
+            markup = render_coming_soon(*coming_soon_data)
+        else:
+            markup = unavailable_card()
+
+        token = f"TTCOURSECARDREF{len(replacements)}TOKEN"
+        replacements[token] = markup
+        return token
+
+    return _COURSE_CARD_REF.sub(replace_reference, source or ""), replacements
+
+
+
 def render_safe_markdown(
     source,
     asset_urls=None,
@@ -149,6 +294,7 @@ def render_safe_markdown(
     source, lesson_references = _resolve_lesson_references(
         source, user=user, admin_preview=admin_preview,
     )
+    source, course_cards = _resolve_course_cards(source)
     asset_urls = asset_urls or {}
     figure_metadata = figure_metadata if isinstance(figure_metadata, dict) else {}
     figure_frames = {}
@@ -380,6 +526,9 @@ def render_safe_markdown(
     for token, markup in figure_frames.items():
         rendered = rendered.replace(f"<p>{token}</p>", markup).replace(token, markup)
     for token, markup in lesson_references.items():
+        rendered = rendered.replace(f"<p>{token}</p>", markup)
+        rendered = rendered.replace(token, markup)
+    for token, markup in course_cards.items():
         rendered = rendered.replace(f"<p>{token}</p>", markup)
         rendered = rendered.replace(token, markup)
     return bleach.clean(

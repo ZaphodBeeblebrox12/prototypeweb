@@ -504,6 +504,42 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   .preview-body .tt-purpose-figure-title { font-size: 21px; }
   .preview-body .tt-purpose-figure-image img { max-height: 50vh; }
 }
+
+/* Catalogue-driven inline course cards: compact, calm, and responsive. */
+.tt-inline-course-card {
+  display:flex; align-items:stretch; justify-content:space-between; gap:1rem; margin:1.35rem 0; padding:1.05rem 1.15rem;
+  border:1px solid var(--tt-line,#dedfd5); border-left:4px solid var(--tt-gold,#a78034); border-radius:12px;
+  background:linear-gradient(130deg,var(--tt-surface,#fffefa),#f6f4ea); box-shadow:0 6px 18px rgba(35,54,42,.05); color:var(--tt-ink,#27362e);
+}
+.tt-inline-course-card__body {min-width:0;flex:1 1 auto}
+.tt-inline-course-card__eyebrow {display:inline-block;margin:0 0 .4rem;color:var(--tt-muted,#68736c);font-size:.68rem;font-weight:750;letter-spacing:.11em;line-height:1.35;text-transform:uppercase}
+.tt-inline-course-card h3 {margin:0 0 .45rem;color:var(--tt-green,#456653);font-size:1.08rem;font-weight:750;line-height:1.35}
+.tt-inline-course-card h3 a {color:inherit;text-decoration:none}
+.tt-inline-course-card h3 a:hover,.tt-inline-course-card h3 a:focus-visible {text-decoration:underline;text-underline-offset:3px}
+.tt-inline-course-card p {margin:.3rem 0 .65rem;line-height:1.55}
+.tt-inline-course-card__outcomes-label {margin-top:.55rem;color:var(--tt-green,#456653);font-size:.76rem;font-weight:750}
+.tt-inline-course-card__outcomes {margin:.3rem 0 .65rem;padding-left:1.15rem;color:var(--tt-ink,#27362e);font-size:.84rem;line-height:1.5}
+.tt-inline-course-card__outcomes li {margin:.12rem 0}
+.tt-inline-course-card__meta {color:var(--tt-muted,#68736c);font-size:.78rem;line-height:1.45}
+.tt-inline-course-card__action {display:flex;align-items:flex-end;flex:0 0 auto}
+.tt-inline-course-card__cta {display:inline-flex;align-items:center;justify-content:center;gap:.45rem;min-height:36px;padding:.55rem .8rem;border:1px solid var(--tt-green,#456653);border-radius:8px;background:var(--tt-green,#456653);color:#fffefa;font-size:.82rem;font-weight:700;line-height:1.25;text-decoration:none;white-space:nowrap}
+.tt-inline-course-card__cta:hover,.tt-inline-course-card__cta:focus-visible {background:#344e3f;color:#fffefa}
+.tt-inline-course-card--coming-soon {border-left-color:var(--tt-green,#456653)}
+.tt-inline-course-card--coming-soon .tt-inline-course-card__eyebrow {color:var(--tt-green,#456653)}
+.tt-inline-course-card--coming-soon .tt-inline-course-card__cta {background:transparent;color:var(--tt-green,#456653);border-color:var(--tt-line,#dedfd5)}
+.tt-inline-course-card--unavailable {border-left-color:#a6aaa4}
+.tt-inline-course-card--unavailable .tt-inline-course-card__cta {background:#6d756f;border-color:#6d756f}
+@media(max-width:640px){.tt-inline-course-card{flex-direction:column;gap:.8rem;padding:.95rem}.tt-inline-course-card__action{align-items:stretch}.tt-inline-course-card__cta{width:100%;white-space:normal}}
+/* Compact layout for the catalogue selector in the lesson editor. */
+.related-course-entry {display:flex;align-items:center;justify-content:space-between;gap:.65rem}
+.related-course-choice {display:flex;align-items:flex-start;gap:.6rem;flex:1 1 auto;min-width:0}
+.related-course-choice>span {display:flex;flex-direction:column;gap:.2rem;min-width:0}
+.related-course-choice input {flex:0 0 auto;margin-top:.2rem}
+.related-course-entry .btn {flex:0 0 auto;white-space:nowrap}
+.related-course-outcome {display:block;color:var(--muted);font-size:.78rem;line-height:1.4}
+.related-course-item[hidden] {display:none!important}
+@media(max-width:640px){.related-course-entry{align-items:stretch;flex-direction:column}.related-course-entry .btn{align-self:flex-start}}
+
 </style>
 </head>
 <body>
@@ -606,7 +642,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   function renderSidebar(){const list=$('#courseList');if(!list)return;const query=($('#courseSearch')?.value||'').trim().toLowerCase();const courses=state.courses.filter(c=>c.title.toLowerCase().includes(query));$('#courseCount').textContent=`${state.courses.length} ${state.courses.length===1?'course':'courses'}`;list.innerHTML=courses.map(c=>`<button type="button" class="course-item ${c.id===state.selectedCourseId?'active':''}" data-action="select-course" data-id="${esc(c.id)}"><span class="course-item-title"><span>${esc(c.title||'Untitled course')}</span><span class="mini-status ${c.status==='published'?'live':''}"></span></span><span class="course-item-meta"><span class="pill ${c.status==='published'?'published':'status'}">${esc(activeStatus(c))}</span><span>${allLessons(c).length} lessons</span></span></button>`).join('')||'<div class="empty-state"><p>No courses match that search.</p></div>';}
   function courseFields(c){return `<div class="section-intro"><h3>Course details</h3><p>Write the public-facing promise first. Save a shared draft at any stage, then submit it for review. Approved and published courses appear in the website Courses tab.</p></div><div class="form-grid"><div class="field full"><label for="courseTitle">Course title</label><input class="input" id="courseTitle" data-entity="course" data-field="title" value="${esc(c.title)}" maxlength="200" placeholder="e.g. Understand Market Structure"></div><div class="field"><label for="courseSlug">Course URL slug</label><input class="input" id="courseSlug" data-entity="course" data-field="slug" value="${esc(c.slug)}" maxlength="150"><span class="help">Keep stable after a course is published.</span></div><div class="field"><label for="courseCategory">Topic / category</label><input class="input" id="courseCategory" data-entity="course" data-field="category" value="${esc(c.category)}" placeholder="Chart reading"></div><div class="field full"><label for="courseSummary">Short summary</label><textarea class="textarea" id="courseSummary" data-entity="course" data-field="summary" maxlength="360" placeholder="One or two sentences for the course card.">${esc(c.summary)}</textarea><span class="help">Used in the catalogue card. Aim for a concise, clear promise.</span></div><div class="field full"><label for="courseDescription">Course description</label><textarea class="textarea" id="courseDescription" data-entity="course" data-field="description" placeholder="Who is this for, what is included, and how will they use it?">${esc(c.description)}</textarea><span class="help">Supports Markdown headings, bullet lists, bold text and links. Preview them in the learner preview below.</span></div><div class="field"><label for="courseLevel">Level</label><select class="select" id="courseLevel" data-entity="course" data-field="level">${['Beginner','Foundational','Intermediate','Advanced','Mixed experience'].map(v=>`<option ${v===c.level?'selected':''}>${v}</option>`).join('')}</select></div><div class="field"><label for="courseDuration">Expected study time</label><input class="input" id="courseDuration" data-entity="course" data-field="duration" value="${esc(c.duration)}" placeholder="e.g. 4 hours"></div><div class="field full"><label>Learning outcomes</label><div id="outcomesList">${c.outcomes.map((v,i)=>`<div class="option-row"><span class="pill">${String(i+1).padStart(2,'0')}</span><input class="input" data-entity="outcome" data-index="${i}" value="${esc(v)}" aria-label="Learning outcome ${i+1}"><button class="icon-btn" type="button" data-action="remove-outcome" data-index="${i}" aria-label="Remove outcome">×</button></div>`).join('')}</div><button class="btn small" type="button" data-action="add-outcome">＋ Add outcome</button></div><div class="field"><label for="coursePrice">Display price (optional)</label><input class="input" id="coursePrice" data-entity="course" data-field="price" value="${esc(c.price)}" placeholder="e.g. ₹999"><span class="help">Display text only. It does not create or activate checkout.</span></div><div class="field"><label for="coursePriceNote">Price note</label><input class="input" id="coursePriceNote" data-entity="course" data-field="priceNote" value="${esc(c.priceNote)}"></div><div class="field full coming-soon-field"><label class="checkbox-row" for="courseComingSoon"><input id="courseComingSoon" type="checkbox" data-entity="course" data-field="comingSoon" ${c.comingSoon?'checked':''}> Announce this course publicly as “Coming soon”</label><span class="help">After you save, the public Courses catalogue can show the title and short summary. Lessons, answer keys and enrolment stay unavailable until you publish the course.</span></div></div><div class="helper-note"><strong>Course state:</strong> ${c.status==='published'?'This course already has a published version. Save your edits as a draft revision; the live catalogue version remains until you publish the updates.':c.status==='draft-update'?'Unpublished changes are saved separately; the current published catalogue card remains live.':'This is a private draft. It will not appear in Courses offered until you publish it.'}</div>`;}
   function curriculumFields(c){const m=currentModule()||c.modules[0];const l=currentLesson()||m?.lessons[0];return `<div class="section-intro"><h3>Build the curriculum</h3><p>Keep the structure easy to scan. Add modules, then add lessons within each module. Reordering controls here are functional in this preview; the production version will save their positions to Django.</p></div><div class="curriculum-layout"><div class="outline-panel"><div class="outline-panel-head"><strong>Course outline</strong><button class="btn small" data-action="add-module" type="button">＋ Module</button></div><div id="curriculumTree">${c.modules.map((mod,mi)=>`<div class="module-block"><div class="module-row"><button class="module-select ${m?.id===mod.id?'active':''}" type="button" data-action="select-module" data-id="${esc(mod.id)}">${String(mi+1).padStart(2,'0')} · ${esc(mod.title)}</button><button class="icon-btn" type="button" data-action="move-module-up" data-id="${esc(mod.id)}" aria-label="Move module up" ${mi===0?'disabled':''}>↑</button><button class="icon-btn" type="button" data-action="move-module-down" data-id="${esc(mod.id)}" aria-label="Move module down" ${mi===c.modules.length-1?'disabled':''}>↓</button></div>${mod.lessons.map((lesson,li)=>`<div class="lesson-row"><button class="lesson-select ${l?.id===lesson.id?'active':''}" type="button" data-action="select-lesson" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}">${String(mi+1)}.${li+1} ${esc(lesson.title)}</button><button class="icon-btn" type="button" data-action="move-lesson-up" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}" aria-label="Move lesson up" ${li===0?'disabled':''}>↑</button><button class="icon-btn" type="button" data-action="move-lesson-down" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}" aria-label="Move lesson down" ${li===mod.lessons.length-1?'disabled':''}>↓</button></div>`).join('')}<div style="padding:6px 7px 3px"><button class="btn small" type="button" data-action="add-lesson" data-id="${esc(mod.id)}">＋ Add lesson</button><button class="btn small danger" type="button" data-action="delete-module" data-id="${esc(mod.id)}" ${c.modules.length===1?'disabled':''}>Remove</button></div></div>`).join('')}</div></div><div class="lesson-editor-card">${m&&l?`<h4>Edit selected lesson</h4><p class="microcopy">Changing titles or order does not disturb other lessons. Lesson UUIDs and student progress are preserved in the production Academy when a course is updated.</p><div class="field"><label>Module title</label><input class="input" data-entity="module" data-field="title" value="${esc(m.title)}"></div><div class="field" style="margin-top:11px"><label>Module summary</label><textarea class="textarea" data-entity="module" data-field="description">${esc(m.description)}</textarea></div><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><div class="field"><label>Lesson title</label><input class="input" data-entity="lesson" data-field="title" value="${esc(l.title)}"></div><div class="field" style="margin-top:11px"><label>Short lesson summary</label><textarea class="textarea" data-entity="lesson" data-field="summary">${esc(l.summary)}</textarea></div><div class="lesson-meta-grid" style="margin-top:11px"><div class="field"><label>Lesson format</label><select class="select" data-entity="lesson" data-field="format">${['reading','video','interactive','quiz'].map(v=>`<option value="${v}" ${l.format===v?'selected':''}>${v[0].toUpperCase()+v.slice(1)}</option>`).join('')}</select></div><div class="field"><label>Minutes</label><input class="input" type="number" min="1" max="360" data-entity="lesson" data-field="minutes" value="${Number(l.minutes)||12}"></div></div><div class="q-actions"><button class="btn small" type="button" data-action="delete-lesson" data-id="${esc(l.id)}" data-module-id="${esc(m.id)}" ${m.lessons.length===1?'disabled':''}>Remove lesson</button><button class="btn small primary" type="button" data-action="go-lesson">Edit lesson content →</button></div>`:'<div class="empty-state"><p>Create a module and lesson to start editing.</p></div>'}</div></div>`;}
-  function lessonFields(l){if(l&&!l.notebook)l.notebook={title:'Before you make the call',prompts:[{label:'Observe',text:'Describe the evidence visible in the chart.'},{label:'Interpret',text:'State one possible reading and a reasonable alternative.'},{label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}]};if(l&&l.notebook&&String(l.notebook.title||'').trim()==='Your Trading Notebook')l.notebook.title='Before you make the call';if(l&&!l.videoUrl)l.videoUrl='';return `<div class="section-intro"><h3>Lesson content</h3><p>Write in Markdown-style sections. The learner preview renders headings and paragraphs using the TradeThesis Learning Room rhythm. Source Markdown remains the intended authoring format in the real system.</p></div>${l?`<div class="field"><label>Lesson body</label><textarea class="textarea" style="min-height:390px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px" data-entity="lesson" data-field="content" placeholder="## The question\n\nExplain the practical problem...">${esc(l.content)}</textarea><span class="help">Use headings from # through ######. To insert an image between paragraphs, click the lesson body where it belongs, then open Figures and select Insert at cursor. This placement is preserved in the website preview.</span></div><div class="helper-note">The production editor will validate and sanitise content on the server before it reaches learners. Markdown source will not be copied into a public static page.</div><div class="field" style="margin-top:14px"><label>Video URL (optional)</label><input class="input" type="url" data-entity="lesson" data-field="videoUrl" value="${esc(l.videoUrl||"")}" placeholder="https://…"><span class="help">Direct MP4/WebM/OGG links play inline. Other URLs are shown as external video links.</span></div><div class="related-course-box"><h4>Notebook prompts</h4><p>These editable prompts appear in the learner’s Your Trading Notebook section.</p><div class="field"><label>Notebook heading</label><input class="input" data-entity="notebook" data-field="title" value="${esc(l.notebook?.title||"Before you make the call")}"><span class="help">This is the large heading shown inside the Your Trading Notebook section of the learner view.</span></div>${(l.notebook?.prompts||[]).map((prompt,index)=>`<div class="q-card"><div class="field"><label>Prompt ${index+1} label</label><input class="input" data-entity="notebook-prompt" data-index="${index}" data-field="label" value="${esc(prompt.label||"")}"></div><div class="field" style="margin-top:8px"><label>Prompt text</label><textarea class="textarea" data-entity="notebook-prompt" data-index="${index}" data-field="text">${esc(prompt.text||"")}</textarea></div></div>`).join("")}</div><div class="notebook-editor-preview"><h4>How learners will see the notebook</h4><p>Preview the styled notebook block here. Changes to the heading or prompts above update this preview.</p><div data-notebook-preview>${notebookPreviewMarkup(l)}</div></div><div class="related-course-box"><h4>Related courses and further learning</h4><p>Select existing courses to reference when this lesson introduces a topic covered in more depth elsewhere—for example, a volume discussion linking to a dedicated volume course. These are cross-references, not automatic purchases or access grants.</p><input class="input" type="search" data-related-course-search placeholder="Search published courses by title or topic" aria-label="Search published related courses"><div class="related-course-list">${demoOffers.map(course=>{const checked=(l.relatedCourseIds||[]).includes(course.id);return `<label class="related-course-item"><input type="checkbox" data-related-course="${esc(course.id)}" ${checked?'checked':''}><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">${esc(course.state)}${course.price?' · '+esc(course.price):''}</span></span></label>`;}).join('')}</div><div class="helper-note">Production behaviour: select a course from the actual published Django catalogue, search by title/topic, and insert a contextual course card or link in the lesson. Unpublished drafts should not be offered as learner-facing references.</div></div><div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap"><button class="btn" type="button" data-action="go-curriculum">← Curriculum</button><button class="btn primary" type="button" data-action="go-questions">Edit practice questions →</button></div>`:'<div class="empty-state"><p>Select a lesson in the curriculum first.</p></div>'}`;}
+  function lessonFields(l){if(l&&!l.notebook)l.notebook={title:'Before you make the call',prompts:[{label:'Observe',text:'Describe the evidence visible in the chart.'},{label:'Interpret',text:'State one possible reading and a reasonable alternative.'},{label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}]};if(l&&l.notebook&&String(l.notebook.title||'').trim()==='Your Trading Notebook')l.notebook.title='Before you make the call';if(l&&!l.videoUrl)l.videoUrl='';return `<div class="section-intro"><h3>Lesson content</h3><p>Write in Markdown-style sections. The learner preview renders headings and paragraphs using the TradeThesis Learning Room rhythm. Source Markdown remains the intended authoring format in the real system.</p></div>${l?`<div class="field"><label>Lesson body</label><textarea class="textarea" style="min-height:390px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px" data-entity="lesson" data-field="content" placeholder="## The question\n\nExplain the practical problem...">${esc(l.content)}</textarea><span class="help">Use headings from # through ######. To insert an image between paragraphs, click the lesson body where it belongs, then open Figures and select Insert at cursor. This placement is preserved in the website preview.</span></div><div class="helper-note">The production editor will validate and sanitise content on the server before it reaches learners. Markdown source will not be copied into a public static page.</div><div class="field" style="margin-top:14px"><label>Video URL (optional)</label><input class="input" type="url" data-entity="lesson" data-field="videoUrl" value="${esc(l.videoUrl||"")}" placeholder="https://…"><span class="help">Direct MP4/WebM/OGG links play inline. Other URLs are shown as external video links.</span></div><div class="related-course-box"><h4>Notebook prompts</h4><p>These editable prompts appear in the learner’s Your Trading Notebook section.</p><div class="field"><label>Notebook heading</label><input class="input" data-entity="notebook" data-field="title" value="${esc(l.notebook?.title||"Before you make the call")}"><span class="help">This is the large heading shown inside the Your Trading Notebook section of the learner view.</span></div>${(l.notebook?.prompts||[]).map((prompt,index)=>`<div class="q-card"><div class="field"><label>Prompt ${index+1} label</label><input class="input" data-entity="notebook-prompt" data-index="${index}" data-field="label" value="${esc(prompt.label||"")}"></div><div class="field" style="margin-top:8px"><label>Prompt text</label><textarea class="textarea" data-entity="notebook-prompt" data-index="${index}" data-field="text">${esc(prompt.text||"")}</textarea></div></div>`).join("")}</div><div class="notebook-editor-preview"><h4>How learners will see the notebook</h4><p>Preview the styled notebook block here. Changes to the heading or prompts above update this preview.</p><div data-notebook-preview>${notebookPreviewMarkup(l)}</div></div><div class="related-course-box"><h4>Related courses and further learning</h4><p>Select existing courses to reference when this lesson introduces a topic covered in more depth elsewhere—for example, a volume discussion linking to a dedicated volume course. These are cross-references, not automatic purchases or access grants.</p><input class="input" type="search" data-related-course-search placeholder="Search published or announced courses by title or topic" aria-label="Search published or announced related courses"><div class="related-course-list">${demoOffers.map(course=>{const checked=(l.relatedCourseIds||[]).includes(course.id);return `<div class="related-course-item related-course-entry"><label class="related-course-choice"><input type="checkbox" data-related-course="${esc(course.id)}" ${checked ? "checked" : ""}><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">${esc(course.state)}${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}${course.duration ? " · " + esc(course.duration) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></label><button class="btn small" type="button" data-action="insert-course-card" data-id="${esc(course.id)}">Insert card at cursor</button></div>`;}).join("")}${comingSoonOffers.map(course=>`<div class="related-course-item related-course-entry"><div class="related-course-choice"><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">Coming soon${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></div><button class="btn small" type="button" data-action="insert-course-card" data-id="${esc(course.id)}">Insert coming-soon card</button></div>`).join("")}${demoOffers.length || comingSoonOffers.length ? "" : '<p class="microcopy">No published or announced courses are available to insert yet.</p>'}</div><div class="helper-note">Choose a published course or an explicitly announced coming-soon course, then insert its card at the cursor. The title, summary, topic highlights and metadata are sourced from the catalogue.</div></div><div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap"><button class="btn" type="button" data-action="go-curriculum">← Curriculum</button><button class="btn primary" type="button" data-action="go-questions">Edit practice questions →</button></div>`:'<div class="empty-state"><p>Select a lesson in the curriculum first.</p></div>'}`;}
   function questionImageMarkup(q, l) {
     const images = Array.isArray(l.images) ? l.images : (l.image ? [l.image] : []);
     const image = images.find(function(item) {
@@ -1090,6 +1126,7 @@ Describe the evidence first.
     const lesson = currentLesson();
     const images = Array.isArray(lesson?.images) ? lesson.images : (lesson?.image ? [lesson.image] : []);
     const figures = [];
+    const inlineCourseCards = [];
     const course = currentCourse();
     const module = currentModule();
     const moduleIndex = Math.max(0, (course?.modules || []).findIndex(item => item.id === module?.id));
@@ -1152,9 +1189,44 @@ Describe the evidence first.
       figures.push('<figure class="tt-purpose-figure tt-comparison-figure" data-figure-id="' + esc(id) + '">' + figureHeader(title) + '<span class="tt-purpose-figure-body"><span class="tt-comparison-cards">' + cards + '</span>' + note + '</span></figure>');
       return '\n\n' + token + '\n\n';
     });
+    prepared = prepared.replace(/\[\[course-card:(coming-soon:)?([0-9a-fA-F-]{36})\]\]/g, function(match, comingSoonPrefix, id) {
+      const isComingSoon = Boolean(comingSoonPrefix);
+      const courseRef = demoOffers.concat(comingSoonOffers).find(item =>
+        Boolean(item.isComingSoon) === isComingSoon &&
+        String(item.referenceId || item.id).toLowerCase() === String(id).toLowerCase()
+      );
+      const token = 'TTCOURSECARDTOKEN' + inlineCourseCards.length + 'END';
+      let cardMarkup;
+      if (courseRef) {
+        const meta = [courseRef.category, courseRef.level, courseRef.duration].filter(Boolean).join(' · ');
+        const outcomes = (courseRef.outcomes || []).filter(value => typeof value === 'string' && value.trim()).slice(0, 2);
+        const outcomeMarkup = outcomes.length
+          ? '<div class="tt-inline-course-card__outcomes-label">Inside this course</div><ul class="tt-inline-course-card__outcomes">' +
+            outcomes.map(outcome => '<li>' + esc(outcome) + '</li>').join('') + '</ul>'
+          : '';
+        const comingSoonClass = isComingSoon ? ' tt-inline-course-card--coming-soon' : '';
+        const eyebrow = isComingSoon ? 'COMING SOON' : 'GO DEEPER';
+        const action = isComingSoon ? 'In preparation' : 'Explore course <span aria-hidden="true">↗</span>';
+        cardMarkup = '<aside class="tt-inline-course-card' + comingSoonClass + '" aria-label="Explore a related TradeThesis course">' +
+          '<div class="tt-inline-course-card__body"><span class="tt-inline-course-card__eyebrow">' + eyebrow + '</span>' +
+          '<h3>' + esc(courseRef.title) + '</h3><p>' + esc(courseRef.summary || 'Explore the course outline and practical learning outcomes.') + '</p>' +
+          outcomeMarkup + (meta ? '<div class="tt-inline-course-card__meta">' + esc(meta) + '</div>' : '') + '</div>' +
+          '<div class="tt-inline-course-card__action"><span class="tt-inline-course-card__cta">' + action + '</span></div></aside>';
+      } else {
+        cardMarkup = '<aside class="tt-inline-course-card tt-inline-course-card--unavailable" aria-label="Course currently unavailable">' +
+          '<div class="tt-inline-course-card__body"><span class="tt-inline-course-card__eyebrow">KEEP LEARNING</span>' +
+          '<h3>Course currently unavailable</h3><p>This course is not in the catalogue right now.</p></div></aside>';
+      }
+      inlineCourseCards.push(cardMarkup);
+      return '\n\n' + token + '\n\n';
+    });
     let html = baseMarkdownRenderer(prepared);
     figures.forEach(function(figure, index) {
       html = html.replace('<p>TTFIGURETOKEN' + index + 'END</p>', figure);
+    });
+    inlineCourseCards.forEach(function(card, index) {
+      const token = 'TTCOURSECARDTOKEN' + index + 'END';
+      html = html.replace('<p>' + token + '</p>', card).replace(token, card);
     });
     return html;
   };
@@ -1371,6 +1443,19 @@ Describe the evidence first.
   const baseHandleActionWithFigures = handleAction;
   handleAction = function(action, el) {
     const lesson = currentLesson();
+    if (lesson && action === 'insert-course-card') {
+      const courseRef = demoOffers.concat(comingSoonOffers).find(item => String(item.id) === String(el?.dataset?.id || ''));
+      if (!courseRef) {
+        toast('That course is no longer in the published or announced catalogue. Refresh and search again.');
+        return;
+      }
+      const token = courseRef.isComingSoon
+        ? '[[course-card:coming-soon:' + courseRef.referenceId + ']]'
+        : '[[course-card:' + courseRef.id + ']]';
+      insertLessonContentAtCaret(lesson, token, true);
+      toast(courseRef.isComingSoon ? 'Coming-soon card inserted at the saved cursor position.' : 'Course card inserted at the saved cursor position.');
+      return;
+    }
     if (action === 'preview-chart-examples') {
       const article = el?.closest('.preview-article');
       const lessonBody = article?.querySelector('[data-preview-lesson-content]');
@@ -1608,7 +1693,7 @@ Describe the evidence first.
     if(help)help.textContent=group.imageIds.length+' selected. Choose at least two images; each image can have its own title and caption.';
     persist(false);
   });
-  document.addEventListener('input',event=>{const el=event.target;if(!el.matches('[data-related-course-search]'))return;const query=el.value.trim().toLowerCase();const box=el.parentElement;box.querySelectorAll('.related-course-item').forEach(item=>{item.hidden=query!==''&&!item.textContent.toLowerCase().includes(query);});});
+  document.addEventListener('input',event=>{const el=event.target;if(!el.matches('[data-related-course-search]'))return;const query=el.value.trim().toLowerCase();const box=el.parentElement;box.querySelectorAll('.related-course-item').forEach(item=>{const searchable=(item.querySelector('.related-course-choice')?.textContent||item.textContent).toLowerCase();item.hidden=query!==''&&!searchable.includes(query);});});
   document.addEventListener('change',event=>{const el=event.target;if(!el.matches('[data-related-course]'))return;const l=currentLesson();if(!l)return;if(!Array.isArray(l.relatedCourseIds))l.relatedCourseIds=[];const id=el.dataset.relatedCourse;if(el.checked&&!l.relatedCourseIds.includes(id))l.relatedCourseIds.push(id);if(!el.checked)l.relatedCourseIds=l.relatedCourseIds.filter(x=>x!==id);persist(false);toast('Related-course reference saved in this preview.');});
   // Shared Academy integration. Local storage remains a convenience cache, not the source of truth.
   const hadLocalDraft = Boolean(localStorage.getItem(STORAGE_KEY));
@@ -1801,14 +1886,20 @@ Describe the evidence first.
         }
       }
       demoOffers = (result.related_courses || []).map(course => ({
-        id:String(course.id), title:course.title, category:'PUBLISHED COURSE',
+        id:String(course.id), referenceId:String(course.id), title:course.title,
+        category:String(course.category || 'TradeThesis course'), level:String(course.level || ''),
+        duration:String(course.estimated_duration || ''),
+        outcomes:Array.isArray(course.learning_outcomes) ? course.learning_outcomes : [],
         summary:course.summary || 'Open this course in the TradeThesis Academy.',
-        price:'', state:'Published in Academy', slug:course.slug
+        isComingSoon:false, price:'', state:'Published in Academy', slug:course.slug
       }));
       comingSoonOffers = (result.coming_soon_courses || []).map(course => ({
-        id:String(course.id), title:course.title, category:course.category || 'TRADETHESIS COURSES',
-        summary:course.description || 'A new course is being prepared.',
-        price:'Details soon', state:'Coming soon', slug:course.slug
+        id:String(course.id), referenceId:String(course.id).replace(/^coming-soon-/, ''),
+        title:course.title, category:course.category || 'TRADETHESIS COURSES',
+        level:String(course.level || ''), duration:String(course.estimated_duration || ''),
+        outcomes:Array.isArray(course.learning_outcomes) ? course.learning_outcomes : [],
+        summary:course.summary || course.description || 'A new course is being prepared.',
+        isComingSoon:true, price:'Details soon', state:'Coming soon', slug:course.slug
       }));
       const publishedPicker = $('#publishedCoursePicker');
       if (publishedPicker) {

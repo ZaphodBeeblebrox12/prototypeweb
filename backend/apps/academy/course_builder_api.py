@@ -750,7 +750,7 @@ def course_builder_api(request):
             status=Course.Status.PUBLISHED,
             modules__is_published=True,
             modules__lessons__is_published=True,
-        ).distinct().order_by("position", "title").values("id", "title", "slug", "summary"))
+        ).distinct().order_by("position", "title").values("id", "title", "slug", "summary", "category", "level", "estimated_duration", "learning_outcomes"))
         # Return catalogue metadata only (never lesson bodies or instructor
         # answer keys). This lets the Builder search references after drafts
         # are reopened on another device without persisting copied lesson text.
@@ -803,6 +803,9 @@ def course_builder_api(request):
                 "category": str(builder_state.get("category") or "TradeThesis courses")[:80],
                 "level": str(builder_state.get("level") or "Self-paced")[:40],
                 "description": str(builder_state.get("summary") or builder_state.get("description") or "")[:360],
+                "summary": str(builder_state.get("summary") or "")[:360],
+                "estimated_duration": str(builder_state.get("duration") or "")[:80],
+                "learning_outcomes": [str(value).strip()[:240] for value in builder_state.get("outcomes", []) if str(value).strip()][:6] if isinstance(builder_state.get("outcomes"), list) else [],
                 "outcome": "Course details and enrolment will be announced closer to launch.",
                 "complements": "This course is being prepared. Full details will be shared closer to launch.",
                 "price": "Coming soon", "status": "coming-soon", "art": "structure",
