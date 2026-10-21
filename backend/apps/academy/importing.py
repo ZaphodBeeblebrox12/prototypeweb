@@ -18,12 +18,6 @@ from apps.audit.models import AuditLog
 
 from .content_rendering import validate_markdown_source
 from .course_card_utils import course_card_publication_issue
-from .regional_content import (
-    CONTENT_COUNTRY_TO_REGION,
-    REGIONAL_CONTENT_CODES,
-    regional_block_asset_ids,
-    regional_block_values,
-)
 from .models import (
     Course,
     CourseContentRevision,
@@ -35,6 +29,12 @@ from .models import (
     LessonInstructorMaterial,
 )
 
+from .regional_content import (
+    CONTENT_COUNTRY_TO_REGION,
+    REGIONAL_CONTENT_CODES,
+    regional_block_asset_ids,
+    regional_block_values,
+)
 User = get_user_model()
 _LESSON_HEADING = re.compile(
     r"^##\s+Lesson\s+(?P<source_id>\d+\.\d+)\s*[—–-]\s*(?P<title>.+?)\s*$",

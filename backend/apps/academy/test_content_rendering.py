@@ -4,13 +4,13 @@ from pathlib import Path
 from django.test import SimpleTestCase
 
 from apps.subscriptions.services import COUNTRY_TO_REGION
-from .regional_content import CONTENT_COUNTRY_TO_REGION, get_content_region_for_country
 
 from .content_rendering import (
     _deduplicate_course_card_refs,
     build_lesson_sections,
     render_safe_markdown,
 )
+from .regional_content import CONTENT_COUNTRY_TO_REGION, get_content_region_for_country
 from .views import _notebook_for_course_display
 
 

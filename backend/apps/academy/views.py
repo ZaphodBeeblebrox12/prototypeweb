@@ -18,12 +18,6 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
 from .content_rendering import build_lesson_sections, render_safe_markdown, resolve_regional_blocks
-from .regional_content import (
-    ASSET_REFERENCE_RE,
-    IMAGE_GROUP_REFERENCE_RE,
-    get_content_region_for_country,
-    regional_block_asset_ids,
-)
 from .course_card_utils import is_course_card_recommendable
 from .models import (
     Course,
@@ -37,6 +31,12 @@ from .models import (
     LessonProgress,
 )
 from .permissions import is_course_content_admin
+from .regional_content import (
+    ASSET_REFERENCE_RE,
+    IMAGE_GROUP_REFERENCE_RE,
+    get_content_region_for_country,
+    regional_block_asset_ids,
+)
 from .services import (
     can_access_lesson,
     get_active_entitlement,
