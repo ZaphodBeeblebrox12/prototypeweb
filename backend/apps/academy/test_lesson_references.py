@@ -154,7 +154,7 @@ class CourseCardReferenceRenderingTests(TestCase):
         self.assertIn('class="tt-course-preview-card tt-course-preview-card--coming-soon"', rendered)
         self.assertIn("Order Flow and Volume", rendered)
         self.assertIn("Understand activity in context.", rendered)
-        self.assertIn("Compare volume with price progress.", rendered)
+        self.assertIn("Volume vs price", rendered)
         self.assertIn("Coming soon", rendered)
         self.assertNotIn("course-detail", rendered)
 
