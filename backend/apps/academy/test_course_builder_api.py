@@ -124,18 +124,19 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "previewAudienceSelect")
         self.assertContains(response, "data-regional-variant")
 
-    def test_rich_text_format_dropdown_keeps_native_select_interaction(self):
+    def test_rich_text_format_dropdown_uses_accessible_custom_menu(self):
         response = self.client.get(reverse("staff_course_builder_preview"))
 
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertContains(
-            response,
-            "if (event.target.closest?.('[data-rich-command]')) event.preventDefault();",
-        )
-        self.assertNotContains(
-            response,
-            "'[data-rich-command], [data-rich-format]'",
-        )
+        self.assertContains(response, "function richFormatPickerMarkup()")
+        self.assertContains(response, "data-rich-format-toggle")
+        self.assertContains(response, "data-rich-format-menu")
+        self.assertContains(response, "data-rich-format-option")
+        self.assertContains(response, "function closeRichFormatPickers(exceptPicker)")
+        self.assertContains(response, "document.execCommand('formatBlock', false, value)")
+        self.assertContains(response, "event.key === 'ArrowDown'")
+        self.assertContains(response, "event.key === 'Escape'")
+        self.assertNotContains(response, "<select data-rich-format")
 
     def test_rich_text_table_allows_custom_dimensions(self):
         response = self.client.get(reverse("staff_course_builder_preview"))
