@@ -609,27 +609,50 @@ class CourseImportAdmin(admin.ModelAdmin):
         record = get_object_or_404(CourseImport, pk=object_id)
         staged = record.assets.filter(stable_asset_id=asset_id).first()
 
-        # Render a stored copy only when it is actually present. Render Free's
-        # filesystem is ephemeral across deploys, so a saved FileField name may
-        # outlive its local file. The review-only fallback below reads only a
-        # checked-in asset path contained within this course's source package.
+        # Render a stored copy only when it is actually present. Google Drive may
+        # time out while checking or reading an image; that must not prevent us from
+        # trying the checked-in source path or original URL below.
         file_field = None
-        if staged and staged.file and staged.file.storage.exists(staged.file.name):
-            file_field = staged.file
+        live = CourseMediaAsset.objects.filter(pk=asset_id).first()
 
-        if file_field is None:
-            live = CourseMediaAsset.objects.filter(pk=asset_id).first()
-            if live and live.file and live.file.storage.exists(live.file.name):
-                file_field = live.file
+        if staged and staged.file:
+            try:
+                if staged.file.storage.exists(staged.file.name):
+                    file_field = staged.file
+            except OSError as exc:
+                logger.warning(
+                    "Staged image storage check failed; trying preview fallbacks (asset=%s, error=%s).",
+                    asset_id,
+                    exc.__class__.__name__,
+                )
+
+        if file_field is None and live and live.file:
+            try:
+                if live.file.storage.exists(live.file.name):
+                    file_field = live.file
+            except OSError as exc:
+                logger.warning(
+                    "Live image storage check failed; trying preview fallbacks (asset=%s, error=%s).",
+                    asset_id,
+                    exc.__class__.__name__,
+                )
 
         if file_field is not None:
-            response = FileResponse(
-                file_field.open("rb"),
-                content_type=mimetypes.guess_type(file_field.name)[0] or "application/octet-stream",
-            )
-            response["Cache-Control"] = "private, no-store"
-            response["X-Content-Type-Options"] = "nosniff"
-            return response
+            try:
+                response = FileResponse(
+                    file_field.open("rb"),
+                    content_type=mimetypes.guess_type(file_field.name)[0] or "application/octet-stream",
+                )
+            except OSError as exc:
+                logger.warning(
+                    "Stored image could not be opened; trying preview fallbacks (asset=%s, error=%s).",
+                    asset_id,
+                    exc.__class__.__name__,
+                )
+            else:
+                response["Cache-Control"] = "private, no-store"
+                response["X-Content-Type-Options"] = "nosniff"
+                return response
 
         if staged and staged.source_path:
             source_root = (
@@ -656,12 +679,7 @@ class CourseImportAdmin(admin.ModelAdmin):
         fallback_urls = [
             staged.original_url if staged else "",
         ]
-        live_original_url = (
-            CourseMediaAsset.objects.filter(pk=asset_id)
-            .values_list("original_url", flat=True)
-            .first()
-        )
-        fallback_urls.append(live_original_url or "")
+        fallback_urls.append(live.original_url if live else "")
         for fallback_url in fallback_urls:
             if isinstance(fallback_url, str) and fallback_url.startswith(("https://", "http://")):
                 return redirect(fallback_url)
