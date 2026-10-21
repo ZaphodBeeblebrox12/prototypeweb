@@ -512,27 +512,27 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   gap:16px;
   margin:18px 0 2px;
   overflow:hidden;
-  border:1px solid var(--tt-line,#ded7c8);
+  border:1px solid #ded7c8;
   border-radius:12px;
-  background:var(--tt-surface,#fffdf8);
-  color:var(--tt-ink,#27382e);
+  background:#fffdf8;
+  color:#27382e;
 }
 .tt-course-preview-card__copy {min-width:0;padding:18px 0 18px 18px}
-.tt-course-preview-card__kicker {display:block;margin:0 0 6px;color:var(--tt-gold,#b48635);font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
-.tt-course-preview-card h3 {margin:6px 0;color:var(--tt-ink,#27382e);font:400 23px/1.1 Georgia,"Times New Roman",serif;letter-spacing:-.025em}
+.tt-course-preview-card__kicker {display:block;margin:0 0 6px;color:#b48635;font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.tt-course-preview-card h3 {margin:6px 0 6px;color:#27382e;font:400 23px/1.1 Georgia,"Times New Roman",serif;letter-spacing:-.025em}
 .tt-course-preview-card p {margin:0 0 10px;color:#5d685d;font-size:11px;line-height:1.65}
 .tt-course-preview-card__topics {display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 12px}
-.tt-course-preview-card__topics span {max-width:100%;padding:4px 7px;border:1px solid var(--tt-line,#ded7c8);border-radius:99px;background:var(--tt-paper,#f7f3e9);color:var(--tt-muted,#687367);font-size:9px;line-height:1.4;overflow-wrap:anywhere}
-.tt-course-preview-card__cta {display:inline-flex;align-items:center;gap:8px;color:var(--tt-green,#345943);font-size:11px;font-weight:850;line-height:1.5;text-decoration:none;border-bottom:1px solid transparent;padding-bottom:2px}
-a.tt-course-preview-card__cta:hover,a.tt-course-preview-card__cta:focus-visible {border-bottom-color:#9cac93;text-decoration:none}
-.tt-course-preview-card__art {display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;min-width:0;padding:14px;background:linear-gradient(145deg,#e2eadb,#f5ead1);color:var(--tt-green,#345943);text-align:center}
+.tt-course-preview-card__topics span {padding:4px 7px;border:1px solid #ded7c8;border-radius:99px;color:#687367;font-size:9px;background:#f7f3e9}
+.tt-course-preview-card__cta {display:inline-flex;align-items:center;gap:8px;color:#345943;font-size:11px;font-weight:850;text-decoration:none}
+.tt-course-preview-card__cta:focus-visible {outline:2px solid #345943;outline-offset:3px}
+.tt-course-preview-card__art {display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;background:linear-gradient(145deg,#e2eadb,#f5ead1);color:#345943;padding:14px}
 .tt-course-preview-card__mark {font:36px Georgia,"Times New Roman",serif;letter-spacing:-.08em}
-.tt-course-preview-card__art small {color:#65715f;font-size:9px;line-height:1.5;letter-spacing:.07em;text-transform:uppercase}
-.tt-course-preview-card--coming-soon .tt-course-preview-card__kicker {color:var(--tt-green,#345943)}
-.tt-course-preview-card--coming-soon .tt-course-preview-card__cta {color:var(--tt-muted,#687367);font-weight:750;cursor:default}
-.tt-course-preview-card--unavailable {display:block;padding:16px 18px;border-left:3px solid #a6aaa4;background:var(--tt-surface,#fffdf8)}
+.tt-course-preview-card__art small {text-align:center;color:#65715f;font-size:9px;line-height:1.5;letter-spacing:.07em;text-transform:uppercase}
+.tt-course-preview-card--coming-soon .tt-course-preview-card__kicker {color:#345943}
+.tt-course-preview-card--coming-soon .tt-course-preview-card__cta {color:#687367;font-weight:750;cursor:default}
+.tt-course-preview-card--unavailable {display:block;padding:16px 18px;border-left:3px solid #a6aaa4;background:#fffdf8}
 .tt-course-preview-card--unavailable .tt-course-preview-card__copy {padding:0}
-.tt-course-preview-card--unavailable .tt-course-preview-card__kicker {color:var(--tt-muted,#687367)}
+.tt-course-preview-card--unavailable .tt-course-preview-card__kicker {color:#687367}
 @media(max-width:850px) {.tt-course-preview-card{grid-template-columns:minmax(0,1fr) 110px}}
 @media(max-width:520px) {.tt-course-preview-card{grid-template-columns:1fr}.tt-course-preview-card__copy{padding:16px}.tt-course-preview-card__art{min-height:96px;flex-direction:row}.tt-course-preview-card__mark{font-size:30px}}
 

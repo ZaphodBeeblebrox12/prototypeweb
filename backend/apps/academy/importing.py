@@ -17,6 +17,7 @@ from PIL import Image, UnidentifiedImageError
 from apps.audit.models import AuditLog
 
 from .content_rendering import validate_markdown_source
+from .course_card_utils import course_card_publication_issue
 from .models import (
     Course,
     CourseContentRevision,
@@ -381,6 +382,14 @@ def stage_course_import(*, manifest_path, payload, asset_sources, warnings, impo
 def validate_import_for_publish(record):
     errors = []
     payload = record.payload or {}
+    course_data = payload.get("course") if isinstance(payload.get("course"), dict) else {}
+    copy_issue = course_card_publication_issue(
+        course_data.get("title"),
+        course_data.get("summary"),
+        course_data.get("description"),
+    )
+    if copy_issue:
+        errors.append(copy_issue)
     if not payload.get("modules"):
         errors.append("The course has no modules.")
     referenced_asset_ids = set()

@@ -1,4 +1,4 @@
-"""Small policy and copy helpers for inline course preview cards."""
+"""Shared eligibility and compact-copy helpers for related course cards."""
 import re
 
 _PLACEHOLDER_TITLES = {
@@ -9,6 +9,7 @@ _PLACEHOLDER_TITLES = {
 _PLACEHOLDER_SUMMARIES = {
     "add a concise course promise here.",
     "a clear, practical description of what learners will study and why it matters.",
+    "describe the learner, what the course covers and what they can practise after completing it.",
 }
 _ARTICLE_WORDS = {"a", "an", "and", "for", "of", "or", "the", "to", "with"}
 _LEADING_VERBS = (
@@ -18,15 +19,32 @@ _LEADING_VERBS = (
 )
 
 
-def is_course_card_recommendable(title, summary):
-    """Keep empty starter records out of the picker and learner-facing copy."""
+def course_card_publication_issue(title, summary, description=""):
+    """Return a learner-facing reason when a course still contains starter copy."""
     title_text = " ".join(str(title or "").casefold().split())
-    summary_text = " ".join(str(summary or "").casefold().split())
-    return title_text not in _PLACEHOLDER_TITLES and summary_text not in _PLACEHOLDER_SUMMARIES
+    summary_source = str(summary or "").strip()
+    if not summary_source:
+        summary_source = str(description or "").strip()
+    summary_text = " ".join(summary_source.casefold().split())
+
+    if not title_text:
+        return "Add a course title before publishing."
+    if title_text in _PLACEHOLDER_TITLES:
+        return "Replace the starter course title before publishing."
+    if not summary_text:
+        return "Add a learner-facing course summary before publishing."
+    if summary_text in _PLACEHOLDER_SUMMARIES:
+        return "Replace the starter course summary with a learner-facing promise before publishing."
+    return ""
+
+
+def is_course_card_recommendable(title, summary, description=""):
+    """Only recommend a published course when its visible title and copy are ready."""
+    return not course_card_publication_issue(title, summary, description)
 
 
 def compact_course_topic(value):
-    """Turn learning outcomes into short topic chips for the Option 4 card."""
+    """Turn learning outcomes into the short topic chips used by Option 4."""
     topic = str(value or "").strip().rstrip(".")
     if not topic:
         return ""
@@ -63,7 +81,7 @@ def course_card_mark(title):
 
 
 def course_card_art_copy(title, category=""):
-    """Return the small two-line descriptor shown in the card's art panel."""
+    """Return the short descriptor shown in Option 4's visual side panel."""
     source = f"{title or ''} {category or ''}".casefold()
     if "volume" in source and "price" in source:
         return "Activity", "meets outcome"

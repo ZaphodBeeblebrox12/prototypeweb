@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.utils.cache import patch_vary_headers
 from django.views.decorators.http import require_GET
 
+from .course_card_utils import is_course_card_recommendable
 from .models import Course, CourseImport
 
 
@@ -13,6 +14,8 @@ def public_course_catalogue(request):
     rows = []
     courses = Course.objects.filter(status=Course.Status.PUBLISHED).prefetch_related("modules__lessons")
     for course in courses:
+        if not is_course_card_recommendable(course.title, course.summary, course.description):
+            continue
         modules = []
         for module in course.modules.all():
             if not module.is_published:
@@ -34,7 +37,7 @@ def public_course_catalogue(request):
             "title": course.title,
             "category": course.category or "TradeThesis courses",
             "level": course.level or "Self-paced",
-            "description": course.summary or course.description[:360],
+            "description": (course.summary or course.description)[:360],
             "outcome": " ".join(course.learning_outcomes)[:500] if course.learning_outcomes else course.description[:360],
             "complements": "Explore this published course in the TradeThesis Academy.",
             "price": "",
@@ -44,7 +47,13 @@ def public_course_catalogue(request):
             "academyUrl": request.build_absolute_uri(reverse("academy:course-detail", args=[course.slug])),
         })
     # Teasers are metadata-only and never expose unpublished lesson content.
-    published_slugs = set(Course.objects.filter(status=Course.Status.PUBLISHED).values_list("slug", flat=True))
+    published_slugs = {
+        slug
+        for slug, title, summary, description in Course.objects.filter(
+            status=Course.Status.PUBLISHED,
+        ).values_list("slug", "title", "summary", "description")
+        if is_course_card_recommendable(title, summary, description)
+    }
     seen_teaser_slugs = set()
     teasers = CourseImport.objects.filter(
         status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REVIEW],
@@ -52,15 +61,23 @@ def public_course_catalogue(request):
     ).order_by("-updated_at")
     for record in teasers:
         state = (record.payload or {}).get("builder_state") or {}
-        if not state.get("comingSoon") or record.course_slug in published_slugs or record.course_slug in seen_teaser_slugs:
+        title = str(state.get("title") or record.title)[:200]
+        summary = str(state.get("summary") or "")[:360]
+        description = str(state.get("description") or "")[:1000]
+        if (
+            not state.get("comingSoon")
+            or record.course_slug in published_slugs
+            or record.course_slug in seen_teaser_slugs
+            or not is_course_card_recommendable(title, summary, description)
+        ):
             continue
         seen_teaser_slugs.add(record.course_slug)
         rows.append({
             "id": "coming-soon-" + str(record.pk), "slug": record.course_slug,
-            "title": str(state.get("title") or record.title)[:200],
+            "title": title,
             "category": str(state.get("category") or "TradeThesis courses")[:80],
             "level": str(state.get("level") or "Self-paced")[:40],
-            "description": str(state.get("summary") or state.get("description") or "")[:360],
+            "description": (summary or description)[:360],
             "outcome": "Course details and enrolment will be announced closer to launch.",
             "complements": "This course is being prepared. Full details will be shared closer to launch.",
             "price": "Coming soon", "status": "coming-soon", "art": "structure",

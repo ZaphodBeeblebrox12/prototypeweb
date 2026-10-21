@@ -303,6 +303,7 @@ def staff_admin_desk(request):
     }
 
     if context["can_manage_course_content"]:
+        from apps.academy.course_card_utils import is_course_card_recommendable
         from apps.academy.models import (
             Course, CourseEntitlement, CourseImport, CourseModule, CourseOffer,
             Lesson, LessonProgress,
@@ -340,6 +341,17 @@ def staff_admin_desk(request):
                 lesson__module__course__status=Course.Status.PUBLISHED,
             ).count(),
         })
+        catalogue_candidates = Course.objects.filter(
+            status=Course.Status.PUBLISHED,
+            modules__is_published=True,
+            modules__lessons__is_published=True,
+        ).distinct().values("title", "summary", "description")
+        course_counts["catalogue_ready_courses"] = sum(
+            1 for course in catalogue_candidates
+            if is_course_card_recommendable(
+                course["title"], course["summary"], course["description"],
+            )
+        )
         context["course_metrics"] = course_counts
         link_models = {
             "courses": Course,

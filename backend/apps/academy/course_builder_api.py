@@ -771,18 +771,23 @@ def course_builder_api(request):
                 and record.status == CourseImport.Status.DRAFT
             ):
                 drafts.append(_draft_response(record, request))
-        related_courses = [
-            course
-            for course in Course.objects.filter(
-                status=Course.Status.PUBLISHED,
-                modules__is_published=True,
-                modules__lessons__is_published=True,
-            ).distinct().order_by("position", "title").values(
-                "id", "title", "slug", "summary", "category", "level",
-                "estimated_duration", "learning_outcomes",
-            )
-            if is_course_card_recommendable(course["title"], course["summary"])
-        ]
+        related_courses = []
+        catalogue_candidates = Course.objects.filter(
+            status=Course.Status.PUBLISHED,
+            modules__is_published=True,
+            modules__lessons__is_published=True,
+        ).distinct().order_by("position", "title").values(
+            "id", "title", "slug", "summary", "description", "category", "level",
+            "estimated_duration", "learning_outcomes",
+        )
+        for course in catalogue_candidates:
+            if not is_course_card_recommendable(
+                course["title"], course["summary"], course["description"],
+            ):
+                continue
+            course["summary"] = (course["summary"] or course["description"])[:360]
+            course.pop("description", None)
+            related_courses.append(course)
         # Return catalogue metadata only (never lesson bodies or instructor
         # answer keys). This lets the Builder search references after drafts
         # are reopened on another device without persisting copied lesson text.
@@ -836,7 +841,7 @@ def course_builder_api(request):
                 continue
             teaser_title = str(builder_state.get("title") or teaser.title)[:200]
             teaser_summary = str(builder_state.get("summary") or builder_state.get("description") or "")[:360]
-            if not is_course_card_recommendable(teaser_title, teaser_summary):
+            if not is_course_card_recommendable(teaser_title, teaser_summary, str(builder_state.get("description") or "")):
                 continue
             seen_teaser_slugs.add(teaser.course_slug)
             coming_soon_courses.append({

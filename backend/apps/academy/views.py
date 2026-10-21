@@ -337,9 +337,12 @@ def lesson_detail(request, course_slug, lesson_id):
     )
     related_ids = lesson.content_json.get("related_course_ids", []) if isinstance(lesson.content_json, dict) else []
     related_ids = [value for value in related_ids if isinstance(value, str) and len(value) == 36 and value.count("-") == 4]
-    related_courses = Course.objects.filter(
-        pk__in=related_ids, status=Course.Status.PUBLISHED,
-    ).exclude(pk=course.pk).order_by("position", "title")
+    related_courses = [
+        related for related in Course.objects.filter(
+            pk__in=related_ids, status=Course.Status.PUBLISHED,
+        ).exclude(pk=course.pk).order_by("position", "title")
+        if is_course_card_recommendable(related.title, related.summary, related.description)
+    ]
     ordered_lessons = list(Lesson.objects.filter(
         module__course=course, module__is_published=True, is_published=True,
     ).select_related("module").order_by("module__position", "position", "title"))
@@ -612,7 +615,7 @@ def course_import_website_preview(request, import_id):
                     pk__in=related_ids,
                     status=Course.Status.PUBLISHED,
                 ).exclude(pk=record.target_course_id).order_by("position", "title")
-                if is_course_card_recommendable(related.title, related.summary)
+                if is_course_card_recommendable(related.title, related.summary, related.description)
             ]
 
         # Match the learner lesson view: render only ordinary HTTP(S) video

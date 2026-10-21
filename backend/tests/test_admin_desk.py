@@ -37,6 +37,7 @@ class AdminDeskTests(TestCase):
         published = Course.objects.create(
             title="Published Course",
             slug="published-course",
+            summary="A practical course summary for learners.",
             status=Course.Status.PUBLISHED,
         )
         module = CourseModule.objects.create(
@@ -69,6 +70,9 @@ class AdminDeskTests(TestCase):
         self.assertContains(response, "Advanced administration (rare use)")
         self.assertEqual(response.context["course_metrics"]["draft_courses"], 1)
         self.assertEqual(response.context["course_metrics"]["published_courses"], 1)
+        self.assertEqual(response.context["course_metrics"]["catalogue_ready_courses"], 1)
+        self.assertContains(response, "Catalogue-ready courses")
+        self.assertContains(response, "Published records can still contain starter copy")
         self.assertEqual(response.context["course_metrics"]["published_lessons"], 1)
         self.assertEqual(response.context["course_metrics"]["courses_total"], 2)
         self.assertEqual(

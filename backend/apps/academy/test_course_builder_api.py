@@ -430,6 +430,7 @@ class CourseBuilderApiTests(TestCase):
         related = Course.objects.create(
             title="Related published course",
             slug="related-published-course",
+            summary="A useful related-course summary.",
             status=Course.Status.PUBLISHED,
         )
         related_module = CourseModule.objects.create(
@@ -1084,6 +1085,48 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(CourseModule.objects.get(pk=module.pk).pk, module.pk)
         self.assertEqual(Lesson.objects.get(pk=lesson.pk).content_markdown, "## Live lesson\n\nReviewed replacement content.")
         self.assertEqual(CourseImport.objects.get(pk=record.pk).status, CourseImport.Status.PUBLISHED)
+
+    def test_public_catalogue_hides_published_placeholder_and_uses_description_fallback(self):
+        placeholder = Course.objects.create(
+            title="Untitled course",
+            slug="untitled-course-catalogue-regression",
+            summary="Add a concise course promise here.",
+            description="Describe the learner, what the course covers and what they can practise after completing it.",
+            status=Course.Status.PUBLISHED,
+        )
+        placeholder_module = CourseModule.objects.create(
+            course=placeholder, title="Foundations", slug="foundations",
+            position=1, is_published=True,
+        )
+        Lesson.objects.create(
+            module=placeholder_module, title="Placeholder lesson", slug="placeholder-lesson",
+            position=1, is_published=True, content_markdown="Placeholder content.",
+        )
+        valid = Course.objects.create(
+            title="Volume and Price Analysis",
+            slug="volume-and-price-analysis-description-fallback",
+            summary="",
+            description="A practical guide to comparing effort with result.",
+            status=Course.Status.PUBLISHED,
+        )
+        valid_module = CourseModule.objects.create(
+            course=valid, title="Foundations", slug="foundations",
+            position=1, is_published=True,
+        )
+        Lesson.objects.create(
+            module=valid_module, title="Read the evidence", slug="read-the-evidence",
+            position=1, is_published=True, content_markdown="Read the evidence before acting.",
+        )
+
+        self.client.logout()
+        response = self.client.get(reverse("academy_public_catalogue"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        courses = response.json()["courses"]
+        titles = [item["title"] for item in courses if item["status"] == "published"]
+        self.assertNotIn("Untitled course", titles)
+        valid_item = next(item for item in courses if item["slug"] == valid.slug)
+        self.assertEqual(valid_item["description"], valid.description[:360])
 
     def test_coming_soon_catalogue_entry_exposes_only_announcement_metadata(self):
         CourseImport.objects.create(

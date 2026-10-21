@@ -78,7 +78,8 @@
   <section class="section" aria-labelledby="courses-heading">
     <div class="section-head"><h2 id="courses-heading">Courses &amp; learning</h2><p>Live catalogue and learner records</p></div>
     <div class="metrics">
-      <div class="metric"><span class="value">{{ course_metrics.published_courses }}</span><span class="label">Published courses</span></div>
+      <div class="metric"><span class="value">{{ course_metrics.published_courses }}</span><span class="label">Published records</span></div>
+      <div class="metric"><span class="value">{{ course_metrics.catalogue_ready_courses }}</span><span class="label">Catalogue-ready courses</span></div>
       <div class="metric"><span class="value">{{ course_metrics.draft_courses }}</span><span class="label">Draft courses</span></div>
       <div class="metric"><span class="value">{{ course_metrics.archived_courses }}</span><span class="label">Archived courses</span></div>
       <div class="metric"><span class="value">{{ course_metrics.published_lessons }}</span><span class="label">Published lessons</span></div>
@@ -86,6 +87,7 @@
       <div class="metric"><span class="value">{{ course_metrics.active_entitlements }}</span><span class="label">Active course accesses</span></div>
       <div class="metric"><span class="value">{{ course_metrics.completed_lessons }}</span><span class="label">Completed lesson records</span></div>
     </div>
+    <p class="note" style="margin-top:10px">Published records can still contain starter copy or lack a released lesson. Catalogue-ready courses have a real learner-facing title and summary plus at least one published module and lesson.</p>
   </section>
 
   <section class="section" aria-labelledby="course-actions-heading">

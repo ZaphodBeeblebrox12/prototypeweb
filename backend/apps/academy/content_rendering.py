@@ -159,7 +159,7 @@ def _resolve_course_cards(source):
     courses_by_id = {
         str(course.pk): course
         for course in Course.objects.filter(pk__in=all_ids, status=Course.Status.PUBLISHED)
-        if is_course_card_recommendable(course.title, course.summary)
+        if is_course_card_recommendable(course.title, course.summary, course.description)
     }
     teasers_by_id = {
         str(teaser.pk): teaser
@@ -169,7 +169,7 @@ def _resolve_course_cards(source):
     published_by_slug = {
         course.slug: course
         for course in Course.objects.filter(slug__in=teaser_slugs, status=Course.Status.PUBLISHED)
-        if is_course_card_recommendable(course.title, course.summary)
+        if is_course_card_recommendable(course.title, course.summary, course.description)
     } if teaser_slugs else {}
 
     def render_topics(raw):
@@ -231,7 +231,7 @@ def _resolve_course_cards(source):
     def render_published_course(course):
         return render_card(
             course.title,
-            course.summary,
+            (course.summary or course.description)[:360],
             course.learning_outcomes,
             destination=reverse("academy:course-detail", args=[course.slug]),
             category=course.category,
@@ -268,7 +268,7 @@ def _resolve_course_cards(source):
             if teaser is not None:
                 target = teaser.target_course
                 if target is not None and target.status == Course.Status.PUBLISHED:
-                    if is_course_card_recommendable(target.title, target.summary):
+                    if is_course_card_recommendable(target.title, target.summary, target.description):
                         course = target
                 else:
                     course = published_by_slug.get(teaser.course_slug)
@@ -281,7 +281,7 @@ def _resolve_course_cards(source):
                     if isinstance(builder_state, dict) and builder_state.get("comingSoon"):
                         teaser_title = str(builder_state.get("title") or teaser.title or "Course")
                         teaser_summary = str(builder_state.get("summary") or builder_state.get("description") or "")
-                        if is_course_card_recommendable(teaser_title, teaser_summary):
+                        if is_course_card_recommendable(teaser_title, teaser_summary, str(builder_state.get("description") or "")):
                             coming_soon_data = (teaser, builder_state)
 
         if course is not None:
