@@ -70,7 +70,17 @@
           <details class="tt-review-lesson" {% if forloop.parentloop.first and forloop.first %}open{% endif %}>
             <summary><span class="tt-review-lesson-number">{{ row.lesson.position|stringformat:"02d" }}</span><span><strong>{{ row.lesson.title }}</strong><small>{{ row.lesson.duration_minutes }} min · {{ row.lesson.source_id }}</small></span></summary>
             <div class="tt-review-lesson-content">
-              {% include "academy/partials/lesson_tabs.html" with lesson_sections=row.sections notebook=row.notebook only %}
+              {% if row.video_url %}
+              <section class="tt-video-lesson" aria-label="Lesson video">
+                {% if row.video_is_file %}
+                <video controls preload="metadata" src="{{ row.video_url }}">Your browser does not support video playback.</video>
+                {% else %}
+                <a href="{{ row.video_url }}" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a>
+                <p class="small text-muted">This video opens in a new tab.</p>
+                {% endif %}
+              </section>
+              {% endif %}
+              {% include "academy/partials/lesson_tabs.html" with lesson_sections=row.sections notebook=row.notebook course_slug=import_record.course_slug practice_questions=row.questions admin_preview=True tab_id_prefix=row.tab_id_prefix only %}
             </div>
           </details>
         {% endfor %}
@@ -78,5 +88,6 @@
     {% endfor %}
   </div>
 </div>
+<dialog class="tt-figure-dialog" data-figure-dialog aria-label="Enlarged course figure"><button type="button" data-figure-close>Close</button><img data-figure-dialog-image alt=""><p data-figure-dialog-caption></p></dialog>
 <script src="{% static 'academy/learning-room.js' %}" defer></script>
 {% endblock %}

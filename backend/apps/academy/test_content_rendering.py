@@ -324,3 +324,68 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn("querySelector('.tt-purpose-figure, .tt-image-group-figure, .tt-comparison-figure')", source)
         self.assertIn("target.scrollIntoView({behavior:'smooth', block:'start'})", source)
         self.assertIn(".preview-notebook-examples-button {", source)
+
+class LessonSectionRoutingAndFigureCountTests(SimpleTestCase):
+    def test_h2_heading_can_start_a_chart_examples_section(self):
+        source = (
+            "## Start with the question\n\n"
+            "Opening idea.\n\n"
+            "## Chart examples\n\n"
+            "A separate worked example."
+        )
+        result = build_lesson_sections(source)
+        self.assertIn("Opening idea.", result["idea_html"])
+        self.assertIn("A separate worked example.", result["examples_html"])
+        self.assertNotIn("A separate worked example.", result["idea_html"])
+
+    def test_figure_count_includes_markdown_group_members_and_comparison_blocks(self):
+        source = "\n\n".join([
+            "### The lead visual",
+            "![Lead chart](https://example.com/lead.png)",
+            "### Additional chart examples",
+            "[[image-group:range-trend]]",
+            "[[teaching-figure:settings-comparison]]",
+        ])
+        metadata = {
+            "range-trend": {
+                "type": "image-group",
+                "title": "Range versus trend",
+                "image_ids": ["asset-a", "asset-b"],
+            },
+            "settings-comparison": {
+                "type": "comparison-cards",
+                "title": "Compare settings",
+                "cards": [
+                    {"kicker": "SHORTER", "title": "Responsive", "body": "Moves sooner."},
+                    {"kicker": "LONGER", "title": "Smoother", "body": "Moves slower."},
+                ],
+            },
+            "asset-a": {"title": "Range example", "alt": "A range"},
+            "asset-b": {"title": "Trend example", "alt": "A trend"},
+        }
+        result = build_lesson_sections(
+            source,
+            asset_urls={
+                "asset-a": "https://example.com/range.png",
+                "asset-b": "https://example.com/trend.png",
+            },
+            figure_metadata=metadata,
+        )
+        self.assertEqual(result["figure_count"], 4)
+        self.assertIn("Range versus trend", result["examples_html"])
+        self.assertIn("Compare settings", result["examples_html"])
+
+    def test_reused_structured_figures_are_counted_per_displayed_instance(self):
+        source = "\n\n".join([
+            "### Additional chart examples",
+            "[[image-group:range-trend]]",
+            "[[image-group:range-trend]]",
+            "[[teaching-figure:settings-comparison]]",
+            "[[teaching-figure:settings-comparison]]",
+        ])
+        metadata = {
+            "range-trend": {"type": "image-group", "image_ids": ["asset-a", "asset-b"]},
+            "settings-comparison": {"type": "comparison-cards", "cards": [{"title": "Short"}]},
+        }
+        result = build_lesson_sections(source, figure_metadata=metadata)
+        self.assertEqual(result["figure_count"], 6)

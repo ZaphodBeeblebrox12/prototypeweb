@@ -30,7 +30,7 @@ _IMAGE_MARKDOWN = re.compile(r"!\[([^\]]*)\]\(asset://([0-9a-fA-F-]{36})(?:\s+[^
 _TEACHING_FIGURE_TOKEN = re.compile(r"\[\[teaching-figure:([A-Za-z0-9_-]{1,120})\]\]")
 _IMAGE_GROUP_TOKEN = re.compile(r"\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]")
 _LESSON_REF = re.compile(r"\[\[(lesson|lesson-card):([0-9a-fA-F-]{36})\]\]")
-_HEADING = re.compile(r"^(#{3,6})\s+(.+?)\s*$")
+_HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
 _DANGEROUS_MARKDOWN = re.compile(
     r"<\s*/?\s*(?:script|style|iframe|object|embed|form|input|button|svg|math)\b"
     r"|<[^>]+\bon[a-z]+\s*=|javascript\s*:|data\s*:\s*text/html",
@@ -392,6 +392,31 @@ def render_safe_markdown(
 
 
 
+def _count_lesson_figures(source, figure_metadata=None):
+    """Count displayed visual assets, including Builder structured figures.
+
+    Image-group members count as individual assets. Repeated tokens count each
+    displayed instance rather than only counting unique figure definitions.
+    """
+    source = source or ""
+    figure_metadata = figure_metadata if isinstance(figure_metadata, dict) else {}
+    count = len(re.findall(r"!\[[^\]]*\]\([^)]+\)", source))
+
+    for group_id in _IMAGE_GROUP_TOKEN.findall(source):
+        metadata = figure_metadata.get(group_id)
+        if not isinstance(metadata, dict) or metadata.get("type") != "image-group":
+            continue
+        image_ids = metadata.get("image_ids", [])
+        if isinstance(image_ids, list):
+            count += len({str(asset_id) for asset_id in image_ids if asset_id})
+
+    for figure_id in _TEACHING_FIGURE_TOKEN.findall(source):
+        metadata = figure_metadata.get(figure_id)
+        if isinstance(metadata, dict) and metadata.get("type") == "comparison-cards":
+            count += 1
+    return count
+
+
 def build_lesson_sections(
     source,
     asset_urls=None,
@@ -466,7 +491,7 @@ def build_lesson_sections(
             "that would strengthen or weaken your reading."
         )
 
-    figure_count = len(re.findall(r"!\[[^\]]*\]\(", source or ""))
+    figure_count = _count_lesson_figures(source, figure_metadata)
     return {
         "idea_html": render_safe_markdown(
             rendered["idea"], asset_urls, user=user, admin_preview=admin_preview,

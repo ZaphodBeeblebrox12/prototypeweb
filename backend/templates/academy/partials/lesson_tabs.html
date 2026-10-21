@@ -1,10 +1,11 @@
+{% with tab_prefix=tab_id_prefix|default:"lesson" %}
 <section class="tt-lesson-tabs" data-learning-tabs>
   <div class="tt-tab-list" role="tablist" aria-label="Lesson sections">
-    <button class="tt-tab is-active" id="tab-idea" type="button" role="tab" aria-selected="true" aria-controls="panel-idea" data-tab-name="idea">The idea</button>
-    <button class="tt-tab" id="tab-examples" type="button" role="tab" aria-selected="false" aria-controls="panel-examples" data-tab-name="examples">Chart examples <span class="tt-tab-count">{{ lesson_sections.figure_count }}</span></button>
-    <button class="tt-tab" id="tab-practice" type="button" role="tab" aria-selected="false" aria-controls="panel-practice" data-tab-name="practice">Test your reading{% if practice_questions %} <span class="tt-tab-count">{{ practice_questions|length }}</span>{% endif %}</button>
+    <button class="tt-tab is-active" id="{{ tab_prefix }}-tab-idea" type="button" role="tab" aria-selected="true" aria-controls="{{ tab_prefix }}-panel-idea" data-tab-name="idea">The idea</button>
+    <button class="tt-tab" id="{{ tab_prefix }}-tab-examples" type="button" role="tab" aria-selected="false" aria-controls="{{ tab_prefix }}-panel-examples" data-tab-name="examples">Chart examples <span class="tt-tab-count">{{ lesson_sections.figure_count }}</span></button>
+    <button class="tt-tab" id="{{ tab_prefix }}-tab-practice" type="button" role="tab" aria-selected="false" aria-controls="{{ tab_prefix }}-panel-practice" data-tab-name="practice">Test your reading{% if practice_questions %} <span class="tt-tab-count">{{ practice_questions|length }}</span>{% endif %}</button>
   </div>
-  <div class="tt-tab-panel" id="panel-idea" role="tabpanel" aria-labelledby="tab-idea" data-tab-panel="idea">
+  <div class="tt-tab-panel" id="{{ tab_prefix }}-panel-idea" role="tabpanel" aria-labelledby="{{ tab_prefix }}-tab-idea" data-tab-panel="idea">
     {{ lesson_sections.idea_html|safe }}
     <aside class="tt-notebook" aria-label="Your Trading Notebook">
       <div class="tt-notebook-index"><span>KEEP<br>IN VIEW</span><strong>01</strong></div>
@@ -51,13 +52,13 @@
     </aside>
     <button class="tt-notebook-examples-button" type="button" data-open-tab="examples">Work through the chart examples <span aria-hidden="true">↗</span></button>
   </div>
-  <div class="tt-tab-panel" id="panel-examples" role="tabpanel" aria-labelledby="tab-examples" data-tab-panel="examples" hidden>{{ lesson_sections.examples_html|safe }}</div>
-  <div class="tt-tab-panel" id="panel-practice" role="tabpanel" aria-labelledby="tab-practice" data-tab-panel="practice" hidden>
+  <div class="tt-tab-panel" id="{{ tab_prefix }}-panel-examples" role="tabpanel" aria-labelledby="{{ tab_prefix }}-tab-examples" data-tab-panel="examples" hidden>{{ lesson_sections.examples_html|safe }}</div>
+  <div class="tt-tab-panel" id="{{ tab_prefix }}-panel-practice" role="tabpanel" aria-labelledby="{{ tab_prefix }}-tab-practice" data-tab-panel="practice" hidden>
     {{ lesson_sections.practice_html|safe }}
     {% if practice_questions and admin_preview %}
-    <section class="tt-practice-questions" aria-labelledby="tt-practice-heading">
+    <section class="tt-practice-questions" aria-labelledby="{{ tab_prefix }}-practice-heading">
       <p class="tt-eyebrow">Apply what you noticed</p>
-      <h2 id="tt-practice-heading">Practice questions</h2>
+      <h2 id="{{ tab_prefix }}-practice-heading">Practice questions</h2>
       {% for question in practice_questions %}
       <fieldset class="tt-question tt-admin-question" disabled>
         <legend>{{ question.prompt }}</legend>
@@ -91,3 +92,4 @@
     {% endif %}
   </div>
 </section>
+{% endwith %}

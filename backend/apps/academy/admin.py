@@ -514,11 +514,52 @@ class CourseImportAdmin(admin.ModelAdmin):
         for module in record.payload.get("modules", []):
             review_lessons = []
             for lesson_data in module.get("lessons", []):
-                notebook = lesson_data.get("content_json", {}).get("notebook") or record.payload.get("notebook", {})
+                content_json = lesson_data.get("content_json", {})
+                if not isinstance(content_json, dict):
+                    content_json = {}
+                figure_metadata = content_json.get("figures", {})
+                if not isinstance(figure_metadata, dict):
+                    figure_metadata = {}
+                notebook = content_json.get("notebook") or record.payload.get("notebook", {})
+                sections = build_lesson_sections(
+                    lesson_data.get("content_markdown", ""),
+                    asset_urls,
+                    user=request.user,
+                    admin_preview=True,
+                    figure_metadata=figure_metadata,
+                    figure_prefix=f"{module.get('position', 0)}.{lesson_data.get('position', 0)}",
+                    module_label=f"Module {module.get('position', '')} · {module.get('title', '')}",
+                )
+                questions = []
+                raw_questions = content_json.get("questions", [])
+                if isinstance(raw_questions, list):
+                    for raw_question in raw_questions[:50]:
+                        if not isinstance(raw_question, dict):
+                            continue
+                        question = dict(raw_question)
+                        asset_id = str(question.get("image_asset_id") or "")
+                        image_metadata = figure_metadata.get(asset_id, {})
+                        if not isinstance(image_metadata, dict):
+                            image_metadata = {}
+                        question["image_url"] = asset_urls.get(asset_id, "") if asset_id else ""
+                        question["image_title"] = str(image_metadata.get("title") or "Chart")[:240]
+                        question["image_alt"] = str(image_metadata.get("alt") or question["image_title"])[:500]
+                        question["image_caption"] = str(image_metadata.get("caption") or "")[:500]
+                        questions.append(question)
+
+                raw_video_url = content_json.get("video_url", "")
+                video_url = raw_video_url.strip() if isinstance(raw_video_url, str) else ""
+                if not video_url.startswith(("https://", "http://")):
+                    video_url = ""
+                video_is_file = video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
                 review_lessons.append({
                     "lesson": lesson_data,
-                    "sections": build_lesson_sections(lesson_data.get("content_markdown", ""), asset_urls, user=request.user, admin_preview=True),
+                    "sections": sections,
                     "notebook": notebook,
+                    "questions": questions,
+                    "video_url": video_url,
+                    "video_is_file": video_is_file,
+                    "tab_id_prefix": f"review-{module.get('position', 0)}-{lesson_data.get('position', 0)}",
                 })
             review_modules.append({"module": module, "lessons": review_lessons})
 

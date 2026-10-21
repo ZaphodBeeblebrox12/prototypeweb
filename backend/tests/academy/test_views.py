@@ -147,6 +147,7 @@ class AcademyViewTests(TestCase):
                         "- Compare alternatives and identify invalidation.\n"
                         "- Build a clear, conditional decision process."
                     ),
+                    "learning_outcomes": ["Use a conditional checklist before considering a trade."],
                 },
                 "modules": [{
                     "title": "Foundations",
@@ -198,6 +199,8 @@ class AcademyViewTests(TestCase):
         self.assertContains(overview_response, "<li>Describe the evidence before interpreting it.</li>")
         self.assertNotContains(overview_response, "### What learners will practise")
         self.assertNotContains(overview_response, "- Describe the evidence before interpreting it.")
+        self.assertContains(overview_response, "Use a conditional checklist before considering a trade.")
+        self.assertContains(overview_response, 'class="tt-overview-outcome-grid"')
 
         self.assertEqual(response.status_code, 200, response.content)
         self.assertContains(response, "How should the observation be used?")

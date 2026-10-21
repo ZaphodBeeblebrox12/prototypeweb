@@ -1242,8 +1242,15 @@ Describe the evidence first.
   }
 
   function moveFigureReference(lesson, id, direction) {
-    const paragraphs = String(lesson.content || '').split(/\n\s*\n/);
-    const index = paragraphs.findIndex(paragraph => paragraph.includes('asset://' + id));
+    const content = String(lesson.content || '');
+    const paragraphs = content.split(/\n\s*\n/);
+    const group = (lesson.imageGroups || []).find(item =>
+      (Array.isArray(item.imageIds) ? item.imageIds : []).some(imageId => String(imageId) === String(id))
+      && content.includes('[[image-group:' + item.id + ']]')
+    );
+    const index = group
+      ? paragraphs.findIndex(paragraph => paragraph.includes('[[image-group:' + group.id + ']]'))
+      : paragraphs.findIndex(paragraph => paragraph.includes('asset://' + id));
     const next = index + direction;
     if (index < 0) {
       toast('Insert this figure into the lesson before reordering it.');

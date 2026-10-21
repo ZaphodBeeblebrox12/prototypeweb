@@ -153,6 +153,20 @@
       </div>
     </section>
 
+    {% if course.learning_outcomes %}
+    <section class="tt-overview-section" aria-labelledby="tt-preview-course-outcomes-title">
+      <div class="tt-overview-section-head">
+        <div><p class="tt-overview-eyebrow">WHAT YOU WILL BE ABLE TO DO</p><h2 id="tt-preview-course-outcomes-title">Skills to develop through the course.</h2></div>
+        <p>Use these outcomes to orient your study. Work through the lessons and examples, then return to them as you review your understanding.</p>
+      </div>
+      <div class="tt-overview-outcome-grid">
+        {% for outcome in course.learning_outcomes %}
+        <article class="tt-overview-outcome"><span class="tt-overview-outcome-number">{{ forloop.counter|stringformat:"02d" }}</span><p>{{ outcome }}</p></article>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
     <section id="tt-preview-curriculum" class="tt-overview-section tt-overview-curriculum" aria-labelledby="tt-preview-curriculum-title">
       <div class="tt-overview-section-head">
         <div><p class="tt-overview-eyebrow">INSIDE THE COURSE</p><h2 id="tt-preview-curriculum-title">Explore the curriculum.</h2></div>

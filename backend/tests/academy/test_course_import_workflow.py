@@ -426,6 +426,34 @@ class CourseImportAdminPreviewTests(TestCase):
         manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
         call_command("import_microcourse", manifest=str(manifest_path), verbosity=0)
         record = CourseImport.objects.get(course_slug="reviewable-course")
+        payload = record.payload
+        review_lesson = payload["modules"][0]["lessons"][0]
+        review_lesson["content_markdown"] += (
+            "\n\n### Additional chart examples\n\n"
+            "[[teaching-figure:review-comparison]]"
+        )
+        review_lesson["content_json"] = {
+            "figures": {
+                "review-comparison": {
+                    "type": "comparison-cards",
+                    "title": "Reviewed comparison figure",
+                    "cards": [{
+                        "kicker": "ALTERNATIVE",
+                        "title": "Wait for confirmation",
+                        "body": "A single observation is not sufficient context.",
+                    }],
+                },
+            },
+            "questions": [{
+                "id": "review-question-1",
+                "prompt": "Review question prompt",
+                "options": ["Assess the context", "Treat the observation as a guarantee"],
+            }],
+            "notebook": {"title": "Review notebook", "prompts": []},
+            "video_url": "https://example.com/lesson-video.mp4",
+        }
+        record.payload = payload
+        record.save(update_fields=["payload"])
         admin_user = User.objects.create_user(
             username="preview-admin", password="test-password",
             role=User.Role.ADMIN, is_staff=True,
@@ -435,6 +463,10 @@ class CourseImportAdminPreviewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Preview text.")
         self.assertContains(response, 'src="https://example.com/temporary-chart.png"')
+        self.assertContains(response, "Reviewed comparison figure")
+        self.assertContains(response, "Review question prompt")
+        self.assertContains(response, "Administrator preview only. Answer submission is disabled in this view.")
+        self.assertContains(response, 'src="https://example.com/lesson-video.mp4"')
         self.assertContains(response, "Using URL for now")
         self.assertContains(response, "Open source")
         self.assertContains(response, "Approve and publish course")
