@@ -264,7 +264,8 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .draft-footer { margin-top:20px; border:1px solid var(--line); border-radius:10px; padding:13px 15px; display:flex; align-items:center; justify-content:space-between; gap:16px; background:var(--panel-soft); }
 .draft-footer p { margin:0; color:var(--muted); font-size:10px; line-height:1.5; }
 .draft-footer strong { color:var(--ink); }
-.toast { position:fixed; right:18px; bottom:18px; padding:13px 16px; background:var(--site-primary); color:white; border-radius:9px; box-shadow:var(--shadow); font-size:12px; font-weight:700; z-index:20; opacity:0; transform:translateY(8px); pointer-events:none; transition:.2s ease; max-width:min(370px,calc(100vw - 36px)); }
+.toast { position:fixed; right:18px; bottom:18px; padding:13px 16px; background:var(--site-primary); color:white; border-radius:9px; box-shadow:var(--shadow); font-size:12px; font-weight:700; line-height:1.5; z-index:20; opacity:0; transform:translateY(8px); pointer-events:none; transition:.2s ease; width:min(460px,calc(100vw - 36px)); max-width:min(460px,calc(100vw - 36px)); max-height:min(65vh,460px); overflow:auto; overflow-wrap:anywhere; white-space:pre-line; }
+.toast.validation-error { background:#fff8ee; color:#673c1d; border:1px solid #d7a26b; box-shadow:0 10px 28px rgba(74,45,18,.18); }
 .toast.show { opacity:1; transform:translateY(0); }
 .empty-state { padding:35px 20px; text-align:center; color:var(--muted); }
 .empty-state h3 { color:var(--ink); font-family:var(--site-font-heading); font-weight:500; font-size:25px; margin:0 0 8px; }
@@ -646,7 +647,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   const currentLesson=()=>{const m=currentModule(); return m.lessons.find(l=>l.id===state.selectedLessonId)||m.lessons[0];};
   const allLessons=c=>c.modules.flatMap(m=>m.lessons);
   const activeStatus=c=>c.status==='published'?'Published':c.status==='draft-update'?'Draft changes':'Draft';
-  function toast(message){const el=$('#toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2800);}
+  function toast(message, duration){const el=$('#toast');const text=String(message??'');const isValidationError=text.includes('\\n');el.textContent=text;el.classList.toggle('validation-error',isValidationError);el.setAttribute('role',isValidationError?'alert':'status');el.setAttribute('aria-live',isValidationError?'assertive':'polite');el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),duration||(isValidationError?15000:2800));}
   function persist(showToast=false){try{state.savedAt=nowText();localStorage.setItem(STORAGE_KEY,JSON.stringify(state));state.storageAvailable=true;if(showToast)toast('Draft saved in this browser. Come back to this preview to continue.');renderSidebar();renderHeaderState();}catch(e){state.storageAvailable=false;toast('Browser storage is full. Reduce image size and try saving again.');}}
   function schedulePersist(){markDirty();clearTimeout(saveTimer);$('#saveIndicator')?.classList.add('saving');if(state.view==='preview')return;saveTimer=setTimeout(()=>{persist(false);const el=$('#saveIndicator');if(el)el.classList.remove('saving');},500);}
   function renderHeaderState(){const c=currentCourse();const save=$('#saveButton');if(save)save.textContent=state.savedAt?'Save draft':'Save draft';const pub=$('#publishButton');if(pub)pub.textContent='Submit for review';}
@@ -1879,7 +1880,16 @@ Describe the evidence first.
     const payload = await response.json().catch(()=>({detail:`The Academy returned a non-JSON response (HTTP ${response.status}). Your browser draft cache has not been cleared.`}));
     if (!response.ok) {
       const detail = Array.isArray(payload.detail) ? payload.detail.join(' ') : (payload.detail || 'The Academy request failed.');
-      throw new Error(detail);
+      const publishErrors = Array.isArray(payload.publish_errors)
+        ? payload.publish_errors.map(item => String(item || '').trim()).filter(Boolean)
+        : [];
+      const message = publishErrors.length
+        ? [detail, 'What needs attention:', ...publishErrors.map((item, index) => `${index + 1}. ${item}`)].filter(Boolean).join('\\n\\n')
+        : detail;
+      const error = new Error(message);
+      error.publishErrors = publishErrors;
+      error.status = response.status;
+      throw error;
     }
     return payload;
   }
