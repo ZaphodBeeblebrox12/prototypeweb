@@ -53,3 +53,26 @@
 .tt-admin-learning-preview .tt-lesson-main { min-width: 0; width: 100%; }
 .tt-admin-learning-preview .tt-lesson-article { max-width: none; width: 100%; margin: 0; }
 .tt-admin-learning-preview .tt-lesson-navigation { margin-top: 16px; }
+
+/* Match Option 4 card dimensions and typography in the Builder learner preview.
+   Learning Room tab rules are intentionally broad, so scope these overrides to
+   the card in the administrator website preview only. */
+.tt-admin-learning-preview .tt-tab-panel .tt-course-preview-card {
+  width: min(100%, 640px);
+}
+.tt-admin-learning-preview .tt-tab-panel .tt-course-preview-card h3 {
+  margin: 5px 0 5px;
+  color: #27382e;
+  font: 400 17px/1.12 Georgia, "Times New Roman", serif;
+  letter-spacing: -.025em;
+}
+.tt-admin-learning-preview .tt-tab-panel .tt-course-preview-card p {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin: 0 0 5px;
+  color: #5d685d;
+  font-size: 9px;
+  line-height: 1.45;
+}
