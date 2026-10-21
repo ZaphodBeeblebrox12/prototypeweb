@@ -4,7 +4,53 @@
     <button class="tt-tab" id="tab-examples" type="button" role="tab" aria-selected="false" aria-controls="panel-examples" data-tab-name="examples">Chart examples <span class="tt-tab-count">{{ lesson_sections.figure_count }}</span></button>
     <button class="tt-tab" id="tab-practice" type="button" role="tab" aria-selected="false" aria-controls="panel-practice" data-tab-name="practice">Test your reading{% if practice_questions %} <span class="tt-tab-count">{{ practice_questions|length }}</span>{% endif %}</button>
   </div>
-  <div class="tt-tab-panel" id="panel-idea" role="tabpanel" aria-labelledby="tab-idea" data-tab-panel="idea">{{ lesson_sections.idea_html|safe }}</div>
+  <div class="tt-tab-panel" id="panel-idea" role="tabpanel" aria-labelledby="tab-idea" data-tab-panel="idea">
+    {{ lesson_sections.idea_html|safe }}
+    <aside class="tt-notebook" aria-label="Your Trading Notebook">
+      <div class="tt-notebook-index"><span>KEEP<br>IN VIEW</span><strong>01</strong></div>
+      <div class="tt-notebook-content">
+        <div class="tt-notebook-kicker">YOUR TRADING NOTEBOOK</div>
+        <h3>{% if notebook.title and notebook.title != "Your Trading Notebook" and notebook.title != "Before you make the call" %}{{ notebook.title }}{% elif course.slug == "understand-bollinger-bands" %}Before treating a touch as a setup{% else %}Before you make the call{% endif %}</h3>
+        {% if notebook.prompts %}
+        <ol>
+          {% for prompt in notebook.prompts %}
+          <li>
+            <span class="tt-notebook-number">{{ forloop.counter|stringformat:"02d" }}</span>
+            <div class="tt-notebook-prompt-copy"><p><strong>{{ prompt.label|default:"Describe"|cut:"." }}.</strong> {{ prompt.text }}</p></div>
+          </li>
+          {% endfor %}
+        </ol>
+        {% else %}
+        <ol>
+          <li><span class="tt-notebook-number">01</span><p><strong>Describe.</strong> Where is price relative to the bands and middle line?</p></li>
+          <li><span class="tt-notebook-number">02</span><p><strong>Interpret.</strong> Does the structure look like a range, a trend or a transition? What is your alternative explanation?</p></li>
+          <li><span class="tt-notebook-number">03</span><p><strong>Test.</strong> What future price behaviour would strengthen or weaken your view?</p></li>
+        </ol>
+        {% endif %}
+        {% if notebook.prompts and lesson %}
+        <details class="tt-notebook-response-editor">
+          <summary>Write your reflections</summary>
+          <form method="post" action="{% url 'academy:lesson-notebook-submit' lesson.id %}" data-notebook-response>
+            {% csrf_token %}
+            <div class="tt-notebook-reflection-fields">
+              {% for prompt in notebook.prompts %}
+              <div class="tt-notebook-reflection-field">
+                <label for="notebook-prompt-{{ forloop.counter0 }}">{{ prompt.label|default:"Reflection" }} — {{ prompt.text }}</label>
+                <textarea id="notebook-prompt-{{ forloop.counter0 }}" name="prompt_{{ forloop.counter0 }}" rows="3" maxlength="4000" placeholder="Write your reflection…">{{ prompt.response }}</textarea>
+              </div>
+              {% endfor %}
+            </div>
+            <div class="tt-notebook-reflection-actions">
+              <button class="tt-notebook-save" type="submit">Save reflection</button>
+              <span data-notebook-feedback role="status" aria-live="polite"></span>
+            </div>
+          </form>
+        </details>
+        {% endif %}
+      </div>
+    </aside>
+    <button class="tt-notebook-examples-button" type="button" data-open-tab="examples">Work through the chart examples <span aria-hidden="true">↗</span></button>
+  </div>
   <div class="tt-tab-panel" id="panel-examples" role="tabpanel" aria-labelledby="tab-examples" data-tab-panel="examples" hidden>{{ lesson_sections.examples_html|safe }}</div>
   <div class="tt-tab-panel" id="panel-practice" role="tabpanel" aria-labelledby="tab-practice" data-tab-panel="practice" hidden>
     {{ lesson_sections.practice_html|safe }}
@@ -45,33 +91,3 @@
     {% endif %}
   </div>
 </section>
-<aside class="tt-notebook" aria-label="Your Trading Notebook">
-  <div class="tt-notebook-kicker">YOUR TRADING NOTEBOOK</div>
-  <h3>{{ notebook.title|default:"Your Trading Notebook" }}</h3>
-  {% if notebook.prompts %}
-    {% if lesson %}
-    <form method="post" action="{% url 'academy:lesson-notebook-submit' lesson.id %}" data-notebook-response>
-      {% csrf_token %}
-      <ol>
-        {% for prompt in notebook.prompts %}
-        <li><label for="notebook-prompt-{{ forloop.counter0 }}"><strong>{{ prompt.label }}</strong></label><p>{{ prompt.text }}</p><textarea id="notebook-prompt-{{ forloop.counter0 }}" name="prompt_{{ forloop.counter0 }}" rows="3" maxlength="4000" placeholder="Write your reflection…">{{ prompt.response }}</textarea></li>
-        {% endfor %}
-      </ol>
-      <button class="tt-notebook-save" type="submit">Save reflection</button>
-      <span data-notebook-feedback role="status" aria-live="polite"></span>
-    </form>
-    {% else %}
-    <ol class="tt-notebook-prompts-readonly">
-      {% for prompt in notebook.prompts %}
-      <li><strong>{{ prompt.label }}</strong><p>{{ prompt.text }}</p></li>
-      {% endfor %}
-    </ol>
-    {% endif %}
-  {% else %}
-  <ol>
-    <li><strong>Observe</strong><p>Describe what the chart actually shows.</p></li>
-    <li><strong>Interpret</strong><p>Write one possible explanation and one reasonable alternative.</p></li>
-    <li><strong>Test</strong><p>Identify the next evidence that would strengthen or weaken your reading.</p></li>
-  </ol>
-  {% endif %}
-</aside>
