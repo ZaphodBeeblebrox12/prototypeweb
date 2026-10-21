@@ -18,6 +18,18 @@
       return;
     }
 
+    const openTab = event.target.closest("[data-open-tab]");
+    if (openTab) {
+      const root = openTab.closest("[data-learning-tabs]");
+      const target = root && Array.from(root.querySelectorAll("[data-tab-name]"))
+        .find(button => button.dataset.tabName === openTab.dataset.openTab);
+      if (target) {
+        target.click();
+        target.focus();
+      }
+      return;
+    }
+
     const close = event.target.closest("[data-figure-close]");
     const dialog = document.querySelector("[data-figure-dialog]");
     if (close && dialog?.open) {
