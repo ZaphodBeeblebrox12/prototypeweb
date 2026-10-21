@@ -36,6 +36,23 @@ def get_content_region_for_country(country_code):
     return CONTENT_COUNTRY_TO_REGION.get(code)
 
 
+def get_content_country(request):
+    """Resolve the real request country without honoring debug/pricing overrides."""
+    country = str(request.META.get("HTTP_CF_IPCOUNTRY") or "").strip().upper()
+    if country != "XX" and len(country) == 2 and country.isascii() and country.isalpha():
+        return country
+
+    try:
+        from apps.subscriptions.geoip import get_country_from_maxmind
+
+        country = str(get_country_from_maxmind(request) or "").strip().upper()
+    except Exception:
+        return None
+    if country != "XX" and len(country) == 2 and country.isascii() and country.isalpha():
+        return country
+    return None
+
+
 def regional_block_values(content_json):
     """Return normalized regional block dictionaries from published lesson JSON."""
     if not isinstance(content_json, dict):

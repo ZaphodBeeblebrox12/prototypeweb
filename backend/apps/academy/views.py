@@ -34,6 +34,7 @@ from .permissions import is_course_content_admin
 from .regional_content import (
     ASSET_REFERENCE_RE,
     IMAGE_GROUP_REFERENCE_RE,
+    get_content_country,
     get_content_region_for_country,
     regional_block_asset_ids,
 )
@@ -83,15 +84,13 @@ def _lesson_asset_ids_for_audience(lesson, country_code=None, region_code=None):
 
 
 def _module_display_title(value):
-
     """Return the authored module name without an optional module-number prefix."""
     title = re.sub(r"^module\s*\d*\s*[·—–:-]?\s*", "", str(value or "").strip(), flags=re.IGNORECASE)
     return title.strip() or "Learning Room"
 
 
 def _regional_audience(request, admin_preview=False):
-    """Resolve country/region from the existing geo resolver; only admins can simulate."""
-    from apps.subscriptions.services import get_pricing_country
+    """Resolve real content geography; only admins can simulate an audience in preview."""
 
     country = None
     if admin_preview and getattr(request, "user", None) and is_course_content_admin(request.user):
@@ -105,9 +104,9 @@ def _regional_audience(request, admin_preview=False):
         if len(audience) == 2 and audience.isalpha() and audience.isascii():
             country = audience
         else:
-            country = get_pricing_country(request)
+            country = get_content_country(request)
     else:
-        country = get_pricing_country(request)
+        country = get_content_country(request)
     return country, get_content_region_for_country(country) if country else None
 
 

@@ -571,6 +571,17 @@ class AcademyViewTests(TestCase):
         self.assertEqual(self.client.get(us_url, HTTP_CF_IPCOUNTRY="IN").status_code, 403)
         self.assertEqual(self.client.get(hidden_url, HTTP_CF_IPCOUNTRY="CA").status_code, 403)
 
+        # Pricing's debug-only test_country override must never change regional media permissions.
+        with self.settings(DEBUG=True):
+            self.assertEqual(
+                self.client.get(india_url, {"test_country": "US"}, HTTP_CF_IPCOUNTRY="IN").status_code,
+                200,
+            )
+            self.assertEqual(
+                self.client.get(us_url, {"test_country": "US"}, HTTP_CF_IPCOUNTRY="IN").status_code,
+                403,
+            )
+
     def test_uploaded_media_for_unentitled_paid_lesson_is_forbidden(self):
         image_bytes = BytesIO()
         Image.new("RGB", (12, 8), (245, 220, 170)).save(image_bytes, format="PNG")

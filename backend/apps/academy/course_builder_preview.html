@@ -1594,7 +1594,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
         const selectedLabel = scope === 'region'
           ? code
           : ((selectedCountry && selectedCountry[1]) || code) + ' (' + code + ')';
-        // Build the full 111-country menu only when this particular control receives focus.
+        // Build the full country/territory menu only when this particular control receives focus.
         // Otherwise every regional variant duplicates the same large option list in the DOM.
         const choices = '<option value="' + esc(code) + '" selected>' + esc(selectedLabel) + '</option>';
         return '<article class="q-card regional-variant-card"><div class="q-top"><strong>VARIANT ' + String(variantIndex + 1).padStart(2,'0') + '</strong><button class="btn small danger" type="button" data-action="remove-regional-variant" data-block-id="' + esc(block.id) + '" data-id="' + esc(variant.id) + '">Remove</button></div>' +
