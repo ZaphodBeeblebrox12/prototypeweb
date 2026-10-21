@@ -1470,11 +1470,41 @@ Describe the evidence first.
     }
     if (lesson && action === 'remove-figure') {
       const id = String(el.dataset.id || '');
-      const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const currentImages = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
+      const removedImage = currentImages.find(image => String(image.id) === id);
+      const escapedId = id.replace(/[.*+?^\$\{\}()|[\]\\]/g, '\\$&');
       lesson.content = String(lesson.content || '')
         .replace(new RegExp('!\\[[^\\]]*\\]\\(asset://' + escapedId + '(?:\\s+[^)]*)?\\)', 'g'), '')
         .replace(/\n{3,}/g, '\n\n');
-      lesson.images = (Array.isArray(lesson.images) ? lesson.images : []).filter(image => image.id !== id);
+
+      const remainingImages = currentImages.filter(image => String(image.id) !== id);
+      const groupsToRemove = new Set();
+      (Array.isArray(lesson.imageGroups) ? lesson.imageGroups : []).forEach(function(group) {
+        const members = Array.isArray(group.imageIds) ? group.imageIds : [];
+        group.imageIds = members.filter(function(imageId, index, allIds) {
+          const value = String(imageId);
+          if (value === id || (removedImage && value === String(removedImage.assetUuid || ''))) return false;
+          const exists = remainingImages.some(image =>
+            String(image.id) === value || String(image.assetUuid || '') === value
+          );
+          return exists && allIds.findIndex(other => String(other) === value) === index;
+        });
+
+        const token = '[[image-group:' + group.id + ']]';
+        if (!String(lesson.content || '').includes(token) || group.imageIds.length >= 2) return;
+        const survivor = group.imageIds
+          .map(imageId => remainingImages.find(image =>
+            String(image.id) === String(imageId) || String(image.assetUuid || '') === String(imageId)
+          ))
+          .find(Boolean);
+        const replacement = survivor
+          ? '![' + String(survivor.alt || survivor.title || 'Course figure').replace(/\]/g, '') + '](asset://' + survivor.id + ')'
+          : '';
+        lesson.content = String(lesson.content || '').split(token).join(replacement).replace(/\n{3,}/g, '\n\n');
+        groupsToRemove.add(String(group.id));
+      });
+      lesson.imageGroups = (lesson.imageGroups || []).filter(group => !groupsToRemove.has(String(group.id)));
+      lesson.images = remainingImages;
       lesson.image = lesson.images[0] || null;
       (lesson.questions || []).forEach(function(question) {
         if (String(question.imageId || '') === id) question.imageId = '';
