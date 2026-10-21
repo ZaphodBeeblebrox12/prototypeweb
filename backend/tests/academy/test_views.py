@@ -350,7 +350,37 @@ class AcademyViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Public preview content.")
 
-    def test_related_courses_use_numbered_next_step_panel(self):
+    def test_related_courses_panel_adapts_to_one_two_or_three_courses(self):
+        courses = [
+            Course.objects.create(
+                title=f"Related course {index}",
+                slug=f"related-course-count-{index}",
+                summary=f"Practise skill {index} in context.",
+                position=10 + index,
+                status=Course.Status.PUBLISHED,
+            )
+            for index in range(1, 4)
+        ]
+        self.preview_lesson.content_json = {}
+        for count in (1, 2, 3):
+            with self.subTest(course_count=count):
+                self.preview_lesson.content_json = {
+                    "related_course_ids": [str(course.pk) for course in courses[:count]],
+                }
+                self.preview_lesson.save(update_fields=["content_json", "updated_at"])
+                response = self.client.get(
+                    reverse("academy:lesson", args=[self.course.slug, self.preview_lesson.pk])
+                )
+                self.assertEqual(response.status_code, 200, response.content)
+                self.assertContains(response, f'data-course-count="{count}"')
+                self.assertEqual(
+                    response.content.decode().count('class="tt-related-course-link tt-related-course-card"'),
+                    count,
+                )
+                self.assertContains(response, "Explore course")
+                self.assertContains(response, "Course references do not grant access or include a purchase.")
+
+    def test_related_courses_use_bright_course_cards_in_branded_panel(self):
         related_courses = [
             Course.objects.create(
                 title="Support and Resistance",
@@ -384,10 +414,12 @@ class AcademyViewTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertContains(response, 'class="tt-related-courses"')
+        self.assertContains(response, 'class="tt-related-courses tt-related-courses--cards"')
         self.assertContains(response, 'class="tt-related-courses-kicker">Continue learning</p>')
-        self.assertContains(response, 'id="tt-related-courses-heading">Related courses</h2>')
-        self.assertEqual(response.content.decode().count('class="tt-related-course-link"'), 3)
+        self.assertContains(response, 'id="tt-related-courses-heading">Build on this lesson</h2>')
+        self.assertEqual(response.content.decode().count('class="tt-related-course-link tt-related-course-card"'), 3)
+        self.assertEqual(response.content.decode().count('class="tt-related-course-card-cta"'), 3)
+        self.assertContains(response, 'data-course-count="3"')
         for index, course in enumerate(related_courses, start=1):
             self.assertContains(response, f'href="{reverse("academy:course-detail", args=[course.slug])}"')
             self.assertContains(response, f"{index:02d}")

@@ -703,175 +703,237 @@
   .tt-learning-room .tt-tab-panel .tt-comparison-cards { grid-template-columns: minmax(0, 1fr); }
 }
 
-/* Signature next-step panel for related courses. */
-.tt-learning-room .tt-related-courses {
+/* Branded panel with bright, individually prominent course cards. */
+.tt-learning-room .tt-related-courses--cards {
   position: relative;
-  margin: clamp(24px, 3vw, 34px) 0 0;
-  padding: clamp(17px, 2.4vw, 24px);
+  margin: clamp(26px, 3.5vw, 38px) 0 0;
+  padding: clamp(18px, 2.8vw, 27px);
   overflow: hidden;
-  border: 1px solid #d7ded1;
-  border-radius: 15px;
-  background: linear-gradient(135deg, #eff3eb 0%, #f7f4eb 72%, #f8f4e9 100%);
+  border: 1px solid #234a36;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #214b36 0%, #173c2b 68%, #183727 100%);
+  box-shadow: 0 12px 28px rgba(27, 57, 40, .12);
 }
-.tt-learning-room .tt-related-courses::before {
+.tt-learning-room .tt-related-courses--cards::before {
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--tt-green) 0%, var(--tt-green) 72%, var(--tt-gold) 100%);
+  background: linear-gradient(90deg, #e0bd62 0%, #e0bd62 28%, #78927a 100%);
 }
-.tt-learning-room .tt-related-courses-header {
+.tt-learning-room .tt-related-courses--cards .tt-related-courses-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  margin: 0 0 16px;
+  gap: 18px;
+  margin: 0 0 19px;
 }
-.tt-learning-room .tt-related-courses-kicker {
-  margin: 0 0 5px;
-  color: var(--tt-green);
+.tt-learning-room .tt-related-courses--cards .tt-related-courses-kicker {
+  margin: 0 0 7px;
+  color: #e7c96f;
   font-size: 9px;
-  font-weight: 850;
-  letter-spacing: .12em;
+  font-weight: 900;
+  letter-spacing: .14em;
   line-height: 1.4;
   text-transform: uppercase;
 }
-.tt-learning-room .tt-related-courses h2 {
+.tt-learning-room .tt-related-courses--cards h2 {
   margin: 0;
-  color: #233a2d;
-  font: 500 clamp(22px, 2.2vw, 27px)/1.13 Georgia, "Times New Roman", serif;
-  letter-spacing: -.02em;
+  color: #fffdf6;
+  font: 500 clamp(23px, 2.4vw, 30px)/1.12 Georgia, "Times New Roman", serif;
+  letter-spacing: -.025em;
 }
-.tt-learning-room .tt-related-courses-header-mark {
+.tt-learning-room .tt-related-courses--cards .tt-related-courses-intro {
+  max-width: 540px;
+  margin: 8px 0 0;
+  color: #d5e0d6;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.tt-learning-room .tt-related-courses--cards .tt-related-courses-count {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 7px 10px;
+  border: 1px solid rgba(235, 215, 154, .34);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .06);
+  color: #f0d88d;
+  font-size: 10px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+.tt-learning-room .tt-related-courses--cards .tt-related-course-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  align-items: stretch;
+  gap: 11px;
+}
+.tt-learning-room .tt-related-courses--cards .tt-related-course-list[data-course-count="1"] {
+  grid-template-columns: minmax(0, 560px);
+}
+.tt-learning-room .tt-related-courses--cards .tt-related-course-list[data-course-count="2"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.tt-learning-room .tt-related-courses--cards .tt-related-course-list[data-course-count="3"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.tt-learning-room .tt-related-courses--cards .tt-related-course-link {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  min-width: 0;
+  padding: 15px 14px 13px;
+  border: 1px solid #e5dfcd;
+  border-radius: 11px;
+  background: #fffdf7;
+  color: var(--tt-ink);
+  text-decoration: none;
+  box-shadow: 0 3px 10px rgba(8, 24, 14, .08);
+  transition: border-color .16s ease, background-color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+.tt-learning-room .tt-related-courses--cards .tt-related-course-link:hover {
+  border-color: #e2c166;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(8, 24, 14, .16);
+  transform: translateY(-2px);
+}
+.tt-learning-room .tt-related-courses--cards .tt-related-course-link:focus-visible {
+  outline: 3px solid #e2c166;
+  outline-offset: 3px;
+}
+.tt-learning-room .tt-related-courses--cards .tt-related-course-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 15px;
+}
+.tt-learning-room .tt-related-courses--cards .tt-related-course-number {
   display: grid;
   flex: 0 0 auto;
   place-items: center;
-  width: 38px;
-  height: 38px;
-  border: 1px solid #d5dfd2;
-  border-radius: 11px;
-  background: rgba(255, 254, 250, .7);
-  color: var(--tt-green);
-  font-size: 20px;
-  line-height: 1;
-}
-.tt-learning-room .tt-related-course-list {
-  display: grid;
-  gap: 9px;
-}
-.tt-learning-room .tt-related-course-link {
-  display: grid;
-  grid-template-columns: 38px minmax(0, 1fr) 32px;
-  align-items: center;
-  gap: 13px;
-  min-width: 0;
-  padding: 12px 14px;
-  border: 1px solid rgba(69, 102, 83, .18);
-  border-radius: 10px;
-  background: rgba(255, 254, 250, .94);
-  color: var(--tt-ink);
-  text-decoration: none;
-  box-shadow: 0 2px 8px rgba(38, 52, 47, .025);
-  transition: border-color .16s ease, background-color .16s ease, box-shadow .16s ease, transform .16s ease;
-}
-.tt-learning-room .tt-related-course-link:hover {
-  border-color: #9caf9d;
-  background: #fffefa;
-  box-shadow: 0 5px 15px rgba(38, 52, 47, .07);
-  transform: translateY(-1px);
-}
-.tt-learning-room .tt-related-course-link:focus-visible {
-  outline: 3px solid #a78034;
-  outline-offset: 3px;
-}
-.tt-learning-room .tt-related-course-number {
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border: 1px solid #d6e0d3;
-  border-radius: 9px;
-  background: #edf2ed;
-  color: #355a43;
-  font-size: 11px;
-  font-weight: 850;
-  letter-spacing: .03em;
-  font-variant-numeric: tabular-nums;
-}
-.tt-learning-room .tt-related-course-copy {
-  display: block;
-  min-width: 0;
-}
-.tt-learning-room .tt-related-course-link strong {
-  display: block;
-  color: #2d4f3a;
-  font-size: 13px;
-  font-weight: 800;
-  line-height: 1.45;
-  overflow-wrap: anywhere;
-}
-.tt-learning-room .tt-related-course-link .tt-related-course-summary {
-  display: block;
-  margin-top: 4px;
-  color: var(--tt-muted);
-  font-size: 12px;
-  line-height: 1.55;
-  overflow-wrap: anywhere;
-}
-.tt-learning-room .tt-related-course-arrow {
-  display: grid;
-  place-items: center;
   width: 31px;
   height: 31px;
-  border: 1px solid #e0e5dc;
+  border: 1px solid #d8e1d5;
+  border-radius: 9px;
+  background: #edf2e9;
+  color: #2d563d;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .02em;
+  font-variant-numeric: tabular-nums;
+}
+.tt-learning-room .tt-related-courses--cards .tt-related-course-label {
+  color: #627365;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: .1em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+.tt-learning-room .tt-related-courses--cards .tt-related-course-copy {
+  display: block;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.tt-learning-room .tt-related-courses--cards .tt-related-course-link strong {
+  display: block;
+  color: #1f4030;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.tt-learning-room .tt-related-courses--cards .tt-related-course-summary {
+  display: block;
+  margin-top: 8px;
+  color: #5e6a61;
+  font-size: 11px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.tt-learning-room .tt-related-courses--cards .tt-related-course-card-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 11px;
+  border-top: 1px solid #e5e2d7;
+  color: #365b42;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.4;
+}
+.tt-learning-room .tt-related-courses--cards .tt-related-course-card-cta > span {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  background: #f5f6f0;
-  color: var(--tt-green);
-  font-size: 18px;
+  background: #e5c35f;
+  color: #1d3b2a;
+  font-size: 15px;
   line-height: 1;
-  transition: color .16s ease, background-color .16s ease, border-color .16s ease, transform .16s ease;
+  transition: transform .16s ease, background-color .16s ease;
 }
-.tt-learning-room .tt-related-course-link:hover .tt-related-course-arrow {
-  border-color: var(--tt-green);
-  background: var(--tt-green);
-  color: #fff;
-  transform: translateX(2px);
+.tt-learning-room .tt-related-courses--cards .tt-related-course-link:hover .tt-related-course-card-cta > span {
+  background: #d8b34f;
+  transform: translate(2px, -1px);
 }
-.tt-learning-room .tt-related-courses .tt-related-course-note {
+.tt-learning-room .tt-related-courses--cards .tt-related-course-note {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  margin: 13px 0 0;
-  padding: 11px 1px 0;
-  border-top: 1px solid rgba(69, 102, 83, .16);
-  color: #66736a;
+  margin: 16px 0 0;
+  padding: 12px 1px 0;
+  border-top: 1px solid rgba(224, 236, 224, .2);
+  color: #d1ded3;
   font-size: 10px;
   line-height: 1.55;
 }
-.tt-learning-room .tt-related-course-note > span {
+.tt-learning-room .tt-related-courses--cards .tt-related-course-note > span {
   display: grid;
   flex: 0 0 auto;
   place-items: center;
   width: 15px;
   height: 15px;
-  border: 1px solid #cbd6c8;
+  border: 1px solid rgba(225, 236, 221, .45);
   border-radius: 50%;
-  color: var(--tt-green);
+  color: #ead078;
   font-size: 9px;
-  font-weight: 800;
+  font-weight: 850;
+}
+@media (max-width: 760px) {
+  .tt-learning-room .tt-related-courses--cards .tt-related-course-list[data-course-count="3"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .tt-learning-room .tt-related-courses--cards .tt-related-course-list[data-course-count="3"] .tt-related-course-card:last-child {
+    grid-column: 1 / -1;
+  }
 }
 @media (max-width: 620px) {
-  .tt-learning-room .tt-related-courses { padding: 16px 13px 13px; border-radius: 12px; }
-  .tt-learning-room .tt-related-courses-header { margin-bottom: 13px; }
-  .tt-learning-room .tt-related-courses-header-mark { width: 33px; height: 33px; border-radius: 9px; font-size: 18px; }
-  .tt-learning-room .tt-related-course-list { gap: 8px; }
-  .tt-learning-room .tt-related-course-link { grid-template-columns: 32px minmax(0, 1fr) 28px; gap: 9px; padding: 10px 9px; }
-  .tt-learning-room .tt-related-course-number { width: 31px; height: 32px; border-radius: 8px; font-size: 10px; }
-  .tt-learning-room .tt-related-course-link strong { font-size: 12px; }
-  .tt-learning-room .tt-related-course-link .tt-related-course-summary { font-size: 11px; }
-  .tt-learning-room .tt-related-course-arrow { width: 27px; height: 27px; font-size: 16px; }
+  .tt-learning-room .tt-related-courses--cards { padding: 17px 13px 14px; border-radius: 13px; }
+  .tt-learning-room .tt-related-courses--cards .tt-related-courses-header { flex-direction: column; gap: 12px; margin-bottom: 15px; }
+  .tt-learning-room .tt-related-courses--cards .tt-related-courses-intro { font-size: 11px; }
+  .tt-learning-room .tt-related-courses--cards .tt-related-course-list,
+  .tt-learning-room .tt-related-courses--cards .tt-related-course-list[data-course-count="1"],
+  .tt-learning-room .tt-related-courses--cards .tt-related-course-list[data-course-count="2"],
+  .tt-learning-room .tt-related-courses--cards .tt-related-course-list[data-course-count="3"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tt-learning-room .tt-related-courses--cards .tt-related-course-list[data-course-count="3"] .tt-related-course-card:last-child {
+    grid-column: auto;
+  }
+  .tt-learning-room .tt-related-courses--cards .tt-related-course-card { padding: 13px 12px 12px; }
+  .tt-learning-room .tt-related-courses--cards .tt-related-course-card-top { margin-bottom: 11px; }
+  .tt-learning-room .tt-related-courses--cards .tt-related-course-link strong { font-size: 16px; }
+  .tt-learning-room .tt-related-courses--cards .tt-related-course-card-cta { margin-top: 13px; padding-top: 9px; }
 }
 
 
