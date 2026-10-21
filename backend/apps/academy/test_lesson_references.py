@@ -104,16 +104,26 @@ class CourseCardReferenceRenderingTests(TestCase):
             "Before the card.\n\n[[course-card:" + str(self.course.pk) + "]]\n\nAfter the card."
         )
         expected_url = reverse("academy:course-detail", args=[self.course.slug])
-        card_index = rendered.index('class="tt-inline-course-card"')
+        card_index = rendered.index('class="tt-course-preview-card"')
         self.assertLess(rendered.index("Before the card."), card_index)
         self.assertLess(card_index, rendered.index("After the card."))
         self.assertIn(self.course.title, rendered)
         self.assertIn(self.course.summary, rendered)
-        self.assertIn("Volume analysis", rendered)
-        self.assertIn("Intermediate", rendered)
-        self.assertIn("3 hours", rendered)
-        self.assertIn("Compare activity with price progress.", rendered)
+        self.assertIn("Companion course", rendered)
+        self.assertIn("Activity vs price", rendered)
+        self.assertIn("V/P", rendered)
+        self.assertIn("meets outcome", rendered)
+        self.assertIn("View course outline", rendered)
         self.assertIn(f'href="{expected_url}"', rendered)
+
+    def test_published_placeholder_course_is_not_rendered_as_a_recommendation(self):
+        self.course.title = "New micro-course draft"
+        self.course.summary = "Add a concise course promise here."
+        self.course.save(update_fields=["title", "summary"])
+        rendered = render_safe_markdown("[[course-card:" + str(self.course.pk) + "]]")
+        self.assertIn("Course currently unavailable", rendered)
+        self.assertNotIn("New micro-course draft", rendered)
+        self.assertNotIn("Add a concise course promise here.", rendered)
 
     def test_course_card_does_not_expose_a_draft_course(self):
         self.course.status = Course.Status.DRAFT
@@ -141,11 +151,11 @@ class CourseCardReferenceRenderingTests(TestCase):
             status=CourseImport.Status.DRAFT,
         )
         rendered = render_safe_markdown("[[course-card:coming-soon:" + str(teaser.pk) + "]]")
-        self.assertIn('class="tt-inline-course-card tt-inline-course-card--coming-soon"', rendered)
+        self.assertIn('class="tt-course-preview-card tt-course-preview-card--coming-soon"', rendered)
         self.assertIn("Order Flow and Volume", rendered)
         self.assertIn("Understand activity in context.", rendered)
         self.assertIn("Compare volume with price progress.", rendered)
-        self.assertIn("COMING SOON", rendered)
+        self.assertIn("Coming soon", rendered)
         self.assertNotIn("course-detail", rendered)
 
     def test_private_builder_draft_is_not_exposed_as_a_course_card(self):

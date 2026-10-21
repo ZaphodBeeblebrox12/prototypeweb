@@ -38,6 +38,7 @@ from .models import (
     LessonInstructorMaterial,
 )
 from .permissions import is_course_content_admin
+from .course_card_utils import is_course_card_recommendable
 from .storage import course_asset_storage
 
 logger = logging.getLogger(__name__)
@@ -770,11 +771,18 @@ def course_builder_api(request):
                 and record.status == CourseImport.Status.DRAFT
             ):
                 drafts.append(_draft_response(record, request))
-        related_courses = list(Course.objects.filter(
-            status=Course.Status.PUBLISHED,
-            modules__is_published=True,
-            modules__lessons__is_published=True,
-        ).distinct().order_by("position", "title").values("id", "title", "slug", "summary", "category", "level", "estimated_duration", "learning_outcomes"))
+        related_courses = [
+            course
+            for course in Course.objects.filter(
+                status=Course.Status.PUBLISHED,
+                modules__is_published=True,
+                modules__lessons__is_published=True,
+            ).distinct().order_by("position", "title").values(
+                "id", "title", "slug", "summary", "category", "level",
+                "estimated_duration", "learning_outcomes",
+            )
+            if is_course_card_recommendable(course["title"], course["summary"])
+        ]
         # Return catalogue metadata only (never lesson bodies or instructor
         # answer keys). This lets the Builder search references after drafts
         # are reopened on another device without persisting copied lesson text.
@@ -810,7 +818,13 @@ def course_builder_api(request):
             asset_storage_status["writes_enabled"],
         )
         coming_soon_courses = []
-        published_slugs = set(Course.objects.filter(status=Course.Status.PUBLISHED).values_list("slug", flat=True))
+        published_slugs = {
+            slug
+            for slug, title, summary in Course.objects.filter(
+                status=Course.Status.PUBLISHED,
+            ).values_list("slug", "title", "summary")
+            if is_course_card_recommendable(title, summary)
+        }
         seen_teaser_slugs = set()
         teaser_records = CourseImport.objects.filter(
             status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REVIEW],
@@ -820,13 +834,17 @@ def course_builder_api(request):
             builder_state = (teaser.payload or {}).get("builder_state") or {}
             if not builder_state.get("comingSoon") or teaser.course_slug in published_slugs or teaser.course_slug in seen_teaser_slugs:
                 continue
+            teaser_title = str(builder_state.get("title") or teaser.title)[:200]
+            teaser_summary = str(builder_state.get("summary") or builder_state.get("description") or "")[:360]
+            if not is_course_card_recommendable(teaser_title, teaser_summary):
+                continue
             seen_teaser_slugs.add(teaser.course_slug)
             coming_soon_courses.append({
                 "id": "coming-soon-" + str(teaser.pk), "slug": teaser.course_slug,
-                "title": str(builder_state.get("title") or teaser.title)[:200],
+                "title": teaser_title,
                 "category": str(builder_state.get("category") or "TradeThesis courses")[:80],
                 "level": str(builder_state.get("level") or "Self-paced")[:40],
-                "description": str(builder_state.get("summary") or builder_state.get("description") or "")[:360],
+                "description": teaser_summary,
                 "summary": str(builder_state.get("summary") or "")[:360],
                 "estimated_duration": str(builder_state.get("duration") or "")[:80],
                 "learning_outcomes": [str(value).strip()[:240] for value in builder_state.get("outcomes", []) if str(value).strip()][:6] if isinstance(builder_state.get("outcomes"), list) else [],

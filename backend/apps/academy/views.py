@@ -16,6 +16,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .content_rendering import build_lesson_sections, render_safe_markdown
+from .course_card_utils import is_course_card_recommendable
 from .models import (
     Course,
     CourseEntitlement,
@@ -606,10 +607,13 @@ def course_import_website_preview(request, import_id):
                     with suppress(ValueError, TypeError, AttributeError):
                         related_ids.append(UUID(raw_id))
         if related_ids:
-            selected_related_courses = Course.objects.filter(
-                pk__in=related_ids,
-                status=Course.Status.PUBLISHED,
-            ).exclude(pk=record.target_course_id).order_by("position", "title")
+            selected_related_courses = [
+                related for related in Course.objects.filter(
+                    pk__in=related_ids,
+                    status=Course.Status.PUBLISHED,
+                ).exclude(pk=record.target_course_id).order_by("position", "title")
+                if is_course_card_recommendable(related.title, related.summary)
+            ]
 
         # Match the learner lesson view: render only ordinary HTTP(S) video
         # destinations, and use the native player only for supported file types.

@@ -391,6 +391,41 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(instructor.rubric_json["questions"][0]["correctIndex"], 0)
         self.assertIn("Start with what can be observed.", instructor.answer_key_markdown)
 
+    def test_course_card_picker_excludes_published_placeholder_course(self):
+        placeholder = Course.objects.create(
+            title="New micro-course draft",
+            slug="new-micro-course-draft-placeholder",
+            summary="Add a concise course promise here.",
+            status=Course.Status.PUBLISHED,
+        )
+        placeholder_module = CourseModule.objects.create(
+            course=placeholder, title="Foundations", slug="foundations",
+            position=1, is_published=True,
+        )
+        Lesson.objects.create(
+            module=placeholder_module, title="Placeholder lesson", slug="placeholder-lesson",
+            position=1, is_published=True, content_markdown="Placeholder content.",
+        )
+        valid_course = Course.objects.create(
+            title="Published course with real copy",
+            slug="published-course-real-copy",
+            summary="A practical introduction to reading market context.",
+            status=Course.Status.PUBLISHED,
+        )
+        valid_module = CourseModule.objects.create(
+            course=valid_course, title="Foundations", slug="foundations",
+            position=1, is_published=True,
+        )
+        Lesson.objects.create(
+            module=valid_module, title="Read the context", slug="read-the-context",
+            position=1, is_published=True, content_markdown="Read the context before acting.",
+        )
+        response = self.client.get(reverse("staff_course_builder_api"))
+        self.assertEqual(response.status_code, 200, response.content)
+        related_ids = {str(item["id"]) for item in response.json()["related_courses"]}
+        self.assertNotIn(str(placeholder.pk), related_ids)
+        self.assertIn(str(valid_course.pk), related_ids)
+
     def test_related_course_uses_published_course_uuid(self):
         related = Course.objects.create(
             title="Related published course",

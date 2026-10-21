@@ -424,3 +424,19 @@ class TemplateParityRegressionTests(SimpleTestCase):
         )
         self.assertEqual(notebook["title"], "Before treating a touch as a setup")
         self.assertIn("bands", " ".join(item["text"] for item in notebook["prompts"]).lower())
+
+
+
+class LessonSectionRoutingRegressionTests(SimpleTestCase):
+    def test_concept_heading_compare_the_possibilities_stays_in_the_idea_panel(self):
+        source = (
+            "## Start with the decision\n\n"
+            "Begin with a practical question.\n\n"
+            "### What to notice\n\n"
+            "Describe the visible evidence.\n\n"
+            "### Compare the possibilities\n\n"
+            "Compare two possible readings and the evidence that separates them."
+        )
+        result = build_lesson_sections(source)
+        self.assertIn("Compare the possibilities", result["idea_html"])
+        self.assertNotIn("Compare the possibilities", result["examples_html"])

@@ -279,6 +279,22 @@ class CourseReviewTemplateTests(TestCase):
         self.assertNotContains(unsafe_response, 'class="tt-video-lesson"')
         self.assertEqual(unsafe_response.context["selected_video_url"], "")
 
+    def test_website_preview_omits_published_placeholder_from_related_course_panel(self):
+        placeholder = Course.objects.create(
+            title="New micro-course draft",
+            slug="preview-new-micro-course-draft-placeholder",
+            summary="Add a concise course promise here.",
+            status=Course.Status.PUBLISHED,
+        )
+        record = self._website_preview_record(related_course_ids=[str(placeholder.pk)])
+        response = self.client.get(
+            reverse("academy:course-import-preview", args=[record.pk]),
+            {"lesson": "1.1"},
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertNotContains(response, "New micro-course draft")
+        self.assertNotContains(response, "Add a concise course promise here.")
+
     def test_website_preview_renders_published_related_courses_only(self):
         published = Course.objects.create(
             title="Volume and Price Analysis",
