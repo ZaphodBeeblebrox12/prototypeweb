@@ -75,6 +75,9 @@ class SupportTicketSubmissionTests(TestCase):
             email="ticket-submit-member@example.test",
             password="test-password-123!",
         )
+        EmailAddress.objects.create(
+            user=self.user, email=self.user.email, primary=True, verified=True
+        )
         self.client.force_login(self.user)
 
     def test_anonymous_user_is_redirected_before_pending_ticket_lookup(self):
