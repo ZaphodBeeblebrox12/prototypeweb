@@ -1008,6 +1008,23 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     const parts = Array.from(editor.childNodes).map(richBlockMarkdown).filter(value => String(value || '').trim());
     return parts.join('\n\n').replace(/\u00a0/g,' ').replace(/\r\n?/g,'\n').replace(/\n[ \t]+\n/g,'\n\n').replace(/\n{3,}/g,'\n\n').trim();
   }
+  function promptTableDimension(label, defaultValue, maximum) {
+    const raw = window.prompt(label + ' (1–' + maximum + '):', String(defaultValue));
+    if (raw === null) return null;
+    const value = Number(raw.trim());
+    if (!Number.isInteger(value) || value < 1 || value > maximum) {
+      toast(label + ' must be a whole number between 1 and ' + maximum + '.');
+      return false;
+    }
+    return value;
+  }
+  function richTableMarkup(rows, columns) {
+    const headings = Array.from({length: columns}, (_, index) => '<th>Heading ' + (index + 1) + '</th>').join('');
+    const bodyRows = Array.from({length: Math.max(0, rows - 1)}, () =>
+      '<tr>' + Array.from({length: columns}, () => '<td><br></td>').join('') + '</tr>'
+    ).join('');
+    return '<table><thead><tr>' + headings + '</tr></thead><tbody>' + bodyRows + '</tbody></table><p><br></p>';
+  }
   function visualEditorMarkup(value, options) {
     options = options || {};
     const kind = String(options.kind || 'main');
@@ -2792,7 +2809,11 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     restoreRichEditorSelection(editor);
     const command = button.dataset.richCommand;
     if (command === 'table') {
-      document.execCommand('insertHTML', false, '<table><thead><tr><th>Heading 1</th><th>Heading 2</th></tr></thead><tbody><tr><td>Detail</td><td>Detail</td></tr></tbody></table><p><br></p>');
+      const columns = promptTableDimension('Number of columns', 3, 12);
+      if (columns === null || columns === false) return;
+      const rows = promptTableDimension('Number of rows', 3, 30);
+      if (rows === null || rows === false) return;
+      document.execCommand('insertHTML', false, richTableMarkup(rows, columns));
     } else if (command === 'link') {
       const selection = window.getSelection();
       const selectedText = selection && selection.toString();

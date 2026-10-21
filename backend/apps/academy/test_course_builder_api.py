@@ -137,6 +137,17 @@ class CourseBuilderApiTests(TestCase):
             "'[data-rich-command], [data-rich-format]'",
         )
 
+    def test_rich_text_table_allows_custom_dimensions(self):
+        response = self.client.get(reverse("staff_course_builder_preview"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "function promptTableDimension(label, defaultValue, maximum)")
+        self.assertContains(response, "function richTableMarkup(rows, columns)")
+        self.assertContains(response, "promptTableDimension('Number of columns', 3, 12)")
+        self.assertContains(response, "promptTableDimension('Number of rows', 3, 30)")
+        self.assertContains(response, "richTableMarkup(rows, columns)")
+        self.assertContains(response, "must be a whole number between 1 and")
+
     def test_regional_asset_remapping_matches_full_image_ids(self):
         from .course_builder_api import _remap_regional_asset_refs
 
