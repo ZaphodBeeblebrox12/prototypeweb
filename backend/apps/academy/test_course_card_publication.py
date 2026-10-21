@@ -148,14 +148,25 @@ class CoursePublicationReadinessTests(TestCase):
     def test_take_it_into_practice_content_is_preserved_in_practice_tab(self):
         from .content_rendering import build_lesson_sections
 
-        sections = build_lesson_sections(
-            "## Start with the decision\\n\\nDescribe the visible evidence.\\n\\n"
-            "### What to notice\\n\\nSeparate observation from interpretation.\\n\\n"
-            "### Compare the possibilities\\n\\nCompare two outcomes.\\n\\n"
-            "### Take it into practice\\n\\n"
+        source = "\\n".join([
+            "## Start with the decision",
+            "",
+            "Describe the visible evidence.",
+            "",
+            "### What to notice",
+            "",
+            "Separate observation from interpretation.",
+            "",
+            "### Compare the possibilities",
+            "",
+            "Compare two outcomes.",
+            "",
+            "### Take it into practice",
+            "",
             "Write down what would strengthen your reading, what would weaken it, "
-            "and what would make waiting the better decision."
-        )
+            "and what would make waiting the better decision.",
+        ])
+        sections = build_lesson_sections(source)
 
         self.assertNotIn("Take it into practice", sections["idea_html"])
         self.assertIn("Take it into practice", sections["practice_html"])
