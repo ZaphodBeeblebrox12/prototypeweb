@@ -38,6 +38,24 @@ _IMAGE_GROUP_TOKEN = re.compile(r"\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]")
 _LESSON_REF = re.compile(r"\[\[(lesson|lesson-card):([0-9a-fA-F-]{36})\]\]")
 _COURSE_CARD_REF = re.compile(r"\[\[course-card:(?:(coming-soon):)?([0-9a-fA-F-]{36})\]\]")
 _TAB_ROUTE_TOKEN = re.compile(r"^\s*\[\[lesson-tab:(idea|examples|practice)\]\]\s*$", re.IGNORECASE)
+
+
+def _deduplicate_course_card_refs(source):
+    """Keep the final placement of each companion course card within a lesson."""
+    source = source or ""
+    matches = list(_COURSE_CARD_REF.finditer(source))
+    seen = set()
+    remove_spans = []
+    for match in reversed(matches):
+        key = ((match.group(1) or "").casefold(), match.group(2).casefold())
+        if key in seen:
+            remove_spans.append((match.start(), match.end()))
+        else:
+            seen.add(key)
+    for start, end in remove_spans:
+        source = source[:start] + source[end:]
+    return re.sub(r"\n[ \t]*\n(?:[ \t]*\n)+", "\n\n", source)
+
 _HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
 _DANGEROUS_MARKDOWN = re.compile(
     r"<\s*/?\s*(?:script|style|iframe|object|embed|form|input|button|svg|math)\b"
@@ -597,12 +615,13 @@ def build_lesson_sections(
     module_label="",
 ):
     """Group source headings into the three reusable Learning Room tabs."""
-    lines = (source or "").splitlines()
+    source = _deduplicate_course_card_refs(source or "")
+    lines = source.splitlines()
     groups = {"idea": [], "examples": [], "practice": []}
     current_group = "idea"
     current_heading = None
     current_lines = []
-    explicit_route_for_next_heading = False
+    pending_route = None
 
     def finish_section():
         nonlocal current_lines, current_heading, current_group
@@ -619,20 +638,25 @@ def build_lesson_sections(
     for line in lines:
         route_marker = _TAB_ROUTE_TOKEN.match(line)
         if route_marker:
-            # Explicit author placement beats the best-effort heading heuristic.
-            # Put the marker immediately before the heading for the section to route.
-            finish_section()
-            current_group = route_marker.group(1).casefold()
-            explicit_route_for_next_heading = True
+            # A route token is an instruction for the next heading, not a command
+            # to move any text that follows it. Keep it pending until that heading
+            # arrives so a misplaced token cannot strand a heading on one tab and
+            # silently move its paragraph and companion cards to another.
+            pending_route = route_marker.group(1).casefold()
             continue
 
         match = _HEADING.match(line)
         if match:
             finish_section()
+            explicit_route = pending_route is not None
+            if explicit_route:
+                current_group = pending_route
+                pending_route = None
             current_heading = line.strip()
             heading = match.group(2).casefold()
-            if explicit_route_for_next_heading:
-                explicit_route_for_next_heading = False
+            if explicit_route:
+                # The explicit route wins over heading-name heuristics for this heading.
+                pass
             # Admin-added headings encode the selected Learning Room tab;
             # handle those exact prefixes before generic content heuristics.
             elif heading.startswith("compare the possibilities") or heading.startswith("additional concept figure"):
@@ -652,6 +676,11 @@ def build_lesson_sections(
             else:
                 current_group = "idea"
             continue
+
+        if line.strip() and pending_route is not None:
+            # The token was inserted inside a section instead of before a heading.
+            # Ignore that stale instruction while preserving the section's own text.
+            pending_route = None
         current_lines.append(line)
     finish_section()
 
