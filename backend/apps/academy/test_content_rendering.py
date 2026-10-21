@@ -389,6 +389,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn('contenteditable="true" spellcheck="true"', preview)
         self.assertIn('data-rich-command="table" aria-label="Insert table">Table', preview)
         self.assertIn('data-visual-editor="true"', preview)
+        self.assertIn("previewUrl.searchParams.set('preview_audience',audience||'GLOBAL')", preview)
         self.assertNotIn("Copy the structure below into a lesson", preview)
         self.assertNotIn("Information tables:", preview)
 
