@@ -1333,10 +1333,10 @@ Describe the evidence first.
   const baseHandleAction = handleAction;
   function isValidCompanionCourse(course) {
     const title = String(course?.title || '').trim();
-    const summary = String(course?.summary || '').trim().toLowerCase().replace(/\\s+/g, ' ');
+    const summary = String(course?.summary || '').trim().toLowerCase().replace(/\s+/g, ' ');
     const currentSlug = String(currentCourse()?.slug || '').trim().toLowerCase();
     const courseSlug = String(course?.slug || '').trim().toLowerCase();
-    const placeholderTitle = /^untitled course(?:\\s*\\d+)?$/i.test(title) ||
+    const placeholderTitle = /^untitled course(?:\s*\d+)?$/i.test(title) ||
       /^(?:new micro-course draft|untitled micro-course)$/i.test(title);
     const placeholderSummary = [
       'add a concise course promise here.',
@@ -1356,8 +1356,8 @@ Describe the evidence first.
     const term = String(query || '').trim().toLowerCase();
     const lesson = currentLesson();
     const source = String(lesson?.content || '');
-    const hasReplaceableReferences = /\\[\\[(?:lesson|lesson-card):[0-9a-fA-F-]{36}\\]\\]/.test(source) ||
-      /\\[\\[course-card:(?:coming-soon:)?[0-9a-fA-F-]{36}\\]\\]/.test(source);
+    const hasReplaceableReferences = /\[\[(?:lesson|lesson-card):[0-9a-fA-F-]{36}\]\]/.test(source) ||
+      /\[\[course-card:(?:coming-soon:)?[0-9a-fA-F-]{36}\]\]/.test(source);
     if (!available.length) {
       return '<div class="empty-state course-card-empty"><p><strong>No eligible companion courses are available yet.</strong></p><p>The current lesson, placeholder titles and placeholder summaries are excluded. Select a real published course or announce a properly titled coming-soon course before inserting a companion card. Nothing is published automatically.</p></div>';
     }
@@ -1382,7 +1382,6 @@ Describe the evidence first.
     ).join('') + '</div>' +
     (matches.length > 8 ? '<p class="help">Showing 8 of ' + matches.length + ' matches. Refine the search to find another course.</p>' : '');
   }
-
   function renderCourseCardResults(query, container) {
     if (container) container.innerHTML = courseCardResultsHtml(query);
   }
@@ -1711,8 +1710,8 @@ Describe the evidence first.
         ? '[[course-card:coming-soon:' + courseRef.referenceId + ']]'
         : '[[course-card:' + courseRef.id + ']]';
       const source = String(lesson.content || '');
-      const courseCardPattern = /\\[\\[course-card:(?:coming-soon:)?[0-9a-fA-F-]{36}\\]\\]/g;
-      const lessonReferencePattern = /\\[\\[(?:lesson|lesson-card):[0-9a-fA-F-]{36}\\]\\]/g;
+      const courseCardPattern = /\[\[course-card:(?:coming-soon:)?[0-9a-fA-F-]{36}\]\]/g;
+      const lessonReferencePattern = /\[\[(?:lesson|lesson-card):[0-9a-fA-F-]{36}\]\]/g;
       const cards = [...source.matchAll(courseCardPattern)];
       const lessonReferences = [...source.matchAll(lessonReferencePattern)];
       const anchorReference = cards[0] || lessonReferences[0];
@@ -1725,7 +1724,7 @@ Describe the evidence first.
       let updated = source.slice(0, anchorReference.index) + marker +
         source.slice(anchorReference.index + anchorReference[0].length);
       updated = updated.replace(courseCardPattern, '').replace(lessonReferencePattern, '');
-      updated = updated.replace(marker, token).replace(/\\n{3,}/g, '\\n\\n').replace(/^[ \\t]*\\n+|\\n+[ \\t]*$/g, '');
+      updated = updated.replace(marker, token).replace(/\n{3,}/g, '\n\n').replace(/^[ \t]*\n+|\n+[ \t]*$/g, '');
       lesson.content = updated;
       state.tab = 'lesson';
       persist(false);
