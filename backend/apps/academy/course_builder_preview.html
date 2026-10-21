@@ -846,7 +846,11 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     return starterComparable(course) === starterComparable(getSeed().courses[0]);
   }
   function load() { try { const raw=localStorage.getItem(STORAGE_KEY); if(raw){const v=JSON.parse(raw); if(v && Array.isArray(v.courses)) return v;} } catch(e){} return getSeed(); }
-  let state=load(); let toastTimer=null; let saveTimer=null; let previewMode=false;
+  let state=load();
+  // Regional editing may contain many rich-text variants. Start on the light overview
+  // screen after a reload; the selected course and all draft content remain untouched.
+  if (state.tab === 'regional') state.tab = 'overview';
+  let toastTimer=null; let saveTimer=null; let previewMode=false;
   let hasUnsavedChanges=false; let editRevision=0; let suppressDirtyTracking=true;
   function markDirty(){hasUnsavedChanges=true;editRevision++;}
   const currentCourse=()=>state.courses.find(c=>c.id===state.selectedCourseId)||state.courses[0];
@@ -1418,12 +1422,16 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       const variants = block.variants.map((variant, variantIndex) => {
         const scope = variant.scope === 'region' ? 'region' : 'country';
         const code = String(variant.code || (scope === 'region' ? 'APAC' : 'IN')).toUpperCase();
-        const choices = scope === 'region'
-          ? regionalRegionOptions.map(value => '<option value="' + value + '"' + (value === code ? ' selected' : '') + '>' + value + '</option>').join('')
-          : regionalCountryOptions.map(([value,label]) => '<option value="' + value + '"' + (value === code ? ' selected' : '') + '>' + esc(label) + ' (' + value + ')</option>').join('');
+        const selectedCountry = regionalCountryOptions.find(([value]) => value === code);
+        const selectedLabel = scope === 'region'
+          ? code
+          : ((selectedCountry && selectedCountry[1]) || code) + ' (' + code + ')';
+        // Build the full 111-country menu only when this particular control receives focus.
+        // Otherwise every regional variant duplicates the same large option list in the DOM.
+        const choices = '<option value="' + esc(code) + '" selected>' + esc(selectedLabel) + '</option>';
         return '<article class="q-card regional-variant-card"><div class="q-top"><strong>VARIANT ' + String(variantIndex + 1).padStart(2,'0') + '</strong><button class="btn small danger" type="button" data-action="remove-regional-variant" data-block-id="' + esc(block.id) + '" data-id="' + esc(variant.id) + '">Remove</button></div>' +
           '<div class="form-grid"><div class="field"><label>Audience type</label><select class="select" data-regional-variant="' + esc(variant.id) + '" data-block-id="' + esc(block.id) + '" data-field="scope"><option value="country"' + (scope === 'country' ? ' selected' : '') + '>One country</option><option value="region"' + (scope === 'region' ? ' selected' : '') + '>A whole region</option></select></div>' +
-          '<div class="field"><label>' + (scope === 'region' ? 'Region' : 'Country') + '</label><select class="select" data-regional-variant="' + esc(variant.id) + '" data-block-id="' + esc(block.id) + '" data-field="code">' + choices + '</select></div></div>' +
+          '<div class="field"><label>' + (scope === 'region' ? 'Region' : 'Country') + '</label><select class="select" data-regional-variant="' + esc(variant.id) + '" data-block-id="' + esc(block.id) + '" data-field="code" data-regional-code-scope="' + scope + '">' + choices + '</select></div></div>' +
           '<div class="field full regional-variant-content"><label>Replacement content</label>' + visualEditorMarkup(variant.content || '', {kind:'regional-variant',blockId:block.id,variantId:variant.id}) +
           '<div class="regional-image-row"><select class="select" data-regional-image-picker data-block-id="' + esc(block.id) + '" data-variant-id="' + esc(variant.id) + '" aria-label="Choose an image for this regional version">' + imageOptions + '</select><button class="btn small" type="button" data-action="insert-regional-image" data-id="' + esc(block.id) + '" data-variant-id="' + esc(variant.id) + '">Insert selected image</button></div></div>' +
           '<label class="checkbox-row"><input type="checkbox" data-regional-variant="' + esc(variant.id) + '" data-block-id="' + esc(block.id) + '" data-field="hidden"' + (variant.hidden ? ' checked' : '') + '> Hide this block completely for this audience</label>' +
@@ -2675,6 +2683,23 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       if (variant) { variant[el.dataset.field] = el.value; schedulePersist(); }
     }
   });
+  document.addEventListener('focusin', event => {
+    const select = event.target.closest?.('select[data-regional-variant][data-field="code"][data-regional-code-scope]');
+    if (!select || select.dataset.regionalOptionsLoaded === 'true') return;
+    const current = select.value;
+    const choices = select.dataset.regionalCodeScope === 'region'
+      ? regionalRegionOptions.map(code => '<option value="' + esc(code) + '">' + esc(code) + '</option>').join('')
+      : regionalCountryOptions.map(([code, label]) => '<option value="' + esc(code) + '">' + esc(label) + ' (' + esc(code) + ')</option>').join('');
+    select.innerHTML = choices;
+    if (!Array.from(select.options).some(option => option.value === current)) {
+      const fallback = document.createElement('option');
+      fallback.value = current;
+      fallback.textContent = current;
+      select.appendChild(fallback);
+    }
+    select.value = current;
+    select.dataset.regionalOptionsLoaded = 'true';
+  }, true);
   document.addEventListener('change', event => {
     const el = event.target;
     if (el.matches('[data-regional-variant][data-field]')) {
