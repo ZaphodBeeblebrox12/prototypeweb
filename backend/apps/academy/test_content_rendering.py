@@ -4,6 +4,7 @@ from pathlib import Path
 from django.test import SimpleTestCase
 
 from apps.subscriptions.services import COUNTRY_TO_REGION
+from .regional_content import CONTENT_COUNTRY_TO_REGION, get_content_region_for_country
 
 from .content_rendering import (
     _deduplicate_course_card_refs,
@@ -404,7 +405,18 @@ class SharedLessonRenderingTests(SimpleTestCase):
             len(option_map),
             "The regional audience list must not contain duplicate country codes.",
         )
-        self.assertEqual(option_map, COUNTRY_TO_REGION)
+        self.assertEqual(option_map, CONTENT_COUNTRY_TO_REGION)
+
+    def test_content_audience_map_covers_more_countries_without_changing_pricing_regions(self):
+        self.assertEqual(248, len(CONTENT_COUNTRY_TO_REGION))
+        self.assertEqual("EU", get_content_region_for_country("is"))
+        self.assertEqual("EU", get_content_region_for_country("UA"))
+        self.assertEqual("APAC", get_content_region_for_country("fj"))
+        self.assertIsNone(get_content_region_for_country("AQ"))
+        # Regional lesson targeting must not silently expand geo-pricing policy.
+        self.assertNotIn("IS", COUNTRY_TO_REGION)
+        self.assertNotIn("UA", COUNTRY_TO_REGION)
+        self.assertNotIn("FJ", COUNTRY_TO_REGION)
 
     def test_course_builder_preview_has_visual_table_editor_support(self):
         preview = (Path(__file__).resolve().parent / "course_builder_preview.html").read_text()

@@ -17,7 +17,13 @@ from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
-from .content_rendering import build_lesson_sections, render_safe_markdown
+from .content_rendering import build_lesson_sections, render_safe_markdown, resolve_regional_blocks
+from .regional_content import (
+    ASSET_REFERENCE_RE,
+    IMAGE_GROUP_REFERENCE_RE,
+    get_content_region_for_country,
+    regional_block_asset_ids,
+)
 from .course_card_utils import is_course_card_recommendable
 from .models import (
     Course,
@@ -40,7 +46,44 @@ from .services import (
 )
 
 
+def _lesson_asset_ids_for_audience(lesson, country_code=None, region_code=None):
+    """Return only the lesson assets referenced by content selected for this audience."""
+    content_json = lesson.content_json if isinstance(lesson.content_json, dict) else {}
+    declared_ids = {
+        str(value).strip().lower()
+        for value in content_json.get("asset_ids", [])
+        if str(value or "").strip()
+    }
+    regional_ids = regional_block_asset_ids(content_json)
+    resolved_markdown = resolve_regional_blocks(
+        lesson.content_markdown or "",
+        regional_blocks=content_json.get("regional_blocks", {}),
+        country_code=country_code,
+        region_code=region_code,
+    )
+    # Preserve legacy/nonregional references, but remove assets whose only
+    # reference is inside an unselected regional variant.
+    allowed_ids = declared_ids - regional_ids
+    allowed_ids.update(value.lower() for value in ASSET_REFERENCE_RE.findall(resolved_markdown))
+    questions = content_json.get("questions") if isinstance(content_json.get("questions"), list) else []
+    for question in questions:
+        if not isinstance(question, dict):
+            continue
+        image_id = question.get("image_asset_id") or question.get("imageId")
+        if image_id:
+            allowed_ids.add(str(image_id).strip().lower())
+    figures = content_json.get("figures") if isinstance(content_json.get("figures"), dict) else {}
+    for group_id in IMAGE_GROUP_REFERENCE_RE.findall(resolved_markdown):
+        figure = figures.get(group_id)
+        if not isinstance(figure, dict) or figure.get("type") != "image-group":
+            continue
+        image_ids = figure.get("image_ids") if isinstance(figure.get("image_ids"), list) else []
+        allowed_ids.update(str(value).strip().lower() for value in image_ids if str(value or "").strip())
+    return allowed_ids
+
+
 def _module_display_title(value):
+
     """Return the authored module name without an optional module-number prefix."""
     title = re.sub(r"^module\s*\d*\s*[·—–:-]?\s*", "", str(value or "").strip(), flags=re.IGNORECASE)
     return title.strip() or "Learning Room"
@@ -48,7 +91,7 @@ def _module_display_title(value):
 
 def _regional_audience(request, admin_preview=False):
     """Resolve country/region from the existing geo resolver; only admins can simulate."""
-    from apps.subscriptions.services import get_pricing_country, get_region_for_country
+    from apps.subscriptions.services import get_pricing_country
 
     country = None
     if admin_preview and getattr(request, "user", None) and is_course_content_admin(request.user):
@@ -65,7 +108,7 @@ def _regional_audience(request, admin_preview=False):
             country = get_pricing_country(request)
     else:
         country = get_pricing_country(request)
-    return country, get_region_for_country(country) if country else None
+    return country, get_content_region_for_country(country) if country else None
 
 
 def _practice_questions_with_images(questions, asset_urls, figure_metadata):
@@ -322,13 +365,20 @@ def lesson_detail(request, course_slug, lesson_id):
         lesson=lesson,
         status=LessonProgress.Status.IN_PROGRESS,
     )
-    asset_ids = lesson.content_json.get("asset_ids", []) if isinstance(lesson.content_json, dict) else []
+    content_json = lesson.content_json if isinstance(lesson.content_json, dict) else {}
+    asset_ids = content_json.get("asset_ids", [])
+    regional_asset_ids = regional_block_asset_ids(content_json)
     media_assets = CourseMediaAsset.objects.filter(course=course, pk__in=asset_ids)
     asset_urls = {}
     for asset in media_assets:
         if asset.file:
             asset_urls[str(asset.pk)] = reverse("academy:media-asset", args=[asset.pk])
-        elif asset.original_url.startswith(("https://", "http://")):
+        elif (
+            str(asset.pk).lower() not in regional_asset_ids
+            and asset.original_url.startswith(("https://", "http://"))
+        ):
+            # External URLs cannot enforce regional access. Regional images must
+            # use managed storage before they can be submitted for review.
             asset_urls[str(asset.pk)] = asset.original_url
     outline_modules = []
     modules = CourseModule.objects.filter(course=course).prefetch_related("lessons").order_by("position", "title")
@@ -387,7 +437,6 @@ def lesson_detail(request, course_slug, lesson_id):
         status=LessonProgress.Status.COMPLETED,
     ).count()
     course_progress_percent = round(completed_lessons * 100 / total_lessons) if total_lessons else 0
-    content_json = lesson.content_json if isinstance(lesson.content_json, dict) else {}
     regional_country, regional_region = _regional_audience(request)
     return render(request, "academy/lesson.html", {
         "course": course, "lesson": lesson, "module": lesson.module,
@@ -821,22 +870,28 @@ def lesson_notebook_submit(request, lesson_id):
 
 @login_required
 def media_asset(request, asset_id):
-    """Deliver teaching images only to admins or learners allowed to view a referencing lesson."""
+    """Deliver images only when an accessible lesson uses them for this audience."""
     asset = get_object_or_404(CourseMediaAsset.objects.select_related("course"), pk=asset_id)
     if not asset.file:
         from django.http import Http404
         raise Http404
     allowed = is_course_content_admin(request.user)
     if not allowed:
+        country_code, region_code = _regional_audience(request)
+        target_asset_id = str(asset.pk).lower()
         for related_lesson in Lesson.objects.filter(
             module__course=asset.course, module__is_published=True, is_published=True,
         ).select_related("module__course"):
-            asset_ids = related_lesson.content_json.get("asset_ids", []) if isinstance(related_lesson.content_json, dict) else []
-            if str(asset.pk) in asset_ids and can_access_lesson(request.user, related_lesson):
+            if not can_access_lesson(request.user, related_lesson):
+                continue
+            permitted_asset_ids = _lesson_asset_ids_for_audience(
+                related_lesson, country_code=country_code, region_code=region_code,
+            )
+            if target_asset_id in permitted_asset_ids:
                 allowed = True
                 break
     if not allowed:
-        raise PermissionDenied("You do not have access to this course image.")
+        raise PermissionDenied("You do not have access to this course image for your content audience.")
     response = FileResponse(
         asset.file.open("rb"),
         content_type=mimetypes.guess_type(asset.file.name)[0] or "application/octet-stream",

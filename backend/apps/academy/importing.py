@@ -18,6 +18,12 @@ from apps.audit.models import AuditLog
 
 from .content_rendering import validate_markdown_source
 from .course_card_utils import course_card_publication_issue
+from .regional_content import (
+    CONTENT_COUNTRY_TO_REGION,
+    REGIONAL_CONTENT_CODES,
+    regional_block_asset_ids,
+    regional_block_values,
+)
 from .models import (
     Course,
     CourseContentRevision,
@@ -393,6 +399,7 @@ def validate_import_for_publish(record):
     if not payload.get("modules"):
         errors.append("The course has no modules.")
     referenced_asset_ids = set()
+    regional_asset_ids = set()
     for module in payload.get("modules", []):
         if not module.get("lessons"):
             errors.append("Module " + str(module.get("title", "")) + " has no lessons.")
@@ -413,7 +420,37 @@ def validate_import_for_publish(record):
                         correct_index = -1
                     if len(options) < 2 or correct_index < 0 or correct_index >= len(options):
                         errors.append("Lesson " + str(lesson.get("title", "")) + " question " + str(question_index) + " needs at least two choices and a correct answer selected.")
-            referenced_asset_ids.update(lesson.get("content_json", {}).get("asset_ids", []))
+            content_json = lesson.get("content_json") if isinstance(lesson.get("content_json"), dict) else {}
+            referenced_asset_ids.update(str(value).lower() for value in content_json.get("asset_ids", []) if value)
+            lesson_regional_asset_ids = regional_block_asset_ids(content_json)
+            referenced_asset_ids.update(lesson_regional_asset_ids)
+            regional_asset_ids.update(lesson_regional_asset_ids)
+            for regional_block in regional_block_values(content_json):
+                base_content = str(regional_block.get("base_content", regional_block.get("baseContent", "")) or "")
+                if re.search(r"!\[[^\]]*\]\(\s*https?://|<img\b[^>]*\bsrc\s*=\s*['\"]https?://", base_content, re.IGNORECASE):
+                    errors.append("Lesson " + str(lesson.get("title", "")) + " regional content must use managed asset references for images; external image URLs cannot be region-locked.")
+                variants = regional_block.get("variants") if isinstance(regional_block.get("variants"), list) else []
+                seen_targets = set()
+                for variant in variants:
+                    if not isinstance(variant, dict):
+                        continue
+                    scope = str(variant.get("scope") or "country").strip().lower()
+                    code = str(variant.get("code") or variant.get("country") or variant.get("region") or "").strip().upper()
+                    target = (scope, code)
+                    if target in seen_targets:
+                        errors.append("Lesson " + str(lesson.get("title", "")) + " regional block repeats the " + code + " audience.")
+                    seen_targets.add(target)
+                    if scope == "country" and code not in CONTENT_COUNTRY_TO_REGION:
+                        errors.append("Lesson " + str(lesson.get("title", "")) + " uses an unsupported regional country code: " + (code or "(empty)") + ".")
+                    elif scope == "region" and code not in REGIONAL_CONTENT_CODES:
+                        errors.append("Lesson " + str(lesson.get("title", "")) + " uses an unsupported regional audience: " + (code or "(empty)") + ".")
+                    elif scope not in {"country", "region"}:
+                        errors.append("Lesson " + str(lesson.get("title", "")) + " has an invalid regional variant scope.")
+                    variant_content = str(variant.get("content") or "")
+                    if re.search(r"!\[[^\]]*\]\(\s*https?://|<img\b[^>]*\bsrc\s*=\s*['\"]https?://", variant_content, re.IGNORECASE):
+                        errors.append("Lesson " + str(lesson.get("title", "")) + " regional content must use managed asset references for images; external image URLs cannot be region-locked.")
+                    if not bool(variant.get("hidden", False)) and not variant_content.strip():
+                        errors.append("Lesson " + str(lesson.get("title", "")) + " has an empty regional variant for " + code + ". Add content or explicitly mark the variant hidden.")
     staged = {str(asset.stable_asset_id): asset for asset in record.assets.all()}
     live = {str(asset.pk): asset for asset in CourseMediaAsset.objects.filter(pk__in=referenced_asset_ids)}
     for asset_id in sorted(referenced_asset_ids):
@@ -426,6 +463,14 @@ def validate_import_for_publish(record):
         requires_owned_assets = bool(
             (payload.get("course") if isinstance(payload.get("course"), dict) else {}).get("requires_owned_assets", False)
         )
+        if asset_id in regional_asset_ids and not staged_has_file and not live_has_file:
+            key = stage_asset.asset_key if stage_asset else asset_id
+            errors.append(
+                "Regional content image " + key
+                + " must be uploaded to managed course storage before publishing. "
+                + "External image URLs cannot be protected by regional access rules."
+            )
+            continue
         is_temporary_bollinger_reference = (
             record.course_slug == "understand-bollinger-bands"
             and stage_asset is not None

@@ -39,6 +39,7 @@ from .models import (
     LessonInstructorMaterial,
 )
 from .permissions import is_course_content_admin
+from .regional_content import CONTENT_COUNTRY_TO_REGION, REGIONAL_CONTENT_CODES
 from .storage import course_asset_storage
 
 logger = logging.getLogger(__name__)
@@ -47,7 +48,7 @@ _MAX_IMAGE_BYTES = 10 * 1024 * 1024
 _ALLOWED_IMAGES = {"image/jpeg": ("JPEG", ".jpg"), "image/png": ("PNG", ".png"), "image/webp": ("WEBP", ".webp")}
 _ASSET_REF = re.compile(r"asset://([A-Za-z0-9-]+)")
 _REGIONAL_BLOCK_TOKEN = re.compile(r"\[\[regional-block:([A-Za-z0-9_-]{1,120})\]\]")
-_ALLOWED_CONTENT_REGIONS = {"APAC", "EU", "NA", "LATAM", "MENA", "SSA"}
+_ALLOWED_CONTENT_REGIONS = REGIONAL_CONTENT_CODES
 _LESSON_REF_TOKEN = re.compile(r"\[\[(?:lesson|lesson-card):([0-9a-fA-F-]{36})\]\]")
 
 
@@ -343,8 +344,8 @@ def _build_import_payload(course_state, course_slug):
                     scope = str(variant.get("scope") or "country").strip().lower()
                     code = str(variant.get("code") or ("IN" if scope == "country" else "APAC")).strip().upper()
                     if scope == "country":
-                        if len(code) != 2 or not code.isalpha() or not code.isascii():
-                            raise ValidationError(f"{title}: country variants must use a two-letter country code.")
+                        if len(code) != 2 or not code.isalpha() or not code.isascii() or code not in CONTENT_COUNTRY_TO_REGION:
+                            raise ValidationError(f"{title}: country variants must use a supported two-letter country code.")
                     elif scope == "region":
                         if code not in _ALLOWED_CONTENT_REGIONS:
                             raise ValidationError(f"{title}: unsupported regional audience {code}.")

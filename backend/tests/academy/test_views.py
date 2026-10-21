@@ -476,6 +476,56 @@ class AcademyViewTests(TestCase):
         self.assertEqual(media_response["Cache-Control"], "private, no-store")
         self.assertEqual(media_response["X-Content-Type-Options"], "nosniff")
 
+    def test_regional_media_urls_only_allow_assets_selected_for_the_actual_country(self):
+        def make_asset(asset_key, filename, label):
+            image_bytes = BytesIO()
+            Image.new("RGB", (12, 8), (245, 220, 170)).save(image_bytes, format="PNG")
+            asset = CourseMediaAsset.objects.create(
+                course=self.course, asset_key=asset_key, alt_text=label,
+            )
+            asset.file.save(
+                filename,
+                SimpleUploadedFile(filename, image_bytes.getvalue(), content_type="image/png"),
+                save=True,
+            )
+            stored_name = asset.file.name
+            self.addCleanup(lambda storage=course_asset_storage, name=stored_name: storage.delete(name))
+            return asset
+
+        base_asset = make_asset("test/regional-base", "regional-base.png", "Global image")
+        india_asset = make_asset("test/regional-india", "regional-india.png", "India image")
+        us_asset = make_asset("test/regional-us", "regional-us.png", "US image")
+        hidden_asset = make_asset("test/regional-hidden", "regional-hidden.png", "Hidden image")
+        self.preview_lesson.content_markdown = "## Regional notice\n\n[[regional-block:notice]]"
+        self.preview_lesson.content_json = {
+            "asset_ids": [str(base_asset.pk), str(india_asset.pk), str(us_asset.pk), str(hidden_asset.pk)],
+            "regional_blocks": {
+                "notice": {
+                    "base_content": f"![Global image](asset://{base_asset.pk})",
+                    "variants": [
+                        {"scope": "country", "code": "IN", "content": f"![India image](asset://{india_asset.pk})", "hidden": False},
+                        {"scope": "country", "code": "US", "content": f"![US image](asset://{us_asset.pk})", "hidden": False},
+                        {"scope": "country", "code": "CA", "content": f"![Hidden image](asset://{hidden_asset.pk})", "hidden": True},
+                    ],
+                },
+            },
+        }
+        self.preview_lesson.save(update_fields=["content_markdown", "content_json", "updated_at"])
+        base_url = reverse("academy:media-asset", args=[base_asset.pk])
+        india_url = reverse("academy:media-asset", args=[india_asset.pk])
+        us_url = reverse("academy:media-asset", args=[us_asset.pk])
+        hidden_url = reverse("academy:media-asset", args=[hidden_asset.pk])
+
+        # An unmapped audience uses base content; it cannot retrieve either override.
+        self.assertEqual(self.client.get(base_url, HTTP_CF_IPCOUNTRY="ZZ").status_code, 200)
+        self.assertEqual(self.client.get(india_url, HTTP_CF_IPCOUNTRY="ZZ").status_code, 403)
+        self.assertEqual(self.client.get(us_url, HTTP_CF_IPCOUNTRY="ZZ").status_code, 403)
+
+        # Actual requester geography selects India; hidden overrides never expose images.
+        self.assertEqual(self.client.get(india_url, HTTP_CF_IPCOUNTRY="IN").status_code, 200)
+        self.assertEqual(self.client.get(us_url, HTTP_CF_IPCOUNTRY="IN").status_code, 403)
+        self.assertEqual(self.client.get(hidden_url, HTTP_CF_IPCOUNTRY="CA").status_code, 403)
+
     def test_uploaded_media_for_unentitled_paid_lesson_is_forbidden(self):
         image_bytes = BytesIO()
         Image.new("RGB", (12, 8), (245, 220, 170)).save(image_bytes, format="PNG")
