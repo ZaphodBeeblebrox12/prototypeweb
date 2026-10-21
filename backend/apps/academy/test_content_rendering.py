@@ -385,6 +385,8 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("Compact figure treatment:", preview)
         self.assertIn("margin: 19px 0", preview)
         self.assertIn("max-height: min(56vh, 500px)", preview)
+        self.assertIn('data-rich-command="bold" aria-label="Bold"', preview)
+        self.assertIn('contenteditable="true" spellcheck="true"', preview)
         self.assertIn('data-rich-command="table" aria-label="Insert table">Table', preview)
         self.assertIn('data-visual-editor="true"', preview)
         self.assertNotIn("Copy the structure below into a lesson", preview)
