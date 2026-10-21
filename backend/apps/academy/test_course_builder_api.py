@@ -248,7 +248,7 @@ class CourseBuilderApiTests(TestCase):
                     )
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, b"checked-in-chart-data")
+        self.assertEqual(b"".join(response.streaming_content), b"checked-in-chart-data")
 
     def test_learner_reflection_is_saved_only_after_access_check(self):
         course = Course.objects.create(
