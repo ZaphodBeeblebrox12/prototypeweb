@@ -348,6 +348,11 @@ class AcademyViewTests(TestCase):
                 slug=f"recommended-course-{index}",
                 summary=f"Practise skill {index} in context.",
                 position=20 + index,
+                learning_outcomes=[
+                    "Compare relative volume with price progress.",
+                    "Explain effort versus result.",
+                    "Identify failed breakouts.",
+                ],
                 status=Course.Status.PUBLISHED,
             )
             for index in range(1, 4)
@@ -408,6 +413,12 @@ class AcademyViewTests(TestCase):
                     count,
                 )
                 self.assertContains(response, "Explore course")
+                self.assertContains(response, 'aria-label="Topics covered"')
+                self.assertContains(response, "Relative volume vs price")
+                self.assertEqual(
+                    response.content.decode().count('class="tt-related-course-topic"'),
+                    count * 2,
+                )
                 self.assertContains(response, "Course references do not grant access or include a purchase.")
                 for index, course in enumerate(related_courses[:count], start=1):
                     self.assertContains(response, course.title)
@@ -442,6 +453,10 @@ class AcademyViewTests(TestCase):
                 slug=f"related-course-count-{index}",
                 summary=f"Practise skill {index} in context.",
                 position=10 + index,
+                learning_outcomes=[
+                    "Compare relative volume with price progress.",
+                    "Explain effort versus result.",
+                ],
                 status=Course.Status.PUBLISHED,
             )
             for index in range(1, 4)
@@ -463,6 +478,12 @@ class AcademyViewTests(TestCase):
                     count,
                 )
                 self.assertContains(response, "Explore course")
+                self.assertContains(response, "aria-label=\"Topics covered\"")
+                self.assertContains(response, "Relative volume vs price")
+                self.assertEqual(
+                    response.content.decode().count('class="tt-related-course-topic"'),
+                    count * 2,
+                )
                 self.assertContains(response, "Course references do not grant access or include a purchase.")
 
     def test_related_courses_use_bright_course_cards_in_branded_panel(self):
@@ -472,6 +493,10 @@ class AcademyViewTests(TestCase):
                 slug="related-support-resistance",
                 summary="Identify price zones and assess reactions.",
                 position=3,
+                learning_outcomes=[
+                    "Identify support and resistance zones.",
+                    "Compare reactions at key price levels.",
+                ],
                 status=Course.Status.PUBLISHED,
             ),
             Course.objects.create(
@@ -479,6 +504,10 @@ class AcademyViewTests(TestCase):
                 slug="related-volume-price",
                 summary="Read activity alongside price progress.",
                 position=4,
+                learning_outcomes=[
+                    "Compare relative volume with price progress.",
+                    "Explain effort versus result.",
+                ],
                 status=Course.Status.PUBLISHED,
             ),
             Course.objects.create(
@@ -486,6 +515,10 @@ class AcademyViewTests(TestCase):
                 slug="related-trade-management",
                 summary="Construct a plan and manage risk through exit.",
                 position=5,
+                learning_outcomes=[
+                    "Build a conditional trade plan before execution.",
+                    "Assess risk and manage the exit.",
+                ],
                 status=Course.Status.PUBLISHED,
             ),
         ]
@@ -511,6 +544,13 @@ class AcademyViewTests(TestCase):
             self.assertContains(response, course.title)
             self.assertContains(response, course.summary)
         self.assertContains(response, "Course references do not grant access or include a purchase.")
+        self.assertContains(response, 'class="tt-related-course-topics"')
+        self.assertContains(response, "Support and resistance zones")
+        self.assertContains(response, "Reactions at key price levels")
+        self.assertContains(response, "Relative volume vs price")
+        self.assertContains(response, "Effort versus result")
+        self.assertContains(response, "Conditional trade plan before execution")
+        self.assertContains(response, "Risk & manage exit")
 
     def test_quiz_submit_returns_indices_for_red_green_feedback_after_submission(self):
         self.preview_lesson.content_json = {

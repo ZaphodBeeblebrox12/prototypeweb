@@ -18,7 +18,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
 from .content_rendering import build_lesson_sections, render_safe_markdown, resolve_regional_blocks
-from .course_card_utils import is_course_card_recommendable
+from .course_card_utils import course_topic_tags, is_course_card_recommendable
 from .models import (
     Course,
     CourseEntitlement,
@@ -423,6 +423,8 @@ def lesson_detail(request, course_slug, lesson_id):
         ).exclude(pk=course.pk).order_by("position", "title")
         if is_course_card_recommendable(related.title, related.summary, related.description)
     ]
+    for related in related_courses:
+        related.topic_tags = course_topic_tags(related.learning_outcomes)
     ordered_lessons = list(Lesson.objects.filter(
         module__course=course, module__is_published=True, is_published=True,
     ).select_related("module").order_by("module__position", "position", "title"))
@@ -724,6 +726,8 @@ def course_import_website_preview(request, import_id):
                 ).exclude(pk=record.target_course_id).order_by("position", "title")
                 if is_course_card_recommendable(related.title, related.summary, related.description)
             ]
+            for related in selected_related_courses:
+                related.topic_tags = course_topic_tags(related.learning_outcomes)
 
         # Match the learner lesson view: render only ordinary HTTP(S) video
         # destinations, and use the native player only for supported file types.

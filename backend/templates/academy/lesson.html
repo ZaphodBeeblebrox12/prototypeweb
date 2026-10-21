@@ -90,6 +90,11 @@
               <span class="tt-related-course-copy">
                 <strong>{{ related.title }}</strong>
                 {% if related.summary %}<span class="tt-related-course-summary">{{ related.summary }}</span>{% endif %}
+                {% if related.topic_tags %}
+                <span class="tt-related-course-topics" aria-label="Topics covered">
+                  {% for topic in related.topic_tags %}<span class="tt-related-course-topic">{{ topic }}</span>{% endfor %}
+                </span>
+                {% endif %}
               </span>
               <span class="tt-related-course-card-cta">Explore course <span aria-hidden="true">↗</span></span>
             </a>

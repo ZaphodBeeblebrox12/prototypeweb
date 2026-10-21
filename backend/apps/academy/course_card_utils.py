@@ -67,6 +67,24 @@ def compact_course_topic(value):
     return topic[:1].upper() + topic[1:] if topic else ""
 
 
+def course_topic_tags(learning_outcomes, limit=2):
+    """Return distinct, compact topic chips from a course's learning outcomes."""
+    if not isinstance(learning_outcomes, list) or limit <= 0:
+        return []
+
+    topics = []
+    seen = set()
+    for outcome in learning_outcomes:
+        topic = compact_course_topic(outcome)
+        key = topic.casefold()
+        if topic and key not in seen:
+            topics.append(topic)
+            seen.add(key)
+        if len(topics) >= limit:
+            break
+    return topics
+
+
 def course_card_mark(title):
     """Create a compact text-only art mark without inventing course imagery."""
     words = [

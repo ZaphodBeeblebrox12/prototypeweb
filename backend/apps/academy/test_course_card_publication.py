@@ -7,7 +7,11 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import SimpleTestCase, TestCase
 
-from .course_card_utils import course_card_publication_issue, is_course_card_recommendable
+from .course_card_utils import (
+    course_card_publication_issue,
+    course_topic_tags,
+    is_course_card_recommendable,
+)
 from .importing import publish_course_import, validate_import_for_publish
 from .models import Course, CourseImport
 
@@ -123,6 +127,26 @@ class CoursePublicationReadinessTests(TestCase):
         )
 
 
+    def test_related_course_topic_tags_reuse_compact_learning_outcome_labels(self):
+        self.assertEqual(
+            course_topic_tags([
+                "Compare relative volume with price progress.",
+                "Explain effort versus result.",
+                "Identify failed breakouts.",
+            ]),
+            ["Relative volume vs price", "Effort versus result"],
+        )
+        self.assertEqual(
+            course_topic_tags([
+                "Compare relative volume with price progress.",
+                "compare relative volume with price progress.",
+                "",
+                "Identify failed breakouts.",
+            ]),
+            ["Relative volume vs price", "Failed breakouts"],
+        )
+        self.assertEqual(course_topic_tags("not a list of outcomes"), [])
+
     def test_valid_course_card_reference_renders_option_four_not_a_lesson_link(self):
         from .content_rendering import render_safe_markdown
 
@@ -185,6 +209,22 @@ class CoursePublicationReadinessTests(TestCase):
         self.assertNotIn("Take it into practice", sections["idea_html"])
         self.assertIn("Take it into practice", sections["practice_html"])
         self.assertIn("what would make waiting the better decision", sections["practice_html"])
+
+
+class RelatedCourseSoftBotanicalParityTests(SimpleTestCase):
+    def test_related_course_cards_use_soft_botanical_surfaces_and_topic_chips(self):
+        root = Path(__file__).resolve().parents[2]
+        styles = (root / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
+        learner = (root / "templates" / "academy" / "lesson.html").read_text(encoding="utf-8")
+        staged_preview = (root / "templates" / "academy" / "course_import_website_preview.html").read_text(encoding="utf-8")
+
+        self.assertIn("background: #edf3e8;", styles)
+        self.assertIn(".tt-related-course-topics", styles)
+        self.assertIn(".tt-related-course-topic", styles)
+        self.assertIn('aria-label="Topics covered"', learner)
+        self.assertIn('aria-label="Topics covered"', staged_preview)
+        self.assertIn("{% for topic in related.topic_tags %}", learner)
+        self.assertIn("{% for topic in related.topic_tags %}", staged_preview)
 
 
 class OptionFourCardParityTests(SimpleTestCase):
