@@ -1,6 +1,7 @@
 """Authenticated learner views for TradeThesis Academy."""
 import json
 import mimetypes
+from copy import deepcopy
 from contextlib import suppress
 from urllib.parse import quote
 from uuid import UUID
@@ -57,6 +58,41 @@ def _practice_questions_with_images(questions, asset_urls, figure_metadata):
         question["image_caption"] = str(metadata.get("caption") or "")[:500]
         hydrated.append(question)
     return hydrated
+
+
+def _notebook_for_course_display(course_slug, notebook):
+    """Use the approved Bollinger Bands copy when a lesson still has untouched generic defaults."""
+    result = deepcopy(notebook) if isinstance(notebook, dict) else {}
+    if course_slug != "understand-bollinger-bands":
+        return result
+
+    default_title_values = {"", "Your Trading Notebook", "Before you make the call"}
+    if str(result.get("title") or "").strip() in default_title_values:
+        result["title"] = "Before treating a touch as a setup"
+
+    default_prompts = [
+        ("Observe", "Describe the evidence visible in the chart."),
+        ("Interpret", "State one possible reading and a reasonable alternative."),
+        ("Test", "Name the next evidence that would strengthen or weaken your reading."),
+    ]
+    raw_prompts = result.get("prompts")
+    matches_generic_defaults = not isinstance(raw_prompts, list) or not raw_prompts
+    if isinstance(raw_prompts, list) and len(raw_prompts) == len(default_prompts):
+        matches_generic_defaults = all(
+            isinstance(prompt, dict)
+            and str(prompt.get("label") or "").strip().rstrip(".") == label
+            and str(prompt.get("text") or "").strip() == text
+            for prompt, (label, text) in zip(raw_prompts, default_prompts)
+        )
+
+    if matches_generic_defaults:
+        result["prompts"] = [
+            {"label": "Describe", "text": "Where is price relative to the bands and middle line?"},
+            {"label": "Interpret", "text": "Does the structure look like a range, a trend or a transition? What is your alternative explanation?"},
+            {"label": "Test", "text": "What future price behaviour would strengthen or weaken your view?"},
+        ]
+    return result
+
 
 
 def _render_course_description(source, user=None, admin_preview=False):
@@ -239,7 +275,10 @@ def lesson_detail(request, course_slug, lesson_id):
             })
         if rows and module_row.is_published:
             outline_modules.append({"module": module_row, "lessons": rows})
-    notebook = lesson.content_json.get("notebook", {}) if isinstance(lesson.content_json, dict) else {}
+    notebook = _notebook_for_course_display(
+        course.slug,
+        lesson.content_json.get("notebook", {}) if isinstance(lesson.content_json, dict) else {},
+    )
     saved_responses = progress.response_json.get("notebook_responses", []) if isinstance(progress.response_json, dict) else []
     if isinstance(notebook, dict) and isinstance(notebook.get("prompts"), list):
         for prompt_index, prompt in enumerate(notebook["prompts"]):
@@ -362,7 +401,7 @@ def admin_lesson_preview(request, course_slug, lesson_id):
         if 0 <= current_index < len(ordered_lessons) - 1
         else None
     )
-    notebook = content_json.get("notebook", {})
+    notebook = _notebook_for_course_display(course.slug, content_json.get("notebook", {}))
     if not isinstance(notebook, dict):
         notebook = {}
     practice_questions = _practice_questions_with_images(
@@ -500,7 +539,10 @@ def course_import_website_preview(request, import_id):
         content_json = selected_lesson.get("content_json", {})
         if not isinstance(content_json, dict):
             content_json = {}
-        selected_notebook = content_json.get("notebook") or payload.get("notebook", {})
+        selected_notebook = _notebook_for_course_display(
+            course.slug,
+            content_json.get("notebook") or payload.get("notebook", {}),
+        )
         if not isinstance(selected_notebook, dict):
             selected_notebook = {}
         selected_practice_questions = _practice_questions_with_images(
