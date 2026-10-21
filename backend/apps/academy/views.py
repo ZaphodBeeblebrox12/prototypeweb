@@ -320,7 +320,7 @@ def lesson_detail(request, course_slug, lesson_id):
     )
     saved_responses = progress.response_json.get("notebook_responses", []) if isinstance(progress.response_json, dict) else []
     reflection_response = str(progress.response_json.get("reflection_response") or "")[:4000] if isinstance(progress.response_json, dict) else ""
-    reflection = _reflection_for_display(content_json.get("reflection", {}) if isinstance(content_json, dict) else {})
+    reflection = _reflection_for_display(lesson.content_json.get("reflection", {}) if isinstance(lesson.content_json, dict) else {})
     if isinstance(notebook, dict) and isinstance(notebook.get("prompts"), list):
         for prompt_index, prompt in enumerate(notebook["prompts"]):
             if isinstance(prompt, dict):
