@@ -101,6 +101,10 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "payload.publish_errors")
         self.assertContains(response, "What needs attention:")
         self.assertContains(response, "validation-error")
+        self.assertContains(response, "Insert a companion-course card (Option 4)")
+        self.assertContains(response, "data-course-card-search")
+        self.assertContains(response, "Those render as lesson links/cards, not as the Option 4 companion-course card.")
+        self.assertContains(response, "data-lesson-reference-picker")
 
     def test_admin_can_save_shared_draft(self):
         response = self.client.post(
