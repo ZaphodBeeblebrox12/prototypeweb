@@ -1365,11 +1365,15 @@ Describe the evidence first.
           ? '<span class="tt-purpose-figure-image"><img data-figure-zoom src="' + esc(image.data) + '" alt="' + esc(image.alt || title) + '" loading="lazy"></span>'
           : '<span class="tt-purpose-figure-missing">Image saved; preview source is not available in this browser.</span>';
         const caption = image.caption ? '<span class="tt-image-group-caption">' + esc(image.caption) + '</span>' : '';
-        return '<span class="tt-image-group-item">' + imageHtml + '<strong class="tt-image-group-item-title">' + esc(title) + '</strong>' + caption + '</span>';
+        return '<span class="tt-image-group-item">' + imageHtml +
+          '<span class="tt-image-group-item-heading"><span class="tt-image-group-case-id" aria-hidden="true"></span><strong class="tt-image-group-item-title">' + esc(title) + '</strong></span>' +
+          caption + '</span>';
       }).join('');
       const note = group.note ? '<span class="tt-purpose-figure-note">' + esc(group.note) + '</span>' : '';
+      const imageLabel = groupedImages.length + (groupedImages.length === 1 ? ' image' : ' images');
+      const groupHeader = '<span class="tt-purpose-figure-head tt-image-group-head"><span class="tt-purpose-figure-header-top"><span class="tt-purpose-figure-module">' + esc(moduleLabel) + '</span><span class="tt-image-group-context">' + imageLabel + ' · compare before interpreting</span></span><strong class="tt-purpose-figure-title">' + esc(group.title || 'Image group') + '</strong></span>';
       const groupMarkup = groupedImages.length >= 2
-        ? '<figure class="tt-purpose-figure tt-image-group-figure" data-figure-id="' + esc(id) + '">' + figureHeader(group.title || 'Image group') + '<span class="tt-purpose-figure-body"><span class="tt-image-group-grid">' + items + '</span>' + note + '</span></figure>'
+        ? '<figure class="tt-purpose-figure tt-image-group-figure" data-figure-id="' + esc(id) + '">' + groupHeader + '<span class="tt-purpose-figure-body"><span class="tt-image-group-grid">' + items + '</span>' + note + '</span></figure>'
         : '<p class="tt-purpose-figure-missing">Select at least two uploaded images in the Images tab to complete this group.</p>';
       figures.push(groupMarkup);
       return '\n\n' + token + '\n\n';
