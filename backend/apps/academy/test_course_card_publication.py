@@ -120,7 +120,8 @@ class OptionFourCardParityTests(SimpleTestCase):
         builder_end = builder.index("/* Compact layout for the catalogue selector in the lesson editor. */", builder_start)
         builder_css = builder[builder_start:builder_end].strip()
         learner_css = learner[learner.index(comment):].strip()
-        normalize = lambda text: re.sub(r"\s+", " ", text).strip()
+        def normalize(text):
+            return re.sub(r"\s+", " ", text).strip()
 
         self.assertEqual(normalize(builder_css), normalize(learner_css))
         self.assertIn("grid-template-columns:minmax(0,1fr) 132px", learner_css)
