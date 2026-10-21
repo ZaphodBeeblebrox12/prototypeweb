@@ -396,6 +396,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("regionalCountryOptions.map(([code, label, region])", preview)
         self.assertIn("regionalCountryRegionMap[country] || ''", preview)
         self.assertIn("audiencePicker.innerHTML", preview)
+        self.assertIn("regionalLabels[code] || code", preview)
         self.assertIn("['NO','Norway','EU']", preview)
         self.assertIn("previewUrl.searchParams.set('preview_audience',audience||'GLOBAL')", preview)
         self.assertNotIn("Copy the structure below into a lesson", preview)
