@@ -1406,7 +1406,7 @@ Describe the evidence first.
       '<div class="course-card-option-actions">' +
       '<button class="btn small primary" type="button" data-action="insert-course-card" data-id="' + esc(course.id) + '">' +
       (course.isComingSoon ? 'Insert coming-soon card' : 'Insert Option 4 card') + '</button>' +
-      (hasReplaceableReferences ? '<button class="btn small secondary" type="button" data-action="replace-course-card-and-remove-links" data-id="' + esc(course.id) + '">Use this card &amp; remove old links</button>' : '') +
+      (hasReplaceableReferences ? '<button class="btn small secondary" type="button" data-action="replace-course-card-and-remove-links" data-id="' + esc(course.id) + '">Keep one card here &amp; clean up</button>' : '') +
       '</div></article>'
     ).join('') + '</div>' +
     (matches.length > 8 ? '<p class="help">Showing 8 of ' + matches.length + ' matches. Refine the search to find another course.</p>' : '');
@@ -1428,7 +1428,7 @@ Describe the evidence first.
       : '';
     return '<section class="related-course-box course-card-picker" data-course-card-picker>' +
       '<h4>Insert a companion-course card (Option 4)</h4>' +
-      '<p>Place the cursor in the lesson body where the course preview should appear, then choose a real catalogue course below. This inserts the mini preview with the title, summary, topic chips and green/gold panel—not a link to an individual lesson.</p>' +
+      '<p>Choose a real catalogue course below. “Keep one card here &amp; clean up” preserves the final card position in the lesson, removes earlier duplicates and accidental lesson links, and clears tab-routing markers that are not attached to a heading. The change is saved to this draft; it does not publish the course.</p>' +
       note +
       '<label for="companionCourseCardSearch">Find a companion course</label>' +
       '<input class="input" id="companionCourseCardSearch" type="search" data-course-card-search placeholder="Search published or coming-soon courses" aria-label="Search courses to insert as an Option 4 card">' +
