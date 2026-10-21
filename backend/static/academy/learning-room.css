@@ -777,3 +777,77 @@
 @media (max-width: 520px) {
   .tt-answer-result { flex-basis: 100%; margin-left: 1.55rem; white-space: normal; }
 }
+
+
+/* Trading Notebook: match the agreed editorial reference block inside The idea tab. */
+.tt-learning-room .tt-notebook {
+  display:grid;
+  grid-template-columns:68px minmax(0,1fr);
+  gap:0 18px;
+  align-items:stretch;
+  margin:28px 0 8px;
+  padding:21px 22px 22px 17px;
+  border:0;
+  border-top:2px solid #66845f;
+  border-bottom:1px solid #d8ddcf;
+  border-radius:0;
+  background:#faf8f0;
+  box-shadow:none;
+}
+.tt-learning-room .tt-notebook-index {
+  display:flex;
+  grid-column:1;
+  grid-row:1 / span 4;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+  min-height:100%;
+  padding:5px 13px 0 0;
+  border-right:1px solid #cbd5c3;
+  text-align:center;
+}
+.tt-learning-room .tt-notebook-index span { color:#6c7565; font-size:8px; line-height:1.35; letter-spacing:.08em; }
+.tt-learning-room .tt-notebook-index strong { color:#c36b4d; font:400 25px/1 Georgia,"Times New Roman",serif; }
+.tt-learning-room .tt-notebook-content { min-width:0; }
+.tt-learning-room .tt-notebook-kicker { margin:2px 0 7px; color:#48664f; font-size:8px; font-weight:850; letter-spacing:.17em; }
+.tt-learning-room .tt-notebook h3 { grid-column:auto; margin:0 0 10px; color:#24503c; font:400 clamp(21px,2.1vw,27px)/1.15 Georgia,"Times New Roman",serif; letter-spacing:-.035em; }
+.tt-learning-room .tt-notebook-content ol { display:block; grid-column:auto; list-style:none; margin:0; padding:0; }
+.tt-learning-room .tt-notebook-content li { display:grid; grid-template-columns:25px minmax(0,1fr); gap:8px; align-items:start; padding:8px 0; border-top:1px solid #d5dbce; }
+.tt-learning-room .tt-notebook-number { padding-top:2px; color:#bd664b; font:400 9px/1.5 Arial,sans-serif; }
+.tt-learning-room .tt-notebook-content li p { margin:0; color:#304b3b; font-size:11px; line-height:1.6; }
+.tt-learning-room .tt-notebook-content li p strong { color:#254f3b; font-weight:800; }
+.tt-learning-room .tt-notebook-response-editor { margin-top:10px; border-top:1px solid #d5dbce; padding-top:9px; }
+.tt-learning-room .tt-notebook-response-editor summary { cursor:pointer; color:#48664f; font-size:11px; font-weight:750; }
+.tt-learning-room .tt-notebook-reflection-fields { display:grid; gap:12px; margin-top:12px; }
+.tt-learning-room .tt-notebook-reflection-field label { display:block; color:#4f6254; font-size:12px; font-weight:700; line-height:1.5; }
+.tt-learning-room .tt-notebook-reflection-actions { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin-top:12px; }
+.tt-learning-room .tt-notebook-examples-button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  min-height:49px;
+  margin-top:10px;
+  padding:13px 20px;
+  border:1px solid #285a43;
+  border-radius:999px;
+  background:#285a43;
+  color:#fffefa;
+  font-size:14px;
+  font-weight:800;
+  text-decoration:none;
+  cursor:pointer;
+  box-shadow:0 5px 12px #285a431c;
+}
+.tt-learning-room .tt-notebook-examples-button:hover { background:#1e4935; border-color:#1e4935; }
+.tt-learning-room .tt-notebook-examples-button:focus-visible { outline:3px solid #a78034; outline-offset:3px; }
+@media(max-width:620px) {
+  .tt-learning-room .tt-notebook { grid-template-columns:48px minmax(0,1fr); gap:0 12px; padding:17px 12px 18px 10px; margin-top:22px; }
+  .tt-learning-room .tt-notebook-index { padding-right:8px; }
+  .tt-learning-room .tt-notebook-index span { font-size:7px; }
+  .tt-learning-room .tt-notebook-index strong { font-size:22px; }
+  .tt-learning-room .tt-notebook-content h3 { font-size:22px; }
+  .tt-learning-room .tt-notebook-content li { grid-template-columns:20px minmax(0,1fr); gap:5px; }
+  .tt-learning-room .tt-notebook-content li p { font-size:11px; }
+  .tt-learning-room .tt-notebook-examples-button { max-width:100%; min-height:45px; padding:11px 15px; font-size:13px; }
+}
