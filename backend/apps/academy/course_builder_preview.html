@@ -744,10 +744,18 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 @media(max-width:760px) { .regional-image-row { grid-template-columns:minmax(0,1fr); } }
 
 /* True visual authoring canvas. */
-.rich-editor-wrapper { border:1px solid var(--line); border-radius:11px; overflow:hidden; background:var(--panel); }
-.rich-editor-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:5px; padding:8px; border-bottom:1px solid var(--line); background:var(--panel-soft); }
-.rich-editor-toolbar button,.rich-editor-toolbar select { min-height:33px; padding:5px 9px; border:1px solid var(--line); border-radius:7px; background:var(--panel); color:var(--ink); font-size:12px; font-weight:700; }
-.rich-editor-toolbar button:hover { border-color:var(--site-primary); color:var(--site-primary); }
+.rich-editor-wrapper { position:relative; z-index:0; isolation:isolate; border:1px solid var(--line); border-radius:11px; overflow:visible; background:var(--panel); }
+.rich-editor-wrapper:focus-within { z-index:8; }
+.rich-editor-toolbar { position:relative; z-index:2; display:flex; flex-wrap:wrap; align-items:center; gap:5px; padding:8px; border-bottom:1px solid var(--line); border-radius:10px 10px 0 0; background:var(--panel-soft); }
+.rich-editor-toolbar button,.rich-editor-toolbar .rich-format-trigger { min-height:33px; padding:5px 9px; border:1px solid var(--line); border-radius:7px; background:var(--panel); color:var(--ink); font-size:12px; font-weight:700; }
+.rich-editor-toolbar button:hover,.rich-editor-toolbar .rich-format-trigger:hover { border-color:var(--site-primary); color:var(--site-primary); }
+.rich-format-picker { position:relative; flex:0 0 auto; }
+.rich-editor-toolbar .rich-format-trigger { display:flex; align-items:center; justify-content:space-between; gap:13px; min-width:96px; cursor:pointer; }
+.rich-format-caret { color:var(--muted); font-size:11px; line-height:1; }
+.rich-format-menu { position:absolute; top:calc(100% + 5px); left:0; z-index:40; display:flex; flex-direction:column; gap:2px; min-width:170px; max-height:min(360px,55vh); overflow-y:auto; padding:5px; border:1px solid var(--line); border-radius:9px; background:var(--panel); box-shadow:0 12px 28px rgba(36,58,43,.18); }
+.rich-format-menu[hidden] { display:none !important; }
+.rich-editor-toolbar .rich-format-option { display:block; width:100%; min-height:32px; padding:7px 10px; border-color:transparent; text-align:left; font-weight:600; white-space:nowrap; }
+.rich-editor-toolbar .rich-format-option[aria-selected="true"] { background:var(--panel-soft); color:var(--site-primary); border-color:var(--line); }
 .rich-editor-canvas { min-height:150px; padding:15px 17px; background:var(--panel); color:var(--ink); font-size:15px; line-height:1.8; overflow-wrap:anywhere; outline:none; }
 .rich-editor-canvas-main { min-height:390px; }
 .rich-editor-canvas:focus { box-shadow:inset 0 0 0 2px #87A48B; }
@@ -760,7 +768,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .rich-editor-canvas th { background:var(--panel-soft); font-weight:800; }
 .tt-editor-token { display:inline-flex; align-items:center; max-width:100%; margin:2px 3px; padding:6px 10px; border:1px solid #c8d5c4; border-radius:7px; background:#eef3e9; color:#2d5b41; font:700 11px/1.4 var(--site-font-body); white-space:normal; vertical-align:middle; user-select:all; }
 .tt-editor-token-block { display:block; width:max-content; max-width:100%; margin:9px 0; border-left:3px solid var(--site-secondary); background:#f4f0e3; }
-@media(max-width:620px) { .rich-editor-toolbar { gap:4px; padding:6px; }.rich-editor-toolbar button,.rich-editor-toolbar select { min-height:32px; padding:5px 7px; font-size:11px; }.rich-editor-canvas { padding:12px; font-size:14px; } }
+@media(max-width:620px) { .rich-editor-toolbar { gap:4px; padding:6px; }.rich-editor-toolbar button,.rich-editor-toolbar .rich-format-trigger { min-height:32px; padding:5px 7px; font-size:11px; }.rich-format-menu { min-width:160px; }.rich-editor-canvas { padding:12px; font-size:14px; } }
 </style>
 </head>
 <body>
@@ -1025,6 +1033,25 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     ).join('');
     return '<table><thead><tr>' + headings + '</tr></thead><tbody>' + bodyRows + '</tbody></table><p><br></p>';
   }
+  function richFormatPickerMarkup() {
+    const choices = [
+      ['p', 'Paragraph'],
+      ['h1', 'Heading 1'],
+      ['h2', 'Heading 2'],
+      ['h3', 'Heading 3'],
+      ['h4', 'Heading 4'],
+      ['h5', 'Heading 5'],
+      ['h6', 'Heading 6'],
+      ['blockquote', 'Quote']
+    ];
+    return '<div class="rich-format-picker" data-rich-format-picker>' +
+      '<button type="button" class="rich-format-trigger" data-rich-format-toggle aria-haspopup="listbox" aria-expanded="false" aria-label="Text style"><span data-rich-format-label>Paragraph</span><span class="rich-format-caret" aria-hidden="true">▾</span></button>' +
+      '<div class="rich-format-menu" data-rich-format-menu role="listbox" aria-label="Text style" hidden>' +
+      choices.map(function(choice, index) {
+        return '<button type="button" class="rich-format-option" data-rich-format-option="' + choice[0] + '" role="option" aria-selected="' + (index === 0 ? 'true' : 'false') + '">' + choice[1] + '</button>';
+      }).join('') +
+      '</div></div>';
+  }
   function visualEditorMarkup(value, options) {
     options = options || {};
     const kind = String(options.kind || 'main');
@@ -1034,7 +1061,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     const minClass = kind === 'main' ? ' rich-editor-canvas-main' : ' rich-editor-canvas-regional';
     return '<div class="rich-editor-wrapper" data-rich-editor-wrapper>' +
       '<div class="rich-editor-toolbar" role="toolbar" aria-label="Text formatting">' +
-      '<select data-rich-format aria-label="Text style"><option value="p">Paragraph</option><option value="h1">Heading 1</option><option value="h2">Heading 2</option><option value="h3">Heading 3</option><option value="h4">Heading 4</option><option value="h5">Heading 5</option><option value="h6">Heading 6</option><option value="blockquote">Quote</option></select>' +
+      richFormatPickerMarkup() +
       '<button type="button" data-rich-command="bold" aria-label="Bold"><strong>B</strong></button><button type="button" data-rich-command="italic" aria-label="Italic"><em>I</em></button><button type="button" data-rich-command="strikeThrough" aria-label="Strikethrough"><s>S</s></button>' +
       '<button type="button" data-rich-command="insertUnorderedList" aria-label="Bulleted list">• List</button><button type="button" data-rich-command="insertOrderedList" aria-label="Numbered list">1. List</button>' +
       '<button type="button" data-rich-command="link" aria-label="Insert link">Link</button><button type="button" data-rich-command="insertHorizontalRule" aria-label="Insert divider">Divider</button><button type="button" data-rich-command="table" aria-label="Insert table">Table</button><button type="button" data-rich-command="undo" aria-label="Undo">Undo</button><button type="button" data-rich-command="redo" aria-label="Redo">Redo</button></div>' +
@@ -2934,8 +2961,8 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     scheduleVisualEditorSync(editor);
   });
   document.addEventListener('mousedown', event => {
-    // Preserve text selection for toolbar buttons without blocking native select menus.
-    if (event.target.closest?.('[data-rich-command]')) event.preventDefault();
+    // Preserve the content selection while clicking formatting controls.
+    if (event.target.closest?.('[data-rich-command], [data-rich-format-toggle], [data-rich-format-option]')) event.preventDefault();
   });
   document.addEventListener('click', event => {
     const button = event.target.closest?.('[data-rich-command]');
@@ -2971,15 +2998,84 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     syncVisualEditorToModel(editor);
     captureRichEditorRange();
   });
-  document.addEventListener('change', event => {
-    const select = event.target.closest?.('[data-rich-format]');
-    if (!select) return;
-    const editor = select.closest('[data-rich-editor-wrapper]')?.querySelector('[data-visual-editor]');
-    if (!editor) return;
-    restoreRichEditorSelection(editor);
-    document.execCommand('formatBlock', false, select.value);
-    syncVisualEditorToModel(editor);
-    captureRichEditorRange();
+  function closeRichFormatPickers(exceptPicker) {
+    document.querySelectorAll('[data-rich-format-picker]').forEach(picker => {
+      if (picker === exceptPicker) return;
+      picker.querySelector('[data-rich-format-toggle]')?.setAttribute('aria-expanded', 'false');
+      const menu = picker.querySelector('[data-rich-format-menu]');
+      if (menu) menu.hidden = true;
+    });
+  }
+  document.addEventListener('click', event => {
+    const toggle = event.target.closest?.('[data-rich-format-toggle]');
+    if (toggle) {
+      event.preventDefault();
+      const picker = toggle.closest('[data-rich-format-picker]');
+      const menu = picker?.querySelector('[data-rich-format-menu]');
+      const opening = toggle.getAttribute('aria-expanded') !== 'true';
+      closeRichFormatPickers(picker);
+      if (menu) menu.hidden = !opening;
+      toggle.setAttribute('aria-expanded', opening ? 'true' : 'false');
+      return;
+    }
+
+    const option = event.target.closest?.('[data-rich-format-option]');
+    if (option) {
+      event.preventDefault();
+      const picker = option.closest('[data-rich-format-picker]');
+      const editor = picker?.closest('[data-rich-editor-wrapper]')?.querySelector('[data-visual-editor]');
+      const value = option.dataset.richFormatOption;
+      if (!picker || !editor || !value) {
+        closeRichFormatPickers();
+        return;
+      }
+      restoreRichEditorSelection(editor);
+      document.execCommand('formatBlock', false, value);
+      syncVisualEditorToModel(editor);
+      picker.querySelectorAll('[data-rich-format-option]').forEach(item => {
+        item.setAttribute('aria-selected', item === option ? 'true' : 'false');
+      });
+      const label = picker.querySelector('[data-rich-format-label]');
+      if (label) label.textContent = option.textContent.trim();
+      closeRichFormatPickers();
+      captureRichEditorRange();
+      picker.querySelector('[data-rich-format-toggle]')?.focus({preventScroll:true});
+      return;
+    }
+
+    if (!event.target.closest?.('[data-rich-format-picker]')) closeRichFormatPickers();
+  });
+  document.addEventListener('keydown', event => {
+    const toggle = event.target.closest?.('[data-rich-format-toggle]');
+    const option = event.target.closest?.('[data-rich-format-option]');
+    if (toggle && event.key === 'ArrowDown') {
+      event.preventDefault();
+      const picker = toggle.closest('[data-rich-format-picker]');
+      const menu = picker?.querySelector('[data-rich-format-menu]');
+      closeRichFormatPickers(picker);
+      if (menu) menu.hidden = false;
+      toggle.setAttribute('aria-expanded', 'true');
+      menu?.querySelector('[data-rich-format-option]')?.focus();
+      return;
+    }
+    if (event.key === 'Escape' && (toggle || option || document.querySelector('[data-rich-format-toggle][aria-expanded="true"]'))) {
+      const picker = (toggle || option)?.closest('[data-rich-format-picker]') ||
+        document.querySelector('[data-rich-format-toggle][aria-expanded="true"]')?.closest('[data-rich-format-picker]');
+      if (!picker) return;
+      event.preventDefault();
+      closeRichFormatPickers();
+      picker.querySelector('[data-rich-format-toggle]')?.focus({preventScroll:true});
+      return;
+    }
+    if (!option || !['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+    const picker = option.closest('[data-rich-format-picker]');
+    const options = Array.from(picker?.querySelectorAll('[data-rich-format-option]') || []);
+    const index = options.indexOf(option);
+    if (!options.length) return;
+    const nextIndex = event.key === 'Home' ? 0 : event.key === 'End' ? options.length - 1 :
+      (index + (event.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
+    event.preventDefault();
+    options[nextIndex].focus();
   });
   document.addEventListener('input',event=>{const el=event.target;if(!el.matches('[data-related-course-search]'))return;const query=el.value.trim().toLowerCase();const box=el.parentElement;box.querySelectorAll('.related-course-item').forEach(item=>{const searchable=(item.querySelector('.related-course-choice')?.textContent||item.textContent).toLowerCase();item.hidden=query!==''&&!searchable.includes(query);});});
   document.addEventListener('change',event=>{const el=event.target;if(!el.matches('[data-related-course]'))return;const l=currentLesson();if(!l)return;if(!Array.isArray(l.relatedCourseIds))l.relatedCourseIds=[];const id=el.dataset.relatedCourse;if(el.checked&&!l.relatedCourseIds.includes(id))l.relatedCourseIds.push(id);if(!el.checked)l.relatedCourseIds=l.relatedCourseIds.filter(x=>x!==id);persist(false);toast('Related-course reference saved in this preview.');});
