@@ -19,7 +19,7 @@
     <main class="content" id="main-content" tabindex="-1">
       <div class="member-desk-context">
         <span class="kicker">TRADETHESIS · MEMBER AREA</span>
-        <span class="member-signed-in">Signed in as {{ user.email|default:user.username }}</span>
+        {% if user.is_authenticated %}<span class="member-signed-in">Signed in as {{ user.email|default:user.username }}</span>{% else %}<a class="member-signed-in" href="{% url 'account_login' %}">Sign in to your member area ↗</a>{% endif %}
       </div>
       {% if messages %}
         <div class="member-flash-list" aria-live="polite">
@@ -33,8 +33,8 @@
         <a class="member-section-tab{% if request.resolver_match.url_name == 'profile' %} active{% endif %}" href="{% url 'profile' %}"{% if request.resolver_match.url_name == 'profile' %} aria-current="page"{% endif %}>Profile &amp; security</a>
         <a class="member-section-tab{% if request.resolver_match.url_name == 'activity' %} active{% endif %}" href="{% url 'activity' %}"{% if request.resolver_match.url_name == 'activity' %} aria-current="page"{% endif %}>Activity</a>
         <a class="member-section-tab{% if request.resolver_match.url_name == 'notifications' %} active{% endif %}" href="{% url 'notifications' %}"{% if request.resolver_match.url_name == 'notifications' %} aria-current="page"{% endif %}>Notifications</a>
-        <a class="member-section-tab{% if request.resolver_match.url_name == 'manage-subscription' or request.resolver_match.url_name == 'payment-receipt' %} active{% endif %}" href="{% url 'manage-subscription' %}"{% if request.resolver_match.url_name == 'manage-subscription' or request.resolver_match.url_name == 'payment-receipt' %} aria-current="page"{% endif %}>Billing &amp; invoices</a>
-        <a class="member-section-tab{% if request.resolver_match.namespace == 'support' %} active{% endif %}" href="{% url 'support:my_tickets' %}"{% if request.resolver_match.namespace == 'support' %} aria-current="page"{% endif %}>Help &amp; support</a>
+        <a class="member-section-tab{% if request.resolver_match.url_name == 'manage-subscription' or request.resolver_match.url_name == 'payment-receipt' or request.resolver_match.url_name == 'upgrade-page' %} active{% endif %}" href="{% url 'manage-subscription' %}"{% if request.resolver_match.url_name == 'manage-subscription' or request.resolver_match.url_name == 'payment-receipt' or request.resolver_match.url_name == 'upgrade-page' %} aria-current="page"{% endif %}>Billing &amp; invoices</a>
+        <a class="member-section-tab{% if request.resolver_match.namespace == 'support' or request.resolver_match.url_name == 'support' %} active{% endif %}" href="{% url 'support:my_tickets' %}"{% if request.resolver_match.namespace == 'support' or request.resolver_match.url_name == 'support' %} aria-current="page"{% endif %}>Help &amp; support</a>
       </nav>
       <section class="page active member-page">
         <header class="page-head">
