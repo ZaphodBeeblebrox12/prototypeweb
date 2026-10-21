@@ -13,6 +13,37 @@ from .views import _notebook_for_course_display
 class SharedLessonRenderingTests(SimpleTestCase):
     ASSET_ID = "8c0f08ab-c9be-45d2-9cde-1f5a0a1c9031"
 
+    def test_regional_block_country_override_precedes_region_and_global_fallback(self):
+        source = "## Disclosure\\n\\n[[regional-block:risk-note]]"
+        blocks = {
+            "risk-note": {
+                "id": "risk-note",
+                "base_content": "Global disclosure.",
+                "variants": [
+                    {"scope": "region", "code": "APAC", "content": "APAC disclosure.", "hidden": False},
+                    {"scope": "country", "code": "IN", "content": "India disclosure.", "hidden": False},
+                ],
+            }
+        }
+        india = build_lesson_sections(source, regional_blocks=blocks, country_code="IN", region_code="APAC")
+        australia = build_lesson_sections(source, regional_blocks=blocks, country_code="AU", region_code="APAC")
+        unknown = build_lesson_sections(source, regional_blocks=blocks, country_code="ZZ", region_code=None)
+        self.assertIn("India disclosure.", india["idea_html"])
+        self.assertIn("APAC disclosure.", australia["idea_html"])
+        self.assertIn("Global disclosure.", unknown["idea_html"])
+        self.assertNotIn("[[regional-block:", india["idea_html"])
+
+    def test_regional_block_can_be_explicitly_hidden_for_a_matching_country(self):
+        source = "## Disclosure\\n\\nBefore.\\n\\n[[regional-block:notice]]\\n\\nAfter."
+        blocks = {"notice": {"id": "notice", "base_content": "Global notice.", "variants": [
+            {"scope": "country", "code": "CA", "content": "unused", "hidden": True}
+        ]}}
+        canada = build_lesson_sections(source, regional_blocks=blocks, country_code="CA", region_code="NA")
+        us = build_lesson_sections(source, regional_blocks=blocks, country_code="US", region_code="NA")
+        self.assertNotIn("unused", canada["idea_html"])
+        self.assertNotIn("Global notice.", canada["idea_html"])
+        self.assertIn("Global notice.", us["idea_html"])
+
     def test_misplaced_tab_route_markers_do_not_hide_section_copy(self):
         source = "\n".join([
             "## Start with the decision",

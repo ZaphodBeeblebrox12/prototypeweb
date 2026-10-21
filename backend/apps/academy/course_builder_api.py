@@ -46,6 +46,8 @@ logger = logging.getLogger(__name__)
 _MAX_IMAGE_BYTES = 10 * 1024 * 1024
 _ALLOWED_IMAGES = {"image/jpeg": ("JPEG", ".jpg"), "image/png": ("PNG", ".png"), "image/webp": ("WEBP", ".webp")}
 _ASSET_REF = re.compile(r"asset://([A-Za-z0-9-]+)")
+_REGIONAL_BLOCK_TOKEN = re.compile(r"\[\[regional-block:([A-Za-z0-9_-]{1,120})\]\]")
+_ALLOWED_CONTENT_REGIONS = {"APAC", "EU", "NA", "LATAM", "MENA", "SSA"}
 _LESSON_REF_TOKEN = re.compile(r"\[\[(?:lesson|lesson-card):([0-9a-fA-F-]{36})\]\]")
 
 
@@ -295,10 +297,75 @@ def _build_import_payload(course_state, course_slug):
                 if stable_image_id:
                     question_image_ids.add(stable_image_id)
 
+            # Regional content blocks occupy an explicit marker in the lesson body.
+            # Store country/region alternatives in learner-safe JSON, and allow their
+            # assets through the same publication and protected-media authorization path.
+            regional_blocks_payload = {}
+            regional_block_asset_ids = set()
+            raw_regional_blocks = lesson.get("regionalBlocks") if isinstance(lesson.get("regionalBlocks"), list) else []
+            active_regional_markers = set(_REGIONAL_BLOCK_TOKEN.findall(content))
+            for block in raw_regional_blocks[:100]:
+                if not isinstance(block, dict):
+                    continue
+                block_id = str(block.get("id") or "").strip()
+                if not block_id or not re.fullmatch(r"[A-Za-z0-9_-]{1,120}", block_id):
+                    raise ValidationError(f"{title}: a regional content block has an invalid ID.")
+                if block_id in regional_blocks_payload:
+                    raise ValidationError(f"{title}: duplicate regional content block ID {block_id}.")
+                if block_id not in active_regional_markers:
+                    # Keep unused authoring blocks in builder_state, not learner JSON.
+                    continue
+
+                def remap_regional_assets(value):
+                    value = str(value or "")[:40000]
+                    for old_id, stable_id in image_by_id.items():
+                        value = value.replace(f"asset://{old_id}", f"asset://{stable_id}")
+                    regional_block_asset_ids.update(_ASSET_REF.findall(value))
+                    return value
+
+                base_content = remap_regional_assets(block.get("baseContent", ""))
+                variants = []
+                seen_variant_targets = set()
+                raw_variants = block.get("variants") if isinstance(block.get("variants"), list) else []
+                if len(raw_variants) > 30:
+                    raise ValidationError(f"{title}: a regional block may contain at most 30 variants.")
+                for variant_index, variant in enumerate(raw_variants, start=1):
+                    if not isinstance(variant, dict):
+                        continue
+                    scope = str(variant.get("scope") or "country").strip().lower()
+                    code = str(variant.get("code") or ("IN" if scope == "country" else "APAC")).strip().upper()
+                    if scope == "country":
+                        if len(code) != 2 or not code.isalpha() or not code.isascii():
+                            raise ValidationError(f"{title}: country variants must use a two-letter country code.")
+                    elif scope == "region":
+                        if code not in _ALLOWED_CONTENT_REGIONS:
+                            raise ValidationError(f"{title}: unsupported regional audience {code}.")
+                    else:
+                        raise ValidationError(f"{title}: regional variant scope must be country or region.")
+                    target_key = (scope, code)
+                    if target_key in seen_variant_targets:
+                        raise ValidationError(f"{title}: regional block {block_id} repeats the {code} audience.")
+                    seen_variant_targets.add(target_key)
+                    variant_id = str(variant.get("id") or f"{block_id}-variant-{variant_index}")[:150]
+                    variants.append({
+                        "id": variant_id,
+                        "scope": scope,
+                        "code": code,
+                        "content": remap_regional_assets(variant.get("content", "")),
+                        "hidden": bool(variant.get("hidden", False)),
+                    })
+                regional_blocks_payload[block_id] = {
+                    "id": block_id,
+                    "title": str(block.get("title") or "Regional content").strip()[:240],
+                    "base_content": base_content,
+                    "variants": variants,
+                }
+
             # Keep figure placement inside authored Markdown; questions may reference the same
             # assets independently. Titles, alt text and captions travel in figure metadata.
             asset_ids = sorted(
                 set(_ASSET_REF.findall(content))
+                | regional_block_asset_ids
                 | {asset_id for group_ids in image_group_asset_ids.values() for asset_id in group_ids}
                 | question_image_ids
             )
@@ -416,6 +483,7 @@ def _build_import_payload(course_state, course_slug):
                 "questions": learner_questions,
                 "notebook": notebook_payload,
                 "video_url": video_url,
+                "regional_blocks": regional_blocks_payload,
             }
             lessons.append({
                 "source_id": f"{module_index}.{lesson_index}",
@@ -688,6 +756,26 @@ def _builder_state_from_published_course(course):
                 "content": lesson.content_markdown or "", "questions": normalized_questions,
                 "images": images, "image": deepcopy(images[0]) if images else None,
                 "imageGroups": image_groups, "teachingFigures": teaching_figures,
+                "regionalBlocks": [
+                    {
+                        "id": str(block_id),
+                        "title": str(block.get("title") or "Regional content"),
+                        "baseContent": str(block.get("base_content") or ""),
+                        "variants": [
+                            {
+                                "id": str(variant.get("id") or f"{block_id}-variant-{index}"),
+                                "scope": str(variant.get("scope") or "country"),
+                                "code": str(variant.get("code") or "IN"),
+                                "content": str(variant.get("content") or ""),
+                                "hidden": bool(variant.get("hidden", False)),
+                            }
+                            for index, variant in enumerate(block.get("variants", []), start=1)
+                            if isinstance(variant, dict)
+                        ] if isinstance(block.get("variants"), list) else [],
+                    }
+                    for block_id, block in (content_json.get("regional_blocks") or {}).items()
+                    if isinstance(block, dict)
+                ],
                 "relatedCourseIds": [str(value) for value in content_json.get("related_course_ids", [])],
             })
         if lessons:
@@ -934,6 +1022,13 @@ def course_builder_api(request):
             for lesson in module["lessons"]:
                 from .content_rendering import validate_markdown_source
                 validate_markdown_source(lesson["content_markdown"])
+                for regional_block in (lesson.get("content_json") or {}).get("regional_blocks", {}).values():
+                    if not isinstance(regional_block, dict):
+                        continue
+                    validate_markdown_source(regional_block.get("base_content", ""))
+                    for regional_variant in regional_block.get("variants", []):
+                        if isinstance(regional_variant, dict):
+                            validate_markdown_source(regional_variant.get("content", ""))
         encoded = json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
         digest = hashlib.sha256(encoded).hexdigest()
         mode = body.get("mode", "save")

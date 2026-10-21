@@ -56,6 +56,8 @@ def _deduplicate_course_card_refs(source):
         source = source[:start] + source[end:]
     return re.sub(r"\n[ \t]*\n(?:[ \t]*\n)+", "\n\n", source)
 
+_REGIONAL_BLOCK_TOKEN = re.compile(r"\[\[regional-block:([A-Za-z0-9_-]{1,120})\]\]")
+_REGIONAL_CODES = frozenset({"APAC", "EU", "NA", "LATAM", "MENA", "SSA"})
 _HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
 _DANGEROUS_MARKDOWN = re.compile(
     r"<\s*/?\s*(?:script|style|iframe|object|embed|form|input|button|svg|math)\b"
@@ -315,6 +317,60 @@ def _resolve_course_cards(source):
 
     return _COURSE_CARD_REF.sub(replace_reference, source or ""), replacements
 
+
+
+def resolve_regional_blocks(source, regional_blocks=None, country_code=None, region_code=None):
+    """Resolve builder-managed regional content server-side before sectioning.
+
+    An exact country override wins over a region override. An explicitly hidden
+    matching block produces no markup; otherwise global/base text is the fallback.
+    """
+    source = str(source or "")
+    if not source:
+        return source
+    if isinstance(regional_blocks, list):
+        blocks = {
+            str(item.get("id") or ""): item
+            for item in regional_blocks
+            if isinstance(item, dict) and item.get("id")
+        }
+    elif isinstance(regional_blocks, dict):
+        blocks = {str(key): value for key, value in regional_blocks.items() if isinstance(value, dict)}
+    else:
+        blocks = {}
+    country = str(country_code or "").strip().upper()
+    region = str(region_code or "").strip().upper()
+    if region not in _REGIONAL_CODES:
+        region = ""
+
+    def replace(match):
+        block = blocks.get(match.group(1))
+        if not isinstance(block, dict):
+            # A stale marker must not leak authoring syntax to learners.
+            return ""
+        variants = block.get("variants") if isinstance(block.get("variants"), list) else []
+        selected = None
+        if country:
+            selected = next((
+                item for item in variants
+                if isinstance(item, dict)
+                and str(item.get("scope") or "").strip().lower() == "country"
+                and str(item.get("code") or item.get("country") or "").strip().upper() == country
+            ), None)
+        if selected is None and region:
+            selected = next((
+                item for item in variants
+                if isinstance(item, dict)
+                and str(item.get("scope") or "").strip().lower() == "region"
+                and str(item.get("code") or item.get("region") or "").strip().upper() == region
+            ), None)
+        if selected is not None:
+            if bool(selected.get("hidden", False)):
+                return ""
+            return str(selected.get("content") or "")
+        return str(block.get("base_content", block.get("baseContent", "")) or "")
+
+    return _REGIONAL_BLOCK_TOKEN.sub(replace, source)
 
 
 def render_safe_markdown(
@@ -632,9 +688,16 @@ def build_lesson_sections(
     figure_prefix=None,
     module_label="",
     course_title="",
+    regional_blocks=None,
+    country_code=None,
+    region_code=None,
 ):
     """Group source headings into the three reusable Learning Room tabs."""
-    source = _deduplicate_course_card_refs(source or "")
+    source = resolve_regional_blocks(
+        source or "", regional_blocks=regional_blocks,
+        country_code=country_code, region_code=region_code,
+    )
+    source = _deduplicate_course_card_refs(source)
     lines = source.splitlines()
     groups = {"idea": [], "examples": [], "practice": []}
     current_group = "idea"

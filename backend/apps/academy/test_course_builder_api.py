@@ -115,6 +115,39 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, 'This placement is preserved in the website preview.</span></div>${courseCardPickerMarkup()}<div class="helper-note">')
         self.assertContains(response, "Those render as lesson links/cards, not as the Option 4 companion-course card.")
         self.assertContains(response, "data-lesson-reference-picker")
+        self.assertContains(response, "Regional content")
+        self.assertContains(response, "previewAudienceSelect")
+        self.assertContains(response, "data-regional-variant")
+
+    def test_regional_content_is_persisted_in_publish_payload_and_builder_snapshot(self):
+        payload = self.draft_payload("regional-content-course")
+        lesson = payload["course"]["modules"][0]["lessons"][0]
+        lesson["content"] += "\\n\\n[[regional-block:risk-note]]"
+        lesson["regionalBlocks"] = [{
+            "id": "risk-note",
+            "title": "Risk disclosure",
+            "baseContent": "Global educational disclosure.",
+            "variants": [
+                {"id": "risk-note-in", "scope": "country", "code": "IN", "content": "India-specific disclosure in INR.", "hidden": False},
+                {"id": "risk-note-na", "scope": "region", "code": "NA", "content": "North American disclosure.", "hidden": False},
+                {"id": "risk-note-hidden", "scope": "country", "code": "CA", "content": "", "hidden": True},
+            ],
+        }]
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        record = CourseImport.objects.get(pk=response.json()["record_id"])
+        saved_lesson = record.payload["modules"][0]["lessons"][0]
+        block = saved_lesson["content_json"]["regional_blocks"]["risk-note"]
+        self.assertEqual(block["base_content"], "Global educational disclosure.")
+        self.assertEqual(block["variants"][0]["code"], "IN")
+        self.assertEqual(block["variants"][1]["scope"], "region")
+        self.assertTrue(block["variants"][2]["hidden"])
+        saved_state = record.payload["builder_state"]["modules"][0]["lessons"][0]
+        self.assertEqual(saved_state["regionalBlocks"][0]["title"], "Risk disclosure")
 
     def test_admin_can_save_shared_draft(self):
         response = self.client.post(

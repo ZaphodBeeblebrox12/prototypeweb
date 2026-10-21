@@ -13,6 +13,7 @@ from django.http import FileResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
 from .content_rendering import build_lesson_sections, render_safe_markdown
@@ -36,6 +37,28 @@ from .services import (
     lesson_release_at,
     update_lesson_progress,
 )
+
+
+def _regional_audience(request, admin_preview=False):
+    """Resolve country/region from the existing geo resolver; only admins can simulate."""
+    from apps.subscriptions.services import get_pricing_country, get_region_for_country
+
+    country = None
+    if admin_preview and getattr(request, "user", None) and is_course_content_admin(request.user):
+        audience = str(request.GET.get("preview_audience") or request.GET.get("preview_country") or "").strip().upper()
+        if audience in {"", "GLOBAL"}:
+            return None, None
+        if audience.startswith("REGION:"):
+            candidate_region = audience.split(":", 1)[1]
+            if candidate_region in {"APAC", "EU", "NA", "LATAM", "MENA", "SSA"}:
+                return None, candidate_region
+        if len(audience) == 2 and audience.isalpha() and audience.isascii():
+            country = audience
+        else:
+            country = get_pricing_country(request)
+    else:
+        country = get_pricing_country(request)
+    return country, get_region_for_country(country) if country else None
 
 
 def _practice_questions_with_images(questions, asset_urls, figure_metadata):
@@ -273,6 +296,7 @@ def course_detail(request, course_slug):
     })
 
 
+@never_cache
 @login_required
 def lesson_detail(request, course_slug, lesson_id):
     lesson = get_object_or_404(
@@ -356,6 +380,8 @@ def lesson_detail(request, course_slug, lesson_id):
         status=LessonProgress.Status.COMPLETED,
     ).count()
     course_progress_percent = round(completed_lessons * 100 / total_lessons) if total_lessons else 0
+    content_json = lesson.content_json if isinstance(lesson.content_json, dict) else {}
+    regional_country, regional_region = _regional_audience(request)
     return render(request, "academy/lesson.html", {
         "course": course, "lesson": lesson, "module": lesson.module,
         "entitlement": entitlement, "progress": progress,
@@ -370,6 +396,9 @@ def lesson_detail(request, course_slug, lesson_id):
             figure_prefix=f"{lesson.module.position}.{lesson.position}",
             module_label=f"Module {lesson.module.position} · {lesson.module.title}",
             course_title=course.title,
+            regional_blocks=content_json.get("regional_blocks", {}),
+            country_code=regional_country,
+            region_code=regional_region,
         ),
         "notebook": notebook, "notebook_responses": saved_responses,
         "reflection": reflection, "reflection_response": reflection_response,
@@ -382,6 +411,7 @@ def lesson_detail(request, course_slug, lesson_id):
     })
 
 
+@never_cache
 @login_required
 def admin_lesson_preview(request, course_slug, lesson_id):
     """Show a real locked lesson to course admins without altering learner state."""
@@ -461,6 +491,7 @@ def admin_lesson_preview(request, course_slug, lesson_id):
     if not isinstance(video_url, str) or not video_url.startswith(("https://", "http://")):
         video_url = ""
     video_is_file = video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
+    regional_country, regional_region = _regional_audience(request, admin_preview=True)
 
     return render(request, "academy/lesson.html", {
         "course": course,
@@ -478,6 +509,9 @@ def admin_lesson_preview(request, course_slug, lesson_id):
             figure_prefix=f"{lesson.module.position}.{lesson.position}",
             module_label=f"Module {lesson.module.position} · {lesson.module.title}",
             course_title=course.title,
+            regional_blocks=content_json.get("regional_blocks", {}),
+            country_code=regional_country,
+            region_code=regional_region,
         ),
         "notebook": notebook,
         "notebook_responses": [],
@@ -496,6 +530,7 @@ def admin_lesson_preview(request, course_slug, lesson_id):
     })
 
 
+@never_cache
 @login_required
 def course_import_website_preview(request, import_id):
     """Render an unpublished CourseImport in the real Academy shell for admins only."""
@@ -579,11 +614,15 @@ def course_import_website_preview(request, import_id):
         selected_content_json = selected_lesson.get("content_json", {})
         if not isinstance(selected_content_json, dict):
             selected_content_json = {}
+        regional_country, regional_region = _regional_audience(request, admin_preview=True)
         selected_sections = build_lesson_sections(
             selected_lesson.get("content_markdown", ""),
             asset_urls,
             user=request.user,
             admin_preview=True,
+            regional_blocks=selected_content_json.get("regional_blocks", {}),
+            country_code=regional_country,
+            region_code=regional_region,
             figure_metadata=selected_content_json.get("figures", {}),
             figure_prefix=str(selected_lesson.get("source_id", "")),
             module_label=f"Module {selected_module.get('position', '')} · {selected_module.get('title', '')}",
