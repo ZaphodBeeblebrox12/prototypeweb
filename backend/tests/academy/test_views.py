@@ -333,6 +333,91 @@ class AcademyViewTests(TestCase):
         self.assertNotContains(response, "Check answers")
         self.assertNotContains(response, "Save reflection")
 
+    def test_staged_course_preview_uses_bright_related_course_cards_for_one_to_three_recommendations(self):
+        admin = User.objects.create_user(
+            username="related-course-preview-admin",
+            password="Test-password-123!",
+            role="admin",
+            is_staff=True,
+        )
+        self.client.force_login(admin)
+
+        related_courses = [
+            Course.objects.create(
+                title=f"Recommended course {index}",
+                slug=f"recommended-course-{index}",
+                summary=f"Practise skill {index} in context.",
+                position=20 + index,
+                status=Course.Status.PUBLISHED,
+            )
+            for index in range(1, 4)
+        ]
+        record = CourseImport.objects.create(
+            course_slug="related-course-preview",
+            title="Related course preview",
+            manifest_version="1.0",
+            content_hash="c" * 64,
+            source_manifest="{}",
+            payload={
+                "course": {
+                    "title": "Related course preview",
+                    "slug": "related-course-preview",
+                    "summary": "Test course for the related-course panel.",
+                    "description": "",
+                },
+                "modules": [{
+                    "title": "Foundations",
+                    "slug": "foundations",
+                    "position": 1,
+                    "lessons": [{
+                        "source_id": "1.1",
+                        "title": "Read the evidence",
+                        "slug": "read-the-evidence",
+                        "position": 1,
+                        "duration_minutes": 12,
+                        "content_markdown": "### The question\n\nStart with the evidence.",
+                        "content_json": {},
+                    }],
+                }],
+            },
+            status=CourseImport.Status.DRAFT,
+        )
+
+        preview_url = reverse("academy:course-import-preview", args=[record.pk])
+        for count in (1, 2, 3):
+            with self.subTest(course_count=count):
+                payload = record.payload
+                payload["modules"][0]["lessons"][0]["content_json"] = {
+                    "related_course_ids": [str(course.pk) for course in related_courses[:count]],
+                }
+                record.payload = payload
+                record.save(update_fields=["payload", "updated_at"])
+
+                response = self.client.get(preview_url, {"lesson": "1.1"})
+
+                self.assertEqual(response.status_code, 200, response.content)
+                self.assertContains(response, 'class="tt-related-courses tt-related-courses--cards"')
+                self.assertContains(response, 'id="tt-related-courses-heading">Build on this lesson</h2>')
+                self.assertContains(response, f'data-course-count="{count}"')
+                self.assertEqual(
+                    response.content.decode().count('class="tt-related-course-link tt-related-course-card"'),
+                    count,
+                )
+                self.assertEqual(
+                    response.content.decode().count('class="tt-related-course-card-cta"'),
+                    count,
+                )
+                self.assertContains(response, "Explore course")
+                self.assertContains(response, "Course references do not grant access or include a purchase.")
+                for index, course in enumerate(related_courses[:count], start=1):
+                    self.assertContains(response, course.title)
+                    self.assertContains(response, course.summary)
+                    self.assertContains(response, f"{index:02d}")
+                    self.assertContains(
+                        response,
+                        f'href="{reverse("academy:course-detail", args=[course.slug])}"',
+                    )
+
     def test_locked_lesson_preview_is_for_course_content_admins_only(self):
         response = self.client.get(
             reverse("academy:admin-lesson-preview", args=[self.course.slug, self.paid_lesson.pk])

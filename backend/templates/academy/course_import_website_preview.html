@@ -90,17 +90,31 @@
           {% endif %}
           {% include "academy/partials/lesson_tabs.html" with lesson_sections=selected_sections notebook=selected_notebook reflection=selected_reflection reflection_response=selected_reflection_response course_slug=course.slug practice_questions=selected_practice_questions admin_preview=True only %}
           {% if selected_related_courses %}
-          <section class="tt-related-courses" aria-labelledby="tt-related-courses-heading">
-            <p>Continue learning</p>
-            <h2 id="tt-related-courses-heading">Related courses</h2>
-            <div class="tt-related-course-list">
+          <section class="tt-related-courses tt-related-courses--cards" aria-labelledby="tt-related-courses-heading">
+            <div class="tt-related-courses-header">
+              <div class="tt-related-courses-heading">
+                <p class="tt-related-courses-kicker">Continue learning</p>
+                <h2 id="tt-related-courses-heading">Build on this lesson</h2>
+                <p class="tt-related-courses-intro">Explore courses that build on the ideas you have just worked through.</p>
+              </div>
+              <span class="tt-related-courses-count">{{ selected_related_courses|length }} course{{ selected_related_courses|length|pluralize }}</span>
+            </div>
+            <div class="tt-related-course-list" data-course-count="{{ selected_related_courses|length }}">
               {% for related in selected_related_courses %}
-              <a class="tt-related-course-link" href="{% url 'academy:course-detail' related.slug %}">
-                <strong>{{ related.title }}</strong>{% if related.summary %}<span>{{ related.summary }}</span>{% endif %}
+              <a class="tt-related-course-link tt-related-course-card" href="{% url 'academy:course-detail' related.slug %}">
+                <span class="tt-related-course-card-top">
+                  <span class="tt-related-course-number" aria-hidden="true">{{ forloop.counter|stringformat:"02d" }}</span>
+                  <span class="tt-related-course-label">Course {{ forloop.counter|stringformat:"02d" }}</span>
+                </span>
+                <span class="tt-related-course-copy">
+                  <strong>{{ related.title }}</strong>
+                  {% if related.summary %}<span class="tt-related-course-summary">{{ related.summary }}</span>{% endif %}
+                </span>
+                <span class="tt-related-course-card-cta">Explore course <span aria-hidden="true">↗</span></span>
               </a>
               {% endfor %}
             </div>
-            <p class="tt-related-course-note">Course references do not grant access or include a purchase.</p>
+            <p class="tt-related-course-note"><span aria-hidden="true">i</span> Course references do not grant access or include a purchase.</p>
           </section>
           {% endif %}
           <dialog class="tt-figure-dialog" data-figure-dialog><button type="button" data-figure-close>Close</button><img data-figure-dialog-image alt=""><p data-figure-dialog-caption></p></dialog>
