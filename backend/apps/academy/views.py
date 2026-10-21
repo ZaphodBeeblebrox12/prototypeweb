@@ -1,8 +1,8 @@
 """Authenticated learner views for TradeThesis Academy."""
 import json
 import mimetypes
-from copy import deepcopy
 from contextlib import suppress
+from copy import deepcopy
 from urllib.parse import quote
 from uuid import UUID
 
@@ -82,7 +82,7 @@ def _notebook_for_course_display(course_slug, notebook):
             isinstance(prompt, dict)
             and str(prompt.get("label") or "").strip().rstrip(".") == label
             and str(prompt.get("text") or "").strip() == text
-            for prompt, (label, text) in zip(raw_prompts, default_prompts)
+            for prompt, (label, text) in zip(raw_prompts, default_prompts, strict=False)
         )
 
     if matches_generic_defaults:
