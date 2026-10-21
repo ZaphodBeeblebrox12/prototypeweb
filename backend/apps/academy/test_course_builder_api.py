@@ -394,6 +394,44 @@ class CourseBuilderApiTests(TestCase):
             ["Price held the prior support zone."],
         )
 
+    def test_bollinger_notebook_fallback_reflections_are_saved(self):
+        from .models import LessonProgress
+
+        course = Course.objects.create(
+            title="Bollinger Notebook course",
+            slug="understand-bollinger-bands",
+            status=Course.Status.PUBLISHED,
+        )
+        module = CourseModule.objects.create(
+            course=course, title="Reading the bands", slug="reading-the-bands",
+            position=1, is_published=True,
+        )
+        lesson = Lesson.objects.create(
+            module=module, title="Before treating a touch as a setup",
+            slug="before-treating-a-touch-as-a-setup", position=1,
+            is_preview=True, is_published=True, content_json={},
+        )
+
+        response = self.client.post(
+            reverse("academy:lesson-notebook-submit", args=[lesson.pk]),
+            data={
+                "prompt_0": "Price is between the middle and upper band.",
+                "prompt_1": "It may be trending, but a range remains possible.",
+                "prompt_2": "I will review the next close and the middle-line response.",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        progress = LessonProgress.objects.get(user=self.admin, lesson=lesson)
+        self.assertEqual(
+            progress.response_json["notebook_responses"],
+            [
+                "Price is between the middle and upper band.",
+                "It may be trending, but a range remains possible.",
+                "I will review the next close and the middle-line response.",
+            ],
+        )
+
     def test_course_builder_is_not_available_to_regular_staff(self):
         staff = User.objects.create_user(
             username="ordinary-staff",
