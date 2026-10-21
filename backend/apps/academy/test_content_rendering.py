@@ -263,7 +263,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
 class TradingNotebookTemplateTests(SimpleTestCase):
     def test_notebook_is_inside_the_idea_panel_before_chart_examples_action(self):
         template = (
-            Path(__file__).resolve().parent
+            Path(__file__).resolve().parents[2]
             / "templates"
             / "academy"
             / "partials"
