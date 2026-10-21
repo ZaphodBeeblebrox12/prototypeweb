@@ -843,6 +843,10 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   }
   function isUntouchedStarterDraft(course) {
     if (!course || course.serverDraftId || course.serverUpdatedAt) return false;
+    // Reject ordinary drafts before deep-cloning their entire lesson/media tree.
+    if (course.title !== 'New micro-course draft' ||
+        course.slug !== 'new-micro-course-draft' ||
+        course.summary !== 'Add a concise course promise here.') return false;
     return starterComparable(course) === starterComparable(getSeed().courses[0]);
   }
   function load() { try { const raw=localStorage.getItem(STORAGE_KEY); if(raw){const v=JSON.parse(raw); if(v && Array.isArray(v.courses)) return v;} } catch(e){} return getSeed(); }
@@ -3032,8 +3036,10 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       // The server's draft list is authoritative for drafts previously loaded
       // from the Academy. Clear deleted/submitted drafts from localStorage,
       // while preserving genuinely local-only unsaved work.
+      let stateChanged = false;
       const liveServerDraftIds = new Set(remoteDrafts.map(remote => String(remote.serverDraftId || remote.id || '')));
       const liveServerDraftSlugs = new Set(remoteDrafts.map(remote => String(remote.slug || '')));
+      const beforeServerFilterCount = state.courses.length;
       state.courses = state.courses.filter(local => {
         const serverId = String(local.serverDraftId || '');
         const serverBacked = Boolean(serverId || local.serverUpdatedAt);
@@ -3041,36 +3047,61 @@ button:disabled { cursor: not-allowed; opacity: .45; }
         return (serverId && liveServerDraftIds.has(serverId)) ||
           (local.slug && liveServerDraftSlugs.has(String(local.slug)));
       });
-      // A default seed is created for a first-time author. If real Academy
-      // drafts exist, do not keep that untouched starter as an extra course card.
-      if (remoteDrafts.length) state.courses = state.courses.filter(local => !isUntouchedStarterDraft(local));
+      if (state.courses.length !== beforeServerFilterCount) stateChanged = true;
+      // Do not deep-compare ordinary local-only courses to the seed; the quick
+      // identity checks above keep large lesson/media trees out of this path.
+      if (remoteDrafts.length) {
+        const beforeSeedFilterCount = state.courses.length;
+        state.courses = state.courses.filter(local => !isUntouchedStarterDraft(local));
+        if (state.courses.length !== beforeSeedFilterCount) stateChanged = true;
+      }
       for (const remote of remoteDrafts) {
-        // The server is the shared source of truth for saved drafts. Replace a
-        // stale browser copy by server ID or slug so another device's latest
-        // saved edits are not hidden by an old localStorage entry.
         const index = state.courses.findIndex(local =>
           (local.serverDraftId && local.serverDraftId === remote.serverDraftId) ||
           (local.slug && local.slug === remote.slug)
         );
-        if (index >= 0) state.courses[index] = remote;
-        else state.courses.push(remote);
+        if (index >= 0) {
+          const local = state.courses[index];
+          // If this cached draft is already on the exact server revision, leave
+          // the cached object and editor DOM alone. New server revisions still win.
+          const sameSavedRevision = Boolean(
+            local.serverDraftId && remote.serverDraftId &&
+            String(local.serverDraftId) === String(remote.serverDraftId) &&
+            local.serverUpdatedAt && remote.serverUpdatedAt &&
+            String(local.serverUpdatedAt) === String(remote.serverUpdatedAt)
+          );
+          if (!sameSavedRevision) {
+            state.courses[index] = remote;
+            stateChanged = true;
+          }
+        } else {
+          state.courses.push(remote);
+          stateChanged = true;
+        }
       }
       if (!hadLocalDraft && remoteDrafts.length) {
         const latest = remoteDrafts[0];
         state.selectedCourseId = latest.id;
         state.selectedModuleId = latest.modules?.[0]?.id || null;
         state.selectedLessonId = latest.modules?.[0]?.lessons?.[0]?.id || null;
+        stateChanged = true;
       }
       if (!state.courses.some(course => course.id === state.selectedCourseId)) {
         const fallback = state.courses[0] || remoteDrafts[0] || null;
         state.selectedCourseId = fallback?.id || null;
         state.selectedModuleId = fallback?.modules?.[0]?.id || null;
         state.selectedLessonId = fallback?.modules?.[0]?.lessons?.[0]?.id || null;
+        stateChanged = true;
       }
       academyReady = true;
       if (editRevision === revisionAtStart) hasUnsavedChanges = false;
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
-      render();
+      if (stateChanged) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+        render();
+      } else {
+        // Still refresh the separate catalogue, without rebuilding the editor.
+        renderCatalogue();
+      }
       if (remoteDrafts.length) toast('Connected to Academy. Shared drafts are available across devices.');
       else toast('Connected to Academy. Save your first draft to make it available across devices.');
     } catch (error) {
