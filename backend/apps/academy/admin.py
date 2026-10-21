@@ -650,6 +650,22 @@ class CourseImportAdmin(admin.ModelAdmin):
                 response["X-Content-Type-Options"] = "nosniff"
                 return response
 
+        # A FileField name or source_path can outlive the local file on Render.
+        # If that backing copy is unavailable, fall back to the original HTTP(S)
+        # image destination instead of returning a broken image to the preview.
+        fallback_urls = [
+            staged.original_url if staged else "",
+        ]
+        live_original_url = (
+            CourseMediaAsset.objects.filter(pk=asset_id)
+            .values_list("original_url", flat=True)
+            .first()
+        )
+        fallback_urls.append(live_original_url or "")
+        for fallback_url in fallback_urls:
+            if isinstance(fallback_url, str) and fallback_url.startswith(("https://", "http://")):
+                return redirect(fallback_url)
+
         from django.http import Http404
         raise Http404("This course image has not been uploaded or found in the checked-in course source.")
 
