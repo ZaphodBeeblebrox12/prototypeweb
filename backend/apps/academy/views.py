@@ -540,7 +540,7 @@ def course_import_website_preview(request, import_id):
         if not isinstance(content_json, dict):
             content_json = {}
         selected_notebook = _notebook_for_course_display(
-            course.slug,
+            str(course.get("slug") or ""),
             content_json.get("notebook") or payload.get("notebook", {}),
         )
         if not isinstance(selected_notebook, dict):
