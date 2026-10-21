@@ -667,7 +667,10 @@ def lesson_notebook_submit(request, lesson_id):
     )
     if not can_access_lesson(request.user, lesson):
         raise PermissionDenied("You do not have access to this lesson yet.")
-    notebook = lesson.content_json.get("notebook", {}) if isinstance(lesson.content_json, dict) else {}
+    notebook = _notebook_for_course_display(
+        lesson.module.course.slug,
+        lesson.content_json.get("notebook", {}) if isinstance(lesson.content_json, dict) else {},
+    )
     prompts = notebook.get("prompts", []) if isinstance(notebook, dict) else []
     responses = []
     for index, _prompt in enumerate(prompts[:6]):
