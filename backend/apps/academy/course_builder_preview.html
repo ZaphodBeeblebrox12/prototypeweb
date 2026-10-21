@@ -603,7 +603,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   const defaultQuestion = () => ({id:uid('q'),prompt:'What evidence would you look for before acting on this observation?',options:['Confirming evidence in price behaviour','One indicator reading by itself','A guaranteed outcome'],correctIndex:0,explanation:'Look for confirming evidence and define what would weaken the idea. An observation is not a complete trade plan.',imageId:''});
   const makeLesson = (n=1) => ({id:uid('lesson'),title:`Lesson 1.${n} — Start with a question`,summary:'A practical introduction to the decision this lesson will help you make.',minutes:12,format:'reading',videoUrl:'',reflectionPrompt:'Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view.',reflectionModelReasoning:'A careful reading separates visible evidence from interpretation, considers a reasonable alternative, and names the evidence that would strengthen or weaken the interpretation.',reflectionChartNotes:'',notebook:{title:'Before you make the call',prompts:[{label:'Observe',text:'Describe the evidence visible in the chart.'},{label:'Interpret',text:'State one possible reading and a reasonable alternative.'},{label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}]},imageGroups:[],content:`## Start with the decision\n\nBegin with a practical question a trader may encounter. Describe what can be observed before offering an interpretation.\n\n### What to notice\n\nSeparate the visible evidence from the conclusion you may draw from it. Name the limits of the observation and consider a reasonable alternative.\n\n### Compare the possibilities\n\nUse a second case to show how similar-looking conditions can lead to different outcomes. Explain which detail changes the interpretation.\n\n### Take it into practice\n\nWrite down what would strengthen your reading, what would weaken it, and what would make waiting the better decision.`,questions:[defaultQuestion()],image:null,relatedCourseIds:[]});
   const makeModule = (n=1) => ({id:uid('module'),title:`Module ${String(n).padStart(2,'0')} — Foundations`,description:'The main ideas and decisions covered in this module.',lessons:[makeLesson(1)]});
-  const makeCourse = (title='Untitled course') => ({id:uid('course'),title,slug:slugify(title),summary:'A clear, practical description of what learners will study and why it matters.',description:'Explain who the course is for, what it covers and how learners will use it. Keep the promise realistic and specific.',category:'Technical analysis',level:'Intermediate',duration:'Self-paced',price:'',priceNote:'Pricing and checkout are configured separately.',status:'draft',comingSoon:false,position:0,createdAt:nowText(),updatedAt:'Not saved yet',publishedAt:null,publishedSnapshot:null,modules:[makeModule(1)],outcomes:['Describe the evidence before interpreting it.','Compare alternatives and identify invalidation.','Build a clear, conditional decision process.']});
+  const makeCourse = (title='Untitled course') => ({id:uid('course'),title,slug:slugify(title),summary:'A clear, practical description of what learners will study and why it matters.',description:'Explain who the course is for, what it covers and how learners will use it. Keep the promise realistic and specific.',category:'Technical analysis',level:'Intermediate',duration:'Self-paced',price:'',priceNote:'Pricing and checkout are configured separately.',status:'draft',comingSoon:false,requiresOwnedAssets:true,position:0,createdAt:nowText(),updatedAt:'Not saved yet',publishedAt:null,publishedSnapshot:null,modules:[makeModule(1)],outcomes:['Describe the evidence before interpreting it.','Compare alternatives and identify invalidation.','Build a clear, conditional decision process.']});
   let demoOffers = [];
   let comingSoonOffers = [];
   let demoLessonRefs = [];
@@ -1325,6 +1325,18 @@ Describe the evidence first.
       </div>
     </article>`).join('');
   }
+
+  const courseFieldsBeforeAssetPolicy = courseFields;
+  courseFields = function(c) {
+    if (c && c.requiresOwnedAssets === undefined) c.requiresOwnedAssets = true;
+    const html = courseFieldsBeforeAssetPolicy(c);
+    if (!c) return html;
+    const checked = c.requiresOwnedAssets ? ' checked' : '';
+    return html + '<section class="related-course-box"><h4>Instructional image policy</h4>' +
+      '<label class="checkbox-row"><input type="checkbox" data-entity="course" data-field="requiresOwnedAssets"' + checked + '> Require course-owned images before publishing</label>' +
+      '<p>When enabled, every referenced instructional image must have a file stored in Academy asset storage. An external image URL is not a durable copy; upload a replacement before publishing. The temporary Bollinger Bands example restriction applies regardless of this setting.</p>' +
+      '</section>';
+  };
 
   function lessonPlacementToolsMarkup() {
     return '<section class="related-course-box lesson-placement-tools"><h4>Control where a section appears</h4><p>Heading-based placement is a fallback. Put your cursor immediately before a section heading and insert one of these markers to explicitly choose the learner tab. The marker is structural and will not appear in the lesson.</p><div class="figure-inline-actions">' +

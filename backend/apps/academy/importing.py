@@ -167,6 +167,7 @@ def inspect_manifest(manifest_path):
             "summary": str(course.get("summary", "")).strip(),
             "description": str(course.get("description", "")).strip(),
             "position": int(course.get("position", 0)),
+            "requires_owned_assets": course.get("requires_owned_assets") is True,
         },
         "notebook": manifest.get("notebook") or {
             "title": "Your Trading Notebook",
@@ -411,13 +412,37 @@ def validate_import_for_publish(record):
         live_asset = live.get(asset_id)
         staged_has_file = bool(stage_asset and stage_asset.file)
         live_has_file = bool(live_asset and live_asset.file)
-        if not staged_has_file and not live_has_file:
-            key = stage_asset.asset_key if stage_asset else asset_id
+        source_url = (stage_asset.original_url if stage_asset else "") or (live_asset.original_url if live_asset else "")
+        has_source_url = bool(re.match(r"^https?://", source_url, re.IGNORECASE))
+        requires_owned_assets = bool(
+            (payload.get("course") if isinstance(payload.get("course"), dict) else {}).get("requires_owned_assets", False)
+        )
+        is_temporary_bollinger_reference = (
+            record.course_slug == "understand-bollinger-bands"
+            and stage_asset is not None
+            and stage_asset.asset_key.startswith("remote/")
+            and not staged_has_file
+            and not live_has_file
+        )
+        if is_temporary_bollinger_reference:
             errors.append(
-                "Missing course-owned image " + key
-                + ". An external source URL is not a durable course asset; upload an approved "
-                "JPEG, PNG or WebP replacement before publishing."
+                "Temporary external Bollinger Bands chart reference "
+                + stage_asset.asset_key
+                + " must be replaced with an approved local chart before publishing."
             )
+        elif not staged_has_file and not live_has_file and (requires_owned_assets or not has_source_url):
+            key = stage_asset.asset_key if stage_asset else asset_id
+            if has_source_url:
+                errors.append(
+                    "Missing course-owned image " + key
+                    + ". This course requires persistent owned images; upload an approved "
+                    "JPEG, PNG or WebP replacement before publishing."
+                )
+            else:
+                errors.append(
+                    "Missing course image " + key
+                    + ". Upload a valid JPEG, PNG or WebP in Course import assets before publishing."
+                )
     return list(dict.fromkeys(errors))
 
 

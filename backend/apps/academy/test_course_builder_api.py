@@ -93,6 +93,7 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "data-notebook-preview")
         self.assertContains(response, "notebookPreviewMarkup(l)")
         self.assertContains(response, "Reflection & reasoning")
+        self.assertContains(response, "Require course-owned images before publishing")
         self.assertContains(response, "Route to Chart examples")
         self.assertContains(response, "Manage inserted lesson references")
         self.assertContains(response, "lessonQualityMarkup")
@@ -128,7 +129,7 @@ class CourseBuilderApiTests(TestCase):
         slug = "external-instructional-image"
         asset_id = uuid.uuid4()
         payload = {
-            "course": {"title": "External Image Test", "slug": slug},
+            "course": {"title": "External Image Test", "slug": slug, "requires_owned_assets": True},
             "assets": [],
             "modules": [{
                 "title": "Foundations",

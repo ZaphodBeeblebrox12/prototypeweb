@@ -451,6 +451,7 @@ def _build_import_payload(course_state, course_slug):
             "estimated_duration": str(snapshot.get("duration") or "").strip()[:80],
             "learning_outcomes": [str(value).strip()[:500] for value in (snapshot.get("outcomes") or []) if str(value).strip()][:20],
             "position": max(0, min(32767, int(snapshot.get("position") or 0))),
+            "requires_owned_assets": bool(snapshot.get("requiresOwnedAssets", False)),
         },
         "notebook": {},
         "modules": modules,
@@ -690,13 +691,19 @@ def _builder_state_from_published_course(course):
             })
         if lessons:
             modules.append({"id": str(module.pk), "title": module.title, "description": module.description, "lessons": lessons})
+    latest_published_import = CourseImport.objects.filter(
+        course_slug=course.slug, status=CourseImport.Status.PUBLISHED,
+    ).order_by("-updated_at").first()
+    published_import_payload = latest_published_import.payload if latest_published_import and isinstance(latest_published_import.payload, dict) else {}
+    published_import_course = published_import_payload.get("course") if isinstance(published_import_payload.get("course"), dict) else {}
+    requires_owned_assets = bool(published_import_course.get("requires_owned_assets", False))
     return {
         "id": "published-" + str(course.pk), "serverCourseId": str(course.pk),
         "title": course.title, "slug": course.slug, "summary": course.summary,
         "description": course.description, "category": course.category or "Technical analysis",
         "level": course.level or "Intermediate", "duration": course.estimated_duration or "Self-paced",
         "price": "", "priceNote": "Pricing and checkout are configured separately.",
-        "status": "draft-update", "comingSoon": False, "position": course.position,
+        "status": "draft-update", "comingSoon": False, "requiresOwnedAssets": requires_owned_assets, "position": course.position,
         "createdAt": course.created_at.isoformat(), "updatedAt": course.updated_at.isoformat(),
         "publishedAt": course.updated_at.isoformat(), "publishedSnapshot": None,
         "outcomes": list(course.learning_outcomes or []), "modules": modules,
