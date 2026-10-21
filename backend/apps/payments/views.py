@@ -335,10 +335,7 @@ class CheckoutPageView(APIView):
 
 
 def _checkout_response(request, pk):
-    intent = get_object_or_404(
-        PaymentIntent, pk=pk, user=request.user,
-        status=PaymentIntent.Status.SUCCESS,
-    )
+    intent = get_object_or_404(PaymentIntent, pk=pk, user=request.user)
     if intent.plan.is_trial:
         return _consent_response(
             request, pk,
@@ -462,8 +459,11 @@ def payment_status(request, payment_intent_id):
 
 @login_required
 def payment_receipt(request, pk):
-    """Print-friendly receipt for one of the caller's own payments."""
-    intent = get_object_or_404(PaymentIntent, pk=pk, user=request.user)
+    """Print-friendly receipt for one of the caller's own successful payments."""
+    intent = get_object_or_404(
+        PaymentIntent, pk=pk, user=request.user,
+        status=PaymentIntent.Status.SUCCESS,
+    )
     subscription = Subscription.objects.filter(
         user=request.user, plan=intent.plan,
         status=Subscription.Status.ACTIVE, is_active=True).first()
