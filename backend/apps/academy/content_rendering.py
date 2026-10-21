@@ -182,7 +182,7 @@ def _resolve_course_cards(source):
             label = compact_course_topic(value)
             if label and label not in topics:
                 topics.append(label)
-            if len(topics) == 3:
+            if len(topics) == 2:
                 break
         if not topics:
             return ""
