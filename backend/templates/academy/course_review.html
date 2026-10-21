@@ -80,7 +80,7 @@
                 {% endif %}
               </section>
               {% endif %}
-              {% include "academy/partials/lesson_tabs.html" with lesson_sections=row.sections notebook=row.notebook course_slug=import_record.course_slug practice_questions=row.questions admin_preview=True tab_id_prefix=row.tab_id_prefix only %}
+              {% include "academy/partials/lesson_tabs.html" with lesson_sections=row.sections notebook=row.notebook reflection=row.reflection reflection_response=row.reflection_response course_slug=import_record.course_slug practice_questions=row.questions admin_preview=True tab_id_prefix=row.tab_id_prefix only %}
             </div>
           </details>
         {% endfor %}

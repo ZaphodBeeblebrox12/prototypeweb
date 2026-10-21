@@ -540,6 +540,11 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .related-course-item[hidden] {display:none!important}
 @media(max-width:640px){.related-course-entry{align-items:stretch;flex-direction:column}.related-course-entry .btn{align-self:flex-start}}
 
+.preview-body .tt-guided-reflection { border-left:3px solid var(--site-secondary); }
+.preview-body .tt-guided-reflection textarea { width:100%; max-width:100%; min-height:100px; padding:10px; border:1px solid var(--line); border-radius:8px; font:inherit; }
+.lesson-quality-list { padding-left:1.2rem; }
+.lesson-quality-list li { margin:8px 0; }
+.lesson-quality-list li span { display:block; color:var(--muted); font-size:11px; line-height:1.5; }
 </style>
 </head>
 <body>
@@ -596,7 +601,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   const slugify = value => String(value || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,150);
   const nowText = () => new Date().toLocaleString([], {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
   const defaultQuestion = () => ({id:uid('q'),prompt:'What evidence would you look for before acting on this observation?',options:['Confirming evidence in price behaviour','One indicator reading by itself','A guaranteed outcome'],correctIndex:0,explanation:'Look for confirming evidence and define what would weaken the idea. An observation is not a complete trade plan.',imageId:''});
-  const makeLesson = (n=1) => ({id:uid('lesson'),title:`Lesson 1.${n} — Start with a question`,summary:'A practical introduction to the decision this lesson will help you make.',minutes:12,format:'reading',videoUrl:'',notebook:{title:'Before you make the call',prompts:[{label:'Observe',text:'Describe the evidence visible in the chart.'},{label:'Interpret',text:'State one possible reading and a reasonable alternative.'},{label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}]},imageGroups:[],content:`## Start with the decision\n\nBegin with a practical question a trader may encounter. Describe what can be observed before offering an interpretation.\n\n### What to notice\n\nSeparate the visible evidence from the conclusion you may draw from it. Name the limits of the observation and consider a reasonable alternative.\n\n### Compare the possibilities\n\nUse a second case to show how similar-looking conditions can lead to different outcomes. Explain which detail changes the interpretation.\n\n### Take it into practice\n\nWrite down what would strengthen your reading, what would weaken it, and what would make waiting the better decision.`,questions:[defaultQuestion()],image:null,relatedCourseIds:[]});
+  const makeLesson = (n=1) => ({id:uid('lesson'),title:`Lesson 1.${n} — Start with a question`,summary:'A practical introduction to the decision this lesson will help you make.',minutes:12,format:'reading',videoUrl:'',reflectionPrompt:'Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view.',reflectionModelReasoning:'A careful reading separates visible evidence from interpretation, considers a reasonable alternative, and names the evidence that would strengthen or weaken the interpretation.',reflectionChartNotes:'',notebook:{title:'Before you make the call',prompts:[{label:'Observe',text:'Describe the evidence visible in the chart.'},{label:'Interpret',text:'State one possible reading and a reasonable alternative.'},{label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}]},imageGroups:[],content:`## Start with the decision\n\nBegin with a practical question a trader may encounter. Describe what can be observed before offering an interpretation.\n\n### What to notice\n\nSeparate the visible evidence from the conclusion you may draw from it. Name the limits of the observation and consider a reasonable alternative.\n\n### Compare the possibilities\n\nUse a second case to show how similar-looking conditions can lead to different outcomes. Explain which detail changes the interpretation.\n\n### Take it into practice\n\nWrite down what would strengthen your reading, what would weaken it, and what would make waiting the better decision.`,questions:[defaultQuestion()],image:null,relatedCourseIds:[]});
   const makeModule = (n=1) => ({id:uid('module'),title:`Module ${String(n).padStart(2,'0')} — Foundations`,description:'The main ideas and decisions covered in this module.',lessons:[makeLesson(1)]});
   const makeCourse = (title='Untitled course') => ({id:uid('course'),title,slug:slugify(title),summary:'A clear, practical description of what learners will study and why it matters.',description:'Explain who the course is for, what it covers and how learners will use it. Keep the promise realistic and specific.',category:'Technical analysis',level:'Intermediate',duration:'Self-paced',price:'',priceNote:'Pricing and checkout are configured separately.',status:'draft',comingSoon:false,position:0,createdAt:nowText(),updatedAt:'Not saved yet',publishedAt:null,publishedSnapshot:null,modules:[makeModule(1)],outcomes:['Describe the evidence before interpreting it.','Compare alternatives and identify invalidation.','Build a clear, conditional decision process.']});
   let demoOffers = [];
@@ -788,7 +793,22 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       }).join('') || '<article class="media-card"><div class="media-empty">No image groups yet. Create one after uploading at least two images.</div></article>'}</div>
       <div class="helper-note"><strong>Inline authoring:</strong> place the cursor in the lesson body before opening Images, then insert a single image or a complete image group. The group title and order stay with the inserted block.</div>`;
   }
-  function renderEditor(){const c=currentCourse();if(!c){$('#workspace').innerHTML='<div class="empty-state"><h3>Create your first course</h3><button class="btn primary" data-action="new-course">＋ New course</button></div>';return;}const tab=state.tab||'overview';const tabDefs=[['overview','Course details'],['curriculum','Curriculum'],['lesson','Lesson content'],['questions','Practice & Q&A'],['media','Images'],['preview','Learner preview']];let panel='';const m=currentModule(), l=currentLesson();if(tab==='overview')panel=courseFields(c);else if(tab==='curriculum')panel=curriculumFields(c);else if(tab==='lesson')panel=lessonFields(l);else if(tab==='questions')panel=questionFields(l);else if(tab==='media')panel=mediaFields(l);else panel=previewFields(c);$('#workspace').innerHTML=`<div class="workspace-toolbar"><div class="breadcrumb">Courses <span aria-hidden="true">/</span> ${esc(c.title||'Untitled course')} <span aria-hidden="true">/</span> ${esc(tabDefs.find(x=>x[0]===tab)?.[1]||'Editor')}</div><div class="toolbar-right"><span class="save-state" id="saveIndicator"><span class="dot"></span><span>${state.savedAt?'Saved '+esc(state.savedAt):'Unsaved draft'}</span></span><button class="btn small" type="button" data-action="save-draft">Save draft</button><button class="btn small danger" type="button" data-action="delete-course">Delete draft</button></div></div><div class="editor-shell"><header class="editor-header"><div><div class="eyebrow">${esc(c.slug||'course-slug')}</div><h2>${esc(c.title||'Untitled course')}</h2><p>${esc(c.summary||'Add a course summary to help learners understand what they will study.')}</p></div><div class="header-mark" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="18" stroke="currentColor" stroke-width="1.5"/><path d="M11 27.5 17 21l5 4 10-11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 14h5v5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></header><nav class="tabs" aria-label="Course editing steps">${tabDefs.map(([id,label])=>`<button class="tab ${tab===id?'active':''}" type="button" role="tab" aria-selected="${tab===id}" data-action="tab" data-tab="${id}">${label}</button>`).join('')}</nav><div class="tab-panel" role="tabpanel">${panel}</div></div>`;}
+  function reflectionFields(l) {
+    if (!l) return '<div class="empty-state"><p>Select a lesson first.</p></div>';
+    const prompt = l.reflectionPrompt === undefined
+      ? 'Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view.'
+      : String(l.reflectionPrompt || '');
+    const reasoning = l.reflectionModelReasoning === undefined
+      ? 'A careful reading separates visible evidence from interpretation, considers a reasonable alternative, and names the evidence that would strengthen or weaken the interpretation.'
+      : String(l.reflectionModelReasoning || '');
+    const notes = String(l.reflectionChartNotes || '');
+    return '<div class="section-intro"><h3>Reflection and model reasoning</h3><p>Preserve the reference template’s “write your first reading, then compare” interaction. These fields are optional and course-specific; use them where they help learning rather than repeating boilerplate.</p></div>' +
+      '<div class="lesson-editor-card"><div class="field"><label>Reflection prompt</label><textarea class="textarea" rows="3" data-entity="lesson" data-field="reflectionPrompt" maxlength="1000" placeholder="What should the learner reason through before revealing the model?">' + esc(prompt) + '</textarea><span class="help">The learner can save their first reading to their account. Do not put the correct answer to a scored quiz here.</span></div>' +
+      '<div class="field"><label>Model reasoning / worked interpretation</label><textarea class="textarea" rows="6" data-entity="lesson" data-field="reflectionModelReasoning" maxlength="3000" placeholder="Explain the evidence, interpretation, alternative and what would change the view.">' + esc(reasoning) + '</textarea><span class="help">This is explanatory feedback, not the private answer key for a scored question.</span></div>' +
+      '<div class="field"><label>Optional chart-reading notes</label><textarea class="textarea" rows="4" data-entity="lesson" data-field="reflectionChartNotes" maxlength="3000" placeholder="Optional notes about what to inspect in the worked chart.">' + esc(notes) + '</textarea></div></div>';
+  }
+
+  function renderEditor(){const c=currentCourse();if(!c){$('#workspace').innerHTML='<div class="empty-state"><h3>Create your first course</h3><button class="btn primary" data-action="new-course">＋ New course</button></div>';return;}const tab=state.tab||'overview';const tabDefs=[['overview','Course details'],['curriculum','Curriculum'],['lesson','Lesson content'],['questions','Practice & Q&A'],['media','Images'],['reflection','Reflection & reasoning'],['preview','Learner preview']];let panel='';const m=currentModule(), l=currentLesson();if(tab==='overview')panel=courseFields(c);else if(tab==='curriculum')panel=curriculumFields(c);else if(tab==='lesson')panel=lessonFields(l);else if(tab==='questions')panel=questionFields(l);else if(tab==='media')panel=mediaFields(l);else if(tab==='reflection')panel=reflectionFields(l);else panel=previewFields(c);$('#workspace').innerHTML=`<div class="workspace-toolbar"><div class="breadcrumb">Courses <span aria-hidden="true">/</span> ${esc(c.title||'Untitled course')} <span aria-hidden="true">/</span> ${esc(tabDefs.find(x=>x[0]===tab)?.[1]||'Editor')}</div><div class="toolbar-right"><span class="save-state" id="saveIndicator"><span class="dot"></span><span>${state.savedAt?'Saved '+esc(state.savedAt):'Unsaved draft'}</span></span><button class="btn small" type="button" data-action="save-draft">Save draft</button><button class="btn small danger" type="button" data-action="delete-course">Delete draft</button></div></div><div class="editor-shell"><header class="editor-header"><div><div class="eyebrow">${esc(c.slug||'course-slug')}</div><h2>${esc(c.title||'Untitled course')}</h2><p>${esc(c.summary||'Add a course summary to help learners understand what they will study.')}</p></div><div class="header-mark" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="18" stroke="currentColor" stroke-width="1.5"/><path d="M11 27.5 17 21l5 4 10-11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 14h5v5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></header><nav class="tabs" aria-label="Course editing steps">${tabDefs.map(([id,label])=>`<button class="tab ${tab===id?'active':''}" type="button" role="tab" aria-selected="${tab===id}" data-action="tab" data-tab="${id}">${label}</button>`).join('')}</nav><div class="tab-panel" role="tabpanel">${panel}</div></div>`;}
   function notebookPreviewMarkup(lesson) {
     if (!lesson) return '';
     const notebook = lesson.notebook && typeof lesson.notebook === 'object' ? lesson.notebook : {};
@@ -830,7 +850,44 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     '</section>' +
     '<button class="preview-notebook-examples-button" type="button" data-action="preview-chart-examples">Work through the chart examples <span aria-hidden="true">↗</span></button>';
   }
-  function previewFields(c){const mods=c.modules.map((m,mi)=>({m,mi}));const lesson=currentLesson();return `<div class="section-intro"><h3>Preview as a learner</h3><p>Review the latest editing state before you publish. This preview is deliberately separate from the live member course.</p></div><div class="preview-split"><article class="preview-article"><div class="course-chip">${esc(c.category)} · ${esc(c.level)}</div><h2>${esc(c.title)}</h2><p class="summary">${esc(c.summary)}</p>${c.description?.trim()?'<div class="preview-body course-description-preview">'+renderMarkdown(c.description)+'</div>':''}<div class="pill">${allLessons(c).length} lessons · ${esc(c.duration)}</div>${c.outcomes?.length?`<section class="preview-outcomes"><h3>What learners will practise</h3><ul>${c.outcomes.map(outcome=>`<li>${esc(outcome)}</li>`).join("")}</ul></section>`:""}${lesson?`<hr style="border:0;border-top:1px solid var(--line);margin:24px 0"><div class="eyebrow">${esc(currentModule()?.title||'Module')} / Lesson</div><h2 style="font-size:28px">${esc(lesson.title)}</h2><p class="summary">${esc(lesson.summary)}</p><div class="preview-body" data-preview-lesson-content>${renderMarkdown(lesson.content)}</div>${notebookPreviewMarkup(lesson)}${lesson.questions.length?`<div class="practice-preview"><h4>Test your reading</h4>${lesson.questions.map((q,qi)=>`<div style="margin-bottom:16px">${questionImageMarkup(q,lesson)}<strong style="font-size:11px">${esc(q.prompt)}</strong>${q.options.map((op,oi)=>`<label class="practice-preview-answer" data-preview-option="${esc(q.id)}" data-option-index="${oi}"><input type="radio" name="pv-${esc(q.id)}" value="${oi}" data-preview-question="${esc(q.id)}"> <span>${esc(op)}</span><span class="answer-result"></span></label>`).join('')}<button class="btn small" type="button" data-action="check-preview" data-id="${esc(q.id)}">Check answer</button><div class="feedback" id="feedback-${esc(q.id)}"></div></div>`).join('')}</div>`:''}`:'<p class="summary">No lesson selected yet.</p>'}</article><aside class="preview-lesson-nav"><h4>Course outline</h4><div>${mods.map(({m,mi})=>`<div style="font-size:10px;font-weight:800;color:var(--muted);padding:9px 6px 4px">${esc(m.title)}</div>${m.lessons.map((item,li)=>`<button type="button" class="${item.id===lesson?.id?'selected':''}" data-action="preview-select-lesson" data-module-id="${esc(m.id)}" data-id="${esc(item.id)}">${mi+1}.${li+1} ${esc(item.title)}</button>`).join('')}`).join('')}</div><div class="helper-note">Draft preview only. Lesson access, authentication, progress and paid content protection are enforced by Django in production.</div></aside></div>`;}
+  function lessonQualityMarkup(lesson) {
+    const content = String(lesson.content || '');
+    const headings = [...content.matchAll(/^#{1,6}\s+(.+)$/gm)].map(match => match[1].toLowerCase());
+    const hasVisual = /!\[[^\]]*\]\([^)]+\)|\[\[(?:image-group|teaching-figure):/.test(content);
+    const hasExamples = /worked|compar|case study|near miss|failed|counterexample|chart example/.test(headings.join(' '));
+    const hasPractice = (Array.isArray(lesson.questions) && lesson.questions.length > 0) || /practice|apply|test your reading|learner task|decision exercise/.test(headings.join(' '));
+    const hasNotebook = Boolean(lesson.notebook && Array.isArray(lesson.notebook.prompts) && lesson.notebook.prompts.some(p => p && String(p.text || '').trim()));
+    const hasReflection = Boolean(String(lesson.reflectionPrompt === undefined ? 'default' : lesson.reflectionPrompt || '').trim());
+    const rows = [
+      [hasVisual, 'Worked visual', 'Add a chart or teaching figure when the concept benefits from visual evidence.'],
+      [hasExamples, 'Worked or contrasting example', 'Check that the learner can compare outcomes, not only read a definition.'],
+      [hasPractice, 'Learner practice', 'Include a decision task or structured question when useful.'],
+      [hasNotebook, 'Notebook prompts', 'Use prompts that fit this course topic rather than generic boilerplate.'],
+      [hasReflection, 'First reading / model reasoning', 'Add an optional reflection and a useful explanation of the reasoning.']
+    ];
+    return '<section class="related-course-box"><h4>Lesson quality review · suggestions, not requirements</h4><p>Use judgement: this checklist is meant to catch omissions, not force every lesson into the same shape.</p><ul class="lesson-quality-list">' +
+      rows.map(([ok, title, hint]) => '<li><strong>' + (ok ? '✓ ' : '○ ') + esc(title) + '</strong><span>' + esc(ok ? 'Reviewed' : hint) + '</span></li>').join('') +
+      '</ul></section>';
+  }
+
+  function reflectionPreviewMarkup(lesson) {
+    if (!lesson) return '';
+    const prompt = lesson.reflectionPrompt === undefined
+      ? 'Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view.'
+      : String(lesson.reflectionPrompt || '');
+    const reasoning = lesson.reflectionModelReasoning === undefined
+      ? 'A careful reading separates visible evidence from interpretation, considers a reasonable alternative, and names the evidence that would strengthen or weaken the interpretation.'
+      : String(lesson.reflectionModelReasoning || '');
+    const notes = String(lesson.reflectionChartNotes || '');
+    if (!prompt && !reasoning && !notes) return '';
+    return '<section class="related-course-box tt-guided-reflection"><p class="eyebrow">Make your first reading</p><h3>Record your reasoning first</h3>' +
+      (prompt ? '<p>' + esc(prompt) + '</p><label for="builder-reflection-response">Your first reading · local preview only</label><textarea id="builder-reflection-response" rows="4" placeholder="Your reflection is not sent to the Academy from this local preview."></textarea>' : '') +
+      (notes ? '<details><summary>Chart-reading notes</summary><p>' + esc(notes) + '</p></details>' : '') +
+      (reasoning ? '<details><summary>Compare with the model reasoning</summary><p>' + esc(reasoning) + '</p></details>' : '') +
+      '</section>';
+  }
+
+  function previewFields(c){const mods=c.modules.map((m,mi)=>({m,mi}));const lesson=currentLesson();return `<div class="section-intro"><h3>Preview as a learner</h3><p>Review the latest editing state before you publish. This preview is deliberately separate from the live member course.</p></div><div class="preview-split"><article class="preview-article"><div class="course-chip">${esc(c.category)} · ${esc(c.level)}</div><h2>${esc(c.title)}</h2><p class="summary">${esc(c.summary)}</p>${c.description?.trim()?'<div class="preview-body course-description-preview">'+renderMarkdown(c.description)+'</div>':''}<div class="pill">${allLessons(c).length} lessons · ${esc(c.duration)}</div>${c.outcomes?.length?`<section class="preview-outcomes"><h3>What learners will practise</h3><ul>${c.outcomes.map(outcome=>`<li>${esc(outcome)}</li>`).join("")}</ul></section>`:""}${lesson?`<hr style="border:0;border-top:1px solid var(--line);margin:24px 0"><div class="eyebrow">${esc(currentModule()?.title||'Module')} / Lesson</div><h2 style="font-size:28px">${esc(lesson.title)}</h2><p class="summary">${esc(lesson.summary)}</p><div class="preview-body" data-preview-lesson-content>${renderMarkdown(lesson.content)}</div>${notebookPreviewMarkup(lesson)}${reflectionPreviewMarkup(lesson)}${lesson.questions.length?`<div class="practice-preview"><h4>Test your reading</h4>${lesson.questions.map((q,qi)=>`<div style="margin-bottom:16px">${questionImageMarkup(q,lesson)}<strong style="font-size:11px">${esc(q.prompt)}</strong>${q.options.map((op,oi)=>`<label class="practice-preview-answer" data-preview-option="${esc(q.id)}" data-option-index="${oi}"><input type="radio" name="pv-${esc(q.id)}" value="${oi}" data-preview-question="${esc(q.id)}"> <span>${esc(op)}</span><span class="answer-result"></span></label>`).join('')}<button class="btn small" type="button" data-action="check-preview" data-id="${esc(q.id)}">Check answer</button><div class="feedback" id="feedback-${esc(q.id)}"></div></div>`).join('')}</div>`:''}`:'<p class="summary">No lesson selected yet.</p>'}</article><aside class="preview-lesson-nav"><h4>Course outline</h4><div>${mods.map(({m,mi})=>`<div style="font-size:10px;font-weight:800;color:var(--muted);padding:9px 6px 4px">${esc(m.title)}</div>${m.lessons.map((item,li)=>`<button type="button" class="${item.id===lesson?.id?'selected':''}" data-action="preview-select-lesson" data-module-id="${esc(m.id)}" data-id="${esc(item.id)}">${mi+1}.${li+1} ${esc(item.title)}</button>`).join('')}`).join('')}</div><div class="helper-note">Draft preview only. Lesson access, authentication, progress and paid content protection are enforced by Django in production.</div></aside></div>`;}
   function renderMarkdown(src){const safe=esc(src);return safe.split(/\n{2,}/).map(block=>{const t=block.trim();if(!t)return'';const h=t.match(/^(#{1,4})\s+(.+)$/);if(h)return `<h3>${h[2]}</h3>`;if(/^[-*]\s/m.test(t))return `<ul>${t.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>`<li>${x.replace(/^[-*]\s+/,'')}</li>`).join('')}</ul>`;return `<p>${t.replace(/\n/g,'<br>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>')}</p>`;}).join('');}
   function renderCatalogue(){const cards=[...demoOffers,...comingSoonOffers];state.courses.filter(c=>c.publishedSnapshot).forEach(c=>{const p=c.publishedSnapshot;cards.push({id:c.id,title:p.title,category:p.category||'MICRO-COURSE',summary:p.summary,price:p.price||'Price not configured',state:'Published from builder'});});$('#catalogueGrid').innerHTML=cards.map(item=>`<article class="offer-card"><div class="offer-art"></div><div class="offer-body"><div class="offer-kicker">${esc(item.category)}</div><h3>${esc(item.title)}</h3><p>${esc(item.summary)}</p><div class="offer-bottom"><div><div class="offer-price">${esc(item.price||'Details soon')}</div><div class="offer-state">${esc(item.state)}</div></div><span class="pill ${item.state==='Coming soon'?'status':'published'}">${item.state==='Coming soon'?'Coming soon':'Published'}</span></div></div></article>`).join('');}
   function render(){renderSidebar();renderEditor();renderCatalogue();renderHeaderState();}
@@ -961,6 +1018,7 @@ Describe the evidence first.
       const figures = '<div>' + unplaced.map(function(image) { return '<figure style="margin:24px 0"><img src="' + image.data + '" alt="' + esc(image.alt || '') + '" style="display:block;max-width:100%;max-height:460px;margin:auto;border-radius:8px"><figcaption style="font-size:11px;color:var(--muted);line-height:1.6;margin-top:8px;text-align:center">' + esc(image.caption || '') + '</figcaption></figure>'; }).join('') + '</div>';
       html = html.replace('</article>', figures + '</article>');
     }
+    if (lesson) html = html.replace("</article>", lessonQualityMarkup(lesson) + "</article>");
     return html;
   };
   renderMarkdown = function(src) {
@@ -1145,7 +1203,7 @@ Describe the evidence first.
       const filename = String(image?.name || '').trim();
       return title && title !== filename && !/\.(jpe?g|png|webp|gif|svg)$/i.test(title) ? title : 'Chart';
     };
-    let prepared = String(src || '').replace(/!\[([^\]]*)\]\(asset:\/\/([^)]+)\)/g, function(match, alt, id) {
+    let prepared = String(src || '').replace(/^\s*\[\[lesson-tab:(?:idea|examples|practice)\]\]\s*$/gim, '').replace(/!\[([^\]]*)\]\(asset:\/\/([^)]+)\)/g, function(match, alt, id) {
       const image = images.find(function(item) { return item.id === id || item.assetUuid === id; });
       if (!image) return match;
       const token = 'TTFIGURETOKEN' + figures.length + 'END';
@@ -1267,6 +1325,37 @@ Describe the evidence first.
       </div>
     </article>`).join('');
   }
+
+  function lessonPlacementToolsMarkup() {
+    return '<section class="related-course-box lesson-placement-tools"><h4>Control where a section appears</h4><p>Heading-based placement is a fallback. Put your cursor immediately before a section heading and insert one of these markers to explicitly choose the learner tab. The marker is structural and will not appear in the lesson.</p><div class="figure-inline-actions">' +
+      '<button class="btn small" type="button" data-action="insert-tab-route" data-route="idea">Route to The idea</button>' +
+      '<button class="btn small" type="button" data-action="insert-tab-route" data-route="examples">Route to Chart examples</button>' +
+      '<button class="btn small" type="button" data-action="insert-tab-route" data-route="practice">Route to Test your reading</button></div><p class="help">Stored as <code>[[lesson-tab:idea]]</code>, <code>[[lesson-tab:examples]]</code> or <code>[[lesson-tab:practice]]</code> on a line before the heading.</p></section>';
+  }
+
+  function inlineLessonReferenceManagerMarkup(lesson) {
+    const content = String(lesson.content || '');
+    const refs = [...content.matchAll(/\[\[(lesson|lesson-card):([0-9a-fA-F-]{36})\]\]/g)];
+    if (!refs.length) {
+      return '<section class="related-course-box"><h4>Inline lesson references</h4><p>No inline lesson links or cards have been inserted yet. Use the search picker below to add one at the cursor.</p></section>';
+    }
+    const rows = refs.map((match, index) => {
+      const kind = match[1], id = match[2];
+      const destination = demoLessonRefs.find(ref => String(ref.id).toLowerCase() === id.toLowerCase());
+      const title = destination ? destination.title : 'Unavailable or unpublished lesson';
+      const course = destination ? destination.course_title : id;
+      const alternative = kind === 'lesson' ? 'Convert to related-lesson card' : 'Convert to inline link';
+      return '<article class="related-course-item"><div><strong>' + esc(title) + '</strong><span>' + esc(course) + ' · ' + (kind === 'lesson' ? 'inline link' : 'lesson card') + '</span></div><div class="figure-inline-actions"><button type="button" class="btn small" data-action="toggle-inline-lesson-reference-kind" data-index="' + index + '">' + alternative + '</button><button type="button" class="btn small danger" data-action="remove-inline-lesson-reference" data-index="' + index + '">Remove</button></div></article>';
+    }).join('');
+    return '<section class="related-course-box"><h4>Manage inserted lesson references</h4><p>These controls affect one occurrence at a time, including when the same destination appears more than once.</p><div class="related-course-list">' + rows + '</div></section>';
+  }
+
+  const lessonFieldsBeforePlacementTools = lessonFields;
+  lessonFields = function(lesson) {
+    const html = lessonFieldsBeforePlacementTools(lesson);
+    if (!lesson) return html;
+    return html + lessonPlacementToolsMarkup() + inlineLessonReferenceManagerMarkup(lesson);
+  };
 
   function rememberLessonContentCaret(target) {
     if (!target || !target.matches('textarea[data-entity="lesson"][data-field="content"]')) return;
@@ -1443,6 +1532,33 @@ Describe the evidence first.
   const baseHandleActionWithFigures = handleAction;
   handleAction = function(action, el) {
     const lesson = currentLesson();
+    if (lesson && action === 'insert-tab-route') {
+      const route = ['idea','examples','practice'].includes(String(el.dataset.route || '')) ? String(el.dataset.route) : 'idea';
+      insertLessonContentAtCaret(lesson, '[[lesson-tab:' + route + ']]', true);
+      toast('Section placement marker inserted. Keep it immediately before the section heading.');
+      return;
+    }
+    if (lesson && (action === 'remove-inline-lesson-reference' || action === 'toggle-inline-lesson-reference-kind')) {
+      const index = Number(el.dataset.index);
+      const pattern = /\[\[(lesson|lesson-card):([0-9a-fA-F-]{36})\]\]/g;
+      const content = String(lesson.content || '');
+      const matches = [...content.matchAll(pattern)];
+      const selected = matches[index];
+      if (!selected) { toast('That reference changed. Reopen the lesson reference list and try again.'); return; }
+      if (action === 'remove-inline-lesson-reference') {
+        lesson.content = content.slice(0, selected.index) + content.slice(selected.index + selected[0].length);
+      } else {
+        const newKind = selected[1] === 'lesson' ? 'lesson-card' : 'lesson';
+        const replacement = '[[' + newKind + ':' + selected[2] + ']]';
+        lesson.content = content.slice(0, selected.index) + replacement + content.slice(selected.index + selected[0].length);
+      }
+      lesson.content = lesson.content.replace(/\n{3,}/g, '\n\n');
+      state.tab = 'lesson';
+      persist(false);
+      renderEditor();
+      toast(action === 'remove-inline-lesson-reference' ? 'Inline lesson reference removed.' : 'Inline lesson reference type changed.');
+      return;
+    }
     if (lesson && action === 'insert-course-card') {
       const courseRef = demoOffers.concat(comingSoonOffers).find(item => String(item.id) === String(el?.dataset?.id || ''));
       if (!courseRef) {

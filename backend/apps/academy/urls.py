@@ -13,5 +13,6 @@ urlpatterns = [
     path("lesson/<uuid:lesson_id>/progress/", views.lesson_progress, name="lesson-progress"),
     path("lesson/<uuid:lesson_id>/quiz/submit/", views.lesson_quiz_submit, name="lesson-quiz-submit"),
     path("lesson/<uuid:lesson_id>/notebook/", views.lesson_notebook_submit, name="lesson-notebook-submit"),
+    path("lesson/<uuid:lesson_id>/reflection/", views.lesson_reflection_submit, name="lesson-reflection-submit"),
     path("media/<uuid:asset_id>/", views.media_asset, name="media-asset"),
 ]

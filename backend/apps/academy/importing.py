@@ -411,25 +411,12 @@ def validate_import_for_publish(record):
         live_asset = live.get(asset_id)
         staged_has_file = bool(stage_asset and stage_asset.file)
         live_has_file = bool(live_asset and live_asset.file)
-        source_url = (stage_asset.original_url if stage_asset else "") or (live_asset.original_url if live_asset else "")
-        has_source_url = bool(re.match(r"^https?://", source_url, re.IGNORECASE))
-        if (
-            record.course_slug == "understand-bollinger-bands"
-            and stage_asset is not None
-            and stage_asset.asset_key.startswith("remote/")
-            and not staged_has_file
-            and not live_has_file
-        ):
-            errors.append(
-                "Temporary external Bollinger Bands chart reference "
-                + stage_asset.asset_key
-                + " must be replaced with an approved local chart before publishing."
-            )
-        if not staged_has_file and not live_has_file and not has_source_url:
+        if not staged_has_file and not live_has_file:
             key = stage_asset.asset_key if stage_asset else asset_id
             errors.append(
-                "Missing course image " + key
-                + ". Upload a valid JPEG, PNG or WebP in Course import assets before publishing."
+                "Missing course-owned image " + key
+                + ". An external source URL is not a durable course asset; upload an approved "
+                "JPEG, PNG or WebP replacement before publishing."
             )
     return list(dict.fromkeys(errors))
 

@@ -387,8 +387,22 @@ def _build_import_payload(course_state, course_slug):
             video_url = str(lesson.get("videoUrl") or "").strip()[:1000]
             if video_url and not video_url.startswith(("https://", "http://")):
                 raise ValidationError(f"{title}: video URL must use HTTPS or HTTP.")
+            reflection = {
+                "prompt": str(
+                    lesson.get("reflectionPrompt")
+                    if "reflectionPrompt" in lesson
+                    else "Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view."
+                ).strip()[:1000],
+                "model_reasoning": str(
+                    lesson.get("reflectionModelReasoning")
+                    if "reflectionModelReasoning" in lesson
+                    else "A careful reading separates visible evidence from interpretation, considers a reasonable alternative, and names the evidence that would strengthen or weaken the interpretation."
+                ).strip()[:3000],
+                "chart_notes": str(lesson.get("reflectionChartNotes") or "").strip()[:3000],
+            }
             content_json = {
                 "schema_version": 1,
+                "reflection": reflection,
                 "source_id": f"{module_index}.{lesson_index}",
                 "asset_ids": asset_ids,
                 "figures": figures,
@@ -658,6 +672,9 @@ def _builder_state_from_published_course(course):
                 "id": str(lesson.pk), "title": lesson.title, "summary": lesson.summary,
                 "minutes": lesson.duration_minutes, "format": lesson.format,
                 "videoUrl": str(content_json.get("video_url") or ""),
+                "reflectionPrompt": str((content_json.get("reflection") or {}).get("prompt") or "Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view."),
+                "reflectionModelReasoning": str((content_json.get("reflection") or {}).get("model_reasoning") or "A careful reading separates visible evidence from interpretation, considers a reasonable alternative, and names the evidence that would strengthen or weaken the interpretation."),
+                "reflectionChartNotes": str((content_json.get("reflection") or {}).get("chart_notes") or ""),
                 "notebook": deepcopy(notebook) or {
                     "title": "Your Trading Notebook",
                     "prompts": [

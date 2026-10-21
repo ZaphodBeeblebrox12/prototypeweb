@@ -31,6 +31,7 @@ _TEACHING_FIGURE_TOKEN = re.compile(r"\[\[teaching-figure:([A-Za-z0-9_-]{1,120})
 _IMAGE_GROUP_TOKEN = re.compile(r"\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]")
 _LESSON_REF = re.compile(r"\[\[(lesson|lesson-card):([0-9a-fA-F-]{36})\]\]")
 _COURSE_CARD_REF = re.compile(r"\[\[course-card:(?:(coming-soon):)?([0-9a-fA-F-]{36})\]\]")
+_TAB_ROUTE_TOKEN = re.compile(r"^\s*\[\[lesson-tab:(idea|examples|practice)\]\]\s*$", re.IGNORECASE)
 _HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
 _DANGEROUS_MARKDOWN = re.compile(
     r"<\s*/?\s*(?:script|style|iframe|object|embed|form|input|button|svg|math)\b"
@@ -581,6 +582,7 @@ def build_lesson_sections(
     current_group = "idea"
     current_heading = None
     current_lines = []
+    explicit_route_for_next_heading = False
 
     def finish_section():
         nonlocal current_lines, current_heading, current_group
@@ -595,14 +597,25 @@ def build_lesson_sections(
         current_heading = None
 
     for line in lines:
+        route_marker = _TAB_ROUTE_TOKEN.match(line)
+        if route_marker:
+            # Explicit author placement beats the best-effort heading heuristic.
+            # Put the marker immediately before the heading for the section to route.
+            finish_section()
+            current_group = route_marker.group(1).casefold()
+            explicit_route_for_next_heading = True
+            continue
+
         match = _HEADING.match(line)
         if match:
             finish_section()
             current_heading = line.strip()
             heading = match.group(2).casefold()
+            if explicit_route_for_next_heading:
+                explicit_route_for_next_heading = False
             # Admin-added headings encode the selected Learning Room tab;
             # handle those exact prefixes before generic content heuristics.
-            if heading.startswith("additional concept figure"):
+            elif heading.startswith("additional concept figure"):
                 current_group = "idea"
             elif heading.startswith("additional chart examples"):
                 current_group = "examples"

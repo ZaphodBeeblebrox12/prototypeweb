@@ -11,7 +11,7 @@
       <div class="tt-notebook-index"><span>KEEP<br>IN VIEW</span><strong>01</strong></div>
       <div class="tt-notebook-content">
         <div class="tt-notebook-kicker">YOUR TRADING NOTEBOOK</div>
-        <h4>{% if notebook.title and notebook.title != "Your Trading Notebook" and notebook.title != "Before you make the call" %}{{ notebook.title }}{% elif course_slug == "understand-bollinger-bands" %}Before treating a touch as a setup{% else %}Before you make the call{% endif %}</h4>
+        <h4>{{ notebook.title|default:"Before you make the call" }}</h4>
         {% if notebook.prompts %}
         <ol>
           {% for prompt in notebook.prompts %}
@@ -23,9 +23,9 @@
         </ol>
         {% else %}
         <ol>
-          <li><span class="tt-notebook-number">01</span><p><strong>Describe.</strong> Where is price relative to the bands and middle line?</p></li>
-          <li><span class="tt-notebook-number">02</span><p><strong>Interpret.</strong> Does the structure look like a range, a trend or a transition? What is your alternative explanation?</p></li>
-          <li><span class="tt-notebook-number">03</span><p><strong>Test.</strong> What future price behaviour would strengthen or weaken your view?</p></li>
+          <li><span class="tt-notebook-number">01</span><p><strong>Observe.</strong> Describe the evidence you can directly observe.</p></li>
+          <li><span class="tt-notebook-number">02</span><p><strong>Interpret.</strong> State one possible reading and a reasonable alternative.</p></li>
+          <li><span class="tt-notebook-number">03</span><p><strong>Test.</strong> Name the next evidence that would strengthen or weaken your reading.</p></li>
         </ol>
         {% endif %}
         {% if notebook.prompts and lesson %}
@@ -36,8 +36,8 @@
             <div class="tt-notebook-reflection-fields">
               {% for prompt in notebook.prompts %}
               <div class="tt-notebook-reflection-field">
-                <label for="notebook-prompt-{{ forloop.counter0 }}">{{ prompt.label|default:"Reflection" }} — {{ prompt.text }}</label>
-                <textarea id="notebook-prompt-{{ forloop.counter0 }}" name="prompt_{{ forloop.counter0 }}" rows="3" maxlength="4000" placeholder="Write your reflection…">{{ prompt.response }}</textarea>
+                <label for="{{ tab_prefix }}-notebook-prompt-{{ forloop.counter0 }}">{{ prompt.label|default:"Reflection" }} — {{ prompt.text }}</label>
+                <textarea id="{{ tab_prefix }}-notebook-prompt-{{ forloop.counter0 }}" name="prompt_{{ forloop.counter0 }}" rows="3" maxlength="4000" placeholder="Write your reflection…">{{ prompt.response }}</textarea>
               </div>
               {% endfor %}
             </div>
@@ -55,6 +55,36 @@
   <div class="tt-tab-panel" id="{{ tab_prefix }}-panel-examples" role="tabpanel" aria-labelledby="{{ tab_prefix }}-tab-examples" data-tab-panel="examples" hidden>{{ lesson_sections.examples_html|safe }}</div>
   <div class="tt-tab-panel" id="{{ tab_prefix }}-panel-practice" role="tabpanel" aria-labelledby="{{ tab_prefix }}-tab-practice" data-tab-panel="practice" hidden>
     {{ lesson_sections.practice_html|safe }}
+    {% if reflection.prompt %}
+    <section class="tt-guided-reflection" aria-labelledby="{{ tab_prefix }}-reflection-heading">
+      <p class="tt-eyebrow">Make your first reading</p>
+      <h2 id="{{ tab_prefix }}-reflection-heading">Record your reasoning first</h2>
+      <p class="tt-guided-reflection-prompt">{{ reflection.prompt }}</p>
+      {% if admin_preview %}
+      <label class="tt-guided-reflection-label" for="{{ tab_prefix }}-reflection-response">Your first reading (preview only)</label>
+      <textarea id="{{ tab_prefix }}-reflection-response" rows="5" disabled placeholder="The learner will write their own observation and reasoning here."></textarea>
+      {% else %}
+      <form method="post" action="{% url 'academy:lesson-reflection-submit' lesson.id %}" data-guided-reflection>
+        {% csrf_token %}
+        <label class="tt-guided-reflection-label" for="{{ tab_prefix }}-reflection-response">Your first reading</label>
+        <textarea id="{{ tab_prefix }}-reflection-response" name="reflection_response" rows="5" maxlength="4000" placeholder="State what you can observe, what it may mean, and what could change your view.">{{ reflection_response }}</textarea>
+        <div class="tt-guided-reflection-actions">
+          <button type="submit" class="tt-notebook-save">Save first reading</button>
+          <span data-guided-reflection-feedback role="status" aria-live="polite"></span>
+        </div>
+      </form>
+      {% endif %}
+      {% if reflection.chart_notes %}
+      <details class="tt-guided-reflection-notes"><summary>Chart-reading notes</summary><p>{{ reflection.chart_notes }}</p></details>
+      {% endif %}
+      {% if reflection.model_reasoning %}
+      <details class="tt-guided-reflection-model">
+        <summary>Compare with the model reasoning</summary>
+        <p>{{ reflection.model_reasoning }}</p>
+      </details>
+      {% endif %}
+    </section>
+    {% endif %}
     {% if practice_questions and admin_preview %}
     <section class="tt-practice-questions" aria-labelledby="{{ tab_prefix }}-practice-heading">
       <p class="tt-eyebrow">Apply what you noticed</p>

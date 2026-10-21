@@ -61,38 +61,77 @@ def _practice_questions_with_images(questions, asset_urls, figure_metadata):
 
 
 def _notebook_for_course_display(course_slug, notebook):
-    """Use the approved Bollinger Bands copy when a lesson still has untouched generic defaults."""
+    """Return topic-appropriate prompts; only the Bollinger course gets Bollinger-specific copy."""
     result = deepcopy(notebook) if isinstance(notebook, dict) else {}
-    if course_slug != "understand-bollinger-bands":
-        return result
-
-    default_title_values = {"", "Your Trading Notebook", "Before you make the call"}
-    if str(result.get("title") or "").strip() in default_title_values:
-        result["title"] = "Before treating a touch as a setup"
-
+    default_title_values = {"", "Your Trading Notebook"}
     default_prompts = [
-        ("Observe", "Describe the evidence visible in the chart."),
-        ("Interpret", "State one possible reading and a reasonable alternative."),
-        ("Test", "Name the next evidence that would strengthen or weaken your reading."),
+        {"label": "Observe", "text": "Describe the evidence you can directly observe."},
+        {"label": "Interpret", "text": "State one possible reading and a reasonable alternative."},
+        {"label": "Test", "text": "Name the next evidence that would strengthen or weaken your reading."},
+    ]
+    legacy_generic_prompts = [
+        {"label": "Observe", "text": "Describe the evidence visible in the chart."},
+        {"label": "Interpret", "text": "State one possible reading and a reasonable alternative."},
+        {"label": "Test", "text": "Name the next evidence that would strengthen or weaken your reading."},
     ]
     raw_prompts = result.get("prompts")
-    matches_generic_defaults = not isinstance(raw_prompts, list) or not raw_prompts
-    if isinstance(raw_prompts, list) and len(raw_prompts) == len(default_prompts):
-        matches_generic_defaults = all(
-            isinstance(prompt, dict)
-            and str(prompt.get("label") or "").strip().rstrip(".") == label
-            and str(prompt.get("text") or "").strip() == text
-            for prompt, (label, text) in zip(raw_prompts, default_prompts, strict=False)
-        )
-
-    if matches_generic_defaults:
-        result["prompts"] = [
-            {"label": "Describe", "text": "Where is price relative to the bands and middle line?"},
-            {"label": "Interpret", "text": "Does the structure look like a range, a trend or a transition? What is your alternative explanation?"},
-            {"label": "Test", "text": "What future price behaviour would strengthen or weaken your view?"},
+    missing_prompts = not isinstance(raw_prompts, list) or not raw_prompts
+    if isinstance(raw_prompts, list):
+        usable_prompts = [
+            prompt for prompt in raw_prompts
+            if isinstance(prompt, dict)
+            and str(prompt.get("label") or "").strip()
+            and str(prompt.get("text") or "").strip()
         ]
+        missing_prompts = not usable_prompts
+        result["prompts"] = usable_prompts[:6] if usable_prompts else deepcopy(default_prompts)
+
+    matches_generic_defaults = missing_prompts
+    if isinstance(raw_prompts, list):
+        for generic_set in (default_prompts, legacy_generic_prompts):
+            if len(raw_prompts) == len(generic_set) and all(
+                isinstance(prompt, dict)
+                and str(prompt.get("label") or "").strip().rstrip(".") == default["label"]
+                and str(prompt.get("text") or "").strip() == default["text"]
+                for prompt, default in zip(raw_prompts, generic_set, strict=False)
+            ):
+                matches_generic_defaults = True
+                break
+    if missing_prompts:
+        result["prompts"] = deepcopy(default_prompts)
+
+    title = str(result.get("title") or "").strip()
+    if title in default_title_values:
+        result["title"] = "Before you make the call"
+
+    if course_slug == "understand-bollinger-bands":
+        if title in default_title_values or title == "Before you make the call":
+            result["title"] = "Before treating a touch as a setup"
+        if matches_generic_defaults:
+            result["prompts"] = [
+                {"label": "Describe", "text": "Where is price relative to the bands and middle line?"},
+                {"label": "Interpret", "text": "Does the structure look like a range, a trend or a transition? What is your alternative explanation?"},
+                {"label": "Test", "text": "What future price behaviour would strengthen or weaken your view?"},
+            ]
     return result
 
+
+_DEFAULT_REFLECTION = {
+    "prompt": "Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view.",
+    "model_reasoning": "A careful reading separates visible evidence from interpretation, considers a reasonable alternative, and names the evidence that would strengthen or weaken the interpretation.",
+    "chart_notes": "",
+}
+
+
+def _reflection_for_display(raw_reflection):
+    """Expose learner-safe reflective guidance, with defaults only for legacy lessons."""
+    if not isinstance(raw_reflection, dict) or "prompt" not in raw_reflection:
+        return dict(_DEFAULT_REFLECTION)
+    return {
+        "prompt": str(raw_reflection.get("prompt") or "").strip()[:1000],
+        "model_reasoning": str(raw_reflection.get("model_reasoning") or "").strip()[:3000],
+        "chart_notes": str(raw_reflection.get("chart_notes") or "").strip()[:3000],
+    }
 
 
 def _render_course_description(source, user=None, admin_preview=False):
@@ -280,6 +319,8 @@ def lesson_detail(request, course_slug, lesson_id):
         lesson.content_json.get("notebook", {}) if isinstance(lesson.content_json, dict) else {},
     )
     saved_responses = progress.response_json.get("notebook_responses", []) if isinstance(progress.response_json, dict) else []
+    reflection_response = str(progress.response_json.get("reflection_response") or "")[:4000] if isinstance(progress.response_json, dict) else ""
+    reflection = _reflection_for_display(content_json.get("reflection", {}) if isinstance(content_json, dict) else {})
     if isinstance(notebook, dict) and isinstance(notebook.get("prompts"), list):
         for prompt_index, prompt in enumerate(notebook["prompts"]):
             if isinstance(prompt, dict):
@@ -325,7 +366,9 @@ def lesson_detail(request, course_slug, lesson_id):
             figure_prefix=f"{lesson.module.position}.{lesson.position}",
             module_label=f"Module {lesson.module.position} · {lesson.module.title}",
         ),
-        "notebook": notebook, "notebook_responses": saved_responses, "outline_modules": outline_modules,
+        "notebook": notebook, "notebook_responses": saved_responses,
+        "reflection": reflection, "reflection_response": reflection_response,
+        "outline_modules": outline_modules,
         "related_courses": related_courses, "practice_questions": practice_questions,
         "video_url": video_url, "video_is_file": video_is_file,
         "previous_lesson": previous_lesson, "next_lesson": next_lesson,
@@ -432,6 +475,8 @@ def admin_lesson_preview(request, course_slug, lesson_id):
         ),
         "notebook": notebook,
         "notebook_responses": [],
+        "reflection": _reflection_for_display(content_json.get("reflection", {}) if isinstance(content_json, dict) else {}),
+        "reflection_response": "",
         "outline_modules": outline_modules,
         "related_courses": Course.objects.none(),
         "practice_questions": practice_questions,
@@ -519,6 +564,7 @@ def course_import_website_preview(request, import_id):
 
     selected_sections = None
     selected_notebook = {}
+    selected_reflection = dict(_DEFAULT_REFLECTION)
     selected_practice_questions = []
     selected_video_url = ""
     selected_video_is_file = False
@@ -545,6 +591,7 @@ def course_import_website_preview(request, import_id):
         )
         if not isinstance(selected_notebook, dict):
             selected_notebook = {}
+        selected_reflection = _reflection_for_display(content_json.get("reflection", {}))
         selected_practice_questions = _practice_questions_with_images(
             content_json.get("questions", []),
             asset_urls,
@@ -594,6 +641,8 @@ def course_import_website_preview(request, import_id):
         "selected_module": selected_module,
         "selected_sections": selected_sections,
         "selected_notebook": selected_notebook,
+        "selected_reflection": selected_reflection,
+        "selected_reflection_response": "",
         "selected_practice_questions": selected_practice_questions,
         "selected_video_url": selected_video_url,
         "selected_video_is_file": selected_video_is_file,
@@ -656,6 +705,27 @@ def lesson_quiz_submit(request, lesson_id):
     )
     return JsonResponse({"ok": True, "score": score, "total": len(results), "results": results})
 
+
+@login_required
+@require_POST
+def lesson_reflection_submit(request, lesson_id):
+    """Persist a learner's first reading without changing protected instructor material."""
+    lesson = get_object_or_404(
+        Lesson.objects.select_related("module__course"),
+        pk=lesson_id, is_published=True, module__is_published=True,
+    )
+    if not can_access_lesson(request.user, lesson):
+        raise PermissionDenied("You do not have access to this lesson yet.")
+    content_json = lesson.content_json if isinstance(lesson.content_json, dict) else {}
+    reflection = _reflection_for_display(content_json.get("reflection", {}))
+    if not reflection.get("prompt"):
+        return JsonResponse({"detail": "A reflection exercise is not configured for this lesson."}, status=404)
+    response_text = str(request.POST.get("reflection_response") or "").strip()[:4000]
+    existing_progress = LessonProgress.objects.filter(user=request.user, lesson=lesson).first()
+    saved_response = dict(existing_progress.response_json or {}) if existing_progress and isinstance(existing_progress.response_json, dict) else {}
+    saved_response["reflection_response"] = response_text
+    update_lesson_progress(user=request.user, lesson=lesson, response_json=saved_response)
+    return JsonResponse({"ok": True, "saved": True})
 
 @login_required
 @require_POST

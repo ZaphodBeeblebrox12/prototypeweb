@@ -88,7 +88,7 @@
             {% endif %}
           </section>
           {% endif %}
-          {% include "academy/partials/lesson_tabs.html" with lesson_sections=selected_sections notebook=selected_notebook course_slug=course.slug practice_questions=selected_practice_questions admin_preview=True only %}
+          {% include "academy/partials/lesson_tabs.html" with lesson_sections=selected_sections notebook=selected_notebook reflection=selected_reflection reflection_response=selected_reflection_response course_slug=course.slug practice_questions=selected_practice_questions admin_preview=True only %}
           {% if selected_related_courses %}
           <section class="tt-related-courses" aria-labelledby="tt-related-courses-heading">
             <p>Continue learning</p>

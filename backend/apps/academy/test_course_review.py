@@ -70,6 +70,8 @@ class CourseReviewTemplateTests(TestCase):
 
         self.assertEqual(response.status_code, 200, response.content)
         self.assertContains(response, "Evidence notebook")
+        self.assertContains(response, "Record your reasoning first")
+        self.assertContains(response, "Compare with the model reasoning")
         self.assertContains(response, "What evidence can you see?")
         self.assertNotContains(response, "data-notebook-response")
         self.assertNotContains(response, "lesson-notebook-submit")
