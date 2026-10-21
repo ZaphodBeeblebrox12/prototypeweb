@@ -3,6 +3,7 @@ from pathlib import Path
 from django.test import SimpleTestCase
 
 from .content_rendering import build_lesson_sections, render_safe_markdown
+from .views import _notebook_for_course_display
 
 
 class SharedLessonRenderingTests(SimpleTestCase):
@@ -389,3 +390,53 @@ class LessonSectionRoutingAndFigureCountTests(SimpleTestCase):
         }
         result = build_lesson_sections(source, figure_metadata=metadata)
         self.assertEqual(result["figure_count"], 6)
+
+
+class TemplateParityRegressionTests(SimpleTestCase):
+    def test_explicit_tab_marker_overrides_ambiguous_heading_heuristics(self):
+        source = (
+            "## Opening explanation\n\n"
+            "Keep the core idea in the first tab.\n\n"
+            "[[lesson-tab:examples]]\n\n"
+            "## Relative volume context\n\n"
+            "This comparison belongs in chart examples even though the heading is ambiguous.\n\n"
+            "[[lesson-tab:practice]]\n\n"
+            "## What would change your view\n\n"
+            "Name the next evidence before acting."
+        )
+        result = build_lesson_sections(source)
+        self.assertIn("Keep the core idea", result["idea_html"])
+        self.assertIn("This comparison belongs in chart examples", result["examples_html"])
+        self.assertIn("Name the next evidence", result["practice_html"])
+        for rendered in (result["idea_html"], result["examples_html"], result["practice_html"]):
+            self.assertNotIn("[[lesson-tab:", rendered)
+
+    def test_empty_non_bollinger_notebook_gets_topic_neutral_prompts(self):
+        notebook = _notebook_for_course_display("volume-price-analysis", {})
+        self.assertEqual(len(notebook["prompts"]), 3)
+        self.assertIn("evidence you can directly observe", notebook["prompts"][0]["text"])
+        self.assertNotIn("bands", " ".join(item["text"] for item in notebook["prompts"]).lower())
+
+    def test_bollinger_default_notebook_retains_course_specific_prompts(self):
+        notebook = _notebook_for_course_display(
+            "understand-bollinger-bands",
+            {"title": "Your Trading Notebook", "prompts": []},
+        )
+        self.assertEqual(notebook["title"], "Before treating a touch as a setup")
+        self.assertIn("bands", " ".join(item["text"] for item in notebook["prompts"]).lower())
+
+
+
+class LessonSectionRoutingRegressionTests(SimpleTestCase):
+    def test_concept_heading_compare_the_possibilities_stays_in_the_idea_panel(self):
+        source = (
+            "## Start with the decision\n\n"
+            "Begin with a practical question.\n\n"
+            "### What to notice\n\n"
+            "Describe the visible evidence.\n\n"
+            "### Compare the possibilities\n\n"
+            "Compare two possible readings and the evidence that separates them."
+        )
+        result = build_lesson_sections(source)
+        self.assertIn("Compare the possibilities", result["idea_html"])
+        self.assertNotIn("Compare the possibilities", result["examples_html"])

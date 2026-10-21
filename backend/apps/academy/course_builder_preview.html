@@ -505,31 +505,37 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   .preview-body .tt-purpose-figure-image img { max-height: 50vh; }
 }
 
-/* Catalogue-driven inline course cards: compact, calm, and responsive. */
-.tt-inline-course-card {
-  display:flex; align-items:stretch; justify-content:space-between; gap:1rem; margin:1.35rem 0; padding:1.05rem 1.15rem;
-  border:1px solid var(--tt-line,#dedfd5); border-left:4px solid var(--tt-gold,#a78034); border-radius:12px;
-  background:linear-gradient(130deg,var(--tt-surface,#fffefa),#f6f4ea); box-shadow:0 6px 18px rgba(35,54,42,.05); color:var(--tt-ink,#27362e);
+/* Option 04 — the mini course preview (shared by Builder, admin preview and learner lessons). */
+.tt-course-preview-card {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 132px;
+  gap:16px;
+  margin:18px 0 2px;
+  overflow:hidden;
+  border:1px solid var(--tt-line,#ded7c8);
+  border-radius:12px;
+  background:var(--tt-surface,#fffdf8);
+  color:var(--tt-ink,#27382e);
 }
-.tt-inline-course-card__body {min-width:0;flex:1 1 auto}
-.tt-inline-course-card__eyebrow {display:inline-block;margin:0 0 .4rem;color:var(--tt-muted,#68736c);font-size:.68rem;font-weight:750;letter-spacing:.11em;line-height:1.35;text-transform:uppercase}
-.tt-inline-course-card h3 {margin:0 0 .45rem;color:var(--tt-green,#456653);font-size:1.08rem;font-weight:750;line-height:1.35}
-.tt-inline-course-card h3 a {color:inherit;text-decoration:none}
-.tt-inline-course-card h3 a:hover,.tt-inline-course-card h3 a:focus-visible {text-decoration:underline;text-underline-offset:3px}
-.tt-inline-course-card p {margin:.3rem 0 .65rem;line-height:1.55}
-.tt-inline-course-card__outcomes-label {margin-top:.55rem;color:var(--tt-green,#456653);font-size:.76rem;font-weight:750}
-.tt-inline-course-card__outcomes {margin:.3rem 0 .65rem;padding-left:1.15rem;color:var(--tt-ink,#27362e);font-size:.84rem;line-height:1.5}
-.tt-inline-course-card__outcomes li {margin:.12rem 0}
-.tt-inline-course-card__meta {color:var(--tt-muted,#68736c);font-size:.78rem;line-height:1.45}
-.tt-inline-course-card__action {display:flex;align-items:flex-end;flex:0 0 auto}
-.tt-inline-course-card__cta {display:inline-flex;align-items:center;justify-content:center;gap:.45rem;min-height:36px;padding:.55rem .8rem;border:1px solid var(--tt-green,#456653);border-radius:8px;background:var(--tt-green,#456653);color:#fffefa;font-size:.82rem;font-weight:700;line-height:1.25;text-decoration:none;white-space:nowrap}
-.tt-inline-course-card__cta:hover,.tt-inline-course-card__cta:focus-visible {background:#344e3f;color:#fffefa}
-.tt-inline-course-card--coming-soon {border-left-color:var(--tt-green,#456653)}
-.tt-inline-course-card--coming-soon .tt-inline-course-card__eyebrow {color:var(--tt-green,#456653)}
-.tt-inline-course-card--coming-soon .tt-inline-course-card__cta {background:transparent;color:var(--tt-green,#456653);border-color:var(--tt-line,#dedfd5)}
-.tt-inline-course-card--unavailable {border-left-color:#a6aaa4}
-.tt-inline-course-card--unavailable .tt-inline-course-card__cta {background:#6d756f;border-color:#6d756f}
-@media(max-width:640px){.tt-inline-course-card{flex-direction:column;gap:.8rem;padding:.95rem}.tt-inline-course-card__action{align-items:stretch}.tt-inline-course-card__cta{width:100%;white-space:normal}}
+.tt-course-preview-card__copy {min-width:0;padding:18px 0 18px 18px}
+.tt-course-preview-card__kicker {display:block;margin:0 0 6px;color:var(--tt-gold,#b48635);font-size:9px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.tt-course-preview-card h3 {margin:6px 0;color:var(--tt-ink,#27382e);font:400 23px/1.1 Georgia,"Times New Roman",serif;letter-spacing:-.025em}
+.tt-course-preview-card p {margin:0 0 10px;color:#5d685d;font-size:11px;line-height:1.65}
+.tt-course-preview-card__topics {display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 12px}
+.tt-course-preview-card__topics span {max-width:100%;padding:4px 7px;border:1px solid var(--tt-line,#ded7c8);border-radius:99px;background:var(--tt-paper,#f7f3e9);color:var(--tt-muted,#687367);font-size:9px;line-height:1.4;overflow-wrap:anywhere}
+.tt-course-preview-card__cta {display:inline-flex;align-items:center;gap:8px;color:var(--tt-green,#345943);font-size:11px;font-weight:850;line-height:1.5;text-decoration:none;border-bottom:1px solid transparent;padding-bottom:2px}
+a.tt-course-preview-card__cta:hover,a.tt-course-preview-card__cta:focus-visible {border-bottom-color:#9cac93;text-decoration:none}
+.tt-course-preview-card__art {display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;min-width:0;padding:14px;background:linear-gradient(145deg,#e2eadb,#f5ead1);color:var(--tt-green,#345943);text-align:center}
+.tt-course-preview-card__mark {font:36px Georgia,"Times New Roman",serif;letter-spacing:-.08em}
+.tt-course-preview-card__art small {color:#65715f;font-size:9px;line-height:1.5;letter-spacing:.07em;text-transform:uppercase}
+.tt-course-preview-card--coming-soon .tt-course-preview-card__kicker {color:var(--tt-green,#345943)}
+.tt-course-preview-card--coming-soon .tt-course-preview-card__cta {color:var(--tt-muted,#687367);font-weight:750;cursor:default}
+.tt-course-preview-card--unavailable {display:block;padding:16px 18px;border-left:3px solid #a6aaa4;background:var(--tt-surface,#fffdf8)}
+.tt-course-preview-card--unavailable .tt-course-preview-card__copy {padding:0}
+.tt-course-preview-card--unavailable .tt-course-preview-card__kicker {color:var(--tt-muted,#687367)}
+@media(max-width:850px) {.tt-course-preview-card{grid-template-columns:minmax(0,1fr) 110px}}
+@media(max-width:520px) {.tt-course-preview-card{grid-template-columns:1fr}.tt-course-preview-card__copy{padding:16px}.tt-course-preview-card__art{min-height:96px;flex-direction:row}.tt-course-preview-card__mark{font-size:30px}}
+
 /* Compact layout for the catalogue selector in the lesson editor. */
 .related-course-entry {display:flex;align-items:center;justify-content:space-between;gap:.65rem}
 .related-course-choice {display:flex;align-items:flex-start;gap:.6rem;flex:1 1 auto;min-width:0}
@@ -540,6 +546,11 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .related-course-item[hidden] {display:none!important}
 @media(max-width:640px){.related-course-entry{align-items:stretch;flex-direction:column}.related-course-entry .btn{align-self:flex-start}}
 
+.preview-body .tt-guided-reflection { border-left:3px solid var(--site-secondary); }
+.preview-body .tt-guided-reflection textarea { width:100%; max-width:100%; min-height:100px; padding:10px; border:1px solid var(--line); border-radius:8px; font:inherit; }
+.lesson-quality-list { padding-left:1.2rem; }
+.lesson-quality-list li { margin:8px 0; }
+.lesson-quality-list li span { display:block; color:var(--muted); font-size:11px; line-height:1.5; }
 </style>
 </head>
 <body>
@@ -596,9 +607,9 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   const slugify = value => String(value || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,150);
   const nowText = () => new Date().toLocaleString([], {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
   const defaultQuestion = () => ({id:uid('q'),prompt:'What evidence would you look for before acting on this observation?',options:['Confirming evidence in price behaviour','One indicator reading by itself','A guaranteed outcome'],correctIndex:0,explanation:'Look for confirming evidence and define what would weaken the idea. An observation is not a complete trade plan.',imageId:''});
-  const makeLesson = (n=1) => ({id:uid('lesson'),title:`Lesson 1.${n} — Start with a question`,summary:'A practical introduction to the decision this lesson will help you make.',minutes:12,format:'reading',videoUrl:'',notebook:{title:'Before you make the call',prompts:[{label:'Observe',text:'Describe the evidence visible in the chart.'},{label:'Interpret',text:'State one possible reading and a reasonable alternative.'},{label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}]},imageGroups:[],content:`## Start with the decision\n\nBegin with a practical question a trader may encounter. Describe what can be observed before offering an interpretation.\n\n### What to notice\n\nSeparate the visible evidence from the conclusion you may draw from it. Name the limits of the observation and consider a reasonable alternative.\n\n### Compare the possibilities\n\nUse a second case to show how similar-looking conditions can lead to different outcomes. Explain which detail changes the interpretation.\n\n### Take it into practice\n\nWrite down what would strengthen your reading, what would weaken it, and what would make waiting the better decision.`,questions:[defaultQuestion()],image:null,relatedCourseIds:[]});
+  const makeLesson = (n=1) => ({id:uid('lesson'),title:`Lesson 1.${n} — Start with a question`,summary:'A practical introduction to the decision this lesson will help you make.',minutes:12,format:'reading',videoUrl:'',reflectionPrompt:'Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view.',reflectionModelReasoning:'A careful reading separates visible evidence from interpretation, considers a reasonable alternative, and names the evidence that would strengthen or weaken the interpretation.',reflectionChartNotes:'',notebook:{title:'Before you make the call',prompts:[{label:'Observe',text:'Describe the evidence visible in the chart.'},{label:'Interpret',text:'State one possible reading and a reasonable alternative.'},{label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}]},imageGroups:[],content:`## Start with the decision\n\nBegin with a practical question a trader may encounter. Describe what can be observed before offering an interpretation.\n\n### What to notice\n\nSeparate the visible evidence from the conclusion you may draw from it. Name the limits of the observation and consider a reasonable alternative.\n\n### Compare the possibilities\n\nUse a second case to show how similar-looking conditions can lead to different outcomes. Explain which detail changes the interpretation.\n\n### Take it into practice\n\nWrite down what would strengthen your reading, what would weaken it, and what would make waiting the better decision.`,questions:[defaultQuestion()],image:null,relatedCourseIds:[]});
   const makeModule = (n=1) => ({id:uid('module'),title:`Module ${String(n).padStart(2,'0')} — Foundations`,description:'The main ideas and decisions covered in this module.',lessons:[makeLesson(1)]});
-  const makeCourse = (title='Untitled course') => ({id:uid('course'),title,slug:slugify(title),summary:'A clear, practical description of what learners will study and why it matters.',description:'Explain who the course is for, what it covers and how learners will use it. Keep the promise realistic and specific.',category:'Technical analysis',level:'Intermediate',duration:'Self-paced',price:'',priceNote:'Pricing and checkout are configured separately.',status:'draft',comingSoon:false,position:0,createdAt:nowText(),updatedAt:'Not saved yet',publishedAt:null,publishedSnapshot:null,modules:[makeModule(1)],outcomes:['Describe the evidence before interpreting it.','Compare alternatives and identify invalidation.','Build a clear, conditional decision process.']});
+  const makeCourse = (title='Untitled course') => ({id:uid('course'),title,slug:slugify(title),summary:'A clear, practical description of what learners will study and why it matters.',description:'Explain who the course is for, what it covers and how learners will use it. Keep the promise realistic and specific.',category:'Technical analysis',level:'Intermediate',duration:'Self-paced',price:'',priceNote:'Pricing and checkout are configured separately.',status:'draft',comingSoon:false,requiresOwnedAssets:true,position:0,createdAt:nowText(),updatedAt:'Not saved yet',publishedAt:null,publishedSnapshot:null,modules:[makeModule(1)],outcomes:['Describe the evidence before interpreting it.','Compare alternatives and identify invalidation.','Build a clear, conditional decision process.']});
   let demoOffers = [];
   let comingSoonOffers = [];
   let demoLessonRefs = [];
@@ -788,7 +799,22 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       }).join('') || '<article class="media-card"><div class="media-empty">No image groups yet. Create one after uploading at least two images.</div></article>'}</div>
       <div class="helper-note"><strong>Inline authoring:</strong> place the cursor in the lesson body before opening Images, then insert a single image or a complete image group. The group title and order stay with the inserted block.</div>`;
   }
-  function renderEditor(){const c=currentCourse();if(!c){$('#workspace').innerHTML='<div class="empty-state"><h3>Create your first course</h3><button class="btn primary" data-action="new-course">＋ New course</button></div>';return;}const tab=state.tab||'overview';const tabDefs=[['overview','Course details'],['curriculum','Curriculum'],['lesson','Lesson content'],['questions','Practice & Q&A'],['media','Images'],['preview','Learner preview']];let panel='';const m=currentModule(), l=currentLesson();if(tab==='overview')panel=courseFields(c);else if(tab==='curriculum')panel=curriculumFields(c);else if(tab==='lesson')panel=lessonFields(l);else if(tab==='questions')panel=questionFields(l);else if(tab==='media')panel=mediaFields(l);else panel=previewFields(c);$('#workspace').innerHTML=`<div class="workspace-toolbar"><div class="breadcrumb">Courses <span aria-hidden="true">/</span> ${esc(c.title||'Untitled course')} <span aria-hidden="true">/</span> ${esc(tabDefs.find(x=>x[0]===tab)?.[1]||'Editor')}</div><div class="toolbar-right"><span class="save-state" id="saveIndicator"><span class="dot"></span><span>${state.savedAt?'Saved '+esc(state.savedAt):'Unsaved draft'}</span></span><button class="btn small" type="button" data-action="save-draft">Save draft</button><button class="btn small danger" type="button" data-action="delete-course">Delete draft</button></div></div><div class="editor-shell"><header class="editor-header"><div><div class="eyebrow">${esc(c.slug||'course-slug')}</div><h2>${esc(c.title||'Untitled course')}</h2><p>${esc(c.summary||'Add a course summary to help learners understand what they will study.')}</p></div><div class="header-mark" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="18" stroke="currentColor" stroke-width="1.5"/><path d="M11 27.5 17 21l5 4 10-11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 14h5v5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></header><nav class="tabs" aria-label="Course editing steps">${tabDefs.map(([id,label])=>`<button class="tab ${tab===id?'active':''}" type="button" role="tab" aria-selected="${tab===id}" data-action="tab" data-tab="${id}">${label}</button>`).join('')}</nav><div class="tab-panel" role="tabpanel">${panel}</div></div>`;}
+  function reflectionFields(l) {
+    if (!l) return '<div class="empty-state"><p>Select a lesson first.</p></div>';
+    const prompt = l.reflectionPrompt === undefined
+      ? 'Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view.'
+      : String(l.reflectionPrompt || '');
+    const reasoning = l.reflectionModelReasoning === undefined
+      ? 'A careful reading separates visible evidence from interpretation, considers a reasonable alternative, and names the evidence that would strengthen or weaken the interpretation.'
+      : String(l.reflectionModelReasoning || '');
+    const notes = String(l.reflectionChartNotes || '');
+    return '<div class="section-intro"><h3>Reflection and model reasoning</h3><p>Preserve the reference template’s “write your first reading, then compare” interaction. These fields are optional and course-specific; use them where they help learning rather than repeating boilerplate.</p></div>' +
+      '<div class="lesson-editor-card"><div class="field"><label>Reflection prompt</label><textarea class="textarea" rows="3" data-entity="lesson" data-field="reflectionPrompt" maxlength="1000" placeholder="What should the learner reason through before revealing the model?">' + esc(prompt) + '</textarea><span class="help">The learner can save their first reading to their account. Do not put the correct answer to a scored quiz here.</span></div>' +
+      '<div class="field"><label>Model reasoning / worked interpretation</label><textarea class="textarea" rows="6" data-entity="lesson" data-field="reflectionModelReasoning" maxlength="3000" placeholder="Explain the evidence, interpretation, alternative and what would change the view.">' + esc(reasoning) + '</textarea><span class="help">This is explanatory feedback, not the private answer key for a scored question.</span></div>' +
+      '<div class="field"><label>Optional chart-reading notes</label><textarea class="textarea" rows="4" data-entity="lesson" data-field="reflectionChartNotes" maxlength="3000" placeholder="Optional notes about what to inspect in the worked chart.">' + esc(notes) + '</textarea></div></div>';
+  }
+
+  function renderEditor(){const c=currentCourse();if(!c){$('#workspace').innerHTML='<div class="empty-state"><h3>Create your first course</h3><button class="btn primary" data-action="new-course">＋ New course</button></div>';return;}const tab=state.tab||'overview';const tabDefs=[['overview','Course details'],['curriculum','Curriculum'],['lesson','Lesson content'],['questions','Practice & Q&A'],['media','Images'],['reflection','Reflection & reasoning'],['preview','Learner preview']];let panel='';const m=currentModule(), l=currentLesson();if(tab==='overview')panel=courseFields(c);else if(tab==='curriculum')panel=curriculumFields(c);else if(tab==='lesson')panel=lessonFields(l);else if(tab==='questions')panel=questionFields(l);else if(tab==='media')panel=mediaFields(l);else if(tab==='reflection')panel=reflectionFields(l);else panel=previewFields(c);$('#workspace').innerHTML=`<div class="workspace-toolbar"><div class="breadcrumb">Courses <span aria-hidden="true">/</span> ${esc(c.title||'Untitled course')} <span aria-hidden="true">/</span> ${esc(tabDefs.find(x=>x[0]===tab)?.[1]||'Editor')}</div><div class="toolbar-right"><span class="save-state" id="saveIndicator"><span class="dot"></span><span>${state.savedAt?'Saved '+esc(state.savedAt):'Unsaved draft'}</span></span><button class="btn small" type="button" data-action="save-draft">Save draft</button><button class="btn small danger" type="button" data-action="delete-course">Delete draft</button></div></div><div class="editor-shell"><header class="editor-header"><div><div class="eyebrow">${esc(c.slug||'course-slug')}</div><h2>${esc(c.title||'Untitled course')}</h2><p>${esc(c.summary||'Add a course summary to help learners understand what they will study.')}</p></div><div class="header-mark" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="18" stroke="currentColor" stroke-width="1.5"/><path d="M11 27.5 17 21l5 4 10-11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 14h5v5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></header><nav class="tabs" aria-label="Course editing steps">${tabDefs.map(([id,label])=>`<button class="tab ${tab===id?'active':''}" type="button" role="tab" aria-selected="${tab===id}" data-action="tab" data-tab="${id}">${label}</button>`).join('')}</nav><div class="tab-panel" role="tabpanel">${panel}</div></div>`;}
   function notebookPreviewMarkup(lesson) {
     if (!lesson) return '';
     const notebook = lesson.notebook && typeof lesson.notebook === 'object' ? lesson.notebook : {};
@@ -830,7 +856,50 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     '</section>' +
     '<button class="preview-notebook-examples-button" type="button" data-action="preview-chart-examples">Work through the chart examples <span aria-hidden="true">↗</span></button>';
   }
-  function previewFields(c){const mods=c.modules.map((m,mi)=>({m,mi}));const lesson=currentLesson();return `<div class="section-intro"><h3>Preview as a learner</h3><p>Review the latest editing state before you publish. This preview is deliberately separate from the live member course.</p></div><div class="preview-split"><article class="preview-article"><div class="course-chip">${esc(c.category)} · ${esc(c.level)}</div><h2>${esc(c.title)}</h2><p class="summary">${esc(c.summary)}</p>${c.description?.trim()?'<div class="preview-body course-description-preview">'+renderMarkdown(c.description)+'</div>':''}<div class="pill">${allLessons(c).length} lessons · ${esc(c.duration)}</div>${c.outcomes?.length?`<section class="preview-outcomes"><h3>What learners will practise</h3><ul>${c.outcomes.map(outcome=>`<li>${esc(outcome)}</li>`).join("")}</ul></section>`:""}${lesson?`<hr style="border:0;border-top:1px solid var(--line);margin:24px 0"><div class="eyebrow">${esc(currentModule()?.title||'Module')} / Lesson</div><h2 style="font-size:28px">${esc(lesson.title)}</h2><p class="summary">${esc(lesson.summary)}</p><div class="preview-body" data-preview-lesson-content>${renderMarkdown(lesson.content)}</div>${notebookPreviewMarkup(lesson)}${lesson.questions.length?`<div class="practice-preview"><h4>Test your reading</h4>${lesson.questions.map((q,qi)=>`<div style="margin-bottom:16px">${questionImageMarkup(q,lesson)}<strong style="font-size:11px">${esc(q.prompt)}</strong>${q.options.map((op,oi)=>`<label class="practice-preview-answer" data-preview-option="${esc(q.id)}" data-option-index="${oi}"><input type="radio" name="pv-${esc(q.id)}" value="${oi}" data-preview-question="${esc(q.id)}"> <span>${esc(op)}</span><span class="answer-result"></span></label>`).join('')}<button class="btn small" type="button" data-action="check-preview" data-id="${esc(q.id)}">Check answer</button><div class="feedback" id="feedback-${esc(q.id)}"></div></div>`).join('')}</div>`:''}`:'<p class="summary">No lesson selected yet.</p>'}</article><aside class="preview-lesson-nav"><h4>Course outline</h4><div>${mods.map(({m,mi})=>`<div style="font-size:10px;font-weight:800;color:var(--muted);padding:9px 6px 4px">${esc(m.title)}</div>${m.lessons.map((item,li)=>`<button type="button" class="${item.id===lesson?.id?'selected':''}" data-action="preview-select-lesson" data-module-id="${esc(m.id)}" data-id="${esc(item.id)}">${mi+1}.${li+1} ${esc(item.title)}</button>`).join('')}`).join('')}</div><div class="helper-note">Draft preview only. Lesson access, authentication, progress and paid content protection are enforced by Django in production.</div></aside></div>`;}
+  function lessonQualityMarkup(lesson) {
+    const content = String(lesson.content || '');
+    const headings = [...content.matchAll(/^#{1,6}\s+(.+)$/gm)].map(match => match[1].toLowerCase());
+    const hasVisual = /!\[[^\]]*\]\([^)]+\)|\[\[(?:image-group|teaching-figure):/.test(content);
+    const hasExamples = /worked|compar|case study|near miss|failed|counterexample|chart example/.test(headings.join(' '));
+    const hasPractice = (Array.isArray(lesson.questions) && lesson.questions.length > 0) || /practice|apply|test your reading|learner task|decision exercise/.test(headings.join(' '));
+    const hasNotebook = Boolean(lesson.notebook && Array.isArray(lesson.notebook.prompts) && lesson.notebook.prompts.some(p => p && String(p.text || '').trim()));
+    const hasReflection = Boolean(String(lesson.reflectionPrompt === undefined ? 'default' : lesson.reflectionPrompt || '').trim());
+    const rows = [
+      [hasVisual, 'Worked visual', 'Add a chart or teaching figure when the concept benefits from visual evidence.'],
+      [hasExamples, 'Worked or contrasting example', 'Check that the learner can compare outcomes, not only read a definition.'],
+      [hasPractice, 'Learner practice', 'Include a decision task or structured question when useful.'],
+      [hasNotebook, 'Notebook prompts', 'Use prompts that fit this course topic rather than generic boilerplate.'],
+      [hasReflection, 'First reading / model reasoning', 'Add an optional reflection and a useful explanation of the reasoning.']
+    ];
+    return '<section class="related-course-box"><h4>Lesson quality review · suggestions, not requirements</h4><p>Use judgement: this checklist is meant to catch omissions, not force every lesson into the same shape.</p><ul class="lesson-quality-list">' +
+      rows.map(([ok, title, hint]) => '<li><strong>' + (ok ? '✓ ' : '○ ') + esc(title) + '</strong><span>' + esc(ok ? 'Reviewed' : hint) + '</span></li>').join('') +
+      '</ul></section>';
+  }
+
+  function reflectionPreviewMarkup(lesson) {
+    if (!lesson) return '';
+    const prompt = lesson.reflectionPrompt === undefined
+      ? 'Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view.'
+      : String(lesson.reflectionPrompt || '');
+    const reasoning = lesson.reflectionModelReasoning === undefined
+      ? 'A careful reading separates visible evidence from interpretation, considers a reasonable alternative, and names the evidence that would strengthen or weaken the interpretation.'
+      : String(lesson.reflectionModelReasoning || '');
+    const notes = String(lesson.reflectionChartNotes || '');
+    if (!prompt && !reasoning && !notes) return '';
+    return '<section class="related-course-box tt-guided-reflection"><p class="eyebrow">Make your first reading</p><h3>Record your reasoning first</h3>' +
+      (prompt ? '<p>' + esc(prompt) + '</p><label for="builder-reflection-response">Your first reading · local preview only</label><textarea id="builder-reflection-response" rows="4" placeholder="Your reflection is not sent to the Academy from this local preview."></textarea>' : '') +
+      (notes ? '<details><summary>Chart-reading notes</summary><p>' + esc(notes) + '</p></details>' : '') +
+      (reasoning ? '<details><summary>Compare with the model reasoning</summary><p>' + esc(reasoning) + '</p></details>' : '') +
+      '</section>';
+  }
+
+  function previewFields(c){const mods=c.modules.map((m,mi)=>({m,mi}));const lesson=currentLesson();return `<div class="section-intro"><h3>Preview as a learner</h3><p>Review the latest editing state before you publish. This preview is deliberately separate from the live member course.</p></div><div class="preview-split"><article class="preview-article"><div class="course-chip">${esc(c.category)} · ${esc(c.level)}</div><h2>${esc(c.title)}</h2><p class="summary">${esc(c.summary)}</p>${c.description?.trim()?'<div class="preview-body course-description-preview">'+renderMarkdown(c.description)+'</div>':''}<div class="pill">${allLessons(c).length} lessons · ${esc(c.duration)}</div>${c.outcomes?.length?`<section class="preview-outcomes"><h3>What learners will practise</h3><ul>${c.outcomes.map(outcome=>`<li>${esc(outcome)}</li>`).join("")}</ul></section>`:""}${lesson?`<hr style="border:0;border-top:1px solid var(--line);margin:24px 0"><div class="eyebrow">${esc(currentModule()?.title||'Module')} / Lesson</div><h2 style="font-size:28px">${esc(lesson.title)}</h2><p class="summary">${esc(lesson.summary)}</p><div class="preview-body" data-preview-lesson-content>${renderMarkdown(lesson.content)}</div>${notebookPreviewMarkup(lesson)}${reflectionPreviewMarkup(lesson)}${lesson.questions.length?`<div class="practice-preview"><h4>Test your reading</h4>${lesson.questions.map((q,qi)=>`<div style="margin-bottom:16px">${questionImageMarkup(q,lesson)}<strong style="font-size:11px">${esc(q.prompt)}</strong>${q.options.map((op,oi)=>`<label class="practice-preview-answer" data-preview-option="${esc(q.id)}" data-option-index="${oi}"><input type="radio" name="pv-${esc(q.id)}" value="${oi}" data-preview-question="${esc(q.id)}"> <span>${esc(op)}</span><span class="answer-result"></span></label>`).join('')}<button class="btn small" type="button" data-action="check-preview" data-id="${esc(q.id)}">Check answer</button><div class="feedback" id="feedback-${esc(q.id)}"></div></div>`).join('')}</div>`:''}`:'<p class="summary">No lesson selected yet.</p>'}</article><aside class="preview-lesson-nav"><h4>Course outline</h4><div>${mods.map(({m,mi})=>`<div style="font-size:10px;font-weight:800;color:var(--muted);padding:9px 6px 4px">${esc(m.title)}</div>${m.lessons.map((item,li)=>`<button type="button" class="${item.id===lesson?.id?'selected':''}" data-action="preview-select-lesson" data-module-id="${esc(m.id)}" data-id="${esc(item.id)}">${mi+1}.${li+1} ${esc(item.title)}</button>`).join('')}`).join('')}</div><div class="helper-note">Draft preview only. Lesson access, authentication, progress and paid content protection are enforced by Django in production.</div></aside></div>`;}
+  const previewFieldsBeforeQualityChecks = previewFields;
+  previewFields = function(c) {
+    const html = previewFieldsBeforeQualityChecks(c);
+    const lesson = currentLesson();
+    return lesson ? html.replace("</article>", lessonQualityMarkup(lesson) + "</article>") : html;
+  };
   function renderMarkdown(src){const safe=esc(src);return safe.split(/\n{2,}/).map(block=>{const t=block.trim();if(!t)return'';const h=t.match(/^(#{1,4})\s+(.+)$/);if(h)return `<h3>${h[2]}</h3>`;if(/^[-*]\s/m.test(t))return `<ul>${t.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>`<li>${x.replace(/^[-*]\s+/,'')}</li>`).join('')}</ul>`;return `<p>${t.replace(/\n/g,'<br>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>')}</p>`;}).join('');}
   function renderCatalogue(){const cards=[...demoOffers,...comingSoonOffers];state.courses.filter(c=>c.publishedSnapshot).forEach(c=>{const p=c.publishedSnapshot;cards.push({id:c.id,title:p.title,category:p.category||'MICRO-COURSE',summary:p.summary,price:p.price||'Price not configured',state:'Published from builder'});});$('#catalogueGrid').innerHTML=cards.map(item=>`<article class="offer-card"><div class="offer-art"></div><div class="offer-body"><div class="offer-kicker">${esc(item.category)}</div><h3>${esc(item.title)}</h3><p>${esc(item.summary)}</p><div class="offer-bottom"><div><div class="offer-price">${esc(item.price||'Details soon')}</div><div class="offer-state">${esc(item.state)}</div></div><span class="pill ${item.state==='Coming soon'?'status':'published'}">${item.state==='Coming soon'?'Coming soon':'Published'}</span></div></div></article>`).join('');}
   function render(){renderSidebar();renderEditor();renderCatalogue();renderHeaderState();}
@@ -1145,7 +1214,7 @@ Describe the evidence first.
       const filename = String(image?.name || '').trim();
       return title && title !== filename && !/\.(jpe?g|png|webp|gif|svg)$/i.test(title) ? title : 'Chart';
     };
-    let prepared = String(src || '').replace(/!\[([^\]]*)\]\(asset:\/\/([^)]+)\)/g, function(match, alt, id) {
+    let prepared = String(src || '').replace(/^\s*\[\[lesson-tab:(?:idea|examples|practice)\]\]\s*$/gim, '').replace(/!\[([^\]]*)\]\(asset:\/\/([^)]+)\)/g, function(match, alt, id) {
       const image = images.find(function(item) { return item.id === id || item.assetUuid === id; });
       if (!image) return match;
       const token = 'TTFIGURETOKEN' + figures.length + 'END';
@@ -1198,24 +1267,46 @@ Describe the evidence first.
       const token = 'TTCOURSECARDTOKEN' + inlineCourseCards.length + 'END';
       let cardMarkup;
       if (courseRef) {
-        const meta = [courseRef.category, courseRef.level, courseRef.duration].filter(Boolean).join(' · ');
-        const outcomes = (courseRef.outcomes || []).filter(value => typeof value === 'string' && value.trim()).slice(0, 2);
-        const outcomeMarkup = outcomes.length
-          ? '<div class="tt-inline-course-card__outcomes-label">Inside this course</div><ul class="tt-inline-course-card__outcomes">' +
-            outcomes.map(outcome => '<li>' + esc(outcome) + '</li>').join('') + '</ul>'
+        const topicLabel = value => {
+          let topic = String(value || '').trim().replace(/[.]+$/, '');
+          topic = topic.replace(/^(?:analyse|analyze|apply|assess|build|compare|describe|develop|distinguish|evaluate|explain|identify|learn|read|recognise|recognize|understand|use)\s+/i, '');
+          topic = topic.replace(/\band identify\b/i, '&').replace(/\bwith price progress\b/i, 'vs price').replace(/\bbefore interpreting it\b/i, 'before interpretation').replace(/^a clear,\s*/i, '');
+          topic = topic.replace(/\b(?:a|an|the)\b/gi, '').replace(/,/g, '').replace(/\s+/g, ' ').trim();
+          if (topic.length > 32) {
+            const clipped = topic.slice(0, 29).replace(/\s+\S*$/, '').trim();
+            topic = (clipped || topic.slice(0, 29)) + '…';
+          }
+          return topic ? topic.charAt(0).toUpperCase() + topic.slice(1) : '';
+        };
+        const topics = (courseRef.outcomes || []).filter(value => typeof value === 'string' && value.trim()).map(topicLabel).filter(Boolean).slice(0, 3);
+        const topicsMarkup = topics.length
+          ? '<div class="tt-course-preview-card__topics" aria-label="Topics covered">' + topics.map(topic => '<span>' + esc(topic) + '</span>').join('') + '</div>'
           : '';
-        const comingSoonClass = isComingSoon ? ' tt-inline-course-card--coming-soon' : '';
-        const eyebrow = isComingSoon ? 'COMING SOON' : 'GO DEEPER';
-        const action = isComingSoon ? 'In preparation' : 'Explore course <span aria-hidden="true">↗</span>';
-        cardMarkup = '<aside class="tt-inline-course-card' + comingSoonClass + '" aria-label="Explore a related TradeThesis course">' +
-          '<div class="tt-inline-course-card__body"><span class="tt-inline-course-card__eyebrow">' + eyebrow + '</span>' +
-          '<h3>' + esc(courseRef.title) + '</h3><p>' + esc(courseRef.summary || 'Explore the course outline and practical learning outcomes.') + '</p>' +
-          outcomeMarkup + (meta ? '<div class="tt-inline-course-card__meta">' + esc(meta) + '</div>' : '') + '</div>' +
-          '<div class="tt-inline-course-card__action"><span class="tt-inline-course-card__cta">' + action + '</span></div></aside>';
+        const words = String(courseRef.title || '').match(/[A-Za-z0-9]+/g) || [];
+        const markWords = words.filter(word => !/^(and|or|for|of|the|to|with)$/i.test(word));
+        const mark = markWords.length > 1 ? markWords[0].charAt(0).toUpperCase() + '/' + markWords[1].charAt(0).toUpperCase() : (markWords[0] || 'TT').slice(0, 2).toUpperCase();
+        const artSource = (String(courseRef.title || '') + ' ' + String(courseRef.category || '')).toLowerCase();
+        const artCopy = artSource.includes('volume') && artSource.includes('price') ? ['Activity', 'meets outcome']
+          : artSource.includes('support') && artSource.includes('resistance') ? ['Price', 'respects zones']
+          : artSource.includes('bollinger') || artSource.includes('volatility') ? ['Volatility', 'in context']
+          : artSource.includes('construction') ? ['Idea', 'to execution'] : ['Learn', 'in context'];
+        const modifier = isComingSoon ? ' tt-course-preview-card--coming-soon' : '';
+        const kicker = isComingSoon ? 'Coming soon' : 'Companion course';
+        const href = !isComingSoon && courseRef.slug ? '/learn/course/' + encodeURIComponent(courseRef.slug) + '/' : '';
+        const cta = isComingSoon
+          ? '<span class="tt-course-preview-card__cta" aria-label="Course not yet available">In preparation</span>'
+          : href
+            ? '<a class="tt-course-preview-card__cta" href="' + esc(href) + '" rel="noopener noreferrer">View course outline <span>↗</span></a>'
+            : '<span class="tt-course-preview-card__cta">View course outline</span>';
+        cardMarkup = '<aside class="tt-course-preview-card' + modifier + '" aria-label="Explore a related TradeThesis course">' +
+          '<div class="tt-course-preview-card__copy"><span class="tt-course-preview-card__kicker">' + kicker + '</span>' +
+          '<h3>' + esc(courseRef.title) + '</h3><p>' + esc(courseRef.summary || 'Move beyond this example and study the broader toolkit.') + '</p>' +
+          topicsMarkup + cta + '</div><div class="tt-course-preview-card__art"><span class="tt-course-preview-card__mark">' + esc(mark) + '</span>' +
+          '<small>' + esc(artCopy[0]) + '<br>' + esc(artCopy[1]) + '</small></div></aside>';
       } else {
-        cardMarkup = '<aside class="tt-inline-course-card tt-inline-course-card--unavailable" aria-label="Course currently unavailable">' +
-          '<div class="tt-inline-course-card__body"><span class="tt-inline-course-card__eyebrow">KEEP LEARNING</span>' +
-          '<h3>Course currently unavailable</h3><p>This course is not in the catalogue right now.</p></div></aside>';
+        cardMarkup = '<aside class="tt-course-preview-card tt-course-preview-card--unavailable" aria-label="Course currently unavailable">' +
+          '<div class="tt-course-preview-card__copy"><span class="tt-course-preview-card__kicker">Keep learning</span>' +
+          '<h3>Course currently unavailable</h3><p>This course is not in the published catalogue right now.</p></div></aside>';
       }
       inlineCourseCards.push(cardMarkup);
       return '\n\n' + token + '\n\n';
@@ -1267,6 +1358,49 @@ Describe the evidence first.
       </div>
     </article>`).join('');
   }
+
+  const courseFieldsBeforeAssetPolicy = courseFields;
+  courseFields = function(c) {
+    if (c && c.requiresOwnedAssets === undefined) c.requiresOwnedAssets = true;
+    const html = courseFieldsBeforeAssetPolicy(c);
+    if (!c) return html;
+    const checked = c.requiresOwnedAssets ? ' checked' : '';
+    return html + '<section class="related-course-box"><h4>Instructional image policy</h4>' +
+      '<label class="checkbox-row"><input type="checkbox" data-entity="course" data-field="requiresOwnedAssets"' + checked + '> Require course-owned images before publishing</label>' +
+      '<p>When enabled, every referenced instructional image must have a file stored in Academy asset storage. An external image URL is not a durable copy; upload a replacement before publishing. The temporary Bollinger Bands example restriction applies regardless of this setting.</p>' +
+      '</section>';
+  };
+
+  function lessonPlacementToolsMarkup() {
+    return '<section class="related-course-box lesson-placement-tools"><h4>Control where a section appears</h4><p>Heading-based placement is a fallback. Put your cursor immediately before a section heading and insert one of these markers to explicitly choose the learner tab. The marker is structural and will not appear in the lesson.</p><div class="figure-inline-actions">' +
+      '<button class="btn small" type="button" data-action="insert-tab-route" data-route="idea">Route to The idea</button>' +
+      '<button class="btn small" type="button" data-action="insert-tab-route" data-route="examples">Route to Chart examples</button>' +
+      '<button class="btn small" type="button" data-action="insert-tab-route" data-route="practice">Route to Test your reading</button></div><p class="help">Stored as <code>[[lesson-tab:idea]]</code>, <code>[[lesson-tab:examples]]</code> or <code>[[lesson-tab:practice]]</code> on a line before the heading.</p></section>';
+  }
+
+  function inlineLessonReferenceManagerMarkup(lesson) {
+    const content = String(lesson.content || '');
+    const refs = [...content.matchAll(/\[\[(lesson|lesson-card):([0-9a-fA-F-]{36})\]\]/g)];
+    if (!refs.length) {
+      return '<section class="related-course-box"><h4>Inline lesson references</h4><p>No inline lesson links or cards have been inserted yet. Use the search picker below to add one at the cursor.</p></section>';
+    }
+    const rows = refs.map((match, index) => {
+      const kind = match[1], id = match[2];
+      const destination = demoLessonRefs.find(ref => String(ref.id).toLowerCase() === id.toLowerCase());
+      const title = destination ? destination.title : 'Unavailable or unpublished lesson';
+      const course = destination ? destination.course_title : id;
+      const alternative = kind === 'lesson' ? 'Convert to related-lesson card' : 'Convert to inline link';
+      return '<article class="related-course-item"><div><strong>' + esc(title) + '</strong><span>' + esc(course) + ' · ' + (kind === 'lesson' ? 'inline link' : 'lesson card') + '</span></div><div class="figure-inline-actions"><button type="button" class="btn small" data-action="toggle-inline-lesson-reference-kind" data-index="' + index + '">' + alternative + '</button><button type="button" class="btn small danger" data-action="remove-inline-lesson-reference" data-index="' + index + '">Remove</button></div></article>';
+    }).join('');
+    return '<section class="related-course-box"><h4>Manage inserted lesson references</h4><p>These controls affect one occurrence at a time, including when the same destination appears more than once.</p><div class="related-course-list">' + rows + '</div></section>';
+  }
+
+  const lessonFieldsBeforePlacementTools = lessonFields;
+  lessonFields = function(lesson) {
+    const html = lessonFieldsBeforePlacementTools(lesson);
+    if (!lesson) return html;
+    return html + lessonPlacementToolsMarkup() + inlineLessonReferenceManagerMarkup(lesson);
+  };
 
   function rememberLessonContentCaret(target) {
     if (!target || !target.matches('textarea[data-entity="lesson"][data-field="content"]')) return;
@@ -1443,6 +1577,33 @@ Describe the evidence first.
   const baseHandleActionWithFigures = handleAction;
   handleAction = function(action, el) {
     const lesson = currentLesson();
+    if (lesson && action === 'insert-tab-route') {
+      const route = ['idea','examples','practice'].includes(String(el.dataset.route || '')) ? String(el.dataset.route) : 'idea';
+      insertLessonContentAtCaret(lesson, '[[lesson-tab:' + route + ']]', true);
+      toast('Section placement marker inserted. Keep it immediately before the section heading.');
+      return;
+    }
+    if (lesson && (action === 'remove-inline-lesson-reference' || action === 'toggle-inline-lesson-reference-kind')) {
+      const index = Number(el.dataset.index);
+      const pattern = /\[\[(lesson|lesson-card):([0-9a-fA-F-]{36})\]\]/g;
+      const content = String(lesson.content || '');
+      const matches = [...content.matchAll(pattern)];
+      const selected = matches[index];
+      if (!selected) { toast('That reference changed. Reopen the lesson reference list and try again.'); return; }
+      if (action === 'remove-inline-lesson-reference') {
+        lesson.content = content.slice(0, selected.index) + content.slice(selected.index + selected[0].length);
+      } else {
+        const newKind = selected[1] === 'lesson' ? 'lesson-card' : 'lesson';
+        const replacement = '[[' + newKind + ':' + selected[2] + ']]';
+        lesson.content = content.slice(0, selected.index) + replacement + content.slice(selected.index + selected[0].length);
+      }
+      lesson.content = lesson.content.replace(/\n{3,}/g, '\n\n');
+      state.tab = 'lesson';
+      persist(false);
+      renderEditor();
+      toast(action === 'remove-inline-lesson-reference' ? 'Inline lesson reference removed.' : 'Inline lesson reference type changed.');
+      return;
+    }
     if (lesson && action === 'insert-course-card') {
       const courseRef = demoOffers.concat(comingSoonOffers).find(item => String(item.id) === String(el?.dataset?.id || ''));
       if (!courseRef) {

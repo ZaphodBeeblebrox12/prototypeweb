@@ -140,3 +140,15 @@ The standalone Bollinger preview contains local-only controls for reviewing imag
 **When this template is included in Django, remove the local-only preview mode.** Render text/image editing controls only for an authenticated administrator who has the dedicated content/media-edit permission. Do not grant this capability to learners, instructors, ordinary staff or all users with `is_staff` by default. Inject server-checked configuration, stable database-backed content IDs, CSRF tokens and save/upload routes. Re-check administrator permission on every write; validate and sanitise content server-side. Text saving must update shared content in the existing course system, while shared images must use persistent media records/storage and retain audit history.
 
 See `docs/architecture/COURSE_CONTENT_EDITOR.md` and `docs/architecture/INSTRUCTIONAL_IMAGE_REPLACEMENT.md`.
+
+## Durable instructional media and publication
+
+Instructional images must use the Academy's persistent asset records. An external image URL can be retained as a source reference for legacy imports, but it is not a durable copy of course media.
+
+- `course.requires_owned_assets` is an explicit publishing policy in a course manifest/import snapshot. When true, every referenced instructional image must have a stored course-owned file before publication; an external URL alone does not satisfy the rule.
+- Course Builder-created drafts should default this policy to enabled. Authors can disable it only when they intentionally accept external-image fallback behaviour for that course.
+- The temporary external chart references in the Bollinger Bands course must still be replaced with approved local figures before publication, regardless of the course-level setting.
+- The review screen must clearly identify an unavailable image and provide the existing administrator replacement workflow. Do not silently render a missing image as a successful, complete figure.
+- Asset ownership and lesson references must remain stable across draft save, review, replacement, publication and subsequent course revisions.
+
+

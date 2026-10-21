@@ -7,12 +7,18 @@ import bleach
 import markdown as markdown_library
 from django.urls import reverse
 
+from .course_card_utils import (
+    compact_course_topic,
+    course_card_art_copy,
+    course_card_mark,
+    is_course_card_recommendable,
+)
 from .models import Course, CourseImport, Lesson
 
 _ALLOWED_TAGS = {
     "a", "aside", "blockquote", "br", "code", "del", "div", "em", "figcaption", "figure",
     "h1", "h2", "h3", "h4", "h5", "h6", "hr", "img", "li", "ol", "p", "pre",
-    "s", "span", "strong", "sub", "sup", "table", "tbody", "td", "th", "thead", "tr", "ul",
+    "s", "small", "span", "strong", "sub", "sup", "table", "tbody", "td", "th", "thead", "tr", "ul",
 }
 _ALLOWED_ATTRIBUTES = {
     "a": ["href", "title", "rel", "class"],
@@ -31,6 +37,7 @@ _TEACHING_FIGURE_TOKEN = re.compile(r"\[\[teaching-figure:([A-Za-z0-9_-]{1,120})
 _IMAGE_GROUP_TOKEN = re.compile(r"\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]")
 _LESSON_REF = re.compile(r"\[\[(lesson|lesson-card):([0-9a-fA-F-]{36})\]\]")
 _COURSE_CARD_REF = re.compile(r"\[\[course-card:(?:(coming-soon):)?([0-9a-fA-F-]{36})\]\]")
+_TAB_ROUTE_TOKEN = re.compile(r"^\s*\[\[lesson-tab:(idea|examples|practice)\]\]\s*$", re.IGNORECASE)
 _HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
 _DANGEROUS_MARKDOWN = re.compile(
     r"<\s*/?\s*(?:script|style|iframe|object|embed|form|input|button|svg|math)\b"
@@ -135,7 +142,7 @@ def _resolve_lesson_references(source, user=None, admin_preview=False):
 
 
 def _resolve_course_cards(source):
-    """Resolve stable course-card references to current published or announced catalogue data."""
+    """Resolve stable course-card references into the approved Option 4 mini preview."""
     from html import escape
 
     references = []
@@ -152,6 +159,7 @@ def _resolve_course_cards(source):
     courses_by_id = {
         str(course.pk): course
         for course in Course.objects.filter(pk__in=all_ids, status=Course.Status.PUBLISHED)
+        if is_course_card_recommendable(course.title, course.summary)
     }
     teasers_by_id = {
         str(teaser.pk): teaser
@@ -161,79 +169,89 @@ def _resolve_course_cards(source):
     published_by_slug = {
         course.slug: course
         for course in Course.objects.filter(slug__in=teaser_slugs, status=Course.Status.PUBLISHED)
+        if is_course_card_recommendable(course.title, course.summary)
     } if teaser_slugs else {}
 
-    def metadata_text(category, level, duration):
-        return " · ".join(
-            str(value).strip() for value in (category, level, duration)
-            if str(value or "").strip()
-        )
-
-    def safe_outcomes(raw):
+    def render_topics(raw):
         if not isinstance(raw, list):
-            return []
-        return [str(value).strip() for value in raw if isinstance(value, str) and value.strip()][:3]
-
-    def render_outcomes(values):
-        values = safe_outcomes(values)
-        if not values:
             return ""
-        items = "".join(f"<li>{escape(value)}</li>" for value in values)
+        topics = []
+        for value in raw:
+            if not isinstance(value, str):
+                continue
+            label = compact_course_topic(value)
+            if label and label not in topics:
+                topics.append(label)
+            if len(topics) == 3:
+                break
+        if not topics:
+            return ""
+        chips = "".join(f"<span>{escape(topic)}</span>" for topic in topics)
+        return '<div class="tt-course-preview-card__topics" aria-label="Topics covered">' + chips + "</div>"
+
+    def render_art(title, category=""):
+        mark = escape(course_card_mark(title))
+        first, second = course_card_art_copy(title, category)
         return (
-            '<div class="tt-inline-course-card__outcomes-label">Inside this course</div>'
-            f'<ul class="tt-inline-course-card__outcomes">{items}</ul>'
+            '<div class="tt-course-preview-card__art">'
+            f'<span class="tt-course-preview-card__mark">{mark}</span>'
+            f'<small>{escape(first)}<br>{escape(second)}</small>'
+            '</div>'
         )
 
-    def render_meta(category, level, duration):
-        value = metadata_text(category, level, duration)
-        return f'<div class="tt-inline-course-card__meta">{escape(value)}</div>' if value else ""
+    def render_card(title, summary, topics, destination="", category="", coming_soon=False):
+        safe_title = escape(str(title or "Course"))
+        safe_summary = escape(str(summary or "Move beyond this example and study the broader toolkit."))
+        if coming_soon:
+            kicker = "Coming soon"
+            cta = (
+                '<span class="tt-course-preview-card__cta" aria-label="Course not yet available">'
+                'In preparation</span>'
+            )
+            modifier = " tt-course-preview-card--coming-soon"
+        else:
+            kicker = "Companion course"
+            safe_destination = escape(destination, quote=True)
+            cta = (
+                f'<a class="tt-course-preview-card__cta" href="{safe_destination}" '
+                'rel="noopener noreferrer">View course outline <span>↗</span></a>'
+            )
+            modifier = ""
+        return (
+            f'<aside class="tt-course-preview-card{modifier}" aria-label="Explore a related TradeThesis course">'
+            '<div class="tt-course-preview-card__copy">'
+            f'<span class="tt-course-preview-card__kicker">{kicker}</span>'
+            f'<h3>{safe_title}</h3><p>{safe_summary}</p>'
+            f'{render_topics(topics)}{cta}'
+            '</div>'
+            f'{render_art(title, category)}'
+            '</aside>'
+        )
 
     def render_published_course(course):
-        destination = escape(reverse("academy:course-detail", args=[course.slug]), quote=True)
-        title = escape(str(course.title or "Course"))
-        summary = escape(str(course.summary or "Explore the course outline and practical learning outcomes."))
-        outcomes = render_outcomes(course.learning_outcomes)
-        metadata = render_meta(course.category, course.level, course.estimated_duration)
-        return (
-            '<aside class="tt-inline-course-card" aria-label="Explore a related TradeThesis course">'
-            '<div class="tt-inline-course-card__body">'
-            '<span class="tt-inline-course-card__eyebrow">GO DEEPER</span>'
-            f'<h3><a href="{destination}" rel="noopener noreferrer">{title}</a></h3>'
-            f'<p>{summary}</p>{outcomes}{metadata}'
-            '</div><div class="tt-inline-course-card__action">'
-            f'<a class="tt-inline-course-card__cta" href="{destination}" rel="noopener noreferrer">'
-            'Explore course <span aria-hidden="true">↗</span></a>'
-            '</div></aside>'
+        return render_card(
+            course.title,
+            course.summary,
+            course.learning_outcomes,
+            destination=reverse("academy:course-detail", args=[course.slug]),
+            category=course.category,
         )
 
     def render_coming_soon(teaser, builder_state):
-        title = escape(str(builder_state.get("title") or teaser.title or "Course"))
-        summary = escape(str(
+        title = str(builder_state.get("title") or teaser.title or "Course")
+        summary = str(
             builder_state.get("summary") or builder_state.get("description")
-            or "Course details will be shared closer to launch."
-        )[:360])
+            or "Move beyond this example and study the broader toolkit."
+        )[:360]
         category = str(builder_state.get("category") or "TradeThesis courses")[:80]
-        level = str(builder_state.get("level") or "Self-paced")[:40]
-        duration = str(builder_state.get("duration") or "")[:80]
-        outcomes = render_outcomes(builder_state.get("outcomes"))
-        metadata = render_meta(category, level, duration)
-        return (
-            '<aside class="tt-inline-course-card tt-inline-course-card--coming-soon" '
-            'aria-label="TradeThesis course coming soon">'
-            '<div class="tt-inline-course-card__body">'
-            '<span class="tt-inline-course-card__eyebrow">COMING SOON</span>'
-            f'<h3>{title}</h3><p>{summary}</p>{outcomes}{metadata}'
-            '</div><div class="tt-inline-course-card__action">'
-            '<span class="tt-inline-course-card__cta" aria-label="Course not yet available">'
-            'In preparation</span></div></aside>'
-        )
+        return render_card(title, summary, builder_state.get("outcomes"), category=category, coming_soon=True)
 
     def unavailable_card():
         return (
-            '<aside class="tt-inline-course-card tt-inline-course-card--unavailable" '
+            '<aside class="tt-course-preview-card tt-course-preview-card--unavailable" '
             'aria-label="Course currently unavailable">'
-            '<div class="tt-inline-course-card__body">'
-            '<span class="tt-inline-course-card__eyebrow">KEEP LEARNING</span>'
+            '<div class="tt-course-preview-card__copy">'
+            '<span class="tt-course-preview-card__kicker">Keep learning</span>'
             '<h3>Course currently unavailable</h3>'
             '<p>This course is not in the published catalogue right now.</p>'
             '</div></aside>'
@@ -245,13 +263,13 @@ def _resolve_course_cards(source):
         kind, stable_id = match.groups()
         course = courses_by_id.get(stable_id) if not kind else None
         coming_soon_data = None
-
         if kind == "coming-soon":
             teaser = teasers_by_id.get(stable_id)
             if teaser is not None:
                 target = teaser.target_course
                 if target is not None and target.status == Course.Status.PUBLISHED:
-                    course = target
+                    if is_course_card_recommendable(target.title, target.summary):
+                        course = target
                 else:
                     course = published_by_slug.get(teaser.course_slug)
                 if course is None and (
@@ -261,7 +279,10 @@ def _resolve_course_cards(source):
                 ):
                     builder_state = teaser.payload.get("builder_state")
                     if isinstance(builder_state, dict) and builder_state.get("comingSoon"):
-                        coming_soon_data = (teaser, builder_state)
+                        teaser_title = str(builder_state.get("title") or teaser.title or "Course")
+                        teaser_summary = str(builder_state.get("summary") or builder_state.get("description") or "")
+                        if is_course_card_recommendable(teaser_title, teaser_summary):
+                            coming_soon_data = (teaser, builder_state)
 
         if course is not None:
             markup = render_published_course(course)
@@ -581,6 +602,7 @@ def build_lesson_sections(
     current_group = "idea"
     current_heading = None
     current_lines = []
+    explicit_route_for_next_heading = False
 
     def finish_section():
         nonlocal current_lines, current_heading, current_group
@@ -595,14 +617,25 @@ def build_lesson_sections(
         current_heading = None
 
     for line in lines:
+        route_marker = _TAB_ROUTE_TOKEN.match(line)
+        if route_marker:
+            # Explicit author placement beats the best-effort heading heuristic.
+            # Put the marker immediately before the heading for the section to route.
+            finish_section()
+            current_group = route_marker.group(1).casefold()
+            explicit_route_for_next_heading = True
+            continue
+
         match = _HEADING.match(line)
         if match:
             finish_section()
             current_heading = line.strip()
             heading = match.group(2).casefold()
+            if explicit_route_for_next_heading:
+                explicit_route_for_next_heading = False
             # Admin-added headings encode the selected Learning Room tab;
             # handle those exact prefixes before generic content heuristics.
-            if heading.startswith("additional concept figure"):
+            elif heading.startswith("compare the possibilities") or heading.startswith("additional concept figure"):
                 current_group = "idea"
             elif heading.startswith("additional chart examples"):
                 current_group = "examples"

@@ -18,6 +18,7 @@ from .models import (
     CourseModule,
     Lesson,
     LessonInstructorMaterial,
+    LessonProgress,
 )
 
 User = get_user_model()
@@ -58,6 +59,9 @@ class CourseBuilderApiTests(TestCase):
                         "minutes": 12,
                         "videoUrl": "https://media.example.test/lesson.mp4",
                         "notebook": {"title": "A useful notebook", "prompts": [{"label": "Observe", "text": "What evidence is visible?"}]},
+                        "reflectionPrompt": "What evidence do you observe before interpreting it?",
+                        "reflectionModelReasoning": "Separate visible evidence from interpretation and consider what would change the view.",
+                        "reflectionChartNotes": "Compare the evidence with a reasonable alternative.",
                         "content": "## Notice\n\nDescribe what is visible before drawing a conclusion.",
                         "questions": [{
                             "id": "question-local-1",
@@ -88,6 +92,12 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "notebook-editor-preview")
         self.assertContains(response, "data-notebook-preview")
         self.assertContains(response, "notebookPreviewMarkup(l)")
+        self.assertContains(response, "Reflection & reasoning")
+        self.assertContains(response, "Require course-owned images before publishing")
+        self.assertContains(response, "Route to Chart examples")
+        self.assertContains(response, "Manage inserted lesson references")
+        self.assertContains(response, "lessonQualityMarkup")
+        self.assertContains(response, "previewFieldsBeforeQualityChecks")
 
     def test_admin_can_save_shared_draft(self):
         response = self.client.post(
@@ -109,8 +119,109 @@ class CourseBuilderApiTests(TestCase):
         saved_lesson = record.payload["modules"][0]["lessons"][0]
         self.assertEqual(saved_lesson["content_json"]["video_url"], "https://media.example.test/lesson.mp4")
         self.assertEqual(saved_lesson["content_json"]["notebook"]["title"], "A useful notebook")
+        self.assertEqual(saved_lesson["content_json"]["reflection"]["prompt"], "What evidence do you observe before interpreting it?")
+        self.assertEqual(saved_lesson["content_json"]["reflection"]["model_reasoning"], "Separate visible evidence from interpretation and consider what would change the view.")
         self.assertEqual(record.payload["course"]["learning_outcomes"], ["Describe evidence before interpreting it."])
         self.assertNotIn("correctIndex", saved_lesson["content_json"])
+
+    def test_publish_validation_rejects_hotlinked_instructional_images_for_any_course(self):
+        from .importing import validate_import_for_publish
+
+        slug = "external-instructional-image"
+        asset_id = uuid.uuid4()
+        payload = {
+            "course": {"title": "External Image Test", "slug": slug, "requires_owned_assets": True},
+            "assets": [],
+            "modules": [{
+                "title": "Foundations",
+                "lessons": [{
+                    "title": "First lesson",
+                    "content_markdown": f"![Chart](asset://{asset_id})",
+                    "content_json": {"asset_ids": [str(asset_id)]},
+                }],
+            }],
+        }
+        record = CourseImport.objects.create(
+            course_slug=slug,
+            title="External Image Test",
+            manifest_version="course-builder-v1",
+            content_hash="e" * 64,
+            source_manifest=f"builder://{slug}",
+            status=CourseImport.Status.REVIEW,
+            imported_by=self.admin,
+            payload=payload,
+        )
+        CourseImportAsset.objects.create(
+            course_import=record,
+            asset_key="remote/external-chart",
+            stable_asset_id=asset_id,
+            original_url="https://charts.example.test/temporary.png",
+            file="",
+        )
+
+        errors = validate_import_for_publish(record)
+
+        self.assertTrue(any("course-owned image" in error for error in errors), errors)
+
+    def test_learner_reflection_is_saved_only_after_access_check(self):
+        course = Course.objects.create(
+            title="Reflection Persistence",
+            slug="reflection-persistence",
+            status=Course.Status.PUBLISHED,
+        )
+        module = CourseModule.objects.create(
+            course=course, title="Foundations", slug="foundations",
+            position=1, is_published=True,
+        )
+        lesson = Lesson.objects.create(
+            module=module, title="First reading", slug="first-reading",
+            position=1, is_published=True, is_preview=True,
+            content_markdown="## Observe\n\nDescribe the visible evidence.",
+            content_json={
+                "reflection": {
+                    "prompt": "What can you observe?",
+                    "model_reasoning": "Separate the observation from the interpretation.",
+                    "chart_notes": "Check an alternative reading.",
+                },
+            },
+        )
+
+        response = self.client.post(
+            reverse("academy:lesson-reflection-submit", args=[lesson.pk]),
+            {"reflection_response": "Price closed above the marked range; follow-through is not known yet."},
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertTrue(response.json()["saved"])
+        progress = LessonProgress.objects.get(user=self.admin, lesson=lesson)
+        self.assertEqual(
+            progress.response_json["reflection_response"],
+            "Price closed above the marked range; follow-through is not known yet.",
+        )
+
+    def test_learner_cannot_save_reflection_before_lesson_access(self):
+        course = Course.objects.create(
+            title="Locked Reflection",
+            slug="locked-reflection",
+            status=Course.Status.PUBLISHED,
+        )
+        module = CourseModule.objects.create(
+            course=course, title="Foundations", slug="foundations",
+            position=1, is_published=True,
+        )
+        lesson = Lesson.objects.create(
+            module=module, title="Locked reading", slug="locked-reading",
+            position=1, is_published=True, is_preview=False,
+            content_json={"reflection": {"prompt": "What do you observe?"}},
+        )
+
+        response = self.client.post(
+            reverse("academy:lesson-reflection-submit", args=[lesson.pk]),
+            {"reflection_response": "A response from a user without course access."},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(LessonProgress.objects.filter(user=self.admin, lesson=lesson).exists())
 
     @patch(
         "apps.academy.course_builder_api.course_asset_storage.status",
@@ -279,6 +390,41 @@ class CourseBuilderApiTests(TestCase):
         instructor = LessonInstructorMaterial.objects.get(lesson=lesson)
         self.assertEqual(instructor.rubric_json["questions"][0]["correctIndex"], 0)
         self.assertIn("Start with what can be observed.", instructor.answer_key_markdown)
+
+    def test_course_card_picker_excludes_published_placeholder_course(self):
+        placeholder = Course.objects.create(
+            title="New micro-course draft",
+            slug="new-micro-course-draft-placeholder",
+            summary="Add a concise course promise here.",
+            status=Course.Status.PUBLISHED,
+        )
+        placeholder_module = CourseModule.objects.create(
+            course=placeholder, title="Foundations", slug="foundations",
+            position=1, is_published=True,
+        )
+        Lesson.objects.create(
+            module=placeholder_module, title="Placeholder lesson", slug="placeholder-lesson",
+            position=1, is_published=True, content_markdown="Placeholder content.",
+        )
+        valid_course = Course.objects.create(
+            title="Published course with real copy",
+            slug="published-course-real-copy",
+            summary="A practical introduction to reading market context.",
+            status=Course.Status.PUBLISHED,
+        )
+        valid_module = CourseModule.objects.create(
+            course=valid_course, title="Foundations", slug="foundations",
+            position=1, is_published=True,
+        )
+        Lesson.objects.create(
+            module=valid_module, title="Read the context", slug="read-the-context",
+            position=1, is_published=True, content_markdown="Read the context before acting.",
+        )
+        response = self.client.get(reverse("staff_course_builder_api"))
+        self.assertEqual(response.status_code, 200, response.content)
+        related_ids = {str(item["id"]) for item in response.json()["related_courses"]}
+        self.assertNotIn(str(placeholder.pk), related_ids)
+        self.assertIn(str(valid_course.pk), related_ids)
 
     def test_related_course_uses_published_course_uuid(self):
         related = Course.objects.create(

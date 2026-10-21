@@ -102,4 +102,31 @@
       button.disabled = false;
     }
   });
+  document.addEventListener("submit", async function (event) {
+    const form = event.target.closest("[data-guided-reflection]");
+    if (!form) return;
+    event.preventDefault();
+    const button = form.querySelector('button[type="submit"]');
+    const feedback = form.querySelector("[data-guided-reflection-feedback]");
+    if (!button || !feedback) return;
+    button.disabled = true;
+    feedback.textContent = "Saving your first reading…";
+    try {
+      const csrf = form.querySelector('[name="csrfmiddlewaretoken"]');
+      const response = await fetch(form.action, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "X-CSRFToken": csrf ? csrf.value : "" },
+        body: new FormData(form)
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.detail || "Your reflection could not be saved.");
+      feedback.textContent = "Saved to your account. Now compare your reasoning with the model reading.";
+    } catch (error) {
+      feedback.textContent = error.message || "Your reflection could not be saved.";
+    } finally {
+      button.disabled = false;
+    }
+  });
+
 })();

@@ -27,6 +27,7 @@ from django.views.decorators.http import require_http_methods
 from PIL import Image, UnidentifiedImageError
 
 from .course_builder_lifecycle import mark_builder_draft_deleted
+from .course_card_utils import is_course_card_recommendable
 from .importing import validate_import_for_publish
 from .models import (
     Course,
@@ -387,8 +388,22 @@ def _build_import_payload(course_state, course_slug):
             video_url = str(lesson.get("videoUrl") or "").strip()[:1000]
             if video_url and not video_url.startswith(("https://", "http://")):
                 raise ValidationError(f"{title}: video URL must use HTTPS or HTTP.")
+            reflection = {
+                "prompt": str(
+                    lesson.get("reflectionPrompt")
+                    if "reflectionPrompt" in lesson
+                    else "Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view."
+                ).strip()[:1000],
+                "model_reasoning": str(
+                    lesson.get("reflectionModelReasoning")
+                    if "reflectionModelReasoning" in lesson
+                    else "A careful reading separates visible evidence from interpretation, considers a reasonable alternative, and names the evidence that would strengthen or weaken the interpretation."
+                ).strip()[:3000],
+                "chart_notes": str(lesson.get("reflectionChartNotes") or "").strip()[:3000],
+            }
             content_json = {
                 "schema_version": 1,
+                "reflection": reflection,
                 "source_id": f"{module_index}.{lesson_index}",
                 "asset_ids": asset_ids,
                 "figures": figures,
@@ -437,6 +452,7 @@ def _build_import_payload(course_state, course_slug):
             "estimated_duration": str(snapshot.get("duration") or "").strip()[:80],
             "learning_outcomes": [str(value).strip()[:500] for value in (snapshot.get("outcomes") or []) if str(value).strip()][:20],
             "position": max(0, min(32767, int(snapshot.get("position") or 0))),
+            "requires_owned_assets": bool(snapshot.get("requiresOwnedAssets", False)),
         },
         "notebook": {},
         "modules": modules,
@@ -658,6 +674,9 @@ def _builder_state_from_published_course(course):
                 "id": str(lesson.pk), "title": lesson.title, "summary": lesson.summary,
                 "minutes": lesson.duration_minutes, "format": lesson.format,
                 "videoUrl": str(content_json.get("video_url") or ""),
+                "reflectionPrompt": str((content_json.get("reflection") or {}).get("prompt") or "Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view."),
+                "reflectionModelReasoning": str((content_json.get("reflection") or {}).get("model_reasoning") or "A careful reading separates visible evidence from interpretation, considers a reasonable alternative, and names the evidence that would strengthen or weaken the interpretation."),
+                "reflectionChartNotes": str((content_json.get("reflection") or {}).get("chart_notes") or ""),
                 "notebook": deepcopy(notebook) or {
                     "title": "Your Trading Notebook",
                     "prompts": [
@@ -673,13 +692,19 @@ def _builder_state_from_published_course(course):
             })
         if lessons:
             modules.append({"id": str(module.pk), "title": module.title, "description": module.description, "lessons": lessons})
+    latest_published_import = CourseImport.objects.filter(
+        course_slug=course.slug, status=CourseImport.Status.PUBLISHED,
+    ).order_by("-updated_at").first()
+    published_import_payload = latest_published_import.payload if latest_published_import and isinstance(latest_published_import.payload, dict) else {}
+    published_import_course = published_import_payload.get("course") if isinstance(published_import_payload.get("course"), dict) else {}
+    requires_owned_assets = bool(published_import_course.get("requires_owned_assets", False))
     return {
         "id": "published-" + str(course.pk), "serverCourseId": str(course.pk),
         "title": course.title, "slug": course.slug, "summary": course.summary,
         "description": course.description, "category": course.category or "Technical analysis",
         "level": course.level or "Intermediate", "duration": course.estimated_duration or "Self-paced",
         "price": "", "priceNote": "Pricing and checkout are configured separately.",
-        "status": "draft-update", "comingSoon": False, "position": course.position,
+        "status": "draft-update", "comingSoon": False, "requiresOwnedAssets": requires_owned_assets, "position": course.position,
         "createdAt": course.created_at.isoformat(), "updatedAt": course.updated_at.isoformat(),
         "publishedAt": course.updated_at.isoformat(), "publishedSnapshot": None,
         "outcomes": list(course.learning_outcomes or []), "modules": modules,
@@ -746,11 +771,18 @@ def course_builder_api(request):
                 and record.status == CourseImport.Status.DRAFT
             ):
                 drafts.append(_draft_response(record, request))
-        related_courses = list(Course.objects.filter(
-            status=Course.Status.PUBLISHED,
-            modules__is_published=True,
-            modules__lessons__is_published=True,
-        ).distinct().order_by("position", "title").values("id", "title", "slug", "summary", "category", "level", "estimated_duration", "learning_outcomes"))
+        related_courses = [
+            course
+            for course in Course.objects.filter(
+                status=Course.Status.PUBLISHED,
+                modules__is_published=True,
+                modules__lessons__is_published=True,
+            ).distinct().order_by("position", "title").values(
+                "id", "title", "slug", "summary", "category", "level",
+                "estimated_duration", "learning_outcomes",
+            )
+            if is_course_card_recommendable(course["title"], course["summary"])
+        ]
         # Return catalogue metadata only (never lesson bodies or instructor
         # answer keys). This lets the Builder search references after drafts
         # are reopened on another device without persisting copied lesson text.
@@ -786,7 +818,13 @@ def course_builder_api(request):
             asset_storage_status["writes_enabled"],
         )
         coming_soon_courses = []
-        published_slugs = set(Course.objects.filter(status=Course.Status.PUBLISHED).values_list("slug", flat=True))
+        published_slugs = {
+            slug
+            for slug, title, summary in Course.objects.filter(
+                status=Course.Status.PUBLISHED,
+            ).values_list("slug", "title", "summary")
+            if is_course_card_recommendable(title, summary)
+        }
         seen_teaser_slugs = set()
         teaser_records = CourseImport.objects.filter(
             status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REVIEW],
@@ -796,13 +834,17 @@ def course_builder_api(request):
             builder_state = (teaser.payload or {}).get("builder_state") or {}
             if not builder_state.get("comingSoon") or teaser.course_slug in published_slugs or teaser.course_slug in seen_teaser_slugs:
                 continue
+            teaser_title = str(builder_state.get("title") or teaser.title)[:200]
+            teaser_summary = str(builder_state.get("summary") or builder_state.get("description") or "")[:360]
+            if not is_course_card_recommendable(teaser_title, teaser_summary):
+                continue
             seen_teaser_slugs.add(teaser.course_slug)
             coming_soon_courses.append({
                 "id": "coming-soon-" + str(teaser.pk), "slug": teaser.course_slug,
-                "title": str(builder_state.get("title") or teaser.title)[:200],
+                "title": teaser_title,
                 "category": str(builder_state.get("category") or "TradeThesis courses")[:80],
                 "level": str(builder_state.get("level") or "Self-paced")[:40],
-                "description": str(builder_state.get("summary") or builder_state.get("description") or "")[:360],
+                "description": teaser_summary,
                 "summary": str(builder_state.get("summary") or "")[:360],
                 "estimated_duration": str(builder_state.get("duration") or "")[:80],
                 "learning_outcomes": [str(value).strip()[:240] for value in builder_state.get("outcomes", []) if str(value).strip()][:6] if isinstance(builder_state.get("outcomes"), list) else [],

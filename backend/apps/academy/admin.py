@@ -42,6 +42,7 @@ from .models import (
 )
 from .permissions import is_course_content_admin
 from .storage import course_asset_storage
+from .views import _reflection_for_display
 
 logger = logging.getLogger(__name__)
 
@@ -521,6 +522,7 @@ class CourseImportAdmin(admin.ModelAdmin):
                 if not isinstance(figure_metadata, dict):
                     figure_metadata = {}
                 notebook = content_json.get("notebook") or record.payload.get("notebook", {})
+                reflection = _reflection_for_display(content_json.get("reflection", {}))
                 sections = build_lesson_sections(
                     lesson_data.get("content_markdown", ""),
                     asset_urls,
@@ -556,6 +558,8 @@ class CourseImportAdmin(admin.ModelAdmin):
                     "lesson": lesson_data,
                     "sections": sections,
                     "notebook": notebook,
+                    "reflection": reflection,
+                    "reflection_response": "",
                     "questions": questions,
                     "video_url": video_url,
                     "video_is_file": video_is_file,
