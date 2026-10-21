@@ -4,6 +4,8 @@ Production settings — used on Render (and any real deployment).
 Overrides base with security hardening, env-driven hosts, Postgres via
 DATABASE_URL (handled in base), and whitenoise manifest storage.
 """
+import json
+
 from .base import *
 
 DEBUG = env("DEBUG", default=False)
@@ -37,6 +39,21 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
     },
 }
+
+_asset_storage_backend_class = env("ACADEMY_ASSET_STORAGE_BACKEND_CLASS", default="").strip()
+if _asset_storage_backend_class:
+    if not ACADEMY_ASSET_STORAGE_ALIAS or ACADEMY_ASSET_STORAGE_ALIAS in {"default", "staticfiles"}:
+        raise ValueError("ACADEMY_ASSET_STORAGE_ALIAS must be a dedicated non-default storage alias.")
+    try:
+        _asset_storage_options = json.loads(env("ACADEMY_ASSET_STORAGE_OPTIONS", default="{}"))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("ACADEMY_ASSET_STORAGE_OPTIONS must be a JSON object.") from exc
+    if not isinstance(_asset_storage_options, dict):
+        raise ValueError("ACADEMY_ASSET_STORAGE_OPTIONS must be a JSON object.")
+    STORAGES[ACADEMY_ASSET_STORAGE_ALIAS] = {
+        "BACKEND": _asset_storage_backend_class,
+        "OPTIONS": _asset_storage_options,
+    }
 
 # Keep DB connections warm across requests (gunicorn workers).
 CONN_MAX_AGE = 60

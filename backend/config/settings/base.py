@@ -1,6 +1,7 @@
 """
 Base settings for community platform.
 """
+import json
 import os
 from pathlib import Path
 
@@ -201,6 +202,35 @@ ACADEMY_GOOGLE_DRIVE_SOURCE_FOLDER_ID = env("ACADEMY_GOOGLE_DRIVE_SOURCE_FOLDER_
     "GOOGLE_DRIVE_SOURCE_FOLDER_ID", default=""
 )
 ACADEMY_GOOGLE_DRIVE_TIMEOUT = env.int("ACADEMY_GOOGLE_DRIVE_TIMEOUT", default=20)
+
+# Provider-neutral course asset routing. Drive remains the default until a deliberate cutover.
+ACADEMY_ASSET_STORAGE_BACKEND = env("ACADEMY_ASSET_STORAGE_BACKEND", default="google_drive").strip().lower()
+if ACADEMY_ASSET_STORAGE_BACKEND not in {"google_drive", "github", "django"}:
+    raise ValueError("ACADEMY_ASSET_STORAGE_BACKEND must be google_drive, github, or django.")
+ACADEMY_ASSET_STORAGE_ALIAS = env("ACADEMY_ASSET_STORAGE_ALIAS", default="academy_assets").strip()
+ACADEMY_ASSET_STORAGE_DURABLE = env.bool("ACADEMY_ASSET_STORAGE_DURABLE", default=False)
+ACADEMY_ASSET_STORAGE_LABEL = env("ACADEMY_ASSET_STORAGE_LABEL", default="")
+ACADEMY_ASSET_MIGRATION_TARGET_ALIAS = env("ACADEMY_ASSET_MIGRATION_TARGET_ALIAS", default="").strip()
+ACADEMY_ASSET_MIGRATION_TARGET_DURABLE = env.bool("ACADEMY_ASSET_MIGRATION_TARGET_DURABLE", default=False)
+
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
+_asset_storage_backend_class = env("ACADEMY_ASSET_STORAGE_BACKEND_CLASS", default="").strip()
+if _asset_storage_backend_class:
+    if not ACADEMY_ASSET_STORAGE_ALIAS or ACADEMY_ASSET_STORAGE_ALIAS in {"default", "staticfiles"}:
+        raise ValueError("ACADEMY_ASSET_STORAGE_ALIAS must be a dedicated non-default storage alias.")
+    try:
+        _asset_storage_options = json.loads(env("ACADEMY_ASSET_STORAGE_OPTIONS", default="{}"))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("ACADEMY_ASSET_STORAGE_OPTIONS must be a JSON object.") from exc
+    if not isinstance(_asset_storage_options, dict):
+        raise ValueError("ACADEMY_ASSET_STORAGE_OPTIONS must be a JSON object.")
+    STORAGES[ACADEMY_ASSET_STORAGE_ALIAS] = {
+        "BACKEND": _asset_storage_backend_class,
+        "OPTIONS": _asset_storage_options,
+    }
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

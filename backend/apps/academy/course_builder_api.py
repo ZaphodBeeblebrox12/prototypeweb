@@ -138,7 +138,30 @@ class CourseSourceSyncError(Exception):
 
 
 def _sync_course_source_to_storage(payload, course_slug):
-    """Prefer Google Drive for durable source snapshots; keep GitHub as migration fallback."""
+    """Back up course source to the selected provider with safe retry semantics."""
+    configured_backend = str(
+        getattr(settings, "ACADEMY_ASSET_STORAGE_BACKEND", "google_drive") or "google_drive"
+    ).strip().lower()
+    if configured_backend == "django":
+        try:
+            course_asset_storage.save_source_snapshot(payload, course_slug)
+            return "configured_storage"
+        except (ImproperlyConfigured, OSError, ValueError, TypeError) as exc:
+            raise CourseSourceSyncError(
+                "The configured durable storage could not confirm the course source snapshot. "
+                "The latest draft remains saved in the Academy as a draft; please retry."
+            ) from exc
+    if configured_backend == "github":
+        try:
+            _sync_course_source_to_github(payload, course_slug)
+            return "github"
+        except ValidationError as exc:
+            messages = getattr(exc, "messages", None)
+            message = " ".join(str(value) for value in messages) if messages else "GitHub source sync failed."
+            raise CourseSourceSyncError(
+                f"{message} The latest draft remains saved in the Academy as a draft; please retry."
+            ) from exc
+
     service_account_ready = bool(
         getattr(settings, "ACADEMY_GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON", "")
         and getattr(settings, "ACADEMY_GOOGLE_DRIVE_ASSET_FOLDER_ID", "")
@@ -147,12 +170,16 @@ def _sync_course_source_to_storage(payload, course_slug):
     oauth_ready = bool(
         getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_ID", "")
         and getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET", "")
-        and ((getattr(settings, "ACADEMY_GOOGLE_DRIVE_REFRESH_TOKEN", "")
-              and getattr(settings, "ACADEMY_GOOGLE_DRIVE_ASSET_FOLDER_ID", "")
-              and getattr(settings, "ACADEMY_GOOGLE_DRIVE_SOURCE_FOLDER_ID", ""))
-             or GoogleDriveCredential.objects.filter(
-                 pk=1, encrypted_refresh_token__gt="", asset_folder_id__gt="", source_folder_id__gt=""
-             ).exists())
+        and (
+            (
+                getattr(settings, "ACADEMY_GOOGLE_DRIVE_REFRESH_TOKEN", "")
+                and getattr(settings, "ACADEMY_GOOGLE_DRIVE_ASSET_FOLDER_ID", "")
+                and getattr(settings, "ACADEMY_GOOGLE_DRIVE_SOURCE_FOLDER_ID", "")
+            )
+            or GoogleDriveCredential.objects.filter(
+                pk=1, encrypted_refresh_token__gt="", asset_folder_id__gt="", source_folder_id__gt=""
+            ).exists()
+        )
     )
     if service_account_ready or oauth_ready:
         try:
@@ -172,7 +199,6 @@ def _sync_course_source_to_storage(payload, course_slug):
         raise CourseSourceSyncError(
             f"{message} The latest draft remains saved in the Academy as a draft; please retry."
         ) from exc
-
 
 def _asset_uuid(course_slug, asset_id):
     return str(uuid.uuid5(uuid.NAMESPACE_URL, f"tradethesis-course:{course_slug}:builder/{asset_id}"))

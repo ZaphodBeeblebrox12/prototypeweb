@@ -40,4 +40,4 @@
 
 ## Boundaries
 
-This patch does not automatically migrate every existing GitHub object to Drive. It does not replace PostgreSQL backups or durable database storage. Storage provider selection, folder permissions, credential validity, and token lifetime must be verified in staging before cutover.
+Use the Durable Storage Migration guide in DURABLE_STORAGE_MIGRATION.md before replacing Google Drive. The migration command inventories and checksum-copies database-referenced media, source snapshots, and legacy provider archives without changing database references or switching providers. It does not replace PostgreSQL backups or durable database storage. Storage provider selection, folder permissions, credential validity, and token lifetime must be verified in staging before cutover.
