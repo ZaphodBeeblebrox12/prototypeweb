@@ -415,7 +415,7 @@ class CourseImportAdminPreviewTests(TestCase):
         )
         manifest = {
             "schema_version": 1,
-            "course": {"title": "Reviewable Course", "slug": "reviewable-course"},
+            "course": {"title": "Reviewable Course", "slug": "reviewable-course", "summary": "A practical course for reading market evidence.", "description": "Practise separating visible evidence from interpretation."},
             "modules": [{
                 "title": "Start", "slug": "start", "position": 1,
                 "source": "lessons/module-01.md",
