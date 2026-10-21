@@ -335,7 +335,10 @@ class CheckoutPageView(APIView):
 
 
 def _checkout_response(request, pk):
-    intent = get_object_or_404(PaymentIntent, pk=pk, user=request.user)
+    intent = get_object_or_404(
+        PaymentIntent, pk=pk, user=request.user,
+        status=PaymentIntent.Status.SUCCESS,
+    )
     if intent.plan.is_trial:
         return _consent_response(
             request, pk,

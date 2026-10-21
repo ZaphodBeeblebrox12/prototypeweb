@@ -1,62 +1,43 @@
-{% extends "base.html" %}
+{% extends "accounts/member_page_base.html" %}
 {% load custom_filters %}
-
-{% block title %}Activity Log - Community Platform{% endblock %}
-{% block page_title %}Activity Log{% endblock %}
-
-{% block content %}
-<div class="card">
-    <div class="card-header">
-        <i class="bi bi-clock-history"></i> Your Activity History
+{% block title %}Account activity | TradeThesis{% endblock %}
+{% block page_kicker %}ACCOUNT HISTORY{% endblock %}
+{% block page_heading %}Recent activity{% endblock %}
+{% block page_description %}<p>A record of account actions and connection changes. This history is for review; it does not place or manage trades.</p>{% endblock %}
+{% block page_content %}
+<section class="member-panel">
+  <div class="member-panel-head"><h2>Activity history</h2><p>Newest events appear first.</p></div>
+  {% if activities %}
+    <div class="member-list">
+      {% for activity in activities %}
+        <article class="member-list-row">
+          <div>
+            <h3>{{ activity.action|title|replace:"_| " }}</h3>
+            <p>
+              {% if activity.action == "login_telegram" %}Logged in via Telegram
+              {% elif activity.action == "login_google" %}Logged in via Google
+              {% elif activity.action == "profile_updated" %}Profile updated
+              {% elif activity.action == "telegram_connected" %}Telegram account connected
+              {% elif activity.action == "staff_approved" %}Staff role approved
+              {% else %}{{ activity.action }}{% endif %}
+            </p>
+            {% if activity.metadata %}
+              <p class="member-meta">
+                {% for key, value in activity.metadata.items %}{{ key }}: {{ value }}{% if not forloop.last %} · {% endif %}{% endfor %}
+              </p>
+            {% endif %}
+          </div>
+          <time class="member-meta" datetime="{{ activity.created_at|date:'c' }}">{{ activity.created_at|date:"M d, Y · H:i" }}</time>
+        </article>
+      {% endfor %}
     </div>
-    <div class="card-body">
-        {% if activities %}
-        <div class="timeline">
-            {% for activity in activities %}
-            <div class="d-flex mb-4">
-                <div class="flex-shrink-0">
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                        <i class="bi bi-activity"></i>
-                    </div>
-                </div>
-                <div class="flex-grow-1 ms-3">
-                    <div class="d-flex justify-content-between">
-                        <h6 class="mb-1">{{ activity.action|title|replace:"_| " }}</h6>
-                        <small class="text-muted">{{ activity.created_at|date:"M d, Y H:i" }}</small>
-                    </div>
-                    <p class="text-muted mb-1">
-                        {% if activity.action == "login_telegram" %}
-                        <i class="bi bi-telegram text-info"></i> Logged in via Telegram
-                        {% elif activity.action == "login_google" %}
-                        <i class="bi bi-google text-danger"></i> Logged in via Google
-                        {% elif activity.action == "profile_updated" %}
-                        <i class="bi bi-person-gear text-primary"></i> Profile updated
-                        {% elif activity.action == "telegram_connected" %}
-                        <i class="bi bi-telegram text-success"></i> Telegram account connected
-                        {% elif activity.action == "staff_approved" %}
-                        <i class="bi bi-shield-check text-success"></i> Staff role approved
-                        {% else %}
-                        {{ activity.action }}
-                        {% endif %}
-                    </p>
-                    {% if activity.metadata %}
-                    <small class="text-muted">
-                        {% for key, value in activity.metadata.items %}
-                        {{ key }}: {{ value }}{% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    </small>
-                    {% endif %}
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="text-center py-5">
-            <i class="bi bi-clock-history display-4 text-muted mb-3"></i>
-            <h5>No activity recorded</h5>
-            <p class="text-muted">Your recent activity will appear here.</p>
-        </div>
-        {% endif %}
+  {% else %}
+    <div class="member-empty-state">
+      <span class="member-empty-icon" aria-hidden="true">◷</span>
+      <h2>No activity recorded yet</h2>
+      <p>Relevant account activity will appear here as you use your member account and connected services.</p>
+      <a class="btn secondary" href="{% url 'dashboard' %}">Return to overview</a>
     </div>
-</div>
+  {% endif %}
+</section>
 {% endblock %}

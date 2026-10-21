@@ -1,59 +1,91 @@
-<!DOCTYPE html>
-<html><head><meta charset='utf-8'><title>Manage Subscription</title><style>
-body{font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#f4f6f8;margin:0;padding:32px 16px;color:#1f2937}
-.wrap{max-width:680px;margin:0 auto}
-.card{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:24px;margin-bottom:18px}
-h1{font-size:20px}h2{font-size:15px;margin:0 0 12px}
-.badge{display:inline-block;padding:3px 12px;border-radius:12px;font-size:12px;font-weight:600}
-.b-ok{background:#dcfce7;color:#16a34a}.b-off{background:#fee2e2;color:#dc2626}.b-mut{background:#f3f4f6;color:#6b7280}
-table{width:100%;border-collapse:collapse;font-size:13px}
-td,th{padding:8px 0;border-bottom:1px solid #eef0f3;text-align:left}th{color:#6b7280;font-weight:500;font-size:12px}
-a{color:#2563eb;text-decoration:none}.btn{display:inline-block;background:#2563eb;color:#fff;padding:10px 22px;border-radius:6px;font-size:14px;text-decoration:none}
-.warn{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px 18px;margin-bottom:18px;font-size:14px}
-.back{font-size:13px;color:#6b7280}
-</style></head><body><div class='wrap'>
-<h1>Manage Subscription <span class='back'>&middot; <a href='/dashboard/'>&larr; dashboard</a></span></h1>
+{% extends "accounts/member_page_base.html" %}
+{% block title %}Billing &amp; membership | TradeThesis{% endblock %}
+{% block page_kicker %}MEMBERSHIP{% endblock %}
+{% block page_heading %}Billing &amp; invoices{% endblock %}
+{% block page_description %}<p>Review your current plan, community access and payment receipts. Renewals and access changes are shown from your recorded account data.</p>{% endblock %}
+{% block page_actions %}<a class="btn secondary" href="{% url 'dashboard' %}">Back to overview</a>{% endblock %}
+{% block page_content %}
+<div class="member-content-stack">
+  <section class="member-panel">
+    <div class="member-panel-head"><h2>Current membership</h2><p>Your active subscription, where available.</p></div>
+    <div class="member-panel-body">
+      {% if subscription %}
+        <div class="member-layout-grid" style="grid-template-columns:minmax(0,1fr) auto;align-items:center">
+          <div>
+            <h3 style="margin:0 0 6px;font:400 25px/1.2 var(--serif)">{{ subscription.plan.name }}</h3>
+            <p class="member-muted" style="margin:0">Expires {{ subscription.expires_at|date:"M d, Y"|default:"date not recorded" }}. Renewals are not automatic.</p>
+          </div>
+          <span class="member-status-pill is-good">Active</span>
+        </div>
+        <div class="member-form-actions" style="margin-top:17px">
+          <a class="btn" href="{{ renew_url }}">Renew / view plans</a>
+          <a class="btn secondary" href="/upgrade/">Explore upgrades</a>
+        </div>
+      {% else %}
+        <div class="member-empty-state" style="padding:12px 0">
+          <span class="member-status-pill is-waiting">No active subscription</span>
+          <h3>No active plan is linked to this account</h3>
+          <p>You can still manage your account, view past receipts and explore available courses.</p>
+          <a class="btn" href="{{ renew_url }}">View available learning and plans</a>
+        </div>
+      {% endif %}
+    </div>
+  </section>
 
-{% if subscription %}
-<div class='card'><h2>{{ subscription.plan.name }} <span class='badge b-ok'>Active</span></h2>
-<p style='font-size:14px;margin:6px 0'>Renews by repurchase &middot; expires <strong>{{ subscription.expires_at|date:"M d, Y" }}</strong></p>
-<a class='btn' href='{{ renew_url }}'>Renew / Extend</a>
-&nbsp;<a class='btn' style='background:#7c3aed' href='/upgrade/'>Upgrade plan</a></div>
-{% else %}
-<div class='card'><h2>No active subscription <span class='badge b-off'>Expired</span></h2>
-<a class='btn' href='{{ renew_url }}'>View plans</a></div>
-{% endif %}
+  <section class="member-panel">
+    <div class="member-panel-head"><h2>Community access</h2><p>Connection status and access linked to your current plan.</p></div>
+    <div class="member-panel-body">
+      {% if access_state.state == 'ready' %}
+        <div class="member-status-panel"><h3>{{ access_state.label }}</h3><p>{{ access_state.detail }}</p></div>
+      {% elif access_state.state == 'pending' %}
+        <div class="member-status-panel is-waiting"><h3>{{ access_state.label }}</h3><p>{{ access_state.detail }}</p></div>
+      {% elif access_state.state == 'needs_action' %}
+        <div class="member-status-panel is-bad"><h3>{{ access_state.label }}</h3><p>{{ access_state.detail }}</p><p style="margin-top:10px"><a class="member-text-link" href="{{ access_state.cta_url }}">{{ access_state.cta_label }} ↗</a></p></div>
+      {% elif access_state.state == 'not_linked' %}
+        <div class="member-status-panel is-waiting"><h3>Connect Telegram</h3><p>Connect Telegram to receive eligible channel access and notifications.</p><p style="margin-top:10px"><a class="member-text-link" href="{{ access_state.cta_url }}">{{ access_state.cta_label }} ↗</a></p></div>
+      {% endif %}
+      <div class="member-table-wrap" style="margin-top:18px">
+        <table class="member-table">
+          <thead><tr><th>Channel</th><th>Platform</th><th>Access</th></tr></thead>
+          <tbody>
+          {% for channel in channels %}
+            <tr><td>{{ channel.name }}</td><td>{{ channel.platform|title }}</td><td><span class="member-status-pill{% if channel.granted %} is-good{% else %} is-waiting{% endif %}">{% if channel.granted %}Access granted{% else %}Pending{% endif %}</span></td></tr>
+          {% empty %}
+            <tr><td colspan="3" class="member-muted">No community channels are mapped to this plan yet.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
 
-{% if access_state.state == 'ready' %}
-<div class='card' style='border-color:#bbf7d0;background:#f0fdf4'><h2>&#9989; {{ access_state.label }}</h2>
-<p style='font-size:14px;margin:0'>{{ access_state.detail }}</p></div>
-{% elif access_state.state == 'pending' %}
-<div class='card' style='border-color:#fde68a;background:#fffbeb'><h2>&#9203; {{ access_state.label }}</h2>
-<p style='font-size:14px;margin:0'>{{ access_state.detail }}</p></div>
-{% elif access_state.state == 'needs_action' %}
-<div class='card' style='border-color:#fecaca;background:#fef2f2'><h2>&#9888;&#65039; {{ access_state.label }}</h2>
-<p style='font-size:14px;margin:0 0 10px'>{{ access_state.detail }}</p>
-<a class='btn' style='background:#dc2626' href='{{ access_state.cta_url }}'>{{ access_state.cta_label }}</a></div>
-{% elif access_state.state == 'not_linked' %}
-<div class='warn'>&#9888;&#65039; <strong>Connect Telegram</strong> to receive channel access and notifications.
-<a href='{{ access_state.cta_url }}'>{{ access_state.cta_label }} &rarr;</a></div>
-{% endif %}
-
-<div class='card'><h2>Included channels</h2>
-{% if channels %}<table>{% for ch in channels %}
-<tr><td>{{ ch.name }}</td><td style='text-transform:capitalize'>{{ ch.platform }}</td>
-<td>{% if ch.granted %}<span class='badge b-ok'>Access granted</span>{% else %}<span class='badge b-mut'>Pending</span>{% endif %}</td></tr>
-{% endfor %}</table>
-{% else %}<p class='back'>No channels are mapped to your plan yet.</p>{% endif %}</div>
-
-<div class='card'><h2>Receipts</h2>
-{% if receipts %}<table><tr><th>Date</th><th>Plan</th><th>Amount</th><th>Status</th><th></th></tr>
-{% for r in receipts %}<tr><td>{{ r.date|date:"M d, Y" }}</td><td>{{ r.plan_name }}</td>
-<td>{{ r.amount_display }}</td><td>{{ r.status }}</td>
-<td>{% if r.status == 'success' %}<a href='{{ r.url }}'>Receipt</a>{% endif %}</td></tr>
-{% endfor %}</table>
-{% else %}<p class='back'>No payments yet.</p>{% endif %}
-<p style='margin-top:14px'><a href="/support/">Need help? Contact support</a> &middot;
-<a href="/policies/refund/">Refund policy</a></p></div>
-
-</div></body></html>
+  <section class="member-panel">
+    <div class="member-panel-head"><h2>Payment history &amp; receipts</h2><p>Open receipts for successful payments only.</p></div>
+    {% if receipts %}
+      <div class="member-table-wrap">
+        <table class="member-table">
+          <thead><tr><th>Date</th><th>Plan</th><th>Amount</th><th>Status</th><th>Receipt</th></tr></thead>
+          <tbody>
+          {% for receipt in receipts %}
+            <tr>
+              <td>{{ receipt.date|date:"M d, Y" }}</td>
+              <td>{{ receipt.plan_name }}</td>
+              <td>{{ receipt.amount_display }}</td>
+              <td><span class="member-status-pill{% if receipt.status == 'success' %} is-good{% elif receipt.status == 'pending' %} is-waiting{% else %} is-bad{% endif %}">{{ receipt.status|title }}</span></td>
+              <td>{% if receipt.status == 'success' %}<a class="member-text-link" href="{{ receipt.url }}">View receipt ↗</a>{% else %}<span class="member-meta">Not available</span>{% endif %}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="member-empty-state"><h3>No payments recorded yet</h3><p>Successful payments and their receipts will appear here.</p></div>
+    {% endif %}
+    <div class="member-panel-body" style="border-top:1px solid var(--line)">
+      <a class="member-text-link" href="/policies/refund/">Refund policy ↗</a>
+      <span class="member-muted"> · </span>
+      <a class="member-text-link" href="{% url 'support:my_tickets' %}">Contact support ↗</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

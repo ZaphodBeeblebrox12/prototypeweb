@@ -1,6 +1,9 @@
-"""Tests for support-ticket account isolation."""
+"""Tests for support-ticket account isolation and submission."""
+from unittest.mock import patch
+
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 
@@ -54,3 +57,76 @@ class SupportTicketUserScopeTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 403)
+
+    def test_anonymous_ticket_detail_redirects_to_login(self):
+        self.client.logout()
+        response = self.client.get(
+            reverse("support:ticket_detail", kwargs={"pk": self.own_ticket.pk})
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/accounts/login/", response["Location"])
+
+
+class SupportTicketSubmissionTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="ticket-submit-member",
+            email="ticket-submit-member@example.test",
+            password="test-password-123!",
+        )
+        self.client.force_login(self.user)
+
+    @patch("apps.support.views.send_ticket_confirmation")
+    def test_billing_ticket_can_be_submitted_and_appears_in_ticket_list(self, send_confirmation):
+        response = self.client.post(
+            reverse("support:request_ticket"),
+            data={
+                "category": SupportTicket.Category.BILLING,
+                "message": "I need help understanding a payment status.",
+            },
+        )
+
+        self.assertRedirects(
+            response, reverse("support:my_tickets"), fetch_redirect_response=False
+        )
+        ticket = SupportTicket.objects.get(user=self.user)
+        self.assertEqual(ticket.category, SupportTicket.Category.BILLING)
+        self.assertEqual(ticket.message, "I need help understanding a payment status.")
+        send_confirmation.assert_called_once_with(ticket)
+
+        list_response = self.client.get(reverse("support:my_tickets"))
+        self.assertEqual(list_response.status_code, 200)
+        self.assertContains(list_response, str(ticket.short_id))
+        self.assertContains(list_response, "Help &amp; support")
+
+    def test_unsupported_attachment_is_rejected_without_creating_ticket(self):
+        upload = SimpleUploadedFile(
+            "not-an-image.exe", b"not an image", content_type="application/octet-stream"
+        )
+        response = self.client.post(
+            reverse("support:request_ticket"),
+            data={
+                "category": SupportTicket.Category.BILLING,
+                "message": "Please review this attachment.",
+                "attachments": upload,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Only PNG, JPG, JPEG, GIF and WEBP images are allowed")
+        self.assertFalse(SupportTicket.objects.filter(user=self.user).exists())
+
+    def test_access_request_requires_affiliate_link_and_screenshot(self):
+        response = self.client.post(
+            reverse("support:request_ticket"),
+            data={
+                "category": SupportTicket.Category.ACCESS,
+                "message": "Please review my access request.",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Select the referral link you used.")
+        self.assertContains(response, "Upload at least one screenshot for access requests.")
+        self.assertFalse(SupportTicket.objects.filter(user=self.user).exists())

@@ -75,6 +75,10 @@ class TicketDetailView(LoginRequiredMixin, DetailView):
                 .prefetch_related("attachments"))
 
     def dispatch(self, request, *args, **kwargs):
+        # Honour LoginRequiredMixin before looking up a private ticket. Without
+        # this guard anonymous visitors receive a 403 instead of the login flow.
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
         obj = self.get_object()
         is_owner = obj.user_id == request.user.id
         if not (is_owner or request.user.is_staff):

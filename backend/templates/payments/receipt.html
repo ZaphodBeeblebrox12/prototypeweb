@@ -1,52 +1,68 @@
-{% load static %}<!DOCTYPE html>
-<html><head><meta charset='utf-8'><title>Receipt</title><style>
-body{font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#f4f6f8;margin:0;padding:40px 16px;color:#1f2937}
-.rc{max-width:560px;margin:0 auto;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:36px}
-h1{font-size:20px;margin:0 0 4px}.ok{color:#16a34a;font-weight:600}
-table{width:100%;border-collapse:collapse;margin-top:18px;font-size:14px}
-td{padding:9px 0;border-bottom:1px solid #eef0f3}td:last-child{text-align:right;font-weight:600}
-.total td{font-size:16px;border-bottom:none;color:#16a34a}
-.muted{color:#6b7280;font-size:12px;margin-top:24px}
-.noprint{margin-top:24px}.btn{display:inline-block;background:#2563eb;color:#fff;padding:10px 22px;border-radius:6px;text-decoration:none;font-size:14px}
-@media print{.noprint{display:none}body{background:#fff}}
-</style></head><body><div class='rc'>
-<h1>{{ site_name }}</h1>
-{% if invoice %}
-<p style="margin:5px 0 0;color:#6b7280;font-size:13px;">Invoice / payment receipt</p>
-<p style="margin:12px 0 0;font-size:14px;"><strong>{{ invoice.invoice_number }}</strong> · {{ invoice.issue_date|date:"M d, Y" }}</p>
-{% if invoice.seller_legal_name or invoice.seller_address or invoice.seller_tax_registration_number %}
-<div style="margin-top:16px;font-size:13px;line-height:1.6;">
-  <strong>{{ invoice.seller_legal_name|default:invoice.seller_name }}</strong><br>
-  {% if invoice.seller_address %}{{ invoice.seller_address|linebreaksbr }}<br>{% endif %}
-  {% if invoice.seller_country %}{{ invoice.seller_country }}<br>{% endif %}
-  {% if invoice.seller_support_email %}{{ invoice.seller_support_email }}<br>{% endif %}
-  {% if invoice.seller_tax_registration_number %}Tax registration: {{ invoice.seller_tax_registration_number }}{% endif %}
-</div>
-{% endif %}
-<div style="margin-top:14px;color:#6b7280;font-size:13px;">Billed to: {{ invoice.customer_name }}{% if invoice.customer_email %} · {{ invoice.customer_email }}{% endif %}</div>
-{% endif %}
-<div class='ok' style="margin-top:18px;">&#10003; Payment successful</div>
-<table>
-<tr><td>{% if invoice %}Item{% else %}Plan{% endif %}</td><td>{% if invoice %}{{ invoice.description }}{% else %}{{ intent.plan.name }}{% endif %}</td></tr>
-<tr><td>Date</td><td>{% if invoice %}{{ invoice.issue_date|date:"M d, Y" }}{% else %}{{ intent.created_at|date:"M d, Y" }}{% endif %}</td></tr>
-<tr><td>Payment method</td><td>{{ intent.get_payment_method_display|default:"Not reported" }}</td></tr>
-<tr><td>Payment provider</td><td>{{ intent.get_provider_display }}</td></tr>
-{% if intent.provider_payment_id %}<tr><td>Payment transaction ID</td><td>{{ intent.provider_payment_id }}</td></tr>{% endif %}
-{% if intent.provider_reference %}<tr><td>Order / checkout reference</td><td>{{ intent.provider_reference }}</td></tr>{% endif %}
-{% if intent.applied_coupon_code %}<tr><td>Coupon</td><td>{{ intent.applied_coupon_code }}</td></tr>{% endif %}
-{% if invoice %}
-<tr><td>Subtotal</td><td>{{ invoice.subtotal_display }}</td></tr>
-{% if invoice.tax_enabled %}<tr><td>{{ invoice.tax_label }} ({{ invoice.tax_rate_percentage }}%){% if invoice.tax_inclusive %} included{% endif %}</td><td>{{ invoice.tax_display }}</td></tr>{% endif %}
-<tr class='total'><td>Total paid</td><td>{{ invoice.total_display }}</td></tr>
-{% else %}
-<tr class='total'><td>Total paid</td><td>{{ intent.currency }} {{ intent.amount_dollars|floatformat:2 }}</td></tr>
-{% endif %}
-</table>
-<p class="muted">This was a one-time payment. Access does not renew automatically.</p>
-{% if refunds %}
-<p style='font-size:13px;color:#b45309'>Refunded: {% for r in refunds %}{{ r.currency }} {{ r.amount_dollars|floatformat:2 }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-{% endif %}
-<p class='muted'>Receipt reference: {{ intent.id }}.{% if invoice %} Invoice details are a snapshot of the business and pricing settings at issue time.{% endif %} Questions? <a href="/support/">Contact support</a>.</p>
-<div class='noprint'><a class='btn' href="javascript:window.print()">Print / Save as PDF</a>
-&nbsp;<a class='btn' style='background:#6b7280' href='/dashboard/'>Dashboard</a></div>
-</div></body></html>
+{% extends "accounts/member_page_base.html" %}
+{% block title %}Payment receipt | TradeThesis{% endblock %}
+{% block page_kicker %}BILLING RECORD{% endblock %}
+{% block page_heading %}Payment receipt{% endblock %}
+{% block page_description %}<p>A record of a successful payment made from your account. Use Print / Save as PDF to keep a copy.</p>{% endblock %}
+{% block page_actions %}{% endblock %}
+{% block page_content %}
+<section class="member-panel receipt-panel">
+  <div class="member-panel-head">
+    <h2>{{ site_name }}</h2>
+    {% if invoice %}
+      <p>Invoice / payment receipt · {{ invoice.invoice_number }} · Issued {{ invoice.issue_date|date:"M d, Y" }}</p>
+    {% else %}
+      <p>Payment receipt · {{ intent.created_at|date:"M d, Y" }}</p>
+    {% endif %}
+  </div>
+  <div class="member-panel-body">
+    {% if invoice %}
+      <div class="member-status-panel">
+        <h3>{{ invoice.seller_legal_name|default:invoice.seller_name }}</h3>
+        {% if invoice.seller_address %}<p>{{ invoice.seller_address|linebreaksbr }}</p>{% endif %}
+        {% if invoice.seller_country %}<p>{{ invoice.seller_country }}</p>{% endif %}
+        {% if invoice.seller_support_email %}<p>{{ invoice.seller_support_email }}</p>{% endif %}
+        {% if invoice.seller_tax_registration_number %}<p>Tax registration: {{ invoice.seller_tax_registration_number }}</p>{% endif %}
+      </div>
+      <p class="member-meta" style="margin-top:14px">Billed to: {{ invoice.customer_name }}{% if invoice.customer_email %} · {{ invoice.customer_email }}{% endif %}</p>
+    {% endif %}
+    <p style="margin:18px 0 4px"><span class="member-status-pill is-good">✓ Payment successful</span></p>
+    <div class="member-table-wrap">
+      <table class="member-table receipt-table">
+        <tbody>
+          <tr><th scope="row">{% if invoice %}Item{% else %}Plan{% endif %}</th><td>{% if invoice %}{{ invoice.description }}{% else %}{{ intent.plan.name }}{% endif %}</td></tr>
+          <tr><th scope="row">Date</th><td>{% if invoice %}{{ invoice.issue_date|date:"M d, Y" }}{% else %}{{ intent.created_at|date:"M d, Y" }}{% endif %}</td></tr>
+          <tr><th scope="row">Payment method</th><td>{{ intent.get_payment_method_display|default:"Not reported" }}</td></tr>
+          <tr><th scope="row">Payment provider</th><td>{{ intent.get_provider_display }}</td></tr>
+          {% if intent.provider_payment_id %}<tr><th scope="row">Transaction ID</th><td>{{ intent.provider_payment_id }}</td></tr>{% endif %}
+          {% if intent.provider_reference %}<tr><th scope="row">Order / checkout reference</th><td>{{ intent.provider_reference }}</td></tr>{% endif %}
+          {% if intent.applied_coupon_code %}<tr><th scope="row">Coupon</th><td>{{ intent.applied_coupon_code }}</td></tr>{% endif %}
+          {% if invoice %}
+            <tr><th scope="row">Subtotal</th><td>{{ invoice.subtotal_display }}</td></tr>
+            {% if invoice.tax_enabled %}<tr><th scope="row">{{ invoice.tax_label }} ({{ invoice.tax_rate_percentage }}%){% if invoice.tax_inclusive %} included{% endif %}</th><td>{{ invoice.tax_display }}</td></tr>{% endif %}
+            <tr class="receipt-total"><th scope="row">Total paid</th><td>{{ invoice.total_display }}</td></tr>
+          {% else %}
+            <tr class="receipt-total"><th scope="row">Total paid</th><td>{{ intent.currency }} {{ intent.amount_dollars|floatformat:2 }}</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+    {% if refunds %}
+      <div class="member-status-panel is-waiting" style="margin-top:17px"><h3>Refund records</h3><p>{% for refund in refunds %}{{ refund.currency }} {{ refund.amount_dollars|floatformat:2 }}{% if not forloop.last %} · {% endif %}{% endfor %}</p></div>
+    {% endif %}
+    <p class="member-print-note">Receipt reference: {{ intent.id }}. {% if invoice %}Invoice details are a snapshot of the business and pricing settings at issue time.{% endif %} Questions? <a class="member-text-link" href="{% url 'support:my_tickets' %}">Contact support ↗</a></p>
+    <div class="member-form-actions member-page-actions" style="margin-top:20px">
+      <button class="btn" type="button" onclick="window.print()">Print / Save as PDF</button>
+      <a class="btn secondary" href="{% url 'manage-subscription' %}">Back to billing</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block extra_css %}
+<style>
+.receipt-panel{max-width:850px;margin:0 auto}
+.receipt-table th{width:42%;background:transparent;color:var(--muted);text-transform:none;letter-spacing:0;font-size:11px}
+.receipt-table td{text-align:right;font-weight:700;overflow-wrap:anywhere}
+.receipt-table .receipt-total th,.receipt-table .receipt-total td{font-size:14px;color:var(--green);font-weight:850}
+@media print{.receipt-panel{max-width:100%;border:0}.receipt-panel .member-panel-head,.receipt-panel .member-panel-body{padding-left:0;padding-right:0}.receipt-table th,.receipt-table td{border-bottom:1px solid #ddd}}
+</style>
+{% endblock %}

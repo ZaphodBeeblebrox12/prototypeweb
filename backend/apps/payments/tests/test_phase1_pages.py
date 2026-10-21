@@ -35,7 +35,8 @@ class ManageSubscriptionPageTests(TestCase):
         self.client.force_login(self.user)
         r = self.client.get(reverse("manage-subscription"))
         self.assertEqual(r.status_code, 200)
-        self.assertContains(r, "Manage Subscription")
+        self.assertContains(r, "Billing &amp; invoices")
+        self.assertContains(r, "member-section-nav")
 
 
 class ReceiptPageTests(TestCase):
@@ -54,6 +55,7 @@ class ReceiptPageTests(TestCase):
         r = self.client.get(f"/receipt/{self.intent.pk}/")
         self.assertEqual(r.status_code, 200)
         self.assertContains(r, "Total paid")
+        self.assertContains(r, "member-section-nav")
 
     def test_other_user_gets_404(self):
         self.client.force_login(self.other)
@@ -62,3 +64,11 @@ class ReceiptPageTests(TestCase):
     def test_anonymous_redirected(self):
         r = self.client.get(f"/receipt/{self.intent.pk}/")
         self.assertIn(r.status_code, (301, 302))
+
+    def test_failed_payment_never_renders_as_a_successful_receipt(self):
+        failed = PaymentIntent.objects.create(
+            user=self.owner, plan=self.plan, amount=999, currency="USD",
+            provider="stripe", status="failed", country="US",
+            provider_reference="cs_failed")
+        self.client.force_login(self.owner)
+        self.assertEqual(self.client.get(f"/receipt/{failed.pk}/").status_code, 404)

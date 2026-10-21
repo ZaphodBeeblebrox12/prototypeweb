@@ -1,35 +1,80 @@
-{% extends "base.html" %}
-{% block title %}Raise a Ticket{% endblock %}
-{% block page_title %}Raise a Ticket{% endblock %}
-{% block content %}
-<div class="card" style="max-width:640px">
-  <div class="card-body">
-    <form method="post" enctype="multipart/form-data" id="ticket-form">
-      {% csrf_token %}
-      {{ form.non_field_errors }}
-      <p>{{ form.category.label_tag }} {{ form.category }} {{ form.category.errors }}</p>
-      <div id="access-only-fields">
-        <p>{{ form.affiliate_link.label_tag }} {{ form.affiliate_link }} {{ form.affiliate_link.errors }}
-           <small class="form-text text-muted">{{ form.affiliate_link.help_text }}</small></p>
+{% extends "accounts/member_page_base.html" %}
+{% block title %}Raise a support ticket | TradeThesis{% endblock %}
+{% block page_kicker %}HELP &amp; SUPPORT{% endblock %}
+{% block page_heading %}How can we help?{% endblock %}
+{% block page_description %}<p>Tell us what happened. Include enough detail for the team to understand the issue, and attach screenshots when they help explain it.</p>{% endblock %}
+{% block page_actions %}<a class="btn secondary" href="{% url 'support:my_tickets' %}">Back to my tickets</a>{% endblock %}
+{% block page_content %}
+<div class="member-layout-grid">
+  <section class="member-panel">
+    <div class="member-panel-head"><h2>Submit a ticket</h2><p>Fields marked by the form’s validation messages need attention before a request can be submitted.</p></div>
+    <div class="member-panel-body">
+      <form method="post" enctype="multipart/form-data" id="ticket-form" class="member-form">
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="member-form-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+        <div class="member-field">
+          {{ form.category.label_tag }}
+          {{ form.category }}
+          {% for error in form.category.errors %}<p class="member-field-error">{{ error }}</p>{% endfor %}
+        </div>
+        <div class="member-field" id="access-only-fields">
+          {{ form.affiliate_link.label_tag }}
+          {{ form.affiliate_link }}
+          {% if form.affiliate_link.help_text %}<p class="member-field-help">{{ form.affiliate_link.help_text }}</p>{% endif %}
+          {% for error in form.affiliate_link.errors %}<p class="member-field-error">{{ error }}</p>{% endfor %}
+        </div>
+        <div class="member-field">
+          {{ form.message.label_tag }}
+          {{ form.message }}
+          {% if form.message.help_text %}<p class="member-field-help">{{ form.message.help_text }}</p>{% endif %}
+          {% for error in form.message.errors %}<p class="member-field-error">{{ error }}</p>{% endfor %}
+        </div>
+        <div class="member-field">
+          {{ form.attachments.label_tag }}
+          {{ form.attachments }}
+          {% if form.attachments.help_text %}<p class="member-field-help">{{ form.attachments.help_text }}</p>{% endif %}
+          {% for error in form.attachments.errors %}<p class="member-field-error">{{ error }}</p>{% endfor %}
+        </div>
+        <div class="member-form-actions">
+          <button type="submit" class="btn">Submit ticket</button>
+          <a class="btn secondary" href="{% url 'support:my_tickets' %}">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </section>
+  <aside class="member-content-stack">
+    <div class="member-status-panel">
+      <h3>What to include</h3>
+      <p>Describe the issue, what you expected, and what happened instead. For payment or access problems, include relevant dates and the course or plan name. Never send passwords or card details.</p>
+    </div>
+    <div class="member-panel">
+      <div class="member-panel-head"><h2>Attachment guidance</h2></div>
+      <div class="member-panel-body">
+        <p class="member-muted">Screenshots are optional for billing and technical issues. Access requests require the referral link used and at least one supporting screenshot.</p>
+        <p class="member-meta">Up to 5 images · PNG, JPG, GIF or WEBP · 5 MB maximum per image.</p>
       </div>
-      <p>{{ form.message.label_tag }} {{ form.message }} {{ form.message.errors }}</p>
-      <div id="attachment-fields">
-        <p>{{ form.attachments.label_tag }} {{ form.attachments }} {{ form.attachments.errors }}
-           <small class="form-text text-muted">{{ form.attachments.help_text }}</small></p>
-      </div>
-      <button type="submit" class="btn btn-primary">Submit ticket</button>
-    </form>
-  </div>
+    </div>
+  </aside>
 </div>
+{% endblock %}
+{% block extra_js %}
 <script>
 (function () {
-  var cat = document.getElementById("id_category");
-  var accessOnly = document.getElementById("access-only-fields");
-  function toggle() {
-    var isAccess = cat.value === "access_request";
-    accessOnly.style.display = isAccess ? "" : "none";
+  const category = document.getElementById('id_category');
+  const accessFields = document.getElementById('access-only-fields');
+  const affiliate = document.getElementById('id_affiliate_link');
+  const attachments = document.getElementById('id_attachments');
+  function syncAccessFields() {
+    if (!category || !accessFields) return;
+    const accessRequest = category.value === 'access_request';
+    accessFields.hidden = !accessRequest;
+    if (affiliate) affiliate.required = accessRequest;
+    if (attachments) attachments.required = accessRequest;
   }
-  if (cat) { cat.addEventListener("change", toggle); toggle(); }
+  if (category) {
+    category.addEventListener('change', syncAccessFields);
+    syncAccessFields();
+  }
 })();
 </script>
 {% endblock %}

@@ -1,0 +1,56 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f3e9">
+  <title>{% block title %}Member area | TradeThesis{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/member-desk.css' %}">
+  <link rel="stylesheet" href="{% static 'css/member-pages.css' %}">
+  <link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-nav.css">
+  <link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-footer.css">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  {% include "partials/sitewide_nav.html" %}
+  <div class="app">
+    <main class="content" id="main-content" tabindex="-1">
+      <div class="member-desk-context">
+        <span class="kicker">TRADETHESIS · MEMBER AREA</span>
+        <span class="member-signed-in">Signed in as {{ user.email|default:user.username }}</span>
+      </div>
+      {% if messages %}
+        <div class="member-flash-list" aria-live="polite">
+          {% for message in messages %}
+            <div class="member-flash member-flash-{{ message.tags|default:'info' }}" role="status">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <nav class="member-section-nav" aria-label="Member area">
+        <a class="member-section-tab{% if request.resolver_match.url_name == 'dashboard' %} active{% endif %}" href="{% url 'dashboard' %}"{% if request.resolver_match.url_name == 'dashboard' %} aria-current="page"{% endif %}>Overview</a>
+        <a class="member-section-tab{% if request.resolver_match.url_name == 'profile' %} active{% endif %}" href="{% url 'profile' %}"{% if request.resolver_match.url_name == 'profile' %} aria-current="page"{% endif %}>Profile &amp; security</a>
+        <a class="member-section-tab{% if request.resolver_match.url_name == 'activity' %} active{% endif %}" href="{% url 'activity' %}"{% if request.resolver_match.url_name == 'activity' %} aria-current="page"{% endif %}>Activity</a>
+        <a class="member-section-tab{% if request.resolver_match.url_name == 'notifications' %} active{% endif %}" href="{% url 'notifications' %}"{% if request.resolver_match.url_name == 'notifications' %} aria-current="page"{% endif %}>Notifications</a>
+        <a class="member-section-tab{% if request.resolver_match.url_name == 'manage-subscription' or request.resolver_match.url_name == 'payment-receipt' %} active{% endif %}" href="{% url 'manage-subscription' %}"{% if request.resolver_match.url_name == 'manage-subscription' or request.resolver_match.url_name == 'payment-receipt' %} aria-current="page"{% endif %}>Billing &amp; invoices</a>
+        <a class="member-section-tab{% if request.resolver_match.namespace == 'support' %} active{% endif %}" href="{% url 'support:my_tickets' %}"{% if request.resolver_match.namespace == 'support' %} aria-current="page"{% endif %}>Help &amp; support</a>
+      </nav>
+      <section class="page active member-page">
+        <header class="page-head">
+          <div class="member-page-heading">
+            <div class="kicker">{% block page_kicker %}ACCOUNT{% endblock %}</div>
+            <h1>{% block page_heading %}Member area{% endblock %}</h1>
+            {% block page_description %}<p>Manage your account and membership details.</p>{% endblock %}
+          </div>
+          <div class="member-page-actions">{% block page_actions %}{% endblock %}</div>
+        </header>
+        {% block page_content %}{% endblock %}
+      </section>
+    </main>
+  </div>
+  {% include "partials/sitewide_footer.html" %}
+  <script src="{% static 'js/sitewide-nav.js' %}" defer></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
