@@ -562,7 +562,13 @@ def course_import_website_preview(request, import_id):
         elif live_asset and live_asset.original_url.startswith(("https://", "http://")):
             asset_urls[str(asset.stable_asset_id)] = live_asset.original_url
 
-    overview_url = reverse("academy:course-import-preview", args=[record.pk])
+    overview_base_url = reverse("academy:course-import-preview", args=[record.pk])
+    requested_audience = str(
+        request.GET.get("preview_audience") or request.GET.get("preview_country") or ""
+    ).strip()
+    overview_url = overview_base_url
+    if requested_audience:
+        overview_url += "?preview_audience=" + quote(requested_audience, safe="")
     admin_review_url = reverse("admin:academy_courseimport_review", args=[record.pk])
     preview_modules = []
     selected_lesson = None
@@ -585,7 +591,9 @@ def course_import_website_preview(request, import_id):
             source_id = str(lesson_data.get("source_id", "")).strip()
             lesson_url = overview_url
             if source_id:
-                lesson_url = overview_url + "?lesson=" + quote(source_id, safe="")
+                lesson_url = overview_base_url + "?lesson=" + quote(source_id, safe="")
+                if requested_audience:
+                    lesson_url += "&preview_audience=" + quote(requested_audience, safe="")
             row = {
                 "lesson": lesson_data,
                 "preview_url": lesson_url,

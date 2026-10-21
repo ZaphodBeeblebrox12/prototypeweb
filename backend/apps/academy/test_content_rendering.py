@@ -1,6 +1,9 @@
 from pathlib import Path
+import re
 
 from django.test import SimpleTestCase
+
+from apps.subscriptions.services import COUNTRY_TO_REGION
 
 from .content_rendering import (
     _deduplicate_course_card_refs,
@@ -374,6 +377,28 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("Two closes above the upper band", rendered)
         self.assertIn("Trend-following short alert", rendered)
         self.assertNotIn("| Confirmed move |", rendered)
+
+    def test_course_builder_country_targets_match_server_geo_regions(self):
+        preview = (Path(__file__).resolve().parent / "course_builder_preview.html").read_text(
+            encoding="utf-8"
+        )
+        match = re.search(
+            r"const regionalCountryOptions = \[(.*?)\n  \];",
+            preview,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(match, "The regional audience options are missing.")
+        parsed = re.findall(
+            r"\['([A-Z]{2})','([^']+)','(APAC|EU|NA|LATAM|MENA|SSA)'\]",
+            match.group(1),
+        )
+        option_map = {code: region for code, _label, region in parsed}
+        self.assertEqual(
+            len(parsed),
+            len(option_map),
+            "The regional audience list must not contain duplicate country codes.",
+        )
+        self.assertEqual(option_map, COUNTRY_TO_REGION)
 
     def test_course_builder_preview_has_visual_table_editor_support(self):
         preview = (Path(__file__).resolve().parent / "course_builder_preview.html").read_text()

@@ -1,6 +1,7 @@
 import json
 import re
 from datetime import timedelta
+from urllib.parse import parse_qs, urlparse
 from io import BytesIO
 
 from django.contrib.auth import get_user_model
@@ -183,6 +184,14 @@ class AcademyViewTests(TestCase):
                                 },
                             },
                         },
+                    }, {
+                        "source_id": "1.2",
+                        "title": "Navigation target lesson",
+                        "slug": "navigation-target-lesson",
+                        "position": 2,
+                        "duration_minutes": 5,
+                        "content_markdown": "### Keep the selected audience\n\nThe preview should preserve its audience here too.",
+                        "content_json": {},
                     }],
                 }],
             },
@@ -223,6 +232,14 @@ class AcademyViewTests(TestCase):
                     self.assertContains(response, expected)
                 for phrase in absent:
                     self.assertNotContains(response, phrase)
+
+                next_lesson_url = response.context["preview_modules"][0]["lessons"][1]["preview_url"]
+                next_query = parse_qs(urlparse(next_lesson_url).query)
+                self.assertEqual(next_query.get("lesson"), ["1.2"])
+                if params.get("preview_audience"):
+                    self.assertEqual(next_query.get("preview_audience"), [params["preview_audience"]])
+                else:
+                    self.assertNotIn("preview_audience", next_query)
 
     def test_staged_course_preview_displays_structured_questions_read_only(self):
         admin = User.objects.create_user(
