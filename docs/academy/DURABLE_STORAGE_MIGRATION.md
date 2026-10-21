@@ -14,7 +14,7 @@ A provider switch must not be confused with moving the whole website or database
 
 Keep the active provider on Google Drive until the copy and verification are complete.
 
-Configure a dedicated Django STORAGES alias using these private hosting environment settings:
+Configure a dedicated Django STORAGES alias using these private hosting environment settings. Do not use Django's `default` or `staticfiles` aliases, and do not point a filesystem destination inside the public media/static directories. The selected provider must remain private because course images are delivered through authenticated views.
 
 - ACADEMY_ASSET_STORAGE_BACKEND_CLASS: the target provider's Django Storage backend class.
 - ACADEMY_ASSET_STORAGE_OPTIONS: a JSON object with backend options. Keep provider credentials in secret environment settings and do not commit them.

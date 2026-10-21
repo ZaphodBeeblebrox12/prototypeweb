@@ -3,6 +3,7 @@ import hashlib
 import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from django.core.files.base import ContentFile
 from django.test import SimpleTestCase, override_settings
@@ -42,6 +43,19 @@ class CourseAssetProviderRoutingTests(SimpleTestCase):
             self.assertTrue(storage.remote_exists(name))
             with storage.open(name, "rb") as stream:
                 self.assertEqual(stream.read(), b"figure bytes")
+
+    def test_primary_provider_read_error_uses_retained_drive_copy(self):
+        with TemporaryDirectory() as target_root, TemporaryDirectory() as legacy_root, self._settings(target_root, legacy_root):
+            storage = GoogleDrivePrivateCourseAssetStorage()
+            with (
+                patch.object(storage, "_open_external", side_effect=OSError("provider offline")),
+                patch.object(
+                    storage, "_open_drive",
+                    return_value=ContentFile(b"retained bytes", name="backup.png"),
+                ),
+                storage.open("academy/course-assets/backup.png", "rb") as stream,
+            ):
+                self.assertEqual(stream.read(), b"retained bytes")
 
     def test_legacy_private_local_file_remains_readable_before_copy(self):
         with TemporaryDirectory() as target_root, TemporaryDirectory() as legacy_root:

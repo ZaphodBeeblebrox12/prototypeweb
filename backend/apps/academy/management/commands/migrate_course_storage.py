@@ -18,7 +18,16 @@ from django.core.files.storage import storages
 from django.core.management.base import BaseCommand, CommandError
 
 from apps.academy.google_drive_storage import DRIVE_API
-from apps.academy.models import CourseImportAsset, CourseMediaAsset
+from apps.academy.models import (
+    Course,
+    CourseContentRevision,
+    CourseImport,
+    CourseImportAsset,
+    CourseMediaAsset,
+    CourseModule,
+    Lesson,
+    LessonInstructorMaterial,
+)
 from apps.academy.storage import GoogleDrivePrivateCourseAssetStorage, course_asset_storage
 
 GITHUB_API = "https://api.github.com"
@@ -216,6 +225,16 @@ class Command(BaseCommand):
         apply = bool(options.get("apply"))
         if not target_alias:
             raise CommandError("Set ACADEMY_ASSET_MIGRATION_TARGET_ALIAS or supply --target-alias.")
+        active = str(getattr(settings, "ACADEMY_ASSET_STORAGE_BACKEND", "google_drive")).strip().lower()
+        active_alias = str(getattr(settings, "ACADEMY_ASSET_STORAGE_ALIAS", "academy_assets") or "academy_assets").strip()
+        if target_alias in {"default", "staticfiles"}:
+            raise CommandError(
+                "Use a dedicated private durable storage alias, never Django's default or staticfiles storage."
+            )
+        if active == "django" and target_alias == active_alias:
+            raise CommandError(
+                "The migration target must be different from the currently active course asset storage alias."
+            )
         if apply and not bool(getattr(settings, "ACADEMY_ASSET_MIGRATION_TARGET_DURABLE", False)):
             raise CommandError(
                 "Refusing to write: confirm the destination is durable, then set "
@@ -287,7 +306,7 @@ class Command(BaseCommand):
             values = model.objects.values_list("pk", *fields).iterator()
             for row in values:
                 record_id = str(row[0])
-                for field_name, value in zip(fields, row[1:]):
+                for field_name, value in zip(fields, row[1:], strict=True):
                     for url in _find_google_drive_urls(value):
                         drive_content_reference_inventory.append({
                             "model": model.__name__,
@@ -466,7 +485,6 @@ class Command(BaseCommand):
             )
 
         drive = GoogleDrivePrivateCourseAssetStorage()
-        active = str(getattr(settings, "ACADEMY_ASSET_STORAGE_BACKEND", "google_drive")).strip().lower()
         drive_credentials_present = bool(
             getattr(settings, "ACADEMY_GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON", "")
             or getattr(settings, "ACADEMY_GOOGLE_DRIVE_REFRESH_TOKEN", "")

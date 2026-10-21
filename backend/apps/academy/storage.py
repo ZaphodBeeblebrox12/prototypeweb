@@ -254,6 +254,22 @@ class GoogleDrivePrivateCourseAssetStorage(GoogleDriveStorageMixin, PrivateCours
             return self.external_storage.open(name, mode)
         return None
 
+    def _try_open_backend(self, backend, readers, name, mode):
+        try:
+            reader = readers[backend]
+            if backend == "github":
+                return reader(name)
+            return reader(name, mode)
+        except Exception as exc:
+            # Provider read failures should not defeat read-through recovery. Never log
+            # full URLs, response bodies, signed links, or exception messages.
+            logger.warning(
+                "Course asset read failed on provider %s (%s); trying retained copies.",
+                backend,
+                type(exc).__name__,
+            )
+            return None
+
     def _open(self, name, mode="rb"):
         primary = self._effective_backend()
         readers = {
@@ -262,14 +278,14 @@ class GoogleDrivePrivateCourseAssetStorage(GoogleDriveStorageMixin, PrivateCours
             "django_storage": self._open_external,
         }
         if primary in readers:
-            result = readers[primary](name, mode) if primary != "github" else readers[primary](name)
+            result = self._try_open_backend(primary, readers, name, mode)
             if result is not None:
                 return result
-        # Retained providers remain readable for migration and rollback.
+        # Retained providers remain readable for migration, rollback, and outages.
         for backend in ("django_storage", "google_drive", "github"):
             if backend == primary:
                 continue
-            result = readers[backend](name, mode) if backend != "github" else readers[backend](name)
+            result = self._try_open_backend(backend, readers, name, mode)
             if result is not None:
                 return result
         return FileSystemStorage._open(self, name, mode)
