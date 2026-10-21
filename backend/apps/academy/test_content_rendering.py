@@ -268,6 +268,23 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertNotIn("Figure 2.2 ·", rendered)
         self.assertEqual(rendered.count('class="tt-image-group-item"'), 2)
 
+    def test_image_groups_use_one_shared_case_comparison_frame_in_builder_and_learner(self):
+        root = Path(__file__).resolve().parents[2]
+        learner_css = (root / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
+        builder_html = (root / "apps" / "academy" / "course_builder_preview.html").read_text(encoding="utf-8")
+
+        self.assertIn("Image-group Option 2 — one shared comparison frame", learner_css)
+        self.assertIn("Image-group Option 2 — match the shared learner comparison frame", builder_html)
+
+        for source in (learner_css, builder_html):
+            self.assertIn("grid-template-columns:repeat(2,minmax(0,1fr))", source)
+            self.assertIn("counter-reset:image-group-case", source)
+            self.assertIn('content:"CASE " counter(image-group-case, upper-alpha)', source)
+            self.assertIn(".tt-image-group-item:nth-child(odd)", source)
+            self.assertIn(".tt-image-group-item:nth-child(n+3)", source)
+            self.assertIn("grid-template-columns:minmax(0,1fr)", source)
+            self.assertIn(".tt-image-group-item:not(:last-child)", source)
+
     def test_filename_is_not_used_as_a_figure_title(self):
         rendered = render_safe_markdown(
             f"![Chart](asset://{self.ASSET_ID})",
