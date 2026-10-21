@@ -75,6 +75,19 @@ class CoursePublicationReadinessTests(TestCase):
             publish_course_import(record, user=self.admin)
         self.assertFalse(Course.objects.filter(slug=record.course_slug).exists())
 
+    def test_numbered_untitled_course_is_not_recommendable(self):
+        issue = course_card_publication_issue(
+            "Untitled course1",
+            "A clear, practical description of what learners will study and why it matters.",
+            "Explain who the course is for and what it covers.",
+        )
+        self.assertIn("starter course title", issue.lower())
+        self.assertFalse(is_course_card_recommendable(
+            "Untitled course1",
+            "A clear, practical description of what learners will study and why it matters.",
+            "Explain who the course is for and what it covers.",
+        ))
+
     def test_starter_course_summary_cannot_pass_publication_validation(self):
         record = self.make_record(
             title="Volume and Price Analysis",
