@@ -267,21 +267,27 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertNotIn("Purpose-built teaching aid", rendered)
         self.assertNotIn("Figure 2.2 ·", rendered)
         self.assertEqual(rendered.count('class="tt-image-group-item"'), 2)
+        self.assertIn("2 images · compare before interpreting", rendered)
+        self.assertEqual(rendered.count('class="tt-image-group-case-id"'), 2)
+        self.assertIn("tt-image-group-item-heading", rendered)
 
     def test_image_groups_use_one_shared_case_comparison_frame_in_builder_and_learner(self):
         root = Path(__file__).resolve().parents[2]
         learner_css = (root / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
         builder_html = (root / "apps" / "academy" / "course_builder_preview.html").read_text(encoding="utf-8")
 
-        self.assertIn("Image-group Option 2 — one shared comparison frame", learner_css)
-        self.assertIn("Image-group Option 2 — match the shared learner comparison frame", builder_html)
+        self.assertIn("Image-group Option 2 — compact shared comparison frame", learner_css)
+        self.assertIn("Image-group Option 2 — compact shared comparison frame, matching the learner view.", builder_html)
 
         for source in (learner_css, builder_html):
             self.assertIn("grid-template-columns:repeat(2,minmax(0,1fr))", source)
             self.assertIn("counter-reset:image-group-case", source)
-            self.assertIn('content:"CASE " counter(image-group-case, upper-alpha)', source)
+            self.assertIn("content:counter(image-group-case, upper-alpha)", source)
             self.assertIn(".tt-image-group-item:nth-child(odd)", source)
             self.assertIn(".tt-image-group-item:nth-child(n+3)", source)
+            self.assertIn(".tt-image-group-item:last-child:nth-child(odd)", source)
+            self.assertIn(".tt-image-group-item-heading", source)
+            self.assertIn(".tt-image-group-context", source)
             self.assertIn("grid-template-columns:minmax(0,1fr)", source)
             self.assertIn(".tt-image-group-item:not(:last-child)", source)
 
