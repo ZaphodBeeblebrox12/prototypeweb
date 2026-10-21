@@ -118,6 +118,9 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "Regional content")
         self.assertContains(response, "previewAudienceSelect")
         self.assertContains(response, "data-regional-variant")
+        self.assertContains(response, "Regional content")
+        self.assertContains(response, "previewAudienceSelect")
+        self.assertContains(response, "data-regional-variant")
 
     def test_regional_content_is_persisted_in_publish_payload_and_builder_snapshot(self):
         payload = self.draft_payload("regional-content-course")
