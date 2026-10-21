@@ -810,7 +810,7 @@
 .tt-learning-room .tt-notebook-index strong { color:#c36b4d; font:400 25px/1 Georgia,"Times New Roman",serif; }
 .tt-learning-room .tt-notebook-content { min-width:0; }
 .tt-learning-room .tt-notebook-kicker { margin:2px 0 7px; color:#48664f; font-size:8px; font-weight:850; letter-spacing:.17em; }
-.tt-learning-room .tt-notebook h3 { grid-column:auto; margin:0 0 10px; color:#24503c; font:400 clamp(21px,2.1vw,27px)/1.15 Georgia,"Times New Roman",serif; letter-spacing:-.035em; }
+.tt-learning-room .tt-notebook h4 { grid-column:auto; margin:0 0 10px; color:#24503c; font:400 clamp(21px,2.1vw,27px)/1.15 Georgia,"Times New Roman",serif; letter-spacing:-.035em; }
 .tt-learning-room .tt-notebook-content ol { display:block; grid-column:auto; list-style:none; margin:0; padding:0; }
 .tt-learning-room .tt-notebook-content li { display:grid; grid-template-columns:25px minmax(0,1fr); gap:8px; align-items:start; padding:8px 0; border-top:1px solid #d5dbce; }
 .tt-learning-room .tt-notebook-number { padding-top:2px; color:#bd664b; font:400 9px/1.5 Arial,sans-serif; }
@@ -846,7 +846,7 @@
   .tt-learning-room .tt-notebook-index { padding-right:8px; }
   .tt-learning-room .tt-notebook-index span { font-size:7px; }
   .tt-learning-room .tt-notebook-index strong { font-size:22px; }
-  .tt-learning-room .tt-notebook-content h3 { font-size:22px; }
+  .tt-learning-room .tt-notebook-content h4 { font-size:22px; }
   .tt-learning-room .tt-notebook-content li { grid-template-columns:20px minmax(0,1fr); gap:5px; }
   .tt-learning-room .tt-notebook-content li p { font-size:11px; }
   .tt-learning-room .tt-notebook-examples-button { max-width:100%; min-height:45px; padding:11px 15px; font-size:13px; }
