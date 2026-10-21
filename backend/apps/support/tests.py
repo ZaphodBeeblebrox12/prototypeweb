@@ -88,7 +88,9 @@ class SupportTicketSubmissionTests(TestCase):
         self.assertIn("/accounts/login/", response["Location"])
 
     @patch("apps.support.views.send_ticket_confirmation")
-    def test_billing_ticket_can_be_submitted_and_appears_in_ticket_list(self, send_confirmation):
+    def test_billing_ticket_can_be_submitted_and_appears_in_ticket_list(
+        self, send_confirmation
+    ):
         response = self.client.post(
             reverse("support:request_ticket"),
             data={
@@ -108,7 +110,7 @@ class SupportTicketSubmissionTests(TestCase):
         list_response = self.client.get(reverse("support:my_tickets"))
         self.assertEqual(list_response.status_code, 200)
         self.assertContains(list_response, str(ticket.short_id))
-        self.assertContains(list_response, "Help &amp; support")
+        self.assertContains(list_response, "HELP &amp; SUPPORT")
 
     def test_unsupported_attachment_is_rejected_without_creating_ticket(self):
         upload = SimpleUploadedFile(
