@@ -57,6 +57,8 @@ This is a planning scope, not a commitment that each item is already backed by t
 
 The current image-group renderer can display a per-image `caption` from figure metadata, but the authoring UI does not provide a clear way to add or edit captions for each image in a group. Carry this requirement into the Rich Builder work:
 
+- Current image-group header rule: show the current course title in the small right-hand header label, not a generic image-count prompt. Keep long names tidy with truncation while preserving access to the full title.
+
 - Add an optional **Caption** field to each image inside an image group. Keep it distinct from the image title and accessibility alt text.
 - Save each caption with that image's figure metadata and preserve it when the group is reordered, edited, saved, reloaded or published.
 - Show the caption beneath its own image in the authoring preview, admin/website preview and learner view; do not merge individual captions into the group-level note.
