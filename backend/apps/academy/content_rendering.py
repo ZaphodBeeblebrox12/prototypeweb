@@ -362,6 +362,20 @@ def render_safe_markdown(
             '</span>'
         )
 
+    def image_group_header(title, image_count):
+        safe_title = escape(str(title or "Image group").strip())
+        image_label = f"{image_count} image" if image_count == 1 else f"{image_count} images"
+        context = escape(f"{image_label} · compare before interpreting")
+        return (
+            '<span class="tt-purpose-figure-head tt-image-group-head">'
+            '<span class="tt-purpose-figure-header-top">'
+            f'<span class="tt-purpose-figure-module">{safe_module_title}</span>'
+            f'<span class="tt-image-group-context">{context}</span>'
+            '</span>'
+            f'<strong class="tt-purpose-figure-title">{safe_title}</strong>'
+            '</span>'
+        )
+
     def display_image_title(metadata):
         raw_title = str(metadata.get("title") or "").strip()
         # Older drafts sometimes stored a filename as the title. Never display that
@@ -446,7 +460,11 @@ def render_safe_markdown(
             )
             items.append(
                 '<span class="tt-image-group-item">'
-                f'{image}<strong class="tt-image-group-item-title">{escape(image_title)}</strong>'
+                f'{image}'
+                '<span class="tt-image-group-item-heading">'
+                '<span class="tt-image-group-case-id" aria-hidden="true"></span>'
+                f'<strong class="tt-image-group-item-title">{escape(image_title)}</strong>'
+                '</span>'
                 f'{caption_markup}</span>'
             )
 
@@ -456,7 +474,7 @@ def render_safe_markdown(
         note_markup = f'<span class="tt-purpose-figure-note">{escape(note)}</span>' if note else ""
         markup = (
             f'<figure class="tt-purpose-figure tt-image-group-figure" data-figure-id="{safe_group_id}">'
-            f'{figure_header(title)}'
+            f'{image_group_header(title, len(items))}'
             '<span class="tt-purpose-figure-body">'
             f'<span class="tt-image-group-grid">{"".join(items)}</span>'
             f'{note_markup}</span></figure>'
