@@ -124,6 +124,19 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "previewAudienceSelect")
         self.assertContains(response, "data-regional-variant")
 
+    def test_rich_text_format_dropdown_keeps_native_select_interaction(self):
+        response = self.client.get(reverse("staff_course_builder_preview"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(
+            response,
+            "if (event.target.closest?.('[data-rich-command]')) event.preventDefault();",
+        )
+        self.assertNotContains(
+            response,
+            "'[data-rich-command], [data-rich-format]'",
+        )
+
     def test_regional_asset_remapping_matches_full_image_ids(self):
         from .course_builder_api import _remap_regional_asset_refs
 

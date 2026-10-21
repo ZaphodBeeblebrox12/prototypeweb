@@ -2780,7 +2780,8 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     scheduleVisualEditorSync(editor);
   });
   document.addEventListener('mousedown', event => {
-    if (event.target.closest?.('[data-rich-command], [data-rich-format]')) event.preventDefault();
+    // Preserve text selection for toolbar buttons without blocking native select menus.
+    if (event.target.closest?.('[data-rich-command]')) event.preventDefault();
   });
   document.addEventListener('click', event => {
     const button = event.target.closest?.('[data-rich-command]');
