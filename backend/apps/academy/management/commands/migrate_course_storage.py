@@ -9,7 +9,7 @@ import json
 import re
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 import requests
 from django.conf import settings
@@ -60,6 +60,22 @@ def _copy_to_target(target, target_name, raw, *, apply):
     if _sha256(_read_storage(target, target_name)) != expected:
         raise ValueError(f"Checksum verification failed after writing {target_name}.")
     return {"status": "copied_verified", "sha256": expected, "size": len(raw)}
+
+
+def _url_host(value):
+    try:
+        return (urlparse(str(value or "")).hostname or "").lower()
+    except (TypeError, ValueError):
+        return ""
+
+
+def _is_google_drive_url(value):
+    """Detect common Drive/Docs delivery hosts without fetching arbitrary URLs."""
+    host = _url_host(value)
+    return (
+        host in {"drive.google.com", "docs.google.com", "drive.usercontent.google.com"}
+        or host.endswith(".googleusercontent.com")
+    )
 
 
 def _github_headers():
@@ -169,6 +185,14 @@ class Command(BaseCommand):
             "--apply", action="store_true",
             help="Write and verify copies. Without this flag the command is read-only.",
         )
+        parser.add_argument(
+            "--allow-reviewed-external-urls",
+            action="store_true",
+            help=(
+                "Allow URL-only records that have been manually reviewed and do not point to "
+                "Google Drive. This never overrides Google Drive URL blockers."
+            ),
+        )
 
     def handle(self, *args, **options):
         target_alias = str(options.get("target_alias") or "").strip()
@@ -196,6 +220,8 @@ class Command(BaseCommand):
             "entries": [],
             "errors": [],
             "warnings": [],
+            "external_url_inventory": [],
+            "asset_records_without_file_or_url": [],
         }
         assets_by_name = {}
         for model, kind in (
@@ -207,6 +233,29 @@ class Command(BaseCommand):
                 if name:
                     item = assets_by_name.setdefault(name, {"name": name, "records": []})
                     item["records"].append({"kind": kind, "id": str(record.pk)})
+
+        external_url_inventory = []
+        google_drive_url_records = []
+        empty_asset_records = []
+        for model, kind in (
+            (CourseImportAsset, "course_import_asset"),
+            (CourseMediaAsset, "course_media_asset"),
+        ):
+            for record in model.objects.filter(file="").iterator():
+                original_url = str(record.original_url or "").strip()
+                entry = {"kind": kind, "id": str(record.pk)}
+                if original_url:
+                    host = _url_host(original_url)
+                    entry["url_host"] = host or "unparseable"
+                    entry["google_drive_dependency"] = _is_google_drive_url(original_url)
+                    external_url_inventory.append(entry)
+                    if entry["google_drive_dependency"]:
+                        google_drive_url_records.append(entry)
+                else:
+                    empty_asset_records.append(entry)
+
+        report["external_url_inventory"] = external_url_inventory
+        report["asset_records_without_file_or_url"] = empty_asset_records
 
         counts = {
             "database_asset_keys": len(assets_by_name),
@@ -229,19 +278,52 @@ class Command(BaseCommand):
             "local_asset_archives_copied_verified": 0,
             "local_asset_archives_already_present": 0,
             "local_asset_archives_planned": 0,
-            "records_without_stored_file": (
-                CourseImportAsset.objects.filter(file="").count()
-                + CourseMediaAsset.objects.filter(file="").count()
-            ),
-            "records_without_file_or_external_url": (
-                CourseImportAsset.objects.filter(file="", original_url="").count()
-                + CourseMediaAsset.objects.filter(file="", original_url="").count()
-            ),
-            "external_url_only_records": (
-                CourseImportAsset.objects.filter(file="").exclude(original_url="").count()
-                + CourseMediaAsset.objects.filter(file="").exclude(original_url="").count()
-            ),
+            "records_without_stored_file": len(external_url_inventory) + len(empty_asset_records),
+            "external_url_only_records": len(external_url_inventory),
+            "google_drive_url_only_records": len(google_drive_url_records),
+            "records_without_file_or_external_url": len(empty_asset_records),
         }
+
+        if google_drive_url_records:
+            report["errors"].append({
+                "kind": "google_drive_url_only_records",
+                "error": (
+                    f"{len(google_drive_url_records)} asset records reference Google Drive URLs "
+                    "without managed files. Import these objects into managed storage and repair "
+                    "the records before any provider cutover."
+                ),
+            })
+        if empty_asset_records:
+            report["errors"].append({
+                "kind": "asset_records_without_file_or_url",
+                "error": (
+                    f"{len(empty_asset_records)} asset records have neither a managed file nor an "
+                    "external URL. Review or repair these rows before cutover."
+                ),
+            })
+        non_drive_url_records = [
+            item for item in external_url_inventory if not item.get("google_drive_dependency")
+        ]
+        if non_drive_url_records and not options.get("allow_reviewed_external_urls"):
+            report["errors"].append({
+                "kind": "unreviewed_external_url_only_records",
+                "error": (
+                    f"{len(non_drive_url_records)} asset records contain external URLs but no "
+                    "managed file. Review their hosts and references; only then use "
+                    "--allow-reviewed-external-urls if they intentionally remain external."
+                ),
+            })
+        elif non_drive_url_records:
+            report["warnings"].append(
+                f"{len(non_drive_url_records)} URL-only asset records were explicitly approved to remain external. "
+                "Their source objects were not downloaded or rewritten."
+            )
+
+        if external_url_inventory:
+            self.stdout.write(
+                "URL-only asset records (ID and host only): "
+                + json.dumps(external_url_inventory, sort_keys=True)
+            )
 
         def copy_entry(target_name, raw, *, kind, source_id=None, records=None):
             try:
@@ -428,16 +510,6 @@ class Command(BaseCommand):
             report["errors"].append({"kind": "github_inventory", "error": str(exc)})
 
         report["counts"] = counts
-        if counts["external_url_only_records"]:
-            report["warnings"].append(
-                f'{counts["external_url_only_records"]} asset records use external original URLs and have no stored file. '
-                "Their URLs were not downloaded or rewritten."
-            )
-        if counts["records_without_file_or_external_url"]:
-            report["warnings"].append(
-                f'{counts["records_without_file_or_external_url"]} asset records have neither a stored file nor an external URL. '
-                "Review these records and confirm they are intentional placeholders before cutover."
-            )
         report["finished_at"] = datetime.now(UTC).isoformat()
         report["complete"] = not report["errors"]
 

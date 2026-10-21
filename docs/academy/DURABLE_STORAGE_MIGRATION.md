@@ -33,10 +33,12 @@ Make sure the destination's private-access controls are suitable for instruction
    python manage.py migrate_course_storage --target-alias academy_assets
 
    It reads every stored image referenced by draft and published course records, hashes the bytes, inventories Google Drive's asset/source folders, inventories legacy GitHub images and Course Builder source JSON, and archives any surviving private local fallback files. An unreadable provider inventory or truncated GitHub tree is an error, not a pass.
-3. Review all counts, errors, and warnings. Any error means the old provider must remain enabled. Review external-URL-only records separately because their bytes are not in managed storage, and investigate rows with neither a file nor a URL before cutover.
+3. Review all counts, errors, and warnings. Any error means the old provider must remain enabled. The dry run lists URL-only row IDs and hostnames (not full URLs). Google Drive URL-only assets are hard blockers and must first be imported into managed storage and linked to their records. Other URL-only records also block the default check; after verifying they do not depend on the old provider, rerun with `--allow-reviewed-external-urls`. Rows with neither a file nor a URL must be repaired or intentionally removed before cutover.
 4. After confirming the destination is persistent, set ACADEMY_ASSET_MIGRATION_TARGET_DURABLE=True and run:
 
    python manage.py migrate_course_storage --target-alias academy_assets --apply
+
+   Add `--allow-reviewed-external-urls` only if the inventory was reviewed and those non-Drive links must intentionally remain external. This flag never overrides Google Drive URL blockers.
 
    This copies database-referenced assets under the same logical names, archives provider objects and historical source snapshots, verifies SHA-256 checksums, refuses to overwrite conflicting objects, and stores a timestamped JSON migration manifest in the destination. It does not change PostgreSQL references or select the new provider.
 5. Run the dry-run inventory again. Identical copied objects should report as already present. Fix every error before cutover.
