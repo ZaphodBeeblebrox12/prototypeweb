@@ -863,6 +863,1576 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   function curriculumFields(c){const m=currentModule()||c.modules[0];const l=currentLesson()||m?.lessons[0];return `<div class="section-intro"><h3>Build the curriculum</h3><p>Keep the structure easy to scan. Add modules, then add lessons within each module. Reordering controls here are functional in this preview; the production version will save their positions to Django.</p></div><div class="curriculum-layout"><div class="outline-panel"><div class="outline-panel-head"><strong>Course outline</strong><button class="btn small" data-action="add-module" type="button">＋ Module</button></div><div id="curriculumTree">${c.modules.map((mod,mi)=>`<div class="module-block"><div class="module-row"><button class="module-select ${m?.id===mod.id?'active':''}" type="button" data-action="select-module" data-id="${esc(mod.id)}">${String(mi+1).padStart(2,'0')} · ${esc(mod.title)}</button><button class="icon-btn" type="button" data-action="move-module-up" data-id="${esc(mod.id)}" aria-label="Move module up" ${mi===0?'disabled':''}>↑</button><button class="icon-btn" type="button" data-action="move-module-down" data-id="${esc(mod.id)}" aria-label="Move module down" ${mi===c.modules.length-1?'disabled':''}>↓</button></div>${mod.lessons.map((lesson,li)=>`<div class="lesson-row"><button class="lesson-select ${l?.id===lesson.id?'active':''}" type="button" data-action="select-lesson" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}">${String(mi+1)}.${li+1} ${esc(lesson.title)}</button><button class="icon-btn" type="button" data-action="move-lesson-up" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}" aria-label="Move lesson up" ${li===0?'disabled':''}>↑</button><button class="icon-btn" type="button" data-action="move-lesson-down" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}" aria-label="Move lesson down" ${li===mod.lessons.length-1?'disabled':''}>↓</button></div>`).join('')}<div style="padding:6px 7px 3px"><button class="btn small" type="button" data-action="add-lesson" data-id="${esc(mod.id)}">＋ Add lesson</button><button class="btn small danger" type="button" data-action="delete-module" data-id="${esc(mod.id)}" ${c.modules.length===1?'disabled':''}>Remove</button></div></div>`).join('')}</div></div><div class="lesson-editor-card">${m&&l?`<h4>Edit selected lesson</h4><p class="microcopy">Changing titles or order does not disturb other lessons. Lesson UUIDs and student progress are preserved in the production Academy when a course is updated.</p><div class="field"><label>Module title</label><input class="input" data-entity="module" data-field="title" value="${esc(m.title)}"></div><div class="field" style="margin-top:11px"><label>Module summary</label><textarea class="textarea" data-entity="module" data-field="description">${esc(m.description)}</textarea></div><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><div class="field"><label>Lesson title</label><input class="input" data-entity="lesson" data-field="title" value="${esc(l.title)}"></div><div class="field" style="margin-top:11px"><label>Short lesson summary</label><textarea class="textarea" data-entity="lesson" data-field="summary">${esc(l.summary)}</textarea></div><div class="lesson-meta-grid" style="margin-top:11px"><div class="field"><label>Lesson format</label><select class="select" data-entity="lesson" data-field="format">${['reading','video','interactive','quiz'].map(v=>`<option value="${v}" ${l.format===v?'selected':''}>${v[0].toUpperCase()+v.slice(1)}</option>`).join('')}</select></div><div class="field"><label>Minutes</label><input class="input" type="number" min="1" max="360" data-entity="lesson" data-field="minutes" value="${Number(l.minutes)||12}"></div></div><div class="q-actions"><button class="btn small" type="button" data-action="delete-lesson" data-id="${esc(l.id)}" data-module-id="${esc(m.id)}" ${m.lessons.length===1?'disabled':''}>Remove lesson</button><button class="btn small primary" type="button" data-action="go-lesson">Edit lesson content →</button></div>`:'<div class="empty-state"><p>Create a module and lesson to start editing.</p></div>'}</div></div>`;}
   let richEditorRange = null;
   function richTokenIsBlock(token) {
+    return !String(token || '').startsWith('[[lesson:');
+  }
+  function richTokenLabel(token) {
+    const value = String(token || '');
+    const lesson = currentLesson();
+    const images = Array.isArray(lesson?.images) ? lesson.images : (lesson?.image ? [lesson.image] : []);
+    const imageMatch = value.match(/^!\[([^\]]*)\]\(asset:\/\/([^)]+)\)$/);
+    if (imageMatch) {
+      const image = images.find(item => String(item.id) === imageMatch[2] || String(item.assetUuid || '') === imageMatch[2]);
+      return 'Chart · ' + (image ? String(image.title || '').trim() || String(image.alt || '').trim() || String(image.name || '').trim() || 'Uploaded image' : imageMatch[1] || 'Uploaded image');
+    }
+    let match = value.match(/^\[\[regional-block:([^\]]+)\]\]$/);
+    if (match) {
+      const block = (lesson?.regionalBlocks || []).find(item => String(item.id) === match[1]);
+      return 'Regional content · ' + (block?.title || 'Content block');
+    }
+    match = value.match(/^\[\[image-group:([^\]]+)\]\]$/);
+    if (match) {
+      const group = (lesson?.imageGroups || []).find(item => String(item.id) === match[1]);
+      return 'Image group · ' + (group?.title || 'Image group');
+    }
+    match = value.match(/^\[\[teaching-figure:([^\]]+)\]\]$/);
+    if (match) {
+      const figure = (lesson?.teachingFigures || []).find(item => String(item.id) === match[1]);
+      return 'Teaching figure · ' + (figure?.title || 'Comparison');
+    }
+    match = value.match(/^\[\[lesson-tab:(idea|examples|practice)\]\]$/);
+    if (match) return 'Section placement · ' + ({idea:'The idea',examples:'Chart examples',practice:'Test your reading'}[match[1]]);
+    match = value.match(/^\[\[course-card:(coming-soon:)?([^\]]+)\]\]$/);
+    if (match) {
+      const course = eligibleCompanionCourses().find(item => String(item.referenceId || item.id).toLowerCase() === String(match[2]).toLowerCase());
+      return (match[1] ? 'Coming-soon course · ' : 'Companion course · ') + (course?.title || 'Course reference');
+    }
+    match = value.match(/^\[\[(lesson|lesson-card):([^\]]+)\]\]$/);
+    if (match) {
+      const ref = demoLessonRefs.find(item => String(item.id).toLowerCase() === String(match[2]).toLowerCase());
+      return (match[1] === 'lesson-card' ? 'Related lesson card · ' : 'Lesson link · ') + (ref?.title || 'Lesson reference');
+    }
+    return 'Managed content block';
+  }
+  function markdownToVisualEditor(source) {
+    const tokens = [];
+    const addToken = token => {
+      const marker = 'TTEDITORBLOCKTOKEN' + tokens.length + 'END';
+      tokens.push({marker,token:String(token)});
+      return marker;
+    };
+    let prepared = String(source || '').replace(/!\[([^\]]*)\]\(asset:\/\/([^)\s]+)(?:\s+[^)]*)?\)/g,
+      (match, alt, id) => addToken('![' + String(alt || '').replace(/\]/g,'') + '](asset://' + id + ')'));
+    prepared = prepared.replace(/\[\[(?:regional-block|image-group|teaching-figure|lesson-tab|lesson|lesson-card|course-card):[^\]]+\]\]/g, addToken);
+    let html = typeof baseMarkdownRenderer === 'function' ? baseMarkdownRenderer(prepared) : '<p>' + esc(prepared) + '</p>';
+    tokens.forEach(item => {
+      const block = richTokenIsBlock(item.token);
+      const markup = '<span class="tt-editor-token' + (block ? ' tt-editor-token-block' : '') + '" contenteditable="false" data-editor-token="' + esc(item.token) + '"' + (block ? ' data-editor-block="true"' : '') + ' role="note">' + esc(richTokenLabel(item.token)) + '</span>';
+      html = html.split('<p>' + item.marker + '</p>').join(markup);
+      html = html.split(item.marker).join(markup);
+    });
+    return html;
+  }
+  function richInlineMarkdown(node) {
+    if (!node) return '';
+    if (node.nodeType === 3) return String(node.nodeValue || '').replace(/\u00a0/g, ' ');
+    if (node.nodeType !== 1) return '';
+    if (node.hasAttribute('data-editor-token')) {
+      const token = node.getAttribute('data-editor-token') || '';
+      return node.getAttribute('data-editor-block') === 'true' ? '\n\n' + token + '\n\n' : token;
+    }
+    const tag = node.tagName.toLowerCase();
+    if (tag === 'br') return '\n';
+    const inner = Array.from(node.childNodes).map(richInlineMarkdown).join('');
+    if (tag === 'strong' || tag === 'b') return '**' + inner + '**';
+    if (tag === 'em' || tag === 'i') return '*' + inner + '*';
+    if (tag === 'del' || tag === 's' || tag === 'strike') return '~~' + inner + '~~';
+    if (tag === 'a') {
+      const href = String(node.getAttribute('href') || '').trim();
+      return /^https?:\/\//i.test(href) ? '[' + inner + '](' + href.replace(/[)\s]/g,'') + ')' : inner;
+    }
+    return inner;
+  }
+  function richTableMarkdown(table) {
+    const rows = Array.from(table.querySelectorAll('tr'));
+    if (!rows.length) return '';
+    const cells = rows.map(row => Array.from(row.querySelectorAll('th,td')).map(cell =>
+      richInlineMarkdown(cell).replace(/\|/g,'\\|').replace(/\n/g,' ').trim()
+    ));
+    const width = Math.max(1, ...cells.map(row => row.length));
+    const lines = cells.map(row => {
+      while (row.length < width) row.push('');
+      return '| ' + row.join(' | ') + ' |';
+    });
+    if (lines.length === 1) lines.push('| ' + Array(width).fill('---').join(' | ') + ' |');
+    else lines.splice(1, 0, '| ' + Array(width).fill('---').join(' | ') + ' |');
+    return lines.join('\n');
+  }
+  function richBlockMarkdown(node) {
+    if (!node) return '';
+    if (node.nodeType === 3) return String(node.nodeValue || '').trim();
+    if (node.nodeType !== 1) return '';
+    if (node.hasAttribute('data-editor-token')) return node.getAttribute('data-editor-token') || '';
+    const tag = node.tagName.toLowerCase();
+    if (/^h[1-6]$/.test(tag)) return '#'.repeat(Number(tag.slice(1))) + ' ' + richInlineMarkdown(node).trim();
+    if (tag === 'p') return richInlineMarkdown(node).trim();
+    if (tag === 'hr') return '---';
+    if (tag === 'blockquote') return richInlineMarkdown(node).trim().split('\n').map(line => '> ' + line).join('\n');
+    if (tag === 'ul' || tag === 'ol') {
+      const items = Array.from(node.children).filter(child => child.tagName && child.tagName.toLowerCase() === 'li');
+      return items.map((item,index) => {
+        const content = Array.from(item.childNodes).map(child => child.nodeType === 1 && ['ul','ol'].includes(child.tagName.toLowerCase()) ? '' : richInlineMarkdown(child)).join('').trim();
+        return tag === 'ol' ? (index+1) + '. ' + content : '- ' + content;
+      }).join('\n');
+    }
+    if (tag === 'table') return richTableMarkdown(node);
+    if (tag === 'pre') return '~~~\n' + node.textContent.replace(/^\n+|\n+$/g,'') + '\n~~~';
+    if (tag === 'br') return '';
+    if (tag === 'div' || tag === 'section' || tag === 'article' || tag === 'aside') {
+      const hasBlockChild = Array.from(node.children).some(child => /^(p|div|h[1-6]|ul|ol|blockquote|hr|table|pre)$/.test(child.tagName.toLowerCase()) || child.hasAttribute('data-editor-token'));
+      if (hasBlockChild) return Array.from(node.childNodes).map(richBlockMarkdown).filter(value => value.trim()).join('\n\n');
+      return richInlineMarkdown(node).trim();
+    }
+    return richInlineMarkdown(node).trim();
+  }
+  function visualEditorToMarkdown(editor) {
+    const parts = Array.from(editor.childNodes).map(richBlockMarkdown).filter(value => String(value || '').trim());
+    return parts.join('\n\n').replace(/\u00a0/g,' ').replace(/\r\n?/g,'\n').replace(/\n[ \t]+\n/g,'\n\n').replace(/\n{3,}/g,'\n\n').trim();
+  }
+  function visualEditorMarkup(value, options) {
+    options = options || {};
+    const kind = String(options.kind || 'main');
+    const blockId = String(options.blockId || '');
+    const variantId = String(options.variantId || '');
+    const field = kind === 'main' ? 'content' : (kind === 'regional-base' ? 'baseContent' : 'content');
+    const minClass = kind === 'main' ? ' rich-editor-canvas-main' : ' rich-editor-canvas-regional';
+    return '<div class="rich-editor-wrapper" data-rich-editor-wrapper>' +
+      '<div class="rich-editor-toolbar" role="toolbar" aria-label="Text formatting">' +
+      '<select data-rich-format aria-label="Text style"><option value="p">Paragraph</option><option value="h1">Heading 1</option><option value="h2">Heading 2</option><option value="h3">Heading 3</option><option value="h4">Heading 4</option><option value="h5">Heading 5</option><option value="h6">Heading 6</option><option value="blockquote">Quote</option></select>' +
+      '<button type="button" data-rich-command="bold" aria-label="Bold"><strong>B</strong></button><button type="button" data-rich-command="italic" aria-label="Italic"><em>I</em></button><button type="button" data-rich-command="strikeThrough" aria-label="Strikethrough"><s>S</s></button>' +
+      '<button type="button" data-rich-command="insertUnorderedList" aria-label="Bulleted list">• List</button><button type="button" data-rich-command="insertOrderedList" aria-label="Numbered list">1. List</button>' +
+      '<button type="button" data-rich-command="link" aria-label="Insert link">Link</button><button type="button" data-rich-command="insertHorizontalRule" aria-label="Insert divider">Divider</button><button type="button" data-rich-command="table" aria-label="Insert table">Table</button><button type="button" data-rich-command="undo" aria-label="Undo">Undo</button><button type="button" data-rich-command="redo" aria-label="Redo">Redo</button></div>' +
+      '<div class="rich-editor-canvas' + minClass + '" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="' + (kind === 'main' ? 'Lesson body rich text editor' : 'Regional content rich text editor') + '" data-visual-editor="true" data-visual-kind="' + esc(kind) + '" data-block-id="' + esc(blockId) + '" data-variant-id="' + esc(variantId) + '" data-field="' + field + '" data-placeholder="Start writing your lesson…">' +
+      markdownToVisualEditor(value) + '</div></div>';
+  }
+  function syncVisualEditorToModel(editor) {
+    const lesson = currentLesson();
+    if (!lesson || !editor) return;
+    const markdown = visualEditorToMarkdown(editor);
+    const kind = editor.dataset.visualKind;
+    if (kind === 'main') lesson.content = markdown;
+    else if (kind === 'regional-base') {
+      const block = (lesson.regionalBlocks || []).find(item => String(item.id) === String(editor.dataset.blockId));
+      if (block) block.baseContent = markdown;
+    } else if (kind === 'regional-variant') {
+      const block = (lesson.regionalBlocks || []).find(item => String(item.id) === String(editor.dataset.blockId));
+      const variant = (block?.variants || []).find(item => String(item.id) === String(editor.dataset.variantId));
+      if (variant) variant.content = markdown;
+    }
+    schedulePersist();
+  }
+  function restoreRichEditorSelection(editor) {
+    if (!editor) return;
+    if (richEditorRange && richEditorRange.editor === editor && editor.contains(richEditorRange.range.commonAncestorContainer)) {
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(richEditorRange.range);
+      return;
+    }
+    editor.focus();
+    const range = document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+  function captureRichEditorRange() {
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+    const range = selection.getRangeAt(0);
+    const anchor = range.commonAncestorContainer.nodeType === 1 ? range.commonAncestorContainer : range.commonAncestorContainer.parentElement;
+    const editor = anchor?.closest?.('[data-visual-editor]');
+    if (!editor || !editor.contains(range.startContainer)) return;
+    richEditorRange = {editor,range:range.cloneRange()};
+    if (editor.dataset.visualKind === 'main') {
+      const prefixRange = document.createRange();
+      prefixRange.selectNodeContents(editor);
+      try { prefixRange.setEnd(range.startContainer,range.startOffset); } catch (_) { return; }
+      const prefix = document.createElement('div');
+      prefix.appendChild(prefixRange.cloneContents());
+      const lesson = currentLesson();
+      if (lesson) {
+        const offset = visualEditorToMarkdown(prefix).length;
+        lessonContentCaret = {lessonId:lesson.id,start:offset,end:offset};
+      }
+    }
+  }
+  function insertVisualTokenAtCursor(editor, token, isBlock) {
+    if (!editor) return;
+    restoreRichEditorSelection(editor);
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+    const range = selection.getRangeAt(0);
+    range.deleteContents();
+    const chip = document.createElement('span');
+    chip.className = 'tt-editor-token' + (isBlock ? ' tt-editor-token-block' : '');
+    chip.contentEditable = 'false';
+    chip.dataset.editorToken = token;
+    if (isBlock) chip.dataset.editorBlock = 'true';
+    chip.setAttribute('role','note');
+    chip.textContent = richTokenLabel(token);
+    range.insertNode(chip);
+    range.setStartAfter(chip);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    richEditorRange = {editor,range:range.cloneRange()};
+    syncVisualEditorToModel(editor);
+  }
+  function lessonFields(l){if(l&&!l.notebook)l.notebook={title:'Before you make the call',prompts:[{label:'Observe',text:'Describe the evidence visible in the chart.'},{label:'Interpret',text:'State one possible reading and a reasonable alternative.'},{label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}]};if(l&&l.notebook&&String(l.notebook.title||'').trim()==='Your Trading Notebook')l.notebook.title='Before you make the call';if(l&&!l.videoUrl)l.videoUrl='';return `<div class="section-intro"><h3>Lesson content</h3><p>Write and format directly in the editor. Use the toolbar for headings, emphasis, lists, links, quotes, dividers and tables; figures and regional blocks remain managed content items.</p></div>${l?`<div class="field"><label>Lesson body</label>${visualEditorMarkup(l.content, {kind:"main"})}<span class="help">Use headings from # through ######. To insert an image between paragraphs, click the lesson body where it belongs, then open Figures and select Insert at cursor. This placement is preserved in the website preview.</span></div>${courseCardPickerMarkup()}<div class="helper-note">The production editor will validate and sanitise content on the server before it reaches learners. Markdown source will not be copied into a public static page.</div><div class="field" style="margin-top:14px"><label>Video URL (optional)</label><input class="input" type="url" data-entity="lesson" data-field="videoUrl" value="${esc(l.videoUrl||"")}" placeholder="https://…"><span class="help">Direct MP4/WebM/OGG links play inline. Other URLs are shown as external video links.</span></div><div class="related-course-box"><h4>Notebook prompts</h4><p>These editable prompts appear in the learner’s Your Trading Notebook section.</p><div class="field"><label>Notebook heading</label><input class="input" data-entity="notebook" data-field="title" value="${esc(l.notebook?.title||"Before you make the call")}"><span class="help">This is the large heading shown inside the Your Trading Notebook section of the learner view.</span></div>${(l.notebook?.prompts||[]).map((prompt,index)=>`<div class="q-card"><div class="field"><label>Prompt ${index+1} label</label><input class="input" data-entity="notebook-prompt" data-index="${index}" data-field="label" value="${esc(prompt.label||"")}"></div><div class="field" style="margin-top:8px"><label>Prompt text</label><textarea class="textarea" data-entity="notebook-prompt" data-index="${index}" data-field="text">${esc(prompt.text||"")}</textarea></div></div>`).join("")}</div><div class="notebook-editor-preview"><h4>How learners will see the notebook</h4><p>Preview the styled notebook block here. Changes to the heading or prompts above update this preview.</p><div data-notebook-preview>${notebookPreviewMarkup(l)}</div></div><div class="related-course-box"><h4>Related-course metadata (optional)</h4><p>These selections record course relationships for discovery; they do not insert a card into the lesson body. To place the mini Option 4 preview inside the lesson, use “Insert a companion-course card (Option 4)” directly below the Lesson body field. Individual lesson links are managed separately.</p><input class="input" type="search" data-related-course-search placeholder="Search published or announced courses by title or topic" aria-label="Search published or announced related courses"><div class="related-course-list">${demoOffers.map(course=>{const checked=(l.relatedCourseIds||[]).includes(course.id);return `<div class="related-course-item related-course-entry"><label class="related-course-choice"><input type="checkbox" data-related-course="${esc(course.id)}" ${checked ? "checked" : ""}><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">${esc(course.state)}${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}${course.duration ? " · " + esc(course.duration) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></label></div>`;}).join("")}${comingSoonOffers.map(course=>`<div class="related-course-item related-course-entry"><div class="related-course-choice"><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">Coming soon${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></div></div>`).join("")}${demoOffers.length || comingSoonOffers.length ? "" : '<p class="microcopy">No published or announced courses are available to associate yet.</p>'}</div><div class="helper-note">These selections record related-course metadata only. Use the dedicated Option 4 picker directly below Lesson body to insert a visual companion-course card into the lesson. No course is automatically published.</div></div><div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap"><button class="btn" type="button" data-action="go-curriculum">← Curriculum</button><button class="btn primary" type="button" data-action="go-questions">Edit practice questions →</button></div>`:'<div class="empty-state"><p>Select a lesson in the curriculum first.</p></div>'}`;}
+  function questionImageMarkup(q, l) {
+    const images = Array.isArray(l.images) ? l.images : (l.image ? [l.image] : []);
+    const image = images.find(function(item) {
+      return String(item.id || '') === String(q.imageId || '') || String(item.assetUuid || '') === String(q.imageId || '');
+    });
+    if (!image) return '';
+    const title = String(image.title || '').trim() || 'Chart';
+    const alt = String(image.alt || title || 'Question chart');
+    const visual = image.data
+      ? '<img src="' + esc(image.data) + '" alt="' + esc(alt) + '" loading="lazy">'
+      : '<div class="media-empty">This image is saved in the Academy asset store. Save the draft to refresh its preview.</div>';
+    const caption = image.caption ? '<span>' + esc(image.caption) + '</span>' : '';
+    return '<figure class="practice-question-figure">' + visual + '<figcaption><strong>' + esc(title) + '</strong>' + caption + '</figcaption></figure>';
+  }
+  function questionFields(l) {
+    if (!l) return '<div class="empty-state"><p>Select a lesson first.</p></div>';
+    if (!Array.isArray(l.questions)) l.questions = [];
+    const images = Array.isArray(l.images) ? l.images : (l.image ? [l.image] : []);
+    const cards = l.questions.map(function(q, qi) {
+      const imageOptions = images.map(function(image) {
+        const title = String(image.title || '').trim() || String(image.alt || '').trim() || String(image.name || '').trim() || 'Untitled image';
+        const selected = String(q.imageId || '') === String(image.id || '');
+        return '<option value="' + esc(image.id) + '"' + (selected ? ' selected' : '') + '>' + esc(title) + '</option>';
+      }).join('');
+      const options = (Array.isArray(q.options) ? q.options : []).map(function(option, oi) {
+        const isCorrect = Number(q.correctIndex) === oi;
+        return '<div class="option-row ' + (isCorrect ? 'is-correct' : '') + '"><input type="radio" name="correct-' + esc(q.id) + '" aria-label="Mark option ' + (oi + 1) + ' as the correct answer" data-correct-option="' + esc(q.id) + '" data-qid="' + esc(q.id) + '" value="' + oi + '"' + (isCorrect ? ' checked' : '') + '><input class="input" data-entity="option" data-qid="' + esc(q.id) + '" data-index="' + oi + '" value="' + esc(option) + '" aria-label="Answer choice ' + (oi + 1) + '"><span class="answer-key-label ' + (isCorrect ? 'is-correct' : '') + '">' + (isCorrect ? '✓ Correct answer' : 'Mark as correct') + '</span></div>';
+      }).join('');
+      return '<article class="q-card">' +
+        '<div class="q-top"><strong>QUESTION ' + String(qi + 1).padStart(2, '0') + '</strong><button class="btn small danger" type="button" data-action="remove-question" data-id="' + esc(q.id) + '"' + (l.questions.length === 1 ? ' disabled' : '') + '>Remove</button></div>' +
+        '<div class="field"><label>Image or chart for this question (optional)</label><select class="select" data-entity="question" data-qid="' + esc(q.id) + '" data-field="imageId" data-question-image-picker><option value="">No image attached</option>' + imageOptions + '</select>' +
+        questionImageMarkup(q, l) +
+        '<label class="help question-image-upload">Or upload an image directly to this question (JPG, PNG or WebP; up to 1.5 MB).</label><input class="input" type="file" accept="image/jpeg,image/png,image/webp" data-question-image-upload="' + esc(q.id) + '">' +
+        '<p class="help">The attached image is also available under Images, where you can edit its title, alt text and caption.</p></div>' +
+        '<div class="field"><label>Question prompt</label><textarea class="textarea" data-entity="question" data-qid="' + esc(q.id) + '" data-field="prompt">' + esc(q.prompt) + '</textarea></div>' +
+        '<div class="subheading"><h4>Answer choices</h4><p>Select the correct answer privately</p></div>' + options +
+        '<div class="field" style="margin-top:15px"><label>Model explanation (private authoring field)</label><textarea class="textarea" data-entity="question" data-qid="' + esc(q.id) + '" data-field="explanation">' + esc(q.explanation) + '</textarea></div>' +
+        '</article>';
+    }).join('');
+    return '<div class="section-intro"><h3>Practice and Q&amp;A</h3><p>Attach a chart to any question, write the prompt and answer choices, then select the correct choice and explain the reasoning. Correct answers and explanations remain private until the learner submits.</p></div>' +
+      '<div class="subheading"><h4>Knowledge check · ' + l.questions.length + ' ' + (l.questions.length === 1 ? 'question' : 'questions') + '</h4><button class="btn small" type="button" data-action="add-question">＋ Add question</button></div>' +
+      cards +
+      '<div class="helper-note"><strong>Privacy contract:</strong> correct answers and answer explanations live in protected instructor material in Django, not in the JSON delivered to learners. Question images are saved as lesson assets and delivered through the Academy asset permissions.</div>';
+  }
+  function mediaFields(l) {
+    if (!l) return '<div class="empty-state"><p>Select a lesson first.</p></div>';
+    const images = Array.isArray(l.images) ? l.images : (l.image ? [l.image] : []);
+    if (!Array.isArray(l.teachingFigures)) l.teachingFigures = [];
+    if (!Array.isArray(l.imageGroups)) l.imageGroups = [];
+    const imageCards = images.map((image, index) => `
+      <article class="media-card" data-image-card="${esc(image.id)}">
+        <div class="media-preview">${image.data ? `<img alt="${esc(image.alt || image.title || image.name || 'Course figure')}" src="${esc(image.data)}" loading="lazy">` : '<div class="media-empty">Image is saved to the Academy asset store.</div>'}</div>
+        <div class="media-meta">
+          <div class="eyebrow">IMAGE ${String(index + 1).padStart(2, '0')}</div>
+          <label>Image title (shown in the figure)</label>
+          <input class="input" data-image-item="${esc(image.id)}" data-field="title" value="${esc((image.title && image.title !== image.name) ? image.title : '')}" maxlength="240" placeholder="Type a title, e.g. BANKNIFTY at support">
+          <label>Alt text</label>
+          <input class="input" data-image-item="${esc(image.id)}" data-field="alt" value="${esc(image.alt || '')}" maxlength="500" placeholder="Describe the figure for accessibility">
+          <label>Caption / explanation</label>
+          <textarea class="textarea" rows="3" data-image-item="${esc(image.id)}" data-field="caption" maxlength="500" placeholder="Explain what the learner should notice.">${esc(image.caption || '')}</textarea>
+          <p class="help">Use your own title; the uploaded filename is never used as the display heading. Insert the image on its own, or select it inside an image group below.</p>
+          <div class="figure-inline-actions">
+            <button class="btn small primary" type="button" data-action="insert-figure" data-id="${esc(image.id)}">Insert at cursor</button>
+            <button class="btn small danger" type="button" data-action="remove-figure" data-id="${esc(image.id)}">Remove image</button>
+          </div>
+        </div>
+      </article>`).join('');
+    const diagrams = l.teachingFigures.map((figure, figureIndex) => `
+      <article class="media-card teaching-figure-card">
+        <div class="media-meta">
+          <div class="eyebrow">PURPOSE-BUILT FIGURE ${String(figureIndex + 1).padStart(2, '0')}</div>
+          <label>Figure title</label>
+          <input class="input" data-teaching-figure="${esc(figure.id)}" data-field="title" value="${esc(figure.title || '')}" maxlength="240">
+          <div class="comparison-card-editor">
+            ${(figure.cards || []).map((card, cardIndex) => `
+              <fieldset class="q-card">
+                <legend>Comparison card ${cardIndex + 1}</legend>
+                <label>Small heading / label</label>
+                <input class="input" data-teaching-figure-card="${esc(figure.id)}" data-index="${cardIndex}" data-field="kicker" value="${esc(card.kicker || '')}" maxlength="100">
+                <label>Card title</label>
+                <input class="input" data-teaching-figure-card="${esc(figure.id)}" data-index="${cardIndex}" data-field="title" value="${esc(card.title || '')}" maxlength="240">
+                <label>Explanation</label>
+                <textarea class="textarea" rows="3" data-teaching-figure-card="${esc(figure.id)}" data-index="${cardIndex}" data-field="body" maxlength="1000">${esc(card.body || '')}</textarea>
+              </fieldset>`).join('')}
+          </div>
+          <label>Figure note / takeaway</label>
+          <textarea class="textarea" rows="3" data-teaching-figure="${esc(figure.id)}" data-field="note" maxlength="1500">${esc(figure.note || '')}</textarea>
+          <p class="help">This creates editable cards like the accepted “Figure 2.2” example; it is not a flattened screenshot.</p>
+          <div class="figure-inline-actions">
+            <button class="btn small primary" type="button" data-action="insert-teaching-figure" data-id="${esc(figure.id)}">Insert at cursor</button>
+            <button class="btn small danger" type="button" data-action="remove-teaching-figure" data-id="${esc(figure.id)}">Remove teaching figure</button>
+          </div>
+        </div>
+      </article>`).join('');
+    return `
+      <div class="section-intro"><h3>Lesson figures</h3><p>Use an uploaded image or build a native comparison figure. Give every figure a title, accessible text and explanatory caption or takeaway, then insert it where it belongs in the lesson. Figure order is part of your authored lesson.</p></div>
+      <div class="related-course-box">
+        <h4>Create a teaching figure</h4>
+        <p>Add editable comparison cards like “Shorter window / Common baseline / Longer window”, rather than drawing them elsewhere and uploading a screenshot.</p>
+        <button class="btn small primary" type="button" data-action="add-teaching-figure">＋ Add comparison-card figure</button>
+      </div>
+      <div class="subheading"><h4>Purpose-built figures</h4><p>${l.teachingFigures.length} figure${l.teachingFigures.length === 1 ? '' : 's'}</p></div>
+      <div class="media-grid">${diagrams || '<article class="media-card"><div class="media-empty">No comparison figures yet. Add one above.</div></article>'}</div>
+      <div class="subheading"><h4>Uploaded images</h4><p>${images.length} image${images.length === 1 ? '' : 's'}</p></div>
+      <div class="media-upload-bar">
+        <label for="multiImageUpload">Add images to this lesson</label>
+        <input class="input" id="multiImageUpload" type="file" multiple accept="image/jpeg,image/png,image/webp">
+        <span class="help">JPG, PNG or WebP, up to 1.5 MB per image. Click the lesson body where an image belongs before opening Figures.</span>
+      </div>
+      <div class="media-grid">${imageCards || '<article class="media-card"><div class="media-empty">No images yet. Add an image above.</div></article>'}</div>
+      <div class="related-course-box image-group-create">
+        <h4>Group images under one title</h4>
+        <p>Select two or more uploaded images to present them side by side beneath one title, like the three-case comparison in the Learning Room reference.</p>
+        <button class="btn small primary" type="button" data-action="add-image-group" ${images.length < 2 ? 'disabled' : ''}>＋ Create image group from first two images</button>
+        ${images.length < 2 ? '<p class="help">Upload at least two images first.</p>' : ''}
+      </div>
+      <div class="subheading"><h4>Image groups</h4><p>${l.imageGroups.length} group${l.imageGroups.length === 1 ? '' : 's'}</p></div>
+      <div class="media-grid image-group-list">${l.imageGroups.map((group, groupIndex) => {
+        const selectedIds = Array.isArray(group.imageIds) ? group.imageIds : [];
+        return `
+          <article class="media-card image-group-editor" data-image-group-card="${esc(group.id)}">
+            <div class="media-meta">
+              <div class="eyebrow">IMAGE GROUP ${String(groupIndex + 1).padStart(2, '0')}</div>
+              <label>Group title</label>
+              <input class="input" data-image-group="${esc(group.id)}" data-field="title" value="${esc(group.title || '')}" maxlength="240" placeholder="e.g. Method II: price position and money flow">
+              <label>Images in this group</label>
+              <div class="image-group-checklist">
+                ${images.map(image => `
+                  <label class="image-group-option">
+                    <input type="checkbox" data-image-group-member="${esc(group.id)}" data-image-id="${esc(image.id)}" ${selectedIds.includes(image.id) ? 'checked' : ''}>
+                    <span>${esc((image.title && image.title !== image.name) ? image.title : image.alt || 'Untitled image')}</span>
+                  </label>`).join('')}
+              </div>
+              <p class="help">${selectedIds.length} selected. Choose at least two images; each image can have its own title and caption.</p>
+              <label>Group note (optional)</label>
+              <textarea class="textarea" rows="2" data-image-group="${esc(group.id)}" data-field="note" maxlength="1500" placeholder="Optional note below the image panels">${esc(group.note || '')}</textarea>
+              <div class="figure-inline-actions">
+                <button class="btn small primary" type="button" data-action="insert-image-group" data-id="${esc(group.id)}">Insert group at cursor</button>
+                <button class="btn small danger" type="button" data-action="remove-image-group" data-id="${esc(group.id)}">Remove group</button>
+              </div>
+            </div>
+          </article>`;
+      }).join('') || '<article class="media-card"><div class="media-empty">No image groups yet. Create one after uploading at least two images.</div></article>'}</div>
+      <div class="helper-note"><strong>Inline authoring:</strong> place the cursor in the lesson body before opening Images, then insert a single image or a complete image group. The group title and order stay with the inserted block.</div>`;
+  }
+  function reflectionFields(l) {
+    if (!l) return '<div class="empty-state"><p>Select a lesson first.</p></div>';
+    const prompt = l.reflectionPrompt === undefined
+      ? 'Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view.'
+      : String(l.reflectionPrompt || '');
+    const reasoning = l.reflectionModelReasoning === undefined
+      ? 'A careful reading separates visible evidence from interpretation, considers a reasonable alternative, and names the evidence that would strengthen or weaken the interpretation.'
+      : String(l.reflectionModelReasoning || '');
+    const notes = String(l.reflectionChartNotes || '');
+    return '<div class="section-intro"><h3>Reflection and model reasoning</h3><p>Preserve the reference template’s “write your first reading, then compare” interaction. These fields are optional and course-specific; use them where they help learning rather than repeating boilerplate.</p></div>' +
+      '<div class="lesson-editor-card"><div class="field"><label>Reflection prompt</label><textarea class="textarea" rows="3" data-entity="lesson" data-field="reflectionPrompt" maxlength="1000" placeholder="What should the learner reason through before revealing the model?">' + esc(prompt) + '</textarea><span class="help">The learner can save their first reading to their account. Do not put the correct answer to a scored quiz here.</span></div>' +
+      '<div class="field"><label>Model reasoning / worked interpretation</label><textarea class="textarea" rows="6" data-entity="lesson" data-field="reflectionModelReasoning" maxlength="3000" placeholder="Explain the evidence, interpretation, alternative and what would change the view.">' + esc(reasoning) + '</textarea><span class="help">This is explanatory feedback, not the private answer key for a scored question.</span></div>' +
+      '<div class="field"><label>Optional chart-reading notes</label><textarea class="textarea" rows="4" data-entity="lesson" data-field="reflectionChartNotes" maxlength="3000" placeholder="Optional notes about what to inspect in the worked chart.">' + esc(notes) + '</textarea></div></div>';
+  }
+
+  const regionalCountryOptions = [
+    ['IN','India'],['US','United States'],['CA','Canada'],['GB','United Kingdom'],['AU','Australia'],['NZ','New Zealand'],
+    ['SG','Singapore'],['JP','Japan'],['CN','China'],['HK','Hong Kong'],['KR','South Korea'],['BD','Bangladesh'],
+    ['PK','Pakistan'],['LK','Sri Lanka'],['NP','Nepal'],['TH','Thailand'],['VN','Vietnam'],['MY','Malaysia'],
+    ['ID','Indonesia'],['PH','Philippines'],['DE','Germany'],['FR','France'],['IT','Italy'],['ES','Spain'],
+    ['NL','Netherlands'],['IE','Ireland'],['SE','Sweden'],['CH','Switzerland'],['AE','United Arab Emirates'],
+    ['SA','Saudi Arabia'],['ZA','South Africa'],['NG','Nigeria'],['KE','Kenya'],['BR','Brazil'],['AR','Argentina'],
+    ['MX','Mexico'],['CL','Chile'],['CO','Colombia'],['EG','Egypt'],['TR','Türkiye'],['IL','Israel'],
+    ['PL','Poland'],['PT','Portugal'],['BE','Belgium'],['AT','Austria'],['DK','Denmark'],['NO','Norway'],
+    ['FI','Finland'],['GR','Greece'],['CZ','Czechia'],['RO','Romania'],['TW','Taiwan']
+  ];
+  const regionalRegionOptions = ['APAC','EU','NA','LATAM','MENA','SSA'];
+  function regionalFields(lesson) {
+    if (!lesson) return '<div class="empty-state"><p>Select a lesson first.</p></div>';
+    if (!Array.isArray(lesson.regionalBlocks)) lesson.regionalBlocks = [];
+    const images = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
+    const imageOptions = '<option value="">Choose an uploaded image…</option>' + images.map(image => {
+      const imageId = String(image.id || image.assetUuid || '');
+      const title = String(image.title || '').trim() || String(image.alt || '').trim() || String(image.name || '').trim() || 'Untitled image';
+      return '<option value="' + esc(imageId) + '">' + esc(title) + '</option>';
+    }).join('');
+    const blocks = lesson.regionalBlocks.map((block, blockIndex) => {
+      if (!Array.isArray(block.variants)) block.variants = [];
+      const variants = block.variants.map((variant, variantIndex) => {
+        const scope = variant.scope === 'region' ? 'region' : 'country';
+        const code = String(variant.code || (scope === 'region' ? 'APAC' : 'IN')).toUpperCase();
+        const choices = scope === 'region'
+          ? regionalRegionOptions.map(value => '<option value="' + value + '"' + (value === code ? ' selected' : '') + '>' + value + '</option>').join('')
+          : regionalCountryOptions.map(([value,label]) => '<option value="' + value + '"' + (value === code ? ' selected' : '') + '>' + esc(label) + ' (' + value + ')</option>').join('');
+        return '<article class="q-card regional-variant-card"><div class="q-top"><strong>VARIANT ' + String(variantIndex + 1).padStart(2,'0') + '</strong><button class="btn small danger" type="button" data-action="remove-regional-variant" data-block-id="' + esc(block.id) + '" data-id="' + esc(variant.id) + '">Remove</button></div>' +
+          '<div class="form-grid"><div class="field"><label>Audience type</label><select class="select" data-regional-variant="' + esc(variant.id) + '" data-block-id="' + esc(block.id) + '" data-field="scope"><option value="country"' + (scope === 'country' ? ' selected' : '') + '>One country</option><option value="region"' + (scope === 'region' ? ' selected' : '') + '>A whole region</option></select></div>' +
+          '<div class="field"><label>' + (scope === 'region' ? 'Region' : 'Country') + '</label><select class="select" data-regional-variant="' + esc(variant.id) + '" data-block-id="' + esc(block.id) + '" data-field="code">' + choices + '</select></div></div>' +
+          '<div class="field full regional-variant-content"><label>Replacement content</label>' + visualEditorMarkup(variant.content || '', {kind:'regional-variant',blockId:block.id,variantId:variant.id}) +
+          '<div class="regional-image-row"><select class="select" data-regional-image-picker data-block-id="' + esc(block.id) + '" data-variant-id="' + esc(variant.id) + '" aria-label="Choose an image for this regional version">' + imageOptions + '</select><button class="btn small" type="button" data-action="insert-regional-image" data-id="' + esc(block.id) + '" data-variant-id="' + esc(variant.id) + '">Insert selected image</button></div></div>' +
+          '<label class="checkbox-row"><input type="checkbox" data-regional-variant="' + esc(variant.id) + '" data-block-id="' + esc(block.id) + '" data-field="hidden"' + (variant.hidden ? ' checked' : '') + '> Hide this block completely for this audience</label>' +
+          '<p class="help">Country-specific copy takes precedence over regional copy. If the block is hidden, no replacement text is rendered for that audience.</p></article>';
+      }).join('');
+      return '<article class="related-course-box regional-block-card"><div class="q-top"><strong>CONTENT BLOCK ' + String(blockIndex + 1).padStart(2,'0') + '</strong><button class="btn small danger" type="button" data-action="remove-regional-block" data-id="' + esc(block.id) + '">Remove block</button></div>' +
+        '<div class="field"><label>Internal block label</label><input class="input" data-regional-block="' + esc(block.id) + '" data-field="title" value="' + esc(block.title || '') + '" maxlength="240" placeholder="e.g. Country-specific risk disclosure"></div>' +
+        '<div class="field" style="margin-top:12px"><label>Global/default version</label>' + visualEditorMarkup(block.baseContent || '', {kind:'regional-base',blockId:block.id}) +
+        '<div class="regional-image-row"><select class="select" data-regional-image-picker data-block-id="' + esc(block.id) + '" aria-label="Choose an image for the global version">' + imageOptions + '</select><button class="btn small" type="button" data-action="insert-regional-image" data-id="' + esc(block.id) + '">Insert selected image</button></div></div>' +
+        '<div class="subheading"><h4>Country and region versions</h4><p>' + block.variants.length + ' override' + (block.variants.length === 1 ? '' : 's') + '</p></div>' +
+        (variants || '<p class="help">No overrides yet. Add a country or region version only where the lesson genuinely needs one.</p>') +
+        '<div class="figure-inline-actions"><button class="btn small" type="button" data-action="add-regional-variant" data-id="' + esc(block.id) + '">＋ Add audience version</button><button class="btn small primary" type="button" data-action="insert-regional-block" data-id="' + esc(block.id) + '">Place block in lesson ↗</button></div>' +
+        '<p class="help">The block appears where its managed placeholder is placed in Lesson content. You do not need to type any placeholder syntax.</p></article>';
+    }).join('');
+    return '<div class="section-intro"><h3>Regional content</h3><p>Keep one course and one catalogue card. Add alternate text blocks for a specific country or region only when necessary; the learner sees the selected version in the same Learning Room template.</p></div>' +
+      '<div class="helper-note"><strong>Audience fallback:</strong> exact country override → region override → global/default copy. Explicit hiding is respected; unknown audiences fall back to the global/default version. All choices are resolved by the server for real learners.</div>' +
+      '<div class="figure-inline-actions"><button class="btn primary" type="button" data-action="add-regional-block">＋ Create regional content block</button><button class="btn" type="button" data-action="go-lesson">Open lesson body</button></div>' +
+      (blocks || '<div class="empty-state"><h3>No regional content yet</h3><p>Your lesson stays global by default. Add a block when a chart, caption, paragraph or disclosure needs an audience-specific version.</p></div>');
+  }
+
+  function renderEditor(){const c=currentCourse();if(!c){$('#workspace').innerHTML='<div class="empty-state"><h3>Create your first course</h3><button class="btn primary" data-action="new-course">＋ New course</button></div>';return;}const tab=state.tab||'overview';const tabDefs=[['overview','Course details'],['curriculum','Curriculum'],['lesson','Lesson content'],['questions','Practice & Q&A'],['media','Images'],['regional','Regional content'],['reflection','Reflection & reasoning'],['preview','Learner preview']];let panel='';const m=currentModule(), l=currentLesson();if(tab==='overview')panel=courseFields(c);else if(tab==='curriculum')panel=curriculumFields(c);else if(tab==='lesson')panel=lessonFields(l);else if(tab==='questions')panel=questionFields(l);else if(tab==='media')panel=mediaFields(l);else if(tab==='regional')panel=regionalFields(l);else if(tab==='reflection')panel=reflectionFields(l);else panel=previewFields(c);$('#workspace').innerHTML=`<div class="workspace-toolbar"><div class="breadcrumb">Courses <span aria-hidden="true">/</span> ${esc(c.title||'Untitled course')} <span aria-hidden="true">/</span> ${esc(tabDefs.find(x=>x[0]===tab)?.[1]||'Editor')}</div><div class="toolbar-right"><span class="save-state" id="saveIndicator"><span class="dot"></span><span>${state.savedAt?'Saved '+esc(state.savedAt):'Unsaved draft'}</span></span><button class="btn small" type="button" data-action="save-draft">Save draft</button><button class="btn small danger" type="button" data-action="delete-course">Delete draft</button></div></div><div class="editor-shell"><header class="editor-header"><div><div class="eyebrow">${esc(c.slug||'course-slug')}</div><h2>${esc(c.title||'Untitled course')}</h2><p>${esc(c.summary||'Add a course summary to help learners understand what they will study.')}</p></div><div class="header-mark" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="18" stroke="currentColor" stroke-width="1.5"/><path d="M11 27.5 17 21l5 4 10-11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 14h5v5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></header><nav class="tabs" aria-label="Course editing steps">${tabDefs.map(([id,label])=>`<button class="tab ${tab===id?'active':''}" type="button" role="tab" aria-selected="${tab===id}" data-action="tab" data-tab="${id}">${label}</button>`).join('')}</nav><div class="tab-panel" role="tabpanel">${panel}</div></div>`;}
+  function notebookPreviewMarkup(lesson) {
+    if (!lesson) return '';
+    const notebook = lesson.notebook && typeof lesson.notebook === 'object' ? lesson.notebook : {};
+    const isBollingerCourse = currentCourse()?.slug === 'understand-bollinger-bands';
+    let heading = String(notebook.title || '').trim();
+    const genericHeadings = ['', 'Your Trading Notebook', 'Before you make the call', 'Before treating a touch as a setup'];
+    if (genericHeadings.includes(heading)) {
+      heading = isBollingerCourse ? 'Before treating a touch as a setup' : 'Before you make the call';
+    }
+    const defaultPrompts = [
+      {label:'Observe',text:'Describe the evidence visible in the chart.'},
+      {label:'Interpret',text:'State one possible reading and a reasonable alternative.'},
+      {label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}
+    ];
+    const bollingerPrompts = [
+      {label:'Describe',text:'Where is price relative to the bands and middle line?'},
+      {label:'Interpret',text:'Does the structure look like a range, a trend or a transition? What is your alternative explanation?'},
+      {label:'Test',text:'What future price behaviour would strengthen or weaken your view?'}
+    ];
+    const hasPrompts = Array.isArray(notebook.prompts) && notebook.prompts.length > 0;
+    let prompts = hasPrompts
+      ? notebook.prompts.filter(prompt => prompt && typeof prompt === 'object')
+      : defaultPrompts;
+    const matchesGenericDefaults = prompts.length === defaultPrompts.length && prompts.every((prompt,index) =>
+      String(prompt.label || '').trim().replace(/[.:]+$/, '') === defaultPrompts[index].label &&
+      String(prompt.text || '').trim() === defaultPrompts[index].text
+    );
+    if (isBollingerCourse && (!hasPrompts || matchesGenericDefaults)) prompts = bollingerPrompts;
+    return '<section class="preview-trading-notebook" aria-label="Your Trading Notebook">' +
+      '<aside class="preview-notebook-index"><span>KEEP<br>IN VIEW</span><strong>01</strong></aside>' +
+      '<div class="preview-notebook-content">' +
+        '<div class="preview-notebook-kicker">YOUR TRADING NOTEBOOK</div>' +
+        '<h4>' + esc(heading) + '</h4>' +
+        '<ol>' + prompts.map((prompt,index) => '<li><span class="preview-notebook-number">' +
+          String(index+1).padStart(2, '0') + '</span><p><strong>' +
+          esc(String(prompt.label || 'Reflect').replace(/[.:]+$/, '')) + '.</strong> ' +
+          esc(String(prompt.text || '')) + '</p></li>').join('') + '</ol>' +
+      '</div>' +
+    '</section>' +
+    '<button class="preview-notebook-examples-button" type="button" data-action="preview-chart-examples">Work through the chart examples <span aria-hidden="true">↗</span></button>';
+  }
+  function lessonQualityMarkup(lesson) {
+    const content = String(lesson.content || '');
+    const headings = [...content.matchAll(/^#{1,6}\s+(.+)$/gm)].map(match => match[1].toLowerCase());
+    const hasVisual = /!\[[^\]]*\]\([^)]+\)|\[\[(?:image-group|teaching-figure):/.test(content);
+    const hasExamples = /worked|compar|case study|near miss|failed|counterexample|chart example/.test(headings.join(' '));
+    const hasPractice = (Array.isArray(lesson.questions) && lesson.questions.length > 0) || /practice|apply|test your reading|learner task|decision exercise/.test(headings.join(' '));
+    const hasNotebook = Boolean(lesson.notebook && Array.isArray(lesson.notebook.prompts) && lesson.notebook.prompts.some(p => p && String(p.text || '').trim()));
+    const hasReflection = Boolean(String(lesson.reflectionPrompt === undefined ? 'default' : lesson.reflectionPrompt || '').trim());
+    const rows = [
+      [hasVisual, 'Worked visual', 'Add a chart or teaching figure when the concept benefits from visual evidence.'],
+      [hasExamples, 'Worked or contrasting example', 'Check that the learner can compare outcomes, not only read a definition.'],
+      [hasPractice, 'Learner practice', 'Include a decision task or structured question when useful.'],
+      [hasNotebook, 'Notebook prompts', 'Use prompts that fit this course topic rather than generic boilerplate.'],
+      [hasReflection, 'First reading / model reasoning', 'Add an optional reflection and a useful explanation of the reasoning.']
+    ];
+    return '<section class="related-course-box"><h4>Lesson quality review · suggestions, not requirements</h4><p>Use judgement: this checklist is meant to catch omissions, not force every lesson into the same shape.</p><ul class="lesson-quality-list">' +
+      rows.map(([ok, title, hint]) => '<li><strong>' + (ok ? '✓ ' : '○ ') + esc(title) + '</strong><span>' + esc(ok ? 'Reviewed' : hint) + '</span></li>').join('') +
+      '</ul></section>';
+  }
+
+  function reflectionPreviewMarkup(lesson) {
+    if (!lesson) return '';
+    const prompt = lesson.reflectionPrompt === undefined
+      ? 'Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view.'
+      : String(lesson.reflectionPrompt || '');
+    const reasoning = lesson.reflectionModelReasoning === undefined
+      ? 'A careful reading separates visible evidence from interpretation, considers a reasonable alternative, and names the evidence that would strengthen or weaken the interpretation.'
+      : String(lesson.reflectionModelReasoning || '');
+    const notes = String(lesson.reflectionChartNotes || '');
+    if (!prompt && !reasoning && !notes) return '';
+    return '<section class="related-course-box tt-guided-reflection"><p class="eyebrow">Make your first reading</p><h3>Record your reasoning first</h3>' +
+      (prompt ? '<p>' + esc(prompt) + '</p><label for="builder-reflection-response">Your first reading · local preview only</label><textarea id="builder-reflection-response" rows="4" placeholder="Your reflection is not sent to the Academy from this local preview."></textarea>' : '') +
+      (notes ? '<details><summary>Chart-reading notes</summary><p>' + esc(notes) + '</p></details>' : '') +
+      (reasoning ? '<details><summary>Compare with the model reasoning</summary><p>' + esc(reasoning) + '</p></details>' : '') +
+      '</section>';
+  }
+
+  function previewFields(c){const mods=c.modules.map((m,mi)=>({m,mi}));const lesson=currentLesson();return `<div class="section-intro"><h3>Preview as a learner</h3><p>Review the latest editing state before you publish. This preview is deliberately separate from the live member course.</p></div><div class="preview-split"><article class="preview-article"><div class="course-chip">${esc(c.category)} · ${esc(c.level)}</div><h2>${esc(c.title)}</h2><p class="summary">${esc(c.summary)}</p>${c.description?.trim()?'<div class="preview-body course-description-preview">'+renderMarkdown(c.description)+'</div>':''}<div class="pill">${allLessons(c).length} lessons · ${esc(c.duration)}</div>${c.outcomes?.length?`<section class="preview-outcomes"><h3>What learners will practise</h3><ul>${c.outcomes.map(outcome=>`<li>${esc(outcome)}</li>`).join("")}</ul></section>`:""}${lesson?`<hr style="border:0;border-top:1px solid var(--line);margin:24px 0"><div class="eyebrow">${esc(currentModule()?.title||'Module')} / Lesson</div><h2 style="font-size:28px">${esc(lesson.title)}</h2><p class="summary">${esc(lesson.summary)}</p><div class="preview-body" data-preview-lesson-content>${renderMarkdown(lesson.content)}</div>${notebookPreviewMarkup(lesson)}${reflectionPreviewMarkup(lesson)}${lesson.questions.length?`<div class="practice-preview"><h4>Test your reading</h4>${lesson.questions.map((q,qi)=>`<div style="margin-bottom:16px">${questionImageMarkup(q,lesson)}<strong style="font-size:11px">${esc(q.prompt)}</strong>${q.options.map((op,oi)=>`<label class="practice-preview-answer" data-preview-option="${esc(q.id)}" data-option-index="${oi}"><input type="radio" name="pv-${esc(q.id)}" value="${oi}" data-preview-question="${esc(q.id)}"> <span>${esc(op)}</span><span class="answer-result"></span></label>`).join('')}<button class="btn small" type="button" data-action="check-preview" data-id="${esc(q.id)}">Check answer</button><div class="feedback" id="feedback-${esc(q.id)}"></div></div>`).join('')}</div>`:''}`:'<p class="summary">No lesson selected yet.</p>'}</article><aside class="preview-lesson-nav"><h4>Course outline</h4><div>${mods.map(({m,mi})=>`<div style="font-size:10px;font-weight:800;color:var(--muted);padding:9px 6px 4px">${esc(m.title)}</div>${m.lessons.map((item,li)=>`<button type="button" class="${item.id===lesson?.id?'selected':''}" data-action="preview-select-lesson" data-module-id="${esc(m.id)}" data-id="${esc(item.id)}">${mi+1}.${li+1} ${esc(item.title)}</button>`).join('')}`).join('')}</div><div class="helper-note">Draft preview only. Lesson access, authentication, progress and paid content protection are enforced by Django in production.</div></aside></div>`;}
+  const previewFieldsBeforeQualityChecks = previewFields;
+  previewFields = function(c) {
+    const html = previewFieldsBeforeQualityChecks(c);
+    const lesson = currentLesson();
+    return lesson ? html.replace("</article>", lessonQualityMarkup(lesson) + "</article>") : html;
+  };
+  function renderMarkdown(src){const safe=esc(src);return safe.split(/\n{2,}/).map(block=>{const t=block.trim();if(!t)return'';const h=t.match(/^(#{1,4})\s+(.+)$/);if(h)return `<h3>${h[2]}</h3>`;if(/^[-*]\s/m.test(t))return `<ul>${t.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>`<li>${x.replace(/^[-*]\s+/,'')}</li>`).join('')}</ul>`;return `<p>${t.replace(/\n/g,'<br>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>')}</p>`;}).join('');}
+  function renderCatalogue(){const cards=[...demoOffers,...comingSoonOffers];state.courses.filter(c=>c.publishedSnapshot).forEach(c=>{const p=c.publishedSnapshot;cards.push({id:c.id,title:p.title,category:p.category||'MICRO-COURSE',summary:p.summary,price:p.price||'Price not configured',state:'Published from builder'});});$('#catalogueGrid').innerHTML=cards.map(item=>`<article class="offer-card"><div class="offer-art"></div><div class="offer-body"><div class="offer-kicker">${esc(item.category)}</div><h3>${esc(item.title)}</h3><p>${esc(item.summary)}</p><div class="offer-bottom"><div><div class="offer-price">${esc(item.price||'Details soon')}</div><div class="offer-state">${esc(item.state)}</div></div><span class="pill ${item.state==='Coming soon'?'status':'published'}">${item.state==='Coming soon'?'Coming soon':'Published'}</span></div></div></article>`).join('');}
+  function render(){renderSidebar();renderEditor();renderCatalogue();renderHeaderState();}
+  function selectCourse(id){if(academyReady&&currentCourse()&&currentCourse().id!==id){clearTimeout(saveTimer);clearTimeout(academySaveTimer);saveCurrentToAcademy(false,false).catch(error=>toast('Could not save the previous draft: '+error.message));}state.selectedCourseId=id;const c=currentCourse();if(c){state.selectedModuleId=c.modules[0]?.id||null;state.selectedLessonId=c.modules[0]?.lessons[0]?.id||null;}state.view='editor';previewMode=false;render();}
+  function saveDraft(){const c=currentCourse();if(!c)return;c.updatedAt=nowText();if(c.status==='published')c.status='draft-update';persist(true);render();}
+  function publishCourse(){const c=currentCourse();if(!c)return;const errs=[];if(!c.title.trim())errs.push('Add a course title.');if(!c.summary.trim())errs.push('Add a short course summary.');if(!c.modules.length)errs.push('Add at least one module.');if(!allLessons(c).length)errs.push('Add at least one lesson.');if(allLessons(c).some(l=>!l.title.trim()||!l.content.trim()))errs.push('Every lesson needs a title and lesson content.');if(errs.length){toast(errs[0]);if(!c.title.trim()||!c.summary.trim())state.tab='overview';else if(!allLessons(c).length)state.tab='curriculum';else state.tab='lesson';render();return;}const snapshot=JSON.parse(JSON.stringify(c));snapshot.status='published';snapshot.publishedSnapshot=null;snapshot.updatedAt=nowText();c.status='published';c.publishedAt=nowText();c.updatedAt=nowText();c.publishedSnapshot=snapshot;persist(false);state.tab='overview';render();$('#catalogueSection').scrollIntoView({behavior:'smooth',block:'start'});toast('Published in this preview. The course now appears under Courses offered.');}
+  function duplicateCourse(){const c=currentCourse();if(!c)return;const copy=JSON.parse(JSON.stringify(c));copy.id=uid('course');copy.title=(c.title||'Untitled course')+' — Copy';copy.slug=slugify(copy.title);copy.status='draft';copy.publishedAt=null;copy.publishedSnapshot=null;copy.createdAt=nowText();copy.updatedAt='Not saved yet';copy.modules.forEach(m=>{m.id=uid('module');m.lessons.forEach(l=>{l.id=uid('lesson');l.questions.forEach(q=>q.id=uid('q'));});});state.courses.unshift(copy);state.selectedCourseId=copy.id;state.selectedModuleId=copy.modules[0]?.id||null;state.selectedLessonId=copy.modules[0]?.lessons[0]?.id||null;state.tab='overview';persist(false);render();toast('Course duplicated as a new draft.');}
+  function moveItem(arr,id,direction){const i=arr.findIndex(x=>x.id===id);const j=i+direction;if(i<0||j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];}
+  function handleAction(action,el){const c=currentCourse();if(!c&&action!=='new-course')return;const m=c?currentModule():null;const l=c?currentLesson():null;const id=el?.dataset?.id;switch(action){case'delete-course':if(c)deleteCourse(c);break;case'select-course':selectCourse(id);break;case'tab':state.tab=el.dataset.tab;renderEditor();renderHeaderState();break;case'save-draft':saveDraft();break;case'new-course':{createNewCourseDraft(el);break;}case'add-regional-block':{if(!Array.isArray(l.regionalBlocks))l.regionalBlocks=[];l.regionalBlocks.push({id:uid('regional'),title:'Regional content block',baseContent:'',variants:[]});state.tab='regional';persist(false);renderEditor();toast('Regional content block created. Add global copy and any audience versions, then place it in the lesson.');break;}case'add-regional-variant':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(id));if(!block)break;if(!Array.isArray(block.variants))block.variants=[];block.variants.push({id:uid('variant'),scope:'country',code:'IN',content:'',hidden:false});persist(false);renderEditor();break;}case'remove-regional-variant':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(el.dataset.blockId));if(!block)break;block.variants=(block.variants||[]).filter(item=>String(item.id)!==String(id));persist(false);renderEditor();break;}case'remove-regional-block':{l.regionalBlocks=(l.regionalBlocks||[]).filter(item=>String(item.id)!==String(id));const token='[[regional-block:'+String(id)+']]';l.content=String(l.content||'').split(token).join('').replace(/\n{3,}/g,'\n\n');persist(false);renderEditor();toast('Regional content block and its placement were removed.');break;}case'insert-regional-block':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(id));if(!block)break;insertLessonContentAtCaret(l,'[[regional-block:'+block.id+']]',true);toast('Regional content block placed in the lesson at the saved cursor position.');break;}case'insert-regional-image':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(id));if(!block)break;const card=el.closest('.regional-block-card');const imagePicker=el.dataset.variantId?card?.querySelector('[data-regional-image-picker][data-variant-id="'+CSS.escape(el.dataset.variantId)+'"]'):card?.querySelector('[data-regional-image-picker]:not([data-variant-id])');const imageId=imagePicker?.value||'';if(!imageId){toast('Choose an uploaded image first.');break;}const images=Array.isArray(l.images)?l.images:(l.image?[l.image]:[]);const image=images.find(item=>String(item.id)===imageId||String(item.assetUuid||'')===imageId);if(!image){toast('That image is not in this lesson.');break;}const target=el.dataset.variantId?(block.variants||[]).find(item=>String(item.id)===String(el.dataset.variantId)):block;const field=el.dataset.variantId?'content':'baseContent';if(!target)break;const markdown='!['+String(image.alt||image.title||'Course figure').replace(/\]/g,'')+'](asset://'+String(image.id||image.assetUuid)+')';target[field]=String(target[field]||'');if(target[field]&&!/\s$/.test(target[field]))target[field]+='\n\n';target[field]+=markdown;persist(false);renderEditor();toast('Image reference inserted into the selected regional version.');break;}case'add-module':{const nm=makeModule(c.modules.length+1);nm.title=`Module ${String(c.modules.length+1).padStart(2,'0')} — New module`;c.modules.push(nm);state.selectedModuleId=nm.id;state.selectedLessonId=nm.lessons[0].id;state.tab='curriculum';persist(false);render();break;}case'select-module':state.selectedModuleId=id;state.selectedLessonId=currentModule()?.lessons[0]?.id||null;renderEditor();break;case'select-lesson':state.selectedModuleId=el.dataset.moduleId;state.selectedLessonId=id;state.tab='curriculum';renderEditor();break;case'add-lesson':{const mod=c.modules.find(x=>x.id===id);if(!mod)break;const nl=makeLesson(mod.lessons.length+1);nl.title=`Lesson ${c.modules.indexOf(mod)+1}.${mod.lessons.length+1} — New lesson`;mod.lessons.push(nl);state.selectedModuleId=mod.id;state.selectedLessonId=nl.id;state.tab='curriculum';persist(false);render();break;}case'delete-module':{if(c.modules.length<=1)break;const i=c.modules.findIndex(x=>x.id===id);c.modules.splice(i,1);state.selectedModuleId=c.modules[0]?.id||null;state.selectedLessonId=c.modules[0]?.lessons[0]?.id||null;persist(false);render();break;}case'delete-lesson':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);if(!mod||mod.lessons.length<=1)break;mod.lessons=mod.lessons.filter(x=>x.id!==id);state.selectedLessonId=mod.lessons[0].id;state.selectedModuleId=mod.id;persist(false);render();break;}case'move-module-up':moveItem(c.modules,id,-1);persist(false);render();break;case'move-module-down':moveItem(c.modules,id,1);persist(false);render();break;case'move-lesson-up':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);moveItem(mod.lessons,id,-1);persist(false);render();break;}case'move-lesson-down':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);moveItem(mod.lessons,id,1);persist(false);render();break;}case'go-lesson':state.tab='lesson';renderEditor();break;case'go-questions':state.tab='questions';renderEditor();break;case'go-curriculum':state.tab='curriculum';renderEditor();break;case'add-outcome':c.outcomes.push('New learning outcome');persist(false);renderEditor();break;case'remove-outcome':c.outcomes.splice(Number(el.dataset.index),1);persist(false);renderEditor();break;case'add-question':l.questions.push(defaultQuestion());persist(false);renderEditor();break;case'remove-question':if(l.questions.length>1)l.questions=l.questions.filter(q=>q.id!==id);persist(false);renderEditor();break;case'correct-option':{const q=l.questions.find(q=>q.id===el.dataset.qid);if(q)q.correctIndex=Number(el.dataset.index);schedulePersist();break;}case'insert-image-reference':if(l.image){l.content+=`\n\n![${l.image.alt||'Course figure'}](asset://${l.image.id||uid('asset')})\n`;state.tab='lesson';persist(false);renderEditor();toast('Image reference added to lesson Markdown.');}break;case'remove-image':l.image=null;persist(false);renderEditor();break;case'preview-select-lesson':state.selectedModuleId=el.dataset.moduleId;state.selectedLessonId=id;renderEditor();break;case'check-preview':{const q=l.questions.find(q=>q.id===id);const checked=$(`input[name="pv-${CSS.escape(id)}"]:checked`);const box=$(`#feedback-${CSS.escape(id)}`);if(!checked){toast('Select an answer first.');break;}const optionLabels=$('#workspace').querySelectorAll('[data-preview-option="'+CSS.escape(id)+'"]');optionLabels.forEach(label=>{const optionIndex=Number(label.dataset.optionIndex);const marker=label.querySelector('.answer-result');label.classList.remove('is-correct','is-incorrect');if(marker)marker.textContent='';if(optionIndex===Number(q.correctIndex)){label.classList.add('is-correct');if(marker)marker.textContent='✓ Correct answer';}else if(optionIndex===Number(checked.value)){label.classList.add('is-incorrect');if(marker)marker.textContent='✕ Your answer';}});box.classList.add('show');const isRight=Number(checked.value)===Number(q.correctIndex);box.textContent=(isRight?'Correct. ':'Incorrect. The correct answer is highlighted in green. ')+q.explanation;break;}}
+  }
+  function updateField(el){const entity=el.dataset.entity;const field=el.dataset.field;const c=currentCourse();const m=currentModule();const l=currentLesson();const val=el.type==='checkbox'?el.checked:(el.type==='number'?Math.max(1,Number(el.value)||1):el.value);if(entity==='course'){c[field]=val;if(field==='title'&&(!c.slug||c.slug===slugify(c._previousTitle||'')))c.slug=slugify(val);if(field==='title'){c._previousTitle=val;const slugInput=$('[data-entity=\"course\"][data-field=\"slug\"]');if(slugInput&&document.activeElement!==slugInput)slugInput.value=c.slug;}}else if(entity==='module'&&m)m[field]=val;else if(entity==='lesson'&&l)l[field]=val;else if(entity==='question'&&l){const q=l.questions.find(q=>q.id===el.dataset.qid);if(q)q[field]=val;}else if(entity==='option'&&l){const q=l.questions.find(q=>q.id===el.dataset.qid);if(q)q.options[Number(el.dataset.index)]=val;}else if(entity==='image'&&l.image)l.image[field]=val;else if(entity==='outcome')c.outcomes[Number(el.dataset.index)]=val;else if(entity==='notebook'&&l){if(!l.notebook)l.notebook={title:'Your Trading Notebook',prompts:[]};l.notebook[field]=val;}else if(entity==='notebook-prompt'&&l){if(!l.notebook)l.notebook={title:'Your Trading Notebook',prompts:[]};const prompt=l.notebook.prompts[Number(el.dataset.index)];if(prompt)prompt[field]=val;}if(entity==='course'&&field==='title'){const title=$('#workspace h2');if(title)title.textContent=val||'Untitled course';}if((entity==='notebook'||entity==='notebook-prompt')&&l){const notebookPreview=$('[data-notebook-preview]');if(notebookPreview)notebookPreview.innerHTML=notebookPreviewMarkup(l);}schedulePersist();}
+
+  function createNewCourseDraft(trigger) {
+    if (trigger?.dataset.courseCreationPending === '1') return;
+    const originalLabel = trigger?.textContent || '';
+    if (trigger) {
+      trigger.dataset.courseCreationPending = '1';
+      trigger.disabled = true;
+      trigger.setAttribute('aria-busy', 'true');
+      trigger.textContent = 'Creating course…';
+    }
+    toast('Opening a new course…');
+    window.setTimeout(() => {
+      try {
+        const course = makeCourse();
+        state.courses.unshift(course);
+        state.selectedCourseId = course.id;
+        state.selectedModuleId = course.modules[0]?.id || null;
+        state.selectedLessonId = course.modules[0]?.lessons[0]?.id || null;
+        state.view = 'editor';
+        previewMode = false;
+        state.tab = 'overview';
+        markDirty();
+
+        try {
+          state.savedAt = nowText();
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          state.storageAvailable = true;
+        } catch (storageError) {
+          state.storageAvailable = false;
+          console.warn('The new course is open, but the browser could not save its local copy.', storageError);
+        }
+
+        try {
+          renderSidebar();
+        } catch (sidebarError) {
+          console.error('Could not refresh the course list.', sidebarError);
+        }
+        renderEditor();
+        renderHeaderState();
+        const title = $('#courseTitle');
+        toast('New draft created. Add details and save when ready.');
+        if (title) {
+          title.focus({preventScroll: true});
+        }
+        $('#workspace')?.scrollIntoView({behavior: 'auto', block: 'start'});
+      } catch (error) {
+        console.error('Could not open a new course draft.', error);
+        toast('Could not open a new course. Please try again. ' + String(error?.message || ''));
+      } finally {
+        if (trigger?.isConnected) {
+          trigger.disabled = false;
+          trigger.removeAttribute('aria-busy');
+          delete trigger.dataset.courseCreationPending;
+          trigger.textContent = originalLabel;
+        }
+      }
+    }, 0);
+  }
+
+  document.addEventListener('click',e=>{const el=e.target.closest('[data-action]');if(el){e.preventDefault();handleAction(el.dataset.action,el);}});
+  document.addEventListener('input',e=>{const el=e.target;if(el.matches('[data-entity][data-field], [data-entity="outcome"], [data-entity="option"]'))updateField(el);});
+  document.addEventListener('change',e=>{const el=e.target;if(el.matches('[data-entity][data-field], [data-entity="outcome"], [data-entity="option"]'))updateField(el);});
+   document.addEventListener('change',e=>{const el=e.target;if(!el.matches('[data-correct-option]'))return;const l=currentLesson();const q=(l?.questions||[]).find(q=>String(q.id)===String(el.dataset.qid));if(!q)return;q.correctIndex=Number(el.value);persist(false);renderEditor();toast('Option '+(Number(el.value)+1)+' marked as the correct answer.');});
+  $('#courseSearch').addEventListener('input',renderSidebar);
+  document.addEventListener('click',event=>{const target=event.target instanceof Element?event.target:null;const button=target?.closest('#newCourseButton, [data-action="new-course"]');if(!button)return;event.preventDefault();event.stopImmediatePropagation();createNewCourseDraft(button);},true);
+  $('#duplicateCourseButton').addEventListener('click',duplicateCourse);
+  $('#editPublishedCourseButton').addEventListener('click',loadPublishedCourse);
+  $('#saveButton').addEventListener('click',()=>saveDraft());
+  $('#previewButton').addEventListener('click',()=>{const previewWindow=window.open('about:blank','_blank');if(!previewWindow){toast('Allow pop-ups for this site to open the website preview.');return;}try{previewWindow.opener=null;previewWindow.document.title='TradeThesis · Preparing website preview';previewWindow.document.body.innerHTML='<p style="font-family:Arial,sans-serif;padding:24px;color:#355a46">Saving the draft and opening the Academy website preview…</p>';}catch(_){}clearTimeout(academySaveTimer);saveCurrentToAcademy(false).then(result=>{if(!result?.website_preview_url)throw new Error('The Academy did not return a website preview URL.');const audience=$('#previewAudienceSelect')?.value||'GLOBAL';const previewUrl=new URL(result.website_preview_url,window.location.origin);if(audience&&audience!=='GLOBAL')previewUrl.searchParams.set('preview_audience',audience);previewWindow.location.replace(previewUrl.toString());toast('Opened the saved draft in the real Academy website template for '+(audience==='GLOBAL'?'the global default':audience)+'.');}).catch(error=>{try{previewWindow.close();}catch(_){}toast('Could not open website preview: '+error.message);});});
+  $('#publishButton').addEventListener('click',()=>publishCourse());
+  $('#backToBuilder').addEventListener('click',()=>$('#workspace').scrollIntoView({behavior:'smooth',block:'start'}));
+  document.addEventListener('change',event=>{if(event.target.id!=='imageUpload')return;const file=event.target.files&&event.target.files[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)){toast('Choose a JPG, PNG or WebP image.');event.target.value='';return;}if(file.size>1.5*1024*1024){toast('This preview limits images to 1.5 MB.');event.target.value='';return;}const reader=new FileReader();reader.onload=()=>{const l=currentLesson();if(!l)return;l.image={id:uid('asset'),name:file.name,alt:$('#imageAlt')?.value||'',data:String(reader.result)};persist(false);renderEditor();toast('Image added to this lesson draft.');};reader.onerror=()=>toast('The image could not be read.');reader.readAsDataURL(file);});
+  // Authoring enhancements: Markdown reference, multi-image upload, alt text and captions.
+  const baseLessonFields = lessonFields;
+  lessonFields = function(l) {
+    const html = baseLessonFields(l);
+    return !l ? html : html + '<section class="markdown-guide"><h4>Visual editor tips</h4><p>Select text and use the toolbar to apply formatting. Use Figures for charts, Regional content for country/region differences, and the companion-course controls for managed course cards. The saved lesson remains compatible with the canonical Learning Room renderer.</p></section>';
+  };
+  const basePreviewFields = previewFields;
+  previewFields = function(c) {
+    let html = basePreviewFields(c);
+    const lesson = currentLesson();
+    if (!lesson) return html;
+    const video = String(lesson.videoUrl || '').trim();
+    if (video) {
+      const isFile = /\.(mp4|webm|ogg)(\?.*)?$/i.test(video);
+      const videoHtml = isFile ? '<figure style="margin:22px 0"><video controls preload="metadata" style="width:100%;max-height:420px" src="' + esc(video) + '">Your browser does not support video playback.</video></figure>' : '<p><a href="' + esc(video) + '" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a></p>';
+      html = html.replace('<div class="preview-body" data-preview-lesson-content>', videoHtml + '<div class="preview-body" data-preview-lesson-content>');
+    }
+    const images = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
+    const authoredContent = String(lesson.content || '');
+    const imageGroups = Array.isArray(lesson.imageGroups) ? lesson.imageGroups : [];
+    const unplaced = images.filter(function(image) {
+      const ids = [image.id, image.assetUuid].filter(Boolean).map(String);
+      const directReference = ids.some(function(id) { return authoredContent.includes('asset://' + id); });
+      const groupedReference = imageGroups.some(function(group) {
+        return authoredContent.includes('[[image-group:' + group.id + ']]')
+          && (Array.isArray(group.imageIds) ? group.imageIds : [])
+            .some(function(groupImageId) { return ids.includes(String(groupImageId)); });
+      });
+      return !directReference && !groupedReference;
+    });
+    if (unplaced.length) {
+      const figures = '<div>' + unplaced.map(function(image) { return '<figure style="margin:24px 0"><img src="' + image.data + '" alt="' + esc(image.alt || '') + '" style="display:block;max-width:100%;max-height:460px;margin:auto;border-radius:8px"><figcaption style="font-size:11px;color:var(--muted);line-height:1.6;margin-top:8px;text-align:center">' + esc(image.caption || '') + '</figcaption></figure>'; }).join('') + '</div>';
+      html = html.replace('</article>', figures + '</article>');
+    }
+    return html;
+  };
+  renderMarkdown = function(src) {
+    const inline = value => esc(String(value ?? ''))
+      .replace(/\x60([^\x60]+)\x60/g, '<code>$1</code>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/~~(.+?)~~/g, '<del>$1</del>')
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    const splitTableRow = row => row.trim()
+      .replace(/^\|/, '')
+      .replace(/\|$/, '')
+      .replace(/\\\|/g, '\uE000')
+      .split('|')
+      .map(cell => cell.replace(/\uE000/g, '|').trim());
+    const isTableDivider = row => {
+      const cells = splitTableRow(row);
+      return cells.length > 1 && cells.every(cell => /^:?-{3,}:?$/.test(cell));
+    };
+    const renderTable = block => {
+      const rows = block.split('\n').map(row => row.trim()).filter(Boolean);
+      if (rows.length < 2 || !rows[0].includes('|') || !isTableDivider(rows[1])) return '';
+      const headers = splitTableRow(rows[0]);
+      const dividers = splitTableRow(rows[1]);
+      if (headers.length < 2 || headers.length !== dividers.length) return '';
+      const alignments = dividers.map(cell =>
+        cell.startsWith(':') && cell.endsWith(':') ? 'center' :
+        cell.endsWith(':') ? 'right' :
+        cell.startsWith(':') ? 'left' : ''
+      );
+      const cellHtml = (cell, tag, index) => {
+        const align = alignments[index] ? ' align="' + alignments[index] + '"' : '';
+        return '<' + tag + align + '>' + inline(cell) + '</' + tag + '>';
+      };
+      const head = '<thead><tr>' + headers.map((cell, i) => cellHtml(cell, 'th', i)).join('') + '</tr></thead>';
+      const bodyRows = rows.slice(2).map(row => {
+        const cells = splitTableRow(row);
+        while (cells.length < headers.length) cells.push('');
+        return '<tr>' + headers.map((_, i) => cellHtml(cells[i] ?? '', 'td', i)).join('') + '</tr>';
+      }).join('');
+      const body = bodyRows ? '<tbody>' + bodyRows + '</tbody>' : '';
+      return '<div class="lesson-table-wrap" role="region" aria-label="Scrollable information table" tabindex="0"><table>' + head + body + '</table></div>';
+    };
+    const lines = String(src || '').replace(/\r\n?/g, '\n').split('\n');
+    const output = [];
+    const headingMatch = line => line.trim().match(/^#{1,6}\s+(.+?)\s*#*\s*$/);
+    const isHorizontalRule = line => /^(?:-{3,}|\*{3,}|_{3,})\s*$/.test(line.trim());
+    const isTableAt = index => Boolean(
+      lines[index] && lines[index].includes('|') &&
+      lines[index + 1] && isTableDivider(lines[index + 1])
+    );
+    const isFence = line => line.trim().match(/^(\x60{3,}|~{3,})\s*([a-z0-9_-]*)\s*$/i);
+    const isBlockStart = index => {
+      const line = lines[index] || '';
+      return Boolean(
+        headingMatch(line) ||
+        isHorizontalRule(line) ||
+        /^\s*>\s?/.test(line) ||
+        /^\s*[-*+]\s+/.test(line) ||
+        /^\s*\d+[.)]\s+/.test(line) ||
+        isFence(line) ||
+        isTableAt(index)
+      );
+    };
+    const renderParagraph = paragraphLines => {
+      const value = paragraphLines.join('\n').trim();
+      if (!value) return '';
+      const table = renderTable(value);
+      if (table) return table;
+      return '<p>' + inline(value).replace(/\n/g, '<br>') + '</p>';
+    };
+
+    for (let index = 0; index < lines.length;) {
+      const line = lines[index];
+      const trimmed = line.trim();
+      if (!trimmed) {
+        index += 1;
+        continue;
+      }
+
+      const fence = isFence(line);
+      if (fence) {
+        const codeLines = [];
+        const marker = fence[1];
+        index += 1;
+        while (index < lines.length && !lines[index].trim().startsWith(marker)) {
+          codeLines.push(lines[index]);
+          index += 1;
+        }
+        if (index < lines.length) index += 1;
+        const language = fence[2] && /^[a-z0-9_-]+$/i.test(fence[2])
+          ? ' class="language-' + esc(fence[2]) + '"'
+          : '';
+        output.push('<pre><code' + language + '>' + esc(codeLines.join('\n')) + '</code></pre>');
+        continue;
+      }
+
+      const heading = headingMatch(line);
+      if (heading) {
+        const level = line.trim().match(/^(#{1,6})/)[1].length;
+        output.push('<h' + level + '>' + inline(heading[1]) + '</h' + level + '>');
+        index += 1;
+        continue;
+      }
+
+      if (isHorizontalRule(trimmed)) {
+        output.push('<hr>');
+        index += 1;
+        continue;
+      }
+
+      if (isTableAt(index)) {
+        const tableLines = [];
+        while (index < lines.length && lines[index].trim() && lines[index].includes('|')) {
+          tableLines.push(lines[index]);
+          index += 1;
+        }
+        const table = renderTable(tableLines.join('\n'));
+        output.push(table || renderParagraph(tableLines));
+        continue;
+      }
+
+      if (/^\s*>\s?/.test(line)) {
+        const quoteLines = [];
+        while (index < lines.length && /^\s*>\s?/.test(lines[index])) {
+          quoteLines.push(inline(lines[index].replace(/^\s*>\s?/, '')));
+          index += 1;
+        }
+        output.push('<blockquote>' + quoteLines.join('<br>') + '</blockquote>');
+        continue;
+      }
+
+      const unordered = /^\s*[-*+]\s+/.test(line);
+      const ordered = /^\s*\d+[.)]\s+/.test(line);
+      if (unordered || ordered) {
+        const items = [];
+        while (index < lines.length) {
+          const current = lines[index];
+          const item = unordered
+            ? current.match(/^\s*[-*+]\s+(.+)$/)
+            : current.match(/^\s*\d+[.)]\s+(.+)$/);
+          if (!item) break;
+          items.push('<li>' + inline(item[1]) + '</li>');
+          index += 1;
+        }
+        const tag = ordered ? 'ol' : 'ul';
+        output.push('<' + tag + '>' + items.join('') + '</' + tag + '>');
+        continue;
+      }
+
+      const paragraphLines = [];
+      while (index < lines.length && lines[index].trim() && !(paragraphLines.length && isBlockStart(index))) {
+        paragraphLines.push(lines[index]);
+        index += 1;
+      }
+      output.push(renderParagraph(paragraphLines));
+    }
+
+    return output.join('');
+  };
+  const baseMarkdownRenderer = renderMarkdown;
+  function resolveBuilderRegionalBlocks(source, lesson, audience) {
+    const blocks = Array.isArray(lesson?.regionalBlocks) ? lesson.regionalBlocks : [];
+    const value = String(audience || 'GLOBAL').toUpperCase();
+    const isRegion = value.startsWith('REGION:');
+    const country = isRegion ? '' : value;
+    const region = isRegion ? value.split(':')[1] : ({
+      IN:'APAC',CN:'APAC',JP:'APAC',KR:'APAC',SG:'APAC',AU:'APAC',NZ:'APAC',BD:'APAC',PK:'APAC',LK:'APAC',NP:'APAC',
+      US:'NA',CA:'NA',MX:'NA',GB:'EU',DE:'EU',FR:'EU',IT:'EU',ES:'EU',NL:'EU',AE:'MENA',SA:'MENA',BR:'LATAM',ZA:'SSA'
+    }[country] || '');
+    return String(source || '').replace(/\[\[regional-block:([A-Za-z0-9_-]{1,120})\]\]/g, (token,id) => {
+      const block = blocks.find(item => String(item.id) === id);
+      if (!block) return '';
+      const variants = Array.isArray(block.variants) ? block.variants : [];
+      let selected = country && country !== 'GLOBAL'
+        ? variants.find(item => item.scope === 'country' && String(item.code || '').toUpperCase() === country)
+        : null;
+      if (!selected && region) selected = variants.find(item => item.scope === 'region' && String(item.code || '').toUpperCase() === region);
+      if (selected) return selected.hidden ? '' : String(selected.content || '');
+      return String(block.baseContent || '');
+    });
+  }
+  renderMarkdown = function(src) {
+    const lesson = currentLesson();
+    const images = Array.isArray(lesson?.images) ? lesson.images : (lesson?.image ? [lesson.image] : []);
+    const figures = [];
+    const inlineCourseCards = [];
+    const course = currentCourse();
+    const module = currentModule();
+    const moduleIndex = Math.max(0, (course?.modules || []).findIndex(item => item.id === module?.id));
+    const moduleNumber = moduleIndex + 1;
+    const moduleTitle = String(module?.title || 'Learning Room').replace(/^module\s*\d*\s*[·—–:-]?\s*/i, '').trim();
+    const moduleLabel = 'MODULE ' + moduleNumber + ' · ' + moduleTitle;
+    const courseTitleLabel = String(course?.title || 'Course');
+    const figureHeader = title =>
+      '<span class="tt-purpose-figure-head">' +
+        '<span class="tt-purpose-figure-header-top">' +
+            '<span class="tt-purpose-figure-module">' + esc(moduleLabel) + '</span>' +
+        '</span>' +
+        '<strong class="tt-purpose-figure-title">' + esc(title || 'Chart') + '</strong>' +
+      '</span>';
+    const displayTitle = image => {
+      const title = String(image?.title || '').trim();
+      const filename = String(image?.name || '').trim();
+      return title && title !== filename && !/\.(jpe?g|png|webp|gif|svg)$/i.test(title) ? title : 'Chart';
+    };
+    const compactDuplicateCourseCards = source => {
+      const original = String(source || '');
+      const matches = [...original.matchAll(/\[\[course-card:(coming-soon:)?([0-9a-fA-F-]{36})\]\]/g)];
+      const lastByCourse = new Map();
+      matches.forEach(match => lastByCourse.set((match[1] || '') + match[2].toLowerCase(), match.index));
+      let result = original;
+      for (let index = matches.length - 1; index >= 0; index--) {
+        const match = matches[index];
+        const key = (match[1] || '') + match[2].toLowerCase();
+        if (lastByCourse.get(key) !== match.index) {
+          result = result.slice(0, match.index) + result.slice(match.index + match[0].length);
+        }
+      }
+      return result.replace(/\n{3,}/g, '\n\n');
+    };
+    let prepared = compactDuplicateCourseCards(resolveBuilderRegionalBlocks(String(src || ''), lesson, $('#previewAudienceSelect')?.value || 'GLOBAL')).replace(/^\s*\[\[lesson-tab:(?:idea|examples|practice)\]\]\s*$/gim, '').replace(/!\[([^\]]*)\]\(asset:\/\/([^)]+)\)/g, function(match, alt, id) {
+      const image = images.find(function(item) { return item.id === id || item.assetUuid === id; });
+      if (!image) return match;
+      const token = 'TTFIGURETOKEN' + figures.length + 'END';
+      const title = displayTitle(image);
+      const imageHtml = image.data
+        ? '<span class="tt-purpose-figure-image"><img data-figure-zoom src="' + esc(image.data) + '" alt="' + esc(image.alt || alt || title) + '" loading="lazy" style="max-width:100%;max-height:460px"></span>'
+        : '<span class="tt-purpose-figure-missing">Image saved; preview source is not available in this browser.</span>';
+      const caption = image.caption ? '<figcaption><p>' + esc(image.caption) + '</p></figcaption>' : '';
+      figures.push('<figure class="tt-purpose-figure" data-figure-id="' + esc(id) + '">' + figureHeader(title) + '<span class="tt-purpose-figure-body">' + imageHtml + '</span>' + caption + '</figure>');
+      return '\n\n' + token + '\n\n';
+    });
+    prepared = prepared.replace(/\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]/g, function(match, id) {
+      const group = (lesson?.imageGroups || []).find(item => String(item.id) === id);
+      if (!group) return match;
+      const token = 'TTFIGURETOKEN' + figures.length + 'END';
+      const groupedImages = (group.imageIds || [])
+        .map(imageId => images.find(item => item.id === imageId || item.assetUuid === imageId))
+        .filter(Boolean);
+      const items = groupedImages.map(image => {
+        const title = displayTitle(image);
+        const imageHtml = image.data
+          ? '<span class="tt-purpose-figure-image"><img data-figure-zoom src="' + esc(image.data) + '" alt="' + esc(image.alt || title) + '" loading="lazy"></span>'
+          : '<span class="tt-purpose-figure-missing">Image saved; preview source is not available in this browser.</span>';
+        const caption = image.caption ? '<span class="tt-image-group-caption">' + esc(image.caption) + '</span>' : '';
+        return '<span class="tt-image-group-item">' + imageHtml +
+          '<span class="tt-image-group-item-heading"><span class="tt-image-group-case-id" aria-hidden="true"></span><strong class="tt-image-group-item-title">' + esc(title) + '</strong></span>' +
+          caption + '</span>';
+      }).join('');
+      const note = group.note ? '<span class="tt-purpose-figure-note">' + esc(group.note) + '</span>' : '';
+      const groupHeader = '<span class="tt-purpose-figure-head tt-image-group-head"><span class="tt-purpose-figure-header-top"><span class="tt-purpose-figure-module">' + esc(moduleLabel) + '</span><span class="tt-image-group-context" title="' + esc(courseTitleLabel) + '">' + esc(courseTitleLabel) + '</span></span><strong class="tt-purpose-figure-title">' + esc(group.title || 'Image group') + '</strong></span>';
+      const groupMarkup = groupedImages.length >= 2
+        ? '<figure class="tt-purpose-figure tt-image-group-figure" data-figure-id="' + esc(id) + '">' + groupHeader + '<span class="tt-purpose-figure-body"><span class="tt-image-group-grid">' + items + '</span>' + note + '</span></figure>'
+        : '<p class="tt-purpose-figure-missing">Select at least two uploaded images in the Images tab to complete this group.</p>';
+      figures.push(groupMarkup);
+      return '\n\n' + token + '\n\n';
+    });
+    prepared = prepared.replace(/\[\[teaching-figure:([A-Za-z0-9_-]{1,120})\]\]/g, function(match, id) {
+      const block = (lesson?.teachingFigures || []).find(item => String(item.id) === id);
+      if (!block) return match;
+      const token = 'TTFIGURETOKEN' + figures.length + 'END';
+      const title = String(block.title || 'Comparison');
+      const cards = (block.cards || []).map(card => '<span class="tt-comparison-card"><span class="tt-comparison-kicker">' + esc(card.kicker || '') + '</span><strong>' + esc(card.title || '') + '</strong><span class="tt-comparison-copy">' + esc(card.body || '') + '</span></span>').join('');
+      const note = block.note ? '<span class="tt-purpose-figure-note">' + esc(block.note) + '</span>' : '';
+      figures.push('<figure class="tt-purpose-figure tt-comparison-figure" data-figure-id="' + esc(id) + '">' + figureHeader(title) + '<span class="tt-purpose-figure-body"><span class="tt-comparison-cards">' + cards + '</span>' + note + '</span></figure>');
+      return '\n\n' + token + '\n\n';
+    });
+    prepared = prepared.replace(/\[\[course-card:(coming-soon:)?([0-9a-fA-F-]{36})\]\]/g, function(match, comingSoonPrefix, id) {
+      const isComingSoon = Boolean(comingSoonPrefix);
+      const courseRef = eligibleCompanionCourses().find(item =>
+        Boolean(item.isComingSoon) === isComingSoon &&
+        String(item.referenceId || item.id).toLowerCase() === String(id).toLowerCase()
+      );
+      const token = 'TTCOURSECARDTOKEN' + inlineCourseCards.length + 'END';
+      let cardMarkup;
+      if (courseRef) {
+        const topicLabel = value => {
+          let topic = String(value || '').trim().replace(/[.]+$/, '');
+          topic = topic.replace(/^(?:analyse|analyze|apply|assess|build|compare|describe|develop|distinguish|evaluate|explain|identify|learn|read|recognise|recognize|understand|use)\s+/i, '');
+          topic = topic.replace(/\band identify\b/i, '&').replace(/\bwith price progress\b/i, 'vs price').replace(/\bbefore interpreting it\b/i, 'before interpretation').replace(/^a clear,\s*/i, '');
+          topic = topic.replace(/\b(?:a|an|the)\b/gi, '').replace(/,/g, '').replace(/\s+/g, ' ').trim();
+          if (topic.length > 32) {
+            const clipped = topic.slice(0, 29).replace(/\s+\S*$/, '').trim();
+            topic = (clipped || topic.slice(0, 29)) + '…';
+          }
+          return topic ? topic.charAt(0).toUpperCase() + topic.slice(1) : '';
+        };
+        const topics = (courseRef.outcomes || []).filter(value => typeof value === 'string' && value.trim()).map(topicLabel).filter(Boolean).slice(0, 2);
+        const topicsMarkup = topics.length
+          ? '<div class="tt-course-preview-card__topics" aria-label="Topics covered">' + topics.map(topic => '<span>' + esc(topic) + '</span>').join('') + '</div>'
+          : '';
+        const words = String(courseRef.title || '').match(/[A-Za-z0-9]+/g) || [];
+        const markWords = words.filter(word => !/^(and|or|for|of|the|to|with)$/i.test(word));
+        const mark = markWords.length > 1 ? markWords[0].charAt(0).toUpperCase() + '/' + markWords[1].charAt(0).toUpperCase() : (markWords[0] || 'TT').slice(0, 2).toUpperCase();
+        const artSource = (String(courseRef.title || '') + ' ' + String(courseRef.category || '')).toLowerCase();
+        const artCopy = artSource.includes('volume') && artSource.includes('price') ? ['Activity', 'meets outcome']
+          : artSource.includes('support') && artSource.includes('resistance') ? ['Price', 'respects zones']
+          : artSource.includes('bollinger') || artSource.includes('volatility') ? ['Volatility', 'in context']
+          : artSource.includes('construction') ? ['Idea', 'to execution'] : ['Learn', 'in context'];
+        const modifier = isComingSoon ? ' tt-course-preview-card--coming-soon' : '';
+        const kicker = isComingSoon ? 'Coming soon' : 'Companion course';
+        const href = !isComingSoon && courseRef.slug ? '/learn/course/' + encodeURIComponent(courseRef.slug) + '/' : '';
+        const cta = isComingSoon
+          ? '<span class="tt-course-preview-card__cta" aria-label="Course not yet available">In preparation</span>'
+          : href
+            ? '<a class="tt-course-preview-card__cta" href="' + esc(href) + '" rel="noopener noreferrer">View course outline <span>↗</span></a>'
+            : '<span class="tt-course-preview-card__cta">View course outline</span>';
+        cardMarkup = '<aside class="tt-course-preview-card' + modifier + '" aria-label="Explore a related TradeThesis course">' +
+          '<div class="tt-course-preview-card__copy"><span class="tt-course-preview-card__kicker">' + kicker + '</span>' +
+          '<h3>' + esc(courseRef.title) + '</h3><p>' + esc(courseRef.summary || 'Move beyond this example and study the broader toolkit.') + '</p>' +
+          topicsMarkup + cta + '</div><div class="tt-course-preview-card__art"><span class="tt-course-preview-card__mark">' + esc(mark) + '</span>' +
+          '<small>' + esc(artCopy[0]) + '<br>' + esc(artCopy[1]) + '</small></div></aside>';
+      } else {
+        cardMarkup = '<aside class="tt-course-preview-card tt-course-preview-card--unavailable" aria-label="Course currently unavailable">' +
+          '<div class="tt-course-preview-card__copy"><span class="tt-course-preview-card__kicker">Keep learning</span>' +
+          '<h3>Course currently unavailable</h3><p>This course is not in the published catalogue right now.</p></div></aside>';
+      }
+      inlineCourseCards.push(cardMarkup);
+      return '\n\n' + token + '\n\n';
+    });
+    let html = baseMarkdownRenderer(prepared);
+    figures.forEach(function(figure, index) {
+      html = html.replace('<p>TTFIGURETOKEN' + index + 'END</p>', figure);
+    });
+    inlineCourseCards.forEach(function(card, index) {
+      const token = 'TTCOURSECARDTOKEN' + index + 'END';
+      html = html.replace('<p>' + token + '</p>', card).replace(token, card);
+    });
+    return html;
+  };
+  const baseHandleAction = handleAction;
+  function isValidCompanionCourse(course) {
+    const title = String(course?.title || '').trim();
+    const summary = String(course?.summary || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    const currentSlug = String(currentCourse()?.slug || '').trim().toLowerCase();
+    const courseSlug = String(course?.slug || '').trim().toLowerCase();
+    const placeholderTitle = /^untitled course(?:\s*\d+)?$/i.test(title) ||
+      /^(?:new micro-course draft|untitled micro-course)$/i.test(title);
+    const placeholderSummary = [
+      'add a concise course promise here.',
+      'a clear, practical description of what learners will study and why it matters.',
+      'describe the learner, what the course covers and what they can practise after completing it.'
+    ].includes(summary);
+    return !placeholderTitle && !placeholderSummary &&
+      !(currentSlug && courseSlug && currentSlug === courseSlug);
+  }
+
+  function eligibleCompanionCourses() {
+    return demoOffers.concat(comingSoonOffers).filter(isValidCompanionCourse);
+  }
+
+  function courseCardResultsHtml(query) {
+    const available = eligibleCompanionCourses();
+    const term = String(query || '').trim().toLowerCase();
+    const lesson = currentLesson();
+    const source = String(lesson?.content || '');
+    const hasReplaceableReferences = /\[\[(?:lesson|lesson-card):[0-9a-fA-F-]{36}\]\]/.test(source) ||
+      /\[\[course-card:(?:coming-soon:)?[0-9a-fA-F-]{36}\]\]/.test(source);
+    if (!available.length) {
+      return '<div class="empty-state course-card-empty"><p><strong>No eligible companion courses are available yet.</strong></p><p>The current lesson, placeholder titles and placeholder summaries are excluded. Select a real published course or announce a properly titled coming-soon course before inserting a companion card. Nothing is published automatically.</p></div>';
+    }
+    const matches = available.filter(course => [
+      course.title, course.summary, course.category, course.level, course.duration,
+      ...(Array.isArray(course.outcomes) ? course.outcomes : [])
+    ].join(' ').toLowerCase().includes(term));
+    if (!matches.length) {
+      return '<p class="microcopy">No available courses match this search. Check the title or choose a course whose publication/coming-soon state is eligible.</p>';
+    }
+    return '<div class="related-course-list">' + matches.slice(0, 8).map(course =>
+      '<article class="related-course-item course-card-option"><div class="course-card-option-copy">' +
+      '<strong>' + esc(course.title) + '</strong>' +
+      '<span class="related-meta">' + (course.isComingSoon ? 'Coming soon' : 'Published in Academy') +
+      (course.category ? ' · ' + esc(course.category) : '') + '</span>' +
+      '<span>' + esc(course.summary || 'Move beyond this example and study the broader toolkit.') + '</span></div>' +
+      '<div class="course-card-option-actions">' +
+      '<button class="btn small primary" type="button" data-action="insert-course-card" data-id="' + esc(course.id) + '">' +
+      (course.isComingSoon ? 'Insert coming-soon card' : 'Insert Option 4 card') + '</button>' +
+      (hasReplaceableReferences ? '<button class="btn small secondary" type="button" data-action="replace-course-card-and-remove-links" data-id="' + esc(course.id) + '">Keep one card here &amp; clean up</button>' : '') +
+      '</div></article>'
+    ).join('') + '</div>' +
+    (matches.length > 8 ? '<p class="help">Showing 8 of ' + matches.length + ' matches. Refine the search to find another course.</p>' : '');
+  }
+  function renderCourseCardResults(query, container) {
+    if (container) container.innerHTML = courseCardResultsHtml(query);
+  }
+
+  function courseCardPickerMarkup() {
+    const lesson = currentLesson();
+    const source = String(lesson?.content || '');
+    const lessonRefs = source.split('[[lesson:').length - 1 + source.split('[[lesson-card:').length - 1;
+    const existingCards = source.split('[[course-card:').length - 1;
+    const note = lessonRefs
+      ? '<p class="course-card-guidance"><strong>Important:</strong> This lesson contains ' + lessonRefs +
+        ' reference' + (lessonRefs === 1 ? '' : 's') + ' to individual lessons. Those render as lesson links/cards, not as the Option 4 companion-course card. ' +
+        (existingCards ? 'A course-card reference is also present.' : 'Insert the course card separately below; remove any lesson links that were added by mistake using “Manage inserted lesson references”.') +
+        '</p>'
+      : '';
+    return '<section class="related-course-box course-card-picker" data-course-card-picker>' +
+      '<h4>Insert a companion-course card (Option 4)</h4>' +
+      '<p>Choose a real catalogue course below. “Keep one card here &amp; clean up” preserves the final card position in the lesson, removes earlier duplicates and accidental lesson links, and clears tab-routing markers that are not attached to a heading. The change is saved to this draft; it does not publish the course.</p>' +
+      note +
+      '<label for="companionCourseCardSearch">Find a companion course</label>' +
+      '<input class="input" id="companionCourseCardSearch" type="search" data-course-card-search placeholder="Search published or coming-soon courses" aria-label="Search courses to insert as an Option 4 card">' +
+      '<div data-course-card-results role="status" aria-live="polite">' + courseCardResultsHtml('') + '</div>' +
+      '</section>';
+  }
+
+  function lessonReferencePickerMarkup() {
+    return `<section class="related-course-box lesson-reference-picker" data-lesson-reference-picker>
+      <h4>Link to another lesson</h4>
+      <p>These controls link to an individual lesson, not an entire companion course. Use an inline link for a brief mention or a related-lesson card for a lesson-level explanation. To show Option 4, use the separate companion-course picker above. References keep a stable lesson ID and never copy the destination lesson body.</p>
+      <label for="lessonReferenceSearch">Find a lesson</label>
+      <input class="input" id="lessonReferenceSearch" type="search" data-lesson-reference-search placeholder="e.g. relative volume, support, value area" aria-label="Search published lessons">
+      <div data-lesson-reference-results role="status" aria-live="polite"><p>Enter at least two characters to search the published lesson catalogue.</p></div>
+    </section>`;
+  }
+
+  function renderLessonReferenceResults(query, container) {
+    if (!container) return;
+    const term = String(query || '').trim().toLowerCase();
+    if (term.length < 2) {
+      container.innerHTML = '<p>Enter at least two characters to search the published lesson catalogue.</p>';
+      return;
+    }
+    const results = demoLessonRefs.filter(ref => [
+      ref.title, ref.summary, ref.module_title, ref.course_title,
+      ...(Array.isArray(ref.topics) ? ref.topics : [])
+    ].join(' ').toLowerCase().includes(term)).slice(0, 15);
+    results.forEach(ref => lessonReferenceIndex.set(String(ref.id), ref));
+    if (!results.length) {
+      container.innerHTML = '<p>No published lessons matched that search.</p>';
+      return;
+    }
+    container.innerHTML = results.map(ref => `<article class="related-course-item" style="margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:8px">
+      <strong>${esc(ref.title)}</strong>
+      <span>${esc(ref.course_title)} · ${esc(ref.module_title)}</span>
+      <span>${esc(ref.summary || (ref.topics || []).slice(0,3).join(' · '))}</span>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:9px">
+        <button class="btn small" type="button" data-action="insert-inline-lesson-reference" data-id="${esc(ref.id)}">Insert inline link</button>
+        <button class="btn small" type="button" data-action="insert-lesson-reference-card" data-id="${esc(ref.id)}">Insert lesson card</button>
+      </div>
+    </article>`).join('');
+  }
+
+  const courseFieldsBeforeAssetPolicy = courseFields;
+  courseFields = function(c) {
+    if (c && c.requiresOwnedAssets === undefined) c.requiresOwnedAssets = true;
+    const html = courseFieldsBeforeAssetPolicy(c);
+    if (!c) return html;
+    const checked = c.requiresOwnedAssets ? ' checked' : '';
+    return html + '<section class="related-course-box"><h4>Instructional image policy</h4>' +
+      '<label class="checkbox-row"><input type="checkbox" data-entity="course" data-field="requiresOwnedAssets"' + checked + '> Require course-owned images before publishing</label>' +
+      '<p>When enabled, every referenced instructional image must have a file stored in Academy asset storage. An external image URL is not a durable copy; upload a replacement before publishing. The temporary Bollinger Bands example restriction applies regardless of this setting.</p>' +
+      '</section>';
+  };
+
+  function lessonPlacementToolsMarkup() {
+    return '<section class="related-course-box lesson-placement-tools"><h4>Control where a section appears</h4><p>Heading-based placement is a fallback. Put your cursor immediately before a section heading and insert one of these markers to explicitly choose the learner tab. The marker is structural and will not appear in the lesson.</p><div class="figure-inline-actions">' +
+      '<button class="btn small" type="button" data-action="insert-tab-route" data-route="idea">Route to The idea</button>' +
+      '<button class="btn small" type="button" data-action="insert-tab-route" data-route="examples">Route to Chart examples</button>' +
+      '<button class="btn small" type="button" data-action="insert-tab-route" data-route="practice">Route to Test your reading</button></div><p class="help">Stored as <code>[[lesson-tab:idea]]</code>, <code>[[lesson-tab:examples]]</code> or <code>[[lesson-tab:practice]]</code> on a line before the heading.</p></section>';
+  }
+
+  function inlineLessonReferenceManagerMarkup(lesson) {
+    const content = String(lesson.content || '');
+    const refs = [...content.matchAll(/\[\[(lesson|lesson-card):([0-9a-fA-F-]{36})\]\]/g)];
+    if (!refs.length) {
+      return '<section class="related-course-box"><h4>Inline lesson references</h4><p>No inline lesson links or cards have been inserted yet. Use the search picker below to add one at the cursor.</p></section>';
+    }
+    const rows = refs.map((match, index) => {
+      const kind = match[1], id = match[2];
+      const destination = demoLessonRefs.find(ref => String(ref.id).toLowerCase() === id.toLowerCase());
+      const title = destination ? destination.title : 'Unavailable or unpublished lesson';
+      const course = destination ? destination.course_title : id;
+      const alternative = kind === 'lesson' ? 'Convert to related-lesson card' : 'Convert to inline link';
+      return '<article class="related-course-item"><div><strong>' + esc(title) + '</strong><span>' + esc(course) + ' · ' + (kind === 'lesson' ? 'inline link' : 'lesson card') + '</span></div><div class="figure-inline-actions"><button type="button" class="btn small" data-action="toggle-inline-lesson-reference-kind" data-index="' + index + '">' + alternative + '</button><button type="button" class="btn small danger" data-action="remove-inline-lesson-reference" data-index="' + index + '">Remove</button></div></article>';
+    }).join('');
+    return '<section class="related-course-box"><h4>Manage inserted lesson references</h4><p>These controls affect one occurrence at a time, including when the same destination appears more than once.</p><div class="related-course-list">' + rows + '</div></section>';
+  }
+
+  const lessonFieldsBeforePlacementTools = lessonFields;
+  lessonFields = function(lesson) {
+    const html = lessonFieldsBeforePlacementTools(lesson);
+    if (!lesson) return html;
+    return html + lessonPlacementToolsMarkup() + inlineLessonReferenceManagerMarkup(lesson);
+  };
+
+  function rememberLessonContentCaret(target) {
+    if (!target || !target.matches('textarea[data-entity="lesson"][data-field="content"]')) return;
+    const lesson = currentLesson();
+    if (!lesson) return;
+    const save = () => {
+      if (!target.isConnected || currentLesson()?.id !== lesson.id) return;
+      lessonContentCaret = {
+        lessonId: lesson.id,
+        start: Number(target.selectionStart) || 0,
+        end: Number(target.selectionEnd) || 0
+      };
+    };
+    save();
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(save);
+  }
+  ['click', 'keyup', 'select', 'input', 'mouseup'].forEach(eventName => {
+    document.addEventListener(eventName, event => rememberLessonContentCaret(event.target), true);
+  });
+
+  function insertLessonContentAtCaret(lesson, token, isBlock) {
+    if (!lesson) return;
+    const visualEditor = $('#workspace [data-visual-editor][data-visual-kind="main"]');
+    if (visualEditor && state.tab === 'lesson') {
+      insertVisualTokenAtCursor(visualEditor, token, isBlock);
+      return;
+    }
+    const content = String(lesson.content || '');
+    const saved = lessonContentCaret && lessonContentCaret.lessonId === lesson.id
+      ? lessonContentCaret : {start:content.length,end:content.length};
+    const start = Math.max(0, Math.min(content.length, Number(saved.start) || 0));
+    const end = Math.max(start, Math.min(content.length, Number(saved.end) || start));
+    const before = content.slice(0, start);
+    const after = content.slice(end);
+    let prefix = '';
+    let suffix = '';
+    if (isBlock) {
+      if (before && !before.endsWith('\n\n')) prefix = before.endsWith('\n') ? '\n' : '\n\n';
+      if (after && !after.startsWith('\n\n')) suffix = after.startsWith('\n') ? '\n' : '\n\n';
+    } else {
+      if (before && !/\s$/.test(before)) prefix = ' ';
+      if (after && !/^\s/.test(after)) suffix = ' ';
+    }
+    lesson.content = before + prefix + token + suffix + after;
+    pendingLessonCaret = {lessonId:lesson.id, position:before.length + prefix.length + token.length};
+    lessonContentCaret = null;
+    state.tab = 'lesson';
+    persist(false);
+    renderEditor();
+  }
+
+  function moveFigureReference(lesson, id, direction) {
+    const content = String(lesson.content || '');
+    const paragraphs = content.split(/\n\s*\n/);
+    const group = (lesson.imageGroups || []).find(item =>
+      (Array.isArray(item.imageIds) ? item.imageIds : []).some(imageId => String(imageId) === String(id))
+      && content.includes('[[image-group:' + item.id + ']]')
+    );
+    const index = group
+      ? paragraphs.findIndex(paragraph => paragraph.includes('[[image-group:' + group.id + ']]'))
+      : paragraphs.findIndex(paragraph => paragraph.includes('asset://' + id));
+    const next = index + direction;
+    if (index < 0) {
+      toast('Insert this figure into the lesson before reordering it.');
+      return;
+    }
+    if (next < 0 || next >= paragraphs.length) {
+      toast('The figure is already at that end of the lesson.');
+      return;
+    }
+    [paragraphs[index], paragraphs[next]] = [paragraphs[next], paragraphs[index]];
+    lesson.content = paragraphs.join('\n\n');
+    persist(false);
+    renderEditor();
+    toast('Figure moved in the lesson content.');
+  }
+
+  const renderMarkdownWithFigures = renderMarkdown;
+  renderMarkdown = function(src) {
+    let output = renderMarkdownWithFigures(src);
+    output = output.replace(/<p>\[\[lesson-card:([0-9a-fA-F-]{36})\]\]<\/p>/g, (match, id) => {
+      const ref = demoLessonRefs.find(item => String(item.id) === id);
+      if (!ref) return '<p>Related lesson unavailable.</p>';
+      return '<aside class="tt-inline-lesson-card" style="margin:18px 0;padding:14px;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:9px;background:var(--paper)"><p style="font-size:10px;letter-spacing:.1em">RELATED LESSON</p><p><strong>' + esc(ref.title) + '</strong></p><p>' + esc(ref.course_title) + ' · ' + esc(ref.module_title) + '</p><p>' + esc(ref.summary || (ref.topics || []).slice(0,3).join(' · ')) + '</p></aside>';
+    });
+    output = output.replace(/\[\[lesson:([0-9a-fA-F-]{36})\]\]/g, (match, id) => {
+      const ref = demoLessonRefs.find(item => String(item.id) === id);
+      return ref ? '<a href="/learn/course/' + encodeURIComponent(ref.course_slug) + '/lesson/' + encodeURIComponent(ref.id) + '/">' + esc(ref.title) + '</a>' : 'Related lesson unavailable.';
+    });
+    return output;
+  };
+
+  const renderEditorBeforeReferenceAndMediaEnhancements = renderEditor;
+  renderEditor = function() {
+    renderEditorBeforeReferenceAndMediaEnhancements();
+    if (state.tab === 'lesson') {
+      const textarea = $('#workspace [data-visual-editor][data-visual-kind="main"]');
+      const field = textarea && textarea.closest('.field');
+      if (field && !$('#workspace [data-course-card-picker]')) {
+        field.insertAdjacentHTML('afterend', courseCardPickerMarkup());
+      }
+      if (field && !$('#workspace [data-lesson-reference-picker]')) {
+        const coursePicker = $('#workspace [data-course-card-picker]');
+        if (coursePicker) coursePicker.insertAdjacentHTML('afterend', lessonReferencePickerMarkup());
+        else field.insertAdjacentHTML('afterend', lessonReferencePickerMarkup());
+      }
+      if (pendingLessonCaret && currentLesson()?.id === pendingLessonCaret.lessonId && textarea) {
+        pendingLessonCaret = null;
+        requestAnimationFrame(() => {
+          const currentEditor = $('#workspace [data-visual-editor][data-visual-kind="main"]');
+          if (currentEditor) {
+            currentEditor.focus();
+            const range = document.createRange();
+            range.selectNodeContents(currentEditor);
+            range.collapse(false);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            captureRichEditorRange();
+          }
+        });
+      }
+    }
+    if (state.tab === 'media') {
+      $('#workspace')?.querySelectorAll('[data-action="remove-figure"]').forEach(removeButton => {
+        const id = removeButton.dataset.id;
+        const actions = removeButton.parentElement;
+        if (!id || !actions || actions.querySelector('[data-replace-image]')) return;
+        const replacement = document.createElement('input');
+        replacement.type = 'file';
+        replacement.accept = 'image/jpeg,image/png,image/webp';
+        replacement.dataset.replaceImage = id;
+        replacement.setAttribute('aria-label', 'Replace this image while keeping its asset identity');
+        replacement.style.maxWidth = '100%';
+        const replacementLabel = document.createElement('label');
+        replacementLabel.className = 'help';
+        replacementLabel.textContent = 'Replace image (JPG, PNG or WebP, max 1.5 MB)';
+        replacementLabel.appendChild(replacement);
+        actions.insertBefore(replacementLabel, removeButton);
+        [['Move earlier','move-figure-up'], ['Move later','move-figure-down']].forEach(([label, action]) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'btn small';
+          button.textContent = label;
+          button.dataset.action = action;
+          button.dataset.id = id;
+          actions.insertBefore(button, removeButton);
+        });
+      });
+    }
+  };
+
+  document.addEventListener('input', event => {
+    const input = event.target;
+    if (!input.matches('[data-course-card-search]')) return;
+    renderCourseCardResults(input.value, input.closest('[data-course-card-picker]')?.querySelector('[data-course-card-results]'));
+  });
+
+  document.addEventListener('input', event => {
+    const input = event.target;
+    if (!input.matches('[data-lesson-reference-search]')) return;
+    const picker = input.closest('[data-lesson-reference-picker]');
+    renderLessonReferenceResults(input.value, picker?.querySelector('[data-lesson-reference-results]'));
+  });
+
+  document.addEventListener('change', event => {
+    const input = event.target;
+    if (!input.matches('[data-replace-image]')) return;
+    const file = input.files && input.files[0];
+    const lesson = currentLesson();
+    if (!file || !lesson) return;
+    if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 1.5 * 1024 * 1024) {
+      toast('Choose a JPG, PNG or WebP image no larger than 1.5 MB.');
+      input.value = '';
+      return;
+    }
+    const images = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
+    const image = images.find(item => item.id === input.dataset.replaceImage);
+    if (!image) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      image.data = String(reader.result);
+      image.name = file.name;
+      lesson.images = images;
+      lesson.image = images[0] || null;
+      persist(false);
+      renderEditor();
+      toast('Image replaced. Its stable asset ID and all lesson references were preserved.');
+    };
+    reader.onerror = () => toast('The replacement image could not be read.');
+    reader.readAsDataURL(file);
+  });
+
+  const baseHandleActionWithFigures = handleAction;
+  handleAction = function(action, el) {
+    const lesson = currentLesson();
+    if (lesson && action === 'insert-tab-route') {
+      const route = ['idea','examples','practice'].includes(String(el.dataset.route || '')) ? String(el.dataset.route) : 'idea';
+      insertLessonContentAtCaret(lesson, '[[lesson-tab:' + route + ']]', true);
+      toast('Section placement marker inserted. Keep it immediately before the section heading.');
+      return;
+    }
+    if (lesson && (action === 'remove-inline-lesson-reference' || action === 'toggle-inline-lesson-reference-kind')) {
+      const index = Number(el.dataset.index);
+      const pattern = /\[\[(lesson|lesson-card):([0-9a-fA-F-]{36})\]\]/g;
+      const content = String(lesson.content || '');
+      const matches = [...content.matchAll(pattern)];
+      const selected = matches[index];
+      if (!selected) { toast('That reference changed. Reopen the lesson reference list and try again.'); return; }
+      if (action === 'remove-inline-lesson-reference') {
+        lesson.content = content.slice(0, selected.index) + content.slice(selected.index + selected[0].length);
+      } else {
+        const newKind = selected[1] === 'lesson' ? 'lesson-card' : 'lesson';
+        const replacement = '[[' + newKind + ':' + selected[2] + ']]';
+        lesson.content = content.slice(0, selected.index) + replacement + content.slice(selected.index + selected[0].length);
+      }
+      lesson.content = lesson.content.replace(/\n{3,}/g, '\n\n');
+      state.tab = 'lesson';
+      persist(false);
+      renderEditor();
+      toast(action === 'remove-inline-lesson-reference' ? 'Inline lesson reference removed.' : 'Inline lesson reference type changed.');
+      return;
+    }
+    if (lesson && action === 'replace-course-card-and-remove-links') {
+      const courseRef = eligibleCompanionCourses().find(item => String(item.id) === String(el?.dataset?.id || ''));
+      if (!courseRef) {
+        toast('That course is no longer eligible. Refresh the catalogue and choose a published or properly announced companion course.');
+        return;
+      }
+      const token = courseRef.isComingSoon
+        ? '[[course-card:coming-soon:' + courseRef.referenceId + ']]'
+        : '[[course-card:' + courseRef.id + ']]';
+      const source = String(lesson.content || '');
+      const courseCardPattern = /\[\[course-card:(?:coming-soon:)?[0-9a-fA-F-]{36}\]\]/g;
+      const lessonReferencePattern = /\[\[(?:lesson|lesson-card):[0-9a-fA-F-]{36}\]\]/g;
+      const routeMarkerPattern = /^[ \t]*\[\[lesson-tab:(?:idea|examples|practice)\]\][ \t]*$/i;
+      const cards = [...source.matchAll(courseCardPattern)];
+      const lessonReferences = [...source.matchAll(lessonReferencePattern)];
+      // Preserve the last authored placement, which is where the intended companion
+      // card sits after "Compare the possibilities" in the current lesson.
+      const anchorReference = cards[cards.length - 1] || lessonReferences[lessonReferences.length - 1];
+      if (!anchorReference) {
+        insertLessonContentAtCaret(lesson, token, true);
+        toast('Companion course card inserted. No old lesson links needed removal.');
+        return;
+      }
+      const marker = 'TTCOURSE_CARD_REPAIR_' + uid('repair') + '_END';
+      let updated = source.slice(0, anchorReference.index) + marker +
+        source.slice(anchorReference.index + anchorReference[0].length);
+      updated = updated.replace(courseCardPattern, '').replace(lessonReferencePattern, '');
+      updated = updated.replace(marker, token);
+
+      // Only retain explicit route markers that are immediately associated with a
+      // heading. Markers accidentally inserted between a heading and its paragraph
+      // are stale instructions and should not affect the lesson's content grouping.
+      const routeLines = updated.split(/\r?\n/);
+      updated = routeLines.filter((line, index, lines) => {
+        if (!routeMarkerPattern.test(line)) return true;
+        let nextIndex = index + 1;
+        while (nextIndex < lines.length && !lines[nextIndex].trim()) nextIndex += 1;
+        return nextIndex < lines.length && /^#{2,6}\s+/.test(lines[nextIndex]);
+      }).join('\n');
+      updated = updated.replace(/\n{3,}/g, '\n\n').replace(/^[ \t]*\n+|\n+[ \t]*$/g, '');
+      const duplicateCardsRemoved = Math.max(0, cards.length - 1);
+      lesson.content = updated;
+      state.tab = 'lesson';
+      persist(false);
+      clearTimeout(academySaveTimer);
+      renderEditor();
+      saveCurrentToAcademy(false, false).then(() => {
+        toast('Saved to Academy. Kept one companion card at its final placement; removed ' +
+          duplicateCardsRemoved + ' duplicate card reference' + (duplicateCardsRemoved === 1 ? '' : 's') +
+          ', ' + lessonReferences.length + ' inline lesson reference' + (lessonReferences.length === 1 ? '' : 's') +
+          ', and misplaced tab markers.', 7500);
+      }).catch(error => {
+        toast('The editor was updated, but the Academy save failed: ' + String(error?.message || error), 9000);
+      });
+      return;
+    }
+    if (lesson && action === 'insert-course-card') {
+      const courseRef = eligibleCompanionCourses().find(item => String(item.id) === String(el?.dataset?.id || ''));
+      if (!courseRef) {
+        toast('That course is no longer in the published or announced catalogue. Refresh and search again.');
+        return;
+      }
+      const token = courseRef.isComingSoon
+        ? '[[course-card:coming-soon:' + courseRef.referenceId + ']]'
+        : '[[course-card:' + courseRef.id + ']]';
+      insertLessonContentAtCaret(lesson, token, true);
+      toast(courseRef.isComingSoon ? 'Coming-soon card inserted at the saved cursor position.' : 'Course card inserted at the saved cursor position.');
+      return;
+    }
+    if (action === 'preview-chart-examples') {
+      const article = el?.closest('.preview-article');
+      const lessonBody = article?.querySelector('[data-preview-lesson-content]');
+      if (!lessonBody) return;
+      const chart = lessonBody.querySelector('.tt-purpose-figure, .tt-image-group-figure, .tt-comparison-figure');
+      const target = chart || lessonBody;
+      target.scrollIntoView({behavior:'smooth', block:'start'});
+      if (chart) {
+        chart.setAttribute('tabindex', '-1');
+        chart.focus({preventScroll:true});
+      } else {
+        toast('No chart figures are inserted in this lesson yet. Add one in the lesson editor to use this shortcut.');
+      }
+      return;
+    }
+    if (lesson && action === 'add-image-group') {
+      const images = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
+      if (images.length < 2) {
+        toast('Upload at least two images before creating an image group.');
+        return;
+      }
+      if (!Array.isArray(lesson.imageGroups)) lesson.imageGroups = [];
+      lesson.imageGroups.push({
+        id: uid('image-group'),
+        title: 'New image group',
+        imageIds: images.slice(0, 2).map(image => image.id),
+        note: ''
+      });
+      persist(false);
+      renderEditor();
+      toast('Image group created. Type its title and choose the images to show together.');
+      return;
+    }
+    if (lesson && action === 'insert-image-group') {
+      const group = (lesson.imageGroups || []).find(item => String(item.id) === String(el.dataset.id));
+      const images = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
+      const selectedImages = (group?.imageIds || []).filter(imageId => images.some(image => image.id === imageId || image.assetUuid === imageId));
+      if (!group || selectedImages.length < 2) {
+        toast('Choose at least two uploaded images for this group.');
+        return;
+      }
+      insertLessonContentAtCaret(lesson, `[[image-group:${group.id}]]`, true);
+      toast('Image group inserted at the saved cursor position.');
+      return;
+    }
+    if (lesson && action === 'remove-image-group') {
+      const id = String(el.dataset.id || '');
+      lesson.content = String(lesson.content || '').split(`[[image-group:${id}]]`).join('').replace(/\n{3,}/g, '\n\n');
+      lesson.imageGroups = (lesson.imageGroups || []).filter(group => String(group.id) !== id);
+      persist(false);
+      renderEditor();
+      toast('Image group and its content reference were removed.');
+      return;
+    }
+    if (lesson && action === 'add-teaching-figure') {
+      if (!Array.isArray(lesson.teachingFigures)) lesson.teachingFigures = [];
+      lesson.teachingFigures.push({
+        id: uid('figure'),
+        type: 'comparison-cards',
+        title: 'What changing the settings changes',
+        cards: [
+          {kicker:'SHORTER WINDOW',title:'More responsive',body:'The average and bands react to fewer recent bars. They may turn sooner, but also change more often.'},
+          {kicker:'20 PERIODS · 2 DEVIATIONS',title:'Common baseline',body:'A widely used reference setting, not a proof that these inputs are best for every market or timeframe.'},
+          {kicker:'LONGER WINDOW',title:'More smoothed',body:'The frame reflects a longer run of data and usually reacts more slowly to a sudden change.'}
+        ],
+        note:'Changing the period and changing the deviation multiplier are different decisions. Compare one setting at a time, then test the rule on varied cases rather than choosing the nicest-looking past chart.'
+      });
+      persist(false);
+      renderEditor();
+      toast('Comparison-card figure created. Edit the cards, then insert it at the cursor.');
+      return;
+    }
+    if (lesson && action === 'insert-teaching-figure') {
+      const figure = (lesson.teachingFigures || []).find(item => String(item.id) === String(el.dataset.id));
+      if (!figure) return;
+      insertLessonContentAtCaret(lesson, `[[teaching-figure:${figure.id}]]`, true);
+      toast('Teaching figure inserted at the saved cursor position.');
+      return;
+    }
+    if (lesson && action === 'remove-teaching-figure') {
+      const id = String(el.dataset.id || '');
+      lesson.content = String(lesson.content || '').split(`[[teaching-figure:${id}]]`).join('').replace(/\n{3,}/g, '\n\n');
+      lesson.teachingFigures = (lesson.teachingFigures || []).filter(item => String(item.id) !== id);
+      persist(false);
+      renderEditor();
+      toast('Teaching figure removed.');
+      return;
+    }
+    if (lesson && action === 'insert-figure') {
+      const images = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
+      const image = images.find(item => item.id === el.dataset.id);
+      if (!image) return;
+      const alt = String(image.alt || 'Course figure').replace(/\]/g, '');
+      insertLessonContentAtCaret(lesson, `![${alt}](asset://${image.id})`, true);
+      toast('Figure inserted at the saved cursor position.');
+      return;
+    }
+    if (lesson && action === 'remove-figure') {
+      const id = String(el.dataset.id || '');
+      const currentImages = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
+      const removedImage = currentImages.find(image => String(image.id) === id);
+      const escapedId = id.replace(/[.*+?^\$\{\}()|[\]\\]/g, '\\
+(() => {
+  'use strict';
+  const STORAGE_KEY = 'tradethesis-course-builder-preview-v1';
+  const $ = (s, root=document) => root.querySelector(s);
+  const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const uid = prefix => `${prefix}-${Math.random().toString(36).slice(2,7)}-${Date.now().toString(36).slice(-4)}`;
+  const slugify = value => String(value || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,150);
+  const nowText = () => new Date().toLocaleString([], {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  const defaultQuestion = () => ({id:uid('q'),prompt:'What evidence would you look for before acting on this observation?',options:['Confirming evidence in price behaviour','One indicator reading by itself','A guaranteed outcome'],correctIndex:0,explanation:'Look for confirming evidence and define what would weaken the idea. An observation is not a complete trade plan.',imageId:''});
+  const makeLesson = (n=1) => ({id:uid('lesson'),title:`Lesson 1.${n} — Start with a question`,summary:'A practical introduction to the decision this lesson will help you make.',minutes:12,format:'reading',videoUrl:'',reflectionPrompt:'Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view.',reflectionModelReasoning:'A careful reading separates visible evidence from interpretation, considers a reasonable alternative, and names the evidence that would strengthen or weaken the interpretation.',reflectionChartNotes:'',notebook:{title:'Before you make the call',prompts:[{label:'Observe',text:'Describe the evidence visible in the chart.'},{label:'Interpret',text:'State one possible reading and a reasonable alternative.'},{label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}]},imageGroups:[],content:`## Start with the decision\n\nBegin with a practical question a trader may encounter. Describe what can be observed before offering an interpretation.\n\n### What to notice\n\nSeparate the visible evidence from the conclusion you may draw from it. Name the limits of the observation and consider a reasonable alternative.\n\n### Compare the possibilities\n\nUse a second case to show how similar-looking conditions can lead to different outcomes. Explain which detail changes the interpretation.\n\n### Take it into practice\n\nWrite down what would strengthen your reading, what would weaken it, and what would make waiting the better decision.`,questions:[defaultQuestion()],image:null,relatedCourseIds:[]});
+  const makeModule = (n=1) => ({id:uid('module'),title:`Module ${String(n).padStart(2,'0')} — Foundations`,description:'The main ideas and decisions covered in this module.',lessons:[makeLesson(1)]});
+  const makeCourse = (title='Untitled course') => ({id:uid('course'),title,slug:slugify(title),summary:'A clear, practical description of what learners will study and why it matters.',description:'Explain who the course is for, what it covers and how learners will use it. Keep the promise realistic and specific.',category:'Technical analysis',level:'Intermediate',duration:'Self-paced',price:'',priceNote:'Pricing and checkout are configured separately.',status:'draft',comingSoon:false,requiresOwnedAssets:true,position:0,createdAt:nowText(),updatedAt:'Not saved yet',publishedAt:null,publishedSnapshot:null,modules:[makeModule(1)],outcomes:['Describe the evidence before interpreting it.','Compare alternatives and identify invalidation.','Build a clear, conditional decision process.']});
+  let demoOffers = [];
+  let comingSoonOffers = [];
+  let demoLessonRefs = [];
+  const lessonReferenceIndex = new Map();
+  let lessonContentCaret = null;
+  let pendingLessonCaret = null;
+  function getSeed() { const c=makeCourse('New micro-course draft'); c.summary='Add a concise course promise here.'; c.description='Describe the learner, what the course covers and what they can practise after completing it.'; c.modules[0].title='Module 01 — Foundations'; c.modules[0].lessons[0].title='Lesson 1.1 — First principles'; return {courses:[c],selectedCourseId:c.id,selectedModuleId:c.modules[0].id,selectedLessonId:c.modules[0].lessons[0].id,view:'overview',tab:'overview'}; }
+  function starterComparable(course) {
+    const copy = JSON.parse(JSON.stringify(course));
+    delete copy.id;
+    delete copy.createdAt;
+    delete copy.serverDraftId;
+    delete copy.serverUpdatedAt;
+    delete copy._previousTitle;
+    for (const mod of copy.modules || []) {
+      delete mod.id;
+      for (const lesson of mod.lessons || []) {
+        delete lesson.id;
+        for (const question of lesson.questions || []) delete question.id;
+      }
+    }
+    return JSON.stringify(copy);
+  }
+  function isUntouchedStarterDraft(course) {
+    if (!course || course.serverDraftId || course.serverUpdatedAt) return false;
+    return starterComparable(course) === starterComparable(getSeed().courses[0]);
+  }
+  function load() { try { const raw=localStorage.getItem(STORAGE_KEY); if(raw){const v=JSON.parse(raw); if(v && Array.isArray(v.courses)) return v;} } catch(e){} return getSeed(); }
+  let state=load(); let toastTimer=null; let saveTimer=null; let previewMode=false;
+  let hasUnsavedChanges=false; let editRevision=0; let suppressDirtyTracking=true;
+  function markDirty(){hasUnsavedChanges=true;editRevision++;}
+  const currentCourse=()=>state.courses.find(c=>c.id===state.selectedCourseId)||state.courses[0];
+  const currentModule=()=>{const c=currentCourse(); return c.modules.find(m=>m.id===state.selectedModuleId)||c.modules[0];};
+  const currentLesson=()=>{const m=currentModule(); return m.lessons.find(l=>l.id===state.selectedLessonId)||m.lessons[0];};
+  const allLessons=c=>c.modules.flatMap(m=>m.lessons);
+  const activeStatus=c=>c.status==='published'?'Published':c.status==='draft-update'?'Draft changes':'Draft';
+  function toast(message, duration){const el=$('#toast');const text=String(message??'');const isValidationError=text.includes('\n');el.textContent=text;el.classList.toggle('validation-error',isValidationError);el.setAttribute('role',isValidationError?'alert':'status');el.setAttribute('aria-live',isValidationError?'assertive':'polite');el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),duration||(isValidationError?15000:2800));}
+  function persist(showToast=false){try{state.savedAt=nowText();localStorage.setItem(STORAGE_KEY,JSON.stringify(state));state.storageAvailable=true;if(showToast)toast('Draft saved in this browser. Come back to this preview to continue.');renderSidebar();renderHeaderState();}catch(e){state.storageAvailable=false;toast('Browser storage is full. Reduce image size and try saving again.');}}
+  function schedulePersist(){markDirty();clearTimeout(saveTimer);$('#saveIndicator')?.classList.add('saving');if(state.view==='preview')return;saveTimer=setTimeout(()=>{persist(false);const el=$('#saveIndicator');if(el)el.classList.remove('saving');},500);}
+  function renderHeaderState(){const c=currentCourse();const save=$('#saveButton');if(save)save.textContent=state.savedAt?'Save draft':'Save draft';const pub=$('#publishButton');if(pub)pub.textContent='Submit for review';}
+  function renderSidebar(){const list=$('#courseList');if(!list)return;const query=($('#courseSearch')?.value||'').trim().toLowerCase();const courses=state.courses.filter(c=>c.title.toLowerCase().includes(query));$('#courseCount').textContent=`${state.courses.length} ${state.courses.length===1?'course':'courses'}`;list.innerHTML=courses.map(c=>`<button type="button" class="course-item ${c.id===state.selectedCourseId?'active':''}" data-action="select-course" data-id="${esc(c.id)}"><span class="course-item-title"><span>${esc(c.title||'Untitled course')}</span><span class="mini-status ${c.status==='published'?'live':''}"></span></span><span class="course-item-meta"><span class="pill ${c.status==='published'?'published':'status'}">${esc(activeStatus(c))}</span><span>${allLessons(c).length} lessons</span></span></button>`).join('')||'<div class="empty-state"><p>No courses match that search.</p></div>';}
+  function courseFields(c){return `<div class="section-intro"><h3>Course details</h3><p>Write the public-facing promise first. Save a shared draft at any stage, then submit it for review. Approved and published courses appear in the website Courses tab.</p></div><div class="form-grid"><div class="field full"><label for="courseTitle">Course title</label><input class="input" id="courseTitle" data-entity="course" data-field="title" value="${esc(c.title)}" maxlength="200" placeholder="e.g. Understand Market Structure"></div><div class="field"><label for="courseSlug">Course URL slug</label><input class="input" id="courseSlug" data-entity="course" data-field="slug" value="${esc(c.slug)}" maxlength="150"><span class="help">Keep stable after a course is published.</span></div><div class="field"><label for="courseCategory">Topic / category</label><input class="input" id="courseCategory" data-entity="course" data-field="category" value="${esc(c.category)}" placeholder="Chart reading"></div><div class="field full"><label for="courseSummary">Short summary</label><textarea class="textarea" id="courseSummary" data-entity="course" data-field="summary" maxlength="360" placeholder="One or two sentences for the course card.">${esc(c.summary)}</textarea><span class="help">Used in the catalogue card. Aim for a concise, clear promise.</span></div><div class="field full"><label for="courseDescription">Course description</label><textarea class="textarea" id="courseDescription" data-entity="course" data-field="description" placeholder="Who is this for, what is included, and how will they use it?">${esc(c.description)}</textarea><span class="help">Supports Markdown headings, bullet lists, bold text and links. Preview them in the learner preview below.</span></div><div class="field"><label for="courseLevel">Level</label><select class="select" id="courseLevel" data-entity="course" data-field="level">${['Beginner','Foundational','Intermediate','Advanced','Mixed experience'].map(v=>`<option ${v===c.level?'selected':''}>${v}</option>`).join('')}</select></div><div class="field"><label for="courseDuration">Expected study time</label><input class="input" id="courseDuration" data-entity="course" data-field="duration" value="${esc(c.duration)}" placeholder="e.g. 4 hours"></div><div class="field full"><label>Learning outcomes</label><div id="outcomesList">${c.outcomes.map((v,i)=>`<div class="option-row"><span class="pill">${String(i+1).padStart(2,'0')}</span><input class="input" data-entity="outcome" data-index="${i}" value="${esc(v)}" aria-label="Learning outcome ${i+1}"><button class="icon-btn" type="button" data-action="remove-outcome" data-index="${i}" aria-label="Remove outcome">×</button></div>`).join('')}</div><button class="btn small" type="button" data-action="add-outcome">＋ Add outcome</button></div><div class="field"><label for="coursePrice">Display price (optional)</label><input class="input" id="coursePrice" data-entity="course" data-field="price" value="${esc(c.price)}" placeholder="e.g. ₹999"><span class="help">Display text only. It does not create or activate checkout.</span></div><div class="field"><label for="coursePriceNote">Price note</label><input class="input" id="coursePriceNote" data-entity="course" data-field="priceNote" value="${esc(c.priceNote)}"></div><div class="field full coming-soon-field"><label class="checkbox-row" for="courseComingSoon"><input id="courseComingSoon" type="checkbox" data-entity="course" data-field="comingSoon" ${c.comingSoon?'checked':''}> Announce this course publicly as “Coming soon”</label><span class="help">After you save, the public Courses catalogue can show the title and short summary. Lessons, answer keys and enrolment stay unavailable until you publish the course.</span></div></div><div class="helper-note"><strong>Course state:</strong> ${c.status==='published'?'This course already has a published version. Save your edits as a draft revision; the live catalogue version remains until you publish the updates.':c.status==='draft-update'?'Unpublished changes are saved separately; the current published catalogue card remains live.':'This is a private draft. It will not appear in Courses offered until you publish it.'}</div>`;}
+  function curriculumFields(c){const m=currentModule()||c.modules[0];const l=currentLesson()||m?.lessons[0];return `<div class="section-intro"><h3>Build the curriculum</h3><p>Keep the structure easy to scan. Add modules, then add lessons within each module. Reordering controls here are functional in this preview; the production version will save their positions to Django.</p></div><div class="curriculum-layout"><div class="outline-panel"><div class="outline-panel-head"><strong>Course outline</strong><button class="btn small" data-action="add-module" type="button">＋ Module</button></div><div id="curriculumTree">${c.modules.map((mod,mi)=>`<div class="module-block"><div class="module-row"><button class="module-select ${m?.id===mod.id?'active':''}" type="button" data-action="select-module" data-id="${esc(mod.id)}">${String(mi+1).padStart(2,'0')} · ${esc(mod.title)}</button><button class="icon-btn" type="button" data-action="move-module-up" data-id="${esc(mod.id)}" aria-label="Move module up" ${mi===0?'disabled':''}>↑</button><button class="icon-btn" type="button" data-action="move-module-down" data-id="${esc(mod.id)}" aria-label="Move module down" ${mi===c.modules.length-1?'disabled':''}>↓</button></div>${mod.lessons.map((lesson,li)=>`<div class="lesson-row"><button class="lesson-select ${l?.id===lesson.id?'active':''}" type="button" data-action="select-lesson" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}">${String(mi+1)}.${li+1} ${esc(lesson.title)}</button><button class="icon-btn" type="button" data-action="move-lesson-up" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}" aria-label="Move lesson up" ${li===0?'disabled':''}>↑</button><button class="icon-btn" type="button" data-action="move-lesson-down" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}" aria-label="Move lesson down" ${li===mod.lessons.length-1?'disabled':''}>↓</button></div>`).join('')}<div style="padding:6px 7px 3px"><button class="btn small" type="button" data-action="add-lesson" data-id="${esc(mod.id)}">＋ Add lesson</button><button class="btn small danger" type="button" data-action="delete-module" data-id="${esc(mod.id)}" ${c.modules.length===1?'disabled':''}>Remove</button></div></div>`).join('')}</div></div><div class="lesson-editor-card">${m&&l?`<h4>Edit selected lesson</h4><p class="microcopy">Changing titles or order does not disturb other lessons. Lesson UUIDs and student progress are preserved in the production Academy when a course is updated.</p><div class="field"><label>Module title</label><input class="input" data-entity="module" data-field="title" value="${esc(m.title)}"></div><div class="field" style="margin-top:11px"><label>Module summary</label><textarea class="textarea" data-entity="module" data-field="description">${esc(m.description)}</textarea></div><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><div class="field"><label>Lesson title</label><input class="input" data-entity="lesson" data-field="title" value="${esc(l.title)}"></div><div class="field" style="margin-top:11px"><label>Short lesson summary</label><textarea class="textarea" data-entity="lesson" data-field="summary">${esc(l.summary)}</textarea></div><div class="lesson-meta-grid" style="margin-top:11px"><div class="field"><label>Lesson format</label><select class="select" data-entity="lesson" data-field="format">${['reading','video','interactive','quiz'].map(v=>`<option value="${v}" ${l.format===v?'selected':''}>${v[0].toUpperCase()+v.slice(1)}</option>`).join('')}</select></div><div class="field"><label>Minutes</label><input class="input" type="number" min="1" max="360" data-entity="lesson" data-field="minutes" value="${Number(l.minutes)||12}"></div></div><div class="q-actions"><button class="btn small" type="button" data-action="delete-lesson" data-id="${esc(l.id)}" data-module-id="${esc(m.id)}" ${m.lessons.length===1?'disabled':''}>Remove lesson</button><button class="btn small primary" type="button" data-action="go-lesson">Edit lesson content →</button></div>`:'<div class="empty-state"><p>Create a module and lesson to start editing.</p></div>'}</div></div>`;}
+  let richEditorRange = null;
+  function richTokenIsBlock(token) {
     return !String(token || '').startsWith('[[lesson:') || String(token || '').startsWith('[[lesson-card:');
   }
   function richTokenLabel(token) {
@@ -2576,6 +4146,568 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       } else {
         const url = window.prompt('Website URL (https://…)');
         if (url === null || !/^https?:\\/\\//i.test(url.trim())) { toast('Enter a valid HTTP or HTTPS website URL.'); return; }
+        document.execCommand('createLink', false, url.trim());
+      }
+    } else {
+      document.execCommand(command, false, null);
+    }
+    syncVisualEditorToModel(editor);
+    captureRichEditorRange();
+  });
+  document.addEventListener('change', event => {
+    const select = event.target.closest?.('[data-rich-format]');
+    if (!select) return;
+    const editor = select.closest('[data-rich-editor-wrapper]')?.querySelector('[data-visual-editor]');
+    if (!editor) return;
+    restoreRichEditorSelection(editor);
+    document.execCommand('formatBlock', false, select.value);
+    syncVisualEditorToModel(editor);
+    captureRichEditorRange();
+  });
+  document.addEventListener('input',event=>{const el=event.target;if(!el.matches('[data-related-course-search]'))return;const query=el.value.trim().toLowerCase();const box=el.parentElement;box.querySelectorAll('.related-course-item').forEach(item=>{const searchable=(item.querySelector('.related-course-choice')?.textContent||item.textContent).toLowerCase();item.hidden=query!==''&&!searchable.includes(query);});});
+  document.addEventListener('change',event=>{const el=event.target;if(!el.matches('[data-related-course]'))return;const l=currentLesson();if(!l)return;if(!Array.isArray(l.relatedCourseIds))l.relatedCourseIds=[];const id=el.dataset.relatedCourse;if(el.checked&&!l.relatedCourseIds.includes(id))l.relatedCourseIds.push(id);if(!el.checked)l.relatedCourseIds=l.relatedCourseIds.filter(x=>x!==id);persist(false);toast('Related-course reference saved in this preview.');});
+  // Shared Academy integration. Local storage remains a convenience cache, not the source of truth.
+  const hadLocalDraft = Boolean(localStorage.getItem(STORAGE_KEY));
+  let academyReady = false;
+  let academySaveTimer = null;
+  let academySaving = false;
+  let academySavePending = false;
+  const csrfValue = () => {
+    const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : '';
+  };
+  async function academyRequest(method, body) {
+    const headers = {'Accept':'application/json'};
+    if (method !== 'GET') {
+      headers['Content-Type'] = 'application/json';
+      headers['X-CSRFToken'] = csrfValue();
+    }
+    const response = await fetch('/staff/course-builder/api/', {
+      method, credentials:'same-origin', headers,
+      ...(body ? {body:JSON.stringify(body)} : {})
+    });
+    const payload = await response.json().catch(()=>({detail:`The Academy returned a non-JSON response (HTTP ${response.status}). Your browser draft cache has not been cleared.`}));
+    if (!response.ok) {
+      const detail = Array.isArray(payload.detail) ? payload.detail.join(' ') : (payload.detail || 'The Academy request failed.');
+      const publishErrors = Array.isArray(payload.publish_errors)
+        ? payload.publish_errors.map(item => String(item || '').trim()).filter(Boolean)
+        : [];
+      const message = publishErrors.length
+        ? [detail, 'What needs attention:', ...publishErrors.map((item, index) => `${index + 1}. ${item}`)].filter(Boolean).join('\n\n')
+        : detail;
+      const error = new Error(message);
+      error.publishErrors = publishErrors;
+      error.status = response.status;
+      throw error;
+    }
+    return payload;
+  }
+  function queueAcademySave() {
+    if (!academyReady) return;
+    if (academySaving) {
+      academySavePending = true;
+      return;
+    }
+    clearTimeout(academySaveTimer);
+    academySaveTimer = setTimeout(async () => {
+      try { await saveCurrentToAcademy(false); }
+      catch (error) { toast('Local changes are kept in this browser, but the Academy save failed: ' + error.message); }
+    }, 900);
+  }
+  async function saveCurrentToAcademy(submit, notify=false) {
+    const course = currentCourse();
+    if (!course) return;
+    academySaving = true;
+    try {
+      const revisionAtStart=editRevision;
+      const result = await academyRequest('POST', {course, mode:submit?'submit':'save', sync_source:notify || submit});
+      course.serverDraftId = result.record_id;
+      course.serverUpdatedAt = result.updated_at || new Date().toISOString();
+      // Replace only the image payloads with their protected server URLs. Do not overwrite
+      // text the author may have typed while the request was in flight.
+      if (result.draft) {
+        for (const savedModule of result.draft.modules || []) {
+          const currentModuleRow = (course.modules || []).find(item => item.id === savedModule.id);
+          if (!currentModuleRow) continue;
+          for (const savedLesson of savedModule.lessons || []) {
+            const currentLessonRow = (currentModuleRow.lessons || []).find(item => item.id === savedLesson.id);
+            if (!currentLessonRow) continue;
+            const savedImages = savedLesson.images || [];
+            if (!Array.isArray(currentLessonRow.images)) currentLessonRow.images = [];
+            for (const savedImage of savedImages) {
+              const currentImage = currentLessonRow.images.find(item => item.id === savedImage.id);
+              if (currentImage) {
+                currentImage.data = savedImage.data || '';
+                currentImage.assetKey = savedImage.assetKey;
+                currentImage.assetUuid = savedImage.assetUuid;
+                currentImage.sha256 = savedImage.sha256;
+              }
+            }
+            currentLessonRow.image = currentLessonRow.images[0] || null;
+          }
+        }
+      }
+      state.savedAt = nowText();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+      if(editRevision===revisionAtStart)hasUnsavedChanges=false;
+      renderHeaderState();
+      if (submit) {
+        toast('Draft saved. Opening the review checklist…');
+        window.location.assign(result.review_url);
+      } else {
+        const indicator = $('#saveIndicator');
+        if (indicator) {
+          const sourceStatus = result.source_snapshot_backend === 'google_drive' ? ' · Google Drive backup saved' : (result.source_snapshot_backend === 'github' ? ' · GitHub source synced' : '');
+          indicator.innerHTML = '<span class="dot"></span><span>Saved to Academy · ' + esc(nowText()) + sourceStatus + '</span>';
+        }
+        if (notify) toast(result.message || 'Draft saved to the Academy.');
+      }
+      return result;
+    } finally {
+      academySaving = false;
+      if (academySavePending) {
+        academySavePending = false;
+        queueAcademySave();
+      }
+    }
+  }
+  persist = function(showToast=false) {
+    try {
+      if(!suppressDirtyTracking)markDirty();
+      state.savedAt = nowText();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      state.storageAvailable = true;
+      if (showToast) toast('Saving draft to the Academy…');
+      renderSidebar();
+      renderHeaderState();
+      queueAcademySave();
+    } catch (error) {
+      state.storageAvailable = false;
+      toast('Browser cache is full. The Academy save will still be attempted.');
+      queueAcademySave();
+    }
+  };
+  saveDraft = function() {
+    if (!currentCourse()) return;
+    clearTimeout(academySaveTimer);
+    saveCurrentToAcademy(false, true).catch(error => toast('Could not save to Academy: ' + error.message));
+  };
+  publishCourse = function() {
+    const course = currentCourse();
+    if (!course) return;
+    if (!course.title.trim() || !course.summary.trim() || !course.modules.length || !allLessons(course).length || allLessons(course).some(lesson=>!lesson.title.trim()||!lesson.content.trim())) {
+      toast('Add a title, summary, at least one module, and complete lesson content before submitting.');
+      state.tab = !course.title.trim() || !course.summary.trim() ? 'overview' : 'lesson';
+      renderEditor();
+      return;
+    }
+    clearTimeout(academySaveTimer);
+    saveCurrentToAcademy(true).catch(error => toast('Could not submit for review: ' + error.message));
+  };
+  async function loadPublishedCourse() {
+    const picker = $('#publishedCoursePicker');
+    const courseId = picker?.value || '';
+    if (!courseId) {
+      toast('Choose a published course first.');
+      picker?.focus();
+      return;
+    }
+    const active = currentCourse();
+    if (active && !isUntouchedStarterDraft(active) && (!active.serverDraftId || hasUnsavedChanges)) {
+      if (hasUnsavedChanges && !window.confirm('Save the current course draft before opening another course?')) return;
+      clearTimeout(saveTimer);
+      clearTimeout(academySaveTimer);
+      try { await saveCurrentToAcademy(false, true); }
+      catch (error) { toast('The current draft could not be saved: ' + error.message); return; }
+    }
+    try {
+      const result = await academyRequest('POST', {action:'begin_edit_published_course', courseId});
+      const course = result.draft || result.course;
+      if (!course) throw new Error('The Academy did not return the course content.');
+      const index = state.courses.findIndex(item =>
+        (course.serverDraftId && item.serverDraftId === course.serverDraftId) ||
+        (course.serverCourseId && item.serverCourseId === course.serverCourseId)
+      );
+      if (index >= 0) state.courses[index] = course;
+      else state.courses.unshift(course);
+      state.selectedCourseId = course.id;
+      state.selectedModuleId = course.modules?.[0]?.id || null;
+      state.selectedLessonId = course.modules?.[0]?.lessons?.[0]?.id || null;
+      state.tab = 'overview';
+      state.view = 'editor';
+      hasUnsavedChanges = false;
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+      render();
+      if (!course.serverDraftId) {
+        clearTimeout(academySaveTimer);
+        await saveCurrentToAcademy(false, false);
+        toast('Published course loaded as a revision. The live course stays unchanged until the revision is approved and published.');
+      } else {
+        toast('Reopened your saved revision. The currently published course remains live until approval.');
+      }
+    } catch (error) {
+      toast('Could not load the published course: ' + error.message);
+    }
+  }
+
+  async function syncAcademy() {
+    const revisionAtStart=editRevision;
+    try {
+      const result = await academyRequest('GET');
+      const storageNotice = document.querySelector('[data-image-storage-status]');
+      const storageStatus = result.asset_storage || {};
+      if (storageNotice) {
+        if (storageStatus.durable && storageStatus.writes_enabled) {
+          storageNotice.textContent = 'Course drafts are saved to the shared Academy database. Lesson images are configured to use durable private storage via ' + String(storageStatus.label || 'a remote provider') + '. Save the draft after editing images so their files and metadata are stored together. Submit a course for review before publishing it to the Courses catalogue; pricing and checkout remain separate.';
+        } else if (storageStatus.writes_enabled) {
+          storageNotice.textContent = 'Course drafts are saved to the shared Academy database. Image storage currently points to the local filesystem, which may not survive a staging restart. Configure Google Drive or ACADEMY_GITHUB_ASSET_TOKEN before relying on uploaded figures.';
+        } else {
+          storageNotice.textContent = 'Course drafts are saved to the shared Academy database. Image uploads are blocked because no durable image provider is configured. Connect Google Drive or set ACADEMY_GITHUB_ASSET_TOKEN; existing uploaded images should be treated as at risk until this status changes.';
+        }
+      }
+      demoOffers = (result.related_courses || []).map(course => ({
+        id:String(course.id), referenceId:String(course.id), title:course.title,
+        category:String(course.category || 'TradeThesis course'), level:String(course.level || ''),
+        duration:String(course.estimated_duration || ''),
+        outcomes:Array.isArray(course.learning_outcomes) ? course.learning_outcomes : [],
+        summary:course.summary || 'Open this course in the TradeThesis Academy.',
+        isComingSoon:false, price:'', state:'Published in Academy', slug:course.slug
+      }));
+      comingSoonOffers = (result.coming_soon_courses || []).map(course => ({
+        id:String(course.id), referenceId:String(course.id).replace(/^coming-soon-/, ''),
+        title:course.title, category:course.category || 'TRADETHESIS COURSES',
+        level:String(course.level || ''), duration:String(course.estimated_duration || ''),
+        outcomes:Array.isArray(course.learning_outcomes) ? course.learning_outcomes : [],
+        summary:course.summary || course.description || 'A new course is being prepared.',
+        isComingSoon:true, price:'Details soon', state:'Coming soon', slug:course.slug
+      }));
+      const publishedPicker = $('#publishedCoursePicker');
+      if (publishedPicker) {
+        const selectedPublishedId = publishedPicker.value;
+        publishedPicker.innerHTML = '<option value="">Choose a published course…</option>' +
+          (result.related_courses || []).map(course =>
+            '<option value="' + esc(String(course.id)) + '">' + esc(course.title) + '</option>'
+          ).join('');
+        if ((result.related_courses || []).some(course => String(course.id) === selectedPublishedId)) {
+          publishedPicker.value = selectedPublishedId;
+        }
+      }
+      demoLessonRefs = Array.isArray(result.lesson_references) ? result.lesson_references : [];
+      lessonReferenceIndex.clear();
+      demoLessonRefs.forEach(ref => lessonReferenceIndex.set(String(ref.id), ref));
+      const remoteDrafts = Array.isArray(result.drafts) ? result.drafts : [];
+      // The server's draft list is authoritative for drafts previously loaded
+      // from the Academy. Clear deleted/submitted drafts from localStorage,
+      // while preserving genuinely local-only unsaved work.
+      const liveServerDraftIds = new Set(remoteDrafts.map(remote => String(remote.serverDraftId || remote.id || '')));
+      const liveServerDraftSlugs = new Set(remoteDrafts.map(remote => String(remote.slug || '')));
+      state.courses = state.courses.filter(local => {
+        const serverId = String(local.serverDraftId || '');
+        const serverBacked = Boolean(serverId || local.serverUpdatedAt);
+        if (!serverBacked) return true;
+        return (serverId && liveServerDraftIds.has(serverId)) ||
+          (local.slug && liveServerDraftSlugs.has(String(local.slug)));
+      });
+      // A default seed is created for a first-time author. If real Academy
+      // drafts exist, do not keep that untouched starter as an extra course card.
+      if (remoteDrafts.length) state.courses = state.courses.filter(local => !isUntouchedStarterDraft(local));
+      for (const remote of remoteDrafts) {
+        // The server is the shared source of truth for saved drafts. Replace a
+        // stale browser copy by server ID or slug so another device's latest
+        // saved edits are not hidden by an old localStorage entry.
+        const index = state.courses.findIndex(local =>
+          (local.serverDraftId && local.serverDraftId === remote.serverDraftId) ||
+          (local.slug && local.slug === remote.slug)
+        );
+        if (index >= 0) state.courses[index] = remote;
+        else state.courses.push(remote);
+      }
+      if (!hadLocalDraft && remoteDrafts.length) {
+        const latest = remoteDrafts[0];
+        state.selectedCourseId = latest.id;
+        state.selectedModuleId = latest.modules?.[0]?.id || null;
+        state.selectedLessonId = latest.modules?.[0]?.lessons?.[0]?.id || null;
+      }
+      if (!state.courses.some(course => course.id === state.selectedCourseId)) {
+        const fallback = state.courses[0] || remoteDrafts[0] || null;
+        state.selectedCourseId = fallback?.id || null;
+        state.selectedModuleId = fallback?.modules?.[0]?.id || null;
+        state.selectedLessonId = fallback?.modules?.[0]?.lessons?.[0]?.id || null;
+      }
+      academyReady = true;
+      if (editRevision === revisionAtStart) hasUnsavedChanges = false;
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+      render();
+      if (remoteDrafts.length) toast('Connected to Academy. Shared drafts are available across devices.');
+      else toast('Connected to Academy. Save your first draft to make it available across devices.');
+    } catch (error) {
+      academyReady = false;
+      const storageNotice = document.querySelector('[data-image-storage-status]');
+      if (storageNotice) storageNotice.textContent = 'Could not verify the Academy image-storage configuration. ' + error.message;
+      toast('Could not connect to the Academy draft service: ' + error.message);
+    }
+  }
+  // Use real published courses for lesson cross-references; never invent catalogue entries.
+  if (!state.savedAt) persist(false);
+  suppressDirtyTracking = false;
+  render();
+  syncAcademy();
+
+  // Clean exits navigate immediately. If edits or a save are pending, offer to
+  // save the draft to the shared Academy first; Cancel keeps the editor open.
+  document.addEventListener('click', event => {
+    const link = event.target.closest('a[data-exit-link]');
+    if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (!hasUnsavedChanges && !academySaving && !academySavePending) return;
+    event.preventDefault();
+    const destination = link.href;
+    if (!window.confirm('Your latest edits may not have finished saving. Save the draft to the Academy and leave this page? Choose Cancel to stay here.')) return;
+    clearTimeout(saveTimer);
+    clearTimeout(academySaveTimer);
+    saveCurrentToAcademy(false, true)
+      .then(() => {
+        if (hasUnsavedChanges) {
+          toast('New edits are still waiting to save. Please save them before leaving.');
+          return;
+        }
+        window.location.assign(destination);
+      })
+      .catch(error => toast('Could not save before leaving: ' + error.message));
+  });
+  window.addEventListener('beforeunload', event => {
+    if (!hasUnsavedChanges && !academySaving && !academySavePending) return;
+    event.preventDefault();
+    event.returnValue = '';
+  });
+
+  async function deleteCourse(course) {
+    const title = String(course.title || 'Untitled course');
+    if (!window.confirm('Delete the draft "' + title + '"? This removes its saved builder draft and uploaded draft media. It does not delete a published course.')) return;
+    clearTimeout(saveTimer);
+    clearTimeout(academySaveTimer);
+    try {
+      if (course.serverDraftId) await academyRequest('DELETE', {serverDraftId: course.serverDraftId});
+      state.courses = state.courses.filter(item =>
+        item.id !== course.id &&
+        (!course.serverDraftId || String(item.serverDraftId || '') !== String(course.serverDraftId))
+      );
+      if (!state.courses.some(item => item.id === state.selectedCourseId)) {
+        const fallback = state.courses[0] || null;
+        state.selectedCourseId = fallback?.id || null;
+        state.selectedModuleId = fallback?.modules?.[0]?.id || null;
+        state.selectedLessonId = fallback?.modules?.[0]?.lessons?.[0]?.id || null;
+        state.tab = 'overview';
+      }
+      hasUnsavedChanges = state.courses.some(item => !item.serverDraftId && !item.serverUpdatedAt);
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+      render();
+      toast(course.serverDraftId ? 'Saved Academy draft deleted.' : 'Local-only draft removed from this browser.');
+    } catch (error) {
+      toast('Could not delete draft: ' + error.message);
+    }
+  }
+} )();
+');
+      lesson.content = String(lesson.content || '')
+        .replace(new RegExp('!\\[[^\\]]*\\]\\(asset://' + escapedId + '(?:\\s+[^)]*)?\\)', 'g'), '')
+        .replace(/\n{3,}/g, '\n\n');
+
+      const remainingImages = currentImages.filter(image => String(image.id) !== id);
+      const groupsToRemove = new Set();
+      (Array.isArray(lesson.imageGroups) ? lesson.imageGroups : []).forEach(function(group) {
+        const members = Array.isArray(group.imageIds) ? group.imageIds : [];
+        group.imageIds = members.filter(function(imageId, index, allIds) {
+          const value = String(imageId);
+          if (value === id || (removedImage && value === String(removedImage.assetUuid || ''))) return false;
+          const exists = remainingImages.some(image =>
+            String(image.id) === value || String(image.assetUuid || '') === value
+          );
+          return exists && allIds.findIndex(other => String(other) === value) === index;
+        });
+
+        const token = '[[image-group:' + group.id + ']]';
+        if (!String(lesson.content || '').includes(token) || group.imageIds.length >= 2) return;
+        const survivor = group.imageIds
+          .map(imageId => remainingImages.find(image =>
+            String(image.id) === String(imageId) || String(image.assetUuid || '') === String(imageId)
+          ))
+          .find(Boolean);
+        const replacement = survivor
+          ? '![' + String(survivor.alt || survivor.title || 'Course figure').replace(/\]/g, '') + '](asset://' + survivor.id + ')'
+          : '';
+        lesson.content = String(lesson.content || '').split(token).join(replacement).replace(/\n{3,}/g, '\n\n');
+        groupsToRemove.add(String(group.id));
+      });
+      lesson.imageGroups = (lesson.imageGroups || []).filter(group => !groupsToRemove.has(String(group.id)));
+      lesson.images = remainingImages;
+      lesson.image = lesson.images[0] || null;
+      (lesson.questions || []).forEach(function(question) {
+        if (String(question.imageId || '') === id) question.imageId = '';
+      });
+      persist(false);
+      renderEditor();
+      toast('Figure and its Markdown references were removed.');
+      return;
+    }
+    if (lesson && (action === 'move-figure-up' || action === 'move-figure-down')) {
+      moveFigureReference(lesson, String(el.dataset.id || ''), action === 'move-figure-up' ? -1 : 1);
+      return;
+    }
+    if (lesson && (action === 'insert-inline-lesson-reference' || action === 'insert-lesson-reference-card')) {
+      const ref = lessonReferenceIndex.get(String(el.dataset.id || ''));
+      if (!ref) {
+        toast('That lesson is no longer in the published catalogue. Search again.');
+        return;
+      }
+      const token = action === 'insert-lesson-reference-card'
+        ? `[[lesson-card:${ref.id}]]` : `[[lesson:${ref.id}]]`;
+      insertLessonContentAtCaret(lesson, token, action === 'insert-lesson-reference-card');
+      toast(action === 'insert-lesson-reference-card' ? 'Lesson card inserted at the saved cursor position.' : 'Lesson link inserted at the saved cursor position.');
+      return;
+    }
+    baseHandleActionWithFigures(action, el);
+  };
+  document.addEventListener('input',event=>{
+    const el=event.target;
+    const l=currentLesson();
+    if(!l)return;
+    if(el.matches('[data-teaching-figure][data-field]')){
+      const figure=(l.teachingFigures||[]).find(item=>String(item.id)===el.dataset.teachingFigure);
+      if(figure){figure[el.dataset.field]=el.value;schedulePersist();}
+      return;
+    }
+    if(el.matches('[data-teaching-figure-card][data-field]')){
+      const figure=(l.teachingFigures||[]).find(item=>String(item.id)===el.dataset.teachingFigureCard);
+      const card=figure?.cards?.[Number(el.dataset.index)];
+      if(card){card[el.dataset.field]=el.value;schedulePersist();}
+      return;
+    }
+    if(el.matches('[data-image-group][data-field]')){
+      const group=(l.imageGroups||[]).find(item=>String(item.id)===el.dataset.imageGroup);
+      if(group){group[el.dataset.field]=el.value;schedulePersist();}
+      return;
+    }
+    if(!el.matches('[data-image-item][data-field]'))return;
+    if(!Array.isArray(l.images))l.images=l.image?[l.image]:[];
+    const im=l.images.find(x=>x.id===el.dataset.imageItem);
+    if(im){im[el.dataset.field]=el.value;l.image=l.images[0]||null;schedulePersist();}
+  });
+  document.addEventListener('change', function(event) {
+    const input = event.target;
+    if (!input.matches('[data-question-image-upload]')) return;
+    const file = input.files && input.files[0];
+    const lesson = currentLesson();
+    if (!file || !lesson) return;
+    const lessonId = lesson.id;
+    const questionId = String(input.dataset.questionImageUpload || '');
+    const question = (lesson.questions || []).find(function(item) { return String(item.id) === questionId; });
+    if (!question) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 1.5 * 1024 * 1024) {
+      toast('Choose a JPG, PNG or WebP image no larger than 1.5 MB.');
+      input.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function() {
+      const images = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
+      const image = {id:uid('asset'), name:file.name, title:'', alt:'', caption:'', data:String(reader.result || '')};
+      images.push(image);
+      lesson.images = images;
+      lesson.image = images[0] || null;
+      question.imageId = image.id;
+      persist(false);
+      if (currentLesson() && currentLesson().id === lessonId && state.tab === 'questions') renderEditor();
+      toast('Image attached to this question. Edit its title and caption under Images.');
+    };
+    reader.onerror = function() { toast('The question image could not be read.'); };
+    reader.readAsDataURL(file);
+  });
+  document.addEventListener('change', function(event) {
+    const input = event.target;
+    if (!input.matches('[data-question-image-picker]')) return;
+    renderEditor();
+  });
+  document.addEventListener('change',event=>{const el=event.target;if(el.id!=='multiImageUpload')return;const files=Array.from(el.files||[]);const l=currentLesson();if(!l||!files.length)return;if(!Array.isArray(l.images))l.images=l.image?[l.image]:[];const valid=files.filter(f=>['image/jpeg','image/png','image/webp'].includes(f.type)&&f.size<=1.5*1024*1024);if(valid.length!==files.length)toast('Skipped files that are not JPG, PNG or WebP under 1.5 MB.');let left=valid.length;if(!left)return;valid.forEach(file=>{const reader=new FileReader();reader.onload=()=>{l.images.push({id:uid('asset'),name:file.name,title:'',alt:'',caption:'',data:String(reader.result)});if(--left===0){l.image=l.images[0]||null;persist(false);renderEditor();toast(`${valid.length} image${valid.length===1?'':'s'} added.`);}};reader.readAsDataURL(file);});});
+  document.addEventListener('change',event=>{
+    const el=event.target;
+    if(!el.matches('[data-image-group-member]'))return;
+    const l=currentLesson();
+    if(!l)return;
+    const group=(l.imageGroups||[]).find(item=>String(item.id)===String(el.dataset.imageGroupMember));
+    if(!group)return;
+    if(!Array.isArray(group.imageIds))group.imageIds=[];
+    const imageId=String(el.dataset.imageId||'');
+    if(el.checked&&!group.imageIds.includes(imageId))group.imageIds.push(imageId);
+    if(!el.checked)group.imageIds=group.imageIds.filter(id=>id!==imageId);
+    const help=el.closest('.image-group-editor')?.querySelector('.help');
+    if(help)help.textContent=group.imageIds.length+' selected. Choose at least two images; each image can have its own title and caption.';
+    persist(false);
+  });
+  document.addEventListener('input', event => {
+    const el = event.target;
+    if (el.matches('[data-regional-block][data-field]')) {
+      const lesson = currentLesson();
+      const block = (lesson?.regionalBlocks || []).find(item => String(item.id) === String(el.dataset.regionalBlock));
+      if (block) { block[el.dataset.field] = el.value; schedulePersist(); }
+      return;
+    }
+    if (el.matches('[data-regional-variant][data-field]') && el.type !== 'checkbox' && el.tagName !== 'SELECT') {
+      const lesson = currentLesson();
+      const block = (lesson?.regionalBlocks || []).find(item => String(item.id) === String(el.dataset.blockId));
+      const variant = (block?.variants || []).find(item => String(item.id) === String(el.dataset.regionalVariant));
+      if (variant) { variant[el.dataset.field] = el.value; schedulePersist(); }
+    }
+  });
+  document.addEventListener('change', event => {
+    const el = event.target;
+    if (el.matches('[data-regional-variant][data-field]')) {
+      const lesson = currentLesson();
+      const block = (lesson?.regionalBlocks || []).find(item => String(item.id) === String(el.dataset.blockId));
+      const variant = (block?.variants || []).find(item => String(item.id) === String(el.dataset.regionalVariant));
+      if (!variant) return;
+      if (el.dataset.field === 'hidden') variant.hidden = el.checked;
+      else {
+        variant[el.dataset.field] = el.value;
+        if (el.dataset.field === 'scope') variant.code = el.value === 'region' ? 'APAC' : 'IN';
+      }
+      persist(false);
+      if (el.tagName === 'SELECT') renderEditor();
+      return;
+    }
+    if (el.id === 'previewAudienceSelect' && state.tab === 'preview') renderEditor();
+  });
+  document.addEventListener('selectionchange', captureRichEditorRange);
+  document.addEventListener('input', event => {
+    const editor = event.target.closest?.('[data-visual-editor]');
+    if (!editor) return;
+    captureRichEditorRange();
+    syncVisualEditorToModel(editor);
+  });
+  document.addEventListener('mousedown', event => {
+    if (event.target.closest?.('[data-rich-command], [data-rich-format]')) event.preventDefault();
+  });
+  document.addEventListener('click', event => {
+    const button = event.target.closest?.('[data-rich-command]');
+    if (!button) return;
+    event.preventDefault();
+    const editor = button.closest('[data-rich-editor-wrapper]')?.querySelector('[data-visual-editor]');
+    if (!editor) return;
+    restoreRichEditorSelection(editor);
+    const command = button.dataset.richCommand;
+    if (command === 'table') {
+      document.execCommand('insertHTML', false, '<table><thead><tr><th>Heading 1</th><th>Heading 2</th></tr></thead><tbody><tr><td>Detail</td><td>Detail</td></tr></tbody></table><p><br></p>');
+    } else if (command === 'link') {
+      const selection = window.getSelection();
+      const selectedText = selection && selection.toString();
+      if (!selectedText) {
+        const label = window.prompt('Link text');
+        if (label === null || !label.trim()) return;
+        const url = window.prompt('Website URL (https://…)');
+        if (url === null || !/^https?:\/\//i.test(url.trim())) { toast('Enter a valid HTTP or HTTPS website URL.'); return; }
+        document.execCommand('insertHTML', false, '<a href="' + esc(url.trim()) + '">' + esc(label.trim()) + '</a>');
+      } else {
+        const url = window.prompt('Website URL (https://…)');
+        if (url === null || !/^https?:\/\//i.test(url.trim())) { toast('Enter a valid HTTP or HTTPS website URL.'); return; }
         document.execCommand('createLink', false, url.trim());
       }
     } else {
