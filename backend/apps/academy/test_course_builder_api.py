@@ -940,7 +940,7 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
             encoding="utf-8"
         )
         self.assertIn(
-            """const button=target?.closest(\'#newCourseButton, [data-action="new-course"]\');""",
+            '''const button=target?.closest(\'#newCourseButton, [data-action="new-course"]\');''',
             source,
         )
         self.assertIn("event.stopImmediatePropagation();createNewCourseDraft(button);},true);", source)
