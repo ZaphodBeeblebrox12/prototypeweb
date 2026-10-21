@@ -738,6 +738,25 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 #previewAudienceSelect { color:#fff; max-width:220px; }
 #previewAudienceSelect option { color:#23332a; background:#fff; }
 @media(max-width:760px) { .regional-image-row { grid-template-columns:minmax(0,1fr); } }
+
+/* True visual authoring canvas. */
+.rich-editor-wrapper { border:1px solid var(--line); border-radius:11px; overflow:hidden; background:var(--panel); }
+.rich-editor-toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:5px; padding:8px; border-bottom:1px solid var(--line); background:var(--panel-soft); }
+.rich-editor-toolbar button,.rich-editor-toolbar select { min-height:33px; padding:5px 9px; border:1px solid var(--line); border-radius:7px; background:var(--panel); color:var(--ink); font-size:12px; font-weight:700; }
+.rich-editor-toolbar button:hover { border-color:var(--site-primary); color:var(--site-primary); }
+.rich-editor-canvas { min-height:150px; padding:15px 17px; background:var(--panel); color:var(--ink); font-size:15px; line-height:1.8; overflow-wrap:anywhere; outline:none; }
+.rich-editor-canvas-main { min-height:390px; }
+.rich-editor-canvas:focus { box-shadow:inset 0 0 0 2px #87A48B; }
+.rich-editor-canvas:empty::before { content:attr(data-placeholder); color:var(--muted); pointer-events:none; }
+.rich-editor-canvas h1,.rich-editor-canvas h2,.rich-editor-canvas h3,.rich-editor-canvas h4,.rich-editor-canvas h5,.rich-editor-canvas h6 { color:var(--site-primary); font-family:var(--site-font-heading); font-weight:500; line-height:1.2; }
+.rich-editor-canvas h1 { font-size:2em; }.rich-editor-canvas h2 { font-size:1.7em; }.rich-editor-canvas h3 { font-size:1.45em; }
+.rich-editor-canvas blockquote { margin:14px 0; padding:10px 15px; border-left:3px solid var(--site-secondary); background:var(--panel-soft); }
+.rich-editor-canvas table { width:100%; border-collapse:collapse; margin:12px 0; }
+.rich-editor-canvas th,.rich-editor-canvas td { border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
+.rich-editor-canvas th { background:var(--panel-soft); font-weight:800; }
+.tt-editor-token { display:inline-flex; align-items:center; max-width:100%; margin:2px 3px; padding:6px 10px; border:1px solid #c8d5c4; border-radius:7px; background:#eef3e9; color:#2d5b41; font:700 11px/1.4 var(--site-font-body); white-space:normal; vertical-align:middle; user-select:all; }
+.tt-editor-token-block { display:block; width:max-content; max-width:100%; margin:9px 0; border-left:3px solid var(--site-secondary); background:#f4f0e3; }
+@media(max-width:620px) { .rich-editor-toolbar { gap:4px; padding:6px; }.rich-editor-toolbar button,.rich-editor-toolbar select { min-height:32px; padding:5px 7px; font-size:11px; }.rich-editor-canvas { padding:12px; font-size:14px; } }
 </style>
 </head>
 <body>
@@ -842,7 +861,225 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   function renderSidebar(){const list=$('#courseList');if(!list)return;const query=($('#courseSearch')?.value||'').trim().toLowerCase();const courses=state.courses.filter(c=>c.title.toLowerCase().includes(query));$('#courseCount').textContent=`${state.courses.length} ${state.courses.length===1?'course':'courses'}`;list.innerHTML=courses.map(c=>`<button type="button" class="course-item ${c.id===state.selectedCourseId?'active':''}" data-action="select-course" data-id="${esc(c.id)}"><span class="course-item-title"><span>${esc(c.title||'Untitled course')}</span><span class="mini-status ${c.status==='published'?'live':''}"></span></span><span class="course-item-meta"><span class="pill ${c.status==='published'?'published':'status'}">${esc(activeStatus(c))}</span><span>${allLessons(c).length} lessons</span></span></button>`).join('')||'<div class="empty-state"><p>No courses match that search.</p></div>';}
   function courseFields(c){return `<div class="section-intro"><h3>Course details</h3><p>Write the public-facing promise first. Save a shared draft at any stage, then submit it for review. Approved and published courses appear in the website Courses tab.</p></div><div class="form-grid"><div class="field full"><label for="courseTitle">Course title</label><input class="input" id="courseTitle" data-entity="course" data-field="title" value="${esc(c.title)}" maxlength="200" placeholder="e.g. Understand Market Structure"></div><div class="field"><label for="courseSlug">Course URL slug</label><input class="input" id="courseSlug" data-entity="course" data-field="slug" value="${esc(c.slug)}" maxlength="150"><span class="help">Keep stable after a course is published.</span></div><div class="field"><label for="courseCategory">Topic / category</label><input class="input" id="courseCategory" data-entity="course" data-field="category" value="${esc(c.category)}" placeholder="Chart reading"></div><div class="field full"><label for="courseSummary">Short summary</label><textarea class="textarea" id="courseSummary" data-entity="course" data-field="summary" maxlength="360" placeholder="One or two sentences for the course card.">${esc(c.summary)}</textarea><span class="help">Used in the catalogue card. Aim for a concise, clear promise.</span></div><div class="field full"><label for="courseDescription">Course description</label><textarea class="textarea" id="courseDescription" data-entity="course" data-field="description" placeholder="Who is this for, what is included, and how will they use it?">${esc(c.description)}</textarea><span class="help">Supports Markdown headings, bullet lists, bold text and links. Preview them in the learner preview below.</span></div><div class="field"><label for="courseLevel">Level</label><select class="select" id="courseLevel" data-entity="course" data-field="level">${['Beginner','Foundational','Intermediate','Advanced','Mixed experience'].map(v=>`<option ${v===c.level?'selected':''}>${v}</option>`).join('')}</select></div><div class="field"><label for="courseDuration">Expected study time</label><input class="input" id="courseDuration" data-entity="course" data-field="duration" value="${esc(c.duration)}" placeholder="e.g. 4 hours"></div><div class="field full"><label>Learning outcomes</label><div id="outcomesList">${c.outcomes.map((v,i)=>`<div class="option-row"><span class="pill">${String(i+1).padStart(2,'0')}</span><input class="input" data-entity="outcome" data-index="${i}" value="${esc(v)}" aria-label="Learning outcome ${i+1}"><button class="icon-btn" type="button" data-action="remove-outcome" data-index="${i}" aria-label="Remove outcome">×</button></div>`).join('')}</div><button class="btn small" type="button" data-action="add-outcome">＋ Add outcome</button></div><div class="field"><label for="coursePrice">Display price (optional)</label><input class="input" id="coursePrice" data-entity="course" data-field="price" value="${esc(c.price)}" placeholder="e.g. ₹999"><span class="help">Display text only. It does not create or activate checkout.</span></div><div class="field"><label for="coursePriceNote">Price note</label><input class="input" id="coursePriceNote" data-entity="course" data-field="priceNote" value="${esc(c.priceNote)}"></div><div class="field full coming-soon-field"><label class="checkbox-row" for="courseComingSoon"><input id="courseComingSoon" type="checkbox" data-entity="course" data-field="comingSoon" ${c.comingSoon?'checked':''}> Announce this course publicly as “Coming soon”</label><span class="help">After you save, the public Courses catalogue can show the title and short summary. Lessons, answer keys and enrolment stay unavailable until you publish the course.</span></div></div><div class="helper-note"><strong>Course state:</strong> ${c.status==='published'?'This course already has a published version. Save your edits as a draft revision; the live catalogue version remains until you publish the updates.':c.status==='draft-update'?'Unpublished changes are saved separately; the current published catalogue card remains live.':'This is a private draft. It will not appear in Courses offered until you publish it.'}</div>`;}
   function curriculumFields(c){const m=currentModule()||c.modules[0];const l=currentLesson()||m?.lessons[0];return `<div class="section-intro"><h3>Build the curriculum</h3><p>Keep the structure easy to scan. Add modules, then add lessons within each module. Reordering controls here are functional in this preview; the production version will save their positions to Django.</p></div><div class="curriculum-layout"><div class="outline-panel"><div class="outline-panel-head"><strong>Course outline</strong><button class="btn small" data-action="add-module" type="button">＋ Module</button></div><div id="curriculumTree">${c.modules.map((mod,mi)=>`<div class="module-block"><div class="module-row"><button class="module-select ${m?.id===mod.id?'active':''}" type="button" data-action="select-module" data-id="${esc(mod.id)}">${String(mi+1).padStart(2,'0')} · ${esc(mod.title)}</button><button class="icon-btn" type="button" data-action="move-module-up" data-id="${esc(mod.id)}" aria-label="Move module up" ${mi===0?'disabled':''}>↑</button><button class="icon-btn" type="button" data-action="move-module-down" data-id="${esc(mod.id)}" aria-label="Move module down" ${mi===c.modules.length-1?'disabled':''}>↓</button></div>${mod.lessons.map((lesson,li)=>`<div class="lesson-row"><button class="lesson-select ${l?.id===lesson.id?'active':''}" type="button" data-action="select-lesson" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}">${String(mi+1)}.${li+1} ${esc(lesson.title)}</button><button class="icon-btn" type="button" data-action="move-lesson-up" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}" aria-label="Move lesson up" ${li===0?'disabled':''}>↑</button><button class="icon-btn" type="button" data-action="move-lesson-down" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}" aria-label="Move lesson down" ${li===mod.lessons.length-1?'disabled':''}>↓</button></div>`).join('')}<div style="padding:6px 7px 3px"><button class="btn small" type="button" data-action="add-lesson" data-id="${esc(mod.id)}">＋ Add lesson</button><button class="btn small danger" type="button" data-action="delete-module" data-id="${esc(mod.id)}" ${c.modules.length===1?'disabled':''}>Remove</button></div></div>`).join('')}</div></div><div class="lesson-editor-card">${m&&l?`<h4>Edit selected lesson</h4><p class="microcopy">Changing titles or order does not disturb other lessons. Lesson UUIDs and student progress are preserved in the production Academy when a course is updated.</p><div class="field"><label>Module title</label><input class="input" data-entity="module" data-field="title" value="${esc(m.title)}"></div><div class="field" style="margin-top:11px"><label>Module summary</label><textarea class="textarea" data-entity="module" data-field="description">${esc(m.description)}</textarea></div><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><div class="field"><label>Lesson title</label><input class="input" data-entity="lesson" data-field="title" value="${esc(l.title)}"></div><div class="field" style="margin-top:11px"><label>Short lesson summary</label><textarea class="textarea" data-entity="lesson" data-field="summary">${esc(l.summary)}</textarea></div><div class="lesson-meta-grid" style="margin-top:11px"><div class="field"><label>Lesson format</label><select class="select" data-entity="lesson" data-field="format">${['reading','video','interactive','quiz'].map(v=>`<option value="${v}" ${l.format===v?'selected':''}>${v[0].toUpperCase()+v.slice(1)}</option>`).join('')}</select></div><div class="field"><label>Minutes</label><input class="input" type="number" min="1" max="360" data-entity="lesson" data-field="minutes" value="${Number(l.minutes)||12}"></div></div><div class="q-actions"><button class="btn small" type="button" data-action="delete-lesson" data-id="${esc(l.id)}" data-module-id="${esc(m.id)}" ${m.lessons.length===1?'disabled':''}>Remove lesson</button><button class="btn small primary" type="button" data-action="go-lesson">Edit lesson content →</button></div>`:'<div class="empty-state"><p>Create a module and lesson to start editing.</p></div>'}</div></div>`;}
-  function lessonFields(l){if(l&&!l.notebook)l.notebook={title:'Before you make the call',prompts:[{label:'Observe',text:'Describe the evidence visible in the chart.'},{label:'Interpret',text:'State one possible reading and a reasonable alternative.'},{label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}]};if(l&&l.notebook&&String(l.notebook.title||'').trim()==='Your Trading Notebook')l.notebook.title='Before you make the call';if(l&&!l.videoUrl)l.videoUrl='';return `<div class="section-intro"><h3>Lesson content</h3><p>Write in Markdown-style sections. The learner preview renders headings and paragraphs using the TradeThesis Learning Room rhythm. Source Markdown remains the intended authoring format in the real system.</p></div>${l?`<div class="field"><label>Lesson body</label><textarea class="textarea" style="min-height:390px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px" data-entity="lesson" data-field="content" placeholder="## The question\n\nExplain the practical problem...">${esc(l.content)}</textarea><span class="help">Use headings from # through ######. To insert an image between paragraphs, click the lesson body where it belongs, then open Figures and select Insert at cursor. This placement is preserved in the website preview.</span></div>${courseCardPickerMarkup()}<div class="helper-note">The production editor will validate and sanitise content on the server before it reaches learners. Markdown source will not be copied into a public static page.</div><div class="field" style="margin-top:14px"><label>Video URL (optional)</label><input class="input" type="url" data-entity="lesson" data-field="videoUrl" value="${esc(l.videoUrl||"")}" placeholder="https://…"><span class="help">Direct MP4/WebM/OGG links play inline. Other URLs are shown as external video links.</span></div><div class="related-course-box"><h4>Notebook prompts</h4><p>These editable prompts appear in the learner’s Your Trading Notebook section.</p><div class="field"><label>Notebook heading</label><input class="input" data-entity="notebook" data-field="title" value="${esc(l.notebook?.title||"Before you make the call")}"><span class="help">This is the large heading shown inside the Your Trading Notebook section of the learner view.</span></div>${(l.notebook?.prompts||[]).map((prompt,index)=>`<div class="q-card"><div class="field"><label>Prompt ${index+1} label</label><input class="input" data-entity="notebook-prompt" data-index="${index}" data-field="label" value="${esc(prompt.label||"")}"></div><div class="field" style="margin-top:8px"><label>Prompt text</label><textarea class="textarea" data-entity="notebook-prompt" data-index="${index}" data-field="text">${esc(prompt.text||"")}</textarea></div></div>`).join("")}</div><div class="notebook-editor-preview"><h4>How learners will see the notebook</h4><p>Preview the styled notebook block here. Changes to the heading or prompts above update this preview.</p><div data-notebook-preview>${notebookPreviewMarkup(l)}</div></div><div class="related-course-box"><h4>Related-course metadata (optional)</h4><p>These selections record course relationships for discovery; they do not insert a card into the lesson body. To place the mini Option 4 preview inside the lesson, use “Insert a companion-course card (Option 4)” directly below the Lesson body field. Individual lesson links are managed separately.</p><input class="input" type="search" data-related-course-search placeholder="Search published or announced courses by title or topic" aria-label="Search published or announced related courses"><div class="related-course-list">${demoOffers.map(course=>{const checked=(l.relatedCourseIds||[]).includes(course.id);return `<div class="related-course-item related-course-entry"><label class="related-course-choice"><input type="checkbox" data-related-course="${esc(course.id)}" ${checked ? "checked" : ""}><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">${esc(course.state)}${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}${course.duration ? " · " + esc(course.duration) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></label></div>`;}).join("")}${comingSoonOffers.map(course=>`<div class="related-course-item related-course-entry"><div class="related-course-choice"><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">Coming soon${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></div></div>`).join("")}${demoOffers.length || comingSoonOffers.length ? "" : '<p class="microcopy">No published or announced courses are available to associate yet.</p>'}</div><div class="helper-note">These selections record related-course metadata only. Use the dedicated Option 4 picker directly below Lesson body to insert a visual companion-course card into the lesson. No course is automatically published.</div></div><div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap"><button class="btn" type="button" data-action="go-curriculum">← Curriculum</button><button class="btn primary" type="button" data-action="go-questions">Edit practice questions →</button></div>`:'<div class="empty-state"><p>Select a lesson in the curriculum first.</p></div>'}`;}
+  let richEditorRange = null;
+  function richTokenIsBlock(token) {
+    return !String(token || '').startsWith('[[lesson:') || String(token || '').startsWith('[[lesson-card:');
+  }
+  function richTokenLabel(token) {
+    const value = String(token || '');
+    const lesson = currentLesson();
+    const images = Array.isArray(lesson?.images) ? lesson.images : (lesson?.image ? [lesson.image] : []);
+    const imageMatch = value.match(/^!\\[([^\\]]*)\\]\\(asset:\\/\\/([^)]+)\\)$/);
+    if (imageMatch) {
+      const image = images.find(item => String(item.id) === imageMatch[2] || String(item.assetUuid || '') === imageMatch[2]);
+      return 'Chart · ' + (image ? String(image.title || '').trim() || String(image.alt || '').trim() || String(image.name || '').trim() || 'Uploaded image' : imageMatch[1] || 'Uploaded image');
+    }
+    let match = value.match(/^\\[\\[regional-block:([^\\]]+)\\]\\]$/);
+    if (match) {
+      const block = (lesson?.regionalBlocks || []).find(item => String(item.id) === match[1]);
+      return 'Regional content · ' + (block?.title || 'Content block');
+    }
+    match = value.match(/^\\[\\[image-group:([^\\]]+)\\]\\]$/);
+    if (match) {
+      const group = (lesson?.imageGroups || []).find(item => String(item.id) === match[1]);
+      return 'Image group · ' + (group?.title || 'Image group');
+    }
+    match = value.match(/^\\[\\[teaching-figure:([^\\]]+)\\]\\]$/);
+    if (match) {
+      const figure = (lesson?.teachingFigures || []).find(item => String(item.id) === match[1]);
+      return 'Teaching figure · ' + (figure?.title || 'Comparison');
+    }
+    match = value.match(/^\\[\\[lesson-tab:(idea|examples|practice)\\]\\]$/);
+    if (match) return 'Section placement · ' + ({idea:'The idea',examples:'Chart examples',practice:'Test your reading'}[match[1]]);
+    match = value.match(/^\\[\\[course-card:(coming-soon:)?([^\\]]+)\\]\\]$/);
+    if (match) {
+      const course = eligibleCompanionCourses().find(item => String(item.referenceId || item.id).toLowerCase() === String(match[2]).toLowerCase());
+      return (match[1] ? 'Coming-soon course · ' : 'Companion course · ') + (course?.title || 'Course reference');
+    }
+    match = value.match(/^\\[\\[(lesson|lesson-card):([^\\]]+)\\]\\]$/);
+    if (match) {
+      const ref = demoLessonRefs.find(item => String(item.id).toLowerCase() === String(match[2]).toLowerCase());
+      return (match[1] === 'lesson-card' ? 'Related lesson card · ' : 'Lesson link · ') + (ref?.title || 'Lesson reference');
+    }
+    return 'Managed content block';
+  }
+  function markdownToVisualEditor(source) {
+    const tokens = [];
+    const addToken = token => {
+      const marker = 'TTEDITORBLOCKTOKEN' + tokens.length + 'END';
+      tokens.push({marker,token:String(token)});
+      return marker;
+    };
+    let prepared = String(source || '').replace(/!\\[([^\\]]*)\\]\\(asset:\\/\\/([^)\\s]+)(?:\\s+[^)]*)?\\)/g,
+      (match, alt, id) => addToken('![' + String(alt || '').replace(/\\]/g,'') + '](asset://' + id + ')'));
+    prepared = prepared.replace(/\\[\\[(?:regional-block|image-group|teaching-figure|lesson-tab|lesson|lesson-card|course-card):[^\\]]+\\]\\]/g, addToken);
+    let html = typeof baseMarkdownRenderer === 'function' ? baseMarkdownRenderer(prepared) : '<p>' + esc(prepared) + '</p>';
+    tokens.forEach(item => {
+      const block = richTokenIsBlock(item.token);
+      const markup = '<span class="tt-editor-token' + (block ? ' tt-editor-token-block' : '') + '" contenteditable="false" data-editor-token="' + esc(item.token) + '"' + (block ? ' data-editor-block="true"' : '') + ' role="note">' + esc(richTokenLabel(item.token)) + '</span>';
+      html = html.split('<p>' + item.marker + '</p>').join(markup);
+      html = html.split(item.marker).join(markup);
+    });
+    return html;
+  }
+  function richInlineMarkdown(node) {
+    if (!node) return '';
+    if (node.nodeType === 3) return String(node.nodeValue || '').replace(/\\u00a0/g, ' ');
+    if (node.nodeType !== 1) return '';
+    if (node.hasAttribute('data-editor-token')) {
+      const token = node.getAttribute('data-editor-token') || '';
+      return node.getAttribute('data-editor-block') === 'true' ? '\\n\\n' + token + '\\n\\n' : token;
+    }
+    const tag = node.tagName.toLowerCase();
+    if (tag === 'br') return '\\n';
+    const inner = Array.from(node.childNodes).map(richInlineMarkdown).join('');
+    if (tag === 'strong' || tag === 'b') return '**' + inner + '**';
+    if (tag === 'em' || tag === 'i') return '*' + inner + '*';
+    if (tag === 'del' || tag === 's' || tag === 'strike') return '~~' + inner + '~~';
+    if (tag === 'a') {
+      const href = String(node.getAttribute('href') || '').trim();
+      return /^https?:\\/\\//i.test(href) ? '[' + inner + '](' + href.replace(/[)\\s]/g,'') + ')' : inner;
+    }
+    return inner;
+  }
+  function richTableMarkdown(table) {
+    const rows = Array.from(table.querySelectorAll('tr'));
+    if (!rows.length) return '';
+    const cells = rows.map(row => Array.from(row.querySelectorAll('th,td')).map(cell =>
+      richInlineMarkdown(cell).replace(/\\|/g,'\\\\|').replace(/\\n/g,' ').trim()
+    ));
+    const width = Math.max(1, ...cells.map(row => row.length));
+    const lines = cells.map(row => {
+      while (row.length < width) row.push('');
+      return '| ' + row.join(' | ') + ' |';
+    });
+    if (lines.length === 1) lines.push('| ' + Array(width).fill('---').join(' | ') + ' |');
+    else lines.splice(1, 0, '| ' + Array(width).fill('---').join(' | ') + ' |');
+    return lines.join('\\n');
+  }
+  function richBlockMarkdown(node) {
+    if (!node) return '';
+    if (node.nodeType === 3) return String(node.nodeValue || '').trim();
+    if (node.nodeType !== 1) return '';
+    if (node.hasAttribute('data-editor-token')) return node.getAttribute('data-editor-token') || '';
+    const tag = node.tagName.toLowerCase();
+    if (/^h[1-6]$/.test(tag)) return '#'.repeat(Number(tag.slice(1))) + ' ' + richInlineMarkdown(node).trim();
+    if (tag === 'p') return richInlineMarkdown(node).trim();
+    if (tag === 'hr') return '---';
+    if (tag === 'blockquote') return richInlineMarkdown(node).trim().split('\\n').map(line => '> ' + line).join('\\n');
+    if (tag === 'ul' || tag === 'ol') {
+      const items = Array.from(node.children).filter(child => child.tagName && child.tagName.toLowerCase() === 'li');
+      return items.map((item,index) => {
+        const content = Array.from(item.childNodes).map(child => child.nodeType === 1 && ['ul','ol'].includes(child.tagName.toLowerCase()) ? '' : richInlineMarkdown(child)).join('').trim();
+        return tag === 'ol' ? (index+1) + '. ' + content : '- ' + content;
+      }).join('\\n');
+    }
+    if (tag === 'table') return richTableMarkdown(node);
+    if (tag === 'pre') return '~~~\\n' + node.textContent.replace(/^\\n+|\\n+$/g,'') + '\\n~~~';
+    if (tag === 'br') return '';
+    if (tag === 'div' || tag === 'section' || tag === 'article' || tag === 'aside') {
+      const hasBlockChild = Array.from(node.children).some(child => /^(p|div|h[1-6]|ul|ol|blockquote|hr|table|pre)$/.test(child.tagName.toLowerCase()) || child.hasAttribute('data-editor-token'));
+      if (hasBlockChild) return Array.from(node.childNodes).map(richBlockMarkdown).filter(value => value.trim()).join('\\n\\n');
+      return richInlineMarkdown(node).trim();
+    }
+    return richInlineMarkdown(node).trim();
+  }
+  function visualEditorToMarkdown(editor) {
+    const parts = Array.from(editor.childNodes).map(richBlockMarkdown).filter(value => String(value || '').trim());
+    return parts.join('\\n\\n').replace(/\\u00a0/g,' ').replace(/\\r\\n?/g,'\\n').replace(/\\n[ \\t]+\\n/g,'\\n\\n').replace(/\\n{3,}/g,'\\n\\n').trim();
+  }
+  function visualEditorMarkup(value, options) {
+    options = options || {};
+    const kind = String(options.kind || 'main');
+    const blockId = String(options.blockId || '');
+    const variantId = String(options.variantId || '');
+    const field = kind === 'main' ? 'content' : (kind === 'regional-base' ? 'baseContent' : 'content');
+    const minClass = kind === 'main' ? ' rich-editor-canvas-main' : ' rich-editor-canvas-regional';
+    return '<div class="rich-editor-wrapper" data-rich-editor-wrapper>' +
+      '<div class="rich-editor-toolbar" role="toolbar" aria-label="Text formatting">' +
+      '<select data-rich-format aria-label="Text style"><option value="p">Paragraph</option><option value="h1">Heading 1</option><option value="h2">Heading 2</option><option value="h3">Heading 3</option><option value="h4">Heading 4</option><option value="h5">Heading 5</option><option value="h6">Heading 6</option><option value="blockquote">Quote</option></select>' +
+      '<button type="button" data-rich-command="bold" aria-label="Bold"><strong>B</strong></button><button type="button" data-rich-command="italic" aria-label="Italic"><em>I</em></button><button type="button" data-rich-command="strikeThrough" aria-label="Strikethrough"><s>S</s></button>' +
+      '<button type="button" data-rich-command="insertUnorderedList" aria-label="Bulleted list">• List</button><button type="button" data-rich-command="insertOrderedList" aria-label="Numbered list">1. List</button>' +
+      '<button type="button" data-rich-command="link" aria-label="Insert link">Link</button><button type="button" data-rich-command="insertHorizontalRule" aria-label="Insert divider">Divider</button><button type="button" data-rich-command="table" aria-label="Insert table">Table</button><button type="button" data-rich-command="undo" aria-label="Undo">Undo</button><button type="button" data-rich-command="redo" aria-label="Redo">Redo</button></div>' +
+      '<div class="rich-editor-canvas' + minClass + '" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="' + (kind === 'main' ? 'Lesson body rich text editor' : 'Regional content rich text editor') + '" data-visual-editor="true" data-visual-kind="' + esc(kind) + '" data-block-id="' + esc(blockId) + '" data-variant-id="' + esc(variantId) + '" data-field="' + field + '" data-placeholder="Start writing your lesson…">' +
+      markdownToVisualEditor(value) + '</div></div>';
+  }
+  function syncVisualEditorToModel(editor) {
+    const lesson = currentLesson();
+    if (!lesson || !editor) return;
+    const markdown = visualEditorToMarkdown(editor);
+    const kind = editor.dataset.visualKind;
+    if (kind === 'main') lesson.content = markdown;
+    else if (kind === 'regional-base') {
+      const block = (lesson.regionalBlocks || []).find(item => String(item.id) === String(editor.dataset.blockId));
+      if (block) block.baseContent = markdown;
+    } else if (kind === 'regional-variant') {
+      const block = (lesson.regionalBlocks || []).find(item => String(item.id) === String(editor.dataset.blockId));
+      const variant = (block?.variants || []).find(item => String(item.id) === String(editor.dataset.variantId));
+      if (variant) variant.content = markdown;
+    }
+    schedulePersist();
+  }
+  function restoreRichEditorSelection(editor) {
+    if (!editor) return;
+    if (richEditorRange && richEditorRange.editor === editor && editor.contains(richEditorRange.range.commonAncestorContainer)) {
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(richEditorRange.range);
+      return;
+    }
+    editor.focus();
+    const range = document.createRange();
+    range.selectNodeContents(editor);
+    range.collapse(false);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+  function captureRichEditorRange() {
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+    const range = selection.getRangeAt(0);
+    const anchor = range.commonAncestorContainer.nodeType === 1 ? range.commonAncestorContainer : range.commonAncestorContainer.parentElement;
+    const editor = anchor?.closest?.('[data-visual-editor]');
+    if (!editor || !editor.contains(range.startContainer)) return;
+    richEditorRange = {editor,range:range.cloneRange()};
+    if (editor.dataset.visualKind === 'main') {
+      const prefixRange = document.createRange();
+      prefixRange.selectNodeContents(editor);
+      try { prefixRange.setEnd(range.startContainer,range.startOffset); } catch (_) { return; }
+      const prefix = document.createElement('div');
+      prefix.appendChild(prefixRange.cloneContents());
+      const lesson = currentLesson();
+      if (lesson) {
+        const offset = visualEditorToMarkdown(prefix).length;
+        lessonContentCaret = {lessonId:lesson.id,start:offset,end:offset};
+      }
+    }
+  }
+  function insertVisualTokenAtCursor(editor, token, isBlock) {
+    if (!editor) return;
+    restoreRichEditorSelection(editor);
+    const selection = window.getSelection();
+    if (!selection || !selection.rangeCount) return;
+    const range = selection.getRangeAt(0);
+    range.deleteContents();
+    const chip = document.createElement('span');
+    chip.className = 'tt-editor-token' + (isBlock ? ' tt-editor-token-block' : '');
+    chip.contentEditable = 'false';
+    chip.dataset.editorToken = token;
+    if (isBlock) chip.dataset.editorBlock = 'true';
+    chip.setAttribute('role','note');
+    chip.textContent = richTokenLabel(token);
+    range.insertNode(chip);
+    range.setStartAfter(chip);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    richEditorRange = {editor,range:range.cloneRange()};
+    syncVisualEditorToModel(editor);
+  }
+  function lessonFields(l){if(l&&!l.notebook)l.notebook={title:'Before you make the call',prompts:[{label:'Observe',text:'Describe the evidence visible in the chart.'},{label:'Interpret',text:'State one possible reading and a reasonable alternative.'},{label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}]};if(l&&l.notebook&&String(l.notebook.title||'').trim()==='Your Trading Notebook')l.notebook.title='Before you make the call';if(l&&!l.videoUrl)l.videoUrl='';return `<div class="section-intro"><h3>Lesson content</h3><p>Write and format directly in the editor. Use the toolbar for headings, emphasis, lists, links, quotes, dividers and tables; figures and regional blocks remain managed content items.</p></div>${l?`<div class="field"><label>Lesson body</label>${visualEditorMarkup(l.content, {kind:"main"})}<span class="help">Use headings from # through ######. To insert an image between paragraphs, click the lesson body where it belongs, then open Figures and select Insert at cursor. This placement is preserved in the website preview.</span></div>${courseCardPickerMarkup()}<div class="helper-note">The production editor will validate and sanitise content on the server before it reaches learners. Markdown source will not be copied into a public static page.</div><div class="field" style="margin-top:14px"><label>Video URL (optional)</label><input class="input" type="url" data-entity="lesson" data-field="videoUrl" value="${esc(l.videoUrl||"")}" placeholder="https://…"><span class="help">Direct MP4/WebM/OGG links play inline. Other URLs are shown as external video links.</span></div><div class="related-course-box"><h4>Notebook prompts</h4><p>These editable prompts appear in the learner’s Your Trading Notebook section.</p><div class="field"><label>Notebook heading</label><input class="input" data-entity="notebook" data-field="title" value="${esc(l.notebook?.title||"Before you make the call")}"><span class="help">This is the large heading shown inside the Your Trading Notebook section of the learner view.</span></div>${(l.notebook?.prompts||[]).map((prompt,index)=>`<div class="q-card"><div class="field"><label>Prompt ${index+1} label</label><input class="input" data-entity="notebook-prompt" data-index="${index}" data-field="label" value="${esc(prompt.label||"")}"></div><div class="field" style="margin-top:8px"><label>Prompt text</label><textarea class="textarea" data-entity="notebook-prompt" data-index="${index}" data-field="text">${esc(prompt.text||"")}</textarea></div></div>`).join("")}</div><div class="notebook-editor-preview"><h4>How learners will see the notebook</h4><p>Preview the styled notebook block here. Changes to the heading or prompts above update this preview.</p><div data-notebook-preview>${notebookPreviewMarkup(l)}</div></div><div class="related-course-box"><h4>Related-course metadata (optional)</h4><p>These selections record course relationships for discovery; they do not insert a card into the lesson body. To place the mini Option 4 preview inside the lesson, use “Insert a companion-course card (Option 4)” directly below the Lesson body field. Individual lesson links are managed separately.</p><input class="input" type="search" data-related-course-search placeholder="Search published or announced courses by title or topic" aria-label="Search published or announced related courses"><div class="related-course-list">${demoOffers.map(course=>{const checked=(l.relatedCourseIds||[]).includes(course.id);return `<div class="related-course-item related-course-entry"><label class="related-course-choice"><input type="checkbox" data-related-course="${esc(course.id)}" ${checked ? "checked" : ""}><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">${esc(course.state)}${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}${course.duration ? " · " + esc(course.duration) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></label></div>`;}).join("")}${comingSoonOffers.map(course=>`<div class="related-course-item related-course-entry"><div class="related-course-choice"><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">Coming soon${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></div></div>`).join("")}${demoOffers.length || comingSoonOffers.length ? "" : '<p class="microcopy">No published or announced courses are available to associate yet.</p>'}</div><div class="helper-note">These selections record related-course metadata only. Use the dedicated Option 4 picker directly below Lesson body to insert a visual companion-course card into the lesson. No course is automatically published.</div></div><div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap"><button class="btn" type="button" data-action="go-curriculum">← Curriculum</button><button class="btn primary" type="button" data-action="go-questions">Edit practice questions →</button></div>`:'<div class="empty-state"><p>Select a lesson in the curriculum first.</p></div>'}`;}
   function questionImageMarkup(q, l) {
     const images = Array.isArray(l.images) ? l.images : (l.image ? [l.image] : []);
     const image = images.find(function(item) {
@@ -1226,23 +1463,10 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   document.addEventListener('change',event=>{if(event.target.id!=='imageUpload')return;const file=event.target.files&&event.target.files[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)){toast('Choose a JPG, PNG or WebP image.');event.target.value='';return;}if(file.size>1.5*1024*1024){toast('This preview limits images to 1.5 MB.');event.target.value='';return;}const reader=new FileReader();reader.onload=()=>{const l=currentLesson();if(!l)return;l.image={id:uid('asset'),name:file.name,alt:$('#imageAlt')?.value||'',data:String(reader.result)};persist(false);renderEditor();toast('Image added to this lesson draft.');};reader.onerror=()=>toast('The image could not be read.');reader.readAsDataURL(file);});
   // Authoring enhancements: Markdown reference, multi-image upload, alt text and captions.
   const baseLessonFields = lessonFields;
-  lessonFields = function(l) { const html=baseLessonFields(l); return !l ? html : html + `<section class="markdown-guide"><h4>Markdown help — headings and formatting</h4><p>Use these patterns in the lesson body. The template should preserve the full hierarchy and formatting in the learner view.</p><ul><li><code># Heading 1</code> through <code>###### Heading 6</code> — all six heading levels. Use <code>##</code> for main sections and <code>###</code> for subsections.</li><li><code>**bold**</code>, <code>*italic*</code>, <code>~~strikethrough~~</code>, <code>&#96;inline code&#96;</code>.</li><li><code>- bullet</code> for unordered lists; <code>1. step</code> for numbered lists.</li><li><code>&gt; note</code> for blockquotes; <code>---</code> for a horizontal divider.</li><li><code>[link text](https://example.com)</code> for links. Only safe, trusted URLs should be allowed.</li><li><strong>Information tables:</strong> use a header row, a separator row and then one row per case, such as <code>| Context | Evidence | Decision |</code> followed by <code>| --- | --- | --- |</code>. The preview keeps wide tables horizontally scrollable on mobile.</li><li><code>![Alt text](asset://figure-id)</code> for a figure reference. Add the figure in Images, then insert its reference where it belongs.</li></ul><p>Copy the structure below into a lesson, then replace the example wording. Keep each heading, list item, quote and table row on its own line; blank lines between different block types make the structure clear.</p>
-<pre>## Notice
-Describe the evidence first.
-
-### Compare
-- Observation A
-- Observation B
-
-> A useful caution.
-
-**Key point:** keep conclusions conditional.
-
----
-
-### Apply
-1. State what would confirm the idea.
-2. Name what would invalidate it.</pre><p><strong>TradeThesis lesson rhythm:</strong> Notice → Compare → Apply → Review. Keep answer keys and rubrics in protected instructor-only material.</p></section>`; };
+  lessonFields = function(l) {
+    const html = baseLessonFields(l);
+    return !l ? html : html + '<section class="markdown-guide"><h4>Visual editor tips</h4><p>Select text and use the toolbar to apply formatting. Use Figures for charts, Regional content for country/region differences, and the companion-course controls for managed course cards. The saved lesson remains compatible with the canonical Learning Room renderer.</p></section>';
+  };
   const basePreviewFields = previewFields;
   previewFields = function(c) {
     let html = basePreviewFields(c);
@@ -1780,6 +2004,11 @@ Describe the evidence first.
 
   function insertLessonContentAtCaret(lesson, token, isBlock) {
     if (!lesson) return;
+    const visualEditor = $('#workspace [data-visual-editor][data-visual-kind="main"]');
+    if (visualEditor && state.tab === 'lesson') {
+      insertVisualTokenAtCursor(visualEditor, token, isBlock);
+      return;
+    }
     const content = String(lesson.content || '');
     const saved = lessonContentCaret && lessonContentCaret.lessonId === lesson.id
       ? lessonContentCaret : {start:content.length,end:content.length};
@@ -1849,7 +2078,7 @@ Describe the evidence first.
   renderEditor = function() {
     renderEditorBeforeReferenceAndMediaEnhancements();
     if (state.tab === 'lesson') {
-      const textarea = $('#workspace textarea[data-entity="lesson"][data-field="content"]');
+      const textarea = $('#workspace [data-visual-editor][data-visual-kind="main"]');
       const field = textarea && textarea.closest('.field');
       if (field && !$('#workspace [data-course-card-picker]')) {
         field.insertAdjacentHTML('afterend', courseCardPickerMarkup());
@@ -1860,14 +2089,18 @@ Describe the evidence first.
         else field.insertAdjacentHTML('afterend', lessonReferencePickerMarkup());
       }
       if (pendingLessonCaret && currentLesson()?.id === pendingLessonCaret.lessonId && textarea) {
-        const caret = pendingLessonCaret.position;
         pendingLessonCaret = null;
         requestAnimationFrame(() => {
-          const currentTextarea = $('#workspace textarea[data-entity="lesson"][data-field="content"]');
-          if (currentTextarea) {
-            currentTextarea.focus();
-            currentTextarea.setSelectionRange(caret, caret);
-            rememberLessonContentCaret(currentTextarea);
+          const currentEditor = $('#workspace [data-visual-editor][data-visual-kind="main"]');
+          if (currentEditor) {
+            currentEditor.focus();
+            const range = document.createRange();
+            range.selectNodeContents(currentEditor);
+            range.collapse(false);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            captureRichEditorRange();
           }
         });
       }
@@ -2310,6 +2543,56 @@ Describe the evidence first.
       return;
     }
     if (el.id === 'previewAudienceSelect' && state.tab === 'preview') renderEditor();
+  });
+  document.addEventListener('selectionchange', captureRichEditorRange);
+  document.addEventListener('input', event => {
+    const editor = event.target.closest?.('[data-visual-editor]');
+    if (!editor) return;
+    captureRichEditorRange();
+    syncVisualEditorToModel(editor);
+  });
+  document.addEventListener('mousedown', event => {
+    if (event.target.closest?.('[data-rich-command], [data-rich-format]')) event.preventDefault();
+  });
+  document.addEventListener('click', event => {
+    const button = event.target.closest?.('[data-rich-command]');
+    if (!button) return;
+    event.preventDefault();
+    const editor = button.closest('[data-rich-editor-wrapper]')?.querySelector('[data-visual-editor]');
+    if (!editor) return;
+    restoreRichEditorSelection(editor);
+    const command = button.dataset.richCommand;
+    if (command === 'table') {
+      document.execCommand('insertHTML', false, '<table><thead><tr><th>Heading 1</th><th>Heading 2</th></tr></thead><tbody><tr><td>Detail</td><td>Detail</td></tr></tbody></table><p><br></p>');
+    } else if (command === 'link') {
+      const selection = window.getSelection();
+      const selectedText = selection && selection.toString();
+      if (!selectedText) {
+        const label = window.prompt('Link text');
+        if (label === null || !label.trim()) return;
+        const url = window.prompt('Website URL (https://…)');
+        if (url === null || !/^https?:\\/\\//i.test(url.trim())) { toast('Enter a valid HTTP or HTTPS website URL.'); return; }
+        document.execCommand('insertHTML', false, '<a href="' + esc(url.trim()) + '">' + esc(label.trim()) + '</a>');
+      } else {
+        const url = window.prompt('Website URL (https://…)');
+        if (url === null || !/^https?:\\/\\//i.test(url.trim())) { toast('Enter a valid HTTP or HTTPS website URL.'); return; }
+        document.execCommand('createLink', false, url.trim());
+      }
+    } else {
+      document.execCommand(command, false, null);
+    }
+    syncVisualEditorToModel(editor);
+    captureRichEditorRange();
+  });
+  document.addEventListener('change', event => {
+    const select = event.target.closest?.('[data-rich-format]');
+    if (!select) return;
+    const editor = select.closest('[data-rich-editor-wrapper]')?.querySelector('[data-visual-editor]');
+    if (!editor) return;
+    restoreRichEditorSelection(editor);
+    document.execCommand('formatBlock', false, select.value);
+    syncVisualEditorToModel(editor);
+    captureRichEditorRange();
   });
   document.addEventListener('input',event=>{const el=event.target;if(!el.matches('[data-related-course-search]'))return;const query=el.value.trim().toLowerCase();const box=el.parentElement;box.querySelectorAll('.related-course-item').forEach(item=>{const searchable=(item.querySelector('.related-course-choice')?.textContent||item.textContent).toLowerCase();item.hidden=query!==''&&!searchable.includes(query);});});
   document.addEventListener('change',event=>{const el=event.target;if(!el.matches('[data-related-course]'))return;const l=currentLesson();if(!l)return;if(!Array.isArray(l.relatedCourseIds))l.relatedCourseIds=[];const id=el.dataset.relatedCourse;if(el.checked&&!l.relatedCourseIds.includes(id))l.relatedCourseIds.push(id);if(!el.checked)l.relatedCourseIds=l.relatedCourseIds.filter(x=>x!==id);persist(false);toast('Related-course reference saved in this preview.');});
