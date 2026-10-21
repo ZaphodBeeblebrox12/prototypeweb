@@ -2752,7 +2752,7 @@ function renderLesson() {
    else manuscriptIdea=ideaFigure+manuscriptIdea;
    $('#panel-learn').innerHTML=`<div class="eyebrow">The idea · Lesson ${lessonId}</div><div class="lesson-manuscript">${manuscriptIdea}</div>${relatedVolumeCard}<button type="button" class="button" data-article-tab="practice">Work through the chart examples ↗</button>`;
    // Render the agreed notebook in the Learn panel so manuscript-backed lessons cannot hide it in Review.
-   const notebookMarkup = `<section class="trading-notebook" aria-label="Your trading notebook"><aside class="notebook-index"><span>KEEP<br>IN VIEW</span><strong>01</strong></aside><div class="notebook-content"><div class="notebook-kicker">YOUR TRADING NOTEBOOK</div><h4>Before treating a touch as a setup</h4><ol><li><span class="notebook-number">01</span><p><strong>Describe.</strong> Where is price relative to the bands and middle line?</p></li><li><span class="notebook-number">02</span><p><strong>Interpret.</strong> Does the structure look like a range, a trend or a transition? What is your alternative explanation?</p></li><li><span class="notebook-number">03</span><p><strong>Test.</strong> What future price behaviour would strengthen or weaken your view?</p></li></ol></div></section>`;
+   const notebookMarkup = ``;
    $('#panel-learn').insertAdjacentHTML('beforeend', notebookMarkup);
    const figures=renderCourseFigure(m.id,activeLessonIndex,profile,lessonId);
    const comparisons=manuscript.examplesHtml ? `<div class="lesson-example-copy">${manuscript.examplesHtml}</div>` : '<p>Use the worked chart to practise the reading. State one observation, one possible interpretation and the evidence that would make you revise it.</p>';
