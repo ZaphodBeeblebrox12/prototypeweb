@@ -49,8 +49,8 @@
     <main class="tt-lesson-main">
     <header class="tt-course-header tt-course-header--depth">
       <div class="tt-course-header-copy">
-        <div class="tt-course-header-tags"><span class="tt-course-header-tag">{{ module.title }}</span><span class="tt-course-header-tag">Lesson {{ module.position|stringformat:"02d" }}.{{ lesson.position|stringformat:"02d" }}</span></div>
-        <p class="tt-eyebrow"><span class="tt-heading-rule" aria-hidden="true"></span> The question behind the chart</p>
+        <div class="tt-course-header-tags"><span class="tt-course-header-tag">Module {{ module.position|stringformat:"02d" }}</span><span class="tt-course-header-tag">Lesson {{ module.position|stringformat:"02d" }}.{{ lesson.position|stringformat:"02d" }}</span></div>
+        <p class="tt-eyebrow tt-module-eyebrow"><span class="tt-heading-rule" aria-hidden="true"></span> MODULE {{ module.position|stringformat:"02d" }} · {{ module_display_title }}</p>
         <h1>{{ lesson.title }}</h1>
         {% if lesson.summary %}<p class="tt-lesson-summary">{{ lesson.summary }}</p>{% endif %}
         <div class="tt-lesson-meta"><span>{{ lesson.duration_minutes }} minutes</span>{% if admin_preview %}<span class="tt-preview-label">Administrator preview</span>{% elif lesson.is_preview %}<span class="tt-preview-label">Lesson preview</span>{% endif %}</div>

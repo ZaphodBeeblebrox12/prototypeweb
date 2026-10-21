@@ -210,6 +210,7 @@
   color: #9a641f;
   margin-bottom: 11px;
 }
+.tt-course-header--depth .tt-module-eyebrow { color: #a8630d; }
 .tt-heading-rule { width: 22px; height: 2px; display: inline-block; background: var(--tt-gold); }
 .tt-course-header--depth h1 {
   max-width: 720px;

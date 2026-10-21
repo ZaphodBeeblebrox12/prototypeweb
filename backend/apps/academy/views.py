@@ -1,6 +1,7 @@
 """Authenticated learner views for TradeThesis Academy."""
 import json
 import mimetypes
+import re
 from contextlib import suppress
 from copy import deepcopy
 from urllib.parse import quote
@@ -37,6 +38,12 @@ from .services import (
     lesson_release_at,
     update_lesson_progress,
 )
+
+
+def _module_display_title(value):
+    """Return the authored module name without an optional module-number prefix."""
+    title = re.sub(r"^module\s*\d*\s*[·—–:-]?\s*", "", str(value or "").strip(), flags=re.IGNORECASE)
+    return title.strip() or "Learning Room"
 
 
 def _regional_audience(request, admin_preview=False):
@@ -384,6 +391,7 @@ def lesson_detail(request, course_slug, lesson_id):
     regional_country, regional_region = _regional_audience(request)
     return render(request, "academy/lesson.html", {
         "course": course, "lesson": lesson, "module": lesson.module,
+        "module_display_title": _module_display_title(lesson.module.title),
         "entitlement": entitlement, "progress": progress,
         "lesson_sections": build_lesson_sections(
             lesson.content_markdown,
@@ -497,6 +505,7 @@ def admin_lesson_preview(request, course_slug, lesson_id):
         "course": course,
         "lesson": lesson,
         "module": lesson.module,
+        "module_display_title": _module_display_title(lesson.module.title),
         "entitlement": entitlement,
         "progress": None,
         "admin_preview": True,
@@ -696,6 +705,7 @@ def course_import_website_preview(request, import_id):
         "admin_review_url": admin_review_url,
         "selected_lesson": selected_lesson,
         "selected_module": selected_module,
+        "selected_module_display_title": _module_display_title(selected_module.get("title") if selected_module else ""),
         "selected_sections": selected_sections,
         "selected_notebook": selected_notebook,
         "selected_reflection": selected_reflection,

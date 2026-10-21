@@ -62,8 +62,8 @@
       <main class="tt-lesson-main">
       <header class="tt-course-header tt-course-header--depth">
         <div class="tt-course-header-copy">
-          <div class="tt-course-header-tags"><span class="tt-course-header-tag">{{ selected_module.title }}</span><span class="tt-course-header-tag">Lesson {{ selected_lesson.source_id }}</span></div>
-          <p class="tt-eyebrow"><span class="tt-heading-rule" aria-hidden="true"></span> The question behind the chart</p>
+          <div class="tt-course-header-tags"><span class="tt-course-header-tag">Module {{ selected_module.position|stringformat:"02d" }}</span><span class="tt-course-header-tag">Lesson {{ selected_lesson.source_id }}</span></div>
+          <p class="tt-eyebrow tt-module-eyebrow"><span class="tt-heading-rule" aria-hidden="true"></span> MODULE {{ selected_module.position|stringformat:"02d" }} · {{ selected_module_display_title }}</p>
           <h1>{{ selected_lesson.title }}</h1>
           {% if selected_lesson.summary %}<p class="tt-lesson-summary">{{ selected_lesson.summary }}</p>{% endif %}
           <div class="tt-lesson-meta"><span>{{ selected_lesson.duration_minutes }} minutes</span><span class="tt-preview-label">Administrator preview</span></div>

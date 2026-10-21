@@ -1339,3 +1339,41 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
             "$('#newCourseButton').addEventListener('click',event=>handleAction('new-course',event.currentTarget));",
             source,
         )
+
+    
+    def test_module_name_eyebrow_uses_selected_module_number_and_title(self):
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("function moduleHeadingLabel(course,module)", source)
+        self.assertIn('class="module-name-eyebrow"', source)
+        self.assertIn("String(moduleIndex + 1).padStart(2, '0') + ' · ' + title", source)
+
+    def test_module_title_is_rendered_in_both_academy_lesson_templates(self):
+        backend_root = Path(__file__).resolve().parents[2]
+        lesson_template = (backend_root / "templates" / "academy" / "lesson.html").read_text(
+            encoding="utf-8"
+        )
+        website_preview = (
+            backend_root / "templates" / "academy" / "course_import_website_preview.html"
+        ).read_text(encoding="utf-8")
+        views_source = Path(__file__).with_name("views.py").read_text(encoding="utf-8")
+        self.assertIn('MODULE {{ module.position|stringformat:"02d" }} · {{ module_display_title }}', lesson_template)
+        self.assertIn(
+            'MODULE {{ selected_module.position|stringformat:"02d" }} · {{ selected_module_display_title }}',
+            website_preview,
+        )
+        self.assertIn('"module_display_title": _module_display_title(lesson.module.title)', views_source)
+        self.assertIn('"selected_module_display_title": _module_display_title(selected_module.get("title") if selected_module else "")', views_source)
+
+    def test_module_display_name_removes_an_optional_number_prefix(self):
+        from .views import _module_display_title
+
+        self.assertEqual(
+            _module_display_title("Module 03 — Read the Market Before Reading the Signal"),
+            "Read the Market Before Reading the Signal",
+        )
+        self.assertEqual(
+            _module_display_title("Read the Market Before Reading the Signal"),
+            "Read the Market Before Reading the Signal",
+        )
