@@ -72,16 +72,26 @@
         {% if admin_preview %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook reflection=reflection reflection_response=reflection_response course_slug=course.slug practice_questions=practice_questions admin_preview=True only %}{% else %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook lesson=lesson reflection=reflection reflection_response=reflection_response course_slug=course.slug practice_questions=practice_questions only %}{% endif %}
         {% if related_courses %}
         <section class="tt-related-courses" aria-labelledby="tt-related-courses-heading">
-          <p>Continue learning</p>
-          <h2 id="tt-related-courses-heading">Related courses</h2>
+          <div class="tt-related-courses-header">
+            <div class="tt-related-courses-heading">
+              <p class="tt-related-courses-kicker">Continue learning</p>
+              <h2 id="tt-related-courses-heading">Related courses</h2>
+            </div>
+            <span class="tt-related-courses-header-mark" aria-hidden="true">↗</span>
+          </div>
           <div class="tt-related-course-list">
             {% for related in related_courses %}
             <a class="tt-related-course-link" href="{% url 'academy:course-detail' related.slug %}">
-              <strong>{{ related.title }}</strong>{% if related.summary %}<span>{{ related.summary }}</span>{% endif %}
+              <span class="tt-related-course-number" aria-hidden="true">{{ forloop.counter|stringformat:"02d" }}</span>
+              <span class="tt-related-course-copy">
+                <strong>{{ related.title }}</strong>
+                {% if related.summary %}<span class="tt-related-course-summary">{{ related.summary }}</span>{% endif %}
+              </span>
+              <span class="tt-related-course-arrow" aria-hidden="true">→</span>
             </a>
             {% endfor %}
           </div>
-          <p class="tt-related-course-note">Course references do not grant access or include a purchase.</p>
+          <p class="tt-related-course-note"><span aria-hidden="true">i</span> Course references do not grant access or include a purchase.</p>
         </section>
         {% endif %}
 {% if not admin_preview %}

@@ -350,6 +350,51 @@ class AcademyViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Public preview content.")
 
+    def test_related_courses_use_numbered_next_step_panel(self):
+        related_courses = [
+            Course.objects.create(
+                title="Support and Resistance",
+                slug="related-support-resistance",
+                summary="Identify price zones and assess reactions.",
+                position=3,
+                status=Course.Status.PUBLISHED,
+            ),
+            Course.objects.create(
+                title="Volume and Price Analysis",
+                slug="related-volume-price",
+                summary="Read activity alongside price progress.",
+                position=4,
+                status=Course.Status.PUBLISHED,
+            ),
+            Course.objects.create(
+                title="Build and Manage a Trade",
+                slug="related-trade-management",
+                summary="Construct a plan and manage risk through exit.",
+                position=5,
+                status=Course.Status.PUBLISHED,
+            ),
+        ]
+        self.preview_lesson.content_json = {
+            "related_course_ids": [str(course.pk) for course in related_courses],
+        }
+        self.preview_lesson.save(update_fields=["content_json", "updated_at"])
+
+        response = self.client.get(
+            reverse("academy:lesson", args=[self.course.slug, self.preview_lesson.pk])
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, 'class="tt-related-courses"')
+        self.assertContains(response, 'class="tt-related-courses-kicker">Continue learning</p>')
+        self.assertContains(response, 'id="tt-related-courses-heading">Related courses</h2>')
+        self.assertEqual(response.content.decode().count('class="tt-related-course-link"'), 3)
+        for index, course in enumerate(related_courses, start=1):
+            self.assertContains(response, f'href="{reverse("academy:course-detail", args=[course.slug])}"')
+            self.assertContains(response, f"{index:02d}")
+            self.assertContains(response, course.title)
+            self.assertContains(response, course.summary)
+        self.assertContains(response, "Course references do not grant access or include a purchase.")
+
     def test_quiz_submit_returns_indices_for_red_green_feedback_after_submission(self):
         self.preview_lesson.content_json = {
             "questions": [{
