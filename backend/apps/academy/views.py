@@ -369,6 +369,7 @@ def lesson_detail(request, course_slug, lesson_id):
             ),
             figure_prefix=f"{lesson.module.position}.{lesson.position}",
             module_label=f"Module {lesson.module.position} · {lesson.module.title}",
+            course_title=course.title,
         ),
         "notebook": notebook, "notebook_responses": saved_responses,
         "reflection": reflection, "reflection_response": reflection_response,
@@ -585,6 +586,7 @@ def course_import_website_preview(request, import_id):
             figure_metadata=selected_content_json.get("figures", {}),
             figure_prefix=str(selected_lesson.get("source_id", "")),
             module_label=f"Module {selected_module.get('position', '')} · {selected_module.get('title', '')}",
+            course_title=str(course.get("title") or record.title),
         )
         content_json = selected_lesson.get("content_json", {})
         if not isinstance(content_json, dict):

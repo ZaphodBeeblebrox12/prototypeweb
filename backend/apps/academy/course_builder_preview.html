@@ -685,6 +685,18 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   font:500 16px/1.3 var(--site-font-heading);
 }
 .preview-body .tt-image-group-caption { display:block; margin:5px 0 0 30px; color:var(--muted); font-size:11px; line-height:1.6; }
+.preview-body .tt-image-group-context {
+  display:block;
+  max-width:46%;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.4;
+  text-align:right;
+}
 .preview-body .tt-image-group-figure .tt-purpose-figure-note {
   display:block;
   margin:0;
@@ -1367,6 +1379,7 @@ Describe the evidence first.
     const moduleNumber = moduleIndex + 1;
     const moduleTitle = String(module?.title || 'Learning Room').replace(/^module\s*\d*\s*[·—–:-]?\s*/i, '').trim();
     const moduleLabel = 'MODULE ' + moduleNumber + ' · ' + moduleTitle;
+    const courseTitleLabel = String(course?.title || 'Course');
     const figureHeader = title =>
       '<span class="tt-purpose-figure-head">' +
         '<span class="tt-purpose-figure-header-top">' +
@@ -1424,8 +1437,7 @@ Describe the evidence first.
           caption + '</span>';
       }).join('');
       const note = group.note ? '<span class="tt-purpose-figure-note">' + esc(group.note) + '</span>' : '';
-      const imageLabel = groupedImages.length + (groupedImages.length === 1 ? ' image' : ' images');
-      const groupHeader = '<span class="tt-purpose-figure-head tt-image-group-head"><span class="tt-purpose-figure-header-top"><span class="tt-purpose-figure-module">' + esc(moduleLabel) + '</span><span class="tt-image-group-context">' + imageLabel + ' · compare before interpreting</span></span><strong class="tt-purpose-figure-title">' + esc(group.title || 'Image group') + '</strong></span>';
+      const groupHeader = '<span class="tt-purpose-figure-head tt-image-group-head"><span class="tt-purpose-figure-header-top"><span class="tt-purpose-figure-module">' + esc(moduleLabel) + '</span><span class="tt-image-group-context" title="' + esc(courseTitleLabel) + '">' + esc(courseTitleLabel) + '</span></span><strong class="tt-purpose-figure-title">' + esc(group.title || 'Image group') + '</strong></span>';
       const groupMarkup = groupedImages.length >= 2
         ? '<figure class="tt-purpose-figure tt-image-group-figure" data-figure-id="' + esc(id) + '">' + groupHeader + '<span class="tt-purpose-figure-body"><span class="tt-image-group-grid">' + items + '</span>' + note + '</span></figure>'
         : '<p class="tt-purpose-figure-missing">Select at least two uploaded images in the Images tab to complete this group.</p>';

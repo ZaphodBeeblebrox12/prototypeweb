@@ -325,6 +325,7 @@ def render_safe_markdown(
     figure_metadata=None,
     figure_prefix=None,
     module_label="",
+    course_title="",
 ):
     """Render sanitised Markdown and titled figures/groups using stable asset IDs."""
     from html import escape
@@ -350,6 +351,7 @@ def render_safe_markdown(
     else:
         module_title = f"MODULE · {raw_module_label}"
     safe_module_title = escape(module_title, quote=True)
+    safe_course_title = escape(str(course_title or "Course").strip() or "Course", quote=True)
 
     def figure_header(title):
         safe_title = escape(str(title or "Chart").strip())
@@ -362,15 +364,13 @@ def render_safe_markdown(
             '</span>'
         )
 
-    def image_group_header(title, image_count):
+    def image_group_header(title):
         safe_title = escape(str(title or "Image group").strip())
-        image_label = f"{image_count} image" if image_count == 1 else f"{image_count} images"
-        context = escape(f"{image_label} · compare before interpreting")
         return (
             '<span class="tt-purpose-figure-head tt-image-group-head">'
             '<span class="tt-purpose-figure-header-top">'
             f'<span class="tt-purpose-figure-module">{safe_module_title}</span>'
-            f'<span class="tt-image-group-context">{context}</span>'
+            f'<span class="tt-image-group-context" title="{safe_course_title}">{safe_course_title}</span>'
             '</span>'
             f'<strong class="tt-purpose-figure-title">{safe_title}</strong>'
             '</span>'
@@ -474,7 +474,7 @@ def render_safe_markdown(
         note_markup = f'<span class="tt-purpose-figure-note">{escape(note)}</span>' if note else ""
         markup = (
             f'<figure class="tt-purpose-figure tt-image-group-figure" data-figure-id="{safe_group_id}">'
-            f'{image_group_header(title, len(items))}'
+            f'{image_group_header(title)}'
             '<span class="tt-purpose-figure-body">'
             f'<span class="tt-image-group-grid">{"".join(items)}</span>'
             f'{note_markup}</span></figure>'
@@ -631,6 +631,7 @@ def build_lesson_sections(
     figure_metadata=None,
     figure_prefix=None,
     module_label="",
+    course_title="",
 ):
     """Group source headings into the three reusable Learning Room tabs."""
     source = _deduplicate_course_card_refs(source or "")
@@ -725,7 +726,7 @@ def build_lesson_sections(
         "idea_html": render_safe_markdown(
             rendered["idea"], asset_urls, user=user, admin_preview=admin_preview,
             figure_metadata=figure_metadata, figure_prefix=figure_prefix,
-            module_label=module_label,
+            module_label=module_label, course_title=course_title,
         ),
         "examples_html": render_safe_markdown(
             rendered["examples"], asset_urls, user=user, admin_preview=admin_preview,

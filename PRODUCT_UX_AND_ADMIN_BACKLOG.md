@@ -53,6 +53,15 @@ The intended dashboard should make routine work easy for a non-technical site ad
 
 This is a planning scope, not a commitment that each item is already backed by the current static prototype. Do not expose answer keys, instructor-only notes or paid lesson bodies through client-side hiding. Only show live metrics/actions when connected to verified backend data; label placeholders/demo data honestly. Prefer extending the eventual production stack and its existing admin/auth conventions rather than inventing a disconnected second source of truth.
 
+## Rich Builder follow-up — editable captions for grouped images
+
+The current image-group renderer can display a per-image `caption` from figure metadata, but the authoring UI does not provide a clear way to add or edit captions for each image in a group. Carry this requirement into the Rich Builder work:
+
+- Add an optional **Caption** field to each image inside an image group. Keep it distinct from the image title and accessibility alt text.
+- Save each caption with that image's figure metadata and preserve it when the group is reordered, edited, saved, reloaded or published.
+- Show the caption beneath its own image in the authoring preview, admin/website preview and learner view; do not merge individual captions into the group-level note.
+- Include regression checks for captions on multiple images, an intentionally blank caption, escaping unsafe markup, and parity between admin and learner rendering.
+
 ## Current UX QA checkpoint — 16 October 2026
 
 The following sitewide foundations have been implemented on `my-new-branch` and covered by GitHub Actions:

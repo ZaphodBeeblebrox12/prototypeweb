@@ -252,6 +252,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
                 },
             },
             module_label="Module 5 · Build and trade setups",
+            course_title="Understand Bollinger Bands",
         )
         figure_index = rendered.index("tt-image-group-figure")
         self.assertLess(rendered.index("Text before the group."), figure_index)
@@ -267,7 +268,11 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertNotIn("Purpose-built teaching aid", rendered)
         self.assertNotIn("Figure 2.2 ·", rendered)
         self.assertEqual(rendered.count('class="tt-image-group-item"'), 2)
-        self.assertIn("2 images · compare before interpreting", rendered)
+        self.assertIn(
+            'class="tt-image-group-context" title="Understand Bollinger Bands">Understand Bollinger Bands</span>',
+            rendered,
+        )
+        self.assertNotIn("2 images · compare before interpreting", rendered)
         self.assertEqual(rendered.count('class="tt-image-group-case-id"'), 2)
         self.assertIn("tt-image-group-item-heading", rendered)
 
@@ -278,6 +283,9 @@ class SharedLessonRenderingTests(SimpleTestCase):
 
         self.assertIn("Image-group Option 2 — compact shared comparison frame", learner_css)
         self.assertIn("Image-group Option 2 — compact shared comparison frame, matching the learner view.", builder_html)
+        self.assertIn("const courseTitleLabel = String(course?.title || 'Course')", builder_html)
+        self.assertIn("text-overflow:ellipsis", builder_html)
+        self.assertIn("text-overflow:ellipsis", learner_css)
 
         for source in (learner_css, builder_html):
             self.assertIn("grid-template-columns:repeat(2,minmax(0,1fr))", source)
