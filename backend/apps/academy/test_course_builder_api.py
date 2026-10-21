@@ -2,6 +2,7 @@ import base64
 import json
 import uuid
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
 
 from django.contrib.admin.models import DELETION, LogEntry
@@ -179,7 +180,7 @@ class CourseBuilderApiTests(TestCase):
 
         self.assertTrue(any("course-owned image" in error for error in errors), errors)
 
-    def test_missing_staged_image_falls_back_to_its_original_url(self):
+    def test_storage_timeout_falls_back_to_original_url_when_no_local_copy_exists(self):
         course_import = CourseImport.objects.create(
             course_slug="missing-image-fallback",
             title="Missing Image Fallback",
@@ -198,15 +199,56 @@ class CourseBuilderApiTests(TestCase):
             stable_asset_id=asset_id,
             source_path="charts/missing-third-image.png",
             original_url=original_url,
-            file="",
+            file="academy/course-imports/missing-image-fallback/third.png",
         )
 
-        response = self.client.get(
-            reverse("admin:academy_courseimport_asset", args=[course_import.pk, asset_id])
-        )
+        storage = CourseImportAsset._meta.get_field("file").storage
+        with patch.object(storage, "exists", side_effect=OSError("Google Drive timed out")):
+            response = self.client.get(
+                reverse("admin:academy_courseimport_asset", args=[course_import.pk, asset_id])
+            )
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response["Location"], original_url)
+
+    def test_storage_timeout_uses_checked_in_source_path_when_available(self):
+        course_slug = "checked-in-image-fallback"
+        source_path = "charts/third-image.png"
+        course_import = CourseImport.objects.create(
+            course_slug=course_slug,
+            title="Checked-in Image Fallback",
+            manifest_version="course-builder-v1",
+            content_hash="c" * 64,
+            source_manifest="builder://checked-in-image-fallback",
+            status=CourseImport.Status.DRAFT,
+            imported_by=self.admin,
+            payload={"course": {"title": "Checked-in Image Fallback", "slug": course_slug}, "modules": []},
+        )
+        asset_id = uuid.uuid4()
+        CourseImportAsset.objects.create(
+            course_import=course_import,
+            asset_key=source_path,
+            stable_asset_id=asset_id,
+            source_path=source_path,
+            original_url="https://charts.example.test/fallback.png",
+            file="academy/course-imports/checked-in-image-fallback/third.png",
+        )
+
+        with TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            stored_chart = root / "course-source" / course_slug / source_path
+            stored_chart.parent.mkdir(parents=True, exist_ok=True)
+            stored_chart.write_bytes(b"checked-in-chart-data")
+
+            storage = CourseImportAsset._meta.get_field("file").storage
+            with override_settings(BASE_DIR=str(root / "backend")):
+                with patch.object(storage, "exists", side_effect=OSError("Google Drive timed out")):
+                    response = self.client.get(
+                        reverse("admin:academy_courseimport_asset", args=[course_import.pk, asset_id])
+                    )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b"checked-in-chart-data")
 
     def test_learner_reflection_is_saved_only_after_access_check(self):
         course = Course.objects.create(
