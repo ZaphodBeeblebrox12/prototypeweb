@@ -1076,15 +1076,15 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     if (!editor || !editor.contains(range.startContainer)) return;
     // Keep the live insertion point cheaply. Do not clone and serialise the text before
     // the caret on every selectionchange; that work grows with lesson length.
-    richEditorRange = {editor,range:range.cloneRange()};
+    richEditorRange = {editor,range:range.cloneRange(),lessonId:currentLesson()?.id || null};
   }
   function rememberRichEditorCaretOffset() {
     const saved = richEditorRange;
     const editor = saved?.editor;
     const range = saved?.range;
-    if (!editor?.isConnected || editor.dataset.visualKind !== 'main' || !range) return;
+    if (!editor || editor.dataset.visualKind !== 'main' || !range) return;
     const lesson = currentLesson();
-    if (!lesson) return;
+    if (!lesson || !saved.lessonId || saved.lessonId !== lesson.id || !editor.contains(range.startContainer)) return;
     const prefixRange = document.createRange();
     prefixRange.selectNodeContents(editor);
     try { prefixRange.setEnd(range.startContainer, range.startOffset); } catch (_) { return; }
@@ -2171,6 +2171,14 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       return;
     }
     const content = String(lesson.content || '');
+    // A detached visual editor still retains its saved Range. Translate that
+    // position to Markdown only when a managed-content insertion actually needs it,
+    // not while switching tabs or moving focus around the editor.
+    if ((!lessonContentCaret || lessonContentCaret.lessonId !== lesson.id) &&
+        richEditorRange?.lessonId === lesson.id &&
+        richEditorRange.editor?.dataset.visualKind === 'main') {
+      rememberRichEditorCaretOffset();
+    }
     const saved = lessonContentCaret && lessonContentCaret.lessonId === lesson.id
       ? lessonContentCaret : {start:content.length,end:content.length};
     const start = Math.max(0, Math.min(content.length, Number(saved.start) || 0));
@@ -2724,18 +2732,6 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   });
   document.addEventListener('click', event => {
     const target = event.target;
-    const savedEditor = richEditorRange?.editor;
-    if (
-      state.tab === 'lesson' &&
-      savedEditor?.isConnected &&
-      savedEditor.dataset.visualKind === 'main' &&
-      target instanceof Node &&
-      !savedEditor.contains(target)
-    ) {
-      // Save the legacy Markdown offset only when leaving the visual editor, not on every
-      // cursor movement. Media/figure actions still insert at the correct lesson position.
-      rememberRichEditorCaretOffset();
-    }
     const pendingEditor = pendingVisualEditorSync;
     if (pendingEditor?.isConnected && target instanceof Node && !pendingEditor.contains(target)) {
       flushVisualEditorSync();
@@ -2744,10 +2740,9 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   document.addEventListener('focusout', event => {
     const editor = event.target.closest?.('[data-visual-editor]');
     if (!editor) return;
+    // Flush pending edits while the editor is still connected, but defer the more
+    // expensive Markdown caret translation until a managed-content insertion needs it.
     if (pendingVisualEditorSync === editor) flushVisualEditorSync();
-    if (state.tab === 'lesson' && editor.dataset.visualKind === 'main' && richEditorRange?.editor === editor) {
-      rememberRichEditorCaretOffset();
-    }
   }, true);
   document.addEventListener('selectionchange', captureRichEditorRange);
   document.addEventListener('input', event => {
