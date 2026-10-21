@@ -549,8 +549,8 @@ class AcademyViewTests(TestCase):
         self.assertContains(response, "Reactions at key price levels")
         self.assertContains(response, "Relative volume vs price")
         self.assertContains(response, "Effort versus result")
-        self.assertContains(response, "Conditional trade plan before execution")
-        self.assertContains(response, "Risk & manage exit")
+        self.assertContains(response, "Conditional trade plan…")
+        self.assertContains(response, "Risk and manage exit")
 
     def test_quiz_submit_returns_indices_for_red_green_feedback_after_submission(self):
         self.preview_lesson.content_json = {
