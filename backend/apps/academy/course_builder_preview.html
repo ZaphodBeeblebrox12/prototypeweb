@@ -147,7 +147,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   .preview-notebook-index strong { color:#c36b4d; font:400 25px/1 Georgia, "Times New Roman", serif; }
   .preview-notebook-content { min-width:0; }
   .preview-notebook-kicker { margin:2px 0 7px; color:#48664f; font-size:8px; font-weight:850; letter-spacing:.17em; }
-  .preview-notebook-content h3 { margin:0 0 10px; color:#24503c; font:400 clamp(21px,2.1vw,27px)/1.15 Georgia, "Times New Roman", serif; letter-spacing:-.035em; }
+  .preview-notebook-content h4 { margin:0 0 10px; color:#24503c; font:400 clamp(21px,2.1vw,27px)/1.15 Georgia, "Times New Roman", serif; letter-spacing:-.035em; }
   .preview-notebook-content ol { list-style:none; margin:0; padding:0; }
   .preview-notebook-content li { display:grid; grid-template-columns:25px minmax(0,1fr); gap:8px; align-items:start; padding:8px 0; border-top:1px solid #d5dbce; }
   .preview-notebook-number { padding-top:2px; color:#bd664b; font:400 9px/1.5 Arial, sans-serif; }
@@ -211,7 +211,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .preview-body .tt-image-group-item-title { display:block; margin-top:9px; color:var(--site-primary); font:500 16px/1.35 var(--site-font-heading); }
 .preview-body .tt-image-group-caption { display:block; margin-top:5px; color:var(--muted); font-size:11px; line-height:1.6; }
 .preview-body .tt-purpose-figure-missing { display:block; padding:18px; border:1px dashed var(--line); color:var(--muted); font-size:11px; }
-@media(max-width:620px) { .preview-trading-notebook { grid-template-columns:48px minmax(0,1fr); gap:12px; margin-top:22px; padding:17px 12px 18px 10px; } .preview-notebook-index { padding-right:8px; } .preview-notebook-index span { font-size:7px; } .preview-notebook-index strong { font-size:22px; } .preview-notebook-content h3 { font-size:22px; } .preview-notebook-content li { grid-template-columns:20px minmax(0,1fr); gap:5px; } .preview-notebook-content li p { font-size:11px; } .option-row { grid-template-columns:22px minmax(0,1fr); } .answer-key-label { grid-column:2; justify-self:start; } .practice-preview-answer { flex-wrap:wrap; } .practice-preview-answer .answer-result { margin-left:0; white-space:normal; } .preview-body .tt-purpose-figure-header-top { align-items:flex-start; flex-direction:column; gap:4px; } .preview-body .tt-purpose-figure-module { text-align:left; } .preview-body .tt-purpose-figure-body { padding:10px; } .preview-body .tt-purpose-figure figcaption { padding:0 10px 12px; } .media-grid { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:620px) { .preview-trading-notebook { grid-template-columns:48px minmax(0,1fr); gap:12px; margin-top:22px; padding:17px 12px 18px 10px; } .preview-notebook-index { padding-right:8px; } .preview-notebook-index span { font-size:7px; } .preview-notebook-index strong { font-size:22px; } .preview-notebook-content h4 { font-size:22px; } .preview-notebook-content li { grid-template-columns:20px minmax(0,1fr); gap:5px; } .preview-notebook-content li p { font-size:11px; } .option-row { grid-template-columns:22px minmax(0,1fr); } .answer-key-label { grid-column:2; justify-self:start; } .practice-preview-answer { flex-wrap:wrap; } .practice-preview-answer .answer-result { margin-left:0; white-space:normal; } .preview-body .tt-purpose-figure-header-top { align-items:flex-start; flex-direction:column; gap:4px; } .preview-body .tt-purpose-figure-module { text-align:left; } .preview-body .tt-purpose-figure-body { padding:10px; } .preview-body .tt-purpose-figure figcaption { padding:0 10px 12px; } .media-grid { grid-template-columns:minmax(0,1fr); } }
 .practice-preview { border:1px solid var(--line); border-radius:10px; background:var(--panel-soft); padding:16px; margin-top:18px; }
     .practice-question-figure { margin:12px 0; overflow:hidden; border:1px solid var(--line); border-radius:9px; background:var(--paper); }
     .practice-question-figure img { display:block; width:auto; max-width:100%; max-height:440px; margin:0 auto; object-fit:contain; }
@@ -761,7 +761,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       '<aside class="preview-notebook-index"><span>KEEP<br>IN VIEW</span><strong>01</strong></aside>' +
       '<div class="preview-notebook-content">' +
         '<div class="preview-notebook-kicker">YOUR TRADING NOTEBOOK</div>' +
-        '<h3>' + esc(heading) + '</h3>' +
+        '<h4>' + esc(heading) + '</h4>' +
         '<ol>' + prompts.map((prompt,index) => '<li><span class="preview-notebook-number">' +
           String(index+1).padStart(2, '0') + '</span><p><strong>' +
           esc(String(prompt.label || 'Reflect').replace(/[.:]+$/, '')) + '.</strong> ' +
