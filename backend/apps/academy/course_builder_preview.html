@@ -1301,7 +1301,7 @@ Describe the evidence first.
           }
           return topic ? topic.charAt(0).toUpperCase() + topic.slice(1) : '';
         };
-        const topics = (courseRef.outcomes || []).filter(value => typeof value === 'string' && value.trim()).map(topicLabel).filter(Boolean).slice(0, 3);
+        const topics = (courseRef.outcomes || []).filter(value => typeof value === 'string' && value.trim()).map(topicLabel).filter(Boolean).slice(0, 2);
         const topicsMarkup = topics.length
           ? '<div class="tt-course-preview-card__topics" aria-label="Topics covered">' + topics.map(topic => '<span>' + esc(topic) + '</span>').join('') + '</div>'
           : '';
