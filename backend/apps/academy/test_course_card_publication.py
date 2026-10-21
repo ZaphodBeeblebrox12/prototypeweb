@@ -148,7 +148,7 @@ class CoursePublicationReadinessTests(TestCase):
     def test_take_it_into_practice_content_is_preserved_in_practice_tab(self):
         from .content_rendering import build_lesson_sections
 
-        source = "\\n".join([
+        source = "\n".join([
             "## Start with the decision",
             "",
             "Describe the visible evidence.",
