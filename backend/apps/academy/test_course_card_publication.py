@@ -128,7 +128,7 @@ class CoursePublicationReadinessTests(TestCase):
         )
 
         rendered = render_safe_markdown(
-            "## Keep exploring\\n\\n[[course-card:" + str(course.pk) + "]]",
+            "## Keep exploring\n\n[[course-card:" + str(course.pk) + "]]",
             admin_preview=True,
         )
 
