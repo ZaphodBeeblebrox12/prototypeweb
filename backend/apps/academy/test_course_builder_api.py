@@ -179,6 +179,35 @@ class CourseBuilderApiTests(TestCase):
 
         self.assertTrue(any("course-owned image" in error for error in errors), errors)
 
+    def test_missing_staged_image_falls_back_to_its_original_url(self):
+        course_import = CourseImport.objects.create(
+            course_slug="missing-image-fallback",
+            title="Missing Image Fallback",
+            manifest_version="course-builder-v1",
+            content_hash="f" * 64,
+            source_manifest="builder://missing-image-fallback",
+            status=CourseImport.Status.DRAFT,
+            imported_by=self.admin,
+            payload={"course": {"title": "Missing Image Fallback", "slug": "missing-image-fallback"}, "modules": []},
+        )
+        asset_id = uuid.uuid4()
+        original_url = "https://charts.example.test/third-image.png"
+        CourseImportAsset.objects.create(
+            course_import=course_import,
+            asset_key="charts/third-image.png",
+            stable_asset_id=asset_id,
+            source_path="charts/missing-third-image.png",
+            original_url=original_url,
+            file="",
+        )
+
+        response = self.client.get(
+            reverse("admin:academy_courseimport_asset", args=[course_import.pk, asset_id])
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], original_url)
+
     def test_learner_reflection_is_saved_only_after_access_check(self):
         course = Course.objects.create(
             title="Reflection Persistence",
