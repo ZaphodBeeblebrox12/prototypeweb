@@ -531,7 +531,9 @@ class CourseImportAdmin(admin.ModelAdmin):
                     figure_metadata=figure_metadata,
                     figure_prefix=f"{module.get('position', 0)}.{lesson_data.get('position', 0)}",
                     module_label=f"Module {module.get('position', '')} · {module.get('title', '')}",
-                    course_title=str((record.payload.get("course") or {}).get("title") or record.title),
+                    course_title=str(
+                        (record.payload.get("course") or {}).get("title") or record.title
+                    ),
                 )
                 questions = []
                 raw_questions = content_json.get("questions", [])
