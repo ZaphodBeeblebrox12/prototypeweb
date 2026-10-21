@@ -290,7 +290,8 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .course-card-picker .course-card-option .course-card-option-copy { min-width:0; }
 .course-card-picker .course-card-option .course-card-option-copy > span { margin-top:4px; }
 .course-card-picker .course-card-option .btn { white-space:nowrap; }
-@media(max-width:520px) { .course-card-picker .course-card-option { grid-template-columns:1fr; } .course-card-picker .course-card-option .btn { width:100%; } }
+.course-card-picker .course-card-option-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; align-items:center; gap:6px; }
+@media(max-width:520px) { .course-card-picker .course-card-option { grid-template-columns:1fr; } .course-card-picker .course-card-option .btn { width:100%; } .course-card-picker .course-card-option-actions { justify-content:stretch; } }
 @media (max-width:1100px) { .app-layout { grid-template-columns:220px minmax(0,1fr); gap:14px; } .curriculum-layout { grid-template-columns:1fr; } .outline-panel { max-height:330px; overflow:auto; } .preview-split { grid-template-columns:1fr; } .preview-lesson-nav { order:-1; } .preview-lesson-nav div { display:flex; gap:6px; flex-wrap:wrap; } .preview-lesson-nav button { width:auto; } }
 @media (max-width:760px) { .topbar { align-items:flex-start; flex-direction:column; } .top-actions { justify-content:flex-start; width:100%; } .page-head { align-items:flex-start; flex-direction:column; } .page-head h1 { font-size:31px; } .app-layout { grid-template-columns:1fr; } .course-list { max-height:230px; } .workspace-toolbar { align-items:flex-start; flex-direction:column; } .toolbar-right { justify-content:flex-start; } .editor-header { padding:17px; } .tab-panel { padding:17px; } .tabs { padding:0 10px; } .tab { padding:12px 8px 10px; font-size:10px; } .form-grid { grid-template-columns:1fr; } .field.full { grid-column:auto; } .media-grid { grid-template-columns:1fr; } .lesson-meta-grid { grid-template-columns:1fr; } .catalogue-grid { grid-template-columns:1fr; } .catalogue-head { align-items:flex-start; flex-direction:column; } .draft-footer { align-items:flex-start; flex-direction:column; } }
 .comparison-card-editor { display:grid; grid-template-columns:minmax(0,1fr); gap:8px; }
@@ -1268,7 +1269,7 @@ Describe the evidence first.
     });
     prepared = prepared.replace(/\[\[course-card:(coming-soon:)?([0-9a-fA-F-]{36})\]\]/g, function(match, comingSoonPrefix, id) {
       const isComingSoon = Boolean(comingSoonPrefix);
-      const courseRef = demoOffers.concat(comingSoonOffers).find(item =>
+      const courseRef = eligibleCompanionCourses().find(item =>
         Boolean(item.isComingSoon) === isComingSoon &&
         String(item.referenceId || item.id).toLowerCase() === String(id).toLowerCase()
       );
@@ -1330,11 +1331,35 @@ Describe the evidence first.
     return html;
   };
   const baseHandleAction = handleAction;
+  function isValidCompanionCourse(course) {
+    const title = String(course?.title || '').trim();
+    const summary = String(course?.summary || '').trim().toLowerCase().replace(/\\s+/g, ' ');
+    const currentSlug = String(currentCourse()?.slug || '').trim().toLowerCase();
+    const courseSlug = String(course?.slug || '').trim().toLowerCase();
+    const placeholderTitle = /^untitled course(?:\\s*\\d+)?$/i.test(title) ||
+      /^(?:new micro-course draft|untitled micro-course)$/i.test(title);
+    const placeholderSummary = [
+      'add a concise course promise here.',
+      'a clear, practical description of what learners will study and why it matters.',
+      'describe the learner, what the course covers and what they can practise after completing it.'
+    ].includes(summary);
+    return !placeholderTitle && !placeholderSummary &&
+      !(currentSlug && courseSlug && currentSlug === courseSlug);
+  }
+
+  function eligibleCompanionCourses() {
+    return demoOffers.concat(comingSoonOffers).filter(isValidCompanionCourse);
+  }
+
   function courseCardResultsHtml(query) {
-    const available = demoOffers.concat(comingSoonOffers);
+    const available = eligibleCompanionCourses();
     const term = String(query || '').trim().toLowerCase();
+    const lesson = currentLesson();
+    const source = String(lesson?.content || '');
+    const hasReplaceableReferences = /\\[\\[(?:lesson|lesson-card):[0-9a-fA-F-]{36}\\]\\]/.test(source) ||
+      /\\[\\[course-card:(?:coming-soon:)?[0-9a-fA-F-]{36}\\]\\]/.test(source);
     if (!available.length) {
-      return '<div class="empty-state course-card-empty"><p><strong>No eligible companion courses are available yet.</strong></p><p>A card can reference a real published course or an explicitly announced coming-soon course with learner-facing title and summary. A private draft is not shown automatically. This does not publish or enrol anyone.</p></div>';
+      return '<div class="empty-state course-card-empty"><p><strong>No eligible companion courses are available yet.</strong></p><p>The current lesson, placeholder titles and placeholder summaries are excluded. Select a real published course or announce a properly titled coming-soon course before inserting a companion card. Nothing is published automatically.</p></div>';
     }
     const matches = available.filter(course => [
       course.title, course.summary, course.category, course.level, course.duration,
@@ -1349,8 +1374,11 @@ Describe the evidence first.
       '<span class="related-meta">' + (course.isComingSoon ? 'Coming soon' : 'Published in Academy') +
       (course.category ? ' · ' + esc(course.category) : '') + '</span>' +
       '<span>' + esc(course.summary || 'Move beyond this example and study the broader toolkit.') + '</span></div>' +
+      '<div class="course-card-option-actions">' +
       '<button class="btn small primary" type="button" data-action="insert-course-card" data-id="' + esc(course.id) + '">' +
-      (course.isComingSoon ? 'Insert coming-soon card' : 'Insert Option 4 card') + '</button></article>'
+      (course.isComingSoon ? 'Insert coming-soon card' : 'Insert Option 4 card') + '</button>' +
+      (hasReplaceableReferences ? '<button class="btn small secondary" type="button" data-action="replace-course-card-and-remove-links" data-id="' + esc(course.id) + '">Use this card &amp; remove old links</button>' : '') +
+      '</div></article>'
     ).join('') + '</div>' +
     (matches.length > 8 ? '<p class="help">Showing 8 of ' + matches.length + ' matches. Refine the search to find another course.</p>' : '');
   }
@@ -1673,8 +1701,41 @@ Describe the evidence first.
       toast(action === 'remove-inline-lesson-reference' ? 'Inline lesson reference removed.' : 'Inline lesson reference type changed.');
       return;
     }
+    if (lesson && action === 'replace-course-card-and-remove-links') {
+      const courseRef = eligibleCompanionCourses().find(item => String(item.id) === String(el?.dataset?.id || ''));
+      if (!courseRef) {
+        toast('That course is no longer eligible. Refresh the catalogue and choose a published or properly announced companion course.');
+        return;
+      }
+      const token = courseRef.isComingSoon
+        ? '[[course-card:coming-soon:' + courseRef.referenceId + ']]'
+        : '[[course-card:' + courseRef.id + ']]';
+      const source = String(lesson.content || '');
+      const courseCardPattern = /\\[\\[course-card:(?:coming-soon:)?[0-9a-fA-F-]{36}\\]\\]/g;
+      const lessonReferencePattern = /\\[\\[(?:lesson|lesson-card):[0-9a-fA-F-]{36}\\]\\]/g;
+      const cards = [...source.matchAll(courseCardPattern)];
+      const lessonReferences = [...source.matchAll(lessonReferencePattern)];
+      const anchorReference = cards[0] || lessonReferences[0];
+      if (!anchorReference) {
+        insertLessonContentAtCaret(lesson, token, true);
+        toast('Companion course card inserted. No old lesson links needed removal.');
+        return;
+      }
+      const marker = 'TTCOURSE_CARD_REPAIR_' + uid('repair') + '_END';
+      let updated = source.slice(0, anchorReference.index) + marker +
+        source.slice(anchorReference.index + anchorReference[0].length);
+      updated = updated.replace(courseCardPattern, '').replace(lessonReferencePattern, '');
+      updated = updated.replace(marker, token).replace(/\\n{3,}/g, '\\n\\n').replace(/^[ \\t]*\\n+|\\n+[ \\t]*$/g, '');
+      lesson.content = updated;
+      state.tab = 'lesson';
+      persist(false);
+      renderEditor();
+      toast('Companion card updated. Removed ' + lessonReferences.length + ' inline lesson reference' +
+        (lessonReferences.length === 1 ? '' : 's') + ' and replaced the previous course card.', 6000);
+      return;
+    }
     if (lesson && action === 'insert-course-card') {
-      const courseRef = demoOffers.concat(comingSoonOffers).find(item => String(item.id) === String(el?.dataset?.id || ''));
+      const courseRef = eligibleCompanionCourses().find(item => String(item.id) === String(el?.dataset?.id || ''));
       if (!courseRef) {
         toast('That course is no longer in the published or announced catalogue. Refresh and search again.');
         return;
