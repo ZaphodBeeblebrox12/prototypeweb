@@ -27,7 +27,7 @@ _ALLOWED_ATTRIBUTES = {
     "figure": ["class", "data-figure-id"],
     "figcaption": ["class"],
     "img": ["src", "alt", "title", "loading", "width", "height", "tabindex", "role", "aria-label"],
-    "span": ["class", "aria-label"],
+    "span": ["class", "aria-label", "title"],
     "strong": ["class"],
     "th": ["align"], "td": ["align"],
 }

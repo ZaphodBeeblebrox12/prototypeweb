@@ -241,11 +241,13 @@ class CourseBuilderApiTests(TestCase):
             stored_chart.write_bytes(b"checked-in-chart-data")
 
             storage = CourseImportAsset._meta.get_field("file").storage
-            with override_settings(BASE_DIR=str(root / "backend")):
-                with patch.object(storage, "exists", side_effect=OSError("Google Drive timed out")):
-                    response = self.client.get(
-                        reverse("admin:academy_courseimport_asset", args=[course_import.pk, asset_id])
-                    )
+            with (
+                override_settings(BASE_DIR=str(root / "backend")),
+                patch.object(storage, "exists", side_effect=OSError("Google Drive timed out")),
+            ):
+                response = self.client.get(
+                    reverse("admin:academy_courseimport_asset", args=[course_import.pk, asset_id])
+                )
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(b"".join(response.streaming_content), b"checked-in-chart-data")

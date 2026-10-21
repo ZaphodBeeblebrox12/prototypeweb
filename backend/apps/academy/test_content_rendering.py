@@ -2,7 +2,11 @@ from pathlib import Path
 
 from django.test import SimpleTestCase
 
-from .content_rendering import _deduplicate_course_card_refs, build_lesson_sections, render_safe_markdown
+from .content_rendering import (
+    _deduplicate_course_card_refs,
+    build_lesson_sections,
+    render_safe_markdown,
+)
 from .views import _notebook_for_course_display
 
 
