@@ -924,12 +924,18 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       (match, alt, id) => addToken('![' + String(alt || '').replace(/\]/g,'') + '](asset://' + id + ')'));
     prepared = prepared.replace(/\[\[(?:regional-block|image-group|teaching-figure|lesson-tab|lesson|lesson-card|course-card):[^\]]+\]\]/g, addToken);
     let html = typeof baseMarkdownRenderer === 'function' ? baseMarkdownRenderer(prepared) : '<p>' + esc(prepared) + '</p>';
-    tokens.forEach(item => {
-      const block = richTokenIsBlock(item.token);
-      const markup = '<span class="tt-editor-token' + (block ? ' tt-editor-token-block' : '') + '" contenteditable="false" data-editor-token="' + esc(item.token) + '"' + (block ? ' data-editor-block="true"' : '') + ' role="note">' + esc(richTokenLabel(item.token)) + '</span>';
-      html = html.split('<p>' + item.marker + '</p>').join(markup);
-      html = html.split(item.marker).join(markup);
-    });
+    if (tokens.length) {
+      const markupByMarker = new Map();
+      tokens.forEach(item => {
+        const block = richTokenIsBlock(item.token);
+        const markup = '<span class="tt-editor-token' + (block ? ' tt-editor-token-block' : '') + '" contenteditable="false" data-editor-token="' + esc(item.token) + '"' + (block ? ' data-editor-block="true"' : '') + ' role="note">' + esc(richTokenLabel(item.token)) + '</span>';
+        markupByMarker.set(item.marker, markup);
+      });
+      // Repeated split/join across the full HTML for each token becomes quadratic
+      // for lessons with many figures, section markers or linked-course references.
+      html = html.replace(/<p>(TTEDITORBLOCKTOKEN\d+END)<\/p>|(TTEDITORBLOCKTOKEN\d+END)/g,
+        (match, blockMarker, inlineMarker) => markupByMarker.get(blockMarker || inlineMarker) || match);
+    }
     return html;
   }
   function richInlineMarkdown(node) {
@@ -1864,18 +1870,16 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     };
     const compactDuplicateCourseCards = source => {
       const original = String(source || '');
-      const matches = [...original.matchAll(/\[\[course-card:(coming-soon:)?([0-9a-fA-F-]{36})\]\]/g)];
+      const pattern = /\[\[course-card:(coming-soon:)?([0-9a-fA-F-]{36})\]\]/g;
+      const matches = [...original.matchAll(pattern)];
+      if (matches.length < 2) return original;
       const lastByCourse = new Map();
       matches.forEach(match => lastByCourse.set((match[1] || '') + match[2].toLowerCase(), match.index));
-      let result = original;
-      for (let index = matches.length - 1; index >= 0; index--) {
-        const match = matches[index];
-        const key = (match[1] || '') + match[2].toLowerCase();
-        if (lastByCourse.get(key) !== match.index) {
-          result = result.slice(0, match.index) + result.slice(match.index + match[0].length);
-        }
-      }
-      return result.replace(/\n{3,}/g, '\n\n');
+      // Remove duplicates in one replacement pass. Slicing and rebuilding the
+      // whole lesson once per duplicate makes large repeated-card lessons costly.
+      return original.replace(pattern, (match, prefix, id, offset) =>
+        lastByCourse.get((prefix || '') + id.toLowerCase()) === offset ? match : ''
+      ).replace(/\n{3,}/g, '\n\n');
     };
     let prepared = compactDuplicateCourseCards(resolveBuilderRegionalBlocks(String(src || ''), lesson, $('#previewAudienceSelect')?.value || 'GLOBAL')).replace(/^\s*\[\[lesson-tab:(?:idea|examples|practice)\]\]\s*$/gim, '').replace(/!\[([^\]]*)\]\(asset:\/\/([^)]+)\)/g, function(match, alt, id) {
       const image = images.find(function(item) { return item.id === id || item.assetUuid === id; });
@@ -1978,13 +1982,16 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       return '\n\n' + token + '\n\n';
     });
     let html = baseMarkdownRenderer(prepared);
-    figures.forEach(function(figure, index) {
-      html = html.replace('<p>TTFIGURETOKEN' + index + 'END</p>', figure);
-    });
-    inlineCourseCards.forEach(function(card, index) {
-      const token = 'TTCOURSECARDTOKEN' + index + 'END';
-      html = html.replace('<p>' + token + '</p>', card).replace(token, card);
-    });
+    // Expand all generated placeholders in a single scan rather than repeatedly
+    // copying the entire rendered lesson for every figure/card token.
+    if (figures.length) {
+      html = html.replace(/<p>TTFIGURETOKEN(\d+)END<\/p>|TTFIGURETOKEN(\d+)END/g,
+        (match, blockIndex, inlineIndex) => figures[Number(blockIndex ?? inlineIndex)] ?? match);
+    }
+    if (inlineCourseCards.length) {
+      html = html.replace(/<p>TTCOURSECARDTOKEN(\d+)END<\/p>|TTCOURSECARDTOKEN(\d+)END/g,
+        (match, blockIndex, inlineIndex) => inlineCourseCards[Number(blockIndex ?? inlineIndex)] ?? match);
+    }
     return html;
   };
   const baseHandleAction = handleAction;
