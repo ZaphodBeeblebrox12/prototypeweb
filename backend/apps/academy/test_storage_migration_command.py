@@ -5,6 +5,7 @@ from django.test import SimpleTestCase
 
 from apps.academy.management.commands.migrate_course_storage import (
     _copy_to_target,
+    _find_google_drive_urls,
     _is_google_drive_url,
     _url_host,
 )
@@ -33,6 +34,16 @@ class StorageMigrationCopyTests(SimpleTestCase):
         self.assertTrue(_is_google_drive_url("https://lh3.googleusercontent.com/abc"))
         self.assertFalse(_is_google_drive_url("https://example.com/course-image.png"))
         self.assertEqual(_url_host("not a valid URL"), "")
+
+    def test_course_content_scan_detects_nested_drive_links(self):
+        payload = {
+            "lesson": {"content": "An image: https://drive.google.com/file/d/123/view"},
+            "variants": [{"url": "https://example.com/image.png"}],
+        }
+        self.assertEqual(
+            _find_google_drive_urls(payload),
+            ["https://drive.google.com/file/d/123/view"],
+        )
 
     def test_dry_run_never_writes(self):
         target = MemoryStorage()

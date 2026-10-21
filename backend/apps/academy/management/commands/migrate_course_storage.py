@@ -78,6 +78,23 @@ def _is_google_drive_url(value):
     )
 
 
+def _find_google_drive_urls(value):
+    """Find Drive-hosted URLs in text or nested JSON without logging full URLs."""
+    if isinstance(value, dict):
+        children = value.values()
+    elif isinstance(value, (list, tuple)):
+        children = value
+    elif isinstance(value, str):
+        candidates = re.findall(r"https?://[^\s\"'<>]+", value, flags=re.IGNORECASE)
+        return [url for url in candidates if _is_google_drive_url(url)]
+    else:
+        return []
+    matches = []
+    for child in children:
+        matches.extend(_find_google_drive_urls(child))
+    return matches
+
+
 def _github_headers():
     headers = {
         "Accept": "application/vnd.github+json",
@@ -257,6 +274,29 @@ class Command(BaseCommand):
         report["external_url_inventory"] = external_url_inventory
         report["asset_records_without_file_or_url"] = empty_asset_records
 
+        drive_content_reference_inventory = []
+        content_sources = (
+            (Course, ("summary", "description", "learning_outcomes")),
+            (CourseModule, ("description",)),
+            (Lesson, ("summary", "content_markdown", "content_json")),
+            (CourseImport, ("source_manifest", "payload")),
+            (CourseContentRevision, ("content_markdown_before", "content_json_before")),
+            (LessonInstructorMaterial, ("answer_key_markdown", "instructor_notes", "rubric_json")),
+        )
+        for model, fields in content_sources:
+            values = model.objects.values_list("pk", *fields).iterator()
+            for row in values:
+                record_id = str(row[0])
+                for field_name, value in zip(fields, row[1:]):
+                    for url in _find_google_drive_urls(value):
+                        drive_content_reference_inventory.append({
+                            "model": model.__name__,
+                            "id": record_id,
+                            "field": field_name,
+                            "url_host": _url_host(url) or "unparseable",
+                        })
+        report["google_drive_url_references_in_course_content"] = drive_content_reference_inventory
+
         counts = {
             "database_asset_keys": len(assets_by_name),
             "database_asset_references": sum(len(v["records"]) for v in assets_by_name.values()),
@@ -281,6 +321,7 @@ class Command(BaseCommand):
             "records_without_stored_file": len(external_url_inventory) + len(empty_asset_records),
             "external_url_only_records": len(external_url_inventory),
             "google_drive_url_only_records": len(google_drive_url_records),
+            "google_drive_urls_in_course_content": len(drive_content_reference_inventory),
             "records_without_file_or_external_url": len(empty_asset_records),
         }
 
@@ -293,6 +334,19 @@ class Command(BaseCommand):
                     "the records before any provider cutover."
                 ),
             })
+        if drive_content_reference_inventory:
+            report["errors"].append({
+                "kind": "google_drive_urls_in_course_content",
+                "error": (
+                    f"{len(drive_content_reference_inventory)} course-content fields still contain "
+                    "Google Drive/Google user-content URLs. Rewrite them to managed asset references "
+                    "or intentionally independent destinations before cutover."
+                ),
+            })
+            self.stdout.write(
+                "Google Drive URLs in course content (record and field only): "
+                + json.dumps(drive_content_reference_inventory, sort_keys=True)
+            )
         if empty_asset_records:
             report["errors"].append({
                 "kind": "asset_records_without_file_or_url",
