@@ -154,7 +154,7 @@ class AcademyViewTests(TestCase):
                         "position": 1,
                         "duration_minutes": 5,
                         "content_markdown": (
-                            "### The question\\n\\nObserve first.\\n\\n"
+                            "### The question\n\nObserve first.\n\n"
                             "[[regional-block:risk-note]]"
                         ),
                         "content_json": {
