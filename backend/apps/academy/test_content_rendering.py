@@ -258,3 +258,52 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("Copy the structure below into a lesson", preview)
         self.assertIn("## Notice\nDescribe the evidence first.\n\n### Compare", preview)
 
+
+
+class TradingNotebookTemplateTests(SimpleTestCase):
+    def test_notebook_is_inside_the_idea_panel_before_chart_examples_action(self):
+        template = (
+            Path(__file__).resolve().parent
+            / "templates"
+            / "academy"
+            / "partials"
+            / "lesson_tabs.html"
+        )
+        source = template.read_text(encoding="utf-8")
+        idea = source.index('data-tab-panel="idea"')
+        notebook = source.index('class="tt-notebook"')
+        action = source.index('data-open-tab="examples"')
+        examples = source.index('data-tab-panel="examples"')
+
+        self.assertLess(idea, notebook)
+        self.assertLess(notebook, action)
+        self.assertLess(action, examples)
+        self.assertEqual(source.count('class="tt-notebook"'), 1)
+        self.assertIn("Before treating a touch as a setup", source)
+        self.assertIn("Where is price relative to the bands and middle line?", source)
+        self.assertIn("What future price behaviour would strengthen or weaken your view?", source)
+
+    def test_notebook_styling_and_chart_tab_action_are_wired(self):
+        backend = Path(__file__).resolve().parents[2]
+        styles = (backend / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
+        script = (backend / "static" / "academy" / "learning-room.js").read_text(encoding="utf-8")
+
+        self.assertIn(".tt-learning-room .tt-notebook-index", styles)
+        self.assertIn(".tt-learning-room .tt-notebook-examples-button", styles)
+        self.assertIn("@media(max-width:620px)", styles)
+        self.assertIn('event.target.closest("[data-open-tab]")', script)
+        self.assertIn('form = event.target.closest("[data-notebook-response]")', script)
+
+    def test_builder_learner_preview_renders_notebook_before_practice_questions(self):
+        builder = Path(__file__).resolve().parent / "course_builder_preview.html"
+        source = builder.read_text(encoding="utf-8")
+        start = source.index("function previewFields(c)")
+        end = source.index("function renderMarkdown(src)", start)
+        preview = source[start:end]
+
+        lesson_body = preview.index("renderMarkdown(lesson.content)")
+        notebook = preview.index("notebookPreviewMarkup(lesson)")
+        questions = preview.index("lesson.questions.length?")
+        self.assertLess(lesson_body, notebook)
+        self.assertLess(notebook, questions)
+        self.assertEqual(preview.count("notebookPreviewMarkup(lesson)"), 1)
