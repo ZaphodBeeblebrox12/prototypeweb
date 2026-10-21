@@ -1340,7 +1340,7 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
             source,
         )
 
-    
+
     def test_module_name_eyebrow_uses_selected_module_number_and_title(self):
         source = Path(__file__).with_name("course_builder_preview.html").read_text(
             encoding="utf-8"
