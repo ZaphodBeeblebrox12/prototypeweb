@@ -248,7 +248,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertNotIn("TRADETHESIS · LEARNING ROOM", preview)
         self.assertIn("tt-purpose-figure-module", preview)
         self.assertIn("data-image-storage-status", preview)
-        self.assertIn("compactDuplicateCourseCards(String(src || '')", preview)
+        self.assertIn("compactDuplicateCourseCards(resolveBuilderRegionalBlocks(String(src || '')", preview)
         self.assertIn("result.asset_storage", preview)
         self.assertIn("Image uploads are blocked because no durable image provider is configured", preview)
 
@@ -372,12 +372,12 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("Trend-following short alert", rendered)
         self.assertNotIn("| Confirmed move |", rendered)
 
-    def test_course_builder_preview_has_markdown_information_table_support(self):
+    def test_course_builder_preview_has_visual_table_editor_support(self):
         preview = (Path(__file__).resolve().parent / "course_builder_preview.html").read_text()
         self.assertIn("const renderTable = block =>", preview)
         self.assertIn("isTableDivider", preview)
         self.assertIn('class="lesson-table-wrap" role="region"', preview)
-        self.assertIn("Information tables:", preview)
+        # The lesson body is now a no-code rich-text canvas; table insertion is a toolbar action.
         self.assertIn("const headingMatch = line =>", preview)
         self.assertIn("const isFence = line =>", preview)
         self.assertIn("output.push('<h' + level", preview)
@@ -385,8 +385,10 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("Compact figure treatment:", preview)
         self.assertIn("margin: 19px 0", preview)
         self.assertIn("max-height: min(56vh, 500px)", preview)
-        self.assertIn("Copy the structure below into a lesson", preview)
-        self.assertIn("## Notice\nDescribe the evidence first.\n\n### Compare", preview)
+        self.assertIn('data-rich-command="table" aria-label="Insert table">Table', preview)
+        self.assertIn('data-visual-editor="true"', preview)
+        self.assertNotIn("Copy the structure below into a lesson", preview)
+        self.assertNotIn("Information tables:", preview)
 
 
 

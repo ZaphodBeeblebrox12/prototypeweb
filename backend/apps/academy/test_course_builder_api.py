@@ -238,6 +238,10 @@ class CourseBuilderApiTests(TestCase):
         self.assertTrue(any("course-owned image" in error for error in errors), errors)
 
     def test_storage_timeout_falls_back_to_original_url_when_no_local_copy_exists(self):
+        # These asset URLs are registered behind Django's staff-only admin view.
+        self.admin.is_staff = True
+        self.admin.save(update_fields=["is_staff"])
+        self.client.force_login(self.admin)
         course_import = CourseImport.objects.create(
             course_slug="missing-image-fallback",
             title="Missing Image Fallback",
@@ -269,6 +273,10 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(response["Location"], original_url)
 
     def test_storage_timeout_uses_checked_in_source_path_when_available(self):
+        # These asset URLs are registered behind Django's staff-only admin view.
+        self.admin.is_staff = True
+        self.admin.save(update_fields=["is_staff"])
+        self.client.force_login(self.admin)
         course_slug = "checked-in-image-fallback"
         source_path = "charts/third-image.png"
         course_import = CourseImport.objects.create(
