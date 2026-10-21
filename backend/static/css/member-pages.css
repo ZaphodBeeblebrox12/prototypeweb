@@ -114,3 +114,7 @@
 .member-guidance-list{display:grid;gap:12px;margin:0;padding-left:20px;color:var(--muted);font-size:11px;line-height:1.75}
 .member-guidance-list li{padding-left:3px}
 .member-guidance-list li::marker{color:var(--green);font-weight:800}
+
+
+/* Render the real Telegram and Discord marks used by the member account cards. */
+.member-integration-mark svg{display:block;width:22px;height:22px;fill:currentColor}
