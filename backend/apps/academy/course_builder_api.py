@@ -27,6 +27,7 @@ from django.views.decorators.http import require_http_methods
 from PIL import Image, UnidentifiedImageError
 
 from .course_builder_lifecycle import mark_builder_draft_deleted
+from .course_card_utils import is_course_card_recommendable
 from .importing import validate_import_for_publish
 from .models import (
     Course,
@@ -38,7 +39,6 @@ from .models import (
     LessonInstructorMaterial,
 )
 from .permissions import is_course_content_admin
-from .course_card_utils import is_course_card_recommendable
 from .storage import course_asset_storage
 
 logger = logging.getLogger(__name__)

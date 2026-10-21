@@ -7,6 +7,12 @@ import bleach
 import markdown as markdown_library
 from django.urls import reverse
 
+from .course_card_utils import (
+    compact_course_topic,
+    course_card_art_copy,
+    course_card_mark,
+    is_course_card_recommendable,
+)
 from .models import Course, CourseImport, Lesson
 
 _ALLOWED_TAGS = {
@@ -147,10 +153,6 @@ def _resolve_course_cards(source):
             continue
     if not references:
         return source or "", {}
-
-    from .course_card_utils import (
-        compact_course_topic, course_card_art_copy, course_card_mark, is_course_card_recommendable,
-    )
 
     all_ids = {stable_id for _kind, stable_id in references}
     teaser_ids = {stable_id for kind, stable_id in references if kind == "coming-soon"}
@@ -633,9 +635,7 @@ def build_lesson_sections(
                 explicit_route_for_next_heading = False
             # Admin-added headings encode the selected Learning Room tab;
             # handle those exact prefixes before generic content heuristics.
-            elif heading.startswith("compare the possibilities"):
-                current_group = "idea"
-            elif heading.startswith("additional concept figure"):
+            elif heading.startswith("compare the possibilities") or heading.startswith("additional concept figure"):
                 current_group = "idea"
             elif heading.startswith("additional chart examples"):
                 current_group = "examples"
