@@ -36,13 +36,16 @@ class SharedLessonRenderingTests(SimpleTestCase):
     def test_regional_block_can_be_explicitly_hidden_for_a_matching_country(self):
         source = "## Disclosure\n\nBefore.\n\n[[regional-block:notice]]\n\nAfter."
         blocks = {"notice": {"id": "notice", "base_content": "Global notice.", "variants": [
-            {"scope": "country", "code": "CA", "content": "unused", "hidden": True}
+            {"scope": "country", "code": "CA", "content": "unused", "hidden": True},
+            {"scope": "region", "code": "NA", "content": "North American notice."}
         ]}}
         canada = build_lesson_sections(source, regional_blocks=blocks, country_code="CA", region_code="NA")
         us = build_lesson_sections(source, regional_blocks=blocks, country_code="US", region_code="NA")
         self.assertNotIn("unused", canada["idea_html"])
+        self.assertNotIn("North American notice.", canada["idea_html"])
         self.assertNotIn("Global notice.", canada["idea_html"])
-        self.assertIn("Global notice.", us["idea_html"])
+        self.assertIn("North American notice.", us["idea_html"])
+        self.assertNotIn("Global notice.", us["idea_html"])
 
     def test_misplaced_tab_route_markers_do_not_hide_section_copy(self):
         source = "\n".join([
@@ -389,6 +392,11 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn('contenteditable="true" spellcheck="true"', preview)
         self.assertIn('data-rich-command="table" aria-label="Insert table">Table', preview)
         self.assertIn('data-visual-editor="true"', preview)
+        self.assertIn("regionalCountryRegionMap = Object.fromEntries", preview)
+        self.assertIn("regionalCountryOptions.map(([code, label, region])", preview)
+        self.assertIn("regionalCountryRegionMap[country] || ''", preview)
+        self.assertIn("audiencePicker.innerHTML", preview)
+        self.assertIn("['NO','Norway','EU']", preview)
         self.assertIn("previewUrl.searchParams.set('preview_audience',audience||'GLOBAL')", preview)
         self.assertNotIn("Copy the structure below into a lesson", preview)
         self.assertNotIn("Information tables:", preview)

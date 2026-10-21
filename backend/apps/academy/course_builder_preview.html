@@ -1241,17 +1241,39 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   }
 
   const regionalCountryOptions = [
-    ['IN','India'],['US','United States'],['CA','Canada'],['GB','United Kingdom'],['AU','Australia'],['NZ','New Zealand'],
-    ['SG','Singapore'],['JP','Japan'],['CN','China'],['HK','Hong Kong'],['KR','South Korea'],['BD','Bangladesh'],
-    ['PK','Pakistan'],['LK','Sri Lanka'],['NP','Nepal'],['TH','Thailand'],['VN','Vietnam'],['MY','Malaysia'],
-    ['ID','Indonesia'],['PH','Philippines'],['DE','Germany'],['FR','France'],['IT','Italy'],['ES','Spain'],
-    ['NL','Netherlands'],['IE','Ireland'],['SE','Sweden'],['CH','Switzerland'],['AE','United Arab Emirates'],
-    ['SA','Saudi Arabia'],['ZA','South Africa'],['NG','Nigeria'],['KE','Kenya'],['BR','Brazil'],['AR','Argentina'],
-    ['MX','Mexico'],['CL','Chile'],['CO','Colombia'],['EG','Egypt'],['TR','Türkiye'],['IL','Israel'],
-    ['PL','Poland'],['PT','Portugal'],['BE','Belgium'],['AT','Austria'],['DK','Denmark'],['NO','Norway'],
-    ['FI','Finland'],['GR','Greece'],['CZ','Czechia'],['RO','Romania'],['TW','Taiwan']
+    ['IN','India','APAC'],['US','United States','NA'],['CA','Canada','NA'],['GB','United Kingdom','EU'],['AU','Australia','APAC'],['NZ','New Zealand','APAC'],
+    ['SG','Singapore','APAC'],['JP','Japan','APAC'],['CN','China','APAC'],['HK','Hong Kong','APAC'],['KR','South Korea','APAC'],['BD','Bangladesh','APAC'],
+    ['PK','Pakistan','APAC'],['LK','Sri Lanka','APAC'],['NP','Nepal','APAC'],['TH','Thailand','APAC'],['VN','Vietnam','APAC'],['MY','Malaysia','APAC'],
+    ['ID','Indonesia','APAC'],['PH','Philippines','APAC'],['DE','Germany','EU'],['FR','France','EU'],['IT','Italy','EU'],['ES','Spain','EU'],
+    ['NL','Netherlands','EU'],['IE','Ireland','EU'],['SE','Sweden','EU'],['CH','Switzerland','EU'],['AE','United Arab Emirates','MENA'],
+    ['SA','Saudi Arabia','MENA'],['ZA','South Africa','SSA'],['NG','Nigeria','SSA'],['KE','Kenya','SSA'],['BR','Brazil','LATAM'],['AR','Argentina','LATAM'],
+    ['MX','Mexico','NA'],['CL','Chile','LATAM'],['CO','Colombia','LATAM'],['EG','Egypt','MENA'],['TR','Türkiye','MENA'],['IL','Israel','MENA'],
+    ['PL','Poland','EU'],['PT','Portugal','EU'],['BE','Belgium','EU'],['AT','Austria','EU'],['DK','Denmark','EU'],['NO','Norway','EU'],
+    ['FI','Finland','EU'],['GR','Greece','EU'],['CZ','Czechia','EU'],['RO','Romania','EU'],['TW','Taiwan','APAC']
   ];
+  const regionalCountryRegionMap = Object.fromEntries(
+    regionalCountryOptions.map(([code, label, region]) => [code, region])
+  );
   const regionalRegionOptions = ['APAC','EU','NA','LATAM','MENA','SSA'];
+  const audiencePicker = document.getElementById('previewAudienceSelect');
+  if (audiencePicker) {
+    const selectedAudience = audiencePicker.value || 'GLOBAL';
+    const regionalLabels = {
+      APAC:'Asia-Pacific', EU:'Europe', NA:'North America',
+      LATAM:'Latin America', MENA:'Middle East & North Africa', SSA:'Sub-Saharan Africa'
+    };
+    const countryOptions = regionalCountryOptions.map(([code, label]) =>
+      '<option value="' + code + '">' + esc(label) + ' (' + code + ')</option>'
+    ).join('');
+    const regionOptions = regionalRegionOptions.map(code =>
+      '<option value="REGION:' + code + '">' + esc(regionalLabels[code] || code) + ' (' + code + ')</option>'
+    ).join('');
+    audiencePicker.innerHTML = '<option value="GLOBAL">Global default</option>' +
+      '<optgroup label="Countries">' + countryOptions + '</optgroup>' +
+      '<optgroup label="Regions">' + regionOptions + '</optgroup>';
+    audiencePicker.value = Array.from(audiencePicker.options).some(option => option.value === selectedAudience)
+      ? selectedAudience : 'GLOBAL';
+  }
   function regionalFields(lesson) {
     if (!lesson) return '<div class="empty-state"><p>Select a lesson first.</p></div>';
     if (!Array.isArray(lesson.regionalBlocks)) lesson.regionalBlocks = [];
@@ -1661,10 +1683,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     const value = String(audience || 'GLOBAL').toUpperCase();
     const isRegion = value.startsWith('REGION:');
     const country = isRegion ? '' : value;
-    const region = isRegion ? value.split(':')[1] : ({
-      IN:'APAC',CN:'APAC',JP:'APAC',KR:'APAC',SG:'APAC',AU:'APAC',NZ:'APAC',BD:'APAC',PK:'APAC',LK:'APAC',NP:'APAC',
-      US:'NA',CA:'NA',MX:'NA',GB:'EU',DE:'EU',FR:'EU',IT:'EU',ES:'EU',NL:'EU',AE:'MENA',SA:'MENA',BR:'LATAM',ZA:'SSA'
-    }[country] || '');
+    const region = isRegion ? value.split(':')[1] : (regionalCountryRegionMap[country] || '');
     return String(source || '').replace(/\[\[regional-block:([A-Za-z0-9_-]{1,120})\]\]/g, (token,id) => {
       const block = blocks.find(item => String(item.id) === id);
       if (!block) return '';
