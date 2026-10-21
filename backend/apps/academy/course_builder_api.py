@@ -300,6 +300,13 @@ def _build_import_payload(course_state, course_slug):
             # Regional content blocks occupy an explicit marker in the lesson body.
             # Store country/region alternatives in learner-safe JSON, and allow their
             # assets through the same publication and protected-media authorization path.
+            def remap_regional_assets(value, image_mapping, referenced_asset_ids):
+                value = str(value or "")[:40000]
+                for old_id, stable_id in image_mapping.items():
+                    value = value.replace(f"asset://{old_id}", f"asset://{stable_id}")
+                referenced_asset_ids.update(_ASSET_REF.findall(value))
+                return value
+
             regional_blocks_payload = {}
             regional_block_asset_ids = set()
             raw_regional_blocks = lesson.get("regionalBlocks") if isinstance(lesson.get("regionalBlocks"), list) else []
@@ -316,14 +323,9 @@ def _build_import_payload(course_state, course_slug):
                     # Keep unused authoring blocks in builder_state, not learner JSON.
                     continue
 
-                def remap_regional_assets(value):
-                    value = str(value or "")[:40000]
-                    for old_id, stable_id in image_by_id.items():
-                        value = value.replace(f"asset://{old_id}", f"asset://{stable_id}")
-                    regional_block_asset_ids.update(_ASSET_REF.findall(value))
-                    return value
-
-                base_content = remap_regional_assets(block.get("baseContent", ""))
+                base_content = remap_regional_assets(
+                    block.get("baseContent", ""), image_by_id, regional_block_asset_ids
+                )
                 variants = []
                 seen_variant_targets = set()
                 raw_variants = block.get("variants") if isinstance(block.get("variants"), list) else []
@@ -351,7 +353,7 @@ def _build_import_payload(course_state, course_slug):
                         "id": variant_id,
                         "scope": scope,
                         "code": code,
-                        "content": remap_regional_assets(variant.get("content", "")),
+                        "content": remap_regional_assets(variant.get("content", ""), image_by_id, regional_block_asset_ids),
                         "hidden": bool(variant.get("hidden", False)),
                     })
                 regional_blocks_payload[block_id] = {
