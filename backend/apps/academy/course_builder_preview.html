@@ -1237,7 +1237,22 @@ Describe the evidence first.
       const filename = String(image?.name || '').trim();
       return title && title !== filename && !/\.(jpe?g|png|webp|gif|svg)$/i.test(title) ? title : 'Chart';
     };
-    let prepared = String(src || '').replace(/^\s*\[\[lesson-tab:(?:idea|examples|practice)\]\]\s*$/gim, '').replace(/!\[([^\]]*)\]\(asset:\/\/([^)]+)\)/g, function(match, alt, id) {
+    const compactDuplicateCourseCards = source => {
+      const original = String(source || '');
+      const matches = [...original.matchAll(/\[\[course-card:(coming-soon:)?([0-9a-fA-F-]{36})\]\]/g)];
+      const lastByCourse = new Map();
+      matches.forEach(match => lastByCourse.set((match[1] || '') + match[2].toLowerCase(), match.index));
+      let result = original;
+      for (let index = matches.length - 1; index >= 0; index--) {
+        const match = matches[index];
+        const key = (match[1] || '') + match[2].toLowerCase();
+        if (lastByCourse.get(key) !== match.index) {
+          result = result.slice(0, match.index) + result.slice(match.index + match[0].length);
+        }
+      }
+      return result.replace(/\n{3,}/g, '\n\n');
+    };
+    let prepared = compactDuplicateCourseCards(String(src || '')).replace(/^\s*\[\[lesson-tab:(?:idea|examples|practice)\]\]\s*$/gim, '').replace(/!\[([^\]]*)\]\(asset:\/\/([^)]+)\)/g, function(match, alt, id) {
       const image = images.find(function(item) { return item.id === id || item.assetUuid === id; });
       if (!image) return match;
       const token = 'TTFIGURETOKEN' + figures.length + 'END';
