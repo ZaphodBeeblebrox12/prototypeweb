@@ -85,6 +85,9 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "YOUR TRADING NOTEBOOK")
         self.assertContains(response, "notebookPreviewMarkup(lesson)")
         self.assertContains(response, "Notebook heading")
+        self.assertContains(response, "notebook-editor-preview")
+        self.assertContains(response, "data-notebook-preview")
+        self.assertContains(response, "notebookPreviewMarkup(l)")
 
     def test_admin_can_save_shared_draft(self):
         response = self.client.post(
