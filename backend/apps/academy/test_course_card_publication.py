@@ -188,6 +188,16 @@ class CoursePublicationReadinessTests(TestCase):
 
 
 class OptionFourCardParityTests(SimpleTestCase):
+    def test_admin_website_preview_matches_builder_option_four_dimensions(self):
+        root = Path(__file__).resolve().parents[2]
+        admin_css = (root / "static" / "academy" / "course-import-preview.css").read_text(encoding="utf-8")
+
+        self.assertIn(".tt-admin-learning-preview .tt-tab-panel .tt-course-preview-card {", admin_css)
+        self.assertIn("width: min(100%, 640px);", admin_css)
+        self.assertIn('font: 400 17px/1.12 Georgia, "Times New Roman", serif;', admin_css)
+        self.assertIn("font-size: 9px;", admin_css)
+        self.assertIn("-webkit-line-clamp: 2;", admin_css)
+
     def test_builder_and_learning_room_use_the_same_option_four_css(self):
         root = Path(__file__).resolve().parents[2]
         builder = (root / "apps" / "academy" / "course_builder_preview.html").read_text(encoding="utf-8")
