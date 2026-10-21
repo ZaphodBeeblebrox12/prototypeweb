@@ -2,12 +2,74 @@ from pathlib import Path
 
 from django.test import SimpleTestCase
 
-from .content_rendering import build_lesson_sections, render_safe_markdown
+from .content_rendering import _deduplicate_course_card_refs, build_lesson_sections, render_safe_markdown
 from .views import _notebook_for_course_display
 
 
 class SharedLessonRenderingTests(SimpleTestCase):
     ASSET_ID = "8c0f08ab-c9be-45d2-9cde-1f5a0a1c9031"
+
+    def test_misplaced_tab_route_markers_do_not_hide_section_copy(self):
+        source = "\n".join([
+            "## Start with the decision",
+            "",
+            "Begin with a practical question a trader may encounter.",
+            "",
+            "### What to notice",
+            "",
+            "[[lesson-tab:examples]]",
+            "",
+            "[[lesson-tab:practice]]",
+            "",
+            "Separate the visible evidence from the conclusion you may draw from it.",
+            "",
+            "### Compare the possibilities",
+            "",
+            "Use a second case to show how similar-looking conditions can lead to different outcomes.",
+        ])
+
+        sections = build_lesson_sections(source)
+
+        self.assertIn("What to notice", sections["idea_html"])
+        self.assertIn("Separate the visible evidence", sections["idea_html"])
+        self.assertIn("Compare the possibilities", sections["idea_html"])
+        self.assertIn("Use a second case", sections["idea_html"])
+        self.assertNotIn("Separate the visible evidence", sections["examples_html"])
+        self.assertNotIn("Use a second case", sections["practice_html"])
+        self.assertNotIn("[[lesson-tab:", sections["idea_html"] + sections["examples_html"] + sections["practice_html"])
+
+    def test_explicit_tab_route_applies_to_the_heading_after_the_marker(self):
+        source = "\n".join([
+            "## Start with the decision",
+            "",
+            "Introduction remains in the idea tab.",
+            "",
+            "[[lesson-tab:practice]]",
+            "",
+            "### What to notice",
+            "",
+            "This heading and its paragraph are intentionally routed to practice.",
+        ])
+
+        sections = build_lesson_sections(source)
+
+        self.assertNotIn("What to notice", sections["idea_html"])
+        self.assertIn("What to notice", sections["practice_html"])
+        self.assertIn("intentionally routed to practice", sections["practice_html"])
+        self.assertIn("Introduction remains in the idea tab", sections["idea_html"])
+
+    def test_duplicate_course_card_refs_keep_the_last_authored_placement(self):
+        card = "[[course-card:8c0f08ab-c9be-45d2-9cde-1f5a0a1c9031]]"
+        source = (
+            "### What to notice\n\n" + card + "\n\n"
+            "### Compare the possibilities\n\nCompare two outcomes.\n\n" + card
+        )
+
+        cleaned = _deduplicate_course_card_refs(source)
+
+        self.assertEqual(cleaned.count(card), 1)
+        self.assertGreater(cleaned.index("Compare the possibilities"), cleaned.index(card))
+        self.assertIn("Compare two outcomes.", cleaned)
 
     def test_authored_heading_levels_are_not_flattened(self):
         source = (
