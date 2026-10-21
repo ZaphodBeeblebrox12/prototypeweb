@@ -29,7 +29,7 @@ def course_card_publication_issue(title, summary, description=""):
 
     if not title_text:
         return "Add a course title before publishing."
-    if title_text in _PLACEHOLDER_TITLES:
+    if title_text in _PLACEHOLDER_TITLES or re.fullmatch(r"untitled course\s*\d+", title_text):
         return "Replace the starter course title before publishing."
     if not summary_text:
         return "Add a learner-facing course summary before publishing."
