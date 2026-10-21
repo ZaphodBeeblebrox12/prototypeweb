@@ -110,6 +110,41 @@ class CoursePublicationReadinessTests(TestCase):
         )
 
 
+    def test_valid_course_card_reference_renders_option_four_not_a_lesson_link(self):
+        from .content_rendering import render_safe_markdown
+
+        course = Course.objects.create(
+            title="Volume & Price Analysis",
+            slug="volume-price-analysis-card-test",
+            summary="Study how trading activity relates to the price result.",
+            description="Compare volume, price progress and failed breakouts.",
+            category="Technical analysis",
+            learning_outcomes=[
+                "Compare relative volume with price progress.",
+                "Explain effort versus result.",
+                "Identify failed breakouts.",
+            ],
+            status=Course.Status.PUBLISHED,
+        )
+
+        rendered = render_safe_markdown(
+            "## Keep exploring\\n\\n[[course-card:" + str(course.pk) + "]]",
+            admin_preview=True,
+        )
+
+        self.assertIn('class="tt-course-preview-card"', rendered)
+        self.assertIn("Volume &amp; Price Analysis", rendered)
+        self.assertIn("tt-course-preview-card__topics", rendered)
+        self.assertIn("Relative volume", rendered)
+        self.assertIn("View course outline", rendered)
+        self.assertIn("/learn/course/volume-price-analysis-card-test/", rendered)
+        self.assertNotIn("Course currently unavailable", rendered)
+
+        lesson_link = render_safe_markdown("[[lesson:" + str(uuid.uuid4()) + "]]", admin_preview=True)
+        self.assertNotIn("tt-course-preview-card", lesson_link)
+        self.assertIn("Related lesson unavailable", lesson_link)
+
+
 class OptionFourCardParityTests(SimpleTestCase):
     def test_builder_and_learning_room_use_the_same_option_four_css(self):
         root = Path(__file__).resolve().parents[2]
