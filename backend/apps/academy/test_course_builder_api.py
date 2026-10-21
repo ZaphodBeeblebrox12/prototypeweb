@@ -935,12 +935,21 @@ class CourseBuilderApiTests(TestCase):
 
 
 class CourseBuilderPreviewWiringTests(SimpleTestCase):
-    def test_new_course_button_passes_a_real_element_to_the_action_handler(self):
+    def test_new_course_buttons_use_responsive_capture_phase_handler(self):
         source = Path(__file__).with_name("course_builder_preview.html").read_text(
             encoding="utf-8"
         )
-        self.assertIn("const id=el?.dataset?.id;", source)
         self.assertIn(
+            "const button=target?.closest('#newCourseButton, [data-action=\\"new-course\\"]');",
+            source,
+        )
+        self.assertIn("event.stopImmediatePropagation();createNewCourseDraft(button);},true);", source)
+        self.assertIn("trigger.textContent = 'Creating course…';", source)
+        self.assertIn("markDirty();", source)
+        self.assertIn("renderEditor();", source)
+        self.assertIn("New draft created. Add details and save when ready.", source)
+        self.assertIn("Could not open a new course. Please try again.", source)
+        self.assertNotIn(
             "$('#newCourseButton').addEventListener('click',event=>handleAction('new-course',event.currentTarget));",
             source,
         )
