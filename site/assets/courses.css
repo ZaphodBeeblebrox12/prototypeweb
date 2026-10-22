@@ -522,3 +522,25 @@
  .courses-catalogue-page .ed-micro-tile:hover,.courses-catalogue-page .ed-action:hover{transform:none}
 }
 
+
+
+/* Search and topic filters stay available within the new editorial tile composition. */
+.courses-catalogue-page .ed-catalogue-controls{display:grid;grid-template-columns:minmax(260px,.75fr) minmax(0,1.25fr);gap:13px;align-items:center;margin:23px 0 12px;padding:12px 13px;background:#f0eee5;border:1px solid #dedbcf}
+.courses-catalogue-page .ed-search{border-radius:0;background:#fffdf7;border-color:#d8d9ca;min-height:43px}
+.courses-catalogue-page .ed-filter-list{gap:6px;align-items:center}
+.courses-catalogue-page .ed-filter-list button{border-radius:0;background:#fffdf7;border-color:#d7d8cb;color:#5b685b;font-size:10px;min-height:32px;padding:6px 9px}
+.courses-catalogue-page .ed-filter-list button.is-active{background:#3e6049;border-color:#3e6049;color:#fffdf7}
+.courses-catalogue-page .ed-filter-list [data-count],.courses-catalogue-page .ed-filter-list [data-filter-count]{border-radius:0;background:#e5cc8a;color:#3e6049}
+.courses-catalogue-page .ed-results-line{display:flex;justify-content:space-between;align-items:center;gap:14px;margin:0 1px 13px;color:#737a6d;font-size:9px;line-height:1.55}
+.courses-catalogue-page .ed-results-line span:first-child{font-weight:850;color:#3e6049}
+.courses-catalogue-page .ed-no-results{border-radius:0;border-color:#d8d9ca;background:#fffdf7}
+.courses-catalogue-page .ed-no-results button{background:#3e6049;color:#fffdf7;border:1px solid #3e6049;padding:9px 12px;font-size:11px;font-weight:750}
+.courses-catalogue-page .cc-development-note.ed-development-note{max-width:none;margin:13px 0 0;padding:9px 12px;border-left:2px solid #c6a251;background:#f0eee5;color:#6b7165;font-size:10px;line-height:1.7}
+.courses-catalogue-page .ed-development-rail[hidden],.courses-catalogue-page .micro-tile-grid[hidden],.courses-catalogue-page .ed-no-results[hidden]{display:none!important}
+@media(max-width:760px){
+ .courses-catalogue-page .ed-catalogue-controls{grid-template-columns:1fr;gap:10px;padding:10px;margin-top:19px}
+ .courses-catalogue-page .ed-filter-list{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:1px 1px 4px;overscroll-behavior-x:contain}
+ .courses-catalogue-page .ed-filter-list::-webkit-scrollbar{display:none}
+ .courses-catalogue-page .ed-filter-list button{flex:0 0 auto}
+ .courses-catalogue-page .ed-results-line{align-items:flex-start;flex-direction:column;gap:3px;margin-bottom:11px}
+}
