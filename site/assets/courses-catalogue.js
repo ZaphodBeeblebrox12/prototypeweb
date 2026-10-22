@@ -39,7 +39,8 @@
   const renderEditorialProgramme = (course, variant) => {
     const isConstruct = variant === 'construct';
     const outcomes = (course.outcomes || []).slice(0, isConstruct ? 3 : 3).map((item, index) => '<li><span>0' + (index + 1) + '</span>' + escapeHTML(item) + '</li>').join('');
-    const facts = (course.facts || []).map(fact => '<span>' + escapeHTML(fact) + '</span>').join('');
+    const factSource = isConstruct ? (course.facts || []) : (course.facts || []).filter(fact => !/connected stages|guided sequence/i.test(fact));
+    const facts = factSource.map(fact => '<span>' + escapeHTML(fact) + '</span>').join('');
     const price = '<div class="ed-offer-price"><strong>' + escapeHTML(course.price) + '</strong><span>' + escapeHTML(course.priceNote) + '</span></div>';
     const action = '<a class="ed-action ' + (isConstruct ? 'ed-action-gold' : 'ed-action-primary') + '" href="' + escapeHTML(course.href) + '">' + escapeHTML(course.cta) + ' <span aria-hidden="true">↗</span></a>';
     if (!isConstruct) {
@@ -100,22 +101,33 @@
 
   let microCourses = data.microCourses.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
 
-  function renderMicroCard(course) {
+  function renderMicroCard(course, index) {
     const hook = course.hook || course.description || '';
     const problem = course.problem || '';
     const learningFocus = course.learningFocus || course.outcome || '';
     const whyThisOne = course.whyThisOne || '';
-    const serial = String(Math.max(1, Math.round((course.order || 10) / 10))).padStart(2, '0');
+    const serial = String(index + 1).padStart(2, '0');
+    const artLabels = {
+      'support-resistance': 'MARK THE ZONE',
+      'bollinger-bands': 'READ VOLATILITY',
+      'candlestick-patterns': 'READ THE CANDLE',
+      'risk-management-basics': 'DEFINE INVALIDATION',
+      'moving-averages': 'READ THE TREND',
+      'options-basics': 'UNDERSTAND THE CONTRACT',
+      'market-structure': 'FIND THE SWING',
+      'understanding-adx': 'MEASURE STRENGTH'
+    };
+    const artLabel = artLabels[course.id] || 'CHART STUDY';
     const status = course.status === 'coming-soon' ? '<span class="ed-course-status">Coming soon</span>' : '';
-    return '<article class="ed-micro-tile">' +
-      '<div class="ed-tile-art"><span class="ed-tile-serial">' + serial + ' <i>/</i> ' + escapeHTML(course.category || 'Focused study') + '</span>' + chartArt(course.art) + '<span class="ed-tile-art-caption">Illustrative chart study · not market data</span></div>' +
+    return '<article class="ed-micro-tile" data-course-id="' + escapeHTML(course.id) + '">' +
+      '<div class="ed-tile-art"><span class="ed-tile-serial">FIELD STUDY <i>/</i> ' + serial + '</span>' + chartArt(course.art) + '<span class="ed-tile-art-caption">' + escapeHTML(artLabel) + '</span></div>' +
       '<div class="ed-tile-body"><div class="ed-tile-meta"><span>' + escapeHTML(course.category || 'Focused study') + '</span><span>' + escapeHTML(course.level || 'Self-paced') + '</span></div>' +
       '<h3 class="ed-tile-title">' + escapeHTML(course.title) + '</h3>' + status +
-      '<div class="ed-tile-problem-label">The problem it helps with</div><p class="ed-tile-hook cc-card-hook">' + escapeHTML(hook) + '</p>' +
+      '<div class="ed-tile-problem-label">The trader’s question</div><p class="ed-tile-hook cc-card-hook">' + escapeHTML(hook) + '</p>' +
       (problem ? '<p class="ed-tile-problem">' + escapeHTML(problem) + '</p>' : '') +
       '<div class="ed-tile-focus"><span>What you will work on</span><p>' + escapeHTML(learningFocus) + '</p></div>' +
       (whyThisOne ? '<p class="ed-tile-why"><b>Why this one</b><span>' + escapeHTML(whyThisOne) + '</span></p>' : '') +
-      '<div class="ed-tile-footer"><div class="ed-tile-price"><strong>' + escapeHTML(course.price || '') + '</strong><span>Catalogue price</span></div><button class="ed-tile-action" type="button" data-open-course="' + escapeHTML(course.id) + '">See what is inside <i aria-hidden="true">↗</i></button></div></div></article>';
+      '<div class="ed-tile-footer"><div class="ed-tile-price"><strong>' + escapeHTML(course.price || '') + '</strong></div><button class="ed-tile-action" type="button" data-open-course="' + escapeHTML(course.id) + '">See what is inside <i aria-hidden="true">↗</i></button></div></div></article>';
   }
   function renderFilterButtons() {
     if (!filterHost) return;
