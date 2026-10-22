@@ -151,30 +151,52 @@
       <div class="account-preview"><span>Already signed in?<br>Return to your saved member session.</span><a href="https://tradethesis-academy-staging.onrender.com/accounts/member-entry/">Open member dashboard →</a></div>
     </section>
   </main>
-  <footer class="sitewide-footer">
-  <div class="sitewide-footer__inner">
-    <div class="sitewide-footer__main">
-      <div class="sitewide-footer__brand-block">
-        <a class="sitewide-footer__brand" href="index.html" aria-label="TradeThesis home">
-          <img src="assets/tradethesis-wordmark.png" alt="TradeThesis — Conviction before execution">
-        </a>
-        <p class="sitewide-footer__copy">Trading education for people who want to understand the decision, not just copy the entry.</p>
+    <footer class="sitewide-footer" id="sitewide-footer">
+    <div class="sitewide-footer__frame">
+      <div class="sitewide-footer__accent" aria-hidden="true"></div>
+      <div class="sitewide-footer__main">
+        <div class="sitewide-footer__brand-block">
+          <p class="sitewide-footer__eyebrow">TRADETHESIS / EDUCATION</p>
+          <a class="sitewide-footer__brand" href="index.html" aria-label="TradeThesis home">
+            <img src="assets/tradethesis-wordmark.png" alt="TradeThesis — Conviction before execution">
+          </a>
+          <h2 class="sitewide-footer__statement">Clarity over noise.<br>Process over prediction.</h2>
+          <p class="sitewide-footer__copy">A clearer view of the process behind the trade.</p>
+        </div>
+        <nav class="sitewide-footer__groups" aria-label="Footer navigation">
+          <section class="sitewide-footer__group" aria-labelledby="footer-learn">
+            <span class="sitewide-footer__number" aria-hidden="true">01</span>
+            <h3 id="footer-learn">Learn</h3>
+            <a href="trading-path.html">Trading Path</a>
+            <a href="courses.html">Course library</a>
+          </section>
+          <section class="sitewide-footer__group" aria-labelledby="footer-read">
+            <span class="sitewide-footer__number" aria-hidden="true">02</span>
+            <h3 id="footer-read">Read</h3>
+            <a href="index.html#desk">The Desk</a>
+            <a href="index.html#approach">Our approach</a>
+          </section>
+          <section class="sitewide-footer__group" aria-labelledby="footer-connect">
+            <span class="sitewide-footer__number" aria-hidden="true">03</span>
+            <h3 id="footer-connect">Connect</h3>
+            <a href="community.html">Community</a>
+            <a href="live-class.html">Live class</a>
+          </section>
+          <section class="sitewide-footer__group" aria-labelledby="footer-support">
+            <span class="sitewide-footer__number" aria-hidden="true">04</span>
+            <h3 id="footer-support">Support</h3>
+            <a href="mailto:hello@tradethesis.com">Contact</a>
+            <a href="member-access.html">Member access</a>
+          </section>
+        </nav>
       </div>
-      <nav class="sitewide-footer__links" aria-label="Footer navigation">
-        <a href="index.html#approach">Our approach</a>
-        <a href="courses.html">Courses</a>
-        <a href="live-class.html">Live class</a>
-        <a href="community.html">Community</a>
-        <a href="index.html#desk">Free learning</a>
-        <a href="#">Back to top ↑</a>
-      </nav>
+      <div class="sitewide-footer__bottom">
+        <span class="sitewide-footer__copyright">© TradeThesis · Conviction before execution</span>
+        <p class="sitewide-footer__disclaimer">For educational purposes only. Nothing on this website is investment advice or a recommendation to buy or sell any financial instrument. Trading involves risk, including the possible loss of capital. Chart examples are illustrative, not live trading signals.</p>
+        <a class="sitewide-footer__top-link" href="#" aria-label="Back to top">Back to top ↑</a>
+      </div>
     </div>
-    <div class="sitewide-footer__bottom">
-      <p class="sitewide-footer__disclaimer">For educational purposes only. Nothing on this website is investment advice or a recommendation to buy or sell any financial instrument. Trading involves risk, including the possible loss of capital. Chart examples are illustrative, not live trading signals.</p>
-      <span>© TradeThesis · Website preview</span>
-    </div>
-  </div>
-</footer>
+  </footer>
   <script>
     (() => {
       const signInTab = document.getElementById('signInTab');
