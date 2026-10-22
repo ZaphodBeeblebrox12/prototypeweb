@@ -3,8 +3,11 @@
 .sitewide-footer,
 .sitewide-footer * { box-sizing: border-box; }
 .sitewide-footer {
-  margin-top: 0;
-  padding: 8px 0 10px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line, #ded8ca);
+  background: var(--paper2, #f2ebdf);
   color: var(--ink, #29382e);
   font-family: var(--sans, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
 }
@@ -16,13 +19,19 @@ main > section:last-child { padding-bottom: 28px !important; }
 main > .sr-room-disclaimer:last-child { margin-bottom: 0 !important; }
 
 .sitewide-footer__paper {
+  width: 100%;
+  margin: 0;
+  padding: 16px 0 11px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: var(--paper2, #f2ebdf);
+}
+.sitewide-footer__patches,
+.sitewide-footer__main,
+.sitewide-footer__bottom {
   width: min(1160px, calc(100% - 48px));
   margin-inline: auto;
-  padding: 16px 21px 11px;
-  overflow: hidden;
-  border: 1px solid var(--line, #ded8ca);
-  border-radius: 17px;
-  background: #f6efe5;
 }
 .sitewide-footer__patches {
   display: grid;
@@ -200,7 +209,10 @@ main > .sr-room-disclaimer:last-child { margin-bottom: 0 !important; }
 @media (max-width: 620px) {
   .sitewide-footer { padding: 7px 0 8px; }
   main > section:last-child { padding-bottom: 22px !important; }
-  .sitewide-footer__paper { width: calc(100% - 24px); padding: 14px 16px 10px; border-radius: 15px; }
+  .sitewide-footer__paper { width: 100%; padding: 14px 0 10px; border-radius: 0; }
+  .sitewide-footer__patches,
+  .sitewide-footer__main,
+  .sitewide-footer__bottom { width: calc(100% - 32px); }
   .sitewide-footer__patches { gap: 12px; padding-bottom: 12px; }
   .sitewide-footer__stamp { font-size: 10px; margin-bottom: 7px; }
   .sitewide-footer__statement { font-size: 27px; line-height: 1.02; }
@@ -216,7 +228,9 @@ main > .sr-room-disclaimer:last-child { margin-bottom: 0 !important; }
   .sitewide-footer__top-link { display: inline-block; margin-top: 1px; }
 }
 @media (max-width: 360px) {
-  .sitewide-footer__paper { width: calc(100% - 20px); padding-inline: 13px; }
+  .sitewide-footer__patches,
+  .sitewide-footer__main,
+  .sitewide-footer__bottom { width: calc(100% - 24px); }
   .sitewide-footer__statement { font-size: 25px; }
   .sitewide-footer__links { column-gap: 11px; }
   .sitewide-footer__link-group a { font-size: 10px; }
