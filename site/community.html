@@ -438,6 +438,48 @@ main{overflow:clip}.section{padding:73px 0}.section-heading{display:flex;align-i
  .merged-process-note p{font-size:12.5px}
 }
 
+
+/* Community overview: benefits plus a visual for different perspectives. */
+.tt-community-content{padding:58px 0 64px;background:#fbf7ef;border-bottom:1px solid var(--line)}
+.tt-community-content__heading{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.7fr);gap:30px;align-items:end;margin:0 0 23px}
+.tt-community-content__heading h2{font:400 clamp(35px,4.1vw,48px)/1.02 var(--serif);letter-spacing:-.045em;margin:12px 0 0;max-width:630px;color:var(--ink)}
+.tt-community-content__heading>p{font-size:12px;line-height:1.8;color:#657064;margin:0 0 3px;max-width:450px}
+.tt-benefit-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.tt-benefit-card{position:relative;isolation:isolate;overflow:hidden;min-height:218px;padding:22px 21px 21px;background:#fffdf8;border:1px solid #e1e5dc;border-radius:17px;box-shadow:0 14px 32px #293e2f0e}
+.tt-benefit-card:after{content:"";position:absolute;z-index:-1;width:100px;height:100px;right:-41px;bottom:-42px;border:1px solid #dfe9d8;border-radius:50%;box-shadow:0 0 0 13px #f8faf5,0 0 0 14px #e7eee2}
+.tt-benefit-card:nth-child(2):after{border-color:#ead9c9;box-shadow:0 0 0 13px #fbf7f1,0 0 0 14px #f1e5d7}
+.tt-benefit-card:nth-child(3):after{border-color:#d9e5ea;box-shadow:0 0 0 13px #f5f9fa,0 0 0 14px #e6eff2}
+.tt-benefit-icon{width:43px;height:43px;display:grid;place-items:center;border-radius:13px;background:#edf3e8;color:#45664a;margin-bottom:17px}
+.tt-benefit-card:nth-child(2) .tt-benefit-icon{background:#f2e6d8;color:#9c6648}
+.tt-benefit-card:nth-child(3) .tt-benefit-icon{background:#eaf0f4;color:#527789}
+.tt-benefit-icon svg{width:22px;height:22px}
+.tt-benefit-kicker{font:800 9px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#638061;margin-bottom:7px}
+.tt-benefit-card h3{font:700 21px/1.18 var(--serif);letter-spacing:-.025em;color:#29382e;margin:0 0 9px;max-width:300px}
+.tt-benefit-card p{font-size:11.5px;line-height:1.75;color:#647064;margin:0;max-width:335px}
+.tt-perspective-panel{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:28px;align-items:center;position:relative;margin-top:18px;padding:28px 27px;border:1px solid #dfe7d9;border-radius:20px;background:linear-gradient(135deg,#edf2e8 0%,#e8eddf 100%);overflow:hidden}
+.tt-perspective-copy{position:relative;z-index:1}
+.tt-perspective-copy .eyebrow{margin-bottom:8px}
+.tt-perspective-copy h2{font:400 clamp(27px,3vw,35px)/1.1 var(--serif);letter-spacing:-.04em;color:#29382e;margin:0 0 10px;max-width:450px}
+.tt-perspective-copy h2 em{font-weight:400;color:#355a46}
+.tt-perspective-copy p{font-size:12px;line-height:1.8;color:#5f6d60;margin:0;max-width:430px}
+.tt-perspective-art{position:relative;min-width:0;min-height:235px;isolation:isolate}
+.tt-perspective-art:before{content:"";position:absolute;z-index:-1;width:215px;height:215px;border:1px solid #d1dec9;border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 0 0 17px #e7eee1,0 0 0 18px #dbe6d4,0 0 0 36px #edf2e8,0 0 0 37px #e0e9da}
+.tt-perspective-chart{position:absolute;width:75%;height:68%;left:12.5%;top:16%;color:#7e9b79;opacity:.85}
+.tt-perspective-card{position:absolute;z-index:2;width:44%;min-height:91px;padding:13px 14px 12px;background:#fffdf8;color:#29382e;border:1px solid #ded8ca;border-radius:5px 12px 5px 12px;box-shadow:0 12px 22px #293e2f17}
+.tt-perspective-card small{display:block;color:#6b8268;font:800 8px var(--mono);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px}
+.tt-perspective-card strong{display:block;font:400 17px/1.13 var(--serif)}
+.tt-perspective-card p{color:#66736a;font-size:9px;line-height:1.45;margin:6px 0 0}
+.tt-perspective-card--one{left:0;top:13px;transform:rotate(-4deg)}
+.tt-perspective-card--two{right:0;top:33px;transform:rotate(3deg);background:#fbf1df;border-color:#eadcc2}
+.tt-perspective-card--two small{color:#b96f50}
+.tt-perspective-card--shared{left:24%;bottom:0;transform:rotate(-1deg);width:51%;min-height:auto;display:flex;align-items:center;gap:10px;padding:10px 13px;background:#254334;color:#fff8e8;border:0;border-radius:5px}
+.tt-perspective-card--shared .tt-shared-mark{width:30px;height:30px;flex:0 0 auto;border:1px solid #dce8d533;border-radius:50%;display:grid;place-items:center;color:#f2d486;font-size:15px}
+.tt-perspective-card--shared small{color:#d2e0cc;font-size:7px;margin-bottom:3px}
+.tt-perspective-card--shared strong{color:#fff8e8;font-size:15px}
+.tt-perspective-connector{position:absolute;z-index:1;width:9px;height:9px;border-radius:50%;background:#b96f50;border:2px solid #edf2e8;left:50%;top:48%}
+@media(max-width:820px){.tt-community-content{padding:45px 0 49px}.tt-community-content__heading{grid-template-columns:1fr;gap:12px}.tt-benefit-grid{grid-template-columns:1fr}.tt-benefit-card{min-height:0;padding:20px}.tt-perspective-panel{grid-template-columns:1fr;gap:12px}}
+@media(max-width:560px){.tt-community-content{padding:37px 0 40px}.tt-community-content__heading h2{font-size:clamp(33px,9vw,42px)}.tt-perspective-panel{padding:21px 16px 17px}.tt-perspective-art{min-height:225px;margin:0 -3px}.tt-perspective-card{padding:11px 10px;width:46%}.tt-perspective-card strong{font-size:15px}.tt-perspective-card p{font-size:8px}.tt-perspective-card--shared{width:60%;left:20%}}
+
 /* Eleventh pass: keep the closing wordmark whole and remove the double bottom gap. */
 .signoff-wordmark{
   font-size:clamp(47px,5.8vw,78px);
@@ -530,7 +572,7 @@ main{overflow:clip}.section{padding:73px 0}.section-heading{display:flex;align-i
     <div class="hero-copy">
       <div class="overline">TradeThesis · Community</div>
       <h1>Your trade thesis is<br><em>the start of the conversation.</em></h1>
-      <p class="hero-description">Bring the market context you are reading, the thesis you are forming, or the risk you are still working through. Compare how other traders approach the same decision—and make your reasoning clearer by examining it from another angle.</p>
+      <p class="hero-description">It is easy to collect strategies. Harder to know when one fits, what would invalidate it, and how to review the decision afterwards. TradeThesis Community is built for that part: a place to sharpen your thinking alongside traders asking the same hard questions—not a feed of calls to copy.</p>
       <div class="hero-manifesto"><span class="manifesto-mark">“</span><p>A useful thesis explains not only why an idea might work, but where it could fail.</p></div>
       <div class="hero-actions"><a class="button-light" href="#community-preview">Explore the community <span aria-hidden="true">↓</span></a><a class="hero-link" href="#how-it-feels">How we think through a trade</a></div>
       <div class="hero-footnote">CONTEXT · THESIS · RISK · MANAGEMENT · REVIEW</div>
@@ -579,51 +621,31 @@ main{overflow:clip}.section{padding:73px 0}.section-heading{display:flex;align-i
 </section>
 
 
-<section class="merged-process-section" id="how-it-feels">
-  <div class="wrap merged-process-wrap">
-    <header class="merged-process-heading">
-      <div class="merged-heading-main">
-        <div class="eyebrow">TradeThesis · The whole decision</div>
-        <h2>Bring the thesis.<br><em>Examine the reasoning.</em></h2>
-      </div>
-      <p>A trade idea becomes more useful when its reasoning can be examined. Start with context, make the thesis explicit, test risk and management, then review what held up. Members can add a perspective at any point in that connected decision.</p>
+
+<section class="tt-community-content" aria-labelledby="tt-community-benefits-title">
+  <div class="wrap">
+    <header class="tt-community-content__heading">
+      <div><div class="eyebrow">A community with a purpose</div><h2 id="tt-community-benefits-title">Don't just collect ideas. Build a process.</h2></div>
+      <p>Courses can teach you the concepts. A thoughtful community gives you a place to question your interpretation, compare approaches, and bring those lessons back to the decisions you face—not think for you.</p>
     </header>
-
-    <div class="merged-process-layout">
-      <figure class="merged-process-workpaper" aria-labelledby="merged-workpaper-caption">
-        <div class="merged-paper-topline"><span>TRADETHESIS / FIELD NOTE 014</span><span>ONE CONNECTED DECISION</span></div>
-        <div class="merged-paper-board">
-          <div class="merged-paper-headingline"><span>THE WHOLE DECISION</span><span class="merged-paper-stamp">WORKING NOTE</span></div>
-          <h3>A trade, <em>thought through.</em></h3>
-          <div class="merged-paper-route" aria-label="Context, thesis, risk and review"><span>CONTEXT</span><i aria-hidden="true">→</i><span>THESIS</span><i aria-hidden="true">→</i><span>RISK</span><i aria-hidden="true">→</i><span>REVIEW</span></div>
-          <svg class="merged-process-sketch" viewBox="0 0 520 155" role="img" aria-label="Illustrative price movement with a context area and a clearly marked invalidation level">
-            <rect x="1" y="1" width="518" height="153" rx="5" fill="#f7f1e3" stroke="#dcd3c0"/>
-            <g stroke="#d8d2c3" stroke-dasharray="3 6" stroke-width="1"><path d="M20 35H500M20 65H500M20 95H500M20 125H500"/><path d="M80 18V137M150 18V137M220 18V137M290 18V137M360 18V137M430 18V137"/></g>
-            <rect x="20" y="38" width="480" height="27" fill="#dce7d4" opacity=".78"/>
-            <path d="M22 112 C42 120,50 91,70 100 S99 110,117 86 S147 98,166 75 S194 91,215 68 S243 85,264 60 S295 72,316 46 S345 68,365 54 S395 64,416 37 S452 55,498 29" fill="none" stroke="#355c43" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M22 112 C42 120,50 91,70 100 S99 110,117 86 S147 98,166 75 S194 91,215 68 S243 85,264 60 S295 72,316 46 S345 68,365 54 S395 64,416 37 S452 55,498 29 L498 137 L22 137Z" fill="#8aa17b" opacity=".13"/>
-            <path d="M20 124H500" stroke="#c76c50" stroke-width="1.7" stroke-dasharray="5 4"/>
-            <rect x="32" y="12" width="92" height="17" rx="3" fill="#e5eadc"/><text x="40" y="24" font-size="9" fill="#355c43" font-family="Arial,sans-serif" letter-spacing=".8">CONTEXT AREA</text>
-            <rect x="382" y="107" width="104" height="16" rx="3" fill="#f4dfd3"/><text x="390" y="118" font-size="8.5" fill="#8e4d39" font-family="Arial,sans-serif" letter-spacing=".5">INVALIDATION</text>
-          </svg>
-          <div class="merged-paper-question"><span>THE QUESTION TO KEEP VISIBLE</span><strong>What would change my mind?</strong></div>
-        </div>
-        <figcaption id="merged-workpaper-caption"><span class="merged-caption-mark" aria-hidden="true">✳</span><span><strong>The reasoning belongs in the plan.</strong><small>Context · Thesis · Risk · Management · Review</small></span></figcaption>
-      </figure>
-
-      <div class="merged-process-right">
-        <div class="merged-process-kicker">The conversation moves through four questions</div>
-        <div class="merged-stage-list" role="list" aria-label="Stages of a trade-thesis discussion">
-          <article class="merged-stage-row" role="listitem"><span class="merged-stage-number">01</span><div><h3>Context</h3><p>What is price doing in the wider picture—and what matters now?</p></div><span class="merged-stage-mark" aria-hidden="true">⌖</span></article>
-          <article class="merged-stage-row" role="listitem"><span class="merged-stage-number">02</span><div><h3>Thesis</h3><p>What supports the thesis, and what evidence would challenge it?</p></div><span class="merged-stage-mark" aria-hidden="true">↗</span></article>
-          <article class="merged-stage-row" role="listitem"><span class="merged-stage-number">03</span><div><h3>Risk &amp; management</h3><p>Where could it fail, what is at stake, and how could the plan adapt?</p></div><span class="merged-stage-mark" aria-hidden="true">△</span></article>
-          <article class="merged-stage-row" role="listitem"><span class="merged-stage-number">04</span><div><h3>Review</h3><p>What held up, what did not, and what should change next time?</p></div><span class="merged-stage-mark" aria-hidden="true">↻</span></article>
-        </div>
-        <div class="merged-process-note"><span aria-hidden="true">↳</span><p>Start at any stage. Follow the reasoning forward—and bring what you learn back into the next thesis.</p></div>
-      </div>
+    <div class="tt-benefit-grid">
+      <article class="tt-benefit-card"><div class="tt-benefit-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19V5m0 14h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="m7 15 4-4 3 2 5-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="tt-benefit-kicker">Context · Evidence · Risk</div><h3>Pressure-test your thesis.</h3><p>See what you may be assuming, what evidence supports the idea, and what would prove it wrong. Not to borrow someone else's answer—to strengthen your own reasoning.</p></article>
+      <article class="tt-benefit-card"><div class="tt-benefit-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 20v-1.5A4.5 4.5 0 0 1 8 14h2a4.5 4.5 0 0 1 4.5 4.5V20M16 5.5a3 3 0 0 1 0 5.8M17 14h.5a3.5 3.5 0 0 1 3.5 3.5V20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><div class="tt-benefit-kicker">Learning · Application</div><h3>Turn lessons into decisions.</h3><p>Connect what you're learning in the Learning Room to context, entry, risk, and management. Move beyond understanding a setup in isolation to thinking through the whole trade.</p></article>
+      <article class="tt-benefit-card"><div class="tt-benefit-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 3.5h9l4 4V21H6a2 2 0 0 1-2-2V5.5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14.5 3.5v5H19M8 13h8M8 16.5h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><div class="tt-benefit-kicker">Reflection · Consistency</div><h3>Improve beyond the outcome.</h3><p>Review the trades you take and the ones you pass on. Learn to judge decisions by the quality of the process, not by one winning or losing result.</p></article>
     </div>
+    <section class="tt-perspective-panel" id="how-it-feels" aria-labelledby="tt-perspective-title">
+      <div class="tt-perspective-copy"><div class="eyebrow">Different perspectives. Better questions.</div><h2 id="tt-perspective-title">No two traders think the same way. <em>That's the point.</em></h2><p>One chart can raise different questions for different traders. Compare the reasoning, challenge the assumptions, and leave with a clearer view of your own plan—not someone else's answer.</p></div>
+      <div class="tt-perspective-art" role="img" aria-label="Illustration of two different perspectives meeting around a shared trade question">
+        <svg class="tt-perspective-chart" viewBox="0 0 360 210" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-opacity=".3" stroke-width="1" stroke-dasharray="3 5"><path d="M12 36H348M12 76H348M12 116H348M12 156H348"/><path d="M62 14V188M122 14V188M182 14V188M242 14V188M302 14V188"/></g><path d="M14 151C43 151 48 108 76 118S119 146 145 91 187 98 208 73 247 91 274 55 319 66 346 30" stroke="#6e9270" stroke-width="2.5" stroke-linecap="round"/><path d="M14 52C44 61 49 88 77 76S118 51 145 105 185 132 210 119 250 142 276 132 319 151 346 163" stroke="#be8667" stroke-width="2.5" stroke-linecap="round"/><path d="M14 151C43 151 48 108 76 118S119 146 145 91 187 98 208 73 247 91 274 55 319 66 346 30" stroke="#6e9270" stroke-opacity=".11" stroke-width="14" stroke-linecap="round"/><path d="M14 52C44 61 49 88 77 76S118 51 145 105 185 132 210 119 250 142 276 132 319 151 346 163" stroke="#be8667" stroke-opacity=".10" stroke-width="14" stroke-linecap="round"/></svg>
+        <span class="tt-perspective-connector" aria-hidden="true"></span>
+        <div class="tt-perspective-card tt-perspective-card--one"><small>One perspective</small><strong>What supports the idea?</strong><p>Look for confirming evidence.</p></div>
+        <div class="tt-perspective-card tt-perspective-card--two"><small>Another perspective</small><strong>What could prove it wrong?</strong><p>Question the assumption.</p></div>
+        <div class="tt-perspective-card tt-perspective-card--shared"><span class="tt-shared-mark" aria-hidden="true">↗</span><span><small>The shared ground</small><strong>A clearer decision process</strong></span></div>
+      </div>
+    </section>
   </div>
 </section>
+
 <section class="community-signoff"><div class="wrap signoff-inner"><div class="signoff-wordmark" aria-hidden="true">COMMUNITY<span>↗</span></div><div class="signoff-copy"><div class="eyebrow">Your next step as a trader</div><h2>You don't need another voice telling you what to trade. <em>You need to trust how you think.</em></h2><p>Selected TradeThesis plans include community access. Find the one that fits.</p><a class="signoff-link" href="courses.html">Explore plans <span aria-hidden="true">↗</span></a></div></div></section>
 </main>
 <footer class="sitewide-footer">
