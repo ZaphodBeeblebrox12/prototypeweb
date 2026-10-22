@@ -45,7 +45,11 @@ from .models import (
     LessonInstructorMaterial,
 )
 from .permissions import is_course_content_admin
-from .regional_content import CONTENT_COUNTRY_TO_REGION, REGIONAL_CONTENT_CODES
+from .regional_content import (
+    CONTENT_COUNTRY_TO_REGION,
+    REGIONAL_CONTENT_CODES,
+    contains_unmanaged_regional_image,
+)
 from .storage import course_asset_storage
 
 logger = logging.getLogger(__name__)
@@ -310,6 +314,12 @@ def _build_import_payload(course_state, course_slug):
                     image_by_id[str(image["id"])] = str(image.get("assetUuid") or _asset_uuid(course_slug, str(image["id"])))
             for old_id, new_id in image_by_id.items():
                 content = content.replace(f"asset://{old_id}", f"asset://{new_id}")
+            # Scan every authored body when registering figures: a group or comparison
+            # figure may be placed only in a country/region-specific lesson version.
+            raw_body_variants_for_figures = lesson.get("regionalContent") if isinstance(lesson.get("regionalContent"), dict) else {}
+            all_lesson_body_sources = content + "\n" + "\n".join(
+                value for value in raw_body_variants_for_figures.values() if isinstance(value, str)
+            )
             # Grouped images are referenced by a semantic token instead of individual
             # Markdown image tokens. Resolve group membership to stable asset UUIDs, and
             # count those assets as lesson references for delivery/access checks.
@@ -319,7 +329,7 @@ def _build_import_payload(course_state, course_slug):
                     continue
                 group_id = str(image_group.get("id") or "").strip()
                 if not group_id or not re.search(
-                    r"\[\[image-group:" + re.escape(group_id) + r"\]\]", content,
+                    r"\[\[image-group:" + re.escape(group_id) + r"\]\]", all_lesson_body_sources,
                 ):
                     continue
                 stable_ids = []
@@ -402,11 +412,52 @@ def _build_import_payload(course_state, course_slug):
                     "variants": variants,
                 }
 
+            # Whole-lesson country/region versions inherit the main body until the
+            # author creates an override. Each saved override is a complete Markdown
+            # body using the same stable, protected media asset references.
+            regional_lesson_content_payload = {}
+            regional_lesson_asset_ids = set()
+            raw_regional_lesson_content = lesson.get("regionalContent")
+            if isinstance(raw_regional_lesson_content, dict):
+                if len(raw_regional_lesson_content) > 30:
+                    raise ValidationError(f"{title}: a lesson may contain at most 30 country/region body overrides.")
+                for raw_key, raw_content in raw_regional_lesson_content.items():
+                    if not isinstance(raw_key, str) or not isinstance(raw_content, str):
+                        continue
+                    scope, separator, code = raw_key.strip().partition(":")
+                    scope = scope.strip().lower()
+                    code = code.strip().upper()
+                    if not separator:
+                        raise ValidationError(f"{title}: lesson body overrides must identify a country or region.")
+                    if scope == "country":
+                        if (
+                            len(code) != 2 or not code.isalpha() or not code.isascii()
+                            or code not in CONTENT_COUNTRY_TO_REGION
+                        ):
+                            raise ValidationError(f"{title}: country body overrides must use a supported two-letter country code.")
+                    elif scope == "region":
+                        if code not in _ALLOWED_CONTENT_REGIONS:
+                            raise ValidationError(f"{title}: unsupported regional lesson body audience {code}.")
+                    else:
+                        raise ValidationError(f"{title}: lesson body override scope must be country or region.")
+                    target_key = f"{scope}:{code}"
+                    if target_key in regional_lesson_content_payload:
+                        raise ValidationError(f"{title}: lesson body override {target_key} is repeated.")
+                    variant_content = _remap_regional_asset_refs(
+                        raw_content, image_by_id, regional_lesson_asset_ids,
+                    )
+                    if contains_unmanaged_regional_image(variant_content):
+                        raise ValidationError(
+                            f"{title}: images in country/region lesson versions must use uploaded, managed course images."
+                        )
+                    regional_lesson_content_payload[target_key] = variant_content
+
             # Keep figure placement inside authored Markdown; questions may reference the same
             # assets independently. Titles, alt text and captions travel in figure metadata.
             asset_ids = sorted(
                 set(_ASSET_REF.findall(content))
                 | regional_block_asset_ids
+                | regional_lesson_asset_ids
                 | {asset_id for group_ids in image_group_asset_ids.values() for asset_id in group_ids}
                 | question_image_ids
             )
@@ -444,7 +495,7 @@ def _build_import_payload(course_state, course_slug):
                 figure_id = str(figure.get("id") or "").strip()
                 if not figure_id or not re.search(
                     r"\[\[teaching-figure:" + re.escape(figure_id) + r"\]\]",
-                    content,
+                    all_lesson_body_sources,
                 ):
                     continue
                 cards = []
@@ -517,7 +568,7 @@ def _build_import_payload(course_state, course_slug):
                 "figures": figures,
                 "lesson_reference_ids": sorted({
                     str(uuid.UUID(value))
-                    for value in _LESSON_REF_TOKEN.findall(content)
+                    for value in _LESSON_REF_TOKEN.findall(all_lesson_body_sources)
                     if _valid_uuid(value)
                 }),
                 "related_course_ids": [str(value) for value in related_ids if _valid_uuid(value)],
@@ -525,6 +576,7 @@ def _build_import_payload(course_state, course_slug):
                 "notebook": notebook_payload,
                 "video_url": video_url,
                 "regional_blocks": regional_blocks_payload,
+                "regional_lesson_content": regional_lesson_content_payload,
             }
             lessons.append({
                 "source_id": f"{module_index}.{lesson_index}",
@@ -819,6 +871,8 @@ def _builder_state_from_published_course(course):
                     for block_id, block in (content_json.get("regional_blocks") or {}).items()
                     if isinstance(block, dict)
                 ],
+                "regionalContent": deepcopy(content_json.get("regional_lesson_content", {}))
+                    if isinstance(content_json.get("regional_lesson_content"), dict) else {},
                 "relatedCourseIds": [str(value) for value in content_json.get("related_course_ids", [])],
             })
         if lessons:

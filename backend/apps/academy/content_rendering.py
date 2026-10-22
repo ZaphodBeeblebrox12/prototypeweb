@@ -14,7 +14,7 @@ from .course_card_utils import (
     is_course_card_recommendable,
 )
 from .models import Course, CourseImport, Lesson
-from .regional_content import strip_unmanaged_regional_images
+from .regional_content import resolve_regional_lesson_content, strip_unmanaged_regional_images
 
 _ALLOWED_TAGS = {
     "a", "aside", "blockquote", "br", "code", "del", "div", "em", "figcaption", "figure",
@@ -692,12 +692,17 @@ def build_lesson_sections(
     module_label="",
     course_title="",
     regional_blocks=None,
+    regional_content=None,
     country_code=None,
     region_code=None,
 ):
     """Group source headings into the three reusable Learning Room tabs."""
+    source = resolve_regional_lesson_content(
+        source or "", regional_content=regional_content,
+        country_code=country_code, region_code=region_code,
+    )
     source = resolve_regional_blocks(
-        source or "", regional_blocks=regional_blocks,
+        source, regional_blocks=regional_blocks,
         country_code=country_code, region_code=region_code,
     )
     source = _deduplicate_course_card_refs(source)

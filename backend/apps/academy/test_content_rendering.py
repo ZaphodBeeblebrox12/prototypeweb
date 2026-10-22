@@ -10,12 +10,38 @@ from .content_rendering import (
     build_lesson_sections,
     render_safe_markdown,
 )
-from .regional_content import CONTENT_COUNTRY_TO_REGION, get_content_region_for_country
+from .regional_content import (
+    CONTENT_COUNTRY_TO_REGION,
+    get_content_region_for_country,
+    regional_lesson_content_asset_ids,
+)
 from .views import _notebook_for_course_display
 
 
 class SharedLessonRenderingTests(SimpleTestCase):
     ASSET_ID = "8c0f08ab-c9be-45d2-9cde-1f5a0a1c9031"
+
+    def test_whole_lesson_body_uses_country_then_region_then_main_fallback(self):
+        source = "Main lesson body."
+        overrides = {
+            "country:IN": "India lesson body.\n\n| Market | Example |\n|---|---|\n| India | NIFTY |",
+            "region:APAC": "APAC lesson body.",
+        }
+
+        india = build_lesson_sections(
+            source, regional_content=overrides, country_code="IN", region_code="APAC",
+        )
+        australia = build_lesson_sections(
+            source, regional_content=overrides, country_code="AU", region_code="APAC",
+        )
+        unknown = build_lesson_sections(
+            source, regional_content=overrides, country_code="ZZ", region_code=None,
+        )
+        self.assertIn("India lesson body.", india["idea_html"])
+        self.assertIn("NIFTY", india["idea_html"])
+        self.assertNotIn("APAC lesson body.", india["idea_html"])
+        self.assertIn("APAC lesson body.", australia["idea_html"])
+        self.assertIn("Main lesson body.", unknown["idea_html"])
 
     def test_regional_block_country_override_precedes_region_and_global_fallback(self):
         source = "## Disclosure\n\n[[regional-block:risk-note]]"
@@ -50,6 +76,16 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertNotIn("Global notice.", canada["idea_html"])
         self.assertIn("North American notice.", us["idea_html"])
         self.assertNotIn("Global notice.", us["idea_html"])
+
+    def test_whole_lesson_override_asset_references_are_collected_for_permissions(self):
+        asset_id = "8c0f08ab-c9be-45d2-9cde-1f5a0a1c9031"
+        content_json = {
+            "regional_lesson_content": {
+                "country:IN": f"![India chart](asset://{asset_id})",
+                "region:APAC": "An override without images.",
+            }
+        }
+        self.assertEqual(regional_lesson_content_asset_ids(content_json), {asset_id})
 
     def test_regional_blocks_never_render_unmanaged_images(self):
         from .regional_content import contains_unmanaged_regional_image

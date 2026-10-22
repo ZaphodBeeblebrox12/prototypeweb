@@ -739,6 +739,14 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .regional-variant-content { margin-top:14px; }
 .regional-image-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:end; margin-top:8px; }
 .regional-image-row .btn { white-space:nowrap; }
+.lesson-body-audience-controls { margin: 0 0 14px; border-left: 3px solid var(--site-secondary); }
+.lesson-body-audience-top { display:grid; grid-template-columns:minmax(220px,0.85fr) minmax(0,1.15fr); gap:14px; align-items:end; }
+.lesson-body-audience-top .field { margin:0; }
+.lesson-body-audience-status { min-width:0; padding:10px 12px; border:1px solid var(--line); border-radius:8px; background:var(--paper); }
+.lesson-body-audience-status strong { display:block; color:var(--site-primary); font-size:12px; }
+.lesson-body-audience-status p { margin:4px 0 8px; color:var(--muted); font-size:11px; line-height:1.5; }
+.lesson-body-audience-status .btn { margin-top:2px; }
+@media(max-width:760px) { .regional-image-row { grid-template-columns:minmax(0,1fr); } .lesson-body-audience-top { grid-template-columns:minmax(0,1fr); } }
 #previewAudienceSelect { color:#fff; max-width:220px; }
 #previewAudienceSelect option { color:#23332a; background:#fff; }
 @media(max-width:760px) { .regional-image-row { grid-template-columns:minmax(0,1fr); } }
@@ -1179,6 +1187,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     const blockId = String(options.blockId || '');
     const variantId = String(options.variantId || '');
     const field = kind === 'main' ? 'content' : (kind === 'regional-base' ? 'baseContent' : 'content');
+    const audience = String(options.audience || 'GLOBAL');
     const minClass = kind === 'main' ? ' rich-editor-canvas-main' : ' rich-editor-canvas-regional';
     return '<div class="rich-editor-wrapper" data-rich-editor-wrapper>' +
       '<div class="rich-editor-toolbar" role="toolbar" aria-label="Text formatting">' +
@@ -1186,7 +1195,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       '<button type="button" data-rich-command="bold" aria-label="Bold"><strong>B</strong></button><button type="button" data-rich-command="italic" aria-label="Italic"><em>I</em></button><button type="button" data-rich-command="strikeThrough" aria-label="Strikethrough"><s>S</s></button>' +
       '<button type="button" data-rich-command="insertUnorderedList" aria-label="Bulleted list">• List</button><button type="button" data-rich-command="insertOrderedList" aria-label="Numbered list">1. List</button>' +
       '<button type="button" data-rich-command="link" aria-label="Insert link">Link</button><button type="button" data-rich-command="insertHorizontalRule" aria-label="Insert divider">Divider</button><button type="button" data-rich-command="table" aria-label="Insert table">Table</button><button type="button" data-rich-command="undo" aria-label="Undo">Undo</button><button type="button" data-rich-command="redo" aria-label="Redo">Redo</button></div>' +
-      '<div class="rich-editor-canvas' + minClass + '" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="' + (kind === 'main' ? 'Lesson body rich text editor' : 'Regional content rich text editor') + '" data-visual-editor="true" data-visual-kind="' + esc(kind) + '" data-block-id="' + esc(blockId) + '" data-variant-id="' + esc(variantId) + '" data-field="' + field + '" data-placeholder="Start writing your lesson…">' +
+      '<div class="rich-editor-canvas' + minClass + '" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="' + (kind === 'main' ? 'Lesson body rich text editor' : 'Regional content rich text editor') + '" data-visual-editor="true" data-visual-kind="' + esc(kind) + '" data-block-id="' + esc(blockId) + '" data-variant-id="' + esc(variantId) + '" data-audience="' + esc(audience) + '" data-field="' + field + '" data-placeholder="Start writing your lesson…">' +
       markdownToVisualEditor(value) + '</div></div>';
   }
   function syncVisualEditorToModel(editor) {
@@ -1208,6 +1217,10 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       const block = (lesson.regionalBlocks || []).find(item => String(item.id) === String(editor.dataset.blockId));
       const variant = (block?.variants || []).find(item => String(item.id) === String(editor.dataset.variantId));
       if (variant) variant.content = markdown;
+    } else if (kind === 'regional-lesson') {
+      setLessonBodyForAudience(lesson, markdown, editor.dataset.audience);
+      const controls = $('#workspace [data-lesson-body-audience-controls]');
+      if (controls) controls.innerHTML = lessonBodyAudienceControlsMarkup(lesson);
     }
     schedulePersist();
   }
@@ -1290,7 +1303,77 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     richEditorRange = {editor,range:range.cloneRange()};
     syncVisualEditorToModel(editor);
   }
-  function lessonFields(l){if(l&&!l.notebook)l.notebook={title:'Before you make the call',prompts:[{label:'Observe',text:'Describe the evidence visible in the chart.'},{label:'Interpret',text:'State one possible reading and a reasonable alternative.'},{label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}]};if(l&&l.notebook&&String(l.notebook.title||'').trim()==='Your Trading Notebook')l.notebook.title='Before you make the call';if(l&&!l.videoUrl)l.videoUrl='';return `<div class="section-intro"><h3>Lesson content</h3><p>Write and format directly in the editor. Use the toolbar for headings, emphasis, lists, links, quotes, dividers and tables; figures and regional blocks remain managed content items.</p></div>${l?`<div class="field"><label>Lesson body</label>${visualEditorMarkup(l.content, {kind:"main"})}<span class="help">Use the toolbar above to format headings, emphasis, lists, links, quotes, dividers, and tables. To add a chart between paragraphs, click where it belongs, then choose Figures → Insert at cursor. The website preview preserves this placement.</span></div>${courseCardPickerMarkup()}<div class="helper-note">This is the content learners will read in the Learning Room. Review the website preview before submitting the course for review.</div><div class="field" style="margin-top:14px"><label>Video URL (optional)</label><input class="input" type="url" data-entity="lesson" data-field="videoUrl" value="${esc(l.videoUrl||"")}" placeholder="https://…"><span class="help">Direct MP4/WebM/OGG links play inline. Other URLs are shown as external video links.</span></div><div class="related-course-box"><h4>Notebook prompts</h4><p>These editable prompts appear in the learner’s Your Trading Notebook section.</p><div class="field"><label>Notebook heading</label><input class="input" data-entity="notebook" data-field="title" value="${esc(l.notebook?.title||"Before you make the call")}"><span class="help">This is the large heading shown inside the Your Trading Notebook section of the learner view.</span></div>${(l.notebook?.prompts||[]).map((prompt,index)=>`<div class="q-card"><div class="field"><label>Prompt ${index+1} label</label><input class="input" data-entity="notebook-prompt" data-index="${index}" data-field="label" value="${esc(prompt.label||"")}"></div><div class="field" style="margin-top:8px"><label>Prompt text</label><textarea class="textarea" data-entity="notebook-prompt" data-index="${index}" data-field="text">${esc(prompt.text||"")}</textarea></div></div>`).join("")}</div><div class="notebook-editor-preview"><h4>How learners will see the notebook</h4><p>Preview the styled notebook block here. Changes to the heading or prompts above update this preview.</p><div data-notebook-preview>${notebookPreviewMarkup(l)}</div></div><div class="related-course-box"><h4>Related-course metadata (optional)</h4><p>These selections record course relationships for discovery; they do not insert a card into the lesson body. To place the mini Option 4 preview inside the lesson, use “Insert a companion-course card (Option 4)” directly below the Lesson body field. Individual lesson links are managed separately.</p><input class="input" type="search" data-related-course-search placeholder="Search published or announced courses by title or topic" aria-label="Search published or announced related courses"><div class="related-course-list">${demoOffers.map(course=>{const checked=(l.relatedCourseIds||[]).includes(course.id);return `<div class="related-course-item related-course-entry"><label class="related-course-choice"><input type="checkbox" data-related-course="${esc(course.id)}" ${checked ? "checked" : ""}><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">${esc(course.state)}${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}${course.duration ? " · " + esc(course.duration) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></label></div>`;}).join("")}${comingSoonOffers.map(course=>`<div class="related-course-item related-course-entry"><div class="related-course-choice"><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">Coming soon${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></div></div>`).join("")}${demoOffers.length || comingSoonOffers.length ? "" : '<p class="microcopy">No published or announced courses are available to associate yet.</p>'}</div><div class="helper-note">These selections record related-course metadata only. Use the dedicated Option 4 picker directly below Lesson body to insert a visual companion-course card into the lesson. No course is automatically published.</div></div><div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap"><button class="btn" type="button" data-action="go-curriculum">← Curriculum</button><button class="btn primary" type="button" data-action="go-questions">Edit practice questions →</button></div>`:'<div class="empty-state"><p>Select a lesson in the curriculum first.</p></div>'}`;}
+  function selectedLessonBodyAudience() {
+    return String(state.lessonContentAudience || 'GLOBAL').toUpperCase();
+  }
+  function lessonBodyAudienceKey(audience) {
+    const value = String(audience || 'GLOBAL').toUpperCase();
+    if (value === 'GLOBAL') return '';
+    if (value.startsWith('REGION:')) return 'region:' + value.slice(7);
+    return /^[A-Z]{2}$/.test(value) ? 'country:' + value : '';
+  }
+  function lessonBodyForAudience(lesson, audience) {
+    if (!lesson) return '';
+    const key = lessonBodyAudienceKey(audience === undefined ? selectedLessonBodyAudience() : audience);
+    const variants = lesson.regionalContent && typeof lesson.regionalContent === 'object' ? lesson.regionalContent : {};
+    return key && Object.prototype.hasOwnProperty.call(variants, key)
+      ? String(variants[key] || '') : String(lesson.content || '');
+  }
+  function setLessonBodyForAudience(lesson, content, audience) {
+    if (!lesson) return;
+    const target = audience === undefined ? selectedLessonBodyAudience() : audience;
+    const key = lessonBodyAudienceKey(target);
+    if (!key) {
+      lesson.content = String(content || '');
+      return;
+    }
+    if (!lesson.regionalContent || typeof lesson.regionalContent !== 'object' || Array.isArray(lesson.regionalContent)) {
+      lesson.regionalContent = {};
+    }
+    lesson.regionalContent[key] = String(content || '');
+  }
+  function lessonBodyEditorKind() {
+    return lessonBodyAudienceKey(selectedLessonBodyAudience()) ? 'regional-lesson' : 'main';
+  }
+  function lessonBodyAudienceLabel() {
+    const audience = selectedLessonBodyAudience();
+    if (audience === 'GLOBAL') return 'Main lesson content';
+    if (audience.startsWith('REGION:')) {
+      const labels = {APAC:'Asia-Pacific',EU:'Europe',NA:'North America',LATAM:'Latin America',MENA:'Middle East & North Africa',SSA:'Sub-Saharan Africa'};
+      return (labels[audience.slice(7)] || audience.slice(7)) + ' lesson content';
+    }
+    const country = regionalCountryOptions.find(item => item[0] === audience);
+    return (country ? country[1] : audience) + ' lesson content';
+  }
+  function lessonBodyAudienceControlsMarkup(lesson) {
+    if (!lesson) return '';
+    const audience = selectedLessonBodyAudience();
+    const key = lessonBodyAudienceKey(audience);
+    const variants = lesson.regionalContent && typeof lesson.regionalContent === 'object' ? lesson.regionalContent : {};
+    const hasOverride = Boolean(key && Object.prototype.hasOwnProperty.call(variants, key));
+    const countryOptions = regionalCountryOptions.map(([code, label]) =>
+      '<option value="' + esc(code) + '"' + (audience === code ? ' selected' : '') + '>' + esc(label) + '</option>'
+    ).join('');
+    const regionNames = {APAC:'Asia-Pacific',EU:'Europe',NA:'North America',LATAM:'Latin America',MENA:'Middle East & North Africa',SSA:'Sub-Saharan Africa'};
+    const regionOptions = regionalRegionOptions.map(code =>
+      '<option value="REGION:' + esc(code) + '"' + (audience === 'REGION:' + code ? ' selected' : '') + '>' +
+      esc(regionNames[code] || code) + '</option>'
+    ).join('');
+    const status = audience === 'GLOBAL' ? 'Editing the default lesson for all audiences.'
+      : (hasOverride ? 'Custom version saved in this draft. Other audiences are unchanged.'
+        : 'This audience currently inherits the main lesson. Your first edit creates a separate version.');
+    const actions = key ? (hasOverride
+      ? '<button class="btn small" type="button" data-action="reset-regional-lesson-content">Reset to main content</button>'
+      : '<button class="btn small" type="button" data-action="start-regional-lesson-content">Start a custom version</button>') : '';
+    return '<section class="related-course-box lesson-body-audience-controls" aria-label="Lesson audience version">' +
+      '<div class="lesson-body-audience-top"><div class="field"><label for="lessonContentAudienceSelect">Edit lesson for</label>' +
+      '<select class="select" id="lessonContentAudienceSelect"><option value="GLOBAL"' + (audience === 'GLOBAL' ? ' selected' : '') + '>Main content · all audiences</option>' +
+      '<optgroup label="Countries">' + countryOptions + '</optgroup><optgroup label="Regions">' + regionOptions + '</optgroup></select></div>' +
+      '<div class="lesson-body-audience-status"><strong>' + (key ? (hasOverride ? 'Custom version' : 'Inherits main') : 'Main version') +
+      '</strong><p data-lesson-audience-status-text>' + esc(status) + '</p>' + actions + '</div></div>' +
+      '<p class="help">Country or regional versions can change the full lesson—text, headings, tables and managed image placements. Other audiences remain unchanged.</p></section>';
+  }
+  function lessonFields(l){if(l&&!l.notebook)l.notebook={title:'Before you make the call',prompts:[{label:'Observe',text:'Describe the evidence visible in the chart.'},{label:'Interpret',text:'State one possible reading and a reasonable alternative.'},{label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}]};if(l&&l.notebook&&String(l.notebook.title||'').trim()==='Your Trading Notebook')l.notebook.title='Before you make the call';if(l&&!l.videoUrl)l.videoUrl='';return `<div class="section-intro"><h3>Lesson content</h3><p>Write the main lesson first, then switch audience to customise an entire country or region version in this same editor. The same rich-text tools work for both.</p></div>${l?`<div data-lesson-body-audience-controls>${lessonBodyAudienceControlsMarkup(l)}</div><div class="field"><label>${lessonBodyAudienceLabel()}</label>${visualEditorMarkup(lessonBodyForAudience(l), {kind: lessonBodyEditorKind(), audience: selectedLessonBodyAudience()})}<span class="help">Use the toolbar above to format headings, emphasis, lists, links, quotes, dividers, and tables. To add a chart between paragraphs, click where it belongs, then choose Figures → Insert at cursor. The website preview preserves this placement.</span></div>${courseCardPickerMarkup()}<div class="helper-note">This is the content learners will read in the Learning Room. Review the website preview before submitting the course for review.</div><div class="field" style="margin-top:14px"><label>Video URL (optional)</label><input class="input" type="url" data-entity="lesson" data-field="videoUrl" value="${esc(l.videoUrl||"")}" placeholder="https://…"><span class="help">Direct MP4/WebM/OGG links play inline. Other URLs are shown as external video links.</span></div><div class="related-course-box"><h4>Notebook prompts</h4><p>These editable prompts appear in the learner’s Your Trading Notebook section.</p><div class="field"><label>Notebook heading</label><input class="input" data-entity="notebook" data-field="title" value="${esc(l.notebook?.title||"Before you make the call")}"><span class="help">This is the large heading shown inside the Your Trading Notebook section of the learner view.</span></div>${(l.notebook?.prompts||[]).map((prompt,index)=>`<div class="q-card"><div class="field"><label>Prompt ${index+1} label</label><input class="input" data-entity="notebook-prompt" data-index="${index}" data-field="label" value="${esc(prompt.label||"")}"></div><div class="field" style="margin-top:8px"><label>Prompt text</label><textarea class="textarea" data-entity="notebook-prompt" data-index="${index}" data-field="text">${esc(prompt.text||"")}</textarea></div></div>`).join("")}</div><div class="notebook-editor-preview"><h4>How learners will see the notebook</h4><p>Preview the styled notebook block here. Changes to the heading or prompts above update this preview.</p><div data-notebook-preview>${notebookPreviewMarkup(l)}</div></div><div class="related-course-box"><h4>Related-course metadata (optional)</h4><p>These selections record course relationships for discovery; they do not insert a card into the lesson body. To place the mini Option 4 preview inside the lesson, use “Insert a companion-course card (Option 4)” directly below the Lesson body field. Individual lesson links are managed separately.</p><input class="input" type="search" data-related-course-search placeholder="Search published or announced courses by title or topic" aria-label="Search published or announced related courses"><div class="related-course-list">${demoOffers.map(course=>{const checked=(l.relatedCourseIds||[]).includes(course.id);return `<div class="related-course-item related-course-entry"><label class="related-course-choice"><input type="checkbox" data-related-course="${esc(course.id)}" ${checked ? "checked" : ""}><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">${esc(course.state)}${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}${course.duration ? " · " + esc(course.duration) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></label></div>`;}).join("")}${comingSoonOffers.map(course=>`<div class="related-course-item related-course-entry"><div class="related-course-choice"><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">Coming soon${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></div></div>`).join("")}${demoOffers.length || comingSoonOffers.length ? "" : '<p class="microcopy">No published or announced courses are available to associate yet.</p>'}</div><div class="helper-note">These selections record related-course metadata only. Use the dedicated Option 4 picker directly below Lesson body to insert a visual companion-course card into the lesson. No course is automatically published.</div></div><div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap"><button class="btn" type="button" data-action="go-curriculum">← Curriculum</button><button class="btn primary" type="button" data-action="go-questions">Edit practice questions →</button></div>`:'<div class="empty-state"><p>Select a lesson in the curriculum first.</p></div>'}`;}
   function questionImageMarkup(q, l) {
     const images = Array.isArray(l.images) ? l.images : (l.image ? [l.image] : []);
     const image = images.find(function(item) {
@@ -1854,7 +1937,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       .trim() || 'Learning Room';
     return 'MODULE ' + String(moduleIndex + 1).padStart(2, '0') + ' · ' + title;
   }
-  function previewFields(c){const mods=c.modules.map((m,mi)=>({m,mi}));const lesson=currentLesson();return `<div class="section-intro"><h3>Preview as a learner</h3><p>Review the latest editing state before you publish. This preview is deliberately separate from the live member course.</p></div><div class="preview-split"><article class="preview-article"><div class="course-chip">${esc(c.category)} · ${esc(c.level)}</div><h2>${esc(c.title)}</h2><p class="summary">${esc(c.summary)}</p>${c.description?.trim()?'<div class="preview-body course-description-preview">'+renderMarkdown(c.description)+'</div>':''}<div class="pill">${allLessons(c).length} lessons · ${esc(c.duration)}</div>${c.outcomes?.length?`<section class="preview-outcomes"><h3>What learners will practise</h3><ul>${c.outcomes.map(outcome=>`<li>${esc(outcome)}</li>`).join("")}</ul></section>`:""}${lesson?`<hr style="border:0;border-top:1px solid var(--line);margin:24px 0"><div class="module-name-eyebrow">${esc(moduleHeadingLabel(c,currentModule()))}</div><h2 class="preview-lesson-title">${esc(lesson.title)}</h2><p class="summary">${esc(lesson.summary)}</p><div class="preview-body" data-preview-lesson-content>${renderMarkdown(lesson.content)}</div>${notebookPreviewMarkup(lesson)}${reflectionPreviewMarkup(lesson)}${lesson.questions.length?`<div class="practice-preview"><h4>Test your reading</h4>${lesson.questions.map((q,qi)=>`<div style="margin-bottom:16px">${questionImageMarkup(q,lesson)}<strong style="font-size:11px">${esc(q.prompt)}</strong>${q.options.map((op,oi)=>`<label class="practice-preview-answer" data-preview-option="${esc(q.id)}" data-option-index="${oi}"><input type="radio" name="pv-${esc(q.id)}" value="${oi}" data-preview-question="${esc(q.id)}"> <span>${esc(op)}</span><span class="answer-result"></span></label>`).join('')}<button class="btn small" type="button" data-action="check-preview" data-id="${esc(q.id)}">Check answer</button><div class="feedback" id="feedback-${esc(q.id)}"></div></div>`).join('')}</div>`:''}`:'<p class="summary">No lesson selected yet.</p>'}</article><aside class="preview-lesson-nav"><h4>Course outline</h4><div>${mods.map(({m,mi})=>`<div style="font-size:10px;font-weight:800;color:var(--muted);padding:9px 6px 4px">${esc(m.title)}</div>${m.lessons.map((item,li)=>`<button type="button" class="${item.id===lesson?.id?'selected':''}" data-action="preview-select-lesson" data-module-id="${esc(m.id)}" data-id="${esc(item.id)}">${mi+1}.${li+1} ${esc(item.title)}</button>`).join('')}`).join('')}</div><div class="helper-note">Draft preview only. Lesson access, authentication, progress and paid content protection are enforced by Django in production.</div></aside></div>`;}
+  function previewFields(c){const mods=c.modules.map((m,mi)=>({m,mi}));const lesson=currentLesson();return `<div class="section-intro"><h3>Preview as a learner</h3><p>Review the latest editing state before you publish. This preview is deliberately separate from the live member course.</p></div><div class="preview-split"><article class="preview-article"><div class="course-chip">${esc(c.category)} · ${esc(c.level)}</div><h2>${esc(c.title)}</h2><p class="summary">${esc(c.summary)}</p>${c.description?.trim()?'<div class="preview-body course-description-preview">'+renderMarkdown(c.description)+'</div>':''}<div class="pill">${allLessons(c).length} lessons · ${esc(c.duration)}</div>${c.outcomes?.length?`<section class="preview-outcomes"><h3>What learners will practise</h3><ul>${c.outcomes.map(outcome=>`<li>${esc(outcome)}</li>`).join("")}</ul></section>`:""}${lesson?`<hr style="border:0;border-top:1px solid var(--line);margin:24px 0"><div class="module-name-eyebrow">${esc(moduleHeadingLabel(c,currentModule()))}</div><h2 class="preview-lesson-title">${esc(lesson.title)}</h2><p class="summary">${esc(lesson.summary)}</p><div class="preview-body" data-preview-lesson-content>${renderMarkdown(lessonBodyForAudience(lesson, $('#previewAudienceSelect')?.value || 'GLOBAL'))}</div>${notebookPreviewMarkup(lesson)}${reflectionPreviewMarkup(lesson)}${lesson.questions.length?`<div class="practice-preview"><h4>Test your reading</h4>${lesson.questions.map((q,qi)=>`<div style="margin-bottom:16px">${questionImageMarkup(q,lesson)}<strong style="font-size:11px">${esc(q.prompt)}</strong>${q.options.map((op,oi)=>`<label class="practice-preview-answer" data-preview-option="${esc(q.id)}" data-option-index="${oi}"><input type="radio" name="pv-${esc(q.id)}" value="${oi}" data-preview-question="${esc(q.id)}"> <span>${esc(op)}</span><span class="answer-result"></span></label>`).join('')}<button class="btn small" type="button" data-action="check-preview" data-id="${esc(q.id)}">Check answer</button><div class="feedback" id="feedback-${esc(q.id)}"></div></div>`).join('')}</div>`:''}`:'<p class="summary">No lesson selected yet.</p>'}</article><aside class="preview-lesson-nav"><h4>Course outline</h4><div>${mods.map(({m,mi})=>`<div style="font-size:10px;font-weight:800;color:var(--muted);padding:9px 6px 4px">${esc(m.title)}</div>${m.lessons.map((item,li)=>`<button type="button" class="${item.id===lesson?.id?'selected':''}" data-action="preview-select-lesson" data-module-id="${esc(m.id)}" data-id="${esc(item.id)}">${mi+1}.${li+1} ${esc(item.title)}</button>`).join('')}`).join('')}</div><div class="helper-note">Draft preview only. Lesson access, authentication, progress and paid content protection are enforced by Django in production.</div></aside></div>`;}
   const previewFieldsBeforeQualityChecks = previewFields;
   previewFields = function(c) {
     const html = previewFieldsBeforeQualityChecks(c);
@@ -2342,7 +2425,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     const available = eligibleCompanionCourses();
     const term = String(query || '').trim().toLowerCase();
     const lesson = currentLesson();
-    const source = String(lesson?.content || '');
+    const source = lesson ? lessonBodyForAudience(lesson) : '';
     const hasReplaceableReferences = /\[\[(?:lesson|lesson-card):[0-9a-fA-F-]{36}\]\]/.test(source) ||
       /\[\[course-card:(?:coming-soon:)?[0-9a-fA-F-]{36}\]\]/.test(source);
     if (!available.length) {
@@ -2375,7 +2458,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 
   function courseCardPickerMarkup() {
     const lesson = currentLesson();
-    const source = String(lesson?.content || '');
+    const source = lesson ? lessonBodyForAudience(lesson) : '';
     const lessonRefs = source.split('[[lesson:').length - 1 + source.split('[[lesson-card:').length - 1;
     const existingCards = source.split('[[course-card:').length - 1;
     const note = lessonRefs
@@ -2451,7 +2534,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   }
 
   function inlineLessonReferenceManagerMarkup(lesson) {
-    const content = String(lesson.content || '');
+    const content = lessonBodyForAudience(lesson);
     const refs = [...content.matchAll(/\[\[(lesson|lesson-card):([0-9a-fA-F-]{36})\]\]/g)];
     if (!refs.length) {
       return '<section class="related-course-box"><h4>Inline lesson references</h4><p>No inline lesson links or cards have been inserted yet. Use the search picker below to add one at the cursor.</p></section>';
@@ -2495,18 +2578,20 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 
   function insertLessonContentAtCaret(lesson, token, isBlock) {
     if (!lesson) return;
-    const visualEditor = $('#workspace [data-visual-editor][data-visual-kind="main"]');
+    const audience = selectedLessonBodyAudience();
+    const editorKind = lessonBodyAudienceKey(audience) ? 'regional-lesson' : 'main';
+    const visualEditor = $('#workspace [data-visual-editor][data-visual-kind="' + editorKind + '"]');
     if (visualEditor && state.tab === 'lesson') {
       insertVisualTokenAtCursor(visualEditor, token, isBlock);
       return;
     }
-    const content = String(lesson.content || '');
+    const content = lessonBodyForAudience(lesson, audience);
     // A detached visual editor still retains its saved Range. Translate that
     // position to Markdown only when a managed-content insertion actually needs it,
     // not while switching tabs or moving focus around the editor.
     if ((!lessonContentCaret || lessonContentCaret.lessonId !== lesson.id) &&
         richEditorRange?.lessonId === lesson.id &&
-        richEditorRange.editor?.dataset.visualKind === 'main') {
+        ['main','regional-lesson'].includes(richEditorRange.editor?.dataset.visualKind)) {
       rememberRichEditorCaretOffset();
     }
     const saved = lessonContentCaret && lessonContentCaret.lessonId === lesson.id
@@ -2524,7 +2609,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       if (before && !/\s$/.test(before)) prefix = ' ';
       if (after && !/^\s/.test(after)) suffix = ' ';
     }
-    lesson.content = before + prefix + token + suffix + after;
+    setLessonBodyForAudience(lesson, before + prefix + token + suffix + after, audience);
     pendingLessonCaret = {lessonId:lesson.id, position:before.length + prefix.length + token.length};
     lessonContentCaret = null;
     state.tab = 'lesson';
@@ -2533,7 +2618,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   }
 
   function moveFigureReference(lesson, id, direction) {
-    const content = String(lesson.content || '');
+    const content = lessonBodyForAudience(lesson);
     const paragraphs = content.split(/\n\s*\n/);
     const group = (lesson.imageGroups || []).find(item =>
       (Array.isArray(item.imageIds) ? item.imageIds : []).some(imageId => String(imageId) === String(id))
@@ -2552,7 +2637,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       return;
     }
     [paragraphs[index], paragraphs[next]] = [paragraphs[next], paragraphs[index]];
-    lesson.content = paragraphs.join('\n\n');
+    setLessonBodyForAudience(lesson, paragraphs.join('\n\n'));
     persist(false);
     renderEditor();
     toast('Figure moved in the lesson content.');
@@ -2686,18 +2771,18 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     if (lesson && (action === 'remove-inline-lesson-reference' || action === 'toggle-inline-lesson-reference-kind')) {
       const index = Number(el.dataset.index);
       const pattern = /\[\[(lesson|lesson-card):([0-9a-fA-F-]{36})\]\]/g;
-      const content = String(lesson.content || '');
+      const content = lessonBodyForAudience(lesson);
       const matches = [...content.matchAll(pattern)];
       const selected = matches[index];
       if (!selected) { toast('That reference changed. Reopen the lesson reference list and try again.'); return; }
       if (action === 'remove-inline-lesson-reference') {
-        lesson.content = content.slice(0, selected.index) + content.slice(selected.index + selected[0].length);
+        setLessonBodyForAudience(lesson, content.slice(0, selected.index) + content.slice(selected.index + selected[0].length));
       } else {
         const newKind = selected[1] === 'lesson' ? 'lesson-card' : 'lesson';
         const replacement = '[[' + newKind + ':' + selected[2] + ']]';
-        lesson.content = content.slice(0, selected.index) + replacement + content.slice(selected.index + selected[0].length);
+        setLessonBodyForAudience(lesson, content.slice(0, selected.index) + replacement + content.slice(selected.index + selected[0].length));
       }
-      lesson.content = lesson.content.replace(/\n{3,}/g, '\n\n');
+      setLessonBodyForAudience(lesson, lessonBodyForAudience(lesson).replace(/\n{3,}/g, '\n\n'));
       state.tab = 'lesson';
       persist(false);
       renderEditor();
@@ -2713,7 +2798,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       const token = courseRef.isComingSoon
         ? '[[course-card:coming-soon:' + courseRef.referenceId + ']]'
         : '[[course-card:' + courseRef.id + ']]';
-      const source = String(lesson.content || '');
+      const source = lessonBodyForAudience(lesson);
       const courseCardPattern = /\[\[course-card:(?:coming-soon:)?[0-9a-fA-F-]{36}\]\]/g;
       const lessonReferencePattern = /\[\[(?:lesson|lesson-card):[0-9a-fA-F-]{36}\]\]/g;
       const routeMarkerPattern = /^[ \t]*\[\[lesson-tab:(?:idea|examples|practice)\]\][ \t]*$/i;
@@ -2745,7 +2830,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       }).join('\n');
       updated = updated.replace(/\n{3,}/g, '\n\n').replace(/^[ \t]*\n+|\n+[ \t]*$/g, '');
       const duplicateCardsRemoved = Math.max(0, cards.length - 1);
-      lesson.content = updated;
+      setLessonBodyForAudience(lesson, updated);
       state.tab = 'lesson';
       persist(false);
       clearTimeout(academySaveTimer);
@@ -2820,7 +2905,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     }
     if (lesson && action === 'remove-image-group') {
       const id = String(el.dataset.id || '');
-      lesson.content = String(lesson.content || '').split(`[[image-group:${id}]]`).join('').replace(/\n{3,}/g, '\n\n');
+      setLessonBodyForAudience(lesson, lessonBodyForAudience(lesson).split(`[[image-group:${id}]]`).join('').replace(/\n{3,}/g, '\n\n'));
       lesson.imageGroups = (lesson.imageGroups || []).filter(group => String(group.id) !== id);
       persist(false);
       renderEditor();
@@ -2854,7 +2939,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     }
     if (lesson && action === 'remove-teaching-figure') {
       const id = String(el.dataset.id || '');
-      lesson.content = String(lesson.content || '').split(`[[teaching-figure:${id}]]`).join('').replace(/\n{3,}/g, '\n\n');
+      setLessonBodyForAudience(lesson, lessonBodyForAudience(lesson).split(`[[teaching-figure:${id}]]`).join('').replace(/\n{3,}/g, '\n\n'));
       lesson.teachingFigures = (lesson.teachingFigures || []).filter(item => String(item.id) !== id);
       persist(false);
       renderEditor();
@@ -3044,6 +3129,12 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   }, true);
   document.addEventListener('change', event => {
     const el = event.target;
+    if (el.id === 'lessonContentAudienceSelect') {
+      flushVisualEditorSync();
+      state.lessonContentAudience = el.value || 'GLOBAL';
+      renderEditor();
+      return;
+    }
     if (el.matches('[data-regional-variant][data-field]')) {
       const lesson = currentLesson();
       const block = (lesson?.regionalBlocks || []).find(item => String(item.id) === String(el.dataset.blockId));
@@ -3060,6 +3151,32 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     }
     if (el.id === 'previewAudienceSelect' && state.tab === 'preview') renderEditor();
   });
+  const handleActionBeforeWholeLessonAudience = handleAction;
+  handleAction = function(action, el) {
+    const lesson = currentLesson();
+    if (lesson && (action === 'start-regional-lesson-content' || action === 'reset-regional-lesson-content')) {
+      const audience = selectedLessonBodyAudience();
+      const key = lessonBodyAudienceKey(audience);
+      if (!key) return;
+      if (!lesson.regionalContent || typeof lesson.regionalContent !== 'object' || Array.isArray(lesson.regionalContent)) {
+        lesson.regionalContent = {};
+      }
+      if (action === 'start-regional-lesson-content') {
+        if (!Object.prototype.hasOwnProperty.call(lesson.regionalContent, key)) {
+          lesson.regionalContent[key] = String(lesson.content || '');
+        }
+        toast('Custom lesson version started. Edit the content below; the main version is unchanged.');
+      } else {
+        delete lesson.regionalContent[key];
+        toast('This audience now inherits the main lesson again.');
+      }
+      state.tab = 'lesson';
+      persist(false);
+      renderEditor();
+      return;
+    }
+    return handleActionBeforeWholeLessonAudience(action, el);
+  };
   document.addEventListener('click', event => {
     const target = event.target;
     const pendingEditor = pendingVisualEditorSync;

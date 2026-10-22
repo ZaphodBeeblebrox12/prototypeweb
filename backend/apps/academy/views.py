@@ -17,7 +17,12 @@ from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
-from .content_rendering import build_lesson_sections, render_safe_markdown, resolve_regional_blocks
+from .content_rendering import (
+    build_lesson_sections,
+    render_safe_markdown,
+    resolve_regional_blocks,
+    resolve_regional_lesson_content,
+)
 from .course_card_utils import course_topic_tags, is_course_card_recommendable
 from .models import (
     Course,
@@ -37,6 +42,7 @@ from .regional_content import (
     get_content_country,
     get_content_region_for_country,
     regional_block_asset_ids,
+    regional_lesson_content_asset_ids,
 )
 from .services import (
     can_access_lesson,
@@ -55,9 +61,15 @@ def _lesson_asset_ids_for_audience(lesson, country_code=None, region_code=None):
         for value in content_json.get("asset_ids", [])
         if str(value or "").strip()
     }
-    regional_ids = regional_block_asset_ids(content_json)
-    resolved_markdown = resolve_regional_blocks(
+    regional_ids = regional_block_asset_ids(content_json) | regional_lesson_content_asset_ids(content_json)
+    resolved_markdown = resolve_regional_lesson_content(
         lesson.content_markdown or "",
+        regional_content=content_json.get("regional_lesson_content", {}),
+        country_code=country_code,
+        region_code=region_code,
+    )
+    resolved_markdown = resolve_regional_blocks(
+        resolved_markdown,
         regional_blocks=content_json.get("regional_blocks", {}),
         country_code=country_code,
         region_code=region_code,
@@ -366,7 +378,7 @@ def lesson_detail(request, course_slug, lesson_id):
     )
     content_json = lesson.content_json if isinstance(lesson.content_json, dict) else {}
     asset_ids = content_json.get("asset_ids", [])
-    regional_asset_ids = regional_block_asset_ids(content_json)
+    regional_asset_ids = regional_block_asset_ids(content_json) | regional_lesson_content_asset_ids(content_json)
     media_assets = CourseMediaAsset.objects.filter(course=course, pk__in=asset_ids)
     asset_urls = {}
     for asset in media_assets:
@@ -455,6 +467,7 @@ def lesson_detail(request, course_slug, lesson_id):
             module_label=f"Module {lesson.module.position} · {lesson.module.title}",
             course_title=course.title,
             regional_blocks=content_json.get("regional_blocks", {}),
+            regional_content=content_json.get("regional_lesson_content", {}),
             country_code=regional_country,
             region_code=regional_region,
         ),
@@ -569,6 +582,7 @@ def admin_lesson_preview(request, course_slug, lesson_id):
             module_label=f"Module {lesson.module.position} · {lesson.module.title}",
             course_title=course.title,
             regional_blocks=content_json.get("regional_blocks", {}),
+            regional_content=content_json.get("regional_lesson_content", {}),
             country_code=regional_country,
             region_code=regional_region,
         ),
@@ -688,6 +702,7 @@ def course_import_website_preview(request, import_id):
             user=request.user,
             admin_preview=True,
             regional_blocks=selected_content_json.get("regional_blocks", {}),
+            regional_content=selected_content_json.get("regional_lesson_content", {}),
             country_code=regional_country,
             region_code=regional_region,
             figure_metadata=selected_content_json.get("figures", {}),

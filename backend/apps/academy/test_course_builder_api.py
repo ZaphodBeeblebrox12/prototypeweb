@@ -130,6 +130,8 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "Regional content")
         self.assertContains(response, "previewAudienceSelect")
         self.assertContains(response, "data-regional-variant")
+        self.assertContains(response, "lessonContentAudienceSelect")
+        self.assertContains(response, "Start a custom version")
 
     def test_rich_text_format_dropdown_uses_accessible_custom_menu(self):
         response = self.client.get(reverse("staff_course_builder_preview"))
@@ -181,6 +183,10 @@ class CourseBuilderApiTests(TestCase):
         payload = self.draft_payload("regional-content-course")
         lesson = payload["course"]["modules"][0]["lessons"][0]
         lesson["content"] += "\n\n[[regional-block:risk-note]]"
+        lesson["regionalContent"] = {
+            "country:IN": "## India version\n\nIndia-specific example.\n\n| Index | Market |\n|---|---|\n| NIFTY | India |",
+            "region:APAC": "## Asia-Pacific version\n\nRegional example.",
+        }
         lesson["regionalBlocks"] = [{
             "id": "risk-note",
             "title": "Risk disclosure",
@@ -204,8 +210,39 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(block["variants"][0]["code"], "IN")
         self.assertEqual(block["variants"][1]["scope"], "region")
         self.assertTrue(block["variants"][2]["hidden"])
+        self.assertEqual(
+            saved_lesson["content_json"]["regional_lesson_content"]["country:IN"],
+            lesson["regionalContent"]["country:IN"],
+        )
+        self.assertEqual(
+            saved_lesson["content_json"]["regional_lesson_content"]["region:APAC"],
+            lesson["regionalContent"]["region:APAC"],
+        )
         saved_state = record.payload["builder_state"]["modules"][0]["lessons"][0]
         self.assertEqual(saved_state["regionalBlocks"][0]["title"], "Risk disclosure")
+        self.assertEqual(saved_state["regionalContent"], lesson["regionalContent"])
+
+    def test_whole_lesson_override_images_use_stable_managed_asset_ids(self):
+        from .course_builder_api import _asset_uuid, _build_import_payload
+
+        course_slug = "country-body-image"
+        state = self.draft_payload(course_slug)["course"]
+        lesson = state["modules"][0]["lessons"][0]
+        stable_id = _asset_uuid(course_slug, "india-chart")
+        lesson["images"] = [{
+            "id": "india-chart", "name": "india-chart.png", "assetUuid": stable_id,
+            "title": "India chart", "alt": "A chart for the India example",
+            "caption": "A country-specific worked example.", "data": "",
+        }]
+        lesson["regionalContent"] = {
+            "country:IN": "## India example\n\n![India chart](asset://india-chart)"
+        }
+        imported, _image_sources = _build_import_payload(state, course_slug)
+        saved = imported["modules"][0]["lessons"][0]
+        content_json = saved["content_json"]
+        self.assertIn(f"asset://{stable_id}", content_json["regional_lesson_content"]["country:IN"])
+        self.assertIn(stable_id, content_json["asset_ids"])
+        self.assertEqual(content_json["figures"][stable_id]["title"], "India chart")
 
     def test_admin_can_save_shared_draft(self):
         response = self.client.post(

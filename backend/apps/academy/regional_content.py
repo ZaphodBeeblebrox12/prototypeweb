@@ -120,6 +120,47 @@ def regional_block_values(content_json):
     return []
 
 
+def regional_lesson_content_values(content_json):
+    """Return whole-lesson audience overrides from learner-safe lesson JSON."""
+    if not isinstance(content_json, dict):
+        return {}
+    values = content_json.get("regional_lesson_content", content_json.get("regionalLessonContent", {}))
+    if not isinstance(values, dict):
+        return {}
+    return {
+        str(key).strip().lower(): str(value or "")
+        for key, value in values.items()
+        if isinstance(key, str) and isinstance(value, str)
+    }
+
+
+def regional_lesson_content_asset_ids(content_json):
+    """Collect managed assets referenced by every whole-lesson audience override."""
+    asset_ids = set()
+    for content in regional_lesson_content_values(content_json).values():
+        asset_ids.update(value.lower() for value in ASSET_REFERENCE_RE.findall(content))
+    return asset_ids
+
+
+def resolve_regional_lesson_content(source, regional_content=None, country_code=None, region_code=None):
+    """Choose a complete lesson body by audience: country, region, then main."""
+    source = str(source or "")
+    raw_variants = regional_content if isinstance(regional_content, dict) else {}
+    variants = {
+        str(key).strip().lower(): value
+        for key, value in raw_variants.items()
+        if isinstance(key, str)
+    }
+    country = str(country_code or "").strip().upper()
+    region = str(region_code or "").strip().upper()
+    selected = variants.get(f"country:{country.lower()}") if country else None
+    if selected is None and region in REGIONAL_CONTENT_CODES:
+        selected = variants.get(f"region:{region.lower()}")
+    if not isinstance(selected, str):
+        return source
+    return strip_unmanaged_regional_images(selected)
+
+
 def regional_block_asset_ids(content_json):
     """Collect every managed-asset reference in regional base and variant content."""
     asset_ids = set()
