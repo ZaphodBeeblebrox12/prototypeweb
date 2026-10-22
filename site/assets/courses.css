@@ -355,3 +355,170 @@
 
 /* Volume & Price Analysis development card status. */
 .cc-course-status{display:inline-flex;align-self:flex-start;margin:4px 0 1px;padding:4px 7px;border:1px solid #d9c58a;border-radius:999px;background:#fbf5e6;color:#705a28;font-size:9px;font-weight:800;letter-spacing:.04em}
+
+
+/* Full-page V3 Editorial Cover + later screenshot-direction micro-course tile system. */
+.courses-catalogue-page .ed-hero{background:#f5f2e9;border-bottom:1px solid #d8d9ca;padding:clamp(30px,4vw,55px) 0 clamp(34px,4.5vw,60px);overflow:hidden}
+.courses-catalogue-page .ed-hero-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.92fr);gap:clamp(26px,5vw,70px);align-items:center}
+.courses-catalogue-page .ed-hero-copy{min-width:0;padding:5px 0}
+.courses-catalogue-page .ed-hero-copy .eyebrow,.courses-catalogue-page .ed-micro-heading .eyebrow{font-size:10px;letter-spacing:.15em;text-transform:uppercase;font-weight:800;color:#3e6049}
+.courses-catalogue-page .ed-hero-copy h1{font:400 clamp(43px,5.4vw,72px)/.98 Georgia,'Times New Roman',serif;letter-spacing:-.055em;color:#252f28;max-width:710px;margin:16px 0 20px}
+.courses-catalogue-page .ed-hero-copy h1 em{font-style:normal;color:#3e6049;font-weight:400}
+.courses-catalogue-page .ed-hero-lede{max-width:570px;color:#5f695e;font-size:15px;line-height:1.85;margin:0}
+.courses-catalogue-page .ed-hero-actions{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:24px}
+.courses-catalogue-page .ed-action{display:inline-flex;align-items:center;justify-content:center;gap:14px;min-height:44px;padding:12px 16px;border:1px solid transparent;text-decoration:none;font-size:12px;font-weight:800;line-height:1.35;transition:background .18s,border-color .18s,transform .18s;color:inherit}
+.courses-catalogue-page .ed-action:hover{transform:translateY(-1px)}
+.courses-catalogue-page .ed-action-primary{background:#3e6049;color:#fffdf7;border-color:#3e6049}
+.courses-catalogue-page .ed-action-primary:hover{background:#2d4b37;border-color:#2d4b37}
+.courses-catalogue-page .ed-action-text{padding:10px 2px;border-bottom:1px solid #c6a251;color:#3e6049}
+.courses-catalogue-page .ed-action-gold{background:#e5cc8a;color:#26372b;border-color:#e5cc8a}
+.courses-catalogue-page .ed-action-gold:hover{background:#d6b968;border-color:#d6b968}
+.courses-catalogue-page .ed-action-outline{border-color:#82977c;background:transparent;color:#355943}
+.courses-catalogue-page .ed-action-outline:hover{background:#dfe7d7}
+.courses-catalogue-page .ed-fine{font-size:11px;line-height:1.7;color:#677165;margin:18px 0 0}
+.courses-catalogue-page .ed-editorial-art{position:relative;min-width:0;transform:rotate(.35deg);padding:clamp(12px,2vw,20px);background:#e6e3d6;border:1px solid #d1d2c4;box-shadow:0 15px 32px #252f2812}
+.courses-catalogue-page .ed-chart-sheet{padding:0;background:#f7f2df;border:1px solid #d2d3c4;line-height:0}
+.courses-catalogue-page .ed-chart-sheet svg{display:block;width:100%;height:auto}
+.courses-catalogue-page .ed-chart-caption{padding:11px 6px 1px;font:italic 15px/1.4 Georgia,'Times New Roman',serif;color:#3e6049}
+.courses-catalogue-page .ed-art-index{position:absolute;right:20px;top:5px;transform:translateY(-50%);padding:5px 8px;background:#c6a251;color:#26372b;font-size:8px;letter-spacing:.12em;font-weight:850}
+.courses-catalogue-page .ed-rule{height:8px;background:linear-gradient(90deg,#3e6049 0 12%,#c6a251 12% 12.5%,#f5f2e9 12.5% 100%);border-bottom:1px solid #d8d9ca}
+.courses-catalogue-page .ed-programmes{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(290px,.88fr);align-items:stretch;gap:14px;padding-top:34px;padding-bottom:28px}
+.courses-catalogue-page .ed-primary,.courses-catalogue-page .ed-secondary{min-width:0;display:flex}
+.courses-catalogue-page .ed-offer-inner{width:100%;display:flex;flex-direction:column;min-width:0;padding:clamp(20px,2.8vw,34px);border:1px solid #d8d9ca}
+.courses-catalogue-page .ed-offer-inner--path{background:#fffdf7;color:#252f28}
+.courses-catalogue-page .ed-offer-inner--construct{background:#31523e;color:#fffdf7;border-color:#31523e}
+.courses-catalogue-page .ed-offer-topline{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:12px;border-bottom:1px solid #d8d9ca;color:#3e6049;font-size:9px;letter-spacing:.13em;text-transform:uppercase;font-weight:850}
+.courses-catalogue-page .ed-offer-inner--construct .ed-offer-topline{color:#e4d5a9;border-color:#617c65}
+.courses-catalogue-page .ed-offer-number{white-space:nowrap;opacity:.8;font-variant-numeric:tabular-nums}
+.courses-catalogue-page .ed-offer-title{font:400 clamp(26px,3vw,39px)/1.04 Georgia,'Times New Roman',serif;letter-spacing:-.035em;margin:18px 0 6px;color:inherit}
+.courses-catalogue-page .ed-offer-subtitle{font:italic 15px/1.45 Georgia,'Times New Roman',serif;margin:0 0 8px;color:#697467}
+.courses-catalogue-page .ed-offer-inner--construct .ed-offer-subtitle{color:#d4dfd0}
+.courses-catalogue-page .ed-offer-promise{font:400 clamp(17px,1.9vw,22px)/1.32 Georgia,'Times New Roman',serif;letter-spacing:-.02em;margin:8px 0 10px;color:#3e6049}
+.courses-catalogue-page .ed-offer-inner--construct .ed-offer-promise{color:#f0d48d}
+.courses-catalogue-page .ed-offer-description{font-size:12px;line-height:1.8;color:#5f695e;margin:0 0 15px;max-width:620px}
+.courses-catalogue-page .ed-offer-inner--construct .ed-offer-description{color:#e0e7dc}
+.courses-catalogue-page .ed-offer-facts{display:flex;flex-wrap:wrap;gap:6px;margin:3px 0 15px}
+.courses-catalogue-page .ed-offer-facts span{font-size:9px;line-height:1.3;padding:7px 8px;background:#eff2e9;border:1px solid #dfe7d7;color:#3e6049}
+.courses-catalogue-page .ed-offer-inner--construct .ed-offer-facts span{background:#294735;border-color:#627d66;color:#f2f1e4}
+.courses-catalogue-page .ed-offer-outcomes{list-style:none;padding:0;margin:0 0 17px;border-top:1px solid #e0e1d5}
+.courses-catalogue-page .ed-offer-outcomes li{display:flex;gap:9px;padding:8px 0;border-bottom:1px solid #e0e1d5;color:#5d685b;font-size:10px;line-height:1.55}
+.courses-catalogue-page .ed-offer-outcomes li>span{flex:none;color:#bd684d;font-size:8px;font-weight:850}
+.courses-catalogue-page .ed-offer-inner--construct .ed-offer-outcomes{border-color:#617c65}
+.courses-catalogue-page .ed-offer-inner--construct .ed-offer-outcomes li{border-color:#617c65;color:#e0e7dc}
+.courses-catalogue-page .ed-offer-inner--construct .ed-offer-outcomes li>span{color:#f0d48d}
+.courses-catalogue-page .ed-offer-bottom{display:flex;align-items:center;justify-content:space-between;gap:14px;padding-top:15px;margin-top:auto;border-top:1px solid #d8d9ca}
+.courses-catalogue-page .ed-offer-inner--construct .ed-offer-bottom{border-color:#617c65}
+.courses-catalogue-page .ed-offer-price{display:flex;flex-direction:column;gap:3px;min-width:0}
+.courses-catalogue-page .ed-offer-price strong{font:400 29px/1 Georgia,'Times New Roman',serif;color:#3e6049;letter-spacing:-.035em}
+.courses-catalogue-page .ed-offer-inner--construct .ed-offer-price strong{color:#f0d48d}
+.courses-catalogue-page .ed-offer-price span{font-size:9px;line-height:1.4;color:#697467}
+.courses-catalogue-page .ed-offer-inner--construct .ed-offer-price span{color:#d4dfd0}
+.courses-catalogue-page .ed-offer-note{font-size:10px;line-height:1.6;color:#d4dfd0;margin:13px 0 0}
+.courses-catalogue-page .ed-foundation-route{margin-top:18px;padding:13px 14px 12px;background:#f1f3eb;border-left:3px solid #c6a251}
+.courses-catalogue-page .ed-foundation-route .eyebrow{font-size:8px;letter-spacing:.13em;color:#3e6049;text-transform:uppercase;font-weight:850}
+.courses-catalogue-page .ed-foundation-route p{font:400 15px/1.55 Georgia,'Times New Roman',serif;color:#31523e;margin:6px 0}
+.courses-catalogue-page .ed-foundation-route p i{font-style:normal;color:#bd684d}
+.courses-catalogue-page .ed-foundation-route small{font-size:9px;color:#697467}
+.courses-catalogue-page .ed-live-wrap{padding-bottom:32px}
+.courses-catalogue-page .ed-live-card{display:grid;grid-template-columns:58px minmax(0,1fr) auto;align-items:center;gap:18px;padding:22px 25px;background:#e8eee1;border:1px solid #cbd8c3}
+.courses-catalogue-page .ed-live-stamp{width:54px;height:54px;display:grid;place-items:center;background:#dfe7d7;border:1px solid #c4d1b9;color:#3e6049}
+.courses-catalogue-page .ed-live-stamp svg{width:36px;height:36px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.courses-catalogue-page .ed-live-copy .eyebrow{font-size:8px;color:#3e6049;letter-spacing:.14em;font-weight:850;text-transform:uppercase}
+.courses-catalogue-page .ed-live-copy h2{font:400 clamp(18px,2.1vw,25px)/1.15 Georgia,'Times New Roman',serif;color:#252f28;margin:5px 0 7px}
+.courses-catalogue-page .ed-live-copy p{font-size:11px;line-height:1.7;color:#586657;max-width:700px;margin:0 0 10px}
+.courses-catalogue-page .ed-live-facts{display:flex;gap:6px;flex-wrap:wrap}
+.courses-catalogue-page .ed-live-facts span{font-size:9px;padding:5px 7px;border:1px solid #cad6c2;background:#f5f7f0;color:#405b43}
+.courses-catalogue-page .ed-micro-section{padding:44px 0 48px;background:#f8f5ed;border-top:1px solid #e2ddcf;border-bottom:1px solid #e2ddcf}
+.courses-catalogue-page .ed-micro-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:22px;align-items:end;margin-bottom:23px}
+.courses-catalogue-page .ed-micro-heading h2{font:400 clamp(31px,3.7vw,46px)/1.03 Georgia,'Times New Roman',serif;color:#252f28;letter-spacing:-.04em;margin:10px 0}
+.courses-catalogue-page .ed-heading-slash{color:#c6a251}
+.courses-catalogue-page .ed-micro-heading p{font-size:12px;line-height:1.8;color:#636d60;max-width:690px;margin:0}
+.courses-catalogue-page .ed-micro-index{display:flex;flex-direction:column;align-items:flex-end;gap:0;color:#3e6049;padding-bottom:4px}
+.courses-catalogue-page .ed-micro-index b{font:400 45px/.9 Georgia,'Times New Roman',serif;letter-spacing:-.04em}
+.courses-catalogue-page .ed-micro-index span{font-size:8px;text-transform:uppercase;letter-spacing:.13em;margin-top:6px}
+.courses-catalogue-page .micro-tile-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:stretch}
+.courses-catalogue-page .ed-micro-tile{display:flex;flex-direction:column;min-width:0;background:#fffdf7;border:1px solid #d8d9ca;color:#252f28;box-shadow:0 5px 15px #252f2808;transition:transform .2s,border-color .2s,box-shadow .2s}
+.courses-catalogue-page .ed-micro-tile:hover{transform:translateY(-3px);border-color:#a6baa0;box-shadow:0 13px 26px #252f2812}
+.courses-catalogue-page .ed-tile-art{position:relative;min-height:160px;display:flex;flex-direction:column;justify-content:space-between;padding:11px 13px 8px;background:#e9eee2;border-bottom:1px solid #d8d9ca;overflow:hidden}
+.courses-catalogue-page .ed-tile-art:after{content:"";position:absolute;right:-41px;top:-74px;width:172px;height:172px;border:1px solid #8ca28555;border-radius:50%;box-shadow:0 0 0 18px #8ca2850a,0 0 0 41px #8ca28508;pointer-events:none}
+.courses-catalogue-page .ed-tile-serial{position:relative;z-index:1;display:flex;gap:8px;align-items:center;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:#46644a;font-weight:850}
+.courses-catalogue-page .ed-tile-serial i{font-style:normal;color:#bd684d}
+.courses-catalogue-page .ed-tile-art svg{position:relative;z-index:1;display:block;width:100%;max-width:260px;height:80px;margin:6px auto}
+.courses-catalogue-page .ed-tile-art-caption{position:relative;z-index:1;font-size:7px;letter-spacing:.05em;color:#6b7868}
+.courses-catalogue-page .ed-tile-body{display:flex;flex:1;flex-direction:column;padding:16px 17px 15px}
+.courses-catalogue-page .ed-tile-meta{display:flex;flex-wrap:wrap;gap:5px 10px;align-items:center;font-size:8px;line-height:1.4;letter-spacing:.08em;text-transform:uppercase;color:#687466}
+.courses-catalogue-page .ed-tile-meta span+span:before{content:"·";margin-right:9px;color:#c6a251}
+.courses-catalogue-page .ed-tile-title{font:400 22px/1.12 Georgia,'Times New Roman',serif;letter-spacing:-.025em;color:#252f28;margin:10px 0 12px}
+.courses-catalogue-page .ed-course-status{display:inline-block;align-self:flex-start;margin:-5px 0 9px;padding:4px 6px;background:#f7ead4;color:#7f5823;font-size:8px;font-weight:800;letter-spacing:.06em;text-transform:uppercase}
+.courses-catalogue-page .ed-tile-problem-label{display:inline-flex;align-self:flex-start;margin:0 0 5px;color:#3e6049;font-size:8px;letter-spacing:.12em;text-transform:uppercase;font-weight:850}
+.courses-catalogue-page .ed-tile-hook{font:400 clamp(20px,2.2vw,26px)/1.08 Georgia,'Times New Roman',serif;letter-spacing:-.028em;color:#31523e;margin:0 0 9px}
+.courses-catalogue-page .ed-tile-problem{border-left:2px solid #bd684d;padding-left:10px;color:#636d60;font-size:11px;line-height:1.7;margin:2px 0 13px}
+.courses-catalogue-page .ed-tile-focus{padding-top:11px;border-top:1px solid #e0e0d4;margin-top:0}
+.courses-catalogue-page .ed-tile-focus>span{font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:#687466;font-weight:850}
+.courses-catalogue-page .ed-tile-focus p{font-size:11px;line-height:1.7;color:#4f5e50;margin:6px 0 0}
+.courses-catalogue-page .ed-tile-why{display:flex;flex-direction:column;gap:4px;margin:12px 0 0;padding-top:10px;border-top:1px solid #e6e4d8;color:#626e61}
+.courses-catalogue-page .ed-tile-why b{font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:#3e6049}
+.courses-catalogue-page .ed-tile-why span{font-size:10px;line-height:1.65}
+.courses-catalogue-page .ed-tile-footer{display:flex;justify-content:space-between;align-items:center;gap:9px;margin-top:auto;padding-top:15px}
+.courses-catalogue-page .ed-tile-price{display:flex;flex-direction:column;gap:3px;min-width:0}
+.courses-catalogue-page .ed-tile-price strong{font:400 26px/1 Georgia,'Times New Roman',serif;letter-spacing:-.035em;color:#3e6049}
+.courses-catalogue-page .ed-tile-price span{font-size:7px;letter-spacing:.07em;text-transform:uppercase;color:#7a8176}
+.courses-catalogue-page .ed-tile-action{display:inline-flex;align-items:center;gap:7px;padding:8px 9px;background:transparent;border:1px solid #b8c7b1;color:#355943;font-size:9px;line-height:1.3;font-weight:800;text-align:left}
+.courses-catalogue-page .ed-tile-action i{display:grid;place-items:center;width:22px;height:22px;background:#e5ecdf;color:#355943;border:1px solid #cbd8c3;font-style:normal;transition:transform .18s}
+.courses-catalogue-page .ed-tile-action:hover{background:#eff2e9;border-color:#3e6049}
+.courses-catalogue-page .ed-tile-action:hover i{transform:translate(2px,-2px);background:#3e6049;color:#fffdf7}
+.courses-catalogue-page .ed-development-rail{margin-top:18px;border:1px solid #d8d9ca;background:#f0eee5}
+.courses-catalogue-page .ed-development-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:17px 20px}
+.courses-catalogue-page .ed-development-inner .eyebrow{font-size:8px;letter-spacing:.13em;color:#926140;font-weight:850;text-transform:uppercase}
+.courses-catalogue-page .ed-development-inner h3{font:400 21px/1.1 Georgia,'Times New Roman',serif;margin:6px 0;color:#252f28}
+.courses-catalogue-page .ed-development-inner p{font-size:11px;line-height:1.6;color:#626e61;margin:0;max-width:730px}
+.courses-catalogue-page .ed-development-action{flex:none;border:1px solid #c9c8ba;background:#fffdf7;color:#355943;padding:10px 12px;font-size:10px;font-weight:800}
+.courses-catalogue-page .ed-development-action span{margin-left:8px;color:#bd684d}
+.courses-catalogue-page .ed-catalogue-note{font-size:9px;line-height:1.6;color:#818678;margin:14px 0 0}
+.courses-catalogue-page .ed-course-foot{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-top:17px;padding-bottom:18px;color:#6c7568;font-size:9px;letter-spacing:.025em}
+.courses-catalogue-page .ed-course-foot strong{color:#3e6049}
+@media(max-width:1000px){
+ .courses-catalogue-page .ed-hero-grid{grid-template-columns:minmax(0,1fr) minmax(260px,.82fr);gap:28px}
+ .courses-catalogue-page .ed-programmes{grid-template-columns:minmax(0,1.05fr) minmax(260px,.95fr)}
+ .courses-catalogue-page .micro-tile-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .courses-catalogue-page .ed-tile-hook{font-size:23px}
+}
+@media(max-width:760px){
+ .courses-catalogue-page .ed-hero-grid{grid-template-columns:1fr;gap:27px}
+ .courses-catalogue-page .ed-hero-copy h1{font-size:clamp(43px,10vw,58px)}
+ .courses-catalogue-page .ed-editorial-art{max-width:620px;width:100%;margin:0 auto;transform:none}
+ .courses-catalogue-page .ed-programmes{grid-template-columns:1fr;padding-top:22px}
+ .courses-catalogue-page .ed-offer-inner{padding:23px}
+ .courses-catalogue-page .ed-live-card{grid-template-columns:46px minmax(0,1fr);gap:12px;padding:16px}
+ .courses-catalogue-page .ed-live-stamp{width:43px;height:43px}
+ .courses-catalogue-page .ed-live-stamp svg{width:29px;height:29px}
+ .courses-catalogue-page .ed-live-card .ed-action{grid-column:2;justify-self:start}
+ .courses-catalogue-page .ed-micro-heading{grid-template-columns:1fr;align-items:start;gap:10px}
+ .courses-catalogue-page .ed-micro-index{display:none}
+ .courses-catalogue-page .ed-micro-heading h2{font-size:clamp(32px,8vw,42px)}
+}
+@media(max-width:560px){
+ .courses-catalogue-page .micro-tile-grid{grid-template-columns:1fr;gap:13px}
+ .courses-catalogue-page .ed-hero{padding:27px 0 32px}
+ .courses-catalogue-page .ed-hero-lede{font-size:13px;line-height:1.75}
+ .courses-catalogue-page .ed-hero-actions{align-items:flex-start;flex-direction:column;gap:10px}
+ .courses-catalogue-page .ed-action{width:100%;justify-content:space-between}
+ .courses-catalogue-page .ed-offer-topline{align-items:flex-start;flex-direction:column;gap:5px}
+ .courses-catalogue-page .ed-offer-bottom{align-items:stretch;flex-direction:column}
+ .courses-catalogue-page .ed-offer-bottom .ed-action{width:100%}
+ .courses-catalogue-page .ed-live-card{grid-template-columns:1fr}
+ .courses-catalogue-page .ed-live-card .ed-action{grid-column:1}
+ .courses-catalogue-page .ed-development-inner{align-items:flex-start;flex-direction:column;padding:15px}
+ .courses-catalogue-page .ed-development-action{width:100%;text-align:left}
+ .courses-catalogue-page .ed-course-foot{align-items:flex-start;flex-direction:column;gap:6px;padding-top:13px;padding-bottom:15px}
+ .courses-catalogue-page .ed-tile-art{min-height:145px}
+ .courses-catalogue-page .ed-tile-body{padding:15px 15px 14px}
+ .courses-catalogue-page .ed-tile-title{font-size:22px}
+ .courses-catalogue-page .ed-tile-footer{align-items:flex-start}
+ .courses-catalogue-page .ed-tile-action{max-width:170px}
+}
+@media(prefers-reduced-motion:reduce){
+ .courses-catalogue-page .ed-micro-tile,.courses-catalogue-page .ed-action,.courses-catalogue-page .ed-tile-action i{transition:none!important}
+ .courses-catalogue-page .ed-micro-tile:hover,.courses-catalogue-page .ed-action:hover{transform:none}
+}
+
