@@ -643,3 +643,35 @@
  .courses-catalogue-page .ed-hero-grid{grid-template-columns:1fr;gap:27px}
  .courses-catalogue-page .ed-hero-copy h1{font-size:clamp(43px,10vw,61px);line-height:.93}
 }
+
+
+/* Editorial merchandise hierarchy: let the first focused study lead, without changing the shared tile language. */
+.courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"]{grid-column:span 2;display:grid;grid-template-columns:minmax(220px,.78fr) minmax(0,1.22fr);align-items:stretch}
+.courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-art{height:100%;min-height:100%;border-bottom:0;border-right:1px solid #d1dacb;padding:15px;background:#e4ecdf}
+.courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-art svg{max-width:100%;height:auto;max-height:190px;margin:auto}
+.courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-art-caption{margin-top:auto}
+.courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-body{padding:22px 23px 18px}
+.courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-title{font-size:clamp(24px,2.5vw,30px);margin-top:12px;margin-bottom:15px}
+.courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-hook{font-size:clamp(25px,2.7vw,32px);max-width:580px}
+.courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-problem{font-size:12px;line-height:1.7;max-width:590px}
+.courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-focus p{font-size:12px}
+.courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-footer{padding-top:16px}
+@media(max-width:1000px){
+ .courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"]{grid-column:span 2}
+ .courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-body{padding:20px}
+}
+@media(max-width:760px){
+ .courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"]{grid-template-columns:minmax(180px,.72fr) minmax(0,1.28fr)}
+ .courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-body{padding:17px}
+ .courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-title{font-size:23px}
+ .courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-hook{font-size:23px}
+}
+@media(max-width:560px){
+ .courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"]{grid-column:span 1;grid-template-columns:1fr}
+ .courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-art{height:auto;min-height:145px;border-right:0;border-bottom:1px solid #d1dacb;padding:11px 13px 8px}
+ .courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-art svg{max-width:260px;height:80px;max-height:90px;margin:6px auto}
+ .courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-art-caption{margin-top:0}
+ .courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-body{padding:15px 15px 14px}
+ .courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-title{font-size:22px}
+ .courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-hook{font-size:24px}
+}
