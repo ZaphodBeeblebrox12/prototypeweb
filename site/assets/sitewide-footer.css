@@ -101,10 +101,10 @@ main > .sr-room-disclaimer:last-child { margin-bottom: 0 !important; }
   border-color: #bd6247;
   box-shadow: 0 4px 0 var(--sage, #dce7d6);
 }
+.sitewide-footer__cta-label,
 .sitewide-footer__cta:hover .sitewide-footer__cta-label,
 .sitewide-footer__cta:focus-visible .sitewide-footer__cta-label {
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration: none !important;
 }
 .sitewide-footer__main {
   display: grid;
