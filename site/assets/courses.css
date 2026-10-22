@@ -575,7 +575,8 @@
 .courses-catalogue-page .ed-offer-inner--construct .ed-offer-facts{margin:0 0 11px;gap:5px}
 .courses-catalogue-page .ed-offer-inner--construct .ed-offer-facts span{font-size:8px;padding:5px 6px}
 .courses-catalogue-page .ed-offer-inner--construct .ed-offer-outcomes{margin:0 0 12px}
-.courses-catalogue-page .ed-offer-inner--construct .ed-offer-outcomes li{font-size:9px;padding:6px 0}
+.courses-catalogue-page .ed-offer-inner--construct .ed-offer-outcomes li{font-size:10px;line-height:1.55;padding:7px 0;color:#4f5f50}
+.courses-catalogue-page .ed-offer-inner--construct .ed-offer-outcomes li>span{color:#b45b3d}
 .courses-catalogue-page .ed-offer-inner--construct .ed-offer-bottom{gap:9px;padding-top:12px}
 .courses-catalogue-page .ed-offer-inner--construct .ed-offer-price strong{font-size:25px;color:#3e6049}
 .courses-catalogue-page .ed-offer-inner--construct .ed-offer-price span{font-size:8px;color:#697467}
