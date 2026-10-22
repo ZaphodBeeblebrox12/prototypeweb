@@ -577,7 +577,7 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         end = source.index("function renderMarkdown(src)", start)
         preview = source[start:end]
 
-        lesson_body = preview.index("renderMarkdown(lesson.content)")
+        lesson_body = preview.index("renderMarkdown(lessonBodyForAudience(lesson,")
         notebook = preview.index("notebookPreviewMarkup(lesson)")
         questions = preview.index("lesson.questions.length?")
         self.assertLess(lesson_body, notebook)
