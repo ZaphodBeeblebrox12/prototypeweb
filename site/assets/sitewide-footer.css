@@ -64,27 +64,47 @@ main > .sr-room-disclaimer:last-child { margin-bottom: 0 !important; }
   line-height: 1.6;
 }
 .sitewide-footer__cta {
-  display: inline-flex;
-  max-width: 205px;
-  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 14px;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  padding: 11px 14px;
-  border: 1px solid var(--green, #355a46);
-  border-radius: 3px 13px 13px 13px;
-  background: var(--green, #355a46);
-  color: var(--card, #fffdf8) !important;
+  width: 156px;
+  max-width: 100%;
+  min-height: 50px;
+  padding: 8px 12px 9px 14px;
+  border: 1px solid var(--tomato, #c96f50);
+  border-radius: 999px;
+  background: var(--tomato, #c96f50);
+  color: #fffdf8 !important;
   font-size: 11px;
   font-weight: 800;
-  line-height: 1.45;
-  box-shadow: 0 3px 0 #25433421;
-  transition: background-color .16s ease, border-color .16s ease, transform .16s ease;
+  line-height: 1.25;
+  box-shadow: 0 3px 0 var(--sage, #dce7d6);
+  transition: background-color .16s ease, border-color .16s ease, transform .16s ease, box-shadow .16s ease;
+}
+.sitewide-footer__cta-label {
+  display: block;
+  max-width: 100px;
+  text-align: left;
+}
+.sitewide-footer__cta-arrow {
+  display: block;
+  justify-self: end;
+  align-self: center;
+  font-size: 13px;
+  line-height: 1;
+  text-decoration: none;
 }
 .sitewide-footer__cta:hover {
   transform: translateY(-1px);
-  background: var(--deep, #254334);
-  border-color: var(--deep, #254334);
+  background: #bd6247;
+  border-color: #bd6247;
+  box-shadow: 0 4px 0 var(--sage, #dce7d6);
+}
+.sitewide-footer__cta:hover .sitewide-footer__cta-label,
+.sitewide-footer__cta:focus-visible .sitewide-footer__cta-label {
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 .sitewide-footer__main {
   display: grid;
@@ -185,7 +205,7 @@ main > .sr-room-disclaimer:last-child { margin-bottom: 0 !important; }
   .sitewide-footer__stamp { font-size: 10px; margin-bottom: 7px; }
   .sitewide-footer__statement { font-size: 27px; line-height: 1.02; }
   .sitewide-footer__message { font-size: 10px; margin-top: 6px; }
-  .sitewide-footer__cta { max-width: 100%; padding: 10px 13px; }
+  .sitewide-footer__cta { width: 156px; max-width: 100%; min-height: 50px; padding: 8px 12px 9px 14px; }
   .sitewide-footer__main { gap: 16px; padding-top: 14px; padding-bottom: 12px; }
   .sitewide-footer__brand img { width: min(190px, 100%); max-height: 43px; }
   .sitewide-footer__links { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 14px; }
