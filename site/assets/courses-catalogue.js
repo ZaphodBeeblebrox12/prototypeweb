@@ -111,7 +111,7 @@
       '<div class="ed-tile-art"><span class="ed-tile-serial">' + serial + ' <i>/</i> ' + escapeHTML(course.category || 'Focused study') + '</span>' + chartArt(course.art) + '<span class="ed-tile-art-caption">Illustrative chart study · not market data</span></div>' +
       '<div class="ed-tile-body"><div class="ed-tile-meta"><span>' + escapeHTML(course.category || 'Focused study') + '</span><span>' + escapeHTML(course.level || 'Self-paced') + '</span></div>' +
       '<h3 class="ed-tile-title">' + escapeHTML(course.title) + '</h3>' + status +
-      '<div class="ed-tile-problem-label">The problem it helps with</div><p class="ed-tile-hook">' + escapeHTML(hook) + '</p>' +
+      '<div class="ed-tile-problem-label">The problem it helps with</div><p class="ed-tile-hook cc-card-hook">' + escapeHTML(hook) + '</p>' +
       (problem ? '<p class="ed-tile-problem">' + escapeHTML(problem) + '</p>' : '') +
       '<div class="ed-tile-focus"><span>What you will work on</span><p>' + escapeHTML(learningFocus) + '</p></div>' +
       (whyThisOne ? '<p class="ed-tile-why"><b>Why this one</b><span>' + escapeHTML(whyThisOne) + '</span></p>' : '') +
