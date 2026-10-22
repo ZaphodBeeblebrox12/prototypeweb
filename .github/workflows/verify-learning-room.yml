@@ -409,21 +409,22 @@ jobs:
             });
             await cataloguePage.goto(server + "/courses.html", { waitUntil: "networkidle" });
             await cataloguePage.waitForSelector("#cc-micro-grid [data-open-course='ci-future-visible-course']");
+            const visibleCourseCount = await cataloguePage.locator("#cc-micro-grid [data-open-course]").count();
             assert.equal(await cataloguePage.locator("#cc-micro-grid [data-open-course='ci-future-hidden-draft']").count(), 0,
               "Hidden development drafts must not appear as public course cards");
             assert.equal(await cataloguePage.locator("#cc-course-filters [data-filter='Hidden draft topic']").count(), 0,
               "Hidden development draft topics must not appear as filters");
             assert.equal(await cataloguePage.locator("#cc-course-filters [data-filter='Emerging topic']").count(), 1,
               "New course topics should automatically add a filter");
-            assert.equal(await cataloguePage.locator('#cc-course-filters [data-count="all"]').innerText(), "10",
-              "The all-topics count should be derived from visible course data");
+            assert.equal(await cataloguePage.locator('#cc-course-filters [data-count="all"]').innerText(), String(visibleCourseCount),
+              "The all-topics count should match the visible course cards, including courses added by the Academy");
             await cataloguePage.locator("#cc-course-filters [data-filter='Emerging topic']").click();
             assert.equal(await cataloguePage.locator("#cc-micro-grid [data-open-course]").count(), 1,
               "Dynamic topic filter should display only matching courses");
             assert.equal(await cataloguePage.locator("#cc-micro-grid").innerText().then(text => text.includes("Emerging Topic Preview")), true);
             await cataloguePage.locator('#cc-course-filters [data-filter="all"]').click();
-            assert.equal(await cataloguePage.locator("#cc-micro-grid [data-open-course]").count(), 10,
-              "All topics should restore all visible cards, not disclose drafts");
+            assert.equal(await cataloguePage.locator("#cc-micro-grid [data-open-course]").count(), visibleCourseCount,
+              "All topics should restore every visible card, not disclose drafts");
             await cataloguePage.setViewportSize({ width: 390, height: 844 });
             const catalogueOverflow = await cataloguePage.evaluate(() => ({
               viewport: document.documentElement.clientWidth,
