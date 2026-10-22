@@ -36,42 +36,44 @@
     return `<svg class="cc-programme-art" viewBox="0 0 175 95" aria-hidden="true"><rect x="3" y="7" width="169" height="81" rx="8" fill="#f6f1e3" stroke="#d7ddcb"/><g stroke="#d3d8c9" stroke-dasharray="3 4"><path d="M13 27H162M13 47H162M13 67H162"/></g><rect x="13" y="58" width="148" height="14" rx="2" fill="#c3d3b8" opacity=".7"/><path d="M13 66L32 58L47 63L64 42L81 51L98 32L116 44L136 20L160 29" fill="none" stroke="#355a46" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g stroke="#355a46" stroke-width="1.4"><path d="M31 51V70M48 53V72M65 35V57M82 45V65M99 25V44M116 37V57M137 13V34M154 18V38"/></g><g fill="#c96f50"><rect x="27" y="56" width="8" height="9" rx="1"/><rect x="44" y="57" width="8" height="9" rx="1"/><rect x="61" y="42" width="8" height="10" rx="1"/><rect x="78" y="48" width="8" height="10" rx="1"/><rect x="95" y="29" width="8" height="10" rx="1"/><rect x="112" y="41" width="8" height="10" rx="1"/><rect x="133" y="17" width="8" height="10" rx="1"/><rect x="150" y="24" width="8" height="9" rx="1"/></g></svg>`;
   };
 
-  const renderProgramme = course => {
-    const isConstruct = course.theme === 'construct';
-    const outputs = isConstruct ? course.outcomes.slice(0, 4) : course.outcomes.slice(0, 3);
-    return `<article class="cc-programme-card ${isConstruct ? 'cc-programme-card--construct' : 'cc-programme-card--path'}" id="${escapeHTML(course.id)}">
-      <div class="cc-programme-visual"><span class="cc-programme-num">0${course.priority} / ${isConstruct ? 'BUILD YOUR PROCESS' : 'START WITH THE BASICS'}</span>${programmeArt(course.art)}</div>
-      <div class="cc-programme-body">
-        <div class="cc-programme-kicker">${escapeHTML(course.kicker)} <span class="cc-pill">${escapeHTML(course.badge)}</span></div>
-        <h3>${escapeHTML(course.title)}</h3>
-        ${course.subtitle ? `<div class="cc-programme-subtitle">${escapeHTML(course.subtitle)}</div>` : ''}
-        <p class="cc-programme-promise">${escapeHTML(course.promise)}</p>
-        <p class="cc-programme-description">${escapeHTML(course.description)}</p>
-        <div class="cc-programme-facts">${course.facts.map(fact => `<span>${escapeHTML(fact)}</span>`).join('')}</div>
-        <div class="cc-programme-outputs">${outputs.map((output, index) => `<div class="cc-programme-output"><b>0${index + 1}</b><span>${escapeHTML(output)}</span></div>`).join('')}</div>
-        <div class="cc-programme-bottom"><div class="cc-price-block"><span class="cc-price">${escapeHTML(course.price)}</span><span class="cc-price-note">${escapeHTML(course.priceNote)}</span></div><a class="button cc-programme-cta" href="${escapeHTML(course.href)}">${escapeHTML(course.cta)} <span aria-hidden="true">↗</span></a></div>
-        ${isConstruct ? `<div class="cc-community-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 19 6v5c0 5-3.2 8.3-7 10-3.8-1.7-7-5-7-10V6z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg><span>${escapeHTML(course.community)}</span></div>` : `<div class="cc-community-note cc-community-note--path"><span aria-hidden="true">✳</span><span>${escapeHTML(course.delivery)}. ${escapeHTML(course.community)}</span></div>`}
-      </div>
-    </article>`;
+  const renderEditorialProgramme = (course, variant) => {
+    const isConstruct = variant === 'construct';
+    const pathSteps = ['Market language and chart reading', 'Context, planning and risk', 'Review the decision, not just the result'];
+    const steps = isConstruct ? course.outcomes.slice(0, 3) : pathSteps;
+    const facts = (course.facts || []).map(fact => '<span>' + escapeHTML(fact) + '</span>').join('');
+    const outcomes = steps.map((item, index) => '<li><span>0' + (index + 1) + '</span>' + escapeHTML(item) + '</li>').join('');
+    const heading = isConstruct ? escapeHTML(course.title) : escapeHTML(course.title);
+    const subtitle = course.subtitle ? '<p class="ed-offer-subtitle">' + escapeHTML(course.subtitle) + '</p>' : '';
+    const note = isConstruct ? '<p class="ed-offer-note">' + escapeHTML(course.community) + '</p>' : '<div class="ed-foundation-route"><span class="eyebrow">The foundation</span><p>Market language <i>→</i> chart reading <i>→</i> risk <i>→</i> planning <i>→</i> review</p><small>Four connected stages · 30-day guided sequence</small></div>';
+    return '<div class="ed-offer-inner ed-offer-inner--' + variant + '">' +
+      '<div class="ed-offer-topline"><span>' + (isConstruct ? 'Flagship programme · guided process' : 'Flagship programme · start here') + '</span><span class="ed-offer-number">0' + (isConstruct ? '2' : '1') + ' / ' + (isConstruct ? 'CONSTRUCT' : 'FOUNDATIONS') + '</span></div>' +
+      '<h2 class="ed-offer-title">' + heading + '</h2>' + subtitle +
+      '<p class="ed-offer-promise">' + escapeHTML(course.promise) + '</p>' +
+      '<p class="ed-offer-description">' + escapeHTML(course.description) + '</p>' +
+      '<div class="ed-offer-facts">' + facts + '</div>' +
+      '<ul class="ed-offer-outcomes">' + outcomes + '</ul>' +
+      '<div class="ed-offer-bottom"><div class="ed-offer-price"><strong>' + escapeHTML(course.price) + '</strong><span>' + escapeHTML(course.priceNote) + '</span></div><a class="ed-action ' + (isConstruct ? 'ed-action-gold' : 'ed-action-primary') + '" href="' + escapeHTML(course.href) + '">' + escapeHTML(course.cta) + ' <span aria-hidden="true">↗</span></a></div>' + note +
+    '</div>';
   };
 
   const microGrid = $('#cc-micro-grid');
-  const programmeGrid = $('#cc-primary-programmes');
-  if (programmeGrid) {
-    const orderedProgrammes = data.programmes.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
-    programmeGrid.innerHTML = orderedProgrammes.map(renderProgramme).join('');
-  }
+  const developmentRail = $('#cc-development-rail');
+  const orderedProgrammes = data.programmes.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
+  const primaryProgramme = orderedProgrammes.find(course => course.id === 'trading-path');
+  const secondaryProgramme = orderedProgrammes.find(course => course.id === 'construct');
+  const primaryHost = $('#ed-trading-path');
+  const secondaryHost = $('[data-offer="construct"]');
+  if (primaryHost && primaryProgramme) primaryHost.innerHTML = renderEditorialProgramme(primaryProgramme, 'path');
+  if (secondaryHost && secondaryProgramme) secondaryHost.innerHTML = renderEditorialProgramme(secondaryProgramme, 'construct');
 
   const supportingProgrammes = [...(data.supportingProgrammes || [])].filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
   const supportHost = $('#cc-supporting-programme');
   if (supportHost && supportingProgrammes.length) {
-    supportHost.innerHTML = supportingProgrammes.map(support => `<article class="cc-live-card" id="${escapeHTML(support.id)}">
-      <div class="cc-live-icon" aria-hidden="true"><svg viewBox="0 0 64 64"><rect x="8" y="10" width="48" height="34" rx="5"/><path d="M22 54h20M32 44v10M17 34l9-10 8 5 12-13"/><path d="M42 16h4v4"/></svg></div>
-      <div class="cc-live-copy"><span class="cc-kicker">Priority 0${support.priority} · A different way to learn</span><h2>${escapeHTML(support.title)}</h2><p>${escapeHTML(support.description)}</p><div class="cc-live-facts">${support.facts.map(fact => `<span>${escapeHTML(fact)}</span>`).join('')}</div></div>
-      <a class="button outline cc-live-cta" href="${escapeHTML(support.href)}">${escapeHTML(support.cta)} <span aria-hidden="true">↗</span></a>
-    </article>`).join('');
+    supportHost.innerHTML = supportingProgrammes.map(support => '<article class="ed-live-card" id="' + escapeHTML(support.id) + '">' +
+      '<div class="ed-live-stamp" aria-hidden="true"><svg viewBox="0 0 64 64"><rect x="8" y="10" width="48" height="34" rx="5"/><path d="M22 54h20M32 44v10M17 34l9-10 8 5 12-13"/><path d="M42 16h4v4"/></svg></div>' +
+      '<div class="ed-live-copy"><span class="eyebrow">A separate delivery format</span><h2>' + escapeHTML(support.title) + '</h2><p>' + escapeHTML(support.description) + '</p><div class="ed-live-facts">' + support.facts.map(fact => '<span>' + escapeHTML(fact) + '</span>').join('') + '</div></div>' +
+      '<a class="ed-action ed-action-outline" href="' + escapeHTML(support.href) + '">' + escapeHTML(support.cta) + ' <span aria-hidden="true">↗</span></a></article>').join('');
   }
-
   const modal = $('#cc-course-modal');
   const modalDialog = $('.cc-modal-dialog', modal);
   const modalScroll = $('#cc-modal-scroll');
