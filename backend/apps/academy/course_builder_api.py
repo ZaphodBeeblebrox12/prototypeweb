@@ -28,6 +28,12 @@ from PIL import Image, UnidentifiedImageError
 
 from .course_builder_lifecycle import mark_builder_draft_deleted
 from .course_card_utils import is_course_card_recommendable
+from .catalogue_presentation import (
+    builder_fields_for_catalogue_presentation,
+    catalogue_presentation_from_builder_state,
+    catalogue_presentation_from_payload,
+    default_presentation_for_course,
+)
 from .importing import validate_import_for_publish
 from .models import (
     Course,
@@ -556,6 +562,8 @@ def _build_import_payload(course_state, course_slug):
             "learning_outcomes": [str(value).strip()[:500] for value in (snapshot.get("outcomes") or []) if str(value).strip()][:20],
             "position": max(0, min(32767, int(snapshot.get("position") or 0))),
             "requires_owned_assets": bool(snapshot.get("requiresOwnedAssets", False)),
+            "catalogue_presentation": catalogue_presentation_from_builder_state(snapshot)[0],
+            "catalogue_presentation_configured": catalogue_presentation_from_builder_state(snapshot)[1],
         },
         "notebook": {},
         "modules": modules,
@@ -821,6 +829,22 @@ def _builder_state_from_published_course(course):
     published_import_payload = latest_published_import.payload if latest_published_import and isinstance(latest_published_import.payload, dict) else {}
     published_import_course = published_import_payload.get("course") if isinstance(published_import_payload.get("course"), dict) else {}
     requires_owned_assets = bool(published_import_course.get("requires_owned_assets", False))
+    catalogue_copy, catalogue_copy_configured = catalogue_presentation_from_payload(published_import_payload)
+    if not catalogue_copy_configured:
+        prior_imports = CourseImport.objects.filter(
+            course_slug=course.slug, status=CourseImport.Status.PUBLISHED,
+        ).exclude(pk=latest_published_import.pk if latest_published_import else None).order_by("-updated_at")
+        for prior_import in prior_imports:
+            prior_payload = prior_import.payload if isinstance(prior_import.payload, dict) else {}
+            prior_copy, prior_configured = catalogue_presentation_from_payload(prior_payload)
+            if prior_configured:
+                catalogue_copy, catalogue_copy_configured = prior_copy, True
+                break
+    if not catalogue_copy_configured:
+        seeded_copy = default_presentation_for_course(course.slug)
+        if seeded_copy is not None:
+            catalogue_copy, catalogue_copy_configured = seeded_copy, True
+    catalogue_builder_fields = builder_fields_for_catalogue_presentation(catalogue_copy, catalogue_copy_configured)
     return {
         "id": "published-" + str(course.pk), "serverCourseId": str(course.pk),
         "title": course.title, "slug": course.slug, "summary": course.summary,
@@ -831,11 +855,17 @@ def _builder_state_from_published_course(course):
         "createdAt": course.created_at.isoformat(), "updatedAt": course.updated_at.isoformat(),
         "publishedAt": course.updated_at.isoformat(), "publishedSnapshot": None,
         "outcomes": list(course.learning_outcomes or []), "modules": modules,
+        **catalogue_builder_fields,
     }
 
 
 def _draft_response(record, request):
     state = deepcopy(record.payload.get("builder_state") or {})
+    _, configured_copy = catalogue_presentation_from_builder_state(state)
+    if not configured_copy:
+        seeded_copy = default_presentation_for_course(record.course_slug)
+        if seeded_copy is not None:
+            state.update(builder_fields_for_catalogue_presentation(seeded_copy, True))
     for module in state.get("modules", []):
         for lesson in module.get("lessons", []):
             images = lesson.get("images") if isinstance(lesson.get("images"), list) else []

@@ -5,6 +5,11 @@ from django.utils.cache import patch_vary_headers
 from django.views.decorators.http import require_GET
 
 from .course_card_utils import is_course_card_recommendable
+from .catalogue_presentation import (
+    catalogue_presentation_api_fields,
+    catalogue_presentation_from_payload,
+    normalize_catalogue_presentation,
+)
 from .models import Course, CourseImport
 
 
@@ -12,6 +17,13 @@ from .models import Course, CourseImport
 def public_course_catalogue(request):
     """Return published catalogue metadata only; never expose lesson bodies or answer keys."""
     rows = []
+    presentation_by_slug = {}
+    for import_record in CourseImport.objects.filter(status=CourseImport.Status.PUBLISHED).order_by("course_slug", "-updated_at"):
+        if import_record.course_slug in presentation_by_slug:
+            continue
+        presentation, configured = catalogue_presentation_from_payload(import_record.payload)
+        if configured:
+            presentation_by_slug[import_record.course_slug] = presentation
     courses = Course.objects.filter(status=Course.Status.PUBLISHED).prefetch_related("modules__lessons")
     for course in courses:
         if not is_course_card_recommendable(course.title, course.summary, course.description):
@@ -45,6 +57,7 @@ def public_course_catalogue(request):
             "art": "structure",
             "modules": modules,
             "academyUrl": request.build_absolute_uri(reverse("academy:course-detail", args=[course.slug])),
+            **catalogue_presentation_api_fields(presentation_by_slug.get(course.slug, normalize_catalogue_presentation({})), course.slug in presentation_by_slug),
         })
     # Teasers are metadata-only and never expose unpublished lesson content.
     published_slugs = {
@@ -86,6 +99,7 @@ def public_course_catalogue(request):
                 "preview": "The full course outline will be shared closer to launch.",
                 "points": ["Content is being prepared."],
             }],
+            **catalogue_presentation_api_fields(*catalogue_presentation_from_payload(record.payload)),
         })
     response = JsonResponse({"courses": rows})
     response["Access-Control-Allow-Origin"] = "*"

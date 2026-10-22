@@ -22,6 +22,7 @@ concurrency:
 
 jobs:
   deploy:
+    if: ${{ !contains(github.event.head_commit.message, '[skip-preview-deploy]') }}
     environment:
       name: tradethesis-preview
       url: ${{ steps.deployment.outputs.page_url }}

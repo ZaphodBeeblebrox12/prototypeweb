@@ -89,14 +89,22 @@
   let microCourses = data.microCourses.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
 
   function renderMicroCard(course) {
+    const hook = course.hook || ''; const fallbackDescription = course.description || '';
+    const problem = course.problem || '';
+    const learningFocus = course.learningFocus || course.outcome || '';
+    const tags = Array.isArray(course.tags) ? course.tags.filter(tag => String(tag || '').trim()) : [];
+    const whyThisOne = course.whyThisOne || '';
     return `<button class="cc-micro-card" type="button" data-open-course="${escapeHTML(course.id)}" aria-label="Preview ${escapeHTML(course.title)}, ${escapeHTML(course.price || course.status)}">
       <span class="cc-card-art">${chartArt(course.art)}</span>
       <span class="cc-card-body">
         <span class="cc-card-meta"><span>${escapeHTML(course.category)}</span><span class="cc-card-level">${escapeHTML(course.level)}</span></span>
         ${course.status === 'coming-soon' ? '<span class="cc-course-status">Coming soon</span>' : (course.status === 'in-development' ? '<span class="cc-course-status">Course in development</span>' : '')}
         <span class="cc-card-title-wrap"><span class="cc-card-title">${escapeHTML(course.title)}</span></span>
-        <span class="cc-card-description">${escapeHTML(course.description)}</span>
-        <span class="cc-card-fit"><span aria-hidden="true">↳</span>${escapeHTML(course.complements)}</span>
+        ${hook ? `<span class="cc-card-problem-label">The problem it helps with</span><span class="cc-card-hook">${escapeHTML(hook)}</span>` : (fallbackDescription ? `<span class="cc-card-description">${escapeHTML(fallbackDescription)}</span>` : '')}
+        ${problem ? `<span class="cc-card-problem">${escapeHTML(problem)}</span>` : ''}
+        ${learningFocus ? `<span class="cc-card-learning-focus">${escapeHTML(learningFocus)}</span>` : ''}
+        ${tags.length ? `<span class="cc-card-tags" aria-label="Course tags">${tags.map(tag => `<span class="cc-card-tag">${escapeHTML(tag)}</span>`).join('')}</span>` : ''}
+        ${whyThisOne ? `<span class="cc-card-why"><b>Why this one:</b> ${escapeHTML(whyThisOne)}</span>` : ''}
         <span class="cc-card-bottom"><span class="cc-card-price">${escapeHTML(course.price || (course.status === 'coming-soon' ? 'Coming soon' : ''))}</span><span class="cc-card-action">${course.status === 'coming-soon' ? 'Coming soon' : (course.status === 'in-development' ? 'View outline' : "See what's inside")} <i aria-hidden="true">↗</i></span></span>
       </span>
     </button>`;
@@ -118,7 +126,7 @@
     const query = (searchInput?.value || '').trim().toLocaleLowerCase();
     const shown = microCourses.filter(course => {
       const categoryMatches = activeFilter === 'all' || course.category === activeFilter;
-      const searchBlob = [course.title, course.category, course.level, course.status, course.description, course.outcome, course.complements].join(' ').toLocaleLowerCase();
+      const searchBlob = [course.title, course.category, course.level, course.status, course.description, course.outcome, course.complements, course.hook, course.problem, course.learningFocus, ...(Array.isArray(course.tags) ? course.tags : []), course.whyThisOne].join(' ').toLocaleLowerCase();
       return categoryMatches && (!query || searchBlob.includes(query));
     });
     microGrid.innerHTML = shown.map(renderMicroCard).join('');
@@ -209,28 +217,47 @@
   fetch("https://tradethesis-academy-staging.onrender.com/api/academy/catalogue/", {headers: {"Accept":"application/json"}})
     .then(response => { if (!response.ok) throw new Error("Academy catalogue unavailable"); return response.json(); })
     .then(payload => {
-      const known = new Set(microCourses.map(course => course.id));
       const academyEntries = (payload.courses || []).filter(course => course && (
         (course.status === "published" && course.academyUrl) || course.status === "coming-soon"
-      ) && !known.has(course.id));
-      for (const course of academyEntries) {
-        microCourses.push({
-          ...course, priority: 3, order: 1000 + microCourses.length,
-          category: course.category || "TradeThesis courses",
-          level: course.level || "Self-paced",
-          art: course.art || "structure",
-          modules: Array.isArray(course.modules) ? course.modules : [],
-          outcome: course.outcome || course.description || "",
-          complements: course.complements || (course.status === "coming-soon"
+      ));
+      let catalogueChanged = false;
+      for (const incoming of academyEntries) {
+        const existing = microCourses.find(course =>
+          String(course.id) === String(incoming.id) ||
+          (incoming.slug && (String(course.slug || "") === String(incoming.slug) || String(course.id) === String(incoming.slug)))
+        );
+        const normalized = {
+          ...incoming, priority: 3, order: 1000 + microCourses.length,
+          category: incoming.category || "TradeThesis courses", level: incoming.level || "Self-paced",
+          art: incoming.art || "structure", modules: Array.isArray(incoming.modules) ? incoming.modules : [],
+          tags: Array.isArray(incoming.tags) ? incoming.tags : [],
+          outcome: incoming.outcome || incoming.description || "",
+          complements: incoming.complements || (incoming.status === "coming-soon"
             ? "This course is being prepared. Full details will be shared closer to launch."
             : "Explore this published course in the TradeThesis Academy."),
-          price: course.price || (course.status === "coming-soon" ? "Coming soon" : "View in Academy")
-        });
+          price: incoming.price || ""
+        };
+        if (existing) {
+          existing.slug = existing.slug || normalized.slug;
+          existing.academyUrl = normalized.academyUrl || existing.academyUrl;
+          if (normalized.modules.length) existing.modules = normalized.modules;
+          if (!existing.outcome && normalized.outcome) existing.outcome = normalized.outcome;
+          if (!existing.complements && normalized.complements) existing.complements = normalized.complements;
+          if (normalized.price && (!existing.price || existing.price === "Coming soon")) existing.price = normalized.price;
+          if (normalized.cataloguePresentationConfigured) {
+            existing.hook = normalized.hook; existing.problem = normalized.problem;
+            existing.learningFocus = normalized.learningFocus; existing.tags = normalized.tags;
+            existing.whyThisOne = normalized.whyThisOne;
+          } else {
+            for (const key of ["hook", "problem", "learningFocus", "whyThisOne"]) if (!existing[key] && normalized[key]) existing[key] = normalized[key];
+            if ((!Array.isArray(existing.tags) || !existing.tags.length) && normalized.tags.length) existing.tags = normalized.tags;
+          }
+          catalogueChanged = true;
+        } else {
+          microCourses.push(normalized); catalogueChanged = true;
+        }
       }
-      if (academyEntries.length) {
-        renderFilterButtons();
-        renderMicroCourses();
-      }
+      if (catalogueChanged) { renderFilterButtons(); renderMicroCourses(); }
     })
     .catch(() => {
       // The curated catalogue remains usable if Academy is temporarily unavailable.

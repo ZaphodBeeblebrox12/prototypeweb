@@ -95,6 +95,13 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "notebookPreviewMarkup(l)")
         self.assertContains(response, "Reflection & reasoning")
         self.assertContains(response, "Require course-owned images before publishing")
+        self.assertContains(response, "Courses tab presentation")
+        self.assertContains(response, "data-field=\"catalogueHook\"")
+        self.assertContains(response, "data-field=\"problemStatement\"")
+        self.assertContains(response, "data-field=\"learningFocus\"")
+        self.assertContains(response, "data-field=\"authoredTags\"")
+        self.assertContains(response, "data-field=\"whyThisOne\"")
+        self.assertContains(response, "Live tile preview")
         self.assertContains(response, "Route to Chart examples")
         self.assertContains(response, "Manage inserted lesson references")
         self.assertContains(response, "lessonQualityMarkup")
@@ -456,6 +463,28 @@ class CourseBuilderApiTests(TestCase):
         migrated_id, migrated_asset = migrate_asset.call_args.args
         self.assertEqual(migrated_id, stable_id)
         self.assertEqual(migrated_asset.pk, asset.pk)
+
+    def test_catalogue_presentation_fields_persist_in_saved_builder_draft(self):
+        payload = self.draft_payload("catalogue-presentation-save")
+        payload["course"].update({
+            "catalogueHook": "Mark fewer zones. Give each one a reason.",
+            "problemStatement": "For traders who see a possible level around every swing.",
+            "learningFocus": "Choose zones, read reactions and identify invalidation.",
+            "authoredTags": "Chart reading, zones, invalidation, chart reading",
+            "whyThisOne": "Treats zones as decision areas to justify, test and invalidate—not lines to collect.",
+            "cataloguePresentationConfigured": True,
+        })
+        response = self.client.post(reverse("staff_course_builder_api"), data=json.dumps(payload), content_type="application/json")
+        self.assertEqual(response.status_code, 200, response.content)
+        record = CourseImport.objects.get(pk=response.json()["record_id"])
+        state = record.payload["builder_state"]
+        self.assertEqual(state["catalogueHook"], payload["course"]["catalogueHook"])
+        self.assertEqual(state["problemStatement"], payload["course"]["problemStatement"])
+        self.assertEqual(state["learningFocus"], payload["course"]["learningFocus"])
+        self.assertEqual(state["whyThisOne"], payload["course"]["whyThisOne"])
+        self.assertTrue(state["cataloguePresentationConfigured"])
+        self.assertEqual(record.payload["course"]["catalogue_presentation"]["tags"], ["Chart reading", "zones", "invalidation"])
+        self.assertTrue(record.payload["course"]["catalogue_presentation_configured"])
 
     def test_existing_saved_builder_draft_can_be_resaved_when_course_slug_is_taken(self):
         slug = "builder-draft-slug-collision"
