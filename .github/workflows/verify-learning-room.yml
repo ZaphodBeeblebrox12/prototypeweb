@@ -439,12 +439,23 @@ jobs:
             // Verify the Course tab and expandable micro-course outline before unrelated public journeys.
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
             await cataloguePage.goto(server + "/courses.html", { waitUntil: "networkidle" });
-            const firstMicroCourse = cataloguePage.locator("#cc-micro-grid [data-open-course]").first();
+            const firstMicroCourse = cataloguePage.locator('#cc-micro-grid [data-open-course="support-resistance"]');
+            await firstMicroCourse.waitFor({ state: "visible" });
             const firstMicroCourseId = await firstMicroCourse.getAttribute("data-open-course");
+            assert.equal(await firstMicroCourse.locator(".cc-card-hook").innerText(), "Mark fewer zones. Give each one a reason.",
+              "The Support & Resistance tile should lead with the configured problem hook");
             await firstMicroCourse.focus();
             await cataloguePage.keyboard.press("Enter");
             assert.equal(await cataloguePage.locator("#cc-course-modal").getAttribute("aria-hidden"), "false",
               "Keyboard activation should open the micro-course preview dialog");
+            assert.equal(await cataloguePage.locator("#cc-modal-title").innerText(), "Support & Resistance");
+            assert.equal(await cataloguePage.locator("#cc-course-modal .cc-modal-presentation h3").innerText(),
+              "Mark fewer zones. Give each one a reason.",
+              "The modal should repeat the problem hook in the current catalogue visual language");
+            assert.ok((await cataloguePage.locator("#cc-course-modal .cc-modal-presentation-problem").innerText()).includes("possible level around every swing"),
+              "The modal should explain which trader problem the course is for");
+            assert.ok((await cataloguePage.locator("#cc-course-modal .cc-modal-presentation-why").innerText()).includes("decision areas"),
+              "The modal should explain what distinguishes this course");
             assert.equal(await cataloguePage.evaluate(() => document.activeElement.classList.contains("cc-modal-close")), true,
               "Opening the course dialog should move focus to its close control");
             const outlineToggles = cataloguePage.locator("#cc-outline .cc-outline-toggle");
@@ -464,7 +475,7 @@ jobs:
               firstMicroCourseId, "Closing the dialog should restore focus to the originating course card");
             console.log("MICROCOURSE_MODAL_PASS: keyboard open, focus, outline state, preview-only CTA and Escape close.");
 
-            // Member entry points must hand off to real Django/allauth routes, never collect credentials on the static site.
+            // Member entry points must hand off to real Django/allauth routes; the password form posts directly to Academy over HTTPS.
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
             await cataloguePage.goto(server + "/member-access.html", { waitUntil: "networkidle" });
             assert.equal(await cataloguePage.evaluate(() => getComputedStyle(document.documentElement).colorScheme), "light",
