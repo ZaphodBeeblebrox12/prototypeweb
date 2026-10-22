@@ -1,6 +1,8 @@
 """Normalize editable marketing fields for the public micro-course catalogue."""
 from __future__ import annotations
+
 import re
+
 
 def _text(value, limit):
     return " ".join(str(value or "").split())[:limit]

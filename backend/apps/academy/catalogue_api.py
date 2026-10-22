@@ -4,12 +4,12 @@ from django.urls import reverse
 from django.utils.cache import patch_vary_headers
 from django.views.decorators.http import require_GET
 
-from .course_card_utils import is_course_card_recommendable
 from .catalogue_presentation import (
     catalogue_presentation_api_fields,
     catalogue_presentation_from_payload,
     normalize_catalogue_presentation,
 )
+from .course_card_utils import is_course_card_recommendable
 from .models import Course, CourseImport
 
 

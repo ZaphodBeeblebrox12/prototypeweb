@@ -26,14 +26,14 @@ from django.utils.text import slugify
 from django.views.decorators.http import require_http_methods
 from PIL import Image, UnidentifiedImageError
 
-from .course_builder_lifecycle import mark_builder_draft_deleted
-from .course_card_utils import is_course_card_recommendable
 from .catalogue_presentation import (
     builder_fields_for_catalogue_presentation,
     catalogue_presentation_from_builder_state,
     catalogue_presentation_from_payload,
     default_presentation_for_course,
 )
+from .course_builder_lifecycle import mark_builder_draft_deleted
+from .course_card_utils import is_course_card_recommendable
 from .importing import validate_import_for_publish
 from .models import (
     Course,

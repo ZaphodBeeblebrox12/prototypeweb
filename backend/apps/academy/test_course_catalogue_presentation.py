@@ -1,8 +1,10 @@
 """Regression coverage for authored public catalogue presentation metadata."""
 import hashlib
+
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
+
 from .models import Course, CourseImport, CourseModule, Lesson
 
 
