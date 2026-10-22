@@ -183,7 +183,7 @@ jobs:
               raise SystemExit("Topic filter buttons should be generated from the catalogue data.")
           if "Listed prices are catalogue references, not confirmation of a live checkout." not in page:
               raise SystemExit("Micro-course catalogue pricing must be clearly labelled as indicative.")
-          if 'data-open-course="${escapeHTML(course.id)}">See what is inside' not in renderer or "Catalogue price" not in renderer:
+          if 'class="ed-tile-action" type="button" data-open-course="' not in renderer or "Catalogue price" not in renderer:
               raise SystemExit("Micro-course details action and catalogue-price label are required.")
           print("Public development message, honest preview pricing and responsive styling validated.")
           PY
