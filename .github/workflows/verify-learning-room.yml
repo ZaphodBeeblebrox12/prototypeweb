@@ -439,10 +439,11 @@ jobs:
             // Verify the Course tab and expandable micro-course outline before unrelated public journeys.
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
             await cataloguePage.goto(server + "/courses.html", { waitUntil: "networkidle" });
+            const firstMicroCourseCard = cataloguePage.locator('#cc-micro-grid article.ed-micro-tile:has([data-open-course="support-resistance"])');
             const firstMicroCourse = cataloguePage.locator('#cc-micro-grid [data-open-course="support-resistance"]');
             await firstMicroCourse.waitFor({ state: "visible" });
             const firstMicroCourseId = await firstMicroCourse.getAttribute("data-open-course");
-            assert.equal(await firstMicroCourse.locator(".cc-card-hook").innerText(), "Mark fewer zones. Give each one a reason.",
+            assert.equal(await firstMicroCourseCard.locator(".cc-card-hook").innerText(), "Mark fewer zones. Give each one a reason.",
               "The Support & Resistance tile should lead with the configured problem hook");
             await firstMicroCourse.focus();
             await cataloguePage.keyboard.press("Enter");
