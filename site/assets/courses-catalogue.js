@@ -91,27 +91,22 @@
   let microCourses = data.microCourses.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
 
   function renderMicroCard(course) {
-    const hook = course.hook || ''; const fallbackDescription = course.description || '';
+    const hook = course.hook || course.description || '';
     const problem = course.problem || '';
     const learningFocus = course.learningFocus || course.outcome || '';
-    const tags = Array.isArray(course.tags) ? course.tags.filter(tag => String(tag || '').trim()) : [];
     const whyThisOne = course.whyThisOne || '';
-    return `<button class="cc-micro-card" type="button" data-open-course="${escapeHTML(course.id)}" aria-label="Preview ${escapeHTML(course.title)}, ${escapeHTML(course.price || course.status)}">
-      <span class="cc-card-art">${chartArt(course.art)}</span>
-      <span class="cc-card-body">
-        <span class="cc-card-meta"><span>${escapeHTML(course.category)}</span><span class="cc-card-level">${escapeHTML(course.level)}</span></span>
-        ${course.status === 'coming-soon' ? '<span class="cc-course-status">Coming soon</span>' : (course.status === 'in-development' ? '<span class="cc-course-status">Course in development</span>' : '')}
-        <span class="cc-card-title-wrap"><span class="cc-card-title">${escapeHTML(course.title)}</span></span>
-        ${hook ? `<span class="cc-card-problem-label">The problem it helps with</span><span class="cc-card-hook">${escapeHTML(hook)}</span>` : (fallbackDescription ? `<span class="cc-card-description">${escapeHTML(fallbackDescription)}</span>` : '')}
-        ${problem ? `<span class="cc-card-problem">${escapeHTML(problem)}</span>` : ''}
-        ${learningFocus ? `<span class="cc-card-learning-focus">${escapeHTML(learningFocus)}</span>` : ''}
-        ${tags.length ? `<span class="cc-card-tags" aria-label="Course tags">${tags.map(tag => `<span class="cc-card-tag">${escapeHTML(tag)}</span>`).join('')}</span>` : ''}
-        ${whyThisOne ? `<span class="cc-card-why"><b>Why this one:</b> ${escapeHTML(whyThisOne)}</span>` : ''}
-        <span class="cc-card-bottom"><span class="cc-card-price">${escapeHTML(course.price || (course.status === 'coming-soon' ? 'Coming soon' : ''))}</span><span class="cc-card-action">${course.status === 'coming-soon' ? 'Coming soon' : (course.status === 'in-development' ? 'View outline' : "See what's inside")} <i aria-hidden="true">↗</i></span></span>
-      </span>
-    </button>`;
+    const serial = String(Math.max(1, Math.round((course.order || 10) / 10))).padStart(2, '0');
+    const status = course.status === 'coming-soon' ? '<span class="ed-course-status">Coming soon</span>' : '';
+    return '<article class="ed-micro-tile">' +
+      '<div class="ed-tile-art"><span class="ed-tile-serial">' + serial + ' <i>/</i> ' + escapeHTML(course.category || 'Focused study') + '</span>' + chartArt(course.art) + '<span class="ed-tile-art-caption">Illustrative chart study · not market data</span></div>' +
+      '<div class="ed-tile-body"><div class="ed-tile-meta"><span>' + escapeHTML(course.category || 'Focused study') + '</span><span>' + escapeHTML(course.level || 'Self-paced') + '</span></div>' +
+      '<h3 class="ed-tile-title">' + escapeHTML(course.title) + '</h3>' + status +
+      '<div class="ed-tile-problem-label">The problem it helps with</div><p class="ed-tile-hook">' + escapeHTML(hook) + '</p>' +
+      (problem ? '<p class="ed-tile-problem">' + escapeHTML(problem) + '</p>' : '') +
+      '<div class="ed-tile-focus"><span>What you will work on</span><p>' + escapeHTML(learningFocus) + '</p></div>' +
+      (whyThisOne ? '<p class="ed-tile-why"><b>Why this one</b><span>' + escapeHTML(whyThisOne) + '</span></p>' : '') +
+      '<div class="ed-tile-footer"><div class="ed-tile-price"><strong>' + escapeHTML(course.price || '') + '</strong><span>Catalogue price</span></div><button class="ed-tile-action" type="button" data-open-course="' + escapeHTML(course.id) + '">See what is inside <i aria-hidden="true">↗</i></button></div></div></article>';
   }
-
   function renderFilterButtons() {
     if (!filterHost) return;
     const categories = [...new Set(microCourses.map(course => course.category).filter(Boolean))]
@@ -126,37 +121,34 @@
   function renderMicroCourses() {
     if (!microGrid) return;
     const query = (searchInput?.value || '').trim().toLocaleLowerCase();
-    const shown = microCourses.filter(course => {
+    const publishedTiles = microCourses.filter(course => course.status !== 'in-development');
+    const shown = publishedTiles.filter(course => {
       const categoryMatches = activeFilter === 'all' || course.category === activeFilter;
-      const searchBlob = [course.title, course.category, course.level, course.status, course.description, course.outcome, course.complements, course.hook, course.problem, course.learningFocus, ...(Array.isArray(course.tags) ? course.tags : []), course.whyThisOne].join(' ').toLocaleLowerCase();
+      const searchBlob = [course.title, course.category, course.level, course.status, course.description, course.outcome, course.complements, course.hook, course.problem, course.learningFocus, course.whyThisOne].join(' ').toLocaleLowerCase();
       return categoryMatches && (!query || searchBlob.includes(query));
     });
     microGrid.innerHTML = shown.map(renderMicroCard).join('');
-    if (countLabel) countLabel.textContent = `${shown.length} focused course${shown.length === 1 ? '' : 's'}`;
+    if (countLabel) countLabel.textContent = shown.length + ' focused course' + (shown.length === 1 ? '' : 's');
     if (noResults) noResults.hidden = shown.length !== 0;
     microGrid.hidden = shown.length === 0;
     if (filterHost) {
       $$('.cc-filter-list button', filterHost).forEach(button => {
         const key = button.dataset.filter;
-        const filteredCount = key === 'all' ? microCourses.length : microCourses.filter(course => course.category === key).length;
+        const filteredCount = key === 'all' ? publishedTiles.length : publishedTiles.filter(course => course.category === key).length;
         let badge = $('[data-filter-count]', button);
-        if (key === 'all') {
-          const allCount = $('[data-count="all"]', button);
-          if (allCount) allCount.textContent = String(filteredCount);
-        } else if (filteredCount > 0) {
-          if (!badge) {
-            badge = document.createElement('span');
-            badge.dataset.filterCount = 'true';
-            button.appendChild(badge);
-          }
-          badge.textContent = String(filteredCount);
-        } else if (badge) badge.remove();
+        if (key === 'all') { const allCount = $('[data-count="all"]', button); if (allCount) allCount.textContent = String(filteredCount); }
+        else if (filteredCount > 0) { if (!badge) { badge = document.createElement('span'); badge.dataset.filterCount = 'true'; button.appendChild(badge); } badge.textContent = String(filteredCount); }
+        else if (badge) badge.remove();
         button.classList.toggle('is-active', key === activeFilter);
         button.setAttribute('aria-pressed', String(key === activeFilter));
       });
     }
+    if (developmentRail) {
+      const inDevelopment = microCourses.filter(course => course.status === 'in-development');
+      developmentRail.hidden = inDevelopment.length === 0;
+      developmentRail.innerHTML = inDevelopment.map(course => '<div class="ed-development-inner"><div><span class="eyebrow">In development · no enrolment yet</span><h3>' + escapeHTML(course.title) + '</h3><p>' + escapeHTML(course.description) + '</p></div><button type="button" class="ed-development-action" data-open-development-course="' + escapeHTML(course.id) + '">Preview course outline <span aria-hidden="true">↗</span></button></div>').join('');
+    }
   }
-
   function cataloguePresentationModalMarkup(course) {
     const tags = Array.isArray(course.tags) ? course.tags.filter(tag => String(tag || '').trim()) : [];
     if (!(course.problem || course.hook || course.learningFocus || course.whyThisOne || tags.length)) return '';
@@ -282,6 +274,13 @@
     const opener = event.target.closest('[data-open-course]');
     if (!opener) return;
     const course = microCourses.find(item => item.id === opener.dataset.openCourse);
+    if (course) openModal(course, opener);
+  });
+
+  developmentRail?.addEventListener('click', event => {
+    const opener = event.target.closest('[data-open-development-course]');
+    if (!opener) return;
+    const course = microCourses.find(item => item.id === opener.dataset.openDevelopmentCourse);
     if (course) openModal(course, opener);
   });
 
