@@ -436,6 +436,34 @@ jobs:
               "The public catalogue should explain that new courses will be added");
             console.log("EXPANDING_CATALOGUE_PASS: dynamic topics, hidden drafts, visible counts, preview state and mobile fit.");
 
+            // Verify the Course tab and expandable micro-course outline before unrelated public journeys.
+            await cataloguePage.setViewportSize({ width: 1280, height: 900 });
+            await cataloguePage.goto(server + "/courses.html", { waitUntil: "networkidle" });
+            const firstMicroCourse = cataloguePage.locator("#cc-micro-grid [data-open-course]").first();
+            const firstMicroCourseId = await firstMicroCourse.getAttribute("data-open-course");
+            await firstMicroCourse.focus();
+            await cataloguePage.keyboard.press("Enter");
+            assert.equal(await cataloguePage.locator("#cc-course-modal").getAttribute("aria-hidden"), "false",
+              "Keyboard activation should open the micro-course preview dialog");
+            assert.equal(await cataloguePage.evaluate(() => document.activeElement.classList.contains("cc-modal-close")), true,
+              "Opening the course dialog should move focus to its close control");
+            const outlineToggles = cataloguePage.locator("#cc-outline .cc-outline-toggle");
+            assert.ok(await outlineToggles.count() >= 2, "Micro-course preview should expose the expandable outline");
+            await outlineToggles.nth(1).click();
+            assert.equal(await outlineToggles.nth(0).getAttribute("aria-expanded"), "false",
+              "Opening another outline section should close the previous section");
+            assert.equal(await outlineToggles.nth(1).getAttribute("aria-expanded"), "true",
+              "Expanded outline state must be announced accessibly");
+            await cataloguePage.locator("[data-get-course]").click();
+            assert.ok((await cataloguePage.locator("#cc-toast").innerText()).includes("not connected to checkout yet"),
+              "Micro-course preview must not pretend checkout is active");
+            await cataloguePage.keyboard.press("Escape");
+            assert.equal(await cataloguePage.locator("#cc-course-modal").getAttribute("aria-hidden"), "true",
+              "Escape should close the micro-course preview dialog");
+            assert.equal(await cataloguePage.evaluate(() => document.activeElement?.dataset?.openCourse || ""),
+              firstMicroCourseId, "Closing the dialog should restore focus to the originating course card");
+            console.log("MICROCOURSE_MODAL_PASS: keyboard open, focus, outline state, preview-only CTA and Escape close.");
+
             // Member entry points must hand off to real Django/allauth routes, never collect credentials on the static site.
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
             await cataloguePage.goto(server + "/member-access.html", { waitUntil: "networkidle" });
@@ -584,32 +612,7 @@ jobs:
                 route + " overflows horizontally at desktop width: " + JSON.stringify(desktopLayout));
             }
             console.log("SITEWIDE_MOBILE_PASS: " + siteRoutes.length + " primary pages fit mobile and desktop viewports.");
-            await cataloguePage.setViewportSize({ width: 1280, height: 900 });
-            await cataloguePage.goto(server + "/courses.html", { waitUntil: "networkidle" });
-            const firstMicroCourse = cataloguePage.locator("#cc-micro-grid [data-open-course]").first();
-            const firstMicroCourseId = await firstMicroCourse.getAttribute("data-open-course");
-            await firstMicroCourse.focus();
-            await cataloguePage.keyboard.press("Enter");
-            assert.equal(await cataloguePage.locator("#cc-course-modal").getAttribute("aria-hidden"), "false",
-              "Keyboard activation should open the micro-course preview dialog");
-            assert.equal(await cataloguePage.evaluate(() => document.activeElement.classList.contains("cc-modal-close")), true,
-              "Opening the course dialog should move focus to its close control");
-            const outlineToggles = cataloguePage.locator("#cc-outline .cc-outline-toggle");
-            assert.ok(await outlineToggles.count() >= 2, "Micro-course preview should expose the expandable outline");
-            await outlineToggles.nth(1).click();
-            assert.equal(await outlineToggles.nth(0).getAttribute("aria-expanded"), "false",
-              "Opening another outline section should close the previous section");
-            assert.equal(await outlineToggles.nth(1).getAttribute("aria-expanded"), "true",
-              "Expanded outline state must be announced accessibly");
-            await cataloguePage.locator("[data-get-course]").click();
-            assert.ok((await cataloguePage.locator("#cc-toast").innerText()).includes("not connected to checkout yet"),
-              "Micro-course preview must not pretend checkout is active");
-            await cataloguePage.keyboard.press("Escape");
-            assert.equal(await cataloguePage.locator("#cc-course-modal").getAttribute("aria-hidden"), "true",
-              "Escape should close the micro-course preview dialog");
-            assert.equal(await cataloguePage.evaluate(() => document.activeElement?.dataset?.openCourse || ""),
-              firstMicroCourseId, "Closing the dialog should restore focus to the originating course card");
-            console.log("MICROCOURSE_MODAL_PASS: keyboard open, focus, outline state, preview-only CTA and Escape close.");
+
 
             assert.deepEqual(pageErrors, [], "Unexpected browser JavaScript errors");
             assert.deepEqual(consoleErrors, [], "Unexpected browser console errors: " + JSON.stringify(consoleErrors));
