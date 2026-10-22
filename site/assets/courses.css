@@ -610,3 +610,36 @@
  .courses-catalogue-page .ed-editorial-art{transform:none}
  .courses-catalogue-page .ed-chart-caption.scribble{right:6px;bottom:17px;max-width:145px}
 }
+
+
+/* Refinement pass: stronger V3 typography, de-duplicated course facts, and a distinct visual cue for each micro-course. */
+.courses-catalogue-page .ed-hero-copy h1{font-size:clamp(46px,6vw,80px);line-height:.9;letter-spacing:-.06em;margin-top:15px;margin-bottom:19px}
+.courses-catalogue-page .ed-hero-grid{grid-template-columns:minmax(0,1.03fr) minmax(300px,.97fr);gap:clamp(30px,4.6vw,64px)}
+.courses-catalogue-page .ed-editorial-art{max-width:660px;justify-self:end;width:100%}
+.courses-catalogue-page .ed-tile-art{background:var(--tile-panel,#e9eee2)}
+.courses-catalogue-page .ed-tile-serial{color:var(--tile-label,#46644a)}
+.courses-catalogue-page .ed-tile-serial i{color:var(--tile-accent,#bd684d)}
+.courses-catalogue-page .ed-tile-art-caption{color:var(--tile-label,#6b7868);font-weight:850;letter-spacing:.11em;font-size:8px}
+.courses-catalogue-page .ed-tile-problem-label{color:var(--tile-label,#3e6049);border-bottom:1px solid var(--tile-accent,#bd684d);padding-bottom:4px}
+.courses-catalogue-page .ed-tile-hook{color:var(--tile-hook,#31523e)}
+.courses-catalogue-page .ed-tile-why b{color:var(--tile-label,#3e6049)}
+.courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"]{--tile-panel:#e4ecdf;--tile-accent:#bd684d;--tile-label:#3e6049;--tile-hook:#31523e;border-top:3px solid #3e6049}
+.courses-catalogue-page .ed-micro-tile[data-course-id="bollinger-bands"]{--tile-panel:#f0ecdd;--tile-accent:#a7833e;--tile-label:#75602f;--tile-hook:#48563f}
+.courses-catalogue-page .ed-micro-tile[data-course-id="candlestick-patterns"]{--tile-panel:#f1e3da;--tile-accent:#b96549;--tile-label:#8c4b36;--tile-hook:#804631}
+.courses-catalogue-page .ed-micro-tile[data-course-id="risk-management-basics"]{--tile-panel:#e1eadd;--tile-accent:#55734e;--tile-label:#3e6049;--tile-hook:#31523e}
+.courses-catalogue-page .ed-micro-tile[data-course-id="moving-averages"]{--tile-panel:#f1efe2;--tile-accent:#b18a45;--tile-label:#716139;--tile-hook:#3d523f}
+.courses-catalogue-page .ed-micro-tile[data-course-id="options-basics"]{--tile-panel:#f1e7db;--tile-accent:#ad674b;--tile-label:#87553e;--tile-hook:#704a38}
+.courses-catalogue-page .ed-micro-tile[data-course-id="market-structure"]{--tile-panel:#e4ebe1;--tile-accent:#66816a;--tile-label:#3e6049;--tile-hook:#31523e}
+.courses-catalogue-page .ed-micro-tile[data-course-id="understanding-adx"]{--tile-panel:#eeecdf;--tile-accent:#a98942;--tile-label:#776330;--tile-hook:#48563f}
+.courses-catalogue-page .ed-tile-problem-label{font-size:7.5px;letter-spacing:.1em;margin-bottom:6px}
+.courses-catalogue-page .ed-tile-hook{margin-bottom:8px}
+.courses-catalogue-page .ed-tile-problem{margin-bottom:11px}
+.courses-catalogue-page .ed-tile-focus{padding-top:10px}
+.courses-catalogue-page .ed-tile-focus p{line-height:1.62}
+.courses-catalogue-page .ed-tile-footer{padding-top:13px}
+.courses-catalogue-page .ed-tile-price strong{font-size:28px}
+.courses-catalogue-page .ed-results-line{padding-bottom:2px}
+@media(max-width:760px){
+ .courses-catalogue-page .ed-hero-grid{grid-template-columns:1fr;gap:27px}
+ .courses-catalogue-page .ed-hero-copy h1{font-size:clamp(43px,10vw,61px);line-height:.93}
+}
