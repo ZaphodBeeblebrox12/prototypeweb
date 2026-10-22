@@ -131,13 +131,14 @@
   }
   function renderFilterButtons() {
     if (!filterHost) return;
-    const categories = [...new Set(microCourses.map(course => course.category).filter(Boolean))]
+    const availableCourses = microCourses.filter(course => course.status !== 'in-development');
+    const categories = [...new Set(availableCourses.map(course => course.category).filter(Boolean))]
       .sort((a, b) => a.localeCompare(b));
     const categoryButtons = categories.map(category => {
-      const count = microCourses.filter(course => course.category === category).length;
+      const count = availableCourses.filter(course => course.category === category).length;
       return `<button type="button" data-filter="${escapeHTML(category)}" aria-pressed="false">${escapeHTML(category)} <span data-filter-count="true">${count}</span></button>`;
     }).join('');
-    filterHost.innerHTML = `<button type="button" class="is-active" data-filter="all" aria-pressed="true">All topics <span data-count="all">${microCourses.length}</span></button>${categoryButtons}`;
+    filterHost.innerHTML = `<button type="button" class="is-active" data-filter="all" aria-pressed="true">All topics <span data-count="all">${availableCourses.length}</span></button>${categoryButtons}`;
   }
 
   function renderMicroCourses() {

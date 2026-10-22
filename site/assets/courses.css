@@ -400,9 +400,9 @@
 .courses-catalogue-page .ed-offer-facts{display:flex;flex-wrap:wrap;gap:6px;margin:3px 0 15px}
 .courses-catalogue-page .ed-offer-facts span{font-size:9px;line-height:1.3;padding:7px 8px;background:#eff2e9;border:1px solid #dfe7d7;color:#3e6049}
 .courses-catalogue-page .ed-offer-inner--construct .ed-offer-facts span{background:#294735;border-color:#627d66;color:#f2f1e4}
-.courses-catalogue-page .ed-offer-outcomes{list-style:none;padding:0;margin:0 0 17px;border-top:1px solid #e0e1d5}
-.courses-catalogue-page .ed-offer-outcomes li{display:flex;gap:9px;padding:8px 0;border-bottom:1px solid #e0e1d5;color:#5d685b;font-size:10px;line-height:1.55}
-.courses-catalogue-page .ed-offer-outcomes li>span{flex:none;color:#bd684d;font-size:8px;font-weight:850}
+.courses-catalogue-page .ed-offer-outcomes{list-style:none;padding:0;margin:0 0 17px;border-top:1px solid #d1c9b8}
+.courses-catalogue-page .ed-offer-outcomes li{display:flex;gap:9px;padding:8px 0;border-bottom:1px solid #d1c9b8;color:#4f5f50;font-size:11px;line-height:1.6}
+.courses-catalogue-page .ed-offer-outcomes li>span{flex:none;min-width:20px;padding-top:1px;color:#9f4f35;font-size:9px;line-height:1.2;font-weight:850}
 .courses-catalogue-page .ed-offer-inner--construct .ed-offer-outcomes{border-color:#617c65}
 .courses-catalogue-page .ed-offer-inner--construct .ed-offer-outcomes li{border-color:#617c65;color:#e0e7dc}
 .courses-catalogue-page .ed-offer-inner--construct .ed-offer-outcomes li>span{color:#f0d48d}
@@ -574,9 +574,9 @@
 .courses-catalogue-page .ed-offer-inner--construct .ed-offer-description{font-size:11px;line-height:1.7;color:#606a5d;margin-bottom:12px}
 .courses-catalogue-page .ed-offer-inner--construct .ed-offer-facts{margin:0 0 11px;gap:5px}
 .courses-catalogue-page .ed-offer-inner--construct .ed-offer-facts span{font-size:8px;padding:5px 6px}
-.courses-catalogue-page .ed-offer-inner--construct .ed-offer-outcomes{margin:0 0 12px}
-.courses-catalogue-page .ed-offer-inner--construct .ed-offer-outcomes li{font-size:10px;line-height:1.55;padding:7px 0;color:#4f5f50}
-.courses-catalogue-page .ed-offer-inner--construct .ed-offer-outcomes li>span{color:#b45b3d}
+.courses-catalogue-page .ed-offer-inner--construct .ed-offer-outcomes{margin:0 0 12px;border-color:#d1c9b8}
+.courses-catalogue-page .ed-offer-inner--construct .ed-offer-outcomes li{font-size:12px;line-height:1.55;padding:8px 0;border-bottom-color:#d1c9b8;color:#465647}
+.courses-catalogue-page .ed-offer-inner--construct .ed-offer-outcomes li>span{color:#9f4f35;font-size:10px}
 .courses-catalogue-page .ed-offer-inner--construct .ed-offer-bottom{gap:9px;padding-top:12px}
 .courses-catalogue-page .ed-offer-inner--construct .ed-offer-price strong{font-size:25px;color:#3e6049}
 .courses-catalogue-page .ed-offer-inner--construct .ed-offer-price span{font-size:8px;color:#697467}
