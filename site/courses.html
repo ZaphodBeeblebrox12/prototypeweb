@@ -105,7 +105,19 @@
         </div>
         <div class="ed-micro-index" aria-hidden="true"><b>08</b><span>focused studies</span></div>
       </div>
+      <div class="ed-catalogue-controls">
+        <label class="cc-search ed-search" for="cc-course-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+          <input id="cc-course-search" type="search" placeholder="Find a topic, e.g. Bollinger Bands" autocomplete="off">
+        </label>
+        <div class="cc-filter-list ed-filter-list" id="cc-course-filters" aria-label="Filter courses by topic">
+          <button type="button" class="is-active" data-filter="all" aria-pressed="true">All topics <span data-count="all">8</span></button>
+        </div>
+      </div>
+      <div class="ed-results-line"><span id="cc-result-count" aria-live="polite">8 focused courses</span><span>Focused learning, not signals · Listed prices are catalogue references</span></div>
       <div class="cc-micro-grid micro-tile-grid" id="cc-micro-grid"><noscript><p>Please enable JavaScript to view the micro-course catalogue.</p></noscript></div>
+      <div class="cc-no-results ed-no-results" id="cc-no-results" hidden><span aria-hidden="true">⌕</span><h3>No course matches that search yet.</h3><p>Try another keyword or choose a different topic.</p><button type="button" class="cc-clear-search">Clear search</button></div>
+      <p class="cc-development-note ed-development-note">The focused catalogue will continue to grow as new courses are ready for learners.</p>
       <div class="ed-development-rail" id="cc-development-rail" hidden></div>
       <p class="ed-catalogue-note">Listed prices are catalogue references, not confirmation of a live checkout. Course details open before any purchase or enrolment step.</p>
     </div>
