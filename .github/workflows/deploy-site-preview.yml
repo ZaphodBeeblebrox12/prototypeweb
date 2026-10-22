@@ -181,8 +181,8 @@ jobs:
               raise SystemExit("The separate in-development rail needs styling.")
           if 'data-filter="Chart reading"' in page or 'data-filter="Indicators"' in page:
               raise SystemExit("Topic filter buttons should be generated from the catalogue data.")
-          if "Listed prices are catalogue references, not confirmation of a live checkout." not in page:
-              raise SystemExit("Micro-course catalogue pricing must be clearly labelled as indicative.")
+          if "Listed prices are catalogue references; checkout is not connected on this page." not in page:
+              raise SystemExit("Micro-course prices must be clearly described as catalogue references, not a connected checkout.")
           if 'class="ed-tile-action" type="button" data-open-course="' not in renderer or "FIELD STUDY" not in renderer or "The trader’s question" not in renderer or "Catalogue price" in renderer:
               raise SystemExit("Micro-course action and distinct editorial tile labels are required; repeated price labels should stay out of the cards.")
           print("Public development message, honest preview pricing and responsive styling validated.")
