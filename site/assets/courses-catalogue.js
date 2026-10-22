@@ -38,24 +38,33 @@
 
   const renderEditorialProgramme = (course, variant) => {
     const isConstruct = variant === 'construct';
-    const pathSteps = ['Market language and chart reading', 'Context, planning and risk', 'Review the decision, not just the result'];
-    const steps = isConstruct ? course.outcomes.slice(0, 3) : pathSteps;
+    const outcomes = (course.outcomes || []).slice(0, isConstruct ? 3 : 3).map((item, index) => '<li><span>0' + (index + 1) + '</span>' + escapeHTML(item) + '</li>').join('');
     const facts = (course.facts || []).map(fact => '<span>' + escapeHTML(fact) + '</span>').join('');
-    const outcomes = steps.map((item, index) => '<li><span>0' + (index + 1) + '</span>' + escapeHTML(item) + '</li>').join('');
-    const heading = isConstruct ? escapeHTML(course.title) : escapeHTML(course.title);
-    const subtitle = course.subtitle ? '<p class="ed-offer-subtitle">' + escapeHTML(course.subtitle) + '</p>' : '';
-    const note = isConstruct ? '<p class="ed-offer-note">' + escapeHTML(course.community) + '</p>' : '<div class="ed-foundation-route"><span class="eyebrow">The foundation</span><p>Market language <i>→</i> chart reading <i>→</i> risk <i>→</i> planning <i>→</i> review</p><small>Four connected stages · 30-day guided sequence</small></div>';
-    return '<div class="ed-offer-inner ed-offer-inner--' + variant + '">' +
-      '<div class="ed-offer-topline"><span>' + (isConstruct ? 'Flagship programme · guided process' : 'Flagship programme · start here') + '</span><span class="ed-offer-number">0' + (isConstruct ? '2' : '1') + ' / ' + (isConstruct ? 'CONSTRUCT' : 'FOUNDATIONS') + '</span></div>' +
-      '<h2 class="ed-offer-title">' + heading + '</h2>' + subtitle +
+    const price = '<div class="ed-offer-price"><strong>' + escapeHTML(course.price) + '</strong><span>' + escapeHTML(course.priceNote) + '</span></div>';
+    const action = '<a class="ed-action ' + (isConstruct ? 'ed-action-gold' : 'ed-action-primary') + '" href="' + escapeHTML(course.href) + '">' + escapeHTML(course.cta) + ' <span aria-hidden="true">↗</span></a>';
+    if (!isConstruct) {
+      return '<div class="ed-offer-inner ed-offer-inner--path">' +
+        '<div class="ed-primary-main"><div class="ed-offer-topline"><span>Flagship programme · start here</span><span class="ed-offer-number">01 / FOUNDATIONS</span></div>' +
+        '<h2 class="ed-offer-title">' + escapeHTML(course.title) + '</h2>' +
+        '<p class="ed-offer-promise">' + escapeHTML(course.promise) + '</p>' +
+        '<p class="ed-offer-description">' + escapeHTML(course.description) + '</p>' +
+        '<div class="ed-offer-facts">' + facts + '</div>' +
+        '<ul class="ed-offer-outcomes">' + outcomes + '</ul>' +
+        '<div class="ed-offer-bottom">' + price + action + '</div></div>' +
+        '<aside class="offer-side"><div><span class="eyebrow">The foundation</span><p class="ed-side-route">Market language <i>→</i> chart reading <i>→</i> risk <i>→</i> planning <i>→</i> review</p></div><div class="ed-side-note">Four connected stages<br>30-day guided sequence</div></aside>' +
+      '</div>';
+    }
+    return '<div class="ed-offer-inner ed-offer-inner--construct">' +
+      '<div class="ed-offer-topline"><span>Flagship programme · guided process</span><span class="ed-offer-number">02 / CONSTRUCT</span></div>' +
+      '<h2 class="ed-offer-title">CONSTRUCT</h2><p class="ed-offer-subtitle">' + escapeHTML(course.subtitle || 'Trade Construction & Management') + '</p>' +
       '<p class="ed-offer-promise">' + escapeHTML(course.promise) + '</p>' +
       '<p class="ed-offer-description">' + escapeHTML(course.description) + '</p>' +
       '<div class="ed-offer-facts">' + facts + '</div>' +
       '<ul class="ed-offer-outcomes">' + outcomes + '</ul>' +
-      '<div class="ed-offer-bottom"><div class="ed-offer-price"><strong>' + escapeHTML(course.price) + '</strong><span>' + escapeHTML(course.priceNote) + '</span></div><a class="ed-action ' + (isConstruct ? 'ed-action-gold' : 'ed-action-primary') + '" href="' + escapeHTML(course.href) + '">' + escapeHTML(course.cta) + ' <span aria-hidden="true">↗</span></a></div>' + note +
+      '<div class="ed-offer-bottom">' + price + action + '</div>' +
+      '<p class="ed-offer-note">' + escapeHTML(course.community) + '</p>' +
     '</div>';
   };
-
   const microGrid = $('#cc-micro-grid');
   const developmentRail = $('#cc-development-rail');
   const orderedProgrammes = data.programmes.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
@@ -70,10 +79,11 @@
   const supportHost = $('#cc-supporting-programme');
   if (supportHost && supportingProgrammes.length) {
     supportHost.innerHTML = supportingProgrammes.map(support => '<article class="ed-live-card" id="' + escapeHTML(support.id) + '">' +
-      '<div class="ed-live-stamp" aria-hidden="true"><svg viewBox="0 0 64 64"><rect x="8" y="10" width="48" height="34" rx="5"/><path d="M22 54h20M32 44v10M17 34l9-10 8 5 12-13"/><path d="M42 16h4v4"/></svg></div>' +
+      '<div class="ed-live-stamp">LIVE /<br>CLASSROOM</div>' +
       '<div class="ed-live-copy"><span class="eyebrow">A separate delivery format</span><h2>' + escapeHTML(support.title) + '</h2><p>' + escapeHTML(support.description) + '</p><div class="ed-live-facts">' + support.facts.map(fact => '<span>' + escapeHTML(fact) + '</span>').join('') + '</div></div>' +
       '<a class="ed-action ed-action-outline" href="' + escapeHTML(support.href) + '">' + escapeHTML(support.cta) + ' <span aria-hidden="true">↗</span></a></article>').join('');
   }
+
   const modal = $('#cc-course-modal');
   const modalDialog = $('.cc-modal-dialog', modal);
   const modalScroll = $('#cc-modal-scroll');
