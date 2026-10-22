@@ -1314,10 +1314,18 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   }
   function lessonBodyForAudience(lesson, audience) {
     if (!lesson) return '';
-    const key = lessonBodyAudienceKey(audience === undefined ? selectedLessonBodyAudience() : audience);
+    const selected = String(audience === undefined ? selectedLessonBodyAudience() : audience).toUpperCase();
+    const key = lessonBodyAudienceKey(selected);
     const variants = lesson.regionalContent && typeof lesson.regionalContent === 'object' ? lesson.regionalContent : {};
-    return key && Object.prototype.hasOwnProperty.call(variants, key)
-      ? String(variants[key] || '') : String(lesson.content || '');
+    if (key && Object.prototype.hasOwnProperty.call(variants, key)) return String(variants[key] || '');
+    if (/^[A-Z]{2}$/.test(selected)) {
+      const inheritedRegion = regionalCountryRegionMap[selected];
+      const regionKey = inheritedRegion ? 'region:' + inheritedRegion : '';
+      if (regionKey && Object.prototype.hasOwnProperty.call(variants, regionKey)) {
+        return String(variants[regionKey] || '');
+      }
+    }
+    return String(lesson.content || '');
   }
   function setLessonBodyForAudience(lesson, content, audience) {
     if (!lesson) return;
@@ -1359,9 +1367,13 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       '<option value="REGION:' + esc(code) + '"' + (audience === 'REGION:' + code ? ' selected' : '') + '>' +
       esc(regionNames[code] || code) + '</option>'
     ).join('');
+    const inheritedRegion = /^[A-Z]{2}$/.test(audience) ? regionalCountryRegionMap[audience] : '';
+    const hasRegionalFallback = Boolean(key && !hasOverride && inheritedRegion &&
+      Object.prototype.hasOwnProperty.call(variants, 'region:' + inheritedRegion));
     const status = audience === 'GLOBAL' ? 'Editing the default lesson for all audiences.'
       : (hasOverride ? 'Custom version saved in this draft. Other audiences are unchanged.'
-        : 'This audience currently inherits the main lesson. Your first edit creates a separate version.');
+        : 'This audience inherits ' + (hasRegionalFallback ? 'its regional version' : 'the main lesson') +
+          ' until you customise it.');
     const actions = key ? (hasOverride
       ? '<button class="btn small" type="button" data-action="reset-regional-lesson-content">Reset to main content</button>'
       : '<button class="btn small" type="button" data-action="start-regional-lesson-content">Start a custom version</button>') : '';
@@ -1369,7 +1381,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       '<div class="lesson-body-audience-top"><div class="field"><label for="lessonContentAudienceSelect">Edit lesson for</label>' +
       '<select class="select" id="lessonContentAudienceSelect"><option value="GLOBAL"' + (audience === 'GLOBAL' ? ' selected' : '') + '>Main content · all audiences</option>' +
       '<optgroup label="Countries">' + countryOptions + '</optgroup><optgroup label="Regions">' + regionOptions + '</optgroup></select></div>' +
-      '<div class="lesson-body-audience-status"><strong>' + (key ? (hasOverride ? 'Custom version' : 'Inherits main') : 'Main version') +
+      '<div class="lesson-body-audience-status"><strong>' + (key ? (hasOverride ? 'Custom version' : (hasRegionalFallback ? 'Inherits regional version' : 'Inherits main')) : 'Main version') +
       '</strong><p data-lesson-audience-status-text>' + esc(status) + '</p>' + actions + '</div></div>' +
       '<p class="help">Country or regional versions can change the full lesson—text, headings, tables and managed image placements. Other audiences remain unchanged.</p></section>';
   }
@@ -3163,7 +3175,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       }
       if (action === 'start-regional-lesson-content') {
         if (!Object.prototype.hasOwnProperty.call(lesson.regionalContent, key)) {
-          lesson.regionalContent[key] = String(lesson.content || '');
+          lesson.regionalContent[key] = lessonBodyForAudience(lesson, audience);
         }
         toast('Custom lesson version started. Edit the content below; the main version is unchanged.');
       } else {
