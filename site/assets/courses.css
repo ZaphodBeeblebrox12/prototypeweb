@@ -677,3 +677,20 @@
  .courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-title{font-size:22px}
  .courses-catalogue-page .ed-micro-tile[data-course-id="support-resistance"] .ed-tile-hook{font-size:24px}
 }
+
+
+/* Courses chart Post-it only: natural folded paper and responsive handwritten quotation. */
+.courses-catalogue-page .ed-natural-sticky{position:absolute;top:65px;right:-14px;z-index:4;box-sizing:border-box;width:clamp(160px,36%,195px);aspect-ratio:1/1;container-type:inline-size;transform:rotate(-3deg);transform-origin:center center}
+.courses-catalogue-page .ed-natural-sticky-paper{display:block;width:100%;height:auto;object-fit:contain;filter:drop-shadow(0 7px 6px #302c1c14)}
+.courses-catalogue-page .ed-natural-sticky-quote{position:absolute;left:10.5%;top:15.8%;width:82%;font-family:'Caveat','Purisa','Segoe Print','Comic Neue','Comic Sans MS',cursive;font-style:normal;font-weight:600;font-size:clamp(15px,6.1cqw,18px);line-height:1.08;letter-spacing:0;color:#31523e;transform:rotate(-.6deg);transform-origin:top left;white-space:normal;text-shadow:0 0 .15px #31523e}
+.courses-catalogue-page .ed-natural-sticky-quote span{display:block;width:100%;white-space:normal}
+.courses-catalogue-page .ed-natural-sticky-quote span:nth-child(2){width:calc(100% - 4px);margin-left:4px}
+.courses-catalogue-page .ed-natural-sticky-quote span:nth-child(3){width:calc(100% - 1px);margin-left:1px}
+@media(max-width:760px){
+ .courses-catalogue-page .ed-natural-sticky{right:6px;top:67px;width:clamp(145px,42%,170px)}
+ .courses-catalogue-page .ed-natural-sticky-quote{left:10.8%;top:20%;width:78%;font-size:clamp(15px,7cqw,18px)}
+}
+@media(max-width:380px){
+ .courses-catalogue-page .ed-natural-sticky{right:3px;top:65px;width:clamp(140px,46%,158px)}
+ .courses-catalogue-page .ed-natural-sticky-quote{top:19.5%;font-size:clamp(14px,7cqw,16px)}
+}
