@@ -136,6 +136,12 @@
 .courses-catalogue-page .cc-card-tag{display:inline-flex;align-items:center;padding:4px 6px;border:1px solid #d6ddcf;border-radius:2px;background:#f5f6ef;color:#586b55;font-size:8px;line-height:1.3}
 .courses-catalogue-page .cc-card-why{display:block;margin-top:auto;padding-top:10px;border-top:1px solid #ece5d8;color:#626d60;font-size:10px;line-height:1.65}
 .courses-catalogue-page .cc-card-why b{color:#3f6047;font-weight:850}
+.courses-catalogue-page .cc-modal-presentation{margin:14px 0 16px;padding:15px 16px;border:1px solid #ded8ca;border-left:3px solid var(--tomato);border-radius:3px 12px 12px 12px;background:#f6f1e7}
+.courses-catalogue-page .cc-modal-presentation-label{display:inline-block;color:#986044;font-size:8px;font-weight:850;letter-spacing:.1em}
+.courses-catalogue-page .cc-modal-presentation h3{margin:6px 0 8px;color:var(--ink);font:400 25px/1.1 var(--serif)}
+.courses-catalogue-page .cc-modal-presentation-problem,.courses-catalogue-page .cc-modal-presentation-focus,.courses-catalogue-page .cc-modal-presentation-why{margin:7px 0;color:#586958;font-size:11px;line-height:1.7}
+.courses-catalogue-page .cc-modal-presentation-why{padding-top:8px;border-top:1px solid #e2dbce}
+.courses-catalogue-page .cc-modal-presentation b{color:#3f6047}
 .courses-catalogue-page .cc-card-fit{display:flex;align-items:flex-start;gap:6px;margin-top:auto;padding-top:10px;border-top:1px solid #ece5d8;color:#556753;font-size:9px;line-height:1.5}
 .courses-catalogue-page .cc-card-fit span{color:#ae6447;font-size:12px;line-height:1.1}
 .courses-catalogue-page .cc-card-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:13px}

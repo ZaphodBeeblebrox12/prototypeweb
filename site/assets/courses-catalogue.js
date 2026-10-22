@@ -155,6 +155,18 @@
     }
   }
 
+  function cataloguePresentationModalMarkup(course) {
+    const tags = Array.isArray(course.tags) ? course.tags.filter(tag => String(tag || '').trim()) : [];
+    if (!(course.problem || course.hook || course.learningFocus || course.whyThisOne || tags.length)) return '';
+    let html = '<section class="cc-modal-presentation"><span class="cc-modal-presentation-label">THE PROBLEM IT HELPS WITH</span>';
+    if (course.hook) html += '<h3>' + escapeHTML(course.hook) + '</h3>';
+    if (course.problem) html += '<p class="cc-modal-presentation-problem">' + escapeHTML(course.problem) + '</p>';
+    if (course.learningFocus) html += '<p class="cc-modal-presentation-focus"><b>Learning focus:</b> ' + escapeHTML(course.learningFocus) + '</p>';
+    if (tags.length) html += '<div class="cc-card-tags">' + tags.map(tag => '<span class="cc-card-tag">' + escapeHTML(tag) + '</span>').join('') + '</div>';
+    if (course.whyThisOne) html += '<p class="cc-modal-presentation-why"><b>Why this one:</b> ' + escapeHTML(course.whyThisOne) + '</p>';
+    return html + '</section>';
+  }
+
   function renderModal(course) {
     const lessonCount = course.modules.reduce((sum, item) => sum + (parseInt(item.count, 10) || 0), 0);
     modalScroll.innerHTML = `<div class="cc-modal-top">
@@ -162,6 +174,7 @@
       <div class="cc-modal-art">${chartArt(course.art)}</div>
     </div>
     <div class="cc-modal-outcome"><span aria-hidden="true">✳</span><span><b>What you'll take away</b><br>${escapeHTML(course.outcome)}</span></div>
+    ${cataloguePresentationModalMarkup(course)}
     <div class="cc-outline-header"><h3>Inside the course</h3><span>Open a section to preview it</span></div>
     <div class="cc-outline" id="cc-outline">${course.modules.map((module, index) => `<section class="cc-outline-item ${index === 0 ? 'is-open' : ''}"><button class="cc-outline-toggle" type="button" aria-expanded="${index === 0 ? 'true' : 'false'}" aria-controls="cc-outline-preview-${escapeHTML(course.id)}-${index}"><span class="cc-outline-num">${String(index + 1).padStart(2, '0')}</span><span class="cc-outline-title">${escapeHTML(module.title)}</span><span class="cc-outline-count">${escapeHTML(module.count)}</span><span class="cc-outline-sign" aria-hidden="true">+</span></button><div class="cc-outline-preview" id="cc-outline-preview-${escapeHTML(course.id)}-${index}" ${index === 0 ? '' : 'hidden'}><p>${escapeHTML(module.preview)}</p><ul>${module.points.map(point => `<li>${escapeHTML(point)}</li>`).join('')}</ul></div></section>`).join('')}</div>
     <p class="cc-modal-fit"><b>Where it fits:</b> ${escapeHTML(course.complements)} This is designed as a standalone micro-course; community access is not included.</p>`;
