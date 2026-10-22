@@ -444,6 +444,18 @@ main{overflow:clip}.section{padding:73px 0}.section-heading{display:flex;align-i
 .tt-community-content__heading{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.7fr);gap:30px;align-items:end;margin:0 0 23px}
 .tt-community-content__heading h2{font:400 clamp(35px,4.1vw,48px)/1.02 var(--serif);letter-spacing:-.045em;margin:12px 0 0;max-width:630px;color:var(--ink)}
 .tt-community-content__heading>p{font-size:12px;line-height:1.8;color:#657064;margin:0 0 3px;max-width:450px}
+.tt-community-content__heading>div{min-width:0}
+.tt-community-content__heading .overview-note{display:flex;align-items:center;gap:9px;margin-top:17px;color:#638061;font:800 10px var(--mono);letter-spacing:.05em}
+.tt-community-content__heading .overview-note svg{width:19px;height:19px;flex:0 0 auto}
+.botanical-pullquote{position:relative;isolation:isolate;overflow:hidden;width:100%;max-width:520px;justify-self:end;text-align:center;padding:25px 29px 24px;background:#f5f6ee;color:#253b2f;border:1px solid #e2e8dc;border-radius:18px}
+.botanical-pullquote:before,.botanical-pullquote:after{content:"";position:absolute;z-index:-1;width:110px;height:110px;opacity:.58;pointer-events:none;background:radial-gradient(ellipse at 35% 35%,#d7e3d1 0 16%,transparent 17%),radial-gradient(ellipse at 70% 55%,#d7e3d1 0 15%,transparent 16%),linear-gradient(65deg,transparent 49%,#c6d8bf 50% 51%,transparent 52%);transform:rotate(-20deg)}
+.botanical-pullquote:before{top:-28px;left:-24px}
+.botanical-pullquote:after{right:-24px;bottom:-28px;transform:rotate(160deg)}
+.botanical-quote-mark{position:relative;z-index:1;font:68px/.7 Georgia,"Times New Roman",serif;color:#c8a65d;margin:0 auto 13px}
+.botanical-pullquote h3{position:relative;z-index:1;font:400 clamp(24px,2.45vw,30px)/1.15 var(--serif);letter-spacing:-.025em;max-width:445px;margin:0 auto;color:#253b2f}
+.botanical-fine-line{position:relative;z-index:1;width:45px;height:1px;background:#c8a65d;margin:17px auto 15px}
+.botanical-pullquote p{position:relative;z-index:1;max-width:450px;margin:0 auto;color:#5e6d61;font-size:12px;line-height:1.75}
+
 .tt-benefit-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
 .tt-benefit-card{position:relative;isolation:isolate;overflow:hidden;min-height:218px;padding:22px 21px 21px;background:#fffdf8;border:1px solid #e1e5dc;border-radius:17px;box-shadow:0 14px 32px #293e2f0e}
 .tt-benefit-card:after{content:"";position:absolute;z-index:-1;width:100px;height:100px;right:-41px;bottom:-42px;border:1px solid #dfe9d8;border-radius:50%;box-shadow:0 0 0 13px #f8faf5,0 0 0 14px #e7eee2}
@@ -594,8 +606,17 @@ main{overflow:clip}.section{padding:73px 0}.section-heading{display:flex;align-i
 <section class="tt-community-content" id="community-preview" aria-labelledby="tt-community-benefits-title">
   <div class="wrap">
     <header class="tt-community-content__heading">
-      <div><div class="eyebrow">A community with a purpose</div><h2 id="tt-community-benefits-title">Don't just collect ideas. Build a process.</h2></div>
-      <p>A course can explain the idea. In the community, you can ask a question, hear how someone else reads the same chart, and talk through what you might have missed. The trade is still yours to decide on; you just don't have to work through every question alone.</p>
+      <div>
+        <div class="eyebrow">A community with a purpose</div>
+        <h2 id="tt-community-benefits-title">Don't just collect ideas. Build a process.</h2>
+        <div class="overview-note"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s-8-4.5-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 6.5-8 11-8 11Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 13h2l1.2-3 2 5 1.2-2H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Built around learning, not signals</div>
+      </div>
+      <aside class="botanical-pullquote" aria-label="A thought worth sharing">
+        <div class="botanical-quote-mark" aria-hidden="true">“</div>
+        <h3>A chart can look obvious, until someone asks you one good question.</h3>
+        <div class="botanical-fine-line" aria-hidden="true"></div>
+        <p>Sometimes another trader spots the assumption you missed or asks something that changes how you see the setup. That’s what makes a good discussion valuable.</p>
+      </aside>
     </header>
     <div class="tt-benefit-grid">
       <article class="tt-benefit-card"><div class="tt-benefit-icon"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19V5m0 14h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="m7 15 4-4 3 2 5-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="tt-benefit-kicker">Context · Evidence · Risk</div><h3>Pressure-test your thesis.</h3><p>See what you may be assuming, what evidence supports the idea, and what would prove it wrong. Not to borrow someone else's answer—to strengthen your own reasoning.</p></article>
