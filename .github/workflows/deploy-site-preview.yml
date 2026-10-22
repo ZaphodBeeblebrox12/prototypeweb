@@ -154,7 +154,7 @@ jobs:
             "const isCatalogueVisible = item => item && item.catalogueVisibility !== 'hidden'",
             'data.programmes.filter(isCatalogueVisible)',
             '[...(data.supportingProgrammes || [])].filter(isCatalogueVisible)',
-            'const microCourses = data.microCourses.filter(isCatalogueVisible)',
+            'data.microCourses.filter(isCatalogueVisible)',
             'function renderFilterButtons()',
             'const categories = [...new Set(microCourses.map(course => course.category).filter(Boolean))]',
             'microCourses.filter(course => course.category === key).length',
