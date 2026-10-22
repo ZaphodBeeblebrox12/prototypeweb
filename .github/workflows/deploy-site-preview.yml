@@ -158,7 +158,7 @@ jobs:
             'data.microCourses.filter(isCatalogueVisible)',
             'function renderFilterButtons()',
             'const categories = [...new Set(microCourses.map(course => course.category).filter(Boolean))]',
-            'microCourses.filter(course => course.category === key).length',
+            'publishedTiles.filter(course => course.category === key).length',
             'shown.length'
           ];
           for (const fragment of required) {
@@ -175,16 +175,16 @@ jobs:
           page = Path("site/courses.html").read_text(encoding="utf-8")
           styles = Path("site/assets/courses.css").read_text(encoding="utf-8")
           renderer = Path("site/assets/courses-catalogue.js").read_text(encoding="utf-8")
-          if "Course development is ongoing" not in page or "add new courses as they’re ready for learners" not in page:
-              raise SystemExit("The public catalogue must set expectations that development is ongoing.")
-          if ".cc-development-note" not in styles or "cc-development-note{margin-top:10px;font-size:11px}" not in styles:
-              raise SystemExit("The course-development note needs desktop and mobile styling.")
+          if "Focused micro-courses" not in page or "One specific question. One focused course." not in page:
+              raise SystemExit("The editorial micro-course section heading is missing.")
+          if ".ed-development-rail" not in styles or ".ed-development-inner" not in styles:
+              raise SystemExit("The separate in-development rail needs styling.")
           if 'data-filter="Chart reading"' in page or 'data-filter="Indicators"' in page:
               raise SystemExit("Topic filter buttons should be generated from the catalogue data.")
-          if "Development ongoing · Prices indicative · No community access included" not in page:
-              raise SystemExit("Micro-course availability and indicative pricing must be explicit.")
-          if 'data-get-course="${escapeHTML(course.id)}">Preview only' not in renderer or "Indicative price · preview only" not in renderer:
-              raise SystemExit("Micro-course preview must not imply checkout is live.")
+          if "Listed prices are catalogue references, not confirmation of a live checkout." not in page:
+              raise SystemExit("Micro-course catalogue pricing must be clearly labelled as indicative.")
+          if 'data-open-course="${escapeHTML(course.id)}">See what is inside' not in renderer or "Catalogue price" not in renderer:
+              raise SystemExit("Micro-course details action and catalogue-price label are required.")
           print("Public development message, honest preview pricing and responsive styling validated.")
           PY
 
