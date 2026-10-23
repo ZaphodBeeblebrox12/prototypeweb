@@ -150,14 +150,19 @@ def _notebook_for_course_display(course_slug, notebook):
     result = deepcopy(notebook) if isinstance(notebook, dict) else {}
     default_title_values = {"", "Your Trading Notebook"}
     default_prompts = [
-        {"label": "Observe", "text": "Describe the evidence you can directly observe."},
-        {"label": "Interpret", "text": "State one possible reading and a reasonable alternative."},
-        {"label": "Test", "text": "Name the next evidence that would strengthen or weaken your reading."},
+        {"label": "Describe", "text": "What evidence is visible?"},
+        {"label": "Interpret", "text": "What could it mean in context?"},
+        {"label": "Apply", "text": "What would change your view?"},
     ]
     legacy_generic_prompts = [
         {"label": "Observe", "text": "Describe the evidence visible in the chart."},
         {"label": "Interpret", "text": "State one possible reading and a reasonable alternative."},
         {"label": "Test", "text": "Name the next evidence that would strengthen or weaken your reading."},
+    ]
+    legacy_bollinger_prompts = [
+        {"label": "Describe", "text": "Where is price relative to the bands and middle line?"},
+        {"label": "Interpret", "text": "Does the structure look like a range, a trend or a transition? What is your alternative explanation?"},
+        {"label": "Test", "text": "What future price behaviour would strengthen or weaken your view?"},
     ]
     raw_prompts = result.get("prompts")
     missing_prompts = not isinstance(raw_prompts, list) or not raw_prompts
@@ -173,7 +178,10 @@ def _notebook_for_course_display(course_slug, notebook):
 
     matches_generic_defaults = missing_prompts
     if isinstance(raw_prompts, list):
-        for generic_set in (default_prompts, legacy_generic_prompts):
+        generic_sets = (default_prompts, legacy_generic_prompts)
+        if course_slug == "understand-bollinger-bands":
+            generic_sets += (legacy_bollinger_prompts,)
+        for generic_set in generic_sets:
             if len(raw_prompts) == len(generic_set) and all(
                 isinstance(prompt, dict)
                 and str(prompt.get("label") or "").strip().rstrip(".") == default["label"]
@@ -196,7 +204,7 @@ def _notebook_for_course_display(course_slug, notebook):
             result["prompts"] = [
                 {"label": "Describe", "text": "Where is price relative to the bands and middle line?"},
                 {"label": "Interpret", "text": "Does the structure look like a range, a trend or a transition? What is your alternative explanation?"},
-                {"label": "Test", "text": "What future price behaviour would strengthen or weaken your view?"},
+                {"label": "Apply", "text": "What would change your view?"},
             ]
     return result
 

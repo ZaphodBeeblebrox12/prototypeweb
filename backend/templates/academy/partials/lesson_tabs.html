@@ -6,7 +6,8 @@
     <button class="tt-tab" id="{{ tab_prefix }}-tab-practice" type="button" role="tab" aria-selected="false" aria-controls="{{ tab_prefix }}-panel-practice" data-tab-name="practice">Test your reading{% if practice_questions %} <span class="tt-tab-count">{{ practice_questions|length }}</span>{% endif %}</button>
   </div>
   <div class="tt-tab-panel" id="{{ tab_prefix }}-panel-idea" role="tabpanel" aria-labelledby="{{ tab_prefix }}-tab-idea" data-tab-panel="idea">
-    {{ lesson_sections.idea_html|safe }}
+    <div class="tt-lesson-idea-layout">
+      <div class="tt-lesson-idea-copy">{{ lesson_sections.idea_html|safe }}</div>
     <aside class="tt-notebook" aria-label="Your Trading Notebook">
       <div class="tt-notebook-index"><span>KEEP<br>IN VIEW</span><strong>01</strong></div>
       <div class="tt-notebook-content">
@@ -26,11 +27,11 @@
           {% if course_slug == "understand-bollinger-bands" %}
           <li><span class="tt-notebook-number">01</span><p><strong>Describe.</strong> Where is price relative to the bands and middle line?</p></li>
           <li><span class="tt-notebook-number">02</span><p><strong>Interpret.</strong> Does the structure look like a range, a trend or a transition? What is your alternative explanation?</p></li>
-          <li><span class="tt-notebook-number">03</span><p><strong>Test.</strong> What future price behaviour would strengthen or weaken your view?</p></li>
+          <li><span class="tt-notebook-number">03</span><p><strong>Apply.</strong> What would change your view?</p></li>
           {% else %}
-          <li><span class="tt-notebook-number">01</span><p><strong>Observe.</strong> Describe the evidence you can directly observe.</p></li>
-          <li><span class="tt-notebook-number">02</span><p><strong>Interpret.</strong> State one possible reading and a reasonable alternative.</p></li>
-          <li><span class="tt-notebook-number">03</span><p><strong>Test.</strong> Name the next evidence that would strengthen or weaken your reading.</p></li>
+          <li><span class="tt-notebook-number">01</span><p><strong>Describe.</strong> What evidence is visible?</p></li>
+          <li><span class="tt-notebook-number">02</span><p><strong>Interpret.</strong> What could it mean in context?</p></li>
+          <li><span class="tt-notebook-number">03</span><p><strong>Apply.</strong> What would change your view?</p></li>
           {% endif %}
         </ol>
         {% endif %}
@@ -56,6 +57,7 @@
         {% endif %}
       </div>
     </aside>
+    </div>
     <button class="tt-notebook-examples-button" type="button" data-open-tab="examples">Work through the chart examples <span aria-hidden="true">↗</span></button>
   </div>
   <div class="tt-tab-panel" id="{{ tab_prefix }}-panel-examples" role="tabpanel" aria-labelledby="{{ tab_prefix }}-tab-examples" data-tab-panel="examples" hidden>{{ lesson_sections.examples_html|safe }}</div>

@@ -1247,3 +1247,32 @@
   .tt-learning-room .tt-tab-panel .tt-image-group-caption { margin-left:30px; }
   .tt-learning-room .tt-tab-panel .tt-image-group-figure .tt-purpose-figure-note { padding:7px 8px 0; }
 }
+
+
+/* Approved responsive lesson composition: notebook once, in the desktop sidebar or mobile cards. */
+.tt-learning-room .tt-lesson-idea-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(245px,300px); align-items:start; gap:clamp(22px,3vw,34px); }
+.tt-learning-room .tt-lesson-idea-copy { min-width:0; }
+.tt-learning-room .tt-lesson-idea-copy > :first-child { margin-top:0; }
+.tt-learning-room .tt-lesson-idea-copy .tt-course-preview-card { margin-top:17px; margin-bottom:17px; }
+.tt-learning-room .tt-lesson-idea-layout .tt-notebook { position:sticky; top:18px; display:block; min-width:0; margin:0 0 12px; padding:18px 16px 16px; border:1px solid #d8ddcf; border-top:3px solid #66845f; background:#faf8f0; }
+.tt-learning-room .tt-lesson-idea-layout .tt-notebook-index { display:none; }
+.tt-learning-room .tt-lesson-idea-layout .tt-notebook-content { min-width:0; }
+.tt-learning-room .tt-lesson-idea-layout .tt-notebook h4 { font-size:clamp(20px,1.7vw,24px); }
+.tt-learning-room .tt-lesson-idea-layout .tt-notebook-content ol { display:grid; grid-template-columns:minmax(0,1fr); gap:0; }
+.tt-learning-room .tt-lesson-idea-layout .tt-notebook-content li { grid-template-columns:22px minmax(0,1fr); gap:7px; padding:11px 0; border-top:1px solid #d5dbce; }
+.tt-learning-room .tt-lesson-idea-layout .tt-notebook-content li p { font-size:12px; line-height:1.6; }
+.tt-learning-room .tt-lesson-idea-layout .tt-notebook form { margin-top:10px; }
+.tt-learning-room .tt-lesson-idea-layout .tt-notebook-examples-button { width:100%; }
+@media (max-width:1100px) {.tt-learning-room .tt-lesson-idea-layout {grid-template-columns:minmax(0,1fr)} .tt-learning-room .tt-lesson-idea-layout .tt-notebook {position:static} .tt-learning-room .tt-lesson-idea-layout .tt-notebook-content ol {grid-template-columns:repeat(3,minmax(0,1fr));gap:12px} .tt-learning-room .tt-lesson-idea-layout .tt-notebook-content li {display:block;padding:11px 10px;border:1px solid #d5dbce;border-radius:7px;background:#fffdf7} .tt-learning-room .tt-lesson-idea-layout .tt-notebook-number {display:block;margin-bottom:7px}}
+@media (max-width:620px) {.tt-learning-room .tt-lesson-idea-layout .tt-notebook-content ol {grid-template-columns:minmax(0,1fr);gap:8px} .tt-learning-room .tt-lesson-idea-layout .tt-notebook-content li {display:grid;grid-template-columns:22px minmax(0,1fr);padding:10px} .tt-learning-room .tt-lesson-idea-layout .tt-notebook-number {margin:0}}
+/* Quote Option 2: the chosen large editorial pull quote. */
+.tt-learning-room .tt-tab-panel blockquote {position:relative;margin:1.8em 0 1.7em;padding:20px 24px 20px 54px;border:0;border-left:3px solid #c36b4d;border-radius:0;background:linear-gradient(110deg,#f8f4e9 0%,#fffdf7 100%);color:#2f4939;font:400 clamp(20px,2.2vw,27px)/1.5 Georgia,"Times New Roman",serif;letter-spacing:-.018em}
+.tt-learning-room .tt-tab-panel blockquote::before {content:"“";position:absolute;top:3px;left:13px;color:#b48635;font:400 58px/.95 Georgia,"Times New Roman",serif}
+.tt-learning-room .tt-tab-panel blockquote p {margin:0 0 .55em}.tt-learning-room .tt-tab-panel blockquote p:last-child {margin-bottom:0}
+@media(max-width:620px){.tt-learning-room .tt-tab-panel blockquote{padding:18px 15px 18px 42px;font-size:20px}.tt-learning-room .tt-tab-panel blockquote::before{left:9px;font-size:47px}}
+.tt-learning-room .tt-structured-table-wrap {max-width:100%;overflow-x:auto;border:1px solid #d8ddcf;border-radius:7px;background:#fffdf8;margin:1.2em 0}
+.tt-learning-room .tt-structured-table {width:100%;min-width:520px;border-collapse:separate;border-spacing:0;margin:0;font-size:.88rem}
+.tt-learning-room .tt-structured-table th,.tt-learning-room .tt-structured-table td {padding:10px 12px;border-right:1px solid #e1e3d9;border-bottom:1px solid #e1e3d9;text-align:left;vertical-align:top}
+.tt-learning-room .tt-structured-table thead tr:first-child th[colspan] {background:#345943;color:#fffdf6;font-size:.76rem;font-weight:750;letter-spacing:.035em}
+.tt-learning-room .tt-structured-table thead tr:last-child th {background:#e8eee3;color:#284936;font-size:.78rem}
+.tt-learning-room .tt-structured-table tbody tr:nth-child(even) td {background:#f7f6ef}

@@ -213,10 +213,19 @@ def _resolve_course_cards(source):
     def render_art(title, category=""):
         mark = escape(course_card_mark(title))
         first, second = course_card_art_copy(title, category)
+        source_text = f"{title} {category}".casefold()
+        is_volume_price = "volume" in source_text and "price" in source_text
+        art_class = "tt-course-preview-card__art tt-course-preview-card__art--cover"
+        if is_volume_price:
+            mark_markup = '<span class="tt-course-preview-card__mark tt-course-preview-card__mark--feature">BEHIND<br>THE MOVE</span>'
+            art_label = "VOLUME × PRICE"
+        else:
+            mark_markup = f'<span class="tt-course-preview-card__mark">{mark}</span>'
+            art_label = f"{first} · {second}"
         return (
-            '<div class="tt-course-preview-card__art">'
-            f'<span class="tt-course-preview-card__mark">{mark}</span>'
-            f'<small>{escape(first)}<br>{escape(second)}</small>'
+            f'<div class="{art_class}">'
+            f'{mark_markup}'
+            f'<small>{escape(art_label)}</small>'
             '</div>'
         )
 

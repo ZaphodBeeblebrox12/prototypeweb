@@ -689,7 +689,8 @@ class TemplateParityRegressionTests(SimpleTestCase):
     def test_empty_non_bollinger_notebook_gets_topic_neutral_prompts(self):
         notebook = _notebook_for_course_display("volume-price-analysis", {})
         self.assertEqual(len(notebook["prompts"]), 3)
-        self.assertIn("evidence you can directly observe", notebook["prompts"][0]["text"])
+        self.assertEqual(notebook["prompts"][0]["label"], "Describe")
+        self.assertEqual(notebook["prompts"][0]["text"], "What evidence is visible?")
         self.assertNotIn("bands", " ".join(item["text"] for item in notebook["prompts"]).lower())
 
     def test_bollinger_default_notebook_retains_course_specific_prompts(self):
@@ -699,6 +700,7 @@ class TemplateParityRegressionTests(SimpleTestCase):
         )
         self.assertEqual(notebook["title"], "Before treating a touch as a setup")
         self.assertIn("bands", " ".join(item["text"] for item in notebook["prompts"]).lower())
+        self.assertEqual(notebook["prompts"][2]["label"], "Apply")
 
 
 

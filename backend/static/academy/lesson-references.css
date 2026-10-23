@@ -95,3 +95,14 @@
   .tt-course-preview-card__art {min-height:96px;padding:5px}
   .tt-course-preview-card__mark {font-size:21px}
 }
+
+/* Option 3 compact cover-left course recommendation; original topic chips stay in place. */
+.tt-course-preview-card {width:min(100%,560px);max-width:560px;grid-template-columns:78px minmax(0,1fr);align-items:stretch;gap:0}
+.tt-course-preview-card__copy {grid-column:2;grid-row:1;padding:10px 11px 10px 12px}
+.tt-course-preview-card__art {grid-column:1;grid-row:1;min-height:100%;border-left:0;border-right:1px solid rgba(180,134,53,.18);box-shadow:inset -1px 0 0 rgba(255,255,255,.4)}
+.tt-course-preview-card__mark--feature {max-width:66px;color:#fff9e8;font:800 8px/1.35 Arial,sans-serif;letter-spacing:.08em;text-align:center}
+.tt-course-preview-card__art--cover {background:linear-gradient(150deg,#456b51 0%,#244632 100%);color:#fff9e8}
+.tt-course-preview-card__art--cover small {color:#f1d58b;font-size:7px;font-weight:800;letter-spacing:.08em}
+.tt-course-preview-card__art--cover .tt-course-preview-card__mark {font-size:0}.tt-course-preview-card__art--cover .tt-course-preview-card__mark--feature {font-size:8px}
+@media(max-width:850px){.tt-course-preview-card{width:100%;grid-template-columns:72px minmax(0,1fr)}}
+@media(max-width:480px){.tt-course-preview-card{grid-template-columns:68px minmax(0,1fr)}.tt-course-preview-card__copy{padding:9px 9px 9px 10px}.tt-course-preview-card__art{padding:5px}.tt-course-preview-card h3{font-size:16px}.tt-course-preview-card__mark--feature{font-size:7px}}
