@@ -6,10 +6,10 @@ from unittest import mock
 from django.test import SimpleTestCase, override_settings
 
 from apps.bot_integration.reconcile_jobs import ProvisionTransport
-from apps.bot_integration.services.telegram import (
+from apps.bot_integration.services.telegram import TelegramBotService
+from apps.bot_integration.services.telegram_transport import (
     OUTCOME_ACCEPTED,
     OUTCOME_INDETERMINATE,
-    TelegramBotService,
     TelegramMessageResult,
 )
 
