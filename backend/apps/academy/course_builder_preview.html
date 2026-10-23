@@ -3368,16 +3368,10 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
         });
 
         const token = '[[image-group:' + group.id + ']]';
-        if (!String(lesson.content || '').includes(token) || group.imageIds.length >= 2) return;
-        const survivor = group.imageIds
-          .map(imageId => remainingImages.find(image =>
-            String(image.id) === String(imageId) || String(image.assetUuid || '') === String(imageId)
-          ))
-          .find(Boolean);
-        const replacement = survivor
-          ? '![' + String(survivor.alt || survivor.title || 'Course figure').replace(/\]/g, '') + '](asset://' + survivor.id + ')'
-          : '';
-        lesson.content = String(lesson.content || '').split(token).join(replacement).replace(/\n{3,}/g, '\n\n');
+        // Keep the group token when one image remains; it becomes the approved count-1 layout.
+        // Remove the group only when no selected media remains.
+        if (!String(lesson.content || '').includes(token) || group.imageIds.length > 0) return;
+        lesson.content = String(lesson.content || '').split(token).join('').replace(/\n{3,}/g, '\n\n');
         groupsToRemove.add(String(group.id));
       });
       lesson.imageGroups = (lesson.imageGroups || []).filter(group => !groupsToRemove.has(String(group.id)));

@@ -494,6 +494,11 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("Hard-block index — exact approved design.", learner_css)
         self.assertIn("Hard-block index — exact approved design.", builder_html)
         self.assertIn("tt-image-group-hard-index", builder_html)
+        self.assertIn(
+            "if (!String(lesson.content || '').includes(token) || group.imageIds.length > 0) return;",
+            builder_html,
+        )
+        self.assertNotIn("const replacement = survivor", builder_html)
         for source in (learner_css, builder_html):
             self.assertIn("grid-template-columns:repeat(3,minmax(0,1fr))", source)
             self.assertIn(
