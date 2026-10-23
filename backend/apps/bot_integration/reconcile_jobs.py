@@ -1,4 +1,4 @@
-"""Reconcile bridge: durable ProvisioningOperation per (user, channel, intent).
+"""Durable reconciliation: one ProvisioningOperation per (user, channel, intent).
 
 The existing diff engine (compute_target_access vs UserChannelAssignment)
 decides WHICH operations are needed.  Each needed operation gets ONE open

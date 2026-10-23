@@ -59,16 +59,39 @@ class TelegramBotService:
         url = f"https://api.telegram.org/bot{token}/{method}"
         try:
             resp = requests.post(url, json=params or {}, timeout=(5, 10))
-            resp.raise_for_status()
-            payload = resp.json()
-            if not isinstance(payload, dict):
-                return {"ok": False, "error": "Unexpected response from Telegram API"}
-            return payload
         except requests.exceptions.Timeout:
-            return {"ok": False, "error": "Request timeout"}
-        except requests.exceptions.RequestException as e:
-            logger.exception(f"Telegram API error: {e}")
-            return {"ok": False, "error": str(e)}
+            return {
+                "ok": False, "error_code": "timeout",
+                "description": "Request to Telegram API timed out",
+                "transport_error": True,
+            }
+        except requests.exceptions.RequestException as exc:
+            # Exception strings can include the token-bearing API URL.
+            logger.warning("Telegram API request failed: %s", type(exc).__name__)
+            return {
+                "ok": False, "error_code": "network_error",
+                "description": "Network error contacting Telegram API",
+                "transport_error": True,
+            }
+
+        try:
+            payload = resp.json()
+        except ValueError:
+            return {
+                "ok": False,
+                "error_code": resp.status_code,
+                "description": f"Telegram returned an unreadable response (HTTP {resp.status_code})",
+                "transport_error": resp.status_code >= 500,
+            }
+        if not isinstance(payload, dict):
+            return {
+                "ok": False, "error_code": resp.status_code,
+                "description": "Unexpected response from Telegram API",
+                "transport_error": resp.status_code >= 500,
+            }
+        if not payload.get("ok") and resp.status_code >= 500:
+            payload["transport_error"] = True
+        return payload
 
     # ------------------------------------------------------------------
     # Reusable message transport (Stage 1)
@@ -167,6 +190,71 @@ class TelegramBotService:
         return False, f"Unban failed: {error}"
 
     @classmethod
+    def is_member(cls, channel_id: str, user_id: int) -> Optional[bool]:
+        """Return True/False only when Telegram reports membership conclusively.
+
+        None means Telegram could not establish the state. Callers must not
+        interpret an API/network error as proof that the user is absent.
+        """
+        response = cls._api_request("getChatMember", {
+            "chat_id": channel_id, "user_id": user_id,
+        })
+        if not response.get("ok"):
+            return None
+        member = response.get("result") or {}
+        status = member.get("status")
+        if status in ("creator", "administrator", "member"):
+            return True
+        if status in ("left", "kicked"):
+            return False
+        if status == "restricted" and isinstance(member.get("is_member"), bool):
+            return member["is_member"]
+        return None
+
+    @classmethod
+    def verify_channel(cls, channel_id: str) -> Dict[str, Any]:
+        """Inspect a channel and the configured bot's current admin rights."""
+        chat_response = cls._api_request("getChat", {"chat_id": channel_id})
+        if not chat_response.get("ok"):
+            return {
+                "ok": False,
+                "error": chat_response.get("description") or chat_response.get("error")
+                         or "Telegram could not read this channel",
+                "detail": {},
+            }
+
+        bot_response = cls._api_request("getMe")
+        if not bot_response.get("ok"):
+            return {
+                "ok": False,
+                "error": bot_response.get("description") or bot_response.get("error")
+                         or "Telegram bot identity could not be verified",
+                "detail": {},
+            }
+        bot_id = (bot_response.get("result") or {}).get("id")
+        member_response = cls._api_request("getChatMember", {
+            "chat_id": channel_id, "user_id": bot_id,
+        }) if bot_id else {"ok": False}
+        member = (member_response.get("result") or {}) if member_response.get("ok") else {}
+        status = member.get("status", "unknown")
+        detail = {
+            "title": (chat_response.get("result") or {}).get("title")
+                     or (chat_response.get("result") or {}).get("username")
+                     or str(channel_id),
+            "type": (chat_response.get("result") or {}).get("type", ""),
+            "bot_status": status,
+            "can_administer": status in ("administrator", "creator"),
+            "can_invite_users": bool(member.get("can_invite_users"))
+                                if status == "administrator" else status == "creator",
+            "can_restrict_members": bool(member.get("can_restrict_members"))
+                                    if status == "administrator" else status == "creator",
+        }
+        if not member_response.get("ok"):
+            detail["bot_status"] = "unknown"
+            detail["can_administer"] = False
+        return {"ok": True, "detail": detail, "error": ""}
+
+    @classmethod
     def get_bot_info(cls):
         return cls._api_request("getMe")
 
@@ -181,9 +269,22 @@ class TelegramBotService:
 
     @classmethod
     def set_webhook(cls, url=None):
+        """Register native Telegram delivery with the secret-token header."""
+        import re
+        from django.conf import settings
+
         config = cls._get_config()
         webhook_url = url or config.telegram_webhook_url
-        if not webhook_url:
+        secret_token = (getattr(settings, "TELEGRAM_WEBHOOK_SECRET", "") or "").strip()
+        if not webhook_url or not secret_token:
+            logger.error("Cannot set Telegram webhook: URL or TELEGRAM_WEBHOOK_SECRET is missing")
             return False
-        result = cls._api_request("setWebhook", {"url": webhook_url})
-        return result.get("ok", False)
+        if not re.fullmatch(r"[A-Za-z0-9_-]{1,256}", secret_token):
+            logger.error("Cannot set Telegram webhook: secret token format is invalid")
+            return False
+        result = cls._api_request("setWebhook", {
+            "url": webhook_url,
+            "secret_token": secret_token,
+            "allowed_updates": ["message"],
+        })
+        return bool(result.get("ok", False))

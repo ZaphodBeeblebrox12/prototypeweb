@@ -39,9 +39,14 @@ class GrantNotificationTests(TestCase):
 
     def _grant(self, result):
         target = SimpleNamespace(telegram_ids={"-100"})
-        with mock.patch.object(reconcile, "ProvisionClient",
-                               return_value=_StubClient(result)), \
-             mock.patch.object(TelegramBotService, "send_message") as send:
+        invite_link = "https://t.me/+test-invite" if result.ok else None
+        with mock.patch(
+            "apps.bot_integration.reconcile_jobs.ProvisionTransport.create_invite_link",
+            return_value=invite_link,
+        ), mock.patch(
+            "apps.bot_integration.reconcile_jobs.ProvisionTransport.send_invite_dm",
+            return_value=bool(result.ok),
+        ), mock.patch.object(TelegramBotService, "send_message") as send:
             reconcile._tg_grant(self.user.id, self.account, target, "-100")
         return send
 

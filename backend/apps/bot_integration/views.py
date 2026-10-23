@@ -1,6 +1,7 @@
 import json
 import secrets
 import logging
+import hmac
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import JsonResponse
@@ -160,91 +161,161 @@ def unlink_discord(request):
 @csrf_exempt
 @require_POST
 def telegram_webhook(request):
-    """Handle Telegram bot updates (deep link verification).
+    """Handle Telegram webhook updates in Django.
 
-    Updates arrive via the existing TradeThesis bot's polling loop, which forwards
-    /start verify_<token> updates here over HTTP (Option 1 architecture —
-    Django runs on localhost and cannot receive Telegram webhooks directly).
-    Requests must carry the Provision Contract v1 HMAC signature; native
-    Telegram webhook delivery is not used.
+    Native Telegram delivery uses X-Telegram-Bot-Api-Secret-Token. The signed
+    HMAC path remains temporarily available for controlled rollback to the
+    legacy bridge; normal account-linking and provisioning no longer require it.
     """
-    from .provision_auth import verify_signed_request
-    body, auth_err = verify_signed_request(request)
-    if auth_err:
-        return JsonResponse({"ok": False, "error": auth_err}, status=401)
+    native_header = request.headers.get("X-Telegram-Bot-Api-Secret-Token")
+    expected_secret = (getattr(settings, "TELEGRAM_WEBHOOK_SECRET", "") or "").strip()
+    if native_header is not None:
+        if not expected_secret or not hmac.compare_digest(native_header, expected_secret):
+            return JsonResponse({"ok": False, "error": "invalid Telegram webhook secret"}, status=401)
+        body = request.body
+    else:
+        # Rollback compatibility only. Native Telegram webhook requests must
+        # authenticate with the separate Telegram secret-token header.
+        from .provision_auth import verify_signed_request
+        body, auth_err = verify_signed_request(request)
+        if auth_err:
+            return JsonResponse({"ok": False, "error": auth_err}, status=401)
+
     try:
         data = json.loads(body)
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, UnicodeDecodeError, TypeError):
         return HttpResponse(status=400)
 
     logger.info("Telegram webhook received update_id=%s", data.get("update_id"))
-
-    if 'message' not in data or 'text' not in data['message']:
+    message = data.get("message")
+    if not isinstance(message, dict) or not isinstance(message.get("text"), str):
         return JsonResponse({"ok": True})
 
-    text = data['message']['text']
-    chat_id = data['message']['chat']['id']
-    from_user = data['message'].get('from', {})
-    telegram_user_id = from_user.get('id')
-
-    if not text.startswith('/start'):
+    chat = message.get("chat") or {}
+    from_user = message.get("from") or {}
+    chat_id = chat.get("id")
+    telegram_user_id = from_user.get("id")
+    # Linking must only occur from a human user's private conversation with
+    # the bot. Group/channel posts are acknowledged but never used to link.
+    if (chat.get("type") != "private" or from_user.get("is_bot")
+            or not isinstance(chat_id, int) or isinstance(chat_id, bool)
+            or not isinstance(telegram_user_id, int) or isinstance(telegram_user_id, bool)):
         return JsonResponse({"ok": True})
 
-    parts = text.split()
-    if len(parts) != 2 or not parts[1].startswith('verify_'):
+    text = message["text"].strip()
+    normalized = text.lower().strip(" !.,?\t\n")
+    welcome = (
+        "👋 Hi! To connect Telegram, open TradeThesis, go to your Dashboard, "
+        "and choose Connect Telegram. If you already have a subscription, "
+        "linking your account lets us sync your channel access."
+    )
+    if normalized in {"hi", "hello", "hey", "start"}:
+        TelegramBotService.send_message(chat_id, welcome)
+        return JsonResponse({"ok": True})
+
+    parts = text.split(maxsplit=1)
+    command = parts[0].split("@", 1)[0].lower() if parts else ""
+    if command != "/start":
+        return JsonResponse({"ok": True})
+    payload = parts[1].strip() if len(parts) > 1 else ""
+    if not payload:
+        TelegramBotService.send_message(chat_id, welcome)
+        return JsonResponse({"ok": True})
+    if not payload.startswith("verify_") or not payload[7:]:
         TelegramBotService.send_message(
             chat_id,
-            "\U0001f44b Hi! To link your account: open the website, go to"
-            " Dashboard and press Connect Telegram. Already paid? Connecting"
-            " grants your channel access automatically.")
+            "That link isn't a TradeThesis verification link. Please open your "
+            "Dashboard and choose Connect Telegram to generate a fresh one.",
+        )
         return JsonResponse({"ok": True})
 
-    token_str = parts[1][7:]  # remove 'verify_'
+    token_str = payload[7:]
+    from django.db import IntegrityError, transaction
+    from apps.jobs.enqueue import enqueue_reconcile
 
+    status = "linked"
+    user = None
     try:
-        token = TelegramVerificationToken.objects.select_related('user').get(token=token_str)
-        if not token.is_valid():
-            TelegramBotService.send_message(chat_id, "❌ Verification link expired. Please request a new one on the website.")
-            token.delete()
-            return JsonResponse({"ok": False})
-
-        user = token.user
-        # Transactional outbox: account + audit + job commit atomically.
-        from django.db import transaction as _tx
-        from apps.jobs.enqueue import enqueue_reconcile
-        with _tx.atomic():
-            TelegramAccount.objects.update_or_create(
-                user=user,
-                defaults={
-                    'chat_id': chat_id,
-                    'telegram_user_id': telegram_user_id,
-                    'is_active': True,
-                    'username': from_user.get('username') or '',
-                    'first_name': from_user.get('first_name') or '',
-                }
+        with transaction.atomic():
+            token = (
+                TelegramVerificationToken.objects.select_for_update()
+                .select_related("user").get(token=token_str)
             )
-            token.delete()
+            user = token.user
+            if not token.is_valid():
+                token.delete()
+                status = "expired"
+            elif TelegramAccount.objects.filter(chat_id=chat_id).exclude(
+                user_id=user.id
+            ).exists():
+                # Preserve the token so support can resolve the existing link;
+                # don't replace or detach another TradeThesis user's account.
+                status = "conflict"
+            else:
+                TelegramAccount.objects.update_or_create(
+                    user=user,
+                    defaults={
+                        "chat_id": chat_id,
+                        "telegram_user_id": telegram_user_id,
+                        "is_active": True,
+                        "username": from_user.get("username") or "",
+                        "first_name": from_user.get("first_name") or "",
+                    },
+                )
+                token.delete()
+                BotAccessAudit.objects.create(
+                    user=user, action="link", platform="telegram",
+                    target=str(chat_id), status="success",
+                )
+                enqueue_reconcile(user.id, reason="telegram_link")
+                transaction.on_commit(
+                    lambda uid=user.id: sync_telegram_profile_for_user(uid)
+                )
+                transaction.on_commit(
+                    lambda uid=user.id: sync_channel_memberships_for_user(uid)
+                )
+    except TelegramVerificationToken.DoesNotExist:
+        # Telegram may retry a webhook after its first successful response.
+        # Treat the already-linked identity as idempotent rather than telling
+        # the member their once-valid token is invalid.
+        if TelegramAccount.objects.filter(chat_id=chat_id).exists():
+            TelegramBotService.send_message(
+                chat_id, "✅ This Telegram account is already linked to TradeThesis."
+            )
+        else:
+            TelegramBotService.send_message(
+                chat_id, "❌ Invalid verification link. Please generate a new one from your Dashboard."
+            )
+            return JsonResponse({"ok": True})
+        return JsonResponse({"ok": True})
+    except IntegrityError:
+        # Covers a concurrent attempt to bind the same Telegram chat to two
+        # users; keep the link intact and give the user a recoverable message.
+        status = "conflict"
 
+    if status == "expired":
+        TelegramBotService.send_message(
+            chat_id, "❌ This verification link expired. Please generate a new one from your Dashboard."
+        )
+        return JsonResponse({"ok": True})
+    if status == "conflict":
+        if user is not None:
             BotAccessAudit.objects.create(
-                user=user,
-                action='link',
-                platform='telegram',
-                target=str(chat_id),
-                status='success'
+                user=user, action="link", platform="telegram",
+                target=str(chat_id), status="failed",
+                error_message="Telegram identity is already linked to another TradeThesis user.",
             )
-
-            enqueue_reconcile(user.id, reason="telegram_link")
-            # Best-effort avatar enrichment AFTER the transaction commits.
-            _tx.on_commit(lambda: sync_telegram_profile_for_user(user.id))
-            _tx.on_commit(lambda: sync_channel_memberships_for_user(user.id))
-
-        TelegramBotService.send_message(chat_id, "✅ Your account is now linked! We'll sync your subscription access shortly.")
-
+        TelegramBotService.send_message(
+            chat_id,
+            "⚠️ This Telegram account is already linked to another TradeThesis account. "
+            "Please contact support to resolve the existing link; this verification link has not been used.",
+        )
         return JsonResponse({"ok": True})
 
-    except TelegramVerificationToken.DoesNotExist:
-        TelegramBotService.send_message(chat_id, "❌ Invalid verification code.")
-        return JsonResponse({"ok": False})
+    TelegramBotService.send_message(
+        chat_id, "✅ Your account is now linked! We'll sync your subscription access shortly."
+    )
+    return JsonResponse({"ok": True})
 
 
 @login_required

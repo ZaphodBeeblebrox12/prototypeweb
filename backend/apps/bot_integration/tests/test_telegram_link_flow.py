@@ -15,7 +15,7 @@ import uuid
 from unittest import mock
 
 from allauth.account.models import EmailAddress
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from apps.accounts.models import User
@@ -175,6 +175,58 @@ class TelegramWebhookVerifyFlowTests(TestCase):
         headers = signed_headers(body) if sign else {}
         return Client().post("/bot/telegram/webhook/", data=body,
                              content_type="application/json", headers=headers)
+
+    def _post_native_start(self, text, secret="native-test-secret"):
+        body = json.dumps({
+            "update_id": 2,
+            "message": {
+                "message_id": 2,
+                "from": {"id": 555000111, "is_bot": False, "first_name": "T"},
+                "chat": {"id": 555000111, "type": "private"},
+                "text": text,
+            },
+        }).encode()
+        return Client().post(
+            "/bot/telegram/webhook/", data=body, content_type="application/json",
+            headers={"X-Telegram-Bot-Api-Secret-Token": secret},
+        )
+
+    @mock.patch("apps.jobs.enqueue.enqueue_reconcile")
+    @mock.patch("apps.bot_integration.views.TelegramBotService")
+    @override_settings(TELEGRAM_WEBHOOK_SECRET="native-test-secret")
+    def test_native_webhook_secret_links_account(self, svc, task):
+        r = self._post_native_start(f"/start verify_{self.token.token}")
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(TelegramAccount.objects.filter(user=self.user, chat_id=555000111).exists())
+        task.assert_called_once_with(self.user.id, reason="telegram_link")
+        svc.send_message.assert_called_once()
+
+    @override_settings(TELEGRAM_WEBHOOK_SECRET="native-test-secret")
+    def test_native_webhook_rejects_wrong_secret(self):
+        r = self._post_native_start(f"/start verify_{self.token.token}", secret="wrong-secret")
+        self.assertEqual(r.status_code, 401)
+        self.assertFalse(TelegramAccount.objects.exists())
+
+    @mock.patch("apps.bot_integration.views.TelegramBotService")
+    @override_settings(TELEGRAM_WEBHOOK_SECRET="native-test-secret")
+    def test_hello_message_gets_welcome(self, svc):
+        r = self._post_native_start("Hello")
+        self.assertEqual(r.status_code, 200)
+        svc.send_message.assert_called_once()
+        self.assertIn("Connect Telegram", svc.send_message.call_args[0][1])
+
+    @mock.patch("apps.bot_integration.views.TelegramBotService")
+    @override_settings(TELEGRAM_WEBHOOK_SECRET="native-test-secret")
+    def test_existing_telegram_identity_is_not_reassigned(self, svc):
+        other = make_user("already-linked")
+        TelegramAccount.objects.create(
+            user=other, chat_id=555000111, telegram_user_id=555000111, is_active=True,
+        )
+        r = self._post_native_start(f"/start verify_{self.token.token}")
+        self.assertEqual(r.status_code, 200)
+        self.assertFalse(TelegramAccount.objects.filter(user=self.user).exists())
+        self.assertTrue(TelegramVerificationToken.objects.filter(pk=self.token.pk).exists())
+        self.assertIn("already linked", svc.send_message.call_args[0][1].lower())
 
     def test_unsigned_request_rejected(self):
         r = self._post_start(f"/start verify_{self.token.token}", sign=False)

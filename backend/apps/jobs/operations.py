@@ -27,6 +27,7 @@ def execute_operation(op: ProvisioningOperation, transport) -> bool:
     before any re-send.  Revoke: ban is naturally idempotent.
     """
     op.attempts += 1
+    op.save(update_fields=["attempts"])
     if op.operation == ProvisioningOperation.OP_REVOKE:
         return _run_revoke(op, transport)
     return _run_grant(op, transport)
@@ -75,12 +76,15 @@ def _run_grant(op, transport) -> bool:
             op.state = st.ST_COMPLETED
             op.save(update_fields=["state"])
             return True
-        # Not a member: outcome unknown or send failed.  Re-send the SAME
-        # persisted link if we have one; never mint a new link merely
-        # because the send of the persisted link failed.
+        if member is None:
+            # Unknown is not equivalent to absent: wait for a reliable probe.
+            op.last_error = "membership could not be verified during grant recovery"
+            op.save(update_fields=["last_error"])
+            return False
+        # Definite non-member: reuse a persisted link if possible.
         if not op.invite_link:
-            # No persisted link (crashed in 'creating'): fall through to
-            # mint a new link — bounded, documented irreducible window.
+            # A crash after Telegram creates the link but before its URL is
+            # persisted is the narrow, documented replacement-link window.
             op.state = st.ST_CREATING
             op.save(update_fields=["state"])
         else:
@@ -103,24 +107,20 @@ def _run_grant(op, transport) -> bool:
         created = transport.create_invite_link(op.telegram_user_id,
                                                op.channel_id,
                                                idempotency_key=op.provision_key)
-        if created is None:
-            # External outcome unknown (transport error after dispatch).
+        if not created:
+            # Link creation failed or its outcome is uncertain; retry safely.
             op.state = st.ST_UNKNOWN
             op.save(update_fields=["state"])
-            return False   # not terminal; job retries -> recovery path
-        # Persist link + state in the SAME step, immediately on success.
-        # The bridge's do_grant ALREADY delivered the invite DM server-side
-        # as part of minting; do NOT _send_link here -- that would double-DM.
+            return False
+        # Persist the invite before any DM attempt, so retries reuse this URL.
         op.invite_link = created
-        op.state = st.ST_SENT
+        op.state = st.ST_CREATED
         op.save(update_fields=["invite_link", "state"])
-        return _confirm_delivered(op, transport)
+        return _send_link(op, transport)
 
     if op.state == st.ST_CREATED:
-        # Link persisted; DM already delivered server-side by do_grant.
-        op.state = st.ST_SENT
-        op.save(update_fields=["state"])
-        return _confirm_delivered(op, transport)
+        # Link was persisted before delivery; attempt/retry the same link.
+        return _send_link(op, transport)
 
     return op.state == st.ST_COMPLETED
 

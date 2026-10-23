@@ -17,8 +17,12 @@ class BotConfigAdmin(admin.ModelAdmin):
     fieldsets = (
         ('Telegram', {
             'fields': ('telegram_bot_token', 'telegram_bot_username', 'telegram_webhook_url'),
-            'description': 'Telegram username: enter WITHOUT the @ prefix '
-                           '(e.g. inderjeetbot). A leading @ is removed automatically.'
+            'description': (
+                'Telegram username: enter WITHOUT the @ prefix (e.g. titanpipbot). '
+                'A leading @ is removed automatically. Native webhook authentication '
+                'uses TELEGRAM_WEBHOOK_SECRET from the hosting environment; the Set '
+                'Webhook button opens a confirmation form before applying the change.'
+            )
         }),
         ('Discord', {
             'fields': ('discord_bot_token', 'discord_guild_id', 'discord_client_id', 'discord_client_secret', 'discord_redirect_uri'),

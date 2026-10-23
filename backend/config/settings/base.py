@@ -387,8 +387,13 @@ MAXMIND_UPDATE_INTERVAL_DAYS = env("MAXMIND_UPDATE_INTERVAL_DAYS", default=7)
 LOGIN_REDIRECT_URL = "/dashboard/"
 ACCOUNT_LOGOUT_REDIRECT_URL = "/"
 
-# ---- Provision Contract v1 (Telegram bot bridge integration) ----
-# Shared HMAC secret - MUST equal the bot's PROVISION_SHARED_SECRET. Env only.
+# ---- Telegram-native webhook authentication ------------------------------
+# Telegram accepts 1-256 characters from A-Z, a-z, 0-9, "_" and "-".
+# Configure a unique secret in Render; never commit a real secret to git.
+TELEGRAM_WEBHOOK_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "").strip()
+
+# ---- Provision Contract v1 (legacy bridge / rollback only) ----------------
+# Retained temporarily for signed bridge registration/rollback.
 PROVISION_SHARED_SECRET = os.environ.get("PROVISION_SHARED_SECRET", "")
 # Bootstrap fallback ONLY, before the bot has registered itself.
 PROVISION_BOT_URL = os.environ.get("PROVISION_BOT_URL", "")

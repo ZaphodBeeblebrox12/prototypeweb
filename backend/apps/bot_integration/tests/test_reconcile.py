@@ -249,8 +249,8 @@ class MembershipRecoveryTests(TestCase):
         a = self._assignment()
         self.assertTrue(a.is_active)              # entitlement persists
         self.assertEqual(len(t2.grants), 1)       # new invite minted
-        # initial delivery is SERVER-SIDE inside do_grant; no local resend DM
-        self.assertEqual(len(t2.dms), 0)
+        # Direct transport sends the persisted invite only after saving it.
+        self.assertEqual(len(t2.dms), 1)
         self.assertIsNotNone(a.last_invite_sent_at)
         first_link = "https://t.me/+fake"  # FakeTransport.create_invite_link return value
         op2 = (ProvisioningOperation.objects
@@ -638,7 +638,7 @@ class MembershipRecoveryTests(TestCase):
         self._run(t2)
         a.refresh_from_db()
         self.assertGreater(a.last_invite_sent_at, expired)
-        self.assertEqual(len(t2.dms), 0)  # grant path DMs server-side
+        self.assertEqual(len(t2.dms), 1)  # fresh grant sends its saved invite
         ops = ProvisioningOperation.objects.filter(
             user_id=self.user.id, operation=ProvisioningOperation.OP_GRANT)
         self.assertEqual(ops.count(), 2)

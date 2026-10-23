@@ -4,8 +4,8 @@ Invariant: actual platform access converges to the access dictated by the
 user's current subscription. Diff-based and idempotent — re-running with no
 change produces zero platform calls and zero audit rows.
 
-The durable worker uses this diff engine plus the provisioning state machine.
-The legacy synchronous entry point shares the same live Discord role reconciler.
+The durable worker uses this diff engine plus the direct Telegram provisioning state machine.
+The legacy synchronous entry point delegates to the same durable runner.
 - Discord roles are granted/revoked on entitlement changes and lapse.
 - Telegram channels from a previous plan are revoked on plan change.
 - No-op reconciles are silent.
