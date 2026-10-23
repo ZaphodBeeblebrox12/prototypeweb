@@ -1134,6 +1134,51 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(saved_table["rows"][1]["cells"][2]["text"], "Confirmed")
         self.assertEqual(saved_lesson["content_markdown"], lesson["content"])
 
+    def test_builder_accepts_rowspans_in_the_option_five_table_header(self):
+        payload = self.draft_payload("builder-option-five-rowspan-table")
+        lesson = payload["course"]["modules"][0]["lessons"][0]
+        lesson["content"] = "Before the table.\n\n[[table-block:ohlc-context]]\n\nAfter the table."
+        lesson["tables"] = {
+            "ohlc-context": {
+                "title": "From observation to execution",
+                "rows": [
+                    {"section": "head", "cells": [
+                        {"text": "Price structure", "colspan": 4, "rowspan": 1, "header": True},
+                        {"text": "Volume", "colspan": 1, "rowspan": 2, "header": True},
+                        {"text": "Context", "colspan": 1, "rowspan": 2, "header": True},
+                    ]},
+                    {"section": "head", "cells": [
+                        {"text": "Open", "colspan": 1, "rowspan": 1, "header": True},
+                        {"text": "High", "colspan": 1, "rowspan": 1, "header": True},
+                        {"text": "Low", "colspan": 1, "rowspan": 1, "header": True},
+                        {"text": "Close", "colspan": 1, "rowspan": 1, "header": True},
+                    ]},
+                    {"section": "body", "cells": [
+                        {"text": "Breakout", "colspan": 1, "rowspan": 1, "header": False},
+                        {"text": "Above range", "colspan": 1, "rowspan": 1, "header": False},
+                        {"text": "Activity rises", "colspan": 1, "rowspan": 1, "header": False},
+                        {"text": "Close holds", "colspan": 1, "rowspan": 1, "header": False},
+                        {"text": "Strong", "colspan": 1, "rowspan": 1, "header": False},
+                        {"text": "Trend", "colspan": 1, "rowspan": 1, "header": False},
+                    ]},
+                ],
+            },
+        }
+
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        record = CourseImport.objects.get(pk=response.json()["record_id"])
+        saved_table = record.payload["modules"][0]["lessons"][0]["content_json"]["tables"]["ohlc-context"]
+        self.assertEqual(saved_table["rows"][0]["cells"][1]["rowspan"], 2)
+        self.assertEqual(saved_table["rows"][0]["cells"][2]["text"], "Context")
+        self.assertEqual(saved_table["rows"][1]["cells"][3]["text"], "Close")
+        self.assertEqual(len(saved_table["rows"][2]["cells"]), 6)
+
     def test_builder_persists_native_comparison_figures_by_stable_token(self):
         from .course_builder_api import _build_import_payload
 

@@ -17,7 +17,7 @@ from .models import Course, CourseImport, Lesson
 from .regional_content import resolve_regional_lesson_content, strip_unmanaged_regional_images
 
 _ALLOWED_TAGS = {
-    "a", "aside", "blockquote", "br", "code", "del", "div", "em", "figcaption", "figure",
+    "a", "aside", "blockquote", "br", "caption", "code", "del", "div", "em", "figcaption", "figure",
     "h1", "h2", "h3", "h4", "h5", "h6", "hr", "img", "li", "ol", "p", "pre",
     "s", "small", "span", "strong", "sub", "sup", "table", "tbody", "td", "th", "thead", "tr", "ul",
 }
@@ -28,6 +28,7 @@ _ALLOWED_ATTRIBUTES = {
     "figure": ["class", "data-figure-id"],
     "figcaption": ["class"],
     "table": ["class"],
+    "caption": ["class"],
     "img": ["src", "alt", "title", "loading", "width", "height", "tabindex", "role", "aria-label"],
     "span": ["class", "aria-label", "title"],
     "strong": ["class"],
@@ -447,7 +448,12 @@ def render_safe_markdown(
             if not head_rows:
                 markup = '<aside class="tt-structured-table-unavailable" role="status"><strong>Table has no header row</strong></aside>'
             else:
-                markup = '<div class="lesson-table-wrap tt-structured-table-wrap" role="region" tabindex="0" aria-label="Scrollable table: ' + title + '"><table class="tt-structured-table">' + thead + tbody + "</table></div>"
+                markup = (
+                    '<div class="lesson-table-wrap tt-structured-table-wrap" role="region" tabindex="0" '
+                    'aria-label="Scrollable table: ' + title + '">'
+                    '<table class="tt-structured-table"><caption class="tt-structured-table-caption">'
+                    + title + '</caption>' + thead + tbody + "</table></div>"
+                )
         token = f"TTSTRUCTUREDTABLE{len(table_frames)}END"
         table_frames[token] = markup
         return token

@@ -482,11 +482,49 @@ class SharedLessonRenderingTests(SimpleTestCase):
         )
         self.assertIn('class="lesson-table-wrap tt-structured-table-wrap"', rendered)
         self.assertIn('aria-label="Scrollable table: Market comparison"', rendered)
+        self.assertIn('<caption class="tt-structured-table-caption">Market comparison</caption>', rendered)
         self.assertIn('colspan="2" scope="colgroup"', rendered)
         self.assertIn("Repeated rejection", rendered)
         self.assertIn("Opening copy.", rendered)
         self.assertIn("Closing copy.", rendered)
         self.assertNotIn("[[table-block:", rendered)
+
+    def test_structured_grouped_table_renders_rowspans_for_single_column_headers(self):
+        rendered = render_safe_markdown(
+            "[[table-block:ohlc-context]]",
+            table_metadata={
+                "ohlc-context": {
+                    "title": "From observation to execution",
+                    "rows": [
+                        {"section": "head", "cells": [
+                            {"text": "Price structure", "colspan": 4, "rowspan": 1, "header": True},
+                            {"text": "Volume", "colspan": 1, "rowspan": 2, "header": True},
+                            {"text": "Context", "colspan": 1, "rowspan": 2, "header": True},
+                        ]},
+                        {"section": "head", "cells": [
+                            {"text": "Open", "colspan": 1, "rowspan": 1, "header": True},
+                            {"text": "High", "colspan": 1, "rowspan": 1, "header": True},
+                            {"text": "Low", "colspan": 1, "rowspan": 1, "header": True},
+                            {"text": "Close", "colspan": 1, "rowspan": 1, "header": True},
+                        ]},
+                        {"section": "body", "cells": [
+                            {"text": "Breakout", "colspan": 1, "rowspan": 1, "header": False},
+                            {"text": "Above range", "colspan": 1, "rowspan": 1, "header": False},
+                            {"text": "Activity rises", "colspan": 1, "rowspan": 1, "header": False},
+                            {"text": "Close holds", "colspan": 1, "rowspan": 1, "header": False},
+                            {"text": "Strong", "colspan": 1, "rowspan": 1, "header": False},
+                            {"text": "Trend", "colspan": 1, "rowspan": 1, "header": False},
+                        ]},
+                    ],
+                }
+            },
+        )
+        self.assertIn('<caption class="tt-structured-table-caption">From observation to execution</caption>', rendered)
+        self.assertIn('rowspan="2" scope="col">Volume</th>', rendered)
+        self.assertIn('rowspan="2" scope="col">Context</th>', rendered)
+        self.assertIn('colspan="4" scope="colgroup">Price structure</th>', rendered)
+        self.assertIn("Open</th>", rendered)
+        self.assertIn("Close</th>", rendered)
 
     def test_information_table_uses_accessible_scrollable_reference_wrapper(self):
         source = (

@@ -857,6 +857,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .rich-editor-canvas .tt-editor-structured-table thead tr:last-child th { background:#e8eee3; color:#284936; }
 .lesson-table-wrap.tt-structured-table-wrap { max-width:100%; overflow-x:auto; border:1px solid #d8ddcf; border-radius:7px; background:#fffdf8; margin:1.2em 0; }
 .tt-structured-table { width:100%; min-width:520px; border-collapse:separate; border-spacing:0; margin:0; font-size:.88rem; }
+.tt-structured-table caption.tt-structured-table-caption { caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:#f6f0e2; color:#5d685d; font:italic 13px/1.45 Georgia,"Times New Roman",serif; text-align:left; }
 .tt-structured-table th,.tt-structured-table td { padding:10px 12px; border-right:1px solid #e1e3d9; border-bottom:1px solid #e1e3d9; text-align:left; vertical-align:top; }
 .tt-structured-table thead tr:first-child th[colspan] { background:#345943; color:#fffdf6; }
 .tt-structured-table thead tr:last-child th { background:#e8eee3; color:#284936; }
@@ -1191,10 +1192,35 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     }
     return value;
   }
+  function tableGridLayout(table) {
+    const rows=Array.from(table.querySelectorAll('tr'));
+    const occupiedByRow=rows.map(()=>new Set());
+    const layout=[];
+    let width=0;
+    rows.forEach((row,rowIndex)=>{
+      const occupied=occupiedByRow[rowIndex];
+      const placements=[];
+      let cursor=0;
+      Array.from(row.children).filter(cell=>/^(TH|TD)$/.test(cell.tagName)).forEach(cell=>{
+        const colspan=Math.max(1,Number(cell.getAttribute('colspan')||1));
+        const rowspan=Math.max(1,Number(cell.getAttribute('rowspan')||1));
+        while(cursor+colspan<=12&&Array.from({length:colspan},(_,i)=>cursor+i).some(column=>occupied.has(column)))cursor++;
+        const start=cursor;
+        const end=start+colspan-1;
+        for(let column=start;column<=end;column++){
+          occupied.add(column);
+          for(let future=rowIndex+1;future<Math.min(rows.length,rowIndex+rowspan);future++)occupiedByRow[future].add(column);
+        }
+        placements.push({cell,start,end,colspan,rowspan});
+        cursor=end+1;
+      });
+      width=Math.max(width,occupied.size?Math.max(...occupied)+1:0);
+      layout.push({row,placements,occupied});
+    });
+    return {rows:layout,width};
+  }
   function tableLogicalWidth(table) {
-    const row = table?.querySelector('thead tr') || table?.querySelector('tr');
-    if (!row) return 0;
-    return Array.from(row.children).reduce((sum,cell)=>sum+Math.max(1,Number(cell.getAttribute('colspan')||1)),0);
+    return tableGridLayout(table).width;
   }
   function tableCellMarkup(tag,text,colspan,rowspan) {
     const col=Number(colspan)>1?' colspan="'+Number(colspan)+'"':'';
@@ -1204,7 +1230,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   }
   function structuredTableEditorMarkup(tableId) {
     const data=currentLesson()?.tables?.[tableId];
-    if(!data||!Array.isArray(data.rows)) return '<div class="tt-editor-table-scroll"><table data-editor-structured-table="'+esc(tableId)+'" data-table-title="Lesson table"><thead><tr><th>Group 1</th></tr></thead><tbody><tr><td>Table data needs repair</td></tr></tbody></table></div>';
+    if(!data||!Array.isArray(data.rows)) return '<div class="tt-editor-table-scroll"><table class="tt-editor-structured-table" data-editor-structured-table="'+esc(tableId)+'" data-table-title="Lesson table"><caption class="tt-structured-table-caption">Lesson table</caption><thead><tr><th>Header</th></tr></thead><tbody><tr><td>Table data needs repair</td></tr></tbody></table></div>';
     const heads=[],bodies=[];
     data.rows.forEach(row=>{
       if(!row||!Array.isArray(row.cells))return;
@@ -1212,7 +1238,9 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       if(!cells)return;
       (row.section==='head'?heads:bodies).push('<tr>'+cells+'</tr>');
     });
-    return '<div class="tt-editor-table-scroll"><table class="tt-editor-structured-table" data-editor-structured-table="'+esc(tableId)+'" data-table-title="'+esc(data.title||'Lesson table')+'">'+
+    const title=String(data.title||'From observation to execution');
+    return '<div class="tt-editor-table-scroll"><table class="tt-editor-structured-table" data-editor-structured-table="'+esc(tableId)+'" data-table-title="'+esc(title)+'">'+
+      '<caption class="tt-structured-table-caption">'+esc(title)+'</caption>'+
       (heads.length?'<thead>'+heads.join('')+'</thead>':'')+(bodies.length?'<tbody>'+bodies.join('')+'</tbody>':'')+'</table></div><p><br></p>';
   }
   function structuredTableHtmlFromData(data, tableId, editorMode) {
@@ -1220,8 +1248,10 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     const renderRow=row=>'<tr>'+(row.cells||[]).map(cell=>tableCellMarkup(row.section==='head'||cell.header?'th':'td',cell.text,cell.colspan,cell.rowspan)).join('')+'</tr>';
     const heads=data.rows.filter(row=>row.section==='head').map(renderRow).join('');
     const bodies=data.rows.filter(row=>row.section!=='head').map(renderRow).join('');
-    const attrs=editorMode?' data-editor-structured-table="'+esc(tableId)+'" data-table-title="'+esc(data.title||'Lesson table')+'"':'';
-    return '<div class="lesson-table-wrap tt-structured-table-wrap'+(editorMode?' tt-editor-table-scroll':'')+'" role="region" tabindex="0" aria-label="Scrollable table: '+esc(data.title||'Lesson table')+'"><table class="'+(editorMode?'tt-editor-structured-table':'tt-structured-table')+'"'+attrs+'>'+
+    const title=String(data.title||'From observation to execution');
+    const caption='<caption class="tt-structured-table-caption">'+esc(title)+'</caption>';
+    const attrs=editorMode?' data-editor-structured-table="'+esc(tableId)+'" data-table-title="'+esc(title)+'"':'';
+    return '<div class="lesson-table-wrap tt-structured-table-wrap'+(editorMode?' tt-editor-table-scroll':'')+'" role="region" tabindex="0" aria-label="Scrollable table: '+esc(title)+'"><table class="'+(editorMode?'tt-editor-structured-table':'tt-structured-table')+'"'+attrs+'>'+caption+
       (heads?'<thead>'+heads+'</thead>':'')+(bodies?'<tbody>'+bodies+'</tbody>':'')+'</table></div>'+(editorMode?'<p><br></p>':'');
   }
   function refreshStructuredTableMetadata(table) {
@@ -1229,8 +1259,11 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     const lesson=currentLesson();if(!lesson)return;
     if(!lesson.tables||typeof lesson.tables!=='object')lesson.tables={};
     const id=table.dataset.editorStructuredTable;
+    const caption=table.querySelector('caption');
+    const title=caption?String(caption.textContent||'').trim():'';
+    if(title)table.dataset.tableTitle=title;
     lesson.tables[id]={
-      title:table.dataset.tableTitle||lesson.tables[id]?.title||'Lesson table',
+      title:table.dataset.tableTitle||lesson.tables[id]?.title||'From observation to execution',
       rows:Array.from(table.querySelectorAll('tr')).map(row=>({
         section:row.closest('thead')?'head':'body',
         cells:Array.from(row.querySelectorAll(':scope > th, :scope > td')).map(cell=>({
@@ -1248,25 +1281,30 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     return node&&editor.contains(node)?node.closest('table'):null;
   }
   function insertGroupedTable(editor) {
-    const columns=promptTableDimension('Number of columns',4,12);if(columns===null||columns===false)return;
-    if(columns<2){toast('Grouped headers need at least two columns.');return;}
+    const columns=promptTableDimension('Number of columns',6,12);if(columns===null||columns===false)return;
+    if(columns<4){toast('Option 5 grouped headers need at least four columns.');return;}
     const bodyRows=promptTableDimension('Number of data rows',3,30);if(bodyRows===null||bodyRows===false)return;
-    const groupCount=promptTableDimension('Number of header groups',2,Math.min(6,columns));if(groupCount===null||groupCount===false)return;
-    const labels=[];
-    for(let i=0;i<groupCount;i++){const label=window.prompt('Header group '+(i+1)+' label:','Group '+(i+1));if(label===null)return;labels.push(label.trim()||('Group '+(i+1)));}
-    const groupCells=[];let start=0;
-    labels.forEach((label,index)=>{const remaining=columns-start;const remainingGroups=labels.length-index;const span=Math.ceil(remaining/remainingGroups);groupCells.push({text:label,colspan:span,rowspan:1,header:true});start+=span;});
+    const title=window.prompt('Table title shown above the table:','From observation to execution');if(title===null)return;
+    const groupLabel=window.prompt('Main grouped header label:','Price structure');if(groupLabel===null)return;
+    const groupWidth=columns-2;
+    const leafLabels=['Open','High','Low','Close'];
+    const groupCells=[
+      {text:groupLabel.trim()||'Price structure',colspan:groupWidth,rowspan:1,header:true},
+      {text:'Volume',colspan:1,rowspan:2,header:true},
+      {text:'Context',colspan:1,rowspan:2,header:true}
+    ];
     const rows=[
       {section:'head',cells:groupCells},
-      {section:'head',cells:Array.from({length:columns},(_,i)=>({text:'Field '+(i+1),colspan:1,rowspan:1,header:true}))},
+      {section:'head',cells:Array.from({length:groupWidth},(_,i)=>({text:leafLabels[i]||('Field '+(i+1)),colspan:1,rowspan:1,header:true}))},
       ...Array.from({length:bodyRows},()=>({section:'body',cells:Array.from({length:columns},()=>({text:'',colspan:1,rowspan:1,header:false}))}))
     ];
     const lesson=currentLesson();if(!lesson)return;
     if(!lesson.tables||typeof lesson.tables!=='object')lesson.tables={};
-    const id=uid('table');lesson.tables[id]={title:'Lesson table',rows};
+    const id=uid('table');
+    lesson.tables[id]={title:title.trim()||'From observation to execution',rows};
     restoreRichEditorSelection(editor);document.execCommand('insertHTML',false,structuredTableEditorMarkup(id));
     syncVisualEditorToModel(editor);captureRichEditorRange();
-    toast('Grouped table inserted. Edit group labels and headings directly; use the table controls to add or remove rows and columns.');
+    toast('Option 5 grouped table inserted. Edit the caption, grouped heading, leaf labels and data cells directly; row and column controls preserve merged headers.');
   }
   function editSelectedTable(action,editor) {
     restoreRichEditorSelection(editor);
@@ -1284,18 +1322,26 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       thead.insertBefore(groupRow,headerRow);
       if(!table.dataset.editorStructuredTable){table.dataset.editorStructuredTable=uid('table');table.dataset.tableTitle='Lesson table';}
     } else if(action==='add-column'){
-      const width=tableLogicalWidth(table);if(width>=12){toast('Tables support up to 12 columns.');return;}
-      table.querySelectorAll('tr').forEach(row=>{
-        const cells=Array.from(row.children).filter(cell=>/^(TH|TD)$/.test(cell.tagName));if(!cells.length)return;
-        const inHeader=Boolean(row.closest('thead'));const last=cells[cells.length-1];
-        if(inHeader&&(Number(last.getAttribute('colspan')||1)>1||cells.length<width)){last.colSpan=Math.max(1,Number(last.colSpan||1))+1;}
-        else{const cell=document.createElement(inHeader?'th':'td');cell.innerHTML='<br>';if(inHeader)cell.scope='col';row.appendChild(cell);}
+      const layout=tableGridLayout(table);const width=layout.width;
+      if(width>=12){toast('Tables support up to 12 columns.');return;}
+      const spanningHeader=layout.rows.flatMap(info=>info.placements.map(placement=>({...placement,row:info.row})))
+        .find(placement=>placement.row.closest('thead')&&placement.rowspan>1&&placement.end===width-1);
+      if(spanningHeader)spanningHeader.cell.colSpan=spanningHeader.colspan+1;
+      layout.rows.forEach(info=>{
+        if(spanningHeader&&info.row===spanningHeader.row)return;
+        const last=info.placements[info.placements.length-1];if(!last||last.end!==width-1)return;
+        const inHeader=Boolean(info.row.closest('thead'));
+        if(inHeader&&last.colspan>1)last.cell.colSpan=last.colspan+1;
+        else{const cell=document.createElement(inHeader?'th':'td');cell.innerHTML='<br>';if(inHeader)cell.scope='col';info.row.appendChild(cell);}
       });
     } else if(action==='remove-column'){
-      const width=tableLogicalWidth(table);if(width<=1){toast('A table must keep at least one column.');return;}
-      table.querySelectorAll('tr').forEach(row=>{
-        const cells=Array.from(row.children).filter(cell=>/^(TH|TD)$/.test(cell.tagName));const last=cells[cells.length-1];if(!last)return;
-        const span=Math.max(1,Number(last.getAttribute('colspan')||1));if(span>1)last.colSpan=span-1;else last.remove();
+      const layout=tableGridLayout(table);const width=layout.width;
+      if(width<=1){toast('A table must keep at least one column.');return;}
+      layout.rows.forEach(info=>{
+        const lastColumnCell=info.placements.find(placement=>placement.end===width-1);
+        if(!lastColumnCell)return;
+        if(lastColumnCell.colspan>1)lastColumnCell.cell.colSpan=lastColumnCell.colspan-1;
+        else lastColumnCell.cell.remove();
       });
     } else if(action==='add-row'){
       const width=tableLogicalWidth(table);let tbody=table.querySelector('tbody');if(!tbody){tbody=document.createElement('tbody');table.appendChild(tbody);}

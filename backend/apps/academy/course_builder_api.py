@@ -537,7 +537,6 @@ def _build_import_payload(course_state, course_slug):
                     raise ValidationError(f"{title}: a structured table must contain between 1 and 60 rows.")
                 clean_rows = []
                 encountered_body = False
-                expected_width = None
                 for row in raw_rows:
                     if not isinstance(row, dict):
                         continue
@@ -570,13 +569,37 @@ def _build_import_payload(course_state, course_slug):
                         })
                     if not clean_cells:
                         continue
-                    if expected_width is None:
-                        expected_width = row_width
-                    if row_width > 12 or row_width != expected_width:
-                        raise ValidationError(f"{title}: each grouped-table row must cover the same 1–12 columns.")
+                    if row_width > 12:
+                        raise ValidationError(f"{title}: grouped-table rows cannot cover more than 12 columns.")
                     clean_rows.append({"section": section, "cells": clean_cells})
                 if not clean_rows or not any(row["section"] == "head" for row in clean_rows):
                     raise ValidationError(f"{title}: a structured table needs at least one header row.")
+                occupied_by_row = [set() for _row in clean_rows]
+                expected_width = None
+                for row_index, row in enumerate(clean_rows):
+                    occupied = occupied_by_row[row_index]
+                    for cell in row["cells"]:
+                        colspan = cell["colspan"]
+                        rowspan = cell["rowspan"]
+                        if row_index + rowspan > len(clean_rows):
+                            raise ValidationError(f"{title}: a table cell cannot span beyond the last row.")
+                        column = 0
+                        while column + colspan <= 12:
+                            span_columns = range(column, column + colspan)
+                            if not any(position in occupied for position in span_columns):
+                                break
+                            column += 1
+                        if column + colspan > 12:
+                            raise ValidationError(f"{title}: grouped-table rows cannot cover more than 12 columns.")
+                        span_columns = range(column, column + colspan)
+                        occupied.update(span_columns)
+                        for future_row in range(row_index + 1, row_index + rowspan):
+                            occupied_by_row[future_row].update(span_columns)
+                    row_width = max(occupied) + 1 if occupied else 0
+                    if expected_width is None:
+                        expected_width = row_width
+                    elif row_width != expected_width:
+                        raise ValidationError(f"{title}: each grouped-table row must cover the same 1–12 columns.")
                 tables_payload[table_id] = {
                     "title": str(raw_table.get("title") or "Lesson table").strip()[:240],
                     "rows": clean_rows,
