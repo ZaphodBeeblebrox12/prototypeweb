@@ -841,10 +841,13 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn("display: none !important;", notebook_styles)
         self.assertIn(".tt-learning-room .tt-mobile-pause-and-record,\n  .tt-admin-course-preview", notebook_styles)
         self.assertIn("display: block;", notebook_styles)
-        mobile_rule_start = notebook_styles.index(
+        mobile_marker = notebook_styles.index(
             "/* Option A: keep all three reflection cards on one row on phone screens. */"
         )
-        mobile_rule_end = notebook_styles.index("\n}", mobile_rule_start)
+        mobile_rule_start = notebook_styles.rindex(
+            "@media (max-width: 680px)", 0, mobile_marker
+        )
+        mobile_rule_end = notebook_styles.rfind("}", mobile_rule_start)
         mobile_rules = notebook_styles[mobile_rule_start:mobile_rule_end]
         self.assertIn("@media (max-width: 680px)", mobile_rules)
         self.assertIn("grid-template-columns: repeat(3, minmax(0, 1fr));", mobile_rules)
