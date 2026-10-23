@@ -27,10 +27,11 @@ _ALLOWED_ATTRIBUTES = {
     "div": ["class", "role", "aria-label", "tabindex"],
     "figure": ["class", "data-figure-id"],
     "figcaption": ["class"],
+    "table": ["class"],
     "img": ["src", "alt", "title", "loading", "width", "height", "tabindex", "role", "aria-label"],
     "span": ["class", "aria-label", "title"],
     "strong": ["class"],
-    "th": ["align"], "td": ["align"],
+    "th": ["align", "colspan", "rowspan", "scope"], "td": ["align", "colspan", "rowspan"],
 }
 _IMAGE_REF = re.compile(r"asset://([0-9a-fA-F-]{36})")
 _IMAGE_MARKDOWN = re.compile(r"!\[([^\]]*)\]\(asset://([0-9a-fA-F-]{36})(?:\s+[^)]*)?\)")
@@ -38,6 +39,7 @@ _TEACHING_FIGURE_TOKEN = re.compile(r"\[\[teaching-figure:([A-Za-z0-9_-]{1,120})
 _IMAGE_GROUP_TOKEN = re.compile(r"\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]")
 _LESSON_REF = re.compile(r"\[\[(lesson|lesson-card):([0-9a-fA-F-]{36})\]\]")
 _COURSE_CARD_REF = re.compile(r"\[\[course-card:(?:(coming-soon):)?([0-9a-fA-F-]{36})\]\]")
+_TABLE_BLOCK_TOKEN = re.compile(r"\[\[table-block:([A-Za-z0-9_-]{1,120})\]\]")
 _TAB_ROUTE_TOKEN = re.compile(r"^\s*\[\[lesson-tab:(idea|examples|practice)\]\]\s*$", re.IGNORECASE)
 
 
@@ -394,8 +396,9 @@ def render_safe_markdown(
     figure_prefix=None,
     module_label="",
     course_title="",
+    table_metadata=None,
 ):
-    """Render sanitised Markdown and titled figures/groups using stable asset IDs."""
+    """Render sanitised Markdown, structured tables, figures and groups."""
     from html import escape
 
     source = validate_markdown_source(source or "")
@@ -403,6 +406,51 @@ def render_safe_markdown(
         source, user=user, admin_preview=admin_preview,
     )
     source, course_cards = _resolve_course_cards(source)
+    table_metadata = table_metadata if isinstance(table_metadata, dict) else {}
+    table_frames = {}
+
+    def replace_table_block(match):
+        table_id = match.group(1)
+        metadata = table_metadata.get(table_id)
+        rows = metadata.get("rows") if isinstance(metadata, dict) else None
+        if not isinstance(rows, list) or not rows:
+            markup = '<aside class="tt-structured-table-unavailable" role="status"><strong>Table unavailable in this preview</strong></aside>'
+        else:
+            head_rows, body_rows = [], []
+            title = escape(str(metadata.get("title") or "Lesson table").strip() or "Lesson table")
+            for row in rows[:60]:
+                if not isinstance(row, dict):
+                    continue
+                section = "head" if row.get("section") == "head" else "body"
+                cells = row.get("cells") if isinstance(row.get("cells"), list) else []
+                cell_markup = []
+                for cell in cells[:12]:
+                    if not isinstance(cell, dict):
+                        continue
+                    tag = "th" if section == "head" or bool(cell.get("header")) else "td"
+                    try:
+                        colspan = max(1, min(12, int(cell.get("colspan", 1))))
+                        rowspan = max(1, min(12, int(cell.get("rowspan", 1))))
+                    except (TypeError, ValueError):
+                        colspan, rowspan = 1, 1
+                    spans = (f' colspan="{colspan}"' if colspan > 1 else "") + (f' rowspan="{rowspan}"' if rowspan > 1 else "")
+                    scope = ' scope="colgroup"' if tag == "th" and colspan > 1 else (' scope="col"' if tag == "th" else "")
+                    cell_markup.append(f"<{tag}{spans}{scope}>{escape(str(cell.get('text') or ''))}</{tag}>")
+                if not cell_markup:
+                    continue
+                row_markup = "<tr>" + "".join(cell_markup) + "</tr>"
+                (head_rows if section == "head" else body_rows).append(row_markup)
+            thead = "<thead>" + "".join(head_rows) + "</thead>" if head_rows else ""
+            tbody = "<tbody>" + "".join(body_rows) + "</tbody>" if body_rows else ""
+            if not head_rows:
+                markup = '<aside class="tt-structured-table-unavailable" role="status"><strong>Table has no header row</strong></aside>'
+            else:
+                markup = '<div class="lesson-table-wrap tt-structured-table-wrap" role="region" tabindex="0" aria-label="Scrollable table: ' + title + '"><table class="tt-structured-table">' + thead + tbody + "</table></div>"
+        token = f"TTSTRUCTUREDTABLE{len(table_frames)}END"
+        table_frames[token] = markup
+        return token
+
+    source = _TABLE_BLOCK_TOKEN.sub(replace_table_block, source or "")
     asset_urls = asset_urls or {}
     figure_metadata = figure_metadata if isinstance(figure_metadata, dict) else {}
     figure_frames = {}
@@ -656,6 +704,9 @@ def render_safe_markdown(
     for token, markup in course_cards.items():
         rendered = rendered.replace(f"<p>{token}</p>", markup)
         rendered = rendered.replace(token, markup)
+    for token, markup in table_frames.items():
+        rendered = rendered.replace(f"<p>{token}</p>", markup)
+        rendered = rendered.replace(token, markup)
     return bleach.clean(
         rendered,
         tags=_ALLOWED_TAGS,
@@ -704,6 +755,7 @@ def build_lesson_sections(
     regional_content=None,
     country_code=None,
     region_code=None,
+    table_metadata=None,
 ):
     """Group source headings into the three reusable Learning Room tabs."""
     source = resolve_regional_lesson_content(
@@ -807,6 +859,7 @@ def build_lesson_sections(
             rendered["idea"], asset_urls, user=user, admin_preview=admin_preview,
             figure_metadata=figure_metadata, figure_prefix=figure_prefix,
             module_label=module_label, course_title=course_title,
+            table_metadata=table_metadata,
         ),
         "examples_html": render_safe_markdown(
             rendered["examples"], asset_urls, user=user, admin_preview=admin_preview,

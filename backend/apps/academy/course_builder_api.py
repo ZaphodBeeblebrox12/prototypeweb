@@ -320,6 +320,17 @@ def _build_import_payload(course_state, course_slug):
             all_lesson_body_sources = content + "\n" + "\n".join(
                 value for value in raw_body_variants_for_figures.values() if isinstance(value, str)
             )
+            raw_regional_blocks_for_tables = lesson.get("regionalBlocks") if isinstance(lesson.get("regionalBlocks"), list) else []
+            regional_block_body_sources = []
+            for regional_block in raw_regional_blocks_for_tables:
+                if not isinstance(regional_block, dict):
+                    continue
+                if isinstance(regional_block.get("baseContent"), str):
+                    regional_block_body_sources.append(regional_block["baseContent"])
+                for regional_variant in regional_block.get("variants", []):
+                    if isinstance(regional_variant, dict) and isinstance(regional_variant.get("content"), str):
+                        regional_block_body_sources.append(regional_variant["content"])
+            all_lesson_body_sources += "\n" + "\n".join(regional_block_body_sources)
             # Grouped images are referenced by a semantic token instead of individual
             # Markdown image tokens. Resolve group membership to stable asset UUIDs, and
             # count those assets as lesson references for delivery/access checks.
@@ -514,6 +525,63 @@ def _build_import_payload(course_state, course_slug):
                     "cards": cards,
                     "note": str(figure.get("note") or "").strip()[:1500],
                 }
+            tables_payload = {}
+            raw_tables = lesson.get("tables") if isinstance(lesson.get("tables"), dict) else {}
+            table_refs = set(re.findall(r"\[\[table-block:([A-Za-z0-9_-]{1,120})\]\]", all_lesson_body_sources))
+            for table_id in sorted(table_refs):
+                raw_table = raw_tables.get(table_id)
+                if not isinstance(raw_table, dict):
+                    raise ValidationError(f"{title}: table {table_id} is referenced but its editable data is missing.")
+                raw_rows = raw_table.get("rows") if isinstance(raw_table.get("rows"), list) else []
+                if not raw_rows or len(raw_rows) > 60:
+                    raise ValidationError(f"{title}: a structured table must contain between 1 and 60 rows.")
+                clean_rows = []
+                encountered_body = False
+                expected_width = None
+                for row in raw_rows:
+                    if not isinstance(row, dict):
+                        continue
+                    section = str(row.get("section") or "body").lower()
+                    if section not in {"head", "body"}:
+                        raise ValidationError(f"{title}: table rows must be header or body rows.")
+                    if section == "body":
+                        encountered_body = True
+                    elif encountered_body:
+                        raise ValidationError(f"{title}: grouped table header rows must appear before body rows.")
+                    raw_cells = row.get("cells") if isinstance(row.get("cells"), list) else []
+                    if not raw_cells or len(raw_cells) > 12:
+                        raise ValidationError(f"{title}: each table row must have between 1 and 12 cells.")
+                    clean_cells, row_width = [], 0
+                    for cell in raw_cells:
+                        if not isinstance(cell, dict):
+                            continue
+                        try:
+                            colspan = int(cell.get("colspan", 1))
+                            rowspan = int(cell.get("rowspan", 1))
+                        except (TypeError, ValueError):
+                            raise ValidationError(f"{title}: table cell spans must be whole numbers.")
+                        if not 1 <= colspan <= 12 or not 1 <= rowspan <= 12:
+                            raise ValidationError(f"{title}: table cell spans must be between 1 and 12.")
+                        row_width += colspan
+                        clean_cells.append({
+                            "text": str(cell.get("text") or "")[:2000],
+                            "colspan": colspan, "rowspan": rowspan,
+                            "header": bool(cell.get("header")),
+                        })
+                    if not clean_cells:
+                        continue
+                    if expected_width is None:
+                        expected_width = row_width
+                    if row_width > 12 or row_width != expected_width:
+                        raise ValidationError(f"{title}: each grouped-table row must cover the same 1–12 columns.")
+                    clean_rows.append({"section": section, "cells": clean_cells})
+                if not clean_rows or not any(row["section"] == "head" for row in clean_rows):
+                    raise ValidationError(f"{title}: a structured table needs at least one header row.")
+                tables_payload[table_id] = {
+                    "title": str(raw_table.get("title") or "Lesson table").strip()[:240],
+                    "rows": clean_rows,
+                }
+
             learner_questions = []
             for question_index, question in enumerate(questions, start=1):
                 if not isinstance(question, dict):
@@ -566,6 +634,7 @@ def _build_import_payload(course_state, course_slug):
                 "source_id": f"{module_index}.{lesson_index}",
                 "asset_ids": asset_ids,
                 "figures": figures,
+                "tables": tables_payload,
                 "lesson_reference_ids": sorted({
                     str(uuid.UUID(value))
                     for value in _LESSON_REF_TOKEN.findall(all_lesson_body_sources)

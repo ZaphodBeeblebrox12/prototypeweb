@@ -471,6 +471,10 @@ def lesson_detail(request, course_slug, lesson_id):
                 lesson.content_json.get("figures", {})
                 if isinstance(lesson.content_json, dict) else {}
             ),
+            table_metadata=(
+                lesson.content_json.get("tables", {})
+                if isinstance(lesson.content_json, dict) else {}
+            ),
             figure_prefix=f"{lesson.module.position}.{lesson.position}",
             module_label=f"Module {lesson.module.position} · {lesson.module.title}",
             course_title=course.title,
@@ -586,6 +590,7 @@ def admin_lesson_preview(request, course_slug, lesson_id):
             user=request.user,
             admin_preview=True,
             figure_metadata=content_json.get("figures", {}),
+            table_metadata=content_json.get("tables", {}),
             figure_prefix=f"{lesson.module.position}.{lesson.position}",
             module_label=f"Module {lesson.module.position} · {lesson.module.title}",
             course_title=course.title,
@@ -714,6 +719,7 @@ def course_import_website_preview(request, import_id):
             country_code=regional_country,
             region_code=regional_region,
             figure_metadata=selected_content_json.get("figures", {}),
+            table_metadata=selected_content_json.get("tables", {}),
             figure_prefix=str(selected_lesson.get("source_id", "")),
             module_label=f"Module {selected_module.get('position', '')} · {selected_module.get('title', '')}",
             course_title=str(course.get("title") or record.title),

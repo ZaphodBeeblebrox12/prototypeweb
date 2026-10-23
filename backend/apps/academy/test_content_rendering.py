@@ -452,6 +452,42 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn('<strong class="tt-purpose-figure-title">Chart</strong>', rendered)
         self.assertNotIn("BANKNIFTY_2023-08-06_16-51-56_bd975.png", rendered)
 
+    def test_structured_grouped_table_renders_spans_and_accessible_wrapper(self):
+        source = "Opening copy.\n\n[[table-block:market-comparison]]\n\nClosing copy."
+        rendered = render_safe_markdown(
+            source,
+            table_metadata={
+                "market-comparison": {
+                    "title": "Market comparison",
+                    "rows": [
+                        {"section": "head", "cells": [
+                            {"text": "Context", "colspan": 2, "rowspan": 1, "header": True},
+                            {"text": "Decision", "colspan": 2, "rowspan": 1, "header": True},
+                        ]},
+                        {"section": "head", "cells": [
+                            {"text": "Market", "colspan": 1, "rowspan": 1, "header": True},
+                            {"text": "Evidence", "colspan": 1, "rowspan": 1, "header": True},
+                            {"text": "If confirmed", "colspan": 1, "rowspan": 1, "header": True},
+                            {"text": "If rejected", "colspan": 1, "rowspan": 1, "header": True},
+                        ]},
+                        {"section": "body", "cells": [
+                            {"text": "Range", "colspan": 1, "rowspan": 1, "header": False},
+                            {"text": "Repeated rejection", "colspan": 1, "rowspan": 1, "header": False},
+                            {"text": "Wait for follow-through", "colspan": 1, "rowspan": 1, "header": False},
+                            {"text": "Reassess the range", "colspan": 1, "rowspan": 1, "header": False},
+                        ]},
+                    ],
+                }
+            },
+        )
+        self.assertIn('class="lesson-table-wrap tt-structured-table-wrap"', rendered)
+        self.assertIn('aria-label="Scrollable table: Market comparison"', rendered)
+        self.assertIn('colspan="2" scope="colgroup"', rendered)
+        self.assertIn("Repeated rejection", rendered)
+        self.assertIn("Opening copy.", rendered)
+        self.assertIn("Closing copy.", rendered)
+        self.assertNotIn("[[table-block:", rendered)
+
     def test_information_table_uses_accessible_scrollable_reference_wrapper(self):
         source = (
             "| Confirmed move | ADX above threshold | ADX below threshold |\n"

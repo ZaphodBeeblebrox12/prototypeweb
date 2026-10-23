@@ -1089,6 +1089,51 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(cleaned_image["title"], "")
         self.assertEqual(cleaned_image["name"], "BANKNIFTY_2023-08-06_16-51-56_bd975.png")
 
+    def test_builder_persists_grouped_header_table_metadata_losslessly(self):
+        payload = self.draft_payload("builder-grouped-table")
+        lesson = payload["course"]["modules"][0]["lessons"][0]
+        lesson["content"] = (
+            "Introductory text.\n\n"
+            "[[table-block:market-comparison]]\n\n"
+            "Follow-up text."
+        )
+        lesson["tables"] = {
+            "market-comparison": {
+                "title": "Market comparison",
+                "rows": [
+                    {"section": "head", "cells": [
+                        {"text": "Context", "colspan": 2, "rowspan": 1, "header": True},
+                        {"text": "Decision", "colspan": 2, "rowspan": 1, "header": True},
+                    ]},
+                    {"section": "head", "cells": [
+                        {"text": "Market", "colspan": 1, "rowspan": 1, "header": True},
+                        {"text": "Evidence", "colspan": 1, "rowspan": 1, "header": True},
+                        {"text": "Confirmed", "colspan": 1, "rowspan": 1, "header": True},
+                        {"text": "Rejected", "colspan": 1, "rowspan": 1, "header": True},
+                    ]},
+                    {"section": "body", "cells": [
+                        {"text": "Range", "colspan": 1, "rowspan": 1, "header": False},
+                        {"text": "Repeated rejection", "colspan": 1, "rowspan": 1, "header": False},
+                        {"text": "Wait for follow-through", "colspan": 1, "rowspan": 1, "header": False},
+                        {"text": "Reassess the range", "colspan": 1, "rowspan": 1, "header": False},
+                    ]},
+                ],
+            },
+        }
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        record = CourseImport.objects.get(pk=response.json()["record_id"])
+        saved_lesson = record.payload["modules"][0]["lessons"][0]
+        saved_table = saved_lesson["content_json"]["tables"]["market-comparison"]
+        self.assertEqual(saved_table["title"], "Market comparison")
+        self.assertEqual(saved_table["rows"][0]["cells"][0]["colspan"], 2)
+        self.assertEqual(saved_table["rows"][1]["cells"][2]["text"], "Confirmed")
+        self.assertEqual(saved_lesson["content_markdown"], lesson["content"])
+
     def test_builder_persists_native_comparison_figures_by_stable_token(self):
         from .course_builder_api import _build_import_payload
 
