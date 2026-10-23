@@ -312,16 +312,10 @@
   .tt-tab-panel .tt-purpose-figure figcaption { padding: 0 10px 12px; }
 }
 
-
-
-
-
-
-
 @media (max-width: 620px) {
   .tt-tab-panel .tt-purpose-figure-header-top { flex-direction: column; gap: 4px; }
   .tt-tab-panel .tt-purpose-figure-module { text-align: left; }
-  
+
 }
 /* Editable comparison-card figures, matching the accepted Figure 2.2 teaching aid. */
 .tt-tab-panel .tt-comparison-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
@@ -485,11 +479,6 @@
 .tt-learning-room .tt-tab-panel .tt-purpose-figure-image img { max-height: 620px; }
 .tt-learning-room .tt-tab-panel .tt-purpose-figure figcaption { padding: 0 clamp(15px, 2.2vw, 26px) 22px; font-size: .92rem; line-height: 1.8; }
 
-
-
-
-
-
 .tt-learning-room .tt-tab-panel .tt-comparison-cards { gap: 14px; }
 .tt-learning-room .tt-tab-panel .tt-comparison-card { padding: 17px; border-radius: 12px; background: linear-gradient(150deg, var(--tt-surface), #f1f1e8); }
 .tt-learning-room .tt-tab-panel .tt-comparison-card strong { font-size: 1.22rem; }
@@ -600,10 +589,6 @@
 .tt-learning-room .tt-tab-panel .tt-purpose-figure-body { padding: 14px; }
 .tt-learning-room .tt-tab-panel .tt-purpose-figure-image img { max-height: 470px; }
 .tt-learning-room .tt-tab-panel .tt-purpose-figure figcaption { padding: 12px 13px 5px; font-size: 12px; line-height: 1.6; }
-
-
-
-
 
 .tt-learning-room .tt-tab-panel .tt-comparison-cards { gap: 10px; }
 .tt-learning-room .tt-tab-panel .tt-comparison-card { padding: 12px; border-radius: 9px; }
