@@ -72,7 +72,10 @@ class ServiceTests(SimpleTestCase):
         m_send.assert_not_called()
 
     def test_templates_render_key_content(self):
-        self.assertIn("alice", render_welcome("alice"))
+        welcome = render_welcome("alice")
+        self.assertIn("alice", welcome)
+        self.assertIn("expiry reminders).", welcome)
+        self.assertNotIn("/stop", welcome)
         rendered = render_subscription_activated("alice", "Pro")
         self.assertIn("Pro", rendered)
         self.assertIn("activated", rendered)
