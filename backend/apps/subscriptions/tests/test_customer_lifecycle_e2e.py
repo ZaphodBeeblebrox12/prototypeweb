@@ -10,14 +10,15 @@ HTTP codes):
     path) -> renewal extension -> expiry -> reconcile revoke -> post-revoke
     membership/dashboard state.
 
-External providers (Telegram Bot API, provision bridge) are mocked at the
-same boundaries the existing test-suite uses. No new infrastructure.
+Telegram Bot API calls are mocked at the direct Django transport boundary.
+No polling bridge or live Telegram network request is used.
 """
 
 import contextlib
 import hashlib
 import hmac
 import json
+from types import SimpleNamespace
 from unittest import mock
 
 from django.test import Client, TestCase, override_settings
@@ -60,58 +61,47 @@ def rp_sig(body):
 
 @contextlib.contextmanager
 def patched_provision():
-    """Patch every provision boundary the reconcile stack may use.
-
-    Returns {target: mock}. Targets that do not exist in this revision are
-    skipped so the test stays valid across either transport implementation.
-    """
-    targets = [
-        "apps.bot_integration.reconcile.ProvisionClient",
-        "apps.bot_integration.services.provision_client.ProvisionClient",
-        "apps.bot_integration.reconcile_jobs.ProvisionClient",
-        "apps.bot_integration.reconcile_jobs.ProvisionTransport",
-        "apps.bot_integration.reconcile.ProvisionTransport",
-    ]
-    active = {}
-    patchers = []
-    for t in targets:
-        try:
-            patcher = mock.patch(t)
-            active[t] = patcher.start()
-            patchers.append(patcher)
-        except Exception:
-            pass
+    """Mock the direct Telegram transport used by the durable reconciler."""
     _GRANT_LOG.clear()
     _REVOKE_LOG.clear()
-    for p in active.values():
-        p.side_effect = lambda *a, **k: _spy_instance()
-    try:
-        yield active
-    finally:
-        for patcher in reversed(patchers):
-            patcher.stop()
+    state = {"member": True}
+    instance = mock.MagicMock()
+
+    def create_invite_link(telegram_user_id, channel_id, idempotency_key=None):
+        _GRANT_LOG.append(((telegram_user_id, channel_id), {
+            "idempotency_key": idempotency_key,
+        }))
+        return "https://t.me/+e2e-one-use-link"
+
+    def send_invite_dm(telegram_user_id, channel_id, invite_link):
+        return True
+
+    def is_member(telegram_user_id, channel_id):
+        return state["member"]
+
+    def revoke(telegram_user_id, channel_id, idempotency_key=None):
+        _REVOKE_LOG.append(((telegram_user_id, channel_id), {
+            "idempotency_key": idempotency_key,
+        }))
+        state["member"] = False
+        return SimpleNamespace(
+            ok=True, retryable=False, error_code="", error_message="",
+        )
+
+    instance.create_invite_link.side_effect = create_invite_link
+    instance.send_invite_dm.side_effect = send_invite_dm
+    instance.is_member.side_effect = is_member
+    instance.revoke.side_effect = revoke
+
+    with mock.patch(
+        "apps.bot_integration.reconcile_jobs.ProvisionTransport",
+        return_value=instance,
+    ):
+        yield {"transport": instance}
 
 
 _GRANT_LOG = []
 _REVOKE_LOG = []
-
-
-def _spy_instance():
-    from apps.bot_integration.services.provision_client import ProvisionResult
-    inst = mock.MagicMock()
-    ok = ProvisionResult(ok=True, status="applied")
-    already = ProvisionResult(ok=True, status="already_applied")
-    def grant(*a, **k):
-        _GRANT_LOG.append((a, k))
-        return already if [1 for x in _GRANT_LOG
-                           if x[0][:2] == a[:2]] else ok
-    def revoke(*a, **k):
-        _REVOKE_LOG.append((a, k))
-        return already if [1 for x in _REVOKE_LOG
-                           if x[0][:2] == a[:2]] else ok
-    inst.grant.side_effect = grant
-    inst.revoke.side_effect = revoke
-    return inst
 
 
 def grant_calls(mocks):

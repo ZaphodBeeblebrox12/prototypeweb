@@ -55,10 +55,15 @@ def ok():
 
 def fake_transport():
     inst = mock.Mock()
-    inst.grant = mock.Mock(return_value=ok())
-    inst.revoke = mock.Mock(return_value=ok())
-    return mock.patch("apps.bot_integration.reconcile.ProvisionClient",
-                      return_value=inst), inst
+    inst.create_invite_link = mock.Mock(return_value="https://t.me/+fake")
+    inst.send_invite_dm = mock.Mock(return_value=True)
+    inst.is_member = mock.Mock(return_value=False)
+    inst.revoke = mock.Mock(return_value=mock.Mock(
+        ok=True, retryable=False, error_code="", error_message=""))
+    return mock.patch(
+        "apps.bot_integration.reconcile_jobs.ProvisionTransport",
+        return_value=inst,
+    ), inst
 
 
 class CancelActionTests(TestCase):

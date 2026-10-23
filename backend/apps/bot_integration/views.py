@@ -289,8 +289,16 @@ def telegram_webhook(request):
             return JsonResponse({"ok": True})
         return JsonResponse({"ok": True})
     except IntegrityError:
-        # Covers a concurrent attempt to bind the same Telegram chat to two
-        # users; keep the link intact and give the user a recoverable message.
+        # Translate only the expected Telegram-identity uniqueness race.
+        # Other integrity errors (such as outbox failures) must remain server
+        # errors instead of being mislabeled as a user conflict.
+        already_owned = (
+            user is not None
+            and TelegramAccount.objects.filter(chat_id=chat_id)
+            .exclude(user_id=user.id).exists()
+        )
+        if not already_owned:
+            raise
         status = "conflict"
 
     if status == "expired":

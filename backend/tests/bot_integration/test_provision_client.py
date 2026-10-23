@@ -19,6 +19,7 @@ from apps.bot_integration.models import (
 from apps.bot_integration.services import provision_client
 from apps.bot_integration.services.provision_client import (
     BotOffline, ProvisionClient, ProvisionResult)
+from apps.jobs.operations import DefiniteProvisioningError
 from apps.subscriptions.models import Plan, Subscription
 
 pytestmark = pytest.mark.django_db
@@ -166,11 +167,27 @@ def _ok():
 
 
 def _client_double(grant=None, revoke=None):
+    """Fake the direct Telegram transport that backs durable reconciliation."""
     instance = mock.Mock()
-    instance.grant = mock.Mock(return_value=grant or _ok())
-    instance.revoke = mock.Mock(return_value=revoke or _ok())
-    return mock.patch("apps.bot_integration.reconcile.ProvisionClient",
-                      return_value=instance), instance
+    grant_result = grant or _ok()
+    revoke_result = revoke or _ok()
+    if grant_result.ok:
+        instance.create_invite_link = mock.Mock(
+            return_value="https://t.me/+fake"
+        )
+    else:
+        instance.create_invite_link = mock.Mock(
+            side_effect=DefiniteProvisioningError(
+                f"{grant_result.error_code}: {grant_result.error_message}"
+            )
+        )
+    instance.send_invite_dm = mock.Mock(return_value=True)
+    instance.is_member = mock.Mock(side_effect=[True, False, False, True])
+    instance.revoke = mock.Mock(return_value=revoke_result)
+    return mock.patch(
+        "apps.bot_integration.reconcile_jobs.ProvisionTransport",
+        return_value=instance,
+    ), instance
 
 
 @pytest.mark.usefixtures("provision_settings")
@@ -181,7 +198,8 @@ class TestReconcileProvisionTransport:
             provision_client.__name__  # touch import
             from apps.bot_integration import reconcile
             reconcile.reconcile_user_access(entitled_user.id)
-        assert client.grant.call_count == 1
+        assert client.create_invite_link.call_count == 1
+        assert client.send_invite_dm.call_count == 1
         a = UserChannelAssignment.objects.get(
             user_id=entitled_user.id, platform="telegram", external_id="-1001")
         assert a.is_active
@@ -210,7 +228,7 @@ class TestReconcileProvisionTransport:
         from apps.bot_integration import reconcile
         with patcher:
             reconcile.reconcile_user_access(entitled_user.id)
-        assert client.grant.call_count == 0
+        assert client.create_invite_link.call_count == 0
         assert not UserChannelAssignment.objects.filter(
             user_id=entitled_user.id).exists()
         assert BotAccessAudit.objects.filter(

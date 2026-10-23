@@ -19,7 +19,7 @@ from apps.bot_integration.models import (
 from apps.bot_integration.reconcile import (
     _audit, _control_channel_guard, _reconcile_discord, compute_target_access)
 from apps.jobs.models import ProvisioningOperation
-from apps.jobs.operations import execute_operation
+from apps.jobs.operations import DefiniteProvisioningError, execute_operation
 
 logger = logging.getLogger(__name__)
 
@@ -53,10 +53,24 @@ class ProvisionTransport:
             return None
         ok, error = self.client.unban_user(channel_id, telegram_user_id)
         if not ok:
-            logger.warning("Telegram unban failed for channel %s: %s",
-                           channel_id, error)
+            if self._retryable(error):
+                logger.warning("Telegram unban outcome uncertain/retryable for channel %s",
+                               channel_id)
+                return None
+            raise DefiniteProvisioningError(
+                error or "Telegram rejected the unban request."
+            )
+
+        link, error, retryable = self.client.create_one_time_invite_link_result(channel_id)
+        if link:
+            return link
+        if retryable:
+            logger.warning("Telegram invite creation outcome uncertain/retryable for channel %s",
+                           channel_id)
             return None
-        return self.client.create_one_time_invite_link(channel_id)
+        raise DefiniteProvisioningError(
+            error or "Telegram rejected invite creation."
+        )
 
     def send_invite_dm(self, telegram_user_id, channel_id, invite_link):
         # Telegram sendMessage has no idempotency key; never report an

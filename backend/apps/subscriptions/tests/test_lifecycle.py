@@ -44,12 +44,20 @@ def ok():
 
 
 def patched_transport():
-    """Patch the ProvisionClient used by reconcile; returns (patcher, client)."""
+    """Patch direct Telegram transport; returns (patcher, transport)."""
     instance = mock.Mock()
-    instance.grant = mock.Mock(return_value=ok())
-    instance.revoke = mock.Mock(return_value=ok())
-    return (mock.patch("apps.bot_integration.reconcile.ProvisionClient",
-                       return_value=instance), instance)
+    instance.create_invite_link = mock.Mock(return_value="https://t.me/+fake")
+    instance.send_invite_dm = mock.Mock(return_value=True)
+    instance.is_member = mock.Mock(return_value=False)
+    instance.revoke = mock.Mock(return_value=mock.Mock(
+        ok=True, retryable=False, error_code="", error_message=""))
+    return (
+        mock.patch(
+            "apps.bot_integration.reconcile_jobs.ProvisionTransport",
+            return_value=instance,
+        ),
+        instance,
+    )
 
 
 @mock.patch("apps.jobs.enqueue.enqueue_reconcile")

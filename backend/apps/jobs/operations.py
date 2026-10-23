@@ -15,8 +15,12 @@ from .models import ProvisioningOperation
 logger = logging.getLogger(__name__)
 
 
+class DefiniteProvisioningError(Exception):
+    """The provider definitely rejected a provisioning step; do not treat it as unknown."""
+
+
 class _ProvisionTransport:
-    """Pluggable transport (real = ProvisionClient; tests inject a fake)."""
+    """Pluggable transport (tests inject a fake)."""
 
 
 def execute_operation(op: ProvisioningOperation, transport) -> bool:
@@ -37,11 +41,8 @@ def _run_revoke(op, transport) -> bool:
     result = transport.revoke(op.telegram_user_id, op.channel_id,
                               idempotency_key=op.provision_key)
     if result.ok:
-        # A provisioning "success" is NOT proof of revocation.  The bridge
-        # maps Telegram "user not found"/"kicked" to already_applied, and its
-        # idempotency cache can replay an old success -- either can report
-        # success while the user is still in the channel.  Verify with a
-        # read-only membership probe before declaring completion.
+        # A successful ban response is not sufficient evidence by itself.
+        # Verify with a read-only membership probe before declaring completion.
         member = transport.is_member(op.telegram_user_id, op.channel_id)
         if member is False:
             op.state = ProvisioningOperation.ST_COMPLETED
@@ -100,13 +101,18 @@ def _run_grant(op, transport) -> bool:
         # Mark creating BEFORE the side effect (durability).
         op.state = st.ST_CREATING
         op.save(update_fields=["state"])
-        # provision_key is unique per operation: the bridge's 24h grant
-        # cache is keyed on it, so each NEW lifecycle actually executes the
-        # bot's do_grant (unban + fresh invite + DM) instead of receiving a
-        # cached already_applied from a previous lifecycle.
-        created = transport.create_invite_link(op.telegram_user_id,
-                                               op.channel_id,
-                                               idempotency_key=op.provision_key)
+        # Pass the operation key for audit/diagnostics. Telegram has no
+        # invite-creation idempotency key, so durable state bounds retries.
+        try:
+            created = transport.create_invite_link(
+                op.telegram_user_id, op.channel_id,
+                idempotency_key=op.provision_key,
+            )
+        except DefiniteProvisioningError as exc:
+            op.state = st.ST_FAILED
+            op.last_error = str(exc)[:500]
+            op.save(update_fields=["state", "last_error"])
+            return True
         if not created:
             # Link creation failed or its outcome is uncertain; retry safely.
             op.state = st.ST_UNKNOWN
@@ -123,17 +129,6 @@ def _run_grant(op, transport) -> bool:
         return _send_link(op, transport)
 
     return op.state == st.ST_COMPLETED
-
-
-def _confirm_delivered(op, transport) -> bool:
-    """Post-delivery confirmation for server-side DMs (do_grant): mark SENT,
-    upgrade to COMPLETED when membership is already visible.  Never sends.
-    """
-    st = ProvisioningOperation
-    if transport.is_member(op.telegram_user_id, op.channel_id) is True:
-        op.state = st.ST_COMPLETED
-        op.save(update_fields=["state"])
-    return True
 
 
 def _send_link(op, transport) -> bool:

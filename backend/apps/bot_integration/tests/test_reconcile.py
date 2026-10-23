@@ -396,7 +396,7 @@ class MembershipRecoveryTests(TestCase):
                 return False
 
         t1 = MembershipRecoveryTransport(member=False)
-        self._run(t1)  # grant mints; server-side DM; op SENT (member False)
+        self._run(t1)  # grant persists invite and sends direct DM; op SENT
         op1 = ProvisioningOperation.objects.get(
             user_id=self.user.id, operation=ProvisioningOperation.OP_GRANT)
         self.assertEqual(op1.state, ProvisioningOperation.ST_SENT)
@@ -422,9 +422,9 @@ class MembershipRecoveryTests(TestCase):
             user_id=self.user.id, action="grant",
             status="failed").count(), 1)
 
-        # later reconcile retries: the FAILED op is terminal, so a fresh
-        # grant lifecycle is minted and delivered (server-side DM; recovery
-        # audits only on COMPLETED/FAILED, so the success count is unchanged)
+        # Later reconcile retries: the FAILED operation is terminal, so a fresh
+        # grant lifecycle is minted and its persisted invite is sent directly.
+        # Recovery audits only on COMPLETED/FAILED, so counts stay stable.
         t2 = MembershipRecoveryTransport(member=False)
         self._run(t2)
         a.refresh_from_db()

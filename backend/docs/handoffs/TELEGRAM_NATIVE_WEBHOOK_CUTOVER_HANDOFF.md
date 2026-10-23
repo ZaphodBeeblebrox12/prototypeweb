@@ -3,8 +3,8 @@
 **Updated:** 2026-10-23  
 **Repository:** `ZaphodBeeblebrox12/prototypeweb`  
 **Working branch:** `my-new-branch`  
-**Implementation commit:** `e3f568fd21b8f1fa850f01988f6efe0bfca02348`  
-**Current state:** Source commit is on the approved branch. CI status still needs to be confirmed. Render staging has not been deployed or modified.
+**Implementation branch:** `my-new-branch` (follow the latest branch head for the current implementation commit)  
+**Current state:** CI identified compatibility tests still targeting the retired bridge client. The direct transport and tests are being corrected on this branch. Render staging has not been deployed or modified.
 
 ## Goal and non-negotiables
 

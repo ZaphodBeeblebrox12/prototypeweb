@@ -7,6 +7,7 @@ from django.test import SimpleTestCase, override_settings
 
 from apps.bot_integration.reconcile_jobs import ProvisionTransport
 from apps.bot_integration.services.telegram import TelegramBotService
+from apps.jobs.operations import DefiniteProvisioningError
 from apps.bot_integration.services.telegram_transport import (
     OUTCOME_ACCEPTED,
     OUTCOME_INDETERMINATE,
@@ -15,11 +16,11 @@ from apps.bot_integration.services.telegram_transport import (
 
 
 class DirectProvisionTransportTests(SimpleTestCase):
-    @mock.patch.object(TelegramBotService, "create_one_time_invite_link")
+    @mock.patch.object(TelegramBotService, "create_one_time_invite_link_result")
     @mock.patch.object(TelegramBotService, "unban_user")
     def test_grant_unbans_before_creating_one_time_invite(self, unban, create):
         unban.return_value = (True, "")
-        create.return_value = "https://t.me/+one-use-link"
+        create.return_value = ("https://t.me/+one-use-link", "", False)
 
         link = ProvisionTransport().create_invite_link(12345, "-100123")
 
@@ -27,7 +28,7 @@ class DirectProvisionTransportTests(SimpleTestCase):
         unban.assert_called_once_with("-100123", 12345)
         create.assert_called_once_with("-100123")
 
-    @mock.patch.object(TelegramBotService, "create_one_time_invite_link")
+    @mock.patch.object(TelegramBotService, "create_one_time_invite_link_result")
     @mock.patch.object(TelegramBotService, "unban_user")
     def test_unban_failure_prevents_invite_creation(self, unban, create):
         unban.return_value = (False, "Telegram network timeout")
@@ -36,6 +37,23 @@ class DirectProvisionTransportTests(SimpleTestCase):
 
         self.assertIsNone(link)
         create.assert_not_called()
+
+    @mock.patch.object(TelegramBotService, "create_one_time_invite_link_result")
+    @mock.patch.object(TelegramBotService, "unban_user", return_value=(True, ""))
+    def test_definite_invite_rejection_is_not_unknown(self, unban, create):
+        create.return_value = (None, "bot is not an administrator", False)
+
+        with self.assertRaises(DefiniteProvisioningError):
+            ProvisionTransport().create_invite_link(12345, "-100123")
+
+    @mock.patch.object(TelegramBotService, "create_one_time_invite_link_result")
+    @mock.patch.object(TelegramBotService, "unban_user", return_value=(True, ""))
+    def test_retryable_invite_failure_remains_unknown(self, unban, create):
+        create.return_value = (None, "network timeout", True)
+
+        link = ProvisionTransport().create_invite_link(12345, "-100123")
+
+        self.assertIsNone(link)
 
     @mock.patch.object(TelegramBotService, "send_message_result")
     def test_accepted_dm_is_confirmed(self, send):

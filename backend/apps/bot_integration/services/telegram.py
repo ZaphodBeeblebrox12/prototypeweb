@@ -139,7 +139,10 @@ class TelegramBotService:
         return cls.send_message_result(chat_id, text).ok
 
     @classmethod
-    def create_one_time_invite_link(cls, channel_id: str, expire_seconds: int = 86400) -> Optional[str]:
+    def create_one_time_invite_link_result(
+        cls, channel_id: str, expire_seconds: int = 86400,
+    ) -> tuple[Optional[str], str, bool]:
+        """Return (invite_link, error, retryable) without conflating failure classes."""
         expire_date = int((timezone.now() + timedelta(seconds=expire_seconds)).timestamp())
         result = cls._api_request("createChatInviteLink", {
             "chat_id": channel_id,
@@ -150,10 +153,32 @@ class TelegramBotService:
             result_payload = result.get("result")
             if isinstance(result_payload, dict):
                 invite_link = result_payload.get("invite_link")
-                if isinstance(invite_link, str):
-                    return invite_link
-        logger.error(f"Failed to create invite link for {channel_id}: {result}")
-        return None
+                if isinstance(invite_link, str) and invite_link.strip():
+                    return invite_link, "", False
+        error = (result.get("description") or result.get("error")
+                 or "Telegram did not return a usable invite link")
+        code = result.get("error_code")
+        retryable = bool(result.get("transport_error")) or code in {
+            429, 500, 502, 503, 504,
+        } or any(word in error.lower() for word in (
+            "timeout", "timed out", "network", "temporarily unavailable",
+        ))
+        # Do not log raw HTTP objects or exception strings; only provider
+        # descriptions/codes are retained, never the bot token-bearing URL.
+        logger.warning(
+            "Telegram invite creation failed channel=%s code=%s retryable=%s",
+            channel_id, code, retryable,
+        )
+        return None, error, retryable
+
+    @classmethod
+    def create_one_time_invite_link(
+        cls, channel_id: str, expire_seconds: int = 86400,
+    ) -> Optional[str]:
+        link, _error, _retryable = cls.create_one_time_invite_link_result(
+            channel_id, expire_seconds,
+        )
+        return link
 
     @classmethod
     def ban_user(cls, channel_id: str, user_id: int) -> tuple[bool, str]:
@@ -187,7 +212,7 @@ class TelegramBotService:
         if result.get("ok"):
             return True, ""
         error = result.get("description", "")
-        return False, f"Unban failed: {error}"
+        return False, f"Unban failed: {error} (code {result.get('error_code')})"
 
     @classmethod
     def is_member(cls, channel_id: str, user_id: int) -> Optional[bool]:
