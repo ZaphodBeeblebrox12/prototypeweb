@@ -176,3 +176,9 @@
   .tt-learning-room .tt-notebook-prompts .tt-notebook-number,
   .tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-prompts .tt-notebook-number { margin: 0; }
 }
+
+/* Builder-only sticky offset: keep the Pause and Record card below the
+   sticky sitewide header. The normal learner view retains its 18px offset. */
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook {
+  top: 95px; /* 76px navigation + 1px border + 18px breathing room */
+}
