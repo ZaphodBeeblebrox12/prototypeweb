@@ -345,11 +345,11 @@ def _build_import_payload(course_state, course_slug):
                     continue
                 stable_ids = []
                 raw_ids = image_group.get("imageIds") if isinstance(image_group.get("imageIds"), list) else []
-                for raw_id in raw_ids:
+                for raw_id in raw_ids[:4]:
                     stable_id = image_by_id.get(str(raw_id))
                     if stable_id and stable_id not in stable_ids:
                         stable_ids.append(stable_id)
-                if len(stable_ids) >= 2:
+                if len(stable_ids) >= 1:
                     image_group_asset_ids[group_id] = stable_ids
 
             # Images assigned to practice questions are instructional assets too, even though
@@ -491,11 +491,15 @@ def _build_import_payload(course_state, course_slug):
                     item for item in (lesson.get("imageGroups") or [])
                     if isinstance(item, dict) and str(item.get("id") or "").strip() == group_id
                 )
+                group_description = str(
+                    image_group.get("description") or image_group.get("note") or ""
+                ).strip()[:1500]
                 figures[group_id] = {
                     "type": "image-group",
                     "title": str(image_group.get("title") or "").strip()[:240],
                     "image_ids": stable_ids,
-                    "note": str(image_group.get("note") or "").strip()[:1500],
+                    "description": group_description,
+                    "note": group_description,
                 }
 
             # Purpose-built comparison-card figures are authored content blocks, not image files.
@@ -861,9 +865,13 @@ def _builder_state_from_published_course(course):
                 if figure.get("type") == "image-group":
                     group_ids = [str(value) for value in figure.get("image_ids", []) if value]
                     asset_ids.update(group_ids)
+                    group_description = str(
+                        figure.get("description") or figure.get("note") or ""
+                    )
                     image_groups.append({
                         "id": str(figure_id), "title": str(figure.get("title") or ""),
-                        "imageIds": group_ids, "note": str(figure.get("note") or ""),
+                        "imageIds": group_ids, "description": group_description,
+                        "note": group_description,
                     })
                 elif figure.get("type") == "comparison-cards":
                     teaching_figures.append({

@@ -2017,3 +2017,49 @@
   letter-spacing: normal;
 }
 
+
+
+/* Hard-block index — exact approved design. */
+.tt-image-group-hard-index, .tt-image-group-hard-index * { box-sizing:border-box; }
+.tt-image-group-hard-index { display:block; width:100%; max-width:100%; min-width:0; margin:20px 0 22px; padding:0; overflow:visible; border:0; border-radius:0; background:transparent; box-shadow:none; color:#27382e; font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; line-height:1.55; }
+.tt-image-group-hard-index .indexed { display:grid; grid-template-columns:34px minmax(0,1fr); gap:10px; align-items:stretch; }
+.tt-image-group-hard-index .index-block { display:flex; flex-direction:column; align-items:center; justify-content:space-between; gap:10px; min-height:100%; padding:10px 0; background:#345943; color:#f7f3e9; user-select:none; }
+.tt-image-group-hard-index .group-number { display:block; font-size:10px; font-weight:850; letter-spacing:.04em; font-variant-numeric:tabular-nums; }
+.tt-image-group-hard-index .index-label { display:block; writing-mode:vertical-rl; transform:rotate(180deg); font-size:9px; font-weight:750; letter-spacing:.13em; line-height:1.1; white-space:nowrap; }
+.tt-image-group-hard-index .image-count { display:block; width:100%; padding-top:7px; border-top:1px solid #a5b8a7; text-align:center; font-size:10px; font-weight:850; font-variant-numeric:tabular-nums; }
+.tt-image-group-hard-index .group-content { min-width:0; }
+.tt-image-group-hard-index .group-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; margin:0 0 12px; padding:0 0 11px; border-bottom:1px solid #ded7c8; }
+.tt-image-group-hard-index .group-heading-copy { min-width:0; }
+.tt-image-group-hard-index .group-kicker { display:block; margin:0 0 4px; color:#345943; font-size:9px; font-weight:850; letter-spacing:.13em; text-transform:uppercase; }
+.tt-image-group-hard-index .group-title { display:block; margin:0; color:#27382e; font:500 clamp(20px,2.3vw,27px)/1.14 Georgia,"Times New Roman",serif; letter-spacing:-.03em; }
+.tt-image-group-hard-index .group-description { display:block; max-width:680px; margin:5px 0 0; color:#687367; font-size:11px; line-height:1.55; }
+.tt-image-group-hard-index .group-mark { display:grid; flex:0 0 auto; place-items:center; min-width:28px; height:28px; padding:0 6px; border:1px solid #345943; color:#345943; font-size:9px; font-weight:850; font-variant-numeric:tabular-nums; }
+.tt-image-group-hard-index .chart-grid { display:grid; min-width:0; align-content:start; gap:17px 12px; }
+.tt-image-group-hard-index .count-1 { grid-template-columns:minmax(0,1fr); }
+.tt-image-group-hard-index .count-2 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.tt-image-group-hard-index .count-3 { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.tt-image-group-hard-index .count-4 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.tt-image-group-hard-index .chart-item { min-width:0; }
+.tt-image-group-hard-index .item-head { display:flex; align-items:baseline; gap:8px; min-width:0; margin:0 0 7px; }
+.tt-image-group-hard-index .item-index { display:inline-grid; flex:0 0 auto; place-items:center; width:21px; height:21px; background:#202720; color:#fffdf8; font-size:9px; font-weight:850; line-height:1; }
+.tt-image-group-hard-index .item-title { display:block; min-width:0; margin:0; color:#27382e; font-size:13px; font-weight:750; line-height:1.35; letter-spacing:-.01em; }
+.tt-image-group-hard-index .tt-purpose-figure-image { display:block; width:100%; max-width:100%; min-width:0; margin:0; padding:0; overflow:hidden; border:0; border-radius:0; background:#151923; box-shadow:none; line-height:0; }
+.tt-image-group-hard-index .chart-item .tt-purpose-figure-image img.chart-image, .tt-image-group-hard-index .chart-item>img.chart-image { display:block; width:100%; max-width:100%; height:auto; max-height:none; margin:0; padding:0; aspect-ratio:2.22; object-fit:contain; border:0; border-radius:0; background:#151923; box-shadow:none; }
+.tt-image-group-hard-index .chart-image-missing { display:grid; width:100%; min-width:0; place-items:center; aspect-ratio:2.22; padding:10px; background:#151923; color:#fffdf8; border:0; border-radius:0; font-size:10px; line-height:1.5; text-align:center; }
+.tt-image-group-hard-index .caption { display:block; max-width:70ch; margin:7px 0 0; color:#5f6b61; font-size:11px; font-weight:400; line-height:1.55; }
+.tt-image-group-hard-index .caption:empty { display:none; }
+.tt-image-group-hard-index .caption-label { color:#345943; font-weight:800; }
+@media(max-width:760px) { .tt-image-group-hard-index .count-3 { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:560px) {
+ .tt-image-group-hard-index .indexed { grid-template-columns:26px minmax(0,1fr); gap:7px; }
+ .tt-image-group-hard-index .index-block { padding:8px 0; }
+ .tt-image-group-hard-index .index-label { font-size:8px; }
+ .tt-image-group-hard-index .group-heading { gap:9px; margin-bottom:10px; padding-bottom:9px; }
+ .tt-image-group-hard-index .group-title { font-size:21px; }
+ .tt-image-group-hard-index .group-description { font-size:10px; }
+ .tt-image-group-hard-index .group-mark { min-width:25px; height:25px; }
+ .tt-image-group-hard-index .count-2, .tt-image-group-hard-index .count-3, .tt-image-group-hard-index .count-4 { grid-template-columns:minmax(0,1fr); }
+ .tt-image-group-hard-index .chart-grid { gap:17px; }
+ .tt-image-group-hard-index .item-title { font-size:12px; }
+ .tt-image-group-hard-index .caption { font-size:10px; }
+}

@@ -1240,6 +1240,52 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   letter-spacing: normal;
 }
 
+
+/* Hard-block index — exact approved design. */
+.tt-image-group-hard-index, .tt-image-group-hard-index * { box-sizing:border-box; }
+.tt-image-group-hard-index { display:block; width:100%; max-width:100%; min-width:0; margin:20px 0 22px; padding:0; overflow:visible; border:0; border-radius:0; background:transparent; box-shadow:none; color:#27382e; font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; line-height:1.55; }
+.tt-image-group-hard-index .indexed { display:grid; grid-template-columns:34px minmax(0,1fr); gap:10px; align-items:stretch; }
+.tt-image-group-hard-index .index-block { display:flex; flex-direction:column; align-items:center; justify-content:space-between; gap:10px; min-height:100%; padding:10px 0; background:#345943; color:#f7f3e9; user-select:none; }
+.tt-image-group-hard-index .group-number { display:block; font-size:10px; font-weight:850; letter-spacing:.04em; font-variant-numeric:tabular-nums; }
+.tt-image-group-hard-index .index-label { display:block; writing-mode:vertical-rl; transform:rotate(180deg); font-size:9px; font-weight:750; letter-spacing:.13em; line-height:1.1; white-space:nowrap; }
+.tt-image-group-hard-index .image-count { display:block; width:100%; padding-top:7px; border-top:1px solid #a5b8a7; text-align:center; font-size:10px; font-weight:850; font-variant-numeric:tabular-nums; }
+.tt-image-group-hard-index .group-content { min-width:0; }
+.tt-image-group-hard-index .group-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; margin:0 0 12px; padding:0 0 11px; border-bottom:1px solid #ded7c8; }
+.tt-image-group-hard-index .group-heading-copy { min-width:0; }
+.tt-image-group-hard-index .group-kicker { display:block; margin:0 0 4px; color:#345943; font-size:9px; font-weight:850; letter-spacing:.13em; text-transform:uppercase; }
+.tt-image-group-hard-index .group-title { display:block; margin:0; color:#27382e; font:500 clamp(20px,2.3vw,27px)/1.14 Georgia,"Times New Roman",serif; letter-spacing:-.03em; }
+.tt-image-group-hard-index .group-description { display:block; max-width:680px; margin:5px 0 0; color:#687367; font-size:11px; line-height:1.55; }
+.tt-image-group-hard-index .group-mark { display:grid; flex:0 0 auto; place-items:center; min-width:28px; height:28px; padding:0 6px; border:1px solid #345943; color:#345943; font-size:9px; font-weight:850; font-variant-numeric:tabular-nums; }
+.tt-image-group-hard-index .chart-grid { display:grid; min-width:0; align-content:start; gap:17px 12px; }
+.tt-image-group-hard-index .count-1 { grid-template-columns:minmax(0,1fr); }
+.tt-image-group-hard-index .count-2 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.tt-image-group-hard-index .count-3 { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.tt-image-group-hard-index .count-4 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.tt-image-group-hard-index .chart-item { min-width:0; }
+.tt-image-group-hard-index .item-head { display:flex; align-items:baseline; gap:8px; min-width:0; margin:0 0 7px; }
+.tt-image-group-hard-index .item-index { display:inline-grid; flex:0 0 auto; place-items:center; width:21px; height:21px; background:#202720; color:#fffdf8; font-size:9px; font-weight:850; line-height:1; }
+.tt-image-group-hard-index .item-title { display:block; min-width:0; margin:0; color:#27382e; font-size:13px; font-weight:750; line-height:1.35; letter-spacing:-.01em; }
+.tt-image-group-hard-index .tt-purpose-figure-image { display:block; width:100%; max-width:100%; min-width:0; margin:0; padding:0; overflow:hidden; border:0; border-radius:0; background:#151923; box-shadow:none; line-height:0; }
+.tt-image-group-hard-index .chart-item .tt-purpose-figure-image img.chart-image, .tt-image-group-hard-index .chart-item>img.chart-image { display:block; width:100%; max-width:100%; height:auto; max-height:none; margin:0; padding:0; aspect-ratio:2.22; object-fit:contain; border:0; border-radius:0; background:#151923; box-shadow:none; }
+.tt-image-group-hard-index .chart-image-missing { display:grid; width:100%; min-width:0; place-items:center; aspect-ratio:2.22; padding:10px; background:#151923; color:#fffdf8; border:0; border-radius:0; font-size:10px; line-height:1.5; text-align:center; }
+.tt-image-group-hard-index .caption { display:block; max-width:70ch; margin:7px 0 0; color:#5f6b61; font-size:11px; font-weight:400; line-height:1.55; }
+.tt-image-group-hard-index .caption:empty { display:none; }
+.tt-image-group-hard-index .caption-label { color:#345943; font-weight:800; }
+@media(max-width:760px) { .tt-image-group-hard-index .count-3 { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:560px) {
+ .tt-image-group-hard-index .indexed { grid-template-columns:26px minmax(0,1fr); gap:7px; }
+ .tt-image-group-hard-index .index-block { padding:8px 0; }
+ .tt-image-group-hard-index .index-label { font-size:8px; }
+ .tt-image-group-hard-index .group-heading { gap:9px; margin-bottom:10px; padding-bottom:9px; }
+ .tt-image-group-hard-index .group-title { font-size:21px; }
+ .tt-image-group-hard-index .group-description { font-size:10px; }
+ .tt-image-group-hard-index .group-mark { min-width:25px; height:25px; }
+ .tt-image-group-hard-index .count-2, .tt-image-group-hard-index .count-3, .tt-image-group-hard-index .count-4 { grid-template-columns:minmax(0,1fr); }
+ .tt-image-group-hard-index .chart-grid { gap:17px; }
+ .tt-image-group-hard-index .item-title { font-size:12px; }
+ .tt-image-group-hard-index .caption { font-size:10px; }
+}
+
 </style>
 </head>
 <body>
@@ -2090,14 +2136,14 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       </div>
       <div class="media-grid">${imageCards || '<article class="media-card"><div class="media-empty">No images yet. Add an image above.</div></article>'}</div>
       <div class="related-course-box image-group-create">
-        <h4>Group images under one title</h4>
-        <p>Select two or more uploaded images to present them side by side beneath one title, like the three-case comparison in the Learning Room reference.</p>
-        <button class="btn small primary" type="button" data-action="add-image-group" ${images.length < 2 ? 'disabled' : ''}>＋ Create image group from first two images</button>
-        ${images.length < 2 ? '<p class="help">Upload at least two images first.</p>' : ''}
+        <h4>Create a chart group</h4>
+        <p>Use the approved hard-block index layout for one to four images. Each image keeps its own title, alt text and optional caption.</p>
+        <button class="btn small primary" type="button" data-action="add-image-group" ${images.length < 1 ? 'disabled' : ''}>＋ Create chart group from first available images</button>
+        ${images.length < 1 ? '<p class="help">Upload at least one image first.</p>' : ''}
       </div>
       <div class="subheading"><h4>Image groups</h4><p>${l.imageGroups.length} group${l.imageGroups.length === 1 ? '' : 's'}</p></div>
       <div class="media-grid image-group-list">${l.imageGroups.map((group, groupIndex) => {
-        const selectedIds = Array.isArray(group.imageIds) ? group.imageIds : [];
+        const selectedIds = Array.isArray(group.imageIds) ? group.imageIds.slice(0, 4) : [];
         return `
           <article class="media-card image-group-editor" data-image-group-card="${esc(group.id)}">
             <div class="media-meta">
@@ -2112,9 +2158,9 @@ button:disabled { cursor: not-allowed; opacity: .45; }
                     <span>${esc((image.title && image.title !== image.name) ? image.title : image.alt || 'Untitled image')}</span>
                   </label>`).join('')}
               </div>
-              <p class="help">${selectedIds.length} selected. Choose at least two images; each image can have its own title and caption.</p>
-              <label>Group note (optional)</label>
-              <textarea class="textarea" rows="2" data-image-group="${esc(group.id)}" data-field="note" maxlength="1500" placeholder="Optional note below the image panels">${esc(group.note || '')}</textarea>
+              <p class="help">${selectedIds.length} selected. Choose one to four images; every image has its own title and optional caption.</p>
+              <label>Group description (optional)</label>
+              <textarea class="textarea" rows="2" data-image-group="${esc(group.id)}" data-field="description" maxlength="1500" placeholder="Optional context for the complete chart group">${esc(group.description !== undefined ? group.description : (group.note || ''))}</textarea>
               <div class="figure-inline-actions">
                 <button class="btn small primary" type="button" data-action="insert-image-group" data-id="${esc(group.id)}">Insert group at cursor</button>
                 <button class="btn small danger" type="button" data-action="remove-image-group" data-id="${esc(group.id)}">Remove group</button>
@@ -2940,24 +2986,35 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       const group = (lesson?.imageGroups || []).find(item => String(item.id) === id);
       if (!group) return match;
       const token = 'TTFIGURETOKEN' + figures.length + 'END';
-      const groupedImages = (group.imageIds || [])
+      const groupIndex = Math.max(0, (lesson?.imageGroups || []).findIndex(item => String(item.id) === id)) + 1;
+      const groupNumber = String(groupIndex).padStart(2, '0');
+      const groupedImages = (group.imageIds || []).slice(0, 4)
         .map(imageId => images.find(item => item.id === imageId || item.assetUuid === imageId))
         .filter(Boolean);
-      const items = groupedImages.map(image => {
+      const items = groupedImages.map((image, index) => {
         const title = displayTitle(image);
         const imageHtml = image.data
-          ? '<span class="tt-purpose-figure-image"><img data-figure-zoom src="' + esc(image.data) + '" alt="' + esc(image.alt || title) + '" loading="lazy"></span>'
-          : '<span class="tt-purpose-figure-missing">Image saved; preview source is not available in this browser.</span>';
-        const caption = image.caption ? '<span class="tt-image-group-caption">' + esc(image.caption) + '</span>' : '';
-        return '<span class="tt-image-group-item">' + imageHtml +
-          '<span class="tt-image-group-item-heading"><span class="tt-image-group-case-id" aria-hidden="true"></span><strong class="tt-image-group-item-title">' + esc(title) + '</strong></span>' +
-          caption + '</span>';
+          ? '<span class="tt-purpose-figure-image"><img class="chart-image" data-figure-zoom src="' + esc(image.data) + '" alt="' + esc(image.alt || title) + '" loading="lazy" decoding="async" tabindex="0" role="button" aria-label="Enlarge course figure"></span>'
+          : '<span class="chart-image chart-image-missing" role="status">Image unavailable</span>';
+        const caption = String(image.caption || '').trim()
+          ? '<span class="caption"><span class="caption-label">Note</span> — ' + esc(String(image.caption).trim()) + '</span>'
+          : '';
+        return '<div class="chart-item"><div class="item-head"><span class="item-index">' +
+          String.fromCharCode(65 + index) + '</span><span class="item-title">' + esc(title) +
+          '</span></div>' + imageHtml + caption + '</div>';
       }).join('');
-      const note = group.note ? '<span class="tt-purpose-figure-note">' + esc(group.note) + '</span>' : '';
-      const groupHeader = '<span class="tt-purpose-figure-head tt-image-group-head"><span class="tt-purpose-figure-header-top"><span class="tt-purpose-figure-module">' + esc(moduleLabel) + '</span><span class="tt-image-group-context" title="' + esc(courseTitleLabel) + '">' + esc(courseTitleLabel) + '</span></span><strong class="tt-purpose-figure-title">' + esc(group.title || 'Image group') + '</strong></span>';
-      const groupMarkup = groupedImages.length >= 2
-        ? '<figure class="tt-purpose-figure tt-image-group-figure" data-figure-id="' + esc(id) + '">' + groupHeader + '<span class="tt-purpose-figure-body"><span class="tt-image-group-grid">' + items + '</span>' + note + '</span></figure>'
-        : '<p class="tt-purpose-figure-missing">Select at least two uploaded images in the Images tab to complete this group.</p>';
+      const descriptionText = String(group.description !== undefined ? group.description : (group.note || '')).trim();
+      const description = descriptionText ? '<span class="group-description">' + esc(descriptionText) + '</span>' : '';
+      const groupHeader = '<div class="group-heading"><div class="group-heading-copy"><span class="group-kicker">Chart group · ' +
+        groupNumber + '</span><span class="group-title">' + esc(group.title || 'Image group') + '</span>' +
+        description + '</div><span class="group-mark">' + String(groupedImages.length).padStart(2, '0') + '</span></div>';
+      const groupMarkup = groupedImages.length >= 1
+        ? '<figure class="tt-purpose-figure tt-image-group-figure tt-image-group-hard-index" data-figure-id="' + esc(id) +
+          '"><div class="indexed"><aside class="index-block" aria-label="Group index"><span class="group-number">' +
+          groupNumber + '</span><span class="index-label">CHART STUDY</span><span class="image-count">×' +
+          groupedImages.length + '</span></aside><div class="group-content">' + groupHeader +
+          '<div class="chart-grid count-' + groupedImages.length + '">' + items + '</div></div></div></figure>'
+        : '<span class="tt-purpose-figure-missing" role="status">Choose one to four images in the Images tab to complete this chart group.</span>';
       figures.push(groupMarkup);
       return '\n\n' + token + '\n\n';
     });
@@ -3520,28 +3577,29 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     }
     if (lesson && action === 'add-image-group') {
       const images = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
-      if (images.length < 2) {
-        toast('Upload at least two images before creating an image group.');
+      if (images.length < 1) {
+        toast('Upload at least one image before creating a chart group.');
         return;
       }
       if (!Array.isArray(lesson.imageGroups)) lesson.imageGroups = [];
       lesson.imageGroups.push({
         id: uid('image-group'),
-        title: 'New image group',
-        imageIds: images.slice(0, 2).map(image => image.id),
+        title: 'New chart group',
+        imageIds: images.slice(0, 4).map(image => image.id),
+        description: '',
         note: ''
       });
       persist(false);
       renderEditor();
-      toast('Image group created. Type its title and choose the images to show together.');
+      toast('Chart group created. Add its title and optional description, then choose one to four images.');
       return;
     }
     if (lesson && action === 'insert-image-group') {
       const group = (lesson.imageGroups || []).find(item => String(item.id) === String(el.dataset.id));
       const images = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
       const selectedImages = (group?.imageIds || []).filter(imageId => images.some(image => image.id === imageId || image.assetUuid === imageId));
-      if (!group || selectedImages.length < 2) {
-        toast('Choose at least two uploaded images for this group.');
+      if (!group || selectedImages.length < 1 || selectedImages.length > 4) {
+        toast('Choose one to four uploaded images for this chart group.');
         return;
       }
       insertLessonContentAtCaret(lesson, `[[image-group:${group.id}]]`, true);
@@ -3734,10 +3792,16 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     if(!group)return;
     if(!Array.isArray(group.imageIds))group.imageIds=[];
     const imageId=String(el.dataset.imageId||'');
-    if(el.checked&&!group.imageIds.includes(imageId))group.imageIds.push(imageId);
-    if(!el.checked)group.imageIds=group.imageIds.filter(id=>id!==imageId);
+    if(el.checked&&!group.imageIds.includes(imageId)){
+      if(group.imageIds.length>=4){el.checked=false;toast('A chart group can contain at most four images.');return;}
+      group.imageIds.push(imageId);
+    }
+    if(!el.checked){
+      if(group.imageIds.length<=1){el.checked=true;toast('A chart group must contain at least one image.');return;}
+      group.imageIds=group.imageIds.filter(id=>id!==imageId);
+    }
     const help=el.closest('.image-group-editor')?.querySelector('.help');
-    if(help)help.textContent=group.imageIds.length+' selected. Choose at least two images; each image can have its own title and caption.';
+    if(help)help.textContent=group.imageIds.length+' selected. Choose one to four images; each image has its own title and optional caption.';
     persist(false);
   });
   document.addEventListener('input', event => {

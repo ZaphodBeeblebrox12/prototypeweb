@@ -364,7 +364,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("{{ lesson_sections.examples_html|safe }}", tabs_template)
         self.assertIn("{{ lesson_sections.practice_html|safe }}", tabs_template)
 
-    def test_titled_image_group_renders_multiple_images_with_module_heading_in_place(self):
+    def test_titled_image_group_renders_approved_hard_index_hierarchy(self):
         group_id = "image-group-method-two"
         first_id = "6a51e8ac-35e2-489c-9a18-48221818e5d9"
         second_id = "7b62f9bd-46f3-4ae0-8b13-59332929f6ea"
@@ -384,7 +384,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
                     "type": "image-group",
                     "title": "Method II: price position and money flow",
                     "image_ids": [first_id, second_id],
-                    "note": "Both conditions must hold.",
+                    "description": "Both conditions must hold.",
                 },
                 first_id: {
                     "title": "Long candidate",
@@ -400,56 +400,111 @@ class SharedLessonRenderingTests(SimpleTestCase):
             module_label="Module 5 · Build and trade setups",
             course_title="Understand Bollinger Bands",
         )
-        figure_index = rendered.index("tt-image-group-figure")
+        figure_index = rendered.index("tt-image-group-hard-index")
         self.assertLess(rendered.index("Text before the group."), figure_index)
         self.assertLess(figure_index, rendered.index("Text after the group."))
         self.assertIn("Method II: price position and money flow", rendered)
-        self.assertIn("MODULE 5 · Build and trade setups", rendered)
-        self.assertIn("Long candidate", rendered)
-        self.assertIn("Near miss", rendered)
+        self.assertIn("Chart group · 01", rendered)
+        self.assertNotIn("MODULE 5 · Build and trade setups", rendered)
         self.assertIn('src="/media/long-candidate.png"', rendered)
         self.assertIn('src="/media/near-miss.png"', rendered)
-        self.assertIn("Both conditions must hold.", rendered)
-        self.assertIn("One condition is not met.", rendered)
-        self.assertNotIn("Purpose-built teaching aid", rendered)
-        self.assertNotIn("Figure 2.2 ·", rendered)
-        self.assertEqual(rendered.count('class="tt-image-group-item"'), 2)
-        self.assertIn(
-            'class="tt-image-group-context" title="Understand Bollinger Bands">Understand Bollinger Bands</span>',
-            rendered,
+        self.assertIn('class="image-count">×2</span>', rendered)
+        self.assertIn('class="group-mark">02</span>', rendered)
+        self.assertEqual(rendered.count('class="chart-item"'), 2)
+        self.assertEqual(rendered.count('class="item-index"'), 2)
+        self.assertEqual(rendered.count('class="caption"'), 2)
+        self.assertLess(
+            rendered.index('class="item-title">Long candidate</span>'),
+            rendered.index('class="chart-image"'),
         )
-        self.assertNotIn("2 images · compare before interpreting", rendered)
-        self.assertEqual(rendered.count('class="tt-image-group-case-id"'), 2)
-        self.assertIn("tt-image-group-item-heading", rendered)
+        self.assertEqual(rendered.count('class="tt-purpose-figure-image"'), 2)
+        self.assertNotIn("tt-image-group-context", rendered)
+        self.assertNotIn("tt-image-group-case-id", rendered)
 
-    def test_image_groups_use_borderless_compact_layout_in_builder_and_learner(self):
+    def test_hard_index_handles_one_to_four_images_and_empty_fields(self):
+        image_ids = [
+            "6a51e8ac-35e2-489c-9a18-48221818e5d9",
+            "7b62f9bd-46f3-4ae0-8b13-59332929f6ea",
+            "11111111-1111-4111-8111-111111111111",
+            "22222222-2222-4222-8222-222222222222",
+        ]
+        for count in range(1, 5):
+            with self.subTest(image_count=count):
+                group_id = f"hard-index-{count}"
+                ids = image_ids[:count]
+                urls = {
+                    asset_id: f"/media/chart-{index + 1}.png"
+                    for index, asset_id in enumerate(ids)
+                }
+                metadata = {
+                    group_id: {
+                        "type": "image-group",
+                        "title": "A complete chart comparison",
+                        "image_ids": ids,
+                        "description": "Shared context." if count > 1 else "",
+                    }
+                }
+                for index, asset_id in enumerate(ids):
+                    letter = chr(ord("A") + index)
+                    metadata[asset_id] = {
+                        "title": f"Image {letter}",
+                        "alt": f"Accessible description for image {letter}",
+                        "caption": "Caption A" if index == 0 else "",
+                    }
+                rendered = render_safe_markdown(
+                    f"[[image-group:{group_id}]]",
+                    asset_urls=urls,
+                    figure_metadata=metadata,
+                    module_label="Module 1 · Context",
+                    course_title="Test course",
+                )
+                self.assertIn('class="tt-image-group-hard-index"', rendered)
+                self.assertIn(f'class="chart-grid count-{count}"', rendered)
+                self.assertIn(f'class="image-count">×{count}</span>', rendered)
+                self.assertIn(f'class="group-mark">{count:02d}</span>', rendered)
+                self.assertEqual(rendered.count('class="chart-item"'), count)
+                self.assertEqual(rendered.count('class="item-index"'), count)
+                self.assertLess(
+                    rendered.index('class="item-title">Image A</span>'),
+                    rendered.index('class="chart-image"'),
+                )
+                self.assertIn("Note</span> — Caption A", rendered)
+                self.assertEqual(rendered.count('class="caption"'), 1)
+                self.assertNotIn('class="caption"></span>', rendered)
+                if count == 1:
+                    self.assertNotIn('class="group-description"', rendered)
+                else:
+                    self.assertIn(
+                        'class="group-description">Shared context.</span>',
+                        rendered,
+                    )
+                for index in range(count):
+                    self.assertIn(f'Image {chr(ord("A") + index)}', rendered)
+
+    def test_image_groups_use_exact_hard_index_styles_in_builder_and_learner(self):
         root = Path(__file__).resolve().parents[2]
-        learner_css = (root / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
-        builder_html = (root / "apps" / "academy" / "course_builder_preview.html").read_text(encoding="utf-8")
-
-        self.assertIn("Image-group Option 3 — borderless, compact chart group", learner_css)
-        self.assertIn("Image-group Option 3 — borderless compact chart group, matching the learner view.", builder_html)
-        self.assertIn("const courseTitleLabel = String(course?.title || 'Course')", builder_html)
-        self.assertIn("text-overflow:ellipsis", builder_html)
-        self.assertIn("text-overflow:ellipsis", learner_css)
-
+        learner_css = (
+            root / "static" / "academy" / "learning-room.css"
+        ).read_text(encoding="utf-8")
+        builder_html = (
+            root / "apps" / "academy" / "course_builder_preview.html"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Hard-block index — exact approved design.", learner_css)
+        self.assertIn("Hard-block index — exact approved design.", builder_html)
+        self.assertIn('class="tt-image-group-hard-index"', builder_html)
         for source in (learner_css, builder_html):
-            self.assertIn("border:0", source)
-            self.assertIn("aspect-ratio:auto", source)
-            self.assertIn("height:auto", source)
-            self.assertIn("grid-template-columns:repeat(2,minmax(0,1fr))", source)
-            self.assertIn("counter-reset:image-group-case", source)
-            self.assertIn("content:counter(image-group-case, upper-alpha)", source)
-            self.assertIn(".tt-image-group-item:nth-child(odd)", source)
-            self.assertIn(".tt-image-group-item:nth-child(n+3)", source)
-            self.assertIn(".tt-image-group-item:last-child:nth-child(odd)", source)
-            self.assertIn(".tt-image-group-item-heading", source)
-            self.assertIn(".tt-image-group-context", source)
-            self.assertIn("grid-template-columns:minmax(0,1fr)", source)
-            self.assertIn(".tt-image-group-item:not(:last-child)", source)
-            self.assertNotIn(".tt-image-group-item:nth-child(odd) { border-right:1px solid", source)
-            self.assertNotIn(".tt-image-group-item:nth-child(n+3) { border-top:1px solid", source)
-            self.assertNotIn(".tt-image-group-item:not(:last-child) { border-bottom:1px solid", source)
+            self.assertIn("grid-template-columns:repeat(3,minmax(0,1fr))", source)
+            self.assertIn(
+                ".count-4 { grid-template-columns:repeat(2,minmax(0,1fr)); }",
+                source,
+            )
+            self.assertIn("aspect-ratio:2.22", source)
+            self.assertIn("object-fit:contain", source)
+            self.assertIn("background:#345943", source)
+            self.assertIn("background:#202720", source)
+            self.assertIn("@media(max-width:760px)", source)
+            self.assertIn("@media(max-width:560px)", source)
+            self.assertIn("grid-template-columns:26px minmax(0,1fr)", source)
 
     def test_filename_is_not_used_as_a_figure_title(self):
         rendered = render_safe_markdown(

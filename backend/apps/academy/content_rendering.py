@@ -29,7 +29,7 @@ _ALLOWED_ATTRIBUTES = {
     "figcaption": ["class"],
     "table": ["class"],
     "caption": ["class"],
-    "img": ["src", "alt", "title", "loading", "width", "height", "tabindex", "role", "aria-label"],
+    "img": ["class", "src", "alt", "title", "loading", "width", "height", "tabindex", "role", "aria-label"],
     "span": ["class", "aria-label", "title"],
     "strong": ["class"],
     "th": ["align", "colspan", "rowspan", "scope"], "td": ["align", "colspan", "rowspan"],
@@ -488,18 +488,6 @@ def render_safe_markdown(
             '</span>'
         )
 
-    def image_group_header(title):
-        safe_title = escape(str(title or "Image group").strip())
-        return (
-            '<span class="tt-purpose-figure-head tt-image-group-head">'
-            '<span class="tt-purpose-figure-header-top">'
-            f'<span class="tt-purpose-figure-module">{safe_module_title}</span>'
-            f'<span class="tt-image-group-context" title="{safe_course_title}">{safe_course_title}</span>'
-            '</span>'
-            f'<strong class="tt-purpose-figure-title">{safe_title}</strong>'
-            '</span>'
-        )
-
     def display_image_title(metadata):
         raw_title = str(metadata.get("title") or "").strip()
         # Older drafts sometimes stored a filename as the title. Never display that
@@ -546,19 +534,21 @@ def render_safe_markdown(
         figure_frames[token] = markup
         return token
 
+    # Number groups by their first appearance in lesson content, independent of media IDs.
+    group_numbers = {}
+    for group_match in _IMAGE_GROUP_TOKEN.finditer(source or ""):
+        group_numbers.setdefault(group_match.group(1), len(group_numbers) + 1)
+
     def replace_image_group(match):
         group_id = match.group(1)
         metadata = figure_metadata.get(group_id)
         if not isinstance(metadata, dict) or metadata.get("type") != "image-group":
             return match.group(0)
-
-        title = display_image_title(metadata)
-        safe_group_id = escape(group_id, quote=True)
         raw_ids = metadata.get("image_ids", [])
         if not isinstance(raw_ids, list):
             raw_ids = []
         items = []
-        for raw_id in raw_ids[:12]:
+        for raw_id in raw_ids[:4]:
             asset_id = str(raw_id)
             image_metadata = figure_metadata.get(asset_id, {})
             if not isinstance(image_metadata, dict):
@@ -569,39 +559,47 @@ def render_safe_markdown(
             image_url = asset_urls.get(asset_id, "")
             if image_url:
                 image = (
-                    f'<span class="tt-purpose-figure-image">'
-                    f'<img src="{escape(str(image_url), quote=True)}" alt="{escape(alt, quote=True)}" '
+                    '<span class="tt-purpose-figure-image">'
+                    f'<img class="chart-image" src="{escape(str(image_url), quote=True)}" alt="{escape(alt, quote=True)}" '
                     'loading="lazy" decoding="async" tabindex="0" role="button" '
                     'aria-label="Enlarge course figure"></span>'
                 )
             else:
-                image = (
-                    '<span class="tt-purpose-figure-missing" role="status">'
-                    '<strong>Image unavailable</strong></span>'
-                )
+                image = '<span class="chart-image chart-image-missing" role="status">Image unavailable</span>'
             caption_markup = (
-                f'<span class="tt-image-group-caption">{escape(caption)}</span>' if caption else ""
+                f'<span class="caption"><span class="caption-label">Note</span> — {escape(caption)}</span>'
+                if caption else ""
             )
+            letter = chr(ord("A") + len(items))
             items.append(
-                '<span class="tt-image-group-item">'
-                f'{image}'
-                '<span class="tt-image-group-item-heading">'
-                '<span class="tt-image-group-case-id" aria-hidden="true"></span>'
-                f'<strong class="tt-image-group-item-title">{escape(image_title)}</strong>'
-                '</span>'
-                f'{caption_markup}</span>'
+                '<div class="chart-item"><div class="item-head">'
+                f'<span class="item-index">{letter}</span>'
+                f'<span class="item-title">{escape(image_title)}</span></div>'
+                f'{image}{caption_markup}</div>'
             )
-
-        if len(items) < 2:
-            return '<span class="tt-purpose-figure-missing">This image group needs at least two uploaded images.</span>'
-        note = str(metadata.get("note") or "").strip()
-        note_markup = f'<span class="tt-purpose-figure-note">{escape(note)}</span>' if note else ""
+        if not items:
+            return '<span class="tt-purpose-figure-missing" role="status">Choose one to four images to complete this chart group.</span>'
+        group_number_text = f"{group_numbers.get(group_id, 1):02d}"
+        count = len(items)
+        safe_group_id = escape(group_id, quote=True)
+        title = escape(str(metadata.get("title") or "Image group").strip() or "Image group")
+        description = str(metadata.get("description") or metadata.get("note") or "").strip()
+        description_markup = f'<span class="group-description">{escape(description)}</span>' if description else ""
+        group_heading = (
+            '<div class="group-heading"><div class="group-heading-copy">'
+            f'<span class="group-kicker">Chart group · {group_number_text}</span>'
+            f'<span class="group-title">{title}</span>{description_markup}</div>'
+            f'<span class="group-mark">{count:02d}</span></div>'
+        )
         markup = (
-            f'<figure class="tt-purpose-figure tt-image-group-figure" data-figure-id="{safe_group_id}">'
-            f'{image_group_header(title)}'
-            '<span class="tt-purpose-figure-body">'
-            f'<span class="tt-image-group-grid">{"".join(items)}</span>'
-            f'{note_markup}</span></figure>'
+            f'<figure class="tt-purpose-figure tt-image-group-figure tt-image-group-hard-index" data-figure-id="{safe_group_id}">'
+            '<div class="indexed"><aside class="index-block" aria-label="Group index">'
+            f'<span class="group-number">{group_number_text}</span>'
+            '<span class="index-label">CHART STUDY</span>'
+            f'<span class="image-count">×{count}</span></aside>'
+            f'<div class="group-content">{group_heading}'
+            f'<div class="chart-grid count-{count}">{"".join(items)}</div>'
+            '</div></div></figure>'
         )
         token = f"TTSTRUCTUREDFIGURE{len(figure_frames)}END"
         figure_frames[token] = markup
