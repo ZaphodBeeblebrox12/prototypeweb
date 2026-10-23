@@ -902,6 +902,7 @@ def _builder_state_from_published_course(course):
                 row["imageId"] = str(public_match.get("image_asset_id") or row.get("imageId") or "") if isinstance(public_match, dict) else str(row.get("imageId") or "")
                 normalized_questions.append(row)
             notebook = content_json.get("notebook") if isinstance(content_json.get("notebook"), dict) else {}
+            tables = deepcopy(content_json.get("tables", {})) if isinstance(content_json.get("tables"), dict) else {}
             lessons.append({
                 "id": str(lesson.pk), "title": lesson.title, "summary": lesson.summary,
                 "minutes": lesson.duration_minutes, "format": lesson.format,
@@ -912,11 +913,12 @@ def _builder_state_from_published_course(course):
                 "notebook": deepcopy(notebook) or {
                     "title": "Your Trading Notebook",
                     "prompts": [
-                        {"label": "Observe", "text": "Describe the evidence visible in the chart."},
+                        {"label": "Describe", "text": "What evidence is visible?"},
                         {"label": "Interpret", "text": "State one possible reading and a reasonable alternative."},
-                        {"label": "Test", "text": "Name the next evidence that would strengthen or weaken your reading."},
+                        {"label": "Apply", "text": "What would change your view?"},
                     ],
                 },
+                "tables": tables,
                 "content": lesson.content_markdown or "", "questions": normalized_questions,
                 "images": images, "image": deepcopy(images[0]) if images else None,
                 "imageGroups": image_groups, "teachingFigures": teaching_figures,

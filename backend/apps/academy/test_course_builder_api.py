@@ -1307,9 +1307,14 @@ class CourseBuilderApiTests(TestCase):
         lesson = Lesson.objects.create(
             module=module, title="Lesson One", slug="lesson-one",
             summary="Live lesson summary", format="reading",
-            content_markdown="## Live lesson\n\nOriginal published lesson content.",
+            content_markdown="## Live lesson\n\nOriginal published lesson content.\n\n[[table-block:table-live]]",
             content_json={
                 "schema_version": 1, "source_id": "1.1", "asset_ids": [], "figures": {},
+                "tables": {"table-live": {"title": "Grouped comparison", "rows": [
+                    {"section": "head", "cells": [{"text": "Context", "colspan": 2, "rowspan": 1, "header": True}]},
+                    {"section": "head", "cells": [{"text": "Market", "colspan": 1, "rowspan": 1, "header": True}, {"text": "Response", "colspan": 1, "rowspan": 1, "header": True}]},
+                    {"section": "body", "cells": [{"text": "Range", "colspan": 1, "rowspan": 1, "header": False}, {"text": "Wait", "colspan": 1, "rowspan": 1, "header": False}]},
+                ]}},
                 "related_course_ids": [],
                 "questions": [{
                     "id": "question-live", "prompt": "Which option is correct?",
@@ -1337,7 +1342,8 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(state["serverCourseId"], str(course.pk))
         self.assertEqual(state["modules"][0]["id"], str(module.pk))
         self.assertEqual(state["modules"][0]["lessons"][0]["id"], str(lesson.pk))
-        self.assertEqual(state["modules"][0]["lessons"][0]["content"], "## Live lesson\n\nOriginal published lesson content.")
+        self.assertEqual(state["modules"][0]["lessons"][0]["content"], "## Live lesson\n\nOriginal published lesson content.\n\n[[table-block:table-live]]")
+        self.assertEqual(state["modules"][0]["lessons"][0]["tables"]["table-live"]["rows"][0]["cells"][0]["colspan"], 2)
         self.assertEqual(state["modules"][0]["lessons"][0]["questions"][0]["correctIndex"], 1)
 
         state["summary"] = "Revised summary"

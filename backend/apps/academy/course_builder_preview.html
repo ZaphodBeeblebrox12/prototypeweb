@@ -2028,8 +2028,8 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       heading = isBollingerCourse ? 'Before treating a touch as a setup' : 'Before you make the call';
     }
     const defaultPrompts = [
-      {label:'Observe',text:'Describe the evidence visible in the chart.'},
-      {label:'Interpret',text:'State one possible reading and a reasonable alternative.'},
+      {label:'Describe',text:'What evidence is visible?'},
+      {label:'Interpret',text:'What could it mean in context?'},
       {label:'Apply',text:'What would change your view?'}
     ];
     const bollingerPrompts = [
@@ -2058,6 +2058,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     const matchesGenericDefaults = matchesPromptSet(prompts, defaultPrompts) || matchesPromptSet(prompts, legacyGenericPrompts);
     const matchesBollingerDefaults = matchesPromptSet(prompts, bollingerPrompts) || matchesPromptSet(prompts, legacyBollingerPrompts);
     if (isBollingerCourse && (!hasPrompts || matchesGenericDefaults || matchesBollingerDefaults)) prompts = bollingerPrompts;
+    else if (matchesGenericDefaults) prompts = defaultPrompts;
     return '<section class="preview-trading-notebook" aria-label="Your Trading Notebook">' +
       '<aside class="preview-notebook-index"><span>KEEP<br>IN VIEW</span><strong>01</strong></aside>' +
       '<div class="preview-notebook-content">' +
@@ -2206,8 +2207,41 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   $('#backToBuilder').addEventListener('click',()=>$('#workspace').scrollIntoView({behavior:'smooth',block:'start'}));
   document.addEventListener('change',event=>{if(event.target.id!=='imageUpload')return;const file=event.target.files&&event.target.files[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)){toast('Choose a JPG, PNG or WebP image.');event.target.value='';return;}if(file.size>1.5*1024*1024){toast('This preview limits images to 1.5 MB.');event.target.value='';return;}const reader=new FileReader();reader.onload=()=>{const l=currentLesson();if(!l)return;l.image={id:uid('asset'),name:file.name,alt:$('#imageAlt')?.value||'',data:String(reader.result)};persist(false);renderEditor();toast('Image added to this lesson draft.');};reader.onerror=()=>toast('The image could not be read.');reader.readAsDataURL(file);});
   // Authoring enhancements: Markdown reference, multi-image upload, alt text and captions.
+  function migrateLegacyNotebookPrompts(lesson) {
+    if (!lesson || !lesson.notebook || !Array.isArray(lesson.notebook.prompts)) return;
+    const prompts = lesson.notebook.prompts;
+    const normalized = list => list.map(prompt => ({
+      label:String(prompt?.label || '').trim().replace(/[.:]+$/,''),
+      text:String(prompt?.text || '').trim()
+    }));
+    const currentDefault = [
+      {label:'Describe',text:'What evidence is visible?'},
+      {label:'Interpret',text:'What could it mean in context?'},
+      {label:'Apply',text:'What would change your view?'}
+    ];
+    const legacyGeneric = [
+      {label:'Observe',text:'Describe the evidence visible in the chart.'},
+      {label:'Interpret',text:'State one possible reading and a reasonable alternative.'},
+      {label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}
+    ];
+    const legacyGenericAlt = [
+      {label:'Observe',text:'Describe the evidence you can directly observe.'},
+      {label:'Interpret',text:'State one possible reading and a reasonable alternative.'},
+      {label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}
+    ];
+    const legacyBollinger = [
+      {label:'Describe',text:'Where is price relative to the bands and middle line?'},
+      {label:'Interpret',text:'Does the structure look like a range, a trend or a transition? What is your alternative explanation?'},
+      {label:'Test',text:'What future price behaviour would strengthen or weaken your view?'}
+    ];
+    const equal = (left,right) => JSON.stringify(normalized(left)) === JSON.stringify(normalized(right));
+    const isBollinger = currentCourse()?.slug === 'understand-bollinger-bands';
+    if (isBollinger && equal(prompts,legacyBollinger)) lesson.notebook.prompts = bollingerPrompts;
+    else if (equal(prompts,legacyGeneric) || equal(prompts,legacyGenericAlt)) lesson.notebook.prompts = currentDefault;
+  }
   const baseLessonFields = lessonFields;
   lessonFields = function(l) {
+    migrateLegacyNotebookPrompts(l);
     const html = baseLessonFields(l);
     return !l ? html : html + '<section class="markdown-guide"><h4>Visual editor tips</h4><p>Select text and use the toolbar to format it. Use Figures for charts, Regional content for country or region differences, and companion-course controls for related course cards. The learner preview shows the Learning Room layout.</p></section>';
   };
