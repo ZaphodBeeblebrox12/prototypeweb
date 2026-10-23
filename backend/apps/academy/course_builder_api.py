@@ -491,9 +491,12 @@ def _build_import_payload(course_state, course_slug):
                     item for item in (lesson.get("imageGroups") or [])
                     if isinstance(item, dict) and str(item.get("id") or "").strip() == group_id
                 )
-                group_description = str(
-                    image_group.get("description") or image_group.get("note") or ""
-                ).strip()[:1500]
+                raw_group_description = (
+                    image_group.get("description")
+                    if "description" in image_group
+                    else image_group.get("note")
+                )
+                group_description = str(raw_group_description or "").strip()[:1500]
                 figures[group_id] = {
                     "type": "image-group",
                     "title": str(image_group.get("title") or "").strip()[:240],
@@ -865,9 +868,12 @@ def _builder_state_from_published_course(course):
                 if figure.get("type") == "image-group":
                     group_ids = [str(value) for value in figure.get("image_ids", []) if value]
                     asset_ids.update(group_ids)
-                    group_description = str(
-                        figure.get("description") or figure.get("note") or ""
+                    raw_group_description = (
+                        figure.get("description")
+                        if "description" in figure
+                        else figure.get("note")
                     )
+                    group_description = str(raw_group_description or "")
                     image_groups.append({
                         "id": str(figure_id), "title": str(figure.get("title") or ""),
                         "imageIds": group_ids, "description": group_description,

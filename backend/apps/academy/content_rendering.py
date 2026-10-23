@@ -595,7 +595,12 @@ def render_safe_markdown(
         count = len(items)
         safe_group_id = escape(group_id, quote=True)
         title = escape(str(metadata.get("title") or "Image group").strip() or "Image group")
-        description = str(metadata.get("description") or metadata.get("note") or "").strip()
+        raw_description = (
+            metadata.get("description")
+            if "description" in metadata
+            else metadata.get("note")
+        )
+        description = str(raw_description or "").strip()
         description_markup = f'<span class="group-description">{escape(description)}</span>' if description else ""
         group_heading = (
             '<div class="group-heading"><div class="group-heading-copy">'

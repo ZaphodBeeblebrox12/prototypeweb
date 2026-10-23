@@ -442,6 +442,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
                         "title": "A complete chart comparison",
                         "image_ids": ids,
                         "description": "Shared context." if count > 1 else "",
+                        "note": "Legacy note that must stay cleared" if count == 1 else "",
                     }
                 }
                 for index, asset_id in enumerate(ids):
@@ -473,6 +474,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
                 self.assertNotIn('class="caption"></span>', rendered)
                 if count == 1:
                     self.assertNotIn('class="group-description"', rendered)
+                    self.assertNotIn("Legacy note that must stay cleared", rendered)
                 else:
                     self.assertIn(
                         'class="group-description">Shared context.</span>',
