@@ -891,6 +891,7 @@ class TradingNotebookTemplateTests(SimpleTestCase):
     def test_course_builder_heading_ladder_is_active_in_both_preview_paths(self):
         backend = Path(__file__).resolve().parents[2]
         website_preview_css = (backend / "static" / "academy" / "course-import-preview.css").read_text(encoding="utf-8")
+        learning_room_css = (backend / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
         builder_source = (backend / "apps" / "academy" / "course_builder_preview.html").read_text(encoding="utf-8")
 
         # Catch an unclosed comment swallowing the whole website-preview parity block.
@@ -901,6 +902,16 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         )
         self.assertIn(".tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel h6", website_preview_css)
 
+        # Confirm the active, reference-matched content heading sizes in both website-preview stylesheets.
+        for css, prefix in (
+            (learning_room_css, ".tt-learning-room .tt-tab-panel"),
+            (website_preview_css, ".tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel"),
+        ):
+            for level, declaration in (("h2", "font-size: 27px;"), ("h3", "font-size: 20px;")):
+                rules = re.findall(re.escape(prefix + " " + level) + r"\s*\{([^}]*)\}", css)
+                self.assertTrue(rules, f"Missing active {prefix} {level} rule")
+                self.assertIn(declaration, rules[-1])
+
         # The local preview has its own CSS and must end with the same H1-H6 scale.
         ladder_start = builder_source.rfind("/* Canonical authored-heading ladder: keep the Builder's local learner preview")
         self.assertGreater(ladder_start, 0)
@@ -908,8 +919,8 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         ladder = builder_source[ladder_start:ladder_end]
         expected = {
             "h1": "font-size: clamp(42px, 5vw, 64px);",
-            "h2": "font-size: clamp(29px, 2.8vw, 37px);",
-            "h3": "font-size: 22px;",
+            "h2": "font-size: 27px;",
+            "h3": "font-size: 20px;",
             "h4": "font-size: 20px;",
             "h5": "font-size: 16px;",
             "h6": "font-size: 9px;",
