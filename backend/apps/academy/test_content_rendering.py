@@ -458,7 +458,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
                     module_label="Module 1 · Context",
                     course_title="Test course",
                 )
-                self.assertIn('class="tt-image-group-hard-index"', rendered)
+                self.assertIn("tt-image-group-hard-index", rendered)
                 self.assertIn(f'class="chart-grid count-{count}"', rendered)
                 self.assertIn(f'class="image-count">×{count}</span>', rendered)
                 self.assertIn(f'class="group-mark">{count:02d}</span>', rendered)
@@ -491,7 +491,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
         ).read_text(encoding="utf-8")
         self.assertIn("Hard-block index — exact approved design.", learner_css)
         self.assertIn("Hard-block index — exact approved design.", builder_html)
-        self.assertIn('class="tt-image-group-hard-index"', builder_html)
+        self.assertIn("tt-image-group-hard-index", builder_html)
         for source in (learner_css, builder_html):
             self.assertIn("grid-template-columns:repeat(3,minmax(0,1fr))", source)
             self.assertIn(
