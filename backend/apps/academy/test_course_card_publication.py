@@ -207,6 +207,28 @@ class CoursePublicationReadinessTests(TestCase):
         self.assertIn("Learn · in context", rendered)
         self.assertNotIn(">T/I</span>", rendered)
 
+    def test_authored_svg_is_removed_but_companion_card_icon_is_preserved(self):
+        from .content_rendering import render_safe_markdown
+
+        authored_svg = '<svg class="authored-icon" viewBox="0 0 10 10"><path d="M0 0L10 10"></path></svg>'
+        rendered_authored_svg = render_safe_markdown(authored_svg, admin_preview=True)
+        self.assertNotIn("<svg", rendered_authored_svg.lower())
+        self.assertNotIn("<path", rendered_authored_svg.lower())
+
+        course = Course.objects.create(
+            title="Companion card SVG safety test",
+            slug="companion-card-svg-safety-test",
+            summary="A practical guide to applying the concept.",
+            category="Trading education",
+            status=Course.Status.PUBLISHED,
+        )
+        rendered_card = render_safe_markdown(
+            "[[course-card:" + str(course.pk) + "]]",
+            admin_preview=True,
+        )
+        self.assertIn('class="tt-course-preview-card__mark-icon"', rendered_card)
+        self.assertIn("<path", rendered_card.lower())
+
     def test_take_it_into_practice_content_is_preserved_in_practice_tab(self):
         from .content_rendering import build_lesson_sections
 

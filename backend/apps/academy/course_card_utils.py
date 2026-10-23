@@ -11,7 +11,6 @@ _PLACEHOLDER_SUMMARIES = {
     "a clear, practical description of what learners will study and why it matters.",
     "describe the learner, what the course covers and what they can practise after completing it.",
 }
-_ARTICLE_WORDS = {"a", "an", "and", "for", "of", "or", "the", "to", "with"}
 _LEADING_VERBS = (
     "analyse", "analyze", "apply", "assess", "build", "compare", "describe",
     "develop", "distinguish", "evaluate", "explain", "identify", "learn", "read",
@@ -85,21 +84,8 @@ def course_topic_tags(learning_outcomes, limit=2):
     return topics
 
 
-def course_card_mark(title):
-    """Create a compact text-only art mark without inventing course imagery."""
-    words = [
-        word for word in re.findall(r"[A-Za-z0-9]+", str(title or ""))
-        if word.casefold() not in _ARTICLE_WORDS
-    ]
-    if len(words) >= 2:
-        return f"{words[0][0].upper()}/{words[1][0].upper()}"
-    if words:
-        return words[0][:2].upper()
-    return "TT"
-
-
 def course_card_open_book_markup():
-    """Return the fixed open-book SVG used for non-special companion-course cards."""
+    """Return the trusted fixed SVG restored after user-authored HTML is sanitized."""
     return (
         '<svg class="tt-course-preview-card__mark-icon" viewBox="0 0 32 26" '
         'fill="none" aria-hidden="true" focusable="false">'
