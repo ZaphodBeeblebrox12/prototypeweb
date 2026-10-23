@@ -1249,22 +1249,101 @@
 }
 
 
-/* Approved responsive lesson composition: notebook once, in the desktop sidebar or mobile cards. */
-.tt-learning-room .tt-lesson-idea-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(245px,300px); align-items:start; gap:clamp(22px,3vw,34px); }
+/* Approved learner composition: tabs and Notebook remain peers for every tab. */
+.tt-learning-room .learning-content-grid {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(230px,270px);
+  align-items:start;
+  gap:clamp(20px,2.5vw,34px);
+}
+.tt-learning-room .lesson-content-column {
+  min-width:0;
+  padding:clamp(15px,2.2vw,25px);
+  border:1px solid #ded7c8;
+  border-radius:10px;
+  background:#fffdf8;
+}
+.tt-learning-room .lesson-content-column .tt-tab-list {
+  display:flex;
+  flex-wrap:wrap;
+  gap:clamp(14px,2.3vw,26px);
+  border-bottom:1px solid #ded7c8;
+}
+.tt-learning-room .lesson-content-column .tt-tab-panel {
+  min-width:0;
+  padding:clamp(20px,2.4vw,30px) 0 0;
+  overflow-wrap:anywhere;
+}
+.tt-learning-room .lesson-content-column .tt-tab-panel[hidden] { display:none!important; }
+.tt-learning-room .lesson-content-column .tt-tab-panel > :first-child { margin-top:0; }
 .tt-learning-room .tt-lesson-idea-copy { min-width:0; }
 .tt-learning-room .tt-lesson-idea-copy > :first-child { margin-top:0; }
 .tt-learning-room .tt-lesson-idea-copy .tt-course-preview-card { margin-top:17px; margin-bottom:17px; }
-.tt-learning-room .tt-lesson-idea-layout .tt-notebook { position:sticky; top:18px; display:block; min-width:0; margin:0 0 12px; padding:18px 16px 16px; border:1px solid #d8ddcf; border-top:3px solid #66845f; background:#faf8f0; }
-.tt-learning-room .tt-lesson-idea-layout .tt-notebook-index { display:none; }
-.tt-learning-room .tt-lesson-idea-layout .tt-notebook-content { min-width:0; }
-.tt-learning-room .tt-lesson-idea-layout .tt-notebook h4 { font-size:clamp(20px,1.7vw,24px); }
-.tt-learning-room .tt-lesson-idea-layout .tt-notebook-content ol { display:grid; grid-template-columns:minmax(0,1fr); gap:0; }
-.tt-learning-room .tt-lesson-idea-layout .tt-notebook-content li { grid-template-columns:22px minmax(0,1fr); gap:7px; padding:11px 0; border-top:1px solid #d5dbce; }
-.tt-learning-room .tt-lesson-idea-layout .tt-notebook-content li p { font-size:12px; line-height:1.6; }
-.tt-learning-room .tt-lesson-idea-layout .tt-notebook form { margin-top:10px; }
-.tt-learning-room .tt-lesson-idea-layout .tt-notebook-examples-button { width:100%; }
-@media (max-width:1100px) {.tt-learning-room .tt-lesson-idea-layout {grid-template-columns:minmax(0,1fr)} .tt-learning-room .tt-lesson-idea-layout .tt-notebook {position:static} .tt-learning-room .tt-lesson-idea-layout .tt-notebook-content ol {grid-template-columns:repeat(3,minmax(0,1fr));gap:12px} .tt-learning-room .tt-lesson-idea-layout .tt-notebook-content li {display:block;padding:11px 10px;border:1px solid #d5dbce;border-radius:7px;background:#fffdf7} .tt-learning-room .tt-lesson-idea-layout .tt-notebook-number {display:block;margin-bottom:7px}}
-@media (max-width:620px) {.tt-learning-room .tt-lesson-idea-layout .tt-notebook-content ol {grid-template-columns:minmax(0,1fr);gap:8px} .tt-learning-room .tt-lesson-idea-layout .tt-notebook-content li {display:grid;grid-template-columns:22px minmax(0,1fr);padding:10px} .tt-learning-room .tt-lesson-idea-layout .tt-notebook-number {margin:0}}
+.tt-learning-room .tt-notebook {
+  position:sticky;
+  top:18px;
+  display:block;
+  min-width:0;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+  border:1px solid #d8ddcf;
+  border-radius:8px;
+  background:#fffdf8;
+  box-shadow:0 10px 28px rgba(41,56,46,.06);
+}
+.tt-learning-room .tt-notebook-index { display:none; }
+.tt-learning-room .tt-notebook-content { display:block; min-width:0; padding:0; }
+.tt-learning-room .tt-notebook-top { padding:17px 17px 15px; background:#2e4c3a; color:#fffdf8; }
+.tt-learning-room .tt-notebook-top .tt-notebook-kicker { margin:0 0 7px; color:#d9c28e; font-size:9px; letter-spacing:.14em; }
+.tt-learning-room .tt-notebook-top h4 { margin:0 0 8px; color:#fffdf8; font:500 22px/1.18 Georgia,"Times New Roman",serif; letter-spacing:-.025em; }
+.tt-learning-room .tt-notebook-intro { margin:0; color:#e1e8df; font-size:10px; line-height:1.6; }
+.tt-learning-room .tt-notebook-prompts { padding:4px 17px 8px; }
+.tt-learning-room .tt-notebook-prompts ol {
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:0;
+  padding:0;
+  margin:0;
+  list-style:none;
+}
+.tt-learning-room .tt-notebook-prompts li {
+  display:grid;
+  grid-template-columns:22px minmax(0,1fr);
+  align-items:start;
+  gap:8px;
+  padding:12px 0;
+  border:0;
+  border-bottom:1px solid #e9e4d8;
+  background:transparent;
+}
+.tt-learning-room .tt-notebook-prompts li:last-child { border-bottom:0; }
+.tt-learning-room .tt-notebook-prompts .tt-notebook-number { margin:0; }
+.tt-learning-room .tt-notebook-prompt-copy { min-width:0; }
+.tt-learning-room .tt-notebook-prompt-copy p { margin:0; color:#39463d; font-size:11px; line-height:1.6; }
+.tt-learning-room .tt-notebook-prompt-copy strong { color:#345943; }
+.tt-learning-room .tt-notebook-response-editor { padding:0 17px 15px; margin:0; border-top:1px solid #e9e4d8; }
+.tt-learning-room .tt-notebook-response-editor summary { padding:12px 0 3px; color:#345943; font-size:10px; font-weight:800; cursor:pointer; }
+.tt-learning-room .tt-notebook-response-editor .reflection-note { font-size:10px; line-height:1.5; }
+.tt-learning-room .tt-notebook-response-editor .reflection-field { margin:10px 0; }
+.tt-learning-room .tt-notebook-response-editor label { display:block; margin-bottom:5px; font-size:10px; line-height:1.5; }
+.tt-learning-room .tt-notebook-response-editor textarea { width:100%; box-sizing:border-box; border:1px solid #ded7c8; border-radius:4px; padding:8px; font:inherit; font-size:11px; }
+.tt-learning-room .tt-notebook-response-editor button { border:1px solid #345943; border-radius:3px; padding:9px 10px; background:#345943; color:#fff; font-size:10px; font-weight:750; }
+.tt-learning-room .tt-notebook-examples-button { width:100%; }
+@media (max-width:1100px) {
+  .tt-learning-room .learning-content-grid { grid-template-columns:minmax(0,1fr); }
+  .tt-learning-room .lesson-content-column { grid-row:2; }
+  .tt-learning-room .tt-notebook { position:static; grid-row:1; grid-column:1; }
+  .tt-learning-room .tt-notebook-prompts ol { grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+  .tt-learning-room .tt-notebook-prompts li { display:block; padding:11px 10px; border:1px solid #d5dbce; border-radius:7px; background:#fffdf7; }
+  .tt-learning-room .tt-notebook-prompts .tt-notebook-number { display:block; margin:0 0 7px; }
+}
+@media(max-width:620px) {
+  .tt-learning-room .lesson-content-column { padding:15px 13px 19px; }
+  .tt-learning-room .tt-notebook-prompts ol { grid-template-columns:minmax(0,1fr); gap:0; }
+  .tt-learning-room .tt-notebook-prompts li { display:grid; grid-template-columns:22px minmax(0,1fr); padding:11px 0; border:0; border-bottom:1px solid #e9e4d8; border-radius:0; background:transparent; }
+  .tt-learning-room .tt-notebook-prompts .tt-notebook-number { display:inline-grid; margin:0; }
+}
 /* Quote Option 2: the chosen large editorial pull quote. */
 .tt-learning-room .tt-tab-panel blockquote {position:relative;margin:1.8em 0 1.7em;padding:20px 24px 20px 54px;border:0;border-left:3px solid #c36b4d;border-radius:0;background:linear-gradient(110deg,#f8f4e9 0%,#fffdf7 100%);color:#2f4939;font:400 clamp(20px,2.2vw,27px)/1.5 Georgia,"Times New Roman",serif;letter-spacing:-.018em}
 .tt-learning-room .tt-tab-panel blockquote::before {content:"“";position:absolute;top:3px;left:13px;color:#b48635;font:400 58px/.95 Georgia,"Times New Roman",serif}
@@ -1335,4 +1414,119 @@
 }
 .tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table tr:last-child td {
   border-bottom: 0;
+}
+
+/* TradeThesis agreed-template parity overrides — pass 2 */
+/* Keep these LAST: the stylesheet contains legacy duplicate rules later in the file. */
+.tt-learning-room {
+  box-sizing:border-box;
+  max-width:1440px;
+  margin:0 auto;
+  padding:clamp(20px,3vw,40px);
+  line-height:1.72;
+  border:1px solid #e7e0d2;
+  color:#27382e;
+  background:radial-gradient(ellipse at 12% 0%,#e4eadb62,transparent 42%),radial-gradient(ellipse at 94% 26%,#f2e6ce45,transparent 34%);
+}
+.tt-learning-room .tt-room-grid {
+  display:grid;
+  grid-template-columns:minmax(210px,255px) minmax(0,1fr);
+  align-items:start;
+  gap:clamp(20px,3vw,38px);
+}
+.tt-learning-room .tt-outline {
+  box-sizing:border-box;
+  position:sticky;
+  top:18px;
+  max-height:calc(100vh - 36px);
+  overflow:auto;
+  padding:17px 15px;
+  border:1px solid #ded7c8;
+  border-radius:0;
+  background:#f7f7f0;
+  box-shadow:none;
+  scrollbar-gutter:stable;
+}
+.tt-learning-room .tt-outline-heading h2 { font:600 17px/1.3 Georgia,"Times New Roman",serif; margin:0 0 4px; }
+.tt-learning-room .tt-outline-heading span { font-size:11px; color:#687367; }
+.tt-learning-room .tt-outline-search { display:block; margin:14px 0; }
+.tt-learning-room .tt-outline-search input { box-sizing:border-box; width:100%; padding:9px 10px; border:1px solid #ded7c8; border-radius:3px; background:#fff; color:#27382e; font:inherit; font-size:12px; }
+.tt-learning-room .tt-outline-module { border-top:1px solid #ded7c8; padding:12px 0 5px; }
+.tt-learning-room .tt-outline-module h3 { font:600 13px/1.35 Georgia,"Times New Roman",serif; margin:0 0 8px; color:#34483a; }
+.tt-learning-room .tt-outline-module ul { display:block; list-style:none; margin:0; padding:0; }
+.tt-learning-room .tt-outline-item { margin:0; }
+.tt-learning-room .tt-outline-item a,.tt-learning-room .tt-locked-lesson {
+  display:flex; align-items:flex-start; justify-content:space-between; gap:8px;
+  padding:7px 8px; border-left:2px solid transparent; border-radius:0;
+  text-decoration:none; font-size:11.5px; line-height:1.45; color:#4d5e53;
+}
+.tt-learning-room .tt-outline-item a:hover { background:#eeefe7; }
+.tt-learning-room .tt-outline-item a.is-current { background:#e8eee7; border-left-color:#345943; color:#203e2f; font-weight:700; }
+.tt-learning-room .learning-content-grid {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(230px,270px);
+  align-items:start;
+  gap:clamp(20px,2.5vw,34px);
+}
+.tt-learning-room .lesson-content-column {
+  min-width:0; padding:clamp(15px,2.2vw,25px);
+  border:1px solid #ded7c8; border-radius:10px; background:#fffdf8;
+}
+.tt-learning-room .lesson-content-column .tt-tab-list {
+  display:flex; flex-wrap:wrap; gap:clamp(14px,2.3vw,26px); border-bottom:1px solid #ded7c8;
+}
+.tt-learning-room .lesson-content-column .tt-tab-panel { min-width:0; padding:clamp(20px,2.4vw,30px) 0 0; overflow-wrap:anywhere; }
+.tt-learning-room .lesson-content-column .tt-tab-panel[hidden] { display:none!important; }
+.tt-learning-room .lesson-content-column .tt-tab-panel > :first-child { margin-top:0; }
+.tt-learning-room .tt-notebook {
+  display:block; position:sticky; top:18px; grid-row:auto; align-self:start; min-width:0;
+  margin:0; padding:0; overflow:hidden; border:1px solid #ded7c8; border-radius:8px;
+  background:#fffdf8; box-shadow:0 10px 28px rgba(41,56,46,.06);
+}
+.tt-learning-room .tt-notebook-index { display:none!important; }
+.tt-learning-room .tt-notebook-content { display:block; min-width:0; padding:0; }
+.tt-learning-room .tt-notebook-top { padding:17px 17px 15px; background:#2e4c3a; color:#fffdf8; }
+.tt-learning-room .tt-notebook-top .tt-notebook-kicker { margin:0 0 7px; color:#e7c96f; font-size:9px; letter-spacing:.14em; }
+.tt-learning-room .tt-notebook-top h4 { margin:0 0 8px; color:#fffdf8; font:500 23px/1.16 Georgia,"Times New Roman",serif; letter-spacing:-.025em; }
+.tt-learning-room .tt-notebook-intro { margin:0; color:#e1e8df; font-size:11px; line-height:1.6; }
+.tt-learning-room .tt-notebook-prompts { padding:4px 17px 8px; background:#fffdf8; }
+.tt-learning-room .tt-notebook-prompts ol { display:grid; grid-template-columns:minmax(0,1fr); gap:0; padding:0; margin:0; list-style:none; }
+.tt-learning-room .tt-notebook-prompts li { display:grid; grid-template-columns:22px minmax(0,1fr); align-items:start; gap:8px; padding:12px 0; border:0; border-bottom:1px solid #e9e4d8; border-radius:0; background:transparent; }
+.tt-learning-room .tt-notebook-prompts li:last-child { border-bottom:0; }
+.tt-learning-room .tt-notebook-prompts .tt-notebook-number { display:inline-grid; place-items:center; width:21px; height:21px; padding:0; margin:0; border:1px solid #ded7c8; border-radius:50%; color:#b48635; font:800 9px/1 Arial,sans-serif; }
+.tt-learning-room .tt-notebook-prompt-copy { min-width:0; }
+.tt-learning-room .tt-notebook-prompt-copy p { margin:0; color:#27382e; font:500 14px/1.4 Georgia,"Times New Roman",serif; }
+.tt-learning-room .tt-notebook-prompt-copy strong { color:#345943; font-family:Arial,sans-serif; font-size:9px; font-weight:850; letter-spacing:.1em; text-transform:uppercase; }
+.tt-learning-room .tt-notebook-response-editor { margin:0; padding:0 17px 14px; border-top:1px solid #ded7c8; background:#fffdf8; }
+.tt-learning-room .tt-notebook-response-editor summary { padding:12px 0 3px; color:#345943; font-size:10px; font-weight:800; cursor:pointer; }
+.tt-learning-room .tt-notebook-hint { margin:0; padding:11px 17px 14px; border-top:1px solid #ded7c8; background:#f6f2e8; color:#687367; font-size:10px; line-height:1.55; }
+.tt-learning-room .tt-course-header--depth { margin-bottom:18px; }
+.tt-learning-room .tt-course-progress { display:block; height:5px; margin-top:13px; overflow:hidden; background:#e6e9e1; border-radius:99px; }
+.tt-learning-room .tt-course-progress span { display:block; height:100%; background:#345943; }
+@media(max-width:1180px) {
+  .tt-learning-room { padding:22px; }
+  .tt-learning-room .tt-room-grid { grid-template-columns:minmax(190px,230px) minmax(0,1fr); gap:20px; }
+  .tt-learning-room .learning-content-grid { grid-template-columns:minmax(0,1fr) 235px; gap:18px; }
+}
+@media(max-width:920px) {
+  .tt-learning-room .tt-room-grid { grid-template-columns:minmax(0,1fr); }
+  .tt-learning-room .tt-outline { position:static; max-height:360px; }
+  .tt-learning-room .tt-outline nav { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 15px; }
+  .tt-learning-room .learning-content-grid { grid-template-columns:minmax(0,1fr); }
+  .tt-learning-room .tt-notebook { position:static; grid-row:1; }
+  .tt-learning-room .tt-notebook-prompts ol { grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+  .tt-learning-room .tt-notebook-prompts li { display:block; padding:11px 10px; border:1px solid #ded7c8; border-radius:7px; background:#fffdf8; }
+  .tt-learning-room .tt-notebook-prompts .tt-notebook-number { margin:0 0 7px; }
+}
+@media(max-width:680px) {
+  .tt-learning-room { padding:14px 11px 24px; }
+  .tt-learning-room .tt-outline { max-height:275px; padding:12px; }
+  .tt-learning-room .tt-outline nav { grid-template-columns:minmax(0,1fr); }
+  .tt-learning-room .learning-content-grid { grid-template-columns:minmax(0,1fr); gap:18px; }
+  .tt-learning-room .lesson-content-column { padding:15px 13px 19px; }
+  .tt-learning-room .tt-course-header--depth { gap:15px; padding:20px 15px; }
+  .tt-learning-room .tt-course-header--depth h1 { font-size:35px; }
+  .tt-learning-room .tt-notebook-prompts ol { grid-template-columns:minmax(0,1fr); gap:0; }
+  .tt-learning-room .tt-notebook-prompts li { display:grid; grid-template-columns:22px minmax(0,1fr); padding:11px 0; border:0; border-bottom:1px solid #e9e4d8; border-radius:0; background:transparent; }
+  .tt-learning-room .tt-notebook-prompts .tt-notebook-number { margin:0; }
 }

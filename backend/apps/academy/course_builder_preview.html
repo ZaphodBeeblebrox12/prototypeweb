@@ -2160,13 +2160,23 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       .trim() || 'Learning Room';
     return 'MODULE ' + String(moduleIndex + 1).padStart(2, '0') + ' · ' + title;
   }
-  function previewFields(c){const mods=c.modules.map((m,mi)=>({m,mi}));const lesson=currentLesson();return `<div class="section-intro"><h3>Preview as a learner</h3><p>Review the latest editing state before you publish. This preview is deliberately separate from the live member course.</p></div><div class="preview-split"><article class="preview-article"><div class="course-chip">${esc(c.category)} · ${esc(c.level)}</div><h2>${esc(c.title)}</h2><p class="summary">${esc(c.summary)}</p>${c.description?.trim()?'<div class="preview-body course-description-preview">'+renderMarkdown(c.description)+'</div>':''}<div class="pill">${allLessons(c).length} lessons · ${esc(c.duration)}</div>${c.outcomes?.length?`<section class="preview-outcomes"><h3>What learners will practise</h3><ul>${c.outcomes.map(outcome=>`<li>${esc(outcome)}</li>`).join("")}</ul></section>`:""}${lesson?`<hr style="border:0;border-top:1px solid var(--line);margin:24px 0"><div class="module-name-eyebrow">${esc(moduleHeadingLabel(c,currentModule()))}</div><h2 class="preview-lesson-title">${esc(lesson.title)}</h2><p class="summary">${esc(lesson.summary)}</p><div class="builder-lesson-preview-grid"><div class="builder-lesson-preview-main"><div class="preview-body" data-preview-lesson-content>${renderMarkdown(lessonBodyForAudience(lesson, $('#previewAudienceSelect')?.value || 'GLOBAL'))}</div>${reflectionPreviewMarkup(lesson)}</div><aside class="builder-lesson-preview-sidebar">${notebookPreviewMarkup(lesson)}</aside></div>${lesson.questions.length?`<div class="practice-preview"><h4>Test your reading</h4>${lesson.questions.map((q,qi)=>`<div style="margin-bottom:16px">${questionImageMarkup(q,lesson)}<strong style="font-size:11px">${esc(q.prompt)}</strong>${q.options.map((op,oi)=>`<label class="practice-preview-answer" data-preview-option="${esc(q.id)}" data-option-index="${oi}"><input type="radio" name="pv-${esc(q.id)}" value="${oi}" data-preview-question="${esc(q.id)}"> <span>${esc(op)}</span><span class="answer-result"></span></label>`).join('')}<button class="btn small" type="button" data-action="check-preview" data-id="${esc(q.id)}">Check answer</button><div class="feedback" id="feedback-${esc(q.id)}"></div></div>`).join('')}</div>`:''}`:'<p class="summary">No lesson selected yet.</p>'}</article><aside class="preview-lesson-nav"><h4>Course outline</h4><div>${mods.map(({m,mi})=>`<div style="font-size:10px;font-weight:800;color:var(--muted);padding:9px 6px 4px">${esc(m.title)}</div>${m.lessons.map((item,li)=>`<button type="button" class="${item.id===lesson?.id?'selected':''}" data-action="preview-select-lesson" data-module-id="${esc(m.id)}" data-id="${esc(item.id)}">${mi+1}.${li+1} ${esc(item.title)}</button>`).join('')}`).join('')}</div><div class="helper-note">Draft preview only. Lesson access, authentication, progress and paid content protection are enforced by Django in production.</div></aside></div>`;}
-  const previewFieldsBeforeQualityChecks = previewFields;
-  previewFields = function(c) {
-    const html = previewFieldsBeforeQualityChecks(c);
-    const lesson = currentLesson();
-    return lesson ? html.replace("</article>", lessonQualityMarkup(lesson) + "</article>") : html;
-  };
+  function previewFields(c) {
+    return `<section class="builder-website-preview" data-builder-website-preview>
+      <div class="section-intro">
+        <h3>Preview the saved learner experience</h3>
+        <p>This opens the same Academy lesson template used by the unpublished website preview. Changes are saved as a draft only; this does not publish the course or alter learner progress.</p>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:14px 0">
+        <p data-website-preview-status role="status" aria-live="polite" style="margin:0;color:var(--muted);font-size:12px">Waiting for the Academy draft connection…</p>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <button class="btn small" type="button" data-action="refresh-website-preview">Refresh preview</button>
+          <a class="btn small" data-website-preview-open href="#" target="_blank" rel="noopener noreferrer" hidden>Open in new tab ↗</a>
+        </div>
+      </div>
+      <p data-website-preview-error role="alert" aria-live="assertive" hidden style="padding:10px 12px;border-left:3px solid #a55e4f;background:#f5eee2;color:#704338;font-size:12px"></p>
+      <iframe data-builder-website-preview-frame title="TradeThesis learner-facing course preview" loading="eager" referrerpolicy="same-origin" style="display:block;width:100%;height:76vh;min-height:480px;border:1px solid var(--line);border-radius:8px;background:#f7f3e9"></iframe>
+    </section>`;
+  }
   function renderMarkdown(src){const safe=esc(src);return safe.split(/\n{2,}/).map(block=>{const t=block.trim();if(!t)return'';const h=t.match(/^(#{1,4})\s+(.+)$/);if(h)return `<h3>${h[2]}</h3>`;if(/^[-*]\s/m.test(t))return `<ul>${t.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>`<li>${x.replace(/^[-*]\s+/,'')}</li>`).join('')}</ul>`;return `<p>${t.replace(/\n/g,'<br>').replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>').replace(/\*([^*\n]+)\*/g,'<em>$1</em>')}</p>`;}).join('');}
   function renderCatalogue(){const cards=[...demoOffers,...comingSoonOffers];state.courses.filter(c=>c.publishedSnapshot).forEach(c=>{const p=c.publishedSnapshot;cards.push({id:c.id,title:p.title,category:p.category||'MICRO-COURSE',summary:p.summary,price:p.price||'Price not configured',state:'Published from builder'});});$('#catalogueGrid').innerHTML=cards.map(item=>`<article class="offer-card"><div class="offer-art"></div><div class="offer-body"><div class="offer-kicker">${esc(item.category)}</div><h3>${esc(item.title)}</h3><p>${esc(item.summary)}</p><div class="offer-bottom"><div><div class="offer-price">${esc(item.price||'Details soon')}</div><div class="offer-state">${esc(item.state)}</div></div><span class="pill ${item.state==='Coming soon'?'status':'published'}">${item.state==='Coming soon'?'Coming soon':'Published'}</span></div></div></article>`).join('');}
   function render(){renderSidebar();renderEditor();renderCatalogue();renderHeaderState();}
@@ -2175,7 +2185,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   function publishCourse(){const c=currentCourse();if(!c)return;const errs=[];if(!c.title.trim())errs.push('Add a course title.');if(!c.summary.trim())errs.push('Add a short course summary.');if(!c.modules.length)errs.push('Add at least one module.');if(!allLessons(c).length)errs.push('Add at least one lesson.');if(allLessons(c).some(l=>!l.title.trim()||!l.content.trim()))errs.push('Every lesson needs a title and lesson content.');if(errs.length){toast(errs[0]);if(!c.title.trim()||!c.summary.trim())state.tab='overview';else if(!allLessons(c).length)state.tab='curriculum';else state.tab='lesson';render();return;}const snapshot=JSON.parse(JSON.stringify(c));snapshot.status='published';snapshot.publishedSnapshot=null;snapshot.updatedAt=nowText();c.status='published';c.publishedAt=nowText();c.updatedAt=nowText();c.publishedSnapshot=snapshot;persist(false);state.tab='overview';render();$('#catalogueSection').scrollIntoView({behavior:'smooth',block:'start'});toast('Published in this preview. The course now appears under Courses offered.');}
   function duplicateCourse(){const c=currentCourse();if(!c)return;const copy=JSON.parse(JSON.stringify(c));copy.id=uid('course');copy.title=(c.title||'Untitled course')+' — Copy';copy.slug=slugify(copy.title);copy.status='draft';copy.publishedAt=null;copy.publishedSnapshot=null;copy.createdAt=nowText();copy.updatedAt='Not saved yet';copy.modules.forEach(m=>{m.id=uid('module');m.lessons.forEach(l=>{l.id=uid('lesson');l.questions.forEach(q=>q.id=uid('q'));});});state.courses.unshift(copy);state.selectedCourseId=copy.id;state.selectedModuleId=copy.modules[0]?.id||null;state.selectedLessonId=copy.modules[0]?.lessons[0]?.id||null;state.tab='overview';persist(false);render();toast('Course duplicated as a new draft.');}
   function moveItem(arr,id,direction){const i=arr.findIndex(x=>x.id===id);const j=i+direction;if(i<0||j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];}
-  function handleAction(action,el){const c=currentCourse();if(!c&&action!=='new-course')return;const m=c?currentModule():null;const l=c?currentLesson():null;const id=el?.dataset?.id;switch(action){case'delete-course':if(c)deleteCourse(c);break;case'select-course':selectCourse(id);break;case'tab':state.tab=el.dataset.tab;renderEditor();renderHeaderState();break;case'save-draft':saveDraft();break;case'new-course':{createNewCourseDraft(el);break;}case'add-regional-block':{if(!Array.isArray(l.regionalBlocks))l.regionalBlocks=[];l.regionalBlocks.push({id:uid('regional'),title:'Regional content block',baseContent:'',variants:[]});state.tab='regional';persist(false);renderEditor();toast('Regional content block created. Add global copy and any audience versions, then place it in the lesson.');break;}case'add-regional-variant':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(id));if(!block)break;if(!Array.isArray(block.variants))block.variants=[];block.variants.push({id:uid('variant'),scope:'country',code:'IN',content:'',hidden:false});persist(false);renderEditor();break;}case'remove-regional-variant':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(el.dataset.blockId));if(!block)break;block.variants=(block.variants||[]).filter(item=>String(item.id)!==String(id));persist(false);renderEditor();break;}case'remove-regional-block':{l.regionalBlocks=(l.regionalBlocks||[]).filter(item=>String(item.id)!==String(id));const token='[[regional-block:'+String(id)+']]';l.content=String(l.content||'').split(token).join('').replace(/\n{3,}/g,'\n\n');persist(false);renderEditor();toast('Regional content block and its placement were removed.');break;}case'insert-regional-block':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(id));if(!block)break;insertLessonContentAtCaret(l,'[[regional-block:'+block.id+']]',true);toast('Regional content block placed in the lesson at the saved cursor position.');break;}case'insert-regional-image':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(id));if(!block)break;const card=el.closest('.regional-block-card');const imagePicker=el.dataset.variantId?card?.querySelector('[data-regional-image-picker][data-variant-id="'+CSS.escape(el.dataset.variantId)+'"]'):card?.querySelector('[data-regional-image-picker]:not([data-variant-id])');const imageId=imagePicker?.value||'';if(!imageId){toast('Choose an uploaded image first.');break;}const images=Array.isArray(l.images)?l.images:(l.image?[l.image]:[]);const image=images.find(item=>String(item.id)===imageId||String(item.assetUuid||'')===imageId);if(!image){toast('That image is not in this lesson.');break;}const target=el.dataset.variantId?(block.variants||[]).find(item=>String(item.id)===String(el.dataset.variantId)):block;const field=el.dataset.variantId?'content':'baseContent';if(!target)break;const markdown='!['+String(image.alt||image.title||'Course figure').replace(/\]/g,'')+'](asset://'+String(image.id||image.assetUuid)+')';target[field]=String(target[field]||'');if(target[field]&&!/\s$/.test(target[field]))target[field]+='\n\n';target[field]+=markdown;persist(false);renderEditor();toast('Image reference inserted into the selected regional version.');break;}case'add-module':{const nm=makeModule(c.modules.length+1);nm.title=`Module ${String(c.modules.length+1).padStart(2,'0')} — New module`;c.modules.push(nm);state.selectedModuleId=nm.id;state.selectedLessonId=nm.lessons[0].id;state.tab='curriculum';persist(false);render();break;}case'select-module':state.selectedModuleId=id;state.selectedLessonId=currentModule()?.lessons[0]?.id||null;renderEditor();break;case'select-lesson':state.selectedModuleId=el.dataset.moduleId;state.selectedLessonId=id;state.tab='curriculum';renderEditor();break;case'add-lesson':{const mod=c.modules.find(x=>x.id===id);if(!mod)break;const nl=makeLesson(mod.lessons.length+1);nl.title=`Lesson ${c.modules.indexOf(mod)+1}.${mod.lessons.length+1} — New lesson`;mod.lessons.push(nl);state.selectedModuleId=mod.id;state.selectedLessonId=nl.id;state.tab='curriculum';persist(false);render();break;}case'delete-module':{if(c.modules.length<=1)break;const i=c.modules.findIndex(x=>x.id===id);c.modules.splice(i,1);state.selectedModuleId=c.modules[0]?.id||null;state.selectedLessonId=c.modules[0]?.lessons[0]?.id||null;persist(false);render();break;}case'delete-lesson':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);if(!mod||mod.lessons.length<=1)break;mod.lessons=mod.lessons.filter(x=>x.id!==id);state.selectedLessonId=mod.lessons[0].id;state.selectedModuleId=mod.id;persist(false);render();break;}case'move-module-up':moveItem(c.modules,id,-1);persist(false);render();break;case'move-module-down':moveItem(c.modules,id,1);persist(false);render();break;case'move-lesson-up':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);moveItem(mod.lessons,id,-1);persist(false);render();break;}case'move-lesson-down':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);moveItem(mod.lessons,id,1);persist(false);render();break;}case'go-lesson':state.tab='lesson';renderEditor();break;case'go-questions':state.tab='questions';renderEditor();break;case'go-curriculum':state.tab='curriculum';renderEditor();break;case'add-outcome':c.outcomes.push('New learning outcome');persist(false);renderEditor();break;case'remove-outcome':c.outcomes.splice(Number(el.dataset.index),1);persist(false);renderEditor();break;case'add-question':l.questions.push(defaultQuestion());persist(false);renderEditor();break;case'remove-question':if(l.questions.length>1)l.questions=l.questions.filter(q=>q.id!==id);persist(false);renderEditor();break;case'correct-option':{const q=l.questions.find(q=>q.id===el.dataset.qid);if(q)q.correctIndex=Number(el.dataset.index);schedulePersist();break;}case'insert-image-reference':if(l.image){l.content+=`\n\n![${l.image.alt||'Course figure'}](asset://${l.image.id||uid('asset')})\n`;state.tab='lesson';persist(false);renderEditor();toast('Image reference added to lesson Markdown.');}break;case'remove-image':l.image=null;persist(false);renderEditor();break;case'preview-select-lesson':state.selectedModuleId=el.dataset.moduleId;state.selectedLessonId=id;renderEditor();break;case'check-preview':{const q=l.questions.find(q=>q.id===id);const checked=$(`input[name="pv-${CSS.escape(id)}"]:checked`);const box=$(`#feedback-${CSS.escape(id)}`);if(!checked){toast('Select an answer first.');break;}const optionLabels=$('#workspace').querySelectorAll('[data-preview-option="'+CSS.escape(id)+'"]');optionLabels.forEach(label=>{const optionIndex=Number(label.dataset.optionIndex);const marker=label.querySelector('.answer-result');label.classList.remove('is-correct','is-incorrect');if(marker)marker.textContent='';if(optionIndex===Number(q.correctIndex)){label.classList.add('is-correct');if(marker)marker.textContent='✓ Correct answer';}else if(optionIndex===Number(checked.value)){label.classList.add('is-incorrect');if(marker)marker.textContent='✕ Your answer';}});box.classList.add('show');const isRight=Number(checked.value)===Number(q.correctIndex);box.textContent=(isRight?'Correct. ':'Incorrect. The correct answer is highlighted in green. ')+q.explanation;break;}}
+  function handleAction(action,el){const c=currentCourse();if(!c&&action!=='new-course')return;const m=c?currentModule():null;const l=c?currentLesson():null;const id=el?.dataset?.id;switch(action){case'delete-course':if(c)deleteCourse(c);break;case'select-course':selectCourse(id);break;case'tab':state.tab=el.dataset.tab;renderEditor();renderHeaderState();break;case'save-draft':saveDraft();break;case'new-course':{createNewCourseDraft(el);break;}case'add-regional-block':{if(!Array.isArray(l.regionalBlocks))l.regionalBlocks=[];l.regionalBlocks.push({id:uid('regional'),title:'Regional content block',baseContent:'',variants:[]});state.tab='regional';persist(false);renderEditor();toast('Regional content block created. Add global copy and any audience versions, then place it in the lesson.');break;}case'add-regional-variant':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(id));if(!block)break;if(!Array.isArray(block.variants))block.variants=[];block.variants.push({id:uid('variant'),scope:'country',code:'IN',content:'',hidden:false});persist(false);renderEditor();break;}case'remove-regional-variant':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(el.dataset.blockId));if(!block)break;block.variants=(block.variants||[]).filter(item=>String(item.id)!==String(id));persist(false);renderEditor();break;}case'remove-regional-block':{l.regionalBlocks=(l.regionalBlocks||[]).filter(item=>String(item.id)!==String(id));const token='[[regional-block:'+String(id)+']]';l.content=String(l.content||'').split(token).join('').replace(/\n{3,}/g,'\n\n');persist(false);renderEditor();toast('Regional content block and its placement were removed.');break;}case'insert-regional-block':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(id));if(!block)break;insertLessonContentAtCaret(l,'[[regional-block:'+block.id+']]',true);toast('Regional content block placed in the lesson at the saved cursor position.');break;}case'insert-regional-image':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(id));if(!block)break;const card=el.closest('.regional-block-card');const imagePicker=el.dataset.variantId?card?.querySelector('[data-regional-image-picker][data-variant-id="'+CSS.escape(el.dataset.variantId)+'"]'):card?.querySelector('[data-regional-image-picker]:not([data-variant-id])');const imageId=imagePicker?.value||'';if(!imageId){toast('Choose an uploaded image first.');break;}const images=Array.isArray(l.images)?l.images:(l.image?[l.image]:[]);const image=images.find(item=>String(item.id)===imageId||String(item.assetUuid||'')===imageId);if(!image){toast('That image is not in this lesson.');break;}const target=el.dataset.variantId?(block.variants||[]).find(item=>String(item.id)===String(el.dataset.variantId)):block;const field=el.dataset.variantId?'content':'baseContent';if(!target)break;const markdown='!['+String(image.alt||image.title||'Course figure').replace(/\]/g,'')+'](asset://'+String(image.id||image.assetUuid)+')';target[field]=String(target[field]||'');if(target[field]&&!/\s$/.test(target[field]))target[field]+='\n\n';target[field]+=markdown;persist(false);renderEditor();toast('Image reference inserted into the selected regional version.');break;}case'add-module':{const nm=makeModule(c.modules.length+1);nm.title=`Module ${String(c.modules.length+1).padStart(2,'0')} — New module`;c.modules.push(nm);state.selectedModuleId=nm.id;state.selectedLessonId=nm.lessons[0].id;state.tab='curriculum';persist(false);render();break;}case'select-module':state.selectedModuleId=id;state.selectedLessonId=currentModule()?.lessons[0]?.id||null;renderEditor();break;case'select-lesson':state.selectedModuleId=el.dataset.moduleId;state.selectedLessonId=id;state.tab='curriculum';renderEditor();break;case'add-lesson':{const mod=c.modules.find(x=>x.id===id);if(!mod)break;const nl=makeLesson(mod.lessons.length+1);nl.title=`Lesson ${c.modules.indexOf(mod)+1}.${mod.lessons.length+1} — New lesson`;mod.lessons.push(nl);state.selectedModuleId=mod.id;state.selectedLessonId=nl.id;state.tab='curriculum';persist(false);render();break;}case'delete-module':{if(c.modules.length<=1)break;const i=c.modules.findIndex(x=>x.id===id);c.modules.splice(i,1);state.selectedModuleId=c.modules[0]?.id||null;state.selectedLessonId=c.modules[0]?.lessons[0]?.id||null;persist(false);render();break;}case'delete-lesson':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);if(!mod||mod.lessons.length<=1)break;mod.lessons=mod.lessons.filter(x=>x.id!==id);state.selectedLessonId=mod.lessons[0].id;state.selectedModuleId=mod.id;persist(false);render();break;}case'move-module-up':moveItem(c.modules,id,-1);persist(false);render();break;case'move-module-down':moveItem(c.modules,id,1);persist(false);render();break;case'move-lesson-up':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);moveItem(mod.lessons,id,-1);persist(false);render();break;}case'move-lesson-down':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);moveItem(mod.lessons,id,1);persist(false);render();break;}case'go-lesson':state.tab='lesson';renderEditor();break;case'go-questions':state.tab='questions';renderEditor();break;case'go-curriculum':state.tab='curriculum';renderEditor();break;case'add-outcome':c.outcomes.push('New learning outcome');persist(false);renderEditor();break;case'remove-outcome':c.outcomes.splice(Number(el.dataset.index),1);persist(false);renderEditor();break;case'add-question':l.questions.push(defaultQuestion());persist(false);renderEditor();break;case'remove-question':if(l.questions.length>1)l.questions=l.questions.filter(q=>q.id!==id);persist(false);renderEditor();break;case'correct-option':{const q=l.questions.find(q=>q.id===el.dataset.qid);if(q)q.correctIndex=Number(el.dataset.index);schedulePersist();break;}case'insert-image-reference':if(l.image){l.content+=`\n\n![${l.image.alt||'Course figure'}](asset://${l.image.id||uid('asset')})\n`;state.tab='lesson';persist(false);renderEditor();toast('Image reference added to lesson Markdown.');}break;case'remove-image':l.image=null;persist(false);renderEditor();break;case'refresh-website-preview':refreshBuilderWebsitePreview(true);break;case'preview-select-lesson':state.selectedModuleId=el.dataset.moduleId;state.selectedLessonId=id;renderEditor();break;case'check-preview':{const q=l.questions.find(q=>q.id===id);const checked=$(`input[name="pv-${CSS.escape(id)}"]:checked`);const box=$(`#feedback-${CSS.escape(id)}`);if(!checked){toast('Select an answer first.');break;}const optionLabels=$('#workspace').querySelectorAll('[data-preview-option="'+CSS.escape(id)+'"]');optionLabels.forEach(label=>{const optionIndex=Number(label.dataset.optionIndex);const marker=label.querySelector('.answer-result');label.classList.remove('is-correct','is-incorrect');if(marker)marker.textContent='';if(optionIndex===Number(q.correctIndex)){label.classList.add('is-correct');if(marker)marker.textContent='✓ Correct answer';}else if(optionIndex===Number(checked.value)){label.classList.add('is-incorrect');if(marker)marker.textContent='✕ Your answer';}});box.classList.add('show');const isRight=Number(checked.value)===Number(q.correctIndex);box.textContent=(isRight?'Correct. ':'Incorrect. The correct answer is highlighted in green. ')+q.explanation;break;}}
   }
   function updateField(el){const entity=el.dataset.entity;const field=el.dataset.field;const c=currentCourse();const m=currentModule();const l=currentLesson();const val=el.type==='checkbox'?el.checked:(el.type==='number'?Math.max(1,Number(el.value)||1):el.value);if(entity==='course'){c[field]=val;if(['catalogueHook','problemStatement','learningFocus','authoredTags','whyThisOne'].includes(field))c.cataloguePresentationConfigured=true;if(field==='title'&&(!c.slug||c.slug===slugify(c._previousTitle||'')))c.slug=slugify(val);if(field==='title'){c._previousTitle=val;const slugInput=$('[data-entity=\"course\"][data-field=\"slug\"]');if(slugInput&&document.activeElement!==slugInput)slugInput.value=c.slug;}}else if(entity==='module'&&m)m[field]=val;else if(entity==='lesson'&&l)l[field]=val;else if(entity==='question'&&l){const q=l.questions.find(q=>q.id===el.dataset.qid);if(q)q[field]=val;}else if(entity==='option'&&l){const q=l.questions.find(q=>q.id===el.dataset.qid);if(q)q.options[Number(el.dataset.index)]=val;}else if(entity==='image'&&l.image)l.image[field]=val;else if(entity==='outcome')c.outcomes[Number(el.dataset.index)]=val;else if(entity==='notebook'&&l){if(!l.notebook)l.notebook={title:'Your Trading Notebook',prompts:[]};l.notebook[field]=val;}else if(entity==='notebook-prompt'&&l){if(!l.notebook)l.notebook={title:'Your Trading Notebook',prompts:[]};const prompt=l.notebook.prompts[Number(el.dataset.index)];if(prompt)prompt[field]=val;}if(entity==='course'&&field==='title'){const title=$('#workspace h2');if(title)title.textContent=val||'Untitled course';}if((entity==='notebook'||entity==='notebook-prompt')&&l){const notebookPreview=$('[data-notebook-preview]');if(notebookPreview)notebookPreview.innerHTML=notebookPreviewMarkup(l);}if(entity==='course'&&['title','category','level','price','catalogueHook','problemStatement','learningFocus','authoredTags','whyThisOne'].includes(field)){const preview=$('[data-catalogue-presentation-preview]');if(preview)preview.outerHTML=cataloguePresentationPreviewMarkup(c);}schedulePersist();}
 
@@ -2288,36 +2298,6 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     migrateLegacyNotebookPrompts(l);
     const html = baseLessonFields(l);
     return !l ? html : html + '<section class="markdown-guide"><h4>Visual editor tips</h4><p>Select text and use the toolbar to format it. Use Figures for charts, Regional content for country or region differences, and companion-course controls for related course cards. The learner preview shows the Learning Room layout.</p></section>';
-  };
-  const basePreviewFields = previewFields;
-  previewFields = function(c) {
-    let html = basePreviewFields(c);
-    const lesson = currentLesson();
-    if (!lesson) return html;
-    const video = String(lesson.videoUrl || '').trim();
-    if (video) {
-      const isFile = /\.(mp4|webm|ogg)(\?.*)?$/i.test(video);
-      const videoHtml = isFile ? '<figure style="margin:22px 0"><video controls preload="metadata" style="width:100%;max-height:420px" src="' + esc(video) + '">Your browser does not support video playback.</video></figure>' : '<p><a href="' + esc(video) + '" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a></p>';
-      html = html.replace('<div class="preview-body" data-preview-lesson-content>', videoHtml + '<div class="preview-body" data-preview-lesson-content>');
-    }
-    const images = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
-    const authoredContent = String(lesson.content || '');
-    const imageGroups = Array.isArray(lesson.imageGroups) ? lesson.imageGroups : [];
-    const unplaced = images.filter(function(image) {
-      const ids = [image.id, image.assetUuid].filter(Boolean).map(String);
-      const directReference = ids.some(function(id) { return authoredContent.includes('asset://' + id); });
-      const groupedReference = imageGroups.some(function(group) {
-        return authoredContent.includes('[[image-group:' + group.id + ']]')
-          && (Array.isArray(group.imageIds) ? group.imageIds : [])
-            .some(function(groupImageId) { return ids.includes(String(groupImageId)); });
-      });
-      return !directReference && !groupedReference;
-    });
-    if (unplaced.length) {
-      const figures = '<div>' + unplaced.map(function(image) { return '<figure style="margin:24px 0"><img src="' + image.data + '" alt="' + esc(image.alt || '') + '" style="display:block;max-width:100%;max-height:460px;margin:auto;border-radius:8px"><figcaption style="font-size:11px;color:var(--muted);line-height:1.6;margin-top:8px;text-align:center">' + esc(image.caption || '') + '</figcaption></figure>'; }).join('') + '</div>';
-      html = html.replace('</article>', figures + '</article>');
-    }
-    return html;
   };
   renderMarkdown = function(src) {
     const inline = value => esc(String(value ?? ''))
@@ -3922,6 +3902,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
         // Still refresh the separate catalogue, without rebuilding the editor.
         renderCatalogue();
       }
+      if (state.tab === 'preview') window.setTimeout(() => refreshBuilderWebsitePreview(false), 0);
       if (remoteDrafts.length) toast('Connected to Academy. Shared drafts are available across devices.');
       else toast('Connected to Academy. Save your first draft to make it available across devices.');
     } catch (error) {
@@ -3932,6 +3913,180 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     }
   }
   // Use real published courses for lesson cross-references; never invent catalogue entries.
+  // Render the real saved draft route in the Builder's learner-preview tab.
+  // This keeps the preview aligned with the published lesson templates instead
+  // of maintaining a second lesson HTML renderer in this admin page.
+  let builderWebsitePreviewInFlight = false;
+  let builderWebsitePreviewPending = false;
+  let builderWebsitePreviewPendingForce = false;
+  let builderWebsitePreviewRetryTimer = null;
+  let builderWebsitePreviewLastKey = '';
+  let builderWebsitePreviewLastUrl = '';
+
+  function builderWebsitePreviewCurrentKey() {
+    const course = currentCourse();
+    if (!course) return '';
+    const modules = Array.isArray(course.modules) ? course.modules : [];
+    const moduleIndex = modules.findIndex(item => String(item.id) === String(state.selectedModuleId));
+    const selectedModule = moduleIndex >= 0 ? modules[moduleIndex] : null;
+    const lessons = Array.isArray(selectedModule?.lessons) ? selectedModule.lessons : [];
+    const lessonIndex = lessons.findIndex(item => String(item.id) === String(state.selectedLessonId));
+    const audience = document.querySelector('#previewAudienceSelect')?.value || 'GLOBAL';
+    return JSON.stringify({
+      courseId: course.id,
+      moduleIndex,
+      lessonIndex,
+      audience,
+      revision: editRevision
+    });
+  }
+
+  function setBuilderWebsitePreviewUrl(host, url, cacheKey) {
+    if (!host || !host.isConnected) return;
+    const frame = host.querySelector('[data-builder-website-preview-frame]');
+    const openLink = host.querySelector('[data-website-preview-open]');
+    const status = host.querySelector('[data-website-preview-status]');
+    const error = host.querySelector('[data-website-preview-error]');
+    if (!frame || !openLink || !status) return;
+    if (error) {
+      error.hidden = true;
+      error.textContent = '';
+    }
+    openLink.href = url;
+    openLink.hidden = false;
+    frame.dataset.previewUrl = url;
+    if (frame.getAttribute('src') !== url) {
+      status.textContent = 'Loading the saved, unpublished learner preview…';
+      frame.onload = () => {
+        if (frame.dataset.previewUrl === url && frame.getAttribute('src') === url) {
+          const currentStatus = host.querySelector('[data-website-preview-status]');
+          if (currentStatus) currentStatus.textContent = 'Preview loaded · saved draft only; not published.';
+        }
+      };
+      frame.setAttribute('src', url);
+    } else {
+      status.textContent = 'Preview ready · saved draft only; not published.';
+    }
+    host.dataset.previewKey = cacheKey;
+  }
+
+  async function refreshBuilderWebsitePreview(force = false) {
+    if (state.tab !== 'preview') return;
+    let host = document.querySelector('[data-builder-website-preview]');
+    if (!host) return;
+
+    const status = host.querySelector('[data-website-preview-status]');
+    const error = host.querySelector('[data-website-preview-error]');
+    const openLink = host.querySelector('[data-website-preview-open]');
+    const course = currentCourse();
+    if (!course) {
+      if (status) status.textContent = 'Select a course to preview its learner experience.';
+      if (openLink) openLink.hidden = true;
+      return;
+    }
+
+    const cacheKey = builderWebsitePreviewCurrentKey();
+    if (!force && cacheKey === builderWebsitePreviewLastKey && builderWebsitePreviewLastUrl) {
+      setBuilderWebsitePreviewUrl(host, builderWebsitePreviewLastUrl, cacheKey);
+      return;
+    }
+    if (builderWebsitePreviewInFlight) {
+      builderWebsitePreviewPending = true;
+      builderWebsitePreviewPendingForce = builderWebsitePreviewPendingForce || force;
+      if (status) status.textContent = 'A preview refresh is already running; the latest selection will be loaded next…';
+      return;
+    }
+    if (!academyReady) {
+      if (status) status.textContent = 'Waiting for the Academy draft connection…';
+      return;
+    }
+    if (academySaving) {
+      if (status) status.textContent = 'Finishing the current draft save before refreshing the preview…';
+      window.clearTimeout(builderWebsitePreviewRetryTimer);
+      builderWebsitePreviewRetryTimer = window.setTimeout(() => {
+        refreshBuilderWebsitePreview(force);
+      }, 250);
+      return;
+    }
+
+    builderWebsitePreviewInFlight = true;
+    builderWebsitePreviewPending = false;
+    builderWebsitePreviewPendingForce = false;
+    if (status) status.textContent = 'Saving the draft and preparing the learner preview…';
+    if (error) {
+      error.hidden = true;
+      error.textContent = '';
+    }
+    // Do not leave a link to a stale preview visible while a new draft is saved.
+    if (openLink) openLink.hidden = true;
+    try {
+      window.clearTimeout(academySaveTimer);
+      const result = await saveCurrentToAcademy(false);
+      if (state.tab !== 'preview') return;
+      if (builderWebsitePreviewCurrentKey() !== cacheKey) {
+        builderWebsitePreviewPending = true;
+        return;
+      }
+      if (!result?.website_preview_url) {
+        throw new Error('The Academy did not return a website preview URL. The draft may be saved, but the preview route is unavailable.');
+      }
+
+      const previewUrl = new URL(result.website_preview_url, window.location.origin);
+      if (previewUrl.origin !== window.location.origin) {
+        throw new Error('The Academy returned a preview URL outside this site. It was blocked for safety.');
+      }
+      const modules = Array.isArray(course.modules) ? course.modules : [];
+      const moduleIndex = modules.findIndex(item => String(item.id) === String(state.selectedModuleId));
+      const selectedModule = moduleIndex >= 0 ? modules[moduleIndex] : null;
+      const lessons = Array.isArray(selectedModule?.lessons) ? selectedModule.lessons : [];
+      const lessonIndex = lessons.findIndex(item => String(item.id) === String(state.selectedLessonId));
+      if (moduleIndex >= 0 && lessonIndex >= 0) {
+        // The import API assigns stable source ids using 1-based module/lesson indexes.
+        previewUrl.searchParams.set('lesson', String(moduleIndex + 1) + '.' + String(lessonIndex + 1));
+      } else {
+        previewUrl.searchParams.delete('lesson');
+      }
+      previewUrl.searchParams.set('preview_audience', document.querySelector('#previewAudienceSelect')?.value || 'GLOBAL');
+      // Reload the frame when a draft revision changes, even if the route is unchanged.
+      previewUrl.searchParams.set('builder_preview_revision', String(editRevision));
+      if (force) previewUrl.searchParams.set('builder_preview_refresh', String(Date.now()));
+      const finalUrl = previewUrl.toString();
+      builderWebsitePreviewLastKey = cacheKey;
+      builderWebsitePreviewLastUrl = finalUrl;
+      host = document.querySelector('[data-builder-website-preview]');
+      setBuilderWebsitePreviewUrl(host, finalUrl, cacheKey);
+    } catch (previewError) {
+      host = document.querySelector('[data-builder-website-preview]');
+      if (state.tab === 'preview' && host) {
+        const currentStatus = host.querySelector('[data-website-preview-status]');
+        const currentError = host.querySelector('[data-website-preview-error]');
+        const currentOpenLink = host.querySelector('[data-website-preview-open]');
+        if (currentStatus) currentStatus.textContent = 'The learner preview could not be refreshed.';
+        if (currentError) {
+          currentError.textContent = String(previewError?.message || previewError);
+          currentError.hidden = false;
+        }
+        if (currentOpenLink) currentOpenLink.hidden = true;
+      }
+    } finally {
+      builderWebsitePreviewInFlight = false;
+      if (builderWebsitePreviewPending && state.tab === 'preview') {
+        const pendingForce = builderWebsitePreviewPendingForce;
+        builderWebsitePreviewPending = false;
+        builderWebsitePreviewPendingForce = false;
+        window.setTimeout(() => refreshBuilderWebsitePreview(pendingForce), 0);
+      }
+    }
+  }
+
+  const renderEditorBeforeWebsitePreview = renderEditor;
+  renderEditor = function() {
+    renderEditorBeforeWebsitePreview();
+    if (state.tab === 'preview') {
+      window.setTimeout(() => refreshBuilderWebsitePreview(false), 0);
+    }
+  };
+
   if (!state.savedAt) persist(false);
   suppressDirtyTracking = false;
   render();

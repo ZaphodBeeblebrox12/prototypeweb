@@ -328,6 +328,28 @@ class AcademyViewTests(TestCase):
             response,
             "Administrator preview only. Answer submission is disabled in this view.",
         )
+        self.assertEqual(response.headers.get("X-Frame-Options"), "SAMEORIGIN")
+        self.assertContains(response, "<strong>Observe.</strong>")
+        self.assertContains(response, 'class="tt-course-progress tt-course-progress--draft"')
+        self.assertContains(response, 'aria-label="Draft preview progress (unstarted)"')
+        self.assertContains(response, 'aria-valuenow="0"')
+        self.assertContains(response, 'style="width:0%"')
+        self.assertNotContains(response, 'data-notebook-response')
+        self.assertNotContains(response, 'data-guided-reflection')
+        self.assertNotContains(response, 'data-practice-quiz')
+
+        # Framing is enabled only for the authenticated, admin-only draft route.
+        ordinary_page = self.client.get(reverse("academy:course-detail", args=[self.course.slug]))
+        self.assertEqual(ordinary_page.status_code, 200)
+        self.assertEqual(ordinary_page.headers.get("X-Frame-Options"), "DENY")
+
+        self.client.force_login(self.user)
+        unauthorized = self.client.get(
+            reverse("academy:course-import-preview", args=[record.pk]),
+            {"lesson": "1.1"},
+        )
+        self.assertEqual(unauthorized.status_code, 403)
+        self.assertNotContains(unauthorized, "A structured preview lesson.", status_code=403)
         self.assertContains(response, '<fieldset class="tt-question tt-admin-question" disabled>')
         self.assertContains(response, "Record the evidence you can see.")
         self.assertNotContains(response, "Check answers")

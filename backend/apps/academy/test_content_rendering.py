@@ -326,28 +326,43 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("LONGER WINDOW", rendered)
         self.assertIn("Compare one setting at a time.", rendered)
 
-    def test_course_builder_preview_keeps_each_figure_at_its_markdown_position(self):
-        preview = (Path(__file__).resolve().parent / "course_builder_preview.html").read_text()
-        # Placeholder separators must be actual Markdown blank lines, not literal
-        # backslash-n text, or headings and figure tokens leak into the preview.
-        self.assertIn(r"return '\n\n' + token + '\n\n';", preview)
-        # A placed asset may use either its builder ID or its stable asset UUID.
-        # It should not also be appended to the end of the preview as unplaced.
-        self.assertIn("[image.id, image.assetUuid]", preview)
-        self.assertIn("authoredContent.includes('asset://' + id)", preview)
-        self.assertIn('data-action="add-image-group"', preview)
-        self.assertIn('data-action="insert-image-group"', preview)
-        self.assertIn('data-image-group-member', preview)
-        self.assertIn(r"[[image-group:", preview)
-        self.assertIn("groupedReference", preview)
-        self.assertIn("imageGroups.some", preview)
-        self.assertNotIn("TRADETHESIS · LEARNING ROOM", preview)
-        self.assertIn("tt-purpose-figure-module", preview)
-        self.assertIn("data-image-storage-status", preview)
-        self.assertIn("compactDuplicateCourseCards(resolveBuilderRegionalBlocks(String(src || '')", preview)
-        self.assertIn("result.asset_storage", preview)
-        self.assertIn("Image uploads are blocked because no durable image provider is configured", preview)
+    def test_course_builder_preview_uses_academy_renderer_for_figure_positions(self):
+        backend_root = Path(__file__).resolve().parents[2]
+        builder = (Path(__file__).resolve().parent / "course_builder_preview.html").read_text(
+            encoding="utf-8"
+        )
+        website_preview = (
+            backend_root / "templates" / "academy" / "course_import_website_preview.html"
+        ).read_text(encoding="utf-8")
+        tabs_template = (
+            backend_root / "templates" / "academy" / "partials" / "lesson_tabs.html"
+        ).read_text(encoding="utf-8")
+        views_source = (backend_root / "apps" / "academy" / "views.py").read_text(
+            encoding="utf-8"
+        )
 
+        # Builder saves the current draft and opens its real Academy preview.
+        self.assertIn('data-builder-website-preview-frame', builder)
+        self.assertIn("async function refreshBuilderWebsitePreview(force = false)", builder)
+        self.assertIn("saveCurrentToAcademy(false)", builder)
+        self.assertIn("website_preview_url", builder)
+        self.assertIn(
+            "previewUrl.searchParams.set('lesson', String(moduleIndex + 1) + '.' + String(lessonIndex + 1));",
+            builder,
+        )
+        self.assertIn("preview_audience", builder)
+
+        # The draft route uses the shared section renderer and learner-facing tabs.
+        self.assertIn("selected_sections = build_lesson_sections(", views_source)
+        self.assertIn('figure_metadata=content_json.get("figures", {})', views_source)
+        self.assertIn('table_metadata=content_json.get("tables", {})', views_source)
+        self.assertIn(
+            '{% include "academy/partials/lesson_tabs.html" with lesson_sections=selected_sections',
+            website_preview,
+        )
+        self.assertIn("{{ lesson_sections.idea_html|safe }}", tabs_template)
+        self.assertIn("{{ lesson_sections.examples_html|safe }}", tabs_template)
+        self.assertIn("{{ lesson_sections.practice_html|safe }}", tabs_template)
 
     def test_titled_image_group_renders_multiple_images_with_module_heading_in_place(self):
         group_id = "image-group-method-two"
@@ -622,7 +637,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
 
 
 class TradingNotebookTemplateTests(SimpleTestCase):
-    def test_notebook_is_inside_the_idea_panel_before_chart_examples_action(self):
+    def test_notebook_sits_beside_the_entire_tabbed_content_column(self):
         template = (
             Path(__file__).resolve().parents[2]
             / "templates"
@@ -631,15 +646,38 @@ class TradingNotebookTemplateTests(SimpleTestCase):
             / "lesson_tabs.html"
         )
         source = template.read_text(encoding="utf-8")
-        idea = source.index('data-tab-panel="idea"')
-        notebook = source.index('class="tt-notebook"')
-        action = source.index('data-open-tab="examples"')
-        examples = source.index('data-tab-panel="examples"')
 
-        self.assertLess(idea, notebook)
-        self.assertLess(notebook, action)
-        self.assertLess(action, examples)
+        grid = source.index('<div class="learning-content-grid">')
+        column = source.index('<div class="lesson-content-column">', grid)
+        tabs = source.index('<section class="tt-lesson-tabs"', column)
+        notebook = source.index('<aside class="tt-notebook"', grid)
+
+        self.assertLess(grid, column)
+        self.assertLess(column, tabs)
+        self.assertLess(tabs, notebook)
+
+        # Both the complete tabs section and its content-column wrapper
+        # must close before the Notebook sibling begins.
+        tabs_end = source.rfind("</section>", tabs, notebook)
+        self.assertGreaterEqual(
+            tabs_end, tabs,
+            "Could not find the closing tag for the complete lesson-tabs section.",
+        )
+
+        content_column_end = source.find("</div>", tabs_end)
+        self.assertGreater(
+            content_column_end, tabs_end,
+            "Could not find the content-column closing tag after the tabs.",
+        )
+        self.assertLess(
+            content_column_end, notebook,
+            "The Notebook must be outside the complete content column.",
+        )
+
         self.assertEqual(source.count('class="tt-notebook"'), 1)
+        self.assertIn('data-tab-panel="idea"', source)
+        self.assertIn('data-tab-panel="examples"', source)
+        self.assertIn('data-tab-panel="practice"', source)
         self.assertIn("Before treating a touch as a setup", source)
         self.assertIn("Where is price relative to the bands and middle line?", source)
         self.assertIn("What would change your view?", source)
@@ -651,24 +689,35 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         script = (backend / "static" / "academy" / "learning-room.js").read_text(encoding="utf-8")
 
         self.assertIn(".tt-learning-room .tt-notebook-index", styles)
+        self.assertIn(".tt-learning-room .learning-content-grid", styles)
+        self.assertIn(".tt-learning-room .lesson-content-column", styles)
+        self.assertIn("grid-row:1", styles)
         self.assertIn(".tt-learning-room .tt-notebook-examples-button", styles)
         self.assertIn("@media(max-width:620px)", styles)
         self.assertIn('event.target.closest("[data-open-tab]")', script)
         self.assertIn('form = event.target.closest("[data-notebook-response]")', script)
 
-    def test_builder_learner_preview_renders_notebook_before_practice_questions(self):
+    def test_builder_learner_preview_uses_the_saved_academy_website_template(self):
         builder = Path(__file__).resolve().parent / "course_builder_preview.html"
         source = builder.read_text(encoding="utf-8")
         start = source.index("function previewFields(c)")
         end = source.index("function renderMarkdown(src)", start)
         preview = source[start:end]
 
-        lesson_body = preview.index("renderMarkdown(lessonBodyForAudience(lesson,")
-        notebook = preview.index("notebookPreviewMarkup(lesson)")
-        questions = preview.index("lesson.questions.length?")
-        self.assertLess(lesson_body, notebook)
-        self.assertLess(notebook, questions)
-        self.assertEqual(preview.count("notebookPreviewMarkup(lesson)"), 1)
+        self.assertIn('data-builder-website-preview', preview)
+        self.assertIn('data-builder-website-preview-frame', preview)
+        self.assertIn('data-website-preview-status', preview)
+        self.assertIn('data-website-preview-error', preview)
+        self.assertIn('data-action="refresh-website-preview"', preview)
+        self.assertNotIn("builder-lesson-preview-grid", preview)
+        self.assertNotIn("notebookPreviewMarkup(lesson)", preview)
+        self.assertNotIn("lesson.questions.length?", preview)
+        self.assertIn("async function refreshBuilderWebsitePreview(force = false)", source)
+        self.assertIn("saveCurrentToAcademy(false)", source)
+        self.assertIn("previewUrl.origin !== window.location.origin", source)
+        self.assertIn("preview_audience", source)
+        self.assertIn("moduleIndex + 1", source)
+        self.assertIn("lessonIndex + 1", source)
 
     def test_builder_notebook_chart_examples_shortcut_is_present_and_wired(self):
         builder = Path(__file__).resolve().parent / "course_builder_preview.html"

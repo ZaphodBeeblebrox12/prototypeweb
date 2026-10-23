@@ -1,4 +1,6 @@
 {% with tab_prefix=tab_id_prefix|default:"lesson" %}
+<div class="learning-content-grid">
+  <div class="lesson-content-column">
 <section class="tt-lesson-tabs" data-learning-tabs>
   <div class="tt-tab-list" role="tablist" aria-label="Lesson sections">
     <button class="tt-tab is-active" id="{{ tab_prefix }}-tab-idea" type="button" role="tab" aria-selected="true" aria-controls="{{ tab_prefix }}-panel-idea" data-tab-name="idea">The idea</button>
@@ -6,58 +8,8 @@
     <button class="tt-tab" id="{{ tab_prefix }}-tab-practice" type="button" role="tab" aria-selected="false" aria-controls="{{ tab_prefix }}-panel-practice" data-tab-name="practice">Test your reading{% if practice_questions %} <span class="tt-tab-count">{{ practice_questions|length }}</span>{% endif %}</button>
   </div>
   <div class="tt-tab-panel" id="{{ tab_prefix }}-panel-idea" role="tabpanel" aria-labelledby="{{ tab_prefix }}-tab-idea" data-tab-panel="idea">
-    <div class="tt-lesson-idea-layout">
-      <div class="tt-lesson-idea-copy">{{ lesson_sections.idea_html|safe }}</div>
-    <aside class="tt-notebook" aria-label="Your Trading Notebook">
-      <div class="tt-notebook-index"><span>KEEP<br>IN VIEW</span><strong>01</strong></div>
-      <div class="tt-notebook-content">
-        <div class="tt-notebook-kicker">YOUR TRADING NOTEBOOK</div>
-<h4>{% if notebook.title and notebook.title != "Your Trading Notebook" and notebook.title != "Before you make the call" %}{{ notebook.title }}{% elif course_slug == "understand-bollinger-bands" %}Before treating a touch as a setup{% else %}Before you make the call{% endif %}</h4>
-        {% if notebook.prompts %}
-        <ol>
-          {% for prompt in notebook.prompts %}
-          <li>
-            <span class="tt-notebook-number">{{ forloop.counter|stringformat:"02d" }}</span>
-            <div class="tt-notebook-prompt-copy"><p><strong>{{ prompt.label|default:"Describe"|cut:"." }}.</strong> {{ prompt.text }}</p></div>
-          </li>
-          {% endfor %}
-        </ol>
-        {% else %}
-        <ol>
-          {% if course_slug == "understand-bollinger-bands" %}
-          <li><span class="tt-notebook-number">01</span><p><strong>Describe.</strong> Where is price relative to the bands and middle line?</p></li>
-          <li><span class="tt-notebook-number">02</span><p><strong>Interpret.</strong> Does the structure look like a range, a trend or a transition? What is your alternative explanation?</p></li>
-          <li><span class="tt-notebook-number">03</span><p><strong>Apply.</strong> What would change your view?</p></li>
-          {% else %}
-          <li><span class="tt-notebook-number">01</span><p><strong>Describe.</strong> What evidence is visible?</p></li>
-          <li><span class="tt-notebook-number">02</span><p><strong>Interpret.</strong> What could it mean in context?</p></li>
-          <li><span class="tt-notebook-number">03</span><p><strong>Apply.</strong> What would change your view?</p></li>
-          {% endif %}
-        </ol>
-        {% endif %}
-        {% if notebook.prompts and lesson %}
-        <details class="tt-notebook-response-editor">
-          <summary>Write your reflections</summary>
-          <form method="post" action="{% url 'academy:lesson-notebook-submit' lesson.id %}" data-notebook-response>
-            {% csrf_token %}
-            <div class="tt-notebook-reflection-fields">
-              {% for prompt in notebook.prompts %}
-              <div class="tt-notebook-reflection-field">
-                <label for="{{ tab_prefix }}-notebook-prompt-{{ forloop.counter0 }}">{{ prompt.label|default:"Reflection" }} — {{ prompt.text }}</label>
-                <textarea id="{{ tab_prefix }}-notebook-prompt-{{ forloop.counter0 }}" name="prompt_{{ forloop.counter0 }}" rows="3" maxlength="4000" placeholder="Write your reflection…">{{ prompt.response }}</textarea>
-              </div>
-              {% endfor %}
-            </div>
-            <div class="tt-notebook-reflection-actions">
-              <button class="tt-notebook-save" type="submit">Save reflection</button>
-              <span data-notebook-feedback role="status" aria-live="polite"></span>
-            </div>
-          </form>
-        </details>
-        {% endif %}
-      </div>
-    </aside>
-    </div>
+    <div class="tt-lesson-idea-copy">{{ lesson_sections.idea_html|safe }}</div>
+
     <button class="tt-notebook-examples-button" type="button" data-open-tab="examples">Work through the chart examples <span aria-hidden="true">↗</span></button>
   </div>
   <div class="tt-tab-panel" id="{{ tab_prefix }}-panel-examples" role="tabpanel" aria-labelledby="{{ tab_prefix }}-tab-examples" data-tab-panel="examples" hidden>{{ lesson_sections.examples_html|safe }}</div>
@@ -130,4 +82,62 @@
     {% endif %}
   </div>
 </section>
+  </div>
+<aside class="tt-notebook" aria-label="Your Trading Notebook">
+      <div class="tt-notebook-index"><span>KEEP<br>IN VIEW</span><strong>01</strong></div>
+      <div class="tt-notebook-content">
+        <div class="tt-notebook-top">
+        <div class="tt-notebook-kicker">PAUSE AND RECORD</div>
+        <h4>{% if notebook.title and notebook.title != "Your Trading Notebook" and notebook.title != "Before you make the call" %}{{ notebook.title }}{% elif course_slug == "understand-bollinger-bands" %}Before treating a touch as a setup{% else %}Before you make the call{% endif %}</h4>
+        <p class="tt-notebook-intro">Make the reading conditional. Keep what you saw separate from what you think it means.</p>
+      </div>
+        <div class="tt-notebook-prompts">
+{% if notebook.prompts %}
+        <ol>
+          {% for prompt in notebook.prompts %}
+          <li>
+            <span class="tt-notebook-number">{{ forloop.counter|stringformat:"02d" }}</span>
+            <div class="tt-notebook-prompt-copy"><p><strong>{{ prompt.label|default:"Describe"|cut:"." }}.</strong> {{ prompt.text }}</p></div>
+          </li>
+          {% endfor %}
+        </ol>
+        {% else %}
+        <ol>
+          {% if course_slug == "understand-bollinger-bands" %}
+          <li><span class="tt-notebook-number">01</span><p><strong>Describe.</strong> Where is price relative to the bands and middle line?</p></li>
+          <li><span class="tt-notebook-number">02</span><p><strong>Interpret.</strong> Does the structure look like a range, a trend or a transition? What is your alternative explanation?</p></li>
+          <li><span class="tt-notebook-number">03</span><p><strong>Apply.</strong> What would change your view?</p></li>
+          {% else %}
+          <li><span class="tt-notebook-number">01</span><p><strong>Describe.</strong> What evidence is visible?</p></li>
+          <li><span class="tt-notebook-number">02</span><p><strong>Interpret.</strong> What could it mean in context?</p></li>
+          <li><span class="tt-notebook-number">03</span><p><strong>Apply.</strong> What would change your view?</p></li>
+          {% endif %}
+        </ol>
+        {% endif %}
+      </div>
+        {% if notebook.prompts and lesson %}
+        <details class="tt-notebook-response-editor">
+          <summary>Write your reflections</summary>
+          <form method="post" action="{% url 'academy:lesson-notebook-submit' lesson.id %}" data-notebook-response>
+            {% csrf_token %}
+            <div class="tt-notebook-reflection-fields">
+              {% for prompt in notebook.prompts %}
+              <div class="tt-notebook-reflection-field">
+                <label for="{{ tab_prefix }}-notebook-prompt-{{ forloop.counter0 }}">{{ prompt.label|default:"Reflection" }} — {{ prompt.text }}</label>
+                <textarea id="{{ tab_prefix }}-notebook-prompt-{{ forloop.counter0 }}" name="prompt_{{ forloop.counter0 }}" rows="3" maxlength="4000" placeholder="Write your reflection…">{{ prompt.response }}</textarea>
+              </div>
+              {% endfor %}
+            </div>
+            <div class="tt-notebook-reflection-actions">
+              <button class="tt-notebook-save" type="submit">Save reflection</button>
+              <span data-notebook-feedback role="status" aria-live="polite"></span>
+            </div>
+          </form>
+        </details>
+        {% endif %}
+      </div>
+      <p class="tt-notebook-hint">Try answering in three short sentences. In the last one, name a specific price behaviour that would strengthen or weaken your current reading.</p>
+      
+    </aside>
+</div>
 {% endwith %}

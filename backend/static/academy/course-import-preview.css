@@ -84,3 +84,38 @@
 @media (max-width: 420px) {
   .tt-admin-learning-preview .tt-tab-panel .tt-course-preview-card { grid-template-columns: 54px minmax(0, 1fr); }
 }
+
+/* The staged preview shows an unstarted draft line, never learner progress. */
+.tt-admin-learning-preview .tt-course-header--depth { position:relative; padding-bottom:25px; }
+.tt-admin-learning-preview .tt-course-header--depth .tt-course-progress--draft {
+  position:absolute;
+  left:clamp(27px,3.5vw,44px);
+  right:clamp(27px,3.5vw,44px);
+  bottom:0;
+  width:auto;
+  height:5px;
+  margin:0;
+}
+@media(max-width:680px) {
+  .tt-admin-learning-preview .tt-course-header--depth .tt-course-progress--draft { left:15px; right:15px; }
+}
+
+/* TradeThesis draft-preview shell parity overrides — pass 2 */
+.tt-admin-course-preview { max-width:none; margin:0 auto; padding:10px clamp(12px,3vw,42px) 44px; color:#27382e; }
+.tt-admin-course-preview .tt-admin-preview-banner { margin:0 auto 14px; max-width:1440px; border-radius:3px; padding:13px 16px; }
+.tt-admin-course-preview .tt-admin-learning-preview {
+  box-sizing:border-box; max-width:1440px; margin:0 auto; padding:clamp(20px,3vw,40px);
+  border:1px solid #e7e0d2;
+  background:radial-gradient(ellipse at 12% 0%,#e4eadb62,transparent 42%),radial-gradient(ellipse at 94% 26%,#f2e6ce45,transparent 34%);
+}
+.tt-admin-course-preview .tt-admin-learning-preview .tt-outline { border:1px solid #ded7c8; border-radius:0; background:#f7f7f0; }
+.tt-admin-course-preview .tt-admin-learning-preview .tt-lesson-article { max-width:none; width:100%; margin:0; }
+.tt-admin-course-preview .tt-admin-learning-preview .tt-lesson-main { min-width:0; width:100%; }
+.tt-admin-course-preview .tt-admin-learning-preview .tt-lesson-navigation { margin-top:16px; }
+@media(max-width:920px) {
+  .tt-admin-course-preview .tt-admin-learning-preview { padding:22px; }
+}
+@media(max-width:680px) {
+  .tt-admin-course-preview { padding:10px 8px 25px; }
+  .tt-admin-course-preview .tt-admin-learning-preview { padding:14px 11px 24px; }
+}

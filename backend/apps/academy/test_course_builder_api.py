@@ -80,10 +80,23 @@ class CourseBuilderApiTests(TestCase):
             "mode": "save",
         }
 
-    def test_builder_learner_preview_includes_trading_notebook_block(self):
+    def test_builder_learner_preview_uses_academy_template_and_keeps_notebook_authoring(self):
         response = self.client.get(reverse("staff_course_builder_preview"))
 
         self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, 'data-builder-website-preview')
+        self.assertContains(response, 'data-builder-website-preview-frame')
+        self.assertContains(response, 'data-website-preview-status')
+        self.assertContains(response, 'data-website-preview-error')
+        self.assertContains(response, 'data-action="refresh-website-preview"')
+        self.assertContains(response, "async function refreshBuilderWebsitePreview(force = false)")
+        self.assertContains(response, "website_preview_url")
+        builder_source = response.content.decode("utf-8")
+        preview_start = builder_source.index("function previewFields(c)")
+        preview_end = builder_source.index("function renderMarkdown(src)", preview_start)
+        learner_preview = builder_source[preview_start:preview_end]
+        self.assertNotIn("builder-lesson-preview-grid", learner_preview)
+        self.assertNotIn("notebookPreviewMarkup(lesson)", learner_preview)
         self.assertContains(response, "function notebookPreviewMarkup(lesson)")
         self.assertContains(response, 'class="preview-trading-notebook"')
         self.assertContains(response, "KEEP<br>IN VIEW")
@@ -105,7 +118,8 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "Route to Chart examples")
         self.assertContains(response, "Manage inserted lesson references")
         self.assertContains(response, "lessonQualityMarkup")
-        self.assertContains(response, "previewFieldsBeforeQualityChecks")
+        self.assertContains(response, "data-builder-website-preview-frame")
+        self.assertNotContains(response, "previewFieldsBeforeQualityChecks")
         self.assertContains(response, "payload.publish_errors")
         self.assertContains(response, "What needs attention:")
         self.assertContains(response, "validation-error")
@@ -1528,13 +1542,18 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
         )
 
 
-    def test_module_name_eyebrow_uses_selected_module_number_and_title(self):
+    def test_builder_preview_routes_selected_lesson_to_academy_template(self):
         source = Path(__file__).with_name("course_builder_preview.html").read_text(
             encoding="utf-8"
         )
-        self.assertIn("function moduleHeadingLabel(course,module)", source)
-        self.assertIn('class="module-name-eyebrow"', source)
-        self.assertIn("String(moduleIndex + 1).padStart(2, '0') + ' · ' + title", source)
+        self.assertIn('data-builder-website-preview-frame', source)
+        self.assertIn(
+            "previewUrl.searchParams.set('lesson', String(moduleIndex + 1) + '.' + String(lessonIndex + 1));",
+            source,
+        )
+        self.assertIn("previewUrl.searchParams.set('preview_audience'", source)
+        self.assertIn("async function refreshBuilderWebsitePreview(force = false)", source)
+        self.assertNotIn('class="module-name-eyebrow"', source)
 
     def test_module_title_is_rendered_in_both_academy_lesson_templates(self):
         backend_root = Path(__file__).resolve().parents[2]
