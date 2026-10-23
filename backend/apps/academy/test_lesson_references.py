@@ -111,8 +111,9 @@ class CourseCardReferenceRenderingTests(TestCase):
         self.assertIn(self.course.summary, rendered)
         self.assertIn("Companion course", rendered)
         self.assertIn("Activity vs price", rendered)
-        self.assertIn("V/P", rendered)
-        self.assertIn("meets outcome", rendered)
+        self.assertIn("BEHIND<br>THE MOVE", rendered)
+        self.assertIn("VOLUME × PRICE", rendered)
+        self.assertIn("tt-course-preview-card__topics", rendered)
         self.assertIn("View course outline", rendered)
         self.assertIn(f'href="{expected_url}"', rendered)
 

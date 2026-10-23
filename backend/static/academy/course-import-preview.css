@@ -54,11 +54,11 @@
 .tt-admin-learning-preview .tt-lesson-article { max-width: none; width: 100%; margin: 0; }
 .tt-admin-learning-preview .tt-lesson-navigation { margin-top: 16px; }
 
-/* Match Option 4 card dimensions and typography in the Builder learner preview.
+/* Match Option 3 card dimensions and typography in the Builder learner preview.
    Learning Room tab rules are intentionally broad, so scope these overrides to
    the card in the administrator website preview only. */
 .tt-admin-learning-preview .tt-tab-panel .tt-course-preview-card {
-  width: min(100%, 640px);
+  width: min(100%, 560px);
 }
 .tt-admin-learning-preview .tt-tab-panel .tt-course-preview-card h3 {
   margin: 5px 0 5px;

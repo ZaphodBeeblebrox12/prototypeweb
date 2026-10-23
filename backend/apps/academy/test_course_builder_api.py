@@ -109,7 +109,7 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "payload.publish_errors")
         self.assertContains(response, "What needs attention:")
         self.assertContains(response, "validation-error")
-        self.assertContains(response, "Insert a companion-course card (Option 4)")
+        self.assertContains(response, "Insert a companion-course card (Option 3)")
         self.assertContains(response, "data-course-card-search")
         self.assertContains(response, "eligibleCompanionCourses()")
         self.assertContains(response, "replace-course-card-and-remove-links")

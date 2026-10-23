@@ -593,7 +593,8 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertEqual(source.count('class="tt-notebook"'), 1)
         self.assertIn("Before treating a touch as a setup", source)
         self.assertIn("Where is price relative to the bands and middle line?", source)
-        self.assertIn("What future price behaviour would strengthen or weaken your view?", source)
+        self.assertIn("What would change your view?", source)
+        self.assertIn("<strong>Apply.</strong>", source)
 
     def test_notebook_styling_and_chart_tab_action_are_wired(self):
         backend = Path(__file__).resolve().parents[2]
