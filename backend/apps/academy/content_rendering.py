@@ -400,6 +400,7 @@ def render_safe_markdown(
     module_label="",
     course_title="",
     table_metadata=None,
+    image_group_numbers=None,
 ):
     """Render sanitised Markdown, structured tables, figures and groups."""
     from html import escape
@@ -410,6 +411,7 @@ def render_safe_markdown(
     )
     source, course_cards = _resolve_course_cards(source)
     table_metadata = table_metadata if isinstance(table_metadata, dict) else {}
+    image_group_numbers = image_group_numbers if isinstance(image_group_numbers, dict) else {}
     table_frames = {}
 
     def replace_table_block(match):
@@ -578,7 +580,14 @@ def render_safe_markdown(
             )
         if not items:
             return '<span class="tt-purpose-figure-missing" role="status">Choose one to four images to complete this chart group.</span>'
-        group_number_text = f"{group_numbers.get(group_id, 1):02d}"
+        raw_group_number = image_group_numbers.get(group_id)
+        try:
+            group_number = int(raw_group_number) if raw_group_number is not None else group_numbers.get(group_id, 1)
+        except (TypeError, ValueError):
+            group_number = group_numbers.get(group_id, 1)
+        if group_number < 1:
+            group_number = group_numbers.get(group_id, 1)
+        group_number_text = f"{group_number:02d}"
         count = len(items)
         safe_group_id = escape(group_id, quote=True)
         title = escape(str(metadata.get("title") or "Image group").strip() or "Image group")
@@ -772,6 +781,9 @@ def build_lesson_sections(
         country_code=country_code, region_code=region_code,
     )
     source = _deduplicate_course_card_refs(source)
+    image_group_numbers = {}
+    for group_id in _IMAGE_GROUP_TOKEN.findall(source):
+        image_group_numbers.setdefault(group_id, len(image_group_numbers) + 1)
     lines = source.splitlines()
     groups = {"idea": [], "examples": [], "practice": []}
     current_group = "idea"
@@ -865,16 +877,19 @@ def build_lesson_sections(
             figure_metadata=figure_metadata, figure_prefix=figure_prefix,
             module_label=module_label, course_title=course_title,
             table_metadata=table_metadata,
+            image_group_numbers=image_group_numbers,
         ),
         "examples_html": render_safe_markdown(
             rendered["examples"], asset_urls, user=user, admin_preview=admin_preview,
             figure_metadata=figure_metadata, figure_prefix=figure_prefix,
             module_label=module_label, course_title=course_title,
+            image_group_numbers=image_group_numbers,
         ),
         "practice_html": render_safe_markdown(
             rendered["practice"], asset_urls, user=user, admin_preview=admin_preview,
             figure_metadata=figure_metadata, figure_prefix=figure_prefix,
             module_label=module_label, course_title=course_title,
+            image_group_numbers=image_group_numbers,
         ),
         "figure_count": figure_count,
     }

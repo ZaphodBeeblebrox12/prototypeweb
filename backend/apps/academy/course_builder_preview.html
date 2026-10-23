@@ -2663,11 +2663,17 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
       figures.push('<figure class="tt-purpose-figure" data-figure-id="' + esc(id) + '">' + figureHeader(title) + '<span class="tt-purpose-figure-body">' + imageHtml + '</span>' + caption + '</figure>');
       return '\n\n' + token + '\n\n';
     });
+    const previewGroupNumbers = new Map();
+    for (const groupMatch of prepared.matchAll(/\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]/g)) {
+      if (!previewGroupNumbers.has(groupMatch[1])) {
+        previewGroupNumbers.set(groupMatch[1], previewGroupNumbers.size + 1);
+      }
+    }
     prepared = prepared.replace(/\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]/g, function(match, id) {
       const group = (lesson?.imageGroups || []).find(item => String(item.id) === id);
       if (!group) return match;
       const token = 'TTFIGURETOKEN' + figures.length + 'END';
-      const groupIndex = Math.max(0, (lesson?.imageGroups || []).findIndex(item => String(item.id) === id)) + 1;
+      const groupIndex = previewGroupNumbers.get(id) || 1;
       const groupNumber = String(groupIndex).padStart(2, '0');
       const groupedImages = (group.imageIds || []).slice(0, 4)
         .map(imageId => images.find(item => item.id === imageId || item.assetUuid === imageId))

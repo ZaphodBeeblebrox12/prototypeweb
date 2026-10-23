@@ -506,6 +506,39 @@ class SharedLessonRenderingTests(SimpleTestCase):
             self.assertIn("@media(max-width:560px)", source)
             self.assertIn("grid-template-columns:26px minmax(0,1fr)", source)
 
+
+    def test_image_group_numbering_stays_consistent_across_lesson_tabs(self):
+        first_id = "11111111-1111-4111-8111-111111111111"
+        second_id = "22222222-2222-4222-8222-222222222222"
+        source = (
+            "[[lesson-tab:idea]]\n"
+            "## First reading\n\n"
+            "[[image-group:first-group]]\n\n"
+            "[[lesson-tab:examples]]\n"
+            "## Chart examples\n\n"
+            "[[image-group:second-group]]"
+        )
+        rendered = build_lesson_sections(
+            source,
+            asset_urls={first_id: "/media/first.png", second_id: "/media/second.png"},
+            figure_metadata={
+                "first-group": {
+                    "type": "image-group",
+                    "title": "First group",
+                    "image_ids": [first_id],
+                },
+                "second-group": {
+                    "type": "image-group",
+                    "title": "Second group",
+                    "image_ids": [second_id],
+                },
+                first_id: {"title": "First chart", "alt": "First chart"},
+                second_id: {"title": "Second chart", "alt": "Second chart"},
+            },
+        )
+        self.assertIn("Chart group · 01", rendered["idea_html"])
+        self.assertIn("Chart group · 02", rendered["examples_html"])
+
     def test_filename_is_not_used_as_a_figure_title(self):
         rendered = render_safe_markdown(
             f"![Chart](asset://{self.ASSET_ID})",
