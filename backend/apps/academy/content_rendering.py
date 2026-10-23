@@ -475,7 +475,6 @@ def render_safe_markdown(
     else:
         module_title = f"MODULE · {raw_module_label}"
     safe_module_title = escape(module_title, quote=True)
-    safe_course_title = escape(str(course_title or "Course").strip() or "Course", quote=True)
 
     def figure_header(title):
         safe_title = escape(str(title or "Chart").strip())
