@@ -724,6 +724,12 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn(".rich-editor-canvas h2 { font-size:clamp(29px,2.8vw,37px); font-weight:400; line-height:1.13; letter-spacing:-.04em; margin:0 0 16px; }", builder_source)
         self.assertIn("display: block;", lesson_styles)
         self.assertIn("{% else %}Your Trading Notebook{% endif %}", tabs_template)
+        self.assertIn('{% if notebook.prompts %}\\n        <details class="tt-notebook-response-editor">', tabs_template)
+        self.assertIn("<summary>Write your reflections</summary>", tabs_template)
+        self.assertIn("{% if admin_preview or not lesson %}", tabs_template)
+        self.assertIn("This design preview does not submit or store them.", tabs_template)
+        self.assertIn('placeholder="Write a short reflection…" disabled', tabs_template)
+        self.assertIn("data-notebook-response", tabs_template)
         self.assertIn("Before treating a touch as a setup", tabs_template)
         self.assertIn('<div class="tt-notebook-prompt-copy"><p><strong>Describe.</strong>', tabs_template)
 

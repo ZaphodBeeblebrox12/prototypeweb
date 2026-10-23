@@ -115,9 +115,20 @@
         </ol>
         {% endif %}
       </div>
-        {% if notebook.prompts and lesson %}
+        {% if notebook.prompts %}
         <details class="tt-notebook-response-editor">
           <summary>Write your reflections</summary>
+          {% if admin_preview or not lesson %}
+          <p class="tt-notebook-reflection-note">In the learner view, these responses use the existing Academy save flow. This design preview does not submit or store them.</p>
+          <div class="tt-notebook-reflection-fields">
+            {% for prompt in notebook.prompts %}
+            <div class="tt-notebook-reflection-field">
+              <label for="{{ tab_prefix }}-notebook-prompt-{{ forloop.counter0 }}">{{ prompt.label|default:"Reflection" }} — {{ prompt.text }}</label>
+              <textarea id="{{ tab_prefix }}-notebook-prompt-{{ forloop.counter0 }}" rows="3" maxlength="4000" placeholder="Write a short reflection…" disabled>{{ prompt.response }}</textarea>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
           <form method="post" action="{% url 'academy:lesson-notebook-submit' lesson.id %}" data-notebook-response>
             {% csrf_token %}
             <div class="tt-notebook-reflection-fields">
@@ -133,6 +144,7 @@
               <span data-notebook-feedback role="status" aria-live="polite"></span>
             </div>
           </form>
+          {% endif %}
         </details>
         {% endif %}
       </div>

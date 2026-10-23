@@ -1627,3 +1627,18 @@
   .tt-learning-room .tt-tab-panel h4 { font-size: 20px; }
   .tt-learning-room .tt-tab-panel h5 { font-size: 16px; }
 }
+
+
+/* Notebook response disclosure: keep the reflection accordion visible in both learner and preview modes. */
+.tt-learning-room .tt-notebook-response-editor .tt-notebook-reflection-note {
+  margin: 10px 0 12px;
+  color: #687367;
+  font-size: 10px;
+  line-height: 1.55;
+}
+.tt-learning-room .tt-notebook-response-editor textarea:disabled {
+  background: #fffdf8;
+  color: #58665c;
+  opacity: 1;
+  cursor: default;
+}
