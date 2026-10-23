@@ -65,8 +65,8 @@ def unlink_telegram(request):
         enqueue_reconcile(request.user.id, reason="telegram_unlink")
         messages.success(request, "✅ Telegram disconnected. You can reconnect anytime from Connected accounts in your Dashboard.")
     except TelegramAccount.DoesNotExist:
-        pass
-    return redirect('dashboard')
+        messages.info(request, "No Telegram account is currently linked.")
+    return redirect(f"{reverse('dashboard')}#connections")
 
 
 def _discord_connections_redirect():
