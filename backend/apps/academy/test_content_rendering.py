@@ -834,15 +834,21 @@ class TradingNotebookTemplateTests(SimpleTestCase):
             with self.subTest(label=label):
                 self.assertIn(f"<h3>{label}</h3>", tabs_template)
 
-        # The alternative is hidden on desktop, shown through tablet widths,
-        # stacked on mobile, and never displayed alongside the right-rail card.
+        # The alternative is hidden on desktop and shown through tablet/mobile;
+        # all three cards stay on one row, including the narrow mobile breakpoint.
         self.assertIn(".tt-learning-room .tt-mobile-pause-and-record {\n  display: none;", notebook_styles)
         self.assertIn("@media (max-width: 920px)", notebook_styles)
         self.assertIn("display: none !important;", notebook_styles)
         self.assertIn(".tt-learning-room .tt-mobile-pause-and-record,\n  .tt-admin-course-preview", notebook_styles)
         self.assertIn("display: block;", notebook_styles)
-        self.assertIn("@media (max-width: 680px)", notebook_styles)
-        self.assertIn("grid-template-columns: minmax(0, 1fr);", notebook_styles)
+        mobile_rule_start = notebook_styles.index(
+            "/* Option A: keep all three reflection cards on one row on phone screens. */"
+        )
+        mobile_rule_end = notebook_styles.index("\n}", mobile_rule_start)
+        mobile_rules = notebook_styles[mobile_rule_start:mobile_rule_end]
+        self.assertIn("@media (max-width: 680px)", mobile_rules)
+        self.assertIn("grid-template-columns: repeat(3, minmax(0, 1fr));", mobile_rules)
+        self.assertNotIn("grid-template-columns: minmax(0, 1fr);", mobile_rules)
 
     def test_agreed_preview_width_editorial_type_scale_and_notebook_hierarchy(self):
         backend = Path(__file__).resolve().parents[2]
