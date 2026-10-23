@@ -868,6 +868,290 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .tt-structured-table thead tr:last-child th { background:#e8eee3; color:#284936; }
 @media(max-width:900px) { .builder-lesson-preview-grid { grid-template-columns:1fr; } .builder-lesson-preview-sidebar { order:2; } .builder-lesson-preview-sidebar .preview-trading-notebook { position:static; } .builder-lesson-preview-sidebar .preview-notebook-content ol { grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media(max-width:620px) { .builder-lesson-preview-sidebar .preview-notebook-content ol { grid-template-columns:1fr; } }
+
+
+/* TradeThesis micro-course table — Design 06: Alternating Field Notes.
+   Exact design rules from the approved first-round gallery.
+   Palette: forest green #345943, cream #fffdf8, gold #b48635,
+   alternating cream #f3f0e6 / sage #e8eee4. */
+
+/* Published learner lesson */
+.tt-learning-room .tt-tab-panel .lesson-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  margin: 1.25em 0 1.5em;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.tt-learning-room .tt-tab-panel .lesson-table-wrap:focus-visible {
+  outline: 2px solid #b48635;
+  outline-offset: 3px;
+}
+.tt-learning-room .tt-tab-panel .lesson-table-wrap table,
+.tt-learning-room .tt-tab-panel table {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 0;
+  color: #27382e;
+  font-size: 11px;
+  line-height: 1.55;
+}
+.tt-learning-room .tt-tab-panel .lesson-table-wrap table {
+  min-width: 490px;
+}
+.tt-learning-room .tt-tab-panel table th,
+.tt-learning-room .tt-tab-panel table td {
+  text-align: left;
+  vertical-align: top;
+  border: 0;
+  overflow-wrap: anywhere;
+}
+.tt-learning-room .tt-tab-panel table th {
+  padding: 11px 12px;
+  background: #345943;
+  color: #fffdf8;
+  border-bottom: 2px solid #b48635;
+  font-size: 10px;
+  line-height: 1.4;
+  font-weight: 800;
+}
+.tt-learning-room .tt-tab-panel table td {
+  padding: 12px;
+  font-size: 11px;
+  line-height: 1.55;
+}
+.tt-learning-room .tt-tab-panel table tbody tr:nth-child(odd) td {
+  background: #f3f0e6;
+}
+.tt-learning-room .tt-tab-panel table tbody tr:nth-child(even) td {
+  background: #e8eee4;
+}
+.tt-learning-room .tt-tab-panel table tbody td:first-child {
+  color: #264632;
+  font-weight: 800;
+}
+.tt-learning-room .tt-tab-panel table th[align="center"],
+.tt-learning-room .tt-tab-panel table td[align="center"] {
+  text-align: center;
+}
+.tt-learning-room .tt-tab-panel table th[align="right"],
+.tt-learning-room .tt-tab-panel table td[align="right"] {
+  text-align: right;
+}
+.tt-learning-room .tt-tab-panel .lesson-table-wrap table p {
+  margin: 0;
+}
+
+/* Specificity-matched overrides for tables created by Course Builder's structured-table tool. */
+.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  margin: 1.25em 0 1.5em;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table {
+  width: 100%;
+  min-width: 490px;
+  margin: 0;
+  border: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 0;
+  color: #27382e;
+  font-size: 11px;
+  line-height: 1.55;
+}
+.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table th,
+.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table td {
+  padding: 12px;
+  border: 0;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table thead th {
+  padding: 11px 12px;
+  background: #345943;
+  color: #fffdf8;
+  border: 0;
+  border-bottom: 2px solid #b48635;
+  font-size: 10px;
+  line-height: 1.4;
+  font-weight: 800;
+}
+.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table tbody tr:nth-child(odd) td {
+  background: #f3f0e6;
+}
+.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table tbody tr:nth-child(even) td {
+  background: #e8eee4;
+}
+.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table tbody td:first-child {
+  color: #264632;
+  font-weight: 800;
+}
+.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table th[align="center"],
+.tt-learning-room .tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table td[align="center"] {
+  text-align: center;
+}
+.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table th[align="right"],
+.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table td[align="right"] {
+  text-align: right;
+}
+
+/* Keep authored captions available to assistive technology without adding a visible caption strip.
+   Design 06 in the gallery has no visible caption above the header. */
+.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table caption.tt-structured-table-caption {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+/* Course Builder's in-page learner preview: mirror the published page exactly. */
+.preview-body .lesson-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  margin: 1.25em 0 1.5em;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.preview-body .lesson-table-wrap:focus-visible {
+  outline: 2px solid #b48635;
+  outline-offset: 3px;
+}
+.preview-body .lesson-table-wrap table {
+  width: 100%;
+  min-width: 490px;
+  margin: 0;
+  border: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 0;
+  color: #27382e;
+  font-size: 11px;
+  line-height: 1.55;
+}
+.preview-body .lesson-table-wrap th,
+.preview-body .lesson-table-wrap td {
+  padding: 12px;
+  border: 0;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+.preview-body .lesson-table-wrap th {
+  padding: 11px 12px;
+  background: #345943;
+  color: #fffdf8;
+  border: 0;
+  border-bottom: 2px solid #b48635;
+  font-size: 10px;
+  line-height: 1.4;
+  font-weight: 800;
+}
+.preview-body .lesson-table-wrap tbody tr:nth-child(odd) td {
+  background: #f3f0e6;
+}
+.preview-body .lesson-table-wrap tbody tr:nth-child(even) td {
+  background: #e8eee4;
+}
+.preview-body .lesson-table-wrap tbody td:first-child {
+  color: #264632;
+  font-weight: 800;
+}
+.preview-body .lesson-table-wrap th[align="center"],
+.preview-body .lesson-table-wrap td[align="center"] {
+  text-align: center;
+}
+.preview-body .lesson-table-wrap th[align="right"],
+.preview-body .lesson-table-wrap td[align="right"] {
+  text-align: right;
+}
+.preview-body .lesson-table-wrap table p {
+  margin: 0;
+}
+.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table {
+  width: 100%;
+  min-width: 490px;
+  margin: 0;
+  border: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 0;
+  color: #27382e;
+  font-size: 11px;
+  line-height: 1.55;
+}
+.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table th,
+.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table td {
+  padding: 12px;
+  border: 0;
+  text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table thead th {
+  padding: 11px 12px;
+  background: #345943;
+  color: #fffdf8;
+  border: 0;
+  border-bottom: 2px solid #b48635;
+  font-size: 10px;
+  line-height: 1.4;
+  font-weight: 800;
+}
+.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table tbody tr:nth-child(odd) td {
+  background: #f3f0e6;
+}
+.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table tbody tr:nth-child(even) td {
+  background: #e8eee4;
+}
+.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table tbody td:first-child {
+  color: #264632;
+  font-weight: 800;
+}
+.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table th[align="center"],
+.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table td[align="center"] {
+  text-align: center;
+}
+.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table th[align="right"],
+.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table td[align="right"] {
+  text-align: right;
+}
+.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table caption.tt-structured-table-caption {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  background: transparent !important;
+}
 </style>
 </head>
 <body>
