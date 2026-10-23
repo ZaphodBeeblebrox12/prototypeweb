@@ -10,7 +10,7 @@ from django.urls import reverse
 from .course_card_utils import (
     compact_course_topic,
     course_card_art_copy,
-    course_card_mark,
+    course_card_open_book_markup,
     is_course_card_recommendable,
 )
 from .models import Course, CourseImport, Lesson
@@ -19,7 +19,7 @@ from .regional_content import resolve_regional_lesson_content, strip_unmanaged_r
 _ALLOWED_TAGS = {
     "a", "aside", "blockquote", "br", "caption", "code", "del", "div", "em", "figcaption", "figure",
     "h1", "h2", "h3", "h4", "h5", "h6", "hr", "img", "li", "ol", "p", "pre",
-    "s", "small", "span", "strong", "sub", "sup", "table", "tbody", "td", "th", "thead", "tr", "ul",
+    "s", "small", "span", "strong", "sub", "sup", "svg", "path", "table", "tbody", "td", "th", "thead", "tr", "ul",
 }
 _ALLOWED_ATTRIBUTES = {
     "a": ["href", "title", "rel", "class"],
@@ -28,6 +28,8 @@ _ALLOWED_ATTRIBUTES = {
     "figure": ["class", "data-figure-id"],
     "figcaption": ["class"],
     "table": ["class"],
+    "svg": ["class", "viewBox", "fill", "aria-hidden", "focusable"],
+    "path": ["d", "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin", "opacity"],
     "caption": ["class"],
     "img": ["class", "src", "alt", "title", "loading", "width", "height", "tabindex", "role", "aria-label"],
     "span": ["class", "aria-label", "title"],
@@ -214,7 +216,6 @@ def _resolve_course_cards(source):
         return '<div class="tt-course-preview-card__topics" aria-label="Topics covered">' + chips + "</div>"
 
     def render_art(title, category=""):
-        mark = escape(course_card_mark(title))
         first, second = course_card_art_copy(title, category)
         source_text = f"{title} {category}".casefold()
         is_volume_price = "volume" in source_text and "price" in source_text
@@ -223,10 +224,11 @@ def _resolve_course_cards(source):
             mark_markup = '<span class="tt-course-preview-card__mark tt-course-preview-card__mark--feature">BEHIND<br>THE MOVE</span>'
             art_label = "VOLUME × PRICE"
         else:
-            mark_markup = f'<span class="tt-course-preview-card__mark">{mark}</span>'
+            mark_markup = course_card_open_book_markup()
             art_label = f"{first} · {second}"
         return (
             f'<div class="{art_class}">'
+            '<span class="tt-course-preview-card__rings" aria-hidden="true"></span>'
             f'{mark_markup}'
             f'<small>{escape(art_label)}</small>'
             '</div>'

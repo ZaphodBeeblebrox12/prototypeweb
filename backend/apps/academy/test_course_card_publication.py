@@ -185,6 +185,28 @@ class CoursePublicationReadinessTests(TestCase):
         self.assertIn("Related lesson unavailable", lesson_link)
 
 
+
+    def test_companion_course_uses_open_book_instead_of_title_initials(self):
+        from .content_rendering import render_safe_markdown
+
+        course = Course.objects.create(
+            title="This is how a trade is actually added",
+            slug="trade-added-open-book-card-test",
+            summary="A practical guide to connecting the idea with the actual order.",
+            category="Trading education",
+            status=Course.Status.PUBLISHED,
+        )
+        rendered = render_safe_markdown(
+            "[[course-card:" + str(course.pk) + "]]",
+            admin_preview=True,
+        )
+
+        self.assertIn('class="tt-course-preview-card__mark-icon"', rendered)
+        self.assertIn('viewBox="0 0 32 26"', rendered)
+        self.assertIn('class="tt-course-preview-card__rings"', rendered)
+        self.assertIn("Learn · in context", rendered)
+        self.assertNotIn(">T/I</span>", rendered)
+
     def test_take_it_into_practice_content_is_preserved_in_practice_tab(self):
         from .content_rendering import build_lesson_sections
 
@@ -268,6 +290,11 @@ class OptionThreeCardParityTests(SimpleTestCase):
         self.assertIn("tt-course-preview-card__topics", learner_css)
         self.assertIn("tt-course-preview-card__art", learner_css)
         self.assertIn("tt-course-preview-card__art--cover", learner_css)
+        self.assertIn(".tt-course-preview-card__mark-icon", learner_css)
+        self.assertIn(".tt-course-preview-card__rings", learner_css)
+        self.assertIn("width: 27px", learner_css)
+        self.assertNotIn("const markWords", builder)
+        self.assertIn("tt-course-preview-card__mark-icon", builder)
         self.assertIn("BEHIND<br>THE MOVE", builder)
         self.assertIn("VOLUME × PRICE", builder)
         self.assertIn("View course outline", builder)

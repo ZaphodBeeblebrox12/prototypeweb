@@ -485,14 +485,26 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .tt-course-preview-card__cta { display: inline-flex; align-items: center; gap: 6px; color: #345943; font-size: 10px; line-height: 1.3; font-weight: 850; text-decoration: none; transition: color .18s ease; }
 .tt-course-preview-card__cta:hover { color: #a16e1d; text-decoration: underline; text-underline-offset: 2px; }
 .tt-course-preview-card__cta:focus-visible { outline: 2px solid #345943; outline-offset: 3px; }
-.tt-course-preview-card__art { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; min-width: 0; min-height: 104px; padding: 5px 3px; border-right: 1px solid rgba(180,134,53,.18); background: linear-gradient(160deg, #dce7d4, #f3e4bd); color: #345943; position: relative; overflow: hidden; text-align: center; }
-.tt-course-preview-card__art::before, .tt-course-preview-card__art::after { content: ""; position: absolute; border: 1px solid rgba(52,89,67,.21); border-radius: 50%; width: 62px; height: 62px; }
-.tt-course-preview-card__art::after { width: 86px; height: 86px; }
+.tt-course-preview-card__art { grid-column: 1; grid-row: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; min-width: 0; min-height: 104px; padding: 5px 3px; border-right: 1px solid rgba(180,134,53,.18); background: linear-gradient(160deg, #dce7d4, #f3e4bd); color: #345943; position: relative; overflow: hidden; text-align: center; }
+.tt-course-preview-card__rings,
+.tt-course-preview-card__rings::before,
+.tt-course-preview-card__rings::after {
+  position: absolute;
+  z-index: 0;
+  content: "";
+  border: 1px solid rgb(108 137 103 / 30%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.tt-course-preview-card__rings { width: 86px; height: 86px; }
+.tt-course-preview-card__rings::before { inset: 8px; }
+.tt-course-preview-card__rings::after { inset: 17px; }
 .tt-course-preview-card__mark { position: relative; z-index: 1; font: 700 18px/1 Georgia, "Times New Roman", serif; letter-spacing: -.05em; color: #345943; }
-.tt-course-preview-card__art small { position: relative; z-index: 1; text-align: center; color: #51664f; font: 800 5.5px/1.3 Arial, sans-serif; letter-spacing: .09em; text-transform: uppercase; }
+.tt-course-preview-card__mark-icon { position: relative; z-index: 1; display: block; flex: 0 0 auto; width: 27px; height: 23px; color: #345943; }
+.tt-course-preview-card__art small { position: relative; z-index: 1; display: block; max-width: 60px; color: #51664f; font: 800 6.8px/1.25 Arial, sans-serif; letter-spacing: .045em; text-transform: uppercase; }
 .tt-course-preview-card__mark--feature { position: relative; z-index: 1; max-width: 58px; color: #345943; font: 700 9px/1.08 Georgia, "Times New Roman", serif; letter-spacing: -.02em; text-align: center; }
 .tt-course-preview-card__art--cover { background: linear-gradient(160deg, #dce7d4, #f3e4bd); color: #345943; }
-.tt-course-preview-card__art--cover small { color: #51664f; font-size: 5.5px; font-weight: 800; letter-spacing: .09em; }
+.tt-course-preview-card__art--cover small { color: #51664f; font-size: 6.8px; font-weight: 800; letter-spacing: .045em; }
 .tt-course-preview-card--coming-soon .tt-course-preview-card__kicker { color: #345943; }
 .tt-course-preview-card--coming-soon .tt-course-preview-card__cta { color: #687367; font-weight: 750; cursor: default; }
 .tt-course-preview-card--unavailable { display: block; width: min(100%, 560px); max-width: 560px; padding: 12px 14px; border-left: 3px solid #a6aaa4; background: #fffdf8; }
@@ -2588,9 +2600,6 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
           return topic ? topic.charAt(0).toUpperCase() + topic.slice(1) : '';
         };
         const topics = (courseRef.outcomes || []).filter(value => typeof value === 'string' && value.trim()).map(topicLabel).filter(Boolean).slice(0, 2);
-        const words = String(courseRef.title || '').match(/[A-Za-z0-9]+/g) || [];
-        const markWords = words.filter(word => !/^(and|or|for|of|the|to|with)$/i.test(word));
-        const mark = markWords.length > 1 ? markWords[0].charAt(0).toUpperCase() + '/' + markWords[1].charAt(0).toUpperCase() : (markWords[0] || 'TT').slice(0, 2).toUpperCase();
         const artSource = (String(courseRef.title || '') + ' ' + String(courseRef.category || '')).toLowerCase();
         const isVolumePrice = artSource.includes('volume') && artSource.includes('price');
         const artCopy = isVolumePrice ? ['Activity', 'meets outcome']
@@ -2609,10 +2618,11 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
           : href
             ? '<a class="tt-course-preview-card__cta" href="' + esc(href) + '" rel="noopener noreferrer">View course outline <span>↗</span></a>'
             : '<span class="tt-course-preview-card__cta">View course outline</span>';
-        const artMark = isVolumePrice ? '<span class="tt-course-preview-card__mark tt-course-preview-card__mark--feature">BEHIND<br>THE MOVE</span>' : '<span class="tt-course-preview-card__mark">' + esc(mark) + '</span>';
+        const openBookMarkup = '<svg class="tt-course-preview-card__mark-icon" viewBox="0 0 32 26" fill="none" aria-hidden="true" focusable="false"><path d="M16 6.2C12.2 3.6 7.9 3 2.7 4.1V20c5.1-1 9.5-.4 13.3 2.4V6.2Z" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"></path><path d="M16 6.2C19.8 3.6 24.1 3 29.3 4.1V20c-5.1-1-9.5-.4-13.3 2.4V6.2Z" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"></path><path d="M6 8.1c2.7-.3 5.1.1 7.1 1.1M6 11.4c2.7-.3 5.1.1 7.1 1.1M26 8.1c-2.7-.3-5.1.1-7.1 1.1M26 11.4c-2.7-.3-5.1.1-7.1 1.1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity=".7"></path></svg>';
+        const artMark = isVolumePrice ? '<span class="tt-course-preview-card__mark tt-course-preview-card__mark--feature">BEHIND<br>THE MOVE</span>' : openBookMarkup;
         const artLabel = isVolumePrice ? 'VOLUME × PRICE' : (artCopy[0] + ' · ' + artCopy[1]);
         cardMarkup = '<aside class="tt-course-preview-card' + modifier + '" aria-label="Explore a related TradeThesis course">' +
-          '<div class="tt-course-preview-card__art tt-course-preview-card__art--cover">' + artMark + '<small>' + esc(artLabel) + '</small></div>' +
+          '<div class="tt-course-preview-card__art tt-course-preview-card__art--cover"><span class="tt-course-preview-card__rings" aria-hidden="true"></span>' + artMark + '<small>' + esc(artLabel) + '</small></div>' +
           '<div class="tt-course-preview-card__copy"><span class="tt-course-preview-card__kicker">' + kicker + '</span>' +
           '<h3>' + esc(courseRef.title) + '</h3><p>' + esc(courseRef.summary || 'Move beyond this example and study the broader toolkit.') + '</p>' +
           topicsMarkup + cta + '</div></aside>';

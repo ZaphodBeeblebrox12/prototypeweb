@@ -98,6 +98,21 @@ def course_card_mark(title):
     return "TT"
 
 
+def course_card_open_book_markup():
+    """Return the fixed open-book SVG used for non-special companion-course cards."""
+    return (
+        '<svg class="tt-course-preview-card__mark-icon" viewBox="0 0 32 26" '
+        'fill="none" aria-hidden="true" focusable="false">'
+        '<path d="M16 6.2C12.2 3.6 7.9 3 2.7 4.1V20c5.1-1 9.5-.4 13.3 2.4V6.2Z" '
+        'stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"></path>'
+        '<path d="M16 6.2C19.8 3.6 24.1 3 29.3 4.1V20c-5.1-1-9.5-.4-13.3 2.4V6.2Z" '
+        'stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"></path>'
+        '<path d="M6 8.1c2.7-.3 5.1.1 7.1 1.1M6 11.4c2.7-.3 5.1.1 7.1 1.1M26 8.1c-2.7-.3-5.1.1-7.1 1.1M26 11.4c-2.7-.3-5.1.1-7.1 1.1" '
+        'stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity=".7"></path>'
+        '</svg>'
+    )
+
+
 def course_card_art_copy(title, category=""):
     """Return the short descriptor shown in Option 4's visual side panel."""
     source = f"{title or ''} {category or ''}".casefold()
