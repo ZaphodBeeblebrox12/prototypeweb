@@ -41,24 +41,30 @@ class CourseBuilderGitHubFailureTests(TestCase):
                 "level": "Intermediate",
                 "duration": "Self-paced",
                 "outcomes": [],
-                "modules": [{
-                    "title": "Foundations",
-                    "description": "",
-                    "lessons": [{
-                        "title": "First principles",
-                        "summary": "",
-                        "format": "reading",
-                        "minutes": 12,
-                        "content": "## Notice\n\nDescribe the visible evidence first.",
-                        "images": [],
-                        "notebook": {
-                            "title": "Evidence notebook",
-                            "prompts": [{"label": "Observe", "text": "What is visible?"}],
-                        },
-                        "questions": [],
-                        "relatedCourseIds": [],
-                    }],
-                }],
+                "modules": [
+                    {
+                        "title": "Foundations",
+                        "description": "",
+                        "lessons": [
+                            {
+                                "title": "First principles",
+                                "summary": "",
+                                "format": "reading",
+                                "minutes": 12,
+                                "content": "## Notice\n\nDescribe the visible evidence first.",
+                                "images": [],
+                                "notebook": {
+                                    "title": "Evidence notebook",
+                                    "prompts": [
+                                        {"label": "Observe", "text": "What is visible?"},
+                                    ],
+                                },
+                                "questions": [],
+                                "relatedCourseIds": [],
+                            },
+                        ],
+                    },
+                ],
             },
         }
 
@@ -113,7 +119,9 @@ class CourseBuilderGitHubFailureTests(TestCase):
         self.assertEqual(retry_response.status_code, 200, retry_response.content)
         self.assertTrue(retry_response.json()["submitted"])
         self.assertEqual(retry_response.json()["record_id"], first_record_id)
-        self.assertIn("already awaiting review", retry_response.json()["message"].lower())
+        self.assertIn(
+            "already awaiting review", retry_response.json()["message"].lower()
+        )
         self.assertEqual(CourseImport.objects.filter(course_slug=slug).count(), 1)
         self.assertEqual(
             CourseImport.objects.get(pk=first_record_id).status,
@@ -169,7 +177,9 @@ class CourseBuilderGitHubFailureTests(TestCase):
             response = self.submit_changed_draft(slug)
 
         self.assertEqual(response.status_code, 503, response.content)
-        self.assertIn("could not be reached", str(response.json().get("detail", "")).lower())
+        self.assertIn(
+            "could not be reached", str(response.json().get("detail", "")).lower()
+        )
         github_put.assert_not_called()
         self.assert_draft_persisted(record)
 

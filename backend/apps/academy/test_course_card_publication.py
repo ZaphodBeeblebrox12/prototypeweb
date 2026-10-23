@@ -253,7 +253,7 @@ class OptionFourCardParityTests(SimpleTestCase):
         self.assertEqual(normalize(builder_css), normalize(learner_css))
         self.assertIn("grid-template-columns: 78px minmax(0, 1fr)", learner_css)
         self.assertIn("width: min(100%, 560px)", learner_css)
-        self.assertIn("max-width:640px", learner_css)
+        self.assertIn("max-width: 560px", learner_css)
         self.assertIn("grid-template-columns: 68px minmax(0, 1fr)", learner_css)
         self.assertIn("grid-template-columns: 72px minmax(0, 1fr)", learner_css)
         self.assertIn("-webkit-line-clamp:2", learner_css)

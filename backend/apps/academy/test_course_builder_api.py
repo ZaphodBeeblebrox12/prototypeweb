@@ -120,7 +120,7 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "Kept one companion card at its final placement")
         self.assertContains(response, "removes earlier duplicates and accidental lesson links")
         self.assertContains(response, 'The website preview preserves this placement.</span></div>${courseCardPickerMarkup()}<div class="helper-note">')
-        self.assertContains(response, "Those render as lesson links/cards, not as the Option 4 companion-course card.")
+        self.assertContains(response, "Those render as lesson links/cards, not as the Option 3 inline course card.")
         self.assertContains(response, "data-lesson-reference-picker")
         self.assertContains(response, "Uses the existing Learning Room layout")
         self.assertNotContains(response, "Reuse the Learning Room template")
