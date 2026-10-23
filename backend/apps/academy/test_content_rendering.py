@@ -809,6 +809,41 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn('event.target.closest("[data-open-tab]")', script)
         self.assertIn('form = event.target.closest("[data-notebook-response]")', script)
 
+    def test_responsive_pause_and_record_uses_cards_below_lesson_on_small_screens(self):
+        backend = Path(__file__).resolve().parents[2]
+        tabs_template = (
+            backend / "templates" / "academy" / "partials" / "lesson_tabs.html"
+        ).read_text(encoding="utf-8")
+        notebook_styles = (
+            backend / "static" / "academy" / "notebook-card.css"
+        ).read_text(encoding="utf-8")
+
+        # The mobile card alternative belongs after the full side-by-side grid,
+        # so it is at the end of the lesson content and before Continue Learning.
+        grid_end = tabs_template.index(
+            '</div>\n<section class="tt-mobile-pause-and-record"'
+        )
+        mobile_cards = tabs_template.index(
+            '<section class="tt-mobile-pause-and-record"'
+        )
+        template_end = tabs_template.rfind("{% endwith %}")
+        self.assertLess(grid_end, mobile_cards)
+        self.assertLess(mobile_cards, template_end)
+        self.assertEqual(tabs_template.count('class="tt-mobile-pause-and-record"'), 1)
+        for label in ("Describe", "Interpret", "Apply"):
+            with self.subTest(label=label):
+                self.assertIn(f"<h3>{label}</h3>", tabs_template)
+
+        # The alternative is hidden on desktop, shown through tablet widths,
+        # stacked on mobile, and never displayed alongside the right-rail card.
+        self.assertIn(".tt-learning-room .tt-mobile-pause-and-record {\n  display: none;", notebook_styles)
+        self.assertIn("@media (max-width: 920px)", notebook_styles)
+        self.assertIn("display: none !important;", notebook_styles)
+        self.assertIn(".tt-learning-room .tt-mobile-pause-and-record,\n  .tt-admin-course-preview", notebook_styles)
+        self.assertIn("display: block;", notebook_styles)
+        self.assertIn("@media (max-width: 680px)", notebook_styles)
+        self.assertIn("grid-template-columns: minmax(0, 1fr);", notebook_styles)
+
     def test_agreed_preview_width_editorial_type_scale_and_notebook_hierarchy(self):
         backend = Path(__file__).resolve().parents[2]
         lesson_styles = (backend / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
