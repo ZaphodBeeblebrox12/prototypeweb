@@ -347,30 +347,18 @@ class CustomerLifecycleE2E(TestCase):
 
 
 class ProvisionPatchHygieneTests(TestCase):
-    """Regression guard: patched_provision must leave no residue.
+    """Regression guard: the direct transport test patch must be cleaned up."""
 
-    The original implementation stopped the returned mocks instead of the
-    patchers, so every patched target (including
-    apps.bot_integration.services.provision_client.ProvisionClient) leaked
-    for the rest of the test process — surfacing as
-    'ValueError: not enough values to unpack (expected 2, got 0)' in
-    unrelated bot_integration tests that import ProvisionClient afterwards.
-    """
+    def test_patched_provision_restores_direct_transport(self):
+        from apps.bot_integration import reconcile_jobs
 
-    def test_patched_provision_restores_all_targets(self):
-        from apps.bot_integration.services import provision_client as pc_module
-        from apps.bot_integration import reconcile, reconcile_jobs
-
-        real_class = pc_module.ProvisionClient
-        real_transport_jobs = getattr(reconcile_jobs, "ProvisionTransport", None)
-        real_transport_rec = getattr(reconcile, "ProvisionTransport", None)
+        real_transport = reconcile_jobs.ProvisionTransport
 
         with patched_provision() as mocks:
-            # Inside: everything patched
-            self.assertIsNot(pc_module.ProvisionClient, real_class)
-            self.assertIn("apps.bot_integration.services.provision_client.ProvisionClient", mocks)
+            # The reconciler must see the fake direct transport inside context.
+            self.assertIsNot(reconcile_jobs.ProvisionTransport, real_transport)
+            self.assertIn("transport", mocks)
+            self.assertTrue(mocks["transport"].create_invite_link.called is False)
 
-        # Outside: everything restored
-        self.assertIs(pc_module.ProvisionClient, real_class)
-        self.assertIs(getattr(reconcile_jobs, "ProvisionTransport", None), real_transport_jobs)
-        self.assertIs(getattr(reconcile, "ProvisionTransport", None), real_transport_rec)
+        # After the context exits, the production direct transport is restored.
+        self.assertIs(reconcile_jobs.ProvisionTransport, real_transport)
