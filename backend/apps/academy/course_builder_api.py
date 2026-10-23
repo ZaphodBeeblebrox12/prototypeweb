@@ -945,8 +945,7 @@ def _builder_state_from_published_course(course):
             if (
                 not raw_prompts
                 or any(raw_prompts == legacy for legacy in legacy_prompt_sets)
-                or raw_prompts == generic_prompts
-                or raw_prompts == bollinger_prompts
+                or raw_prompts in (generic_prompts, bollinger_prompts)
             ):
                 notebook["prompts"] = (
                     bollinger_prompts
