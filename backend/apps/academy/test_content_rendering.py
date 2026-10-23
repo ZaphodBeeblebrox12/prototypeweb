@@ -489,6 +489,17 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("Closing copy.", rendered)
         self.assertNotIn("[[table-block:", rendered)
 
+    def test_option_five_table_styles_override_generic_lesson_table_skin(self):
+        root = Path(__file__).resolve().parents[2]
+        styles = (root / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
+
+        self.assertIn(".tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table", styles)
+        self.assertIn("border-radius: 7px;", styles)
+        self.assertIn("min-width: 520px;", styles)
+        self.assertIn("background: #345943;", styles)
+        self.assertIn("background: #e8eee3;", styles)
+        self.assertIn(".tt-structured-table caption.tt-structured-table-caption", styles)
+
     def test_structured_grouped_table_renders_rowspans_for_single_column_headers(self):
         rendered = render_safe_markdown(
             "[[table-block:ohlc-context]]",
