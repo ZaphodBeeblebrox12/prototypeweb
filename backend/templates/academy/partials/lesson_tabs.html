@@ -155,4 +155,56 @@
       
     </aside>
 </div>
+<section class="tt-mobile-pause-and-record" aria-label="Pause and record: Describe, Interpret, Apply">
+  <div class="tt-mobile-pause-cards">
+    {% if course_slug == "understand-bollinger-bands" %}
+    <article class="tt-mobile-pause-card">
+      <p class="tt-mobile-pause-step">01 / Describe</p>
+      <h3>Describe</h3>
+      <p class="tt-mobile-pause-question">What evidence is visible?</p>
+      <p class="tt-mobile-pause-guidance">Locate price relative to the upper, middle and lower bands. Note the width and recent price structure. Do not predict in this step.</p>
+    </article>
+    <article class="tt-mobile-pause-card">
+      <p class="tt-mobile-pause-step">02 / Interpret</p>
+      <h3>Interpret</h3>
+      <p class="tt-mobile-pause-question">What could it mean in context?</p>
+      <p class="tt-mobile-pause-guidance">Is price trending, moving sideways or changing character? Name another reasonable explanation that could fit the same evidence.</p>
+    </article>
+    <article class="tt-mobile-pause-card">
+      <p class="tt-mobile-pause-step">03 / Apply</p>
+      <h3>Apply</h3>
+      <p class="tt-mobile-pause-question">What would change your view?</p>
+      <p class="tt-mobile-pause-guidance">State the next observable behaviour that would strengthen or weaken your interpretation. Make it specific enough to recognise on the chart.</p>
+    </article>
+    {% elif notebook.prompts %}
+      {% for prompt in notebook.prompts %}
+      <article class="tt-mobile-pause-card">
+        <p class="tt-mobile-pause-step">{{ forloop.counter|stringformat:"02d" }} / {{ prompt.label|default:"Reflect"|cut:"." }}</p>
+        <h3>{{ prompt.label|default:"Reflect"|cut:"." }}</h3>
+        <p class="tt-mobile-pause-question">{{ prompt.text }}</p>
+        <p class="tt-mobile-pause-guidance">{% if forloop.counter0 == 0 %}State what you can observe directly on the chart. Keep visible evidence separate from interpretation.{% elif forloop.counter0 == 1 %}Read the evidence in context and consider at least one reasonable alternative explanation.{% else %}Name the next observable behaviour that would strengthen or weaken your current reading.{% endif %}</p>
+      </article>
+      {% endfor %}
+    {% else %}
+    <article class="tt-mobile-pause-card">
+      <p class="tt-mobile-pause-step">01 / Describe</p>
+      <h3>Describe</h3>
+      <p class="tt-mobile-pause-question">What evidence is visible?</p>
+      <p class="tt-mobile-pause-guidance">State what you can observe directly on the chart. Keep visible evidence separate from interpretation.</p>
+    </article>
+    <article class="tt-mobile-pause-card">
+      <p class="tt-mobile-pause-step">02 / Interpret</p>
+      <h3>Interpret</h3>
+      <p class="tt-mobile-pause-question">What could it mean in context?</p>
+      <p class="tt-mobile-pause-guidance">Read the evidence in context and consider at least one reasonable alternative explanation.</p>
+    </article>
+    <article class="tt-mobile-pause-card">
+      <p class="tt-mobile-pause-step">03 / Apply</p>
+      <h3>Apply</h3>
+      <p class="tt-mobile-pause-question">What would change your view?</p>
+      <p class="tt-mobile-pause-guidance">Name the next observable behaviour that would strengthen or weaken your current reading.</p>
+    </article>
+    {% endif %}
+  </div>
+</section>
 {% endwith %}
