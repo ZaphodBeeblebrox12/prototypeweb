@@ -63,7 +63,7 @@ def unlink_telegram(request):
         )
         from apps.jobs.enqueue import enqueue_reconcile
         enqueue_reconcile(request.user.id, reason="telegram_unlink")
-        messages.success(request, "Telegram account unlinked.")
+        messages.success(request, "✅ Telegram disconnected. You can reconnect anytime from Connected accounts in your Dashboard.")
     except TelegramAccount.DoesNotExist:
         pass
     return redirect('dashboard')
@@ -205,9 +205,9 @@ def telegram_webhook(request):
     text = message["text"].strip()
     normalized = text.lower().strip(" !.,?\t\n")
     welcome = (
-        "👋 Hi! To connect Telegram, open TradeThesis, go to your Dashboard, "
-        "and choose Connect Telegram. If you already have a subscription, "
-        "linking your account lets us sync your channel access."
+        "👋 Welcome to TradeThesis! To connect your account, open your Dashboard "
+        "and tap Connect Telegram. If you already have a subscription, "
+        "we’ll check your community access after linking."
     )
     if normalized in {"hi", "hello", "hey", "start"}:
         TelegramBotService.send_message(chat_id, welcome)
@@ -224,8 +224,8 @@ def telegram_webhook(request):
     if not payload.startswith("verify_") or not payload[7:]:
         TelegramBotService.send_message(
             chat_id,
-            "That link isn't a TradeThesis verification link. Please open your "
-            "Dashboard and choose Connect Telegram to generate a fresh one.",
+            "⚠️ That link doesn’t look right. Open your TradeThesis Dashboard and tap "
+            "Connect Telegram to get a fresh one.",
         )
         return JsonResponse({"ok": True})
 
@@ -280,11 +280,12 @@ def telegram_webhook(request):
         # the member their once-valid token is invalid.
         if TelegramAccount.objects.filter(chat_id=chat_id).exists():
             TelegramBotService.send_message(
-                chat_id, "✅ This Telegram account is already linked to TradeThesis."
+                chat_id, "🎉 You’re already connected to TradeThesis."
             )
         else:
             TelegramBotService.send_message(
-                chat_id, "❌ Invalid verification link. Please generate a new one from your Dashboard."
+                chat_id, "⚠️ We couldn’t use that link. Return to your TradeThesis Dashboard and "
+                "tap Connect Telegram to get a fresh one."
             )
             return JsonResponse({"ok": True})
         return JsonResponse({"ok": True})
@@ -303,7 +304,8 @@ def telegram_webhook(request):
 
     if status == "expired":
         TelegramBotService.send_message(
-            chat_id, "❌ This verification link expired. Please generate a new one from your Dashboard."
+            chat_id, "⏳ This link has expired. No worries—return to your TradeThesis Dashboard "
+            "and tap Connect Telegram to get a fresh one."
         )
         return JsonResponse({"ok": True})
     if status == "conflict":
@@ -316,12 +318,13 @@ def telegram_webhook(request):
         TelegramBotService.send_message(
             chat_id,
             "⚠️ This Telegram account is already linked to another TradeThesis account. "
-            "Please contact support to resolve the existing link; this verification link has not been used.",
+            "Please contact support so we can help resolve it.",
         )
         return JsonResponse({"ok": True})
 
     TelegramBotService.send_message(
-        chat_id, "✅ Your account is now linked! We'll sync your subscription access shortly."
+        chat_id, "🎉 You’re connected! Your TradeThesis account is now linked to Telegram. "
+        "We’ll check your subscription access and let you know when everything’s ready."
     )
     return JsonResponse({"ok": True})
 
