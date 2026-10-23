@@ -834,6 +834,37 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .cb-cp-bottom strong{color:#355943;font:400 22px Georgia,serif}
 .cb-cp-bottom span{color:#355943;font-size:10px;font-weight:700}
 
+
+.tt-course-preview-card { width:min(100%,560px); max-width:560px; grid-template-columns:78px minmax(0,1fr); align-items:stretch; gap:0; }
+.tt-course-preview-card__copy { grid-column:2; grid-row:1; padding:10px 11px 10px 12px; }
+.tt-course-preview-card__art { grid-column:1; grid-row:1; min-height:100%; border-left:0; border-right:1px solid rgba(180,134,53,.18); }
+.tt-course-preview-card__mark--feature { max-width:66px; color:#fff9e8; font:800 8px/1.35 Arial,sans-serif; letter-spacing:.08em; text-align:center; }
+.tt-course-preview-card__art--cover { background:linear-gradient(150deg,#456b51 0%,#244632 100%); color:#fff9e8; }
+.tt-course-preview-card__art--cover small { color:#f1d58b; font-size:7px; font-weight:800; letter-spacing:.08em; }
+.tt-course-preview-card__art--cover .tt-course-preview-card__mark { font-size:0; }
+.tt-course-preview-card__art--cover .tt-course-preview-card__mark--feature { font-size:8px; }
+.preview-body blockquote { position:relative; margin:1.5em 0; padding:18px 20px 18px 48px; border:0; border-left:3px solid #c36b4d; background:linear-gradient(110deg,#f8f4e9 0%,#fffdf7 100%); color:#2f4939; font:400 22px/1.5 Georgia,"Times New Roman",serif; }
+.preview-body blockquote::before { content:"“"; position:absolute; top:2px; left:10px; color:#b48635; font:400 50px/.95 Georgia,"Times New Roman",serif; }
+.builder-lesson-preview-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(220px,260px); gap:22px; align-items:start; }
+.builder-lesson-preview-main,.builder-lesson-preview-sidebar { min-width:0; }
+.builder-lesson-preview-sidebar .preview-trading-notebook { position:sticky; top:12px; display:block; width:100%; margin:0 0 10px; padding:13px; }
+.builder-lesson-preview-sidebar .preview-notebook-index { display:none; }
+.builder-lesson-preview-sidebar .preview-notebook-content ol { grid-template-columns:1fr; gap:0; }
+.builder-lesson-preview-sidebar .preview-notebook-content li { display:block; padding:8px 0; border-top:1px solid #d5dbce; }
+.builder-lesson-preview-sidebar .preview-notebook-number { display:block; margin-bottom:4px; }
+.builder-lesson-preview-sidebar .preview-notebook-examples-button { width:100%; }
+.tt-editor-table-scroll { max-width:100%; overflow-x:auto; margin:10px 0; }
+.rich-editor-canvas .tt-editor-structured-table { min-width:520px; width:100%; border-collapse:separate; border-spacing:0; }
+.rich-editor-canvas .tt-editor-structured-table th,.rich-editor-canvas .tt-editor-structured-table td { min-width:76px; padding:9px 10px; border:1px solid #dedfd5; vertical-align:top; }
+.rich-editor-canvas .tt-editor-structured-table thead tr:first-child th[colspan] { background:#345943; color:#fffdf6; }
+.rich-editor-canvas .tt-editor-structured-table thead tr:last-child th { background:#e8eee3; color:#284936; }
+.lesson-table-wrap.tt-structured-table-wrap { max-width:100%; overflow-x:auto; border:1px solid #d8ddcf; border-radius:7px; background:#fffdf8; margin:1.2em 0; }
+.tt-structured-table { width:100%; min-width:520px; border-collapse:separate; border-spacing:0; margin:0; font-size:.88rem; }
+.tt-structured-table th,.tt-structured-table td { padding:10px 12px; border-right:1px solid #e1e3d9; border-bottom:1px solid #e1e3d9; text-align:left; vertical-align:top; }
+.tt-structured-table thead tr:first-child th[colspan] { background:#345943; color:#fffdf6; }
+.tt-structured-table thead tr:last-child th { background:#e8eee3; color:#284936; }
+@media(max-width:900px) { .builder-lesson-preview-grid { grid-template-columns:1fr; } .builder-lesson-preview-sidebar { order:2; } .builder-lesson-preview-sidebar .preview-trading-notebook { position:static; } .builder-lesson-preview-sidebar .preview-notebook-content ol { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(max-width:620px) { .builder-lesson-preview-sidebar .preview-notebook-content ol { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -980,6 +1011,8 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       const figure = (lesson?.teachingFigures || []).find(item => String(item.id) === match[1]);
       return 'Teaching figure · ' + (figure?.title || 'Comparison');
     }
+    match = value.match(/^\[\[table-block:([^\]]+)\]\]$/);
+    if (match) return 'Grouped-header table · ' + (lesson?.tables?.[match[1]]?.title || 'Lesson table');
     match = value.match(/^\[\[lesson-tab:(idea|examples|practice)\]\]$/);
     if (match) return 'Section placement · ' + ({idea:'The idea',examples:'Chart examples',practice:'Test your reading'}[match[1]]);
     match = value.match(/^\[\[course-card:(coming-soon:)?([^\]]+)\]\]$/);
@@ -1062,14 +1095,16 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     };
     let prepared = String(source || '').replace(/!\[([^\]]*)\]\(asset:\/\/([^)\s]+)(?:\s+[^)]*)?\)/g,
       (match, alt, id) => addToken('![' + String(alt || '').replace(/\]/g,'') + '](asset://' + id + ')'));
-    prepared = prepared.replace(/\[\[(?:regional-block|image-group|teaching-figure|lesson-tab|lesson|lesson-card|course-card):[^\]]+\]\]/g, addToken);
+    prepared = prepared.replace(/\[\[(?:regional-block|image-group|teaching-figure|table-block|lesson-tab|lesson|lesson-card|course-card):[^\]]+\]\]/g, addToken);
     let html = typeof baseMarkdownRenderer === 'function' ? baseMarkdownRenderer(prepared) : '<p>' + esc(prepared) + '</p>';
     if (tokens.length) {
       const markupByMarker = new Map();
       tokens.forEach(item => {
         const block = richTokenIsBlock(item.token);
         const imageCaptionMarkup = inlineImageCaptionMarkup(item.token);
-        const markup = imageCaptionMarkup || ('<span class="tt-editor-token' + (block ? ' tt-editor-token-block' : '') + '" contenteditable="false" data-editor-token="' + esc(item.token) + '"' + (block ? ' data-editor-block="true"' : '') + ' role="note">' + esc(richTokenLabel(item.token)) + '</span>');
+        const tableMatch = item.token.match(/^\[\[table-block:([^\]]+)\]\]$/);
+        const structuredMarkup = tableMatch ? structuredTableEditorMarkup(tableMatch[1]) : '';
+        const markup = imageCaptionMarkup || structuredMarkup || ('<span class="tt-editor-token' + (block ? ' tt-editor-token-block' : '') + '" contenteditable="false" data-editor-token="' + esc(item.token) + '"' + (block ? ' data-editor-block="true"' : '') + ' role="note">' + esc(richTokenLabel(item.token)) + '</span>');
         markupByMarker.set(item.marker, markup);
       });
       // Repeated split/join across the full HTML for each token becomes quadratic
@@ -1131,6 +1166,10 @@ button:disabled { cursor: not-allowed; opacity: .45; }
         return tag === 'ol' ? (index+1) + '. ' + content : '- ' + content;
       }).join('\n');
     }
+    if (tag === 'table' && node.dataset.editorStructuredTable) {
+      refreshStructuredTableMetadata(node);
+      return '[[table-block:' + String(node.dataset.editorStructuredTable) + ']]';
+    }
     if (tag === 'table') return richTableMarkdown(node);
     if (tag === 'pre') return '~~~\n' + node.textContent.replace(/^\n+|\n+$/g,'') + '\n~~~';
     if (tag === 'br') return '';
@@ -1154,6 +1193,121 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       return false;
     }
     return value;
+  }
+  function tableLogicalWidth(table) {
+    const row = table?.querySelector('thead tr') || table?.querySelector('tr');
+    if (!row) return 0;
+    return Array.from(row.children).reduce((sum,cell)=>sum+Math.max(1,Number(cell.getAttribute('colspan')||1)),0);
+  }
+  function tableCellMarkup(tag,text,colspan,rowspan) {
+    const col=Number(colspan)>1?' colspan="'+Number(colspan)+'"':'';
+    const row=Number(rowspan)>1?' rowspan="'+Number(rowspan)+'"':'';
+    const scope=tag==='th'?(Number(colspan)>1?' scope="colgroup"':' scope="col"'):'';
+    return '<'+tag+col+row+scope+'>'+esc(text||'')+'</'+tag+'>';
+  }
+  function structuredTableEditorMarkup(tableId) {
+    const data=currentLesson()?.tables?.[tableId];
+    if(!data||!Array.isArray(data.rows)) return '<div class="tt-editor-table-scroll"><table data-editor-structured-table="'+esc(tableId)+'" data-table-title="Lesson table"><thead><tr><th>Group 1</th></tr></thead><tbody><tr><td>Table data needs repair</td></tr></tbody></table></div>';
+    const heads=[],bodies=[];
+    data.rows.forEach(row=>{
+      if(!row||!Array.isArray(row.cells))return;
+      const cells=row.cells.map(cell=>tableCellMarkup(row.section==='head'||cell.header?'th':'td',cell.text,cell.colspan,cell.rowspan)).join('');
+      if(!cells)return;
+      (row.section==='head'?heads:bodies).push('<tr>'+cells+'</tr>');
+    });
+    return '<div class="tt-editor-table-scroll"><table class="tt-editor-structured-table" data-editor-structured-table="'+esc(tableId)+'" data-table-title="'+esc(data.title||'Lesson table')+'">'+
+      (heads.length?'<thead>'+heads.join('')+'</thead>':'')+(bodies.length?'<tbody>'+bodies.join('')+'</tbody>':'')+'</table></div><p><br></p>';
+  }
+  function structuredTableHtmlFromData(data, tableId, editorMode) {
+    if(!data||!Array.isArray(data.rows))return '';
+    const renderRow=row=>'<tr>'+(row.cells||[]).map(cell=>tableCellMarkup(row.section==='head'||cell.header?'th':'td',cell.text,cell.colspan,cell.rowspan)).join('')+'</tr>';
+    const heads=data.rows.filter(row=>row.section==='head').map(renderRow).join('');
+    const bodies=data.rows.filter(row=>row.section!=='head').map(renderRow).join('');
+    const attrs=editorMode?' data-editor-structured-table="'+esc(tableId)+'" data-table-title="'+esc(data.title||'Lesson table')+'"':'';
+    return '<div class="lesson-table-wrap tt-structured-table-wrap'+(editorMode?' tt-editor-table-scroll':'')+'" role="region" tabindex="0" aria-label="Scrollable table: '+esc(data.title||'Lesson table')+'"><table class="'+(editorMode?'tt-editor-structured-table':'tt-structured-table')+'"'+attrs+'>'+
+      (heads?'<thead>'+heads+'</thead>':'')+(bodies?'<tbody>'+bodies+'</tbody>':'')+'</table></div>'+(editorMode?'<p><br></p>':'');
+  }
+  function refreshStructuredTableMetadata(table) {
+    if(!table||!table.dataset.editorStructuredTable)return;
+    const lesson=currentLesson();if(!lesson)return;
+    if(!lesson.tables||typeof lesson.tables!=='object')lesson.tables={};
+    const id=table.dataset.editorStructuredTable;
+    lesson.tables[id]={
+      title:table.dataset.tableTitle||lesson.tables[id]?.title||'Lesson table',
+      rows:Array.from(table.querySelectorAll('tr')).map(row=>({
+        section:row.closest('thead')?'head':'body',
+        cells:Array.from(row.querySelectorAll(':scope > th, :scope > td')).map(cell=>({
+          text:richInlineMarkdown(cell).replace(/\n+/g,' ').trim(),
+          colspan:Math.max(1,Number(cell.getAttribute('colspan')||1)),
+          rowspan:Math.max(1,Number(cell.getAttribute('rowspan')||1)),
+          header:cell.tagName.toLowerCase()==='th'
+        }))
+      }))
+    };
+  }
+  function selectedEditorTable(editor) {
+    const saved=richEditorRange;const range=saved?.editor===editor?saved.range:null;
+    const container=range?.startContainer;const node=container?.nodeType===1?container:container?.parentElement;
+    return node&&editor.contains(node)?node.closest('table'):null;
+  }
+  function insertGroupedTable(editor) {
+    const columns=promptTableDimension('Number of columns',4,12);if(columns===null||columns===false)return;
+    const bodyRows=promptTableDimension('Number of data rows',3,30);if(bodyRows===null||bodyRows===false)return;
+    const groupCount=promptTableDimension('Number of header groups',2,Math.min(6,columns));if(groupCount===null||groupCount===false)return;
+    const labels=[];
+    for(let i=0;i<groupCount;i++){const label=window.prompt('Header group '+(i+1)+' label:','Group '+(i+1));if(label===null)return;labels.push(label.trim()||('Group '+(i+1)));}
+    const groupCells=[];let start=0;
+    labels.forEach((label,index)=>{const remaining=columns-start;const remainingGroups=labels.length-index;const span=Math.ceil(remaining/remainingGroups);groupCells.push({text:label,colspan:span,rowspan:1,header:true});start+=span;});
+    const rows=[
+      {section:'head',cells:groupCells},
+      {section:'head',cells:Array.from({length:columns},(_,i)=>({text:'Field '+(i+1),colspan:1,rowspan:1,header:true}))},
+      ...Array.from({length:bodyRows},()=>({section:'body',cells:Array.from({length:columns},()=>({text:'',colspan:1,rowspan:1,header:false}))}))
+    ];
+    const lesson=currentLesson();if(!lesson)return;
+    if(!lesson.tables||typeof lesson.tables!=='object')lesson.tables={};
+    const id=uid('table');lesson.tables[id]={title:'Lesson table',rows};
+    restoreRichEditorSelection(editor);document.execCommand('insertHTML',false,structuredTableEditorMarkup(id));
+    syncVisualEditorToModel(editor);captureRichEditorRange();
+    toast('Grouped table inserted. Edit group labels and headings directly; use the table controls to add or remove rows and columns.');
+  }
+  function editSelectedTable(action,editor) {
+    restoreRichEditorSelection(editor);
+    const table=selectedEditorTable(editor);
+    if(!table){toast('Place the cursor inside a table first.');return;}
+    if(action==='group-headers'){
+      if(table.querySelector('thead th[colspan]')){toast('This table already has grouped header cells. Edit the group labels directly.');return;}
+      const width=tableLogicalWidth(table);if(width<2){toast('Add at least two columns before grouping headers.');return;}
+      const count=promptTableDimension('Number of header groups',2,Math.min(6,width));if(count===null||count===false)return;
+      const labels=[];for(let i=0;i<count;i++){const label=window.prompt('Header group '+(i+1)+' label:','Group '+(i+1));if(label===null)return;labels.push(label.trim()||('Group '+(i+1));}
+      let thead=table.querySelector('thead');if(!thead){thead=document.createElement('thead');table.insertBefore(thead,table.firstChild);}
+      let headerRow=thead.querySelector('tr');if(!headerRow){headerRow=document.createElement('tr');thead.appendChild(headerRow);for(let i=0;i<width;i++){const th=document.createElement('th');th.textContent='Field '+(i+1);headerRow.appendChild(th);}}
+      const groupRow=document.createElement('tr');let start=0;
+      labels.forEach((label,index)=>{const remaining=width-start;const span=Math.ceil(remaining/(labels.length-index));const th=document.createElement('th');th.colSpan=span;th.scope='colgroup';th.textContent=label;groupRow.appendChild(th);start+=span;});
+      thead.insertBefore(groupRow,headerRow);
+      if(!table.dataset.editorStructuredTable){table.dataset.editorStructuredTable=uid('table');table.dataset.tableTitle='Lesson table';}
+    } else if(action==='add-column'){
+      const width=tableLogicalWidth(table);if(width>=12){toast('Tables support up to 12 columns.');return;}
+      table.querySelectorAll('tr').forEach(row=>{
+        const cells=Array.from(row.children).filter(cell=>/^(TH|TD)$/.test(cell.tagName));if(!cells.length)return;
+        const inHeader=Boolean(row.closest('thead'));const last=cells[cells.length-1];
+        if(inHeader&&(Number(last.getAttribute('colspan')||1)>1||cells.length<width)){last.colSpan=Math.max(1,Number(last.colSpan||1))+1;}
+        else{const cell=document.createElement(inHeader?'th':'td');cell.innerHTML='<br>';if(inHeader)cell.scope='col';row.appendChild(cell);}
+      });
+    } else if(action==='remove-column'){
+      const width=tableLogicalWidth(table);if(width<=1){toast('A table must keep at least one column.');return;}
+      table.querySelectorAll('tr').forEach(row=>{
+        const cells=Array.from(row.children).filter(cell=>/^(TH|TD)$/.test(cell.tagName));const last=cells[cells.length-1];if(!last)return;
+        const span=Math.max(1,Number(last.getAttribute('colspan')||1));if(span>1)last.colSpan=span-1;else last.remove();
+      });
+    } else if(action==='add-row'){
+      const width=tableLogicalWidth(table);let tbody=table.querySelector('tbody');if(!tbody){tbody=document.createElement('tbody');table.appendChild(tbody);}
+      const row=document.createElement('tr');for(let i=0;i<width;i++){const td=document.createElement('td');td.innerHTML='<br>';row.appendChild(td);}tbody.appendChild(row);
+    } else if(action==='remove-row'){
+      const saved=richEditorRange?.range?.startContainer;const node=saved?.nodeType===1?saved:saved?.parentElement;const row=node?.closest?.('tr');
+      if(!row||!row.closest('tbody')){toast('Place the cursor inside a body row to remove that row.');return;}
+      if(row.parentElement.querySelectorAll('tr').length<=1){toast('Keep at least one data row in the table.');return;}row.remove();
+    }
+    refreshStructuredTableMetadata(table);syncVisualEditorToModel(editor);captureRichEditorRange();
   }
   function richTableMarkup(rows, columns) {
     const headings = Array.from({length: columns}, (_, index) => '<th>Heading ' + (index + 1) + '</th>').join('');
@@ -1194,7 +1348,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       richFormatPickerMarkup() +
       '<button type="button" data-rich-command="bold" aria-label="Bold"><strong>B</strong></button><button type="button" data-rich-command="italic" aria-label="Italic"><em>I</em></button><button type="button" data-rich-command="strikeThrough" aria-label="Strikethrough"><s>S</s></button>' +
       '<button type="button" data-rich-command="insertUnorderedList" aria-label="Bulleted list">• List</button><button type="button" data-rich-command="insertOrderedList" aria-label="Numbered list">1. List</button>' +
-      '<button type="button" data-rich-command="link" aria-label="Insert link">Link</button><button type="button" data-rich-command="insertHorizontalRule" aria-label="Insert divider">Divider</button><button type="button" data-rich-command="table" aria-label="Insert table">Table</button><button type="button" data-rich-command="undo" aria-label="Undo">Undo</button><button type="button" data-rich-command="redo" aria-label="Redo">Redo</button></div>' +
+      '<button type="button" data-rich-command="link" aria-label="Insert link">Link</button><button type="button" data-rich-command="blockquote" aria-label="Insert pull quote">Quote</button><button type="button" data-rich-command="insertHorizontalRule" aria-label="Insert divider">Divider</button><button type="button" data-rich-command="table" aria-label="Insert table">Table</button><button type="button" data-rich-command="grouped-table" aria-label="Insert grouped-header table">Grouped table</button><button type="button" data-rich-table-action="add-column" aria-label="Add a column to the selected table">Column +</button><button type="button" data-rich-table-action="add-row" aria-label="Add a row to the selected table">Row +</button><button type="button" data-rich-table-action="remove-column" aria-label="Remove the last column from the selected table">Column −</button><button type="button" data-rich-table-action="remove-row" aria-label="Remove the selected body row from the table">Row −</button><button type="button" data-rich-table-action="group-headers" aria-label="Add grouped headers to the selected table">Group headers</button><button type="button" data-rich-command="undo" aria-label="Undo">Undo</button><button type="button" data-rich-command="redo" aria-label="Redo">Redo</button></div>' +
       '<div class="rich-editor-canvas' + minClass + '" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="' + (kind === 'main' ? 'Lesson body rich text editor' : 'Regional content rich text editor') + '" data-visual-editor="true" data-visual-kind="' + esc(kind) + '" data-block-id="' + esc(blockId) + '" data-variant-id="' + esc(variantId) + '" data-audience="' + esc(audience) + '" data-field="' + field + '" data-placeholder="Start writing your lesson…">' +
       markdownToVisualEditor(value) + '</div></div>';
   }
@@ -1876,22 +2030,34 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     const defaultPrompts = [
       {label:'Observe',text:'Describe the evidence visible in the chart.'},
       {label:'Interpret',text:'State one possible reading and a reasonable alternative.'},
-      {label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}
+      {label:'Apply',text:'What would change your view?'}
     ];
     const bollingerPrompts = [
       {label:'Describe',text:'Where is price relative to the bands and middle line?'},
       {label:'Interpret',text:'Does the structure look like a range, a trend or a transition? What is your alternative explanation?'},
-      {label:'Test',text:'What future price behaviour would strengthen or weaken your view?'}
+      {label:'Apply',text:'What would change your view?'}
     ];
     const hasPrompts = Array.isArray(notebook.prompts) && notebook.prompts.length > 0;
     let prompts = hasPrompts
       ? notebook.prompts.filter(prompt => prompt && typeof prompt === 'object')
       : defaultPrompts;
-    const matchesGenericDefaults = prompts.length === defaultPrompts.length && prompts.every((prompt,index) =>
-      String(prompt.label || '').trim().replace(/[.:]+$/, '') === defaultPrompts[index].label &&
-      String(prompt.text || '').trim() === defaultPrompts[index].text
+    const legacyGenericPrompts = [
+      {label:'Observe',text:'Describe the evidence visible in the chart.'},
+      {label:'Interpret',text:'State one possible reading and a reasonable alternative.'},
+      {label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}
+    ];
+    const legacyBollingerPrompts = [
+      {label:'Describe',text:'Where is price relative to the bands and middle line?'},
+      {label:'Interpret',text:'Does the structure look like a range, a trend or a transition? What is your alternative explanation?'},
+      {label:'Test',text:'What future price behaviour would strengthen or weaken your view?'}
+    ];
+    const matchesPromptSet = (items, expected) => items.length === expected.length && items.every((prompt,index) =>
+      String(prompt.label || '').trim().replace(/[.:]+$/, '') === expected[index].label &&
+      String(prompt.text || '').trim() === expected[index].text
     );
-    if (isBollingerCourse && (!hasPrompts || matchesGenericDefaults)) prompts = bollingerPrompts;
+    const matchesGenericDefaults = matchesPromptSet(prompts, defaultPrompts) || matchesPromptSet(prompts, legacyGenericPrompts);
+    const matchesBollingerDefaults = matchesPromptSet(prompts, bollingerPrompts) || matchesPromptSet(prompts, legacyBollingerPrompts);
+    if (isBollingerCourse && (!hasPrompts || matchesGenericDefaults || matchesBollingerDefaults)) prompts = bollingerPrompts;
     return '<section class="preview-trading-notebook" aria-label="Your Trading Notebook">' +
       '<aside class="preview-notebook-index"><span>KEEP<br>IN VIEW</span><strong>01</strong></aside>' +
       '<div class="preview-notebook-content">' +
@@ -1949,7 +2115,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
       .trim() || 'Learning Room';
     return 'MODULE ' + String(moduleIndex + 1).padStart(2, '0') + ' · ' + title;
   }
-  function previewFields(c){const mods=c.modules.map((m,mi)=>({m,mi}));const lesson=currentLesson();return `<div class="section-intro"><h3>Preview as a learner</h3><p>Review the latest editing state before you publish. This preview is deliberately separate from the live member course.</p></div><div class="preview-split"><article class="preview-article"><div class="course-chip">${esc(c.category)} · ${esc(c.level)}</div><h2>${esc(c.title)}</h2><p class="summary">${esc(c.summary)}</p>${c.description?.trim()?'<div class="preview-body course-description-preview">'+renderMarkdown(c.description)+'</div>':''}<div class="pill">${allLessons(c).length} lessons · ${esc(c.duration)}</div>${c.outcomes?.length?`<section class="preview-outcomes"><h3>What learners will practise</h3><ul>${c.outcomes.map(outcome=>`<li>${esc(outcome)}</li>`).join("")}</ul></section>`:""}${lesson?`<hr style="border:0;border-top:1px solid var(--line);margin:24px 0"><div class="module-name-eyebrow">${esc(moduleHeadingLabel(c,currentModule()))}</div><h2 class="preview-lesson-title">${esc(lesson.title)}</h2><p class="summary">${esc(lesson.summary)}</p><div class="preview-body" data-preview-lesson-content>${renderMarkdown(lessonBodyForAudience(lesson, $('#previewAudienceSelect')?.value || 'GLOBAL'))}</div>${notebookPreviewMarkup(lesson)}${reflectionPreviewMarkup(lesson)}${lesson.questions.length?`<div class="practice-preview"><h4>Test your reading</h4>${lesson.questions.map((q,qi)=>`<div style="margin-bottom:16px">${questionImageMarkup(q,lesson)}<strong style="font-size:11px">${esc(q.prompt)}</strong>${q.options.map((op,oi)=>`<label class="practice-preview-answer" data-preview-option="${esc(q.id)}" data-option-index="${oi}"><input type="radio" name="pv-${esc(q.id)}" value="${oi}" data-preview-question="${esc(q.id)}"> <span>${esc(op)}</span><span class="answer-result"></span></label>`).join('')}<button class="btn small" type="button" data-action="check-preview" data-id="${esc(q.id)}">Check answer</button><div class="feedback" id="feedback-${esc(q.id)}"></div></div>`).join('')}</div>`:''}`:'<p class="summary">No lesson selected yet.</p>'}</article><aside class="preview-lesson-nav"><h4>Course outline</h4><div>${mods.map(({m,mi})=>`<div style="font-size:10px;font-weight:800;color:var(--muted);padding:9px 6px 4px">${esc(m.title)}</div>${m.lessons.map((item,li)=>`<button type="button" class="${item.id===lesson?.id?'selected':''}" data-action="preview-select-lesson" data-module-id="${esc(m.id)}" data-id="${esc(item.id)}">${mi+1}.${li+1} ${esc(item.title)}</button>`).join('')}`).join('')}</div><div class="helper-note">Draft preview only. Lesson access, authentication, progress and paid content protection are enforced by Django in production.</div></aside></div>`;}
+  function previewFields(c){const mods=c.modules.map((m,mi)=>({m,mi}));const lesson=currentLesson();return `<div class="section-intro"><h3>Preview as a learner</h3><p>Review the latest editing state before you publish. This preview is deliberately separate from the live member course.</p></div><div class="preview-split"><article class="preview-article"><div class="course-chip">${esc(c.category)} · ${esc(c.level)}</div><h2>${esc(c.title)}</h2><p class="summary">${esc(c.summary)}</p>${c.description?.trim()?'<div class="preview-body course-description-preview">'+renderMarkdown(c.description)+'</div>':''}<div class="pill">${allLessons(c).length} lessons · ${esc(c.duration)}</div>${c.outcomes?.length?`<section class="preview-outcomes"><h3>What learners will practise</h3><ul>${c.outcomes.map(outcome=>`<li>${esc(outcome)}</li>`).join("")}</ul></section>`:""}${lesson?`<hr style="border:0;border-top:1px solid var(--line);margin:24px 0"><div class="module-name-eyebrow">${esc(moduleHeadingLabel(c,currentModule()))}</div><h2 class="preview-lesson-title">${esc(lesson.title)}</h2><p class="summary">${esc(lesson.summary)}</p><div class="builder-lesson-preview-grid"><div class="builder-lesson-preview-main"><div class="preview-body" data-preview-lesson-content>${renderMarkdown(lessonBodyForAudience(lesson, $('#previewAudienceSelect')?.value || 'GLOBAL'))}</div>${reflectionPreviewMarkup(lesson)}</div><aside class="builder-lesson-preview-sidebar">${notebookPreviewMarkup(lesson)}</aside></div>${lesson.questions.length?`<div class="practice-preview"><h4>Test your reading</h4>${lesson.questions.map((q,qi)=>`<div style="margin-bottom:16px">${questionImageMarkup(q,lesson)}<strong style="font-size:11px">${esc(q.prompt)}</strong>${q.options.map((op,oi)=>`<label class="practice-preview-answer" data-preview-option="${esc(q.id)}" data-option-index="${oi}"><input type="radio" name="pv-${esc(q.id)}" value="${oi}" data-preview-question="${esc(q.id)}"> <span>${esc(op)}</span><span class="answer-result"></span></label>`).join('')}<button class="btn small" type="button" data-action="check-preview" data-id="${esc(q.id)}">Check answer</button><div class="feedback" id="feedback-${esc(q.id)}"></div></div>`).join('')}</div>`:''}`:'<p class="summary">No lesson selected yet.</p>'}</article><aside class="preview-lesson-nav"><h4>Course outline</h4><div>${mods.map(({m,mi})=>`<div style="font-size:10px;font-weight:800;color:var(--muted);padding:9px 6px 4px">${esc(m.title)}</div>${m.lessons.map((item,li)=>`<button type="button" class="${item.id===lesson?.id?'selected':''}" data-action="preview-select-lesson" data-module-id="${esc(m.id)}" data-id="${esc(item.id)}">${mi+1}.${li+1} ${esc(item.title)}</button>`).join('')}`).join('')}</div><div class="helper-note">Draft preview only. Lesson access, authentication, progress and paid content protection are enforced by Django in production.</div></aside></div>`;}
   const previewFieldsBeforeQualityChecks = previewFields;
   previewFields = function(c) {
     const html = previewFieldsBeforeQualityChecks(c);
@@ -2299,7 +2465,13 @@ button:disabled { cursor: not-allowed; opacity: .45; }
         lastByCourse.get((prefix || '') + id.toLowerCase()) === offset ? match : ''
       ).replace(/\n{3,}/g, '\n\n');
     };
-    let prepared = compactDuplicateCourseCards(resolveBuilderRegionalBlocks(String(src || ''), lesson, $('#previewAudienceSelect')?.value || 'GLOBAL')).replace(/^\s*\[\[lesson-tab:(?:idea|examples|practice)\]\]\s*$/gim, '').replace(/!\[([^\]]*)\]\(asset:\/\/([^)]+)\)/g, function(match, alt, id) {
+    const structuredTables = [];
+    let prepared = compactDuplicateCourseCards(resolveBuilderRegionalBlocks(String(src || ''), lesson, $('#previewAudienceSelect')?.value || 'GLOBAL')).replace(/^\s*\[\[lesson-tab:(?:idea|examples|practice)\]\]\s*$/gim, '').replace(/\[\[table-block:([A-Za-z0-9_-]{1,120})\]\]/g, function(match,id) {
+      const data = lesson?.tables?.[id];
+      const token = 'TTSTRUCTUREDTABLEPREVIEW' + structuredTables.length + 'END';
+      structuredTables.push(data ? structuredTableHtmlFromData(data,id,false) : '<aside class="tt-structured-table-unavailable">Table data is missing in this draft.</aside>');
+      return '\n\n' + token + '\n\n';
+    }).replace(/!\[([^\]]*)\]\(asset:\/\/([^)]+)\)/g, function(match, alt, id) {
       const image = images.find(function(item) { return item.id === id || item.assetUuid === id; });
       if (!image) return match;
       const token = 'TTFIGURETOKEN' + figures.length + 'END';
@@ -2379,6 +2551,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
           : artSource.includes('bollinger') || artSource.includes('volatility') ? ['Volatility', 'in context']
           : artSource.includes('construction') ? ['Idea', 'to execution'] : ['Learn', 'in context'];
         const modifier = isComingSoon ? ' tt-course-preview-card--coming-soon' : '';
+        const isVolumePrice = artSource.includes('volume') && artSource.includes('price');
         const kicker = isComingSoon ? 'Coming soon' : 'Companion course';
         const href = !isComingSoon && courseRef.slug ? '/learn/course/' + encodeURIComponent(courseRef.slug) + '/' : '';
         const cta = isComingSoon
@@ -2386,11 +2559,13 @@ button:disabled { cursor: not-allowed; opacity: .45; }
           : href
             ? '<a class="tt-course-preview-card__cta" href="' + esc(href) + '" rel="noopener noreferrer">View course outline <span>↗</span></a>'
             : '<span class="tt-course-preview-card__cta">View course outline</span>';
+        const artMark = isVolumePrice ? '<span class="tt-course-preview-card__mark tt-course-preview-card__mark--feature">BEHIND<br>THE MOVE</span>' : '<span class="tt-course-preview-card__mark">' + esc(mark) + '</span>';
+        const artLabel = isVolumePrice ? 'VOLUME × PRICE' : (artCopy[0] + ' · ' + artCopy[1]);
         cardMarkup = '<aside class="tt-course-preview-card' + modifier + '" aria-label="Explore a related TradeThesis course">' +
+          '<div class="tt-course-preview-card__art tt-course-preview-card__art--cover">' + artMark + '<small>' + esc(artLabel) + '</small></div>' +
           '<div class="tt-course-preview-card__copy"><span class="tt-course-preview-card__kicker">' + kicker + '</span>' +
           '<h3>' + esc(courseRef.title) + '</h3><p>' + esc(courseRef.summary || 'Move beyond this example and study the broader toolkit.') + '</p>' +
-          topicsMarkup + cta + '</div><div class="tt-course-preview-card__art"><span class="tt-course-preview-card__mark">' + esc(mark) + '</span>' +
-          '<small>' + esc(artCopy[0]) + '<br>' + esc(artCopy[1]) + '</small></div></aside>';
+          topicsMarkup + cta + '</div></aside>';
       } else {
         cardMarkup = '<aside class="tt-course-preview-card tt-course-preview-card--unavailable" aria-label="Course currently unavailable">' +
           '<div class="tt-course-preview-card__copy"><span class="tt-course-preview-card__kicker">Keep learning</span>' +
@@ -2409,6 +2584,10 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     if (inlineCourseCards.length) {
       html = html.replace(/<p>TTCOURSECARDTOKEN(\d+)END<\/p>|TTCOURSECARDTOKEN(\d+)END/g,
         (match, blockIndex, inlineIndex) => inlineCourseCards[Number(blockIndex ?? inlineIndex)] ?? match);
+    }
+    if (structuredTables.length) {
+      html = html.replace(/<p>TTSTRUCTUREDTABLEPREVIEW(\d+)END<\/p>|TTSTRUCTUREDTABLEPREVIEW(\d+)END/g,
+        (match, blockIndex, inlineIndex) => structuredTables[Number(blockIndex ?? inlineIndex)] ?? match);
     }
     return html;
   };
@@ -3234,7 +3413,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   });
   document.addEventListener('mousedown', event => {
     // Preserve the content selection while clicking formatting controls.
-    if (event.target.closest?.('[data-rich-command], [data-rich-format-toggle], [data-rich-format-option]')) event.preventDefault();
+    if (event.target.closest?.('[data-rich-command], [data-rich-table-action], [data-rich-format-toggle], [data-rich-format-option]')) event.preventDefault();
   });
   document.addEventListener('click', event => {
     const button = event.target.closest?.('[data-rich-command]');
@@ -3244,7 +3423,12 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     if (!editor) return;
     restoreRichEditorSelection(editor);
     const command = button.dataset.richCommand;
-    if (command === 'table') {
+    if (command === 'grouped-table') {
+      insertGroupedTable(editor);
+      return;
+    } else if (command === 'blockquote') {
+      document.execCommand('formatBlock', false, 'blockquote');
+    } else if (command === 'table') {
       const columns = promptTableDimension('Number of columns', 3, 12);
       if (columns === null || columns === false) return;
       const rows = promptTableDimension('Number of rows', 3, 30);
@@ -3269,6 +3453,13 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     }
     syncVisualEditorToModel(editor);
     captureRichEditorRange();
+  });
+  document.addEventListener('click', event => {
+    const button = event.target.closest?.('[data-rich-table-action]');
+    if (!button) return;
+    event.preventDefault();
+    const editor = button.closest('[data-rich-editor-wrapper]')?.querySelector('[data-visual-editor]');
+    if (editor) editSelectedTable(button.dataset.richTableAction, editor);
   });
   function closeRichFormatPickers(exceptPicker) {
     document.querySelectorAll('[data-rich-format-picker]').forEach(picker => {
