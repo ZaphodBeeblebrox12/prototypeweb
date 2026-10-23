@@ -1531,46 +1531,49 @@
   .tt-learning-room .tt-notebook-prompts .tt-notebook-number { margin:0; }
 }
 
-/* Visual parity pass 6: canonical heading styles, matching the editor's level picker.
-   The agreed HTML reference uses 27px regular serif for H3 and 20px regular serif for H4. */
+/* Visual parity pass 7: map every Academy content heading to the canonical
+   standalone course template. The lesson hero is already outside this panel,
+   so Markdown H2 takes the visual role of the reference article's H3. */
 .tt-learning-room .tt-tab-panel h1 {
-  margin: 0 0 13px;
+  margin: 0 0 16px;
+  max-width: 760px;
+  color: #27382e;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(42px, 5vw, 64px);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -.05em;
+}
+.tt-learning-room .tt-tab-panel h2 {
+  margin: 0 0 16px;
+  max-width: 760px;
   color: #27382e;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(29px, 2.8vw, 37px);
-  font-weight: 700;
-  line-height: 1.12;
-  letter-spacing: -.035em;
+  font-weight: 400;
+  line-height: 1.13;
+  letter-spacing: -.04em;
 }
-.tt-learning-room .tt-tab-panel h2 {
-  margin: 25px 0 9px;
+.tt-learning-room .tt-tab-panel h3 {
+  margin: 26px 0 10px;
   color: #27382e;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 22px;
   font-weight: 400;
-  line-height: 1.2;
+  line-height: 1.18;
   letter-spacing: -.025em;
 }
-.tt-learning-room .tt-tab-panel h3 {
-  margin: 0 0 9px;
-  color: #27382e;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 27px;
-  font-weight: 400;
-  line-height: 1.12;
-  letter-spacing: -.035em;
-}
 .tt-learning-room .tt-tab-panel h4 {
-  margin: 25px 0 9px;
+  margin: 24px 0 8px;
   color: #27382e;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 20px;
   font-weight: 400;
-  line-height: 1.35;
+  line-height: 1.2;
   letter-spacing: -.02em;
 }
 .tt-learning-room .tt-tab-panel h5 {
-  margin: 24px 0 8px;
+  margin: 22px 0 8px;
   color: #27382e;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 16px;
@@ -1590,6 +1593,7 @@
 .tt-learning-room .tt-tab-panel p {
   margin: 9px 0 13px;
   color: #58665c;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 13px;
   line-height: 1.8;
 }
@@ -1604,6 +1608,7 @@
   margin: 9px 0 16px;
   padding-left: 24px;
   color: #58665c;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 13px;
   line-height: 1.8;
 }
@@ -1614,42 +1619,11 @@
   line-height: 1.8;
 }
 .tt-learning-room .tt-tab-panel li + li { margin-top: 5px; }
-.tt-learning-room .tt-notebook-top h4 {
-  margin: 0 0 8px;
-  color: #fffdf8;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 27px;
-  font-weight: 400;
-  line-height: 1.15;
-  letter-spacing: -.025em;
-}
-.tt-learning-room .tt-notebook-intro { font-size: 12px; line-height: 1.6; }
-.tt-learning-room .tt-notebook-prompt-copy p {
-  margin: 0;
-  color: #27382e;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1.45;
-}
-.tt-learning-room .tt-notebook-prompt-copy strong {
-  display: block;
-  margin: 0 0 5px;
-  color: #345943;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: .11em;
-  text-transform: uppercase;
-}
-.tt-learning-room .tt-notebook-response-editor summary { font-size: 11px; }
-.tt-learning-room .tt-notebook-hint { font-size: 11px; line-height: 1.6; }
+
 @media (max-width: 680px) {
-  .tt-learning-room .tt-tab-panel h1 { font-size: 29px; }
-  .tt-learning-room .tt-tab-panel h2 { font-size: 22px; }
-  .tt-learning-room .tt-tab-panel h3 { font-size: 27px; }
+  .tt-learning-room .tt-tab-panel h1 { font-size: 42px; }
+  .tt-learning-room .tt-tab-panel h2 { font-size: 29px; }
+  .tt-learning-room .tt-tab-panel h3 { font-size: 22px; }
   .tt-learning-room .tt-tab-panel h4 { font-size: 20px; }
   .tt-learning-room .tt-tab-panel h5 { font-size: 16px; }
-  .tt-learning-room .tt-tab-panel p { font-size: 13px; }
-  .tt-learning-room .tt-notebook-top h4 { font-size: 25px; }
 }
