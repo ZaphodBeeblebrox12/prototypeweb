@@ -249,12 +249,14 @@ def _resolve_course_cards(source):
                 'rel="noopener noreferrer">View course outline <span>↗</span></a>'
             )
             modifier = ""
+        card_text = f"{title} {category}".casefold()
+        display_topics = ["Volume", "Price structure"] if "volume" in card_text and "price" in card_text else topics
         return (
             f'<aside class="tt-course-preview-card{modifier}" aria-label="Explore a related TradeThesis course">'
             '<div class="tt-course-preview-card__copy">'
             f'<span class="tt-course-preview-card__kicker">{kicker}</span>'
             f'<h3>{safe_title}</h3><p>{safe_summary}</p>'
-            f'{render_topics(topics)}{cta}'
+            f'{render_topics(display_topics)}{cta}'
             '</div>'
             f'{render_art(title, category)}'
             '</aside>'

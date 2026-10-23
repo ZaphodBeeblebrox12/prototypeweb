@@ -147,7 +147,7 @@ class CoursePublicationReadinessTests(TestCase):
         )
         self.assertEqual(course_topic_tags("not a list of outcomes"), [])
 
-    def test_valid_course_card_reference_renders_option_four_not_a_lesson_link(self):
+    def test_valid_course_card_reference_renders_option_three_not_a_lesson_link(self):
         from .content_rendering import render_safe_markdown
 
         course = Course.objects.create(
@@ -172,7 +172,9 @@ class CoursePublicationReadinessTests(TestCase):
         self.assertIn('class="tt-course-preview-card"', rendered)
         self.assertIn("Volume &amp; Price Analysis", rendered)
         self.assertIn("tt-course-preview-card__topics", rendered)
-        self.assertIn("Relative volume", rendered)
+        self.assertIn("<span>Volume</span>", rendered)
+        self.assertIn("<span>Price structure</span>", rendered)
+        self.assertNotIn("Relative volume", rendered)
         self.assertNotIn("Failed breakouts", rendered)
         self.assertIn("View course outline", rendered)
         self.assertIn("/learn/course/volume-price-analysis-card-test/", rendered)
@@ -227,13 +229,15 @@ class RelatedCourseSoftBotanicalParityTests(SimpleTestCase):
         self.assertIn("{% for topic in related.topic_tags %}", staged_preview)
 
 
-class OptionFourCardParityTests(SimpleTestCase):
+class OptionThreeCardParityTests(SimpleTestCase):
     def test_admin_website_preview_matches_builder_option_three_dimensions(self):
         root = Path(__file__).resolve().parents[2]
         admin_css = (root / "static" / "academy" / "course-import-preview.css").read_text(encoding="utf-8")
 
         self.assertIn(".tt-admin-learning-preview .tt-tab-panel .tt-course-preview-card {", admin_css)
-        self.assertIn("width: min(100%, 560px);", admin_css)
+        self.assertIn("width: min(72%, 640px);", admin_css)
+        self.assertIn("max-width: 640px;", admin_css)
+        self.assertIn("width: 100%; max-width: none;", admin_css)
         self.assertIn('font: 400 17px/1.12 Georgia, "Times New Roman", serif;', admin_css)
         self.assertIn("font-size: 9px;", admin_css)
         self.assertIn("-webkit-line-clamp: 2;", admin_css)
@@ -251,11 +255,15 @@ class OptionFourCardParityTests(SimpleTestCase):
             return re.sub(r"\s+", " ", text).strip()
 
         self.assertEqual(normalize(builder_css), normalize(learner_css))
-        self.assertIn("grid-template-columns: 78px minmax(0, 1fr)", learner_css)
+        self.assertIn("grid-template-columns: 66px minmax(0, 1fr)", learner_css)
+        self.assertIn("width: min(72%, 640px)", learner_css)
+        self.assertIn("min-height: 104px", learner_css)
+        self.assertIn(".tt-course-preview-card__art::before", learner_css)
+        self.assertIn(".tt-course-preview-card__art::after", learner_css)
         self.assertIn("width: min(100%, 560px)", learner_css)
         self.assertIn("max-width: 560px", learner_css)
-        self.assertIn("grid-template-columns: 68px minmax(0, 1fr)", learner_css)
-        self.assertIn("grid-template-columns: 72px minmax(0, 1fr)", learner_css)
+        self.assertIn("grid-template-columns: 60px minmax(0, 1fr)", learner_css)
+        self.assertIn("grid-template-columns: 54px minmax(0, 1fr)", learner_css)
         self.assertIn("-webkit-line-clamp: 2;", learner_css)
         self.assertIn("tt-course-preview-card__topics", learner_css)
         self.assertIn("tt-course-preview-card__art", learner_css)
