@@ -697,6 +697,22 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn('event.target.closest("[data-open-tab]")', script)
         self.assertIn('form = event.target.closest("[data-notebook-response]")', script)
 
+    def test_agreed_preview_width_editorial_type_scale_and_notebook_hierarchy(self):
+        backend = Path(__file__).resolve().parents[2]
+        lesson_styles = (backend / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
+        preview_styles = (backend / "static" / "academy" / "course-import-preview.css").read_text(encoding="utf-8")
+        tabs_template = (backend / "templates" / "academy" / "partials" / "lesson_tabs.html").read_text(encoding="utf-8")
+
+        self.assertIn(".main-content:has(> .tt-admin-course-preview)", preview_styles)
+        self.assertIn("width: min(1600px, 100%)", preview_styles)
+        self.assertIn("grid-template-columns: minmax(0, 1fr) 245px", preview_styles)
+        self.assertIn("font-size: clamp(25px, 2.2vw, 31px)", lesson_styles)
+        self.assertIn("font-size: 13px;", lesson_styles)
+        self.assertIn("display: block;", lesson_styles)
+        self.assertIn("{% else %}Your Trading Notebook{% endif %}", tabs_template)
+        self.assertIn("Before treating a touch as a setup", tabs_template)
+        self.assertIn('<div class="tt-notebook-prompt-copy"><p><strong>Describe.</strong>', tabs_template)
+
     def test_builder_learner_preview_uses_the_saved_academy_website_template(self):
         builder = Path(__file__).resolve().parent / "course_builder_preview.html"
         source = builder.read_text(encoding="utf-8")

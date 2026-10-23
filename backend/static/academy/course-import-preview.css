@@ -119,3 +119,22 @@
   .tt-admin-course-preview { padding:10px 8px 25px; }
   .tt-admin-course-preview .tt-admin-learning-preview { padding:14px 11px 24px; }
 }
+
+
+/* Visual parity pass 3: use the approved wide page shell for this route only.
+   The shared design-system .main-content cap (1330px) is narrower than the
+   standalone reference template's 1600px main shell. */
+.main-content:has(> .tt-admin-course-preview) {
+  width: min(1600px, 100%);
+  padding: 24px clamp(16px, 3vw, 42px) 52px;
+}
+.tt-admin-course-preview .tt-admin-learning-preview .learning-content-grid {
+  grid-template-columns: minmax(0, 1fr) 245px;
+  gap: clamp(20px, 2.5vw, 34px);
+}
+@media (max-width: 920px) {
+  .tt-admin-course-preview .tt-admin-learning-preview .learning-content-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+}

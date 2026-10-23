@@ -1530,3 +1530,57 @@
   .tt-learning-room .tt-notebook-prompts li { display:grid; grid-template-columns:22px minmax(0,1fr); padding:11px 0; border:0; border-bottom:1px solid #e9e4d8; border-radius:0; background:transparent; }
   .tt-learning-room .tt-notebook-prompts .tt-notebook-number { margin:0; }
 }
+
+
+/* Visual parity pass 3: match the approved template's editorial scale. */
+.tt-learning-room .tt-tab-panel {
+  font-size: 13px;
+  line-height: 1.82;
+}
+.tt-learning-room .tt-tab-panel h1 {
+  font-size: clamp(25px, 2.2vw, 31px);
+  line-height: 1.18;
+  margin: 0 0 13px;
+  font-weight: 500;
+  letter-spacing: -.025em;
+}
+.tt-learning-room .tt-tab-panel h2 {
+  font-size: clamp(23px, 2vw, 28px);
+  line-height: 1.2;
+  margin: 28px 0 9px;
+  letter-spacing: -.02em;
+}
+.tt-learning-room .tt-tab-panel h3 {
+  font-size: clamp(20px, 1.65vw, 23px);
+  line-height: 1.25;
+  margin: 28px 0 9px;
+  letter-spacing: -.015em;
+}
+.tt-learning-room .tt-tab-panel .tt-lesson-idea-copy > :first-child { margin-top: 0; }
+.tt-learning-room .tt-tab-panel p {
+  font-size: 13px;
+  line-height: 1.82;
+  margin: 0 0 14px;
+}
+.tt-learning-room .tt-tab-panel ul,
+.tt-learning-room .tt-tab-panel ol {
+  margin: 0 0 20px;
+  padding-left: 22px;
+}
+.tt-learning-room .tt-tab-panel li {
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 7px 0;
+  padding-left: 4px;
+}
+
+/* Notebook prompt labels sit above their serif questions, like the reference. */
+.tt-learning-room .tt-notebook-prompt-copy strong {
+  display: block;
+  margin: 0 0 5px;
+}
+@media (max-width: 680px) {
+  .tt-learning-room .tt-tab-panel h1 { font-size: 25px; }
+  .tt-learning-room .tt-tab-panel h2 { font-size: 23px; }
+  .tt-learning-room .tt-tab-panel h3 { font-size: 20px; }
+}
