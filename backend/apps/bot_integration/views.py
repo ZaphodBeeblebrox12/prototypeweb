@@ -54,6 +54,18 @@ def unlink_telegram(request):
         tg = TelegramAccount.objects.get(user=request.user)
         old_chat_id = tg.chat_id
         tg.delete()
+        # Best-effort confirmation: the disconnect must succeed even if Telegram
+        # is temporarily unavailable or the user has blocked the bot.
+        try:
+            sent = TelegramBotService.send_message(
+                old_chat_id,
+                "🔓 Telegram disconnected. Your TradeThesis account has been disconnected from Telegram. "
+                "You can reconnect anytime from your Dashboard.",
+            )
+            if not sent:
+                logger.info("Telegram disconnect confirmation was not accepted chat_id=%s", old_chat_id)
+        except Exception:
+            logger.exception("Telegram disconnect confirmation failed chat_id=%s", old_chat_id)
         BotAccessAudit.objects.create(
             user=request.user,
             action='unlink',
