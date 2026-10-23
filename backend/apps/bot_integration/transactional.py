@@ -75,8 +75,7 @@ def render_welcome(username: str) -> str:
         f"👋 Welcome, {username}!\n\n"
         "Your Telegram account is now linked. You'll receive "
         "account notifications here (payment confirmations, subscription "
-        "updates, expiry reminders).\n\n"
-        "Reply /stop anytime to manage notifications."
+        "updates, expiry reminders)."
     )
 
 
