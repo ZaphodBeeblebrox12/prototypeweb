@@ -329,7 +329,7 @@ class AcademyViewTests(TestCase):
             "Administrator preview only. Answer submission is disabled in this view.",
         )
         self.assertEqual(response.headers.get("X-Frame-Options"), "SAMEORIGIN")
-        self.assertContains(response, "<strong>Observe.</strong>")
+        self.assertContains(response, '<strong class="tt-notebook-prompt-label">Observe</strong>')
         self.assertContains(response, 'class="tt-course-progress tt-course-progress--draft"')
         self.assertContains(response, 'aria-label="Draft preview progress (unstarted)"')
         self.assertContains(response, 'aria-valuenow="0"')
