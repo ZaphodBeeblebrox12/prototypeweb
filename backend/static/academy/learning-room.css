@@ -49,9 +49,6 @@
 .tt-tab-panel li { padding-left:.2rem; margin:.35em 0; }
 .tt-tab-panel blockquote { border-left:3px solid var(--tt-gold); padding:7px 0 7px 18px; margin:1.3em 0; color:#4d5e53; }
 .tt-tab-panel img { max-width:100%; height:auto; display:block; margin:1rem auto; border:1px solid var(--tt-line); background:white; }
-.tt-tab-panel table { border-collapse:collapse; width:100%; margin:1.2em 0; font-size:.9rem; }
-.tt-tab-panel th,.tt-tab-panel td { border:1px solid var(--tt-line); padding:8px 10px; text-align:left; }
-.tt-tab-panel th { background:#f1f2eb; }
 .tt-tab-panel code { padding:.12em .32em; background:#f1f1eb; font-size:.9em; }
 .tt-tab-panel pre { max-width:100%; overflow:auto; padding:14px; background:#f1f1eb; }
 .tt-notebook { display:grid; grid-template-columns:minmax(130px,.34fr) minmax(0,1fr); gap:14px 24px; background:#f2f4ed; border-top:3px solid #98aa8f; padding:19px clamp(15px,2.2vw,27px); margin:9px 0 28px; }
@@ -115,7 +112,6 @@
   .tt-asset-preview { width:84px; max-height:68px; }
 }
 
-
 /* Course-template parity: progress, structured practice, reflections, media and navigation. */
 .tt-course-progress { height: 5px; margin-top: 13px; overflow: hidden; background: #e6e9e1; border-radius: 99px; }
 .tt-course-progress span { display: block; height: 100%; background: var(--tt-green); transition: width .2s ease; }
@@ -160,7 +156,6 @@
 
 .tt-tab-panel img[role="button"] { cursor: zoom-in; }
 .tt-tab-panel img[role="button"]:focus-visible { outline: 3px solid var(--tt-gold); outline-offset: 4px; }
-
 
 /* Approved content-rich lesson header shared by learner and administrator previews. */
 .tt-course-header--depth {
@@ -443,9 +438,6 @@
 .tt-learning-room .tt-tab-panel p { color: #58665c; margin: 0 0 1.15em; }
 .tt-learning-room .tt-tab-panel p strong { color: var(--tt-ink); }
 .tt-learning-room .tt-tab-panel blockquote { padding: 14px 18px; border-radius: 0 12px 12px 0; background: var(--tt-surface-2); color: var(--tt-ink); }
-.tt-learning-room .tt-tab-panel table { border-radius: 11px; overflow: hidden; font-size: .92rem; }
-.tt-learning-room .tt-tab-panel th { background: #e9eee5; color: var(--tt-green-deep); }
-.tt-learning-room .tt-tab-panel td { background: var(--tt-surface); }
 .tt-learning-room .tt-notebook {
   border: 1px solid var(--tt-line);
   border-top: 4px solid #98aa8f;
@@ -540,46 +532,6 @@
   .tt-learning-room .tt-lesson-nav-next { text-align: left; }
   .tt-learning-room .tt-tab-panel .tt-comparison-cards { grid-template-columns: minmax(0, 1fr); }
 }
-
-
-/* Information tables follow the reference preview's framed, scrollable treatment. */
-.tt-learning-room .tt-tab-panel .lesson-table-wrap {
-  width: 100%;
-  max-width: 100%;
-  margin: 1.25em 0 1.5em;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  border: 1px solid var(--tt-line);
-  border-radius: 12px;
-  background: var(--tt-surface);
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap:focus-visible { outline: 2px solid var(--tt-green); outline-offset: 3px; }
-.tt-learning-room .tt-tab-panel .lesson-table-wrap table {
-  width: 100%;
-  min-width: 560px;
-  margin: 0;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 0;
-  font-size: .86rem;
-  line-height: 1.72;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap th,
-.tt-learning-room .tt-tab-panel .lesson-table-wrap td {
-  padding: 10px 13px;
-  border: 0;
-  border-bottom: 1px solid var(--tt-line);
-  text-align: left;
-  vertical-align: top;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap th { background: #e9eee5; color: var(--tt-green-deep); font-weight: 750; }
-.tt-learning-room .tt-tab-panel .lesson-table-wrap td { background: var(--tt-surface); }
-.tt-learning-room .tt-tab-panel .lesson-table-wrap tr:last-child td { border-bottom: 0; }
-.tt-learning-room .tt-tab-panel .lesson-table-wrap th[align="center"],
-.tt-learning-room .tt-tab-panel .lesson-table-wrap td[align="center"] { text-align: center; }
-.tt-learning-room .tt-tab-panel .lesson-table-wrap th[align="right"],
-.tt-learning-room .tt-tab-panel .lesson-table-wrap td[align="right"] { text-align: right; }
 
 /* Density alignment pass — match the approved first-pass template.
    The lesson header shares the main column with the outline; retain hierarchy without excess blank space. */
@@ -965,7 +917,6 @@
   .tt-learning-room .tt-related-courses--cards .tt-related-course-card-cta { margin: 13px -12px -12px; padding: 9px 12px; }
 }
 
-
 /* Match the canonical Learning Room answer feedback; reveal the key only after grading. */
 .tt-learning-room .tt-answer-option.is-correct {
   border-color: #9bb58d;
@@ -994,7 +945,6 @@
 @media (max-width: 520px) {
   .tt-answer-result { flex-basis: 100%; margin-left: 1.55rem; white-space: normal; }
 }
-
 
 /* Trading Notebook: match the agreed editorial reference block inside The idea tab. */
 .tt-learning-room .tt-notebook {
@@ -1092,7 +1042,6 @@
 .tt-guided-reflection-notes, .tt-guided-reflection-model { margin-top:12px; padding:11px 13px; border:1px solid var(--tt-line, #d8ddd2); border-radius:8px; }
 .tt-guided-reflection-notes summary, .tt-guided-reflection-model summary { cursor:pointer; font-weight:650; }
 .tt-guided-reflection-notes p, .tt-guided-reflection-model p { margin-bottom:0; }
-
 
 /* Image-group Option 3 — borderless, compact chart group. */
 .tt-learning-room .tt-tab-panel .tt-image-group-figure {
@@ -1248,7 +1197,6 @@
   .tt-learning-room .tt-tab-panel .tt-image-group-figure .tt-purpose-figure-note { padding:7px 8px 0; }
 }
 
-
 /* Approved learner composition: tabs and Notebook remain peers for every tab. */
 .tt-learning-room .learning-content-grid {
   display:grid;
@@ -1349,75 +1297,9 @@
 .tt-learning-room .tt-tab-panel blockquote::before {content:"“";position:absolute;top:3px;left:13px;color:#b48635;font:400 58px/.95 Georgia,"Times New Roman",serif}
 .tt-learning-room .tt-tab-panel blockquote p {margin:0 0 .55em}.tt-learning-room .tt-tab-panel blockquote p:last-child {margin-bottom:0}
 @media(max-width:620px){.tt-learning-room .tt-tab-panel blockquote{padding:18px 15px 18px 42px;font-size:20px}.tt-learning-room .tt-tab-panel blockquote::before{left:9px;font-size:47px}}
-.tt-learning-room .tt-structured-table-wrap {max-width:100%;overflow-x:auto;border:1px solid #d8ddcf;border-radius:7px;background:#fffdf8;margin:1.2em 0}
-.tt-learning-room .tt-structured-table {width:100%;min-width:520px;border-collapse:separate;border-spacing:0;margin:0;font-size:.88rem}
-.tt-learning-room .tt-structured-table caption.tt-structured-table-caption {caption-side:top;padding:9px 12px;border-bottom:1px solid #e1e3d9;background:#f6f0e2;color:#5d685d;font:italic 13px/1.45 Georgia,"Times New Roman",serif;text-align:left}
-.tt-learning-room .tt-structured-table th,.tt-learning-room .tt-structured-table td {padding:10px 12px;border-right:1px solid #e1e3d9;border-bottom:1px solid #e1e3d9;text-align:left;vertical-align:top}
-.tt-learning-room .tt-structured-table thead tr:first-child th[colspan] {background:#345943;color:#fffdf6;font-size:.76rem;font-weight:750;letter-spacing:.035em}
-.tt-learning-room .tt-structured-table thead tr:last-child th {background:#e8eee3;color:#284936;font-size:.78rem}
-.tt-learning-room .tt-structured-table tbody tr:nth-child(even) td {background:#f7f6ef}
-
-
-/* Option 5 table parity: higher-specificity rules override the generic lesson-table skin. */
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap {
-  width: 100%;
-  max-width: 100%;
-  margin: 1.2em 0;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  border: 1px solid #d8ddcf;
-  border-radius: 7px;
-  background: #fffdf8;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table {
-  width: 100%;
-  min-width: 520px;
-  margin: 0;
-  border-collapse: separate;
-  border-spacing: 0;
-  font-size: .88rem;
-  line-height: 1.5;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table caption.tt-structured-table-caption {
-  caption-side: top;
-  padding: 9px 12px;
-  border-bottom: 1px solid #e1e3d9;
-  background: #f6f0e2;
-  color: #5d685d;
-  font: italic 13px/1.45 Georgia, "Times New Roman", serif;
-  text-align: left;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table th,
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table td {
-  padding: 10px 12px;
-  border: 0;
-  border-right: 1px solid #e1e3d9;
-  border-bottom: 1px solid #e1e3d9;
-  text-align: left;
-  vertical-align: top;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table thead tr:first-child th[colspan] {
-  background: #345943;
-  color: #fffdf6;
-  font-size: .76rem;
-  font-weight: 750;
-  letter-spacing: .035em;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table thead tr:last-child th {
-  background: #e8eee3;
-  color: #284936;
-  font-size: .78rem;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table tbody tr:nth-child(even) td {
-  background: #f7f6ef;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table tr:last-child td {
-  border-bottom: 0;
-}
 
 /* TradeThesis agreed-template parity overrides — pass 2 */
-/* Keep these LAST: the stylesheet contains legacy duplicate rules later in the file. */
+
 .tt-learning-room {
   box-sizing:border-box;
   max-width:1440px;
@@ -1628,7 +1510,6 @@
   .tt-learning-room .tt-tab-panel h5 { font-size: 16px; }
 }
 
-
 /* Notebook response disclosure: keep the reflection accordion visible in both learner and preview modes. */
 .tt-learning-room .tt-notebook-response-editor .tt-notebook-reflection-note {
   margin: 10px 0 12px;
@@ -1642,382 +1523,6 @@
   opacity: 1;
   cursor: default;
 }
-
-/* TradeThesis micro-course table — Design 06: Alternating Field Notes.
-   Exact design rules from the approved first-round gallery.
-   Palette: forest green #345943, cream #fffdf8, gold #b48635,
-   alternating cream #f3f0e6 / sage #e8eee4. */
-
-/* Published learner lesson */
-.tt-learning-room .tt-tab-panel .lesson-table-wrap {
-  width: 100%;
-  max-width: 100%;
-  margin: 1.25em 0 1.5em;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap:focus-visible {
-  outline: 2px solid #b48635;
-  outline-offset: 3px;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap table,
-.tt-learning-room .tt-tab-panel table {
-  width: 100%;
-  margin: 0;
-  border: 0;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 0;
-  color: #27382e;
-  font-size: 11px;
-  line-height: 1.55;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap table {
-  min-width: 490px;
-}
-.tt-learning-room .tt-tab-panel table th,
-.tt-learning-room .tt-tab-panel table td {
-  text-align: left;
-  vertical-align: top;
-  border: 0;
-  overflow-wrap: anywhere;
-}
-.tt-learning-room .tt-tab-panel table th {
-  padding: 11px 12px;
-  background: #345943;
-  color: #fffdf8;
-  border-bottom: 2px solid #b48635;
-  font-size: 10px;
-  line-height: 1.4;
-  font-weight: 800;
-}
-.tt-learning-room .tt-tab-panel table td {
-  padding: 12px;
-  font-size: 11px;
-  line-height: 1.55;
-}
-.tt-learning-room .tt-tab-panel table tbody tr:nth-child(odd) td {
-  background: #f3f0e6;
-}
-.tt-learning-room .tt-tab-panel table tbody tr:nth-child(even) td {
-  background: #e8eee4;
-}
-.tt-learning-room .tt-tab-panel table tbody td:first-child {
-  color: #264632;
-  font-weight: 800;
-}
-.tt-learning-room .tt-tab-panel table th[align="center"],
-.tt-learning-room .tt-tab-panel table td[align="center"] {
-  text-align: center;
-}
-.tt-learning-room .tt-tab-panel table th[align="right"],
-.tt-learning-room .tt-tab-panel table td[align="right"] {
-  text-align: right;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap table p {
-  margin: 0;
-}
-
-/* Specificity-matched overrides for tables created by Course Builder's structured-table tool. */
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap {
-  width: 100%;
-  max-width: 100%;
-  margin: 1.25em 0 1.5em;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table {
-  width: 100%;
-  min-width: 490px;
-  margin: 0;
-  border: 0;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 0;
-  color: #27382e;
-  font-size: 11px;
-  line-height: 1.55;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table th,
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table td {
-  padding: 12px;
-  border: 0;
-  text-align: left;
-  vertical-align: top;
-  overflow-wrap: anywhere;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table thead th {
-  padding: 11px 12px;
-  background: #345943;
-  color: #fffdf8;
-  border: 0;
-  border-bottom: 2px solid #b48635;
-  font-size: 10px;
-  line-height: 1.4;
-  font-weight: 800;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table tbody tr:nth-child(odd) td {
-  background: #f3f0e6;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table tbody tr:nth-child(even) td {
-  background: #e8eee4;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table tbody td:first-child {
-  color: #264632;
-  font-weight: 800;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table th[align="center"],
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table td[align="center"] {
-  text-align: center;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table th[align="right"],
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table td[align="right"] {
-  text-align: right;
-}
-
-/* Keep authored captions available to assistive technology without adding a visible caption strip.
-   Design 06 in the gallery has no visible caption above the header. */
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table caption.tt-structured-table-caption {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
-  background: transparent !important;
-}
-
-/* Course Builder's in-page learner preview: mirror the published page exactly. */
-.preview-body .lesson-table-wrap {
-  width: 100%;
-  max-width: 100%;
-  margin: 1.25em 0 1.5em;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
-.preview-body .lesson-table-wrap:focus-visible {
-  outline: 2px solid #b48635;
-  outline-offset: 3px;
-}
-.preview-body .lesson-table-wrap table {
-  width: 100%;
-  min-width: 490px;
-  margin: 0;
-  border: 0;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 0;
-  color: #27382e;
-  font-size: 11px;
-  line-height: 1.55;
-}
-.preview-body .lesson-table-wrap th,
-.preview-body .lesson-table-wrap td {
-  padding: 12px;
-  border: 0;
-  text-align: left;
-  vertical-align: top;
-  overflow-wrap: anywhere;
-}
-.preview-body .lesson-table-wrap th {
-  padding: 11px 12px;
-  background: #345943;
-  color: #fffdf8;
-  border: 0;
-  border-bottom: 2px solid #b48635;
-  font-size: 10px;
-  line-height: 1.4;
-  font-weight: 800;
-}
-.preview-body .lesson-table-wrap tbody tr:nth-child(odd) td {
-  background: #f3f0e6;
-}
-.preview-body .lesson-table-wrap tbody tr:nth-child(even) td {
-  background: #e8eee4;
-}
-.preview-body .lesson-table-wrap tbody td:first-child {
-  color: #264632;
-  font-weight: 800;
-}
-.preview-body .lesson-table-wrap th[align="center"],
-.preview-body .lesson-table-wrap td[align="center"] {
-  text-align: center;
-}
-.preview-body .lesson-table-wrap th[align="right"],
-.preview-body .lesson-table-wrap td[align="right"] {
-  text-align: right;
-}
-.preview-body .lesson-table-wrap table p {
-  margin: 0;
-}
-.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table {
-  width: 100%;
-  min-width: 490px;
-  margin: 0;
-  border: 0;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 0;
-  color: #27382e;
-  font-size: 11px;
-  line-height: 1.55;
-}
-.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table th,
-.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table td {
-  padding: 12px;
-  border: 0;
-  text-align: left;
-  vertical-align: top;
-  overflow-wrap: anywhere;
-}
-.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table thead th {
-  padding: 11px 12px;
-  background: #345943;
-  color: #fffdf8;
-  border: 0;
-  border-bottom: 2px solid #b48635;
-  font-size: 10px;
-  line-height: 1.4;
-  font-weight: 800;
-}
-.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table tbody tr:nth-child(odd) td {
-  background: #f3f0e6;
-}
-.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table tbody tr:nth-child(even) td {
-  background: #e8eee4;
-}
-.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table tbody td:first-child {
-  color: #264632;
-  font-weight: 800;
-}
-.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table th[align="center"],
-.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table td[align="center"] {
-  text-align: center;
-}
-.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table th[align="right"],
-.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table td[align="right"] {
-  text-align: right;
-}
-.preview-body .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table caption.tt-structured-table-caption {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
-  background: transparent !important;
-}
-
-
-/* Design 06 fidelity fix: beat legacy structured-table header rules.
-   These values match the approved Alternating Field Notes gallery exactly. */
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table thead tr:last-child th,
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table thead tr:first-child th[colspan] {
-  padding: 11px 12px;
-  background: #345943;
-  color: #fffdf8;
-  border: 0;
-  border-bottom: 2px solid #b48635;
-  font-size: 11px;
-  line-height: 1.55;
-  font-weight: 800;
-  letter-spacing: normal;
-}
-
-/* Design 06 live-page selector fix: target the table class directly.
-   Some lesson HTML has .tt-structured-table without .tt-structured-table-wrap
-   on its parent, so wrapper-qualified rules do not match its header. */
-.tt-learning-room .tt-tab-panel .tt-structured-table thead tr:last-child th,
-.tt-learning-room .tt-tab-panel .tt-structured-table thead tr:first-child th[colspan] {
-  padding: 11px 12px;
-  color: #fffdf8;
-  background: #345943;
-  border: 0;
-  border-bottom: 2px solid #b48635;
-  font-size: 10px;
-  line-height: 1.4;
-  font-weight: 800;
-  letter-spacing: normal;
-}
-
-
-/* Design 06 exact gallery parity: fix wrapper-qualified plain lesson tables.
-   Ported from .tt-table-design--06 in the original 10-design gallery.
-   This deliberately outranks the earlier .lesson-table-wrap th pale-sage rule. */
-.tt-learning-room .tt-tab-panel .lesson-table-wrap table {
-  width: 100%;
-  min-width: 490px;
-  margin: 0;
-  border: 0;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 0;
-  color: #27382e;
-  font-size: 11px;
-  line-height: 1.55;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap table thead tr:last-child th {
-  padding: 11px 12px;
-  color: #fffdf8;
-  background: #345943;
-  border: 0;
-  border-bottom: 2px solid #b48635;
-  font-size: 10px;
-  line-height: 1.4;
-  font-weight: 800;
-  letter-spacing: normal;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap table tbody td {
-  padding: 12px;
-  border: 0;
-  font-size: 11px;
-  line-height: 1.55;
-  overflow-wrap: anywhere;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap table tbody tr:nth-child(odd) td {
-  background: #f3f0e6;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap table tbody tr:nth-child(even) td {
-  background: #e8eee4;
-}
-.tt-learning-room .tt-tab-panel .lesson-table-wrap table tbody td:first-child {
-  color: #264632;
-  font-weight: 800;
-}
-
-/* Keep the structured-table renderer on the same exact gallery sizing. */
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table thead tr:last-child th,
-.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table thead tr:first-child th[colspan] {
-  padding: 11px 12px;
-  color: #fffdf8;
-  background: #345943;
-  border: 0;
-  border-bottom: 2px solid #b48635;
-  font-size: 10px;
-  line-height: 1.4;
-  font-weight: 800;
-  letter-spacing: normal;
-}
-
-
 
 /* Hard-block index — exact approved design. */
 .tt-image-group-hard-index, .tt-image-group-hard-index * { box-sizing:border-box; }
@@ -2062,4 +1567,110 @@
  .tt-image-group-hard-index .chart-grid { gap:17px; }
  .tt-image-group-hard-index .item-title { font-size:12px; }
  .tt-image-group-hard-index .caption { font-size:10px; }
+}
+
+/* Canonical micro-course table styling: Alternating Field Notes (Design 06).
+   Exact source values from the selected gallery. Plain and structured lesson tables
+   share this single treatment; the rich-text editor keeps its own separate table rules. */
+.tt-learning-room .tt-tab-panel .lesson-table-wrap,
+.preview-body .lesson-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  margin: 1.25em 0 1.5em;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.tt-learning-room .tt-tab-panel .lesson-table-wrap:focus-visible,
+.preview-body .lesson-table-wrap:focus-visible {
+  outline: 2px solid #b48635;
+  outline-offset: 3px;
+}
+.tt-learning-room .tt-tab-panel table,
+.preview-body table {
+  width: 100%;
+  margin: 1.25em 0 1.5em;
+  border: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 0;
+  color: #27382e;
+  font-size: 11px;
+  line-height: 1.55;
+}
+.tt-learning-room .tt-tab-panel .lesson-table-wrap table,
+.preview-body .lesson-table-wrap table {
+  min-width: 490px;
+  margin: 0;
+}
+.tt-learning-room .tt-tab-panel table th,
+.tt-learning-room .tt-tab-panel table td,
+.preview-body table th,
+.preview-body table td {
+  text-align: left;
+  vertical-align: top;
+  border: 0;
+  overflow-wrap: anywhere;
+}
+.tt-learning-room .tt-tab-panel table th,
+.preview-body table th {
+  padding: 11px 12px;
+  background: #345943;
+  color: #fffdf8;
+  border-bottom: 2px solid #b48635;
+  font-size: 10px;
+  line-height: 1.4;
+  font-weight: 800;
+}
+.tt-learning-room .tt-tab-panel table td,
+.preview-body table td {
+  padding: 12px;
+  font-size: 11px;
+  line-height: 1.55;
+}
+.tt-learning-room .tt-tab-panel table tbody tr:nth-child(odd) td,
+.preview-body table tbody tr:nth-child(odd) td {
+  background: #f3f0e6;
+}
+.tt-learning-room .tt-tab-panel table tbody tr:nth-child(even) td,
+.preview-body table tbody tr:nth-child(even) td {
+  background: #e8eee4;
+}
+.tt-learning-room .tt-tab-panel table tbody td:first-child,
+.preview-body table tbody td:first-child {
+  color: #264632;
+  font-weight: 800;
+}
+.tt-learning-room .tt-tab-panel table th[align="center"],
+.tt-learning-room .tt-tab-panel table td[align="center"],
+.preview-body table th[align="center"],
+.preview-body table td[align="center"] {
+  text-align: center;
+}
+.tt-learning-room .tt-tab-panel table th[align="right"],
+.tt-learning-room .tt-tab-panel table td[align="right"],
+.preview-body table th[align="right"],
+.preview-body table td[align="right"] {
+  text-align: right;
+}
+.tt-learning-room .tt-tab-panel .lesson-table-wrap table p,
+.preview-body .lesson-table-wrap table p {
+  margin: 0;
+}
+/* Accessible table captions stay available to assistive technology but have no visible strip. */
+.tt-learning-room .tt-tab-panel table.tt-structured-table caption.tt-structured-table-caption,
+.preview-body table.tt-structured-table caption.tt-structured-table-caption {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  background: transparent !important;
 }
