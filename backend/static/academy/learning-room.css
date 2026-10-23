@@ -1925,3 +1925,19 @@
   border: 0 !important;
   background: transparent !important;
 }
+
+
+/* Design 06 fidelity fix: beat legacy structured-table header rules.
+   These values match the approved Alternating Field Notes gallery exactly. */
+.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table thead tr:last-child th,
+.tt-learning-room .tt-tab-panel .lesson-table-wrap.tt-structured-table-wrap .tt-structured-table thead tr:first-child th[colspan] {
+  padding: 11px 12px;
+  background: #345943;
+  color: #fffdf8;
+  border: 0;
+  border-bottom: 2px solid #b48635;
+  font-size: 11px;
+  line-height: 1.55;
+  font-weight: 800;
+  letter-spacing: normal;
+}
