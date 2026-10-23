@@ -99,29 +99,58 @@ class BotConfigAdmin(admin.ModelAdmin):
         return redirect(request.META.get('HTTP_REFERER', '../'))
 
     def set_webhook(self, request):
-        """Set Telegram webhook."""
+        """Configure the native Telegram webhook after a CSRF-protected POST."""
+        from django.conf import settings
+        from django.template.response import TemplateResponse
+
         config = BotConfig.get_config()
-        if not config.telegram_bot_token:
-            self.message_user(request, "❌ Bot token not set.", level='ERROR')
-            return redirect(request.META.get('HTTP_REFERER', '../'))
-
-        webhook_url = config.telegram_webhook_url
+        webhook_url = (config.telegram_webhook_url or "").strip()
         if not webhook_url:
-            from django.conf import settings
-            site_url = getattr(settings, 'SITE_URL', None)
+            site_url = (getattr(settings, "SITE_BASE_URL", "") or "").strip().rstrip("/")
             if site_url:
-                webhook_url = f"{site_url.rstrip('/')}/bot/telegram/webhook/"
-            else:
-                self.message_user(request, "❌ No webhook URL configured and SITE_URL not set.", level='ERROR')
-                return redirect(request.META.get('HTTP_REFERER', '../'))
+                webhook_url = f"{site_url}/bot/telegram/webhook/"
 
-        success = TelegramBotService.set_webhook(webhook_url)
-        if success:
-            self.message_user(request, f"✅ Webhook set to {webhook_url}", level='SUCCESS')
+        if request.method != "POST":
+            return TemplateResponse(
+                request,
+                "admin/bot_integration/set_telegram_webhook_confirm.html",
+                {
+                    **self.admin_site.each_context(request),
+                    "opts": self.model._meta,
+                    "title": "Set Telegram webhook",
+                    "webhook_url": webhook_url,
+                    "secret_configured": bool(
+                        getattr(settings, "TELEGRAM_WEBHOOK_SECRET", "")
+                    ),
+                    "token_configured": bool(config.telegram_bot_token),
+                },
+            )
+
+        if not config.telegram_bot_token:
+            self.message_user(request, "❌ Bot token not set.", level="ERROR")
+        elif not webhook_url:
+            self.message_user(
+                request, "❌ No webhook URL configured and SITE_BASE_URL is not set.",
+                level="ERROR",
+            )
+        elif not getattr(settings, "TELEGRAM_WEBHOOK_SECRET", ""):
+            self.message_user(
+                request, "❌ TELEGRAM_WEBHOOK_SECRET is missing from the hosting environment.",
+                level="ERROR",
+            )
+        elif TelegramBotService.set_webhook(webhook_url):
+            self.message_user(
+                request, f"✅ Native Telegram webhook set to {webhook_url}",
+                level="SUCCESS",
+            )
         else:
-            self.message_user(request, "❌ Failed to set webhook. Check token and internet.", level='ERROR')
+            self.message_user(
+                request,
+                "❌ Telegram rejected the webhook. Check the HTTPS URL, token and TELEGRAM_WEBHOOK_SECRET format.",
+                level="ERROR",
+            )
+        return redirect(request.META.get("HTTP_REFERER", "../"))
 
-        return redirect(request.META.get('HTTP_REFERER', '../'))
 
 
 @admin.register(TelegramAccount)

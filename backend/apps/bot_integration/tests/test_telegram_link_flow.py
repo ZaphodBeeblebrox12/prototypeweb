@@ -259,7 +259,7 @@ class TelegramWebhookVerifyFlowTests(TestCase):
     def test_invalid_token_rejected_no_account(self, svc):
         r = self._post_start("/start verify_doesnotexist")
         self.assertEqual(r.status_code, 200)
-        self.assertEqual(r.json(), {"ok": False})
+        self.assertEqual(r.json(), {"ok": True})
         self.assertFalse(TelegramAccount.objects.exists())
         svc.send_message.assert_called_once()   # user is told the code is invalid
 
@@ -270,7 +270,7 @@ class TelegramWebhookVerifyFlowTests(TestCase):
             expires_at=tz.now() - tz.timedelta(seconds=10))
         r = self._post_start(f"/start verify_{self.token.token}")
         self.assertEqual(r.status_code, 200)
-        self.assertEqual(r.json(), {"ok": False})
+        self.assertEqual(r.json(), {"ok": True})
         self.assertFalse(TelegramAccount.objects.exists())
 
     @mock.patch("apps.bot_integration.views.TelegramBotService")

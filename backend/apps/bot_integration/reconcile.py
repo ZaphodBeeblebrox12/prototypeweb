@@ -35,28 +35,22 @@ def _audit(user_id, action, platform, target, success, error_message=""):
 
 
 def reconcile_user_access(user_id):
+    """Compatibility entry point routed through durable direct-Telegram provisioning."""
     lock_key = f"bot_integration:reconcile:{user_id}"
     if not cache.add(lock_key, True, LOCK_TTL):
-        return  # another reconcile in flight; it sees fresh state
+        return
     try:
-        target = compute_target_access(user_id)
-
-        tg = TelegramAccount.objects.filter(user_id=user_id, is_active=True).first()
-        if tg:
-            _reconcile_telegram(user_id, tg, target)
-
-        dc = DiscordAccount.objects.filter(user_id=user_id, is_active=True).first()
-        if dc and not _reconcile_discord(user_id, dc, target):
-            # Keep the older synchronous entry point honest too: it must not
-            # swallow a Discord API failure just because the durable worker is
-            # the preferred path.
-            from apps.jobs.enqueue import enqueue_reconcile
-            try:
-                enqueue_reconcile(user_id, reason="discord_direct_reconcile_retry")
-            except Exception:
-                logger.exception("could not queue retry for Discord reconciliation user=%s", user_id)
-            return False
+        from .reconcile_jobs import run_user_reconcile
+        run_user_reconcile(user_id)
         return True
+    except Exception:
+        logger.exception("direct access reconciliation failed for user=%s", user_id)
+        from apps.jobs.enqueue import enqueue_reconcile
+        try:
+            enqueue_reconcile(user_id, reason="direct_reconcile_retry")
+        except Exception:
+            logger.exception("could not queue retry for user=%s", user_id)
+        return False
     finally:
         cache.delete(lock_key)
 
@@ -85,7 +79,6 @@ def _reconcile_telegram(user_id, account, target):
 # Discord roles are reconciled from live guild state in _reconcile_discord below.
 
 from django.conf import settings as _settings
-from .services.provision_client import ProvisionClient
 
 
 def _control_channel_guard(channel_id):
@@ -127,18 +120,26 @@ def _tg_grant(user_id, account, target, channel_id):
     if guard:
         _audit(user_id, "grant", "telegram", channel_id, False, guard)
         return
-    result = ProvisionClient().grant(tg_id, channel_id)
-    if result.ok:
+    from .reconcile_jobs import ProvisionTransport
+    transport = ProvisionTransport()
+    invite_link = transport.create_invite_link(tg_id, channel_id)
+    if not invite_link:
+        error = "Telegram could not unban the user or create an invite link."
+        _audit(user_id, "grant", "telegram", channel_id, False, error)
+        _tg_notify_grant(account, channel_id, False, error)
+        return
+    delivered = transport.send_invite_dm(tg_id, channel_id, invite_link)
+    if delivered is True:
         UserChannelAssignment.objects.get_or_create(
             user_id=user_id, platform="telegram", external_id=channel_id,
             defaults={"is_active": True})
         _audit(user_id, "grant", "telegram", channel_id, True, "")
         _tg_notify_grant(account, channel_id, True)
     else:
-        _audit(user_id, "grant", "telegram", channel_id, False,
-               f"{result.error_code}: {result.error_message}"[:500])
-        _tg_notify_grant(account, channel_id, False,
-                         result.error_message or result.error_code or "")
+        error = ("Telegram DM delivery outcome is unknown."
+                 if delivered is None else "Telegram rejected the invite DM.")
+        _audit(user_id, "grant", "telegram", channel_id, False, error)
+        _tg_notify_grant(account, channel_id, False, error)
 
 
 def _tg_revoke(user_id, account, channel_id):
@@ -150,15 +151,21 @@ def _tg_revoke(user_id, account, channel_id):
     if guard:
         _audit(user_id, "revoke", "telegram", channel_id, False, guard)
         return
-    result = ProvisionClient().revoke(account.telegram_user_id, channel_id)
-    if result.ok:
+    from .reconcile_jobs import ProvisionTransport
+    transport = ProvisionTransport()
+    result = transport.revoke(account.telegram_user_id, channel_id)
+    member = transport.is_member(account.telegram_user_id, channel_id) if result.ok else None
+    if result.ok and member is False:
         UserChannelAssignment.objects.filter(
             user_id=user_id, platform="telegram", external_id=channel_id,
             is_active=True).update(is_active=False, revoked_at=timezone.now())
         _audit(user_id, "revoke", "telegram", channel_id, True, "")
     else:
-        _audit(user_id, "revoke", "telegram", channel_id, False,
-               f"{result.error_code}: {result.error_message}"[:500])
+        error = result.error_message or (
+            "Telegram accepted the ban, but membership could not be verified."
+            if result.ok else "Telegram rejected the revoke."
+        )
+        _audit(user_id, "revoke", "telegram", channel_id, False, error[:500])
 
 
 def _reconcile_discord(user_id, account, target):

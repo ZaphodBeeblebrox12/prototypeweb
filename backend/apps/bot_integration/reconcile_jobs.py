@@ -8,6 +8,7 @@ ProvisioningOperation row; retries reuse its id/link; a NEW lifecycle
 
 import logging
 from datetime import timedelta
+from types import SimpleNamespace
 
 from django.db.models import Q
 
@@ -27,55 +28,66 @@ INVITE_RESEND_THROTTLE = timedelta(hours=6)
 
 
 class ProvisionTransport:
-    """Transport adapter over the existing ProvisionClient."""
+    """Direct Telegram Bot API transport using the singleton BotConfig token.
+
+    Invite creation and invite delivery are separate so a URL can be persisted
+    to ProvisioningOperation before a DM attempt is made.
+    """
 
     def __init__(self, client=None):
-        from apps.bot_integration.services.provision_client import ProvisionClient
-        self.client = client or ProvisionClient()
+        from apps.bot_integration.services.telegram import TelegramBotService
+        self.client = client or TelegramBotService
+
+    @staticmethod
+    def _retryable(error_message):
+        message = (error_message or "").lower()
+        return any(term in message for term in (
+            "timeout", "network", "rate limit", "429", "500", "502",
+            "503", "504", "temporarily unavailable",
+        ))
 
     def create_invite_link(self, telegram_user_id, channel_id,
                            idempotency_key=None):
-        # The provision API mints the link as part of grant; we surface the
-        # outcome via grant's detail.  Simplified: grant performs the whole
-        # Telegram side; here we drive the state machine with the client.
-        # idempotency_key is the ProvisioningOperation.provision_key: each
-        # NEW grant lifecycle must actually reach the bot's do_grant (which
-        # unbans).  The bridge caches grant results by this key for 24h, so
-        # a static per-user/channel key would return a cached already_applied
-        # and silently skip the unban.
-        res = self.client.grant(telegram_user_id, channel_id,
-                                idempotency_key=idempotency_key)
-        if res.ok:
-            return (res.detail or {}).get("invite_link", "")
-        return None
+        # A re-grant lifts a previous ban before minting a fresh one-use link.
+        if not telegram_user_id:
+            return None
+        ok, error = self.client.unban_user(channel_id, telegram_user_id)
+        if not ok:
+            logger.warning("Telegram unban failed for channel %s: %s",
+                           channel_id, error)
+            return None
+        return self.client.create_one_time_invite_link(channel_id)
 
     def send_invite_dm(self, telegram_user_id, channel_id, invite_link):
-        # Initial grants DM the link server-side inside do_grant; this method
-        # is the DELIVERY path for recovery resends (and SEND/UNKNOWN retries)
-        # of a PERSISTED invite link: it must actually reach the user through
-        # the bot's existing contract DM path.  A failure here is a failure
-        # to send -- never report success without the bot accepting it.
-        res = self.client.resend_invite(telegram_user_id, channel_id,
-                                        invite_link)
-        return bool(res.ok)
+        # Telegram sendMessage has no idempotency key; never report an
+        # indeterminate result as successful delivery.
+        result = self.client.send_message_result(
+            telegram_user_id,
+            "🔓 Your TradeThesis subscription is active. Join your channel here: "
+            + str(invite_link),
+        )
+        if result.ok:
+            return True
+        if getattr(result, "outcome", "") == "indeterminate":
+            return None
+        return False
 
     def is_member(self, telegram_user_id, channel_id):
-        # True = member; False = definitely not a member; None = membership
-        # could not be determined (transport/Telegram error).  "Unknown" is
-        # NEVER collapsed into "not a member".
-        res = self.client.check_membership(telegram_user_id, channel_id)
-        if res.ok:
-            return bool((res.detail or {}).get("member"))
-        return None
+        return self.client.is_member(channel_id, telegram_user_id)
 
     def revoke(self, telegram_user_id, channel_id, idempotency_key=None):
-        # Must forward the key: without it the bridge falls back to its
-        # static per-user/channel cache key, and a revoke within 24h of any
-        # earlier revoke would return a cached already_applied WITHOUT
-        # executing banChatMember.
-        return self.client.revoke(telegram_user_id, channel_id,
-                                  idempotency_key=idempotency_key)
-
+        if not telegram_user_id:
+            return SimpleNamespace(
+                ok=False, retryable=False, error_code="missing_telegram_user_id",
+                error_message="Missing telegram_user_id",
+            )
+        ok, error = self.client.ban_user(channel_id, telegram_user_id)
+        return SimpleNamespace(
+            ok=ok,
+            retryable=(not ok and self._retryable(error)),
+            error_code="" if ok else "telegram_api_error",
+            error_message="" if ok else (error or "Telegram revoke failed"),
+        )
 
 def _get_or_create_operation(user_id, channel_id, operation, telegram_user_id):
     """Reuse the OPEN operation for this intent; else create a new one."""
