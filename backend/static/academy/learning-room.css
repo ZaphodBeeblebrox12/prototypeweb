@@ -1531,56 +1531,117 @@
   .tt-learning-room .tt-notebook-prompts .tt-notebook-number { margin:0; }
 }
 
-
-/* Visual parity pass 3: match the approved template's editorial scale. */
+/* Visual parity pass 4: restore the canonical lesson type scale and emphasis.
+   The standalone reference uses a 37px editorial heading, 25px subheadings,
+   16px prose, 13px compact lists, and explicit 700-weight inline emphasis. */
 .tt-learning-room .tt-tab-panel {
-  font-size: 13px;
+  font-size: 16px;
   line-height: 1.82;
 }
-.tt-learning-room .tt-tab-panel h1 {
-  font-size: clamp(25px, 2.2vw, 31px);
-  line-height: 1.18;
+.tt-learning-room .tt-tab-panel h1,
+.tt-learning-room .tt-tab-panel h3 {
   margin: 0 0 13px;
-  font-weight: 500;
+  color: #27382e;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(30px, 2.8vw, 37px);
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -.035em;
+}
+.tt-learning-room .tt-tab-panel h2,
+.tt-learning-room .tt-tab-panel h4 {
+  margin: 25px 0 12px;
+  color: #27382e;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 25px;
+  font-weight: 400;
+  line-height: 1.18;
   letter-spacing: -.025em;
 }
-.tt-learning-room .tt-tab-panel h2 {
-  font-size: clamp(23px, 2vw, 28px);
+.tt-learning-room .tt-tab-panel h5,
+.tt-learning-room .tt-tab-panel h6 {
+  margin: 24px 0 8px;
+  color: #27382e;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20px;
+  font-weight: 400;
   line-height: 1.2;
-  margin: 28px 0 9px;
   letter-spacing: -.02em;
-}
-.tt-learning-room .tt-tab-panel h3 {
-  font-size: clamp(20px, 1.65vw, 23px);
-  line-height: 1.25;
-  margin: 28px 0 9px;
-  letter-spacing: -.015em;
 }
 .tt-learning-room .tt-tab-panel .tt-lesson-idea-copy > :first-child { margin-top: 0; }
 .tt-learning-room .tt-tab-panel p {
-  font-size: 13px;
-  line-height: 1.82;
-  margin: 0 0 14px;
+  margin: 9px 0 13px;
+  color: #58665c;
+  font-size: 16px;
+  line-height: 1.88;
+}
+.tt-learning-room .tt-tab-panel p strong,
+.tt-learning-room .tt-tab-panel strong,
+.tt-learning-room .tt-tab-panel b {
+  color: #27382e;
+  font-weight: 700;
 }
 .tt-learning-room .tt-tab-panel ul,
 .tt-learning-room .tt-tab-panel ol {
-  margin: 0 0 20px;
-  padding-left: 22px;
+  margin: 9px 0 16px;
+  padding-left: 24px;
+  color: #58665c;
+  font-size: 13px;
+  line-height: 1.8;
 }
 .tt-learning-room .tt-tab-panel li {
+  margin: 0;
+  padding-left: 0;
   font-size: 13px;
-  line-height: 1.7;
-  margin: 7px 0;
-  padding-left: 4px;
+  line-height: 1.8;
 }
+.tt-learning-room .tt-tab-panel li + li { margin-top: 5px; }
 
-/* Notebook prompt labels sit above their serif questions, like the reference. */
+/* The Notebook follows the approved title/question scale: serif title,
+   small uppercase action label, and a separate question line beneath it. */
+.tt-learning-room .tt-notebook-top h4 {
+  margin: 0 0 8px;
+  color: #fffdf8;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -.025em;
+}
+.tt-learning-room .tt-notebook-intro {
+  font-size: 12px;
+  line-height: 1.6;
+}
+.tt-learning-room .tt-notebook-prompt-copy p {
+  margin: 0;
+  color: #27382e;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.42;
+}
 .tt-learning-room .tt-notebook-prompt-copy strong {
   display: block;
   margin: 0 0 5px;
+  color: #345943;
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.tt-learning-room .tt-notebook-response-editor summary { font-size: 11px; }
+.tt-learning-room .tt-notebook-hint {
+  font-size: 11px;
+  line-height: 1.6;
 }
 @media (max-width: 680px) {
-  .tt-learning-room .tt-tab-panel h1 { font-size: 25px; }
-  .tt-learning-room .tt-tab-panel h2 { font-size: 23px; }
-  .tt-learning-room .tt-tab-panel h3 { font-size: 20px; }
+  .tt-learning-room .tt-tab-panel h1,
+  .tt-learning-room .tt-tab-panel h3 { font-size: 30px; }
+  .tt-learning-room .tt-tab-panel h2,
+  .tt-learning-room .tt-tab-panel h4 { font-size: 23px; }
+  .tt-learning-room .tt-tab-panel h5,
+  .tt-learning-room .tt-tab-panel h6 { font-size: 20px; }
+  .tt-learning-room .tt-tab-panel p { font-size: 15px; }
+  .tt-learning-room .tt-notebook-top h4 { font-size: 25px; }
 }
