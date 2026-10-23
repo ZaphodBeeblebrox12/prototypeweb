@@ -678,16 +678,30 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn('data-tab-panel="idea"', source)
         self.assertIn('data-tab-panel="examples"', source)
         self.assertIn('data-tab-panel="practice"', source)
-        self.assertIn("Before treating a touch as a setup", source)
+        self.assertIn("Your Trading Notebook", source)
         self.assertIn("Where is price relative to the bands and middle line?", source)
         self.assertIn("What would change your view?", source)
-        self.assertIn("<strong>Apply.</strong>", source)
+        self.assertIn('<strong class="tt-notebook-prompt-label">Apply</strong>', source)
 
     def test_notebook_styling_and_chart_tab_action_are_wired(self):
         backend = Path(__file__).resolve().parents[2]
         styles = (backend / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
+        notebook_styles = (backend / "static" / "academy" / "notebook-card.css").read_text(encoding="utf-8")
         script = (backend / "static" / "academy" / "learning-room.js").read_text(encoding="utf-8")
+        lesson_template = (backend / "templates" / "academy" / "lesson.html").read_text(encoding="utf-8")
+        draft_template = (backend / "templates" / "academy" / "course_import_website_preview.html").read_text(encoding="utf-8")
+        tabs_template = (backend / "templates" / "academy" / "partials" / "lesson_tabs.html").read_text(encoding="utf-8")
 
+        self.assertGreater(lesson_template.index("notebook-card.css"), lesson_template.index("admin-lesson-preview.css"))
+        self.assertGreater(draft_template.index("notebook-card.css"), draft_template.index("course-import-preview.css"))
+        self.assertIn("grid-template-columns: minmax(0, 1fr) 245px;", notebook_styles)
+        self.assertIn("font-size: 25px;", notebook_styles)
+        self.assertIn("font-weight: 700;", notebook_styles)
+        self.assertIn("font-size: 12px;", notebook_styles)
+        self.assertIn(".tt-notebook-prompt-label", notebook_styles)
+        self.assertIn("<summary>Write your reflections</summary>", tabs_template)
+        self.assertIn('placeholder="Write a short reflection…" disabled', tabs_template)
+        self.assertIn("data-notebook-response", tabs_template)
         self.assertIn(".tt-learning-room .tt-notebook-index", styles)
         self.assertIn(".tt-learning-room .learning-content-grid", styles)
         self.assertIn(".tt-learning-room .lesson-content-column", styles)
@@ -723,7 +737,7 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn('font-family: Georgia, "Times New Roman", serif;', preview_styles)
         self.assertIn(".rich-editor-canvas h2 { font-size:clamp(29px,2.8vw,37px); font-weight:400; line-height:1.13; letter-spacing:-.04em; margin:0 0 16px; }", builder_source)
         self.assertIn("display: block;", lesson_styles)
-        self.assertIn("{% else %}Your Trading Notebook{% endif %}", tabs_template)
+        self.assertIn('{{ notebook.title|default:"Your Trading Notebook" }}', tabs_template)
         self.assertIn("{% if notebook.prompts %}", tabs_template)
         self.assertIn('<details class="tt-notebook-response-editor">', tabs_template)
         self.assertIn("<summary>Write your reflections</summary>", tabs_template)
@@ -731,8 +745,9 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn("This design preview does not submit or store them.", tabs_template)
         self.assertIn('placeholder="Write a short reflection…" disabled', tabs_template)
         self.assertIn("data-notebook-response", tabs_template)
-        self.assertIn("Before treating a touch as a setup", tabs_template)
-        self.assertIn('<div class="tt-notebook-prompt-copy"><p><strong>Describe.</strong>', tabs_template)
+        self.assertIn("Your Trading Notebook", tabs_template)
+        self.assertIn('<strong class="tt-notebook-prompt-label">Describe</strong>', tabs_template)
+        self.assertIn('<p>What evidence is visible?</p>', tabs_template)
 
     def test_builder_learner_preview_uses_the_saved_academy_website_template(self):
         builder = Path(__file__).resolve().parent / "course_builder_preview.html"
@@ -882,7 +897,7 @@ class TemplateParityRegressionTests(SimpleTestCase):
             "understand-bollinger-bands",
             {"title": "Your Trading Notebook", "prompts": []},
         )
-        self.assertEqual(notebook["title"], "Before treating a touch as a setup")
+        self.assertEqual(notebook["title"], "Your Trading Notebook")
         self.assertIn("bands", " ".join(item["text"] for item in notebook["prompts"]).lower())
         self.assertEqual(notebook["prompts"][2]["label"], "Apply")
 

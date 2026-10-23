@@ -88,7 +88,7 @@
       <div class="tt-notebook-content">
         <div class="tt-notebook-top">
         <div class="tt-notebook-kicker">PAUSE AND RECORD</div>
-        <h4>{% if notebook.title and notebook.title != "Your Trading Notebook" and notebook.title != "Before you make the call" %}{{ notebook.title }}{% elif course_slug == "understand-bollinger-bands" %}Before treating a touch as a setup{% else %}Your Trading Notebook{% endif %}</h4>
+        <h4>{{ notebook.title|default:"Your Trading Notebook" }}</h4>
         <p class="tt-notebook-intro">Make the reading conditional. Keep what you saw separate from what you think it means.</p>
       </div>
         <div class="tt-notebook-prompts">
@@ -97,20 +97,23 @@
           {% for prompt in notebook.prompts %}
           <li>
             <span class="tt-notebook-number">{{ forloop.counter|stringformat:"02d" }}</span>
-            <div class="tt-notebook-prompt-copy"><p><strong>{{ prompt.label|default:"Describe"|cut:"." }}.</strong> {{ prompt.text }}</p></div>
+            <div class="tt-notebook-prompt-copy">
+              <strong class="tt-notebook-prompt-label">{{ prompt.label|default:"Describe"|cut:"." }}</strong>
+              <p>{{ prompt.text }}</p>
+            </div>
           </li>
           {% endfor %}
         </ol>
         {% else %}
         <ol>
           {% if course_slug == "understand-bollinger-bands" %}
-          <li><span class="tt-notebook-number">01</span><div class="tt-notebook-prompt-copy"><p><strong>Describe.</strong> Where is price relative to the bands and middle line?</p></div></li>
-          <li><span class="tt-notebook-number">02</span><div class="tt-notebook-prompt-copy"><p><strong>Interpret.</strong> Does the structure look like a range, a trend or a transition? What is your alternative explanation?</p></div></li>
-          <li><span class="tt-notebook-number">03</span><div class="tt-notebook-prompt-copy"><p><strong>Apply.</strong> What would change your view?</p></div></li>
+          <li><span class="tt-notebook-number">01</span><div class="tt-notebook-prompt-copy"><strong class="tt-notebook-prompt-label">Describe</strong><p>Where is price relative to the bands and middle line?</p></div></li>
+          <li><span class="tt-notebook-number">02</span><div class="tt-notebook-prompt-copy"><strong class="tt-notebook-prompt-label">Interpret</strong><p>Does the structure look like a range, a trend or a transition? What is your alternative explanation?</p></div></li>
+          <li><span class="tt-notebook-number">03</span><div class="tt-notebook-prompt-copy"><strong class="tt-notebook-prompt-label">Apply</strong><p>What would change your view?</p></div></li>
           {% else %}
-          <li><span class="tt-notebook-number">01</span><div class="tt-notebook-prompt-copy"><p><strong>Describe.</strong> What evidence is visible?</p></div></li>
-          <li><span class="tt-notebook-number">02</span><div class="tt-notebook-prompt-copy"><p><strong>Interpret.</strong> What could it mean in context?</p></div></li>
-          <li><span class="tt-notebook-number">03</span><div class="tt-notebook-prompt-copy"><p><strong>Apply.</strong> What would change your view?</p></div></li>
+          <li><span class="tt-notebook-number">01</span><div class="tt-notebook-prompt-copy"><strong class="tt-notebook-prompt-label">Describe</strong><p>What evidence is visible?</p></div></li>
+          <li><span class="tt-notebook-number">02</span><div class="tt-notebook-prompt-copy"><strong class="tt-notebook-prompt-label">Interpret</strong><p>What could it mean in context?</p></div></li>
+          <li><span class="tt-notebook-number">03</span><div class="tt-notebook-prompt-copy"><strong class="tt-notebook-prompt-label">Apply</strong><p>What would change your view?</p></div></li>
           {% endif %}
         </ol>
         {% endif %}

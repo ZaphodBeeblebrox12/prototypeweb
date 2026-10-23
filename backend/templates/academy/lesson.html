@@ -7,7 +7,7 @@
 {% endblock %}
 {% load static %}
 {% block title %}{{ lesson.title }} · {{ course.title }}{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'academy/learning-room.css' %}"><link rel="stylesheet" href="{% static 'academy/lesson-references.css' %}">{% if admin_preview %}<link rel="stylesheet" href="{% static 'academy/admin-lesson-preview.css' %}">{% endif %}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'academy/learning-room.css' %}"><link rel="stylesheet" href="{% static 'academy/lesson-references.css' %}">{% if admin_preview %}<link rel="stylesheet" href="{% static 'academy/admin-lesson-preview.css' %}">{% endif %}<link rel="stylesheet" href="{% static 'academy/notebook-card.css' %}">{% endblock %}
 {% block content %}
 <div class="tt-learning-room{% if admin_preview %} tt-admin-lesson-preview{% endif %}">
   {% if admin_preview %}<aside class="tt-admin-lesson-preview-banner" role="status"><strong>ADMIN PREVIEW · LOCKED ACCESS BYPASSED FOR REVIEW ONLY</strong><span>This read-only view does not unlock the lesson for learners, save progress, or submit notebook and quiz responses.</span><a href="{% url 'academy:course-detail' course.slug %}">Back to course overview ↗</a></aside>{% endif %}

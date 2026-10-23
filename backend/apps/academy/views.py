@@ -149,7 +149,9 @@ def _practice_questions_with_images(questions, asset_urls, figure_metadata):
 def _notebook_for_course_display(course_slug, notebook):
     """Return topic-appropriate prompts; only the Bollinger course gets Bollinger-specific copy."""
     result = deepcopy(notebook) if isinstance(notebook, dict) else {}
-    default_title_values = {"", "Your Trading Notebook"}
+    default_title_values = {
+        "", "Your Trading Notebook", "Before you make the call", "Before treating a touch as a setup",
+    }
     default_prompts = [
         {"label": "Describe", "text": "What evidence is visible?"},
         {"label": "Interpret", "text": "What could it mean in context?"},
@@ -196,11 +198,11 @@ def _notebook_for_course_display(course_slug, notebook):
 
     title = str(result.get("title") or "").strip()
     if title in default_title_values:
-        result["title"] = "Before you make the call"
+        result["title"] = "Your Trading Notebook"
+    else:
+        result["title"] = title
 
     if course_slug == "understand-bollinger-bands":
-        if title in default_title_values or title == "Before you make the call":
-            result["title"] = "Before treating a touch as a setup"
         if matches_generic_defaults:
             result["prompts"] = [
                 {"label": "Describe", "text": "Where is price relative to the bands and middle line?"},
