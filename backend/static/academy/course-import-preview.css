@@ -214,8 +214,3 @@
   .tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel h5 { font-size: 16px; }
 }
 
-/* Match the approved reference: the shared header must not stick over the
-   course outline on this administrator-only website preview. */
-body:has(.main-content > .tt-admin-course-preview) .sitewide-header {
-  position: relative;
-}
