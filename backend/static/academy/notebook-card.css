@@ -248,13 +248,40 @@
   }
 }
 @media (max-width: 680px) {
+  /* Option A: keep all three reflection cards on one row on phone screens. */
   .tt-learning-room .tt-mobile-pause-cards,
   .tt-admin-course-preview .tt-admin-learning-preview .tt-mobile-pause-cards {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
   }
   .tt-learning-room .tt-mobile-pause-card,
   .tt-admin-course-preview .tt-admin-learning-preview .tt-mobile-pause-card {
-    padding: 15px 14px;
+    padding: 10px 8px;
+    border-radius: 6px;
+  }
+  .tt-learning-room .tt-mobile-pause-card .tt-mobile-pause-step,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-mobile-pause-card .tt-mobile-pause-step {
+    font-size: 7px;
+    letter-spacing: .025em;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+  .tt-learning-room .tt-mobile-pause-card h3,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-mobile-pause-card h3 {
+    margin: 6px 0 4px;
+    font-size: 12px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+  .tt-learning-room .tt-mobile-pause-card .tt-mobile-pause-question,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-mobile-pause-card .tt-mobile-pause-question {
+    margin: 0 0 7px;
+    font-size: 13px;
+    line-height: 1.3;
+  }
+  .tt-learning-room .tt-mobile-pause-card .tt-mobile-pause-guidance,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-mobile-pause-card .tt-mobile-pause-guidance {
+    font-size: 10px;
+    line-height: 1.45;
   }
 }
