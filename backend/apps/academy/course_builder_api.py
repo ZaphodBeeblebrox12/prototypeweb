@@ -559,7 +559,7 @@ def _build_import_payload(course_state, course_slug):
                             colspan = int(cell.get("colspan", 1))
                             rowspan = int(cell.get("rowspan", 1))
                         except (TypeError, ValueError):
-                            raise ValidationError(f"{title}: table cell spans must be whole numbers.")
+                            raise ValidationError(f"{title}: table cell spans must be whole numbers.") from None
                         if not 1 <= colspan <= 12 or not 1 <= rowspan <= 12:
                             raise ValidationError(f"{title}: table cell spans must be between 1 and 12.")
                         row_width += colspan
