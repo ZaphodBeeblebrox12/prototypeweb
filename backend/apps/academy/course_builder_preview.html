@@ -1168,6 +1168,20 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   letter-spacing: normal;
 }
 
+/* Design 06 live-page selector fix: target unwrapped structured tables too. */
+.preview-body .tt-structured-table thead tr:last-child th,
+.preview-body .tt-structured-table thead tr:first-child th[colspan] {
+  padding: 11px 12px;
+  color: #fffdf8;
+  background: #345943;
+  border: 0;
+  border-bottom: 2px solid #b48635;
+  font-size: 10px;
+  line-height: 1.4;
+  font-weight: 800;
+  letter-spacing: normal;
+}
+
 </style>
 </head>
 <body>

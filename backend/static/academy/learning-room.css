@@ -1941,3 +1941,19 @@
   font-weight: 800;
   letter-spacing: normal;
 }
+
+/* Design 06 live-page selector fix: target the table class directly.
+   Some lesson HTML has .tt-structured-table without .tt-structured-table-wrap
+   on its parent, so wrapper-qualified rules do not match its header. */
+.tt-learning-room .tt-tab-panel .tt-structured-table thead tr:last-child th,
+.tt-learning-room .tt-tab-panel .tt-structured-table thead tr:first-child th[colspan] {
+  padding: 11px 12px;
+  color: #fffdf8;
+  background: #345943;
+  border: 0;
+  border-bottom: 2px solid #b48635;
+  font-size: 10px;
+  line-height: 1.4;
+  font-weight: 800;
+  letter-spacing: normal;
+}
