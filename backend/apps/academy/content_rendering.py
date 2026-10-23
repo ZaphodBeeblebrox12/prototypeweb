@@ -582,7 +582,11 @@ def render_safe_markdown(
             return '<span class="tt-purpose-figure-missing" role="status">Choose one to four images to complete this chart group.</span>'
         raw_group_number = image_group_numbers.get(group_id)
         try:
-            group_number = int(raw_group_number) if raw_group_number is not None else group_numbers.get(group_id, 1)
+            group_number = (
+                int(raw_group_number)
+                if raw_group_number is not None
+                else group_numbers.get(group_id, 1)
+            )
         except (TypeError, ValueError):
             group_number = group_numbers.get(group_id, 1)
         if group_number < 1:
