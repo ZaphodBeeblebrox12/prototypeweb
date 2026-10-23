@@ -773,8 +773,13 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .rich-editor-canvas-main { min-height:390px; }
 .rich-editor-canvas:focus { box-shadow:inset 0 0 0 2px #87A48B; }
 .rich-editor-canvas:empty::before { content:attr(data-placeholder); color:var(--muted); pointer-events:none; }
-.rich-editor-canvas h1,.rich-editor-canvas h2,.rich-editor-canvas h3,.rich-editor-canvas h4,.rich-editor-canvas h5,.rich-editor-canvas h6 { color:var(--site-primary); font-family:var(--site-font-heading); font-weight:500; line-height:1.2; }
-.rich-editor-canvas h1 { font-size:2em; }.rich-editor-canvas h2 { font-size:1.7em; }.rich-editor-canvas h3 { font-size:1.45em; }
+.rich-editor-canvas h1,.rich-editor-canvas h2,.rich-editor-canvas h3,.rich-editor-canvas h4,.rich-editor-canvas h5,.rich-editor-canvas h6 { color:var(--site-primary); font-family:var(--site-font-heading); line-height:1.2; margin:18px 0 8px; }
+.rich-editor-canvas h1 { font-size:37px; font-weight:700; line-height:1.12; }
+.rich-editor-canvas h2 { font-size:22px; font-weight:400; line-height:1.2; }
+.rich-editor-canvas h3 { font-size:27px; font-weight:400; line-height:1.12; letter-spacing:-.035em; }
+.rich-editor-canvas h4 { font-size:20px; font-weight:400; line-height:1.35; letter-spacing:-.02em; }
+.rich-editor-canvas h5 { font-size:16px; font-weight:700; line-height:1.3; }
+.rich-editor-canvas h6 { font-family:var(--site-font-body); font-size:13px; font-weight:800; line-height:1.4; letter-spacing:.09em; text-transform:uppercase; }
 .rich-editor-canvas blockquote { margin:14px 0; padding:10px 15px; border-left:3px solid var(--site-secondary); background:var(--panel-soft); }
 .rich-editor-canvas table { width:100%; border-collapse:collapse; margin:12px 0; }
 .rich-editor-canvas th,.rich-editor-canvas td { border:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top; }
@@ -1363,12 +1368,12 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   function richFormatPickerMarkup() {
     const choices = [
       ['p', 'Paragraph'],
-      ['h1', 'Heading 1'],
-      ['h2', 'Heading 2'],
-      ['h3', 'Heading 3'],
-      ['h4', 'Heading 4'],
-      ['h5', 'Heading 5'],
-      ['h6', 'Heading 6'],
+      ['h1', 'Heading 1 (Display)'],
+      ['h2', 'Heading 2 (Section)'],
+      ['h3', 'Heading 3 (Editorial serif)'],
+      ['h4', 'Heading 4 (Serif subheading)'],
+      ['h5', 'Heading 5 (Minor heading)'],
+      ['h6', 'Heading 6 (Eyebrow)'],
       ['blockquote', 'Quote']
     ];
     return '<div class="rich-format-picker" data-rich-format-picker>' +
@@ -1453,6 +1458,23 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     selection.removeAllRanges();
     selection.addRange(range);
   }
+  function syncRichFormatPickerFromSelection(editor, selection) {
+    if (!editor || !selection) return;
+    const node = selection.anchorNode;
+    const anchor = node && node.nodeType === 1 ? node : node?.parentElement;
+    const block = anchor?.closest?.('p,h1,h2,h3,h4,h5,h6,blockquote');
+    if (!block || !editor.contains(block)) return;
+    const tag = block.tagName.toLowerCase();
+    const picker = editor.closest('[data-rich-editor-wrapper]')?.querySelector('[data-rich-format-picker]');
+    if (!picker) return;
+    const option = picker.querySelector('[data-rich-format-option="' + tag + '"]');
+    if (!option) return;
+    picker.querySelectorAll('[data-rich-format-option]').forEach(item => {
+      item.setAttribute('aria-selected', item === option ? 'true' : 'false');
+    });
+    const label = picker.querySelector('[data-rich-format-label]');
+    if (label) label.textContent = option.textContent.trim();
+  }
   function captureRichEditorRange() {
     const selection = window.getSelection();
     if (!selection || !selection.rangeCount) return;
@@ -1463,6 +1485,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
     // Keep the live insertion point cheaply. Do not clone and serialise the text before
     // the caret on every selectionchange; that work grows with lesson length.
     richEditorRange = {editor,range:range.cloneRange(),lessonId:currentLesson()?.id || null};
+    syncRichFormatPickerFromSelection(editor, selection);
   }
   function rememberRichEditorCaretOffset() {
     const saved = richEditorRange;
