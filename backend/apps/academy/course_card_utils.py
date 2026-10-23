@@ -1,4 +1,4 @@
-"""Shared eligibility and compact-copy helpers for related course cards."""
+"""Shared eligibility and compact-copy helpers for inline related-course cards."""
 import re
 
 _PLACEHOLDER_TITLES = {

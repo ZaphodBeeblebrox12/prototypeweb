@@ -165,7 +165,7 @@ def _resolve_lesson_references(source, user=None, admin_preview=False):
 
 
 def _resolve_course_cards(source):
-    """Resolve stable course-card references into the approved Option 4 mini preview."""
+    """Resolve stable course-card references into the approved compact inline course preview."""
     from html import escape
 
     references = []
