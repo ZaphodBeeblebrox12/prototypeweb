@@ -206,6 +206,8 @@ def _notebook_for_course_display(course_slug, notebook):
                 {"label": "Interpret", "text": "Does the structure look like a range, a trend or a transition? What is your alternative explanation?"},
                 {"label": "Apply", "text": "What would change your view?"},
             ]
+    elif matches_generic_defaults:
+        result["prompts"] = deepcopy(default_prompts)
     return result
 
 

@@ -901,7 +901,58 @@ def _builder_state_from_published_course(course):
                 ), public_questions[index - 1] if index <= len(public_questions) else {})
                 row["imageId"] = str(public_match.get("image_asset_id") or row.get("imageId") or "") if isinstance(public_match, dict) else str(row.get("imageId") or "")
                 normalized_questions.append(row)
-            notebook = content_json.get("notebook") if isinstance(content_json.get("notebook"), dict) else {}
+            notebook = deepcopy(content_json.get("notebook")) if isinstance(content_json.get("notebook"), dict) else {}
+            raw_prompts = notebook.get("prompts") if isinstance(notebook.get("prompts"), list) else []
+            generic_prompts = [
+                {"label": "Describe", "text": "What evidence is visible?"},
+                {"label": "Interpret", "text": "What could it mean in context?"},
+                {"label": "Apply", "text": "What would change your view?"},
+            ]
+            bollinger_prompts = [
+                {"label": "Describe", "text": "Where is price relative to the bands and middle line?"},
+                {
+                    "label": "Interpret",
+                    "text": (
+                        "Does the structure look like a range, a trend or a transition? "
+                        "What is your alternative explanation?"
+                    ),
+                },
+                {"label": "Apply", "text": "What would change your view?"},
+            ]
+            legacy_prompt_sets = [
+                [
+                    {"label": "Observe", "text": "Describe the evidence visible in the chart."},
+                    {"label": "Interpret", "text": "State one possible reading and a reasonable alternative."},
+                    {"label": "Test", "text": "Name the next evidence that would strengthen or weaken your reading."},
+                ],
+                [
+                    {"label": "Observe", "text": "Describe the evidence you can directly observe."},
+                    {"label": "Interpret", "text": "State one possible reading and a reasonable alternative."},
+                    {"label": "Test", "text": "Name the next evidence that would strengthen or weaken your reading."},
+                ],
+                [
+                    {"label": "Describe", "text": "Where is price relative to the bands and middle line?"},
+                    {
+                        "label": "Interpret",
+                        "text": (
+                            "Does the structure look like a range, a trend or a transition? "
+                            "What is your alternative explanation?"
+                        ),
+                    },
+                    {"label": "Test", "text": "What future price behaviour would strengthen or weaken your view?"},
+                ],
+            ]
+            if (
+                not raw_prompts
+                or any(raw_prompts == legacy for legacy in legacy_prompt_sets)
+                or raw_prompts == generic_prompts
+                or raw_prompts == bollinger_prompts
+            ):
+                notebook["prompts"] = (
+                    bollinger_prompts
+                    if course.slug == "understand-bollinger-bands"
+                    else generic_prompts
+                )
             tables = deepcopy(content_json.get("tables", {})) if isinstance(content_json.get("tables"), dict) else {}
             lessons.append({
                 "id": str(lesson.pk), "title": lesson.title, "summary": lesson.summary,

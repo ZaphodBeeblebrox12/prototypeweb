@@ -729,6 +729,18 @@ class TemplateParityRegressionTests(SimpleTestCase):
         self.assertEqual(notebook["prompts"][0]["text"], "What evidence is visible?")
         self.assertNotIn("bands", " ".join(item["text"] for item in notebook["prompts"]).lower())
 
+    def test_legacy_generic_notebook_prompts_migrate_to_describe_apply(self):
+        notebook = _notebook_for_course_display(
+            "support-resistance",
+            {"title": "Your Trading Notebook", "prompts": [
+                {"label": "Observe", "text": "Describe the evidence visible in the chart."},
+                {"label": "Interpret", "text": "State one possible reading and a reasonable alternative."},
+                {"label": "Test", "text": "Name the next evidence that would strengthen or weaken your reading."},
+            ]},
+        )
+        self.assertEqual(notebook["prompts"][0]["label"], "Describe")
+        self.assertEqual(notebook["prompts"][2]["label"], "Apply")
+
     def test_bollinger_default_notebook_retains_course_specific_prompts(self):
         notebook = _notebook_for_course_display(
             "understand-bollinger-bands",
