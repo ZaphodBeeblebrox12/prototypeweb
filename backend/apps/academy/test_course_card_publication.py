@@ -256,7 +256,7 @@ class OptionFourCardParityTests(SimpleTestCase):
         self.assertIn("max-width: 560px", learner_css)
         self.assertIn("grid-template-columns: 68px minmax(0, 1fr)", learner_css)
         self.assertIn("grid-template-columns: 72px minmax(0, 1fr)", learner_css)
-        self.assertIn("-webkit-line-clamp:2", learner_css)
+        self.assertIn("-webkit-line-clamp: 2;", learner_css)
         self.assertIn("tt-course-preview-card__topics", learner_css)
         self.assertIn("tt-course-preview-card__art", learner_css)
         self.assertIn("tt-course-preview-card__art--cover", learner_css)
