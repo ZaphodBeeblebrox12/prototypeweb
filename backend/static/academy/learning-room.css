@@ -1214,7 +1214,7 @@
 
 /* Canonical micro-course table styling: Alternating Field Notes (Design 06).
    Exact source values from the selected gallery. Plain and structured lesson tables
-   share this single treatment; the rich-text editor keeps its own separate table rules. */
+   share this treatment; the editable Course Builder canvas receives matching rules from course-template-parity.css. */
 .tt-learning-room .tt-tab-panel .lesson-table-wrap,
 .preview-body .lesson-table-wrap {
   width: 100%;

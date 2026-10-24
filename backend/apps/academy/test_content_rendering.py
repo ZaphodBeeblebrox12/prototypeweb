@@ -969,6 +969,47 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn("font-size: 27px;", parity_css)
         self.assertIn("font-size: 20px;", parity_css)
 
+    def test_course_builder_content_blocks_match_learner_treatment(self):
+        backend = Path(__file__).resolve().parents[2]
+        parity_css = (backend / "static" / "academy" / "course-template-parity.css").read_text(encoding="utf-8")
+        builder_source = (backend / "apps" / "academy" / "course_builder_preview.html").read_text(encoding="utf-8")
+
+        # The parity stylesheet loads after the builder's embedded component styles.
+        parity_link = builder_source.index('/static/academy/course-template-parity.css')
+        self.assertGreater(parity_link, builder_source.index("</style>"))
+        self.assertLess(parity_link, builder_source.index("</head>"))
+        for selector in (
+            ".rich-editor-canvas blockquote {",
+            ".rich-editor-canvas blockquote::before,",
+            ".rich-editor-canvas table {",
+            ".rich-editor-canvas table th,",
+            ".rich-editor-canvas table tbody tr:nth-child(odd) td,",
+            ".rich-editor-canvas table tbody tr:nth-child(even) td,",
+            ".rich-editor-canvas .tt-editor-table-scroll table,",
+        ):
+            self.assertIn(selector, parity_css)
+        self.assertIn(".preview-body,\n.rich-editor-canvas {", parity_css)
+        for value in (
+            "border-left: 3px solid #c36b4d;",
+            "font: 400 clamp(20px, 2.2vw, 27px)/1.5 Georgia,",
+            'content: "“";',
+            "background: #345943;",
+            "border-bottom: 2px solid #b48635;",
+            "background: #f3f0e6;",
+            "background: #e8eee4;",
+        ):
+            self.assertIn(value, parity_css)
+        for legacy_rule in (
+            ".preview-body blockquote {",
+            ".preview-body blockquote::before {",
+            ".rich-editor-canvas blockquote { margin:14px 0;",
+            ".rich-editor-canvas table { width:100%; border-collapse:collapse;",
+            ".rich-editor-canvas th,.rich-editor-canvas td { border:1px solid var(--line);",
+            ".rich-editor-canvas th { background:var(--panel-soft);",
+            ".rich-editor-canvas .tt-editor-structured-table thead tr:last-child th { background:#e8eee3;",
+        ):
+            self.assertNotIn(legacy_rule, builder_source)
+
     def test_builder_learner_preview_uses_the_saved_academy_website_template(self):
         builder = Path(__file__).resolve().parent / "course_builder_preview.html"
         source = builder.read_text(encoding="utf-8")
