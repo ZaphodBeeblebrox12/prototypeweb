@@ -888,7 +888,7 @@ class TradingNotebookTemplateTests(SimpleTestCase):
             self.assertIn(selector, parity_styles)
         for heading in ("h2", "h3", "h4", "h5"):
             self.assertNotIn(f".rich-editor-canvas {heading} {{", builder_source)
-        self.assertIn(".rich-editor-canvas > h6:first-of-type,", parity_styles)
+        self.assertIn(".rich-editor-canvas h6,", parity_styles)
         self.assertIn(".rich-editor-canvas p.eyebrow,", parity_styles)
         self.assertIn("display: block;", lesson_styles)
         self.assertIn('{{ notebook.title|default:"Your Trading Notebook" }}', tabs_template)
@@ -920,7 +920,7 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         for selector in (".rich-editor-canvas h2 {", ".rich-editor-canvas h3 {", ".rich-editor-canvas h4 {", ".rich-editor-canvas h5 {"):
             self.assertIn(selector, parity_css)
         self.assertIn(".rich-editor-canvas p.eyebrow,", parity_css)
-        self.assertIn(".rich-editor-canvas > h6:first-of-type,", parity_css)
+        self.assertIn(".rich-editor-canvas h6,", parity_css)
         for heading in ("h2", "h3", "h4", "h5", "h6"):
             self.assertNotIn(f".rich-editor-canvas {heading} {{", builder_source)
         # The embedded builder preview must not retain duplicate heading rules;
