@@ -895,6 +895,9 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
   const makeCourse = (title='Untitled course') => ({id:uid('course'),title,slug:slugify(title),summary:'A clear, practical description of what learners will study and why it matters.',description:'Explain who the course is for, what it covers and how learners will use it. Keep the promise realistic and specific.',category:'Technical analysis',level:'Intermediate',duration:'Self-paced',price:'',priceNote:'Pricing and checkout are configured separately.',catalogueHook:'',problemStatement:'',learningFocus:'',authoredTags:'',whyThisOne:'',cataloguePresentationConfigured:false,status:'draft',comingSoon:false,requiresOwnedAssets:true,position:0,createdAt:nowText(),updatedAt:'Not saved yet',publishedAt:null,publishedSnapshot:null,modules:[makeModule(1)],outcomes:['Describe the evidence before interpreting it.','Compare alternatives and identify invalidation.','Build a clear, conditional decision process.']});
   let demoOffers = [];
   let comingSoonOffers = [];
+  let catalogueLoaded = false;
+  let catalogueLoadFailed = false;
+  let deletingDraftId = null;
   let demoLessonRefs = [];
   const lessonReferenceIndex = new Map();
   let lessonContentCaret = null;
@@ -924,8 +927,148 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
         course.summary !== 'Add a concise course promise here.') return false;
     return starterComparable(course) === starterComparable(getSeed().courses[0]);
   }
-  function load() { try { const raw=localStorage.getItem(STORAGE_KEY); if(raw){const v=JSON.parse(raw); if(v && Array.isArray(v.courses)) return v;} } catch(e){} return getSeed(); }
-  let state=load();
+  function normalizeLessonState(lesson, index) {
+    const source = lesson && typeof lesson === 'object' && !Array.isArray(lesson) ? lesson : {};
+    const defaults = makeLesson(index + 1);
+    const normalized = {...defaults, ...source};
+    normalized.id = String(source.id || defaults.id);
+    normalized.title = String(source.title ?? defaults.title);
+    normalized.summary = String(source.summary ?? defaults.summary);
+    normalized.content = typeof source.content === 'string' ? source.content : defaults.content;
+    normalized.videoUrl = String(source.videoUrl ?? '');
+    normalized.minutes = Number.isFinite(Number(source.minutes)) && Number(source.minutes) > 0
+      ? Math.min(360, Math.max(1, Number(source.minutes))) : defaults.minutes;
+    normalized.questions = (Array.isArray(source.questions) ? source.questions : defaults.questions)
+      .filter(question => question && typeof question === 'object' && !Array.isArray(question))
+      .map(question => {
+        const questionDefaults = defaultQuestion();
+        const item = {...questionDefaults, ...question};
+        item.id = String(question.id || questionDefaults.id);
+        item.prompt = String(question.prompt ?? questionDefaults.prompt);
+        item.options = Array.isArray(question.options)
+          ? question.options.map(option => String(option ?? ''))
+          : questionDefaults.options;
+        const correctIndex = Number(question.correctIndex);
+        item.correctIndex = Number.isInteger(correctIndex) && correctIndex >= 0 && correctIndex < item.options.length
+          ? correctIndex : 0;
+        item.explanation = String(question.explanation ?? questionDefaults.explanation);
+        item.imageId = String(question.imageId ?? '');
+        return item;
+      });
+    const rawImages = Array.isArray(source.images)
+      ? source.images
+      : (source.image && typeof source.image === 'object' ? [source.image] : []);
+    normalized.images = rawImages.filter(image => image && typeof image === 'object' && !Array.isArray(image));
+    normalized.image = normalized.images[0] || (source.image && typeof source.image === 'object' ? source.image : null);
+    normalized.imageGroups = Array.isArray(source.imageGroups) ? source.imageGroups : [];
+    normalized.teachingFigures = Array.isArray(source.teachingFigures) ? source.teachingFigures : [];
+    normalized.tables = source.tables && typeof source.tables === 'object' && !Array.isArray(source.tables) ? source.tables : {};
+    normalized.regionalBlocks = Array.isArray(source.regionalBlocks) ? source.regionalBlocks : [];
+    normalized.regionalContent = source.regionalContent && typeof source.regionalContent === 'object' && !Array.isArray(source.regionalContent)
+      ? source.regionalContent : {};
+    normalized.relatedCourseIds = Array.isArray(source.relatedCourseIds) ? source.relatedCourseIds.map(String) : [];
+    const notebookSource = source.notebook && typeof source.notebook === 'object' && !Array.isArray(source.notebook)
+      ? source.notebook : {};
+    normalized.notebook = {...defaults.notebook, ...notebookSource};
+    normalized.notebook.title = String(notebookSource.title ?? defaults.notebook.title);
+    normalized.notebook.prompts = Array.isArray(notebookSource.prompts)
+      ? notebookSource.prompts.filter(prompt => prompt && typeof prompt === 'object' && !Array.isArray(prompt)).map(prompt => ({
+          ...prompt,
+          label: String(prompt.label ?? 'Reflect'),
+          text: String(prompt.text ?? ''),
+        }))
+      : defaults.notebook.prompts;
+    return normalized;
+  }
+
+  function normalizeCourseState(course) {
+    const source = course && typeof course === 'object' && !Array.isArray(course) ? course : {};
+    const title = String(source.title ?? 'Untitled course');
+    const defaults = makeCourse(title);
+    const normalized = {...defaults, ...source, title};
+    normalized.id = String(source.id || defaults.id);
+    normalized.slug = String(source.slug || slugify(title));
+    normalized.summary = String(source.summary ?? defaults.summary);
+    normalized.description = String(source.description ?? defaults.description);
+    for (const field of ['category', 'level', 'duration', 'price', 'priceNote', 'catalogueHook',
+      'problemStatement', 'learningFocus', 'authoredTags', 'whyThisOne']) {
+      normalized[field] = String(source[field] ?? defaults[field]);
+    }
+    normalized.status = ['draft', 'draft-update', 'published'].includes(source.status) ? source.status : 'draft';
+    normalized.outcomes = Array.isArray(source.outcomes) ? source.outcomes.map(value => String(value ?? '')) : defaults.outcomes;
+    normalized.comingSoon = Boolean(source.comingSoon);
+    normalized.cataloguePresentationConfigured = Boolean(source.cataloguePresentationConfigured);
+    const rawModules = Array.isArray(source.modules)
+      ? source.modules.filter(module => module && typeof module === 'object' && !Array.isArray(module))
+      : [];
+    normalized.modules = rawModules.length ? rawModules.map((module, moduleIndex) => {
+      const moduleDefaults = makeModule(moduleIndex + 1);
+      const normalizedModule = {...moduleDefaults, ...module};
+      normalizedModule.id = String(module.id || moduleDefaults.id);
+      normalizedModule.title = String(module.title ?? moduleDefaults.title);
+      normalizedModule.description = String(module.description ?? moduleDefaults.description);
+      const rawLessons = Array.isArray(module.lessons)
+        ? module.lessons.filter(lesson => lesson && typeof lesson === 'object' && !Array.isArray(lesson))
+        : [];
+      normalizedModule.lessons = rawLessons.length
+        ? rawLessons.map((lesson, lessonIndex) => normalizeLessonState(lesson, lessonIndex))
+        : moduleDefaults.lessons.map((lesson, lessonIndex) => normalizeLessonState(lesson, lessonIndex));
+      return normalizedModule;
+    }) : defaults.modules;
+    if (!normalized.modules.length) normalized.modules = defaults.modules;
+    return normalized;
+  }
+
+  function normalizeLoadedState(value) {
+    const seed = getSeed();
+    const source = value && typeof value === 'object' && !Array.isArray(value) ? value : seed;
+    const rawCourses = Array.isArray(source.courses) ? source.courses : seed.courses;
+    const normalized = {
+      ...seed,
+      ...source,
+      courses: rawCourses
+        .filter(course => course && typeof course === 'object' && !Array.isArray(course))
+        .map(normalizeCourseState),
+    };
+    if (Array.isArray(source.courses) && source.courses.length === 0) normalized.courses = [];
+    if (normalized.tab === 'regional') normalized.tab = 'overview';
+    if (!['overview', 'curriculum', 'lesson', 'questions', 'media', 'reflection', 'preview'].includes(normalized.tab)) {
+      normalized.tab = 'overview';
+    }
+    if (normalized.courses.length) {
+      if (!normalized.courses.some(course => course.id === String(normalized.selectedCourseId || ''))) {
+        normalized.selectedCourseId = normalized.courses[0].id;
+      }
+      const selectedCourse = normalized.courses.find(course => course.id === normalized.selectedCourseId) || normalized.courses[0];
+      if (!selectedCourse.modules.some(module => module.id === String(normalized.selectedModuleId || ''))) {
+        normalized.selectedModuleId = selectedCourse.modules[0]?.id || null;
+      }
+      const selectedModule = selectedCourse.modules.find(module => module.id === normalized.selectedModuleId) || selectedCourse.modules[0];
+      if (!selectedModule.lessons.some(lesson => lesson.id === String(normalized.selectedLessonId || ''))) {
+        normalized.selectedLessonId = selectedModule.lessons[0]?.id || null;
+      }
+    } else {
+      normalized.selectedCourseId = null;
+      normalized.selectedModuleId = null;
+      normalized.selectedLessonId = null;
+      normalized.tab = 'overview';
+    }
+    return normalized;
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const value = JSON.parse(raw);
+        if (value && Array.isArray(value.courses)) return value;
+      }
+    } catch (error) {
+      console.warn('The saved Course Builder cache could not be read; starting with a fresh local draft.', error);
+    }
+    return getSeed();
+  }
+  let state=normalizeLoadedState(load());
   // Regional editing may contain many rich-text variants. Start on the light overview
   // screen after a reload; the selected course and all draft content remain untouched.
   if (state.tab === 'regional') state.tab = 'overview';
@@ -2048,7 +2191,21 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
       (blocks || '<div class="empty-state"><h3>No regional content yet</h3><p>Your lesson stays global by default. Add a block when a chart, caption, paragraph or disclosure needs an audience-specific version.</p></div>');
   }
 
-  function renderEditor(){const c=currentCourse();if(!c){$('#workspace').innerHTML='<div class="empty-state"><h3>Create your first course</h3><button class="btn primary" data-action="new-course">＋ New course</button></div>';return;}const tab=state.tab||'overview';const tabDefs=[['overview','Course details'],['curriculum','Curriculum'],['lesson','Lesson content'],['questions','Practice & Q&A'],['media','Images'],['reflection','Reflection & reasoning'],['preview','Learner preview']];let panel='';const m=currentModule(), l=currentLesson();if(tab==='overview')panel=courseFields(c);else if(tab==='curriculum')panel=curriculumFields(c);else if(tab==='lesson')panel=lessonFields(l);else if(tab==='questions')panel=questionFields(l);else if(tab==='media')panel=mediaFields(l);else if(tab==='reflection')panel=reflectionFields(l);else panel=previewFields(c);$('#workspace').innerHTML=`<div class="workspace-toolbar"><div class="breadcrumb">Courses <span aria-hidden="true">/</span> ${esc(c.title||'Untitled course')} <span aria-hidden="true">/</span> ${esc(tabDefs.find(x=>x[0]===tab)?.[1]||'Editor')}</div><div class="toolbar-right"><span class="save-state" id="saveIndicator"><span class="dot"></span><span>${state.savedAt?'Saved '+esc(state.savedAt):'Unsaved draft'}</span></span><button class="btn small" type="button" data-action="save-draft">Save draft</button><button class="btn small danger" type="button" data-action="delete-course">Delete draft</button></div></div><div class="editor-shell"><header class="editor-header"><div><div class="eyebrow">${esc(c.slug||'course-slug')}</div><h2>${esc(c.title||'Untitled course')}</h2><p>${esc(c.summary||'Add a course summary to help learners understand what they will study.')}</p></div><div class="header-mark" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="18" stroke="currentColor" stroke-width="1.5"/><path d="M11 27.5 17 21l5 4 10-11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 14h5v5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></header><nav class="tabs" aria-label="Course editing steps">${tabDefs.map(([id,label])=>`<button class="tab ${tab===id?'active':''}" type="button" role="tab" aria-selected="${tab===id}" data-action="tab" data-tab="${id}">${label}</button>`).join('')}</nav><div class="tab-panel" role="tabpanel">${panel}</div></div>`;}
+  function renderEditor(){const c=currentCourse();if(!c){$('#workspace').innerHTML='<div class="empty-state"><h3>Create your first course</h3><button class="btn primary" data-action="new-course">＋ New course</button></div>';return;}const tab=state.tab||'overview';const tabDefs=[['overview','Course details'],['curriculum','Curriculum'],['lesson','Lesson content'],['questions','Practice & Q&A'],['media','Images'],['reflection','Reflection & reasoning'],['preview','Learner preview']];let panel='';const m=currentModule(), l=currentLesson();if(tab==='overview')panel=courseFields(c);else if(tab==='curriculum')panel=curriculumFields(c);else if(tab==='lesson')panel=lessonFields(l);else if(tab==='questions')panel=questionFields(l);else if(tab==='media')panel=mediaFields(l);else if(tab==='reflection')panel=reflectionFields(l);else panel=previewFields(c);$('#workspace').innerHTML=`<div class="workspace-toolbar"><div class="breadcrumb">Courses <span aria-hidden="true">/</span> ${esc(c.title||'Untitled course')} <span aria-hidden="true">/</span> ${esc(tabDefs.find(x=>x[0]===tab)?.[1]||'Editor')}</div><div class="toolbar-right"><span class="save-state" id="saveIndicator"><span class="dot"></span><span>${state.savedAt?'Saved '+esc(state.savedAt):'Unsaved draft'}</span></span><button class="btn small" type="button" data-action="save-draft">Save draft</button><button class="btn small danger" type="button" data-action="delete-course" ${deletingDraftId===String(c.id)?'disabled aria-busy="true"':''}>${deletingDraftId===String(c.id)?'Deleting draft…':'Delete draft'}</button></div></div><div class="editor-shell"><header class="editor-header"><div><div class="eyebrow">${esc(c.slug||'course-slug')}</div><h2>${esc(c.title||'Untitled course')}</h2><p>${esc(c.summary||'Add a course summary to help learners understand what they will study.')}</p></div><div class="header-mark" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="18" stroke="currentColor" stroke-width="1.5"/><path d="M11 27.5 17 21l5 4 10-11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 14h5v5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></header><nav class="tabs" aria-label="Course editing steps">${tabDefs.map(([id,label])=>`<button class="tab ${tab===id?'active':''}" type="button" role="tab" aria-selected="${tab===id}" data-action="tab" data-tab="${id}">${label}</button>`).join('')}</nav><div class="tab-panel" role="tabpanel">${panel}</div></div>`;}
+  const renderEditorImplementation = renderEditor;
+  function renderEditorSafely() {
+    try {
+      renderEditorImplementation();
+    } catch (error) {
+      console.error('Could not render the selected Course Builder draft.', error);
+      const workspace = $('#workspace');
+      if (workspace) {
+        workspace.innerHTML = '<div class="empty-state"><h3>Could not open this draft</h3><p>Your saved content has not been deleted. The editor encountered older or incomplete saved data. Refresh to reload the Academy copy, or create a separate draft while this is investigated.</p></div>';
+      }
+      toast('Could not open draft: ' + String(error?.message || 'The saved data is incomplete.'));
+    }
+  }
+  renderEditor = renderEditorSafely;
   function notebookPreviewMarkup(lesson) {
     if (!lesson) return '';
     const notebook = lesson.notebook && typeof lesson.notebook === 'object' ? lesson.notebook : {};
@@ -2164,8 +2321,38 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
       <iframe data-builder-website-preview-frame title="TradeThesis learner-facing course preview" loading="eager" referrerpolicy="same-origin" style="display:block;width:100%;height:76vh;min-height:480px;border:1px solid var(--line);border-radius:8px;background:#f7f3e9"></iframe>
     </section>`;
   }
-    function renderCatalogue(){const cards=[...demoOffers,...comingSoonOffers];state.courses.filter(c=>c.publishedSnapshot).forEach(c=>{const p=c.publishedSnapshot;cards.push({id:c.id,title:p.title,category:p.category||'MICRO-COURSE',summary:p.summary,price:p.price||'Price not configured',state:'Published from builder'});});$('#catalogueGrid').innerHTML=cards.map(item=>`<article class="offer-card"><div class="offer-art"></div><div class="offer-body"><div class="offer-kicker">${esc(item.category)}</div><h3>${esc(item.title)}</h3><p>${esc(item.summary)}</p><div class="offer-bottom"><div><div class="offer-price">${esc(item.price||'Details soon')}</div><div class="offer-state">${esc(item.state)}</div></div><span class="pill ${item.state==='Coming soon'?'status':'published'}">${item.state==='Coming soon'?'Coming soon':'Published'}</span></div></div></article>`).join('');}
-  function render(){renderSidebar();renderEditor();renderCatalogue();renderHeaderState();}
+    function renderCatalogue() {
+      const cards = [...demoOffers, ...comingSoonOffers];
+      state.courses.filter(course => course.publishedSnapshot).forEach(course => {
+        const snapshot = course.publishedSnapshot;
+        cards.push({
+          id: course.id,
+          title: snapshot.title || course.title,
+          category: snapshot.category || 'MICRO-COURSE',
+          summary: snapshot.summary || course.summary,
+          price: snapshot.price || 'Price not configured',
+          state: 'Published from builder',
+        });
+      });
+      const grid = $('#catalogueGrid');
+      if (!grid) return;
+      if (!cards.length) {
+        const message = !catalogueLoaded
+          ? 'Loading the published catalogue from the Academy…'
+          : catalogueLoadFailed
+            ? 'The Academy catalogue could not be loaded. Check the connection and refresh the builder.'
+            : 'No published courses are ready for the catalogue yet.';
+        grid.innerHTML = '<div class="empty-state catalogue-empty-state"><p>' + esc(message) + '</p></div>';
+        return;
+      }
+      grid.innerHTML = cards.map(item => '<article class="offer-card"><div class="offer-art"></div><div class="offer-body"><div class="offer-kicker">' +
+        esc(item.category || 'TRADETHESIS COURSE') + '</div><h3>' + esc(item.title || 'Untitled course') + '</h3><p>' +
+        esc(item.summary || 'Course details will be announced soon.') + '</p><div class="offer-bottom"><div><div class="offer-price">' +
+        esc(item.price || 'Details soon') + '</div><div class="offer-state">' + esc(item.state) +
+        '</div></div><span class="pill ' + (item.state === 'Coming soon' ? 'status' : 'published') + '">' +
+        (item.state === 'Coming soon' ? 'Coming soon' : 'Published') + '</span></div></div></article>').join('');
+    }
+  function render(){renderSidebar();renderEditorSafely();renderCatalogue();renderHeaderState();}
   function selectCourse(id){if(academyReady&&currentCourse()&&currentCourse().id!==id){clearTimeout(saveTimer);clearTimeout(academySaveTimer);saveCurrentToAcademy(false,false).catch(error=>toast('Could not save the previous draft: '+error.message));}state.selectedCourseId=id;const c=currentCourse();if(c){state.selectedModuleId=c.modules[0]?.id||null;state.selectedLessonId=c.modules[0]?.lessons[0]?.id||null;}state.view='editor';previewMode=false;render();}
   function saveDraft(){const c=currentCourse();if(!c)return;c.updatedAt=nowText();if(c.status==='published')c.status='draft-update';persist(true);render();}
   function publishCourse(){const c=currentCourse();if(!c)return;const errs=[];if(!c.title.trim())errs.push('Add a course title.');if(!c.summary.trim())errs.push('Add a short course summary.');if(!c.modules.length)errs.push('Add at least one module.');if(!allLessons(c).length)errs.push('Add at least one lesson.');if(allLessons(c).some(l=>!l.title.trim()||!l.content.trim()))errs.push('Every lesson needs a title and lesson content.');if(errs.length){toast(errs[0]);if(!c.title.trim()||!c.summary.trim())state.tab='overview';else if(!allLessons(c).length)state.tab='curriculum';else state.tab='lesson';render();return;}const snapshot=JSON.parse(JSON.stringify(c));snapshot.status='published';snapshot.publishedSnapshot=null;snapshot.updatedAt=nowText();c.status='published';c.publishedAt=nowText();c.updatedAt=nowText();c.publishedSnapshot=snapshot;persist(false);state.tab='overview';render();$('#catalogueSection').scrollIntoView({behavior:'smooth',block:'start'});toast('Published in this preview. The course now appears under Courses offered.');}
@@ -3619,10 +3806,23 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
       headers['Content-Type'] = 'application/json';
       headers['X-CSRFToken'] = csrfValue();
     }
-    const response = await fetch('/staff/course-builder/api/', {
-      method, credentials:'same-origin', headers,
-      ...(body ? {body:JSON.stringify(body)} : {})
-    });
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    const timeoutId = window.setTimeout(() => controller?.abort(), 20000);
+    let response;
+    try {
+      response = await fetch('/staff/course-builder/api/', {
+        method, credentials:'same-origin', headers,
+        ...(body ? {body:JSON.stringify(body)} : {}),
+        ...(controller ? {signal:controller.signal} : {})
+      });
+    } catch (error) {
+      if (error?.name === 'AbortError') {
+        throw new Error('The Academy request timed out after 20 seconds. Refresh the builder and check the Academy service.');
+      }
+      throw error;
+    } finally {
+      window.clearTimeout(timeoutId);
+    }
     const payload = await response.json().catch(()=>({detail:`The Academy returned a non-JSON response (HTTP ${response.status}). Your browser draft cache has not been cleared.`}));
     if (!response.ok) {
       const detail = Array.isArray(payload.detail) ? payload.detail.join(' ') : (payload.detail || 'The Academy request failed.');
@@ -3761,8 +3961,9 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
     }
     try {
       const result = await academyRequest('POST', {action:'begin_edit_published_course', courseId});
-      const course = result.draft || result.course;
-      if (!course) throw new Error('The Academy did not return the course content.');
+      const rawCourse = result.draft || result.course;
+      if (!rawCourse) throw new Error('The Academy did not return the course content.');
+      const course = normalizeCourseState(rawCourse);
       const index = state.courses.findIndex(item =>
         (course.serverDraftId && item.serverDraftId === course.serverDraftId) ||
         (course.serverCourseId && item.serverCourseId === course.serverCourseId)
@@ -3833,6 +4034,8 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
           publishedPicker.value = selectedPublishedId;
         }
       }
+      catalogueLoaded = true;
+      catalogueLoadFailed = false;
       demoLessonRefs = Array.isArray(result.lesson_references) ? result.lesson_references : [];
       lessonReferenceIndex.clear();
       demoLessonRefs.forEach(ref => lessonReferenceIndex.set(String(ref.id), ref));
@@ -3875,11 +4078,11 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
             String(local.serverUpdatedAt) === String(remote.serverUpdatedAt)
           );
           if (!sameSavedRevision) {
-            state.courses[index] = remote;
+            state.courses[index] = normalizeCourseState(remote);
             stateChanged = true;
           }
         } else {
-          state.courses.push(remote);
+          state.courses.push(normalizeCourseState(remote));
           stateChanged = true;
         }
       }
@@ -3911,6 +4114,9 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
       else toast('Connected to Academy. Save your first draft to make it available across devices.');
     } catch (error) {
       academyReady = false;
+      catalogueLoaded = true;
+      catalogueLoadFailed = true;
+      renderCatalogue();
       const storageNotice = document.querySelector('[data-image-storage-status]');
       if (storageNotice) storageNotice.textContent = 'Could not verify the Academy image-storage configuration. ' + error.message;
       toast('Could not connect to the Academy draft service: ' + error.message);
@@ -4124,15 +4330,51 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
   });
 
   async function deleteCourse(course) {
+    if (deletingDraftId) return;
     const title = String(course.title || 'Untitled course');
     if (!window.confirm('Delete the draft "' + title + '"? This removes its saved builder draft and uploaded draft media. It does not delete a published course.')) return;
+
+    deletingDraftId = String(course.id);
     clearTimeout(saveTimer);
     clearTimeout(academySaveTimer);
+    renderEditorSafely();
+
     try {
-      if (course.serverDraftId) await academyRequest('DELETE', {serverDraftId: course.serverDraftId});
+      // Do not race the delete request against a save already accepted by the browser.
+      const deadline = Date.now() + 20000;
+      while (academySaving && Date.now() < deadline) {
+        await new Promise(resolve => window.setTimeout(resolve, 50));
+      }
+      if (academySaving) {
+        throw new Error('A draft save is still in progress. Wait for saving to finish, then try again.');
+      }
+      clearTimeout(academySaveTimer);
+      academySavePending = false;
+
+      const staleServerDraft = !course.serverDraftId && Boolean(course.serverUpdatedAt);
+      let serverDraftId = String(course.serverDraftId || '');
+      let deletedFromAcademy = Boolean(serverDraftId);
+
+      if (serverDraftId) {
+        await academyRequest('DELETE', {serverDraftId});
+      } else if (staleServerDraft) {
+        // Older browser caches can retain the server timestamp but not the server UUID.
+        // Reconcile by exact slug + title before removing the server-side record.
+        const result = await academyRequest('GET');
+        const remoteDraft = (Array.isArray(result.drafts) ? result.drafts : []).find(remote =>
+          String(remote.slug || '') === String(course.slug || '') &&
+          String(remote.title || '') === String(course.title || '')
+        );
+        serverDraftId = String(remoteDraft?.serverDraftId || '');
+        if (serverDraftId) {
+          await academyRequest('DELETE', {serverDraftId});
+          deletedFromAcademy = true;
+        }
+      }
+
       state.courses = state.courses.filter(item =>
         item.id !== course.id &&
-        (!course.serverDraftId || String(item.serverDraftId || '') !== String(course.serverDraftId))
+        (!serverDraftId || String(item.serverDraftId || '') !== serverDraftId)
       );
       if (!state.courses.some(item => item.id === state.selectedCourseId)) {
         const fallback = state.courses[0] || null;
@@ -4143,10 +4385,17 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
       }
       hasUnsavedChanges = state.courses.some(item => !item.serverDraftId && !item.serverUpdatedAt);
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+      deletingDraftId = null;
       render();
-      toast(course.serverDraftId ? 'Saved Academy draft deleted.' : 'Local-only draft removed from this browser.');
+      toast(deletedFromAcademy
+        ? 'Saved Academy draft deleted.'
+        : staleServerDraft
+          ? 'Removed the stale browser copy; no matching saved Academy draft remained.'
+          : 'Local-only draft removed from this browser.');
     } catch (error) {
-      toast('Could not delete draft: ' + error.message);
+      deletingDraftId = null;
+      renderEditorSafely();
+      toast('Delete draft failed: ' + error.message);
     }
   }
 } )();
