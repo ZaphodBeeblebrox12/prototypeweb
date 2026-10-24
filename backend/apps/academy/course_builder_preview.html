@@ -845,11 +845,11 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
   letter-spacing: -.05em;
 }
 .preview-body h2 {
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   max-width: 760px;
   color: #27382e;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 27px;
+  font-size: clamp(27px, 2.5vw, 33px);
   font-weight: 400;
   line-height: 1.12;
   letter-spacing: -.035em;
@@ -858,10 +858,9 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
   margin: 26px 0 10px;
   color: #27382e;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 400;
-  line-height: 1.2;
-  letter-spacing: -.02em;
+  line-height: 1.18;
 }
 .preview-body h4 {
   margin: 24px 0 8px;
@@ -893,9 +892,12 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
 @media (max-width: 680px) {
   .preview-body h1 { font-size: 42px; }
   .preview-body h2 { font-size: 27px; }
-  .preview-body h3 { font-size: 20px; }
+  .preview-body h3 { font-size: 22px; }
   .preview-body h4 { font-size: 20px; }
   .preview-body h5 { font-size: 16px; }
+}
+@media (max-width: 500px) {
+  .preview-body h3 { font-size: 21px; }
 }
 </style>
 </head>
@@ -2229,8 +2231,7 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
       <iframe data-builder-website-preview-frame title="TradeThesis learner-facing course preview" loading="eager" referrerpolicy="same-origin" style="display:block;width:100%;height:76vh;min-height:480px;border:1px solid var(--line);border-radius:8px;background:#f7f3e9"></iframe>
     </section>`;
   }
-  function renderMarkdown(src){const safe=esc(src);return safe.split(/\n{2,}/).map(block=>{const t=block.trim();if(!t)return'';const h=t.match(/^(#{1,4})\s+(.+)$/);if(h)return `<h3>${h[2]}</h3>`;if(/^[-*]\s/m.test(t))return `<ul>${t.split('\n').map(x=>x.trim()).filter(Boolean).map(x=>`<li>${x.replace(/^[-*]\s+/,'')}</li>`).join('')}</ul>`;return `<p>${t.replace(/\n/g,'<br>').replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>').replace(/\*([^*\n]+)\*/g,'<em>$1</em>')}</p>`;}).join('');}
-  function renderCatalogue(){const cards=[...demoOffers,...comingSoonOffers];state.courses.filter(c=>c.publishedSnapshot).forEach(c=>{const p=c.publishedSnapshot;cards.push({id:c.id,title:p.title,category:p.category||'MICRO-COURSE',summary:p.summary,price:p.price||'Price not configured',state:'Published from builder'});});$('#catalogueGrid').innerHTML=cards.map(item=>`<article class="offer-card"><div class="offer-art"></div><div class="offer-body"><div class="offer-kicker">${esc(item.category)}</div><h3>${esc(item.title)}</h3><p>${esc(item.summary)}</p><div class="offer-bottom"><div><div class="offer-price">${esc(item.price||'Details soon')}</div><div class="offer-state">${esc(item.state)}</div></div><span class="pill ${item.state==='Coming soon'?'status':'published'}">${item.state==='Coming soon'?'Coming soon':'Published'}</span></div></div></article>`).join('');}
+    function renderCatalogue(){const cards=[...demoOffers,...comingSoonOffers];state.courses.filter(c=>c.publishedSnapshot).forEach(c=>{const p=c.publishedSnapshot;cards.push({id:c.id,title:p.title,category:p.category||'MICRO-COURSE',summary:p.summary,price:p.price||'Price not configured',state:'Published from builder'});});$('#catalogueGrid').innerHTML=cards.map(item=>`<article class="offer-card"><div class="offer-art"></div><div class="offer-body"><div class="offer-kicker">${esc(item.category)}</div><h3>${esc(item.title)}</h3><p>${esc(item.summary)}</p><div class="offer-bottom"><div><div class="offer-price">${esc(item.price||'Details soon')}</div><div class="offer-state">${esc(item.state)}</div></div><span class="pill ${item.state==='Coming soon'?'status':'published'}">${item.state==='Coming soon'?'Coming soon':'Published'}</span></div></div></article>`).join('');}
   function render(){renderSidebar();renderEditor();renderCatalogue();renderHeaderState();}
   function selectCourse(id){if(academyReady&&currentCourse()&&currentCourse().id!==id){clearTimeout(saveTimer);clearTimeout(academySaveTimer);saveCurrentToAcademy(false,false).catch(error=>toast('Could not save the previous draft: '+error.message));}state.selectedCourseId=id;const c=currentCourse();if(c){state.selectedModuleId=c.modules[0]?.id||null;state.selectedLessonId=c.modules[0]?.lessons[0]?.id||null;}state.view='editor';previewMode=false;render();}
   function saveDraft(){const c=currentCourse();if(!c)return;c.updatedAt=nowText();if(c.status==='published')c.status='draft-update';persist(true);render();}
