@@ -882,8 +882,8 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn("font-weight: 850;", parity_styles)
         self.assertIn("letter-spacing: .15em;", parity_styles)
         self.assertIn('font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;', parity_styles)
-        self.assertIn(".tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel h2", preview_styles)
-        self.assertIn('font-family: Georgia, "Times New Roman", serif;', preview_styles)
+        self.assertIn(".preview-body h2,", parity_styles)
+        self.assertIn('font-family: Georgia, "Times New Roman", serif;', parity_styles)
         for selector in (".rich-editor-canvas h2 {", ".rich-editor-canvas h3 {", ".rich-editor-canvas h4 {", ".rich-editor-canvas h5 {"):
             self.assertIn(selector, parity_styles)
         for heading in ("h2", "h3", "h4", "h5"):
