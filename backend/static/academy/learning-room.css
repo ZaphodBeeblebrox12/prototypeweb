@@ -426,8 +426,6 @@
 .tt-learning-room .tt-tab-panel h2,
 .tt-learning-room .tt-tab-panel h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; letter-spacing: -.035em; color: var(--tt-ink); }
 .tt-learning-room .tt-tab-panel h1 { font-size: clamp(2rem, 4vw, 3.25rem); line-height: 1.04; }
-.tt-learning-room .tt-tab-panel h2 { font-size: clamp(1.65rem, 3vw, 2.45rem); line-height: 1.1; margin: 1.65em 0 .55em; }
-.tt-learning-room .tt-tab-panel h3 { font-size: clamp(1.45rem, 2.4vw, 1.95rem); line-height: 1.16; margin: 1.55em 0 .55em; }
 .tt-learning-room .tt-tab-panel h4 { font: 650 1.08rem/1.45 var(--tt-sans, Arial, sans-serif); color: var(--tt-green-deep); margin: 1.4em 0 .5em; }
 .tt-learning-room .tt-tab-panel p { color: #58665c; margin: 0 0 1.15em; }
 .tt-learning-room .tt-tab-panel p strong { color: var(--tt-ink); }
@@ -575,8 +573,6 @@
 .tt-learning-room .tt-lesson-plan-steps strong { font-size: 11px; }
 .tt-learning-room .tt-lesson-plan-steps span { font-size: 7px; }
 .tt-learning-room .tt-tab-panel { padding: clamp(18px, 2.2vw, 28px) 4px; font-size: 1rem; line-height: 1.78; }
-.tt-learning-room .tt-tab-panel h2 { margin: 1.15em 0 .45em; font-size: clamp(1.45rem, 2.5vw, 2.1rem); line-height: 1.12; }
-.tt-learning-room .tt-tab-panel h3 { margin: 1.15em 0 .45em; font-size: clamp(1.25rem, 2vw, 1.65rem); line-height: 1.18; }
 .tt-learning-room .tt-tab-panel p { margin-bottom: .9em; }
 .tt-learning-room .tt-tab-panel .tt-purpose-figure,
 .tt-learning-room .tt-tab-panel .tt-course-figure {
@@ -1267,11 +1263,11 @@
   letter-spacing: -.05em;
 }
 .tt-learning-room .tt-tab-panel h2 {
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   max-width: 760px;
   color: #27382e;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 27px;
+  font-size: clamp(27px, 2.5vw, 33px);
   font-weight: 400;
   line-height: 1.12;
   letter-spacing: -.035em;
@@ -1280,10 +1276,9 @@
   margin: 26px 0 10px;
   color: #27382e;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 400;
-  line-height: 1.2;
-  letter-spacing: -.02em;
+  line-height: 1.18;
 }
 .tt-learning-room .tt-tab-panel h4 {
   margin: 24px 0 8px;
@@ -1345,7 +1340,7 @@
 @media (max-width: 680px) {
   .tt-learning-room .tt-tab-panel h1 { font-size: 42px; }
   .tt-learning-room .tt-tab-panel h2 { font-size: 27px; }
-  .tt-learning-room .tt-tab-panel h3 { font-size: 20px; }
+  .tt-learning-room .tt-tab-panel h3 { font-size: 22px; }
   .tt-learning-room .tt-tab-panel h4 { font-size: 20px; }
   .tt-learning-room .tt-tab-panel h5 { font-size: 16px; }
 }
@@ -1513,4 +1508,8 @@
   white-space: nowrap !important;
   border: 0 !important;
   background: transparent !important;
+}
+
+@media (max-width: 500px) {
+  .tt-learning-room .tt-tab-panel h3 { font-size: 21px; }
 }
