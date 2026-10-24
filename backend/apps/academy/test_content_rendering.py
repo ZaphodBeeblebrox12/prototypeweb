@@ -1059,7 +1059,7 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         opening_quote_end = parity_css.index(".tt-learning-room .tt-tab-panel blockquote p,", opening_quote_start)
         opening_quote_rule = parity_css[opening_quote_start:opening_quote_end]
         self.assertIn('content: "“";', opening_quote_rule)
-        self.assertIn("font: 400 54px/.72 Georgia, \\"Times New Roman\\", serif;", opening_quote_rule)
+        self.assertIn('font: 400 54px/.72 Georgia, "Times New Roman", serif;', opening_quote_rule)
         self.assertIn("pointer-events: none;", opening_quote_rule)
 
         margin_label_start = parity_css.index(".tt-learning-room .tt-tab-panel blockquote::before,")
