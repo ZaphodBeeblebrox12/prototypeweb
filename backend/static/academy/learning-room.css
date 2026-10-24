@@ -1164,9 +1164,9 @@
   color: #27382e;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(42px, 5vw, 64px);
-  font-weight: 400;
+  font-weight: 600;
   line-height: 1.02;
-  letter-spacing: -.05em;
+  letter-spacing: -.025em;
 }
 .tt-learning-room .tt-tab-panel h2 {
   margin: 0 0 12px;
@@ -1174,16 +1174,17 @@
   color: #27382e;
   font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(27px, 2.5vw, 33px);
-  font-weight: 400;
+  font-weight: 600;
   line-height: 1.12;
-  letter-spacing: -.035em;
+  letter-spacing: -.025em;
 }
 .tt-learning-room .tt-tab-panel h3 {
   margin: 26px 0 10px;
   color: #27382e;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 22px;
-  font-weight: 400;
+  font-weight: 600;
+  letter-spacing: -.025em;
   line-height: 1.18;
 }
 .tt-learning-room .tt-tab-panel h4 {

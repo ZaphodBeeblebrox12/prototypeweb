@@ -910,14 +910,20 @@ class TradingNotebookTemplateTests(SimpleTestCase):
                 canonical_start = css.rfind(marker)
                 self.assertGreater(canonical_start, 0, f"Missing canonical heading block in {prefix}")
                 canonical = css[canonical_start:]
+                h1 = re.search(re.escape(prefix + " h1") + r"\s*\{([^}]*)\}", canonical)
                 h2 = re.search(re.escape(prefix + " h2") + r"\s*\{([^}]*)\}", canonical)
                 h3 = re.search(re.escape(prefix + " h3") + r"\s*\{([^}]*)\}", canonical)
+                self.assertIsNotNone(h1, f"Missing canonical H1 rule in {prefix}")
                 self.assertIsNotNone(h2, f"Missing canonical H2 rule in {prefix}")
                 self.assertIsNotNone(h3, f"Missing canonical H3 rule in {prefix}")
                 self.assertIn("font-size: clamp(27px, 2.5vw, 33px);", h2.group(1))
                 self.assertIn("line-height: 1.12;", h2.group(1))
                 self.assertIn("font-size: 22px;", h3.group(1))
                 self.assertIn("line-height: 1.18;", h3.group(1))
+                for level, rule in (("H1", h1), ("H2", h2), ("H3", h3)):
+                    with self.subTest(heading=level, stylesheet=prefix):
+                        self.assertIn("font-weight: 600;", rule.group(1))
+                        self.assertIn("letter-spacing: -.025em;", rule.group(1))
                 self.assertRegex(
                     css[css.rfind("@media (max-width: 500px)"):],
                     re.escape(prefix + " h3") + r"\s*\{[^}]*font-size: 21px;",
@@ -942,6 +948,11 @@ class TradingNotebookTemplateTests(SimpleTestCase):
                 self.assertIn(declaration, ladder)
         self.assertIn("@media (max-width: 500px)", ladder)
         self.assertIn(".preview-body h3 { font-size: 21px; }", ladder)
+        for level in ("h1", "h2", "h3"):
+            rule = re.search(re.escape(f".preview-body {level}") + r"\s*\{([^}]*)\}", ladder)
+            self.assertIsNotNone(rule, f"Missing local preview {level.upper()} rule")
+            self.assertIn("font-weight: 600;", rule.group(1))
+            self.assertIn("letter-spacing: -.025em;", rule.group(1))
         # This unused helper flattened Markdown heading levels to H3 and is no longer needed:
         self.assertNotIn("function renderMarkdown(src)", builder_source)
 
