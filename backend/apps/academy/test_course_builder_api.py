@@ -1625,6 +1625,25 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
         )
 
 
+    def test_course_builder_uses_site_native_dialogs_instead_of_browser_prompt_apis(self):
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotRegex(source, r"\b(?:window\.)?(?:alert|confirm|prompt)\s*\(")
+        for marker in (
+            'id="builderDialogBackdrop"',
+            'role="dialog"',
+            'aria-modal="true"',
+            "async function builderConfirm(message, options = {})",
+            "async function builderPrompt(message, defaultValue = '', options = {})",
+            "event.key === 'Escape'",
+            "builderDialogElement.querySelectorAll",
+            "confirmLabel:'Delete draft'",
+            "confirmLabel:'Save and leave'",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, source)
+
     def test_builder_diagnostics_capture_startup_render_and_api_phases_locally(self):
         source = Path(__file__).with_name("course_builder_preview.html").read_text(
             encoding="utf-8"
