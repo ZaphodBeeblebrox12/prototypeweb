@@ -1471,7 +1471,14 @@ body.builder-dialog-open { overflow:hidden; }
     if (/^h[1-6]$/.test(tag)) return '#'.repeat(Number(tag.slice(1))) + ' ' + richInlineMarkdown(node).trim();
     if (tag === 'p') return richInlineMarkdown(node).trim();
     if (tag === 'hr') return '---';
-    if (tag === 'blockquote') return richInlineMarkdown(node).trim().split('\n').map(line => '> ' + line).join('\n');
+    if (tag === 'blockquote') {
+      const paragraphs = Array.from(node.childNodes).map(child => {
+        if (child.nodeType === 1 && child.tagName.toLowerCase() === 'p') return richInlineMarkdown(child).trim();
+        return richBlockMarkdown(child);
+      }).filter(value => String(value || '').trim());
+      const quoteContent = paragraphs.join('\n\n');
+      return quoteContent.split('\n').map(line => line ? '> ' + line : '>').join('\n');
+    }
     if (tag === 'ul' || tag === 'ol') {
       const items = Array.from(node.children).filter(child => child.tagName && child.tagName.toLowerCase() === 'li');
       return items.map((item,index) => {
@@ -2812,12 +2819,20 @@ body.builder-dialog-open { overflow:hidden; }
       }
 
       if (/^\s*>\s?/.test(line)) {
-        const quoteLines = [];
+        const quoteParagraphs = [];
+        let quoteParagraphLines = [];
         while (index < lines.length && /^\s*>\s?/.test(lines[index])) {
-          quoteLines.push(inline(lines[index].replace(/^\s*>\s?/, '')));
+          const quoteLine = lines[index].replace(/^\s*>\s?/, '');
+          if (!quoteLine.trim()) {
+            if (quoteParagraphLines.length) quoteParagraphs.push(quoteParagraphLines.join('<br>'));
+            quoteParagraphLines = [];
+          } else {
+            quoteParagraphLines.push(inline(quoteLine));
+          }
           index += 1;
         }
-        output.push('<blockquote>' + quoteLines.join('<br>') + '</blockquote>');
+        if (quoteParagraphLines.length) quoteParagraphs.push(quoteParagraphLines.join('<br>'));
+        output.push('<blockquote>' + quoteParagraphs.map(paragraph => '<p>' + paragraph + '</p>').join('') + '</blockquote>');
         continue;
       }
 
