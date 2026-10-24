@@ -3891,11 +3891,13 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
       const publishedPicker = $('#publishedCoursePicker');
       if (publishedPicker) {
         const selectedPublishedId = publishedPicker.value;
+        const publishedCourseOptions = Array.isArray(result.published_course_options)
+          ? result.published_course_options : [];
         publishedPicker.innerHTML = '<option value="">Choose a published course…</option>' +
-          (result.related_courses || []).map(course =>
+          publishedCourseOptions.map(course =>
             '<option value="' + esc(String(course.id)) + '">' + esc(course.title) + '</option>'
           ).join('');
-        if ((result.related_courses || []).some(course => String(course.id) === selectedPublishedId)) {
+        if (publishedCourseOptions.some(course => String(course.id) === selectedPublishedId)) {
           publishedPicker.value = selectedPublishedId;
         }
       }
