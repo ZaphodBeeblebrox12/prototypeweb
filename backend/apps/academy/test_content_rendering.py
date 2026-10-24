@@ -865,19 +865,23 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn("width: min(1600px, 100%)", preview_styles)
         self.assertIn("grid-template-columns: minmax(0, 1fr) 245px", preview_styles)
         self.assertIn("font-size: clamp(42px, 5vw, 64px)", lesson_styles)
-        self.assertIn(".tt-learning-room .tt-tab-panel h2,", parity_styles)
+        # Authored H2-H5 roles now live in the canonical shared stylesheet.
+        for selector in (
+            ".tt-learning-room .tt-tab-panel h2,",
+            ".tt-learning-room .tt-tab-panel h3,",
+            ".tt-learning-room .tt-tab-panel h4,",
+            ".tt-learning-room .tt-tab-panel h5,",
+        ):
+            self.assertIn(selector, parity_styles)
         self.assertIn("font-size: 30px;", parity_styles)
         self.assertIn("font-size: 27px;", parity_styles)
-        self.assertIn("font-size: 22px;", lesson_styles)
-        self.assertIn("font-size: 20px;", lesson_styles)
-        self.assertIn("font-size: 16px;", lesson_styles)
-        self.assertIn("font-size: 13px;", lesson_styles)
-        self.assertIn("font-weight: 700;", lesson_styles)
-        self.assertIn("font-weight: 400;", lesson_styles)
-        self.assertIn('font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;', lesson_styles)
-        self.assertIn("font-size: 9px;", lesson_styles)
-        self.assertIn("font-weight: 850;", lesson_styles)
-        self.assertIn("letter-spacing: .16em;", lesson_styles)
+        self.assertIn("font-size: 22px;", parity_styles)
+        self.assertIn("font-size: 1em;", parity_styles)
+        self.assertIn("font-size: .83em;", parity_styles)
+        self.assertIn("font-size: 13px;", parity_styles)
+        self.assertIn("font-weight: 850;", parity_styles)
+        self.assertIn("letter-spacing: .15em;", parity_styles)
+        self.assertIn('font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;', parity_styles)
         self.assertIn(".tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel h2", preview_styles)
         self.assertIn('font-family: Georgia, "Times New Roman", serif;', preview_styles)
         for selector in (".rich-editor-canvas h2 {", ".rich-editor-canvas h3 {", ".rich-editor-canvas h4 {", ".rich-editor-canvas h5 {"):
