@@ -133,7 +133,10 @@
 .preview-body blockquote,
 .rich-editor-canvas blockquote {
   position: relative;
-  min-height: 64px; /* Allow the two-word vertical CONTEXT FIRST margin label to fit. */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 64px; /* One-line text centers; multi-line text grows the label with the quote. */
   margin: 1.8em 0 1.7em;
   padding: 0 0 0 42px;
   border: 0;
