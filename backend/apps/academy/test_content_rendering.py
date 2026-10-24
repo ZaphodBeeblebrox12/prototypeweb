@@ -980,12 +980,13 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertLess(parity_link, builder_source.index("</head>"))
         for selector in (
             ".rich-editor-canvas blockquote {",
-            ".rich-editor-canvas blockquote::before,",
+            ".rich-editor-canvas blockquote::before {",
             ".rich-editor-canvas table {",
-            ".rich-editor-canvas table th,",
-            ".rich-editor-canvas table tbody tr:nth-child(odd) td,",
-            ".rich-editor-canvas table tbody tr:nth-child(even) td,",
+            ".rich-editor-canvas table th {",
+            ".rich-editor-canvas table tbody tr:nth-child(odd) td {",
+            ".rich-editor-canvas table tbody tr:nth-child(even) td {",
             ".rich-editor-canvas .tt-editor-table-scroll table,",
+            ".rich-editor-canvas table.tt-editor-structured-table {",
         ):
             self.assertIn(selector, parity_css)
         self.assertIn(".preview-body,\n.rich-editor-canvas {", parity_css)
