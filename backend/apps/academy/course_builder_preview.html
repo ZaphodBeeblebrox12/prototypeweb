@@ -886,6 +886,8 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
   const STORAGE_KEY = 'tradethesis-course-builder-preview-v1';
   const $ = (s, root=document) => root.querySelector(s);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  // Renderer enhancements replace this binding several times below. Declare it for strict mode.
+  let renderMarkdown;
 
   // Local-only diagnostics for startup failures. These never transmit course data.
   const courseBuilderDiagnostics = {
