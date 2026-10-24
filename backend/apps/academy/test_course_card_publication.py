@@ -208,12 +208,17 @@ class CoursePublicationReadinessTests(TestCase):
         self.assertNotIn(">T/I</span>", rendered)
 
     def test_authored_svg_is_removed_but_companion_card_icon_is_preserved(self):
-        from .content_rendering import render_safe_markdown
+        from django.core.exceptions import ValidationError
+        from .content_rendering import render_safe_markdown, validate_markdown_source
 
         authored_svg = '<svg class="authored-icon" viewBox="0 0 10 10"><path d="M0 0L10 10"></path></svg>'
         rendered_authored_svg = render_safe_markdown(authored_svg, admin_preview=True)
         self.assertNotIn("<svg", rendered_authored_svg.lower())
         self.assertNotIn("<path", rendered_authored_svg.lower())
+        # Rendering sanitizes legacy/external content, but save/review validation
+        # continues to reject the same active SVG before it can be stored.
+        with self.assertRaises(ValidationError):
+            validate_markdown_source(authored_svg)
 
         course = Course.objects.create(
             title="Companion card SVG safety test",
@@ -302,8 +307,8 @@ class OptionThreeCardParityTests(SimpleTestCase):
         self.assertIn("grid-template-columns: 66px minmax(0, 1fr)", learner_css)
         self.assertIn("width: min(72%, 640px)", learner_css)
         self.assertIn("min-height: 104px", learner_css)
-        self.assertIn(".tt-course-preview-card__art::before", learner_css)
-        self.assertIn(".tt-course-preview-card__art::after", learner_css)
+        self.assertIn(".tt-course-preview-card__rings::before", learner_css)
+        self.assertIn(".tt-course-preview-card__rings::after", learner_css)
         self.assertIn("width: min(100%, 560px)", learner_css)
         self.assertIn("max-width: 560px", learner_css)
         self.assertIn("grid-template-columns: 60px minmax(0, 1fr)", learner_css)
