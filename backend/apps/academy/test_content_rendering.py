@@ -900,14 +900,12 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         lesson_template = (backend / "templates" / "academy" / "lesson.html").read_text(encoding="utf-8")
         admin_template = (backend / "templates" / "academy" / "course_import_website_preview.html").read_text(encoding="utf-8")
 
-        # The one typography stylesheet must load after each legacy stylesheet path.
         self.assertGreater(lesson_template.index("course-template-parity.css"), lesson_template.index("notebook-card.css"))
         self.assertGreater(admin_template.index("course-template-parity.css"), admin_template.index("notebook-card.css"))
         parity_link = builder_source.index('/static/academy/course-template-parity.css')
         self.assertGreater(parity_link, builder_source.index("</style>"))
         self.assertLess(parity_link, builder_source.index("</head>"))
 
-        # Legacy pass-7 blocks are removed; a single stylesheet owns the heading scale.
         self.assertNotIn("Visual parity pass 7: map every Academy content heading", learning_room_css)
         self.assertNotIn("Visual parity pass 7: apply the canonical heading ladder", website_preview_css)
         self.assertNotIn("Canonical authored-heading ladder", builder_source)
@@ -923,23 +921,25 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         h2 = rule_body(".tt-learning-room .tt-tab-panel h2,")
         h3 = rule_body(".tt-learning-room .tt-tab-panel h3,")
         h4 = rule_body(".tt-learning-room .tt-tab-panel h4,")
-        eyebrow = rule_body(".tt-learning-room .tt-lesson-idea-copy > h6:first-child,")
-        no_rule = rule_body(".tt-learning-room .tt-lesson-idea-copy > h6:first-child::before,")
+        h5 = rule_body(".tt-learning-room .tt-tab-panel h5,")
+        eyebrow = rule_body(".tt-learning-room .tt-tab-panel .body-copy p.eyebrow,")
+        no_rule = rule_body(".tt-learning-room .tt-tab-panel .body-copy p.eyebrow::before,")
 
         for value in ("font-size: 30px;", "font-weight: 600;", "line-height: 1.2;", "letter-spacing: -.025em;", "margin: 0 0 13px;", "max-width: 730px;"):
             self.assertIn(value, h2)
         for value in ("font-size: 22px;", "font-weight: 600;", "line-height: 1.25;", "letter-spacing: -.025em;", "margin: 28px 0 9px;"):
             self.assertIn(value, h3)
-        for value in ("font-size: 20px;", "font-weight: 400;", "line-height: 1.2;", "letter-spacing: -.02em;", "margin: 24px 0 8px;"):
+        for value in ("font-size: 1em;", "font-weight: 700;", "line-height: inherit;", "letter-spacing: normal;", "margin: 1.33em 0;"):
             self.assertIn(value, h4)
+        for value in ("font-size: .83em;", "font-weight: 700;", "line-height: inherit;", "letter-spacing: normal;", "margin: 1.67em 0;"):
+            self.assertIn(value, h5)
         for value in ("font-size: 13px;", "font-weight: 850;", "line-height: 1.82;", "letter-spacing: .15em;", "text-transform: uppercase;", "margin: 0 0 14px;", "color: #39463d;"):
             self.assertIn(value, eyebrow)
         self.assertIn("content: none;", no_rule)
         self.assertIn("display: none;", no_rule)
-        self.assertIn("h6:first-of-type", parity_css)
         self.assertIn("@media (max-width: 560px)", parity_css)
         self.assertIn("font-size: 27px;", parity_css)
-        self.assertIn("font-size: 21px;", parity_css)
+        self.assertIn("font-size: 20px;", parity_css)
 
     def test_builder_learner_preview_uses_the_saved_academy_website_template(self):
         builder = Path(__file__).resolve().parent / "course_builder_preview.html"
