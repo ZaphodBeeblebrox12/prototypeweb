@@ -3853,6 +3853,7 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
   // Shared Academy integration. Local storage remains a convenience cache, not the source of truth.
   const hadLocalDraft = Boolean(localStorage.getItem(STORAGE_KEY));
   let academyReady = false;
+  let academySyncPromise = null;
   let academySaveTimer = null;
   let academySaving = false;
   let academySavePending = false;
@@ -4430,7 +4431,7 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
   render();
   diagnosticStage('initial-render-returned');
   diagnosticStage('academy-sync-dispatch');
-  syncAcademy();
+  academySyncPromise = syncAcademy();
 
   // Clean exits navigate immediately. If edits or a save are pending, offer to
   // save the draft to the shared Academy first; Cancel keeps the editor open.
@@ -4459,17 +4460,91 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
     event.returnValue = '';
   });
 
+  function sameDraftModuleIdentity(left, right) {
+    const signature = course => {
+      const modules = Array.isArray(course?.modules) ? course.modules : [];
+      if (!modules.length) return null;
+      const result = [];
+      for (const module of modules) {
+        if (!module || !module.id || !Array.isArray(module.lessons)) return null;
+        const lessonIds = module.lessons.map(lesson => String(lesson?.id || ''));
+        if (lessonIds.some(id => !id)) return null;
+        result.push({id:String(module.id), lessons:lessonIds});
+      }
+      return JSON.stringify(result);
+    };
+    const leftSignature = signature(left);
+    const rightSignature = signature(right);
+    return Boolean(leftSignature && rightSignature && leftSignature === rightSignature);
+  }
+
+  async function findAcademyDraftForDeletion(course, allowLegacySlugTitleFallback) {
+    const result = await academyRequest('GET');
+    const drafts = Array.isArray(result.drafts) ? result.drafts : [];
+    const courseId = String(course.id || '');
+    const idMatches = drafts.filter(remote =>
+      String(remote.id || '') === courseId ||
+      String(remote.serverDraftId || '') === courseId
+    );
+    if (idMatches.length > 1) {
+      throw new Error('More than one Academy draft matches this browser ID. Refresh the Course Builder and try again.');
+    }
+    if (idMatches.length === 1) return idMatches[0];
+
+    const structureMatches = drafts.filter(remote =>
+      String(remote.slug || '') === String(course.slug || '') &&
+      String(remote.title || '') === String(course.title || '') &&
+      sameDraftModuleIdentity(remote, course)
+    );
+    if (structureMatches.length > 1) {
+      throw new Error('More than one Academy draft matches this course structure. Refresh the Course Builder and choose the saved draft again.');
+    }
+    if (structureMatches.length === 1) return structureMatches[0];
+
+    // Legacy caches may retain a server timestamp but lose the server UUID.
+    // Only use their slug/title fallback when that pair identifies one record.
+    if (allowLegacySlugTitleFallback) {
+      const legacyMatches = drafts.filter(remote =>
+        String(remote.slug || '') === String(course.slug || '') &&
+        String(remote.title || '') === String(course.title || '')
+      );
+      if (legacyMatches.length > 1) {
+        throw new Error('Several saved drafts share this title and URL. Refresh the Course Builder so the correct draft can be identified.');
+      }
+      if (legacyMatches.length === 1) return legacyMatches[0];
+    }
+    return null;
+  }
+
   async function deleteCourse(course) {
     if (deletingDraftId) return;
     const title = String(course.title || 'Untitled course');
     if (!window.confirm('Delete the draft "' + title + '"? This removes its saved builder draft and uploaded draft media. It does not delete a published course.')) return;
 
-    deletingDraftId = String(course.id);
+    const requestedCourseId = String(course.id || '');
+    deletingDraftId = requestedCourseId;
     clearTimeout(saveTimer);
     clearTimeout(academySaveTimer);
     renderEditorSafely();
 
     try {
+      // The initial Academy GET may still be reconciling cached drafts. Wait for
+      // it before classifying this entry as local-only; otherwise that GET can
+      // put the remote draft back into state immediately after the delete toast.
+      if (academySyncPromise && !academyReady) {
+        await academySyncPromise;
+        const refreshedById = state.courses.find(item => String(item.id || '') === requestedCourseId);
+        if (refreshedById) {
+          course = refreshedById;
+        } else if (course.slug && course.title) {
+          const sameSlugAndTitle = state.courses.filter(item =>
+            String(item.slug || '') === String(course.slug || '') &&
+            String(item.title || '') === String(course.title || '')
+          );
+          if (sameSlugAndTitle.length === 1) course = sameSlugAndTitle[0];
+        }
+      }
+
       // Do not race the delete request against a save already accepted by the browser.
       const deadline = Date.now() + 20000;
       while (academySaving && Date.now() < deadline) {
@@ -4483,23 +4558,23 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
 
       const staleServerDraft = !course.serverDraftId && Boolean(course.serverUpdatedAt);
       let serverDraftId = String(course.serverDraftId || '');
-      let deletedFromAcademy = Boolean(serverDraftId);
+      let deletedFromAcademy = false;
 
-      if (serverDraftId) {
-        await academyRequest('DELETE', {serverDraftId});
-      } else if (staleServerDraft) {
-        // Older browser caches can retain the server timestamp but not the server UUID.
-        // Reconcile by exact slug + title before removing the server-side record.
-        const result = await academyRequest('GET');
-        const remoteDraft = (Array.isArray(result.drafts) ? result.drafts : []).find(remote =>
-          String(remote.slug || '') === String(course.slug || '') &&
-          String(remote.title || '') === String(course.title || '')
-        );
-        serverDraftId = String(remoteDraft?.serverDraftId || '');
-        if (serverDraftId) {
-          await academyRequest('DELETE', {serverDraftId});
-          deletedFromAcademy = true;
+      if (!serverDraftId) {
+        // Resolve metadata-less cached entries by stable identity or matching
+        // module/lesson IDs before deciding that only a local copy exists.
+        const remoteDraft = await findAcademyDraftForDeletion(course, staleServerDraft);
+        if (remoteDraft && !remoteDraft.serverDraftId) {
+          throw new Error('The matching Academy draft did not include its server ID. Refresh the Course Builder and retry.');
         }
+        serverDraftId = String(remoteDraft?.serverDraftId || '');
+      }
+      if (serverDraftId) {
+        const deletion = await academyRequest('DELETE', {serverDraftId});
+        if (!deletion?.ok || String(deletion.deleted_id || '') !== serverDraftId) {
+          throw new Error('The Academy did not confirm deletion of the saved draft.');
+        }
+        deletedFromAcademy = true;
       }
 
       state.courses = state.courses.filter(item =>
