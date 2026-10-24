@@ -657,6 +657,37 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(instructor.rubric_json["questions"][0]["correctIndex"], 0)
         self.assertIn("Start with what can be observed.", instructor.answer_key_markdown)
 
+    def test_preview_normalizes_legacy_browser_drafts_before_initial_render(self):
+        response = self.client.get(reverse("staff_course_builder_preview"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        source = response.content.decode("utf-8")
+        self.assertIn("function normalizeLessonState(lesson, index)", source)
+        self.assertIn("function normalizeCourseState(course)", source)
+        self.assertIn("function normalizeLoadedState(value)", source)
+        self.assertIn("let state=normalizeLoadedState(load());", source)
+        self.assertIn("function renderEditorSafely()", source)
+        self.assertIn("renderEditorSafely();", source)
+        self.assertIn("syncAcademy();", source)
+
+    def test_preview_catalogue_distinguishes_loading_from_an_empty_public_catalogue(self):
+        response = self.client.get(reverse("staff_course_builder_preview"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        source = response.content.decode("utf-8")
+        self.assertIn("let catalogueLoaded = false;", source)
+        self.assertIn("Loading the published catalogue from the Academy…", source)
+        self.assertIn("No published courses are ready for the catalogue yet.", source)
+
+    def test_delete_draft_reconciles_legacy_server_backed_browser_entries(self):
+        response = self.client.get(reverse("staff_course_builder_preview"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        source = response.content.decode("utf-8")
+        self.assertIn("const staleServerDraft = !course.serverDraftId && Boolean(course.serverUpdatedAt);", source)
+        self.assertIn("Deleting draft…", source)
+        self.assertIn("Delete draft failed:", source)
+
     def test_published_course_edit_options_include_unready_courses_but_related_cards_do_not(self):
         placeholder = Course.objects.create(
             title="New micro-course draft",
