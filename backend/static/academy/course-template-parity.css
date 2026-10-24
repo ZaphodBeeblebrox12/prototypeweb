@@ -138,7 +138,7 @@
   justify-content: center;
   min-height: 64px; /* One-line text centers; multi-line text grows the label with the quote. */
   margin: 1.8em 0 1.7em;
-  padding: 12px 0 0 42px; /* Space for the decorative opening quote above the text. */
+  padding: 0 0 0 92px; /* Reserve a dedicated inline gutter for the opening quote mark. */
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -176,11 +176,11 @@
 .rich-editor-canvas blockquote::after {
   content: "“";
   position: absolute;
-  top: -25px;
+  top: 4px;
   left: 42px;
   color: #d6b097;
-  font: 400 54px/.72 Georgia, "Times New Roman", serif;
-  opacity: .9;
+  font: 400 34px/.8 Georgia, "Times New Roman", serif;
+  opacity: .88;
   pointer-events: none;
   user-select: none;
 }
@@ -379,7 +379,7 @@
   .tt-learning-room .tt-tab-panel blockquote,
   .preview-body blockquote,
   .rich-editor-canvas blockquote {
-    padding-left: 37px;
+    padding: 0 0 0 74px;
     font-size: 18px;
     line-height: 1.45;
   }
@@ -395,9 +395,9 @@
   .tt-learning-room .tt-tab-panel blockquote::after,
   .preview-body blockquote::after,
   .rich-editor-canvas blockquote::after {
-    top: -21px;
+    top: 4px;
     left: 37px;
-    font-size: 46px;
+    font-size: 30px;
   }
 
   .tt-learning-room .tt-tab-panel blockquote > p:first-child:has(> strong:only-child),
