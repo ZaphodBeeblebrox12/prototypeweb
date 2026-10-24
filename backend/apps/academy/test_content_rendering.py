@@ -975,6 +975,39 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn("font-size: 27px;", parity_css)
         self.assertIn("font-size: 20px;", parity_css)
 
+    def test_rich_editor_canvas_fills_workspace_and_preserves_reading_measure(self):
+        backend = Path(__file__).resolve().parents[2]
+        parity_css = (backend / "static" / "academy" / "course-template-parity.css").read_text(
+            encoding="utf-8"
+        )
+
+        # The editable surface is full width; the 730px limit applies to lesson content.
+        canvas_start = parity_css.index(".rich-editor-canvas {")
+        canvas_end = parity_css.index("}", canvas_start) + 1
+        canvas_rule = parity_css[canvas_start:canvas_end]
+        self.assertIn("width: 100%;", canvas_rule)
+        self.assertIn("max-width: none;", canvas_rule)
+        self.assertIn("box-sizing: border-box;", canvas_rule)
+        self.assertNotIn("max-width: 730px;", canvas_rule)
+
+        self.assertIn(
+            ".tt-learning-room .tt-lesson-idea-copy,\n.preview-body {",
+            parity_css,
+        )
+        self.assertIn("max-width: 730px;", parity_css)
+        for selector in (
+            ".rich-editor-canvas > p,",
+            ".rich-editor-canvas > ul,",
+            ".rich-editor-canvas > ol,",
+            ".rich-editor-canvas > blockquote,",
+            ".rich-editor-canvas > hr,",
+            ".rich-editor-canvas > table,",
+            ".rich-editor-canvas > .lesson-table-wrap,",
+            ".rich-editor-canvas > .tt-editor-table-scroll",
+        ):
+            with self.subTest(selector=selector):
+                self.assertIn(selector, parity_css)
+
     def test_course_builder_content_blocks_match_learner_treatment(self):
         backend = Path(__file__).resolve().parents[2]
         parity_css = (backend / "static" / "academy" / "course-template-parity.css").read_text(encoding="utf-8")
