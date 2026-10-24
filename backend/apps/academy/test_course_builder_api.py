@@ -667,7 +667,7 @@ class CourseBuilderApiTests(TestCase):
         self.assertIn("function normalizeLoadedState(value)", source)
         self.assertIn("let state=normalizeLoadedState(load());", source)
         self.assertIn("function renderEditorSafely()", source)
-        self.assertIn("renderEditorSafely();", source)
+        self.assertIn("runRenderStep('editor', renderEditorSafely);", source)
         self.assertIn("const renderEditorWithAllEnhancements = renderEditor;", source)
         self.assertIn("renderEditorSafely = function()", source)
         self.assertIn("syncAcademy();", source)
@@ -1593,6 +1593,33 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
             "$('#newCourseButton').addEventListener('click',event=>handleAction('new-course',event.currentTarget));",
             source,
         )
+
+
+    def test_builder_diagnostics_capture_startup_render_and_api_phases_locally(self):
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(
+            encoding="utf-8"
+        )
+        for marker in (
+            "window.__TRADETHESIS_COURSE_BUILDER_DIAGNOSTICS",
+            "window.addEventListener('error'",
+            "window.addEventListener('unhandledrejection'",
+            "diagnosticStage('browser-state-normalization-started')",
+            "runRenderStep('sidebar', renderSidebar)",
+            "runRenderStep('editor', renderEditorSafely)",
+            "runRenderStep('catalogue', renderCatalogue)",
+            "diagnosticError('editor-render', error)",
+            "diagnosticStage('api-fetch-started'",
+            "diagnosticStage('api-response-received'",
+            "diagnosticStage('api-response-parsed'",
+            "diagnosticStage('academy-sync-started'",
+            "diagnosticStage('academy-sync-complete'",
+            "diagnosticError('academy-sync-failed', error)",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, source)
+        self.assertIn("requestDiagnostic.payloadKeys", source)
+        self.assertIn("requestDiagnostic.payloadSummary", source)
+        self.assertNotIn("fetch('/staff/course-builder/diagnostics", source)
 
 
     def test_builder_preview_routes_selected_lesson_to_academy_template(self):
