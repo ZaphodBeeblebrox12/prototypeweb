@@ -405,7 +405,16 @@ def render_safe_markdown(
     """Render sanitised Markdown, structured tables, figures and groups."""
     from html import escape
 
-    source = validate_markdown_source(source or "")
+    # Rendering old or externally authored lesson Markdown must sanitize SVG markup
+    # rather than aborting the entire preview. Save/review paths still call
+    # validate_markdown_source directly and reject active SVG before it is stored.
+    source = re.sub(
+        r"<\s*svg\b[^>]*>.*?<\s*/\s*svg\s*>",
+        "",
+        source or "",
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    source = validate_markdown_source(source)
     source, lesson_references = _resolve_lesson_references(
         source, user=user, admin_preview=admin_preview,
     )
