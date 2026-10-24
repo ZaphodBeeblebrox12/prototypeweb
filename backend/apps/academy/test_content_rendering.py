@@ -917,6 +917,13 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn(".rich-editor-canvas > h6:first-of-type,", parity_css)
         for heading in ("h2", "h3", "h4", "h5", "h6"):
             self.assertNotIn(f".rich-editor-canvas {heading} {{", builder_source)
+        # The embedded builder preview must not retain duplicate heading rules;
+        # course-template-parity.css is the source of truth for H2-H5.
+        for heading in ("h2", "h3", "h4", "h5"):
+            self.assertNotIn(f".preview-body {heading} {{", builder_source)
+        self.assertNotIn(".preview-body > h2:first-child", builder_source)
+        self.assertNotIn(".preview-body > h3:first-child", builder_source)
+        self.assertIn(".preview-body > h1:first-child { margin-top: .1em; }", builder_source)
 
         self.assertNotIn("Visual parity pass 7: map every Academy content heading", learning_room_css)
         self.assertNotIn("Visual parity pass 7: apply the canonical heading ladder", website_preview_css)
