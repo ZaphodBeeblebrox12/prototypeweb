@@ -143,8 +143,8 @@
   border-radius: 0;
   background: transparent;
   color: #2f4939;
-  font: 400 19px/1.42 Georgia, "Times New Roman", serif;
-  letter-spacing: -.018em;
+  font: 400 21px/1.45 Georgia, "Times New Roman", serif;
+  letter-spacing: -.01em;
 }
 
 .tt-learning-room .tt-tab-panel blockquote::before,
@@ -191,7 +191,7 @@
   margin: 0 0 .65em;
   color: inherit;
   font: inherit;
-  line-height: 1.42;
+  line-height: 1.45;
 }
 
 .tt-learning-room .tt-tab-panel blockquote p:last-child,
@@ -380,7 +380,8 @@
   .preview-body blockquote,
   .rich-editor-canvas blockquote {
     padding-left: 37px;
-    font-size: 17px;
+    font-size: 18px;
+    line-height: 1.45;
   }
 
   .tt-learning-room .tt-tab-panel blockquote::before,
