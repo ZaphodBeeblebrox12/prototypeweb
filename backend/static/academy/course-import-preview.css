@@ -198,3 +198,24 @@
 @media (max-width: 500px) {
   .tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel h3 { font-size: 21px; }
 }
+
+/* Course Outline sticky-header clipping fix.
+   The shared sitewide header is 77px tall on desktop; keep the outline below it.
+   At <=920px the preview becomes one column, so the outline must scroll in document flow. */
+@media (min-width: 921px) {
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-outline {
+    position: sticky;
+    top: 95px;
+    max-height: calc(100vh - 113px);
+    scroll-margin-top: 95px;
+  }
+}
+@media (max-width: 920px) {
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-outline {
+    position: static;
+    top: auto;
+    max-height: none;
+    overflow: visible;
+    scroll-margin-top: 0;
+  }
+}
