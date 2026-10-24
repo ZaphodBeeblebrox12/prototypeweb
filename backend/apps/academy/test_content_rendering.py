@@ -926,16 +926,17 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         eyebrow = rule_body(".tt-learning-room .tt-lesson-idea-copy > h6:first-child,")
         no_rule = rule_body(".tt-learning-room .tt-lesson-idea-copy > h6:first-child::before,")
 
-        for value in ("font-size: 31px;", "font-weight: 600;", "line-height: 1.18;", "letter-spacing: -.025em;", "margin: 0 0 14px;", "max-width: 730px;"):
+        for value in ("font-size: 30px;", "font-weight: 600;", "line-height: 1.2;", "letter-spacing: -.025em;", "margin: 0 0 13px;", "max-width: 730px;"):
             self.assertIn(value, h2)
-        for value in ("font-size: 23px;", "font-weight: 600;", "line-height: 1.25;", "letter-spacing: -.025em;", "margin: 30px 0 9px;"):
+        for value in ("font-size: 22px;", "font-weight: 600;", "line-height: 1.25;", "letter-spacing: -.025em;", "margin: 28px 0 9px;"):
             self.assertIn(value, h3)
         for value in ("font-size: 20px;", "font-weight: 400;", "line-height: 1.2;", "letter-spacing: -.02em;", "margin: 24px 0 8px;"):
             self.assertIn(value, h4)
-        for value in ("font-size: 10px;", "font-weight: 850;", "line-height: 1.4;", "letter-spacing: .15em;", "text-transform: uppercase;", "margin: 0 0 9px;", "var(--tt-green"):
+        for value in ("font-size: 13px;", "font-weight: 850;", "line-height: 1.82;", "letter-spacing: .15em;", "text-transform: uppercase;", "margin: 0 0 14px;", "color: #39463d;"):
             self.assertIn(value, eyebrow)
         self.assertIn("content: none;", no_rule)
         self.assertIn("display: none;", no_rule)
+        self.assertIn("h6:first-of-type", parity_css)
         self.assertIn("@media (max-width: 560px)", parity_css)
         self.assertIn("font-size: 27px;", parity_css)
         self.assertIn("font-size: 21px;", parity_css)
