@@ -909,6 +909,15 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertNotIn("Visual parity pass 7: map every Academy content heading", learning_room_css)
         self.assertNotIn("Visual parity pass 7: apply the canonical heading ladder", website_preview_css)
         self.assertNotIn("Canonical authored-heading ladder", builder_source)
+        # Only the global fallback remains in learning-room.css; the canonical stylesheet owns the scoped ladder.
+        self.assertIn(".tt-tab-panel h3 {", learning_room_css)
+        self.assertIn(".tt-tab-panel h4 {", learning_room_css)
+        self.assertNotIn(".tt-learning-room .tt-tab-panel h2,", learning_room_css)
+        self.assertNotIn(".tt-learning-room .tt-tab-panel h3 {", learning_room_css)
+        self.assertNotIn(".tt-learning-room .tt-tab-panel h4 {", learning_room_css)
+        self.assertNotIn('data-tab-panel="idea"', parity_css)
+        self.assertNotIn("h6:first-child", parity_css)
+        self.assertNotIn(".eyebrow:first-child", parity_css)
         self.assertEqual(learning_room_css.count("/*"), learning_room_css.count("*/"))
         self.assertEqual(website_preview_css.count("/*"), website_preview_css.count("*/"))
 

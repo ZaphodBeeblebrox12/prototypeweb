@@ -66,16 +66,11 @@
 /* In the Academy source, the lead H6 is an eyebrow role. Preserve its authored
    heading level, but render it like the template's text-only eyebrow (no rule). */
 .tt-learning-room .tt-tab-panel .body-copy p.eyebrow,
-.tt-learning-room .tt-lesson-idea-copy > .eyebrow:first-child,
+.tt-learning-room .tt-lesson-idea-copy > h6:first-of-type,
 .tt-learning-room .tt-lesson-idea-copy > .eyebrow:first-of-type,
-.tt-learning-room .tt-tab-panel[data-tab-panel="idea"] .tt-lesson-idea-copy > h6:first-child,
-.tt-learning-room .tt-tab-panel[data-tab-panel="idea"] .tt-lesson-idea-copy > h6:first-of-type,
 .preview-body p.eyebrow,
-.preview-body > h6:first-child,
 .preview-body > h6:first-of-type,
-.preview-body > .eyebrow:first-child,
-.preview-body > .eyebrow:first-of-type,
-.preview-body .eyebrow:first-child{
+.preview-body > .eyebrow:first-of-type {
   display: block;
   margin: 0 0 14px;
   color: #39463d;
@@ -88,15 +83,11 @@
 }
 
 .tt-learning-room .tt-tab-panel .body-copy p.eyebrow::before,
-.tt-learning-room .tt-lesson-idea-copy > .eyebrow:first-child::before,
+.tt-learning-room .tt-lesson-idea-copy > h6:first-of-type::before,
 .tt-learning-room .tt-lesson-idea-copy > .eyebrow:first-of-type::before,
-.tt-learning-room .tt-tab-panel[data-tab-panel="idea"] .tt-lesson-idea-copy > h6:first-child::before,
-.tt-learning-room .tt-tab-panel[data-tab-panel="idea"] .tt-lesson-idea-copy > h6:first-of-type::before,
 .preview-body p.eyebrow::before,
-.preview-body > h6:first-child::before,
 .preview-body > h6:first-of-type::before,
-.preview-body > .eyebrow:first-child::before,
-.preview-body > .eyebrow:first-of-type::before{
+.preview-body > .eyebrow:first-of-type::before {
   content: none;
   display: none;
 }
