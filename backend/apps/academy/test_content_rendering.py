@@ -1031,6 +1031,22 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn(".tt-learning-room .tt-lesson-idea-copy,\n.preview-body {", parity_css)
         self.assertIn(".rich-editor-canvas {", parity_css)
         self.assertIn("max-width: none;", parity_css)
+        for selector in (
+            ".tt-learning-room .tt-tab-panel h6,",
+            ".tt-learning-room .tt-lesson-idea-copy h6,",
+            ".preview-body h6,",
+            ".rich-editor-canvas h6,",
+            ".rich-editor-canvas h6::before,",
+        ):
+            with self.subTest(selector=selector):
+                self.assertIn(selector, parity_css)
+        for legacy_selector in (
+            ".tt-learning-room .tt-lesson-idea-copy > h6:first-of-type,",
+            ".preview-body > h6:first-of-type,",
+            ".rich-editor-canvas > h6:first-of-type,",
+        ):
+            with self.subTest(legacy_selector=legacy_selector):
+                self.assertNotIn(legacy_selector, parity_css)
         for value in (
             "border-left: 3px solid #c36b4d;",
             "font: 400 clamp(20px, 2.2vw, 27px)/1.5 Georgia,",
