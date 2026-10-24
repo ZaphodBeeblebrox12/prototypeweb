@@ -886,6 +886,52 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
   const STORAGE_KEY = 'tradethesis-course-builder-preview-v1';
   const $ = (s, root=document) => root.querySelector(s);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+
+  // Local-only diagnostics for startup failures. These never transmit course data.
+  const courseBuilderDiagnostics = {
+    startedAt: new Date().toISOString(),
+    stage: 'script-started',
+    history: [],
+    errors: [],
+    lastApiRequest: null
+  };
+  window.__TRADETHESIS_COURSE_BUILDER_DIAGNOSTICS = courseBuilderDiagnostics;
+  function diagnosticStage(stage, details) {
+    const entry = {stage:String(stage), at:new Date().toISOString()};
+    if (details && typeof details === 'object') entry.details = details;
+    courseBuilderDiagnostics.stage = entry.stage;
+    courseBuilderDiagnostics.lastUpdatedAt = entry.at;
+    courseBuilderDiagnostics.history.push(entry);
+    if (courseBuilderDiagnostics.history.length > 40) courseBuilderDiagnostics.history.shift();
+  }
+  function diagnosticError(stage, error, details) {
+    const priorStage = courseBuilderDiagnostics.stage;
+    const item = {
+      at:new Date().toISOString(),
+      stage:String(stage),
+      priorStage:String(priorStage || ''),
+      name:String(error && error.name || 'Error').slice(0, 100),
+      message:String(error && error.message != null ? error.message : (error == null ? 'Unknown error' : error)).slice(0, 600),
+      stack:String(error && error.stack || '').slice(0, 3000)
+    };
+    if (details && typeof details === 'object') item.details = details;
+    courseBuilderDiagnostics.errors.push(item);
+    if (courseBuilderDiagnostics.errors.length > 10) courseBuilderDiagnostics.errors.shift();
+    courseBuilderDiagnostics.lastError = item;
+    diagnosticStage(stage, {priorStage:item.priorStage, message:item.message, ...(details || {})});
+    console.error('[Course Builder diagnostic]', item);
+    return item;
+  }
+  window.addEventListener('error', event => {
+    diagnosticError('window-error', event.error || new Error(event.message || 'Unknown browser error'), {
+      filename:String(event.filename || '').slice(0, 300),
+      line:Number(event.lineno || 0),
+      column:Number(event.colno || 0)
+    });
+  });
+  window.addEventListener('unhandledrejection', event => {
+    diagnosticError('unhandled-rejection', event.reason || new Error('An unhandled promise rejection occurred.'));
+  });
   const uid = prefix => `${prefix}-${Math.random().toString(36).slice(2,7)}-${Date.now().toString(36).slice(-4)}`;
   const slugify = value => String(value || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,150);
   const nowText = () => new Date().toLocaleString([], {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
@@ -1068,7 +1114,9 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
     }
     return getSeed();
   }
+  diagnosticStage('browser-state-normalization-started');
   let state=normalizeLoadedState(load());
+  diagnosticStage('browser-state-normalization-complete', {courseCount:state.courses.length, selectedCoursePresent:Boolean(state.selectedCourseId)});
   // Regional editing may contain many rich-text variants. Start on the light overview
   // screen after a reload; the selected course and all draft content remain untouched.
   if (state.tab === 'regional') state.tab = 'overview';
@@ -2197,7 +2245,7 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
     try {
       renderEditorImplementation();
     } catch (error) {
-      console.error('Could not render the selected Course Builder draft.', error);
+      diagnosticError('editor-render', error);
       const workspace = $('#workspace');
       if (workspace) {
         workspace.innerHTML = '<div class="empty-state"><h3>Could not open this draft</h3><p>Your saved content has not been deleted. The editor encountered older or incomplete saved data. Refresh to reload the Academy copy, or create a separate draft while this is investigated.</p></div>';
@@ -2352,7 +2400,23 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
         '</div></div><span class="pill ' + (item.state === 'Coming soon' ? 'status' : 'published') + '">' +
         (item.state === 'Coming soon' ? 'Coming soon' : 'Published') + '</span></div></div></article>').join('');
     }
-  function render(){renderSidebar();renderEditorSafely();renderCatalogue();renderHeaderState();}
+  function runRenderStep(name, renderStep) {
+    diagnosticStage('render-' + name + '-started');
+    try {
+      renderStep();
+      diagnosticStage('render-' + name + '-complete');
+    } catch (error) {
+      diagnosticError('render-' + name + '-failed', error);
+    }
+  }
+  function render() {
+    diagnosticStage('render-started');
+    runRenderStep('sidebar', renderSidebar);
+    runRenderStep('editor', renderEditorSafely);
+    runRenderStep('catalogue', renderCatalogue);
+    runRenderStep('header-state', renderHeaderState);
+    diagnosticStage('render-complete');
+  }
   function selectCourse(id){if(academyReady&&currentCourse()&&currentCourse().id!==id){clearTimeout(saveTimer);clearTimeout(academySaveTimer);saveCurrentToAcademy(false,false).catch(error=>toast('Could not save the previous draft: '+error.message));}state.selectedCourseId=id;const c=currentCourse();if(c){state.selectedModuleId=c.modules[0]?.id||null;state.selectedLessonId=c.modules[0]?.lessons[0]?.id||null;}state.view='editor';previewMode=false;render();}
   function saveDraft(){const c=currentCourse();if(!c)return;c.updatedAt=nowText();if(c.status==='published')c.status='draft-update';persist(true);render();}
   function publishCourse(){const c=currentCourse();if(!c)return;const errs=[];if(!c.title.trim())errs.push('Add a course title.');if(!c.summary.trim())errs.push('Add a short course summary.');if(!c.modules.length)errs.push('Add at least one module.');if(!allLessons(c).length)errs.push('Add at least one lesson.');if(allLessons(c).some(l=>!l.title.trim()||!l.content.trim()))errs.push('Every lesson needs a title and lesson content.');if(errs.length){toast(errs[0]);if(!c.title.trim()||!c.summary.trim())state.tab='overview';else if(!allLessons(c).length)state.tab='curriculum';else state.tab='lesson';render();return;}const snapshot=JSON.parse(JSON.stringify(c));snapshot.status='published';snapshot.publishedSnapshot=null;snapshot.updatedAt=nowText();c.status='published';c.publishedAt=nowText();c.updatedAt=nowText();c.publishedSnapshot=snapshot;persist(false);state.tab='overview';render();$('#catalogueSection').scrollIntoView({behavior:'smooth',block:'start'});toast('Published in this preview. The course now appears under Courses offered.');}
@@ -3802,6 +3866,14 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
   };
   async function academyRequest(method, body) {
     const headers = {'Accept':'application/json'};
+    const requestDiagnostic = {
+      method:String(method),
+      url:'/staff/course-builder/api/',
+      startedAt:new Date().toISOString(),
+      phase:'fetch-started'
+    };
+    courseBuilderDiagnostics.lastApiRequest = requestDiagnostic;
+    diagnosticStage('api-fetch-started', {method:String(method), url:requestDiagnostic.url});
     if (method !== 'GET') {
       headers['Content-Type'] = 'application/json';
       headers['X-CSRFToken'] = csrfValue();
@@ -3815,7 +3887,18 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
         ...(body ? {body:JSON.stringify(body)} : {}),
         ...(controller ? {signal:controller.signal} : {})
       });
+      requestDiagnostic.phase = 'response-received';
+      requestDiagnostic.status = Number(response.status);
+      requestDiagnostic.ok = Boolean(response.ok);
+      requestDiagnostic.responseAt = new Date().toISOString();
+      diagnosticStage('api-response-received', {
+        method:String(method), status:Number(response.status), ok:Boolean(response.ok)
+      });
     } catch (error) {
+      requestDiagnostic.phase = 'fetch-failed';
+      requestDiagnostic.errorName = String(error && error.name || 'Error').slice(0, 100);
+      requestDiagnostic.errorMessage = String(error && error.message || error || 'Unknown error').slice(0, 600);
+      diagnosticError('api-fetch-failed', error, {method:String(method), url:requestDiagnostic.url});
       if (error?.name === 'AbortError') {
         throw new Error('The Academy request timed out after 20 seconds. Refresh the builder and check the Academy service.');
       }
@@ -3824,6 +3907,22 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
       window.clearTimeout(timeoutId);
     }
     const payload = await response.json().catch(()=>({detail:`The Academy returned a non-JSON response (HTTP ${response.status}). Your browser draft cache has not been cleared.`}));
+    requestDiagnostic.phase = 'response-parsed';
+    requestDiagnostic.parsedAt = new Date().toISOString();
+    requestDiagnostic.payloadKeys = payload && typeof payload === 'object' ? Object.keys(payload).slice(0, 40) : [];
+    requestDiagnostic.payloadSummary = {
+      draftCount:Array.isArray(payload?.drafts) ? payload.drafts.length : null,
+      publishedOptionCount:Array.isArray(payload?.published_course_options) ? payload.published_course_options.length : null,
+      relatedCourseCount:Array.isArray(payload?.related_courses) ? payload.related_courses.length : null,
+      comingSoonCount:Array.isArray(payload?.coming_soon_courses) ? payload.coming_soon_courses.length : null
+    };
+    diagnosticStage('api-response-parsed', {
+      method:String(method),
+      status:Number(response.status),
+      ok:Boolean(response.ok),
+      payloadKeys:requestDiagnostic.payloadKeys,
+      payloadSummary:requestDiagnostic.payloadSummary
+    });
     if (!response.ok) {
       const detail = Array.isArray(payload.detail) ? payload.detail.join(' ') : (payload.detail || 'The Academy request failed.');
       const publishErrors = Array.isArray(payload.publish_errors)
@@ -3992,8 +4091,16 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
 
   async function syncAcademy() {
     const revisionAtStart=editRevision;
+    diagnosticStage('academy-sync-started', {revisionAtStart});
     try {
       const result = await academyRequest('GET');
+      diagnosticStage('academy-sync-payload-received', {
+        draftCount:Array.isArray(result.drafts) ? result.drafts.length : null,
+        publishedOptionCount:Array.isArray(result.published_course_options) ? result.published_course_options.length : null,
+        relatedCourseCount:Array.isArray(result.related_courses) ? result.related_courses.length : null,
+        comingSoonCount:Array.isArray(result.coming_soon_courses) ? result.coming_soon_courses.length : null,
+        hasAssetStorage:Boolean(result.asset_storage)
+      });
       const storageNotice = document.querySelector('[data-image-storage-status]');
       const storageStatus = result.asset_storage || {};
       if (storageNotice) {
@@ -4110,15 +4217,22 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
         renderCatalogue();
       }
       if (state.tab === 'preview') window.setTimeout(() => refreshBuilderWebsitePreview(false), 0);
+      diagnosticStage('academy-sync-complete', {
+        draftCount:remoteDrafts.length,
+        publishedOptionCount:Array.isArray(result.published_course_options) ? result.published_course_options.length : 0,
+        catalogueCount:demoOffers.length + comingSoonOffers.length
+      });
       if (remoteDrafts.length) toast('Connected to Academy. Shared drafts are available across devices.');
       else toast('Connected to Academy. Save your first draft to make it available across devices.');
     } catch (error) {
+      diagnosticError('academy-sync-failed', error);
       academyReady = false;
       catalogueLoaded = true;
       catalogueLoadFailed = true;
       renderCatalogue();
       const storageNotice = document.querySelector('[data-image-storage-status]');
       if (storageNotice) storageNotice.textContent = 'Could not verify the Academy image-storage configuration. ' + error.message;
+      diagnosticStage('academy-sync-failure-displayed');
       toast('Could not connect to the Academy draft service: ' + error.message);
     }
   }
@@ -4305,7 +4419,7 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
     try {
       renderEditorWithAllEnhancements();
     } catch (error) {
-      console.error('Could not render the selected Course Builder draft.', error);
+      diagnosticError('editor-render', error);
       const workspace = $('#workspace');
       if (workspace) {
         workspace.innerHTML = '<div class="empty-state"><h3>Could not open this draft</h3><p>Your saved content has not been deleted. The editor encountered older or incomplete saved data. Refresh to reload the Academy copy, or create a separate draft while this is investigated.</p></div>';
@@ -4316,7 +4430,10 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
 
   if (!state.savedAt) persist(false);
   suppressDirtyTracking = false;
+  diagnosticStage('initial-render-dispatch');
   render();
+  diagnosticStage('initial-render-returned');
+  diagnosticStage('academy-sync-dispatch');
   syncAcademy();
 
   // Clean exits navigate immediately. If edits or a save are pending, offer to
