@@ -1227,8 +1227,15 @@ def course_builder_api(request):
                     "points": ["Content is being prepared."],
                 }],
             })
+        published_course_options = [
+            {"id": str(course["id"]), "title": course["title"], "slug": course["slug"]}
+            for course in Course.objects.filter(
+                status=Course.Status.PUBLISHED,
+            ).order_by("position", "title").values("id", "title", "slug")
+        ]
         return JsonResponse({
             "drafts": drafts, "related_courses": related_courses,
+            "published_course_options": published_course_options,
             "lesson_references": lesson_references, "coming_soon_courses": coming_soon_courses,
             "asset_storage": asset_storage_status,
         })
