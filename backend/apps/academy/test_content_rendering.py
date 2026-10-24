@@ -893,121 +893,52 @@ class TradingNotebookTemplateTests(SimpleTestCase):
 
     def test_course_builder_heading_ladder_is_active_in_both_preview_paths(self):
         backend = Path(__file__).resolve().parents[2]
-        website_preview_css = (backend / "static" / "academy" / "course-import-preview.css").read_text(encoding="utf-8")
+        parity_css = (backend / "static" / "academy" / "course-template-parity.css").read_text(encoding="utf-8")
         learning_room_css = (backend / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
+        website_preview_css = (backend / "static" / "academy" / "course-import-preview.css").read_text(encoding="utf-8")
         builder_source = (backend / "apps" / "academy" / "course_builder_preview.html").read_text(encoding="utf-8")
+        lesson_template = (backend / "templates" / "academy" / "lesson.html").read_text(encoding="utf-8")
+        admin_template = (backend / "templates" / "academy" / "course_import_website_preview.html").read_text(encoding="utf-8")
 
-        # The website-preview heading blocks must remain active CSS, not be swallowed by a comment.
-        for css in (website_preview_css, learning_room_css):
-            self.assertEqual(css.count("/*"), css.count("*/"))
+        # The one typography stylesheet must load after each legacy stylesheet path.
+        self.assertGreater(lesson_template.index("course-template-parity.css"), lesson_template.index("notebook-card.css"))
+        self.assertGreater(admin_template.index("course-template-parity.css"), admin_template.index("notebook-card.css"))
+        parity_link = builder_source.index('/static/academy/course-template-parity.css')
+        self.assertGreater(parity_link, builder_source.index("</style>"))
+        self.assertLess(parity_link, builder_source.index("</head>"))
 
-        styles = (
-            (learning_room_css, ".tt-learning-room .tt-tab-panel", "Visual parity pass 7: map every Academy content heading"),
-            (website_preview_css, ".tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel", "Visual parity pass 7: apply the canonical heading ladder"),
-        )
-        for css, prefix, marker in styles:
-            with self.subTest(stylesheet=prefix):
-                canonical_start = css.rfind(marker)
-                self.assertGreater(canonical_start, 0, f"Missing canonical heading block in {prefix}")
-                canonical = css[canonical_start:]
-                h1 = re.search(re.escape(prefix + " h1") + r"\s*\{([^}]*)\}", canonical)
-                h2 = re.search(re.escape(prefix + " h2") + r"\s*\{([^}]*)\}", canonical)
-                h3 = re.search(re.escape(prefix + " h3") + r"\s*\{([^}]*)\}", canonical)
-                h6 = re.search(re.escape(prefix + " h6") + r"\s*\{([^}]*)\}", canonical)
-                self.assertIsNotNone(h1, f"Missing canonical H1 rule in {prefix}")
-                self.assertIsNotNone(h2, f"Missing canonical H2 rule in {prefix}")
-                self.assertIsNotNone(h3, f"Missing canonical H3 rule in {prefix}")
-                self.assertIsNotNone(h6, f"Missing canonical H6 eyebrow rule in {prefix}")
-                # Authored Markdown H2 visually assumes the template's article H3 role.
-                self.assertIn("margin: 0 0 16px;", h2.group(1))
-                self.assertIn("max-width: 760px;", h2.group(1))
-                self.assertIn("font-size: clamp(29px, 2.8vw, 37px);", h2.group(1))
-                self.assertIn("font-weight: 400;", h2.group(1))
-                self.assertIn("line-height: 1.13;", h2.group(1))
-                self.assertIn("letter-spacing: -.04em;", h2.group(1))
-                self.assertIn("font-size: 22px;", h3.group(1))
-                self.assertIn("line-height: 1.18;", h3.group(1))
-                self.assertIn("display: flex;", h6.group(1))
-                self.assertIn("align-items: center;", h6.group(1))
-                self.assertIn("gap: 9px;", h6.group(1))
-                self.assertIn("margin: 0 0 14px;", h6.group(1))
-                self.assertIn("color: #98631b;", h6.group(1))
-                self.assertIn("font-size: 11px;", h6.group(1))
-                self.assertIn("font-weight: 850;", h6.group(1))
-                self.assertIn("line-height: inherit;", h6.group(1))
-                self.assertIn("letter-spacing: .17em;", h6.group(1))
-                self.assertIn("text-transform: uppercase;", h6.group(1))
-                self.assertIn("letter-spacing: .17em;", h6.group(1))
-                eyebrow_rule = re.search(re.escape(prefix + " h6::before") + r"\s*\{([^}]*)\}", canonical)
-                self.assertIsNotNone(eyebrow_rule, f"Missing eyebrow rule decoration in {prefix}")
-                self.assertIn('content: "";', eyebrow_rule.group(1))
-                self.assertIn("width: 24px;", eyebrow_rule.group(1))
-                self.assertIn("height: 2px;", eyebrow_rule.group(1))
-                self.assertIn("background: #b48635;", eyebrow_rule.group(1))
-                for level, rule in (("H1", h1), ("H3", h3)):
-                    with self.subTest(heading=level, stylesheet=prefix):
-                        self.assertIn("font-weight: 600;", rule.group(1))
-                        self.assertIn("letter-spacing: -.025em;", rule.group(1))
-                narrow_rules = css[css.rfind("@media (max-width: 680px)"):css.rfind("@media (max-width: 500px)")]
-                self.assertRegex(narrow_rules, re.escape(prefix + " h2") + r"\s*\{[^}]*font-size: 29px;")
-                self.assertRegex(
-                    css[css.rfind("@media (max-width: 500px)"):],
-                    re.escape(prefix + " h2") + r"\s*\{[^}]*font-size: 27px;",
-                )
-                self.assertRegex(
-                    css[css.rfind("@media (max-width: 500px)"):],
-                    re.escape(prefix + " h3") + r"\s*\{[^}]*font-size: 21px;",
-                )
+        # Legacy pass-7 blocks are removed; a single stylesheet owns the heading scale.
+        self.assertNotIn("Visual parity pass 7: map every Academy content heading", learning_room_css)
+        self.assertNotIn("Visual parity pass 7: apply the canonical heading ladder", website_preview_css)
+        self.assertNotIn("Canonical authored-heading ladder", builder_source)
+        self.assertEqual(learning_room_css.count("/*"), learning_room_css.count("*/"))
+        self.assertEqual(website_preview_css.count("/*"), website_preview_css.count("*/"))
 
-        # The local preview must share the scale, including its narrow-screen H3 size.
-        ladder_start = builder_source.rfind("/* Canonical authored-heading ladder: keep the Builder's local learner preview")
-        self.assertGreater(ladder_start, 0)
-        ladder_end = builder_source.index("</style>", ladder_start)
-        ladder = builder_source[ladder_start:ladder_end]
-        expected = {
-            "h1": "font-size: clamp(42px, 5vw, 64px);",
-            "h2": "font-size: clamp(29px, 2.8vw, 37px);",
-            "h3": "font-size: 22px;",
-            "h4": "font-size: 20px;",
-            "h5": "font-size: 16px;",
-            "h6": "font-size: 11px;",
-        }
-        for level, declaration in expected.items():
-            with self.subTest(heading=level):
-                self.assertIn(f".preview-body {level} {{", ladder)
-                self.assertIn(declaration, ladder)
-        self.assertIn("@media (max-width: 500px)", ladder)
-        self.assertIn(".preview-body h3 { font-size: 21px; }", ladder)
-        for level in ("h1", "h3"):
-            rule = re.search(re.escape(f".preview-body {level}") + r"\s*\{([^}]*)\}", ladder)
-            self.assertIsNotNone(rule, f"Missing local preview {level.upper()} rule")
-            self.assertIn("font-weight: 600;", rule.group(1))
-            self.assertIn("letter-spacing: -.025em;", rule.group(1))
-        h2 = re.search(re.escape(".preview-body h2") + r"\s*\{([^}]*)\}", ladder)
-        self.assertIsNotNone(h2, "Missing local preview H2 article-title mapping")
-        self.assertIn("font-weight: 400;", h2.group(1))
-        self.assertIn("line-height: 1.13;", h2.group(1))
-        self.assertIn("letter-spacing: -.04em;", h2.group(1))
-        h6 = re.search(re.escape(".preview-body h6") + r"\s*\{([^}]*)\}", ladder)
-        self.assertIsNotNone(h6, "Missing local preview H6 eyebrow rule")
-        self.assertIn("font-size: 11px;", h6.group(1))
-        self.assertIn("font-weight: 850;", h6.group(1))
-        self.assertIn("line-height: inherit;", h6.group(1))
-        self.assertIn("letter-spacing: .17em;", h6.group(1))
-        self.assertIn("display: flex;", h6.group(1))
-        self.assertIn("align-items: center;", h6.group(1))
-        self.assertIn("gap: 9px;", h6.group(1))
-        self.assertIn("margin: 0 0 14px;", h6.group(1))
-        self.assertIn("color: #98631b;", h6.group(1))
-        h6_before = re.search(re.escape(".preview-body h6::before") + r"\s*\{([^}]*)\}", ladder)
-        self.assertIsNotNone(h6_before, "Missing local preview eyebrow rule decoration")
-        self.assertIn("width: 24px;", h6_before.group(1))
-        self.assertIn("height: 2px;", h6_before.group(1))
-        self.assertIn("background: #b48635;", h6_before.group(1))
-        self.assertIn(".preview-body h2 { font-size: 29px; }", ladder)
-        self.assertIn(".preview-body h2 { font-size: 27px; }", ladder)
-        # This unused helper flattened Markdown heading levels to H3 and is no longer needed:
-        self.assertNotIn("function renderMarkdown(src)", builder_source)
+        def rule_body(selector):
+            start = parity_css.index(selector)
+            opening = parity_css.index("{", start)
+            closing = parity_css.index("}", opening)
+            return parity_css[opening + 1:closing]
+
+        h2 = rule_body(".tt-learning-room .tt-tab-panel h2,")
+        h3 = rule_body(".tt-learning-room .tt-tab-panel h3,")
+        h4 = rule_body(".tt-learning-room .tt-tab-panel h4,")
+        eyebrow = rule_body(".tt-learning-room .tt-lesson-idea-copy > h6:first-child,")
+        no_rule = rule_body(".tt-learning-room .tt-lesson-idea-copy > h6:first-child::before,")
+
+        for value in ("font-size: 31px;", "font-weight: 600;", "line-height: 1.18;", "letter-spacing: -.025em;", "margin: 0 0 14px;", "max-width: 730px;"):
+            self.assertIn(value, h2)
+        for value in ("font-size: 23px;", "font-weight: 600;", "line-height: 1.25;", "letter-spacing: -.025em;", "margin: 30px 0 9px;"):
+            self.assertIn(value, h3)
+        for value in ("font-size: 20px;", "font-weight: 400;", "line-height: 1.2;", "letter-spacing: -.02em;", "margin: 24px 0 8px;"):
+            self.assertIn(value, h4)
+        for value in ("font-size: 10px;", "font-weight: 850;", "line-height: 1.4;", "letter-spacing: .15em;", "text-transform: uppercase;", "margin: 0 0 9px;", "var(--tt-green"):
+            self.assertIn(value, eyebrow)
+        self.assertIn("content: none;", no_rule)
+        self.assertIn("display: none;", no_rule)
+        self.assertIn("@media (max-width: 560px)", parity_css)
+        self.assertIn("font-size: 27px;", parity_css)
+        self.assertIn("font-size: 21px;", parity_css)
 
     def test_builder_learner_preview_uses_the_saved_academy_website_template(self):
         builder = Path(__file__).resolve().parent / "course_builder_preview.html"

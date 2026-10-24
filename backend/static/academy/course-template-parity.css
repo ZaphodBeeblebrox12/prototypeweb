@@ -1,0 +1,87 @@
+/* TradeThesis course-template typography parity.
+   Source of truth: tradethesis_course_builder_output_preview_v2.html.
+   Load after legacy component styles. Keep the shared heading-role definitions here. */
+
+.tt-learning-room .tt-lesson-idea-copy,
+.preview-body {
+  max-width: 730px;
+  min-width: 0;
+}
+
+.tt-learning-room .tt-tab-panel h2,
+.preview-body h2 {
+  max-width: 730px;
+  margin: 0 0 14px;
+  color: var(--tt-ink, var(--ink, #27382e));
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 31px;
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -.025em;
+}
+
+.tt-learning-room .tt-tab-panel h3,
+.preview-body h3 {
+  max-width: 730px;
+  margin: 30px 0 9px;
+  color: var(--tt-ink, var(--ink, #27382e));
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -.025em;
+}
+
+.tt-learning-room .tt-tab-panel h4,
+.preview-body h4 {
+  margin: 24px 0 8px;
+  color: var(--tt-ink, var(--ink, #27382e));
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -.02em;
+}
+
+.tt-learning-room .tt-lesson-idea-copy p,
+.preview-body p {
+  margin: 0 0 15px;
+  color: #39463d;
+  line-height: 1.8;
+}
+
+/* In the Academy source, the lead H6 is an eyebrow role. Preserve its authored
+   heading level, but render it like the template's text-only eyebrow (no rule). */
+.tt-learning-room .tt-lesson-idea-copy > h6:first-child,
+.tt-learning-room .tt-lesson-idea-copy > .eyebrow:first-child,
+.preview-body > h6:first-child,
+.preview-body > .eyebrow:first-child,
+.preview-body .eyebrow:first-child {
+  display: block;
+  margin: 0 0 9px;
+  color: var(--tt-green, var(--green, #345943));
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.4;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+}
+
+.tt-learning-room .tt-lesson-idea-copy > h6:first-child::before,
+.preview-body > h6:first-child::before {
+  content: none;
+  display: none;
+}
+
+@media (max-width: 560px) {
+  .tt-learning-room .tt-tab-panel h2,
+  .preview-body h2 {
+    font-size: 27px;
+  }
+
+  .tt-learning-room .tt-tab-panel h3,
+  .preview-body h3 {
+    font-size: 21px;
+  }
+}
