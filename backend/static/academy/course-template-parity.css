@@ -4,10 +4,17 @@
    view, builder preview and editable lesson canvas visually aligned. */
 
 .tt-learning-room .tt-lesson-idea-copy,
-.preview-body,
-.rich-editor-canvas {
+.preview-body {
   max-width: 730px;
   min-width: 0;
+}
+
+/* The editing surface fills the workspace; reading measure belongs to its content. */
+.rich-editor-canvas {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .tt-learning-room .tt-tab-panel h2,
@@ -298,4 +305,28 @@
     left: 9px;
     font-size: 47px;
   }
+}
+
+
+/* Keep prose at the learner reading measure without narrowing the editable surface. */
+.rich-editor-canvas > p,
+.rich-editor-canvas > ul,
+.rich-editor-canvas > ol,
+.rich-editor-canvas > blockquote,
+.rich-editor-canvas > hr,
+.rich-editor-canvas > h1,
+.rich-editor-canvas > h2,
+.rich-editor-canvas > h3,
+.rich-editor-canvas > h4,
+.rich-editor-canvas > h5,
+.rich-editor-canvas > h6,
+.rich-editor-canvas > table,
+.rich-editor-canvas > .lesson-table-wrap,
+.rich-editor-canvas > .tt-editor-table-scroll {
+  max-width: 730px;
+}
+
+.rich-editor-canvas > .lesson-table-wrap,
+.rich-editor-canvas > .tt-editor-table-scroll {
+  width: 100%;
 }
