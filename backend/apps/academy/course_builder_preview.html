@@ -823,6 +823,26 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
   border: 0 !important;
   background: transparent !important;
 }
+
+/* TradeThesis-native confirmation and input dialogs. */
+.builder-dialog-backdrop { position:fixed; inset:0; z-index:12000; display:grid; place-items:center; padding:22px; background:rgb(25 35 28 / 48%); backdrop-filter:blur(3px); }
+.builder-dialog-backdrop[hidden], .builder-dialog [hidden] { display:none !important; }
+.builder-dialog { width:min(100%,460px); max-height:min(88vh,720px); overflow:auto; padding:clamp(22px,4vw,30px); border:1px solid #d8ddcf; border-radius:14px; background:#fbfaf6; color:#27382e; box-shadow:0 24px 80px rgb(18 29 21 / 24%),0 3px 12px rgb(18 29 21 / 9%); }
+.builder-dialog-eyebrow { margin:0 0 10px; color:#5e755f; font-size:10px; font-weight:850; letter-spacing:.13em; line-height:1.4; text-transform:uppercase; }
+.builder-dialog h2 { margin:0 0 10px; color:#294c38; font:500 clamp(23px,3vw,29px)/1.12 Georgia,"Times New Roman",serif; letter-spacing:-.025em; }
+.builder-dialog-message { margin:0 0 20px; color:#57665a; font-size:13px; line-height:1.65; white-space:pre-line; }
+.builder-dialog-field { display:grid; gap:7px; margin:0 0 22px; }
+.builder-dialog-field label { color:#344b3b; font-size:12px; font-weight:750; }
+.builder-dialog-field input { width:100%; min-width:0; box-sizing:border-box; padding:11px 12px; border:1px solid #cbd4c8; border-radius:7px; background:#fffefa; color:#27382e; font:inherit; font-size:14px; }
+.builder-dialog-field input:focus-visible { outline:3px solid rgb(52 89 67 / 22%); border-color:#345943; }
+.builder-dialog-actions { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:9px; margin-top:8px; }
+.builder-dialog-actions button { min-height:40px; padding:9px 15px; border:1px solid #cbd4c8; border-radius:999px; background:#fffefa; color:#314a39; font:inherit; font-size:12px; font-weight:800; cursor:pointer; }
+.builder-dialog-actions button.primary { border-color:#345943; background:#345943; color:#fffefa; }
+.builder-dialog-actions button.danger { border-color:#934b3e; background:#934b3e; color:#fffefa; }
+.builder-dialog-actions button:hover { filter:brightness(.97); }
+.builder-dialog-actions button:focus-visible { outline:3px solid rgb(180 134 53 / 48%); outline-offset:2px; }
+body.builder-dialog-open { overflow:hidden; }
+@media (max-width:520px) { .builder-dialog-backdrop { padding:12px; align-items:end; } .builder-dialog { max-height:90vh; padding:22px 18px; border-radius:14px 14px 9px 9px; } .builder-dialog-actions button { flex:1 1 auto; } }
 </style>
 <link rel="stylesheet" href="/static/academy/course-template-parity.css">
 </head>
@@ -870,6 +890,23 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
     <div class="catalogue-grid" id="catalogueGrid"></div>
     <div class="draft-footer"><p><strong>Publication is separate from pricing.</strong> A published course can appear in the catalogue, but paid checkout should only activate after its Course Offer, price and access rules are configured in the existing commerce admin.</p><button class="btn small" type="button" id="backToBuilder">Back to builder ↑</button></div>
   </section>
+  <div class="builder-dialog-backdrop" id="builderDialogBackdrop" hidden>
+    <section class="builder-dialog" id="builderDialog" role="dialog" aria-modal="true" aria-labelledby="builderDialogTitle" aria-describedby="builderDialogMessage" tabindex="-1">
+      <div class="builder-dialog-eyebrow">TradeThesis · Course Builder</div>
+      <h2 id="builderDialogTitle">Please confirm</h2>
+      <p class="builder-dialog-message" id="builderDialogMessage"></p>
+      <form id="builderDialogForm">
+        <div class="builder-dialog-field" id="builderDialogField" hidden>
+          <label id="builderDialogInputLabel" for="builderDialogInput">Value</label>
+          <input id="builderDialogInput" name="value" autocomplete="off">
+        </div>
+        <div class="builder-dialog-actions">
+          <button type="button" id="builderDialogCancel">Cancel</button>
+          <button type="submit" id="builderDialogConfirm" class="primary">Continue</button>
+        </div>
+      </form>
+    </section>
+  </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </div>
 <script>
@@ -1123,6 +1160,130 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
   const allLessons=c=>c.modules.flatMap(m=>m.lessons);
   const activeStatus=c=>c.status==='published'?'Published':c.status==='draft-update'?'Draft changes':'Draft';
   function toast(message, duration){const el=$('#toast');const text=String(message??'');const isValidationError=text.includes('\n');el.textContent=text;el.classList.toggle('validation-error',isValidationError);el.setAttribute('role',isValidationError?'alert':'status');el.setAttribute('aria-live',isValidationError?'assertive':'polite');el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),duration||(isValidationError?15000:2800));}
+  const builderDialogBackdrop = $('#builderDialogBackdrop');
+  const builderDialogElement = $('#builderDialog');
+  const builderDialogForm = $('#builderDialogForm');
+  const builderDialogTitle = $('#builderDialogTitle');
+  const builderDialogMessage = $('#builderDialogMessage');
+  const builderDialogField = $('#builderDialogField');
+  const builderDialogInput = $('#builderDialogInput');
+  const builderDialogInputLabel = $('#builderDialogInputLabel');
+  const builderDialogCancel = $('#builderDialogCancel');
+  const builderDialogConfirm = $('#builderDialogConfirm');
+  let activeBuilderDialogResolve = null;
+  let activeBuilderDialogKind = 'confirm';
+  let builderDialogReturnFocus = null;
+
+  function closeBuilderDialog(result) {
+    if (!activeBuilderDialogResolve) return;
+    const resolve = activeBuilderDialogResolve;
+    activeBuilderDialogResolve = null;
+    builderDialogBackdrop.hidden = true;
+    document.body.classList.remove('builder-dialog-open');
+    const returnFocus = builderDialogReturnFocus;
+    builderDialogReturnFocus = null;
+    if (returnFocus?.isConnected && typeof returnFocus.focus === 'function') returnFocus.focus();
+    resolve(result);
+  }
+
+  function showBuilderDialog(options = {}) {
+    if (activeBuilderDialogResolve) closeBuilderDialog(activeBuilderDialogKind === 'prompt' ? null : false);
+    const kind = options.kind === 'prompt' ? 'prompt' : 'confirm';
+    activeBuilderDialogKind = kind;
+    builderDialogReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    builderDialogTitle.textContent = String(options.title || (kind === 'prompt' ? 'Enter a value' : 'Please confirm'));
+    builderDialogMessage.textContent = String(options.message || '');
+    builderDialogMessage.hidden = !builderDialogMessage.textContent;
+    builderDialogField.hidden = kind !== 'prompt';
+    builderDialogInputLabel.textContent = String(options.inputLabel || 'Value');
+    builderDialogInput.value = String(options.inputValue ?? '');
+    builderDialogInput.placeholder = String(options.placeholder || '');
+    builderDialogCancel.textContent = String(options.cancelLabel || 'Cancel');
+    builderDialogConfirm.textContent = String(options.confirmLabel || (kind === 'prompt' ? 'Continue' : 'Confirm'));
+    builderDialogConfirm.classList.toggle('danger', Boolean(options.danger));
+    builderDialogConfirm.classList.toggle('primary', !options.danger);
+    builderDialogBackdrop.hidden = false;
+    document.body.classList.add('builder-dialog-open');
+
+    return new Promise(resolve => {
+      activeBuilderDialogResolve = resolve;
+      window.requestAnimationFrame(() => {
+        if (!activeBuilderDialogResolve) return;
+        if (kind === 'prompt') {
+          builderDialogInput.focus();
+          builderDialogInput.select();
+        } else if (options.danger) {
+          builderDialogCancel.focus();
+        } else {
+          builderDialogConfirm.focus();
+        }
+      });
+    });
+  }
+
+  async function builderConfirm(message, options = {}) {
+    return Boolean(await showBuilderDialog({
+      kind:'confirm',
+      title:options.title || 'Please confirm',
+      message,
+      confirmLabel:options.confirmLabel || 'Continue',
+      cancelLabel:options.cancelLabel || 'Cancel',
+      danger:Boolean(options.danger)
+    }));
+  }
+
+  async function builderPrompt(message, defaultValue = '', options = {}) {
+    return await showBuilderDialog({
+      kind:'prompt',
+      title:options.title || message,
+      message:options.description || 'Enter a value to continue.',
+      inputLabel:options.inputLabel || message,
+      inputValue:defaultValue,
+      placeholder:options.placeholder || '',
+      confirmLabel:options.confirmLabel || 'Continue',
+      cancelLabel:options.cancelLabel || 'Cancel'
+    });
+  }
+
+  builderDialogForm.addEventListener('submit', event => {
+    event.preventDefault();
+    closeBuilderDialog(activeBuilderDialogKind === 'prompt' ? builderDialogInput.value : true);
+  });
+  builderDialogCancel.addEventListener('click', () => {
+    closeBuilderDialog(activeBuilderDialogKind === 'prompt' ? null : false);
+  });
+  builderDialogBackdrop.addEventListener('click', event => {
+    if (event.target === builderDialogBackdrop) {
+      closeBuilderDialog(activeBuilderDialogKind === 'prompt' ? null : false);
+    }
+  });
+  document.addEventListener('keydown', event => {
+    if (!activeBuilderDialogResolve) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeBuilderDialog(activeBuilderDialogKind === 'prompt' ? null : false);
+      return;
+    }
+    if (event.key !== 'Tab') return;
+    const focusable = Array.from(builderDialogElement.querySelectorAll(
+      'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+    )).filter(element => !element.hidden && element.getClientRects().length);
+    if (!focusable.length) {
+      event.preventDefault();
+      builderDialogElement.focus();
+      return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && (document.activeElement === first || !builderDialogElement.contains(document.activeElement))) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && (document.activeElement === last || !builderDialogElement.contains(document.activeElement))) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+
   function persist(showToast=false){try{state.savedAt=nowText();localStorage.setItem(STORAGE_KEY,JSON.stringify(state));state.storageAvailable=true;if(showToast)toast('Draft saved in this browser. Come back to this preview to continue.');renderSidebar();renderHeaderState();}catch(e){state.storageAvailable=false;toast('Browser storage is full. Reduce image size and try saving again.');}}
   function schedulePersist(){markDirty();clearTimeout(saveTimer);$('#saveIndicator')?.classList.add('saving');if(state.view==='preview')return;saveTimer=setTimeout(()=>{persist(false);const el=$('#saveIndicator');if(el)el.classList.remove('saving');},500);}
   function renderHeaderState(){const c=currentCourse();const save=$('#saveButton');if(save)save.textContent=state.savedAt?'Save draft':'Save draft';const pub=$('#publishButton');if(pub)pub.textContent='Submit for review';}
@@ -1336,8 +1497,8 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
     const parts = Array.from(editor.childNodes).map(richBlockMarkdown).filter(value => String(value || '').trim());
     return parts.join('\n\n').replace(/\u00a0/g,' ').replace(/\r\n?/g,'\n').replace(/\n[ \t]+\n/g,'\n\n').replace(/\n{3,}/g,'\n\n').trim();
   }
-  function promptTableDimension(label, defaultValue, maximum) {
-    const raw = window.prompt(label + ' (1–' + maximum + '):', String(defaultValue));
+  async function promptTableDimension(label, defaultValue, maximum) {
+    const raw = await builderPrompt(label + ' (1–' + maximum + '):', String(defaultValue), {title:label, description:'Enter a whole number in the allowed range.', inputLabel:'Number', confirmLabel:'Use value'});
     if (raw === null) return null;
     const value = Number(raw.trim());
     if (!Number.isInteger(value) || value < 1 || value > maximum) {
@@ -1434,12 +1595,12 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
     const container=range?.startContainer;const node=container?.nodeType===1?container:container?.parentElement;
     return node&&editor.contains(node)?node.closest('table'):null;
   }
-  function insertGroupedTable(editor) {
-    const columns=promptTableDimension('Number of columns',6,12);if(columns===null||columns===false)return;
+  async function insertGroupedTable(editor) {
+    const columns=await promptTableDimension('Number of columns',6,12);if(columns===null||columns===false)return;
     if(columns<4){toast('Option 5 grouped headers need at least four columns.');return;}
-    const bodyRows=promptTableDimension('Number of data rows',3,30);if(bodyRows===null||bodyRows===false)return;
-    const title=window.prompt('Table title shown above the table:','From observation to execution');if(title===null)return;
-    const groupLabel=window.prompt('Main grouped header label:','Price structure');if(groupLabel===null)return;
+    const bodyRows=await promptTableDimension('Number of data rows',3,30);if(bodyRows===null||bodyRows===false)return;
+    const title=await builderPrompt('Table title shown above the table:','From observation to execution',{title:'Name the table',description:'This title appears above the grouped table.',inputLabel:'Table title',confirmLabel:'Continue'});if(title===null)return;
+    const groupLabel=await builderPrompt('Main grouped header label:','Price structure',{title:'Name the price group',description:'Set the label for the grouped header spanning the price columns.',inputLabel:'Group label',confirmLabel:'Continue'});if(groupLabel===null)return;
     const groupWidth=columns-2;
     const leafLabels=['Open','High','Low','Close'];
     const groupCells=[
@@ -1460,15 +1621,15 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
     syncVisualEditorToModel(editor);captureRichEditorRange();
     toast('Option 5 grouped table inserted. Edit the caption, grouped heading, leaf labels and data cells directly; row and column controls preserve merged headers.');
   }
-  function editSelectedTable(action,editor) {
+  async function editSelectedTable(action,editor) {
     restoreRichEditorSelection(editor);
     const table=selectedEditorTable(editor);
     if(!table){toast('Place the cursor inside a table first.');return;}
     if(action==='group-headers'){
       if(table.querySelector('thead th[colspan]')){toast('This table already has grouped header cells. Edit the group labels directly.');return;}
       const width=tableLogicalWidth(table);if(width<2){toast('Add at least two columns before grouping headers.');return;}
-      const count=promptTableDimension('Number of header groups',2,Math.min(6,width));if(count===null||count===false)return;
-      const labels=[];for(let i=0;i<count;i++){const label=window.prompt('Header group '+(i+1)+' label:','Group '+(i+1));if(label===null)return;labels.push(label.trim()||('Group '+(i+1)));}
+      const count=await promptTableDimension('Number of header groups',2,Math.min(6,width));if(count===null||count===false)return;
+      const labels=[];for(let i=0;i<count;i++){const groupLabel=await builderPrompt('Header group '+(i+1)+' label:','Group '+(i+1),{title:'Name header group '+(i+1),description:'Choose a short label for this group of columns.',inputLabel:'Header group '+(i+1),confirmLabel:'Continue'});if(groupLabel===null)return;labels.push(groupLabel.trim()||('Group '+(i+1)));}
       let thead=table.querySelector('thead');if(!thead){thead=document.createElement('thead');table.insertBefore(thead,table.firstChild);}
       let headerRow=thead.querySelector('tr');if(!headerRow){headerRow=document.createElement('tr');thead.appendChild(headerRow);for(let i=0;i<width;i++){const th=document.createElement('th');th.textContent='Field '+(i+1);headerRow.appendChild(th);}}
       const groupRow=document.createElement('tr');let start=0;
@@ -3721,7 +3882,7 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
     // Preserve the content selection while clicking formatting controls.
     if (event.target.closest?.('[data-rich-command], [data-rich-table-action], [data-rich-format-toggle], [data-rich-format-option]')) event.preventDefault();
   });
-  document.addEventListener('click', event => {
+  document.addEventListener('click', async event => {
     const button = event.target.closest?.('[data-rich-command]');
     if (!button) return;
     event.preventDefault();
@@ -3730,42 +3891,43 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
     restoreRichEditorSelection(editor);
     const command = button.dataset.richCommand;
     if (command === 'grouped-table') {
-      insertGroupedTable(editor);
+      await insertGroupedTable(editor);
       return;
     } else if (command === 'blockquote') {
       document.execCommand('formatBlock', false, 'blockquote');
     } else if (command === 'table') {
-      const columns = promptTableDimension('Number of columns', 3, 12);
+      const columns = await promptTableDimension('Number of columns', 3, 12);
       if (columns === null || columns === false) return;
-      const rows = promptTableDimension('Number of rows', 3, 30);
+      const rows = await promptTableDimension('Number of rows', 3, 30);
       if (rows === null || rows === false) return;
       document.execCommand('insertHTML', false, richTableMarkup(rows, columns));
     } else if (command === 'link') {
       const selection = window.getSelection();
       const selectedText = selection && selection.toString();
       if (!selectedText) {
-        const label = window.prompt('Link text');
+        const label = await builderPrompt('Link text','',{title:'Insert a link',description:'Choose the text readers will see in the lesson.',inputLabel:'Link text',confirmLabel:'Continue'});
         if (label === null || !label.trim()) return;
-        const url = window.prompt('Website URL (https://…)');
+        const url = await builderPrompt('Website URL (https://…)','',{title:'Link destination',description:'Use a complete HTTP or HTTPS website address.',inputLabel:'Website URL',placeholder:'https://example.com',confirmLabel:'Insert link'});
         if (url === null || !/^https?:\/\//i.test(url.trim())) { toast('Enter a valid HTTP or HTTPS website URL.'); return; }
         document.execCommand('insertHTML', false, '<a href="' + esc(url.trim()) + '">' + esc(label.trim()) + '</a>');
       } else {
-        const url = window.prompt('Website URL (https://…)');
+        const url = await builderPrompt('Website URL (https://…)','',{title:'Link destination',description:'Use a complete HTTP or HTTPS website address.',inputLabel:'Website URL',placeholder:'https://example.com',confirmLabel:'Insert link'});
         if (url === null || !/^https?:\/\//i.test(url.trim())) { toast('Enter a valid HTTP or HTTPS website URL.'); return; }
         document.execCommand('createLink', false, url.trim());
       }
     } else {
       document.execCommand(command, false, null);
     }
+    restoreRichEditorSelection(editor);
     syncVisualEditorToModel(editor);
     captureRichEditorRange();
   });
-  document.addEventListener('click', event => {
+  document.addEventListener('click', async event => {
     const button = event.target.closest?.('[data-rich-table-action]');
     if (!button) return;
     event.preventDefault();
     const editor = button.closest('[data-rich-editor-wrapper]')?.querySelector('[data-visual-editor]');
-    if (editor) editSelectedTable(button.dataset.richTableAction, editor);
+    if (editor) await editSelectedTable(button.dataset.richTableAction, editor);
   });
   function closeRichFormatPickers(exceptPicker) {
     document.querySelectorAll('[data-rich-format-picker]').forEach(picker => {
@@ -4047,7 +4209,7 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
     }
     const active = currentCourse();
     if (active && !isUntouchedStarterDraft(active) && (!active.serverDraftId || hasUnsavedChanges)) {
-      if (hasUnsavedChanges && !window.confirm('Save the current course draft before opening another course?')) return;
+      if (hasUnsavedChanges && !await builderConfirm('Save the current course draft before opening another course?', {title:'Save before opening another course?', confirmLabel:'Save and continue'})) return;
       clearTimeout(saveTimer);
       clearTimeout(academySaveTimer);
       try { await saveCurrentToAcademy(false, true); }
@@ -4433,13 +4595,13 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
 
   // Clean exits navigate immediately. If edits or a save are pending, offer to
   // save the draft to the shared Academy first; Cancel keeps the editor open.
-  document.addEventListener('click', event => {
+  document.addEventListener('click', async event => {
     const link = event.target.closest('a[data-exit-link]');
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     if (!hasUnsavedChanges && !academySaving && !academySavePending) return;
     event.preventDefault();
     const destination = link.href;
-    if (!window.confirm('Your latest edits may not have finished saving. Save the draft to the Academy and leave this page? Choose Cancel to stay here.')) return;
+    if (!await builderConfirm('Your latest edits may not have finished saving. Save the draft to the Academy and leave this page? Choose Cancel to stay here.', {title:'Save before leaving?', confirmLabel:'Save and leave'})) return;
     clearTimeout(saveTimer);
     clearTimeout(academySaveTimer);
     saveCurrentToAcademy(false, true)
@@ -4517,7 +4679,7 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
   async function deleteCourse(course) {
     if (deletingDraftId) return;
     const title = String(course.title || 'Untitled course');
-    if (!window.confirm('Delete the draft "' + title + '"? This removes its saved builder draft and uploaded draft media. It does not delete a published course.')) return;
+    if (!await builderConfirm('This removes the saved builder draft and its uploaded draft media. It does not delete a published course.', {title:'Delete the draft “' + title + '”?', confirmLabel:'Delete draft', cancelLabel:'Keep draft', danger:true})) return;
 
     const requestedCourseId = String(course.id || '');
     deletingDraftId = requestedCourseId;
