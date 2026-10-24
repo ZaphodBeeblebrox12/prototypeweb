@@ -859,12 +859,15 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         preview_styles = (backend / "static" / "academy" / "course-import-preview.css").read_text(encoding="utf-8")
         tabs_template = (backend / "templates" / "academy" / "partials" / "lesson_tabs.html").read_text(encoding="utf-8")
         builder_source = (backend / "apps" / "academy" / "course_builder_preview.html").read_text(encoding="utf-8")
+        parity_styles = (backend / "static" / "academy" / "course-template-parity.css").read_text(encoding="utf-8")
 
         self.assertIn(".main-content:has(> .tt-admin-course-preview)", preview_styles)
         self.assertIn("width: min(1600px, 100%)", preview_styles)
         self.assertIn("grid-template-columns: minmax(0, 1fr) 245px", preview_styles)
         self.assertIn("font-size: clamp(42px, 5vw, 64px)", lesson_styles)
-        self.assertIn("font-size: clamp(27px, 2.5vw, 33px);", lesson_styles)
+        self.assertIn(".tt-learning-room .tt-tab-panel h2,", parity_styles)
+        self.assertIn("font-size: 30px;", parity_styles)
+        self.assertIn("font-size: 27px;", parity_styles)
         self.assertIn("font-size: 22px;", lesson_styles)
         self.assertIn("font-size: 20px;", lesson_styles)
         self.assertIn("font-size: 16px;", lesson_styles)
@@ -877,7 +880,6 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn("letter-spacing: .16em;", lesson_styles)
         self.assertIn(".tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel h2", preview_styles)
         self.assertIn('font-family: Georgia, "Times New Roman", serif;', preview_styles)
-        parity_styles = (backend / "static" / "academy" / "course-template-parity.css").read_text(encoding="utf-8")
         for selector in (".rich-editor-canvas h2 {", ".rich-editor-canvas h3 {", ".rich-editor-canvas h4 {", ".rich-editor-canvas h5 {"):
             self.assertIn(selector, parity_styles)
         for heading in ("h2", "h3", "h4", "h5"):
