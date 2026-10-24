@@ -1047,10 +1047,22 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         ):
             with self.subTest(legacy_selector=legacy_selector):
                 self.assertNotIn(legacy_selector, parity_css)
+        quote_start = parity_css.index(".tt-learning-room .tt-tab-panel blockquote,")
+        quote_end = parity_css.index(".tt-learning-room .tt-tab-panel blockquote p,")
+        quote_rule = parity_css[quote_start:quote_end]
+        self.assertIn("min-height: 64px;", quote_rule)
+        self.assertIn("padding: 0 0 0 42px;", quote_rule)
+        self.assertIn("border: 0;", quote_rule)
+        self.assertIn('font: 400 19px/1.42 Georgia, "Times New Roman", serif;', quote_rule)
+
+        margin_label_start = parity_css.index(".tt-learning-room .tt-tab-panel blockquote::before,")
+        margin_label_end = parity_css.index(".tt-learning-room .tt-tab-panel blockquote p,")
+        margin_label_rule = parity_css[margin_label_start:margin_label_end]
+        self.assertIn('content: "CONTEXT FIRST";', margin_label_rule)
+        self.assertIn("border-right: 1px solid #c9d8d2;", margin_label_rule)
+        self.assertIn("writing-mode: vertical-rl;", margin_label_rule)
+
         for value in (
-            "border-left: 3px solid #c36b4d;",
-            "font: 400 clamp(20px, 2.2vw, 27px)/1.5 Georgia,",
-            'content: "“";',
             "background: #345943;",
             "border-bottom: 2px solid #b48635;",
             "background: #f3f0e6;",
