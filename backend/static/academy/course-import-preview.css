@@ -134,11 +134,11 @@
   letter-spacing: -.05em;
 }
 .tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel h2 {
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   max-width: 760px;
   color: #27382e;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 27px;
+  font-size: clamp(27px, 2.5vw, 33px);
   font-weight: 400;
   line-height: 1.12;
   letter-spacing: -.035em;
@@ -147,10 +147,9 @@
   margin: 26px 0 10px;
   color: #27382e;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 400;
-  line-height: 1.2;
-  letter-spacing: -.02em;
+  line-height: 1.18;
 }
 .tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel h4 {
   margin: 24px 0 8px;
@@ -191,8 +190,11 @@
 @media (max-width: 680px) {
   .tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel h1 { font-size: 42px; }
   .tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel h2 { font-size: 27px; }
-  .tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel h3 { font-size: 20px; }
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel h3 { font-size: 22px; }
   .tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel h4 { font-size: 20px; }
   .tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel h5 { font-size: 16px; }
 }
 
+@media (max-width: 500px) {
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel h3 { font-size: 21px; }
+}
