@@ -93,7 +93,7 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "website_preview_url")
         builder_source = response.content.decode("utf-8")
         preview_start = builder_source.index("function previewFields(c)")
-        preview_end = builder_source.index("function renderMarkdown(src)", preview_start)
+        preview_end = builder_source.index("  renderMarkdown = function(src)", preview_start)
         learner_preview = builder_source[preview_start:preview_end]
         self.assertNotIn("builder-lesson-preview-grid", learner_preview)
         self.assertNotIn("notebookPreviewMarkup(lesson)", learner_preview)
@@ -656,6 +656,18 @@ class CourseBuilderApiTests(TestCase):
         instructor = LessonInstructorMaterial.objects.get(lesson=lesson)
         self.assertEqual(instructor.rubric_json["questions"][0]["correctIndex"], 0)
         self.assertIn("Start with what can be observed.", instructor.answer_key_markdown)
+
+    def test_markdown_renderer_binding_is_declared_before_strict_mode_enhancements(self):
+        response = self.client.get(reverse("staff_course_builder_preview"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        source = response.content.decode("utf-8")
+        declaration = source.index("let renderMarkdown;")
+        first_assignment = source.index("  renderMarkdown = function(src)")
+        self.assertIn("'use strict';", source)
+        self.assertLess(declaration, first_assignment)
+        self.assertIn("const baseMarkdownRenderer = renderMarkdown;", source)
+        self.assertIn("const renderMarkdownWithFigures = renderMarkdown;", source)
 
     def test_preview_normalizes_legacy_browser_drafts_before_initial_render(self):
         response = self.client.get(reverse("staff_course_builder_preview"))
