@@ -1,6 +1,7 @@
 /* TradeThesis course-template typography parity.
    Source of truth: tradethesis_course_builder_output_preview_v2.html.
-   Load after legacy component styles. Keep the shared heading-role definitions here. */
+   Load after component styles. Shared heading-role definitions cover learner previews
+   and the Course Builder's editable lesson canvas. */
 
 .tt-learning-room .tt-lesson-idea-copy,
 .preview-body {
@@ -9,7 +10,8 @@
 }
 
 .tt-learning-room .tt-tab-panel h2,
-.preview-body h2 {
+.preview-body h2,
+.rich-editor-canvas h2 {
   max-width: 730px;
   margin: 0 0 13px;
   color: var(--tt-ink, var(--ink, #27382e));
@@ -21,7 +23,8 @@
 }
 
 .tt-learning-room .tt-tab-panel h3,
-.preview-body h3 {
+.preview-body h3,
+.rich-editor-canvas h3 {
   max-width: 730px;
   margin: 28px 0 9px;
   color: var(--tt-ink, var(--ink, #27382e));
@@ -33,7 +36,8 @@
 }
 
 .tt-learning-room .tt-tab-panel h4,
-.preview-body h4 {
+.preview-body h4,
+.rich-editor-canvas h4 {
   /* Match the reference document's effective browser-default H4. */
   margin: 1.33em 0;
   color: inherit;
@@ -45,7 +49,8 @@
 }
 
 .tt-learning-room .tt-tab-panel h5,
-.preview-body h5 {
+.preview-body h5,
+.rich-editor-canvas h5 {
   /* The reference does not define a bespoke H5; preserve its default scale. */
   margin: 1.67em 0;
   color: inherit;
@@ -70,7 +75,10 @@
 .tt-learning-room .tt-lesson-idea-copy > .eyebrow:first-of-type,
 .preview-body p.eyebrow,
 .preview-body > h6:first-of-type,
-.preview-body > .eyebrow:first-of-type {
+.preview-body > .eyebrow:first-of-type,
+.rich-editor-canvas p.eyebrow,
+.rich-editor-canvas > h6:first-of-type,
+.rich-editor-canvas > .eyebrow:first-of-type {
   display: block;
   margin: 0 0 14px;
   color: #39463d;
@@ -87,19 +95,24 @@
 .tt-learning-room .tt-lesson-idea-copy > .eyebrow:first-of-type::before,
 .preview-body p.eyebrow::before,
 .preview-body > h6:first-of-type::before,
-.preview-body > .eyebrow:first-of-type::before {
+.preview-body > .eyebrow:first-of-type::before,
+.rich-editor-canvas p.eyebrow::before,
+.rich-editor-canvas > h6:first-of-type::before,
+.rich-editor-canvas > .eyebrow:first-of-type::before {
   content: none;
   display: none;
 }
 
 @media (max-width: 560px) {
   .tt-learning-room .tt-tab-panel h2,
-  .preview-body h2 {
+  .preview-body h2,
+  .rich-editor-canvas h2 {
     font-size: 27px;
   }
 
   .tt-learning-room .tt-tab-panel h3,
-  .preview-body h3 {
+  .preview-body h3,
+  .rich-editor-canvas h3 {
     font-size: 20px;
   }
 }

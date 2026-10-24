@@ -877,7 +877,13 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn("letter-spacing: .16em;", lesson_styles)
         self.assertIn(".tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel h2", preview_styles)
         self.assertIn('font-family: Georgia, "Times New Roman", serif;', preview_styles)
-        self.assertIn(".rich-editor-canvas h2 { font-size:clamp(29px,2.8vw,37px); font-weight:400; line-height:1.13; letter-spacing:-.04em; margin:0 0 16px; }", builder_source)
+        parity_styles = (backend / "static" / "academy" / "course-template-parity.css").read_text(encoding="utf-8")
+        for selector in (".rich-editor-canvas h2 {", ".rich-editor-canvas h3 {", ".rich-editor-canvas h4 {", ".rich-editor-canvas h5 {"):
+            self.assertIn(selector, parity_styles)
+        for heading in ("h2", "h3", "h4", "h5"):
+            self.assertNotIn(f".rich-editor-canvas {heading} {{", builder_source)
+        self.assertIn(".rich-editor-canvas > h6:first-of-type,", parity_styles)
+        self.assertIn(".rich-editor-canvas p.eyebrow,", parity_styles)
         self.assertIn("display: block;", lesson_styles)
         self.assertIn('{{ notebook.title|default:"Your Trading Notebook" }}', tabs_template)
         self.assertIn("{% if notebook.prompts %}", tabs_template)
@@ -905,6 +911,12 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         parity_link = builder_source.index('/static/academy/course-template-parity.css')
         self.assertGreater(parity_link, builder_source.index("</style>"))
         self.assertLess(parity_link, builder_source.index("</head>"))
+        for selector in (".rich-editor-canvas h2 {", ".rich-editor-canvas h3 {", ".rich-editor-canvas h4 {", ".rich-editor-canvas h5 {"):
+            self.assertIn(selector, parity_css)
+        self.assertIn(".rich-editor-canvas p.eyebrow,", parity_css)
+        self.assertIn(".rich-editor-canvas > h6:first-of-type,", parity_css)
+        for heading in ("h2", "h3", "h4", "h5", "h6"):
+            self.assertNotIn(f".rich-editor-canvas {heading} {{", builder_source)
 
         self.assertNotIn("Visual parity pass 7: map every Academy content heading", learning_room_css)
         self.assertNotIn("Visual parity pass 7: apply the canonical heading ladder", website_preview_css)
