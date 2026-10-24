@@ -913,13 +913,20 @@ class TradingNotebookTemplateTests(SimpleTestCase):
                 h1 = re.search(re.escape(prefix + " h1") + r"\s*\{([^}]*)\}", canonical)
                 h2 = re.search(re.escape(prefix + " h2") + r"\s*\{([^}]*)\}", canonical)
                 h3 = re.search(re.escape(prefix + " h3") + r"\s*\{([^}]*)\}", canonical)
+                h6 = re.search(re.escape(prefix + " h6") + r"\s*\{([^}]*)\}", canonical)
                 self.assertIsNotNone(h1, f"Missing canonical H1 rule in {prefix}")
                 self.assertIsNotNone(h2, f"Missing canonical H2 rule in {prefix}")
                 self.assertIsNotNone(h3, f"Missing canonical H3 rule in {prefix}")
+                self.assertIsNotNone(h6, f"Missing canonical H6 eyebrow rule in {prefix}")
                 self.assertIn("font-size: clamp(27px, 2.5vw, 33px);", h2.group(1))
                 self.assertIn("line-height: 1.12;", h2.group(1))
                 self.assertIn("font-size: 22px;", h3.group(1))
                 self.assertIn("line-height: 1.18;", h3.group(1))
+                self.assertIn("font-size: 11px;", h6.group(1))
+                self.assertIn("font-weight: 850;", h6.group(1))
+                self.assertIn("line-height: inherit;", h6.group(1))
+                self.assertIn("letter-spacing: .17em;", h6.group(1))
+                self.assertIn("text-transform: uppercase;", h6.group(1))
                 for level, rule in (("H1", h1), ("H2", h2), ("H3", h3)):
                     with self.subTest(heading=level, stylesheet=prefix):
                         self.assertIn("font-weight: 600;", rule.group(1))
@@ -940,7 +947,7 @@ class TradingNotebookTemplateTests(SimpleTestCase):
             "h3": "font-size: 22px;",
             "h4": "font-size: 20px;",
             "h5": "font-size: 16px;",
-            "h6": "font-size: 9px;",
+            "h6": "font-size: 11px;",
         }
         for level, declaration in expected.items():
             with self.subTest(heading=level):
@@ -953,6 +960,12 @@ class TradingNotebookTemplateTests(SimpleTestCase):
             self.assertIsNotNone(rule, f"Missing local preview {level.upper()} rule")
             self.assertIn("font-weight: 600;", rule.group(1))
             self.assertIn("letter-spacing: -.025em;", rule.group(1))
+        h6 = re.search(re.escape(".preview-body h6") + r"\s*\{([^}]*)\}", ladder)
+        self.assertIsNotNone(h6, "Missing local preview H6 eyebrow rule")
+        self.assertIn("font-size: 11px;", h6.group(1))
+        self.assertIn("font-weight: 850;", h6.group(1))
+        self.assertIn("line-height: inherit;", h6.group(1))
+        self.assertIn("letter-spacing: .17em;", h6.group(1))
         # This unused helper flattened Markdown heading levels to H3 and is no longer needed:
         self.assertNotIn("function renderMarkdown(src)", builder_source)
 
