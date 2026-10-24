@@ -138,7 +138,7 @@
   justify-content: center;
   min-height: 64px; /* One-line text centers; multi-line text grows the label with the quote. */
   margin: 1.8em 0 1.7em;
-  padding: 0 0 0 42px;
+  padding: 12px 0 0 42px; /* Space for the decorative opening quote above the text. */
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -168,6 +168,21 @@
   text-transform: uppercase;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
+}
+
+/* Subtle opening quote, matching the reference card. Decorative only; never part of lesson text. */
+.tt-learning-room .tt-tab-panel blockquote::after,
+.preview-body blockquote::after,
+.rich-editor-canvas blockquote::after {
+  content: "“";
+  position: absolute;
+  top: -25px;
+  left: 42px;
+  color: #d6b097;
+  font: 400 54px/.72 Georgia, "Times New Roman", serif;
+  opacity: .9;
+  pointer-events: none;
+  user-select: none;
 }
 
 .tt-learning-room .tt-tab-panel blockquote p,
@@ -374,6 +389,14 @@
     width: 23px;
     padding-right: 7px;
     font-size: 8px;
+  }
+
+  .tt-learning-room .tt-tab-panel blockquote::after,
+  .preview-body blockquote::after,
+  .rich-editor-canvas blockquote::after {
+    top: -21px;
+    left: 37px;
+    font-size: 46px;
   }
 
   .tt-learning-room .tt-tab-panel blockquote > p:first-child:has(> strong:only-child),
