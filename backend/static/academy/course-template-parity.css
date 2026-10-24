@@ -76,16 +76,17 @@
   line-height: 1.8;
 }
 
-/* In the Academy source, the lead H6 is an eyebrow role. Preserve its authored
-   heading level, but render it like the template's text-only eyebrow (no rule). */
+/* Heading 6 is the eyebrow role in the authoring toolbar. Apply the same
+   text-only eyebrow treatment to every H6, not just the first one in a lesson. */
+.tt-learning-room .tt-tab-panel h6,
 .tt-learning-room .tt-tab-panel .body-copy p.eyebrow,
-.tt-learning-room .tt-lesson-idea-copy > h6:first-of-type,
+.tt-learning-room .tt-lesson-idea-copy h6,
 .tt-learning-room .tt-lesson-idea-copy > .eyebrow:first-of-type,
 .preview-body p.eyebrow,
-.preview-body > h6:first-of-type,
+.preview-body h6,
 .preview-body > .eyebrow:first-of-type,
 .rich-editor-canvas p.eyebrow,
-.rich-editor-canvas > h6:first-of-type,
+.rich-editor-canvas h6,
 .rich-editor-canvas > .eyebrow:first-of-type {
   display: block;
   margin: 0 0 14px;
@@ -98,14 +99,15 @@
   text-transform: uppercase;
 }
 
+.tt-learning-room .tt-tab-panel h6::before,
 .tt-learning-room .tt-tab-panel .body-copy p.eyebrow::before,
-.tt-learning-room .tt-lesson-idea-copy > h6:first-of-type::before,
+.tt-learning-room .tt-lesson-idea-copy h6::before,
 .tt-learning-room .tt-lesson-idea-copy > .eyebrow:first-of-type::before,
 .preview-body p.eyebrow::before,
-.preview-body > h6:first-of-type::before,
+.preview-body h6::before,
 .preview-body > .eyebrow:first-of-type::before,
 .rich-editor-canvas p.eyebrow::before,
-.rich-editor-canvas > h6:first-of-type::before,
+.rich-editor-canvas h6::before,
 .rich-editor-canvas > .eyebrow:first-of-type::before {
   content: none;
   display: none;
