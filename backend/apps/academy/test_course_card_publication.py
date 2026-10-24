@@ -209,6 +209,7 @@ class CoursePublicationReadinessTests(TestCase):
 
     def test_authored_svg_is_removed_but_companion_card_icon_is_preserved(self):
         from django.core.exceptions import ValidationError
+
         from .content_rendering import render_safe_markdown, validate_markdown_source
 
         authored_svg = '<svg class="authored-icon" viewBox="0 0 10 10"><path d="M0 0L10 10"></path></svg>'
