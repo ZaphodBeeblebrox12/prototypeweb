@@ -864,7 +864,7 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn("width: min(1600px, 100%)", preview_styles)
         self.assertIn("grid-template-columns: minmax(0, 1fr) 245px", preview_styles)
         self.assertIn("font-size: clamp(42px, 5vw, 64px)", lesson_styles)
-        self.assertIn("font-size: clamp(29px, 2.8vw, 37px)", lesson_styles)
+        self.assertIn("font-size: clamp(27px, 2.5vw, 33px);", lesson_styles)
         self.assertIn("font-size: 22px;", lesson_styles)
         self.assertIn("font-size: 20px;", lesson_styles)
         self.assertIn("font-size: 16px;", lesson_styles)
@@ -897,33 +897,41 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         learning_room_css = (backend / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
         builder_source = (backend / "apps" / "academy" / "course_builder_preview.html").read_text(encoding="utf-8")
 
-        # Catch an unclosed comment swallowing the whole website-preview parity block.
-        self.assertEqual(website_preview_css.count("/*"), website_preview_css.count("*/"))
-        self.assertIn(
-            "/* Visual parity pass 7: apply the canonical heading ladder after learning-room.css. */",
-            website_preview_css,
+        # The website-preview heading blocks must remain active CSS, not be swallowed by a comment.
+        for css in (website_preview_css, learning_room_css):
+            self.assertEqual(css.count("/*"), css.count("*/"))
+
+        styles = (
+            (learning_room_css, ".tt-learning-room .tt-tab-panel", "Visual parity pass 7: map every Academy content heading"),
+            (website_preview_css, ".tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel", "Visual parity pass 7: apply the canonical heading ladder"),
         )
-        self.assertIn(".tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel h6", website_preview_css)
+        for css, prefix, marker in styles:
+            with self.subTest(stylesheet=prefix):
+                canonical_start = css.rfind(marker)
+                self.assertGreater(canonical_start, 0, f"Missing canonical heading block in {prefix}")
+                canonical = css[canonical_start:]
+                h2 = re.search(re.escape(prefix + " h2") + r"\s*\{([^}]*)\}", canonical)
+                h3 = re.search(re.escape(prefix + " h3") + r"\s*\{([^}]*)\}", canonical)
+                self.assertIsNotNone(h2, f"Missing canonical H2 rule in {prefix}")
+                self.assertIsNotNone(h3, f"Missing canonical H3 rule in {prefix}")
+                self.assertIn("font-size: clamp(27px, 2.5vw, 33px);", h2.group(1))
+                self.assertIn("line-height: 1.12;", h2.group(1))
+                self.assertIn("font-size: 22px;", h3.group(1))
+                self.assertIn("line-height: 1.18;", h3.group(1))
+                self.assertRegex(
+                    css[css.rfind("@media (max-width: 500px)"):],
+                    re.escape(prefix + " h3") + r"\s*\{[^}]*font-size: 21px;",
+                )
 
-        # Confirm the active, reference-matched content heading sizes in both website-preview stylesheets.
-        for css, prefix in (
-            (learning_room_css, ".tt-learning-room .tt-tab-panel"),
-            (website_preview_css, ".tt-admin-course-preview .tt-admin-learning-preview .tt-tab-panel"),
-        ):
-            for level, declaration in (("h2", "font-size: 27px;"), ("h3", "font-size: 20px;")):
-                rules = re.findall(re.escape(prefix + " " + level) + r"\s*\{([^}]*)\}", css)
-                self.assertTrue(rules, f"Missing active {prefix} {level} rule")
-                self.assertIn(declaration, rules[-1])
-
-        # The local preview has its own CSS and must end with the same H1-H6 scale.
+        # The local preview must share the scale, including its narrow-screen H3 size.
         ladder_start = builder_source.rfind("/* Canonical authored-heading ladder: keep the Builder's local learner preview")
         self.assertGreater(ladder_start, 0)
         ladder_end = builder_source.index("</style>", ladder_start)
         ladder = builder_source[ladder_start:ladder_end]
         expected = {
             "h1": "font-size: clamp(42px, 5vw, 64px);",
-            "h2": "font-size: 27px;",
-            "h3": "font-size: 20px;",
+            "h2": "font-size: clamp(27px, 2.5vw, 33px);",
+            "h3": "font-size: 22px;",
             "h4": "font-size: 20px;",
             "h5": "font-size: 16px;",
             "h6": "font-size: 9px;",
@@ -932,6 +940,10 @@ class TradingNotebookTemplateTests(SimpleTestCase):
             with self.subTest(heading=level):
                 self.assertIn(f".preview-body {level} {{", ladder)
                 self.assertIn(declaration, ladder)
+        self.assertIn("@media (max-width: 500px)", ladder)
+        self.assertIn(".preview-body h3 { font-size: 21px; }", ladder)
+        # This unused helper flattened Markdown heading levels to H3 and is no longer needed:
+        self.assertNotIn("function renderMarkdown(src)", builder_source)
 
     def test_builder_learner_preview_uses_the_saved_academy_website_template(self):
         builder = Path(__file__).resolve().parent / "course_builder_preview.html"
