@@ -668,6 +668,8 @@ class CourseBuilderApiTests(TestCase):
         self.assertIn("let state=normalizeLoadedState(load());", source)
         self.assertIn("function renderEditorSafely()", source)
         self.assertIn("renderEditorSafely();", source)
+        self.assertIn("const renderEditorWithAllEnhancements = renderEditor;", source)
+        self.assertIn("renderEditorSafely = function()", source)
         self.assertIn("syncAcademy();", source)
 
     def test_preview_catalogue_distinguishes_loading_from_an_empty_public_catalogue(self):
