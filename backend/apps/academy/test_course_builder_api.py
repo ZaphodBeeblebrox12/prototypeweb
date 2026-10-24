@@ -693,6 +693,24 @@ class CourseBuilderApiTests(TestCase):
         self.assertIn("Loading the published catalogue from the Academy…", source)
         self.assertIn("No published courses are ready for the catalogue yet.", source)
 
+    def test_delete_draft_waits_for_initial_sync_and_checks_academy_before_local_only_removal(self):
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(
+            encoding="utf-8"
+        )
+        for marker in (
+            "let academySyncPromise = null;",
+            "academySyncPromise = syncAcademy();",
+            "if (academySyncPromise && !academyReady)",
+            "async function findAcademyDraftForDeletion(course, allowLegacySlugTitleFallback)",
+            "String(remote.id || '') === courseId",
+            "sameDraftModuleIdentity(remote, course)",
+            "const remoteDraft = await findAcademyDraftForDeletion(course, staleServerDraft);",
+            "The Academy did not confirm deletion of the saved draft.",
+            "Local-only draft removed from this browser.",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, source)
+
     def test_delete_draft_reconciles_legacy_server_backed_browser_entries(self):
         response = self.client.get(reverse("staff_course_builder_preview"))
 
