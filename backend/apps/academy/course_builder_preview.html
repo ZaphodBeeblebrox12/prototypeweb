@@ -4297,6 +4297,23 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
     }
   };
 
+  // Capture the final decorated renderer, not the base renderer defined earlier.
+  // The page adds reference/media enhancements and website-preview refresh hooks
+  // after the initial renderer declaration; a safety wrapper must retain them.
+  const renderEditorWithAllEnhancements = renderEditor;
+  renderEditorSafely = function() {
+    try {
+      renderEditorWithAllEnhancements();
+    } catch (error) {
+      console.error('Could not render the selected Course Builder draft.', error);
+      const workspace = $('#workspace');
+      if (workspace) {
+        workspace.innerHTML = '<div class="empty-state"><h3>Could not open this draft</h3><p>Your saved content has not been deleted. The editor encountered older or incomplete saved data. Refresh to reload the Academy copy, or create a separate draft while this is investigated.</p></div>';
+      }
+      toast('Could not open draft: ' + String(error?.message || 'The saved data is incomplete.'));
+    }
+  };
+
   if (!state.savedAt) persist(false);
   suppressDirtyTracking = false;
   render();
