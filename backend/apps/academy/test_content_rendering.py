@@ -918,19 +918,42 @@ class TradingNotebookTemplateTests(SimpleTestCase):
                 self.assertIsNotNone(h2, f"Missing canonical H2 rule in {prefix}")
                 self.assertIsNotNone(h3, f"Missing canonical H3 rule in {prefix}")
                 self.assertIsNotNone(h6, f"Missing canonical H6 eyebrow rule in {prefix}")
-                self.assertIn("font-size: clamp(27px, 2.5vw, 33px);", h2.group(1))
-                self.assertIn("line-height: 1.12;", h2.group(1))
+                # Authored Markdown H2 visually assumes the template's article H3 role.
+                self.assertIn("margin: 0 0 16px;", h2.group(1))
+                self.assertIn("max-width: 760px;", h2.group(1))
+                self.assertIn("font-size: clamp(29px, 2.8vw, 37px);", h2.group(1))
+                self.assertIn("font-weight: 400;", h2.group(1))
+                self.assertIn("line-height: 1.13;", h2.group(1))
+                self.assertIn("letter-spacing: -.04em;", h2.group(1))
                 self.assertIn("font-size: 22px;", h3.group(1))
                 self.assertIn("line-height: 1.18;", h3.group(1))
+                self.assertIn("display: flex;", h6.group(1))
+                self.assertIn("align-items: center;", h6.group(1))
+                self.assertIn("gap: 9px;", h6.group(1))
+                self.assertIn("margin: 0 0 14px;", h6.group(1))
+                self.assertIn("color: #98631b;", h6.group(1))
                 self.assertIn("font-size: 11px;", h6.group(1))
                 self.assertIn("font-weight: 850;", h6.group(1))
                 self.assertIn("line-height: inherit;", h6.group(1))
                 self.assertIn("letter-spacing: .17em;", h6.group(1))
                 self.assertIn("text-transform: uppercase;", h6.group(1))
-                for level, rule in (("H1", h1), ("H2", h2), ("H3", h3)):
+                self.assertIn("letter-spacing: .17em;", h6.group(1))
+                eyebrow_rule = re.search(re.escape(prefix + " h6::before") + r"\s*\{([^}]*)\}", canonical)
+                self.assertIsNotNone(eyebrow_rule, f"Missing eyebrow rule decoration in {prefix}")
+                self.assertIn('content: "";', eyebrow_rule.group(1))
+                self.assertIn("width: 24px;", eyebrow_rule.group(1))
+                self.assertIn("height: 2px;", eyebrow_rule.group(1))
+                self.assertIn("background: #b48635;", eyebrow_rule.group(1))
+                for level, rule in (("H1", h1), ("H3", h3)):
                     with self.subTest(heading=level, stylesheet=prefix):
                         self.assertIn("font-weight: 600;", rule.group(1))
                         self.assertIn("letter-spacing: -.025em;", rule.group(1))
+                narrow_rules = css[css.rfind("@media (max-width: 680px)"):css.rfind("@media (max-width: 500px)")]
+                self.assertRegex(narrow_rules, re.escape(prefix + " h2") + r"\s*\{[^}]*font-size: 29px;")
+                self.assertRegex(
+                    css[css.rfind("@media (max-width: 500px)"):],
+                    re.escape(prefix + " h2") + r"\s*\{[^}]*font-size: 27px;",
+                )
                 self.assertRegex(
                     css[css.rfind("@media (max-width: 500px)"):],
                     re.escape(prefix + " h3") + r"\s*\{[^}]*font-size: 21px;",
@@ -943,7 +966,7 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         ladder = builder_source[ladder_start:ladder_end]
         expected = {
             "h1": "font-size: clamp(42px, 5vw, 64px);",
-            "h2": "font-size: clamp(27px, 2.5vw, 33px);",
+            "h2": "font-size: clamp(29px, 2.8vw, 37px);",
             "h3": "font-size: 22px;",
             "h4": "font-size: 20px;",
             "h5": "font-size: 16px;",
@@ -955,17 +978,34 @@ class TradingNotebookTemplateTests(SimpleTestCase):
                 self.assertIn(declaration, ladder)
         self.assertIn("@media (max-width: 500px)", ladder)
         self.assertIn(".preview-body h3 { font-size: 21px; }", ladder)
-        for level in ("h1", "h2", "h3"):
+        for level in ("h1", "h3"):
             rule = re.search(re.escape(f".preview-body {level}") + r"\s*\{([^}]*)\}", ladder)
             self.assertIsNotNone(rule, f"Missing local preview {level.upper()} rule")
             self.assertIn("font-weight: 600;", rule.group(1))
             self.assertIn("letter-spacing: -.025em;", rule.group(1))
+        h2 = re.search(re.escape(".preview-body h2") + r"\s*\{([^}]*)\}", ladder)
+        self.assertIsNotNone(h2, "Missing local preview H2 article-title mapping")
+        self.assertIn("font-weight: 400;", h2.group(1))
+        self.assertIn("line-height: 1.13;", h2.group(1))
+        self.assertIn("letter-spacing: -.04em;", h2.group(1))
         h6 = re.search(re.escape(".preview-body h6") + r"\s*\{([^}]*)\}", ladder)
         self.assertIsNotNone(h6, "Missing local preview H6 eyebrow rule")
         self.assertIn("font-size: 11px;", h6.group(1))
         self.assertIn("font-weight: 850;", h6.group(1))
         self.assertIn("line-height: inherit;", h6.group(1))
         self.assertIn("letter-spacing: .17em;", h6.group(1))
+        self.assertIn("display: flex;", h6.group(1))
+        self.assertIn("align-items: center;", h6.group(1))
+        self.assertIn("gap: 9px;", h6.group(1))
+        self.assertIn("margin: 0 0 14px;", h6.group(1))
+        self.assertIn("color: #98631b;", h6.group(1))
+        h6_before = re.search(re.escape(".preview-body h6::before") + r"\s*\{([^}]*)\}", ladder)
+        self.assertIsNotNone(h6_before, "Missing local preview eyebrow rule decoration")
+        self.assertIn("width: 24px;", h6_before.group(1))
+        self.assertIn("height: 2px;", h6_before.group(1))
+        self.assertIn("background: #b48635;", h6_before.group(1))
+        self.assertIn(".preview-body h2 { font-size: 29px; }", ladder)
+        self.assertIn(".preview-body h2 { font-size: 27px; }", ladder)
         # This unused helper flattened Markdown heading levels to H3 and is no longer needed:
         self.assertNotIn("function renderMarkdown(src)", builder_source)
 
