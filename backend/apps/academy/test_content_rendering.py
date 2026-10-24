@@ -949,7 +949,7 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         builder = Path(__file__).resolve().parent / "course_builder_preview.html"
         source = builder.read_text(encoding="utf-8")
         start = source.index("function previewFields(c)")
-        end = source.index("function renderMarkdown(src)", start)
+        end = source.index("function renderCatalogue()", start)
         preview = source[start:end]
 
         self.assertIn('data-builder-website-preview', preview)
