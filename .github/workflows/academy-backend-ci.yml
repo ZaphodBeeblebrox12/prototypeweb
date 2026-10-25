@@ -7,7 +7,7 @@ on:
       - "backend/**"
       - ".github/workflows/academy-backend-ci.yml"
   pull_request:
-    branches: [my-new-branch]
+    branches: [my-new-branch, main]
     paths:
       - "backend/**"
       - ".github/workflows/academy-backend-ci.yml"
