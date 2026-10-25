@@ -2051,8 +2051,10 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
             '"module_display_title": _module_display_title(lesson.module.title)', views_source
         )
         self.assertIn(
-            '"selected_module_display_title": _module_display_title(selected_module.get("title") if selected_module else "")',
-            views_source,
+            '"selected_module_display_title": _module_display_title(', views_source
+        )
+        self.assertIn(
+            'selected_module.get("title") if selected_module else ""', views_source
         )
 
     def test_module_display_name_removes_an_optional_number_prefix(self):
