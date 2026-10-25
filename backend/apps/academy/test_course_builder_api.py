@@ -1983,6 +1983,19 @@ class CourseBuilderApiTests(TestCase):
         self.assertIsNone(response.json().get("trading_path_import_candidate"))
 
 class CourseBuilderPreviewWiringTests(SimpleTestCase):
+    def test_empty_notebook_prompts_are_materialized_as_editable_pause_interpret_apply_fields(self):
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
+        for marker in (
+            "l.notebook.prompts.length===0",
+            "{label:'Pause',text:'What evidence is visible?'}",
+            "{label:'Interpret',text:'What could it mean in context?'}",
+            "{label:'Apply',text:'What would change your view?'}",
+            'data-entity="notebook-prompt"',
+            "Prompt text",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, source)
+
     def test_builder_auto_imports_trading_path_from_shared_candidate(self):
         source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
         for marker in (
