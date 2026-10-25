@@ -19,6 +19,25 @@ on:
       - "site/courses.html"
       - "tools/qa/check_bollinger_preview.py"
       - ".github/workflows/verify-bollinger-preview.yml"
+  pull_request:
+    branches:
+      - my-new-branch
+      - main
+    paths:
+      - "course-source/understand-bollinger-bands/preview/first-pass/index.html"
+      - "course-source/understand-bollinger-bands/preview/template-reference/index.html"
+      - "course-source/understand-bollinger-bands/assets/bollinger-lessons-data.js"
+      - "course-source/understand-bollinger-bands/assets/student-assets/svg/**"
+      - "backend/apps/academy/importing.py"
+      - "backend/apps/academy/models.py"
+      - "backend/tests/academy/test_course_import_workflow.py"
+      - "site/assets/course-content-admin-editor.js"
+      - "site/assets/instructional-image-admin.js"
+      - "site/assets/course-catalogue-data.js"
+      - "site/assets/courses-catalogue.js"
+      - "site/courses.html"
+      - "tools/qa/check_bollinger_preview.py"
+      - ".github/workflows/verify-bollinger-preview.yml"
   workflow_dispatch:
 
 permissions:
