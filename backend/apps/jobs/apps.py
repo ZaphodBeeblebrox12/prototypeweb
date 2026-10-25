@@ -1,0 +1,36 @@
+from django.apps import AppConfig
+
+
+class JobsConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.jobs"
+
+    def ready(self):
+        # Start the admin-managed periodic scheduler only in long-lived server
+        # processes; skip one-shot management commands (migrate/test/shell...).
+        import os
+        import sys
+
+        skip_commands = {
+            "migrate", "makemigrations", "test", "pytest", "mypy", "ruff",
+            "black", "shell", "dbshell", "collectstatic", "check", "loaddata",
+            "dumpdata", "diffsettings", "sendtestemail", "createsuperuser",
+            "makemessages", "compilemessages", "sync_channel_memberships",
+        }
+        # pytest-django invokes Django setup from the pytest process rather
+        # than `manage.py test`; the scheduler must not start before pytest
+        # creates its test database and runs migrations.
+        command_name = os.path.basename(sys.argv[0]).lower() if sys.argv else ""
+        if (
+            command_name in skip_commands
+            or "pytest" in sys.modules
+            or set(sys.argv) & skip_commands
+        ):
+            return
+        try:
+            from .scheduler import start_scheduler
+            start_scheduler()
+        except Exception:
+            import logging
+            logging.getLogger(__name__).exception(
+                "periodic scheduler failed to start")

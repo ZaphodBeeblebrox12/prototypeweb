@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="640" viewBox="0 0 720 640" role="img" aria-labelledby="title desc">
+<title id="title">Figure 1.1e · Price returns inside the range</title>
+<desc id="desc">The original twelve-bar breakout example followed by three bars that return inside the former range and continue lower.</desc>
+<rect width="720" height="640" fill="#f6f5f0"/>
+<rect x="22" y="18" width="676" height="600" rx="13" fill="#fffefa" stroke="#d9d7cf" stroke-width="2"/>
+<text x="42" y="56" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="700" fill="#252923">Figure 1.1e · Price returns inside the range</text>
+<text x="42" y="86" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#41443d">The same initial breakout, followed by a failed move.</text>
+<text x="43" y="120" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700" fill="#41443d">PRICE · dashed line = reference</text>
+<line x1="78" y1="134" x2="680" y2="134" stroke="#d9d7cf" stroke-width="1.3"/>
+<text x="68" y="140" font-family="Arial,Helvetica,sans-serif" font-size="26" text-anchor="end" fill="#41443d">118</text>
+<line x1="78" y1="208.67" x2="680" y2="208.67" stroke="#d9d7cf" stroke-width="1.3"/>
+<text x="68" y="214.67" font-family="Arial,Helvetica,sans-serif" font-size="26" text-anchor="end" fill="#41443d">110</text>
+<line x1="78" y1="283.33" x2="680" y2="283.33" stroke="#d9d7cf" stroke-width="1.3"/>
+<text x="68" y="289.33" font-family="Arial,Helvetica,sans-serif" font-size="26" text-anchor="end" fill="#41443d">101</text>
+<line x1="78" y1="358" x2="680" y2="358" stroke="#d9d7cf" stroke-width="1.3"/>
+<text x="68" y="364" font-family="Arial,Helvetica,sans-serif" font-size="26" text-anchor="end" fill="#41443d">93</text>
+<line x1="78" y1="178.80" x2="680" y2="178.80" stroke="#62645f" stroke-width="2" stroke-dasharray="7 5"/>
+<line x1="98.07" y1="304.24" x2="98.07" y2="340.08" stroke="#27725f" stroke-width="3"/>
+<rect x="87.23" y="313.20" width="21.67" height="17.92" rx="1" fill="#27725f"/>
+<text x="98.07" y="382" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="27" fill="#41443d">1</text>
+<line x1="138.20" y1="286.32" x2="138.20" y2="322.16" stroke="#27725f" stroke-width="3"/>
+<rect x="127.36" y="295.28" width="21.67" height="17.92" rx="1" fill="#27725f"/>
+<line x1="178.33" y1="268.40" x2="178.33" y2="304.24" stroke="#27725f" stroke-width="3"/>
+<rect x="167.50" y="277.36" width="21.67" height="17.92" rx="1" fill="#27725f"/>
+<text x="178.33" y="382" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="27" fill="#41443d">3</text>
+<line x1="218.47" y1="250.48" x2="218.47" y2="286.32" stroke="#27725f" stroke-width="3"/>
+<rect x="207.63" y="259.44" width="21.67" height="17.92" rx="1" fill="#27725f"/>
+<line x1="258.60" y1="223.60" x2="258.60" y2="268.40" stroke="#27725f" stroke-width="3"/>
+<rect x="247.76" y="232.56" width="21.67" height="26.88" rx="1" fill="#27725f"/>
+<line x1="298.73" y1="205.68" x2="298.73" y2="241.52" stroke="#27725f" stroke-width="3"/>
+<rect x="287.90" y="214.64" width="21.67" height="17.92" rx="1" fill="#27725f"/>
+<text x="298.73" y="382" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="27" fill="#41443d">6</text>
+<line x1="338.87" y1="187.76" x2="338.87" y2="223.60" stroke="#27725f" stroke-width="3"/>
+<rect x="328.03" y="196.72" width="21.67" height="17.92" rx="1" fill="#27725f"/>
+<line x1="379" y1="178.80" x2="379" y2="214.64" stroke="#be6b61" stroke-width="3"/>
+<rect x="368.16" y="196.72" width="21.67" height="8.96" rx="1" fill="#be6b61"/>
+<line x1="419.13" y1="187.76" x2="419.13" y2="232.56" stroke="#be6b61" stroke-width="3"/>
+<rect x="408.30" y="205.68" width="21.67" height="17.92" rx="1" fill="#be6b61"/>
+<text x="419.13" y="382" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="27" fill="#41443d">9</text>
+<line x1="459.27" y1="196.72" x2="459.27" y2="241.52" stroke="#27725f" stroke-width="3"/>
+<rect x="448.43" y="214.64" width="21.67" height="8.96" rx="1" fill="#27725f"/>
+<line x1="499.40" y1="187.76" x2="499.40" y2="223.60" stroke="#27725f" stroke-width="3"/>
+<rect x="488.56" y="196.72" width="21.67" height="17.92" rx="1" fill="#27725f"/>
+<line x1="539.53" y1="160.88" x2="539.53" y2="205.68" stroke="#27725f" stroke-width="3"/>
+<rect x="528.70" y="169.84" width="21.67" height="26.88" rx="1" fill="#27725f"/>
+<rect x="521.70" y="151.88" width="35.67" height="62.80" rx="4" fill="none" stroke="#252923" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="539.53" y="382" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="27" fill="#41443d">12</text>
+<line x1="579.67" y1="151.92" x2="579.67" y2="196.72" stroke="#be6b61" stroke-width="3"/>
+<rect x="568.83" y="169.84" width="21.67" height="17.92" rx="1" fill="#be6b61"/>
+<line x1="619.80" y1="169.84" x2="619.80" y2="214.64" stroke="#be6b61" stroke-width="3"/>
+<rect x="608.96" y="187.76" width="21.67" height="17.92" rx="1" fill="#be6b61"/>
+<line x1="659.93" y1="187.76" x2="659.93" y2="232.56" stroke="#be6b61" stroke-width="3"/>
+<rect x="649.10" y="205.68" width="21.67" height="17.92" rx="1" fill="#be6b61"/>
+<text x="659.93" y="382" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="27" fill="#41443d">3</text>
+<text x="43" y="413" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700" fill="#41443d">REPORTED VOLUME</text>
+<line x1="78" y1="485.93" x2="680" y2="485.93" stroke="#62645f" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="84" y="477.93" font-family="Arial,Helvetica,sans-serif" font-size="25" fill="#41443d">Baseline 184</text>
+<rect x="87.23" y="500.56" width="21.67" height="27.44" rx="1" fill="#a5aaa3"/>
+<rect x="127.36" y="498.27" width="21.67" height="29.73" rx="1" fill="#a5aaa3"/>
+<rect x="167.50" y="494.84" width="21.67" height="33.16" rx="1" fill="#a5aaa3"/>
+<rect x="207.63" y="492.56" width="21.67" height="35.44" rx="1" fill="#a5aaa3"/>
+<rect x="247.76" y="487.98" width="21.67" height="40.02" rx="1" fill="#a5aaa3"/>
+<rect x="287.90" y="484.55" width="21.67" height="43.45" rx="1" fill="#a5aaa3"/>
+<rect x="328.03" y="479.98" width="21.67" height="48.02" rx="1" fill="#a5aaa3"/>
+<rect x="368.16" y="484.55" width="21.67" height="43.45" rx="1" fill="#a5aaa3"/>
+<rect x="408.30" y="487.98" width="21.67" height="40.02" rx="1" fill="#a5aaa3"/>
+<rect x="448.43" y="490.27" width="21.67" height="37.73" rx="1" fill="#a5aaa3"/>
+<rect x="488.56" y="486.84" width="21.67" height="41.16" rx="1" fill="#a5aaa3"/>
+<rect x="528.70" y="434.25" width="21.67" height="93.75" rx="1" fill="#c6a63a"/>
+<rect x="568.83" y="454.83" width="21.67" height="73.17" rx="1" fill="#a5aaa3"/>
+<rect x="608.96" y="461.69" width="21.67" height="66.31" rx="1" fill="#a5aaa3"/>
+<rect x="649.10" y="457.12" width="21.67" height="70.88" rx="1" fill="#a5aaa3"/>
+<text x="42" y="598" font-family="Arial,Helvetica,sans-serif" font-size="23" fill="#252923">Volume 410 · 5-bar baseline 184 · 2.23×</text>
+</svg>

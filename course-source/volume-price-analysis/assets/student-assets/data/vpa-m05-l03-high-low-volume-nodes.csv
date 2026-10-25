@@ -1,0 +1,166 @@
+stage,record_type,bar,open,high,low,close,volume,price_level,profile_volume,metric,value,profile_period
+NOTICE,PRICE_BAR,1,147.45,148.35,147.05,148,350,,,,,selected composite
+NOTICE,PRICE_BAR,2,148,150.55,147.7,150,420,,,,,selected composite
+NOTICE,PRICE_BAR,3,150,152.4,149.4,152,500,,,,,selected composite
+NOTICE,PRICE_BAR,4,152,154.7,151.55,154,530,,,,,selected composite
+NOTICE,PRICE_BAR,5,154,155.35,153.6,155,490,,,,,selected composite
+NOTICE,PRICE_BAR,6,155,156.55,154.7,156,470,,,,,selected composite
+NOTICE,PRICE_BAR,7,156,157.8,155.4,157.4,610,,,,,selected composite
+NOTICE,PRICE_BAR,8,157.4,159.7,156.95,159,660,,,,,selected composite
+NOTICE,PRICE_BAR,9,159,160.85,158.6,160.5,720,,,,,selected composite
+NOTICE,PRICE_BAR,10,160.5,162.55,160.2,162,760,,,,,selected composite
+NOTICE,PRICE_BAR,11,162,163.4,161.4,163,790,,,,,selected composite
+NOTICE,PRICE_BAR,12,163,164.7,162.55,164,820,,,,,selected composite
+NOTICE,PRICE_BAR,13,164,165.35,163.6,165,780,,,,,selected composite
+NOTICE,PRICE_BAR,14,165,166.55,164.7,166,850,,,,,selected composite
+COMPARE_A,PRICE_BAR,1,147.45,148.35,147.05,148,350,,,,,same composite
+COMPARE_A,PRICE_BAR,2,148,150.55,147.7,150,420,,,,,same composite
+COMPARE_A,PRICE_BAR,3,150,152.4,149.4,152,500,,,,,same composite
+COMPARE_A,PRICE_BAR,4,152,154.7,151.55,154,530,,,,,same composite
+COMPARE_A,PRICE_BAR,5,154,155.35,153.6,155,490,,,,,same composite
+COMPARE_A,PRICE_BAR,6,155,156.55,154.7,156,470,,,,,same composite
+COMPARE_A,PRICE_BAR,7,156,157.8,155.4,157.4,610,,,,,same composite
+COMPARE_A,PRICE_BAR,8,157.4,159.7,156.95,159,660,,,,,same composite
+COMPARE_A,PRICE_BAR,9,159,160.85,158.6,160.5,720,,,,,same composite
+COMPARE_A,PRICE_BAR,10,160.5,162.55,160.2,162,760,,,,,same composite
+COMPARE_A,PRICE_BAR,11,162,163.4,161.4,163,790,,,,,same composite
+COMPARE_A,PRICE_BAR,12,163,164.7,162.55,164,820,,,,,same composite
+COMPARE_A,PRICE_BAR,13,164,165.35,163.6,165,780,,,,,same composite
+COMPARE_A,PRICE_BAR,14,165,166.55,164.7,166,850,,,,,same composite
+COMPARE_B,PRICE_BAR,1,157.35,158.25,156.95,157.9,228,,,,,later period with more trade above
+COMPARE_B,PRICE_BAR,2,157.9,159.2,157.6,158.65,357,,,,,later period with more trade above
+COMPARE_B,PRICE_BAR,3,158.65,159.05,157.9,158.5,425,,,,,later period with more trade above
+COMPARE_B,PRICE_BAR,4,158.5,159.95,158.05,159.25,345,,,,,later period with more trade above
+COMPARE_B,PRICE_BAR,5,159.25,159.6,158.7,159.1,417,,,,,later period with more trade above
+COMPARE_B,PRICE_BAR,6,159.1,160.4,158.8,159.85,400,,,,,later period with more trade above
+COMPARE_B,PRICE_BAR,7,159.85,160.25,159.1,159.7,397,,,,,later period with more trade above
+COMPARE_B,PRICE_BAR,8,159.7,161.15,159.25,160.45,561,,,,,later period with more trade above
+COMPARE_B,PRICE_BAR,9,160.45,160.8,159.9,160.3,612,,,,,later period with more trade above
+COMPARE_B,PRICE_BAR,10,160.3,162.55,160,162,760,,,,,later period with more trade above
+COMPARE_B,PRICE_BAR,11,162,163.4,161.4,163,790,,,,,later period with more trade above
+COMPARE_B,PRICE_BAR,12,163,164.7,162.55,164,820,,,,,later period with more trade above
+COMPARE_B,PRICE_BAR,13,164,165.35,163.6,165,780,,,,,later period with more trade above
+COMPARE_B,PRICE_BAR,14,165,166.55,164.7,166,850,,,,,later period with more trade above
+APPLY_INITIAL,PRICE_BAR,1,147.45,148.35,147.05,148,350,,,,,selected composite
+APPLY_INITIAL,PRICE_BAR,2,148,150.55,147.7,150,420,,,,,selected composite
+APPLY_INITIAL,PRICE_BAR,3,150,152.4,149.4,152,500,,,,,selected composite
+APPLY_INITIAL,PRICE_BAR,4,152,154.7,151.55,154,530,,,,,selected composite
+APPLY_INITIAL,PRICE_BAR,5,154,155.35,153.6,155,490,,,,,selected composite
+APPLY_INITIAL,PRICE_BAR,6,155,156.55,154.7,156,470,,,,,selected composite
+APPLY_INITIAL,PRICE_BAR,7,156,157.8,155.4,157.4,610,,,,,selected composite
+APPLY_INITIAL,PRICE_BAR,8,157.4,159.7,156.95,159,660,,,,,selected composite
+APPLY_INITIAL,PRICE_BAR,9,159,160.85,158.6,160.5,720,,,,,selected composite
+APPLY_INITIAL,PRICE_BAR,10,160.5,162.55,160.2,162,760,,,,,selected composite
+APPLY_INITIAL,PRICE_BAR,11,162,163.4,161.4,163,790,,,,,selected composite
+APPLY_CONTINUATION,PRICE_BAR,1,147.45,148.35,147.05,148,350,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,2,148,150.55,147.7,150,420,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,3,150,152.4,149.4,152,500,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,4,152,154.7,151.55,154,530,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,5,154,155.35,153.6,155,490,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,6,155,156.55,154.7,156,470,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,7,156,157.8,155.4,157.4,610,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,8,157.4,159.7,156.95,159,660,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,9,159,160.85,158.6,160.5,720,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,10,160.5,162.55,160.2,162,760,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,11,162,163.4,161.4,163,790,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,12,163,167.45,162.6,167,870,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,13,167,168.45,166.6,168,850,,,,,same historic window
+APPLY_CONTINUATION,PRICE_BAR,14,168,169.45,167.6,169,830,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,1,147.45,148.35,147.05,148,350,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,2,148,150.55,147.7,150,420,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,3,150,152.4,149.4,152,500,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,4,152,154.7,151.55,154,530,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,5,154,155.35,153.6,155,490,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,6,155,156.55,154.7,156,470,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,7,156,157.8,155.4,157.4,610,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,8,157.4,159.7,156.95,159,660,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,9,159,160.85,158.6,160.5,720,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,10,160.5,162.55,160.2,162,760,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,11,162,163.4,161.4,163,790,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,12,163,163.45,162.6,163,890,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,13,163,163.45,160.6,161,920,,,,,same historic window
+APPLY_FAILURE,PRICE_BAR,14,161,161.45,158.6,159,950,,,,,same historic window
+NOTICE,PROFILE_BIN,,,,,,,148,180,,,selected composite
+NOTICE,PROFILE_BIN,,,,,,,150,500,,,selected composite
+NOTICE,PROFILE_BIN,,,,,,,152,950,,,selected composite
+NOTICE,PROFILE_BIN,,,,,,,154,760,,,selected composite
+NOTICE,PROFILE_BIN,,,,,,,156,250,,,selected composite
+NOTICE,PROFILE_BIN,,,,,,,158,150,,,selected composite
+NOTICE,PROFILE_BIN,,,,,,,160,300,,,selected composite
+NOTICE,PROFILE_BIN,,,,,,,162,650,,,selected composite
+NOTICE,PROFILE_BIN,,,,,,,164,920,,,selected composite
+NOTICE,PROFILE_BIN,,,,,,,166,780,,,selected composite
+NOTICE,PROFILE_BIN,,,,,,,168,320,,,selected composite
+NOTICE,PROFILE_REFERENCE,,,,,,,,,POC,152,selected composite
+NOTICE,PROFILE_REFERENCE,,,,,,,,,VAH,166,selected composite
+NOTICE,PROFILE_REFERENCE,,,,,,,,,VAL,150,selected composite
+COMPAREA,PROFILE_BIN,,,,,,,148,180,,,same composite
+COMPAREA,PROFILE_BIN,,,,,,,150,500,,,same composite
+COMPAREA,PROFILE_BIN,,,,,,,152,950,,,same composite
+COMPAREA,PROFILE_BIN,,,,,,,154,760,,,same composite
+COMPAREA,PROFILE_BIN,,,,,,,156,250,,,same composite
+COMPAREA,PROFILE_BIN,,,,,,,158,150,,,same composite
+COMPAREA,PROFILE_BIN,,,,,,,160,300,,,same composite
+COMPAREA,PROFILE_BIN,,,,,,,162,650,,,same composite
+COMPAREA,PROFILE_BIN,,,,,,,164,920,,,same composite
+COMPAREA,PROFILE_BIN,,,,,,,166,780,,,same composite
+COMPAREA,PROFILE_BIN,,,,,,,168,320,,,same composite
+COMPAREA,PROFILE_REFERENCE,,,,,,,,,POC,152,same composite
+COMPAREA,PROFILE_REFERENCE,,,,,,,,,VAH,166,same composite
+COMPAREA,PROFILE_REFERENCE,,,,,,,,,VAL,150,same composite
+COMPAREB,PROFILE_BIN,,,,,,,148,140,,,later period with more trade above
+COMPAREB,PROFILE_BIN,,,,,,,150,280,,,later period with more trade above
+COMPAREB,PROFILE_BIN,,,,,,,152,420,,,later period with more trade above
+COMPAREB,PROFILE_BIN,,,,,,,154,520,,,later period with more trade above
+COMPAREB,PROFILE_BIN,,,,,,,156,650,,,later period with more trade above
+COMPAREB,PROFILE_BIN,,,,,,,158,720,,,later period with more trade above
+COMPAREB,PROFILE_BIN,,,,,,,160,760,,,later period with more trade above
+COMPAREB,PROFILE_BIN,,,,,,,162,790,,,later period with more trade above
+COMPAREB,PROFILE_BIN,,,,,,,164,850,,,later period with more trade above
+COMPAREB,PROFILE_BIN,,,,,,,166,900,,,later period with more trade above
+COMPAREB,PROFILE_BIN,,,,,,,168,920,,,later period with more trade above
+COMPAREB,PROFILE_REFERENCE,,,,,,,,,POC,168,later period with more trade above
+COMPAREB,PROFILE_REFERENCE,,,,,,,,,VAH,168,later period with more trade above
+COMPAREB,PROFILE_REFERENCE,,,,,,,,,VAL,158,later period with more trade above
+APPLY,PROFILE_BIN,,,,,,,148,180,,,selected composite
+APPLY,PROFILE_BIN,,,,,,,150,500,,,selected composite
+APPLY,PROFILE_BIN,,,,,,,152,950,,,selected composite
+APPLY,PROFILE_BIN,,,,,,,154,760,,,selected composite
+APPLY,PROFILE_BIN,,,,,,,156,250,,,selected composite
+APPLY,PROFILE_BIN,,,,,,,158,150,,,selected composite
+APPLY,PROFILE_BIN,,,,,,,160,300,,,selected composite
+APPLY,PROFILE_BIN,,,,,,,162,650,,,selected composite
+APPLY,PROFILE_BIN,,,,,,,164,920,,,selected composite
+APPLY,PROFILE_BIN,,,,,,,166,780,,,selected composite
+APPLY,PROFILE_BIN,,,,,,,168,320,,,selected composite
+APPLY,PROFILE_REFERENCE,,,,,,,,,POC,152,selected composite
+APPLY,PROFILE_REFERENCE,,,,,,,,,VAH,166,selected composite
+APPLY,PROFILE_REFERENCE,,,,,,,,,VAL,150,selected composite
+CONTINUATION,PROFILE_BIN,,,,,,,148,180,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,150,500,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,152,950,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,154,760,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,156,250,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,158,150,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,160,300,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,162,650,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,164,920,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,166,780,,,same historic window
+CONTINUATION,PROFILE_BIN,,,,,,,168,320,,,same historic window
+CONTINUATION,PROFILE_REFERENCE,,,,,,,,,POC,152,same historic window
+CONTINUATION,PROFILE_REFERENCE,,,,,,,,,VAH,166,same historic window
+CONTINUATION,PROFILE_REFERENCE,,,,,,,,,VAL,150,same historic window
+FAILURE,PROFILE_BIN,,,,,,,148,180,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,150,500,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,152,950,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,154,760,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,156,250,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,158,150,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,160,300,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,162,650,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,164,920,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,166,780,,,same historic window
+FAILURE,PROFILE_BIN,,,,,,,168,320,,,same historic window
+FAILURE,PROFILE_REFERENCE,,,,,,,,,POC,152,same historic window
+FAILURE,PROFILE_REFERENCE,,,,,,,,,VAH,166,same historic window
+FAILURE,PROFILE_REFERENCE,,,,,,,,,VAL,150,same historic window

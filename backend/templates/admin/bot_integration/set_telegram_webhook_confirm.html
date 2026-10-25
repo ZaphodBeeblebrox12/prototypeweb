@@ -1,0 +1,24 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>{{ title }}</h1>
+<p>This will configure Telegram to deliver Titan Pip Bot updates directly to the Django Academy webhook.</p>
+<p><strong>Webhook URL:</strong> {{ webhook_url|default:"Not configured" }}</p>
+{% if not token_configured %}
+  <p class="errornote">The Telegram bot token is missing from Bot Configuration.</p>
+{% endif %}
+{% if not secret_configured %}
+  <p class="errornote">TELEGRAM_WEBHOOK_SECRET is missing from the hosting environment. Set it before continuing.</p>
+{% endif %}
+{% if not webhook_url %}
+  <p class="errornote">Set SITE_BASE_URL or provide a webhook URL in Bot Configuration.</p>
+{% endif %}
+<form method="post">
+  {% csrf_token %}
+  <div>
+    <button type="submit" class="default" {% if not token_configured or not secret_configured or not webhook_url %}disabled{% endif %}>
+      Set native Telegram webhook
+    </button>
+    <a href="{% url 'admin:bot_integration_botconfig_changelist' %}" class="button">Cancel</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Member dashboard | TradeThesis</title>
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/tradethesis-icon.png">
+  <link href="assets/site.css" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light;
+  --canvas: #f7f3e9;
+  --surface: #fffdf8;
+  --surface-soft: #f2ecdf;
+  --surface-green: #e6edde;
+  --ink: #29382e;
+  --muted: #687268;
+  --line: #ded8ca;
+  --green: #355a46;
+  --deep: #254334;
+  --tomato: #c96f50;
+  --butter: #f0d38a;
+  --sage: #dce7d6;
+  --shadow: 0 14px 34px #29382e0b;
+  --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --serif: Georgia, "Times New Roman", serif;
+  --mono: "SFMono-Regular", Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html { min-height: 100%; background: var(--canvas); }
+body { margin: 0; background: var(--canvas); color: var(--ink); font-family: var(--sans); line-height: 1.5; }
+button, input, select { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--tomato); outline-offset: 3px; }
+.app { min-height: 100vh; background: var(--canvas); }
+.sidebar { position: fixed; inset: 76px auto 0 0; width: 246px; background: var(--surface); border-right: 1px solid var(--line); padding: 25px 16px 18px; display: flex; flex-direction: column; z-index: 10; }
+.brand { display:flex; gap:11px; align-items:center; padding: 0 8px 27px; border-bottom:1px solid var(--line); }
+.sitewide-header .brand { padding:0; border:0; }
+.sidebar-logo { display:block; width:202px; max-width:100%; max-height:50px; height:auto; object-fit:contain; object-position:left center; }
+.brand-mark { width:39px; height:39px; flex:0 0 39px; display:grid; place-items:center; border-radius:13px 13px 13px 5px; background:var(--green); color:#fffdf8; font:italic 24px var(--serif); transform:rotate(-3deg); }
+.brand-name { font:600 20px/.98 var(--serif); letter-spacing:-.02em; }
+.brand-tag { color:var(--muted); display:block; margin-top:5px; font-size:8px; text-transform:uppercase; letter-spacing:.13em; }
+.side-caption { color:var(--muted); font-size:9px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; padding:25px 10px 9px; }
+.side-nav { display:grid; gap:4px; }
+.side-link { width:100%; display:flex; align-items:center; gap:11px; padding:11px 12px; border:1px solid transparent; border-radius:11px; background:transparent; color:var(--muted); text-align:left; font-size:12px; transition:background .15s,border-color .15s,color .15s; }
+.side-link svg { width:17px; height:17px; flex:0 0 17px; stroke:currentColor; fill:none; stroke-width:1.7; }
+.side-link:hover { background:var(--surface-soft); color:var(--ink); }
+.side-link.active { background:var(--surface-green); border-color:var(--line); color:var(--ink); font-weight:750; }
+.side-link.active svg { color:var(--green); }
+.side-badge { margin-left:auto; min-width:21px; text-align:center; border-radius:99px; padding:2px 6px; background:var(--surface-soft); color:var(--muted); font:10px var(--mono); }
+.sidebar-bottom { margin-top:auto; }
+.help-card { border:1px solid var(--line); background:var(--surface-soft); border-radius:13px; padding:13px 13px 14px; margin:0 3px 15px; }
+.help-card strong { font:400 18px var(--serif); display:block; margin-bottom:4px; }
+.help-card p { margin:0 0 9px; font-size:10px; color:var(--muted); line-height:1.6; }
+.help-card button { color:var(--green); border:0; background:transparent; padding:0; font-size:11px; font-weight:800; }
+.user-mini { display:flex; align-items:center; gap:10px; border-top:1px solid var(--line); padding:17px 5px 0; }
+.avatar { display:grid; place-items:center; width:34px; height:34px; flex:0 0 34px; border-radius:50%; background:var(--butter); color:#463f2b; font:600 12px var(--serif); }
+.user-mini b { display:block; font-size:11px; }
+.user-mini small { display:block; font-size:9px; color:var(--muted); margin-top:2px; }
+.side-menu { display:none; }
+.main { margin-left:246px; min-width:0; }
+.topbar { height:76px; padding:0 clamp(22px,4vw,48px); display:flex; justify-content:space-between; align-items:center; gap:20px; background:var(--surface); border-bottom:1px solid var(--line); }
+.crumb { color:var(--muted); font-size:10px; letter-spacing:.03em; }
+.crumb b { color:var(--ink); font-weight:750; }
+.top-actions { display:flex; align-items:center; gap:10px; }
+.preview-chip { display:inline-flex; align-items:center; gap:7px; border:1px solid var(--line); border-radius:99px; color:var(--muted); padding:6px 9px; font-size:9px; white-space:nowrap; }
+.preview-chip:before { content:""; width:6px; height:6px; border-radius:50%; background:var(--tomato); }
+.icon-btn { display:grid; place-items:center; width:37px; height:37px; border-radius:50%; border:1px solid var(--line); background:transparent; color:var(--muted); }
+.icon-btn svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.7; }
+.content { width:min(1330px,100%); padding:34px clamp(22px,4vw,48px) 55px; margin:0 auto; }
+.page-head { display:flex; justify-content:space-between; align-items:flex-end; gap:20px; margin-bottom:25px; }
+.kicker { display:flex; align-items:center; gap:8px; color:var(--green); font-size:9px; font-weight:850; letter-spacing:.14em; text-transform:uppercase; }
+.kicker:before { content:""; width:17px; height:2px; background:var(--tomato); }
+h1 { font:400 clamp(32px,3.4vw,43px)/1.06 var(--serif); letter-spacing:-.045em; margin:10px 0 7px; }
+.page-head p { color:var(--muted); font-size:12px; margin:0; }
+.page-head-actions { display:flex; gap:9px; align-items:center; flex-shrink:0; }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:1px solid var(--green); padding:10px 15px; min-height:41px; border-radius:999px; background:var(--green); color:#fffdf8; font-size:11px; font-weight:750; white-space:nowrap; transition:transform .15s, box-shadow .15s; }
+.btn:hover { transform:translateY(-1px); box-shadow:0 5px 14px #25433418; }
+.btn.secondary { background:transparent; color:var(--green); border-color:var(--line); }
+.btn.subtle { border-color:var(--line); background:var(--surface); color:var(--ink); }
+.btn.small { min-height:33px; padding:7px 11px; font-size:10px; }
+.grid { display:grid; gap:15px; }
+.stats { grid-template-columns:repeat(4,minmax(0,1fr)); margin-bottom:17px; }
+.stat { min-width:0; border:1px solid var(--line); border-radius:15px; background:var(--surface); padding:17px 18px 16px; box-shadow:0 4px 15px #29382e04; }
+.stat-head { display:flex; align-items:center; justify-content:space-between; gap:8px; color:var(--muted); font-size:10px; }
+.stat-icon { width:29px; height:29px; border-radius:9px; display:grid; place-items:center; background:var(--surface-soft); color:var(--green); }
+.stat-icon svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.8; }
+.stat-value { margin:11px 0 3px; font:400 clamp(19px,2.1vw,27px)/1.1 var(--serif); letter-spacing:-.025em; }
+.stat-note { font-size:9px; color:var(--muted); line-height:1.5; }
+.mini-status { color:var(--green); font-size:9px; font-weight:800; }
+.overview-grid { grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr); align-items:stretch; }
+.card { background:var(--surface); border:1px solid var(--line); border-radius:16px; min-width:0; box-shadow:var(--shadow); }
+.card-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:19px 20px 0; }
+.card-title { font:400 22px/1.12 var(--serif); letter-spacing:-.025em; margin:0; }
+.card-subtitle { font-size:10px; color:var(--muted); margin:6px 0 0; line-height:1.6; }
+.text-link { color:var(--green); font-size:10px; font-weight:800; white-space:nowrap; border:0; background:transparent; padding:3px 0; }
+.text-link:hover { text-decoration:underline; text-underline-offset:3px; }
+.plan-card { background:var(--deep); color:#f7f2e7; border:1px solid #254334; overflow:hidden; position:relative; box-shadow:0 14px 30px #25433419; }
+.plan-card:after { content:""; position:absolute; right:-72px; top:-95px; width:240px; height:240px; border:1px solid #f0d38a32; border-radius:50%; box-shadow:0 0 0 24px #f0d38a07,0 0 0 54px #f0d38a05; pointer-events:none; }
+.plan-card .card-head, .plan-body { position:relative; z-index:1; }
+.plan-card .card-title { font-size:25px; }
+.plan-card .card-subtitle { color:#c8d6c4; max-width:390px; font-size:11px; }
+.plan-label { display:inline-flex; align-items:center; gap:6px; border:1px solid #ffffff3b; border-radius:99px; padding:5px 8px; color:#f0d38a; font-size:9px; font-weight:800; white-space:nowrap; }
+.plan-label:before { content:""; width:5px; height:5px; border-radius:50%; background:#a7c59f; }
+.plan-body { padding:23px 20px 19px; }
+.plan-meta { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:4px 0 18px; }
+.plan-meta > div { background:#ffffff0c; border:1px solid #ffffff20; padding:11px 12px; border-radius:10px; }
+.plan-meta small { display:block; color:#c8d6c4; font-size:9px; margin-bottom:4px; }
+.plan-meta strong { font-size:12px; font-weight:650; }
+.plan-actions { display:flex; flex-wrap:wrap; align-items:center; gap:9px; }
+.plan-card .btn { background:var(--butter); border-color:var(--butter); color:#3c3829; }
+.plan-card .btn.secondary { color:#f7f2e7; background:transparent; border-color:#ffffff50; }
+.plan-footnote { color:#c8d6c4; font-size:9px; margin:12px 0 0; }
+.integration-list { padding:12px 20px 19px; display:grid; gap:10px; }
+.integration { display:flex; align-items:center; gap:12px; border:1px solid var(--line); border-radius:12px; padding:12px; min-width:0; }
+.integration-logo { display:grid; place-items:center; width:39px; height:39px; flex:0 0 39px; border-radius:12px; font-size:18px; font-weight:800; }
+.integration-logo.telegram { background:#e1edf1; color:#2386b6; }
+.integration-logo.discord { background:#e8e6f5; color:#5552a0; }
+.integration-details { flex:1; min-width:0; }
+.integration-details strong { display:block; font-size:12px; }
+.integration-details p { margin:3px 0 0; font-size:9px; line-height:1.45; color:var(--muted); overflow-wrap:anywhere; }
+.connection-status { display:inline-flex; align-items:center; gap:5px; margin-top:5px; font-size:9px; color:var(--muted); }
+.connection-status:before { content:""; width:5px; height:5px; border-radius:50%; background:var(--line); }
+.connection-status.connected { color:var(--green); }
+.connection-status.connected:before { background:#72a56d; }
+.integration .btn { flex-shrink:0; }
+.section-grid { grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); margin-top:16px; align-items:start; }
+.payment-list { padding:6px 20px 12px; }
+.payment-row { display:grid; grid-template-columns:1fr auto auto; align-items:center; gap:12px; border-bottom:1px solid var(--line); padding:13px 0; }
+.payment-row:last-child { border-bottom:0; }
+.payment-main strong { display:block; font-size:11px; }
+.payment-main small { display:block; color:var(--muted); margin-top:3px; font-size:9px; }
+.amount { font:400 16px var(--serif); white-space:nowrap; }
+.paid { color:var(--green); font-size:9px; font-weight:800; white-space:nowrap; }
+.table-demo { font-size:9px; color:var(--muted); padding:0 20px 14px; }
+.quick-list { display:grid; }
+.quick-row { display:flex; align-items:center; gap:12px; padding:13px 20px; border-top:1px solid var(--line); }
+.quick-row:first-child { border-top:0; }
+.quick-icon { display:grid; place-items:center; width:33px; height:33px; border-radius:10px; background:var(--surface-soft); color:var(--green); flex:0 0 33px; font-size:15px; }
+.quick-copy { flex:1; min-width:0; }
+.quick-copy strong { display:block; font-size:11px; }
+.quick-copy small { display:block; margin-top:3px; color:var(--muted); font-size:9px; line-height:1.5; }
+.notice { margin-top:17px; display:flex; align-items:flex-start; gap:10px; padding:13px 15px; border:1px solid var(--line); border-left:3px solid var(--tomato); border-radius:0 11px 11px 0; background:var(--surface); color:var(--muted); font-size:10px; line-height:1.7; }
+.notice b { color:var(--ink); }
+.page { display:none; }
+.page.active { display:block; animation:reveal .18s ease; }
+@keyframes reveal { from { opacity:.55; transform:translateY(3px); } to { opacity:1; transform:none; } }
+.detail-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:15px; }
+.panel-body { padding:16px 20px 20px; }
+.detail-line { display:flex; justify-content:space-between; align-items:center; gap:18px; padding:12px 0; border-bottom:1px solid var(--line); font-size:11px; }
+.detail-line:last-child { border-bottom:0; }
+.detail-line span { color:var(--muted); }
+.detail-line strong { text-align:right; font-size:11px; font-weight:700; }
+.inline-form { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.field { display:grid; gap:6px; }
+.field.full { grid-column:1/-1; }
+.field label { color:var(--muted); font-size:10px; font-weight:750; }
+.field input, .field select { width:100%; padding:11px 12px; border:1px solid var(--line); background:var(--canvas); border-radius:9px; color:var(--ink); font-size:11px; }
+.profile-actions { display:flex; gap:9px; margin-top:15px; }
+.page-intro { max-width:740px; margin:-10px 0 22px; font-size:12px; line-height:1.75; color:var(--muted); }
+.learning-card { display:grid; grid-template-columns:70px 1fr auto; align-items:center; gap:16px; padding:18px 20px; border-bottom:1px solid var(--line); }
+.learning-card:last-child { border-bottom:0; }
+.course-mark { width:70px; height:70px; display:grid; place-items:center; border-radius:12px; background:var(--surface-green); color:var(--green); font:italic 25px var(--serif); }
+.learning-copy h3 { margin:0 0 4px; font:400 22px/1.1 var(--serif); }
+.learning-copy p { margin:0; font-size:10px; color:var(--muted); line-height:1.7; }
+.progress-track { width:min(250px,100%); height:5px; border-radius:9px; background:var(--surface-soft); overflow:hidden; margin:13px 0 5px; }
+.progress-fill { height:100%; background:var(--green); width:35%; border-radius:inherit; }
+.learning-meta { font-size:9px; color:var(--muted); }
+.invoice-head { display:grid; grid-template-columns:1.4fr .8fr .7fr .7fr; gap:10px; color:var(--muted); font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; padding:14px 20px 8px; }
+.invoice-row { display:grid; grid-template-columns:1.4fr .8fr .7fr .7fr; gap:10px; align-items:center; padding:13px 20px; border-top:1px solid var(--line); font-size:10px; }
+.invoice-row strong { font-size:10px; }
+.invoice-row .btn { justify-self:start; }
+.section-label { color:var(--muted); font-size:9px; letter-spacing:.1em; text-transform:uppercase; font-weight:850; padding:0 20px; margin:17px 0 2px; }
+.security-item { display:flex; justify-content:space-between; gap:15px; align-items:center; padding:14px 20px; border-top:1px solid var(--line); }
+.security-item strong { display:block; font-size:11px; }
+.security-item small { display:block; color:var(--muted); font-size:9px; margin-top:4px; }
+.faq { border-top:1px solid var(--line); }
+.faq details { padding:15px 20px; border-bottom:1px solid var(--line); }
+.faq summary { cursor:pointer; font-size:12px; font-weight:750; }
+.faq details p { font-size:10px; line-height:1.75; color:var(--muted); max-width:800px; margin:10px 0 0; }
+.empty-note { color:var(--muted); font-size:10px; line-height:1.7; padding:5px 20px 18px; }
+.toast { position:fixed; bottom:22px; right:24px; z-index:80; max-width:min(420px,calc(100vw - 32px)); background:var(--deep); color:#f7f2e7; border:1px solid #ffffff22; border-radius:12px; box-shadow:0 16px 40px #0003; padding:13px 16px; display:flex; align-items:flex-start; gap:10px; font-size:11px; line-height:1.6; opacity:0; transform:translateY(9px); pointer-events:none; transition:opacity .2s,transform .2s; }
+.toast.show { opacity:1; transform:none; }
+.modal-backdrop { position:fixed; inset:0; z-index:70; display:none; align-items:center; justify-content:center; padding:18px; background:#1d2b2399; backdrop-filter:blur(4px); }
+.modal-backdrop.open { display:flex; }
+.modal { background:var(--surface); color:var(--ink); width:min(490px,100%); padding:25px; border:1px solid var(--line); border-radius:20px; box-shadow:0 30px 90px #0004; }
+.modal-top { display:flex; justify-content:space-between; align-items:center; gap:15px; }
+.modal-top .kicker { font-size:9px; }
+.modal h2 { font:400 30px/1.1 var(--serif); letter-spacing:-.03em; margin:14px 0 8px; }
+.modal p { font-size:11px; color:var(--muted); line-height:1.8; }
+.modal-actions { display:flex; gap:9px; flex-wrap:wrap; margin-top:18px; }
+@media(max-width:1180px) {
+  .sidebar { width:218px; }
+  .main { margin-left:218px; }
+  .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .overview-grid,.section-grid,.detail-grid { grid-template-columns:1fr; }
+  .site-placeholder { display:none; }
+}
+@media(max-width:820px) { .sidebar { top:70px; } }
+@media(max-width:480px) { .sidebar { top:66px; } }
+@media(max-width:760px) {
+  .sidebar { width:min(300px,86vw); transform:translateX(-104%); transition:transform .22s ease; box-shadow:0 0 0 100vmax #0000; }
+  .sidebar.open { transform:translateX(0); box-shadow:0 0 0 100vmax #0a130d66; }
+  .main { margin-left:0; }
+  .topbar { height:64px; padding:0 17px; }
+  .side-menu { display:grid; }
+  .crumb { display:none; }
+  .content { padding:25px 16px 42px; }
+  .page-head { align-items:flex-start; flex-direction:column; gap:14px; }
+  .page-head-actions { width:100%; justify-content:flex-start; flex-wrap:wrap; }
+  .stats { gap:10px; }
+  .stat { padding:14px; }
+  .stat-value { font-size:22px; }
+  .overview-grid,.section-grid { gap:12px; }
+  .card-head { padding:17px 16px 0; }
+  .integration-list { padding:12px 16px 16px; }
+  .payment-list { padding:6px 16px 12px; }
+  .table-demo { padding:0 16px 14px; }
+  .quick-row { padding:12px 16px; }
+  .invoice-head { display:none; }
+  .invoice-row { grid-template-columns:1fr auto; gap:8px; }
+  .invoice-row .invoice-date { color:var(--muted); }
+  .invoice-row .invoice-state { text-align:right; }
+  .invoice-row .btn { grid-column:2; }
+  .learning-card { grid-template-columns:52px 1fr; padding:16px; gap:12px; }
+  .course-mark { width:52px; height:58px; }
+  .learning-card>.btn { grid-column:2; justify-self:start; }
+  .inline-form { grid-template-columns:1fr; }
+  .field.full { grid-column:auto; }
+}
+@media(max-width:420px) {
+  .preview-chip { display:none; }
+  .stats { grid-template-columns:1fr 1fr; }
+  .stat-head { font-size:9px; }
+  .stat-value { font-size:20px; }
+  .plan-meta { grid-template-columns:1fr; }
+  .integration { flex-wrap:wrap; }
+  .integration .btn { margin-left:51px; }
+  .payment-row { grid-template-columns:1fr auto; }
+  .payment-row .paid { grid-column:2; }
+}
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; transition-duration:.01ms!important; scroll-behavior:auto!important; } }
+
+/* Editorial dashboard refinement: clear hierarchy and product-aware billing. */
+.overview-masthead { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(230px,.72fr); gap:20px; align-items:stretch; margin-bottom:22px; }
+.masthead-copy { position:relative; overflow:hidden; padding:28px 30px 25px; border:1px solid var(--line); border-radius:18px; background:radial-gradient(ellipse at 9% 0%, #e7eddf 0%, transparent 54%), var(--surface); box-shadow:var(--shadow); }
+.masthead-copy h1 { font-size:clamp(33px,3.3vw,47px); margin:12px 0 10px; }
+.masthead-copy>p { max-width:620px; margin:0; font-size:12px; line-height:1.8; color:var(--muted); }
+.masthead-flags { display:flex; flex-wrap:wrap; gap:7px; margin-top:19px; }
+.masthead-flags span { border:1px solid var(--line); border-radius:99px; padding:6px 9px; background:var(--surface); color:var(--muted); font-size:9px; }
+.masthead-flags span:first-child { color:var(--green); background:var(--surface-green); }
+.masthead-art { position:relative; isolation:isolate; overflow:hidden; min-height:190px; padding:20px 22px; display:flex; flex-direction:column; justify-content:space-between; border-radius:18px; background:var(--deep); color:#f8f3e7; box-shadow:0 13px 28px #25433420; }
+.masthead-art:before { content:""; position:absolute; z-index:-1; width:205px; height:205px; border:1px solid #f0d38a35; border-radius:50%; right:-50px; top:-48px; box-shadow:0 0 0 20px #f0d38a08,0 0 0 46px #f0d38a06; }
+.masthead-art-top { display:flex; align-items:center; justify-content:space-between; gap:12px; color:#d0d9ca; font:8px var(--mono); letter-spacing:.12em; }
+.masthead-stamp { width:31px; height:31px; display:grid; place-items:center; border:1px solid #e3c981a6; border-radius:50%; color:var(--butter); font:italic 19px var(--serif); }
+.masthead-rule { width:46px; height:2px; margin-top:15px; background:var(--tomato); }
+.masthead-art strong { display:block; margin:15px 0; font:400 clamp(22px,2.1vw,29px)/1.08 var(--serif); letter-spacing:-.025em; }
+.masthead-art small { color:#c4d0bf; font:8px var(--mono); letter-spacing:.08em; }
+.masthead-orbit { position:absolute; width:95px; height:95px; border:1px dashed #f0d38a48; border-radius:50%; right:20px; bottom:18px; }
+.overview-actions { display:flex; justify-content:space-between; align-items:center; gap:20px; margin:0 0 15px; padding:0 2px; }
+.overview-actions p { margin:4px 0 0; font-size:10px; color:var(--muted); }
+.portfolio-card .card-head { padding-bottom:4px; }
+.portfolio-list { position:relative; z-index:1; padding:0 20px; }
+.portfolio-row { display:grid; grid-template-columns:27px minmax(0,1fr) auto; gap:11px; align-items:center; padding:13px 0; border-top:1px solid #ffffff21; }
+.portfolio-index { display:grid; place-items:center; width:26px; height:26px; border:1px solid #ffffff30; border-radius:8px; color:var(--butter); font:10px var(--mono); }
+.portfolio-copy { min-width:0; }
+.portfolio-copy strong { display:block; font-size:11px; font-weight:750; }
+.portfolio-copy em { color:#d9c38a; font-size:9px; font-style:normal; font-weight:600; }
+.portfolio-copy small { display:block; margin-top:4px; font-size:9px; line-height:1.5; color:#c5d2c2; }
+.portfolio-status { border:1px solid #91b18b5c; background:#91b18b12; border-radius:99px; padding:4px 7px; color:#cce0bf; font:8px var(--mono); letter-spacing:.04em; white-space:nowrap; }
+.portfolio-status.recurring { border-color:#e4ca7a70; color:#f0d38a; background:#f0d38a0c; }
+.plan-card .plan-body { padding-top:14px; }
+.plan-card .plan-meta { margin-bottom:14px; }
+.purchase-model-strip { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-bottom:28px; }
+.purchase-model-strip>div { display:flex; gap:12px; align-items:flex-start; padding:15px 16px; background:var(--surface); border:1px solid var(--line); border-radius:13px; }
+.model-number { display:grid; place-items:center; flex:0 0 29px; width:29px; height:29px; border-radius:9px; background:var(--surface-green); color:var(--green); font:11px var(--mono); }
+.purchase-model-strip strong { display:block; font-size:11px; }
+.purchase-model-strip p { margin:5px 0 0; font-size:9px; line-height:1.6; color:var(--muted); }
+.purchase-section-head { display:flex; justify-content:space-between; align-items:flex-end; gap:16px; margin:27px 0 14px; }
+.purchase-section-head h2 { margin:7px 0 4px; font:400 clamp(25px,2.6vw,33px)/1.1 var(--serif); letter-spacing:-.03em; }
+.purchase-section-head p { margin:0; font-size:10px; color:var(--muted); }
+.purchase-section-total { color:var(--muted); font-size:9px; padding-bottom:4px; white-space:nowrap; }
+.purchase-cards { grid-template-columns:repeat(3,minmax(0,1fr)); align-items:stretch; gap:13px; }
+.purchase-card { min-width:0; position:relative; padding:18px; display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); }
+.purchase-card.featured { background:linear-gradient(180deg,#eef2e8,var(--surface)); border-color:#c3d2ba; box-shadow:0 12px 28px #355a4612; }
+.purchase-card-top { display:flex; justify-content:space-between; align-items:center; gap:9px; margin-bottom:17px; }
+.product-symbol { display:grid; place-items:center; width:38px; height:38px; border-radius:12px 12px 4px 12px; background:var(--surface-green); color:var(--green); font:italic 17px var(--serif); }
+.access-pill { border:1px solid var(--line); border-radius:99px; padding:5px 8px; color:var(--green); background:var(--surface-green); font-size:8px; font-weight:800; }
+.purchase-category { color:var(--tomato); font:8px var(--mono); letter-spacing:.12em; }
+.purchase-card h3 { margin:9px 0 8px; font:400 23px/1.08 var(--serif); letter-spacing:-.025em; }
+.purchase-card>p { min-height:49px; margin:0; color:var(--muted); font-size:10px; line-height:1.7; }
+.purchase-price-row { display:flex; flex-wrap:wrap; align-items:baseline; gap:7px; margin:17px 0 12px; padding-bottom:13px; border-bottom:1px solid var(--line); }
+.purchase-price-row strong { font:400 25px/1 var(--serif); letter-spacing:-.025em; }
+.purchase-price-row span { font-size:9px; color:var(--muted); }
+.purchase-detail-list { display:grid; gap:9px; margin-bottom:18px; }
+.purchase-detail-list>div { display:flex; justify-content:space-between; gap:10px; align-items:flex-start; font-size:9px; line-height:1.5; }
+.purchase-detail-list span { color:var(--muted); }
+.purchase-detail-list b { text-align:right; font-weight:700; }
+.purchase-card-actions { display:flex; gap:7px; flex-wrap:wrap; margin-top:auto; padding-top:13px; border-top:1px solid var(--line); }
+.purchase-card-actions .btn { padding-inline:10px; font-size:9px; }
+.recurring-head { margin-top:38px; }
+.subscription-panel { display:grid; grid-template-columns:105px minmax(0,1fr) auto; gap:20px; align-items:stretch; padding:21px; border:1px solid #d1c69b; border-radius:17px; background:linear-gradient(115deg,#f4edda,var(--surface)); box-shadow:var(--shadow); }
+.subscription-visual { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px; min-height:133px; border-radius:12px; background:var(--deep); color:#d8e2d3; font:8px/1.7 var(--mono); text-align:center; letter-spacing:.1em; }
+.subscription-visual-mark { display:grid; place-items:center; width:48px; height:48px; border-radius:50%; border:1px solid #f0d38a73; color:var(--butter); font-size:27px; }
+.subscription-copy { min-width:0; }
+.subscription-title-line { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.subscription-title-line h3 { margin:0; font:400 24px/1.1 var(--serif); }
+.subscription-title-line h3 span { display:inline-block; margin-left:4px; padding:4px 6px; border-radius:4px; background:var(--surface-soft); color:var(--muted); vertical-align:middle; font:8px var(--mono); letter-spacing:.05em; text-transform:uppercase; }
+.status-chip { border:1px solid var(--line); border-radius:99px; padding:5px 8px; background:var(--surface); color:var(--green); font-size:8px; font-weight:800; white-space:nowrap; }
+.subscription-copy>p { margin:9px 0 14px; color:var(--muted); font-size:10px; line-height:1.7; max-width:660px; }
+.subscription-facts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+.subscription-facts>div { border-top:1px solid var(--line); padding-top:9px; }
+.subscription-facts small { display:block; color:var(--muted); font-size:8px; margin-bottom:4px; }
+.subscription-facts strong { display:block; font-size:10px; line-height:1.4; }
+.subscription-facts em { color:var(--muted); font-size:9px; font-style:normal; font-weight:500; }
+.subscription-actions { display:flex; flex-direction:column; justify-content:center; align-items:flex-start; gap:12px; border-left:1px solid var(--line); padding-left:19px; }
+.subscription-actions .btn { font-size:9px; }
+.subscription-actions .text-link { font-size:9px; }
+.ledger-head,.ledger-row { grid-template-columns:minmax(180px,1.5fr) minmax(80px,.8fr) minmax(75px,.65fr) minmax(145px,1fr); }
+.ledger-row { align-items:center; }
+.ledger-row>div:first-child strong { display:block; font-size:10px; }
+.ledger-row>div:first-child small { display:block; margin-top:4px; font-size:8px; color:var(--muted); }
+.ledger-type { width:max-content; max-width:100%; border:1px solid var(--line); border-radius:99px; padding:4px 7px; background:var(--surface-soft); color:var(--muted); font-size:8px; white-space:nowrap; }
+.recurring-type { color:var(--green); background:var(--surface-green); }
+.ledger-amount { font:400 16px var(--serif); white-space:nowrap; }
+.ledger-status { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.ledger-status .paid { font-size:8px; }
+.ledger-status .btn { padding:6px 8px; font-size:8px; }
+.billing-bottom-grid { grid-template-columns:repeat(2,minmax(0,1fr)); margin-top:15px; }
+@media(max-width:1180px) {
+  .purchase-cards { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .purchase-card:last-child { grid-column:1/-1; }
+  .subscription-panel { grid-template-columns:88px minmax(0,1fr); }
+  .subscription-actions { grid-column:2; border-left:0; border-top:1px solid var(--line); padding:14px 0 0; flex-direction:row; align-items:center; }
+  .ledger-head,.ledger-row { grid-template-columns:minmax(150px,1.4fr) minmax(74px,.7fr) minmax(70px,.6fr) minmax(135px,1fr); }
+}
+@media(max-width:760px) {
+  .overview-masthead { grid-template-columns:1fr; gap:12px; }
+  .masthead-copy { padding:23px 21px; }
+  .masthead-art { min-height:168px; }
+  .overview-actions { align-items:flex-start; flex-direction:column; gap:12px; }
+  .purchase-model-strip { grid-template-columns:1fr; gap:8px; }
+  .purchase-cards { grid-template-columns:1fr; }
+  .purchase-card:last-child { grid-column:auto; }
+  .purchase-card>p { min-height:0; }
+  .purchase-section-head { align-items:flex-start; flex-direction:column; gap:5px; }
+  .subscription-panel { grid-template-columns:1fr; padding:16px; }
+  .subscription-visual { min-height:90px; flex-direction:row; justify-content:flex-start; padding:14px 18px; }
+  .subscription-visual-mark { width:44px; height:44px; }
+  .subscription-actions { grid-column:auto; flex-wrap:wrap; }
+  .subscription-facts { grid-template-columns:1fr 1fr; }
+  .ledger-head { display:none; }
+  .ledger-row { grid-template-columns:minmax(0,1fr) auto; gap:9px; padding:14px 16px; }
+  .ledger-row>div:first-child { grid-column:1/-1; }
+  .ledger-type { grid-column:1; }
+  .ledger-amount { grid-column:2; grid-row:2; justify-self:end; }
+  .ledger-status { grid-column:1/-1; justify-content:space-between; padding-top:3px; }
+  .billing-bottom-grid { grid-template-columns:1fr; }
+}
+@media(max-width:420px) {
+  .portfolio-row { grid-template-columns:27px minmax(0,1fr); }
+  .portfolio-status { grid-column:2; justify-self:start; }
+  .masthead-flags span { font-size:8px; }
+  .subscription-facts { grid-template-columns:1fr; }
+  .ledger-row { grid-template-columns:minmax(0,1fr) auto; }
+}
+</style>
+  <link href="assets/sitewide-footer.css?v=20261022-footer-full-width-r1" rel="stylesheet">
+  <link href="assets/sitewide-nav.css" rel="stylesheet">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+<header class="header sitewide-header" data-sitewide-nav>
+  <div class="wrap nav">
+    <a class="brand" href="index.html" aria-label="TradeThesis home"><img class="brand-logo brand-logo-header" src="assets/tradethesis-horizontal.png" alt="TradeThesis — Conviction before execution"></a>
+    <nav aria-label="Main navigation" class="navlinks">
+      <a href="index.html#approach">Our approach</a>
+      <a href="courses.html">Courses</a>
+      <a href="community.html">Community</a>
+      <a href="index.html#desk">The Desk</a>
+    </nav>
+    <a class="button" href="https://tradethesis-academy-staging.onrender.com/accounts/member-entry/">Open member dashboard ↗</a>
+    <button aria-expanded="false" aria-label="Open navigation" class="mobile-toggle" type="button" data-sitewide-toggle>☰</button>
+  </div>
+  <nav aria-label="Mobile navigation" class="wrap mobilelinks" data-sitewide-mobile>
+    <a href="index.html#approach">Our approach</a>
+    <a href="courses.html">Courses</a>
+    <a href="community.html">Community</a>
+    <a href="index.html#desk">The Desk</a>
+    <a class="mobile-menu-cta" href="https://tradethesis-academy-staging.onrender.com/accounts/member-entry/">Open member dashboard ↗</a>
+  </nav>
+</header>
+<div class="app">
+<aside class="sidebar" id="sidebar" aria-label="Member dashboard navigation">
+  <a class="brand dashboard-brand" href="#page-overview" aria-label="TradeThesis member desk home">
+    <img class="sidebar-logo" src="assets/tradethesis-horizontal.png" alt="TradeThesis — Conviction before execution">
+  </a>
+  <div class="side-caption">Member desk</div>
+  <nav class="side-nav" aria-label="Member sections">
+    <button class="side-link active" data-page="overview"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Overview</button>
+    <button class="side-link" data-page="purchases"><svg viewBox="0 0 24 24"><path d="M4 7.5h16l-1.4 12H5.4z"/><path d="M8.5 8V6a3.5 3.5 0 0 1 7 0v2"/><path d="M9 12h6"/></svg>Purchases &amp; access<span class="side-badge">3</span></button>
+    <button class="side-link" data-page="connections"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.2 1.2"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1.2-1.2"/></svg>Connected accounts<span class="side-badge">0/2</span></button>
+    <button class="side-link" data-page="billing"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg>Billing &amp; invoices</button>
+    <button class="side-link" data-page="learning"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20M8 7h8M8 10h6"/></svg>My learning</button>
+    <button class="side-link" data-page="profile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Profile &amp; security</button>
+    <button class="side-link" data-page="help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.6 1.3c-.9 1.1-2.2 1.3-2.2 3M12 17h.01"/></svg>Help &amp; support</button>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="help-card"><strong>Need a hand?</strong><p>Account access, community links or a payment question—we’ll point you in the right direction.</p><button data-goto="help">Visit help &amp; support →</button></div>
+    <div class="user-mini"><span class="avatar">AM</span><span><b>Alex Morgan <span aria-hidden="true">⌄</span></b><small>Member account · Demo</small></span></div>
+  </div>
+</aside>
+<div class="main">
+  <header class="topbar">
+    <button class="icon-btn side-menu" id="menuBtn" aria-label="Open dashboard menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    <div class="crumb">TRADETHESIS <span aria-hidden="true">/</span> <b id="crumbLabel">OVERVIEW</b></div>
+    <div class="top-actions"><span class="preview-chip">Member dashboard · Demo data</span><button class="icon-btn" aria-label="Help" data-goto="help"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4.5 1.5c-.8.8-2 1.2-2 2.5M12 17h.01"/></svg></button><button class="icon-btn" aria-label="Profile and settings" data-goto="profile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button></div>
+  </header>
+  <main class="content" id="main-content" tabindex="-1">
+    <section class="page active" id="page-overview" data-view="overview">
+      <div class="overview-masthead"><div class="masthead-copy"><div class="kicker">YOUR MEMBER DESK / ACCOUNT SUMMARY</div><h1>Good to see you, Alex.</h1><p>Courses, community access and every payment—together, with each purchase’s terms kept clear.</p><div class="masthead-flags"><span>2 one-time orders</span><span>1 recurring plan · demo</span><span>Sample account</span></div></div><div class="masthead-art"><div class="masthead-art-top"><span>TRADETHESIS / MEMBER EDITION</span><span class="masthead-stamp">T</span></div><div class="masthead-rule"></div><strong>Access you own.<br>Plans you control.</strong><small>MEMBER DESK · ACCOUNT OVERVIEW</small><div class="masthead-orbit" aria-hidden="true"></div></div></div>
+      <div class="overview-actions"><div><div class="kicker">Your account, at a glance</div><p>Jump straight to the thing you came here to do.</p></div><div class="page-head-actions"><button class="btn secondary" data-goto="connections">Connect a community ↗</button><button class="btn" data-goto="billing">Review billing</button></div></div>
+      <div class="grid stats">
+        <article class="stat"><div class="stat-head">Access records <span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20"/></svg></span></div><div class="stat-value">3 items</div><div class="stat-note">2 one-time purchases + 1 recurring demo plan</div></article>
+        <article class="stat"><div class="stat-head">Connected accounts <span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.2 1.2"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1.2-1.2"/></svg></span></div><div class="stat-value" id="connectionStat">0 of 2</div><div class="stat-note">Telegram and Discord</div></article>
+        <article class="stat"><div class="stat-head">Latest payment <span class="stat-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg></span></div><div class="stat-value">₹17,000</div><div class="stat-note">CONSTRUCT · one-time · sample receipt</div></article>
+        <article class="stat"><div class="stat-head">Recurring plans <span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6.1 9A6.5 6.5 0 0 1 17 6l3 6M4 12l3 6a6.5 6.5 0 0 0 10.9-3"/></svg></span></div><div class="stat-value">1 plan · demo</div><div class="stat-note">Separate from one-time course purchases</div></article>
+      </div>
+      <div class="grid overview-grid">
+        <article class="card plan-card portfolio-card">
+          <div class="card-head"><div><div class="kicker" style="color:#f0d38a">Your purchase portfolio</div><h2 class="card-title" style="margin-top:9px">Different products. Clear terms.</h2><p class="card-subtitle">Payment type and access period are tracked separately—so a one-time purchase never looks like a subscription.</p></div><span class="plan-label">3 access records</span></div>
+          <div class="portfolio-list">
+            <div class="portfolio-row"><span class="portfolio-index">01</span><div class="portfolio-copy"><strong>The TradeThesis Trading Path</strong><small>One-time purchase · Lifetime course access</small></div><span class="portfolio-status">ACTIVE</span></div>
+            <div class="portfolio-row"><span class="portfolio-index">02</span><div class="portfolio-copy"><strong>CONSTRUCT</strong><small>One-time programme fee · includes 12 months of community access</small></div><span class="portfolio-status">ACTIVE</span></div>
+            <div class="portfolio-row"><span class="portfolio-index">03</span><div class="portfolio-copy"><strong>Community membership <em>· demo plan</em></strong><small>Recurring subscription · renews separately from course purchases</small></div><span class="portfolio-status recurring">RECURRING</span></div>
+          </div>
+          <div class="plan-body"><div class="plan-meta"><div><small>Member email</small><strong>alex@example.com</strong></div><div><small>Billing principle</small><strong>Every payment tied to a product</strong></div></div><div class="plan-actions"><button class="btn" data-goto="purchases">Manage purchases ↗</button><button class="btn secondary" data-goto="billing">Review invoices</button></div><p class="plan-footnote">Sample records for design review. The standalone monthly plan is illustrative, not a current advertised offer.</p></div>
+        </article>
+        <article class="card">
+          <div class="card-head"><div><h2 class="card-title">Community connections</h2><p class="card-subtitle">Link the accounts you use to access member spaces.</p></div><button class="text-link" data-goto="connections">Manage all →</button></div>
+          <div class="integration-list">
+            <div class="integration"><span class="integration-logo telegram" aria-hidden="true">➤</span><div class="integration-details"><strong>Telegram</strong><p id="telegramIdentity">Member updates and community access</p><span id="telegramStatus" class="connection-status">Not linked</span></div><button class="btn secondary small" data-connect="telegram" id="telegramBtn">Connect</button></div>
+            <div class="integration"><span class="integration-logo discord" aria-hidden="true">◈</span><div class="integration-details"><strong>Discord</strong><p id="discordIdentity">Community discussion and member roles</p><span id="discordStatus" class="connection-status">Not linked</span></div><button class="btn secondary small" data-connect="discord" id="discordBtn">Connect</button></div>
+          </div>
+        </article>
+      </div>
+      <div class="grid section-grid">
+        <article class="card"><div class="card-head"><div><h2 class="card-title">Recent payment activity</h2><p class="card-subtitle">Each line names the product or plan being paid for.</p></div><button class="text-link" data-goto="billing">Full billing history →</button></div><div class="payment-list"><div class="payment-row"><div class="payment-main"><strong>The TradeThesis Trading Path</strong><small>One-time purchase · TT-DEMO-001</small></div><span class="amount">₹999</span><span class="paid">Paid</span></div><div class="payment-row"><div class="payment-main"><strong>CONSTRUCT</strong><small>One-time programme · TT-DEMO-002</small></div><span class="amount">₹17,000</span><span class="paid">Paid</span></div><div class="payment-row"><div class="payment-main"><strong>Community membership <em>· demo plan</em></strong><small>Monthly subscription · sample renewal</small></div><span class="amount">₹499</span><span class="paid">Paid</span></div></div><div class="table-demo">Illustrative records only. The live account would show each order, charge, tax, renewal and receipt from the billing system.</div></article>
+        <article class="card"><div class="card-head"><div><h2 class="card-title">Account shortcuts</h2><p class="card-subtitle">The common things members need to do.</p></div></div><div class="quick-list"><div class="quick-row"><span class="quick-icon">↔</span><div class="quick-copy"><strong>Connect your communities</strong><small>Link Telegram and Discord to your member access.</small></div><button class="text-link" data-goto="connections">Open →</button></div><div class="quick-row"><span class="quick-icon">₹</span><div class="quick-copy"><strong>Manage billing</strong><small>Review purchases, payment methods and invoices.</small></div><button class="text-link" data-goto="billing">Open →</button></div><div class="quick-row"><span class="quick-icon">⚙</span><div class="quick-copy"><strong>Account &amp; security</strong><small>Update your email and account preferences.</small></div><button class="text-link" data-goto="profile">Open →</button></div></div></article>
+      </div>
+      <div class="notice"><span aria-hidden="true">ⓘ</span><span><b>Preview notice:</b> Telegram, Discord, payments, invoices and profile settings are represented visually. No external accounts are linked and no payments are processed or stored in this mockup.</span></div>
+    </section>
+
+    <section class="page" id="page-purchases" data-view="purchases">
+      <div class="page-head"><div><div class="kicker">Products &amp; entitlements</div><h1>What you bought. What you can access.</h1><p>One account can hold several courses, programmes and memberships, each with its own access period and payment terms.</p></div><div class="page-head-actions"><button class="btn secondary" data-goto="learning">Open my learning</button><button class="btn" data-goto="billing">View all charges</button></div></div>
+      <div class="purchase-model-strip"><div><span class="model-number">01</span><div><strong>One-time purchase</strong><p>Charged once. Access can be lifetime or time-limited.</p></div></div><div><span class="model-number">02</span><div><strong>Recurring plan</strong><p>Shows its own price, billing cycle, renewal and cancellation controls.</p></div></div><div><span class="model-number">03</span><div><strong>Course or cohort access</strong><p>Enrolment dates and access rules are recorded separately from payment frequency.</p></div></div></div>
+      <div class="purchase-section-head"><div><div class="kicker">Your purchases</div><h2>One-time purchases &amp; formats</h2><p>Two sample paid orders, plus an example of how a cohort offer would appear before enrolment.</p></div><span class="purchase-section-total">2 paid orders · 1 product example</span></div>
+      <div class="grid purchase-cards">
+        <article class="purchase-card"><div class="purchase-card-top"><span class="product-symbol">TP</span><span class="access-pill">Lifetime access</span></div><div class="purchase-category">SELF-PACED COURSE</div><h3>The TradeThesis Trading Path</h3><p>30 lessons across four connected stages, from chart reading to risk and review.</p><div class="purchase-price-row"><strong>₹999</strong><span>paid once · sample</span></div><div class="purchase-detail-list"><div><span>Payment type</span><b>One-time</b></div><div><span>Access</span><b>Lifetime</b></div><div><span>Order reference</span><b>TT-DEMO-001</b></div></div><div class="purchase-card-actions"><button class="btn" data-goto="learning">Open course ↗</button><button class="btn secondary" data-invoice="TT-DEMO-001">Receipt</button></div></article>
+        <article class="purchase-card featured"><div class="purchase-card-top"><span class="product-symbol">C</span><span class="access-pill">Programme access</span></div><div class="purchase-category">GUIDED PROGRAMME</div><h3>CONSTRUCT</h3><p>Trade construction and management with guided practice and structured reviews.</p><div class="purchase-price-row"><strong>₹17,000</strong><span>paid once · sample</span></div><div class="purchase-detail-list"><div><span>Payment type</span><b>One-time</b></div><div><span>Programme access</span><b>As described at purchase</b></div><div><span>Included community</span><b>12 months</b></div></div><div class="purchase-card-actions"><button class="btn" data-goto="learning">Open programme ↗</button><button class="btn secondary" data-invoice="TT-DEMO-002">Receipt</button></div></article>
+        <article class="purchase-card"><div class="purchase-card-top"><span class="product-symbol">LC</span><span class="access-pill">Not purchased in demo</span></div><div class="purchase-category">LIVE CLASSROOM · PRODUCT EXAMPLE</div><h3>Trade Construction &amp; Management</h3><p>Six-week live classroom with guided worksheets and a final playbook. This card illustrates a course offer, not an existing order.</p><div class="purchase-price-row"><strong>One-time fee</strong><span>shown at checkout when offered</span></div><div class="purchase-detail-list"><div><span>Payment type</span><b>One-time enrolment</b></div><div><span>Access period</span><b>Class and materials terms</b></div><div><span>Order reference</span><b>No order in this demo</b></div></div><div class="purchase-card-actions"><button class="btn" data-modal="courses">Explore course formats ↗</button></div></article>
+      </div>
+      <div class="purchase-section-head recurring-head"><div><div class="kicker">Managed separately</div><h2>Recurring memberships</h2><p>Subscriptions are never mixed into the one-time purchase list.</p></div><span class="purchase-section-total">1 illustrative plan</span></div>
+      <article class="subscription-panel"><div class="subscription-visual"><span class="subscription-visual-mark">↻</span><span>RENEWAL<br>CONTROL</span></div><div class="subscription-copy"><div class="subscription-title-line"><h3>Community membership <span>Demo plan</span></h3><span class="status-chip">Active · simulated</span></div><p>A separate monthly membership is shown here to demonstrate how recurring billing would appear. It is not an advertised TradeThesis offer and is not connected to a payment provider.</p><div class="subscription-facts"><div><small>Plan price</small><strong>₹499 <em>/ month</em></strong></div><div><small>Next renewal</small><strong>14 Nov 2026 <em>· sample date</em></strong></div><div><small>Cancellation</small><strong>Manage any time</strong></div></div></div><div class="subscription-actions"><button class="btn" data-goto="billing">Manage subscription</button><button class="text-link" data-modal="subscription-terms">View plan terms →</button></div></article>
+      <div class="notice"><span aria-hidden="true">ⓘ</span><span><b>Why this matters:</b> buying a course once, receiving time-limited access, joining a cohort and subscribing monthly are different things. The live dashboard should show the purchase, the access entitlement and any renewal as related—but distinct—records.</span></div>
+    </section>
+
+    <section class="page" id="page-connections" data-view="connections">
+      <div class="page-head"><div><div class="kicker">Connected services</div><h1>Your communities, linked.</h1><p>Connect the accounts you use so the right member access can be matched to you.</p></div><div class="page-head-actions"><button class="btn secondary" data-goto="help">Connection help</button></div></div>
+      <p class="page-intro">In the live product, linking will use each service’s supported authorization or verification flow. TradeThesis should only request the permissions needed for membership access.</p>
+      <div class="grid detail-grid">
+        <article class="card"><div class="card-head"><div><h2 class="card-title">Telegram</h2><p class="card-subtitle">Member announcements, community access and account verification.</p></div><span class="integration-logo telegram">➤</span></div><div class="panel-body"><div class="detail-line"><span>Connection status</span><strong id="telegramDetailStatus">Not linked</strong></div><div class="detail-line"><span>Linked Telegram</span><strong id="telegramDetailIdentity">None yet</strong></div><div class="detail-line"><span>Access check</span><strong>On successful verification</strong></div><div class="profile-actions"><button class="btn" data-connect="telegram" id="telegramDetailBtn">Connect Telegram</button><button class="btn subtle" data-disconnect="telegram" id="telegramDisconnect" hidden>Disconnect</button></div></div></article>
+        <article class="card"><div class="card-head"><div><h2 class="card-title">Discord</h2><p class="card-subtitle">Verify your member role and open the right community spaces.</p></div><span class="integration-logo discord">◈</span></div><div class="panel-body"><div class="detail-line"><span>Connection status</span><strong id="discordDetailStatus">Not linked</strong></div><div class="detail-line"><span>Linked Discord</span><strong id="discordDetailIdentity">None yet</strong></div><div class="detail-line"><span>Member role</span><strong>Assigned after verification</strong></div><div class="profile-actions"><button class="btn" data-connect="discord" id="discordDetailBtn">Connect Discord</button><button class="btn subtle" data-disconnect="discord" id="discordDisconnect" hidden>Disconnect</button></div></div></article>
+      </div>
+      <div class="notice"><span aria-hidden="true">ⓘ</span><span><b>Designed for safe linking:</b> Telegram and Discord connections must be verified against the signed-in member ID. Buttons in this HTML prototype only simulate a state change; they do not authorize or connect to either service.</span></div>
+    </section>
+
+    <section class="page" id="page-billing" data-view="billing">
+      <div class="page-head"><div><div class="kicker">Billing ledger</div><h1>Every charge should tell a story.</h1><p>See which product a payment belongs to, whether it was one-time or recurring, and what happens next.</p></div><div class="page-head-actions"><button class="btn secondary" data-goto="purchases">View purchased products</button><button class="btn" data-modal="payment-method">Payment methods</button></div></div>
+      <div class="grid detail-grid">
+        <article class="card"><div class="card-head"><div><h2 class="card-title">Billing summary</h2><p class="card-subtitle">A summary of different payment types, not a single generic membership.</p></div><span class="plan-label" style="background:var(--surface-green);color:var(--green);border-color:var(--line)">Sample account</span></div><div class="panel-body"><div class="detail-line"><span>One-time purchases</span><strong>2 paid orders · sample</strong></div><div class="detail-line"><span>Recurring subscriptions</span><strong>1 illustrative plan</strong></div><div class="detail-line"><span>Next recurring charge</span><strong>14 Nov 2026 · sample</strong></div><div class="detail-line"><span>Course renewals</span><strong>None unless terms say otherwise</strong></div><div class="profile-actions"><button class="btn secondary" data-goto="purchases">Review product terms</button><button class="btn" data-modal="payment-method">Payment methods</button></div></div></article>
+        <article class="card"><div class="card-head"><div><h2 class="card-title">Payment method</h2><p class="card-subtitle">A secure place to manage saved payment details.</p></div><span class="quick-icon">₹</span></div><div class="panel-body"><div class="detail-line"><span>Saved method</span><strong id="savedMethodLabel">None saved</strong></div><div class="detail-line"><span>Secure processing</span><strong>Checkout provider</strong></div><p class="page-intro" style="margin:12px 0 14px">Payment details should be handled by the connected payment provider, not stored directly in the website.</p><button class="btn" data-modal="payment-method">Add or update method</button></div></article>
+      </div>
+      <article class="card billing-ledger" style="margin-top:16px"><div class="card-head"><div><div class="kicker">Transaction ledger</div><h2 class="card-title">Payments matched to products</h2><p class="card-subtitle">Each payment should resolve to the exact course, programme or plan it purchased.</p></div><span class="preview-chip">Sample records</span></div><div class="invoice-head ledger-head"><span>Product / order</span><span>Payment type</span><span>Amount</span><span>Status / receipt</span></div><div class="invoice-row ledger-row"><div><strong>The TradeThesis Trading Path</strong><small>TT-DEMO-001 · 08 Oct 2026</small></div><span class="ledger-type">One-time</span><span class="ledger-amount">₹999</span><div class="ledger-status"><span class="paid">Paid · sample</span><button class="btn subtle small" data-invoice="TT-DEMO-001">Receipt ↗</button></div></div><div class="invoice-row ledger-row"><div><strong>CONSTRUCT</strong><small>TT-DEMO-002 · sample order</small></div><span class="ledger-type">One-time</span><span class="ledger-amount">₹17,000</span><div class="ledger-status"><span class="paid">Paid · sample</span><button class="btn subtle small" data-invoice="TT-DEMO-002">Receipt ↗</button></div></div><div class="invoice-row ledger-row"><div><strong>Community membership <em>· demo plan</em></strong><small>SUB-DEMO-001 · sample cycle</small></div><span class="ledger-type recurring-type">Monthly recurring</span><span class="ledger-amount">₹499</span><div class="ledger-status"><span class="paid">Paid · sample</span><button class="btn subtle small" data-invoice="SUB-DEMO-001">Receipt ↗</button></div></div><p class="empty-note">Live rows should include currency, tax, discounts, payment provider reference, refund/chargeback state and a downloadable invoice where applicable.</p></article>
+      <div class="grid billing-bottom-grid"><article class="card"><div class="card-head"><div><h2 class="card-title">One-time purchase rules</h2><p class="card-subtitle">Do not show a renewal date for an order that does not renew.</p></div></div><div class="panel-body"><div class="detail-line"><span>Lifetime course</span><strong>Paid once · no renewal</strong></div><div class="detail-line"><span>Time-limited programme</span><strong>Paid once · access end date shown</strong></div><div class="detail-line"><span>Live cohort</span><strong>Order and cohort dates linked</strong></div></div></article><article class="card"><div class="card-head"><div><h2 class="card-title">Recurring plan controls</h2><p class="card-subtitle">Plan changes should affect only that subscription.</p></div></div><div class="panel-body"><div class="detail-line"><span>Next renewal</span><strong>14 Nov 2026 · sample</strong></div><div class="detail-line"><span>Payment method</span><strong id="savedMethodLabel">None saved</strong></div><div class="profile-actions"><button class="btn" data-modal="subscription-terms">Manage plan</button><button class="btn secondary" data-modal="cancel-subscription">Cancellation terms</button></div></div></article></div>
+      <div class="notice"><span aria-hidden="true">ⓘ</span><span><b>Billing is not active in this preview.</b> The payment actions open an explanatory dialog only. No checkout, charge, payment method or invoice is created.</span></div>
+    </section>
+
+    <section class="page" id="page-learning" data-view="learning">
+      <div class="page-head"><div><div class="kicker">Your learning</div><h1>Pick up where you left off.</h1><p>Your enrolled courses and course access belong beside your account and billing details.</p></div><div class="page-head-actions"><button class="btn" data-modal="courses">Explore courses ↗</button></div></div>
+      <div class="card"><div class="learning-card"><div class="course-mark">TT</div><div class="learning-copy"><h3>The TradeThesis Trading Path</h3><p>30 lessons · Four connected stages · Lifetime access</p><div class="progress-track"><div class="progress-fill"></div></div><span class="learning-meta">35% complete · Sample progress only</span></div><button class="btn" data-modal="course">Continue course ↗</button></div></div>
+      <div class="notice"><span aria-hidden="true">ⓘ</span><span><b>Learning progress:</b> the final product can link this panel to your course platform and return you to your last lesson. Progress shown here is just a visual placeholder.</span></div>
+    </section>
+
+    <section class="page" id="page-profile" data-view="profile">
+      <div class="page-head"><div><div class="kicker">Your details</div><h1>Account &amp; security.</h1><p>Manage your profile and keep your account details current.</p></div></div>
+      <div class="grid detail-grid">
+        <article class="card"><div class="card-head"><div><h2 class="card-title">Profile details</h2><p class="card-subtitle">The details used for your member account and receipts.</p></div></div><div class="panel-body"><form id="profileForm" class="inline-form"><div class="field"><label for="firstName">First name</label><input id="firstName" name="firstName" value="Alex" autocomplete="given-name"></div><div class="field"><label for="lastName">Last name</label><input id="lastName" name="lastName" value="Morgan" autocomplete="family-name"></div><div class="field full"><label for="email">Email address</label><input id="email" name="email" type="email" value="alex@example.com" autocomplete="email"></div><div class="field full"><label for="timezone">Time zone</label><select id="timezone" name="timezone"><option>Asia/Kolkata (IST)</option><option>Europe/London</option><option>America/New_York</option><option>UTC</option></select></div><div class="field full"><label for="notifications">Member updates</label><select id="notifications" name="notifications"><option>Essential account and payment updates</option><option>All product and community updates</option><option>Essential updates only</option></select></div></form><div class="profile-actions"><button class="btn" id="saveProfile">Save changes</button><button class="btn secondary" id="resetProfile">Reset form</button></div></div></article>
+        <article class="card"><div class="card-head"><div><h2 class="card-title">Sign-in &amp; security</h2><p class="card-subtitle">A safer home for your account.</p></div></div><div class="section-label">Security controls</div><div class="security-item"><div><strong>Password</strong><small>Update your sign-in password.</small></div><button class="btn secondary small" data-modal="password">Change password</button></div><div class="security-item"><div><strong>Active sessions</strong><small>Review devices currently signed in.</small></div><button class="btn secondary small" data-modal="sessions">Review</button></div><div class="security-item"><div><strong>Sign out</strong><small>End your session on this device.</small></div><button class="btn subtle small" data-modal="signout">Sign out</button></div><p class="empty-note">Security actions are placeholders. Real password changes and sessions require the authentication backend.</p></article>
+      </div>
+    </section>
+
+    <section class="page" id="page-help" data-view="help">
+      <div class="page-head"><div><div class="kicker">Help &amp; support</div><h1>Let’s get it sorted.</h1><p>Answers for the account, community and billing tasks members are most likely to need.</p></div><div class="page-head-actions"><button class="btn" data-modal="support">Contact support</button></div></div>
+      <article class="card"><div class="card-head"><div><h2 class="card-title">Common questions</h2><p class="card-subtitle">A few useful answers before you need to ask.</p></div></div><div class="faq"><details><summary>How do I link Telegram to my member account?</summary><p>The production flow should start a verification request and ask you to confirm through the official TradeThesis bot. Only after successful verification should the dashboard show it as linked or grant member access.</p></details><details><summary>Why connect Discord?</summary><p>Discord linking can verify your account and synchronize the correct member role. Authorizations should request only the minimum permissions needed to establish the link and apply the role.</p></details><details><summary>Where can I find my invoice?</summary><p>Open Membership &amp; billing, locate a payment in your invoice history and choose View receipt. The live system should display records supplied by the payment provider or billing database.</p></details><details><summary>Will this dashboard renew my course automatically?</summary><p>The current Trading Path offer describes lifetime access. A recurring plan, if offered in future, should show its price, renewal date and cancellation terms clearly before a member confirms payment.</p></details><details><summary>Are these buttons connected to my accounts?</summary><p>No. This is an interactive design prototype. It does not connect to Telegram or Discord, process payments, save profile changes or authenticate users.</p></details></div></article>
+    </section>
+  </main>
+</div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"><span aria-hidden="true">✳</span><span id="toastText">Preview action complete.</span></div>
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal"><div class="modal-top"><div class="kicker">Preview only</div><button class="icon-btn" id="modalClose" aria-label="Close dialog">×</button></div><h2 id="modalTitle">This action is not connected.</h2><p id="modalText">This dashboard is a visual prototype.</p><div class="modal-actions" id="modalActions"><button class="btn" id="modalPrimary">Got it</button><button class="btn secondary" id="modalSecondary">Cancel</button></div></div></div>
+<script>
+(() => {
+  const pages = [...document.querySelectorAll('[data-view]')];
+  const navItems = [...document.querySelectorAll('[data-page]')];
+  const titles = {overview:'OVERVIEW',purchases:'PURCHASES & ACCESS',connections:'CONNECTED ACCOUNTS',billing:'BILLING & INVOICES',learning:'MY LEARNING',profile:'PROFILE & SECURITY',help:'HELP & SUPPORT'};
+  function goTo(name) {
+    pages.forEach(p => p.classList.toggle('active', p.dataset.view === name));
+    navItems.forEach(n => n.classList.toggle('active', n.dataset.page === name));
+    document.getElementById('crumbLabel').textContent = titles[name] || 'OVERVIEW';
+    document.getElementById('sidebar').classList.remove('open');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  document.querySelectorAll('[data-page]').forEach(el => el.addEventListener('click', () => goTo(el.dataset.page)));
+  document.querySelectorAll('[data-goto]').forEach(el => el.addEventListener('click', () => goTo(el.dataset.goto)));
+  const toast = document.getElementById('toast'); let toastTimer;
+  function notify(message) { document.getElementById('toastText').textContent = message; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 3700); }
+  const modalBackdrop = document.getElementById('modalBackdrop');
+  const modalPresets = {
+    'checkout': ['Checkout is not connected yet.', 'In the live product this would take you to a secure checkout for the selected course or membership. The amount, billing frequency, taxes and cancellation terms should be shown before confirmation. No payment has been taken.', 'Explore courses', 'Close', () => goTo('learning')],
+    'payment-method': ['Secure payment methods', 'When billing is connected, you will manage payment methods through the payment provider’s secure customer portal. This site should not collect or store raw card details itself.', 'View billing', 'Close', () => goTo('billing')],
+    'courses': ['Course catalogue', 'The production dashboard can link to the course catalogue. Course access and the amount paid should sync with the billing and enrolment records.', 'Open learning', 'Close', () => goTo('learning')],
+    'course': ['Course platform not connected', 'This button is where the member would return to their last lesson. Connect it to the course platform before launch.', 'My learning', 'Close', () => goTo('learning')],
+    'password': ['Password management is not connected.', 'A real password reset must use the authentication backend and a verified recovery flow. No changes have been made.', 'Profile settings', 'Close', () => goTo('profile')],
+    'sessions': ['Session management is a placeholder.', 'The live version can show active sessions and support revoking them through the authentication service. This preview does not know about any real sessions.', 'Profile settings', 'Close', () => goTo('profile')],
+    'signout': ['Sign-out is a placeholder.', 'There is no logged-in session in this prototype. A production sign-out action should invalidate the session with the authentication service.', 'Stay here', 'Close', null],
+    'support': ['Support form not connected.', 'The production contact flow can create a support ticket with the member ID and relevant billing or connection reference. This preview does not submit anything.', 'Help centre', 'Close', () => goTo('help')],
+    'subscription-terms': ['Subscription controls — preview only', 'A live recurring plan should show the exact product, price, billing frequency, next charge date, cancellation effective date and any refund rules. These controls must never cancel a one-time course order by mistake.', 'Go to billing', 'Close', () => goTo('billing')],
+    'cancel-subscription': ['Cancellation terms — preview only', 'Cancellation should stop future renewals for this specific recurring subscription while preserving any course or programme access already purchased under separate terms. No subscription exists in this prototype.', 'Go to purchases', 'Close', () => goTo('purchases')],
+  };
+  let modalPrimaryCallback = null;
+  function openModal(key) {
+    const p = modalPresets[key]; if (!p) return;
+    document.getElementById('modalTitle').textContent = p[0];
+    document.getElementById('modalText').textContent = p[1];
+    document.getElementById('modalPrimary').textContent = p[2];
+    document.getElementById('modalSecondary').textContent = p[3];
+    modalPrimaryCallback = p[4]; modalBackdrop.classList.add('open'); document.getElementById('modalClose').focus();
+  }
+  function closeModal() { modalBackdrop.classList.remove('open'); }
+  document.querySelectorAll('[data-modal]').forEach(el => el.addEventListener('click', () => openModal(el.dataset.modal)));
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.getElementById('modalSecondary').addEventListener('click', closeModal);
+  document.getElementById('modalPrimary').addEventListener('click', () => { const cb = modalPrimaryCallback; closeModal(); if (cb) cb(); });
+  modalBackdrop.addEventListener('click', e => { if (e.target === modalBackdrop) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+  const connected = {telegram:false,discord:false};
+  const displayName = {telegram:'@alex_morgan_demo',discord:'Alex Morgan · Demo'};
+  function paintConnection(service) {
+    const title = service[0].toUpperCase() + service.slice(1);
+    const on = connected[service];
+    const status = document.getElementById(service+'Status');
+    const identity = document.getElementById(service+'Identity');
+    const btn = document.getElementById(service+'Btn');
+    const dStatus = document.getElementById(service+'DetailStatus');
+    const dIdentity = document.getElementById(service+'DetailIdentity');
+    const dBtn = document.getElementById(service+'DetailBtn');
+    const dDisconnect = document.getElementById(service+'Disconnect');
+    status.textContent = on ? 'Preview linked · not a real connection' : 'Not linked';
+    status.classList.toggle('connected', on);
+    identity.textContent = on ? displayName[service] : (service === 'telegram' ? 'Member updates and community access' : 'Community discussion and member roles');
+    btn.textContent = on ? 'Manage' : 'Connect';
+    dStatus.textContent = on ? 'Preview linked (simulated)' : 'Not linked';
+    dIdentity.textContent = on ? displayName[service] : 'None yet';
+    dBtn.textContent = on ? 'Connection details' : 'Connect '+title;
+    dDisconnect.hidden = !on;
+    const count = Object.values(connected).filter(Boolean).length;
+    document.getElementById('connectionStat').textContent = count+' of 2';
+    document.querySelector('[data-page="connections"] .side-badge').textContent = count+'/2';
+  }
+  document.querySelectorAll('[data-connect]').forEach(el => el.addEventListener('click', () => {
+    const service = el.dataset.connect;
+    if (connected[service]) { notify('This connection is only simulated in the prototype. No '+service+' account is linked.'); return; }
+    const title = service === 'telegram' ? 'Connect Telegram' : 'Connect Discord';
+    document.getElementById('modalTitle').textContent = title+' — preview';
+    document.getElementById('modalText').textContent = service === 'telegram' ? 'In production, this would open a verified TradeThesis bot-linking flow. After you confirm your Telegram identity, the server would bind it to your signed-in member account. This simulation will not contact Telegram.' : 'In production, this would use Discord OAuth to verify your identity and request only the permissions needed to assign the correct member role. This simulation will not contact Discord.';
+    document.getElementById('modalPrimary').textContent = 'Simulate linked state';
+    document.getElementById('modalSecondary').textContent = 'Cancel';
+    modalPrimaryCallback = () => { connected[service] = true; paintConnection(service); notify('Preview state only: '+service+' appears linked in this mockup. Nothing was connected externally.'); };
+    modalBackdrop.classList.add('open'); document.getElementById('modalClose').focus();
+  }));
+  document.querySelectorAll('[data-disconnect]').forEach(el => el.addEventListener('click', () => {
+    const service = el.dataset.disconnect;
+    connected[service] = false; paintConnection(service);
+    notify('Demo connection state reset. No external account was disconnected.');
+  }));
+  document.querySelectorAll('[data-invoice]').forEach(el => el.addEventListener('click', () => notify('Sample receipt '+el.dataset.invoice+' only. Invoice generation is not connected.')));
+  document.getElementById('saveProfile').addEventListener('click', () => {
+    const form = document.getElementById('profileForm');
+    if (!form.reportValidity()) return;
+    notify('Preview only: profile changes are not saved to an account.');
+  });
+  document.getElementById('resetProfile').addEventListener('click', () => { document.getElementById('profileForm').reset(); notify('Form reset to its sample values.'); });
+  document.getElementById('menuBtn').addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
+})();
+</script>
+
+  <script src="assets/sitewide-nav.js" defer></script>
+        <footer class="sitewide-footer" id="sitewide-footer">
+    <div class="sitewide-footer__paper">
+      <section class="sitewide-footer__patches" aria-label="A note before you go">
+        <div class="sitewide-footer__note-copy">
+          <span class="sitewide-footer__stamp">A NOTE BEFORE YOU GO</span>
+          <h2 class="sitewide-footer__statement">Make the decision yours.<br><em>Build the process.</em></h2>
+          <p class="sitewide-footer__message">A clearer view of the process behind the trade.</p>
+        </div>
+        <a class="sitewide-footer__cta" href="trading-path.html"><span class="sitewide-footer__cta-label">Explore the Trading Path</span><span class="sitewide-footer__cta-arrow" aria-hidden="true">↗</span></a>
+      </section>
+      <div class="sitewide-footer__main">
+        <div class="sitewide-footer__brand-block">
+          <a class="sitewide-footer__brand" href="index.html" aria-label="TradeThesis home">
+            <img src="assets/tradethesis-wordmark.png" alt="TradeThesis — Conviction before execution">
+          </a>
+          <p class="sitewide-footer__copy">No signals, no hype—just a better process.</p>
+        </div>
+        <nav class="sitewide-footer__links" aria-label="Footer navigation">
+          <section class="sitewide-footer__link-group" aria-labelledby="footer-learn">
+            <h3 id="footer-learn">Learn</h3>
+            <a href="courses.html">Courses</a>
+            <a href="trading-path.html">Trading Path</a>
+          </section>
+          <section class="sitewide-footer__link-group" aria-labelledby="footer-about">
+            <h3 id="footer-about">About</h3>
+            <a href="index.html#approach">Our principles</a>
+            <a href="community.html">Community</a>
+          </section>
+          <section class="sitewide-footer__link-group" aria-labelledby="footer-essentials">
+            <h3 id="footer-essentials">Essentials</h3>
+            <a href="member-access.html">Member access</a>
+            <a href="live-class.html">Live class</a>
+          </section>
+        </nav>
+      </div>
+      <div class="sitewide-footer__bottom">
+        <span class="sitewide-footer__copyright">© TradeThesis · Conviction before execution</span>
+        <p class="sitewide-footer__disclaimer" id="sitewide-footer-disclaimer">For educational purposes only. Nothing on this website is investment advice or a recommendation to buy or sell any financial instrument. Trading involves risk, including the possible loss of capital. Chart examples are illustrative, not live trading signals.</p>
+        <a class="sitewide-footer__top-link" href="#" aria-label="Back to top">Back to top ↑</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

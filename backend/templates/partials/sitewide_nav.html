@@ -1,0 +1,72 @@
+{% load static %}
+<header class="sitewide-header{% if user.is_authenticated %} sitewide-header--authenticated{% endif %}" data-sitewide-nav>
+  <div class="wrap nav">
+    <a aria-label="TradeThesis home" class="brand" href="{{ public_site_url }}/index.html">
+      <img class="brand-logo brand-logo-header" src="{% static 'brand/tradethesis-horizontal.png' %}" alt="TradeThesis — Conviction before execution">
+    </a>
+    <nav aria-label="Main navigation" class="navlinks">
+      <a href="{{ public_site_url }}/index.html#approach">Our approach</a>
+      <a href="{{ public_site_url }}/courses.html">Courses</a>
+      <a href="{{ public_site_url }}/community.html">Community</a>
+      <a href="{{ public_site_url }}/index.html#desk">The Desk</a>
+    </nav>
+    <div class="tt-live-control" data-youtube-live-control data-youtube-live-status-url="/api/youtube/live-status/" hidden>
+      <button class="tt-live-pill" type="button" aria-label="TradeThesis is live on YouTube" aria-expanded="false" aria-controls="ttYoutubeLivePopover" data-youtube-live-toggle>
+        <span class="tt-live-dot" aria-hidden="true"></span>
+        <span class="tt-live-pill-label">LIVE</span>
+        <span class="tt-live-pill-context">ON YOUTUBE</span>
+      </button>
+      <div class="tt-live-popover" id="ttYoutubeLivePopover" data-youtube-live-popover role="region" aria-label="TradeThesis YouTube live stream" hidden>
+        <div class="tt-live-popover-eyebrow"><span class="tt-live-dot" aria-hidden="true"></span> LIVE NOW</div>
+        <p class="tt-live-popover-title">TradeThesis is live on YouTube.</p>
+        <p class="tt-live-popover-copy">Join the session while it’s in progress.</p>
+        <a class="tt-live-watch-link" href="https://www.youtube.com/" data-youtube-live-watch target="_blank" rel="noopener noreferrer">Watch on YouTube <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    {% if user.is_authenticated %}
+      <a class="button member-area-link" href="{% url 'dashboard' %}">Open member dashboard ↗</a>
+    {% elif request.path == '/accounts/login/' %}
+      <a class="button member-area-link" href="{% url 'account_signup' %}">Create account ↗</a>
+    {% elif request.path == '/accounts/signup/' %}
+      <a class="button member-area-link" href="{% url 'account_login' %}">Sign in ↗</a>
+    {% else %}
+      <a class="button member-area-link" href="{% url 'account_login' %}">Open member dashboard ↗</a>
+    {% endif %}
+    {% if user.is_authenticated %}
+      <details class="tt-account-menu">
+        <summary aria-label="Open account menu">
+          <span class="tt-account-avatar">{{ user.first_name|default:user.username|first|upper }}</span>
+          <span class="tt-account-name">{{ user.first_name|default:user.username }}</span>
+          <span class="tt-account-caret" aria-hidden="true">⌄</span>
+        </summary>
+        <div class="tt-account-dropdown">
+          <a href="{% url 'dashboard' %}">Member area</a>
+          {% if user.is_staff %}<a href="{% url 'staff_admin_desk' %}">Admin Desk</a>{% endif %}
+          <a href="{% url 'profile' %}">Profile &amp; security</a>
+          <a href="{% url 'growth:referral_dashboard' %}">Referral credits</a>
+          <a href="{% url 'account_logout' %}">Sign out</a>
+        </div>
+      </details>
+    {% endif %}
+    <button aria-expanded="false" aria-label="Open navigation" class="mobile-toggle" type="button" data-sitewide-toggle>☰</button>
+  </div>
+  <nav aria-label="Mobile navigation" class="wrap mobilelinks" data-sitewide-mobile>
+    <a href="{{ public_site_url }}/index.html#approach">Our approach</a>
+    <a href="{{ public_site_url }}/courses.html">Courses</a>
+    <a href="{{ public_site_url }}/community.html">Community</a>
+    <a href="{{ public_site_url }}/index.html#desk">The Desk</a>
+    {% if user.is_authenticated %}
+      <a class="mobile-menu-cta" href="{% url 'dashboard' %}">Open member dashboard ↗</a>
+      {% if user.is_staff %}<a href="{% url 'staff_admin_desk' %}">Admin Desk</a>{% endif %}
+      <a href="{% url 'profile' %}">Profile &amp; security</a>
+      <a href="{% url 'growth:referral_dashboard' %}">Referral credits</a>
+      <a class="mobile-menu-cta" href="{% url 'account_logout' %}">Sign out</a>
+    {% elif request.path == '/accounts/login/' %}
+      <a class="mobile-menu-cta" href="{% url 'account_signup' %}">Create account ↗</a>
+    {% elif request.path == '/accounts/signup/' %}
+      <a class="mobile-menu-cta" href="{% url 'account_login' %}">Sign in ↗</a>
+    {% else %}
+      <a class="mobile-menu-cta" href="{% url 'account_login' %}">Open member dashboard ↗</a>
+    {% endif %}
+  </nav>
+</header>

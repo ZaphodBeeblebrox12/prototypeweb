@@ -1,0 +1,126 @@
+{
+  "assertions": 24,
+  "passed": 24,
+  "checks": [
+    {
+      "name": "startup lesson title",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "long reading rendered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L12 field-note prompt specific",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "stage starts gated",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "stage 1 unlocks after meaningful attempt",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "stage 2 unlocks after meaningful attempt",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "stage 3 unlocks after meaningful attempt",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "final recap unlocked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L12 five quiz questions",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "quiz submission reveals explanations",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Lesson 13 title rendered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Lesson 13 specific notes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Lesson 13 simple-to-complex figures rendered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Lesson 13 simple diagrams precede complex diagrams",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "field notes persisted to local storage",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Lesson 14 expanded failure taxonomy",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Range-edge upthrust and downside failure diagrams rendered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Pivot and continuation-pause failure diagrams rendered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Instructor-led detail present for range and pivot failures",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Lesson 14 failure-only stop illustration",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Lesson 14 stop-loss marker only in failure lesson",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Stop-loss language absent from Lessons 12 and 13",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "duplicate Lesson 12 volume section removed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "lesson reading stays instructor-led, not bibliography-led",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

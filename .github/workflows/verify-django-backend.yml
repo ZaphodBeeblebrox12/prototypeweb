@@ -1,0 +1,143 @@
+name: Verify Django Academy backend
+
+on:
+  push:
+    branches:
+      - my-new-branch
+    paths:
+      - "backend/**"
+      - ".github/workflows/verify-django-backend.yml"
+  pull_request:
+    branches:
+      - my-new-branch
+      - main
+    paths:
+      - "backend/**"
+      - ".github/workflows/verify-django-backend.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: academy-backend-verification-v2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      SECRET_KEY: ci-only-not-a-secret
+      DEBUG: "True"
+      ALLOWED_HOSTS: localhost,127.0.0.1,testserver
+      DATABASE_URL: sqlite:////tmp/tradethesis-tests.sqlite3
+      EMAIL_BACKEND: django.core.mail.backends.locmem.EmailBackend
+      MAXMIND_ENABLED: "False"
+    steps:
+      - name: Check out tested revision
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install runtime and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-django ruff black mypy django-stubs
+
+      - name: Check Django configuration and Python syntax
+        run: |
+          python manage.py check
+          python -m compileall -q apps config
+
+      - name: Prepare the isolated test database
+        run: python manage.py migrate --noinput
+
+      - name: Validate the complete source-course catalogue
+        run: python manage.py seed_academy_catalogue
+
+      - name: Smoke-test draft imports against isolated CI database
+        run: |
+          python manage.py seed_academy_catalogue --apply
+          python manage.py shell <<'PY'
+          from pathlib import Path
+          import re
+          from apps.academy.models import Course, CourseModule, CourseOffer, Lesson, LessonInstructorMaterial
+
+          expected = {
+              "trading-path": (4, 30),
+              "support-resistance": (6, 18),
+              "volume-price-analysis": (6, 30),
+          }
+          for slug, (module_count, lesson_count) in expected.items():
+              course = Course.objects.get(slug=slug)
+              modules = list(CourseModule.objects.filter(course=course))
+              lessons = list(Lesson.objects.filter(module__course=course))
+              assert course.status == Course.Status.DRAFT, slug
+              assert len(modules) == module_count, (slug, len(modules))
+              assert len(lessons) == lesson_count, (slug, len(lessons))
+              assert all(not module.is_published for module in modules), slug
+              assert all(not lesson.is_published for lesson in lessons), slug
+              assert all(lesson.content_markdown.strip() for lesson in lessons), slug
+              assert all("CHART NEEDED:" not in lesson.content_markdown for lesson in lessons), slug
+              assert all("Diagram already made:" not in lesson.content_markdown for lesson in lessons), slug
+              figure_names = {
+                  f"{directory}/{name}" for lesson in lessons
+                  for directory, name in re.findall(
+                      r"/static/academy/(course-images|support-resistance|vpa)/([^\s)]+)",
+                      lesson.content_markdown,
+                  )
+              }
+              assert all((Path("static/academy") / name).is_file() for name in figure_names), slug
+              if slug == "trading-path":
+                  assert any(name.startswith("course-images/") for name in figure_names), slug
+              elif slug == "support-resistance":
+                  assert len(figure_names) == 10, (slug, figure_names)
+                  assert all(name.startswith("support-resistance/") for name in figure_names), slug
+                  assert not any("reference-internal" in name for name in figure_names), slug
+              elif slug == "volume-price-analysis":
+                  expected_vpa = {
+                      "vpa/vpa-m01-l01-stage1-spot-volume-mobile.svg",
+                      "vpa/vpa-m01-l01-candle-context-compare-mobile.svg",
+                  }
+                  assert figure_names == expected_vpa, (slug, figure_names)
+                  assert not any("stage3" in name for name in figure_names), slug
+              assert LessonInstructorMaterial.objects.filter(lesson__module__course=course).count() == lesson_count, slug
+              assert not CourseOffer.objects.filter(course=course).exists(), slug
+              print(f"{slug}: {len(modules)} unpublished modules, {len(lessons)} unpublished lessons, {len(figure_names)} linked figures, separate instructor materials, no offer")
+
+          assert Course.objects.filter(slug__in=expected).count() == len(expected)
+          PY
+
+      - name: Lint Academy and email backend implementation
+        run: ruff check apps/academy/ tests/academy/ apps/core/email_backends.py tests/test_email_backends.py
+
+      - name: Check Academy and email backend formatting
+        continue-on-error: true
+        run: black --check apps/academy/ tests/academy/ apps/core/email_backends.py tests/test_email_backends.py
+
+      - name: Type-check Academy implementation
+        continue-on-error: true
+        run: mypy apps/academy/
+
+      - name: Run backend regression tests
+        run: pytest --cov=apps --cov=integrations --cov-report=xml
+
+      - name: Upload test coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-py${{ matrix.python-version }}
+          path: backend/coverage.xml
+          if-no-files-found: ignore

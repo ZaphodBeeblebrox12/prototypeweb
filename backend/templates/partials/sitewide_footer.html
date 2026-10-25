@@ -1,0 +1,43 @@
+{% load static %}
+<footer class="sitewide-footer" id="sitewide-footer">
+  <div class="sitewide-footer__paper">
+    <section class="sitewide-footer__patches" aria-label="A note before you go">
+      <div class="sitewide-footer__note-copy">
+        <span class="sitewide-footer__stamp">A NOTE BEFORE YOU GO</span>
+        <h2 class="sitewide-footer__statement">Make the decision yours.<br><em>Build the process.</em></h2>
+        <p class="sitewide-footer__message">A clearer view of the process behind the trade.</p>
+      </div>
+      <a class="sitewide-footer__cta" href="{{ public_site_url }}/trading-path.html"><span class="sitewide-footer__cta-label">Explore the Trading Path</span><span class="sitewide-footer__cta-arrow" aria-hidden="true">↗</span></a>
+    </section>
+    <div class="sitewide-footer__main">
+      <div class="sitewide-footer__brand-block">
+        <a class="sitewide-footer__brand" href="{{ public_site_url }}/index.html" aria-label="TradeThesis home">
+          <img src="{% static 'brand/tradethesis-wordmark.png' %}" alt="TradeThesis — Conviction before execution">
+        </a>
+        <p class="sitewide-footer__copy">No signals, no hype—just a better process.</p>
+      </div>
+      <nav class="sitewide-footer__links" aria-label="Footer navigation">
+        <section class="sitewide-footer__link-group" aria-labelledby="footer-learn">
+          <h3 id="footer-learn">Learn</h3>
+          <a href="{{ public_site_url }}/courses.html">Courses</a>
+          <a href="{{ public_site_url }}/trading-path.html">Trading Path</a>
+        </section>
+        <section class="sitewide-footer__link-group" aria-labelledby="footer-about">
+          <h3 id="footer-about">About</h3>
+          <a href="{{ public_site_url }}/index.html#approach">Our principles</a>
+          <a href="{{ public_site_url }}/community.html">Community</a>
+        </section>
+        <section class="sitewide-footer__link-group" aria-labelledby="footer-essentials">
+          <h3 id="footer-essentials">Essentials</h3>
+          <a href="{{ public_site_url }}/member-access.html">Member access</a>
+          <a href="{{ public_site_url }}/live-class.html">Live class</a>
+        </section>
+      </nav>
+    </div>
+    <div class="sitewide-footer__bottom">
+      <span class="sitewide-footer__copyright">© TradeThesis · Conviction before execution</span>
+      <p class="sitewide-footer__disclaimer" id="sitewide-footer-disclaimer">For educational purposes only. Nothing on this website is investment advice or a recommendation to buy or sell any financial instrument. Trading involves risk, including the possible loss of capital. Chart examples are illustrative, not live trading signals.</p>
+      <a class="sitewide-footer__top-link" href="#" aria-label="Back to top">Back to top ↑</a>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,8 @@
+Hi {{ username }},
+
+Your {{ plan_name }} access has expired, so paid membership access has been paused. You can review renewal options any time to restore access.
+
+Review renewal options: {{ dashboard_url }}
+
+TradeThesis
+Conviction before execution

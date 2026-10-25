@@ -1,0 +1,91 @@
+{% extends "accounts/member_page_base.html" %}
+{% load socialaccount %}
+{% block title %}Profile &amp; security | TradeThesis{% endblock %}
+{% block page_kicker %}YOUR ACCOUNT{% endblock %}
+{% block page_heading %}Profile &amp; security{% endblock %}
+{% block page_description %}<p>Keep your personal details accurate and manage the community accounts connected to your membership.</p>{% endblock %}
+{% block page_content %}
+<div class="member-layout-grid">
+  <section class="member-panel">
+    <div class="member-panel-head">
+      <h2>Profile information</h2>
+      <p>Changes are saved to your TradeThesis account.</p>
+    </div>
+    <div class="member-panel-body">
+      <form method="post" action="{% url 'profile' %}" class="member-form">
+        {% csrf_token %}
+        <div class="member-form-grid">
+          <div class="member-field">
+            <label for="profile-first-name">First name</label>
+            <input id="profile-first-name" type="text" name="first_name" value="{{ user.first_name }}" autocomplete="given-name">
+          </div>
+          <div class="member-field">
+            <label for="profile-last-name">Last name</label>
+            <input id="profile-last-name" type="text" name="last_name" value="{{ user.last_name }}" autocomplete="family-name">
+          </div>
+          <div class="member-field member-field-full">
+            <label for="profile-email">Email address</label>
+            <input id="profile-email" type="email" name="email" value="{{ user.email|default:'' }}" autocomplete="email">
+            <p class="member-field-help">Used for account communication and support replies.</p>
+          </div>
+          <div class="member-field member-field-full">
+            <label for="profile-bio">About you (optional)</label>
+            <textarea id="profile-bio" name="bio" rows="4">{{ user.bio }}</textarea>
+          </div>
+        </div>
+        <div class="member-form-actions"><button type="submit" class="btn">Save profile</button></div>
+      </form>
+    </div>
+  </section>
+  <div class="member-content-stack">
+    <section class="member-panel">
+      <div class="member-panel-head"><h2>Connected accounts</h2><p>Connections are used for eligible community access and updates.</p></div>
+      <div class="member-panel-body">
+        <div class="member-content-stack">
+          <div class="member-integration-row">
+            <span class="member-integration-mark telegram" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M23.91 3.79 20.6 20.04c-.25 1.13-.92 1.4-1.86.87l-5.14-3.79-2.48 2.39c-.27.27-.49.49-.99.49l.35-5.24 9.52-8.6c.42-.37-.09-.58-.65-.21L7.59 13.25 2.51 11.5c-1.1-.34-1.12-1.1.23-1.61L22.6 2.3c.91-.34 1.72.22 1.31 1.49Z"/></svg></span>
+            <div class="member-integration-copy">
+              <strong>Telegram</strong>
+              {% if user.telegram_id and user.telegram_verified %}
+                <p>Connected{% if user.telegram_username %} as @{{ user.telegram_username }}{% endif %}</p>
+                <span class="member-status-pill is-good">Connected</span>
+              {% else %}
+                <p>Not connected to this account.</p>
+                <a class="member-text-link" href="{% url 'bot_integration:telegram_connect' %}">Connect Telegram ↗</a>
+              {% endif %}
+            </div>
+          </div>
+          <div class="member-integration-row">
+            <span class="member-integration-mark discord" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 0 0-4.8851-1.5152.0714.0714 0 0 0-.075.0364c-.211.3753-.4447.8658-.6083 1.2535-1.8454-.2762-3.68-.2762-5.4868 0-.1636-.396-.406-.8782-.6188-1.2535a.077.077 0 0 0-.0785-.0371 19.7363 19.7363 0 0 0-4.8851 1.5152.07.07 0 0 0-.0321.0276C.5334 9.0467-.32 13.5793.0992 18.055a.0824.0824 0 0 0 .0312.056c2.0766 1.5277 4.0888 2.455 6.0575 3.072a.0781.0781 0 0 0 .0842-.0276c.4666-.6398.8827-1.3152 1.2427-2.0241a.076.076 0 0 0-.0416-.1057 13.052 13.052 0 0 1-1.8882-.9008.077.077 0 0 1-.0076-.1277c.1263-.0943.2528-.1923.3739-.2914a.0743.0743 0 0 1 .0776-.0104c3.956 1.8078 8.2357 1.8078 12.1445 0a.074.074 0 0 1 .0785.0095c.1211.0991.2475.1978.3748.2921a.077.077 0 0 1-.0066.1277c-.6033.3536-1.235.6549-1.8906.9007a.0766.0766 0 0 0-.0407.1066c.367.708.779 1.3824 1.2418 2.0231a.077.077 0 0 0 .0842.0285c1.9735-.6171 3.9897-1.5443 6.0674-3.072a.077.077 0 0 0 .0303-.0551c.5004-5.1774-.8382-9.6748-3.5485-13.6586a.0624.0624 0 0 0-.0312-.0276ZM8.02 13.3312c-1.1765 0-2.14-1.0806-2.14-2.415 0-1.3346.9445-2.4152 2.14-2.4152 1.2052 0 2.1585 1.09 2.1399 2.4152 0 1.3344-.9446 2.415-2.14 2.415Zm7.96 0c-1.1765 0-2.1399-1.0806-2.1399-2.415 0-1.3346.9444-2.4152 2.1399-2.4152 1.2051 0 2.1585 1.09 2.1399 2.4152 0 1.3344-.9445 2.415-2.1399 2.415Z"/></svg></span>
+            <div class="member-integration-copy">
+              <strong>Discord</strong>
+              {% if user.discord_id and user.discord_verified %}
+                <p>{{ user.discord_username|default:"Discord account linked" }}</p>
+                <span class="member-status-pill is-good">Connected</span>
+                <form method="post" action="{% url 'discord_disconnect' %}" class="member-inline-form">
+                  {% csrf_token %}
+                  <button type="submit" class="btn secondary small">Disconnect Discord</button>
+                </form>
+              {% else %}
+                <p>Connect Discord to join eligible community channels and receive updates.</p>
+                <a class="member-text-link" href="{% url 'bot_integration:discord_connect' %}">Connect Discord ↗</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="member-panel">
+      <div class="member-panel-head"><h2>Account details</h2><p>Reference information for your account.</p></div>
+      <div class="member-panel-body">
+        <dl class="member-definition-list">
+          <div class="member-definition-row"><dt>Username</dt><dd>{{ user.username }}</dd></div>
+          <div class="member-definition-row"><dt>Role</dt><dd>{{ user.get_role_display }}</dd></div>
+          <div class="member-definition-row"><dt>Joined</dt><dd>{{ user.date_joined|date:"M d, Y" }}</dd></div>
+          <div class="member-definition-row"><dt>Last login</dt><dd>{{ user.last_login|date:"M d, Y"|default:"Not recorded" }}</dd></div>
+        </dl>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

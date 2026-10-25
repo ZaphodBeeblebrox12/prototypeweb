@@ -1,0 +1,13 @@
+Hi {{ user.username }},
+
+Your gift subscription to {{ plan_name }} has been activated for {{ duration_days }} days.
+
+Your subscription is active and expires on {{ subscription_expires|date:"F j, Y" }}.
+This gift was from {{ sender_name }}.
+
+Enjoy your access and take the learning at your own pace.
+
+TradeThesis
+Conviction before execution
+
+Trading involves risk. TradeThesis content is for educational purposes and is not investment advice.

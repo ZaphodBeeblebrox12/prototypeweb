@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1270" viewBox="0 0 720 1270" role="img" aria-labelledby="title desc">
+<title id="title">The same candle, different context</title>
+<desc id="desc">A reflowed mobile comparison stacks the two synthetic price sequences vertically. Both highlighted candidate candles have the same OHLC dimensions; the prior structure, location and relative volume differ.</desc>
+<rect width="720" height="1270" fill="#f6f5f0"/>
+<rect x="22" y="18" width="676" height="585" rx="13" fill="#fffefa" stroke="#d9d7cf" stroke-width="2"/>
+<text x="42" y="56" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="700" fill="#252923">Figure 1.1a · Recovery after a pullback</text>
+<text x="42" y="86" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#41443d">Candidate volume is modestly above its local baseline.</text>
+<text x="43" y="120" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700" fill="#41443d">PRICE · dashed line = reference</text>
+<line x1="78" y1="134" x2="680" y2="134" stroke="#d9d7cf" stroke-width="1.3"/>
+<text x="68" y="140" font-family="Arial,Helvetica,sans-serif" font-size="26" text-anchor="end" fill="#41443d">115</text>
+<line x1="78" y1="208.67" x2="680" y2="208.67" stroke="#d9d7cf" stroke-width="1.3"/>
+<text x="68" y="214.67" font-family="Arial,Helvetica,sans-serif" font-size="26" text-anchor="end" fill="#41443d">109</text>
+<line x1="78" y1="283.33" x2="680" y2="283.33" stroke="#d9d7cf" stroke-width="1.3"/>
+<text x="68" y="289.33" font-family="Arial,Helvetica,sans-serif" font-size="26" text-anchor="end" fill="#41443d">103</text>
+<line x1="78" y1="358" x2="680" y2="358" stroke="#d9d7cf" stroke-width="1.3"/>
+<text x="68" y="364" font-family="Arial,Helvetica,sans-serif" font-size="26" text-anchor="end" fill="#41443d">97</text>
+<line x1="78" y1="196.22" x2="680" y2="196.22" stroke="#62645f" stroke-width="2" stroke-dasharray="7 5"/>
+<line x1="103.08" y1="283.33" x2="103.08" y2="333.11" stroke="#27725f" stroke-width="3"/>
+<rect x="92.08" y="295.78" width="22" height="24.89" rx="1" fill="#27725f"/>
+<text x="103.08" y="382" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="27" fill="#41443d">1</text>
+<line x1="153.25" y1="258.44" x2="153.25" y2="308.22" stroke="#27725f" stroke-width="3"/>
+<rect x="142.25" y="270.89" width="22" height="24.89" rx="1" fill="#27725f"/>
+<line x1="203.42" y1="246" x2="203.42" y2="295.78" stroke="#be6b61" stroke-width="3"/>
+<rect x="192.42" y="270.89" width="22" height="12.44" rx="1" fill="#be6b61"/>
+<text x="203.42" y="382" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="27" fill="#41443d">3</text>
+<line x1="253.58" y1="233.56" x2="253.58" y2="295.78" stroke="#27725f" stroke-width="3"/>
+<rect x="242.58" y="246" width="22" height="37.33" rx="1" fill="#27725f"/>
+<line x1="303.75" y1="196.22" x2="303.75" y2="258.44" stroke="#27725f" stroke-width="3"/>
+<rect x="292.75" y="208.67" width="22" height="37.33" rx="1" fill="#27725f"/>
+<line x1="353.92" y1="158.89" x2="353.92" y2="221.11" stroke="#27725f" stroke-width="3"/>
+<rect x="342.92" y="171.33" width="22" height="37.33" rx="1" fill="#27725f"/>
+<text x="353.92" y="382" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="27" fill="#41443d">6</text>
+<line x1="404.08" y1="158.89" x2="404.08" y2="208.67" stroke="#be6b61" stroke-width="3"/>
+<rect x="393.08" y="171.33" width="22" height="24.89" rx="1" fill="#be6b61"/>
+<line x1="454.25" y1="183.78" x2="454.25" y2="233.56" stroke="#be6b61" stroke-width="3"/>
+<rect x="443.25" y="196.22" width="22" height="24.89" rx="1" fill="#be6b61"/>
+<line x1="504.42" y1="196.22" x2="504.42" y2="246" stroke="#27725f" stroke-width="3"/>
+<rect x="493.42" y="208.67" width="22" height="12.44" rx="1" fill="#27725f"/>
+<text x="504.42" y="382" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="27" fill="#41443d">9</text>
+<line x1="554.58" y1="196.22" x2="554.58" y2="246" stroke="#be6b61" stroke-width="3"/>
+<rect x="543.58" y="208.67" width="22" height="24.89" rx="1" fill="#be6b61"/>
+<line x1="604.75" y1="221.11" x2="604.75" y2="258.44" stroke="#be6b61" stroke-width="3"/>
+<rect x="593.75" y="233.56" width="22" height="12.44" rx="1" fill="#be6b61"/>
+<line x1="654.92" y1="183.78" x2="654.92" y2="246" stroke="#27725f" stroke-width="3"/>
+<rect x="643.92" y="196.22" width="22" height="37.33" rx="1" fill="#27725f"/>
+<rect x="636.92" y="174.78" width="36" height="80.22" rx="4" fill="none" stroke="#252923" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="654.92" y="382" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="27" fill="#41443d">12</text>
+<text x="43" y="413" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700" fill="#41443d">REPORTED VOLUME</text>
+<line x1="78" y1="452.52" x2="680" y2="452.52" stroke="#62645f" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="84" y="444.52" font-family="Arial,Helvetica,sans-serif" font-size="25" fill="#41443d">Baseline 157</text>
+<rect x="92.08" y="467.90" width="22" height="60.10" rx="1" fill="#a5aaa3"/>
+<rect x="142.25" y="458.29" width="22" height="69.71" rx="1" fill="#a5aaa3"/>
+<rect x="192.42" y="455.88" width="22" height="72.12" rx="1" fill="#a5aaa3"/>
+<rect x="242.58" y="451.08" width="22" height="76.92" rx="1" fill="#a5aaa3"/>
+<rect x="292.75" y="443.87" width="22" height="84.13" rx="1" fill="#a5aaa3"/>
+<rect x="342.92" y="434.25" width="22" height="93.75" rx="1" fill="#a5aaa3"/>
+<rect x="393.08" y="439.06" width="22" height="88.94" rx="1" fill="#a5aaa3"/>
+<rect x="443.25" y="448.67" width="22" height="79.33" rx="1" fill="#a5aaa3"/>
+<rect x="493.42" y="453.48" width="22" height="74.52" rx="1" fill="#a5aaa3"/>
+<rect x="543.58" y="458.29" width="22" height="69.71" rx="1" fill="#a5aaa3"/>
+<rect x="593.75" y="463.10" width="22" height="64.90" rx="1" fill="#a5aaa3"/>
+<rect x="643.92" y="439.06" width="22" height="88.94" rx="1" fill="#c6a63a"/>
+<text x="42" y="583" font-family="Arial,Helvetica,sans-serif" font-size="23" fill="#252923">Volume 185 · 5-bar baseline 157 · 1.18×</text>
+<rect x="22" y="630" width="676" height="585" rx="13" fill="#fffefa" stroke="#d9d7cf" stroke-width="2"/>
+<text x="42" y="668" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="700" fill="#252923">Figure 1.1b · Extended rise near prior highs</text>
+<text x="42" y="698" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="#41443d">Candidate activity is higher relative to its baseline.</text>
+<text x="43" y="732" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700" fill="#41443d">PRICE · dashed line = reference</text>
+<line x1="78" y1="746" x2="680" y2="746" stroke="#d9d7cf" stroke-width="1.3"/>
+<text x="68" y="752" font-family="Arial,Helvetica,sans-serif" font-size="26" text-anchor="end" fill="#41443d">135</text>
+<line x1="78" y1="820.67" x2="680" y2="820.67" stroke="#d9d7cf" stroke-width="1.3"/>
+<text x="68" y="826.67" font-family="Arial,Helvetica,sans-serif" font-size="26" text-anchor="end" fill="#41443d">126</text>
+<line x1="78" y1="895.33" x2="680" y2="895.33" stroke="#d9d7cf" stroke-width="1.3"/>
+<text x="68" y="901.33" font-family="Arial,Helvetica,sans-serif" font-size="26" text-anchor="end" fill="#41443d">116</text>
+<line x1="78" y1="970" x2="680" y2="970" stroke="#d9d7cf" stroke-width="1.3"/>
+<text x="68" y="976" font-family="Arial,Helvetica,sans-serif" font-size="26" text-anchor="end" fill="#41443d">107</text>
+<line x1="78" y1="762" x2="680" y2="762" stroke="#62645f" stroke-width="2" stroke-dasharray="7 5"/>
+<line x1="103.08" y1="922" x2="103.08" y2="954" stroke="#27725f" stroke-width="3"/>
+<rect x="92.08" y="930" width="22" height="16" rx="1" fill="#27725f"/>
+<text x="103.08" y="994" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="27" fill="#41443d">1</text>
+<line x1="153.25" y1="898" x2="153.25" y2="938" stroke="#27725f" stroke-width="3"/>
+<rect x="142.25" y="906" width="22" height="24" rx="1" fill="#27725f"/>
+<line x1="203.42" y1="874" x2="203.42" y2="914" stroke="#27725f" stroke-width="3"/>
+<rect x="192.42" y="882" width="22" height="24" rx="1" fill="#27725f"/>
+<text x="203.42" y="994" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="27" fill="#41443d">3</text>
+<line x1="253.58" y1="850" x2="253.58" y2="890" stroke="#27725f" stroke-width="3"/>
+<rect x="242.58" y="858" width="22" height="24" rx="1" fill="#27725f"/>
+<line x1="303.75" y1="826" x2="303.75" y2="866" stroke="#27725f" stroke-width="3"/>
+<rect x="292.75" y="834" width="22" height="24" rx="1" fill="#27725f"/>
+<line x1="353.92" y1="802" x2="353.92" y2="842" stroke="#27725f" stroke-width="3"/>
+<rect x="342.92" y="810" width="22" height="24" rx="1" fill="#27725f"/>
+<text x="353.92" y="994" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="27" fill="#41443d">6</text>
+<line x1="404.08" y1="786" x2="404.08" y2="818" stroke="#27725f" stroke-width="3"/>
+<rect x="393.08" y="794" width="22" height="16" rx="1" fill="#27725f"/>
+<line x1="454.25" y1="770" x2="454.25" y2="802" stroke="#27725f" stroke-width="3"/>
+<rect x="443.25" y="778" width="22" height="16" rx="1" fill="#27725f"/>
+<line x1="504.42" y1="762" x2="504.42" y2="786" stroke="#27725f" stroke-width="3"/>
+<rect x="493.42" y="770" width="22" height="8" rx="1" fill="#27725f"/>
+<text x="504.42" y="994" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="27" fill="#41443d">9</text>
+<line x1="554.58" y1="762" x2="554.58" y2="794" stroke="#be6b61" stroke-width="3"/>
+<rect x="543.58" y="770" width="22" height="16" rx="1" fill="#be6b61"/>
+<line x1="604.75" y1="770" x2="604.75" y2="802" stroke="#be6b61" stroke-width="3"/>
+<rect x="593.75" y="786" width="22" height="8" rx="1" fill="#be6b61"/>
+<line x1="654.92" y1="762" x2="654.92" y2="802" stroke="#27725f" stroke-width="3"/>
+<rect x="643.92" y="770" width="22" height="24" rx="1" fill="#27725f"/>
+<rect x="636.92" y="753" width="36" height="58" rx="4" fill="none" stroke="#252923" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="654.92" y="994" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="27" fill="#41443d">12</text>
+<text x="43" y="1025" font-family="Arial,Helvetica,sans-serif" font-size="27" font-weight="700" fill="#41443d">REPORTED VOLUME</text>
+<line x1="78" y1="1089.78" x2="680" y2="1089.78" stroke="#62645f" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="84" y="1081.78" font-family="Arial,Helvetica,sans-serif" font-size="25" fill="#41443d">Baseline 225</text>
+<rect x="92.08" y="1110.98" width="22" height="29.02" rx="1" fill="#a5aaa3"/>
+<rect x="142.25" y="1106.52" width="22" height="33.48" rx="1" fill="#a5aaa3"/>
+<rect x="192.42" y="1104.29" width="22" height="35.71" rx="1" fill="#a5aaa3"/>
+<rect x="242.58" y="1100.94" width="22" height="39.06" rx="1" fill="#a5aaa3"/>
+<rect x="292.75" y="1097.59" width="22" height="42.41" rx="1" fill="#a5aaa3"/>
+<rect x="342.92" y="1095.36" width="22" height="44.64" rx="1" fill="#a5aaa3"/>
+<rect x="393.08" y="1090.89" width="22" height="49.11" rx="1" fill="#a5aaa3"/>
+<rect x="443.25" y="1088.66" width="22" height="51.34" rx="1" fill="#a5aaa3"/>
+<rect x="493.42" y="1086.43" width="22" height="53.57" rx="1" fill="#a5aaa3"/>
+<rect x="543.58" y="1090.89" width="22" height="49.11" rx="1" fill="#a5aaa3"/>
+<rect x="593.75" y="1092.01" width="22" height="47.99" rx="1" fill="#a5aaa3"/>
+<rect x="643.92" y="1046.25" width="22" height="93.75" rx="1" fill="#c6a63a"/>
+<text x="42" y="1195" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="#252923">Candidate volume 420; preceding-five-bar baseline 225; about 1.87×.</text>
+</svg>

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block page_context %}
+<div class="page-context-status page-context-status--standalone" aria-label="Account status">
+{% if user.is_banned %}<span class="badge bg-danger">BANNED</span>{% endif %}
+{% if user.telegram_verified %}<span class="badge bg-success"><i class="bi bi-telegram"></i> Telegram connected</span>{% endif %}
+</div>
+{% endblock %}
+{% block title %}Course purchase unavailable | TradeThesis{% endblock %}
+{% block page_title %}Course purchase unavailable{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:640px">
+  <section class="card">
+    <div class="card-body">
+      <h1 style="font-size:1.5rem">This course is not available yet.</h1>
+      <p>The offer must be published with an active one-time price before checkout can begin. No payment has been created.</p>
+      <p><a class="btn btn-outline-primary" href="/">Return to TradeThesis</a></p>
+    </div>
+  </section>
+</div>
+{% endblock %}

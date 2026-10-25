@@ -1,0 +1,16 @@
+Hi {{ username }},
+
+Your payment for {{ plan_name }} was disputed through the payment provider, and the dispute was confirmed. As a result, paid access linked to that payment has been revoked.
+
+Product: {{ plan_name }}
+Disputed amount: {{ amount_display }}
+{% if date_display %}Payment date: {{ date_display }}{% endif %}
+{% if provider_payment_id %}Payment transaction ID: {{ provider_payment_id }}{% endif %}
+{% if provider_reference %}Order / checkout reference: {{ provider_reference }}{% endif %}
+
+{% if product_type == 'course' %}Course access revoked: access to {{ plan_name }} is no longer available on this account.{% else %}Membership access ended: paid membership access, including any paid channel access, has ended.{% endif %}
+
+{% if support_url %}If you believe this is a mistake, contact support: {{ support_url }}{% else %}Review your account: {{ dashboard_url }}{% endif %}
+
+TradeThesis
+Conviction before execution

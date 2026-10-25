@@ -1,0 +1,21 @@
+Hi {{ username }},
+
+Your payment for {{ plan_name }} was successful. Here are the details for your records.
+
+Product: {{ plan_name }}
+Amount paid: {{ amount_display }}
+Date: {{ date_display }}
+{% if invoice_number %}Invoice number: {{ invoice_number }}
+{% endif %}Payment method: {{ payment_method_display }}
+Payment provider: {{ provider_display }}
+{% if provider_payment_id %}Payment transaction ID: {{ provider_payment_id }}
+{% endif %}{% if provider_reference %}Order / checkout reference: {{ provider_reference }}
+{% endif %}{% if expires_display %}Access expiry: {{ expires_display }}
+{% endif %}
+{% if product_type == 'course' and learning_url %}Open your course: {{ learning_url }}{% else %}View membership access: {{ dashboard_url }}{% endif %}
+{% if invoice_url %}{% if invoice_number %}View invoice / payment receipt ({{ invoice_number }}):{% else %}View payment receipt:{% endif %} {{ invoice_url }}{% endif %}
+
+{{ billing_disclosure|default:'This was a one-time payment. Access does not renew automatically.' }}
+
+TradeThesis
+Conviction before execution

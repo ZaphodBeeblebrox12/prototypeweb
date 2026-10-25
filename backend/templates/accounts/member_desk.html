@@ -1,0 +1,296 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f7f3e9">
+<title>Member desk | TradeThesis</title>
+<link rel="stylesheet" href="{% static 'css/member-desk.css' %}"><link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-nav.css">
+<link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-footer.css">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+{% include "partials/sitewide_nav.html" %}
+<div class="app">
+<div class="main">
+  <main class="content" id="main-content" tabindex="-1">
+    <div class="member-desk-context">
+      <div class="kicker">TRADETHESIS · MEMBER DESK</div>
+      <span class="member-signed-in">Signed in as {{ user.email|default:user.username }}</span>
+    </div>
+    {% if messages %}
+    <div class="member-flash-list" aria-live="polite">
+      {% for message in messages %}
+      <div class="member-flash member-flash-{{ message.tags|default:'info' }}" role="status">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <nav class="member-section-nav" aria-label="Member desk sections">
+      <button class="member-section-tab active" type="button" data-page="overview" aria-controls="page-overview" aria-pressed="true">Overview</button>
+      <button class="member-section-tab" type="button" data-page="purchases" aria-controls="page-purchases" aria-pressed="false">Purchases &amp; access <span class="member-tab-count">{{ member_access_record_count }}</span></button>
+      <button class="member-section-tab" type="button" data-page="connections" aria-controls="page-connections" aria-pressed="false">Connected accounts <span class="member-tab-count">{{ member_connected_accounts }}/2</span></button>
+      <button class="member-section-tab" type="button" data-page="billing" aria-controls="page-billing" aria-pressed="false">Billing &amp; invoices</button>
+      <button class="member-section-tab" type="button" data-page="learning" aria-controls="page-learning" aria-pressed="false">My learning</button>
+      <button class="member-section-tab" type="button" data-page="profile" aria-controls="page-profile" aria-pressed="false">Profile &amp; security</button>
+      <button class="member-section-tab" type="button" data-page="help" aria-controls="page-help" aria-pressed="false">Help &amp; support</button>
+    </nav>
+    <section class="page active" id="page-overview" data-view="overview">
+
+      {% if not member_owned_courses and not subscription_cards and not member_has_purchase_history and not recent_payments and not ended_subscription %}
+      <div class="no-purchase-overview">
+        <div class="no-purchase-hero-grid">
+          <article class="no-purchase-hero">
+            <div class="no-purchase-hero-top">
+              <span class="no-purchase-hero-kicker">A GOOD PLACE TO BEGIN</span>
+              <span class="no-purchase-status">Account ready</span>
+            </div>
+            <div>
+              <h1>Your trading education starts with <em>a decision.</em></h1>
+              <p class="hero-description">Welcome back, {{ user.first_name|default:user.username }}. Explore the learning paths, understand how TradeThesis teaches, and choose a next step that fits your goals.</p>
+              <div class="no-purchase-hero-actions">
+                <a class="btn" href="{% url 'academy:home' %}">Explore course library ↗</a>
+                <a class="btn secondary" href="{{ public_site_url }}/index.html#approach">Our approach ↗</a>
+              </div>
+            </div>
+            <p class="no-purchase-hero-foot">Your account is ready. You do not need to make a purchase to manage your profile or community connections.</p>
+          </article>
+          <aside class="no-purchase-getting-started">
+            <div class="eyebrow">Start here</div>
+            <h2>Make your first step useful.</h2>
+            <p>Choose the route that best matches what you want to learn.</p>
+            <div class="no-purchase-step"><span class="no-purchase-step-icon">01</span><div><strong>Choose a starting point</strong><p>Browse published courses and review their curriculum and access terms.</p></div></div>
+            <div class="no-purchase-step"><span class="no-purchase-step-icon">02</span><div><strong>Understand the method</strong><p>See how context, trade construction, risk and review fit together.</p></div></div>
+            <div class="no-purchase-step"><span class="no-purchase-step-icon">03</span><div><strong>Connect when you need to</strong><p>Link Telegram or Discord only when it is useful for your membership.</p></div></div>
+          </aside>
+        </div>
+
+        <div class="no-purchase-section-title">
+          <div><h2>Choose your starting point</h2><p>Begin with the area that best matches your goal.</p></div>
+          <a class="no-purchase-quiet-link" href="{% url 'academy:home' %}">View course library →</a>
+        </div>
+        <div class="no-purchase-choice-grid">
+          <article class="no-purchase-choice-card"><span class="no-purchase-choice-icon" aria-hidden="true">⌁</span><span class="no-purchase-choice-category">FOUNDATIONS</span><h3>Build your foundations</h3><p>Start with the bigger picture and build a more structured way to think about trading decisions.</p><a class="btn secondary" href="{% url 'academy:home' %}">Explore learning paths ↗</a></article>
+          <article class="no-purchase-choice-card"><span class="no-purchase-choice-icon" aria-hidden="true">◫</span><span class="no-purchase-choice-category">MICRO-COURSES</span><h3>Develop a specific skill</h3><p>Study a focused topic, work through examples and apply the idea at your own pace.</p><a class="btn secondary" href="{% url 'academy:home' %}">Browse focused courses ↗</a></article>
+          <article class="no-purchase-choice-card"><span class="no-purchase-choice-icon" aria-hidden="true">↗</span><span class="no-purchase-choice-category">OUR METHOD</span><h3>Understand the approach</h3><p>Get familiar with context, construction, risk, management and review before choosing a course.</p><a class="btn secondary" href="{{ public_site_url }}/index.html#approach">See how we teach ↗</a></article>
+        </div>
+
+        <div class="no-purchase-lower-grid">
+          <article class="no-purchase-panel">
+            <div class="no-purchase-panel-head"><h2>Your learning library</h2><p>Purchased course access and saved progress are kept with your account.</p></div>
+            <div class="no-purchase-empty-row"><span class="no-purchase-empty-symbol" aria-hidden="true">▤</span><div><strong>No purchased course access yet</strong><p>No purchased course access is linked to this account yet. You can still browse published courses and open previews that are available to you.</p><a class="no-purchase-quiet-link" href="{% url 'academy:home' %}">Browse published courses →</a></div></div>
+          </article>
+          <article class="no-purchase-panel">
+            <div class="no-purchase-panel-head"><h2>Community connections</h2><p>Connect a service when you are ready to use it.</p></div>
+            <div class="no-purchase-service-row">
+              <span class="no-purchase-service-logo telegram" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M23.91 3.79 20.6 20.04c-.25 1.13-.92 1.4-1.86.87l-5.14-3.79-2.48 2.39c-.27.27-.49.49-.99.49l.35-5.24 9.52-8.6c.42-.37-.09-.58-.65-.21L7.59 13.25 2.51 11.5c-1.1-.34-1.12-1.1.23-1.61L22.6 2.3c.91-.34 1.72.22 1.31 1.49Z"/></svg></span>
+              <div class="no-purchase-service-copy"><strong>Telegram</strong><p>Member updates and eligible community access</p><span class="no-purchase-service-state">{% if telegram_connected %}Connected{% else %}Not connected{% endif %}</span></div>
+              {% if telegram_connected %}<button class="btn secondary" type="button" data-goto="connections">Manage</button>{% elif telegram_bot_configured %}<a class="btn secondary" href="{% url 'bot_integration:telegram_connect' %}">Connect Telegram</a>{% else %}<button class="btn secondary" type="button" data-goto="connections">Setup required</button>{% endif %}
+            </div>
+            <div class="no-purchase-service-row">
+              <span class="no-purchase-service-logo discord" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 0 0-4.8851-1.5152.0714.0714 0 0 0-.075.0364c-.211.3753-.4447.8658-.6083 1.2535-1.8454-.2762-3.68-.2762-5.4868 0-.1636-.396-.406-.8782-.6188-1.2535a.077.077 0 0 0-.0785-.0371 19.7363 19.7363 0 0 0-4.8851 1.5152.07.07 0 0 0-.0321.0276C.5334 9.0467-.32 13.5793.0992 18.055a.0824.0824 0 0 0 .0312.056c2.0766 1.5277 4.0888 2.455 6.0575 3.072a.0781.0781 0 0 0 .0842-.0276c.4666-.6398.8827-1.3152 1.2427-2.0241a.076.076 0 0 0-.0416-.1057 13.052 13.052 0 0 1-1.8882-.9008.077.077 0 0 1-.0076-.1277c.1263-.0943.2528-.1923.3739-.2914a.0743.0743 0 0 1 .0776-.0104c3.956 1.8078 8.2357 1.8078 12.1445 0a.074.074 0 0 1 .0785.0095c.1211.0991.2475.1978.3748.2921a.077.077 0 0 1-.0066.1277c-.6033.3536-1.235.6549-1.8906.9007a.0766.0766 0 0 0-.0407.1066c.367.708.779 1.3824 1.2418 2.0231a.077.077 0 0 0 .0842.0285c1.9735-.6171 3.9897-1.5443 6.0674-3.072a.077.077 0 0 0 .0303-.0551c.5004-5.1774-.8382-9.6748-3.5485-13.6586a.0624.0624 0 0 0-.0312-.0276ZM8.02 13.3312c-1.1765 0-2.14-1.0806-2.14-2.415 0-1.3346.9445-2.4152 2.14-2.4152 1.2052 0 2.1585 1.09 2.1399 2.4152 0 1.3344-.9446 2.415-2.14 2.415Zm7.96 0c-1.1765 0-2.1399-1.0806-2.1399-2.415 0-1.3346.9444-2.4152 2.1399-2.4152 1.2051 0 2.1585 1.09 2.1399 2.4152 0 1.3344-.9445 2.415-2.1399 2.415Z"/></svg></span>
+              <div class="no-purchase-service-copy"><strong>Discord</strong><p>Community discussion and member roles</p><span class="no-purchase-service-state">{% if discord_connected %}Connected{% elif discord_account %}Disconnect pending{% else %}Not connected{% endif %}</span></div>
+              {% if discord_connected %}<button class="btn secondary" type="button" data-goto="connections">Manage</button>{% elif discord_account %}<button class="btn secondary" type="button" data-goto="connections">Resolve</button>{% else %}<a class="btn secondary" href="{% url 'bot_integration:discord_connect' %}">Connect</a>{% endif %}
+            </div>
+            <div class="no-purchase-panel-foot">Some community spaces require qualifying course access or a plan.</div>
+          </article>
+        </div>
+        <div class="no-purchase-notice"><strong>A clear start, without pressure.</strong> This dashboard does not invent purchases, active plans or learning progress. Your account, billing and learning details will be shown from their recorded data.</div>
+      </div>
+      {% else %}
+      <div class="overview-masthead"><div class="masthead-copy"><div class="kicker">YOUR MEMBER DESK / ACCOUNT SUMMARY</div><h1>Good to see you, {{ user.first_name|default:user.username }}.</h1><p>Courses, community access and payments—together, with your access terms and account activity kept clear.</p><div class="masthead-flags"><span>{{ member_owned_courses|length }} course access record{{ member_owned_courses|length|pluralize }}</span><span>{{ subscription_cards|length }} active plan{{ subscription_cards|length|pluralize }}</span><span>Member since {{ user.date_joined|date:"M Y" }}</span></div></div><div class="masthead-art"><div class="masthead-art-top"><span>TRADETHESIS / MEMBER EDITION</span><span class="masthead-stamp">T</span></div><div class="masthead-rule"></div><strong>Access you own.<br>Plans you control.</strong><small>MEMBER DESK · ACCOUNT OVERVIEW</small></div></div>
+      <div class="overview-actions"><div><div class="kicker">Your account, at a glance</div><p>Jump straight to the thing you came here to do.</p></div><div class="page-head-actions"><button class="btn secondary" type="button" data-goto="connections">Connect a community ↗</button><button class="btn" type="button" data-goto="billing">Review billing</button></div></div>
+      <div class="grid stats">
+        <article class="stat"><div class="stat-head">Course access records <span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20"/></svg></span></div><div class="stat-value">{{ member_active_entitlements }}</div><div class="stat-note">Active course entitlements on this account</div></article>
+        <article class="stat"><div class="stat-head">Connected accounts <span class="stat-icon"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.2 1.2"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1.2-1.2"/></svg></span></div><div class="stat-value">{{ member_connected_accounts }} of 2</div><div class="stat-note">Telegram and Discord link status</div></article>
+        <article class="stat"><div class="stat-head">Latest payment <span class="stat-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg></span></div><div class="stat-value">{% if recent_payments %}{{ recent_payments.0.amount_display }}{% else %}—{% endif %}</div><div class="stat-note">{% if recent_payments %}{{ recent_payments.0.plan_name }} · {{ recent_payments.0.status }}{% else %}No payment record yet{% endif %}</div></article>
+        <article class="stat"><div class="stat-head">Lessons completed <span class="stat-icon"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/><circle cx="12" cy="12" r="9"/></svg></span></div><div class="stat-value">{{ member_lessons_completed }}</div><div class="stat-note">Completion records saved for your account</div></article>
+      </div>
+      <div class="grid overview-grid">
+        <article class="card plan-card portfolio-card"><div class="card-head"><div><div class="kicker" style="color:#f0d38a">Your access portfolio</div><h2 class="card-title" style="margin-top:9px">Different products. Clear terms.</h2><p class="card-subtitle">Course access and plans are tracked separately so one-time learning purchases do not get confused with recurring billing.</p></div><span class="plan-label">{{ member_access_record_count }} access record{{ member_access_record_count|pluralize }}</span></div>
+          <div class="portfolio-list">
+            {% for item in member_owned_courses %}<div class="portfolio-row"><span class="portfolio-index">{{ forloop.counter|stringformat:"02d" }}</span><div class="portfolio-copy"><strong>{{ item.course.title }}</strong><small>{{ item.entitlement.get_source_display }} · {% if item.entitlement.expires_at %}access until {{ item.entitlement.expires_at|date:"M d, Y" }}{% else %}no expiry recorded{% endif %}</small></div><span class="portfolio-status">ACTIVE</span></div>{% endfor %}
+            {% for card in subscription_cards %}<div class="portfolio-row"><span class="portfolio-index">S{{ forloop.counter }}</span><div class="portfolio-copy"><strong>{{ card.plan.name }}</strong><small>{% if card.billing.is_trial %}Trial{% elif card.billing.is_complimentary %}Complimentary plan{% elif card.billing.is_recurring %}Recurring plan{% else %}Account plan{% endif %}{% if card.billing.period_end %} · through {{ card.billing.period_end|date:"M d, Y" }}{% endif %}</small></div><span class="portfolio-status{% if card.billing.is_recurring %} recurring{% endif %}">{% if card.billing.is_expired %}ENDED{% elif card.billing.is_trial %}TRIAL{% else %}ACTIVE{% endif %}</span></div>{% endfor %}
+            {% if not member_owned_courses and not subscription_cards %}<div class="empty-state">No course access or active plans are recorded yet. Published courses and available plans will appear in the relevant sections when they are available to your account.</div>{% endif %}
+          </div>
+          <div class="plan-body"><div class="plan-meta"><div><small>Member email</small><strong>{{ user.email|default:"No email on file" }}</strong></div><div><small>Account since</small><strong>{{ user.date_joined|date:"d M Y" }}</strong></div></div><div class="plan-actions"><button class="btn" type="button" data-goto="purchases">Manage purchases ↗</button><button class="btn secondary" type="button" data-goto="billing">Review billing</button></div></div>
+        </article>
+        <article class="card"><div class="card-head"><div><h2 class="card-title">Community connections</h2><p class="card-subtitle">Real link status for the services connected to your account.</p></div><button class="text-link" type="button" data-goto="connections">Manage all →</button></div>
+          <div class="integration-list">
+            <div class="integration"><span class="integration-logo telegram" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M23.91 3.79 20.6 20.04c-.25 1.13-.92 1.4-1.86.87l-5.14-3.79-2.48 2.39c-.27.27-.49.49-.99.49l.35-5.24 9.52-8.6c.42-.37-.09-.58-.65-.21L7.59 13.25 2.51 11.5c-1.1-.34-1.12-1.1.23-1.61L22.6 2.3c.91-.34 1.72.22 1.31 1.49Z"/></svg></span><div class="integration-details"><strong>Telegram</strong><p>{% if telegram_account and telegram_account.is_active %}{% if telegram_account.username %}@{{ telegram_account.username }}{% else %}Verified Telegram account{% endif %}{% else %}Member updates and community access{% endif %}</p><span class="connection-status{% if telegram_connected %} connected{% endif %}">{% if telegram_connected %}Connected{% else %}Not linked{% endif %}</span></div>{% if telegram_connected %}<button class="btn secondary small" type="button" data-goto="connections">Manage</button>{% elif telegram_bot_configured %}<a class="btn secondary small" href="{% url 'bot_integration:telegram_connect' %}">Connect Telegram</a>{% else %}<button class="btn secondary small" type="button" data-goto="connections">Setup required</button>{% endif %}</div>
+            <div class="integration"><span class="integration-logo discord" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M20.317 4.3698a19.7913 19.7913 0 0 0-4.8851-1.5152.0714.0714 0 0 0-.075.0364c-.211.3753-.4447.8658-.6083 1.2535-1.8454-.2762-3.68-.2762-5.4868 0-.1636-.396-.406-.8782-.6188-1.2535a.077.077 0 0 0-.0785-.0371 19.7363 19.7363 0 0 0-4.8851 1.5152.07.07 0 0 0-.0321.0276C.5334 9.0467-.32 13.5793.0992 18.055a.0824.0824 0 0 0 .0312.056c2.0766 1.5277 4.0888 2.455 6.0575 3.072a.0781.0781 0 0 0 .0842-.0276c.4666-.6398.8827-1.3152 1.2427-2.0241a.076.076 0 0 0-.0416-.1057 13.052 13.052 0 0 1-1.8882-.9008.077.077 0 0 1-.0076-.1277c.1263-.0943.2528-.1923.3739-.2914a.0743.0743 0 0 1 .0776-.0104c3.956 1.8078 8.2357 1.8078 12.1445 0a.074.074 0 0 1 .0785.0095c.1211.0991.2475.1978.3748.2921a.077.077 0 0 1-.0066.1277c-.6033.3536-1.235.6549-1.8906.9007a.0766.0766 0 0 0-.0407.1066c.367.708.779 1.3824 1.2418 2.0231a.077.077 0 0 0 .0842.0285c1.9735-.6171 3.9897-1.5443 6.0674-3.072a.077.077 0 0 0 .0303-.0551c.5004-5.1774-.8382-9.6748-3.5485-13.6586a.0624.0624 0 0 0-.0312-.0276ZM8.02 13.3312c-1.1765 0-2.14-1.0806-2.14-2.415 0-1.3346.9445-2.4152 2.14-2.4152 1.2052 0 2.1585 1.09 2.1399 2.4152 0 1.3344-.9446 2.415-2.14 2.415Zm7.96 0c-1.1765 0-2.1399-1.0806-2.1399-2.415 0-1.3346.9444-2.4152 2.1399-2.4152 1.2051 0 2.1585 1.09 2.1399 2.4152 0 1.3344-.9445 2.415-2.1399 2.415Z"/></svg></span><div class="integration-details"><strong>Discord</strong><p>{% if discord_account and discord_account.is_active %}{% if discord_account.username %}{{ discord_account.username }}{% else %}Verified Discord account{% endif %}{% else %}Community discussion and member roles{% endif %}</p><span class="connection-status{% if discord_connected %} connected{% endif %}">{% if discord_connected %}Connected{% elif discord_account %}Disconnect pending{% else %}Not linked{% endif %}</span></div>{% if discord_connected %}<button class="btn secondary small" type="button" data-goto="connections">Manage</button>{% elif discord_account %}<form class="inline-form" method="post" action="{% url 'bot_integration:discord_unlink' %}">{% csrf_token %}<button class="btn secondary small" type="submit">Retry disconnect</button></form>{% else %}<a class="btn secondary small" href="{% url 'bot_integration:discord_connect' %}">Connect</a>{% endif %}</div>
+          </div>
+        </article>
+      </div>
+      <div class="grid section-grid">
+        <article class="card"><div class="card-head"><div><h2 class="card-title">Recent payment activity</h2><p class="card-subtitle">Account-backed payment records and their current status.</p></div><button class="text-link" type="button" data-goto="billing">Full billing history →</button></div><div class="payment-list">
+          {% for payment in recent_payments %}<div class="payment-row"><div class="payment-main"><strong>{{ payment.plan_name }}</strong><small>{{ payment.date|date:"d M Y" }} · {{ payment.status }}{% if payment.refund_label %} · {{ payment.refund_label }}{% endif %}{% if payment.chargeback_label %} · {{ payment.chargeback_label }}{% endif %}</small>{% if payment.status_key == 'success' %}<a class="text-link payment-receipt-link" href="{% url 'payment-receipt' payment.pk %}">{% if payment.invoice_number %}Invoice {{ payment.invoice_number }} · view receipt{% else %}View receipt{% endif %} ↗</a>{% endif %}</div><span class="amount">{{ payment.amount_display }}</span><span class="paid{% if payment.status_key == 'pending' or payment.status_key == 'processing' %} pending{% elif payment.status_key == 'failed' or payment.status_key == 'canceled' %} failed{% endif %}">{{ payment.status }}</span></div>{% empty %}<div class="empty-state">There are no payment records for this account yet.</div>{% endfor %}
+        </div></article>
+        <article class="card"><div class="card-head"><div><h2 class="card-title">Account shortcuts</h2><p class="card-subtitle">The common things members need to do.</p></div></div><div class="quick-list"><div class="quick-row"><span class="quick-icon">↔</span><div class="quick-copy"><strong>Connect your communities</strong><small>Review Telegram and Discord status.</small></div><button class="text-link" type="button" data-goto="connections">Open →</button></div><div class="quick-row"><span class="quick-icon">₹</span><div class="quick-copy"><strong>Manage billing</strong><small>Review plans and recent payment records.</small></div><button class="text-link" type="button" data-goto="billing">Open →</button></div><div class="quick-row"><span class="quick-icon">⚙</span><div class="quick-copy"><strong>Account &amp; security</strong><small>Update your details or change your password.</small></div><button class="text-link" type="button" data-goto="profile">Open →</button></div></div></article>
+      </div>
+      <div class="notice"><span aria-hidden="true">ⓘ</span><span><b>Account data, not demo data.</b> The information above is read from your TradeThesis account, course progress, connected-account records and payment history. Actions that change access or account settings lead to the relevant secured page or service.</span></div>
+
+      {% endif %}
+    </section>
+
+    <section class="page" id="page-purchases" data-view="purchases">
+      <div class="page-head"><div><div class="kicker">PRODUCTS &amp; ENTITLEMENTS</div><h1>What you bought. What you can access.</h1><p>Course entitlements and subscriptions are shown separately, each with its own access period and payment terms.</p></div><div class="page-head-actions"><button class="btn secondary" type="button" data-goto="learning">Open my learning</button><button class="btn" type="button" data-goto="billing">View billing</button></div></div>
+      <div class="purchase-model-strip"><div><span class="model-number">01</span><div><strong>Course access</strong><p>Access comes from an active entitlement attached to your account.</p></div></div><div><span class="model-number">02</span><div><strong>Recurring plan</strong><p>Plan status, price, billing frequency and renewal are shown separately.</p></div></div><div><span class="model-number">03</span><div><strong>Learning progress</strong><p>Saved lesson completions live with the course record, not a sample dashboard.</p></div></div></div>
+      <div class="purchase-section-head"><div><div class="kicker">YOUR COURSE ACCESS</div><h2>Courses &amp; programmes</h2><p>Your active course access is drawn from the entitlement records on your account.</p></div><span class="purchase-section-total">{{ member_owned_courses|length }} active</span></div>
+      <div class="grid purchase-cards">
+        {% for item in member_owned_courses %}<article class="purchase-card"><div class="purchase-card-top"><span class="product-symbol">{{ item.course.title|slice:":2"|upper }}</span><span class="access-pill">Access active</span></div><div class="purchase-category">COURSE / PROGRAMME</div><h3>{{ item.course.title }}</h3><p>{{ item.course.summary|default:item.course.description|truncatechars:180 }}</p><div class="purchase-price-row"><strong>{{ item.completed_lessons }}/{{ item.total_lessons }}</strong><span>lessons completed</span></div><div class="purchase-detail-list"><div><span>Access source</span><b>{{ item.entitlement.get_source_display }}</b></div><div><span>Access period</span><b>{% if item.entitlement.expires_at %}Until {{ item.entitlement.expires_at|date:"d M Y" }}{% else %}No expiry recorded{% endif %}</b></div><div><span>Progress</span><b>{{ item.progress_percent }}%</b></div></div><div class="purchase-card-actions"><a class="btn" href="{% url 'academy:course-detail' item.course.slug %}">Open course ↗</a><button class="btn secondary" type="button" data-goto="learning">View learning</button></div></article>{% empty %}<div class="empty-state">There is no active course entitlement on this account yet. Your purchased or administrator-granted course access will appear here after it is recorded.</div>{% endfor %}
+      </div>
+      <div class="purchase-section-head recurring-head"><div><div class="kicker">MANAGED SEPARATELY</div><h2>Plans &amp; memberships</h2><p>Each subscription has its own status and terms.</p></div><span class="purchase-section-total">{{ subscription_cards|length }} active</span></div>
+      {% for card in subscription_cards %}<article class="subscription-panel" style="margin-bottom:12px"><div class="subscription-visual"><span class="subscription-visual-mark">↻</span><span>PLAN<br>STATUS</span></div><div class="subscription-copy"><div class="subscription-title-line"><h3>{{ card.plan.name }}</h3>{% if card.billing.is_expired %}<span class="bill-badge expired">Expired</span>{% elif card.billing.is_expiring %}<span class="bill-badge expiring">Expiring soon</span>{% elif card.billing.is_trial %}<span class="bill-badge trial">Trial</span>{% elif card.billing.is_complimentary %}<span class="bill-badge complimentary">Complimentary</span>{% else %}<span class="status-chip">Active</span>{% endif %}</div><p>{% if card.plan.description %}{{ card.plan.description }}{% else %}Plan access and billing information recorded for this account.{% endif %}</p><div class="subscription-facts"><div><small>Price</small><strong>{% if card.billing.price_display %}{{ card.billing.price_display }}{% else %}Not listed{% endif %}</strong></div><div><small>Billing period</small><strong>{% if card.billing.interval_display %}{{ card.billing.interval_display }}{% else %}As granted{% endif %}</strong></div><div><small>{% if card.billing.is_recurring %}Next renewal / end{% else %}Access end{% endif %}</small><strong>{% if card.billing.period_end %}{{ card.billing.period_end|date:"d M Y" }}{% else %}No end date recorded{% endif %}</strong></div></div></div><div class="subscription-actions"><a class="btn" href="{% url 'manage-subscription' %}">Manage subscription</a>{% if card.upgrade_candidates %}<a class="btn secondary" href="{% url 'upgrade-page' %}">Explore upgrade</a>{% endif %}</div></article>{% empty %}<div class="empty-state">No active subscription plan is recorded. Available plans and trial options are listed under Billing &amp; invoices.</div>{% endfor %}
+    </section>
+
+    <section class="page" id="page-connections" data-view="connections">
+      <div class="page-head"><div><div class="kicker">CONNECTED SERVICES</div><h1>Your communities, linked properly.</h1><p>Connect the accounts you use for community access. We show a connected state only when an active account link is recorded.</p></div></div>
+      <div class="grid account-grid">
+        <article class="card"><div class="card-head"><div><h2 class="card-title">Telegram</h2><p class="card-subtitle">Member announcements and Telegram community access.</p></div><span class="integration-logo telegram" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M23.91 3.79 20.6 20.04c-.25 1.13-.92 1.4-1.86.87l-5.14-3.79-2.48 2.39c-.27.27-.49.49-.99.49l.35-5.24 9.52-8.6c.42-.37-.09-.58-.65-.21L7.59 13.25 2.51 11.5c-1.1-.34-1.12-1.1.23-1.61L22.6 2.3c.91-.34 1.72.22 1.31 1.49Z"/></svg></span></div><div class="account-facts"><div class="account-fact"><span>Connection status</span><strong>{% if telegram_connected %}Connected{% else %}Not linked{% endif %}</strong></div><div class="account-fact"><span>Account</span><strong>{% if telegram_account and telegram_account.is_active %}{% if telegram_account.username %}@{{ telegram_account.username }}{% else %}Verified Telegram account{% endif %}{% elif user.telegram_username %}@{{ user.telegram_username }}{% else %}No account linked{% endif %}</strong></div><div class="account-fact"><span>Active free channels</span><strong>{{ telegram_channel_count }}</strong></div></div>
+          {% if not telegram_bot_configured and not telegram_connected %}
+          <div class="telegram-setup-notice" role="status">
+            <strong>The TradeThesis Telegram bot is not configured yet.</strong>
+            <p>Account verification and community access use the same bot. Ask an administrator to check the existing Telegram Bot Configuration.</p>
+          </div>
+          {% endif %}
+          <div class="support-actions">{% if telegram_connected %}<form class="inline-form" method="post" action="{% url 'bot_integration:telegram_unlink' %}" onsubmit="return confirm('Disconnect the Telegram account linked to TradeThesis?');">{% csrf_token %}<button class="btn secondary" type="submit">Disconnect Telegram</button></form>{% elif telegram_bot_configured %}<a class="btn" href="{% url 'bot_integration:telegram_connect' %}">Connect Telegram ↗</a>{% else %}<span class="btn secondary" aria-disabled="true">Telegram setup required</span>{% endif %}</div></article>
+        <article class="card"><div class="card-head"><div><h2 class="card-title">Discord</h2><p class="card-subtitle">Community conversations and member-role access.</p></div><span class="integration-logo discord" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M20.317 4.3698a19.7913 19.7913 0 0 0-4.8851-1.5152.0714.0714 0 0 0-.075.0364c-.211.3753-.4447.8658-.6083 1.2535-1.8454-.2762-3.68-.2762-5.4868 0-.1636-.396-.406-.8782-.6188-1.2535a.077.077 0 0 0-.0785-.0371 19.7363 19.7363 0 0 0-4.8851 1.5152.07.07 0 0 0-.0321.0276C.5334 9.0467-.32 13.5793.0992 18.055a.0824.0824 0 0 0 .0312.056c2.0766 1.5277 4.0888 2.455 6.0575 3.072a.0781.0781 0 0 0 .0842-.0276c.4666-.6398.8827-1.3152 1.2427-2.0241a.076.076 0 0 0-.0416-.1057 13.052 13.052 0 0 1-1.8882-.9008.077.077 0 0 1-.0076-.1277c.1263-.0943.2528-.1923.3739-.2914a.0743.0743 0 0 1 .0776-.0104c3.956 1.8078 8.2357 1.8078 12.1445 0a.074.074 0 0 1 .0785.0095c.1211.0991.2475.1978.3748.2921a.077.077 0 0 1-.0066.1277c-.6033.3536-1.235.6549-1.8906.9007a.0766.0766 0 0 0-.0407.1066c.367.708.779 1.3824 1.2418 2.0231a.077.077 0 0 0 .0842.0285c1.9735-.6171 3.9897-1.5443 6.0674-3.072a.077.077 0 0 0 .0303-.0551c.5004-5.1774-.8382-9.6748-3.5485-13.6586a.0624.0624 0 0 0-.0312-.0276ZM8.02 13.3312c-1.1765 0-2.14-1.0806-2.14-2.415 0-1.3346.9445-2.4152 2.14-2.4152 1.2052 0 2.1585 1.09 2.1399 2.4152 0 1.3344-.9446 2.415-2.14 2.415Zm7.96 0c-1.1765 0-2.1399-1.0806-2.1399-2.415 0-1.3346.9444-2.4152 2.1399-2.4152 1.2051 0 2.1585 1.09 2.1399 2.4152 0 1.3344-.9445 2.415-2.1399 2.415Z"/></svg></span></div><div class="account-facts"><div class="account-fact"><span>Connection status</span><strong>{% if discord_connected %}Connected{% elif discord_account %}Disconnect pending{% else %}Not linked{% endif %}</strong></div><div class="account-fact"><span>Account</span><strong>{% if discord_account %}{{ discord_account.username|default:discord_account.discord_user_id }}{% elif user.discord_username %}{{ user.discord_username }}{% else %}No account linked{% endif %}</strong></div><div class="account-fact"><span>Access sync</span><strong>{% if discord_connected %}Linked account recorded{% elif discord_account %}Role grants paused until disconnect completes{% else %}Connect to link your account{% endif %}</strong></div></div><div class="support-actions">{% if discord_connected %}<form class="inline-form" method="post" action="{% url 'bot_integration:discord_unlink' %}" onsubmit="return confirm('Disconnect the Discord account linked to TradeThesis?');">{% csrf_token %}<button class="btn secondary" type="submit">Disconnect Discord</button></form>{% elif discord_account %}<form class="inline-form" method="post" action="{% url 'bot_integration:discord_unlink' %}">{% csrf_token %}<button class="btn secondary" type="submit">Retry disconnect ↻</button></form>{% else %}<a class="btn" href="{% url 'bot_integration:discord_connect' %}">Connect Discord ↗</a>{% endif %}</div></article>
+      </div>
+      <div class="notice"><span aria-hidden="true">ⓘ</span><span><b>Account security.</b> Connecting or disconnecting a community account changes its link status. Only use accounts that you control. Membership access remains governed by your recorded course and plan entitlements.</span></div>
+    </section>
+
+    <section class="page" id="page-billing" data-view="billing">
+      <div class="page-head"><div><div class="kicker">PAYMENTS &amp; PLAN TERMS</div><h1>Billing, without the guesswork.</h1><p>Review the plan records and recent transactions attached to your account. Course purchases and subscriptions remain separate.</p></div></div>
+      {% if ended_subscription %}<div class="notice"><span aria-hidden="true">ⓘ</span><span>Your <b>{{ ended_subscription.plan_name }}</b> plan{% if ended_subscription.ended_at %} ended on {{ ended_subscription.ended_at|date:"d M Y" }}{% endif %}. Explore available options below if you need to regain access.</span></div>{% endif %}
+      <div class="grid billing-layout">
+        <section class="card billing-owned"><div class="panel-title-row"><div><h2>Your plans</h2><p>Current status and account-backed billing terms.</p></div></div>
+          {% for card in subscription_cards %}<article class="billing-subscription{% if card.billing.is_expired %} state-expired{% elif card.billing.is_expiring %} state-expiring{% endif %}">{% if card.product %}<div class="purchase-category">{{ card.product.name }}</div>{% endif %}<div class="billing-sub-top"><h3>{{ card.plan.name }}</h3>{% if card.billing.is_expired %}<span class="bill-badge expired">Expired</span>{% elif card.billing.is_expiring %}<span class="bill-badge expiring">Expiring soon</span>{% elif card.billing.is_trial %}<span class="bill-badge trial">Trial</span>{% elif card.billing.is_complimentary %}<span class="bill-badge complimentary">Complimentary</span>{% else %}<span class="bill-badge active">Active</span>{% endif %}</div>{% if card.billing.price_display %}<div class="bill-price">{{ card.billing.price_display }}{% if card.billing.interval_display %}<span>/ {{ card.billing.interval_display|lower }}</span>{% endif %}</div>{% endif %}{% if card.billing.period_end %}<p class="bill-period">{% if card.billing.is_expired %}Ended{% elif card.billing.is_trial %}Trial ends{% elif card.billing.is_recurring %}Renews{% else %}Access until{% endif %} <strong>{{ card.billing.period_end|date:"d M Y" }}</strong>{% if card.billing.days_remaining is not None and card.billing.days_remaining >= 0 %} · {{ card.billing.days_remaining }} day{{ card.billing.days_remaining|pluralize }} left{% endif %}</p>{% endif %}{% if card.features %}<div class="feature-heading">Included in your plan</div><ul class="plan-features">{% for f in card.features %}<li>{{ f.text }}</li>{% endfor %}</ul>{% endif %}<div class="billing-actions">{% if card.upgrade_candidates %}<a class="btn" href="{% url 'upgrade-page' %}">Upgrade plan ↗</a>{% endif %}<a class="btn secondary" href="{% url 'manage-subscription' %}">Manage subscription</a></div></article>{% empty %}<article class="billing-subscription"><div class="billing-sub-top"><h3>Free plan</h3><span class="bill-badge complimentary">Free account</span></div><p class="card-subtitle">There is no active subscription plan associated with this account.</p></article>{% endfor %}
+          {% for offer in trial_offers %}<article class="trial-offer">{% if offer.product %}<div class="purchase-category">{{ offer.product.name }}</div>{% endif %}<h3>Try {{ offer.plan.name }}</h3><p>{{ offer.duration_days }} days free</p><form method="post" action="{% url 'subscriptions:purchase-plan' %}">{% csrf_token %}<input type="hidden" name="plan_id" value="{{ offer.plan.id }}"><button class="btn" type="submit">Start free trial ↗</button></form></article>{% endfor %}
+        </section>
+        <section class="card available-plans"><div class="panel-title-row"><div><h2>{% if subscription_cards %}Explore other products{% else %}Available plans{% endif %}</h2><p>{% if user_country %}Prices for {{ user_country }} · {% endif %}Visible offers and access options for your account.</p></div></div>
+          {% for group in explore_products %}<div class="product-group"><div class="product-heading"><h3>{{ group.product.name }}</h3>{% if group.product.description %}<p>{{ group.product.description }}</p>{% endif %}</div><div class="plan-grid">{% for plan in group.plans %}<article class="plan-option"><div class="plan-option-top"><h4>{{ plan.name }}</h4>{% if not plan.price_display %}<span class="bill-badge expiring">Invite only</span>{% endif %}</div>{% if plan.price_display %}<div class="bill-price">{{ plan.price_display }} <span>/ {{ plan.display_interval_label|lower }}</span></div>{% if plan.interval_prices %}<p class="other-intervals">{% for ip in plan.interval_prices %}{{ ip.price_display }} / {{ ip.interval_display|lower }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>{% endif %}{% else %}<div class="custom-pricing">Custom pricing</div>{% endif %}{% if plan.features %}<ul class="plan-features">{% for f in plan.features %}<li>{{ f.text }}</li>{% endfor %}</ul>{% endif %}<div class="plan-option-action">{% if plan.price_display %}<a class="btn" href="{% url 'payment-start' %}?plan_id={{ plan.id }}&interval={{ plan.display_interval|default:'monthly' }}">Get started ↗</a>{% else %}<a class="btn secondary" href="{% url 'support:request_ticket' %}">Request access ↗</a>{% endif %}</div></article>{% endfor %}</div></div>{% endfor %}
+          {% if ungrouped_cards %}<div class="product-group"><div class="product-heading"><h3>{% if subscription_cards %}Upgrade options{% else %}Available plans{% endif %}</h3><p>Plan options with clear prices and terms.</p></div><div class="plan-grid">{% for plan in ungrouped_cards %}<article class="plan-option"><div class="plan-option-top"><h4>{{ plan.name }}</h4>{% if not plan.price_display %}<span class="bill-badge expiring">Invite only</span>{% endif %}</div>{% if plan.price_display %}<div class="bill-price">{{ plan.price_display }} <span>/ {{ plan.display_interval_label|lower }}</span></div>{% if plan.interval_prices %}<p class="other-intervals">{% for ip in plan.interval_prices %}{{ ip.price_display }} / {{ ip.interval_display|lower }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>{% endif %}{% else %}<div class="custom-pricing">Custom pricing</div>{% endif %}{% if plan.features %}<ul class="plan-features">{% for f in plan.features %}<li>{{ f.text }}</li>{% endfor %}</ul>{% endif %}<div class="plan-option-action">{% if not plan.price_display %}<a class="btn secondary" href="{% url 'support:request_ticket' %}">Request access ↗</a>{% elif subscription_cards %}<a class="btn" href="{% url 'upgrade-page' %}">Upgrade ↗</a>{% else %}<a class="btn" href="{% url 'payment-start' %}?plan_id={{ plan.id }}&interval={{ plan.display_interval|default:'monthly' }}">Get started ↗</a>{% endif %}</div></article>{% endfor %}</div></div>{% elif subscription_cards and not explore_products %}<p class="highest-plan-note">You're on the highest available plan for this product; there's nothing above it. Thank you for being a member.</p>{% endif %}
+        </section>
+      </div>
+      <div class="purchase-section-head"><div><div class="kicker">ACCOUNT TRANSACTIONS</div><h2>Payment history</h2><p>Recent payment intents and their current recorded state.</p></div><span class="purchase-section-total">{{ recent_payments|length }} recent</span></div>
+      <article class="card"><div class="payment-list">{% for payment in recent_payments %}<div class="payment-row"><div class="payment-main"><strong>{{ payment.plan_name }}</strong><small>{{ payment.date|date:"d M Y, H:i" }} · {{ payment.status }}{% if payment.coupon %} · Coupon {{ payment.coupon }}{% endif %}{% if payment.refund_label %} · {{ payment.refund_label }}{% endif %}{% if payment.chargeback_label %} · {{ payment.chargeback_label }}{% endif %}</small>{% if payment.status_key == 'success' %}<a class="text-link payment-receipt-link" href="{% url 'payment-receipt' payment.pk %}">{% if payment.invoice_number %}Invoice {{ payment.invoice_number }} · view receipt{% else %}View receipt{% endif %} ↗</a>{% endif %}</div><span class="amount">{{ payment.amount_display }}</span><span class="paid{% if payment.status_key == 'pending' or payment.status_key == 'processing' %} pending{% elif payment.status_key == 'failed' or payment.status_key == 'canceled' %} failed{% endif %}">{{ payment.status }}</span></div>{% empty %}<div class="empty-state">No payment history is available for this account yet.</div>{% endfor %}</div></article>
+    </section>
+
+    <section class="page" id="page-learning" data-view="learning">
+      <div class="learning-page-head">
+        <div class="learning-page-brand"><div class="kicker">TRADETHESIS<br>ACADEMY</div></div>
+        <h1>Your learning, when you are ready.</h1>
+        <p>Course cards and saved lesson progress will appear here once your account has access.</p>
+      </div>
+      {% if member_course_cards %}
+      <article class="card learning-list" aria-label="Your courses and saved progress">
+        <div class="learning-list-heading">
+          <div><div class="kicker">YOUR LEARNING</div><h2>Pick up where you left off.</h2></div>
+          <a class="btn secondary" href="{% url 'academy:home' %}">Explore more courses ↗</a>
+        </div>
+        {% for item in member_course_cards %}<div class="learning-card"><div class="course-mark">{{ item.course.title|slice:":2"|upper }}</div><div class="learning-copy"><h3>{{ item.course.title }}</h3><p>{{ item.course.summary|default:item.course.description|truncatechars:180 }}</p><div class="learning-meta">{{ item.completed_lessons }} of {{ item.total_lessons }} lessons complete · {{ item.progress_percent }}%</div><div class="progress-track" role="progressbar" aria-label="{{ item.course.title }} progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ item.progress_percent }}"><div class="progress-fill" style="width:{{ item.progress_percent }}%"></div></div><span class="course-access-state{% if not item.entitlement %} explore{% endif %}">{% if item.entitlement %}Access active{% else %}Saved progress · no active entitlement{% endif %}</span></div>{% if item.resume_lesson %}<a class="btn{% if not item.entitlement %} secondary{% endif %}" href="{% url 'academy:lesson' item.course.slug item.resume_lesson.id %}">{% if item.entitlement %}Continue learning ↗{% else %}Open preview ↗{% endif %}</a>{% else %}<a class="btn secondary" href="{% url 'academy:course-detail' item.course.slug %}">{% if item.entitlement %}Review course ↗{% else %}View course ↗{% endif %}</a>{% endif %}</div>{% endfor %}
+      </article>
+      <div class="notice"><span aria-hidden="true">ⓘ</span><span><b>Progress is account-specific.</b> Completed lessons are calculated from your saved lesson records. A visible course is not the same thing as an active entitlement; each course page enforces its own access rules.</span></div>
+      {% else %}
+      <article class="learning-empty-state" aria-labelledby="learning-empty-title">
+        <div class="learning-empty-content">
+          <div class="learning-empty-icon" aria-hidden="true"><svg viewBox="0 0 28 28" role="presentation"><path d="M5 20 8 7h15l-3 13Z"></path></svg></div>
+          <h2 id="learning-empty-title">Nothing to resume just yet</h2>
+          <p>You have no active course access or saved learning progress in this preview. Explore the catalogue to find a suitable starting point; the dashboard should never invent a lesson or completion percentage.</p>
+          <div class="learning-empty-actions">
+            <a class="btn" href="{% url 'academy:home' %}">Explore the course catalogue ↗</a>
+            <button class="btn secondary" type="button" data-goto="overview">Back to overview</button>
+          </div>
+        </div>
+      </article>
+      {% endif %}
+    </section>
+
+    <section class="page" id="page-profile" data-view="profile">
+      <div class="page-head"><div><div class="kicker">ACCOUNT &amp; SECURITY</div><h1>Your details, all in one place.</h1><p>Review your registered email, account history and community links. Changes to account details take place on the secure profile page.</p></div><div class="page-head-actions"><a class="btn" href="{% url 'profile' %}">Edit profile ↗</a></div></div>
+      <div class="grid account-grid"><article class="card"><div class="card-head"><div><h2 class="card-title">Account details</h2><p class="card-subtitle">Information currently saved to your TradeThesis account.</p></div></div><div class="account-facts"><div class="account-fact"><span>Display name</span><strong>{{ user.get_full_name|default:user.username }}</strong></div><div class="account-fact"><span>Email address</span><strong>{{ user.email|default:"No email on file" }}</strong></div><div class="account-fact"><span>Username</span><strong>{{ user.username }}</strong></div><div class="account-fact"><span>Member since</span><strong>{{ user.date_joined|date:"d M Y" }}</strong></div><div class="account-fact"><span>Last sign in</span><strong>{% if user.last_login %}{{ user.last_login|date:"d M Y, H:i" }}{% else %}Not recorded{% endif %}</strong></div></div><div class="support-actions"><a class="btn" href="{% url 'profile' %}">Profile &amp; settings ↗</a><a class="btn secondary" href="{% url 'account_reset_password' %}">Change password ↗</a></div></article>
+      <article class="card"><div class="card-head"><div><h2 class="card-title">Connected services</h2><p class="card-subtitle">Connection status used by the member access system.</p></div></div><div class="account-facts"><div class="account-fact"><span>Telegram</span><strong>{% if telegram_connected %}Connected{% else %}Not linked{% endif %}</strong></div><div class="account-fact"><span>Discord</span><strong>{% if discord_connected %}Connected{% elif discord_account %}Disconnect pending{% else %}Not linked{% endif %}</strong></div><div class="account-fact"><span>Unread notifications</span><strong>{{ unread_count|default:0 }}</strong></div></div><div class="support-actions"><button class="btn secondary" type="button" data-goto="connections">Manage connections ↗</button><a class="btn secondary" href="{% url 'notifications' %}">Notifications ↗</a></div></article></div>
+    </section>
+
+    <section class="page" id="page-help" data-view="help">
+      <div class="page-head"><div><div class="kicker">HELP &amp; SUPPORT</div><h1>Good questions deserve a clear answer.</h1><p>For account access, course enrolment, community connections or payment issues, use the support area so the request stays attached to your account.</p></div></div>
+      <div class="grid account-grid"><article class="card"><div class="card-head"><div><h2 class="card-title">Contact support</h2><p class="card-subtitle">Create a ticket with the team or review the tickets you have already opened.</p></div></div><div class="support-actions"><a class="btn" href="{% url 'support:request_ticket' %}">Create a support request ↗</a><a class="btn secondary" href="{% url 'support:my_tickets' %}">My support tickets ↗</a></div></article>
+      <article class="card"><div class="card-head"><div><h2 class="card-title">Quick answers</h2><p class="card-subtitle">A few useful starting points.</p></div></div><div class="account-facts"><div class="account-fact"><span>Course access</span><strong>Check My learning and Purchases &amp; access.</strong></div><div class="account-fact"><span>Billing question</span><strong>Review plan status and recent payment history.</strong></div><div class="account-fact"><span>Community link</span><strong>Review the connection status before opening a ticket.</strong></div><div class="account-fact"><span>Account security</span><strong>Use Profile &amp; security to update your details.</strong></div></div></article></div>
+      <div class="notice"><span aria-hidden="true">ⓘ</span><span><b>Trading education, not trading advice.</b> TradeThesis content is for educational purposes only. Trading involves risk, including possible loss of capital.</span></div>
+    </section>
+    
+  </main>
+</div>
+</div>
+{% include "partials/sitewide_footer.html" %}
+<script>
+(function(){
+  const pages=['overview','purchases','connections','billing','learning','profile','help'];
+  const sections=Array.from(document.querySelectorAll('[data-view]'));
+  const tabs=Array.from(document.querySelectorAll('[data-page]'));
+  function activate(name,changeHash){
+    if(!pages.includes(name)) name='overview';
+    sections.forEach(function(section){section.classList.toggle('active',section.getAttribute('data-view')===name)});
+    tabs.forEach(function(tab){const active=tab.getAttribute('data-page')===name;tab.classList.toggle('active',active);tab.setAttribute('aria-pressed',active?'true':'false')});
+    if(changeHash&&window.history&&window.history.replaceState)window.history.replaceState(null,'','#'+name);
+    if(window.scrollTo)window.scrollTo({top:0,behavior:'smooth'});
+  }
+  tabs.forEach(function(tab){tab.addEventListener('click',function(){activate(tab.getAttribute('data-page'),true)})});
+  document.querySelectorAll('[data-goto]').forEach(function(button){button.addEventListener('click',function(){activate(button.getAttribute('data-goto'),true)})});
+  const initial=window.location.hash.slice(1);activate(pages.includes(initial)?initial:'overview',false);
+  // Telegram opens outside this page. Refresh once when a member returns so
+  // the server-rendered Connected status reflects the account link just made.
+  const telegramConnectKey='tt-telegram-connect-started-at';
+  document.querySelectorAll('a[href*="/bot/telegram/connect/"]').forEach(function(link){
+    link.addEventListener('click',function(){
+      try{sessionStorage.setItem(telegramConnectKey,String(Date.now()))}catch(_error){}
+    });
+  });
+  function refreshAfterTelegramReturn(){
+    let startedAt=0;
+    try{startedAt=Number(sessionStorage.getItem(telegramConnectKey)||0)}catch(_error){}
+    if(!startedAt)return;
+    if(Date.now()-startedAt>10*60*1000){
+      try{sessionStorage.removeItem(telegramConnectKey)}catch(_error){}
+      return;
+    }
+    if(document.visibilityState && document.visibilityState!=='visible')return;
+    try{sessionStorage.removeItem(telegramConnectKey)}catch(_error){}
+    window.location.reload();
+  }
+  // Some browsers return from the Telegram app by making the existing tab
+  // visible again, not by reporting a back/forward navigation. Only refresh
+  // if this page was actually backgrounded after the member clicked Connect.
+  let pageWasHiddenAfterConnect=false;
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='hidden'){
+      let startedAt=0;
+      try{startedAt=Number(sessionStorage.getItem(telegramConnectKey)||0)}catch(_error){}
+      pageWasHiddenAfterConnect=Boolean(startedAt&&Date.now()-startedAt<=10*60*1000);
+      return;
+    }
+    if(document.visibilityState==='visible'&&pageWasHiddenAfterConnect){
+      pageWasHiddenAfterConnect=false;
+      refreshAfterTelegramReturn();
+    }
+  });
+  window.addEventListener('pageshow',function(event){
+    const navigation=performance.getEntriesByType('navigation')[0];
+    const returnedFromExternalFlow=Boolean(event&&event.persisted)||Boolean(navigation&&navigation.type==='back_forward');
+    if(returnedFromExternalFlow){
+      refreshAfterTelegramReturn();
+      return;
+    }
+    // A fresh navigation to #connections is the configuration-error path from
+    // the Connect endpoint; clear its marker but preserve the visible message.
+    if(window.location.hash==='#connections'){
+      try{sessionStorage.removeItem(telegramConnectKey)}catch(_error){}
+    }
+  });
+  window.addEventListener('hashchange',function(){const page=window.location.hash.slice(1);if(pages.includes(page))activate(page,false)});
+})();
+</script>
+<script src="{% static 'js/sitewide-nav.js' %}" defer></script>
+</body>
+</html>

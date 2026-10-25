@@ -1,0 +1,76 @@
+{% extends "accounts/member_page_base.html" %}
+{% block title %}Ticket {{ ticket.short_id }} | TradeThesis{% endblock %}
+{% block page_kicker %}HELP &amp; SUPPORT · TICKET {{ ticket.short_id }}{% endblock %}
+{% block page_heading %}Ticket {{ ticket.short_id }}{% endblock %}
+{% block page_description %}<p>Review the details and status of this request. Any staff response shown here is attached to this ticket.</p>{% endblock %}
+{% block page_actions %}<a class="btn secondary" href="{% url 'support:my_tickets' %}">All my tickets</a>{% endblock %}
+{% block page_content %}
+<div class="member-layout-grid">
+  <div class="member-content-stack">
+    <section class="member-panel">
+      <div class="member-panel-head">
+        <h2>Request details</h2>
+        <p>Submitted {{ ticket.created_at|date:"M d, Y · H:i" }}{% if ticket.updated_at != ticket.created_at %} · Updated {{ ticket.updated_at|date:"M d, Y · H:i" }}{% endif %}</p>
+      </div>
+      <div class="member-panel-body">
+        <dl class="member-definition-list">
+          <div class="member-definition-row"><dt>Category</dt><dd>{{ ticket.get_category_display }}</dd></div>
+          <div class="member-definition-row"><dt>Status</dt><dd><span class="member-status-pill{% if ticket.status == 'pending' %} is-waiting{% elif ticket.status == 'approved' %} is-good{% elif ticket.status == 'rejected' %} is-bad{% endif %}">{{ ticket.get_status_display }}</span></dd></div>
+          {% if ticket.affiliate_link %}<div class="member-definition-row"><dt>Referral link used</dt><dd>{{ ticket.affiliate_link.name }} <span class="member-meta">(code {{ ticket.affiliate_link.referral_code }})</span></dd></div>{% endif %}
+          {% if ticket.plan %}<div class="member-definition-row"><dt>Plan</dt><dd>{{ ticket.plan.name }}</dd></div>{% endif %}
+        </dl>
+        <div class="member-status-panel" style="margin-top:17px">
+          <h3>Your message</h3>
+          <div class="member-ticket-message">{{ ticket.message }}</div>
+        </div>
+        {% if ticket.attachments.all %}
+          <div style="margin-top:22px">
+            <h3 class="member-section-heading">Attachments</h3>
+            <div class="member-attachment-grid">
+              {% for attachment in ticket.attachments.all %}
+                <a class="member-attachment" href="{{ attachment.file.url }}" target="_blank" rel="noopener noreferrer">
+                  <img src="{{ attachment.file.url }}" alt="Screenshot attached to ticket {{ ticket.short_id }}" loading="lazy">
+                  <span class="member-meta">Open screenshot ↗</span>
+                </a>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </section>
+    {% if ticket.status == "rejected" and ticket.admin_notes %}
+      <section class="member-status-panel is-bad"><h3>Review note</h3><p>{{ ticket.admin_notes|linebreaksbr }}</p></section>
+    {% elif ticket.status == "approved" and ticket.admin_notes %}
+      <section class="member-status-panel"><h3>Review note</h3><p>{{ ticket.admin_notes|linebreaksbr }}</p></section>
+    {% endif %}
+  </div>
+  <aside class="member-content-stack">
+    <section class="member-panel">
+      <div class="member-panel-head"><h2>Next steps</h2></div>
+      <div class="member-panel-body">
+        {% if ticket.status == "pending" %}
+          <p class="member-muted">Your ticket is waiting for review. You can return to this page to check its status.</p>
+          {% if user == ticket.user %}
+            <form method="post" action="{% url 'support:withdraw_ticket' ticket.pk %}" onsubmit="return confirm('Withdraw this ticket? You can open a new one afterwards.');">
+              {% csrf_token %}
+              <button type="submit" class="btn secondary">Withdraw ticket</button>
+            </form>
+          {% endif %}
+        {% elif ticket.status == "approved" %}
+          <p class="member-muted">This request has been approved or resolved. Review the note above for any additional details.</p>
+        {% elif ticket.status == "rejected" %}
+          <p class="member-muted">This request has been closed. Review the note above, then contact support with a new ticket if you still need help.</p>
+          <a class="btn secondary" href="{% url 'support:request_ticket' %}">Raise another ticket</a>
+        {% else %}
+          <p class="member-muted">This ticket was withdrawn.</p>
+        {% endif %}
+      </div>
+    </section>
+    <section class="member-status-panel">
+      <h3>Need more help?</h3>
+      <p>Return to your ticket list or submit another request if you have a different issue.</p>
+      <p style="margin-top:10px"><a class="member-text-link" href="{% url 'support:my_tickets' %}">View all tickets ↗</a></p>
+    </section>
+  </aside>
+</div>
+{% endblock %}

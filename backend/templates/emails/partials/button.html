@@ -1,0 +1,19 @@
+<!-- Email-safe CTA. Required: url, label. Optional: color, align. -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td align="{{ align|default:'left' }}" style="padding:8px 0 4px;">
+      <!--[if mso]>
+      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ url|default:'#' }}" style="height:46px;v-text-anchor:middle;width:250px;" arcsize="18%" stroke="f" fillcolor="{{ color|default:'#28533F' }}">
+        <w:anchorlock/><center style="color:#ffffff;font-family:Arial,sans-serif;font-size:15px;font-weight:bold;">{{ label }}</center>
+      </v:roundrect>
+      <![endif]-->
+      <!--[if !mso]><!-- -->
+      <table role="presentation" class="btn-wrap" cellpadding="0" cellspacing="0" border="0" style="display:inline-table;">
+        <tr><td bgcolor="{{ color|default:'#28533F' }}" style="background-color:{{ color|default:'#28533F' }};border-radius:8px;">
+          <a class="btn-link" href="{{ url|default:'#' }}" style="display:inline-block;padding:14px 24px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:18px;font-weight:700;letter-spacing:0.1px;color:#FFFFFF;text-decoration:none;border-radius:8px;">{{ label }}</a>
+        </td></tr>
+      </table>
+      <!--<![endif]-->
+    </td>
+  </tr>
+</table>

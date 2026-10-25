@@ -1,0 +1,186 @@
+{
+  "assertions": 36,
+  "passed": 36,
+  "checks": [
+    {
+      "name": "startup lesson title",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "long reading and evidence table rendered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Lesson 12 historical chart appears beside the first-read question",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "inline chart control opens the staged evidence tab",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Volume is presented as an existing catalogue course",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Volume section explains spot FX, CFD and tick volume",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "first chart stage has an instrument/date/zone-specific caption",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L12 field-note prompt specific",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "stage starts gated",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "stage 1 unlocks after meaningful attempt",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "stage 2 updates the caption to its own visible date range",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "stage 2 unlocks after meaningful attempt",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "stage 3 unlocks after meaningful attempt",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "final recap unlocked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L12 seven quiz questions",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "quiz submission reveals automated feedback",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Lesson 13 title rendered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Lesson 13 specific notes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Lesson 13 simple-to-complex figures rendered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Lesson 13 historical chart and question appear together without exposing later stages",
+      "ok": true,
+      "detail": "stage1=true; question=true; stage2Hidden=true"
+    },
+    {
+      "name": "Lesson 13 simple diagrams precede complex diagrams",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "field notes persisted to local storage",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Lesson 14 expanded failure taxonomy",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Lesson 14 historical chart is placed beside the applied review question",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Range-edge upthrust and downside failure diagrams rendered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Pivot and continuation-pause failure diagrams rendered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Plain-language detail present for range and pivot failures",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Lesson 14 failure-only stop illustration",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Lesson 14 stop-loss marker only in failure lesson",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Stop-loss language absent from Lessons 12 and 13",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "duplicate Lesson 12 volume section removed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "lesson reading stays instructor-led, not bibliography-led",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "model answers shown after final chart stage",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "dynamic lesson 13 quiz count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "dynamic lesson 14 quiz count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "staged response includes learner model answers",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

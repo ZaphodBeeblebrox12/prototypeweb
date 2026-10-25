@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="Canonical TradeThesis Learning Room template reference, wired to the approved Bollinger Bands lesson data.">
+<title>TradeThesis Learning Room Template — Bollinger Bands Reference</title>
+<style>
+:root {
+  --paper: #fbf7ef;
+  --paper-deep: #f1eadc;
+  --surface: #fffdf8;
+  --surface-soft: #f7f2e8;
+  --ink: #28382e;
+  --body: #4c5b50;
+  --muted: #758074;
+  --muted-light: #92998b;
+  --green: #355a46;
+  --green-deep: #254334;
+  --green-wash: #e3eadc;
+  --sage: #d9e3d1;
+  --gold: #ad823b;
+  --gold-wash: #f5ebd4;
+  --terracotta: #c46d4f;
+  --line: #ded7c9;
+  --line-dark: #c8c0b0;
+  --shadow-soft: 0 3px 12px rgba(41,56,46,.035), 0 10px 26px rgba(41,56,46,.035);
+  --serif: Georgia, "Times New Roman", serif;
+  --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "SFMono-Regular", Consolas, monospace;
+  --reading: 800px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 14px/1.6 var(--sans); -webkit-font-smoothing: antialiased; }
+button, input, textarea { font: inherit; }
+button { cursor: pointer; }
+a { color: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--terracotta); outline-offset: 3px; }
+::selection { background: #f0d38a; color: var(--ink); }
+[hidden] { display: none !important; }
+.topline { min-height: 30px; padding: 7px 24px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--green-deep); color: var(--surface); font-size: 10px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+.topline .right { color: #e2e9dc; opacity: .9; font-size: 9px; text-align: right; letter-spacing: .06em; }
+.header { position: sticky; top: 0; z-index: 30; background: rgba(251,247,239,.97); border-bottom: 1px solid rgba(222,215,201,.96); backdrop-filter: blur(12px); }
+.header-inner { max-width: 1440px; min-height: 72px; margin: 0 auto; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.brand { display: flex; align-items: center; gap: 11px; min-width: 210px; color: var(--green-deep); text-decoration: none; }
+.brand-mark { width: 36px; height: 36px; display: grid; place-items: center; flex: 0 0 auto; border: 1px solid var(--green); border-radius: 50% 50% 50% 4px; font: italic 21px var(--serif); transform: rotate(-3deg); }
+.brand-name { display: block; font: 25px/1 var(--serif); letter-spacing: -.045em; }
+.brand-tag { display: block; margin-top: 4px; color: var(--muted); font-size: 8px; font-weight: 750; letter-spacing: .15em; text-transform: uppercase; }
+.header-actions { display: flex; align-items: center; gap: 7px; }
+.header-actions button { min-height: 38px; padding: 9px 12px; border: 1px solid transparent; background: transparent; color: var(--muted); font-size: 11px; font-weight: 700; }
+.header-actions button.active { color: var(--green); border-bottom-color: var(--terracotta); font-weight: 850; }
+.header-actions .outline { border-color: var(--line); background: var(--surface); color: var(--green); }
+.menu-toggle { display: none; width: 42px; height: 42px; border: 1px solid var(--line); background: var(--surface); color: var(--green); border-radius: 50%; font-size: 18px; }
+main { max-width: 1440px; margin: 0 auto; padding: 0 28px 54px; }
+.course-intro { display: flex; align-items: end; justify-content: space-between; gap: 28px; padding: 24px 4px 21px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
+.eyebrow { display: flex; align-items: center; gap: 8px; color: var(--green); font-size: 9px; font-weight: 850; letter-spacing: .15em; text-transform: uppercase; }
+.eyebrow:before { content: ""; width: 18px; height: 2px; background: var(--terracotta); }
+.course-intro h1 { margin: 10px 0 8px; font: 400 clamp(34px,4vw,48px)/1.02 var(--serif); letter-spacing: -.048em; }
+.course-intro p { max-width: 720px; margin: 0; color: var(--body); font: 16px/1.6 var(--serif); }
+.intro-stats { min-width: 230px; text-align: right; }
+.intro-stats strong { display: block; color: var(--green); font: 400 22px var(--serif); }
+.intro-stats span { color: var(--muted); font-size: 10px; }
+.progress-row { display: flex; align-items: center; gap: 9px; max-width: 470px; margin-top: 15px; }
+.progress-copy { color: var(--muted); font-size: 9px; white-space: nowrap; }
+.progress-track { height: 5px; flex: 1; overflow: hidden; background: #e6dfd2; border-radius: 99px; }
+.progress-track span { display: block; height: 100%; width: 0; background: var(--green); transition: width .2s; }
+.overview-hero { position: relative; overflow: hidden; margin-top: 15px; padding: 34px 36px 30px; border-top: 2px solid #9caf96; border-bottom: 1px solid var(--line); background: linear-gradient(116deg,#fffdf8 0%,#f6f0e4 69%,#e9eadc 100%); box-shadow: var(--shadow-soft); }
+.overview-hero:after { content: ""; position: absolute; width: 420px; height: 420px; right: -105px; top: -224px; border: 1px solid #d8c99f; border-radius: 50%; box-shadow: 0 0 0 24px rgba(214,199,155,.07),0 0 0 60px rgba(214,199,155,.055),0 0 0 98px rgba(214,199,155,.035); pointer-events: none; }
+.overview-hero > * { position: relative; z-index: 1; }
+.overview-hero h2 { max-width: 800px; margin: 14px 0; font: 400 clamp(38px,4.8vw,62px)/.99 var(--serif); letter-spacing: -.055em; }
+.overview-hero h2 em { color: var(--green); }
+.overview-hero p { max-width: 700px; color: var(--body); font: 17px/1.65 var(--serif); margin: 0; }
+.overview-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 19px; }
+.overview-meta span { padding: 6px 10px; border: 1px solid var(--line); background: #fffaf2; color: var(--muted); font-size: 9px; }
+.button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 10px 16px; border: 1px solid var(--green); border-radius: 999px; background: var(--green); color: var(--surface); font-size: 11px; font-weight: 800; text-decoration: none; }
+.button.secondary { color: var(--green); background: var(--surface); border-color: var(--line); }
+.button:hover { filter: brightness(.97); }
+.overview-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 21px; }
+.section { padding: 33px 2px 12px; }
+.section-head { display: flex; align-items: end; justify-content: space-between; gap: 22px; margin-bottom: 17px; }
+.section-head h2 { margin: 7px 0 0; color: var(--green); font: 400 31px/1.08 var(--serif); letter-spacing: -.04em; }
+.section-head p { max-width: 420px; margin: 0; color: var(--body); font-size: 12px; line-height: 1.75; }
+.curriculum { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 13px; }
+.module-card { min-width: 0; display: flex; flex-direction: column; padding: 17px 17px 15px; border-top: 2px solid var(--sage); border-bottom: 1px solid var(--line); background: var(--surface); box-shadow: 0 3px 12px rgba(41,56,46,.025); }
+.module-card:nth-child(3n+2) { border-top-color: #e7d5a8; }
+.module-card:nth-child(3n) { border-top-color: #d9b19e; }
+.module-head { display: flex; align-items: baseline; gap: 10px; border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 9px; }
+.module-no { color: var(--terracotta); font: 28px var(--serif); }
+.module-card h3 { margin: 0; color: var(--green); font: 400 19px/1.15 var(--serif); }
+.module-card .module-deck { color: var(--body); font-size: 11px; line-height: 1.7; margin: 0 0 10px; }
+.module-card ul { list-style: none; padding: 0; margin: 0; border-top: 1px solid #e8e1d5; }
+.module-card li { border-bottom: 1px solid #e8e1d5; }
+.module-card li button { width: 100%; padding: 9px 1px; display: grid; grid-template-columns: 31px minmax(0,1fr) 12px; gap: 6px; align-items: start; border: 0; background: transparent; text-align: left; color: var(--body); font-size: 11px; line-height: 1.6; }
+.module-card li button:hover { color: var(--green); text-decoration: underline; text-underline-offset: 2px; }
+.module-card li button .lesson-no { color: var(--gold); font: 9px var(--mono); }
+.course-note { display: flex; align-items: flex-start; gap: 12px; padding: 16px 18px; margin-top: 23px; border: 1px solid #e7d7ab; background: #fff9e9; }
+.course-note-mark { color: var(--gold); font: 23px var(--serif); }
+.course-note strong { display: block; margin-bottom: 4px; color: #5d512f; font-size: 11px; }
+.course-note p { margin: 0; color: #766c51; font-size: 10px; line-height: 1.7; }
+#roomView { display: none; }
+.room-topline { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 17px 0 15px; border-bottom: 1px solid var(--line); }
+.room-topline h2 { margin: 5px 0 0; color: var(--green); font: 400 29px/1.1 var(--serif); }
+.room-topline p { margin: 5px 0 0; color: var(--muted); font-size: 10px; }
+.workspace { display: grid; grid-template-columns: 282px minmax(0,1fr); gap: 20px; align-items: start; padding-top: 17px; }
+.sidebar { position: sticky; top: 88px; max-height: calc(100vh - 102px); min-height: 340px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow-soft); }
+.sidebar-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 14px 11px; border-bottom: 1px solid var(--line); }
+.sidebar-head strong { font: 400 21px var(--serif); }
+.sidebar-head span { color: var(--muted); font: 10px var(--mono); }
+.search-wrap { position: relative; margin: 11px 12px 9px; }
+.search-wrap input { width: 100%; padding: 10px 10px 10px 30px; border: 1px solid var(--line); border-radius: 2px; background: var(--paper); color: var(--ink); font-size: 11px; }
+.search-wrap:before { content: "⌕"; position: absolute; left: 10px; top: 3px; color: var(--muted); font-size: 19px; }
+.module-list { min-height: 0; overflow: auto; padding: 0 11px 13px; flex: 1; scrollbar-width: thin; scrollbar-color: #d5cbb9 transparent; }
+.module-block { margin-bottom: 5px; }
+.module-toggle { width: 100%; display: grid; grid-template-columns: 29px minmax(0,1fr) 12px; align-items: center; gap: 8px; padding: 8px 5px; border: 0; background: transparent; color: var(--green); text-align: left; }
+.module-toggle:hover { background: var(--surface-soft); }
+.module-toggle .module-number { width: 27px; height: 27px; display: grid; place-items: center; border-radius: 50% 50% 50% 4px; background: var(--green-wash); font: 13px var(--serif); }
+.module-toggle strong { display: block; font-size: 11px; line-height: 1.45; }
+.module-toggle small { display: block; margin-top: 3px; color: var(--muted); font-size: 9px; line-height: 1.45; }
+.module-toggle .chevron { color: var(--muted); font-size: 13px; transition: transform .15s; }
+.module-block.open .chevron { transform: rotate(90deg); }
+.side-lessons { display: none; margin: 0 0 2px 11px; padding: 0 0 0 11px; border-left: 1px solid var(--line); }
+.module-block.open .side-lessons { display: grid; gap: 1px; }
+.side-lesson { width: 100%; display: grid; grid-template-columns: 31px minmax(0,1fr) 13px; align-items: start; gap: 5px; padding: 8px 5px; border: 0; border-radius: 2px; background: transparent; color: var(--body); text-align: left; font-size: 10px; line-height: 1.55; }
+.side-lesson:hover { background: var(--surface-soft); color: var(--ink); }
+.side-lesson.active { background: var(--green-wash); color: var(--green-deep); font-weight: 800; box-shadow: inset 2px 0 var(--green); }
+.side-lesson .lesson-id { color: var(--gold); font: 8px var(--mono); }
+.side-lesson .completed { color: var(--green); }
+.sidebar-foot { padding: 10px 12px 12px; border-top: 1px solid var(--line); color: var(--muted); font-size: 8px; line-height: 1.6; }
+.main-column { min-width: 0; }
+.lesson-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 1px 9px; }
+.crumbs { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; color: var(--muted); font-size: 8px; font-weight: 800; letter-spacing: .09em; }
+.crumbs b { color: var(--green); }
+.toolbar-actions { display: flex; gap: 6px; }
+.tiny-btn { padding: 6px 9px; border: 1px solid var(--line); background: var(--surface); color: var(--green); font-size: 9px; font-weight: 750; white-space: nowrap; }
+.lesson-cover { position: relative; overflow: hidden; padding: 24px 27px 17px; border-top: 2px solid #8fa287; border-bottom: 1px solid var(--line); background: linear-gradient(118deg,#fffdf8 0%,#f7f1e5 66%,#eee8d8 100%); box-shadow: var(--shadow-soft); }
+.lesson-cover:after { content: ""; position: absolute; right: -87px; top: -132px; width: 310px; height: 310px; border: 1px solid #d8c99f; border-radius: 50%; box-shadow: 0 0 0 22px rgba(214,199,155,.045),0 0 0 50px rgba(214,199,155,.03); pointer-events: none; }
+.cover-top { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.cover-kicker { display: flex; align-items: center; gap: 7px; color: var(--green); font-size: 9px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+.cover-kicker:before { content: ""; width: 16px; height: 2px; background: var(--terracotta); }
+.cover-count { color: var(--muted); font: 9px var(--mono); white-space: nowrap; }
+.cover-main { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0,1fr) 72px; gap: 14px; align-items: center; }
+.cover-overline { margin: 0 0 7px; color: #9b6c4f; font-size: 8px; font-weight: 850; letter-spacing: .15em; text-transform: uppercase; }
+.lesson-cover h1 { max-width: 800px; margin: 0 0 10px; font: 400 clamp(31px,3.2vw,44px)/1.04 var(--serif); letter-spacing: -.045em; }
+.lesson-cover h1 em { color: var(--green); }
+.lesson-deck { max-width: 760px; margin: 0; color: var(--body); font: 15px/1.6 var(--serif); }
+.cover-numeral { color: #c5b27d; opacity: .77; text-align: center; font: 400 64px/.9 var(--serif); letter-spacing: -.08em; text-shadow: 0 1px 0 #fffdf8; }
+.cover-bottom { position: relative; z-index: 1; display: flex; align-items: center; flex-wrap: wrap; gap: 7px 15px; margin-top: 17px; padding-top: 11px; border-top: 1px solid var(--line); }
+.cover-bottom span { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 8px; }
+.cover-bottom i { color: var(--terracotta); font-style: normal; font-size: 12px; }
+.local-pill { margin-left: auto; padding: 5px 8px; border: 1px solid #d2ddc9; background: #f5f7ef; color: var(--green) !important; font-size: 8px !important; }
+.outcomes { display: grid; grid-template-columns: 103px repeat(3,minmax(0,1fr)); align-items: stretch; padding: 12px 15px 13px; background: rgba(255,253,248,.6); border-bottom: 1px solid var(--line); }
+.outcomes-label { padding: 2px 9px 0 0; color: #79643f; font-size: 9px; font-weight: 850; letter-spacing: .1em; line-height: 1.55; text-transform: uppercase; }
+.outcome { padding: 0 12px; border-left: 1px solid #e0d8c8; color: var(--body); font-size: 10px; line-height: 1.6; }
+.outcome strong { display: block; margin-bottom: 4px; color: var(--green); font-size: 10px; }
+.outcome span { display: block; }
+.tab-bar { display: flex; align-items: center; gap: 26px; margin: 0 0 22px; padding: 0 14px; border-bottom: 1px solid var(--line); }
+.tab { position: relative; padding: 14px 0 12px; border: 0; background: transparent; color: var(--muted); font-size: 11px; font-weight: 750; white-space: nowrap; }
+.tab .tab-count { margin-left: 5px; color: var(--muted-light); font: 9px var(--mono); }
+.tab.active { color: var(--green-deep); }
+.tab.active:after { content: ""; position: absolute; right: 0; bottom: -1px; left: 0; height: 2px; background: var(--terracotta); }
+.tab-panel { min-width: 0; }
+.lesson-reading { width: 100%; max-width: var(--reading); margin: 0 auto; padding: 0 15px; color: var(--body); }
+.section-kicker { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; color: #9b6c4f; font-size: 8px; font-weight: 850; letter-spacing: .17em; text-transform: uppercase; }
+.section-kicker:before { content: ""; width: 19px; height: 1px; background: var(--terracotta); }
+.lesson-reading h2 { max-width: 780px; margin: 0 0 12px; color: var(--green); font: 400 29px/1.13 var(--serif); letter-spacing: -.035em; }
+.lesson-reading h3 { margin: 25px 0 9px; color: var(--green); font: 400 22px/1.2 var(--serif); letter-spacing: -.02em; }
+.lesson-reading p { max-width: 760px; margin: 0 0 16px; color: var(--body); font-size: 14px; line-height: 1.82; }
+.lesson-reading p.lead { max-width: 735px; color: #3d5042; font: 400 17px/1.72 var(--serif); }
+.lesson-reading strong { color: var(--ink); font-weight: 780; }
+.lesson-reading ul, .lesson-reading ol { max-width: 760px; margin: 8px 0 20px; padding-left: 21px; color: var(--body); font-size: 12px; line-height: 1.8; }
+.lesson-reading li { padding: 3px 0; }
+.lesson-reading li::marker { color: var(--terracotta); }
+.lesson-reading h4 { margin: 23px 0 8px; color: var(--green); font: 400 21px/1.22 var(--serif); }
+.lesson-reading blockquote { max-width: 760px; margin: 25px 0; padding: 6px 0 6px 20px; border-left: 2px solid #e4cf91; color: var(--green); font: italic 21px/1.4 var(--serif); }
+.figure-plate { max-width: 800px; margin: 24px 0 26px; padding: 11px 11px 0; border: 1px solid var(--line); background: #f1eee5; box-shadow: 0 2px 4px rgba(41,56,46,.025),0 8px 17px rgba(41,56,46,.04); }
+.plate-top { display: flex; align-items: center; justify-content: space-between; gap: 11px; padding: 2px 2px 9px; }
+.plate-title { color: var(--ink); font-size: 10px; font-weight: 850; letter-spacing: .05em; text-transform: uppercase; }
+.plate-note { color: var(--muted); font-size: 9px; text-align: right; }
+.chart-canvas { overflow: hidden; border: 1px solid #e0dacb; background: #fbfaf4; }
+.chart-canvas svg, .figure-plate svg { display: block; max-width: 100%; height: auto; }
+.figure-foot { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 10px 2px 12px; color: var(--body); font-size: 10px; line-height: 1.6; }
+.figure-foot strong { color: var(--green); font-size: 9px; }
+.zoom { padding: 0; border: 0; background: transparent; color: var(--green); font-size: 9px; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.compare-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 800px; margin: 19px 0 23px; }
+.compare-item { min-width: 0; padding-top: 10px; border-top: 2px solid var(--sage); }
+.compare-item h4 { margin: 0 0 6px; color: var(--green); font: 400 18px/1.18 var(--serif); }
+.compare-item p { margin: 0 0 9px; color: var(--body); font-size: 11px; line-height: 1.7; }
+.compare-label { margin-bottom: 6px; color: #9b6c4f; font-size: 8px; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
+.small-chart { padding: 5px; border: 1px solid var(--line); background: #f1eee5; }
+.small-chart svg { display: block; width: 100%; height: auto; }
+.context-note { display: grid; grid-template-columns: 132px minmax(0,1fr); align-items: start; gap: 15px; max-width: 800px; margin: 20px 0 25px; padding: 13px 0 14px; border-top: 1px solid var(--line-dark); border-bottom: 1px solid var(--line); }
+.context-note-label { display: flex; align-items: center; gap: 7px; padding-top: 3px; color: #9b6c4f; font-size: 8px; font-weight: 850; letter-spacing: .14em; line-height: 1.5; text-transform: uppercase; }
+.context-note-label:before { content: ""; width: 15px; height: 2px; flex: 0 0 auto; background: var(--terracotta); }
+.context-note p { max-width: none; margin: 0; font-size: 12px; line-height: 1.78; }
+.notebook { display: grid; grid-template-columns: 63px minmax(0,1fr); gap: 18px; max-width: 800px; margin: 27px auto 25px; padding: 21px 22px 23px; border-top: 2px solid #708769; border-bottom: 1px solid #d6dfce; background: linear-gradient(90deg,#f8f5eb,#fbf8f0); box-shadow: 0 2px 4px rgba(41,56,46,.02),0 8px 18px rgba(41,56,46,.03); }
+.notebook-stamp { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 5px 10px 0 0; border-right: 1px solid #d1dcc8; color: #8a7551; font: 9px/1.5 var(--mono); text-align: center; }
+.notebook-stamp span:last-child { color: #bd7556; font: 29px/.95 var(--serif); }
+.notebook-kicker { margin: 0 0 7px; color: #6f8068; font-size: 8px; font-weight: 850; letter-spacing: .15em; text-transform: uppercase; }
+.notebook-title { margin: 0 0 10px; color: var(--green); font: 400 24px/1.1 var(--serif); }
+.notebook-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.notebook-list li { display: grid; grid-template-columns: 24px minmax(0,1fr); gap: 9px; padding: 9px 0; border-top: 1px solid #d0dac8; color: #3f5543; font-size: 12px; line-height: 1.65; }
+.notebook-no { padding-top: 2px; color: #be7557; font: 9px var(--mono); }
+.notebook-copy strong { color: var(--green); }
+.assessment { max-width: 800px; margin: 0 auto 24px; padding: 23px 23px 22px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: linear-gradient(120deg,#fbf8f0,#f0f1e8); }
+.assessment-head { display: grid; grid-template-columns: 34px minmax(0,1fr); align-items: start; gap: 12px; margin-bottom: 12px; }
+.assessment-mark { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: var(--sage); color: var(--green); font: 17px var(--serif); }
+.assessment-title { margin: 1px 0 5px; color: var(--green); font: 400 24px/1.12 var(--serif); }
+.assessment-sub { margin: 0; color: var(--muted); font-size: 10px; }
+.quiz-item { padding: 14px 0 15px; border-bottom: 1px solid #d7dfd0; }
+.quiz-prompt { display: grid; grid-template-columns: 25px minmax(0,1fr); gap: 10px; align-items: start; margin-bottom: 10px; }
+.quiz-no { width: 23px; height: 23px; display: grid; place-items: center; border-radius: 50%; background: #f0d38a; color: #765e2f; font: 9px var(--mono); }
+.quiz-question { padding-top: 2px; color: #344639; font-size: 13px; line-height: 1.7; }
+.choices { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; margin-left: 35px; }
+.choice { min-width: 0; display: grid; grid-template-columns: 19px minmax(0,1fr); align-items: start; gap: 7px; padding: 10px; border: 1px solid #dddccf; border-radius: 3px; background: var(--surface); color: var(--body); font-size: 11px; line-height: 1.6; text-align: left; }
+.choice:hover { border-color: #9db39b; background: #f7f8f1; }
+.choice-letter { width: 18px; height: 18px; display: grid; place-items: center; border: 1px solid #d8d3c5; border-radius: 50%; background: #f6f0e5; color: var(--muted); font: 8px var(--mono); }
+.choice.selected { background: var(--green-wash); border-color: #718d70; color: var(--green-deep); }
+.choice.correct { background: #e4efdf !important; border-color: #678663 !important; }
+.choice.incorrect { background: #f8e7df !important; border-color: var(--terracotta) !important; }
+.quiz-feedback { display: none; margin: 10px 0 0 35px; padding: 11px 12px; border-left: 2px solid var(--green); background: var(--surface); color: var(--body); font-size: 10px; line-height: 1.65; }
+.quiz-feedback.show { display: block; }
+.quiz-feedback.wrong { border-color: var(--terracotta); }
+.assessment-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid #d0d9c8; }
+.assessment-foot p { max-width: 390px; margin: 0; color: var(--muted); font-size: 9px; }
+.secondary-btn { padding: 9px 12px; border: 1px solid #c9b67f; background: transparent; color: #6f5a2a; font-size: 10px; font-weight: 750; }
+.practice-sheet { max-width: 800px; margin: 0 auto 22px; display: grid; grid-template-columns: 78px minmax(0,1fr); gap: 16px; padding: 20px 22px 22px; border-left: 3px solid #d4b76b; border-radius: 0 9px 9px 0; background: #f8f0dc; }
+.practice-stamp { padding-top: 3px; color: #7a6230; font: 11px/1.5 var(--mono); }
+.practice-stamp b { display: block; margin-top: 6px; font: 28px var(--serif); }
+.practice-title { margin: 2px 0 8px; color: var(--green); font: 400 23px/1.15 var(--serif); }
+.practice-copy { margin: 0 0 12px; color: #4d5445; font-size: 12px; line-height: 1.75; }
+.reflection { width: 100%; min-height: 82px; resize: vertical; padding: 11px 12px; border: 1px solid #dfd1ab; background: #fffbf0; color: var(--ink); font: 12px/1.6 var(--sans); }
+.practice-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 10px; }
+.practice-status { color: #6d6245; font-size: 10px; }
+.lesson-footer { max-width: 800px; margin: 0 auto; padding-top: 17px; border-top: 1px solid var(--line); }
+.complete-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 2px 14px; border-bottom: 1px solid var(--line); }
+.complete-control { display: flex; align-items: center; gap: 9px; color: var(--green); font-size: 10px; font-weight: 800; }
+.complete-control input { width: 16px; height: 16px; accent-color: var(--green); }
+.completion-hint { color: var(--muted); font-size: 10px; text-align: right; }
+.lesson-nav { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 12px; padding: 14px 0; }
+.action-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 14px; border: 1px solid var(--green); border-radius: 999px; background: var(--green); color: var(--surface); font-size: 11px; font-weight: 800; white-space: nowrap; transition: background .15s ease, border-color .15s ease, transform .15s ease; }
+.action-btn:hover:not(:disabled) { transform: translateY(-1px); }
+.action-btn.secondary { background: transparent; color: var(--green); }
+.action-btn:disabled { opacity: .38; cursor: not-allowed; }
+.next-copy { min-width: 0; padding-left: 12px; border-left: 1px solid var(--line); }
+.next-copy span { display: block; margin-bottom: 3px; color: var(--muted-light); font-size: 8px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+.next-copy strong { display: block; overflow: hidden; color: var(--green); font: 400 15px/1.25 var(--serif); text-overflow: ellipsis; white-space: nowrap; }
+.footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 32px; padding: 17px 3px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 8px; letter-spacing: .08em; text-transform: uppercase; }
+.toast { position: fixed; z-index: 90; bottom: 18px; left: 50%; max-width: calc(100vw - 24px); padding: 10px 14px; transform: translate(-50%,15px); opacity: 0; pointer-events: none; background: var(--green-deep); color: var(--surface); font-size: 10px; box-shadow: var(--shadow-soft); transition: transform .16s,opacity .16s; }
+.toast.show { transform: translate(-50%,0); opacity: 1; }
+.chart-modal { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; padding: 18px; background: rgba(28,42,33,.82); }
+.chart-modal.open { display: flex; }
+.modal-inner { width: min(1100px,100%); max-height: 92vh; overflow: auto; padding: 15px; border: 1px solid var(--line); background: var(--paper); }
+.modal-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 12px; color: var(--muted); font-size: 10px; }
+.modal-bar button { padding: 7px 11px; border: 1px solid var(--line); background: var(--surface); color: var(--green); font-size: 10px; }
+.modal-chart svg, .modal-chart img { display: block; width: 100%; height: auto; }
+@media (max-width: 1120px) {
+  .workspace { grid-template-columns: 255px minmax(0,1fr); gap: 16px; }
+  .curriculum { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .cover-numeral { font-size: 56px; }
+  .outcomes { grid-template-columns: 88px repeat(3,minmax(0,1fr)); }
+  .lesson-cover { padding-inline: 22px; }
+}
+@media (max-width: 820px) {
+  .topline { padding-inline: 12px; font-size: 8px; }
+  .header-inner { min-height: 64px; padding-inline: 15px; }
+  .brand { min-width: 0; }
+  .brand-mark { width: 33px; height: 33px; }
+  .brand-name { font-size: 21px; }
+  .header-actions { display: none; }
+  .menu-toggle { display: block; }
+  main { padding-inline: 16px; }
+  .course-intro { display: block; padding-top: 17px; }
+  .course-intro h1 { font-size: 34px; }
+  .intro-stats { margin-top: 14px; text-align: left; }
+  .intro-stats strong { display: inline; margin-right: 7px; font-size: 19px; }
+  .workspace { display: block; }
+  .sidebar { position: fixed; top: 64px; bottom: 0; left: 0; z-index: 60; width: min(350px,90vw); max-height: none; min-height: 0; transform: translateX(-105%); transition: transform .2s; }
+  body.menu-open .sidebar { transform: translateX(0); }
+  .drawer-overlay { position: fixed; inset: 64px 0 0; z-index: 55; background: rgba(31,48,38,.42); opacity: 0; pointer-events: none; transition: opacity .2s; }
+  body.menu-open .drawer-overlay { opacity: 1; pointer-events: auto; }
+  .room-topline { align-items: flex-start; flex-direction: column; }
+  .lesson-toolbar { align-items: flex-start; flex-direction: column; }
+  .toolbar-actions .tiny-btn { display: none; }
+  .lesson-cover { padding: 21px 18px 15px; }
+  .cover-main { grid-template-columns: minmax(0,1fr) 48px; gap: 8px; }
+  .lesson-cover h1 { font-size: clamp(30px,6vw,39px); }
+  .cover-numeral { font-size: 47px; }
+  .outcomes { grid-template-columns: 1fr; padding: 11px 14px 8px; }
+  .outcomes-label { padding: 0 0 5px; }
+  .outcome { padding: 8px 0; border-top: 1px solid var(--line); border-left: 0; }
+  .outcome strong { display: inline; margin-right: 6px; }
+  .tab-bar { gap: 20px; overflow-x: auto; padding-inline: 11px; white-space: nowrap; }
+  .lesson-reading { max-width: none; padding-inline: 8px; }
+  .notebook, .assessment, .practice-sheet, .lesson-footer { max-width: none; }
+  .notebook { grid-template-columns: 44px minmax(0,1fr); gap: 12px; padding: 17px 14px; }
+  .notebook-stamp { padding-right: 6px; }
+  .notebook-title { font-size: 22px; }
+  .choices { grid-template-columns: 1fr; margin-left: 34px; }
+  .assessment { padding: 19px 15px; }
+  .practice-sheet { grid-template-columns: 55px minmax(0,1fr); gap: 11px; padding: 17px 14px; }
+  .curriculum { grid-template-columns: 1fr 1fr; }
+  .overview-hero { padding: 26px 22px; }
+  .overview-hero h2 { font-size: 43px; }
+  .section-head { display: block; }
+  .section-head p { margin-top: 9px; font-size: 12px; }
+  .drawer-overlay { display: block; }
+}
+@media (max-width: 520px) {
+  main { padding-inline: 12px; }
+  .topline .right { max-width: 120px; }
+  .course-intro h1 { font-size: 31px; }
+  .overview-hero { padding: 23px 16px; }
+  .overview-hero h2 { font-size: 36px; }
+  .overview-hero p { font-size: 15px; }
+  .curriculum { grid-template-columns: 1fr; }
+  .lesson-cover { padding-inline: 14px; }
+  .cover-main { grid-template-columns: minmax(0,1fr) 37px; gap: 5px; }
+  .lesson-cover h1 { font-size: 30px; }
+  .cover-numeral { font-size: 43px; }
+  .cover-count { font-size: 8px; }
+  .cover-kicker { font-size: 7px; }
+  .lesson-deck { font-size: 14px; }
+  .lesson-reading { padding-inline: 2px; }
+  .lesson-reading h2 { font-size: 26px; }
+  .lesson-reading p.lead { font-size: 16px; }
+  .context-note { grid-template-columns: 1fr; gap: 5px; margin: 17px 0 21px; }
+  .compare-pair { grid-template-columns: 1fr; }
+  .notebook { grid-template-columns: 35px minmax(0,1fr); gap: 9px; padding-inline: 11px; }
+  .notebook-stamp span:last-child { font-size: 23px; }
+  .notebook-title { font-size: 21px; }
+  .assessment-title { font-size: 21px; }
+  .assessment-head { grid-template-columns: 29px minmax(0,1fr); gap: 9px; }
+  .assessment-mark { width: 27px; height: 27px; }
+  .assessment-foot { align-items: stretch; flex-direction: column; }
+  .assessment-foot .secondary-btn { width: 100%; }
+  .practice-sheet { grid-template-columns: 43px minmax(0,1fr); padding-inline: 11px; }
+  .practice-stamp { font-size: 9px; }
+  .practice-stamp b { font-size: 24px; }
+  .complete-line { align-items: flex-start; flex-direction: column; gap: 7px; }
+  .completion-hint { text-align: left; }
+  .lesson-nav { grid-template-columns: auto minmax(0,1fr); gap: 8px; }
+  .next-copy { grid-column: 1/-1; grid-row: 1; padding: 0 0 9px; border-left: 0; border-bottom: 1px solid var(--line); }
+  #prevLesson { grid-column: 1; grid-row: 2; }
+  #nextLesson { grid-column: 2; grid-row: 2; }
+  .action-btn { padding: 10px 9px; font-size: 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,*::before,*::after { transition: none !important; }
+}
+</style>
+<!-- Lesson copy is generated from the authored Markdown; this file is the visual and interaction reference. -->
+<script src="../../assets/bollinger-lessons-data.js"></script>
+</head>
+<body>
+<div class="topline"><span>TRADETHESIS <strong>·</strong> INDEPENDENT TRADING EDUCATION</span><span class="right">Canonical template reference · Standalone HTML · Not connected to the live site</span></div>
+<header class="header"><div class="header-inner">
+  <a href="#overview" class="brand" id="brandHome" aria-label="TradeThesis course home"><span class="brand-mark" aria-hidden="true">T.</span><span><span class="brand-name">TradeThesis</span><span class="brand-tag">Conviction before execution</span></span></a>
+  <nav class="header-actions" aria-label="Course views"><button type="button" class="active" data-view="overview">Course overview</button><button type="button" data-view="room">Learning room</button><button type="button" class="outline" id="outlineJump">Course outline ↗</button></nav>
+  <button type="button" class="menu-toggle" id="mobileMenu" aria-label="Open course outline" aria-expanded="false">☷</button>
+</div></header>
+<main>
+  <section class="course-intro"><div><div class="eyebrow">A TradeThesis learning series</div><h1>Understand Bollinger Bands</h1><p>Read the bands in context. Build conditional ideas, recognise when they fail, and decide what evidence matters next.</p><div class="progress-row"><span class="progress-copy" id="progressText">0 of 30 lessons complete</span><div class="progress-track" aria-label="Course progress"><span id="progressBar"></span></div></div></div><div class="intro-stats"><strong>7 modules · 30 lessons</strong><span>Self-study · Illustrative target: 6–8 hours</span></div></section>
+  <section id="overviewView">
+    <div class="overview-hero"><div class="eyebrow">From indicator to judgement</div><h2>Read what the bands show. <em>Decide what to do next.</em></h2><p>Bollinger Bands describe price relative to recent variation. This course teaches the next step: interpreting that evidence without treating every touch, squeeze or close as an automatic signal.</p><div class="overview-meta"><span>7 learning modules</span><span>30 lessons</span><span>Static chart studies</span><span>Risk and review included</span></div><div class="overview-actions"><button class="button" type="button" data-view="room">Continue to the learning room ↗</button><button class="button secondary" id="overviewOutline" type="button">Explore the curriculum ↓</button></div></div>
+    <section class="section" id="curriculum"><div class="section-head"><div><div class="eyebrow">The course path</div><h2>Seven modules. One developing skill.</h2></div><p>Move from understanding the indicator to building conditional plans and reviewing decisions. Lessons can use different teaching patterns when the topic requires it.</p></div><div class="curriculum" id="curriculumGrid"></div></section>
+    <div class="course-note"><span class="course-note-mark">✳</span><div><strong>A note on how to use the course</strong><p>Use Observe → Interpret → Test as a reasoning habit, not a prediction formula. “Not enough evidence yet” is a valid conclusion when the chart does not support a stronger one.</p></div></div>
+  </section>
+  <section id="roomView">
+    <div class="room-topline"><div><div class="eyebrow">The learning room</div><h2>Work through the evidence.</h2><p>Read the idea, compare chart cases, and practise making a conditional judgement.</p></div><button type="button" class="button secondary" id="backOverview">← Course overview</button></div>
+    <div class="workspace">
+      <aside class="sidebar" id="sidebar" aria-label="Course navigation"><div class="sidebar-head"><strong>Learning outline</strong><span>30 lessons</span></div><label class="search-wrap"><input id="lessonSearch" type="search" placeholder="Search all lessons…" aria-label="Search all lessons"></label><div class="module-list" id="moduleList"></div><div class="sidebar-foot">Lesson completion and notes are stored only in this browser preview. They are not connected to a member account.</div></aside>
+      <div class="main-column"><div class="lesson-toolbar"><div class="crumbs"><span>COURSES</span><span>/</span><span>TECHNICAL TOOLS</span><span>/</span><b>UNDERSTAND BOLLINGER BANDS</b></div><div class="toolbar-actions"><button class="tiny-btn" id="outlineTop" type="button">Outline ↗</button></div></div>
+        <article class="lesson-experience">
+          <header class="lesson-cover"><div class="cover-top"><div class="cover-kicker"><span id="lessonModule">MODULE 01</span><span>·</span><span>FOUNDATIONS</span></div><div class="cover-count" id="lessonNumber">LESSON 1.1 / 30</div></div><div class="cover-main"><div><p class="cover-overline">A useful distinction to carry forward</p><h1 id="lessonTitle">What Are the Bands Showing You?</h1><p class="lesson-deck" id="lessonDeck">The bands offer a moving reference for relative price position and recent variation. They do not, on their own, predict the next move.</p></div><div class="cover-numeral" id="coverNumeral" aria-hidden="true">1.1</div></div><div class="cover-bottom"><span><i>◷</i><b id="lessonTime">15 minutes</b> estimated</span><span><i>✳</i> Core concept</span><span><i>▤</i><b id="figureCount">Figures vary by lesson</b></span><span class="local-pill">Browser preview progress</span></div></header>
+          <div class="outcomes"><div class="outcomes-label">By the end<br>of this lesson</div><div class="outcome"><strong>Describe the event</strong><span>State what happened without predicting the next move.</span></div><div class="outcome"><strong>Classify the context</strong><span>Use the middle line, band width and surrounding structure.</span></div><div class="outcome"><strong>Choose the next test</strong><span>Name the evidence that would strengthen or weaken your view.</span></div></div>
+          <div class="tab-bar" role="tablist" aria-label="Lesson sections"><button class="tab active" id="tabIdea" type="button" role="tab" aria-selected="true" data-tab="idea">The idea</button><button class="tab" id="tabExamples" type="button" role="tab" aria-selected="false" data-tab="examples">Chart examples <span class="tab-count" id="exampleCount">02</span></button><button class="tab" id="tabTest" type="button" role="tab" aria-selected="false" data-tab="test">Test your reading <span class="tab-count">01</span></button></div>
+          <section class="tab-panel" id="ideaPanel" role="tabpanel"><article class="lesson-reading" id="ideaContent"></article><section class="notebook"><div class="notebook-stamp">KEEP<br>IN VIEW<span id="notebookNumber">01</span></div><div><div class="notebook-kicker">Your trading notebook</div><h2 class="notebook-title" id="notebookTitle">Before treating a touch as a setup</h2><ul class="notebook-list" id="notebookList"><li><span class="notebook-no">01</span><span class="notebook-copy"><strong>Describe.</strong> Where is price relative to the bands and middle line?</span></li><li><span class="notebook-no">02</span><span class="notebook-copy"><strong>Interpret.</strong> Does the structure look like a range, a trend or a transition? What is your alternative explanation?</span></li><li><span class="notebook-no">03</span><span class="notebook-copy"><strong>Test.</strong> What future price behaviour would strengthen or weaken your view?</span></li></ul></div></section></section>
+          <section class="tab-panel" id="examplesPanel" role="tabpanel" hidden><article class="lesson-reading" id="examplesContent"></article></section>
+          <section class="tab-panel" id="testPanel" role="tabpanel" hidden><article class="lesson-reading" id="testContent"></article></section>
+          <footer class="lesson-footer"><div class="complete-line"><label class="complete-control"><input type="checkbox" id="completeLesson"> Mark this lesson complete</label><span class="completion-hint">Progress is stored locally for this visual review only.</span></div><div class="lesson-nav"><button class="action-btn secondary" id="prevLesson" type="button">← Previous</button><div class="next-copy"><span>Next in the course</span><strong id="nextTitle">A band touch is evidence, not a signal</strong></div><button class="action-btn" id="nextLesson" type="button">Next lesson →</button></div></footer>
+        </article>
+      </div>
+    </div>
+  </section>
+  <footer class="footer"><span>TradeThesis · Conviction before execution</span><span>Standalone review · Not the live member site</span></footer>
+</main>
+<div class="drawer-overlay" id="drawerOverlay"></div><div class="toast" id="toast" role="status" aria-live="polite"></div><div class="chart-modal" id="chartModal" role="dialog" aria-modal="true" aria-labelledby="modalCaption"><div class="modal-inner"><div class="modal-bar"><span id="modalCaption">Enlarged course figure</span><button type="button" id="closeModal">Close ✕</button></div><div class="modal-chart" id="modalChart"></div></div></div>
+<script>
+const modules = [
+ {id:1,title:'What Bollinger Bands Actually Tell You',sub:'Observation before inference',lessons:['What Are the Bands Showing You?','When Price Reaches a Band, What Does It Mean?','Why the Bands Keep Changing','What the Bands Cannot Tell You']},
+ {id:2,title:'Read the Bands and Their Measurements',sub:'The centre line, outer bands, %B and BandWidth',lessons:['How the Bands Are Built','Why 20 and 2 Are Defaults, Not Laws','Use %B to Describe Price Position','Use BandWidth to See When the Bands Are Narrow or Wide']},
+ {id:3,title:'Read the Market Before Reading the Signal',sub:'Trend, range, squeeze and follow-through',lessons:['First Decide: Trend or Range?','When Price Walks Along a Band','Two Ways Traders Talk About a “Squeeze”','A Squeeze Does Not Choose the Direction']},
+ {id:4,title:"Read Bollinger's Signature Patterns",sub:'W-bottoms, M-tops and confirmation',lessons:['Reading a W-Bottom','Reading an M-Top','When Price and an Indicator Tell Different Stories','Is the Pattern Complete Enough to Trade?']},
+ {id:5,title:'Use the Setups the Authors Actually Wrote',sub:'Documented methods and their required conditions',lessons:['Bollinger Method I: Trade the Volatility Breakout','Bollinger Method II: Follow Strength Confirmed by MFI','Bollinger Method III: Look for Reversal Clues in Volume','Bollinger Method IV: Wait for a Confirmed Breakout','Trade the W-Bottom and M-Top, Not Just the Shape',"John Carter's TTM Squeeze: Use Momentum for Direction"]},
+ {id:6,title:'Recognise Failed Setups and Know When to Wait',sub:'False starts, changing conditions and no-trade decisions',lessons:['The False Start After a Squeeze','When a Band Walk Traps Reversal Traders','When a Range Trade Stops Being a Range Trade','Late Entries, Conflicting Evidence, and No-Trade Conditions']},
+ {id:7,title:'Manage Risk and Review the Process',sub:'Sizing, management, testing and review',lessons:['Size the Trade From the Point Where the Idea Fails','Decide How You Will Manage the Trade Before Entry','Test the Idea Without Fitting It to the Past','Review the Decision, Not Just the Result']}
+];
+const allLessons = modules.flatMap(m => m.lessons.map((title,index)=>({module:m.id,index,title,id:`${m.id}.${index+1}`,key:`${m.id}-${index}`})));
+const defaultLesson = {module:1,index:0};
+const state = {view:'room',tab:'idea',module:defaultLesson.module,lesson:defaultLesson.index,completed:new Set(),notes:{}};
+const $ = selector => document.querySelector(selector);
+const $$ = selector => [...document.querySelectorAll(selector)];
+let toastTimer;
+function toast(message){const node=$('#toast');node.textContent=message;node.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>node.classList.remove('show'),2600);}
+function safeHtml(value){return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function selectedLesson(){return allLessons.find(l=>l.module===state.module&&l.index===state.lesson)||allLessons[0];}
+function getManuscript(lesson){return window.BOLLINGER_MANUSCRIPTS?.[lesson.id]||null;}
+function buildModuleList(){
+ const query=$('#lessonSearch').value.trim().toLowerCase();
+ $('#moduleList').innerHTML=modules.map(m=>{
+  const filtered=m.lessons.map((title,index)=>({title,index})).filter(l=>!query||m.title.toLowerCase().includes(query)||l.title.toLowerCase().includes(query));
+  if(query&&!filtered.length)return '';
+  const open=m.id===state.module||!!query;
+  return `<section class="module-block ${open?'open':''}" data-module-block="${m.id}"><button class="module-toggle" type="button" data-module-toggle="${m.id}" aria-expanded="${open}"><span class="module-number">${String(m.id).padStart(2,'0')}</span><span><strong>${m.title}</strong><small>${m.sub}</small></span><span class="chevron">›</span></button><div class="side-lessons">${filtered.map(l=>{const lesson=allLessons.find(x=>x.module===m.id&&x.index===l.index);return `<button class="side-lesson ${m.id===state.module&&l.index===state.lesson?'active':''}" type="button" data-open-module="${m.id}" data-open-lesson="${l.index}" aria-current="${m.id===state.module&&l.index===state.lesson?'page':'false'}"><span class="lesson-id">${m.id}.${l.index+1}</span><span>${safeHtml(l.title)}</span><span class="completed">${state.completed.has(lesson.key)?'✓':''}</span></button>`}).join('')}</div></section>`;
+ }).join('') || '<p style="padding:12px;color:var(--muted);font-size:11px">No lesson matches that search.</p>';
+ $('#curriculumGrid').innerHTML=modules.map(m=>`<article class="module-card"><div class="module-head"><span class="module-no">${String(m.id).padStart(2,'0')}</span><h3>${m.title}</h3></div><p class="module-deck">${m.sub}</p><ul>${m.lessons.map((title,index)=>`<li><button type="button" data-open-module="${m.id}" data-open-lesson="${index}"><span class="lesson-no">${m.id}.${index+1}</span><span>${safeHtml(title)}</span><span>↗</span></button></li>`).join('')}</ul></article>`).join('');
+}
+function updateProgress(){const done=state.completed.size;$('#progressText').textContent=`${done} of 30 lessons complete`;$('#progressBar').style.width=`${Math.round(done/30*100)}%`;}
+function setView(view){state.view=view;$('#overviewView').hidden=view!=='overview';$('#roomView').style.display=view==='room'?'block':'none';$$('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));document.body.classList.remove('menu-open');$('#mobileMenu').setAttribute('aria-expanded','false');$('#mobileMenu').textContent='☷';window.scrollTo({top:0,behavior:'smooth'});if(view==='room')renderLesson();}
+function setTab(tab){state.tab=tab;$$('[data-tab]').forEach(button=>{const active=button.dataset.tab===tab;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));});const ids={idea:'ideaPanel',examples:'examplesPanel',test:'testPanel'};Object.values(ids).forEach(id=>$('#'+id).hidden=true);$('#'+ids[tab]).hidden=false;}
+function svgFigure(lesson,variant='main'){
+ const palettes={range:{top:'31',mid:'67',bottom:'104',path:'M12 72 L31 46 L51 79 L71 38 L91 65 L111 94 L131 53 L151 77 L171 43 L191 82 L211 60 L231 92 L251 48 L271 73 L302 58'},trend:{top:'M8 75 Q90 69 150 47 T302 12',mid:'M8 95 Q90 87 150 72 T302 42',bottom:'M8 125 Q90 121 150 110 T302 91',path:'M8 111 L28 102 L46 114 L68 85 L90 94 L111 72 L133 81 L156 55 L178 67 L201 40 L224 51 L248 25 L270 34 L289 16 L302 20'},squeeze:{top:'M8 26 Q85 39 155 46 T302 21',mid:'M8 66 Q85 67 155 67 T302 66',bottom:'M8 105 Q85 94 155 88 T302 111',path:'M8 64 L27 59 L47 70 L66 58 L86 67 L105 61 L125 71 L145 57 L163 66 L184 49 L204 37 L224 50 L244 26 L264 35 L283 18 L302 11'}};
+ const type=variant==='compare1'?'range':variant==='compare2'?'trend':variant;
+ const p=palettes[type]||palettes.trend;
+ const small=variant.startsWith('compare');
+ if(small)return `<svg viewBox="0 0 310 136" role="img" aria-label="${type==='range'?'Range-like chart comparison':'Trending chart comparison'}"><rect width="310" height="136" fill="#fbfaf4"/><g stroke="#e4ded0" stroke-width="1"><path d="M0 34H310M0 68H310M0 102H310M62 0V136M124 0V136M186 0V136M248 0V136"/></g><path d="M8 ${p.top}H302" fill="none" stroke="#8da285" stroke-width="2"/><path d="M8 ${p.bottom}H302" fill="none" stroke="#8da285" stroke-width="2"/><path d="M8 ${p.mid}H302" fill="none" stroke="#bb8b3e" stroke-width="1.5" stroke-dasharray="4 4"/><path d="${p.path}" fill="none" stroke="#355a46" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+ return `<figure class="figure-plate"><div class="plate-top"><span class="plate-title">Figure ${lesson.id} · ${type==='range'?'A range-like structure':type==='squeeze'?'Compression before expansion':'Price and relative volatility'}</span><span class="plate-note">Illustrative teaching chart · not historical data</span></div><div class="chart-canvas"><svg id="chart-${lesson.id.replace('.','-')}" viewBox="0 0 900 310" role="img" aria-label="Illustrative ${type} price action with upper, middle and lower Bollinger Bands"><rect width="900" height="310" fill="#fbfaf4"/><g stroke="#e4ded0" stroke-width="1"><path d="M25 45H875M25 90H875M25 135H875M25 180H875M25 225H875M25 270H875M95 15V285M180 15V285M265 15V285M350 15V285M435 15V285M520 15V285M605 15V285M690 15V285M775 15V285M860 15V285"/></g><path d="M25 95 C130 92 190 96 265 93 S410 95 495 94 S640 95 710 93 S800 94 875 91 L875 231 C790 227 720 231 640 229 S490 230 410 231 S265 227 185 232 S85 229 25 232 Z" fill="#dce7d6" opacity=".72"/><path d="M25 95 C130 92 190 96 265 93 S410 95 495 94 S640 95 710 93 S800 94 875 91" fill="none" stroke="#809a79" stroke-width="2.5"/><path d="M25 164 C130 164 190 163 265 164 S410 166 495 164 S640 162 710 165 S800 164 875 162" fill="none" stroke="#bb8b3e" stroke-width="2.5" stroke-dasharray="8 6"/><path d="M25 232 C130 230 190 227 265 231 S410 228 495 231 S640 230 710 228 S800 230 875 231" fill="none" stroke="#809a79" stroke-width="2.5"/><path d="${type==='range'?'M25 166 L55 140 L84 189 L113 134 L143 159 L173 198 L203 149 L233 177 L263 143 L293 176 L323 155 L353 191 L383 146 L413 169 L443 151 L473 187 L503 148 L533 173 L563 142 L593 179 L623 155 L653 185 L683 145 L713 173 L743 151 L773 180 L803 155 L833 170 L875 162':type==='squeeze'?'M25 171 L55 164 L84 177 L113 165 L143 172 L173 164 L203 177 L233 168 L263 172 L293 165 L323 170 L353 164 L383 173 L413 166 L443 171 L473 162 L503 173 L533 149 L563 129 L593 150 L623 112 L653 128 L683 90 L713 108 L743 71 L773 88 L803 49 L833 62 L875 30':'M25 226 L55 208 L84 218 L113 193 L143 209 L173 180 L203 194 L233 165 L263 182 L293 148 L323 165 L353 135 L383 153 L413 124 L443 139 L473 111 L503 127 L533 97 L563 113 L593 81 L623 101 L653 69 L683 84 L713 56 L743 70 L773 43 L803 55 L833 28 L875 21'}" fill="none" stroke="#355a46" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"/><g font-family="system-ui,sans-serif" font-size="11" font-weight="700"><rect x="46" y="30" width="153" height="27" rx="2" fill="#fffdf8" stroke="#d8d0bd"/><text x="57" y="47" fill="#355a46">Upper band</text><path d="M114 57L136 94" stroke="#a6b59d" stroke-width="1.5"/><rect x="375" y="237" width="155" height="27" rx="2" fill="#fffdf8" stroke="#d8d0bd"/><text x="386" y="254" fill="#355a46">Middle line</text><path d="M454 237L455 165" stroke="#a6b59d" stroke-width="1.5"/><rect x="655" y="246" width="155" height="27" rx="2" fill="#fffdf8" stroke="#d8d0bd"/><text x="666" y="263" fill="#355a46">Lower band</text><path d="M735 246L747 229" stroke="#a6b59d" stroke-width="1.5"/></g><text x="27" y="296" fill="#8a8e80" font-family="system-ui,sans-serif" font-size="10">EARLIER</text><text x="827" y="296" fill="#8a8e80" font-family="system-ui,sans-serif" font-size="10">LATER</text></svg></div><figcaption class="figure-foot"><span><strong>FIGURE ${lesson.id}</strong> · A schematic visual to support the reading. It is not historical price data.</span><button class="zoom" type="button" data-zoom="chart-${lesson.id.replace('.','-')}">Enlarge ↗</button></figcaption></figure>`;
+}
+function fallbackIdea(lesson, manuscript){
+ const m=modules[lesson.module-1];
+ const context={
+  1:'The bands are a moving reference for relative price and recent variation. Start with what price is doing around the bands; do not infer a reversal from location alone.',
+  2:'The inputs change how the indicator is calculated. Treat settings as measurement choices and keep the interpretation tied to the rule you actually use.',
+  3:'Context changes what the same band interaction might mean. Classify the structure using price swings, the middle line, band width and follow-through.',
+  4:'A named pattern is a hypothesis, not proof. Inspect the relationship between its parts and identify what would confirm or invalidate the pattern.',
+  5:'A setup needs defined conditions, a trigger and an invalidation rule. Keep the indicator observation separate from entry timing, stop placement and position size.',
+  6:'A failed first idea does not automatically create an opposite-side trade. Reassess the original thesis and decide what evidence is still missing.',
+  7:'Plan risk and review rules before entry. Evaluate whether the decision followed the plan separately from whether the outcome happened to be profitable.'
+ };
+ return `<div class="section-kicker">The essential question</div><h2>${safeHtml(lesson.title)}</h2><p class="lead">${safeHtml(manuscript?.take||context[lesson.module])}</p><p>Start by stating the visible evidence in plain language. Then describe one plausible interpretation and one alternative explanation. Finally, identify the next piece of price behaviour that could strengthen or weaken the view.</p><h3>What to inspect</h3><ul><li>Where price sits relative to the upper band, middle line and lower band.</li><li>Whether the middle line and bands are rising, falling, flat, narrowing or widening.</li><li>How price behaves after the event, rather than assuming the event predicts what comes next.</li></ul><h3>Keep observation separate from interpretation</h3><p>A useful reading should be clear about what the chart proves, what it merely suggests, and what remains unknown. A conditional plan can include a wait decision when the evidence is incomplete.</p>${svgFigure(lesson,lesson.module===3?'squeeze':'trend')}<blockquote>Describe the evidence first. Let the market earn the interpretation.</blockquote>`;
+}
+function fallbackExamples(lesson, manuscript){
+ const title=lesson.module===3?'Compression and expansion':lesson.module===5?'Trigger, invalidation and room to target':lesson.module===7?'The plan and the outcome':'Similar-looking events, different context';
+ return `<div class="section-kicker">Compare the evidence</div><h2>${safeHtml(title)}</h2><p class="lead">The purpose of a chart comparison is not to find a perfect picture. It is to notice which evidence changes the next question you should ask.</p><div class="compare-pair"><section class="compare-item"><div class="compare-label">Case A · One possible reading</div><h4>Evidence that fits the idea</h4>${svgFigure(lesson,'compare1')}<p>Record the visible structure, then state the interpretation it may support. Keep the condition that would confirm it explicit.</p></section><section class="compare-item"><div class="compare-label">Case B · A competing reading</div><h4>Evidence that could weaken it</h4>${svgFigure(lesson,'compare2')}<p>Look for a similar appearance with different context, or for the expected follow-through that never arrives.</p></section></div><h3>Compare with the same questions</h3><ul><li>What is visibly different between the cases?</li><li>What interpretation fits each case without claiming certainty?</li><li>What would make you abandon or delay the proposed setup?</li></ul>${manuscript?.examplesHtml||''}`;
+}
+function fallbackTest(lesson, manuscript){
+ const questions=[
+  {q:'A price bar touches the upper Bollinger Band. What does that fact establish on its own?',a:['Price must reverse.','Price reached the upper part of its recent volatility envelope.','The next candle should be bullish.'],correct:1,why:'A touch describes location. Directional meaning depends on structure and follow-through.'},
+  {q:'The bands widen after a large candle, but price has not held above the prior range. What is the best next step?',a:['Assume a new trend has started.','Increase size because volatility is expanding.','Treat widening as an observation and wait for evidence of sustained structure.'],correct:2,why:'A large move can widen the bands. Expansion alone does not establish a durable trend.'},
+  {q:'A setup trigger has occurred, but the stop distance makes the trade risk unacceptable. What is the correct decision?',a:['Move the stop closer just to increase size.','Skip the trade or redesign the plan before entry.','Ignore the risk because the pattern is clear.'],correct:1,why:'A trigger does not override risk limits. The plan must remain acceptable before execution.'}
+ ];
+ const item=manuscript?.quiz?{q:manuscript.quiz.question,a:manuscript.quiz.choices,correct:manuscript.quiz.correct,why:manuscript.quiz.why}:questions[lesson.module===5?2:lesson.module===3?1:0];
+ return `<div class="section-kicker">Test your reading</div><h2>What does the evidence allow you to conclude?</h2><p class="lead">${safeHtml(manuscript?.take||'Choose the most defensible reading, then explain the evidence and its limits.')}</p><section class="assessment"><div class="assessment-head"><div class="assessment-mark">✓</div><div><h3 class="assessment-title">Choose the most defensible reading</h3><p class="assessment-sub">Choose an interpretation that fits the evidence without claiming more than it supports.</p></div></div><div class="quiz-item"><div class="quiz-prompt"><span class="quiz-no">01</span><div class="quiz-question">${safeHtml(item.q)}</div></div><div class="choices" id="quizChoices">${item.a.map((answer,i)=>`<button type="button" class="choice" data-correct="${i===item.correct}"><span class="choice-letter">${String.fromCharCode(65+i)}</span><span>${safeHtml(answer)}</span></button>`).join('')}</div><div class="quiz-feedback" id="quizFeedback" data-why="${safeHtml(item.why||'')}" aria-live="polite"></div></div><div class="assessment-foot"><p>Reasoning check, not a prediction score. The explanation appears after you select an answer.</p><button type="button" class="secondary-btn" id="resetQuiz">Try again</button></div></section><section class="practice-sheet"><div class="practice-stamp">YOUR<br>READING<b>${String(lesson.module).padStart(2,'0')}</b></div><div><h3 class="practice-title">Write the next question you would ask</h3><p class="practice-copy">Name one visible fact, one possible interpretation, one alternative and the next evidence that could change your view. “Unclear” is acceptable when you explain why.</p><textarea id="reflection" class="reflection" placeholder="I can observe… One possible interpretation is… An alternative is… I would look next for…" aria-label="Write your chart reading">${safeHtml(state.notes[lesson.key]||'')}</textarea><div class="practice-actions"><button class="secondary-btn" id="saveReflection" type="button">Keep note in this preview</button><span class="practice-status" id="reflectionStatus" aria-live="polite">Notes stay in this browser preview.</span></div></div></section>${manuscript?.practiceHtml||''}`;
+}
+function applyContentHooks(){
+ const map=[['#lessonTitle','lesson.title'],['#lessonDeck','lesson.summary'],['#ideaContent h2','lesson.idea.heading'],['#ideaContent p.lead','lesson.idea.lead'],['#notebookTitle','lesson.notebook.title'],['#examplesContent h2','lesson.examples.heading'],['#testContent h2','lesson.test.heading']];
+ map.forEach(([selector,key])=>{const el=$(selector);if(el)el.dataset.editorField=key;});
+ $$('#ideaContent .figure-plate,#examplesContent .figure-plate').forEach((el,index)=>{el.dataset.mediaSlot=`${selectedLesson().id}.figure.${index+1}`;});
+}
+function renderLesson(){
+ const lesson=selectedLesson(), module=modules[lesson.module-1], manuscript=getManuscript(lesson);
+ $('#lessonModule').textContent=`MODULE ${String(lesson.module).padStart(2,'0')}`;
+ $('#lessonNumber').textContent=`LESSON ${lesson.id} / 30`;
+ $('#coverNumeral').textContent=lesson.id;
+ $('#lessonTitle').textContent=manuscript?.title||lesson.title;
+ $('#lessonDeck').textContent=manuscript?.take||['Read relative price position before interpreting a touch.','Measurement settings define how the bands are calculated.','The same band event can have different meanings in different conditions.','A pattern is a hypothesis that needs confirmation.','A setup needs a defined trigger and invalidation rule.','A failed setup is not automatically a new signal.','Risk and review rules help make decisions repeatable.'][lesson.module-1];
+ $('#lessonTime').textContent=manuscript?.timeLabel|| (lesson.module===5?'25–28 minutes':'15 minutes');
+ $('#figureCount').textContent='Figures vary by lesson';
+ $('#notebookNumber').textContent=String(lesson.module).padStart(2,'0');
+ $('#notebookTitle').textContent=lesson.module===5?'Before acting on a setup':'Before treating an observation as a setup';
+ $('#completeLesson').checked=state.completed.has(lesson.key);
+ $('#prevLesson').disabled=allLessons.indexOf(lesson)===0;
+ $('#nextLesson').disabled=allLessons.indexOf(lesson)===allLessons.length-1;
+ const next=allLessons[Math.min(allLessons.indexOf(lesson)+1,allLessons.length-1)];$('#nextTitle').textContent=next.title;
+ if(manuscript){
+  let idea=(manuscript.ideaHtml||'').trim();
+  const insertedFigure=svgFigure(lesson,lesson.module===3?'squeeze':'trend');
+  const firstParagraphEnd=idea.indexOf('</p>');
+  if(firstParagraphEnd>=0) idea=idea.slice(0,firstParagraphEnd+4)+insertedFigure+idea.slice(firstParagraphEnd+4);
+  else idea=insertedFigure+idea;
+  $('#ideaContent').innerHTML=`<div class="section-kicker">The essential idea · ${lesson.id}</div>${idea||fallbackIdea(lesson,manuscript)}`;
+  $('#examplesContent').innerHTML=`<div class="section-kicker">Chart examples · ${lesson.id}</div>${fallbackExamples(lesson,manuscript)}`;
+  $('#testContent').innerHTML=`<div class="section-kicker">Test your reading · ${lesson.id}</div>${fallbackTest(lesson,manuscript)}`;
+ }else{
+  $('#ideaContent').innerHTML=fallbackIdea(lesson,null);
+  $('#examplesContent').innerHTML=fallbackExamples(lesson,null);
+  $('#testContent').innerHTML=fallbackTest(lesson,null);
+ }
+ $('#exampleCount').textContent=String($('#examplesContent').querySelectorAll('figure,.figure-plate').length||2).padStart(2,'0');
+ setTab(state.tab);buildModuleList();updateProgress();applyContentHooks();bindQuiz();bindReflection();bindZoom();
+}
+function openLesson(moduleId,index){state.module=moduleId;state.lesson=index;state.tab='idea';setView('room');setTab('idea');buildModuleList();window.scrollTo({top:0,behavior:'smooth'});}
+function bindQuiz(){const group=$('#quizChoices');if(!group)return;const feedback=$('#quizFeedback');if(!feedback)return;group.querySelectorAll('.choice').forEach(button=>button.addEventListener('click',()=>{group.querySelectorAll('.choice').forEach(el=>el.classList.remove('selected','correct','incorrect'));button.classList.add('selected');const good=button.dataset.correct==='true';button.classList.add(good?'correct':'incorrect');const why=feedback.dataset.why||'';feedback.textContent=good?(why?'Correct. '+why:'That is the most defensible reading. The answer fits the evidence while keeping uncertainty and context in view.'):(why?'Not quite. '+why:'This conclusion goes beyond the evidence. Separate the visible event from its possible meaning, then identify what you need to see next.');feedback.classList.add('show');feedback.classList.toggle('wrong',!good);}));const reset=$('#resetQuiz');if(reset)reset.addEventListener('click',()=>{group.querySelectorAll('.choice').forEach(el=>el.classList.remove('selected','correct','incorrect'));feedback.classList.remove('show','wrong');});}
+function bindReflection(){const save=$('#saveReflection');if(!save)return;save.addEventListener('click',()=>{const input=$('#reflection'),status=$('#reflectionStatus');if(!input||input.value.trim().length<15){if(status)status.textContent='Add a little more reasoning before keeping the note.';return;}state.notes[selectedLesson().key]=input.value.trim();if(status)status.textContent='Note kept in this browser preview only.';toast('Note kept in this preview only.');});}
+function bindZoom(){ $$('#ideaContent [data-zoom],#examplesContent [data-zoom],#ideaContent .zoom,#examplesContent .zoom').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.zoom||button.closest('figure')?.querySelector('svg')?.id;if(id)openChart(id);})); }
+function openChart(id){const node=$('#'+CSS.escape(id));if(!node)return;const clone=node.cloneNode(true);clone.removeAttribute('id');$('#modalChart').replaceChildren(clone);$('#modalCaption').textContent='Enlarged course figure';$('#chartModal').classList.add('open');$('#closeModal').focus();}
+function closeChart(){ $('#chartModal').classList.remove('open'); }
+document.addEventListener('click',event=>{
+ const tab=event.target.closest('[data-tab]');if(tab){setTab(tab.dataset.tab);return;}
+ const view=event.target.closest('[data-view]');if(view){setView(view.dataset.view);return;}
+ const open=event.target.closest('[data-open-module]');if(open){openLesson(Number(open.dataset.openModule),Number(open.dataset.openLesson));return;}
+ const toggle=event.target.closest('[data-module-toggle]');if(toggle){const block=toggle.closest('.module-block');block.classList.toggle('open');toggle.setAttribute('aria-expanded',String(block.classList.contains('open')));return;}
+ const zoom=event.target.closest('[data-zoom]');if(zoom){openChart(zoom.dataset.zoom);return;}
+});
+$('#lessonSearch').addEventListener('input',buildModuleList);
+$('#brandHome').addEventListener('click',event=>{event.preventDefault();setView('overview');});
+$('#backOverview').addEventListener('click',()=>setView('overview'));
+$('#outlineJump').addEventListener('click',()=>{if(matchMedia('(max-width:820px)').matches){document.body.classList.add('menu-open');$('#mobileMenu').setAttribute('aria-expanded','true');$('#mobileMenu').textContent='×';}else{$('#sidebar').scrollIntoView({behavior:'smooth',block:'start'});$('#lessonSearch').focus();}});
+$('#outlineTop').addEventListener('click',()=>{if(matchMedia('(max-width:820px)').matches){document.body.classList.add('menu-open');$('#mobileMenu').setAttribute('aria-expanded','true');$('#mobileMenu').textContent='×';}else{$('#sidebar').scrollIntoView({behavior:'smooth',block:'start'});}});
+$('#mobileMenu').addEventListener('click',()=>{const open=!document.body.classList.contains('menu-open');document.body.classList.toggle('menu-open',open);$('#mobileMenu').setAttribute('aria-expanded',String(open));$('#mobileMenu').textContent=open?'×':'☷';});
+$('#drawerOverlay').addEventListener('click',()=>{document.body.classList.remove('menu-open');$('#mobileMenu').setAttribute('aria-expanded','false');$('#mobileMenu').textContent='☷';});
+$('#overviewOutline').addEventListener('click',()=>$('#curriculum').scrollIntoView({behavior:'smooth',block:'start'}));
+$('#completeLesson').addEventListener('change',event=>{const lesson=selectedLesson();if(event.target.checked)state.completed.add(lesson.key);else state.completed.delete(lesson.key);buildModuleList();updateProgress();toast(event.target.checked?'Lesson marked complete in this preview.':'Completion mark removed.');});
+function moveLesson(direction){const index=allLessons.findIndex(l=>l.module===state.module&&l.index===state.lesson),next=allLessons[index+direction];if(!next)return;state.module=next.module;state.lesson=next.index;state.tab='idea';renderLesson();setTab('idea');window.scrollTo({top:0,behavior:'smooth'});}
+$('#prevLesson').addEventListener('click',()=>moveLesson(-1));$('#nextLesson').addEventListener('click',()=>moveLesson(1));
+$('#closeModal').addEventListener('click',closeChart);$('#chartModal').addEventListener('click',event=>{if(event.target===$('#chartModal'))closeChart();});document.addEventListener('keydown',event=>{if(event.key==='Escape'){closeChart();document.body.classList.remove('menu-open');$('#mobileMenu').setAttribute('aria-expanded','false');$('#mobileMenu').textContent='☷';}if(event.altKey&&event.key==='ArrowRight')moveLesson(1);if(event.altKey&&event.key==='ArrowLeft')moveLesson(-1);});
+// Preview-only state. Production lesson completion and editing must be provided by authenticated Django views.
+try { const saved=JSON.parse(localStorage.getItem('tt-bollinger-preview-state')||'{}');state.completed=new Set(saved.completed||[]);state.notes=saved.notes||{}; } catch(e) { /* use an empty session when storage is blocked */ }
+const persistPreviewState=()=>{try{localStorage.setItem('tt-bollinger-preview-state',JSON.stringify({completed:[...state.completed],notes:state.notes}));}catch(e){/* preview remains usable without browser storage */}};
+const originalUpdateProgress=updateProgress;updateProgress=function(){originalUpdateProgress();persistPreviewState();};
+// If the canonical repository data script is inaccessible, the standalone layout still opens with truthful lesson-level fallback copy.
+setView('room');setTab('idea');
+</script>
+</body>
+</html>

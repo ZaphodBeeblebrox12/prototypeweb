@@ -1,0 +1,46 @@
+name: Audit instructional image assets
+
+on:
+  push:
+    branches:
+      - my-new-branch
+    paths:
+      - "**/*.png"
+      - "**/*.svg"
+      - "review/build_image_asset_inventory.py"
+      - ".github/workflows/audit-instructional-images.yml"
+  pull_request:
+    branches:
+      - my-new-branch
+      - main
+    paths:
+      - "**/*.png"
+      - "**/*.svg"
+      - "review/build_image_asset_inventory.py"
+      - ".github/workflows/audit-instructional-images.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: instructional-image-inventory-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  image-inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out working branch
+        uses: actions/checkout@v4
+
+      - name: Generate image/vector inventory
+        run: python review/build_image_asset_inventory.py --output review/IMAGE_ASSET_INVENTORY.generated.csv
+
+      - name: Upload native-dimension inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: instructional-image-inventory
+          path: review/IMAGE_ASSET_INVENTORY.generated.csv
+          if-no-files-found: error
+          retention-days: 5

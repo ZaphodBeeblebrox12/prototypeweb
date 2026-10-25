@@ -1,0 +1,8 @@
+Hi {{ username }},
+
+Your {{ plan_name }} access expires in {{ days }} day{{ days|pluralize:'s' }}. Renew if you would like to keep uninterrupted access.
+
+Review membership: {{ dashboard_url }}
+
+TradeThesis
+Conviction before execution

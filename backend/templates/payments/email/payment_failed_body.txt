@@ -1,0 +1,14 @@
+Hi {{ username }},
+
+We could not complete your payment for {{ plan_name }}. Before trying again, check your dashboard or payment provider for any pending authorisation so you do not accidentally pay twice.
+
+Plan: {{ plan_name }}
+Amount: {{ amount_display }}
+{% if date_display %}Attempted: {{ date_display }}{% endif %}
+
+Review payment status: {{ dashboard_url }}
+
+If the status is still unclear, contact support and include the payment details above.
+
+TradeThesis
+Conviction before execution

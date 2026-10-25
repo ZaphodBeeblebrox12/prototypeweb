@@ -1,0 +1,60 @@
+{% extends "accounts/member_page_base.html" %}
+{% block title %}Upgrade membership | TradeThesis{% endblock %}
+{% block page_kicker %}MEMBERSHIP OPTIONS{% endblock %}
+{% block page_heading %}Upgrade your plan{% endblock %}
+{% block page_description %}<p>Compare eligible plans and review the credit from your current plan before deciding. Nothing changes until you choose an upgrade and complete payment.</p>{% endblock %}
+{% block page_actions %}<a class="btn secondary" href="{% url 'dashboard' %}">Back to overview</a>{% endblock %}
+{% block page_content %}
+<div class="member-content-stack">
+  {% if subscription %}
+    <section class="member-panel">
+      <div class="member-panel-head"><h2>Your current plan</h2><p>The unused portion of this plan may be credited toward an eligible upgrade.</p></div>
+      <div class="member-panel-body">
+        <h3 style="margin:0 0 7px;font:400 25px/1.2 var(--serif)">{{ subscription.plan.name }}</h3>
+        <p class="member-muted">Your new plan starts after payment and runs for a full term. Review the due-today amount before you proceed.</p>
+      </div>
+    </section>
+    {% if options %}
+      <section class="member-panel">
+        <div class="member-panel-head"><h2>Available upgrades</h2><p>Prices and credits are calculated for your current membership.</p></div>
+        <div class="member-table-wrap">
+          <table class="member-table">
+            <thead><tr><th>Plan</th><th>Full price</th><th>Credit</th><th>Due today</th><th>Action</th></tr></thead>
+            <tbody>
+              {% for option in options %}
+                <tr>
+                  <td><strong>{{ option.plan.name }}</strong><small>{{ option.plan.description|truncatechars:60 }}</small></td>
+                  <td>{{ option.price_display }}</td>
+                  <td>−{{ option.credit_display }}</td>
+                  <td><strong>{{ option.due_display }}</strong></td>
+                  <td>
+                    <form method="post" action="{% url 'upgrade-start' %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="plan_id" value="{{ option.plan.pk }}">
+                      <button type="submit" class="btn small">Upgrade</button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="member-panel-body">
+          <p class="member-meta">Credit is based on the unused portion of your current plan. The old plan is replaced after payment succeeds.</p>
+        </div>
+      </section>
+    {% else %}
+      <section class="member-panel"><div class="member-empty-state"><h2>No higher plans available</h2><p>There are no eligible upgrades for your current plan right now.</p><a class="btn secondary" href="{% url 'manage-subscription' %}">Return to billing</a></div></section>
+    {% endif %}
+  {% else %}
+    <section class="member-panel">
+      <div class="member-empty-state">
+        <span class="member-status-pill is-waiting">No active subscription</span>
+        <h2>Choose a plan before upgrading</h2>
+        <p>An upgrade requires an active plan. View the available learning options from your member overview.</p>
+        <a class="btn" href="{% url 'dashboard' %}">View member overview</a>
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

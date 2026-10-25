@@ -1,0 +1,12 @@
+Hi {{ username }},
+
+Your previous subscription has ended. As an invitation to return, you can use this code for {{ percent_off }}% off by {{ valid_until|date:'M d, Y' }}:
+
+{{ code }}
+
+Review membership options: {{ dashboard_url }}
+
+Apply the code at checkout. This offer expires on {{ valid_until|date:'M d, Y' }}.
+
+TradeThesis
+Conviction before execution

@@ -1,0 +1,287 @@
+/*
+ * Canonical Pause and Record card.
+ * Loaded last by both the learner lesson and unpublished Builder website preview
+ * so both routes share the same notebook dimensions and typography.
+ */
+.tt-learning-room .learning-content-grid,
+.tt-admin-course-preview .tt-admin-learning-preview .learning-content-grid {
+  grid-template-columns: minmax(0, 1fr) 245px;
+  gap: clamp(20px, 2vw, 28px);
+  align-items: start;
+}
+.tt-learning-room .tt-notebook,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook {
+  position: sticky;
+  top: 18px;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 245px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #ded7c8;
+  border-radius: 8px;
+  background: #fffdf8;
+  box-shadow: 0 10px 28px rgba(41, 56, 46, .06);
+}
+.tt-learning-room .tt-notebook-index,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-index { display: none !important; }
+.tt-learning-room .tt-notebook-content,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-content {
+  display: block; min-width: 0; padding: 0;
+}
+.tt-learning-room .tt-notebook-top,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-top {
+  padding: 17px 17px 15px; background: #2e4c3a; color: #fffdf8;
+}
+.tt-learning-room .tt-notebook-top .tt-notebook-kicker,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-top .tt-notebook-kicker {
+  margin: 0 0 7px; color: #e7c96f;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 9px; font-weight: 850; line-height: 1.4; letter-spacing: .14em; text-transform: uppercase;
+}
+.tt-learning-room .tt-notebook-top h4,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-top h4 {
+  margin: 0 0 8px; color: #fffdf8;
+  font-family: Georgia, "Times New Roman", serif; font-size: 25px; font-weight: 700;
+  line-height: 1.06; letter-spacing: -.025em;
+}
+.tt-learning-room .tt-notebook-intro,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-intro {
+  margin: 0; color: #e1e8df;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 11px; font-weight: 400; line-height: 1.55;
+}
+.tt-learning-room .tt-notebook-prompts,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-prompts { padding: 4px 17px 8px; background: #fffdf8; }
+.tt-learning-room .tt-notebook-prompts ol,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-prompts ol {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; margin: 0; padding: 0; list-style: none;
+}
+.tt-learning-room .tt-notebook-prompts li,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-prompts li {
+  display: grid; grid-template-columns: 22px minmax(0, 1fr); align-items: start; gap: 8px;
+  margin: 0; padding: 11px 0 12px; border: 0; border-bottom: 1px solid #e9e4d8;
+  border-radius: 0; background: transparent;
+}
+.tt-learning-room .tt-notebook-prompts li:last-child,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-prompts li:last-child { border-bottom: 0; }
+.tt-learning-room .tt-notebook-prompts .tt-notebook-number,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-prompts .tt-notebook-number {
+  display: inline-grid; place-items: center; box-sizing: border-box; width: 21px; height: 21px;
+  margin: 0; padding: 0; border: 1px solid #ded7c8; border-radius: 50%; color: #b48635;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 9px; font-weight: 800; line-height: 1;
+}
+.tt-learning-room .tt-notebook-prompt-copy,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-prompt-copy { display: block; min-width: 0; }
+.tt-learning-room .tt-notebook-prompt-label,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-prompt-label {
+  display: block; margin: 1px 0 5px; color: #345943;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 9px; font-weight: 850; line-height: 1.4; letter-spacing: .11em; text-transform: uppercase;
+}
+.tt-learning-room .tt-notebook-prompt-copy p,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-prompt-copy p {
+  margin: 0; color: #27382e; font-family: Georgia, "Times New Roman", serif;
+  font-size: 12px; font-weight: 400; line-height: 1.45;
+}
+.tt-learning-room .tt-notebook-response-editor,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-response-editor {
+  margin: 0; padding: 0 17px 14px; border-top: 1px solid #ded7c8; background: #fffdf8;
+}
+.tt-learning-room .tt-notebook-response-editor summary,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-response-editor summary {
+  display: list-item; padding: 12px 0 3px; color: #345943;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 10px; font-weight: 800; line-height: 1.45; cursor: pointer;
+}
+.tt-learning-room .tt-notebook-response-editor .tt-notebook-reflection-note,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-response-editor .tt-notebook-reflection-note {
+  margin: 10px 0 12px; color: #687367;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 10px; line-height: 1.55;
+}
+.tt-learning-room .tt-notebook-reflection-fields,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-reflection-fields { display: grid; gap: 12px; margin-top: 12px; }
+.tt-learning-room .tt-notebook-reflection-field label,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-reflection-field label {
+  display: block; margin-bottom: 5px; color: #4f6254;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 10px; font-weight: 700; line-height: 1.5;
+}
+.tt-learning-room .tt-notebook-response-editor textarea,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-response-editor textarea {
+  display: block; width: 100%; box-sizing: border-box; border: 1px solid #ded7c8;
+  border-radius: 4px; padding: 8px; background: #fffdf8; color: #27382e;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 11px; line-height: 1.5;
+}
+.tt-learning-room .tt-notebook-response-editor textarea:disabled,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-response-editor textarea:disabled {
+  opacity: 1; color: #58665c; cursor: default;
+}
+.tt-learning-room .tt-notebook-reflection-actions,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-reflection-actions {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 12px;
+}
+.tt-learning-room .tt-notebook-reflection-actions button,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-reflection-actions button {
+  border: 1px solid #345943; border-radius: 3px; padding: 9px 10px; background: #345943; color: #fff;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 10px; font-weight: 750;
+}
+.tt-learning-room .tt-notebook-hint,
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-hint {
+  margin: 0; padding: 11px 17px 14px; border-top: 1px solid #ded7c8; background: #f6f2e8;
+  color: #687367; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 10px; font-weight: 400; line-height: 1.55;
+}
+@media (max-width: 920px) {
+  .tt-learning-room .learning-content-grid,
+  .tt-admin-course-preview .tt-admin-learning-preview .learning-content-grid { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .tt-learning-room .tt-notebook,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-notebook {
+    position: static; grid-row: 1; grid-column: 1; width: 100%; max-width: none;
+  }
+  .tt-learning-room .lesson-content-column,
+  .tt-admin-course-preview .tt-admin-learning-preview .lesson-content-column {
+    grid-row: 2; grid-column: 1; min-width: 0;
+  }
+}
+@media (min-width: 681px) and (max-width: 920px) {
+  .tt-learning-room .tt-notebook-prompts ol,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-prompts ol {
+    grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;
+  }
+  .tt-learning-room .tt-notebook-prompts li,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-prompts li {
+    display: block; padding: 11px 10px; border: 1px solid #d5dbce; border-radius: 7px; background: #fffdf8;
+  }
+  .tt-learning-room .tt-notebook-prompts .tt-notebook-number,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-prompts .tt-notebook-number { margin: 0 0 7px; }
+}
+@media (max-width: 680px) {
+  .tt-learning-room .tt-notebook-prompts ol,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-prompts ol {
+    grid-template-columns: minmax(0, 1fr); gap: 0;
+  }
+  .tt-learning-room .tt-notebook-prompts li,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-prompts li {
+    display: grid; grid-template-columns: 22px minmax(0, 1fr); padding: 11px 0 12px;
+    border: 0; border-bottom: 1px solid #e9e4d8; border-radius: 0; background: transparent;
+  }
+  .tt-learning-room .tt-notebook-prompts .tt-notebook-number,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-notebook-prompts .tt-notebook-number { margin: 0; }
+}
+
+/* Builder-only sticky offset: keep the Pause and Record card below the
+   sticky sitewide header. The normal learner view retains its 18px offset. */
+.tt-admin-course-preview .tt-admin-learning-preview .tt-notebook {
+  top: 95px; /* 76px navigation + 1px border + 18px breathing room */
+}
+
+
+/* Responsive alternate for Pause and Record: desktop keeps the sticky right rail;
+   tablet/mobile use the same three-card learning prompt at the end of the lesson. */
+.tt-learning-room .tt-mobile-pause-and-record {
+  display: none;
+  min-width: 0;
+  margin: 18px 0 22px;
+}
+.tt-learning-room .tt-mobile-pause-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  min-width: 0;
+}
+.tt-learning-room .tt-mobile-pause-card {
+  min-width: 0;
+  padding: 15px 14px;
+  border: 1px solid #ded7c8;
+  border-radius: 7px;
+  background: #fffdf8;
+  overflow-wrap: anywhere;
+}
+.tt-learning-room .tt-mobile-pause-card .tt-mobile-pause-step {
+  margin: 0 0 7px;
+  color: #a78034;
+  font-size: 9px;
+  font-weight: 850;
+  line-height: 1.4;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.tt-learning-room .tt-mobile-pause-card h3 {
+  margin: 7px 0 5px;
+  color: #2e4c3a;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: 0;
+}
+.tt-learning-room .tt-mobile-pause-card .tt-mobile-pause-question {
+  margin: 0 0 8px;
+  color: #26362d;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+.tt-learning-room .tt-mobile-pause-card .tt-mobile-pause-guidance {
+  margin: 0;
+  color: #667166;
+  font-size: 12px;
+  line-height: 1.6;
+}
+@media (max-width: 920px) {
+  .tt-learning-room .tt-notebook,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-notebook {
+    display: none !important;
+  }
+  .tt-learning-room .tt-mobile-pause-and-record,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-mobile-pause-and-record {
+    display: block;
+  }
+}
+@media (max-width: 680px) {
+  /* Option A: keep all three reflection cards on one row on phone screens. */
+  .tt-learning-room .tt-mobile-pause-cards,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-mobile-pause-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .tt-learning-room .tt-mobile-pause-card,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-mobile-pause-card {
+    padding: 10px 8px;
+    border-radius: 6px;
+  }
+  .tt-learning-room .tt-mobile-pause-card .tt-mobile-pause-step,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-mobile-pause-card .tt-mobile-pause-step {
+    font-size: 7px;
+    letter-spacing: .025em;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+  .tt-learning-room .tt-mobile-pause-card h3,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-mobile-pause-card h3 {
+    margin: 6px 0 4px;
+    font-size: 12px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+  .tt-learning-room .tt-mobile-pause-card .tt-mobile-pause-question,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-mobile-pause-card .tt-mobile-pause-question {
+    margin: 0 0 7px;
+    font-size: 13px;
+    line-height: 1.3;
+  }
+  .tt-learning-room .tt-mobile-pause-card .tt-mobile-pause-guidance,
+  .tt-admin-course-preview .tt-admin-learning-preview .tt-mobile-pause-card .tt-mobile-pause-guidance {
+    font-size: 10px;
+    line-height: 1.45;
+  }
+}

@@ -1,0 +1,11 @@
+file,lesson_use,figure_name,teaching_purpose,classification
+assets/figures/FIG01_breakout_evidence_ladder.png,Lesson 12,"Evidence ladder: intraday penetration, close outside and follow-through",Compare observation strength without treating any state as a guarantee.,Original schematic illustration; not market data
+assets/figures/FIG02_filter_tradeoffs.png,Lessons 12–13,Confirmation filter trade-offs,Show delayed recognition and later failure after a rule was satisfied.,Original schematic illustration; not market data
+assets/figures/FIG03_context_changes_the_question.png,Lessons 12–13,Local break inside broader range,Contrast a local break with a wider range context.,Original schematic illustration; not market data
+assets/figures/FIG04_break_return_response.png,Lesson 13,"Break, return and response",Split one word into three separately observable events.,Original schematic illustration; not market data
+assets/figures/FIG05_three_retest_outcomes.png,Lesson 13,"Hold-like, failure-like and inconclusive response",Compare three possible responses after a retest.,Original schematic illustration; not market data
+assets/figures/FIG06_failure_sequence.png,Lesson 14,Four-stage failed-breakout timeline,"Show prior area, break, contradiction and uncertain next path.",Original schematic illustration; not market data
+assets/figures/FIG07_failure_is_not_reverse_signal.png,Lesson 14,Alternative paths after a failure,Prevent the false inference that failure mandates a reverse trade.,Original schematic illustration; not market data
+assets/figures/FIG08_volume_context_not_gate.png,Lesson 12,Price and volume as contextual evidence,Explain volume does not determine outcome on its own.,Original schematic illustration; not market data
+assets/figures/FIG09_decision_record_timeline.png,Lessons 12–14,Decision-record timeline,"Preserve prior context, first read, contradiction and review.",Original schematic illustration; not market data
+assets/figures/FIG10_failed_signal_family.png,Lesson 14,Different failed-signal structures,"Show failures are a family of sequences, not one candle pattern.",Original schematic illustration; not market data

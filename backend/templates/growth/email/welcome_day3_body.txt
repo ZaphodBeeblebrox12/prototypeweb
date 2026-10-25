@@ -1,0 +1,9 @@
+Hi {{ username }},
+
+Just checking in. If you have not finished setting up TradeThesis, you can connect Telegram from your account dashboard, or contact support and we will help you work through it.
+
+Connect Telegram: {{ connect_url }}
+Open your dashboard: {{ dashboard_url }}
+
+TradeThesis
+Conviction before execution

@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Desk | TradeThesis{% endblock %}
+{% block page_title %}Admin Desk{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-desk { --td-ink:#26342f; --td-muted:#68736c; --td-line:#dedfd5; --td-paper:#fbfaf6; --td-surface:#fffefa; --td-green:#456653; color:var(--td-ink); max-width:1160px; margin-inline:auto; }
+  .tt-desk * { box-sizing:border-box; }
+  .tt-desk a { color:#315b43; text-underline-offset:3px; }
+  .tt-desk .desk-head { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; flex-wrap:wrap; margin:8px 0 24px; }
+  .tt-desk .eyebrow { margin:0 0 6px; color:var(--td-muted); font-size:11px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; }
+  .tt-desk .intro { max-width:720px; margin:8px 0 0; color:var(--td-muted); font-size:14px; }
+  .tt-desk .btn { display:inline-flex; align-items:center; justify-content:center; min-height:38px; padding:9px 13px; border:1px solid #456653; border-radius:4px; background:#456653; color:#fff; font-weight:650; text-decoration:none; }
+  .tt-desk .btn.secondary { background:var(--td-surface); color:#315b43; }
+  .tt-desk .section { margin:26px 0 0; }
+  .tt-desk .section-head { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:10px; }
+  .tt-desk h2 { margin:0; color:var(--td-ink); font-size:17px; font-weight:700; }
+  .tt-desk .section-head p { margin:0; color:var(--td-muted); font-size:12px; }
+  .tt-desk .metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(155px,1fr)); gap:10px; }
+  .tt-desk .metric { min-height:94px; padding:15px 16px; border:1px solid var(--td-line); border-radius:5px; background:var(--td-surface); }
+  .tt-desk .metric .value { display:block; margin-bottom:7px; color:var(--td-ink); font-size:26px; font-weight:700; line-height:1.1; font-variant-numeric:tabular-nums; }
+  .tt-desk .metric .label { color:var(--td-muted); font-size:12px; }
+  .tt-desk .columns { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr)); gap:12px; }
+  .tt-desk .panel { padding:17px 18px; border:1px solid var(--td-line); border-radius:5px; background:var(--td-surface); }
+  .tt-desk .link-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:8px; margin:0; padding:0; list-style:none; }
+  .tt-desk .link-list a { display:block; padding:11px 12px; border:1px solid var(--td-line); border-radius:4px; text-decoration:none; font-weight:650; }
+  .tt-desk .link-list a:hover, .tt-desk .link-list a:focus-visible { border-color:#456653; background:#edf2ed; }
+  .tt-desk .note { margin:0; color:var(--td-muted); font-size:13px; }
+  .tt-desk .signal-list { display:grid; gap:9px; margin:0; padding:0; list-style:none; }
+  .tt-desk .signal-list li { display:flex; justify-content:space-between; gap:12px; padding-bottom:8px; border-bottom:1px solid #ecece5; }
+  .tt-desk .signal-list li:last-child { padding-bottom:0; border-bottom:0; }
+  .tt-desk .signal-count { min-width:2ch; color:var(--td-ink); font-weight:750; font-variant-numeric:tabular-nums; }
+  @media(max-width:640px) { .tt-desk .desk-head { gap:13px; } .tt-desk .btn { width:100%; } .tt-desk .metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .tt-desk .metric { padding:12px; } .tt-desk .metric .value { font-size:23px; } }
+  @media(prefers-reduced-motion:reduce) { .tt-desk * { scroll-behavior:auto !important; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tt-desk">
+  <header class="desk-head">
+    <div>
+      <p class="eyebrow">TradeThesis · Site operations</p>
+      <p class="intro">Your day-to-day workspace for learner accounts, access, payments and business settings, with operational checks when something needs attention.</p>
+    </div>
+    <a class="btn secondary" href="{{ django_admin_url }}">Advanced administration (rare use) ↗</a>
+  </header>
+
+  <section class="section" aria-labelledby="daily-management-heading">
+    <div class="section-head"><h2 id="daily-management-heading">Everyday management</h2><p>Routine creator tasks, without opening Django Admin.</p></div>
+    <ul class="link-list">
+      {% if desk_access.accounts %}<li><a href="{% url 'staff_admin_desk_accounts' %}">Manage learner accounts →</a></li>{% endif %}
+      {% if desk_access.subscriptions %}<li><a href="{% url 'staff_admin_desk_subscriptions' %}">Manage subscriptions &amp; access →</a></li>{% endif %}
+      {% if desk_access.finance %}<li><a href="{% url 'staff_admin_desk_finance' %}">Payments &amp; invoice register →</a></li>{% endif %}
+      {% if desk_access.business %}<li><a href="{% url 'staff_admin_desk_business' %}">Business details &amp; tax settings →</a></li>{% endif %}
+    </ul>
+  </section>
+
+  {% if accounts or subscriptions %}
+  <section class="section" aria-labelledby="business-overview-heading">
+    <div class="section-head">
+      <h2 id="business-overview-heading">Business overview</h2>
+      <p>Current counts from records you are permitted to view</p>
+    </div>
+    <div class="metrics">
+      {% if accounts %}
+      <div class="metric"><span class="value">{{ accounts.active_learners }}</span><span class="label">Active learner accounts</span></div>
+      {% endif %}
+      {% if subscriptions %}
+      <div class="metric"><span class="value">{{ subscriptions.active }}</span><span class="label">Active subscriptions</span></div>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if course_metrics %}
+  <section class="section" aria-labelledby="courses-heading">
+    <div class="section-head"><h2 id="courses-heading">Courses &amp; learning</h2><p>Live catalogue and learner records</p></div>
+    <div class="metrics">
+      <div class="metric"><span class="value">{{ course_metrics.published_courses }}</span><span class="label">Published records</span></div>
+      <div class="metric"><span class="value">{{ course_metrics.catalogue_ready_courses }}</span><span class="label">Catalogue-ready courses</span></div>
+      <div class="metric"><span class="value">{{ course_metrics.draft_courses }}</span><span class="label">Draft courses</span></div>
+      <div class="metric"><span class="value">{{ course_metrics.archived_courses }}</span><span class="label">Archived courses</span></div>
+      <div class="metric"><span class="value">{{ course_metrics.published_lessons }}</span><span class="label">Published lessons</span></div>
+      <div class="metric"><span class="value">{{ course_metrics.active_offers }}</span><span class="label">Active course offers</span></div>
+      <div class="metric"><span class="value">{{ course_metrics.active_entitlements }}</span><span class="label">Active course accesses</span></div>
+      <div class="metric"><span class="value">{{ course_metrics.completed_lessons }}</span><span class="label">Completed lesson records</span></div>
+    </div>
+    <p class="note" style="margin-top:10px">Published records can still contain starter copy or lack a released lesson. Catalogue-ready courses have a real learner-facing title and summary plus at least one published module and lesson.</p>
+  </section>
+
+  <section class="section" aria-labelledby="course-actions-heading">
+    <div class="section-head"><h2 id="course-actions-heading">Course content &amp; authoring</h2><p>The creator-friendly course editor is a separate workstream; advanced record tools remain available in Django for now.</p></div>
+    <ul class="link-list">
+      <li><a href="{% url 'staff_course_builder_preview' %}">Open Course Builder →</a> <span class="note">Shared Academy drafts · submit for review</span></li>
+      {% if course_links.courses %}<li><a href="{{ course_links.courses }}">Manage courses →</a></li>{% endif %}
+      {% if course_links.modules %}<li><a href="{{ course_links.modules }}">Manage modules →</a></li>{% endif %}
+      {% if course_links.lessons %}<li><a href="{{ course_links.lessons }}">Manage lessons &amp; release dates →</a></li>{% endif %}
+      {% if course_links.offers %}<li><a href="{{ course_links.offers }}">Manage course offers →</a></li>{% endif %}
+      {% if course_links.imports %}<li><a href="{{ course_links.imports }}">Review course imports <span class="signal-count">{{ course_metrics.imports_awaiting_review }}</span> →</a></li>{% endif %}
+      {% if course_links.entitlements %}<li><a href="{{ course_links.entitlements }}">Review learner access →</a></li>{% endif %}
+    </ul>
+  </section>
+  {% else %}
+  <section class="section panel" aria-labelledby="course-restricted-heading">
+    <h2 id="course-restricted-heading">Course content</h2>
+    <p class="note">Course publishing tools are visible only to administrators authorised to manage shared course content.</p>
+  </section>
+  {% endif %}
+
+  {% if accounts or subscriptions %}
+  <section class="section" aria-labelledby="membership-heading">
+    <div class="section-head"><h2 id="membership-heading">Membership &amp; learners</h2><p>Open existing management screens</p></div>
+    <ul class="link-list">
+      {% if accounts.links.users %}<li><a href="{{ accounts.links.users }}">Manage learner accounts →</a></li>{% endif %}
+      {% if subscriptions.links.all %}<li><a href="{{ subscriptions.links.all }}">Manage subscriptions →</a></li>{% endif %}
+      {% if subscriptions.links.expiring_soon %}<li><a href="{{ subscriptions.links.expiring_soon }}">Review subscriptions expiring in 7 days ({{ subscriptions.expiring_soon }}) →</a></li>{% endif %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <section class="section" aria-labelledby="attention-heading">
+    <div class="section-head"><h2 id="attention-heading">Items to check</h2><p>Only metrics allowed by your account permissions are shown</p></div>
+    <div class="columns">
+      {% if policy_readiness %}
+      <div class="panel">
+        <h2>Sales readiness · legal policies</h2>
+        {% if policy_readiness.ready %}
+          <p class="note" style="margin-top:10px">All public policy pages have active, non-placeholder versions.</p>
+        {% else %}
+          <p class="note" style="margin-top:10px">Checkout consent is blocked while required policy versions are missing or still contain placeholders.</p>
+          <ul class="signal-list" style="margin-top:12px">
+            {% for item in policy_readiness.items %}
+              {% if not item.ready %}
+              <li>
+                <a href="{{ policy_readiness.url }}">Fix {{ item.label }}{% if item.version %} (v{{ item.version }}){% endif %} →</a>
+                <span class="note">{{ item.reason }}</span>
+              </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+      {% endif %}
+      {% if business_readiness %}
+      <div class="panel">
+        <h2>Business &amp; invoice setup</h2>
+        {% if business_readiness.ready %}
+          <p class="note" style="margin-top:10px">Required seller and invoice fields are present. Confirm the values are accurate.</p>
+        {% else %}
+          <p class="note" style="margin-top:10px">Complete these details before issuing real customer invoices.</p>
+          <ul class="signal-list" style="margin-top:12px">
+            {% for item in business_readiness.items %}
+            <li><a href="{{ business_readiness.url }}">Add {{ item.label }} →</a></li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+      {% endif %}
+      {% if runtime_readiness %}
+      <div class="panel">
+        <h2>Launch configuration</h2>
+        <ul class="signal-list" style="margin-top:12px">
+          {% for item in runtime_readiness.items %}
+          <li>
+            <span>
+              {{ item.label }}
+              {% if not item.ready %}<small class="note" style="display:block;margin-top:3px">{{ item.reason }}</small>{% endif %}
+            </span>
+            <span class="signal-count" aria-label="{% if item.ready %}Configured{% else %}Needs attention{% endif %}">{% if item.ready %}✓{% else %}{% if item.required %}!{% else %}Optional{% endif %}{% endif %}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        <p class="note" style="margin-top:12px">This checks configuration presence only, not successful payments, email delivery or backup restoration. Secrets are never displayed here.</p>
+      </div>
+      {% endif %}
+      {% if payments %}
+      <div class="panel">
+        <h2>Payments</h2>
+        <ul class="signal-list" style="margin-top:12px">
+          <li><a href="{{ payments.links.pending }}">Pending payments</a><span class="signal-count">{{ payments.pending }}</span></li>
+          <li><a href="{{ payments.links.failed }}">Failed payments</a><span class="signal-count">{{ payments.failed }}</span></li>
+        </ul>
+      </div>
+      {% endif %}
+      {% if invoicing %}
+      <div class="panel">
+        <h2>Invoices &amp; business settings</h2>
+        <ul class="signal-list" style="margin-top:12px">
+          {% if invoicing.links.invoices %}<li><a href="{{ invoicing.links.invoices }}">Invoice register</a><span class="signal-count">{{ invoicing.count }}</span></li>{% endif %}
+          {% if invoicing.links.settings %}<li><a href="{{ invoicing.links.settings }}">Business details &amp; tax settings</a><span class="signal-count">Edit</span></li>{% endif %}
+        </ul>
+      </div>
+      {% endif %}
+      {% if telegram %}
+      <div class="panel">
+        <h2>Community access</h2>
+        <ul class="signal-list" style="margin-top:12px">
+          <li><a href="{{ telegram.links.failed }}">Failed community-access operations (Telegram &amp; Discord, 7 days)</a><span class="signal-count">{{ telegram.recent_failed }}</span></li>
+        </ul>
+      </div>
+      {% endif %}
+      {% if jobs %}
+      <div class="panel">
+        <h2>Background work</h2>
+        <ul class="signal-list" style="margin-top:12px">
+          <li><a href="{{ jobs.links.failed }}">Failed jobs (7 days)</a><span class="signal-count">{{ jobs.failed }}</span></li>
+          <li><a href="{{ jobs.links.pending }}">Pending jobs</a><span class="signal-count">{{ jobs.pending }}</span></li>
+          <li><a href="{{ jobs.links.stalled }}">Stalled jobs (3+ attempts)</a><span class="signal-count">{{ jobs.stalled }}</span></li>
+        </ul>
+      </div>
+      {% endif %}
+      {% if subscriptions %}
+      <div class="panel">
+        <h2>Subscriptions</h2>
+        <ul class="signal-list" style="margin-top:12px">
+          <li><a href="{{ subscriptions.links.expiring_soon }}">Expiring in 7 days</a><span class="signal-count">{{ subscriptions.expiring_soon }}</span></li>
+          <li><span>Active subscriptions</span><span class="signal-count">{{ subscriptions.active }}</span></li>
+          <li><a href="{{ subscriptions.links.recently_expired }}">Recently expired (7 days)</a><span class="signal-count">{{ subscriptions.recently_expired }}</span></li>
+        </ul>
+      </div>
+      {% endif %}
+      {% if not payments and not invoicing and not telegram and not jobs and not subscriptions and not policy_readiness and not business_readiness and not runtime_readiness %}
+      <div class="panel"><p class="note">No operational metrics are available for your current permissions. Use Django administration to review the records you are authorised to access.</p></div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

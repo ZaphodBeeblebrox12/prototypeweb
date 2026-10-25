@@ -1,0 +1,229 @@
+name: Deploy TradeThesis preview
+
+on:
+  push:
+    branches:
+      - my-new-branch
+    paths:
+      - "site/**"
+      - "course-content/support-resistance/chart_assets/charts/**"
+      - ".github/workflows/deploy-site-preview.yml"
+      - "tools/qa/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: trade-thesis-pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: ${{ !contains(github.event.head_commit.message, '[skip-preview-deploy]') }}
+    environment:
+      name: tradethesis-preview
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out preview branch
+        uses: actions/checkout@v4
+
+      # This site is plain static HTML/CSS/JS. The configure-pages action
+      # performs a Pages-site API lookup that is returning 404 in this repo;
+      # the upload-pages-artifact + deploy-pages steps are sufficient here.
+
+      - name: Validate integrated learning-room content
+        run: |
+          node --check site/assets/support-resistance-room.js
+          python - <<'PY'
+          from pathlib import Path
+          js = Path("site/assets/support-resistance-room.js").read_text(encoding="utf-8")
+          for lesson_id, module_id, label in (
+              (6, 3, "Draw & evaluate: boundaries"),
+              (7, 3, "Draw & evaluate: editing"),
+              (8, 3, "Draw & evaluate: evaluation"),
+              (12, 5, "Breakout or temporary penetration"),
+              (13, 5, "Retests and role reversal"),
+              (14, 5, "Failed breakouts and alternate outcomes"),
+          ):
+              marker = f'"id":{lesson_id},"module":{module_id}'
+              lesson = next((line for line in js.splitlines() if marker in line), None)
+              if lesson is None:
+                  raise SystemExit(f"Missing lesson data for {label}")
+              for required in ('"chartStages":[', '"teaching":{', '"quizItems":['):
+                  if required not in lesson:
+                      raise SystemExit(f"{label} is missing {required}")
+              if len(lesson) < 3000:
+                  raise SystemExit(f"{label} still looks like a thin placeholder")
+          for required in ("function lessonActivityReady(l)", "function lessonActivityHelp(l)", 'disabled=state!=="complete"&&((l.id===5&&!chartLabCompletedInSession)||!activityReady)'):
+              if required not in js:
+                  raise SystemExit("Missing activity completion gate: " + required)
+          root = Path("site/assets")
+          figures = (
+              "FIG01_breakout_evidence_ladder.png",
+              "FIG02_filter_tradeoffs.png",
+              "FIG03_context_changes_the_question.png",
+              "FIG05_three_retest_outcomes.png",
+              "FIG06_retest_is_not_owed.png",
+              "FIG07_failure_is_not_reverse_signal.png",
+              "FIG08_volume_context_not_gate.png",
+              "FIG09_decision_record_timeline.png",
+              "FIG10_failed_signal_family.png",
+              "FIG14_failed_failure_reclaim.png",
+              "FIG17_range_vs_trendline_failure.png",
+              "FIG18_neckline_formation_failures.png",
+              "FIG19_simple_break_return_response.png",
+              "FIG20_simple_retest_outcomes.png",
+          )
+          missing = [name for name in figures if not (root / "breakout-failure-figures" / name).is_file()]
+          if missing:
+              raise SystemExit("Missing breakout teaching figures: " + ", ".join(missing))
+          print("Learning-room JavaScript syntax and six expanded lesson payloads validated.")
+          PY
+
+      - name: Validate full V5.2 reader
+        run: |
+          node --check site/module5-v5_2/assets/module5.js
+          node --check site/module5-v5_2/assets/module5-deep-content.js
+          node --check site/module5-v5_2/assets/module5-interactions.js
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          root = Path("site/module5-v5_2")
+          html = (root / "index.html").read_text(encoding="utf-8")
+          deep = (root / "assets/module5-deep-content.js").read_text(encoding="utf-8")
+          interactions = (root / "assets/module5-interactions.js").read_text(encoding="utf-8")
+          main = (root / "assets/module5.js").read_text(encoding="utf-8")
+          required = (
+              "assets/module5.css",
+              "assets/module5-deep-content.js",
+              "assets/module5-interactions.js",
+              "assets/module5.js",
+              "BREAKOUTS_FAILURES_AUTHOR_RESEARCH.md",
+          )
+          missing = [p for p in required if not (root / p).is_file()]
+          if missing:
+              raise SystemExit("Missing V5.2 reader files: " + ", ".join(missing))
+          figure_refs = set(re.findall(r"assets/figures/(FIG\d{2}_[A-Za-z0-9_-]+\.png)", deep))
+          figure_refs.update(re.findall(r"assets/figures/(FIG\d{2}_[A-Za-z0-9_-]+\.png)", interactions))
+          missing_figures = [name for name in figure_refs if not (root / "assets/figures" / name).is_file()]
+          if missing_figures:
+              raise SystemExit("Missing schematic figures: " + ", ".join(sorted(missing_figures)))
+          stage_refs = set(re.findall(r'["\']image["\']\s*:\s*["\']charts/([^"\']+\.png)', interactions))
+          if len(stage_refs) < 11:
+              raise SystemExit(f"Expected the full staged synthetic examples, found {len(stage_refs)} unique chart images")
+          missing_charts = [name for name in stage_refs if not (root / "charts" / name).is_file()]
+          if missing_charts:
+              raise SystemExit("Missing synthetic lesson charts: " + ", ".join(sorted(missing_charts)))
+          if "Original historical chart visual withheld pending data-redistribution rights review" not in main:
+              raise SystemExit("Historical case image rights notice is missing")
+          if "case-chart-rights-note" not in main or "case-chart-figure" in main:
+              raise SystemExit("Historical case chart must be replaced by the rights-review notice")
+          if not all(name in deep for name in ("The depth of the return matters", "Some breakouts never retest", "Role reversal is possible")):
+              raise SystemExit("Expected long-form Lesson 13 sections are missing from the deep content source")
+          if not (root / "BREAKOUTS_FAILURES_AUTHOR_RESEARCH.md").is_file():
+              raise SystemExit("Research notes link target missing")
+          print(f"V5.2 reader validated: {len(figure_refs)} schematic figures, {len(stage_refs)} synthetic staged charts, full reading and source notes present.")
+          PY
+
+      - name: Validate expandable course catalogue
+        run: |
+          node --check site/assets/course-catalogue-data.js
+          node --check site/assets/courses-catalogue.js
+          node <<'JS'
+          const fs = require('node:fs');
+          const vm = require('node:vm');
+          const sandbox = { window: {} };
+          vm.runInNewContext(fs.readFileSync('site/assets/course-catalogue-data.js', 'utf8'), sandbox);
+          const data = sandbox.window.TRADETHESIS_COURSE_DATA;
+          if (!data) throw new Error('Course catalogue data was not registered');
+          for (const key of ['programmes', 'supportingProgrammes', 'microCourses']) {
+            const items = data[key];
+            if (!Array.isArray(items)) throw new Error('Missing catalogue array: ' + key);
+            const ids = items.map(item => item.id);
+            if (ids.some(id => typeof id !== 'string' || !id.trim())) throw new Error('Missing stable ID in ' + key);
+            if (new Set(ids).size !== ids.length) throw new Error('Duplicate stable ID in ' + key);
+            if (items.some(item => !['visible', 'hidden'].includes(item.catalogueVisibility))) {
+              throw new Error('Each item must explicitly declare catalogueVisibility in ' + key);
+            }
+          }
+          const renderer = fs.readFileSync('site/assets/courses-catalogue.js', 'utf8');
+          const required = [
+            "const isCatalogueVisible = item => item && item.catalogueVisibility !== 'hidden'",
+            'data.programmes.filter(isCatalogueVisible)',
+            '[...(data.supportingProgrammes || [])].filter(isCatalogueVisible)',
+            'data.microCourses.filter(isCatalogueVisible)',
+            'function renderFilterButtons()',
+            'const categories = [...new Set(microCourses.map(course => course.category).filter(Boolean))]',
+            'publishedTiles.filter(course => course.category === key).length',
+            'shown.length'
+          ];
+          for (const fragment of required) {
+            if (!renderer.includes(fragment)) throw new Error('Catalogue is no longer draft-safe and data-driven: missing ' + fragment);
+          }
+          const visible = item => item && item.catalogueVisibility !== 'hidden';
+          const draftFixture = { id: '__future-draft__', catalogueVisibility: 'hidden' };
+          if (visible(draftFixture)) throw new Error('Hidden development drafts must not appear in the public catalogue');
+          console.log('Catalogue arrays, stable IDs, draft visibility and dynamic topic filters validated.');
+          JS
+          python - <<'PY'
+          from pathlib import Path
+
+          page = Path("site/courses.html").read_text(encoding="utf-8")
+          styles = Path("site/assets/courses.css").read_text(encoding="utf-8")
+          renderer = Path("site/assets/courses-catalogue.js").read_text(encoding="utf-8")
+          if "Focused micro-courses" not in page or "One specific question. One focused course." not in page:
+              raise SystemExit("The editorial micro-course section heading is missing.")
+          if ".ed-development-rail" not in styles or ".ed-development-inner" not in styles:
+              raise SystemExit("The separate in-development rail needs styling.")
+          if 'data-filter="Chart reading"' in page or 'data-filter="Indicators"' in page:
+              raise SystemExit("Topic filter buttons should be generated from the catalogue data.")
+          if "Listed prices are catalogue references; checkout is not connected on this page." not in page:
+              raise SystemExit("Micro-course prices must be clearly described as catalogue references, not a connected checkout.")
+          if 'class="ed-tile-action" type="button" data-open-course="' not in renderer or "FIELD STUDY" not in renderer or "The trader’s question" not in renderer or "Catalogue price" in renderer:
+              raise SystemExit("Micro-course action and distinct editorial tile labels are required; repeated price labels should stay out of the cards.")
+          print("Public development message, honest preview pricing and responsive styling validated.")
+          PY
+
+      - name: Stage chart images referenced by the learning room
+        run: |
+          python - <<'PY'
+          import re
+          import shutil
+          from pathlib import Path
+
+          source = Path("course-content/support-resistance/chart_assets/charts")
+          app = Path("site/assets/support-resistance-room.js").read_text(encoding="utf-8")
+          names = sorted(set(re.findall(r"""["']([A-Za-z0-9_-]+\.png)["']""", app)))
+          names = [name for name in names if name.startswith(("L", "CL"))]
+          missing = [name for name in names if not (source / name).is_file()]
+          if missing:
+              raise SystemExit("Missing learning-room chart assets: " + ", ".join(missing))
+          target = Path("site/assets/support-resistance-charts")
+          if target.exists():
+              shutil.rmtree(target)
+          target.mkdir(parents=True, exist_ok=True)
+          vector_count = 0
+          for name in names:
+              shutil.copy2(source / name, target / name)
+              vector_name = Path(name).with_suffix(".svg").name
+              if (source / vector_name).is_file():
+                  shutil.copy2(source / vector_name, target / vector_name)
+                  vector_count += 1
+          print(f"Staged {len(names)} referenced PNG chart images and {vector_count} SVG vector variants for the preview.")
+          PY
+
+      - name: Audit internal static-site links
+        run: python tools/qa/check_static_site_links.py
+
+      - name: Upload the site folder
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy preview
+        id: deployment
+        uses: actions/deploy-pages@v4

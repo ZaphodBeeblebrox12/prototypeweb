@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>{% block title %}TradeThesis{% endblock %}</title>
+  <style>
+    @media only screen and (max-width: 620px) {
+      .container { width: 100% !important; max-width: 100% !important; }
+      .px { padding-left: 22px !important; padding-right: 22px !important; }
+      .stack { display: block !important; width: 100% !important; }
+      .hide-mobile { display: none !important; max-height: 0 !important; overflow: hidden !important; mso-hide: all !important; }
+      .btn-wrap { width: 100% !important; }
+      .btn-link { display: block !important; text-align: center !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:#F4F6F1;">
+  <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#F4F6F1;">
+    {% block preheader %}A message from TradeThesis{% endblock %}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#F4F6F1" style="width:100%;background-color:#F4F6F1;">
+    <tr>
+      <td align="center" style="padding:28px 12px 34px;">
+        <table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;">
+          <tr>
+            <td class="px" style="padding:0 12px 18px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td valign="middle" style="vertical-align:middle;">
+                    {% if logo_url %}
+                      <img src="{{ logo_url }}" alt="TradeThesis — Conviction before Execution" width="178" style="display:block;border:0;outline:none;text-decoration:none;width:178px;max-width:100%;height:auto;">
+                    {% else %}
+                      <span style="font-family:Arial,sans-serif;font-size:20px;line-height:26px;font-weight:700;color:#20352A;">TradeThesis</span>
+                    {% endif %}
+                  </td>
+                  <td class="hide-mobile" align="right" valign="middle" style="vertical-align:middle;text-align:right;">
+                    <span style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:#839087;">{% block header_tagline %}Account update{% endblock %}</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#FFFFFF;border:1px solid #E0E6DE;border-radius:14px;overflow:hidden;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr><td height="4" bgcolor="#28533F" style="height:4px;line-height:4px;font-size:0;background-color:#28533F;">&nbsp;</td></tr>
+                <tr><td>{% block content %}{% endblock %}</td></tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="px" align="center" style="padding:22px 16px 4px;text-align:center;">
+              {% if dashboard_url %}<a href="{{ dashboard_url }}" style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:20px;color:#28533F;text-decoration:none;font-weight:650;">Your account</a>{% endif %}
+              {% if dashboard_url and support_url %}<span style="color:#B6BFB7;">&nbsp;&nbsp;·&nbsp;&nbsp;</span>{% endif %}
+              {% if support_url %}<a href="{{ support_url }}" style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:20px;color:#28533F;text-decoration:none;font-weight:650;">Contact support</a>{% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td class="px" align="center" style="padding:8px 20px 0;text-align:center;">
+              <div style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:11px;line-height:18px;color:#879188;">
+                You’re receiving this message because of activity on your TradeThesis account.<br>
+                Trading involves risk. TradeThesis content is for educational purposes and is not investment advice.<br>
+                Please do not reply to this automated email.
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

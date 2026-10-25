@@ -1,0 +1,12 @@
+{% autoescape off %}
+Hi {{ user.get_username }},
+
+Welcome to TradeThesis. Please confirm your email address to finish setting up your account:
+
+{{ activate_url }}
+
+For security, this link expires in 3 days. If you did not create a TradeThesis account, you can ignore this message.
+
+TradeThesis
+Conviction before execution
+{% endautoescape %}

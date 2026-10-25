@@ -1,0 +1,963 @@
+"""Minimal payment views for simple payment flow."""
+import logging
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.utils import timezone
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from apps.subscriptions.models import Plan, PlanPrice, Subscription
+from apps.subscriptions.services import (
+    resolve_plan_price, get_pricing_country, split_resolved_price, format_price,
+)
+
+from . import providers
+from .models import BillingSettings, Invoice, PaymentIntent, WebhookEvent
+from .notifications import notify_payment_failed
+from .invoicing import calculate_price_breakdown
+from .services import activate_paid_subscription, interval_days_for
+
+from apps.growth.services.referrals import ReferralService
+
+logger = logging.getLogger(__name__)
+
+
+def get_provider_for_country(country_code: str) -> str:
+    """Select payment provider based on country. IN -> Razorpay, else Stripe."""
+    if country_code and country_code.upper() == "IN":
+        return PaymentIntent.Provider.RAZORPAY
+    return PaymentIntent.Provider.STRIPE
+
+
+@login_required
+def course_purchase_start(request, offer_slug):
+    """Render checkout for a published course offer without creating a payment intent."""
+    from apps.academy.models import CourseOffer
+    from apps.academy.services import get_active_entitlement
+
+    offer = (
+        CourseOffer.objects.select_related("course", "plan")
+        .filter(slug=offer_slug, is_active=True)
+        .first()
+    )
+    if (
+        offer is None
+        or not offer.is_saleable
+        or offer.plan is None
+        or not offer.plan.is_active
+        or not offer.plan.is_hidden
+    ):
+        return render(
+            request, "payments/course_purchase_unavailable.html", status=404,
+        )
+
+    if get_active_entitlement(request.user, offer.course):
+        return redirect("academy:course-detail", course_slug=offer.course.slug)
+
+    # An offer is saleable only when an active one-time price resolves for this visitor.
+    try:
+        price = resolve_plan_price(offer.plan, "one_time", request)
+    except PlanPrice.DoesNotExist:
+        return render(
+            request, "payments/course_purchase_unavailable.html", status=404,
+        )
+
+    access_description = (
+        "Lifetime course access"
+        if offer.access_duration_days is None
+        else f"{offer.access_duration_days} days of course access"
+    )
+    return render(request, "payments/course_purchase_start.html", {
+        "offer": offer,
+        "price_display": format_price(price.price_cents, price.currency),
+        "access_description": access_description,
+        "payment_start_url": reverse("payment-start"),
+    })
+
+
+@api_view(["GET", "POST"])
+@permission_classes([IsAuthenticated])
+def payment_start(request):
+    """Start a payment flow.
+
+    Accepts POST (API clients) or GET (the landing-page CTA redirect after
+    signup/login, where plan_id and interval arrive as query params).
+    """
+    if request.method == "GET":
+        plan_id = request.GET.get("plan_id")
+        interval = request.GET.get("interval", "monthly")
+    else:
+        plan_id = request.data.get("plan_id")
+        interval = request.data.get("interval", "monthly")
+    if not plan_id:
+        return Response(
+            {"detail": "plan_id is required."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        plan = Plan.objects.get(id=plan_id, is_active=True)
+    except Plan.DoesNotExist:
+        return Response({"detail": "Plan not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Course purchases use the common PaymentIntent/evidence ledger but have
+    # one-time pricing and grant a course entitlement instead of a subscription.
+    from apps.academy.models import CourseOffer
+    course_offer = (CourseOffer.objects.filter(plan=plan)
+                    .select_related("course").first())
+    if plan.is_trial:
+        return Response(
+            {"detail": (
+                "Trial-to-renewal checkout is disabled. Choose a one-time "
+                "purchase with a fixed access period instead."
+            )},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if course_offer is not None:
+        if not course_offer.is_saleable:
+            return Response({"detail": "This course offer is not available for purchase."},
+                            status=status.HTTP_404_NOT_FOUND)
+        from apps.academy.services import get_active_entitlement
+        if get_active_entitlement(request.user, course_offer.course):
+            return Response({
+                "detail": "You already have access to this course.",
+                "course_slug": course_offer.course.slug,
+            }, status=status.HTTP_409_CONFLICT)
+        interval = "one_time"
+    elif plan.is_hidden:
+        # Hidden plans are not publicly purchasable through subscription checkout.
+        # They may be purchased only through a configured active CourseOffer above.
+        return Response({"detail": "Plan not found."}, status=status.HTTP_404_NOT_FOUND)
+    elif interval == "one_time":
+        return Response({"detail": "One-time pricing is reserved for configured course offers."},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        resolved_price = resolve_plan_price(plan, interval, request)
+    except Exception:
+        return Response(
+            {"detail": "No active price found for this plan and interval."},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    country = get_pricing_country(request)
+    provider = get_provider_for_country(country)
+
+    base_amount = resolved_price.price_cents
+    discount_info = ReferralService.get_checkout_discount(request.user, base_amount)
+    final_amount = discount_info["final_amount_cents"]
+    applied_referral = discount_info.get("referral")
+
+    coupon_code = request.data.get("coupon_code") or request.GET.get("coupon_code", "")
+    if coupon_code:
+        from apps.promotions.services.coupons import apply_coupon, CouponError
+        try:
+            final_amount, applied_coupon, coupon_discount = apply_coupon(
+                user=request.user, plan=plan, base_amount_cents=final_amount,
+                code=coupon_code, has_referral_discount=applied_referral is not None)
+        except CouponError as exc:
+            return Response({"detail": f"coupon: {exc.reason}"},
+                           status=status.HTTP_400_BAD_REQUEST)
+    else:
+        applied_coupon, coupon_discount = None, 0
+
+    # Tax stays disabled by default. If the owner explicitly enables the
+    # simple fixed rate, snapshot the breakdown before provider handoff.
+    billing_settings = BillingSettings.get_solo()
+    price_breakdown = calculate_price_breakdown(final_amount, billing_settings)
+
+    with transaction.atomic():
+        fk = split_resolved_price(resolved_price)
+        payment_intent = PaymentIntent.objects.create(
+            user=request.user,
+            plan=plan,
+            plan_price=fk["plan_price"],
+            geo_plan_price=fk["geo_plan_price"],
+            subtotal_cents=price_breakdown["subtotal_cents"],
+            tax_enabled=price_breakdown["tax_enabled"],
+            tax_rate_percentage=price_breakdown["tax_rate_percentage"],
+            tax_label=price_breakdown["tax_label"],
+            tax_amount_cents=price_breakdown["tax_amount_cents"],
+            tax_inclusive=price_breakdown["tax_inclusive"],
+            amount=price_breakdown["total_cents"],
+            currency=fk["price_currency"],
+            provider=provider,
+            status=PaymentIntent.Status.PENDING,
+            country=country or "",
+            applied_referral_discount=applied_referral,
+            applied_coupon_code=(applied_coupon.code if applied_coupon else ""),
+            coupon_discount_cents=coupon_discount,
+            base_amount_cents=base_amount,
+        )
+
+    # ── Chargeback-evidence architecture: the agreement moment (ONE
+    #    affirmative checkbox -> granular immutable acceptance records,
+    #    device/IP/session capture) happens BEFORE any provider handoff.
+    #    The provider session is created only after consent is captured.
+    consent_url = f"/checkout/consent/{payment_intent.id}/"
+    checkout_url = f"/checkout/{payment_intent.id}/"
+
+    return Response({
+        "provider": provider,
+        "payment_intent_id": str(payment_intent.id),
+        "checkout_url": checkout_url,
+        "consent_url": consent_url,
+        "amount": payment_intent.amount,
+        "subtotal": payment_intent.subtotal_cents,
+        "tax_amount": payment_intent.tax_amount_cents,
+        "tax_enabled": payment_intent.tax_enabled,
+        "original_amount": resolved_price.price_cents,
+        "discount_applied": applied_referral is not None,
+        "discount_percent": discount_info["discount_percent"] if discount_info["has_discount"] else 0,
+        "currency": payment_intent.currency,
+        "plan": {"id": str(plan.id), "name": plan.name, "tier": plan.tier},
+        "product_type": "course" if course_offer is not None else "subscription",
+        "course_slug": course_offer.course.slug if course_offer is not None else None,
+    })
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def payment_confirm(request):
+    """Verify provider state before applying the common fulfilment path."""
+    payment_intent_id = request.data.get("payment_intent_id")
+    if not payment_intent_id:
+        return Response({"detail": "payment_intent_id required"},
+                        status=status.HTTP_400_BAD_REQUEST)
+    payment_intent = get_object_or_404(
+        PaymentIntent, id=payment_intent_id, user=request.user)
+
+    if payment_intent.status == PaymentIntent.Status.SUCCESS:
+        return Response(_existing_result(request.user, payment_intent))
+
+    try:
+        verified = providers.verify_provider_payment(payment_intent)
+    except providers.ProviderError:
+        verified = None
+    if verified is None:
+        return Response({"status": "pending",
+                         "payment_intent_id": str(payment_intent.id)})
+    if verified is False:
+        marked = PaymentIntent.objects.filter(
+            pk=payment_intent.pk,
+            status=PaymentIntent.Status.PENDING).update(
+                status=PaymentIntent.Status.FAILED)
+        if marked:
+            from apps.events.models import record_event
+            record_event(
+                "payment.failed",
+                dedupe_key=f"payment.failed:{payment_intent.pk}",
+                user_id=payment_intent.user_id,
+                object_ref=f"payment:{payment_intent.pk}",
+                payload={"payment_intent_id": str(payment_intent.pk),
+                         "amount": payment_intent.amount,
+                         "currency": payment_intent.currency},
+            )
+            transaction.on_commit(lambda: notify_payment_failed(payment_intent))
+        return Response({"status": "failed",
+                         "payment_intent_id": str(payment_intent.id)})
+
+    activated, result_object = activate_paid_subscription(payment_intent)
+    course_offer = _course_offer_for_payment(payment_intent)
+    if course_offer is not None:
+        result = _course_payment_result(request.user, payment_intent, course_offer)
+        if not activated:
+            result["already_processed"] = True
+        return Response(result)
+    if result_object is None:
+        return Response({"status": "pending", "payment_intent_id": str(payment_intent.id)})
+    result = {"status": "success",
+              "subscription_id": str(result_object.id),
+              "payment_intent_id": str(payment_intent.id),
+              "expires_at": result_object.expires_at}
+    if not activated:
+        result["already_processed"] = True
+    return Response(result)
+
+
+def _course_offer_for_payment(payment_intent):
+    from apps.academy.models import CourseOffer
+    return (CourseOffer.objects.filter(plan_id=payment_intent.plan_id)
+            .select_related("course").first())
+
+
+def _course_payment_result(user, payment_intent, offer):
+    from apps.academy.models import CourseEntitlement
+    entitlement = CourseEntitlement.objects.filter(
+        user_id=user.pk, course_id=offer.course_id,
+    ).first()
+    if entitlement is None:
+        access_state = "not_granted"
+    elif entitlement.has_access:
+        access_state = "active"
+    elif entitlement.status == CourseEntitlement.Status.REVOKED:
+        access_state = "revoked"
+    else:
+        access_state = "expired"
+    return {
+        "status": "success",
+        "payment_intent_id": str(payment_intent.id),
+        "product_type": "course",
+        "course_slug": offer.course.slug,
+        "course_title": offer.course.title,
+        "course_access": access_state,
+        "course_entitlement_id": str(entitlement.id) if entitlement else None,
+        "expires_at": entitlement.expires_at if entitlement else None,
+    }
+
+
+def _existing_result(user, payment_intent):
+    course_offer = _course_offer_for_payment(payment_intent)
+    if course_offer is not None:
+        result = _course_payment_result(user, payment_intent, course_offer)
+        result["already_processed"] = True
+        return result
+    subscription = Subscription.objects.filter(
+        user=user, plan=payment_intent.plan, is_active=True).first()
+    return {"status": "success", "already_processed": True,
+            "subscription_id": str(subscription.id) if subscription else None,
+            "payment_intent_id": str(payment_intent.id)}
+
+
+class CheckoutPageView(APIView):
+    """Bridge page: routes the customer to the provider-hosted checkout."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        return _checkout_response(request, pk)
+
+
+def _checkout_response(request, pk):
+    intent = get_object_or_404(PaymentIntent, pk=pk, user=request.user)
+    if intent.plan.is_trial:
+        return _consent_response(
+            request, pk,
+            error=("Trial-to-renewal checkout is disabled. "
+                   "Choose a one-time purchase instead."),
+        )
+    from apps.evidence.models import CheckoutEvidence
+    if intent.status == PaymentIntent.Status.PENDING and not \
+            CheckoutEvidence.objects.filter(payment_intent=intent).exists():
+        # The agreement moment must be captured before provider handoff.
+        return redirect("checkout-consent", pk=pk)
+    context = {"intent": intent, "plan": intent.plan, "amount": intent.amount,
+               "currency": intent.currency,
+               "canceled": bool(request.GET.get("canceled"))}
+    if intent.provider == "razorpay":
+        context["razorpay_key_id"] = settings.RAZORPAY_KEY_ID
+        context["razorpay_order_id"] = intent.provider_reference
+        # Prefill identity only; the customer can change these details in
+        # Razorpay Checkout. Do not collect/store bank or UPI PIN credentials.
+        context["razorpay_customer_name"] = (
+            getattr(intent.user, "full_name", "") or intent.user.username
+        )
+        context["razorpay_customer_email"] = intent.user.email or ""
+    else:
+        url = None
+        if intent.provider_reference:
+            try:
+                url = providers.get_stripe_checkout_url(intent.provider_reference)
+            except providers.ProviderError:
+                url = None
+        context["stripe_checkout_url"] = url
+    return render(request, "payments/checkout.html", context)
+
+
+class ConfirmPageView(APIView):
+    """Provider return URL: verify server-side, then render the result."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        return _confirm_response(request, pk)
+
+
+def _confirm_response(request, pk):
+    """Verify provider state and render the course or subscription result."""
+    intent = get_object_or_404(PaymentIntent, pk=pk, user=request.user)
+    course_offer = _course_offer_for_payment(intent)
+    result = {"status": "pending", "intent": intent, "course_offer": course_offer}
+
+    if course_offer is not None:
+        from apps.academy.models import CourseEntitlement
+        entitlement = CourseEntitlement.objects.filter(
+            user_id=request.user.pk, course_id=course_offer.course_id,
+        ).first()
+        if intent.status != PaymentIntent.Status.SUCCESS:
+            try:
+                verified = providers.verify_provider_payment(intent)
+            except providers.ProviderError:
+                verified = None
+            if verified is True:
+                _activated, _result = activate_paid_subscription(intent)
+                intent.refresh_from_db()
+                entitlement = CourseEntitlement.objects.filter(
+                    user_id=request.user.pk, course_id=course_offer.course_id,
+                ).first()
+            elif verified is False:
+                marked = PaymentIntent.objects.filter(
+                    pk=intent.pk, status=PaymentIntent.Status.PENDING
+                ).update(status=PaymentIntent.Status.FAILED)
+                if marked:
+                    transaction.on_commit(lambda: notify_payment_failed(intent))
+                result["status"] = "failed"
+        if intent.status == PaymentIntent.Status.SUCCESS:
+            result["status"] = "success"
+        result["entitlement"] = entitlement
+        result["course_access_active"] = bool(entitlement and entitlement.has_access)
+        result["course_url"] = f"/learn/course/{course_offer.course.slug}/"
+        return render(request, "payments/confirm.html", result)
+
+    if intent.status == PaymentIntent.Status.SUCCESS:
+        subscription = Subscription.objects.filter(
+            user=request.user, plan=intent.plan, is_active=True).first()
+        if subscription is not None:
+            result["status"] = "success"
+    else:
+        try:
+            verified = providers.verify_provider_payment(intent)
+        except providers.ProviderError:
+            verified = None
+        if verified is True:
+            _activated, subscription = activate_paid_subscription(intent)
+            if subscription is not None:
+                result["status"] = "success"
+        elif verified is False:
+            marked = PaymentIntent.objects.filter(
+                pk=intent.pk, status=PaymentIntent.Status.PENDING
+            ).update(status=PaymentIntent.Status.FAILED)
+            if marked:
+                transaction.on_commit(lambda: notify_payment_failed(intent))
+            result["status"] = "failed"
+    return render(request, "payments/confirm.html", result)
+
+
+def payment_status(request, payment_intent_id):
+    """Get status of a payment intent."""
+    try:
+        payment_intent = PaymentIntent.objects.get(id=payment_intent_id, user=request.user)
+    except PaymentIntent.DoesNotExist:
+        return Response({"detail": "Payment intent not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    return Response({
+        "id": str(payment_intent.id),
+        "status": payment_intent.status,
+        "provider": payment_intent.provider,
+        "amount": payment_intent.amount,
+        "currency": payment_intent.currency,
+        "plan": {"id": str(payment_intent.plan.id), "name": payment_intent.plan.name},
+        "created_at": payment_intent.created_at,
+        "updated_at": payment_intent.updated_at
+    })
+
+
+@login_required
+def payment_receipt(request, pk):
+    """Print-friendly receipt for one of the caller's own successful payments."""
+    intent = get_object_or_404(
+        PaymentIntent, pk=pk, user=request.user,
+        status=PaymentIntent.Status.SUCCESS,
+    )
+    subscription = Subscription.objects.filter(
+        user=request.user, plan=intent.plan,
+        status=Subscription.Status.ACTIVE, is_active=True).first()
+    invoice = Invoice.objects.filter(payment_intent=intent).first()
+    return render(request, "payments/receipt.html", {
+        "intent": intent, "subscription": subscription,
+        "invoice": invoice,
+        "refunds": list(intent.refunds.all()),
+        "site_name": getattr(settings, "SITE_NAME", "TradeThesis"),
+    })
+
+
+@login_required
+def manage_subscription_page(request):
+    """Self-service hub: status, included channels, receipts, renew CTA."""
+    from apps.bot_integration.models import (
+        PlanChannelMapping, UserChannelAssignment)
+    subscription = (Subscription.objects
+                    .filter(user=request.user, status=Subscription.Status.ACTIVE,
+                            is_active=True)
+                    .select_related("plan", "plan_price")
+                    .order_by("-expires_at").first())
+    channels = []
+    if subscription is not None:
+        assigned = set(UserChannelAssignment.objects.filter(
+            user=request.user, is_active=True).values_list("platform", "external_id"))
+        for m in (PlanChannelMapping.objects
+                  .filter(plan=subscription.plan)
+                  .order_by("platform", "name")):
+            channels.append({
+                "name": m.name or m.external_id,
+                "platform": m.platform,
+                "granted": (m.platform, m.external_id) in assigned,
+            })
+    intents = (PaymentIntent.objects.filter(user=request.user)
+               .select_related("plan").order_by("-created_at")[:10])
+    receipts = [{"pk": str(i.pk), "plan_name": i.plan.name,
+                 "amount_display": f"{i.currency} {i.amount_dollars:.2f}",
+                 "date": i.created_at, "status": i.status,
+                 "url": f"/receipt/{i.pk}/"} for i in intents]
+    tg = getattr(request.user, "telegram_account", None)
+    from apps.bot_integration.services.channel_sync import get_telegram_access_state
+    access_state = get_telegram_access_state(request.user)
+    return render(request, "payments/manage_subscription.html", {
+        "subscription": subscription, "channels": channels,
+        "receipts": receipts, "access_state": access_state,
+        "telegram_linked": bool(tg and tg.is_active),
+        "connect_url": "/bot/telegram/connect/",
+        "renew_url": "/dashboard/",
+    })
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def payment_history(request):
+    """Read-only billing history for the caller (GET /history/).
+
+    PaymentIntent is the source of truth — no shadow table. Each entry
+    carries its own refund rows and refund/chargeback state; the "resulting
+    subscription" block is derived from the caller's currently active
+    subscription for the same plan (safe derivation; nothing is written).
+    """
+    intents = (PaymentIntent.objects
+               .filter(user=request.user)
+               .select_related("plan", "applied_referral_discount")
+               .prefetch_related("refunds")
+               .order_by("-created_at")[:50])
+    active_by_plan = {
+        s.plan_id: s for s in Subscription.objects.filter(
+            user=request.user, status=Subscription.Status.ACTIVE, is_active=True)
+    }
+    data = []
+    for intent in intents:
+        subscription = active_by_plan.get(intent.plan_id)
+        data.append({
+            "id": str(intent.id),
+            "created_at": intent.created_at,
+            "plan": {"id": str(intent.plan_id), "name": intent.plan.name},
+            "base_amount_cents": intent.base_amount_cents,
+            "amount": intent.amount,
+            "currency": intent.currency,
+            "status": intent.status,
+            "provider": intent.provider,
+            "applied_coupon_code": intent.applied_coupon_code,
+            "coupon_discount_cents": intent.coupon_discount_cents,
+            "has_referral_discount": intent.applied_referral_discount_id is not None,
+            "provider_reference": intent.provider_reference,
+            "provider_payment_id": intent.provider_payment_id,
+            "refunds": [{
+                "id": str(r.id),
+                "amount_cents": r.amount_cents,
+                "currency": r.currency,
+                "refunded_at": r.refunded_at,
+                "source": r.source,
+                "provider_refund_id": r.provider_refund_id,
+            } for r in intent.refunds.all()],
+            "refunded_cents": intent.refunded_cents,
+            "is_partially_refunded": intent.is_partially_refunded,
+            "is_fully_refunded": intent.is_fully_refunded,
+            "refunded_at": intent.refunded_at,
+            "chargeback": intent.chargeback,
+            "chargeback_confirmed": intent.chargeback_confirmed,
+            "chargeback_reference": intent.chargeback_reference,
+            "chargeback_at": intent.chargeback_at,
+            "receipt_url": f"/receipt/{intent.id}/" if intent.status == "success" else "",
+            "subscription": ({
+                "id": str(subscription.id),
+                "status": subscription.status,
+                "expires_at": subscription.expires_at,
+            } if subscription else None),
+        })
+    return Response({"payments": data})
+
+
+# ───────────────────── Phase 3: Operator's Cockpit (staff only) ────────────
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth import get_user_model
+from django.db.models import Sum
+from django.views.decorators.http import require_POST
+
+
+def _ops_alert(staff_users, title, message):
+    """Dedup'd in-app alert to every staff member."""
+    from apps.notifications.models import Notification
+    for u in staff_users:
+        Notification.objects.get_or_create(
+            user=u, notification_type=Notification.NotificationType.SYSTEM,
+            title=title, defaults={"message": message, "link": "/staff/ops/"})
+
+
+@staff_member_required
+def ops_dashboard(request):
+    from datetime import timedelta
+    from django.core.cache import cache
+    from apps.jobs.models import Job, PeriodicJob
+    User = get_user_model()
+    now = timezone.now()
+    staff_users = list(User.objects.filter(is_staff=True))
+
+    pending = Job.objects.filter(status="pending")
+    pending_count = pending.count()
+    oldest_pending = pending.order_by("next_attempt_at").first()
+    last_done = (Job.objects
+                 .filter(status__in=["succeeded", "failed"])
+                 .order_by("-updated_at").first())
+    webhooks = {prov: WebhookEvent.objects.filter(provider=prov)
+                .order_by("-received_at").first()
+                for prov in ("stripe", "razorpay")}
+    periodic = PeriodicJob.objects.all()
+    scheduler_alive = cache.get("jobs:scheduler:heartbeat") is not None
+
+    # breach alerts (dedup'd; cleared by resolving the underlying condition)
+    if pending_count > 20:
+        _ops_alert(staff_users, f"Ops: {pending_count} pending jobs",
+                   "Job queue is backing up - check that runjobs/scheduler is running.")
+    if oldest_pending and oldest_pending.next_attempt_at < now - timedelta(minutes=10):
+        _ops_alert(staff_users, "Ops: oldest pending job is stuck",
+                   f"Oldest pending job is older than 10 minutes "
+                   f"(next_attempt_at={oldest_pending.next_attempt_at}).")
+
+    # Worklist 1: paid but missing channel access.
+    # Reuses reconcile's SINGLE entitlement definition (compute_target_access)
+    # - never a parallel copy of "should have access" logic.
+    from apps.bot_integration.models import UserChannelAssignment
+    try:
+        from apps.bot_integration.access import compute_target_access
+    except Exception:
+        compute_target_access = None
+    paid_no_access = []
+    for sub in (Subscription.objects
+                .filter(status=Subscription.Status.ACTIVE, is_active=True)
+                .select_related("user", "plan"))[:200]:
+        if compute_target_access is not None:
+            want = set(getattr(compute_target_access(sub.user),
+                               "telegram_ids", None) or [])
+        else:
+            from apps.bot_integration.models import PlanChannelMapping
+            want = set(PlanChannelMapping.objects.filter(
+                plan=sub.plan, platform="telegram",
+            ).values_list("external_id", flat=True))
+        if not want:
+            continue
+        have = set(UserChannelAssignment.objects.filter(
+            user=sub.user, platform="telegram", is_active=True,
+        ).values_list("external_id", flat=True))
+        missing = want - have
+        if missing:
+            paid_no_access.append({"user": sub.user, "missing": sorted(missing),
+                                   "expires": sub.expires_at})
+    # Worklist 2: stuck grants (failed grant audits, 24h)
+    from apps.bot_integration.models import BotAccessAudit
+    stuck = (BotAccessAudit.objects
+             .filter(action="grant", status="failed",
+                     created_at__gte=now - timedelta(hours=24))
+             .select_related("user").order_by("-created_at")[:50])
+    # Worklist 3: failed payments, 7 days
+    failed_payments = (PaymentIntent.objects
+                       .filter(status=PaymentIntent.Status.FAILED,
+                               created_at__gte=now - timedelta(days=7))
+                       .select_related("user", "plan")
+                       .order_by("-created_at")[:50])
+    # Worklist 4: expiring within 7 days
+    expiring = (Subscription.objects
+                .filter(status=Subscription.Status.ACTIVE, is_active=True,
+                        expires_at__lte=now + timedelta(days=7))
+                .select_related("user", "plan")
+                .order_by("expires_at")[:50])
+    # Revenue summary
+    success = PaymentIntent.objects.filter(status=PaymentIntent.Status.SUCCESS)
+    today_rev = success.filter(created_at__date=now.date()).aggregate(s=Sum("amount"))["s"] or 0
+    month_rev = success.filter(created_at__year=now.year,
+                               created_at__month=now.month).aggregate(s=Sum("amount"))["s"] or 0
+    refunded = success.aggregate(s=Sum("refunded_cents"))["s"] or 0
+    chargebacks = success.filter(chargeback_confirmed=True).count()
+
+    return render(request, "payments/ops.html", {
+        "pending_count": pending_count,
+        "oldest_pending": oldest_pending,
+        "last_done": last_done,
+        "webhooks": webhooks, "periodic": periodic,
+        "scheduler_alive": scheduler_alive,
+        "paid_no_access": paid_no_access, "stuck": stuck,
+        "failed_payments": failed_payments, "expiring": expiring,
+        "today_rev": today_rev / 100, "month_rev": month_rev / 100,
+        "refunded": refunded / 100, "chargebacks": chargebacks,
+        "now": now,
+    })
+
+
+@staff_member_required
+@require_POST
+def ops_reconcile_user(request, user_id):
+    from apps.jobs.enqueue import enqueue_reconcile
+    enqueue_reconcile(user_id, reason="ops_manual")
+    return redirect("ops-dashboard")
+
+
+@staff_member_required
+def ops_payments_csv(request):
+    import csv
+    from django.http import HttpResponse
+    resp = HttpResponse(content_type="text/csv")
+    resp["Content-Disposition"] = 'attachment; filename="payments.csv"'
+    w = csv.writer(resp)
+    w.writerow(["date", "user", "email", "plan", "amount_cents", "currency",
+                "payment_method", "provider", "status", "refunded_cents", "chargeback",
+                "provider_reference", "provider_payment_id"])
+    for pi in (PaymentIntent.objects.select_related("user", "plan")
+               .order_by("-created_at")[:10000]):
+        w.writerow([pi.created_at.isoformat(), pi.user.username, pi.user.email,
+                    pi.plan.name, pi.amount, pi.currency,
+                    pi.get_payment_method_display() or "Not reported",
+                    pi.provider, pi.status, pi.refunded_cents,
+                    pi.chargeback_confirmed, pi.provider_reference,
+                    pi.provider_payment_id])
+    return resp
+
+
+@staff_member_required
+def ops_user_detail(request, pk):
+    from apps.audit.models import AuditLog
+    from apps.notifications.models import Notification
+    from apps.subscriptions.models import SubscriptionHistory
+    from apps.bot_integration.models import (
+        DiscordAccount, TelegramAccount, UserChannelAssignment)
+    User = get_user_model()
+    user = get_object_or_404(User, pk=pk)
+    return render(request, "payments/user360.html", {
+        "u": user,
+        "subscriptions": Subscription.objects.filter(user=user).select_related("plan"),
+        "history": SubscriptionHistory.objects.filter(user=user).order_by("-created_at")[:20],
+        "intents": PaymentIntent.objects.filter(user=user).select_related("plan").order_by("-created_at")[:20],
+        "tg": getattr(user, "telegram_account", None),
+        "dc": getattr(user, "discord_account", None),
+        "assignments": UserChannelAssignment.objects.filter(user=user).order_by("-assigned_at")[:20],
+        "audit": AuditLog.objects.filter(user=user).order_by("-created_at")[:30],
+        "notes": Notification.objects.filter(user=user).order_by("-created_at")[:10],
+    })
+
+
+# ───────────────────── Self-serve upgrade (prorated) ───────────────────────
+from .services import UpgradeError, compute_upgrade_quote
+
+
+@login_required
+def upgrade_page(request):
+    """List higher-tier plans with proration math for the current sub."""
+    from apps.subscriptions.services import resolve_plan_price, format_price
+    subscription = Subscription.objects.filter(
+        user=request.user, status=Subscription.Status.ACTIVE,
+        is_active=True).select_related("plan").first()
+    options = []
+    if subscription is not None:
+        candidates = (Plan.objects
+                      .filter(is_active=True, is_trial=False,
+                              display_order__gt=subscription.plan.display_order)
+                      .order_by("display_order"))
+        if subscription.plan.product_id is not None:
+            candidates = candidates.filter(product_id=subscription.plan.product_id)
+        else:
+            candidates = candidates.filter(product__isnull=True)
+        for plan in candidates:
+            try:
+                quote = compute_upgrade_quote(request.user, plan, request)
+            except UpgradeError:
+                continue
+            except Exception:
+                logger.exception("upgrade quote failed for plan %s", plan.pk)
+                continue
+            options.append({
+                "plan": plan,
+                "price_display": format_price(quote["fk"]["price_cents"],
+                                              quote["currency"]),
+                "credit_display": format_price(quote["prorated_credit_cents"],
+                                               quote["currency"]),
+                "due_display": format_price(quote["amount_due_cents"],
+                                            quote["currency"]),
+                "remaining_days": quote["remaining_days"],
+            })
+    return render(request, "payments/upgrade.html", {
+        "subscription": subscription, "options": options,
+    })
+
+
+@login_required
+def upgrade_start(request):
+    """Create a prorated upgrade intent + pending UpgradeHistory, go to checkout."""
+    from apps.subscriptions.models import UpgradeHistory
+    from django.conf import settings as dj_settings
+    from apps.subscriptions.services import get_pricing_country
+
+    plan_id = request.POST.get("plan_id") or request.GET.get("plan_id")
+    plan = Plan.objects.filter(pk=plan_id, is_active=True, is_trial=False, is_hidden=False).first()
+    if plan is None:
+        return redirect("upgrade-page")
+    try:
+        quote = compute_upgrade_quote(request.user, plan, request)
+    except UpgradeError as exc:
+        messages.error(request, str(exc))
+        return redirect("upgrade-page")
+
+    subscription = quote["subscription"]
+    fk = quote["fk"]
+    country = get_pricing_country(request) or ""
+    intent = PaymentIntent.objects.create(
+        user=request.user, plan=plan, plan_price=fk["plan_price"],
+        geo_plan_price=fk["geo_plan_price"],
+        base_amount_cents=quote["resolved_price"].price_cents,
+        amount=quote["amount_due_cents"], currency=quote["currency"],
+        provider=get_provider_for_country(country),
+        status=PaymentIntent.Status.PENDING, country=country,
+        is_upgrade=True,
+    )
+    UpgradeHistory.objects.create(
+        user=request.user, from_subscription=subscription,
+        from_plan=subscription.plan, to_plan=plan,
+        from_price_cents=quote["from_price_cents"],
+        to_price_cents=quote["resolved_price"].price_cents,
+        prorated_credit_cents=quote["prorated_credit_cents"],
+        amount_due_cents=quote["amount_due_cents"],
+        pricing_country=country or None, is_successful=False,
+    )
+    # Consent-first: evidence capture happens on the consent step before
+    # any provider session is created.
+    return redirect("checkout-consent", pk=intent.id)
+
+
+# ───────────────────── Checkout consent (evidence capture) ─────────────────
+import json as _json
+
+
+class CheckoutConsentView(APIView):
+    """The agreement moment. ONE affirmative checkbox; granular records.
+
+    GET  - offer summary (plan, price, interval, features, plain billing
+           disclosure) + single checkbox with links to the exact documents.
+    POST - validates affirmative consent, captures write-once evidence
+           (IP / UA / device fingerprint / session ref / pricing snapshot /
+           policy versions) + per-policy acceptance records, THEN creates
+           the provider session and hands off.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        return _consent_response(request, pk)
+
+    def post(self, request, pk):
+        intent = get_object_or_404(
+            PaymentIntent, pk=pk, user=request.user,
+            status=PaymentIntent.Status.PENDING)
+        if intent.plan.is_trial:
+            return _consent_response(
+                request, pk,
+                error=("Trial-to-renewal checkout is disabled. "
+                       "Choose a one-time purchase instead."),
+            )
+        agreed = request.data.get("agree") in ("on", "true", "1", True)
+        if not agreed:
+            return _consent_response(
+                request, pk,
+                error="Please confirm your agreement to continue.")
+        from apps.evidence.models import CheckoutEvidence
+        from apps.evidence.services import capture_checkout_evidence
+        if not CheckoutEvidence.objects.filter(payment_intent=intent).exists():
+            signals = None
+            raw = request.data.get("device_signals")
+            if raw:
+                if len(str(raw)) > 8192:
+                    signals = None  # oversized payload -> server-side signals
+                else:
+                    try:
+                        parsed = _json.loads(raw)
+                        if isinstance(parsed, dict):
+                            signals = parsed
+                    except (ValueError, TypeError):
+                        signals = None  # fall back to server-side signals
+            try:
+                capture_checkout_evidence(intent, request,
+                                          client_signals=signals)
+            except RuntimeError as exc:
+                logger.exception("checkout evidence capture failed")
+                return _consent_response(
+                    request, pk,
+                    error=f"Could not record your agreement: {exc}")
+        # Evidence captured (or already present): provider handoff.
+        base = settings.SITE_BASE_URL
+        try:
+            checkout = providers.create_hosted_checkout(
+                intent,
+                success_url=f"{base}/confirm-page/{intent.id}/",
+                cancel_url=f"{base}/checkout/{intent.id}/?canceled=1")
+        except providers.ProviderError as exc:
+            return _consent_response(
+                request, pk,
+                error=f"Payment provider error: {exc}")
+        intent.provider_reference = checkout.provider_reference
+        intent.save(update_fields=["provider_reference"])
+        return redirect("checkout-page", pk=pk)
+
+
+def _consent_response(request, pk, error=None):
+    from apps.evidence.models import CheckoutEvidence
+    from apps.policies.services import active_versions
+    from apps.subscriptions.services import format_price
+    intent = get_object_or_404(PaymentIntent, pk=pk, user=request.user)
+    trial_disallowed = bool(intent.plan.is_trial)
+    already = (
+        CheckoutEvidence.objects.filter(payment_intent=intent).exists()
+        and not trial_disallowed
+    )
+    expired = intent.status != PaymentIntent.Status.PENDING
+    policies = active_versions()
+    features = []
+    desc = (intent.plan.description or "")
+    for line in desc.splitlines():
+        line = line.strip().lstrip("*-").strip()
+        if line:
+            features.append(line)
+    course_offer = _course_offer_for_payment(intent)
+    if trial_disallowed:
+        billing_disclosure = (
+            "Trial-to-renewal checkout is disabled. This offer cannot be purchased here."
+        )
+    elif course_offer is not None:
+        duration_days = course_offer.access_duration_days
+        if duration_days is None:
+            billing_disclosure = (
+                "One-time payment. Permanent course access; it will not renew automatically."
+            )
+        else:
+            billing_disclosure = (
+                f"One-time payment. Course access lasts {duration_days} days; "
+                "it will not renew automatically."
+            )
+    else:
+        access_days = interval_days_for(intent)
+        billing_disclosure = (
+            f"One-time payment for {access_days} days of access. "
+            "No automatic renewal."
+        )
+    subtotal_cents = intent.subtotal_cents or max(intent.amount - intent.tax_amount_cents, 0)
+    return render(request, "payments/checkout_consent.html", {
+        "intent": intent, "plan": intent.plan, "course_offer": course_offer,
+        "price_display": format_price(intent.amount, intent.currency),
+        "subtotal_display": format_price(subtotal_cents, intent.currency),
+        "tax_display": format_price(intent.tax_amount_cents, intent.currency),
+        "tax_enabled": intent.tax_enabled,
+        "tax_label": intent.tax_label,
+        "tax_rate_display": intent.tax_rate_percentage,
+        "billing_disclosure": billing_disclosure,
+        "trial_disallowed": trial_disallowed,
+        "features": features,
+        "policies": policies,
+        "already_captured": already,
+        "expired": expired,
+        "error": error,
+    })

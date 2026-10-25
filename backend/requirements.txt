@@ -1,0 +1,19 @@
+Django>=4.2.0,<5.0
+django-environ>=0.11.0
+djangorestframework>=3.14.0
+django-allauth==0.57.0
+django-ipware>=5.0    # get_client_ip in subscriptions/services.py (was missing from requirements)
+Pillow>=10.0.0
+whitenoise>=6.5.0
+python-telegram-bot>=20.0
+requests>=2.31.0
+google-auth>=2.29.0
+cryptography>=42.0.0
+geoip2>=4.7.0
+maxminddb>=2.2.0
+stripe>=8.0.0        # P1: hosted Stripe Checkout
+razorpay>=1.4.0      # P1: hosted Razorpay Checkout.js
+gunicorn>=21.2.0     # production WSGI server
+psycopg[binary]>=3.1.8   # PostgreSQL driver for Django 4.2 (render.com)
+Markdown>=3.6,<4.0
+bleach>=6.1,<7.0

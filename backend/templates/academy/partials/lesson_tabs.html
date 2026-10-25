@@ -1,0 +1,210 @@
+{% with tab_prefix=tab_id_prefix|default:"lesson" %}
+<div class="learning-content-grid">
+  <div class="lesson-content-column">
+<section class="tt-lesson-tabs" data-learning-tabs>
+  <div class="tt-tab-list" role="tablist" aria-label="Lesson sections">
+    <button class="tt-tab is-active" id="{{ tab_prefix }}-tab-idea" type="button" role="tab" aria-selected="true" aria-controls="{{ tab_prefix }}-panel-idea" data-tab-name="idea">The idea</button>
+    <button class="tt-tab" id="{{ tab_prefix }}-tab-examples" type="button" role="tab" aria-selected="false" aria-controls="{{ tab_prefix }}-panel-examples" data-tab-name="examples">Chart examples <span class="tt-tab-count">{{ lesson_sections.figure_count }}</span></button>
+    <button class="tt-tab" id="{{ tab_prefix }}-tab-practice" type="button" role="tab" aria-selected="false" aria-controls="{{ tab_prefix }}-panel-practice" data-tab-name="practice">Test your reading{% if practice_questions %} <span class="tt-tab-count">{{ practice_questions|length }}</span>{% endif %}</button>
+  </div>
+  <div class="tt-tab-panel" id="{{ tab_prefix }}-panel-idea" role="tabpanel" aria-labelledby="{{ tab_prefix }}-tab-idea" data-tab-panel="idea">
+    <div class="tt-lesson-idea-copy">{{ lesson_sections.idea_html|safe }}</div>
+
+    <button class="tt-notebook-examples-button" type="button" data-open-tab="examples">Work through the chart examples <span aria-hidden="true">↗</span></button>
+  </div>
+  <div class="tt-tab-panel" id="{{ tab_prefix }}-panel-examples" role="tabpanel" aria-labelledby="{{ tab_prefix }}-tab-examples" data-tab-panel="examples" hidden>{{ lesson_sections.examples_html|safe }}</div>
+  <div class="tt-tab-panel" id="{{ tab_prefix }}-panel-practice" role="tabpanel" aria-labelledby="{{ tab_prefix }}-tab-practice" data-tab-panel="practice" hidden>
+    {{ lesson_sections.practice_html|safe }}
+    {% if reflection.prompt %}
+    <section class="tt-guided-reflection" aria-labelledby="{{ tab_prefix }}-reflection-heading">
+      <p class="tt-eyebrow">Make your first reading</p>
+      <h2 id="{{ tab_prefix }}-reflection-heading">Record your reasoning first</h2>
+      <p class="tt-guided-reflection-prompt">{{ reflection.prompt }}</p>
+      {% if admin_preview %}
+      <label class="tt-guided-reflection-label" for="{{ tab_prefix }}-reflection-response">Your first reading (preview only)</label>
+      <textarea id="{{ tab_prefix }}-reflection-response" rows="5" disabled placeholder="The learner will write their own observation and reasoning here."></textarea>
+      {% else %}
+      <form method="post" action="{% url 'academy:lesson-reflection-submit' lesson.id %}" data-guided-reflection>
+        {% csrf_token %}
+        <label class="tt-guided-reflection-label" for="{{ tab_prefix }}-reflection-response">Your first reading</label>
+        <textarea id="{{ tab_prefix }}-reflection-response" name="reflection_response" rows="5" maxlength="4000" placeholder="State what you can observe, what it may mean, and what could change your view.">{{ reflection_response }}</textarea>
+        <div class="tt-guided-reflection-actions">
+          <button type="submit" class="tt-notebook-save">Save first reading</button>
+          <span data-guided-reflection-feedback role="status" aria-live="polite"></span>
+        </div>
+      </form>
+      {% endif %}
+      {% if reflection.chart_notes %}
+      <details class="tt-guided-reflection-notes"><summary>Chart-reading notes</summary><p>{{ reflection.chart_notes }}</p></details>
+      {% endif %}
+      {% if reflection.model_reasoning %}
+      <details class="tt-guided-reflection-model">
+        <summary>Compare with the model reasoning</summary>
+        <p>{{ reflection.model_reasoning }}</p>
+      </details>
+      {% endif %}
+    </section>
+    {% endif %}
+    {% if practice_questions and admin_preview %}
+    <section class="tt-practice-questions" aria-labelledby="{{ tab_prefix }}-practice-heading">
+      <p class="tt-eyebrow">Apply what you noticed</p>
+      <h2 id="{{ tab_prefix }}-practice-heading">Practice questions</h2>
+      {% for question in practice_questions %}
+      <fieldset class="tt-question tt-admin-question" disabled>
+        <legend>{{ question.prompt }}</legend>
+        {% if question.image_url %}<figure class="tt-question-figure" style="margin:12px 0"><img src="{{ question.image_url }}" alt="{{ question.image_alt|default:question.image_title }}" loading="lazy" style="display:block;max-width:100%;max-height:420px;width:auto;height:auto;margin:0 auto;border-radius:6px"><figcaption style="padding:8px 0;color:var(--tt-muted);font-size:.82rem;line-height:1.5"><strong>{{ question.image_title|default:"Chart" }}</strong>{% if question.image_caption %}<span> · {{ question.image_caption }}</span>{% endif %}</figcaption></figure>{% endif %}
+        <ul>{% for option in question.options %}<li>{{ option }}</li>{% endfor %}</ul>
+      </fieldset>
+      {% endfor %}
+      <p class="tt-practice-note">Administrator preview only. Answer submission is disabled in this view.</p>
+    </section>
+    {% elif practice_questions and lesson %}
+    <section class="tt-practice-questions" aria-labelledby="tt-practice-heading">
+      <p class="tt-eyebrow">Apply what you noticed</p>
+      <h2 id="tt-practice-heading">Practice questions</h2>
+      <form method="post" action="{% url 'academy:lesson-quiz-submit' lesson.id %}" data-practice-quiz>
+        {% csrf_token %}
+        {% for question in practice_questions %}
+        <fieldset class="tt-question">
+          <legend>{{ question.prompt }}</legend>
+          {% if question.image_url %}<figure class="tt-question-figure" style="margin:12px 0"><img src="{{ question.image_url }}" alt="{{ question.image_alt|default:question.image_title }}" loading="lazy" style="display:block;max-width:100%;max-height:420px;width:auto;height:auto;margin:0 auto;border-radius:6px"><figcaption style="padding:8px 0;color:var(--tt-muted);font-size:.82rem;line-height:1.5"><strong>{{ question.image_title|default:"Chart" }}</strong>{% if question.image_caption %}<span> · {{ question.image_caption }}</span>{% endif %}</figcaption></figure>{% endif %}
+          {% for option in question.options %}
+          <label class="tt-answer-option" data-question-option="{{ question.id }}" data-option-index="{{ forloop.counter0 }}"><input type="radio" name="{{ question.id }}" value="{{ forloop.counter0 }}"><span class="tt-answer-text">{{ option }}</span><span class="tt-answer-result" data-answer-marker aria-hidden="true"></span></label>
+          {% endfor %}
+          <p class="tt-quiz-feedback" data-quiz-feedback="{{ question.id }}" role="status" aria-live="polite"></p>
+        </fieldset>
+        {% endfor %}
+        <button class="tt-publish-button" type="submit">Check answers</button>
+        <p class="tt-quiz-score" data-quiz-score role="status" aria-live="polite"></p>
+      </form>
+      <p class="tt-practice-note">Feedback is checked by the Academy after submission. Correct answers are not included in the page beforehand.</p>
+    </section>
+    {% endif %}
+  </div>
+</section>
+  </div>
+<aside class="tt-notebook" aria-label="Your Trading Notebook">
+      <div class="tt-notebook-index"><span>KEEP<br>IN VIEW</span><strong>01</strong></div>
+      <div class="tt-notebook-content">
+        <div class="tt-notebook-top">
+        <div class="tt-notebook-kicker">PAUSE AND RECORD</div>
+        <h4>{{ notebook.title|default:"Your Trading Notebook" }}</h4>
+        <p class="tt-notebook-intro">Make the reading conditional. Keep what you saw separate from what you think it means.</p>
+      </div>
+        <div class="tt-notebook-prompts">
+{% if notebook.prompts %}
+        <ol>
+          {% for prompt in notebook.prompts %}
+          <li>
+            <span class="tt-notebook-number">{{ forloop.counter|stringformat:"02d" }}</span>
+            <div class="tt-notebook-prompt-copy">
+              <strong class="tt-notebook-prompt-label">{{ prompt.label|default:"Describe"|cut:"." }}</strong>
+              <p>{{ prompt.text }}</p>
+            </div>
+          </li>
+          {% endfor %}
+        </ol>
+        {% else %}
+        <ol>
+          {% if course_slug == "understand-bollinger-bands" %}
+          <li><span class="tt-notebook-number">01</span><div class="tt-notebook-prompt-copy"><strong class="tt-notebook-prompt-label">Describe</strong><p>Where is price relative to the bands and middle line?</p></div></li>
+          <li><span class="tt-notebook-number">02</span><div class="tt-notebook-prompt-copy"><strong class="tt-notebook-prompt-label">Interpret</strong><p>Does the structure look like a range, a trend or a transition? What is your alternative explanation?</p></div></li>
+          <li><span class="tt-notebook-number">03</span><div class="tt-notebook-prompt-copy"><strong class="tt-notebook-prompt-label">Apply</strong><p>What would change your view?</p></div></li>
+          {% else %}
+          <li><span class="tt-notebook-number">01</span><div class="tt-notebook-prompt-copy"><strong class="tt-notebook-prompt-label">Describe</strong><p>What evidence is visible?</p></div></li>
+          <li><span class="tt-notebook-number">02</span><div class="tt-notebook-prompt-copy"><strong class="tt-notebook-prompt-label">Interpret</strong><p>What could it mean in context?</p></div></li>
+          <li><span class="tt-notebook-number">03</span><div class="tt-notebook-prompt-copy"><strong class="tt-notebook-prompt-label">Apply</strong><p>What would change your view?</p></div></li>
+          {% endif %}
+        </ol>
+        {% endif %}
+      </div>
+        {% if notebook.prompts %}
+        <details class="tt-notebook-response-editor">
+          <summary>Write your reflections</summary>
+          {% if admin_preview or not lesson %}
+          <p class="tt-notebook-reflection-note">In the learner view, these responses use the existing Academy save flow. This design preview does not submit or store them.</p>
+          <div class="tt-notebook-reflection-fields">
+            {% for prompt in notebook.prompts %}
+            <div class="tt-notebook-reflection-field">
+              <label for="{{ tab_prefix }}-notebook-prompt-{{ forloop.counter0 }}">{{ prompt.label|default:"Reflection" }} — {{ prompt.text }}</label>
+              <textarea id="{{ tab_prefix }}-notebook-prompt-{{ forloop.counter0 }}" rows="3" maxlength="4000" placeholder="Write a short reflection…" disabled>{{ prompt.response }}</textarea>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <form method="post" action="{% url 'academy:lesson-notebook-submit' lesson.id %}" data-notebook-response>
+            {% csrf_token %}
+            <div class="tt-notebook-reflection-fields">
+              {% for prompt in notebook.prompts %}
+              <div class="tt-notebook-reflection-field">
+                <label for="{{ tab_prefix }}-notebook-prompt-{{ forloop.counter0 }}">{{ prompt.label|default:"Reflection" }} — {{ prompt.text }}</label>
+                <textarea id="{{ tab_prefix }}-notebook-prompt-{{ forloop.counter0 }}" name="prompt_{{ forloop.counter0 }}" rows="3" maxlength="4000" placeholder="Write your reflection…">{{ prompt.response }}</textarea>
+              </div>
+              {% endfor %}
+            </div>
+            <div class="tt-notebook-reflection-actions">
+              <button class="tt-notebook-save" type="submit">Save reflection</button>
+              <span data-notebook-feedback role="status" aria-live="polite"></span>
+            </div>
+          </form>
+          {% endif %}
+        </details>
+        {% endif %}
+      </div>
+      <p class="tt-notebook-hint">Try answering in three short sentences. In the last one, name a specific price behaviour that would strengthen or weaken your current reading.</p>
+      
+    </aside>
+</div>
+<section class="tt-mobile-pause-and-record" aria-label="Pause and record: Describe, Interpret, Apply">
+  <div class="tt-mobile-pause-cards">
+    {% if course_slug == "understand-bollinger-bands" %}
+    <article class="tt-mobile-pause-card">
+      <p class="tt-mobile-pause-step">01 / Describe</p>
+      <h3>Describe</h3>
+      <p class="tt-mobile-pause-question">What evidence is visible?</p>
+      <p class="tt-mobile-pause-guidance">Locate price relative to the upper, middle and lower bands. Note the width and recent price structure. Do not predict in this step.</p>
+    </article>
+    <article class="tt-mobile-pause-card">
+      <p class="tt-mobile-pause-step">02 / Interpret</p>
+      <h3>Interpret</h3>
+      <p class="tt-mobile-pause-question">What could it mean in context?</p>
+      <p class="tt-mobile-pause-guidance">Is price trending, moving sideways or changing character? Name another reasonable explanation that could fit the same evidence.</p>
+    </article>
+    <article class="tt-mobile-pause-card">
+      <p class="tt-mobile-pause-step">03 / Apply</p>
+      <h3>Apply</h3>
+      <p class="tt-mobile-pause-question">What would change your view?</p>
+      <p class="tt-mobile-pause-guidance">State the next observable behaviour that would strengthen or weaken your interpretation. Make it specific enough to recognise on the chart.</p>
+    </article>
+    {% elif notebook.prompts %}
+      {% for prompt in notebook.prompts %}
+      <article class="tt-mobile-pause-card">
+        <p class="tt-mobile-pause-step">{{ forloop.counter|stringformat:"02d" }} / {{ prompt.label|default:"Reflect"|cut:"." }}</p>
+        <h3>{{ prompt.label|default:"Reflect"|cut:"." }}</h3>
+        <p class="tt-mobile-pause-question">{{ prompt.text }}</p>
+        <p class="tt-mobile-pause-guidance">{% if forloop.counter0 == 0 %}State what you can observe directly on the chart. Keep visible evidence separate from interpretation.{% elif forloop.counter0 == 1 %}Read the evidence in context and consider at least one reasonable alternative explanation.{% else %}Name the next observable behaviour that would strengthen or weaken your current reading.{% endif %}</p>
+      </article>
+      {% endfor %}
+    {% else %}
+    <article class="tt-mobile-pause-card">
+      <p class="tt-mobile-pause-step">01 / Describe</p>
+      <h3>Describe</h3>
+      <p class="tt-mobile-pause-question">What evidence is visible?</p>
+      <p class="tt-mobile-pause-guidance">State what you can observe directly on the chart. Keep visible evidence separate from interpretation.</p>
+    </article>
+    <article class="tt-mobile-pause-card">
+      <p class="tt-mobile-pause-step">02 / Interpret</p>
+      <h3>Interpret</h3>
+      <p class="tt-mobile-pause-question">What could it mean in context?</p>
+      <p class="tt-mobile-pause-guidance">Read the evidence in context and consider at least one reasonable alternative explanation.</p>
+    </article>
+    <article class="tt-mobile-pause-card">
+      <p class="tt-mobile-pause-step">03 / Apply</p>
+      <h3>Apply</h3>
+      <p class="tt-mobile-pause-question">What would change your view?</p>
+      <p class="tt-mobile-pause-guidance">Name the next observable behaviour that would strengthen or weaken your current reading.</p>
+    </article>
+    {% endif %}
+  </div>
+</section>
+{% endwith %}

@@ -1,0 +1,240 @@
+[
+  {
+    "id": 12,
+    "title": "Breakout or Temporary Penetration?",
+    "time": "30–35 min",
+    "stages": [
+      {
+        "image": "charts/L12-01-before-break.png",
+        "alt": "NIFTY 50 daily candles through 2 September 2016. The prior upper zone is highlighted; subsequent candles are hidden.",
+        "title": "Stage 1 · Before the break",
+        "prompt": "What makes this a plausible prior upper area, and what would count as a break on this daily chart?",
+        "placeholder": "Name the prior evidence, your breakout convention, and one thing that would remain uncertain."
+      },
+      {
+        "image": "charts/L12-02-outside-zone.png",
+        "alt": "The same NIFTY 50 chart through 8 September 2016, now showing several closes above the highlighted zone.",
+        "title": "Stage 2 · The move closes outside",
+        "prompt": "Price has now closed above the zone for several sessions. What is better supported now—and what is still not guaranteed?",
+        "placeholder": "State your revised view, the evidence for it, and a specific condition that would weaken it."
+      },
+      {
+        "image": "charts/L12-03-later-failure.png",
+        "alt": "The complete teaching window through 16 September 2016, showing price later returning below the original zone.",
+        "title": "Stage 3 · Later evidence",
+        "prompt": "How should you revise your earlier view now that price has moved back below the original zone?",
+        "placeholder": "Explain which earlier evidence still mattered, what changed, and what you would avoid claiming in hindsight."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "A wick crosses above resistance but the candle closes back inside the zone. What is the most precise description?",
+        "options": [
+          "The breakout is confirmed.",
+          "Price penetrated the area intraday but did not close beyond the chosen boundary.",
+          "The level has become support."
+        ],
+        "correct": 1,
+        "feedback": "The high records an excursion; the close records where the session finished. They are not identical observations."
+      },
+      {
+        "q": "Two closes beyond a zone guarantee continuation.",
+        "options": [
+          "True",
+          "False"
+        ],
+        "correct": 1,
+        "feedback": "A time filter is a convention, not a guarantee. The historical example later closes back below its zone."
+      },
+      {
+        "q": "No volume surge appears on the chart. Does that alone prove the breakout is false?",
+        "options": [
+          "Yes, volume is mandatory in every market.",
+          "No. Volume is one possible contextual input; assess the price sequence and chart context too.",
+          "Yes, unless the next candle gaps."
+        ],
+        "correct": 1,
+        "feedback": "Practitioners differ on how volume should be used. The course should not turn it into a universal pass/fail rule."
+      },
+      {
+        "q": "A fixed 20-point buffer means the same thing on every instrument and volatility regime.",
+        "options": [
+          "True; points always have the same significance.",
+          "False; its meaning depends on instrument scale and current movement.",
+          "True, if the zone is drawn horizontally."
+        ],
+        "correct": 1,
+        "feedback": "Fixed-distance, percentage and volatility-scaled conventions have different trade-offs. None is universal."
+      },
+      {
+        "q": "After two closes beyond the zone, price later returns inside it. What is the best review?",
+        "options": [
+          "The earlier closes were not real observations.",
+          "The rule was consistent, but later evidence weakened the continuation interpretation.",
+          "A short trade is automatically required."
+        ],
+        "correct": 1,
+        "feedback": "Later evidence changes the current interpretation; it does not erase what was observable at the earlier stage."
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "title": "Retests and Role Reversal",
+    "time": "35–40 min",
+    "stages": [
+      {
+        "image": "charts/L13-01-before-break.png",
+        "alt": "NIFTY 50 daily candles through 14 August 2014, with the candidate former-resistance zone highlighted.",
+        "title": "Stage 1 · The old upper area",
+        "prompt": "Which visible reactions support this candidate band, and what alternative boundary could another careful analyst defend?",
+        "placeholder": "Record the reactions you rely on and what your band excludes."
+      },
+      {
+        "image": "charts/L13-02-return-toward-area.png",
+        "alt": "The same chart through 22 August 2014, showing the break and a later candle whose low approaches the zone edge.",
+        "title": "Stage 2 · The return approaches",
+        "prompt": "Did price enter the chosen band, touch its edge or just approach it? What does the close add?",
+        "placeholder": "Describe the low and close relative to the zone; do not call the outcome confirmed yet."
+      },
+      {
+        "image": "charts/L13-03-later-evidence.png",
+        "alt": "The full selected NIFTY 50 window through 18 September 2014, with later price remaining above the candidate area.",
+        "title": "Stage 3 · Later evidence",
+        "prompt": "What does the later sequence support, and what claim would go beyond the evidence?",
+        "placeholder": "Explain how your interpretation changed and what remains unproven."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "Does every breakout need to return to its origin?",
+        "options": [
+          "Yes, a retest is required.",
+          "No. Price may continue without returning.",
+          "Only if the first candle closes outside the zone."
+        ],
+        "correct": 1,
+        "feedback": "A retest can offer additional evidence, but it is not mandatory."
+      },
+      {
+        "q": "Former resistance definitely becomes support after price returns from above.",
+        "options": [
+          "True",
+          "False"
+        ],
+        "correct": 1,
+        "feedback": "Role reversal is a hypothesis; price can hold, cross through or remain ambiguous."
+      },
+      {
+        "q": "What should you do if the zone seems to need a new boundary after later candles appear?",
+        "options": [
+          "Move it silently to fit the outcome.",
+          "Record the revision and the new evidence that justified it.",
+          "Pretend the original boundary always included the new candles."
+        ],
+        "correct": 1,
+        "feedback": "Revising a zone is possible, but the revision should be explicit to avoid hindsight-fitting."
+      },
+      {
+        "q": "A return touches the band but the sequence then closes repeatedly inside the old range. What is the safest description?",
+        "options": [
+          "The retest succeeded because it touched the band.",
+          "The role-reversal hypothesis is weakened by the later closes inside the prior range.",
+          "The next move must reach the opposite range edge."
+        ],
+        "correct": 1,
+        "feedback": "Touching the area is not enough to determine the response; the later closes matter."
+      },
+      {
+        "q": "A move continues without a return to the original zone. What does that establish?",
+        "options": [
+          "The breakout was invalid.",
+          "Only that the return did not happen in this window; it is not a required step.",
+          "You must chase the move."
+        ],
+        "correct": 1,
+        "feedback": "The market does not owe a retest. Missing one is not evidence that every breakout is invalid."
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "title": "Failed Breakouts and Alternate Outcomes",
+    "time": "45–55 min including Wider Neckline",
+    "stages": [
+      {
+        "image": "charts/L14-01-before-break.png",
+        "alt": "NIFTY 50 daily candles through 19 January 2018, showing the candidate former-resistance band before the breakout.",
+        "title": "Stage 1 · Before the breakout attempt",
+        "prompt": "Which visible reactions define your candidate area? What would count as contradictory evidence later?",
+        "placeholder": "State the initial hypothesis, prior evidence, and a specific invalidation condition."
+      },
+      {
+        "image": "charts/L14-02-initial-return.png",
+        "alt": "The same NIFTY 50 chart through 1 February 2018, showing a move above the band and a return that still closes above it.",
+        "title": "Stage 2 · The return looks acceptable",
+        "prompt": "At this point, what interpretation is plausible? What evidence is still missing?",
+        "placeholder": "Write the provisional view before you see the next sessions."
+      },
+      {
+        "image": "charts/L14-03-failed-follow-through.png",
+        "alt": "The same NIFTY 50 series through 20 February 2018, showing the close below the band and later weakness.",
+        "title": "Stage 3 · The thesis is challenged",
+        "prompt": "Which specific new evidence weakens the continuation thesis? Does it guarantee an opposite trade?",
+        "placeholder": "Record the contradiction, your revised view, and what remains uncertain."
+      }
+    ],
+    "quiz": [
+      {
+        "q": "Price breaks above a zone and later closes back inside the prior range. What is the most careful conclusion?",
+        "options": [
+          "The next move must be lower.",
+          "The return is contradictory evidence against sustained continuation; assess the later sequence.",
+          "The original area was drawn incorrectly."
+        ],
+        "correct": 1,
+        "feedback": "The failure weakens the original thesis. It does not guarantee direction or prove that the original zone was invalid."
+      },
+      {
+        "q": "What distinguishes a failure test from a single wick beyond a zone?",
+        "options": [
+          "Any wick is enough to prove the failure test.",
+          "The sequence includes a move beyond a prior pivot or area and a quick reversal that challenges the initial move.",
+          "A volume surge is mandatory."
+        ],
+        "correct": 1,
+        "feedback": "The sequence and the response matter. One wick beyond a boundary does not establish the complete pattern."
+      },
+      {
+        "q": "Price fails to hold beyond resistance, then later reclaims the original boundary and remains above it. What should you record?",
+        "options": [
+          "The first failure never happened.",
+          "The reclaim is new evidence that may weaken the failure interpretation; preserve both events.",
+          "The original continuation thesis is guaranteed to succeed now."
+        ],
+        "correct": 1,
+        "feedback": "The sequence changes as new candles appear. A reclaim challenges the current label without erasing earlier observations."
+      },
+      {
+        "q": "Does high volume on a failed breakout prove stop hunting?",
+        "options": [
+          "Yes; high volume proves that stops were triggered intentionally.",
+          "No. Volume describes activity in the feed; it does not prove hidden motive.",
+          "Only if the candle closes outside the zone."
+        ],
+        "correct": 1,
+        "feedback": "The data feed and its baseline matter, but OHLCV alone cannot establish who acted or why."
+      },
+      {
+        "q": "In a hypothetical failed-upside-break setup, what is a defensible structural reference for an initial stop?",
+        "options": [
+          "A fixed line just above the old zone, regardless of the failure high.",
+          "Beyond the failure extreme that would undermine the failure thesis, with appropriate room; if that distance is too large, reduce exposure or pass.",
+          "Exactly one fixed tick amount on every instrument."
+        ],
+        "correct": 1,
+        "feedback": "The structural reference is the extreme that would invalidate the failed-breakout interpretation. It is not a universal buffer, and stop orders may fill worse than the stop price during gaps or fast markets."
+      }
+    ]
+  }
+]

@@ -1,0 +1,17 @@
+Hi {{ username }},
+
+Welcome to TradeThesis. Our workflow is simple: understand the context, construct the trade, manage risk, and review the result.
+
+Three useful first steps:
+1. Check your profile and account details.
+2. Explore the learning library, including a micro-course or the TradeThesis Trading Path.
+3. Connect Telegram from your dashboard when you are ready for plan-related channel access.
+
+Open your dashboard: {{ dashboard_url }}
+
+No rush. Take the steps that are useful to you, in your own time.
+
+TradeThesis
+Conviction before execution
+
+Trading involves risk. TradeThesis content is for educational purposes and is not investment advice.

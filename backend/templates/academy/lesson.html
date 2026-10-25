@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block page_context %}
+<div class="page-context-status page-context-status--standalone" aria-label="Account status">
+{% if user.is_banned %}<span class="badge bg-danger">BANNED</span>{% endif %}
+{% if user.telegram_verified %}<span class="badge bg-success"><i class="bi bi-telegram"></i> Telegram connected</span>{% endif %}
+</div>
+{% endblock %}
+{% load static %}
+{% block title %}{{ lesson.title }} · {{ course.title }}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'academy/learning-room.css' %}"><link rel="stylesheet" href="{% static 'academy/lesson-references.css' %}">{% if admin_preview %}<link rel="stylesheet" href="{% static 'academy/admin-lesson-preview.css' %}">{% endif %}<link rel="stylesheet" href="{% static 'academy/notebook-card.css' %}"><link rel="stylesheet" href="{% static 'academy/course-template-parity.css' %}">{% endblock %}
+{% block content %}
+<div class="tt-learning-room{% if admin_preview %} tt-admin-lesson-preview{% endif %}">
+  {% if admin_preview %}<aside class="tt-admin-lesson-preview-banner" role="status"><strong>ADMIN PREVIEW · LOCKED ACCESS BYPASSED FOR REVIEW ONLY</strong><span>This read-only view does not unlock the lesson for learners, save progress, or submit notebook and quiz responses.</span><a href="{% url 'academy:course-detail' course.slug %}">Back to course overview ↗</a></aside>{% endif %}
+  <div class="tt-breadcrumb"><a href="{% url 'academy:home' %}">Academy</a><span>/</span><a href="{% url 'academy:course-detail' course.slug %}">{{ course.title }}</a><span>/</span><span>{{ module.title }}</span></div>
+
+
+  <div class="tt-room-grid">
+    <aside class="tt-outline" aria-label="Course lesson outline">
+      <div class="tt-outline-heading"><h2>Course outline</h2><span>{{ course.title }}</span></div>
+      <label class="tt-outline-search"><span class="visually-hidden">Search lessons</span><input type="search" placeholder="Find a lesson…" data-outline-search></label>
+      <nav>
+        {% for group in outline_modules %}
+          <section class="tt-outline-module">
+            <h3>{{ group.module.position|stringformat:"02d" }} · {{ group.module.title }}</h3>
+            <ul>
+              {% for item in group.lessons %}
+                <li class="tt-outline-item" data-outline-item>
+                  {% if admin_preview %}
+                    <a href="{{ item.admin_preview_url }}" {% if item.current %}aria-current="page" class="is-current"{% endif %}>
+                      <span>{{ item.lesson.title }}</span>
+                      {% if not item.accessible %}<span class="tt-admin-locked-label">LOCKED</span>{% endif %}
+                    </a>
+                  {% elif item.accessible %}
+                    <a href="{% url 'academy:lesson' course.slug item.lesson.id %}" {% if item.current %}aria-current="page" class="is-current"{% endif %}>
+                      <span>{{ item.lesson.title }}</span>
+                      {% if item.progress and item.progress.status == "completed" %}<span class="tt-complete-mark" aria-label="Completed">✓</span>{% endif %}
+                    </a>
+                  {% else %}
+                    <span class="tt-locked-lesson">{{ item.lesson.title }} <span aria-label="Locked">⌑</span></span>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          </section>
+        {% endfor %}
+      </nav>
+    </aside>
+
+    <main class="tt-lesson-main">
+    <header class="tt-course-header tt-course-header--depth">
+      <div class="tt-course-header-copy">
+        <div class="tt-course-header-tags"><span class="tt-course-header-tag">Module {{ module.position|stringformat:"02d" }}</span><span class="tt-course-header-tag">Lesson {{ module.position|stringformat:"02d" }}.{{ lesson.position|stringformat:"02d" }}</span></div>
+        <p class="tt-eyebrow tt-module-eyebrow"><span class="tt-heading-rule" aria-hidden="true"></span> MODULE {{ module.position|stringformat:"02d" }} · {{ module_display_title }}</p>
+        <h1>{{ lesson.title }}</h1>
+        {% if lesson.summary %}<p class="tt-lesson-summary">{{ lesson.summary }}</p>{% endif %}
+        <div class="tt-lesson-meta"><span>{{ lesson.duration_minutes }} minutes</span>{% if admin_preview %}<span class="tt-preview-label">Administrator preview</span>{% elif lesson.is_preview %}<span class="tt-preview-label">Lesson preview</span>{% endif %}</div>
+      </div>
+      <aside class="tt-lesson-plan" aria-label="In this lesson">
+        <div class="tt-lesson-plan-top"><strong>In this lesson</strong><span>{{ module.position|stringformat:"02d" }}.{{ lesson.position|stringformat:"02d" }}</span></div>
+        <p class="tt-lesson-plan-kicker">Study time</p>
+        <div class="tt-lesson-plan-time"><strong>{{ lesson.duration_minutes }} minutes</strong><span>Estimated study time</span></div>
+        <div class="tt-lesson-plan-divider"></div>
+        <p class="tt-lesson-plan-kicker">You will work through</p>
+        <div class="tt-lesson-plan-steps"><div><span>01</span><strong>Describe</strong></div><div><span>02</span><strong>Interpret</strong></div><div><span>03</span><strong>Apply</strong></div></div>
+      </aside>
+      {% if not admin_preview %}
+      <div class="tt-course-progress" role="progressbar" aria-label="Course progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ course_progress_percent }}"><span style="width:{{ course_progress_percent }}%"></span></div>
+      {% endif %}
+    </header>
+      <article class="tt-lesson-article">
+        {% if video_url %}<section class="tt-video-lesson" aria-label="Lesson video">{% if video_is_file %}<video controls preload="metadata" src="{{ video_url }}">Your browser does not support video playback.</video>{% else %}<a href="{{ video_url }}" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a><p class="small text-muted">This video opens in a new tab.</p>{% endif %}</section>{% endif %}
+        {% if admin_preview %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook reflection=reflection reflection_response=reflection_response course_slug=course.slug practice_questions=practice_questions admin_preview=True only %}{% else %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook lesson=lesson reflection=reflection reflection_response=reflection_response course_slug=course.slug practice_questions=practice_questions only %}{% endif %}
+        {% if related_courses %}
+        <section class="tt-related-courses tt-related-courses--cards" aria-labelledby="tt-related-courses-heading">
+          <div class="tt-related-courses-header">
+            <div class="tt-related-courses-heading">
+              <p class="tt-related-courses-kicker">Continue learning</p>
+              <h2 id="tt-related-courses-heading">Build on this lesson</h2>
+              <p class="tt-related-courses-intro">Explore courses that build on the ideas you have just worked through.</p>
+            </div>
+            <span class="tt-related-courses-count">{{ related_courses|length }} course{{ related_courses|length|pluralize }}</span>
+          </div>
+          <div class="tt-related-course-list" data-course-count="{{ related_courses|length }}">
+            {% for related in related_courses %}
+            <a class="tt-related-course-link tt-related-course-card" href="{% url 'academy:course-detail' related.slug %}">
+              <span class="tt-related-course-card-top">
+                <span class="tt-related-course-number" aria-hidden="true">{{ forloop.counter|stringformat:"02d" }}</span>
+                <span class="tt-related-course-label">Course {{ forloop.counter|stringformat:"02d" }}</span>
+              </span>
+              <span class="tt-related-course-copy">
+                <strong>{{ related.title }}</strong>
+                {% if related.summary %}<span class="tt-related-course-summary">{{ related.summary }}</span>{% endif %}
+                {% if related.topic_tags %}
+                <span class="tt-related-course-topics" aria-label="Topics covered">
+                  {% for topic in related.topic_tags %}<span class="tt-related-course-topic">{{ topic }}</span>{% endfor %}
+                </span>
+                {% endif %}
+              </span>
+              <span class="tt-related-course-card-cta">Explore course <span aria-hidden="true">↗</span></span>
+            </a>
+            {% endfor %}
+          </div>
+          <p class="tt-related-course-note"><span aria-hidden="true">i</span> Course references do not grant access or include a purchase.</p>
+        </section>
+        {% endif %}
+{% if not admin_preview %}
+        <div class="tt-completion">
+          <div><strong>{% if progress and progress.status == "completed" %}Lesson completed{% else %}Finished this lesson?{% endif %}</strong><p>Your progress is saved to your account.</p></div>
+          <form method="post" action="{% url 'academy:lesson-progress' lesson.id %}" data-lesson-complete>
+            {% csrf_token %}<input type="hidden" name="status" value="completed">
+            <button type="submit" {% if progress and progress.status == "completed" %}disabled{% endif %}>{% if progress and progress.status == "completed" %}Completed ✓{% else %}Mark complete{% endif %}</button>
+          </form>
+          <span data-progress-feedback role="status" aria-live="polite"></span>
+        </div>
+        <nav class="tt-lesson-navigation" aria-label="Lesson navigation">{% if previous_lesson %}<a class="tt-lesson-nav-link" href="{% url 'academy:lesson' course.slug previous_lesson.id %}"><span>← Previous lesson</span><strong>{{ previous_lesson.title }}</strong></a>{% else %}<span class="tt-lesson-nav-placeholder">You are at the first available lesson.</span>{% endif %}{% if next_lesson %}<a class="tt-lesson-nav-link tt-lesson-nav-next" href="{% url 'academy:lesson' course.slug next_lesson.id %}"><span>Next lesson →</span><strong>{{ next_lesson.title }}</strong></a>{% else %}<a class="tt-lesson-nav-link tt-lesson-nav-next" href="{% url 'academy:course-detail' course.slug %}"><span>Course overview →</span><strong>Return to course</strong></a>{% endif %}</nav>
+        {% else %}
+        <nav class="tt-lesson-navigation" aria-label="Administrator preview lesson navigation">
+          {% if previous_lesson %}<a class="tt-lesson-nav-link" href="{% url 'academy:admin-lesson-preview' course.slug previous_lesson.id %}"><span>← Previous lesson</span><strong>{{ previous_lesson.title }}</strong></a>{% else %}<span class="tt-lesson-nav-placeholder">First lesson in this course.</span>{% endif %}
+          {% if next_lesson %}<a class="tt-lesson-nav-link tt-lesson-nav-next" href="{% url 'academy:admin-lesson-preview' course.slug next_lesson.id %}"><span>Next lesson →</span><strong>{{ next_lesson.title }}</strong></a>{% else %}<a class="tt-lesson-nav-link tt-lesson-nav-next" href="{% url 'academy:course-detail' course.slug %}"><span>Course overview →</span><strong>Return to course</strong></a>{% endif %}
+        </nav>
+        {% endif %}
+        <dialog class="tt-figure-dialog" data-figure-dialog><button type="button" data-figure-close>Close</button><img data-figure-dialog-image alt=""><p data-figure-dialog-caption></p></dialog>
+      </article>
+    </main>
+  </div>
+</div>
+<script src="{% static 'academy/learning-room.js' %}" defer></script>
+<script>
+(() => {
+  const quizForm = document.querySelector("[data-practice-quiz]");
+  if (quizForm) {
+    quizForm.addEventListener("change", event => {
+      if (!event.target.matches('input[type="radio"]')) return;
+      const questionId = event.target.name;
+      quizForm.querySelectorAll('[data-question-option="' + CSS.escape(questionId) + '"]').forEach(label => {
+        label.classList.remove("is-correct", "is-incorrect");
+        const marker = label.querySelector("[data-answer-marker]");
+        if (marker) marker.textContent = "";
+      });
+      const feedback = quizForm.querySelector('[data-quiz-feedback="' + CSS.escape(questionId) + '"]');
+      if (feedback) {
+        feedback.classList.remove("is-correct", "is-incorrect");
+        feedback.textContent = "";
+      }
+      const currentScore = quizForm.querySelector("[data-quiz-score]");
+      if (currentScore) currentScore.textContent = "";
+    });
+    quizForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const button = quizForm.querySelector('button[type="submit"]');
+      const score = quizForm.querySelector("[data-quiz-score]");
+      const answers = {};
+      quizForm.querySelectorAll('input[type="radio"]:checked').forEach(input => { answers[input.name] = input.value; });
+      button.disabled = true;
+      score.textContent = "Checking your answers…";
+      try {
+        const response = await fetch(quizForm.action, {
+          method: "POST",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": quizForm.querySelector('[name="csrfmiddlewaretoken"]').value
+          },
+          body: JSON.stringify({answers})
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.detail || "Answers could not be checked.");
+        for (const result of payload.results || []) {
+          const feedback = quizForm.querySelector('[data-quiz-feedback="' + CSS.escape(result.id) + '"]');
+          if (feedback) {
+            feedback.classList.remove("is-correct", "is-incorrect");
+            feedback.classList.add(result.correct ? "is-correct" : "is-incorrect");
+            const lead = result.correct ? "Correct. " : (result.selected_index === null ? "No answer selected. The correct answer is highlighted in green. " : "Incorrect. Your answer is red; the correct answer is green. ");
+            feedback.textContent = lead + (result.explanation || "");
+          }
+          const choices = quizForm.querySelectorAll('[data-question-option="' + CSS.escape(result.id) + '"]');
+          choices.forEach(label => {
+            const optionIndex = Number(label.dataset.optionIndex);
+            const marker = label.querySelector("[data-answer-marker]");
+            label.classList.remove("is-correct", "is-incorrect");
+            if (marker) marker.textContent = "";
+            if (result.correct_index !== null && Number(result.correct_index) === optionIndex) {
+              label.classList.add("is-correct");
+              if (marker) marker.textContent = "✓ Correct answer";
+            } else if (result.selected_index !== null && Number(result.selected_index) === optionIndex) {
+              label.classList.add("is-incorrect");
+              if (marker) marker.textContent = "✕ Your answer";
+            }
+          });
+        }
+        score.textContent = "You got " + payload.score + " of " + payload.total + " correct.";
+      } catch (error) {
+        score.textContent = error.message || "Answers could not be checked.";
+      } finally {
+        button.disabled = false;
+      }
+    });
+  }
+
+  const form = document.querySelector("[data-lesson-complete]");
+  if (!form) return;
+  form.addEventListener("submit", async event => {
+    event.preventDefault();
+    const button = form.querySelector("button");
+    const feedback = document.querySelector("[data-progress-feedback]");
+    button.disabled = true;
+    try {
+      const response = await fetch(form.action, {
+        method: "POST", credentials: "same-origin",
+        headers: {"X-CSRFToken": form.querySelector('[name="csrfmiddlewaretoken"]').value},
+        body: new FormData(form)
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.detail || "Progress could not be saved.");
+      button.textContent = "Completed ✓";
+      button.disabled = true;
+      feedback.textContent = "Progress saved.";
+    } catch (error) {
+      feedback.textContent = error.message || "Progress could not be saved.";
+      button.disabled = false;
+    }
+  });
+})();
+</script>
+{% endblock %}

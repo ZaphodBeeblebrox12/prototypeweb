@@ -1,0 +1,11 @@
+Hello {{ user.get_username|default:user.username }},
+
+Welcome to TradeThesis. Please confirm your email address to finish creating your account:
+
+{{ activate_url }}
+
+If you did not create this account, you can ignore this email.
+
+TradeThesis
+Conviction before execution
+Trading involves risk. Our content is for educational purposes and is not investment advice.

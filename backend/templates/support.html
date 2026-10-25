@@ -1,0 +1,57 @@
+{% extends "accounts/member_page_base.html" %}
+{% block title %}Help &amp; support | TradeThesis{% endblock %}
+{% block page_kicker %}HELP &amp; SUPPORT{% endblock %}
+{% block page_heading %}Let’s get you unstuck{% endblock %}
+{% block page_description %}<p>Choose the route that fits your question. Support tickets keep the details together so you can track the response.</p>{% endblock %}
+{% block page_actions %}
+  <a class="btn secondary" href="{% url 'support:my_tickets' %}">My tickets</a>
+  <a class="btn" href="{% url 'support:request_ticket' %}">Raise a ticket ↗</a>
+{% endblock %}
+{% block page_content %}
+<div class="member-layout-grid">
+  <div class="member-content-stack">
+    <section class="member-panel">
+      <div class="member-panel-head"><h2>Contact support</h2><p>The ticket system is the best way to report a problem and follow its status.</p></div>
+      <div class="member-panel-body">
+        <p class="member-muted">Choose the category that best describes your issue, share what happened, and attach screenshots if they help explain it. You can return to your ticket at any time to check its status.</p>
+        <div class="member-form-actions">
+          <a class="btn" href="{% url 'support:request_ticket' %}">Submit a support ticket</a>
+          <a class="btn secondary" href="{% url 'support:my_tickets' %}">View existing tickets</a>
+        </div>
+      </div>
+    </section>
+    <section class="member-panel">
+      <div class="member-panel-head"><h2>Common issues</h2><p>A few checks may resolve the issue before you submit a request.</p></div>
+      <div class="member-list">
+        <div class="member-list-row"><div><h3>Telegram or community access</h3><p>Confirm Telegram is connected to the right TradeThesis account. Open the bot linked from your dashboard and press <strong>Start</strong> if you have not done so.</p></div></div>
+        <div class="member-list-row"><div><h3>Payment status</h3><p>Check Billing &amp; invoices for recorded payment status and available receipts. A receipt is available only after a payment succeeds.</p><p><a class="member-text-link" href="{% url 'manage-subscription' %}">Open billing ↗</a></p></div></div>
+        <div class="member-list-row"><div><h3>Course access</h3><p>Open My learning from your member overview to review the courses currently linked to your account. If access still looks wrong, submit a ticket with the course name and relevant details.</p><p><a class="member-text-link" href="{% url 'dashboard' %}">Open member overview ↗</a></p></div></div>
+      </div>
+    </section>
+    <section class="member-panel">
+      <div class="member-panel-head"><h2>Policies and account information</h2></div>
+      <div class="member-panel-body">
+        <p><a class="member-text-link" href="{% url 'refund-policy' %}">Refund policy ↗</a></p>
+        <p><a class="member-text-link" href="{% url 'terms' %}">Terms of service ↗</a></p>
+        <p><a class="member-text-link" href="{% url 'risk-disclaimer' %}">Risk disclaimer ↗</a></p>
+      </div>
+    </section>
+  </div>
+  <aside class="member-content-stack">
+    <section class="member-status-panel">
+      <h3>Before you submit</h3>
+      <p>Include the steps you took, what you expected to happen, and what happened instead. For payment issues, include the approximate date and plan name. Do not share passwords, full card details, or one-time codes.</p>
+    </section>
+    <section class="member-panel">
+      <div class="member-panel-head"><h2>What happens next?</h2></div>
+      <div class="member-panel-body">
+        <ol class="member-guidance-list">
+          <li>Submit the ticket with a clear description.</li>
+          <li>Keep the ticket reference so you can return to the same request.</li>
+          <li>Check the ticket detail page for its current status and any review note.</li>
+        </ol>
+      </div>
+    </section>
+  </aside>
+</div>
+{% endblock %}

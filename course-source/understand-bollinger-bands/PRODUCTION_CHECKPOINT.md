@@ -1,0 +1,156 @@
+# Understand Bollinger Bands — First-Pass Production Checkpoint
+
+**Branch:** `my-new-branch`  
+**Current state as of 17 October 2026:** all 30 lesson manuscripts deepened and connected to the first-pass Learning Room; not merged into `main` or integrated into served course pages.
+
+## Current canonical template decision — 20 October 2026
+
+- The approved canonical visual/interaction reference is `course-source/understand-bollinger-bands/preview/first-pass/index.html` (the content-rich first-pass Learning Room).
+- This decision supersedes the older 17–18 October 2026 entries later in this file that selected `preview/template-reference/index.html`. Those entries are retained as historical audit records; do not use them as the current template instruction.
+- The course's authored Markdown and manifest remain the content and structure authorities. Use the first-pass HTML as the rich visual/interaction reference for reusable Django implementation, not as a production page to copy wholesale. Keep its preview-only editing controls out of learner-facing production pages.
+- The active Django Academy runtime is under `backend/` in this same repository and branch. Older external-repository references elsewhere in this checkpoint are historical source/rollback notes.
+- Work remains on `my-new-branch`; no merge to `main` or deployment is authorised by this clarification.
+
+## Checkpoints saved
+
+1. `course-source/COURSE_TEMPLATE_STANDARD.md` — the shared TradeThesis course template is now the adopted standard for all new courses and the migration target for existing courses.
+2. `course-source/understand-bollinger-bands/preview/first-pass/index.html` plus `course-source/understand-bollinger-bands/assets/bollinger-lessons-data.js` — the first-pass Learning Room and its generated student-facing manuscript payload.
+
+## GitHub checkpoint trail
+
+The following work is committed on `my-new-branch`, in sequence:
+
+- `a0278203f177744a94285bf0def4deae38035409` — adopt the shared course template standard.
+- `292ad165691b47311ebc24a6eb16e54d65dfe67a` — save the standalone first-pass course preview.
+- `5d22a057805a100b28c2e698a97fd62e0c058750` — add this production checkpoint.
+- `a0900916d3c2a344f38ac426e268fc3d095548e6` — connect the reusable course creation method to the standard.
+- `da3b77cf16d58751713bcbea69fd96d597e644cc` — link the Bollinger README to the standard and preview.
+- `92b4346129d1b497872df1d65853ed625b53e915` — record an updated web-source shortlist and clearly mark download status.
+
+Each saved point remains on `my-new-branch`; none is merged or deployed.
+- `02bcd3f94503654b1d535a31131fc8160b5ed025` — remove the visible “SYNTHETIC DATA” label from the course preview fallback and add module/lesson-based figure numbering inside generated chart illustrations.
+
+## Inline visualization runtime fix — 16 October 2026
+
+- `e163d1c606d0b03da084a9260fcdcf8433327aad` — fixed `practiceCases()` indexing in `preview/first-pass/index.html`. The object stores examples by module IDs 1–7, but the previous lookup used `cases[mId - 1]`; Module 1 therefore received `undefined`, and the lesson renderer failed when calling `.map()`.
+- Corrected lookup: `return cases[mId];`
+- Browser smoke test with Chromium/Playwright: **passed**. Loaded the standalone HTML, navigated all 30 lessons through the lesson-rendering path, checked the practice panel and SVG chart for every lesson, and opened/closed the chart zoom modal. Zero page errors and zero console errors after the fix.
+
+## Focused source checks
+
+- The checkpointed preview contains the seven-module / 30-lesson curriculum.
+- Inline teaching-chart SVGs are generated locally by the preview, but reference-image figures may use temporary remote source URLs and are not all local assets.
+- The chart zoom modal, lesson tabs, lesson outline, learner response area and completion action are present in source.
+- A full browser screenshot smoke test has not completed in this environment. Downloading third-party historical chart binaries also remains blocked by outbound network/DNS restrictions; the internal source index records candidate pages without pretending their images are local files.
+
+
+## Lesson-depth and Learning Room integration — 17 October 2026
+
+### What changed
+
+- Expanded all 30 Markdown lesson manuscripts with lesson-specific worked comparisons. The 24 shorter lessons in Modules 1–4 and 6–7 now contain a second worked comparison in addition to the first; Module 5 retains its longer method/setup instruction and historical case discussions.
+- Added `assets/bollinger-lessons-data.js`, generated from the Markdown manuscripts. It carries the full student-facing content into the preview's three existing tabs, **The idea**, **Chart examples**, and **Test your reading**. The Markdown lesson files remain the content source of truth.
+- Updated `preview/first-pass/index.html` to load that generated file, render the fuller lesson copy, show lesson-specific chart examples and exercise content, and use one unique knowledge-check question per lesson.
+- Increased main lesson paragraph text from 11px to 13px and added rendering for lists, block quotes and Markdown tables. Removed the stale Volume & Price Analysis fallback copy from the initial lesson panels; the explicit related-course cross-link remains where intended.
+- Updated `tools/qa/check_bollinger_preview.py` to verify the data binding, all 30 lesson records, unique quiz prompts, populated idea/example/practice tabs, and a minimum lesson-content size.
+
+### Checkpoint commits
+
+- `d28ee10b886b0688c8f9a4634463cd650848594d`, `9ca95350f475463817a030cf111f13381cf11bf7`, `4d52e2f480c361e5af675663e9612b71017d1d32`, `befb1ebc61529c1d9a68fa2c84564d88fe585828`, `d718d3f528d6e48ae9cedcfe08be589c03d76848`, `e8562c9e602b6ab857c4367b8284d05eee554923` — second worked comparisons added across Modules 1–4 and 6–7.
+- `d1d5b122a7b48068e6ab304d0b5b9d618de6651a` — regenerate the 30-lesson payload from the expanded manuscripts.
+- `b2a00d497cc988e21dbd577caf8418b07b62c579` — connect full manuscripts to the Learning Room and replace its stale fallback panels.
+- `d83e5bcd7806be27069934c520b3ee6c6fda301d`, `9dcb4d3e72f08c4c6e14287411e63c9ce09f16b4` — extend the source QA checks and correct the word-count assertion.
+
+### Validation status
+
+A source-level JavaScript syntax/data check passed after the rendering change: both inline preview scripts and the generated content script compile; the data parses to 30 lessons with 30 distinct quiz questions; each lesson has non-empty idea, chart-example and practice content. The current generated lesson content ranges from approximately 907 to 1,503 words across the three tabs.
+
+**Important:** the previous Chromium/Playwright smoke test was run before this manuscript-rendering change. A fresh browser smoke test and screenshot review have **not** yet been run on the new Learning Room content. Image references also remain provisional. This checkpoint records source validation, not a claim that the new browser UI is fully release-tested.
+
+The repository's separate `Deploy TradeThesis preview` workflow is triggered by changes under `tools/qa/**`, but its upload step packages only the `site/` directory. It does not package this `course-source/understand-bollinger-bands/` preview or the generated lesson-data asset.
+
+
+## First-pass target
+
+The preview follows the seven-module Understand Bollinger Bands manuscript, uses the paper-like TradeThesis look, integrates the lesson navigation, and includes local inline chart illustrations so it does not depend on hot-linked images to render. The visual learning pattern is flexible; the template's section labels are not mandatory boilerplate.
+
+## Image status — important
+
+The current preview's embedded chart illustrations are **provisional teaching visuals**, not the final downloaded historical/source charts requested for the course. Network access from the working container failed when tested against the existing external chart URL, so this pass has not yet downloaded historical web images into the repository. Do not describe the current visuals as downloaded website assets.
+
+Next asset pass:
+- Find useful visual examples for relevant Bollinger concepts and methods.
+- Download each usable image as a local repository asset rather than leave it hot-linked in lesson content.
+- Record original source URL, source/page title, access date, image filename, and replacement status in the internal image index.
+- Use these only as temporary review/reference images; replace them with the user's own TradingView captures before public release.
+- Keep student-facing labels at Figure 1.1, 1.2, etc., by module; remove any internal production/level labels from displayed images.
+- Re-run broken-reference and responsive image/zoom checks after assets have been placed.
+
+## Teaching/content requirements
+
+- Preserve the seven-module course architecture and its current 30-lesson manuscript.
+- Keep student-facing language natural and practical for intermediate traders.
+- Use Observe → Interpret → Test as a reasoning habit, not a rigid three-card layout.
+- Clearly distinguish author/source trigger rules from course-designed execution and risk-management options.
+- No ChartLab for this course; use supplied static visuals and learner reasoning tasks.
+- No merge to `main`, no deployment, and no production website integration without the user's explicit approval.
+
+
+## Shared micro-course template source of truth and Django handoff — 17 October 2026
+
+- The selected concrete visual/interaction reference is `course-source/understand-bollinger-bands/preview/template-reference/index.html` on `my-new-branch`. It preserves **Your Trading Notebook** and omits the green **“By the end, you can”** objective card. The content-rich `preview/first-pass/index.html` remains a separate manuscript/QA preview.
+- Updated `course-source/COURSE_TEMPLATE_STANDARD.md` to make the hierarchy explicit: shared design rules → canonical HTML reference → each course's authored Markdown/architecture/assets → validated manifest → generated preview output → published Django records.
+- Added `course-integration/MICROCOURSE_TEMPLATE_DJANGO_HANDOFF.md` with the recommended reusable-template/import approach, backend security requirements, acceptance checklist and a copy-ready implementation prompt.
+- Updated `docs/architecture/COURSE_CONTENT_EDITOR.md` and `docs/architecture/INSTRUCTIONAL_IMAGE_REPLACEMENT.md` to make text and image editing administrator-only. Updated `docs/architecture/FRONTEND_BACKEND_INTEGRATION.md` and the Bollinger Bands README to cross-link the approved reference and handoff.
+- Production Django integration has **not** been implemented by these documentation commits. The current static preview's local editing/image behaviour remains preview-only; persistent edits require the separate Academy app, administrator-only permission checks, CSRF, validated database writes, persistent media storage and tests.
+- Work remains on `my-new-branch`. No `main` merge or deployment is authorised.
+
+
+
+## Shared template integration checkpoint — 17 October 2026
+
+**Reviewed source head:** `38159a54d6759d050653d9cc98746985c9ad0aad` — “Document source-linked image slots and administrator overrides”. This section is a source audit checkpoint; it does not change the approved template design or perform Django integration.
+
+### Template decision
+
+- The shared course standard is `course-source/COURSE_TEMPLATE_STANDARD.md`.
+- The canonical design reference is `preview/template-reference/index.html` in this course package; `preview/first-pass/index.html` remains the content-rich course preview.
+- The schema-v1 manifest and authored Markdown remain the structured course and lesson sources; `assets/bollinger-lessons-data.js` is generated preview data, not a second authoring source.
+- The implementation contract is `course-integration/MICROCOURSE_TEMPLATE_DJANGO_HANDOFF.md`.
+- **Decision:** the layout, lesson tabs, notebook treatment, manifest shape, and content handoff are sufficiently defined for extraction into reusable Django templates. The source template is ready for Django integration. This is not a public-release approval.
+
+### Source-level checks completed for this checkpoint
+
+- Parsed the manifest and confirmed schema version 1, seven modules and 30 lessons.
+- Confirmed module and lesson slugs are unique and every manifest lesson's source ID and exact title match a heading in its Markdown source.
+- Parsed the generated `window.BOLLINGER_MANUSCRIPTS` payload as JSON: 30 records, 30 distinct knowledge-check questions, and populated idea, chart-example and practice content for every record.
+- Verified lesson copy ranges from 907 to 1,503 words across those three tabs.
+- Compiled the two inline JavaScript blocks from the current preview for syntax validation.
+- Confirmed the three lesson tabs, notebook styling, chart enlargement controls, removal of the retired “By the end, you can” card, and the notice that browser-local edits are not shared or persistent.
+- Verified the site catalogue’s development-course handling and that the preview/admin-editor source discloses that local image changes are not uploaded or saved.
+
+These are source-content and static syntax checks from this audit; the full Python QA script was not executed as a local test run.
+
+### Assets and checks still outstanding
+
+- The Markdown contains 62 image references: 30 relative local paths and 32 external references in Module 5.
+- The representative expected asset `assets/student-assets/svg/bb-m01-f01.svg` is absent. The asset register states that the figure entries are briefs, not finished or visually QA-approved image files.
+- Inline illustrative charts in the preview are useful for reviewing lesson flow, but they do not mean the finished asset register has been produced.
+- A fresh browser interaction run and screenshot review have not been completed after the expanded 30-lesson manuscript payload was wired into the Learning Room. Earlier browser smoke-test results predate that content-rendering change.
+- No current GitHub status checks were returned for the reviewed source head.
+
+### Handoff boundary
+
+- Django must render this design through the existing Academy base shell and real sitewide navigation; do not ship the standalone preview as the production page.
+- Editing controls inside the HTML preview are review-only. Shared, persistent lesson-text and image changes must be implemented through the Django admin workflow, with authorisation restricted to superusers or the explicitly designated content-admin role—not ordinary staff or learners.
+- Keep course-specific media review visible. Missing local figures and temporary remote references must be resolved and visually checked before public course release.
+- No branch merge, deployment, or public release was performed in this checkpoint.
+
+
+## Canonical Learning Room template selected — 18 October 2026
+
+- The Foundation Review iteration selected in chat is now stored on `my-new-branch` at `preview/template-reference/index.html` and is the canonical visual/interaction reference.
+- It loads the generated manuscript payload from `assets/bollinger-lessons-data.js`, displays the actual 30 lesson titles across seven modules, and uses each lesson's authored knowledge-check question and rationale.
+- `preview/first-pass/index.html` has been kept unchanged as the content-rich first-pass preview with its existing review/editor hooks and QA contract. It is not being treated as the canonical visual design after this checkpoint.
+- Markdown lesson manuscripts and the manifest remain the content/structure authority; the generated JavaScript remains derivative preview data. The new HTML is a visual/interaction reference for extraction into the existing Django Academy base shell, not production Django code.
+- No branch merge or deployment was performed. Browser-wide responsive/interaction verification remains a separate release check.

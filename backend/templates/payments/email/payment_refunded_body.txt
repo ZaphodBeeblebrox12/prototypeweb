@@ -1,0 +1,14 @@
+Hi {{ username }},
+
+A refund has been issued for your {{ plan_name }} payment. It will return to your original payment method; bank processing times vary.
+
+Original payment: {{ amount_display }}
+Refunded: {{ refunded_amount }}
+{% if date_display %}Payment date: {{ date_display }}{% endif %}
+{% if provider_reference %}Payment reference: {{ provider_reference }}{% endif %}
+{% if fully_refunded %}{% if product_type == 'course' %}This was a full refund, so course access has been revoked.{% else %}This was a full refund, so your membership access has ended.{% endif %}{% else %}{% if product_type == 'course' %}This was a partial refund; course access remains active.{% else %}This was a partial refund; membership access remains active.{% endif %}{% endif %}
+
+{% if invoice_url %}View payment receipt: {{ invoice_url }}{% else %}View your account: {{ dashboard_url }}{% endif %}
+
+TradeThesis
+Conviction before execution

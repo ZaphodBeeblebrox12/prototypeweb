@@ -1,0 +1,16 @@
+{% extends "auth/tradethesis_auth_base.html" %}
+{% load i18n socialaccount %}
+{% block title %}{% trans "Create account" %}{% endblock %}
+{% block auth_content %}
+<h2 id="formTitle" class="form-title">Make it yours.</h2>
+<p class="form-intro">Create one account to keep your courses, purchases and member connections together.</p>
+{% if form.non_field_errors %}<div class="form-error" role="alert">{% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}</div>{% endif %}
+<form method="post" action="{% url 'account_signup' %}">
+{% csrf_token %}{% if redirect_field_value %}<input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">{% endif %}
+<div class="field{% if form.email.errors %} has-error{% endif %}"><label for="id_email">Email address</label>{{ form.email }}{% for error in form.email.errors %}<p class="field-error">{{ error }}</p>{% endfor %}</div>
+<div class="field{% if form.password1.errors %} has-error{% endif %}"><label for="id_password1">Password</label>{{ form.password1 }}{% for error in form.password1.errors %}<p class="field-error">{{ error }}</p>{% endfor %}</div>
+<div class="field{% if form.password2.errors %} has-error{% endif %}"><label for="id_password2">Confirm password</label>{{ form.password2 }}{% for error in form.password2.errors %}<p class="field-error">{{ error }}</p>{% endfor %}</div>
+<button type="submit" class="primary">Create your account ↗</button></form>
+<p class="form-note">Email verification and account security remain part of the sign-up process.</p>
+<div class="bottom-row"><span>Already a member?</span><a href="{% url 'account_login' %}">Sign in →</a></div>
+{% endblock %}

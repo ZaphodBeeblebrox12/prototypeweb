@@ -1,0 +1,159 @@
+"""Provisioning operation state machine: durable external side effects.
+
+Honest at-least-once with persisted operation state.  The irreducible
+window (Telegram executes createChatInviteLink, process dies before the
+URL is persisted) is documented: recovery mints ONE replacement link and
+checks membership before any re-send.  Revoke is a separate idempotent
+machine.
+"""
+
+import logging
+from django.utils import timezone
+
+from .models import ProvisioningOperation
+
+logger = logging.getLogger(__name__)
+
+
+class DefiniteProvisioningError(Exception):
+    """The provider definitely rejected a provisioning step; do not treat it as unknown."""
+
+
+class _ProvisionTransport:
+    """Pluggable transport (tests inject a fake)."""
+
+
+def execute_operation(op: ProvisioningOperation, transport) -> bool:
+    """Drive one operation to completion.  Returns True when terminal.
+
+    States pending/creating: no external effect committed yet -> safe rerun.
+    created/sent/unknown: reuse persisted invite_link; membership check
+    before any re-send.  Revoke: ban is naturally idempotent.
+    """
+    op.attempts += 1
+    op.save(update_fields=["attempts"])
+    if op.operation == ProvisioningOperation.OP_REVOKE:
+        return _run_revoke(op, transport)
+    return _run_grant(op, transport)
+
+
+def _run_revoke(op, transport) -> bool:
+    result = transport.revoke(op.telegram_user_id, op.channel_id,
+                              idempotency_key=op.provision_key)
+    if result.ok:
+        # A successful ban response is not sufficient evidence by itself.
+        # Verify with a read-only membership probe before declaring completion.
+        member = transport.is_member(op.telegram_user_id, op.channel_id)
+        if member is False:
+            op.state = ProvisioningOperation.ST_COMPLETED
+            op.save(update_fields=["state"])
+            return True
+        op.state = ProvisioningOperation.ST_FAILED
+        op.last_error = (
+            "revoke accepted by bot but user is still a member"
+            if member is True else
+            "revoke accepted by bot but membership could not be verified")
+        op.save(update_fields=["state", "last_error"])
+        return True  # terminal for this attempt; next reconcile retries
+                       # with a fresh revoke operation
+    if result.retryable:
+        op.state = ProvisioningOperation.ST_FAILED
+        op.last_error = result.error_message
+        op.save(update_fields=["state", "last_error"])
+        return True    # terminal for this attempt; job retry re-enters
+    op.state = ProvisioningOperation.ST_FAILED
+    op.last_error = result.error_message
+    op.save(update_fields=["state", "last_error"])
+    return True
+
+
+def _run_grant(op, transport) -> bool:
+    st = ProvisioningOperation
+
+    # Recovery for states with an uncertain send outcome.
+    if op.state in (st.ST_SENDING, st.ST_SENT, st.ST_UNKNOWN):
+        member = transport.is_member(op.telegram_user_id, op.channel_id)
+        if member is True:
+            op.state = st.ST_COMPLETED
+            op.save(update_fields=["state"])
+            return True
+        if member is None:
+            # Unknown is not equivalent to absent: wait for a reliable probe.
+            op.last_error = "membership could not be verified during grant recovery"
+            op.save(update_fields=["last_error"])
+            return False
+        # Definite non-member: reuse a persisted link if possible.
+        if not op.invite_link:
+            # A crash after Telegram creates the link but before its URL is
+            # persisted is the narrow, documented replacement-link window.
+            op.state = st.ST_CREATING
+            op.save(update_fields=["state"])
+        else:
+            return _send_link(op, transport)
+
+    if op.state == st.ST_FAILED:
+        if op.invite_link:
+            return _send_link(op, transport)
+        op.state = st.ST_CREATING
+        op.save(update_fields=["state"])
+
+    if op.state in (st.ST_PENDING, st.ST_CREATING):
+        # Mark creating BEFORE the side effect (durability).
+        op.state = st.ST_CREATING
+        op.save(update_fields=["state"])
+        # Pass the operation key for audit/diagnostics. Telegram has no
+        # invite-creation idempotency key, so durable state bounds retries.
+        try:
+            created = transport.create_invite_link(
+                op.telegram_user_id, op.channel_id,
+                idempotency_key=op.provision_key,
+            )
+        except DefiniteProvisioningError as exc:
+            op.state = st.ST_FAILED
+            op.last_error = str(exc)[:500]
+            op.save(update_fields=["state", "last_error"])
+            return True
+        if not created:
+            # Link creation failed or its outcome is uncertain; retry safely.
+            op.state = st.ST_UNKNOWN
+            op.save(update_fields=["state"])
+            return False
+        # Persist the invite before any DM attempt, so retries reuse this URL.
+        op.invite_link = created
+        op.state = st.ST_CREATED
+        op.save(update_fields=["invite_link", "state"])
+        return _send_link(op, transport)
+
+    if op.state == st.ST_CREATED:
+        # Link was persisted before delivery; attempt/retry the same link.
+        return _send_link(op, transport)
+
+    return op.state == st.ST_COMPLETED
+
+
+def _send_link(op, transport) -> bool:
+    st = ProvisioningOperation
+    op.state = st.ST_SENDING
+    op.save(update_fields=["state"])
+    sent = transport.send_invite_dm(op.telegram_user_id,
+                                  op.channel_id,
+                                  op.invite_link)
+    if sent is True:
+        op.state = st.ST_SENT
+        op.save(update_fields=["state"])
+        # Final confirmation via membership (user may join immediately).
+        member = transport.is_member(op.telegram_user_id, op.channel_id)
+        if member is True:
+            op.state = st.ST_COMPLETED
+            op.save(update_fields=["state"])
+            return True
+        return False   # sent, not yet joined; convergence completes later
+    if sent is False:
+        op.state = st.ST_FAILED
+        op.last_error = "send_message known failure"
+        op.save(update_fields=["state", "last_error"])
+        return True    # terminal-ish; retry re-sends SAME link
+    # None: send outcome unknown.
+    op.state = st.ST_UNKNOWN
+    op.save(update_fields=["state"])
+    return False

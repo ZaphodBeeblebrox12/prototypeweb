@@ -1,0 +1,78 @@
+{% extends "accounts/member_page_base.html" %}
+{% block title %}Notifications | TradeThesis{% endblock %}
+{% block page_kicker %}ACCOUNT UPDATES{% endblock %}
+{% block page_heading %}Notifications{% endblock %}
+{% block page_description %}<p>Review account updates, connection notices and other messages linked to your membership.</p>{% endblock %}
+{% block page_actions %}
+  {% if notifications %}
+    <button class="btn secondary" type="button" id="mark-all-read" data-read-all-url="{% url 'api_notifications_read_all' %}">Mark all as read</button>
+  {% endif %}
+{% endblock %}
+{% block page_content %}
+<form id="notifications-csrf" hidden>{% csrf_token %}</form>
+<p id="notification-action-status" class="member-meta" role="status" aria-live="polite"></p>
+<section class="member-panel">
+  <div class="member-panel-head"><h2>Your updates</h2><p>Unread items are marked so they are easier to find.</p></div>
+  {% if notifications %}
+    <div class="member-list">
+      {% for notification in notifications %}
+        <article class="member-notification{% if not notification.is_read %} is-unread{% endif %}">
+          <div>
+            <h3>{% if not notification.is_read %}<span class="member-status-pill is-good">New</span> {% endif %}{{ notification.title }}</h3>
+            <p>{{ notification.message }}</p>
+            <small class="member-meta">{{ notification.created_at|timesince }} ago</small>
+            {% if notification.link %}<p><a class="member-text-link" href="{{ notification.link }}">View details ↗</a></p>{% endif %}
+          </div>
+          <div class="member-notification-actions">
+            {% if not notification.is_read %}
+              <button class="btn secondary small mark-read" type="button" data-read-url="{% url 'api_notification_read' notification.pk %}">Mark read</button>
+            {% else %}
+              <span class="member-status-pill">Read</span>
+            {% endif %}
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="member-empty-state">
+      <span class="member-empty-icon" aria-hidden="true">♧</span>
+      <h2>You’re all caught up</h2>
+      <p>There are no notifications on your account right now. New account updates will appear here.</p>
+      <a class="btn secondary" href="{% url 'dashboard' %}">Return to overview</a>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
+{% block extra_js %}
+<script>
+(function () {
+  const tokenField = document.querySelector('#notifications-csrf [name="csrfmiddlewaretoken"]');
+  const statusRegion = document.getElementById('notification-action-status');
+  const csrfToken = tokenField ? tokenField.value : '';
+  async function submitRead(url, button) {
+    if (!url || !csrfToken) {
+      statusRegion.textContent = 'We could not verify this action. Refresh the page and try again.';
+      return;
+    }
+    if (button) button.disabled = true;
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest'}
+      });
+      const data = await response.json();
+      if (!response.ok || !data.success) throw new Error('Notification update failed');
+      window.location.reload();
+    } catch (error) {
+      if (button) button.disabled = false;
+      statusRegion.textContent = 'The notification could not be updated. Please try again.';
+    }
+  }
+  document.querySelectorAll('.mark-read').forEach(function (button) {
+    button.addEventListener('click', function () { submitRead(button.dataset.readUrl, button); });
+  });
+  const markAll = document.getElementById('mark-all-read');
+  if (markAll) markAll.addEventListener('click', function () { submitRead(markAll.dataset.readAllUrl, markAll); });
+})();
+</script>
+{% endblock %}

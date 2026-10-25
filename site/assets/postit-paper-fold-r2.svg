@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="0.92" y2="1">
+      <stop offset="0" stop-color="#fff8e6"/>
+      <stop offset=".45" stop-color="#fff5dc"/>
+      <stop offset=".78" stop-color="#fff2d4"/>
+      <stop offset="1" stop-color="#f8e9c4"/>
+    </linearGradient>
+    <linearGradient id="foldUnder" x1=".1" y1=".1" x2=".95" y2=".85">
+      <stop offset="0" stop-color="#fff8e8"/>
+      <stop offset=".32" stop-color="#fff3d9"/>
+      <stop offset=".72" stop-color="#ead7ac"/>
+      <stop offset="1" stop-color="#d5bd8b"/>
+    </linearGradient>
+    <linearGradient id="foldShadow" x1=".05" y1=".1" x2=".9" y2=".95">
+      <stop offset="0" stop-color="#8d7448" stop-opacity=".05"/>
+      <stop offset=".55" stop-color="#9d804b" stop-opacity=".23"/>
+      <stop offset="1" stop-color="#8b7041" stop-opacity=".32"/>
+    </linearGradient>
+    <filter id="paperShadow" x="-15%" y="-15%" width="135%" height="140%">
+      <feGaussianBlur stdDeviation="2.4"/>
+    </filter>
+    <filter id="softCrease" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="1.3"/>
+    </filter>
+    <filter id="paperGrain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency=".72" numOctaves="2" seed="13" result="noise"/>
+      <feColorMatrix in="noise" type="saturate" values="0" result="mono"/>
+      <feComponentTransfer in="mono" result="faintNoise">
+        <feFuncA type="table" tableValues="0 .055"/>
+      </feComponentTransfer>
+      <feBlend in="SourceGraphic" in2="faintNoise" mode="multiply"/>
+    </filter>
+  </defs>
+
+  <path d="M16 13 L305 14 Q309 14 309 19 L309 304 Q309 309 304 309 L16 307 Q11 307 11 302 L12 19 Q12 14 16 13 Z"
+        fill="#806943" opacity=".22" transform="translate(2 4)" filter="url(#paperShadow)"/>
+  <path d="M15 11 L304 12 Q308 12 308 17 L308 304 Q308 308 303 308 L16 306 Q12 306 12 301 L13 17 Q13 12 15 11 Z"
+        fill="url(#paper)" stroke="#d7c394" stroke-width="1.2"/>
+
+  <path d="M202 306 C221 287 268 248 308 193 L308 304 Q308 308 303 308 L202 306 Z"
+        fill="url(#foldShadow)" opacity=".8" filter="url(#softCrease)"/>
+  <path d="M202 306 C220 288 268 247 308 193 L308 308 Z"
+        fill="url(#foldUnder)" stroke="#d4bd8b" stroke-width=".85"/>
+  <path d="M202 306 C220 288 268 247 308 193"
+        fill="none" stroke="#9d804c" stroke-width="3.2" opacity=".3" filter="url(#softCrease)"/>
+  <path d="M202 306 C222 286 270 244 306 195"
+        fill="none" stroke="#fffdf2" stroke-width="1.5" opacity=".9"/>
+  <path d="M213 301 C239 276 278 241 301 205"
+        fill="none" stroke="#fffdf2" stroke-width=".9" opacity=".55"/>
+
+  <path d="M15 11 L304 12 Q308 12 308 17 L308 304 Q308 308 303 308 L16 306 Q12 306 12 301 L13 17 Q13 12 15 11 Z"
+        fill="transparent" filter="url(#paperGrain)"/>
+</svg>

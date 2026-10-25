@@ -1,0 +1,32 @@
+{% extends "emails/base_email.html" %}
+{% block title %}Welcome to TradeThesis{% endblock %}
+{% block preheader %}A few useful first steps for your TradeThesis account.{% endblock %}
+{% block header_tagline %}Getting started{% endblock %}
+{% block content %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr>
+    <td class="px" style="padding:34px 32px 8px;border-top:4px solid #28533F;border-radius:8px 8px 0 0;">
+      <h1 style="margin:0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:22px;line-height:29px;color:#20352A;">Welcome to TradeThesis</h1>
+      <p style="margin:10px 0 0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#536259;">Our approach is simple: understand the context, construct the trade, manage risk, and review the result.</p>
+    </td>
+  </tr>
+  <tr><td class="px" style="padding:14px 32px 8px;">{% include "emails/partials/market_motif.html" %}</td></tr>
+  <tr>
+    <td class="px" style="padding:10px 32px 8px;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#536259;">
+      <p style="margin:0 0 8px;font-weight:700;color:#20352A;">Three useful first steps</p>
+      <ol style="margin:0;padding-left:22px;">
+        <li style="padding:0 0 6px;">Check your profile and account details.</li>
+        <li style="padding:0 0 6px;">Explore the learning library, including a micro-course or the TradeThesis Trading Path.</li>
+        <li>Connect Telegram from your dashboard when you are ready for plan-related channel access.</li>
+      </ol>
+      <p style="margin:14px 0 0;">No rush. Take the steps that are useful to you, in your own time.</p>
+    </td>
+  </tr>
+  <tr>
+    <td class="px" style="padding:12px 32px 26px;">
+      {% include "emails/partials/button.html" with url=dashboard_url label="Open your dashboard" %}
+      <p style="margin:12px 0 0;font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:12px;line-height:19px;color:#718075;">Questions? <a href="{{ support_url }}" style="color:#28533F;text-decoration:underline;">Contact support</a>.</p>
+    </td>
+  </tr>
+</table>
+{% endblock %}

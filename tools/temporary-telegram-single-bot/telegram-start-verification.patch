@@ -1,0 +1,435 @@
+diff --git a/main.py b/main.py
+index 8f193c2..a402fa6 100644
+--- a/main.py
++++ b/main.py
+@@ -3834,6 +3834,25 @@ class TradingBot:
+         from bot_integration import open_manager_channel
+         await open_manager_channel(self, update, context)
+ 
++    @_safe_handler("handle_start")
++    async def handle_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
++        """Route TradeThesis verification deep links before the channel manager."""
++        args = getattr(context, "args", None) or []
++        if args and args[0].startswith("verify_"):
++            from tradethesis_verification_bridge import forward_telegram_verification
++
++            forwarded = await forward_telegram_verification(update)
++            if not forwarded and update.effective_message:
++                await update.effective_message.reply_text(
++                    "I couldn't complete the TradeThesis account link right now. "
++                    "Please return to your TradeThesis dashboard, click Connect Telegram "
++                    "again, and tap Start. If the problem continues, contact support."
++                )
++            return
++
++        # Preserve the existing /start experience for normal bot conversations.
++        await self.handle_manager_private(update, context)
++
+     async def handle_manager_private(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+         """Send Web App button in private chat (inside Telegram)"""
+         from bot_integration import open_manager_private
+@@ -5767,7 +5786,8 @@ Average G/L: {stats['avg_gl_pct']:+.2f}%
+         
+         # ========== PRIVATE CHAT HANDLERS — WEB APP ==========
+         # These work in private DMs with the bot (Web App opens inside Telegram)
+-        app.add_handler(CommandHandler("start", self.handle_manager_private, filters=filters.ChatType.PRIVATE))
++        # Verification deep links must be handled before the manager fallback.
++        app.add_handler(CommandHandler("start", self.handle_start, filters=filters.ChatType.PRIVATE))
+         app.add_handler(CommandHandler("manager", self.handle_manager_private, filters=filters.ChatType.PRIVATE))
+         
+         # ========== WEB APP DATA HANDLER ==========
+diff --git a/tests/test_tradethesis_verification_bridge.py b/tests/test_tradethesis_verification_bridge.py
+new file mode 100644
+index 0000000..bba0a8d
+--- /dev/null
++++ b/tests/test_tradethesis_verification_bridge.py
+@@ -0,0 +1,184 @@
++import asyncio
++import hashlib
++import hmac
++import json
++import os
++import threading
++import unittest
++from http.server import BaseHTTPRequestHandler, HTTPServer
++from unittest.mock import patch
++
++from tradethesis_verification_bridge import (
++    build_signed_request,
++    forward_telegram_verification,
++)
++
++
++class FakeChat:
++    id = 321
++    type = "private"
++
++
++class FakeUser:
++    id = 321
++    is_bot = False
++    first_name = "Test"
++    last_name = "User"
++    username = "test_user"
++    language_code = "en"
++
++
++class FakeMessage:
++    def __init__(self, text):
++        self.text = text
++        self.chat = FakeChat()
++        self.from_user = FakeUser()
++        self.message_id = 3
++        self.date = None
++
++
++class FakeUpdate:
++    def __init__(self, text="/start verify_one-time-token", update_id=123):
++        self.update_id = update_id
++        self.effective_message = FakeMessage(text)
++
++
++class RequestCaptureHandler(BaseHTTPRequestHandler):
++    captured = None
++    response_code = 200
++    redirect_location = None
++    redirect_followed = False
++
++    def do_POST(self):
++        body = self.rfile.read(int(self.headers.get("Content-Length", "0")))
++        RequestCaptureHandler.captured = {
++            "path": self.path,
++            "body": body,
++            "timestamp": self.headers.get("X-Bot-Timestamp"),
++            "nonce": self.headers.get("X-Bot-Nonce"),
++            "signature": self.headers.get("X-Bot-Signature"),
++        }
++        # If urllib follows a redirect, mark the second request and return 200.
++        if self.path == "/redirect-target":
++            RequestCaptureHandler.redirect_followed = True
++            status_code = 200
++        else:
++            status_code = RequestCaptureHandler.response_code
++        self.send_response(status_code)
++        self.send_header("Content-Type", "application/json")
++        if RequestCaptureHandler.redirect_location and self.path != "/redirect-target":
++            self.send_header("Location", RequestCaptureHandler.redirect_location)
++        self.end_headers()
++        self.wfile.write(b'{"ok":true}')
++
++    def log_message(self, *args):
++        pass
++
++
++class TelegramVerificationBridgeTests(unittest.TestCase):
++    def test_signature_matches_django_contract(self):
++        payload = {"update_id": 10, "message": {"text": "/start verify_secret-token"}}
++        secret = "test-shared-secret"
++        body, headers = build_signed_request(
++            payload, secret, timestamp="1700000000", nonce="fixed-nonce"
++        )
++        expected = hmac.new(
++            secret.encode(),
++            b"1700000000.fixed-nonce." + body,
++            hashlib.sha256,
++        ).hexdigest()
++        self.assertEqual(headers["X-Bot-Signature"], expected)
++        self.assertEqual(json.loads(body), payload)
++        self.assertEqual(headers["Content-Type"], "application/json")
++
++    def test_forwarding_sends_native_update_with_hmac_headers(self):
++        RequestCaptureHandler.captured = None
++        RequestCaptureHandler.response_code = 200
++        server = HTTPServer(("127.0.0.1", 0), RequestCaptureHandler)
++        thread = threading.Thread(target=server.serve_forever, daemon=True)
++        thread.start()
++        try:
++            with patch.dict(os.environ, {
++                "TRADETHESIS_TELEGRAM_WEBHOOK_URL": f"http://127.0.0.1:{server.server_port}/bot/telegram/webhook/",
++                "PROVISION_SHARED_SECRET": "local-test-secret",
++                "TRADETHESIS_TELEGRAM_WEBHOOK_TIMEOUT": "2",
++            }, clear=False):
++                forwarded = asyncio.run(forward_telegram_verification(FakeUpdate()))
++            self.assertTrue(forwarded)
++            captured = RequestCaptureHandler.captured
++            self.assertIsNotNone(captured)
++            self.assertEqual(captured["path"], "/bot/telegram/webhook/")
++            actual_payload = json.loads(captured["body"])
++            self.assertEqual(actual_payload["update_id"], 123)
++            self.assertEqual(actual_payload["message"]["text"], "/start verify_one-time-token")
++            self.assertEqual(actual_payload["message"]["chat"], {"id": 321, "type": "private"})
++            expected = hmac.new(
++                b"local-test-secret",
++                f'{captured["timestamp"]}.{captured["nonce"]}.'.encode() + captured["body"],
++                hashlib.sha256,
++            ).hexdigest()
++            self.assertEqual(captured["signature"], expected)
++        finally:
++            server.shutdown()
++            server.server_close()
++            thread.join(timeout=2)
++
++    def test_missing_configuration_fails_closed(self):
++        with patch.dict(os.environ, {
++            "TRADETHESIS_TELEGRAM_WEBHOOK_URL": "",
++            "PROVISION_SHARED_SECRET": "",
++        }, clear=False):
++            self.assertFalse(asyncio.run(forward_telegram_verification(FakeUpdate())))
++
++    def test_non_local_http_endpoint_fails_closed(self):
++        with patch.dict(os.environ, {
++            "TRADETHESIS_TELEGRAM_WEBHOOK_URL": "http://example.com/bot/telegram/webhook/",
++            "PROVISION_SHARED_SECRET": "local-test-secret",
++        }, clear=False):
++            self.assertFalse(asyncio.run(forward_telegram_verification(FakeUpdate())))
++
++
++    def test_redirect_response_is_not_followed(self):
++        RequestCaptureHandler.captured = None
++        RequestCaptureHandler.redirect_followed = False
++        RequestCaptureHandler.redirect_location = "/redirect-target"
++        RequestCaptureHandler.response_code = 307
++        server = HTTPServer(("127.0.0.1", 0), RequestCaptureHandler)
++        thread = threading.Thread(target=server.serve_forever, daemon=True)
++        thread.start()
++        try:
++            with patch.dict(os.environ, {
++                "TRADETHESIS_TELEGRAM_WEBHOOK_URL": f"http://127.0.0.1:{server.server_port}/bot/telegram/webhook/",
++                "PROVISION_SHARED_SECRET": "local-test-secret",
++                "TRADETHESIS_TELEGRAM_WEBHOOK_TIMEOUT": "2",
++            }, clear=False):
++                self.assertFalse(asyncio.run(forward_telegram_verification(FakeUpdate(update_id=7))))
++            self.assertFalse(RequestCaptureHandler.redirect_followed)
++            self.assertEqual(RequestCaptureHandler.captured["path"], "/bot/telegram/webhook/")
++        finally:
++            RequestCaptureHandler.redirect_location = None
++            server.shutdown()
++            server.server_close()
++            thread.join(timeout=2)
++
++    def test_non_2xx_response_is_not_reported_as_forwarded(self):
++        RequestCaptureHandler.captured = None
++        RequestCaptureHandler.response_code = 401
++        server = HTTPServer(("127.0.0.1", 0), RequestCaptureHandler)
++        thread = threading.Thread(target=server.serve_forever, daemon=True)
++        thread.start()
++        try:
++            with patch.dict(os.environ, {
++                "TRADETHESIS_TELEGRAM_WEBHOOK_URL": f"http://127.0.0.1:{server.server_port}/bot/telegram/webhook/",
++                "PROVISION_SHARED_SECRET": "local-test-secret",
++                "TRADETHESIS_TELEGRAM_WEBHOOK_TIMEOUT": "2",
++            }, clear=False):
++                self.assertFalse(asyncio.run(forward_telegram_verification(FakeUpdate(update_id=1))))
++        finally:
++            server.shutdown()
++            server.server_close()
++            thread.join(timeout=2)
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tradethesis_verification_bridge.py b/tradethesis_verification_bridge.py
+new file mode 100644
+index 0000000..585c1ee
+--- /dev/null
++++ b/tradethesis_verification_bridge.py
+@@ -0,0 +1,199 @@
++"""Signed forwarding bridge for TradeThesis Telegram deep-link verification.
++
++Required environment variables in the running bot process:
++  TRADETHESIS_TELEGRAM_WEBHOOK_URL=https://<staging-host>/bot/telegram/webhook/
++  PROVISION_SHARED_SECRET=<same secret configured in Django>
++
++No request body, /start token, signature, or secret is written to logs.
++"""
++from __future__ import annotations
++
++import asyncio
++import hashlib
++import hmac
++import json
++import logging
++import os
++import secrets
++import time
++from urllib.error import HTTPError, URLError
++from urllib.parse import urlsplit
++from urllib.request import HTTPRedirectHandler, Request, build_opener
++from typing import Any
++
++logger = logging.getLogger(__name__)
++DEFAULT_TIMEOUT_SECONDS = 10
++
++
++class _NoRedirectHandler(HTTPRedirectHandler):
++    """Do not forward a verification token to an unconfigured redirect host."""
++
++    def redirect_request(self, req, fp, code, msg, headers, newurl):
++        return None
++
++
++_NO_REDIRECT_OPENER = build_opener(_NoRedirectHandler())
++
++
++def build_signed_request(
++    update_payload: dict[str, Any],
++    secret: str,
++    *,
++    timestamp: str | None = None,
++    nonce: str | None = None,
++) -> tuple[bytes, dict[str, str]]:
++    """Return the exact JSON body and HMAC headers expected by Django."""
++    if not secret:
++        raise ValueError("A shared secret is required")
++
++    body = json.dumps(
++        update_payload,
++        separators=(",", ":"),
++        ensure_ascii=False,
++    ).encode("utf-8")
++    ts = timestamp or str(int(time.time()))
++    request_nonce = nonce or secrets.token_urlsafe(18)
++    signed_prefix = f"{ts}.{request_nonce}.".encode("utf-8")
++    signature = hmac.new(
++        secret.encode("utf-8"), signed_prefix + body, hashlib.sha256
++    ).hexdigest()
++    return body, {
++        "Content-Type": "application/json",
++        "X-Bot-Timestamp": ts,
++        "X-Bot-Nonce": request_nonce,
++        "X-Bot-Signature": signature,
++    }
++
++
++def _url_is_safe(url: str) -> bool:
++    try:
++        parsed = urlsplit(url)
++    except ValueError:
++        return False
++    if not parsed.hostname or parsed.username or parsed.password:
++        return False
++    if parsed.scheme == "https":
++        return True
++    # Allow plain HTTP only for local, offline tests/local development.
++    return parsed.scheme == "http" and parsed.hostname in {"127.0.0.1", "localhost", "::1"}
++
++
++def _post_signed(url: str, body: bytes, headers: dict[str, str], timeout: int) -> bool:
++    request = Request(url, data=body, headers=headers, method="POST")
++    try:
++        with _NO_REDIRECT_OPENER.open(request, timeout=timeout) as response:
++            status_code = response.status
++            # Consume the small response body so the connection can be released.
++            response.read(16_384)
++    except HTTPError as exc:
++        status_code = exc.code
++        try:
++            exc.read(16_384)
++        except Exception:
++            pass
++    except (URLError, TimeoutError, OSError) as exc:
++        logger.warning(
++            "TradeThesis Telegram verification forward failed (%s)",
++            type(exc).__name__,
++        )
++        return False
++    except Exception as exc:  # defensive: never crash the Telegram poller
++        logger.warning(
++            "TradeThesis Telegram verification forward failed (%s)",
++            type(exc).__name__,
++        )
++        return False
++
++    if 200 <= status_code < 300:
++        # Django sends the user-facing result message. Any 2xx means the update
++        # reached that handler; it may legitimately report an expired/invalid token.
++        return True
++    logger.warning(
++        "TradeThesis Telegram verification endpoint returned HTTP %s", status_code
++    )
++    return False
++
++
++def telegram_update_payload(update: Any) -> dict[str, Any]:
++    """Build a small JSON-safe Telegram Update envelope Django consumes.
++
++    A minimal envelope avoids accidentally passing library datetime objects or
++    unrelated update fields into JSON serialization. It still contains every
++    field the Django verification handler reads.
++    """
++    message = getattr(update, "effective_message", None)
++    if message is None or not getattr(message, "text", None):
++        raise ValueError("A text Telegram message is required")
++    chat = getattr(message, "chat", None)
++    sender = getattr(message, "from_user", None)
++    if chat is None or sender is None:
++        raise ValueError("Telegram message is missing chat or sender")
++
++    message_date = getattr(message, "date", None)
++    date_timestamp = int(message_date.timestamp()) if message_date else int(time.time())
++    sender_payload: dict[str, Any] = {
++        "id": sender.id,
++        "is_bot": bool(getattr(sender, "is_bot", False)),
++        "first_name": getattr(sender, "first_name", "") or "",
++    }
++    for field in ("last_name", "username", "language_code"):
++        value = getattr(sender, field, None)
++        if value:
++            sender_payload[field] = value
++
++    message_payload: dict[str, Any] = {
++        "message_id": getattr(message, "message_id", 0) or 0,
++        "date": date_timestamp,
++        "chat": {
++            "id": chat.id,
++            "type": getattr(chat, "type", "private") or "private",
++        },
++        "from": sender_payload,
++        "text": message.text,
++    }
++    return {
++        "update_id": getattr(update, "update_id", 0) or 0,
++        "message": message_payload,
++    }
++
++
++async def forward_telegram_verification(update: Any) -> bool:
++    """Forward a Telegram Update for /start verify_<token> to Django.
++
++    Django validates the one-time token and sends the user's success/error reply.
++    """
++    endpoint = (os.getenv("TRADETHESIS_TELEGRAM_WEBHOOK_URL") or "").strip()
++    secret = os.getenv("PROVISION_SHARED_SECRET") or ""
++    if not endpoint or not secret:
++        missing = []
++        if not endpoint:
++            missing.append("TRADETHESIS_TELEGRAM_WEBHOOK_URL")
++        if not secret:
++            missing.append("PROVISION_SHARED_SECRET")
++        logger.error(
++            "Telegram verification forwarding is disabled; missing configuration: %s",
++            ", ".join(missing),
++        )
++        return False
++    if not _url_is_safe(endpoint):
++        logger.error(
++            "Telegram verification endpoint must use HTTPS (HTTP is allowed only on localhost)"
++        )
++        return False
++
++    try:
++        body, headers = build_signed_request(telegram_update_payload(update), secret)
++    except Exception as exc:
++        logger.warning(
++            "Unable to prepare TradeThesis verification request (%s)",
++            type(exc).__name__,
++        )
++        return False
++
++    try:
++        timeout = max(1, int(os.getenv("TRADETHESIS_TELEGRAM_WEBHOOK_TIMEOUT", "10")))
++    except ValueError:
++        timeout = DEFAULT_TIMEOUT_SECONDS
++
++    # urllib is synchronous; keep it off the bot's event loop.
++    return await asyncio.to_thread(_post_signed, endpoint, body, headers, timeout)

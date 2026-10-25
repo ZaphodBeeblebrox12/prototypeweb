@@ -1,0 +1,307 @@
+import uuid
+import secrets
+from django.db import models
+from django.utils import timezone
+from django.conf import settings
+from django.core.exceptions import ValidationError
+
+
+class BotConfig(models.Model):
+    """Singleton configuration for Telegram and Discord bots."""
+    telegram_bot_token = models.CharField(max_length=255, blank=True)
+    telegram_bot_username = models.CharField(max_length=255, blank=True)
+    telegram_webhook_url = models.URLField(blank=True, help_text="Override auto webhook URL")
+
+    discord_bot_token = models.CharField(max_length=255, blank=True)
+    discord_guild_id = models.CharField(max_length=64, blank=True, help_text="Discord server (guild) ID")
+    discord_client_id = models.CharField(max_length=255, blank=True)
+    discord_client_secret = models.CharField(max_length=255, blank=True)
+    discord_redirect_uri = models.URLField(blank=True)
+
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Bot Configuration"
+        verbose_name_plural = "Bot Configurations"
+
+    def __str__(self):
+        return f"Bot Config (Telegram: {bool(self.telegram_bot_token)}, Discord: {bool(self.discord_bot_token)})"
+
+    @staticmethod
+    def _normalize_bot_username(value):
+        """Canonical form for Telegram bot usernames: bare handle, no '@'.
+
+        Telegram's getMe returns the bare username (e.g. 'inderjeetbot'),
+        and valid t.me deep links require that form.  Operators may enter
+        '@inderjeetbot' in the admin, so normalize at the model boundary —
+        every consumer then sees one canonical representation.
+        """
+        if not value:
+            return value
+        return value.strip().lstrip("@")
+
+    def clean(self):
+        super().clean()
+        self.telegram_bot_username = self._normalize_bot_username(
+            self.telegram_bot_username)
+
+    def save(self, *args, **kwargs):
+        self.telegram_bot_username = self._normalize_bot_username(
+            self.telegram_bot_username)
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_config(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+
+class TelegramAccount(models.Model):
+    """Links a Django user to their Telegram chat_id and user_id."""
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='telegram_account'
+    )
+    chat_id = models.BigIntegerField(unique=True)
+    telegram_user_id = models.BigIntegerField(
+        null=True, blank=True,
+        help_text="Telegram numeric user ID (from message.from.id). Used for banning/unbanning."
+    )
+    linked_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+    last_synced_at = models.DateTimeField(null=True, blank=True)
+
+    # Profile enrichment (captured at verification; avatar fetched post-commit
+    # by services/profile_sync.py - best-effort, never blocks verification).
+    username = models.CharField(max_length=64, blank=True, default="")
+    first_name = models.CharField(max_length=64, blank=True, default="")
+    avatar = models.ImageField(upload_to="telegram_avatars/", null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Telegram Account"
+        verbose_name_plural = "Telegram Accounts"
+
+    def __str__(self):
+        return f"{self.user.username} -> {self.chat_id}"
+
+    @property
+    def display_name(self):
+        # Best available human-readable name for UI display.
+        return self.username or self.first_name or f"User {self.chat_id}"
+
+
+class DiscordAccount(models.Model):
+    """Links a Django user to their Discord user ID and guild roles."""
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='discord_account'
+    )
+    discord_user_id = models.CharField(max_length=64, unique=True)
+    guild_id = models.CharField(max_length=64, blank=True)
+    username = models.CharField(max_length=255, blank=True)
+    roles = models.JSONField(default=list, blank=True, help_text="Cached list of role IDs")
+    linked_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Discord Account"
+        verbose_name_plural = "Discord Accounts"
+
+    def __str__(self):
+        return f"{self.user.username} -> {self.discord_user_id}"
+
+
+class PlanChannelMapping(models.Model):
+    """Maps a subscription plan to Telegram channels and Discord roles."""
+    PLATFORM_CHOICES = [
+        ('telegram', 'Telegram'),
+        ('discord', 'Discord'),
+    ]
+
+    plan = models.ForeignKey(
+        'subscriptions.Plan',
+        on_delete=models.CASCADE,
+        related_name='bot_channel_mappings'
+    )
+    platform = models.CharField(max_length=10, choices=PLATFORM_CHOICES)
+    external_id = models.CharField(
+        max_length=255,
+        help_text="Telegram channel ID/username or Discord role ID"
+    )
+    name = models.CharField(max_length=255, blank=True, help_text="Human-readable name")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [('plan', 'platform', 'external_id')]
+        verbose_name = "Plan Channel Mapping"
+        verbose_name_plural = "Plan Channel Mappings"
+
+    def __str__(self):
+        return f"{self.plan.name} → {self.platform}: {self.external_id}"
+
+    def clean(self):
+        super().clean()
+        self.external_id = str(self.external_id or "").strip()
+        control = str(
+            getattr(settings, "PROVISION_CONTROL_CHANNEL_ID", "") or ""
+        ).strip()
+        if control and self.external_id == control:
+            raise ValidationError({
+                "external_id": (
+                    "This is the control/admin channel — it cannot be a subscriber target."
+                )
+            })
+
+
+class UserChannelAssignment(models.Model):
+    """
+    Idempotency: tracks which channels/roles have already been granted to a user.
+    """
+    PLATFORM_CHOICES = [
+        ('telegram', 'Telegram'),
+        ('discord', 'Discord'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='channel_assignments'
+    )
+    platform = models.CharField(max_length=10, choices=PLATFORM_CHOICES)
+    external_id = models.CharField(max_length=255)
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    # Persistent resend-throttle state: set ONLY when an invite is actually
+    # (re)sent by reconciliation recovery.  NULL means "no invite sent yet"
+    # so pre-existing rows keep working unchanged.
+    last_invite_sent_at = models.DateTimeField(
+        null=True, blank=True, default=None,
+        help_text="Last time an invite was actually (re)sent for this "
+                  "assignment; drives the persistent 6h resend throttle.",
+    )
+
+    class Meta:
+        unique_together = [('user', 'platform', 'external_id')]
+        verbose_name = "User Channel Assignment"
+        verbose_name_plural = "User Channel Assignments"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.platform}:{self.external_id} ({'active' if self.is_active else 'revoked'})"
+
+
+class BotAccessAudit(models.Model):
+    """Audit log for all bot actions."""
+    ACTION_CHOICES = [
+        ('grant', 'Grant'),
+        ('revoke', 'Revoke'),
+        ('link', 'Link'),
+        ('unlink', 'Unlink'),
+        ('sync', 'Sync'),
+    ]
+    PLATFORM_CHOICES = [
+        ('telegram', 'Telegram'),
+        ('discord', 'Discord'),
+    ]
+    STATUS_CHOICES = [
+        ('success', 'Success'),
+        ('failed', 'Failed'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='bot_audits'
+    )
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
+    platform = models.CharField(max_length=10, choices=PLATFORM_CHOICES)
+    target = models.CharField(max_length=255, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    error_message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['user', 'created_at']),
+            models.Index(fields=['status']),
+        ]
+        verbose_name = "Bot Access Audit"
+        verbose_name_plural = "Bot Access Audits"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.action} on {self.platform} ({self.status})"
+
+
+class TelegramVerificationToken(models.Model):
+    """Temporary token for deep‑link verification."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='telegram_verification_tokens'
+    )
+    token = models.CharField(max_length=64, unique=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def is_valid(self):
+        return timezone.now() < self.expires_at
+
+    @classmethod
+    def create_token(cls, user, ttl_minutes=10):
+        token = secrets.token_urlsafe(32)
+        expires = timezone.now() + timezone.timedelta(minutes=ttl_minutes)
+        return cls.objects.create(user=user, token=token, expires_at=expires)
+
+    class Meta:
+        verbose_name = "Telegram Verification Token"
+        verbose_name_plural = "Telegram Verification Tokens"
+
+# ─── Provision v1 hardening: control channel can never be a subscriber target ───
+
+class CommunityChannel(models.Model):
+    """Free / bot-administered channel registry for membership DISPLAY."""
+    PLATFORM_CHOICES = [('telegram', 'Telegram'), ('discord', 'Discord')]
+    platform = models.CharField(max_length=10, choices=PLATFORM_CHOICES,
+                                default='telegram')
+    external_id = models.CharField(max_length=255,
+        help_text='Telegram chat id or @username')
+    name = models.CharField(max_length=255, blank=True)
+    invite_url = models.URLField(blank=True,
+        help_text='Optional public invite for non-members')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('platform', 'external_id')
+        verbose_name = 'Community Channel'
+        verbose_name_plural = 'Community Channels'
+
+    def __str__(self):
+        return f'{self.name or self.external_id} ({self.platform})'
+
+
+class ChannelMembershipSnapshot(models.Model):
+    """Observed membership (display only; never drives access control)."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='channel_membership_snapshots')
+    channel = models.ForeignKey(
+        CommunityChannel, on_delete=models.CASCADE,
+        related_name='membership_snapshots')
+    is_member = models.BooleanField(default=False)
+    checked_at = models.DateTimeField()
+
+    class Meta:
+        unique_together = ('user', 'channel')
+        verbose_name = 'Channel Membership Snapshot'
+        verbose_name_plural = 'Channel Membership Snapshots'
+
+    def __str__(self):
+        return f'{self.user} - {self.channel}: member={self.is_member}'
+
+
+

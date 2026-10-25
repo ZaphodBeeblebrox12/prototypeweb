@@ -1,0 +1,29 @@
+name: Enforce my-new-branch as the integration target
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  require-integration-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require feature PRs to target my-new-branch; permit branch promotion to main
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          # Allow the working integration branch to be promoted to main.
+          if [ "$HEAD_REF" = "my-new-branch" ] && [ "$BASE_REF" = "main" ]; then
+            echo "Promotion pull request from my-new-branch to main is permitted."
+            exit 0
+          fi
+          # All other feature pull requests must continue to target my-new-branch.
+          if [ "$BASE_REF" != "my-new-branch" ]; then
+            echo "::error::Feature pull requests must target my-new-branch. Only my-new-branch may be promoted to main."
+            exit 1
+          fi
+          echo "Pull request target is my-new-branch; feature integration rule passed."

@@ -1,0 +1,131 @@
+"""Shared eligibility and compact-copy helpers for inline related-course cards."""
+
+import re
+
+_PLACEHOLDER_TITLES = {
+    "new micro-course draft",
+    "untitled course",
+    "untitled micro-course",
+}
+_PLACEHOLDER_SUMMARIES = {
+    "add a concise course promise here.",
+    "a clear, practical description of what learners will study and why it matters.",
+    "describe the learner, what the course covers and what they can practise after completing it.",
+}
+_LEADING_VERBS = (
+    "analyse",
+    "analyze",
+    "apply",
+    "assess",
+    "build",
+    "compare",
+    "describe",
+    "develop",
+    "distinguish",
+    "evaluate",
+    "explain",
+    "identify",
+    "learn",
+    "read",
+    "recognise",
+    "recognize",
+    "understand",
+    "use",
+)
+
+
+def course_card_publication_issue(title, summary, description=""):
+    """Return a learner-facing reason when a course still contains starter copy."""
+    title_text = " ".join(str(title or "").casefold().split())
+    summary_source = str(summary or "").strip()
+    if not summary_source:
+        summary_source = str(description or "").strip()
+    summary_text = " ".join(summary_source.casefold().split())
+
+    if not title_text:
+        return "Add a course title before publishing."
+    if title_text in _PLACEHOLDER_TITLES or re.fullmatch(r"untitled course\s*\d+", title_text):
+        return "Replace the starter course title before publishing."
+    if not summary_text:
+        return "Add a learner-facing course summary before publishing."
+    if summary_text in _PLACEHOLDER_SUMMARIES:
+        return "Replace the starter course summary with a learner-facing promise before publishing."
+    return ""
+
+
+def is_course_card_recommendable(title, summary, description=""):
+    """Only recommend a published course when its visible title and copy are ready."""
+    return not course_card_publication_issue(title, summary, description)
+
+
+def compact_course_topic(value):
+    """Turn learning outcomes into the short topic chips used by Option 4."""
+    topic = str(value or "").strip().rstrip(".")
+    if not topic:
+        return ""
+    topic = re.sub(
+        r"^(?:" + "|".join(_LEADING_VERBS) + r")\s+",
+        "",
+        topic,
+        flags=re.IGNORECASE,
+    )
+    topic = re.sub(r"\band identify\b", "&", topic, flags=re.IGNORECASE)
+    topic = re.sub(r"\bwith price progress\b", "vs price", topic, flags=re.IGNORECASE)
+    topic = re.sub(
+        r"\bbefore interpreting it\b", "before interpretation", topic, flags=re.IGNORECASE
+    )
+    topic = re.sub(r"^a clear,\s*", "", topic, flags=re.IGNORECASE)
+    topic = re.sub(r"\b(?:a|an|the)\b", "", topic, flags=re.IGNORECASE)
+    topic = re.sub(r",", "", topic)
+    topic = " ".join(topic.split()).strip(" ,;:")
+    if len(topic) > 32:
+        clipped = topic[:29].rsplit(" ", 1)[0].rstrip(" ,;:")
+        topic = (clipped or topic[:29].rstrip()) + "…"
+    return topic[:1].upper() + topic[1:] if topic else ""
+
+
+def course_topic_tags(learning_outcomes, limit=2):
+    """Return distinct, compact topic chips from a course's learning outcomes."""
+    if not isinstance(learning_outcomes, list) or limit <= 0:
+        return []
+
+    topics = []
+    seen = set()
+    for outcome in learning_outcomes:
+        topic = compact_course_topic(outcome)
+        key = topic.casefold()
+        if topic and key not in seen:
+            topics.append(topic)
+            seen.add(key)
+        if len(topics) >= limit:
+            break
+    return topics
+
+
+def course_card_open_book_markup():
+    """Return the trusted fixed SVG restored after user-authored HTML is sanitized."""
+    return (
+        '<svg class="tt-course-preview-card__mark-icon" viewBox="0 0 32 26" '
+        'fill="none" aria-hidden="true" focusable="false">'
+        '<path d="M16 6.2C12.2 3.6 7.9 3 2.7 4.1V20c5.1-1 9.5-.4 13.3 2.4V6.2Z" '
+        'stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"></path>'
+        '<path d="M16 6.2C19.8 3.6 24.1 3 29.3 4.1V20c-5.1-1-9.5-.4-13.3 2.4V6.2Z" '
+        'stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"></path>'
+        '<path d="M6 8.1c2.7-.3 5.1.1 7.1 1.1M6 11.4c2.7-.3 5.1.1 7.1 1.1M26 8.1c-2.7-.3-5.1.1-7.1 1.1M26 11.4c-2.7-.3-5.1.1-7.1 1.1" '
+        'stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity=".7"></path>'
+        "</svg>"
+    )
+
+
+def course_card_art_copy(title, category=""):
+    """Return the short descriptor shown in Option 4's visual side panel."""
+    source = f"{title or ''} {category or ''}".casefold()
+    if "volume" in source and "price" in source:
+        return "Activity", "meets outcome"
+    if "support" in source and "resistance" in source:
+        return "Price", "respects zones"
+    if "bollinger" in source or "volatility" in source:
+        return "Volatility", "in context"
+    if "construction" in source:
+        return "Idea", "to execution"
+    return "Learn", "in context"
