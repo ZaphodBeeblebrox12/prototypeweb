@@ -30,7 +30,7 @@
       {
         "id": "trading-path-module-1",
         "title": "Foundations",
-        "description": "The building blocks of market mechanics and chart reading.",
+        "description": "Level 1 · Days 1–8 · The building blocks of market mechanics and chart reading.",
         "lessons": [
           {
             "id": "trading-path-lesson-01",
@@ -205,7 +205,7 @@
       {
         "id": "trading-path-module-2",
         "title": "The Technical Toolkit",
-        "description": "Structure, patterns, indicators and timeframe context.",
+        "description": "Level 2 · Days 9–16 · Structure, patterns, indicators and timeframe context.",
         "lessons": [
           {
             "id": "trading-path-lesson-09",
@@ -380,7 +380,7 @@
       {
         "id": "trading-path-module-3",
         "title": "Trading Mechanics",
-        "description": "Turn a thesis into an executable plan with defined risk.",
+        "description": "Level 3 · Days 17–24 · Turn a thesis into an executable plan with defined risk.",
         "lessons": [
           {
             "id": "trading-path-lesson-17",
@@ -555,7 +555,7 @@
       {
         "id": "trading-path-module-4",
         "title": "Psychology & Going Live",
-        "description": "Build habits, review decisions and assemble a personal playbook.",
+        "description": "Level 4 · Days 25–30 · Build habits, review decisions and assemble a personal playbook.",
         "lessons": [
           {
             "id": "trading-path-lesson-25",
@@ -693,7 +693,7 @@
           {
             "id": "trading-path-resource-01",
             "title": "Candlestick patterns",
-            "summary": "Quick references · Reading resource",
+            "summary": "Quick references · A focused guide to five useful candle patterns, their triggers and invalidation points. · Reading resource · Source file: cheat-sheet-candlestick-patterns.md (markdown)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
@@ -714,7 +714,7 @@
           {
             "id": "trading-path-resource-02",
             "title": "Chart patterns",
-            "summary": "Quick references · Reading resource",
+            "summary": "Quick references · Common chart structures, confirmation triggers, measured targets and volume context. · Reading resource · Source file: cheat-sheet-chart-patterns.md (markdown)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
@@ -735,7 +735,7 @@
           {
             "id": "trading-path-resource-03",
             "title": "Formulas",
-            "summary": "Quick references · Reading resource",
+            "summary": "Quick references · A concise reference for position size, P&L, R-multiples, expectancy and breakeven rates. · Reading resource · Source file: cheat-sheet-formulas.md (markdown)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
@@ -756,7 +756,7 @@
           {
             "id": "trading-path-resource-04",
             "title": "Indicators",
-            "summary": "Quick references · Reading resource",
+            "summary": "Quick references · Practical rules for moving averages, RSI, MACD and Fibonacci without overloading a chart. · Reading resource · Source file: cheat-sheet-indicators.md (markdown)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
@@ -777,7 +777,7 @@
           {
             "id": "trading-path-resource-05",
             "title": "Risk rules",
-            "summary": "Quick references · Reading resource",
+            "summary": "Quick references · Five risk rules to review before a position is opened or managed. · Reading resource · Source file: cheat-sheet-risk-rules.md (markdown)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
@@ -798,7 +798,7 @@
           {
             "id": "trading-path-resource-06",
             "title": "Trading glossary",
-            "summary": "Glossary · Alphabetical reference",
+            "summary": "Glossary · An alphabetical reference for the language used throughout the Trading Path, written in plain English with Indian-market context where supplied. · Alphabetical reference · Source file: glossary.md (markdown)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
@@ -819,7 +819,7 @@
           {
             "id": "trading-path-resource-07",
             "title": "Completion tracker",
-            "summary": "Working tools · Reading resource",
+            "summary": "Working tools · A printable 30-day tracker to see what you have completed and what remains. · Reading resource · Source file: completion-tracker.md (markdown)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
@@ -840,7 +840,7 @@
           {
             "id": "trading-path-resource-08",
             "title": "Trading journal",
-            "summary": "Working tools · Excel workbook + CSV",
+            "summary": "Working tools · A reusable trade log for planned risk, realised P&L, costs and R results. The Excel workbook adds calculations, dropdowns and a field guide; the CSV is a simple import-friendly companion. · Excel workbook + CSV · Source file: journal-template.csv (csv)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
@@ -861,7 +861,7 @@
           {
             "id": "trading-path-resource-09",
             "title": "Position-size calculator",
-            "summary": "Working tools · Spreadsheet template",
+            "summary": "Working tools · A spreadsheet starting point for translating a risk budget and stop distance into position size. · Spreadsheet template · Source file: position-size-calculator.csv (csv)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
@@ -882,7 +882,7 @@
           {
             "id": "trading-path-resource-10",
             "title": "Trade checklist",
-            "summary": "Working tools · Reading resource",
+            "summary": "Working tools · A pre-trade sequence from context and trigger to stop, size and daily limits. · Reading resource · Source file: trade-checklist-printable.md (markdown)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
@@ -903,7 +903,7 @@
           {
             "id": "trading-path-resource-11",
             "title": "Playbook template",
-            "summary": "Working tools · Reading resource",
+            "summary": "Working tools · A reusable structure for documenting your instruments, setups, risk rules and review ritual. · Reading resource · Source file: playbook-template.md (markdown)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
@@ -924,7 +924,7 @@
           {
             "id": "trading-path-resource-12",
             "title": "Your first 30 days live",
-            "summary": "Practice & review · Reading resource",
+            "summary": "Practice & review · A measured week-by-week plan for moving from study to small, deliberate practice. · Reading resource · Source file: bonus-1-first-30-days-live.md (markdown)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
@@ -945,7 +945,7 @@
           {
             "id": "trading-path-resource-13",
             "title": "50-question quiz bank",
-            "summary": "Practice & review · Reading resource",
+            "summary": "Practice & review · Fifty practice questions across the course, with an answer key for self-review. · Reading resource · Source file: bonus-2-quiz-bank.md (markdown)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
@@ -966,7 +966,7 @@
           {
             "id": "trading-path-resource-14",
             "title": "Myths vs facts",
-            "summary": "Practice & review · Reading resource",
+            "summary": "Practice & review · A grounded look at common trading beliefs and what a process-led approach asks instead. · Reading resource · Source file: bonus-3-myths-vs-facts.md (markdown)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
@@ -987,7 +987,7 @@
           {
             "id": "trading-path-resource-15",
             "title": "Books & tools",
-            "summary": "Practice & review · Reading resource",
+            "summary": "Practice & review · A short reading and tools list, ordered to complement the lessons. · Reading resource · Source file: bonus-4-resources.md (markdown)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
@@ -1008,7 +1008,7 @@
           {
             "id": "trading-path-resource-16",
             "title": "Trade review cards",
-            "summary": "Practice & review · Reading resource",
+            "summary": "Practice & review · Ten annotated scenarios focused on context, trigger, management and the lesson learned. · Reading resource · Source file: bonus-5-trade-review-cards.md (markdown)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
@@ -1029,7 +1029,7 @@
           {
             "id": "trading-path-resource-17",
             "title": "Graduation certificate template",
-            "summary": "Completion · Reading resource",
+            "summary": "Completion · A certificate template to personalise after the course requirements have been completed. · Reading resource · Source file: CERTIFICATE-template.md (markdown)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
@@ -1050,7 +1050,7 @@
           {
             "id": "trading-path-resource-18",
             "title": "The 30-day course roadmap",
-            "summary": "Course map · Course map",
+            "summary": "Course map · The full 30-day sequence, grouped into four connected levels. · Course map · Source file: COURSE_ROADMAP.md (markdown)",
             "minutes": 1,
             "format": "reading",
             "videoUrl": "",
