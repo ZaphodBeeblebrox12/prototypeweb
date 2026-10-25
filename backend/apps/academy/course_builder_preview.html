@@ -569,6 +569,127 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 #previewAudienceSelect option { color:#23332a; background:#fff; }
 @media(max-width:760px) { .regional-image-row { grid-template-columns:minmax(0,1fr); } }
 
+/* Live lesson outline: navigable H1–H4 hierarchy beside the writing canvas. */
+.lesson-outline-layout {
+  display:grid;
+  grid-template-columns:minmax(190px,230px) minmax(0,1fr);
+  align-items:start;
+  gap:16px;
+  margin:10px 0 18px;
+}
+.lesson-outline-aside,.lesson-outline-content { min-width:0; }
+.lesson-outline-panel {
+  position:sticky;
+  top:14px;
+  max-height:calc(100vh - 30px);
+  overflow:auto;
+  padding:13px 11px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--panel-soft);
+  color:var(--ink);
+}
+.lesson-outline-panel > summary {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  list-style:none;
+  cursor:pointer;
+}
+.lesson-outline-panel > summary::-webkit-details-marker { display:none; }
+.lesson-outline-title {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  font-size:12px;
+  font-weight:850;
+  letter-spacing:.015em;
+}
+.lesson-outline-title::before {
+  content:"";
+  display:block;
+  width:3px;
+  height:17px;
+  flex:0 0 3px;
+  border-radius:2px;
+  background:var(--site-secondary);
+}
+.lesson-outline-count {
+  flex:0 0 auto;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:650;
+  white-space:nowrap;
+}
+.lesson-outline-panel[open] > summary {
+  margin-bottom:9px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--line);
+}
+.lesson-outline-list { display:grid; gap:3px; }
+.lesson-outline-list[hidden] { display:none !important; }
+.lesson-outline-button {
+  display:grid;
+  grid-template-columns:22px minmax(0,1fr);
+  align-items:start;
+  gap:6px;
+  width:100%;
+  padding:7px 7px;
+  border:1px solid transparent;
+  border-left:2px solid transparent;
+  border-radius:6px;
+  background:transparent;
+  color:var(--muted);
+  font:600 11px/1.45 var(--site-font-body);
+  text-align:left;
+  cursor:pointer;
+}
+.lesson-outline-button[data-level="2"] { padding-left:16px; }
+.lesson-outline-button[data-level="3"] { padding-left:26px; }
+.lesson-outline-button[data-level="4"] { padding-left:36px; }
+.lesson-outline-level {
+  padding-top:1px;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.01em;
+}
+.lesson-outline-label { min-width:0; overflow-wrap:anywhere; }
+.lesson-outline-button:hover {
+  border-color:var(--line);
+  background:var(--panel);
+  color:var(--ink);
+}
+.lesson-outline-button.is-active {
+  border-color:var(--line);
+  border-left-color:var(--site-secondary);
+  background:var(--panel);
+  color:var(--site-primary);
+}
+.lesson-outline-button.is-active .lesson-outline-level { color:var(--site-secondary); }
+.lesson-outline-button:focus-visible {
+  outline:2px solid var(--site-secondary);
+  outline-offset:1px;
+}
+.lesson-outline-empty {
+  margin:0;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.6;
+}
+@media(max-width:900px) {
+  .lesson-outline-layout { grid-template-columns:minmax(0,1fr); gap:10px; }
+  .lesson-outline-panel { position:static; max-height:none; }
+  .lesson-outline-panel[open] .lesson-outline-list { max-height:220px; overflow-y:auto; }
+}
+@media(max-width:480px) {
+  .lesson-outline-layout { gap:8px; }
+  .lesson-outline-panel { padding:11px 9px; }
+  .lesson-outline-button { font-size:11px; }
+}
+
 /* True visual authoring canvas. */
 .rich-editor-wrapper { position:relative; z-index:0; isolation:isolate; border:1px solid var(--line); border-radius:11px; overflow:visible; background:var(--panel); }
 .rich-editor-wrapper:focus-within { z-index:8; }
@@ -1962,7 +2083,75 @@ body.builder-dialog-open { overflow:hidden; }
       '</strong><p data-lesson-audience-status-text>' + esc(status) + '</p>' + actions + '</div></div>' +
       '<p class="help">Country or regional versions can change the full lesson—text, headings, tables and managed image placements. Other audiences remain unchanged.</p></section>';
   }
-  function lessonFields(l){if(l&&!l.notebook)l.notebook={title:'Before you make the call',prompts:[]};if(l&&l.notebook&&(!Array.isArray(l.notebook.prompts)||l.notebook.prompts.length===0))l.notebook.prompts=[{label:'Pause',text:'What evidence is visible?'},{label:'Interpret',text:'What could it mean in context?'},{label:'Apply',text:'What would change your view?'}];if(l&&l.notebook&&String(l.notebook.title||'').trim()==='Your Trading Notebook')l.notebook.title='Before you make the call';if(l&&!l.videoUrl)l.videoUrl='';return `<div class="section-intro"><h3>Lesson content</h3><p>Write the main lesson first, then switch audience to customise an entire country or region version in this same editor. The same rich-text tools work for both.</p></div>${l?`<div data-lesson-body-audience-controls>${lessonBodyAudienceControlsMarkup(l)}</div><div class="field"><label>${lessonBodyAudienceLabel()}</label>${visualEditorMarkup(lessonBodyForAudience(l), {kind: lessonBodyEditorKind(), audience: selectedLessonBodyAudience()})}<span class="help">Use the toolbar above to format headings, emphasis, lists, links, quotes, dividers, and tables. To add a chart between paragraphs, click where it belongs, then choose Figures → Insert at cursor. The website preview preserves this placement.</span></div>${courseCardPickerMarkup()}<div class="helper-note">This is the content learners will read in the Learning Room. Review the website preview before submitting the course for review.</div><div class="field" style="margin-top:14px"><label>Video URL (optional)</label><input class="input" type="url" data-entity="lesson" data-field="videoUrl" value="${esc(l.videoUrl||"")}" placeholder="https://…"><span class="help">Direct MP4/WebM/OGG links play inline. Other URLs are shown as external video links.</span></div><div class="related-course-box"><h4>Notebook prompts</h4><p>These editable prompts appear in the learner’s Your Trading Notebook section.</p><div class="field"><label>Notebook heading</label><input class="input" data-entity="notebook" data-field="title" value="${esc(l.notebook?.title||"Before you make the call")}"><span class="help">This is the large heading shown inside the Your Trading Notebook section of the learner view.</span></div>${(l.notebook?.prompts||[]).map((prompt,index)=>`<div class="q-card"><div class="field"><label>Prompt ${index+1} label</label><input class="input" data-entity="notebook-prompt" data-index="${index}" data-field="label" value="${esc(prompt.label||"")}"></div><div class="field" style="margin-top:8px"><label>Prompt text</label><textarea class="textarea" data-entity="notebook-prompt" data-index="${index}" data-field="text">${esc(prompt.text||"")}</textarea></div></div>`).join("")}</div><div class="notebook-editor-preview"><h4>How learners will see the notebook</h4><p>Preview the styled notebook block here. Changes to the heading or prompts above update this preview.</p><div data-notebook-preview>${notebookPreviewMarkup(l)}</div></div><div class="related-course-box"><h4>Related-course metadata (optional)</h4><p>These selections record course relationships for discovery; they do not insert a card into the lesson body. To place the compact Option 3 inline course card, use the companion-course picker directly below the Lesson body field. Individual lesson links are managed separately.</p><input class="input" type="search" data-related-course-search placeholder="Search published or announced courses by title or topic" aria-label="Search published or announced related courses"><div class="related-course-list">${demoOffers.map(course=>{const checked=(l.relatedCourseIds||[]).includes(course.id);return `<div class="related-course-item related-course-entry"><label class="related-course-choice"><input type="checkbox" data-related-course="${esc(course.id)}" ${checked ? "checked" : ""}><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">${esc(course.state)}${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}${course.duration ? " · " + esc(course.duration) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></label></div>`;}).join("")}${comingSoonOffers.map(course=>`<div class="related-course-item related-course-entry"><div class="related-course-choice"><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">Coming soon${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></div></div>`).join("")}${demoOffers.length || comingSoonOffers.length ? "" : '<p class="microcopy">No published or announced courses are available to associate yet.</p>'}</div><div class="helper-note">These selections record related-course metadata only. Use the dedicated inline course-card picker below Lesson body to insert a visual companion-course card into the lesson. No course is automatically published.</div></div><div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap"><button class="btn" type="button" data-action="go-curriculum">← Curriculum</button><button class="btn primary" type="button" data-action="go-questions">Edit practice questions →</button></div>`:'<div class="empty-state"><p>Select a lesson in the curriculum first.</p></div>'}`;}
+  function lessonOutlineMarkup() {
+    return '<details class="lesson-outline-panel" data-lesson-outline open>' +
+      '<summary><span class="lesson-outline-title">Lesson outline</span>' +
+      '<span class="lesson-outline-count" data-lesson-outline-count>0 headings</span></summary>' +
+      '<nav class="lesson-outline-list" data-lesson-outline-list aria-label="Headings in this lesson"></nav>' +
+      '<p class="lesson-outline-empty" data-lesson-outline-empty>No headings yet. Use the text-style menu to add H1–H4 headings.</p>' +
+      '</details>';
+  }
+
+  function lessonOutlineHeadingRecords(editor) {
+    if (!editor) return [];
+    return Array.from(editor.querySelectorAll('h1,h2,h3,h4')).map((node, index) => ({
+      node,
+      index,
+      level:Number(node.tagName.slice(1)),
+      text:String(node.textContent || '').replace(/\s+/g, ' ').trim()
+    })).filter(item => item.text);
+  }
+
+  function lessonOutlineItemsMarkup(headings, activeIndex) {
+    return headings.map((item, visibleIndex) =>
+      '<button type="button" class="lesson-outline-button' +
+      (Number(activeIndex) === item.index ? ' is-active' : '') +
+      '" data-lesson-outline-index="' + item.index + '" data-level="' + item.level +
+      '" aria-label="Go to heading ' + (visibleIndex + 1) + ': ' + esc(item.text) +
+      '" title="Go to ' + esc(item.text) + '">' +
+      '<span class="lesson-outline-level">H' + item.level + '</span>' +
+      '<span class="lesson-outline-label">' + esc(item.text) + '</span></button>'
+    ).join('');
+  }
+
+  function updateLessonOutlineFromEditor(editor) {
+    if (!editor || !editor.isConnected) return;
+    const panel = editor.closest('.lesson-outline-layout')?.querySelector('[data-lesson-outline]');
+    if (!panel) return;
+    const list = panel.querySelector('[data-lesson-outline-list]');
+    const count = panel.querySelector('[data-lesson-outline-count]');
+    const empty = panel.querySelector('[data-lesson-outline-empty]');
+    if (!list || !count || !empty) return;
+
+    const headings = lessonOutlineHeadingRecords(editor);
+    const selection = window.getSelection();
+    const anchor = selection?.anchorNode;
+    const anchorElement = anchor?.nodeType === 1 ? anchor : anchor?.parentElement;
+    const selectedHeading = anchorElement?.closest?.('h1,h2,h3,h4');
+    if (selectedHeading && editor.contains(selectedHeading)) {
+      const selectedIndex = Array.from(editor.querySelectorAll('h1,h2,h3,h4')).indexOf(selectedHeading);
+      if (selectedIndex >= 0) panel.dataset.activeIndex = String(selectedIndex);
+    }
+
+    const activeIndex = panel.dataset.activeIndex;
+    const markup = lessonOutlineItemsMarkup(headings, activeIndex);
+    if (list.innerHTML !== markup) list.innerHTML = markup;
+    count.textContent = headings.length + (headings.length === 1 ? ' heading' : ' headings');
+    empty.hidden = headings.length > 0;
+    list.hidden = headings.length === 0;
+  }
+
+  let lessonOutlineUpdateFrame = null;
+  function scheduleLessonOutlineUpdate(editor) {
+    if (!editor) return;
+    if (lessonOutlineUpdateFrame !== null) window.cancelAnimationFrame(lessonOutlineUpdateFrame);
+    lessonOutlineUpdateFrame = window.requestAnimationFrame(() => {
+      lessonOutlineUpdateFrame = null;
+      if (editor.isConnected) updateLessonOutlineFromEditor(editor);
+    });
+  }
+
+  function lessonFields(l){if(l&&!l.notebook)l.notebook={title:'Before you make the call',prompts:[]};if(l&&l.notebook&&(!Array.isArray(l.notebook.prompts)||l.notebook.prompts.length===0))l.notebook.prompts=[{label:'Pause',text:'What evidence is visible?'},{label:'Interpret',text:'What could it mean in context?'},{label:'Apply',text:'What would change your view?'}];if(l&&l.notebook&&String(l.notebook.title||'').trim()==='Your Trading Notebook')l.notebook.title='Before you make the call';if(l&&!l.videoUrl)l.videoUrl='';return `<div class="section-intro"><h3>Lesson content</h3><p>Write the main lesson first, then switch audience to customise an entire country or region version in this same editor. The same rich-text tools work for both.</p></div>${l?`<div data-lesson-body-audience-controls>${lessonBodyAudienceControlsMarkup(l)}</div><div class="lesson-outline-layout"><aside class="lesson-outline-aside">${lessonOutlineMarkup()}</aside><div class="lesson-outline-content"><div class="field"><label>${lessonBodyAudienceLabel()}</label>${visualEditorMarkup(lessonBodyForAudience(l), {kind: lessonBodyEditorKind(), audience: selectedLessonBodyAudience()})}<span class="help">Use the toolbar above to format headings, emphasis, lists, links, quotes, dividers, and tables. To add a chart between paragraphs, click where it belongs, then choose Figures → Insert at cursor. The website preview preserves this placement.</span></div>${courseCardPickerMarkup()}</div></div><div class="helper-note">This is the content learners will read in the Learning Room. Review the website preview before submitting the course for review.</div><div class="field" style="margin-top:14px"><label>Video URL (optional)</label><input class="input" type="url" data-entity="lesson" data-field="videoUrl" value="${esc(l.videoUrl||"")}" placeholder="https://…"><span class="help">Direct MP4/WebM/OGG links play inline. Other URLs are shown as external video links.</span></div><div class="related-course-box"><h4>Notebook prompts</h4><p>These editable prompts appear in the learner’s Your Trading Notebook section.</p><div class="field"><label>Notebook heading</label><input class="input" data-entity="notebook" data-field="title" value="${esc(l.notebook?.title||"Before you make the call")}"><span class="help">This is the large heading shown inside the Your Trading Notebook section of the learner view.</span></div>${(l.notebook?.prompts||[]).map((prompt,index)=>`<div class="q-card"><div class="field"><label>Prompt ${index+1} label</label><input class="input" data-entity="notebook-prompt" data-index="${index}" data-field="label" value="${esc(prompt.label||"")}"></div><div class="field" style="margin-top:8px"><label>Prompt text</label><textarea class="textarea" data-entity="notebook-prompt" data-index="${index}" data-field="text">${esc(prompt.text||"")}</textarea></div></div>`).join("")}</div><div class="notebook-editor-preview"><h4>How learners will see the notebook</h4><p>Preview the styled notebook block here. Changes to the heading or prompts above update this preview.</p><div data-notebook-preview>${notebookPreviewMarkup(l)}</div></div><div class="related-course-box"><h4>Related-course metadata (optional)</h4><p>These selections record course relationships for discovery; they do not insert a card into the lesson body. To place the compact Option 3 inline course card, use the companion-course picker directly below the Lesson body field. Individual lesson links are managed separately.</p><input class="input" type="search" data-related-course-search placeholder="Search published or announced courses by title or topic" aria-label="Search published or announced related courses"><div class="related-course-list">${demoOffers.map(course=>{const checked=(l.relatedCourseIds||[]).includes(course.id);return `<div class="related-course-item related-course-entry"><label class="related-course-choice"><input type="checkbox" data-related-course="${esc(course.id)}" ${checked ? "checked" : ""}><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">${esc(course.state)}${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}${course.duration ? " · " + esc(course.duration) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></label></div>`;}).join("")}${comingSoonOffers.map(course=>`<div class="related-course-item related-course-entry"><div class="related-course-choice"><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">Coming soon${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></div></div>`).join("")}${demoOffers.length || comingSoonOffers.length ? "" : '<p class="microcopy">No published or announced courses are available to associate yet.</p>'}</div><div class="helper-note">These selections record related-course metadata only. Use the dedicated inline course-card picker below Lesson body to insert a visual companion-course card into the lesson. No course is automatically published.</div></div><div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap"><button class="btn" type="button" data-action="go-curriculum">← Curriculum</button><button class="btn primary" type="button" data-action="go-questions">Edit practice questions →</button></div>`:'<div class="empty-state"><p>Select a lesson in the curriculum first.</p></div>'}`;}
   function questionImageMarkup(q, l) {
     const images = Array.isArray(l.images) ? l.images : (l.image ? [l.image] : []);
     const image = images.find(function(item) {
@@ -3373,6 +3562,8 @@ body.builder-dialog-open { overflow:hidden; }
   renderEditor = function() {
     renderEditorBeforeReferenceAndMediaEnhancements();
     if (state.tab === 'lesson') {
+      const outlineEditor = $('#workspace .lesson-outline-layout [data-visual-editor]');
+      if (outlineEditor) updateLessonOutlineFromEditor(outlineEditor);
       const textarea = $('#workspace [data-visual-editor][data-visual-kind="main"]');
       const field = textarea && textarea.closest('.field');
       if (field && !$('#workspace [data-course-card-picker]')) {
@@ -3428,6 +3619,29 @@ body.builder-dialog-open { overflow:hidden; }
       });
     }
   };
+
+  document.addEventListener('click', event => {
+    const button = event.target.closest?.('[data-lesson-outline-index]');
+    if (!button) return;
+    const layout = button.closest('.lesson-outline-layout');
+    const panel = layout?.querySelector('[data-lesson-outline]');
+    const editor = layout?.querySelector('[data-visual-editor]');
+    const targetIndex = Number(button.dataset.lessonOutlineIndex);
+    const heading = editor?.querySelectorAll('h1,h2,h3,h4')[targetIndex];
+    if (!panel || !editor || !heading) return;
+
+    panel.dataset.activeIndex = String(targetIndex);
+    const range = document.createRange();
+    range.selectNodeContents(heading);
+    range.collapse(true);
+    editor.focus({preventScroll:true});
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    captureRichEditorRange();
+    updateLessonOutlineFromEditor(editor);
+    heading.scrollIntoView({behavior:'smooth', block:'center'});
+  });
 
   document.addEventListener('input', event => {
     const input = event.target;
@@ -3931,6 +4145,7 @@ body.builder-dialog-open { overflow:hidden; }
     if (!editor) return;
     captureRichEditorRange();
     scheduleVisualEditorSync(editor);
+    scheduleLessonOutlineUpdate(editor);
   });
   document.addEventListener('mousedown', event => {
     // Preserve the content selection while clicking formatting controls.
@@ -3974,6 +4189,7 @@ body.builder-dialog-open { overflow:hidden; }
     }
     restoreRichEditorSelection(editor);
     syncVisualEditorToModel(editor);
+    updateLessonOutlineFromEditor(editor);
     captureRichEditorRange();
   });
   document.addEventListener('click', async event => {
@@ -4017,6 +4233,7 @@ body.builder-dialog-open { overflow:hidden; }
       restoreRichEditorSelection(editor);
       document.execCommand('formatBlock', false, value);
       syncVisualEditorToModel(editor);
+      updateLessonOutlineFromEditor(editor);
       picker.querySelectorAll('[data-rich-format-option]').forEach(item => {
         item.setAttribute('aria-selected', item === option ? 'true' : 'false');
       });
