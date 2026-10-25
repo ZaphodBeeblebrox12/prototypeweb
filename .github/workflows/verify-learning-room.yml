@@ -11,6 +11,7 @@ on:
   pull_request:
     branches:
       - my-new-branch
+      - main
     paths:
       - "site/**"
       - "course-content/support-resistance/chart_assets/charts/**"
