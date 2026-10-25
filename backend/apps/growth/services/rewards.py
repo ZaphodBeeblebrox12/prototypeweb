@@ -1,5 +1,6 @@
 """Rewards domain — split from apps/growth/services.py (mechanical, no behavior change)."""
 import logging
+from datetime import timedelta
 from typing import Optional, Tuple, List
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -49,15 +50,18 @@ class UserRewardBalance:
 
     def __init__(self, user: User):
         self.user = user
-        self._cache = None
+        self._cache: Optional[List[ReferralReward]] = None
 
     def _get_rewards(self) -> List[ReferralReward]:
         """Get all non-expired, credited rewards for user."""
         if self._cache is None:
-            self._cache = list(ReferralReward.objects.filter(
-                referrer=self.user,
-                status=ReferralReward.Status.CREDITED  # Only count credited (not pending)
-            ))
+            self._cache = list(
+                ReferralReward.objects.filter(
+                    referrer=self.user,
+                    status=ReferralReward.Status.CREDITED,
+                )
+            )
+        assert self._cache is not None
         return self._cache
 
     @property
@@ -182,7 +186,7 @@ class ReferralRewardService:
 
         # Calculate unlock time (default 72 hours from now)
         delay_hours = settings_obj.reward_delay_hours or 72
-        unlocked_at = timezone.now() + timezone.timedelta(hours=delay_hours)
+        unlocked_at = timezone.now() + timedelta(hours=delay_hours)
 
         # Create the reward as PENDING (not immediately credited)
         reward = ReferralReward.objects.create(
@@ -250,7 +254,7 @@ class ReferralRewardService:
                     triggering_sub.is_active or 
                     (triggering_sub.status == Subscription.Status.EXPIRED and 
                      triggering_sub.expires_at and 
-                     triggering_sub.expires_at > timezone.now() - timezone.timedelta(days=30))
+                     triggering_sub.expires_at > timezone.now() - timedelta(days=30))
                 )
 
                 # Additional check: look for refund in PaymentIntent
@@ -391,7 +395,7 @@ class ReferralRewardService:
         balance = UserRewardBalance(user)
         extra_days = balance.calculate_extension_days(plan_price_cents, plan_duration_days)
 
-        extension_percentage = 0
+        extension_percentage = 0.0
         if plan_duration_days > 0:
             extension_percentage = (extra_days / plan_duration_days) * 100
 
@@ -545,7 +549,7 @@ class SubscriptionCreditService:
 
         # Extend the subscription
         old_expires = subscription.expires_at
-        new_expires = old_expires + timezone.timedelta(days=extra_days)
+        new_expires = old_expires + timedelta(days=extra_days)
         subscription.expires_at = new_expires
         subscription.save(update_fields=["expires_at"])
 

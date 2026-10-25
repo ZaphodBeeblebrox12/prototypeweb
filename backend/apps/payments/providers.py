@@ -113,7 +113,8 @@ def get_stripe_checkout_url(session_id: str) -> Optional[str]:
         session = stripe.checkout.Session.retrieve(session_id)
     except Exception as exc:
         raise ProviderError(f"stripe session retrieve failed: {exc}") from exc
-    return session.get("url")
+    url = session.get("url")
+    return url if isinstance(url, str) else None
 
 
 def verify_stripe_payment(intent) -> Optional[bool]:

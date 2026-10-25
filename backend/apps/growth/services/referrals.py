@@ -1,5 +1,6 @@
 """Referrals domain — split from apps/growth/services.py (mechanical, no behavior change)."""
 import logging
+from datetime import timedelta
 from typing import Optional, Tuple, List
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -130,7 +131,7 @@ class ReferralService:
                 # Count recent same-domain referrals by this referrer
                 recent_count = Referral.objects.filter(
                     referrer=referrer,
-                    created_at__gte=timezone.now() - timezone.timedelta(days=7)
+                    created_at__gte=timezone.now() - timedelta(days=7)
                 ).count()
 
                 if recent_count > 5:

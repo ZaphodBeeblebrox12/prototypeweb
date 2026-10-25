@@ -10,6 +10,9 @@ API (enqueue_reconcile / process_job) is identical on both.
 
 import logging
 import time
+from datetime import timedelta
+from typing import Any, Callable, TypeVar, cast
+from uuid import UUID
 from django.db import OperationalError, IntegrityError, transaction
 from django.db.models import F
 from django.utils import timezone
@@ -18,12 +21,14 @@ from .models import Job, ReconcileState
 
 logger = logging.getLogger(__name__)
 
+T = TypeVar('T')
+
 LOCK_RETRY_ATTEMPTS = 4
 LOCK_RETRY_BASE_SECONDS = 0.2
 MAX_CONVERGENCE_ITERATIONS = 10
 
 
-def _retry_locked(fn, *args, **kwargs):
+def _retry_locked(fn: Callable[..., T], *args: Any, **kwargs: Any) -> T:
     """Run fn, retrying transient SQLite 'database is locked' errors."""
     for attempt in range(LOCK_RETRY_ATTEMPTS):
         try:
@@ -33,12 +38,11 @@ def _retry_locked(fn, *args, **kwargs):
             if not is_locked or attempt == LOCK_RETRY_ATTEMPTS - 1:
                 raise
             time.sleep(LOCK_RETRY_BASE_SECONDS * (2 ** attempt))
-    return None
+    raise RuntimeError("Lock retry exhausted without a result")
 
 
 @transaction.atomic
-@transaction.atomic
-def enqueue_reconcile(user_id: int, reason: str = "") -> Job:
+def enqueue_reconcile(user_id: UUID | str, reason: str = "") -> Job:
     """Coalescing transactional enqueue of a reconciliation job.
 
     Lock order: ReconcileState -> Job (held throughout one transaction).
@@ -54,12 +58,15 @@ def enqueue_reconcile(user_id: int, reason: str = "") -> Job:
                             .filter(user_id=user_id).update(version=F("version") + 1))
     if updated == 0:
         _retry_locked(lambda: ReconcileState.objects.create(user_id=user_id, version=1))
-    version = _retry_locked(lambda: _lock(ReconcileState.objects)
-                            .get(user_id=user_id).version)
+    version: int = _retry_locked(
+        lambda: _lock(ReconcileState.objects).get(user_id=user_id).version
+    )
 
-    existing = _retry_locked(lambda: _lock(Job.objects)
-                             .filter(idempotency_key=key, status__in=Job.OPEN_STATUSES)
-                             .first())
+    existing: Job | None = _retry_locked(
+        lambda: _lock(Job.objects)
+        .filter(idempotency_key=key, status__in=Job.OPEN_STATUSES)
+        .first()
+    )
     if existing is not None:
         if version > existing.requested_version:
             existing.requested_version = version
@@ -75,7 +82,7 @@ def enqueue_reconcile(user_id: int, reason: str = "") -> Job:
     except IntegrityError:
         pass
 
-    job = _retry_locked(lambda: _lock(Job.objects.filter(idempotency_key=key)).get())
+    job: Job = _retry_locked(lambda: _lock(Job.objects.filter(idempotency_key=key)).get())
     if version > job.requested_version:
         job.requested_version = version
         job.save(update_fields=["requested_version"])
@@ -87,12 +94,13 @@ def enqueue_generic(kind: str, payload: dict, idempotency_key=None,
                     delay_seconds: int = 0) -> Job:
     """Non-reconcile enqueue (sweep/geoip/referrals) with simple suppression
     of duplicate OPEN jobs of the same kind+key."""
-    next_at = timezone.now() + timezone.timedelta(seconds=delay_seconds)
+    next_at = timezone.now() + timedelta(seconds=delay_seconds)
     key = idempotency_key or f"{kind}:{hash(frozenset(payload.items())) if payload else ''}"
-    existing = _retry_locked(lambda: (Job.objects
-                                      .filter(idempotency_key=key,
-                                              status__in=Job.OPEN_STATUSES)
-                                      .select_for_update().first()))
+    existing: Job | None = _retry_locked(
+        lambda: Job.objects.filter(
+            idempotency_key=key, status__in=Job.OPEN_STATUSES
+        ).select_for_update().first()
+    )
     if existing is not None:
         return existing
     try:
@@ -101,4 +109,4 @@ def enqueue_generic(kind: str, payload: dict, idempotency_key=None,
                                       idempotency_key=key, next_attempt_at=next_at)
     except IntegrityError:
         pass
-    return _retry_locked(lambda: Job.objects.get(idempotency_key=key))
+    return cast(Job, _retry_locked(lambda: Job.objects.get(idempotency_key=key)))

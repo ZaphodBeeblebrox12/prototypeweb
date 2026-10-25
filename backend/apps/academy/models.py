@@ -309,7 +309,7 @@ class CourseEntitlement(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["user", "course"], name="academy_ent_user_course_uq"),
             models.CheckConstraint(
-                check=models.Q(expires_at__isnull=True)
+                condition=models.Q(expires_at__isnull=True)
                 | models.Q(expires_at__gt=models.F("starts_at")),
                 name="academy_ent_expiry_start_ck",
             ),

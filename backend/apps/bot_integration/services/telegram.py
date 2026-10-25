@@ -233,7 +233,7 @@ class TelegramBotService:
         if status in ("left", "kicked"):
             return False
         if status == "restricted" and isinstance(member.get("is_member"), bool):
-            return member["is_member"]
+            return member["is_member"] is True
         return None
 
     @classmethod
@@ -257,10 +257,14 @@ class TelegramBotService:
                 "detail": {},
             }
         bot_id = (bot_response.get("result") or {}).get("id")
-        member_response = cls._api_request("getChatMember", {
-            "chat_id": channel_id, "user_id": bot_id,
-        }) if bot_id else {"ok": False}
-        member = (member_response.get("result") or {}) if member_response.get("ok") else {}
+        member_response: Dict[str, Any] = (
+            cls._api_request("getChatMember", {"chat_id": channel_id, "user_id": bot_id})
+            if bot_id
+            else {"ok": False}
+        )
+        member: Dict[str, Any] = (
+            (member_response.get("result") or {}) if member_response.get("ok") else {}
+        )
         status = member.get("status", "unknown")
         detail = {
             "title": (chat_response.get("result") or {}).get("title")

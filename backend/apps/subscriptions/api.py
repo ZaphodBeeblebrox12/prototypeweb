@@ -156,7 +156,8 @@ def create_subscription_from_gift(
     pricing_region = None
     if request:
         pricing_country = get_pricing_country(request)
-        pricing_region = get_region_for_country(pricing_country)
+        if pricing_country:
+            pricing_region = get_region_for_country(pricing_country)
 
     # Create the subscription with gift attribution
     subscription = Subscription.objects.create(

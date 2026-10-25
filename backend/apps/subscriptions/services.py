@@ -2,6 +2,7 @@
 Subscription services for geo pricing, gifts, admin grants, and events.
 """
 import uuid
+from datetime import timedelta
 from typing import Optional, Dict, Any
 
 from django.utils import timezone
@@ -57,7 +58,8 @@ def get_region_for_country(country_code: str) -> Optional[str]:
 def get_request_country(request) -> str:
     import logging
     logger = logging.getLogger(__name__)
-    cf_country = request.META.get("HTTP_CF_IPCOUNTRY", "").upper()
+    raw_cf_country = request.META.get("HTTP_CF_IPCOUNTRY", "")
+    cf_country = raw_cf_country.upper() if isinstance(raw_cf_country, str) else ""
     if cf_country and cf_country != "XX" and len(cf_country) == 2:
         return cf_country
     client_ip, is_routable = get_client_ip(request)
@@ -66,7 +68,7 @@ def get_request_country(request) -> str:
             logger.debug(f"IP detected ({client_ip}) but no geo mapping available")
         else:
             logger.debug(f"Private/non-routable IP detected ({client_ip})")
-    default_country = getattr(settings, "DEFAULT_COUNTRY", "US")
+    default_country = str(getattr(settings, "DEFAULT_COUNTRY", "US"))
     return default_country.upper()
 
 def get_pricing_country(request) -> Optional[str]:
@@ -79,11 +81,12 @@ def get_pricing_country(request) -> Optional[str]:
     """
     if getattr(settings, "DEBUG", False):
         test_country = request.GET.get("test_country")
-        if test_country:
+        if isinstance(test_country, str) and test_country:
             return test_country.upper()
 
     # Primary: Cloudflare header
-    cf_country = request.META.get("HTTP_CF_IPCOUNTRY", "").upper()
+    raw_cf_country = request.META.get("HTTP_CF_IPCOUNTRY", "")
+    cf_country = raw_cf_country.upper() if isinstance(raw_cf_country, str) else ""
     if cf_country and cf_country != "XX" and len(cf_country) == 2:
         return cf_country
 
@@ -273,7 +276,7 @@ def create_gift_subscription(
         message=message,
         gift_code=str(uuid.uuid4())[:16].upper(),
         duration_days=duration_days,
-        expires_at=timezone.now() + timezone.timedelta(days=30),
+        expires_at=timezone.now() + timedelta(days=30),
     )
     return gift
 
@@ -293,7 +296,7 @@ def claim_gift_subscription(
     if gift.to_user:
         raise ValueError("Gift already claimed")
     with transaction.atomic():
-        expires_at = timezone.now() + timezone.timedelta(days=gift.duration_days)
+        expires_at = timezone.now() + timedelta(days=gift.duration_days)
         subscription = Subscription.objects.create(
             user=to_user,
             plan=gift.plan,
@@ -344,7 +347,7 @@ def grant_subscription_by_admin(
         if duration_days is None:
             expires_at = None  # no expiry (approval-granted hidden plans)
         else:
-            expires_at = timezone.now() + timezone.timedelta(days=duration_days)
+            expires_at = timezone.now() + timedelta(days=duration_days)
         subscription = Subscription.objects.create(
             user=user,
             plan=plan,
@@ -385,7 +388,7 @@ def emit_event(
     event_type: str,
     subscription: Subscription,
     user: User,
-    metadata: Dict[str, Any] = None
+    metadata: Optional[Dict[str, Any]] = None
 ):
     import logging
     event_data = {
@@ -400,7 +403,7 @@ def emit_event(
 
 def start_trial(user: User, plan: Plan, days: int = 14, request = None) -> Subscription:
     with transaction.atomic():
-        expires_at = timezone.now() + timezone.timedelta(days=days)
+        expires_at = timezone.now() + timedelta(days=days)
         subscription = Subscription.objects.create(
             user=user,
             plan=plan,
@@ -713,7 +716,7 @@ def extend_subscription(subscription, days, actor="admin"):
         base_expiry = current.expires_at
         if base_expiry < now:
             base_expiry = now
-        new_expiry = base_expiry + timezone.timedelta(days=days)
+        new_expiry = base_expiry + timedelta(days=days)
         updated = Subscription.objects.filter(
             pk=current.pk, is_active=True, status=Subscription.Status.ACTIVE,
             expires_at=current.expires_at,

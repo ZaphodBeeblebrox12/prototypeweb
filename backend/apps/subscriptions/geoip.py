@@ -8,7 +8,7 @@ import shutil
 import tempfile
 from pathlib import Path
 from threading import Lock
-from typing import Optional
+from typing import Any, Optional
 
 import requests
 from django.conf import settings
@@ -21,7 +21,7 @@ _maxmind_reader = None
 _reader_lock = Lock()
 
 # GeoIP2 import deferred until needed
-geoip2 = None
+geoip2: Any = None
 
 
 def _import_geoip2():
@@ -52,13 +52,13 @@ def get_client_ip(request) -> Optional[str]:
     2. REMOTE_ADDR
     Returns None for private/invalid IPs.
     """
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0].strip()
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    if isinstance(x_forwarded_for, str) and x_forwarded_for.strip():
+        ip = x_forwarded_for.split(",", maxsplit=1)[0].strip()
     else:
-        ip = request.META.get('REMOTE_ADDR')
+        ip = request.META.get("REMOTE_ADDR")
 
-    if not ip or ip == '127.0.0.1' or _is_private_ip(ip):
+    if not isinstance(ip, str) or not ip or ip == "127.0.0.1" or _is_private_ip(ip):
         return None
     return ip
 
@@ -224,7 +224,7 @@ def get_country_from_maxmind(request) -> Optional[str]:
 
     try:
         response = reader.country(client_ip)
-        country_code = response.country.iso_code
+        country_code: str | None = response.country.iso_code
 
         cache_ttl = getattr(settings, 'MAXMIND_CACHE_TTL', 86400)
         cache.set(cache_key, country_code or "", cache_ttl)

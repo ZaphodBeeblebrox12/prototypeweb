@@ -12,6 +12,7 @@ event + AuditLog, and entitlement changes flow through the existing
 subscription services (never a parallel access-control system).
 """
 import logging
+from typing import cast
 
 from django.db import transaction
 from django.db.models import F
@@ -82,7 +83,7 @@ def activate_paid_subscription(payment_intent) -> tuple[bool, object]:
                     .select_related("course").first())
     if course_offer is not None:
         from apps.academy.services import activate_course_payment
-        return activate_course_payment(payment_intent, course_offer)
+        return cast(tuple[bool, object], activate_course_payment(payment_intent, course_offer))
 
     price_source = payment_intent.plan_price or payment_intent.geo_plan_price
     if getattr(price_source, "interval", None) == "one_time":
@@ -212,31 +213,6 @@ def refund_context_for(payment_intent) -> str:
     plan.is_trial (pre-instrumentation payments only - documented weakness).
     Never derived from today's plan configuration when a snapshot exists.
     """
-    try:
-        snap = payment_intent.checkout_evidence.pricing_snapshot
-        if snap.get("is_trial"):
-            return Refund.CommercialContext.TRIAL
-        if snap.get("is_upgrade") or getattr(payment_intent, "is_upgrade", False):
-            return Refund.CommercialContext.UPGRADE
-        return Refund.CommercialContext.STANDARD
-    except Exception:
-        pass
-    try:
-        if payment_intent.plan.is_trial:
-            return Refund.CommercialContext.TRIAL
-    except Exception:
-        pass
-    if getattr(payment_intent, "is_upgrade", False):
-        return Refund.CommercialContext.UPGRADE
-    return Refund.CommercialContext.STANDARD
-
-
-def refund_context_for(payment_intent) -> str:
-    """Commercial context of a payment, stamped onto its Refund rows.
-
-    Source of truth: the payment's CHECKOUT EVIDENCE snapshot (immutable,
-    transaction-specific). Fallbacks: intent.is_upgrade, then live plan.is_trial
-    (pre-instrumentation payments only - documented weakness)."""
     try:
         snap = payment_intent.checkout_evidence.pricing_snapshot
         if snap.get("is_trial"):

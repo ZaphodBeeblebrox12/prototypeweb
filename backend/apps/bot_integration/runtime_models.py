@@ -8,6 +8,8 @@ self-registration.  No secrets are ever stored.
 
 from __future__ import annotations
 
+from datetime import timedelta
+
 from django.db import models
 from django.utils import timezone
 
@@ -54,8 +56,8 @@ class BotRuntimeState(models.Model):
             return False
 
     def is_fresh(self, seconds: int) -> bool:
-        cutoff = timezone.now() - timezone.timedelta(seconds=seconds)
-        return self.last_seen >= cutoff
+        cutoff = timezone.now() - timedelta(seconds=seconds)
+        return bool(self.last_seen >= cutoff)
 
     @classmethod
     def latest_compatible(cls, freshness_seconds: int):
@@ -63,7 +65,7 @@ class BotRuntimeState(models.Model):
         from django.conf import settings
         fresh = cls.objects.filter(
             last_seen__gte=timezone.now()
-            - timezone.timedelta(seconds=freshness_seconds)
+            - timedelta(seconds=freshness_seconds)
         )
         for state in fresh:
             if state.is_compatible():
@@ -76,7 +78,7 @@ class BotRuntimeState(models.Model):
 
     @classmethod
     def mark_offline_stale(cls, freshness_seconds: int):
-        cutoff = timezone.now() - timezone.timedelta(seconds=freshness_seconds)
+        cutoff = timezone.now() - timedelta(seconds=freshness_seconds)
         cls.objects.filter(status=cls.STATUS_ONLINE, last_seen__lt=cutoff) \
                    .update(status=cls.STATUS_OFFLINE)
 

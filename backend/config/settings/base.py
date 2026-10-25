@@ -4,6 +4,7 @@ Base settings for community platform.
 import json
 import os
 from pathlib import Path
+from typing import Any
 
 import environ
 
@@ -213,7 +214,7 @@ ACADEMY_ASSET_STORAGE_LABEL = env("ACADEMY_ASSET_STORAGE_LABEL", default="")
 ACADEMY_ASSET_MIGRATION_TARGET_ALIAS = env("ACADEMY_ASSET_MIGRATION_TARGET_ALIAS", default="").strip()
 ACADEMY_ASSET_MIGRATION_TARGET_DURABLE = env.bool("ACADEMY_ASSET_MIGRATION_TARGET_DURABLE", default=False)
 
-STORAGES = {
+STORAGES: dict[str, dict[str, Any]] = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
