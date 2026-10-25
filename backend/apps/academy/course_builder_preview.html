@@ -909,6 +909,7 @@ body.builder-dialog-open { overflow:hidden; }
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </div>
+<!-- COURSE_BUILDER_IMPORTED_DRAFT_DATA -->
 <script>
 (() => {
   'use strict';
@@ -1145,8 +1146,45 @@ body.builder-dialog-open { overflow:hidden; }
     }
     return getSeed();
   }
+  const tradingPathImportRequested = new URLSearchParams(window.location.search).get('import') === 'trading-path';
+  let requestedTradingPathDraft = null;
+  if (tradingPathImportRequested) {
+    try {
+      const importNode = document.getElementById('courseBuilderImportedDraft');
+      const importPayload = JSON.parse(importNode?.textContent || '{}');
+      if (importPayload?.course && typeof importPayload.course === 'object') {
+        requestedTradingPathDraft = normalizeCourseState(importPayload.course);
+      }
+    } catch (error) {
+      console.error('Could not read the Trading Path import payload.', error);
+    }
+  }
+  function clearTradingPathImportQuery() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('import');
+    window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+  }
   diagnosticStage('browser-state-normalization-started');
   let state=normalizeLoadedState(load());
+  if (requestedTradingPathDraft) {
+    // Remove only the untouched starter placeholder; preserve every real local draft.
+    state.courses = state.courses.filter(local => !isUntouchedStarterDraft(local));
+    let importedCourse = state.courses.find(local =>
+      String(local.slug || '') === String(requestedTradingPathDraft.slug || '')
+    );
+    if (!importedCourse) {
+      state.courses.unshift(requestedTradingPathDraft);
+      importedCourse = requestedTradingPathDraft;
+    }
+    state.selectedCourseId = importedCourse.id;
+    state.selectedModuleId = importedCourse.modules?.[0]?.id || null;
+    state.selectedLessonId = importedCourse.modules?.[0]?.lessons?.[0]?.id || null;
+    state.view = 'editor';
+    state.tab = 'overview';
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (error) {
+      console.warn('The imported Trading Path draft could not be cached in this browser.', error);
+    }
+  }
   diagnosticStage('browser-state-normalization-complete', {courseCount:state.courses.length, selectedCoursePresent:Boolean(state.selectedCourseId)});
   // Regional editing may contain many rich-text variants. Start on the light overview
   // screen after a reload; the selected course and all draft content remain untouched.
@@ -4396,6 +4434,36 @@ body.builder-dialog-open { overflow:hidden; }
       });
       if (remoteDrafts.length) toast('Connected to Academy. Shared drafts are available across devices.');
       else toast('Connected to Academy. Save your first draft to make it available across devices.');
+      if (tradingPathImportRequested && requestedTradingPathDraft) {
+        const desiredSlug = String(requestedTradingPathDraft.slug || '');
+        const importedCourse = state.courses.find(item => String(item.slug || '') === desiredSlug);
+        if (!importedCourse) {
+          toast('The Trading Path content was not found in the editor state. Reopen the import link to retry.');
+        } else {
+          state.selectedCourseId = importedCourse.id;
+          state.selectedModuleId = importedCourse.modules?.[0]?.id || null;
+          state.selectedLessonId = importedCourse.modules?.[0]?.lessons?.[0]?.id || null;
+          state.view = 'editor';
+          state.tab = 'overview';
+          render();
+          const savedRemoteDraft = remoteDrafts.find(item => String(item.slug || '') === desiredSlug);
+          if (savedRemoteDraft) {
+            clearTradingPathImportQuery();
+            toast('Opened the existing Your Trading Path draft. No duplicate was created or published.');
+          } else {
+            clearTimeout(academySaveTimer);
+            try {
+              await saveCurrentToAcademy(false, false);
+              clearTradingPathImportQuery();
+              renderSidebar();
+              renderHeaderState();
+              toast('Imported all Trading Path content as an editable Academy draft. Nothing was published.');
+            } catch (saveError) {
+              toast('Trading Path content is loaded in the editor, but shared saving failed: ' + String(saveError?.message || saveError));
+            }
+          }
+        }
+      }
     } catch (error) {
       diagnosticError('academy-sync-failed', error);
       academyReady = false;
