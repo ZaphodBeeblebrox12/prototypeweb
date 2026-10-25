@@ -1955,7 +1955,45 @@ class CourseBuilderApiTests(TestCase):
         self.assertNotIn("Secret module title", body)
 
 
+    def test_get_offers_trading_path_as_a_one_time_shared_draft_candidate(self):
+        response = self.client.get(reverse("staff_course_builder_api"))
+        self.assertEqual(response.status_code, 200)
+        candidate = response.json().get("trading_path_import_candidate")
+        self.assertIsInstance(candidate, dict)
+        self.assertEqual(candidate["course"]["title"], "Your Trading Path")
+        self.assertEqual(len(candidate["course"]["modules"]), 5)
+        self.assertEqual(
+            sum(len(module["lessons"]) for module in candidate["course"]["modules"]),
+            48,
+        )
+
+    def test_get_does_not_offer_trading_path_again_after_a_draft_exists(self):
+        CourseImport.objects.create(
+            course_slug="your-trading-path-import-draft",
+            title="Your Trading Path",
+            manifest_version="course-builder-v1",
+            content_hash="a" * 64,
+            source_manifest="builder://your-trading-path-import-draft",
+            payload={"builder_state": {"title": "Your Trading Path"}},
+            status=CourseImport.Status.DRAFT,
+            imported_by=self.admin,
+        )
+        response = self.client.get(reverse("staff_course_builder_api"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.json().get("trading_path_import_candidate"))
+
 class CourseBuilderPreviewWiringTests(SimpleTestCase):
+    def test_builder_auto_imports_trading_path_from_shared_candidate(self):
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
+        for marker in (
+            "result.trading_path_import_candidate",
+            "autoImportedTradingPath",
+            "Your Trading Path is now in Your courses as an editable draft.",
+            "await saveCurrentToAcademy(false, false)",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, source)
+
     def test_new_course_buttons_use_responsive_capture_phase_handler(self):
         source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
         self.assertIn(

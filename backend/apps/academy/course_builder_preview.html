@@ -4417,6 +4417,29 @@ body.builder-dialog-open { overflow:hidden; }
         state.selectedLessonId = fallback?.modules?.[0]?.lessons?.[0]?.id || null;
         stateChanged = true;
       }
+      // The bundled Trading Path is imported once into the shared Academy draft store.
+      // Do this on the ordinary Builder route too, so authors do not need a special URL.
+      let autoImportedTradingPath = false;
+      const tradingPathCandidate = result.trading_path_import_candidate;
+      const candidateCourse = tradingPathCandidate && tradingPathCandidate.course;
+      if (candidateCourse && typeof candidateCourse === 'object' &&
+          !remoteDrafts.some(remote => String(remote.slug || '') === String(candidateCourse.slug || ''))) {
+        let importedCourse = state.courses.find(local =>
+          String(local.slug || '') === String(candidateCourse.slug || '')
+        );
+        if (!importedCourse) {
+          importedCourse = normalizeCourseState(candidateCourse);
+          state.courses.unshift(importedCourse);
+        }
+        // Preserve a prior local-only copy if the last save attempt did not complete.
+        state.selectedCourseId = importedCourse.id;
+        state.selectedModuleId = importedCourse.modules?.[0]?.id || null;
+        state.selectedLessonId = importedCourse.modules?.[0]?.lessons?.[0]?.id || null;
+        state.view = 'editor';
+        state.tab = 'overview';
+        stateChanged = true;
+        autoImportedTradingPath = true;
+      }
       academyReady = true;
       if (editRevision === revisionAtStart) hasUnsavedChanges = false;
       if (stateChanged) {
@@ -4434,7 +4457,18 @@ body.builder-dialog-open { overflow:hidden; }
       });
       if (remoteDrafts.length) toast('Connected to Academy. Shared drafts are available across devices.');
       else toast('Connected to Academy. Save your first draft to make it available across devices.');
-      if (tradingPathImportRequested && requestedTradingPathDraft) {
+      if (autoImportedTradingPath) {
+        clearTimeout(academySaveTimer);
+        try {
+          await saveCurrentToAcademy(false, false);
+          if (tradingPathImportRequested) clearTradingPathImportQuery();
+          renderSidebar();
+          renderHeaderState();
+          toast('Your Trading Path is now in Your courses as an editable draft. Nothing was published.');
+        } catch (saveError) {
+          toast('Your Trading Path is loaded in the builder but the shared draft save failed: ' + String(saveError?.message || saveError));
+        }
+      } else if (tradingPathImportRequested && requestedTradingPathDraft) {
         const desiredSlug = String(requestedTradingPathDraft.slug || '');
         const importedCourse = state.courses.find(item => String(item.slug || '') === desiredSlug);
         if (!importedCourse) {

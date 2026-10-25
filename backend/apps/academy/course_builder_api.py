@@ -10,6 +10,7 @@ import re
 import uuid
 from copy import deepcopy
 from io import BytesIO
+from pathlib import Path
 from urllib.parse import quote
 
 import requests
@@ -54,6 +55,34 @@ from .regional_content import (
 from .storage import course_asset_storage
 
 logger = logging.getLogger(__name__)
+
+_TRADING_PATH_IMPORT_FILE = Path(__file__).with_name("course_builder_trading_path_import.json")
+_TRADING_PATH_IMPORT_SLUG = "your-trading-path-import-draft"
+
+
+def _trading_path_import_candidate():
+    """Offer the bundled course for one-time import until its draft exists."""
+    if CourseImport.objects.filter(course_slug=_TRADING_PATH_IMPORT_SLUG).exclude(
+        status=CourseImport.Status.DELETED
+    ).exists():
+        return None
+    if Course.objects.exclude(status=Course.Status.ARCHIVED).filter(
+        slug=_TRADING_PATH_IMPORT_SLUG
+    ).exists():
+        return None
+    try:
+        with _TRADING_PATH_IMPORT_FILE.open(encoding="utf-8") as source:
+            candidate = json.load(source)
+    except (OSError, json.JSONDecodeError):
+        logger.exception("Could not load the one-time Trading Path import source")
+        return None
+    if not isinstance(candidate, dict) or not isinstance(candidate.get("course"), dict):
+        logger.error("The one-time Trading Path import source has an invalid structure")
+        return None
+    if candidate["course"].get("slug") != _TRADING_PATH_IMPORT_SLUG:
+        logger.error("The one-time Trading Path import source has an unexpected slug")
+        return None
+    return candidate
 
 _MAX_IMAGE_BYTES = 10 * 1024 * 1024
 _ALLOWED_IMAGES = {
@@ -1534,6 +1563,7 @@ def course_builder_api(request):
                     "topics": topics,
                 }
             )
+        trading_path_import_candidate = _trading_path_import_candidate()
         asset_storage_status = course_asset_storage.status()
         logger.info(
             "Course Builder asset storage configured: backend=%s durable=%s writes_enabled=%s",
@@ -1621,6 +1651,7 @@ def course_builder_api(request):
                 "lesson_references": lesson_references,
                 "coming_soon_courses": coming_soon_courses,
                 "asset_storage": asset_storage_status,
+                "trading_path_import_candidate": trading_path_import_candidate,
             }
         )
 
