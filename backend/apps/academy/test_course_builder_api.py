@@ -2035,7 +2035,10 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
         website_preview = (
             backend_root / "templates" / "academy" / "course_import_website_preview.html"
         ).read_text(encoding="utf-8")
-        views_source = Path(__file__).with_name("views.py").read_text(encoding="utf-8")
+        # Normalize whitespace so Black's wrapping does not break this template-wiring contract.
+        views_source = " ".join(
+            Path(__file__).with_name("views.py").read_text(encoding="utf-8").split()
+        )
         self.assertIn(
             'MODULE {{ module.position|stringformat:"02d" }} · {{ module_display_title }}',
             lesson_template,
