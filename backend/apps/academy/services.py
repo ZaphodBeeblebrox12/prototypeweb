@@ -1,4 +1,5 @@
 """Server-side course access, release timing, entitlement and progress rules."""
+
 from datetime import timedelta
 
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -25,7 +26,8 @@ def get_active_entitlement(user, course, at=None):
             user=user, course=course, status=CourseEntitlement.Status.ACTIVE, starts_at__lte=at
         )
         .filter(Q(expires_at__isnull=True) | Q(expires_at__gt=at))
-        .select_related("course", "offer", "payment_intent").first()
+        .select_related("course", "offer", "payment_intent")
+        .first()
     )
 
 
@@ -39,19 +41,25 @@ def can_access_lesson(user, lesson, at=None):
     at = at or timezone.now()
     lesson = Lesson.objects.select_related("module__course").get(pk=lesson.pk)
     course = lesson.module.course
-    if not lesson.is_published or not lesson.module.is_published or course.status == Course.Status.DRAFT:
+    if (
+        not lesson.is_published
+        or not lesson.module.is_published
+        or course.status == Course.Status.DRAFT
+    ):
         return False
     if lesson.is_preview and course.status == Course.Status.PUBLISHED:
         return True
     entitlement = get_active_entitlement(user, course, at)
     return bool(entitlement and lesson_release_at(entitlement, lesson) <= at)
 
+
 def choose_resume_lesson(user, lessons, progress_by_lesson, at=None):
     """Choose the last visited unfinished accessible lesson, then the next available one."""
     at = at or timezone.now()
     ordered_lessons = list(lessons)
     in_progress = [
-        lesson for lesson in ordered_lessons
+        lesson
+        for lesson in ordered_lessons
         if (
             lesson.pk in progress_by_lesson
             and progress_by_lesson[lesson.pk].status == LessonProgress.Status.IN_PROGRESS
@@ -59,8 +67,7 @@ def choose_resume_lesson(user, lessons, progress_by_lesson, at=None):
     ]
     in_progress.sort(
         key=lambda lesson: (
-            progress_by_lesson[lesson.pk].last_seen_at
-            or progress_by_lesson[lesson.pk].updated_at,
+            progress_by_lesson[lesson.pk].last_seen_at or progress_by_lesson[lesson.pk].updated_at,
             progress_by_lesson[lesson.pk].updated_at,
         ),
         reverse=True,
@@ -102,10 +109,15 @@ def get_resume_lesson(user, course, at=None):
     return choose_resume_lesson(user, lessons, progress_by_lesson, at)
 
 
-
-
-def grant_course_entitlement(*, user, offer, payment_intent=None, granted_by=None,
-                             source=CourseEntitlement.Source.PURCHASE, reason=""):
+def grant_course_entitlement(
+    *,
+    user,
+    offer,
+    payment_intent=None,
+    granted_by=None,
+    source=CourseEntitlement.Source.PURCHASE,
+    reason="",
+):
     """Grant course access; a repeat delivery of the same payment is a no-op.
 
     The unique user/course database constraint is the final duplicate-row guard.
@@ -125,15 +137,22 @@ def grant_course_entitlement(*, user, offer, payment_intent=None, granted_by=Non
     if offer.course.status == Course.Status.DRAFT:
         raise ValidationError("Cannot grant access to a draft course.")
     now = timezone.now()
-    requested_expiry = now + timedelta(days=offer.access_duration_days) if offer.access_duration_days else None
+    requested_expiry = (
+        now + timedelta(days=offer.access_duration_days) if offer.access_duration_days else None
+    )
 
     with transaction.atomic():
         entitlement, created = CourseEntitlement.objects.get_or_create(
-            user=user, course=offer.course,
+            user=user,
+            course=offer.course,
             defaults={
-                "offer": offer, "payment_intent": payment_intent, "source": source,
-                "status": CourseEntitlement.Status.ACTIVE, "starts_at": now,
-                "expires_at": requested_expiry, "granted_by": granted_by,
+                "offer": offer,
+                "payment_intent": payment_intent,
+                "source": source,
+                "status": CourseEntitlement.Status.ACTIVE,
+                "starts_at": now,
+                "expires_at": requested_expiry,
+                "granted_by": granted_by,
             },
         )
         if created:
@@ -148,11 +167,19 @@ def grant_course_entitlement(*, user, offer, payment_intent=None, granted_by=Non
             if was_active and entitlement.expires_at is None:
                 return entitlement, False
             if was_active:
-                final_expiry = None if requested_expiry is None else max(entitlement.expires_at or now, requested_expiry)
+                final_expiry = (
+                    None
+                    if requested_expiry is None
+                    else max(entitlement.expires_at or now, requested_expiry)
+                )
                 event_type = CourseEntitlementEvent.EventType.EXTENDED
             else:
                 final_expiry = requested_expiry
-                event_type = CourseEntitlementEvent.EventType.REINSTATED if entitlement.status == CourseEntitlement.Status.REVOKED else CourseEntitlementEvent.EventType.GRANTED
+                event_type = (
+                    CourseEntitlementEvent.EventType.REINSTATED
+                    if entitlement.status == CourseEntitlement.Status.REVOKED
+                    else CourseEntitlementEvent.EventType.GRANTED
+                )
             entitlement.offer = offer
             entitlement.payment_intent = payment_intent
             entitlement.source = source
@@ -162,16 +189,34 @@ def grant_course_entitlement(*, user, offer, payment_intent=None, granted_by=Non
             entitlement.revoked_at = None
             entitlement.revocation_reason = ""
             entitlement.granted_by = granted_by
-            entitlement.save(update_fields=[
-                "offer", "payment_intent", "source", "status", "starts_at", "expires_at",
-                "revoked_at", "revocation_reason", "granted_by", "updated_at",
-            ])
+            entitlement.save(
+                update_fields=[
+                    "offer",
+                    "payment_intent",
+                    "source",
+                    "status",
+                    "starts_at",
+                    "expires_at",
+                    "revoked_at",
+                    "revocation_reason",
+                    "granted_by",
+                    "updated_at",
+                ]
+            )
 
         CourseEntitlementEvent.objects.create(
-            entitlement=entitlement, payment_intent=payment_intent, actor=granted_by,
-            event_type=event_type, reason=reason,
-            details={"source": source, "offer_id": str(offer.pk),
-                     "expires_at": entitlement.expires_at.isoformat() if entitlement.expires_at else None},
+            entitlement=entitlement,
+            payment_intent=payment_intent,
+            actor=granted_by,
+            event_type=event_type,
+            reason=reason,
+            details={
+                "source": source,
+                "offer_id": str(offer.pk),
+                "expires_at": (
+                    entitlement.expires_at.isoformat() if entitlement.expires_at else None
+                ),
+            },
         )
         return entitlement, True
 
@@ -182,14 +227,22 @@ def revoke_course_entitlement_for_payment(payment_intent, *, reason):
     A refund for an older purchase must not revoke a later valid repurchase.
     Call this only from the existing verified refund/chargeback service.
     """
-    offer = CourseOffer.objects.filter(plan_id=payment_intent.plan_id).select_related("course").first()
+    offer = (
+        CourseOffer.objects.filter(plan_id=payment_intent.plan_id).select_related("course").first()
+    )
     if offer is None:
         return False
     with transaction.atomic():
-        entitlement = CourseEntitlement.objects.select_for_update().filter(
-            user_id=payment_intent.user_id, course_id=offer.course_id,
-            payment_intent_id=payment_intent.pk, status=CourseEntitlement.Status.ACTIVE,
-        ).first()
+        entitlement = (
+            CourseEntitlement.objects.select_for_update()
+            .filter(
+                user_id=payment_intent.user_id,
+                course_id=offer.course_id,
+                payment_intent_id=payment_intent.pk,
+                status=CourseEntitlement.Status.ACTIVE,
+            )
+            .first()
+        )
         if entitlement is None:
             return False
         entitlement.status = CourseEntitlement.Status.REVOKED
@@ -197,14 +250,18 @@ def revoke_course_entitlement_for_payment(payment_intent, *, reason):
         entitlement.revocation_reason = reason[:240]
         entitlement.save(update_fields=["status", "revoked_at", "revocation_reason", "updated_at"])
         CourseEntitlementEvent.objects.create(
-            entitlement=entitlement, payment_intent=payment_intent,
-            event_type=CourseEntitlementEvent.EventType.REVOKED, reason=reason,
+            entitlement=entitlement,
+            payment_intent=payment_intent,
+            event_type=CourseEntitlementEvent.EventType.REVOKED,
+            reason=reason,
             details={"payment_intent_id": str(payment_intent.pk)},
         )
         return True
 
 
-def update_lesson_progress(*, user, lesson, status=None, response_json=None, seconds_delta=0, at=None):
+def update_lesson_progress(
+    *, user, lesson, status=None, response_json=None, seconds_delta=0, at=None
+):
     """Persist progress only if the learner can access this lesson right now."""
     at = at or timezone.now()
     if not can_access_lesson(user, lesson, at):
@@ -226,7 +283,10 @@ def update_lesson_progress(*, user, lesson, status=None, response_json=None, sec
         # undo a completion record.
         if rank[status] >= rank[progress.status]:
             progress.status = status
-        if status in (LessonProgress.Status.IN_PROGRESS, LessonProgress.Status.COMPLETED) and not progress.started_at:
+        if (
+            status in (LessonProgress.Status.IN_PROGRESS, LessonProgress.Status.COMPLETED)
+            and not progress.started_at
+        ):
             progress.started_at = at
         if status == LessonProgress.Status.COMPLETED:
             progress.completed_at = progress.completed_at or at
@@ -250,35 +310,44 @@ def activate_course_payment(payment_intent, offer):
         raise ValidationError("A course offer requires an immutable one-time price snapshot.")
 
     claimed = PaymentIntent.objects.filter(
-        pk=payment_intent.pk, status=PaymentIntent.Status.PENDING,
+        pk=payment_intent.pk,
+        status=PaymentIntent.Status.PENDING,
     ).update(status=PaymentIntent.Status.SUCCESS)
     if not claimed:
         # A successful earlier claim is terminal here. Never re-grant after a
         # refund/chargeback merely because a duplicate capture event arrived.
         entitlement = CourseEntitlement.objects.filter(
-            user_id=payment_intent.user_id, course_id=offer.course_id,
+            user_id=payment_intent.user_id,
+            course_id=offer.course_id,
         ).first()
         return False, entitlement
 
     payment_intent.refresh_from_db()
     entitlement, created = grant_course_entitlement(
-        user=payment_intent.user, offer=offer, payment_intent=payment_intent,
+        user=payment_intent.user,
+        offer=offer,
+        payment_intent=payment_intent,
         source=CourseEntitlement.Source.PURCHASE,
         reason="Verified one-time course payment",
     )
     if created:
         from apps.events.models import record_event
+
         record_event(
             "academy.entitlement_granted",
             dedupe_key=f"academy.entitlement_granted:{payment_intent.pk}",
             user_id=payment_intent.user_id,
             object_ref=f"course_entitlement:{entitlement.pk}",
-            payload={"payment_intent_id": str(payment_intent.pk),
-                     "course_id": str(offer.course_id),
-                     "course_slug": offer.course.slug,
-                     "entitlement_id": str(entitlement.pk)},
+            payload={
+                "payment_intent_id": str(payment_intent.pk),
+                "course_id": str(offer.course_id),
+                "course_slug": offer.course.slug,
+                "entitlement_id": str(entitlement.pk),
+            },
         )
-        transaction.on_commit(lambda intent_id=payment_intent.pk: _notify_course_purchase(intent_id))
+        transaction.on_commit(
+            lambda intent_id=payment_intent.pk: _notify_course_purchase(intent_id)
+        )
     return created, entitlement
 
 
@@ -287,8 +356,12 @@ def _notify_course_purchase(payment_intent_id):
     try:
         from apps.payments.models import PaymentIntent
         from apps.payments.notifications import notify_payment_succeeded
+
         intent = PaymentIntent.objects.select_related("user", "plan").get(pk=payment_intent_id)
         notify_payment_succeeded(intent, subscription=None)
     except Exception:
         import logging
-        logging.getLogger(__name__).exception("course purchase receipt failed for PaymentIntent %s", payment_intent_id)
+
+        logging.getLogger(__name__).exception(
+            "course purchase receipt failed for PaymentIntent %s", payment_intent_id
+        )

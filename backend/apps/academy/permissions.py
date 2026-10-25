@@ -1,4 +1,6 @@
 """Narrow authorization policy for shared instructional content."""
+
+
 def is_course_content_admin(user):
     """Only superusers or users explicitly assigned the ADMIN role may edit shared content.
 

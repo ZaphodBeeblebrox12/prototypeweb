@@ -30,20 +30,33 @@ class AcademyViewTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username="learner", password="Test-password-123!")
         self.course = Course.objects.create(
-            title="Trading Path", slug="trading-path", status=Course.Status.PUBLISHED,
+            title="Trading Path",
+            slug="trading-path",
+            status=Course.Status.PUBLISHED,
             summary="Learn to read the screen.",
         )
         self.module = CourseModule.objects.create(
-            course=self.course, title="Foundations", slug="foundations",
-            position=1, is_published=True,
+            course=self.course,
+            title="Foundations",
+            slug="foundations",
+            position=1,
+            is_published=True,
         )
         self.paid_lesson = Lesson.objects.create(
-            module=self.module, title="Private lesson", slug="private-lesson",
-            position=1, is_published=True, content_markdown="SECRET PAID LESSON BODY",
+            module=self.module,
+            title="Private lesson",
+            slug="private-lesson",
+            position=1,
+            is_published=True,
+            content_markdown="SECRET PAID LESSON BODY",
         )
         self.preview_lesson = Lesson.objects.create(
-            module=self.module, title="Preview lesson", slug="preview-lesson",
-            position=2, is_published=True, is_preview=True,
+            module=self.module,
+            title="Preview lesson",
+            slug="preview-lesson",
+            position=2,
+            is_published=True,
+            is_preview=True,
             content_markdown="Public preview content.",
         )
         self.client.force_login(self.user)
@@ -78,7 +91,7 @@ class AcademyViewTests(TestCase):
         self.assertContains(response, 'class="tt-course-overview"')
         self.assertContains(response, 'class="tt-overview-hero"')
         self.assertContains(response, 'class="tt-overview-curriculum-grid"')
-        self.assertContains(response, 'academy/course-overview.css')
+        self.assertContains(response, "academy/course-overview.css")
         self.assertEqual(response.context["total_modules"], 1)
         self.assertEqual(response.context["total_lessons"], 2)
         self.assertEqual(response.context["total_study_minutes"], 20)
@@ -99,9 +112,7 @@ class AcademyViewTests(TestCase):
         )
         self.client.force_login(admin)
 
-        overview = self.client.get(
-            reverse("academy:course-detail", args=[self.course.slug])
-        )
+        overview = self.client.get(reverse("academy:course-detail", args=[self.course.slug]))
         self.assertEqual(overview.status_code, 200)
         preview_url = reverse(
             "academy:admin-lesson-preview",
@@ -144,56 +155,64 @@ class AcademyViewTests(TestCase):
                     "summary": "A saved draft for audience preview tests.",
                     "description": "Preview each authored version in the Learning Room.",
                 },
-                "modules": [{
-                    "title": "Foundations",
-                    "slug": "foundations",
-                    "position": 1,
-                    "lessons": [{
-                        "source_id": "1.1",
-                        "title": "Audience-specific disclosure",
-                        "slug": "audience-specific-disclosure",
+                "modules": [
+                    {
+                        "title": "Foundations",
+                        "slug": "foundations",
                         "position": 1,
-                        "duration_minutes": 5,
-                        "content_markdown": (
-                            "### The question\n\nObserve first.\n\n"
-                            "[[regional-block:risk-note]]"
-                        ),
-                        "content_json": {
-                            "regional_blocks": {
-                                "risk-note": {
-                                    "id": "risk-note",
-                                    "title": "Country disclosure",
-                                    "base_content": "Global disclosure.",
-                                    "variants": [
-                                        {
-                                            "scope": "country", "code": "IN",
-                                            "content": "India-specific disclosure.",
-                                            "hidden": False,
+                        "lessons": [
+                            {
+                                "source_id": "1.1",
+                                "title": "Audience-specific disclosure",
+                                "slug": "audience-specific-disclosure",
+                                "position": 1,
+                                "duration_minutes": 5,
+                                "content_markdown": (
+                                    "### The question\n\nObserve first.\n\n"
+                                    "[[regional-block:risk-note]]"
+                                ),
+                                "content_json": {
+                                    "regional_blocks": {
+                                        "risk-note": {
+                                            "id": "risk-note",
+                                            "title": "Country disclosure",
+                                            "base_content": "Global disclosure.",
+                                            "variants": [
+                                                {
+                                                    "scope": "country",
+                                                    "code": "IN",
+                                                    "content": "India-specific disclosure.",
+                                                    "hidden": False,
+                                                },
+                                                {
+                                                    "scope": "region",
+                                                    "code": "APAC",
+                                                    "content": "APAC-specific disclosure.",
+                                                    "hidden": False,
+                                                },
+                                                {
+                                                    "scope": "country",
+                                                    "code": "US",
+                                                    "content": "US-only hidden disclosure.",
+                                                    "hidden": True,
+                                                },
+                                            ],
                                         },
-                                        {
-                                            "scope": "region", "code": "APAC",
-                                            "content": "APAC-specific disclosure.",
-                                            "hidden": False,
-                                        },
-                                        {
-                                            "scope": "country", "code": "US",
-                                            "content": "US-only hidden disclosure.",
-                                            "hidden": True,
-                                        },
-                                    ],
+                                    },
                                 },
                             },
-                        },
-                    }, {
-                        "source_id": "1.2",
-                        "title": "Navigation target lesson",
-                        "slug": "navigation-target-lesson",
-                        "position": 2,
-                        "duration_minutes": 5,
-                        "content_markdown": "### Keep the selected audience\n\nThe preview should preserve its audience here too.",
-                        "content_json": {},
-                    }],
-                }],
+                            {
+                                "source_id": "1.2",
+                                "title": "Navigation target lesson",
+                                "slug": "navigation-target-lesson",
+                                "position": 2,
+                                "duration_minutes": 5,
+                                "content_markdown": "### Keep the selected audience\n\nThe preview should preserve its audience here too.",
+                                "content_json": {},
+                            },
+                        ],
+                    }
+                ],
             },
         )
         preview_url = reverse("academy:course-import-preview", args=[record.pk])
@@ -211,7 +230,11 @@ class AcademyViewTests(TestCase):
             (
                 {"lesson": "1.1"},
                 "Global disclosure.",
-                ("India-specific disclosure.", "APAC-specific disclosure.", "US-only hidden disclosure."),
+                (
+                    "India-specific disclosure.",
+                    "APAC-specific disclosure.",
+                    "US-only hidden disclosure.",
+                ),
             ),
             (
                 {"lesson": "1.1", "preview_audience": "US"},
@@ -233,11 +256,15 @@ class AcademyViewTests(TestCase):
                 for phrase in absent:
                     self.assertNotContains(response, phrase)
 
-                next_lesson_url = response.context["preview_modules"][0]["lessons"][1]["preview_url"]
+                next_lesson_url = response.context["preview_modules"][0]["lessons"][1][
+                    "preview_url"
+                ]
                 next_query = parse_qs(urlparse(next_lesson_url).query)
                 self.assertEqual(next_query.get("lesson"), ["1.2"])
                 if params.get("preview_audience"):
-                    self.assertEqual(next_query.get("preview_audience"), [params["preview_audience"]])
+                    self.assertEqual(
+                        next_query.get("preview_audience"), [params["preview_audience"]]
+                    )
                 else:
                     self.assertNotIn("preview_audience", next_query)
 
@@ -266,43 +293,52 @@ class AcademyViewTests(TestCase):
                         "- Compare alternatives and identify invalidation.\n"
                         "- Build a clear, conditional decision process."
                     ),
-                    "learning_outcomes": ["Use a conditional checklist before considering a trade."],
+                    "learning_outcomes": [
+                        "Use a conditional checklist before considering a trade."
+                    ],
                 },
-                "modules": [{
-                    "title": "Foundations",
-                    "slug": "foundations",
-                    "position": 1,
-                    "summary": "Start with the evidence.",
-                    "lessons": [{
-                        "source_id": "1.1",
-                        "title": "Read the evidence",
-                        "slug": "read-the-evidence",
+                "modules": [
+                    {
+                        "title": "Foundations",
+                        "slug": "foundations",
                         "position": 1,
-                        "duration_minutes": 12,
-                        "summary": "A structured preview lesson.",
-                        "content_markdown": (
-                            "### The question\n\n"
-                            "Start by describing what is visible."
-                        ),
-                        "content_json": {
-                            "questions": [{
-                                "id": "q1",
-                                "prompt": "How should the observation be used?",
-                                "options": [
-                                    "As evidence to assess in context",
-                                    "As an automatic signal",
-                                ],
-                            }],
-                            "notebook": {
-                                "title": "Your Trading Notebook",
-                                "prompts": [{
-                                    "label": "Observe",
-                                    "text": "Record the evidence you can see.",
-                                }],
-                            },
-                        },
-                    }],
-                }],
+                        "summary": "Start with the evidence.",
+                        "lessons": [
+                            {
+                                "source_id": "1.1",
+                                "title": "Read the evidence",
+                                "slug": "read-the-evidence",
+                                "position": 1,
+                                "duration_minutes": 12,
+                                "summary": "A structured preview lesson.",
+                                "content_markdown": (
+                                    "### The question\n\n" "Start by describing what is visible."
+                                ),
+                                "content_json": {
+                                    "questions": [
+                                        {
+                                            "id": "q1",
+                                            "prompt": "How should the observation be used?",
+                                            "options": [
+                                                "As evidence to assess in context",
+                                                "As an automatic signal",
+                                            ],
+                                        }
+                                    ],
+                                    "notebook": {
+                                        "title": "Your Trading Notebook",
+                                        "prompts": [
+                                            {
+                                                "label": "Observe",
+                                                "text": "Record the evidence you can see.",
+                                            }
+                                        ],
+                                    },
+                                },
+                            }
+                        ],
+                    }
+                ],
             },
         )
 
@@ -311,14 +347,20 @@ class AcademyViewTests(TestCase):
             {"lesson": "1.1"},
         )
 
-        overview_response = self.client.get(reverse("academy:course-import-preview", args=[record.pk]))
+        overview_response = self.client.get(
+            reverse("academy:course-import-preview", args=[record.pk])
+        )
         self.assertEqual(overview_response.status_code, 200, overview_response.content)
         self.assertContains(overview_response, "<h3>What learners will practise</h3>")
         self.assertContains(overview_response, "<ul>")
-        self.assertContains(overview_response, "<li>Describe the evidence before interpreting it.</li>")
+        self.assertContains(
+            overview_response, "<li>Describe the evidence before interpreting it.</li>"
+        )
         self.assertNotContains(overview_response, "### What learners will practise")
         self.assertNotContains(overview_response, "- Describe the evidence before interpreting it.")
-        self.assertContains(overview_response, "Use a conditional checklist before considering a trade.")
+        self.assertContains(
+            overview_response, "Use a conditional checklist before considering a trade."
+        )
         self.assertContains(overview_response, 'class="tt-overview-outcome-grid"')
 
         self.assertEqual(response.status_code, 200, response.content)
@@ -334,9 +376,9 @@ class AcademyViewTests(TestCase):
         self.assertContains(response, 'aria-label="Draft preview progress (unstarted)"')
         self.assertContains(response, 'aria-valuenow="0"')
         self.assertContains(response, 'style="width:0%"')
-        self.assertNotContains(response, 'data-notebook-response')
-        self.assertNotContains(response, 'data-guided-reflection')
-        self.assertNotContains(response, 'data-practice-quiz')
+        self.assertNotContains(response, "data-notebook-response")
+        self.assertNotContains(response, "data-guided-reflection")
+        self.assertNotContains(response, "data-practice-quiz")
 
         # Framing is enabled only for the authenticated, admin-only draft route.
         ordinary_page = self.client.get(reverse("academy:course-detail", args=[self.course.slug]))
@@ -355,7 +397,9 @@ class AcademyViewTests(TestCase):
         self.assertNotContains(response, "Check answers")
         self.assertNotContains(response, "Save reflection")
 
-    def test_staged_course_preview_uses_bright_related_course_cards_for_one_to_three_recommendations(self):
+    def test_staged_course_preview_uses_bright_related_course_cards_for_one_to_three_recommendations(
+        self,
+    ):
         admin = User.objects.create_user(
             username="related-course-preview-admin",
             password="Test-password-123!",
@@ -392,20 +436,24 @@ class AcademyViewTests(TestCase):
                     "summary": "Test course for the related-course panel.",
                     "description": "",
                 },
-                "modules": [{
-                    "title": "Foundations",
-                    "slug": "foundations",
-                    "position": 1,
-                    "lessons": [{
-                        "source_id": "1.1",
-                        "title": "Read the evidence",
-                        "slug": "read-the-evidence",
+                "modules": [
+                    {
+                        "title": "Foundations",
+                        "slug": "foundations",
                         "position": 1,
-                        "duration_minutes": 12,
-                        "content_markdown": "### The question\n\nStart with the evidence.",
-                        "content_json": {},
-                    }],
-                }],
+                        "lessons": [
+                            {
+                                "source_id": "1.1",
+                                "title": "Read the evidence",
+                                "slug": "read-the-evidence",
+                                "position": 1,
+                                "duration_minutes": 12,
+                                "content_markdown": "### The question\n\nStart with the evidence.",
+                                "content_json": {},
+                            }
+                        ],
+                    }
+                ],
             },
             status=CourseImport.Status.DRAFT,
         )
@@ -423,11 +471,17 @@ class AcademyViewTests(TestCase):
                 response = self.client.get(preview_url, {"lesson": "1.1"})
 
                 self.assertEqual(response.status_code, 200, response.content)
-                self.assertContains(response, 'class="tt-related-courses tt-related-courses--cards"')
-                self.assertContains(response, 'id="tt-related-courses-heading">Build on this lesson</h2>')
+                self.assertContains(
+                    response, 'class="tt-related-courses tt-related-courses--cards"'
+                )
+                self.assertContains(
+                    response, 'id="tt-related-courses-heading">Build on this lesson</h2>'
+                )
                 self.assertContains(response, f'data-course-count="{count}"')
                 self.assertEqual(
-                    response.content.decode().count('class="tt-related-course-link tt-related-course-card"'),
+                    response.content.decode().count(
+                        'class="tt-related-course-link tt-related-course-card"'
+                    ),
                     count,
                 )
                 self.assertEqual(
@@ -441,7 +495,9 @@ class AcademyViewTests(TestCase):
                     response.content.decode().count('class="tt-related-course-topic"'),
                     count * 2,
                 )
-                self.assertContains(response, "Course references do not grant access or include a purchase.")
+                self.assertContains(
+                    response, "Course references do not grant access or include a purchase."
+                )
                 for index, course in enumerate(related_courses[:count], start=1):
                     self.assertContains(response, course.title)
                     self.assertContains(response, course.summary)
@@ -459,12 +515,16 @@ class AcademyViewTests(TestCase):
         self.assertNotContains(response, "SECRET PAID LESSON BODY", status_code=403)
 
     def test_paid_lesson_is_not_retrievable_without_entitlement(self):
-        response = self.client.get(reverse("academy:lesson", args=[self.course.slug, self.paid_lesson.pk]))
+        response = self.client.get(
+            reverse("academy:lesson", args=[self.course.slug, self.paid_lesson.pk])
+        )
         self.assertEqual(response.status_code, 403)
         self.assertNotContains(response, "SECRET PAID LESSON BODY", status_code=403)
 
     def test_published_preview_lesson_can_be_opened(self):
-        response = self.client.get(reverse("academy:lesson", args=[self.course.slug, self.preview_lesson.pk]))
+        response = self.client.get(
+            reverse("academy:lesson", args=[self.course.slug, self.preview_lesson.pk])
+        )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Public preview content.")
 
@@ -496,17 +556,21 @@ class AcademyViewTests(TestCase):
                 self.assertEqual(response.status_code, 200, response.content)
                 self.assertContains(response, f'data-course-count="{count}"')
                 self.assertEqual(
-                    response.content.decode().count('class="tt-related-course-link tt-related-course-card"'),
+                    response.content.decode().count(
+                        'class="tt-related-course-link tt-related-course-card"'
+                    ),
                     count,
                 )
                 self.assertContains(response, "Explore course")
-                self.assertContains(response, "aria-label=\"Topics covered\"")
+                self.assertContains(response, 'aria-label="Topics covered"')
                 self.assertContains(response, "Relative volume vs price")
                 self.assertEqual(
                     response.content.decode().count('class="tt-related-course-topic"'),
                     count * 2,
                 )
-                self.assertContains(response, "Course references do not grant access or include a purchase.")
+                self.assertContains(
+                    response, "Course references do not grant access or include a purchase."
+                )
 
     def test_related_courses_use_bright_course_cards_in_branded_panel(self):
         related_courses = [
@@ -557,15 +621,24 @@ class AcademyViewTests(TestCase):
         self.assertContains(response, 'class="tt-related-courses tt-related-courses--cards"')
         self.assertContains(response, 'class="tt-related-courses-kicker">Continue learning</p>')
         self.assertContains(response, 'id="tt-related-courses-heading">Build on this lesson</h2>')
-        self.assertEqual(response.content.decode().count('class="tt-related-course-link tt-related-course-card"'), 3)
+        self.assertEqual(
+            response.content.decode().count(
+                'class="tt-related-course-link tt-related-course-card"'
+            ),
+            3,
+        )
         self.assertEqual(response.content.decode().count('class="tt-related-course-card-cta"'), 3)
         self.assertContains(response, 'data-course-count="3"')
         for index, course in enumerate(related_courses, start=1):
-            self.assertContains(response, f'href="{reverse("academy:course-detail", args=[course.slug])}"')
+            self.assertContains(
+                response, f'href="{reverse("academy:course-detail", args=[course.slug])}"'
+            )
             self.assertContains(response, f"{index:02d}")
             self.assertContains(response, course.title)
             self.assertContains(response, course.summary)
-        self.assertContains(response, "Course references do not grant access or include a purchase.")
+        self.assertContains(
+            response, "Course references do not grant access or include a purchase."
+        )
         self.assertContains(response, 'class="tt-related-course-topics"')
         self.assertContains(response, "Support and resistance zones")
         self.assertContains(response, "Reactions at key price levels")
@@ -576,24 +649,32 @@ class AcademyViewTests(TestCase):
 
     def test_quiz_submit_returns_indices_for_red_green_feedback_after_submission(self):
         self.preview_lesson.content_json = {
-            "questions": [{
-                "id": "question-1",
-                "prompt": "What does the chart show?",
-                "options": ["Breakout", "Rejection"],
-            }],
+            "questions": [
+                {
+                    "id": "question-1",
+                    "prompt": "What does the chart show?",
+                    "options": ["Breakout", "Rejection"],
+                }
+            ],
         }
         self.preview_lesson.save(update_fields=["content_json", "updated_at"])
         LessonInstructorMaterial.objects.create(
             lesson=self.preview_lesson,
-            rubric_json={"questions": [{
-                "id": "question-1",
-                "options": ["Breakout", "Rejection"],
-                "correctIndex": 1,
-                "explanation": "The repeated rejection is the key evidence.",
-            }]},
+            rubric_json={
+                "questions": [
+                    {
+                        "id": "question-1",
+                        "options": ["Breakout", "Rejection"],
+                        "correctIndex": 1,
+                        "explanation": "The repeated rejection is the key evidence.",
+                    }
+                ]
+            },
         )
 
-        page = self.client.get(reverse("academy:lesson", args=[self.course.slug, self.preview_lesson.pk]))
+        page = self.client.get(
+            reverse("academy:lesson", args=[self.course.slug, self.preview_lesson.pk])
+        )
         self.assertEqual(page.status_code, 200)
         self.assertContains(page, 'data-question-option="question-1"')
         self.assertNotContains(page, '"correct_index": 1')
@@ -615,7 +696,12 @@ class AcademyViewTests(TestCase):
     def test_published_preview_renders_multiple_images_in_selected_learning_room_tabs(self):
         placements = [
             ("Idea figure", "Additional concept figure", "idea", "https://example.com/idea.png"),
-            ("Example chart", "Additional chart examples", "examples", "https://example.com/examples.png"),
+            (
+                "Example chart",
+                "Additional chart examples",
+                "examples",
+                "https://example.com/examples.png",
+            ),
             ("Practice figure", "Practice figure", "practice", "https://example.com/practice.png"),
         ]
         assets = []
@@ -628,12 +714,14 @@ class AcademyViewTests(TestCase):
                 original_url=url,
             )
             assets.append(asset)
-            markdown_parts.extend([
-                "",
-                f"### {heading}",
-                "",
-                f"![{alt_text}](asset://{asset.pk})",
-            ])
+            markdown_parts.extend(
+                [
+                    "",
+                    f"### {heading}",
+                    "",
+                    f"![{alt_text}](asset://{asset.pk})",
+                ]
+            )
         self.preview_lesson.content_markdown = "\n".join(markdown_parts)
         self.preview_lesson.content_json = {"asset_ids": [str(asset.pk) for asset in assets]}
         self.preview_lesson.save(update_fields=["content_markdown", "content_json", "updated_at"])
@@ -705,7 +793,9 @@ class AcademyViewTests(TestCase):
             image_bytes = BytesIO()
             Image.new("RGB", (12, 8), (245, 220, 170)).save(image_bytes, format="PNG")
             asset = CourseMediaAsset.objects.create(
-                course=self.course, asset_key=asset_key, alt_text=label,
+                course=self.course,
+                asset_key=asset_key,
+                alt_text=label,
             )
             asset.file.save(
                 filename,
@@ -713,7 +803,9 @@ class AcademyViewTests(TestCase):
                 save=True,
             )
             stored_name = asset.file.name
-            self.addCleanup(lambda storage=course_asset_storage, name=stored_name: storage.delete(name))
+            self.addCleanup(
+                lambda storage=course_asset_storage, name=stored_name: storage.delete(name)
+            )
             return asset
 
         base_asset = make_asset("test/regional-base", "regional-base.png", "Global image")
@@ -722,14 +814,34 @@ class AcademyViewTests(TestCase):
         hidden_asset = make_asset("test/regional-hidden", "regional-hidden.png", "Hidden image")
         self.preview_lesson.content_markdown = "## Regional notice\n\n[[regional-block:notice]]"
         self.preview_lesson.content_json = {
-            "asset_ids": [str(base_asset.pk), str(india_asset.pk), str(us_asset.pk), str(hidden_asset.pk)],
+            "asset_ids": [
+                str(base_asset.pk),
+                str(india_asset.pk),
+                str(us_asset.pk),
+                str(hidden_asset.pk),
+            ],
             "regional_blocks": {
                 "notice": {
                     "base_content": f"![Global image](asset://{base_asset.pk})",
                     "variants": [
-                        {"scope": "country", "code": "IN", "content": f"![India image](asset://{india_asset.pk})", "hidden": False},
-                        {"scope": "country", "code": "US", "content": f"![US image](asset://{us_asset.pk})", "hidden": False},
-                        {"scope": "country", "code": "CA", "content": f"![Hidden image](asset://{hidden_asset.pk})", "hidden": True},
+                        {
+                            "scope": "country",
+                            "code": "IN",
+                            "content": f"![India image](asset://{india_asset.pk})",
+                            "hidden": False,
+                        },
+                        {
+                            "scope": "country",
+                            "code": "US",
+                            "content": f"![US image](asset://{us_asset.pk})",
+                            "hidden": False,
+                        },
+                        {
+                            "scope": "country",
+                            "code": "CA",
+                            "content": f"![Hidden image](asset://{hidden_asset.pk})",
+                            "hidden": True,
+                        },
                     ],
                 },
             },
@@ -753,7 +865,9 @@ class AcademyViewTests(TestCase):
         # Pricing's debug-only test_country override must never change regional media permissions.
         with self.settings(DEBUG=True):
             self.assertEqual(
-                self.client.get(india_url, {"test_country": "US"}, HTTP_CF_IPCOUNTRY="IN").status_code,
+                self.client.get(
+                    india_url, {"test_country": "US"}, HTTP_CF_IPCOUNTRY="IN"
+                ).status_code,
                 200,
             )
             self.assertEqual(
@@ -772,7 +886,9 @@ class AcademyViewTests(TestCase):
         )
         asset.file.save(
             "private-chart.png",
-            SimpleUploadedFile("private-chart.png", image_bytes.getvalue(), content_type="image/png"),
+            SimpleUploadedFile(
+                "private-chart.png", image_bytes.getvalue(), content_type="image/png"
+            ),
             save=True,
         )
         stored_name = asset.file.name
@@ -790,7 +906,6 @@ class AcademyViewTests(TestCase):
             {"status": "completed"},
         )
         self.assertEqual(response.status_code, 403)
-
 
     def test_opening_accessible_lesson_saves_an_in_progress_resume_point(self):
         response = self.client.get(
@@ -844,7 +959,6 @@ class AcademyViewTests(TestCase):
             reverse("academy:lesson", args=[self.course.slug, self.paid_lesson.pk])
         )
         self.assertEqual(response.status_code, 403)
-
 
     def test_unpublished_lesson_and_module_cannot_be_opened_directly(self):
         lesson_url = reverse("academy:lesson", args=[self.course.slug, self.paid_lesson.pk])
@@ -923,21 +1037,22 @@ class AcademyViewTests(TestCase):
             content_markdown="Must not contribute to visible progress.",
         )
         LessonProgress.objects.create(
-            user=self.user, lesson=self.preview_lesson,
+            user=self.user,
+            lesson=self.preview_lesson,
             status=LessonProgress.Status.COMPLETED,
         )
         LessonProgress.objects.create(
-            user=other_user, lesson=self.paid_lesson,
+            user=other_user,
+            lesson=self.paid_lesson,
             status=LessonProgress.Status.COMPLETED,
         )
         LessonProgress.objects.create(
-            user=self.user, lesson=hidden_lesson,
+            user=self.user,
+            lesson=hidden_lesson,
             status=LessonProgress.Status.COMPLETED,
         )
 
-        response = self.client.get(
-            reverse("academy:course-detail", args=[self.course.slug])
-        )
+        response = self.client.get(reverse("academy:course-detail", args=[self.course.slug]))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["total_lessons"], 2)
         self.assertEqual(response.context["completed_lessons"], 1)

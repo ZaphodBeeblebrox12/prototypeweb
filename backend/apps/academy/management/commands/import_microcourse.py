@@ -1,4 +1,5 @@
 """Validate and stage an authored TradeThesis micro-course for administrator review."""
+
 from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
@@ -12,7 +13,8 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("--manifest", required=True, help="Path to course-manifest.json")
         parser.add_argument(
-            "--dry-run", action="store_true",
+            "--dry-run",
+            action="store_true",
             help="Validate the manifest and source files without writing to the database or media storage.",
         )
 
@@ -32,7 +34,9 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("Asset review: " + warning))
 
         if options["dry_run"]:
-            self.stdout.write(self.style.SUCCESS("Dry run complete; no records or files were written."))
+            self.stdout.write(
+                self.style.SUCCESS("Dry run complete; no records or files were written.")
+            )
             return
 
         try:
@@ -44,10 +48,14 @@ class Command(BaseCommand):
                 imported_by=None,
             )
         except Exception as exc:
-            raise CommandError(f"Course import failed without publishing learner content: {exc}") from exc
+            raise CommandError(
+                f"Course import failed without publishing learner content: {exc}"
+            ) from exc
 
         for warning in stage_warnings:
             self.stdout.write(self.style.WARNING("Asset review: " + warning))
         action = "Staged new review draft" if created else "Reused existing import (idempotent)"
         self.stdout.write(self.style.SUCCESS(f"{action}: {record.title} [{record.pk}]"))
-        self.stdout.write("Open Django Admin → Academy → Course imports → Review to inspect and publish.")
+        self.stdout.write(
+            "Open Django Admin → Academy → Course imports → Review to inspect and publish."
+        )

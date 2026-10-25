@@ -1,4 +1,5 @@
 """Mocked regression tests for the Drive adapter."""
+
 from unittest.mock import Mock, patch
 
 from django.core.exceptions import ImproperlyConfigured, SuspiciousFileOperation
@@ -59,13 +60,16 @@ class GoogleDriveCourseStorageTests(SimpleTestCase):
         self.assertFalse(storage.status()["writes_enabled"])
 
     def test_remote_exists_checks_remote_providers_without_local_fallback(self):
-        with patch.object(self.storage, "_find_drive_file", return_value=None), patch.object(
-            PrivateCourseAssetStorage, "remote_exists", return_value=False
+        with (
+            patch.object(self.storage, "_find_drive_file", return_value=None),
+            patch.object(PrivateCourseAssetStorage, "remote_exists", return_value=False),
         ):
             self.assertFalse(self.storage.remote_exists("legacy-local-image.png"))
 
     def test_drive_save_uses_stable_key_and_folder(self):
-        with patch.object(self.storage, "_write_drive_bytes", return_value={"id": "drive-file"}) as write:
+        with patch.object(
+            self.storage, "_write_drive_bytes", return_value={"id": "drive-file"}
+        ) as write:
             name = self.storage.save(
                 "academy/example/figure.png",
                 ContentFile(b"image bytes", name="figure.png"),
@@ -82,15 +86,19 @@ class GoogleDriveCourseStorageTests(SimpleTestCase):
 
     def test_source_snapshot_requires_configured_folder(self):
         storage = GoogleDrivePrivateCourseAssetStorage()
-        with override_settings(ACADEMY_GOOGLE_DRIVE_SOURCE_FOLDER_ID=""), self.assertRaises(ImproperlyConfigured):
+        with (
+            override_settings(ACADEMY_GOOGLE_DRIVE_SOURCE_FOLDER_ID=""),
+            self.assertRaises(ImproperlyConfigured),
+        ):
             storage.save_source_snapshot({"modules": []}, "missing-folder")
 
     def test_drive_errors_do_not_disclose_credentials(self):
         session = Mock()
         session.request.return_value = Mock(status_code=403)
-        with patch.object(self.storage, "_drive_session", return_value=session), self.assertRaisesRegex(
-            OSError, "HTTP 403"
-        ) as raised:
+        with (
+            patch.object(self.storage, "_drive_session", return_value=session),
+            self.assertRaisesRegex(OSError, "HTTP 403") as raised,
+        ):
             self.storage._drive_request("GET", "https://www.googleapis.com/drive/v3/files")
         self.assertNotIn("secret-test", str(raised.exception))
         self.assertNotIn("refresh-test", str(raised.exception))

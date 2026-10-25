@@ -1,4 +1,5 @@
 """Regression coverage for publish eligibility and Option 4 course-card parity."""
+
 import re
 import uuid
 from pathlib import Path
@@ -44,23 +45,27 @@ class CoursePublicationReadinessTests(TestCase):
                     "description": description,
                 },
                 "assets": [],
-                "modules": [{
-                    "slug": "foundations",
-                    "title": "Foundations",
-                    "summary": "",
-                    "position": 1,
-                    "lessons": [{
-                        "source_id": "1.1",
-                        "slug": "first-principles",
-                        "title": "First principles",
+                "modules": [
+                    {
+                        "slug": "foundations",
+                        "title": "Foundations",
                         "summary": "",
                         "position": 1,
-                        "duration_minutes": 12,
-                        "release_day": 1,
-                        "content_markdown": "## Evidence\n\nDescribe the visible evidence before interpreting it.",
-                        "content_json": {"asset_ids": []},
-                    }],
-                }],
+                        "lessons": [
+                            {
+                                "source_id": "1.1",
+                                "slug": "first-principles",
+                                "title": "First principles",
+                                "summary": "",
+                                "position": 1,
+                                "duration_minutes": 12,
+                                "release_day": 1,
+                                "content_markdown": "## Evidence\n\nDescribe the visible evidence before interpreting it.",
+                                "content_json": {"asset_ids": []},
+                            }
+                        ],
+                    }
+                ],
             },
         )
 
@@ -86,11 +91,13 @@ class CoursePublicationReadinessTests(TestCase):
             "Explain who the course is for and what it covers.",
         )
         self.assertIn("starter course title", issue.lower())
-        self.assertFalse(is_course_card_recommendable(
-            "Untitled course1",
-            "A clear, practical description of what learners will study and why it matters.",
-            "Explain who the course is for and what it covers.",
-        ))
+        self.assertFalse(
+            is_course_card_recommendable(
+                "Untitled course1",
+                "A clear, practical description of what learners will study and why it matters.",
+                "Explain who the course is for and what it covers.",
+            )
+        )
 
     def test_starter_course_summary_cannot_pass_publication_validation(self):
         record = self.make_record(
@@ -114,11 +121,13 @@ class CoursePublicationReadinessTests(TestCase):
             "A practical guide to reading activity alongside the price result.",
         )
         self.assertEqual(issue, "")
-        self.assertTrue(is_course_card_recommendable(
-            "Volume and Price Analysis",
-            "",
-            "A practical guide to reading activity alongside the price result.",
-        ))
+        self.assertTrue(
+            is_course_card_recommendable(
+                "Volume and Price Analysis",
+                "",
+                "A practical guide to reading activity alongside the price result.",
+            )
+        )
 
     def test_missing_summary_and_description_are_not_catalogue_ready(self):
         self.assertIn(
@@ -126,23 +135,26 @@ class CoursePublicationReadinessTests(TestCase):
             course_card_publication_issue("Volume and Price Analysis", "").lower(),
         )
 
-
     def test_related_course_topic_tags_reuse_compact_learning_outcome_labels(self):
         self.assertEqual(
-            course_topic_tags([
-                "Compare relative volume with price progress.",
-                "Explain effort versus result.",
-                "Identify failed breakouts.",
-            ]),
+            course_topic_tags(
+                [
+                    "Compare relative volume with price progress.",
+                    "Explain effort versus result.",
+                    "Identify failed breakouts.",
+                ]
+            ),
             ["Relative volume vs price", "Effort versus result"],
         )
         self.assertEqual(
-            course_topic_tags([
-                "Compare relative volume with price progress.",
-                "compare relative volume with price progress.",
-                "",
-                "Identify failed breakouts.",
-            ]),
+            course_topic_tags(
+                [
+                    "Compare relative volume with price progress.",
+                    "compare relative volume with price progress.",
+                    "",
+                    "Identify failed breakouts.",
+                ]
+            ),
             ["Relative volume vs price", "Failed breakouts"],
         )
         self.assertEqual(course_topic_tags("not a list of outcomes"), [])
@@ -180,11 +192,11 @@ class CoursePublicationReadinessTests(TestCase):
         self.assertIn("/learn/course/volume-price-analysis-card-test/", rendered)
         self.assertNotIn("Course currently unavailable", rendered)
 
-        lesson_link = render_safe_markdown("[[lesson:" + str(uuid.uuid4()) + "]]", admin_preview=True)
+        lesson_link = render_safe_markdown(
+            "[[lesson:" + str(uuid.uuid4()) + "]]", admin_preview=True
+        )
         self.assertNotIn("tt-course-preview-card", lesson_link)
         self.assertIn("Related lesson unavailable", lesson_link)
-
-
 
     def test_companion_course_uses_open_book_instead_of_title_initials(self):
         from .content_rendering import render_safe_markdown
@@ -212,7 +224,9 @@ class CoursePublicationReadinessTests(TestCase):
 
         from .content_rendering import render_safe_markdown, validate_markdown_source
 
-        authored_svg = '<svg class="authored-icon" viewBox="0 0 10 10"><path d="M0 0L10 10"></path></svg>'
+        authored_svg = (
+            '<svg class="authored-icon" viewBox="0 0 10 10"><path d="M0 0L10 10"></path></svg>'
+        )
         rendered_authored_svg = render_safe_markdown(authored_svg, admin_preview=True)
         self.assertNotIn("<svg", rendered_authored_svg.lower())
         self.assertNotIn("<path", rendered_authored_svg.lower())
@@ -238,24 +252,26 @@ class CoursePublicationReadinessTests(TestCase):
     def test_take_it_into_practice_content_is_preserved_in_practice_tab(self):
         from .content_rendering import build_lesson_sections
 
-        source = "\n".join([
-            "## Start with the decision",
-            "",
-            "Describe the visible evidence.",
-            "",
-            "### What to notice",
-            "",
-            "Separate observation from interpretation.",
-            "",
-            "### Compare the possibilities",
-            "",
-            "Compare two outcomes.",
-            "",
-            "### Take it into practice",
-            "",
-            "Write down what would strengthen your reading, what would weaken it, "
-            "and what would make waiting the better decision.",
-        ])
+        source = "\n".join(
+            [
+                "## Start with the decision",
+                "",
+                "Describe the visible evidence.",
+                "",
+                "### What to notice",
+                "",
+                "Separate observation from interpretation.",
+                "",
+                "### Compare the possibilities",
+                "",
+                "Compare two outcomes.",
+                "",
+                "### Take it into practice",
+                "",
+                "Write down what would strengthen your reading, what would weaken it, "
+                "and what would make waiting the better decision.",
+            ]
+        )
         sections = build_lesson_sections(source)
 
         self.assertNotIn("Take it into practice", sections["idea_html"])
@@ -268,7 +284,9 @@ class RelatedCourseSoftBotanicalParityTests(SimpleTestCase):
         root = Path(__file__).resolve().parents[2]
         styles = (root / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
         learner = (root / "templates" / "academy" / "lesson.html").read_text(encoding="utf-8")
-        staged_preview = (root / "templates" / "academy" / "course_import_website_preview.html").read_text(encoding="utf-8")
+        staged_preview = (
+            root / "templates" / "academy" / "course_import_website_preview.html"
+        ).read_text(encoding="utf-8")
 
         self.assertIn("background: #edf3e8;", styles)
         self.assertIn(".tt-related-course-topics", styles)
@@ -282,9 +300,13 @@ class RelatedCourseSoftBotanicalParityTests(SimpleTestCase):
 class OptionThreeCardParityTests(SimpleTestCase):
     def test_admin_website_preview_matches_builder_option_three_dimensions(self):
         root = Path(__file__).resolve().parents[2]
-        admin_css = (root / "static" / "academy" / "course-import-preview.css").read_text(encoding="utf-8")
+        admin_css = (root / "static" / "academy" / "course-import-preview.css").read_text(
+            encoding="utf-8"
+        )
 
-        self.assertIn(".tt-admin-learning-preview .tt-tab-panel .tt-course-preview-card {", admin_css)
+        self.assertIn(
+            ".tt-admin-learning-preview .tt-tab-panel .tt-course-preview-card {", admin_css
+        )
         self.assertIn("width: min(72%, 640px);", admin_css)
         self.assertIn("max-width: 640px;", admin_css)
         self.assertIn("width: 100%; max-width: none;", admin_css)
@@ -294,13 +316,20 @@ class OptionThreeCardParityTests(SimpleTestCase):
 
     def test_builder_and_learning_room_use_the_same_option_three_css(self):
         root = Path(__file__).resolve().parents[2]
-        builder = (root / "apps" / "academy" / "course_builder_preview.html").read_text(encoding="utf-8")
-        learner = (root / "static" / "academy" / "lesson-references.css").read_text(encoding="utf-8")
+        builder = (root / "apps" / "academy" / "course_builder_preview.html").read_text(
+            encoding="utf-8"
+        )
+        learner = (root / "static" / "academy" / "lesson-references.css").read_text(
+            encoding="utf-8"
+        )
         comment = "/* Option 03 — compact course-cover split (shared by Builder, admin preview and learner lessons). */"
         builder_start = builder.index(comment)
-        builder_end = builder.index("/* Compact layout for the catalogue selector in the lesson editor. */", builder_start)
+        builder_end = builder.index(
+            "/* Compact layout for the catalogue selector in the lesson editor. */", builder_start
+        )
         builder_css = builder[builder_start:builder_end].strip()
-        learner_css = learner[learner.index(comment):].strip()
+        learner_css = learner[learner.index(comment) :].strip()
+
         def normalize(text):
             return re.sub(r"\s+", " ", text).strip()
 

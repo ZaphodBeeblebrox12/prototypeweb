@@ -1,4 +1,5 @@
 """Regression coverage for safely handling failed GitHub source sync."""
+
 import json
 import uuid
 from unittest.mock import Mock, patch
@@ -119,9 +120,7 @@ class CourseBuilderGitHubFailureTests(TestCase):
         self.assertEqual(retry_response.status_code, 200, retry_response.content)
         self.assertTrue(retry_response.json()["submitted"])
         self.assertEqual(retry_response.json()["record_id"], first_record_id)
-        self.assertIn(
-            "already awaiting review", retry_response.json()["message"].lower()
-        )
+        self.assertIn("already awaiting review", retry_response.json()["message"].lower())
         self.assertEqual(CourseImport.objects.filter(course_slug=slug).count(), 1)
         self.assertEqual(
             CourseImport.objects.get(pk=first_record_id).status,
@@ -133,10 +132,13 @@ class CourseBuilderGitHubFailureTests(TestCase):
             with self.subTest(status_code=status_code):
                 slug = f"github-denied-{status_code}"
                 record = self.save_initial_draft(slug)
-                with patch(
-                    "apps.academy.course_builder_api.requests.get",
-                    return_value=Mock(status_code=status_code),
-                ), patch("apps.academy.course_builder_api.requests.put") as github_put:
+                with (
+                    patch(
+                        "apps.academy.course_builder_api.requests.get",
+                        return_value=Mock(status_code=status_code),
+                    ),
+                    patch("apps.academy.course_builder_api.requests.put") as github_put,
+                ):
                     response = self.submit_changed_draft(slug)
 
                 self.assertEqual(response.status_code, 503, response.content)
@@ -155,10 +157,14 @@ class CourseBuilderGitHubFailureTests(TestCase):
             file="legacy-image.png",
         )
 
-        with patch.object(course_asset_storage, "delete") as storage_delete, patch(
-            "apps.academy.course_builder_api.requests.get",
-            return_value=Mock(status_code=401),
-        ), patch("apps.academy.course_builder_api.requests.put"):
+        with (
+            patch.object(course_asset_storage, "delete") as storage_delete,
+            patch(
+                "apps.academy.course_builder_api.requests.get",
+                return_value=Mock(status_code=401),
+            ),
+            patch("apps.academy.course_builder_api.requests.put"),
+        ):
             response = self.submit_changed_draft(slug)
 
         self.assertEqual(response.status_code, 503, response.content)
@@ -170,28 +176,32 @@ class CourseBuilderGitHubFailureTests(TestCase):
     def test_github_timeout_preserves_the_last_saved_draft(self):
         slug = "github-timeout-course"
         record = self.save_initial_draft(slug)
-        with patch(
-            "apps.academy.course_builder_api.requests.get",
-            side_effect=requests.Timeout("mock timeout"),
-        ), patch("apps.academy.course_builder_api.requests.put") as github_put:
+        with (
+            patch(
+                "apps.academy.course_builder_api.requests.get",
+                side_effect=requests.Timeout("mock timeout"),
+            ),
+            patch("apps.academy.course_builder_api.requests.put") as github_put,
+        ):
             response = self.submit_changed_draft(slug)
 
         self.assertEqual(response.status_code, 503, response.content)
-        self.assertIn(
-            "could not be reached", str(response.json().get("detail", "")).lower()
-        )
+        self.assertIn("could not be reached", str(response.json().get("detail", "")).lower())
         github_put.assert_not_called()
         self.assert_draft_persisted(record)
 
     def test_github_write_failure_preserves_the_last_saved_draft(self):
         slug = "github-write-failure-course"
         record = self.save_initial_draft(slug)
-        with patch(
-            "apps.academy.course_builder_api.requests.get",
-            return_value=Mock(status_code=404),
-        ), patch(
-            "apps.academy.course_builder_api.requests.put",
-            return_value=Mock(status_code=500),
+        with (
+            patch(
+                "apps.academy.course_builder_api.requests.get",
+                return_value=Mock(status_code=404),
+            ),
+            patch(
+                "apps.academy.course_builder_api.requests.put",
+                return_value=Mock(status_code=500),
+            ),
         ):
             response = self.submit_changed_draft(slug)
 

@@ -1,4 +1,5 @@
 """Google Drive-backed private storage with existing GitHub/local fallback."""
+
 from __future__ import annotations
 
 import hashlib
@@ -29,6 +30,7 @@ class GoogleDriveStorageMixin:
     def _credential_record(self):
         try:
             from .models import GoogleDriveCredential
+
             return GoogleDriveCredential.objects.filter(pk=1).first()
         except Exception:
             return None
@@ -48,12 +50,16 @@ class GoogleDriveStorageMixin:
         try:
             return record.get_refresh_token()
         except Exception:
-            logger.warning("Stored Google Drive credential could not be decrypted; using another configured storage backend if available.")
+            logger.warning(
+                "Stored Google Drive credential could not be decrypted; using another configured storage backend if available."
+            )
             return ""
 
     @property
     def _asset_folder_id(self):
-        configured = str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_ASSET_FOLDER_ID", "") or "").strip()
+        configured = str(
+            getattr(settings, "ACADEMY_GOOGLE_DRIVE_ASSET_FOLDER_ID", "") or ""
+        ).strip()
         if configured:
             return configured
         record = self._credential_record()
@@ -61,7 +67,9 @@ class GoogleDriveStorageMixin:
 
     @property
     def _source_folder_id(self):
-        configured = str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_SOURCE_FOLDER_ID", "") or "").strip()
+        configured = str(
+            getattr(settings, "ACADEMY_GOOGLE_DRIVE_SOURCE_FOLDER_ID", "") or ""
+        ).strip()
         if configured:
             return configured
         record = self._credential_record()
@@ -76,7 +84,9 @@ class GoogleDriveStorageMixin:
             return True
         refresh_token = self._refresh_token
         client_id = str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_ID", "") or "").strip()
-        client_secret = str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET", "") or "").strip()
+        client_secret = str(
+            getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET", "") or ""
+        ).strip()
         return bool(refresh_token and client_id and client_secret)
 
     @property
@@ -89,20 +99,31 @@ class GoogleDriveStorageMixin:
             return self._drive_session_cache
         try:
             from google.auth.transport.requests import AuthorizedSession
+
             client_id = str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_ID", "") or "").strip()
-            client_secret = str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET", "") or "").strip()
+            client_secret = str(
+                getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET", "") or ""
+            ).strip()
             if self._refresh_token and client_id and client_secret:
                 from google.oauth2.credentials import Credentials
+
                 credentials = Credentials(
                     token=None,
                     refresh_token=self._refresh_token,
-                    token_uri=str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_TOKEN_URI", "https://oauth2.googleapis.com/token")),
+                    token_uri=str(
+                        getattr(
+                            settings,
+                            "ACADEMY_GOOGLE_DRIVE_TOKEN_URI",
+                            "https://oauth2.googleapis.com/token",
+                        )
+                    ),
                     client_id=client_id,
                     client_secret=client_secret,
                     scopes=[DRIVE_SCOPE],
                 )
             elif self._service_account_json:
                 from google.oauth2 import service_account
+
                 credentials = service_account.Credentials.from_service_account_info(
                     json.loads(self._service_account_json), scopes=[DRIVE_SCOPE]
                 )
@@ -120,15 +141,20 @@ class GoogleDriveStorageMixin:
     def _drive_request(self, method, url, *, expected=(200,), **kwargs):
         try:
             response = self._drive_session().request(
-                method, url,
+                method,
+                url,
                 timeout=int(getattr(settings, "ACADEMY_GOOGLE_DRIVE_TIMEOUT", 20)),
                 **kwargs,
             )
         except Exception as exc:
-            logger.warning("Google Drive request could not be completed (%s).", exc.__class__.__name__)
+            logger.warning(
+                "Google Drive request could not be completed (%s).", exc.__class__.__name__
+            )
             raise OSError("Google Drive course storage is temporarily unavailable.") from exc
         if response.status_code not in expected:
-            logger.warning("Google Drive request failed (method=%s status=%s).", method, response.status_code)
+            logger.warning(
+                "Google Drive request failed (method=%s status=%s).", method, response.status_code
+            )
             raise OSError(f"Google Drive course storage returned HTTP {response.status_code}.")
         return response
 
@@ -143,9 +169,14 @@ class GoogleDriveStorageMixin:
             f"properties has {{ key='tradeThesisPathHash' and value='{key}' }} and trashed = false"
         )
         response = self._drive_request(
-            "GET", f"{DRIVE_API}/files",
-            params={"q": query, "pageSize": 2, "orderBy": "modifiedTime desc",
-                    "fields": "files(id,name,size,mimeType,md5Checksum,properties)"},
+            "GET",
+            f"{DRIVE_API}/files",
+            params={
+                "q": query,
+                "pageSize": 2,
+                "orderBy": "modifiedTime desc",
+                "fields": "files(id,name,size,mimeType,md5Checksum,properties)",
+            },
         )
         try:
             found = response.json().get("files")
@@ -174,12 +205,16 @@ class GoogleDriveStorageMixin:
             f"--{boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n".encode()
             + json.dumps(metadata, separators=(",", ":")).encode()
             + f"\r\n--{boundary}\r\nContent-Type: {content_type or 'application/octet-stream'}\r\n\r\n".encode()
-            + raw + f"\r\n--{boundary}--\r\n".encode()
+            + raw
+            + f"\r\n--{boundary}--\r\n".encode()
         )
         response = self._drive_request(
-            method, url, expected=(200, 201),
+            method,
+            url,
+            expected=(200, 201),
             params={"uploadType": "multipart", "fields": "id,name,size,md5Checksum,properties"},
-            headers={"Content-Type": f"multipart/related; boundary={boundary}"}, data=body,
+            headers={"Content-Type": f"multipart/related; boundary={boundary}"},
+            data=body,
         )
         try:
             result = response.json()
@@ -200,8 +235,10 @@ class GoogleDriveStorageMixin:
             found = self._find_drive_file(name, self._asset_folder_id)
             if found:
                 response = self._drive_request(
-                    "GET", f"{DRIVE_API}/files/{found['id']}",
-                    params={"alt": "media"}, expected=(200,),
+                    "GET",
+                    f"{DRIVE_API}/files/{found['id']}",
+                    params={"alt": "media"},
+                    expected=(200,),
                 )
                 return ContentFile(response.content, name=name)
         return super()._open(name, mode)
@@ -248,7 +285,9 @@ class GoogleDriveStorageMixin:
     def save_source_snapshot(self, payload, course_slug):
         if not self._drive_auth_configured or not self._source_folder_id:
             raise ImproperlyConfigured("Google Drive source snapshots are not configured.")
-        raw = (json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
+        raw = (json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode(
+            "utf-8"
+        )
         digest = hashlib.sha256(raw).hexdigest()
         self._write_drive_bytes(
             name=f"{course_slug}-{digest[:12]}.json",

@@ -3,6 +3,7 @@
 The source is still a teaching manuscript. This command keeps knowledge checks
 out of learner copy, creates no price/offer, and does not publish any content.
 """
+
 import re
 from pathlib import Path
 
@@ -55,20 +56,27 @@ _VPA_FIGURES = {
             "Candidate candle and its local volume baseline",
         ),
         (
-            ("**Level 2 — Compare (guided):**", "### Worked comparison — same colour, different evidence"),
+            (
+                "**Level 2 — Compare (guided):**",
+                "### Worked comparison — same colour, different evidence",
+            ),
             "vpa-m01-l01-candle-context-compare-mobile.svg",
             "Similar candle shapes in different contexts",
         ),
     ),
 }
+
+
 def lesson_segments(module_markdown):
     """Yield lesson number, sequence, title, and manuscript section."""
     matches = list(_LESSON_HEADER.finditer(module_markdown))
     result = []
     for index, match in enumerate(matches):
         end = matches[index + 1].start() if index + 1 < len(matches) else len(module_markdown)
-        segment = module_markdown[match.start():end].strip()
-        segment = re.split(r"^##\s+Module\s+\d+\s+instructor notes\b", segment, maxsplit=1, flags=re.I | re.M)[0].strip()
+        segment = module_markdown[match.start() : end].strip()
+        segment = re.split(
+            r"^##\s+Module\s+\d+\s+instructor notes\b", segment, maxsplit=1, flags=re.I | re.M
+        )[0].strip()
         result.append((int(match.group(1)), int(match.group(2)), match.group(3).strip(), segment))
     return result
 
@@ -78,7 +86,7 @@ def h3_sections(markdown_text):
     sections = []
     for index, match in enumerate(matches):
         end = matches[index + 1].start() if index + 1 < len(matches) else len(markdown_text)
-        sections.append((match.group(1).strip(), markdown_text[match.end():end].strip()))
+        sections.append((match.group(1).strip(), markdown_text[match.end() : end].strip()))
     return sections
 
 
@@ -94,7 +102,7 @@ def extract_vpa_student_body(segment):
     if lesson_heading is None:
         raise CommandError("A VPA lesson segment has no lesson heading.")
 
-    student_markdown = segment[lesson_heading.end():].strip()
+    student_markdown = segment[lesson_heading.end() :].strip()
     internal_sections = []
 
     # Remove only explicitly instructor-only/answer sections, preserving the
@@ -105,14 +113,14 @@ def extract_vpa_student_body(segment):
     )
     matches = list(internal_heading.finditer(student_markdown))
     for match in matches:
-        next_heading = re.search(r"^###\s+", student_markdown[match.end():], re.M)
+        next_heading = re.search(r"^###\s+", student_markdown[match.end() :], re.M)
         end = match.end() + next_heading.start() if next_heading else len(student_markdown)
-        internal_sections.append(student_markdown[match.start():end].strip())
+        internal_sections.append(student_markdown[match.start() : end].strip())
 
     for match in reversed(matches):
-        next_heading = re.search(r"^###\s+", student_markdown[match.end():], re.M)
+        next_heading = re.search(r"^###\s+", student_markdown[match.end() :], re.M)
         end = match.end() + next_heading.start() if next_heading else len(student_markdown)
-        student_markdown = student_markdown[:match.start()] + student_markdown[end:]
+        student_markdown = student_markdown[: match.start()] + student_markdown[end:]
 
     # These production-only metadata lines are not part of the actual lesson.
     student_markdown = re.sub(
@@ -147,14 +155,16 @@ def extract_vpa_student_body(segment):
         feedback = re.match(r"^\s*\*\*Feedback:\*\*\s*(.+)$", line, re.I)
         if feedback:
             revealed.append(feedback.group(1).strip())
-            learner_lines.extend([
-                "<details>",
-                "<summary>Feedback</summary>",
-                "",
-                feedback.group(1).strip(),
-                "",
-                "</details>",
-            ])
+            learner_lines.extend(
+                [
+                    "<details>",
+                    "<summary>Feedback</summary>",
+                    "",
+                    feedback.group(1).strip(),
+                    "",
+                    "</details>",
+                ]
+            )
         else:
             learner_lines.append(line)
     student_markdown = "\n".join(learner_lines).strip()
@@ -172,6 +182,7 @@ def extract_vpa_student_body(segment):
             + "\n\n".join(revealed)
         )
     return student_markdown, "\n\n".join(internal_sections)
+
 
 def estimate_duration(segment):
     match = _DURATION.search(segment)
@@ -193,8 +204,7 @@ def embed_vpa_figures(lesson_number, student_markdown, assets_root, figure_count
     for anchors, filename, caption in specs:
         if not (Path(assets_root) / filename).is_file():
             raise CommandError(
-                f"Required VPA lesson figure is missing: "
-                f"{Path(assets_root) / filename}"
+                f"Required VPA lesson figure is missing: " f"{Path(assets_root) / filename}"
             )
 
         if isinstance(anchors, str):
@@ -206,16 +216,11 @@ def embed_vpa_figures(lesson_number, student_markdown, assets_root, figure_count
             def add_figure(match, filename=filename, caption=caption):
                 figure_counters[module_number] = figure_counters.get(module_number, 0) + 1
                 figure_number = f"{module_number}.{figure_counters[module_number]}"
-                image = (
-                    f"![Figure {figure_number} — {caption}]"
-                    f"(/static/academy/vpa/{filename})"
-                )
+                image = f"![Figure {figure_number} — {caption}]" f"(/static/academy/vpa/{filename})"
                 figure_caption = f"*{caption}.*"
                 return f"{match.group(1)}\n\n{image}\n\n{figure_caption}"
 
-            student_markdown, replacements = pattern.subn(
-                add_figure, student_markdown, count=1
-            )
+            student_markdown, replacements = pattern.subn(add_figure, student_markdown, count=1)
             if replacements == 1:
                 placed = True
                 break
@@ -265,12 +270,14 @@ class Command(BaseCommand):
             if not title_match:
                 raise CommandError(f"Cannot read module title from {filename}.")
             module_title = title_match.group(1).strip()
-            modules.append({
-                "position": position,
-                "title": module_title,
-                "slug": slugify(module_title),
-                "source_path": str(source_path.relative_to(repository_root)),
-            })
+            modules.append(
+                {
+                    "position": position,
+                    "title": module_title,
+                    "slug": slugify(module_title),
+                    "source_path": str(source_path.relative_to(repository_root)),
+                }
+            )
 
             lesson_items = lesson_segments(source)
             if len(lesson_items) != 5:
@@ -297,18 +304,20 @@ class Command(BaseCommand):
                         f"{filename}, Lesson {module_number}.{lesson_position} ({title}): {exc} "
                         f"Available section headings: {found_sections!r}"
                     ) from exc
-                parsed_lessons.append({
-                    "module_position": position,
-                    "lesson_position": lesson_position,
-                    "lesson_number": f"{module_number}.{lesson_position}",
-                    "title": title,
-                    "segment": segment,
-                    "body": learner_body,
-                    "internal_material": internal_material,
-                    "media_notes": media_notes,
-                    "duration_minutes": estimate_duration(segment),
-                    "source_path": str(source_path.relative_to(repository_root)),
-                })
+                parsed_lessons.append(
+                    {
+                        "module_position": position,
+                        "lesson_position": lesson_position,
+                        "lesson_number": f"{module_number}.{lesson_position}",
+                        "title": title,
+                        "segment": segment,
+                        "body": learner_body,
+                        "internal_material": internal_material,
+                        "media_notes": media_notes,
+                        "duration_minutes": estimate_duration(segment),
+                        "source_path": str(source_path.relative_to(repository_root)),
+                    }
+                )
 
         if len(parsed_lessons) != 30:
             raise CommandError(
@@ -383,7 +392,8 @@ class Command(BaseCommand):
                         "Confirm answer-feedback design, chart media and timing before publication."
                         + (
                             f"\n\nMedia / production notes:\n{item['media_notes']}"
-                            if item["media_notes"] else ""
+                            if item["media_notes"]
+                            else ""
                         )
                     ),
                 )

@@ -66,7 +66,6 @@ class CourseDeletionAdminTests(TestCase):
         self.assertFalse(Course.objects.filter(pk=self.course.pk).exists())
         self.assertFalse(CourseMediaAsset.objects.filter(pk=self.asset.pk).exists())
 
-
     def test_course_delete_retires_matching_builder_draft_but_keeps_review_history(self):
         draft = CourseImport.objects.create(
             course_slug=self.course.slug,

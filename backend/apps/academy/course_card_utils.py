@@ -1,4 +1,5 @@
 """Shared eligibility and compact-copy helpers for inline related-course cards."""
+
 import re
 
 _PLACEHOLDER_TITLES = {
@@ -12,9 +13,24 @@ _PLACEHOLDER_SUMMARIES = {
     "describe the learner, what the course covers and what they can practise after completing it.",
 }
 _LEADING_VERBS = (
-    "analyse", "analyze", "apply", "assess", "build", "compare", "describe",
-    "develop", "distinguish", "evaluate", "explain", "identify", "learn", "read",
-    "recognise", "recognize", "understand", "use",
+    "analyse",
+    "analyze",
+    "apply",
+    "assess",
+    "build",
+    "compare",
+    "describe",
+    "develop",
+    "distinguish",
+    "evaluate",
+    "explain",
+    "identify",
+    "learn",
+    "read",
+    "recognise",
+    "recognize",
+    "understand",
+    "use",
 )
 
 
@@ -55,7 +71,9 @@ def compact_course_topic(value):
     )
     topic = re.sub(r"\band identify\b", "&", topic, flags=re.IGNORECASE)
     topic = re.sub(r"\bwith price progress\b", "vs price", topic, flags=re.IGNORECASE)
-    topic = re.sub(r"\bbefore interpreting it\b", "before interpretation", topic, flags=re.IGNORECASE)
+    topic = re.sub(
+        r"\bbefore interpreting it\b", "before interpretation", topic, flags=re.IGNORECASE
+    )
     topic = re.sub(r"^a clear,\s*", "", topic, flags=re.IGNORECASE)
     topic = re.sub(r"\b(?:a|an|the)\b", "", topic, flags=re.IGNORECASE)
     topic = re.sub(r",", "", topic)
@@ -95,7 +113,7 @@ def course_card_open_book_markup():
         'stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"></path>'
         '<path d="M6 8.1c2.7-.3 5.1.1 7.1 1.1M6 11.4c2.7-.3 5.1.1 7.1 1.1M26 8.1c-2.7-.3-5.1.1-7.1 1.1M26 11.4c-2.7-.3-5.1.1-7.1 1.1" '
         'stroke="currentColor" stroke-width="1.1" stroke-linecap="round" opacity=".7"></path>'
-        '</svg>'
+        "</svg>"
     )
 
 

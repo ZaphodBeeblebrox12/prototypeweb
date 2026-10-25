@@ -3,6 +3,7 @@
 The import intentionally creates no commerce Plan or CourseOffer. Review media,
 source accuracy, release rules and privacy before changing any publication state.
 """
+
 import json
 import re
 from pathlib import Path
@@ -46,6 +47,7 @@ def split_lesson_source(source):
         def take(match):
             target.append(match.group(0).strip())
             return "\n\n"
+
         return pattern.sub(take, content)
 
     body = collect(_ANSWER_DETAILS, body, answers)
@@ -54,7 +56,6 @@ def split_lesson_source(source):
     body = re.sub(r"^#\s+Day\s+\d+\s+[—–-].*\n+", "", body, count=1, flags=re.M)
     body = re.sub(r"\n{3,}", "\n\n", body).strip()
     return body, "\n\n".join(answers).strip(), "\n\n".join(notes).strip()
-
 
 
 def embed_existing_figures(source, generated_root, static_root, module_number, counters):
@@ -91,13 +92,15 @@ def embed_existing_figures(source, generated_root, static_root, module_number, c
         caption = re.sub(r"^L\d+-\d+-", "", Path(filename).stem, flags=re.I)
         caption = caption.replace("-", " ").strip().capitalize()
         image_url = f"/static/academy/course-images/{filename}"
-        output.extend([
-            "",
-            f"![Figure {figure_number} — {caption}]({image_url})",
-            "",
-            f"*Figure {figure_number} — {caption}.*",
-            "",
-        ])
+        output.extend(
+            [
+                "",
+                f"![Figure {figure_number} — {caption}]({image_url})",
+                "",
+                f"*Figure {figure_number} — {caption}.*",
+                "",
+            ]
+        )
         production_notes.append(
             f"Embedded Figure {figure_number} from {filename}. Source chart marker and production brief:\n\n"
             + "\n".join(block)
@@ -105,6 +108,7 @@ def embed_existing_figures(source, generated_root, static_root, module_number, c
 
     learner_source = re.sub(r"\n{3,}", "\n\n", "\n".join(output)).strip()
     return learner_source, "\n\n".join(production_notes).strip()
+
 
 def lesson_summary(body, fallback):
     match = re.search(
@@ -163,7 +167,9 @@ class Command(BaseCommand):
             relative = Path(str(item.get("source_file", "")))
             source_path = (source_root / relative).resolve()
             if source_root_resolved not in source_path.parents or not source_path.is_file():
-                raise CommandError(f"Lesson source is missing or outside the course folder: {relative}")
+                raise CommandError(
+                    f"Lesson source is missing or outside the course folder: {relative}"
+                )
             source = source_path.read_text(encoding="utf-8")
             source_with_figures, embedded_media_notes = embed_existing_figures(
                 source,
@@ -178,13 +184,15 @@ class Command(BaseCommand):
             )
             if not learner_body:
                 raise CommandError(f"Lesson has no learner-facing content: {relative}")
-            parsed.append({
-                **item,
-                "source_path": str(relative),
-                "body": learner_body,
-                "answer_key": answer_key,
-                "media_notes": media_notes,
-            })
+            parsed.append(
+                {
+                    **item,
+                    "source_path": str(relative),
+                    "body": learner_body,
+                    "answer_key": answer_key,
+                    "media_notes": media_notes,
+                }
+            )
 
         by_level = {int(level["level"]): level for level in levels}
         if any(int(item.get("level", 0)) not in by_level for item in parsed):
@@ -257,7 +265,11 @@ class Command(BaseCommand):
                     answer_key_markdown=item["answer_key"],
                     instructor_notes=(
                         f"Imported from {item['source_path']}. Verify lesson duration and media."
-                        + (f"\n\nMedia / production notes:\n{item['media_notes']}" if item["media_notes"] else "")
+                        + (
+                            f"\n\nMedia / production notes:\n{item['media_notes']}"
+                            if item["media_notes"]
+                            else ""
+                        )
                     ),
                 )
 

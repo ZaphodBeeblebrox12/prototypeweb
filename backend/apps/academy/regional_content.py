@@ -40,7 +40,9 @@ def contains_unmanaged_regional_image(content):
         src_match = _REGIONAL_HTML_IMAGE_SRC_RE.search(match.group(0))
         if not src_match:
             return True
-        source_url = next((value for value in src_match.groupdict().values() if value is not None), "")
+        source_url = next(
+            (value for value in src_match.groupdict().values() if value is not None), ""
+        )
         if not _is_managed_regional_image_source(source_url):
             return True
     return False
@@ -50,8 +52,9 @@ def strip_unmanaged_regional_images(content):
     """Remove unmanaged Markdown/HTML image embeds from regional content at render time."""
     source = str(content or "")
     source = _REGIONAL_MARKDOWN_IMAGE_RE.sub(
-        lambda match: match.group(0)
-        if _is_managed_regional_image_source(match.group("src")) else "",
+        lambda match: (
+            match.group(0) if _is_managed_regional_image_source(match.group("src")) else ""
+        ),
         source,
     )
 
@@ -59,11 +62,12 @@ def strip_unmanaged_regional_images(content):
         src_match = _REGIONAL_HTML_IMAGE_SRC_RE.search(match.group(0))
         if not src_match:
             return ""
-        source_url = next((value for value in src_match.groupdict().values() if value is not None), "")
+        source_url = next(
+            (value for value in src_match.groupdict().values() if value is not None), ""
+        )
         return match.group(0) if _is_managed_regional_image_source(source_url) else ""
 
     return _REGIONAL_HTML_IMAGE_RE.sub(keep_managed_html_image, source)
-
 
 
 # ISO 3166-1 alpha-2 audience codes, grouped by the six Course Builder regions.
@@ -124,7 +128,9 @@ def regional_lesson_content_values(content_json):
     """Return whole-lesson audience overrides from learner-safe lesson JSON."""
     if not isinstance(content_json, dict):
         return {}
-    values = content_json.get("regional_lesson_content", content_json.get("regionalLessonContent", {}))
+    values = content_json.get(
+        "regional_lesson_content", content_json.get("regionalLessonContent", {})
+    )
     if not isinstance(values, dict):
         return {}
     return {
@@ -142,7 +148,9 @@ def regional_lesson_content_asset_ids(content_json):
     return asset_ids
 
 
-def resolve_regional_lesson_content(source, regional_content=None, country_code=None, region_code=None):
+def resolve_regional_lesson_content(
+    source, regional_content=None, country_code=None, region_code=None
+):
     """Choose a complete lesson body by audience: country, region, then main."""
     source = str(source or "")
     raw_variants = regional_content if isinstance(regional_content, dict) else {}
@@ -166,7 +174,9 @@ def regional_block_asset_ids(content_json):
     asset_ids = set()
     for block in regional_block_values(content_json):
         base_content = block.get("base_content", block.get("baseContent", ""))
-        asset_ids.update(value.lower() for value in ASSET_REFERENCE_RE.findall(str(base_content or "")))
+        asset_ids.update(
+            value.lower() for value in ASSET_REFERENCE_RE.findall(str(base_content or ""))
+        )
         variants = block.get("variants") if isinstance(block.get("variants"), list) else []
         for variant in variants:
             if isinstance(variant, dict):

@@ -59,9 +59,7 @@ class ResendEmailBackend(BaseEmailBackend):
                 return False
             if isinstance(exc, (ImproperlyConfigured, ValueError)):
                 raise
-            raise RuntimeError(
-                f"Resend email delivery failed ({type(exc).__name__})."
-            ) from exc
+            raise RuntimeError(f"Resend email delivery failed ({type(exc).__name__}).") from exc
 
     @staticmethod
     def _build_payload(message: Any) -> dict[str, Any]:
@@ -83,8 +81,7 @@ class ResendEmailBackend(BaseEmailBackend):
             payload["reply_to"] = list(message.reply_to)
         if getattr(message, "extra_headers", None):
             payload["headers"] = {
-                str(name): str(value)
-                for name, value in message.extra_headers.items()
+                str(name): str(value) for name, value in message.extra_headers.items()
             }
 
         if getattr(message, "content_subtype", "plain") == "html":
@@ -102,8 +99,7 @@ class ResendEmailBackend(BaseEmailBackend):
         attachments = getattr(message, "attachments", [])
         if attachments:
             payload["attachments"] = [
-                ResendEmailBackend._build_attachment(attachment)
-                for attachment in attachments
+                ResendEmailBackend._build_attachment(attachment) for attachment in attachments
             ]
 
         return payload

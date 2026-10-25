@@ -1,4 +1,5 @@
 """Authenticated learner views for TradeThesis Academy."""
+
 import json
 import mimetypes
 import re
@@ -62,7 +63,9 @@ def _lesson_asset_ids_for_audience(lesson, country_code=None, region_code=None):
         for value in content_json.get("asset_ids", [])
         if str(value or "").strip()
     }
-    regional_ids = regional_block_asset_ids(content_json) | regional_lesson_content_asset_ids(content_json)
+    regional_ids = regional_block_asset_ids(content_json) | regional_lesson_content_asset_ids(
+        content_json
+    )
     resolved_markdown = resolve_regional_lesson_content(
         lesson.content_markdown or "",
         regional_content=content_json.get("regional_lesson_content", {}),
@@ -79,7 +82,9 @@ def _lesson_asset_ids_for_audience(lesson, country_code=None, region_code=None):
     # reference is inside an unselected regional variant.
     allowed_ids = declared_ids - regional_ids
     allowed_ids.update(value.lower() for value in ASSET_REFERENCE_RE.findall(resolved_markdown))
-    questions = content_json.get("questions") if isinstance(content_json.get("questions"), list) else []
+    questions = (
+        content_json.get("questions") if isinstance(content_json.get("questions"), list) else []
+    )
     for question in questions:
         if not isinstance(question, dict):
             continue
@@ -92,13 +97,17 @@ def _lesson_asset_ids_for_audience(lesson, country_code=None, region_code=None):
         if not isinstance(figure, dict) or figure.get("type") != "image-group":
             continue
         image_ids = figure.get("image_ids") if isinstance(figure.get("image_ids"), list) else []
-        allowed_ids.update(str(value).strip().lower() for value in image_ids if str(value or "").strip())
+        allowed_ids.update(
+            str(value).strip().lower() for value in image_ids if str(value or "").strip()
+        )
     return allowed_ids
 
 
 def _module_display_title(value):
     """Return the authored module name without an optional module-number prefix."""
-    title = re.sub(r"^module\s*\d*\s*[·—–:-]?\s*", "", str(value or "").strip(), flags=re.IGNORECASE)
+    title = re.sub(
+        r"^module\s*\d*\s*[·—–:-]?\s*", "", str(value or "").strip(), flags=re.IGNORECASE
+    )
     return title.strip() or "Learning Room"
 
 
@@ -107,7 +116,11 @@ def _regional_audience(request, admin_preview=False):
 
     country = None
     if admin_preview and getattr(request, "user", None) and is_course_content_admin(request.user):
-        audience = str(request.GET.get("preview_audience") or request.GET.get("preview_country") or "").strip().upper()
+        audience = (
+            str(request.GET.get("preview_audience") or request.GET.get("preview_country") or "")
+            .strip()
+            .upper()
+        )
         if audience in {"", "GLOBAL"}:
             return None, None
         if audience.startswith("REGION:"):
@@ -150,7 +163,10 @@ def _notebook_for_course_display(course_slug, notebook):
     """Return topic-appropriate prompts; only the Bollinger course gets Bollinger-specific copy."""
     result = deepcopy(notebook) if isinstance(notebook, dict) else {}
     default_title_values = {
-        "", "Your Trading Notebook", "Before you make the call", "Before treating a touch as a setup",
+        "",
+        "Your Trading Notebook",
+        "Before you make the call",
+        "Before treating a touch as a setup",
     }
     default_prompts = [
         {"label": "Describe", "text": "What evidence is visible?"},
@@ -160,18 +176,28 @@ def _notebook_for_course_display(course_slug, notebook):
     legacy_generic_prompts = [
         {"label": "Observe", "text": "Describe the evidence visible in the chart."},
         {"label": "Interpret", "text": "State one possible reading and a reasonable alternative."},
-        {"label": "Test", "text": "Name the next evidence that would strengthen or weaken your reading."},
+        {
+            "label": "Test",
+            "text": "Name the next evidence that would strengthen or weaken your reading.",
+        },
     ]
     legacy_bollinger_prompts = [
         {"label": "Describe", "text": "Where is price relative to the bands and middle line?"},
-        {"label": "Interpret", "text": "Does the structure look like a range, a trend or a transition? What is your alternative explanation?"},
-        {"label": "Test", "text": "What future price behaviour would strengthen or weaken your view?"},
+        {
+            "label": "Interpret",
+            "text": "Does the structure look like a range, a trend or a transition? What is your alternative explanation?",
+        },
+        {
+            "label": "Test",
+            "text": "What future price behaviour would strengthen or weaken your view?",
+        },
     ]
     raw_prompts = result.get("prompts")
     missing_prompts = not isinstance(raw_prompts, list) or not raw_prompts
     if isinstance(raw_prompts, list):
         usable_prompts = [
-            prompt for prompt in raw_prompts
+            prompt
+            for prompt in raw_prompts
             if isinstance(prompt, dict)
             and str(prompt.get("label") or "").strip()
             and str(prompt.get("text") or "").strip()
@@ -205,8 +231,14 @@ def _notebook_for_course_display(course_slug, notebook):
     if course_slug == "understand-bollinger-bands":
         if matches_generic_defaults:
             result["prompts"] = [
-                {"label": "Describe", "text": "Where is price relative to the bands and middle line?"},
-                {"label": "Interpret", "text": "Does the structure look like a range, a trend or a transition? What is your alternative explanation?"},
+                {
+                    "label": "Describe",
+                    "text": "Where is price relative to the bands and middle line?",
+                },
+                {
+                    "label": "Interpret",
+                    "text": "Does the structure look like a range, a trend or a transition? What is your alternative explanation?",
+                },
                 {"label": "Apply", "text": "What would change your view?"},
             ]
     elif matches_generic_defaults:
@@ -254,9 +286,11 @@ def _render_course_description(source, user=None, admin_preview=False):
 
 def _active_entitlements(user, at=None):
     at = at or timezone.now()
-    return (CourseEntitlement.objects.filter(
-        user=user, status=CourseEntitlement.Status.ACTIVE, starts_at__lte=at,
-    ).filter(Q(expires_at__isnull=True) | Q(expires_at__gt=at)))
+    return CourseEntitlement.objects.filter(
+        user=user,
+        status=CourseEntitlement.Status.ACTIVE,
+        starts_at__lte=at,
+    ).filter(Q(expires_at__isnull=True) | Q(expires_at__gt=at))
 
 
 @login_required
@@ -264,36 +298,57 @@ def academy_home(request):
     """Member landing page: purchased courses, progress, and available offers."""
     entitlements = list(_active_entitlements(request.user).select_related("course"))
     entitlements_by_course = {ent.course_id: ent for ent in entitlements}
-    courses_by_id = {course.pk: course for course in Course.objects.filter(status=Course.Status.PUBLISHED)}
+    courses_by_id = {
+        course.pk: course for course in Course.objects.filter(status=Course.Status.PUBLISHED)
+    }
     for entitlement in entitlements:
         courses_by_id.setdefault(entitlement.course_id, entitlement.course)
 
     course_cards = []
     for course in sorted(courses_by_id.values(), key=lambda c: (c.position, c.title.casefold())):
         entitlement = entitlements_by_course.get(course.pk)
-        visible_lesson_ids = list(Lesson.objects.filter(
-            module__course=course, module__is_published=True, is_published=True,
-        ).values_list("pk", flat=True))
+        visible_lesson_ids = list(
+            Lesson.objects.filter(
+                module__course=course,
+                module__is_published=True,
+                is_published=True,
+            ).values_list("pk", flat=True)
+        )
         total = len(visible_lesson_ids)
         done = LessonProgress.objects.filter(
-            user=request.user, lesson_id__in=visible_lesson_ids,
+            user=request.user,
+            lesson_id__in=visible_lesson_ids,
             status=LessonProgress.Status.COMPLETED,
         ).count()
-        course_cards.append({
-            "course": course, "entitlement": entitlement,
-            "total_lessons": total, "completed_lessons": done,
-            "progress_percent": round(done * 100 / total) if total else 0,
-            "resume_lesson": get_resume_lesson(request.user, course),
-        })
+        course_cards.append(
+            {
+                "course": course,
+                "entitlement": entitlement,
+                "total_lessons": total,
+                "completed_lessons": done,
+                "progress_percent": round(done * 100 / total) if total else 0,
+                "resume_lesson": get_resume_lesson(request.user, course),
+            }
+        )
 
-    offers = CourseOffer.objects.filter(
-        is_active=True, course__status=Course.Status.PUBLISHED,
-        plan__is_active=True,
-    ).select_related("course", "plan").order_by("position", "name")
+    offers = (
+        CourseOffer.objects.filter(
+            is_active=True,
+            course__status=Course.Status.PUBLISHED,
+            plan__is_active=True,
+        )
+        .select_related("course", "plan")
+        .order_by("position", "name")
+    )
     offers = [o for o in offers if o.is_saleable and o.course_id not in entitlements_by_course]
-    return render(request, "academy/home.html", {
-        "course_cards": course_cards, "offers": offers,
-    })
+    return render(
+        request,
+        "academy/home.html",
+        {
+            "course_cards": course_cards,
+            "offers": offers,
+        },
+    )
 
 
 @login_required
@@ -302,15 +357,19 @@ def course_detail(request, course_slug):
     entitlement = get_active_entitlement(request.user, course)
     if course.status != Course.Status.PUBLISHED and entitlement is None:
         from django.http import Http404
+
         raise Http404
 
     lesson_queryset = Lesson.objects.filter(is_published=True).order_by("position", "title")
-    modules = CourseModule.objects.filter(course=course, is_published=True).order_by(
-        "position", "title"
-    ).prefetch_related(Prefetch("lessons", queryset=lesson_queryset))
+    modules = (
+        CourseModule.objects.filter(course=course, is_published=True)
+        .order_by("position", "title")
+        .prefetch_related(Prefetch("lessons", queryset=lesson_queryset))
+    )
     lesson_ids = [lesson.pk for module in modules for lesson in module.lessons.all()]
     progress_by_lesson = {
-        p.lesson_id: p for p in LessonProgress.objects.filter(user=request.user, lesson_id__in=lesson_ids)
+        p.lesson_id: p
+        for p in LessonProgress.objects.filter(user=request.user, lesson_id__in=lesson_ids)
     }
     module_rows = []
     now = timezone.now()
@@ -319,55 +378,70 @@ def course_detail(request, course_slug):
         for lesson in module.lessons.all():
             allowed = can_access_lesson(request.user, lesson, now)
             release_at = lesson_release_at(entitlement, lesson) if entitlement else None
-            rows.append({
-                "lesson": lesson, "accessible": allowed,
-                "progress": progress_by_lesson.get(lesson.pk),
-                "release_at": release_at,
-            })
+            rows.append(
+                {
+                    "lesson": lesson,
+                    "accessible": allowed,
+                    "progress": progress_by_lesson.get(lesson.pk),
+                    "release_at": release_at,
+                }
+            )
         if rows:
             module_rows.append({"module": module, "lessons": rows})
 
     first_accessible_lesson = next(
-        (
-            item["lesson"]
-            for row in module_rows
-            for item in row["lessons"]
-            if item["accessible"]
-        ),
+        (item["lesson"] for row in module_rows for item in row["lessons"] if item["accessible"]),
         None,
     )
     total_study_minutes = sum(
-        item["lesson"].duration_minutes
-        for row in module_rows
-        for item in row["lessons"]
+        item["lesson"].duration_minutes for row in module_rows for item in row["lessons"]
     )
-    offer = CourseOffer.objects.filter(
-        course=course, is_active=True, plan__is_active=True,
-    ).select_related("plan", "course").first()
+    offer = (
+        CourseOffer.objects.filter(
+            course=course,
+            is_active=True,
+            plan__is_active=True,
+        )
+        .select_related("plan", "course")
+        .first()
+    )
     if offer is not None and not offer.is_saleable:
         offer = None
     visible_lesson_ids = Lesson.objects.filter(
-        module__course=course, module__is_published=True, is_published=True,
+        module__course=course,
+        module__is_published=True,
+        is_published=True,
     ).values_list("pk", flat=True)
     completed = LessonProgress.objects.filter(
-        user=request.user, lesson_id__in=visible_lesson_ids,
+        user=request.user,
+        lesson_id__in=visible_lesson_ids,
         status=LessonProgress.Status.COMPLETED,
     ).count()
-    total = Lesson.objects.filter(module__course=course, module__is_published=True, is_published=True).count()
-    return render(request, "academy/course_detail.html", {
-        "course": course,
-        "course_description_html": _render_course_description(course.description, user=request.user),
-        "entitlement": entitlement, "offer": offer,
-        "module_rows": module_rows, "completed_lessons": completed,
-        "total_lessons": total,
-        "total_modules": len(module_rows),
-        "total_study_minutes": total_study_minutes,
-        "total_study_hours": total_study_minutes // 60,
-        "total_study_minutes_remainder": total_study_minutes % 60,
-        "first_accessible_lesson": first_accessible_lesson,
-        "is_course_content_admin": is_course_content_admin(request.user),
-        "progress_percent": round(completed * 100 / total) if total else 0,
-    })
+    total = Lesson.objects.filter(
+        module__course=course, module__is_published=True, is_published=True
+    ).count()
+    return render(
+        request,
+        "academy/course_detail.html",
+        {
+            "course": course,
+            "course_description_html": _render_course_description(
+                course.description, user=request.user
+            ),
+            "entitlement": entitlement,
+            "offer": offer,
+            "module_rows": module_rows,
+            "completed_lessons": completed,
+            "total_lessons": total,
+            "total_modules": len(module_rows),
+            "total_study_minutes": total_study_minutes,
+            "total_study_hours": total_study_minutes // 60,
+            "total_study_minutes_remainder": total_study_minutes % 60,
+            "first_accessible_lesson": first_accessible_lesson,
+            "is_course_content_admin": is_course_content_admin(request.user),
+            "progress_percent": round(completed * 100 / total) if total else 0,
+        },
+    )
 
 
 @never_cache
@@ -375,8 +449,10 @@ def course_detail(request, course_slug):
 def lesson_detail(request, course_slug, lesson_id):
     lesson = get_object_or_404(
         Lesson.objects.select_related("module__course"),
-        pk=lesson_id, module__course__slug=course_slug,
-        is_published=True, module__is_published=True,
+        pk=lesson_id,
+        module__course__slug=course_slug,
+        is_published=True,
+        module__is_published=True,
     )
     course = lesson.module.course
     if not can_access_lesson(request.user, lesson):
@@ -391,112 +467,185 @@ def lesson_detail(request, course_slug, lesson_id):
     )
     content_json = lesson.content_json if isinstance(lesson.content_json, dict) else {}
     asset_ids = content_json.get("asset_ids", [])
-    regional_asset_ids = regional_block_asset_ids(content_json) | regional_lesson_content_asset_ids(content_json)
+    regional_asset_ids = regional_block_asset_ids(content_json) | regional_lesson_content_asset_ids(
+        content_json
+    )
     media_assets = CourseMediaAsset.objects.filter(course=course, pk__in=asset_ids)
     asset_urls = {}
     for asset in media_assets:
         if asset.file:
             asset_urls[str(asset.pk)] = reverse("academy:media-asset", args=[asset.pk])
-        elif (
-            str(asset.pk).lower() not in regional_asset_ids
-            and asset.original_url.startswith(("https://", "http://"))
+        elif str(asset.pk).lower() not in regional_asset_ids and asset.original_url.startswith(
+            ("https://", "http://")
         ):
             # External URLs cannot enforce regional access. Regional images must
             # use managed storage before they can be submitted for review.
             asset_urls[str(asset.pk)] = asset.original_url
     outline_modules = []
-    modules = CourseModule.objects.filter(course=course).prefetch_related("lessons").order_by("position", "title")
+    modules = (
+        CourseModule.objects.filter(course=course)
+        .prefetch_related("lessons")
+        .order_by("position", "title")
+    )
     now = timezone.now()
     for module_row in modules:
         rows = []
         for outline_lesson in module_row.lessons.all():
             if not outline_lesson.is_published:
                 continue
-            rows.append({
-                "lesson": outline_lesson,
-                "accessible": can_access_lesson(request.user, outline_lesson, now),
-                "current": outline_lesson.pk == lesson.pk,
-                "progress": LessonProgress.objects.filter(user=request.user, lesson=outline_lesson).first(),
-            })
+            rows.append(
+                {
+                    "lesson": outline_lesson,
+                    "accessible": can_access_lesson(request.user, outline_lesson, now),
+                    "current": outline_lesson.pk == lesson.pk,
+                    "progress": LessonProgress.objects.filter(
+                        user=request.user, lesson=outline_lesson
+                    ).first(),
+                }
+            )
         if rows and module_row.is_published:
             outline_modules.append({"module": module_row, "lessons": rows})
     notebook = _notebook_for_course_display(
         course.slug,
         lesson.content_json.get("notebook", {}) if isinstance(lesson.content_json, dict) else {},
     )
-    saved_responses = progress.response_json.get("notebook_responses", []) if isinstance(progress.response_json, dict) else []
-    reflection_response = str(progress.response_json.get("reflection_response") or "")[:4000] if isinstance(progress.response_json, dict) else ""
-    reflection = _reflection_for_display(lesson.content_json.get("reflection", {}) if isinstance(lesson.content_json, dict) else {})
+    saved_responses = (
+        progress.response_json.get("notebook_responses", [])
+        if isinstance(progress.response_json, dict)
+        else []
+    )
+    reflection_response = (
+        str(progress.response_json.get("reflection_response") or "")[:4000]
+        if isinstance(progress.response_json, dict)
+        else ""
+    )
+    reflection = _reflection_for_display(
+        lesson.content_json.get("reflection", {}) if isinstance(lesson.content_json, dict) else {}
+    )
     if isinstance(notebook, dict) and isinstance(notebook.get("prompts"), list):
         for prompt_index, prompt in enumerate(notebook["prompts"]):
             if isinstance(prompt, dict):
-                prompt["response"] = saved_responses[prompt_index] if isinstance(saved_responses, list) and prompt_index < len(saved_responses) else ""
-    video_url = lesson.content_json.get("video_url", "") if isinstance(lesson.content_json, dict) else ""
-    video_url = video_url if isinstance(video_url, str) and video_url.startswith(("https://", "http://")) else ""
+                prompt["response"] = (
+                    saved_responses[prompt_index]
+                    if isinstance(saved_responses, list) and prompt_index < len(saved_responses)
+                    else ""
+                )
+    video_url = (
+        lesson.content_json.get("video_url", "") if isinstance(lesson.content_json, dict) else ""
+    )
+    video_url = (
+        video_url
+        if isinstance(video_url, str) and video_url.startswith(("https://", "http://"))
+        else ""
+    )
     video_is_file = video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
-    practice_questions = lesson.content_json.get("questions", []) if isinstance(lesson.content_json, dict) else []
+    practice_questions = (
+        lesson.content_json.get("questions", []) if isinstance(lesson.content_json, dict) else []
+    )
     practice_questions = _practice_questions_with_images(
         practice_questions,
         asset_urls,
         lesson.content_json.get("figures", {}) if isinstance(lesson.content_json, dict) else {},
     )
-    related_ids = lesson.content_json.get("related_course_ids", []) if isinstance(lesson.content_json, dict) else []
-    related_ids = [value for value in related_ids if isinstance(value, str) and len(value) == 36 and value.count("-") == 4]
+    related_ids = (
+        lesson.content_json.get("related_course_ids", [])
+        if isinstance(lesson.content_json, dict)
+        else []
+    )
+    related_ids = [
+        value
+        for value in related_ids
+        if isinstance(value, str) and len(value) == 36 and value.count("-") == 4
+    ]
     related_courses = [
-        related for related in Course.objects.filter(
-            pk__in=related_ids, status=Course.Status.PUBLISHED,
-        ).exclude(pk=course.pk).order_by("position", "title")
+        related
+        for related in Course.objects.filter(
+            pk__in=related_ids,
+            status=Course.Status.PUBLISHED,
+        )
+        .exclude(pk=course.pk)
+        .order_by("position", "title")
         if is_course_card_recommendable(related.title, related.summary, related.description)
     ]
     for related in related_courses:
         related.topic_tags = course_topic_tags(related.learning_outcomes)
-    ordered_lessons = list(Lesson.objects.filter(
-        module__course=course, module__is_published=True, is_published=True,
-    ).select_related("module").order_by("module__position", "position", "title"))
-    accessible_lessons = [item for item in ordered_lessons if can_access_lesson(request.user, item, now)]
-    current_index = next((i for i, item in enumerate(accessible_lessons) if item.pk == lesson.pk), -1)
+    ordered_lessons = list(
+        Lesson.objects.filter(
+            module__course=course,
+            module__is_published=True,
+            is_published=True,
+        )
+        .select_related("module")
+        .order_by("module__position", "position", "title")
+    )
+    accessible_lessons = [
+        item for item in ordered_lessons if can_access_lesson(request.user, item, now)
+    ]
+    current_index = next(
+        (i for i, item in enumerate(accessible_lessons) if item.pk == lesson.pk), -1
+    )
     previous_lesson = accessible_lessons[current_index - 1] if current_index > 0 else None
-    next_lesson = accessible_lessons[current_index + 1] if 0 <= current_index < len(accessible_lessons) - 1 else None
+    next_lesson = (
+        accessible_lessons[current_index + 1]
+        if 0 <= current_index < len(accessible_lessons) - 1
+        else None
+    )
     total_lessons = len(ordered_lessons)
     completed_lessons = LessonProgress.objects.filter(
-        user=request.user, lesson_id__in=[item.pk for item in ordered_lessons],
+        user=request.user,
+        lesson_id__in=[item.pk for item in ordered_lessons],
         status=LessonProgress.Status.COMPLETED,
     ).count()
     course_progress_percent = round(completed_lessons * 100 / total_lessons) if total_lessons else 0
     regional_country, regional_region = _regional_audience(request)
-    return render(request, "academy/lesson.html", {
-        "course": course, "lesson": lesson, "module": lesson.module,
-        "module_display_title": _module_display_title(lesson.module.title),
-        "entitlement": entitlement, "progress": progress,
-        "lesson_sections": build_lesson_sections(
-            lesson.content_markdown,
-            asset_urls,
-            user=request.user,
-            figure_metadata=(
-                lesson.content_json.get("figures", {})
-                if isinstance(lesson.content_json, dict) else {}
+    return render(
+        request,
+        "academy/lesson.html",
+        {
+            "course": course,
+            "lesson": lesson,
+            "module": lesson.module,
+            "module_display_title": _module_display_title(lesson.module.title),
+            "entitlement": entitlement,
+            "progress": progress,
+            "lesson_sections": build_lesson_sections(
+                lesson.content_markdown,
+                asset_urls,
+                user=request.user,
+                figure_metadata=(
+                    lesson.content_json.get("figures", {})
+                    if isinstance(lesson.content_json, dict)
+                    else {}
+                ),
+                table_metadata=(
+                    lesson.content_json.get("tables", {})
+                    if isinstance(lesson.content_json, dict)
+                    else {}
+                ),
+                figure_prefix=f"{lesson.module.position}.{lesson.position}",
+                module_label=f"Module {lesson.module.position} · {lesson.module.title}",
+                course_title=course.title,
+                regional_blocks=content_json.get("regional_blocks", {}),
+                regional_content=content_json.get("regional_lesson_content", {}),
+                country_code=regional_country,
+                region_code=regional_region,
             ),
-            table_metadata=(
-                lesson.content_json.get("tables", {})
-                if isinstance(lesson.content_json, dict) else {}
-            ),
-            figure_prefix=f"{lesson.module.position}.{lesson.position}",
-            module_label=f"Module {lesson.module.position} · {lesson.module.title}",
-            course_title=course.title,
-            regional_blocks=content_json.get("regional_blocks", {}),
-            regional_content=content_json.get("regional_lesson_content", {}),
-            country_code=regional_country,
-            region_code=regional_region,
-        ),
-        "notebook": notebook, "notebook_responses": saved_responses,
-        "reflection": reflection, "reflection_response": reflection_response,
-        "outline_modules": outline_modules,
-        "related_courses": related_courses, "practice_questions": practice_questions,
-        "video_url": video_url, "video_is_file": video_is_file,
-        "previous_lesson": previous_lesson, "next_lesson": next_lesson,
-        "course_progress_percent": course_progress_percent,
-        "completed_lessons": completed_lessons, "total_lessons": total_lessons,
-    })
+            "notebook": notebook,
+            "notebook_responses": saved_responses,
+            "reflection": reflection,
+            "reflection_response": reflection_response,
+            "outline_modules": outline_modules,
+            "related_courses": related_courses,
+            "practice_questions": practice_questions,
+            "video_url": video_url,
+            "video_is_file": video_is_file,
+            "previous_lesson": previous_lesson,
+            "next_lesson": next_lesson,
+            "course_progress_percent": course_progress_percent,
+            "completed_lessons": completed_lessons,
+            "total_lessons": total_lessons,
+        },
+    )
 
 
 @never_cache
@@ -525,35 +674,43 @@ def admin_lesson_preview(request, course_slug, lesson_id):
     for asset in media_assets:
         if asset.file:
             asset_urls[str(asset.pk)] = reverse("academy:media-asset", args=[asset.pk])
-        elif isinstance(asset.original_url, str) and asset.original_url.startswith(("https://", "http://")):
+        elif isinstance(asset.original_url, str) and asset.original_url.startswith(
+            ("https://", "http://")
+        ):
             asset_urls[str(asset.pk)] = asset.original_url
 
     now = timezone.now()
-    modules = CourseModule.objects.filter(
-        course=course,
-        is_published=True,
-    ).prefetch_related(
-        Prefetch(
-            "lessons",
-            queryset=Lesson.objects.filter(is_published=True).order_by("position", "title"),
+    modules = (
+        CourseModule.objects.filter(
+            course=course,
+            is_published=True,
         )
-    ).order_by("position", "title")
+        .prefetch_related(
+            Prefetch(
+                "lessons",
+                queryset=Lesson.objects.filter(is_published=True).order_by("position", "title"),
+            )
+        )
+        .order_by("position", "title")
+    )
     outline_modules = []
     ordered_lessons = []
     for module_row in modules:
         rows = []
         for outline_lesson in module_row.lessons.all():
             ordered_lessons.append(outline_lesson)
-            rows.append({
-                "lesson": outline_lesson,
-                "accessible": can_access_lesson(request.user, outline_lesson, now),
-                "current": outline_lesson.pk == lesson.pk,
-                "progress": None,
-                "admin_preview_url": reverse(
-                    "academy:admin-lesson-preview",
-                    args=[course.slug, outline_lesson.pk],
-                ),
-            })
+            rows.append(
+                {
+                    "lesson": outline_lesson,
+                    "accessible": can_access_lesson(request.user, outline_lesson, now),
+                    "current": outline_lesson.pk == lesson.pk,
+                    "progress": None,
+                    "admin_preview_url": reverse(
+                        "academy:admin-lesson-preview",
+                        args=[course.slug, outline_lesson.pk],
+                    ),
+                }
+            )
         if rows:
             outline_modules.append({"module": module_row, "lessons": rows})
 
@@ -581,44 +738,50 @@ def admin_lesson_preview(request, course_slug, lesson_id):
     video_is_file = video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
     regional_country, regional_region = _regional_audience(request, admin_preview=True)
 
-    return render(request, "academy/lesson.html", {
-        "course": course,
-        "lesson": lesson,
-        "module": lesson.module,
-        "module_display_title": _module_display_title(lesson.module.title),
-        "entitlement": entitlement,
-        "progress": None,
-        "admin_preview": True,
-        "lesson_sections": build_lesson_sections(
-            lesson.content_markdown,
-            asset_urls,
-            user=request.user,
-            admin_preview=True,
-            figure_metadata=content_json.get("figures", {}),
-            table_metadata=content_json.get("tables", {}),
-            figure_prefix=f"{lesson.module.position}.{lesson.position}",
-            module_label=f"Module {lesson.module.position} · {lesson.module.title}",
-            course_title=course.title,
-            regional_blocks=content_json.get("regional_blocks", {}),
-            regional_content=content_json.get("regional_lesson_content", {}),
-            country_code=regional_country,
-            region_code=regional_region,
-        ),
-        "notebook": notebook,
-        "notebook_responses": [],
-        "reflection": _reflection_for_display(content_json.get("reflection", {}) if isinstance(content_json, dict) else {}),
-        "reflection_response": "",
-        "outline_modules": outline_modules,
-        "related_courses": Course.objects.none(),
-        "practice_questions": practice_questions,
-        "video_url": video_url,
-        "video_is_file": video_is_file,
-        "previous_lesson": previous_lesson,
-        "next_lesson": next_lesson,
-        "course_progress_percent": 0,
-        "completed_lessons": 0,
-        "total_lessons": len(ordered_lessons),
-    })
+    return render(
+        request,
+        "academy/lesson.html",
+        {
+            "course": course,
+            "lesson": lesson,
+            "module": lesson.module,
+            "module_display_title": _module_display_title(lesson.module.title),
+            "entitlement": entitlement,
+            "progress": None,
+            "admin_preview": True,
+            "lesson_sections": build_lesson_sections(
+                lesson.content_markdown,
+                asset_urls,
+                user=request.user,
+                admin_preview=True,
+                figure_metadata=content_json.get("figures", {}),
+                table_metadata=content_json.get("tables", {}),
+                figure_prefix=f"{lesson.module.position}.{lesson.position}",
+                module_label=f"Module {lesson.module.position} · {lesson.module.title}",
+                course_title=course.title,
+                regional_blocks=content_json.get("regional_blocks", {}),
+                regional_content=content_json.get("regional_lesson_content", {}),
+                country_code=regional_country,
+                region_code=regional_region,
+            ),
+            "notebook": notebook,
+            "notebook_responses": [],
+            "reflection": _reflection_for_display(
+                content_json.get("reflection", {}) if isinstance(content_json, dict) else {}
+            ),
+            "reflection_response": "",
+            "outline_modules": outline_modules,
+            "related_courses": Course.objects.none(),
+            "practice_questions": practice_questions,
+            "video_url": video_url,
+            "video_is_file": video_is_file,
+            "previous_lesson": previous_lesson,
+            "next_lesson": next_lesson,
+            "course_progress_percent": 0,
+            "completed_lessons": 0,
+            "total_lessons": len(ordered_lessons),
+        },
+    )
 
 
 @xframe_options_sameorigin
@@ -755,10 +918,13 @@ def course_import_website_preview(request, import_id):
                         related_ids.append(UUID(raw_id))
         if related_ids:
             selected_related_courses = [
-                related for related in Course.objects.filter(
+                related
+                for related in Course.objects.filter(
                     pk__in=related_ids,
                     status=Course.Status.PUBLISHED,
-                ).exclude(pk=record.target_course_id).order_by("position", "title")
+                )
+                .exclude(pk=record.target_course_id)
+                .order_by("position", "title")
                 if is_course_card_recommendable(related.title, related.summary, related.description)
             ]
             for related in selected_related_courses:
@@ -771,37 +937,45 @@ def course_import_website_preview(request, import_id):
             raw_video_url = raw_video_url.strip()
             if raw_video_url.startswith(("https://", "http://")):
                 selected_video_url = raw_video_url
-                selected_video_is_file = raw_video_url.lower().split("?", 1)[0].endswith(
-                    (".mp4", ".webm", ".ogg")
+                selected_video_is_file = (
+                    raw_video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
                 )
 
-    return render(request, "academy/course_import_website_preview.html", {
-        "import_record": record,
-        "course": course,
-        "course_description_html": _render_course_description(
-            course.get("description", ""), user=request.user, admin_preview=True,
-        ),
-        "preview_modules": preview_modules,
-        "total_modules": len(preview_modules),
-        "total_lessons": total_lessons,
-        "total_study_minutes": total_study_minutes,
-        "total_study_hours": total_study_minutes // 60,
-        "total_study_minutes_remainder": total_study_minutes % 60,
-        "overview_url": overview_url,
-        "first_preview_url": first_preview_url,
-        "admin_review_url": admin_review_url,
-        "selected_lesson": selected_lesson,
-        "selected_module": selected_module,
-        "selected_module_display_title": _module_display_title(selected_module.get("title") if selected_module else ""),
-        "selected_sections": selected_sections,
-        "selected_notebook": selected_notebook,
-        "selected_reflection": selected_reflection,
-        "selected_reflection_response": "",
-        "selected_practice_questions": selected_practice_questions,
-        "selected_video_url": selected_video_url,
-        "selected_video_is_file": selected_video_is_file,
-        "selected_related_courses": selected_related_courses,
-    })
+    return render(
+        request,
+        "academy/course_import_website_preview.html",
+        {
+            "import_record": record,
+            "course": course,
+            "course_description_html": _render_course_description(
+                course.get("description", ""),
+                user=request.user,
+                admin_preview=True,
+            ),
+            "preview_modules": preview_modules,
+            "total_modules": len(preview_modules),
+            "total_lessons": total_lessons,
+            "total_study_minutes": total_study_minutes,
+            "total_study_hours": total_study_minutes // 60,
+            "total_study_minutes_remainder": total_study_minutes % 60,
+            "overview_url": overview_url,
+            "first_preview_url": first_preview_url,
+            "admin_review_url": admin_review_url,
+            "selected_lesson": selected_lesson,
+            "selected_module": selected_module,
+            "selected_module_display_title": _module_display_title(
+                selected_module.get("title") if selected_module else ""
+            ),
+            "selected_sections": selected_sections,
+            "selected_notebook": selected_notebook,
+            "selected_reflection": selected_reflection,
+            "selected_reflection_response": "",
+            "selected_practice_questions": selected_practice_questions,
+            "selected_video_url": selected_video_url,
+            "selected_video_is_file": selected_video_is_file,
+            "selected_related_courses": selected_related_courses,
+        },
+    )
 
 
 @login_required
@@ -810,7 +984,9 @@ def lesson_quiz_submit(request, lesson_id):
     """Grade practice questions server-side; answer keys never enter the learner page."""
     lesson = get_object_or_404(
         Lesson.objects.select_related("module__course"),
-        pk=lesson_id, is_published=True, module__is_published=True,
+        pk=lesson_id,
+        is_published=True,
+        module__is_published=True,
     )
     if not can_access_lesson(request.user, lesson):
         raise PermissionDenied("You do not have access to this lesson yet.")
@@ -820,11 +996,19 @@ def lesson_quiz_submit(request, lesson_id):
         return JsonResponse({"detail": "The request body must be valid JSON."}, status=400)
     answers = payload.get("answers", {}) if isinstance(payload, dict) else {}
     if not isinstance(answers, dict):
-        return JsonResponse({"detail": "Answers must be an object keyed by question ID."}, status=400)
+        return JsonResponse(
+            {"detail": "Answers must be an object keyed by question ID."}, status=400
+        )
     material = LessonInstructorMaterial.objects.filter(lesson=lesson).first()
-    questions = material.rubric_json.get("questions", []) if material and isinstance(material.rubric_json, dict) else []
+    questions = (
+        material.rubric_json.get("questions", [])
+        if material and isinstance(material.rubric_json, dict)
+        else []
+    )
     if not questions:
-        return JsonResponse({"detail": "Practice questions are not configured for this lesson."}, status=404)
+        return JsonResponse(
+            {"detail": "Practice questions are not configured for this lesson."}, status=404
+        )
 
     results = []
     score = 0
@@ -841,17 +1025,25 @@ def lesson_quiz_submit(request, lesson_id):
         correct = 0 <= selected < len(options) and selected == correct_index
         if correct:
             score += 1
-        results.append({
-            "id": question_id,
-            "correct": correct,
-            # Reveal option indexes only after the learner submits an attempt.
-            "selected_index": selected if 0 <= selected < len(options) else None,
-            "correct_index": correct_index if 0 <= correct_index < len(options) else None,
-            "explanation": str(question.get("explanation", ""))[:3000],
-        })
+        results.append(
+            {
+                "id": question_id,
+                "correct": correct,
+                # Reveal option indexes only after the learner submits an attempt.
+                "selected_index": selected if 0 <= selected < len(options) else None,
+                "correct_index": correct_index if 0 <= correct_index < len(options) else None,
+                "explanation": str(question.get("explanation", ""))[:3000],
+            }
+        )
     existing_progress = LessonProgress.objects.filter(user=request.user, lesson=lesson).first()
-    saved_response = dict(existing_progress.response_json or {}) if existing_progress and isinstance(existing_progress.response_json, dict) else {}
-    saved_response.update({"quiz_answers": answers, "quiz_score": score, "quiz_total": len(results)})
+    saved_response = (
+        dict(existing_progress.response_json or {})
+        if existing_progress and isinstance(existing_progress.response_json, dict)
+        else {}
+    )
+    saved_response.update(
+        {"quiz_answers": answers, "quiz_score": score, "quiz_total": len(results)}
+    )
     update_lesson_progress(
         user=request.user,
         lesson=lesson,
@@ -866,20 +1058,29 @@ def lesson_reflection_submit(request, lesson_id):
     """Persist a learner's first reading without changing protected instructor material."""
     lesson = get_object_or_404(
         Lesson.objects.select_related("module__course"),
-        pk=lesson_id, is_published=True, module__is_published=True,
+        pk=lesson_id,
+        is_published=True,
+        module__is_published=True,
     )
     if not can_access_lesson(request.user, lesson):
         raise PermissionDenied("You do not have access to this lesson yet.")
     content_json = lesson.content_json if isinstance(lesson.content_json, dict) else {}
     reflection = _reflection_for_display(content_json.get("reflection", {}))
     if not reflection.get("prompt"):
-        return JsonResponse({"detail": "A reflection exercise is not configured for this lesson."}, status=404)
+        return JsonResponse(
+            {"detail": "A reflection exercise is not configured for this lesson."}, status=404
+        )
     response_text = str(request.POST.get("reflection_response") or "").strip()[:4000]
     existing_progress = LessonProgress.objects.filter(user=request.user, lesson=lesson).first()
-    saved_response = dict(existing_progress.response_json or {}) if existing_progress and isinstance(existing_progress.response_json, dict) else {}
+    saved_response = (
+        dict(existing_progress.response_json or {})
+        if existing_progress and isinstance(existing_progress.response_json, dict)
+        else {}
+    )
     saved_response["reflection_response"] = response_text
     update_lesson_progress(user=request.user, lesson=lesson, response_json=saved_response)
     return JsonResponse({"ok": True, "saved": True})
+
 
 @login_required
 @require_POST
@@ -887,7 +1088,9 @@ def lesson_notebook_submit(request, lesson_id):
     """Persist learner reflections without exposing or altering instructor materials."""
     lesson = get_object_or_404(
         Lesson.objects.select_related("module__course"),
-        pk=lesson_id, is_published=True, module__is_published=True,
+        pk=lesson_id,
+        is_published=True,
+        module__is_published=True,
     )
     if not can_access_lesson(request.user, lesson):
         raise PermissionDenied("You do not have access to this lesson yet.")
@@ -900,7 +1103,11 @@ def lesson_notebook_submit(request, lesson_id):
     for index, _prompt in enumerate(prompts[:6]):
         responses.append(str(request.POST.get(f"prompt_{index}", "")).strip()[:4000])
     existing_progress = LessonProgress.objects.filter(user=request.user, lesson=lesson).first()
-    saved_response = dict(existing_progress.response_json or {}) if existing_progress and isinstance(existing_progress.response_json, dict) else {}
+    saved_response = (
+        dict(existing_progress.response_json or {})
+        if existing_progress and isinstance(existing_progress.response_json, dict)
+        else {}
+    )
     saved_response["notebook_responses"] = responses
     update_lesson_progress(user=request.user, lesson=lesson, response_json=saved_response)
     return JsonResponse({"ok": True, "saved": True})
@@ -912,24 +1119,31 @@ def media_asset(request, asset_id):
     asset = get_object_or_404(CourseMediaAsset.objects.select_related("course"), pk=asset_id)
     if not asset.file:
         from django.http import Http404
+
         raise Http404
     allowed = is_course_content_admin(request.user)
     if not allowed:
         country_code, region_code = _regional_audience(request)
         target_asset_id = str(asset.pk).lower()
         for related_lesson in Lesson.objects.filter(
-            module__course=asset.course, module__is_published=True, is_published=True,
+            module__course=asset.course,
+            module__is_published=True,
+            is_published=True,
         ).select_related("module__course"):
             if not can_access_lesson(request.user, related_lesson):
                 continue
             permitted_asset_ids = _lesson_asset_ids_for_audience(
-                related_lesson, country_code=country_code, region_code=region_code,
+                related_lesson,
+                country_code=country_code,
+                region_code=region_code,
             )
             if target_asset_id in permitted_asset_ids:
                 allowed = True
                 break
     if not allowed:
-        raise PermissionDenied("You do not have access to this course image for your content audience.")
+        raise PermissionDenied(
+            "You do not have access to this course image for your content audience."
+        )
     response = FileResponse(
         asset.file.open("rb"),
         content_type=mimetypes.guess_type(asset.file.name)[0] or "application/octet-stream",
@@ -953,7 +1167,8 @@ def lesson_progress(request, lesson_id):
     try:
         seconds_delta = int(request.POST.get("seconds_delta", "0"))
         progress = update_lesson_progress(
-            user=request.user, lesson=lesson,
+            user=request.user,
+            lesson=lesson,
             status=request.POST.get("status") or None,
             response_json=response_json,
             seconds_delta=seconds_delta,
@@ -962,8 +1177,11 @@ def lesson_progress(request, lesson_id):
         return JsonResponse({"detail": str(exc)}, status=403)
     except (ValidationError, ValueError) as exc:
         return JsonResponse({"detail": str(exc)}, status=400)
-    return JsonResponse({
-        "ok": True, "status": progress.status,
-        "completed_at": progress.completed_at.isoformat() if progress.completed_at else None,
-        "time_spent_seconds": progress.time_spent_seconds,
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "status": progress.status,
+            "completed_at": progress.completed_at.isoformat() if progress.completed_at else None,
+            "time_spent_seconds": progress.time_spent_seconds,
+        }
+    )

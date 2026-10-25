@@ -52,10 +52,14 @@ def _retire_builder_drafts_for_course_slugs(slugs):
     normalized_slugs = {str(slug) for slug in slugs if slug}
     if not normalized_slugs:
         return
-    drafts = CourseImport.objects.select_for_update().filter(
-        course_slug__in=normalized_slugs,
-        status=CourseImport.Status.DRAFT,
-    ).order_by("pk")
+    drafts = (
+        CourseImport.objects.select_for_update()
+        .filter(
+            course_slug__in=normalized_slugs,
+            status=CourseImport.Status.DRAFT,
+        )
+        .order_by("pk")
+    )
     for draft in drafts:
         if draft.payload.get("builder_state"):
             mark_builder_draft_deleted(draft)
@@ -149,7 +153,16 @@ class CourseModuleAdmin(admin.ModelAdmin):
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
     form = LessonAdminForm
-    list_display = ("title", "module", "format", "position", "release_day", "is_preview", "is_published", "add_figure_link")
+    list_display = (
+        "title",
+        "module",
+        "format",
+        "position",
+        "release_day",
+        "is_preview",
+        "is_published",
+        "add_figure_link",
+    )
     list_filter = ("format", "is_preview", "is_published", "module__course")
     search_fields = ("title", "summary", "module__title", "module__course__title")
     prepopulated_fields = {"slug": ("title",)}
@@ -226,7 +239,9 @@ class LessonAdmin(admin.ModelAdmin):
                         + figure_markdown
                         + "\n"
                     )
-                    content_json = dict(lesson.content_json) if isinstance(lesson.content_json, dict) else {}
+                    content_json = (
+                        dict(lesson.content_json) if isinstance(lesson.content_json, dict) else {}
+                    )
                     asset_ids = list(content_json.get("asset_ids", []))
                     asset_ids.append(str(asset.pk))
                     content_json["asset_ids"] = asset_ids
@@ -234,6 +249,7 @@ class LessonAdmin(admin.ModelAdmin):
                     lesson.save(update_fields=["content_markdown", "content_json", "updated_at"])
 
                     from apps.audit.models import AuditLog
+
                     AuditLog.log(
                         action="academy_lesson_figure_added",
                         user=request.user,
@@ -252,7 +268,10 @@ class LessonAdmin(admin.ModelAdmin):
                 if stored_name:
                     course_asset_storage.delete(stored_name)
                 logger.exception("Could not add a course figure to lesson %s", lesson.pk)
-                form.add_error(None, "The image could not be added. No lesson change was saved; please try again.")
+                form.add_error(
+                    None,
+                    "The image could not be added. No lesson change was saved; please try again.",
+                )
             else:
                 messages.success(
                     request,
@@ -293,12 +312,16 @@ class LessonAdmin(admin.ModelAdmin):
             previous = Lesson.objects.filter(pk=obj.pk).first()
             if previous:
                 watched = ("title", "summary", "content_markdown", "content_json")
-                changed_fields = [field for field in watched if getattr(previous, field) != getattr(obj, field)]
+                changed_fields = [
+                    field for field in watched if getattr(previous, field) != getattr(obj, field)
+                ]
                 if changed_fields:
                     CourseContentRevision.objects.create(
-                        lesson=previous, editor=request.user,
+                        lesson=previous,
+                        editor=request.user,
                         revision_type=CourseContentRevision.RevisionType.ADMIN_EDIT,
-                        title_before=previous.title, summary_before=previous.summary,
+                        title_before=previous.title,
+                        summary_before=previous.summary,
                         content_markdown_before=previous.content_markdown,
                         content_json_before=previous.content_json,
                         fields_changed=changed_fields,
@@ -306,14 +329,33 @@ class LessonAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         if changed_fields:
             from apps.audit.models import AuditLog
+
             AuditLog.log(
-                action="academy_lesson_content_updated", user=request.user,
-                object_type="lesson", object_id=obj.pk,
+                action="academy_lesson_content_updated",
+                user=request.user,
+                object_type="lesson",
+                object_id=obj.pk,
                 metadata={"fields_changed": changed_fields},
             )
 
     fieldsets = (
-        (None, {"fields": ("module", "title", "slug", "summary", "format", "position", "duration_minutes", "release_day", "is_preview", "is_published")}),
+        (
+            None,
+            {
+                "fields": (
+                    "module",
+                    "title",
+                    "slug",
+                    "summary",
+                    "format",
+                    "position",
+                    "duration_minutes",
+                    "release_day",
+                    "is_preview",
+                    "is_published",
+                )
+            },
+        ),
         ("Learner content", {"fields": ("content_markdown", "content_json")}),
         ("System", {"fields": ("created_at", "updated_at")}),
     )
@@ -348,9 +390,22 @@ class CourseEntitlementEventInline(admin.TabularInline):
 
 @admin.register(CourseEntitlement)
 class CourseEntitlementAdmin(admin.ModelAdmin):
-    list_display = ("user", "course", "status", "starts_at", "expires_at", "source", "payment_intent")
+    list_display = (
+        "user",
+        "course",
+        "status",
+        "starts_at",
+        "expires_at",
+        "source",
+        "payment_intent",
+    )
     list_filter = ("status", "source", "course")
-    search_fields = ("user__username", "user__email", "course__title", "payment_intent__provider_reference")
+    search_fields = (
+        "user__username",
+        "user__email",
+        "course__title",
+        "payment_intent__provider_reference",
+    )
     readonly_fields = tuple(f.name for f in CourseEntitlement._meta.fields)
     inlines = (CourseEntitlementEventInline,)
 
@@ -397,7 +452,14 @@ class LessonProgressAdmin(admin.ModelAdmin):
 @admin.register(CourseImport)
 class CourseImportAdmin(admin.ModelAdmin):
     change_list_template = "admin/academy/courseimport/change_list.html"
-    list_display = ("title", "course_slug", "status", "manifest_version", "imported_at", "review_link")
+    list_display = (
+        "title",
+        "course_slug",
+        "status",
+        "manifest_version",
+        "imported_at",
+        "review_link",
+    )
     list_filter = ("status", "imported_at")
     search_fields = ("title", "course_slug", "content_hash")
     readonly_fields = tuple(field.name for field in CourseImport._meta.fields)
@@ -422,7 +484,10 @@ class CourseImportAdmin(admin.ModelAdmin):
     def review_link(self, obj):
         if obj.status not in (CourseImport.Status.REVIEW, CourseImport.Status.PUBLISHED):
             return "Not reviewable"
-        return format_html('<a href="{}">Preview course</a>', reverse("admin:academy_courseimport_review", args=[obj.pk]))
+        return format_html(
+            '<a href="{}">Preview course</a>',
+            reverse("admin:academy_courseimport_review", args=[obj.pk]),
+        )
 
     def get_urls(self):
         custom = [
@@ -431,9 +496,21 @@ class CourseImportAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.stage_canonical_bollinger_view),
                 name="academy_courseimport_stage_bollinger",
             ),
-            path("<uuid:object_id>/review/", self.admin_site.admin_view(self.review_view), name="academy_courseimport_review"),
-            path("<uuid:object_id>/publish/", self.admin_site.admin_view(self.publish_view), name="academy_courseimport_publish"),
-            path("<uuid:object_id>/asset/<uuid:asset_id>/", self.admin_site.admin_view(self.asset_view), name="academy_courseimport_asset"),
+            path(
+                "<uuid:object_id>/review/",
+                self.admin_site.admin_view(self.review_view),
+                name="academy_courseimport_review",
+            ),
+            path(
+                "<uuid:object_id>/publish/",
+                self.admin_site.admin_view(self.publish_view),
+                name="academy_courseimport_publish",
+            ),
+            path(
+                "<uuid:object_id>/asset/<uuid:asset_id>/",
+                self.admin_site.admin_view(self.asset_view),
+                name="academy_courseimport_asset",
+            ),
         ]
         return custom + super().get_urls()
 
@@ -548,7 +625,9 @@ class CourseImportAdmin(admin.ModelAdmin):
                             image_metadata = {}
                         question["image_url"] = asset_urls.get(asset_id, "") if asset_id else ""
                         question["image_title"] = str(image_metadata.get("title") or "Chart")[:240]
-                        question["image_alt"] = str(image_metadata.get("alt") or question["image_title"])[:500]
+                        question["image_alt"] = str(
+                            image_metadata.get("alt") or question["image_title"]
+                        )[:500]
                         question["image_caption"] = str(image_metadata.get("caption") or "")[:500]
                         questions.append(question)
 
@@ -556,43 +635,59 @@ class CourseImportAdmin(admin.ModelAdmin):
                 video_url = raw_video_url.strip() if isinstance(raw_video_url, str) else ""
                 if not video_url.startswith(("https://", "http://")):
                     video_url = ""
-                video_is_file = video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
-                review_lessons.append({
-                    "lesson": lesson_data,
-                    "sections": sections,
-                    "notebook": notebook,
-                    "reflection": reflection,
-                    "reflection_response": "",
-                    "questions": questions,
-                    "video_url": video_url,
-                    "video_is_file": video_is_file,
-                    "tab_id_prefix": f"review-{module.get('position', 0)}-{lesson_data.get('position', 0)}",
-                })
+                video_is_file = (
+                    video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
+                )
+                review_lessons.append(
+                    {
+                        "lesson": lesson_data,
+                        "sections": sections,
+                        "notebook": notebook,
+                        "reflection": reflection,
+                        "reflection_response": "",
+                        "questions": questions,
+                        "video_url": video_url,
+                        "video_is_file": video_is_file,
+                        "tab_id_prefix": f"review-{module.get('position', 0)}-{lesson_data.get('position', 0)}",
+                    }
+                )
             review_modules.append({"module": module, "lessons": review_lessons})
 
-        errors = validate_import_for_publish(record) if record.status == CourseImport.Status.REVIEW else []
+        errors = (
+            validate_import_for_publish(record)
+            if record.status == CourseImport.Status.REVIEW
+            else []
+        )
         asset_rows = []
         for asset in staged_assets:
             live_asset = CourseMediaAsset.objects.filter(pk=asset.stable_asset_id).first()
-            asset_rows.append({
-                "asset": asset,
-                "has_file": bool(asset.file) or bool(live_asset and live_asset.file),
-                "preview_url": asset_urls.get(str(asset.stable_asset_id), ""),
-                "original_url": asset.original_url or (live_asset.original_url if live_asset else ""),
-                "has_external_source": bool(
-                    (asset.original_url or (live_asset.original_url if live_asset else "")).startswith(("https://", "http://"))
-                ),
-                "status_label": (
-                    "Uploaded replacement"
-                    if (bool(asset.file) or bool(live_asset and live_asset.file))
-                    else (
-                        "Using URL for now"
-                        if (asset.original_url or (live_asset.original_url if live_asset else "")).startswith(("https://", "http://"))
-                        else "Needs upload"
-                    )
-                ),
-                "edit_url": reverse("admin:academy_courseimportasset_change", args=[asset.pk]),
-            })
+            asset_rows.append(
+                {
+                    "asset": asset,
+                    "has_file": bool(asset.file) or bool(live_asset and live_asset.file),
+                    "preview_url": asset_urls.get(str(asset.stable_asset_id), ""),
+                    "original_url": asset.original_url
+                    or (live_asset.original_url if live_asset else ""),
+                    "has_external_source": bool(
+                        (
+                            asset.original_url or (live_asset.original_url if live_asset else "")
+                        ).startswith(("https://", "http://"))
+                    ),
+                    "status_label": (
+                        "Uploaded replacement"
+                        if (bool(asset.file) or bool(live_asset and live_asset.file))
+                        else (
+                            "Using URL for now"
+                            if (
+                                asset.original_url
+                                or (live_asset.original_url if live_asset else "")
+                            ).startswith(("https://", "http://"))
+                            else "Needs upload"
+                        )
+                    ),
+                    "edit_url": reverse("admin:academy_courseimportasset_change", args=[asset.pk]),
+                }
+            )
         context = {
             **self.admin_site.each_context(request),
             "opts": self.model._meta,
@@ -649,7 +744,8 @@ class CourseImportAdmin(admin.ModelAdmin):
             try:
                 response = FileResponse(
                     file_field.open("rb"),
-                    content_type=mimetypes.guess_type(file_field.name)[0] or "application/octet-stream",
+                    content_type=mimetypes.guess_type(file_field.name)[0]
+                    or "application/octet-stream",
                 )
             except OSError as exc:
                 logger.warning(
@@ -675,7 +771,8 @@ class CourseImportAdmin(admin.ModelAdmin):
             ):
                 response = FileResponse(
                     source_path.open("rb"),
-                    content_type=mimetypes.guess_type(source_path.name)[0] or "application/octet-stream",
+                    content_type=mimetypes.guess_type(source_path.name)[0]
+                    or "application/octet-stream",
                 )
                 response["Cache-Control"] = "private, no-store"
                 response["X-Content-Type-Options"] = "nosniff"
@@ -693,7 +790,10 @@ class CourseImportAdmin(admin.ModelAdmin):
                 return redirect(fallback_url)
 
         from django.http import Http404
-        raise Http404("This course image has not been uploaded or found in the checked-in course source.")
+
+        raise Http404(
+            "This course image has not been uploaded or found in the checked-in course source."
+        )
 
     def publish_view(self, request, object_id):
         if not self._is_authorized(request):
@@ -717,8 +817,28 @@ class CourseImportAssetAdmin(admin.ModelAdmin):
     list_display = ("course_import", "asset_key", "source_error", "file", "updated_at")
     list_filter = ("course_import__status",)
     search_fields = ("course_import__title", "asset_key", "alt_text")
-    readonly_fields = ("course_import", "asset_key", "stable_asset_id", "source_path", "original_url", "source_error", "created_at", "updated_at")
-    fields = ("course_import", "asset_key", "stable_asset_id", "source_path", "original_url", "source_error", "alt_text", "file", "created_at", "updated_at")
+    readonly_fields = (
+        "course_import",
+        "asset_key",
+        "stable_asset_id",
+        "source_path",
+        "original_url",
+        "source_error",
+        "created_at",
+        "updated_at",
+    )
+    fields = (
+        "course_import",
+        "asset_key",
+        "stable_asset_id",
+        "source_path",
+        "original_url",
+        "source_error",
+        "alt_text",
+        "file",
+        "created_at",
+        "updated_at",
+    )
 
     def has_module_permission(self, request):
         return is_course_content_admin(request.user)
@@ -737,12 +857,15 @@ class CourseImportAssetAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         from apps.audit.models import AuditLog
+
         if obj.file:
             obj.source_error = ""
         super().save_model(request, obj, form, change)
         AuditLog.log(
-            action="academy_course_import_asset_updated", user=request.user,
-            object_type="course_import_asset", object_id=obj.pk,
+            action="academy_course_import_asset_updated",
+            user=request.user,
+            object_type="course_import_asset",
+            object_id=obj.pk,
             metadata={"course_import_id": str(obj.course_import_id), "asset_key": obj.asset_key},
         )
 
@@ -753,8 +876,26 @@ class CourseMediaAssetAdmin(admin.ModelAdmin):
     list_display = ("course", "asset_key", "alt_text", "updated_at", "updated_by")
     list_filter = ("course",)
     search_fields = ("course__title", "asset_key", "alt_text")
-    readonly_fields = ("course", "asset_key", "source_path", "original_url", "created_at", "updated_at", "updated_by")
-    fields = ("course", "asset_key", "source_path", "original_url", "alt_text", "file", "created_at", "updated_at", "updated_by")
+    readonly_fields = (
+        "course",
+        "asset_key",
+        "source_path",
+        "original_url",
+        "created_at",
+        "updated_at",
+        "updated_by",
+    )
+    fields = (
+        "course",
+        "asset_key",
+        "source_path",
+        "original_url",
+        "alt_text",
+        "file",
+        "created_at",
+        "updated_at",
+        "updated_by",
+    )
 
     def has_module_permission(self, request):
         return is_course_content_admin(request.user)
@@ -773,6 +914,7 @@ class CourseMediaAssetAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         from apps.audit.models import AuditLog
+
         old_name = ""
         if change:
             previous = CourseMediaAsset.objects.filter(pk=obj.pk).first()
@@ -781,9 +923,15 @@ class CourseMediaAssetAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         if change and old_name != (obj.file.name if obj.file else ""):
             AuditLog.log(
-                action="academy_course_media_replaced", user=request.user,
-                object_type="course_media_asset", object_id=obj.pk,
-                metadata={"asset_key": obj.asset_key, "old_file": old_name, "new_file": obj.file.name if obj.file else ""},
+                action="academy_course_media_replaced",
+                user=request.user,
+                object_type="course_media_asset",
+                object_id=obj.pk,
+                metadata={
+                    "asset_key": obj.asset_key,
+                    "old_file": old_name,
+                    "new_file": obj.file.name if obj.file else "",
+                },
             )
 
 

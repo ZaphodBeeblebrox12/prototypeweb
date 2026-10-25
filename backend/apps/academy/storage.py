@@ -8,6 +8,7 @@ GitHub's authenticated Contents API is used only server-side. Image delivery
 continues through Django's authenticated/entitlement-checked views; no GitHub
 download URL is exposed to learners.
 """
+
 import base64
 import hashlib
 import json
@@ -48,7 +49,9 @@ class PrivateCourseAssetStorage(FileSystemStorage):
         self.repository = getattr(settings, "ACADEMY_GITHUB_ASSET_REPOSITORY", "").strip()
         self.token = getattr(settings, "ACADEMY_GITHUB_ASSET_TOKEN", "").strip()
         self.branch = getattr(settings, "ACADEMY_GITHUB_ASSET_BRANCH", "my-new-branch").strip()
-        self.path_prefix = getattr(settings, "ACADEMY_GITHUB_ASSET_PATH_PREFIX", "course-assets").strip("/")
+        self.path_prefix = getattr(
+            settings, "ACADEMY_GITHUB_ASSET_PATH_PREFIX", "course-assets"
+        ).strip("/")
         self.timeout = int(getattr(settings, "ACADEMY_GITHUB_ASSET_TIMEOUT", 15))
         self.github_enabled = bool(self.repository and self.token)
         self.api_root = "https://api.github.com"
@@ -85,9 +88,7 @@ class PrivateCourseAssetStorage(FileSystemStorage):
                 "GitHub course asset request failed with status %s",
                 response.status_code,
             )
-            raise OSError(
-                f"Private course image storage returned HTTP {response.status_code}."
-            )
+            raise OSError(f"Private course image storage returned HTTP {response.status_code}.")
         return response
 
     def _metadata(self, name):
@@ -175,9 +176,13 @@ class GoogleDrivePrivateCourseAssetStorage(GoogleDriveStorageMixin, PrivateCours
 
     def __init__(self):
         super().__init__()
-        self.provider_mode = str(
-            getattr(settings, "ACADEMY_ASSET_STORAGE_BACKEND", "google_drive") or "google_drive"
-        ).strip().lower()
+        self.provider_mode = (
+            str(
+                getattr(settings, "ACADEMY_ASSET_STORAGE_BACKEND", "google_drive") or "google_drive"
+            )
+            .strip()
+            .lower()
+        )
         if self.provider_mode not in self.SUPPORTED_PROVIDERS:
             raise ImproperlyConfigured(
                 "ACADEMY_ASSET_STORAGE_BACKEND must be google_drive, github, or django."
@@ -222,8 +227,10 @@ class GoogleDrivePrivateCourseAssetStorage(GoogleDriveStorageMixin, PrivateCours
         if not found:
             return None
         response = self._drive_request(
-            "GET", f"{DRIVE_API}/files/{found['id']}",
-            params={"alt": "media"}, expected=(200,),
+            "GET",
+            f"{DRIVE_API}/files/{found['id']}",
+            params={"alt": "media"},
+            expected=(200,),
         )
         return ContentFile(response.content, name=name)
 
@@ -322,9 +329,17 @@ class GoogleDrivePrivateCourseAssetStorage(GoogleDriveStorageMixin, PrivateCours
         primary = self._effective_backend()
         if self._primary_remote_exists(name):
             return True
-        if primary != "django_storage" and self.external_storage is not None and self.external_storage.exists(name):
+        if (
+            primary != "django_storage"
+            and self.external_storage is not None
+            and self.external_storage.exists(name)
+        ):
             return True
-        if primary != "google_drive" and self._drive_asset_enabled and self._find_drive_file(name, self._asset_folder_id):
+        if (
+            primary != "google_drive"
+            and self._drive_asset_enabled
+            and self._find_drive_file(name, self._asset_folder_id)
+        ):
             return True
         if primary != "github" and self.github_enabled and self._metadata(name) is not None:
             return True
@@ -343,9 +358,17 @@ class GoogleDrivePrivateCourseAssetStorage(GoogleDriveStorageMixin, PrivateCours
                     return int(response.json()["size"])
                 except (ValueError, AttributeError, TypeError, KeyError):
                     pass
-        elif primary == "django_storage" and self.external_storage and self.external_storage.exists(name):
+        elif (
+            primary == "django_storage"
+            and self.external_storage
+            and self.external_storage.exists(name)
+        ):
             return self.external_storage.size(name)
-        if primary != "django_storage" and self.external_storage is not None and self.external_storage.exists(name):
+        if (
+            primary != "django_storage"
+            and self.external_storage is not None
+            and self.external_storage.exists(name)
+        ):
             return self.external_storage.size(name)
         if primary != "google_drive" and self._drive_asset_enabled:
             found = self._find_drive_file(name, self._asset_folder_id)
@@ -374,9 +397,13 @@ class GoogleDrivePrivateCourseAssetStorage(GoogleDriveStorageMixin, PrivateCours
                 if response is not None:
                     metadata = response.json()
                     self._request(
-                        "DELETE", self._url(self._github_path(name)),
-                        json={"message": f"Remove course asset {Path(name).name}",
-                              "sha": metadata["sha"], "branch": self.branch},
+                        "DELETE",
+                        self._url(self._github_path(name)),
+                        json={
+                            "message": f"Remove course asset {Path(name).name}",
+                            "sha": metadata["sha"],
+                            "branch": self.branch,
+                        },
                     )
             return
         if primary == "django_storage":
@@ -403,7 +430,9 @@ class GoogleDrivePrivateCourseAssetStorage(GoogleDriveStorageMixin, PrivateCours
         else:
             backend, label, durable = "local_filesystem", "local filesystem", False
         return {
-            "backend": backend, "label": label, "durable": durable,
+            "backend": backend,
+            "label": label,
+            "durable": durable,
             "writes_enabled": durable or not required,
         }
 
@@ -411,14 +440,20 @@ class GoogleDrivePrivateCourseAssetStorage(GoogleDriveStorageMixin, PrivateCours
         """Save content-addressed course source snapshots using the selected provider."""
         if self.provider_mode == "django":
             if not self.status()["writes_enabled"] or self.external_storage is None:
-                raise ImproperlyConfigured("The configured durable storage destination is not enabled for writes.")
-            raw = (json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
+                raise ImproperlyConfigured(
+                    "The configured durable storage destination is not enabled for writes."
+                )
+            raw = (json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode(
+                "utf-8"
+            )
             digest = hashlib.sha256(raw).hexdigest()
             logical_name = f"course-source/builder-drafts/{course_slug}/{digest}.json"
             if self.external_storage.exists(logical_name):
                 with self.external_storage.open(logical_name, "rb") as stream:
                     if hashlib.sha256(stream.read()).hexdigest() != digest:
-                        raise OSError("The stored course source snapshot does not match its content hash.")
+                        raise OSError(
+                            "The stored course source snapshot does not match its content hash."
+                        )
                 return True
             saved = self.external_storage.save(logical_name, ContentFile(raw))
             if saved != logical_name:
@@ -428,16 +463,23 @@ class GoogleDrivePrivateCourseAssetStorage(GoogleDriveStorageMixin, PrivateCours
                     raise OSError("The stored course source snapshot failed checksum verification.")
             return True
         if self.provider_mode == "github":
-            raise ImproperlyConfigured("GitHub course source snapshots use the dedicated GitHub source sync routine.")
+            raise ImproperlyConfigured(
+                "GitHub course source snapshots use the dedicated GitHub source sync routine."
+            )
         if not self._drive_auth_configured or not self._source_folder_id:
             raise ImproperlyConfigured("Google Drive course source snapshots are not configured.")
-        raw = (json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
+        raw = (json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode(
+            "utf-8"
+        )
         digest = hashlib.sha256(raw).hexdigest()
         self._write_drive_bytes(
             name=f"{course_slug}-{digest[:12]}.json",
             logical_key=f"course-source/builder-drafts/{course_slug}/{digest}.json",
-            folder_id=self._source_folder_id, raw=raw, content_type="application/json",
+            folder_id=self._source_folder_id,
+            raw=raw,
+            content_type="application/json",
         )
         return True
+
 
 course_asset_storage = GoogleDrivePrivateCourseAssetStorage()

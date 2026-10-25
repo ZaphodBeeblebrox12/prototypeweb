@@ -1,4 +1,5 @@
 """Admin-only staging view for the in-progress Course Builder prototype."""
+
 from pathlib import Path
 
 from django.contrib.auth.decorators import login_required

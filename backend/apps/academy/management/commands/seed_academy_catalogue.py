@@ -45,23 +45,18 @@ class Command(BaseCommand):
         # rows if this catalogue is already present, rather than partially
         # updating editor-reviewed content.
         if apply_changes:
-            existing = list(
-                Course.objects.filter(slug__in=slugs).values_list("slug", flat=True)
-            )
+            existing = list(Course.objects.filter(slug__in=slugs).values_list("slug", flat=True))
             if existing:
                 raise CommandError(
                     "Catalogue import is create-only; these course slugs already "
                     f"exist: {', '.join(sorted(existing))}. No rows were changed."
                 )
 
-
         for command_name, _slug, _modules, _lessons in COURSES:
             try:
                 call_command(command_name, stdout=self.stdout)
             except CommandError as exc:
-                raise CommandError(
-                    f"Catalogue preflight failed in {command_name}: {exc}"
-                ) from exc
+                raise CommandError(f"Catalogue preflight failed in {command_name}: {exc}") from exc
 
         if not apply_changes:
             self.stdout.write(

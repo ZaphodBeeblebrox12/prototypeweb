@@ -3,6 +3,7 @@
 This command is intentionally draft-only. It separates marked answers from learner
 copy and does not publish lessons, provision ChartLab, create offers, or sell access.
 """
+
 import json
 import re
 from pathlib import Path
@@ -21,32 +22,82 @@ from apps.academy.models import (
 
 _SNR_FIGURES = {
     1: (
-        ("1.1", "L01-A-01-clean.svg", "Repeated lower reactions around a broad area (illustrative chart).", "Price revisits a similar lower area in this illustrative sequence; no support boundary is drawn."),
+        (
+            "1.1",
+            "L01-A-01-clean.svg",
+            "Repeated lower reactions around a broad area (illustrative chart).",
+            "Price revisits a similar lower area in this illustrative sequence; no support boundary is drawn.",
+        ),
     ),
     2: (
-        ("1.2", "L02-A-01-clean.svg", "An upward sequence with pullbacks and higher turns (illustrative chart).", "An illustrative rising sequence with pullbacks and generally higher turning points."),
+        (
+            "1.2",
+            "L02-A-01-clean.svg",
+            "An upward sequence with pullbacks and higher turns (illustrative chart).",
+            "An illustrative rising sequence with pullbacks and generally higher turning points.",
+        ),
     ),
     3: (
-        ("2.1", "L03-A-01-clean.svg", "A price sequence before major swing points are selected (illustrative chart).", "An illustrative chart with major and minor turns, before any candidate points are selected."),
+        (
+            "2.1",
+            "L03-A-01-clean.svg",
+            "A price sequence before major swing points are selected (illustrative chart).",
+            "An illustrative chart with major and minor turns, before any candidate points are selected.",
+        ),
     ),
     4: (
-        ("2.2", "L04-A-01-clean.svg", "Lower reactions before zone boundaries are drawn (illustrative chart).", "Related lower reactions with varied wick lows; no zone boundaries are drawn."),
+        (
+            "2.2",
+            "L04-A-01-clean.svg",
+            "Lower reactions before zone boundaries are drawn (illustrative chart).",
+            "Related lower reactions with varied wick lows; no zone boundaries are drawn.",
+        ),
     ),
     5: (
-        ("2.3", "L05-A-01-overmarked.svg", "Candidate areas before reducing chart clutter (illustrative chart).", "An illustrative chart with candidate areas, some overlapping or less relevant."),
+        (
+            "2.3",
+            "L05-A-01-overmarked.svg",
+            "Candidate areas before reducing chart clutter (illustrative chart).",
+            "An illustrative chart with candidate areas, some overlapping or less relevant.",
+        ),
     ),
     6: (
-        ("3.1", "L06-A-01-clean.svg", "Lower-reaction practice with the boundaries hidden (illustrative chart).", "An illustrative chart with three lower reactions and zone boundaries hidden."),
+        (
+            "3.1",
+            "L06-A-01-clean.svg",
+            "Lower-reaction practice with the boundaries hidden (illustrative chart).",
+            "An illustrative chart with three lower reactions and zone boundaries hidden.",
+        ),
     ),
     7: (
-        ("3.2", "L07-A-01-overmarked.svg", "An overmarked chart before redundant areas are removed (illustrative chart).", "An illustrative chart with multiple candidate zones before editing for readability."),
+        (
+            "3.2",
+            "L07-A-01-overmarked.svg",
+            "An overmarked chart before redundant areas are removed (illustrative chart).",
+            "An illustrative chart with multiple candidate zones before editing for readability.",
+        ),
     ),
     8: (
-        ("3.3", "L08-A-01-many-crossings.svg", "Frequent crossings and mixed behaviour near an area (illustrative chart).", "Price crosses and revisits a band frequently in this illustrative example."),
-        ("3.4", "L08-A-02-fewer-interpretable.svg", "Fewer visits with clearer contextual reactions (illustrative chart).", "Fewer visits to an area with clearer contextual reactions; this is not a strength score."),
+        (
+            "3.3",
+            "L08-A-01-many-crossings.svg",
+            "Frequent crossings and mixed behaviour near an area (illustrative chart).",
+            "Price crosses and revisits a band frequently in this illustrative example.",
+        ),
+        (
+            "3.4",
+            "L08-A-02-fewer-interpretable.svg",
+            "Fewer visits with clearer contextual reactions (illustrative chart).",
+            "Fewer visits to an area with clearer contextual reactions; this is not a strength score.",
+        ),
     ),
     15: (
-        ("6.1", "L15-A-01-clean.svg", "Price between two contextual areas, with no trade prescribed (illustrative chart).", "Price sits between two candidate reaction areas; no entry or outcome is marked."),
+        (
+            "6.1",
+            "L15-A-01-clean.svg",
+            "Price between two contextual areas, with no trade prescribed (illustrative chart).",
+            "Price sits between two candidate reaction areas; no entry or outcome is marked.",
+        ),
     ),
 }
 
@@ -87,10 +138,7 @@ def embed_snr_figures(lesson_number, module_position, learner_markdown, static_r
 
     heading_matches = list(_HEADING.finditer(learner_markdown))
     heading = next(
-        (
-            match for match in heading_matches
-            if "student-facing" in match.group(2).casefold()
-        ),
+        (match for match in heading_matches if "student-facing" in match.group(2).casefold()),
         heading_matches[0] if heading_matches else None,
     )
     if heading is None:
@@ -118,11 +166,11 @@ def embed_snr_figures(lesson_number, module_position, learner_markdown, static_r
         )
 
     injected = (
-        learner_markdown[:heading.end()]
+        learner_markdown[: heading.end()]
         + "\n\n"
         + "\n\n".join(blocks)
         + "\n\n"
-        + learner_markdown[heading.end():]
+        + learner_markdown[heading.end() :]
     )
     injected = re.sub(r"\n{3,}", "\n\n", injected).strip()
     return injected, "\n".join(notes)
@@ -137,7 +185,7 @@ def lesson_segments(script):
         end = starts[index + 1].start() if index + 1 < len(starts) else len(script)
         if number in segments:
             raise CommandError(f"Canonical script defines Lesson {number} more than once.")
-        segments[number] = script[start.start():end].strip()
+        segments[number] = script[start.start() : end].strip()
     return segments
 
 
@@ -147,7 +195,7 @@ def h2_sections(markdown_text):
     sections = []
     for index, match in enumerate(matches):
         end = matches[index + 1].start() if index + 1 < len(matches) else len(markdown_text)
-        sections.append((match.group(1).strip(), markdown_text[match.end():end].strip()))
+        sections.append((match.group(1).strip(), markdown_text[match.end() : end].strip()))
     return sections
 
 
@@ -162,12 +210,12 @@ def remove_internal_blocks(markdown_text):
             continue
         level = len(match.group(1))
         end = len(markdown_text)
-        for following in matches[index + 1:]:
+        for following in matches[index + 1 :]:
             if len(following.group(1)) <= level:
                 end = following.start()
                 break
         removed_ranges.append((match.start(), end))
-        internal.append(markdown_text[match.start():end].strip())
+        internal.append(markdown_text[match.start() : end].strip())
 
     chars = list(markdown_text)
     for start, end in removed_ranges:
@@ -186,11 +234,7 @@ def remove_internal_blocks(markdown_text):
         if _ANSWER_EXAMPLE_LABEL.match(stripped):
             collected = [line]
             index += 1
-            while (
-                index < len(lines)
-                and lines[index].strip()
-                and not _HEADING.match(lines[index])
-            ):
+            while index < len(lines) and lines[index].strip() and not _HEADING.match(lines[index]):
                 collected.append(lines[index])
                 index += 1
             answer_lines.append("\n".join(collected).strip())
@@ -211,8 +255,8 @@ def remove_internal_blocks(markdown_text):
             answer_lines.append("\n".join(collected).strip())
             continue
         if inline_match:
-            before = line[:inline_match.start()].rstrip()
-            after = line[inline_match.start():].strip()
+            before = line[: inline_match.start()].rstrip()
+            after = line[inline_match.start() :].strip()
             if before:
                 kept.append(before)
             answer_lines.append(after)
@@ -223,7 +267,9 @@ def remove_internal_blocks(markdown_text):
         index += 1
 
     learner_markdown = re.sub(r"\n{3,}", "\n\n", "\n".join(kept)).strip()
-    learner_markdown = re.sub(r"^#\s*TradeThesis.*\n+", "", learner_markdown, flags=re.I | re.M).strip()
+    learner_markdown = re.sub(
+        r"^#\s*TradeThesis.*\n+", "", learner_markdown, flags=re.I | re.M
+    ).strip()
     return learner_markdown, "\n\n".join(x for x in answer_lines if x)
 
 
@@ -270,11 +316,17 @@ def extract_snr_student_body(lesson_number, segment):
         ]
     else:
         for heading, body in sections:
-            if re.match(r"^(?:3\.\s+.*learner-facing|4\.\s+student-facing|5\.\s+final knowledge check)", heading, re.I):
+            if re.match(
+                r"^(?:3\.\s+.*learner-facing|4\.\s+student-facing|5\.\s+final knowledge check)",
+                heading,
+                re.I,
+            ):
                 selected.append((heading, body))
 
     if not selected:
-        raise CommandError(f"Lesson {lesson_number:02d} has no extractable student-facing sections.")
+        raise CommandError(
+            f"Lesson {lesson_number:02d} has no extractable student-facing sections."
+        )
 
     combined = "\n\n".join(f"## {heading}\n\n{body}" for heading, body in selected)
     learner_body, answer_key = remove_internal_blocks(combined)
@@ -319,11 +371,13 @@ def build_instructor_notes(item, source_path, manifest_status, extra=""):
     ]
     if extra.strip():
         lines.extend(["", "Additional instructor and media notes:", extra.strip()])
-    lines.extend([
-        "",
-        "Imported as a draft only. Confirm lesson media, progressive reveal, assessment behavior, "
-        "authentic case dependencies, accessibility, and learner-facing wording before publication.",
-    ])
+    lines.extend(
+        [
+            "",
+            "Imported as a draft only. Confirm lesson media, progressive reveal, assessment behavior, "
+            "authentic case dependencies, accessibility, and learner-facing wording before publication.",
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -362,7 +416,9 @@ class Command(BaseCommand):
             relative = Path(str(item.get("path", "")))
             script_path = (course_root / relative).resolve()
             if course_root.resolve() not in script_path.parents or not script_path.is_file():
-                raise CommandError(f"Canonical lesson script is missing or outside course source: {relative}")
+                raise CommandError(
+                    f"Canonical lesson script is missing or outside course source: {relative}"
+                )
             script_texts[str(relative)] = script_path.read_text(encoding="utf-8")
 
         module_for_lesson = {}
@@ -373,7 +429,9 @@ class Command(BaseCommand):
                 module_for_lesson[lesson_id] = (position, module)
 
         parsed = []
-        static_figure_root = repository_root / "backend" / "static" / "academy" / "support-resistance"
+        static_figure_root = (
+            repository_root / "backend" / "static" / "academy" / "support-resistance"
+        )
         for item in raw_lessons:
             source_rel = str(item.get("canonical_script_path", ""))
             script = script_texts.get(source_rel)
@@ -394,16 +452,18 @@ class Command(BaseCommand):
             learner_body, media_notes = embed_snr_figures(
                 number, module_position, learner_body, static_figure_root
             )
-            parsed.append({
-                **item,
-                "module_position": module_position,
-                "module_title": str(module["title"]),
-                "source_path": source_rel,
-                "body": learner_body,
-                "answer_key": answer_key,
-                "media_notes": media_notes,
-                "duration_minutes": estimate_duration(segment),
-            })
+            parsed.append(
+                {
+                    **item,
+                    "module_position": module_position,
+                    "module_title": str(module["title"]),
+                    "source_path": source_rel,
+                    "body": learner_body,
+                    "answer_key": answer_key,
+                    "media_notes": media_notes,
+                    "duration_minutes": estimate_duration(segment),
+                }
+            )
 
         if len({item["lesson_id"] for item in parsed}) != 18:
             raise CommandError("Lesson IDs in the manifest are not unique.")
@@ -472,7 +532,9 @@ class Command(BaseCommand):
                     lesson=lesson,
                     answer_key_markdown=item["answer_key"],
                     instructor_notes=build_instructor_notes(
-                        item, item["source_path"], str(manifest.get("status", "Draft")),
+                        item,
+                        item["source_path"],
+                        str(manifest.get("status", "Draft")),
                         extra=item["media_notes"],
                     ),
                 )

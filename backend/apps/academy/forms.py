@@ -1,4 +1,5 @@
 """Server-side form validation for administrator course and media editing."""
+
 from contextlib import suppress
 from urllib.parse import urlsplit
 
@@ -27,7 +28,9 @@ def validate_upload_image(upload):
         image = Image.open(upload)
         image_format = image.format
         if image_format not in _ALLOWED_IMAGE_FORMATS:
-            raise ValidationError("Use a valid JPEG, PNG or WebP image. SVG uploads are not accepted.")
+            raise ValidationError(
+                "Use a valid JPEG, PNG or WebP image. SVG uploads are not accepted."
+            )
         image.load()
         # Use a server-selected suffix rather than the browser-supplied filename.
         upload.name = "course-image" + _ALLOWED_IMAGE_FORMATS[image_format]

@@ -1,4 +1,5 @@
 """Staff-only Google Drive OAuth connection flow."""
+
 from __future__ import annotations
 
 import secrets
@@ -34,7 +35,14 @@ def _redirect_uri(request):
             return request.build_absolute_uri(reverse("academy_google_drive_oauth_callback"))
         raise ImproperlyConfigured("Google Drive OAuth redirect URI is not configured.")
     parsed = urlsplit(configured)
-    if parsed.scheme != "https" or not parsed.netloc or parsed.username or parsed.password or parsed.query or parsed.fragment:
+    if (
+        parsed.scheme != "https"
+        or not parsed.netloc
+        or parsed.username
+        or parsed.password
+        or parsed.query
+        or parsed.fragment
+    ):
         raise ImproperlyConfigured("Google Drive OAuth redirect URI must be an absolute HTTPS URL.")
     return configured
 
@@ -46,21 +54,32 @@ def google_drive_oauth_start(request):
     client_id = str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_ID", "") or "").strip()
     client_secret = str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET", "") or "").strip()
     if not client_id or not client_secret:
-        messages.error(request, "Google Drive OAuth client credentials are not configured on staging.")
+        messages.error(
+            request, "Google Drive OAuth client credentials are not configured on staging."
+        )
         return redirect("staff_course_builder_preview")
     try:
         redirect_uri = _redirect_uri(request)
     except ImproperlyConfigured:
-        messages.error(request, "Google Drive's HTTPS redirect URI is not configured on staging yet.")
+        messages.error(
+            request, "Google Drive's HTTPS redirect URI is not configured on staging yet."
+        )
         return redirect("staff_course_builder_preview")
     state = secrets.token_urlsafe(32)
     request.session[STATE_SESSION_KEY] = state
     request.session.modified = True
-    query = urlencode({
-        "client_id": client_id, "redirect_uri": redirect_uri,
-        "response_type": "code", "scope": SCOPE, "access_type": "offline",
-        "prompt": "consent", "include_granted_scopes": "true", "state": state,
-    })
+    query = urlencode(
+        {
+            "client_id": client_id,
+            "redirect_uri": redirect_uri,
+            "response_type": "code",
+            "scope": SCOPE,
+            "access_type": "offline",
+            "prompt": "consent",
+            "include_granted_scopes": "true",
+            "state": state,
+        }
+    )
     return redirect(f"{AUTH_URL}?{query}")
 
 
@@ -71,7 +90,9 @@ def google_drive_oauth_callback(request):
     expected_state = request.session.pop(STATE_SESSION_KEY, None)
     received_state = request.GET.get("state", "")
     if not expected_state or not secrets.compare_digest(str(expected_state), str(received_state)):
-        messages.error(request, "Google Drive authorization could not be verified. Please start again.")
+        messages.error(
+            request, "Google Drive authorization could not be verified. Please start again."
+        )
         return redirect("staff_course_builder_preview")
     if request.GET.get("error"):
         messages.error(request, "Google Drive authorization was cancelled or denied.")
@@ -83,10 +104,17 @@ def google_drive_oauth_callback(request):
         messages.error(request, "Google Drive authorization was incomplete. Please start again.")
         return redirect("staff_course_builder_preview")
     try:
-        response = requests.post(TOKEN_URL, data={
-            "code": code, "client_id": client_id, "client_secret": client_secret,
-            "redirect_uri": _redirect_uri(request), "grant_type": "authorization_code",
-        }, timeout=15)
+        response = requests.post(
+            TOKEN_URL,
+            data={
+                "code": code,
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "redirect_uri": _redirect_uri(request),
+                "grant_type": "authorization_code",
+            },
+            timeout=15,
+        )
         if response.status_code != 200:
             raise ValueError("token exchange rejected")
         token_data = response.json()
@@ -95,6 +123,7 @@ def google_drive_oauth_callback(request):
         if not access_token:
             raise ValueError("access token missing")
         from .models import GoogleDriveCredential
+
         credential, _ = GoogleDriveCredential.objects.get_or_create(pk=1)
         if not refresh_token and credential.encrypted_refresh_token:
             refresh_token = credential.get_refresh_token()
@@ -102,13 +131,17 @@ def google_drive_oauth_callback(request):
             raise ValueError("offline access token missing")
         headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
         folder_ids = [credential.asset_folder_id, credential.source_folder_id]
-        for index, folder_name in enumerate(("TradeThesis Course Assets", "TradeThesis Course Source Snapshots")):
+        for index, folder_name in enumerate(
+            ("TradeThesis Course Assets", "TradeThesis Course Source Snapshots")
+        ):
             if folder_ids[index]:
                 continue
             folder_response = requests.post(
-                DRIVE_API, headers=headers,
+                DRIVE_API,
+                headers=headers,
                 json={"name": folder_name, "mimeType": "application/vnd.google-apps.folder"},
-                params={"fields": "id,name"}, timeout=15,
+                params={"fields": "id,name"},
+                timeout=15,
             )
             if folder_response.status_code not in (200, 201):
                 raise ValueError("Drive folder creation failed")
@@ -125,9 +158,21 @@ def google_drive_oauth_callback(request):
                 credential.save(update_fields=["source_folder_id", "updated_at"])
         credential.set_refresh_token(refresh_token)
         credential.asset_folder_id, credential.source_folder_id = folder_ids
-        credential.save(update_fields=["encrypted_refresh_token", "asset_folder_id", "source_folder_id", "updated_at"])
+        credential.save(
+            update_fields=[
+                "encrypted_refresh_token",
+                "asset_folder_id",
+                "source_folder_id",
+                "updated_at",
+            ]
+        )
     except Exception:
-        messages.error(request, "Google Drive setup failed safely. Check staging configuration and try again.")
+        messages.error(
+            request, "Google Drive setup failed safely. Check staging configuration and try again."
+        )
         return redirect("staff_course_builder_preview")
-    messages.success(request, "Google Drive connected. Private asset and source folders were created in your Drive.")
+    messages.success(
+        request,
+        "Google Drive connected. Private asset and source folders were created in your Drive.",
+    )
     return redirect("staff_course_builder_preview")

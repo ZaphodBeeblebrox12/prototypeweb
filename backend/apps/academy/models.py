@@ -1,4 +1,5 @@
 """Course catalogue, course entitlements and learner progress."""
+
 import uuid
 from pathlib import Path
 
@@ -14,6 +15,7 @@ from .storage import course_asset_storage
 
 class GoogleDriveCredential(models.Model):
     """Single staging Drive connection; OAuth refresh token is encrypted at rest."""
+
     id = models.PositiveSmallIntegerField(primary_key=True, default=1, editable=False)
     encrypted_refresh_token = models.TextField(blank=True)
     asset_folder_id = models.CharField(max_length=255, blank=True)
@@ -26,7 +28,10 @@ class GoogleDriveCredential(models.Model):
         import hashlib
 
         from cryptography.fernet import Fernet
-        key = hashlib.sha256((settings.SECRET_KEY + "|tradethesis-drive-token-v1").encode()).digest()
+
+        key = hashlib.sha256(
+            (settings.SECRET_KEY + "|tradethesis-drive-token-v1").encode()
+        ).digest()
         return Fernet(base64.urlsafe_b64encode(key))
 
     def set_refresh_token(self, token):
@@ -85,7 +90,9 @@ class CourseModule(models.Model):
         ordering = ["position", "title"]
         constraints = [
             models.UniqueConstraint(fields=["course", "slug"], name="academy_mod_course_slug_uq"),
-            models.UniqueConstraint(fields=["course", "position"], name="academy_mod_course_pos_uq"),
+            models.UniqueConstraint(
+                fields=["course", "position"], name="academy_mod_course_pos_uq"
+            ),
         ]
 
     def __str__(self):
@@ -124,7 +131,11 @@ class Lesson(models.Model):
             models.UniqueConstraint(fields=["module", "slug"], name="academy_les_mod_slug_uq"),
             models.UniqueConstraint(fields=["module", "position"], name="academy_les_mod_pos_uq"),
         ]
-        indexes = [models.Index(fields=["module", "is_published", "position"], name="academy_lesson_release_idx")]
+        indexes = [
+            models.Index(
+                fields=["module", "is_published", "position"], name="academy_lesson_release_idx"
+            )
+        ]
 
     @property
     def course(self):
@@ -136,7 +147,10 @@ class Lesson(models.Model):
 
 class LessonInstructorMaterial(models.Model):
     """Instructor-only answer keys and rubrics, separate from learner payloads."""
-    lesson = models.OneToOneField(Lesson, on_delete=models.CASCADE, related_name="instructor_material")
+
+    lesson = models.OneToOneField(
+        Lesson, on_delete=models.CASCADE, related_name="instructor_material"
+    )
     answer_key_markdown = models.TextField(blank=True)
     instructor_notes = models.TextField(blank=True)
     rubric_json = models.JSONField(default=dict, blank=True)
@@ -148,18 +162,24 @@ class LessonInstructorMaterial(models.Model):
 
 class CourseOffer(models.Model):
     """Connects a one-time commerce Plan to the specific course it grants."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name="offers")
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=160, unique=True)
     plan = models.OneToOneField(
-        "subscriptions.Plan", on_delete=models.PROTECT, related_name="academy_offer",
-        null=True, blank=True,
+        "subscriptions.Plan",
+        on_delete=models.PROTECT,
+        related_name="academy_offer",
+        null=True,
+        blank=True,
         help_text="Use a dedicated Plan with an active one_time price; do not reuse a subscription Plan.",
     )
     # NULL means permanent access. Timed access must be an explicit product rule.
     access_duration_days = models.PositiveIntegerField(
-        null=True, blank=True, validators=[MinValueValidator(1)],
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1)],
         help_text="Leave blank for permanent course access.",
     )
     is_active = models.BooleanField(default=False)
@@ -184,11 +204,15 @@ class CourseOffer(models.Model):
                         "Course offer Plans must be hidden from the subscription catalogue."
                     )
                 from apps.subscriptions.models import GeoPlanPrice, PlanPrice
-                has_price = PlanPrice.objects.filter(
-                    plan_id=self.plan_id, interval="one_time", is_active=True
-                ).exists() or GeoPlanPrice.objects.filter(
-                    plan_id=self.plan_id, interval="one_time", is_active=True
-                ).exists()
+
+                has_price = (
+                    PlanPrice.objects.filter(
+                        plan_id=self.plan_id, interval="one_time", is_active=True
+                    ).exists()
+                    or GeoPlanPrice.objects.filter(
+                        plan_id=self.plan_id, interval="one_time", is_active=True
+                    ).exists()
+                )
                 if not has_price:
                     errors["plan"] = "Add an active one-time price before activating this offer."
             if errors:
@@ -198,18 +222,29 @@ class CourseOffer(models.Model):
         if self.plan_id:
             from apps.payments.models import PaymentIntent
             from apps.subscriptions.models import Subscription
+
             if self._state.adding:
-                if PaymentIntent.objects.filter(plan_id=self.plan_id).exists() or Subscription.objects.filter(plan_id=self.plan_id).exists():
-                    raise ValidationError({
-                        "plan": "This Plan has payment or subscription history; create a new Plan for the course offer."
-                    })
+                if (
+                    PaymentIntent.objects.filter(plan_id=self.plan_id).exists()
+                    or Subscription.objects.filter(plan_id=self.plan_id).exists()
+                ):
+                    raise ValidationError(
+                        {
+                            "plan": "This Plan has payment or subscription history; create a new Plan for the course offer."
+                        }
+                    )
             else:
                 previous = CourseOffer.objects.filter(pk=self.pk).first()
-                if previous and (
-                    previous.plan_id != self.plan_id
-                    or previous.course_id != self.course_id
-                    or previous.access_duration_days != self.access_duration_days
-                ) and previous.plan_id and PaymentIntent.objects.filter(plan_id=previous.plan_id).exists():
+                if (
+                    previous
+                    and (
+                        previous.plan_id != self.plan_id
+                        or previous.course_id != self.course_id
+                        or previous.access_duration_days != self.access_duration_days
+                    )
+                    and previous.plan_id
+                    and PaymentIntent.objects.filter(plan_id=previous.plan_id).exists()
+                ):
                     raise ValidationError(
                         "Course, Plan and access duration are frozen after a payment intent exists. "
                         "Create a new offer for future sales instead."
@@ -217,7 +252,9 @@ class CourseOffer(models.Model):
 
     @property
     def is_saleable(self):
-        return bool(self.is_active and self.plan_id and self.course.status == Course.Status.PUBLISHED)
+        return bool(
+            self.is_active and self.plan_id and self.course.status == Course.Status.PUBLISHED
+        )
 
     def __str__(self):
         return self.name
@@ -235,21 +272,33 @@ class CourseEntitlement(models.Model):
         COMPLIMENTARY = "complimentary", _("Complimentary access")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="academy_entitlements")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="academy_entitlements"
+    )
     course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name="entitlements")
-    offer = models.ForeignKey(CourseOffer, on_delete=models.SET_NULL, null=True, blank=True, related_name="entitlements")
+    offer = models.ForeignKey(
+        CourseOffer, on_delete=models.SET_NULL, null=True, blank=True, related_name="entitlements"
+    )
     payment_intent = models.ForeignKey(
-        "payments.PaymentIntent", on_delete=models.SET_NULL, null=True, blank=True,
+        "payments.PaymentIntent",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="academy_entitlements",
     )
     source = models.CharField(max_length=16, choices=Source.choices, default=Source.PURCHASE)
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.ACTIVE)
     starts_at = models.DateTimeField(default=timezone.now)
-    expires_at = models.DateTimeField(null=True, blank=True, help_text="NULL means permanent access.")
+    expires_at = models.DateTimeField(
+        null=True, blank=True, help_text="NULL means permanent access."
+    )
     revoked_at = models.DateTimeField(null=True, blank=True)
     revocation_reason = models.CharField(max_length=240, blank=True, default="")
     granted_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="academy_entitlements_granted",
     )
     created_at = models.DateTimeField(auto_now_add=True)
@@ -260,15 +309,24 @@ class CourseEntitlement(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["user", "course"], name="academy_ent_user_course_uq"),
             models.CheckConstraint(
-                check=models.Q(expires_at__isnull=True) | models.Q(expires_at__gt=models.F("starts_at")),
+                check=models.Q(expires_at__isnull=True)
+                | models.Q(expires_at__gt=models.F("starts_at")),
                 name="academy_ent_expiry_start_ck",
             ),
         ]
-        indexes = [models.Index(fields=["user", "status", "expires_at"], name="academy_entitlement_access_idx")]
+        indexes = [
+            models.Index(
+                fields=["user", "status", "expires_at"], name="academy_entitlement_access_idx"
+            )
+        ]
 
     def has_access_at(self, at=None):
         at = at or timezone.now()
-        return self.status == self.Status.ACTIVE and self.starts_at <= at and (self.expires_at is None or self.expires_at > at)
+        return (
+            self.status == self.Status.ACTIVE
+            and self.starts_at <= at
+            and (self.expires_at is None or self.expires_at > at)
+        )
 
     @property
     def has_access(self):
@@ -286,12 +344,19 @@ class CourseEntitlementEvent(models.Model):
         REVOKED = "revoked", _("Revoked")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    entitlement = models.ForeignKey(CourseEntitlement, on_delete=models.PROTECT, related_name="events")
+    entitlement = models.ForeignKey(
+        CourseEntitlement, on_delete=models.PROTECT, related_name="events"
+    )
     payment_intent = models.ForeignKey(
-        "payments.PaymentIntent", on_delete=models.SET_NULL, null=True, blank=True,
+        "payments.PaymentIntent",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="academy_entitlement_events",
     )
-    actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
     event_type = models.CharField(max_length=16, choices=EventType.choices)
     reason = models.CharField(max_length=240, blank=True, default="")
     details = models.JSONField(default=dict, blank=True)
@@ -311,7 +376,9 @@ class LessonProgress(models.Model):
         COMPLETED = "completed", _("Completed")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="academy_lesson_progress")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="academy_lesson_progress"
+    )
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name="learner_progress")
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.NOT_STARTED)
     started_at = models.DateTimeField(null=True, blank=True)
@@ -325,7 +392,9 @@ class LessonProgress(models.Model):
 
     class Meta:
         ordering = ["-updated_at"]
-        constraints = [models.UniqueConstraint(fields=["user", "lesson"], name="academy_prog_user_lesson_uq")]
+        constraints = [
+            models.UniqueConstraint(fields=["user", "lesson"], name="academy_prog_user_lesson_uq")
+        ]
         indexes = [models.Index(fields=["user", "status"], name="academy_prog_user_status_idx")]
 
     def __str__(self):
@@ -348,6 +417,7 @@ def course_media_asset_upload_to(instance, filename):
 
 class CourseImport(models.Model):
     """Editable builder draft until submitted; reviewable snapshots never mutate live course rows."""
+
     class Status(models.TextChoices):
         DRAFT = "draft", _("Builder draft")
         REVIEW = "review", _("Awaiting review")
@@ -364,9 +434,23 @@ class CourseImport(models.Model):
     source_manifest = models.TextField()
     payload = models.JSONField(default=dict)
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.REVIEW)
-    target_course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="imports")
-    imported_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="academy_course_imports")
-    reviewed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="academy_course_imports_reviewed")
+    target_course = models.ForeignKey(
+        Course, on_delete=models.SET_NULL, null=True, blank=True, related_name="imports"
+    )
+    imported_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="academy_course_imports",
+    )
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="academy_course_imports_reviewed",
+    )
     imported_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     published_at = models.DateTimeField(null=True, blank=True)
@@ -374,7 +458,9 @@ class CourseImport(models.Model):
     class Meta:
         ordering = ["-imported_at"]
         constraints = [
-            models.UniqueConstraint(fields=["course_slug", "content_hash"], name="academy_import_slug_hash_uq"),
+            models.UniqueConstraint(
+                fields=["course_slug", "content_hash"], name="academy_import_slug_hash_uq"
+            ),
         ]
         indexes = [models.Index(fields=["status", "imported_at"], name="academy_import_status_idx")]
 
@@ -384,6 +470,7 @@ class CourseImport(models.Model):
 
 class CourseImportAsset(models.Model):
     """Asset belonging to a staged import; missing source images can be uploaded during review."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     course_import = models.ForeignKey(CourseImport, on_delete=models.CASCADE, related_name="assets")
     asset_key = models.CharField(max_length=512)
@@ -392,14 +479,18 @@ class CourseImportAsset(models.Model):
     source_path = models.CharField(max_length=512, blank=True)
     original_url = models.TextField(blank=True)
     source_error = models.CharField(max_length=240, blank=True)
-    file = models.ImageField(storage=course_asset_storage, upload_to=course_import_asset_upload_to, blank=True)
+    file = models.ImageField(
+        storage=course_asset_storage, upload_to=course_import_asset_upload_to, blank=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["asset_key"]
         constraints = [
-            models.UniqueConstraint(fields=["course_import", "asset_key"], name="academy_import_asset_key_uq"),
+            models.UniqueConstraint(
+                fields=["course_import", "asset_key"], name="academy_import_asset_key_uq"
+            ),
         ]
 
     def __str__(self):
@@ -408,21 +499,32 @@ class CourseImportAsset(models.Model):
 
 class CourseMediaAsset(models.Model):
     """Shared course asset with a stable ID and protected delivery route."""
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="media_assets")
     asset_key = models.CharField(max_length=512)
-    file = models.ImageField(storage=course_asset_storage, upload_to=course_media_asset_upload_to, blank=True)
+    file = models.ImageField(
+        storage=course_asset_storage, upload_to=course_media_asset_upload_to, blank=True
+    )
     alt_text = models.CharField(max_length=500, blank=True)
     source_path = models.CharField(max_length=512, blank=True)
     original_url = models.TextField(blank=True)
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="academy_media_assets_updated")
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="academy_media_assets_updated",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["asset_key"]
         constraints = [
-            models.UniqueConstraint(fields=["course", "asset_key"], name="academy_media_course_key_uq"),
+            models.UniqueConstraint(
+                fields=["course", "asset_key"], name="academy_media_course_key_uq"
+            ),
         ]
 
     def __str__(self):
@@ -431,14 +533,27 @@ class CourseMediaAsset(models.Model):
 
 class CourseContentRevision(models.Model):
     """Previous lesson content, retained before admin edits or approved imports."""
+
     class RevisionType(models.TextChoices):
         ADMIN_EDIT = "admin_edit", _("Administrator edit")
         IMPORT = "import", _("Approved course import")
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     lesson = models.ForeignKey(Lesson, on_delete=models.PROTECT, related_name="content_revisions")
-    editor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="academy_content_revisions")
-    source_import = models.ForeignKey(CourseImport, on_delete=models.SET_NULL, null=True, blank=True, related_name="content_revisions")
+    editor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="academy_content_revisions",
+    )
+    source_import = models.ForeignKey(
+        CourseImport,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="content_revisions",
+    )
     revision_type = models.CharField(max_length=16, choices=RevisionType.choices)
     title_before = models.CharField(max_length=240)
     summary_before = models.CharField(max_length=360, blank=True)

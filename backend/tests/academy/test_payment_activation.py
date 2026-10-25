@@ -20,43 +20,66 @@ User = get_user_model()
 
 class CoursePaymentActivationTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(
-            username="course-buyer", password="Test-password-123!"
-        )
+        self.user = User.objects.create_user(username="course-buyer", password="Test-password-123!")
         self.plan = Plan.objects.create(
-            name="Trading Path One-Time", tier=Plan.Tier.BASIC, is_active=True, is_hidden=True,
+            name="Trading Path One-Time",
+            tier=Plan.Tier.BASIC,
+            is_active=True,
+            is_hidden=True,
         )
         self.price = PlanPrice.objects.create(
-            plan=self.plan, interval=PlanPrice.Interval.ONE_TIME,
-            price_cents=99900, currency="INR", is_active=True,
+            plan=self.plan,
+            interval=PlanPrice.Interval.ONE_TIME,
+            price_cents=99900,
+            currency="INR",
+            is_active=True,
         )
         self.course = Course.objects.create(
-            title="Trading Path", slug="trading-path",
+            title="Trading Path",
+            slug="trading-path",
             status=Course.Status.PUBLISHED,
         )
         self.module = CourseModule.objects.create(
-            course=self.course, title="Foundations", slug="foundations",
-            position=1, is_published=True,
+            course=self.course,
+            title="Foundations",
+            slug="foundations",
+            position=1,
+            is_published=True,
         )
         self.lesson = Lesson.objects.create(
-            module=self.module, title="Read the screen", slug="read-the-screen",
-            position=1, release_day=1, is_published=True,
+            module=self.module,
+            title="Read the screen",
+            slug="read-the-screen",
+            position=1,
+            release_day=1,
+            is_published=True,
             content_markdown="Paid lesson content",
         )
         self.offer = CourseOffer.objects.create(
-            course=self.course, name="Trading Path", slug="trading-path",
-            plan=self.plan, access_duration_days=None, is_active=True,
+            course=self.course,
+            name="Trading Path",
+            slug="trading-path",
+            plan=self.plan,
+            access_duration_days=None,
+            is_active=True,
         )
         self.intent = PaymentIntent.objects.create(
-            user=self.user, plan=self.plan, plan_price=self.price,
-            amount=99900, base_amount_cents=99900, currency="INR",
+            user=self.user,
+            plan=self.plan,
+            plan_price=self.price,
+            amount=99900,
+            base_amount_cents=99900,
+            currency="INR",
             provider=PaymentIntent.Provider.RAZORPAY,
             status=PaymentIntent.Status.PENDING,
         )
 
     def test_hidden_plan_without_course_offer_cannot_be_purchased(self):
         hidden_plan = Plan.objects.create(
-            name="Internal-only plan", tier=Plan.Tier.PRO, is_active=True, is_hidden=True,
+            name="Internal-only plan",
+            tier=Plan.Tier.PRO,
+            is_active=True,
+            is_hidden=True,
         )
         self.client.force_login(self.user)
         response = self.client.post(
@@ -121,15 +144,23 @@ class CoursePaymentActivationTests(TestCase):
 
     def test_one_time_plan_without_course_offer_cannot_become_subscription(self):
         orphan_plan = Plan.objects.create(
-            name="Unmapped one-time plan", tier=Plan.Tier.PRO, is_active=True,
+            name="Unmapped one-time plan",
+            tier=Plan.Tier.PRO,
+            is_active=True,
         )
         orphan_price = PlanPrice.objects.create(
-            plan=orphan_plan, interval=PlanPrice.Interval.ONE_TIME,
-            price_cents=50000, currency="INR", is_active=True,
+            plan=orphan_plan,
+            interval=PlanPrice.Interval.ONE_TIME,
+            price_cents=50000,
+            currency="INR",
+            is_active=True,
         )
         orphan_intent = PaymentIntent.objects.create(
-            user=self.user, plan=orphan_plan, plan_price=orphan_price,
-            amount=50000, currency="INR",
+            user=self.user,
+            plan=orphan_plan,
+            plan_price=orphan_price,
+            amount=50000,
+            currency="INR",
             provider=PaymentIntent.Provider.RAZORPAY,
             status=PaymentIntent.Status.PENDING,
         )

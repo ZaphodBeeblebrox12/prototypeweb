@@ -29,13 +29,22 @@ class SharedLessonRenderingTests(SimpleTestCase):
         }
 
         india = build_lesson_sections(
-            source, regional_content=overrides, country_code="IN", region_code="APAC",
+            source,
+            regional_content=overrides,
+            country_code="IN",
+            region_code="APAC",
         )
         australia = build_lesson_sections(
-            source, regional_content=overrides, country_code="AU", region_code="APAC",
+            source,
+            regional_content=overrides,
+            country_code="AU",
+            region_code="APAC",
         )
         unknown = build_lesson_sections(
-            source, regional_content=overrides, country_code="ZZ", region_code=None,
+            source,
+            regional_content=overrides,
+            country_code="ZZ",
+            region_code=None,
         )
         self.assertIn("India lesson body.", india["idea_html"])
         self.assertIn("NIFTY", india["idea_html"])
@@ -50,14 +59,30 @@ class SharedLessonRenderingTests(SimpleTestCase):
                 "id": "risk-note",
                 "base_content": "Global disclosure.",
                 "variants": [
-                    {"scope": "region", "code": "APAC", "content": "APAC disclosure.", "hidden": False},
-                    {"scope": "country", "code": "IN", "content": "India disclosure.", "hidden": False},
+                    {
+                        "scope": "region",
+                        "code": "APAC",
+                        "content": "APAC disclosure.",
+                        "hidden": False,
+                    },
+                    {
+                        "scope": "country",
+                        "code": "IN",
+                        "content": "India disclosure.",
+                        "hidden": False,
+                    },
                 ],
             }
         }
-        india = build_lesson_sections(source, regional_blocks=blocks, country_code="IN", region_code="APAC")
-        australia = build_lesson_sections(source, regional_blocks=blocks, country_code="AU", region_code="APAC")
-        unknown = build_lesson_sections(source, regional_blocks=blocks, country_code="ZZ", region_code=None)
+        india = build_lesson_sections(
+            source, regional_blocks=blocks, country_code="IN", region_code="APAC"
+        )
+        australia = build_lesson_sections(
+            source, regional_blocks=blocks, country_code="AU", region_code="APAC"
+        )
+        unknown = build_lesson_sections(
+            source, regional_blocks=blocks, country_code="ZZ", region_code=None
+        )
         self.assertIn("India disclosure.", india["idea_html"])
         self.assertIn("APAC disclosure.", australia["idea_html"])
         self.assertIn("Global disclosure.", unknown["idea_html"])
@@ -65,12 +90,22 @@ class SharedLessonRenderingTests(SimpleTestCase):
 
     def test_regional_block_can_be_explicitly_hidden_for_a_matching_country(self):
         source = "## Disclosure\n\nBefore.\n\n[[regional-block:notice]]\n\nAfter."
-        blocks = {"notice": {"id": "notice", "base_content": "Global notice.", "variants": [
-            {"scope": "country", "code": "CA", "content": "unused", "hidden": True},
-            {"scope": "region", "code": "NA", "content": "North American notice."}
-        ]}}
-        canada = build_lesson_sections(source, regional_blocks=blocks, country_code="CA", region_code="NA")
-        us = build_lesson_sections(source, regional_blocks=blocks, country_code="US", region_code="NA")
+        blocks = {
+            "notice": {
+                "id": "notice",
+                "base_content": "Global notice.",
+                "variants": [
+                    {"scope": "country", "code": "CA", "content": "unused", "hidden": True},
+                    {"scope": "region", "code": "NA", "content": "North American notice."},
+                ],
+            }
+        }
+        canada = build_lesson_sections(
+            source, regional_blocks=blocks, country_code="CA", region_code="NA"
+        )
+        us = build_lesson_sections(
+            source, regional_blocks=blocks, country_code="US", region_code="NA"
+        )
         self.assertNotIn("unused", canada["idea_html"])
         self.assertNotIn("North American notice.", canada["idea_html"])
         self.assertNotIn("Global notice.", canada["idea_html"])
@@ -141,23 +176,25 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertTrue(contains_unmanaged_regional_image("![site-relative](/static/example.png)"))
 
     def test_misplaced_tab_route_markers_do_not_hide_section_copy(self):
-        source = "\n".join([
-            "## Start with the decision",
-            "",
-            "Begin with a practical question a trader may encounter.",
-            "",
-            "### What to notice",
-            "",
-            "[[lesson-tab:examples]]",
-            "",
-            "[[lesson-tab:practice]]",
-            "",
-            "Separate the visible evidence from the conclusion you may draw from it.",
-            "",
-            "### Compare the possibilities",
-            "",
-            "Use a second case to show how similar-looking conditions can lead to different outcomes.",
-        ])
+        source = "\n".join(
+            [
+                "## Start with the decision",
+                "",
+                "Begin with a practical question a trader may encounter.",
+                "",
+                "### What to notice",
+                "",
+                "[[lesson-tab:examples]]",
+                "",
+                "[[lesson-tab:practice]]",
+                "",
+                "Separate the visible evidence from the conclusion you may draw from it.",
+                "",
+                "### Compare the possibilities",
+                "",
+                "Use a second case to show how similar-looking conditions can lead to different outcomes.",
+            ]
+        )
 
         sections = build_lesson_sections(source)
 
@@ -167,20 +204,25 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("Use a second case", sections["idea_html"])
         self.assertNotIn("Separate the visible evidence", sections["examples_html"])
         self.assertNotIn("Use a second case", sections["practice_html"])
-        self.assertNotIn("[[lesson-tab:", sections["idea_html"] + sections["examples_html"] + sections["practice_html"])
+        self.assertNotIn(
+            "[[lesson-tab:",
+            sections["idea_html"] + sections["examples_html"] + sections["practice_html"],
+        )
 
     def test_explicit_tab_route_applies_to_the_heading_after_the_marker(self):
-        source = "\n".join([
-            "## Start with the decision",
-            "",
-            "Introduction remains in the idea tab.",
-            "",
-            "[[lesson-tab:practice]]",
-            "",
-            "### What to notice",
-            "",
-            "This heading and its paragraph are intentionally routed to practice.",
-        ])
+        source = "\n".join(
+            [
+                "## Start with the decision",
+                "",
+                "Introduction remains in the idea tab.",
+                "",
+                "[[lesson-tab:practice]]",
+                "",
+                "### What to notice",
+                "",
+                "This heading and its paragraph are intentionally routed to practice.",
+            ]
+        )
 
         sections = build_lesson_sections(source)
 
@@ -236,8 +278,12 @@ class SharedLessonRenderingTests(SimpleTestCase):
             figure_prefix="2.2",
             module_label="Module 5 · Build and trade setups",
         )
-        self.assertLess(rendered.index("Text before the figure."), rendered.index('class="tt-purpose-figure"'))
-        self.assertLess(rendered.index('class="tt-purpose-figure"'), rendered.index("Text after the figure."))
+        self.assertLess(
+            rendered.index("Text before the figure."), rendered.index('class="tt-purpose-figure"')
+        )
+        self.assertLess(
+            rendered.index('class="tt-purpose-figure"'), rendered.index("Text after the figure.")
+        )
         self.assertIn("What changing the settings changes", rendered)
         self.assertIn("MODULE 5 · Build and trade setups", rendered)
         self.assertNotIn("TRADETHESIS · LEARNING ROOM", rendered)
@@ -261,13 +307,12 @@ class SharedLessonRenderingTests(SimpleTestCase):
         )
         self.assertNotIn("<script>", rendered)
         self.assertIn('alt="diagram&quot; onerror=&quot;alert(1)"', rendered)
-        self.assertNotIn('<img src=x onerror=alert(1)>', rendered)
+        self.assertNotIn("<img src=x onerror=alert(1)>", rendered)
         self.assertIn("&lt;script&gt;bad&lt;/script&gt;", rendered)
 
     def test_legacy_image_and_adjacent_caption_still_render_as_figure(self):
         source = (
-            f"![Legacy image](asset://{self.ASSET_ID})\n\n"
-            "Legacy caption stays with the image."
+            f"![Legacy image](asset://{self.ASSET_ID})\n\n" "Legacy caption stays with the image."
         )
         rendered = render_safe_markdown(
             source,
@@ -275,7 +320,6 @@ class SharedLessonRenderingTests(SimpleTestCase):
         )
         self.assertIn('<figure class="tt-course-figure">', rendered)
         self.assertIn("Legacy caption stays with the image.", rendered)
-
 
     def test_native_comparison_figure_renders_editable_cards_in_place(self):
         figure_id = "figure-block-01"
@@ -313,8 +357,12 @@ class SharedLessonRenderingTests(SimpleTestCase):
             figure_prefix="2.2",
             module_label="Module 5 · Build and trade setups",
         )
-        self.assertLess(rendered.index("Text before the figure."), rendered.index('class="tt-purpose-figure'))
-        self.assertLess(rendered.index('class="tt-purpose-figure'), rendered.index("Text after the figure."))
+        self.assertLess(
+            rendered.index("Text before the figure."), rendered.index('class="tt-purpose-figure')
+        )
+        self.assertLess(
+            rendered.index('class="tt-purpose-figure'), rendered.index("Text after the figure.")
+        )
         self.assertIn("What changing the settings changes", rendered)
         self.assertIn("MODULE 5 · Build and trade setups", rendered)
         self.assertNotIn("TRADETHESIS · LEARNING ROOM", rendered)
@@ -337,12 +385,10 @@ class SharedLessonRenderingTests(SimpleTestCase):
         tabs_template = (
             backend_root / "templates" / "academy" / "partials" / "lesson_tabs.html"
         ).read_text(encoding="utf-8")
-        views_source = (backend_root / "apps" / "academy" / "views.py").read_text(
-            encoding="utf-8"
-        )
+        views_source = (backend_root / "apps" / "academy" / "views.py").read_text(encoding="utf-8")
 
         # Builder saves the current draft and opens its real Academy preview.
-        self.assertIn('data-builder-website-preview-frame', builder)
+        self.assertIn("data-builder-website-preview-frame", builder)
         self.assertIn("async function refreshBuilderWebsitePreview(force = false)", builder)
         self.assertIn("saveCurrentToAcademy(false)", builder)
         self.assertIn("website_preview_url", builder)
@@ -369,9 +415,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
         first_id = "6a51e8ac-35e2-489c-9a18-48221818e5d9"
         second_id = "7b62f9bd-46f3-4ae0-8b13-59332929f6ea"
         source = (
-            "Text before the group.\n\n"
-            f"[[image-group:{group_id}]]\n\n"
-            "Text after the group."
+            "Text before the group.\n\n" f"[[image-group:{group_id}]]\n\n" "Text after the group."
         )
         rendered = render_safe_markdown(
             source,
@@ -433,8 +477,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
                 group_id = f"hard-index-{count}"
                 ids = image_ids[:count]
                 urls = {
-                    asset_id: f"/media/chart-{index + 1}.png"
-                    for index, asset_id in enumerate(ids)
+                    asset_id: f"/media/chart-{index + 1}.png" for index, asset_id in enumerate(ids)
                 }
                 metadata = {
                     group_id: {
@@ -485,12 +528,12 @@ class SharedLessonRenderingTests(SimpleTestCase):
 
     def test_image_groups_use_exact_hard_index_styles_in_builder_and_learner(self):
         root = Path(__file__).resolve().parents[2]
-        learner_css = (
-            root / "static" / "academy" / "learning-room.css"
-        ).read_text(encoding="utf-8")
-        builder_html = (
-            root / "apps" / "academy" / "course_builder_preview.html"
-        ).read_text(encoding="utf-8")
+        learner_css = (root / "static" / "academy" / "learning-room.css").read_text(
+            encoding="utf-8"
+        )
+        builder_html = (root / "apps" / "academy" / "course_builder_preview.html").read_text(
+            encoding="utf-8"
+        )
         self.assertIn("Hard-block index — exact approved design.", learner_css)
         self.assertIn("Hard-block index — exact approved design.", builder_html)
         self.assertIn("tt-image-group-hard-index", builder_html)
@@ -512,7 +555,6 @@ class SharedLessonRenderingTests(SimpleTestCase):
             self.assertIn("@media(max-width:760px)", source)
             self.assertIn("@media(max-width:560px)", source)
             self.assertIn("grid-template-columns:26px minmax(0,1fr)", source)
-
 
     def test_image_group_numbering_stays_consistent_across_lesson_tabs(self):
         first_id = "11111111-1111-4111-8111-111111111111"
@@ -570,29 +612,60 @@ class SharedLessonRenderingTests(SimpleTestCase):
                 "market-comparison": {
                     "title": "Market comparison",
                     "rows": [
-                        {"section": "head", "cells": [
-                            {"text": "Context", "colspan": 2, "rowspan": 1, "header": True},
-                            {"text": "Decision", "colspan": 2, "rowspan": 1, "header": True},
-                        ]},
-                        {"section": "head", "cells": [
-                            {"text": "Market", "colspan": 1, "rowspan": 1, "header": True},
-                            {"text": "Evidence", "colspan": 1, "rowspan": 1, "header": True},
-                            {"text": "If confirmed", "colspan": 1, "rowspan": 1, "header": True},
-                            {"text": "If rejected", "colspan": 1, "rowspan": 1, "header": True},
-                        ]},
-                        {"section": "body", "cells": [
-                            {"text": "Range", "colspan": 1, "rowspan": 1, "header": False},
-                            {"text": "Repeated rejection", "colspan": 1, "rowspan": 1, "header": False},
-                            {"text": "Wait for follow-through", "colspan": 1, "rowspan": 1, "header": False},
-                            {"text": "Reassess the range", "colspan": 1, "rowspan": 1, "header": False},
-                        ]},
+                        {
+                            "section": "head",
+                            "cells": [
+                                {"text": "Context", "colspan": 2, "rowspan": 1, "header": True},
+                                {"text": "Decision", "colspan": 2, "rowspan": 1, "header": True},
+                            ],
+                        },
+                        {
+                            "section": "head",
+                            "cells": [
+                                {"text": "Market", "colspan": 1, "rowspan": 1, "header": True},
+                                {"text": "Evidence", "colspan": 1, "rowspan": 1, "header": True},
+                                {
+                                    "text": "If confirmed",
+                                    "colspan": 1,
+                                    "rowspan": 1,
+                                    "header": True,
+                                },
+                                {"text": "If rejected", "colspan": 1, "rowspan": 1, "header": True},
+                            ],
+                        },
+                        {
+                            "section": "body",
+                            "cells": [
+                                {"text": "Range", "colspan": 1, "rowspan": 1, "header": False},
+                                {
+                                    "text": "Repeated rejection",
+                                    "colspan": 1,
+                                    "rowspan": 1,
+                                    "header": False,
+                                },
+                                {
+                                    "text": "Wait for follow-through",
+                                    "colspan": 1,
+                                    "rowspan": 1,
+                                    "header": False,
+                                },
+                                {
+                                    "text": "Reassess the range",
+                                    "colspan": 1,
+                                    "rowspan": 1,
+                                    "header": False,
+                                },
+                            ],
+                        },
                     ],
                 }
             },
         )
         self.assertIn('class="lesson-table-wrap tt-structured-table-wrap"', rendered)
         self.assertIn('aria-label="Scrollable table: Market comparison"', rendered)
-        self.assertIn('<caption class="tt-structured-table-caption">Market comparison</caption>', rendered)
+        self.assertIn(
+            '<caption class="tt-structured-table-caption">Market comparison</caption>', rendered
+        )
         self.assertIn('colspan="2" scope="colgroup"', rendered)
         self.assertIn("Repeated rejection", rendered)
         self.assertIn("Opening copy.", rendered)
@@ -620,30 +693,62 @@ class SharedLessonRenderingTests(SimpleTestCase):
                 "ohlc-context": {
                     "title": "From observation to execution",
                     "rows": [
-                        {"section": "head", "cells": [
-                            {"text": "Price structure", "colspan": 4, "rowspan": 1, "header": True},
-                            {"text": "Volume", "colspan": 1, "rowspan": 2, "header": True},
-                            {"text": "Context", "colspan": 1, "rowspan": 2, "header": True},
-                        ]},
-                        {"section": "head", "cells": [
-                            {"text": "Open", "colspan": 1, "rowspan": 1, "header": True},
-                            {"text": "High", "colspan": 1, "rowspan": 1, "header": True},
-                            {"text": "Low", "colspan": 1, "rowspan": 1, "header": True},
-                            {"text": "Close", "colspan": 1, "rowspan": 1, "header": True},
-                        ]},
-                        {"section": "body", "cells": [
-                            {"text": "Breakout", "colspan": 1, "rowspan": 1, "header": False},
-                            {"text": "Above range", "colspan": 1, "rowspan": 1, "header": False},
-                            {"text": "Activity rises", "colspan": 1, "rowspan": 1, "header": False},
-                            {"text": "Close holds", "colspan": 1, "rowspan": 1, "header": False},
-                            {"text": "Strong", "colspan": 1, "rowspan": 1, "header": False},
-                            {"text": "Trend", "colspan": 1, "rowspan": 1, "header": False},
-                        ]},
+                        {
+                            "section": "head",
+                            "cells": [
+                                {
+                                    "text": "Price structure",
+                                    "colspan": 4,
+                                    "rowspan": 1,
+                                    "header": True,
+                                },
+                                {"text": "Volume", "colspan": 1, "rowspan": 2, "header": True},
+                                {"text": "Context", "colspan": 1, "rowspan": 2, "header": True},
+                            ],
+                        },
+                        {
+                            "section": "head",
+                            "cells": [
+                                {"text": "Open", "colspan": 1, "rowspan": 1, "header": True},
+                                {"text": "High", "colspan": 1, "rowspan": 1, "header": True},
+                                {"text": "Low", "colspan": 1, "rowspan": 1, "header": True},
+                                {"text": "Close", "colspan": 1, "rowspan": 1, "header": True},
+                            ],
+                        },
+                        {
+                            "section": "body",
+                            "cells": [
+                                {"text": "Breakout", "colspan": 1, "rowspan": 1, "header": False},
+                                {
+                                    "text": "Above range",
+                                    "colspan": 1,
+                                    "rowspan": 1,
+                                    "header": False,
+                                },
+                                {
+                                    "text": "Activity rises",
+                                    "colspan": 1,
+                                    "rowspan": 1,
+                                    "header": False,
+                                },
+                                {
+                                    "text": "Close holds",
+                                    "colspan": 1,
+                                    "rowspan": 1,
+                                    "header": False,
+                                },
+                                {"text": "Strong", "colspan": 1, "rowspan": 1, "header": False},
+                                {"text": "Trend", "colspan": 1, "rowspan": 1, "header": False},
+                            ],
+                        },
                     ],
                 }
             },
         )
-        self.assertIn('<caption class="tt-structured-table-caption">From observation to execution</caption>', rendered)
+        self.assertIn(
+            '<caption class="tt-structured-table-caption">From observation to execution</caption>',
+            rendered,
+        )
         self.assertIn('rowspan="2" scope="col">Volume</th>', rendered)
         self.assertIn('rowspan="2" scope="col">Context</th>', rendered)
         self.assertIn('colspan="4" scope="colgroup">Price structure</th>', rendered)
@@ -733,7 +838,6 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertNotIn("Information tables:", preview)
 
 
-
 class TradingNotebookTemplateTests(SimpleTestCase):
     def test_notebook_sits_beside_the_entire_tabbed_content_column(self):
         template = (
@@ -758,17 +862,20 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         # must close before the Notebook sibling begins.
         tabs_end = source.rfind("</section>", tabs, notebook)
         self.assertGreaterEqual(
-            tabs_end, tabs,
+            tabs_end,
+            tabs,
             "Could not find the closing tag for the complete lesson-tabs section.",
         )
 
         content_column_end = source.find("</div>", tabs_end)
         self.assertGreater(
-            content_column_end, tabs_end,
+            content_column_end,
+            tabs_end,
             "Could not find the content-column closing tag after the tabs.",
         )
         self.assertLess(
-            content_column_end, notebook,
+            content_column_end,
+            notebook,
             "The Notebook must be outside the complete content column.",
         )
 
@@ -784,14 +891,28 @@ class TradingNotebookTemplateTests(SimpleTestCase):
     def test_notebook_styling_and_chart_tab_action_are_wired(self):
         backend = Path(__file__).resolve().parents[2]
         styles = (backend / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
-        notebook_styles = (backend / "static" / "academy" / "notebook-card.css").read_text(encoding="utf-8")
+        notebook_styles = (backend / "static" / "academy" / "notebook-card.css").read_text(
+            encoding="utf-8"
+        )
         script = (backend / "static" / "academy" / "learning-room.js").read_text(encoding="utf-8")
-        lesson_template = (backend / "templates" / "academy" / "lesson.html").read_text(encoding="utf-8")
-        draft_template = (backend / "templates" / "academy" / "course_import_website_preview.html").read_text(encoding="utf-8")
-        tabs_template = (backend / "templates" / "academy" / "partials" / "lesson_tabs.html").read_text(encoding="utf-8")
+        lesson_template = (backend / "templates" / "academy" / "lesson.html").read_text(
+            encoding="utf-8"
+        )
+        draft_template = (
+            backend / "templates" / "academy" / "course_import_website_preview.html"
+        ).read_text(encoding="utf-8")
+        tabs_template = (
+            backend / "templates" / "academy" / "partials" / "lesson_tabs.html"
+        ).read_text(encoding="utf-8")
 
-        self.assertGreater(lesson_template.index("notebook-card.css"), lesson_template.index("admin-lesson-preview.css"))
-        self.assertGreater(draft_template.index("notebook-card.css"), draft_template.index("course-import-preview.css"))
+        self.assertGreater(
+            lesson_template.index("notebook-card.css"),
+            lesson_template.index("admin-lesson-preview.css"),
+        )
+        self.assertGreater(
+            draft_template.index("notebook-card.css"),
+            draft_template.index("course-import-preview.css"),
+        )
         self.assertIn("grid-template-columns: minmax(0, 1fr) 245px;", notebook_styles)
         self.assertIn("font-size: 25px;", notebook_styles)
         self.assertIn("font-weight: 700;", notebook_styles)
@@ -814,18 +935,14 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         tabs_template = (
             backend / "templates" / "academy" / "partials" / "lesson_tabs.html"
         ).read_text(encoding="utf-8")
-        notebook_styles = (
-            backend / "static" / "academy" / "notebook-card.css"
-        ).read_text(encoding="utf-8")
+        notebook_styles = (backend / "static" / "academy" / "notebook-card.css").read_text(
+            encoding="utf-8"
+        )
 
         # The mobile card alternative belongs after the full side-by-side grid,
         # so it is at the end of the lesson content and before Continue Learning.
-        grid_end = tabs_template.index(
-            '</div>\n<section class="tt-mobile-pause-and-record"'
-        )
-        mobile_cards = tabs_template.index(
-            '<section class="tt-mobile-pause-and-record"'
-        )
+        grid_end = tabs_template.index('</div>\n<section class="tt-mobile-pause-and-record"')
+        mobile_cards = tabs_template.index('<section class="tt-mobile-pause-and-record"')
         template_end = tabs_template.rfind("{% endwith %}")
         self.assertLess(grid_end, mobile_cards)
         self.assertLess(mobile_cards, template_end)
@@ -836,17 +953,20 @@ class TradingNotebookTemplateTests(SimpleTestCase):
 
         # The alternative is hidden on desktop and shown through tablet/mobile;
         # all three cards stay on one row, including the narrow mobile breakpoint.
-        self.assertIn(".tt-learning-room .tt-mobile-pause-and-record {\n  display: none;", notebook_styles)
+        self.assertIn(
+            ".tt-learning-room .tt-mobile-pause-and-record {\n  display: none;", notebook_styles
+        )
         self.assertIn("@media (max-width: 920px)", notebook_styles)
         self.assertIn("display: none !important;", notebook_styles)
-        self.assertIn(".tt-learning-room .tt-mobile-pause-and-record,\n  .tt-admin-course-preview", notebook_styles)
+        self.assertIn(
+            ".tt-learning-room .tt-mobile-pause-and-record,\n  .tt-admin-course-preview",
+            notebook_styles,
+        )
         self.assertIn("display: block;", notebook_styles)
         mobile_marker = notebook_styles.index(
             "/* Option A: keep all three reflection cards on one row on phone screens. */"
         )
-        mobile_rule_start = notebook_styles.rindex(
-            "@media (max-width: 680px)", 0, mobile_marker
-        )
+        mobile_rule_start = notebook_styles.rindex("@media (max-width: 680px)", 0, mobile_marker)
         mobile_rule_end = notebook_styles.rfind("}", mobile_rule_start)
         mobile_rules = notebook_styles[mobile_rule_start:mobile_rule_end]
         self.assertIn("@media (max-width: 680px)", mobile_rules)
@@ -855,11 +975,21 @@ class TradingNotebookTemplateTests(SimpleTestCase):
 
     def test_agreed_preview_width_editorial_type_scale_and_notebook_hierarchy(self):
         backend = Path(__file__).resolve().parents[2]
-        lesson_styles = (backend / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
-        preview_styles = (backend / "static" / "academy" / "course-import-preview.css").read_text(encoding="utf-8")
-        tabs_template = (backend / "templates" / "academy" / "partials" / "lesson_tabs.html").read_text(encoding="utf-8")
-        builder_source = (backend / "apps" / "academy" / "course_builder_preview.html").read_text(encoding="utf-8")
-        parity_styles = (backend / "static" / "academy" / "course-template-parity.css").read_text(encoding="utf-8")
+        lesson_styles = (backend / "static" / "academy" / "learning-room.css").read_text(
+            encoding="utf-8"
+        )
+        preview_styles = (backend / "static" / "academy" / "course-import-preview.css").read_text(
+            encoding="utf-8"
+        )
+        tabs_template = (
+            backend / "templates" / "academy" / "partials" / "lesson_tabs.html"
+        ).read_text(encoding="utf-8")
+        builder_source = (backend / "apps" / "academy" / "course_builder_preview.html").read_text(
+            encoding="utf-8"
+        )
+        parity_styles = (backend / "static" / "academy" / "course-template-parity.css").read_text(
+            encoding="utf-8"
+        )
 
         self.assertIn(".main-content:has(> .tt-admin-course-preview)", preview_styles)
         self.assertIn("width: min(1600px, 100%)", preview_styles)
@@ -881,10 +1011,18 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn("font-size: 13px;", parity_styles)
         self.assertIn("font-weight: 850;", parity_styles)
         self.assertIn("letter-spacing: .15em;", parity_styles)
-        self.assertIn('font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;', parity_styles)
+        self.assertIn(
+            'font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;',
+            parity_styles,
+        )
         self.assertIn(".preview-body h2,", parity_styles)
         self.assertIn('font-family: Georgia, "Times New Roman", serif;', parity_styles)
-        for selector in (".rich-editor-canvas h2 {", ".rich-editor-canvas h3 {", ".rich-editor-canvas h4 {", ".rich-editor-canvas h5 {"):
+        for selector in (
+            ".rich-editor-canvas h2 {",
+            ".rich-editor-canvas h3 {",
+            ".rich-editor-canvas h4 {",
+            ".rich-editor-canvas h5 {",
+        ):
             self.assertIn(selector, parity_styles)
         for heading in ("h2", "h3", "h4", "h5"):
             self.assertNotIn(f".rich-editor-canvas {heading} {{", builder_source)
@@ -901,23 +1039,46 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn("data-notebook-response", tabs_template)
         self.assertIn("Your Trading Notebook", tabs_template)
         self.assertIn('<strong class="tt-notebook-prompt-label">Describe</strong>', tabs_template)
-        self.assertIn('<p>What evidence is visible?</p>', tabs_template)
+        self.assertIn("<p>What evidence is visible?</p>", tabs_template)
 
     def test_course_builder_heading_ladder_is_active_in_both_preview_paths(self):
         backend = Path(__file__).resolve().parents[2]
-        parity_css = (backend / "static" / "academy" / "course-template-parity.css").read_text(encoding="utf-8")
-        learning_room_css = (backend / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
-        website_preview_css = (backend / "static" / "academy" / "course-import-preview.css").read_text(encoding="utf-8")
-        builder_source = (backend / "apps" / "academy" / "course_builder_preview.html").read_text(encoding="utf-8")
-        lesson_template = (backend / "templates" / "academy" / "lesson.html").read_text(encoding="utf-8")
-        admin_template = (backend / "templates" / "academy" / "course_import_website_preview.html").read_text(encoding="utf-8")
+        parity_css = (backend / "static" / "academy" / "course-template-parity.css").read_text(
+            encoding="utf-8"
+        )
+        learning_room_css = (backend / "static" / "academy" / "learning-room.css").read_text(
+            encoding="utf-8"
+        )
+        website_preview_css = (
+            backend / "static" / "academy" / "course-import-preview.css"
+        ).read_text(encoding="utf-8")
+        builder_source = (backend / "apps" / "academy" / "course_builder_preview.html").read_text(
+            encoding="utf-8"
+        )
+        lesson_template = (backend / "templates" / "academy" / "lesson.html").read_text(
+            encoding="utf-8"
+        )
+        admin_template = (
+            backend / "templates" / "academy" / "course_import_website_preview.html"
+        ).read_text(encoding="utf-8")
 
-        self.assertGreater(lesson_template.index("course-template-parity.css"), lesson_template.index("notebook-card.css"))
-        self.assertGreater(admin_template.index("course-template-parity.css"), admin_template.index("notebook-card.css"))
-        parity_link = builder_source.index('/static/academy/course-template-parity.css')
+        self.assertGreater(
+            lesson_template.index("course-template-parity.css"),
+            lesson_template.index("notebook-card.css"),
+        )
+        self.assertGreater(
+            admin_template.index("course-template-parity.css"),
+            admin_template.index("notebook-card.css"),
+        )
+        parity_link = builder_source.index("/static/academy/course-template-parity.css")
         self.assertGreater(parity_link, builder_source.index("</style>"))
         self.assertLess(parity_link, builder_source.index("</head>"))
-        for selector in (".rich-editor-canvas h2 {", ".rich-editor-canvas h3 {", ".rich-editor-canvas h4 {", ".rich-editor-canvas h5 {"):
+        for selector in (
+            ".rich-editor-canvas h2 {",
+            ".rich-editor-canvas h3 {",
+            ".rich-editor-canvas h4 {",
+            ".rich-editor-canvas h5 {",
+        ):
             self.assertIn(selector, parity_css)
         self.assertIn(".rich-editor-canvas p.eyebrow,", parity_css)
         self.assertIn(".rich-editor-canvas h6,", parity_css)
@@ -931,8 +1092,12 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertNotIn(".preview-body > h3:first-child", builder_source)
         self.assertIn(".preview-body > h1:first-child { margin-top: .1em; }", builder_source)
 
-        self.assertNotIn("Visual parity pass 7: map every Academy content heading", learning_room_css)
-        self.assertNotIn("Visual parity pass 7: apply the canonical heading ladder", website_preview_css)
+        self.assertNotIn(
+            "Visual parity pass 7: map every Academy content heading", learning_room_css
+        )
+        self.assertNotIn(
+            "Visual parity pass 7: apply the canonical heading ladder", website_preview_css
+        )
         self.assertNotIn("Canonical authored-heading ladder", builder_source)
         # Only the global fallback remains in learning-room.css; the canonical stylesheet owns the scoped ladder.
         self.assertIn(".tt-tab-panel h3 {", learning_room_css)
@@ -950,7 +1115,7 @@ class TradingNotebookTemplateTests(SimpleTestCase):
             start = parity_css.index(selector)
             opening = parity_css.index("{", start)
             closing = parity_css.index("}", opening)
-            return parity_css[opening + 1:closing]
+            return parity_css[opening + 1 : closing]
 
         h2 = rule_body(".tt-learning-room .tt-tab-panel h2,")
         h3 = rule_body(".tt-learning-room .tt-tab-panel h3,")
@@ -959,15 +1124,48 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         eyebrow = rule_body(".tt-learning-room .tt-tab-panel .body-copy p.eyebrow,")
         no_rule = rule_body(".tt-learning-room .tt-tab-panel .body-copy p.eyebrow::before,")
 
-        for value in ("font-size: 30px;", "font-weight: 600;", "line-height: 1.2;", "letter-spacing: -.025em;", "margin: 0 0 13px;", "max-width: 730px;"):
+        for value in (
+            "font-size: 30px;",
+            "font-weight: 600;",
+            "line-height: 1.2;",
+            "letter-spacing: -.025em;",
+            "margin: 0 0 13px;",
+            "max-width: 730px;",
+        ):
             self.assertIn(value, h2)
-        for value in ("font-size: 22px;", "font-weight: 600;", "line-height: 1.25;", "letter-spacing: -.025em;", "margin: 28px 0 9px;"):
+        for value in (
+            "font-size: 22px;",
+            "font-weight: 600;",
+            "line-height: 1.25;",
+            "letter-spacing: -.025em;",
+            "margin: 28px 0 9px;",
+        ):
             self.assertIn(value, h3)
-        for value in ("font-size: 1em;", "font-weight: 700;", "line-height: inherit;", "letter-spacing: normal;", "margin: 1.33em 0;"):
+        for value in (
+            "font-size: 1em;",
+            "font-weight: 700;",
+            "line-height: inherit;",
+            "letter-spacing: normal;",
+            "margin: 1.33em 0;",
+        ):
             self.assertIn(value, h4)
-        for value in ("font-size: .83em;", "font-weight: 700;", "line-height: inherit;", "letter-spacing: normal;", "margin: 1.67em 0;"):
+        for value in (
+            "font-size: .83em;",
+            "font-weight: 700;",
+            "line-height: inherit;",
+            "letter-spacing: normal;",
+            "margin: 1.67em 0;",
+        ):
             self.assertIn(value, h5)
-        for value in ("font-size: 13px;", "font-weight: 850;", "line-height: 1.82;", "letter-spacing: .15em;", "text-transform: uppercase;", "margin: 0 0 14px;", "color: #39463d;"):
+        for value in (
+            "font-size: 13px;",
+            "font-weight: 850;",
+            "line-height: 1.82;",
+            "letter-spacing: .15em;",
+            "text-transform: uppercase;",
+            "margin: 0 0 14px;",
+            "color: #39463d;",
+        ):
             self.assertIn(value, eyebrow)
         self.assertIn("content: none;", no_rule)
         self.assertIn("display: none;", no_rule)
@@ -1010,11 +1208,15 @@ class TradingNotebookTemplateTests(SimpleTestCase):
 
     def test_course_builder_content_blocks_match_learner_treatment(self):
         backend = Path(__file__).resolve().parents[2]
-        parity_css = (backend / "static" / "academy" / "course-template-parity.css").read_text(encoding="utf-8")
-        builder_source = (backend / "apps" / "academy" / "course_builder_preview.html").read_text(encoding="utf-8")
+        parity_css = (backend / "static" / "academy" / "course-template-parity.css").read_text(
+            encoding="utf-8"
+        )
+        builder_source = (backend / "apps" / "academy" / "course_builder_preview.html").read_text(
+            encoding="utf-8"
+        )
 
         # The parity stylesheet loads after the builder's embedded component styles.
-        parity_link = builder_source.index('/static/academy/course-template-parity.css')
+        parity_link = builder_source.index("/static/academy/course-template-parity.css")
         self.assertGreater(parity_link, builder_source.index("</style>"))
         self.assertLess(parity_link, builder_source.index("</head>"))
         for selector in (
@@ -1056,7 +1258,9 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn('font: 400 21px/1.45 Georgia, "Times New Roman", serif;', quote_rule)
 
         opening_quote_start = parity_css.index(".tt-learning-room .tt-tab-panel blockquote::after,")
-        opening_quote_end = parity_css.index(".tt-learning-room .tt-tab-panel blockquote p,", opening_quote_start)
+        opening_quote_end = parity_css.index(
+            ".tt-learning-room .tt-tab-panel blockquote p,", opening_quote_start
+        )
         opening_quote_rule = parity_css[opening_quote_start:opening_quote_end]
         self.assertIn('content: "“";', opening_quote_rule)
         self.assertIn('font: 400 34px/.8 Georgia, "Times New Roman", serif;', opening_quote_rule)
@@ -1094,10 +1298,10 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         end = source.index("function renderCatalogue()", start)
         preview = source[start:end]
 
-        self.assertIn('data-builder-website-preview', preview)
-        self.assertIn('data-builder-website-preview-frame', preview)
-        self.assertIn('data-website-preview-status', preview)
-        self.assertIn('data-website-preview-error', preview)
+        self.assertIn("data-builder-website-preview", preview)
+        self.assertIn("data-builder-website-preview-frame", preview)
+        self.assertIn("data-website-preview-status", preview)
+        self.assertIn("data-website-preview-error", preview)
         self.assertIn('data-action="refresh-website-preview"', preview)
         self.assertNotIn("builder-lesson-preview-grid", preview)
         self.assertNotIn("notebookPreviewMarkup(lesson)", preview)
@@ -1122,9 +1326,13 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn("preview-notebook-examples-button", notebook_renderer)
         self.assertIn("data-preview-lesson-content", source)
         self.assertIn("action === 'preview-chart-examples'", source)
-        self.assertIn("querySelector('.tt-purpose-figure, .tt-image-group-figure, .tt-comparison-figure')", source)
+        self.assertIn(
+            "querySelector('.tt-purpose-figure, .tt-image-group-figure, .tt-comparison-figure')",
+            source,
+        )
         self.assertIn("target.scrollIntoView({behavior:'smooth', block:'start'})", source)
         self.assertIn(".preview-notebook-examples-button {", source)
+
 
 class LessonSectionRoutingAndFigureCountTests(SimpleTestCase):
     def test_h2_heading_can_start_a_chart_examples_section(self):
@@ -1140,13 +1348,15 @@ class LessonSectionRoutingAndFigureCountTests(SimpleTestCase):
         self.assertNotIn("A separate worked example.", result["idea_html"])
 
     def test_figure_count_includes_markdown_group_members_and_comparison_blocks(self):
-        source = "\n\n".join([
-            "### The lead visual",
-            "![Lead chart](https://example.com/lead.png)",
-            "### Additional chart examples",
-            "[[image-group:range-trend]]",
-            "[[teaching-figure:settings-comparison]]",
-        ])
+        source = "\n\n".join(
+            [
+                "### The lead visual",
+                "![Lead chart](https://example.com/lead.png)",
+                "### Additional chart examples",
+                "[[image-group:range-trend]]",
+                "[[teaching-figure:settings-comparison]]",
+            ]
+        )
         metadata = {
             "range-trend": {
                 "type": "image-group",
@@ -1177,13 +1387,15 @@ class LessonSectionRoutingAndFigureCountTests(SimpleTestCase):
         self.assertIn("Compare settings", result["examples_html"])
 
     def test_reused_structured_figures_are_counted_per_displayed_instance(self):
-        source = "\n\n".join([
-            "### Additional chart examples",
-            "[[image-group:range-trend]]",
-            "[[image-group:range-trend]]",
-            "[[teaching-figure:settings-comparison]]",
-            "[[teaching-figure:settings-comparison]]",
-        ])
+        source = "\n\n".join(
+            [
+                "### Additional chart examples",
+                "[[image-group:range-trend]]",
+                "[[image-group:range-trend]]",
+                "[[teaching-figure:settings-comparison]]",
+                "[[teaching-figure:settings-comparison]]",
+            ]
+        )
         metadata = {
             "range-trend": {"type": "image-group", "image_ids": ["asset-a", "asset-b"]},
             "settings-comparison": {"type": "comparison-cards", "cards": [{"title": "Short"}]},
@@ -1221,11 +1433,20 @@ class TemplateParityRegressionTests(SimpleTestCase):
     def test_legacy_generic_notebook_prompts_migrate_to_describe_apply(self):
         notebook = _notebook_for_course_display(
             "support-resistance",
-            {"title": "Your Trading Notebook", "prompts": [
-                {"label": "Observe", "text": "Describe the evidence visible in the chart."},
-                {"label": "Interpret", "text": "State one possible reading and a reasonable alternative."},
-                {"label": "Test", "text": "Name the next evidence that would strengthen or weaken your reading."},
-            ]},
+            {
+                "title": "Your Trading Notebook",
+                "prompts": [
+                    {"label": "Observe", "text": "Describe the evidence visible in the chart."},
+                    {
+                        "label": "Interpret",
+                        "text": "State one possible reading and a reasonable alternative.",
+                    },
+                    {
+                        "label": "Test",
+                        "text": "Name the next evidence that would strengthen or weaken your reading.",
+                    },
+                ],
+            },
         )
         self.assertEqual(notebook["prompts"][0]["label"], "Describe")
         self.assertEqual(notebook["prompts"][2]["label"], "Apply")
@@ -1238,7 +1459,6 @@ class TemplateParityRegressionTests(SimpleTestCase):
         self.assertEqual(notebook["title"], "Your Trading Notebook")
         self.assertIn("bands", " ".join(item["text"] for item in notebook["prompts"]).lower())
         self.assertEqual(notebook["prompts"][2]["label"], "Apply")
-
 
 
 class LessonSectionRoutingRegressionTests(SimpleTestCase):

@@ -1,4 +1,5 @@
 """Mocked tests for the Google Drive OAuth flow."""
+
 from unittest.mock import Mock, patch
 from urllib.parse import parse_qs, urlsplit
 
@@ -22,8 +23,10 @@ REDIRECT_URI = "https://tradethesis-academy-staging.onrender.com/staff/google-dr
 class GoogleDriveOAuthTests(TestCase):
     def setUp(self):
         self.admin = User.objects.create_user(
-            username="drive-oauth-admin", password="test-password",
-            role="admin", is_staff=True,
+            username="drive-oauth-admin",
+            password="test-password",
+            role="admin",
+            is_staff=True,
         )
         self.client.force_login(self.admin)
 

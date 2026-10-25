@@ -118,9 +118,7 @@ class ResendEmailBackendTests(SimpleTestCase):
             to=["learner@example.com"],
         )
 
-        self.assertEqual(
-            ResendEmailBackend(fail_silently=True).send_messages([message]), 0
-        )
+        self.assertEqual(ResendEmailBackend(fail_silently=True).send_messages([message]), 0)
 
     def test_empty_message_list_is_a_noop(self):
         self.assertEqual(ResendEmailBackend().send_messages([]), 0)

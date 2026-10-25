@@ -40,13 +40,17 @@ class CourseImportWorkflowTests(TestCase):
         self.write_source("Initial lesson explanation.")
         self.write_manifest()
         self.admin = User.objects.create_user(
-            username="course-admin", password="test-password",
-            role=User.Role.ADMIN, is_staff=True,
+            username="course-admin",
+            password="test-password",
+            role=User.Role.ADMIN,
+            is_staff=True,
         )
         self.learner = User.objects.create_user(username="learner", password="test-password")
         self.ordinary_staff = User.objects.create_user(
-            username="ordinary-staff", password="test-password",
-            role=User.Role.STAFF, is_staff=True,
+            username="ordinary-staff",
+            password="test-password",
+            role=User.Role.STAFF,
+            is_staff=True,
         )
 
     def tearDown(self):
@@ -78,27 +82,33 @@ class CourseImportWorkflowTests(TestCase):
                 "title": "Your Trading Notebook",
                 "prompts": [{"label": "Observe", "text": "Describe the evidence."}],
             },
-            "modules": [{
-                "title": "Foundations",
-                "slug": "foundations",
-                "summary": "The first lesson.",
-                "position": 1,
-                "source": "lessons/module-01.md",
-                "lessons": [{
-                    "source_id": "1.1",
-                    "title": "Read the evidence",
-                    "slug": "read-the-evidence",
+            "modules": [
+                {
+                    "title": "Foundations",
+                    "slug": "foundations",
+                    "summary": "The first lesson.",
                     "position": 1,
-                    "duration_minutes": 12,
-                    "release_day": 1,
-                }],
-            }],
+                    "source": "lessons/module-01.md",
+                    "lessons": [
+                        {
+                            "source_id": "1.1",
+                            "title": "Read the evidence",
+                            "slug": "read-the-evidence",
+                            "position": 1,
+                            "duration_minutes": 12,
+                            "release_day": 1,
+                        }
+                    ],
+                }
+            ],
         }
         self.manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
 
     def import_draft(self):
         call_command("import_microcourse", manifest=str(self.manifest_path), verbosity=0)
-        return CourseImport.objects.get(course_slug="import-test-course", status=CourseImport.Status.REVIEW)
+        return CourseImport.objects.get(
+            course_slug="import-test-course", status=CourseImport.Status.REVIEW
+        )
 
     def test_repeated_import_is_idempotent_and_does_not_create_live_course(self):
         first = self.import_draft()
@@ -115,7 +125,8 @@ class CourseImportWorkflowTests(TestCase):
         lesson = Lesson.objects.get(module=module, slug="read-the-evidence")
         lesson_id = lesson.pk
         progress = LessonProgress.objects.create(
-            user=self.learner, lesson=lesson,
+            user=self.learner,
+            lesson=lesson,
             status=LessonProgress.Status.COMPLETED,
         )
         old_content = lesson.content_markdown
@@ -157,9 +168,7 @@ class CourseImportWorkflowTests(TestCase):
     def test_multiple_external_images_keep_independent_replaceable_slots(self):
         first_url = "https://example.com/charts/first.png"
         second_url = "https://example.com/charts/second.png"
-        self.write_source(
-            f"![First chart]({first_url})\n\n![Second chart]({second_url})"
-        )
+        self.write_source(f"![First chart]({first_url})\n\n![Second chart]({second_url})")
         record = self.import_draft()
         self.assertEqual(record.assets.count(), 2)
         self.assertEqual(
@@ -188,15 +197,20 @@ class CourseImportWorkflowTests(TestCase):
             ("Third chart", "https://example.com/charts/third.png", "examples"),
         ]
         for alt_text, original_url, placement in urls:
-            response = self.client.post(add_url, {
-                "alt_text": alt_text,
-                "original_url": original_url,
-                "placement": placement,
-            })
+            response = self.client.post(
+                add_url,
+                {
+                    "alt_text": alt_text,
+                    "original_url": original_url,
+                    "placement": placement,
+                },
+            )
             self.assertEqual(response.status_code, 302)
 
         lesson.refresh_from_db()
-        added_assets = CourseMediaAsset.objects.filter(course=course, asset_key__startswith="admin-added/")
+        added_assets = CourseMediaAsset.objects.filter(
+            course=course, asset_key__startswith="admin-added/"
+        )
         self.assertEqual(added_assets.count(), 2)
         self.assertTrue(all(asset.original_url for asset in added_assets))
         self.assertEqual(len(lesson.content_json["asset_ids"]), 2)
@@ -205,7 +219,9 @@ class CourseImportWorkflowTests(TestCase):
         self.assertIn("https://example.com/charts/second.png", sections["examples_html"])
         self.assertIn("https://example.com/charts/third.png", sections["examples_html"])
         self.assertEqual(
-            CourseContentRevision.objects.filter(lesson=lesson, revision_type=CourseContentRevision.RevisionType.ADMIN_EDIT).count(),
+            CourseContentRevision.objects.filter(
+                lesson=lesson, revision_type=CourseContentRevision.RevisionType.ADMIN_EDIT
+            ).count(),
             2,
         )
 
@@ -216,16 +232,29 @@ class CourseImportWorkflowTests(TestCase):
         add_url = reverse("admin:academy_lesson_add_figure", args=[lesson.pk])
         placements = [
             ("Idea diagram", "https://example.com/figures/idea.png", "idea", "idea_html"),
-            ("Chart example", "https://example.com/figures/example.png", "examples", "examples_html"),
-            ("Practice figure", "https://example.com/figures/practice.png", "practice", "practice_html"),
+            (
+                "Chart example",
+                "https://example.com/figures/example.png",
+                "examples",
+                "examples_html",
+            ),
+            (
+                "Practice figure",
+                "https://example.com/figures/practice.png",
+                "practice",
+                "practice_html",
+            ),
         ]
 
         for alt_text, url, placement, _expected_section in placements:
-            response = self.client.post(add_url, {
-                "alt_text": alt_text,
-                "original_url": url,
-                "placement": placement,
-            })
+            response = self.client.post(
+                add_url,
+                {
+                    "alt_text": alt_text,
+                    "original_url": url,
+                    "placement": placement,
+                },
+            )
             self.assertEqual(response.status_code, 302)
 
         lesson.refresh_from_db()
@@ -267,10 +296,18 @@ class CourseImportWorkflowTests(TestCase):
         self.client.force_login(self.ordinary_staff)
         response = self.client.post(
             reverse("admin:academy_lesson_add_figure", args=[lesson.pk]),
-            {"alt_text": "Chart", "original_url": "https://example.com/chart.png", "placement": "examples"},
+            {
+                "alt_text": "Chart",
+                "original_url": "https://example.com/chart.png",
+                "placement": "examples",
+            },
         )
         self.assertEqual(response.status_code, 403)
-        self.assertFalse(CourseMediaAsset.objects.filter(course=course, asset_key__startswith="admin-added/").exists())
+        self.assertFalse(
+            CourseMediaAsset.objects.filter(
+                course=course, asset_key__startswith="admin-added/"
+            ).exists()
+        )
 
     def test_ordinary_staff_and_learner_cannot_add_or_replace_shared_images(self):
         course = publish_course_import(self.import_draft(), user=self.admin)
@@ -333,21 +370,35 @@ class CourseImportWorkflowTests(TestCase):
         client.force_login(self.admin)
         response = client.post(
             reverse("admin:academy_lesson_add_figure", args=[lesson.pk]),
-            {"alt_text": "Chart", "original_url": "https://example.com/chart.png", "placement": "examples"},
+            {
+                "alt_text": "Chart",
+                "original_url": "https://example.com/chart.png",
+                "placement": "examples",
+            },
         )
         self.assertEqual(response.status_code, 403)
-        self.assertFalse(CourseMediaAsset.objects.filter(course=course, asset_key__startswith="admin-added/").exists())
+        self.assertFalse(
+            CourseMediaAsset.objects.filter(
+                course=course, asset_key__startswith="admin-added/"
+            ).exists()
+        )
 
     def test_admin_can_replace_a_linked_image_with_an_upload(self):
-        course = Course.objects.create(title="Image replacement course", slug="image-replacement-course")
+        course = Course.objects.create(
+            title="Image replacement course", slug="image-replacement-course"
+        )
         source_url = "https://example.com/charts/original.png"
         asset = CourseMediaAsset.objects.create(
-            course=course, asset_key="remote/original-chart", original_url=source_url,
+            course=course,
+            asset_key="remote/original-chart",
+            original_url=source_url,
             alt_text="Original linked chart",
         )
         image_bytes = BytesIO()
         Image.new("RGB", (12, 8), (245, 220, 170)).save(image_bytes, format="PNG")
-        upload = SimpleUploadedFile("my-chart.png", image_bytes.getvalue(), content_type="image/png")
+        upload = SimpleUploadedFile(
+            "my-chart.png", image_bytes.getvalue(), content_type="image/png"
+        )
 
         self.client.force_login(self.admin)
         response = self.client.post(
@@ -356,18 +407,21 @@ class CourseImportWorkflowTests(TestCase):
         )
         self.assertEqual(response.status_code, 302)
         asset.refresh_from_db()
-        self.addCleanup(lambda: course_asset_storage.delete(asset.file.name) if asset.file else None)
+        self.addCleanup(
+            lambda: course_asset_storage.delete(asset.file.name) if asset.file else None
+        )
         self.assertTrue(asset.file)
         self.assertEqual(asset.original_url, source_url)
         self.assertEqual(asset.alt_text, "My replacement chart")
         self.assertEqual(asset.updated_by, self.admin)
-        self.assertTrue(AuditLog.objects.filter(
-            action="academy_course_media_replaced",
-            object_type="course_media_asset",
-            object_id=str(asset.pk),
-            user=self.admin,
-        ).exists())
-
+        self.assertTrue(
+            AuditLog.objects.filter(
+                action="academy_course_media_replaced",
+                object_type="course_media_asset",
+                object_id=str(asset.pk),
+                user=self.admin,
+            ).exists()
+        )
 
     def test_missing_image_blocks_publish_and_leaves_course_unpublished(self):
         self.write_source("![Missing chart](../assets/not-ready.png)\n\nThis is the lesson.")
@@ -381,9 +435,7 @@ class CourseImportWorkflowTests(TestCase):
     def test_ordinary_staff_cannot_open_admin_course_review(self):
         record = self.import_draft()
         self.client.force_login(self.ordinary_staff)
-        response = self.client.get(
-            reverse("admin:academy_courseimport_review", args=[record.pk])
-        )
+        response = self.client.get(reverse("admin:academy_courseimport_review", args=[record.pk]))
         self.assertEqual(response.status_code, 403)
 
     def test_publish_requires_csrf_token(self):
@@ -415,12 +467,27 @@ class CourseImportAdminPreviewTests(TestCase):
         )
         manifest = {
             "schema_version": 1,
-            "course": {"title": "Reviewable Course", "slug": "reviewable-course", "summary": "A practical course for reading market evidence.", "description": "Practise separating visible evidence from interpretation."},
-            "modules": [{
-                "title": "Start", "slug": "start", "position": 1,
-                "source": "lessons/module-01.md",
-                "lessons": [{"source_id": "1.1", "title": "Read the evidence", "slug": "read-the-evidence"}],
-            }],
+            "course": {
+                "title": "Reviewable Course",
+                "slug": "reviewable-course",
+                "summary": "A practical course for reading market evidence.",
+                "description": "Practise separating visible evidence from interpretation.",
+            },
+            "modules": [
+                {
+                    "title": "Start",
+                    "slug": "start",
+                    "position": 1,
+                    "source": "lessons/module-01.md",
+                    "lessons": [
+                        {
+                            "source_id": "1.1",
+                            "title": "Read the evidence",
+                            "slug": "read-the-evidence",
+                        }
+                    ],
+                }
+            ],
         }
         manifest_path = root / "course-manifest.json"
         manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
@@ -429,34 +496,39 @@ class CourseImportAdminPreviewTests(TestCase):
         payload = record.payload
         review_lesson = payload["modules"][0]["lessons"][0]
         review_lesson["content_markdown"] += (
-            "\n\n### Additional chart examples\n\n"
-            "[[teaching-figure:review-comparison]]"
+            "\n\n### Additional chart examples\n\n" "[[teaching-figure:review-comparison]]"
         )
         review_lesson["content_json"] = {
             "figures": {
                 "review-comparison": {
                     "type": "comparison-cards",
                     "title": "Reviewed comparison figure",
-                    "cards": [{
-                        "kicker": "ALTERNATIVE",
-                        "title": "Wait for confirmation",
-                        "body": "A single observation is not sufficient context.",
-                    }],
+                    "cards": [
+                        {
+                            "kicker": "ALTERNATIVE",
+                            "title": "Wait for confirmation",
+                            "body": "A single observation is not sufficient context.",
+                        }
+                    ],
                 },
             },
-            "questions": [{
-                "id": "review-question-1",
-                "prompt": "Review question prompt",
-                "options": ["Assess the context", "Treat the observation as a guarantee"],
-            }],
+            "questions": [
+                {
+                    "id": "review-question-1",
+                    "prompt": "Review question prompt",
+                    "options": ["Assess the context", "Treat the observation as a guarantee"],
+                }
+            ],
             "notebook": {"title": "Review notebook", "prompts": []},
             "video_url": "https://example.com/lesson-video.mp4",
         }
         record.payload = payload
         record.save(update_fields=["payload"])
         admin_user = User.objects.create_user(
-            username="preview-admin", password="test-password",
-            role=User.Role.ADMIN, is_staff=True,
+            username="preview-admin",
+            password="test-password",
+            role=User.Role.ADMIN,
+            is_staff=True,
         )
         self.client.force_login(admin_user)
         response = self.client.get(reverse("admin:academy_courseimport_review", args=[record.pk]))
@@ -465,7 +537,9 @@ class CourseImportAdminPreviewTests(TestCase):
         self.assertContains(response, 'src="https://example.com/temporary-chart.png"')
         self.assertContains(response, "Reviewed comparison figure")
         self.assertContains(response, "Review question prompt")
-        self.assertContains(response, "Administrator preview only. Answer submission is disabled in this view.")
+        self.assertContains(
+            response, "Administrator preview only. Answer submission is disabled in this view."
+        )
         self.assertContains(response, 'src="https://example.com/lesson-video.mp4"')
         self.assertContains(response, "Using URL for now")
         self.assertContains(response, "Open source")
@@ -485,47 +559,60 @@ class CourseSourceSvgAndReleaseGateTests(TestCase):
     def write_package(self, slug, image_markdown):
         newline = chr(10)
         source_lines = [
-            "## Lesson 1.1 — Read the evidence", "",
-            "### The question", "",
-            "Read the chart in context.", "",
-            image_markdown, "",
+            "## Lesson 1.1 — Read the evidence",
+            "",
+            "### The question",
+            "",
+            "Read the chart in context.",
+            "",
+            image_markdown,
+            "",
         ]
         self.source.write_text(newline.join(source_lines), encoding="utf-8")
-        self.manifest_path.write_text(json.dumps({
-            "schema_version": 1,
-            "manifest_version": "test-v1",
-            "course": {
-                "title": "Source Asset Test Course",
-                "slug": slug,
-                "summary": "Testing reviewed source assets.",
-                "description": "A staged-only test.",
-                "position": 50,
-            },
-            "modules": [{
-                "title": "Foundations",
-                "slug": "foundations",
-                "position": 1,
-                "source": "lessons/module-01.md",
-                "lessons": [{
-                    "source_id": "1.1",
-                    "title": "Read the evidence",
-                    "slug": "read-the-evidence",
-                    "position": 1,
-                    "duration_minutes": 12,
-                    "release_day": 1,
-                }],
-            }],
-        }), encoding="utf-8")
+        self.manifest_path.write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "manifest_version": "test-v1",
+                    "course": {
+                        "title": "Source Asset Test Course",
+                        "slug": slug,
+                        "summary": "Testing reviewed source assets.",
+                        "description": "A staged-only test.",
+                        "position": 50,
+                    },
+                    "modules": [
+                        {
+                            "title": "Foundations",
+                            "slug": "foundations",
+                            "position": 1,
+                            "source": "lessons/module-01.md",
+                            "lessons": [
+                                {
+                                    "source_id": "1.1",
+                                    "title": "Read the evidence",
+                                    "slug": "read-the-evidence",
+                                    "position": 1,
+                                    "duration_minutes": 12,
+                                    "release_day": 1,
+                                }
+                            ],
+                        }
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
         call_command("import_microcourse", manifest=str(self.manifest_path), verbosity=0)
         return CourseImport.objects.get(course_slug=slug, status=CourseImport.Status.REVIEW)
 
     def test_checked_in_svg_is_staged_as_svg_source_asset(self):
         svg = (
             '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80" viewBox="0 0 120 80">'
-            '<title>Example chart</title><desc>A simple chart illustration.</desc>'
+            "<title>Example chart</title><desc>A simple chart illustration.</desc>"
             '<rect x="1" y="1" width="118" height="78" fill="#fbf7ef"/>'
             '<path d="M10 60 L40 35 L70 45 L110 15" stroke="#26392f" stroke-width="3" fill="none"/>'
-            '</svg>'
+            "</svg>"
         )
         (self.root / "assets" / "figure.svg").write_text(svg, encoding="utf-8")
         record = self.write_package("svg-source-test", "![Example figure](../assets/figure.svg)")
@@ -537,7 +624,7 @@ class CourseSourceSvgAndReleaseGateTests(TestCase):
     def test_scripted_svg_is_not_staged_as_an_image(self):
         (self.root / "assets" / "figure.svg").write_text(
             '<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10">'
-            '<title>Unsafe</title><desc>Unsafe example</desc><script>alert(1)</script></svg>',
+            "<title>Unsafe</title><desc>Unsafe example</desc><script>alert(1)</script></svg>",
             encoding="utf-8",
         )
         record = self.write_package("svg-unsafe-test", "![Example figure](../assets/figure.svg)")
@@ -551,11 +638,15 @@ class CourseSourceSvgAndReleaseGateTests(TestCase):
             "![Temporary historical chart](https://example.com/chart.png)",
         )
         errors = validate_import_for_publish(record)
-        self.assertTrue(any("Temporary external Bollinger Bands chart reference" in error for error in errors))
+        self.assertTrue(
+            any("Temporary external Bollinger Bands chart reference" in error for error in errors)
+        )
         asset = record.assets.get(asset_key__startswith="remote/")
         stream = BytesIO()
         Image.new("RGB", (20, 20), "white").save(stream, format="PNG")
         stream.seek(0)
         asset.file.save("replacement.png", File(stream), save=True)
         errors = validate_import_for_publish(record)
-        self.assertFalse(any("Temporary external Bollinger Bands chart reference" in error for error in errors))
+        self.assertFalse(
+            any("Temporary external Bollinger Bands chart reference" in error for error in errors)
+        )

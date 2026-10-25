@@ -1,4 +1,5 @@
 """Regression tests for read-only course-import review and learner lesson tabs."""
+
 import uuid
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -36,37 +37,41 @@ class CourseReviewTemplateTests(TestCase):
             payload={
                 "course": {"title": "Review Template Regression Course", "slug": slug},
                 "assets": [],
-                "modules": [{
-                    "slug": "foundations",
-                    "title": "Foundations",
-                    "summary": "",
-                    "position": 1,
-                    "lessons": [{
-                        "source_id": "1.1",
-                        "slug": "first-principles",
-                        "title": "First principles",
+                "modules": [
+                    {
+                        "slug": "foundations",
+                        "title": "Foundations",
                         "summary": "",
                         "position": 1,
-                        "duration_minutes": 12,
-                        "content_markdown": "## Notice\n\nDescribe what is visible before interpreting it.",
-                        "content_json": {
-                            "asset_ids": [],
-                            "notebook": {
-                                "title": "Evidence notebook",
-                                "prompts": [{
-                                    "label": "Observe",
-                                    "text": "What evidence can you see?",
-                                }],
-                            },
-                        },
-                    }],
-                }],
+                        "lessons": [
+                            {
+                                "source_id": "1.1",
+                                "slug": "first-principles",
+                                "title": "First principles",
+                                "summary": "",
+                                "position": 1,
+                                "duration_minutes": 12,
+                                "content_markdown": "## Notice\n\nDescribe what is visible before interpreting it.",
+                                "content_json": {
+                                    "asset_ids": [],
+                                    "notebook": {
+                                        "title": "Evidence notebook",
+                                        "prompts": [
+                                            {
+                                                "label": "Observe",
+                                                "text": "What evidence can you see?",
+                                            }
+                                        ],
+                                    },
+                                },
+                            }
+                        ],
+                    }
+                ],
             },
         )
 
-        response = self.client.get(
-            reverse("admin:academy_courseimport_review", args=[record.pk])
-        )
+        response = self.client.get(reverse("admin:academy_courseimport_review", args=[record.pk]))
 
         self.assertEqual(response.status_code, 200, response.content)
         self.assertContains(response, "Evidence notebook")
@@ -100,11 +105,11 @@ class CourseReviewTemplateTests(TestCase):
         }
         with (
             patch("apps.academy.admin.inspect_manifest", return_value=(payload, {}, [])) as inspect,
-            patch("apps.academy.admin.stage_course_import", return_value=(record, True, [])) as stage,
+            patch(
+                "apps.academy.admin.stage_course_import", return_value=(record, True, [])
+            ) as stage,
         ):
-            response = self.client.post(
-                reverse("admin:academy_courseimport_stage_bollinger")
-            )
+            response = self.client.post(reverse("admin:academy_courseimport_stage_bollinger"))
 
         self.assertRedirects(
             response,
@@ -118,9 +123,7 @@ class CourseReviewTemplateTests(TestCase):
 
     def test_staging_authored_bollinger_source_requires_post(self):
         with patch("apps.academy.admin.inspect_manifest") as inspect:
-            response = self.client.get(
-                reverse("admin:academy_courseimport_stage_bollinger")
-            )
+            response = self.client.get(reverse("admin:academy_courseimport_stage_bollinger"))
         self.assertEqual(response.status_code, 405)
         inspect.assert_not_called()
 
@@ -130,7 +133,9 @@ class CourseReviewTemplateTests(TestCase):
         self.assertContains(response, "Stage Understand Bollinger Bands for review")
         self.assertContains(response, "csrfmiddlewaretoken")
 
-    def _website_preview_record(self, video_url=None, course_slug="website-preview-course", related_course_ids=None):
+    def _website_preview_record(
+        self, video_url=None, course_slug="website-preview-course", related_course_ids=None
+    ):
         return CourseImport.objects.create(
             course_slug=course_slug,
             title="Website Preview Course",
@@ -151,57 +156,59 @@ class CourseReviewTemplateTests(TestCase):
                     "prompts": [{"label": "Observe", "text": "What evidence is visible?"}],
                 },
                 "assets": [],
-                "modules": [{
-                    "slug": "foundations",
-                    "title": "Foundations",
-                    "summary": "Start by observing the chart.",
-                    "position": 1,
-                    "lessons": [
-                        {
-                            "source_id": "1.1",
-                            "slug": "first-principles",
-                            "title": "First principles",
-                            "summary": "Begin with visible evidence.",
-                            "position": 1,
-                            "duration_minutes": 12,
-                            "content_markdown": (
-                                "## The idea\n\nAuthored lesson text for the website preview.\n\n"
-                                "## Chart examples\n\nCompare the two cases.\n\n"
-                                "## Test your reading\n\nWhat evidence would change your view?"
-                            ),
-                            "content_json": {
-                                "asset_ids": [],
-                                "video_url": video_url,
-                                "related_course_ids": related_course_ids or [],
-                                "notebook": {
-                                    "title": "Evidence notebook",
-                                    "prompts": [{
-                                        "label": "Observe",
-                                        "text": "What evidence is visible?",
-                                    }],
+                "modules": [
+                    {
+                        "slug": "foundations",
+                        "title": "Foundations",
+                        "summary": "Start by observing the chart.",
+                        "position": 1,
+                        "lessons": [
+                            {
+                                "source_id": "1.1",
+                                "slug": "first-principles",
+                                "title": "First principles",
+                                "summary": "Begin with visible evidence.",
+                                "position": 1,
+                                "duration_minutes": 12,
+                                "content_markdown": (
+                                    "## The idea\n\nAuthored lesson text for the website preview.\n\n"
+                                    "## Chart examples\n\nCompare the two cases.\n\n"
+                                    "## Test your reading\n\nWhat evidence would change your view?"
+                                ),
+                                "content_json": {
+                                    "asset_ids": [],
+                                    "video_url": video_url,
+                                    "related_course_ids": related_course_ids or [],
+                                    "notebook": {
+                                        "title": "Evidence notebook",
+                                        "prompts": [
+                                            {
+                                                "label": "Observe",
+                                                "text": "What evidence is visible?",
+                                            }
+                                        ],
+                                    },
                                 },
                             },
-                        },
-                        {
-                            "source_id": "1.2",
-                            "slug": "second-principles",
-                            "title": "Second principles",
-                            "summary": "",
-                            "position": 2,
-                            "duration_minutes": 13,
-                            "content_markdown": "## The idea\n\nSecond lesson body.",
-                            "content_json": {"asset_ids": []},
-                        },
-                    ],
-                }],
+                            {
+                                "source_id": "1.2",
+                                "slug": "second-principles",
+                                "title": "Second principles",
+                                "summary": "",
+                                "position": 2,
+                                "duration_minutes": 13,
+                                "content_markdown": "## The idea\n\nSecond lesson body.",
+                                "content_json": {"asset_ids": []},
+                            },
+                        ],
+                    }
+                ],
             },
         )
 
     def test_website_preview_uses_shared_shell_and_shows_full_curriculum(self):
         record = self._website_preview_record()
-        response = self.client.get(
-            reverse("academy:course-import-preview", args=[record.pk])
-        )
+        response = self.client.get(reverse("academy:course-import-preview", args=[record.pk]))
 
         self.assertEqual(response.status_code, 200, response.content)
         self.assertContains(response, "Website Preview Course")
@@ -353,16 +360,12 @@ class CourseReviewTemplateTests(TestCase):
         )
         self.client.force_login(learner)
 
-        response = self.client.get(
-            reverse("academy:course-import-preview", args=[record.pk])
-        )
+        response = self.client.get(reverse("academy:course-import-preview", args=[record.pk]))
         self.assertEqual(response.status_code, 403)
 
     def test_content_review_links_to_website_preview(self):
         record = self._website_preview_record()
-        response = self.client.get(
-            reverse("admin:academy_courseimport_review", args=[record.pk])
-        )
+        response = self.client.get(reverse("admin:academy_courseimport_review", args=[record.pk]))
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(

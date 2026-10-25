@@ -1,4 +1,5 @@
 """Safe Markdown rendering and sectioning for the shared Learning Room."""
+
 import html
 import re
 import uuid
@@ -17,9 +18,42 @@ from .models import Course, CourseImport, Lesson
 from .regional_content import resolve_regional_lesson_content, strip_unmanaged_regional_images
 
 _ALLOWED_TAGS = {
-    "a", "aside", "blockquote", "br", "caption", "code", "del", "div", "em", "figcaption", "figure",
-    "h1", "h2", "h3", "h4", "h5", "h6", "hr", "img", "li", "ol", "p", "pre",
-    "s", "small", "span", "strong", "sub", "sup", "table", "tbody", "td", "th", "thead", "tr", "ul",
+    "a",
+    "aside",
+    "blockquote",
+    "br",
+    "caption",
+    "code",
+    "del",
+    "div",
+    "em",
+    "figcaption",
+    "figure",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "hr",
+    "img",
+    "li",
+    "ol",
+    "p",
+    "pre",
+    "s",
+    "small",
+    "span",
+    "strong",
+    "sub",
+    "sup",
+    "table",
+    "tbody",
+    "td",
+    "th",
+    "thead",
+    "tr",
+    "ul",
 }
 _ALLOWED_ATTRIBUTES = {
     "a": ["href", "title", "rel", "class"],
@@ -29,10 +63,22 @@ _ALLOWED_ATTRIBUTES = {
     "figcaption": ["class"],
     "table": ["class"],
     "caption": ["class"],
-    "img": ["class", "src", "alt", "title", "loading", "width", "height", "tabindex", "role", "aria-label"],
+    "img": [
+        "class",
+        "src",
+        "alt",
+        "title",
+        "loading",
+        "width",
+        "height",
+        "tabindex",
+        "role",
+        "aria-label",
+    ],
     "span": ["class", "aria-label", "title"],
     "strong": ["class"],
-    "th": ["align", "colspan", "rowspan", "scope"], "td": ["align", "colspan", "rowspan"],
+    "th": ["align", "colspan", "rowspan", "scope"],
+    "td": ["align", "colspan", "rowspan"],
 }
 _IMAGE_REF = re.compile(r"asset://([0-9a-fA-F-]{36})")
 _IMAGE_MARKDOWN = re.compile(r"!\[([^\]]*)\]\(asset://([0-9a-fA-F-]{36})(?:\s+[^)]*)?\)")
@@ -60,6 +106,7 @@ def _deduplicate_course_card_refs(source):
         source = source[:start] + source[end:]
     return re.sub(r"\n[ \t]*\n(?:[ \t]*\n)+", "\n\n", source)
 
+
 _REGIONAL_BLOCK_TOKEN = re.compile(r"\[\[regional-block:([A-Za-z0-9_-]{1,120})\]\]")
 _REGIONAL_CODES = frozenset({"APAC", "EU", "NA", "LATAM", "MENA", "SSA"})
 _HEADING = re.compile(r"^(#{2,6})\s+(.+?)\s*$")
@@ -75,7 +122,10 @@ def validate_markdown_source(value):
     value = (value or "").replace("\x00", "")
     if _DANGEROUS_MARKDOWN.search(value):
         from django.core.exceptions import ValidationError
-        raise ValidationError("Active HTML, event handlers and executable URLs are not allowed in lesson content.")
+
+        raise ValidationError(
+            "Active HTML, event handlers and executable URLs are not allowed in lesson content."
+        )
     return value
 
 
@@ -86,6 +136,7 @@ def _resolve_asset_refs(source, asset_urls):
         if not url:
             return "**Image awaiting upload: " + html.escape(alt or "course figure") + "**"
         return "![" + alt.replace("]", "") + "](" + url + ")"
+
     source = _IMAGE_MARKDOWN.sub(image_replacement, source or "")
     return _IMAGE_REF.sub(lambda match: asset_urls.get(match.group(1), ""), source)
 
@@ -133,6 +184,7 @@ def _resolve_lesson_references(source, user=None, admin_preview=False):
             if not can_open_lesson and getattr(user, "is_authenticated", False):
                 # The same gate used by lesson_detail protects contextual links.
                 from .services import can_access_lesson
+
                 can_open_lesson = can_access_lesson(user, lesson)
             destination_url = (
                 reverse("academy:lesson", args=[course.slug, lesson.pk])
@@ -144,11 +196,13 @@ def _resolve_lesson_references(source, user=None, admin_preview=False):
             safe_course = html.escape(course.title)
             if kind == "lesson-card":
                 detail = html.escape(lesson.summary) if can_open_lesson and lesson.summary else ""
-                access_note = "" if can_open_lesson else "<p>View the course overview to check access.</p>"
+                access_note = (
+                    "" if can_open_lesson else "<p>View the course overview to check access.</p>"
+                )
                 summary = f"<p>{detail}</p>" if detail else ""
                 markup = (
                     '<aside class="tt-inline-lesson-card" aria-label="Related lesson">'
-                    '<p><strong>RELATED LESSON</strong></p>'
+                    "<p><strong>RELATED LESSON</strong></p>"
                     f'<p><a class="tt-inline-lesson-link" href="{safe_url}" rel="noopener noreferrer">'
                     f"<strong>{safe_title}</strong></a></p>"
                     f"<p>{safe_course}</p>{summary}{access_note}</aside>"
@@ -185,16 +239,28 @@ def _resolve_course_cards(source, open_book_placeholder):
         for course in Course.objects.filter(pk__in=all_ids, status=Course.Status.PUBLISHED)
         if is_course_card_recommendable(course.title, course.summary, course.description)
     }
-    teasers_by_id = {
-        str(teaser.pk): teaser
-        for teaser in CourseImport.objects.filter(pk__in=teaser_ids).select_related("target_course")
-    } if teaser_ids else {}
+    teasers_by_id = (
+        {
+            str(teaser.pk): teaser
+            for teaser in CourseImport.objects.filter(pk__in=teaser_ids).select_related(
+                "target_course"
+            )
+        }
+        if teaser_ids
+        else {}
+    )
     teaser_slugs = {teaser.course_slug for teaser in teasers_by_id.values()}
-    published_by_slug = {
-        course.slug: course
-        for course in Course.objects.filter(slug__in=teaser_slugs, status=Course.Status.PUBLISHED)
-        if is_course_card_recommendable(course.title, course.summary, course.description)
-    } if teaser_slugs else {}
+    published_by_slug = (
+        {
+            course.slug: course
+            for course in Course.objects.filter(
+                slug__in=teaser_slugs, status=Course.Status.PUBLISHED
+            )
+            if is_course_card_recommendable(course.title, course.summary, course.description)
+        }
+        if teaser_slugs
+        else {}
+    )
 
     def render_topics(raw):
         if not isinstance(raw, list):
@@ -211,7 +277,11 @@ def _resolve_course_cards(source, open_book_placeholder):
         if not topics:
             return ""
         chips = "".join(f"<span>{escape(topic)}</span>" for topic in topics)
-        return '<div class="tt-course-preview-card__topics" aria-label="Topics covered">' + chips + "</div>"
+        return (
+            '<div class="tt-course-preview-card__topics" aria-label="Topics covered">'
+            + chips
+            + "</div>"
+        )
 
     def render_art(title, category=""):
         first, second = course_card_art_copy(title, category)
@@ -227,19 +297,21 @@ def _resolve_course_cards(source, open_book_placeholder):
         return (
             f'<div class="{art_class}">'
             '<span class="tt-course-preview-card__rings" aria-hidden="true"></span>'
-            f'{mark_markup}'
-            f'<small>{escape(art_label)}</small>'
-            '</div>'
+            f"{mark_markup}"
+            f"<small>{escape(art_label)}</small>"
+            "</div>"
         )
 
     def render_card(title, summary, topics, destination="", category="", coming_soon=False):
         safe_title = escape(str(title or "Course"))
-        safe_summary = escape(str(summary or "Move beyond this example and study the broader toolkit."))
+        safe_summary = escape(
+            str(summary or "Move beyond this example and study the broader toolkit.")
+        )
         if coming_soon:
             kicker = "Coming soon"
             cta = (
                 '<span class="tt-course-preview-card__cta" aria-label="Course not yet available">'
-                'In preparation</span>'
+                "In preparation</span>"
             )
             modifier = " tt-course-preview-card--coming-soon"
         else:
@@ -251,16 +323,20 @@ def _resolve_course_cards(source, open_book_placeholder):
             )
             modifier = ""
         card_text = f"{title} {category}".casefold()
-        display_topics = ["Volume", "Price structure"] if "volume" in card_text and "price" in card_text else topics
+        display_topics = (
+            ["Volume", "Price structure"]
+            if "volume" in card_text and "price" in card_text
+            else topics
+        )
         return (
             f'<aside class="tt-course-preview-card{modifier}" aria-label="Explore a related TradeThesis course">'
             '<div class="tt-course-preview-card__copy">'
             f'<span class="tt-course-preview-card__kicker">{kicker}</span>'
-            f'<h3>{safe_title}</h3><p>{safe_summary}</p>'
-            f'{render_topics(display_topics)}{cta}'
-            '</div>'
-            f'{render_art(title, category)}'
-            '</aside>'
+            f"<h3>{safe_title}</h3><p>{safe_summary}</p>"
+            f"{render_topics(display_topics)}{cta}"
+            "</div>"
+            f"{render_art(title, category)}"
+            "</aside>"
         )
 
     def render_published_course(course):
@@ -275,11 +351,14 @@ def _resolve_course_cards(source, open_book_placeholder):
     def render_coming_soon(teaser, builder_state):
         title = str(builder_state.get("title") or teaser.title or "Course")
         summary = str(
-            builder_state.get("summary") or builder_state.get("description")
+            builder_state.get("summary")
+            or builder_state.get("description")
             or "Move beyond this example and study the broader toolkit."
         )[:360]
         category = str(builder_state.get("category") or "TradeThesis courses")[:80]
-        return render_card(title, summary, builder_state.get("outcomes"), category=category, coming_soon=True)
+        return render_card(
+            title, summary, builder_state.get("outcomes"), category=category, coming_soon=True
+        )
 
     def unavailable_card():
         return (
@@ -287,9 +366,9 @@ def _resolve_course_cards(source, open_book_placeholder):
             'aria-label="Course currently unavailable">'
             '<div class="tt-course-preview-card__copy">'
             '<span class="tt-course-preview-card__kicker">Keep learning</span>'
-            '<h3>Course currently unavailable</h3>'
-            '<p>This course is not in the published catalogue right now.</p>'
-            '</div></aside>'
+            "<h3>Course currently unavailable</h3>"
+            "<p>This course is not in the published catalogue right now.</p>"
+            "</div></aside>"
         )
 
     replacements = {}
@@ -303,7 +382,9 @@ def _resolve_course_cards(source, open_book_placeholder):
             if teaser is not None:
                 target = teaser.target_course
                 if target is not None and target.status == Course.Status.PUBLISHED:
-                    if is_course_card_recommendable(target.title, target.summary, target.description):
+                    if is_course_card_recommendable(
+                        target.title, target.summary, target.description
+                    ):
                         course = target
                 else:
                     course = published_by_slug.get(teaser.course_slug)
@@ -315,8 +396,14 @@ def _resolve_course_cards(source, open_book_placeholder):
                     builder_state = teaser.payload.get("builder_state")
                     if isinstance(builder_state, dict) and builder_state.get("comingSoon"):
                         teaser_title = str(builder_state.get("title") or teaser.title or "Course")
-                        teaser_summary = str(builder_state.get("summary") or builder_state.get("description") or "")
-                        if is_course_card_recommendable(teaser_title, teaser_summary, str(builder_state.get("description") or "")):
+                        teaser_summary = str(
+                            builder_state.get("summary") or builder_state.get("description") or ""
+                        )
+                        if is_course_card_recommendable(
+                            teaser_title,
+                            teaser_summary,
+                            str(builder_state.get("description") or ""),
+                        ):
                             coming_soon_data = (teaser, builder_state)
 
         if course is not None:
@@ -331,7 +418,6 @@ def _resolve_course_cards(source, open_book_placeholder):
         return token
 
     return _COURSE_CARD_REF.sub(replace_reference, source or ""), replacements
-
 
 
 def resolve_regional_blocks(source, regional_blocks=None, country_code=None, region_code=None):
@@ -350,7 +436,9 @@ def resolve_regional_blocks(source, regional_blocks=None, country_code=None, reg
             if isinstance(item, dict) and item.get("id")
         }
     elif isinstance(regional_blocks, dict):
-        blocks = {str(key): value for key, value in regional_blocks.items() if isinstance(value, dict)}
+        blocks = {
+            str(key): value for key, value in regional_blocks.items() if isinstance(value, dict)
+        }
     else:
         blocks = {}
     country = str(country_code or "").strip().upper()
@@ -366,19 +454,28 @@ def resolve_regional_blocks(source, regional_blocks=None, country_code=None, reg
         variants = block.get("variants") if isinstance(block.get("variants"), list) else []
         selected = None
         if country:
-            selected = next((
-                item for item in variants
-                if isinstance(item, dict)
-                and str(item.get("scope") or "").strip().lower() == "country"
-                and str(item.get("code") or item.get("country") or "").strip().upper() == country
-            ), None)
+            selected = next(
+                (
+                    item
+                    for item in variants
+                    if isinstance(item, dict)
+                    and str(item.get("scope") or "").strip().lower() == "country"
+                    and str(item.get("code") or item.get("country") or "").strip().upper()
+                    == country
+                ),
+                None,
+            )
         if selected is None and region:
-            selected = next((
-                item for item in variants
-                if isinstance(item, dict)
-                and str(item.get("scope") or "").strip().lower() == "region"
-                and str(item.get("code") or item.get("region") or "").strip().upper() == region
-            ), None)
+            selected = next(
+                (
+                    item
+                    for item in variants
+                    if isinstance(item, dict)
+                    and str(item.get("scope") or "").strip().lower() == "region"
+                    and str(item.get("code") or item.get("region") or "").strip().upper() == region
+                ),
+                None,
+            )
         if selected is not None:
             if bool(selected.get("hidden", False)):
                 return ""
@@ -416,7 +513,9 @@ def render_safe_markdown(
     )
     source = validate_markdown_source(source)
     source, lesson_references = _resolve_lesson_references(
-        source, user=user, admin_preview=admin_preview,
+        source,
+        user=user,
+        admin_preview=admin_preview,
     )
     # A per-render nonce protects the trusted card SVG from the general lesson sanitizer.
     # Only the fixed server-owned icon is restored after Bleach removes authored SVG.
@@ -450,9 +549,17 @@ def render_safe_markdown(
                         rowspan = max(1, min(12, int(cell.get("rowspan", 1))))
                     except (TypeError, ValueError):
                         colspan, rowspan = 1, 1
-                    spans = (f' colspan="{colspan}"' if colspan > 1 else "") + (f' rowspan="{rowspan}"' if rowspan > 1 else "")
-                    scope = ' scope="colgroup"' if tag == "th" and colspan > 1 else (' scope="col"' if tag == "th" else "")
-                    cell_markup.append(f"<{tag}{spans}{scope}>{escape(str(cell.get('text') or ''))}</{tag}>")
+                    spans = (f' colspan="{colspan}"' if colspan > 1 else "") + (
+                        f' rowspan="{rowspan}"' if rowspan > 1 else ""
+                    )
+                    scope = (
+                        ' scope="colgroup"'
+                        if tag == "th" and colspan > 1
+                        else (' scope="col"' if tag == "th" else "")
+                    )
+                    cell_markup.append(
+                        f"<{tag}{spans}{scope}>{escape(str(cell.get('text') or ''))}</{tag}>"
+                    )
                 if not cell_markup:
                     continue
                 row_markup = "<tr>" + "".join(cell_markup) + "</tr>"
@@ -466,7 +573,11 @@ def render_safe_markdown(
                     '<div class="lesson-table-wrap tt-structured-table-wrap" role="region" tabindex="0" '
                     'aria-label="Scrollable table: ' + title + '">'
                     '<table class="tt-structured-table"><caption class="tt-structured-table-caption">'
-                    + title + '</caption>' + thead + tbody + "</table></div>"
+                    + title
+                    + "</caption>"
+                    + thead
+                    + tbody
+                    + "</table></div>"
                 )
         token = f"TTSTRUCTUREDTABLE{len(table_frames)}END"
         table_frames[token] = markup
@@ -481,9 +592,16 @@ def render_safe_markdown(
     if module_match:
         module_number, module_name = module_match.groups()
         module_name = re.sub(
-            r"^module\s*\d*\s*[·—–:-]?\s*", "", module_name, flags=re.IGNORECASE,
+            r"^module\s*\d*\s*[·—–:-]?\s*",
+            "",
+            module_name,
+            flags=re.IGNORECASE,
         ).strip()
-        module_title = f"MODULE {int(module_number)} · {module_name}" if module_name else f"MODULE {int(module_number)}"
+        module_title = (
+            f"MODULE {int(module_number)} · {module_name}"
+            if module_name
+            else f"MODULE {int(module_number)}"
+        )
     elif raw_module_label.upper().startswith("MODULE"):
         module_title = raw_module_label
     else:
@@ -496,9 +614,9 @@ def render_safe_markdown(
             '<span class="tt-purpose-figure-head">'
             '<span class="tt-purpose-figure-header-top">'
             f'<span class="tt-purpose-figure-module">{safe_module_title}</span>'
-            '</span>'
+            "</span>"
             f'<strong class="tt-purpose-figure-title">{safe_title}</strong>'
-            '</span>'
+            "</span>"
         )
 
     def display_image_title(metadata):
@@ -533,14 +651,14 @@ def render_safe_markdown(
         else:
             body = (
                 '<span class="tt-purpose-figure-missing" role="status">'
-                '<strong>Figure awaiting upload</strong>'
-                '<span>The image for this figure is not available in this preview.</span>'
-                '</span>'
+                "<strong>Figure awaiting upload</strong>"
+                "<span>The image for this figure is not available in this preview.</span>"
+                "</span>"
             )
-        caption_markup = f'<figcaption><p>{safe_caption}</p></figcaption>' if safe_caption else ""
+        caption_markup = f"<figcaption><p>{safe_caption}</p></figcaption>" if safe_caption else ""
         markup = (
             f'<figure class="tt-purpose-figure" data-figure-id="{safe_asset_id}">'
-            f'{figure_header(title)}'
+            f"{figure_header(title)}"
             f'<span class="tt-purpose-figure-body">{body}</span>{caption_markup}</figure>'
         )
         token = f"TTSTRUCTUREDFIGURE{len(figure_frames)}END"
@@ -581,14 +699,15 @@ def render_safe_markdown(
                 image = '<span class="chart-image chart-image-missing" role="status">Image unavailable</span>'
             caption_markup = (
                 f'<span class="caption"><span class="caption-label">Note</span> — {escape(caption)}</span>'
-                if caption else ""
+                if caption
+                else ""
             )
             letter = chr(ord("A") + len(items))
             items.append(
                 '<div class="chart-item"><div class="item-head">'
                 f'<span class="item-index">{letter}</span>'
                 f'<span class="item-title">{escape(image_title)}</span></div>'
-                f'{image}{caption_markup}</div>'
+                f"{image}{caption_markup}</div>"
             )
         if not items:
             return '<span class="tt-purpose-figure-missing" role="status">Choose one to four images to complete this chart group.</span>'
@@ -608,12 +727,12 @@ def render_safe_markdown(
         safe_group_id = escape(group_id, quote=True)
         title = escape(str(metadata.get("title") or "Image group").strip() or "Image group")
         raw_description = (
-            metadata.get("description")
-            if "description" in metadata
-            else metadata.get("note")
+            metadata.get("description") if "description" in metadata else metadata.get("note")
         )
         description = str(raw_description or "").strip()
-        description_markup = f'<span class="group-description">{escape(description)}</span>' if description else ""
+        description_markup = (
+            f'<span class="group-description">{escape(description)}</span>' if description else ""
+        )
         group_heading = (
             '<div class="group-heading"><div class="group-heading-copy">'
             f'<span class="group-kicker">Chart group · {group_number_text}</span>'
@@ -628,7 +747,7 @@ def render_safe_markdown(
             f'<span class="image-count">×{count}</span></aside>'
             f'<div class="group-content">{group_heading}'
             f'<div class="chart-grid count-{count}">{"".join(items)}</div>'
-            '</div></div></figure>'
+            "</div></div></figure>"
         )
         token = f"TTSTRUCTUREDFIGURE{len(figure_frames)}END"
         figure_frames[token] = markup
@@ -663,18 +782,18 @@ def render_safe_markdown(
             card_markup.append(
                 '<span class="tt-comparison-card">'
                 f'<span class="tt-comparison-kicker">{kicker}</span>'
-                f'<strong>{card_title}</strong>'
+                f"<strong>{card_title}</strong>"
                 f'<span class="tt-comparison-copy">{body}</span>'
-                '</span>'
+                "</span>"
             )
         note = escape(str(metadata.get("note") or "").strip())
         note_markup = f'<span class="tt-purpose-figure-note">{note}</span>' if note else ""
         markup = (
             f'<figure class="tt-purpose-figure tt-comparison-figure" data-figure-id="{safe_id}">'
-            f'{figure_header(title)}'
+            f"{figure_header(title)}"
             '<span class="tt-purpose-figure-body">'
             f'<span class="tt-comparison-cards">{"".join(card_markup)}</span>'
-            f'{note_markup}</span></figure>'
+            f"{note_markup}</span></figure>"
         )
         token = f"TTSTRUCTUREDFIGURE{len(figure_frames)}END"
         figure_frames[token] = markup
@@ -703,18 +822,19 @@ def render_safe_markdown(
     # horizontally scrollable wrapper so the header and cells remain readable
     # on narrow screens. Avoid nesting the wrapper when the author already used it.
     def wrap_information_table(match):
-        prefix = rendered[:match.start()]
+        prefix = rendered[: match.start()]
         last_open = prefix.rfind("<div")
         last_close = prefix.rfind("</div>")
         if last_open > last_close:
             opening_tag_end = prefix.find(">", last_open)
-            opening_tag = prefix[last_open:opening_tag_end + 1]
-            if re.search(r'class=["\'][^"\']*\blesson-table-wrap\b[^"\']*["\']', opening_tag, re.IGNORECASE):
+            opening_tag = prefix[last_open : opening_tag_end + 1]
+            if re.search(
+                r'class=["\'][^"\']*\blesson-table-wrap\b[^"\']*["\']', opening_tag, re.IGNORECASE
+            ):
                 return match.group(0)
         return (
             '<div class="lesson-table-wrap" role="region" '
-            'aria-label="Scrollable information table" tabindex="0">'
-            + match.group(0) + '</div>'
+            'aria-label="Scrollable information table" tabindex="0">' + match.group(0) + "</div>"
         )
 
     rendered = re.sub(
@@ -724,7 +844,9 @@ def render_safe_markdown(
         flags=re.IGNORECASE | re.DOTALL,
     )
     # Existing authored image-plus-caption pairs continue to work for old course content.
-    rendered = re.sub(r"<img\b", '<img tabindex="0" role="button" aria-label="Enlarge course figure"', rendered)
+    rendered = re.sub(
+        r"<img\b", '<img tabindex="0" role="button" aria-label="Enlarge course figure"', rendered
+    )
     rendered = re.sub(
         r"<p>(<img\b[^>]*>)</p>\s*<p>(.*?)</p>",
         r'<figure class="tt-course-figure">\1<figcaption>\2</figcaption></figure>',
@@ -752,7 +874,6 @@ def render_safe_markdown(
     # SVG/path are not globally allowed for lesson content. Restore only the nonce-backed,
     # constant markup generated by the companion-card renderer above.
     return sanitized.replace(course_book_placeholder, course_card_open_book_markup())
-
 
 
 def _count_lesson_figures(source, figure_metadata=None):
@@ -797,12 +918,16 @@ def build_lesson_sections(
 ):
     """Group source headings into the three reusable Learning Room tabs."""
     source = resolve_regional_lesson_content(
-        source or "", regional_content=regional_content,
-        country_code=country_code, region_code=region_code,
+        source or "",
+        regional_content=regional_content,
+        country_code=country_code,
+        region_code=region_code,
     )
     source = resolve_regional_blocks(
-        source, regional_blocks=regional_blocks,
-        country_code=country_code, region_code=region_code,
+        source,
+        regional_blocks=regional_blocks,
+        country_code=country_code,
+        region_code=region_code,
     )
     source = _deduplicate_course_card_refs(source)
     image_group_numbers = {}
@@ -851,19 +976,41 @@ def build_lesson_sections(
                 pass
             # Admin-added headings encode the selected Learning Room tab;
             # handle those exact prefixes before generic content heuristics.
-            elif heading.startswith("compare the possibilities") or heading.startswith("additional concept figure"):
+            elif heading.startswith("compare the possibilities") or heading.startswith(
+                "additional concept figure"
+            ):
                 current_group = "idea"
             elif heading.startswith("additional chart examples"):
                 current_group = "examples"
-            elif heading.startswith("practice figure") or any(word in heading for word in (
-                "practice", "task", "try a new", "test your", "model response",
-                "model reasoning", "feedback", "knowledge check", "apply",
-            )):
+            elif heading.startswith("practice figure") or any(
+                word in heading
+                for word in (
+                    "practice",
+                    "task",
+                    "try a new",
+                    "test your",
+                    "model response",
+                    "model reasoning",
+                    "feedback",
+                    "knowledge check",
+                    "apply",
+                )
+            ):
                 current_group = "practice"
-            elif any(word in heading for word in (
-                "worked", "compare", "comparison", "chart example", "look closely",
-                "case study", "case a", "case b", "figure",
-            )):
+            elif any(
+                word in heading
+                for word in (
+                    "worked",
+                    "compare",
+                    "comparison",
+                    "chart example",
+                    "look closely",
+                    "case study",
+                    "case a",
+                    "case b",
+                    "figure",
+                )
+            ):
                 current_group = "examples"
             else:
                 current_group = "idea"
@@ -880,7 +1027,9 @@ def build_lesson_sections(
     if not any(groups.values()):
         groups["idea"] = [source or "Lesson content is being prepared."]
 
-    rendered = {key: "\n\n".join(part for part in parts if part.strip()) for key, parts in groups.items()}
+    rendered = {
+        key: "\n\n".join(part for part in parts if part.strip()) for key, parts in groups.items()
+    }
     if not rendered["idea"].strip():
         rendered["idea"] = source or "Lesson content is being prepared."
     if not rendered["examples"].strip():
@@ -897,22 +1046,37 @@ def build_lesson_sections(
     figure_count = _count_lesson_figures(source, figure_metadata)
     return {
         "idea_html": render_safe_markdown(
-            rendered["idea"], asset_urls, user=user, admin_preview=admin_preview,
-            figure_metadata=figure_metadata, figure_prefix=figure_prefix,
-            module_label=module_label, course_title=course_title,
+            rendered["idea"],
+            asset_urls,
+            user=user,
+            admin_preview=admin_preview,
+            figure_metadata=figure_metadata,
+            figure_prefix=figure_prefix,
+            module_label=module_label,
+            course_title=course_title,
             table_metadata=table_metadata,
             image_group_numbers=image_group_numbers,
         ),
         "examples_html": render_safe_markdown(
-            rendered["examples"], asset_urls, user=user, admin_preview=admin_preview,
-            figure_metadata=figure_metadata, figure_prefix=figure_prefix,
-            module_label=module_label, course_title=course_title,
+            rendered["examples"],
+            asset_urls,
+            user=user,
+            admin_preview=admin_preview,
+            figure_metadata=figure_metadata,
+            figure_prefix=figure_prefix,
+            module_label=module_label,
+            course_title=course_title,
             image_group_numbers=image_group_numbers,
         ),
         "practice_html": render_safe_markdown(
-            rendered["practice"], asset_urls, user=user, admin_preview=admin_preview,
-            figure_metadata=figure_metadata, figure_prefix=figure_prefix,
-            module_label=module_label, course_title=course_title,
+            rendered["practice"],
+            asset_urls,
+            user=user,
+            admin_preview=admin_preview,
+            figure_metadata=figure_metadata,
+            figure_prefix=figure_prefix,
+            module_label=module_label,
+            course_title=course_title,
             image_group_numbers=image_group_numbers,
         ),
         "figure_count": figure_count,

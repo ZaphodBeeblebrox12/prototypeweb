@@ -1,4 +1,5 @@
 """Security and rendering tests for in-context lesson references."""
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -22,8 +23,11 @@ class LessonReferenceRenderingTests(TestCase):
             status=Course.Status.PUBLISHED,
         )
         self.module = CourseModule.objects.create(
-            course=self.course, title="Volume context", slug="volume-context",
-            position=1, is_published=True,
+            course=self.course,
+            title="Volume context",
+            slug="volume-context",
+            position=1,
+            is_published=True,
         )
         self.lesson = Lesson.objects.create(
             module=self.module,
@@ -31,7 +35,9 @@ class LessonReferenceRenderingTests(TestCase):
             slug="read-relative-volume",
             summary="Compare activity with progress in price.",
             content_markdown="PRIVATE_DESTINATION_BODY",
-            position=1, is_preview=True, is_published=True,
+            position=1,
+            is_preview=True,
+            is_published=True,
         )
 
     def test_inline_link_resolves_to_the_accessible_lesson(self):
@@ -40,7 +46,8 @@ class LessonReferenceRenderingTests(TestCase):
             user=self.user,
         )
         expected_url = reverse(
-            "academy:lesson", args=[self.course.slug, self.lesson.pk],
+            "academy:lesson",
+            args=[self.course.slug, self.lesson.pk],
         )
         self.assertIn(f'href="{expected_url}"', rendered)
         self.assertIn("Read relative volume", rendered)
@@ -52,7 +59,8 @@ class LessonReferenceRenderingTests(TestCase):
             user=self.user,
         )
         expected_url = reverse(
-            "academy:lesson", args=[self.course.slug, self.lesson.pk],
+            "academy:lesson",
+            args=[self.course.slug, self.lesson.pk],
         )
         self.assertIn('class="tt-inline-lesson-card"', rendered)
         self.assertIn(f'href="{expected_url}"', rendered)
@@ -85,7 +93,6 @@ class LessonReferenceRenderingTests(TestCase):
         self.assertNotIn("PRIVATE_DESTINATION_BODY", rendered)
 
 
-
 class CourseCardReferenceRenderingTests(TestCase):
     def setUp(self):
         self.course = Course.objects.create(
@@ -95,7 +102,10 @@ class CourseCardReferenceRenderingTests(TestCase):
             category="Volume analysis",
             level="Intermediate",
             estimated_duration="3 hours",
-            learning_outcomes=["Compare activity with price progress.", "Identify when volume does not confirm the move."],
+            learning_outcomes=[
+                "Compare activity with price progress.",
+                "Identify when volume does not confirm the move.",
+            ],
             status=Course.Status.PUBLISHED,
         )
 
@@ -141,19 +151,23 @@ class CourseCardReferenceRenderingTests(TestCase):
             title="Order Flow and Volume",
             content_hash="a" * 64,
             source_manifest="{}",
-            payload={"builder_state": {
-                "comingSoon": True,
-                "title": "Order Flow and Volume",
-                "summary": "Understand activity in context.",
-                "category": "Volume analysis",
-                "level": "Intermediate",
-                "duration": "2 hours",
-                "outcomes": ["Compare volume with price progress."],
-            }},
+            payload={
+                "builder_state": {
+                    "comingSoon": True,
+                    "title": "Order Flow and Volume",
+                    "summary": "Understand activity in context.",
+                    "category": "Volume analysis",
+                    "level": "Intermediate",
+                    "duration": "2 hours",
+                    "outcomes": ["Compare volume with price progress."],
+                }
+            },
             status=CourseImport.Status.DRAFT,
         )
         rendered = render_safe_markdown("[[course-card:coming-soon:" + str(teaser.pk) + "]]")
-        self.assertIn('class="tt-course-preview-card tt-course-preview-card--coming-soon"', rendered)
+        self.assertIn(
+            'class="tt-course-preview-card tt-course-preview-card--coming-soon"', rendered
+        )
         self.assertIn("Order Flow and Volume", rendered)
         self.assertIn("Understand activity in context.", rendered)
         self.assertIn("Volume vs price", rendered)
@@ -166,11 +180,13 @@ class CourseCardReferenceRenderingTests(TestCase):
             title="Private draft course title",
             content_hash="b" * 64,
             source_manifest="{}",
-            payload={"builder_state": {
-                "comingSoon": False,
-                "title": "Private draft course title",
-                "summary": "Private draft summary.",
-            }},
+            payload={
+                "builder_state": {
+                    "comingSoon": False,
+                    "title": "Private draft course title",
+                    "summary": "Private draft summary.",
+                }
+            },
             status=CourseImport.Status.DRAFT,
         )
         rendered = render_safe_markdown("[[course-card:coming-soon:" + str(teaser.pk) + "]]")
@@ -200,6 +216,6 @@ class CourseCardReferenceRenderingTests(TestCase):
         self.course.save(update_fields=["title", "summary"])
         rendered = render_safe_markdown("[[course-card:" + str(self.course.pk) + "]]")
         self.assertNotIn("<script>", rendered)
-        self.assertNotIn('<img src=x onerror=', rendered)
+        self.assertNotIn("<img src=x onerror=", rendered)
         self.assertIn("&lt;script&gt;", rendered)
         self.assertIn("&lt;img src=x onerror=", rendered)

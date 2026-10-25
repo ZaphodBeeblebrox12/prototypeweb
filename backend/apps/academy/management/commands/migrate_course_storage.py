@@ -3,6 +3,7 @@
 This command is read-only by default. It never changes the active provider or
 rewrites database file references; cutover is a separate deployment operation.
 """
+
 import base64
 import hashlib
 import json
@@ -82,9 +83,7 @@ def _copy_to_target(target, target_name, raw, *, apply):
         return {"status": "already_present", "sha256": expected, "size": len(raw)}
     if not apply:
         return {"status": "planned", "sha256": expected, "size": len(raw)}
-    saved_name = target.save(
-        target_name, ContentFile(raw, name=PurePosixPath(target_name).name)
-    )
+    saved_name = target.save(target_name, ContentFile(raw, name=PurePosixPath(target_name).name))
     if saved_name != target_name:
         raise ValueError(
             f"Target storage changed the logical path for {target_name}; returned {saved_name!r}."
@@ -104,10 +103,11 @@ def _url_host(value):
 def _is_google_drive_url(value):
     """Detect common Drive/Docs delivery hosts without fetching arbitrary URLs."""
     host = _url_host(value)
-    return (
-        host in {"drive.google.com", "docs.google.com", "drive.usercontent.google.com"}
-        or host.endswith(".googleusercontent.com")
-    )
+    return host in {
+        "drive.google.com",
+        "docs.google.com",
+        "drive.usercontent.google.com",
+    } or host.endswith(".googleusercontent.com")
 
 
 def _find_google_drive_urls(value):
@@ -141,40 +141,54 @@ def _github_headers():
 
 def _github_tree_files():
     repository = str(getattr(settings, "ACADEMY_GITHUB_ASSET_REPOSITORY", "") or "").strip()
-    branch = str(getattr(settings, "ACADEMY_GITHUB_ASSET_BRANCH", "my-new-branch") or "my-new-branch").strip()
+    branch = str(
+        getattr(settings, "ACADEMY_GITHUB_ASSET_BRANCH", "my-new-branch") or "my-new-branch"
+    ).strip()
     if not repository:
         raise RuntimeError("The legacy GitHub repository is not configured.")
     response = requests.get(
         f"{GITHUB_API}/repos/{repository}/branches/{quote(branch, safe='')}",
-        headers=_github_headers(), timeout=20,
+        headers=_github_headers(),
+        timeout=20,
     )
     if response.status_code != 200:
-        raise RuntimeError(f"Could not inventory the legacy GitHub branch (HTTP {response.status_code}).")
+        raise RuntimeError(
+            f"Could not inventory the legacy GitHub branch (HTTP {response.status_code})."
+        )
     branch_data = response.json()
     tree_sha = branch_data.get("commit", {}).get("commit", {}).get("tree", {}).get("sha")
     if not tree_sha:
         raise RuntimeError("GitHub did not return the legacy branch tree SHA.")
     response = requests.get(
         f"{GITHUB_API}/repos/{repository}/git/trees/{tree_sha}",
-        headers=_github_headers(), params={"recursive": "1"}, timeout=30,
+        headers=_github_headers(),
+        params={"recursive": "1"},
+        timeout=30,
     )
     if response.status_code != 200:
-        raise RuntimeError(f"Could not inventory legacy GitHub assets (HTTP {response.status_code}).")
+        raise RuntimeError(
+            f"Could not inventory legacy GitHub assets (HTTP {response.status_code})."
+        )
     payload = response.json()
     if not isinstance(payload, dict) or not isinstance(payload.get("tree"), list):
         raise RuntimeError("GitHub returned an unreadable repository tree.")
     if payload.get("truncated"):
-        raise RuntimeError("GitHub truncated the repository tree; inventory completeness cannot be certified.")
+        raise RuntimeError(
+            "GitHub truncated the repository tree; inventory completeness cannot be certified."
+        )
     return repository, payload["tree"]
 
 
 def _github_blob_bytes(repository, sha):
     response = requests.get(
         f"{GITHUB_API}/repos/{repository}/git/blobs/{sha}",
-        headers=_github_headers(), timeout=30,
+        headers=_github_headers(),
+        timeout=30,
     )
     if response.status_code != 200:
-        raise RuntimeError(f"Could not download a legacy GitHub blob (HTTP {response.status_code}).")
+        raise RuntimeError(
+            f"Could not download a legacy GitHub blob (HTTP {response.status_code})."
+        )
     payload = response.json()
     if payload.get("encoding") != "base64" or not payload.get("content"):
         raise RuntimeError("GitHub returned a blob with an unsupported encoding.")
@@ -212,8 +226,10 @@ def _drive_files(storage, folder_id):
 
 def _drive_blob_bytes(storage, file_id):
     response = storage._drive_request(
-        "GET", f"{DRIVE_API}/files/{file_id}",
-        params={"alt": "media"}, expected=(200,),
+        "GET",
+        f"{DRIVE_API}/files/{file_id}",
+        params={"alt": "media"},
+        expected=(200,),
     )
     return response.content
 
@@ -227,11 +243,14 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             "--target-alias",
-            default=str(getattr(settings, "ACADEMY_ASSET_MIGRATION_TARGET_ALIAS", "") or "").strip(),
+            default=str(
+                getattr(settings, "ACADEMY_ASSET_MIGRATION_TARGET_ALIAS", "") or ""
+            ).strip(),
             help="Django STORAGES alias for the new durable destination.",
         )
         parser.add_argument(
-            "--apply", action="store_true",
+            "--apply",
+            action="store_true",
             help="Write and verify copies. Without this flag the command is read-only.",
         )
         parser.add_argument(
@@ -248,8 +267,12 @@ class Command(BaseCommand):
         apply = bool(options.get("apply"))
         if not target_alias:
             raise CommandError("Set ACADEMY_ASSET_MIGRATION_TARGET_ALIAS or supply --target-alias.")
-        active = str(getattr(settings, "ACADEMY_ASSET_STORAGE_BACKEND", "google_drive")).strip().lower()
-        active_alias = str(getattr(settings, "ACADEMY_ASSET_STORAGE_ALIAS", "academy_assets") or "academy_assets").strip()
+        active = (
+            str(getattr(settings, "ACADEMY_ASSET_STORAGE_BACKEND", "google_drive")).strip().lower()
+        )
+        active_alias = str(
+            getattr(settings, "ACADEMY_ASSET_STORAGE_ALIAS", "academy_assets") or "academy_assets"
+        ).strip()
         if target_alias in {"default", "staticfiles"}:
             raise CommandError(
                 "Use a dedicated private durable storage alias, never Django's default or staticfiles storage."
@@ -331,12 +354,14 @@ class Command(BaseCommand):
                 record_id = str(row[0])
                 for field_name, value in zip(fields, row[1:], strict=True):
                     for url in _find_google_drive_urls(value):
-                        drive_content_reference_inventory.append({
-                            "model": model.__name__,
-                            "id": record_id,
-                            "field": field_name,
-                            "url_host": _url_host(url) or "unparseable",
-                        })
+                        drive_content_reference_inventory.append(
+                            {
+                                "model": model.__name__,
+                                "id": record_id,
+                                "field": field_name,
+                                "url_host": _url_host(url) or "unparseable",
+                            }
+                        )
         report["google_drive_url_references_in_course_content"] = drive_content_reference_inventory
 
         counts = {
@@ -368,47 +393,55 @@ class Command(BaseCommand):
         }
 
         if google_drive_url_records:
-            report["errors"].append({
-                "kind": "google_drive_url_only_records",
-                "error": (
-                    f"{len(google_drive_url_records)} asset records reference Google Drive URLs "
-                    "without managed files. Import these objects into managed storage and repair "
-                    "the records before any provider cutover."
-                ),
-            })
+            report["errors"].append(
+                {
+                    "kind": "google_drive_url_only_records",
+                    "error": (
+                        f"{len(google_drive_url_records)} asset records reference Google Drive URLs "
+                        "without managed files. Import these objects into managed storage and repair "
+                        "the records before any provider cutover."
+                    ),
+                }
+            )
         if drive_content_reference_inventory:
-            report["errors"].append({
-                "kind": "google_drive_urls_in_course_content",
-                "error": (
-                    f"{len(drive_content_reference_inventory)} course-content fields still contain "
-                    "Google Drive/Google user-content URLs. Rewrite them to managed asset references "
-                    "or intentionally independent destinations before cutover."
-                ),
-            })
+            report["errors"].append(
+                {
+                    "kind": "google_drive_urls_in_course_content",
+                    "error": (
+                        f"{len(drive_content_reference_inventory)} course-content fields still contain "
+                        "Google Drive/Google user-content URLs. Rewrite them to managed asset references "
+                        "or intentionally independent destinations before cutover."
+                    ),
+                }
+            )
             self.stdout.write(
                 "Google Drive URLs in course content (record and field only): "
                 + json.dumps(drive_content_reference_inventory, sort_keys=True)
             )
         if empty_asset_records:
-            report["errors"].append({
-                "kind": "asset_records_without_file_or_url",
-                "error": (
-                    f"{len(empty_asset_records)} asset records have neither a managed file nor an "
-                    "external URL. Review or repair these rows before cutover."
-                ),
-            })
+            report["errors"].append(
+                {
+                    "kind": "asset_records_without_file_or_url",
+                    "error": (
+                        f"{len(empty_asset_records)} asset records have neither a managed file nor an "
+                        "external URL. Review or repair these rows before cutover."
+                    ),
+                }
+            )
         non_drive_url_records = [
             item for item in external_url_inventory if not item.get("google_drive_dependency")
         ]
         if non_drive_url_records and not options.get("allow_reviewed_external_urls"):
-            report["errors"].append({
-                "kind": "unreviewed_external_url_only_records",
-                "error": (
-                    f"{len(non_drive_url_records)} asset records contain external URLs but no "
-                    "managed file. Review their hosts and references; only then use "
-                    "--allow-reviewed-external-urls if they intentionally remain external."
-                ),
-            })
+            report["errors"].append(
+                {
+                    "kind": "unreviewed_external_url_only_records",
+                    "error": (
+                        f"{len(non_drive_url_records)} asset records contain external URLs but no "
+                        "managed file. Review their hosts and references; only then use "
+                        "--allow-reviewed-external-urls if they intentionally remain external."
+                    ),
+                }
+            )
         elif non_drive_url_records:
             report["warnings"].append(
                 f"{len(non_drive_url_records)} URL-only asset records were explicitly approved to remain external. "
@@ -424,10 +457,14 @@ class Command(BaseCommand):
         def copy_entry(target_name, raw, *, kind, source_id=None, records=None):
             try:
                 result = _copy_to_target(target, target_name, raw, apply=apply)
-                result.update({
-                    "kind": kind, "target_name": target_name,
-                    "source_id": source_id, "records": records or [],
-                })
+                result.update(
+                    {
+                        "kind": kind,
+                        "target_name": target_name,
+                        "source_id": source_id,
+                        "records": records or [],
+                    }
+                )
                 report["entries"].append(result)
                 suffix = {
                     "copied_verified": "_copied_verified",
@@ -452,22 +489,34 @@ class Command(BaseCommand):
                     if key:
                         counts[key + suffix] += 1
             except Exception as exc:
-                report["errors"].append({
-                    "kind": kind, "target_name": target_name,
-                    "source_id": source_id, "error": str(exc),
-                    "records": records or [],
-                })
+                report["errors"].append(
+                    {
+                        "kind": kind,
+                        "target_name": target_name,
+                        "source_id": source_id,
+                        "error": str(exc),
+                        "records": records or [],
+                    }
+                )
 
         # Copy all database-referenced draft/live images under their existing logical names.
         for name, item in assets_by_name.items():
             try:
-                copy_entry(name, _read_storage(course_asset_storage, name),
-                           kind="database_asset", records=item["records"])
+                copy_entry(
+                    name,
+                    _read_storage(course_asset_storage, name),
+                    kind="database_asset",
+                    records=item["records"],
+                )
             except Exception as exc:
-                report["errors"].append({
-                    "kind": "database_asset_source_read", "target_name": name,
-                    "error": str(exc), "records": item["records"],
-                })
+                report["errors"].append(
+                    {
+                        "kind": "database_asset_source_read",
+                        "target_name": name,
+                        "error": str(exc),
+                        "records": item["records"],
+                    }
+                )
 
         # Inventory any surviving private local fallback files as well. Do not treat a
         # missing local directory as durable storage, and never copy a tree into itself.
@@ -490,18 +539,27 @@ class Command(BaseCommand):
                 relative = path.relative_to(local_root).as_posix()
                 target_name = "course-assets/archive/local-filesystem/" + relative
                 try:
-                    copy_entry(target_name, path.read_bytes(), kind="local_asset_archive",
-                               source_id=relative)
+                    copy_entry(
+                        target_name,
+                        path.read_bytes(),
+                        kind="local_asset_archive",
+                        source_id=relative,
+                    )
                 except Exception as exc:
-                    report["errors"].append({
-                        "kind": "local_asset_archive_source_read",
-                        "source_id": relative, "error": str(exc),
-                    })
+                    report["errors"].append(
+                        {
+                            "kind": "local_asset_archive_source_read",
+                            "source_id": relative,
+                            "error": str(exc),
+                        }
+                    )
         elif active == "local_filesystem":
-            report["errors"].append({
-                "kind": "local_filesystem_inventory",
-                "error": "The active local private-media directory does not exist; its inventory cannot be certified.",
-            })
+            report["errors"].append(
+                {
+                    "kind": "local_filesystem_inventory",
+                    "error": "The active local private-media directory does not exist; its inventory cannot be certified.",
+                }
+            )
         else:
             report["warnings"].append(
                 "The private local fallback directory is absent; no local-only objects were available to archive."
@@ -515,17 +573,21 @@ class Command(BaseCommand):
         )
         drive_required = active == "google_drive" or drive_credentials_present
         if drive_required and not drive._drive_auth_configured:
-            report["errors"].append({
-                "kind": "google_drive_inventory",
-                "error": "Drive access is not configured; complete Google Drive inventory cannot be certified.",
-            })
+            report["errors"].append(
+                {
+                    "kind": "google_drive_inventory",
+                    "error": "Drive access is not configured; complete Google Drive inventory cannot be certified.",
+                }
+            )
         elif drive._drive_auth_configured:
             asset_folder, source_folder = drive._asset_folder_id, drive._source_folder_id
             if not asset_folder:
-                report["errors"].append({
-                    "kind": "google_drive_asset_inventory",
-                    "error": "The Drive asset folder ID is missing; inventory cannot be certified.",
-                })
+                report["errors"].append(
+                    {
+                        "kind": "google_drive_asset_inventory",
+                        "error": "The Drive asset folder ID is missing; inventory cannot be certified.",
+                    }
+                )
             else:
                 try:
                     # Archive every Drive object, including duplicate logical keys. Database-
@@ -536,21 +598,32 @@ class Command(BaseCommand):
                             file_id, _safe_component(item.get("name"))
                         )
                         try:
-                            copy_entry(target_name, _drive_blob_bytes(drive, file_id),
-                                       kind="drive_asset_archive", source_id=file_id)
+                            copy_entry(
+                                target_name,
+                                _drive_blob_bytes(drive, file_id),
+                                kind="drive_asset_archive",
+                                source_id=file_id,
+                            )
                         except Exception as exc:
-                            report["errors"].append({
-                                "kind": "drive_asset_archive_source_read",
-                                "source_id": file_id, "error": str(exc),
-                            })
+                            report["errors"].append(
+                                {
+                                    "kind": "drive_asset_archive_source_read",
+                                    "source_id": file_id,
+                                    "error": str(exc),
+                                }
+                            )
                 except Exception as exc:
-                    report["errors"].append({"kind": "google_drive_asset_inventory", "error": str(exc)})
+                    report["errors"].append(
+                        {"kind": "google_drive_asset_inventory", "error": str(exc)}
+                    )
 
             if not source_folder:
-                report["errors"].append({
-                    "kind": "google_drive_source_inventory",
-                    "error": "The Drive source snapshot folder ID is missing; source inventory cannot be certified.",
-                })
+                report["errors"].append(
+                    {
+                        "kind": "google_drive_source_inventory",
+                        "error": "The Drive source snapshot folder ID is missing; source inventory cannot be certified.",
+                    }
+                )
             else:
                 try:
                     for item in _drive_files(drive, source_folder):
@@ -559,20 +632,34 @@ class Command(BaseCommand):
                             file_id, _safe_component(item.get("name"))
                         )
                         try:
-                            copy_entry(target_name, _drive_blob_bytes(drive, file_id),
-                                       kind="drive_source_snapshot", source_id=file_id)
+                            copy_entry(
+                                target_name,
+                                _drive_blob_bytes(drive, file_id),
+                                kind="drive_source_snapshot",
+                                source_id=file_id,
+                            )
                         except Exception as exc:
-                            report["errors"].append({
-                                "kind": "drive_source_snapshot_source_read",
-                                "source_id": file_id, "error": str(exc),
-                            })
+                            report["errors"].append(
+                                {
+                                    "kind": "drive_source_snapshot_source_read",
+                                    "source_id": file_id,
+                                    "error": str(exc),
+                                }
+                            )
                 except Exception as exc:
-                    report["errors"].append({"kind": "google_drive_source_inventory", "error": str(exc)})
+                    report["errors"].append(
+                        {"kind": "google_drive_source_inventory", "error": str(exc)}
+                    )
         elif not drive_required:
-            report["warnings"].append("Google Drive is not configured; no Drive-only archive inventory was performed.")
+            report["warnings"].append(
+                "Google Drive is not configured; no Drive-only archive inventory was performed."
+            )
 
         # Archive provider-only GitHub assets and builder source snapshots as a recovery layer.
-        prefix = str(getattr(settings, "ACADEMY_GITHUB_ASSET_PATH_PREFIX", "course-assets") or "course-assets").strip("/")
+        prefix = str(
+            getattr(settings, "ACADEMY_GITHUB_ASSET_PATH_PREFIX", "course-assets")
+            or "course-assets"
+        ).strip("/")
         try:
             repository, tree = _github_tree_files()
             for item in tree:
@@ -580,27 +667,43 @@ class Command(BaseCommand):
                 if item.get("type") != "blob" or not item.get("sha"):
                     continue
                 if path.startswith(prefix + "/"):
-                    logical_name = path[len(prefix) + 1:]
+                    logical_name = path[len(prefix) + 1 :]
                     target_name = "course-assets/archive/github/" + logical_name
                     try:
-                        copy_entry(target_name, _github_blob_bytes(repository, item["sha"]),
-                                   kind="github_asset_archive", source_id=path)
+                        copy_entry(
+                            target_name,
+                            _github_blob_bytes(repository, item["sha"]),
+                            kind="github_asset_archive",
+                            source_id=path,
+                        )
                     except Exception as exc:
-                        report["errors"].append({
-                            "kind": "github_asset_archive_source_read", "source_id": path,
-                            "error": str(exc),
-                        })
-                elif path.startswith("course-source/builder-drafts/") and path.lower().endswith(".json"):
-                    relative = path[len("course-source/builder-drafts/"):]
+                        report["errors"].append(
+                            {
+                                "kind": "github_asset_archive_source_read",
+                                "source_id": path,
+                                "error": str(exc),
+                            }
+                        )
+                elif path.startswith("course-source/builder-drafts/") and path.lower().endswith(
+                    ".json"
+                ):
+                    relative = path[len("course-source/builder-drafts/") :]
                     target_name = "course-source/migrated-snapshots/github/" + relative
                     try:
-                        copy_entry(target_name, _github_blob_bytes(repository, item["sha"]),
-                                   kind="github_source_snapshot", source_id=path)
+                        copy_entry(
+                            target_name,
+                            _github_blob_bytes(repository, item["sha"]),
+                            kind="github_source_snapshot",
+                            source_id=path,
+                        )
                     except Exception as exc:
-                        report["errors"].append({
-                            "kind": "github_source_snapshot_source_read", "source_id": path,
-                            "error": str(exc),
-                        })
+                        report["errors"].append(
+                            {
+                                "kind": "github_source_snapshot_source_read",
+                                "source_id": path,
+                                "error": str(exc),
+                            }
+                        )
         except Exception as exc:
             report["errors"].append({"kind": "github_inventory", "error": str(exc)})
 
@@ -617,23 +720,36 @@ class Command(BaseCommand):
             )
             report["manifest_path"] = manifest_path
             try:
-                manifest_raw = (json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
-                saved = target.save(manifest_path, ContentFile(manifest_raw, name="migration-report.json"))
+                manifest_raw = (
+                    json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+                ).encode("utf-8")
+                saved = target.save(
+                    manifest_path, ContentFile(manifest_raw, name="migration-report.json")
+                )
                 if saved != manifest_path:
-                    report["errors"].append({
-                        "kind": "migration_manifest", "target_name": manifest_path,
-                        "error": f"Target storage changed manifest path to {saved!r}.",
-                    })
+                    report["errors"].append(
+                        {
+                            "kind": "migration_manifest",
+                            "target_name": manifest_path,
+                            "error": f"Target storage changed manifest path to {saved!r}.",
+                        }
+                    )
             except Exception as exc:
-                report["errors"].append({
-                    "kind": "migration_manifest", "target_name": manifest_path, "error": str(exc),
-                })
+                report["errors"].append(
+                    {
+                        "kind": "migration_manifest",
+                        "target_name": manifest_path,
+                        "error": str(exc),
+                    }
+                )
 
         self.stdout.write(f"Target alias: {target_alias}")
         self.stdout.write(f"Mode: {'APPLY' if apply else 'DRY RUN (no writes)'}")
         self.stdout.write(f"Unique database asset keys: {counts['database_asset_keys']}")
         self.stdout.write(f"Database asset references: {counts['database_asset_references']}")
-        self.stdout.write(f"External-URL-only records (not downloaded): {counts['external_url_only_records']}")
+        self.stdout.write(
+            f"External-URL-only records (not downloaded): {counts['external_url_only_records']}"
+        )
         self.stdout.write(f"Migration complete: {'YES' if not report['errors'] else 'NO'}")
         if manifest_path:
             self.stdout.write(f"Manifest: {manifest_path}")
@@ -641,18 +757,25 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("Warning: " + warning))
         if report["errors"]:
             for error in report["errors"][:20]:
-                self.stdout.write(self.style.ERROR(
-                    "{}: {} {}".format(
-                        error.get("kind"), error.get("target_name") or error.get("source_id") or "",
-                        error.get("error"),
+                self.stdout.write(
+                    self.style.ERROR(
+                        "{}: {} {}".format(
+                            error.get("kind"),
+                            error.get("target_name") or error.get("source_id") or "",
+                            error.get("error"),
+                        )
                     )
-                ))
+                )
             if len(report["errors"]) > 20:
-                self.stdout.write(self.style.ERROR(f"... plus {len(report['errors']) - 20} additional errors."))
+                self.stdout.write(
+                    self.style.ERROR(f"... plus {len(report['errors']) - 20} additional errors.")
+                )
             raise CommandError(
                 f"Storage migration is incomplete ({len(report['errors'])} errors). "
                 "Keep the old provider enabled and inspect the report before retrying."
             )
-        self.stdout.write(self.style.SUCCESS(
-            "Inventory/copy checks passed. The active provider was not changed; review the report before cutover."
-        ))
+        self.stdout.write(
+            self.style.SUCCESS(
+                "Inventory/copy checks passed. The active provider was not changed; review the report before cutover."
+            )
+        )

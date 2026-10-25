@@ -1,4 +1,5 @@
 """Tests for safe, idempotent checksum copies."""
+
 from io import BytesIO
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
@@ -34,7 +35,10 @@ class MemoryStorage:
 
 class StorageMigrationCopyTests(SimpleTestCase):
     def test_rejects_filesystem_storage_overlapping_public_media_root(self):
-        with TemporaryDirectory() as public_root, override_settings(MEDIA_ROOT=public_root, STATIC_ROOT=""):
+        with (
+            TemporaryDirectory() as public_root,
+            override_settings(MEDIA_ROOT=public_root, STATIC_ROOT=""),
+        ):
             target = SimpleNamespace(location=public_root)
             with self.assertRaisesRegex(CommandError, "overlaps MEDIA_ROOT"):
                 _ensure_target_filesystem_is_private(target)

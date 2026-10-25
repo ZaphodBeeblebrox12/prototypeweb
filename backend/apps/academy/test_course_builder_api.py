@@ -48,34 +48,45 @@ class CourseBuilderApiTests(TestCase):
                 "price": "",
                 "status": "draft",
                 "outcomes": ["Describe evidence before interpreting it."],
-                "modules": [{
-                    "id": "module-local-1",
-                    "title": "Module 01 — Foundations",
-                    "description": "Start with observable evidence.",
-                    "lessons": [{
-                        "id": "lesson-local-1",
-                        "title": "Lesson 1.1 — First principles",
-                        "summary": "Separate evidence from interpretation.",
-                        "format": "reading",
-                        "minutes": 12,
-                        "videoUrl": "https://media.example.test/lesson.mp4",
-                        "notebook": {"title": "A useful notebook", "prompts": [{"label": "Observe", "text": "What evidence is visible?"}]},
-                        "reflectionPrompt": "What evidence do you observe before interpreting it?",
-                        "reflectionModelReasoning": "Separate visible evidence from interpretation and consider what would change the view.",
-                        "reflectionChartNotes": "Compare the evidence with a reasonable alternative.",
-                        "content": "## Notice\n\nDescribe what is visible before drawing a conclusion.",
-                        "questions": [{
-                            "id": "question-local-1",
-                            "prompt": "What should you identify first?",
-                            "options": ["Visible evidence", "A prediction", "A target"],
-                            "correctIndex": 0,
-                            "explanation": "Start with what can be observed.",
-                        }],
-                        "images": [],
-                        "image": None,
-                        "relatedCourseIds": [],
-                    }],
-                }],
+                "modules": [
+                    {
+                        "id": "module-local-1",
+                        "title": "Module 01 — Foundations",
+                        "description": "Start with observable evidence.",
+                        "lessons": [
+                            {
+                                "id": "lesson-local-1",
+                                "title": "Lesson 1.1 — First principles",
+                                "summary": "Separate evidence from interpretation.",
+                                "format": "reading",
+                                "minutes": 12,
+                                "videoUrl": "https://media.example.test/lesson.mp4",
+                                "notebook": {
+                                    "title": "A useful notebook",
+                                    "prompts": [
+                                        {"label": "Observe", "text": "What evidence is visible?"}
+                                    ],
+                                },
+                                "reflectionPrompt": "What evidence do you observe before interpreting it?",
+                                "reflectionModelReasoning": "Separate visible evidence from interpretation and consider what would change the view.",
+                                "reflectionChartNotes": "Compare the evidence with a reasonable alternative.",
+                                "content": "## Notice\n\nDescribe what is visible before drawing a conclusion.",
+                                "questions": [
+                                    {
+                                        "id": "question-local-1",
+                                        "prompt": "What should you identify first?",
+                                        "options": ["Visible evidence", "A prediction", "A target"],
+                                        "correctIndex": 0,
+                                        "explanation": "Start with what can be observed.",
+                                    }
+                                ],
+                                "images": [],
+                                "image": None,
+                                "relatedCourseIds": [],
+                            }
+                        ],
+                    }
+                ],
             },
             "mode": "save",
         }
@@ -84,10 +95,10 @@ class CourseBuilderApiTests(TestCase):
         response = self.client.get(reverse("staff_course_builder_preview"))
 
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertContains(response, 'data-builder-website-preview')
-        self.assertContains(response, 'data-builder-website-preview-frame')
-        self.assertContains(response, 'data-website-preview-status')
-        self.assertContains(response, 'data-website-preview-error')
+        self.assertContains(response, "data-builder-website-preview")
+        self.assertContains(response, "data-builder-website-preview-frame")
+        self.assertContains(response, "data-website-preview-status")
+        self.assertContains(response, "data-website-preview-error")
         self.assertContains(response, 'data-action="refresh-website-preview"')
         self.assertContains(response, "async function refreshBuilderWebsitePreview(force = false)")
         self.assertContains(response, "website_preview_url")
@@ -109,11 +120,11 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "Reflection & reasoning")
         self.assertContains(response, "Require course-owned images before publishing")
         self.assertContains(response, "Courses tab presentation")
-        self.assertContains(response, "data-field=\"catalogueHook\"")
-        self.assertContains(response, "data-field=\"problemStatement\"")
-        self.assertContains(response, "data-field=\"learningFocus\"")
-        self.assertContains(response, "data-field=\"authoredTags\"")
-        self.assertContains(response, "data-field=\"whyThisOne\"")
+        self.assertContains(response, 'data-field="catalogueHook"')
+        self.assertContains(response, 'data-field="problemStatement"')
+        self.assertContains(response, 'data-field="learningFocus"')
+        self.assertContains(response, 'data-field="authoredTags"')
+        self.assertContains(response, 'data-field="whyThisOne"')
         self.assertContains(response, "Live tile preview")
         self.assertContains(response, "Route to Chart examples")
         self.assertContains(response, "Manage inserted lesson references")
@@ -133,8 +144,13 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "routeMarkerPattern")
         self.assertContains(response, "Kept one companion card at its final placement")
         self.assertContains(response, "removes earlier duplicates and accidental lesson links")
-        self.assertContains(response, 'The website preview preserves this placement.</span></div>${courseCardPickerMarkup()}<div class="helper-note">')
-        self.assertContains(response, "Those render as lesson links/cards, not as the Option 3 inline course card.")
+        self.assertContains(
+            response,
+            'The website preview preserves this placement.</span></div>${courseCardPickerMarkup()}<div class="helper-note">',
+        )
+        self.assertContains(
+            response, "Those render as lesson links/cards, not as the Option 3 inline course card."
+        )
         self.assertContains(response, "data-lesson-reference-picker")
         self.assertContains(response, "Uses the existing Learning Room layout")
         self.assertNotContains(response, "Reuse the Learning Room template")
@@ -159,7 +175,9 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "Heading 3 (Section subheading)")
         self.assertContains(response, "Heading 4 (Minor subheading)")
         self.assertContains(response, "Heading 5 (Small heading)")
-        self.assertContains(response, "function syncRichFormatPickerFromSelection(editor, selection)")
+        self.assertContains(
+            response, "function syncRichFormatPickerFromSelection(editor, selection)"
+        )
         self.assertContains(response, "function closeRichFormatPickers(exceptPicker)")
         self.assertContains(response, "document.execCommand('formatBlock', false, value)")
         self.assertContains(response, "event.key === 'ArrowDown'")
@@ -206,16 +224,36 @@ class CourseBuilderApiTests(TestCase):
             "country:IN": "## India version\n\nIndia-specific example.\n\n| Index | Market |\n|---|---|\n| NIFTY | India |",
             "region:APAC": "## Asia-Pacific version\n\nRegional example.",
         }
-        lesson["regionalBlocks"] = [{
-            "id": "risk-note",
-            "title": "Risk disclosure",
-            "baseContent": "Global educational disclosure.",
-            "variants": [
-                {"id": "risk-note-in", "scope": "country", "code": "IN", "content": "India-specific disclosure in INR.", "hidden": False},
-                {"id": "risk-note-na", "scope": "region", "code": "NA", "content": "North American disclosure.", "hidden": False},
-                {"id": "risk-note-hidden", "scope": "country", "code": "CA", "content": "", "hidden": True},
-            ],
-        }]
+        lesson["regionalBlocks"] = [
+            {
+                "id": "risk-note",
+                "title": "Risk disclosure",
+                "baseContent": "Global educational disclosure.",
+                "variants": [
+                    {
+                        "id": "risk-note-in",
+                        "scope": "country",
+                        "code": "IN",
+                        "content": "India-specific disclosure in INR.",
+                        "hidden": False,
+                    },
+                    {
+                        "id": "risk-note-na",
+                        "scope": "region",
+                        "code": "NA",
+                        "content": "North American disclosure.",
+                        "hidden": False,
+                    },
+                    {
+                        "id": "risk-note-hidden",
+                        "scope": "country",
+                        "code": "CA",
+                        "content": "",
+                        "hidden": True,
+                    },
+                ],
+            }
+        ]
         response = self.client.post(
             reverse("staff_course_builder_api"),
             data=json.dumps(payload),
@@ -248,11 +286,17 @@ class CourseBuilderApiTests(TestCase):
         state = self.draft_payload(course_slug)["course"]
         lesson = state["modules"][0]["lessons"][0]
         stable_id = _asset_uuid(course_slug, "india-chart")
-        lesson["images"] = [{
-            "id": "india-chart", "name": "india-chart.png", "assetUuid": stable_id,
-            "title": "India chart", "alt": "A chart for the India example",
-            "caption": "A country-specific worked example.", "data": "",
-        }]
+        lesson["images"] = [
+            {
+                "id": "india-chart",
+                "name": "india-chart.png",
+                "assetUuid": stable_id,
+                "title": "India chart",
+                "alt": "A chart for the India example",
+                "caption": "A country-specific worked example.",
+                "data": "",
+            }
+        ]
         lesson["regionalContent"] = {
             "country:IN": "## India example\n\n![India chart](asset://india-chart)"
         }
@@ -279,13 +323,27 @@ class CourseBuilderApiTests(TestCase):
         )
         self.assertEqual(record.status, CourseImport.Status.DRAFT)
         self.assertEqual(record.payload["builder_state"]["title"], "Builder API Course")
-        self.assertEqual(record.payload["modules"][0]["lessons"][0]["content_markdown"], "## Notice\n\nDescribe what is visible before drawing a conclusion.")
+        self.assertEqual(
+            record.payload["modules"][0]["lessons"][0]["content_markdown"],
+            "## Notice\n\nDescribe what is visible before drawing a conclusion.",
+        )
         saved_lesson = record.payload["modules"][0]["lessons"][0]
-        self.assertEqual(saved_lesson["content_json"]["video_url"], "https://media.example.test/lesson.mp4")
+        self.assertEqual(
+            saved_lesson["content_json"]["video_url"], "https://media.example.test/lesson.mp4"
+        )
         self.assertEqual(saved_lesson["content_json"]["notebook"]["title"], "A useful notebook")
-        self.assertEqual(saved_lesson["content_json"]["reflection"]["prompt"], "What evidence do you observe before interpreting it?")
-        self.assertEqual(saved_lesson["content_json"]["reflection"]["model_reasoning"], "Separate visible evidence from interpretation and consider what would change the view.")
-        self.assertEqual(record.payload["course"]["learning_outcomes"], ["Describe evidence before interpreting it."])
+        self.assertEqual(
+            saved_lesson["content_json"]["reflection"]["prompt"],
+            "What evidence do you observe before interpreting it?",
+        )
+        self.assertEqual(
+            saved_lesson["content_json"]["reflection"]["model_reasoning"],
+            "Separate visible evidence from interpretation and consider what would change the view.",
+        )
+        self.assertEqual(
+            record.payload["course"]["learning_outcomes"],
+            ["Describe evidence before interpreting it."],
+        )
         self.assertNotIn("correctIndex", saved_lesson["content_json"])
 
     def test_publish_validation_rejects_hotlinked_instructional_images_for_any_course(self):
@@ -296,14 +354,18 @@ class CourseBuilderApiTests(TestCase):
         payload = {
             "course": {"title": "External Image Test", "slug": slug, "requires_owned_assets": True},
             "assets": [],
-            "modules": [{
-                "title": "Foundations",
-                "lessons": [{
-                    "title": "First lesson",
-                    "content_markdown": f"![Chart](asset://{asset_id})",
-                    "content_json": {"asset_ids": [str(asset_id)]},
-                }],
-            }],
+            "modules": [
+                {
+                    "title": "Foundations",
+                    "lessons": [
+                        {
+                            "title": "First lesson",
+                            "content_markdown": f"![Chart](asset://{asset_id})",
+                            "content_json": {"asset_ids": [str(asset_id)]},
+                        }
+                    ],
+                }
+            ],
         }
         record = CourseImport.objects.create(
             course_slug=slug,
@@ -340,7 +402,10 @@ class CourseBuilderApiTests(TestCase):
             source_manifest="builder://missing-image-fallback",
             status=CourseImport.Status.DRAFT,
             imported_by=self.admin,
-            payload={"course": {"title": "Missing Image Fallback", "slug": "missing-image-fallback"}, "modules": []},
+            payload={
+                "course": {"title": "Missing Image Fallback", "slug": "missing-image-fallback"},
+                "modules": [],
+            },
         )
         asset_id = uuid.uuid4()
         original_url = "https://charts.example.test/third-image.png"
@@ -377,7 +442,10 @@ class CourseBuilderApiTests(TestCase):
             source_manifest="builder://checked-in-image-fallback",
             status=CourseImport.Status.DRAFT,
             imported_by=self.admin,
-            payload={"course": {"title": "Checked-in Image Fallback", "slug": course_slug}, "modules": []},
+            payload={
+                "course": {"title": "Checked-in Image Fallback", "slug": course_slug},
+                "modules": [],
+            },
         )
         asset_id = uuid.uuid4()
         CourseImportAsset.objects.create(
@@ -414,12 +482,19 @@ class CourseBuilderApiTests(TestCase):
             status=Course.Status.PUBLISHED,
         )
         module = CourseModule.objects.create(
-            course=course, title="Foundations", slug="foundations",
-            position=1, is_published=True,
+            course=course,
+            title="Foundations",
+            slug="foundations",
+            position=1,
+            is_published=True,
         )
         lesson = Lesson.objects.create(
-            module=module, title="First reading", slug="first-reading",
-            position=1, is_published=True, is_preview=True,
+            module=module,
+            title="First reading",
+            slug="first-reading",
+            position=1,
+            is_published=True,
+            is_preview=True,
             content_markdown="## Observe\n\nDescribe the visible evidence.",
             content_json={
                 "reflection": {
@@ -432,7 +507,9 @@ class CourseBuilderApiTests(TestCase):
 
         response = self.client.post(
             reverse("academy:lesson-reflection-submit", args=[lesson.pk]),
-            {"reflection_response": "Price closed above the marked range; follow-through is not known yet."},
+            {
+                "reflection_response": "Price closed above the marked range; follow-through is not known yet."
+            },
         )
 
         self.assertEqual(response.status_code, 200, response.content)
@@ -450,12 +527,19 @@ class CourseBuilderApiTests(TestCase):
             status=Course.Status.PUBLISHED,
         )
         module = CourseModule.objects.create(
-            course=course, title="Foundations", slug="foundations",
-            position=1, is_published=True,
+            course=course,
+            title="Foundations",
+            slug="foundations",
+            position=1,
+            is_published=True,
         )
         lesson = Lesson.objects.create(
-            module=module, title="Locked reading", slug="locked-reading",
-            position=1, is_published=True, is_preview=False,
+            module=module,
+            title="Locked reading",
+            slug="locked-reading",
+            position=1,
+            is_published=True,
+            is_preview=False,
             content_json={"reflection": {"prompt": "What do you observe?"}},
         )
 
@@ -470,8 +554,10 @@ class CourseBuilderApiTests(TestCase):
     @patch(
         "apps.academy.course_builder_api.course_asset_storage.status",
         return_value={
-            "backend": "github", "label": "private GitHub repository",
-            "durable": True, "writes_enabled": True,
+            "backend": "github",
+            "label": "private GitHub repository",
+            "durable": True,
+            "writes_enabled": True,
         },
     )
     def test_builder_api_exposes_durable_asset_storage_status(self, storage_status):
@@ -480,8 +566,10 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(
             response.json()["asset_storage"],
             {
-                "backend": "github", "label": "private GitHub repository",
-                "durable": True, "writes_enabled": True,
+                "backend": "github",
+                "label": "private GitHub repository",
+                "durable": True,
+                "writes_enabled": True,
             },
         )
         storage_status.assert_called_once_with()
@@ -501,16 +589,25 @@ class CourseBuilderApiTests(TestCase):
             stable_asset_id=stable_id,
             file="academy/course-imports/legacy-local-image.png",
         )
-        with patch(
-            "apps.academy.course_builder_api.course_asset_storage.status",
-            return_value={"backend": "github", "label": "private GitHub repository", "durable": True, "writes_enabled": True},
-        ), patch(
-            "apps.academy.course_builder_api.course_asset_storage.remote_exists",
-            return_value=False,
-        ), patch(
-            "apps.academy.course_builder_api._copy_existing_asset",
-            return_value=True,
-        ) as migrate_asset:
+        with (
+            patch(
+                "apps.academy.course_builder_api.course_asset_storage.status",
+                return_value={
+                    "backend": "github",
+                    "label": "private GitHub repository",
+                    "durable": True,
+                    "writes_enabled": True,
+                },
+            ),
+            patch(
+                "apps.academy.course_builder_api.course_asset_storage.remote_exists",
+                return_value=False,
+            ),
+            patch(
+                "apps.academy.course_builder_api._copy_existing_asset",
+                return_value=True,
+            ) as migrate_asset,
+        ):
             from .course_builder_api import _store_images
 
             _store_images(record, {})
@@ -522,15 +619,21 @@ class CourseBuilderApiTests(TestCase):
 
     def test_catalogue_presentation_fields_persist_in_saved_builder_draft(self):
         payload = self.draft_payload("catalogue-presentation-save")
-        payload["course"].update({
-            "catalogueHook": "Mark fewer zones. Give each one a reason.",
-            "problemStatement": "For traders who see a possible level around every swing.",
-            "learningFocus": "Choose zones, read reactions and identify invalidation.",
-            "authoredTags": "Chart reading, zones, invalidation, chart reading",
-            "whyThisOne": "Treats zones as decision areas to justify, test and invalidate—not lines to collect.",
-            "cataloguePresentationConfigured": True,
-        })
-        response = self.client.post(reverse("staff_course_builder_api"), data=json.dumps(payload), content_type="application/json")
+        payload["course"].update(
+            {
+                "catalogueHook": "Mark fewer zones. Give each one a reason.",
+                "problemStatement": "For traders who see a possible level around every swing.",
+                "learningFocus": "Choose zones, read reactions and identify invalidation.",
+                "authoredTags": "Chart reading, zones, invalidation, chart reading",
+                "whyThisOne": "Treats zones as decision areas to justify, test and invalidate—not lines to collect.",
+                "cataloguePresentationConfigured": True,
+            }
+        )
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
         self.assertEqual(response.status_code, 200, response.content)
         record = CourseImport.objects.get(pk=response.json()["record_id"])
         state = record.payload["builder_state"]
@@ -539,7 +642,10 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(state["learningFocus"], payload["course"]["learningFocus"])
         self.assertEqual(state["whyThisOne"], payload["course"]["whyThisOne"])
         self.assertTrue(state["cataloguePresentationConfigured"])
-        self.assertEqual(record.payload["course"]["catalogue_presentation"]["tags"], ["Chart reading", "zones", "invalidation"])
+        self.assertEqual(
+            record.payload["course"]["catalogue_presentation"]["tags"],
+            ["Chart reading", "zones", "invalidation"],
+        )
         self.assertTrue(record.payload["course"]["catalogue_presentation_configured"])
 
     def test_existing_saved_builder_draft_can_be_resaved_when_course_slug_is_taken(self):
@@ -605,7 +711,8 @@ class CourseBuilderApiTests(TestCase):
         github_get.return_value = Mock(status_code=404)
         github_put.return_value = Mock(status_code=201)
         github_put.return_value.json.return_value = {
-            "content": {"sha": "blob-sha"}, "commit": {"sha": "commit-sha"}
+            "content": {"sha": "blob-sha"},
+            "commit": {"sha": "commit-sha"},
         }
         payload = self.draft_payload("github-source-course")
         payload["sync_source"] = True
@@ -694,9 +801,7 @@ class CourseBuilderApiTests(TestCase):
         self.assertIn("No published courses are ready for the catalogue yet.", source)
 
     def test_delete_draft_waits_for_initial_sync_and_checks_academy_before_local_only_removal(self):
-        source = Path(__file__).with_name("course_builder_preview.html").read_text(
-            encoding="utf-8"
-        )
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
         for marker in (
             "let academySyncPromise = null;",
             "academySyncPromise = syncAcademy();",
@@ -716,7 +821,10 @@ class CourseBuilderApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200, response.content)
         source = response.content.decode("utf-8")
-        self.assertIn("const staleServerDraft = !course.serverDraftId && Boolean(course.serverUpdatedAt);", source)
+        self.assertIn(
+            "const staleServerDraft = !course.serverDraftId && Boolean(course.serverUpdatedAt);",
+            source,
+        )
         self.assertIn("Deleting draft…", source)
         self.assertIn("Delete draft failed:", source)
 
@@ -728,12 +836,19 @@ class CourseBuilderApiTests(TestCase):
             status=Course.Status.PUBLISHED,
         )
         placeholder_module = CourseModule.objects.create(
-            course=placeholder, title="Foundations", slug="foundations",
-            position=1, is_published=True,
+            course=placeholder,
+            title="Foundations",
+            slug="foundations",
+            position=1,
+            is_published=True,
         )
         Lesson.objects.create(
-            module=placeholder_module, title="Placeholder lesson", slug="placeholder-lesson",
-            position=1, is_published=True, content_markdown="Placeholder content.",
+            module=placeholder_module,
+            title="Placeholder lesson",
+            slug="placeholder-lesson",
+            position=1,
+            is_published=True,
+            content_markdown="Placeholder content.",
         )
         course_without_published_lessons = Course.objects.create(
             title="Published course awaiting lessons",
@@ -748,12 +863,19 @@ class CourseBuilderApiTests(TestCase):
             status=Course.Status.PUBLISHED,
         )
         valid_module = CourseModule.objects.create(
-            course=valid_course, title="Foundations", slug="foundations",
-            position=1, is_published=True,
+            course=valid_course,
+            title="Foundations",
+            slug="foundations",
+            position=1,
+            is_published=True,
         )
         Lesson.objects.create(
-            module=valid_module, title="Read the context", slug="read-the-context",
-            position=1, is_published=True, content_markdown="Read the context before acting.",
+            module=valid_module,
+            title="Read the context",
+            slug="read-the-context",
+            position=1,
+            is_published=True,
+            content_markdown="Read the context before acting.",
         )
         response = self.client.get(reverse("staff_course_builder_api"))
         self.assertEqual(response.status_code, 200, response.content)
@@ -770,6 +892,7 @@ class CourseBuilderApiTests(TestCase):
         self.assertNotIn(str(placeholder.pk), related_ids)
         self.assertNotIn(str(course_without_published_lessons.pk), related_ids)
         self.assertIn(str(valid_course.pk), related_ids)
+
     def test_related_course_uses_published_course_uuid(self):
         related = Course.objects.create(
             title="Related published course",
@@ -778,12 +901,19 @@ class CourseBuilderApiTests(TestCase):
             status=Course.Status.PUBLISHED,
         )
         related_module = CourseModule.objects.create(
-            course=related, title="Related module", slug="related-module",
-            position=1, is_published=True,
+            course=related,
+            title="Related module",
+            slug="related-module",
+            position=1,
+            is_published=True,
         )
         Lesson.objects.create(
-            module=related_module, title="Related lesson", slug="related-lesson",
-            position=1, is_published=True, content_markdown="A related lesson.",
+            module=related_module,
+            title="Related lesson",
+            slug="related-lesson",
+            position=1,
+            is_published=True,
+            content_markdown="A related lesson.",
         )
         payload = self.draft_payload("course-with-related-reference")
         payload["course"]["modules"][0]["lessons"][0]["relatedCourseIds"] = [str(related.pk)]
@@ -805,18 +935,23 @@ class CourseBuilderApiTests(TestCase):
             status=Course.Status.PUBLISHED,
         )
         module = CourseModule.objects.create(
-            course=destination, title="Volume context", slug="volume-context",
-            position=1, is_published=True,
+            course=destination,
+            title="Volume context",
+            slug="volume-context",
+            position=1,
+            is_published=True,
         )
         lesson = Lesson.objects.create(
-            module=module, title="Read relative volume", slug="read-relative-volume",
-            position=1, is_published=True, is_preview=True,
+            module=module,
+            title="Read relative volume",
+            slug="read-relative-volume",
+            position=1,
+            is_published=True,
+            is_preview=True,
             content_markdown="## Compare volume\n\nPrivate destination body is not copied.",
         )
         payload = self.draft_payload("course-with-inline-lesson-reference")
-        payload["course"]["modules"][0]["lessons"][0]["content"] += (
-            f"\n\n[[lesson:{lesson.pk}]]"
-        )
+        payload["course"]["modules"][0]["lessons"][0]["content"] += f"\n\n[[lesson:{lesson.pk}]]"
         response = self.client.post(
             reverse("staff_course_builder_api"),
             data=json.dumps(payload),
@@ -833,22 +968,32 @@ class CourseBuilderApiTests(TestCase):
 
     def test_builder_catalogue_includes_only_published_lesson_destinations(self):
         course = Course.objects.create(
-            title="Volume Profile", slug="volume-profile",
+            title="Volume Profile",
+            slug="volume-profile",
             status=Course.Status.PUBLISHED,
         )
         module = CourseModule.objects.create(
-            course=course, title="Value areas", slug="value-areas",
-            position=1, is_published=True,
+            course=course,
+            title="Value areas",
+            slug="value-areas",
+            position=1,
+            is_published=True,
         )
         Lesson.objects.create(
-            module=module, title="Read the value area", slug="read-value-area",
+            module=module,
+            title="Read the value area",
+            slug="read-value-area",
             summary="Understand value migration and acceptance.",
             content_markdown="## Value area\n\nVolume profile helps describe acceptance.",
-            position=1, is_published=True,
+            position=1,
+            is_published=True,
         )
         Lesson.objects.create(
-            module=module, title="Unpublished draft lesson", slug="draft-lesson",
-            position=2, is_published=False,
+            module=module,
+            title="Unpublished draft lesson",
+            slug="draft-lesson",
+            position=2,
+            is_published=False,
         )
         response = self.client.get(reverse("staff_course_builder_api"))
         self.assertEqual(response.status_code, 200, response.content)
@@ -860,19 +1005,30 @@ class CourseBuilderApiTests(TestCase):
         from .models import LessonProgress
 
         course = Course.objects.create(
-            title="Notebook course", slug="notebook-course",
+            title="Notebook course",
+            slug="notebook-course",
             status=Course.Status.PUBLISHED,
         )
         module = CourseModule.objects.create(
-            course=course, title="Module One", slug="module-one",
-            position=1, is_published=True,
+            course=course,
+            title="Module One",
+            slug="module-one",
+            position=1,
+            is_published=True,
         )
         lesson = Lesson.objects.create(
-            module=module, title="Lesson One", slug="lesson-one",
-            position=1, is_preview=True, is_published=True,
-            content_json={"notebook": {"title": "Notebook", "prompts": [
-                {"label": "Observe", "text": "What is visible?"}
-            ]}},
+            module=module,
+            title="Lesson One",
+            slug="lesson-one",
+            position=1,
+            is_preview=True,
+            is_published=True,
+            content_json={
+                "notebook": {
+                    "title": "Notebook",
+                    "prompts": [{"label": "Observe", "text": "What is visible?"}],
+                }
+            },
         )
         response = self.client.post(
             reverse("academy:lesson-notebook-submit", args=[lesson.pk]),
@@ -894,13 +1050,20 @@ class CourseBuilderApiTests(TestCase):
             status=Course.Status.PUBLISHED,
         )
         module = CourseModule.objects.create(
-            course=course, title="Reading the bands", slug="reading-the-bands",
-            position=1, is_published=True,
+            course=course,
+            title="Reading the bands",
+            slug="reading-the-bands",
+            position=1,
+            is_published=True,
         )
         lesson = Lesson.objects.create(
-            module=module, title="Before treating a touch as a setup",
-            slug="before-treating-a-touch-as-a-setup", position=1,
-            is_preview=True, is_published=True, content_json={},
+            module=module,
+            title="Before treating a touch as a setup",
+            slug="before-treating-a-touch-as-a-setup",
+            position=1,
+            is_preview=True,
+            is_published=True,
+            content_json={},
         )
 
         response = self.client.post(
@@ -941,12 +1104,18 @@ class CourseBuilderApiTests(TestCase):
             status=Course.Status.PUBLISHED,
         )
         module = CourseModule.objects.create(
-            course=published, title="Module One", slug="module-one",
-            position=1, is_published=True,
+            course=published,
+            title="Module One",
+            slug="module-one",
+            position=1,
+            is_published=True,
         )
         Lesson.objects.create(
-            module=module, title="Lesson One", slug="lesson-one",
-            position=1, content_markdown="A safe lesson body.",
+            module=module,
+            title="Lesson One",
+            slug="lesson-one",
+            position=1,
+            content_markdown="A safe lesson body.",
             is_published=True,
         )
         Course.objects.create(
@@ -971,18 +1140,28 @@ class CourseBuilderApiTests(TestCase):
             status=Course.Status.PUBLISHED,
         )
         module = CourseModule.objects.create(
-            course=course, title="Module One", slug="module-one",
-            position=1, is_published=True,
+            course=course,
+            title="Module One",
+            slug="module-one",
+            position=1,
+            is_published=True,
         )
         lesson = Lesson.objects.create(
-            module=module, title="Lesson One", slug="lesson-one",
-            position=1, is_published=True,
-            content_json={"questions": [{
-                "id": "question-chart",
-                "prompt": "What does this chart show?",
-                "options": ["Rejection", "Breakout"],
-                "image_asset_id": "",
-            }]},
+            module=module,
+            title="Lesson One",
+            slug="lesson-one",
+            position=1,
+            is_published=True,
+            content_json={
+                "questions": [
+                    {
+                        "id": "question-chart",
+                        "prompt": "What does this chart show?",
+                        "options": ["Rejection", "Breakout"],
+                        "image_asset_id": "",
+                    }
+                ]
+            },
         )
         asset = CourseMediaAsset.objects.create(
             course=course,
@@ -992,24 +1171,30 @@ class CourseBuilderApiTests(TestCase):
         )
         lesson.content_json = {
             "asset_ids": [str(asset.pk)],
-            "figures": {str(asset.pk): {
-                "title": "Resistance test",
-                "alt": "Price rejecting resistance",
-                "caption": "Compare the closes near resistance.",
-            }},
-            "questions": [{
-                "id": "question-chart",
-                "prompt": "What does this chart show?",
-                "options": ["Rejection", "Breakout"],
-                "image_asset_id": str(asset.pk),
-            }],
+            "figures": {
+                str(asset.pk): {
+                    "title": "Resistance test",
+                    "alt": "Price rejecting resistance",
+                    "caption": "Compare the closes near resistance.",
+                }
+            },
+            "questions": [
+                {
+                    "id": "question-chart",
+                    "prompt": "What does this chart show?",
+                    "options": ["Rejection", "Breakout"],
+                    "image_asset_id": str(asset.pk),
+                }
+            ],
         }
         lesson.save(update_fields=["content_json", "updated_at"])
 
         state = _builder_state_from_published_course(course)
         hydrated_lesson = state["modules"][0]["lessons"][0]
         question = hydrated_lesson["questions"][0]
-        hydrated_image = next(image for image in hydrated_lesson["images"] if image["id"] == str(asset.pk))
+        hydrated_image = next(
+            image for image in hydrated_lesson["images"] if image["id"] == str(asset.pk)
+        )
 
         self.assertEqual(question["imageId"], str(asset.pk))
         self.assertEqual(hydrated_image["data"], reverse("academy:media-asset", args=[asset.pk]))
@@ -1022,14 +1207,17 @@ class CourseBuilderApiTests(TestCase):
         state = self.draft_payload("builder-question-image")["course"]
         lesson = state["modules"][0]["lessons"][0]
         image_id = "question-chart-01"
-        lesson["images"] = [{
-            "id": image_id,
-            "name": "resistance-chart.png",
-            "title": "Repeated resistance test",
-            "alt": "Price testing the same resistance area three times",
-            "caption": "Notice the closes around the marked zone.",
-            "data": "data:image/png;base64," + base64.b64encode(b"fake image bytes").decode("ascii"),
-        }]
+        lesson["images"] = [
+            {
+                "id": image_id,
+                "name": "resistance-chart.png",
+                "title": "Repeated resistance test",
+                "alt": "Price testing the same resistance area three times",
+                "caption": "Notice the closes around the marked zone.",
+                "data": "data:image/png;base64,"
+                + base64.b64encode(b"fake image bytes").decode("ascii"),
+            }
+        ]
         lesson["image"] = lesson["images"][0]
         lesson["questions"][0]["imageId"] = image_id
 
@@ -1055,16 +1243,24 @@ class CourseBuilderApiTests(TestCase):
     def test_practice_question_image_hydration_uses_resolved_asset_url(self):
         from .views import _practice_questions_with_images
 
-        questions = [{
-            "id": "question-1",
-            "prompt": "What does this chart show?",
-            "options": ["A", "B"],
-            "image_asset_id": "asset-uuid",
-        }]
+        questions = [
+            {
+                "id": "question-1",
+                "prompt": "What does this chart show?",
+                "options": ["A", "B"],
+                "image_asset_id": "asset-uuid",
+            }
+        ]
         hydrated = _practice_questions_with_images(
             questions,
             {"asset-uuid": "/academy/media/asset-uuid/"},
-            {"asset-uuid": {"title": "Chart A", "alt": "A price chart", "caption": "Look at the retest."}},
+            {
+                "asset-uuid": {
+                    "title": "Chart A",
+                    "alt": "A price chart",
+                    "caption": "Look at the retest.",
+                }
+            },
         )
 
         self.assertEqual(hydrated[0]["image_url"], "/academy/media/asset-uuid/")
@@ -1085,14 +1281,17 @@ class CourseBuilderApiTests(TestCase):
             f"![Band comparison](asset://{image_id})\n\n"
             "Text after the figure."
         )
-        lesson["images"] = [{
-            "id": image_id,
-            "name": "band-comparison.png",
-            "title": "What changing the settings changes",
-            "alt": "Three cards compare shorter, baseline and longer Bollinger Band windows.",
-            "caption": caption,
-            "data": "data:image/png;base64," + base64.b64encode(b"fake image bytes").decode("ascii"),
-        }]
+        lesson["images"] = [
+            {
+                "id": image_id,
+                "name": "band-comparison.png",
+                "title": "What changing the settings changes",
+                "alt": "Three cards compare shorter, baseline and longer Bollinger Band windows.",
+                "caption": caption,
+                "data": "data:image/png;base64,"
+                + base64.b64encode(b"fake image bytes").decode("ascii"),
+            }
+        ]
         lesson["image"] = lesson["images"][0]
 
         imported, image_sources = _build_import_payload(state, "builder-figure-contract")
@@ -1101,7 +1300,10 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(len(figure_map), 1)
         stable_id, metadata = next(iter(figure_map.items()))
         self.assertEqual(metadata["title"], "What changing the settings changes")
-        self.assertEqual(metadata["alt"], "Three cards compare shorter, baseline and longer Bollinger Band windows.")
+        self.assertEqual(
+            metadata["alt"],
+            "Three cards compare shorter, baseline and longer Bollinger Band windows.",
+        )
         self.assertEqual(metadata["caption"], caption)
         self.assertIn(f"asset://{stable_id}", saved_lesson["content_markdown"])
         self.assertIn(stable_id, saved_lesson["content_json"]["asset_ids"])
@@ -1131,7 +1333,8 @@ class CourseBuilderApiTests(TestCase):
                 "title": "Long candidate",
                 "alt": "Price rises alongside the upper band.",
                 "caption": "Both conditions must hold.",
-                "data": "data:image/png;base64," + base64.b64encode(b"fake first image").decode("ascii"),
+                "data": "data:image/png;base64,"
+                + base64.b64encode(b"fake first image").decode("ascii"),
             },
             {
                 "id": second_id,
@@ -1139,16 +1342,19 @@ class CourseBuilderApiTests(TestCase):
                 "title": "Near miss",
                 "alt": "Price moves sideways while one condition fails.",
                 "caption": "One condition is not met.",
-                "data": "data:image/png;base64," + base64.b64encode(b"fake second image").decode("ascii"),
+                "data": "data:image/png;base64,"
+                + base64.b64encode(b"fake second image").decode("ascii"),
             },
         ]
         lesson["image"] = lesson["images"][0]
-        lesson["imageGroups"] = [{
-            "id": group_id,
-            "title": "Method II: price position and money flow",
-            "imageIds": [first_id, second_id],
-            "note": "Read both inputs together.",
-        }]
+        lesson["imageGroups"] = [
+            {
+                "id": group_id,
+                "title": "Method II: price position and money flow",
+                "imageIds": [first_id, second_id],
+                "note": "Read both inputs together.",
+            }
+        ]
 
         imported, image_sources = _build_import_payload(state, "builder-image-group")
         saved_lesson = imported["modules"][0]["lessons"][0]
@@ -1173,15 +1379,19 @@ class CourseBuilderApiTests(TestCase):
 
         state = self.draft_payload("builder-filename-title")["course"]
         lesson = state["modules"][0]["lessons"][0]
-        lesson["images"] = [{
-            "id": "legacy-image",
-            "name": "BANKNIFTY_2023-08-06_16-51-56_bd975.png",
-            "title": "BANKNIFTY_2023-08-06_16-51-56_bd975.png",
-            "alt": "BANKNIFTY price chart",
-            "caption": "",
-            "data": "",
-        }]
-        cleaned, _image_sources, _asset_specs = _clean_image_payload(state, "builder-filename-title")
+        lesson["images"] = [
+            {
+                "id": "legacy-image",
+                "name": "BANKNIFTY_2023-08-06_16-51-56_bd975.png",
+                "title": "BANKNIFTY_2023-08-06_16-51-56_bd975.png",
+                "alt": "BANKNIFTY price chart",
+                "caption": "",
+                "data": "",
+            }
+        ]
+        cleaned, _image_sources, _asset_specs = _clean_image_payload(
+            state, "builder-filename-title"
+        )
         cleaned_image = cleaned["modules"][0]["lessons"][0]["images"][0]
         self.assertEqual(cleaned_image["title"], "")
         self.assertEqual(cleaned_image["name"], "BANKNIFTY_2023-08-06_16-51-56_bd975.png")
@@ -1190,30 +1400,52 @@ class CourseBuilderApiTests(TestCase):
         payload = self.draft_payload("builder-grouped-table")
         lesson = payload["course"]["modules"][0]["lessons"][0]
         lesson["content"] = (
-            "Introductory text.\n\n"
-            "[[table-block:market-comparison]]\n\n"
-            "Follow-up text."
+            "Introductory text.\n\n" "[[table-block:market-comparison]]\n\n" "Follow-up text."
         )
         lesson["tables"] = {
             "market-comparison": {
                 "title": "Market comparison",
                 "rows": [
-                    {"section": "head", "cells": [
-                        {"text": "Context", "colspan": 2, "rowspan": 1, "header": True},
-                        {"text": "Decision", "colspan": 2, "rowspan": 1, "header": True},
-                    ]},
-                    {"section": "head", "cells": [
-                        {"text": "Market", "colspan": 1, "rowspan": 1, "header": True},
-                        {"text": "Evidence", "colspan": 1, "rowspan": 1, "header": True},
-                        {"text": "Confirmed", "colspan": 1, "rowspan": 1, "header": True},
-                        {"text": "Rejected", "colspan": 1, "rowspan": 1, "header": True},
-                    ]},
-                    {"section": "body", "cells": [
-                        {"text": "Range", "colspan": 1, "rowspan": 1, "header": False},
-                        {"text": "Repeated rejection", "colspan": 1, "rowspan": 1, "header": False},
-                        {"text": "Wait for follow-through", "colspan": 1, "rowspan": 1, "header": False},
-                        {"text": "Reassess the range", "colspan": 1, "rowspan": 1, "header": False},
-                    ]},
+                    {
+                        "section": "head",
+                        "cells": [
+                            {"text": "Context", "colspan": 2, "rowspan": 1, "header": True},
+                            {"text": "Decision", "colspan": 2, "rowspan": 1, "header": True},
+                        ],
+                    },
+                    {
+                        "section": "head",
+                        "cells": [
+                            {"text": "Market", "colspan": 1, "rowspan": 1, "header": True},
+                            {"text": "Evidence", "colspan": 1, "rowspan": 1, "header": True},
+                            {"text": "Confirmed", "colspan": 1, "rowspan": 1, "header": True},
+                            {"text": "Rejected", "colspan": 1, "rowspan": 1, "header": True},
+                        ],
+                    },
+                    {
+                        "section": "body",
+                        "cells": [
+                            {"text": "Range", "colspan": 1, "rowspan": 1, "header": False},
+                            {
+                                "text": "Repeated rejection",
+                                "colspan": 1,
+                                "rowspan": 1,
+                                "header": False,
+                            },
+                            {
+                                "text": "Wait for follow-through",
+                                "colspan": 1,
+                                "rowspan": 1,
+                                "header": False,
+                            },
+                            {
+                                "text": "Reassess the range",
+                                "colspan": 1,
+                                "rowspan": 1,
+                                "header": False,
+                            },
+                        ],
+                    },
                 ],
             },
         }
@@ -1239,25 +1471,34 @@ class CourseBuilderApiTests(TestCase):
             "ohlc-context": {
                 "title": "From observation to execution",
                 "rows": [
-                    {"section": "head", "cells": [
-                        {"text": "Price structure", "colspan": 4, "rowspan": 1, "header": True},
-                        {"text": "Volume", "colspan": 1, "rowspan": 2, "header": True},
-                        {"text": "Context", "colspan": 1, "rowspan": 2, "header": True},
-                    ]},
-                    {"section": "head", "cells": [
-                        {"text": "Open", "colspan": 1, "rowspan": 1, "header": True},
-                        {"text": "High", "colspan": 1, "rowspan": 1, "header": True},
-                        {"text": "Low", "colspan": 1, "rowspan": 1, "header": True},
-                        {"text": "Close", "colspan": 1, "rowspan": 1, "header": True},
-                    ]},
-                    {"section": "body", "cells": [
-                        {"text": "Breakout", "colspan": 1, "rowspan": 1, "header": False},
-                        {"text": "Above range", "colspan": 1, "rowspan": 1, "header": False},
-                        {"text": "Activity rises", "colspan": 1, "rowspan": 1, "header": False},
-                        {"text": "Close holds", "colspan": 1, "rowspan": 1, "header": False},
-                        {"text": "Strong", "colspan": 1, "rowspan": 1, "header": False},
-                        {"text": "Trend", "colspan": 1, "rowspan": 1, "header": False},
-                    ]},
+                    {
+                        "section": "head",
+                        "cells": [
+                            {"text": "Price structure", "colspan": 4, "rowspan": 1, "header": True},
+                            {"text": "Volume", "colspan": 1, "rowspan": 2, "header": True},
+                            {"text": "Context", "colspan": 1, "rowspan": 2, "header": True},
+                        ],
+                    },
+                    {
+                        "section": "head",
+                        "cells": [
+                            {"text": "Open", "colspan": 1, "rowspan": 1, "header": True},
+                            {"text": "High", "colspan": 1, "rowspan": 1, "header": True},
+                            {"text": "Low", "colspan": 1, "rowspan": 1, "header": True},
+                            {"text": "Close", "colspan": 1, "rowspan": 1, "header": True},
+                        ],
+                    },
+                    {
+                        "section": "body",
+                        "cells": [
+                            {"text": "Breakout", "colspan": 1, "rowspan": 1, "header": False},
+                            {"text": "Above range", "colspan": 1, "rowspan": 1, "header": False},
+                            {"text": "Activity rises", "colspan": 1, "rowspan": 1, "header": False},
+                            {"text": "Close holds", "colspan": 1, "rowspan": 1, "header": False},
+                            {"text": "Strong", "colspan": 1, "rowspan": 1, "header": False},
+                            {"text": "Trend", "colspan": 1, "rowspan": 1, "header": False},
+                        ],
+                    },
                 ],
             },
         }
@@ -1270,7 +1511,9 @@ class CourseBuilderApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200, response.content)
         record = CourseImport.objects.get(pk=response.json()["record_id"])
-        saved_table = record.payload["modules"][0]["lessons"][0]["content_json"]["tables"]["ohlc-context"]
+        saved_table = record.payload["modules"][0]["lessons"][0]["content_json"]["tables"][
+            "ohlc-context"
+        ]
         self.assertEqual(saved_table["rows"][0]["cells"][1]["rowspan"], 2)
         self.assertEqual(saved_table["rows"][0]["cells"][2]["text"], "Context")
         self.assertEqual(saved_table["rows"][1]["cells"][3]["text"], "Close")
@@ -1288,17 +1531,31 @@ class CourseBuilderApiTests(TestCase):
             "Text after the comparison."
         )
         lesson["content"] = source
-        lesson["teachingFigures"] = [{
-            "id": figure_id,
-            "type": "comparison-cards",
-            "title": "What changing the settings changes",
-            "cards": [
-                {"kicker": "SHORTER WINDOW", "title": "More responsive", "body": "Reacts to fewer recent bars."},
-                {"kicker": "20 PERIODS · 2 DEVIATIONS", "title": "Common baseline", "body": "A reference, not a law."},
-                {"kicker": "LONGER WINDOW", "title": "More smoothed", "body": "Usually reacts more slowly."},
-            ],
-            "note": "Compare one setting at a time.",
-        }]
+        lesson["teachingFigures"] = [
+            {
+                "id": figure_id,
+                "type": "comparison-cards",
+                "title": "What changing the settings changes",
+                "cards": [
+                    {
+                        "kicker": "SHORTER WINDOW",
+                        "title": "More responsive",
+                        "body": "Reacts to fewer recent bars.",
+                    },
+                    {
+                        "kicker": "20 PERIODS · 2 DEVIATIONS",
+                        "title": "Common baseline",
+                        "body": "A reference, not a law.",
+                    },
+                    {
+                        "kicker": "LONGER WINDOW",
+                        "title": "More smoothed",
+                        "body": "Usually reacts more slowly.",
+                    },
+                ],
+                "note": "Compare one setting at a time.",
+            }
+        ]
 
         imported, image_sources = _build_import_payload(state, "builder-native-figure")
         saved_lesson = imported["modules"][0]["lessons"][0]
@@ -1311,7 +1568,6 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(figure["cards"][1]["title"], "Common baseline")
         self.assertEqual(figure["cards"][2]["title"], "More smoothed")
         self.assertEqual(figure["note"], "Compare one setting at a time.")
-
 
     def test_admin_can_delete_saved_builder_draft_and_it_disappears_from_the_list(self):
         saved = self.client.post(
@@ -1335,7 +1591,9 @@ class CourseBuilderApiTests(TestCase):
 
         refreshed = self.client.get(reverse("staff_course_builder_api"))
         self.assertEqual(refreshed.status_code, 200, refreshed.content)
-        self.assertNotIn(record_id, [draft["serverDraftId"] for draft in refreshed.json()["drafts"]])
+        self.assertNotIn(
+            record_id, [draft["serverDraftId"] for draft in refreshed.json()["drafts"]]
+        )
 
     def test_course_builder_delete_does_not_remove_a_submitted_review_item(self):
         saved = self.client.post(
@@ -1355,7 +1613,6 @@ class CourseBuilderApiTests(TestCase):
         )
         self.assertEqual(deleted.status_code, 404)
         self.assertTrue(CourseImport.objects.filter(pk=record.pk).exists())
-
 
     def test_stale_browser_copy_cannot_recreate_a_deleted_builder_draft(self):
         payload = self.draft_payload("builder-delete-stale-copy")
@@ -1393,7 +1650,6 @@ class CourseBuilderApiTests(TestCase):
             [draft["serverDraftId"] for draft in refreshed.json()["drafts"]],
         )
 
-
     def test_get_retires_legacy_builder_draft_after_course_was_deleted_in_admin(self):
         payload = self.draft_payload()
         saved = self.client.post(
@@ -1424,10 +1680,11 @@ class CourseBuilderApiTests(TestCase):
 
         refreshed = self.client.get(reverse("staff_course_builder_api"))
         self.assertEqual(refreshed.status_code, 200, refreshed.content)
-        self.assertNotIn(record_id, [draft["serverDraftId"] for draft in refreshed.json()["drafts"]])
+        self.assertNotIn(
+            record_id, [draft["serverDraftId"] for draft in refreshed.json()["drafts"]]
+        )
         record.refresh_from_db()
         self.assertEqual(record.status, CourseImport.Status.DELETED)
-
 
     def test_published_course_can_be_loaded_into_builder_as_a_separate_review_revision(self):
         course = Course.objects.create(
@@ -1443,36 +1700,85 @@ class CourseBuilderApiTests(TestCase):
             status=Course.Status.PUBLISHED,
         )
         module = CourseModule.objects.create(
-            course=course, title="Foundations", slug="foundations",
-            description="Live module description", position=1, is_published=True,
+            course=course,
+            title="Foundations",
+            slug="foundations",
+            description="Live module description",
+            position=1,
+            is_published=True,
         )
         lesson = Lesson.objects.create(
-            module=module, title="Lesson One", slug="lesson-one",
-            summary="Live lesson summary", format="reading",
+            module=module,
+            title="Lesson One",
+            slug="lesson-one",
+            summary="Live lesson summary",
+            format="reading",
             content_markdown="## Live lesson\n\nOriginal published lesson content.\n\n[[table-block:table-live]]",
             content_json={
-                "schema_version": 1, "source_id": "1.1", "asset_ids": [], "figures": {},
-                "tables": {"table-live": {"title": "Grouped comparison", "rows": [
-                    {"section": "head", "cells": [{"text": "Context", "colspan": 2, "rowspan": 1, "header": True}]},
-                    {"section": "head", "cells": [{"text": "Market", "colspan": 1, "rowspan": 1, "header": True}, {"text": "Response", "colspan": 1, "rowspan": 1, "header": True}]},
-                    {"section": "body", "cells": [{"text": "Range", "colspan": 1, "rowspan": 1, "header": False}, {"text": "Wait", "colspan": 1, "rowspan": 1, "header": False}]},
-                ]}},
+                "schema_version": 1,
+                "source_id": "1.1",
+                "asset_ids": [],
+                "figures": {},
+                "tables": {
+                    "table-live": {
+                        "title": "Grouped comparison",
+                        "rows": [
+                            {
+                                "section": "head",
+                                "cells": [
+                                    {"text": "Context", "colspan": 2, "rowspan": 1, "header": True}
+                                ],
+                            },
+                            {
+                                "section": "head",
+                                "cells": [
+                                    {"text": "Market", "colspan": 1, "rowspan": 1, "header": True},
+                                    {
+                                        "text": "Response",
+                                        "colspan": 1,
+                                        "rowspan": 1,
+                                        "header": True,
+                                    },
+                                ],
+                            },
+                            {
+                                "section": "body",
+                                "cells": [
+                                    {"text": "Range", "colspan": 1, "rowspan": 1, "header": False},
+                                    {"text": "Wait", "colspan": 1, "rowspan": 1, "header": False},
+                                ],
+                            },
+                        ],
+                    }
+                },
                 "related_course_ids": [],
-                "questions": [{
-                    "id": "question-live", "prompt": "Which option is correct?",
-                    "options": ["First option", "Second option"],
-                }],
-                "notebook": {"title": "My notebook", "prompts": []}, "video_url": "",
+                "questions": [
+                    {
+                        "id": "question-live",
+                        "prompt": "Which option is correct?",
+                        "options": ["First option", "Second option"],
+                    }
+                ],
+                "notebook": {"title": "My notebook", "prompts": []},
+                "video_url": "",
             },
-            position=1, is_published=True,
+            position=1,
+            is_published=True,
         )
         LessonInstructorMaterial.objects.create(
             lesson=lesson,
-            rubric_json={"questions": [{
-                "id": "question-live", "prompt": "Which option is correct?",
-                "options": ["First option", "Second option"], "correctIndex": 1,
-                "explanation": "The second option matches the evidence.", "imageId": "",
-            }]},
+            rubric_json={
+                "questions": [
+                    {
+                        "id": "question-live",
+                        "prompt": "Which option is correct?",
+                        "options": ["First option", "Second option"],
+                        "correctIndex": 1,
+                        "explanation": "The second option matches the evidence.",
+                        "imageId": "",
+                    }
+                ]
+            },
         )
         loaded = self.client.post(
             reverse("staff_course_builder_api"),
@@ -1484,12 +1790,22 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(state["serverCourseId"], str(course.pk))
         self.assertEqual(state["modules"][0]["id"], str(module.pk))
         self.assertEqual(state["modules"][0]["lessons"][0]["id"], str(lesson.pk))
-        self.assertEqual(state["modules"][0]["lessons"][0]["content"], "## Live lesson\n\nOriginal published lesson content.\n\n[[table-block:table-live]]")
-        self.assertEqual(state["modules"][0]["lessons"][0]["tables"]["table-live"]["rows"][0]["cells"][0]["colspan"], 2)
+        self.assertEqual(
+            state["modules"][0]["lessons"][0]["content"],
+            "## Live lesson\n\nOriginal published lesson content.\n\n[[table-block:table-live]]",
+        )
+        self.assertEqual(
+            state["modules"][0]["lessons"][0]["tables"]["table-live"]["rows"][0]["cells"][0][
+                "colspan"
+            ],
+            2,
+        )
         self.assertEqual(state["modules"][0]["lessons"][0]["questions"][0]["correctIndex"], 1)
 
         state["summary"] = "Revised summary"
-        state["modules"][0]["lessons"][0]["content"] = "## Live lesson\n\nReviewed replacement content."
+        state["modules"][0]["lessons"][0][
+            "content"
+        ] = "## Live lesson\n\nReviewed replacement content."
         saved = self.client.post(
             reverse("staff_course_builder_api"),
             data=json.dumps({"course": state, "mode": "save", "sync_source": False}),
@@ -1506,7 +1822,9 @@ class CourseBuilderApiTests(TestCase):
 
         revision_state = saved.json()["draft"]
         revision_state["summary"] = "Revised summary"
-        revision_state["modules"][0]["lessons"][0]["content"] = "## Live lesson\n\nReviewed replacement content."
+        revision_state["modules"][0]["lessons"][0][
+            "content"
+        ] = "## Live lesson\n\nReviewed replacement content."
         submitted = self.client.post(
             reverse("staff_course_builder_api"),
             data=json.dumps({"course": revision_state, "mode": "submit", "sync_source": False}),
@@ -1518,13 +1836,19 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(record.status, CourseImport.Status.REVIEW)
 
         from .importing import publish_course_import
+
         published_again = publish_course_import(record, user=self.admin)
         self.assertEqual(published_again.pk, course.pk)
         self.assertEqual(Course.objects.filter(slug="published-edit-course").count(), 1)
         self.assertEqual(Course.objects.get(pk=course.pk).summary, "Revised summary")
         self.assertEqual(CourseModule.objects.get(pk=module.pk).pk, module.pk)
-        self.assertEqual(Lesson.objects.get(pk=lesson.pk).content_markdown, "## Live lesson\n\nReviewed replacement content.")
-        self.assertEqual(CourseImport.objects.get(pk=record.pk).status, CourseImport.Status.PUBLISHED)
+        self.assertEqual(
+            Lesson.objects.get(pk=lesson.pk).content_markdown,
+            "## Live lesson\n\nReviewed replacement content.",
+        )
+        self.assertEqual(
+            CourseImport.objects.get(pk=record.pk).status, CourseImport.Status.PUBLISHED
+        )
 
     def test_public_catalogue_hides_published_placeholder_and_uses_description_fallback(self):
         placeholder = Course.objects.create(
@@ -1535,12 +1859,19 @@ class CourseBuilderApiTests(TestCase):
             status=Course.Status.PUBLISHED,
         )
         placeholder_module = CourseModule.objects.create(
-            course=placeholder, title="Foundations", slug="foundations",
-            position=1, is_published=True,
+            course=placeholder,
+            title="Foundations",
+            slug="foundations",
+            position=1,
+            is_published=True,
         )
         Lesson.objects.create(
-            module=placeholder_module, title="Placeholder lesson", slug="placeholder-lesson",
-            position=1, is_published=True, content_markdown="Placeholder content.",
+            module=placeholder_module,
+            title="Placeholder lesson",
+            slug="placeholder-lesson",
+            position=1,
+            is_published=True,
+            content_markdown="Placeholder content.",
         )
         valid = Course.objects.create(
             title="Volume and Price Analysis",
@@ -1550,12 +1881,19 @@ class CourseBuilderApiTests(TestCase):
             status=Course.Status.PUBLISHED,
         )
         valid_module = CourseModule.objects.create(
-            course=valid, title="Foundations", slug="foundations",
-            position=1, is_published=True,
+            course=valid,
+            title="Foundations",
+            slug="foundations",
+            position=1,
+            is_published=True,
         )
         Lesson.objects.create(
-            module=valid_module, title="Read the evidence", slug="read-the-evidence",
-            position=1, is_published=True, content_markdown="Read the evidence before acting.",
+            module=valid_module,
+            title="Read the evidence",
+            slug="read-the-evidence",
+            position=1,
+            is_published=True,
+            content_markdown="Read the evidence before acting.",
         )
 
         self.client.logout()
@@ -1570,31 +1908,44 @@ class CourseBuilderApiTests(TestCase):
 
     def test_coming_soon_catalogue_entry_exposes_only_announcement_metadata(self):
         CourseImport.objects.create(
-            course_slug="coming-soon-options-course", title="Options Course",
-            manifest_version="course-builder-v1", content_hash="a" * 64,
+            course_slug="coming-soon-options-course",
+            title="Options Course",
+            manifest_version="course-builder-v1",
+            content_hash="a" * 64,
             source_manifest="builder://coming-soon-options-course",
             status=CourseImport.Status.DRAFT,
             payload={
                 "builder_state": {
-                    "title": "Options Course", "slug": "coming-soon-options-course",
+                    "title": "Options Course",
+                    "slug": "coming-soon-options-course",
                     "summary": "A practical options course is nearly ready.",
                     "description": "A longer internal draft description.",
-                    "category": "Options", "level": "Intermediate", "comingSoon": True,
+                    "category": "Options",
+                    "level": "Intermediate",
+                    "comingSoon": True,
                 },
-                "modules": [{
-                    "title": "Secret module title",
-                    "lessons": [{
-                        "title": "Private lesson body",
-                        "content_markdown": "PRIVATE LESSON TEXT THAT MUST NOT LEAK",
-                        "instructor_material": {"questions": [{"prompt": "SECRET ANSWER KEY"}]},
-                    }],
-                }],
+                "modules": [
+                    {
+                        "title": "Secret module title",
+                        "lessons": [
+                            {
+                                "title": "Private lesson body",
+                                "content_markdown": "PRIVATE LESSON TEXT THAT MUST NOT LEAK",
+                                "instructor_material": {
+                                    "questions": [{"prompt": "SECRET ANSWER KEY"}]
+                                },
+                            }
+                        ],
+                    }
+                ],
             },
         )
         self.client.logout()
         response = self.client.get(reverse("academy_public_catalogue"))
         self.assertEqual(response.status_code, 200, response.content)
-        teaser = next(item for item in response.json()["courses"] if item["status"] == "coming-soon")
+        teaser = next(
+            item for item in response.json()["courses"] if item["status"] == "coming-soon"
+        )
         self.assertEqual(teaser["title"], "Options Course")
         self.assertEqual(teaser["description"], "A practical options course is nearly ready.")
         self.assertEqual(teaser["modules"][0]["title"], "Course outline")
@@ -1606,14 +1957,14 @@ class CourseBuilderApiTests(TestCase):
 
 class CourseBuilderPreviewWiringTests(SimpleTestCase):
     def test_new_course_buttons_use_responsive_capture_phase_handler(self):
-        source = Path(__file__).with_name("course_builder_preview.html").read_text(
-            encoding="utf-8"
-        )
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
         self.assertIn(
-            '''const button=target?.closest(\'#newCourseButton, [data-action="new-course"]\');''',
+            """const button=target?.closest(\'#newCourseButton, [data-action="new-course"]\');""",
             source,
         )
-        self.assertIn("event.stopImmediatePropagation();createNewCourseDraft(button);},true);", source)
+        self.assertIn(
+            "event.stopImmediatePropagation();createNewCourseDraft(button);},true);", source
+        )
         self.assertIn("trigger.textContent = 'Creating course…';", source)
         self.assertIn("markDirty();", source)
         self.assertIn("renderEditor();", source)
@@ -1624,11 +1975,8 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
             source,
         )
 
-
     def test_course_builder_uses_site_native_dialogs_instead_of_browser_prompt_apis(self):
-        source = Path(__file__).with_name("course_builder_preview.html").read_text(
-            encoding="utf-8"
-        )
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
         self.assertNotRegex(source, r"\b(?:window\.)?(?:alert|confirm|prompt)\s*\(")
         for marker in (
             'id="builderDialogBackdrop"',
@@ -1645,9 +1993,7 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
                 self.assertIn(marker, source)
 
     def test_builder_diagnostics_capture_startup_render_and_api_phases_locally(self):
-        source = Path(__file__).with_name("course_builder_preview.html").read_text(
-            encoding="utf-8"
-        )
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
         for marker in (
             "window.__TRADETHESIS_COURSE_BUILDER_DIAGNOSTICS",
             "window.addEventListener('error'",
@@ -1670,12 +2016,9 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
         self.assertIn("requestDiagnostic.payloadSummary", source)
         self.assertNotIn("fetch('/staff/course-builder/diagnostics", source)
 
-
     def test_builder_preview_routes_selected_lesson_to_academy_template(self):
-        source = Path(__file__).with_name("course_builder_preview.html").read_text(
-            encoding="utf-8"
-        )
-        self.assertIn('data-builder-website-preview-frame', source)
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
+        self.assertIn("data-builder-website-preview-frame", source)
         self.assertIn(
             "previewUrl.searchParams.set('lesson', String(moduleIndex + 1) + '.' + String(lessonIndex + 1));",
             source,
@@ -1693,13 +2036,21 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
             backend_root / "templates" / "academy" / "course_import_website_preview.html"
         ).read_text(encoding="utf-8")
         views_source = Path(__file__).with_name("views.py").read_text(encoding="utf-8")
-        self.assertIn('MODULE {{ module.position|stringformat:"02d" }} · {{ module_display_title }}', lesson_template)
+        self.assertIn(
+            'MODULE {{ module.position|stringformat:"02d" }} · {{ module_display_title }}',
+            lesson_template,
+        )
         self.assertIn(
             'MODULE {{ selected_module.position|stringformat:"02d" }} · {{ selected_module_display_title }}',
             website_preview,
         )
-        self.assertIn('"module_display_title": _module_display_title(lesson.module.title)', views_source)
-        self.assertIn('"selected_module_display_title": _module_display_title(selected_module.get("title") if selected_module else "")', views_source)
+        self.assertIn(
+            '"module_display_title": _module_display_title(lesson.module.title)', views_source
+        )
+        self.assertIn(
+            '"selected_module_display_title": _module_display_title(selected_module.get("title") if selected_module else "")',
+            views_source,
+        )
 
     def test_module_display_name_removes_an_optional_number_prefix(self):
         from .views import _module_display_title

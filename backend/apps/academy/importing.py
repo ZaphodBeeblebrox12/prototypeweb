@@ -1,4 +1,5 @@
 """Manifest validation, idempotent staging, review checks and atomic publishing."""
+
 import hashlib
 import json
 import re
@@ -45,15 +46,70 @@ _IMAGE = re.compile(r"!\[(?P<alt>[^\]]*)\]\((?P<path>[^)\s]+)(?:\s+[^)]*)?\)")
 _ALLOWED_FORMATS = {"JPEG": ".jpg", "PNG": ".png", "WEBP": ".webp"}
 _MAX_IMAGE_BYTES = 10 * 1024 * 1024
 # SVG is accepted only for checked-in course source figures, never as an admin upload.
-_SVG_TAGS = {"svg", "title", "desc", "g", "rect", "text", "tspan", "line", "path", "circle", "ellipse", "polyline", "polygon"}
-_SVG_ATTRIBUTES = {
-    "xmlns", "width", "height", "viewBox", "x", "y", "x1", "y1", "x2", "y2",
-    "cx", "cy", "r", "rx", "ry", "d", "points", "fill", "fill-opacity",
-    "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin", "stroke-dasharray",
-    "stroke-dashoffset", "opacity", "font-family", "font-size", "font-weight",
-    "text-anchor", "dominant-baseline", "transform", "id", "version",
+_SVG_TAGS = {
+    "svg",
+    "title",
+    "desc",
+    "g",
+    "rect",
+    "text",
+    "tspan",
+    "line",
+    "path",
+    "circle",
+    "ellipse",
+    "polyline",
+    "polygon",
 }
-_SVG_FORBIDDEN_TOKENS = ("<!DOCTYPE", "<!ENTITY", "<script", "<foreignObject", "<image", "<use", "href=", "style=", "url(", "javascript:", "data:")
+_SVG_ATTRIBUTES = {
+    "xmlns",
+    "width",
+    "height",
+    "viewBox",
+    "x",
+    "y",
+    "x1",
+    "y1",
+    "x2",
+    "y2",
+    "cx",
+    "cy",
+    "r",
+    "rx",
+    "ry",
+    "d",
+    "points",
+    "fill",
+    "fill-opacity",
+    "stroke",
+    "stroke-width",
+    "stroke-linecap",
+    "stroke-linejoin",
+    "stroke-dasharray",
+    "stroke-dashoffset",
+    "opacity",
+    "font-family",
+    "font-size",
+    "font-weight",
+    "text-anchor",
+    "dominant-baseline",
+    "transform",
+    "id",
+    "version",
+}
+_SVG_FORBIDDEN_TOKENS = (
+    "<!DOCTYPE",
+    "<!ENTITY",
+    "<script",
+    "<foreignObject",
+    "<image",
+    "<use",
+    "href=",
+    "style=",
+    "url(",
+    "javascript:",
+    "data:",
+)
 
 
 def _sha(data):
@@ -61,7 +117,9 @@ def _sha(data):
 
 
 def _stable_asset_id(course_slug, asset_key):
-    return str(uuid.uuid5(uuid.NAMESPACE_URL, "tradethesis-course:" + course_slug + ":" + asset_key))
+    return str(
+        uuid.uuid5(uuid.NAMESPACE_URL, "tradethesis-course:" + course_slug + ":" + asset_key)
+    )
 
 
 def _safe_source_path(package_root, source, label):
@@ -83,7 +141,7 @@ def _split_module_markdown(source, source_path):
     for index, match in enumerate(matches):
         source_id = match.group("source_id")
         end = matches[index + 1].start() if index + 1 < len(matches) else len(source)
-        body = source[match.end():end].strip()
+        body = source[match.end() : end].strip()
         if source_id in lessons:
             raise ValueError(f"Duplicate source lesson identifier {source_id} in {source_path}.")
         if not body:
@@ -118,7 +176,10 @@ def _inspect_svg(path):
             key = attribute.rsplit("}", 1)[-1]
             if key not in _SVG_ATTRIBUTES or key.lower().startswith("on"):
                 return None, f"source SVG uses unsupported attribute: {key}"
-            if key != "xmlns" and any(token in value.lower() for token in ("url(", "javascript:", "data:", "http://", "https://")):
+            if key != "xmlns" and any(
+                token in value.lower()
+                for token in ("url(", "javascript:", "data:", "http://", "https://")
+            ):
                 return None, f"source SVG contains an external or executable reference in {key}"
     children = {child.tag.rsplit("}", 1)[-1] for child in root}
     if not {"title", "desc"}.issubset(children):
@@ -157,7 +218,11 @@ def inspect_manifest(manifest_path):
         raise ValueError("Unsupported manifest schema_version; expected 1.")
     course = manifest.get("course")
     modules_manifest = manifest.get("modules")
-    if not isinstance(course, dict) or not isinstance(modules_manifest, list) or not modules_manifest:
+    if (
+        not isinstance(course, dict)
+        or not isinstance(modules_manifest, list)
+        or not modules_manifest
+    ):
         raise ValueError("Manifest requires a course object and a non-empty modules list.")
 
     required_course = ("title", "slug")
@@ -177,12 +242,19 @@ def inspect_manifest(manifest_path):
             "position": int(course.get("position", 0)),
             "requires_owned_assets": course.get("requires_owned_assets") is True,
         },
-        "notebook": manifest.get("notebook") or {
+        "notebook": manifest.get("notebook")
+        or {
             "title": "Your Trading Notebook",
             "prompts": [
                 {"label": "Observe", "text": "Describe the evidence visible in the chart."},
-                {"label": "Interpret", "text": "State one possible reading and a reasonable alternative."},
-                {"label": "Test", "text": "Name the next evidence that would strengthen or weaken your reading."},
+                {
+                    "label": "Interpret",
+                    "text": "State one possible reading and a reasonable alternative.",
+                },
+                {
+                    "label": "Test",
+                    "text": "Name the next evidence that would strengthen or weaken your reading.",
+                },
             ],
         },
         "modules": [],
@@ -206,11 +278,15 @@ def inspect_manifest(manifest_path):
         if not module_slug or slugify(module_slug) != module_slug or not module_title:
             raise ValueError(f"Module {module_index} needs a title and stable lowercase slug.")
         if module_slug in seen_module_slugs or module_position in seen_module_positions:
-            raise ValueError(f"Duplicate module slug or position: {module_slug} / {module_position}.")
+            raise ValueError(
+                f"Duplicate module slug or position: {module_slug} / {module_position}."
+            )
         seen_module_slugs.add(module_slug)
         seen_module_positions.add(module_position)
 
-        source_path = _safe_source_path(package_root, module.get("source"), f"module {module_slug} source")
+        source_path = _safe_source_path(
+            package_root, module.get("source"), f"module {module_slug} source"
+        )
         source_text = source_path.read_text(encoding="utf-8")
         source_lessons = _split_module_markdown(source_text, source_path)
         lessons_manifest = module.get("lessons")
@@ -278,8 +354,13 @@ def inspect_manifest(manifest_path):
                         f"Unsupported image URL scheme in lesson {source_id}: {raw_path.split(':', 1)[0]}"
                     )
                 asset_path = (source_path.parent / raw_path).resolve()
-                if asset_path != package_root.resolve() and package_root.resolve() not in asset_path.parents:
-                    raise ValueError(f"Image reference escapes course package in lesson {source_id}: {raw_path}")
+                if (
+                    asset_path != package_root.resolve()
+                    and package_root.resolve() not in asset_path.parents
+                ):
+                    raise ValueError(
+                        f"Image reference escapes course package in lesson {source_id}: {raw_path}"
+                    )
                 asset_key = asset_path.relative_to(package_root.resolve()).as_posix()
                 image_info, image_error = _inspect_image(asset_path)
                 stable_id = _stable_asset_id(course["slug"], asset_key)
@@ -297,33 +378,47 @@ def inspect_manifest(manifest_path):
                     if image_info:
                         asset_sources[asset_key] = asset_path
                     else:
-                        warnings.append(f"{source_id}: {asset_key}: {image_error or 'asset unavailable'}")
+                        warnings.append(
+                            f"{source_id}: {asset_key}: {image_error or 'asset unavailable'}"
+                        )
                 elif not asset_records[asset_key]["alt_text"] and alt:
                     asset_records[asset_key]["alt_text"] = alt
                 return "![" + alt.replace("]", "") + "](asset://" + stable_id + ")"
 
             content = _IMAGE.sub(replace_image, content)
             validate_markdown_source(content)
-            asset_ids = sorted({
-                match.group(1) for match in re.finditer(r"asset://([0-9a-fA-F-]{36})", content)
-            })
+            asset_ids = sorted(
+                {match.group(1) for match in re.finditer(r"asset://([0-9a-fA-F-]{36})", content)}
+            )
             notebook = item.get("notebook") or payload["notebook"]
-            module_payload["lessons"].append({
-                "source_id": source_id,
-                "slug": lesson_slug,
-                "title": lesson_title,
-                "summary": str(item.get("summary", "")).strip(),
-                "position": lesson_position,
-                "duration_minutes": max(1, int(item.get("duration_minutes", 15))),
-                "release_day": max(1, int(item.get("release_day", 1))),
-                "is_preview": bool(item.get("is_preview", False)),
-                "format": str(item.get("format", "reading")),
-                "content_markdown": content.strip(),
-                "content_json": {"schema_version": 1, "source_id": source_id, "asset_ids": asset_ids, "notebook": notebook},
-            })
-        extra_sources = sorted(set(source_lessons) - {str(item.get("source_id", item.get("id", ""))) for item in lessons_manifest})
+            module_payload["lessons"].append(
+                {
+                    "source_id": source_id,
+                    "slug": lesson_slug,
+                    "title": lesson_title,
+                    "summary": str(item.get("summary", "")).strip(),
+                    "position": lesson_position,
+                    "duration_minutes": max(1, int(item.get("duration_minutes", 15))),
+                    "release_day": max(1, int(item.get("release_day", 1))),
+                    "is_preview": bool(item.get("is_preview", False)),
+                    "format": str(item.get("format", "reading")),
+                    "content_markdown": content.strip(),
+                    "content_json": {
+                        "schema_version": 1,
+                        "source_id": source_id,
+                        "asset_ids": asset_ids,
+                        "notebook": notebook,
+                    },
+                }
+            )
+        extra_sources = sorted(
+            set(source_lessons)
+            - {str(item.get("source_id", item.get("id", ""))) for item in lessons_manifest}
+        )
         if extra_sources:
-            raise ValueError(f"Module {module_slug} has Markdown lessons missing from the manifest: {', '.join(extra_sources)}.")
+            raise ValueError(
+                f"Module {module_slug} has Markdown lessons missing from the manifest: {', '.join(extra_sources)}."
+            )
         payload["modules"].append(module_payload)
 
     payload["assets"] = sorted(asset_records.values(), key=lambda item: item["asset_key"])
@@ -337,7 +432,9 @@ def stage_course_import(*, manifest_path, payload, asset_sources, warnings, impo
     content_hash = _sha(json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8"))
     course_meta = payload["course"]
     with transaction.atomic():
-        record = CourseImport.objects.filter(course_slug=course_meta["slug"], content_hash=content_hash).first()
+        record = CourseImport.objects.filter(
+            course_slug=course_meta["slug"], content_hash=content_hash
+        ).first()
         if record is not None:
             return record, False, warnings
         CourseImport.objects.filter(
@@ -372,12 +469,20 @@ def stage_course_import(*, manifest_path, payload, asset_sources, warnings, impo
                     asset.save(update_fields=["source_error"])
                     stage_warnings.append(spec["asset_key"] + ": " + asset.source_error)
                     continue
-                safe_ext = ".svg" if image_info["format"] == "SVG" else _ALLOWED_FORMATS[image_info["format"]]
+                safe_ext = (
+                    ".svg"
+                    if image_info["format"] == "SVG"
+                    else _ALLOWED_FORMATS[image_info["format"]]
+                )
                 allowed_suffixes = {".jpg", ".jpeg"} if safe_ext == ".jpg" else {safe_ext}
                 if source_file.suffix.lower() not in allowed_suffixes:
-                    asset.source_error = "Source file extension does not match its decoded image format."
+                    asset.source_error = (
+                        "Source file extension does not match its decoded image format."
+                    )
                     asset.save(update_fields=["source_error"])
-                    stage_warnings.append(spec["asset_key"] + ": filename extension does not match the decoded image.")
+                    stage_warnings.append(
+                        spec["asset_key"] + ": filename extension does not match the decoded image."
+                    )
                     continue
                 with source_file.open("rb") as stream:
                     asset.file.save("asset" + safe_ext, File(stream), save=True)
@@ -406,68 +511,160 @@ def validate_import_for_publish(record):
             errors.append("Module " + str(module.get("title", "")) + " has no lessons.")
         for lesson in module.get("lessons", []):
             if not lesson.get("title") or not lesson.get("content_markdown", "").strip():
-                errors.append("Lesson " + str(lesson.get("title", lesson.get("source_id", ""))) + " is missing a title or lesson text.")
+                errors.append(
+                    "Lesson "
+                    + str(lesson.get("title", lesson.get("source_id", "")))
+                    + " is missing a title or lesson text."
+                )
             if record.target_course_id:
-                instructor_material = lesson.get("instructor_material") if isinstance(lesson.get("instructor_material"), dict) else {}
-                questions = instructor_material.get("questions") if isinstance(instructor_material.get("questions"), list) else []
+                instructor_material = (
+                    lesson.get("instructor_material")
+                    if isinstance(lesson.get("instructor_material"), dict)
+                    else {}
+                )
+                questions = (
+                    instructor_material.get("questions")
+                    if isinstance(instructor_material.get("questions"), list)
+                    else []
+                )
                 for question_index, question in enumerate(questions, start=1):
-                    if not isinstance(question, dict) or not str(question.get("prompt") or "").strip():
-                        errors.append("Lesson " + str(lesson.get("title", "")) + " question " + str(question_index) + " needs a prompt.")
+                    if (
+                        not isinstance(question, dict)
+                        or not str(question.get("prompt") or "").strip()
+                    ):
+                        errors.append(
+                            "Lesson "
+                            + str(lesson.get("title", ""))
+                            + " question "
+                            + str(question_index)
+                            + " needs a prompt."
+                        )
                         continue
-                    options = question.get("options") if isinstance(question.get("options"), list) else []
+                    options = (
+                        question.get("options") if isinstance(question.get("options"), list) else []
+                    )
                     try:
                         correct_index = int(question.get("correctIndex", -1))
                     except (TypeError, ValueError):
                         correct_index = -1
                     if len(options) < 2 or correct_index < 0 or correct_index >= len(options):
-                        errors.append("Lesson " + str(lesson.get("title", "")) + " question " + str(question_index) + " needs at least two choices and a correct answer selected.")
-            content_json = lesson.get("content_json") if isinstance(lesson.get("content_json"), dict) else {}
-            referenced_asset_ids.update(str(value).lower() for value in content_json.get("asset_ids", []) if value)
+                        errors.append(
+                            "Lesson "
+                            + str(lesson.get("title", ""))
+                            + " question "
+                            + str(question_index)
+                            + " needs at least two choices and a correct answer selected."
+                        )
+            content_json = (
+                lesson.get("content_json") if isinstance(lesson.get("content_json"), dict) else {}
+            )
+            referenced_asset_ids.update(
+                str(value).lower() for value in content_json.get("asset_ids", []) if value
+            )
             lesson_regional_asset_ids = regional_block_asset_ids(content_json)
             referenced_asset_ids.update(lesson_regional_asset_ids)
             regional_asset_ids.update(lesson_regional_asset_ids)
             for regional_block in regional_block_values(content_json):
-                base_content = str(regional_block.get("base_content", regional_block.get("baseContent", "")) or "")
+                base_content = str(
+                    regional_block.get("base_content", regional_block.get("baseContent", "")) or ""
+                )
                 if contains_unmanaged_regional_image(base_content):
-                    errors.append("Lesson " + str(lesson.get("title", "")) + " regional content must use managed asset references for images; external image URLs cannot be region-locked.")
-                variants = regional_block.get("variants") if isinstance(regional_block.get("variants"), list) else []
+                    errors.append(
+                        "Lesson "
+                        + str(lesson.get("title", ""))
+                        + " regional content must use managed asset references for images; external image URLs cannot be region-locked."
+                    )
+                variants = (
+                    regional_block.get("variants")
+                    if isinstance(regional_block.get("variants"), list)
+                    else []
+                )
                 seen_targets = set()
                 for variant in variants:
                     if not isinstance(variant, dict):
                         continue
                     scope = str(variant.get("scope") or "country").strip().lower()
-                    code = str(variant.get("code") or variant.get("country") or variant.get("region") or "").strip().upper()
+                    code = (
+                        str(
+                            variant.get("code")
+                            or variant.get("country")
+                            or variant.get("region")
+                            or ""
+                        )
+                        .strip()
+                        .upper()
+                    )
                     target = (scope, code)
                     if target in seen_targets:
-                        errors.append("Lesson " + str(lesson.get("title", "")) + " regional block repeats the " + code + " audience.")
+                        errors.append(
+                            "Lesson "
+                            + str(lesson.get("title", ""))
+                            + " regional block repeats the "
+                            + code
+                            + " audience."
+                        )
                     seen_targets.add(target)
                     if scope == "country" and code not in CONTENT_COUNTRY_TO_REGION:
-                        errors.append("Lesson " + str(lesson.get("title", "")) + " uses an unsupported regional country code: " + (code or "(empty)") + ".")
+                        errors.append(
+                            "Lesson "
+                            + str(lesson.get("title", ""))
+                            + " uses an unsupported regional country code: "
+                            + (code or "(empty)")
+                            + "."
+                        )
                     elif scope == "region" and code not in REGIONAL_CONTENT_CODES:
-                        errors.append("Lesson " + str(lesson.get("title", "")) + " uses an unsupported regional audience: " + (code or "(empty)") + ".")
+                        errors.append(
+                            "Lesson "
+                            + str(lesson.get("title", ""))
+                            + " uses an unsupported regional audience: "
+                            + (code or "(empty)")
+                            + "."
+                        )
                     elif scope not in {"country", "region"}:
-                        errors.append("Lesson " + str(lesson.get("title", "")) + " has an invalid regional variant scope.")
+                        errors.append(
+                            "Lesson "
+                            + str(lesson.get("title", ""))
+                            + " has an invalid regional variant scope."
+                        )
                     variant_content = str(variant.get("content") or "")
                     if contains_unmanaged_regional_image(variant_content):
-                        errors.append("Lesson " + str(lesson.get("title", "")) + " regional content must use managed asset references for images; external image URLs cannot be region-locked.")
+                        errors.append(
+                            "Lesson "
+                            + str(lesson.get("title", ""))
+                            + " regional content must use managed asset references for images; external image URLs cannot be region-locked."
+                        )
                     if not bool(variant.get("hidden", False)) and not variant_content.strip():
-                        errors.append("Lesson " + str(lesson.get("title", "")) + " has an empty regional variant for " + code + ". Add content or explicitly mark the variant hidden.")
+                        errors.append(
+                            "Lesson "
+                            + str(lesson.get("title", ""))
+                            + " has an empty regional variant for "
+                            + code
+                            + ". Add content or explicitly mark the variant hidden."
+                        )
     staged = {str(asset.stable_asset_id): asset for asset in record.assets.all()}
-    live = {str(asset.pk): asset for asset in CourseMediaAsset.objects.filter(pk__in=referenced_asset_ids)}
+    live = {
+        str(asset.pk): asset
+        for asset in CourseMediaAsset.objects.filter(pk__in=referenced_asset_ids)
+    }
     for asset_id in sorted(referenced_asset_ids):
         stage_asset = staged.get(asset_id)
         live_asset = live.get(asset_id)
         staged_has_file = bool(stage_asset and stage_asset.file)
         live_has_file = bool(live_asset and live_asset.file)
-        source_url = (stage_asset.original_url if stage_asset else "") or (live_asset.original_url if live_asset else "")
+        source_url = (stage_asset.original_url if stage_asset else "") or (
+            live_asset.original_url if live_asset else ""
+        )
         has_source_url = bool(re.match(r"^https?://", source_url, re.IGNORECASE))
         requires_owned_assets = bool(
-            (payload.get("course") if isinstance(payload.get("course"), dict) else {}).get("requires_owned_assets", False)
+            (payload.get("course") if isinstance(payload.get("course"), dict) else {}).get(
+                "requires_owned_assets", False
+            )
         )
         if asset_id in regional_asset_ids and not staged_has_file and not live_has_file:
             key = stage_asset.asset_key if stage_asset else asset_id
             errors.append(
-                "Regional content image " + key
+                "Regional content image "
+                + key
                 + " must be uploaded to managed course storage before publishing. "
                 + "External image URLs cannot be protected by regional access rules."
             )
@@ -485,17 +682,23 @@ def validate_import_for_publish(record):
                 + stage_asset.asset_key
                 + " must be replaced with an approved local chart before publishing."
             )
-        elif not staged_has_file and not live_has_file and (requires_owned_assets or not has_source_url):
+        elif (
+            not staged_has_file
+            and not live_has_file
+            and (requires_owned_assets or not has_source_url)
+        ):
             key = stage_asset.asset_key if stage_asset else asset_id
             if has_source_url:
                 errors.append(
-                    "Missing course-owned image " + key
+                    "Missing course-owned image "
+                    + key
                     + ". This course requires persistent owned images; upload an approved "
                     "JPEG, PNG or WebP replacement before publishing."
                 )
             else:
                 errors.append(
-                    "Missing course image " + key
+                    "Missing course image "
+                    + key
                     + ". Upload a valid JPEG, PNG or WebP in Course import assets before publishing."
                 )
     return list(dict.fromkeys(errors))
@@ -516,17 +719,23 @@ def publish_course_import(record, *, user):
         if record.target_course_id:
             course = Course.objects.select_for_update().filter(pk=record.target_course_id).first()
             if course is None or course.status != Course.Status.PUBLISHED:
-                raise ValidationError("The published course attached to this revision is no longer available.")
+                raise ValidationError(
+                    "The published course attached to this revision is no longer available."
+                )
         if course is None:
             course = Course.objects.filter(slug=record.course_slug).first()
         if course is None:
             course = Course.objects.create(
-                title=course_data["title"], slug=course_data["slug"],
-                summary=course_data.get("summary", ""), description=course_data.get("description", ""),
-                category=course_data.get("category", ""), level=course_data.get("level", ""),
+                title=course_data["title"],
+                slug=course_data["slug"],
+                summary=course_data.get("summary", ""),
+                description=course_data.get("description", ""),
+                category=course_data.get("category", ""),
+                level=course_data.get("level", ""),
                 estimated_duration=course_data.get("estimated_duration", ""),
                 learning_outcomes=course_data.get("learning_outcomes", []),
-                position=course_data.get("position", 0), status=Course.Status.DRAFT,
+                position=course_data.get("position", 0),
+                status=Course.Status.DRAFT,
             )
         else:
             for index, module in enumerate(course.modules.order_by("position", "pk")):
@@ -541,10 +750,20 @@ def publish_course_import(record, *, user):
         course.estimated_duration = course_data.get("estimated_duration", course.estimated_duration)
         course.learning_outcomes = course_data.get("learning_outcomes", course.learning_outcomes)
         course.position = course_data.get("position", 0)
-        course.save(update_fields=[
-            "title", "slug", "summary", "description", "category", "level",
-            "estimated_duration", "learning_outcomes", "position", "updated_at",
-        ])
+        course.save(
+            update_fields=[
+                "title",
+                "slug",
+                "summary",
+                "description",
+                "category",
+                "level",
+                "estimated_duration",
+                "learning_outcomes",
+                "position",
+                "updated_at",
+            ]
+        )
 
         module_slugs = {item["slug"] for item in payload["modules"]}
         all_modules = list(course.modules.all())
@@ -555,10 +774,13 @@ def publish_course_import(record, *, user):
 
         for module_index, module_data in enumerate(payload["modules"]):
             module, _created = CourseModule.objects.get_or_create(
-                course=course, slug=module_data["slug"],
+                course=course,
+                slug=module_data["slug"],
                 defaults={
-                    "title": module_data["title"], "description": module_data.get("summary", ""),
-                    "position": 20000 + module_index, "is_published": False,
+                    "title": module_data["title"],
+                    "description": module_data.get("summary", ""),
+                    "position": 20000 + module_index,
+                    "is_published": False,
                 },
             )
             existing_lessons = list(module.lessons.all())
@@ -570,15 +792,20 @@ def publish_course_import(record, *, user):
             module.description = module_data.get("summary", "")
             module.position = 20000 + module_index
             module.is_published = False
-            module.save(update_fields=["title", "description", "position", "is_published", "updated_at"])
+            module.save(
+                update_fields=["title", "description", "position", "is_published", "updated_at"]
+            )
 
             lesson_slugs = {item["slug"] for item in module_data["lessons"]}
             for lesson_index, lesson_data in enumerate(module_data["lessons"]):
                 lesson, created = Lesson.objects.get_or_create(
-                    module=module, slug=lesson_data["slug"],
+                    module=module,
+                    slug=lesson_data["slug"],
                     defaults={
-                        "title": lesson_data["title"], "position": 20000 + lesson_index,
-                        "content_markdown": "", "is_published": False,
+                        "title": lesson_data["title"],
+                        "position": 20000 + lesson_index,
+                        "content_markdown": "",
+                        "is_published": False,
                     },
                 )
                 next_markdown = lesson_data["content_markdown"]
@@ -595,7 +822,9 @@ def publish_course_import(record, *, user):
                     "content_json": next_json,
                     "is_published": True,
                 }
-                changed_fields = [field for field, value in next_fields.items() if getattr(lesson, field) != value]
+                changed_fields = [
+                    field for field, value in next_fields.items() if getattr(lesson, field) != value
+                ]
                 if not created and changed_fields:
                     CourseContentRevision.objects.create(
                         lesson=lesson,
@@ -659,17 +888,26 @@ def publish_course_import(record, *, user):
             media_asset = CourseMediaAsset.objects.filter(pk=asset_id).first()
             if media_asset is None:
                 media_asset = CourseMediaAsset(
-                    id=asset_id, course=course, asset_key=asset_data["asset_key"],
-                    alt_text=asset_data.get("alt_text", ""), source_path=asset_data.get("source_path", ""),
+                    id=asset_id,
+                    course=course,
+                    asset_key=asset_data["asset_key"],
+                    alt_text=asset_data.get("alt_text", ""),
+                    source_path=asset_data.get("source_path", ""),
                     original_url=asset_data.get("original_url", ""),
                     updated_by=user,
                 )
             else:
                 media_asset.course = course
                 media_asset.asset_key = asset_data["asset_key"]
-                media_asset.alt_text = (staged_asset.alt_text if staged_asset and staged_asset.alt_text else asset_data.get("alt_text", "")) or media_asset.alt_text
+                media_asset.alt_text = (
+                    staged_asset.alt_text
+                    if staged_asset and staged_asset.alt_text
+                    else asset_data.get("alt_text", "")
+                ) or media_asset.alt_text
                 media_asset.source_path = asset_data.get("source_path", "")
-                media_asset.original_url = asset_data.get("original_url", "") or media_asset.original_url
+                media_asset.original_url = (
+                    asset_data.get("original_url", "") or media_asset.original_url
+                )
                 media_asset.updated_by = user
             if staged_asset and staged_asset.file:
                 media_asset.file.name = staged_asset.file.name
@@ -690,6 +928,10 @@ def publish_course_import(record, *, user):
             user=user,
             object_type="course",
             object_id=course.pk,
-            metadata={"course_slug": course.slug, "course_import_id": str(record.pk), "content_hash": record.content_hash},
+            metadata={
+                "course_slug": course.slug,
+                "course_import_id": str(record.pk),
+                "content_hash": record.content_hash,
+            },
         )
         return course

@@ -1,4 +1,5 @@
 """Normalize editable marketing fields for the public micro-course catalogue."""
+
 from __future__ import annotations
 
 import re
@@ -6,6 +7,7 @@ import re
 
 def _text(value, limit):
     return " ".join(str(value or "").split())[:limit]
+
 
 def normalize_catalogue_presentation(value):
     value = value if isinstance(value, dict) else {}
@@ -33,9 +35,17 @@ def normalize_catalogue_presentation(value):
         "why_this_one": _text(value.get("why_this_one", value.get("whyThisOne")), 500),
     }
 
+
 def _has_copy(value):
     value = normalize_catalogue_presentation(value)
-    return bool(value["hook"] or value["problem"] or value["learning_focus"] or value["tags"] or value["why_this_one"])
+    return bool(
+        value["hook"]
+        or value["problem"]
+        or value["learning_focus"]
+        or value["tags"]
+        or value["why_this_one"]
+    )
+
 
 def catalogue_presentation_from_builder_state(state):
     state = state if isinstance(state, dict) else {}
@@ -48,6 +58,7 @@ def catalogue_presentation_from_builder_state(state):
     }
     value = normalize_catalogue_presentation(raw)
     return value, bool(state.get("cataloguePresentationConfigured", False) or _has_copy(value))
+
 
 def catalogue_presentation_from_payload(payload):
     payload = payload if isinstance(payload, dict) else {}
@@ -62,6 +73,7 @@ def catalogue_presentation_from_payload(payload):
     state = payload.get("builder_state") if isinstance(payload.get("builder_state"), dict) else {}
     return catalogue_presentation_from_builder_state(state)
 
+
 def builder_fields_for_catalogue_presentation(value, configured=None):
     value = normalize_catalogue_presentation(value)
     if configured is None:
@@ -75,6 +87,7 @@ def builder_fields_for_catalogue_presentation(value, configured=None):
         "cataloguePresentationConfigured": bool(configured),
     }
 
+
 def catalogue_presentation_api_fields(value, configured):
     value = normalize_catalogue_presentation(value)
     return {
@@ -86,14 +99,17 @@ def catalogue_presentation_api_fields(value, configured):
         "cataloguePresentationConfigured": bool(configured),
     }
 
+
 def default_presentation_for_course(slug):
     """Seed the approved copy on the existing Support & Resistance course only."""
     if slug != "support-resistance":
         return None
-    return normalize_catalogue_presentation({
-        "hook": "Mark fewer zones. Give each one a reason.",
-        "problem": "For traders who see a possible level around every swing and need a reason to keep or discard it.",
-        "learning_focus": "Choose and defend relevant zones, read reactions and breaks, and identify invalidation.",
-        "tags": [],
-        "why_this_one": "Treats zones as decision areas to justify, test and invalidate—not lines to collect.",
-    })
+    return normalize_catalogue_presentation(
+        {
+            "hook": "Mark fewer zones. Give each one a reason.",
+            "problem": "For traders who see a possible level around every swing and need a reason to keep or discard it.",
+            "learning_focus": "Choose and defend relevant zones, read reactions and breaks, and identify invalidation.",
+            "tags": [],
+            "why_this_one": "Treats zones as decision areas to justify, test and invalidate—not lines to collect.",
+        }
+    )

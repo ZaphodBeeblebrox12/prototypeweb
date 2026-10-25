@@ -1,4 +1,5 @@
 """Focused tests for private GitHub course asset storage."""
+
 import base64
 from unittest.mock import Mock, patch
 
@@ -59,13 +60,15 @@ class PrivateCourseAssetStorageTests(SimpleTestCase):
         self.assertEqual(image.read(), b"private image")
 
     def test_open_falls_back_to_local_storage_when_github_asset_is_absent(self):
-        with patch.object(self.storage, "_metadata", return_value=None), patch.object(
-            FileSystemStorage, "_open", autospec=True, side_effect=FileNotFoundError
-        ) as local_open:
+        with (
+            patch.object(self.storage, "_metadata", return_value=None),
+            patch.object(
+                FileSystemStorage, "_open", autospec=True, side_effect=FileNotFoundError
+            ) as local_open,
+        ):
             with self.assertRaises(FileNotFoundError):
                 self.storage._open("missing.png")
             local_open.assert_called_once_with(self.storage, "missing.png", "rb")
-
 
     def test_missing_remote_provider_refuses_hosted_image_writes(self):
         with override_settings(
@@ -79,8 +82,9 @@ class PrivateCourseAssetStorageTests(SimpleTestCase):
                 storage._save("academy/course-assets/figure.png", ContentFile(b"image bytes"))
 
     def test_remote_exists_does_not_count_local_fallback_as_durable(self):
-        with patch.object(self.storage, "_metadata", return_value=None), patch.object(
-            FileSystemStorage, "exists", autospec=True, return_value=True
+        with (
+            patch.object(self.storage, "_metadata", return_value=None),
+            patch.object(FileSystemStorage, "exists", autospec=True, return_value=True),
         ):
             self.assertTrue(self.storage.exists("legacy-local-image.png"))
             self.assertFalse(self.storage.remote_exists("legacy-local-image.png"))
