@@ -1180,7 +1180,8 @@ body.builder-dialog-open { overflow:hidden; }
     state.selectedModuleId = importedCourse.modules?.[0]?.id || null;
     state.selectedLessonId = importedCourse.modules?.[0]?.lessons?.[0]?.id || null;
     state.view = 'editor';
-    state.tab = 'overview';
+    state.tab = 'curriculum';
+    state.tradingPathOutlineAutoOpened = true;
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (error) {
       console.warn('The imported Trading Path draft could not be cached in this browser.', error);
     }
@@ -2617,7 +2618,7 @@ body.builder-dialog-open { overflow:hidden; }
     runRenderStep('header-state', renderHeaderState);
     diagnosticStage('render-complete');
   }
-  function selectCourse(id){if(academyReady&&currentCourse()&&currentCourse().id!==id){clearTimeout(saveTimer);clearTimeout(academySaveTimer);saveCurrentToAcademy(false,false).catch(error=>toast('Could not save the previous draft: '+error.message));}state.selectedCourseId=id;const c=currentCourse();if(c){state.selectedModuleId=c.modules[0]?.id||null;state.selectedLessonId=c.modules[0]?.lessons[0]?.id||null;}state.view='editor';previewMode=false;render();}
+  function selectCourse(id){if(academyReady&&currentCourse()&&currentCourse().id!==id){clearTimeout(saveTimer);clearTimeout(academySaveTimer);saveCurrentToAcademy(false,false).catch(error=>toast('Could not save the previous draft: '+error.message));}state.selectedCourseId=id;const c=currentCourse();if(c){state.selectedModuleId=c.modules[0]?.id||null;state.selectedLessonId=c.modules[0]?.lessons[0]?.id||null;if(c.slug==='your-trading-path-import-draft'&&!state.tradingPathOutlineAutoOpened){state.tab='curriculum';state.tradingPathOutlineAutoOpened=true;}}state.view='editor';previewMode=false;render();}
   function saveDraft(){const c=currentCourse();if(!c)return;c.updatedAt=nowText();if(c.status==='published')c.status='draft-update';persist(true);render();}
   function publishCourse(){const c=currentCourse();if(!c)return;const errs=[];if(!c.title.trim())errs.push('Add a course title.');if(!c.summary.trim())errs.push('Add a short course summary.');if(!c.modules.length)errs.push('Add at least one module.');if(!allLessons(c).length)errs.push('Add at least one lesson.');if(allLessons(c).some(l=>!l.title.trim()||!l.content.trim()))errs.push('Every lesson needs a title and lesson content.');if(errs.length){toast(errs[0]);if(!c.title.trim()||!c.summary.trim())state.tab='overview';else if(!allLessons(c).length)state.tab='curriculum';else state.tab='lesson';render();return;}const snapshot=JSON.parse(JSON.stringify(c));snapshot.status='published';snapshot.publishedSnapshot=null;snapshot.updatedAt=nowText();c.status='published';c.publishedAt=nowText();c.updatedAt=nowText();c.publishedSnapshot=snapshot;persist(false);state.tab='overview';render();$('#catalogueSection').scrollIntoView({behavior:'smooth',block:'start'});toast('Published in this preview. The course now appears under Courses offered.');}
   function duplicateCourse(){const c=currentCourse();if(!c)return;const copy=JSON.parse(JSON.stringify(c));copy.id=uid('course');copy.title=(c.title||'Untitled course')+' — Copy';copy.slug=slugify(copy.title);copy.status='draft';copy.publishedAt=null;copy.publishedSnapshot=null;copy.createdAt=nowText();copy.updatedAt='Not saved yet';copy.modules.forEach(m=>{m.id=uid('module');m.lessons.forEach(l=>{l.id=uid('lesson');l.questions.forEach(q=>q.id=uid('q'));});});state.courses.unshift(copy);state.selectedCourseId=copy.id;state.selectedModuleId=copy.modules[0]?.id||null;state.selectedLessonId=copy.modules[0]?.lessons[0]?.id||null;state.tab='overview';persist(false);render();toast('Course duplicated as a new draft.');}
@@ -4436,9 +4437,19 @@ body.builder-dialog-open { overflow:hidden; }
         state.selectedModuleId = importedCourse.modules?.[0]?.id || null;
         state.selectedLessonId = importedCourse.modules?.[0]?.lessons?.[0]?.id || null;
         state.view = 'editor';
-        state.tab = 'overview';
+        state.tab = 'curriculum';
+        state.tradingPathOutlineAutoOpened = true;
         stateChanged = true;
         autoImportedTradingPath = true;
+      }
+      const selectedTradingPath = state.courses.find(course =>
+        String(course.id) === String(state.selectedCourseId || '') &&
+        String(course.slug || '') === 'your-trading-path-import-draft'
+      );
+      if (selectedTradingPath && !state.tradingPathOutlineAutoOpened) {
+        state.tab = 'curriculum';
+        state.tradingPathOutlineAutoOpened = true;
+        stateChanged = true;
       }
       academyReady = true;
       if (editRevision === revisionAtStart) hasUnsavedChanges = false;
@@ -4478,7 +4489,8 @@ body.builder-dialog-open { overflow:hidden; }
           state.selectedModuleId = importedCourse.modules?.[0]?.id || null;
           state.selectedLessonId = importedCourse.modules?.[0]?.lessons?.[0]?.id || null;
           state.view = 'editor';
-          state.tab = 'overview';
+          state.tab = 'curriculum';
+          state.tradingPathOutlineAutoOpened = true;
           render();
           const savedRemoteDraft = remoteDrafts.find(item => String(item.slug || '') === desiredSlug);
           if (savedRemoteDraft) {

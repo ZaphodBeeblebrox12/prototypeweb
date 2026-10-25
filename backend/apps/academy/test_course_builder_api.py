@@ -1990,6 +1990,9 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
             "autoImportedTradingPath",
             "Your Trading Path is now in Your courses as an editable draft.",
             "await saveCurrentToAcademy(false, false)",
+            "state.tab = 'curriculum';",
+            "state.tradingPathOutlineAutoOpened = true;",
+            "selectedTradingPath && !state.tradingPathOutlineAutoOpened",
         ):
             with self.subTest(marker=marker):
                 self.assertIn(marker, source)
