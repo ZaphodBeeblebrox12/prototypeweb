@@ -4722,6 +4722,28 @@ body.builder-dialog-open { overflow:hidden; }
   diagnosticStage('academy-sync-dispatch');
   academySyncPromise = syncAcademy();
 
+  // Use the existing TradeThesis dialog for browser Back where the browser
+  // permits it. A same-URL history checkpoint keeps the page alive long enough
+  // to ask before leaving; the browser still owns tab-close/reload warnings.
+  const courseBuilderExitGuardStateKey = '__tradethesisCourseBuilderExitGuard';
+  let courseBuilderExitGuardArmed = false;
+  let allowCourseBuilderHistoryExit = false;
+  let handlingCourseBuilderBack = false;
+
+  function armCourseBuilderExitGuard() {
+    if (courseBuilderExitGuardArmed) return;
+    try {
+      const currentHistoryState = window.history.state;
+      const guardedHistoryState = currentHistoryState && typeof currentHistoryState === 'object'
+        ? {...currentHistoryState, [courseBuilderExitGuardStateKey]:true}
+        : {[courseBuilderExitGuardStateKey]:true};
+      window.history.pushState(guardedHistoryState, '', window.location.href);
+      courseBuilderExitGuardArmed = true;
+    } catch (error) {
+      console.warn('The Course Builder browser-back guard could not be installed.', error);
+    }
+  }
+
   // Clean exits navigate immediately. If edits or a save are pending, offer to
   // save the draft to the shared Academy first; Cancel keeps the editor open.
   document.addEventListener('click', async event => {
@@ -4744,10 +4766,72 @@ body.builder-dialog-open { overflow:hidden; }
       .catch(error => toast('Could not save before leaving: ' + error.message));
   });
   window.addEventListener('beforeunload', event => {
+    // This flag is set only after the user has confirmed an intentional exit
+    // through the TradeThesis dialog or chosen browser Back with a clean draft.
+    if (allowCourseBuilderHistoryExit) return;
     if (!hasUnsavedChanges && !academySaving && !academySavePending) return;
     event.preventDefault();
     event.returnValue = '';
   });
+
+  window.addEventListener('popstate', async event => {
+    if (allowCourseBuilderHistoryExit) return;
+
+    // Forward navigation back onto our sentinel is not an exit attempt.
+    if (event.state && event.state[courseBuilderExitGuardStateKey]) {
+      courseBuilderExitGuardArmed = true;
+      return;
+    }
+
+    // The sentinel was consumed by Back. Restore it immediately so a Cancel
+    // leaves the user on the Course Builder rather than one history entry back.
+    courseBuilderExitGuardArmed = false;
+    if (handlingCourseBuilderBack) {
+      armCourseBuilderExitGuard();
+      return;
+    }
+
+    const workPending = hasUnsavedChanges || academySaving || academySavePending;
+    if (!workPending) {
+      // The draft is clean, so complete the user's Back action.
+      allowCourseBuilderHistoryExit = true;
+      window.history.back();
+      return;
+    }
+
+    armCourseBuilderExitGuard();
+    handlingCourseBuilderBack = true;
+    try {
+      const confirmed = await builderConfirm(
+        'Your latest edits may not have finished saving. Save the draft to the Academy and leave this page? Choose Cancel to stay here.',
+        {title:'Save before leaving?', confirmLabel:'Save and leave'}
+      );
+      if (!confirmed) return;
+
+      clearTimeout(saveTimer);
+      clearTimeout(academySaveTimer);
+      try {
+        await saveCurrentToAcademy(false, true);
+      } catch (error) {
+        toast('Could not save before leaving: ' + error.message);
+        return;
+      }
+
+      if (hasUnsavedChanges || academySaving || academySavePending) {
+        toast('New edits are still waiting to save. Please save them before leaving.');
+        return;
+      }
+
+      // We are at the sentinel; skip both it and the Course Builder entry to
+      // return to the page that was open before the builder.
+      allowCourseBuilderHistoryExit = true;
+      window.history.go(-2);
+    } finally {
+      handlingCourseBuilderBack = false;
+    }
+  });
+
+  armCourseBuilderExitGuard();
 
   function sameDraftModuleIdentity(left, right) {
     const signature = course => {
