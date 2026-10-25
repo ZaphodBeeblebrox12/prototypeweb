@@ -161,14 +161,14 @@ class Plan(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["tier", "is_trial"],
-                condition=models.Q(product__isnull=True),
+                check=models.Q(product__isnull=True),  # type: ignore[call-arg]
                 name="unique_ungrouped_tier_trial",
                 violation_error_message=_(
                     "Only one plan per tier is allowed outside a product (ungrouped)."),
             ),
             models.UniqueConstraint(
                 fields=["product", "tier", "is_trial"],
-                condition=models.Q(product__isnull=False),
+                check=models.Q(product__isnull=False),  # type: ignore[call-arg]
                 name="unique_product_tier_trial",
                 violation_error_message=_(
                     "A plan with this tier already exists in this product."),
@@ -348,7 +348,7 @@ class GeoPlanPrice(models.Model):
         ordering = ["plan", "interval", "country", "region"]
         constraints = [
             models.CheckConstraint(
-                condition=~models.Q(country__isnull=True, region__isnull=True),
+                check=~models.Q(country__isnull=True, region__isnull=True),  # type: ignore[call-arg]
                 name="geo_price_must_have_country_or_region",
                 violation_error_message="GeoPlanPrice must have either country or region specified. Use PlanPrice for global pricing.",
             ),

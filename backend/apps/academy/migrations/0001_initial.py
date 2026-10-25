@@ -94,7 +94,7 @@ class Migration(migrations.Migration):
         migrations.AddConstraint(model_name="lesson", constraint=models.UniqueConstraint(fields=("module", "slug"), name="academy_les_mod_slug_uq")),
         migrations.AddConstraint(model_name="lesson", constraint=models.UniqueConstraint(fields=("module", "position"), name="academy_les_mod_pos_uq")),
         migrations.AddConstraint(model_name="courseentitlement", constraint=models.UniqueConstraint(fields=("user", "course"), name="academy_ent_user_course_uq")),
-        migrations.AddConstraint(model_name="courseentitlement", constraint=models.CheckConstraint(condition=models.Q(("expires_at__isnull", True), ("expires_at__gt", models.F("starts_at")), _connector="OR"), name="academy_ent_expiry_start_ck")),
+        migrations.AddConstraint(model_name="courseentitlement", constraint=models.CheckConstraint(check=models.Q(("expires_at__isnull", True), ("expires_at__gt", models.F("starts_at")), _connector="OR"), name="academy_ent_expiry_start_ck")),  # type: ignore[call-arg]
         migrations.AddConstraint(model_name="lessonprogress", constraint=models.UniqueConstraint(fields=("user", "lesson"), name="academy_prog_user_lesson_uq")),
         migrations.AddIndex(model_name="course", index=models.Index(fields=["status", "position"], name="academy_course_status_pos")),
         migrations.AddIndex(model_name="lesson", index=models.Index(fields=["module", "is_published", "position"], name="academy_lesson_release_idx")),
