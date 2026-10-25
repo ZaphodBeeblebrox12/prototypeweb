@@ -54,7 +54,9 @@ def course_builder_preview(request):
             )
         import_json = json.dumps(import_payload, ensure_ascii=False, separators=(",", ":"))
         # Prevent uploaded lesson text from closing the JSON script element.
-        import_json = import_json.replace("&", "\\u0026").replace("<", "\\u003c").replace(">", "\\u003e")
+        import_json = import_json.replace("&", "\\u0026")
+        import_json = import_json.replace("<", "\\u003c")
+        import_json = import_json.replace(">", "\\u003e")
         import_tag = (
             '<script type="application/json" id="courseBuilderImportedDraft">'
             + import_json
