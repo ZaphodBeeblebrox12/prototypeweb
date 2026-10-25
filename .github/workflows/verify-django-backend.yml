@@ -10,6 +10,7 @@ on:
   pull_request:
     branches:
       - my-new-branch
+      - main
     paths:
       - "backend/**"
       - ".github/workflows/verify-django-backend.yml"
