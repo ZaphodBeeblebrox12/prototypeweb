@@ -161,14 +161,14 @@ class Plan(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["tier", "is_trial"],
-                check=models.Q(product__isnull=True),  # type: ignore[call-arg]
+                condition=models.Q(product__isnull=True),
                 name="unique_ungrouped_tier_trial",
                 violation_error_message=_(
                     "Only one plan per tier is allowed outside a product (ungrouped)."),
             ),
             models.UniqueConstraint(
                 fields=["product", "tier", "is_trial"],
-                check=models.Q(product__isnull=False),  # type: ignore[call-arg]
+                condition=models.Q(product__isnull=False),
                 name="unique_product_tier_trial",
                 violation_error_message=_(
                     "A plan with this tier already exists in this product."),
