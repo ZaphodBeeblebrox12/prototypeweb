@@ -42,11 +42,8 @@ jobs:
       - name: Validate Render build script syntax
         run: bash -n build.sh
 
-      - name: Diagnose and verify Django migration state
-        run: |
-          python manage.py makemigrations support --verbosity 3
-          cat apps/support/migrations/0007_remove_supportticket_uniq_one_pending_ticket_per_user_and_more.py
-          python manage.py makemigrations --check --dry-run
+      - name: Check Django migration state
+        run: python manage.py makemigrations --check --dry-run
 
       - name: Run linting with ruff
         run: ruff check apps/academy/ tests/academy/
