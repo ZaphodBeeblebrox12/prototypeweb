@@ -170,6 +170,10 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 32 * 1024 * 1024
 ACADEMY_PRIVATE_MEDIA_ROOT = env("ACADEMY_PRIVATE_MEDIA_ROOT", default=str(BASE_DIR / "private_course_media"))
 # Hosted deployments must use a durable provider rather than silently writing to ephemeral disk.
 ACADEMY_REQUIRE_DURABLE_ASSETS = env.bool("ACADEMY_REQUIRE_DURABLE_ASSETS", default=not DEBUG)
+# Do not accept support screenshots onto Render's ephemeral filesystem in hosted environments.
+SUPPORT_ATTACHMENTS_REQUIRE_DRIVE = env.bool(
+    "SUPPORT_ATTACHMENTS_REQUIRE_DRIVE", default=not DEBUG
+)
 # Course Builder source and image assets live in this repository, on the feature branch.
 # Keep the write token in the hosting environment; never commit it.
 ACADEMY_GITHUB_ASSET_REPOSITORY = "ZaphodBeeblebrox12/prototypeweb"
