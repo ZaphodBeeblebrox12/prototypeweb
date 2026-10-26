@@ -40,13 +40,23 @@ class RequestTicketView(LoginRequiredMixin, CreateView):
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
             return self.handle_no_permission()
-        existing = SupportTicket.objects.filter(
-            user=request.user, status=SupportTicket.Status.PENDING).first()
-        if existing:
-            messages.info(request, "You already have a pending ticket - "
-                                   "we'll get to it as soon as possible.")
-            return HttpResponseRedirect(
-                reverse_lazy("support:ticket_detail", kwargs={"pk": existing.pk}))
+        # One open ticket per category. Do not block a separate billing issue
+        # merely because the member also has an access request in progress.
+        category = (request.POST.get("category") or "").strip()
+        if request.method == "POST" and category in SupportTicket.Category.values:
+            existing = SupportTicket.objects.filter(
+                user=request.user,
+                category=category,
+                status__in=SupportTicket.ACTIVE_STATUSES,
+            ).first()
+            if existing:
+                messages.info(
+                    request,
+                    "You already have an open ticket in this category. Continue the existing conversation.",
+                )
+                return HttpResponseRedirect(
+                    reverse_lazy("support:ticket_detail", kwargs={"pk": existing.pk})
+                )
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -66,7 +76,21 @@ class RequestTicketView(LoginRequiredMixin, CreateView):
                 for upload in uploads:
                     TicketAttachment(ticket=self.object, file=upload).save()
         except IntegrityError:
-            form.add_error(None, "You already have a pending ticket.")
+            category = form.cleaned_data.get("category")
+            existing = SupportTicket.objects.filter(
+                user=self.request.user,
+                category=category,
+                status__in=SupportTicket.ACTIVE_STATUSES,
+            ).first()
+            if existing:
+                messages.info(
+                    self.request,
+                    "You already have an open ticket in this category. Continue the existing conversation.",
+                )
+                return HttpResponseRedirect(
+                    reverse_lazy("support:ticket_detail", kwargs={"pk": existing.pk})
+                )
+            form.add_error(None, "This ticket could not be created because a conflicting open ticket exists.")
             return self.form_invalid(form)
         except ValidationError as exc:
             form.add_error("attachments", "; ".join(exc.messages))
@@ -191,8 +215,8 @@ class WithdrawTicketView(LoginRequiredMixin, View):
         ticket = get_object_or_404(SupportTicket, pk=pk)
         if ticket.user_id != request.user.id:
             raise PermissionDenied
-        if ticket.status != SupportTicket.Status.PENDING:
-            messages.error(request, "Only pending tickets can be withdrawn.")
+        if not ticket.is_open:
+            messages.error(request, "Only open tickets can be withdrawn.")
             return redirect("support:ticket_detail", pk=pk)
         ticket.status = SupportTicket.Status.WITHDRAWN
         ticket.save(update_fields=["status", "updated_at"])
