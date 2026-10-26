@@ -2,7 +2,7 @@
 {% block title %}Ticket {{ ticket.short_id }} | TradeThesis{% endblock %}
 {% block page_kicker %}HELP &amp; SUPPORT · TICKET {{ ticket.short_id }}{% endblock %}
 {% block page_heading %}Ticket {{ ticket.short_id }}{% endblock %}
-{% block page_description %}<p>Review the details and status of this request. Any staff response shown here is attached to this ticket.</p>{% endblock %}
+{% block page_description %}<p>Review the details, follow the conversation, and check the status of this request.</p>{% endblock %}
 {% block page_actions %}<a class="btn secondary" href="{% url 'support:my_tickets' %}">All my tickets</a>{% endblock %}
 {% block page_content %}
 <div class="member-layout-grid">
@@ -20,16 +20,17 @@
           {% if ticket.plan %}<div class="member-definition-row"><dt>Plan</dt><dd>{{ ticket.plan.name }}</dd></div>{% endif %}
         </dl>
         <div class="member-status-panel" style="margin-top:17px">
-          <h3>Your message</h3>
-          <div class="member-ticket-message">{{ ticket.message }}</div>
+          <h3>Your original message</h3>
+          <div class="member-ticket-message">{{ ticket.message|linebreaksbr }}</div>
         </div>
         {% if ticket.attachments.all %}
           <div style="margin-top:22px">
             <h3 class="member-section-heading">Attachments</h3>
             <div class="member-attachment-grid">
               {% for attachment in ticket.attachments.all %}
-                <a class="member-attachment" href="{{ attachment.file.url }}" target="_blank" rel="noopener noreferrer">
-                  <img src="{{ attachment.file.url }}" alt="Screenshot attached to ticket {{ ticket.short_id }}" loading="lazy">
+                {% url 'support:attachment_download' attachment.pk as attachment_url %}
+                <a class="member-attachment" href="{{ attachment_url }}" target="_blank" rel="noopener noreferrer">
+                  <img src="{{ attachment_url }}" alt="Screenshot attached to ticket {{ ticket.short_id }}" loading="lazy">
                   <span class="member-meta">Open screenshot ↗</span>
                 </a>
               {% endfor %}
@@ -38,18 +39,55 @@
         {% endif %}
       </div>
     </section>
-    {% if ticket.status == "rejected" and ticket.admin_notes %}
-      <section class="member-status-panel is-bad"><h3>Review note</h3><p>{{ ticket.admin_notes|linebreaksbr }}</p></section>
-    {% elif ticket.status == "approved" and ticket.admin_notes %}
-      <section class="member-status-panel"><h3>Review note</h3><p>{{ ticket.admin_notes|linebreaksbr }}</p></section>
+
+    {% if ticket.admin_notes and ticket.status != "pending" %}
+      <section class="member-status-panel{% if ticket.status == 'rejected' %} is-bad{% endif %}">
+        <h3>Review note</h3><p>{{ ticket.admin_notes|linebreaksbr }}</p>
+      </section>
     {% endif %}
+
+    <section class="member-panel">
+      <div class="member-panel-head">
+        <h2>Conversation</h2>
+        <p>Public replies are visible to you and support. Staff-only notes are never shown here.</p>
+      </div>
+      <div class="member-panel-body">
+        {% for conversation_message in ticket.messages.all %}
+          {% if not conversation_message.is_internal or can_review %}
+            <article class="member-status-panel" style="margin-bottom:12px">
+              <p class="member-meta">
+                {% if conversation_message.is_internal %}Internal staff note
+                {% elif conversation_message.author_id == ticket.user_id %}You
+                {% elif conversation_message.author and conversation_message.author.is_staff %}TradeThesis support
+                {% else %}Ticket participant{% endif %}
+                · {{ conversation_message.created_at|date:"M d, Y · H:i" }}
+              </p>
+              <div class="member-ticket-message">{{ conversation_message.body|linebreaksbr }}</div>
+            </article>
+          {% endif %}
+        {% empty %}
+          <p class="member-muted">No replies yet. Any follow-up will appear here.</p>
+        {% endfor %}
+
+        {% if user == ticket.user and ticket.status == "pending" %}
+          <form method="post" action="{% url 'support:ticket_reply' ticket.pk %}" style="margin-top:18px">
+            {% csrf_token %}
+            <label for="ticket-reply-body">Add a reply</label>
+            <textarea id="ticket-reply-body" name="body" rows="4" maxlength="10000" required
+              placeholder="Add information that may help resolve this ticket..."></textarea>
+            <button type="submit" class="btn" style="margin-top:10px">Send reply</button>
+          </form>
+        {% endif %}
+      </div>
+    </section>
   </div>
+
   <aside class="member-content-stack">
     <section class="member-panel">
       <div class="member-panel-head"><h2>Next steps</h2></div>
       <div class="member-panel-body">
         {% if ticket.status == "pending" %}
-          <p class="member-muted">Your ticket is waiting for review. You can return to this page to check its status.</p>
+          <p class="member-muted">Your ticket is waiting for review. You can reply here while it is pending or withdraw it if the request is no longer needed.</p>
           {% if user == ticket.user %}
             <form method="post" action="{% url 'support:withdraw_ticket' ticket.pk %}" onsubmit="return confirm('Withdraw this ticket? You can open a new one afterwards.');">
               {% csrf_token %}
@@ -59,7 +97,7 @@
         {% elif ticket.status == "approved" %}
           <p class="member-muted">This request has been approved or resolved. Review the note above for any additional details.</p>
         {% elif ticket.status == "rejected" %}
-          <p class="member-muted">This request has been closed. Review the note above, then contact support with a new ticket if you still need help.</p>
+          <p class="member-muted">This request has been closed. Review the note above, then raise a new ticket if you still need help.</p>
           <a class="btn secondary" href="{% url 'support:request_ticket' %}">Raise another ticket</a>
         {% else %}
           <p class="member-muted">This ticket was withdrawn.</p>
