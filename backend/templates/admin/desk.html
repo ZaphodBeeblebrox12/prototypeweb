@@ -65,7 +65,7 @@
     </div>
     <div class="panel">
       <div class="section-head">
-        <h2>{{ support_tickets.pending }} pending</h2>
+        <h2>{{ support_tickets.open }} open · {{ support_tickets.overdue_sla }} overdue</h2>
         <p>
           <a href="{{ support_tickets.links.pending }}">View pending queue →</a>
           · <a href="{{ support_tickets.links.all }}">View all tickets →</a>
@@ -80,8 +80,19 @@
           {% else %}
           <span>#{{ ticket_row.ticket.short_id }} · {{ ticket_row.ticket.get_category_display }}</span>
           {% endif %}
-          <span class="signal-count">{{ ticket_row.ticket.get_status_display }}</span>
-          <span class="note">{{ ticket_row.ticket.user }} · {{ ticket_row.ticket.created_at|date:"j M Y, H:i" }} — {{ ticket_row.ticket.message|truncatechars:120 }}</span>
+          <span class="signal-count">
+            {{ ticket_row.ticket.get_status_display }} · {{ ticket_row.ticket.get_priority_display }}
+            {% if ticket_row.ticket.is_sla_overdue %} · SLA overdue{% endif %}
+          </span>
+          <span class="note">
+            {% if ticket_row.can_review %}
+              {{ ticket_row.ticket.user }} · {{ ticket_row.ticket.created_at|date:"j M Y, H:i" }}
+              {% if ticket_row.ticket.assigned_to %} · Assigned to {{ ticket_row.ticket.assigned_to }}{% endif %}
+              — {{ ticket_row.ticket.message|truncatechars:120 }}
+            {% else %}
+              Request details are restricted to the ticket's assigned reviewer.
+            {% endif %}
+          </span>
         </li>
         {% endfor %}
       </ul>

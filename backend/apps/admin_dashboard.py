@@ -287,6 +287,14 @@ def _subscription_dashboard_context(request):
             "pending": SupportTicket.objects.filter(
                 status=SupportTicket.Status.PENDING
             ).count(),
+            "open": SupportTicket.objects.filter(
+                status__in=SupportTicket.ACTIVE_STATUSES
+            ).count(),
+            "overdue_sla": SupportTicket.objects.filter(
+                status__in=SupportTicket.ACTIVE_STATUSES,
+                first_response_at__isnull=True,
+                first_response_due_at__lt=now,
+            ).count(),
             "recent": recent_tickets,
             "links": {
                 "all": ticket_changelist,
