@@ -352,46 +352,116 @@
     .then(response => { if (!response.ok) throw new Error("Academy catalogue unavailable"); return response.json(); })
     .then(payload => {
       const academyEntries = (payload.courses || []).filter(course => course && (
-        (course.status === "published" && course.academyUrl) || course.status === "coming-soon"
+        course.catalogueRole === "hidden" ||
+        ((course.status === "published" && course.academyUrl) || course.status === "coming-soon")
       ));
       let catalogueChanged = false;
+
       for (const incoming of academyEntries) {
-        const existing = microCourses.find(course =>
-          String(course.id) === String(incoming.id) ||
-          (incoming.slug && (String(course.slug || "") === String(incoming.slug) || String(course.id) === String(incoming.slug)))
-        );
-        const normalized = {
-          ...incoming, priority: 3, order: 1000 + microCourses.length,
-          category: incoming.category || "TradeThesis courses", level: incoming.level || "Self-paced",
-          art: incoming.art || "structure", modules: Array.isArray(incoming.modules) ? incoming.modules : [],
-          tags: Array.isArray(incoming.tags) ? incoming.tags : [],
-          outcome: incoming.outcome || incoming.description || "",
-          complements: incoming.complements || (incoming.status === "coming-soon"
-            ? "This course is being prepared. Full details will be shared closer to launch."
-            : "Explore this published course in the TradeThesis Academy."),
-          price: incoming.price || ""
-        };
-        if (existing) {
-          existing.slug = existing.slug || normalized.slug;
-          existing.academyUrl = normalized.academyUrl || existing.academyUrl;
-          if (normalized.modules.length) existing.modules = normalized.modules;
-          if (!existing.outcome && normalized.outcome) existing.outcome = normalized.outcome;
-          if (!existing.complements && normalized.complements) existing.complements = normalized.complements;
-          if (normalized.price && (!existing.price || existing.price === "Coming soon")) existing.price = normalized.price;
-          if (normalized.cataloguePresentationConfigured) {
-            existing.hook = normalized.hook; existing.problem = normalized.problem;
-            existing.learningFocus = normalized.learningFocus; existing.tags = normalized.tags;
-            existing.whyThisOne = normalized.whyThisOne;
-          } else {
-            for (const key of ["hook", "problem", "learningFocus", "whyThisOne"]) if (!existing[key] && normalized[key]) existing[key] = normalized[key];
-            if ((!Array.isArray(existing.tags) || !existing.tags.length) && normalized.tags.length) existing.tags = normalized.tags;
-          }
+        const role = ["flagship", "supporting", "mini", "hidden"].includes(incoming.catalogueRole)
+          ? incoming.catalogueRole : "mini";
+        const staticProgramme = findStaticProgramme(incoming);
+        const staticSupporting = findStaticSupportingProgramme(incoming);
+        const staticMicro = findStaticMicroCourse(incoming);
+        const prior = microCourses.find(course => sameCatalogueCourse(course, incoming)) ||
+          dynamicFlagshipCourses.find(course => sameCatalogueCourse(course, incoming)) ||
+          dynamicSupportingCourses.find(course => sameCatalogueCourse(course, incoming)) ||
+          staticProgramme || staticSupporting || staticMicro || null;
+
+        if (role === "hidden" || incoming.status === "hidden") {
+          [staticProgramme, staticSupporting, staticMicro].filter(Boolean).forEach(course => {
+            course.catalogueVisibility = "hidden";
+          });
+          microCourses = microCourses.filter(course => !sameCatalogueCourse(course, incoming));
+          dynamicFlagshipCourses = dynamicFlagshipCourses.filter(course => !sameCatalogueCourse(course, incoming));
+          dynamicSupportingCourses = dynamicSupportingCourses.filter(course => !sameCatalogueCourse(course, incoming));
           catalogueChanged = true;
-        } else {
-          microCourses.push(normalized); catalogueChanged = true;
+          continue;
         }
+
+        const normalized = {
+          ...(prior || {}),
+          ...incoming,
+          // Static editorial cards keep their stable IDs so their dedicated
+          // layout and anchors continue to work when an admin changes roles.
+          id: (prior && prior.id) || incoming.id,
+          slug: incoming.slug || (prior && prior.slug) || String(incoming.id || ""),
+          catalogueRole: role,
+          catalogueOrder: Number.isFinite(Number(incoming.catalogueOrder))
+            ? Number(incoming.catalogueOrder)
+            : ((prior && Number.isFinite(Number(prior.order))) ? Number(prior.order) : 1000),
+          category: incoming.category || (prior && prior.category) || "TradeThesis courses",
+          level: incoming.level || (prior && prior.level) || "Self-paced",
+          art: incoming.art || (prior && prior.art) || "structure",
+          modules: Array.isArray(incoming.modules) && incoming.modules.length
+            ? incoming.modules : (Array.isArray(prior && prior.modules) ? prior.modules : []),
+          tags: Array.isArray(incoming.tags) ? incoming.tags : (Array.isArray(prior && prior.tags) ? prior.tags : []),
+          outcome: incoming.outcome || (prior && prior.outcome) || incoming.description || "",
+          complements: incoming.complements || (prior && prior.complements) ||
+            (incoming.status === "coming-soon"
+              ? "This course is being prepared. Full details will be shared closer to launch."
+              : "Explore this published course in the TradeThesis Academy."),
+          price: incoming.price || (prior && prior.price) || "",
+          priority: role === "flagship" ? 1 : role === "supporting" ? 2 : 3,
+          order: Number.isFinite(Number(incoming.catalogueOrder))
+            ? Number(incoming.catalogueOrder)
+            : ((prior && Number.isFinite(Number(prior.order))) ? Number(prior.order) : 1000 + microCourses.length)
+        };
+
+        if (normalized.cataloguePresentationConfigured) {
+          normalized.hook = normalized.hook || "";
+          normalized.problem = normalized.problem || "";
+          normalized.learningFocus = normalized.learningFocus || "";
+          normalized.whyThisOne = normalized.whyThisOne || "";
+        } else if (prior) {
+          for (const key of ["hook", "problem", "learningFocus", "whyThisOne"]) {
+            normalized[key] = prior[key] || normalized[key] || "";
+          }
+          if ((!Array.isArray(normalized.tags) || !normalized.tags.length) &&
+              Array.isArray(prior.tags) && prior.tags.length) normalized.tags = prior.tags;
+        }
+
+        // Remove any old rendering of this course before placing it in exactly
+        // one section. Static marketing cards keep their authored design/copy.
+        microCourses = microCourses.filter(course => !sameCatalogueCourse(course, incoming));
+        dynamicFlagshipCourses = dynamicFlagshipCourses.filter(course => !sameCatalogueCourse(course, incoming));
+        dynamicSupportingCourses = dynamicSupportingCourses.filter(course => !sameCatalogueCourse(course, incoming));
+
+        if (staticProgramme) {
+          staticProgramme.catalogueVisibility = role === "flagship" ? "visible" : "hidden";
+          if (role === "flagship") {
+            Object.assign(staticProgramme, normalized, {id: staticProgramme.id, catalogueVisibility: "visible"});
+          }
+        }
+        if (staticSupporting) {
+          staticSupporting.catalogueVisibility = role === "supporting" ? "visible" : "hidden";
+          if (role === "supporting") {
+            Object.assign(staticSupporting, normalized, {id: staticSupporting.id, catalogueVisibility: "visible"});
+          }
+        }
+        if (staticMicro) staticMicro.catalogueVisibility = role === "mini" ? "visible" : "hidden";
+
+        if (role === "flagship") {
+          if (!staticProgramme) dynamicFlagshipCourses.push(normalized);
+        } else if (role === "supporting") {
+          if (!staticSupporting) dynamicSupportingCourses.push(normalized);
+        } else if (staticMicro) {
+          // Merge into the existing authored tile, keeping its art and curated
+          // marketing copy unless the builder explicitly configured new copy.
+          Object.assign(staticMicro, normalized, {id: staticMicro.id, catalogueVisibility: "visible"});
+          microCourses.push(staticMicro);
+        } else {
+          microCourses.push(normalized);
+        }
+        catalogueChanged = true;
       }
-      if (catalogueChanged) { renderFilterButtons(); renderMicroCourses(); }
+
+      if (catalogueChanged) {
+        renderProgrammeSections();
+        renderSupportingProgrammes();
+        renderFilterButtons();
+        renderMicroCourses();
+      }
     })
     .catch(() => {
       // The curated catalogue remains usable if Academy is temporarily unavailable.
