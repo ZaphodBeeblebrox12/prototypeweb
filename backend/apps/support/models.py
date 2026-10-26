@@ -1,10 +1,12 @@
 """Support tickets: member access, billing, and technical support."""
 import os
 import uuid
+from datetime import timedelta
 
 from PIL import Image, UnidentifiedImageError
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.models import User
@@ -69,9 +71,30 @@ class SupportTicket(models.Model):
 
     class Status(models.TextChoices):
         PENDING = "pending", _("Pending")
+        IN_PROGRESS = "in_progress", _("In progress")
+        AWAITING_MEMBER = "awaiting_member", _("Awaiting member")
         APPROVED = "approved", _("Approved / Resolved")
         REJECTED = "rejected", _("Rejected / Closed")
         WITHDRAWN = "withdrawn", _("Withdrawn by user")
+
+    class Priority(models.TextChoices):
+        LOW = "low", _("Low")
+        NORMAL = "normal", _("Normal")
+        HIGH = "high", _("High")
+        URGENT = "urgent", _("Urgent")
+
+    SLA_TARGET_HOURS = {
+        Priority.URGENT: 2,
+        Priority.HIGH: 8,
+        Priority.NORMAL: 24,
+        Priority.LOW: 72,
+    }
+
+    ACTIVE_STATUSES = (
+        Status.PENDING,
+        Status.IN_PROGRESS,
+        Status.AWAITING_MEMBER,
+    )
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
@@ -88,8 +111,26 @@ class SupportTicket(models.Model):
         related_name="support_tickets",
         help_text=_("Default plan from the referral link, or plan selected by reviewer"))
     message = models.TextField(help_text=_("Describe the request or issue"))
-    status = models.CharField(max_length=10, choices=Status.choices,
+    status = models.CharField(max_length=20, choices=Status.choices,
                               default=Status.PENDING)
+    priority = models.CharField(
+        max_length=10, choices=Priority.choices, default=Priority.NORMAL,
+        help_text=_("Target first-response time: urgent 2h, high 8h, normal 24h, low 72h."),
+    )
+    assigned_to = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="assigned_support_tickets",
+        limit_choices_to={"is_staff": True},
+        help_text=_("Staff member responsible for the next action."),
+    )
+    first_response_due_at = models.DateTimeField(
+        null=True, blank=True, db_index=True,
+        help_text=_("First-response SLA deadline; recalculated when priority changes before a reply."),
+    )
+    first_response_at = models.DateTimeField(
+        null=True, blank=True,
+        help_text=_("Timestamp of the first public support response or review."),
+    )
     admin_notes = models.TextField(
         blank=True, default="",
         help_text=_("Reviewer summary shown to the member"))
@@ -106,10 +147,16 @@ class SupportTicket(models.Model):
         verbose_name_plural = _("support tickets")
         constraints = [
             models.UniqueConstraint(
-                fields=["user"],
-                condition=models.Q(status="pending"),
-                name="uniq_one_pending_ticket_per_user",
+                fields=["user", "category"],
+                condition=models.Q(status__in=["pending", "in_progress", "awaiting_member"]),
+                name="uniq_one_open_ticket_per_user_category",
             ),
+        ]
+        indexes = [
+            models.Index(fields=["status", "first_response_due_at"],
+                         name="support_status_sla_due_idx"),
+            models.Index(fields=["assigned_to", "status"],
+                         name="support_assignee_status_idx"),
         ]
 
     def __str__(self):
@@ -140,6 +187,38 @@ class SupportTicket(models.Model):
             })
         if self.is_access_request and self.plan_id and not self.plan.is_hidden:
             raise ValidationError({"plan": _("Access requests may use only hidden plans.")})
+        if self.assigned_to_id and not self.assigned_to.is_staff:
+            raise ValidationError({"assigned_to": _("Tickets can only be assigned to staff members.")})
+
+    def save(self, *args, **kwargs):
+        priority_hours = self.SLA_TARGET_HOURS.get(self.priority, self.SLA_TARGET_HOURS[self.Priority.NORMAL])
+        if self._state.adding:
+            if self.first_response_due_at is None:
+                self.first_response_due_at = timezone.now() + timedelta(hours=priority_hours)
+        else:
+            previous = type(self).objects.filter(pk=self.pk).values(
+                "priority", "first_response_at"
+            ).first()
+            if (previous and previous["priority"] != self.priority
+                    and previous["first_response_at"] is None):
+                self.first_response_due_at = timezone.now() + timedelta(hours=priority_hours)
+                update_fields = kwargs.get("update_fields")
+                if update_fields is not None:
+                    kwargs["update_fields"] = set(update_fields) | {"first_response_due_at"}
+        super().save(*args, **kwargs)
+
+    @property
+    def is_open(self):
+        return self.status in self.ACTIVE_STATUSES
+
+    @property
+    def is_sla_overdue(self):
+        return (
+            self.first_response_at is None
+            and self.first_response_due_at is not None
+            and self.first_response_due_at < timezone.now()
+            and self.is_open
+        )
 
     def can_be_reviewed_by(self, user, plan=None):
         """Superusers always may review; mapped-plan approvers govern access tickets."""
