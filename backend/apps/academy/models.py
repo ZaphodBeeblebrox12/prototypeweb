@@ -20,6 +20,7 @@ class GoogleDriveCredential(models.Model):
     encrypted_refresh_token = models.TextField(blank=True)
     asset_folder_id = models.CharField(max_length=255, blank=True)
     source_folder_id = models.CharField(max_length=255, blank=True)
+    support_attachment_folder_id = models.CharField(max_length=255, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     @staticmethod
