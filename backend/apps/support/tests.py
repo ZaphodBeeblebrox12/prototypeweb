@@ -360,6 +360,23 @@ class SupportAttachmentDriveStorageTests(TestCase):
         )
         self.assertNotIn("permissions", create_call.kwargs["json"])
 
+    def test_storage_never_generates_a_public_attachment_url(self):
+        storage = SupportAttachmentStorage()
+        with self.assertRaisesRegex(ValueError, "authenticated support download route"):
+            storage.url("support/tickets/private/screenshot.png")
+
+    @override_settings(
+        ACADEMY_GOOGLE_DRIVE_REFRESH_TOKEN="refresh-test",
+        ACADEMY_GOOGLE_DRIVE_CLIENT_ID="client-test",
+        ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET="secret-test",
+        ACADEMY_GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON="",
+        ACADEMY_GOOGLE_DRIVE_SUPPORT_FOLDER_ID="support-only-folder",
+    )
+    def test_drive_backed_storage_has_no_local_filesystem_path(self):
+        storage = SupportAttachmentStorage()
+        with self.assertRaisesRegex(NotImplementedError, "no local filesystem path"):
+            storage.path("support/tickets/private/screenshot.png")
+
     @override_settings(
         DEBUG=False,
         SUPPORT_ATTACHMENTS_REQUIRE_DRIVE=True,
