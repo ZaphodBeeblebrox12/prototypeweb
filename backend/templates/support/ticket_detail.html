@@ -15,7 +15,7 @@
       <div class="member-panel-body">
         <dl class="member-definition-list">
           <div class="member-definition-row"><dt>Category</dt><dd>{{ ticket.get_category_display }}</dd></div>
-          <div class="member-definition-row"><dt>Status</dt><dd><span class="member-status-pill{% if ticket.status == 'pending' %} is-waiting{% elif ticket.status == 'approved' %} is-good{% elif ticket.status == 'rejected' %} is-bad{% endif %}">{{ ticket.get_status_display }}</span></dd></div>
+          <div class="member-definition-row"><dt>Status</dt><dd><span class="member-status-pill{% if ticket.status == 'pending' or ticket.status == 'in_progress' or ticket.status == 'awaiting_member' %} is-waiting{% elif ticket.status == 'approved' %} is-good{% elif ticket.status == 'rejected' %} is-bad{% endif %}">{{ ticket.get_status_display }}</span></dd></div>
           {% if ticket.affiliate_link %}<div class="member-definition-row"><dt>Referral link used</dt><dd>{{ ticket.affiliate_link.name }} <span class="member-meta">(code {{ ticket.affiliate_link.referral_code }})</span></dd></div>{% endif %}
           {% if ticket.plan %}<div class="member-definition-row"><dt>Plan</dt><dd>{{ ticket.plan.name }}</dd></div>{% endif %}
         </dl>
@@ -40,7 +40,7 @@
       </div>
     </section>
 
-    {% if ticket.admin_notes and ticket.status != "pending" %}
+    {% if ticket.admin_notes and (ticket.status == "approved" or ticket.status == "rejected") %}
       <section class="member-status-panel{% if ticket.status == 'rejected' %} is-bad{% endif %}">
         <h3>Review note</h3><p>{{ ticket.admin_notes|linebreaksbr }}</p>
       </section>
@@ -69,7 +69,7 @@
           <p class="member-muted">No replies yet. Any follow-up will appear here.</p>
         {% endfor %}
 
-        {% if user == ticket.user and ticket.status == "pending" %}
+        {% if user == ticket.user and ticket.is_open %}
           <form method="post" action="{% url 'support:ticket_reply' ticket.pk %}" style="margin-top:18px">
             {% csrf_token %}
             <label for="ticket-reply-body">Add a reply</label>
@@ -87,20 +87,24 @@
       <div class="member-panel-head"><h2>Next steps</h2></div>
       <div class="member-panel-body">
         {% if ticket.status == "pending" %}
-          <p class="member-muted">Your ticket is waiting for review. You can reply here while it is pending or withdraw it if the request is no longer needed.</p>
-          {% if user == ticket.user %}
-            <form method="post" action="{% url 'support:withdraw_ticket' ticket.pk %}" onsubmit="return confirm('Withdraw this ticket? You can open a new one afterwards.');">
-              {% csrf_token %}
-              <button type="submit" class="btn secondary">Withdraw ticket</button>
-            </form>
-          {% endif %}
+          <p class="member-muted">Your ticket has been received and is waiting for a reviewer. You can add information here while it remains open.</p>
+        {% elif ticket.status == "in_progress" %}
+          <p class="member-muted">Support is actively reviewing this ticket. Any public reply will appear in the conversation.</p>
+        {% elif ticket.status == "awaiting_member" %}
+          <p class="member-muted">Support has replied and may be waiting for more information from you. Reply in the conversation to return the ticket to active review.</p>
         {% elif ticket.status == "approved" %}
-          <p class="member-muted">This request has been approved or resolved. Review the note above for any additional details.</p>
+          <p class="member-muted">This request has been resolved. Review the note above for the outcome.</p>
         {% elif ticket.status == "rejected" %}
           <p class="member-muted">This request has been closed. Review the note above, then raise a new ticket if you still need help.</p>
           <a class="btn secondary" href="{% url 'support:request_ticket' %}">Raise another ticket</a>
         {% else %}
           <p class="member-muted">This ticket was withdrawn.</p>
+        {% endif %}
+        {% if user == ticket.user and ticket.is_open %}
+          <form method="post" action="{% url 'support:withdraw_ticket' ticket.pk %}" onsubmit="return confirm('Withdraw this ticket? You can open a new one afterwards.');" style="margin-top:12px">
+            {% csrf_token %}
+            <button type="submit" class="btn secondary">Withdraw ticket</button>
+          </form>
         {% endif %}
       </div>
     </section>
