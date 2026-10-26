@@ -414,6 +414,8 @@ jobs:
               });
             });
             await cataloguePage.addInitScript(() => {
+              // Exercise a production-origin override without making real external requests.
+              window.TRADETHESIS_ACADEMY_BASE_URL = "https://academy.example.test";
               let catalogueData;
               Object.defineProperty(window, "TRADETHESIS_COURSE_DATA", {
                 configurable: true,
@@ -455,8 +457,14 @@ jobs:
             });
             await cataloguePage.goto(server + "/courses.html", { waitUntil: "networkidle" });
             const academyBaseUrl = await cataloguePage.evaluate(() => window.TRADETHESIS_ACADEMY_CONFIG?.baseUrl || "");
-            assert.match(academyBaseUrl, /^https:\/\/[^/]+$/,
-              "The Academy API host should come from the central public configuration");
+            assert.equal(academyBaseUrl, "https://academy.example.test",
+              "The public Academy origin should be overrideable for a different deployment");
+            const memberEntryHref = await cataloguePage.locator(".member-area-link").getAttribute("href");
+            assert.equal(new URL(memberEntryHref).origin, new URL(academyBaseUrl).origin,
+              "The desktop member link should follow the configured Academy origin");
+            const liveStatusUrl = await cataloguePage.locator("[data-youtube-live-control]").getAttribute("data-youtube-live-status-url");
+            assert.equal(new URL(liveStatusUrl).origin, new URL(academyBaseUrl).origin,
+              "The live-status endpoint should follow the configured Academy origin");
             try {
               await cataloguePage.waitForSelector("#cc-course-filters [data-filter='API fixture category']");
             const apiBackedStaticMicro = cataloguePage.locator('#cc-micro-grid article.ed-micro-tile:has([data-open-course="bollinger-bands"])');
