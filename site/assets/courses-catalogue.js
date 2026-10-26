@@ -135,7 +135,8 @@
   }
 
   function renderProgrammeSections() {
-    const ordered = (data.programmes || []).filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
+    const orderedProgrammes = data.programmes.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
+    const ordered = orderedProgrammes;
     const primary = ordered.find(course => course.id === 'trading-path');
     const secondary = ordered.find(course => course.id === 'construct');
     if (primaryHost) {
@@ -165,7 +166,8 @@
 
   function renderSupportingProgrammes() {
     if (!supportHost) return;
-    const staticRows = supportingProgrammes.filter(isCatalogueVisible);
+    const staticRows = [...(data.supportingProgrammes || [])].filter(isCatalogueVisible)
+      .sort((a, b) => (a.catalogueOrder ?? a.order ?? 0) - (b.catalogueOrder ?? b.order ?? 0));
     const dynamicRows = dynamicSupportingCourses.filter(course => !findStaticSupportingProgramme(course));
     const rows = [
       ...staticRows.map(course => ({course, dynamic: false})),
@@ -237,7 +239,8 @@
   function renderFilterButtons() {
     if (!filterHost) return;
     const availableCourses = microCourses.filter(course => course.status !== 'in-development');
-    const categories = [...new Set(availableCourses.map(course => course.category).filter(Boolean))]
+    const categories = [...new Set(microCourses.map(course => course.category).filter(Boolean))]
+      .filter(category => availableCourses.some(course => course.category === category))
       .sort((a, b) => a.localeCompare(b));
     const categoryButtons = categories.map(category => {
       const count = availableCourses.filter(course => course.category === category).length;
