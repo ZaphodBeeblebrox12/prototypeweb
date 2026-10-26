@@ -11,6 +11,7 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.models import User
 from apps.subscriptions.models import Plan
+from .storage import SupportAttachmentStorage
 
 ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
 MAX_ATTACHMENTS_PER_TICKET = 5
@@ -242,7 +243,10 @@ class TicketAttachment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     ticket = models.ForeignKey(
         SupportTicket, on_delete=models.CASCADE, related_name="attachments")
-    file = models.FileField(upload_to=ticket_attachment_upload_path)
+    file = models.FileField(
+        upload_to=ticket_attachment_upload_path,
+        storage=SupportAttachmentStorage(),
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
