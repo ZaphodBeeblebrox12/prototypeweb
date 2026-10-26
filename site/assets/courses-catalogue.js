@@ -68,22 +68,126 @@
   };
   const microGrid = $('#cc-micro-grid');
   const developmentRail = $('#cc-development-rail');
-  const orderedProgrammes = data.programmes.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
-  const primaryProgramme = orderedProgrammes.find(course => course.id === 'trading-path');
-  const secondaryProgramme = orderedProgrammes.find(course => course.id === 'construct');
   const primaryHost = $('#ed-trading-path');
   const secondaryHost = $('[data-offer="construct"]');
-  if (primaryHost && primaryProgramme) primaryHost.innerHTML = renderEditorialProgramme(primaryProgramme, 'path');
-  if (secondaryHost && secondaryProgramme) secondaryHost.innerHTML = renderEditorialProgramme(secondaryProgramme, 'construct');
-
-  const supportingProgrammes = [...(data.supportingProgrammes || [])].filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
+  const programmeHost = $('.ed-programmes');
   const supportHost = $('#cc-supporting-programme');
-  if (supportHost && supportingProgrammes.length) {
-    supportHost.innerHTML = supportingProgrammes.map(support => '<article class="ed-live-card" id="' + escapeHTML(support.id) + '">' +
-      '<div class="ed-live-stamp">LIVE /<br>CLASSROOM</div>' +
-      '<div class="ed-live-copy"><span class="eyebrow">A separate delivery format</span><h2>' + escapeHTML(support.title) + '</h2><p>' + escapeHTML(support.description) + '</p><div class="ed-live-facts">' + support.facts.map(fact => '<span>' + escapeHTML(fact) + '</span>').join('') + '</div></div>' +
-      '<a class="ed-action ed-action-outline" href="' + escapeHTML(support.href) + '">' + escapeHTML(support.cta) + ' <span aria-hidden="true">↗</span></a></article>').join('');
+  let supportingProgrammes = [...(data.supportingProgrammes || [])];
+  let dynamicFlagshipCourses = [];
+  let dynamicSupportingCourses = [];
+
+  const sameCatalogueCourse = (item, incoming) => {
+    if (!item || !incoming) return false;
+    const incomingKeys = [incoming.slug, incoming.id].filter(Boolean).map(String);
+    const itemKeys = [item.slug, item.id].filter(Boolean).map(String);
+    return incomingKeys.some(key => itemKeys.includes(key));
+  };
+  const findStaticProgramme = incoming => (data.programmes || []).find(item => sameCatalogueCourse(item, incoming));
+  const findStaticSupportingProgramme = incoming => (data.supportingProgrammes || []).find(item => sameCatalogueCourse(item, incoming));
+  const findStaticMicroCourse = incoming => (data.microCourses || []).find(item => sameCatalogueCourse(item, incoming));
+
+  function renderDynamicFlagship(course, index) {
+    const modules = Array.isArray(course.modules) ? course.modules : [];
+    const outcomeSource = Array.isArray(course.outcomes) ? course.outcomes : modules.map(module => module.title).filter(Boolean);
+    const outcomes = (outcomeSource.length ? outcomeSource : (course.outcome ? [course.outcome] : []))
+      .slice(0, 3)
+      .map((item, itemIndex) => '<li><span>0' + (itemIndex + 1) + '</span>' + escapeHTML(item) + '</li>').join('');
+    const rawFacts = Array.isArray(course.facts) ? course.facts : [
+      course.duration || course.estimated_duration,
+      course.level,
+      modules.length ? String(modules.length) + ' modules' : ''
+    ];
+    const facts = rawFacts.filter(Boolean).slice(0, 4).map(fact => '<span>' + escapeHTML(fact) + '</span>').join('');
+    const price = course.price || '';
+    const priceNote = course.priceNote || (price ? '' : 'Pricing and access are configured separately.');
+    const href = course.academyUrl || course.href || '';
+    const action = href
+      ? '<a class="ed-action ed-action-gold" href="' + escapeHTML(href) + '">' + escapeHTML(course.cta || 'Explore course') + ' <span aria-hidden="true">↗</span></a>'
+      : '<span class="ed-offer-note">Course details coming soon</span>';
+    return '<div class="ed-offer-inner ed-offer-inner--construct">' +
+      '<div class="ed-offer-topline"><span>Flagship programme</span><span class="ed-offer-number">FEATURED / ' + String(index + 1).padStart(2, '0') + '</span></div>' +
+      '<h2 class="ed-offer-title">' + escapeHTML(course.title || 'Course title') + '</h2>' +
+      '<p class="ed-offer-subtitle">' + escapeHTML(course.subtitle || course.category || course.level || 'Self-paced programme') + '</p>' +
+      '<p class="ed-offer-promise">' + escapeHTML(course.promise || course.hook || course.outcome || 'A focused learning programme built around a clear trading skill.') + '</p>' +
+      '<p class="ed-offer-description">' + escapeHTML(course.description || '') + '</p>' +
+      '<div class="ed-offer-facts">' + facts + '</div>' +
+      (outcomes ? '<ul class="ed-offer-outcomes">' + outcomes + '</ul>' : '') +
+      '<div class="ed-offer-bottom"><div class="ed-offer-price"><strong>' + escapeHTML(price) + '</strong><span>' + escapeHTML(priceNote) + '</span></div>' + action + '</div>' +
+    '</div>';
   }
+
+  function renderDynamicSupporting(course, index) {
+    const modules = Array.isArray(course.modules) ? course.modules : [];
+    const rawFacts = Array.isArray(course.facts) ? course.facts : [
+      course.duration || course.estimated_duration,
+      course.level,
+      modules.length ? String(modules.length) + ' modules' : ''
+    ];
+    const facts = rawFacts.filter(Boolean).slice(0, 4).map(fact => '<span>' + escapeHTML(fact) + '</span>').join('');
+    const href = course.academyUrl || course.href || '';
+    const action = href
+      ? '<a class="ed-action ed-action-outline" href="' + escapeHTML(href) + '">' + escapeHTML(course.cta || 'Explore programme') + ' <span aria-hidden="true">↗</span></a>'
+      : '<span class="ed-offer-note">Course details coming soon</span>';
+    return '<article class="ed-live-card" id="academy-support-' + escapeHTML(course.slug || course.id || index) + '">' +
+      '<div class="ed-live-stamp">SUPPORTING /<br>PROGRAMME</div>' +
+      '<div class="ed-live-copy"><span class="eyebrow">Supporting programme</span><h2>' + escapeHTML(course.title || 'Course title') + '</h2><p>' + escapeHTML(course.description || '') + '</p><div class="ed-live-facts">' + facts + '</div></div>' +
+      action + '</article>';
+  }
+
+  function renderProgrammeSections() {
+    const ordered = (data.programmes || []).filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
+    const primary = ordered.find(course => course.id === 'trading-path');
+    const secondary = ordered.find(course => course.id === 'construct');
+    if (primaryHost) {
+      primaryHost.style.display = primary ? '' : 'none';
+      primaryHost.innerHTML = primary ? renderEditorialProgramme(primary, 'path') : '';
+    }
+    if (secondaryHost) {
+      secondaryHost.style.display = secondary ? '' : 'none';
+      secondaryHost.innerHTML = secondary ? renderEditorialProgramme(secondary, 'construct') : '';
+    }
+    if (programmeHost) {
+      $('[data-dynamic-catalogue-role="flagship"]', programmeHost).forEach(card => card.remove());
+      dynamicFlagshipCourses
+        .filter(course => !findStaticProgramme(course))
+        .sort((a, b) => (a.catalogueOrder ?? a.order ?? 0) - (b.catalogueOrder ?? b.order ?? 0))
+        .forEach((course, index) => {
+          const card = document.createElement('article');
+          card.className = 'ed-secondary';
+          card.dataset.dynamicCatalogueRole = 'flagship';
+          card.dataset.dynamicCatalogueSlug = String(course.slug || course.id || '');
+          card.innerHTML = renderDynamicFlagship(course, index);
+          programmeHost.appendChild(card);
+        });
+    }
+  }
+
+  function renderSupportingProgrammes() {
+    if (!supportHost) return;
+    const staticRows = supportingProgrammes.filter(isCatalogueVisible);
+    const dynamicRows = dynamicSupportingCourses.filter(course => !findStaticSupportingProgramme(course));
+    const rows = [
+      ...staticRows.map(course => ({course, dynamic: false})),
+      ...dynamicRows.map(course => ({course, dynamic: true}))
+    ].sort((a, b) => ((a.course.catalogueOrder ?? a.course.order ?? 0) - (b.course.catalogueOrder ?? b.course.order ?? 0)));
+    supportHost.innerHTML = rows.map((entry, index) => {
+      if (entry.dynamic) return renderDynamicSupporting(entry.course, index);
+      const support = entry.course;
+      const facts = Array.isArray(support.facts) ? support.facts : [];
+      const action = support.href
+        ? '<a class="ed-action ed-action-outline" href="' + escapeHTML(support.href) + '">' + escapeHTML(support.cta || 'Explore programme') + ' <span aria-hidden="true">↗</span></a>'
+        : '<span class="ed-offer-note">Details coming soon</span>';
+      return '<article class="ed-live-card" id="' + escapeHTML(support.id) + '">' +
+        '<div class="ed-live-stamp">LIVE /<br>CLASSROOM</div>' +
+        '<div class="ed-live-copy"><span class="eyebrow">A separate delivery format</span><h2>' + escapeHTML(support.title) + '</h2><p>' + escapeHTML(support.description) + '</p><div class="ed-live-facts">' + facts.map(fact => '<span>' + escapeHTML(fact) + '</span>').join('') + '</div></div>' +
+        action + '</article>';
+    }).join('');
+    const section = $('#supporting-learning');
+    if (section) section.style.display = rows.length ? '' : 'none';
+  }
+
+  renderProgrammeSections();
+  renderSupportingProgrammes();
 
   const modal = $('#cc-course-modal');
   const modalDialog = $('.cc-modal-dialog', modal);
