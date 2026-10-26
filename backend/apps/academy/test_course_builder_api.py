@@ -148,7 +148,7 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "removes earlier duplicates and accidental lesson links")
         self.assertContains(
             response,
-            'The website preview preserves this placement.</span></div>${courseCardPickerMarkup()}<div class="helper-note">',
+            'The website preview preserves this placement.</span></div>${courseCardPickerMarkup()}</div></div><div class="helper-note">',
         )
         self.assertContains(
             response, "Those render as lesson links/cards, not as the Option 3 inline course card."
