@@ -176,6 +176,7 @@ def google_drive_oauth_callback(request):
         return redirect("staff_course_builder_preview")
     messages.success(
         request,
-        "Google Drive connected. Private asset and source folders were created in your Drive.",
+        "Google Drive connected. Separate private folders for course assets, source snapshots, "
+        "and support attachments are ready in your Drive.",
     )
     return redirect("staff_course_builder_preview")
