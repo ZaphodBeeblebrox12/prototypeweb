@@ -187,8 +187,10 @@ class SupportTicket(models.Model):
             })
         if self.is_access_request and self.plan_id and not self.plan.is_hidden:
             raise ValidationError({"plan": _("Access requests may use only hidden plans.")})
-        if self.assigned_to_id and not self.assigned_to.is_staff:
-            raise ValidationError({"assigned_to": _("Tickets can only be assigned to staff members.")})
+        if self.assigned_to_id and not self.can_be_reviewed_by(self.assigned_to):
+            raise ValidationError({
+                "assigned_to": _("Tickets can only be assigned to an authorized reviewer.")
+            })
 
     def save(self, *args, **kwargs):
         priority_hours = self.SLA_TARGET_HOURS.get(self.priority, self.SLA_TARGET_HOURS[self.Priority.NORMAL])
