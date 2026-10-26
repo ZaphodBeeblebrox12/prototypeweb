@@ -132,6 +132,13 @@ class SupportTicketAdmin(admin.ModelAdmin):
             kwargs["queryset"] = Plan.objects.filter(is_hidden=True)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+    def save_model(self, request, obj, form, change):
+        if obj.is_access_request and obj.plan_id and not obj.can_be_reviewed_by(
+            request.user, plan=obj.plan
+        ):
+            raise PermissionDenied("You are not authorized to assign this plan to the ticket.")
+        super().save_model(request, obj, form, change)
+
     def change_view(self, request, object_id, form_url="", extra_context=None):
         ticket = self.get_object(request, object_id)
         if ticket and not ticket.can_be_reviewed_by(request.user):
