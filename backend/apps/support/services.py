@@ -47,32 +47,41 @@ def _send_email(user, email, subject, text, template):
     """Send one transactional email and record its outcome in EmailLog."""
     if not email:
         return False
-    log = EmailLog.objects.create(
-        user=user,
-        email=email,
-        template=template[:100],
-        subject=subject[:255],
-        status="queued",
-        metadata={"source": "support_ticket"},
-    )
+    log = None
+    try:
+        log = EmailLog.objects.create(
+            user=user,
+            email=email,
+            template=template[:100],
+            subject=subject[:255],
+            status="queued",
+            metadata={"source": "support_ticket"},
+        )
+    except Exception:
+        # A tracking-table problem must not prevent the actual user/staff alert.
+        logger.exception("could not create support email log recipient=%s", email)
+
     try:
         sent_count = send_mail(subject, text, None, [email], fail_silently=False)
     except Exception as exc:
-        log.status = "failed"
-        log.error_message = str(exc)[:4000]
-        log.save(update_fields=["status", "error_message"])
+        if log is not None:
+            log.status = "failed"
+            log.error_message = str(exc)[:4000]
+            log.save(update_fields=["status", "error_message"])
         logger.exception("support email failed recipient=%s template=%s", email, template)
         return False
 
     if sent_count:
-        log.status = "sent"
-        log.sent_at = timezone.now()
-        log.save(update_fields=["status", "sent_at"])
+        if log is not None:
+            log.status = "sent"
+            log.sent_at = timezone.now()
+            log.save(update_fields=["status", "sent_at"])
         return True
 
-    log.status = "failed"
-    log.error_message = "Email backend reported that no message was sent."
-    log.save(update_fields=["status", "error_message"])
+    if log is not None:
+        log.status = "failed"
+        log.error_message = "Email backend reported that no message was sent."
+        log.save(update_fields=["status", "error_message"])
     logger.error("support email was not sent recipient=%s template=%s", email, template)
     return False
 
