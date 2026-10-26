@@ -57,6 +57,41 @@
     </ul>
   </section>
 
+  {% if support_tickets %}
+  <section class="section" aria-labelledby="support-tickets-heading">
+    <div class="section-head">
+      <h2 id="support-tickets-heading">Support tickets</h2>
+      <p>Member requests · newest first</p>
+    </div>
+    <div class="panel">
+      <div class="section-head">
+        <h2>{{ support_tickets.pending }} pending</h2>
+        <p>
+          <a href="{{ support_tickets.links.pending }}">View pending queue →</a>
+          · <a href="{{ support_tickets.links.all }}">View all tickets →</a>
+        </p>
+      </div>
+      {% if support_tickets.recent %}
+      <ul class="signal-list" style="margin-top:12px">
+        {% for ticket_row in support_tickets.recent %}
+        <li>
+          {% if ticket_row.can_review %}
+          <a href="{% url 'admin:support_supportticket_change' ticket_row.ticket.pk %}">#{{ ticket_row.ticket.short_id }} · {{ ticket_row.ticket.get_category_display }}</a>
+          {% else %}
+          <span>#{{ ticket_row.ticket.short_id }} · {{ ticket_row.ticket.get_category_display }}</span>
+          {% endif %}
+          <span class="signal-count">{{ ticket_row.ticket.get_status_display }}</span>
+          <span class="note">{{ ticket_row.ticket.user }} · {{ ticket_row.ticket.created_at|date:"j M Y, H:i" }} — {{ ticket_row.ticket.message|truncatechars:120 }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="note" style="margin-top:10px">No support tickets have been submitted yet.</p>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
+
   {% if accounts or subscriptions %}
   <section class="section" aria-labelledby="business-overview-heading">
     <div class="section-head">
@@ -221,7 +256,7 @@
         </ul>
       </div>
       {% endif %}
-      {% if not payments and not invoicing and not telegram and not jobs and not subscriptions and not policy_readiness and not business_readiness and not runtime_readiness %}
+      {% if not payments and not invoicing and not telegram and not jobs and not subscriptions and not support_tickets and not policy_readiness and not business_readiness and not runtime_readiness %}
       <div class="panel"><p class="note">No operational metrics are available for your current permissions. Use Django administration to review the records you are authorised to access.</p></div>
       {% endif %}
     </div>

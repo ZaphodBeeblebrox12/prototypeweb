@@ -267,6 +267,33 @@ def _subscription_dashboard_context(request):
                     "jobs", "job", {"queue_state": "stalled"}),
             },
         }
+    # Surface the member support queue in the custom Admin Desk as well as Django Admin.
+    # Use the registered admin's permission hooks so visibility matches the actual queue.
+    from apps.support.models import SupportTicket
+
+    support_admin = admin.site._registry.get(SupportTicket)
+    if support_admin and support_admin.has_view_permission(request):
+        ticket_changelist = reverse("admin:support_supportticket_changelist")
+        recent_tickets = [
+            {
+                "ticket": ticket,
+                "can_review": support_admin.has_change_permission(request, ticket),
+            }
+            for ticket in SupportTicket.objects.select_related("user", "plan").order_by(
+                "-created_at"
+            )[:5]
+        ]
+        ctx["support_tickets"] = {
+            "pending": SupportTicket.objects.filter(
+                status=SupportTicket.Status.PENDING
+            ).count(),
+            "recent": recent_tickets,
+            "links": {
+                "all": ticket_changelist,
+                "pending": f"{ticket_changelist}?status__exact={SupportTicket.Status.PENDING}",
+            },
+        }
+
     return ctx
 
 
