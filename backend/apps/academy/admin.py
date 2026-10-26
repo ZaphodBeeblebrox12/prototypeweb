@@ -73,8 +73,9 @@ class CourseModuleInline(admin.TabularInline):
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ("title", "slug", "status", "position", "updated_at")
-    list_filter = ("status",)
+    list_display = ("title", "slug", "catalogue_role", "status", "position", "updated_at")
+    list_filter = ("status", "catalogue_role")
+    list_editable = ("catalogue_role", "position")
     search_fields = ("title", "slug", "summary")
     prepopulated_fields = {"slug": ("title",)}
     inlines = (CourseModuleInline,)
