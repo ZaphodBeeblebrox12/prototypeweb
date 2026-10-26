@@ -164,7 +164,7 @@ def google_drive_oauth_callback(request):
             credential.save(update_fields=[folder_fields[index], "updated_at"])
 
         credential.set_refresh_token(refresh_token)
-        for field, folder_id in zip(folder_fields, folder_ids):
+        for field, folder_id in zip(folder_fields, folder_ids, strict=True):
             setattr(credential, field, folder_id)
         credential.save(
             update_fields=["encrypted_refresh_token", *folder_fields, "updated_at"]
