@@ -72,6 +72,7 @@
   const secondaryHost = $('[data-offer="construct"]');
   const programmeHost = $('.ed-programmes');
   const supportHost = $('#cc-supporting-programme');
+  // Route each Academy course into one catalogue section from its saved role.
   let supportingProgrammes = [...(data.supportingProgrammes || [])];
   let dynamicFlagshipCourses = [];
   let dynamicSupportingCourses = [];
