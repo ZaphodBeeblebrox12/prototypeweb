@@ -903,6 +903,12 @@ def _build_import_payload(course_state, course_slug):
                 if str(value).strip()
             ][:20],
             "position": max(0, min(32767, int(snapshot.get("position") or 0))),
+            "catalogue_role": (
+                str(snapshot.get("catalogueRole") or Course.CatalogueRole.MINI)
+                if str(snapshot.get("catalogueRole") or Course.CatalogueRole.MINI)
+                in Course.CatalogueRole.values
+                else Course.CatalogueRole.MINI
+            ),
             "requires_owned_assets": bool(snapshot.get("requiresOwnedAssets", False)),
             "catalogue_presentation": catalogue_presentation_from_builder_state(snapshot)[0],
             "catalogue_presentation_configured": catalogue_presentation_from_builder_state(
@@ -1415,6 +1421,7 @@ def _builder_state_from_published_course(course):
         "comingSoon": False,
         "requiresOwnedAssets": requires_owned_assets,
         "position": course.position,
+        "catalogueRole": course.catalogue_role,
         "createdAt": course.created_at.isoformat(),
         "updatedAt": course.updated_at.isoformat(),
         "publishedAt": course.updated_at.isoformat(),
