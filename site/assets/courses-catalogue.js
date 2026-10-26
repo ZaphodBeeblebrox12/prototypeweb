@@ -154,6 +154,7 @@
         .forEach((course, index) => {
           const card = document.createElement('article');
           card.className = 'ed-secondary';
+          card.style.gridColumn = '1 / -1';
           card.dataset.dynamicCatalogueRole = 'flagship';
           card.dataset.dynamicCatalogueSlug = String(course.slug || course.id || '');
           card.innerHTML = renderDynamicFlagship(course, index);
