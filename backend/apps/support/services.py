@@ -48,6 +48,17 @@ def _record_notification(user, subject, text, link):
         return None
 
 
+def _save_email_log(log, update_fields):
+    if log is None:
+        return
+    try:
+        log.save(update_fields=update_fields)
+    except Exception:
+        # An analytics/logging outage must not stop a notification reaching
+        # the rest of the recipients.
+        logger.exception("could not update support EmailLog id=%s", log.pk)
+
+
 def _send_email(user, email, subject, text, template):
     """Send one transactional email and record its outcome in EmailLog."""
     if not email:
@@ -72,7 +83,7 @@ def _send_email(user, email, subject, text, template):
         if log is not None:
             log.status = "failed"
             log.error_message = str(exc)[:4000]
-            log.save(update_fields=["status", "error_message"])
+            _save_email_log(log, ["status", "error_message"])
         logger.exception("support email failed recipient=%s template=%s", email, template)
         return False
 
@@ -80,7 +91,7 @@ def _send_email(user, email, subject, text, template):
         if log is not None:
             log.status = "sent"
             log.sent_at = timezone.now()
-            log.save(update_fields=["status", "sent_at"])
+            _save_email_log(log, ["status", "sent_at"])
         return True
 
     if log is not None:
