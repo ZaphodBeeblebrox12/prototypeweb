@@ -125,6 +125,18 @@ class SupportAttachmentStorage(GoogleDriveStorageMixin, FileSystemStorage):
         )
         return name
 
+    def url(self, name):
+        raise ValueError(
+            "Support attachments are private. Use the authenticated support download route."
+        )
+
+    def path(self, name):
+        if self._drive_asset_enabled:
+            raise NotImplementedError(
+                "Google Drive attachments do not have a local filesystem path."
+            )
+        return FileSystemStorage.path(self, name)
+
     def delete(self, name):
         """Remove remote bytes as well as any legacy local copy."""
         if self._drive_asset_enabled:
