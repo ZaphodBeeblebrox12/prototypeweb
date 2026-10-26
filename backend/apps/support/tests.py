@@ -1,4 +1,5 @@
 """Regression tests for support-ticket lifecycle and access control."""
+from datetime import timedelta
 from io import BytesIO
 from unittest.mock import patch
 
@@ -9,12 +10,15 @@ from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.notifications.models import EmailLog, Notification
 from apps.subscriptions.models import Plan
 from apps.support.admin import SupportTicketAdmin
 from apps.support.models import AffiliateLink, SupportTicket, TicketAttachment, TicketMessage
-from apps.support.services import add_ticket_message, approve_ticket
+from apps.support.services import (
+    add_ticket_message, approve_ticket, reject_ticket, reopen_ticket, set_ticket_status,
+)
 
 
 User = get_user_model()
@@ -197,6 +201,38 @@ class SupportTicketSubmissionTests(TestCase):
         self.assertContains(response, "not a valid image matching its extension")
         self.assertFalse(SupportTicket.objects.filter(user=self.user).exists())
 
+    @patch("apps.support.views.notify_staff_about_ticket")
+    @patch("apps.support.views.send_ticket_confirmation")
+    def test_member_can_open_a_different_category_while_another_is_open(
+        self, send_confirmation, staff_alert
+    ):
+        SupportTicket.objects.create(
+            user=self.user,
+            category=SupportTicket.Category.BILLING,
+            message="Existing billing issue.",
+        )
+        response = self.client.post(
+            reverse("support:request_ticket"),
+            data={
+                "category": SupportTicket.Category.TECHNICAL,
+                "message": "I cannot open the Telegram group.",
+            },
+        )
+        self.assertRedirects(
+            response, reverse("support:my_tickets"), fetch_redirect_response=False
+        )
+        self.assertEqual(
+            SupportTicket.objects.filter(
+                user=self.user, status__in=SupportTicket.ACTIVE_STATUSES
+            ).count(),
+            2,
+        )
+        self.assertTrue(SupportTicket.objects.filter(
+            user=self.user, category=SupportTicket.Category.TECHNICAL
+        ).exists())
+        send_confirmation.assert_called_once()
+        staff_alert.assert_called_once()
+
     def test_access_request_requires_affiliate_link_and_screenshot(self):
         response = self.client.post(
             reverse("support:request_ticket"),
@@ -362,3 +398,73 @@ class SupportTicketWorkflowTests(TestCase):
     def test_service_rejects_oversized_replies_server_side(self):
         with self.assertRaisesRegex(ValueError, "10,000 characters or fewer"):
             add_ticket_message(self.ticket, self.member, "x" * 10001)
+
+    def test_priority_sets_and_recalculates_first_response_sla(self):
+        self.assertIsNotNone(self.ticket.first_response_due_at)
+        old_due = self.ticket.first_response_due_at
+        self.ticket.priority = SupportTicket.Priority.URGENT
+        self.ticket.save(update_fields=["priority", "updated_at"])
+        self.ticket.refresh_from_db()
+        now = timezone.now()
+        self.assertLess(self.ticket.first_response_due_at, old_due)
+        self.assertGreater(self.ticket.first_response_due_at, now + timedelta(hours=1, minutes=58))
+        self.assertLess(self.ticket.first_response_due_at, now + timedelta(hours=2, minutes=1))
+
+        self.ticket.first_response_due_at = now - timedelta(minutes=1)
+        self.ticket.first_response_at = None
+        self.ticket.save(update_fields=["first_response_due_at", "first_response_at", "updated_at"])
+        self.ticket.refresh_from_db()
+        self.assertTrue(self.ticket.is_sla_overdue)
+
+    def test_start_review_assigns_reviewer_without_faking_first_response(self):
+        set_ticket_status(
+            self.ticket, self.allowed_reviewer, SupportTicket.Status.IN_PROGRESS
+        )
+        self.ticket.refresh_from_db()
+        self.assertEqual(self.ticket.status, SupportTicket.Status.IN_PROGRESS)
+        self.assertEqual(self.ticket.assigned_to, self.allowed_reviewer)
+        self.assertIsNone(self.ticket.first_response_at)
+
+    @patch("apps.support.services.notify_user")
+    @patch("apps.support.services.notify_staff_about_ticket")
+    def test_public_replies_drive_awaiting_member_and_in_progress_states(
+        self, notify_staff, notify_user
+    ):
+        with self.captureOnCommitCallbacks(execute=True):
+            add_ticket_message(
+                self.ticket, self.allowed_reviewer,
+                "Please confirm the referral account email.",
+            )
+            self.ticket.refresh_from_db()
+            self.assertEqual(self.ticket.status, SupportTicket.Status.AWAITING_MEMBER)
+            self.assertIsNotNone(self.ticket.first_response_at)
+
+            add_ticket_message(
+                self.ticket, self.member,
+                "The email is member@example.test.",
+            )
+            self.ticket.refresh_from_db()
+            self.assertEqual(self.ticket.status, SupportTicket.Status.IN_PROGRESS)
+
+        notify_user.assert_called_once()
+        notify_staff.assert_called_once()
+
+    def test_closed_ticket_can_be_reopened_and_keeps_previous_review_note(self):
+        with self.captureOnCommitCallbacks(execute=False):
+            reject_ticket(
+                self.ticket, self.allowed_reviewer,
+                "Please provide a clearer referral screenshot.",
+            )
+            self.ticket.refresh_from_db()
+            self.assertEqual(self.ticket.status, SupportTicket.Status.REJECTED)
+
+            reopen_ticket(self.ticket, self.allowed_reviewer)
+        self.ticket.refresh_from_db()
+        self.assertEqual(self.ticket.status, SupportTicket.Status.IN_PROGRESS)
+        self.assertEqual(self.ticket.admin_notes, "")
+        self.assertIsNone(self.ticket.reviewed_at)
+        self.assertTrue(TicketMessage.objects.filter(
+            ticket=self.ticket,
+            is_internal=True,
+            body__contains="Please provide a clearer referral screenshot.",
+        ).exists())
