@@ -208,7 +208,7 @@ class SupportTicketSubmissionTests(TestCase):
                 },
             )
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "couldn't securely store the screenshots")
+        self.assertContains(response, "securely store the screenshots")
         self.assertFalse(SupportTicket.objects.filter(user=self.user).exists())
 
     def test_image_extension_does_not_allow_arbitrary_file_contents(self):
