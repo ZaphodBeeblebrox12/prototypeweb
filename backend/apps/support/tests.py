@@ -203,6 +203,32 @@ class SupportTicketSubmissionTests(TestCase):
 
     @patch("apps.support.views.notify_staff_about_ticket")
     @patch("apps.support.views.send_ticket_confirmation")
+    def test_same_category_open_ticket_redirects_to_existing_conversation(
+        self, send_confirmation, staff_alert
+    ):
+        existing = SupportTicket.objects.create(
+            user=self.user,
+            category=SupportTicket.Category.BILLING,
+            message="Existing billing issue.",
+        )
+        response = self.client.post(
+            reverse("support:request_ticket"),
+            data={
+                "category": SupportTicket.Category.BILLING,
+                "message": "A second billing issue.",
+            },
+        )
+        self.assertRedirects(
+            response,
+            reverse("support:ticket_detail", kwargs={"pk": existing.pk}),
+            fetch_redirect_response=False,
+        )
+        self.assertEqual(SupportTicket.objects.filter(user=self.user).count(), 1)
+        send_confirmation.assert_not_called()
+        staff_alert.assert_not_called()
+
+    @patch("apps.support.views.notify_staff_about_ticket")
+    @patch("apps.support.views.send_ticket_confirmation")
     def test_member_can_open_a_different_category_while_another_is_open(
         self, send_confirmation, staff_alert
     ):
@@ -312,6 +338,15 @@ class SupportTicketWorkflowTests(TestCase):
     def test_unauthorized_staff_cannot_approve_mapped_plan(self):
         with self.assertRaises(PermissionError):
             approve_ticket(self.ticket, self.plan, self.other_reviewer)
+        self.ticket.refresh_from_db()
+        self.assertEqual(self.ticket.status, SupportTicket.Status.PENDING)
+
+    def test_unauthorized_staff_cannot_reject_selected_plan(self):
+        with self.assertRaises(PermissionError):
+            reject_ticket(
+                self.ticket, self.other_reviewer,
+                "Please provide a clearer screenshot.", plan=self.plan,
+            )
         self.ticket.refresh_from_db()
         self.assertEqual(self.ticket.status, SupportTicket.Status.PENDING)
 
