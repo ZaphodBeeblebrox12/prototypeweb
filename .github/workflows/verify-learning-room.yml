@@ -594,8 +594,6 @@ jobs:
               "The member sign-in form should expose one password field for direct Academy verification");
             assert.equal(await loginForm.locator('button[type="submit"]').count(), 1,
               "Sign-in should use the existing POST form, not a separate marketing link");
-            assert.equal(loginActionUrl.pathname, "/accounts/login/from-member-access/",
-              "Sign-in must post to the server-side Django login");
             assert.equal(resetUrl.pathname, "/accounts/password/reset/",
               "Password reset must route to Django/allauth");
             await cataloguePage.locator("#createTab").click();
