@@ -196,6 +196,21 @@ class SupportTicketSubmissionTests(TestCase):
         self.assertContains(response, "Only PNG, JPG, JPEG, GIF and WEBP images are allowed")
         self.assertFalse(SupportTicket.objects.filter(user=self.user).exists())
 
+    def test_drive_upload_failure_shows_form_error_and_rolls_back_ticket(self):
+        storage = TicketAttachment._meta.get_field("file").storage
+        with patch.object(storage, "_save", side_effect=OSError("Drive unavailable")):
+            response = self.client.post(
+                reverse("support:request_ticket"),
+                data={
+                    "category": SupportTicket.Category.TECHNICAL,
+                    "message": "Please help me access the community.",
+                    "attachments": uploaded_png(),
+                },
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "couldn't securely store the screenshots")
+        self.assertFalse(SupportTicket.objects.filter(user=self.user).exists())
+
     def test_image_extension_does_not_allow_arbitrary_file_contents(self):
         upload = SimpleUploadedFile("fake.png", b"not actually a PNG", content_type="image/png")
         response = self.client.post(
