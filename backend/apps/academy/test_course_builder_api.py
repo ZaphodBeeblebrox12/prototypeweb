@@ -2032,6 +2032,25 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
             with self.subTest(marker=marker):
                 self.assertIn(marker, source)
 
+    def test_regional_content_editor_is_reachable_and_keeps_saved_tab(self):
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
+        for marker in (
+            "['overview', 'curriculum', 'lesson', 'questions', 'media', 'reflection', 'regional', 'preview'].includes(normalized.tab)",
+            "['regional','Regional content']",
+            "else if(tab==='regional')panel=regionalFields(l);",
+            "case'add-regional-block':",
+            "state.tab='regional';",
+            "else if (kind === 'regional-base')",
+            "else if (kind === 'regional-variant')",
+            "if (el.matches('[data-regional-block][data-field]'))",
+            "if (el.matches('[data-regional-variant][data-field]'))",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, source)
+
+        self.assertNotIn("if (normalized.tab === 'regional') normalized.tab = 'overview';", source)
+        self.assertNotIn("if (state.tab === 'regional') state.tab = 'overview';", source)
+
     def test_new_course_buttons_use_responsive_capture_phase_handler(self):
         source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
         self.assertIn(
