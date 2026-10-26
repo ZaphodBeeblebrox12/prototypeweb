@@ -43,7 +43,7 @@ jobs:
         run: bash -n build.sh
 
       - name: Check Django migration state
-        run: python manage.py makemigrations --check --dry-run
+        run: python manage.py makemigrations --check --dry-run --verbosity 3
 
       - name: Run linting with ruff
         run: ruff check apps/academy/ tests/academy/
