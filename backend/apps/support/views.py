@@ -175,6 +175,10 @@ class TicketDetailView(LoginRequiredMixin, DetailView):
             self.request.user.is_staff
             and self.object.can_be_reviewed_by(self.request.user)
         )
+        context["conversation_messages"] = [
+            message for message in self.object.messages.all()
+            if not message.is_internal or context["can_review"]
+        ]
         context["reply_form"] = TicketReplyForm()
         return context
 
