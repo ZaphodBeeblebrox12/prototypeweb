@@ -27,8 +27,10 @@ def public_course_catalogue(request):
         presentation, configured = catalogue_presentation_from_payload(import_record.payload)
         if configured:
             presentation_by_slug[import_record.course_slug] = presentation
-    courses = Course.objects.filter(status=Course.Status.PUBLISHED).prefetch_related(
-        "modules__lessons"
+    courses = (
+        Course.objects.filter(status=Course.Status.PUBLISHED)
+        .prefetch_related("modules__lessons")
+        .order_by("position", "title", "slug")
     )
     for course in courses:
         # Send only a minimal marker for hidden courses so the static marketing
@@ -101,7 +103,7 @@ def public_course_catalogue(request):
     teasers = CourseImport.objects.filter(
         status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REVIEW],
         target_course__isnull=True,
-    ).order_by("-updated_at")
+    ).order_by("-updated_at", "course_slug")
     for record in teasers:
         state = (record.payload or {}).get("builder_state") or {}
         title = str(state.get("title") or record.title)[:200]
