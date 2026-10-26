@@ -8,7 +8,9 @@ from django.urls import reverse
 from django.utils.html import format_html
 
 from .models import AffiliateLink, SupportTicket, TicketAttachment, TicketMessage
-from .services import add_ticket_message, approve_ticket, reject_ticket
+from .services import (
+    add_ticket_message, approve_ticket, reject_ticket, reopen_ticket, set_ticket_status,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -59,13 +61,19 @@ class TicketMessageInline(admin.TabularInline):
 
 @admin.register(SupportTicket)
 class SupportTicketAdmin(admin.ModelAdmin):
-    list_display = ["short_id", "user", "category", "affiliate_link", "plan",
-                    "status", "created_at", "reviewed_by"]
-    list_filter = ["category", "status", "created_at", "affiliate_link"]
-    search_fields = ["user__username", "user__email", "message", "admin_notes"]
+    list_display = [
+        "short_id", "user", "category", "priority", "assigned_to", "plan",
+        "status", "sla_state", "created_at", "reviewed_by",
+    ]
+    list_filter = ["category", "status", "priority", "assigned_to", "created_at", "affiliate_link"]
+    search_fields = ["user__username", "user__email", "message", "admin_notes",
+                     "assigned_to__username"]
     list_select_related = ["user", "plan", "affiliate_link", "reviewed_by"]
-    readonly_fields = ["user", "category", "affiliate_link", "message",
-                       "created_at", "updated_at", "reviewed_by", "reviewed_at"]
+    readonly_fields = [
+        "user", "category", "affiliate_link", "message", "status", "created_at",
+        "updated_at", "reviewed_by", "reviewed_at", "first_response_due_at",
+        "first_response_at", "sla_state",
+    ]
     inlines = [TicketAttachmentInline, TicketMessageInline]
     change_form_template = "admin/support/supportticket/change_form.html"
 
@@ -115,6 +123,10 @@ class SupportTicketAdmin(admin.ModelAdmin):
         if request.method == "POST" and ticket is not None:
             if "_send_reply" in request.POST:
                 return self._send_reply(request, ticket)
+            if "_start_review" in request.POST:
+                return self._set_status(request, ticket, "in_progress")
+            if "_reopen_ticket" in request.POST:
+                return self._reopen_ticket(request, ticket)
             if "_approve_grant" in request.POST:
                 return self._approve(request, ticket)
             if "_reject" in request.POST:
@@ -167,6 +179,34 @@ class SupportTicketAdmin(admin.ModelAdmin):
         except (ValueError, PermissionError) as exc:
             messages.error(request, str(exc))
         return HttpResponseRedirect(request.path)
+
+    def _set_status(self, request, ticket, status):
+        try:
+            set_ticket_status(ticket, request.user, status)
+        except (ValueError, PermissionError) as exc:
+            messages.error(request, str(exc))
+        else:
+            messages.success(request, f"Ticket moved to {ticket.get_status_display().lower()}.")
+        return HttpResponseRedirect(request.path)
+
+    def _reopen_ticket(self, request, ticket):
+        try:
+            reopen_ticket(ticket, request.user)
+        except (ValueError, PermissionError) as exc:
+            messages.error(request, str(exc))
+        else:
+            messages.success(request, "Ticket reopened and returned to active work.")
+        return HttpResponseRedirect(request.path)
+
+    def sla_state(self, obj):
+        if obj.is_sla_overdue:
+            return format_html('<strong style="color:#b71c1c">Overdue</strong>')
+        if obj.first_response_at:
+            return "Responded"
+        if obj.first_response_due_at:
+            return f"Due {obj.first_response_due_at:%Y-%m-%d %H:%M}"
+        return "No deadline"
+    sla_state.short_description = "First-response SLA"
 
     def _send_reply(self, request, ticket):
         body = request.POST.get("staff_reply", "")
