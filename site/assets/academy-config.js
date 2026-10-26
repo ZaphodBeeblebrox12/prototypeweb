@@ -1,6 +1,7 @@
 /* Public deployment configuration for the Academy service; never put secrets here. */
 (() => {
   const stagingOrigin = "https://tradethesis-academy-staging.onrender.com";
+  // A deployment may define window.TRADETHESIS_ACADEMY_BASE_URL before this script loads.
   const configuredBaseUrl = String(window.TRADETHESIS_ACADEMY_BASE_URL || stagingOrigin)
     .trim()
     .replace(/\/+$/, "");
