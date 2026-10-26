@@ -81,7 +81,13 @@
           <span>#{{ ticket_row.ticket.short_id }} · {{ ticket_row.ticket.get_category_display }}</span>
           {% endif %}
           <span class="signal-count">{{ ticket_row.ticket.get_status_display }}</span>
-          <span class="note">{{ ticket_row.ticket.user }} · {{ ticket_row.ticket.created_at|date:"j M Y, H:i" }} — {{ ticket_row.ticket.message|truncatechars:120 }}</span>
+          <span class="note">
+            {% if ticket_row.can_review %}
+              {{ ticket_row.ticket.user }} · {{ ticket_row.ticket.created_at|date:"j M Y, H:i" }} — {{ ticket_row.ticket.message|truncatechars:120 }}
+            {% else %}
+              Request details are restricted to the ticket's assigned reviewer.
+            {% endif %}
+          </span>
         </li>
         {% endfor %}
       </ul>
