@@ -368,6 +368,14 @@ jobs:
                 badResponses.push({ status: response.status(), url: response.url() });
               }
             });
+            await cataloguePage.route("**/api/youtube/live-status/", async route => {
+              await route.fulfill({
+                status: 200,
+                contentType: "application/json",
+                headers: { "access-control-allow-origin": "*" },
+                body: JSON.stringify({ is_live: false, watch_url: "" })
+              });
+            });
             await cataloguePage.route("**/api/academy/catalogue/", async route => {
               await route.fulfill({
                 status: 200,
