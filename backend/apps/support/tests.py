@@ -49,6 +49,10 @@ class SupportTicketUserScopeTests(TestCase):
         EmailAddress.objects.create(
             user=self.owner, email=self.owner.email, primary=True, verified=True
         )
+        EmailAddress.objects.create(
+            user=self.other_user, email=self.other_user.email,
+            primary=True, verified=True,
+        )
         self.own_ticket = SupportTicket.objects.create(
             user=self.owner,
             category=SupportTicket.Category.BILLING,
