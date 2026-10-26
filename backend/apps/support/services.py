@@ -169,8 +169,8 @@ def approve_ticket(ticket, plan, admin, notes=None):
     """
     from .models import SupportTicket
 
-    if ticket.status != SupportTicket.Status.PENDING:
-        raise ValueError("Only pending tickets can be approved.")
+    if not ticket.is_open:
+        raise ValueError("Only open tickets can be approved.")
     if ticket.is_access_request:
         if plan is None:
             raise ValueError("Assign a plan before approving an access request.")
@@ -196,7 +196,12 @@ def approve_ticket(ticket, plan, admin, notes=None):
     ticket.status = SupportTicket.Status.APPROVED
     ticket.reviewed_by = admin
     ticket.reviewed_at = timezone.now()
-    update_fields = ["status", "reviewed_by", "reviewed_at", "updated_at", "admin_notes"]
+    if ticket.first_response_at is None:
+        ticket.first_response_at = ticket.reviewed_at
+    update_fields = [
+        "status", "reviewed_by", "reviewed_at", "updated_at", "admin_notes",
+        "first_response_at",
+    ]
     if ticket.is_access_request:
         update_fields.append("plan")
     ticket.save(update_fields=update_fields)
@@ -222,8 +227,8 @@ def reject_ticket(ticket, admin, notes):
     from .models import SupportTicket
 
     notes = (notes or "").strip()
-    if ticket.status != SupportTicket.Status.PENDING:
-        raise ValueError("Only pending tickets can be rejected.")
+    if not ticket.is_open:
+        raise ValueError("Only open tickets can be rejected.")
     if not notes:
         raise ValueError("A reason (admin notes) is required.")
     if not ticket.can_be_reviewed_by(admin):
@@ -233,11 +238,78 @@ def reject_ticket(ticket, admin, notes):
     ticket.admin_notes = notes
     ticket.reviewed_by = admin
     ticket.reviewed_at = timezone.now()
+    if ticket.first_response_at is None:
+        ticket.first_response_at = ticket.reviewed_at
     ticket.save(update_fields=["status", "admin_notes", "reviewed_by",
-                               "reviewed_at", "updated_at"])
+                               "reviewed_at", "first_response_at", "updated_at"])
     subject = "Your ticket was not approved"
     text = (f"Your ticket ({ticket.get_category_display()}) was reviewed and not "
             f"approved. Reason: {notes}")
+    transaction.on_commit(lambda: notify_user(ticket, subject, text))
+    return ticket
+
+
+@transaction.atomic
+def set_ticket_status(ticket, admin, status):
+    """Move a ticket between active work states or reopen a closed ticket."""
+    from .models import SupportTicket, TicketMessage
+
+    if not ticket.can_be_reviewed_by(admin):
+        raise PermissionError("You are not allowed to review this ticket.")
+    if status not in {
+        SupportTicket.Status.IN_PROGRESS,
+        SupportTicket.Status.AWAITING_MEMBER,
+    }:
+        raise ValueError("Unsupported ticket status transition.")
+    if not ticket.is_open:
+        raise ValueError("Reopen a closed ticket before changing its work status.")
+
+    ticket.status = status
+    ticket.reviewed_by = admin
+    if ticket.first_response_at is None:
+        ticket.first_response_at = timezone.now()
+    ticket.save(update_fields=["status", "reviewed_by", "first_response_at", "updated_at"])
+    TicketMessage.objects.create(
+        ticket=ticket, author=admin,
+        body=f"Ticket status changed to: {ticket.get_status_display()}.",
+        is_internal=True,
+    )
+    return ticket
+
+
+@transaction.atomic
+def reopen_ticket(ticket, admin):
+    """Reopen a resolved/closed ticket while preserving its previous review note."""
+    from .models import SupportTicket, TicketMessage
+
+    if not ticket.can_be_reviewed_by(admin):
+        raise PermissionError("You are not allowed to review this ticket.")
+    if ticket.status not in {SupportTicket.Status.APPROVED, SupportTicket.Status.REJECTED}:
+        raise ValueError("Only resolved or closed tickets can be reopened.")
+    another_open = SupportTicket.objects.filter(
+        user_id=ticket.user_id,
+        category=ticket.category,
+        status__in=SupportTicket.ACTIVE_STATUSES,
+    ).exclude(pk=ticket.pk).exists()
+    if another_open:
+        raise ValueError(
+            "This member already has an open ticket in this category. Resolve it before reopening this one."
+        )
+
+    if ticket.admin_notes:
+        TicketMessage.objects.create(
+            ticket=ticket, author=admin, body=f"Previous review note: {ticket.admin_notes}",
+            is_internal=True,
+        )
+    ticket.admin_notes = ""
+    ticket.status = SupportTicket.Status.IN_PROGRESS
+    ticket.reviewed_by = None
+    ticket.reviewed_at = None
+    ticket.save(update_fields=[
+        "admin_notes", "status", "reviewed_by", "reviewed_at", "updated_at",
+    ])
+    subject = f"Your support ticket {ticket.short_id} has been reopened"
+    text = "Support has reopened your ticket and will continue working on it."
     transaction.on_commit(lambda: notify_user(ticket, subject, text))
     return ticket
 
@@ -252,18 +324,21 @@ def add_ticket_message(ticket, author, body, is_internal=False):
         raise ValueError("Enter a message before sending.")
     if len(body) > 10000:
         raise ValueError("Messages must be 10,000 characters or fewer.")
-    if getattr(author, "is_staff", False):
+    is_staff_author = bool(getattr(author, "is_staff", False))
+    if is_staff_author:
         if not ticket.can_be_reviewed_by(author):
             raise PermissionError("You are not allowed to reply to this ticket.")
         if ticket.status == SupportTicket.Status.WITHDRAWN:
             raise ValueError("A withdrawn ticket cannot receive replies.")
+        if not is_internal and not ticket.is_open:
+            raise ValueError("Reopen the ticket before sending a public reply.")
     else:
         if ticket.user_id != author.pk:
             raise PermissionError("You can reply only to your own ticket.")
         if is_internal:
             raise PermissionError("Members cannot create internal notes.")
-        if ticket.status != SupportTicket.Status.PENDING:
-            raise ValueError("Replies are available only while a ticket is pending.")
+        if not ticket.is_open:
+            raise ValueError("Replies are available only while a ticket is open.")
 
     message = TicketMessage.objects.create(
         ticket=ticket, author=author, body=body, is_internal=is_internal
@@ -271,11 +346,19 @@ def add_ticket_message(ticket, author, body, is_internal=False):
     if is_internal:
         return message
 
-    if getattr(author, "is_staff", False):
+    if is_staff_author:
+        ticket.status = SupportTicket.Status.AWAITING_MEMBER
+        if ticket.first_response_at is None:
+            ticket.first_response_at = timezone.now()
+        ticket.save(update_fields=["status", "first_response_at", "updated_at"])
         subject = f"New reply on support ticket {ticket.short_id}"
         text = f"Support replied to your ticket:\n\n{body}"
         transaction.on_commit(lambda: notify_user(ticket, subject, text))
     else:
+        # A member reply answers a staff question and returns the ticket to
+        # active work. Pending tickets are also promoted to in-progress.
+        ticket.status = SupportTicket.Status.IN_PROGRESS
+        ticket.save(update_fields=["status", "updated_at"])
         subject = f"Member reply on support ticket {ticket.short_id}"
         text = f"{ticket.user} replied to ticket {ticket.short_id}:\n\n{body[:1500]}"
         transaction.on_commit(
