@@ -63,9 +63,11 @@ class GoogleDriveOAuthTests(TestCase):
         assets.json.return_value = {"id": "asset-folder"}
         sources = Mock(status_code=200)
         sources.json.return_value = {"id": "source-folder"}
+        support = Mock(status_code=200)
+        support.json.return_value = {"id": "support-folder"}
         with patch(
             "apps.academy.google_drive_oauth.requests.post",
-            side_effect=[token, assets, sources],
+            side_effect=[token, assets, sources, support],
         ):
             response = self.client.get(
                 reverse("academy_google_drive_oauth_callback"),
@@ -77,6 +79,7 @@ class GoogleDriveOAuthTests(TestCase):
         self.assertNotIn("REFRESH_TEST", credential.encrypted_refresh_token)
         self.assertEqual(credential.asset_folder_id, "asset-folder")
         self.assertEqual(credential.source_folder_id, "source-folder")
+        self.assertEqual(credential.support_attachment_folder_id, "support-folder")
         self.assertNotIn("ACCESS_TEST", response.content.decode())
         self.assertNotIn("REFRESH_TEST", response.content.decode())
 
