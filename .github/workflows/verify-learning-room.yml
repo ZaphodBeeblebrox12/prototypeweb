@@ -368,6 +368,33 @@ jobs:
                 badResponses.push({ status: response.status(), url: response.url() });
               }
             });
+            await cataloguePage.route("https://tradethesis-academy-staging.onrender.com/api/academy/catalogue/", async route => {
+              await route.fulfill({
+                status: 200,
+                contentType: "application/json",
+                headers: { "access-control-allow-origin": "*" },
+                body: JSON.stringify({ courses: [{
+                  id: "ci-api-bollinger-bands",
+                  slug: "bollinger-bands",
+                  title: "Bollinger Bands",
+                  category: "API fixture category",
+                  level: "Intermediate",
+                  description: "Browser test API course.",
+                  outcome: "Browser test outcome.",
+                  complements: "Browser fixture only.",
+                  price: "",
+                  status: "published",
+                  catalogueRole: "mini",
+                  catalogueOrder: 11,
+                  art: "structure",
+                  modules: [
+                    { title: "First module", count: "1 lesson", preview: "First preview", points: ["First lesson"] },
+                    { title: "Second module", count: "1 lesson", preview: "Second preview", points: ["Second lesson"] }
+                  ],
+                  academyUrl: "https://tradethesis-academy-staging.onrender.com/courses/bollinger-bands/"
+                }] })
+              });
+            });
             await cataloguePage.addInitScript(() => {
               let catalogueData;
               Object.defineProperty(window, "TRADETHESIS_COURSE_DATA", {
@@ -410,7 +437,11 @@ jobs:
             });
             await cataloguePage.goto(server + "/courses.html", { waitUntil: "networkidle" });
             try {
-              await cataloguePage.waitForSelector("#cc-micro-grid [data-open-course='ci-future-visible-course']", { timeout: 8000 });
+              await cataloguePage.waitForSelector("#cc-course-filters [data-filter='API fixture category']");
+            const apiBackedStaticMicro = cataloguePage.locator('#cc-micro-grid article.ed-micro-tile:has([data-open-course="bollinger-bands"])');
+            assert.equal(await apiBackedStaticMicro.locator(".ed-tile-art svg circle").count(), 0,
+              "Generic Academy API fallback artwork must not replace the authored Bollinger Bands tile art");
+            await cataloguePage.waitForSelector("#cc-micro-grid [data-open-course='ci-future-visible-course']", { timeout: 8000 });
             } catch (error) {
               const diagnostic = await cataloguePage.evaluate(() => {
                 const data = window.TRADETHESIS_COURSE_DATA;

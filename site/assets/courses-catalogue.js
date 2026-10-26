@@ -73,7 +73,6 @@
   const programmeHost = $('.ed-programmes');
   const supportHost = $('#cc-supporting-programme');
   // Route each Academy course into one catalogue section from its saved role.
-  let supportingProgrammes = [...(data.supportingProgrammes || [])];
   let dynamicFlagshipCourses = [];
   let dynamicSupportingCourses = [];
 
@@ -137,9 +136,8 @@
 
   function renderProgrammeSections() {
     const orderedProgrammes = data.programmes.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
-    const ordered = orderedProgrammes;
-    const primary = ordered.find(course => course.id === 'trading-path');
-    const secondary = ordered.find(course => course.id === 'construct');
+    const primary = orderedProgrammes.find(course => course.id === 'trading-path');
+    const secondary = orderedProgrammes.find(course => course.id === 'construct');
     if (primaryHost) {
       primaryHost.style.display = primary ? '' : 'none';
       primaryHost.innerHTML = primary ? renderEditorialProgramme(primary, 'path') : '';
@@ -397,7 +395,9 @@
             : ((prior && Number.isFinite(Number(prior.order))) ? Number(prior.order) : 1000),
           category: incoming.category || (prior && prior.category) || "TradeThesis courses",
           level: incoming.level || (prior && prior.level) || "Self-paced",
-          art: incoming.art || (prior && prior.art) || "structure",
+          // The API currently supplies generic fallback artwork. Preserve a curated tile's
+          // authored art instead of replacing it with that placeholder.
+          art: (staticMicro && staticMicro.art) || incoming.art || (prior && prior.art) || "structure",
           modules: Array.isArray(incoming.modules) && incoming.modules.length
             ? incoming.modules : (Array.isArray(prior && prior.modules) ? prior.modules : []),
           tags: Array.isArray(incoming.tags) ? incoming.tags : (Array.isArray(prior && prior.tags) ? prior.tags : []),
