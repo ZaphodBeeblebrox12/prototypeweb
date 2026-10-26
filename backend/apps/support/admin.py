@@ -188,9 +188,18 @@ class SupportTicketAdmin(admin.ModelAdmin):
         return HttpResponseRedirect(request.path)
 
     def _reject(self, request, ticket):
+        from apps.subscriptions.models import Plan
+
         notes = request.POST.get("admin_notes", ticket.admin_notes)
+        plan = ticket.review_plan if ticket.is_access_request else None
+        raw_plan_id = (request.POST.get("plan") or "").strip()
+        if ticket.is_access_request and raw_plan_id:
+            plan = Plan.objects.filter(pk=raw_plan_id, is_hidden=True).first()
+            if plan is None:
+                messages.error(request, "Pick a valid hidden plan.")
+                return HttpResponseRedirect(request.path)
         try:
-            reject_ticket(ticket, request.user, notes)
+            reject_ticket(ticket, request.user, notes, plan=plan)
             messages.success(request, "Ticket closed; user notified.")
         except (ValueError, PermissionError) as exc:
             messages.error(request, str(exc))
