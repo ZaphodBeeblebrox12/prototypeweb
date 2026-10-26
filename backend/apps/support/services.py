@@ -265,10 +265,8 @@ def set_ticket_status(ticket, admin, status):
         raise ValueError("Reopen a closed ticket before changing its work status.")
 
     ticket.status = status
-    ticket.reviewed_by = admin
-    if ticket.first_response_at is None:
-        ticket.first_response_at = timezone.now()
-    ticket.save(update_fields=["status", "reviewed_by", "first_response_at", "updated_at"])
+    ticket.assigned_to = ticket.assigned_to or admin
+    ticket.save(update_fields=["status", "assigned_to", "updated_at"])
     TicketMessage.objects.create(
         ticket=ticket, author=admin,
         body=f"Ticket status changed to: {ticket.get_status_display()}.",
