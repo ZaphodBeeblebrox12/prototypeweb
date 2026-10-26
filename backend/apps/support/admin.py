@@ -68,7 +68,7 @@ class SupportTicketAdmin(admin.ModelAdmin):
     list_filter = ["category", "status", "priority", "assigned_to", "created_at", "affiliate_link"]
     search_fields = ["user__username", "user__email", "message", "admin_notes",
                      "assigned_to__username"]
-    list_select_related = ["user", "plan", "affiliate_link", "reviewed_by"]
+    list_select_related = ["user", "plan", "affiliate_link", "reviewed_by", "assigned_to"]
     readonly_fields = [
         "user", "category", "affiliate_link", "message", "status", "created_at",
         "updated_at", "reviewed_by", "reviewed_at", "first_response_due_at",
@@ -80,6 +80,10 @@ class SupportTicketAdmin(admin.ModelAdmin):
     fieldsets = (
         ("Ticket", {
             "fields": (("user", "created_at"), "category", "affiliate_link", "message"),
+        }),
+        ("Operations", {
+            "fields": ("priority", "assigned_to", "first_response_due_at",
+                       ("first_response_at", "sla_state")),
         }),
         ("Review", {
             "fields": ("plan", "status", "admin_notes",
