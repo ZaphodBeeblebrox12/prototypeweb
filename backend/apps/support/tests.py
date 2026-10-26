@@ -7,18 +7,21 @@ from allauth.account.models import EmailAddress
 from PIL import Image
 from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
 from apps.notifications.models import EmailLog, Notification
+from apps.academy.models import GoogleDriveCredential
 from apps.subscriptions.models import Plan
 from apps.support.admin import SupportTicketAdmin
 from apps.support.models import AffiliateLink, SupportTicket, TicketAttachment, TicketMessage
 from apps.support.services import (
     add_ticket_message, approve_ticket, reject_ticket, reopen_ticket, set_ticket_status,
 )
+from apps.support.storage import SupportAttachmentStorage
 
 
 User = get_user_model()
@@ -34,6 +37,7 @@ def uploaded_png(name="tiny.png"):
     return SimpleUploadedFile(name, valid_png_bytes(), content_type="image/png")
 
 
+@override_settings(SUPPORT_ATTACHMENTS_REQUIRE_DRIVE=False)
 class SupportTicketUserScopeTests(TestCase):
     def setUp(self):
         self.owner = User.objects.create_user(
@@ -131,6 +135,7 @@ class SupportTicketUserScopeTests(TestCase):
         self.assertEqual(self.client.get(url).status_code, 403)
 
 
+@override_settings(SUPPORT_ATTACHMENTS_REQUIRE_DRIVE=False)
 class SupportTicketSubmissionTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
@@ -305,6 +310,72 @@ class SupportTicketSubmissionTests(TestCase):
         send_confirmation.assert_called_once_with(ticket)
         staff_alert.assert_called_once_with(ticket)
 
+
+
+
+class SupportAttachmentDriveStorageTests(TestCase):
+    @override_settings(
+        DEBUG=False,
+        SUPPORT_ATTACHMENTS_REQUIRE_DRIVE=True,
+        ACADEMY_GOOGLE_DRIVE_REFRESH_TOKEN="refresh-test",
+        ACADEMY_GOOGLE_DRIVE_CLIENT_ID="client-test",
+        ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET="secret-test",
+        ACADEMY_GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON="",
+        ACADEMY_GOOGLE_DRIVE_SUPPORT_FOLDER_ID="",
+        ACADEMY_GOOGLE_DRIVE_ASSET_FOLDER_ID="course-assets-folder",
+        ACADEMY_GOOGLE_DRIVE_SOURCE_FOLDER_ID="course-sources-folder",
+    )
+    def test_upload_creates_dedicated_private_folder_and_persists_its_id(self):
+        storage = SupportAttachmentStorage()
+        folder_listing = type("Response", (), {"json": lambda self: {"files": []}})()
+        folder_created = type(
+            "Response", (), {"json": lambda self: {
+                "id": "support-only-folder",
+                "name": "TradeThesis Support Attachments",
+                "mimeType": "application/vnd.google-apps.folder",
+            }}
+        )()
+        with (
+            patch.object(storage, "_drive_request", side_effect=[folder_listing, folder_created]) as drive_request,
+            patch.object(storage, "_write_drive_bytes", return_value={"id": "drive-upload-id"}) as write,
+        ):
+            saved_name = storage.save(
+                "support/tickets/example-ticket/example-image.png",
+                ContentFile(valid_png_bytes(), name="example-image.png"),
+            )
+
+        self.assertEqual(saved_name, "support/tickets/example-ticket/example-image.png")
+        self.assertEqual(write.call_args.kwargs["folder_id"], "support-only-folder")
+        self.assertNotEqual(write.call_args.kwargs["folder_id"], "course-assets-folder")
+        self.assertNotEqual(write.call_args.kwargs["folder_id"], "course-sources-folder")
+        credential = GoogleDriveCredential.objects.get(pk=1)
+        self.assertEqual(credential.support_attachment_folder_id, "support-only-folder")
+        create_call = drive_request.call_args_list[1]
+        self.assertEqual(
+            create_call.kwargs["json"],
+            {
+                "name": "TradeThesis Support Attachments",
+                "mimeType": "application/vnd.google-apps.folder",
+            },
+        )
+        self.assertNotIn("permissions", create_call.kwargs["json"])
+
+    @override_settings(
+        DEBUG=False,
+        SUPPORT_ATTACHMENTS_REQUIRE_DRIVE=True,
+        ACADEMY_GOOGLE_DRIVE_REFRESH_TOKEN="",
+        ACADEMY_GOOGLE_DRIVE_CLIENT_ID="",
+        ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET="",
+        ACADEMY_GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON="",
+        ACADEMY_GOOGLE_DRIVE_SUPPORT_FOLDER_ID="",
+    )
+    def test_hosted_upload_fails_closed_without_drive_instead_of_using_ephemeral_disk(self):
+        storage = SupportAttachmentStorage()
+        with self.assertRaisesRegex(OSError, "Google Drive support attachment storage is not configured"):
+            storage.save(
+                "support/tickets/example-ticket/example-image.png",
+                ContentFile(valid_png_bytes(), name="example-image.png"),
+            )
 
 class SupportTicketWorkflowTests(TestCase):
     def setUp(self):
