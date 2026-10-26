@@ -281,6 +281,18 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(saved_state["regionalBlocks"][0]["title"], "Risk disclosure")
         self.assertEqual(saved_state["regionalContent"], lesson["regionalContent"])
 
+        # Exercise the editor's reload path: a fresh API GET must hydrate the
+        # same regional blocks and audience overrides that were just saved.
+        refreshed = self.client.get(reverse("staff_course_builder_api"))
+        self.assertEqual(refreshed.status_code, 200, refreshed.content)
+        reloaded_state = next(
+            draft for draft in refreshed.json()["drafts"]
+            if draft["serverDraftId"] == str(record.pk)
+        )
+        reloaded_lesson = reloaded_state["modules"][0]["lessons"][0]
+        self.assertEqual(reloaded_lesson["regionalBlocks"], lesson["regionalBlocks"])
+        self.assertEqual(reloaded_lesson["regionalContent"], lesson["regionalContent"])
+
     def test_whole_lesson_override_images_use_stable_managed_asset_ids(self):
         from .course_builder_api import _asset_uuid, _build_import_payload
 
