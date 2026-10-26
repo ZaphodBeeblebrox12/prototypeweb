@@ -119,7 +119,9 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "notebookPreviewMarkup(l)")
         self.assertContains(response, "Reflection & reasoning")
         self.assertContains(response, "Require course-owned images before publishing")
-        self.assertContains(response, "Courses tab presentation")
+        self.assertContains(response, "Courses page placement")
+        self.assertContains(response, 'data-field="catalogueRole"')
+        self.assertContains(response, "Not listed on the Courses page")
         self.assertContains(response, 'data-field="catalogueHook"')
         self.assertContains(response, 'data-field="problemStatement"')
         self.assertContains(response, 'data-field="learningFocus"')
@@ -621,6 +623,7 @@ class CourseBuilderApiTests(TestCase):
         payload = self.draft_payload("catalogue-presentation-save")
         payload["course"].update(
             {
+                "catalogueRole": "flagship",
                 "catalogueHook": "Mark fewer zones. Give each one a reason.",
                 "problemStatement": "For traders who see a possible level around every swing.",
                 "learningFocus": "Choose zones, read reactions and identify invalidation.",
@@ -637,6 +640,8 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(response.status_code, 200, response.content)
         record = CourseImport.objects.get(pk=response.json()["record_id"])
         state = record.payload["builder_state"]
+        self.assertEqual(state["catalogueRole"], "flagship")
+        self.assertEqual(record.payload["course"]["catalogue_role"], "flagship")
         self.assertEqual(state["catalogueHook"], payload["course"]["catalogueHook"])
         self.assertEqual(state["problemStatement"], payload["course"]["problemStatement"])
         self.assertEqual(state["learningFocus"], payload["course"]["learningFocus"])
@@ -1101,6 +1106,8 @@ class CourseBuilderApiTests(TestCase):
             title="Published API Course",
             slug="published-api-course",
             summary="A published course.",
+            catalogue_role=Course.CatalogueRole.SUPPORTING,
+            position=17,
             status=Course.Status.PUBLISHED,
         )
         module = CourseModule.objects.create(
@@ -1123,12 +1130,27 @@ class CourseBuilderApiTests(TestCase):
             slug="private-draft-course",
             status=Course.Status.DRAFT,
         )
+        Course.objects.create(
+            title="Intentionally Hidden Course",
+            slug="intentionally-hidden-course",
+            summary="Do not show this course on the public Courses page.",
+            catalogue_role=Course.CatalogueRole.HIDDEN,
+            status=Course.Status.PUBLISHED,
+        )
         self.client.logout()
         response = self.client.get(reverse("academy_public_catalogue"))
         self.assertEqual(response.status_code, 200)
-        titles = [item["title"] for item in response.json()["courses"]]
+        rows = response.json()["courses"]
+        titles = [item.get("title") for item in rows if item.get("title")]
         self.assertIn("Published API Course", titles)
         self.assertNotIn("Private Draft Course", titles)
+        published_row = next(item for item in rows if item.get("slug") == published.slug)
+        self.assertEqual(published_row["catalogueRole"], "supporting")
+        self.assertEqual(published_row["catalogueOrder"], 17)
+        hidden_row = next(item for item in rows if item.get("slug") == "intentionally-hidden-course")
+        self.assertEqual(hidden_row["catalogueRole"], "hidden")
+        self.assertEqual(hidden_row["status"], "hidden")
+        self.assertNotIn("title", hidden_row)
         self.assertEqual(response["Access-Control-Allow-Origin"], "*")
 
     def test_published_course_editor_hydrates_saved_question_image_url(self):
