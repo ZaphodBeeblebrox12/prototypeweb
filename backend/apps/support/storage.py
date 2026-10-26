@@ -6,7 +6,6 @@ all downloads pass through the authenticated support attachment view.
 """
 from __future__ import annotations
 
-import json
 import logging
 import mimetypes
 from pathlib import Path
@@ -115,7 +114,7 @@ class SupportAttachmentStorage(GoogleDriveStorageMixin, FileSystemStorage):
 
     def _save(self, name, content):
         if not self._drive_auth_configured:
-            if getattr(settings, "ACADEMY_REQUIRE_DURABLE_ASSETS", not settings.DEBUG):
+            if getattr(settings, "SUPPORT_ATTACHMENTS_REQUIRE_DRIVE", not settings.DEBUG):
                 raise OSError(
                     "Google Drive support attachment storage is not configured. "
                     "Reconnect Google Drive or configure the support folder before uploading."
