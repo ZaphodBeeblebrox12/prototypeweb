@@ -1,40 +1,134 @@
 {% extends "accounts/member_page_base.html" %}
+{% load static %}
 {% block title %}Ticket {{ ticket.short_id }} | TradeThesis{% endblock %}
 {% block page_kicker %}HELP &amp; SUPPORT · TICKET {{ ticket.short_id }}{% endblock %}
 {% block page_heading %}Ticket {{ ticket.short_id }}{% endblock %}
-{% block page_description %}<p>Review the details, follow the conversation, and check the status of this request.</p>{% endblock %}
-{% block page_actions %}<a class="btn secondary" href="{% url 'support:my_tickets' %}">All my tickets</a>{% endblock %}
+{% block page_description %}<p>Your original request, support replies, and next steps — kept together in one place.</p>{% endblock %}
+{% block page_actions %}
+  <span class="support-ticket-header-status{% if ticket.status == 'pending' or ticket.status == 'in_progress' or ticket.status == 'awaiting_member' %} is-waiting{% elif ticket.status == 'approved' %} is-good{% elif ticket.status == 'rejected' %} is-bad{% endif %}" aria-label="Ticket status: {{ ticket.get_status_display }}">{{ ticket.get_status_display }}</span>
+  <a class="btn secondary" href="{% url 'support:my_tickets' %}">All my tickets</a>
+{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/support-ticket.css' %}">{% endblock %}
 {% block page_content %}
-<div class="member-layout-grid">
-  <div class="member-content-stack">
-    <section class="member-panel">
+<div class="member-layout-grid support-ticket-layout">
+  <div class="member-content-stack support-ticket-main">
+    <section class="member-panel support-ticket-conversation-panel">
       <div class="member-panel-head">
-        <h2>Request details</h2>
-        <p>Submitted {{ ticket.created_at|date:"M d, Y · H:i" }}{% if ticket.updated_at != ticket.created_at %} · Updated {{ ticket.updated_at|date:"M d, Y · H:i" }}{% endif %}</p>
-      </div>
-      <div class="member-panel-body">
-        <dl class="member-definition-list">
-          <div class="member-definition-row"><dt>Category</dt><dd>{{ ticket.get_category_display }}</dd></div>
-          <div class="member-definition-row"><dt>Status</dt><dd><span class="member-status-pill{% if ticket.status == 'pending' or ticket.status == 'in_progress' or ticket.status == 'awaiting_member' %} is-waiting{% elif ticket.status == 'approved' %} is-good{% elif ticket.status == 'rejected' %} is-bad{% endif %}">{{ ticket.get_status_display }}</span></dd></div>
-          {% if ticket.affiliate_link %}<div class="member-definition-row"><dt>Referral link used</dt><dd>{{ ticket.affiliate_link.name }} <span class="member-meta">(code {{ ticket.affiliate_link.referral_code }})</span></dd></div>{% endif %}
-          {% if ticket.plan %}<div class="member-definition-row"><dt>Plan</dt><dd>{{ ticket.plan.name }}</dd></div>{% endif %}
-        </dl>
-        <div class="member-status-panel" style="margin-top:17px">
-          <h3>Your original message</h3>
-          <div class="member-ticket-message">{{ ticket.message|linebreaksbr }}</div>
+        <div class="support-ticket-section-heading">
+          <div>
+            <h2>Conversation</h2>
+            <p>Keep follow-up in this thread so the support team has the full context.</p>
+          </div>
+          {% if ticket.is_open %}
+            <span class="member-status-pill is-waiting">Open for replies</span>
+          {% else %}
+            <span class="member-status-pill">Closed</span>
+          {% endif %}
         </div>
-        {% if ticket.attachments.all %}
-          <div style="margin-top:22px">
-            <h3 class="member-section-heading">Attachments</h3>
-            <div class="member-attachment-grid">
-              {% for attachment in ticket.attachments.all %}
-                {% url 'support:attachment_download' attachment.pk as attachment_url %}
-                <a class="member-attachment" href="{{ attachment_url }}" target="_blank" rel="noopener noreferrer">
-                  <img src="{{ attachment_url }}" alt="Screenshot attached to ticket {{ ticket.short_id }}" loading="lazy">
-                  <span class="member-meta">Open screenshot ↗</span>
-                </a>
-              {% endfor %}
+      </div>
+      <div class="member-panel-body support-ticket-thread">
+        <article class="support-ticket-message support-ticket-message--original">
+          <div class="support-ticket-message-heading">
+            <div class="support-ticket-message-author">
+              {% if user == ticket.user %}
+                <strong>You</strong>
+              {% else %}
+                <strong>{{ ticket.user.get_full_name|default:ticket.user.get_username }}</strong>
+              {% endif %}
+              <span class="support-ticket-message-kind">Original request</span>
             </div>
+            <time datetime="{{ ticket.created_at|date:'c' }}">{{ ticket.created_at|date:"M d, Y · H:i" }}</time>
+          </div>
+          <div class="support-ticket-message-body">{{ ticket.message|linebreaksbr }}</div>
+          {% if ticket.attachments.all %}
+            <div class="support-ticket-attachments">
+              <h3>Attachments</h3>
+              <div class="member-attachment-grid">
+                {% for attachment in ticket.attachments.all %}
+                  {% url 'support:attachment_download' attachment.pk as attachment_url %}
+                  <a class="support-ticket-attachment" href="{{ attachment_url }}" target="_blank" rel="noopener noreferrer">
+                    <img src="{{ attachment_url }}" alt="Attachment to ticket {{ ticket.short_id }}" loading="lazy">
+                    <span class="member-meta">Open attachment ↗</span>
+                  </a>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+        </article>
+
+        {% for conversation_message in conversation_messages %}
+          <article class="support-ticket-message{% if conversation_message.is_internal %} support-ticket-message--internal{% elif conversation_message.author_id == ticket.user_id %} support-ticket-message--member{% else %} support-ticket-message--support{% endif %}">
+            <div class="support-ticket-message-heading">
+              <div class="support-ticket-message-author">
+                <strong>
+                  {% if conversation_message.is_internal %}Internal staff note
+                  {% elif conversation_message.author_id == ticket.user_id %}
+                    {% if user == ticket.user %}You{% else %}{{ ticket.user.get_full_name|default:ticket.user.get_username }}{% endif %}
+                  {% elif conversation_message.author and conversation_message.author.is_staff %}TradeThesis support
+                  {% else %}Ticket participant{% endif %}
+                </strong>
+                {% if conversation_message.author_id != ticket.user_id and not conversation_message.is_internal and conversation_message.author and conversation_message.author.is_staff %}
+                  <span class="support-ticket-message-kind">Support reply</span>
+                {% endif %}
+              </div>
+              <time datetime="{{ conversation_message.created_at|date:'c' }}">{{ conversation_message.created_at|date:"M d, Y · H:i" }}</time>
+            </div>
+            <div class="support-ticket-message-body">{{ conversation_message.body|linebreaksbr }}</div>
+          </article>
+        {% empty %}
+          <div class="support-ticket-no-replies">
+            <span class="support-ticket-no-replies-mark" aria-hidden="true">↳</span>
+            <div>
+              <h3>No replies yet</h3>
+              <p>Any update from the support team will appear here. You can add more details below while your ticket is open.</p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      {% if user == ticket.user and ticket.is_open %}
+        <form method="post" action="{% url 'support:ticket_reply' ticket.pk %}" class="support-ticket-reply-form">
+          {% csrf_token %}
+          <div class="support-ticket-reply-heading">
+            <label for="ticket-reply-body">Add a reply</label>
+            <p>Share an update or answer a question from support. Your reply will be added to this conversation.</p>
+          </div>
+          <textarea id="ticket-reply-body" name="body" rows="5" maxlength="10000" required
+            placeholder="Write your reply here…"></textarea>
+          <div class="support-ticket-reply-footer">
+            <p>Up to 10,000 characters. Never include passwords, one-time codes, or full card details.</p>
+            <button type="submit" class="btn">Send reply</button>
+          </div>
+        </form>
+      {% endif %}
+    </section>
+  </div>
+
+  <aside class="member-content-stack support-ticket-sidebar">
+    <section class="member-panel support-ticket-next-steps">
+      <div class="member-panel-head"><h2>Next steps</h2></div>
+      <div class="member-panel-body">
+        {% if ticket.status == "pending" %}
+          <p class="support-ticket-next-steps-copy">We’ve received your request. The support team will review it, and any public reply will appear in this conversation.</p>
+        {% elif ticket.status == "in_progress" %}
+          <p class="support-ticket-next-steps-copy">Support is reviewing this ticket. Keep any follow-up in this thread so the full context stays together.</p>
+        {% elif ticket.status == "awaiting_member" %}
+          <p class="support-ticket-next-steps-copy">Support may be waiting for more information from you. Reply in the conversation to continue the review.</p>
+        {% elif ticket.status == "approved" %}
+          <p class="support-ticket-next-steps-copy">This request has been resolved. The review note below explains the outcome when one was provided.</p>
+        {% elif ticket.status == "rejected" %}
+          <p class="support-ticket-next-steps-copy">This request has been closed. Review the note below, then raise a new ticket if you still need help.</p>
+          <a class="member-text-link support-ticket-raise-link" href="{% url 'support:request_ticket' %}">Raise another ticket ↗</a>
+        {% else %}
+          <p class="support-ticket-next-steps-copy">This ticket was withdrawn. You can submit a new request if you still need help.</p>
+          <a class="member-text-link support-ticket-raise-link" href="{% url 'support:request_ticket' %}">Raise another ticket ↗</a>
+        {% endif %}
+        {% if user == ticket.user and ticket.is_open %}
+          <div class="support-ticket-sidebar-action">
+            <form method="post" action="{% url 'support:withdraw_ticket' ticket.pk %}" onsubmit="return confirm('Withdraw this ticket? You can open a new one afterwards.');">
+              {% csrf_token %}
+              <button type="submit" class="btn secondary">Withdraw ticket</button>
+            </form>
           </div>
         {% endif %}
       </div>
@@ -42,78 +136,24 @@
 
     {% if ticket.admin_notes %}
       {% if ticket.status == "approved" or ticket.status == "rejected" %}
-        <section class="member-status-panel{% if ticket.status == 'rejected' %} is-bad{% endif %}">
-          <h3>Review note</h3><p>{{ ticket.admin_notes|linebreaksbr }}</p>
+        <section class="member-status-panel support-ticket-review-note{% if ticket.status == 'rejected' %} is-bad{% endif %}">
+          <h3>Review note</h3>
+          <p>{{ ticket.admin_notes|linebreaksbr }}</p>
         </section>
       {% endif %}
     {% endif %}
 
-    <section class="member-panel">
-      <div class="member-panel-head">
-        <h2>Conversation</h2>
-        <p>Public replies are visible to you and support. Staff-only notes are never shown here.</p>
-      </div>
+    <section class="member-panel support-ticket-details-panel">
+      <div class="member-panel-head"><h2>Request details</h2></div>
       <div class="member-panel-body">
-        {% for conversation_message in ticket.messages.all %}
-          {% if not conversation_message.is_internal or can_review %}
-            <article class="member-status-panel" style="margin-bottom:12px">
-              <p class="member-meta">
-                {% if conversation_message.is_internal %}Internal staff note
-                {% elif conversation_message.author_id == ticket.user_id %}You
-                {% elif conversation_message.author and conversation_message.author.is_staff %}TradeThesis support
-                {% else %}Ticket participant{% endif %}
-                · {{ conversation_message.created_at|date:"M d, Y · H:i" }}
-              </p>
-              <div class="member-ticket-message">{{ conversation_message.body|linebreaksbr }}</div>
-            </article>
-          {% endif %}
-        {% empty %}
-          <p class="member-muted">No replies yet. Any follow-up will appear here.</p>
-        {% endfor %}
-
-        {% if user == ticket.user and ticket.is_open %}
-          <form method="post" action="{% url 'support:ticket_reply' ticket.pk %}" style="margin-top:18px">
-            {% csrf_token %}
-            <label for="ticket-reply-body">Add a reply</label>
-            <textarea id="ticket-reply-body" name="body" rows="4" maxlength="10000" required
-              placeholder="Add information that may help resolve this ticket..."></textarea>
-            <button type="submit" class="btn" style="margin-top:10px">Send reply</button>
-          </form>
-        {% endif %}
+        <dl class="member-definition-list">
+          <div class="member-definition-row"><dt>Category</dt><dd>{{ ticket.get_category_display }}</dd></div>
+          <div class="member-definition-row"><dt>Submitted</dt><dd>{{ ticket.created_at|date:"M d, Y · H:i" }}</dd></div>
+          <div class="member-definition-row"><dt>Last activity</dt><dd>{{ ticket.updated_at|date:"M d, Y · H:i" }}</dd></div>
+          {% if ticket.affiliate_link %}<div class="member-definition-row"><dt>Referral link</dt><dd>{{ ticket.affiliate_link.name }} <span class="member-meta">(code {{ ticket.affiliate_link.referral_code }})</span></dd></div>{% endif %}
+          {% if ticket.plan %}<div class="member-definition-row"><dt>Plan</dt><dd>{{ ticket.plan.name }}</dd></div>{% endif %}
+        </dl>
       </div>
-    </section>
-  </div>
-
-  <aside class="member-content-stack">
-    <section class="member-panel">
-      <div class="member-panel-head"><h2>Next steps</h2></div>
-      <div class="member-panel-body">
-        {% if ticket.status == "pending" %}
-          <p class="member-muted">Your ticket has been received and is waiting for a reviewer. You can add information here while it remains open.</p>
-        {% elif ticket.status == "in_progress" %}
-          <p class="member-muted">Support is actively reviewing this ticket. Any public reply will appear in the conversation.</p>
-        {% elif ticket.status == "awaiting_member" %}
-          <p class="member-muted">Support has replied and may be waiting for more information from you. Reply in the conversation to return the ticket to active review.</p>
-        {% elif ticket.status == "approved" %}
-          <p class="member-muted">This request has been resolved. Review the note above for the outcome.</p>
-        {% elif ticket.status == "rejected" %}
-          <p class="member-muted">This request has been closed. Review the note above, then raise a new ticket if you still need help.</p>
-          <a class="btn secondary" href="{% url 'support:request_ticket' %}">Raise another ticket</a>
-        {% else %}
-          <p class="member-muted">This ticket was withdrawn.</p>
-        {% endif %}
-        {% if user == ticket.user and ticket.is_open %}
-          <form method="post" action="{% url 'support:withdraw_ticket' ticket.pk %}" onsubmit="return confirm('Withdraw this ticket? You can open a new one afterwards.');" style="margin-top:12px">
-            {% csrf_token %}
-            <button type="submit" class="btn secondary">Withdraw ticket</button>
-          </form>
-        {% endif %}
-      </div>
-    </section>
-    <section class="member-status-panel">
-      <h3>Need more help?</h3>
-      <p>Return to your ticket list or submit another request if you have a different issue.</p>
-      <p style="margin-top:10px"><a class="member-text-link" href="{% url 'support:my_tickets' %}">View all tickets ↗</a></p>
     </section>
   </aside>
 </div>
