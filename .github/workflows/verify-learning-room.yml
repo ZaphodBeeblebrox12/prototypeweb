@@ -418,7 +418,7 @@ jobs:
                   art: "structure",
                   // Empty modules preserve the curated multi-section outline for this matched course.
                   modules: [],
-                  academyUrl: "https://tradethesis-academy-staging.onrender.com/courses/support-resistance/"
+                  academyUrl: ""
                 }] })
               });
             });
