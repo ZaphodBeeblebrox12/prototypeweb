@@ -224,7 +224,7 @@ def approve_ticket(ticket, plan, admin, notes=None):
 
 
 @transaction.atomic
-def reject_ticket(ticket, admin, notes):
+def reject_ticket(ticket, admin, notes, plan=None):
     """Reject/close a pending ticket and notify the member with the reason."""
     from .models import SupportTicket
 
@@ -233,7 +233,9 @@ def reject_ticket(ticket, admin, notes):
         raise ValueError("Only open tickets can be rejected.")
     if not notes:
         raise ValueError("A reason (admin notes) is required.")
-    if not ticket.can_be_reviewed_by(admin):
+    if not ticket.can_be_reviewed_by(
+        admin, plan=plan if ticket.is_access_request else None
+    ):
         raise PermissionError("You are not allowed to review this ticket.")
 
     ticket.status = SupportTicket.Status.REJECTED
