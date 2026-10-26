@@ -569,9 +569,17 @@ jobs:
             const loginForm = cataloguePage.locator("#memberLoginForm");
             assert.equal((await loginForm.getAttribute("method") || "get").toLowerCase(), "post",
               "Member credentials must be submitted with POST, not a query string");
-            assert.match(await loginForm.getAttribute("action") || "",
-              /^https:\/\/tradethesis-academy-staging\.onrender\.com\/accounts\/login\/from-member-access\/$/,
-              "The public sign-in form must submit directly to the HTTPS Academy login endpoint");
+            const loginActionUrl = new URL(await loginForm.getAttribute("action") || "");
+            assert.equal(loginActionUrl.origin, new URL(academyBaseUrl).origin,
+              "The public sign-in form must submit to the configured Academy origin");
+            assert.equal(loginActionUrl.pathname, "/accounts/login/from-member-access/",
+              "The public sign-in form must keep its intended login endpoint");
+            const resetUrl = new URL(await cataloguePage.locator('a[href*="/accounts/password/reset/"]').getAttribute("href") || "");
+            const signupUrl = new URL(await cataloguePage.locator('a[href*="/accounts/signup/"]').getAttribute("href") || "");
+            assert.equal(resetUrl.origin, new URL(academyBaseUrl).origin,
+              "The password-reset link must follow the configured Academy origin");
+            assert.equal(signupUrl.origin, new URL(academyBaseUrl).origin,
+              "The signup link must follow the configured Academy origin");
             assert.equal(await loginForm.locator('input[type="password"]').count(), 1,
               "The member sign-in form should expose one password field for direct Academy verification");
             assert.equal(await loginForm.locator('button[type="submit"]').count(), 1,
