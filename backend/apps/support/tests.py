@@ -341,6 +341,14 @@ class SupportTicketWorkflowTests(TestCase):
         self.ticket.refresh_from_db()
         self.assertEqual(self.ticket.status, SupportTicket.Status.PENDING)
 
+    def test_reviewer_acl_filters_the_admin_queue_not_just_ticket_detail(self):
+        request = RequestFactory().get("/admin/support/supportticket/")
+        ticket_admin = SupportTicketAdmin(SupportTicket, admin.site)
+        request.user = self.allowed_reviewer
+        self.assertIn(self.ticket.pk, list(ticket_admin.get_queryset(request).values_list("pk", flat=True)))
+        request.user = self.other_reviewer
+        self.assertNotIn(self.ticket.pk, list(ticket_admin.get_queryset(request).values_list("pk", flat=True)))
+
     def test_unauthorized_staff_cannot_reject_selected_plan(self):
         with self.assertRaises(PermissionError):
             reject_ticket(
