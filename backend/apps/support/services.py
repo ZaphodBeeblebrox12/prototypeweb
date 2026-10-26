@@ -22,10 +22,12 @@ def _ticket_url(ticket, staff=False):
         path = f"/admin/support/supportticket/{ticket.pk}/change/"
     else:
         path = reverse("support:ticket_detail", kwargs={"pk": ticket.pk})
-    # Use the public deployed origin first. SITE_BASE_URL defaults to localhost
-    # in base settings and must not accidentally leak into notification links.
-    base = (getattr(settings, "TRADETHESIS_PUBLIC_SITE_URL", "") or
-            getattr(settings, "SITE_BASE_URL", "")).rstrip("/")
+    # SITE_BASE_URL is the authenticated Academy origin. Its development
+    # default must not leak into production notifications, and the public
+    # marketing origin may not host the private ticket routes.
+    base = (getattr(settings, "SITE_BASE_URL", "") or "").rstrip("/")
+    if base.startswith(("http://127.0.0.1", "http://localhost")):
+        base = ""
     return f"{base}{path}" if base else path
 
 
