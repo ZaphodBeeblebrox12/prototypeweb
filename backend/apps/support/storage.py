@@ -153,7 +153,7 @@ class SupportAttachmentStorage(GoogleDriveStorageMixin, FileSystemStorage):
     def path(self, name):
         if self._drive_asset_enabled:
             raise NotImplementedError(
-                "Google Drive attachments do not have a local filesystem path."
+                "Google Drive attachments have no local filesystem path."
             )
         return FileSystemStorage.path(self, name)
 
