@@ -12,6 +12,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+from django.db import transaction
 from django.utils.deconstruct import deconstructible
 
 from apps.academy.google_drive_storage import (
@@ -59,30 +60,20 @@ class SupportAttachmentStorage(GoogleDriveStorageMixin, FileSystemStorage):
         if not self._drive_auth_configured:
             return ""
 
-        # This is a fixed name created by this app. The folder is intentionally
-        # created without public permissions or link-sharing settings.
-        response = self._drive_request(
-            "GET",
-            f"{DRIVE_API}/files",
-            params={
-                "q": (
-                    "name='TradeThesis Support Attachments' and "
-                    "mimeType='application/vnd.google-apps.folder' and trashed = false"
-                ),
-                "pageSize": 10,
-                "orderBy": "createdTime",
-                "fields": "files(id,name,mimeType)",
-            },
-        )
-        try:
-            found = response.json().get("files")
-        except (ValueError, AttributeError, TypeError) as exc:
-            raise OSError("Google Drive returned an unreadable support-folder listing.") from exc
-        if not isinstance(found, list):
-            raise OSError("Google Drive returned an unreadable support-folder listing.")
+        from apps.academy.models import GoogleDriveCredential
 
-        folder_id = str(found[0].get("id") or "").strip() if found else ""
-        if not folder_id:
+        # Lock the single credential row while initializing the folder. This
+        # prevents concurrent first uploads from creating several Drive folders.
+        with transaction.atomic():
+            GoogleDriveCredential.objects.get_or_create(pk=1)
+            credential = GoogleDriveCredential.objects.select_for_update().get(pk=1)
+            if credential.support_attachment_folder_id:
+                self._support_folder_cache = credential.support_attachment_folder_id
+                return self._support_folder_cache
+
+            # Always create a fresh folder instead of reusing a same-name folder
+            # whose sharing settings may have been changed manually. Google Drive's
+            # create operation adds no public or anyone-with-link permission.
             response = self._drive_request(
                 "POST",
                 f"{DRIVE_API}/files",
@@ -98,19 +89,10 @@ class SupportAttachmentStorage(GoogleDriveStorageMixin, FileSystemStorage):
             if not folder_id:
                 raise OSError("Google Drive did not confirm the support folder.")
 
-        self._support_folder_cache = folder_id
-        try:
-            from apps.academy.models import GoogleDriveCredential
-
-            credential, _ = GoogleDriveCredential.objects.get_or_create(pk=1)
-            if credential.support_attachment_folder_id != folder_id:
-                credential.support_attachment_folder_id = folder_id
-                credential.save(update_fields=["support_attachment_folder_id", "updated_at"])
-        except Exception:
-            # A configured environment folder ID is still sufficient. Without a
-            # durable DB record, this process uses its cache and logs the issue.
-            logger.exception("Could not persist the Google Drive support folder ID.")
-        return folder_id
+            credential.support_attachment_folder_id = folder_id
+            credential.save(update_fields=["support_attachment_folder_id", "updated_at"])
+            self._support_folder_cache = folder_id
+            return folder_id
 
     def _save(self, name, content):
         if not self._drive_auth_configured:
