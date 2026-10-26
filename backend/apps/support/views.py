@@ -60,6 +60,7 @@ class RequestTicketView(LoginRequiredMixin, CreateView):
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
+        stored_attachments = []
         try:
             with transaction.atomic():
                 form.instance.user = self.request.user
@@ -74,7 +75,31 @@ class RequestTicketView(LoginRequiredMixin, CreateView):
                     :MAX_ATTACHMENTS_PER_TICKET
                 ]
                 for upload in uploads:
-                    TicketAttachment(ticket=self.object, file=upload).save()
+                    attachment = TicketAttachment(ticket=self.object, file=upload)
+                    attachment.save()
+                    stored_attachments.append(attachment)
+        except OSError:
+            # Drive writes are outside the database transaction. Remove any
+            # earlier successful uploads if a later upload in this batch fails.
+            for attachment in reversed(stored_attachments):
+                try:
+                    attachment.file.storage.delete(attachment.file.name)
+                except Exception:
+                    logger.exception(
+                        "support upload cleanup failed ticket=%s attachment=%s",
+                        getattr(self.object, "pk", None),
+                        attachment.pk,
+                    )
+            logger.exception(
+                "support attachment storage failed for user=%s",
+                self.request.user.pk,
+            )
+            form.add_error(
+                "attachments",
+                "We couldn't securely store the screenshots just now. "
+                "Please try again in a moment; your ticket has not been submitted.",
+            )
+            return self.form_invalid(form)
         except IntegrityError:
             category = form.cleaned_data.get("category")
             existing = SupportTicket.objects.filter(
