@@ -72,6 +72,7 @@ class PublicCataloguePresentationTests(TestCase):
         self.assertEqual(row["tags"], presentation["tags"])
         self.assertEqual(row["whyThisOne"], presentation["why_this_one"])
         self.assertTrue(row["cataloguePresentationConfigured"])
+        self.assertEqual(row["catalogueRole"], "mini")
         self.assertNotIn(
             "PRIVATE LESSON BODY MUST NOT BE RETURNED", response.content.decode("utf-8")
         )
