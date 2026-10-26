@@ -120,6 +120,75 @@ class SupportTicketUserScopeTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "Internal reviewer context.")
 
+    def test_ticket_history_loads_recent_updates_first_and_reveals_older_batch(self):
+        base_time = timezone.now()
+        for index in range(10):
+            reply = TicketMessage.objects.create(
+                ticket=self.own_ticket,
+                author=self.owner,
+                body=f"Public history item {index:02d}",
+            )
+            TicketMessage.objects.filter(pk=reply.pk).update(
+                created_at=base_time + timedelta(seconds=index)
+            )
+        staff = User.objects.create_user(
+            username="history-reviewer", email="history-reviewer@example.test",
+            password="test-password-123!", is_staff=True,
+        )
+        internal = TicketMessage.objects.create(
+            ticket=self.own_ticket, author=staff,
+            body="PRIVATE_HISTORY_NOTE", is_internal=True,
+        )
+        TicketMessage.objects.filter(pk=internal.pk).update(
+            created_at=base_time + timedelta(seconds=20)
+        )
+
+        url = reverse("support:ticket_detail", kwargs={"pk": self.own_ticket.pk})
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Showing the latest 8 of 10 conversation updates.")
+        self.assertContains(response, "Public history item 02")
+        self.assertContains(response, "Public history item 09")
+        self.assertNotContains(response, "Public history item 00")
+        self.assertNotContains(response, "Public history item 01")
+        self.assertNotContains(response, "PRIVATE_HISTORY_NOTE")
+        self.assertContains(response, "Load 2 earlier messages")
+        self.assertContains(response, "show_messages=10#support-ticket-history")
+        # Older request history is collapsed when a conversation already exists.
+        self.assertContains(response, '<details class="support-ticket-original-request">')
+
+        expanded = self.client.get(f"{url}?show_messages=10")
+        self.assertEqual(expanded.status_code, 200)
+        self.assertContains(expanded, "Public history item 00")
+        self.assertContains(expanded, "Public history item 01")
+        self.assertNotContains(expanded, "PRIVATE_HISTORY_NOTE")
+        self.assertNotContains(expanded, "Load 2 earlier messages")
+
+    def test_member_history_count_excludes_private_staff_notes(self):
+        staff = User.objects.create_user(
+            username="private-history-reviewer", email="private-history@example.test",
+            password="test-password-123!", is_staff=True,
+        )
+        for index in range(2):
+            TicketMessage.objects.create(
+                ticket=self.own_ticket, author=self.owner,
+                body=f"Visible reply {index}",
+            )
+        TicketMessage.objects.create(
+            ticket=self.own_ticket, author=staff,
+            body="DO_NOT_COUNT_PRIVATE_NOTE", is_internal=True,
+        )
+
+        response = self.client.get(
+            reverse("support:ticket_detail", kwargs={"pk": self.own_ticket.pk})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Showing the latest 2 of 2 conversation updates.")
+        self.assertNotContains(response, "DO_NOT_COUNT_PRIVATE_NOTE")
+        self.assertNotContains(response, "Load 2 earlier messages")
+
     def test_attachment_download_is_private_and_authenticated(self):
         attachment = TicketAttachment.objects.create(
             ticket=self.own_ticket,

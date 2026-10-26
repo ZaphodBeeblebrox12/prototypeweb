@@ -150,6 +150,8 @@ class MyTicketsView(LoginRequiredMixin, ListView):
 
 
 class TicketDetailView(LoginRequiredMixin, DetailView):
+    CONVERSATION_PAGE_SIZE = 8
+
     model = SupportTicket
     template_name = "support/ticket_detail.html"
     context_object_name = "ticket"
@@ -157,7 +159,7 @@ class TicketDetailView(LoginRequiredMixin, DetailView):
     def get_queryset(self):
         return (SupportTicket.objects
                 .select_related("affiliate_link", "plan", "reviewed_by")
-                .prefetch_related("attachments", "messages", "messages__author"))
+                .prefetch_related("attachments"))
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -175,10 +177,38 @@ class TicketDetailView(LoginRequiredMixin, DetailView):
             self.request.user.is_staff
             and self.object.can_be_reviewed_by(self.request.user)
         )
-        context["conversation_messages"] = [
-            message for message in self.object.messages.all()
-            if not message.is_internal or context["can_review"]
-        ]
+        # Keep long ticket histories compact by default. Load older items in
+        # deliberate batches rather than rendering every message on each request.
+        message_queryset = self.object.messages.select_related("author")
+        if not context["can_review"]:
+            message_queryset = message_queryset.filter(is_internal=False)
+
+        total_message_count = message_queryset.count()
+        try:
+            requested_count = int(
+                self.request.GET.get("show_messages", self.CONVERSATION_PAGE_SIZE)
+            )
+        except (TypeError, ValueError):
+            requested_count = self.CONVERSATION_PAGE_SIZE
+        visible_count = min(
+            total_message_count,
+            max(self.CONVERSATION_PAGE_SIZE, requested_count),
+        )
+        latest_messages = list(
+            message_queryset.order_by("-created_at", "-pk")[:visible_count]
+        )
+        latest_messages.reverse()
+
+        context["conversation_messages"] = latest_messages
+        context["total_message_count"] = total_message_count
+        context["has_earlier_messages"] = total_message_count > visible_count
+        context["next_message_limit"] = min(
+            total_message_count, visible_count + self.CONVERSATION_PAGE_SIZE
+        )
+        context["messages_to_load"] = min(
+            self.CONVERSATION_PAGE_SIZE, total_message_count - visible_count
+        )
+        context["earlier_message_count"] = total_message_count - visible_count
         context["reply_form"] = TicketReplyForm()
         return context
 

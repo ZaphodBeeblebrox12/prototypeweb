@@ -17,7 +17,7 @@
         <div class="support-ticket-section-heading">
           <div>
             <h2>Conversation</h2>
-            <p>Keep follow-up in this thread so the support team has the full context.</p>
+            <p>{% if total_message_count %}Showing the latest {{ conversation_messages|length }} of {{ total_message_count }} conversation updates. {% if has_earlier_messages %}Load older replies when you need more history.{% else %}You’re viewing the full conversation.{% endif %}{% else %}Keep follow-up in this thread so the support team has the full context.{% endif %}</p>
           </div>
           {% if ticket.is_open %}
             <span class="member-status-pill is-waiting">Open for replies</span>
@@ -27,37 +27,48 @@
         </div>
       </div>
       <div class="member-panel-body support-ticket-thread">
-        <article class="support-ticket-message support-ticket-message--original">
-          <div class="support-ticket-message-heading">
-            <div class="support-ticket-message-author">
-              {% if user == ticket.user %}
-                <strong>You</strong>
-              {% else %}
-                <strong>{{ ticket.user.get_full_name|default:ticket.user.get_username }}</strong>
-              {% endif %}
-              <span class="support-ticket-message-kind">Original request</span>
-            </div>
-            <time datetime="{{ ticket.created_at|date:'c' }}">{{ ticket.created_at|date:"M d, Y · H:i" }}</time>
-          </div>
-          <div class="support-ticket-message-body">{{ ticket.message|linebreaksbr }}</div>
-          {% if ticket.attachments.all %}
-            <div class="support-ticket-attachments">
-              <h3>Attachments</h3>
-              <div class="member-attachment-grid">
-                {% for attachment in ticket.attachments.all %}
-                  {% url 'support:attachment_download' attachment.pk as attachment_url %}
-                  <a class="support-ticket-attachment" href="{{ attachment_url }}" target="_blank" rel="noopener noreferrer">
-                    <img src="{{ attachment_url }}" alt="Attachment to ticket {{ ticket.short_id }}" loading="lazy">
-                    <span class="member-meta">Open attachment ↗</span>
-                  </a>
-                {% endfor %}
+        <details class="support-ticket-original-request"{% if total_message_count == 0 %} open{% endif %}>
+          <summary class="support-ticket-original-summary">
+            <span class="support-ticket-original-mark" aria-hidden="true">01</span>
+            <span class="support-ticket-original-copy">
+              <strong>Original request</strong>
+              <span>{{ ticket.message|striptags|truncatechars:110 }}</span>
+            </span>
+            <time datetime="{{ ticket.created_at|date:'c' }}">Submitted {{ ticket.created_at|date:"M d, Y · H:i" }}</time>
+          </summary>
+          <div class="support-ticket-original-content">
+            <div class="support-ticket-message-body">{{ ticket.message|linebreaksbr }}</div>
+            {% if ticket.attachments.all %}
+              <div class="support-ticket-attachments">
+                <h3>Attachments</h3>
+                <div class="member-attachment-grid">
+                  {% for attachment in ticket.attachments.all %}
+                    {% url 'support:attachment_download' attachment.pk as attachment_url %}
+                    <a class="support-ticket-attachment" href="{{ attachment_url }}" target="_blank" rel="noopener noreferrer">
+                      <img src="{{ attachment_url }}" alt="Attachment to ticket {{ ticket.short_id }}" loading="lazy">
+                      <span class="member-meta">Open attachment ↗</span>
+                    </a>
+                  {% endfor %}
+                </div>
               </div>
-            </div>
-          {% endif %}
-        </article>
+            {% endif %}
+          </div>
+        </details>
+
+        {% if has_earlier_messages %}
+          <nav class="support-ticket-history-control" id="support-ticket-history" aria-label="Conversation history">
+            <a class="support-ticket-history-link" href="?show_messages={{ next_message_limit }}#support-ticket-history">
+              <span class="support-ticket-history-icon" aria-hidden="true">↑</span>
+              <span class="support-ticket-history-copy">
+                <strong>Load {{ messages_to_load }} earlier message{% if messages_to_load != 1 %}s{% endif %}</strong>
+                <small>{{ earlier_message_count }} older update{% if earlier_message_count != 1 %}s{% endif %} not shown</small>
+              </span>
+            </a>
+          </nav>
+        {% endif %}
 
         {% for conversation_message in conversation_messages %}
-          <article class="support-ticket-message{% if conversation_message.is_internal %} support-ticket-message--internal{% elif conversation_message.author_id == ticket.user_id %} support-ticket-message--member{% else %} support-ticket-message--support{% endif %}">
+          <article id="ticket-message-{{ conversation_message.pk }}" class="support-ticket-message{% if conversation_message.is_internal %} support-ticket-message--internal{% elif conversation_message.author_id == ticket.user_id %} support-ticket-message--member{% else %} support-ticket-message--support{% endif %}">
             <div class="support-ticket-message-heading">
               <div class="support-ticket-message-author">
                 <strong>
