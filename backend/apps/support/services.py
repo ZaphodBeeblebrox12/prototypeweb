@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 from django.db import transaction
+from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 
@@ -135,7 +136,16 @@ def notify_staff_about_ticket(ticket, subject=None, body=None, message_id=None):
     delivery is tracked in EmailLog.
     """
     User = get_user_model()
-    staff = list(User.objects.filter(is_staff=True, is_active=True).exclude(pk=ticket.user_id))
+    staff_queryset = User.objects.filter(is_staff=True, is_active=True).exclude(
+        pk=ticket.user_id
+    )
+    review_plan = ticket.review_plan
+    if review_plan and review_plan.ticket_approvers.exists():
+        # Do not leak ticket contents to staff who cannot open this ticket.
+        staff_queryset = staff_queryset.filter(
+            Q(is_superuser=True) | Q(pk__in=review_plan.ticket_approvers.values_list("pk", flat=True))
+        )
+    staff = list(staff_queryset)
     event_subject = subject or f"New support ticket {ticket.short_id}"
     event_body = body or (
         f"{ticket.user} submitted {ticket.get_category_display()}: "
