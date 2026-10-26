@@ -734,6 +734,9 @@ def publish_course_import(record, *, user):
                 level=course_data.get("level", ""),
                 estimated_duration=course_data.get("estimated_duration", ""),
                 learning_outcomes=course_data.get("learning_outcomes", []),
+                catalogue_role=course_data.get(
+                    "catalogue_role", Course.CatalogueRole.MINI
+                ),
                 position=course_data.get("position", 0),
                 status=Course.Status.DRAFT,
             )
@@ -749,6 +752,7 @@ def publish_course_import(record, *, user):
         course.level = course_data.get("level", course.level)
         course.estimated_duration = course_data.get("estimated_duration", course.estimated_duration)
         course.learning_outcomes = course_data.get("learning_outcomes", course.learning_outcomes)
+        course.catalogue_role = course_data.get("catalogue_role", course.catalogue_role)
         course.position = course_data.get("position", 0)
         course.save(
             update_fields=[
@@ -760,6 +764,7 @@ def publish_course_import(record, *, user):
                 "level",
                 "estimated_duration",
                 "learning_outcomes",
+                "catalogue_role",
                 "position",
                 "updated_at",
             ]
