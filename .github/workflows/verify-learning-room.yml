@@ -423,8 +423,13 @@ jobs:
               });
             });
             await cataloguePage.addInitScript(() => {
-              // Exercise a production-origin override without making real external requests.
-              window.TRADETHESIS_ACADEMY_BASE_URL = "https://academy.example.test";
+              // Exercise the origin override only on the Courses-page fixture;
+              // unrelated checkout preview tests must remain genuinely unconfigured.
+              if (window.location.pathname.endsWith("/courses.html")) {
+                window.TRADETHESIS_ACADEMY_BASE_URL = "https://academy.example.test";
+              } else {
+                delete window.TRADETHESIS_ACADEMY_BASE_URL;
+              }
               let catalogueData;
               Object.defineProperty(window, "TRADETHESIS_COURSE_DATA", {
                 configurable: true,
