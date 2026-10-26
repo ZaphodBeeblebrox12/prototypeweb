@@ -327,7 +327,6 @@ class SupportAttachmentDriveStorageTests(TestCase):
     )
     def test_upload_creates_dedicated_private_folder_and_persists_its_id(self):
         storage = SupportAttachmentStorage()
-        folder_listing = type("Response", (), {"json": lambda self: {"files": []}})()
         folder_created = type(
             "Response", (), {"json": lambda self: {
                 "id": "support-only-folder",
@@ -336,7 +335,7 @@ class SupportAttachmentDriveStorageTests(TestCase):
             }}
         )()
         with (
-            patch.object(storage, "_drive_request", side_effect=[folder_listing, folder_created]) as drive_request,
+            patch.object(storage, "_drive_request", return_value=folder_created) as drive_request,
             patch.object(storage, "_write_drive_bytes", return_value={"id": "drive-upload-id"}) as write,
         ):
             saved_name = storage.save(
@@ -350,7 +349,8 @@ class SupportAttachmentDriveStorageTests(TestCase):
         self.assertNotEqual(write.call_args.kwargs["folder_id"], "course-sources-folder")
         credential = GoogleDriveCredential.objects.get(pk=1)
         self.assertEqual(credential.support_attachment_folder_id, "support-only-folder")
-        create_call = drive_request.call_args_list[1]
+        drive_request.assert_called_once()
+        create_call = drive_request.call_args_list[0]
         self.assertEqual(
             create_call.kwargs["json"],
             {
