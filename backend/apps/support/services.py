@@ -97,7 +97,7 @@ def _send_email(user, email, subject, text, template):
     if log is not None:
         log.status = "failed"
         log.error_message = "Email backend reported that no message was sent."
-        log.save(update_fields=["status", "error_message"])
+        _save_email_log(log, ["status", "error_message"])
     logger.error("support email was not sent recipient=%s template=%s", email, template)
     return False
 
