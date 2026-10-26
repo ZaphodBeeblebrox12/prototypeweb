@@ -67,7 +67,7 @@ jobs:
           import re
           from pathlib import Path
 
-          target = "https://tradethesis-academy-staging.onrender.com/accounts/member-entry/"
+          target_path = "/accounts/member-entry/"
           pages = (
               "site/index.html",
               "site/courses.html",
@@ -81,6 +81,8 @@ jobs:
           )
           for name in pages:
               html = Path(name).read_text(encoding="utf-8")
+              if "assets/academy-config.js" not in html:
+                  raise SystemExit(f"{name}: missing the shared Academy endpoint config")
               links = re.findall(
                   r'<a\b[^>]*>\s*Open member dashboard ↗\s*</a>',
                   html,
@@ -88,10 +90,10 @@ jobs:
               )
               if len(links) != 2:
                   raise SystemExit(f"{name}: expected desktop and mobile dashboard links, found {len(links)}")
-              stale = [link for link in links if f'href="{target}"' not in link]
+              stale = [link for link in links if f'data-academy-path="{target_path}"' not in link]
               if stale:
-                  raise SystemExit(f"{name}: dashboard link bypasses session-aware member entry")
-          print("All public desktop/mobile dashboard links use the session-aware member-entry route.")
+                  raise SystemExit(f"{name}: dashboard link bypasses configured session-aware member entry")
+          print("All public desktop/mobile dashboard links use the configured session-aware member-entry route.")
           PY
 
       - name: Install Playwright
@@ -368,7 +370,15 @@ jobs:
                 badResponses.push({ status: response.status(), url: response.url() });
               }
             });
-            await cataloguePage.route("https://tradethesis-academy-staging.onrender.com/api/academy/catalogue/", async route => {
+            await cataloguePage.route("**/api/youtube/live-status/", async route => {
+              await route.fulfill({
+                status: 200,
+                contentType: "application/json",
+                headers: { "access-control-allow-origin": "*" },
+                body: JSON.stringify({ is_live: false, watch_url: "" })
+              });
+            });
+            await cataloguePage.route("**/api/academy/catalogue/", async route => {
               await route.fulfill({
                 status: 200,
                 contentType: "application/json",
@@ -392,10 +402,35 @@ jobs:
                     { title: "Second module", count: "1 lesson", preview: "Second preview", points: ["Second lesson"] }
                   ],
                   academyUrl: "https://tradethesis-academy-staging.onrender.com/courses/bollinger-bands/"
+                }, {
+                  id: "ci-api-support-resistance",
+                  slug: "support-resistance",
+                  title: "Support & Resistance",
+                  category: "API fixture category",
+                  level: "Intermediate",
+                  description: "Browser test API course with the default zero position.",
+                  outcome: "Browser test outcome.",
+                  complements: "Browser fixture only.",
+                  price: "",
+                  status: "published",
+                  catalogueRole: "mini",
+                  catalogueOrder: 0,
+                  art: "structure",
+                  // Empty modules preserve the curated multi-section outline for this matched course.
+                  modules: [],
+                  academyUrl: ""
                 }] })
               });
             });
             await cataloguePage.addInitScript(() => {
+              // Exercise the origin override on the Courses and sign-in fixtures.
+              // Other pages, especially checkout-preview routes, remain unconfigured.
+              if (window.location.pathname.endsWith("/courses.html") ||
+                  window.location.pathname.endsWith("/member-access.html")) {
+                window.TRADETHESIS_ACADEMY_BASE_URL = "https://academy.example.test";
+              } else {
+                delete window.TRADETHESIS_ACADEMY_BASE_URL;
+              }
               let catalogueData;
               Object.defineProperty(window, "TRADETHESIS_COURSE_DATA", {
                 configurable: true,
@@ -436,6 +471,15 @@ jobs:
               });
             });
             await cataloguePage.goto(server + "/courses.html", { waitUntil: "networkidle" });
+            const academyBaseUrl = await cataloguePage.evaluate(() => window.TRADETHESIS_ACADEMY_CONFIG?.baseUrl || "");
+            assert.equal(academyBaseUrl, "https://academy.example.test",
+              "The public Academy origin should be overrideable for a different deployment");
+            const memberEntryHref = await cataloguePage.locator(".member-area-link").getAttribute("href");
+            assert.equal(new URL(memberEntryHref).origin, new URL(academyBaseUrl).origin,
+              "The desktop member link should follow the configured Academy origin");
+            const liveStatusUrl = await cataloguePage.locator("[data-youtube-live-control]").getAttribute("data-youtube-live-status-url");
+            assert.equal(new URL(liveStatusUrl).origin, new URL(academyBaseUrl).origin,
+              "The live-status endpoint should follow the configured Academy origin");
             try {
               await cataloguePage.waitForSelector("#cc-course-filters [data-filter='API fixture category']");
             const apiBackedStaticMicro = cataloguePage.locator('#cc-micro-grid article.ed-micro-tile:has([data-open-course="bollinger-bands"])');
@@ -462,6 +506,11 @@ jobs:
               throw error;
             }
             const visibleCourseCount = await cataloguePage.locator("#cc-micro-grid [data-open-course]").count();
+            const firstCatalogueIds = await cataloguePage.locator("#cc-micro-grid article.ed-micro-tile").evaluateAll(
+              cards => cards.slice(0, 2).map(card => card.dataset.courseId)
+            );
+            assert.deepEqual(firstCatalogueIds, ["support-resistance", "bollinger-bands"],
+              "Zero should preserve a curated course's position; a positive saved position should order the next card");
             assert.equal(await cataloguePage.locator("#cc-micro-grid [data-open-course='ci-future-hidden-draft']").count(), 0,
               "Hidden development drafts must not appear as public course cards");
             assert.equal(await cataloguePage.locator("#cc-course-filters [data-filter='Hidden draft topic']").count(), 0,
@@ -536,21 +585,28 @@ jobs:
             const loginForm = cataloguePage.locator("#memberLoginForm");
             assert.equal((await loginForm.getAttribute("method") || "get").toLowerCase(), "post",
               "Member credentials must be submitted with POST, not a query string");
-            assert.match(await loginForm.getAttribute("action") || "",
-              /^https:\/\/tradethesis-academy-staging\.onrender\.com\/accounts\/login\/from-member-access\/$/,
-              "The public sign-in form must submit directly to the HTTPS Academy login endpoint");
+            const loginActionUrl = new URL(await loginForm.getAttribute("action") || "");
+            assert.equal(loginActionUrl.origin, new URL(academyBaseUrl).origin,
+              "The public sign-in form must submit to the configured Academy origin");
+            assert.equal(loginActionUrl.pathname, "/accounts/login/from-member-access/",
+              "The public sign-in form must keep its intended login endpoint");
+            const resetUrl = new URL(await cataloguePage.locator('a[href*="/accounts/password/reset/"]').getAttribute("href") || "");
+            const signupUrl = new URL(await cataloguePage.locator('a[href*="/accounts/signup/"]').getAttribute("href") || "");
+            assert.equal(resetUrl.origin, new URL(academyBaseUrl).origin,
+              "The password-reset link must follow the configured Academy origin");
+            assert.equal(signupUrl.origin, new URL(academyBaseUrl).origin,
+              "The signup link must follow the configured Academy origin");
             assert.equal(await loginForm.locator('input[type="password"]').count(), 1,
               "The member sign-in form should expose one password field for direct Academy verification");
             assert.equal(await loginForm.locator('button[type="submit"]').count(), 1,
               "Sign-in should use the existing POST form, not a separate marketing link");
-            assert.match(await loginForm.getAttribute("action") || "",
-              /^https:\/\/tradethesis-academy-staging\.onrender\.com\/accounts\/login\/from-member-access\/$/,
-              "Sign-in must post to the server-side Django login");
-            assert.equal(await cataloguePage.locator('a[href^="https://tradethesis-academy-staging.onrender.com/accounts/password/reset/"]').count(), 1,
+            assert.equal(resetUrl.pathname, "/accounts/password/reset/",
               "Password reset must route to Django/allauth");
             await cataloguePage.locator("#createTab").click();
             const signupHref = await cataloguePage.locator("#createPanel a.primary").getAttribute("href");
-            assert.match(signupHref || "", /^https:\/\/tradethesis-academy-staging\.onrender\.com\/accounts\/signup\//,
+            assert.equal(new URL(signupHref || "").origin, new URL(academyBaseUrl).origin,
+              "Sign-up CTA must use the configured Academy origin");
+            assert.equal(new URL(signupHref || "").pathname, "/accounts/signup/",
               "Sign-up CTA must lead to the server-side Django signup");
             await cataloguePage.setViewportSize({ width: 390, height: 844 });
             const accessOverflow = await cataloguePage.evaluate(() => ({

@@ -219,6 +219,23 @@
 
   let microCourses = data.microCourses.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
 
+  // A stored position of zero is the database default, not a deliberate request
+  // to move an existing curated tile to the front of the catalogue.
+  const positiveCatalogueOrder = value => {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+  };
+  const resolveCatalogueOrder = (incoming, prior) =>
+    positiveCatalogueOrder(incoming.catalogueOrder) ??
+    positiveCatalogueOrder(prior && prior.catalogueOrder) ??
+    positiveCatalogueOrder(prior && prior.order) ??
+    (1000 + microCourses.length);
+  const compareCatalogueCourses = (a, b) =>
+    (Number(a.priority ?? 3) - Number(b.priority ?? 3)) ||
+    ((positiveCatalogueOrder(a.order) ?? 1000) - (positiveCatalogueOrder(b.order) ?? 1000)) ||
+    String(a.title || "").localeCompare(String(b.title || "")) ||
+    String(a.slug || a.id || "").localeCompare(String(b.slug || b.id || ""));
+
   function renderMicroCard(course, index) {
     const hook = course.hook || course.description || '';
     const problem = course.problem || '';
@@ -363,7 +380,9 @@
       modalFooter.prepend(note);
     }
   };
-  fetch("https://tradethesis-academy-staging.onrender.com/api/academy/catalogue/", {headers: {"Accept":"application/json"}})
+  const academyBaseUrl = String(window.TRADETHESIS_ACADEMY_CONFIG?.baseUrl || "").trim().replace(/\/+$/, "");
+  const academyCatalogueUrl = academyBaseUrl ? academyBaseUrl + "/api/academy/catalogue/" : "";
+  if (academyCatalogueUrl) fetch(academyCatalogueUrl, {headers: {"Accept":"application/json"}})
     .then(response => { if (!response.ok) throw new Error("Academy catalogue unavailable"); return response.json(); })
     .then(payload => {
       const academyEntries = (payload.courses || []).filter(course => course && (
@@ -394,6 +413,7 @@
           continue;
         }
 
+        const catalogueOrder = resolveCatalogueOrder(incoming, prior);
         const normalized = {
           ...(prior || {}),
           ...incoming,
@@ -402,9 +422,7 @@
           id: (prior && prior.id) || incoming.id,
           slug: incoming.slug || (prior && prior.slug) || String(incoming.id || ""),
           catalogueRole: role,
-          catalogueOrder: Number.isFinite(Number(incoming.catalogueOrder))
-            ? Number(incoming.catalogueOrder)
-            : ((prior && Number.isFinite(Number(prior.order))) ? Number(prior.order) : 1000),
+          catalogueOrder,
           category: incoming.category || (prior && prior.category) || "TradeThesis courses",
           level: incoming.level || (prior && prior.level) || "Self-paced",
           // The API currently supplies generic fallback artwork. Preserve a curated tile's
@@ -420,9 +438,7 @@
               : "Explore this published course in the TradeThesis Academy."),
           price: incoming.price || (prior && prior.price) || "",
           priority: role === "flagship" ? 1 : role === "supporting" ? 2 : 3,
-          order: Number.isFinite(Number(incoming.catalogueOrder))
-            ? Number(incoming.catalogueOrder)
-            : ((prior && Number.isFinite(Number(prior.order))) ? Number(prior.order) : 1000 + microCourses.length)
+          order: catalogueOrder
         };
 
         if (normalized.cataloguePresentationConfigured) {
@@ -474,6 +490,11 @@
       }
 
       if (catalogueChanged) {
+        // Synchronisation removes and re-adds matched cards; sort once after the
+        // full payload so saved positive positions and stable tie-breakers win.
+        microCourses.sort(compareCatalogueCourses);
+        dynamicFlagshipCourses.sort(compareCatalogueCourses);
+        dynamicSupportingCourses.sort(compareCatalogueCourses);
         renderProgrammeSections();
         renderSupportingProgrammes();
         renderFilterButtons();
