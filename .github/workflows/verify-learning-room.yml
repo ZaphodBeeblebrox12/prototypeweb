@@ -67,7 +67,7 @@ jobs:
           import re
           from pathlib import Path
 
-          target = "https://tradethesis-academy-staging.onrender.com/accounts/member-entry/"
+          target_path = "/accounts/member-entry/"
           pages = (
               "site/index.html",
               "site/courses.html",
@@ -81,6 +81,8 @@ jobs:
           )
           for name in pages:
               html = Path(name).read_text(encoding="utf-8")
+              if "assets/academy-config.js" not in html:
+                  raise SystemExit(f"{name}: missing the shared Academy endpoint config")
               links = re.findall(
                   r'<a\b[^>]*>\s*Open member dashboard ↗\s*</a>',
                   html,
@@ -88,10 +90,10 @@ jobs:
               )
               if len(links) != 2:
                   raise SystemExit(f"{name}: expected desktop and mobile dashboard links, found {len(links)}")
-              stale = [link for link in links if f'href="{target}"' not in link]
+              stale = [link for link in links if f'data-academy-path="{target_path}"' not in link]
               if stale:
-                  raise SystemExit(f"{name}: dashboard link bypasses session-aware member entry")
-          print("All public desktop/mobile dashboard links use the session-aware member-entry route.")
+                  raise SystemExit(f"{name}: dashboard link bypasses configured session-aware member entry")
+          print("All public desktop/mobile dashboard links use the configured session-aware member-entry route.")
           PY
 
       - name: Install Playwright
@@ -592,14 +594,15 @@ jobs:
               "The member sign-in form should expose one password field for direct Academy verification");
             assert.equal(await loginForm.locator('button[type="submit"]').count(), 1,
               "Sign-in should use the existing POST form, not a separate marketing link");
-            assert.match(await loginForm.getAttribute("action") || "",
-              /^https:\/\/tradethesis-academy-staging\.onrender\.com\/accounts\/login\/from-member-access\/$/,
+            assert.equal(loginActionUrl.pathname, "/accounts/login/from-member-access/",
               "Sign-in must post to the server-side Django login");
-            assert.equal(await cataloguePage.locator('a[href^="https://tradethesis-academy-staging.onrender.com/accounts/password/reset/"]').count(), 1,
+            assert.equal(resetUrl.pathname, "/accounts/password/reset/",
               "Password reset must route to Django/allauth");
             await cataloguePage.locator("#createTab").click();
             const signupHref = await cataloguePage.locator("#createPanel a.primary").getAttribute("href");
-            assert.match(signupHref || "", /^https:\/\/tradethesis-academy-staging\.onrender\.com\/accounts\/signup\//,
+            assert.equal(new URL(signupHref || "").origin, new URL(academyBaseUrl).origin,
+              "Sign-up CTA must use the configured Academy origin");
+            assert.equal(new URL(signupHref || "").pathname, "/accounts/signup/",
               "Sign-up CTA must lead to the server-side Django signup");
             await cataloguePage.setViewportSize({ width: 390, height: 844 });
             const accessOverflow = await cataloguePage.evaluate(() => ({
