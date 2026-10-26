@@ -21,8 +21,10 @@ def _ticket_url(ticket, staff=False):
         path = f"/admin/support/supportticket/{ticket.pk}/change/"
     else:
         path = reverse("support:ticket_detail", kwargs={"pk": ticket.pk})
-    base = (getattr(settings, "SITE_BASE_URL", "") or
-            getattr(settings, "TRADETHESIS_PUBLIC_SITE_URL", "")).rstrip("/")
+    # Use the public deployed origin first. SITE_BASE_URL defaults to localhost
+    # in base settings and must not accidentally leak into notification links.
+    base = (getattr(settings, "TRADETHESIS_PUBLIC_SITE_URL", "") or
+            getattr(settings, "SITE_BASE_URL", "")).rstrip("/")
     return f"{base}{path}" if base else path
 
 
