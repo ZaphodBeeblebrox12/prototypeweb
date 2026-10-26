@@ -37,6 +37,12 @@ class TicketAttachmentInline(admin.TabularInline):
         return "-"
     file_link.short_description = "Screenshot"
 
+    def has_view_permission(self, request, obj=None):
+        return bool(
+            request.user.is_staff
+            and (obj is None or obj.can_be_reviewed_by(request.user))
+        )
+
     def has_add_permission(self, request, obj=None):
         return False
 
@@ -48,6 +54,12 @@ class TicketMessageInline(admin.TabularInline):
     can_delete = False
     fields = ["author", "body", "is_internal", "created_at"]
     readonly_fields = ["author", "body", "is_internal", "created_at"]
+
+    def has_view_permission(self, request, obj=None):
+        return bool(
+            request.user.is_staff
+            and (obj is None or obj.can_be_reviewed_by(request.user))
+        )
 
     def has_add_permission(self, request, obj=None):
         return False
