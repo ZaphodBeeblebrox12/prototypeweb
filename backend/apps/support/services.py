@@ -250,6 +250,8 @@ def add_ticket_message(ticket, author, body, is_internal=False):
     body = (body or "").strip()
     if not body:
         raise ValueError("Enter a message before sending.")
+    if len(body) > 10000:
+        raise ValueError("Messages must be 10,000 characters or fewer.")
     if getattr(author, "is_staff", False):
         if not ticket.can_be_reviewed_by(author):
             raise PermissionError("You are not allowed to reply to this ticket.")
