@@ -31,8 +31,14 @@ class SupportAttachmentStorage(GoogleDriveStorageMixin, FileSystemStorage):
 
     def __init__(self):
         super().__init__(
-            location=str(getattr(settings, "MEDIA_ROOT", Path(settings.BASE_DIR) / "media")),
-            base_url=getattr(settings, "MEDIA_URL", "/media/"),
+            location=str(
+                getattr(
+                    settings,
+                    "SUPPORT_ATTACHMENTS_PRIVATE_MEDIA_ROOT",
+                    Path(settings.BASE_DIR) / "private_support_attachments",
+                )
+            ),
+            base_url=None,
         )
         self._support_folder_cache = ""
 
@@ -125,6 +131,20 @@ class SupportAttachmentStorage(GoogleDriveStorageMixin, FileSystemStorage):
         )
         return name
 
+    def _open(self, name, mode="rb"):
+        try:
+            return GoogleDriveStorageMixin._open(self, name, mode)
+        except OSError:
+            # During the storage cutover, retain read access to old local uploads
+            # if a copy still exists. These files are only opened by the
+            # authorized attachment view; they are never served from MEDIA_URL.
+            legacy_root = str(getattr(settings, "MEDIA_ROOT", Path(settings.BASE_DIR) / "media"))
+            if Path(legacy_root).resolve() == Path(self.location).resolve():
+                raise
+            logger.info("Trying legacy local support attachment after storage miss.")
+            legacy_storage = FileSystemStorage(location=legacy_root, base_url=None)
+            return legacy_storage._open(name, mode)
+
     def url(self, name):
         raise ValueError(
             "Support attachments are private. Use the authenticated support download route."
@@ -147,5 +167,8 @@ class SupportAttachmentStorage(GoogleDriveStorageMixin, FileSystemStorage):
                     f"{DRIVE_API}/files/{found['id']}",
                     expected=(204,),
                 )
-        # Also remove a legacy local copy if one existed before Drive was enabled.
-        return FileSystemStorage.delete(self, name)
+        # Remove both the private dev fallback and any legacy MEDIA_ROOT copy.
+        FileSystemStorage.delete(self, name)
+        legacy_root = str(getattr(settings, "MEDIA_ROOT", Path(settings.BASE_DIR) / "media"))
+        if Path(legacy_root).resolve() != Path(self.location).resolve():
+            FileSystemStorage(location=legacy_root, base_url=None).delete(name)
