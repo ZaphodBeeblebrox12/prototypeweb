@@ -130,12 +130,22 @@ def google_drive_oauth_callback(request):
         if not refresh_token:
             raise ValueError("offline access token missing")
         headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
-        folder_ids = [credential.asset_folder_id, credential.source_folder_id]
-        for index, folder_name in enumerate(
-            ("TradeThesis Course Assets", "TradeThesis Course Source Snapshots")
-        ):
+        folder_fields = (
+            "asset_folder_id",
+            "source_folder_id",
+            "support_attachment_folder_id",
+        )
+        folder_names = (
+            "TradeThesis Course Assets",
+            "TradeThesis Course Source Snapshots",
+            "TradeThesis Support Attachments",
+        )
+        folder_ids = [getattr(credential, field) for field in folder_fields]
+        for index, folder_name in enumerate(folder_names):
             if folder_ids[index]:
                 continue
+            # Drive's default for a newly created folder is private to the
+            # connected account. Do not add public or anyone-with-link permissions.
             folder_response = requests.post(
                 DRIVE_API,
                 headers=headers,
@@ -150,21 +160,14 @@ def google_drive_oauth_callback(request):
             if not folder_id:
                 raise ValueError("Drive folder id missing")
             folder_ids[index] = folder_id
-            if index == 0:
-                credential.asset_folder_id = folder_id
-                credential.save(update_fields=["asset_folder_id", "updated_at"])
-            else:
-                credential.source_folder_id = folder_id
-                credential.save(update_fields=["source_folder_id", "updated_at"])
+            setattr(credential, folder_fields[index], folder_id)
+            credential.save(update_fields=[folder_fields[index], "updated_at"])
+
         credential.set_refresh_token(refresh_token)
-        credential.asset_folder_id, credential.source_folder_id = folder_ids
+        for field, folder_id in zip(folder_fields, folder_ids):
+            setattr(credential, field, folder_id)
         credential.save(
-            update_fields=[
-                "encrypted_refresh_token",
-                "asset_folder_id",
-                "source_folder_id",
-                "updated_at",
-            ]
+            update_fields=["encrypted_refresh_token", *folder_fields, "updated_at"]
         )
     except Exception:
         messages.error(
