@@ -218,6 +218,7 @@ class Command(BaseCommand):
             course = Course.objects.create(
                 title=product.get("name", "The TradeThesis Trading Path"),
                 slug="trading-path",
+                catalogue_role=Course.CatalogueRole.FLAGSHIP,
                 summary=(
                     "Thirty lessons across foundations, technical tools, trading mechanics and "
                     "psychology. Imported as a draft for content and delivery review."
