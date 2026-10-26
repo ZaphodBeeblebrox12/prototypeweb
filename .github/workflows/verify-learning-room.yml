@@ -423,9 +423,10 @@ jobs:
               });
             });
             await cataloguePage.addInitScript(() => {
-              // Exercise the origin override only on the Courses-page fixture;
-              // unrelated checkout preview tests must remain genuinely unconfigured.
-              if (window.location.pathname.endsWith("/courses.html")) {
+              // Exercise the origin override on the Courses and sign-in fixtures.
+              // Other pages, especially checkout-preview routes, remain unconfigured.
+              if (window.location.pathname.endsWith("/courses.html") ||
+                  window.location.pathname.endsWith("/member-access.html")) {
                 window.TRADETHESIS_ACADEMY_BASE_URL = "https://academy.example.test";
               } else {
                 delete window.TRADETHESIS_ACADEMY_BASE_URL;
