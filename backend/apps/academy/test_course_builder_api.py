@@ -2063,6 +2063,15 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
         self.assertNotIn("if (normalized.tab === 'regional') normalized.tab = 'overview';", source)
         self.assertNotIn("if (state.tab === 'regional') state.tab = 'overview';", source)
 
+    def test_local_autosave_is_not_suppressed_by_legacy_preview_view_state(self):
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
+        start = source.index("function schedulePersist(){")
+        end = source.index("function renderHeaderState()", start)
+        schedule_persist = source[start:end]
+
+        self.assertNotIn("state.view==='preview'", schedule_persist)
+        self.assertIn("saveTimer=setTimeout(()=>{persist(false)", schedule_persist)
+
     def test_new_course_buttons_use_responsive_capture_phase_handler(self):
         source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
         self.assertIn(
