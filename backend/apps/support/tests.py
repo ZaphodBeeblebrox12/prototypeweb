@@ -352,3 +352,13 @@ class SupportTicketWorkflowTests(TestCase):
             user=self.allowed_reviewer, template="support_ticket_staff_alert",
             status="sent",
         ).exists())
+        self.assertFalse(Notification.objects.filter(
+            user=self.other_reviewer, title__contains=self.ticket.short_id
+        ).exists())
+        self.assertFalse(EmailLog.objects.filter(
+            user=self.other_reviewer, template="support_ticket_staff_alert",
+        ).exists())
+
+    def test_service_rejects_oversized_replies_server_side(self):
+        with self.assertRaisesRegex(ValueError, "10,000 characters or fewer"):
+            add_ticket_message(self.ticket, self.member, "x" * 10001)
