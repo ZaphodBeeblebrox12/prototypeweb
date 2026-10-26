@@ -1,5 +1,6 @@
 """Admin-only staging view for the in-progress Course Builder prototype."""
 
+import json
 from pathlib import Path
 
 from django.contrib.auth.decorators import login_required
@@ -12,6 +13,7 @@ from django.views.decorators.http import require_GET
 from .permissions import is_course_content_admin
 
 _PREVIEW_FILE = Path(__file__).with_name("course_builder_preview.html")
+_TRADING_PATH_IMPORT_FILE = Path(__file__).with_name("course_builder_trading_path_import.json")
 
 
 @login_required
@@ -33,6 +35,34 @@ def course_builder_preview(request):
             status=503,
             content_type="text/plain; charset=utf-8",
         )
+
+    if request.GET.get("import") == "trading-path":
+        try:
+            import_payload = json.loads(_TRADING_PATH_IMPORT_FILE.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return HttpResponse(
+                "The Trading Path import source is unavailable. Please contact the site administrator.",
+                status=503,
+                content_type="text/plain; charset=utf-8",
+            )
+        marker = "<!-- COURSE_BUILDER_IMPORTED_DRAFT_DATA -->"
+        if marker not in document:
+            return HttpResponse(
+                "The Course Builder import hook is unavailable. Please contact the site administrator.",
+                status=503,
+                content_type="text/plain; charset=utf-8",
+            )
+        import_json = json.dumps(import_payload, ensure_ascii=False, separators=(",", ":"))
+        # Prevent uploaded lesson text from closing the JSON script element.
+        import_json = import_json.replace("&", "\\u0026")
+        import_json = import_json.replace("<", "\\u003c")
+        import_json = import_json.replace(">", "\\u003e")
+        import_tag = (
+            '<script type="application/json" id="courseBuilderImportedDraft">'
+            + import_json
+            + "</script>"
+        )
+        document = document.replace(marker, import_tag, 1)
 
     get_token(request)  # Ensure the authenticated builder receives a CSRF cookie for JSON saves.
     response = HttpResponse(document, content_type="text/html; charset=utf-8")

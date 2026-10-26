@@ -569,6 +569,127 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 #previewAudienceSelect option { color:#23332a; background:#fff; }
 @media(max-width:760px) { .regional-image-row { grid-template-columns:minmax(0,1fr); } }
 
+/* Live lesson outline: navigable H1–H4 hierarchy beside the writing canvas. */
+.lesson-outline-layout {
+  display:grid;
+  grid-template-columns:minmax(190px,230px) minmax(0,1fr);
+  align-items:start;
+  gap:16px;
+  margin:10px 0 18px;
+}
+.lesson-outline-aside,.lesson-outline-content { min-width:0; }
+.lesson-outline-panel {
+  position:sticky;
+  top:14px;
+  max-height:calc(100vh - 30px);
+  overflow:auto;
+  padding:13px 11px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--panel-soft);
+  color:var(--ink);
+}
+.lesson-outline-panel > summary {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  list-style:none;
+  cursor:pointer;
+}
+.lesson-outline-panel > summary::-webkit-details-marker { display:none; }
+.lesson-outline-title {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  font-size:12px;
+  font-weight:850;
+  letter-spacing:.015em;
+}
+.lesson-outline-title::before {
+  content:"";
+  display:block;
+  width:3px;
+  height:17px;
+  flex:0 0 3px;
+  border-radius:2px;
+  background:var(--site-secondary);
+}
+.lesson-outline-count {
+  flex:0 0 auto;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:650;
+  white-space:nowrap;
+}
+.lesson-outline-panel[open] > summary {
+  margin-bottom:9px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--line);
+}
+.lesson-outline-list { display:grid; gap:3px; }
+.lesson-outline-list[hidden] { display:none !important; }
+.lesson-outline-button {
+  display:grid;
+  grid-template-columns:22px minmax(0,1fr);
+  align-items:start;
+  gap:6px;
+  width:100%;
+  padding:7px 7px;
+  border:1px solid transparent;
+  border-left:2px solid transparent;
+  border-radius:6px;
+  background:transparent;
+  color:var(--muted);
+  font:600 11px/1.45 var(--site-font-body);
+  text-align:left;
+  cursor:pointer;
+}
+.lesson-outline-button[data-level="2"] { padding-left:16px; }
+.lesson-outline-button[data-level="3"] { padding-left:26px; }
+.lesson-outline-button[data-level="4"] { padding-left:36px; }
+.lesson-outline-level {
+  padding-top:1px;
+  color:var(--muted);
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.01em;
+}
+.lesson-outline-label { min-width:0; overflow-wrap:anywhere; }
+.lesson-outline-button:hover {
+  border-color:var(--line);
+  background:var(--panel);
+  color:var(--ink);
+}
+.lesson-outline-button.is-active {
+  border-color:var(--line);
+  border-left-color:var(--site-secondary);
+  background:var(--panel);
+  color:var(--site-primary);
+}
+.lesson-outline-button.is-active .lesson-outline-level { color:var(--site-secondary); }
+.lesson-outline-button:focus-visible {
+  outline:2px solid var(--site-secondary);
+  outline-offset:1px;
+}
+.lesson-outline-empty {
+  margin:0;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.6;
+}
+@media(max-width:900px) {
+  .lesson-outline-layout { grid-template-columns:minmax(0,1fr); gap:10px; }
+  .lesson-outline-panel { position:static; max-height:none; }
+  .lesson-outline-panel[open] .lesson-outline-list { max-height:220px; overflow-y:auto; }
+}
+@media(max-width:480px) {
+  .lesson-outline-layout { gap:8px; }
+  .lesson-outline-panel { padding:11px 9px; }
+  .lesson-outline-button { font-size:11px; }
+}
+
 /* True visual authoring canvas. */
 .rich-editor-wrapper { position:relative; z-index:0; isolation:isolate; border:1px solid var(--line); border-radius:11px; overflow:visible; background:var(--panel); }
 .rich-editor-wrapper:focus-within { z-index:8; }
@@ -909,6 +1030,7 @@ body.builder-dialog-open { overflow:hidden; }
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </div>
+<!-- COURSE_BUILDER_IMPORTED_DRAFT_DATA -->
 <script>
 (() => {
   'use strict';
@@ -969,7 +1091,7 @@ body.builder-dialog-open { overflow:hidden; }
   const defaultQuestion = () => ({id:uid('q'),prompt:'What evidence would you look for before acting on this observation?',options:['Confirming evidence in price behaviour','One indicator reading by itself','A guaranteed outcome'],correctIndex:0,explanation:'Look for confirming evidence and define what would weaken the idea. An observation is not a complete trade plan.',imageId:''});
   const makeLesson = (n=1) => ({id:uid('lesson'),title:`Lesson 1.${n} — Start with a question`,summary:'A practical introduction to the decision this lesson will help you make.',minutes:12,format:'reading',videoUrl:'',reflectionPrompt:'Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view.',reflectionModelReasoning:'A careful reading separates visible evidence from interpretation, considers a reasonable alternative, and names the evidence that would strengthen or weaken the interpretation.',reflectionChartNotes:'',notebook:{title:'Before you make the call',prompts:[{label:'Observe',text:'Describe the evidence visible in the chart.'},{label:'Interpret',text:'State one possible reading and a reasonable alternative.'},{label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}]},imageGroups:[],content:`## Start with the decision\n\nBegin with a practical question a trader may encounter. Describe what can be observed before offering an interpretation.\n\n### What to notice\n\nSeparate the visible evidence from the conclusion you may draw from it. Name the limits of the observation and consider a reasonable alternative.\n\n### Compare the possibilities\n\nUse a second case to show how similar-looking conditions can lead to different outcomes. Explain which detail changes the interpretation.\n\n### Take it into practice\n\nWrite down what would strengthen your reading, what would weaken it, and what would make waiting the better decision.`,questions:[defaultQuestion()],image:null,relatedCourseIds:[]});
   const makeModule = (n=1) => ({id:uid('module'),title:`Module ${String(n).padStart(2,'0')} — Foundations`,description:'The main ideas and decisions covered in this module.',lessons:[makeLesson(1)]});
-  const makeCourse = (title='Untitled course') => ({id:uid('course'),title,slug:slugify(title),summary:'A clear, practical description of what learners will study and why it matters.',description:'Explain who the course is for, what it covers and how learners will use it. Keep the promise realistic and specific.',category:'Technical analysis',level:'Intermediate',duration:'Self-paced',price:'',priceNote:'Pricing and checkout are configured separately.',catalogueHook:'',problemStatement:'',learningFocus:'',authoredTags:'',whyThisOne:'',cataloguePresentationConfigured:false,status:'draft',comingSoon:false,requiresOwnedAssets:true,position:0,createdAt:nowText(),updatedAt:'Not saved yet',publishedAt:null,publishedSnapshot:null,modules:[makeModule(1)],outcomes:['Describe the evidence before interpreting it.','Compare alternatives and identify invalidation.','Build a clear, conditional decision process.']});
+  const makeCourse = (title='Untitled course') => ({id:uid('course'),title,slug:slugify(title),summary:'A clear, practical description of what learners will study and why it matters.',description:'Explain who the course is for, what it covers and how learners will use it. Keep the promise realistic and specific.',category:'Technical analysis',level:'Intermediate',duration:'Self-paced',price:'',priceNote:'Pricing and checkout are configured separately.',catalogueRole:'mini',catalogueHook:'',problemStatement:'',learningFocus:'',authoredTags:'',whyThisOne:'',cataloguePresentationConfigured:false,status:'draft',comingSoon:false,requiresOwnedAssets:true,position:0,createdAt:nowText(),updatedAt:'Not saved yet',publishedAt:null,publishedSnapshot:null,modules:[makeModule(1)],outcomes:['Describe the evidence before interpreting it.','Compare alternatives and identify invalidation.','Build a clear, conditional decision process.']});
   let demoOffers = [];
   let comingSoonOffers = [];
   let catalogueLoaded = false;
@@ -1067,10 +1189,11 @@ body.builder-dialog-open { overflow:hidden; }
     normalized.slug = String(source.slug || slugify(title));
     normalized.summary = String(source.summary ?? defaults.summary);
     normalized.description = String(source.description ?? defaults.description);
-    for (const field of ['category', 'level', 'duration', 'price', 'priceNote', 'catalogueHook',
+    for (const field of ['category', 'level', 'duration', 'price', 'priceNote', 'catalogueRole', 'catalogueHook',
       'problemStatement', 'learningFocus', 'authoredTags', 'whyThisOne']) {
       normalized[field] = String(source[field] ?? defaults[field]);
     }
+    normalized.catalogueRole = ['flagship','supporting','mini','hidden'].includes(normalized.catalogueRole) ? normalized.catalogueRole : 'mini';
     normalized.status = ['draft', 'draft-update', 'published'].includes(source.status) ? source.status : 'draft';
     normalized.outcomes = Array.isArray(source.outcomes) ? source.outcomes.map(value => String(value ?? '')) : defaults.outcomes;
     normalized.comingSoon = Boolean(source.comingSoon);
@@ -1145,8 +1268,46 @@ body.builder-dialog-open { overflow:hidden; }
     }
     return getSeed();
   }
+  const tradingPathImportRequested = new URLSearchParams(window.location.search).get('import') === 'trading-path';
+  let requestedTradingPathDraft = null;
+  if (tradingPathImportRequested) {
+    try {
+      const importNode = document.getElementById('courseBuilderImportedDraft');
+      const importPayload = JSON.parse(importNode?.textContent || '{}');
+      if (importPayload?.course && typeof importPayload.course === 'object') {
+        requestedTradingPathDraft = normalizeCourseState(importPayload.course);
+      }
+    } catch (error) {
+      console.error('Could not read the Trading Path import payload.', error);
+    }
+  }
+  function clearTradingPathImportQuery() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('import');
+    window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+  }
   diagnosticStage('browser-state-normalization-started');
   let state=normalizeLoadedState(load());
+  if (requestedTradingPathDraft) {
+    // Remove only the untouched starter placeholder; preserve every real local draft.
+    state.courses = state.courses.filter(local => !isUntouchedStarterDraft(local));
+    let importedCourse = state.courses.find(local =>
+      String(local.slug || '') === String(requestedTradingPathDraft.slug || '')
+    );
+    if (!importedCourse) {
+      state.courses.unshift(requestedTradingPathDraft);
+      importedCourse = requestedTradingPathDraft;
+    }
+    state.selectedCourseId = importedCourse.id;
+    state.selectedModuleId = importedCourse.modules?.[0]?.id || null;
+    state.selectedLessonId = importedCourse.modules?.[0]?.lessons?.[0]?.id || null;
+    state.view = 'editor';
+    state.tab = 'curriculum';
+    state.tradingPathOutlineAutoOpened = true;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (error) {
+      console.warn('The imported Trading Path draft could not be cached in this browser.', error);
+    }
+  }
   diagnosticStage('browser-state-normalization-complete', {courseCount:state.courses.length, selectedCoursePresent:Boolean(state.selectedCourseId)});
   // Regional editing may contain many rich-text variants. Start on the light overview
   // screen after a reload; the selected course and all draft content remain untouched.
@@ -1290,9 +1451,9 @@ body.builder-dialog-open { overflow:hidden; }
   function renderSidebar(){const list=$('#courseList');if(!list)return;const query=($('#courseSearch')?.value||'').trim().toLowerCase();const courses=state.courses.filter(c=>c.title.toLowerCase().includes(query));$('#courseCount').textContent=`${state.courses.length} ${state.courses.length===1?'course':'courses'}`;list.innerHTML=courses.map(c=>`<button type="button" class="course-item ${c.id===state.selectedCourseId?'active':''}" data-action="select-course" data-id="${esc(c.id)}"><span class="course-item-title"><span>${esc(c.title||'Untitled course')}</span><span class="mini-status ${c.status==='published'?'live':''}"></span></span><span class="course-item-meta"><span class="pill ${c.status==='published'?'published':'status'}">${esc(activeStatus(c))}</span><span>${allLessons(c).length} lessons</span></span></button>`).join('')||'<div class="empty-state"><p>No courses match that search.</p></div>';}
   function cataloguePresentationPreviewMarkup(c) {
     const tags = String(c.authoredTags || '').split(/[,;\n]+/).map(tag => tag.trim()).filter(Boolean).slice(0, 10);
-    return '<div class="cb-catalogue-preview" data-catalogue-presentation-preview><div class="cb-cp-art"><span>TRADETHESIS · MICRO-COURSE</span><svg viewBox="0 0 340 86" role="img" aria-label="Decorative chart preview"><path d="M12 69H328M12 43H328M12 17H328" stroke="#c8d1bf" stroke-width="1"/><path d="M14 61L45 53L69 60L96 31L120 45L145 23L170 39L199 18L222 33L247 12L276 28L301 9L326 15" fill="none" stroke="#3f6047" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M96 31L96 75M199 18L199 75M276 28L276 75" stroke="#b86d4d" stroke-width="1.5" stroke-dasharray="3 4"/></svg></div><div class="cb-cp-body"><div class="cb-cp-meta">' + esc(c.category || 'Chart reading') + '<span>' + esc(c.level || 'Foundational skill') + '</span></div><h4>' + esc(c.title || 'Course title') + '</h4><span class="cb-cp-label">THE PROBLEM IT HELPS WITH</span><p class="cb-cp-hook">' + esc(c.catalogueHook || 'Your course hook will appear here.') + '</p><p class="cb-cp-problem">' + esc(c.problemStatement || 'Describe the trader situation this course helps with.') + '</p><p class="cb-cp-focus">' + esc(c.learningFocus || 'Describe what the learner will practise.') + '</p>' + (tags.length ? '<div class="cb-cp-tags">' + tags.map(tag => '<span>' + esc(tag) + '</span>').join('') + '</div>' : '') + (c.whyThisOne ? '<p class="cb-cp-why"><b>Why this one:</b> ' + esc(c.whyThisOne) + '</p>' : '') + '<div class="cb-cp-bottom"><strong>' + esc(c.price || 'Price shown from course offer') + '</strong><span>See what’s inside ↗</span></div></div></div>';
+    return '<div class="cb-catalogue-preview" data-catalogue-presentation-preview><div class="cb-cp-art"><span>TRADETHESIS · ' + esc(c.catalogueRole==='flagship'?'FLAGSHIP PROGRAMME':c.catalogueRole==='supporting'?'SUPPORTING PROGRAMME':c.catalogueRole==='hidden'?'NOT LISTED':'MINI-COURSE') + '</span><svg viewBox="0 0 340 86" role="img" aria-label="Decorative chart preview"><path d="M12 69H328M12 43H328M12 17H328" stroke="#c8d1bf" stroke-width="1"/><path d="M14 61L45 53L69 60L96 31L120 45L145 23L170 39L199 18L222 33L247 12L276 28L301 9L326 15" fill="none" stroke="#3f6047" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M96 31L96 75M199 18L199 75M276 28L276 75" stroke="#b86d4d" stroke-width="1.5" stroke-dasharray="3 4"/></svg></div><div class="cb-cp-body"><div class="cb-cp-meta">' + esc(c.category || 'Chart reading') + '<span>' + esc(c.level || 'Foundational skill') + '</span></div><h4>' + esc(c.title || 'Course title') + '</h4><span class="cb-cp-label">THE PROBLEM IT HELPS WITH</span><p class="cb-cp-hook">' + esc(c.catalogueHook || 'Your course hook will appear here.') + '</p><p class="cb-cp-problem">' + esc(c.problemStatement || 'Describe the trader situation this course helps with.') + '</p><p class="cb-cp-focus">' + esc(c.learningFocus || 'Describe what the learner will practise.') + '</p>' + (tags.length ? '<div class="cb-cp-tags">' + tags.map(tag => '<span>' + esc(tag) + '</span>').join('') + '</div>' : '') + (c.whyThisOne ? '<p class="cb-cp-why"><b>Why this one:</b> ' + esc(c.whyThisOne) + '</p>' : '') + '<div class="cb-cp-bottom"><strong>' + esc(c.price || 'Price shown from course offer') + '</strong><span>See what’s inside ↗</span></div></div></div>';
   }
-  function courseFields(c){return `<div class="section-intro"><h3>Course details</h3><p>Write the public-facing promise first. Save a shared draft at any stage, then submit it for review. Approved and published courses appear in the website Courses tab.</p></div><div class="form-grid"><div class="field full"><label for="courseTitle">Course title</label><input class="input" id="courseTitle" data-entity="course" data-field="title" value="${esc(c.title)}" maxlength="200" placeholder="e.g. Understand Market Structure"></div><div class="field"><label for="courseSlug">Course URL slug</label><input class="input" id="courseSlug" data-entity="course" data-field="slug" value="${esc(c.slug)}" maxlength="150"><span class="help">Keep stable after a course is published.</span></div><div class="field"><label for="courseCategory">Topic / category</label><input class="input" id="courseCategory" data-entity="course" data-field="category" value="${esc(c.category)}" placeholder="Chart reading"></div><div class="field full"><label for="courseSummary">Short summary</label><textarea class="textarea" id="courseSummary" data-entity="course" data-field="summary" maxlength="360" placeholder="One or two sentences for the course card.">${esc(c.summary)}</textarea><span class="help">Used in the catalogue card. Aim for a concise, clear promise.</span></div><div class="field full"><label for="courseDescription">Course description</label><textarea class="textarea" id="courseDescription" data-entity="course" data-field="description" placeholder="Who is this for, what is included, and how will they use it?">${esc(c.description)}</textarea><span class="help">Write a clear, practical course description. Check how it reads in the learner preview below.</span></div><div class="field"><label for="courseLevel">Level</label><select class="select" id="courseLevel" data-entity="course" data-field="level">${['Beginner','Foundational','Intermediate','Advanced','Mixed experience'].map(v=>`<option ${v===c.level?'selected':''}>${v}</option>`).join('')}</select></div><div class="field"><label for="courseDuration">Expected study time</label><input class="input" id="courseDuration" data-entity="course" data-field="duration" value="${esc(c.duration)}" placeholder="e.g. 4 hours"></div><div class="field full"><label>Learning outcomes</label><div id="outcomesList">${c.outcomes.map((v,i)=>`<div class="option-row"><span class="pill">${String(i+1).padStart(2,'0')}</span><input class="input" data-entity="outcome" data-index="${i}" value="${esc(v)}" aria-label="Learning outcome ${i+1}"><button class="icon-btn" type="button" data-action="remove-outcome" data-index="${i}" aria-label="Remove outcome">×</button></div>`).join('')}</div><button class="btn small" type="button" data-action="add-outcome">＋ Add outcome</button></div><div class="field"><label for="coursePrice">Display price (optional)</label><input class="input" id="coursePrice" data-entity="course" data-field="price" value="${esc(c.price)}" placeholder="e.g. ₹999"><span class="help">Display text only. It does not create or activate checkout.</span></div><div class="field"><label for="coursePriceNote">Price note</label><input class="input" id="coursePriceNote" data-entity="course" data-field="priceNote" value="${esc(c.priceNote)}"></div><div class="field full coming-soon-field"><label class="checkbox-row" for="courseComingSoon"><input id="courseComingSoon" type="checkbox" data-entity="course" data-field="comingSoon" ${c.comingSoon?'checked':''}> Announce this course publicly as “Coming soon”</label><span class="help">After you save, the public Courses catalogue can show the title and short summary. Lessons, answer keys and enrolment stay unavailable until you publish the course.</span></div></div><section class="related-course-box catalogue-presentation-editor"><h4>Courses tab presentation</h4><p>These fields control the public micro-course tile. The label and layout are managed by the website design; edit the course-specific copy here.</p><div class="field"><label for="courseCatalogueHook">Problem hook / headline</label><textarea class="textarea" id="courseCatalogueHook" data-entity="course" data-field="catalogueHook" maxlength="200" placeholder="A clear line that makes the trader recognise the problem.">${esc(c.catalogueHook||'')}</textarea><span class="help">Displayed beneath “The problem it helps with”.</span></div><div class="field" style="margin-top:11px"><label for="courseProblemStatement">Who this helps / problem statement</label><textarea class="textarea" id="courseProblemStatement" data-entity="course" data-field="problemStatement" maxlength="500" placeholder="For traders who…">${esc(c.problemStatement||'')}</textarea></div><div class="field" style="margin-top:11px"><label for="courseLearningFocus">Learning focus</label><textarea class="textarea" id="courseLearningFocus" data-entity="course" data-field="learningFocus" maxlength="500" placeholder="What the learner will practise or be able to assess.">${esc(c.learningFocus||'')}</textarea></div><div class="field" style="margin-top:11px"><label for="courseAuthoredTags">Authored tags</label><input class="input" id="courseAuthoredTags" data-entity="course" data-field="authoredTags" maxlength="400" value="${esc(c.authoredTags||'')}" placeholder="Chart reading, zones, invalidation"><span class="help">Separate tags with commas. Leave empty to hide the tag row.</span></div><div class="field" style="margin-top:11px"><label for="courseWhyThisOne">Why this one is different</label><textarea class="textarea" id="courseWhyThisOne" data-entity="course" data-field="whyThisOne" maxlength="500" placeholder="Explain the approach that distinguishes this course.">${esc(c.whyThisOne||'')}</textarea></div><div class="field" style="margin-top:14px"><label>Live tile preview</label><p class="help">Updates as you edit the fields above.</p>${cataloguePresentationPreviewMarkup(c)}</div></section><div class="helper-note"><strong>Course state:</strong> ${c.status==='published'?'This course already has a published version. Save your edits as a draft revision; the live catalogue version remains until you publish the updates.':c.status==='draft-update'?'Unpublished changes are saved separately; the current published catalogue card remains live.':'This is a private draft. It will not appear in Courses offered until you publish it.'}</div>`;}
+  function courseFields(c){return `<div class="section-intro"><h3>Course details</h3><p>Write the public-facing promise first. Save a shared draft at any stage, then submit it for review. Approved and published courses appear in the website Courses tab.</p></div><div class="form-grid"><div class="field full"><label for="courseTitle">Course title</label><input class="input" id="courseTitle" data-entity="course" data-field="title" value="${esc(c.title)}" maxlength="200" placeholder="e.g. Understand Market Structure"></div><div class="field"><label for="courseSlug">Course URL slug</label><input class="input" id="courseSlug" data-entity="course" data-field="slug" value="${esc(c.slug)}" maxlength="150"><span class="help">Keep stable after a course is published.</span></div><div class="field"><label for="courseCategory">Topic / category</label><input class="input" id="courseCategory" data-entity="course" data-field="category" value="${esc(c.category)}" placeholder="Chart reading"></div><div class="field full"><label for="courseSummary">Short summary</label><textarea class="textarea" id="courseSummary" data-entity="course" data-field="summary" maxlength="360" placeholder="One or two sentences for the course card.">${esc(c.summary)}</textarea><span class="help">Used in the catalogue card. Aim for a concise, clear promise.</span></div><div class="field full"><label for="courseDescription">Course description</label><textarea class="textarea" id="courseDescription" data-entity="course" data-field="description" placeholder="Who is this for, what is included, and how will they use it?">${esc(c.description)}</textarea><span class="help">Write a clear, practical course description. Check how it reads in the learner preview below.</span></div><div class="field"><label for="courseLevel">Level</label><select class="select" id="courseLevel" data-entity="course" data-field="level">${['Beginner','Foundational','Intermediate','Advanced','Mixed experience'].map(v=>`<option ${v===c.level?'selected':''}>${v}</option>`).join('')}</select></div><div class="field"><label for="courseDuration">Expected study time</label><input class="input" id="courseDuration" data-entity="course" data-field="duration" value="${esc(c.duration)}" placeholder="e.g. 4 hours"></div><div class="field full"><label>Learning outcomes</label><div id="outcomesList">${c.outcomes.map((v,i)=>`<div class="option-row"><span class="pill">${String(i+1).padStart(2,'0')}</span><input class="input" data-entity="outcome" data-index="${i}" value="${esc(v)}" aria-label="Learning outcome ${i+1}"><button class="icon-btn" type="button" data-action="remove-outcome" data-index="${i}" aria-label="Remove outcome">×</button></div>`).join('')}</div><button class="btn small" type="button" data-action="add-outcome">＋ Add outcome</button></div><div class="field"><label for="coursePrice">Display price (optional)</label><input class="input" id="coursePrice" data-entity="course" data-field="price" value="${esc(c.price)}" placeholder="e.g. ₹999"><span class="help">Display text only. It does not create or activate checkout.</span></div><div class="field"><label for="coursePriceNote">Price note</label><input class="input" id="coursePriceNote" data-entity="course" data-field="priceNote" value="${esc(c.priceNote)}"></div><div class="field full coming-soon-field"><label class="checkbox-row" for="courseComingSoon"><input id="courseComingSoon" type="checkbox" data-entity="course" data-field="comingSoon" ${c.comingSoon?'checked':''}> Announce this course publicly as “Coming soon”</label><span class="help">After you save, the public Courses catalogue can show the title and short summary. Lessons, answer keys and enrolment stay unavailable until you publish the course.</span></div></div><section class="related-course-box catalogue-placement-editor"><h4>Courses page placement</h4><p>Choose where this course appears in the public catalogue. This controls placement only; publication, price, checkout and learner access remain separate.</p><div class="field"><label for="courseCatalogueRole">Catalogue placement</label><select class="input" id="courseCatalogueRole" data-entity="course" data-field="catalogueRole"><option value="flagship" ${c.catalogueRole==='flagship'?'selected':''}>Flagship programme</option><option value="supporting" ${c.catalogueRole==='supporting'?'selected':''}>Supporting programme</option><option value="mini" ${c.catalogueRole==='mini'?'selected':''}>Mini-course</option><option value="hidden" ${c.catalogueRole==='hidden'?'selected':''}>Not listed on the Courses page</option></select><span class="help">The Courses page moves the course to the selected section after the role is saved with the published version.</span></div></section><section class="related-course-box catalogue-presentation-editor"><h4>Course card presentation</h4><p>Edit the copy shown on this course's public card. The catalogue placement is controlled separately above.</p><div class="field"><label for="courseCatalogueHook">Problem hook / headline</label><textarea class="textarea" id="courseCatalogueHook" data-entity="course" data-field="catalogueHook" maxlength="200" placeholder="A clear line that makes the trader recognise the problem.">${esc(c.catalogueHook||'')}</textarea><span class="help">Displayed beneath “The problem it helps with”.</span></div><div class="field" style="margin-top:11px"><label for="courseProblemStatement">Who this helps / problem statement</label><textarea class="textarea" id="courseProblemStatement" data-entity="course" data-field="problemStatement" maxlength="500" placeholder="For traders who…">${esc(c.problemStatement||'')}</textarea></div><div class="field" style="margin-top:11px"><label for="courseLearningFocus">Learning focus</label><textarea class="textarea" id="courseLearningFocus" data-entity="course" data-field="learningFocus" maxlength="500" placeholder="What the learner will practise or be able to assess.">${esc(c.learningFocus||'')}</textarea></div><div class="field" style="margin-top:11px"><label for="courseAuthoredTags">Authored tags</label><input class="input" id="courseAuthoredTags" data-entity="course" data-field="authoredTags" maxlength="400" value="${esc(c.authoredTags||'')}" placeholder="Chart reading, zones, invalidation"><span class="help">Separate tags with commas. Leave empty to hide the tag row.</span></div><div class="field" style="margin-top:11px"><label for="courseWhyThisOne">Why this one is different</label><textarea class="textarea" id="courseWhyThisOne" data-entity="course" data-field="whyThisOne" maxlength="500" placeholder="Explain the approach that distinguishes this course.">${esc(c.whyThisOne||'')}</textarea></div><div class="field" style="margin-top:14px"><label>Live tile preview</label><p class="help">Updates as you edit the fields above.</p>${cataloguePresentationPreviewMarkup(c)}</div></section><div class="helper-note"><strong>Course state:</strong> ${c.status==='published'?'This course already has a published version. Save your edits as a draft revision; the live catalogue version remains until you publish the updates.':c.status==='draft-update'?'Unpublished changes are saved separately; the current published catalogue card remains live.':'This is a private draft. It will not appear in Courses offered until you publish it.'}</div>`;}
   function curriculumFields(c){const m=currentModule()||c.modules[0];const l=currentLesson()||m?.lessons[0];return `<div class="section-intro"><h3>Build the curriculum</h3><p>Keep the structure easy to scan. Add modules, then add lessons within each module. Reordering controls here are functional in this preview; the production version will save their positions to Django.</p></div><div class="curriculum-layout"><div class="outline-panel"><div class="outline-panel-head"><strong>Course outline</strong><button class="btn small" data-action="add-module" type="button">＋ Module</button></div><div id="curriculumTree">${c.modules.map((mod,mi)=>`<div class="module-block"><div class="module-row"><button class="module-select ${m?.id===mod.id?'active':''}" type="button" data-action="select-module" data-id="${esc(mod.id)}">${String(mi+1).padStart(2,'0')} · ${esc(mod.title)}</button><button class="icon-btn" type="button" data-action="move-module-up" data-id="${esc(mod.id)}" aria-label="Move module up" ${mi===0?'disabled':''}>↑</button><button class="icon-btn" type="button" data-action="move-module-down" data-id="${esc(mod.id)}" aria-label="Move module down" ${mi===c.modules.length-1?'disabled':''}>↓</button></div>${mod.lessons.map((lesson,li)=>`<div class="lesson-row"><button class="lesson-select ${l?.id===lesson.id?'active':''}" type="button" data-action="select-lesson" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}">${String(mi+1)}.${li+1} ${esc(lesson.title)}</button><button class="icon-btn" type="button" data-action="move-lesson-up" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}" aria-label="Move lesson up" ${li===0?'disabled':''}>↑</button><button class="icon-btn" type="button" data-action="move-lesson-down" data-module-id="${esc(mod.id)}" data-id="${esc(lesson.id)}" aria-label="Move lesson down" ${li===mod.lessons.length-1?'disabled':''}>↓</button></div>`).join('')}<div style="padding:6px 7px 3px"><button class="btn small" type="button" data-action="add-lesson" data-id="${esc(mod.id)}">＋ Add lesson</button><button class="btn small danger" type="button" data-action="delete-module" data-id="${esc(mod.id)}" ${c.modules.length===1?'disabled':''}>Remove</button></div></div>`).join('')}</div></div><div class="lesson-editor-card">${m&&l?`<h4>Edit selected lesson</h4><p class="microcopy">Changing titles or order does not disturb other lessons. Lesson UUIDs and student progress are preserved in the production Academy when a course is updated.</p><div class="field"><label>Module title</label><input class="input" data-entity="module" data-field="title" value="${esc(m.title)}"></div><div class="field" style="margin-top:11px"><label>Module summary</label><textarea class="textarea" data-entity="module" data-field="description">${esc(m.description)}</textarea></div><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><div class="field"><label>Lesson title</label><input class="input" data-entity="lesson" data-field="title" value="${esc(l.title)}"></div><div class="field" style="margin-top:11px"><label>Short lesson summary</label><textarea class="textarea" data-entity="lesson" data-field="summary">${esc(l.summary)}</textarea></div><div class="lesson-meta-grid" style="margin-top:11px"><div class="field"><label>Lesson format</label><select class="select" data-entity="lesson" data-field="format">${['reading','video','interactive','quiz'].map(v=>`<option value="${v}" ${l.format===v?'selected':''}>${v[0].toUpperCase()+v.slice(1)}</option>`).join('')}</select></div><div class="field"><label>Minutes</label><input class="input" type="number" min="1" max="360" data-entity="lesson" data-field="minutes" value="${Number(l.minutes)||12}"></div></div><div class="q-actions"><button class="btn small" type="button" data-action="delete-lesson" data-id="${esc(l.id)}" data-module-id="${esc(m.id)}" ${m.lessons.length===1?'disabled':''}>Remove lesson</button><button class="btn small primary" type="button" data-action="go-lesson">Edit lesson content →</button></div>`:'<div class="empty-state"><p>Create a module and lesson to start editing.</p></div>'}</div></div>`;}
   let richEditorRange = null;
   let visualEditorSyncTimer = null;
@@ -1923,7 +2084,75 @@ body.builder-dialog-open { overflow:hidden; }
       '</strong><p data-lesson-audience-status-text>' + esc(status) + '</p>' + actions + '</div></div>' +
       '<p class="help">Country or regional versions can change the full lesson—text, headings, tables and managed image placements. Other audiences remain unchanged.</p></section>';
   }
-  function lessonFields(l){if(l&&!l.notebook)l.notebook={title:'Before you make the call',prompts:[{label:'Observe',text:'Describe the evidence visible in the chart.'},{label:'Interpret',text:'State one possible reading and a reasonable alternative.'},{label:'Test',text:'Name the next evidence that would strengthen or weaken your reading.'}]};if(l&&l.notebook&&String(l.notebook.title||'').trim()==='Your Trading Notebook')l.notebook.title='Before you make the call';if(l&&!l.videoUrl)l.videoUrl='';return `<div class="section-intro"><h3>Lesson content</h3><p>Write the main lesson first, then switch audience to customise an entire country or region version in this same editor. The same rich-text tools work for both.</p></div>${l?`<div data-lesson-body-audience-controls>${lessonBodyAudienceControlsMarkup(l)}</div><div class="field"><label>${lessonBodyAudienceLabel()}</label>${visualEditorMarkup(lessonBodyForAudience(l), {kind: lessonBodyEditorKind(), audience: selectedLessonBodyAudience()})}<span class="help">Use the toolbar above to format headings, emphasis, lists, links, quotes, dividers, and tables. To add a chart between paragraphs, click where it belongs, then choose Figures → Insert at cursor. The website preview preserves this placement.</span></div>${courseCardPickerMarkup()}<div class="helper-note">This is the content learners will read in the Learning Room. Review the website preview before submitting the course for review.</div><div class="field" style="margin-top:14px"><label>Video URL (optional)</label><input class="input" type="url" data-entity="lesson" data-field="videoUrl" value="${esc(l.videoUrl||"")}" placeholder="https://…"><span class="help">Direct MP4/WebM/OGG links play inline. Other URLs are shown as external video links.</span></div><div class="related-course-box"><h4>Notebook prompts</h4><p>These editable prompts appear in the learner’s Your Trading Notebook section.</p><div class="field"><label>Notebook heading</label><input class="input" data-entity="notebook" data-field="title" value="${esc(l.notebook?.title||"Before you make the call")}"><span class="help">This is the large heading shown inside the Your Trading Notebook section of the learner view.</span></div>${(l.notebook?.prompts||[]).map((prompt,index)=>`<div class="q-card"><div class="field"><label>Prompt ${index+1} label</label><input class="input" data-entity="notebook-prompt" data-index="${index}" data-field="label" value="${esc(prompt.label||"")}"></div><div class="field" style="margin-top:8px"><label>Prompt text</label><textarea class="textarea" data-entity="notebook-prompt" data-index="${index}" data-field="text">${esc(prompt.text||"")}</textarea></div></div>`).join("")}</div><div class="notebook-editor-preview"><h4>How learners will see the notebook</h4><p>Preview the styled notebook block here. Changes to the heading or prompts above update this preview.</p><div data-notebook-preview>${notebookPreviewMarkup(l)}</div></div><div class="related-course-box"><h4>Related-course metadata (optional)</h4><p>These selections record course relationships for discovery; they do not insert a card into the lesson body. To place the compact Option 3 inline course card, use the companion-course picker directly below the Lesson body field. Individual lesson links are managed separately.</p><input class="input" type="search" data-related-course-search placeholder="Search published or announced courses by title or topic" aria-label="Search published or announced related courses"><div class="related-course-list">${demoOffers.map(course=>{const checked=(l.relatedCourseIds||[]).includes(course.id);return `<div class="related-course-item related-course-entry"><label class="related-course-choice"><input type="checkbox" data-related-course="${esc(course.id)}" ${checked ? "checked" : ""}><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">${esc(course.state)}${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}${course.duration ? " · " + esc(course.duration) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></label></div>`;}).join("")}${comingSoonOffers.map(course=>`<div class="related-course-item related-course-entry"><div class="related-course-choice"><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">Coming soon${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></div></div>`).join("")}${demoOffers.length || comingSoonOffers.length ? "" : '<p class="microcopy">No published or announced courses are available to associate yet.</p>'}</div><div class="helper-note">These selections record related-course metadata only. Use the dedicated inline course-card picker below Lesson body to insert a visual companion-course card into the lesson. No course is automatically published.</div></div><div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap"><button class="btn" type="button" data-action="go-curriculum">← Curriculum</button><button class="btn primary" type="button" data-action="go-questions">Edit practice questions →</button></div>`:'<div class="empty-state"><p>Select a lesson in the curriculum first.</p></div>'}`;}
+  function lessonOutlineMarkup() {
+    return '<details class="lesson-outline-panel" data-lesson-outline open>' +
+      '<summary><span class="lesson-outline-title">Lesson outline</span>' +
+      '<span class="lesson-outline-count" data-lesson-outline-count>0 headings</span></summary>' +
+      '<nav class="lesson-outline-list" data-lesson-outline-list aria-label="Headings in this lesson"></nav>' +
+      '<p class="lesson-outline-empty" data-lesson-outline-empty>No headings yet. Use the text-style menu to add H1–H4 headings.</p>' +
+      '</details>';
+  }
+
+  function lessonOutlineHeadingRecords(editor) {
+    if (!editor) return [];
+    return Array.from(editor.querySelectorAll('h1,h2,h3,h4')).map((node, index) => ({
+      node,
+      index,
+      level:Number(node.tagName.slice(1)),
+      text:String(node.textContent || '').replace(/\s+/g, ' ').trim()
+    })).filter(item => item.text);
+  }
+
+  function lessonOutlineItemsMarkup(headings, activeIndex) {
+    return headings.map((item, visibleIndex) =>
+      '<button type="button" class="lesson-outline-button' +
+      (Number(activeIndex) === item.index ? ' is-active' : '') +
+      '" data-lesson-outline-index="' + item.index + '" data-level="' + item.level +
+      '" aria-label="Go to heading ' + (visibleIndex + 1) + ': ' + esc(item.text) +
+      '" title="Go to ' + esc(item.text) + '">' +
+      '<span class="lesson-outline-level">H' + item.level + '</span>' +
+      '<span class="lesson-outline-label">' + esc(item.text) + '</span></button>'
+    ).join('');
+  }
+
+  function updateLessonOutlineFromEditor(editor) {
+    if (!editor || !editor.isConnected) return;
+    const panel = editor.closest('.lesson-outline-layout')?.querySelector('[data-lesson-outline]');
+    if (!panel) return;
+    const list = panel.querySelector('[data-lesson-outline-list]');
+    const count = panel.querySelector('[data-lesson-outline-count]');
+    const empty = panel.querySelector('[data-lesson-outline-empty]');
+    if (!list || !count || !empty) return;
+
+    const headings = lessonOutlineHeadingRecords(editor);
+    const selection = window.getSelection();
+    const anchor = selection?.anchorNode;
+    const anchorElement = anchor?.nodeType === 1 ? anchor : anchor?.parentElement;
+    const selectedHeading = anchorElement?.closest?.('h1,h2,h3,h4');
+    if (selectedHeading && editor.contains(selectedHeading)) {
+      const selectedIndex = Array.from(editor.querySelectorAll('h1,h2,h3,h4')).indexOf(selectedHeading);
+      if (selectedIndex >= 0) panel.dataset.activeIndex = String(selectedIndex);
+    }
+
+    const activeIndex = panel.dataset.activeIndex;
+    const markup = lessonOutlineItemsMarkup(headings, activeIndex);
+    if (list.innerHTML !== markup) list.innerHTML = markup;
+    count.textContent = headings.length + (headings.length === 1 ? ' heading' : ' headings');
+    empty.hidden = headings.length > 0;
+    list.hidden = headings.length === 0;
+  }
+
+  let lessonOutlineUpdateFrame = null;
+  function scheduleLessonOutlineUpdate(editor) {
+    if (!editor) return;
+    if (lessonOutlineUpdateFrame !== null) window.cancelAnimationFrame(lessonOutlineUpdateFrame);
+    lessonOutlineUpdateFrame = window.requestAnimationFrame(() => {
+      lessonOutlineUpdateFrame = null;
+      if (editor.isConnected) updateLessonOutlineFromEditor(editor);
+    });
+  }
+
+  function lessonFields(l){if(l&&!l.notebook)l.notebook={title:'Before you make the call',prompts:[]};if(l&&l.notebook&&(!Array.isArray(l.notebook.prompts)||l.notebook.prompts.length===0))l.notebook.prompts=[{label:'Pause',text:'What evidence is visible?'},{label:'Interpret',text:'What could it mean in context?'},{label:'Apply',text:'What would change your view?'}];if(l&&l.notebook&&String(l.notebook.title||'').trim()==='Your Trading Notebook')l.notebook.title='Before you make the call';if(l&&!l.videoUrl)l.videoUrl='';return `<div class="section-intro"><h3>Lesson content</h3><p>Write the main lesson first, then switch audience to customise an entire country or region version in this same editor. The same rich-text tools work for both.</p></div>${l?`<div data-lesson-body-audience-controls>${lessonBodyAudienceControlsMarkup(l)}</div><div class="lesson-outline-layout"><aside class="lesson-outline-aside">${lessonOutlineMarkup()}</aside><div class="lesson-outline-content"><div class="field"><label>${lessonBodyAudienceLabel()}</label>${visualEditorMarkup(lessonBodyForAudience(l), {kind: lessonBodyEditorKind(), audience: selectedLessonBodyAudience()})}<span class="help">Use the toolbar above to format headings, emphasis, lists, links, quotes, dividers, and tables. To add a chart between paragraphs, click where it belongs, then choose Figures → Insert at cursor. The website preview preserves this placement.</span></div>${courseCardPickerMarkup()}</div></div><div class="helper-note">This is the content learners will read in the Learning Room. Review the website preview before submitting the course for review.</div><div class="field" style="margin-top:14px"><label>Video URL (optional)</label><input class="input" type="url" data-entity="lesson" data-field="videoUrl" value="${esc(l.videoUrl||"")}" placeholder="https://…"><span class="help">Direct MP4/WebM/OGG links play inline. Other URLs are shown as external video links.</span></div><div class="related-course-box"><h4>Notebook prompts</h4><p>These editable prompts appear in the learner’s Your Trading Notebook section.</p><div class="field"><label>Notebook heading</label><input class="input" data-entity="notebook" data-field="title" value="${esc(l.notebook?.title||"Before you make the call")}"><span class="help">This is the large heading shown inside the Your Trading Notebook section of the learner view.</span></div>${(l.notebook?.prompts||[]).map((prompt,index)=>`<div class="q-card"><div class="field"><label>Prompt ${index+1} label</label><input class="input" data-entity="notebook-prompt" data-index="${index}" data-field="label" value="${esc(prompt.label||"")}"></div><div class="field" style="margin-top:8px"><label>Prompt text</label><textarea class="textarea" data-entity="notebook-prompt" data-index="${index}" data-field="text">${esc(prompt.text||"")}</textarea></div></div>`).join("")}</div><div class="notebook-editor-preview"><h4>How learners will see the notebook</h4><p>Preview the styled notebook block here. Changes to the heading or prompts above update this preview.</p><div data-notebook-preview>${notebookPreviewMarkup(l)}</div></div><div class="related-course-box"><h4>Related-course metadata (optional)</h4><p>These selections record course relationships for discovery; they do not insert a card into the lesson body. To place the compact Option 3 inline course card, use the companion-course picker directly below the Lesson body field. Individual lesson links are managed separately.</p><input class="input" type="search" data-related-course-search placeholder="Search published or announced courses by title or topic" aria-label="Search published or announced related courses"><div class="related-course-list">${demoOffers.map(course=>{const checked=(l.relatedCourseIds||[]).includes(course.id);return `<div class="related-course-item related-course-entry"><label class="related-course-choice"><input type="checkbox" data-related-course="${esc(course.id)}" ${checked ? "checked" : ""}><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">${esc(course.state)}${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}${course.duration ? " · " + esc(course.duration) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></label></div>`;}).join("")}${comingSoonOffers.map(course=>`<div class="related-course-item related-course-entry"><div class="related-course-choice"><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">Coming soon${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></div></div>`).join("")}${demoOffers.length || comingSoonOffers.length ? "" : '<p class="microcopy">No published or announced courses are available to associate yet.</p>'}</div><div class="helper-note">These selections record related-course metadata only. Use the dedicated inline course-card picker below Lesson body to insert a visual companion-course card into the lesson. No course is automatically published.</div></div><div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap"><button class="btn" type="button" data-action="go-curriculum">← Curriculum</button><button class="btn primary" type="button" data-action="go-questions">Edit practice questions →</button></div>`:'<div class="empty-state"><p>Select a lesson in the curriculum first.</p></div>'}`;}
   function questionImageMarkup(q, l) {
     const images = Array.isArray(l.images) ? l.images : (l.image ? [l.image] : []);
     const image = images.find(function(item) {
@@ -1950,7 +2179,7 @@ body.builder-dialog-open { overflow:hidden; }
       }).join('');
       const options = (Array.isArray(q.options) ? q.options : []).map(function(option, oi) {
         const isCorrect = Number(q.correctIndex) === oi;
-        return '<div class="option-row ' + (isCorrect ? 'is-correct' : '') + '"><input type="radio" name="correct-' + esc(q.id) + '" aria-label="Mark option ' + (oi + 1) + ' as the correct answer" data-correct-option="' + esc(q.id) + '" data-qid="' + esc(q.id) + '" value="' + oi + '"' + (isCorrect ? ' checked' : '') + '><input class="input" data-entity="option" data-qid="' + esc(q.id) + '" data-index="' + oi + '" value="' + esc(option) + '" aria-label="Answer choice ' + (oi + 1) + '"><span class="answer-key-label ' + (isCorrect ? 'is-correct' : '') + '">' + (isCorrect ? '✓ Correct answer' : 'Mark as correct') + '</span></div>';
+        return '<div class="option-row ' + (isCorrect ? 'is-correct' : '') + '"><input type="radio" id="correct-' + esc(q.id) + '-' + oi + '" name="correct-' + esc(q.id) + '" aria-label="Mark option ' + (oi + 1) + ' as the correct answer" data-correct-option="' + esc(q.id) + '" data-qid="' + esc(q.id) + '" data-index="' + oi + '" value="' + oi + '"' + (isCorrect ? ' checked' : '') + '><input class="input" type="text" autocomplete="off" data-entity="option" data-qid="' + esc(q.id) + '" data-index="' + oi + '" value="' + esc(option) + '" aria-label="Answer choice ' + (oi + 1) + '"><button class="answer-key-label ' + (isCorrect ? 'is-correct' : '') + '" type="button" data-mark-correct data-qid="' + esc(q.id) + '" data-index="' + oi + '" aria-pressed="' + (isCorrect ? 'true' : 'false') + '" aria-label="Mark answer choice ' + (oi + 1) + ' as correct">' + (isCorrect ? '✓ Correct answer' : 'Mark as correct') + '</button></div>';
       }).join('');
       return '<article class="q-card">' +
         '<div class="q-top"><strong>QUESTION ' + String(qi + 1).padStart(2, '0') + '</strong><button class="btn small danger" type="button" data-action="remove-question" data-id="' + esc(q.id) + '"' + (l.questions.length === 1 ? ' disabled' : '') + '>Remove</button></div>' +
@@ -2426,7 +2655,7 @@ body.builder-dialog-open { overflow:hidden; }
       heading = isBollingerCourse ? 'Before treating a touch as a setup' : 'Before you make the call';
     }
     const defaultPrompts = [
-      {label:'Describe',text:'What evidence is visible?'},
+      {label:'Pause',text:'What evidence is visible?'},
       {label:'Interpret',text:'What could it mean in context?'},
       {label:'Apply',text:'What would change your view?'}
     ];
@@ -2579,13 +2808,46 @@ body.builder-dialog-open { overflow:hidden; }
     runRenderStep('header-state', renderHeaderState);
     diagnosticStage('render-complete');
   }
-  function selectCourse(id){if(academyReady&&currentCourse()&&currentCourse().id!==id){clearTimeout(saveTimer);clearTimeout(academySaveTimer);saveCurrentToAcademy(false,false).catch(error=>toast('Could not save the previous draft: '+error.message));}state.selectedCourseId=id;const c=currentCourse();if(c){state.selectedModuleId=c.modules[0]?.id||null;state.selectedLessonId=c.modules[0]?.lessons[0]?.id||null;}state.view='editor';previewMode=false;render();}
+  function selectCourse(id){if(academyReady&&currentCourse()&&currentCourse().id!==id){clearTimeout(saveTimer);clearTimeout(academySaveTimer);saveCurrentToAcademy(false,false).catch(error=>toast('Could not save the previous draft: '+error.message));}state.selectedCourseId=id;const c=currentCourse();if(c){state.selectedModuleId=c.modules[0]?.id||null;state.selectedLessonId=c.modules[0]?.lessons[0]?.id||null;if(c.slug==='your-trading-path-import-draft'&&!state.tradingPathOutlineAutoOpened){state.tab='curriculum';state.tradingPathOutlineAutoOpened=true;}}state.view='editor';previewMode=false;render();}
   function saveDraft(){const c=currentCourse();if(!c)return;c.updatedAt=nowText();if(c.status==='published')c.status='draft-update';persist(true);render();}
   function publishCourse(){const c=currentCourse();if(!c)return;const errs=[];if(!c.title.trim())errs.push('Add a course title.');if(!c.summary.trim())errs.push('Add a short course summary.');if(!c.modules.length)errs.push('Add at least one module.');if(!allLessons(c).length)errs.push('Add at least one lesson.');if(allLessons(c).some(l=>!l.title.trim()||!l.content.trim()))errs.push('Every lesson needs a title and lesson content.');if(errs.length){toast(errs[0]);if(!c.title.trim()||!c.summary.trim())state.tab='overview';else if(!allLessons(c).length)state.tab='curriculum';else state.tab='lesson';render();return;}const snapshot=JSON.parse(JSON.stringify(c));snapshot.status='published';snapshot.publishedSnapshot=null;snapshot.updatedAt=nowText();c.status='published';c.publishedAt=nowText();c.updatedAt=nowText();c.publishedSnapshot=snapshot;persist(false);state.tab='overview';render();$('#catalogueSection').scrollIntoView({behavior:'smooth',block:'start'});toast('Published in this preview. The course now appears under Courses offered.');}
   function duplicateCourse(){const c=currentCourse();if(!c)return;const copy=JSON.parse(JSON.stringify(c));copy.id=uid('course');copy.title=(c.title||'Untitled course')+' — Copy';copy.slug=slugify(copy.title);copy.status='draft';copy.publishedAt=null;copy.publishedSnapshot=null;copy.createdAt=nowText();copy.updatedAt='Not saved yet';copy.modules.forEach(m=>{m.id=uid('module');m.lessons.forEach(l=>{l.id=uid('lesson');l.questions.forEach(q=>q.id=uid('q'));});});state.courses.unshift(copy);state.selectedCourseId=copy.id;state.selectedModuleId=copy.modules[0]?.id||null;state.selectedLessonId=copy.modules[0]?.lessons[0]?.id||null;state.tab='overview';persist(false);render();toast('Course duplicated as a new draft.');}
   function moveItem(arr,id,direction){const i=arr.findIndex(x=>x.id===id);const j=i+direction;if(i<0||j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];}
   function handleAction(action,el){const c=currentCourse();if(!c&&action!=='new-course')return;const m=c?currentModule():null;const l=c?currentLesson():null;const id=el?.dataset?.id;switch(action){case'delete-course':if(c)deleteCourse(c);break;case'select-course':selectCourse(id);break;case'tab':state.tab=el.dataset.tab;renderEditor();renderHeaderState();break;case'save-draft':saveDraft();break;case'new-course':{createNewCourseDraft(el);break;}case'add-regional-block':{if(!Array.isArray(l.regionalBlocks))l.regionalBlocks=[];l.regionalBlocks.push({id:uid('regional'),title:'Regional content block',baseContent:'',variants:[]});state.tab='regional';persist(false);renderEditor();toast('Regional content block created. Add global copy and any audience versions, then place it in the lesson.');break;}case'add-regional-variant':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(id));if(!block)break;if(!Array.isArray(block.variants))block.variants=[];block.variants.push({id:uid('variant'),scope:'country',code:'IN',content:'',hidden:false});persist(false);renderEditor();break;}case'remove-regional-variant':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(el.dataset.blockId));if(!block)break;block.variants=(block.variants||[]).filter(item=>String(item.id)!==String(id));persist(false);renderEditor();break;}case'remove-regional-block':{l.regionalBlocks=(l.regionalBlocks||[]).filter(item=>String(item.id)!==String(id));const token='[[regional-block:'+String(id)+']]';l.content=String(l.content||'').split(token).join('').replace(/\n{3,}/g,'\n\n');persist(false);renderEditor();toast('Regional content block and its placement were removed.');break;}case'insert-regional-block':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(id));if(!block)break;insertLessonContentAtCaret(l,'[[regional-block:'+block.id+']]',true);toast('Regional content block placed in the lesson at the saved cursor position.');break;}case'insert-regional-image':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(id));if(!block)break;const card=el.closest('.regional-block-card');const imagePicker=el.dataset.variantId?card?.querySelector('[data-regional-image-picker][data-variant-id="'+CSS.escape(el.dataset.variantId)+'"]'):card?.querySelector('[data-regional-image-picker]:not([data-variant-id])');const imageId=imagePicker?.value||'';if(!imageId){toast('Choose an uploaded image first.');break;}const images=Array.isArray(l.images)?l.images:(l.image?[l.image]:[]);const image=images.find(item=>String(item.id)===imageId||String(item.assetUuid||'')===imageId);if(!image){toast('That image is not in this lesson.');break;}const target=el.dataset.variantId?(block.variants||[]).find(item=>String(item.id)===String(el.dataset.variantId)):block;const field=el.dataset.variantId?'content':'baseContent';if(!target)break;const markdown='!['+String(image.alt||image.title||'Course figure').replace(/\]/g,'')+'](asset://'+String(image.id||image.assetUuid)+')';target[field]=String(target[field]||'');if(target[field]&&!/\s$/.test(target[field]))target[field]+='\n\n';target[field]+=markdown;persist(false);renderEditor();toast('Image reference inserted into the selected regional version.');break;}case'add-module':{const nm=makeModule(c.modules.length+1);nm.title=`Module ${String(c.modules.length+1).padStart(2,'0')} — New module`;c.modules.push(nm);state.selectedModuleId=nm.id;state.selectedLessonId=nm.lessons[0].id;state.tab='curriculum';persist(false);render();break;}case'select-module':state.selectedModuleId=id;state.selectedLessonId=currentModule()?.lessons[0]?.id||null;renderEditor();break;case'select-lesson':state.selectedModuleId=el.dataset.moduleId;state.selectedLessonId=id;state.tab='curriculum';renderEditor();break;case'add-lesson':{const mod=c.modules.find(x=>x.id===id);if(!mod)break;const nl=makeLesson(mod.lessons.length+1);nl.title=`Lesson ${c.modules.indexOf(mod)+1}.${mod.lessons.length+1} — New lesson`;mod.lessons.push(nl);state.selectedModuleId=mod.id;state.selectedLessonId=nl.id;state.tab='curriculum';persist(false);render();break;}case'delete-module':{if(c.modules.length<=1)break;const i=c.modules.findIndex(x=>x.id===id);c.modules.splice(i,1);state.selectedModuleId=c.modules[0]?.id||null;state.selectedLessonId=c.modules[0]?.lessons[0]?.id||null;persist(false);render();break;}case'delete-lesson':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);if(!mod||mod.lessons.length<=1)break;mod.lessons=mod.lessons.filter(x=>x.id!==id);state.selectedLessonId=mod.lessons[0].id;state.selectedModuleId=mod.id;persist(false);render();break;}case'move-module-up':moveItem(c.modules,id,-1);persist(false);render();break;case'move-module-down':moveItem(c.modules,id,1);persist(false);render();break;case'move-lesson-up':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);moveItem(mod.lessons,id,-1);persist(false);render();break;}case'move-lesson-down':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);moveItem(mod.lessons,id,1);persist(false);render();break;}case'go-lesson':state.tab='lesson';renderEditor();break;case'go-questions':state.tab='questions';renderEditor();break;case'go-curriculum':state.tab='curriculum';renderEditor();break;case'add-outcome':c.outcomes.push('New learning outcome');persist(false);renderEditor();break;case'remove-outcome':c.outcomes.splice(Number(el.dataset.index),1);persist(false);renderEditor();break;case'add-question':l.questions.push(defaultQuestion());persist(false);renderEditor();break;case'remove-question':if(l.questions.length>1)l.questions=l.questions.filter(q=>q.id!==id);persist(false);renderEditor();break;case'correct-option':{const q=l.questions.find(q=>q.id===el.dataset.qid);if(q)q.correctIndex=Number(el.dataset.index);schedulePersist();break;}case'insert-image-reference':if(l.image){l.content+=`\n\n![${l.image.alt||'Course figure'}](asset://${l.image.id||uid('asset')})\n`;state.tab='lesson';persist(false);renderEditor();toast('Image reference added to lesson Markdown.');}break;case'remove-image':l.image=null;persist(false);renderEditor();break;case'refresh-website-preview':refreshBuilderWebsitePreview(true);break;case'preview-select-lesson':state.selectedModuleId=el.dataset.moduleId;state.selectedLessonId=id;renderEditor();break;case'check-preview':{const q=l.questions.find(q=>q.id===id);const checked=$(`input[name="pv-${CSS.escape(id)}"]:checked`);const box=$(`#feedback-${CSS.escape(id)}`);if(!checked){toast('Select an answer first.');break;}const optionLabels=$('#workspace').querySelectorAll('[data-preview-option="'+CSS.escape(id)+'"]');optionLabels.forEach(label=>{const optionIndex=Number(label.dataset.optionIndex);const marker=label.querySelector('.answer-result');label.classList.remove('is-correct','is-incorrect');if(marker)marker.textContent='';if(optionIndex===Number(q.correctIndex)){label.classList.add('is-correct');if(marker)marker.textContent='✓ Correct answer';}else if(optionIndex===Number(checked.value)){label.classList.add('is-incorrect');if(marker)marker.textContent='✕ Your answer';}});box.classList.add('show');const isRight=Number(checked.value)===Number(q.correctIndex);box.textContent=(isRight?'Correct. ':'Incorrect. The correct answer is highlighted in green. ')+q.explanation;break;}}
   }
+  function updateAnswerChoice(el){
+    const lesson=currentLesson();
+    const question=(lesson?.questions||[]).find(item=>String(item.id)===String(el.dataset.qid));
+    const index=Number(el.dataset.index);
+    if(!question||!Array.isArray(question.options)||!Number.isInteger(index)||index<0||index>=question.options.length)return;
+    const value=String(el.value??'');
+    if(question.options[index]===value)return;
+    question.options[index]=value;
+    schedulePersist();
+  }
+  function setCorrectAnswer(questionId, optionIndex){
+    const lesson=currentLesson();
+    const question=(lesson?.questions||[]).find(item=>String(item.id)===String(questionId));
+    const index=Number(optionIndex);
+    if(!question||!Array.isArray(question.options)||!Number.isInteger(index)||index<0||index>=question.options.length)return;
+    question.correctIndex=index;
+    document.querySelectorAll('[data-correct-option]').forEach(radio=>{
+      if(String(radio.dataset.qid)!==String(questionId))return;
+      const selected=Number(radio.dataset.index??radio.value)===index;
+      radio.checked=selected;
+      const row=radio.closest('.option-row');
+      row?.classList.toggle('is-correct',selected);
+      const markButton=row?.querySelector('[data-mark-correct]');
+      if(markButton){
+        markButton.classList.toggle('is-correct',selected);
+        markButton.setAttribute('aria-pressed',String(selected));
+        markButton.textContent=selected?'✓ Correct answer':'Mark as correct';
+      }
+    });
+    schedulePersist();
+    toast('Option '+(index+1)+' marked as the correct answer.');
+  }
+
   function updateField(el){const entity=el.dataset.entity;const field=el.dataset.field;const c=currentCourse();const m=currentModule();const l=currentLesson();const val=el.type==='checkbox'?el.checked:(el.type==='number'?Math.max(1,Number(el.value)||1):el.value);if(entity==='course'){c[field]=val;if(['catalogueHook','problemStatement','learningFocus','authoredTags','whyThisOne'].includes(field))c.cataloguePresentationConfigured=true;if(field==='title'&&(!c.slug||c.slug===slugify(c._previousTitle||'')))c.slug=slugify(val);if(field==='title'){c._previousTitle=val;const slugInput=$('[data-entity=\"course\"][data-field=\"slug\"]');if(slugInput&&document.activeElement!==slugInput)slugInput.value=c.slug;}}else if(entity==='module'&&m)m[field]=val;else if(entity==='lesson'&&l)l[field]=val;else if(entity==='question'&&l){const q=l.questions.find(q=>q.id===el.dataset.qid);if(q)q[field]=val;}else if(entity==='option'&&l){const q=l.questions.find(q=>q.id===el.dataset.qid);if(q)q.options[Number(el.dataset.index)]=val;}else if(entity==='image'&&l.image)l.image[field]=val;else if(entity==='outcome')c.outcomes[Number(el.dataset.index)]=val;else if(entity==='notebook'&&l){if(!l.notebook)l.notebook={title:'Your Trading Notebook',prompts:[]};l.notebook[field]=val;}else if(entity==='notebook-prompt'&&l){if(!l.notebook)l.notebook={title:'Your Trading Notebook',prompts:[]};const prompt=l.notebook.prompts[Number(el.dataset.index)];if(prompt)prompt[field]=val;}if(entity==='course'&&field==='title'){const title=$('#workspace h2');if(title)title.textContent=val||'Untitled course';}if((entity==='notebook'||entity==='notebook-prompt')&&l){const notebookPreview=$('[data-notebook-preview]');if(notebookPreview)notebookPreview.innerHTML=notebookPreviewMarkup(l);}if(entity==='course'&&['title','category','level','price','catalogueHook','problemStatement','learningFocus','authoredTags','whyThisOne'].includes(field)){const preview=$('[data-catalogue-presentation-preview]');if(preview)preview.outerHTML=cataloguePresentationPreviewMarkup(c);}schedulePersist();}
 
   function createNewCourseDraft(trigger) {
@@ -2647,9 +2909,9 @@ body.builder-dialog-open { overflow:hidden; }
   }
 
   document.addEventListener('click',e=>{const el=e.target.closest('[data-action]');if(el){e.preventDefault();handleAction(el.dataset.action,el);}});
-  document.addEventListener('input',e=>{const el=e.target;if(el.matches('[data-entity][data-field], [data-entity="outcome"], [data-entity="option"]'))updateField(el);});
-  document.addEventListener('change',e=>{const el=e.target;if(el.matches('[data-entity][data-field], [data-entity="outcome"], [data-entity="option"]'))updateField(el);});
-   document.addEventListener('change',e=>{const el=e.target;if(!el.matches('[data-correct-option]'))return;const l=currentLesson();const q=(l?.questions||[]).find(q=>String(q.id)===String(el.dataset.qid));if(!q)return;q.correctIndex=Number(el.value);persist(false);renderEditor();toast('Option '+(Number(el.value)+1)+' marked as the correct answer.');});
+  document.addEventListener('input',e=>{const el=e.target;if(el.matches('[data-entity="option"]')){updateAnswerChoice(el);return;}if(el.matches('[data-entity][data-field], [data-entity="outcome"]'))updateField(el);});
+  document.addEventListener('change',e=>{const el=e.target;if(el.matches('[data-correct-option]')){setCorrectAnswer(el.dataset.qid,el.dataset.index ?? el.value);return;}if(el.matches('[data-entity="option"]')){updateAnswerChoice(el);return;}if(el.matches('[data-entity][data-field], [data-entity="outcome"]'))updateField(el);});
+  document.addEventListener('click',e=>{const button=e.target instanceof Element?e.target.closest('[data-mark-correct]'):null;if(!button)return;e.preventDefault();setCorrectAnswer(button.dataset.qid,button.dataset.index);});
   $('#courseSearch').addEventListener('input',renderSidebar);
   document.addEventListener('click',event=>{const target=event.target instanceof Element?event.target:null;const button=target?.closest('#newCourseButton, [data-action="new-course"]');if(!button)return;event.preventDefault();event.stopImmediatePropagation();createNewCourseDraft(button);},true);
   $('#duplicateCourseButton').addEventListener('click',duplicateCourse);
@@ -3334,6 +3596,8 @@ body.builder-dialog-open { overflow:hidden; }
   renderEditor = function() {
     renderEditorBeforeReferenceAndMediaEnhancements();
     if (state.tab === 'lesson') {
+      const outlineEditor = $('#workspace .lesson-outline-layout [data-visual-editor]');
+      if (outlineEditor) updateLessonOutlineFromEditor(outlineEditor);
       const textarea = $('#workspace [data-visual-editor][data-visual-kind="main"]');
       const field = textarea && textarea.closest('.field');
       if (field && !$('#workspace [data-course-card-picker]')) {
@@ -3389,6 +3653,29 @@ body.builder-dialog-open { overflow:hidden; }
       });
     }
   };
+
+  document.addEventListener('click', event => {
+    const button = event.target.closest?.('[data-lesson-outline-index]');
+    if (!button) return;
+    const layout = button.closest('.lesson-outline-layout');
+    const panel = layout?.querySelector('[data-lesson-outline]');
+    const editor = layout?.querySelector('[data-visual-editor]');
+    const targetIndex = Number(button.dataset.lessonOutlineIndex);
+    const heading = editor?.querySelectorAll('h1,h2,h3,h4')[targetIndex];
+    if (!panel || !editor || !heading) return;
+
+    panel.dataset.activeIndex = String(targetIndex);
+    const range = document.createRange();
+    range.selectNodeContents(heading);
+    range.collapse(true);
+    editor.focus({preventScroll:true});
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    captureRichEditorRange();
+    updateLessonOutlineFromEditor(editor);
+    heading.scrollIntoView({behavior:'smooth', block:'center'});
+  });
 
   document.addEventListener('input', event => {
     const input = event.target;
@@ -3892,6 +4179,7 @@ body.builder-dialog-open { overflow:hidden; }
     if (!editor) return;
     captureRichEditorRange();
     scheduleVisualEditorSync(editor);
+    scheduleLessonOutlineUpdate(editor);
   });
   document.addEventListener('mousedown', event => {
     // Preserve the content selection while clicking formatting controls.
@@ -3935,6 +4223,7 @@ body.builder-dialog-open { overflow:hidden; }
     }
     restoreRichEditorSelection(editor);
     syncVisualEditorToModel(editor);
+    updateLessonOutlineFromEditor(editor);
     captureRichEditorRange();
   });
   document.addEventListener('click', async event => {
@@ -3978,6 +4267,7 @@ body.builder-dialog-open { overflow:hidden; }
       restoreRichEditorSelection(editor);
       document.execCommand('formatBlock', false, value);
       syncVisualEditorToModel(editor);
+      updateLessonOutlineFromEditor(editor);
       picker.querySelectorAll('[data-rich-format-option]').forEach(item => {
         item.setAttribute('aria-selected', item === option ? 'true' : 'false');
       });
@@ -4379,6 +4669,39 @@ body.builder-dialog-open { overflow:hidden; }
         state.selectedLessonId = fallback?.modules?.[0]?.lessons?.[0]?.id || null;
         stateChanged = true;
       }
+      // The bundled Trading Path is imported once into the shared Academy draft store.
+      // Do this on the ordinary Builder route too, so authors do not need a special URL.
+      let autoImportedTradingPath = false;
+      const tradingPathCandidate = result.trading_path_import_candidate;
+      const candidateCourse = tradingPathCandidate && tradingPathCandidate.course;
+      if (candidateCourse && typeof candidateCourse === 'object' &&
+          !remoteDrafts.some(remote => String(remote.slug || '') === String(candidateCourse.slug || ''))) {
+        let importedCourse = state.courses.find(local =>
+          String(local.slug || '') === String(candidateCourse.slug || '')
+        );
+        if (!importedCourse) {
+          importedCourse = normalizeCourseState(candidateCourse);
+          state.courses.unshift(importedCourse);
+        }
+        // Preserve a prior local-only copy if the last save attempt did not complete.
+        state.selectedCourseId = importedCourse.id;
+        state.selectedModuleId = importedCourse.modules?.[0]?.id || null;
+        state.selectedLessonId = importedCourse.modules?.[0]?.lessons?.[0]?.id || null;
+        state.view = 'editor';
+        state.tab = 'curriculum';
+        state.tradingPathOutlineAutoOpened = true;
+        stateChanged = true;
+        autoImportedTradingPath = true;
+      }
+      const selectedTradingPath = state.courses.find(course =>
+        String(course.id) === String(state.selectedCourseId || '') &&
+        String(course.slug || '') === 'your-trading-path-import-draft'
+      );
+      if (selectedTradingPath && !state.tradingPathOutlineAutoOpened) {
+        state.tab = 'curriculum';
+        state.tradingPathOutlineAutoOpened = true;
+        stateChanged = true;
+      }
       academyReady = true;
       if (editRevision === revisionAtStart) hasUnsavedChanges = false;
       if (stateChanged) {
@@ -4396,6 +4719,48 @@ body.builder-dialog-open { overflow:hidden; }
       });
       if (remoteDrafts.length) toast('Connected to Academy. Shared drafts are available across devices.');
       else toast('Connected to Academy. Save your first draft to make it available across devices.');
+      if (autoImportedTradingPath) {
+        clearTimeout(academySaveTimer);
+        try {
+          await saveCurrentToAcademy(false, false);
+          if (tradingPathImportRequested) clearTradingPathImportQuery();
+          renderSidebar();
+          renderHeaderState();
+          toast('Your Trading Path is now in Your courses as an editable draft. Nothing was published.');
+        } catch (saveError) {
+          toast('Your Trading Path is loaded in the builder but the shared draft save failed: ' + String(saveError?.message || saveError));
+        }
+      } else if (tradingPathImportRequested && requestedTradingPathDraft) {
+        const desiredSlug = String(requestedTradingPathDraft.slug || '');
+        const importedCourse = state.courses.find(item => String(item.slug || '') === desiredSlug);
+        if (!importedCourse) {
+          toast('The Trading Path content was not found in the editor state. Reopen the import link to retry.');
+        } else {
+          state.selectedCourseId = importedCourse.id;
+          state.selectedModuleId = importedCourse.modules?.[0]?.id || null;
+          state.selectedLessonId = importedCourse.modules?.[0]?.lessons?.[0]?.id || null;
+          state.view = 'editor';
+          state.tab = 'curriculum';
+          state.tradingPathOutlineAutoOpened = true;
+          render();
+          const savedRemoteDraft = remoteDrafts.find(item => String(item.slug || '') === desiredSlug);
+          if (savedRemoteDraft) {
+            clearTradingPathImportQuery();
+            toast('Opened the existing Your Trading Path draft. No duplicate was created or published.');
+          } else {
+            clearTimeout(academySaveTimer);
+            try {
+              await saveCurrentToAcademy(false, false);
+              clearTradingPathImportQuery();
+              renderSidebar();
+              renderHeaderState();
+              toast('Imported all Trading Path content as an editable Academy draft. Nothing was published.');
+            } catch (saveError) {
+              toast('Trading Path content is loaded in the editor, but shared saving failed: ' + String(saveError?.message || saveError));
+            }
+          }
+        }
+      }
     } catch (error) {
       diagnosticError('academy-sync-failed', error);
       academyReady = false;
@@ -4608,6 +4973,28 @@ body.builder-dialog-open { overflow:hidden; }
   diagnosticStage('academy-sync-dispatch');
   academySyncPromise = syncAcademy();
 
+  // Use the existing TradeThesis dialog for browser Back where the browser
+  // permits it. A same-URL history checkpoint keeps the page alive long enough
+  // to ask before leaving; the browser still owns tab-close/reload warnings.
+  const courseBuilderExitGuardStateKey = '__tradethesisCourseBuilderExitGuard';
+  let courseBuilderExitGuardArmed = false;
+  let allowCourseBuilderHistoryExit = false;
+  let handlingCourseBuilderBack = false;
+
+  function armCourseBuilderExitGuard() {
+    if (courseBuilderExitGuardArmed) return;
+    try {
+      const currentHistoryState = window.history.state;
+      const guardedHistoryState = currentHistoryState && typeof currentHistoryState === 'object'
+        ? {...currentHistoryState, [courseBuilderExitGuardStateKey]:true}
+        : {[courseBuilderExitGuardStateKey]:true};
+      window.history.pushState(guardedHistoryState, '', window.location.href);
+      courseBuilderExitGuardArmed = true;
+    } catch (error) {
+      console.warn('The Course Builder browser-back guard could not be installed.', error);
+    }
+  }
+
   // Clean exits navigate immediately. If edits or a save are pending, offer to
   // save the draft to the shared Academy first; Cancel keeps the editor open.
   document.addEventListener('click', async event => {
@@ -4630,10 +5017,72 @@ body.builder-dialog-open { overflow:hidden; }
       .catch(error => toast('Could not save before leaving: ' + error.message));
   });
   window.addEventListener('beforeunload', event => {
+    // This flag is set only after the user has confirmed an intentional exit
+    // through the TradeThesis dialog or chosen browser Back with a clean draft.
+    if (allowCourseBuilderHistoryExit) return;
     if (!hasUnsavedChanges && !academySaving && !academySavePending) return;
     event.preventDefault();
     event.returnValue = '';
   });
+
+  window.addEventListener('popstate', async event => {
+    if (allowCourseBuilderHistoryExit) return;
+
+    // Forward navigation back onto our sentinel is not an exit attempt.
+    if (event.state && event.state[courseBuilderExitGuardStateKey]) {
+      courseBuilderExitGuardArmed = true;
+      return;
+    }
+
+    // The sentinel was consumed by Back. Restore it immediately so a Cancel
+    // leaves the user on the Course Builder rather than one history entry back.
+    courseBuilderExitGuardArmed = false;
+    if (handlingCourseBuilderBack) {
+      armCourseBuilderExitGuard();
+      return;
+    }
+
+    const workPending = hasUnsavedChanges || academySaving || academySavePending;
+    if (!workPending) {
+      // The draft is clean, so complete the user's Back action.
+      allowCourseBuilderHistoryExit = true;
+      window.history.back();
+      return;
+    }
+
+    armCourseBuilderExitGuard();
+    handlingCourseBuilderBack = true;
+    try {
+      const confirmed = await builderConfirm(
+        'Your latest edits may not have finished saving. Save the draft to the Academy and leave this page? Choose Cancel to stay here.',
+        {title:'Save before leaving?', confirmLabel:'Save and leave'}
+      );
+      if (!confirmed) return;
+
+      clearTimeout(saveTimer);
+      clearTimeout(academySaveTimer);
+      try {
+        await saveCurrentToAcademy(false, true);
+      } catch (error) {
+        toast('Could not save before leaving: ' + error.message);
+        return;
+      }
+
+      if (hasUnsavedChanges || academySaving || academySavePending) {
+        toast('New edits are still waiting to save. Please save them before leaving.');
+        return;
+      }
+
+      // We are at the sentinel; skip both it and the Course Builder entry to
+      // return to the page that was open before the builder.
+      allowCourseBuilderHistoryExit = true;
+      window.history.go(-2);
+    } finally {
+      handlingCourseBuilderBack = false;
+    }
+  });
+
+  armCourseBuilderExitGuard();
 
   function sameDraftModuleIdentity(left, right) {
     const signature = course => {

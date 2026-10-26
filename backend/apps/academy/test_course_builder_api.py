@@ -119,7 +119,9 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "notebookPreviewMarkup(l)")
         self.assertContains(response, "Reflection & reasoning")
         self.assertContains(response, "Require course-owned images before publishing")
-        self.assertContains(response, "Courses tab presentation")
+        self.assertContains(response, "Courses page placement")
+        self.assertContains(response, 'data-field="catalogueRole"')
+        self.assertContains(response, "Not listed on the Courses page")
         self.assertContains(response, 'data-field="catalogueHook"')
         self.assertContains(response, 'data-field="problemStatement"')
         self.assertContains(response, 'data-field="learningFocus"')
@@ -146,7 +148,7 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "removes earlier duplicates and accidental lesson links")
         self.assertContains(
             response,
-            'The website preview preserves this placement.</span></div>${courseCardPickerMarkup()}<div class="helper-note">',
+            'The website preview preserves this placement.</span></div>${courseCardPickerMarkup()}</div></div><div class="helper-note">',
         )
         self.assertContains(
             response, "Those render as lesson links/cards, not as the Option 3 inline course card."
@@ -621,6 +623,7 @@ class CourseBuilderApiTests(TestCase):
         payload = self.draft_payload("catalogue-presentation-save")
         payload["course"].update(
             {
+                "catalogueRole": "flagship",
                 "catalogueHook": "Mark fewer zones. Give each one a reason.",
                 "problemStatement": "For traders who see a possible level around every swing.",
                 "learningFocus": "Choose zones, read reactions and identify invalidation.",
@@ -637,6 +640,8 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(response.status_code, 200, response.content)
         record = CourseImport.objects.get(pk=response.json()["record_id"])
         state = record.payload["builder_state"]
+        self.assertEqual(state["catalogueRole"], "flagship")
+        self.assertEqual(record.payload["course"]["catalogue_role"], "flagship")
         self.assertEqual(state["catalogueHook"], payload["course"]["catalogueHook"])
         self.assertEqual(state["problemStatement"], payload["course"]["problemStatement"])
         self.assertEqual(state["learningFocus"], payload["course"]["learningFocus"])
@@ -1101,6 +1106,8 @@ class CourseBuilderApiTests(TestCase):
             title="Published API Course",
             slug="published-api-course",
             summary="A published course.",
+            catalogue_role=Course.CatalogueRole.SUPPORTING,
+            position=17,
             status=Course.Status.PUBLISHED,
         )
         module = CourseModule.objects.create(
@@ -1123,12 +1130,27 @@ class CourseBuilderApiTests(TestCase):
             slug="private-draft-course",
             status=Course.Status.DRAFT,
         )
+        Course.objects.create(
+            title="Intentionally Hidden Course",
+            slug="intentionally-hidden-course",
+            summary="Do not show this course on the public Courses page.",
+            catalogue_role=Course.CatalogueRole.HIDDEN,
+            status=Course.Status.PUBLISHED,
+        )
         self.client.logout()
         response = self.client.get(reverse("academy_public_catalogue"))
         self.assertEqual(response.status_code, 200)
-        titles = [item["title"] for item in response.json()["courses"]]
+        rows = response.json()["courses"]
+        titles = [item.get("title") for item in rows if item.get("title")]
         self.assertIn("Published API Course", titles)
         self.assertNotIn("Private Draft Course", titles)
+        published_row = next(item for item in rows if item.get("slug") == published.slug)
+        self.assertEqual(published_row["catalogueRole"], "supporting")
+        self.assertEqual(published_row["catalogueOrder"], 17)
+        hidden_row = next(item for item in rows if item.get("slug") == "intentionally-hidden-course")
+        self.assertEqual(hidden_row["catalogueRole"], "hidden")
+        self.assertEqual(hidden_row["status"], "hidden")
+        self.assertNotIn("title", hidden_row)
         self.assertEqual(response["Access-Control-Allow-Origin"], "*")
 
     def test_published_course_editor_hydrates_saved_question_image_url(self):
@@ -1955,7 +1977,61 @@ class CourseBuilderApiTests(TestCase):
         self.assertNotIn("Secret module title", body)
 
 
+    def test_get_offers_trading_path_as_a_one_time_shared_draft_candidate(self):
+        response = self.client.get(reverse("staff_course_builder_api"))
+        self.assertEqual(response.status_code, 200)
+        candidate = response.json().get("trading_path_import_candidate")
+        self.assertIsInstance(candidate, dict)
+        self.assertEqual(candidate["course"]["title"], "Your Trading Path")
+        self.assertEqual(len(candidate["course"]["modules"]), 5)
+        self.assertEqual(
+            sum(len(module["lessons"]) for module in candidate["course"]["modules"]),
+            48,
+        )
+
+    def test_get_does_not_offer_trading_path_again_after_a_draft_exists(self):
+        CourseImport.objects.create(
+            course_slug="your-trading-path-import-draft",
+            title="Your Trading Path",
+            manifest_version="course-builder-v1",
+            content_hash="a" * 64,
+            source_manifest="builder://your-trading-path-import-draft",
+            payload={"builder_state": {"title": "Your Trading Path"}},
+            status=CourseImport.Status.DRAFT,
+            imported_by=self.admin,
+        )
+        response = self.client.get(reverse("staff_course_builder_api"))
+        self.assertEqual(response.status_code, 200)
+        self.assertIsNone(response.json().get("trading_path_import_candidate"))
+
 class CourseBuilderPreviewWiringTests(SimpleTestCase):
+    def test_empty_notebook_prompts_are_materialized_as_editable_pause_interpret_apply_fields(self):
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
+        for marker in (
+            "l.notebook.prompts.length===0",
+            "{label:'Pause',text:'What evidence is visible?'}",
+            "{label:'Interpret',text:'What could it mean in context?'}",
+            "{label:'Apply',text:'What would change your view?'}",
+            'data-entity="notebook-prompt"',
+            "Prompt text",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, source)
+
+    def test_builder_auto_imports_trading_path_from_shared_candidate(self):
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
+        for marker in (
+            "result.trading_path_import_candidate",
+            "autoImportedTradingPath",
+            "Your Trading Path is now in Your courses as an editable draft.",
+            "await saveCurrentToAcademy(false, false)",
+            "state.tab = 'curriculum';",
+            "state.tradingPathOutlineAutoOpened = true;",
+            "selectedTradingPath && !state.tradingPathOutlineAutoOpened",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, source)
+
     def test_new_course_buttons_use_responsive_capture_phase_handler(self):
         source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
         self.assertIn(

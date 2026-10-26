@@ -68,22 +68,130 @@
   };
   const microGrid = $('#cc-micro-grid');
   const developmentRail = $('#cc-development-rail');
-  const orderedProgrammes = data.programmes.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
-  const primaryProgramme = orderedProgrammes.find(course => course.id === 'trading-path');
-  const secondaryProgramme = orderedProgrammes.find(course => course.id === 'construct');
   const primaryHost = $('#ed-trading-path');
   const secondaryHost = $('[data-offer="construct"]');
-  if (primaryHost && primaryProgramme) primaryHost.innerHTML = renderEditorialProgramme(primaryProgramme, 'path');
-  if (secondaryHost && secondaryProgramme) secondaryHost.innerHTML = renderEditorialProgramme(secondaryProgramme, 'construct');
-
-  const supportingProgrammes = [...(data.supportingProgrammes || [])].filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
+  const programmeHost = $('.ed-programmes');
   const supportHost = $('#cc-supporting-programme');
-  if (supportHost && supportingProgrammes.length) {
-    supportHost.innerHTML = supportingProgrammes.map(support => '<article class="ed-live-card" id="' + escapeHTML(support.id) + '">' +
-      '<div class="ed-live-stamp">LIVE /<br>CLASSROOM</div>' +
-      '<div class="ed-live-copy"><span class="eyebrow">A separate delivery format</span><h2>' + escapeHTML(support.title) + '</h2><p>' + escapeHTML(support.description) + '</p><div class="ed-live-facts">' + support.facts.map(fact => '<span>' + escapeHTML(fact) + '</span>').join('') + '</div></div>' +
-      '<a class="ed-action ed-action-outline" href="' + escapeHTML(support.href) + '">' + escapeHTML(support.cta) + ' <span aria-hidden="true">↗</span></a></article>').join('');
+  // Route each Academy course into one catalogue section from its saved role.
+  let supportingProgrammes = [...(data.supportingProgrammes || [])];
+  let dynamicFlagshipCourses = [];
+  let dynamicSupportingCourses = [];
+
+  const sameCatalogueCourse = (item, incoming) => {
+    if (!item || !incoming) return false;
+    const incomingKeys = [incoming.slug, incoming.id].filter(Boolean).map(String);
+    const itemKeys = [item.slug, item.id].filter(Boolean).map(String);
+    return incomingKeys.some(key => itemKeys.includes(key));
+  };
+  const findStaticProgramme = incoming => (data.programmes || []).find(item => sameCatalogueCourse(item, incoming));
+  const findStaticSupportingProgramme = incoming => (data.supportingProgrammes || []).find(item => sameCatalogueCourse(item, incoming));
+  const findStaticMicroCourse = incoming => (data.microCourses || []).find(item => sameCatalogueCourse(item, incoming));
+
+  function renderDynamicFlagship(course, index) {
+    const modules = Array.isArray(course.modules) ? course.modules : [];
+    const outcomeSource = Array.isArray(course.outcomes) ? course.outcomes : modules.map(module => module.title).filter(Boolean);
+    const outcomes = (outcomeSource.length ? outcomeSource : (course.outcome ? [course.outcome] : []))
+      .slice(0, 3)
+      .map((item, itemIndex) => '<li><span>0' + (itemIndex + 1) + '</span>' + escapeHTML(item) + '</li>').join('');
+    const rawFacts = Array.isArray(course.facts) ? course.facts : [
+      course.duration || course.estimated_duration,
+      course.level,
+      modules.length ? String(modules.length) + ' modules' : ''
+    ];
+    const facts = rawFacts.filter(Boolean).slice(0, 4).map(fact => '<span>' + escapeHTML(fact) + '</span>').join('');
+    const price = course.price || '';
+    const priceNote = course.priceNote || (price ? '' : 'Pricing and access are configured separately.');
+    const href = course.academyUrl || course.href || '';
+    const action = href
+      ? '<a class="ed-action ed-action-gold" href="' + escapeHTML(href) + '">' + escapeHTML(course.cta || 'Explore course') + ' <span aria-hidden="true">↗</span></a>'
+      : '<span class="ed-offer-note">Course details coming soon</span>';
+    return '<div class="ed-offer-inner ed-offer-inner--construct">' +
+      '<div class="ed-offer-topline"><span>Flagship programme</span><span class="ed-offer-number">FEATURED / ' + String(index + 1).padStart(2, '0') + '</span></div>' +
+      '<h2 class="ed-offer-title">' + escapeHTML(course.title || 'Course title') + '</h2>' +
+      '<p class="ed-offer-subtitle">' + escapeHTML(course.subtitle || course.category || course.level || 'Self-paced programme') + '</p>' +
+      '<p class="ed-offer-promise">' + escapeHTML(course.promise || course.hook || course.outcome || 'A focused learning programme built around a clear trading skill.') + '</p>' +
+      '<p class="ed-offer-description">' + escapeHTML(course.description || '') + '</p>' +
+      '<div class="ed-offer-facts">' + facts + '</div>' +
+      (outcomes ? '<ul class="ed-offer-outcomes">' + outcomes + '</ul>' : '') +
+      '<div class="ed-offer-bottom"><div class="ed-offer-price"><strong>' + escapeHTML(price) + '</strong><span>' + escapeHTML(priceNote) + '</span></div>' + action + '</div>' +
+    '</div>';
   }
+
+  function renderDynamicSupporting(course, index) {
+    const modules = Array.isArray(course.modules) ? course.modules : [];
+    const rawFacts = Array.isArray(course.facts) ? course.facts : [
+      course.duration || course.estimated_duration,
+      course.level,
+      modules.length ? String(modules.length) + ' modules' : ''
+    ];
+    const facts = rawFacts.filter(Boolean).slice(0, 4).map(fact => '<span>' + escapeHTML(fact) + '</span>').join('');
+    const href = course.academyUrl || course.href || '';
+    const action = href
+      ? '<a class="ed-action ed-action-outline" href="' + escapeHTML(href) + '">' + escapeHTML(course.cta || 'Explore programme') + ' <span aria-hidden="true">↗</span></a>'
+      : '<span class="ed-offer-note">Course details coming soon</span>';
+    return '<article class="ed-live-card" id="academy-support-' + escapeHTML(course.slug || course.id || index) + '">' +
+      '<div class="ed-live-stamp">SUPPORTING /<br>PROGRAMME</div>' +
+      '<div class="ed-live-copy"><span class="eyebrow">Supporting programme</span><h2>' + escapeHTML(course.title || 'Course title') + '</h2><p>' + escapeHTML(course.description || '') + '</p><div class="ed-live-facts">' + facts + '</div></div>' +
+      action + '</article>';
+  }
+
+  function renderProgrammeSections() {
+    const orderedProgrammes = data.programmes.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
+    const ordered = orderedProgrammes;
+    const primary = ordered.find(course => course.id === 'trading-path');
+    const secondary = ordered.find(course => course.id === 'construct');
+    if (primaryHost) {
+      primaryHost.style.display = primary ? '' : 'none';
+      primaryHost.innerHTML = primary ? renderEditorialProgramme(primary, 'path') : '';
+    }
+    if (secondaryHost) {
+      secondaryHost.style.display = secondary ? '' : 'none';
+      secondaryHost.innerHTML = secondary ? renderEditorialProgramme(secondary, 'construct') : '';
+    }
+    if (programmeHost) {
+      $$('[data-dynamic-catalogue-role="flagship"]', programmeHost).forEach(card => card.remove());
+      dynamicFlagshipCourses
+        .filter(course => !findStaticProgramme(course))
+        .sort((a, b) => (a.catalogueOrder ?? a.order ?? 0) - (b.catalogueOrder ?? b.order ?? 0))
+        .forEach((course, index) => {
+          const card = document.createElement('article');
+          card.className = 'ed-secondary';
+          card.style.gridColumn = '1 / -1';
+          card.dataset.dynamicCatalogueRole = 'flagship';
+          card.dataset.dynamicCatalogueSlug = String(course.slug || course.id || '');
+          card.innerHTML = renderDynamicFlagship(course, index);
+          programmeHost.appendChild(card);
+        });
+    }
+  }
+
+  function renderSupportingProgrammes() {
+    if (!supportHost) return;
+    const staticRows = [...(data.supportingProgrammes || [])].filter(isCatalogueVisible)
+      .sort((a, b) => (a.catalogueOrder ?? a.order ?? 0) - (b.catalogueOrder ?? b.order ?? 0));
+    const dynamicRows = dynamicSupportingCourses.filter(course => !findStaticSupportingProgramme(course));
+    const rows = [
+      ...staticRows.map(course => ({course, dynamic: false})),
+      ...dynamicRows.map(course => ({course, dynamic: true}))
+    ].sort((a, b) => ((a.course.catalogueOrder ?? a.course.order ?? 0) - (b.course.catalogueOrder ?? b.course.order ?? 0)));
+    supportHost.innerHTML = rows.map((entry, index) => {
+      if (entry.dynamic) return renderDynamicSupporting(entry.course, index);
+      const support = entry.course;
+      const facts = Array.isArray(support.facts) ? support.facts : [];
+      const action = support.href
+        ? '<a class="ed-action ed-action-outline" href="' + escapeHTML(support.href) + '">' + escapeHTML(support.cta || 'Explore programme') + ' <span aria-hidden="true">↗</span></a>'
+        : '<span class="ed-offer-note">Details coming soon</span>';
+      return '<article class="ed-live-card" id="' + escapeHTML(support.id) + '">' +
+        '<div class="ed-live-stamp">LIVE /<br>CLASSROOM</div>' +
+        '<div class="ed-live-copy"><span class="eyebrow">A separate delivery format</span><h2>' + escapeHTML(support.title) + '</h2><p>' + escapeHTML(support.description) + '</p><div class="ed-live-facts">' + facts.map(fact => '<span>' + escapeHTML(fact) + '</span>').join('') + '</div></div>' +
+        action + '</article>';
+    }).join('');
+    const section = $('#supporting-learning');
+    if (section) section.style.display = rows.length ? '' : 'none';
+  }
+
+  renderProgrammeSections();
+  renderSupportingProgrammes();
 
   const modal = $('#cc-course-modal');
   const modalDialog = $('.cc-modal-dialog', modal);
@@ -132,7 +240,8 @@
   function renderFilterButtons() {
     if (!filterHost) return;
     const availableCourses = microCourses.filter(course => course.status !== 'in-development');
-    const categories = [...new Set(availableCourses.map(course => course.category).filter(Boolean))]
+    const categories = [...new Set(microCourses.map(course => course.category).filter(Boolean))]
+      .filter(category => availableCourses.some(course => course.category === category))
       .sort((a, b) => a.localeCompare(b));
     const categoryButtons = categories.map(category => {
       const count = availableCourses.filter(course => course.category === category).length;
@@ -248,46 +357,116 @@
     .then(response => { if (!response.ok) throw new Error("Academy catalogue unavailable"); return response.json(); })
     .then(payload => {
       const academyEntries = (payload.courses || []).filter(course => course && (
-        (course.status === "published" && course.academyUrl) || course.status === "coming-soon"
+        course.catalogueRole === "hidden" ||
+        ((course.status === "published" && course.academyUrl) || course.status === "coming-soon")
       ));
       let catalogueChanged = false;
+
       for (const incoming of academyEntries) {
-        const existing = microCourses.find(course =>
-          String(course.id) === String(incoming.id) ||
-          (incoming.slug && (String(course.slug || "") === String(incoming.slug) || String(course.id) === String(incoming.slug)))
-        );
-        const normalized = {
-          ...incoming, priority: 3, order: 1000 + microCourses.length,
-          category: incoming.category || "TradeThesis courses", level: incoming.level || "Self-paced",
-          art: incoming.art || "structure", modules: Array.isArray(incoming.modules) ? incoming.modules : [],
-          tags: Array.isArray(incoming.tags) ? incoming.tags : [],
-          outcome: incoming.outcome || incoming.description || "",
-          complements: incoming.complements || (incoming.status === "coming-soon"
-            ? "This course is being prepared. Full details will be shared closer to launch."
-            : "Explore this published course in the TradeThesis Academy."),
-          price: incoming.price || ""
-        };
-        if (existing) {
-          existing.slug = existing.slug || normalized.slug;
-          existing.academyUrl = normalized.academyUrl || existing.academyUrl;
-          if (normalized.modules.length) existing.modules = normalized.modules;
-          if (!existing.outcome && normalized.outcome) existing.outcome = normalized.outcome;
-          if (!existing.complements && normalized.complements) existing.complements = normalized.complements;
-          if (normalized.price && (!existing.price || existing.price === "Coming soon")) existing.price = normalized.price;
-          if (normalized.cataloguePresentationConfigured) {
-            existing.hook = normalized.hook; existing.problem = normalized.problem;
-            existing.learningFocus = normalized.learningFocus; existing.tags = normalized.tags;
-            existing.whyThisOne = normalized.whyThisOne;
-          } else {
-            for (const key of ["hook", "problem", "learningFocus", "whyThisOne"]) if (!existing[key] && normalized[key]) existing[key] = normalized[key];
-            if ((!Array.isArray(existing.tags) || !existing.tags.length) && normalized.tags.length) existing.tags = normalized.tags;
-          }
+        const role = ["flagship", "supporting", "mini", "hidden"].includes(incoming.catalogueRole)
+          ? incoming.catalogueRole : "mini";
+        const staticProgramme = findStaticProgramme(incoming);
+        const staticSupporting = findStaticSupportingProgramme(incoming);
+        const staticMicro = findStaticMicroCourse(incoming);
+        const prior = microCourses.find(course => sameCatalogueCourse(course, incoming)) ||
+          dynamicFlagshipCourses.find(course => sameCatalogueCourse(course, incoming)) ||
+          dynamicSupportingCourses.find(course => sameCatalogueCourse(course, incoming)) ||
+          staticProgramme || staticSupporting || staticMicro || null;
+
+        if (role === "hidden" || incoming.status === "hidden") {
+          [staticProgramme, staticSupporting, staticMicro].filter(Boolean).forEach(course => {
+            course.catalogueVisibility = "hidden";
+          });
+          microCourses = microCourses.filter(course => !sameCatalogueCourse(course, incoming));
+          dynamicFlagshipCourses = dynamicFlagshipCourses.filter(course => !sameCatalogueCourse(course, incoming));
+          dynamicSupportingCourses = dynamicSupportingCourses.filter(course => !sameCatalogueCourse(course, incoming));
           catalogueChanged = true;
-        } else {
-          microCourses.push(normalized); catalogueChanged = true;
+          continue;
         }
+
+        const normalized = {
+          ...(prior || {}),
+          ...incoming,
+          // Static editorial cards keep their stable IDs so their dedicated
+          // layout and anchors continue to work when an admin changes roles.
+          id: (prior && prior.id) || incoming.id,
+          slug: incoming.slug || (prior && prior.slug) || String(incoming.id || ""),
+          catalogueRole: role,
+          catalogueOrder: Number.isFinite(Number(incoming.catalogueOrder))
+            ? Number(incoming.catalogueOrder)
+            : ((prior && Number.isFinite(Number(prior.order))) ? Number(prior.order) : 1000),
+          category: incoming.category || (prior && prior.category) || "TradeThesis courses",
+          level: incoming.level || (prior && prior.level) || "Self-paced",
+          art: incoming.art || (prior && prior.art) || "structure",
+          modules: Array.isArray(incoming.modules) && incoming.modules.length
+            ? incoming.modules : (Array.isArray(prior && prior.modules) ? prior.modules : []),
+          tags: Array.isArray(incoming.tags) ? incoming.tags : (Array.isArray(prior && prior.tags) ? prior.tags : []),
+          outcome: incoming.outcome || (prior && prior.outcome) || incoming.description || "",
+          complements: incoming.complements || (prior && prior.complements) ||
+            (incoming.status === "coming-soon"
+              ? "This course is being prepared. Full details will be shared closer to launch."
+              : "Explore this published course in the TradeThesis Academy."),
+          price: incoming.price || (prior && prior.price) || "",
+          priority: role === "flagship" ? 1 : role === "supporting" ? 2 : 3,
+          order: Number.isFinite(Number(incoming.catalogueOrder))
+            ? Number(incoming.catalogueOrder)
+            : ((prior && Number.isFinite(Number(prior.order))) ? Number(prior.order) : 1000 + microCourses.length)
+        };
+
+        if (normalized.cataloguePresentationConfigured) {
+          normalized.hook = normalized.hook || "";
+          normalized.problem = normalized.problem || "";
+          normalized.learningFocus = normalized.learningFocus || "";
+          normalized.whyThisOne = normalized.whyThisOne || "";
+        } else if (prior) {
+          for (const key of ["hook", "problem", "learningFocus", "whyThisOne"]) {
+            normalized[key] = prior[key] || normalized[key] || "";
+          }
+          if ((!Array.isArray(normalized.tags) || !normalized.tags.length) &&
+              Array.isArray(prior.tags) && prior.tags.length) normalized.tags = prior.tags;
+        }
+
+        // Remove any old rendering of this course before placing it in exactly
+        // one section. Static marketing cards keep their authored design/copy.
+        microCourses = microCourses.filter(course => !sameCatalogueCourse(course, incoming));
+        dynamicFlagshipCourses = dynamicFlagshipCourses.filter(course => !sameCatalogueCourse(course, incoming));
+        dynamicSupportingCourses = dynamicSupportingCourses.filter(course => !sameCatalogueCourse(course, incoming));
+
+        if (staticProgramme) {
+          staticProgramme.catalogueVisibility = role === "flagship" ? "visible" : "hidden";
+          if (role === "flagship") {
+            Object.assign(staticProgramme, normalized, {id: staticProgramme.id, catalogueVisibility: "visible"});
+          }
+        }
+        if (staticSupporting) {
+          staticSupporting.catalogueVisibility = role === "supporting" ? "visible" : "hidden";
+          if (role === "supporting") {
+            Object.assign(staticSupporting, normalized, {id: staticSupporting.id, catalogueVisibility: "visible"});
+          }
+        }
+        if (staticMicro) staticMicro.catalogueVisibility = role === "mini" ? "visible" : "hidden";
+
+        if (role === "flagship") {
+          if (!staticProgramme) dynamicFlagshipCourses.push(normalized);
+        } else if (role === "supporting") {
+          if (!staticSupporting) dynamicSupportingCourses.push(normalized);
+        } else if (staticMicro) {
+          // Merge into the existing authored tile, keeping its art and curated
+          // marketing copy unless the builder explicitly configured new copy.
+          Object.assign(staticMicro, normalized, {id: staticMicro.id, catalogueVisibility: "visible"});
+          microCourses.push(staticMicro);
+        } else {
+          microCourses.push(normalized);
+        }
+        catalogueChanged = true;
       }
-      if (catalogueChanged) { renderFilterButtons(); renderMicroCourses(); }
+
+      if (catalogueChanged) {
+        renderProgrammeSections();
+        renderSupportingProgrammes();
+        renderFilterButtons();
+        renderMicroCourses();
+      }
     })
     .catch(() => {
       // The curated catalogue remains usable if Academy is temporarily unavailable.

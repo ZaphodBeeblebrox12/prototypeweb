@@ -409,7 +409,27 @@ jobs:
               });
             });
             await cataloguePage.goto(server + "/courses.html", { waitUntil: "networkidle" });
-            await cataloguePage.waitForSelector("#cc-micro-grid [data-open-course='ci-future-visible-course']");
+            try {
+              await cataloguePage.waitForSelector("#cc-micro-grid [data-open-course='ci-future-visible-course']", { timeout: 8000 });
+            } catch (error) {
+              const diagnostic = await cataloguePage.evaluate(() => {
+                const data = window.TRADETHESIS_COURSE_DATA;
+                const grid = document.querySelector("#cc-micro-grid");
+                return {
+                  readyState: document.readyState,
+                  microGridFound: Boolean(grid),
+                  microGridHidden: grid ? grid.hidden : null,
+                  microGridText: grid ? grid.innerText.slice(0, 600) : "",
+                  visibleCards: grid ? grid.querySelectorAll("[data-open-course]").length : 0,
+                  dataLoaded: Boolean(data),
+                  microCourseCount: data && Array.isArray(data.microCourses) ? data.microCourses.length : null,
+                  fixtureFoundInData: Boolean(data && Array.isArray(data.microCourses) && data.microCourses.some(course => course.id === "ci-future-visible-course")),
+                  scriptErrors: window.__TRADETHESIS_COURSE_CATALOGUE_ERROR || null
+                };
+              });
+              console.log("CATALOGUE_SMOKE_DIAGNOSTIC", JSON.stringify({ diagnostic, pageErrors, consoleErrors, failedRequests, badResponses }));
+              throw error;
+            }
             const visibleCourseCount = await cataloguePage.locator("#cc-micro-grid [data-open-course]").count();
             assert.equal(await cataloguePage.locator("#cc-micro-grid [data-open-course='ci-future-hidden-draft']").count(), 0,
               "Hidden development drafts must not appear as public course cards");

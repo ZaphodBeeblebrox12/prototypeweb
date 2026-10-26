@@ -31,6 +31,16 @@ def public_course_catalogue(request):
         "modules__lessons"
     )
     for course in courses:
+        # Send only a minimal marker for hidden courses so the static marketing
+        # page can remove a manually-curated card with the same slug.
+        if course.catalogue_role == Course.CatalogueRole.HIDDEN:
+            rows.append({
+                "id": str(course.pk),
+                "slug": course.slug,
+                "catalogueRole": Course.CatalogueRole.HIDDEN,
+                "status": "hidden",
+            })
+            continue
         if not is_course_card_recommendable(course.title, course.summary, course.description):
             continue
         modules = []
@@ -66,6 +76,8 @@ def public_course_catalogue(request):
                 "complements": "Explore this published course in the TradeThesis Academy.",
                 "price": "",
                 "status": "published",
+                "catalogueRole": course.catalogue_role,
+                "catalogueOrder": course.position,
                 "art": "structure",
                 "modules": modules,
                 "academyUrl": request.build_absolute_uri(
@@ -95,8 +107,12 @@ def public_course_catalogue(request):
         title = str(state.get("title") or record.title)[:200]
         summary = str(state.get("summary") or "")[:360]
         description = str(state.get("description") or "")[:1000]
+        catalogue_role = str(state.get("catalogueRole") or Course.CatalogueRole.MINI)
+        if catalogue_role not in Course.CatalogueRole.values:
+            catalogue_role = Course.CatalogueRole.MINI
         if (
             not state.get("comingSoon")
+            or catalogue_role == Course.CatalogueRole.HIDDEN
             or record.course_slug in published_slugs
             or record.course_slug in seen_teaser_slugs
             or not is_course_card_recommendable(title, summary, description)
@@ -115,6 +131,8 @@ def public_course_catalogue(request):
                 "complements": "This course is being prepared. Full details will be shared closer to launch.",
                 "price": "Coming soon",
                 "status": "coming-soon",
+                "catalogueRole": catalogue_role,
+                "catalogueOrder": max(0, int(state.get("position") or 0)),
                 "art": "structure",
                 "modules": [
                     {
