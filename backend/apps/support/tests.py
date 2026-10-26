@@ -128,7 +128,20 @@ class SupportTicketUserScopeTests(TestCase):
         self.assertEqual(owner_response["X-Content-Type-Options"], "nosniff")
 
         self.client.force_login(self.other_user)
-        self.assertEqual(self.client.get(url).status_code, 403)
+        denied_response = self.client.get(url)
+        request_user = denied_response.wsgi_request.user
+        self.assertEqual(
+            denied_response.status_code,
+            403,
+            (
+                f"Expected forbidden attachment access; status={denied_response.status_code}, "
+                f"location={denied_response.get('Location')!r}, "
+                f"authenticated={request_user.is_authenticated}, "
+                f"active={getattr(request_user, 'is_active', None)!r}, "
+                f"email={getattr(request_user, 'email', None)!r}, "
+                f"verified_email={EmailAddress.objects.filter(user=self.other_user, verified=True).exists()}"
+            ),
+        )
 
 
 class SupportTicketSubmissionTests(TestCase):
