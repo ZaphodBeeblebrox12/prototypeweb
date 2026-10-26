@@ -40,10 +40,12 @@
       </div>
     </section>
 
-    {% if ticket.admin_notes and (ticket.status == "approved" or ticket.status == "rejected") %}
-      <section class="member-status-panel{% if ticket.status == 'rejected' %} is-bad{% endif %}">
-        <h3>Review note</h3><p>{{ ticket.admin_notes|linebreaksbr }}</p>
-      </section>
+    {% if ticket.admin_notes %}
+      {% if ticket.status == "approved" or ticket.status == "rejected" %}
+        <section class="member-status-panel{% if ticket.status == 'rejected' %} is-bad{% endif %}">
+          <h3>Review note</h3><p>{{ ticket.admin_notes|linebreaksbr }}</p>
+        </section>
+      {% endif %}
     {% endif %}
 
     <section class="member-panel">
