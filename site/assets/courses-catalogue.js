@@ -149,7 +149,7 @@
       secondaryHost.innerHTML = secondary ? renderEditorialProgramme(secondary, 'construct') : '';
     }
     if (programmeHost) {
-      $('[data-dynamic-catalogue-role="flagship"]', programmeHost).forEach(card => card.remove());
+      $$('[data-dynamic-catalogue-role="flagship"]', programmeHost).forEach(card => card.remove());
       dynamicFlagshipCourses
         .filter(course => !findStaticProgramme(course))
         .sort((a, b) => (a.catalogueOrder ?? a.order ?? 0) - (b.catalogueOrder ?? b.order ?? 0))
