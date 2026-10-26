@@ -694,3 +694,63 @@
  .courses-catalogue-page .ed-natural-sticky{right:3px;top:65px;width:clamp(140px,46%,158px)}
  .courses-catalogue-page .ed-natural-sticky-quote{top:19.5%;font-size:clamp(14px,7cqw,16px)}
 }
+
+
+/* CONSTRUCT personal note — expressive editorial type with readable supporting copy. */
+.courses-catalogue-page .ed-construct-personal-note{
+  position:relative;
+  z-index:1;
+  margin:14px 0 15px;
+  padding:12px 14px 13px;
+  border-top:1px solid #cdbba1;
+  border-bottom:1px solid #cdbba1;
+  background:linear-gradient(100deg,#f1e6d7 0%,#fffaf1 80%);
+  color:#173f35;
+  transform:rotate(-.35deg);
+  transform-origin:left center;
+}
+.courses-catalogue-page .ed-construct-note-label{
+  margin:0 0 8px;
+  color:#a15a42;
+  font:800 9px/1.4 Arial,Helvetica,sans-serif;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+}
+.courses-catalogue-page .ed-construct-note-headline{
+  margin:0;
+  color:#173f35;
+  font:italic clamp(27px,2.5vw,34px)/.98 Georgia,'Times New Roman',serif;
+  letter-spacing:-.055em;
+  transform:rotate(-.8deg);
+  transform-origin:left center;
+}
+.courses-catalogue-page .ed-construct-note-headline span{color:#b15940}
+.courses-catalogue-page .ed-construct-note-body{
+  margin:12px 0 0;
+  padding:3px 0 3px 12px;
+  border-left:3px solid #dfc87c;
+  color:#31594b;
+  font:400 15px/1.5 Arial,Helvetica,sans-serif;
+}
+.courses-catalogue-page .ed-construct-note-question{
+  display:block;
+  margin:0 0 3px;
+  color:#173f35;
+  font:italic 16px/1.4 Georgia,'Times New Roman',serif;
+}
+.courses-catalogue-page .ed-construct-note-after{
+  display:block;
+  color:#31594b;
+  font:400 15px/1.5 Arial,Helvetica,sans-serif;
+}
+@media(max-width:760px){
+  .courses-catalogue-page .ed-construct-personal-note{margin:13px 0 14px;padding:11px 12px 12px}
+  .courses-catalogue-page .ed-construct-note-headline{font-size:clamp(26px,6vw,32px)}
+  .courses-catalogue-page .ed-construct-note-body{font-size:14px;line-height:1.55;padding-left:10px}
+  .courses-catalogue-page .ed-construct-note-question{font-size:15px}
+  .courses-catalogue-page .ed-construct-note-after{font-size:14px;line-height:1.55}
+}
+@media(max-width:380px){
+  .courses-catalogue-page .ed-construct-note-headline{font-size:25px}
+  .courses-catalogue-page .ed-construct-note-body{margin-top:10px}
+}

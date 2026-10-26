@@ -36,6 +36,16 @@
     return `<svg class="cc-programme-art" viewBox="0 0 175 95" aria-hidden="true"><rect x="3" y="7" width="169" height="81" rx="8" fill="#f6f1e3" stroke="#d7ddcb"/><g stroke="#d3d8c9" stroke-dasharray="3 4"><path d="M13 27H162M13 47H162M13 67H162"/></g><rect x="13" y="58" width="148" height="14" rx="2" fill="#c3d3b8" opacity=".7"/><path d="M13 66L32 58L47 63L64 42L81 51L98 32L116 44L136 20L160 29" fill="none" stroke="#355a46" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g stroke="#355a46" stroke-width="1.4"><path d="M31 51V70M48 53V72M65 35V57M82 45V65M99 25V44M116 37V57M137 13V34M154 18V38"/></g><g fill="#c96f50"><rect x="27" y="56" width="8" height="9" rx="1"/><rect x="44" y="57" width="8" height="9" rx="1"/><rect x="61" y="42" width="8" height="10" rx="1"/><rect x="78" y="48" width="8" height="10" rx="1"/><rect x="95" y="29" width="8" height="10" rx="1"/><rect x="112" y="41" width="8" height="10" rx="1"/><rect x="133" y="17" width="8" height="10" rx="1"/><rect x="150" y="24" width="8" height="9" rx="1"/></g></svg>`;
   };
 
+  // Personal annotation for CONSTRUCT: review the trader's original thesis, not just the outcome.
+  const renderConstructPersonalNote = () =>
+    '<aside class="ed-construct-personal-note" aria-label="A note about reviewing the trade">' +
+      '<div class="ed-construct-note-label">A thought worth keeping</div>' +
+      '<p class="ed-construct-note-headline">Before the<br>chart <span>answered.</span></p>' +
+      '<p class="ed-construct-note-body"><span class="ed-construct-note-question">What did you believe then?</span><span class="ed-construct-note-after">Don\'t let the ending answer for you.</span></p>' +
+    '</aside>';
+  const isConstructCourse = course => [course.id, course.slug, course.title, course.subtitle, course.category]
+    .some(value => /construct(?:ion)?/i.test(String(value || '')));
+
   const renderEditorialProgramme = (course, variant) => {
     const isConstruct = variant === 'construct';
     const outcomes = (course.outcomes || []).slice(0, isConstruct ? 3 : 3).map((item, index) => '<li><span>0' + (index + 1) + '</span>' + escapeHTML(item) + '</li>').join('');
@@ -61,6 +71,7 @@
       '<p class="ed-offer-promise">' + escapeHTML(course.promise) + '</p>' +
       '<p class="ed-offer-description">' + escapeHTML(course.description) + '</p>' +
       '<div class="ed-offer-facts">' + facts + '</div>' +
+      renderConstructPersonalNote() +
       '<ul class="ed-offer-outcomes">' + outcomes + '</ul>' +
       '<div class="ed-offer-bottom">' + price + action + '</div>' +
       '<p class="ed-offer-note">' + escapeHTML(course.community) + '</p>' +
@@ -111,6 +122,7 @@
       '<p class="ed-offer-promise">' + escapeHTML(course.promise || course.hook || course.outcome || 'A focused learning programme built around a clear trading skill.') + '</p>' +
       '<p class="ed-offer-description">' + escapeHTML(course.description || '') + '</p>' +
       '<div class="ed-offer-facts">' + facts + '</div>' +
+      (isConstructCourse(course) ? renderConstructPersonalNote() : '') +
       (outcomes ? '<ul class="ed-offer-outcomes">' + outcomes + '</ul>' : '') +
       '<div class="ed-offer-bottom"><div class="ed-offer-price"><strong>' + escapeHTML(price) + '</strong><span>' + escapeHTML(priceNote) + '</span></div>' + action + '</div>' +
     '</div>';
