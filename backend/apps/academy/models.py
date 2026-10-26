@@ -53,6 +53,12 @@ class Course(models.Model):
         PUBLISHED = "published", _("Published")
         ARCHIVED = "archived", _("Archived")
 
+    class CatalogueRole(models.TextChoices):
+        FLAGSHIP = "flagship", _("Flagship programme")
+        SUPPORTING = "supporting", _("Supporting programme")
+        MINI = "mini", _("Mini-course")
+        HIDDEN = "hidden", _("Not listed on the Courses page")
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=160, unique=True)
@@ -62,6 +68,12 @@ class Course(models.Model):
     level = models.CharField(max_length=40, blank=True)
     estimated_duration = models.CharField(max_length=80, blank=True)
     learning_outcomes = models.JSONField(default=list, blank=True)
+    catalogue_role = models.CharField(
+        max_length=16,
+        choices=CatalogueRole.choices,
+        default=CatalogueRole.MINI,
+        help_text="Controls which section of the public Courses page displays this course.",
+    )
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.DRAFT)
     position = models.PositiveSmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
