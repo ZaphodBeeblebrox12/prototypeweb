@@ -163,6 +163,10 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 # without changing the application source. The free staging filesystem remains ephemeral.
 MEDIA_URL = env("MEDIA_URL", default="/media/")
 MEDIA_ROOT = env("MEDIA_ROOT", default=str(BASE_DIR / "media"))
+SUPPORT_ATTACHMENTS_PRIVATE_MEDIA_ROOT = env(
+    "SUPPORT_ATTACHMENTS_PRIVATE_MEDIA_ROOT",
+    default=str(BASE_DIR / "private_support_attachments"),
+)
 # Course Builder sends small, validated image payloads to the authenticated draft API.
 DATA_UPLOAD_MAX_MEMORY_SIZE = 32 * 1024 * 1024
 # Private instructional images must live outside MEDIA_ROOT (which can be served directly in DEBUG).
