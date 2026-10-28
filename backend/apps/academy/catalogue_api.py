@@ -67,6 +67,12 @@ def public_course_catalogue(request):
                 "id": str(course.pk),
                 "slug": course.slug,
                 "title": course.title,
+                "accessType": course.access_type,
+                "isFree": course.access_type == Course.AccessType.FREE,
+                "includedInFreeMembership": course.access_type in (
+                    Course.AccessType.MEMBERSHIP,
+                    Course.AccessType.MIXED,
+                ),
                 "category": course.category or "TradeThesis courses",
                 "level": course.level or "Self-paced",
                 "description": (course.summary or course.description)[:360],

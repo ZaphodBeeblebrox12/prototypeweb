@@ -60,6 +60,12 @@ class Course(models.Model):
         MINI = "mini", _("Mini-course")
         HIDDEN = "hidden", _("Not listed on the Courses page")
 
+    class AccessType(models.TextChoices):
+        FREE = "free", _("Free course")
+        MEMBERSHIP = "membership", _("Included in free membership")
+        PAID = "paid", _("Paid individual purchase")
+        MIXED = "mixed", _("Free membership or individual purchase")
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=160, unique=True)
@@ -75,6 +81,15 @@ class Course(models.Model):
         default=CatalogueRole.MINI,
         help_text="Controls which section of the public Courses page displays this course.",
     )
+    access_type = models.CharField(
+        max_length=16,
+        choices=AccessType.choices,
+        default=AccessType.PAID,
+        help_text=(
+            "Controls learner access. Existing courses retain paid-offer behaviour unless "
+            "an administrator explicitly changes this setting."
+        ),
+    )
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.DRAFT)
     position = models.PositiveSmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -86,6 +101,37 @@ class Course(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class PlanCourseAccess(models.Model):
+    """An active subscription plan that unlocks a specific published course."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    plan = models.ForeignKey(
+        "subscriptions.Plan",
+        on_delete=models.CASCADE,
+        related_name="academy_course_access",
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="plan_access",
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["course__position", "course__title"]
+        constraints = [
+            models.UniqueConstraint(fields=["plan", "course"], name="academy_plan_course_access_uq"),
+        ]
+        indexes = [
+            models.Index(fields=["course", "is_active"], name="academy_plan_access_course_idx"),
+        ]
+
+    def __str__(self):
+        return f"{self.plan.name} · {self.course.title}"
 
 
 class CourseModule(models.Model):
@@ -211,6 +257,13 @@ class CourseOffer(models.Model):
                 errors["plan"] = "An active course offer must map to a commerce Plan."
             if self.course_id and self.course.status != Course.Status.PUBLISHED:
                 errors["course"] = "Publish the course before activating its offer."
+            if self.course_id and self.course.access_type not in (
+                Course.AccessType.PAID,
+                Course.AccessType.MIXED,
+            ):
+                errors["course"] = (
+                    "Individual purchase offers are only valid for paid or mixed-access courses."
+                )
             if self.plan_id:
                 if not self.plan.is_hidden:
                     errors["plan"] = (
@@ -266,7 +319,11 @@ class CourseOffer(models.Model):
     @property
     def is_saleable(self):
         return bool(
-            self.is_active and self.plan_id and self.course.status == Course.Status.PUBLISHED
+            self.is_active
+            and self.plan_id
+            and self.course.status == Course.Status.PUBLISHED
+            and self.course.access_type
+            in (Course.AccessType.PAID, Course.AccessType.MIXED)
         )
 
     def __str__(self):

@@ -10,11 +10,15 @@ from django.utils import timezone
 from apps.events.models import record_event
 from django.conf import settings
 from django.db import transaction
-from django.core.exceptions import PermissionDenied
+from django.db.models import Q
+from django.core.exceptions import PermissionDenied, ValidationError
 from ipware import get_client_ip
 
 from apps.accounts.models import User
 from .models import (
+    FREE_MEMBERSHIP_PLAN_NAME,
+    FREE_MEMBERSHIP_PRODUCT_SLUG,
+    Product,
     Plan, PlanPrice, Subscription, SubscriptionHistory,
     UpgradeHistory, GiftSubscription, GeoPlanPrice, UserTrialUsage,
     SubscriptionReminder,
@@ -170,6 +174,174 @@ def get_geo_price_for_trial(plan, country):
         )
     except GeoPlanPrice.DoesNotExist:
         return None
+
+def ensure_free_membership_plan():
+    """Create TradeThesis Free without mutating any existing paid plan or price."""
+    with transaction.atomic():
+        product, _product_created = Product.objects.get_or_create(
+            slug=FREE_MEMBERSHIP_PRODUCT_SLUG,
+            defaults={
+                "name": "TradeThesis Free Membership",
+                "description": "Free membership for selected TradeThesis Academy courses.",
+                "is_active": True,
+            },
+        )
+        plan, plan_created = Plan.objects.get_or_create(
+            product=product,
+            tier=Plan.Tier.FREE,
+            is_trial=False,
+            defaults={
+                "name": FREE_MEMBERSHIP_PLAN_NAME,
+                "description": "Permanent free membership with access to selected Academy courses.",
+                "is_active": True,
+                "is_hidden": False,
+                "display_order": 0,
+            },
+        )
+        if (
+            not product.is_active
+            or plan.product_id != product.pk
+            or plan.tier != Plan.Tier.FREE
+            or plan.is_trial
+            or not plan.is_active
+            or plan.is_hidden
+        ):
+            raise ValidationError(
+                "TradeThesis Free is not active and publicly available. Review its plan configuration."
+            )
+
+        if plan_created:
+            PlanPrice.objects.create(
+                plan=plan,
+                interval=PlanPrice.Interval.MONTHLY,
+                price_cents=0,
+                currency="INR",
+                is_active=True,
+            )
+        else:
+            monthly = plan.prices.filter(
+                interval=PlanPrice.Interval.MONTHLY, is_active=True
+            ).first()
+            if monthly is None or monthly.price_cents != 0:
+                raise ValidationError(
+                    "TradeThesis Free must have an active monthly price of ₹0. "
+                    "Existing pricing was not changed automatically."
+                )
+
+        if plan.prices.filter(is_active=True).exclude(price_cents=0).exists():
+            raise ValidationError(
+                "TradeThesis Free has a non-zero active base price. No price was changed."
+            )
+        if plan.geo_prices.filter(is_active=True).exclude(price_cents=0).exists():
+            raise ValidationError(
+                "TradeThesis Free has a non-zero regional price. No price was changed."
+            )
+        return plan
+
+
+@transaction.atomic
+def join_free_membership(user, plan, request=None):
+    """Activate TradeThesis Free without checkout, payment intent, or a credit card."""
+    if not getattr(user, "is_authenticated", False) or not getattr(user, "is_active", False):
+        raise PermissionDenied("Sign in to join TradeThesis Free.")
+
+    try:
+        plan = Plan.objects.select_for_update().select_related("product").get(pk=plan.pk)
+    except Plan.DoesNotExist as exc:
+        raise PermissionDenied("The free membership is not available.") from exc
+
+    if (
+        not plan.product_id
+        or plan.product.slug != FREE_MEMBERSHIP_PRODUCT_SLUG
+        or not plan.product.is_active
+        or plan.tier != Plan.Tier.FREE
+        or plan.is_trial
+        or plan.is_hidden
+        or not plan.is_active
+    ):
+        raise PermissionDenied("Only the published TradeThesis Free plan can be joined without payment.")
+
+    from apps.academy.models import Course, PlanCourseAccess
+
+    has_included_course = PlanCourseAccess.objects.filter(
+        plan=plan,
+        is_active=True,
+        course__status=Course.Status.PUBLISHED,
+        course__access_type__in=[Course.AccessType.MEMBERSHIP, Course.AccessType.MIXED],
+    ).exists()
+    if not has_included_course:
+        raise PermissionDenied("TradeThesis Free has no currently published included courses.")
+
+    monthly = plan.prices.filter(
+        interval=PlanPrice.Interval.MONTHLY, is_active=True
+    ).first()
+    if monthly is None or monthly.price_cents != 0:
+        raise PermissionDenied("TradeThesis Free is not configured with an active ₹0 monthly price.")
+    if plan.prices.filter(is_active=True).exclude(price_cents=0).exists():
+        raise PermissionDenied("TradeThesis Free has non-zero active pricing.")
+    if plan.geo_prices.filter(is_active=True).exclude(price_cents=0).exists():
+        raise PermissionDenied("TradeThesis Free has non-zero regional pricing.")
+
+    now = timezone.now()
+    active = Subscription.objects.select_for_update().filter(
+        user=user,
+        status=Subscription.Status.ACTIVE,
+        is_active=True,
+        started_at__lte=now,
+    ).filter(Q(expires_at__isnull=True) | Q(expires_at__gt=now))
+    existing = active.filter(plan=plan).first()
+    if existing:
+        return existing
+
+    # Never cancel or downgrade an unrelated plan as a side effect of joining this funnel.
+    conflict = active.filter(product_id=plan.product_id).exclude(plan=plan).first()
+    if conflict:
+        raise PermissionDenied(
+            "An active subscription already exists for this product. Manage that subscription before changing plans."
+        )
+
+    pricing_country = get_pricing_country(request) if request is not None else None
+    pricing_region = get_region_for_country(pricing_country) if pricing_country else None
+    subscription = Subscription.objects.create(
+        user=user,
+        plan=plan,
+        product=plan.product,
+        plan_price=monthly,
+        base_price_cents=0,
+        discount_cents=0,
+        price_cents=0,
+        price_currency=monthly.currency,
+        status=Subscription.Status.ACTIVE,
+        is_active=True,
+        started_at=now,
+        expires_at=None,
+        is_trial=False,
+        pricing_country=pricing_country,
+        pricing_region=pricing_region,
+    )
+    SubscriptionHistory.objects.create(
+        subscription=subscription,
+        user=user,
+        event_type=SubscriptionHistory.EventType.ACTIVATED,
+        new_plan_id=plan.pk,
+        new_status=Subscription.Status.ACTIVE,
+        notes="Joined TradeThesis Free; no payment was collected.",
+        metadata={"free_membership": True, "payment_collected": False},
+    )
+    record_event(
+        "subscription.activated",
+        dedupe_key=f"subscription.activated:{subscription.pk}",
+        user_id=user.pk,
+        object_ref=f"subscription:{subscription.pk}",
+        payload={
+            "plan_id": str(plan.pk),
+            "product_slug": FREE_MEMBERSHIP_PRODUCT_SLUG,
+            "free_membership": True,
+            "payment_collected": False,
+        },
+    )
+    return subscription
+
 
 def purchase_plan(user, plan, request=None):
     """Create a subscription for the user (handles both regular and trial plans)."""

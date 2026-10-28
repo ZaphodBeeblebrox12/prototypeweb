@@ -5,7 +5,7 @@ Trials ONLY show if a GeoPlanPrice exists for the user's specific country/region
 import logging
 
 from django.utils import timezone
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
@@ -14,6 +14,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 
 from .models import (
+    FREE_MEMBERSHIP_PRODUCT_SLUG,
     Plan, Subscription, GiftSubscription, UpgradeHistory,
     PlanPrice, GeoPlanPrice, SubscriptionHistory, UserTrialUsage
 )
@@ -27,6 +28,7 @@ from .services import (
     get_pricing_country,
     get_region_for_country,
     purchase_plan,
+    join_free_membership,
     has_user_used_trial,
     format_price,
     get_geo_price_for_trial,
@@ -39,7 +41,17 @@ logger = logging.getLogger(__name__)
 def plan_list(request):
     """List all active plans with standard pricing."""
     plans = Plan.objects.filter(is_active=True, is_hidden=False).order_by("display_order")
-    serializer = PlanSerializer(plans, many=True)
+    visible_plans = []
+    for plan in plans:
+        if (
+            plan.tier == Plan.Tier.FREE
+            and plan.product_id
+            and plan.product.slug == FREE_MEMBERSHIP_PRODUCT_SLUG
+            and not PlanSerializer(plan).data.get("is_free")
+        ):
+            continue
+        visible_plans.append(plan)
+    serializer = PlanSerializer(visible_plans, many=True)
     return Response({"plans": serializer.data})
 
 
@@ -57,6 +69,14 @@ def plan_list_geo(request):
     data = []
 
     for plan in plans:
+        if (
+            plan.tier == Plan.Tier.FREE
+            and plan.product_id
+            and plan.product.slug == FREE_MEMBERSHIP_PRODUCT_SLUG
+            and not PlanSerializer(plan).data.get("is_free")
+        ):
+            continue
+
         # === TRIAL PLAN LOGIC (Region-Locked) ===
         if plan.is_trial:
             geo_price = get_geo_price_for_trial(plan, country)
@@ -88,11 +108,18 @@ def plan_list_geo(request):
             interval = request.GET.get("interval", "monthly")
             if interval not in [c[0] for c in PlanPrice.Interval.choices]:
                 interval = "monthly"
+            if (
+                plan.tier == Plan.Tier.FREE
+                and plan.product_id
+                and plan.product.slug == FREE_MEMBERSHIP_PRODUCT_SLUG
+            ):
+                interval = PlanPrice.Interval.MONTHLY
             price_obj = resolve_plan_price(plan, interval, request)
             plan_data["price_cents"] = price_obj.price_cents
             plan_data["currency"] = price_obj.currency
             plan_data["price_display"] = format_price(price_obj.price_cents, price_obj.currency)
             plan_data["geo_pricing"] = isinstance(price_obj, GeoPlanPrice)
+            plan_data["is_free"] = bool(plan_data.get("is_free")) and price_obj.price_cents == 0
         except PlanPrice.DoesNotExist:
             logger.warning(f"No pricing found for plan {plan.name}, skipping")
             continue
@@ -124,6 +151,39 @@ def plan_detail_geo(request, plan_id):
         )
 
     country = get_pricing_country(request)
+
+    if (
+        plan.tier == Plan.Tier.FREE
+        and plan.product_id
+        and plan.product.slug == FREE_MEMBERSHIP_PRODUCT_SLUG
+    ):
+        plan_data = PlanSerializer(plan).data
+        if not plan_data.get("is_free"):
+            return Response(
+                {"error": "TradeThesis Free must have active zero-priced membership pricing."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        price_obj = PlanPrice.objects.filter(
+            plan=plan,
+            interval=PlanPrice.Interval.MONTHLY,
+            is_active=True,
+            price_cents=0,
+        ).first()
+        if price_obj is None:
+            return Response(
+                {"error": "TradeThesis Free has no active ₹0 monthly price."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        plan_data.update({
+            "is_trial": False,
+            "is_free": True,
+            "already_used": False,
+            "price_cents": 0,
+            "currency": price_obj.currency,
+            "price_display": format_price(0, price_obj.currency),
+            "geo_pricing": False,
+        })
+        return Response({"plan": plan_data, "user_country": country})
 
     # === TRIAL REGION CHECK ===
     if plan.is_trial:
@@ -222,6 +282,24 @@ def purchase_plan_view(request):
             {"error": "Plan not found"},
             status=status.HTTP_404_NOT_FOUND
         )
+
+    # TradeThesis Free joins immediately and never enters checkout.
+    if (
+        plan.tier == Plan.Tier.FREE
+        and plan.product_id
+        and plan.product.slug == FREE_MEMBERSHIP_PRODUCT_SLUG
+    ):
+        try:
+            subscription = join_free_membership(request.user, plan, request)
+            serializer = SubscriptionSerializer(subscription)
+            return Response({
+                "subscription": serializer.data,
+                "is_free": True,
+                "requires_payment": False,
+                "message": "You joined TradeThesis Free. No payment was collected.",
+            })
+        except (PermissionDenied, ValidationError) as exc:
+            return Response({"error": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
 
     # === REGION CHECK FOR TRIALS ===
     if plan.is_trial:

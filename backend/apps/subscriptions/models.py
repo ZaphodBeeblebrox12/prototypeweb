@@ -13,6 +13,10 @@ from apps.accounts.models import User
 from .sanitize import clean_html
 
 
+FREE_MEMBERSHIP_PRODUCT_SLUG = "tradethesis-free-membership"
+FREE_MEMBERSHIP_PLAN_NAME = "TradeThesis Free"
+
+
 class Product(models.Model):
     """A sellable product/service line.
 
