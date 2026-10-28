@@ -36,6 +36,7 @@ from .regional_content import (
     regional_block_asset_ids,
     regional_block_values,
 )
+from .services import sync_free_membership_course_access
 
 User = get_user_model()
 _LESSON_HEADING = re.compile(
@@ -724,6 +725,12 @@ def publish_course_import(record, *, user):
                 )
         if course is None:
             course = Course.objects.filter(slug=record.course_slug).first()
+        access_type = course_data.get(
+            "access_type",
+            course.access_type if course is not None else Course.AccessType.PAID,
+        )
+        if access_type not in Course.AccessType.values:
+            raise ValidationError("Course import contains an invalid access type.")
         if course is None:
             course = Course.objects.create(
                 title=course_data["title"],
@@ -737,6 +744,7 @@ def publish_course_import(record, *, user):
                 catalogue_role=course_data.get(
                     "catalogue_role", Course.CatalogueRole.MINI
                 ),
+                access_type=access_type,
                 position=course_data.get("position", 0),
                 status=Course.Status.DRAFT,
             )
@@ -753,6 +761,7 @@ def publish_course_import(record, *, user):
         course.estimated_duration = course_data.get("estimated_duration", course.estimated_duration)
         course.learning_outcomes = course_data.get("learning_outcomes", course.learning_outcomes)
         course.catalogue_role = course_data.get("catalogue_role", course.catalogue_role)
+        course.access_type = access_type
         course.position = course_data.get("position", 0)
         course.save(
             update_fields=[
@@ -765,6 +774,7 @@ def publish_course_import(record, *, user):
                 "estimated_duration",
                 "learning_outcomes",
                 "catalogue_role",
+                "access_type",
                 "position",
                 "updated_at",
             ]
@@ -920,6 +930,7 @@ def publish_course_import(record, *, user):
 
         course.status = Course.Status.PUBLISHED
         course.save(update_fields=["status", "updated_at"])
+        sync_free_membership_course_access(course)
         record.target_course = course
         record.status = CourseImport.Status.PUBLISHED
         record.reviewed_by = user

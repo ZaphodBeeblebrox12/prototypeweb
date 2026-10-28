@@ -16,11 +16,11 @@
       {% for item in course_cards %}
         <div class="col-12 col-md-6">
           <article class="card h-100"><div class="card-body">
-            <p class="text-uppercase small text-muted mb-2">{% if item.entitlement %}Enrolled{% else %}Course overview{% endif %}</p>
+            <p class="text-uppercase small text-muted mb-2">{% if item.has_access %}Enrolled{% else %}Course overview{% endif %}</p>
             <h3 class="h5">{{ item.course.title }}</h3>
             <p class="text-muted">{{ item.course.summary }}</p>
-            {% if item.entitlement %}<p class="small mb-2">{{ item.completed_lessons }} of {{ item.total_lessons }} lessons complete · {{ item.progress_percent }}%</p><div class="progress mb-3" role="progressbar" aria-valuenow="{{ item.progress_percent }}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width:{{ item.progress_percent }}%"></div></div>{% endif %}
-            {% if item.resume_lesson %}<a class="btn btn-primary" href="{% url 'academy:lesson' item.course.slug item.resume_lesson.id %}">{% if item.entitlement %}Continue learning{% else %}Open preview lesson{% endif %} ↗</a>{% else %}<a class="btn btn-primary" href="{% url 'academy:course-detail' item.course.slug %}">{% if item.entitlement %}Review course{% else %}Explore course{% endif %} ↗</a>{% endif %}
+            {% if item.has_access %}<p class="small mb-2">{{ item.completed_lessons }} of {{ item.total_lessons }} lessons complete · {{ item.progress_percent }}%</p><div class="progress mb-3" role="progressbar" aria-valuenow="{{ item.progress_percent }}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width:{{ item.progress_percent }}%"></div></div>{% endif %}
+            {% if item.resume_lesson %}<a class="btn btn-primary" href="{% url 'academy:lesson' item.course.slug item.resume_lesson.id %}">{% if item.has_access %}Continue learning{% else %}Open preview lesson{% endif %} ↗</a>{% else %}<a class="btn btn-primary" href="{% url 'academy:course-detail' item.course.slug %}">{% if item.has_access %}Review course{% else %}Explore course{% endif %} ↗</a>{% endif %}
           </div></article>
         </div>
       {% endfor %}

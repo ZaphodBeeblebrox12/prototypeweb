@@ -14,6 +14,7 @@ from .models import (
     CourseOffer,
     Lesson,
     LessonProgress,
+    PlanCourseAccess,
 )
 
 
@@ -31,9 +32,167 @@ def get_active_entitlement(user, course, at=None):
     )
 
 
-def lesson_release_at(entitlement, lesson):
-    """Day 1 unlocks at grant time; day 2 unlocks 24 hours later."""
-    return entitlement.starts_at + timedelta(days=max(lesson.release_day - 1, 0))
+def get_free_membership_plan_for_course(course):
+    """Return the active TradeThesis Free mapping for a course, if configured."""
+    from apps.subscriptions.models import FREE_MEMBERSHIP_PRODUCT_SLUG, Plan, PlanPrice
+
+    mappings = (
+        PlanCourseAccess.objects.filter(
+            course=course,
+            is_active=True,
+            plan__product__slug=FREE_MEMBERSHIP_PRODUCT_SLUG,
+            plan__product__is_active=True,
+            plan__tier=Plan.Tier.FREE,
+            plan__is_trial=False,
+            plan__is_active=True,
+            plan__is_hidden=False,
+            plan__prices__interval=PlanPrice.Interval.MONTHLY,
+            plan__prices__is_active=True,
+            plan__prices__price_cents=0,
+        )
+        .select_related("plan", "plan__product")
+        .distinct()
+    )
+    for mapping in mappings:
+        if mapping.plan.prices.filter(is_active=True).exclude(price_cents=0).exists():
+            continue
+        if mapping.plan.geo_prices.filter(is_active=True).exclude(price_cents=0).exists():
+            continue
+        return mapping
+    return None
+
+
+def get_active_plan_subscription(user, course, at=None):
+    """Find the active subscription that unlocks a course through plan mapping."""
+    if not getattr(user, "is_authenticated", False):
+        return None
+    from apps.subscriptions.models import (
+        FREE_MEMBERSHIP_PRODUCT_SLUG,
+        Plan,
+        PlanPrice,
+        Subscription,
+    )
+
+    at = at or timezone.now()
+    return (
+        Subscription.objects.filter(
+            user=user,
+            is_active=True,
+            status=Subscription.Status.ACTIVE,
+            started_at__lte=at,
+            plan__academy_course_access__course=course,
+            plan__academy_course_access__is_active=True,
+            plan__academy_course_access__course__access_type__in=[
+                Course.AccessType.MEMBERSHIP,
+                Course.AccessType.MIXED,
+            ],
+            plan__product__slug=FREE_MEMBERSHIP_PRODUCT_SLUG,
+            plan__product__is_active=True,
+            plan__tier=Plan.Tier.FREE,
+            plan__is_trial=False,
+            plan__prices__interval=PlanPrice.Interval.MONTHLY,
+            plan__prices__is_active=True,
+            plan__prices__price_cents=0,
+            plan__is_active=True,
+            plan__is_hidden=False,
+        )
+        .filter(Q(expires_at__isnull=True) | Q(expires_at__gt=at))
+        .select_related("plan")
+        .order_by("-started_at")
+        .first()
+    )
+
+
+def has_active_plan_access(user, course, at=None):
+    return get_active_plan_subscription(user, course, at) is not None
+
+
+def sync_free_membership_course_access(course):
+    """Synchronize the dedicated free membership mapping at course publication."""
+    from apps.subscriptions.models import FREE_MEMBERSHIP_PRODUCT_SLUG
+    from apps.subscriptions.services import ensure_free_membership_plan
+
+    if course.access_type in (Course.AccessType.MEMBERSHIP, Course.AccessType.MIXED):
+        plan = ensure_free_membership_plan()
+        PlanCourseAccess.objects.update_or_create(
+            plan=plan,
+            course=course,
+            defaults={"is_active": True},
+        )
+    else:
+        PlanCourseAccess.objects.filter(
+            course=course,
+            plan__product__slug=FREE_MEMBERSHIP_PRODUCT_SLUG,
+        ).update(is_active=False)
+
+
+def enrol_in_free_course(*, user, course):
+    """Create permanent, auditable complimentary access for a course marked Free."""
+    if not getattr(user, "is_authenticated", False) or not getattr(user, "is_active", False):
+        raise PermissionDenied("Sign in to enrol in this free course.")
+    if course.status != Course.Status.PUBLISHED or course.access_type != Course.AccessType.FREE:
+        raise PermissionDenied("This course is not available for free enrolment.")
+
+    now = timezone.now()
+    with transaction.atomic():
+        entitlement, created = CourseEntitlement.objects.get_or_create(
+            user=user,
+            course=course,
+            defaults={
+                "source": CourseEntitlement.Source.COMPLIMENTARY,
+                "status": CourseEntitlement.Status.ACTIVE,
+                "starts_at": now,
+                "expires_at": None,
+            },
+        )
+        if created:
+            event_type = CourseEntitlementEvent.EventType.GRANTED
+        else:
+            entitlement = CourseEntitlement.objects.select_for_update().get(pk=entitlement.pk)
+            if entitlement.has_access_at(now):
+                return entitlement
+            event_type = (
+                CourseEntitlementEvent.EventType.REINSTATED
+                if entitlement.status == CourseEntitlement.Status.REVOKED
+                else CourseEntitlementEvent.EventType.GRANTED
+            )
+            entitlement.offer = None
+            entitlement.payment_intent = None
+            entitlement.source = CourseEntitlement.Source.COMPLIMENTARY
+            entitlement.status = CourseEntitlement.Status.ACTIVE
+            entitlement.starts_at = now
+            entitlement.expires_at = None
+            entitlement.revoked_at = None
+            entitlement.revocation_reason = ""
+            entitlement.granted_by = None
+            entitlement.save(
+                update_fields=[
+                    "offer", "payment_intent", "source", "status", "starts_at",
+                    "expires_at", "revoked_at", "revocation_reason", "granted_by", "updated_at",
+                ]
+            )
+        CourseEntitlementEvent.objects.create(
+            entitlement=entitlement,
+            actor=user,
+            event_type=event_type,
+            reason="Learner enrolled in a free Academy course.",
+            details={
+                "source": CourseEntitlement.Source.COMPLIMENTARY,
+                "course_id": str(course.pk),
+                "course_slug": course.slug,
+            },
+        )
+        return entitlement
+
+
+def lesson_release_at(access_record, lesson):
+    """Return a lesson's unlock time for either a course entitlement or subscription."""
+    started_at = getattr(access_record, "starts_at", None) or getattr(
+        access_record, "started_at", None
+    )
+    if started_at is None:
+        return timezone.now()
+    return started_at + timedelta(days=max(int(lesson.release_day or 1) - 1, 0))
 
 
 def can_access_lesson(user, lesson, at=None):
@@ -50,7 +209,12 @@ def can_access_lesson(user, lesson, at=None):
     if lesson.is_preview and course.status == Course.Status.PUBLISHED:
         return True
     entitlement = get_active_entitlement(user, course, at)
-    return bool(entitlement and lesson_release_at(entitlement, lesson) <= at)
+    if entitlement and lesson_release_at(entitlement, lesson) <= at:
+        return True
+    if course.access_type not in (Course.AccessType.MEMBERSHIP, Course.AccessType.MIXED):
+        return False
+    subscription = get_active_plan_subscription(user, course, at)
+    return bool(subscription and lesson_release_at(subscription, lesson) <= at)
 
 
 def choose_resume_lesson(user, lessons, progress_by_lesson, at=None):

@@ -46,6 +46,7 @@ class CourseBuilderApiTests(TestCase):
                 "level": "Intermediate",
                 "duration": "Self-paced",
                 "price": "",
+                "accessType": "paid",
                 "status": "draft",
                 "outcomes": ["Describe evidence before interpreting it."],
                 "modules": [
@@ -120,6 +121,10 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "Reflection & reasoning")
         self.assertContains(response, "Require course-owned images before publishing")
         self.assertContains(response, "Courses page placement")
+        self.assertContains(response, 'id="courseAccessType"')
+        self.assertContains(response, 'value="free"')
+        self.assertContains(response, 'value="membership"')
+        self.assertContains(response, 'value="mixed"')
         self.assertContains(response, 'data-field="catalogueRole"')
         self.assertContains(response, "Not listed on the Courses page")
         self.assertContains(response, 'data-field="catalogueHook"')
@@ -164,6 +169,27 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "data-regional-variant")
         self.assertContains(response, "lessonContentAudienceSelect")
         self.assertContains(response, "Start a custom version")
+
+    def test_course_access_type_is_saved_and_reloaded_with_builder_draft(self):
+        payload = self.draft_payload("builder-membership-course")
+        payload["course"]["accessType"] = "membership"
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        record = CourseImport.objects.get(pk=response.json()["record_id"])
+        self.assertEqual(record.payload["course"]["access_type"], "membership")
+        self.assertEqual(record.payload["builder_state"]["accessType"], "membership")
+
+        refreshed = self.client.get(reverse("staff_course_builder_api"))
+        self.assertEqual(refreshed.status_code, 200, refreshed.content)
+        reloaded = next(
+            draft for draft in refreshed.json()["drafts"]
+            if draft["serverDraftId"] == str(record.pk)
+        )
+        self.assertEqual(reloaded["accessType"], "membership")
 
     def test_rich_text_format_dropdown_uses_accessible_custom_menu(self):
         response = self.client.get(reverse("staff_course_builder_preview"))

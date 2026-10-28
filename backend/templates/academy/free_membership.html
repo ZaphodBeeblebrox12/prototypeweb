@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}TradeThesis Free · Free trading education{% endblock %}
+{% block content %}
+<main class="container py-5" style="max-width: 900px">
+  <section class="border rounded-4 p-4 p-md-5 mb-4">
+    <p class="text-uppercase small fw-semibold text-muted mb-2">TradeThesis Academy</p>
+    <h1 class="display-5 mb-3">TradeThesis Free</h1>
+    <p class="lead">Start learning without paying for a course or signing up for a paid subscription.</p>
+    <div class="d-flex align-items-baseline flex-wrap gap-2 mb-3">
+      <span class="display-4 fw-semibold">₹0</span>
+      <span class="text-muted">always free · no card required</span>
+    </div>
+    <p class="mb-4">Create an account, join the free membership, and work through selected courses at your own pace. Paid courses remain optional.</p>
+    {% if plan %}
+      {% if user.is_authenticated %}
+        <form action="{% url 'academy:join-free-membership-landing' %}" method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-lg">Join TradeThesis Free</button>
+        </form>
+      {% else %}
+        <a class="btn btn-primary btn-lg" href="{{ signup_url }}">Create a free account</a>
+        <p class="small text-muted mt-3 mb-0">Already have an account? <a href="{% url 'account_login' %}?next={{ request.path|urlencode }}">Sign in</a>, then join here.</p>
+      {% endif %}
+    {% else %}
+      <p class="mb-0">The free membership is being prepared. Check back soon for the first included course.</p>
+    {% endif %}
+  </section>
+
+  <section>
+    <h2 class="h3 mb-3">What is included</h2>
+    {% if courses %}
+      <div class="row g-3">
+        {% for course in courses %}
+          <div class="col-12 col-md-6">
+            <article class="card h-100">
+              <div class="card-body">
+                <p class="small text-uppercase text-muted mb-2">Included with free membership</p>
+                <h3 class="h5">{{ course.title }}</h3>
+                {% if course.summary %}<p class="text-muted">{{ course.summary }}</p>{% endif %}
+                <a href="{% url 'academy:course-detail' course.slug %}" class="btn btn-outline-primary">View course</a>
+              </div>
+            </article>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">Courses included in the membership will appear here after they are published.</p>
+    {% endif %}
+    <p class="small text-muted mt-4">No payment is collected to join TradeThesis Free. Any optional paid purchase uses the existing secure checkout.</p>
+  </section>
+</main>
+{% endblock %}
