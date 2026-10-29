@@ -122,8 +122,8 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         if user.email and not self._is_email_verified(user):
             return reverse("account_email_verification_sent")
 
-        # DefaultAccountAdapter validates and honours the requested next= URL,
-        # falling back to LOGIN_REDIRECT_URL when no safe destination is supplied.
+        # Allauth's login view validates next= before calling this fallback.
+        # Preserve the configured default for ordinary sign-ins.
         return super().get_login_redirect_url(request)
 
     def get_email_confirmation_redirect_url(self, request):
