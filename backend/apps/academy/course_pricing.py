@@ -160,8 +160,9 @@ def pricing_fields_for_builder(course: Course) -> dict[str, Any]:
             lines.append(f"{row.country} {amount} {row.currency}")
         elif row.region:
             lines.append(f"region {row.region} {amount} {row.currency}")
+    first_override = overrides.first()
     amount_text = _format_major_units(base.price_cents) if base else ""
-    currency = base.currency if base else (overrides.first().currency if overrides else "INR")
+    currency = base.currency if base else (first_override.currency if first_override else "INR")
     price = format_price(base.price_cents, currency) if base else ""
     return {
         "priceAmount": amount_text,
@@ -201,7 +202,7 @@ def sync_course_purchase_offer(course: Course, pricing: dict[str, Any]) -> Cours
                 ).update(is_active=False)
         return offer
 
-    if offer and offer.plan_id:
+    if offer and offer.plan_id and offer.plan is not None:
         plan = offer.plan
     else:
         product_slug = f"course-{course.pk.hex[:32]}"
