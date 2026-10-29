@@ -15,6 +15,7 @@ from django.utils.text import slugify
 
 from apps.subscriptions.models import GeoPlanPrice, Plan, PlanPrice, Product
 from apps.subscriptions.services import COUNTRY_TO_REGION, format_price, resolve_plan_price
+
 from .models import Course, CourseOffer
 
 
