@@ -19,6 +19,7 @@ from apps.audit.models import AuditLog
 
 from .content_rendering import validate_markdown_source
 from .course_card_utils import course_card_publication_issue
+from .course_pricing import sync_course_purchase_offer
 from .models import (
     Course,
     CourseContentRevision,
@@ -931,6 +932,13 @@ def publish_course_import(record, *, user):
         course.status = Course.Status.PUBLISHED
         course.save(update_fields=["status", "updated_at"])
         sync_free_membership_course_access(course)
+        # Older imports predate Builder-managed pricing; leave their existing
+        # offers untouched until a Builder pricing payload is explicitly saved.
+        if "pricing" in course_data:
+            pricing_data = course_data.get("pricing")
+            if not isinstance(pricing_data, dict):
+                raise ValidationError("Course pricing must be an object.")
+            sync_course_purchase_offer(course, pricing_data)
         record.target_course = course
         record.status = CourseImport.Status.PUBLISHED
         record.reviewed_by = user
