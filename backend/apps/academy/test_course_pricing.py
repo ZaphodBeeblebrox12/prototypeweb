@@ -9,7 +9,7 @@ from apps.payments.models import PaymentIntent
 from apps.subscriptions.models import GeoPlanPrice, PlanPrice
 
 from .course_pricing import parse_course_pricing, sync_course_purchase_offer
-from .models import Course, CourseOffer
+from .models import Course
 
 User = get_user_model()
 
