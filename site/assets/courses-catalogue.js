@@ -334,25 +334,7 @@
     <div class="cc-outline" id="cc-outline">${course.modules.map((module, index) => `<section class="cc-outline-item ${index === 0 ? 'is-open' : ''}"><button class="cc-outline-toggle" type="button" aria-expanded="${index === 0 ? 'true' : 'false'}" aria-controls="cc-outline-preview-${escapeHTML(course.id)}-${index}"><span class="cc-outline-num">${String(index + 1).padStart(2, '0')}</span><span class="cc-outline-title">${escapeHTML(module.title)}</span><span class="cc-outline-count">${escapeHTML(module.count)}</span><span class="cc-outline-sign" aria-hidden="true">+</span></button><div class="cc-outline-preview" id="cc-outline-preview-${escapeHTML(course.id)}-${index}" ${index === 0 ? '' : 'hidden'}><p>${escapeHTML(module.preview)}</p><ul>${module.points.map(point => `<li>${escapeHTML(point)}</li>`).join('')}</ul></div></section>`).join('')}</div>
     <p class="cc-modal-fit"><b>Where it fits:</b> ${escapeHTML(course.complements)} This is designed as a standalone micro-course; community access is not included.</p>`;
     const hasAcademyDestination = course.status === 'published' && Boolean(course.academyUrl);
-    const mappedButUnavailable = Boolean(course.academySlug) && !hasAcademyDestination;
-    let actionMarkup;
-    let priceNote = 'Indicative price · preview only';
-    if (course.status === 'coming-soon') {
-      priceNote = 'No enrolment yet · launch details to follow';
-      actionMarkup = '<button class="button cc-modal-cta" type="button" disabled aria-disabled="true">Coming soon</button>';
-    } else if (course.status === 'in-development') {
-      priceNote = 'Development outline only · no enrolment yet';
-      actionMarkup = '<button class="button cc-modal-cta" type="button" disabled aria-disabled="true">Course in development</button>';
-    } else if (hasAcademyDestination) {
-      priceNote = 'Continue to Academy to enrol or access your course';
-      actionMarkup = `<a class="button cc-modal-cta" href="${escapeHTML(course.academyUrl)}">Continue to course <span aria-hidden="true">↗</span></a>`;
-    } else if (mappedButUnavailable) {
-      priceNote = 'Course access is not available yet';
-      actionMarkup = '<button class="button cc-modal-cta" type="button" disabled aria-disabled="true">Course unavailable</button>';
-    } else {
-      actionMarkup = `<button class="button cc-modal-cta" type="button" data-get-course="${escapeHTML(course.id)}">Preview only <span aria-hidden="true">↗</span></button>`;
-    }
-    modalFooter.innerHTML = `<div class="cc-modal-price-wrap"><span class="cc-modal-price">${escapeHTML(course.price)}</span><span class="cc-modal-price-note">${priceNote}</span></div>${actionMarkup}`;
+    modalFooter.innerHTML = `<div class="cc-modal-price-wrap"><span class="cc-modal-price">${escapeHTML(course.price)}</span><span class="cc-modal-price-note">${course.status === 'coming-soon' ? 'No enrolment yet · launch details to follow' : (course.status === 'in-development' ? 'Development outline only · no enrolment yet' : (hasAcademyDestination ? 'Continue to Academy to enrol or access your course' : 'Indicative price · preview only'))}</span></div>${course.status === 'coming-soon' ? '<button class="button cc-modal-cta" type="button" disabled aria-disabled="true">Coming soon</button>' : (course.status === 'in-development' ? '<button class="button cc-modal-cta" type="button" disabled aria-disabled="true">Course in development</button>' : (hasAcademyDestination ? `<a class="button cc-modal-cta" href="${escapeHTML(course.academyUrl)}">Continue to course <span aria-hidden="true">↗</span></a>` : `<button class="button cc-modal-cta" type="button" data-get-course="${escapeHTML(course.id)}">Preview only <span aria-hidden="true">↗</span></button>`))}`;
   }
 
   function openModal(course, opener) {
