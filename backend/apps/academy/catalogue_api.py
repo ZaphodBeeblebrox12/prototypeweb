@@ -14,7 +14,7 @@ from .catalogue_presentation import (
 )
 from .course_card_utils import is_course_card_recommendable
 from .course_pricing import resolved_course_offer_price
-from .models import Course, CourseImport, CourseOffer
+from .models import Course, CourseImport
 
 
 @require_GET
