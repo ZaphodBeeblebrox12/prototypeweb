@@ -123,6 +123,13 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         # falling back to LOGIN_REDIRECT_URL when no safe destination is supplied.
         return super().get_login_redirect_url(request)
 
+    def get_email_confirmation_redirect_url(self, request):
+        """Return the learner to their requested course after email verification."""
+        destination = self._safe_redirect_destination(request)
+        if destination:
+            return destination
+        return super().get_email_confirmation_redirect_url(request)
+
     def get_logout_redirect_url(self, request):
         return "/"
 
