@@ -26,6 +26,7 @@ from .content_rendering import (
     resolve_regional_lesson_content,
 )
 from .course_card_utils import course_topic_tags, is_course_card_recommendable
+from .course_pricing import resolved_course_offer_price
 from .models import (
     Course,
     CourseEntitlement,
@@ -445,6 +446,13 @@ def course_detail(request, course_slug):
     )
     if offer is not None and not offer.is_saleable:
         offer = None
+    offer_price_display = ""
+    if offer is not None:
+        resolved_price = resolved_course_offer_price(offer, request)
+        if resolved_price:
+            offer_price_display = resolved_price[0]
+        else:
+            offer = None
     visible_lesson_ids = Lesson.objects.filter(
         module__course=course,
         module__is_published=True,
@@ -471,6 +479,7 @@ def course_detail(request, course_slug):
             "can_enrol_free": can_enrol_free,
             "free_membership_plan": free_membership_plan,
             "offer": offer,
+            "offer_price_display": offer_price_display,
             "module_rows": module_rows,
             "completed_lessons": completed,
             "total_lessons": total,
