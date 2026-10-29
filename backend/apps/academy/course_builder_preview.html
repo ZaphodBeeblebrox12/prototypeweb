@@ -1585,7 +1585,7 @@ body.builder-dialog-open { overflow:hidden; }
   function geoPriceOverridesEditorMarkup(course) {
     const parsed = parseGeoPriceOverridesForBuilder(course.geoPriceOverrides);
     const selectedKey = parsed.entries[0]?.key || 'country:IN';
-    return '<div class="geo-price-manager"><label for="courseGeoMarket">Country or region</label>' +
+    return '<div class="geo-price-manager"><div class="geo-price-manager-heading"><strong>Country and regional prices (optional)</strong><p class="help">Add a different one-time price for a specific country or region.</p></div><label for="courseGeoMarket">Country or region</label>' +
       '<select class="select" id="courseGeoMarket" aria-label="Select country or region to configure a specific course price">' + geoPriceMarketOptionsMarkup(selectedKey) + '</select>' +
       '<span class="help">Choose a country or region to open its price fields. Switching markets keeps prices already entered for other markets.</span>' +
       '<div id="courseGeoPriceFields">' + geoPriceEditorFieldsMarkup(course, selectedKey) + '</div>' +
