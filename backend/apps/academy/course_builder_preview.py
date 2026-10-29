@@ -26,7 +26,7 @@ _SUPPORT_RESISTANCE_CHART_DIR = (
     / "chart_assets"
     / "charts"
 )
-_SAFE_CHART_ASSET_ID = re.compile(r"[A-Za-z0-9-]{1,100}\\Z")
+_SAFE_CHART_ASSET_ID = re.compile(r"[A-Za-z0-9-]{1,100}\Z")
 
 
 def _support_resistance_import_payload():
