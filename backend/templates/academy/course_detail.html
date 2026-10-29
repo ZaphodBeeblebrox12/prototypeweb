@@ -34,7 +34,7 @@
 
       <div class="tt-overview-actions">
         {% if first_accessible_lesson %}
-          <a class="tt-overview-button" href="{% url 'academy:lesson' course.slug first_accessible_lesson.id %}">{% if entitlement %}Continue learning{% else %}Explore a preview lesson{% endif %} <span aria-hidden="true">↗</span></a>
+          <a class="tt-overview-button" href="{% url 'academy:lesson' course.slug first_accessible_lesson.id %}">{% if has_course_access %}Continue learning{% else %}Explore a preview lesson{% endif %} <span aria-hidden="true">↗</span></a>
         {% else %}
           <a class="tt-overview-button" href="#tt-course-curriculum">Explore curriculum <span aria-hidden="true">↓</span></a>
         {% endif %}
@@ -42,7 +42,7 @@
       </div>
       <p class="tt-overview-hero-note">Work through the material at your own pace. Lesson availability follows your course access and release schedule.</p>
 
-      {% if entitlement %}
+      {% if has_course_access %}
       <div class="tt-overview-progress" aria-label="Course progress">
         <div class="tt-overview-progress-row"><span>YOUR COURSE PROGRESS</span><strong>{{ completed_lessons }} of {{ total_lessons }} lessons · {{ progress_percent }}%</strong></div>
         <div class="tt-overview-progress-track" role="progressbar" aria-label="Course progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ progress_percent }}"><span style="width:{{ progress_percent }}%"></span></div>
@@ -65,16 +65,37 @@
     </div>
   </section>
 
-  {% if offer and not entitlement %}
+  {% if can_enrol_free %}
+  <section class="tt-overview-access" aria-labelledby="tt-free-course-access-title">
+    <div><h2 id="tt-free-course-access-title">Start this course for free</h2><p>Enrol with your account and keep permanent access. No payment or subscription is required.</p></div>
+    <form action="{% url 'academy:enrol-free-course' course.slug %}" method="post">
+      {% csrf_token %}<button type="submit" class="tt-overview-button">Enrol for free ↗</button>
+    </form>
+  </section>
+  {% endif %}
+
+  {% if free_membership_plan and not has_course_access %}
+  <section class="tt-overview-access" aria-labelledby="tt-free-membership-access-title">
+    <div><h2 id="tt-free-membership-access-title">Included in TradeThesis Free</h2><p>Join the free membership to unlock this course. No purchase or payment details are required.</p></div>
+    <form action="{% url 'academy:join-free-membership' course.slug %}" method="post">
+      {% csrf_token %}<button type="submit" class="tt-overview-button">Join free membership ↗</button>
+    </form>
+  </section>
+  {% endif %}
+
+  {% if offer and not has_course_access %}
+  {% if course.access_type == 'paid' or course.access_type == 'mixed' %}
   <section class="tt-overview-access" aria-labelledby="tt-course-access-title">
-    <div><h2 id="tt-course-access-title">Get the full course</h2><p>Use secure checkout to enrol. Course access is granted only after the payment provider confirms payment.</p></div>
+    <div><h2 id="tt-course-access-title">Get the full course</h2><p>Use secure checkout to enrol. Course access is granted only after the payment provider confirms payment.</p>{% if offer_price_display %}<p class="tt-overview-hero-note"><strong>{{ offer_price_display }}</strong> one-time purchase.</p>{% endif %}</div>
     <form action="{% url 'payment-start' %}" method="post" data-academy-checkout>
       {% csrf_token %}<input type="hidden" name="plan_id" value="{{ offer.plan_id }}"><input type="hidden" name="interval" value="one_time">
       <button type="submit" class="tt-overview-button">Continue to secure checkout ↗</button>
       <p class="tt-overview-checkout-error" data-checkout-error role="status"></p>
     </form>
   </section>
-  {% elif not entitlement %}
+  {% endif %}
+  {% endif %}
+  {% if not has_course_access and not can_enrol_free and not free_membership_plan and course.access_type != 'free' %}
   <aside class="tt-overview-access-note" role="status">
     <span class="tt-overview-note-mark" aria-hidden="true">i</span>
     <div><strong>Enrolment is not available right now</strong><p>This course has no active checkout offer at the moment. You can still review the curriculum and open any lessons marked as previews.</p></div>

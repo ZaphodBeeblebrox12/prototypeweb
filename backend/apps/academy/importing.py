@@ -19,6 +19,7 @@ from apps.audit.models import AuditLog
 
 from .content_rendering import validate_markdown_source
 from .course_card_utils import course_card_publication_issue
+from .course_pricing import sync_course_purchase_offer
 from .models import (
     Course,
     CourseContentRevision,
@@ -36,6 +37,7 @@ from .regional_content import (
     regional_block_asset_ids,
     regional_block_values,
 )
+from .services import sync_free_membership_course_access
 
 User = get_user_model()
 _LESSON_HEADING = re.compile(
@@ -724,6 +726,12 @@ def publish_course_import(record, *, user):
                 )
         if course is None:
             course = Course.objects.filter(slug=record.course_slug).first()
+        access_type = course_data.get(
+            "access_type",
+            course.access_type if course is not None else Course.AccessType.PAID,
+        )
+        if access_type not in Course.AccessType.values:
+            raise ValidationError("Course import contains an invalid access type.")
         if course is None:
             course = Course.objects.create(
                 title=course_data["title"],
@@ -737,6 +745,7 @@ def publish_course_import(record, *, user):
                 catalogue_role=course_data.get(
                     "catalogue_role", Course.CatalogueRole.MINI
                 ),
+                access_type=access_type,
                 position=course_data.get("position", 0),
                 status=Course.Status.DRAFT,
             )
@@ -753,6 +762,7 @@ def publish_course_import(record, *, user):
         course.estimated_duration = course_data.get("estimated_duration", course.estimated_duration)
         course.learning_outcomes = course_data.get("learning_outcomes", course.learning_outcomes)
         course.catalogue_role = course_data.get("catalogue_role", course.catalogue_role)
+        course.access_type = access_type
         course.position = course_data.get("position", 0)
         course.save(
             update_fields=[
@@ -765,6 +775,7 @@ def publish_course_import(record, *, user):
                 "estimated_duration",
                 "learning_outcomes",
                 "catalogue_role",
+                "access_type",
                 "position",
                 "updated_at",
             ]
@@ -920,6 +931,14 @@ def publish_course_import(record, *, user):
 
         course.status = Course.Status.PUBLISHED
         course.save(update_fields=["status", "updated_at"])
+        sync_free_membership_course_access(course)
+        # Older imports predate Builder-managed pricing; leave their existing
+        # offers untouched until a Builder pricing payload is explicitly saved.
+        if "pricing" in course_data:
+            pricing_data = course_data.get("pricing")
+            if not isinstance(pricing_data, dict):
+                raise ValidationError("Course pricing must be an object.")
+            sync_course_purchase_offer(course, pricing_data)
         record.target_course = course
         record.status = CourseImport.Status.PUBLISHED
         record.reviewed_by = user

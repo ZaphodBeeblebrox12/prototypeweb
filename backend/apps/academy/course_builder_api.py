@@ -36,6 +36,7 @@ from .catalogue_presentation import (
 )
 from .course_builder_lifecycle import mark_builder_draft_deleted
 from .course_card_utils import is_course_card_recommendable
+from .course_pricing import parse_course_pricing, pricing_fields_for_builder
 from .importing import validate_import_for_publish
 from .models import (
     Course,
@@ -347,6 +348,10 @@ def _clean_image_payload(course_state, course_slug):
 
 def _build_import_payload(course_state, course_slug):
     snapshot, image_sources, asset_specs = _clean_image_payload(course_state, course_slug)
+    access_type = str(snapshot.get("accessType") or Course.AccessType.PAID).strip()
+    if access_type not in Course.AccessType.values:
+        raise ValidationError("Choose a valid course access model.")
+    pricing = parse_course_pricing(snapshot)
     modules = []
     seen_module_slugs = set()
     for module_index, module in enumerate(snapshot.get("modules") or [], start=1):
@@ -897,6 +902,8 @@ def _build_import_payload(course_state, course_slug):
             "category": str(snapshot.get("category") or "").strip()[:80],
             "level": str(snapshot.get("level") or "").strip()[:40],
             "estimated_duration": str(snapshot.get("duration") or "").strip()[:80],
+            "access_type": access_type,
+            "pricing": pricing,
             "learning_outcomes": [
                 str(value).strip()[:500]
                 for value in (snapshot.get("outcomes") or [])
@@ -1415,8 +1422,8 @@ def _builder_state_from_published_course(course):
         "category": course.category or "Technical analysis",
         "level": course.level or "Intermediate",
         "duration": course.estimated_duration or "Self-paced",
-        "price": "",
-        "priceNote": "Pricing and checkout are configured separately.",
+        **pricing_fields_for_builder(course),
+        "accessType": course.access_type,
         "status": "draft-update",
         "comingSoon": False,
         "requiresOwnedAssets": requires_owned_assets,

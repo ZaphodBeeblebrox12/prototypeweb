@@ -374,10 +374,16 @@
       link.href = course.academyUrl;
       link.textContent = 'Open in Academy ↗';
       modalFooter.replaceChildren(link);
+      const priceWrap = document.createElement('div');
+      priceWrap.className = 'cc-modal-price-wrap';
+      const price = document.createElement('span');
+      price.className = 'cc-modal-price';
+      price.textContent = course.price || '';
       const note = document.createElement('span');
       note.className = 'cc-modal-price-note';
-      note.textContent = 'Published in the Academy · access and pricing configured separately';
-      modalFooter.prepend(note);
+      note.textContent = course.priceNote || 'Open the course details to confirm its access terms.';
+      priceWrap.append(price, note);
+      modalFooter.replaceChildren(priceWrap, link);
     }
   };
   const academyBaseUrl = String(window.TRADETHESIS_ACADEMY_CONFIG?.baseUrl || "").trim().replace(/\/+$/, "");
@@ -436,7 +442,8 @@
             (incoming.status === "coming-soon"
               ? "This course is being prepared. Full details will be shared closer to launch."
               : "Explore this published course in the TradeThesis Academy."),
-          price: incoming.price || (prior && prior.price) || "",
+          price: incoming.priceConfigured ? (incoming.price || "") : (prior && prior.price) || incoming.price || "",
+          priceNote: incoming.priceConfigured ? (incoming.priceNote || "") : incoming.priceNote || (prior && prior.priceNote) || "",
           priority: role === "flagship" ? 1 : role === "supporting" ? 2 : 3,
           order: catalogueOrder
         };

@@ -1,6 +1,7 @@
 """Minimal payment views for simple payment flow."""
 import logging
 from django.conf import settings
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
@@ -13,9 +14,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from apps.subscriptions.models import Plan, PlanPrice, Subscription
+from apps.subscriptions.models import (
+    FREE_MEMBERSHIP_PRODUCT_SLUG, Plan, PlanPrice, Subscription
+)
 from apps.subscriptions.services import (
     resolve_plan_price, get_pricing_country, split_resolved_price, format_price,
+    join_free_membership,
 )
 
 from . import providers
@@ -109,9 +113,30 @@ def payment_start(request):
 
     # Course purchases use the common PaymentIntent/evidence ledger but have
     # one-time pricing and grant a course entitlement instead of a subscription.
-    from apps.academy.models import CourseOffer
+    from apps.academy.models import Course, CourseOffer
     course_offer = (CourseOffer.objects.filter(plan=plan)
                     .select_related("course").first())
+
+    # A free membership is enrolment, not a payment. Intercept before price
+    # breakdowns, consent evidence, or PaymentIntent creation.
+    if (
+        plan.tier == Plan.Tier.FREE
+        and plan.product_id
+        and plan.product.slug == FREE_MEMBERSHIP_PRODUCT_SLUG
+    ):
+        try:
+            subscription = join_free_membership(request.user, plan, request)
+        except (PermissionDenied, ValidationError) as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+        if request.method == "GET":
+            return redirect(reverse("academy:home"))
+        return Response({
+            "is_free": True,
+            "requires_payment": False,
+            "subscription_id": str(subscription.pk),
+            "message": "You joined TradeThesis Free. No payment was collected.",
+        })
+
     if plan.is_trial:
         return Response(
             {"detail": (
@@ -122,14 +147,27 @@ def payment_start(request):
         )
     if course_offer is not None:
         if not course_offer.is_saleable:
-            return Response({"detail": "This course offer is not available for purchase."},
-                            status=status.HTTP_404_NOT_FOUND)
-        from apps.academy.services import get_active_entitlement
-        if get_active_entitlement(request.user, course_offer.course):
-            return Response({
-                "detail": "You already have access to this course.",
-                "course_slug": course_offer.course.slug,
-            }, status=status.HTTP_409_CONFLICT)
+            return Response(
+                {"detail": "This course offer is not available for purchase."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        if course_offer.course.access_type not in (Course.AccessType.PAID, Course.AccessType.MIXED):
+            return Response(
+                {"detail": "This course is not available for individual purchase."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        from apps.academy.services import get_active_entitlement, has_active_plan_access
+        if (
+            get_active_entitlement(request.user, course_offer.course)
+            or has_active_plan_access(request.user, course_offer.course)
+        ):
+            return Response(
+                {
+                    "detail": "You already have access to this course.",
+                    "course_slug": course_offer.course.slug,
+                },
+                status=status.HTTP_409_CONFLICT,
+            )
         interval = "one_time"
     elif plan.is_hidden:
         # Hidden plans are not publicly purchasable through subscription checkout.

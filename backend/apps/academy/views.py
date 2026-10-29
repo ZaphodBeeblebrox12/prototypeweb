@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Prefetch, Q
 from django.http import FileResponse, JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
@@ -26,6 +26,7 @@ from .content_rendering import (
     resolve_regional_lesson_content,
 )
 from .course_card_utils import course_topic_tags, is_course_card_recommendable
+from .course_pricing import resolved_course_offer_price
 from .models import (
     Course,
     CourseEntitlement,
@@ -296,6 +297,8 @@ def _active_entitlements(user, at=None):
 @login_required
 def academy_home(request):
     """Member landing page: purchased courses, progress, and available offers."""
+    from .services import has_active_plan_access
+
     entitlements = list(_active_entitlements(request.user).select_related("course"))
     entitlements_by_course = {ent.course_id: ent for ent in entitlements}
     courses_by_id = {
@@ -324,6 +327,7 @@ def academy_home(request):
             {
                 "course": course,
                 "entitlement": entitlement,
+                "has_access": bool(entitlement or has_active_plan_access(request.user, course)),
                 "total_lessons": total,
                 "completed_lessons": done,
                 "progress_percent": round(done * 100 / total) if total else 0,
@@ -335,12 +339,22 @@ def academy_home(request):
         CourseOffer.objects.filter(
             is_active=True,
             course__status=Course.Status.PUBLISHED,
+            course__access_type__in=[Course.AccessType.PAID, Course.AccessType.MIXED],
             plan__is_active=True,
         )
         .select_related("course", "plan")
         .order_by("position", "name")
     )
-    offers = [o for o in offers if o.is_saleable and o.course_id not in entitlements_by_course]
+    offers = [
+        offer
+        for offer in offers
+        if offer.is_saleable
+        and offer.course_id not in entitlements_by_course
+        and (
+            offer.course.access_type != Course.AccessType.MIXED
+            or not has_active_plan_access(request.user, offer.course)
+        )
+    ]
     return render(
         request,
         "academy/home.html",
@@ -353,9 +367,32 @@ def academy_home(request):
 
 @login_required
 def course_detail(request, course_slug):
+    from .services import get_active_plan_subscription, get_free_membership_plan_for_course
+
     course = get_object_or_404(Course, slug=course_slug)
     entitlement = get_active_entitlement(request.user, course)
-    if course.status != Course.Status.PUBLISHED and entitlement is None:
+    membership_subscription = (
+        get_active_plan_subscription(request.user, course)
+        if course.access_type in (Course.AccessType.MEMBERSHIP, Course.AccessType.MIXED)
+        else None
+    )
+    has_course_access = bool(entitlement or membership_subscription)
+    free_membership_mapping = (
+        get_free_membership_plan_for_course(course)
+        if course.access_type in (Course.AccessType.MEMBERSHIP, Course.AccessType.MIXED)
+        else None
+    )
+    free_membership_plan = free_membership_mapping.plan if free_membership_mapping else None
+    can_enrol_free = (
+        course.status == Course.Status.PUBLISHED
+        and course.access_type == Course.AccessType.FREE
+        and not has_course_access
+    )
+    if (
+        course.status != Course.Status.PUBLISHED
+        and entitlement is None
+        and membership_subscription is None
+    ):
         from django.http import Http404
 
         raise Http404
@@ -373,11 +410,12 @@ def course_detail(request, course_slug):
     }
     module_rows = []
     now = timezone.now()
+    access_record = entitlement or membership_subscription
     for module in modules:
         rows = []
         for lesson in module.lessons.all():
             allowed = can_access_lesson(request.user, lesson, now)
-            release_at = lesson_release_at(entitlement, lesson) if entitlement else None
+            release_at = lesson_release_at(access_record, lesson) if access_record else None
             rows.append(
                 {
                     "lesson": lesson,
@@ -400,6 +438,7 @@ def course_detail(request, course_slug):
         CourseOffer.objects.filter(
             course=course,
             is_active=True,
+            course__access_type__in=[Course.AccessType.PAID, Course.AccessType.MIXED],
             plan__is_active=True,
         )
         .select_related("plan", "course")
@@ -407,6 +446,13 @@ def course_detail(request, course_slug):
     )
     if offer is not None and not offer.is_saleable:
         offer = None
+    offer_price_display = ""
+    if offer is not None:
+        resolved_price = resolved_course_offer_price(offer, request)
+        if resolved_price:
+            offer_price_display = resolved_price[0]
+        else:
+            offer = None
     visible_lesson_ids = Lesson.objects.filter(
         module__course=course,
         module__is_published=True,
@@ -429,7 +475,11 @@ def course_detail(request, course_slug):
                 course.description, user=request.user
             ),
             "entitlement": entitlement,
+            "has_course_access": has_course_access,
+            "can_enrol_free": can_enrol_free,
+            "free_membership_plan": free_membership_plan,
             "offer": offer,
+            "offer_price_display": offer_price_display,
             "module_rows": module_rows,
             "completed_lessons": completed,
             "total_lessons": total,
@@ -442,6 +492,105 @@ def course_detail(request, course_slug):
             "progress_percent": round(completed * 100 / total) if total else 0,
         },
     )
+
+
+def _public_free_membership_plan():
+    """Return TradeThesis Free only when all active base and regional prices are zero."""
+    from apps.subscriptions.models import FREE_MEMBERSHIP_PRODUCT_SLUG, Plan, PlanPrice
+
+    candidates = (
+        Plan.objects.filter(
+            product__slug=FREE_MEMBERSHIP_PRODUCT_SLUG,
+            product__is_active=True,
+            tier=Plan.Tier.FREE,
+            is_trial=False,
+            is_active=True,
+            is_hidden=False,
+            academy_course_access__is_active=True,
+            academy_course_access__course__status=Course.Status.PUBLISHED,
+            academy_course_access__course__access_type__in=[
+                Course.AccessType.MEMBERSHIP,
+                Course.AccessType.MIXED,
+            ],
+            prices__interval=PlanPrice.Interval.MONTHLY,
+            prices__is_active=True,
+            prices__price_cents=0,
+        )
+        .select_related("product")
+        .distinct()
+        .order_by("display_order", "name")
+    )
+    for plan in candidates:
+        if plan.prices.filter(is_active=True).exclude(price_cents=0).exists():
+            continue
+        if plan.geo_prices.filter(is_active=True).exclude(price_cents=0).exists():
+            continue
+        return plan
+    return None
+
+
+@login_required
+@require_POST
+def enrol_free_course(request, course_slug):
+    """Enrol a signed-in learner in a published course explicitly marked Free."""
+    from .services import enrol_in_free_course
+
+    course = get_object_or_404(Course, slug=course_slug, status=Course.Status.PUBLISHED)
+    enrol_in_free_course(user=request.user, course=course)
+    return redirect("academy:course-detail", course_slug=course.slug)
+
+
+@login_required
+@require_POST
+def join_free_membership_for_course(request, course_slug):
+    """Join TradeThesis Free from a course included in that membership."""
+    from apps.subscriptions.services import join_free_membership
+
+    from .services import get_free_membership_plan_for_course
+
+    course = get_object_or_404(Course, slug=course_slug, status=Course.Status.PUBLISHED)
+    if course.access_type not in (Course.AccessType.MEMBERSHIP, Course.AccessType.MIXED):
+        raise PermissionDenied("This course is not offered through TradeThesis Free.")
+    mapping = get_free_membership_plan_for_course(course)
+    if mapping is None:
+        raise PermissionDenied("TradeThesis Free is not currently configured for this course.")
+    join_free_membership(request.user, mapping.plan, request)
+    return redirect("academy:course-detail", course_slug=course.slug)
+
+
+def free_membership_landing(request):
+    """Public, no-payment landing page for the TradeThesis Free funnel."""
+    plan = _public_free_membership_plan()
+    courses = (
+        Course.objects.filter(
+            plan_access__plan=plan,
+            plan_access__is_active=True,
+            status=Course.Status.PUBLISHED,
+        ).order_by("position", "title")
+        if plan
+        else Course.objects.none()
+    )
+    signup_url = (
+        f"{reverse('account_signup')}?next={quote(reverse('academy:free-membership'), safe='/')}"
+    )
+    return render(
+        request,
+        "academy/free_membership.html",
+        {"plan": plan, "courses": courses, "signup_url": signup_url},
+    )
+
+
+@login_required
+@require_POST
+def join_free_membership_from_landing(request):
+    """Join TradeThesis Free from its public landing page."""
+    from apps.subscriptions.services import join_free_membership
+
+    plan = _public_free_membership_plan()
+    if plan is None:
+        raise PermissionDenied("TradeThesis Free is not currently available.")
+    join_free_membership(request.user, plan, request)
+    return redirect("academy:home")
 
 
 @never_cache
