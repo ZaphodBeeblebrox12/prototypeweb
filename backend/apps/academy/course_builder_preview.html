@@ -386,7 +386,6 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   .app-layout { grid-template-columns:minmax(0,1fr); }
   .tabs { padding:0 10px; }
   .tab { padding:12px 8px 10px; font-size:10px; }
-  .lesson-body-audience-top { grid-template-columns:minmax(0,1fr); }
   .page-head { padding-top:26px; }
   .page-head h1 { font-size:clamp(33px,7.8vw,46px); }
   .editor-header { padding:19px; }
@@ -573,7 +572,10 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 @media(max-width:760px) { .regional-image-row { grid-template-columns:minmax(0,1fr); } .lesson-body-audience-top { grid-template-columns:minmax(0,1fr); } }
 #previewAudienceSelect { color:#fff; max-width:220px; }
 #previewAudienceSelect option { color:#23332a; background:#fff; }
-@media(max-width:760px) { .regional-image-row { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:760px) {
+  .regional-image-row { grid-template-columns:minmax(0,1fr); }
+  .lesson-body-audience-top { grid-template-columns:minmax(0,1fr); }
+}
 
 /* Live lesson outline: navigable H1–H4 hierarchy beside the writing canvas. */
 .lesson-outline-layout {
