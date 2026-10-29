@@ -1,0 +1,793 @@
+{
+  "source_filename": "course-content/support-resistance/production/course_content_manifest.json",
+  "import_title": "Support & Resistance",
+  "import_notes": "Draft-only import. Uses canonical lesson scripts and synthetic, unlabelled chart assets where available. ChartLab activities, answer overlays and internal answer keys are excluded. Lessons 16 and 17 require genuine instructor case records; Lesson 18 assessment scoring still requires review.",
+  "course": {
+    "id": "support-resistance-import-course",
+    "title": "Support & Resistance",
+    "slug": "support-resistance-draft",
+    "summary": "Learn to identify defensible support and resistance areas, interpret price behaviour around them, and form conditional scenarios without treating any zone as a guarantee.",
+    "description": "An 18-lesson TradeThesis course on chart structure, support and resistance zones, price reactions, breakouts, invalidation and decision review. Imported as a working draft for editing and review. ChartLab activities have been excluded.",
+    "category": "Technical analysis",
+    "level": "Beginner to intermediate",
+    "duration": "18 lessons · approximately 5–6 hours plus practice",
+    "price": "",
+    "priceNote": "",
+    "catalogueHook": "Read the evidence around a zone before deciding what it might mean.",
+    "problemStatement": "Many traders draw levels as if they were exact barriers or automatic signals. This course teaches a more disciplined way to describe structure, evaluate zones and reconsider an interpretation when the evidence changes.",
+    "learningFocus": "Observation → interpretation → conditional scenario → invalidation or reconsideration.",
+    "authoredTags": "support and resistance, chart structure, price action, breakouts, risk awareness",
+    "whyThisOne": "A practical foundation for reading zones without promising that they will hold or that a particular trade will work.",
+    "cataloguePresentationConfigured": false,
+    "status": "draft",
+    "comingSoon": false,
+    "requiresOwnedAssets": true,
+    "position": 0,
+    "createdAt": "Not saved yet",
+    "updatedAt": "Not saved yet",
+    "publishedAt": null,
+    "publishedSnapshot": null,
+    "outcomes": [
+      "Describe market structure before drawing support and resistance zones.",
+      "Identify and defend relevant areas using visible chart evidence.",
+      "Interpret approaches, reactions, breakouts and retests without assuming certainty.",
+      "Develop conditional scenarios and state what would invalidate or weaken them.",
+      "Recognise when evidence is ambiguous or standing aside is defensible."
+    ],
+    "modules": [
+      {
+        "id": "support-resistance-module-1",
+        "title": "Understand",
+        "description": "Build the concept before drawing zones.",
+        "lessons": [
+          {
+            "id": "support-resistance-lesson-01",
+            "title": "What support and resistance actually tell you",
+            "summary": "Understand support/resistance as areas where responses may occur, not promises.",
+            "minutes": 14,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nUnderstand support/resistance as areas where responses may occur, not promises.\n\nThe text below is the proposed wording shown to the learner. Instructor cues and production instructions are marked separately so they are not accidentally displayed as lesson copy.\n\n### Welcome and set the task\n\n**On screen:** \n\n> What support and resistance actually tell you\n\n**On screen:** \n\n> Before we draw lines on a chart, let's learn what we are looking for.\n>\n> You do not need to know the answer yet. First, observe where price has been moving and what happened when it returned to certain areas.\n\n### Chart A, unlabelled observation\n\n**Show:** Chart A in its plain state. It should contain two or three visible occasions where declining price slows, pauses or turns upward in roughly the same broad area. No zone, line, arrows or explanatory labels appear yet.\n\n**On screen:** \n\n> Look at the chart. Without trying to predict the next move, what stands out about the places where price pauses, turns or moves away?\n\n**Response options:**\n- Price reacted around a similar area more than once.\n- Price is moving mostly in one direction.\n- I see no clear pattern yet.\n- I'm not sure.\n\n**After response — on-screen feedback:**\n\n> Good chart reading starts with describing what is visible. More than one interpretation may be reasonable at this stage. We are looking for evidence, not trying to guess the future.\n\n### Name the idea: support\n\n**Reveal:** Add a soft, horizontal band over the broad area containing the prior lower reactions. Avoid a hairline that implies an exact, uniquely correct price. Label the area **“prior reaction area”** first; then reveal the term **“support area.”**\n\n**On screen:** \n\n> **Support** is an area where falling price has previously slowed, paused or turned upward.\n>\n> We use the word to describe what price did around that area in the history shown on the chart. It does not mean price must stop there the next time.\n\n**Optional hover/expand note (not required to pass):**\n\n> You will learn how to choose the boundaries of a zone later. For now, notice that the reactions occupy an area, not one perfectly exact price.\n\nThis preview is intentionally brief. The full “zones, not perfect lines” treatment remains Lesson 4.\n\n### Chart B: resistance as the counterpart\n\n**Show:** A second, equally clean illustration. Price rises into a broad area, pauses or turns downward on more than one occasion. Initially, show it without annotations.\n\n**On screen:** \n\n> Now look at a similar situation from the other direction. What happened when price rose into this area?\n\n**Response options:**\n- It paused or turned down around a similar area.\n- It moved through without a clear pause.\n- I can't tell from this excerpt.\n\n**Reveal:** Add a broad band around the prior upper reactions. Reveal the label **“resistance area.”**\n\n**On screen:** \n\n> **Resistance** is an area where rising price has previously slowed, paused or turned downward.\n>\n> Support and resistance describe prior price behaviour. They are not a promise about the next move.\n\n### The important counterexample: a zone can be crossed\n\n**On screen:** \n\n> Based only on the earlier candles, we marked an area where price had reacted. What do you think we should expect the marking to guarantee?\n\n**Options:**\n- It guarantees price will turn there again.\n- It marks an area worth watching, but the next move is uncertain.\n- It guarantees that a trade should be taken there.\n\nAfter the learner answers, reveal the additional candles crossing the band.\n\n**On screen:** \n\n> Price has now moved through the area. That does not erase the earlier reactions; it shows that the area did not contain this move.\n>\n> A support or resistance area is a way to organise what we observe. It is not an unbreakable floor or ceiling, and it does not tell us by itself when to enter a trade.\n\n### Observation versus explanation\n\n**On screen:** \n\n> What can the chart tell us — and what can it not tell us?\n\n**On-screen two-column reveal:**\n\n**Visible observation**\n- Price turned upward near this area on two earlier occasions.\n- Price later crossed the same area.\n\n**Possible interpretation, not proven by the chart alone**\n- “Large institutions must be buying here.”\n- “The zone will hold next time.”\n- “A trade here is certain to work.”\n\n**Student-facing copy:**\n\n> A chart shows us price behaviour. It does not show the full reason for every move or the intentions of every participant.\n>\n> Good analysis begins with evidence. We can form a scenario, but we must leave room for price to behave differently.\n\n### Short practice\n\n**Show:** Two small, previously unseen illustrative chart excerpts labelled **A** and **B**. Chart A includes multiple pauses/turns in a broad area. Chart B includes a single close pass by a price level with no clear repeated reaction.\n\n**On-screen question:**\n\n> Which chart gives you clearer visible evidence of a prior reaction area? Choose one, then explain what you observed.\n\n**Expected answer:** Chart A, because it shows more than one visible reaction around a similar area. The answer must not claim that the area is guaranteed to hold or that the chart proves who caused the reaction.\n\n**Feedback if A selected with a reason:**\n\n> Yes. You referred to what the chart shows: more than one reaction around a similar area. That makes it a reasonable area to pay attention to, not a guaranteed future turning point.\n\n**Feedback if B selected:**\n\n> Look again at how many times price visibly reacted around the area. A single pass may still be relevant in some contexts, but this exercise asks which excerpt shows clearer evidence of repeated prior reactions.\n\n**Feedback if “I'm not sure”:**\n\n> That is acceptable when the evidence is unclear. In chart reading, recognising uncertainty is better than inventing certainty. Compare the visible reactions and decide whether the evidence is strong enough to make a tentative observation.\n\n### Knowledge check and takeaway\n\n**On-screen takeaway:**\n\n> **A zone is an area of interest, not a prediction.**\n\n**On-screen knowledge check:**\n\n**Q1. Which is the best description of support?**\n- A guaranteed floor where price cannot fall further.\n- An area where falling price previously slowed, paused or turned upward.\n- A signal to buy whenever price touches it.\n\n**Correct:** Second option.\n\n**Q2. Price moves through an area that had previously acted as support. What can we conclude from this chart alone?**\n- The original marking was necessarily useless.\n- The market was manipulated by institutions.\n- The area did not contain this move; the earlier reactions still occurred, and the new evidence matters.\n\n**Correct:** Third option.\n\n**Q3. Which statement is an observation rather than an unsupported explanation?**\n- “Price turned upward near this area twice.”\n- “Institutions bought here to defend the level.”\n- “Price must reverse here again.”\n\n**Correct:** First option.\n\n**Completion behaviour:** Show brief feedback after each answer. Do not use high-stakes scoring or block course navigation for this introductory check. Require the learner to review a missed answer before marking the lesson complete, but allow retry.\n\n## Chart examples\n\n![Initial chart — practice, ambiguous evidence](asset://sr-L01-PRACTICE-B-01-clean)",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": [
+              {
+                "assetId": "L01-PRACTICE-B-01-clean",
+                "title": "Initial chart — practice, ambiguous evidence",
+                "alt": "Illustrative practice chart with uneven lower reactions; the evidence for one precise repeated area is weaker and uncertainty is reasonable.",
+                "caption": "Illustrative chart — not historical market data."
+              }
+            ]
+          },
+          {
+            "id": "support-resistance-lesson-02",
+            "title": "Read structure before drawing",
+            "summary": "Describe rising, falling, ranging, transitional or unclear structure before adding zones.",
+            "minutes": 15,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nDescribe rising, falling, ranging, transitional or unclear structure before adding zones.\n\n## Lesson draft\n\nDescribe rising, falling, ranging, transitional or unclear structure before adding zones.\n\n## Chart examples\n\n![Initial chart — clean rising sequence](asset://sr-L02-A-01-clean)\n\n![Practice chart — clean falling sequence](asset://sr-L02-B-01-clean)",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": [
+              {
+                "assetId": "L02-A-01-clean",
+                "title": "Initial chart — clean rising sequence",
+                "alt": "Illustrative rising candlestick sequence with several pullbacks and generally higher turning points.",
+                "caption": "Illustrative chart — not historical market data."
+              },
+              {
+                "assetId": "L02-B-01-clean",
+                "title": "Practice chart — clean falling sequence",
+                "alt": "Illustrative falling sequence with upward retracements and generally lower turning points.",
+                "caption": "Illustrative chart — not historical market data."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "support-resistance-module-2",
+        "title": "Find",
+        "description": "Identify meaningful swings, boundaries and useful areas.",
+        "lessons": [
+          {
+            "id": "support-resistance-lesson-03",
+            "title": "Identify meaningful swing points",
+            "summary": "Select consequential swings without marking every local turn.",
+            "minutes": 15,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nSelect consequential swings without marking every local turn.\n\n## Lesson draft\n\nSelect consequential swings without marking every local turn.\n\n## Chart examples\n\n![Initial chart — over-marked chart; initial view](asset://sr-L03-A-01-clean)\n\n![Practice chart — independent practice; candidate IDs shown](asset://sr-L03-B-01-candidate-turns)",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": [
+              {
+                "assetId": "L03-A-01-clean",
+                "title": "Initial chart — over-marked chart; initial view",
+                "alt": "Illustrative chart with many local turns along a broad down-then-up path; no candidate points are initially marked.",
+                "caption": "Illustrative chart — not historical market data."
+              },
+              {
+                "assetId": "L03-B-01-candidate-turns",
+                "title": "Practice chart — independent practice; candidate IDs shown",
+                "alt": "Same independent rising practice sequence with neutral candidate IDs on larger and smaller turns; no reference points are marked.",
+                "caption": "Illustrative chart — not historical market data."
+              }
+            ]
+          },
+          {
+            "id": "support-resistance-lesson-04",
+            "title": "Zones, not perfect lines",
+            "summary": "Use a band that accounts for related reactions instead of demanding one exact price.",
+            "minutes": 15,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nUse a band that accounts for related reactions instead of demanding one exact price.\n\n## Lesson draft\n\nUse a band that accounts for related reactions instead of demanding one exact price.",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": []
+          },
+          {
+            "id": "support-resistance-lesson-05",
+            "title": "Choose the right areas and reduce clutter",
+            "summary": "Prioritise useful areas and remove low-value marks.",
+            "minutes": 20,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nPrioritise useful areas and remove low-value marks.\n\n### Make the new challenge feel meaningful\n\n**On screen:** \n\n> Choose the areas that matter\n\n**On screen:** \n\n> You can now recognise the structure of a chart and identify places where price has reacted before. The next challenge is deciding what deserves to stay on the chart.\n>\n> A useful chart does not show everything you noticed. It shows the areas that help you explain what matters.\n\n### The cluttered chart\n\n**Show:** A schematic chart with seven or eight candidate horizontal marks or bands. Include a mix of: a broad prior range edge, a major turning area, two nearby marks that may be redundant, a tiny local fluctuation and one mark far from the current chart question. Do not mark which ones are “good” or “bad.”\n\n**On screen:** \n\n> Imagine you have to explain this chart to another trader. Which areas would you keep, combine or leave out?\n>\n> You are not being asked to find the one perfect answer. Choose the areas you can explain with evidence.\n\n**Interaction:** Let the learner tap candidate marks to classify each as **Keep**, **Combine with another area**, **Leave out for this reading**, or **Not sure yet**. They should be able to revise a selection before submitting. Avoid dragging all lines around at this stage; the lesson is about selection, not precision drawing.\n\n**After submission — neutral feedback:**\n\n> Your choices give us something to examine. The important part is not how many marks you kept; it is whether each one adds useful information.\n\nDo not grade the initial selection heavily. It is a diagnostic moment and should create a reason to learn the filters.\n\n### Teach the selection filters\n\n**Reveal the heading:**\n\n> Three questions help you decide what stays\n\nReveal each one at a time, with one highlighted candidate mark on the chart.\n\n**On screen — filter 1: Is it anchored in structure?**\n\n> Does this area relate to a meaningful turn, a cluster of related reactions or an edge of the range? Or is it simply a small fluctuation that happens to be easy to mark?\n\n**On screen — filter 2: Does it add information?**\n\n> Does this area tell us something different from a nearby area we have already kept? If two marks describe the same broad region, do we need both?\n\n**On screen — filter 3: Is it relevant to the chart question?**\n\n> Does this area help explain the part of the chart we are studying now? An area can be real in the historical chart and still not be central to the current reading.\n\n### Watch the chart become easier to read\n\n**Show:** Return to the same cluttered chart. Remove one mark at a time. The learner must see exactly what changed and why; do not replace the entire image instantly with a “perfect” version.\n\n**Reveal sequence:**\n\n1. Remove a tiny local fluctuation that does not explain meaningful structure.\n2. Combine two nearby marks that refer to the same broad reaction area.\n3. Leave out an area that is distant from the current question, while noting it could be relevant in another analysis.\n4. Keep a major area that is tied to clear structure.\n\n**On screen:** \n\n> We removed this mark because it added little beyond the structure already shown.\n\n> We combined these marks because the chart supports treating them as one broader area for this exercise.\n\n> We left this area out of the current reading. That does not mean it can never matter; it simply is not helping answer today's question.\n\n> We kept this area because it connects to a clear structural feature. It is still an area to observe, not a guarantee of future behaviour.\n\n### Give the learner a practical constraint\n\n**On screen:** \n\n> For the next exercise, try to keep no more than three or four primary areas. This is a practice constraint to help you focus—not a rule that every trading chart must contain four zones or fewer.\n\n**Prompt:**\n\n> Before you continue, complete this sentence: “I kept these areas because… I left out or combined these because…”\n\n**Interaction:** Short text entry or selection plus a concise justification. Do not require lengthy prose on mobile.\n\n**Feedback guidance:** Credit reference to structure, redundancy and relevance. Do not award extra credit for using the fewest possible zones if important context was omitted.\n\n### Knowledge check\n\n**Q1. Why should a chart not be filled with every possible zone?**\n\nA. A chart is always limited to four zones in real trading.  \nB. Too many marks can obscure the structure and add little information.  \nC. A chart with fewer zones guarantees a better trade.\n\n**Correct answer:** B.\n\n**Feedback:**\n\n> Exactly. The number is not the rule. The aim is to keep the areas that help explain the chart and leave out marks that add little to the current reading.\n\n**Q2. If your zone differs from the reference drawing, what should you examine first?**\n\nA. Whether your boundary is pixel-perfect.  \nB. Whether your zone captures the relevant reactions and has a defensible width.  \nC. Whether your zone guarantees the next price move.\n\n**Correct answer:** B.\n\n**Feedback:**\n\n> Compare the evidence and the boundary logic. The reference is a reasoned example, not a promise that only one exact drawing can be valid.\n\n### Close and give earned encouragement\n\n**On screen:** \n\n> **A useful chart is selective. Keep the areas you can explain.**\n\n**On screen:** \n\n> You have now moved from recognising a reaction to choosing which areas deserve attention—and made your first complete support-and-resistance drawing attempt.\n>\n> That is a real step forward. You are not expected to have a finished method yet. The next lesson is about making your boundaries more consistent and explaining exactly why you placed them where you did.\n\n**Chart Reading Notes prompt:**\n\n> I kept these areas because…  \n> I left out or combined… because…  \n> One part I still find uncertain is…\n\nKeep the encouragement specific and proportionate. It should acknowledge the new skill, not imply proficiency from completing one exercise.",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": []
+          }
+        ]
+      },
+      {
+        "id": "support-resistance-module-3",
+        "title": "Draw and evaluate",
+        "description": "Choose defensible zones and keep charts readable.",
+        "lessons": [
+          {
+            "id": "support-resistance-lesson-06",
+            "title": "Set defensible zone boundaries",
+            "summary": "Explain boundary choice with visible reactions, wicks and bodies.",
+            "minutes": 18,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nExplain boundary choice with visible reactions, wicks and bodies.\n\n### Connect selection to drawing\n\n**On screen:** \n\n> Set boundaries you can explain\n\n**On screen:** \n\n> Last lesson, you chose which areas deserved attention. Now we will work on the drawing itself.\n>\n> The question is not “What is the one perfect price?” It is “Which boundaries describe the reactions I am trying to capture, without making the zone meaningless?”\n\n### Observe the variation first\n\n**Show:** A schematic support example in which three lower reactions occur in the same broad region, but their wick extremes, candle bodies and closes are not identical.\n\n**On screen:** \n\n> Look carefully at these reactions. Do they all turn at one identical price, or do they occupy a range?\n\n**Response choices:**\n- The reactions line up exactly.\n- The reactions are near one another but vary.\n- I cannot tell from this view.\n\n**Reveal:** Highlight the related lows and show light guide marks for the wick extremes and body/close area. Do not draw the final zone yet.\n\n**On-screen feedback:**\n\n> The reactions are related, but they are not identical. A useful zone needs to represent that variation while still preserving a meaningful area.\n\n### Establish the boundary method\n\n**On-screen — heading:**\n\n> A defensible zone starts with a reason\n\nReveal the four steps one at a time.\n\n**Step 1 — Anchor the area.**\n\n> Start with the meaningful swing or group of related reactions. Do not start by choosing a width that looks neat and then searching for candles to justify it.\n\n**Step 2 — Inspect the candles involved.**\n\n> Look at the relevant wick extremes and where the bodies and closes sit. Ask which parts of the candles help describe the reaction you are marking.\n\n**Step 3 — Test whether the band captures the evidence.**\n\n> Does the area include the related reactions you are trying to represent? Or does it miss an important part of the cluster?\n\n**Step 4 — Test whether the band stays useful.**\n\n> Is the zone so wide that it covers unrelated price action and stops helping you distinguish where the reaction occurred?\n\n### Compare three choices\n\n**Show in sequence, all on the same chart:**\n\n1. A too-narrow line/band that captures only the very tips of one reaction and misses related variation.\n2. A defensible zone that captures the relevant cluster.\n3. An overly broad band that swallows candles and movement not needed to describe the reaction.\n\n**On screen:** \n\n> What does this boundary include—and what important information might it miss or blur?\n\n**Reveal 1 — too narrow:**\n\n> This mark is precise on the screen, but it does not represent the full group of reactions we are examining. A thin line is not automatically more accurate simply because it looks exact.\n\n**Reveal 2 — defensible:**\n\n> This zone captures the main reaction area while keeping its boundaries tied to visible structure. Another trader might choose slightly different edges and still describe the same area reasonably.\n\n**Reveal 3 — too broad:**\n\n> This band covers so much unrelated price action that it becomes harder to explain what the zone actually represents. Wider is not automatically safer or better.\n\n### A consistent convention matters more than copying a drawing\n\n**Show:** Two side-by-side versions of the same reaction area. One convention is more wick-inclusive; the other gives greater emphasis to the body/close cluster while still acknowledging the excursion.\n\n**On screen:** \n\n> A wick can show how far price briefly travelled. The body and close can show where the candle finished. Both can be useful observations, but neither gives a universal answer on its own.\n>\n> Choose a boundary convention that makes sense for the chart, explain why it captures the relevant reactions, and apply it consistently. Do not quietly change the rule from candle to candle just to make the old drawing look right.\n\n**Prompt:**\n\n> Which version would you use for this chart, and what evidence would you use to explain your choice?\n\n**Feedback principle:** Accept either version if the written explanation fits the chart and the band remains useful. If a selected version excludes a defining reaction or covers an excessive amount of unrelated movement, ask the student to reconsider that evidence.\n\n### Apply the same thinking at resistance\n\n**Show:** A separate upper-reaction chart with varied wick highs and body/close placement. Begin unlabelled.\n\n**On screen:** \n\n> Now apply the same reasoning from the other direction. Which upper reactions belong to the area, and what would make your zone too broad?\n\n**Reveal:** Add a reference band after the student responds.\n\n**On-screen explanation:**\n\n> The direction has changed, but the reasoning has not. Start from the related structure, inspect the candle ranges and closes, and choose boundaries that capture the area without swallowing unrelated movement.\n\n### Independent practice: defend your own boundaries\n\n**Show:** A new, unlabelled schematic chart with one coherent lower reaction cluster. It should be somewhat less tidy than the first demonstration but still interpretable.\n\n**On-screen instructions:**\n\n> 1. Mark a support zone around the relevant reactions.\n> 2. Before looking at the reference, complete the three short prompts below.\n\n**Prompts:**\n- What is the structural anchor for your zone?\n- Which candle features or reactions determined your boundaries?\n- What nearby movement did you choose not to include, and why?\n\n**After submission — model comparison:** Reveal the reference band with two brief notes: “Why this area was captured” and “A reasonable alternative.” The alternative should be real, not token language; if no alternative is defensible on this chart, the note should say why.\n\n### Knowledge check\n\n**Q1. Which is the best reason to make a zone a little wider than one thin line?**\n\nA. Wider zones are always safer.  \nB. Related reactions occupy a range, and the chosen band should capture the relevant evidence without becoming vague.  \nC. A broad zone makes a future reaction more likely.\n\n**Correct answer:** B.\n\n**Feedback:**\n\n> The width should describe the reaction area. It is not a way to guarantee a future outcome.\n\n**Q2. Two students draw slightly different zones around the same cluster. What should we examine?**\n\nA. Which drawing matches the reference pixels exactly.  \nB. Whether each drawing has a structural anchor, captures the relevant reactions and remains usefully bounded.  \nC. Which student sounds more confident.\n\n**Correct answer:** B.\n\n**Feedback:**\n\n> A reasonable alternative can still be defensible. The drawing must be supported by the chart, not by confidence or visual imitation.\n\n### Close and give the learner a usable principle\n\n**On-screen takeaway:**\n\n> **A good boundary has a reason. Precision without evidence is only decoration.**\n\n**On-screen closing copy:**\n\n> You have now moved beyond spotting an area. You have practised explaining where it begins, where it ends and why those limits are useful.\n>\n> The next lesson is about the other half of clear chart work: knowing what to remove. Even a well-drawn zone may not deserve to stay on every chart.\n\n**Chart Reading Notes prompt:**\n\n> I chose these boundaries because…  \n> A reasonable alternative could be…  \n> I would reconsider my width if…",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": []
+          },
+          {
+            "id": "support-resistance-lesson-07",
+            "title": "Keep the chart readable",
+            "summary": "Remove marks that do not improve explanation.",
+            "minutes": 15,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nRemove marks that do not improve explanation.\n\n### Set the editing task\n\n**On screen:** \n\n> A clear chart is edited, not just marked\n\n**On screen:** \n\n> A zone can be drawn reasonably and still not help the current analysis.\n>\n> Today you will practise editing a chart. You are not trying to erase every detail; you are trying to keep the details that help explain the structure.\n\n### Ask what the marks actually help explain\n\n**Show:** A chart covered with about six or seven zones, including repeated overlapping marks, a minor local mark, a major structural area, and one meaningful but distant area.\n\n**On-screen prompt:**\n\n> Which of these marks helps you explain the part of the chart we are looking at now? Which marks repeat information or pull your attention away?\n\n**Interaction:** Let the learner select zones as **Keep**, **Combine**, **Leave out for this reading**, or **Uncertain**. If the interface cannot support selections per band, use a short numbered list with a chart legend. Do not require precise drawing yet.\n\n**On-screen response after attempt:**\n\n> Before removing anything, decide what job each mark is doing. A mark should earn its place by helping answer a question about this chart.\n\n### Demonstrate three reasons to edit\n\nReveal the reasons one at a time. Each reason should highlight the exact band involved.\n\n**Reason 1 — It repeats information already present.**\n\n> These two nearby bands describe the same broad reaction region for the question we are asking. Combining them makes the structure easier to read without losing a distinction this chart needs.\n\n**Caution:** Combine only when the areas are genuinely redundant for the present analysis. If the two bands represent different structural pivots or different parts of a range, keep that distinction visible.\n\n**Reason 2 — It is weakly anchored.**\n\n> This mark sits near a small fluctuation but does not help explain the larger movement. We can acknowledge that price moved there without promoting every pause to a main zone.\n\n**Caution:** “Minor” does not mean “never relevant.” A small area may matter to a different, more local question. We are choosing the focus for this chart, not declaring universal irrelevance.\n\n**Reason 3 — It is not needed for the current question.**\n\n> This area is part of the broader history, but it is far from the section we are studying. Leaving it out helps us concentrate on the current structure. We can bring it back if the question changes.\n\n**Caution:** If the distant zone is needed to understand the visible chart's overall range, do not remove it just to produce a sparse image. The actual chart must make the decision defensible.\n\n### Reveal the chart becoming clearer\n\n**Show:** Remove or merge one mark per reveal. Keep the previous state available as a brief toggle or “see previous version” action.\n\nFor each edit, show:\n- the band changed;\n- whether it was removed or combined;\n- the specific reason; and\n- what information remains represented afterward.\n\n**On-screen copy after the last edit:**\n\n> Notice what changed: we did not discover a secret level. We made the chart's main structure easier to explain by removing marks that were not earning their space.\n\n### Explain the exercise constraint\n\n**On screen:** \n\n> For the next chart, aim to keep no more than four primary areas. This limit is a way to practise prioritising. It is not a universal rule for trading charts.\n\n**Prompt:**\n\n> For each area you keep, you should be able to finish the sentence: “This stays because…”\n\n### Independent practice: edit another chart\n\n**Show:** A new schematic chart with five or six candidate zones. Include one clear structural area, two overlapping/redundant marks, one minor fluctuation and one area that is potentially meaningful but not central to the question.\n\n**On-screen instructions:**\n\n> Edit the chart for this question: “Which areas best explain the main structure shown here?”\n>\n> Keep, combine or leave out each candidate area. Then write one short reason for one mark you kept and one you removed or combined.\n\n**Response structure:**\n- Area kept because…\n- Area removed/combined because…\n- One area I am unsure about is…\n\n### Compare, don't copy\n\n**Reveal:** The reasoned reference version, then highlight each key decision.\n\n**On-screen copy:**\n\n> Compare the jobs of the retained marks. Did you keep the important structure? Did any two of your zones repeat the same information? Did you remove something that you can now explain was useful?\n>\n> Your chart does not need to look identical to this one. If a different selection preserves the important structure and you can defend it, that is worth keeping.\n\n### Knowledge check\n\n**Q1. You remove a zone because it does not help answer the question in this chart. What does that mean?**\n\nA. The area can never matter in future analysis.  \nB. It is not needed for this particular reading; a different question may make it relevant.  \nC. All distant zones should always be deleted.\n\n**Correct answer:** B.\n\n**Feedback:**\n\n> Editing is contextual. You are choosing what helps this reading, not declaring that an area is permanently meaningless.\n\n**Q2. When should two nearby zones be combined?**\n\nA. Whenever they are close together on the screen.  \nB. When they describe the same broad region for the current question and combining them does not hide a meaningful distinction.  \nC. Always combine all nearby zones to reduce clutter.\n\n**Correct answer:** B.\n\n**Feedback:**\n\n> The decision depends on what the areas represent, not just their visual distance.\n\n### Close with the feeling of control\n\n**On-screen takeaway:**\n\n> **Every mark should have a job. Leaving something out is a decision too.**\n\n**On-screen closing copy:**\n\n> You can now do more than add zones. You can edit your analysis, explain what stays and deliberately leave out what does not help.\n>\n> Next, we will look at how to evaluate a zone's usefulness without pretending there is a magic number that tells us how strong it is.\n\n**Chart Reading Notes prompt:**\n\n> I removed or combined… because…  \n> The most useful area I kept was… because…  \n> If my chart question changed, I might reconsider…\n\n## Chart examples\n\n![Initial chart — final clean view](asset://sr-L07-A-04-clean-final)\n\n![Practice chart — independent chart editing practice](asset://sr-L07-B-01-practice)",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": [
+              {
+                "assetId": "L07-A-04-clean-final",
+                "title": "Initial chart — final clean view",
+                "alt": "Final edited chart with only the two areas needed to explain the current structure; it is not claimed to be the only possible clean chart.",
+                "caption": "Illustrative chart — not historical market data."
+              },
+              {
+                "assetId": "L07-B-01-practice",
+                "title": "Practice chart — independent chart editing practice",
+                "alt": "Independent illustrative practice chart with six candidate bands, including a redundant lower pair, a minor area, relevant upper structure and a distant band.",
+                "caption": "Illustrative chart — not historical market data."
+              }
+            ]
+          },
+          {
+            "id": "support-resistance-lesson-08",
+            "title": "Evaluate a zone without inventing a magic score",
+            "summary": "Review zone relevance contextually, not with a universal numeric score.",
+            "minutes": 20,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nReview zone relevance contextually, not with a universal numeric score.\n\n### Reframe the question\n\n**On screen:** \n\n> What makes a zone worth paying attention to?\n\n**On screen:** \n\n> You can now choose areas, draw boundaries and remove marks that do not help your reading. The next question is more subtle: why is one area worth paying attention to at all?\n>\n> We will examine the evidence without turning it into a magic score or pretending a zone can guarantee what price will do.\n\n### Compare two candidate zones\n\n**Show:** Two schematic chart excerpts side by side, both with candidate areas highlighted in a neutral style but no labels saying which is better.\n\n- **Area A:** several crossings/touches, some noisy, overlapping movement and no single clear structural anchor in the shown excerpt.\n- **Area B:** fewer visible reactions but a clearer relationship to a turning point or broader range structure, with visible movement away from the area.\n\nDo not make Area B unrealistically perfect, and do not make Area A obviously meaningless. Students should need to reason.\n\n**On-screen prompt:**\n\n> One area has more visible visits. The other has fewer, but its reactions are easier to describe. What would you inspect before deciding which area is more useful for this chart?\n\n**Response options:**\n- Count the touches and select the higher number.\n- Examine structure, how the reactions behave, and whether the area helps explain the current chart.\n- Choose whichever area price touched most recently.\n- I would need more context before deciding.\n\n**Feedback for the evidence-based choice:**\n\n> Good. A count is an observation, but it does not explain what those visits mean. We need to look at how the area fits the structure and what the chart actually shows.\n\n**Feedback for “need more context”:**\n\n> That may be the most defensible response. You can describe evidence in the visible excerpt while remaining uncertain about how important the area is in a broader view.\n\n### Build a qualitative review, one question at a time\n\n**On-screen heading:**\n\n> Five questions—not a score\n\nReveal each question as a short inspection prompt. Do not number them as points or let the user total them into a percentage.\n\n**Question 1 — What anchors the zone?**\n\n> Does it relate to a meaningful swing, a cluster of related reactions or an edge of a broader range? Be able to point to that structure.\n\n**Question 2 — How clear are the reactions?**\n\n> Are the reactions recognisably related, or are we grouping together price movements that do not really describe the same area?\n\n**Question 3 — What happened after the reactions?**\n\n> Did price visibly move away, pause, overlap or cross repeatedly? Describe the behaviour. Do not assume that a clear departure proves the same thing will happen again.\n\n**Question 4 — Where is the area in the current chart?**\n\n> Is it relevant to the part of the chart we are studying? Are there other areas nearby that change what this one helps us explain?\n\n**Question 5 — What remains uncertain?**\n\n> Could another reasonable reading exist? Is this only a local view? What information is not visible in the chart excerpt?\n\n### Correct the three common shortcuts\n\nReveal each statement, ask the student to choose **Helpful**, **Not a reliable rule**, or **Needs context**, then show the explanation.\n\n**Shortcut A:** “Three touches makes a level strong.”\n\n**Reveal explanation:**\n\n> Three touches is a count, not a complete explanation. Were the reactions clear? Did they describe the same area? What was price doing around them? The count alone cannot answer that.\n\n**Shortcut B:** “Every additional touch makes the zone stronger.”\n**Reveal explanation:**\n\n> Additional visits add information about how price is interacting with the area, but they do not automatically improve or weaken it. The behaviour and broader context matter.\n\n**Shortcut C:** “A zone becomes weak after every retest.”\n\n**Reveal explanation:**\n\n> That is also too simple. A retest is a new interaction to interpret, not a universal verdict. We will later study how evidence can change as price revisits, crosses or moves away from an area.\n\n### Apply the review to one area\n\n**Show:** A new area with a clear structural anchor but some ambiguity around the exact extent of related reactions.\n\n**On-screen prompt:**\n\n> Complete both sentences:\n>\n> “This area is worth watching in this chart because…”\n>\n> “What remains uncertain is…”\n\n**Model response shown after attempt:**\n\n> “The area relates to a prior turning point and two reactions in a similar region. The chart gives me a reason to mark it, but it does not tell me whether price will react the same way next time.”\n\n### Knowledge check\n\n**Q1. A candidate zone has five visible visits, but the reactions are noisy and its structural role is unclear. What can you conclude?**\n\nA. Five visits make it the strongest zone on the chart.  \nB. The area has been visited several times, but the count alone does not establish its usefulness.  \nC. The zone must fail because it has been touched too often.\n\n**Correct answer:** B.\n\n**Feedback:**\n\n> The count is one observation. Look at how the area fits the structure, how price behaved around it and what remains uncertain.\n\n**Q2. In Uneven Lows, what matters most when comparing your support band with the reference?**\n\nA. Every low must be inside a perfectly level line.  \nB. Whether your band captures the related structure with defensible boundaries and a clear rationale.  \nC. Whether you predicted the next price movement correctly.\n\n**Correct answer:** B.\n\n**Feedback:**\n\n> The task is to represent the related reaction area, not to force all lows to match or predict the next move.\n\n### Close the first three skills as one achievement\n\n**On-screen takeaway:**\n\n> **Evaluate the evidence. Do not turn it into a magic number.**\n\n**On-screen closing copy:**\n\n> Look at what you can now do that you could not do at the start of this course. You can recognise structure, select the areas that matter, draw boundaries you can explain, simplify the chart and question your own assumptions about a zone.\n>\n> You have not learned to predict every reaction—and that is not the goal. You have begun to build a repeatable way to read a chart and explain your decisions. The next module turns to what price does as it approaches and interacts with these areas.\n\n**Chart Reading Notes prompt:**\n\n> This zone is worth attention because…  \n> The visible evidence is…  \n> The part I cannot know from this chart alone is…\n\n**Tone note:** This is the strongest progress acknowledgement in Lessons 5–8 because the learner has now connected selection, drawing, editing and evaluation. Keep it concrete and modest. No “you are now a professional trader” language, no return claims and no badge implying mastery.",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": []
+          }
+        ]
+      },
+      {
+        "id": "support-resistance-module-4",
+        "title": "Read reactions",
+        "description": "Interpret the approach, response and changing evidence.",
+        "lessons": [
+          {
+            "id": "support-resistance-lesson-09",
+            "title": "Read the approach to a zone",
+            "summary": "Describe approach behaviour before the zone is reached; separate observation from interpretation.",
+            "minutes": 17,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nDescribe approach behaviour before the zone is reached; separate observation from interpretation.\n\n### Open on a practical question\n\n**On screen:** \n\n> Read the approach to a zone\n\n**On screen:** \n\n> A zone gives us an area to pay attention to. But price does not arrive there in the same way every time.\n>\n> Today, we will look at the journey toward an area—not just the area itself.\n\n**Production note:** A small progress line may show “Lesson 9 of 18.” Do not add a triumphant animation. The learner should feel they are entering a more applied stage, not that they have already mastered the skill.\n\n### Controlled Chart A: a more directional approach\n\n**On screen:** \n\n> Before price reaches the area, describe the path it is taking. What do you notice about the candles and the recent swings?\n\n**Response choices:**\n- Price is advancing with relatively little overlap.\n- Price is moving back and forth with substantial overlap.\n- The excerpt is too short for me to tell.\n\nAllow a short free-text response if the lesson platform supports it.\n\n**After response — feedback:**\n\n> You are describing the approach, not predicting the result. Keep those two jobs separate.\n\n**Reveal sequence:**\n1. Highlight the sequence of recent swing points.\n2. Highlight the comparatively directional run toward the band.\n3. Keep future candles hidden.\n\n**Student-facing explanation:**\n\n> Here, price has moved toward the area in a relatively directional way. That is an observation about the route it has taken so far.\n>\n> It does **not** tell us that the area must break. Price could continue, pause, turn away or produce mixed evidence. The approach gives us context; it does not give us certainty.\n\n### Controlled Chart B: a hesitant, overlapping approach\n\n**Chart B brief:** Use a second schematic chart approaching a comparably clear area. This time the path includes overlapping candles, short back-and-forth moves and less clean directional progress. Keep scale and visual styling similar to Chart A, so differences in the approach are visible without decoration.\n\n**On screen:** \n\n> The destination is similar. What differs in the path price takes to get there?\n\n**After the learner responds, reveal:**\n- A subtle bracket over the overlapping sequence.\n- The recent local swing points.\n- The target zone, without showing the eventual reaction.\n\n**Student-facing explanation:**\n\n> This approach has more overlap and less consistent progress in one direction. That tells us something about the route, but not the result.\n>\n> Avoid turning descriptions into automatic rules. A directional approach does not guarantee a break, and an overlapping approach does not guarantee a rejection. We are building context, not a formula.\n\n**Compare interaction:** Ask the learner to finish both statements:\n- “On Chart A, I noticed …”\n- “On Chart B, I noticed …”\n\n**Model response:** Chart A advanced more directionally with fewer overlapping candles; Chart B moved back and forth more. Both remained uncertain as to what would happen at the zone.\n\n**Acceptable alternatives:** Students may refer to the swing sequence or the degree of overlap, if these observations match the actual chart. Do not accept predictions presented as facts (“A will break; B will reverse”) as complete answers.\n\n### Teach four things to observe before the zone\n\nReveal the following one at a time. Do not put all four labels on the chart at once.\n\n**On screen:** \n\n> Four observations worth making\n\n**1. Direction and swing sequence**\n\n> Is price making progressively higher or lower turns, or has it been moving sideways? Describe the recent structure before you interpret it.\n\n**2. Overlap and pauses**\n\n> Is price moving relatively directly, or spending more time moving back and forth? Overlap is an observation, not a standalone trading signal.\n\n**3. Nearby structure**\n\n> Is there another meaningful area nearby? The room between price and the next opposing area may matter if we later consider a scenario.\n\n**4. Wider context**\n\n> Does the local move sit inside a broader trend or trading range? A wider chart can add context, but it does not automatically overrule the local evidence.\n\n### Ask what still remains unknown\n\n**On screen:** \n\n> Before we reveal what happens next, name one thing the chart tells you and one thing it does not tell you yet.\n\n**Feedback:**\n\n> That distinction is useful. A good chart reader can describe what is visible and leave the rest open until there is more evidence.\n\n### First instructor-chart micro-case\n\n**Asset requirements:** One of your actual historical charts, cropped to show enough context to understand the current structure and the approach to a relevant zone. The initial image must be captured at a point before the zone interaction. Hide your markings, future candles, entry/exit labels, stop, target, P&L and final outcome. Record instrument, timeframe, date/time of the screenshot and what was knowable at that moment in the private asset register.\n\n**Show initial state:** Plain chart only. If the zone itself is not obvious without your mark, do not draw it in advance; students should make a first reading.\n\n**On screen:** \n\n> This time, the chart comes from my own trading. I am going to show you only the information available at this point—not what happened afterward.\n>\n> You do not need to agree with my eventual analysis. First, make your own observation.\n\n**Prompt:**\n\n> How is price approaching the area you think matters? Name one piece of evidence and one uncertainty.\n\n**Response requirement:** One sentence for the observed evidence; one sentence for the uncertainty.\n\n**Only after the response, reveal your markings.**\n\n> “I marked this area because [describe the visible structure or prior reaction]. Before price reached it, I noticed [describe the approach without predicting the outcome]. One thing I did not know yet was [state a genuine uncertainty]. I was not treating the zone as a guarantee.”\n\nDo not fill these blanks with invented rationale. They must be based on the actual trade and chart at that moment.\n\n**After the reveal, show this note:**\n\n> Your drawing may differ from mine and still be defensible. Compare the evidence and the boundaries, not just the shape of the mark.\n\n**Hard stop:** End the micro-case before the entry decision or outcome. Do not click forward to the later candles. Say:\n\n> We will study complete trade decisions later. For now, we are practising one part of that process: reading the approach without pretending we already know the result.\n\n### Independent practice\n\n**Controlled practice chart:** A third, unseen approach to a zone. Keep the eventual reaction hidden.\n\n**Question 1:** Which description best fits the approach?\n- Relatively directional with limited overlap.\n- Overlapping and hesitant.\n- Too little information to make a useful description.\n\n**Question 2 — free response:** What contextual detail would you check next, and what remains uncertain?\n\n**Scoring:**\n- 1 point: accurate observation.\n- 1 point: identifies relevant context or another area.\n- 1 point: states a real uncertainty rather than treating the outcome as guaranteed.\n\n**Feedback if the learner makes a firm prediction:**\n\n> That is one possible scenario, but the candles shown do not establish it as fact. What can you point to on the chart, and what would you still need to observe?\n\n### Takeaway and close\n\n**On screen:** \n\n> **Read the route, not just the destination.** The approach to a zone adds context, but it does not determine what happens next.\n\n**Short reflection:**\n\n> Next time you look at a chart, describe the last few swings and the path toward a zone before drawing a conclusion about the reaction.\n\n**Bridge to Lesson 10:**\n\n> We have looked at the path toward an area. Next, we will watch what happens when price actually reaches it—and learn why one wick or candle is rarely enough to settle the question.\n\n## Chart examples\n\n![Initial chart — independent approach practice](asset://sr-L09-PRACTICE-01-clean)",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": [
+              {
+                "assetId": "L09-PRACTICE-01-clean",
+                "title": "Initial chart — independent approach practice",
+                "alt": "Illustrative practice chart approaching a lower area with a mix of directional movement and pauses; learner describes visible approach behaviour.",
+                "caption": "Illustrative chart — not historical market data."
+              }
+            ]
+          },
+          {
+            "id": "support-resistance-lesson-10",
+            "title": "Rejection versus acceptance",
+            "summary": "Distinguish a reaction away, sustained movement beyond, and inconclusive evidence.",
+            "minutes": 18,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nDistinguish a reaction away, sustained movement beyond, and inconclusive evidence.\n\n### Open with the question\n\n**On screen:** \n\n> Rejection or acceptance?\n\n**On screen:** \n\n> Price has reached an area we care about. What happens next matters—but one candle rarely tells the whole story.\n>\n> We will read the evidence as it arrives, rather than looking at the finished chart and pretending the answer was obvious.\n\n### Sequence A, first candle only\n\n**On screen:** \n\n> What can we say from this candle alone?\n\nOptions:\n- The candle guarantees rejection.\n- It shows price traded through part of the area and then closed back away from the extreme.\n- It proves price has accepted beyond the zone.\n- There is not enough information to know what happens next.\n\nAllow two choices: the factual observation and “not enough information about the next move” are both valid. Avoid grading this as a single-word pattern test.\n\n**Feedback:**\n\n> We can describe the candle's range and close. We cannot yet know whether later price action will reinforce this as rejection, establish activity beyond the zone, or remain mixed.\n\n### Reveal the close and annotate the candle\n\n**Reveal:** Add small arrows for the high/low excursion and closing location. Do not add a large red/green label saying “rejection.”\n\n**Student-facing explanation:**\n\n> A wick tells us price traded at those prices during the candle. The close tells us where the candle finished. Both are useful observations, but neither tells the entire story by itself.\n>\n> A move beyond the zone followed by a close back inside can be evidence consistent with rejection. We still need to see what price does afterward.\n\n### Reveal follow-through: Sequence A\n\n**Reveal:** Add the next two or three candles. In this sequence, price moves away from the zone and does not immediately reclaim the area.\n\n**Prompt:**\n\n> With these candles added, how would you describe the evidence now?\n\nOptions:\n- Evidence consistent with rejection has strengthened.\n- Price has clearly established itself beyond the zone.\n- The evidence remains entirely unchanged.\n- I need to inspect the sequence again.\n\n**Model response:** “The close back away from the area followed by movement away strengthens the interpretation that this interaction was a rejection. It still does not guarantee that the zone will hold on another visit.”\n\n**Feedback:**\n\n> Your interpretation can become better supported without becoming certain. We are describing the sequence we can see—not promising the next one.\n\n### Sequence B: close beyond the band, then continued action\n\n**Chart B brief:** Similar visual layout but a different outcome. Price crosses the band and closes beyond it. Reveal only that candle first, then ask the learner to respond. After the initial response, reveal two additional candles that continue to spend time or close beyond the zone.\n\n**Prompt after first candle:**\n\n> Price has closed beyond the zone. Is that enough on its own to say the area has been accepted?\n\n**Model response:** The close is relevant evidence that price finished beyond the zone, but one candle does not settle the classification.\n\n**Reveal follow-through. Then prompt:**\n\n> What changed after the next candles appeared?\n\n**Model response:** Continued action beyond the zone makes acceptance a more reasonable current description than it was after the first candle alone. This remains a contextual judgement; price could still return through the zone.\n\n**Student-facing copy:**\n\n> **Acceptance is not a magic candle.** We are looking for evidence that price is spending time or continuing to act beyond an area, rather than just passing through it briefly.\n\n### Sequence C: conflicting evidence\n\n**Chart C brief:** Price crosses the area, closes beyond it, then returns to the band and moves back and forth. The excerpt should remain genuinely ambiguous rather than resolve cleanly in either direction.\n\n**Prompt:**\n\n> Does this sequence give you a clear answer, or is the evidence mixed?\n\nExpected answer: Mixed/inconclusive. The price has moved beyond the area but has not shown clean, sustained behaviour on one side. More context or additional candles may be needed.\n\n**Student-facing explanation:**\n\n> “Inconclusive” is a valid chart-reading conclusion. It means the evidence shown does not justify a stronger claim yet. Good analysis is not a contest to produce a confident label for every chart.\n\n### Three descriptions to keep separate\n\nReveal three definitions in turn:\n\n**Rejection evidence:**\n> Price tested or entered the area and then moved away in the visible sequence.\n\n**Acceptance evidence:**\n> Price showed continued or established activity beyond the area in the visible sequence.\n\n**Inconclusive:**\n> The available candles are mixed, too few or insufficient to distinguish the two descriptions.\n\n**Copy beneath the definitions:**\n\n> These terms describe the evidence so far. They do not guarantee what price will do next, and they are not trade signals by themselves.\n\n### Practice: four short sequences\n\nShow four short chart sequences in order. For every sequence, require a classification **and one sentence of evidence**. Let the learner revise after viewing the entire allotted sequence, but never show the final outcome before the classification step.\n\n**Sequence 1:** Wick pierces the upper edge; candle closes back below; next candles move away.  \n**Key:** Evidence consistent with rejection. Explain the close back away and subsequent movement. No guarantee of future resistance.\n\n**Sequence 2:** Price closes beyond the zone; the next two candles also act beyond it.  \n**Key:** Evidence consistent with acceptance beyond the zone. The relevant evidence is continued action, not just the first close.\n\n**Sequence 3:** Price crosses, comes back, crosses again; sequence ends inside the band.  \n**Key:** Inconclusive/mixed. A strong answer explicitly says why neither interpretation is settled.\n\n**Sequence 4:** One large candle closes beyond the zone, but no later candles are shown.  \n**Key:** A break and close have occurred in the excerpt; sustained acceptance is not established because follow-through is unavailable. “Too early to classify” is an excellent answer.\n\n**Scoring per sequence (0–2):**\n- 1 point for a defensible evidence category (inconclusive earns full credit where appropriate).\n- 1 point for citing the right visible evidence and avoiding a guarantee.\n\n**Feedback on overconfident answers:**\n\n> Look at the candles you have, not the candles you wish you had. What is visible, and what information is still missing?\n\n### Optional link to Lesson 9's micro-case\n\nIf the actual chart would make the answer ambiguous for reasons not taught yet, omit this repeat. The controlled exercises take precedence over forcing a personal chart into the lesson.\n\n### Takeaway and bridge\n\n**Takeaway:**\n\n> **One candle is evidence, not a verdict.** Read the excursion, the close and what follows; stay willing to say “inconclusive.”\n\n**Bridge:**\n\n> Next, we will follow a zone across several visits. Instead of labelling it once and defending that label forever, we will practise updating our view as the evidence changes.\n\n## Chart examples\n\n![Initial chart — close back above zone and initial move away](asset://sr-L10-A-02-close-away)",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": [
+              {
+                "assetId": "L10-A-02-close-away",
+                "title": "Initial chart — close back above zone and initial move away",
+                "alt": "Progressive reveal of an illustrative sequence at a prior zone: close back above zone and initial move away; later candles stay hidden until the next stage.",
+                "caption": "Illustrative chart — not historical market data."
+              }
+            ]
+          },
+          {
+            "id": "support-resistance-lesson-11",
+            "title": "How a zone’s significance changes",
+            "summary": "Update a zone assessment when new evidence accumulates or weakens.",
+            "minutes": 18,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nUpdate a zone assessment when new evidence accumulates or weakens.\n\n### Open with the problem\n\n**On screen:** \n\n> A zone is not a permanent verdict\n\n**On screen:** \n\n> It is tempting to mark an area once and keep calling it “strong” or “weak.” But price keeps moving, and new evidence can change what that area means for the chart in front of us.\n>\n> Today, we will keep the original marking visible while updating the evidence around it.\n\n### Timeline Stage 1: first clear reaction\n\n**Prompt:**\n\n> At this point in the chart, what can you reasonably say about the area? What can you not know yet?\n\n**Model response:** The area is worth watching because price reacted there and moved away in the sequence shown. We cannot know whether it will react again or how future price will behave.\n\n**Learner evidence log — row 1:**\n- **Observed:** What actually happened in the candles?\n- **Current interpretation:** What does the evidence make reasonable to consider?\n- **Still unknown:** What has not happened or been established yet?\n\n**On-screen feedback:**\n\n> Keep a record of the evidence that caused you to mark the area. Later, we can see what has changed rather than rewriting the story from memory.\n\n### Timeline Stage 2: price revisits and moves away again\n\n**Reveal:** Add a later return to the same area followed by another movement away. Do not yet show further visits.\n\n**Prompt:**\n\n> Has the new visit changed your reading? Choose one and explain why.\n\nOptions:\n- The evidence for a relevant reaction area has gained another example.\n- The zone is now guaranteed to hold.\n- The zone must be weaker because it has been tested again.\n- I need more information before judging the change.\n\n**Correct reasoning:** The second reaction supplies another example of price interacting with the area, but a second reaction does not guarantee the next. It is not sufficient on its own to declare the zone stronger or weaker in a predictive sense.\n\n**Student-facing explanation:**\n\n> A second reaction adds information about how price has behaved around this area. But the count is not a magic score. The nature of each interaction, the move away, and the wider context still matter.\n\n**Evidence log — row 2:** Ask what changed and what remains uncertain. Keep row 1 visible.\n\n### Timeline Stage 3: a deeper test or longer pause\n\n**Reveal:** Add a third interaction in which price enters further into the zone or spends longer around it, but does not yet break cleanly away. The sequence should be genuinely debatable rather than designed to prove a touch-count rule.\n\n**Prompt:**\n\n> What is different about this interaction compared with the earlier ones?\n\n**Model response:** Price penetrated further into the marked area or spent more time within it; this changes the description of the interaction. It does not by itself prove that the zone has failed or that it will hold.\n\n**On-screen explanation:**\n\n> The later interaction is not identical to the earlier ones. Note what changed rather than forcing every visit into the same label.\n\n### Timeline Stage 4: decisive move through, or evidence remains mixed\n\nUse a sequence where price moves decisively through the band or remains beyond it for several candles. This is still about updating significance, not the full breakout/role-reversal lesson.\n\n**Before reveal prompt:**\n\n> If price now moves through the area, what should happen to your original reading?\n\n**Reveal the relevant candles. Then display:**\n\n> New evidence does not erase the past. It changes what we can reasonably say now.\n\n### Teach the evidence review framework\n\n**On screen:** \n\n> Four questions for updating a zone\n\nReveal one at a time:\n\n1. **What originally justified marking the area?** Name the structure and prior reaction.\n2. **What new evidence has arrived?** Describe price behaviour without inserting a motive.\n3. **Does that evidence strengthen, weaken or leave the interpretation unclear?** Explain why; this is a judgement about the current reading, not a numerical score.\n4. **What needs to change in my chart or scenario?** The zone might remain relevant, need revised boundaries, become less useful for the current question, or be left as inconclusive.\n\n**Student-facing copy:**\n\n> You do not need to defend your first interpretation forever. You need to explain why you held it at the time and what made you revise it.\n\n### Independent timeline exercise\n\n**Asset:** A fresh three-stage chart sequence with one zone and later interactions. Learner must submit an entry at each stage before the next stage unlocks.\n\n**Evidence log prompts at each stage:**\n- What is visible in this stage?\n- What is your current interpretation?\n- What remains uncertain?\n- Has your reading changed since the previous stage? Why?\n\n**Scoring (0–3):**\n- 1 point for accurate observation of what changed.\n- 1 point for a conditional current interpretation.\n- 1 point for an explicit revision or uncertainty where appropriate.\n\nDo not score the student by whether their final directional guess matches the hidden end of the chart. Score the evidence log.\n\n### Compare first and final reads\n\nKeep the learner's first interpretation visible beside their final one.\n\n**On screen:** \n\n> Your first answer was based on the candles available then. Your final answer has more information. The goal is not to make the first answer look foolish; it is to make the update understandable.\n\n**Reflection prompt:**\n\n> What new evidence mattered most to your change in interpretation?\n\nAccept any answer that names the specific changed candle sequence or price behaviour and explains its effect.\n\n### Takeaway and bridge\n\n**Takeaway:**\n\n> **A good chart reader updates the read when the evidence changes.** Touch count alone is not a score, and an old reaction does not guarantee the next one.\n\n**Bridge:**\n\n> Next, we will examine a particular kind of change: price moving beyond a zone. We will separate the fact that price crossed a boundary from the stronger claim that a breakout is holding.\n\n## Chart examples\n\n![Initial chart — timeline stage 1: initial reaction](asset://sr-L11-01-first-reaction)",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": [
+              {
+                "assetId": "L11-01-first-reaction",
+                "title": "Initial chart — timeline stage 1: initial reaction",
+                "alt": "Progressive timeline reveal: Initial lower reaction and movement away are visible; later visits are hidden.",
+                "caption": "Illustrative chart — not historical market data."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "support-resistance-module-5",
+        "title": "Breakouts and failures",
+        "description": "Assess crossings, retests and failed moves without assuming certainty.",
+        "lessons": [
+          {
+            "id": "support-resistance-lesson-12",
+            "title": "Breakout or temporary penetration?",
+            "summary": "Distinguish brief crossings from more sustained movement beyond a zone.",
+            "minutes": 28,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nDistinguish brief crossings from more sustained movement beyond a zone.\n\n### Introduce the distinction\n\n**On screen:** \n\n> A break is an event. A breakout thesis is an interpretation.\n\n**On screen:** \n\n> When price moves through a zone, we can describe that crossing immediately. What we cannot know from the crossing alone is whether price will continue, return, or remain uncertain.\n>\n> Today, we will look at the evidence one step at a time.\n\n### Sequence A: first movement through the band\n\n**Chart A brief:** A clean prior resistance band and price rising into and through it. Reveal the initial candle that crosses beyond the upper edge. Stop there.\n\n**Prompt:**\n\n> What can you say for certain from the candles now shown?\n\nOptions:\n- Price has traded beyond the marked area in this sequence.\n- The breakout is guaranteed to continue.\n- The old resistance is guaranteed to become support.\n- The price action is too complicated to describe anything.\n\n**Correct answer:** Price has traded beyond the marked area. This is an observable description; the rest are predictions or later concepts.\n\n**Student-facing copy:**\n\n> The boundary has been crossed. That is the event. Whether this becomes a sustained breakout is a separate question.\n\n### Sequence A develops into a temporary penetration/reversal\n\n**Reveal:** Add the next two or three candles. In this case, price returns into the zone and continues back toward the prior range rather than holding beyond it.\n\n**Prompt:**\n\n> How should this new information affect your interpretation?\n\n**On-screen explanation:**\n\n> A price crossing can be real even when the attempt to hold beyond the zone does not last. We can describe the later return as evidence against the initial continuation idea.\n\n### Sequence B: crossing with follow-through\n\n**First prompt, after the first close beyond:**\n\n> Has the area been crossed? Yes. Do we already know that the move will continue? No. What evidence would you watch next?\n\nAccept reasonable replies that reference subsequent action, whether price quickly returns through the band, and the surrounding structure.\n\n**Reveal next candles. Then show:**\n\n> The additional candles show that price has continued to act beyond the zone. That is stronger evidence of a move holding than the initial crossing alone. It is still not a guarantee of further continuation.\n\n**Prompt:**\n\n> Finish this sentence: “The current evidence is consistent with ___, but I would reconsider if ___.”\n\nAccept other specific, plausible invalidating evidence. Do not insist all students use identical wording.\n\n### Sequence C: mixed or inconclusive evidence\n\n**Chart C brief:** Price moves beyond the zone, returns near it, then crosses back and forth. The extract ends without a decisive sequence.\n\n**Prompt:**\n\n> What is your current read?\n\nOptions:\n- A sustained break is clearly established.\n- The crossing failed with certainty.\n- The evidence is mixed; I would not make a stronger claim yet.\n\n**Correct answer:** The evidence is mixed/inconclusive. Students must mention the back-and-forth movement or lack of sustained action outside the band.\n\n**Student-facing explanation:**\n\n> Some charts do not resolve cleanly in the excerpt we have. You are allowed to leave the question open. “Inconclusive” is more useful than pretending uncertainty does not exist.\n\n### What to consider after a crossing\n\nReveal four prompts, one at a time:\n\n**1. Where did price close relative to the zone?**\n\n> Record the close as an observation; do not treat it as a guaranteed rule.\n\n**2. What happened after the crossing?**\n\n> Did price continue beyond the area, return quickly, or move back and forth?\n\n**3. How does the crossing fit the broader structure?**\n\n> Is it happening at the edge of a range, within a broader trend or in a congested area? Context can alter the interpretation.\n\n**4. What would make you reconsider?**\n\n> Name evidence that would weaken your current reading, rather than defending it regardless of what price does.\n\n### Independent practice: three staged sequences\n\nThe learner completes each sequence with the future candles hidden until their current response is submitted.\n\n**Practice 1 — quick return:** A candle trades above resistance, closes near/inside the band, and the next candles return to the prior range.\n- **Model read:** The crossing occurred, but follow-through was absent and price returned to the range. Evidence against sustained acceptance in this sequence; do not infer every such cross will fail.\n\n**Practice 2 — follow-through:** Price closes beyond the zone and subsequent candles continue to hold outside it.\n- **Model read:** Evidence is consistent with the move holding beyond the area. The continuation is not guaranteed; a future return could change the interpretation.\n\n**Practice 3 — mixed:** Price crosses beyond, returns to the band and oscillates with no clear separation.\n- **Model read:** Inconclusive. State what additional price behaviour would strengthen either interpretation.\n\n**Required written response for each:**\n> “The current evidence suggests ___. I am not yet sure about ___. I would reconsider if ___.”\n\n**Scoring per sequence (0–3):**\n- 1 point: accurate observation of where price is relative to the zone.\n- 1 point: interpretation matches the sequence and uses cautious language.\n- 1 point: meaningful condition for reconsideration.\n\n**Feedback for binary overconfidence:**\n\n> You have named a possible direction, but what evidence supports it? What would show that your current read is no longer useful?\n\n### Carefully bounded research note\n\n**On screen — optional expandable note titled “Why can some breaks accelerate?”**\n\n> Some research in foreign-exchange markets has found that clustered orders around certain widely watched prices can help explain why price sometimes accelerates as a level is crossed. That does not mean every support/resistance line contains those orders or that every breakout will accelerate.\n\n### Takeaway and bridge\n\n**Takeaway:**\n\n> **Crossing the zone is what happened. Holding beyond it is what we need to assess.** Observe the follow-through, keep alternatives open, and identify what would change your read.\n\n**Bridge:**\n\n> Next, we will explore what may happen when price returns to a broken area. Sometimes the old role appears to reverse; sometimes price re-enters the previous range. Neither outcome should be assumed in advance.\n\n### Extended reading: confirmation is a convention, not certainty\n\n**A close beyond a line is evidence. It is not a verdict.**\n\nBefore interpreting a breakout, define the area using only information visible before the move. Keep that boundary stable while later candles develop. If you redraw it, record the change rather than pretending the revised boundary was always there.\n\nAn intraday penetration, a close beyond the zone, time spent outside it, volume and follow-through are different kinds of evidence. A wick beyond the band followed by a close back inside shows that price traded beyond the area but the session did not finish beyond the selected edge. A close outside gives a different observation, but a close just beyond the edge can still fail. A distance filter may avoid marginal crossings but delay recognition; a time filter such as multiple closes can make a rule consistent but cannot make the move invulnerable. Volume may add context when the data is appropriate and comparable. Practitioners differ on how much weight to give it; neither a volume surge nor its absence is a universal verdict.\n\nState the timeframe and convention. A daily close beyond a prior range boundary is not the same observation as a one-minute wick. A local break may also remain inside a larger range. You do not need a universal confirmation formula; you need a rule you can explain and an honest account of its trade-off.\n\nThe important distinction is between **using a filter** and **believing the filter removes uncertainty**. A filter can reject some ambiguous cases while admitting others that later fail. It is a decision convention, not a promise about the next candle.\n\n### Worked historical case: NIFTY 50 daily bars, September 2016\n\n**Temporary internal teaching reference:** the candidate band is approximately **8,810–8,850 index points**, selected around prior upper-area activity at the end of August and start of September. It is an instructional analytical choice, not an official level. Replace the associated chart with user-owned or rights-cleared material before publication.\n\nAt the first reveal, show price approaching the band and hide subsequent candles. Ask the learner what would count as a break on the daily timeframe, which confirmation convention they would use, and what that convention might miss.\n\nThen reveal the move outside the band: the daily close was **8,943 on 6 September**, **8,917.95 on 7 September**, and **8,952.50 on 8 September**. This is more evidence of a move beyond the selected area than a single intraday wick. Ask the learner to record a provisional view and the evidence that would weaken it.\n\nFinally reveal the **9 September** close of **8,866.70**, still above the chosen band, and the **12 September** close of **8,715.60**, back below it. In this selected window, the move failed to sustain itself above the area. The later outcome does not prove that the earlier filter was irrational; it shows that a consistent filter can still admit a move that later fails.\n\n### Field note before the worked explanation\n\nBefore revealing the final stage, record:\n1. **Boundary:** why this area was worth watching before the break.\n2. **Rule:** which evidence you required—penetration, close, distance, time outside, volume, or a combination.\n3. **First read:** what you believed after the early closes, using only the candles then visible.\n4. **Cost of the rule:** what delay or missed move your filter could create.\n5. **Revision condition:** what future evidence would weaken your interpretation.\n\nDo not score learners for guessing the ending. Score accurate observation, a clearly stated convention, and a meaningful revision condition.\n\n## Chart examples\n\n![Initial chart — initial crossing; return hidden](asset://sr-L12-A-01-first-crossing)",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": [
+              {
+                "assetId": "L12-A-01-first-crossing",
+                "title": "Initial chart — initial crossing; return hidden",
+                "alt": "Initial stage of an illustrative upward crossing of a zone; later candles that return price toward the old range remain hidden.",
+                "caption": "Illustrative chart — not historical market data."
+              }
+            ]
+          },
+          {
+            "id": "support-resistance-lesson-13",
+            "title": "Retests and role reversal",
+            "summary": "Treat return tests and role reversal as possibilities, not requirements.",
+            "minutes": 28,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nTreat return tests and role reversal as possibilities, not requirements.\n\n> In the last few lessons, you learned that a move beyond a zone is not automatically a confirmed breakout. Now we will look at what can happen afterwards.\n>\n> Sometimes price returns to the area it has just crossed. Traders often call this a **retest**.\n>\n> The useful question is not “Will price retest?” It is “If price returns, what does its behaviour tell us—and what would show that our interpretation is wrong?”\n\n> A role reversal is a way to describe a possible change in how an area behaves.\n>\n> If price previously struggled to move above resistance, then later breaks above it, that old resistance area may become relevant as support on a subsequent return. The reverse can happen when price breaks below support.\n>\n> Notice the word **may**. The market is not required to respect the old zone in its new role. Price can hold near it, move through it, or react in a way that remains unclear.\n>\n> A retest is not a magic entry signal. It is a new piece of evidence to assess in context.\n>\n> Keep the original area on the chart while you assess the return. Do not move the zone just to make the later candles look like a perfect retest. If the original boundaries no longer explain the behaviour, say so and reassess.\n>\n> Finally, do not assume that every breakout must return to its origin. Sometimes price continues without a retest. Missing that move is not a reason to chase it.\n\n**A retest is not confirmation. It is the next test of a claim.**\n\nThe word *retest* describes a return towards an area that price previously crossed. It does not tell us whether the old area is holding in its new role. Separate three events in your notes: the **break**, the **return**, and the **response after the return**.\n\nA return may touch the edge, enter part of the band, travel through it or stop just short. None of these observations alone settles the outcome. If price stays on the new side and later moves away, a role-reversal interpretation becomes more plausible in that sequence. If price crosses back into the old range and cannot reclaim the area, the interpretation weakens. If the candles overlap around the boundary, “inconclusive so far” may be the best description.\n\nDo not redraw the original zone just to make the return look neat after you have seen it. If new evidence leads you to revise a boundary, record when and why. The analyst's job is to make a defensible judgement with the information available at each stage—not to produce a perfect-looking chart after the fact.\n\nAlso keep the possibility that no return occurs. A breakout does not owe the analyst a tidy retest. Missing a move because it never returned is not a reason to chase it, and the absence of a retest does not invalidate every break.\n\n### Worked historical case: NIFTY 50 daily bars, August 2014\n\n**Temporary internal teaching reference:** the candidate former-resistance zone is approximately **7,795–7,865 index points**, selected around prior upper-area activity. These are chosen teaching boundaries, not official levels. Replace the associated chart with user-owned or rights-cleared material before publication.\n\nOn **18 August 2014**, the daily close was **7,874.25**, above the selected band. Hide subsequent candles and ask whether the break alone proves the area has changed roles. Then reveal **20 August**: the session's low was **7,864.05** and its close was **7,875.30**. The low reached just inside the selected band while the close finished above it. In the following selected window, price stayed above the area and moved higher.\n\nThis sequence is consistent with the old area remaining relevant from above during this window. It does not establish that the band caused the rally or must hold on another visit. Another defensible boundary could lead to a slightly different description, so explain the boundary rather than reward pixel-perfect matching.\n\n### The comparison that matters\n\nCompare this hold-like sequence with a return that crosses through the original zone and closes inside the prior range. Ask what changed in the **response after the return**. Both sequences can be called returns or retests; later evidence distinguishes a holding interpretation from a weakening one.\n\n### Field note: preserve the revision, not just the conclusion\n\nRequire a four-stage timeline:\n1. **Before the break:** why the area was selected.\n2. **After the break:** what changed and what remained unproven.\n3. **At the return:** whether price touched, entered or crossed the area, including the close.\n4. **After later candles:** what strengthened or weakened the interpretation.\n\nThen ask: “Which sentence in your first note would you keep, and which would you revise?” This turns notes into a record of reasoning rather than a retrospective explanation.\n\n**Task:** On a new chart, students must:\n1. Mark the original zone.\n2. Identify the point where price moves beyond it.\n3. If a return occurs, label the return without deciding the outcome prematurely.\n4. Choose one description: *holding beyond the area*, *moving back through the area*, or *inconclusive so far*.\n5. Write one alternative scenario.\n\n**Acceptable response example:**\n\n> Price has moved above the former resistance zone and has returned to it. The return is still being assessed. If price holds above the area and moves away, the role-reversal interpretation becomes more plausible. If price moves back through the zone and remains in the prior range, that interpretation weakens.\n\nAccept different wording when the student distinguishes observation from inference and identifies an alternative. Do not grade based on whether their drawing exactly matches the reference.\n\n**Q1. Does every breakout need a retest?**  \nCorrect: No. Price can continue without returning to the zone.\n\n**Q2. Has former resistance definitely become support once price returns to it from above?**  \nCorrect: No. The return is an opportunity to observe behaviour, not proof that the role has changed.\n\n**Q3. Which evidence would weaken a bullish role-reversal interpretation?**  \nCorrect: Price moving back through the former resistance area and failing to hold above it. Accept other contextually defensible examples.\n\n> You can now separate three things that are often confused: the original zone, the move beyond it, and the behaviour after a return.\n>\n> That distinction matters. You are no longer treating “breakout” or “retest” as an answer by itself; you are asking what the chart has actually shown.\n>\n> **Keep this:** A retest is a situation to evaluate, not an event the market owes you.",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": []
+          },
+          {
+            "id": "support-resistance-lesson-14",
+            "title": "Failed breakouts and alternate outcomes",
+            "summary": "Analyse a failed break without hindsight and consider alternate paths.",
+            "minutes": 34,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nAnalyse a failed break without hindsight and consider alternate paths.\n\n> A breakout can look convincing and still fail. That does not mean every breakout is a trap, and it does not mean we should assume failure whenever price hesitates.\n>\n> Our job is to describe what is visible, decide what the evidence currently supports, and change our view when the evidence changes.\n>\n> In this lesson, you will practise holding more than one possible outcome in mind—and letting the chart, not hindsight, determine when an interpretation needs to change.\n\n> A failed breakout is a description of a sequence, not a prediction you can make with certainty at the first crossing.\n>\n> First, price moves beyond a zone. At that moment, we record what happened. Then new candles arrive. If price returns through the zone and cannot sustain itself beyond it, the continuation interpretation weakens.\n>\n> We need to be careful with the word *failure*. A brief move back inside the zone may be inconclusive. A sustained return through the area is stronger evidence that the original breakout thesis is not working as expected.\n>\n> This is why we planned alternatives before the outcome. We do not need to know which scenario will happen to define what evidence would support or weaken each one.\n>\n> The lesson is not “fade every breakout.” That would replace one rigid rule with another. The lesson is to observe, update, and avoid defending a thesis after its supporting evidence has disappeared.\n\n**A failed breakout can tell you more than the breakout attempt—but it is not an automatic reverse signal.**\n\nA failed-breakout interpretation depends on later evidence. At the first crossing, price has moved beyond the area; do not label the attempt a failure before contradictory evidence exists. If price later returns through the original boundary and cannot sustain the move outside it, the continuation thesis has weakened. That still does not establish that price must reverse strongly in the opposite direction.\n\nUse a four-part review:\n1. **Prior boundary:** what area was defensible before the attempted break? Preserve the original markings for the first comparison.\n2. **Break attempt:** what was visible then—a wick, close, distance beyond the band, or follow-through?\n3. **Contradiction:** what later behaviour challenged the continuation idea? Distinguish a return into the band from a close back inside the prior range.\n4. **After the contradiction:** did price continue into the range, recover, or remain mixed? The response affects how strongly the failure should be described.\n\nA brief return inside a zone can be inconclusive. Sustained movement back into the old range is stronger evidence against the original continuation thesis. A pullback that approaches the zone and remains beyond it is not the same sequence as a move that crosses back through and cannot reclaim the area.\n\nThe opposite direction becomes an alternative worth assessing, not an automatic trade. A chart does not reveal who was trapped, whether an institution engineered the move, or why it happened. Keep claims tied to observable price behaviour.\n\n### Worked historical case: NIFTY 50 daily bars, January–February 2018\n\n**Temporary internal teaching reference:** the candidate former-resistance area is approximately **10,900–10,920 index points**, framed around the prior swing high near **10,906.85 on 19 January 2018**. It is a selected instructional boundary, not an official market level. Replace the associated chart with user-owned or rights-cleared material before publication.\n\nReveal the sequence through **1 February** but hide **2 February**. The daily close moved above the selected area on **22 January** at **10,966.20** and remained above it through the following sessions; the close on **1 February** was **11,016.90**. Ask: “What is the strongest claim this evidence supports? What remains uncertain? What would make the continuation interpretation weaker?”\n\nRequire a provisional response before continuing. Then reveal **2 February**: the session closed at **10,760.60**, back below the original band after trading as high as **11,117.35** the day before. This is material contradictory evidence for the idea that price was sustaining itself above the old boundary in this window.\n\nThe lesson is not that the failure was obvious in advance, nor that a short trade was automatically justified. At the time of the earlier closes, the later move back below the band was not yet visible. Preserve the earlier reasoning, then revise it in response to new information.\n\n### Field note: the failure record\n\nBefore showing the worked interpretation, record:\n- **Original thesis:** what did I think the move beyond the boundary meant?\n- **Evidence available then:** what had price done up to that point? Exclude future candles.\n- **Contradiction:** which later observation weakened the thesis?\n- **Revised reading:** what is now more plausible, and what remains uncertain?\n- **Process check:** was the initial interpretation reasonable given the evidence then available, even though the move later failed?\n\nThis separates decision process from outcome. A reasonable thesis can fail; a profitable outcome can follow weak reasoning. Review the evidence and consistency of process rather than simply rewarding the final direction.\n\n> You have now worked through three different chart studies. The point was not to make every drawing look identical. It was to practise choosing areas, explaining boundaries, and noticing when the evidence is clear or uncertain.\n>\n> A useful analyst can say, “My first interpretation has weakened.” That is not a failure of chart reading. It is part of chart reading.",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": []
+          }
+        ]
+      },
+      {
+        "id": "support-resistance-module-6",
+        "title": "Apply and review",
+        "description": "Turn chart observations into conditional scenarios and review decisions.",
+        "lessons": [
+          {
+            "id": "support-resistance-lesson-15",
+            "title": "From zones to conditional scenarios",
+            "summary": "Write if/then scenarios, invalidation, alternatives and available space.",
+            "minutes": 20,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nWrite if/then scenarios, invalidation, alternatives and available space.\n\n> You can now identify and draw useful zones, and you have practised interpreting price behaviour around them. The next step is to organise that reading into a plan.\n>\n> A plan is not a prediction dressed up as certainty. It is a clear description of what you are observing, what you may do if specific evidence appears, and what would make you reconsider.\n>\n> Sometimes the best conclusion is that the chart is not clear enough yet. We will treat that as a valid analytical outcome—not as an empty answer.\n\nUse a simple visual with four separate labels:\n\n1. **Observation:** What can I point to on the chart right now?\n2. **Scenario:** What are plausible next paths?\n3. **Condition to watch:** What observable development would make one scenario more relevant?\n4. **Invalidation / reassessment:** What evidence would show that the scenario no longer fits?\n\nAdd **available space** as a fifth check: how far is the next opposing zone, and is there room for the idea to make sense after costs and risk are considered? Do not teach a universal minimum reward-to-risk ratio in this lesson; that belongs to a defined trading plan and depends on execution assumptions.\n\n**Prompt:**\n\n> What can we say from this chart without predicting the next candle?\n\n**Model observation:**\n\n> Price is within a trading range and is approaching the lower marked area. The chart shows previous reactions there, but the area is not guaranteed to hold.\n\n**Scenario A:**\n\n> If price reacts at the lower area and subsequent candles support that interpretation, a move back into the range is one possible scenario.\n\n**Scenario B:**\n\n> If price moves through the lower area and begins sustaining itself below it, the idea that the range floor is holding becomes weaker. The next area below may become relevant.\n\n**Reassessment condition:**\n\n> If price moves through the zone and follow-through contradicts the expected reaction, I will not continue to treat the zone as a guaranteed floor.\n\n**Space check:**\n\n> The upper range boundary is the next opposing area for a move back into the range. If the distance is small relative to the risk required by a proposed trade plan, there may not be enough room to justify the idea.\n\n> Notice what this plan does not say: “Support will hold.”\n>\n> It says where price is, what a reaction might look like, what would weaken that idea, and where the next opposing area lies.\n>\n> This is more useful because the plan can respond to new evidence. If price behaves differently from the scenario, you have already decided what you need to reconsider.\n>\n> You do not need to create a trade from every chart. If zones overlap, if the next opposing area is very close, or if price behaviour is inconclusive, your analysis can end with “wait” or “stand aside.”\n\nProvide a new chart with:\n- One clearly marked support area.\n- One resistance area.\n- Current price approaching support.\n- No future candles shown.\n\nStudents complete:\n\n**1. What do you observe?**  \n**2. What are two plausible scenarios?**  \n**3. What would strengthen the first scenario?**  \n**4. What would weaken or invalidate it?**  \n**5. Where is the next opposing area?**  \n**6. Is there enough clarity to plan a trade now, or is waiting more reasonable? Explain.**\n\n## Chart examples\n\n![Initial chart — independent scenario practice; zones hidden](asset://sr-L15-B-01-practice)",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": [
+              {
+                "assetId": "L15-B-01-practice",
+                "title": "Initial chart — independent scenario practice; zones hidden",
+                "alt": "Illustrative independent practice chart for writing conditional scenarios; students identify context and zones before seeing the reference.",
+                "caption": "Illustrative chart — not historical market data."
+              }
+            ]
+          },
+          {
+            "id": "support-resistance-lesson-16",
+            "title": "Case study: a trade based on a reaction",
+            "summary": "Review a real reaction-based trade chronologically and separate process from outcome.",
+            "minutes": 23,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nReview a real reaction-based trade chronologically and separate process from outcome.\n\n> In this lesson, we will examine a real trade from the information available at the time.\n>\n> I will not show you the finished chart first. You will see the context, make your own observations, and then compare your reasoning with mine.\n>\n> The aim is not to copy my entry. It is to understand how I used the zone, what else I needed before acting, what risk I accepted, and what would have made me reconsider.\n>\n> We will reveal the outcome last. That helps us judge the decision using the evidence that was available, rather than allowing the result to rewrite the story.\n\nComplete this with the actual trade:\n- **What I noticed:** [verified observation]\n- **Why this zone mattered:** [instructor's actual rationale]\n- **What I expected:** [actual thesis]\n- **What I needed to see:** [actual trigger or condition]\n- **What would challenge my idea:** [actual invalidation]\n- **How I managed the risk:** [verified process]\n- **What happened:** [verified outcome]\n- **What I would retain or change:** [instructor's honest review]\n\n> You have now seen how a zone fits into a real decision rather than existing as a drawing on its own.\n>\n> Notice how many separate judgements were involved: reading context, selecting an area, deciding what evidence mattered, defining risk and responding as the trade developed.\n>\n> Your goal is not to reproduce my trade. It is to build a process you can explain, question and review.\n>\n> **Keep this:** A real trade is most useful when you can see what was knowable at the time—not just how the chart looked afterwards.\n\n> **Draft status — instructor case required:** This lesson's case-study structure is prepared, but the genuine instructor trade/decision record, original chart and contemporaneous rationale have not been supplied. Add the authentic record before treating this lesson as complete. Do not substitute a fabricated example.",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": []
+          },
+          {
+            "id": "support-resistance-lesson-17",
+            "title": "When the thesis fails, or you stay out",
+            "summary": "Review an authentic failed thesis, loss or justified stand-aside; distinguish thesis failure from process failure.",
+            "minutes": 21,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nReview an authentic failed thesis, loss or justified stand-aside; distinguish thesis failure from process failure.\n\n> The previous case showed how a zone can form part of a trade decision. This case asks a different question: what do we do when the evidence no longer supports the idea—or when the chart never gives us enough clarity to act?\n>\n> A disciplined process is not one that is always right. It is one that can explain why it acted, what would change its view, and how it responds when the situation changes.\n>\n> We will again reveal the chart in stages. The goal is not to judge the trade by its outcome alone. It is to examine the decisions with the information that was available at the time.\n\nStudents answer:\n1. What was the original thesis?\n2. Which observations supported it?\n3. Which new observation challenged it?\n4. Was the change decisive or still ambiguous? Explain.\n5. What did the instructor actually do?\n6. What alternative response could be reasonable under a different plan?\n7. What did the outcome reveal, and what could not have been known earlier?\n8. What is the transferable lesson?\n\n### Model response framework\n\n> The original thesis was [scenario], based on [visible evidence]. It became weaker when [new observation]. At that moment, [specific uncertainty] remained. The instructor responded by [actual action] because [actual rationale]. The result was [verified outcome], but the result alone does not tell us whether the earlier decision was good. The main process lesson is [specific lesson].\n\nThis is a framework, not a prefilled answer. Populate it only after selecting the real case.\n\nIf the best example is a no-trade decision, structure the lesson as follows:\n\n1. Show the chart and ask students to identify potential zones.\n2. Reveal the competing areas or unclear structure.\n3. Ask whether the next opposing zone leaves useful space.\n4. Reveal the instructor's reason for not trading.\n5. Show what happened later only after the reasoning is recorded.\n6. Discuss why the later move does not prove that standing aside was wrong.\n\nStudent-facing line:\n\n> A market can move without offering a setup that fits your process. Seeing a move afterwards does not mean you should have taken it beforehand. The decision has to be judged using the information and conditions available at the time.\n\n**Q1. Does a losing outcome automatically mean the zone was drawn incorrectly?**  \nNo. Review the evidence, thesis, risk and management separately from the result.\n\n**Q2. Should you ignore evidence that contradicts your thesis because the zone was originally important?**  \nNo. A zone is not a promise. New evidence may require reassessment.\n\n**Q3. Is standing aside a valid outcome?**  \nYes, when the chart does not meet the student's defined conditions or the uncertainty/risk is not acceptable.\n\n**Q4. Why reveal the trade outcome last?**  \nTo reduce hindsight bias and let the learner assess decisions using the information available at each point.\n\n> You have now seen that good chart reading is not about defending your first idea. It is about being clear about why you formed it, noticing when the evidence changes, and responding in a way you can explain.\n>\n> Sometimes that leads to a trade. Sometimes it leads to a change of plan. Sometimes it means doing nothing.\n>\n> **Keep this:** The purpose of a process is not to remove uncertainty. It is to help you respond to uncertainty deliberately.\n\n> **Draft status — instructor case required:** This lesson's case-study structure is prepared, but the genuine instructor trade/decision record, original chart and contemporaneous rationale have not been supplied. Add the authentic record before treating this lesson as complete. Do not substitute a fabricated example.",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": []
+          },
+          {
+            "id": "support-resistance-lesson-18",
+            "title": "Final chart review and knowledge check",
+            "summary": "Independently apply the full method to an unfamiliar chart.",
+            "minutes": 33,
+            "format": "reading",
+            "videoUrl": "",
+            "content": "**In this lesson**\n\nIndependently apply the full method to an unfamiliar chart.\n\n### On screen — title\n\n> Final chart review\n\n### On screen — opening copy\n\n> This is your chance to bring the course together on a chart you have not seen before.\n>\n> Read the structure, choose the areas you believe matter, explain your boundaries, and describe what you would watch next. There is no need to force a trade or pretend the chart is clearer than it is.\n\n### On screen — assessment note\n\n> Your reasoning matters more than matching one exact drawing. A well-supported alternative or a justified decision to wait can be a strong answer.\n\n### Stage 1 — Read the broader structure\n\n**Show:** The unfamiliar chart with adequate left-side history and current price visible. No zones, swing labels, indicators, arrows or future candles.\n\n**On-screen prompt:**\n\n> **1. What is the broader structure?**\n>\n> Describe the path of price before marking zones. Use the major turns rather than every small fluctuation.\n\n**Response fields:**\n- Structure: `Generally rising` / `Generally falling` / `Broad range` / `Transition or mixed` / `Unclear from this excerpt`.\n- Evidence: short text entry — *Which visible swings or areas support that description?*\n- Uncertainty: short text entry — *What part of the structure is not yet clear?*\n\n**Reference-answer policy:** The selected category must be supported by the actual chart. If the chart has a mixed late section, an answer that describes the earlier structure and identifies the later transition may be stronger than a single label for the whole chart.\n\n**Feedback after submission (before reference reveal):**\n\n> You have recorded your first reading. Keep it available as you move through the assessment; new observations may refine it, but they should not rewrite what was visible at the start.\n\n### Stage 2 — Select the zones that matter\n\n**Show:** Keep the same chart and scale. Allow the learner to add candidate zones using the course's drawing interaction or choose broad candidate areas if drawing is not available.\n\n**On-screen prompt:**\n\n> **2. Mark the areas you consider most relevant.**\n>\n> Choose zones that help explain the structure or current price context. You do not need to mark every visible turn.\n\n**Required learner actions:**\n1. Mark one or more support/resistance areas they consider relevant. The chart may justify more than one area on either side or may not justify a clear zone in one location.\n2. For each selected area, provide a short rationale: *“I kept this area because…”*\n3. State at least one candidate area, minor turn or historical mark intentionally left out, and why.\n4. Where evidence is mixed, the learner may label a zone provisional or leave a candidate unmarked.\n\n**On-screen reminder:**\n\n> The point is not to produce the most marks or the fewest marks. Explain the job each retained area does in this reading.\n\n### Stage 3 — Defend the boundaries\n\n**Show:** The learner's selected zones remain visible. No reference overlay yet.\n\n**On-screen prompt:**\n\n> **3. Explain your boundaries.**\n>\n> For each main zone, describe what the upper and lower boundaries include. You may refer to wick extremes, candle bodies/closes, or a consistent combination.\n\n**Response prompts:**\n- *What structural turn or group of reactions anchors this zone?*\n- *Which visible prices or candle features helped you choose the boundaries?*\n- *What evidence did you leave outside the zone, and why?*\n- *Could another boundary choice also be reasonable? Explain.*\n\n**Feedback principle:** Look for a coherent explanation of coverage and width, not precision to the tick. A narrower or wider zone may be defensible if it represents the relevant reactions clearly and the learner states its limitations.\n\n**Common misconception to catch:** A learner says the zone must include every wick, or that a wick-only/body-only approach is universally correct. Feedback should ask what the chosen convention is intended to represent rather than prescribe one method for every chart.\n\n### Stage 4 — Interpret the current approach or reaction\n\n**On-screen prompt:**\n\n> **4. What is price doing around the area now?**\n>\n> First describe the evidence you can see. Then explain what it may mean—and what remains unknown.\n\n**Response fields:**\n- **Observation:** *What happened in the candles shown?* (for example, approach direction, overlap, a wick through the area, a close relative to it, or movement away).\n- **Interpretation:** *What does that evidence make reasonable to consider?*\n- **Uncertainty:** *What can you not conclude yet?*\n\n**Model-answer shape (not a pre-filled answer):**\n\n> Price has [observable description] relative to the marked area. That is consistent with [a cautious interpretation], but the sequence does not yet establish [unproven conclusion]. I would need to observe [relevant further evidence] before making a stronger claim.\n\n**Scoring guardrail:** Do not award full credit to “it will bounce” or “it will break” without chart evidence and a clear uncertainty statement—even if the hidden outcome later matches the guess.\n\n### Stage 5 — Build conditional scenarios\n\n**On-screen prompt:**\n\n> **5. What are the plausible next paths?**\n>\n> Write two conditional scenarios, or give one scenario and explain why waiting or standing aside is currently more reasonable.\n\n**Scenario template:**\n- **If** [specific, observable development] occurs, **then** [interpretation or next step] becomes more plausible.\n- **If instead** [different observable development] occurs, **then** [alternative interpretation] becomes more plausible.\n- **I would reconsider** the first scenario if [evidence that would weaken or invalidate it].\n\n**Acceptable examples of conditional language:**\n- “If price moves away from the area and subsequent candles support that reading, a return into the prior range becomes one possible path.”\n- “If price trades through the area and begins to sustain itself on the other side, the original reaction thesis weakens.”\n- “If the candles continue to overlap the zone without clearer follow-through, I would keep the interpretation provisional.”\n\nThese are language examples only. The actual answer key must match the selected assessment chart and must not dictate the direction of its hidden future move.\n\n**Feedback if the learner gives only one confident prediction:**\n\n> That is one possible outcome, but a scenario is more useful when it states the evidence it depends on. What alternative would change your reading, and what would you need to see before treating the first idea as better supported?\n\n**Feedback if the learner chooses to stand aside:**\n\n> Waiting can be a defensible conclusion. Explain what is unclear, what evidence you are waiting for, or why the available space does not currently support a useful plan.\n\n### Stage 6 — Invalidation and available space\n\n**On-screen prompt:**\n\n> **6. What would make you reconsider—and where is the next opposing area?**\n\n**Required response:**\n- State one specific observable development that would weaken or invalidate the primary scenario.\n- Identify the next meaningful opposing zone, if one can be reasonably identified.\n- Explain whether the space between the current area and the opposing area appears meaningful or limited.\n- If the chart does not provide enough context to identify an opposing zone, say so instead of inventing one.\n\n**On-screen note:**\n\n> A zone is not an entry trigger by itself. Available space and invalidation help organise an analysis; a separate method and risk plan would be required before making a real trade decision.\n\n**Scoring guardrail:** Do not introduce an unapproved universal minimum reward-to-risk ratio. This assessment checks whether the learner considered the space and explained its relevance, not whether they applied an unstated numeric rule.\n\n### Stage 7 — Submit and check understanding\n\nBefore revealing the reference analysis, show a concise review screen with the learner's own entries:\n\n- Broad structure and evidence.\n- Zones selected and rationale.\n- Boundary notes and omitted areas.\n- Current observation and interpretation.\n- Scenario(s), uncertainty and invalidation.\n- Next opposing area / available space.\n\n**On-screen copy:**\n\n> Review your notes before submitting. You can still correct an omission or clarify an explanation. Once submitted, your answers will be compared with a reasoned reference—not against a claim that there is only one valid drawing.\n\nUse seven questions. Present one at a time, provide explanatory feedback, and allow the learner to review incorrect responses. The knowledge check reinforces course principles; it must not replace the chart-based assessment.\n\n### Q1. What does a support/resistance zone tell you?\n\nA. The exact price where the next reversal must occur.  \nB. An area associated with prior price behaviour that may be relevant to the current reading. **Correct.**  \nC. A complete entry signal by itself.\n\n**Feedback:** A zone organises visible historical behaviour. It is not a guarantee or a full trading plan.\n\n### Q2. Why can two different zone boundaries both be defensible?\n\nA. Boundaries are random, so any drawing is equally useful.  \nB. Different conventions may capture the same related reactions, provided the choice and its limits are explained. **Correct.**  \nC. Only the lowest wick is relevant in every chart.\n\n**Feedback:** Reasonable alternatives are evidence-based, not arbitrary. Explain what the band includes and excludes.\n\n### Q3. Why is touch count alone insufficient to rank a zone?\n\nA. A count does not explain the structure, clarity of reactions or current context. **Correct.**  \nB. The highest touch count always identifies the strongest zone.  \nC. Zones with multiple reactions should never be considered.\n\n**Feedback:** The count is an observation. It is not a complete quality score or a guarantee of future behaviour.\n\n### Q4. Does one wick through a zone prove a breakout or acceptance beyond it?\n\nA. Yes, any wick through the boundary settles the question.  \nB. No. It shows that price traded through that area during the candle; the wider sequence and subsequent action still matter. **Correct.**  \nC. Yes, if the wick is longer than the candle body.\n\n**Feedback:** Describe the excursion first. Use later candles only when they are actually available.\n\n### Q5. What is role reversal?\n\nA. A rule that former resistance must become support after an upside break.  \nB. A possible change in how a broken area behaves; the new role must be assessed from subsequent evidence. **Correct.**  \nC. A reason to redraw the zone around the latest candles.\n\n**Feedback:** Former resistance may act as support, or former support may act as resistance, but the role can fail.\n\n### Q6. What belongs in the invalidation field of a conditional scenario?\n\nA. A specific observable development that would weaken or contradict the scenario. **Correct.**  \nB. A statement that the original zone must hold.  \nC. The final outcome, written as if it had been known in advance.\n\n**Feedback:** Invalidation keeps a thesis open to evidence. It is not a retrospective explanation.\n\n### Q7. When is standing aside a defensible conclusion?\n\nA. Never; every chart must provide a trade.  \nB. When evidence is unclear, the next opposing area leaves limited space, or the conditions of the stated plan are absent. **Correct.**  \nC. Only when price has already moved away.\n\n**Feedback:** A chart can be worth studying without offering a clear plan. “Wait” or “stand aside” is a valid conclusion when it is explained.\n\nAfter feedback, invite the learner to complete a final short note. This is a learning recap, not a performance journal.\n\n- **The structural read I can defend:** …\n- **The zone decision I can explain:** …\n- **The evidence I would watch next:** …\n- **The condition that would make me reconsider:** …\n- **The uncertainty I am willing to leave unresolved:** …\n\n**On-screen close:**\n\n> You have completed the course's final chart review. The goal was not to remove uncertainty or predict every move. It was to make your reading explainable: what you saw, why you marked an area, what you would watch next, and what would change your mind.\n>\n> **Keep this:** A defensible analysis explains both its evidence and its limits.\n\nAdd the standard unobtrusive disclaimer: *“For educational purposes only. Trading involves risk.”*\n\n> **Assessment review note:** The assessment and rubric remain a draft. Validate scoring, answer reveal and retry behaviour before publication.",
+            "questions": [],
+            "reflectionPrompt": "What evidence is visible, what is your interpretation, and what would change your view?",
+            "reflectionModelReasoning": "",
+            "reflectionChartNotes": "",
+            "notebook": {
+              "title": "Your Chart Reading Notes",
+              "prompts": [
+                {
+                  "label": "Pause",
+                  "text": "What evidence is visible on the chart? Describe it without predicting the next move."
+                },
+                {
+                  "label": "Interpret",
+                  "text": "What could the observed behaviour mean, and what is another reasonable explanation?"
+                },
+                {
+                  "label": "Apply",
+                  "text": "What evidence would weaken your reading or make standing aside sensible?"
+                }
+              ]
+            },
+            "image": null,
+            "images": [],
+            "imageGroups": [],
+            "relatedCourseIds": [],
+            "imageRefs": []
+          }
+        ]
+      }
+    ]
+  }
+}
