@@ -11,7 +11,8 @@ from .catalogue_presentation import (
     normalize_catalogue_presentation,
 )
 from .course_card_utils import is_course_card_recommendable
-from .models import Course, CourseImport
+from .course_pricing import resolved_course_offer_price
+from .models import Course, CourseImport, CourseOffer
 
 
 @require_GET
@@ -29,7 +30,7 @@ def public_course_catalogue(request):
             presentation_by_slug[import_record.course_slug] = presentation
     courses = (
         Course.objects.filter(status=Course.Status.PUBLISHED)
-        .prefetch_related("modules__lessons")
+        .prefetch_related("modules__lessons", "offers__plan")
         .order_by("position", "title", "slug")
     )
     for course in courses:
@@ -62,6 +63,28 @@ def public_course_catalogue(request):
             )
         if not modules:
             continue
+        offers = [
+            offer for offer in course.offers.all()
+            if offer.is_active and offer.plan_id and offer.plan.is_active and offer.is_saleable
+        ]
+        resolved_price = resolved_course_offer_price(offers[0], request) if offers else None
+        if resolved_price:
+            course_price, _currency = resolved_price
+            price_note = (
+                "One-time purchase · also included in TradeThesis Free"
+                if course.access_type == Course.AccessType.MIXED
+                else "One-time purchase · secure checkout"
+            )
+            price_configured = True
+        elif course.access_type == Course.AccessType.FREE:
+            course_price, price_note, price_configured = "Free", "Enrol with your account · no payment required", True
+        elif course.access_type == Course.AccessType.MEMBERSHIP:
+            course_price, price_note, price_configured = "Included in TradeThesis Free", "Free membership access", True
+        elif course.access_type == Course.AccessType.MIXED:
+            course_price, price_note, price_configured = "Included in TradeThesis Free", "Free membership or individual purchase", True
+        else:
+            course_price, price_note, price_configured = "", "No active purchase price is configured", False
+
         rows.append(
             {
                 "id": str(course.pk),
@@ -82,7 +105,9 @@ def public_course_catalogue(request):
                     else course.description[:360]
                 ),
                 "complements": "Explore this published course in the TradeThesis Academy.",
-                "price": "",
+                "price": course_price,
+                "priceNote": price_note,
+                "priceConfigured": price_configured,
                 "status": "published",
                 "catalogueRole": course.catalogue_role,
                 "catalogueOrder": course.position,
