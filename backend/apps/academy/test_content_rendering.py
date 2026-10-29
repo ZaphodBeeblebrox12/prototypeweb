@@ -913,7 +913,7 @@ class TradingNotebookTemplateTests(SimpleTestCase):
             draft_template.index("notebook-card.css"),
             draft_template.index("course-import-preview.css"),
         )
-        self.assertIn("grid-template-columns: minmax(0, 1fr) 245px;", notebook_styles)
+        self.assertIn("grid-template-columns: minmax(0, 1fr) 220.5px;", notebook_styles)
         self.assertIn("font-size: 25px;", notebook_styles)
         self.assertIn("font-weight: 700;", notebook_styles)
         self.assertIn("font-size: 12px;", notebook_styles)
