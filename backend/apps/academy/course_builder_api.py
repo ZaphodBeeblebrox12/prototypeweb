@@ -1003,18 +1003,19 @@ def _store_images(record, image_sources):
         elif asset.file:
             storage = asset.file.storage
             storage_status = storage.status()
-            if storage_status.get("durable"):
-                # Check the durable provider explicitly so a local fallback cannot
-                # masquerade as a successful upload. If it already exists remotely,
-                # don't call exists() too: Drive.exists() repeats the same remote
-                # listing request and made every save perform duplicate API calls.
-                if not storage.remote_exists(asset.file.name):
-                    if not _copy_existing_asset(asset.stable_asset_id, asset):
-                        raise ValidationError(
-                            f"Image {asset.asset_key} is only present in temporary storage. "
-                            "Re-upload it before relying on this lesson."
-                        )
-            elif not storage.exists(asset.file.name):
+            # Check the durable provider explicitly so a local fallback cannot
+            # masquerade as a successful upload. Do not call exists() after
+            # remote_exists(): Drive.exists() repeats the same remote listing request.
+            if (
+                storage_status.get("durable")
+                and not storage.remote_exists(asset.file.name)
+                and not _copy_existing_asset(asset.stable_asset_id, asset)
+            ):
+                raise ValidationError(
+                    f"Image {asset.asset_key} is only present in temporary storage. "
+                    "Re-upload it before relying on this lesson."
+                )
+            elif not storage_status.get("durable") and not storage.exists(asset.file.name):
                 _copy_existing_asset(asset.stable_asset_id, asset)
         else:
             _copy_existing_asset(asset.stable_asset_id, asset)
