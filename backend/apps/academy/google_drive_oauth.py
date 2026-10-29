@@ -24,7 +24,7 @@ STATE_SESSION_KEY = "academy_google_drive_oauth_state"
 FORCE_REFRESH_SESSION_KEY = "academy_google_drive_oauth_force_refresh"
 
 
-class FreshRefreshTokenRequired(Exception):
+class FreshRefreshTokenRequiredError(Exception):
     """Google did not return a new offline refresh token for a forced reconnect."""
 
 
@@ -136,7 +136,7 @@ def google_drive_oauth_callback(request):
         if not refresh_token and force_refresh:
             # Do not mistake the already-invalid stored token for a newly issued
             # token. In forced renewal mode, require Google to return a fresh one.
-            raise FreshRefreshTokenRequired()
+            raise FreshRefreshTokenRequiredError()
         if not refresh_token and credential and credential.encrypted_refresh_token:
             refresh_token = credential.get_refresh_token()
         if not refresh_token:
@@ -183,7 +183,7 @@ def google_drive_oauth_callback(request):
         credential.save(
             update_fields=["encrypted_refresh_token", *folder_fields, "updated_at"]
         )
-    except FreshRefreshTokenRequired:
+    except FreshRefreshTokenRequiredError:
         messages.error(
             request,
             "Google did not issue a new refresh token. The existing credential was left unchanged. "
