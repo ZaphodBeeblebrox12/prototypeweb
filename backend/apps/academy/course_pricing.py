@@ -18,7 +18,6 @@ from apps.subscriptions.services import COUNTRY_TO_REGION, format_price, resolve
 
 from .models import Course, CourseOffer
 
-
 SUPPORTED_CURRENCIES = {"INR", "USD", "EUR", "GBP"}
 _AMOUNT_RE = re.compile(r"^\d{1,8}(?:\.\d{1,2})?$")
 _CURRENCY_SYMBOLS = {"₹": "INR", "$": "USD", "€": "EUR", "£": "GBP"}
