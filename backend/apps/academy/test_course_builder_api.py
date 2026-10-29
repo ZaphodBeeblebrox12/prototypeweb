@@ -167,7 +167,6 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "data-regional-variant")
         self.assertContains(response, "Regional content")
         self.assertContains(response, "previewAudienceSelect")
-        self.assertContains(response, "data-regional-variant")
         self.assertContains(response, "lessonContentAudienceSelect")
         self.assertContains(response, "Start a custom version")
 
@@ -2129,24 +2128,36 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
             with self.subTest(marker=marker):
                 self.assertIn(marker, source)
 
-    def test_regional_content_editor_is_reachable_and_keeps_saved_tab(self):
+    def test_legacy_regional_block_tab_is_removed_but_country_selector_remains(self):
         source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
-        for marker in (
-            "['overview', 'curriculum', 'lesson', 'questions', 'media', 'reflection', 'regional', 'preview'].includes(normalized.tab)",
+
+        # The block-level editor tab is retired in favour of the whole-lesson
+        # country/region selector. Legacy block persistence and rendering remain
+        # available so older drafts and published lessons retain their content.
+        for retired_marker in (
             "['regional','Regional content']",
             "else if(tab==='regional')panel=regionalFields(l);",
+            "function regionalFields(lesson)",
             "case'add-regional-block':",
-            "state.tab='regional';",
-            "else if (kind === 'regional-base')",
-            "else if (kind === 'regional-variant')",
-            "if (el.matches('[data-regional-block][data-field]'))",
+            "case'add-regional-variant':",
+            "case'remove-regional-block':",
+            "case'remove-regional-variant':",
+            "case'insert-regional-block':",
+            "case'insert-regional-image':",
             "if (el.matches('[data-regional-variant][data-field]'))",
         ):
-            with self.subTest(marker=marker):
-                self.assertIn(marker, source)
+            with self.subTest(marker=retired_marker):
+                self.assertNotIn(retired_marker, source)
 
-        self.assertNotIn("if (normalized.tab === 'regional') normalized.tab = 'overview';", source)
-        self.assertNotIn("if (state.tab === 'regional') state.tab = 'overview';", source)
+        self.assertNotIn(
+            "['overview', 'curriculum', 'lesson', 'questions', 'media', 'reflection', 'regional', 'preview'].includes(normalized.tab)",
+            source,
+        )
+        self.assertIn("lessonContentAudienceSelect", source)
+        self.assertIn("function lessonBodyAudienceControlsMarkup(lesson)", source)
+        self.assertIn("function setLessonBodyForAudience(lesson, content, audience)", source)
+        self.assertIn('data-action=\\"start-regional-lesson-content\\"', source)
+        self.assertIn("previewAudienceSelect", source)
 
     def test_local_autosave_is_not_suppressed_by_legacy_preview_view_state(self):
         source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
