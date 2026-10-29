@@ -80,6 +80,95 @@ class GoogleDriveCourseStorageTests(SimpleTestCase):
         self.assertEqual(kwargs["folder_id"], "asset-folder-test")
         self.assertEqual(kwargs["raw"], b"image bytes")
 
+    def test_stored_oauth_token_overrides_stale_environment_token(self):
+        record = Mock(encrypted_refresh_token="encrypted-token")
+        record.get_refresh_token.return_value = "database-refresh-token"
+        with (
+            override_settings(ACADEMY_GOOGLE_DRIVE_REFRESH_TOKEN="stale-environment-token"),
+            patch.object(self.storage, "_credential_record", return_value=record),
+        ):
+            self.assertEqual(self.storage._refresh_token, "database-refresh-token")
+
+    def test_environment_oauth_token_is_fallback_without_stored_token(self):
+        with (
+            override_settings(ACADEMY_GOOGLE_DRIVE_REFRESH_TOKEN="environment-refresh-token"),
+            patch.object(self.storage, "_credential_record", return_value=None),
+        ):
+            self.assertEqual(self.storage._refresh_token, "environment-refresh-token")
+
+    def test_service_account_credentials_take_precedence_over_oauth(self):
+        session = Mock()
+        service_credentials = Mock()
+        with (
+            override_settings(
+                ACADEMY_GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON='{"type":"service_account"}',
+                ACADEMY_GOOGLE_DRIVE_REFRESH_TOKEN="stale-environment-token",
+            ),
+            patch(
+                "google.oauth2.service_account.Credentials.from_service_account_info",
+                return_value=service_credentials,
+            ) as service_account_factory,
+            patch("google.oauth2.credentials.Credentials") as oauth_factory,
+            patch("google.auth.transport.requests.AuthorizedSession", return_value=session),
+        ):
+            storage = GoogleDrivePrivateCourseAssetStorage()
+            self.assertIs(storage._drive_session(), session)
+
+        service_account_factory.assert_called_once()
+        oauth_factory.assert_not_called()
+        self.assertEqual(storage._drive_session_auth_source, "service_account")
+
+    def test_cached_session_is_rebuilt_when_oauth_token_rotates(self):
+        first_record = Mock(encrypted_refresh_token="encrypted-one")
+        first_record.get_refresh_token.return_value = "database-refresh-one"
+        second_record = Mock(encrypted_refresh_token="encrypted-two")
+        second_record.get_refresh_token.return_value = "database-refresh-two"
+        first_session, second_session = Mock(), Mock()
+        with (
+            override_settings(
+                ACADEMY_GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON="",
+                ACADEMY_GOOGLE_DRIVE_REFRESH_TOKEN="",
+            ),
+            patch.object(
+                self.storage,
+                "_credential_record",
+                side_effect=[first_record, second_record],
+            ),
+            patch("google.oauth2.credentials.Credentials") as oauth_factory,
+            patch(
+                "google.auth.transport.requests.AuthorizedSession",
+                side_effect=[first_session, second_session],
+            ),
+        ):
+            self.assertIs(self.storage._drive_session(), first_session)
+            self.assertIs(self.storage._drive_session(), second_session)
+
+        self.assertEqual(oauth_factory.call_count, 2)
+        self.assertEqual(
+            [call.kwargs["refresh_token"] for call in oauth_factory.call_args_list],
+            ["database-refresh-one", "database-refresh-two"],
+        )
+
+    def test_refresh_errors_log_only_allowlisted_provider_code(self):
+        session = Mock()
+        session.request.side_effect = Exception(
+            "invalid_grant: Token has been expired or revoked.",
+            {"error": "invalid_grant", "error_description": "do not log this detail", "refresh_token": "refresh-test"},
+        )
+        self.storage._drive_session_auth_source = "oauth_environment"
+        with (
+            patch.object(self.storage, "_drive_session", return_value=session),
+            self.assertLogs("apps.academy.google_drive_storage", level="WARNING") as captured,
+            self.assertRaisesRegex(OSError, "temporarily unavailable"),
+        ):
+            self.storage._drive_request("GET", "https://www.googleapis.com/drive/v3/files")
+
+        log_output = "\n".join(captured.output)
+        self.assertIn("provider_error=invalid_grant", log_output)
+        self.assertIn("source=oauth_environment", log_output)
+        self.assertNotIn("do not log this detail", log_output)
+        self.assertNotIn("refresh-test", log_output)
+
     def test_path_traversal_is_rejected(self):
         with self.assertRaises(SuspiciousFileOperation):
             self.storage.get_available_name("../escape.png")
