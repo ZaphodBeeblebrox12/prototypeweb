@@ -86,7 +86,7 @@
   {% if offer and not has_course_access %}
   {% if course.access_type == 'paid' or course.access_type == 'mixed' %}
   <section class="tt-overview-access" aria-labelledby="tt-course-access-title">
-    <div><h2 id="tt-course-access-title">Get the full course</h2><p>Use secure checkout to enrol. Course access is granted only after the payment provider confirms payment.</p></div>
+    <div><h2 id="tt-course-access-title">Get the full course</h2><p>Use secure checkout to enrol. Course access is granted only after the payment provider confirms payment.</p>{% if offer_price_display %}<p class="tt-overview-hero-note"><strong>{{ offer_price_display }}</strong> one-time purchase.</p>{% endif %}</div>
     <form action="{% url 'payment-start' %}" method="post" data-academy-checkout>
       {% csrf_token %}<input type="hidden" name="plan_id" value="{{ offer.plan_id }}"><input type="hidden" name="interval" value="one_time">
       <button type="submit" class="tt-overview-button">Continue to secure checkout ↗</button>
