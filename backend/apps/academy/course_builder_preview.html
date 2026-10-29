@@ -572,12 +572,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   box-shadow: none;
 }
 
-/* Regional content authoring controls. */
-.regional-block-card { background:linear-gradient(135deg,var(--panel-soft),var(--panel)); border-left:3px solid var(--site-secondary); }
-.regional-variant-card { background:var(--panel); }
-.regional-variant-content { margin-top:14px; }
-.regional-image-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:end; margin-top:8px; }
-.regional-image-row .btn { white-space:nowrap; }
+/* Whole-lesson audience selector. */
 .lesson-body-audience-controls { margin: 0 0 14px; border-left: 3px solid var(--site-secondary); }
 .lesson-body-audience-top { display:grid; grid-template-columns:minmax(220px,0.85fr) minmax(0,1.15fr); gap:14px; align-items:end; }
 .lesson-body-audience-top .field { margin:0; }
@@ -585,13 +580,9 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .lesson-body-audience-status strong { display:block; color:var(--site-primary); font-size:12px; }
 .lesson-body-audience-status p { margin:4px 0 8px; color:var(--muted); font-size:11px; line-height:1.5; }
 .lesson-body-audience-status .btn { margin-top:2px; }
-@media(max-width:760px) { .regional-image-row { grid-template-columns:minmax(0,1fr); } .lesson-body-audience-top { grid-template-columns:minmax(0,1fr); } }
+@media(max-width:760px) { .lesson-body-audience-top { grid-template-columns:minmax(0,1fr); } }
 #previewAudienceSelect { color:#fff; max-width:220px; }
 #previewAudienceSelect option { color:#23332a; background:#fff; }
-@media(max-width:760px) {
-  .regional-image-row { grid-template-columns:minmax(0,1fr); }
-  .lesson-body-audience-top { grid-template-columns:minmax(0,1fr); }
-}
 
 /* Live lesson outline: navigable H1–H4 hierarchy beside the writing canvas. */
 .lesson-outline-layout {
@@ -1280,7 +1271,7 @@ body.builder-dialog-open { overflow:hidden; }
         .map(normalizeCourseState),
     };
     if (Array.isArray(source.courses) && source.courses.length === 0) normalized.courses = [];
-    if (!['overview', 'curriculum', 'lesson', 'questions', 'media', 'reflection', 'regional', 'preview'].includes(normalized.tab)) {
+    if (!['overview', 'curriculum', 'lesson', 'questions', 'media', 'reflection', 'preview'].includes(normalized.tab)) {
       normalized.tab = 'overview';
     }
     if (normalized.courses.length) {
@@ -1395,8 +1386,7 @@ body.builder-dialog-open { overflow:hidden; }
     }
   }
   diagnosticStage('browser-state-normalization-complete', {courseCount:state.courses.length, selectedCoursePresent:Boolean(state.selectedCourseId)});
-  // Keep the saved authoring tab on reload. Regional content is an active editor tab
-  // and must remain reachable after its content has been saved.
+  // Keep supported authoring tabs on reload; removed tabs normalize to Course details.
   let toastTimer=null; let saveTimer=null; let previewMode=false;
   let hasUnsavedChanges=false; let editRevision=0; let suppressDirtyTracking=true;
   function markDirty(){hasUnsavedChanges=true;editRevision++;}
@@ -2095,9 +2085,7 @@ body.builder-dialog-open { overflow:hidden; }
   function visualEditorMarkup(value, options) {
     options = options || {};
     const kind = String(options.kind || 'main');
-    const blockId = String(options.blockId || '');
-    const variantId = String(options.variantId || '');
-    const field = kind === 'main' ? 'content' : (kind === 'regional-base' ? 'baseContent' : 'content');
+    const field = 'content';
     const audience = String(options.audience || 'GLOBAL');
     const minClass = kind === 'main' ? ' rich-editor-canvas-main' : ' rich-editor-canvas-regional';
     return '<div class="rich-editor-wrapper" data-rich-editor-wrapper>' +
@@ -2106,7 +2094,7 @@ body.builder-dialog-open { overflow:hidden; }
       '<button type="button" data-rich-command="bold" aria-label="Bold"><strong>B</strong></button><button type="button" data-rich-command="italic" aria-label="Italic"><em>I</em></button><button type="button" data-rich-command="strikeThrough" aria-label="Strikethrough"><s>S</s></button>' +
       '<button type="button" data-rich-command="insertUnorderedList" aria-label="Bulleted list">• List</button><button type="button" data-rich-command="insertOrderedList" aria-label="Numbered list">1. List</button>' +
       '<button type="button" data-rich-command="link" aria-label="Insert link">Link</button><button type="button" data-rich-command="blockquote" aria-label="Insert pull quote">Quote</button><button type="button" data-rich-command="insertHorizontalRule" aria-label="Insert divider">Divider</button><button type="button" data-rich-command="table" aria-label="Insert table">Table</button><button type="button" data-rich-command="grouped-table" aria-label="Insert grouped-header table">Grouped table</button><button type="button" data-rich-table-action="add-column" aria-label="Add a column to the selected table">Column +</button><button type="button" data-rich-table-action="add-row" aria-label="Add a row to the selected table">Row +</button><button type="button" data-rich-table-action="remove-column" aria-label="Remove the last column from the selected table">Column −</button><button type="button" data-rich-table-action="remove-row" aria-label="Remove the selected body row from the table">Row −</button><button type="button" data-rich-table-action="group-headers" aria-label="Add grouped headers to the selected table">Group headers</button><button type="button" data-rich-command="undo" aria-label="Undo">Undo</button><button type="button" data-rich-command="redo" aria-label="Redo">Redo</button></div>' +
-      '<div class="rich-editor-canvas' + minClass + '" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="' + (kind === 'main' ? 'Lesson body rich text editor' : 'Regional content rich text editor') + '" data-visual-editor="true" data-visual-kind="' + esc(kind) + '" data-block-id="' + esc(blockId) + '" data-variant-id="' + esc(variantId) + '" data-audience="' + esc(audience) + '" data-field="' + field + '" data-placeholder="Start writing your lesson…">' +
+      '<div class="rich-editor-canvas' + minClass + '" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="' + (kind === 'main' ? 'Lesson body rich text editor' : 'Lesson body rich text editor for selected audience') + '" data-visual-editor="true" data-visual-kind="' + esc(kind) + '" data-audience="' + esc(audience) + '" data-field="' + field + '" data-placeholder="Start writing your lesson…">' +
       markdownToVisualEditor(value) + '</div></div>';
   }
   function syncVisualEditorToModel(editor) {
@@ -2121,14 +2109,7 @@ body.builder-dialog-open { overflow:hidden; }
     const markdown = visualEditorToMarkdown(editor);
     const kind = editor.dataset.visualKind;
     if (kind === 'main') lesson.content = markdown;
-    else if (kind === 'regional-base') {
-      const block = (lesson.regionalBlocks || []).find(item => String(item.id) === String(editor.dataset.blockId));
-      if (block) block.baseContent = markdown;
-    } else if (kind === 'regional-variant') {
-      const block = (lesson.regionalBlocks || []).find(item => String(item.id) === String(editor.dataset.blockId));
-      const variant = (block?.variants || []).find(item => String(item.id) === String(editor.dataset.variantId));
-      if (variant) variant.content = markdown;
-    } else if (kind === 'regional-lesson') {
+    else if (kind === 'regional-lesson') {
       setLessonBodyForAudience(lesson, markdown, editor.dataset.audience);
       const controls = $('#workspace [data-lesson-body-audience-controls]');
       if (controls) controls.innerHTML = lessonBodyAudienceControlsMarkup(lesson);
@@ -2816,51 +2797,7 @@ body.builder-dialog-open { overflow:hidden; }
     audiencePicker.value = Array.from(audiencePicker.options).some(option => option.value === selectedAudience)
       ? selectedAudience : 'GLOBAL';
   }
-  function regionalFields(lesson) {
-    if (!lesson) return '<div class="empty-state"><p>Select a lesson first.</p></div>';
-    if (!Array.isArray(lesson.regionalBlocks)) lesson.regionalBlocks = [];
-    const images = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
-    const imageOptions = '<option value="">Choose an uploaded image…</option>' + images.map(image => {
-      const imageId = String(image.id || image.assetUuid || '');
-      const title = String(image.title || '').trim() || String(image.alt || '').trim() || String(image.name || '').trim() || 'Untitled image';
-      return '<option value="' + esc(imageId) + '">' + esc(title) + '</option>';
-    }).join('');
-    const blocks = lesson.regionalBlocks.map((block, blockIndex) => {
-      if (!Array.isArray(block.variants)) block.variants = [];
-      const variants = block.variants.map((variant, variantIndex) => {
-        const scope = variant.scope === 'region' ? 'region' : 'country';
-        const code = String(variant.code || (scope === 'region' ? 'APAC' : 'IN')).toUpperCase();
-        const selectedCountry = regionalCountryOptions.find(([value]) => value === code);
-        const selectedLabel = scope === 'region'
-          ? code
-          : ((selectedCountry && selectedCountry[1]) || code) + ' (' + code + ')';
-        // Build the full country/territory menu only when this particular control receives focus.
-        // Otherwise every regional variant duplicates the same large option list in the DOM.
-        const choices = '<option value="' + esc(code) + '" selected>' + esc(selectedLabel) + '</option>';
-        return '<article class="q-card regional-variant-card"><div class="q-top"><strong>VARIANT ' + String(variantIndex + 1).padStart(2,'0') + '</strong><button class="btn small danger" type="button" data-action="remove-regional-variant" data-block-id="' + esc(block.id) + '" data-id="' + esc(variant.id) + '">Remove</button></div>' +
-          '<div class="form-grid"><div class="field"><label>Audience type</label><select class="select" data-regional-variant="' + esc(variant.id) + '" data-block-id="' + esc(block.id) + '" data-field="scope"><option value="country"' + (scope === 'country' ? ' selected' : '') + '>One country</option><option value="region"' + (scope === 'region' ? ' selected' : '') + '>A whole region</option></select></div>' +
-          '<div class="field"><label>' + (scope === 'region' ? 'Region' : 'Country') + '</label><select class="select" data-regional-variant="' + esc(variant.id) + '" data-block-id="' + esc(block.id) + '" data-field="code" data-regional-code-scope="' + scope + '">' + choices + '</select></div></div>' +
-          '<div class="field full regional-variant-content"><label>Replacement content</label>' + visualEditorMarkup(variant.content || '', {kind:'regional-variant',blockId:block.id,variantId:variant.id}) +
-          '<div class="regional-image-row"><select class="select" data-regional-image-picker data-block-id="' + esc(block.id) + '" data-variant-id="' + esc(variant.id) + '" aria-label="Choose an image for this regional version">' + imageOptions + '</select><button class="btn small" type="button" data-action="insert-regional-image" data-id="' + esc(block.id) + '" data-variant-id="' + esc(variant.id) + '">Insert selected image</button></div></div>' +
-          '<label class="checkbox-row"><input type="checkbox" data-regional-variant="' + esc(variant.id) + '" data-block-id="' + esc(block.id) + '" data-field="hidden"' + (variant.hidden ? ' checked' : '') + '> Hide this block completely for this audience</label>' +
-          '<p class="help">Country-specific copy takes precedence over regional copy. If the block is hidden, no replacement text is rendered for that audience.</p></article>';
-      }).join('');
-      return '<article class="related-course-box regional-block-card"><div class="q-top"><strong>CONTENT BLOCK ' + String(blockIndex + 1).padStart(2,'0') + '</strong><button class="btn small danger" type="button" data-action="remove-regional-block" data-id="' + esc(block.id) + '">Remove block</button></div>' +
-        '<div class="field"><label>Internal block label</label><input class="input" data-regional-block="' + esc(block.id) + '" data-field="title" value="' + esc(block.title || '') + '" maxlength="240" placeholder="e.g. Country-specific risk disclosure"></div>' +
-        '<div class="field" style="margin-top:12px"><label>Global/default version</label>' + visualEditorMarkup(block.baseContent || '', {kind:'regional-base',blockId:block.id}) +
-        '<div class="regional-image-row"><select class="select" data-regional-image-picker data-block-id="' + esc(block.id) + '" aria-label="Choose an image for the global version">' + imageOptions + '</select><button class="btn small" type="button" data-action="insert-regional-image" data-id="' + esc(block.id) + '">Insert selected image</button></div></div>' +
-        '<div class="subheading"><h4>Country and region versions</h4><p>' + block.variants.length + ' override' + (block.variants.length === 1 ? '' : 's') + '</p></div>' +
-        (variants || '<p class="help">No overrides yet. Add a country or region version only where the lesson genuinely needs one.</p>') +
-        '<div class="figure-inline-actions"><button class="btn small" type="button" data-action="add-regional-variant" data-id="' + esc(block.id) + '">＋ Add audience version</button><button class="btn small primary" type="button" data-action="insert-regional-block" data-id="' + esc(block.id) + '">Place block in lesson ↗</button></div>' +
-        '<p class="help">The block appears where its managed placeholder is placed in Lesson content. You do not need to type any placeholder syntax.</p></article>';
-    }).join('');
-    return '<div class="section-intro"><h3>Regional content</h3><p>Keep one course and one catalogue card. Add alternate text blocks for a specific country or region only when necessary; the learner sees the selected version in the same Learning Room template.</p></div>' +
-      '<div class="helper-note"><strong>Audience fallback:</strong> exact country override → region override → global/default copy. Explicit hiding is respected; unknown audiences fall back to the global/default version. All choices are resolved by the server for real learners.</div>' +
-      '<div class="figure-inline-actions"><button class="btn primary" type="button" data-action="add-regional-block">＋ Create regional content block</button><button class="btn" type="button" data-action="go-lesson">Open lesson body</button></div>' +
-      (blocks || '<div class="empty-state"><h3>No regional content yet</h3><p>Your lesson stays global by default. Add a block when a chart, caption, paragraph or disclosure needs an audience-specific version.</p></div>');
-  }
-
-  function renderEditor(){const c=currentCourse();if(!c){$('#workspace').innerHTML='<div class="empty-state"><h3>Create your first course</h3><button class="btn primary" data-action="new-course">＋ New course</button></div>';return;}const tab=state.tab||'overview';const tabDefs=[['overview','Course details'],['curriculum','Curriculum'],['lesson','Lesson content'],['questions','Practice & Q&A'],['media','Images'],['reflection','Reflection & reasoning'],['regional','Regional content'],['preview','Learner preview']];let panel='';const m=currentModule(), l=currentLesson();if(tab==='overview')panel=courseFields(c);else if(tab==='curriculum')panel=curriculumFields(c);else if(tab==='lesson')panel=lessonFields(l);else if(tab==='questions')panel=questionFields(l);else if(tab==='media')panel=mediaFields(l);else if(tab==='reflection')panel=reflectionFields(l);else if(tab==='regional')panel=regionalFields(l);else panel=previewFields(c);$('#workspace').innerHTML=`<div class="workspace-toolbar"><div class="breadcrumb">Courses <span aria-hidden="true">/</span> ${esc(c.title||'Untitled course')} <span aria-hidden="true">/</span> ${esc(tabDefs.find(x=>x[0]===tab)?.[1]||'Editor')}</div><div class="toolbar-right"><span class="save-state" id="saveIndicator"><span class="dot"></span><span>${state.savedAt?'Saved '+esc(state.savedAt):'Unsaved draft'}</span></span><button class="btn small" type="button" data-action="save-draft">Save draft</button><button class="btn small danger" type="button" data-action="delete-course" ${deletingDraftId===String(c.id)?'disabled aria-busy="true"':''}>${deletingDraftId===String(c.id)?'Deleting draft…':'Delete draft'}</button></div></div><div class="editor-shell"><header class="editor-header"><div><div class="eyebrow">${esc(c.slug||'course-slug')}</div><h2>${esc(c.title||'Untitled course')}</h2><p>${esc(c.summary||'Add a course summary to help learners understand what they will study.')}</p></div><div class="header-mark" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="18" stroke="currentColor" stroke-width="1.5"/><path d="M11 27.5 17 21l5 4 10-11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 14h5v5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></header><nav class="tabs" aria-label="Course editing steps">${tabDefs.map(([id,label])=>`<button class="tab ${tab===id?'active':''}" type="button" role="tab" aria-selected="${tab===id}" data-action="tab" data-tab="${id}">${label}</button>`).join('')}</nav><div class="tab-panel" role="tabpanel">${panel}</div></div>`;}
+  function renderEditor(){const c=currentCourse();if(!c){$('#workspace').innerHTML='<div class="empty-state"><h3>Create your first course</h3><button class="btn primary" data-action="new-course">＋ New course</button></div>';return;}const tab=state.tab||'overview';const tabDefs=[['overview','Course details'],['curriculum','Curriculum'],['lesson','Lesson content'],['questions','Practice & Q&A'],['media','Images'],['reflection','Reflection & reasoning'],['preview','Learner preview']];let panel='';const m=currentModule(), l=currentLesson();if(tab==='overview')panel=courseFields(c);else if(tab==='curriculum')panel=curriculumFields(c);else if(tab==='lesson')panel=lessonFields(l);else if(tab==='questions')panel=questionFields(l);else if(tab==='media')panel=mediaFields(l);else if(tab==='reflection')panel=reflectionFields(l);else panel=previewFields(c);$('#workspace').innerHTML=`<div class="workspace-toolbar"><div class="breadcrumb">Courses <span aria-hidden="true">/</span> ${esc(c.title||'Untitled course')} <span aria-hidden="true">/</span> ${esc(tabDefs.find(x=>x[0]===tab)?.[1]||'Editor')}</div><div class="toolbar-right"><span class="save-state" id="saveIndicator"><span class="dot"></span><span>${state.savedAt?'Saved '+esc(state.savedAt):'Unsaved draft'}</span></span><button class="btn small" type="button" data-action="save-draft">Save draft</button><button class="btn small danger" type="button" data-action="delete-course" ${deletingDraftId===String(c.id)?'disabled aria-busy="true"':''}>${deletingDraftId===String(c.id)?'Deleting draft…':'Delete draft'}</button></div></div><div class="editor-shell"><header class="editor-header"><div><div class="eyebrow">${esc(c.slug||'course-slug')}</div><h2>${esc(c.title||'Untitled course')}</h2><p>${esc(c.summary||'Add a course summary to help learners understand what they will study.')}</p></div><div class="header-mark" aria-hidden="true"><svg width="44" height="44" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="18" stroke="currentColor" stroke-width="1.5"/><path d="M11 27.5 17 21l5 4 10-11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M27 14h5v5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></header><nav class="tabs" aria-label="Course editing steps">${tabDefs.map(([id,label])=>`<button class="tab ${tab===id?'active':''}" type="button" role="tab" aria-selected="${tab===id}" data-action="tab" data-tab="${id}">${label}</button>`).join('')}</nav><div class="tab-panel" role="tabpanel">${panel}</div></div>`;}
   const renderEditorImplementation = renderEditor;
   function renderEditorSafely() {
     try {
@@ -3043,7 +2980,7 @@ body.builder-dialog-open { overflow:hidden; }
   function publishCourse(){const c=currentCourse();if(!c)return;const errs=[];if(!c.title.trim())errs.push('Add a course title.');if(!c.summary.trim())errs.push('Add a short course summary.');if(!c.modules.length)errs.push('Add at least one module.');if(!allLessons(c).length)errs.push('Add at least one lesson.');if(allLessons(c).some(l=>!l.title.trim()||!l.content.trim()))errs.push('Every lesson needs a title and lesson content.');if(errs.length){toast(errs[0]);if(!c.title.trim()||!c.summary.trim())state.tab='overview';else if(!allLessons(c).length)state.tab='curriculum';else state.tab='lesson';render();return;}const snapshot=JSON.parse(JSON.stringify(c));snapshot.status='published';snapshot.publishedSnapshot=null;snapshot.updatedAt=nowText();c.status='published';c.publishedAt=nowText();c.updatedAt=nowText();c.publishedSnapshot=snapshot;persist(false);state.tab='overview';render();$('#catalogueSection').scrollIntoView({behavior:'smooth',block:'start'});toast('Published in this preview. The course now appears under Courses offered.');}
   function duplicateCourse(){const c=currentCourse();if(!c)return;const copy=JSON.parse(JSON.stringify(c));copy.id=uid('course');copy.title=(c.title||'Untitled course')+' — Copy';copy.slug=slugify(copy.title);copy.status='draft';copy.publishedAt=null;copy.publishedSnapshot=null;copy.createdAt=nowText();copy.updatedAt='Not saved yet';copy.modules.forEach(m=>{m.id=uid('module');m.lessons.forEach(l=>{l.id=uid('lesson');l.questions.forEach(q=>q.id=uid('q'));});});state.courses.unshift(copy);state.selectedCourseId=copy.id;state.selectedModuleId=copy.modules[0]?.id||null;state.selectedLessonId=copy.modules[0]?.lessons[0]?.id||null;state.tab='overview';persist(false);render();toast('Course duplicated as a new draft.');}
   function moveItem(arr,id,direction){const i=arr.findIndex(x=>x.id===id);const j=i+direction;if(i<0||j<0||j>=arr.length)return;[arr[i],arr[j]]=[arr[j],arr[i]];}
-  function handleAction(action,el){const c=currentCourse();if(!c&&action!=='new-course')return;const m=c?currentModule():null;const l=c?currentLesson():null;const id=el?.dataset?.id;switch(action){case'save-geo-price':saveGeoPriceOverride(c);break;case'edit-geo-price':{const marketSelect=$('#courseGeoMarket');if(marketSelect)marketSelect.value=el.dataset.marketKey||'country:IN';renderGeoPriceEditor();$('#courseGeoPriceAmount')?.focus();break;}case'remove-geo-price':removeGeoPriceOverride(c,el.dataset.marketKey||'');break;case'delete-course':if(c)deleteCourse(c);break;case'select-course':selectCourse(id);break;case'tab':state.tab=el.dataset.tab;renderEditor();renderHeaderState();break;case'save-draft':saveDraft();break;case'new-course':{createNewCourseDraft(el);break;}case'add-regional-block':{if(!Array.isArray(l.regionalBlocks))l.regionalBlocks=[];l.regionalBlocks.push({id:uid('regional'),title:'Regional content block',baseContent:'',variants:[]});state.tab='regional';persist(false);renderEditor();toast('Regional content block created. Add global copy and any audience versions, then place it in the lesson.');break;}case'add-regional-variant':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(id));if(!block)break;if(!Array.isArray(block.variants))block.variants=[];block.variants.push({id:uid('variant'),scope:'country',code:'IN',content:'',hidden:false});persist(false);renderEditor();break;}case'remove-regional-variant':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(el.dataset.blockId));if(!block)break;block.variants=(block.variants||[]).filter(item=>String(item.id)!==String(id));persist(false);renderEditor();break;}case'remove-regional-block':{l.regionalBlocks=(l.regionalBlocks||[]).filter(item=>String(item.id)!==String(id));const token='[[regional-block:'+String(id)+']]';l.content=String(l.content||'').split(token).join('').replace(/\n{3,}/g,'\n\n');persist(false);renderEditor();toast('Regional content block and its placement were removed.');break;}case'insert-regional-block':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(id));if(!block)break;insertLessonContentAtCaret(l,'[[regional-block:'+block.id+']]',true);toast('Regional content block placed in the lesson at the saved cursor position.');break;}case'insert-regional-image':{const block=(l.regionalBlocks||[]).find(item=>String(item.id)===String(id));if(!block)break;const card=el.closest('.regional-block-card');const imagePicker=el.dataset.variantId?card?.querySelector('[data-regional-image-picker][data-variant-id="'+CSS.escape(el.dataset.variantId)+'"]'):card?.querySelector('[data-regional-image-picker]:not([data-variant-id])');const imageId=imagePicker?.value||'';if(!imageId){toast('Choose an uploaded image first.');break;}const images=Array.isArray(l.images)?l.images:(l.image?[l.image]:[]);const image=images.find(item=>String(item.id)===imageId||String(item.assetUuid||'')===imageId);if(!image){toast('That image is not in this lesson.');break;}const target=el.dataset.variantId?(block.variants||[]).find(item=>String(item.id)===String(el.dataset.variantId)):block;const field=el.dataset.variantId?'content':'baseContent';if(!target)break;const markdown='!['+String(image.alt||image.title||'Course figure').replace(/\]/g,'')+'](asset://'+String(image.id||image.assetUuid)+')';target[field]=String(target[field]||'');if(target[field]&&!/\s$/.test(target[field]))target[field]+='\n\n';target[field]+=markdown;persist(false);renderEditor();toast('Image reference inserted into the selected regional version.');break;}case'add-module':{const nm=makeModule(c.modules.length+1);nm.title=`Module ${String(c.modules.length+1).padStart(2,'0')} — New module`;c.modules.push(nm);state.selectedModuleId=nm.id;state.selectedLessonId=nm.lessons[0].id;state.tab='curriculum';persist(false);render();break;}case'select-module':state.selectedModuleId=id;state.selectedLessonId=currentModule()?.lessons[0]?.id||null;renderEditor();break;case'select-lesson':state.selectedModuleId=el.dataset.moduleId;state.selectedLessonId=id;state.tab='curriculum';renderEditor();break;case'add-lesson':{const mod=c.modules.find(x=>x.id===id);if(!mod)break;const nl=makeLesson(mod.lessons.length+1);nl.title=`Lesson ${c.modules.indexOf(mod)+1}.${mod.lessons.length+1} — New lesson`;mod.lessons.push(nl);state.selectedModuleId=mod.id;state.selectedLessonId=nl.id;state.tab='curriculum';persist(false);render();break;}case'delete-module':{if(c.modules.length<=1)break;const i=c.modules.findIndex(x=>x.id===id);c.modules.splice(i,1);state.selectedModuleId=c.modules[0]?.id||null;state.selectedLessonId=c.modules[0]?.lessons[0]?.id||null;persist(false);render();break;}case'delete-lesson':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);if(!mod||mod.lessons.length<=1)break;mod.lessons=mod.lessons.filter(x=>x.id!==id);state.selectedLessonId=mod.lessons[0].id;state.selectedModuleId=mod.id;persist(false);render();break;}case'move-module-up':moveItem(c.modules,id,-1);persist(false);render();break;case'move-module-down':moveItem(c.modules,id,1);persist(false);render();break;case'move-lesson-up':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);moveItem(mod.lessons,id,-1);persist(false);render();break;}case'move-lesson-down':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);moveItem(mod.lessons,id,1);persist(false);render();break;}case'go-lesson':state.tab='lesson';renderEditor();break;case'go-questions':state.tab='questions';renderEditor();break;case'go-curriculum':state.tab='curriculum';renderEditor();break;case'add-outcome':c.outcomes.push('New learning outcome');persist(false);renderEditor();break;case'remove-outcome':c.outcomes.splice(Number(el.dataset.index),1);persist(false);renderEditor();break;case'add-question':l.questions.push(defaultQuestion());persist(false);renderEditor();break;case'remove-question':if(l.questions.length>1)l.questions=l.questions.filter(q=>q.id!==id);persist(false);renderEditor();break;case'correct-option':{const q=l.questions.find(q=>q.id===el.dataset.qid);if(q)q.correctIndex=Number(el.dataset.index);schedulePersist();break;}case'insert-image-reference':if(l.image){l.content+=`\n\n![${l.image.alt||'Course figure'}](asset://${l.image.id||uid('asset')})\n`;state.tab='lesson';persist(false);renderEditor();toast('Image reference added to lesson Markdown.');}break;case'remove-image':l.image=null;persist(false);renderEditor();break;case'refresh-website-preview':refreshBuilderWebsitePreview(true);break;case'preview-select-lesson':state.selectedModuleId=el.dataset.moduleId;state.selectedLessonId=id;renderEditor();break;case'check-preview':{const q=l.questions.find(q=>q.id===id);const checked=$(`input[name="pv-${CSS.escape(id)}"]:checked`);const box=$(`#feedback-${CSS.escape(id)}`);if(!checked){toast('Select an answer first.');break;}const optionLabels=$('#workspace').querySelectorAll('[data-preview-option="'+CSS.escape(id)+'"]');optionLabels.forEach(label=>{const optionIndex=Number(label.dataset.optionIndex);const marker=label.querySelector('.answer-result');label.classList.remove('is-correct','is-incorrect');if(marker)marker.textContent='';if(optionIndex===Number(q.correctIndex)){label.classList.add('is-correct');if(marker)marker.textContent='✓ Correct answer';}else if(optionIndex===Number(checked.value)){label.classList.add('is-incorrect');if(marker)marker.textContent='✕ Your answer';}});box.classList.add('show');const isRight=Number(checked.value)===Number(q.correctIndex);box.textContent=(isRight?'Correct. ':'Incorrect. The correct answer is highlighted in green. ')+q.explanation;break;}}
+  function handleAction(action,el){const c=currentCourse();if(!c&&action!=='new-course')return;const m=c?currentModule():null;const l=c?currentLesson():null;const id=el?.dataset?.id;switch(action){case'save-geo-price':saveGeoPriceOverride(c);break;case'edit-geo-price':{const marketSelect=$('#courseGeoMarket');if(marketSelect)marketSelect.value=el.dataset.marketKey||'country:IN';renderGeoPriceEditor();$('#courseGeoPriceAmount')?.focus();break;}case'remove-geo-price':removeGeoPriceOverride(c,el.dataset.marketKey||'');break;case'delete-course':if(c)deleteCourse(c);break;case'select-course':selectCourse(id);break;case'tab':state.tab=el.dataset.tab;renderEditor();renderHeaderState();break;case'save-draft':saveDraft();break;case'new-course':{createNewCourseDraft(el);break;}case'add-module':{const nm=makeModule(c.modules.length+1);nm.title=`Module ${String(c.modules.length+1).padStart(2,'0')} — New module`;c.modules.push(nm);state.selectedModuleId=nm.id;state.selectedLessonId=nm.lessons[0].id;state.tab='curriculum';persist(false);render();break;}case'select-module':state.selectedModuleId=id;state.selectedLessonId=currentModule()?.lessons[0]?.id||null;renderEditor();break;case'select-lesson':state.selectedModuleId=el.dataset.moduleId;state.selectedLessonId=id;state.tab='curriculum';renderEditor();break;case'add-lesson':{const mod=c.modules.find(x=>x.id===id);if(!mod)break;const nl=makeLesson(mod.lessons.length+1);nl.title=`Lesson ${c.modules.indexOf(mod)+1}.${mod.lessons.length+1} — New lesson`;mod.lessons.push(nl);state.selectedModuleId=mod.id;state.selectedLessonId=nl.id;state.tab='curriculum';persist(false);render();break;}case'delete-module':{if(c.modules.length<=1)break;const i=c.modules.findIndex(x=>x.id===id);c.modules.splice(i,1);state.selectedModuleId=c.modules[0]?.id||null;state.selectedLessonId=c.modules[0]?.lessons[0]?.id||null;persist(false);render();break;}case'delete-lesson':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);if(!mod||mod.lessons.length<=1)break;mod.lessons=mod.lessons.filter(x=>x.id!==id);state.selectedLessonId=mod.lessons[0].id;state.selectedModuleId=mod.id;persist(false);render();break;}case'move-module-up':moveItem(c.modules,id,-1);persist(false);render();break;case'move-module-down':moveItem(c.modules,id,1);persist(false);render();break;case'move-lesson-up':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);moveItem(mod.lessons,id,-1);persist(false);render();break;}case'move-lesson-down':{const mod=c.modules.find(x=>x.id===el.dataset.moduleId);moveItem(mod.lessons,id,1);persist(false);render();break;}case'go-lesson':state.tab='lesson';renderEditor();break;case'go-questions':state.tab='questions';renderEditor();break;case'go-curriculum':state.tab='curriculum';renderEditor();break;case'add-outcome':c.outcomes.push('New learning outcome');persist(false);renderEditor();break;case'remove-outcome':c.outcomes.splice(Number(el.dataset.index),1);persist(false);renderEditor();break;case'add-question':l.questions.push(defaultQuestion());persist(false);renderEditor();break;case'remove-question':if(l.questions.length>1)l.questions=l.questions.filter(q=>q.id!==id);persist(false);renderEditor();break;case'correct-option':{const q=l.questions.find(q=>q.id===el.dataset.qid);if(q)q.correctIndex=Number(el.dataset.index);schedulePersist();break;}case'insert-image-reference':if(l.image){l.content+=`\n\n![${l.image.alt||'Course figure'}](asset://${l.image.id||uid('asset')})\n`;state.tab='lesson';persist(false);renderEditor();toast('Image reference added to lesson Markdown.');}break;case'remove-image':l.image=null;persist(false);renderEditor();break;case'refresh-website-preview':refreshBuilderWebsitePreview(true);break;case'preview-select-lesson':state.selectedModuleId=el.dataset.moduleId;state.selectedLessonId=id;renderEditor();break;case'check-preview':{const q=l.questions.find(q=>q.id===id);const checked=$(`input[name="pv-${CSS.escape(id)}"]:checked`);const box=$(`#feedback-${CSS.escape(id)}`);if(!checked){toast('Select an answer first.');break;}const optionLabels=$('#workspace').querySelectorAll('[data-preview-option="'+CSS.escape(id)+'"]');optionLabels.forEach(label=>{const optionIndex=Number(label.dataset.optionIndex);const marker=label.querySelector('.answer-result');label.classList.remove('is-correct','is-incorrect');if(marker)marker.textContent='';if(optionIndex===Number(q.correctIndex)){label.classList.add('is-correct');if(marker)marker.textContent='✓ Correct answer';}else if(optionIndex===Number(checked.value)){label.classList.add('is-incorrect');if(marker)marker.textContent='✕ Your answer';}});box.classList.add('show');const isRight=Number(checked.value)===Number(q.correctIndex);box.textContent=(isRight?'Correct. ':'Incorrect. The correct answer is highlighted in green. ')+q.explanation;break;}}
   }
   function updateAnswerChoice(el){
     const lesson=currentLesson();
@@ -4285,58 +4222,12 @@ body.builder-dialog-open { overflow:hidden; }
     if(help)help.textContent=group.imageIds.length+' selected. Choose one to four images; each image has its own title and optional caption.';
     persist(false);
   });
-  document.addEventListener('input', event => {
-    const el = event.target;
-    if (el.matches('[data-regional-block][data-field]')) {
-      const lesson = currentLesson();
-      const block = (lesson?.regionalBlocks || []).find(item => String(item.id) === String(el.dataset.regionalBlock));
-      if (block) { block[el.dataset.field] = el.value; schedulePersist(); }
-      return;
-    }
-    if (el.matches('[data-regional-variant][data-field]') && el.type !== 'checkbox' && el.tagName !== 'SELECT') {
-      const lesson = currentLesson();
-      const block = (lesson?.regionalBlocks || []).find(item => String(item.id) === String(el.dataset.blockId));
-      const variant = (block?.variants || []).find(item => String(item.id) === String(el.dataset.regionalVariant));
-      if (variant) { variant[el.dataset.field] = el.value; schedulePersist(); }
-    }
-  });
-  document.addEventListener('focusin', event => {
-    const select = event.target.closest?.('select[data-regional-variant][data-field="code"][data-regional-code-scope]');
-    if (!select || select.dataset.regionalOptionsLoaded === 'true') return;
-    const current = select.value;
-    const choices = select.dataset.regionalCodeScope === 'region'
-      ? regionalRegionOptions.map(code => '<option value="' + esc(code) + '">' + esc(code) + '</option>').join('')
-      : regionalCountryOptions.map(([code, label]) => '<option value="' + esc(code) + '">' + esc(label) + ' (' + esc(code) + ')</option>').join('');
-    select.innerHTML = choices;
-    if (!Array.from(select.options).some(option => option.value === current)) {
-      const fallback = document.createElement('option');
-      fallback.value = current;
-      fallback.textContent = current;
-      select.appendChild(fallback);
-    }
-    select.value = current;
-    select.dataset.regionalOptionsLoaded = 'true';
-  }, true);
   document.addEventListener('change', event => {
     const el = event.target;
     if (el.id === 'lessonContentAudienceSelect') {
       flushVisualEditorSync();
       state.lessonContentAudience = el.value || 'GLOBAL';
       renderEditor();
-      return;
-    }
-    if (el.matches('[data-regional-variant][data-field]')) {
-      const lesson = currentLesson();
-      const block = (lesson?.regionalBlocks || []).find(item => String(item.id) === String(el.dataset.blockId));
-      const variant = (block?.variants || []).find(item => String(item.id) === String(el.dataset.regionalVariant));
-      if (!variant) return;
-      if (el.dataset.field === 'hidden') variant.hidden = el.checked;
-      else {
-        variant[el.dataset.field] = el.value;
-        if (el.dataset.field === 'scope') variant.code = el.value === 'region' ? 'APAC' : 'IN';
-      }
-      persist(false);
-      if (el.tagName === 'SELECT') renderEditor();
       return;
     }
     if (el.id === 'previewAudienceSelect' && state.tab === 'preview') renderEditor();
