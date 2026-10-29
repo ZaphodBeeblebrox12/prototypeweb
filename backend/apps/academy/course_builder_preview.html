@@ -982,7 +982,7 @@ body.builder-dialog-open { overflow:hidden; }
       <button class="btn secondary" id="publishButton" type="button">Submit for review</button>
     </div>
   </header>
-  <div class="notice"><strong>Academy workspace</strong><span data-image-storage-status>Checking image-storage configuration… Course drafts are saved to the shared Academy database. Submit a course for review before publishing it to the Courses catalogue. Pricing and checkout remain separate.</span></div>
+  <div class="notice"><strong>Academy workspace</strong><span data-image-storage-status>Checking image-storage configuration… Course drafts are saved to the shared Academy database. Set course access and pricing here. Submit the course for review before paid checkout is enabled.</span></div>
   <section class="page-head">
     <div><div class="eyebrow">Course operations / Content studio</div><h1>Build a course, one lesson at a time.</h1><p>Create the structure, write and revise lesson content, add figures, set practice questions, then preview the learner experience before publishing it to the course catalogue.</p><div class="page-meta"><span class="pill">Uses the existing Learning Room layout</span><span class="pill">Save and return later</span><span class="pill">Draft → review → publish</span></div></div>
   </section>
@@ -1009,7 +1009,7 @@ body.builder-dialog-open { overflow:hidden; }
   <section class="catalogue" id="catalogueSection">
     <div class="catalogue-head"><div><div class="eyebrow">Public-facing destination · Preview only</div><h2>Courses offered</h2></div><p>When a course is published in the real system, its catalogue card will come from the Django database—not from a hand-edited JavaScript list.</p></div>
     <div class="catalogue-grid" id="catalogueGrid"></div>
-    <div class="draft-footer"><p><strong>Publication is separate from pricing.</strong> A published course can appear in the catalogue, but paid checkout should only activate after its Course Offer, price and access rules are configured in the existing commerce admin.</p><button class="btn small" type="button" id="backToBuilder">Back to builder ↑</button></div>
+    <div class="draft-footer"><p><strong>Prices are set here.</strong> Reviewed pricing is applied when the course is published. Existing payment records keep their original amounts.</p><button class="btn small" type="button" id="backToBuilder">Back to builder ↑</button></div>
   </section>
   <div class="builder-dialog-backdrop" id="builderDialogBackdrop" hidden>
     <section class="builder-dialog" id="builderDialog" role="dialog" aria-modal="true" aria-labelledby="builderDialogTitle" aria-describedby="builderDialogMessage" tabindex="-1">
@@ -4590,7 +4590,7 @@ body.builder-dialog-open { overflow:hidden; }
       const storageStatus = result.asset_storage || {};
       if (storageNotice) {
         if (storageStatus.durable && storageStatus.writes_enabled) {
-          storageNotice.textContent = 'Course drafts are saved to the shared Academy database. Lesson images are configured to use durable private storage via ' + String(storageStatus.label || 'a remote provider') + '. Save the draft after editing images so their files and metadata are stored together. Submit a course for review before publishing it to the Courses catalogue; pricing and checkout remain separate.';
+          storageNotice.textContent = 'Course drafts are saved to the shared Academy database. Lesson images are configured to use durable private storage via ' + String(storageStatus.label || 'a remote provider') + '. Save the draft after editing images so their files and metadata are stored together. Set access and pricing in this Builder, then submit the course for review before checkout is enabled.';
         } else if (storageStatus.writes_enabled) {
           storageNotice.textContent = 'Course drafts are saved to the shared Academy database. Image storage currently points to the local filesystem, which may not survive a staging restart. Configure Google Drive or ACADEMY_GITHUB_ASSET_TOKEN before relying on uploaded figures.';
         } else {
