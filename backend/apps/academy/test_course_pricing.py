@@ -186,5 +186,8 @@ class CourseBuilderPricingTests(TestCase):
         self.assertContains(response, 'id="coursePriceAmount"')
         self.assertContains(response, 'id="coursePriceCurrency"')
         self.assertContains(response, 'id="courseGeoPriceOverrides"')
+        self.assertContains(response, 'id="courseGeoMarket"')
+        self.assertContains(response, 'data-action="save-geo-price"')
+        self.assertContains(response, "Switching markets keeps prices already entered for other markets.")
         self.assertContains(response, "Country and regional prices")
         self.assertNotContains(response, "Display text only. It does not create or activate checkout.")
