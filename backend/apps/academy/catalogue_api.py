@@ -5,6 +5,8 @@ from django.urls import reverse
 from django.utils.cache import patch_vary_headers
 from django.views.decorators.http import require_GET
 
+from apps.subscriptions.models import PlanPrice
+
 from .catalogue_presentation import (
     catalogue_presentation_api_fields,
     catalogue_presentation_from_payload,
@@ -68,6 +70,17 @@ def public_course_catalogue(request):
             if offer.is_active and offer.plan_id and offer.plan.is_active and offer.is_saleable
         ]
         resolved_price = resolved_course_offer_price(offers[0], request) if offers else None
+        has_configured_offer_price = bool(
+            offers
+            and (
+                offers[0].plan.prices.filter(
+                    interval=PlanPrice.Interval.ONE_TIME, is_active=True
+                ).exists()
+                or offers[0].plan.geo_prices.filter(
+                    interval=PlanPrice.Interval.ONE_TIME, is_active=True
+                ).exists()
+            )
+        ) if offers and not resolved_price else bool(resolved_price)
         if resolved_price:
             course_price, _currency = resolved_price
             price_note = (
@@ -82,6 +95,8 @@ def public_course_catalogue(request):
             course_price, price_note, price_configured = "Included in TradeThesis Free", "Free membership access", True
         elif course.access_type == Course.AccessType.MIXED:
             course_price, price_note, price_configured = "Included in TradeThesis Free", "Free membership or individual purchase", True
+        elif course.access_type == Course.AccessType.PAID and has_configured_offer_price:
+            course_price, price_note, price_configured = "", "Individual checkout is not available in your market", True
         else:
             course_price, price_note, price_configured = "", "No active purchase price is configured", False
 
