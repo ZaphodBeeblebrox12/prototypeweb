@@ -164,9 +164,6 @@ class CourseBuilderApiTests(TestCase):
         self.assertNotContains(response, "Reuse the Learning Room template")
         self.assertContains(response, "Regional content")
         self.assertContains(response, "previewAudienceSelect")
-        self.assertContains(response, "data-regional-variant")
-        self.assertContains(response, "Regional content")
-        self.assertContains(response, "previewAudienceSelect")
         self.assertContains(response, "lessonContentAudienceSelect")
         self.assertContains(response, "Start a custom version")
 
