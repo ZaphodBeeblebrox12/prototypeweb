@@ -4462,7 +4462,7 @@ body.builder-dialog-open { overflow:hidden; }
       headers['X-CSRFToken'] = csrfValue();
     }
     const controller = typeof AbortController === 'function' ? new AbortController() : null;
-    const timeoutMs = method === 'GET' ? 20000 : 100000;
+    const timeoutMs = method === 'GET' ? 20000 : (body?.mode === 'submit' ? 100000 : 30000);
     const timeoutId = window.setTimeout(() => controller?.abort(), timeoutMs);
     let response;
     try {
@@ -4544,7 +4544,7 @@ body.builder-dialog-open { overflow:hidden; }
     academySaving = true;
     try {
       const revisionAtStart=editRevision;
-      const result = await academyRequest('POST', {course, mode:submit?'submit':'save', sync_source:notify || submit});
+      const result = await academyRequest('POST', {course, mode:submit?'submit':'save', sync_source:submit});
       course.serverDraftId = result.record_id;
       course.serverUpdatedAt = result.updated_at || new Date().toISOString();
       // Replace only the image payloads with their protected server URLs. Do not overwrite

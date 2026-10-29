@@ -656,6 +656,46 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(migrated_id, stable_id)
         self.assertEqual(migrated_asset.pk, asset.pk)
 
+    def test_existing_durable_asset_does_not_issue_duplicate_remote_lookup(self):
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(self.draft_payload("builder-existing-drive-image")),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        record = CourseImport.objects.get(pk=response.json()["record_id"])
+        asset = CourseImportAsset.objects.create(
+            course_import=record,
+            asset_key="builder/existing-drive-image",
+            stable_asset_id=uuid.uuid4(),
+            file="academy/course-imports/existing-drive-image.png",
+        )
+
+        with (
+            patch(
+                "apps.academy.course_builder_api.course_asset_storage.status",
+                return_value={
+                    "backend": "google_drive",
+                    "label": "Google Drive",
+                    "durable": True,
+                    "writes_enabled": True,
+                },
+            ),
+            patch(
+                "apps.academy.course_builder_api.course_asset_storage.remote_exists",
+                return_value=True,
+            ) as remote_exists,
+            patch("apps.academy.course_builder_api.course_asset_storage.exists") as storage_exists,
+            patch("apps.academy.course_builder_api._copy_existing_asset") as migrate_asset,
+        ):
+            from .course_builder_api import _store_images
+
+            _store_images(record, {})
+
+        remote_exists.assert_called_once_with(asset.file.name)
+        storage_exists.assert_not_called()
+        migrate_asset.assert_not_called()
+
     def test_drive_image_write_failure_returns_retryable_storage_error(self):
         payload = self.draft_payload("builder-drive-image-storage-failure")
         lesson = payload["course"]["modules"][0]["lessons"][0]
@@ -2258,7 +2298,12 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
                 self.assertIn(marker, source)
         self.assertIn("requestDiagnostic.payloadKeys", source)
         self.assertIn("requestDiagnostic.payloadSummary", source)
-        self.assertIn("const timeoutMs = method === 'GET' ? 20000 : 100000;", source)
+        self.assertIn(
+            "const timeoutMs = method === 'GET' ? 20000 : (body?.mode === 'submit' ? 100000 : 30000);",
+            source,
+        )
+        self.assertIn("sync_source:submit", source)
+        self.assertNotIn("sync_source:notify || submit", source)
         self.assertNotIn("fetch('/staff/course-builder/diagnostics", source)
 
     def test_builder_preview_routes_selected_lesson_to_academy_template(self):
