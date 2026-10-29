@@ -26,6 +26,8 @@ class GoogleDriveStorageMixin:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._drive_session_cache = None
+        self._drive_session_cache_fingerprint = None
+        self._drive_session_auth_source = "unknown"
 
     def _credential_record(self):
         try:
@@ -39,21 +41,33 @@ class GoogleDriveStorageMixin:
     def _service_account_json(self):
         return str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON", "") or "").strip()
 
-    @property
-    def _refresh_token(self):
+    def _oauth_refresh_token(self):
+        """Return the current OAuth token and its source without logging the token.
+
+        An OAuth connection made through the staff UI must take effect even when
+        an older environment token is configured. Environment credentials remain
+        the fallback for deployments without a stored, decryptable OAuth token.
+        """
+        record = self._credential_record()
+        if record and record.encrypted_refresh_token:
+            try:
+                token = str(record.get_refresh_token() or "").strip()
+                if token:
+                    return token, "database"
+            except Exception:
+                logger.warning(
+                    "Stored Google Drive OAuth credential could not be decrypted; "
+                    "checking configured environment credentials."
+                )
+
         configured = str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_REFRESH_TOKEN", "") or "").strip()
         if configured:
-            return configured
-        record = self._credential_record()
-        if not record or not record.encrypted_refresh_token:
-            return ""
-        try:
-            return record.get_refresh_token()
-        except Exception:
-            logger.warning(
-                "Stored Google Drive credential could not be decrypted; using another configured storage backend if available."
-            )
-            return ""
+            return configured, "environment"
+        return "", "none"
+
+    @property
+    def _refresh_token(self):
+        return self._oauth_refresh_token()[0]
 
     @property
     def _asset_folder_id(self):
@@ -95,41 +109,70 @@ class GoogleDriveStorageMixin:
         return bool(configured and self._asset_folder_id)
 
     def _drive_session(self):
-        if self._drive_session_cache is not None:
+        service_account_json = self._service_account_json
+        refresh_token, refresh_token_source = self._oauth_refresh_token()
+        client_id = str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_ID", "") or "").strip()
+        client_secret = str(
+            getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET", "") or ""
+        ).strip()
+        token_uri = str(
+            getattr(
+                settings,
+                "ACADEMY_GOOGLE_DRIVE_TOKEN_URI",
+                "https://oauth2.googleapis.com/token",
+            )
+        )
+
+        # A cached Django storage instance can outlive a staff OAuth reconnect.
+        # Fingerprint the auth configuration (never log it) so changed credentials
+        # replace the old AuthorizedSession automatically.
+        fingerprint_payload = [
+            service_account_json,
+            refresh_token,
+            refresh_token_source,
+            client_id,
+            client_secret,
+            token_uri,
+        ]
+        fingerprint = hashlib.sha256(
+            json.dumps(fingerprint_payload, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
+        if (
+            self._drive_session_cache is not None
+            and self._drive_session_cache_fingerprint == fingerprint
+        ):
             return self._drive_session_cache
+
         try:
             from google.auth.transport.requests import AuthorizedSession
 
-            client_id = str(getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_ID", "") or "").strip()
-            client_secret = str(
-                getattr(settings, "ACADEMY_GOOGLE_DRIVE_CLIENT_SECRET", "") or ""
-            ).strip()
-            if self._refresh_token and client_id and client_secret:
+            # Match the advertised policy: use service-account credentials when
+            # present; otherwise use the stored or environment OAuth refresh token.
+            if service_account_json:
+                from google.oauth2 import service_account
+
+                credentials = service_account.Credentials.from_service_account_info(
+                    json.loads(service_account_json), scopes=[DRIVE_SCOPE]
+                )
+                auth_source = "service_account"
+            elif refresh_token and client_id and client_secret:
                 from google.oauth2.credentials import Credentials
 
                 credentials = Credentials(
                     token=None,
-                    refresh_token=self._refresh_token,
-                    token_uri=str(
-                        getattr(
-                            settings,
-                            "ACADEMY_GOOGLE_DRIVE_TOKEN_URI",
-                            "https://oauth2.googleapis.com/token",
-                        )
-                    ),
+                    refresh_token=refresh_token,
+                    token_uri=token_uri,
                     client_id=client_id,
                     client_secret=client_secret,
                     scopes=[DRIVE_SCOPE],
                 )
-            elif self._service_account_json:
-                from google.oauth2 import service_account
-
-                credentials = service_account.Credentials.from_service_account_info(
-                    json.loads(self._service_account_json), scopes=[DRIVE_SCOPE]
-                )
+                auth_source = f"oauth_{refresh_token_source}"
             else:
                 raise ImproperlyConfigured("Google Drive credentials are not configured.")
+
             self._drive_session_cache = AuthorizedSession(credentials)
+            self._drive_session_cache_fingerprint = fingerprint
+            self._drive_session_auth_source = auth_source
         except ImportError as exc:
             raise ImproperlyConfigured("Google Drive dependencies are not installed.") from exc
         except ImproperlyConfigured:
@@ -147,8 +190,13 @@ class GoogleDriveStorageMixin:
                 **kwargs,
             )
         except Exception as exc:
+            provider_error = self._safe_provider_error_code(exc)
             logger.warning(
-                "Google Drive request could not be completed (%s).", exc.__class__.__name__
+                "Google Drive request could not be completed "
+                "(%s; source=%s; provider_error=%s).",
+                exc.__class__.__name__,
+                self._drive_session_auth_source,
+                provider_error,
             )
             raise OSError("Google Drive course storage is temporarily unavailable.") from exc
         if response.status_code not in expected:
@@ -157,6 +205,30 @@ class GoogleDriveStorageMixin:
             )
             raise OSError(f"Google Drive course storage returned HTTP {response.status_code}.")
         return response
+
+    @staticmethod
+    def _safe_provider_error_code(exc):
+        """Extract only an allowlisted OAuth error code; never log tokens or descriptions."""
+        allowed = {
+            "access_denied",
+            "invalid_client",
+            "invalid_grant",
+            "invalid_request",
+            "insufficient_scope",
+            "server_error",
+            "temporarily_unavailable",
+            "unauthorized_client",
+        }
+        for argument in getattr(exc, "args", ()):
+            if isinstance(argument, dict):
+                code = str(argument.get("error") or "").strip()
+                if code in allowed:
+                    return code
+            elif isinstance(argument, str):
+                code = argument.split(":", 1)[0].strip()
+                if code in allowed:
+                    return code
+        return "unknown"
 
     @staticmethod
     def _logical_hash(logical_key):
