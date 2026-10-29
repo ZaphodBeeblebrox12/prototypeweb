@@ -51,7 +51,7 @@ def test_confirmation_email_carries_safe_course_destination():
     request = RequestFactory().post(
         "/accounts/signup/",
         {"next": COURSE_DESTINATION},
-        HTTP_HOST="academy.test",
+        HTTP_HOST="testserver",
     )
     email_address = SimpleNamespace(
         user=SimpleNamespace(email="learner@example.com"),
@@ -85,7 +85,7 @@ def test_confirmation_destination_rejects_external_redirects():
     request = RequestFactory().post(
         "/accounts/signup/",
         {"next": "https://evil.example/collect"},
-        HTTP_HOST="academy.test",
+        HTTP_HOST="testserver",
     )
 
     assert adapter._safe_redirect_destination(request) == ""
