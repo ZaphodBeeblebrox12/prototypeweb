@@ -79,6 +79,17 @@ def test_confirmation_email_carries_safe_course_destination():
     assert parse_qs(url.query)["next"] == [COURSE_DESTINATION]
 
 
+
+def test_email_confirmation_returns_to_the_requested_course():
+    """After email confirmation, the destination comes from the validated link."""
+    adapter = CustomAccountAdapter()
+    request = RequestFactory().get(
+        "/accounts/confirm-email/test-key/",
+        {"next": COURSE_DESTINATION},
+    )
+
+    assert adapter.get_email_confirmation_redirect_url(request) == COURSE_DESTINATION
+
 def test_confirmation_destination_rejects_external_redirects():
     """An attacker cannot turn the course return parameter into an open redirect."""
     adapter = CustomAccountAdapter()
