@@ -1,5 +1,6 @@
 import base64
 import json
+import re
 import uuid
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -2042,6 +2043,48 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIsNone(response.json().get("trading_path_import_candidate"))
 
+
+    def test_support_resistance_import_includes_six_modules_eighteen_lessons_and_safe_charts(self):
+        response = self.client.get(
+            reverse("staff_course_builder_preview"),
+            {"import": "support-resistance"},
+        )
+        self.assertEqual(response.status_code, 200, response.content[:1000])
+        document = response.content.decode("utf-8")
+        match = re.search(
+            r'<script type="application/json" id="courseBuilderImportedDraft">(.*?)</script>',
+            document,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(match, "The bundled draft payload should be injected for import.")
+        payload = json.loads(match.group(1))
+        course = payload["course"]
+        self.assertEqual(course["slug"], "support-resistance-draft")
+        self.assertEqual(course["status"], "draft")
+        self.assertEqual(len(course["modules"]), 6)
+        self.assertEqual(
+            sum(len(module["lessons"]) for module in course["modules"]),
+            18,
+        )
+        lesson_body = json.dumps(course, ensure_ascii=False)
+        self.assertNotIn("ChartLab", lesson_body)
+        self.assertIn("genuine instructor trade record", lesson_body)
+        self.assertIn("authentic failed or invalidated thesis", lesson_body)
+        self.assertIn("Stage 6 — Exit and outcome", lesson_body)
+        self.assertIn("Alternative case — the decision to stand aside", lesson_body)
+        self.assertIn("assessment and rubric remain a draft", lesson_body)
+        hydrated_images = [
+            image
+            for module in course["modules"]
+            for lesson in module["lessons"]
+            for image in lesson.get("images", [])
+        ]
+        self.assertGreaterEqual(len(hydrated_images), 18)
+        self.assertTrue(all(image["data"].startswith("data:image/png;base64,") for image in hydrated_images))
+        self.assertTrue(all(image["id"].startswith("sr-") for image in hydrated_images))
+        self.assertNotIn("imageRefs", lesson_body)
+        self.assertIsNone(course["publishedSnapshot"])
+
 class CourseBuilderPreviewWiringTests(SimpleTestCase):
     def test_empty_notebook_prompts_are_materialized_as_editable_pause_interpret_apply_fields(self):
         source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
@@ -2066,6 +2109,22 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
             "state.tab = 'curriculum';",
             "state.tradingPathOutlineAutoOpened = true;",
             "selectedTradingPath && !state.tradingPathOutlineAutoOpened",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, source)
+
+
+    def test_support_resistance_import_uses_shared_draft_save_flow_without_publishing(self):
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
+        for marker in (
+            "supportResistanceImportRequested",
+            "requestedSupportResistanceDraft",
+            "clearSupportResistanceImportQuery()",
+            "result.drafts",
+            "!supportResistanceImportRequested && candidateCourse",
+            "await saveCurrentToAcademy(false, false)",
+            "Imported Support & Resistance as an editable 18-lesson draft. Nothing was published.",
+            "Opened the existing Support & Resistance draft. No duplicate was created or published.",
         ):
             with self.subTest(marker=marker):
                 self.assertIn(marker, source)

@@ -1334,6 +1334,24 @@ body.builder-dialog-open { overflow:hidden; }
     url.searchParams.delete('import');
     window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
   }
+  const supportResistanceImportRequested = new URLSearchParams(window.location.search).get('import') === 'support-resistance';
+  let requestedSupportResistanceDraft = null;
+  if (supportResistanceImportRequested) {
+    try {
+      const importNode = document.getElementById('courseBuilderImportedDraft');
+      const importPayload = JSON.parse(importNode?.textContent || '{}');
+      if (importPayload?.course && typeof importPayload.course === 'object') {
+        requestedSupportResistanceDraft = normalizeCourseState(importPayload.course);
+      }
+    } catch (error) {
+      console.error('Could not read the Support & Resistance import payload.', error);
+    }
+  }
+  function clearSupportResistanceImportQuery() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('import');
+    window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+  }
   diagnosticStage('browser-state-normalization-started');
   let state=normalizeLoadedState(load());
   if (requestedTradingPathDraft) {
@@ -1354,6 +1372,26 @@ body.builder-dialog-open { overflow:hidden; }
     state.tradingPathOutlineAutoOpened = true;
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (error) {
       console.warn('The imported Trading Path draft could not be cached in this browser.', error);
+    }
+  }
+  if (requestedSupportResistanceDraft) {
+    // The source is a bundled draft package; preserve all other non-placeholder drafts.
+    state.courses = state.courses.filter(local => !isUntouchedStarterDraft(local));
+    let importedCourse = state.courses.find(local =>
+      String(local.slug || '') === String(requestedSupportResistanceDraft.slug || '')
+    );
+    if (!importedCourse) {
+      state.courses.unshift(requestedSupportResistanceDraft);
+      importedCourse = requestedSupportResistanceDraft;
+    }
+    state.selectedCourseId = importedCourse.id;
+    state.selectedModuleId = importedCourse.modules?.[0]?.id || null;
+    state.selectedLessonId = importedCourse.modules?.[0]?.lessons?.[0]?.id || null;
+    state.view = 'editor';
+    state.tab = 'curriculum';
+    state.supportResistanceOutlineAutoOpened = true;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (error) {
+      console.warn('The imported Support & Resistance draft could not be cached in this browser.', error);
     }
   }
   diagnosticStage('browser-state-normalization-complete', {courseCount:state.courses.length, selectedCoursePresent:Boolean(state.selectedCourseId)});
@@ -4866,7 +4904,7 @@ body.builder-dialog-open { overflow:hidden; }
       let autoImportedTradingPath = false;
       const tradingPathCandidate = result.trading_path_import_candidate;
       const candidateCourse = tradingPathCandidate && tradingPathCandidate.course;
-      if (candidateCourse && typeof candidateCourse === 'object' &&
+      if (!supportResistanceImportRequested && candidateCourse && typeof candidateCourse === 'object' &&
           !remoteDrafts.some(remote => String(remote.slug || '') === String(candidateCourse.slug || ''))) {
         let importedCourse = state.courses.find(local =>
           String(local.slug || '') === String(candidateCourse.slug || '')
@@ -4892,6 +4930,22 @@ body.builder-dialog-open { overflow:hidden; }
       if (selectedTradingPath && !state.tradingPathOutlineAutoOpened) {
         state.tab = 'curriculum';
         state.tradingPathOutlineAutoOpened = true;
+        stateChanged = true;
+      }
+      if (supportResistanceImportRequested && requestedSupportResistanceDraft) {
+        let importedCourse = state.courses.find(local =>
+          String(local.slug || '') === String(requestedSupportResistanceDraft.slug || '')
+        );
+        if (!importedCourse) {
+          importedCourse = normalizeCourseState(requestedSupportResistanceDraft);
+          state.courses.unshift(importedCourse);
+        }
+        state.selectedCourseId = importedCourse.id;
+        state.selectedModuleId = importedCourse.modules?.[0]?.id || null;
+        state.selectedLessonId = importedCourse.modules?.[0]?.lessons?.[0]?.id || null;
+        state.view = 'editor';
+        state.tab = 'curriculum';
+        state.supportResistanceOutlineAutoOpened = true;
         stateChanged = true;
       }
       academyReady = true;
@@ -4949,6 +5003,36 @@ body.builder-dialog-open { overflow:hidden; }
               toast('Imported all Trading Path content as an editable Academy draft. Nothing was published.');
             } catch (saveError) {
               toast('Trading Path content is loaded in the editor, but shared saving failed: ' + String(saveError?.message || saveError));
+            }
+          }
+        }
+      } else if (supportResistanceImportRequested && requestedSupportResistanceDraft) {
+        const desiredSlug = String(requestedSupportResistanceDraft.slug || '');
+        const importedCourse = state.courses.find(item => String(item.slug || '') === desiredSlug);
+        if (!importedCourse) {
+          toast('The Support & Resistance content was not found in the editor state. Reopen the import link to retry.');
+        } else {
+          state.selectedCourseId = importedCourse.id;
+          state.selectedModuleId = importedCourse.modules?.[0]?.id || null;
+          state.selectedLessonId = importedCourse.modules?.[0]?.lessons?.[0]?.id || null;
+          state.view = 'editor';
+          state.tab = 'curriculum';
+          state.supportResistanceOutlineAutoOpened = true;
+          render();
+          const savedRemoteDraft = remoteDrafts.find(item => String(item.slug || '') === desiredSlug);
+          if (savedRemoteDraft) {
+            clearSupportResistanceImportQuery();
+            toast('Opened the existing Support & Resistance draft. No duplicate was created or published.');
+          } else {
+            clearTimeout(academySaveTimer);
+            try {
+              await saveCurrentToAcademy(false, false);
+              clearSupportResistanceImportQuery();
+              renderSidebar();
+              renderHeaderState();
+              toast('Imported Support & Resistance as an editable 18-lesson draft. Nothing was published.');
+            } catch (saveError) {
+              toast('Support & Resistance is loaded in the Builder, but saving to the shared Academy failed: ' + String(saveError?.message || saveError));
             }
           }
         }
