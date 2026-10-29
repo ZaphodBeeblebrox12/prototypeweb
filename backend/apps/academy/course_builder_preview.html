@@ -376,6 +376,7 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .offer-card p { font-size:13px; line-height:1.75; }
 .btn { border-radius:999px; padding:11px 16px; font-size:12px; }
 @media(max-width:1100px) {
+  .app-layout { grid-template-columns:220px minmax(0,1fr); gap:14px; }
   .preview-split { grid-template-columns:minmax(0,1fr); }
   .preview-lesson-nav { order:-1; }
   .preview-lesson-nav div { gap:8px; }
@@ -383,6 +384,9 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 }
 @media(max-width:760px) {
   .app-layout { grid-template-columns:minmax(0,1fr); }
+  .tabs { padding:0 10px; }
+  .tab { padding:12px 8px 10px; font-size:10px; }
+  .lesson-body-audience-top { grid-template-columns:minmax(0,1fr); }
   .page-head { padding-top:26px; }
   .page-head h1 { font-size:clamp(33px,7.8vw,46px); }
   .editor-header { padding:19px; }
