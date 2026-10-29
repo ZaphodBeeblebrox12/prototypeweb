@@ -1,5 +1,6 @@
 """Mocked regression tests for the Drive adapter."""
 
+import hashlib
 from unittest.mock import Mock, patch
 
 from django.core.exceptions import ImproperlyConfigured, SuspiciousFileOperation
@@ -31,6 +32,30 @@ class GoogleDriveCourseStorageTests(SimpleTestCase):
     )
     def test_oauth_client_without_authorization_keeps_drive_disabled(self):
         self.assertFalse(self.storage._drive_asset_enabled)
+
+    def test_matching_existing_drive_content_is_not_uploaded_twice(self):
+        raw = b"same image bytes after a timed-out request"
+        existing = {
+            "id": "previous-upload",
+            "name": "figure.png",
+            "md5Checksum": hashlib.md5(raw).hexdigest(),
+            "properties": {"tradeThesisPathHash": "key"},
+        }
+        with (
+            patch.object(self.storage, "_find_drive_file", return_value=existing) as find,
+            patch.object(self.storage, "_drive_request") as drive_request,
+        ):
+            result = self.storage._write_drive_bytes(
+                name="figure.png",
+                logical_key="course-assets/example/figure.png",
+                folder_id="asset-folder-test",
+                raw=raw,
+                content_type="image/png",
+            )
+
+        find.assert_called_once_with("course-assets/example/figure.png", "asset-folder-test")
+        self.assertEqual(result, existing)
+        drive_request.assert_not_called()
 
     def test_status_reports_configured_drive_as_durable(self):
         self.assertEqual(

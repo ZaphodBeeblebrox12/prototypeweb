@@ -7,6 +7,7 @@ import json
 import logging
 import mimetypes
 import re
+import time
 import uuid
 from copy import deepcopy
 from io import BytesIO
@@ -1676,6 +1677,11 @@ def course_builder_api(request):
             }
         )
 
+    save_started = time.monotonic()
+    logger.info(
+        "Course Builder write request received: body_bytes=%s",
+        request.META.get("CONTENT_LENGTH", "unknown"),
+    )
     try:
         body = json.loads(request.body.decode("utf-8"))
         if not isinstance(body, dict):
@@ -1782,6 +1788,15 @@ def course_builder_api(request):
                 )
         course_state["slug"] = slug
         payload, image_sources = _build_import_payload(course_state, slug)
+        inline_image_count = sum(
+            1 for source in image_sources.values() if str(source).startswith("data:")
+        )
+        logger.info(
+            "Course Builder payload prepared: slug=%s inline_image_count=%s body_bytes=%s",
+            slug,
+            inline_image_count,
+            request.META.get("CONTENT_LENGTH", "unknown"),
+        )
         if not payload["modules"]:
             return JsonResponse({"detail": "Add at least one module before saving."}, status=400)
         for module in payload["modules"]:
@@ -1996,7 +2011,14 @@ def course_builder_api(request):
                         )
                     removed_asset.delete()
 
+            image_store_started = time.monotonic()
             _store_images(record, image_sources)
+            logger.info(
+                "Course Builder image persistence completed: slug=%s inline_image_count=%s duration_ms=%s",
+                slug,
+                inline_image_count,
+                int((time.monotonic() - image_store_started) * 1000),
+            )
             errors = validate_import_for_publish(record)
             if mode == "submit" and errors:
                 return JsonResponse(
@@ -2009,9 +2031,22 @@ def course_builder_api(request):
             # Keep review transitions and stale-asset deletion until after a
             # requested remote source snapshot has been confirmed.
 
+        logger.info(
+            "Course Builder draft transaction completed: slug=%s elapsed_ms=%s",
+            slug,
+            int((time.monotonic() - save_started) * 1000),
+        )
+        source_sync_started = time.monotonic()
         source_snapshot_backend = (
             _sync_course_source_to_storage(payload, slug) if sync_source_requested else None
         )
+        if sync_source_requested:
+            logger.info(
+                "Course Builder source snapshot completed: slug=%s backend=%s duration_ms=%s",
+                slug,
+                source_snapshot_backend,
+                int((time.monotonic() - source_sync_started) * 1000),
+            )
         github_source_synced = (
             source_snapshot_backend == "github" if source_snapshot_backend is not None else None
         )

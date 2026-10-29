@@ -4462,7 +4462,8 @@ body.builder-dialog-open { overflow:hidden; }
       headers['X-CSRFToken'] = csrfValue();
     }
     const controller = typeof AbortController === 'function' ? new AbortController() : null;
-    const timeoutId = window.setTimeout(() => controller?.abort(), 20000);
+    const timeoutMs = method === 'GET' ? 20000 : 100000;
+    const timeoutId = window.setTimeout(() => controller?.abort(), timeoutMs);
     let response;
     try {
       response = await fetch('/staff/course-builder/api/', {
@@ -4483,7 +4484,9 @@ body.builder-dialog-open { overflow:hidden; }
       requestDiagnostic.errorMessage = String(error && error.message || error || 'Unknown error').slice(0, 600);
       diagnosticError('api-fetch-failed', error, {method:String(method), url:requestDiagnostic.url});
       if (error?.name === 'AbortError') {
-        throw new Error('The Academy request timed out after 20 seconds. Refresh the builder and check the Academy service.');
+        const timeoutSeconds = Math.round(timeoutMs / 1000);
+        const requestLabel = method === 'GET' ? 'request' : 'save request';
+        throw new Error(`The Academy ${requestLabel} timed out after ${timeoutSeconds} seconds. Your browser draft cache has not been cleared; check the Academy service before retrying.`);
       }
       throw error;
     } finally {

@@ -262,6 +262,13 @@ class GoogleDriveStorageMixin:
 
     def _write_drive_bytes(self, *, name, logical_key, folder_id, raw, content_type):
         existing = self._find_drive_file(logical_key, folder_id)
+        content_md5 = hashlib.md5(raw).hexdigest()
+        if existing and str(existing.get("md5Checksum") or "").lower() == content_md5:
+            # A prior request may have uploaded the bytes before its browser request
+            # timed out. Reuse the confirmed remote object instead of uploading it
+            # again on every retry.
+            logger.info("Drive asset already matches uploaded content; remote write skipped.")
+            return existing
         metadata = {
             "name": name,
             "mimeType": content_type or "application/octet-stream",

@@ -2258,6 +2258,7 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
                 self.assertIn(marker, source)
         self.assertIn("requestDiagnostic.payloadKeys", source)
         self.assertIn("requestDiagnostic.payloadSummary", source)
+        self.assertIn("const timeoutMs = method === 'GET' ? 20000 : 100000;", source)
         self.assertNotIn("fetch('/staff/course-builder/diagnostics", source)
 
     def test_builder_preview_routes_selected_lesson_to_academy_template(self):
