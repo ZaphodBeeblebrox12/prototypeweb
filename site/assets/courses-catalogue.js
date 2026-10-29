@@ -436,7 +436,8 @@
             (incoming.status === "coming-soon"
               ? "This course is being prepared. Full details will be shared closer to launch."
               : "Explore this published course in the TradeThesis Academy."),
-          price: incoming.price || (prior && prior.price) || "",
+          price: incoming.priceConfigured ? (incoming.price || "") : (prior && prior.price) || incoming.price || "",
+          priceNote: incoming.priceConfigured ? (incoming.priceNote || "") : incoming.priceNote || (prior && prior.priceNote) || "",
           priority: role === "flagship" ? 1 : role === "supporting" ? 2 : 3,
           order: catalogueOrder
         };
