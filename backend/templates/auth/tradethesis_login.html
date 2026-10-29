@@ -13,5 +13,5 @@
 <button type="submit" class="primary">Sign in to your member desk ↗</button></form>
 {% get_providers as social_providers %}{% for provider in social_providers %}{% if provider.id == "google" %}<div class="divider">or</div><a class="social-link" href="{% provider_login_url 'google' %}">Continue with Google</a>{% endif %}{% endfor %}
 <p class="form-note">Your sign-in is handled securely by TradeThesis Academy. We never use a preview form for authentication.</p>
-<div class="bottom-row"><span>New here?</span><a href="{% url 'account_signup' %}">Create your account →</a></div>
+<div class="bottom-row"><span>New here?</span><a href="{% url 'account_signup' %}{% if redirect_field_value %}?{{ redirect_field_name }}={{ redirect_field_value|urlencode }}{% endif %}">Create your account →</a></div>
 {% endblock %}
