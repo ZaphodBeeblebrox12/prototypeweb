@@ -2068,7 +2068,7 @@ class CourseBuilderApiTests(TestCase):
         )
         lesson_body = json.dumps(course, ensure_ascii=False)
         self.assertNotIn("ChartLab", lesson_body)
-        self.assertIn("authentic instructor trade record", lesson_body)
+        self.assertIn("genuine instructor trade record", lesson_body)
         self.assertIn("authentic failed or invalidated thesis", lesson_body)
         self.assertIn("Stage 6 — Exit and outcome", lesson_body)
         self.assertIn("Alternative case — the decision to stand aside", lesson_body)
