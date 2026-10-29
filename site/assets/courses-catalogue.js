@@ -90,7 +90,9 @@
   const sameCatalogueCourse = (item, incoming) => {
     if (!item || !incoming) return false;
     const incomingKeys = [incoming.slug, incoming.id].filter(Boolean).map(String);
-    const itemKeys = [item.slug, item.id].filter(Boolean).map(String);
+    // A curated static card may intentionally point at a Builder-managed slug
+    // while retaining its original stable ID and marketing copy.
+    const itemKeys = [item.slug, item.id, item.academySlug].filter(Boolean).map(String);
     return incomingKeys.some(key => itemKeys.includes(key));
   };
   const findStaticProgramme = incoming => (data.programmes || []).find(item => sameCatalogueCourse(item, incoming));

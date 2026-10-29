@@ -150,6 +150,10 @@ jobs:
               throw new Error('Each item must explicitly declare catalogueVisibility in ' + key);
             }
           }
+          const supportResistance = data.microCourses.find(item => item.id === 'support-resistance');
+          if (!supportResistance || supportResistance.academySlug !== 'support-resistance-draft') {
+            throw new Error('The existing Support & Resistance card must point to the Builder-managed Academy slug.');
+          }
           const renderer = fs.readFileSync('site/assets/courses-catalogue.js', 'utf8');
           const required = [
             "const isCatalogueVisible = item => item && item.catalogueVisibility !== 'hidden'",
@@ -159,7 +163,8 @@ jobs:
             'function renderFilterButtons()',
             'const categories = [...new Set(microCourses.map(course => course.category).filter(Boolean))]',
             'publishedTiles.filter(course => course.category === key).length',
-            'shown.length'
+            'shown.length',
+            'const itemKeys = [item.slug, item.id, item.academySlug]'
           ];
           for (const fragment of required) {
             if (!renderer.includes(fragment)) throw new Error('Catalogue is no longer draft-safe and data-driven: missing ' + fragment);

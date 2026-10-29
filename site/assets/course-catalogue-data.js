@@ -76,6 +76,10 @@ window.TRADETHESIS_COURSE_DATA = {
   microCourses: [
     {
       id: "support-resistance",
+      // The Builder draft is kept on a distinct database slug to avoid colliding
+      // with the older seeded course row. Once published, merge it into this
+      // existing curated card instead of rendering a second Support & Resistance tile.
+      academySlug: "support-resistance-draft",
       catalogueVisibility: "visible",
       priority: 3,
       order: 10,
