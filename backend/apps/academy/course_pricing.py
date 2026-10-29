@@ -68,7 +68,7 @@ def parse_course_pricing(state: dict[str, Any]) -> dict[str, Any]:
     price_cents = _amount_to_minor_units(raw_amount, label="Course price")
 
     overrides_text = str(state.get("geoPriceOverrides") or "")
-    geo_prices = []
+    geo_prices: list[dict[str, Any]] = []
     seen_scopes = set()
     allowed_regions = set(COUNTRY_TO_REGION.values())
     for line_number, raw_line in enumerate(overrides_text.splitlines(), start=1):
@@ -98,7 +98,7 @@ def parse_course_pricing(state: dict[str, Any]) -> dict[str, Any]:
                     f"Regional price line {line_number}: use a valid two-letter country code."
                 )
             key = ("country", code)
-            geo_row = {"country": code, "region": None}
+            geo_row: dict[str, Any] = {"country": code, "region": None}
         else:
             if code not in allowed_regions:
                 region_list = ", ".join(sorted(allowed_regions))
@@ -110,11 +110,14 @@ def parse_course_pricing(state: dict[str, Any]) -> dict[str, Any]:
         if key in seen_scopes:
             raise ValidationError(f"Regional price line {line_number}: {scope} {code} is listed more than once.")
         seen_scopes.add(key)
+        override_amount = _amount_to_minor_units(
+            amount_text, label=f"Regional price line {line_number}"
+        )
+        if override_amount is None:
+            raise ValidationError(f"Regional price line {line_number}: enter a price amount.")
         geo_row.update(
             {
-                "price_cents": _amount_to_minor_units(
-                    amount_text, label=f"Regional price line {line_number}"
-                ),
+                "price_cents": override_amount,
                 "currency": override_currency,
             }
         )
@@ -184,7 +187,8 @@ def sync_course_purchase_offer(course: Course, pricing: dict[str, Any]) -> Cours
     )
     price_cents = pricing.get("price_cents")
     currency = str(pricing.get("currency") or "INR").upper()
-    geo_prices = pricing.get("geo_prices") if isinstance(pricing.get("geo_prices"), list) else []
+    raw_geo_prices = pricing.get("geo_prices")
+    geo_prices = raw_geo_prices if isinstance(raw_geo_prices, list) else []
     has_price = price_cents is not None or bool(geo_prices)
     allowed_access = course.access_type in (Course.AccessType.PAID, Course.AccessType.MIXED)
 
@@ -313,8 +317,11 @@ def resolved_course_offer_price(offer: CourseOffer, request) -> tuple[str, str] 
     """Resolve the price for the visitor's market without creating checkout state."""
     if not offer or not offer.is_saleable or not offer.plan_id:
         return None
+    plan = offer.plan
+    if plan is None:
+        return None
     try:
-        price = resolve_plan_price(offer.plan, PlanPrice.Interval.ONE_TIME, request)
+        price = resolve_plan_price(plan, PlanPrice.Interval.ONE_TIME, request)
     except PlanPrice.DoesNotExist:
         return None
     return format_price(price.price_cents, price.currency), price.currency
