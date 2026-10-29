@@ -401,7 +401,7 @@ jobs:
                     { title: "First module", count: "1 lesson", preview: "First preview", points: ["First lesson"] },
                     { title: "Second module", count: "1 lesson", preview: "Second preview", points: ["Second lesson"] }
                   ],
-                  academyUrl: "https://tradethesis-academy-staging.onrender.com/courses/bollinger-bands/"
+                  academyUrl: "https://tradethesis-academy-staging.onrender.com/learn/course/bollinger-bands/"
                 }, {
                   id: "ci-api-support-resistance",
                   slug: "support-resistance",
@@ -576,6 +576,21 @@ jobs:
             assert.equal(await cataloguePage.evaluate(() => document.activeElement?.dataset?.openCourse || ""),
               firstMicroCourseId, "Closing the dialog should restore focus to the originating course card");
             console.log("MICROCOURSE_MODAL_PASS: keyboard open, focus, outline state, preview-only CTA and Escape close.");
+
+            // A genuinely published catalogue item must use its Academy course URL.
+            const publishedCourseOpener = cataloguePage.locator('#cc-micro-grid [data-open-course="bollinger-bands"]');
+            await publishedCourseOpener.waitFor({ state: "visible" });
+            await publishedCourseOpener.focus();
+            await cataloguePage.keyboard.press("Enter");
+            assert.equal(await cataloguePage.locator("#cc-modal-title").innerText(), "Bollinger Bands");
+            const publishedCourseCta = cataloguePage.locator("#cc-course-modal .cc-modal-cta");
+            assert.equal(await publishedCourseCta.evaluate(el => el.tagName), "A",
+              "A published course with an Academy URL must use a real link, not a preview-only button");
+            assert.equal(await publishedCourseCta.getAttribute("href"),
+              "https://tradethesis-academy-staging.onrender.com/learn/course/bollinger-bands/",
+              "The published-course CTA must target the Academy course-detail route");
+            await cataloguePage.keyboard.press("Escape");
+            console.log("PUBLISHED_COURSE_CTA_PASS: Academy course-detail link rendered for published course.");
 
             // Member entry points must hand off to real Django/allauth routes; the password form posts directly to Academy over HTTPS.
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
