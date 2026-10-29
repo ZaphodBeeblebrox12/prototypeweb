@@ -1989,17 +1989,59 @@ def course_builder_api(request):
                 digest = hashlib.sha256(encoded).hexdigest()
 
             if draft is None:
-                record = CourseImport.objects.create(
+                defaults = {
+                    "title": title,
+                    "manifest_version": "course-builder-v1",
+                    "source_manifest": f"builder://{slug}",
+                    "payload": payload,
+                    "status": CourseImport.Status.DRAFT,
+                    "target_course": server_course,
+                    "imported_by": request.user,
+                }
+                # Two retries can reach the create path before either one has
+                # committed a draft row. get_or_create handles the unique
+                # (course_slug, content_hash) race rather than returning HTTP 500.
+                record, created = CourseImport.objects.get_or_create(
                     course_slug=slug,
-                    title=title,
-                    manifest_version="course-builder-v1",
                     content_hash=digest,
-                    source_manifest=f"builder://{slug}",
-                    payload=payload,
-                    status=CourseImport.Status.DRAFT,
-                    target_course=server_course,
-                    imported_by=request.user,
+                    defaults=defaults,
                 )
+                if not created and record.status != CourseImport.Status.DRAFT:
+                    if mode == "submit" and record.status == CourseImport.Status.REVIEW:
+                        review_url = reverse(
+                            "admin:academy_courseimport_review",
+                            args=[record.pk],
+                        )
+                        return JsonResponse(
+                            {
+                                "ok": True,
+                                "submitted": True,
+                                "record_id": str(record.pk),
+                                "review_url": review_url,
+                                "publish_errors": [],
+                                "github_source_synced": None,
+                                "source_snapshot_backend": None,
+                                "source_snapshot_synced": False,
+                                "message": "This course version is already awaiting review. No duplicate submission was created.",
+                            }
+                        )
+                    # The conflicting version became visible after the earlier
+                    # conflict check. Never overwrite an immutable review/published
+                    # import. Fork a new editable version instead.
+                    payload["builder_revision"] = str(uuid.uuid4())
+                    encoded = json.dumps(
+                        payload, sort_keys=True, ensure_ascii=False, separators=(",", ":")
+                    ).encode("utf-8")
+                    digest = hashlib.sha256(encoded).hexdigest()
+                    defaults["payload"] = payload
+                    record, created = CourseImport.objects.get_or_create(
+                        course_slug=slug,
+                        content_hash=digest,
+                        defaults=defaults,
+                    )
+                # Mark the record as preserved even when this request won the
+                # create race and then failed while writing images.
+                draft = record
             else:
                 record = draft
                 if server_course:
