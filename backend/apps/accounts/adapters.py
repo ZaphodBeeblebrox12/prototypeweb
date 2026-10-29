@@ -10,6 +10,8 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from apps.accounts.models import User
 
@@ -95,16 +97,31 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         return email
 
 
+    def _safe_redirect_destination(self, request):
+        """Return a same-site destination requested during the course journey."""
+        candidate = (
+            request.POST.get(self.redirect_field_name)
+            or request.GET.get(self.redirect_field_name)
+        )
+        if candidate and url_has_allowed_host_and_scheme(
+            candidate,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
+        ):
+            return candidate
+        return ""
+
     def get_login_redirect_url(self, request):
-        """Redirect after login - check if email is verified."""
+        """Respect safe return destinations after login while enforcing verification."""
         user = request.user
 
-        # Check if user needs email verification
+        # Do not grant access via an unverified email address.
         if user.email and not self._is_email_verified(user):
-            # Redirect to verification sent page
-            return reverse('account_email_verification_sent')
+            return reverse("account_email_verification_sent")
 
-        return "/dashboard/"
+        # DefaultAccountAdapter validates and honours the requested next= URL,
+        # falling back to LOGIN_REDIRECT_URL when no safe destination is supplied.
+        return super().get_login_redirect_url(request)
 
     def get_logout_redirect_url(self, request):
         return "/"
@@ -128,11 +145,21 @@ class CustomAccountAdapter(DefaultAccountAdapter):
 
     def send_confirmation_mail(self, request, emailconfirmation, signup):
         """Send confirmation email with custom context."""
+        activate_url = self.get_email_confirmation_url(request, emailconfirmation)
+        next_url = self._safe_redirect_destination(request)
+        if next_url:
+            # Email verification is a separate browser visit, so explicitly carry
+            # the safe same-site destination through the confirmation link.
+            parts = urlsplit(activate_url)
+            query = dict(parse_qsl(parts.query, keep_blank_values=True))
+            query[self.redirect_field_name] = next_url
+            activate_url = urlunsplit(
+                (parts.scheme, parts.netloc, parts.path, urlencode(query), parts.fragment)
+            )
+
         ctx = {
             "user": emailconfirmation.email_address.user,
-            "activate_url": self.get_email_confirmation_url(
-                request, emailconfirmation
-            ),
+            "activate_url": activate_url,
             "current_site": get_current_site(request),
             "key": emailconfirmation.key,
         }
