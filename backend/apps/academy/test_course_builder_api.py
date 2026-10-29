@@ -2156,7 +2156,7 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
         self.assertIn("lessonContentAudienceSelect", source)
         self.assertIn("function lessonBodyAudienceControlsMarkup(lesson)", source)
         self.assertIn("function setLessonBodyForAudience(lesson, content, audience)", source)
-        self.assertIn('data-action=\\"start-regional-lesson-content\\"', source)
+        self.assertIn('data-action="start-regional-lesson-content"', source)
         self.assertIn("previewAudienceSelect", source)
 
     def test_local_autosave_is_not_suppressed_by_legacy_preview_view_state(self):
