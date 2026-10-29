@@ -6,7 +6,7 @@ course revision is published. PaymentIntent rows keep their own amount snapshot.
 """
 
 import re
-from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
 from django.core.exceptions import ValidationError
@@ -15,7 +15,6 @@ from django.utils.text import slugify
 
 from apps.subscriptions.models import GeoPlanPrice, Plan, PlanPrice, Product
 from apps.subscriptions.services import COUNTRY_TO_REGION, format_price, resolve_plan_price
-
 from .models import Course, CourseOffer
 
 
