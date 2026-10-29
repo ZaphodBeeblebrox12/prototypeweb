@@ -12,5 +12,5 @@
 <div class="field{% if form.password2.errors %} has-error{% endif %}"><label for="id_password2">Confirm password</label>{{ form.password2 }}{% for error in form.password2.errors %}<p class="field-error">{{ error }}</p>{% endfor %}</div>
 <button type="submit" class="primary">Create your account ↗</button></form>
 <p class="form-note">Email verification and account security remain part of the sign-up process.</p>
-<div class="bottom-row"><span>Already a member?</span><a href="{% url 'account_login' %}">Sign in →</a></div>
+<div class="bottom-row"><span>Already a member?</span><a href="{% url 'account_login' %}{% if redirect_field_value %}?{{ redirect_field_name }}={{ redirect_field_value|urlencode }}{% endif %}">Sign in →</a></div>
 {% endblock %}
