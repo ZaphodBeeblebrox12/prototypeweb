@@ -2158,6 +2158,8 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
         self.assertIn("function setLessonBodyForAudience(lesson, content, audience)", source)
         self.assertIn('data-action="start-regional-lesson-content"', source)
         self.assertIn("previewAudienceSelect", source)
+        self.assertIn("Use Figures for charts and the country/region audience selector above for full-lesson variations.", source)
+        self.assertNotIn("Regional content for country or region differences", source)
 
     def test_local_autosave_is_not_suppressed_by_legacy_preview_view_state(self):
         source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
