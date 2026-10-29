@@ -86,6 +86,9 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
 
 class CustomAccountAdapter(DefaultAccountAdapter):
     """Custom account adapter with email verification support."""
+    # Match django-allauth's default redirect field used by its auth views.
+    redirect_field_name = "next"
+
 
     def clean_email(self, email):
         """Reject duplicate email addresses before the unique DB constraint is hit."""
