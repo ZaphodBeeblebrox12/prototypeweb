@@ -9,9 +9,11 @@ import mimetypes
 import re
 import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from copy import deepcopy
 from io import BytesIO
 from pathlib import Path
+from threading import local
 from urllib.parse import quote
 
 import requests
@@ -967,7 +969,21 @@ class CourseAssetStorageError(OSError):
     """Validated course image could not be persisted to the configured storage."""
 
 
+_ASSET_STORAGE_WORKER_LOCAL = local()
+_MAX_PARALLEL_IMAGE_WRITES = 6
+
+
+def _persist_image_file(storage_class, name, raw):
+    """Write one image through a worker-local storage instance."""
+    storage = getattr(_ASSET_STORAGE_WORKER_LOCAL, "storage", None)
+    if storage is None or type(storage) is not storage_class:
+        storage = storage_class()
+        _ASSET_STORAGE_WORKER_LOCAL.storage = storage
+    return storage.save(name, ContentFile(raw, name=Path(name).name))
+
+
 def _store_images(record, image_sources):
+    pending_writes = []
     for asset in record.assets.all():
         source = image_sources.get(asset.asset_key, "")
         if source.startswith("data:"):
@@ -988,18 +1004,12 @@ def _store_images(record, image_sources):
             except (ValueError, binascii.Error, UnidentifiedImageError, OSError) as exc:
                 raise ValidationError(f"Invalid image {asset.asset_key}: {exc}") from exc
 
-            # Provider failures are not image-validation failures. A Drive token
-            # refresh error must reach the API's 503 handler rather than be
-            # mislabeled as an HTTP 400 bad-image request.
-            try:
-                asset.file.save(f"figure{suffix}", ContentFile(raw), save=True)
-            except Exception as exc:
-                raise CourseAssetStorageError(
-                    f"Could not persist image {asset.asset_key} to course storage."
-                ) from exc
-            asset.alt_text = asset.alt_text[:500]
-            asset.source_error = ""
-            asset.save(update_fields=["alt_text", "source_error", "updated_at"])
+            # Generate the provider key on the request thread, then write image
+            # bytes concurrently. Keep ORM updates on this thread and only commit
+            # file names after every external write has succeeded.
+            storage = asset.file.storage
+            name = asset.file.field.generate_filename(asset, f"figure{suffix}")
+            pending_writes.append((asset, type(storage), name, raw))
         elif asset.file:
             storage = asset.file.storage
             storage_status = storage.status()
@@ -1019,6 +1029,38 @@ def _store_images(record, image_sources):
                 _copy_existing_asset(asset.stable_asset_id, asset)
         else:
             _copy_existing_asset(asset.stable_asset_id, asset)
+
+    if not pending_writes:
+        return
+
+    saved_names = {}
+    failures = []
+    with ThreadPoolExecutor(
+        max_workers=min(_MAX_PARALLEL_IMAGE_WRITES, len(pending_writes)),
+        thread_name_prefix="course-image-write",
+    ) as executor:
+        future_to_write = {
+            executor.submit(_persist_image_file, storage_class, name, raw): (asset, raw)
+            for asset, storage_class, name, raw in pending_writes
+        }
+        for future in as_completed(future_to_write):
+            asset, _raw = future_to_write[future]
+            try:
+                saved_names[asset.pk] = future.result()
+            except Exception as exc:
+                failures.append((asset, exc))
+
+    if failures:
+        failed_asset, cause = failures[0]
+        raise CourseAssetStorageError(
+            f"Could not persist image {failed_asset.asset_key} to course storage."
+        ) from cause
+
+    for asset, _storage_class, _name, _raw in pending_writes:
+        asset.file = saved_names[asset.pk]
+        asset.alt_text = asset.alt_text[:500]
+        asset.source_error = ""
+        asset.save(update_fields=["file", "alt_text", "source_error", "updated_at"])
 
 
 def _retire_legacy_drafts_for_deleted_courses(records):

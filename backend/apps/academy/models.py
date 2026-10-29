@@ -475,7 +475,12 @@ def course_import_asset_upload_to(instance, filename):
     suffix = Path(filename).suffix.lower()
     if suffix not in {".jpg", ".jpeg", ".png", ".webp", ".svg"}:
         suffix = ".png"
-    return f"academy/course-imports/{instance.course_import_id}/{uuid.uuid4().hex}{suffix}"
+    stable_asset_id = getattr(instance, "stable_asset_id", None) or getattr(instance, "pk", None)
+    try:
+        filename_id = uuid.UUID(str(stable_asset_id)).hex if stable_asset_id else uuid.uuid4().hex
+    except (ValueError, TypeError, AttributeError):
+        filename_id = uuid.uuid4().hex
+    return f"academy/course-imports/{instance.course_import_id}/{filename_id}{suffix}"
 
 
 def course_media_asset_upload_to(instance, filename):

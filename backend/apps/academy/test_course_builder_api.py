@@ -656,6 +656,28 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(migrated_id, stable_id)
         self.assertEqual(migrated_asset.pk, asset.pk)
 
+    def test_course_import_asset_upload_path_is_stable_for_retry(self):
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(self.draft_payload("builder-stable-image-path")),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        record = CourseImport.objects.get(pk=response.json()["record_id"])
+        stable_id = uuid.uuid4()
+        asset = CourseImportAsset.objects.create(
+            course_import=record,
+            asset_key="builder/stable-image-path",
+            stable_asset_id=stable_id,
+        )
+
+        from .models import course_import_asset_upload_to
+
+        first_path = course_import_asset_upload_to(asset, "figure.png")
+        second_path = course_import_asset_upload_to(asset, "figure.png")
+        self.assertEqual(first_path, second_path)
+        self.assertIn(stable_id.hex, first_path)
+
     def test_existing_durable_asset_does_not_issue_duplicate_remote_lookup(self):
         response = self.client.post(
             reverse("staff_course_builder_api"),
@@ -714,7 +736,7 @@ class CourseBuilderApiTests(TestCase):
         lesson["image"] = lesson["images"][0]
 
         with patch(
-            "apps.academy.course_builder_api.course_asset_storage.save",
+            "apps.academy.course_builder_api._persist_image_file",
             side_effect=OSError("Google Drive invalid_grant"),
         ):
             response = self.client.post(
