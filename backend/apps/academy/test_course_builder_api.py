@@ -2,6 +2,7 @@ import base64
 import json
 import re
 import uuid
+from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
@@ -11,6 +12,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
+from PIL import Image
 
 from .models import (
     Course,
@@ -653,6 +655,37 @@ class CourseBuilderApiTests(TestCase):
         migrated_id, migrated_asset = migrate_asset.call_args.args
         self.assertEqual(migrated_id, stable_id)
         self.assertEqual(migrated_asset.pk, asset.pk)
+
+    def test_drive_image_write_failure_returns_retryable_storage_error(self):
+        payload = self.draft_payload("builder-drive-image-storage-failure")
+        lesson = payload["course"]["modules"][0]["lessons"][0]
+        png = BytesIO()
+        Image.new("RGB", (2, 2), color=(255, 255, 255)).save(png, format="PNG")
+        lesson["images"] = [
+            {
+                "id": "drive-write-failure-figure",
+                "name": "figure.png",
+                "title": "Storage failure test figure",
+                "alt": "A small test figure",
+                "caption": "Used to verify storage failure handling.",
+                "data": "data:image/png;base64," + base64.b64encode(png.getvalue()).decode("ascii"),
+            }
+        ]
+        lesson["image"] = lesson["images"][0]
+
+        with patch(
+            "apps.academy.course_builder_api.course_asset_storage.save",
+            side_effect=OSError("Google Drive invalid_grant"),
+        ):
+            response = self.client.post(
+                reverse("staff_course_builder_api"),
+                data=json.dumps(payload),
+                content_type="application/json",
+            )
+
+        self.assertEqual(response.status_code, 503, response.content)
+        self.assertTrue(response.json()["retryable"])
+        self.assertIn("temporarily unavailable", response.json()["detail"])
 
     def test_catalogue_presentation_fields_persist_in_saved_builder_draft(self):
         payload = self.draft_payload("catalogue-presentation-save")

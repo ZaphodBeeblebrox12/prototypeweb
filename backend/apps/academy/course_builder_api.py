@@ -962,6 +962,10 @@ def path_name(value):
     return str(value).rsplit("/", 1)[-1] or "course-figure"
 
 
+class CourseAssetStorageError(OSError):
+    """Validated course image could not be persisted to the configured storage."""
+
+
 def _store_images(record, image_sources):
     for asset in record.assets.all():
         source = image_sources.get(asset.asset_key, "")
@@ -980,18 +984,21 @@ def _store_images(record, image_sources):
                     expected_format, suffix = _ALLOWED_IMAGES[mime]
                     if image.format != expected_format:
                         raise ValueError("Image file content does not match its declared type.")
+            except (ValueError, binascii.Error, UnidentifiedImageError, OSError) as exc:
+                raise ValidationError(f"Invalid image {asset.asset_key}: {exc}") from exc
+
+            # Provider failures are not image-validation failures. A Drive token
+            # refresh error must reach the API's 503 handler rather than be
+            # mislabeled as an HTTP 400 bad-image request.
+            try:
                 asset.file.save(f"figure{suffix}", ContentFile(raw), save=True)
-                asset.alt_text = asset.alt_text[:500]
-                asset.source_error = ""
-                asset.save(update_fields=["alt_text", "source_error", "updated_at"])
-            except (
-                ImproperlyConfigured,
-                ValueError,
-                binascii.Error,
-                UnidentifiedImageError,
-                OSError,
-            ) as exc:
-                raise ValidationError(f"Could not save image {asset.asset_key}: {exc}") from exc
+            except Exception as exc:
+                raise CourseAssetStorageError(
+                    f"Could not persist image {asset.asset_key} to course storage."
+                ) from exc
+            asset.alt_text = asset.alt_text[:500]
+            asset.source_error = ""
+            asset.save(update_fields=["alt_text", "source_error", "updated_at"])
         elif asset.file:
             storage = asset.file.storage
             storage_status = storage.status()
