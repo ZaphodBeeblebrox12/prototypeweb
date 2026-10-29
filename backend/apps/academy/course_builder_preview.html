@@ -990,7 +990,7 @@ body.builder-dialog-open { overflow:hidden; }
       <a class="btn dark-outline" href="/learn/" data-exit-link>← Back to Academy</a>
       <a class="btn dark-outline" href="/staff/admin-desk/" data-exit-link>Admin dashboard ↗</a>
       <label class="eyebrow" for="previewAudienceSelect">Preview audience</label>
-      <select class="btn dark-outline" id="previewAudienceSelect" aria-label="Preview regional content audience"><option value="GLOBAL">Global default</option><option value="IN">India</option><option value="REGION:APAC">APAC</option><option value="US">United States</option><option value="CA">Canada</option><option value="REGION:NA">North America</option><option value="GB">United Kingdom</option><option value="REGION:EU">Europe</option><option value="REGION:LATAM">Latin America</option><option value="REGION:MENA">Middle East &amp; North Africa</option><option value="REGION:SSA">Sub-Saharan Africa</option></select>
+      <select class="btn dark-outline" id="previewAudienceSelect" aria-label="Preview lesson audience"><option value="GLOBAL">Global default</option><option value="IN">India</option><option value="REGION:APAC">APAC</option><option value="US">United States</option><option value="CA">Canada</option><option value="REGION:NA">North America</option><option value="GB">United Kingdom</option><option value="REGION:EU">Europe</option><option value="REGION:LATAM">Latin America</option><option value="REGION:MENA">Middle East &amp; North Africa</option><option value="REGION:SSA">Sub-Saharan Africa</option></select>
       <span class="eyebrow">Authoring preview</span>
       <button class="btn dark-outline" id="previewButton" type="button">Preview course ↗</button>
       <button class="btn dark-outline" id="saveButton" type="button">Save draft</button>
@@ -3125,7 +3125,7 @@ body.builder-dialog-open { overflow:hidden; }
   lessonFields = function(l) {
     migrateLegacyNotebookPrompts(l);
     const html = baseLessonFields(l);
-    return !l ? html : html + '<section class="markdown-guide"><h4>Visual editor tips</h4><p>Select text and use the toolbar to format it. Use Figures for charts, Regional content for country or region differences, and companion-course controls for related course cards. The learner preview shows the Learning Room layout.</p></section>';
+    return !l ? html : html + '<section class="markdown-guide"><h4>Visual editor tips</h4><p>Select text and use the toolbar to format it. Use Figures for charts and the country/region audience selector above for full-lesson variations. Use companion-course controls for related course cards. The learner preview shows the Learning Room layout.</p></section>';
   };
   renderMarkdown = function(src) {
     const inline = value => esc(String(value ?? ''))
