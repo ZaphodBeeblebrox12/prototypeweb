@@ -982,7 +982,7 @@ def _persist_image_file(storage_class, name, raw):
     return storage.save(name, ContentFile(raw, name=Path(name).name))
 
 
-def _store_images(record, image_sources):
+def _store_images(record, image_sources, *, verify_existing_assets=True):
     pending_writes = []
     for asset in record.assets.all():
         source = image_sources.get(asset.asset_key, "")
@@ -1011,11 +1011,13 @@ def _store_images(record, image_sources):
             name = asset.file.field.generate_filename(asset, f"figure{suffix}")
             pending_writes.append((asset, type(storage), name, raw))
         elif asset.file:
+            # Existing durable files are validated on review submission, not on
+            # every autosave. A per-asset Drive listing is a network round trip;
+            # repeating it for 20+ images made routine saves exceed 30 seconds.
+            if not verify_existing_assets:
+                continue
             storage = asset.file.storage
             storage_status = storage.status()
-            # Check the durable provider explicitly so a local fallback cannot
-            # masquerade as a successful upload. Do not call exists() after
-            # remote_exists(): Drive.exists() repeats the same remote listing request.
             if (
                 storage_status.get("durable")
                 and not storage.remote_exists(asset.file.name)
@@ -1027,7 +1029,7 @@ def _store_images(record, image_sources):
                 )
             elif not storage_status.get("durable") and not storage.exists(asset.file.name):
                 _copy_existing_asset(asset.stable_asset_id, asset)
-        else:
+        elif verify_existing_assets:
             _copy_existing_asset(asset.stable_asset_id, asset)
 
     if not pending_writes:
@@ -2099,7 +2101,11 @@ def course_builder_api(request):
                     removed_asset.delete()
 
             image_store_started = time.monotonic()
-            _store_images(record, image_sources)
+            _store_images(
+                record,
+                image_sources,
+                verify_existing_assets=(mode == "submit"),
+            )
             logger.info(
                 "Course Builder image persistence completed: slug=%s inline_image_count=%s duration_ms=%s",
                 slug,

@@ -678,6 +678,37 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(first_path, second_path)
         self.assertIn(stable_id.hex, first_path)
 
+    def test_routine_save_skips_remote_lookups_for_already_saved_images(self):
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(self.draft_payload("builder-routine-save-skips-drive-check")),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        record = CourseImport.objects.get(pk=response.json()["record_id"])
+        asset = CourseImportAsset.objects.create(
+            course_import=record,
+            asset_key="builder/saved-image-no-recheck",
+            stable_asset_id=uuid.uuid4(),
+            file="academy/course-imports/saved-image-no-recheck.png",
+        )
+        storage = asset.file.storage
+
+        with (
+            patch.object(storage, "status") as storage_status,
+            patch.object(storage, "remote_exists") as remote_exists,
+            patch.object(storage, "exists") as exists,
+            patch("apps.academy.course_builder_api._copy_existing_asset") as copy_asset,
+        ):
+            from .course_builder_api import _store_images
+
+            _store_images(record, {}, verify_existing_assets=False)
+
+        storage_status.assert_not_called()
+        remote_exists.assert_not_called()
+        exists.assert_not_called()
+        copy_asset.assert_not_called()
+
     def test_existing_durable_asset_does_not_issue_duplicate_remote_lookup(self):
         response = self.client.post(
             reverse("staff_course_builder_api"),
