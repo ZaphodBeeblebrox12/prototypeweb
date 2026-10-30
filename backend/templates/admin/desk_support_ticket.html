@@ -145,7 +145,7 @@
           </div>
           <div class="field"><label for="ticket-priority">Priority</label>
             <select id="ticket-priority" name="priority">
-              {% for value,label in ticket.Priority.choices %}<option value="{{ value }}" {% if ticket.priority == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+              {% for value,label in priority_choices %}<option value="{{ value }}" {% if ticket.priority == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
             </select>
           </div>
           <button class="button secondary" type="submit">Save assignment</button>
