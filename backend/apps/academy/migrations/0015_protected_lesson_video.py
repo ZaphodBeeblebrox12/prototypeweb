@@ -1,3 +1,4 @@
+import apps.academy.models
 import apps.academy.video_storage
 import django.conf
 import django.core.validators
@@ -30,7 +31,7 @@ class Migration(migrations.Migration):
                     models.FileField(
                         blank=True,
                         storage=apps.academy.video_storage.PrivateLessonVideoStorage(),
-                        upload_to="apps.academy.models.protected_lesson_video_upload_to",
+                        upload_to=apps.academy.models.protected_lesson_video_upload_to,
                         validators=[
                             django.core.validators.FileExtensionValidator(
                                 allowed_extensions=["mp4", "mov", "mkv", "webm"]
