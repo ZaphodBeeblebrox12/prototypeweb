@@ -1775,6 +1775,63 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(figure["cards"][2]["title"], "More smoothed")
         self.assertEqual(figure["note"], "Compare one setting at a time.")
 
+    def test_returned_submission_can_be_reopened_saved_and_resubmitted_in_builder(self):
+        saved = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(self.draft_payload("builder-returned-for-changes")),
+            content_type="application/json",
+        )
+        self.assertEqual(saved.status_code, 200, saved.content)
+        record = CourseImport.objects.get(pk=saved.json()["record_id"])
+        record.payload["review_feedback"] = "Clarify the course outcome before publication."
+        record.status = CourseImport.Status.REJECTED
+        record.save(update_fields=["payload", "status", "updated_at"])
+
+        refreshed = self.client.get(reverse("staff_course_builder_api"))
+        self.assertEqual(refreshed.status_code, 200, refreshed.content)
+        returned_state = next(
+            draft for draft in refreshed.json()["drafts"]
+            if draft["serverDraftId"] == str(record.pk)
+        )
+        self.assertEqual(
+            returned_state["reviewFeedback"],
+            "Clarify the course outcome before publication.",
+        )
+        returned_state["summary"] = "A revised practical course summary."
+
+        resaved = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps({
+                "course": returned_state,
+                "mode": "save",
+                "sync_source": False,
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(resaved.status_code, 200, resaved.content)
+        record.refresh_from_db()
+        self.assertEqual(record.status, CourseImport.Status.DRAFT)
+        self.assertNotIn("review_feedback", record.payload)
+        self.assertEqual(resaved.json()["draft"]["reviewFeedback"], "")
+
+        with patch("apps.academy.course_builder_api.validate_import_for_publish", return_value=[]):
+            resubmitted = self.client.post(
+                reverse("staff_course_builder_api"),
+                data=json.dumps({
+                    "course": resaved.json()["draft"],
+                    "mode": "submit",
+                    "sync_source": False,
+                }),
+                content_type="application/json",
+            )
+        self.assertEqual(resubmitted.status_code, 200, resubmitted.content)
+        self.assertEqual(
+            resubmitted.json()["review_url"],
+            reverse("staff_admin_desk_course_review", args=[record.pk]),
+        )
+        record.refresh_from_db()
+        self.assertEqual(record.status, CourseImport.Status.REVIEW)
+
     def test_admin_can_delete_saved_builder_draft_and_it_disappears_from_the_list(self):
         saved = self.client.post(
             reverse("staff_course_builder_api"),
