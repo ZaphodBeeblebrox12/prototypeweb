@@ -3,7 +3,7 @@
 import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
@@ -90,9 +90,11 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
         playlist = response.content.decode("utf-8")
         self.assertIn("no-store", response["Cache-Control"])
         self.assertNotIn("protected-key", playlist)
-        ticket_match = re.search(r"\?ticket=([^\s]+)", playlist)
-        self.assertIsNotNone(ticket_match)
-        return playlist, ticket_match.group(1)
+        key_match = re.search(r'URI="([^"]+)"', playlist)
+        self.assertIsNotNone(key_match)
+        ticket = parse_qs(urlparse(key_match.group(1)).query).get("ticket", [])
+        self.assertTrue(ticket)
+        return playlist, ticket[0]
 
     def test_manifest_rewrites_key_and_segment_to_session_bound_routes(self):
         playlist, _ticket = self._playlist_and_ticket()
@@ -113,7 +115,7 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
         playlist, _ticket = self._playlist_and_ticket()
         key_url = re.search(r'URI="([^"]+)"', playlist).group(1)
         segment_url = next(
-            line for line in playlist.splitlines() if line.endswith(".ts?ticket=" + _ticket)
+            line for line in playlist.splitlines() if "segment_00000.ts?ticket=" in line
         )
 
         key_response = self.client.get(key_url)
@@ -128,7 +130,7 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
     def test_ticket_cannot_be_reused_from_a_different_login_session(self):
         playlist, _ticket = self._playlist_and_ticket()
         segment_url = next(
-            line for line in playlist.splitlines() if line.endswith(".ts?ticket=" + _ticket)
+            line for line in playlist.splitlines() if "segment_00000.ts?ticket=" in line
         )
 
         second_session = Client()
