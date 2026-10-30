@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Unpublished course imports | Admin Desk | TradeThesis{% endblock %}
+{% block page_title %}Unpublished course imports{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-import-cleanup{--ink:#26342f;--muted:#68736c;--line:#dedfd5;--surface:#fffefa;color:var(--ink);max-width:1160px;margin:8px auto 36px}
+  .tt-import-cleanup *{box-sizing:border-box}
+  .tt-import-cleanup a{color:#315b43;text-underline-offset:3px}
+  .tt-import-cleanup .head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+  .tt-import-cleanup .eyebrow{margin:0 0 6px;color:var(--muted);font-size:11px;font-weight:750;letter-spacing:.09em;text-transform:uppercase}
+  .tt-import-cleanup h1{margin:0;color:var(--ink);font-size:27px}
+  .tt-import-cleanup .intro{max-width:760px;margin:8px 0 0;color:var(--muted);font-size:14px}
+  .tt-import-cleanup .button{display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 12px;border:1px solid #456653;border-radius:4px;background:#456653;color:white;text-decoration:none;font-weight:650}
+  .tt-import-cleanup .button.secondary{background:var(--surface);color:#315b43}
+  .tt-import-cleanup .warning{padding:14px 16px;border:1px solid #d7b77c;border-left:4px solid #bd8431;background:#fff9ec;border-radius:4px;color:#5d492a;font-size:13px;margin:16px 0}
+  .tt-import-cleanup .count{display:flex;align-items:center;gap:11px;border:1px solid var(--line);background:var(--surface);border-radius:5px;padding:13px 16px;margin-bottom:14px}
+  .tt-import-cleanup .count strong{font-size:23px;font-variant-numeric:tabular-nums}
+  .tt-import-cleanup .count span{font-size:13px;color:var(--muted)}
+  .tt-import-cleanup .items{border:1px solid var(--line);border-radius:5px;background:var(--surface);overflow:hidden}
+  .tt-import-cleanup .item{display:grid;grid-template-columns:minmax(180px,1.4fr) minmax(120px,.7fr) minmax(150px,.8fr) minmax(230px,1.1fr);gap:14px;align-items:start;padding:15px 16px;border-bottom:1px solid #ecece5}
+  .tt-import-cleanup .item:last-child{border-bottom:0}
+  .tt-import-cleanup .title{font-weight:750;color:var(--ink)}
+  .tt-import-cleanup .muted{display:block;color:var(--muted);font-size:12px;margin-top:4px;overflow-wrap:anywhere}
+  .tt-import-cleanup .status{display:inline-flex;padding:4px 7px;border:1px solid var(--line);border-radius:3px;background:#f4f5ef;font-size:11px}
+  .tt-import-cleanup .delete-form{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+  .tt-import-cleanup input{width:78px;min-height:34px;padding:6px 8px;border:1px solid #c9c9bf;border-radius:4px}
+  .tt-import-cleanup .danger{background:#fff;color:#9c3f32;border-color:#c9897d}
+  .tt-import-cleanup .empty{padding:35px;text-align:center;color:var(--muted)}
+  @media(max-width:760px){.tt-import-cleanup .item{grid-template-columns:1fr 1fr}.tt-import-cleanup .delete-form{grid-column:1/-1}.tt-import-cleanup .head .button{width:100%}}
+</style>
+{% endblock %}
+{% block content %}
+<main class="tt-import-cleanup">
+  <header class="head">
+    <div>
+      <p class="eyebrow">TradeThesis · Admin Desk</p>
+      <h1>Unpublished course imports</h1>
+      <p class="intro">This list contains only imports that are not linked to an existing Course record. Use it to remove test submissions and abandoned drafts, not published learning content.</p>
+    </div>
+    <a class="button secondary" href="{% url 'staff_admin_desk' %}">← Admin Desk</a>
+  </header>
+  <div class="warning">
+    <strong>Permanent deletion.</strong> Removing an import deletes its database record and staged image files. This cannot be undone. Published imports, imports linked to a course, and imports whose slug matches an existing Course are deliberately excluded.
+  </div>
+  <div class="count"><strong>{{ candidate_count }}</strong><span>unpublished import{{ candidate_count|pluralize }} eligible for cleanup</span></div>
+  <section class="items" aria-label="Unpublished course imports eligible for cleanup">
+    {% for record in imports %}
+      <article class="item">
+        <div>
+          <span class="title">{{ record.title }}</span>
+          <span class="muted">{{ record.course_slug }}</span>
+        </div>
+        <div><span class="status">{{ record.get_status_display }}</span></div>
+        <div>
+          <span class="muted">Saved by {{ record.imported_by|default:"Unknown author" }}</span>
+          <span class="muted">Updated {{ record.updated_at|date:"j M Y · H:i" }}</span>
+          {% if record.status == "review" %}<a class="muted" href="{% url 'staff_admin_desk_course_review' record.pk %}">Open review page ↗</a>{% endif %}
+        </div>
+        <form class="delete-form" method="post" action="{% url 'staff_admin_desk_course_import_delete' record.pk %}">
+          {% csrf_token %}
+          <label class="muted" for="confirm-{{ record.pk }}">Type DELETE</label>
+          <input id="confirm-{{ record.pk }}" name="confirmation" autocomplete="off" spellcheck="false" required>
+          <button class="button danger" type="submit">Permanently delete</button>
+        </form>
+      </article>
+    {% empty %}
+      <div class="empty"><strong>No unpublished test imports are eligible for cleanup.</strong><br>Published records and protected course revisions are not listed here.</div>
+    {% endfor %}
+  </section>
+</main>
+{% endblock %}
