@@ -16,9 +16,9 @@ from .course_builder_lifecycle import mark_builder_draft_deleted
 from .forms import (
     CourseImportAssetAdminForm,
     CourseMediaAssetAdminForm,
-    ProtectedLessonVideoAdminForm,
     LessonAdminForm,
     LessonFigureAdminForm,
+    ProtectedLessonVideoAdminForm,
 )
 from .importing import (
     inspect_manifest,
@@ -33,12 +33,12 @@ from .models import (
     CourseImport,
     CourseImportAsset,
     CourseMediaAsset,
-    ProtectedLessonVideo,
     CourseModule,
     CourseOffer,
     Lesson,
     LessonInstructorMaterial,
     LessonProgress,
+    ProtectedLessonVideo,
 )
 from .permissions import is_course_content_admin
 from .storage import course_asset_storage
