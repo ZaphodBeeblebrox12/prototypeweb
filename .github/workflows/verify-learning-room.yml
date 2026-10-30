@@ -645,18 +645,25 @@ jobs:
               "Member-area sample data must be clearly identified as a preview");
             console.log("MEMBER_UX_PASS: preview-only auth copy, light theme and mobile fit.");
 
-            // The Trading Path now targets Academy checkout. Local preview hosts are
-            // deliberately unmapped and must stop safely without creating a payment.
+            // The Trading Path is free. Local previews resolve Academy links to the
+            // staging service, but must point to the course detail / free-enrolment route,
+            // never the legacy paid checkout endpoint.
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
             await cataloguePage.goto(server + "/trading-path.html", { waitUntil: "networkidle" });
-            await cataloguePage.locator("[data-course-purchase]").first().click();
-            assert.ok((await cataloguePage.locator("#previewModal").getAttribute("class")).includes("open"),
-              "Unconfigured Trading Path checkout should show a helpful configuration disclosure");
-            assert.ok((await cataloguePage.locator("#previewModal").innerText()).includes("Checkout is not configured yet."),
-              "Local preview hosts must not be routed to a live or staging checkout");
-            assert.ok((await cataloguePage.locator("#previewModal").innerText()).includes("No payment has been taken."),
-              "Unconfigured checkout must explicitly state that no payment was taken");
-            await cataloguePage.locator("#previewModal .close").click();
+            const tradingPathEnrolment = cataloguePage.locator('[data-academy-path="/learn/course/trading-path/"]').first();
+            assert.equal(await tradingPathEnrolment.count(), 1,
+              "Trading Path must expose a free-enrolment link");
+            assert.ok((await tradingPathEnrolment.innerText()).toLowerCase().includes("enrol for free"),
+              "Trading Path CTA must say enrol for free");
+            assert.equal(
+              await tradingPathEnrolment.getAttribute("href"),
+              "https://tradethesis-academy-staging.onrender.com/learn/course/trading-path/",
+              "Trading Path CTA must resolve to the Academy course-detail route",
+            );
+            assert.equal(await cataloguePage.locator("[data-course-purchase]").count(), 0,
+              "Trading Path must not expose the paid checkout CTA");
+            assert.ok((await cataloguePage.locator(".product-price").innerText()).includes("Free"),
+              "Trading Path page must show a free price");
 
             await cataloguePage.goto(server + "/construct.html", { waitUntil: "networkidle" });
             await cataloguePage.locator("[data-preview-enquiry]").first().click();
