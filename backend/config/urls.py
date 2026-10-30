@@ -23,6 +23,7 @@ from apps.admin_desk_views import (
     admin_desk_business, admin_desk_finance, admin_desk_invoice_detail,
     admin_desk_course_reviews, admin_desk_course_review, admin_desk_course_asset,
     admin_desk_course_approve, admin_desk_course_reject,
+    admin_desk_course_import_cleanup, admin_desk_course_import_delete,
 )
 from apps.core.views import health_check
 
@@ -41,6 +42,8 @@ urlpatterns = [
     path("staff/admin-desk/courses/review/<uuid:import_id>/assets/<uuid:asset_id>/", admin_desk_course_asset, name="staff_admin_desk_course_asset"),
     path("staff/admin-desk/courses/review/<uuid:import_id>/approve/", admin_desk_course_approve, name="staff_admin_desk_course_approve"),
     path("staff/admin-desk/courses/review/<uuid:import_id>/return/", admin_desk_course_reject, name="staff_admin_desk_course_reject"),
+    path("staff/admin-desk/courses/import-cleanup/", admin_desk_course_import_cleanup, name="staff_admin_desk_course_import_cleanup"),
+    path("staff/admin-desk/courses/imports/<uuid:import_id>/delete/", admin_desk_course_import_delete, name="staff_admin_desk_course_import_delete"),
     path("staff/admin-desk/accounts/", admin_desk_accounts, name="staff_admin_desk_accounts"),
     path("staff/admin-desk/accounts/<uuid:user_id>/", admin_desk_account_detail, name="staff_admin_desk_account_detail"),
     path("staff/admin-desk/accounts/<uuid:user_id>/action/", admin_desk_account_action, name="staff_admin_desk_account_action"),
