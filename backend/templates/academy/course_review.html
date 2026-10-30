@@ -15,6 +15,11 @@
   .tt-return-course-form p{margin:0;color:#68736c;font-size:13px}
   .tt-return-course-form textarea{width:100%;min-height:88px;padding:10px;border:1px solid #cfd5c9;border-radius:4px;background:#fff;font:inherit;resize:vertical}
   .tt-return-course-form button{justify-self:start}
+  .tt-purge-test-import{display:grid;gap:8px;max-width:520px;padding:13px 15px;border:1px solid #dfb6ad;border-radius:5px;background:#fff9f7;margin-top:12px}
+  .tt-purge-test-import p{margin:0;color:#76483f;font-size:13px}
+  .tt-purge-test-import .confirm-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .tt-purge-test-import input{width:100px;min-height:36px;padding:7px 9px;border:1px solid #c9897d;border-radius:4px;font:inherit}
+  .tt-purge-test-import button{border:1px solid #9c3f32;border-radius:4px;background:#fff;color:#9c3f32;padding:8px 12px;font:inherit;font-weight:700;cursor:pointer}
 </style>
 {% endblock %}
 {% block content %}
@@ -53,10 +58,22 @@
     {% if desk_review and import_record.status == "review" %}
       <form method="post" action="{{ reject_url }}" class="tt-return-course-form">
         {% csrf_token %}
-        <label for="course-review-feedback"><strong>Return to author with feedback</strong></label>
-        <p class="small text-muted">Explain what needs to change. The course will return to the Course Builder as an editable draft.</p>
+        <label for="course-review-feedback"><strong>Reject and return to the Course Builder</strong></label>
+        <p class="small text-muted">Add reviewer feedback. The author will receive it with the editable draft and can correct and resubmit the same course.</p>
         <textarea id="course-review-feedback" name="feedback" rows="3" maxlength="2000" required placeholder="Describe the corrections needed before this course can be approved."></textarea>
-        <button class="tt-secondary-button" type="submit">Return for changes</button>
+        <button class="tt-secondary-button" type="submit">Reject · send back to editor</button>
+      </form>
+    {% endif %}
+    {% if desk_review and purge_allowed %}
+      <form method="post" action="{{ purge_url }}" class="tt-purge-test-import">
+        {% csrf_token %}
+        <strong>Permanently delete this test submission</strong>
+        <p>This option is available only because the import is not linked to a Course record and no matching course exists. Its staged images will also be deleted. This cannot be undone.</p>
+        <div class="confirm-row">
+          <label for="purge-confirmation">Type DELETE</label>
+          <input id="purge-confirmation" name="confirmation" autocomplete="off" required>
+          <button type="submit">Permanently delete</button>
+        </div>
       </form>
     {% endif %}
   </section>
