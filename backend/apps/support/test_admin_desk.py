@@ -220,7 +220,7 @@ class AdminDeskSupportTicketTests(TestCase):
         self.ticket.refresh_from_db()
         self.assertEqual(self.ticket.status, SupportTicket.Status.AWAITING_MEMBER)
 
-    @patch("apps.support.admin_desk_views.approve_ticket", create=True)
+    @patch("apps.support.services.approve_ticket")
     def test_access_ticket_approval_is_posted_through_dashboard(self, approve):
         plan = Plan.objects.create(
             name="Dashboard hidden access",
