@@ -309,25 +309,22 @@ def admin_desk_support_tickets(request):
     assignment = request.GET.get("assignment", "").strip()
 
     if query:
-        queryset = queryset.filter(
+        search_filter = (
             Q(user__username__icontains=query)
             | Q(user__email__icontains=query)
             | Q(message__icontains=query)
             | Q(admin_notes__icontains=query)
         )
         # Permit an exact UUID search without making partial UUID casts unsafe.
+        # Keep it in one WHERE clause so later status/category filters remain valid.
         try:
             from uuid import UUID
             ticket_uuid = UUID(query)
         except (TypeError, ValueError, AttributeError):
             ticket_uuid = None
         if ticket_uuid:
-            queryset = queryset | reviewable_ticket_queryset(
-                request.user,
-                SupportTicket.objects.select_related(
-                    "user", "plan", "affiliate_link", "assigned_to"
-                ).filter(pk=ticket_uuid),
-            )
+            search_filter |= Q(pk=ticket_uuid)
+        queryset = queryset.filter(search_filter)
 
     if status in {value for value, _label in SupportTicket.Status.choices}:
         queryset = queryset.filter(status=status)
