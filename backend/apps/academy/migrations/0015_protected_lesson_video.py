@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
                     "source_file",
                     models.FileField(
                         blank=True,
-                        storage=apps.academy.video_storage.lesson_video_storage,
+                        storage=apps.academy.video_storage.PrivateLessonVideoStorage(),
                         upload_to="apps.academy.models.protected_lesson_video_upload_to",
                         validators=[
                             django.core.validators.FileExtensionValidator(
