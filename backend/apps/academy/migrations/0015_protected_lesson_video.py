@@ -1,6 +1,7 @@
+import apps.academy.video_storage
+import django.conf
 import django.core.validators
 import django.db.models.deletion
-import django.utils.timezone
 from django.db import migrations, models
 import uuid
 
@@ -8,7 +9,7 @@ import uuid
 class Migration(migrations.Migration):
     dependencies = [
         ("academy", "0014_make_trading_path_free"),
-        migrations.swappable_dependency("auth.User"),
+        migrations.swappable_dependency(django.conf.settings.AUTH_USER_MODEL),
     ]
 
     operations = [
@@ -18,17 +19,17 @@ class Migration(migrations.Migration):
                 (
                     "id",
                     models.UUIDField(
-                        primary_key=True, default=uuid.uuid4, editable=False, serialize=False
+                        primary_key=True,
+                        default=uuid.uuid4,
+                        editable=False,
+                        serialize=False,
                     ),
                 ),
                 (
                     "source_file",
                     models.FileField(
                         blank=True,
-                        storage=__import__(
-                            "apps.academy.video_storage",
-                            fromlist=["lesson_video_storage"],
-                        ).lesson_video_storage,
+                        storage=apps.academy.video_storage.lesson_video_storage,
                         upload_to="apps.academy.models.protected_lesson_video_upload_to",
                         validators=[
                             django.core.validators.FileExtensionValidator(
@@ -62,7 +63,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="academy_protected_videos_created",
-                        to=settings.AUTH_USER_MODEL,
+                        to=django.conf.settings.AUTH_USER_MODEL,
                     ),
                 ),
                 (
@@ -74,6 +75,8 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"ordering": ["lesson__module__course__title", "lesson__title"]},
+            options={
+                "ordering": ["lesson__module__course__title", "lesson__title"],
+            },
         ),
     ]
