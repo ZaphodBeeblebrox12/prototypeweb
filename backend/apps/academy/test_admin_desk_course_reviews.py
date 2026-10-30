@@ -188,7 +188,7 @@ class AdminDeskCourseReviewTests(TestCase):
             slug="protected-course-import",
             status=Course.Status.PUBLISHED,
         )
-        self.make_import(slug=protected_course.slug)
+        protected = self.make_import(slug=protected_course.slug)
         protected_response = self.client.get(
             reverse("staff_admin_desk_course_review", args=[protected.pk])
         )
