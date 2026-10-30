@@ -13,7 +13,7 @@ from django.db.models import Q, Count, Max, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 
 
 def _allowed(user, permission):
@@ -63,6 +63,23 @@ def admin_desk_course_reviews(request):
 
 
 @login_required
+@require_GET
+def admin_desk_course_asset(request, import_id, asset_id):
+    """Serve private review figures without navigating through Django Admin."""
+    _guard(request)
+    from django.contrib import admin
+    from apps.academy.models import CourseImport
+    from apps.academy.permissions import is_course_content_admin
+
+    if not is_course_content_admin(request.user):
+        raise PermissionDenied
+    model_admin = admin.site._registry.get(CourseImport)
+    if model_admin is None:
+        raise PermissionDenied
+    return model_admin.asset_view(request, str(import_id), str(asset_id))
+
+
+@login_required
 def admin_desk_course_review(request, import_id):
     """Render a complete course submission preview inside the TradeThesis Admin Desk."""
     _guard(request)
@@ -83,7 +100,14 @@ def admin_desk_course_review(request, import_id):
         {
             "title": "Review course submission",
             "import_record": record,
-            **build_course_import_review_data(record, request, allow_asset_edits=False),
+            **build_course_import_review_data(
+                record,
+                request,
+                allow_asset_edits=False,
+                asset_url_builder=lambda asset_id: reverse(
+                    "staff_admin_desk_course_asset", args=[record.pk, asset_id]
+                ),
+            ),
             "publish_url": reverse("staff_admin_desk_course_approve", args=[record.pk]),
             "reject_url": reverse("staff_admin_desk_course_reject", args=[record.pk]),
             "changelist_url": reverse("staff_admin_desk_course_reviews"),
