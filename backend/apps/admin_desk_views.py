@@ -13,7 +13,7 @@ from django.db.models import Q, Count, Max, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 
 
 def _allowed(user, permission):
@@ -33,6 +33,151 @@ def _audit(action, actor, object_type, object_id, metadata=None):
         action=action, user=actor, object_type=object_type,
         object_id=object_id, metadata=metadata or {},
     )
+
+
+@login_required
+def admin_desk_course_reviews(request):
+    """List course submissions awaiting administrator approval."""
+    _guard(request)
+    from apps.academy.permissions import is_course_content_admin
+
+    if not is_course_content_admin(request.user):
+        raise PermissionDenied
+    from apps.academy.models import CourseImport
+
+    queryset = (
+        CourseImport.objects.filter(status=CourseImport.Status.REVIEW)
+        .select_related("imported_by", "target_course")
+        .order_by("-imported_at", "title")
+    )
+    page = Paginator(queryset, 25).get_page(request.GET.get("page"))
+    return render(
+        request,
+        "admin/desk_course_reviews.html",
+        {
+            "review_page": page,
+            "pending_count": queryset.count(),
+            "desk_nav": _nav(request),
+        },
+    )
+
+
+@login_required
+@require_GET
+def admin_desk_course_asset(request, import_id, asset_id):
+    """Serve private review figures without navigating through Django Admin."""
+    _guard(request)
+    from django.contrib import admin
+    from apps.academy.models import CourseImport
+    from apps.academy.permissions import is_course_content_admin
+
+    if not is_course_content_admin(request.user):
+        raise PermissionDenied
+    model_admin = admin.site._registry.get(CourseImport)
+    if model_admin is None:
+        raise PermissionDenied
+    return model_admin.asset_view(request, str(import_id), str(asset_id))
+
+
+@login_required
+def admin_desk_course_review(request, import_id):
+    """Render a complete course submission preview inside the TradeThesis Admin Desk."""
+    _guard(request)
+    from apps.academy.models import CourseImport
+    from apps.academy.permissions import is_course_content_admin
+    from apps.academy.review_context import build_course_import_review_data
+
+    if not is_course_content_admin(request.user):
+        raise PermissionDenied
+    record = get_object_or_404(
+        CourseImport.objects.select_related("imported_by", "target_course"),
+        pk=import_id,
+        status=CourseImport.Status.REVIEW,
+    )
+    return render(
+        request,
+        "academy/course_review.html",
+        {
+            "title": "Review course submission",
+            "import_record": record,
+            **build_course_import_review_data(
+                record,
+                request,
+                allow_asset_edits=False,
+                asset_url_builder=lambda asset_id: reverse(
+                    "staff_admin_desk_course_asset", args=[record.pk, asset_id]
+                ),
+            ),
+            "publish_url": reverse("staff_admin_desk_course_approve", args=[record.pk]),
+            "reject_url": reverse("staff_admin_desk_course_reject", args=[record.pk]),
+            "changelist_url": reverse("staff_admin_desk_course_reviews"),
+            "back_url": reverse("staff_admin_desk_course_reviews"),
+            "back_label": "Back to course approvals",
+            "desk_url": reverse("staff_admin_desk"),
+            "desk_review": True,
+            "desk_nav": _nav(request),
+        },
+    )
+
+
+@login_required
+@require_POST
+def admin_desk_course_approve(request, import_id):
+    """Approve and publish a reviewed course using the canonical atomic publisher."""
+    _guard(request)
+    from apps.academy.importing import publish_course_import
+    from apps.academy.models import CourseImport
+    from apps.academy.permissions import is_course_content_admin
+
+    if not is_course_content_admin(request.user):
+        raise PermissionDenied
+    record = get_object_or_404(CourseImport, pk=import_id)
+    try:
+        course = publish_course_import(record, user=request.user)
+    except ValidationError as exc:
+        for message in exc.messages:
+            messages.error(request, message)
+        return redirect("staff_admin_desk_course_review", import_id=record.pk)
+    messages.success(request, f"{course.title} has been approved and published.")
+    return redirect("staff_admin_desk_course_reviews")
+
+
+@login_required
+@require_POST
+def admin_desk_course_reject(request, import_id):
+    """Return a submission to its author with mandatory reviewer feedback."""
+    _guard(request)
+    from apps.academy.models import CourseImport
+    from apps.academy.permissions import is_course_content_admin
+
+    if not is_course_content_admin(request.user):
+        raise PermissionDenied
+    feedback = str(request.POST.get("feedback") or "").strip()[:2000]
+    if not feedback:
+        messages.error(request, "Add feedback explaining what needs to change before returning this course.")
+        return redirect("staff_admin_desk_course_review", import_id=import_id)
+
+    with transaction.atomic():
+        record = get_object_or_404(
+            CourseImport.objects.select_for_update(),
+            pk=import_id,
+            status=CourseImport.Status.REVIEW,
+        )
+        payload = dict(record.payload or {})
+        payload["review_feedback"] = feedback
+        record.payload = payload
+        record.status = CourseImport.Status.REJECTED
+        record.reviewed_by = request.user
+        record.save(update_fields=["payload", "status", "reviewed_by", "updated_at"])
+        _audit(
+            "academy.course_import.returned_for_changes",
+            request.user,
+            "course_import",
+            record.pk,
+            {"course_slug": record.course_slug, "feedback": feedback},
+        )
+    messages.warning(request, f"{record.title} was returned to the Course Builder with your feedback.")
+    return redirect("staff_admin_desk_course_reviews")
 
 
 def _nav(request):

@@ -129,11 +129,34 @@
       <div class="metric"><span class="value">{{ course_metrics.draft_courses }}</span><span class="label">Draft courses</span></div>
       <div class="metric"><span class="value">{{ course_metrics.archived_courses }}</span><span class="label">Archived courses</span></div>
       <div class="metric"><span class="value">{{ course_metrics.published_lessons }}</span><span class="label">Published lessons</span></div>
+      <div class="metric"><span class="value">{{ course_metrics.imports_awaiting_review }}</span><span class="label">Awaiting course approval</span></div>
       <div class="metric"><span class="value">{{ course_metrics.active_offers }}</span><span class="label">Active course offers</span></div>
       <div class="metric"><span class="value">{{ course_metrics.active_entitlements }}</span><span class="label">Active course accesses</span></div>
       <div class="metric"><span class="value">{{ course_metrics.completed_lessons }}</span><span class="label">Completed lesson records</span></div>
     </div>
     <p class="note" style="margin-top:10px">Published records can still contain starter copy or lack a released lesson. Catalogue-ready courses have a real learner-facing title and summary plus at least one published module and lesson.</p>
+    <div class="panel" style="margin-top:12px">
+      <div class="section-head">
+        <h2>Pending course approvals</h2>
+        <p>{{ course_metrics.imports_awaiting_review }} waiting for review</p>
+      </div>
+      {% if course_review_items %}
+        <ul class="signal-list">
+          {% for item in course_review_items %}
+            <li>
+              <span>
+                <strong>{{ item.record.title }}</strong>
+                <span class="note"> · {% if item.record.target_course %}Revision{% else %}New course{% endif %} · {{ item.record.imported_at|date:"j M Y, H:i" }}</span>
+              </span>
+              <a href="{{ item.url }}">Review →</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="note">No course submissions are waiting for approval.</p>
+      {% endif %}
+      <p style="margin:12px 0 0"><a href="{{ course_review_queue_url }}">Open course approval queue →</a></p>
+    </div>
   </section>
 
   <section class="section" aria-labelledby="course-actions-heading">
@@ -144,7 +167,7 @@
       {% if course_links.modules %}<li><a href="{{ course_links.modules }}">Manage modules →</a></li>{% endif %}
       {% if course_links.lessons %}<li><a href="{{ course_links.lessons }}">Manage lessons &amp; release dates →</a></li>{% endif %}
       {% if course_links.offers %}<li><a href="{{ course_links.offers }}">Manage course offers →</a></li>{% endif %}
-      {% if course_links.imports %}<li><a href="{{ course_links.imports }}">Review course imports <span class="signal-count">{{ course_metrics.imports_awaiting_review }}</span> →</a></li>{% endif %}
+      {% if course_links.imports %}<li><a href="{{ course_links.imports }}">Review course approvals <span class="signal-count">{{ course_metrics.imports_awaiting_review }}</span> →</a></li>{% endif %}
       {% if course_links.entitlements %}<li><a href="{{ course_links.entitlements }}">Review learner access →</a></li>{% endif %}
     </ul>
   </section>

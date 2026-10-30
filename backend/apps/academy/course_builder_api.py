@@ -275,7 +275,7 @@ def _clean_image_payload(course_state, course_slug):
     snapshot = deepcopy(course_state)
     server_draft_id = str(course_state.get("serverDraftId") or "").strip()
     server_course_id = str(course_state.get("serverCourseId") or "").strip()
-    for transient in ("serverDraftId", "serverUpdatedAt", "serverCourseId"):
+    for transient in ("serverDraftId", "serverUpdatedAt", "serverCourseId", "reviewFeedback"):
         snapshot.pop(transient, None)
     images_by_key = {}
     specs_by_key = {}
@@ -1114,7 +1114,7 @@ def _retire_legacy_drafts_for_deleted_courses(records):
                     CourseImport.objects.select_for_update()
                     .filter(
                         pk=record.pk,
-                        status=CourseImport.Status.DRAFT,
+                        status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
                     )
                     .first()
                 )
@@ -1515,6 +1515,11 @@ def _draft_response(record, request):
     state["serverDraftId"] = str(record.pk)
     state["serverUpdatedAt"] = record.updated_at.isoformat()
     state["status"] = "draft-update" if record.target_course_id else "draft"
+    state["reviewFeedback"] = (
+        str((record.payload or {}).get("review_feedback") or "")[:2000]
+        if record.status == CourseImport.Status.REJECTED
+        else ""
+    )
     if record.target_course_id:
         state["serverCourseId"] = str(record.target_course_id)
     return state
@@ -1543,7 +1548,7 @@ def course_builder_api(request):
             record = get_object_or_404(
                 CourseImport.objects.select_for_update(),
                 pk=draft_id,
-                status=CourseImport.Status.DRAFT,
+                status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
             )
             if not record.payload.get("builder_state"):
                 return JsonResponse(
@@ -1555,14 +1560,16 @@ def course_builder_api(request):
     if request.method == "GET":
         drafts = []
         builder_records = list(
-            CourseImport.objects.filter(status=CourseImport.Status.DRAFT).order_by("-updated_at")
+            CourseImport.objects.filter(
+                status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED]
+            ).order_by("-updated_at")
         )
         retired_ids = _retire_legacy_drafts_for_deleted_courses(builder_records)
         for record in builder_records:
             if (
                 record.payload.get("builder_state")
                 and str(record.pk) not in retired_ids
-                and record.status == CourseImport.Status.DRAFT
+                and record.status in (CourseImport.Status.DRAFT, CourseImport.Status.REJECTED)
             ):
                 drafts.append(_draft_response(record, request))
         related_courses = []
@@ -1751,7 +1758,8 @@ def course_builder_api(request):
                 )
             existing_edit = (
                 CourseImport.objects.filter(
-                    target_course=published_course, status=CourseImport.Status.DRAFT
+                    target_course=published_course,
+                    status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
                 )
                 .order_by("-updated_at")
                 .first()
@@ -1782,7 +1790,7 @@ def course_builder_api(request):
             server_draft_uuid = uuid.UUID(server_draft_id)
             if not CourseImport.objects.filter(
                 pk=server_draft_uuid,
-                status=CourseImport.Status.DRAFT,
+                status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
             ).exists():
                 return JsonResponse(
                     {
@@ -1822,7 +1830,7 @@ def course_builder_api(request):
                 and CourseImport.objects.filter(
                     pk=server_draft_id,
                     course_slug=slug,
-                    status=CourseImport.Status.DRAFT,
+                    status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
                     target_course__isnull=True,
                 ).exists()
             )
@@ -1881,7 +1889,7 @@ def course_builder_api(request):
                     CourseImport.objects.select_for_update()
                     .filter(
                         pk=server_draft_uuid,
-                        status=CourseImport.Status.DRAFT,
+                        status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
                     )
                     .first()
                 )
@@ -1911,7 +1919,7 @@ def course_builder_api(request):
                     CourseImport.objects.select_for_update()
                     .filter(
                         course_slug=slug,
-                        status=CourseImport.Status.DRAFT,
+                        status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
                     )
                     .exclude(pk=draft.pk)
                     .exists()
@@ -1928,7 +1936,7 @@ def course_builder_api(request):
                     CourseImport.objects.select_for_update()
                     .filter(
                         course_slug=slug,
-                        status=CourseImport.Status.DRAFT,
+                        status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
                         target_course=server_course,
                     )
                     .first()
@@ -1938,7 +1946,7 @@ def course_builder_api(request):
                     CourseImport.objects.select_for_update()
                     .filter(
                         course_slug=slug,
-                        status=CourseImport.Status.DRAFT,
+                        status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
                         target_course__isnull=True,
                     )
                     .first()
@@ -1958,7 +1966,7 @@ def course_builder_api(request):
                 )
                 if existing_review is not None:
                     review_url = reverse(
-                        "admin:academy_courseimport_review",
+                        "staff_admin_desk_course_review",
                         args=[existing_review.pk],
                     )
                     return JsonResponse(
@@ -2011,7 +2019,7 @@ def course_builder_api(request):
                 if not created and record.status != CourseImport.Status.DRAFT:
                     if mode == "submit" and record.status == CourseImport.Status.REVIEW:
                         review_url = reverse(
-                            "admin:academy_courseimport_review",
+                            "staff_admin_desk_course_review",
                             args=[record.pk],
                         )
                         return JsonResponse(
@@ -2053,6 +2061,12 @@ def course_builder_api(request):
                 record.manifest_version = "course-builder-v1"
                 record.content_hash = digest
                 record.source_manifest = f"builder://{slug}"
+                if record.status == CourseImport.Status.REJECTED:
+                    previous_feedback = str(
+                        (record.payload or {}).get("review_feedback") or ""
+                    )
+                    if previous_feedback:
+                        payload["review_feedback"] = previous_feedback
                 record.payload = payload
                 record.imported_by = request.user
                 record.save(
@@ -2176,11 +2190,16 @@ def course_builder_api(request):
                     course_slug=slug,
                     status=CourseImport.Status.REVIEW,
                 ).exclude(pk=current_record.pk).update(status=CourseImport.Status.SUPERSEDED)
+                current_record.payload.pop("review_feedback", None)
                 current_record.status = CourseImport.Status.REVIEW
-                current_record.save(update_fields=["status", "updated_at"])
+                current_record.save(update_fields=["status", "payload", "updated_at"])
+            elif current_record.status == CourseImport.Status.REJECTED:
+                current_record.payload.pop("review_feedback", None)
+                current_record.status = CourseImport.Status.DRAFT
+                current_record.save(update_fields=["status", "payload", "updated_at"])
             record = current_record
 
-        review_url = reverse("admin:academy_courseimport_review", args=[record.pk])
+        review_url = reverse("staff_admin_desk_course_review", args=[record.pk])
         if mode == "submit":
             return JsonResponse(
                 {

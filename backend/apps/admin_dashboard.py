@@ -388,12 +388,24 @@ def staff_admin_desk(request):
             )
         )
         context["course_metrics"] = course_counts
+        pending_course_reviews = (
+            CourseImport.objects.filter(status=CourseImport.Status.REVIEW)
+            .select_related("imported_by", "target_course")
+            .order_by("-imported_at", "title")
+        )
+        context["course_review_items"] = [
+            {
+                "record": record,
+                "url": reverse("staff_admin_desk_course_review", args=[record.pk]),
+            }
+            for record in pending_course_reviews[:5]
+        ]
+        context["course_review_queue_url"] = reverse("staff_admin_desk_course_reviews")
         link_models = {
             "courses": Course,
             "modules": CourseModule,
             "lessons": Lesson,
             "offers": CourseOffer,
-            "imports": CourseImport,
             "entitlements": CourseEntitlement,
         }
         course_links = {}
@@ -403,6 +415,7 @@ def staff_admin_desk(request):
                 course_links[key] = reverse(
                     f"admin:{model._meta.app_label}_{model._meta.model_name}_changelist"
                 )
+        course_links["imports"] = context["course_review_queue_url"]
         context["course_links"] = course_links
 
     return render(request, "admin/desk.html", context)

@@ -7,14 +7,30 @@
 {% endblock %}
 {% load static %}
 {% block title %}Review {{ import_record.title }} · TradeThesis{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'academy/learning-room.css' %}"><link rel="stylesheet" href="{% static 'academy/lesson-references.css' %}">{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'academy/learning-room.css' %}">
+<link rel="stylesheet" href="{% static 'academy/lesson-references.css' %}">
+<style>
+  .tt-return-course-form{display:grid;gap:8px;max-width:520px;padding:13px 15px;border:1px solid #dedfd5;border-radius:5px;background:#fffefa}
+  .tt-return-course-form p{margin:0;color:#68736c;font-size:13px}
+  .tt-return-course-form textarea{width:100%;min-height:88px;padding:10px;border:1px solid #cfd5c9;border-radius:4px;background:#fff;font:inherit;resize:vertical}
+  .tt-return-course-form button{justify-self:start}
+</style>
+{% endblock %}
 {% block content %}
 <div class="tt-learning-room tt-course-review">
-  <div class="tt-breadcrumb"><a href="{% url 'admin:academy_courseimport_changelist' %}">Course imports</a><span>/</span><span>Review draft</span></div>
+  <div class="tt-breadcrumb">
+    {% if desk_review %}
+      <a href="{{ desk_url }}">Admin Desk</a><span>/</span><a href="{{ changelist_url }}">Course approvals</a><span>/</span><span>Review submission</span>
+    {% else %}
+      <a href="{% url 'admin:academy_courseimport_changelist' %}">Course imports</a><span>/</span><span>Review draft</span>
+    {% endif %}
+  </div>
   <header class="tt-course-header">
     <p class="tt-eyebrow">ADMINISTRATOR REVIEW · {{ import_record.get_status_display|upper }}</p>
     <h1>{{ import_record.title }}</h1>
     <p class="tt-lesson-summary">Preview the staged course as learners will read it. Publishing is a separate, explicit action.</p>
+    {% if import_record.imported_by %}<div class="tt-lesson-meta"><span>Submitted by {{ import_record.imported_by }}</span></div>{% endif %}
     <div class="tt-lesson-meta"><span>{{ import_record.course_slug }}</span><span>Manifest {{ import_record.manifest_version }}</span><span>Imported {{ import_record.imported_at|date:"j M Y, H:i" }}</span></div>
     {% if import_record.target_course %}
       <aside class="tt-lesson-summary" role="note">
@@ -26,14 +42,23 @@
   <section class="tt-review-actions">
     <div><h2>Before publishing</h2><p>Fix missing figures below, check lesson content, then publish this exact staged version.</p></div>
     <div class="tt-review-action-buttons">
-      <a class="tt-secondary-button" href="{{ changelist_url }}">Back to imports</a>
+      <a class="tt-secondary-button" href="{{ back_url|default:changelist_url }}">{{ back_label|default:"Back to imports" }}</a>
       <a class="tt-secondary-button" href="{% url 'academy:course-import-preview' import_record.pk %}">View website preview ↗</a>
       {% if import_record.status == "review" and not publish_errors %}
-        <form method="post" action="{{ publish_url }}" onsubmit="return confirm('Publish this course version to learners?');">
+        <form method="post" action="{{ publish_url }}">
           {% csrf_token %}<button class="tt-publish-button" type="submit">Approve and publish course</button>
         </form>
       {% endif %}
     </div>
+    {% if desk_review and import_record.status == "review" %}
+      <form method="post" action="{{ reject_url }}" class="tt-return-course-form">
+        {% csrf_token %}
+        <label for="course-review-feedback"><strong>Return to author with feedback</strong></label>
+        <p class="small text-muted">Explain what needs to change. The course will return to the Course Builder as an editable draft.</p>
+        <textarea id="course-review-feedback" name="feedback" rows="3" maxlength="2000" required placeholder="Describe the corrections needed before this course can be approved."></textarea>
+        <button class="tt-secondary-button" type="submit">Return for changes</button>
+      </form>
+    {% endif %}
   </section>
   {% if publish_errors %}
     <section class="tt-validation-errors" aria-labelledby="tt-validation-heading">
@@ -45,7 +70,7 @@
   {% if asset_rows %}
     <section class="tt-asset-review" aria-labelledby="tt-assets-heading">
       <h2 id="tt-assets-heading">Figures and image assets</h2>
-      <p>Original Markdown image links are used by default. Administrators can replace any image here; missing local figure files need an uploaded replacement before publishing.</p>
+      <p>Check the availability of each figure before publishing. Missing local figure files need an approved replacement before the course can go live.</p>
       <ul>
         {% for row in asset_rows %}
           <li>
@@ -55,7 +80,7 @@
               <small>{{ row.asset.asset_key }}</small>
             </div>
             {% if row.has_external_source %}<a href="{{ row.original_url }}" target="_blank" rel="noopener noreferrer">Open source ↗</a>{% endif %}
-            <a href="{{ row.edit_url }}">Review / replace</a>
+            {% if row.edit_url %}<a href="{{ row.edit_url }}">Review / replace</a>{% endif %}
           </li>
         {% endfor %}
       </ul>
