@@ -62,6 +62,11 @@ class AdminDeskCourseReviewTests(TestCase):
         )
         self.assertContains(response, "Pending course approvals")
         self.assertContains(response, "Admin Desk Review Course")
+        self.assertContains(response, "Permanently remove test imports")
+        self.assertContains(
+            response,
+            reverse("staff_admin_desk_course_import_cleanup"),
+        )
         self.assertNotEqual(
             response.context["course_links"]["imports"],
             reverse("admin:academy_courseimport_changelist"),
@@ -253,3 +258,6 @@ class AdminDeskCourseReviewTests(TestCase):
         )
         response = self.client.get(reverse("staff_admin_desk_course_reviews"))
         self.assertEqual(response.status_code, 403)
+
+        cleanup_response = self.client.get(reverse("staff_admin_desk_course_import_cleanup"))
+        self.assertEqual(cleanup_response.status_code, 403)
