@@ -68,7 +68,7 @@
         <h2>{{ support_tickets.open }} open · {{ support_tickets.overdue_sla }} overdue</h2>
         <p>
           <a href="{{ support_tickets.links.pending }}">View pending queue →</a>
-          · <a href="{{ support_tickets.links.all }}">View all tickets →</a>
+          · <a href="{{ support_tickets.links.all }}">Open support workspace →</a>
         </p>
       </div>
       {% if support_tickets.recent %}
@@ -76,7 +76,7 @@
         {% for ticket_row in support_tickets.recent %}
         <li>
           {% if ticket_row.can_review %}
-          <a href="{% url 'admin:support_supportticket_change' ticket_row.ticket.pk %}">#{{ ticket_row.ticket.short_id }} · {{ ticket_row.ticket.get_category_display }}</a>
+          <a href="{% url 'staff_admin_desk_support_ticket' ticket_row.ticket.pk %}">#{{ ticket_row.ticket.short_id }} · {{ ticket_row.ticket.get_category_display }}</a>
           {% else %}
           <span>#{{ ticket_row.ticket.short_id }} · {{ ticket_row.ticket.get_category_display }}</span>
           {% endif %}

@@ -110,16 +110,30 @@ class AdminDeskTests(TestCase):
         self.assertEqual(response.context["support_tickets"]["pending"], 1)
         self.assertEqual(
             response.context["support_tickets"]["links"]["all"],
-            reverse("admin:support_supportticket_changelist"),
+            reverse("staff_admin_desk_support_tickets"),
         )
         self.assertEqual(
             response.context["support_tickets"]["links"]["pending"],
-            reverse("admin:support_supportticket_changelist") + "?status__exact=pending",
+            reverse("staff_admin_desk_support_tickets") + "?status=pending",
+        )
+        self.assertEqual(
+            response.context["support_tickets"]["recent"][0]["can_review"],
+            True,
         )
 
         queue_response = self.client.get(response.context["support_tickets"]["links"]["pending"])
         self.assertEqual(queue_response.status_code, 200)
         self.assertContains(queue_response, ticket.short_id)
+        self.assertNotContains(
+            queue_response,
+            reverse("admin:support_supportticket_changelist"),
+        )
+        detail_response = self.client.get(
+            reverse("staff_admin_desk_support_ticket", args=[ticket.pk])
+        )
+        self.assertEqual(detail_response.status_code, 200)
+        self.assertContains(detail_response, "Conversation")
+        self.assertContains(detail_response, "Assignment &amp; priority")
 
     def test_non_staff_user_is_forbidden(self):
         learner = User.objects.create_user(
