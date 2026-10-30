@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Support workspace | Admin Desk | TradeThesis{% endblock %}
+{% block page_title %}Support workspace{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-support-queue{--ink:#26342f;--muted:#68736c;--line:#dedfd5;--surface:#fffefa;--green:#456653;color:var(--ink);max-width:1160px;margin:8px auto 36px}
+  .tt-support-queue *{box-sizing:border-box}
+  .tt-support-queue a{color:#315b43;text-underline-offset:3px}
+  .tt-support-queue .head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+  .tt-support-queue .eyebrow{margin:0 0 6px;color:var(--muted);font-size:11px;font-weight:750;letter-spacing:.09em;text-transform:uppercase}
+  .tt-support-queue h1{margin:0;color:var(--ink);font-size:28px;line-height:1.15}
+  .tt-support-queue .intro{margin:8px 0 0;color:var(--muted);font-size:14px;max-width:740px}
+  .tt-support-queue .button{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:9px 13px;border:1px solid var(--green);border-radius:4px;background:var(--green);color:white;text-decoration:none;font-weight:700}
+  .tt-support-queue .button.secondary{background:var(--surface);color:#315b43}
+  .tt-support-queue .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0}
+  .tt-support-queue .stat{padding:13px 15px;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+  .tt-support-queue .stat strong{display:block;font-size:25px;line-height:1.1;font-variant-numeric:tabular-nums}
+  .tt-support-queue .stat span{display:block;margin-top:6px;color:var(--muted);font-size:12px}
+  .tt-support-queue .filters{display:grid;grid-template-columns:minmax(200px,2fr) repeat(4,minmax(130px,1fr)) auto;gap:8px;padding:13px;border:1px solid var(--line);border-radius:5px;background:var(--surface);margin-bottom:14px}
+  .tt-support-queue input,.tt-support-queue select{width:100%;min-height:39px;padding:8px 10px;border:1px solid #cfd5c9;border-radius:4px;background:#fff;color:var(--ink);font:inherit;font-size:13px}
+  .tt-support-queue .table{border:1px solid var(--line);border-radius:5px;background:var(--surface);overflow:hidden}
+  .tt-support-queue .row{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(125px,.7fr) minmax(130px,.8fr) minmax(115px,.7fr) auto;gap:13px;align-items:center;padding:14px 16px;border-bottom:1px solid #ecece5}
+  .tt-support-queue .row:last-child{border-bottom:0}
+  .tt-support-queue .ticket-link{display:block;color:var(--ink);font-weight:750;text-decoration:none}
+  .tt-support-queue .ticket-link:hover{text-decoration:underline}
+  .tt-support-queue .muted{display:block;margin-top:4px;color:var(--muted);font-size:12px;line-height:1.45;overflow-wrap:anywhere}
+  .tt-support-queue .pill{display:inline-flex;padding:4px 7px;border:1px solid var(--line);border-radius:3px;background:#f5f5ef;color:#45554a;font-size:11px;font-weight:650;white-space:nowrap}
+  .tt-support-queue .pill.overdue{border-color:#e0b5ab;background:#fff5f2;color:#914638}
+  .tt-support-queue .empty{padding:38px 18px;text-align:center;color:var(--muted)}
+  .tt-support-queue .pager{display:flex;justify-content:space-between;gap:10px;padding:13px 16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+  @media(max-width:900px){.tt-support-queue .filters{grid-template-columns:repeat(3,minmax(0,1fr))}.tt-support-queue .filters input{grid-column:span 2}.tt-support-queue .row{grid-template-columns:minmax(0,1.5fr) minmax(100px,.8fr) auto}.tt-support-queue .row .meta{display:none}}
+  @media(max-width:560px){.tt-support-queue .stats{grid-template-columns:repeat(2,minmax(0,1fr))}.tt-support-queue .filters{grid-template-columns:1fr 1fr}.tt-support-queue .filters input{grid-column:1/-1}.tt-support-queue .filters .button{grid-column:1/-1}.tt-support-queue .row{grid-template-columns:1fr auto;gap:7px}.tt-support-queue .row .ticket-link{grid-column:1}.tt-support-queue .row .status{grid-column:2;grid-row:1}.tt-support-queue .row .muted{grid-column:1/-1}.tt-support-queue .head .button{width:100%}}
+</style>
+{% endblock %}
+{% block content %}
+<main class="tt-support-queue">
+  <header class="head">
+    <div>
+      <p class="eyebrow">TradeThesis · Admin Desk</p>
+      <h1>Support workspace</h1>
+      <p class="intro">Review member requests, keep the conversation in one place, and resolve access, billing and technical issues without opening Django Admin. Tickets are scoped to your reviewer permissions.</p>
+    </div>
+    <a class="button secondary" href="{% url 'staff_admin_desk' %}">← Admin Desk</a>
+  </header>
+
+  <section class="stats" aria-label="Support ticket summary">
+    <div class="stat"><strong>{{ stats.pending }}</strong><span>Pending review</span></div>
+    <div class="stat"><strong>{{ stats.open }}</strong><span>Open tickets</span></div>
+    <div class="stat"><strong>{{ stats.overdue }}</strong><span>First response overdue</span></div>
+    <div class="stat"><strong>{{ stats.resolved }}</strong><span>Resolved / closed</span></div>
+  </section>
+
+  <form class="filters" method="get">
+    <input type="search" name="q" value="{{ query }}" placeholder="Search member, email, ticket text…">
+    <select name="status" aria-label="Filter by status">
+      <option value="">All statuses</option>
+      <option value="active" {% if status_filter == "active" %}selected{% endif %}>All open</option>
+      {% for value,label in status_choices %}<option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <select name="category" aria-label="Filter by category">
+      <option value="">All categories</option>
+      {% for value,label in category_choices %}<option value="{{ value }}" {% if category_filter == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <select name="priority" aria-label="Filter by priority">
+      <option value="">All priorities</option>
+      {% for value,label in priority_choices %}<option value="{{ value }}" {% if priority_filter == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <select name="assignment" aria-label="Filter by assignment">
+      <option value="">Any assignment</option>
+      <option value="mine" {% if assignment_filter == "mine" %}selected{% endif %}>Assigned to me</option>
+      <option value="unassigned" {% if assignment_filter == "unassigned" %}selected{% endif %}>Unassigned</option>
+    </select>
+    <button class="button" type="submit">Apply</button>
+  </form>
+
+  <section class="table" aria-label="Support tickets">
+    {% for ticket in ticket_page %}
+      <article class="row">
+        <div>
+          <a class="ticket-link" href="{% url 'staff_admin_desk_support_ticket' ticket.pk %}">#{{ ticket.short_id }} · {{ ticket.get_category_display }}</a>
+          <span class="muted">{{ ticket.user.get_full_name|default:ticket.user.get_username }} · {{ ticket.user.email }}</span>
+          <span class="muted">{{ ticket.message|truncatechars:170 }}</span>
+        </div>
+        <div class="status">
+          <span class="pill">{{ ticket.get_status_display }}</span>
+          <span class="muted">{{ ticket.get_priority_display }} priority</span>
+          {% if ticket.is_sla_overdue %}<span class="pill overdue">SLA overdue</span>{% endif %}
+        </div>
+        <div class="meta">
+          <span class="muted">Assigned to</span>
+          <strong>{{ ticket.assigned_to|default:"Unassigned" }}</strong>
+          {% if ticket.plan %}<span class="muted">{{ ticket.plan.name }}</span>{% elif ticket.affiliate_link and ticket.affiliate_link.plan %}<span class="muted">{{ ticket.affiliate_link.plan.name }}</span>{% endif %}
+        </div>
+        <div class="meta">
+          <span class="muted">Submitted</span>
+          <strong>{{ ticket.created_at|date:"j M Y" }}</strong>
+          <span class="muted">{{ ticket.created_at|date:"H:i" }}</span>
+        </div>
+        <a class="button secondary" href="{% url 'staff_admin_desk_support_ticket' ticket.pk %}">Open →</a>
+      </article>
+    {% empty %}
+      <div class="empty"><strong>No tickets match these filters.</strong><br>Clear a filter or try another search.</div>
+    {% endfor %}
+    {% if ticket_page.paginator.num_pages > 1 %}
+      <nav class="pager" aria-label="Support queue pages">
+        <span>Page {{ ticket_page.number }} of {{ ticket_page.paginator.num_pages }} · {{ ticket_page.paginator.count }} tickets</span>
+        <span>
+          {% if ticket_page.has_previous %}<a href="?q={{ query|urlencode }}&status={{ status_filter|urlencode }}&category={{ category_filter|urlencode }}&priority={{ priority_filter|urlencode }}&assignment={{ assignment_filter|urlencode }}&page={{ ticket_page.previous_page_number }}">← Previous</a>{% endif %}
+          {% if ticket_page.has_next %}<a href="?q={{ query|urlencode }}&status={{ status_filter|urlencode }}&category={{ category_filter|urlencode }}&priority={{ priority_filter|urlencode }}&assignment={{ assignment_filter|urlencode }}&page={{ ticket_page.next_page_number }}">Next →</a>{% endif %}
+        </span>
+      </nav>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}
