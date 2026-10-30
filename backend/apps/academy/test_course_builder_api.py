@@ -1775,6 +1775,26 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(figure["cards"][2]["title"], "More smoothed")
         self.assertEqual(figure["note"], "Compare one setting at a time.")
 
+    def test_course_builder_shows_persistent_review_feedback_for_returned_draft(self):
+        saved = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(self.draft_payload("builder-feedback-banner")),
+            content_type="application/json",
+        )
+        self.assertEqual(saved.status_code, 200, saved.content)
+        record = CourseImport.objects.get(pk=saved.json()["record_id"])
+        record.payload["review_feedback"] = "Clarify the opening lesson and replace its chart."
+        record.status = CourseImport.Status.REJECTED
+        record.save(update_fields=["payload", "status", "updated_at"])
+
+        response = self.client.get(reverse("staff_course_builder_preview"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "builder-review-feedback")
+        self.assertContains(response, "Returned for changes · reviewer feedback")
+        self.assertContains(response, "Update this saved draft, then submit it for review again.")
+        self.assertContains(response, "esc(reviewFeedback)")
+
     def test_returned_submission_can_be_reopened_saved_and_resubmitted_in_builder(self):
         saved = self.client.post(
             reverse("staff_course_builder_api"),

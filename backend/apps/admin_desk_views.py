@@ -115,6 +115,8 @@ def admin_desk_course_review(request, import_id):
             "back_label": "Back to course approvals",
             "desk_url": reverse("staff_admin_desk"),
             "desk_review": True,
+            "purge_allowed": _can_permanently_delete_test_import(record),
+            "purge_url": reverse("staff_admin_desk_course_import_delete", args=[record.pk]),
             "desk_nav": _nav(request),
         },
     )
@@ -178,6 +180,108 @@ def admin_desk_course_reject(request, import_id):
         )
     messages.warning(request, f"{record.title} was returned to the Course Builder with your feedback.")
     return redirect("staff_admin_desk_course_reviews")
+
+
+def _can_permanently_delete_test_import(record):
+    """Only purge unlinked, unpublished imports that cannot represent a live course."""
+    from apps.academy.models import Course, CourseImport
+
+    if record.target_course_id or record.status not in {
+        CourseImport.Status.DRAFT,
+        CourseImport.Status.REVIEW,
+        CourseImport.Status.REJECTED,
+        CourseImport.Status.SUPERSEDED,
+        CourseImport.Status.DELETED,
+    }:
+        return False
+    # Older imports may not have target_course set. A matching Course row still
+    # means this import may be history for real learner-facing content.
+    return not Course.objects.filter(slug=record.course_slug).exists()
+
+
+@login_required
+@require_GET
+def admin_desk_course_import_cleanup(request):
+    """List unpublished imports that are safe candidates for permanent test-data cleanup."""
+    _guard(request)
+    from apps.academy.models import Course, CourseImport
+    from apps.academy.permissions import is_course_content_admin
+
+    if not is_course_content_admin(request.user):
+        raise PermissionDenied
+    candidates = (
+        CourseImport.objects.filter(
+            status__in=[
+                CourseImport.Status.DRAFT,
+                CourseImport.Status.REVIEW,
+                CourseImport.Status.REJECTED,
+                CourseImport.Status.SUPERSEDED,
+                CourseImport.Status.DELETED,
+            ],
+            target_course__isnull=True,
+        )
+        .exclude(course_slug__in=Course.objects.values("slug"))
+        .select_related("imported_by")
+        .order_by("-updated_at", "title")
+    )
+    return render(
+        request,
+        "admin/desk_course_import_cleanup.html",
+        {
+            "imports": candidates,
+            "candidate_count": candidates.count(),
+            "desk_nav": _nav(request),
+        },
+    )
+
+
+@login_required
+@require_POST
+def admin_desk_course_import_delete(request, import_id):
+    """Permanently purge a standalone, unpublished test import and its staged files."""
+    _guard(request)
+    from apps.academy.models import CourseImport
+    from apps.academy.permissions import is_course_content_admin
+
+    if not is_course_content_admin(request.user):
+        raise PermissionDenied
+    if str(request.POST.get("confirmation") or "").strip().upper() != "DELETE":
+        messages.error(request, "Type DELETE to confirm permanent removal.")
+        return redirect("staff_admin_desk_course_import_cleanup")
+
+    deleted_id = str(import_id)
+    with transaction.atomic():
+        record = get_object_or_404(
+            CourseImport.objects.select_for_update().prefetch_related("assets"),
+            pk=import_id,
+        )
+        if not _can_permanently_delete_test_import(record):
+            messages.error(
+                request,
+                "This import is linked to a course or is not eligible for permanent test-data cleanup. No records were deleted.",
+            )
+            return redirect("staff_admin_desk_course_import_cleanup")
+        title = record.title
+        slug = record.course_slug
+        status = record.status
+        for asset in record.assets.all():
+            if asset.file:
+                storage = asset.file.storage
+                name = asset.file.name
+                transaction.on_commit(
+                    lambda storage=storage, name=name: storage.delete(name),
+                    robust=True,
+                )
+        record.delete()
+        _audit(
+            "academy.course_import.permanently_deleted",
+            request.user,
+            "course_import",
+            deleted_id,
+            {"course_slug": slug, "title": title, "previous_status": status},
+        )
+    messages.success(request, f"{title} and its staged import files were permanently deleted.")
+    return redirect("staff_admin_desk_course_import_cleanup")
 
 
 def _nav(request):

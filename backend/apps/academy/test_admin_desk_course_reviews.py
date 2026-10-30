@@ -62,6 +62,11 @@ class AdminDeskCourseReviewTests(TestCase):
         )
         self.assertContains(response, "Pending course approvals")
         self.assertContains(response, "Admin Desk Review Course")
+        self.assertContains(response, "Permanently remove test imports")
+        self.assertContains(
+            response,
+            reverse("staff_admin_desk_course_import_cleanup"),
+        )
         self.assertNotEqual(
             response.context["course_links"]["imports"],
             reverse("admin:academy_courseimport_changelist"),
@@ -97,7 +102,7 @@ class AdminDeskCourseReviewTests(TestCase):
         self.assertEqual(response.status_code, 200, response.content)
         self.assertContains(response, "Review submission")
         self.assertContains(response, "Approve and publish course")
-        self.assertContains(response, "Return to author with feedback")
+        self.assertContains(response, "Reject and return to the Course Builder")
         self.assertContains(
             response,
             reverse("staff_admin_desk_course_approve", args=[record.pk]),
@@ -169,6 +174,79 @@ class AdminDeskCourseReviewTests(TestCase):
             "Add a clearer learning outcome and replace the missing chart.",
         )
 
+    def test_review_page_offers_permanent_deletion_only_for_unlinked_unpublished_test_imports(self):
+        record = self.make_import(slug="safe-test-import")
+        response = self.client.get(
+            reverse("staff_admin_desk_course_review", args=[record.pk])
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "Permanently delete this test submission")
+        self.assertTrue(response.context["purge_allowed"])
+
+        protected_course = Course.objects.create(
+            title="Protected published course",
+            slug="protected-course-import",
+            status=Course.Status.PUBLISHED,
+        )
+        protected = self.make_import(slug=protected_course.slug)
+        protected_response = self.client.get(
+            reverse("staff_admin_desk_course_review", args=[protected.pk])
+        )
+        self.assertEqual(protected_response.status_code, 200, protected_response.content)
+        self.assertFalse(protected_response.context["purge_allowed"])
+        self.assertNotContains(protected_response, "Permanently delete this test submission")
+
+    def test_test_import_cleanup_excludes_published_course_slugs(self):
+        eligible = self.make_import(slug="eligible-test-import")
+        protected_course = Course.objects.create(
+            title="Protected Bollinger Bands",
+            slug="understand-bollinger-bands",
+            status=Course.Status.PUBLISHED,
+        )
+        protected = self.make_import(slug=protected_course.slug)
+
+        response = self.client.get(reverse("staff_admin_desk_course_import_cleanup"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, eligible.title)
+        self.assertNotContains(response, protected.course_slug)
+        self.assertContains(response, "Permanent deletion")
+
+    def test_unpublished_test_import_can_be_permanently_deleted_after_typed_confirmation(self):
+        record = self.make_import(slug="permanent-test-import")
+
+        refused = self.client.post(
+            reverse("staff_admin_desk_course_import_delete", args=[record.pk]),
+            {"confirmation": "delete maybe"},
+        )
+        self.assertRedirects(refused, reverse("staff_admin_desk_course_import_cleanup"))
+        self.assertTrue(CourseImport.objects.filter(pk=record.pk).exists())
+
+        deleted = self.client.post(
+            reverse("staff_admin_desk_course_import_delete", args=[record.pk]),
+            {"confirmation": "DELETE"},
+        )
+        self.assertRedirects(deleted, reverse("staff_admin_desk_course_import_cleanup"))
+        self.assertFalse(CourseImport.objects.filter(pk=record.pk).exists())
+
+    def test_permanent_cleanup_refuses_import_that_matches_a_real_course(self):
+        course = Course.objects.create(
+            title="Live learning path",
+            slug="trading-path",
+            status=Course.Status.PUBLISHED,
+        )
+        record = self.make_import(slug=course.slug)
+
+        response = self.client.post(
+            reverse("staff_admin_desk_course_import_delete", args=[record.pk]),
+            {"confirmation": "DELETE"},
+        )
+
+        self.assertRedirects(response, reverse("staff_admin_desk_course_import_cleanup"))
+        self.assertTrue(CourseImport.objects.filter(pk=record.pk).exists())
+        course.refresh_from_db()
+        self.assertEqual(course.status, Course.Status.PUBLISHED)
+
     def test_course_approval_pages_are_restricted_to_course_content_admins(self):
         self.client.force_login(
             User.objects.create_user(
@@ -180,3 +258,6 @@ class AdminDeskCourseReviewTests(TestCase):
         )
         response = self.client.get(reverse("staff_admin_desk_course_reviews"))
         self.assertEqual(response.status_code, 403)
+
+        cleanup_response = self.client.get(reverse("staff_admin_desk_course_import_cleanup"))
+        self.assertEqual(cleanup_response.status_code, 403)

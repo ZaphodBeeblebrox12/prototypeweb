@@ -168,6 +168,7 @@
       {% if course_links.lessons %}<li><a href="{{ course_links.lessons }}">Manage lessons &amp; release dates →</a></li>{% endif %}
       {% if course_links.offers %}<li><a href="{{ course_links.offers }}">Manage course offers →</a></li>{% endif %}
       {% if course_links.imports %}<li><a href="{{ course_links.imports }}">Review course approvals <span class="signal-count">{{ course_metrics.imports_awaiting_review }}</span> →</a></li>{% endif %}
+      <li><a href="{% url 'staff_admin_desk_course_import_cleanup' %}">Permanently remove test imports →</a></li>
       {% if course_links.entitlements %}<li><a href="{{ course_links.entitlements }}">Review learner access →</a></li>{% endif %}
     </ul>
   </section>
