@@ -200,6 +200,7 @@ def _can_permanently_delete_test_import(record):
 
 
 @login_required
+@require_GET
 def admin_desk_course_import_cleanup(request):
     """List unpublished imports that are safe candidates for permanent test-data cleanup."""
     _guard(request)
