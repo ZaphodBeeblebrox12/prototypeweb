@@ -61,7 +61,7 @@ def _verify_ticket(request, video, ticket):
             max_age=int(getattr(settings, "ACADEMY_VIDEO_TICKET_MAX_AGE", 14400)),
         )
     except (signing.BadSignature, signing.SignatureExpired, TypeError, ValueError):
-        raise Http404
+        raise Http404 from None
     if (
         payload.get("video") != str(video.pk)
         or payload.get("user") != str(request.user.pk)
