@@ -43,16 +43,38 @@ def get_provider_for_country(country_code: str) -> str:
 @login_required
 def course_purchase_start(request, offer_slug):
     """Render checkout for a published course offer without creating a payment intent."""
-    from apps.academy.models import CourseOffer
+    from apps.academy.models import Course, CourseOffer
     from apps.academy.services import get_active_entitlement
+
+    # Keep old purchase links useful after a course becomes free. The public
+    # Trading Path CTA and any previously issued offer URL must land on the
+    # Academy course page, where the learner can enrol without payment.
+    free_course = Course.objects.filter(
+        slug=offer_slug,
+        status=Course.Status.PUBLISHED,
+        access_type__in=(Course.AccessType.FREE, Course.AccessType.MEMBERSHIP),
+    ).first()
+    if free_course is not None:
+        return redirect("academy:course-detail", course_slug=free_course.slug)
 
     offer = (
         CourseOffer.objects.select_related("course", "plan")
-        .filter(slug=offer_slug, is_active=True)
+        .filter(slug=offer_slug)
         .first()
     )
     if (
+        offer is not None
+        and offer.course.status == Course.Status.PUBLISHED
+        and offer.course.access_type in (
+            Course.AccessType.FREE,
+            Course.AccessType.MEMBERSHIP,
+        )
+    ):
+        return redirect("academy:course-detail", course_slug=offer.course.slug)
+
+    if (
         offer is None
+        or not offer.is_active
         or not offer.is_saleable
         or offer.plan is None
         or not offer.plan.is_active
