@@ -13,7 +13,6 @@ from django.core import signing
 from django.http import FileResponse, Http404, HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.utils.cache import add_never_cache_headers
 from django.views.decorators.http import require_GET
 
 from .models import ProtectedLessonVideo
