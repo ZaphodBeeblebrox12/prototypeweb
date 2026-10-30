@@ -148,6 +148,58 @@ class PurchaseFlowTests(APITestCase):
         self.assertContains(response, "₹999")
         self.assertEqual(PaymentIntent.objects.count(), 0)
 
+    def test_free_trading_path_purchase_url_redirects_to_course_enrolment(self, _geo, prov):
+        self.client.force_login(self.user)
+        course = Course.objects.create(
+            title="TradeThesis Trading Path",
+            slug="trading-path",
+            status=Course.Status.PUBLISHED,
+            access_type=Course.AccessType.FREE,
+        )
+
+        # The historical public CTA used /buy/course/trading-path/.
+        response = self.client.get(reverse(
+            "course-purchase-start", kwargs={"offer_slug": "trading-path"}))
+
+        self.assertRedirects(
+            response,
+            reverse("academy:course-detail", kwargs={"course_slug": course.slug}),
+            fetch_redirect_response=False,
+        )
+        self.assertEqual(PaymentIntent.objects.count(), 0)
+        prov.create_hosted_checkout.assert_not_called()
+
+    def test_inactive_legacy_offer_slug_for_free_course_redirects_too(self, _geo, prov):
+        self.client.force_login(self.user)
+        course = Course.objects.create(
+            title="TradeThesis Trading Path",
+            slug="trading-path",
+            status=Course.Status.PUBLISHED,
+            access_type=Course.AccessType.FREE,
+        )
+        plan, _price = make_plan("one_time", price_cents=99900, currency="INR")
+        plan.is_hidden = True
+        plan.save(update_fields=["is_hidden"])
+        legacy_offer = CourseOffer.objects.create(
+            course=course,
+            name="Legacy Trading Path offer",
+            slug="trading-path-legacy-offer",
+            plan=plan,
+            is_active=False,
+            access_duration_days=None,
+        )
+
+        response = self.client.get(reverse(
+            "course-purchase-start", kwargs={"offer_slug": legacy_offer.slug}))
+
+        self.assertRedirects(
+            response,
+            reverse("academy:course-detail", kwargs={"course_slug": course.slug}),
+            fetch_redirect_response=False,
+        )
+        self.assertEqual(PaymentIntent.objects.count(), 0)
+        prov.create_hosted_checkout.assert_not_called()
+
     def test_course_offer_payment_start_resolves_one_time_product(self, _geo, prov):
         offer = self._saleable_course_offer()
         response = self.client.post(reverse("payment-start"), {
