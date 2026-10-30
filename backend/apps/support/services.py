@@ -17,9 +17,37 @@ from apps.subscriptions.services import grant_subscription_by_admin
 logger = logging.getLogger(__name__)
 
 
+def reviewable_ticket_queryset(user, queryset=None):
+    """Return only support tickets visible to this staff member's reviewer scope."""
+    from .models import SupportTicket
+
+    qs = queryset if queryset is not None else SupportTicket.objects.all()
+    if not getattr(user, "is_active", False) or not getattr(user, "is_staff", False):
+        return qs.none()
+    if getattr(user, "is_superuser", False):
+        return qs
+    # Match the admin queue's plan-approver rules: a populated approver list
+    # restricts access; an empty list keeps the established any-staff behavior.
+    return qs.filter(
+        Q(plan__ticket_approvers__pk=user.pk)
+        | Q(plan__isnull=False, plan__ticket_approvers__isnull=True)
+        | Q(
+            plan__isnull=True,
+            affiliate_link__plan__ticket_approvers__pk=user.pk,
+        )
+        | Q(
+            plan__isnull=True,
+            affiliate_link__plan__ticket_approvers__isnull=True,
+        )
+    ).distinct()
+
+
 def _ticket_url(ticket, staff=False):
     if staff:
-        path = f"/admin/support/supportticket/{ticket.pk}/change/"
+        path = reverse(
+            "staff_admin_desk_support_ticket",
+            kwargs={"ticket_id": ticket.pk},
+        )
     else:
         path = reverse("support:ticket_detail", kwargs={"pk": ticket.pk})
     # SITE_BASE_URL is the authenticated Academy origin. Its development
