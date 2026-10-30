@@ -229,6 +229,7 @@ class Command(BaseCommand):
                     "or publishing. Review the lesson content and media before release."
                 ),
                 status=Course.Status.DRAFT,
+                access_type=Course.AccessType.FREE,
                 position=10,
             )
 
