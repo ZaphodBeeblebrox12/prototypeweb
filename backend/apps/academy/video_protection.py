@@ -95,8 +95,12 @@ def protected_video_manifest(request, video_id):
     )
     _assert_video_access(request, video)
 
-    manifest_path = _private_stream_directory(video) / "index.m3u8"
-    if not manifest_path.is_file():
+    stream_dir = _private_stream_directory(video)
+    manifest_path = (stream_dir / "index.m3u8").resolve()
+    if stream_dir not in manifest_path.parents or not manifest_path.is_file():
+        raise Http404
+    key_path = (stream_dir / "encryption.key").resolve()
+    if stream_dir not in key_path.parents or not key_path.is_file() or key_path.stat().st_size != 16:
         raise Http404
 
     ticket = quote(_make_ticket(request, video), safe="")
@@ -104,18 +108,23 @@ def protected_video_manifest(request, video_id):
     segment_url = reverse("academy:protected-video-segment", args=[video.pk, "PLACEHOLDER"])
     playlist = manifest_path.read_text(encoding="utf-8")
     rewritten_lines = []
+    has_aes128_key = False
     for line in playlist.splitlines():
         stripped = line.strip()
         if stripped.startswith("#EXT-X-KEY:"):
-            if "URI=" not in stripped:
+            if "METHOD=AES-128" not in stripped or "URI=" not in stripped:
                 raise Http404
             line = re.sub(r'URI="[^"]+"', f'URI="{key_url}"', line)
+            has_aes128_key = True
         elif stripped and not stripped.startswith("#"):
             name = Path(stripped).name
             if name != stripped or not _SEGMENT_RE.fullmatch(name):
                 raise Http404
             line = segment_url.replace("PLACEHOLDER", quote(name, safe="")) + f"?ticket={ticket}"
         rewritten_lines.append(line)
+
+    if not has_aes128_key:
+        raise Http404
 
     response = HttpResponse(
         "\n".join(rewritten_lines) + "\n",
@@ -134,8 +143,9 @@ def protected_video_key(request, video_id):
         status=ProtectedLessonVideo.Status.READY,
     )
     _verify_ticket(request, video, request.GET.get("ticket", ""))
-    key_path = _private_stream_directory(video) / "encryption.key"
-    if not key_path.is_file() or key_path.stat().st_size != 16:
+    stream_dir = _private_stream_directory(video)
+    key_path = (stream_dir / "encryption.key").resolve()
+    if stream_dir not in key_path.parents or not key_path.is_file() or key_path.stat().st_size != 16:
         raise Http404
     response = HttpResponse(key_path.read_bytes(), content_type="application/octet-stream")
     return _private_response_headers(response)
@@ -151,8 +161,9 @@ def protected_video_segment(request, video_id, segment_name):
         status=ProtectedLessonVideo.Status.READY,
     )
     _verify_ticket(request, video, request.GET.get("ticket", ""))
-    segment_path = _private_stream_directory(video) / segment_name
-    if not segment_path.is_file():
+    stream_dir = _private_stream_directory(video)
+    segment_path = (stream_dir / segment_name).resolve()
+    if stream_dir not in segment_path.parents or not segment_path.is_file():
         raise Http404
     response = FileResponse(segment_path.open("rb"), content_type="video/mp2t")
     return _private_response_headers(response)
