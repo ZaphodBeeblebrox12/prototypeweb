@@ -869,11 +869,11 @@ class ProtectedLessonVideoAdmin(admin.ModelAdmin):
         return is_course_content_admin(request.user)
 
     def save_model(self, request, obj, form, change):
-        previous_name = ""
-        if change:
-            previous = ProtectedLessonVideo.objects.filter(pk=obj.pk).first()
-            previous_name = previous.source_file.name if previous and previous.source_file else ""
-        if not change or previous_name != (obj.source_file.name if obj.source_file else ""):
+        previous = ProtectedLessonVideo.objects.filter(pk=obj.pk).first() if change else None
+        previous_name = previous.source_file.name if previous and previous.source_file else ""
+        previous_directory = previous.stream_directory if previous else ""
+        replacing_source = not change or previous_name != (obj.source_file.name if obj.source_file else "")
+        if replacing_source:
             obj.status = ProtectedLessonVideo.Status.PENDING
             obj.stream_directory = ""
             obj.processing_error = ""
@@ -881,6 +881,16 @@ class ProtectedLessonVideoAdmin(admin.ModelAdmin):
         if not change:
             obj.created_by = request.user
         super().save_model(request, obj, form, change)
+        if replacing_source and previous:
+            if previous_name:
+                previous.source_file.storage.delete(previous_name)
+            if previous_directory:
+                root = Path(settings.ACADEMY_VIDEO_STORAGE_ROOT).resolve()
+                old_directory = (root / previous_directory).resolve()
+                if root in old_directory.parents and old_directory.is_dir():
+                    import shutil
+
+                    shutil.rmtree(old_directory, ignore_errors=True)
 
     def delete_model(self, request, obj):
         import shutil
