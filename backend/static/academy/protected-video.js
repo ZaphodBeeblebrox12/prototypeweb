@@ -85,22 +85,44 @@
     watermark.style.bottom = "auto";
   };
 
-  const showWatermarkCycle = () => {
-    if (document.hidden) {
-      window.setTimeout(showWatermarkCycle, 4000);
-      return;
-    }
+  let cycleTimer = null;
+  let movementTimer = null;
+  let hideTimer = null;
+
+  const stopWatermark = () => {
+    window.clearTimeout(cycleTimer);
+    window.clearTimeout(hideTimer);
+    window.clearInterval(movementTimer);
+    watermark.classList.remove("is-visible");
+  };
+
+  const scheduleWatermark = delay => {
+    window.clearTimeout(cycleTimer);
+    cycleTimer = window.setTimeout(showWatermarkCycle, delay);
+  };
+
+  function showWatermarkCycle() {
+    if (video.paused || video.ended || document.hidden) return;
 
     moveWatermark();
     watermark.classList.add("is-visible");
-    const movementTimer = window.setInterval(moveWatermark, 3600);
+    movementTimer = window.setInterval(moveWatermark, 3600);
 
-    window.setTimeout(() => {
+    hideTimer = window.setTimeout(() => {
       window.clearInterval(movementTimer);
       watermark.classList.remove("is-visible");
-      window.setTimeout(showWatermarkCycle, 22000);
+      scheduleWatermark(22000);
     }, 9000);
-  };
+  }
 
-  window.setTimeout(showWatermarkCycle, 3200);
+  video.addEventListener("play", () => scheduleWatermark(1400));
+  video.addEventListener("pause", stopWatermark);
+  video.addEventListener("ended", stopWatermark);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      stopWatermark();
+    } else if (!video.paused && !video.ended) {
+      scheduleWatermark(1400);
+    }
+  });
 })();
