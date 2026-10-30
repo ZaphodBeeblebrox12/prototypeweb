@@ -101,6 +101,19 @@ class AdminDeskSupportTicketTests(TestCase):
         self.assertEqual(allowed_response.status_code, 200, allowed_response.content)
         self.assertContains(allowed_response, restricted_ticket.short_id)
 
+    def test_queue_exact_uuid_search_can_combine_with_status_filters(self):
+        response = self.client.get(
+            reverse("staff_admin_desk_support_tickets"),
+            {
+                "q": str(self.ticket.pk),
+                "status": SupportTicket.Status.PENDING,
+            },
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, self.ticket.short_id)
+        self.assertEqual(response.context["ticket_page"].paginator.count, 1)
+
     def test_ticket_detail_shows_conversation_private_notes_and_member_evidence_links(self):
         TicketMessage.objects.create(
             ticket=self.ticket,
