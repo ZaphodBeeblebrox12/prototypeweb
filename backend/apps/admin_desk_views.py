@@ -1,5 +1,6 @@
 """Creator-facing Admin Desk workflows; model imports stay inside request handlers."""
 from datetime import timedelta
+import logging
 
 from django import forms
 from django.contrib import messages
@@ -14,6 +15,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
+
+
+logger = logging.getLogger(__name__)
 
 
 def _allowed(user, permission):
@@ -282,6 +286,336 @@ def admin_desk_course_import_delete(request, import_id):
         )
     messages.success(request, f"{title} and its staged import files were permanently deleted.")
     return redirect("staff_admin_desk_course_import_cleanup")
+
+
+@login_required
+@require_GET
+def admin_desk_support_tickets(request):
+    """Permission-filtered support queue in the TradeThesis Admin Desk."""
+    _guard(request)
+    from apps.support.models import SupportTicket
+    from apps.support.services import reviewable_ticket_queryset
+
+    queryset = reviewable_ticket_queryset(
+        request.user,
+        SupportTicket.objects.select_related(
+            "user", "plan", "affiliate_link", "assigned_to"
+        ),
+    )
+    query = request.GET.get("q", "").strip()[:160]
+    status = request.GET.get("status", "").strip()
+    category = request.GET.get("category", "").strip()
+    priority = request.GET.get("priority", "").strip()
+    assignment = request.GET.get("assignment", "").strip()
+
+    if query:
+        queryset = queryset.filter(
+            Q(user__username__icontains=query)
+            | Q(user__email__icontains=query)
+            | Q(message__icontains=query)
+            | Q(admin_notes__icontains=query)
+        )
+        # Permit an exact UUID search without making partial UUID casts unsafe.
+        try:
+            from uuid import UUID
+            ticket_uuid = UUID(query)
+        except (TypeError, ValueError, AttributeError):
+            ticket_uuid = None
+        if ticket_uuid:
+            queryset = queryset | reviewable_ticket_queryset(
+                request.user,
+                SupportTicket.objects.select_related(
+                    "user", "plan", "affiliate_link", "assigned_to"
+                ).filter(pk=ticket_uuid),
+            )
+
+    if status in {value for value, _label in SupportTicket.Status.choices}:
+        queryset = queryset.filter(status=status)
+    elif status == "active":
+        queryset = queryset.filter(status__in=SupportTicket.ACTIVE_STATUSES)
+    if category in {value for value, _label in SupportTicket.Category.choices}:
+        queryset = queryset.filter(category=category)
+    if priority in {value for value, _label in SupportTicket.Priority.choices}:
+        queryset = queryset.filter(priority=priority)
+    if assignment == "mine":
+        queryset = queryset.filter(assigned_to=request.user)
+    elif assignment == "unassigned":
+        queryset = queryset.filter(assigned_to__isnull=True)
+
+    base_queryset = reviewable_ticket_queryset(request.user, SupportTicket.objects.all())
+    now = timezone.now()
+    stats = {
+        "pending": base_queryset.filter(status=SupportTicket.Status.PENDING).count(),
+        "open": base_queryset.filter(status__in=SupportTicket.ACTIVE_STATUSES).count(),
+        "overdue": base_queryset.filter(
+            status__in=SupportTicket.ACTIVE_STATUSES,
+            first_response_at__isnull=True,
+            first_response_due_at__lt=now,
+        ).count(),
+        "resolved": base_queryset.filter(
+            status__in=[SupportTicket.Status.APPROVED, SupportTicket.Status.REJECTED]
+        ).count(),
+    }
+    page = Paginator(queryset.order_by("-created_at"), 25).get_page(
+        request.GET.get("page")
+    )
+    return render(
+        request,
+        "admin/desk_support_tickets.html",
+        {
+            "ticket_page": page,
+            "query": query,
+            "status_filter": status,
+            "category_filter": category,
+            "priority_filter": priority,
+            "assignment_filter": assignment,
+            "status_choices": SupportTicket.Status.choices,
+            "category_choices": SupportTicket.Category.choices,
+            "priority_choices": SupportTicket.Priority.choices,
+            "stats": stats,
+            "desk_nav": _nav(request),
+        },
+    )
+
+
+@login_required
+@require_GET
+def admin_desk_support_ticket(request, ticket_id):
+    """Read and manage one support conversation inside the Admin Desk."""
+    _guard(request)
+    from apps.support.models import SupportTicket
+    from apps.support.services import reviewable_ticket_queryset
+
+    ticket = get_object_or_404(
+        reviewable_ticket_queryset(
+            request.user,
+            SupportTicket.objects.select_related(
+                "user", "plan", "affiliate_link", "assigned_to", "reviewed_by"
+            ).prefetch_related("attachments", "messages__author"),
+        ),
+        pk=ticket_id,
+    )
+    conversation = ticket.messages.select_related("author").order_by(
+        "created_at", "pk"
+    )
+    try:
+        requested_count = int(request.GET.get("show_messages", "50"))
+    except (TypeError, ValueError):
+        requested_count = 50
+    visible_count = min(conversation.count(), max(20, min(requested_count, 200)))
+    total_messages = conversation.count()
+    messages_page = list(conversation.order_by("-created_at", "-pk")[:visible_count])
+    messages_page.reverse()
+
+    from apps.subscriptions.models import Plan
+
+    plan_options = []
+    if ticket.is_access_request:
+        plan_options = [
+            plan for plan in Plan.objects.filter(is_hidden=True).order_by("name")
+            if ticket.can_be_reviewed_by(request.user, plan=plan)
+        ]
+    staff_options = [
+        staff for staff in get_user_model().objects.filter(
+            is_staff=True, is_active=True
+        ).order_by("username")
+        if ticket.can_be_reviewed_by(staff)
+    ]
+    return render(
+        request,
+        "admin/desk_support_ticket.html",
+        {
+            "ticket": ticket,
+            "conversation_messages": messages_page,
+            "total_message_count": total_messages,
+            "has_earlier_messages": total_messages > visible_count,
+            "messages_to_load": min(50, total_messages - visible_count),
+            "next_message_limit": min(total_messages, visible_count + 50),
+            "plan_options": plan_options,
+            "staff_options": staff_options,
+            "can_approve": ticket.is_open,
+            "can_reply": ticket.status != SupportTicket.Status.WITHDRAWN,
+            "desk_nav": _nav(request),
+            "queue_url": reverse("staff_admin_desk_support_tickets"),
+        },
+    )
+
+
+@login_required
+@require_POST
+def admin_desk_support_ticket_action(request, ticket_id):
+    """Apply the existing support-ticket workflow from a dashboard POST."""
+    _guard(request)
+    from apps.support.models import SupportTicket
+    from apps.support.services import (
+        add_ticket_message,
+        approve_ticket,
+        reject_ticket,
+        reopen_ticket,
+        reviewable_ticket_queryset,
+        set_ticket_status,
+    )
+    from apps.subscriptions.models import Plan
+
+    ticket = get_object_or_404(
+        reviewable_ticket_queryset(
+            request.user,
+            SupportTicket.objects.select_related("user", "plan", "affiliate_link"),
+        ),
+        pk=ticket_id,
+    )
+    action = (request.POST.get("action") or "").strip()
+
+    if action in {"public_reply", "internal_note"}:
+        try:
+            add_ticket_message(
+                ticket,
+                request.user,
+                request.POST.get("body", ""),
+                is_internal=(action == "internal_note"),
+            )
+        except (ValueError, PermissionError) as exc:
+            messages.error(request, str(exc))
+        else:
+            _audit(
+                "support.ticket.internal_note" if action == "internal_note"
+                else "support.ticket.replied",
+                request.user,
+                "support_ticket",
+                ticket.pk,
+                {"message_visibility": action},
+            )
+            messages.success(
+                request,
+                "Internal note saved." if action == "internal_note"
+                else "Reply sent to the member.",
+            )
+        return redirect("staff_admin_desk_support_ticket", ticket_id=ticket.pk)
+
+    if action in {"start_review", "awaiting_member"}:
+        target_status = (
+            SupportTicket.Status.IN_PROGRESS
+            if action == "start_review"
+            else SupportTicket.Status.AWAITING_MEMBER
+        )
+        try:
+            set_ticket_status(ticket, request.user, target_status)
+        except (ValueError, PermissionError) as exc:
+            messages.error(request, str(exc))
+        else:
+            _audit(
+                "support.ticket.status_changed",
+                request.user,
+                "support_ticket",
+                ticket.pk,
+                {"status": target_status},
+            )
+            messages.success(request, f"Ticket moved to {ticket.get_status_display().lower()}.")
+        return redirect("staff_admin_desk_support_ticket", ticket_id=ticket.pk)
+
+    if action == "reopen":
+        try:
+            reopen_ticket(ticket, request.user)
+        except (ValueError, PermissionError) as exc:
+            messages.error(request, str(exc))
+        else:
+            _audit("support.ticket.reopened", request.user, "support_ticket", ticket.pk)
+            messages.success(request, "Ticket reopened and returned to active work.")
+        return redirect("staff_admin_desk_support_ticket", ticket_id=ticket.pk)
+
+    if action == "approve":
+        raw_plan_id = (request.POST.get("plan") or "").strip()
+        if raw_plan_id:
+            plan = Plan.objects.filter(pk=raw_plan_id, is_hidden=True).first()
+            if plan is None:
+                messages.error(request, "Choose a valid hidden access plan.")
+                return redirect("staff_admin_desk_support_ticket", ticket_id=ticket.pk)
+        else:
+            plan = ticket.plan or (
+                ticket.affiliate_link.plan
+                if ticket.affiliate_link_id and ticket.affiliate_link.plan_id
+                else None
+            )
+        if ticket.is_access_request and plan is None:
+            messages.error(request, "Assign a hidden plan before approving this access request.")
+            return redirect("staff_admin_desk_support_ticket", ticket_id=ticket.pk)
+        notes = request.POST.get("admin_notes", ticket.admin_notes)
+        try:
+            approve_ticket(ticket, plan, request.user, notes=notes)
+        except (ValueError, PermissionError) as exc:
+            messages.error(request, str(exc))
+        except Exception:
+            logger.exception("Admin Desk support approval failed ticket=%s", ticket.pk)
+            messages.error(
+                request,
+                "Approval failed and no changes were committed. Check the logs and retry.",
+            )
+        else:
+            _audit(
+                "support.ticket.approved",
+                request.user,
+                "support_ticket",
+                ticket.pk,
+                {"plan_id": str(plan.pk) if plan else None},
+            )
+            messages.success(
+                request,
+                f"Approved — {ticket.user} granted {plan.name}."
+                if ticket.is_access_request and plan
+                else "Ticket marked resolved; the member was notified.",
+            )
+        return redirect("staff_admin_desk_support_ticket", ticket_id=ticket.pk)
+
+    if action == "reject":
+        notes = request.POST.get("admin_notes", ticket.admin_notes).strip()
+        plan = ticket.review_plan if ticket.is_access_request else None
+        raw_plan_id = (request.POST.get("plan") or "").strip()
+        if ticket.is_access_request and raw_plan_id:
+            plan = Plan.objects.filter(pk=raw_plan_id, is_hidden=True).first()
+            if plan is None:
+                messages.error(request, "Choose a valid hidden access plan.")
+                return redirect("staff_admin_desk_support_ticket", ticket_id=ticket.pk)
+        try:
+            reject_ticket(ticket, request.user, notes, plan=plan)
+        except (ValueError, PermissionError) as exc:
+            messages.error(request, str(exc))
+        else:
+            _audit("support.ticket.rejected", request.user, "support_ticket", ticket.pk)
+            messages.success(request, "Ticket rejected and the member was notified.")
+        return redirect("staff_admin_desk_support_ticket", ticket_id=ticket.pk)
+
+    if action == "update_details":
+        raw_assignee = (request.POST.get("assigned_to") or "").strip()
+        assignee = None
+        if raw_assignee:
+            assignee = get_user_model().objects.filter(
+                pk=raw_assignee, is_staff=True, is_active=True
+            ).first()
+            if assignee is None or not ticket.can_be_reviewed_by(assignee):
+                messages.error(request, "Choose an active reviewer who is allowed to access this ticket.")
+                return redirect("staff_admin_desk_support_ticket", ticket_id=ticket.pk)
+        priority = (request.POST.get("priority") or "").strip()
+        if priority not in {value for value, _label in SupportTicket.Priority.choices}:
+            messages.error(request, "Choose a valid ticket priority.")
+            return redirect("staff_admin_desk_support_ticket", ticket_id=ticket.pk)
+        ticket.assigned_to = assignee
+        ticket.priority = priority
+        ticket.save(update_fields=["assigned_to", "priority", "first_response_due_at", "updated_at"])
+        _audit(
+            "support.ticket.details_updated",
+            request.user,
+            "support_ticket",
+            ticket.pk,
+            {
+                "assigned_to": str(assignee.pk) if assignee else None,
+                "priority": priority,
+            },
+        )
+        messages.success(request, "Ticket assignment and priority updated.")
+        return redirect("staff_admin_desk_support_ticket", ticket_id=ticket.pk)
+
+    messages.error(request, "Choose a valid support-ticket action.")
+    return redirect("staff_admin_desk_support_ticket", ticket_id=ticket.pk)
 
 
 def _nav(request):
