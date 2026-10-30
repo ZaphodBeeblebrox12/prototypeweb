@@ -115,6 +115,8 @@ def admin_desk_course_review(request, import_id):
             "back_label": "Back to course approvals",
             "desk_url": reverse("staff_admin_desk"),
             "desk_review": True,
+            "purge_allowed": _can_permanently_delete_test_import(record),
+            "purge_url": reverse("staff_admin_desk_course_import_delete", args=[record.pk]),
             "desk_nav": _nav(request),
         },
     )
