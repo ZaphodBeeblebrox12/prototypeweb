@@ -37,8 +37,8 @@ from .models import (
     CourseOffer,
     Lesson,
     LessonInstructorMaterial,
-    ProtectedLessonVideo,
     LessonProgress,
+    ProtectedLessonVideo,
 )
 from .permissions import is_course_content_admin
 from .regional_content import (
