@@ -433,6 +433,7 @@ def admin_desk_support_ticket(request, ticket_id):
             "next_message_limit": min(total_messages, visible_count + 50),
             "plan_options": plan_options,
             "staff_options": staff_options,
+            "priority_choices": SupportTicket.Priority.choices,
             "can_approve": ticket.is_open,
             "can_reply": ticket.status != SupportTicket.Status.WITHDRAWN,
             "desk_nav": _nav(request),
