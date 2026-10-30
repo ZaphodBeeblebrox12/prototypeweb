@@ -97,7 +97,7 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
         return playlist, ticket[0]
 
     def test_manifest_rewrites_key_and_segment_to_session_bound_routes(self):
-        playlist, _ticket = self._playlist_and_ticket()
+        playlist, _ = self._playlist_and_ticket()
         self.assertIn(
             reverse("academy:protected-video-key", args=[self.video.pk]),
             playlist,
