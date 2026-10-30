@@ -201,7 +201,7 @@ def _can_permanently_delete_test_import(record):
 def admin_desk_course_import_cleanup(request):
     """List unpublished imports that are safe candidates for permanent test-data cleanup."""
     _guard(request)
-    from apps.academy.models import CourseImport
+    from apps.academy.models import Course, CourseImport
     from apps.academy.permissions import is_course_content_admin
 
     if not is_course_content_admin(request.user):
@@ -217,9 +217,7 @@ def admin_desk_course_import_cleanup(request):
             ],
             target_course__isnull=True,
         )
-        .exclude(course_slug__in=__import__(
-            "apps.academy.models", fromlist=["Course"]
-        ).Course.objects.values("slug"))
+        .exclude(course_slug__in=Course.objects.values("slug"))
         .select_related("imported_by")
         .order_by("-updated_at", "title")
     )
