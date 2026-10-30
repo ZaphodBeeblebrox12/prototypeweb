@@ -44,6 +44,7 @@
     <strong>Permanent deletion.</strong> Removing an import deletes its database record and staged image files. This cannot be undone. Published imports, imports linked to a course, and imports whose slug matches an existing Course are deliberately excluded.
   </div>
   <div class="count"><strong>{{ candidate_count }}</strong><span>unpublished import{{ candidate_count|pluralize }} eligible for cleanup</span></div>
+  <p class="intro" style="margin:0 0 14px">For an actual Course record (rather than an import or Builder draft), use <a href="{% url 'admin:academy_course_changelist' %}">Django Admin → Academy → Courses</a>. Deletion there is blocked when protected offers, entitlements or lesson history still depend on the course.</p>
   <section class="items" aria-label="Unpublished course imports eligible for cleanup">
     {% for record in imports %}
       <article class="item">
