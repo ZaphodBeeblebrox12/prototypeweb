@@ -16,6 +16,7 @@ from .course_builder_lifecycle import mark_builder_draft_deleted
 from .forms import (
     CourseImportAssetAdminForm,
     CourseMediaAssetAdminForm,
+    ProtectedLessonVideoAdminForm,
     LessonAdminForm,
     LessonFigureAdminForm,
 )
@@ -32,6 +33,7 @@ from .models import (
     CourseImport,
     CourseImportAsset,
     CourseMediaAsset,
+    ProtectedLessonVideo,
     CourseModule,
     CourseOffer,
     Lesson,
@@ -818,6 +820,79 @@ class CourseMediaAssetAdmin(admin.ModelAdmin):
                     "new_file": obj.file.name if obj.file else "",
                 },
             )
+
+
+@admin.register(ProtectedLessonVideo)
+class ProtectedLessonVideoAdmin(admin.ModelAdmin):
+    form = ProtectedLessonVideoAdminForm
+    list_display = ("lesson", "course_title", "status", "processed_at", "updated_at")
+    list_filter = ("status", "lesson__module__course")
+    search_fields = ("lesson__title", "lesson__module__course__title")
+    fields = (
+        "lesson",
+        "source_file",
+        "status",
+        "stream_directory",
+        "processing_error",
+        "processed_at",
+        "created_by",
+        "created_at",
+        "updated_at",
+    )
+    readonly_fields = (
+        "status",
+        "stream_directory",
+        "processing_error",
+        "processed_at",
+        "created_by",
+        "created_at",
+        "updated_at",
+    )
+
+    @admin.display(description="Course")
+    def course_title(self, obj):
+        return obj.lesson.module.course.title
+
+    def has_module_permission(self, request):
+        return is_course_content_admin(request.user)
+
+    def has_view_permission(self, request, obj=None):
+        return is_course_content_admin(request.user)
+
+    def has_add_permission(self, request):
+        return is_course_content_admin(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        return is_course_content_admin(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return is_course_content_admin(request.user)
+
+    def save_model(self, request, obj, form, change):
+        previous_name = ""
+        if change:
+            previous = ProtectedLessonVideo.objects.filter(pk=obj.pk).first()
+            previous_name = previous.source_file.name if previous and previous.source_file else ""
+        if not change or previous_name != (obj.source_file.name if obj.source_file else ""):
+            obj.status = ProtectedLessonVideo.Status.PENDING
+            obj.stream_directory = ""
+            obj.processing_error = ""
+            obj.processed_at = None
+        if not change:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+    def delete_model(self, request, obj):
+        import shutil
+
+        if obj.stream_directory:
+            root = Path(settings.ACADEMY_VIDEO_STORAGE_ROOT).resolve()
+            directory = (root / obj.stream_directory).resolve()
+            if root in directory.parents and directory.is_dir():
+                shutil.rmtree(directory, ignore_errors=True)
+        if obj.source_file:
+            obj.source_file.delete(save=False)
+        super().delete_model(request, obj)
 
 
 @admin.register(CourseContentRevision)
