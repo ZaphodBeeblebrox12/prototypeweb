@@ -51,6 +51,7 @@ def course_purchase_start(request, offer_slug):
     # Academy course page, where the learner can enrol without payment.
     free_course = Course.objects.filter(
         slug=offer_slug,
+        status=Course.Status.PUBLISHED,
         access_type__in=(Course.AccessType.FREE, Course.AccessType.MEMBERSHIP),
     ).first()
     if free_course is not None:
@@ -61,9 +62,13 @@ def course_purchase_start(request, offer_slug):
         .filter(slug=offer_slug)
         .first()
     )
-    if offer is not None and offer.course.access_type in (
-        Course.AccessType.FREE,
-        Course.AccessType.MEMBERSHIP,
+    if (
+        offer is not None
+        and offer.course.status == Course.Status.PUBLISHED
+        and offer.course.access_type in (
+            Course.AccessType.FREE,
+            Course.AccessType.MEMBERSHIP,
+        )
     ):
         return redirect("academy:course-detail", course_slug=offer.course.slug)
 
