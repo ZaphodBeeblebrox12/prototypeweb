@@ -1793,7 +1793,7 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "builder-review-feedback")
         self.assertContains(response, "Returned for changes · reviewer feedback")
         self.assertContains(response, "Update this saved draft, then submit it for review again.")
-        self.assertContains(response, "Clarify the opening lesson and replace its chart.")
+        self.assertContains(response, "esc(reviewFeedback)")
 
     def test_returned_submission_can_be_reopened_saved_and_resubmitted_in_builder(self):
         saved = self.client.post(
