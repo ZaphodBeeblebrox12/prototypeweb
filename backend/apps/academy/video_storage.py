@@ -20,7 +20,9 @@ class PrivateLessonVideoStorage(FileSystemStorage):
         super().__init__(location=str(location), base_url=None)
 
     def url(self, name):
-        raise ValueError("Protected lesson videos do not have public file URLs.")
+        # Django's admin file widget asks for a URL to display the current file.
+        # An empty URL keeps that widget renderable without exposing a public route.
+        return ""
 
 
 lesson_video_storage = PrivateLessonVideoStorage()
