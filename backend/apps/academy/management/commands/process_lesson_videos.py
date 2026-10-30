@@ -41,9 +41,16 @@ class Command(BaseCommand):
             configured_binary if Path(configured_binary).is_file() else ""
         )
         if not ffmpeg:
+            try:
+                from imageio_ffmpeg import get_ffmpeg_exe
+
+                ffmpeg = get_ffmpeg_exe()
+            except (ImportError, RuntimeError):
+                ffmpeg = ""
+        if not ffmpeg:
             raise CommandError(
-                "FFmpeg was not found. Install FFmpeg in the service image or set "
-                "ACADEMY_FFMPEG_BINARY to its executable path."
+                "FFmpeg was not found. Install FFmpeg in the service image, install the "
+                "imageio-ffmpeg wheel, or set ACADEMY_FFMPEG_BINARY to its executable path."
             )
 
         videos = ProtectedLessonVideo.objects.select_related("lesson").order_by("created_at")
