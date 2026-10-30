@@ -4575,10 +4575,7 @@ body.builder-dialog-open { overflow:hidden; }
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
       if(editRevision===revisionAtStart)hasUnsavedChanges=false;
       renderHeaderState();
-      if (submit) {
-        toast('Draft saved. Opening the review checklist…');
-        window.location.assign(result.review_url);
-      } else {
+      if (!submit) {
         const indicator = $('#saveIndicator');
         if (indicator) {
           const sourceStatus = result.source_snapshot_backend === 'google_drive' ? ' · Google Drive backup saved' : (result.source_snapshot_backend === 'github' ? ' · GitHub source synced' : '');
@@ -4586,6 +4583,8 @@ body.builder-dialog-open { overflow:hidden; }
         }
         if (notify) toast(result.message || 'Draft saved to the Academy.');
       }
+      // Return the review URL to the submit handler. Navigation must happen
+      // after this function's finally block clears academySaving.
       return result;
     } finally {
       academySaving = false;
@@ -4616,7 +4615,7 @@ body.builder-dialog-open { overflow:hidden; }
     clearTimeout(academySaveTimer);
     saveCurrentToAcademy(false, true).catch(error => toast('Could not save to Academy: ' + error.message));
   };
-  publishCourse = function() {
+  publishCourse = async function() {
     const course = currentCourse();
     if (!course) return;
     if (!course.title.trim() || !course.summary.trim() || !course.modules.length || !allLessons(course).length || allLessons(course).some(lesson=>!lesson.title.trim()||!lesson.content.trim())) {
@@ -4625,8 +4624,25 @@ body.builder-dialog-open { overflow:hidden; }
       renderEditor();
       return;
     }
+    clearTimeout(saveTimer);
     clearTimeout(academySaveTimer);
-    saveCurrentToAcademy(true).catch(error => toast('Could not submit for review: ' + error.message));
+    try {
+      const result = await saveCurrentToAcademy(true);
+      if (!result?.review_url) {
+        toast('The Academy saved the submission but did not return a review checklist URL.');
+        return;
+      }
+      // The save promise resolves only after its finally block has cleared
+      // academySaving. Never navigate while newer edits or a follow-up save exist.
+      if (hasUnsavedChanges || academySaving || academySavePending) {
+        toast('The submission was saved, but newer edits are still waiting to save. Save those edits before opening the review checklist.');
+        return;
+      }
+      toast('Draft saved. Opening the review checklist…');
+      window.location.assign(result.review_url);
+    } catch (error) {
+      toast('Could not submit for review: ' + error.message);
+    }
   };
   async function loadPublishedCourse() {
     const picker = $('#publishedCoursePicker');
