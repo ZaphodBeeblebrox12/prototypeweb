@@ -1,6 +1,7 @@
 """Server-side form validation for administrator course and media editing."""
 
 from contextlib import suppress
+from pathlib import Path
 from urllib.parse import urlsplit
 
 from django import forms
