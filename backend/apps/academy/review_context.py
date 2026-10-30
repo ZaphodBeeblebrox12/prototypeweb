@@ -8,15 +8,21 @@ from .models import CourseImport, CourseMediaAsset
 from .views import _reflection_for_display
 
 
-def build_course_import_review_data(record, request, *, allow_asset_edits=True):
+def build_course_import_review_data(
+    record, request, *, allow_asset_edits=True, asset_url_builder=None
+):
     """Build a learner-safe curriculum preview and publication validation for a staged import."""
     asset_urls = {}
     staged_assets = list(record.assets.all())
     for asset in staged_assets:
         live_asset = CourseMediaAsset.objects.filter(pk=asset.stable_asset_id).first()
         if asset.file or (live_asset and live_asset.file):
-            asset_urls[str(asset.stable_asset_id)] = reverse(
-                "admin:academy_courseimport_asset", args=[record.pk, asset.stable_asset_id]
+            asset_urls[str(asset.stable_asset_id)] = (
+                asset_url_builder(str(asset.stable_asset_id))
+                if asset_url_builder
+                else reverse(
+                    "admin:academy_courseimport_asset", args=[record.pk, asset.stable_asset_id]
+                )
             )
         elif asset.original_url.startswith(("https://", "http://")):
             asset_urls[str(asset.stable_asset_id)] = asset.original_url
