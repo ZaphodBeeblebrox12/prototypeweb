@@ -1111,6 +1111,7 @@ body.builder-dialog-open { overflow:hidden; }
   let comingSoonOffers = [];
   let catalogueLoaded = false;
   let catalogueLoadFailed = false;
+  let lastReviewFeedbackNotice = "";
   let deletingDraftId = null;
   let demoLessonRefs = [];
   const lessonReferenceIndex = new Map();
@@ -4749,6 +4750,15 @@ body.builder-dialog-open { overflow:hidden; }
       lessonReferenceIndex.clear();
       demoLessonRefs.forEach(ref => lessonReferenceIndex.set(String(ref.id), ref));
       const remoteDrafts = Array.isArray(result.drafts) ? result.drafts : [];
+      const returnedDraft = remoteDrafts.find(remote => String(remote.reviewFeedback || "").trim());
+      if (returnedDraft) {
+        const feedbackText = String(returnedDraft.reviewFeedback || "").trim();
+        const noticeKey = String(returnedDraft.serverDraftId || returnedDraft.slug || "") + ":" + feedbackText;
+        if (noticeKey !== lastReviewFeedbackNotice) {
+          toast("Returned for changes: " + feedbackText);
+          lastReviewFeedbackNotice = noticeKey;
+        }
+      }
       // The server's draft list is authoritative for drafts previously loaded
       // from the Academy. Clear deleted/submitted drafts from localStorage,
       // while preserving genuinely local-only unsaved work.
