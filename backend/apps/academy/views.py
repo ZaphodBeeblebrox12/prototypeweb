@@ -8,6 +8,7 @@ from copy import deepcopy
 from urllib.parse import quote
 from uuid import UUID
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Prefetch, Q
@@ -36,6 +37,7 @@ from .models import (
     CourseOffer,
     Lesson,
     LessonInstructorMaterial,
+    ProtectedLessonVideo,
     LessonProgress,
 )
 from .permissions import is_course_content_admin
@@ -679,15 +681,25 @@ def lesson_detail(request, course_slug, lesson_id):
                     if isinstance(saved_responses, list) and prompt_index < len(saved_responses)
                     else ""
                 )
+    protected_video = ProtectedLessonVideo.objects.filter(
+        lesson=lesson,
+        status=ProtectedLessonVideo.Status.READY,
+    ).first()
     video_url = (
         lesson.content_json.get("video_url", "") if isinstance(lesson.content_json, dict) else ""
     )
     video_url = (
         video_url
-        if isinstance(video_url, str) and video_url.startswith(("https://", "http://"))
+        if (
+            not protected_video
+            and settings.ACADEMY_ALLOW_LEGACY_VIDEO_URLS
+            and isinstance(video_url, str)
+            and video_url.startswith(("https://", "http://"))
+        )
         else ""
     )
     video_is_file = video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
+    video_watermark_name = request.user.get_full_name().strip() or request.user.email
     practice_questions = (
         lesson.content_json.get("questions", []) if isinstance(lesson.content_json, dict) else []
     )
@@ -788,6 +800,14 @@ def lesson_detail(request, course_slug, lesson_id):
             "practice_questions": practice_questions,
             "video_url": video_url,
             "video_is_file": video_is_file,
+            "protected_video": protected_video,
+            "protected_video_manifest_url": (
+                reverse("academy:protected-video-manifest", args=[protected_video.pk])
+                if protected_video
+                else ""
+            ),
+            "video_watermark_name": video_watermark_name,
+            "video_watermark_email": request.user.email,
             "previous_lesson": previous_lesson,
             "next_lesson": next_lesson,
             "course_progress_percent": course_progress_percent,
