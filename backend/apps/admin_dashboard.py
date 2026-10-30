@@ -267,38 +267,40 @@ def _subscription_dashboard_context(request):
                     "jobs", "job", {"queue_state": "stalled"}),
             },
         }
-    # Surface the member support queue in the custom Admin Desk as well as Django Admin.
-    # Use the registered admin's permission hooks so visibility matches the actual queue.
+    # Support tickets are reviewed in the TradeThesis Admin Desk. Keep the
+    # same plan-approver scoping that protects the Django Admin queue.
     from apps.support.models import SupportTicket
+    from apps.support.services import reviewable_ticket_queryset
 
     support_admin = admin.site._registry.get(SupportTicket)
     if support_admin and support_admin.has_view_permission(request):
-        ticket_changelist = reverse("admin:support_supportticket_changelist")
+        visible_tickets = reviewable_ticket_queryset(
+            request.user,
+            SupportTicket.objects.select_related(
+                "user", "plan", "affiliate_link", "assigned_to"
+            ),
+        )
+        desk_ticket_list = reverse("staff_admin_desk_support_tickets")
         recent_tickets = [
-            {
-                "ticket": ticket,
-                "can_review": support_admin.has_change_permission(request, ticket),
-            }
-            for ticket in SupportTicket.objects.select_related("user", "plan").order_by(
-                "-created_at"
-            )[:5]
+            {"ticket": ticket, "can_review": True}
+            for ticket in visible_tickets.order_by("-created_at")[:5]
         ]
         ctx["support_tickets"] = {
-            "pending": SupportTicket.objects.filter(
+            "pending": visible_tickets.filter(
                 status=SupportTicket.Status.PENDING
             ).count(),
-            "open": SupportTicket.objects.filter(
+            "open": visible_tickets.filter(
                 status__in=SupportTicket.ACTIVE_STATUSES
             ).count(),
-            "overdue_sla": SupportTicket.objects.filter(
+            "overdue_sla": visible_tickets.filter(
                 status__in=SupportTicket.ACTIVE_STATUSES,
                 first_response_at__isnull=True,
                 first_response_due_at__lt=now,
             ).count(),
             "recent": recent_tickets,
             "links": {
-                "all": ticket_changelist,
-                "pending": f"{ticket_changelist}?status__exact={SupportTicket.Status.PENDING}",
+                "all": desk_ticket_list,
+                "pending": f"{desk_ticket_list}?status={SupportTicket.Status.PENDING}",
             },
         }
 
