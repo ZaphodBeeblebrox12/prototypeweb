@@ -169,6 +169,29 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "lessonContentAudienceSelect")
         self.assertContains(response, "Start a custom version")
 
+    def test_submit_navigation_happens_after_save_guard_is_cleared(self):
+        response = self.client.get(reverse("staff_course_builder_preview"))
+        self.assertEqual(response.status_code, 200, response.content)
+        builder_source = response.content.decode("utf-8")
+
+        save_start = builder_source.index("async function saveCurrentToAcademy(")
+        save_end = builder_source.index("  persist = function", save_start)
+        save_function = builder_source[save_start:save_end]
+        self.assertNotIn("window.location.assign(result.review_url)", save_function)
+        self.assertIn("finally {", save_function)
+        self.assertIn("academySaving = false;", save_function)
+
+        publish_start = builder_source.index("publishCourse = async function()")
+        publish_end = builder_source.index("  async function loadPublishedCourse()", publish_start)
+        publish_handler = builder_source[publish_start:publish_end]
+        save_position = publish_handler.index("await saveCurrentToAcademy(true)")
+        redirect_position = publish_handler.index("window.location.assign(result.review_url)")
+        self.assertLess(save_position, redirect_position)
+        self.assertIn(
+            "if (hasUnsavedChanges || academySaving || academySavePending)",
+            publish_handler,
+        )
+
     def test_course_access_type_is_saved_and_reloaded_with_builder_draft(self):
         payload = self.draft_payload("builder-membership-course")
         payload["course"]["accessType"] = "membership"
