@@ -8,7 +8,12 @@ from django.core.exceptions import ValidationError
 from PIL import Image, UnidentifiedImageError
 
 from .content_rendering import validate_markdown_source
-from .models import CourseImportAsset, CourseMediaAsset, Lesson
+from .models import (
+    CourseImportAsset,
+    CourseMediaAsset,
+    Lesson,
+    ProtectedLessonVideo,
+)
 
 _ALLOWED_IMAGE_FORMATS = {"JPEG": ".jpg", "PNG": ".png", "WEBP": ".webp"}
 _MAX_IMAGE_BYTES = 10 * 1024 * 1024
@@ -125,4 +130,19 @@ class CourseMediaAssetAdminForm(forms.ModelForm):
     def clean_file(self):
         upload = self.cleaned_data.get("file")
         validate_upload_image(upload)
+        return upload
+
+
+
+class ProtectedLessonVideoAdminForm(forms.ModelForm):
+    class Meta:
+        model = ProtectedLessonVideo
+        fields = "__all__"
+
+    def clean_source_file(self):
+        upload = self.cleaned_data.get("source_file")
+        if upload and Path(upload.name).suffix.lower() not in {".mp4", ".mov", ".mkv", ".webm"}:
+            raise ValidationError("Upload an MP4, MOV, MKV or WebM source video.")
+        if upload and upload.size > 5 * 1024 * 1024 * 1024:
+            raise ValidationError("Video uploads must be 5 GB or smaller.")
         return upload
