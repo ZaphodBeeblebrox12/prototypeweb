@@ -87,6 +87,19 @@ class FreeAcademyAccessTests(TestCase):
         self.assertEqual(CourseEntitlement.objects.filter(user=self.user, course=self.course).count(), 1)
         self.assertEqual(CourseEntitlementEvent.objects.filter(entitlement=entitlement).count(), 1)
 
+    def test_free_course_detail_offers_enrolment_without_payment(self):
+        response = self.client.get(
+            reverse("academy:course-detail", args=[self.course.slug])
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "Start this course for free")
+        self.assertContains(response, "Enrol for free")
+        self.assertContains(response, "No payment or subscription is required")
+        self.assertNotContains(response, "Get the full course")
+        self.assertNotContains(response, "Continue to secure checkout")
+        self.assertEqual(PaymentIntent.objects.count(), 0)
+
     def test_individual_course_offer_is_not_saleable_for_free_or_membership_courses(self):
         product = Product.objects.create(
             name="One-time Course Offers",
