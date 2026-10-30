@@ -68,7 +68,17 @@
       {% endif %}
     </header>
       <article class="tt-lesson-article">
-        {% if video_url %}<section class="tt-video-lesson" aria-label="Lesson video">{% if video_is_file %}<video controls preload="metadata" src="{{ video_url }}">Your browser does not support video playback.</video>{% else %}<a href="{{ video_url }}" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a><p class="small text-muted">This video opens in a new tab.</p>{% endif %}</section>{% endif %}
+        {% if protected_video %}<section class="tt-video-lesson tt-video-lesson--protected" aria-label="Protected lesson video" data-protected-video-container>
+          <video controls playsinline preload="none" data-protected-video data-manifest-url="{{ protected_video_manifest_url }}" controlslist="nodownload noremoteplayback" disablepictureinpicture>
+            Your browser does not support protected HLS video playback.
+          </video>
+          <div class="tt-video-watermark" data-video-watermark aria-hidden="true">
+            <span data-video-watermark-name>{{ video_watermark_name }}</span>
+            <span data-video-watermark-email>{{ video_watermark_email }}</span>
+          </div>
+          <p class="tt-video-player-status" data-video-player-status role="status" aria-live="polite"></p>
+        </section>
+        {% elif video_url %}<section class="tt-video-lesson" aria-label="Lesson video">{% if video_is_file %}<video controls preload="metadata" src="{{ video_url }}">Your browser does not support video playback.</video>{% else %}<a href="{{ video_url }}" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a><p class="small text-muted">This video opens in a new tab.</p>{% endif %}</section>{% endif %}
         {% if admin_preview %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook reflection=reflection reflection_response=reflection_response course_slug=course.slug practice_questions=practice_questions admin_preview=True only %}{% else %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook lesson=lesson reflection=reflection reflection_response=reflection_response course_slug=course.slug practice_questions=practice_questions only %}{% endif %}
         {% if related_courses %}
         <section class="tt-related-courses tt-related-courses--cards" aria-labelledby="tt-related-courses-heading">
@@ -124,6 +134,7 @@
     </main>
   </div>
 </div>
+{% if protected_video %}<script src="https://cdn.jsdelivr.net/npm/hls.js@1.7.4/dist/hls.min.js" defer></script><script src="{% static 'academy/protected-video.js' %}" defer></script>{% endif %}
 <script src="{% static 'academy/learning-room.js' %}" defer></script>
 <script>
 (() => {
