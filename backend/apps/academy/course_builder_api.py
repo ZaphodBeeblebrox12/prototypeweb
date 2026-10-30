@@ -1758,7 +1758,8 @@ def course_builder_api(request):
                 )
             existing_edit = (
                 CourseImport.objects.filter(
-                    target_course=published_course, status=CourseImport.Status.DRAFT
+                    target_course=published_course,
+                    status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
                 )
                 .order_by("-updated_at")
                 .first()
