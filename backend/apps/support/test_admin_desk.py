@@ -286,6 +286,7 @@ class AdminDeskSupportTicketTests(TestCase):
         notify_staff_about_ticket(self.ticket)
         notification = Notification.objects.get(
             user=self.reviewer,
+            title__contains=self.ticket.short_id,
             metadata__source="support_ticket",
         )
         self.assertTrue(
