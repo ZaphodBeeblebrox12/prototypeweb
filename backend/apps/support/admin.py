@@ -3,14 +3,14 @@ import logging
 
 from django.contrib import admin, messages
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.html import format_html
 
 from .models import AffiliateLink, SupportTicket, TicketAttachment, TicketMessage
 from .services import (
-    add_ticket_message, approve_ticket, reject_ticket, reopen_ticket, set_ticket_status,
+    add_ticket_message, approve_ticket, reject_ticket, reopen_ticket,
+    reviewable_ticket_queryset, set_ticket_status,
 )
 
 logger = logging.getLogger(__name__)
@@ -108,23 +108,7 @@ class SupportTicketAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
-        if request.user.is_superuser:
-            return queryset
-        # Restrict the queue itself, not just the detail page. The effective
-        # reviewer plan is the ticket's explicit plan or, when absent, the
-        # plan mapped from the referral link.
-        return queryset.filter(
-            Q(plan__ticket_approvers__pk=request.user.pk)
-            | Q(plan__isnull=False, plan__ticket_approvers__isnull=True)
-            | Q(
-                plan__isnull=True,
-                affiliate_link__plan__ticket_approvers__pk=request.user.pk,
-            )
-            | Q(
-                plan__isnull=True,
-                affiliate_link__plan__ticket_approvers__isnull=True,
-            )
-        ).distinct()
+        return reviewable_ticket_queryset(request.user, queryset)
 
     def has_view_permission(self, request, obj=None):
         if not request.user.is_staff:
