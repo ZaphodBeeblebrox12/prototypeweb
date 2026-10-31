@@ -11,4 +11,6 @@ Claim your gift:
 This gift link expires on {{ expires_at|date:"F d, Y" }}. If you don't have a TradeThesis account yet, you'll be able to create one while claiming the gift.
 
 TradeThesis
-Conviction before execution
+Conviction before Execution
+
+Trading involves risk. TradeThesis content is for educational purposes and is not investment advice.
