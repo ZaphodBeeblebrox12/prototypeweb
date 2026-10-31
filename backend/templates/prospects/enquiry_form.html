@@ -50,7 +50,7 @@
         <div class="check"><input type="checkbox" name="{{ form.marketing_opt_in.name }}" id="{{ form.marketing_opt_in.id_for_label }}" {% if form.marketing_opt_in.value %}checked{% endif %}><label for="{{ form.marketing_opt_in.id_for_label }}">{{ form.marketing_opt_in.label }}</label></div>
         <div class="trap" aria-hidden="true"><label for="{{ form.website.id_for_label }}">Website</label>{{ form.website }}</div>
         <button class="submit" type="submit">{{ programme.submit_label }}</button>
-        <p class="fine">We use these details to respond to this enquiry. Marketing updates are optional and are sent only when you separately opt in. See our <a href="{{ public_site_url }}/privacy.html">privacy information</a>.</p>
+        <p class="fine">We use these details to respond to this enquiry. Marketing updates are optional and are sent only when you separately opt in. See our <a href="{% url "privacy-policy" %}">privacy information</a>.</p>
       </form>
     </section>
   </div>
