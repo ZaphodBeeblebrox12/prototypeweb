@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Programme enquiries | Admin Desk | TradeThesis{% endblock %}
+{% block page_title %}Programme enquiries{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+.tt-enquiry-queue{--ink:#26342f;--muted:#68736c;--line:#dedfd5;--surface:#fffefa;--green:#456653;color:var(--ink);max-width:1160px;margin:8px auto 36px}
+.tt-enquiry-queue *{box-sizing:border-box}
+.tt-enquiry-queue a{color:#315b43;text-underline-offset:3px}
+.tt-enquiry-queue .head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.tt-enquiry-queue .eyebrow{margin:0 0 6px;color:var(--muted);font-size:11px;font-weight:750;letter-spacing:.09em;text-transform:uppercase}
+.tt-enquiry-queue h1{margin:0;color:var(--ink);font-size:28px;line-height:1.15}
+.tt-enquiry-queue .intro{margin:8px 0 0;color:var(--muted);font-size:14px;max-width:740px}
+.tt-enquiry-queue .button{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:9px 13px;border:1px solid var(--green);border-radius:4px;background:var(--green);color:white;text-decoration:none;font-weight:700}
+.tt-enquiry-queue .button.secondary{background:var(--surface);color:#315b43}
+.tt-enquiry-queue .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0}
+.tt-enquiry-queue .stat{padding:13px 15px;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+.tt-enquiry-queue .stat strong{display:block;font-size:25px;line-height:1.1;font-variant-numeric:tabular-nums}
+.tt-enquiry-queue .stat span{display:block;margin-top:6px;color:var(--muted);font-size:12px}
+.tt-enquiry-queue .filters{display:grid;grid-template-columns:minmax(200px,2fr) minmax(150px,1fr) minmax(150px,1fr) auto;gap:8px;padding:13px;border:1px solid var(--line);border-radius:5px;background:var(--surface);margin-bottom:14px}
+.tt-enquiry-queue input,.tt-enquiry-queue select{width:100%;min-height:39px;padding:8px 10px;border:1px solid #cfd5c9;border-radius:4px;background:#fff;color:var(--ink);font:inherit;font-size:13px}
+.tt-enquiry-queue .table{border:1px solid var(--line);border-radius:5px;background:var(--surface);overflow:hidden}
+.tt-enquiry-queue .row{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(160px,.9fr) minmax(110px,.6fr) auto;gap:13px;align-items:center;padding:14px 16px;border-bottom:1px solid #ecece5}
+.tt-enquiry-queue .row:last-child{border-bottom:0}
+.tt-enquiry-queue .lead-link{display:block;color:var(--ink);font-weight:750;text-decoration:none}
+.tt-enquiry-queue .lead-link:hover{text-decoration:underline}
+.tt-enquiry-queue .muted{display:block;margin-top:4px;color:var(--muted);font-size:12px;line-height:1.45;overflow-wrap:anywhere}
+.tt-enquiry-queue .pill{display:inline-flex;padding:4px 7px;border:1px solid var(--line);border-radius:3px;background:#f5f5ef;color:#45554a;font-size:11px;font-weight:650;white-space:nowrap}
+.tt-enquiry-queue .empty{padding:38px 18px;text-align:center;color:var(--muted)}
+.tt-enquiry-queue .pager{display:flex;justify-content:space-between;gap:10px;padding:13px 16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+@media(max-width:760px){.tt-enquiry-queue .filters{grid-template-columns:1fr 1fr}.tt-enquiry-queue .filters input{grid-column:1/-1}.tt-enquiry-queue .filters .button{grid-column:1/-1}.tt-enquiry-queue .row{grid-template-columns:minmax(0,1fr) auto}.tt-enquiry-queue .row .meta{grid-column:1/-1}.tt-enquiry-queue .row .status{grid-column:2;grid-row:1}}
+@media(max-width:560px){.tt-enquiry-queue .stats{grid-template-columns:repeat(2,minmax(0,1fr))}.tt-enquiry-queue .head .button{width:100%}}
+</style>
+{% endblock %}
+{% block content %}
+<main class="tt-enquiry-queue">
+  <header class="head">
+    <div>
+      <p class="eyebrow">TradeThesis · Admin Desk · Sales enquiries</p>
+      <h1>Programme enquiries</h1>
+      <p class="intro">Public questions about CONSTRUCT and the Live Classroom. These records are separate from member support tickets. Contact details are visible only to staff with enquiry access.</p>
+    </div>
+    <a class="button secondary" href="{% url 'staff_admin_desk' %}">← Admin Desk</a>
+  </header>
+
+  <section class="stats" aria-label="Enquiry summary">
+    <div class="stat"><strong>{{ stats.new }}</strong><span>New</span></div>
+    <div class="stat"><strong>{{ stats.in_progress }}</strong><span>In progress</span></div>
+    <div class="stat"><strong>{{ stats.replied }}</strong><span>Replied</span></div>
+    <div class="stat"><strong>{{ stats.closed }}</strong><span>Closed</span></div>
+  </section>
+
+  <form class="filters" method="get">
+    <input type="search" name="q" value="{{ query }}" placeholder="Search name, email or question…" aria-label="Search enquiries">
+    <select name="programme" aria-label="Filter by programme">
+      <option value="">All programmes</option>
+      {% for value,label in programme_choices %}<option value="{{ value }}" {% if programme_filter == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <select name="status" aria-label="Filter by status">
+      <option value="">All statuses</option>
+      {% for value,label in status_choices %}<option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button class="button" type="submit">Apply</button>
+  </form>
+
+  <section class="table" aria-label="Programme enquiries">
+    {% for enquiry in enquiry_page %}
+      <article class="row">
+        <div>
+          <a class="lead-link" href="{% url 'staff_admin_desk_course_enquiry' enquiry.pk %}">{{ enquiry.name }} · {{ enquiry.get_programme_display }}</a>
+          <span class="muted">{{ enquiry.email }}</span>
+          <span class="muted">{{ enquiry.message|default:"No additional question supplied."|truncatechars:180 }}</span>
+        </div>
+        <div class="meta">
+          <span class="pill">{{ enquiry.get_status_display }}</span>
+          <span class="muted">{% if enquiry.assigned_to %}Assigned to {{ enquiry.assigned_to }}{% else %}Unassigned{% endif %}</span>
+        </div>
+        <div class="meta">
+          <span class="muted">{{ enquiry.created_at|date:"j M Y, H:i" }}</span>
+          {% if enquiry.responded_at %}<span class="muted">Replied {{ enquiry.responded_at|date:"j M, H:i" }}</span>{% endif %}
+        </div>
+        <div class="status"><a href="{% url 'staff_admin_desk_course_enquiry' enquiry.pk %}">Open →</a></div>
+      </article>
+    {% empty %}
+      <div class="empty">
+        <strong>No programme enquiries match these filters.</strong>
+        <p>New enquiries submitted from the public programme pages will appear here.</p>
+      </div>
+    {% endfor %}
+    {% if enquiry_page.paginator.num_pages > 1 %}
+    <nav class="pager" aria-label="Enquiry pages">
+      <span>Page {{ enquiry_page.number }} of {{ enquiry_page.paginator.num_pages }}</span>
+      <span>
+        {% if enquiry_page.has_previous %}<a href="?q={{ query|urlencode }}&programme={{ programme_filter|urlencode }}&status={{ status_filter|urlencode }}&page={{ enquiry_page.previous_page_number }}">Previous</a>{% endif %}
+        {% if enquiry_page.has_next %} · <a href="?q={{ query|urlencode }}&programme={{ programme_filter|urlencode }}&status={{ status_filter|urlencode }}&page={{ enquiry_page.next_page_number }}">Next</a>{% endif %}
+      </span>
+    </nav>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}
