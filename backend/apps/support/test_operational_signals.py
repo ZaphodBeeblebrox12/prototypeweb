@@ -47,23 +47,29 @@ class SupportIssueSignalTests(TestCase):
             username="signal-single-member",
             email="signal-single-member@example.test",
         )
-        tickets = [
-            SupportTicket.objects.create(
-                user=member,
-                category=SupportTicket.Category.TECHNICAL,
-                message="Telegram connection keeps failing after I reconnect the bot.",
-            ),
-            SupportTicket.objects.create(
-                user=member,
-                category=SupportTicket.Category.TECHNICAL,
-                message="Telegram bot connection fails whenever I reconnect.",
-            ),
-            SupportTicket.objects.create(
-                user=member,
-                category=SupportTicket.Category.TECHNICAL,
-                message="The bot connection fails after reconnecting Telegram.",
-            ),
+        messages = [
+            "Telegram connection keeps failing after I reconnect the bot.",
+            "Telegram bot connection fails whenever I reconnect.",
+            "The bot connection fails after reconnecting Telegram.",
         ]
+        tickets = []
+        for index, message in enumerate(messages):
+            # Support deliberately permits only one open ticket per member
+            # and category. Historical resolved tickets can still be part
+            # of a cross-customer symptom comparison.
+            status = (
+                SupportTicket.Status.APPROVED
+                if index == 0
+                else SupportTicket.Status.REJECTED
+                if index == 1
+                else SupportTicket.Status.PENDING
+            )
+            tickets.append(SupportTicket.objects.create(
+                user=member,
+                category=SupportTicket.Category.TECHNICAL,
+                status=status,
+                message=message,
+            ))
 
         self.assertEqual(build_support_issue_clusters(tickets), [])
 
