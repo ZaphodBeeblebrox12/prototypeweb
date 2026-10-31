@@ -155,10 +155,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def _delete_old_rendition(prefix):
-        for name in (f"{prefix}/index.m3u8", f"{prefix}/encryption.key"):
-            lesson_video_storage.delete(name)
-        # Segment count is discovered from the old playlist; no Drive folder listing
-        # or public folder access is needed.
+        # Read the old playlist before deleting it so its segment keys remain discoverable.
         try:
             with lesson_video_storage.open(f"{prefix}/index.m3u8", "rb") as handle:
                 playlist = handle.read().decode("utf-8")
@@ -168,6 +165,8 @@ class Command(BaseCommand):
             segment = line.strip()
             if segment and not segment.startswith("#") and "/" not in segment:
                 lesson_video_storage.delete(f"{prefix}/{segment}")
+        lesson_video_storage.delete(f"{prefix}/index.m3u8")
+        lesson_video_storage.delete(f"{prefix}/encryption.key")
 
     @staticmethod
     def _fail(video, message):
