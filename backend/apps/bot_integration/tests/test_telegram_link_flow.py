@@ -256,6 +256,21 @@ class TelegramWebhookVerifyFlowTests(TestCase):
         svc.send_message.assert_called_once()    # confirmation DM sent
 
     @mock.patch("apps.bot_integration.views.TelegramBotService")
+    @override_settings(TELEGRAM_WEBHOOK_SECRET="native-test-secret")
+    def test_legacy_user_telegram_identity_cannot_be_linked_to_another_member(self, svc):
+        legacy_owner = make_user("legacy-telegram-owner")
+        legacy_owner.telegram_id = 555000111
+        legacy_owner.telegram_verified = True
+        legacy_owner.save(update_fields=["telegram_id", "telegram_verified"])
+
+        r = self._post_native_start(f"/start verify_{self.token.token}")
+
+        self.assertEqual(r.status_code, 200)
+        self.assertFalse(TelegramAccount.objects.filter(user=self.user).exists())
+        self.assertTrue(TelegramVerificationToken.objects.filter(pk=self.token.pk).exists())
+        self.assertIn("already linked", svc.send_message.call_args.args[1].lower())
+
+    @mock.patch("apps.bot_integration.views.TelegramBotService")
     def test_invalid_token_rejected_no_account(self, svc):
         r = self._post_start("/start verify_doesnotexist")
         self.assertEqual(r.status_code, 200)
