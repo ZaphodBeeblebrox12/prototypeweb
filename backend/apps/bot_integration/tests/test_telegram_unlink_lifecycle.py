@@ -150,6 +150,85 @@ class TelegramUnlinkReconcileTests(TestCase):
         ).exists())
 
 
+class OrphanedTelegramCleanupTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="orphaned-telegram-member",
+            email="orphaned-telegram-member@example.com",
+        )
+        BotAccessAudit.objects.create(
+            user=self.user,
+            action="unlink",
+            platform="telegram",
+            target="710000030",
+            status="success",
+        )
+
+    def test_recovers_orphaned_assignment_using_prior_unlink_identity(self):
+        assignment = UserChannelAssignment.objects.create(
+            user=self.user,
+            platform="telegram",
+            external_id="-100710000030",
+            is_active=True,
+        )
+        transport = FakeRevokeTransport()
+
+        run_user_reconcile(self.user.pk, transport=transport)
+
+        self.assertEqual(
+            [(call[0], call[1]) for call in transport.revokes],
+            [(710000030, "-100710000030")],
+        )
+        assignment.refresh_from_db()
+        self.assertFalse(assignment.is_active)
+        self.assertTrue(BotAccessAudit.objects.filter(
+            user=self.user,
+            action="revoke",
+            platform="telegram",
+            target="-100710000030",
+            status="success",
+        ).exists())
+        self.assertFalse(TelegramAccount.objects.filter(user=self.user).exists())
+
+    def test_recovers_open_grant_without_assignment(self):
+        from apps.jobs.models import ProvisioningOperation
+
+        op = ProvisioningOperation.objects.create(
+            user_id=self.user.pk,
+            channel_id="-100710000031",
+            telegram_user_id=710000030,
+            operation=ProvisioningOperation.OP_GRANT,
+            state=ProvisioningOperation.ST_SENT,
+            invite_link="https://t.me/+legacy-invite",
+        )
+        transport = FakeRevokeTransport()
+
+        run_user_reconcile(self.user.pk, transport=transport)
+
+        self.assertEqual(
+            [(call[0], call[1]) for call in transport.revokes],
+            [(710000030, "-100710000031")],
+        )
+        op.refresh_from_db()
+        self.assertEqual(op.state, ProvisioningOperation.ST_FAILED)
+        self.assertEqual(op.last_error, "superseded_by_revoke")
+
+    def test_orphaned_assignment_without_numeric_unlink_audit_fails_closed(self):
+        self.user.bot_audits.all().delete()
+        assignment = UserChannelAssignment.objects.create(
+            user=self.user,
+            platform="telegram",
+            external_id="-100710000032",
+            is_active=True,
+        )
+
+        with self.assertRaisesRegex(RuntimeError, "without a recoverable Telegram identity"):
+            run_user_reconcile(self.user.pk, transport=FakeRevokeTransport())
+
+        assignment.refresh_from_db()
+        self.assertTrue(assignment.is_active)
+
+
 class TelegramUnlinkRouteTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
