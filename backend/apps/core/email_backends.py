@@ -211,11 +211,6 @@ class ResendEmailBackend(BaseEmailBackend):
             raise ValueError("Resend requires at least one To recipient.")
 
         normalized_subject = ResendEmailBackend._normalise_subject(message.subject)
-        logger.info(
-            "TradeThesis Resend email backend invoked original_subject=%r normalized_subject=%r",
-            message.subject,
-            normalized_subject,
-        )
         payload: dict[str, Any] = {
             "from": message.from_email or settings.DEFAULT_FROM_EMAIL,
             "to": list(message.to),
