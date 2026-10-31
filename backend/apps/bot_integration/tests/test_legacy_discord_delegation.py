@@ -2,6 +2,7 @@
 from unittest import mock
 
 from django.contrib.auth import get_user_model
+from django.http import HttpResponseRedirect
 from django.test import TestCase
 from django.urls import reverse
 
@@ -19,7 +20,7 @@ class LegacyDiscordRouteDelegationTests(TestCase):
 
     @mock.patch("apps.bot_integration.views.discord_oauth_start")
     def test_old_auth_connect_route_delegates_to_canonical_start(self, canonical_start):
-        canonical_start.return_value = mock.Mock(status_code=302)
+        canonical_start.return_value = HttpResponseRedirect("/delegated/")
 
         self.client.get(reverse("discord_connect"))
 
@@ -27,7 +28,7 @@ class LegacyDiscordRouteDelegationTests(TestCase):
 
     @mock.patch("apps.bot_integration.views.discord_oauth_callback")
     def test_old_auth_callback_route_delegates_to_canonical_callback(self, canonical_callback):
-        canonical_callback.return_value = mock.Mock(status_code=302)
+        canonical_callback.return_value = HttpResponseRedirect("/delegated/")
 
         self.client.get(
             reverse("discord_callback"),
@@ -38,7 +39,7 @@ class LegacyDiscordRouteDelegationTests(TestCase):
 
     @mock.patch("apps.bot_integration.views.unlink_discord")
     def test_old_auth_disconnect_route_delegates_to_managed_role_removal(self, canonical_unlink):
-        canonical_unlink.return_value = mock.Mock(status_code=302)
+        canonical_unlink.return_value = HttpResponseRedirect("/delegated/")
 
         self.client.post(reverse("discord_disconnect"))
 
@@ -55,7 +56,7 @@ class LegacyDiscordRouteDelegationTests(TestCase):
 
     @mock.patch("apps.bot_integration.views.discord_oauth_callback")
     def test_historical_api_callback_uri_delegates_to_managed_callback(self, canonical_callback):
-        canonical_callback.return_value = mock.Mock(status_code=302)
+        canonical_callback.return_value = HttpResponseRedirect("/delegated/")
 
         response = self.client.get(
             reverse("api_discord_callback_legacy"),
