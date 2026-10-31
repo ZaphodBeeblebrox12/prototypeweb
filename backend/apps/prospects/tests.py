@@ -209,6 +209,7 @@ class ProspectAdminDeskPermissionTests(TestCase):
             reverse("staff_admin_desk_prospect_enquiry_update", args=[self.record.pk]),
             {
                 "status": ProspectEnquiry.Status.CONTACTED,
+                "assigned_to": str(self.staff.pk),
                 "staff_notes": "Called; prospect asked for the programme outline.",
             },
         )
@@ -218,6 +219,7 @@ class ProspectAdminDeskPermissionTests(TestCase):
         )
         self.record.refresh_from_db()
         self.assertEqual(self.record.status, ProspectEnquiry.Status.CONTACTED)
+        self.assertEqual(self.record.assigned_to, self.staff)
         self.assertEqual(
             self.record.staff_notes,
             "Called; prospect asked for the programme outline.",
@@ -230,6 +232,7 @@ class ProspectAdminDeskPermissionTests(TestCase):
         self.assertEqual(audit.metadata["status_from"], ProspectEnquiry.Status.NEW)
         self.assertEqual(audit.metadata["status_to"], ProspectEnquiry.Status.CONTACTED)
         self.assertTrue(audit.metadata["staff_notes_changed"])
+        self.assertTrue(audit.metadata["assignee_changed"])
 
     def test_invalid_status_is_rejected_without_mutating_record(self):
         self.staff.user_permissions.add(self.view_permission, self.change_permission)
@@ -248,3 +251,32 @@ class ProspectAdminDeskPermissionTests(TestCase):
             action="admin.prospect_enquiry.updated",
             object_id=str(self.record.pk),
         ).exists())
+
+    def test_invalid_or_non_staff_assignee_is_rejected_without_mutating_record(self):
+        self.staff.user_permissions.add(self.view_permission, self.change_permission)
+        non_staff = User.objects.create_user(
+            username="prospect-nonstaff",
+            email="nonstaff@example.test",
+            password="test-password-123!",
+            is_staff=False,
+        )
+        response = self.client.post(
+            reverse("staff_admin_desk_prospect_enquiry_update", args=[self.record.pk]),
+            {
+                "status": ProspectEnquiry.Status.NEW,
+                "assigned_to": str(non_staff.pk),
+                "staff_notes": "This must not be saved.",
+            },
+        )
+        self.assertRedirects(
+            response,
+            reverse("staff_admin_desk_prospect_enquiry", args=[self.record.pk]),
+        )
+        self.record.refresh_from_db()
+        self.assertIsNone(self.record.assigned_to)
+        self.assertEqual(self.record.staff_notes, "")
+        self.assertFalse(AuditLog.objects.filter(
+            action="admin.prospect_enquiry.updated",
+            object_id=str(self.record.pk),
+        ).exists())
+
