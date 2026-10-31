@@ -44,7 +44,7 @@ TRADETHESIS_MEMBER_LOGIN_ORIGINS = env.list(
 # Keep this narrower than CORS/CSRF trust and do not use wildcard hosts.
 TRADETHESIS_PUBLIC_SITE_ORIGINS = env.list(
     "TRADETHESIS_PUBLIC_SITE_ORIGINS",
-    default=[TRADETHESIS_PUBLIC_SITE_URL],
+    default=[TRADETHESIS_PUBLIC_SITE_URL, GITHUB_PAGES_PUBLIC_ORIGIN],
 )
 
 # Application definition
