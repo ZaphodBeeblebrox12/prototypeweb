@@ -98,3 +98,32 @@ The next phase should optimise for a learner who can discover the right offer, u
 - Do not merge to `main`; all proposed changes and PRs target `my-new-branch`.
 - Do not expose paid course material, answer keys, instructor notes, private support data or internal operational payloads to public pages.
 - Do not mark an enquiry, payment, community link, entitlement or progress action successful until the server confirms it.
+
+
+## Implementation update — 31 October 2026
+
+The current customer-experience feature branch now includes a first implementation of the public enquiry journey:
+
+- A dedicated `apps.prospects` Django app stores CONSTRUCT and Live Classroom enquiries separately from authenticated member support tickets.
+- Public forms require permission to contact the prospect; optional marketing opt-in is stored separately and is not treated as consent to contact about the enquiry.
+- Form input is validated server-side. A honeypot catches basic automated submissions, and a keyed HMAC of the normalized email is used for a basic rate limit without storing another raw copy of the address.
+- Enquiries are committed before email is attempted. Mail delivery is best-effort; failed or console-only email delivery does not delete the enquiry or set a sent timestamp.
+- The staff queue and detail pages live in the TradeThesis Admin Desk, use separate `prospects.view_prospectenquiry` / `prospects.change_prospectenquiry` permissions, and audit status/private-note changes. Member support tickets remain separate.
+- The CONSTRUCT and Live Classroom public CTAs now point to their distinct Django prospect routes. The old modal and non-persisting browser-only form were removed.
+- The enquiry form links to the actual named Django privacy-policy route rather than a non-existent static page.
+
+### Required before staging acceptance
+
+1. Set `PROSPECT_ENQUIRY_RECIPIENTS` in the Academy service to a monitored staff inbox. When it is empty, enquiries still appear in the Admin Desk but no staff email is attempted.
+2. Configure a real transactional email backend and sender identity in the Academy service. The console email backend is deliberately treated as non-delivery.
+3. Apply the new `prospects.0001_initial` migration.
+4. Grant the intended staff role/group both `prospects.view_prospectenquiry` and `prospects.change_prospectenquiry`. View-only users can inspect enquiries but cannot edit status or private notes.
+5. Verify the production/public-site Academy base URL and the `/enquire/` routes on the actual deployed host.
+6. Submit test enquiries for both programmes. Confirm the records in the Admin Desk, staff/customer emails, status timestamps, staff audit log, privacy link, throttling and the post-submit receipt.
+7. Test the email failure path. A saved enquiry must remain visible even when customer or staff email delivery fails.
+
+### Current validation boundary
+
+The prior CI run on commit `90b3e3534d3165e1b8c26e1c75d62087997a5ef9` completed with 1,145 tests passing and 29 existing failures, primarily account email-verification/dashboard redirect expectations and one Resend error-code expectation. Its public browser smoke step also still expected the old preview-only enquiry modal/form. The browser workflow was updated to check the real course-enquiry routes and absence of the preview-only handlers. These changes have not yet received a new CI run on the current feature-branch head, and no authenticated staging enquiry has been submitted in this implementation pass.
+
+This is therefore implemented in source, but **not yet staging-accepted or production-ready**. Do not advertise email delivery as active until the mail backend and staff recipient are configured and tested.
