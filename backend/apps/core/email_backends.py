@@ -20,6 +20,8 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.mail.backends.base import BaseEmailBackend
 from django.utils import timezone
 
+from .email_branding import normalise_email_subject, normalise_from_email
+
 logger = logging.getLogger(__name__)
 
 
@@ -125,15 +127,8 @@ class ResendEmailBackend(BaseEmailBackend):
 
     @staticmethod
     def _normalise_subject(subject: Any) -> str:
-        """Replace Django Sites' default example.com prefix before provider send."""
-        value = str(subject or "")
-        return re.sub(
-            r"^\s*\[example\.com\]\s*",
-            "[TradeThesis] ",
-            value,
-            count=1,
-            flags=re.IGNORECASE,
-        )
+        """Ensure every message delivered by the provider carries TradeThesis branding."""
+        return normalise_email_subject(subject)
 
     @staticmethod
     def _start_delivery_records(message: Any, idempotency_key: str) -> list[Any]:
@@ -212,7 +207,7 @@ class ResendEmailBackend(BaseEmailBackend):
 
         normalized_subject = ResendEmailBackend._normalise_subject(message.subject)
         payload: dict[str, Any] = {
-            "from": message.from_email or settings.DEFAULT_FROM_EMAIL,
+            "from": normalise_from_email(message.from_email, settings.DEFAULT_FROM_EMAIL),
             "to": list(message.to),
             "subject": normalized_subject,
         }
