@@ -12,6 +12,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.audit.models import AuditLog
+from apps.notifications.services import NotificationService
 
 from .models import ProspectEnquiry
 
@@ -117,6 +118,27 @@ class PublicProspectEnquiryTests(TestCase):
         self.assertNotIn(email, ProspectEnquiry.objects.first().email_fingerprint)
 
     @patch("apps.prospects.views.NotificationService.send_simple_email", return_value=False)
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.console.EmailBackend")
+    @patch("apps.prospects.views.NotificationService.send_simple_email")
+    def test_console_backend_does_not_mark_customer_or_staff_email_as_sent(self, send_email):
+        self.client.post(
+            reverse("prospects:enquiry", args=[ProspectEnquiry.Programme.CONSTRUCT]),
+            self.valid_payload(),
+        )
+        send_email.assert_not_called()
+        record = ProspectEnquiry.objects.get()
+        self.assertIsNone(record.customer_confirmation_sent_at)
+        self.assertIsNone(record.staff_notification_sent_at)
+
+    @patch("apps.notifications.services.send_mail", return_value=0)
+    def test_simple_email_reports_zero_messages_as_not_sent(self, _send_mail):
+        result = NotificationService.send_simple_email(
+            "learner@example.test",
+            "Test notification",
+            "Test body",
+        )
+        self.assertFalse(result)
+
     def test_email_provider_failure_does_not_discard_enquiry_or_claim_email_was_sent(self, _send):
         response = self.client.post(
             reverse("prospects:enquiry", args=[ProspectEnquiry.Programme.CONSTRUCT]),
