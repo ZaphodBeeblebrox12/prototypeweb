@@ -101,9 +101,15 @@ class Customer360Tests(TestCase):
             email="customer-360-limited@example.test",
             is_staff=True,
         )
+        unlinked_member = User.objects.create_user(
+            username="customer-360-no-ticket",
+            email="customer-360-no-ticket@example.test",
+        )
         self.client.force_login(reviewer)
 
-        response = self.client.get(self.url())
+        response = self.client.get(
+            reverse("staff_admin_desk_customer_360", args=[unlinked_member.pk])
+        )
 
         self.assertEqual(response.status_code, 403)
 
@@ -137,7 +143,12 @@ class Customer360Tests(TestCase):
             message="Restricted plan access request.",
         )
 
-        self.client.force_login(self.reviewer)
+        unrelated_reviewer = User.objects.create_user(
+            username="customer-360-unrelated-reviewer",
+            email="customer-360-unrelated-reviewer@example.test",
+            is_staff=True,
+        )
+        self.client.force_login(unrelated_reviewer)
         forbidden = self.client.get(
             reverse("staff_admin_desk_customer_360", args=[restricted_member.pk])
         )
