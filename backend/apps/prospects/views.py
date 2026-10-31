@@ -123,11 +123,7 @@ def enquiry(request, programme):
     if request.method == "POST" and form.is_valid():
         # Honeypot submissions receive the same public confirmation but are not stored.
         if form.cleaned_data.get("website"):
-            return render(
-                request,
-                "prospects/enquiry_received.html",
-                {"programme": programme_context, "reference": ""},
-            )
+            return redirect("prospects:received")
 
         fingerprint = _email_fingerprint(form.cleaned_data["email"])
         if fingerprint:
