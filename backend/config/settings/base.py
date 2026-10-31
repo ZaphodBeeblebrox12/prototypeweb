@@ -339,6 +339,12 @@ else:
 # ============================================================
 ACCOUNT_ADAPTER = "apps.accounts.adapters.CustomAccountAdapter"
 
+# Keep duplicate-address rejection scoped to sign-up. The adapter is shared by
+# password reset, where existing account emails must remain valid.
+ACCOUNT_FORMS = {
+    "signup": "apps.accounts.forms.TradeThesisSignupForm",
+}
+
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
