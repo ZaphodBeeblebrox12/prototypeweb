@@ -25,22 +25,6 @@ _ALLOWED_SYMPTOM_TERMS = {
     "video", "webhook",
 }
 
-_STOP_WORDS = {
-    "about", "after", "again", "also", "any", "are", "because", "been",
-    "before", "being", "below", "between", "both", "but", "can", "cannot",
-    "could", "did", "does", "doing", "down", "during", "each", "few",
-    "for", "from", "further", "get", "got", "had", "has", "have", "having",
-    "help", "here", "how", "into", "just", "like", "made", "make", "many",
-    "may", "more", "most", "much", "must", "need", "not", "now", "once",
-    "only", "other", "our", "out", "over", "please", "same", "should",
-    "since", "some", "such", "than", "that", "the", "their", "them",
-    "then", "there", "these", "they", "this", "those", "through", "too",
-    "under", "until", "very", "was", "were", "what", "when", "where",
-    "which", "while", "who", "will", "with", "would", "you", "your",
-    "account", "customer", "dear", "hello", "issue", "member", "problem",
-    "support", "thanks", "thesis", "trade", "unable",
-}
-
 def _ticket_terms(message):
     """Return a safe set of symptom words; never return the source message."""
     text = str(message or "").lower()
