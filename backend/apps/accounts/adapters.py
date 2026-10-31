@@ -146,11 +146,16 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         return super().send_mail(template_prefix, email, context)
 
     def _is_email_verified(self, user):
-        """Check if user's email is verified."""
+        """Check that the user's current email address is verified."""
+        if not user.email:
+            return False
         try:
-            email_address = EmailAddress.objects.filter(user=user, verified=True).first()
-            return email_address is not None
-        except:
+            return EmailAddress.objects.filter(
+                user=user,
+                email__iexact=user.email,
+                verified=True,
+            ).exists()
+        except Exception:
             return False
 
     def send_confirmation_mail(self, request, emailconfirmation, signup):
