@@ -77,6 +77,39 @@ class ResendWebhookTests(TestCase):
                 delivery.refresh_from_db()
                 self.assertEqual(delivery.state, expected_state)
 
+    def test_late_sent_event_does_not_downgrade_delivered_state(self):
+        delivery = self._delivery()
+        delivery.state = Delivery.State.DELIVERED
+        delivery.save(update_fields=["state"])
+
+        response = self._signed_post({
+            "type": "email.sent",
+            "data": {"email_id": "re_webhook_test_id"},
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {
+            "ok": True,
+            "updated": 0,
+            "ignored": True,
+        })
+        delivery.refresh_from_db()
+        self.assertEqual(delivery.state, Delivery.State.DELIVERED)
+
+    def test_late_delayed_event_does_not_downgrade_delivered_state(self):
+        delivery = self._delivery()
+        delivery.state = Delivery.State.DELIVERED
+        delivery.save(update_fields=["state"])
+
+        response = self._signed_post({
+            "type": "email.delivery_delayed",
+            "data": {"email_id": "re_webhook_test_id"},
+        })
+
+        self.assertEqual(response.status_code, 200)
+        delivery.refresh_from_db()
+        self.assertEqual(delivery.state, Delivery.State.DELIVERED)
+
     def test_invalid_signature_is_rejected(self):
         self._delivery()
         response = self._signed_post(
