@@ -128,7 +128,7 @@ class ResendEmailBackend(BaseEmailBackend):
         """Replace Django Sites' default example.com prefix before provider send."""
         value = str(subject or "")
         return re.sub(
-            r"^\\s*\\[example\\.com\\]\\s*",
+            r"^\s*\[example\.com\]\s*",
             "[TradeThesis] ",
             value,
             count=1,
@@ -213,7 +213,7 @@ class ResendEmailBackend(BaseEmailBackend):
         payload: dict[str, Any] = {
             "from": message.from_email or settings.DEFAULT_FROM_EMAIL,
             "to": list(message.to),
-            "subject": message.subject or "",
+            "subject": ResendEmailBackend._normalise_subject(message.subject),
         }
 
         if message.cc:
