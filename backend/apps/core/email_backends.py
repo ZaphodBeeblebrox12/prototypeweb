@@ -252,7 +252,7 @@ class ResendEmailBackend(BaseEmailBackend):
             text_body = (
                 text_body.rstrip()
                 + "\n\nTradeThesis\nConviction before Execution"
-                + "\\nTrading involves risk. TradeThesis content is for educational "
+                + "\nTrading involves risk. TradeThesis content is for educational "
                 + "purposes and is not investment advice."
             )
         payload["text"] = text_body
