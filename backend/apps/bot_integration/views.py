@@ -27,6 +27,18 @@ logger = logging.getLogger(__name__)
 @login_required
 def start_telegram_connect(request):
     """Generate a deep link to the existing TradeThesis Telegram bot."""
+    # A disconnect is not complete until managed channel access has been
+    # revoked. Do not allow a replacement identity to race that cleanup.
+    if TelegramAccount.objects.filter(
+        user=request.user, is_active=False
+    ).exists():
+        messages.error(
+            request,
+            "Your previous Telegram disconnect is still being completed. "
+            "Retry disconnecting from Connected accounts before linking again.",
+        )
+        return redirect(f"{reverse('dashboard')}#connections")
+
     # Verification and normal channel access share one bot identity.
     # BotConfig is the canonical credential source used by TelegramBotService.
     config = BotConfig.get_config()
@@ -49,35 +61,42 @@ def start_telegram_connect(request):
 @login_required
 @require_POST
 def unlink_telegram(request):
-    """Disconnect Telegram account from user profile."""
-    try:
-        tg = TelegramAccount.objects.get(user=request.user)
-        old_chat_id = tg.chat_id
-        tg.delete()
-        # Best-effort confirmation: the disconnect must succeed even if Telegram
-        # is temporarily unavailable or the user has blocked the bot.
-        try:
-            sent = TelegramBotService.send_message(
-                old_chat_id,
-                "🔓 Telegram disconnected. Your TradeThesis account has been disconnected from Telegram. "
-                "You can reconnect anytime from your Dashboard.",
-            )
-            if not sent:
-                logger.info("Telegram disconnect confirmation was not accepted chat_id=%s", old_chat_id)
-        except Exception:
-            logger.exception("Telegram disconnect confirmation failed chat_id=%s", old_chat_id)
-        BotAccessAudit.objects.create(
-            user=request.user,
-            action='unlink',
-            platform='telegram',
-            target=str(old_chat_id),
-            status='success'
-        )
-        from apps.jobs.enqueue import enqueue_reconcile
-        enqueue_reconcile(request.user.id, reason="telegram_unlink")
-        messages.success(request, "✅ Telegram disconnected. You can reconnect anytime from Connected accounts in your Dashboard.")
-    except TelegramAccount.DoesNotExist:
+    """Request a safe Telegram disconnect; revoke paid access before deleting identity."""
+    from django.db import transaction
+    from apps.jobs.enqueue import enqueue_reconcile
+
+    account = TelegramAccount.objects.filter(user=request.user).first()
+    if account is None:
         messages.info(request, "No Telegram account is currently linked.")
+        return redirect(f"{reverse('dashboard')}#connections")
+
+    try:
+        # The account row (including telegram_user_id) is the credential needed
+        # to revoke paid-channel membership. Keep it, but pause all new grants.
+        # State change and durable job enqueue commit or roll back together.
+        with transaction.atomic():
+            account = TelegramAccount.objects.select_for_update().get(
+                pk=account.pk, user=request.user
+            )
+            if account.is_active:
+                account.is_active = False
+                account.save(update_fields=["is_active"])
+            enqueue_reconcile(request.user.id, reason="telegram_unlink")
+    except Exception:
+        logger.exception("Telegram disconnect could not be queued user=%s", request.user.pk)
+        messages.error(
+            request,
+            "We couldn't safely start the Telegram disconnect. Your account "
+            "remains linked; please try again.",
+        )
+        return redirect(f"{reverse('dashboard')}#connections")
+
+    messages.info(
+        request,
+        "Telegram disconnect requested. TradeThesis will remove managed "
+        "community access before completing the disconnect. You can retry "
+        "from Connected accounts if it remains pending.",
+    )
     return redirect(f"{reverse('dashboard')}#connections")
 
 
