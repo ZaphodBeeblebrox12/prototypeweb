@@ -337,6 +337,7 @@ def staff_admin_desk(request):
             if billing_settings_exist
             else _has_model_perm(request, "payments", "billingsettings", "add")
         ),
+        "enquiries": _has_model_perm(request, "support", "courseenquiry"),
     }
 
     if context["can_manage_course_content"]:
