@@ -1,15 +1,6 @@
 from django import forms
 
-from .models import ProspectEnquiry
-
-
-STARTING_POINT_CHOICES = [
-    ("", "Choose one (optional)"),
-    ("learning_charts", "Learning to read charts"),
-    ("know_patterns", "Know patterns, need a connected plan"),
-    ("risk_management", "Working on risk and trade management"),
-    ("review_process", "Want a more consistent review process"),
-]
+from .models import STARTING_POINT_CHOICES
 
 
 class ProspectEnquiryForm(forms.Form):
@@ -17,7 +8,7 @@ class ProspectEnquiryForm(forms.Form):
     email = forms.EmailField(label="Email address")
     phone = forms.CharField(max_length=40, required=False, label="Phone or WhatsApp (optional)")
     starting_point = forms.ChoiceField(
-        choices=STARTING_POINT_CHOICES, required=False, label="Where are you starting from?"
+        choices=[("", "Choose one (optional)"), *STARTING_POINT_CHOICES[1:]], required=False, label="Where are you starting from?"
     )
     question = forms.CharField(
         max_length=2000,
