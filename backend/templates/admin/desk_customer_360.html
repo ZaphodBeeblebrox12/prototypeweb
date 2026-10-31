@@ -99,6 +99,10 @@
     </div>
   </section>
 
+  {% if is_internal_account %}
+    <div class="security-note" style="margin-top:12px">Internal staff requester · This profile is limited to identity and tickets visible to your reviewer role. Subscription, payment, invoice, course and security records are hidden for internal accounts.</div>
+  {% endif %}
+
   <section class="stats" aria-label="Customer summary">
     <div class="stat"><strong>{{ stats.open_tickets }}</strong><span>Open support tickets in your queue scope</span></div>
     <div class="stat"><strong>{% if can_view_subscriptions %}{{ stats.active_subscriptions }}{% else %}—{% endif %}</strong><span>Active subscriptions</span></div>
