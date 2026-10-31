@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from apps.support.models import AffiliateLink, SupportTicket, TicketMessage
+from apps.bot_integration.models import TelegramAccount, DiscordAccount
 from apps.subscriptions.models import Plan
 
 User = get_user_model()
@@ -235,3 +236,47 @@ class Customer360Tests(TestCase):
         self.assertEqual(response.status_code, 200, response.content)
         self.assertContains(response, self.url())
         self.assertContains(response, "Customer 360")
+
+
+    def test_customer_360_uses_current_bot_integration_link_records(self):
+        TelegramAccount.objects.create(
+            user=self.member,
+            chat_id=710000001,
+            telegram_user_id=710000001,
+            username="trade_member",
+            is_active=True,
+        )
+        DiscordAccount.objects.create(
+            user=self.member,
+            discord_user_id="880000001",
+            guild_id="990000001",
+            username="trade_member",
+            roles=["role-1"],
+            is_active=True,
+        )
+
+        response = self.client.get(self.url())
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.context["telegram_community_status"], "Linked")
+        self.assertEqual(response.context["discord_community_status"], "Linked")
+        self.assertContains(response, "Telegram · Linked")
+        self.assertContains(response, "Discord · Linked")
+
+    def test_customer_360_distinguishes_legacy_login_from_bot_community_link(self):
+        self.member.telegram_id = 710000002
+        self.member.telegram_verified = True
+        self.member.discord_id = "880000002"
+        self.member.discord_verified = True
+        self.member.save(update_fields=[
+            "telegram_id", "telegram_verified", "discord_id", "discord_verified",
+        ])
+
+        response = self.client.get(self.url())
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.context["telegram_community_status"], "Login only")
+        self.assertEqual(response.context["discord_community_status"], "Legacy identity only")
+        self.assertContains(response, "Telegram · Login only")
+        self.assertContains(response, "Discord · Legacy identity only")
+        self.assertNotContains(response, "Telegram · Linked")
