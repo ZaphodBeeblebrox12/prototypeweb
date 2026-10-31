@@ -1,8 +1,6 @@
 """
 Custom allauth adapter for Google authentication.
-"""
-import logging
-from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+"""from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.account.adapter import DefaultAccountAdapter
 from django.conf import settings
 from allauth.account.models import EmailAddress
@@ -15,8 +13,6 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from apps.accounts.models import User
-
-logger = logging.getLogger(__name__)
 
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
@@ -138,23 +134,10 @@ class CustomAccountAdapter(DefaultAccountAdapter):
             if clean_subject.startswith(prefix)
             else f"{prefix}{clean_subject.removeprefix('[example.com] ').strip()}"
         )
-        logger.info(
-            "TradeThesis account subject formatter invoked adapter=%s input=%r output=%r",
-            f"{type(self).__module__}.{type(self).__name__}",
-            clean_subject,
-            branded_subject,
-        )
         return branded_subject
 
     def send_mail(self, template_prefix, email, context):
         """Add TradeThesis branding and absolute account links to Allauth mail."""
-        logger.info(
-            "TradeThesis account email dispatch adapter=%s template=%s configured_adapter=%s email_backend=%s",
-            f"{type(self).__module__}.{type(self).__name__}",
-            template_prefix,
-            getattr(settings, "ACCOUNT_ADAPTER", "<unset>"),
-            getattr(settings, "EMAIL_BACKEND", "<unset>"),
-        )
         context.setdefault("logo_url", getattr(settings, "EMAIL_LOGO_URL", ""))
         base_url = str(getattr(settings, "SITE_BASE_URL", "") or "").rstrip("/")
         if base_url:
