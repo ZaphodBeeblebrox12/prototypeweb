@@ -244,16 +244,74 @@ def run_user_reconcile(user_id: int, transport=None) -> None:
     target = compute_target_access(user_id)
     account = TelegramAccount.objects.filter(user_id=user_id).first()
     if account is None:
-        # A historical unlink may have deleted the identity before revoking
-        # access. We cannot safely ban a Telegram member without their numeric
-        # user ID, so never silently treat orphaned assignments as reconciled.
-        orphaned = UserChannelAssignment.objects.filter(
-            user_id=user_id, platform="telegram", is_active=True,
-        ).exists()
-        if orphaned:
-            raise RuntimeError(
-                f"Telegram assignments exist without a linked Telegram identity for user {user_id}"
+        # Older unlink code deleted TelegramAccount before reconciliation. Its
+        # audit event retained the private chat ID (equal to the numeric user
+        # ID for the private bot conversation); use that only as a recovery
+        # credential for revocation, never to create or re-link an account.
+        from django.db.models import Q
+        from apps.jobs.models import ProvisioningOperation
+        open_grant_states = [
+            ProvisioningOperation.ST_PENDING,
+            ProvisioningOperation.ST_CREATING,
+            ProvisioningOperation.ST_CREATED,
+            ProvisioningOperation.ST_SENDING,
+            ProvisioningOperation.ST_SENT,
+            ProvisioningOperation.ST_UNKNOWN,
+        ]
+        orphaned_assignments = set(
+            UserChannelAssignment.objects.filter(
+                user_id=user_id, platform="telegram", is_active=True,
+            ).values_list("external_id", flat=True)
+        )
+        open_grants = set(
+            ProvisioningOperation.objects.filter(
+                user_id=user_id,
+                operation=ProvisioningOperation.OP_GRANT,
+                state__in=open_grant_states,
+            ).values_list("channel_id", flat=True)
+        )
+        if orphaned_assignments or open_grants:
+            prior_unlink = BotAccessAudit.objects.filter(
+                user_id=user_id, action="unlink", platform="telegram",
+            ).order_by("-created_at", "-pk").first()
+            try:
+                tg_id = int(prior_unlink.target) if prior_unlink else 0
+            except (TypeError, ValueError):
+                tg_id = 0
+            if tg_id <= 0:
+                raise RuntimeError(
+                    f"Telegram assignments exist without a recoverable Telegram identity for user {user_id}"
+                )
+
+            transport = transport or ProvisionTransport()
+            orphan_targets = orphaned_assignments | open_grants
+            # Include the most recently granted destinations as a final recovery
+            # source. This catches an invite operation that was closed or lost
+            # its assignment row during the old eager-delete flow.
+            orphan_targets |= set(
+                ProvisioningOperation.objects.filter(
+                    user_id=user_id,
+                    operation=ProvisioningOperation.OP_GRANT,
+                ).values_list("channel_id", flat=True)
             )
+            for channel_id in sorted(orphan_targets):
+                error = _control_channel_guard(channel_id)
+                if error:
+                    _audit(user_id, "revoke", "telegram", channel_id, False, error)
+                    raise RuntimeError(error)
+                op = _get_or_create_operation(
+                    user_id, channel_id, ProvisioningOperation.OP_REVOKE, tg_id
+                )
+                execute_operation(op, transport)
+                if op.state == ProvisioningOperation.ST_COMPLETED:
+                    _finalize_revoke(user_id, channel_id)
+                    _supersede_open_grants(user_id, channel_id)
+                else:
+                    message = op.last_error or f"revoke remains unresolved ({op.state})"
+                    _audit(user_id, "revoke", "telegram", channel_id, False, message[:500])
+                    raise RuntimeError(
+                        f"Orphaned Telegram revoke failed for channel {channel_id}: {message[:300]}"
+                    )
 
     if account is not None:
         tg_id = account.telegram_user_id or account.chat_id
