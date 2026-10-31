@@ -30,10 +30,13 @@ from apps.admin_desk_views import (
     admin_desk_operations_job, admin_desk_operations_provisioning,
 )
 from apps.core.views import health_check
+from apps.emailing.webhooks import resend_webhook
 
 urlpatterns = [
     # Render readiness probe: confirm Django and its primary database respond.
     path("health/", health_check, name="health_check"),
+    # Resend delivers signed delivery/bounce/complaint events here.
+    path("api/email/webhooks/resend/", resend_webhook, name="resend_email_webhook"),
     path("staff/course-builder/api/", course_builder_api, name="staff_course_builder_api"),
     path("staff/google-drive/connect/", google_drive_oauth_start, name="academy_google_drive_oauth_start"),
     path("staff/google-drive/oauth/callback/", google_drive_oauth_callback, name="academy_google_drive_oauth_callback"),
