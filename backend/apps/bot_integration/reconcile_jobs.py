@@ -366,14 +366,20 @@ def run_user_reconcile(user_id: int, transport=None) -> None:
                 )
 
             old_chat_id = account.chat_id
-            account.delete()
-            BotAccessAudit.objects.create(
-                user_id=user_id,
-                action="unlink",
-                platform="telegram",
-                target=str(old_chat_id),
-                status="success",
-            )
+            from django.db import transaction
+            with transaction.atomic():
+                locked_account = TelegramAccount.objects.select_for_update().filter(
+                    pk=account.pk, is_active=False
+                ).first()
+                if locked_account is not None:
+                    locked_account.delete()
+                    BotAccessAudit.objects.create(
+                        user_id=user_id,
+                        action="unlink",
+                        platform="telegram",
+                        target=str(old_chat_id),
+                        status="success",
+                    )
             # Confirmation is best effort and happens only after access is
             # removed. A blocked bot must not undo a successful disconnect.
             try:
