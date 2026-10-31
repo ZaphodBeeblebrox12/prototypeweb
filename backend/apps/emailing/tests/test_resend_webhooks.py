@@ -12,9 +12,16 @@ from apps.emailing.models import Delivery
 
 @override_settings(RESEND_WEBHOOK_SECRET="whsec_c2VjcmV0X3NpZ25pbmdfa2V5")
 class ResendWebhookTests(TestCase):
-    def _signed_post(self, event, *, timestamp=None, signature_override=None):
+    def _signed_post(
+        self, event, *, timestamp=None, signature_override=None,
+        add_default_recipient=True,
+    ):
         # Resend now scopes email lifecycle events to recipient(s) in data.to.
-        if event.get("type", "").startswith("email.") and isinstance(event.get("data"), dict):
+        if (
+            add_default_recipient
+            and event.get("type", "").startswith("email.")
+            and isinstance(event.get("data"), dict)
+        ):
             event["data"].setdefault("to", ["learner@example.com"])
         timestamp = str(timestamp or int(time.time()))
         message_id = "msg_resend_test_001"
@@ -145,12 +152,14 @@ class ResendWebhookTests(TestCase):
         self.assertEqual(second.state, Delivery.State.SENT)
 
     def test_missing_recipient_list_is_rejected(self):
-        response = self._signed_post({
-            "type": "email.delivered",
-            "data": {"email_id": "re_not_found"},
-        })
-        # _signed_post adds the default single recipient for email events.
-        self.assertEqual(response.status_code, 503)
+        response = self._signed_post(
+            {
+                "type": "email.delivered",
+                "data": {"email_id": "re_webhook_test_id"},
+            },
+            add_default_recipient=False,
+        )
+        self.assertEqual(response.status_code, 400)
 
     def test_invalid_signature_is_rejected(self):
         self._delivery()
