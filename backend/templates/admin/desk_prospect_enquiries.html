@@ -63,7 +63,7 @@
     {% for item in enquiry_page %}
     <div class="row">
       <div><a class="name" href="{% url 'staff_admin_desk_prospect_enquiry' item.pk %}">{{ item.name }}</a><span class="muted">{{ item.email }}{% if item.phone %} · {{ item.phone }}{% endif %}</span><span class="muted">Ref {{ item.short_reference }}</span></div>
-      <div>{{ item.get_programme_display }}</div>
+      <div>{{ item.get_programme_display }}<span class="muted">{% if item.assigned_to %}Assigned to {{ item.assigned_to.get_full_name|default:item.assigned_to.username }}{% else %}Unassigned{% endif %}</span></div>
       <div><span class="pill">{{ item.get_status_display }}</span></div>
       <div class="meta">{{ item.created_at|date:"j M Y, H:i" }}</div>
       <div><span class="muted">Team: {% if item.staff_notification_sent_at %}sent{% else %}not sent{% endif %}</span><span class="muted">Customer: {% if item.customer_confirmation_sent_at %}sent{% else %}not sent{% endif %}</span></div>
