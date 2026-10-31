@@ -18,6 +18,7 @@ from .forms import (
     CourseMediaAssetAdminForm,
     LessonAdminForm,
     LessonFigureAdminForm,
+    ProtectedLessonVideoAdminForm,
 )
 from .importing import (
     inspect_manifest,
@@ -37,9 +38,11 @@ from .models import (
     Lesson,
     LessonInstructorMaterial,
     LessonProgress,
+    ProtectedLessonVideo,
 )
 from .permissions import is_course_content_admin
 from .storage import course_asset_storage
+from .video_storage import lesson_video_storage
 
 logger = logging.getLogger(__name__)
 
@@ -818,6 +821,118 @@ class CourseMediaAssetAdmin(admin.ModelAdmin):
                     "new_file": obj.file.name if obj.file else "",
                 },
             )
+
+
+@admin.register(ProtectedLessonVideo)
+class ProtectedLessonVideoAdmin(admin.ModelAdmin):
+    form = ProtectedLessonVideoAdminForm
+    list_display = ("lesson", "course_title", "status", "processed_at", "updated_at")
+    list_filter = ("status", "lesson__module__course")
+    search_fields = ("lesson__title", "lesson__module__course__title")
+    fields = (
+        "lesson",
+        "source_file",
+        "status",
+        "stream_directory",
+        "processing_error",
+        "processed_at",
+        "created_by",
+        "created_at",
+        "updated_at",
+    )
+    readonly_fields = (
+        "status",
+        "stream_directory",
+        "processing_error",
+        "processed_at",
+        "created_by",
+        "created_at",
+        "updated_at",
+    )
+
+    @admin.display(description="Course")
+    def course_title(self, obj):
+        return obj.lesson.module.course.title
+
+    def has_module_permission(self, request):
+        return is_course_content_admin(request.user)
+
+    def has_view_permission(self, request, obj=None):
+        return is_course_content_admin(request.user)
+
+    def has_add_permission(self, request):
+        return is_course_content_admin(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        return is_course_content_admin(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return is_course_content_admin(request.user)
+
+    @staticmethod
+    def _delete_rendition(prefix):
+        """Remove HLS objects through the configured provider, including Drive."""
+        if not prefix or prefix.startswith("/") or any(
+            part in {"", ".", ".."} for part in prefix.split("/")
+        ):
+            return
+        try:
+            with lesson_video_storage.open(f"{prefix}/index.m3u8", "rb") as handle:
+                playlist = handle.read().decode("utf-8")
+        except (OSError, UnicodeDecodeError, NotImplementedError):
+            playlist = ""
+
+        names = {f"{prefix}/index.m3u8", f"{prefix}/encryption.key"}
+        for line in playlist.splitlines():
+            segment = line.strip()
+            if (
+                segment
+                and not segment.startswith("#")
+                and "/" not in segment
+                and segment.startswith("segment_")
+                and segment.endswith(".ts")
+                and segment[8:-3].isdigit()
+            ):
+                names.add(f"{prefix}/{segment}")
+        for name in names:
+            try:
+                lesson_video_storage.delete(name)
+            except OSError as exc:
+                logger.warning(
+                    "Could not remove old protected video object (%s).",
+                    exc.__class__.__name__,
+                )
+
+    def save_model(self, request, obj, form, change):
+        previous = ProtectedLessonVideo.objects.filter(pk=obj.pk).first() if change else None
+        previous_name = previous.source_file.name if previous and previous.source_file else ""
+        previous_directory = previous.stream_directory if previous else ""
+        replacing_source = not change or previous_name != (obj.source_file.name if obj.source_file else "")
+        if replacing_source:
+            obj.status = ProtectedLessonVideo.Status.PENDING
+            obj.stream_directory = ""
+            obj.processing_error = ""
+            obj.processed_at = None
+        if not change:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+        if replacing_source and previous:
+            if previous_name:
+                previous.source_file.storage.delete(previous_name)
+            if previous_directory:
+                self._delete_rendition(previous_directory)
+
+    def delete_model(self, request, obj):
+        self._delete_rendition(obj.stream_directory)
+        if obj.source_file:
+            obj.source_file.delete(save=False)
+        super().delete_model(request, obj)
+
+    def delete_queryset(self, request, queryset):
+        # Django's bulk-delete path bypasses delete_model; keep Drive and disk
+        # cleanup consistent for the admin "delete selected" action.
+        for obj in queryset.iterator():
+            self.delete_model(request, obj)
 
 
 @admin.register(CourseContentRevision)
