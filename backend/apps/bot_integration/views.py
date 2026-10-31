@@ -341,9 +341,11 @@ def telegram_webhook(request):
         return JsonResponse({"ok": True})
 
     token_str = payload[7:]
+    from django.contrib.auth import get_user_model
     from django.db import IntegrityError, transaction
     from apps.jobs.enqueue import enqueue_reconcile
 
+    User = get_user_model()
     status = "linked"
     user = None
     try:
@@ -366,8 +368,7 @@ def telegram_webhook(request):
             elif (
                 TelegramAccount.objects.filter(chat_id=chat_id)
                 .exclude(user_id=user.id).exists()
-                or __import__("django.contrib.auth", fromlist=["get_user_model"])
-                .get_user_model().objects.filter(
+                or User.objects.filter(
                     telegram_id=telegram_user_id
                 ).exclude(pk=user.id).exists()
             ):
