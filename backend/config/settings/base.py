@@ -87,6 +87,7 @@ LOCAL_APPS = [
     "apps.advanced_growth",
     "apps.public_views",
     "apps.support",
+    "apps.prospects",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -387,6 +388,8 @@ EMAIL_USE_TLS = env("EMAIL_USE_TLS", default=True)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@example.com")
+# Explicit recipients for public course enquiries. Empty means the Admin Desk queue remains the source of truth.
+PROSPECT_ENQUIRY_RECIPIENTS = env.list("PROSPECT_ENQUIRY_RECIPIENTS", default=[])
 EMAIL_LOGO_URL = os.environ.get(
     "EMAIL_LOGO_URL",
     f"{TRADETHESIS_PUBLIC_SITE_URL}/assets/tradethesis-horizontal.png",
