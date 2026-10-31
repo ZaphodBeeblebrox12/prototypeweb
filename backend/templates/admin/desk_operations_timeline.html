@@ -132,7 +132,7 @@
           <div class="table-wrap"><table>
             <thead><tr><th>Job</th><th>State</th><th>Attempts</th><th>Updated</th></tr></thead>
             <tbody>{% for job in job_incidents %}
-              <tr><td><strong>{{ job.kind }}</strong></td><td><span class="pill {% if job.status == 'failed' %}critical{% else %}warning{% endif %}">{{ job.status }}</span></td><td>{{ job.attempts }} / {{ job.max_attempts }}</td><td>{{ job.updated_at|date:"j M · H:i" }}</td></tr>
+              <tr><td><a href="{% url 'staff_admin_desk_operations_job' job.pk %}"><strong>{{ job.kind }}</strong></a></td><td><span class="pill {% if job.status == 'failed' %}critical{% else %}warning{% endif %}">{{ job.status }}</span></td><td>{{ job.attempts }} / {{ job.max_attempts }}</td><td>{{ job.updated_at|date:"j M · H:i" }}</td></tr>
             {% empty %}<tr><td colspan="4" class="empty">No failed or stalled jobs detected.</td></tr>{% endfor %}</tbody>
           </table></div>
         {% else %}<div class="empty">Your role does not have permission to view background jobs.</div>{% endif %}
@@ -144,7 +144,7 @@
           {% if can_view_provisioning %}
             <h3 style="font-size:12px;margin:12px 0 6px">Provisioning</h3>
             <div class="table-wrap"><table><thead><tr><th>Operation</th><th>State</th><th>Attempts</th><th>Updated</th></tr></thead><tbody>
-              {% for item in provisioning_incidents %}<tr><td>{{ item.operation }}</td><td><span class="pill {% if item.state == 'failed' %}critical{% else %}warning{% endif %}">{{ item.state }}</span></td><td>{{ item.attempts }}</td><td>{{ item.updated_at|date:"j M · H:i" }}</td></tr>{% empty %}<tr><td colspan="4" class="empty">No provisioning failures or unknown states.</td></tr>{% endfor %}
+              {% for item in provisioning_incidents %}<tr><td><a href="{% url 'staff_admin_desk_operations_provisioning' item.pk %}">{{ item.operation }}</a></td><td><span class="pill {% if item.state == 'failed' %}critical{% else %}warning{% endif %}">{{ item.state }}</span></td><td>{{ item.attempts }}</td><td>{{ item.updated_at|date:"j M · H:i" }}</td></tr>{% empty %}<tr><td colspan="4" class="empty">No provisioning failures or unknown states.</td></tr>{% endfor %}
             </tbody></table></div>
           {% endif %}
           {% if can_view_periodic_jobs %}
