@@ -3,7 +3,6 @@ import logging
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.mail import send_mail
 from django.db import transaction
 from django.db.models import Q
 from django.urls import reverse
@@ -11,7 +10,7 @@ from django.utils import timezone
 
 from apps.bot_integration.transactional import TransactionalTelegramService
 from apps.jobs.enqueue import enqueue_reconcile
-from apps.notifications.models import EmailLog, Notification
+from apps.notifications.models import Notification
 from apps.subscriptions.services import grant_subscription_by_admin
 
 logger = logging.getLogger(__name__)
@@ -76,58 +75,36 @@ def _record_notification(user, subject, text, link):
         return None
 
 
-def _save_email_log(log, update_fields):
-    if log is None:
-        return
-    try:
-        log.save(update_fields=update_fields)
-    except Exception:
-        # An analytics/logging outage must not stop a notification reaching
-        # the rest of the recipients.
-        logger.exception("could not update support EmailLog id=%s", log.pk)
-
-
-def _send_email(user, email, subject, text, template):
-    """Send one transactional email and record its outcome in EmailLog."""
+def _send_email(user, email, subject, text, template, link=""):
+    """Send a branded support email through the shared transactional service."""
     if not email:
         return False
-    log = None
     try:
-        log = EmailLog.objects.create(
+        from apps.notifications.services import NotificationService
+
+        return NotificationService.send_email(
+            to_email=email,
+            template="support/email/ticket_notification",
+            subject=subject,
+            context={
+                "email_heading": subject,
+                "message": text,
+                "action_url": link,
+                "button_label": (
+                    "Review support ticket"
+                    if getattr(user, "is_staff", False)
+                    else "View support ticket"
+                ),
+            },
+            metadata={"source": "support_ticket", "event": template},
             user=user,
-            email=email,
-            template=template[:100],
-            subject=subject[:255],
-            status="queued",
-            metadata={"source": "support_ticket"},
+            log_template=template,
         )
     except Exception:
-        # A tracking-table problem must not prevent the actual user/staff alert.
-        logger.exception("could not create support email log recipient=%s", email)
-
-    try:
-        sent_count = send_mail(subject, text, None, [email], fail_silently=False)
-    except Exception as exc:
-        if log is not None:
-            log.status = "failed"
-            log.error_message = str(exc)[:4000]
-            _save_email_log(log, ["status", "error_message"])
-        logger.exception("support email failed recipient=%s template=%s", email, template)
+        logger.exception(
+            "support email failed recipient=%s template=%s", email, template
+        )
         return False
-
-    if sent_count:
-        if log is not None:
-            log.status = "sent"
-            log.sent_at = timezone.now()
-            _save_email_log(log, ["status", "sent_at"])
-        return True
-
-    if log is not None:
-        log.status = "failed"
-        log.error_message = "Email backend reported that no message was sent."
-        _save_email_log(log, ["status", "error_message"])
-    logger.error("support email was not sent recipient=%s template=%s", email, template)
-    return False
 
 
 def _send_telegram(user, text, ticket_id, kind):
@@ -142,31 +119,37 @@ def _send_telegram(user, text, ticket_id, kind):
 def notify_user(ticket, subject, text):
     """Record an in-app notice and attempt the plan's configured channels.
 
-    Failed email deliveries are persisted in EmailLog. Telegram exceptions are
-    logged; the ticket decision is not rolled back because a channel is down.
+    Email delivery is tracked centrally. Telegram exceptions are logged; the
+    ticket decision is not rolled back because a channel is down.
     """
     channel = "both"
     if ticket.plan_id:
         channel = ticket.plan.notice_channel
 
-    _record_notification(ticket.user, subject, text, _ticket_url(ticket))
+    link = _ticket_url(ticket)
+    _record_notification(ticket.user, subject, text, link)
     if channel in ("telegram", "both"):
         _send_telegram(ticket.user, text, ticket.pk, "notice")
     if channel in ("email", "both"):
-        _send_email(ticket.user, ticket.user.email, subject, text, "support_ticket_notice")
+        _send_email(
+            ticket.user, ticket.user.email, subject, text,
+            "support_ticket_notice", link=link,
+        )
 
 
 def send_ticket_confirmation(ticket):
     """Confirm ticket creation to the member in-app, via Telegram and email."""
     text = (f"We received your ticket ({ticket.get_category_display()}). "
             "We'll review it and get back to you shortly.")
+    link = _ticket_url(ticket)
     _record_notification(
-        ticket.user, f"Ticket received - {ticket.short_id}", text, _ticket_url(ticket)
+        ticket.user, f"Ticket received - {ticket.short_id}", text, link
     )
     _send_telegram(ticket.user, text, ticket.pk, "confirmation")
-    _send_email(ticket.user, ticket.user.email,
-                f"Ticket received - {ticket.short_id}", text,
-                "support_ticket_confirmation")
+    _send_email(
+        ticket.user, ticket.user.email, f"Ticket received - {ticket.short_id}",
+        text, "support_ticket_confirmation", link=link,
+    )
 
 
 def notify_staff_about_ticket(ticket, subject=None, body=None, message_id=None):
@@ -174,7 +157,7 @@ def notify_staff_about_ticket(ticket, subject=None, body=None, message_id=None):
 
     There is no mandatory hard-coded inbox address: staff alerts are visible in
     each staff member's existing notification feed, and individual email
-    delivery is tracked in EmailLog.
+    delivery is tracked by the shared notification service.
     """
     User = get_user_model()
     staff_queryset = User.objects.filter(is_staff=True, is_active=True).exclude(
@@ -196,8 +179,10 @@ def notify_staff_about_ticket(ticket, subject=None, body=None, message_id=None):
     for member in staff:
         _record_notification(member, event_subject, event_body, link)
         if member.email:
-            _send_email(member, member.email, event_subject, event_body,
-                        "support_ticket_staff_alert")
+            _send_email(
+                member, member.email, event_subject, event_body,
+                "support_ticket_staff_alert", link=link,
+            )
 
 
 @transaction.atomic
