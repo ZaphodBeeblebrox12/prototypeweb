@@ -1913,10 +1913,17 @@ def admin_desk_prospect_enquiry(request, enquiry_id):
         ProspectEnquiry.objects.select_related("assigned_to"),
         pk=enquiry_id,
     )
+    can_change = _allowed(request.user, "prospects.change_prospectenquiry")
+    staff_users = (
+        get_user_model().objects.filter(is_staff=True, is_active=True)
+        .order_by("username")
+        if can_change else []
+    )
     return render(request, "admin/desk_prospect_enquiry.html", {
         "enquiry": enquiry,
         "status_choices": ProspectEnquiry.Status.choices,
-        "can_change": _allowed(request.user, "prospects.change_prospectenquiry"),
+        "can_change": can_change,
+        "staff_users": staff_users,
         "desk_nav": _nav(request),
         "queue_url": reverse("staff_admin_desk_prospect_enquiries"),
     })
@@ -1925,17 +1932,68 @@ def admin_desk_prospect_enquiry(request, enquiry_id):
 @login_required
 @require_POST
 def admin_desk_prospect_enquiry_update(request, enquiry_id):
-    """Update status and private follow-up notes with a permission check and audit event."""
+    """Update status, assignment and private follow-up notes with audit events."""
     _guard(request, "prospects.change_prospectenquiry")
+    from uuid import UUID
     from apps.prospects.models import ProspectEnquiry
 
     enquiry = get_object_or_404(ProspectEnquiry, pk=enquiry_id)
     new_status = request.POST.get("status", "").strip()
     staff_notes = request.POST.get("staff_notes", "")[:10000]
+    raw_assignee = request.POST.get("assigned_to", "").strip()
     valid_statuses = {value for value, _label in ProspectEnquiry.Status.choices}
     if new_status not in valid_statuses:
         messages.error(request, "Choose a valid enquiry status.")
         return redirect("staff_admin_desk_prospect_enquiry", enquiry_id=enquiry.pk)
+
+    assignee = None
+    if raw_assignee:
+        try:
+            assignee_id = UUID(raw_assignee)
+        except (TypeError, ValueError, AttributeError):
+            messages.error(request, "Choose a valid active staff member.")
+            return redirect("staff_admin_desk_prospect_enquiry", enquiry_id=enquiry.pk)
+        assignee = get_user_model().objects.filter(
+            pk=assignee_id,
+            is_staff=True,
+            is_active=True,
+        ).first()
+        if assignee is None:
+            messages.error(request, "Choose a valid active staff member.")
+            return redirect("staff_admin_desk_prospect_enquiry", enquiry_id=enquiry.pk)
+
+    old_status = enquiry.status
+    old_assignee_id = enquiry.assigned_to_id
+    notes_changed = staff_notes != enquiry.staff_notes
+    assignee_changed = assignee.pk if assignee else None
+    assignee_changed = old_assignee_id != assignee_changed
+    with transaction.atomic():
+        enquiry.status = new_status
+        enquiry.staff_notes = staff_notes
+        enquiry.assigned_to = assignee
+        update_fields = ["status", "staff_notes", "assigned_to", "updated_at"]
+        if new_status == ProspectEnquiry.Status.CONTACTED and enquiry.last_contacted_at is None:
+            enquiry.last_contacted_at = timezone.now()
+            update_fields.append("last_contacted_at")
+        enquiry.save(update_fields=update_fields)
+        if old_status != new_status or notes_changed or assignee_changed:
+            _audit(
+                "admin.prospect_enquiry.updated",
+                request.user,
+                "prospect_enquiry",
+                enquiry.pk,
+                {
+                    "status_from": old_status,
+                    "status_to": new_status,
+                    "staff_notes_changed": notes_changed,
+                    "assignee_from": str(old_assignee_id) if old_assignee_id else "",
+                    "assignee_to": str(assignee.pk) if assignee else "",
+                    "assignee_changed": assignee_changed,
+                },
+            )
+    messages.success(request, "Prospect follow-up saved.")
+    return redirect("staff_admin_desk_prospect_enquiry", enquiry_id=enquiry.pk)
+
 
     old_status = enquiry.status
     notes_changed = staff_notes != enquiry.staff_notes
