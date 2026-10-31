@@ -26,7 +26,7 @@ def normalise_from_email(from_email, default_from_email):
     return formataddr(("TradeThesis", address))
 
 _BRANDED_TEXT_RE = re.compile(
-    r"(?im)^TradeThesis\\s*\\r?\\n\\s*Conviction before execution\\b"
+    r"(?im)^TradeThesis\s*\r?\n\s*Conviction before execution\b"
 )
 
 
@@ -37,7 +37,7 @@ def ensure_branded_plain_text(body):
         return value
     return (
         value
-        + "\\n\\nTradeThesis\\nConviction before Execution"
+        + "\n\nTradeThesis\nConviction before Execution"
         + "\\nTrading involves risk. TradeThesis content is for educational "
         + "purposes and is not investment advice."
     )
