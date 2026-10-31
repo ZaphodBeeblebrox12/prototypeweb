@@ -396,3 +396,55 @@ class CanonicalProfileConnectionStatusTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Connect Discord")
         self.assertNotContains(response, "legacy-discord-handle")
+
+
+
+class DelayedTelegramDeepLinkTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="delayed-telegram-link",
+            email="delayed-telegram-link@example.com",
+        )
+        self.account = TelegramAccount.objects.create(
+            user=self.user,
+            chat_id=710000040,
+            telegram_user_id=710000040,
+            is_active=False,
+        )
+        self.token = TelegramVerificationToken.create_token(self.user)
+
+    @mock.patch("apps.jobs.enqueue.enqueue_reconcile")
+    @mock.patch("apps.bot_integration.views.TelegramBotService")
+    def test_delayed_deep_link_cannot_reactivate_pending_disconnect(self, telegram, enqueue):
+        import json
+        from django.test import override_settings
+
+        body = json.dumps({
+            "update_id": 987654,
+            "message": {
+                "message_id": 42,
+                "from": {
+                    "id": 710000040,
+                    "is_bot": False,
+                    "first_name": "Member",
+                },
+                "chat": {"id": 710000040, "type": "private"},
+                "text": f"/start verify_{self.token.token}",
+            },
+        }).encode()
+
+        with override_settings(TELEGRAM_WEBHOOK_SECRET="native-test-secret"):
+            response = self.client.post(
+                reverse("bot_integration:telegram_webhook"),
+                data=body,
+                content_type="application/json",
+                HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN="native-test-secret",
+            )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.account.refresh_from_db()
+        self.assertFalse(self.account.is_active)
+        self.assertFalse(TelegramVerificationToken.objects.filter(pk=self.token.pk).exists())
+        enqueue.assert_not_called()
+        telegram.send_message.assert_called_once()
+        self.assertIn("disconnect is still being completed", telegram.send_message.call_args.args[1])
