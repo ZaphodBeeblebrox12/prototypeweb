@@ -56,19 +56,20 @@ the native Python runtime rather than the Dockerfile, install FFmpeg in that
 runtime before processing videos or set `ACADEMY_FFMPEG_BINARY` to its path.
 The web process and processing command must use the same storage backend.
 
-The source MP4s and generated HLS files live under this private root, outside
-`MEDIA_ROOT`, `STATIC_ROOT`, and any public CDN. Back up this disk; the
-database stores the relative HLS directory and source-file name, not a second
-copy of the video bytes. Persistent storage and streaming bandwidth still have
-infrastructure costs.
+The source MP4s and generated HLS files live in the configured private
+provider, outside `MEDIA_ROOT`, `STATIC_ROOT`, and any public CDN. Back up the
+Drive folder or persistent disk; the database stores logical storage keys, not
+a second copy of the video bytes. Storage, API quota, and streaming bandwidth
+still have infrastructure costs.
 
 ## Upload and package a video
 
 1. Run migrations: `python manage.py migrate`.
 2. In Django Admin, open **Protected lesson videos** and add one row for the
    lesson. Upload an MP4, MOV, MKV, or WebM source file.
-3. Run the processing command in the same service/container that can read the
-   persistent disk:
+3. Run the processing command in the Academy service/container. It downloads
+   the private source to a temporary worker directory for FFmpeg, then writes
+   encrypted HLS objects back to the selected private storage provider:
 
    ```bash
    python manage.py process_lesson_videos --lesson <LESSON_UUID>
