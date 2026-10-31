@@ -47,10 +47,10 @@ class ResendEmailBackend(BaseEmailBackend):
                 )
 
             payload = self._build_payload(message)
-            idempotency_key = (
-                getattr(message, "_tradethesis_idempotency_key", None)
-                or uuid.uuid4().hex
-            )
+            idempotency_key = getattr(message, "_tradethesis_idempotency_key", None)
+            if not idempotency_key:
+                idempotency_key = uuid.uuid4().hex
+                message._tradethesis_idempotency_key = idempotency_key
             if len(idempotency_key) > 256:
                 raise ValueError("Email idempotency key must be 256 characters or fewer.")
 
