@@ -21,9 +21,6 @@ class EmailVerificationMiddleware:
     # URLs that unverified users CAN access
     ALLOWED_URLS = [
         '/admin/',
-        '/accounts/',
-        '/auth/',
-        '/api/',
         '/static/',
         '/media/',
         '/login',
@@ -32,8 +29,8 @@ class EmailVerificationMiddleware:
         '/verify-email',
         '/confirm-email',
         '/password',
-        '/telegram/',
-        '/dashboard/',
+        # Keep the Telegram login callback accessible without exempting every
+        # route beneath /auth/ or /api/.
         '/auth/telegram/',
     ]
 
@@ -57,6 +54,7 @@ class EmailVerificationMiddleware:
         'telegram_callback',
         'telegram_verify',
         'telegram_connect',
+        'api_telegram_auth',
         # Revocation remains available even to legacy/unverified members: it
         # reduces access and must not be blocked by the verification gate.
         'discord_unlink',
@@ -129,22 +127,17 @@ class EmailVerificationMiddleware:
         if not user.email:
             return False
 
-        # Check if email is verified via allauth
+        # Only the current account email counts. A previously verified
+        # address must not keep authorizing access after the user changes
+        # User.email to a different, unverified address.
         try:
             from allauth.account.models import EmailAddress
-            email_address = EmailAddress.objects.filter(user=user, email=user.email).first()
-            if email_address and email_address.verified:
-                return False
-        except:
-            pass
 
-        # Check if user has any verified emails
-        try:
-            from allauth.account.models import EmailAddress
-            has_verified = EmailAddress.objects.filter(user=user, verified=True).exists()
-            if has_verified:
-                return False
-        except:
-            pass
-
-        return True
+            return not EmailAddress.objects.filter(
+                user=user,
+                email__iexact=user.email,
+                verified=True,
+            ).exists()
+        except Exception:
+            # Fail closed if verification state cannot be checked.
+            return True
