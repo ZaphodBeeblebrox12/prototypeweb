@@ -159,7 +159,7 @@ def enquiry(request, programme):
                 contact_consent=form.cleaned_data["contact_consent"],
                 marketing_opt_in=form.cleaned_data["marketing_opt_in"],
                 source_path=request.path[:255],
-                ip_fingerprint=fingerprint,
+                email_fingerprint=fingerprint,
             )
 
         _send_enquiry_notifications(enquiry_record)
