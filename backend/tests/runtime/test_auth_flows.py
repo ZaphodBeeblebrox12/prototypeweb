@@ -58,6 +58,39 @@ class TestSignupPage:
 
 
 @pytest.mark.django_db
+class TestLogout:
+    def test_desktop_and_mobile_navigation_post_to_logout(self, client):
+        user = User.objects.create_user(
+            username="logout-member", email="logout-member@example.com"
+        )
+        client.force_login(user)
+
+        response = client.get("/dashboard/")
+        assert response.status_code == 200
+        html = response.content.decode()
+
+        # Both responsive navigation variants must use a CSRF-protected POST,
+        # never a GET link that opens Allauth's legacy confirmation template.
+        assert html.count('class="tt-account-logout-form"') == 1
+        assert html.count('class="mobile-menu-logout-form"') == 1
+        assert html.count('action="/accounts/logout/"') == 2
+        assert html.count('name="csrfmiddlewaretoken"') >= 2
+        assert 'href="/accounts/logout/"' not in html
+
+    def test_post_logout_clears_session_and_redirects_without_confirmation(self, client):
+        user = User.objects.create_user(
+            username="logout-session", email="logout-session@example.com"
+        )
+        client.force_login(user)
+
+        response = client.post(reverse("account_logout"))
+
+        assert response.status_code == 302
+        assert response.url == "/"
+        assert "_auth_user_id" not in client.session
+
+
+@pytest.mark.django_db
 class TestSuperuserAdmin:
     def test_createsuperuser_authenticates(self, client):
         _mk_superuser()
