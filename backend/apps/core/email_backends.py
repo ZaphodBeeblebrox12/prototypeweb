@@ -18,7 +18,9 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail.backends.base import BaseEmailBackend
+from django.template.loader import render_to_string
 from django.utils import timezone
+from django.utils.html import strip_tags
 
 from .email_branding import normalise_email_subject, normalise_from_email
 
@@ -234,6 +236,40 @@ class ResendEmailBackend(BaseEmailBackend):
                 payload["html"] = content
             elif mimetype == "text/plain":
                 payload["text"] = content
+
+        # Every outbound message must have a useful text alternative and the
+        # canonical TradeThesis shell. This also catches legacy/direct send_mail
+        # calls that never supplied an HTML template.
+        html_body = payload.get("html", "")
+        text_body = payload.get("text")
+        if text_body is None:
+            text_body = strip_tags(html_body)
+        text_body = str(text_body or "").strip()
+        if not re.search(
+            r"(?im)^TradeThesis\\s*\\r?\\n\\s*Conviction before execution\\b",
+            text_body,
+        ):
+            text_body = (
+                text_body.rstrip()
+                + "\\n\\nTradeThesis\\nConviction before Execution"
+                + "\\nTrading involves risk. TradeThesis content is for educational "
+                + "purposes and is not investment advice."
+            )
+        payload["text"] = text_body
+
+        if "tradethesis-email-shell-v1" not in html_body.lower():
+            base_url = str(getattr(settings, "SITE_BASE_URL", "") or "").rstrip("/")
+            payload["html"] = render_to_string(
+                "emails/provider_fallback.html",
+                {
+                    "subject": normalized_subject,
+                    "body_html": html_body,
+                    "body_text": text_body,
+                    "logo_url": getattr(settings, "EMAIL_LOGO_URL", ""),
+                    "dashboard_url": f"{base_url}/dashboard/" if base_url else "",
+                    "support_url": f"{base_url}/support/" if base_url else "",
+                },
+            )
 
         attachments = getattr(message, "attachments", [])
         if attachments:
