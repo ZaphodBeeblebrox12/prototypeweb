@@ -8,7 +8,6 @@ state to delivered, bounced, complained, or suppressed.
 import base64
 import hashlib
 import logging
-import re
 import uuid
 from email.message import Message
 from typing import Any
