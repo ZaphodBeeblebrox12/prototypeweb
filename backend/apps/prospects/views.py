@@ -4,12 +4,8 @@ import logging
 from datetime import timedelta
 
 from django.conf import settings
-from django.contrib import messages
-from django.core.exceptions import PermissionDenied
-from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Q
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
@@ -47,16 +43,20 @@ def _visitor_fingerprint(request):
 
 def _send_enquiry_notifications(enquiry):
     """Notifications are best-effort; the saved enquiry remains the source of truth."""
-    staff_recipients = list(getattr(settings, "PROSPECT_ENQUIRY_RECIPIENTS", []) or [])
+    staff_recipients = [
+        str(value).strip()
+        for value in (getattr(settings, "PROSPECT_ENQUIRY_RECIPIENTS", []) or [])
+        if str(value).strip()
+    ]
     staff_subject = f"New TradeThesis enquiry · {enquiry.get_programme_display()}"
     staff_body = (
-        "A new prospect enquiry has been saved in the TradeThesis Admin Desk.\\n\\n"
+        "A new prospect enquiry has been saved in the TradeThesis Admin Desk.\n\\n"
         f"Reference: {enquiry.short_reference}\\n"
         f"Programme: {enquiry.get_programme_display()}\\n"
         f"Name: {enquiry.name}\\n"
         f"Email: {enquiry.email}\\n"
         f"Phone: {enquiry.phone or 'Not provided'}\\n"
-        f"Starting point: {enquiry.get_starting_point_display() if hasattr(enquiry, 'get_starting_point_display') else enquiry.starting_point}\\n"
+        f"Starting point: {enquiry.get_starting_point_display()}\\n"
         f"Question: {enquiry.question or 'No additional question'}\\n\\n"
         "Open the Prospect enquiries queue in the TradeThesis Admin Desk to follow up."
     )
