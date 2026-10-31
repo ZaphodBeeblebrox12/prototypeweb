@@ -105,6 +105,9 @@ class MemberEntryTests(TestCase):
             email="member-entry@example.com",
             password=LOGIN_PASSWORD,
         )
+        EmailAddress.objects.create(
+            user=self.user, email=self.user.email, primary=True, verified=True
+        )
 
     def test_authenticated_member_goes_directly_to_dashboard(self):
         self.client.force_login(self.user)
