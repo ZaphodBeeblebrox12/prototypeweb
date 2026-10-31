@@ -23,7 +23,7 @@
     wrapper.querySelectorAll("[data-course-access-message]").forEach(node => {
       safeText(node, message);
     });
-    wrapper.querySelectorAll("[data-course-enrol-cta]").forEach(link => {
+    document.querySelectorAll("[data-course-enrol-cta]").forEach(link => {
       link.setAttribute("href", "#");
       link.setAttribute("aria-disabled", "true");
       link.classList.add("academy-link-unavailable");
@@ -105,7 +105,7 @@
       if (academyUrl.protocol !== "https:" || academyUrl.origin !== academyBaseUrl) {
         throw new Error("The Academy returned an unexpected course destination.");
       }
-      wrapper.querySelectorAll("[data-course-enrol-cta]").forEach(link => {
+      document.querySelectorAll("[data-course-enrol-cta]").forEach(link => {
         link.href = academyUrl.href;
         link.removeAttribute("aria-disabled");
         link.classList.remove("academy-link-unavailable");
