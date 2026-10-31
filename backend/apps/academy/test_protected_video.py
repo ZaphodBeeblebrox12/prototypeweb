@@ -32,7 +32,7 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
             username="protected-video-learner",
             email="learner@example.com",
             password="test-password",
-            role="learner",
+            role=User.Role.USER,
         )
         self.course = Course.objects.create(
             title="Protected Video Course",
@@ -79,7 +79,7 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
             encoding="utf-8",
         )
 
-        self.client.force_login(self.user)
+        self.client.force_login(self.user, backend="django.contrib.auth.backends.ModelBackend")
         self.manifest_url = reverse(
             "academy:protected-video-manifest", args=[self.video.pk]
         )
@@ -134,7 +134,7 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
         )
 
         second_session = Client()
-        second_session.force_login(self.user)
+        second_session.force_login(self.user, backend="django.contrib.auth.backends.ModelBackend")
         response = second_session.get(segment_url)
         self.assertEqual(response.status_code, 404)
 
@@ -143,7 +143,7 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
             username="unentitled-video-learner",
             email="other@example.com",
             password="test-password",
-            role="learner",
+            role=User.Role.USER,
         )
         client = Client()
         client.force_login(other_user)
