@@ -36,8 +36,8 @@ class ProspectEnquiry(models.Model):
     contact_consent = models.BooleanField(default=False)
     marketing_opt_in = models.BooleanField(default=False)
     source_path = models.CharField(max_length=255, blank=True)
-    # HMAC fingerprint only: never persist a raw visitor IP address.
-    ip_fingerprint = models.CharField(max_length=64, blank=True, db_index=True)
+    # Keyed email fingerprint supports throttling without persisting another copy of the address.
+    email_fingerprint = models.CharField(max_length=64, blank=True, db_index=True)
 
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.NEW)
     staff_notes = models.TextField(blank=True)
