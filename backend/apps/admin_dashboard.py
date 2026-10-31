@@ -304,6 +304,26 @@ def _subscription_dashboard_context(request):
             },
         }
 
+    if _has_model_perm(request, "prospects", "prospectenquiry"):
+        from apps.prospects.models import ProspectEnquiry
+
+        prospect_queryset = ProspectEnquiry.objects.all()
+        prospect_queue_url = reverse("staff_admin_desk_prospect_enquiries")
+        ctx["prospect_enquiries"] = {
+            "new": prospect_queryset.filter(status=ProspectEnquiry.Status.NEW).count(),
+            "follow_up": prospect_queryset.filter(
+                status__in=[ProspectEnquiry.Status.CONTACTED, ProspectEnquiry.Status.QUALIFIED]
+            ).count(),
+            "total": prospect_queryset.count(),
+            "recent": list(
+                prospect_queryset.order_by("-created_at")[:5]
+            ),
+            "links": {
+                "all": prospect_queue_url,
+                "new": f"{prospect_queue_url}?status={ProspectEnquiry.Status.NEW}",
+            },
+        }
+
     return ctx
 
 
@@ -337,6 +357,7 @@ def staff_admin_desk(request):
             if billing_settings_exist
             else _has_model_perm(request, "payments", "billingsettings", "add")
         ),
+        "prospects": _has_model_perm(request, "prospects", "prospectenquiry"),
     }
 
     if context["can_manage_course_content"]:
