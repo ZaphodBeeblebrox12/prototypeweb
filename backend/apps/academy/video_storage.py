@@ -6,7 +6,6 @@ proxies manifests, AES keys, and segments after checking learner entitlement.
 import hashlib
 import logging
 import mimetypes
-import re
 from pathlib import Path
 
 from django.conf import settings
@@ -124,8 +123,9 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
             if response.status_code in (200, 201):
                 return content_length
             range_header = response.headers.get("Range", "")
-            match = re.fullmatch(r"bytes=0-(\d+)", range_header)
-            return int(match.group(1)) + 1 if match else 0
+            prefix = "bytes=0-"
+            acknowledged = range_header[len(prefix):] if range_header.startswith(prefix) else ""
+            return int(acknowledged) + 1 if acknowledged.isdigit() else 0
 
         while offset < content_length:
             content.seek(offset)
@@ -168,7 +168,7 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
                     break
                 confirmed = acknowledged_offset(status)
                 if confirmed > content_length:
-                    raise OSError("Google Drive acknowledged an invalid upload range.")
+                    raise OSError("Google Drive acknowledged an invalid upload range.") from None
                 offset = confirmed
                 continue
 
