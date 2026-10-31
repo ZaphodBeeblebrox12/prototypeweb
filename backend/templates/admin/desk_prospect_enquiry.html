@@ -55,7 +55,12 @@
         {% if can_change %}
         <form method="post" action="{% url 'staff_admin_desk_prospect_enquiry_update' enquiry.pk %}">
           {% csrf_token %}
-          <label class="label" for="status">Enquiry status</label>
+          <label class="label" for="assigned_to">Assigned to</label>
+          <select id="assigned_to" name="assigned_to">
+            <option value="">Unassigned</option>
+            {% for staff in staff_users %}<option value="{{ staff.pk }}" {% if enquiry.assigned_to_id == staff.pk %}selected{% endif %}>{{ staff.get_full_name|default:staff.username }}</option>{% endfor %}
+          </select>
+          <label class="label" for="status" style="margin-top:16px">Enquiry status</label>
           <select id="status" name="status">
             {% for value,label in status_choices %}<option value="{{ value }}" {% if enquiry.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
           </select>
