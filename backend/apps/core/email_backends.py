@@ -22,7 +22,11 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.html import strip_tags
 
-from .email_branding import normalise_email_subject, normalise_from_email
+from .email_branding import (
+    ensure_branded_plain_text,
+    normalise_email_subject,
+    normalise_from_email,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -244,17 +248,7 @@ class ResendEmailBackend(BaseEmailBackend):
         text_body = payload.get("text")
         if text_body is None:
             text_body = strip_tags(html_body)
-        text_body = str(text_body or "").strip()
-        if not re.search(
-            r"(?im)^TradeThesis\s*\r?\n\s*Conviction before execution\b",
-            text_body,
-        ):
-            text_body = (
-                text_body.rstrip()
-                + "\n\nTradeThesis\nConviction before Execution"
-                + "\nTrading involves risk. TradeThesis content is for educational "
-                + "purposes and is not investment advice."
-            )
+        text_body = ensure_branded_plain_text(text_body)
         payload["text"] = text_body
 
         if "tradethesis-email-shell-v1" not in html_body.lower():
