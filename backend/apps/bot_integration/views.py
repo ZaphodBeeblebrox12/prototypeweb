@@ -29,9 +29,45 @@ def start_telegram_connect(request):
     """Generate a deep link to the existing TradeThesis Telegram bot."""
     # A disconnect is not complete until managed channel access has been
     # revoked. Do not allow a replacement identity to race that cleanup.
-    if TelegramAccount.objects.filter(
+    from apps.jobs.models import ProvisioningOperation
+    pending_account_disconnect = TelegramAccount.objects.filter(
         user=request.user, is_active=False
-    ).exists():
+    ).exists()
+    orphaned_access = (
+        not TelegramAccount.objects.filter(user=request.user).exists()
+        and (
+            UserChannelAssignment.objects.filter(
+                user=request.user, platform="telegram", is_active=True,
+            ).exists()
+            or ProvisioningOperation.objects.filter(
+                user_id=request.user.pk,
+                operation=ProvisioningOperation.OP_GRANT,
+                state__in=[
+                    ProvisioningOperation.ST_PENDING,
+                    ProvisioningOperation.ST_CREATING,
+                    ProvisioningOperation.ST_CREATED,
+                    ProvisioningOperation.ST_SENDING,
+                    ProvisioningOperation.ST_SENT,
+                    ProvisioningOperation.ST_UNKNOWN,
+                ],
+            ).exists()
+        )
+    )
+    if orphaned_access:
+        from apps.jobs.enqueue import enqueue_reconcile
+        try:
+            enqueue_reconcile(request.user.pk, reason="orphaned_telegram_cleanup")
+        except Exception:
+            logger.exception("Could not queue orphaned Telegram cleanup user=%s", request.user.pk)
+        messages.error(
+            request,
+            "A previous Telegram connection still has community access to clean up. "
+            "We're resolving it before allowing a new Telegram link. Contact support "
+            "if this status does not clear.",
+        )
+        return redirect(f"{reverse('dashboard')}#connections")
+
+    if pending_account_disconnect:
         messages.error(
             request,
             "Your previous Telegram disconnect is still being completed. "
