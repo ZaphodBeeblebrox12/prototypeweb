@@ -76,10 +76,10 @@
   <section class="stats" aria-label="Operational overview">
     <div class="stat"><strong>{{ stats.open_tickets }}</strong><span>Visible tickets opened in this window</span></div>
     <div class="stat"><strong>{{ stats.potential_patterns }}</strong><span>Potential multi-customer patterns</span></div>
-    <div class="stat"><strong>{{ stats.failed_jobs|default:"—" }}</strong><span>Failed background jobs</span></div>
-    <div class="stat"><strong>{{ stats.stalled_jobs|default:"—" }}</strong><span>Stalled / retrying jobs</span></div>
-    <div class="stat"><strong>{{ stats.provisioning_issues|default:"—" }}</strong><span>Provisioning issues</span></div>
-    <div class="stat"><strong>{{ stats.scheduler_errors|default:"—" }}</strong><span>Scheduled-task errors</span></div>
+    <div class="stat"><strong>{% if can_view_jobs %}{{ stats.failed_jobs }}{% else %}—{% endif %}</strong><span>Failed background jobs</span></div>
+    <div class="stat"><strong>{% if can_view_jobs %}{{ stats.stalled_jobs }}{% else %}—{% endif %}</strong><span>Stalled / retrying jobs</span></div>
+    <div class="stat"><strong>{% if can_view_provisioning %}{{ stats.provisioning_issues }}{% else %}—{% endif %}</strong><span>Provisioning issues</span></div>
+    <div class="stat"><strong>{% if can_view_periodic_jobs %}{{ stats.scheduler_errors }}{% else %}—{% endif %}</strong><span>Scheduled-task errors</span></div>
   </section>
 
   <div class="footnote">Support signals and ticket counts are calculated only from tickets your current reviewer role can see. The system feeds use the separate viewing permissions for jobs, domain events, audit and security records. Raw ticket messages, provider IDs, job payloads, security IP addresses and internal support notes are not shown.</div>
