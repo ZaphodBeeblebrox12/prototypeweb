@@ -47,6 +47,7 @@ Subscribe it to:
 - `email.sent`
 - `email.delivered`
 - `email.delivery_delayed`
+- `email.failed`
 - `email.bounced`
 - `email.complained`
 - `email.suppressed`
