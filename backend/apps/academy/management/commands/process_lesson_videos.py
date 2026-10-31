@@ -1,4 +1,4 @@
-"""Package uploaded lesson videos as private AES-128-encrypted HLS VOD."""
+"""Package uploaded lesson videos as private AES-128 HLS VOD."""
 import os
 import secrets
 import shutil
@@ -7,17 +7,16 @@ import tempfile
 from pathlib import Path
 
 from django.conf import settings
+from django.core.files import File
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from apps.academy.models import ProtectedLessonVideo
+from apps.academy.video_storage import lesson_video_storage
 
 
 class Command(BaseCommand):
-    help = (
-        "Convert uploaded lesson videos to private AES-128 HLS. "
-        "Requires FFmpeg and durable private video storage."
-    )
+    help = "Convert uploaded lesson videos to private AES-128 HLS using Drive or durable local storage."
 
     def add_arguments(self, parser):
         parser.add_argument("--lesson", help="Process one lesson UUID.")
@@ -28,12 +27,11 @@ class Command(BaseCommand):
         if (
             not settings.DEBUG
             and getattr(settings, "ACADEMY_REQUIRE_DURABLE_VIDEO_STORAGE", True)
-            and not getattr(settings, "ACADEMY_VIDEO_STORAGE_DURABLE", False)
+            and not lesson_video_storage.is_durable
         ):
             raise CommandError(
-                "Refusing to process videos on ephemeral storage. Mount a persistent disk, "
-                "set ACADEMY_VIDEO_STORAGE_ROOT to its mount path, and set "
-                "ACADEMY_VIDEO_STORAGE_DURABLE=true."
+                "Refusing to process videos without durable storage. Connect Google Drive "
+                "(using the Academy asset folder) or mount a persistent disk."
             )
 
         configured_binary = str(getattr(settings, "ACADEMY_FFMPEG_BINARY", "ffmpeg") or "ffmpeg")
@@ -43,14 +41,13 @@ class Command(BaseCommand):
         if not ffmpeg:
             try:
                 from imageio_ffmpeg import get_ffmpeg_exe
-
                 ffmpeg = get_ffmpeg_exe()
             except (ImportError, RuntimeError):
                 ffmpeg = ""
         if not ffmpeg:
             raise CommandError(
-                "FFmpeg was not found. Install FFmpeg in the service image, install the "
-                "imageio-ffmpeg wheel, or set ACADEMY_FFMPEG_BINARY to its executable path."
+                "FFmpeg was not found. Install FFmpeg in the service image, install "
+                "the imageio-ffmpeg wheel, or set ACADEMY_FFMPEG_BINARY."
             )
 
         videos = ProtectedLessonVideo.objects.select_related("lesson").order_by("created_at")
@@ -58,160 +55,122 @@ class Command(BaseCommand):
             videos = videos.filter(lesson_id=options["lesson"])
         elif not options["all"]:
             videos = videos.filter(
-                status__in=(
-                    ProtectedLessonVideo.Status.PENDING,
-                    ProtectedLessonVideo.Status.FAILED,
-                )
+                status__in=(ProtectedLessonVideo.Status.PENDING, ProtectedLessonVideo.Status.FAILED)
             )
         if not options["force"]:
             videos = videos.exclude(status=ProtectedLessonVideo.Status.READY)
-
         videos = list(videos)
         if not videos:
             self.stdout.write("No lesson videos require processing.")
             return
 
-        root = Path(settings.ACADEMY_VIDEO_STORAGE_ROOT).resolve()
-        root.mkdir(parents=True, exist_ok=True)
         for video in videos:
-            self._process_one(video, ffmpeg, root, force=options["force"])
+            self._process_one(video, ffmpeg, force=options["force"])
 
-    def _process_one(self, video, ffmpeg, root, force=False):
+    def _process_one(self, video, ffmpeg, force=False):
         if not video.source_file:
-            video.status = ProtectedLessonVideo.Status.FAILED
-            video.processing_error = "No source video file is attached."
-            video.save(update_fields=["status", "processing_error", "updated_at"])
-            self.stderr.write(f"Skipped {video.lesson_id}: source file is missing.")
+            self._fail(video, "No source video file is attached.")
             return
 
-        try:
-            source = Path(video.source_file.path).resolve()
-        except (NotImplementedError, ValueError) as exc:
-            raise CommandError(
-                f"Video {video.lesson_id} is not on local filesystem storage; "
-                "the FFmpeg worker requires a mounted local source volume."
-            ) from exc
-        if not source.is_file():
-            raise CommandError(f"Source file for lesson {video.lesson_id} is missing.")
-
-        output_dir = (root / "streams" / str(video.pk)).resolve()
-        if root not in output_dir.parents:
-            raise CommandError("Resolved HLS output directory is outside private video storage.")
-        if output_dir.exists():
-            if not force and video.status == ProtectedLessonVideo.Status.READY:
-                return
-            shutil.rmtree(output_dir)
-        output_dir.mkdir(parents=True, exist_ok=True)
-
-        key = secrets.token_bytes(16)
-        iv = secrets.token_hex(16)
-        key_path = output_dir / "encryption.key"
-        key_path.write_bytes(key)
-        key_path.chmod(0o600)
-        key_info_path = None
-
+        output_prefix = f"streams/{video.pk}"
+        uploaded_names = []
         video.status = ProtectedLessonVideo.Status.PROCESSING
         video.processing_error = ""
-        video.stream_directory = str(output_dir.relative_to(root))
+        video.stream_directory = output_prefix
         video.processed_at = None
-        video.save(
-            update_fields=(
-                "status",
-                "processing_error",
-                "stream_directory",
-                "processed_at",
-                "updated_at",
-            )
-        )
+        video.save(update_fields=("status", "processing_error", "stream_directory", "processed_at", "updated_at"))
 
         try:
-            with tempfile.NamedTemporaryFile(
-                mode="w",
-                encoding="utf-8",
-                prefix="academy-hls-key-",
-                suffix=".txt",
-                dir=str(root),
-                delete=False,
-            ) as key_info:
-                key_info_path = key_info.name
-                key_info.write(f"protected-key\n{key_path}\n0x{iv}\n")
+            # FFmpeg needs local seekable files. Download the private Drive source
+            # to a short-lived worker directory, then upload each encrypted output.
+            with tempfile.TemporaryDirectory(prefix="academy-video-") as work:
+                work_dir = Path(work)
+                source_path = work_dir / f"source{Path(video.source_file.name).suffix or '.mp4'}"
+                with video.source_file.open("rb") as source, source_path.open("wb") as target:
+                    shutil.copyfileobj(source, target, length=1024 * 1024)
 
-            command = [
-                ffmpeg,
-                "-hide_banner",
-                "-loglevel",
-                "error",
-                "-y",
-                "-i",
-                str(source),
-                "-map",
-                "0:v:0",
-                "-map",
-                "0:a:0?",
-                "-c:v",
-                "libx264",
-                "-preset",
-                "veryfast",
-                "-crf",
-                "22",
-                "-profile:v",
-                "main",
-                "-pix_fmt",
-                "yuv420p",
-                "-c:a",
-                "aac",
-                "-b:a",
-                "128k",
-                "-f",
-                "hls",
-                "-hls_time",
-                "6",
-                "-hls_playlist_type",
-                "vod",
-                "-hls_flags",
-                "independent_segments",
-                "-hls_segment_filename",
-                str(output_dir / "segment_%05d.ts"),
-                "-hls_key_info_file",
-                key_info_path,
-                str(output_dir / "index.m3u8"),
-            ]
-            subprocess.run(
-                command,
-                check=True,
-                capture_output=True,
-                text=True,
-                timeout=int(getattr(settings, "ACADEMY_VIDEO_FFMPEG_TIMEOUT", 14400)),
-            )
+                output_dir = work_dir / "hls"
+                output_dir.mkdir()
+                key = secrets.token_bytes(16)
+                iv = secrets.token_hex(16)
+                key_path = output_dir / "encryption.key"
+                key_path.write_bytes(key)
+                key_path.chmod(0o600)
+                key_info_path = work_dir / "key-info.txt"
+                key_info_path.write_text(
+                    f"protected-key\n{key_path}\n0x{iv}\n", encoding="utf-8"
+                )
+                manifest_path = output_dir / "index.m3u8"
+                command = [
+                    ffmpeg, "-hide_banner", "-loglevel", "error", "-y",
+                    "-i", str(source_path),
+                    "-map", "0:v:0", "-map", "0:a:0?",
+                    "-c:v", "libx264", "-preset", "veryfast", "-crf", "22",
+                    "-profile:v", "main", "-pix_fmt", "yuv420p",
+                    "-c:a", "aac", "-b:a", "128k",
+                    "-f", "hls", "-hls_time", "6", "-hls_playlist_type", "vod",
+                    "-hls_flags", "independent_segments",
+                    "-hls_segment_filename", str(output_dir / "segment_%05d.ts"),
+                    "-hls_key_info_file", str(key_info_path), str(manifest_path),
+                ]
+                subprocess.run(
+                    command, check=True, capture_output=True, text=True,
+                    timeout=int(getattr(settings, "ACADEMY_VIDEO_FFMPEG_TIMEOUT", 14400)),
+                )
 
-            manifest = output_dir / "index.m3u8"
-            segments = list(output_dir.glob("segment_*.ts"))
-            if not manifest.is_file() or not segments:
-                raise RuntimeError("FFmpeg finished without creating a valid HLS playlist.")
-            if key_path.stat().st_size != 16:
-                raise RuntimeError("The HLS encryption key is invalid.")
+                segments = sorted(output_dir.glob("segment_*.ts"))
+                if not manifest_path.is_file() or not segments or len(key) != 16:
+                    raise RuntimeError("FFmpeg did not create a valid encrypted HLS rendition.")
+
+                # Remove any old rendition only after a complete new rendition exists.
+                if force:
+                    self._delete_old_rendition(output_prefix)
+
+                objects = [(f"{output_prefix}/encryption.key", key_path),
+                           (f"{output_prefix}/index.m3u8", manifest_path)]
+                objects.extend((f"{output_prefix}/{segment.name}", segment) for segment in segments)
+                for logical_name, local_path in objects:
+                    with local_path.open("rb") as handle:
+                        lesson_video_storage.save(logical_name, File(handle, name=local_path.name))
+                    uploaded_names.append(logical_name)
 
             video.status = ProtectedLessonVideo.Status.READY
             video.processing_error = ""
             video.processed_at = timezone.now()
-            video.save(
-                update_fields=("status", "processing_error", "processed_at", "updated_at")
-            )
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Protected stream ready: {video.lesson.title} ({len(segments)} segments)."
-                )
-            )
-        except (OSError, subprocess.SubprocessError, RuntimeError) as exc:
-            if output_dir.exists():
-                shutil.rmtree(output_dir, ignore_errors=True)
+            video.save(update_fields=("status", "processing_error", "processed_at", "updated_at"))
+            self.stdout.write(self.style.SUCCESS(
+                f"Protected stream ready: {video.lesson.title} ({len(segments)} segments)."
+            ))
+        except (OSError, subprocess.SubprocessError, RuntimeError, ValueError) as exc:
+            for name in uploaded_names:
+                try:
+                    lesson_video_storage.delete(name)
+                except OSError:
+                    self.stderr.write(f"Could not clean up incomplete Drive object: {name}")
             video.status = ProtectedLessonVideo.Status.FAILED
             video.stream_directory = ""
             video.processing_error = str(exc)[-1200:]
-            video.save(
-                update_fields=("status", "stream_directory", "processing_error", "updated_at")
-            )
+            video.save(update_fields=("status", "stream_directory", "processing_error", "updated_at"))
             raise CommandError(f"Processing failed for lesson {video.lesson_id}: {exc}") from exc
-        finally:
-            if key_info_path and os.path.exists(key_info_path):
-                os.unlink(key_info_path)
+
+    @staticmethod
+    def _delete_old_rendition(prefix):
+        for name in (f"{prefix}/index.m3u8", f"{prefix}/encryption.key"):
+            lesson_video_storage.delete(name)
+        # Segment count is discovered from the old playlist; no Drive folder listing
+        # or public folder access is needed.
+        try:
+            with lesson_video_storage.open(f"{prefix}/index.m3u8", "rb") as handle:
+                playlist = handle.read().decode("utf-8")
+        except (OSError, FileNotFoundError):
+            playlist = ""
+        for line in playlist.splitlines():
+            segment = line.strip()
+            if segment and not segment.startswith("#") and "/" not in segment:
+                lesson_video_storage.delete(f"{prefix}/{segment}")
+
+    @staticmethod
+    def _fail(video, message):
+        video.status = ProtectedLessonVideo.Status.FAILED
+        video.processing_error = message
+        video.save(update_fields=("status", "processing_error", "updated_at"))
