@@ -1,6 +1,7 @@
 """
 Custom allauth adapter for Google authentication.
 """
+import logging
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.account.adapter import DefaultAccountAdapter
 from django.conf import settings
