@@ -595,23 +595,72 @@ class SupportTicketWorkflowTests(TestCase):
         self.assertEqual(self.ticket.status, SupportTicket.Status.REJECTED)
         self.assertEqual(self.ticket.admin_notes, "The evidence is incomplete.")
 
-    @patch("apps.support.services.send_mail", return_value=1)
-    def test_staff_alerts_are_persisted_and_email_delivery_is_logged(self, send_email):
+    @override_settings(
+        SITE_BASE_URL="https://academy.example.test",
+        EMAIL_LOGO_URL="https://cdn.example.test/tradethesis-logo.png",
+    )
+    @patch("apps.notifications.services.send_mail", return_value=1)
+    def test_staff_alerts_use_branded_html_and_keep_reviewer_scoped_delivery_logs(
+        self, send_email
+    ):
         from apps.support.services import notify_staff_about_ticket
 
         notify_staff_about_ticket(self.ticket)
+
+        send_email.assert_called_once()
+        payload = send_email.call_args.kwargs
+        self.assertEqual(payload["subject"], f"[TradeThesis] New support ticket {self.ticket.short_id}")
+        self.assertIn("TradeThesis", payload["html_message"])
+        self.assertIn("tradethesis-logo.png", payload["html_message"])
+        self.assertIn("Review support ticket", payload["html_message"])
+        self.assertIn("academy.example.test", payload["html_message"])
+        self.assertIn("Conviction before Execution", payload["message"])
+
         self.assertTrue(Notification.objects.filter(
             user=self.allowed_reviewer, title__contains=self.ticket.short_id
         ).exists())
         self.assertTrue(EmailLog.objects.filter(
             user=self.allowed_reviewer, template="support_ticket_staff_alert",
-            status="sent",
+            subject__startswith="[TradeThesis]", status="sent",
         ).exists())
         self.assertFalse(Notification.objects.filter(
             user=self.other_reviewer, title__contains=self.ticket.short_id
         ).exists())
         self.assertFalse(EmailLog.objects.filter(
             user=self.other_reviewer, template="support_ticket_staff_alert",
+        ).exists())
+
+    def test_member_ticket_confirmation_uses_branded_email_and_ticket_link(self):
+        from apps.support.services import send_ticket_confirmation
+
+        with (
+            override_settings(
+                SITE_BASE_URL="https://academy.example.test",
+                EMAIL_LOGO_URL="https://cdn.example.test/tradethesis-logo.png",
+            ),
+            patch("apps.support.services._send_telegram"),
+            patch("apps.notifications.services.send_mail", return_value=1) as send_email,
+        ):
+            send_ticket_confirmation(self.ticket)
+
+        send_email.assert_called_once()
+        payload = send_email.call_args.kwargs
+        self.assertEqual(
+            payload["subject"],
+            f"[TradeThesis] Ticket received - {self.ticket.short_id}",
+        )
+        self.assertIn("TradeThesis", payload["html_message"])
+        self.assertIn("tradethesis-logo.png", payload["html_message"])
+        self.assertIn(
+            f"/support/tickets/{self.ticket.pk}/",
+            payload["html_message"],
+        )
+        self.assertIn("View support ticket", payload["html_message"])
+        self.assertTrue(EmailLog.objects.filter(
+            user=self.member,
+            template="support_ticket_confirmation",
+            subject__startswith="[TradeThesis]",
+            status="sent",
         ).exists())
 
     def test_service_rejects_oversized_replies_server_side(self):
