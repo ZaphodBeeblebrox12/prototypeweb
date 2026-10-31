@@ -188,6 +188,75 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn("/accounts/login/", response["Location"])
 
+
+    def test_admin_lesson_preview_renders_protected_video_and_can_fetch_manifest(self):
+        admin = User.objects.create_user(
+            username="protected-video-admin",
+            email="video-admin@example.com",
+            password="test-password",
+            role=User.Role.ADMIN,
+            is_staff=True,
+        )
+        self.client.force_login(
+            admin, backend="django.contrib.auth.backends.ModelBackend"
+        )
+
+        preview_url = reverse(
+            "academy:admin-lesson-preview",
+            args=[self.course.slug, self.lesson.pk],
+        )
+        preview = self.client.get(preview_url)
+
+        self.assertEqual(preview.status_code, 200, preview.content)
+        self.assertEqual(preview.context["protected_video"], self.video)
+        self.assertContains(preview, 'data-protected-video-container')
+        self.assertContains(preview, 'data-protected-video')
+        manifest_url = reverse(
+            "academy:protected-video-manifest",
+            args=[self.video.pk],
+        )
+        self.assertContains(preview, manifest_url)
+        self.assertContains(preview, "video-admin@example.com")
+
+        # Admin preview bypasses learner entitlement, but still goes through the
+        # same signed, session-bound manifest/key/segment delivery pipeline.
+        manifest = self.client.get(manifest_url)
+        self.assertEqual(manifest.status_code, 200, manifest.content)
+        self.assertIn("#EXT-X-KEY:METHOD=AES-128", manifest.content.decode("utf-8"))
+
+
+    def test_admin_preview_can_open_ready_video_for_unpublished_lesson(self):
+        self.course.status = Course.Status.DRAFT
+        self.course.save(update_fields=["status", "updated_at"])
+        self.module.is_published = False
+        self.module.save(update_fields=["is_published", "updated_at"])
+        self.lesson.is_published = False
+        self.lesson.save(update_fields=["is_published", "updated_at"])
+
+        admin = User.objects.create_user(
+            username="protected-video-draft-admin",
+            email="draft-admin@example.com",
+            password="test-password",
+            role=User.Role.ADMIN,
+            is_staff=True,
+        )
+        self.client.force_login(
+            admin, backend="django.contrib.auth.backends.ModelBackend"
+        )
+
+        preview_url = reverse(
+            "academy:admin-lesson-preview",
+            args=[self.course.slug, self.lesson.pk],
+        )
+        preview = self.client.get(preview_url)
+
+        self.assertEqual(preview.status_code, 200, preview.content)
+        self.assertContains(preview, 'data-protected-video-container')
+        self.assertContains(
+            preview,
+            reverse("academy:protected-video-manifest", args=[self.video.pk]),
+        )
+
     def test_processing_command_targets_the_protected_video_uuid(self):
         from apps.academy.management.commands.process_lesson_videos import Command
 

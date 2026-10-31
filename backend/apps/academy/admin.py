@@ -827,7 +827,14 @@ class CourseMediaAssetAdmin(admin.ModelAdmin):
 class ProtectedLessonVideoAdmin(admin.ModelAdmin):
     form = ProtectedLessonVideoAdminForm
     actions = ("queue_processing",)
-    list_display = ("lesson", "course_title", "status", "processed_at", "updated_at")
+    list_display = (
+        "lesson",
+        "course_title",
+        "status",
+        "preview_lesson",
+        "processed_at",
+        "updated_at",
+    )
     list_filter = ("status", "lesson__module__course")
     search_fields = ("lesson__title", "lesson__module__course__title")
     fields = (
@@ -854,6 +861,16 @@ class ProtectedLessonVideoAdmin(admin.ModelAdmin):
     @admin.display(description="Course")
     def course_title(self, obj):
         return obj.lesson.module.course.title
+
+    @admin.display(description="Lesson preview")
+    def preview_lesson(self, obj):
+        return format_html(
+            '<a href="{}" target="_blank" rel="noopener">Preview lesson ↗</a>',
+            reverse(
+                "academy:admin-lesson-preview",
+                args=[obj.lesson.module.course.slug, obj.lesson.pk],
+            ),
+        )
 
     @admin.action(description="Queue / rebuild one protected video stream")
     def queue_processing(self, request, queryset):
