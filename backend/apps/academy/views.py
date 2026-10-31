@@ -410,6 +410,10 @@ def course_detail(request, course_slug):
         p.lesson_id: p
         for p in LessonProgress.objects.filter(user=request.user, lesson_id__in=lesson_ids)
     }
+    # A first-session guide is shown until the learner actually opens a lesson.
+    # lesson_detail creates the first IN_PROGRESS record, so no dismissal flag
+    # or extra persistence field is needed.
+    has_started = bool(progress_by_lesson)
     module_rows = []
     now = timezone.now()
     access_record = entitlement or membership_subscription
@@ -490,6 +494,7 @@ def course_detail(request, course_slug):
             "total_study_hours": total_study_minutes // 60,
             "total_study_minutes_remainder": total_study_minutes % 60,
             "first_accessible_lesson": first_accessible_lesson,
+            "has_started": has_started,
             "is_course_content_admin": is_course_content_admin(request.user),
             "progress_percent": round(completed * 100 / total) if total else 0,
         },
