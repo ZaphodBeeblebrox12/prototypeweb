@@ -271,6 +271,41 @@ class TelegramUnlinkRouteTests(TestCase):
         self.assertTrue(TelegramAccount.objects.filter(user=self.user).exists())
         enqueue.assert_called_once_with(self.user.pk, reason="telegram_unlink")
 
+    @mock.patch("apps.jobs.enqueue.enqueue_reconcile")
+    def test_connect_is_blocked_and_tokens_invalidated_for_orphaned_access(self, enqueue):
+        from apps.bot_integration.models import BotAccessAudit
+
+        self.account.delete()
+        UserChannelAssignment.objects.create(
+            user=self.user,
+            platform="telegram",
+            external_id="-100710000010",
+            is_active=True,
+        )
+        BotAccessAudit.objects.create(
+            user=self.user,
+            action="unlink",
+            platform="telegram",
+            target="710000010",
+            status="success",
+        )
+        BotConfig.objects.update_or_create(
+            pk=1,
+            defaults={
+                "telegram_bot_username": "tradethesis_test_bot",
+                "telegram_bot_token": "test-token-not-used-for-network-calls",
+                "is_active": True,
+            },
+        )
+        stale_token = TelegramVerificationToken.create_token(self.user)
+
+        response = self.client.get(reverse("bot_integration:telegram_connect"))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], f"{reverse('dashboard')}#connections")
+        self.assertFalse(TelegramVerificationToken.objects.filter(pk=stale_token.pk).exists())
+        enqueue.assert_called_once_with(self.user.pk, reason="orphaned_telegram_cleanup")
+
     def test_connect_is_blocked_while_previous_disconnect_is_pending(self):
         BotConfig.objects.update_or_create(
             pk=1,
