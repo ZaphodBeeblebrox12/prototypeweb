@@ -31,6 +31,7 @@ PROGRAMMES = {
 
 
 def _visitor_fingerprint(request):
+    """Return a keyed visitor fingerprint without storing the raw IP address."""
     address = request.META.get("REMOTE_ADDR", "").strip()
     if not address:
         return ""
@@ -42,7 +43,7 @@ def _visitor_fingerprint(request):
 
 
 def _send_enquiry_notifications(enquiry):
-    """Notifications are best-effort; the saved enquiry remains the source of truth."""
+    """Send best-effort notifications after the enquiry record has committed."""
     staff_recipients = [
         str(value).strip()
         for value in (getattr(settings, "PROSPECT_ENQUIRY_RECIPIENTS", []) or [])
@@ -50,39 +51,44 @@ def _send_enquiry_notifications(enquiry):
     ]
     staff_subject = f"New TradeThesis enquiry · {enquiry.get_programme_display()}"
     staff_body = (
-        "A new prospect enquiry has been saved in the TradeThesis Admin Desk.\n\\n"
-        f"Reference: {enquiry.short_reference}\\n"
-        f"Programme: {enquiry.get_programme_display()}\\n"
-        f"Name: {enquiry.name}\\n"
-        f"Email: {enquiry.email}\\n"
-        f"Phone: {enquiry.phone or 'Not provided'}\\n"
-        f"Starting point: {enquiry.get_starting_point_display()}\\n"
-        f"Question: {enquiry.question or 'No additional question'}\\n\\n"
+        "A new prospect enquiry has been saved in the TradeThesis Admin Desk.\n\n"
+        f"Reference: {enquiry.short_reference}\n"
+        f"Programme: {enquiry.get_programme_display()}\n"
+        f"Name: {enquiry.name}\n"
+        f"Email: {enquiry.email}\n"
+        f"Phone: {enquiry.phone or 'Not provided'}\n"
+        f"Starting point: {enquiry.get_starting_point_display()}\n"
+        f"Question: {enquiry.question or 'No additional question'}\n\n"
         "Open the Prospect enquiries queue in the TradeThesis Admin Desk to follow up."
     )
     staff_ok = bool(staff_recipients)
     for recipient in staff_recipients:
         try:
-            staff_ok = NotificationService.send_simple_email(
-                recipient, staff_subject, staff_body
-            ) and staff_ok
+            sent = NotificationService.send_simple_email(
+                recipient,
+                staff_subject,
+                staff_body,
+            )
+            staff_ok = sent and staff_ok
         except Exception:
             logger.exception("Prospect staff notification failed enquiry=%s", enquiry.pk)
             staff_ok = False
 
     customer_subject = "We received your TradeThesis enquiry"
     customer_body = (
-        f"Hello {enquiry.name},\\n\\n"
+        f"Hello {enquiry.name},\n\n"
         f"Thank you for asking about {enquiry.get_programme_display()}. "
         "Your enquiry has been recorded. The TradeThesis team will review it and "
-        "contact you using the details you provided.\\n\\n"
-        f"Reference: {enquiry.short_reference}\\n\\n"
-        "This message confirms receipt only; it is not an enrolment or payment confirmation.\\n\\n"
+        "contact you using the details you provided.\n\n"
+        f"Reference: {enquiry.short_reference}\n\n"
+        "This message confirms receipt only; it is not an enrolment or payment confirmation.\n\n"
         "TradeThesis · Conviction before execution"
     )
     try:
         customer_ok = NotificationService.send_simple_email(
-            enquiry.email, customer_subject, customer_body
+            enquiry.email,
+            customer_subject,
+            customer_body,
         )
     except Exception:
         logger.exception("Prospect customer confirmation failed enquiry=%s", enquiry.pk)
@@ -103,6 +109,7 @@ def _send_enquiry_notifications(enquiry):
 def enquiry(request, programme):
     if programme not in PROGRAMMES:
         from django.http import Http404
+
         raise Http404("This enquiry route is not available.")
 
     programme_context = PROGRAMMES[programme]
@@ -110,10 +117,11 @@ def enquiry(request, programme):
     if request.method == "POST" and form.is_valid():
         # Honeypot submissions receive the same public confirmation but are not stored.
         if form.cleaned_data.get("website"):
-            return render(request, "prospects/enquiry_received.html", {
-                "programme": programme_context,
-                "reference": "",
-            })
+            return render(
+                request,
+                "prospects/enquiry_received.html",
+                {"programme": programme_context, "reference": ""},
+            )
 
         fingerprint = _visitor_fingerprint(request)
         if fingerprint:
@@ -124,12 +132,15 @@ def enquiry(request, programme):
             if recent_count >= 5:
                 form.add_error(
                     None,
-                    "We have received several requests from this connection recently. Please try again later or contact us through the details on the website.",
+                    "We have received several requests from this connection recently. "
+                    "Please try again later or contact us through the details on the website.",
                 )
-                return render(request, "prospects/enquiry_form.html", {
-                    "form": form,
-                    "programme": programme_context,
-                }, status=429)
+                return render(
+                    request,
+                    "prospects/enquiry_form.html",
+                    {"form": form, "programme": programme_context},
+                    status=429,
+                )
 
         with transaction.atomic():
             enquiry_record = ProspectEnquiry.objects.create(
@@ -148,14 +159,16 @@ def enquiry(request, programme):
         _send_enquiry_notifications(enquiry_record)
         return redirect("prospects:received")
 
-    return render(request, "prospects/enquiry_form.html", {
-        "form": form,
-        "programme": programme_context,
-    })
+    return render(
+        request,
+        "prospects/enquiry_form.html",
+        {"form": form, "programme": programme_context},
+    )
 
 
 def received(request):
-    return render(request, "prospects/enquiry_received.html", {
-        "programme": None,
-        "reference": "",
-    })
+    return render(
+        request,
+        "prospects/enquiry_received.html",
+        {"programme": None, "reference": ""},
+    )
