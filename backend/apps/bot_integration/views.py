@@ -202,7 +202,93 @@ def unlink_discord(request):
     """Remove managed Discord roles before disconnecting the linked account."""
     dc = DiscordAccount.objects.filter(user=request.user).first()
     if dc is None:
-        messages.info(request, "No Discord account is currently linked.")
+        # Older OAuth flows stored only User.discord_id and never created the
+        # managed DiscordAccount row. Reconcile any roles TradeThesis owns
+        # before clearing that legacy identity; never treat an unreadable
+        # provider state as a successful disconnect.
+        legacy_id = str(getattr(request.user, "discord_id", "") or "").strip()
+        if not legacy_id:
+            messages.info(request, "No Discord account is currently linked.")
+            return _discord_connections_redirect()
+
+        actual_roles = DiscordBotService.get_member_roles(legacy_id)
+        if actual_roles is None:
+            messages.error(
+                request,
+                "We couldn't verify your Discord roles. Your legacy identity "
+                "has been kept so access cleanup can be retried.",
+            )
+            return _discord_connections_redirect()
+
+        managed_roles = set(UserChannelAssignment.objects.filter(
+            user=request.user, platform="discord", is_active=True,
+        ).values_list("external_id", flat=True))
+        managed_roles.update(PlanChannelMapping.objects.filter(
+            platform="discord",
+        ).values_list("external_id", flat=True))
+        roles_to_remove = managed_roles & set(actual_roles)
+        failed_roles = []
+        for role_id in sorted(roles_to_remove):
+            if DiscordBotService.remove_role(legacy_id, role_id):
+                UserChannelAssignment.objects.filter(
+                    user=request.user, platform="discord", external_id=role_id,
+                    is_active=True,
+                ).update(is_active=False, revoked_at=timezone.now())
+                BotAccessAudit.objects.create(
+                    user=request.user, action="revoke", platform="discord",
+                    target=role_id, status="success",
+                )
+            else:
+                failed_roles.append(role_id)
+                BotAccessAudit.objects.create(
+                    user=request.user, action="revoke", platform="discord",
+                    target=role_id, status="failed",
+                    error_message="Role removal failed during legacy Discord disconnect.",
+                )
+
+        remaining_roles = DiscordBotService.get_member_roles(legacy_id)
+        unresolved = (
+            failed_roles
+            or remaining_roles is None
+            or bool(managed_roles & set(remaining_roles or []))
+        )
+        if unresolved:
+            messages.error(
+                request,
+                "Some managed Discord roles could not be verified as removed. "
+                "Your legacy identity remains in place; retry disconnecting "
+                "or contact support.",
+            )
+            return _discord_connections_redirect()
+
+        from apps.audit.models import AuditLog
+        legacy_username = request.user.discord_username
+        request.user.discord_id = None
+        request.user.discord_username = ""
+        request.user.discord_avatar = ""
+        request.user.discord_verified = False
+        request.user.save(update_fields=[
+            "discord_id", "discord_username", "discord_avatar", "discord_verified",
+        ])
+        AuditLog.log(
+            action="discord_disconnected",
+            user=request.user,
+            object_type="user",
+            object_id=request.user.id,
+            metadata={
+                "discord_id": legacy_id,
+                "discord_username": legacy_username or "",
+                "legacy_identity_only": True,
+            },
+        )
+        BotAccessAudit.objects.create(
+            user=request.user, action="unlink", platform="discord",
+            target=legacy_id, status="success",
+        )
+        messages.success(
+            request,
+            "Legacy Discord connection cleared and TradeThesis-managed roles removed.",
+        )
         return _discord_connections_redirect()
 
     # Pause grants before any outbound role-removal request. This closes the
