@@ -353,6 +353,9 @@ AUTHENTICATION_BACKENDS = [
 
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+# Use a stable TradeThesis brand prefix instead of django-allauth falling back
+# to the Django Sites database name (which may still be the example.com seed).
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[TradeThesis] "
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
