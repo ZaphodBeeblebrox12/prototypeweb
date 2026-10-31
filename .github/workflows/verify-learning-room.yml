@@ -645,14 +645,25 @@ jobs:
               "Member-area sample data must be clearly identified as a preview");
             console.log("MEMBER_UX_PASS: preview-only auth copy, light theme and mobile fit.");
 
-            // The Trading Path is free. Local previews resolve Academy links to the
-            // staging service, but must point to the course detail / free-enrolment route,
-            // never the legacy paid checkout endpoint.
+            // The Trading Path is free. Ensure its primary CTA points to the Academy
+            // course detail route rather than the legacy paid checkout endpoint.
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
             await cataloguePage.goto(server + "/trading-path.html", { waitUntil: "networkidle" });
-            const tradingPathEnrolment = cataloguePage.locator('[data-academy-path="/learn/course/trading-path/"]').first();
+            const tradingPathEnrolment = cataloguePage.locator('a.product-enrol-button[data-academy-path="/learn/course/trading-path/"]');
             assert.equal(await tradingPathEnrolment.count(), 1,
-              "Trading Path must expose a free-enrolment link");
+              "Trading Path must expose one primary free-enrolment link");
+            assert.ok(await tradingPathEnrolment.isVisible(),
+              "Trading Path free-enrolment CTA must be visible");
+            console.log("TRADING_PATH_ENROLMENT_DIAGNOSTIC", JSON.stringify(
+              await tradingPathEnrolment.evaluate(el => ({
+                textContent: el.textContent,
+                innerText: el.innerText,
+                outerHTML: el.outerHTML,
+                display: getComputedStyle(el).display,
+                visibility: getComputedStyle(el).visibility,
+                opacity: getComputedStyle(el).opacity
+              }))
+            ));
             assert.ok((await tradingPathEnrolment.innerText()).toLowerCase().includes("enrol for free"),
               "Trading Path CTA must say enrol for free");
             assert.equal(
@@ -665,20 +676,44 @@ jobs:
             assert.ok((await cataloguePage.locator(".product-price").innerText()).includes("Free"),
               "Trading Path page must show a free price");
 
+            // Prospect enquiry forms are live server-backed forms now. Inspect their
+            // contract, but never submit fixtures into the shared staging database.
             await cataloguePage.goto(server + "/construct.html", { waitUntil: "networkidle" });
-            await cataloguePage.locator("[data-preview-enquiry]").first().click();
-            assert.ok((await cataloguePage.locator("#previewModal").getAttribute("class")).includes("open"),
-              "CONSTRUCT enquiry CTA should open its preview disclosure");
-            assert.ok((await cataloguePage.locator("#modalCopy").innerText()).includes("not connected to an enquiry form or checkout yet"),
-              "CONSTRUCT enquiry CTA must be honest about its preview-only status");
-            await cataloguePage.locator("#previewModal .modal-close").click();
+            const constructEnquiry = cataloguePage.locator("#constructEnquiryForm");
+            assert.equal(await constructEnquiry.count(), 1,
+              "CONSTRUCT must expose one prospect enquiry form");
+            assert.ok(await constructEnquiry.isVisible(),
+              "CONSTRUCT enquiry form must be visible");
+            assert.equal(await constructEnquiry.locator('input[name="programme"]').inputValue(), "construct",
+              "CONSTRUCT enquiry must use its own programme identifier");
+            assert.equal(await constructEnquiry.locator('input[name="consent"]').getAttribute("required"), "",
+              "CONSTRUCT enquiry must require response consent");
+            assert.equal(await constructEnquiry.getAttribute("action"),
+              "https://tradethesis-academy-staging.onrender.com/public/enquiries/",
+              "CONSTRUCT form must post to the Academy enquiry endpoint");
+            assert.equal(await cataloguePage.locator("[data-preview-enquiry], #previewModal").count(), 0,
+              "CONSTRUCT must not retain the obsolete preview-only enquiry modal");
+            await cataloguePage.goto(server + "/construct.html?enquiry=received#enquiry-form", { waitUntil: "networkidle" });
+            assert.ok((await cataloguePage.locator("#constructEnquiryResult").innerText()).includes("Your enquiry has been received"),
+              "CONSTRUCT must display the server-confirmed receipt state");
 
             await cataloguePage.goto(server + "/live-class.html", { waitUntil: "networkidle" });
-            await cataloguePage.locator("#liveName").fill("Preview Learner");
-            await cataloguePage.locator("#liveEmail").fill("learner@example.test");
-            await cataloguePage.locator('#liveEnquiryForm button[type="submit"]').click();
-            assert.ok((await cataloguePage.locator("#liveEnquiryResult").innerText()).includes("Nothing has been sent or saved."),
-              "Live-class enquiry preview must not imply delivery or storage");
+            const liveEnquiry = cataloguePage.locator("#enquiry-form");
+            assert.equal(await liveEnquiry.count(), 1,
+              "Live Classroom must expose one prospect enquiry form");
+            assert.ok(await liveEnquiry.isVisible(),
+              "Live Classroom enquiry form must be visible");
+            assert.equal(await liveEnquiry.locator('input[name="programme"]').inputValue(), "live_classroom",
+              "Live Classroom enquiry must use its own programme identifier");
+            assert.equal(await liveEnquiry.locator('input[name="consent"]').getAttribute("required"), "",
+              "Live Classroom enquiry must require response consent");
+            assert.equal(await liveEnquiry.getAttribute("action"),
+              "https://tradethesis-academy-staging.onrender.com/public/enquiries/",
+              "Live Classroom form must post to the Academy enquiry endpoint");
+            await cataloguePage.goto(server + "/live-class.html?enquiry=received#enquiry-form", { waitUntil: "networkidle" });
+            assert.ok((await cataloguePage.locator("#liveEnquiryResult").innerText()).includes("Your enquiry has been received"),
+              "Live Classroom must display the server-confirmed receipt state");
+
             await cataloguePage.setViewportSize({ width: 390, height: 844 });
             const publicOverflow = await cataloguePage.evaluate(() => ({
               viewport: document.documentElement.clientWidth,
