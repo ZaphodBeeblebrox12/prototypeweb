@@ -40,6 +40,13 @@ TRADETHESIS_MEMBER_LOGIN_ORIGINS = env.list(
     default=[TRADETHESIS_PUBLIC_SITE_URL, GITHUB_PAGES_PUBLIC_ORIGIN],
 )
 
+# Exact public origins permitted to submit anonymous prospect enquiries.
+# Keep this narrower than CORS/CSRF trust and do not use wildcard hosts.
+TRADETHESIS_PUBLIC_SITE_ORIGINS = env.list(
+    "TRADETHESIS_PUBLIC_SITE_ORIGINS",
+    default=[TRADETHESIS_PUBLIC_SITE_URL],
+)
+
 # Application definition
 DJANGO_APPS = [
     "apps.admin_config.DashboardAdminConfig",
