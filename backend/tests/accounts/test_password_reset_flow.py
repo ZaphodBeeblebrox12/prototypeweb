@@ -75,7 +75,10 @@ class PasswordResetViewTests(TestCase):
             reverse("account_reset_password_done"),
         )
         self.assertEqual(len(mail.outbox), 1)
-        self.assertIn("Reset your TradeThesis password", mail.outbox[0].subject)
+        self.assertEqual(
+            mail.outbox[0].subject,
+            "[TradeThesis] Reset your TradeThesis password",
+        )
         self.assertIn("/accounts/password/reset/key/", mail.outbox[0].body)
         self.assertIn("reset-learner@example.com", mail.outbox[0].to)
 
