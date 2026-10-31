@@ -48,6 +48,7 @@ class AccountEmailValidationScopeTests(TestCase):
 )
 class PasswordResetViewTests(TestCase):
     def setUp(self):
+        mail.outbox = []
         self.user = User.objects.create_user(
             username="reset-learner",
             email="reset-learner@example.com",
