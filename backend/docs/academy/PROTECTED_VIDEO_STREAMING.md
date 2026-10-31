@@ -67,17 +67,22 @@ still have infrastructure costs.
 1. Run migrations: `python manage.py migrate`.
 2. In Django Admin, open **Protected lesson videos** and add one row for the
    lesson. Upload an MP4, MOV, MKV, or WebM source file.
-3. Run the processing command in the Academy service/container. It downloads
-   the private source to a temporary worker directory for FFmpeg, then writes
-   encrypted HLS objects back to the selected private storage provider:
+3. Return to the **Protected lesson videos** list, select one uploaded row,
+   choose **Queue / rebuild one protected video stream** from the Actions menu,
+   and click **Go**. The Academy job queue runs the existing processing command
+   in the background. Refresh the list to follow the status; a failed attempt
+   records its error on the video row and is retried by the job queue according
+   to its retry policy. The staging queue is single-flight: only one protected
+   video can be queued or processed at a time. Select the next row after the
+   current one finishes.
 
-   ```bash
-   python manage.py process_lesson_videos --lesson <LESSON_UUID>
-   ```
-
-   To process all pending or failed videos, use
-   `python manage.py process_lesson_videos`. Use `--force` to rebuild an
-   existing rendition.
+   On the current Render Free staging service, the queue is drained by the
+   in-process scheduler. Long-running video jobs refresh their job lease so the
+   five-minute stale-job reaper does not start a duplicate encode. This is
+   suitable for short, low-volume staging tests only: FFmpeg shares the web
+   service's CPU and memory. Use a dedicated background worker or media
+   processing service for production workloads and longer videos; do not
+   increase the Render plan without reviewing the cost first.
 
 4. Confirm that the row is marked **Protected stream ready**. The learner lesson
    page will then use the protected HLS player automatically.

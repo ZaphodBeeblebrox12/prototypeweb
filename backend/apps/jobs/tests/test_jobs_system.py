@@ -9,8 +9,14 @@ from apps.accounts.models import User
 from apps.jobs.enqueue import enqueue_reconcile, enqueue_generic
 from apps.jobs.models import Job, ProvisioningOperation, ReconcileState
 from apps.jobs.operations import execute_operation
-from apps.jobs.worker import (claim_next, reaper_reset, process_reconcile_job,
-                              MAX_CONVERGENCE_ITERATIONS)
+from apps.jobs.worker import (
+    HANDLERS,
+    MAX_CONVERGENCE_ITERATIONS,
+    claim_next,
+    process_job,
+    process_reconcile_job,
+    reaper_reset,
+)
 
 
 def make_user(name):
@@ -109,6 +115,50 @@ class WorkerRecoveryTests(TestCase):
         self.assertIsNone(j.locked_at)
 
 
+
+class LongRunningVideoJobHeartbeatTests(TransactionTestCase):
+    def test_active_video_job_refreshes_its_lease_until_processing_finishes(self):
+        from django.utils import timezone
+
+        stale_time = timezone.now() - timezone.timedelta(seconds=900)
+        job = Job.objects.create(
+            kind="process_protected_lesson_video",
+            status=Job.STATUS_RUNNING,
+            locked_at=stale_time,
+        )
+        started = threading.Event()
+        release = threading.Event()
+
+        def slow_handler(payload, claimed_job):
+            started.set()
+            release.wait(timeout=2)
+
+        runner = threading.Thread(
+            target=process_job,
+            args=(job,),
+            daemon=True,
+        )
+        with mock.patch.dict(
+            HANDLERS,
+            {"process_protected_lesson_video": slow_handler},
+        ), mock.patch("apps.jobs.worker.JOB_HEARTBEAT_SECONDS", 0.01):
+            runner.start()
+            try:
+                self.assertTrue(started.wait(timeout=2))
+                time.sleep(0.05)
+                reaper_reset()
+                job.refresh_from_db()
+                self.assertEqual(job.status, Job.STATUS_RUNNING)
+                self.assertGreater(job.locked_at, stale_time)
+            finally:
+                release.set()
+                runner.join(timeout=2)
+
+        self.assertFalse(runner.is_alive())
+        job.refresh_from_db()
+        self.assertEqual(job.status, Job.STATUS_SUCCEEDED)
+
+
 class ProvisioningOperationMachineTests(TestCase):
     """Crash-window matrix: each recovery state takes the correct path."""
 
@@ -181,3 +231,17 @@ class EnqueueGenericTests(TestCase):
         j1 = enqueue_generic("update_maxmind", {}, idempotency_key="sched:mm")
         j2 = enqueue_generic("update_maxmind", {}, idempotency_key="sched:mm")
         self.assertEqual(j1.pk, j2.pk)
+
+    def test_global_video_worker_key_serializes_distinct_video_requests(self):
+        first = enqueue_generic(
+            "process_protected_lesson_video",
+            {"video_id": "video-one", "force": True},
+            idempotency_key="academy:protected-video:single-worker",
+        )
+        second = enqueue_generic(
+            "process_protected_lesson_video",
+            {"video_id": "video-two", "force": True},
+            idempotency_key="academy:protected-video:single-worker",
+        )
+        self.assertEqual(first.pk, second.pk)
+        self.assertEqual(second.payload["video_id"], "video-one")

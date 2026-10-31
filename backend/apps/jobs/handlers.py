@@ -72,7 +72,50 @@ def _subscription_expiry(payload, job):
     return {"expired": expire_due_subscriptions()}
 
 
+def _process_protected_lesson_video(payload, job):
+    """Package one private Academy source video as authenticated encrypted HLS."""
+    from uuid import UUID
+
+    from django.core.management import call_command
+
+    from apps.academy.models import ProtectedLessonVideo
+
+    try:
+        video_id = UUID(str((payload or {}).get("video_id", "")))
+    except (AttributeError, TypeError, ValueError) as exc:
+        raise ValueError("Protected-video jobs require a valid video_id.") from exc
+
+    video = ProtectedLessonVideo.objects.select_related("lesson").filter(pk=video_id).first()
+    if video is None:
+        raise ValueError(f"Protected lesson video {video_id} no longer exists.")
+    if not video.source_file:
+        raise ValueError(f"Protected lesson video {video_id} has no source file.")
+
+    try:
+        call_command(
+            "process_lesson_videos",
+            video=str(video.pk),
+            force=bool((payload or {}).get("force", False)),
+        )
+    except Exception as exc:
+        # Failures before _process_one starts (for example, missing FFmpeg or
+        # an unavailable Drive provider) must not leave the Admin row Pending.
+        current = ProtectedLessonVideo.objects.filter(pk=video.pk).first()
+        if current is not None:
+            if current.status == ProtectedLessonVideo.Status.READY and current.stream_directory:
+                if not current.processing_error:
+                    current.processing_error = (
+                        f"Rebuild failed; previous stream retained: {exc}"
+                    )[-1200:]
+            else:
+                current.status = ProtectedLessonVideo.Status.FAILED
+                current.processing_error = current.processing_error or str(exc)[-1200:]
+            current.save(update_fields=("status", "processing_error", "updated_at"))
+        raise
+
+
 def register_builtin_handlers():
+    HANDLERS.setdefault("process_protected_lesson_video", _process_protected_lesson_video)
     HANDLERS.setdefault("sweep", _sweep)
     HANDLERS.setdefault("subscription_expiry", _subscription_expiry)
     HANDLERS.setdefault("expiry_reminders", _expiry_reminders)

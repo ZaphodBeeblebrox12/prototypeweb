@@ -8,9 +8,11 @@ API.  Lock order everywhere: ReconcileState -> Job.
 """
 
 import logging
+import threading
 import time
+
 from django.core.management.base import BaseCommand
-from django.db import OperationalError, transaction
+from django.db import OperationalError, connections, transaction
 from django.utils import timezone
 
 from .enqueue import MAX_CONVERGENCE_ITERATIONS, _retry_locked
@@ -20,6 +22,8 @@ logger = logging.getLogger(__name__)
 
 REAPER_STALE_SECONDS = 300
 BACKOFF_BASE_SECONDS = 30
+JOB_HEARTBEAT_SECONDS = 45
+LONG_RUNNING_JOB_KINDS = {"process_protected_lesson_video"}
 
 
 def reaper_reset():
@@ -132,24 +136,65 @@ def process_reconcile_job(job, run_body, iteration=0):
 HANDLERS = {}  # kind -> callable(payload_dict, job) ; registered at startup
 
 
+
+def _heartbeat_long_running_job(job_id, stop_event):
+    """Refresh a long-running job lease while its handler is actively working.
+
+    The video encoder and Drive uploads can legitimately exceed the generic
+    five-minute stale-job window. A separate thread keeps the lease fresh;
+    if the process dies, the heartbeat stops and the normal reaper can retry.
+    """
+    while not stop_event.wait(JOB_HEARTBEAT_SECONDS):
+        try:
+            refreshed = Job.objects.filter(
+                pk=job_id, status=Job.STATUS_RUNNING
+            ).update(locked_at=timezone.now())
+            if not refreshed:
+                return
+        except Exception:
+            logger.exception("[jobs] heartbeat failed for long-running job %s", job_id)
+        finally:
+            connections.close_all()
+
+
 def process_job(job):
-    if job.kind == "reconcile":
-        from apps.bot_integration.reconcile_jobs import run_user_reconcile
-        return process_reconcile_job(job, run_user_reconcile)
-    handler = HANDLERS.get(job.kind)
-    if handler is None:
-        with transaction.atomic():
-            _fail(Job.objects.select_for_update().get(pk=job.pk),
-                  ValueError(f"no handler for kind {job.kind!r}"))
-        return
+    heartbeat_stop = None
+    heartbeat_thread = None
+    if job.kind in LONG_RUNNING_JOB_KINDS:
+        heartbeat_stop = threading.Event()
+        heartbeat_thread = threading.Thread(
+            target=_heartbeat_long_running_job,
+            args=(job.pk, heartbeat_stop),
+            name=f"job-heartbeat-{job.pk}",
+            daemon=True,
+        )
+        heartbeat_thread.start()
+
     try:
-        handler(job.payload, job)
-    except Exception as exc:
+        if job.kind == "reconcile":
+            from apps.bot_integration.reconcile_jobs import run_user_reconcile
+            return process_reconcile_job(job, run_user_reconcile)
+        handler = HANDLERS.get(job.kind)
+        if handler is None:
+            with transaction.atomic():
+                _fail(
+                    Job.objects.select_for_update().get(pk=job.pk),
+                    ValueError(f"no handler for kind {job.kind!r}"),
+                )
+            return
+        try:
+            handler(job.payload, job)
+        except Exception as exc:
+            with transaction.atomic():
+                _fail(Job.objects.select_for_update().get(pk=job.pk), exc)
+            return
         with transaction.atomic():
-            _fail(Job.objects.select_for_update().get(pk=job.pk), exc)
-        return
-    with transaction.atomic():
-        _complete(Job.objects.select_for_update().get(pk=job.pk))
+            _complete(Job.objects.select_for_update().get(pk=job.pk))
+    finally:
+        if heartbeat_stop is not None:
+            heartbeat_stop.set()
+            if heartbeat_thread is not None:
+                heartbeat_thread.join(timeout=5)
 
 
 class Command(BaseCommand):

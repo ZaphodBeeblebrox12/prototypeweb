@@ -826,6 +826,7 @@ class CourseMediaAssetAdmin(admin.ModelAdmin):
 @admin.register(ProtectedLessonVideo)
 class ProtectedLessonVideoAdmin(admin.ModelAdmin):
     form = ProtectedLessonVideoAdminForm
+    actions = ("queue_processing",)
     list_display = ("lesson", "course_title", "status", "processed_at", "updated_at")
     list_filter = ("status", "lesson__module__course")
     search_fields = ("lesson__title", "lesson__module__course__title")
@@ -853,6 +854,49 @@ class ProtectedLessonVideoAdmin(admin.ModelAdmin):
     @admin.display(description="Course")
     def course_title(self, obj):
         return obj.lesson.module.course.title
+
+    @admin.action(description="Queue / rebuild one protected video stream")
+    def queue_processing(self, request, queryset):
+        from apps.jobs.enqueue import enqueue_generic
+
+        videos = list(queryset.select_related("lesson").order_by("pk"))
+        candidates = [video for video in videos if video.source_file]
+        skipped = len(videos) - len(candidates)
+        if not candidates:
+            messages.warning(request, "None of the selected rows has a source video.")
+            return
+
+        video = candidates[0]
+        job = enqueue_generic(
+            "process_protected_lesson_video",
+            {"video_id": str(video.pk), "force": True},
+            idempotency_key="academy:protected-video:single-worker",
+        )
+        if str(job.payload.get("video_id")) != str(video.pk):
+            messages.warning(
+                request,
+                "Another protected video is already queued or processing. "
+                "Wait for it to finish, then queue this video.",
+            )
+        else:
+            messages.success(
+                request,
+                (
+                    f"Queued or already processing: {video.lesson.title}. "
+                    "Only one protected video is processed at a time on staging."
+                ),
+            )
+
+        if len(candidates) > 1:
+            messages.info(
+                request,
+                "Only the first selected video was queued. Queue the next one after this finishes.",
+            )
+        if skipped:
+            messages.warning(
+                request,
+                f"Skipped {skipped} selected row(s) without a source video.",
+            )
 
     def has_module_permission(self, request):
         return is_course_content_admin(request.user)
