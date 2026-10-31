@@ -363,11 +363,17 @@ def telegram_webhook(request):
                 # paid access revocation is still running.
                 token.delete()
                 status = "disconnect_pending"
-            elif TelegramAccount.objects.filter(chat_id=chat_id).exclude(
-                user_id=user.id
-            ).exists():
+            elif (
+                TelegramAccount.objects.filter(chat_id=chat_id)
+                .exclude(user_id=user.id).exists()
+                or __import__("django.contrib.auth", fromlist=["get_user_model"])
+                .get_user_model().objects.filter(
+                    telegram_id=telegram_user_id
+                ).exclude(pk=user.id).exists()
+            ):
                 # Preserve the token so support can resolve the existing link;
-                # don't replace or detach another TradeThesis user's account.
+                # don't replace or detach another TradeThesis user's account,
+                # including a legacy Telegram Login Widget identity.
                 status = "conflict"
             else:
                 TelegramAccount.objects.update_or_create(
@@ -596,9 +602,15 @@ def discord_oauth_callback(request):
         messages.error(request, "Discord did not return an account ID. Please try again.")
         return _discord_connections_redirect()
 
-    if DiscordAccount.objects.filter(discord_user_id=discord_id).exclude(
-        user=request.user
-    ).exists():
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    canonical_identity_exists = DiscordAccount.objects.filter(
+        discord_user_id=discord_id
+    ).exclude(user=request.user).exists()
+    legacy_identity_exists = User.objects.filter(
+        discord_id=discord_id
+    ).exclude(pk=request.user.pk).exists()
+    if canonical_identity_exists or legacy_identity_exists:
         messages.error(request, "This Discord account is already linked to another TradeThesis account.")
         return _discord_connections_redirect()
 
