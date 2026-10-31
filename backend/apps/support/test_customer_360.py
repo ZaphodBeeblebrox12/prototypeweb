@@ -160,6 +160,42 @@ class Customer360Tests(TestCase):
         )
         self.assertEqual(allowed.status_code, 200, allowed.content)
 
+    def test_staff_requester_can_open_reviewer_visible_support_profile_without_commercial_records(self):
+        staff_requester = User.objects.create_user(
+            username="customer-360-staff-requester",
+            email="customer-360-staff-requester@example.test",
+            is_staff=True,
+        )
+        staff_ticket = SupportTicket.objects.create(
+            user=staff_requester,
+            category=SupportTicket.Category.TECHNICAL,
+            message="My staff test account cannot open a staging support page.",
+        )
+        self.client.force_login(
+            User.objects.create_user(
+                username="customer-360-support-reviewer",
+                email="customer-360-support-reviewer@example.test",
+                is_staff=True,
+            )
+        )
+
+        response = self.client.get(
+            reverse("staff_admin_desk_customer_360", args=[staff_requester.pk])
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertTrue(response.context["is_internal_account"])
+        self.assertContains(response, "Internal staff requester")
+        self.assertContains(response, staff_ticket.short_id)
+        self.assertFalse(response.context["can_view_subscriptions"])
+        self.assertFalse(response.context["can_view_payments"])
+        self.assertFalse(response.context["can_view_invoices"])
+        self.assertFalse(response.context["can_view_academy_records"])
+        self.assertFalse(response.context["can_view_security_events"])
+        self.assertNotContains(response, "Payments, refunds &amp; disputes")
+        self.assertNotContains(response, "Subscriptions &amp; access history")
+        self.assertNotContains(response, "Course access")
+
     def test_support_ticket_detail_links_to_customer_360(self):
         response = self.client.get(
             reverse("staff_admin_desk_support_ticket", args=[self.ticket.pk])
