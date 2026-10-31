@@ -8,7 +8,9 @@ class ProspectEnquiryForm(forms.Form):
     email = forms.EmailField(label="Email address")
     phone = forms.CharField(max_length=40, required=False, label="Phone or WhatsApp (optional)")
     starting_point = forms.ChoiceField(
-        choices=[("", "Choose one (optional)"), *STARTING_POINT_CHOICES[1:]], required=False, label="Where are you starting from?"
+        choices=[("", "Choose one (optional)"), *STARTING_POINT_CHOICES[1:]],
+        required=False,
+        label="Where are you starting from?",
     )
     question = forms.CharField(
         max_length=2000,
