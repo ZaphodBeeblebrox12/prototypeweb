@@ -28,6 +28,8 @@ from apps.admin_desk_views import (
     admin_desk_support_ticket_action, admin_desk_customer_360,
     admin_desk_operations_timeline,
     admin_desk_operations_job, admin_desk_operations_provisioning,
+    admin_desk_prospect_enquiries, admin_desk_prospect_enquiry,
+    admin_desk_prospect_enquiry_update,
 )
 from apps.core.views import health_check
 
@@ -48,6 +50,9 @@ urlpatterns = [
     path("staff/admin-desk/courses/review/<uuid:import_id>/return/", admin_desk_course_reject, name="staff_admin_desk_course_reject"),
     path("staff/admin-desk/courses/import-cleanup/", admin_desk_course_import_cleanup, name="staff_admin_desk_course_import_cleanup"),
     path("staff/admin-desk/courses/imports/<uuid:import_id>/delete/", admin_desk_course_import_delete, name="staff_admin_desk_course_import_delete"),
+    path("staff/admin-desk/prospects/", admin_desk_prospect_enquiries, name="staff_admin_desk_prospect_enquiries"),
+    path("staff/admin-desk/prospects/<uuid:enquiry_id>/", admin_desk_prospect_enquiry, name="staff_admin_desk_prospect_enquiry"),
+    path("staff/admin-desk/prospects/<uuid:enquiry_id>/update/", admin_desk_prospect_enquiry_update, name="staff_admin_desk_prospect_enquiry_update"),
     path("staff/admin-desk/support/tickets/", admin_desk_support_tickets, name="staff_admin_desk_support_tickets"),
     path("staff/admin-desk/support/tickets/<uuid:ticket_id>/", admin_desk_support_ticket, name="staff_admin_desk_support_ticket"),
     path("staff/admin-desk/support/tickets/<uuid:ticket_id>/action/", admin_desk_support_ticket_action, name="staff_admin_desk_support_ticket_action"),
@@ -99,6 +104,7 @@ urlpatterns = [
     path("api/analytics/", include("apps.analytics.urls")),
     path("api/", include("apps.api.urls")),
     path("api/notifications/", include("apps.notifications.urls")),
+    path("enquire/", include("apps.prospects.urls")),
     path("", include("apps.core.urls")),
     path("dashboard/", accounts_views.DashboardView.as_view(), name="dashboard"),
     path("", include("apps.accounts.profile_urls")),
