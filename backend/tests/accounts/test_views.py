@@ -178,6 +178,9 @@ class DashboardAccessTest(TestCase):
             username='testuser',
             email='test@example.com'
         )
+        EmailAddress.objects.create(
+            user=self.user, email=self.user.email, primary=True, verified=True
+        )
 
     def test_dashboard_requires_login(self):
         """Test that dashboard requires authentication."""
