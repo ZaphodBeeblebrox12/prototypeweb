@@ -74,7 +74,7 @@
   </header>
 
   <section class="stats" aria-label="Operational overview">
-    <div class="stat"><strong>{{ stats.open_tickets }}</strong><span>Visible tickets opened in this window</span></div>
+    <div class="stat"><strong>{{ stats.open_tickets }}</strong><span>Open visible support tickets</span></div>
     <div class="stat"><strong>{{ stats.potential_patterns }}</strong><span>Potential multi-customer patterns</span></div>
     <div class="stat"><strong>{% if can_view_jobs %}{{ stats.failed_jobs }}{% else %}—{% endif %}</strong><span>Failed background jobs</span></div>
     <div class="stat"><strong>{% if can_view_jobs %}{{ stats.stalled_jobs }}{% else %}—{% endif %}</strong><span>Stalled / retrying jobs</span></div>
@@ -88,7 +88,7 @@
     <section>
       <section class="panel">
         <div class="panel-head">
-          <div><h2>Potential multi-customer patterns</h2><p class="note">Similar wording, same ticket category, at least three distinct customers. Review the linked tickets to confirm whether they share a cause.</p></div>
+          <div><h2>Potential multi-customer patterns</h2><p class="note">Similar wording, same ticket category, at least three distinct customers (from up to 250 recent visible tickets). Review the linked tickets to confirm whether they share a cause.</p></div>
           <span class="pill warning">{{ issue_clusters|length }} signal{{ issue_clusters|length|pluralize }}</span>
         </div>
         {% for signal in issue_clusters %}
