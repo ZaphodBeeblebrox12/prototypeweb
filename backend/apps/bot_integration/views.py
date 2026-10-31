@@ -30,6 +30,17 @@ def start_telegram_connect(request):
     # A disconnect is not complete until managed channel access has been
     # revoked. Do not allow a replacement identity to race that cleanup.
     from apps.jobs.models import ProvisioningOperation
+    active_account_linked = TelegramAccount.objects.filter(
+        user=request.user, is_active=True
+    ).exists()
+    if active_account_linked:
+        messages.info(
+            request,
+            "Telegram is already connected. Disconnect it first and wait for "
+            "managed community access to be removed before linking another account.",
+        )
+        return redirect(f"{reverse('dashboard')}#connections")
+
     pending_account_disconnect = TelegramAccount.objects.filter(
         user=request.user, is_active=False
     ).exists()
@@ -358,14 +369,28 @@ def telegram_webhook(request):
             if not token.is_valid():
                 token.delete()
                 status = "expired"
-            elif TelegramAccount.objects.select_for_update().filter(
-                user_id=user.id, is_active=False
-            ).exists():
-                # A delayed deep link must never reactivate an identity while
-                # paid access revocation is still running.
-                token.delete()
-                status = "disconnect_pending"
-            elif (
+            else:
+                existing_account = TelegramAccount.objects.select_for_update().filter(
+                    user_id=user.id
+                ).first()
+                if existing_account is not None and not existing_account.is_active:
+                    # A delayed deep link must never reactivate an identity while
+                    # paid access revocation is still running.
+                    token.delete()
+                    status = "disconnect_pending"
+                elif existing_account is not None:
+                    # A link is immutable while active. Rebinding to a new
+                    # Telegram identity must go through managed unlink first,
+                    # otherwise the old identity's paid memberships are orphaned.
+                    token.delete()
+                    if (
+                        existing_account.chat_id == chat_id
+                        and existing_account.telegram_user_id == telegram_user_id
+                    ):
+                        status = "already_linked"
+                    else:
+                        status = "account_conflict"
+                elif (
                 TelegramAccount.objects.filter(chat_id=chat_id)
                 .exclude(user_id=user.id).exists()
                 or User.objects.filter(
@@ -452,6 +477,28 @@ def telegram_webhook(request):
             "⏳ Your previous Telegram disconnect is still being completed. "
             "Please return to your TradeThesis Member Desk and retry connecting "
             "after the pending disconnect has finished.",
+        )
+        return JsonResponse({"ok": True})
+    if status == "already_linked":
+        TelegramBotService.send_message(
+            chat_id, "🎉 This Telegram account is already connected to TradeThesis."
+        )
+        return JsonResponse({"ok": True})
+    if status == "account_conflict":
+        if user is not None:
+            BotAccessAudit.objects.create(
+                user=user,
+                action="link",
+                platform="telegram",
+                target=str(chat_id),
+                status="failed",
+                error_message="A different Telegram account is already linked; disconnect before rebinding.",
+            )
+        TelegramBotService.send_message(
+            chat_id,
+            "⚠️ A different Telegram account is already connected to your TradeThesis "
+            "profile. Disconnect it from your Member Desk and wait for access cleanup "
+            "before linking another account.",
         )
         return JsonResponse({"ok": True})
 
