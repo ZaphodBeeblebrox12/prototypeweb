@@ -240,7 +240,7 @@ class ResendEmailBackend(BaseEmailBackend):
         # Every outbound message must have a useful text alternative and the
         # canonical TradeThesis shell. This also catches legacy/direct send_mail
         # calls that never supplied an HTML template.
-        html_body = payload.get("html", "")
+        html_body = str(payload.get("html") or "")
         text_body = payload.get("text")
         if text_body is None:
             text_body = strip_tags(html_body)
