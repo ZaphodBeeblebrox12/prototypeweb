@@ -461,10 +461,9 @@ def admin_desk_customer_360(request, user_id):
     visible_ticket = visible_tickets.order_by("-created_at").first()
     can_view_all_learners = _allowed(request.user, "accounts.view_user")
     if visible_ticket is not None:
+        # Internal staff/admin requesters are allowed only through a ticket
+        # visible to this reviewer; their profile is restricted below.
         account = visible_ticket.user
-        # Superuser accounts are never rendered as customer profiles.
-        if account.is_superuser:
-            raise PermissionDenied
     elif can_view_all_learners:
         account = get_object_or_404(
             User.objects.filter(is_staff=False, is_superuser=False),
