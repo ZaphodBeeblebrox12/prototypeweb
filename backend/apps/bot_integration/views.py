@@ -75,6 +75,8 @@ def unlink_telegram(request):
         # to revoke paid-channel membership. Keep it, but pause all new grants.
         # State change and durable job enqueue commit or roll back together.
         with transaction.atomic():
+            # Invalidate any link flow started before the disconnect request.
+            TelegramVerificationToken.objects.filter(user=request.user).delete()
             account = TelegramAccount.objects.select_for_update().get(
                 pk=account.pk, user=request.user
             )
