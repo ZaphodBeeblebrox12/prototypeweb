@@ -94,7 +94,59 @@
 <details><summary>Does this promise profits or a winning strategy?</summary><p>No. The goal is to build, backtest, explain and defend a written process. Historical testing and a clear plan do not guarantee future results.</p></details>
 <details><summary>How much does CONSTRUCT cost? Is the community extra?</summary><p>CONSTRUCT costs ₹17,000. Twelve months of The Wobbling Candle community are included in that fee, with no separate community charge. The next cohort date should be confirmed before enrolment opens.</p></details>
 </div></div></section>
-<section class="section" id="ask"><div class="wrap"><div class="cta-panel"><div><div class="eyebrow">Take the next step</div><h2>Bring your questions about CONSTRUCT.</h2><p>At ₹17,000, CONSTRUCT combines independent study with scheduled review and feedback, plus 12 months in The Wobbling Candle community at no extra charge. It is a learning programme—not a trading bot or a signal service.</p></div><button class="button" data-preview-enquiry>Ask about CONSTRUCT ↗</button></div></div></section>
+<section class="section" id="ask">
+  <div class="wrap">
+    <div class="cta-panel">
+      <div>
+        <div class="eyebrow">Take the next step</div>
+        <h2>Bring your questions about CONSTRUCT.</h2>
+        <p>At ₹17,000, CONSTRUCT combines independent study with scheduled review and feedback, plus 12 months in The Wobbling Candle community at no extra charge. It is a learning programme—not a trading bot or a signal service.</p>
+      </div>
+      <a class="button" href="#enquiry-form">Ask about CONSTRUCT ↗</a>
+    </div>
+    <div class="live-enquiry" id="enquiry-form" style="margin-top:28px">
+      <div>
+        <div class="eyebrow">Programme enquiry</div>
+        <h2>Let's talk about whether CONSTRUCT fits your next step.</h2>
+        <p>Tell us a little about where you are starting from. The TradeThesis team can follow up with programme details and answer your questions.</p>
+        <p class="fine-note">Your details are used to respond to this enquiry. This does not subscribe you to marketing messages.</p>
+      </div>
+      <form class="enquiry-form" id="constructEnquiryForm" method="post" action="#" data-academy-path="/public/enquiries/">
+        <input type="hidden" name="programme" value="construct">
+        <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden">
+          <label for="constructWebsite">Leave this field blank</label>
+          <input id="constructWebsite" name="company_website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+        <label for="constructName">Your name
+          <input id="constructName" name="name" type="text" autocomplete="name" maxlength="120" placeholder="What should we call you?" required>
+        </label>
+        <label for="constructEmail">Email address
+          <input id="constructEmail" name="email" type="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
+        </label>
+        <label for="constructStartingPoint">Where are you starting from?
+          <select id="constructStartingPoint" name="starting_point">
+            <option value="">Choose one (optional)</option>
+            <option value="learning_charts">Learning to read charts</option>
+            <option value="connected_plan">Know some patterns, need a connected plan</option>
+            <option value="risk_management">Working on risk and trade management</option>
+            <option value="review_process">Want a more consistent review process</option>
+            <option value="other">Something else</option>
+          </select>
+        </label>
+        <label for="constructQuestion">What would you most like to work on?
+          <textarea id="constructQuestion" name="message" maxlength="2000" placeholder="A question about the programme, trade construction, risk or review…"></textarea>
+        </label>
+        <label class="enquiry-consent" for="constructConsent">
+          <input id="constructConsent" name="consent" type="checkbox" value="yes" required>
+          <span>I agree that TradeThesis may use these details to respond to this enquiry. See the <a href="#" data-academy-path="/policies/privacy/">privacy policy</a>.</span>
+        </label>
+        <button class="button" type="submit">Send enquiry ↗</button>
+        <p class="fine-note">You will receive a confirmation on this page after submission. No payment is taken and no enrolment is created.</p>
+        <div aria-live="polite" class="enquiry-result" id="constructEnquiryResult" role="status" tabindex="-1"></div>
+      </form>
+    </div>
+  </div>
+</section>
 </main>
         <footer class="sitewide-footer" id="sitewide-footer">
     <div class="sitewide-footer__paper">
@@ -138,8 +190,21 @@
       </div>
     </div>
   </footer>
-<div class="modal" id="previewModal" aria-hidden="true"><div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><button class="modal-close" aria-label="Close dialog">×</button><div class="eyebrow">Programme enquiry</div><h2 id="modalTitle">Enquiry not connected yet</h2><p id="modalCopy">This is a static review page. Before launch, connect this action to an enquiry form or email workflow so the team can confirm fees, dates and available support.</p></div></div>
-<script>const modal=document.getElementById('previewModal');if(modal){const close=modal.querySelector('.modal-close');const copy=modal.querySelector('#modalCopy');const heading=modal.querySelector('#modalTitle');let previousFocus=null;document.querySelectorAll('[data-preview-enquiry]').forEach(el=>el.addEventListener('click',()=>{previousFocus=document.activeElement;heading.textContent='Programme enquiry is not connected yet';copy.textContent='CONSTRUCT is priced at ₹17,000, including 12 months of The Wobbling Candle community at no separate fee. This preview button is not connected to an enquiry form or checkout yet; connect it before launch.';modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';close.focus()}));function hide(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.style.overflow='';if(previousFocus)previousFocus.focus()}close.addEventListener('click',hide);modal.addEventListener('click',e=>{if(e.target===modal)hide()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))hide()})}
+<script>function showCourseEnquiryStatus(elementId) {
+  const state = new URLSearchParams(window.location.search).get("enquiry");
+  const result = document.getElementById(elementId);
+  if (!result || !state) return;
+  const copy = {
+    received: "Thank you. Your enquiry has been received. We will use the email address you provided to follow up. This is not a course enrolment or payment confirmation.",
+    invalid: "The form could not be submitted. Please check your name, email address and consent, then try again.",
+    recent: "We have already received an enquiry from this email address about this programme recently. Please check your inbox or try again later."
+  };
+  if (!copy[state]) return;
+  result.textContent = copy[state];
+  result.dataset.result = state;
+  result.classList.add("show");
+}
+showCourseEnquiryStatus("constructEnquiryResult");
 </script>
   <script src="assets/academy-config.js?v=20261026-catalogue-config-r2"></script>
   <script src="assets/sitewide-nav.js" defer></script>

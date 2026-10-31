@@ -14,7 +14,7 @@ from django.db.models import Q, Count, Max, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.http import require_GET, require_POST, require_http_methods
 
 
 logger = logging.getLogger(__name__)
@@ -1326,6 +1326,7 @@ def _nav(request):
             or _allowed(request.user, "payments.view_invoice")
         ),
         "business": business_allowed,
+        "enquiries": _allowed(request.user, "support.view_courseenquiry"),
     }
 
 
@@ -1840,4 +1841,168 @@ def admin_desk_invoice_detail(request, invoice_id):
         "invoice": invoice,
         "back_url": f"{reverse('staff_admin_desk_finance')}?tab=invoices",
         "desk_nav": _nav(request),
+    })
+
+
+@login_required
+def admin_desk_course_enquiries(request):
+    """Permission-controlled queue for anonymous public programme enquiries."""
+    _guard(request, "support.view_courseenquiry")
+    from apps.support.models import CourseEnquiry
+
+    queryset = CourseEnquiry.objects.select_related("assigned_to")
+    query = request.GET.get("q", "").strip()[:160]
+    status_filter = request.GET.get("status", "").strip()
+    programme_filter = request.GET.get("programme", "").strip()
+
+    if query:
+        queryset = queryset.filter(
+            Q(name__icontains=query)
+            | Q(email__icontains=query)
+            | Q(message__icontains=query)
+        )
+    if status_filter in CourseEnquiry.Status.values:
+        queryset = queryset.filter(status=status_filter)
+    if programme_filter in CourseEnquiry.Programme.values:
+        queryset = queryset.filter(programme=programme_filter)
+
+    all_enquiries = CourseEnquiry.objects.all()
+    stats = {
+        "new": all_enquiries.filter(status=CourseEnquiry.Status.NEW).count(),
+        "in_progress": all_enquiries.filter(status=CourseEnquiry.Status.IN_PROGRESS).count(),
+        "replied": all_enquiries.filter(status=CourseEnquiry.Status.REPLIED).count(),
+        "closed": all_enquiries.filter(status=CourseEnquiry.Status.CLOSED).count(),
+    }
+    page = Paginator(queryset.order_by("-created_at", "pk"), 25).get_page(
+        request.GET.get("page")
+    )
+    return render(request, "admin/desk_course_enquiries.html", {
+        "enquiry_page": page,
+        "query": query,
+        "status_filter": status_filter,
+        "programme_filter": programme_filter,
+        "status_choices": CourseEnquiry.Status.choices,
+        "programme_choices": CourseEnquiry.Programme.choices,
+        "stats": stats,
+        "desk_nav": _nav(request),
+    })
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def admin_desk_course_enquiry(request, enquiry_id):
+    """Review a prospect record and send a logged email reply within Admin Desk."""
+    _guard(request, "support.view_courseenquiry")
+    from django.core.mail import send_mail
+    from apps.support.models import CourseEnquiry, CourseEnquiryReply
+
+    enquiry = get_object_or_404(
+        CourseEnquiry.objects.select_related("assigned_to", "responded_by"),
+        pk=enquiry_id,
+    )
+    if request.method == "POST":
+        _guard(request, "support.change_courseenquiry")
+        action = (request.POST.get("action") or "").strip()
+
+        if action == "claim":
+            enquiry.assigned_to = request.user
+            if enquiry.status == CourseEnquiry.Status.NEW:
+                enquiry.status = CourseEnquiry.Status.IN_PROGRESS
+            enquiry.save(update_fields=["assigned_to", "status", "updated_at"])
+            _audit("admin.course_enquiry.claimed", request.user, "course_enquiry", enquiry.pk)
+            messages.success(request, "Enquiry assigned to you.")
+        elif action == "status":
+            status_value = (request.POST.get("status") or "").strip()
+            allowed_statuses = {
+                CourseEnquiry.Status.IN_PROGRESS,
+                CourseEnquiry.Status.CLOSED,
+            }
+            if status_value not in allowed_statuses:
+                messages.error(request, "Choose a valid work status.")
+            else:
+                enquiry.status = status_value
+                if status_value == CourseEnquiry.Status.CLOSED:
+                    enquiry.assigned_to = enquiry.assigned_to or request.user
+                enquiry.save(update_fields=["status", "assigned_to", "updated_at"])
+                _audit("admin.course_enquiry.status_changed", request.user,
+                       "course_enquiry", enquiry.pk, {"status": status_value})
+                messages.success(request, "Enquiry status updated.")
+        elif action == "internal_note":
+            note = (request.POST.get("internal_note") or "").strip()
+            if not note or len(note) > 4000:
+                messages.error(request, "Enter an internal note of up to 4,000 characters.")
+            else:
+                stamp = timezone.now().strftime("%Y-%m-%d %H:%M UTC")
+                entry = f"[{stamp}] {request.user.get_username()}: {note}"
+                enquiry.internal_notes = (
+                    f"{enquiry.internal_notes.rstrip()}\n\n{entry}".strip()
+                )[-20000:]
+                enquiry.save(update_fields=["internal_notes", "updated_at"])
+                _audit("admin.course_enquiry.internal_note_added", request.user,
+                       "course_enquiry", enquiry.pk, {"length": len(note)})
+                messages.success(request, "Internal note saved.")
+        elif action == "send_reply":
+            subject = (request.POST.get("subject") or "").strip()
+            body = (request.POST.get("body") or "").strip()
+            if not subject or len(subject) > 255 or not body or len(body) > 10000:
+                messages.error(request, "Enter a subject and a reply of up to 10,000 characters.")
+            else:
+                reply = CourseEnquiryReply.objects.create(
+                    enquiry=enquiry, author=request.user, subject=subject, body=body,
+                )
+                try:
+                    sent_count = send_mail(
+                        subject, body, None, [enquiry.email], fail_silently=False
+                    )
+                except Exception as exc:
+                    reply.status = CourseEnquiryReply.Status.FAILED
+                    reply.error_message = type(exc).__name__[:200]
+                    reply.save(update_fields=["status", "error_message"])
+                    logger.exception(
+                        "Course enquiry reply email failed enquiry=%s reply=%s",
+                        enquiry.pk, reply.pk,
+                    )
+                    messages.error(
+                        request,
+                        "The email service did not accept this reply. The failed attempt is recorded; check email configuration before retrying.",
+                    )
+                else:
+                    if sent_count:
+                        reply.status = CourseEnquiryReply.Status.ACCEPTED
+                        reply.sent_at = timezone.now()
+                        reply.save(update_fields=["status", "sent_at"])
+                        enquiry.status = CourseEnquiry.Status.REPLIED
+                        enquiry.responded_at = reply.sent_at
+                        enquiry.responded_by = request.user
+                        enquiry.assigned_to = enquiry.assigned_to or request.user
+                        enquiry.save(update_fields=[
+                            "status", "responded_at", "responded_by",
+                            "assigned_to", "updated_at",
+                        ])
+                        _audit("admin.course_enquiry.reply_accepted", request.user,
+                               "course_enquiry", enquiry.pk, {"reply_id": str(reply.pk)})
+                        messages.success(
+                            request,
+                            "The email backend accepted the reply. This does not confirm delivery to the recipient's inbox.",
+                        )
+                    else:
+                        reply.status = CourseEnquiryReply.Status.FAILED
+                        reply.error_message = "Email backend did not accept the message."
+                        reply.save(update_fields=["status", "error_message"])
+                        messages.error(
+                            request,
+                            "The email service did not accept this reply. The failed attempt is recorded.",
+                        )
+        else:
+            messages.error(request, "Choose a valid enquiry action.")
+
+        return redirect("staff_admin_desk_course_enquiry", enquiry_id=enquiry.pk)
+
+    return render(request, "admin/desk_course_enquiry.html", {
+        "enquiry": enquiry,
+        "replies": enquiry.replies.select_related("author").all(),
+        "desk_nav": _nav(request),
+        "queue_url": reverse("staff_admin_desk_course_enquiries"),
+        "can_change": _allowed(request.user, "support.change_courseenquiry"),
+        "starting_point_choices": CourseEnquiry.StartingPoint.choices,
     })
