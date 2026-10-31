@@ -52,7 +52,7 @@ class ResendEmailBackendTests(TestCase):
             {
                 "from": "TradeThesis <noreply@tradethesis.in>",
                 "to": ["learner@example.com"],
-                "subject": "Confirm your email",
+                "subject": "[TradeThesis] Confirm your email",
                 "reply_to": ["support@example.com"],
                 "headers": {"X-TradeThesis": "account"},
                 "text": "Open the confirmation link.",
@@ -102,6 +102,8 @@ class ResendEmailBackendTests(TestCase):
 
         self.assertEqual(ResendEmailBackend().send_messages([message]), 1)
         payload = post.call_args.kwargs["json"]
+        self.assertEqual(payload["from"], "TradeThesis <billing@tradethesis.in>")
+        self.assertEqual(payload["subject"], "[TradeThesis] Receipt")
         self.assertEqual(
             payload["attachments"],
             [
