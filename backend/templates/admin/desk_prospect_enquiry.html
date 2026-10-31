@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Enquiry {{ enquiry.short_reference }} | Admin Desk | TradeThesis{% endblock %}
+{% block page_title %}Prospect enquiry{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+.tt-prospect-detail{--ink:#26342f;--muted:#68736c;--line:#dedfd5;--surface:#fffefa;--green:#456653;max-width:1040px;margin:8px auto 36px;color:var(--ink)}
+.tt-prospect-detail *{box-sizing:border-box}
+.tt-prospect-detail a{color:#315b43;text-underline-offset:3px}
+.tt-prospect-detail .head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+.tt-prospect-detail h1{margin:0;font:400 28px/1.15 Georgia,serif}
+.tt-prospect-detail .muted{color:var(--muted);font-size:12px}
+.tt-prospect-detail .grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:14px;align-items:start}
+.tt-prospect-detail .panel{padding:19px;border:1px solid var(--line);background:var(--surface);margin-bottom:14px}
+.tt-prospect-detail h2{margin:0 0 14px;font-size:16px}
+.tt-prospect-detail .fact{padding:10px 0;border-bottom:1px solid #ecece5}
+.tt-prospect-detail .fact:last-child{border:0}
+.tt-prospect-detail .label{display:block;color:var(--muted);font-size:10px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.tt-prospect-detail .value{font-size:14px;overflow-wrap:anywhere}
+.tt-prospect-detail textarea,.tt-prospect-detail select{width:100%;padding:10px;border:1px solid #cfd5c9;border-radius:4px;background:white;color:var(--ink);font:inherit}
+.tt-prospect-detail textarea{min-height:150px;resize:vertical}
+.tt-prospect-detail .button{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:9px 14px;border:1px solid var(--green);border-radius:4px;background:var(--green);color:white;font-weight:750;text-decoration:none}
+.tt-prospect-detail .check{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.tt-prospect-detail .status{display:inline-flex;padding:4px 8px;border:1px solid var(--line);background:#f5f5ef;font-size:12px}
+@media(max-width:760px){.tt-prospect-detail .grid{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+{% block content %}
+<main class="tt-prospect-detail">
+  <header class="head">
+    <div><p class="muted">PROSPECT ENQUIRY · REF {{ enquiry.short_reference }}</p><h1>{{ enquiry.name }}</h1><p class="muted">{{ enquiry.get_programme_display }} · received {{ enquiry.created_at|date:"j M Y, H:i" }}</p></div>
+    <a href="{{ queue_url }}">← Back to prospect enquiries</a>
+  </header>
+  <div class="grid">
+    <section>
+      <div class="panel">
+        <h2>Enquiry details</h2>
+        <div class="fact"><span class="label">Email</span><div class="value"><a href="mailto:{{ enquiry.email }}">{{ enquiry.email }}</a></div></div>
+        <div class="fact"><span class="label">Phone / WhatsApp</span><div class="value">{{ enquiry.phone|default:"Not provided" }}</div></div>
+        <div class="fact"><span class="label">Starting point</span><div class="value">{{ enquiry.starting_point|default:"Not specified" }}</div></div>
+        <div class="fact"><span class="label">Question</span><div class="value">{{ enquiry.question|default:"No additional question"|linebreaksbr }}</div></div>
+        <div class="fact"><span class="label">Source page</span><div class="value">{{ enquiry.source_path|default:"Not recorded" }}</div></div>
+      </div>
+      <div class="panel">
+        <h2>Consent &amp; notification record</h2>
+        <p class="check">Contact permission: {% if enquiry.contact_consent %}confirmed{% else %}not recorded{% endif %}</p>
+        <p class="check">Optional marketing updates: {% if enquiry.marketing_opt_in %}opted in{% else %}not opted in{% endif %}</p>
+        <p class="check">Customer receipt: {% if enquiry.customer_confirmation_sent_at %}sent {{ enquiry.customer_confirmation_sent_at|date:"j M Y, H:i" }}{% else %}not confirmed as sent{% endif %}</p>
+        <p class="check">Staff notification: {% if enquiry.staff_notification_sent_at %}sent {{ enquiry.staff_notification_sent_at|date:"j M Y, H:i" }}{% else %}not confirmed as sent; check notification configuration{% endif %}</p>
+      </div>
+    </section>
+    <aside>
+      <div class="panel">
+        <h2>Follow-up</h2>
+        {% if can_change %}
+        <form method="post" action="{% url 'staff_admin_desk_prospect_enquiry_update' enquiry.pk %}">
+          {% csrf_token %}
+          <label class="label" for="status">Enquiry status</label>
+          <select id="status" name="status">
+            {% for value,label in status_choices %}<option value="{{ value }}" {% if enquiry.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+          <label class="label" for="staff_notes" style="margin-top:16px">Private staff notes</label>
+          <textarea id="staff_notes" name="staff_notes" maxlength="10000">{{ enquiry.staff_notes }}</textarea>
+          <p class="muted">These notes are visible only to staff with permission to manage prospect enquiries.</p>
+          <button class="button" type="submit">Save follow-up</button>
+        </form>
+        {% else %}
+        <p class="status">{{ enquiry.get_status_display }}</p>
+        <p class="muted">You have read-only access to this enquiry.</p>
+        {% if enquiry.staff_notes %}<p>{{ enquiry.staff_notes|linebreaksbr }}</p>{% endif %}
+        {% endif %}
+      </div>
+      <div class="panel">
+        <h2>Record</h2>
+        <p class="muted">Created {{ enquiry.created_at|date:"j M Y, H:i" }}</p>
+        <p class="muted">Last updated {{ enquiry.updated_at|date:"j M Y, H:i" }}</p>
+        {% if enquiry.assigned_to %}<p class="muted">Assigned to {{ enquiry.assigned_to }}</p>{% else %}<p class="muted">Not assigned</p>{% endif %}
+      </div>
+    </aside>
+  </div>
+</main>
+{% endblock %}
