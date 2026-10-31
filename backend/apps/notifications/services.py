@@ -13,6 +13,8 @@ from django.template.loader import render_to_string
 from django.contrib.sites.models import Site
 from django.utils import timezone
 
+from apps.core.email_branding import normalise_email_subject
+
 from .models import EmailLog
 
 logger = logging.getLogger(__name__)
@@ -40,6 +42,8 @@ class NotificationService:
         context: Dict[str, Any],
         from_email: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
+        user=None,
+        log_template: Optional[str] = None,
     ) -> bool:
         """
         Send an email using a template.
@@ -59,6 +63,7 @@ class NotificationService:
             NotificationServiceError: If email fails to send
         """
         from_email = from_email or settings.DEFAULT_FROM_EMAIL
+        context = dict(context or {})
 
         # Add site to context
         try:
@@ -101,34 +106,32 @@ class NotificationService:
             logger.error(f"Failed to render email templates for {template}: {e}")
             raise NotificationServiceError(f"Template rendering failed: {e}")
 
+        # A consistent subject brand is visible even when a mail client hides
+        # the sender name or strips HTML. Keep support's event-specific log tags.
+        subject = normalise_email_subject(subject)
+
         # Create email log entry
         email_log = EmailLog.objects.create(
+            user=user,
             email=to_email,
-            template=template,
+            template=(log_template or template)[:100],
             subject=subject,
             status="queued",
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         try:
             # Send the email
-            if html_body:
-                send_mail(
-                    subject=subject,
-                    message=text_body,
-                    from_email=from_email,
-                    recipient_list=[to_email],
-                    html_message=html_body,
-                    fail_silently=False,
-                )
-            else:
-                send_mail(
-                    subject=subject,
-                    message=text_body,
-                    from_email=from_email,
-                    recipient_list=[to_email],
-                    fail_silently=False,
-                )
+            sent_count = send_mail(
+                subject=subject,
+                message=text_body,
+                from_email=from_email,
+                recipient_list=[to_email],
+                html_message=html_body,
+                fail_silently=False,
+            )
+            if not sent_count:
+                raise NotificationServiceError("Email backend reported that no message was sent.")
 
             # Update log
             email_log.status = "sent"
