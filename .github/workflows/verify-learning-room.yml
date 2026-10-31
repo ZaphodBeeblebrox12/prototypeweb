@@ -645,16 +645,15 @@ jobs:
               "Member-area sample data must be clearly identified as a preview");
             console.log("MEMBER_UX_PASS: preview-only auth copy, light theme and mobile fit.");
 
-            // The Trading Path is free. Local previews resolve Academy links to the
-            // staging service, but must point to the course detail / free-enrolment route,
-            // never the legacy paid checkout endpoint.
+            // The Trading Path is a free course, while the two higher-intent programmes
+            // now submit to the real Django prospect-enquiry workflow.
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
             await cataloguePage.goto(server + "/trading-path.html", { waitUntil: "networkidle" });
-            const tradingPathEnrolment = cataloguePage.locator('[data-academy-path="/learn/course/trading-path/"]').first();
+            const tradingPathEnrolment = cataloguePage.locator(".product-enrol-button");
             assert.equal(await tradingPathEnrolment.count(), 1,
-              "Trading Path must expose a free-enrolment link");
+              "Trading Path must expose one primary free-enrolment CTA");
             assert.ok((await tradingPathEnrolment.innerText()).toLowerCase().includes("enrol for free"),
-              "Trading Path CTA must say enrol for free");
+              "Trading Path primary CTA must say enrol for free");
             assert.equal(
               await tradingPathEnrolment.getAttribute("href"),
               "https://tradethesis-academy-staging.onrender.com/learn/course/trading-path/",
@@ -666,19 +665,34 @@ jobs:
               "Trading Path page must show a free price");
 
             await cataloguePage.goto(server + "/construct.html", { waitUntil: "networkidle" });
-            await cataloguePage.locator("[data-preview-enquiry]").first().click();
-            assert.ok((await cataloguePage.locator("#previewModal").getAttribute("class")).includes("open"),
-              "CONSTRUCT enquiry CTA should open its preview disclosure");
-            assert.ok((await cataloguePage.locator("#modalCopy").innerText()).includes("not connected to an enquiry form or checkout yet"),
-              "CONSTRUCT enquiry CTA must be honest about its preview-only status");
-            await cataloguePage.locator("#previewModal .modal-close").click();
+            const constructEnquiry = cataloguePage.locator('[data-academy-path="/enquire/construct/"]');
+            assert.equal(await constructEnquiry.count(), 1,
+              "CONSTRUCT must expose its prospect-enquiry route");
+            assert.equal(
+              await constructEnquiry.getAttribute("href"),
+              "https://tradethesis-academy-staging.onrender.com/enquire/construct/",
+              "CONSTRUCT enquiry CTA must resolve to the Academy prospect route",
+            );
+            assert.equal(await cataloguePage.locator("[data-preview-enquiry]").count(), 0,
+              "CONSTRUCT must not retain its preview-only enquiry handler");
+            assert.equal(await cataloguePage.locator("#previewModal").count(), 0,
+              "CONSTRUCT must not retain the disconnected enquiry modal");
 
             await cataloguePage.goto(server + "/live-class.html", { waitUntil: "networkidle" });
-            await cataloguePage.locator("#liveName").fill("Preview Learner");
-            await cataloguePage.locator("#liveEmail").fill("learner@example.test");
-            await cataloguePage.locator('#liveEnquiryForm button[type="submit"]').click();
-            assert.ok((await cataloguePage.locator("#liveEnquiryResult").innerText()).includes("Nothing has been sent or saved."),
-              "Live-class enquiry preview must not imply delivery or storage");
+            const liveEnquiry = cataloguePage.locator('[data-academy-path="/enquire/live_classroom/"]');
+            assert.equal(await liveEnquiry.count(), 1,
+              "Live Classroom must expose its prospect-enquiry route");
+            assert.equal(
+              await liveEnquiry.getAttribute("href"),
+              "https://tradethesis-academy-staging.onrender.com/enquire/live_classroom/",
+              "Live Classroom enquiry CTA must resolve to the Academy prospect route",
+            );
+            assert.equal(await cataloguePage.locator("#liveEnquiryForm").count(), 0,
+              "Live Classroom must not retain the preview-only form");
+            assert.equal(await cataloguePage.locator("#liveName").count(), 0,
+              "Live Classroom must not retain the unsent preview inputs");
+            console.log("PUBLIC_CTA_ENQUIRY_PASS: free enrolment and both prospect routes resolve without preview-only handlers.");
+
             await cataloguePage.setViewportSize({ width: 390, height: 844 });
             const publicOverflow = await cataloguePage.evaluate(() => ({
               viewport: document.documentElement.clientWidth,
