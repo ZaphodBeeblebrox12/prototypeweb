@@ -11,6 +11,20 @@ _UUID_RE = re.compile(r"\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f
 _NUMBER_RE = re.compile(r"\b\d+\b")
 _WORD_RE = re.compile(r"[a-z]{3,}")
 
+_ALLOWED_SYMPTOM_TERMS = {
+    "access", "account", "activation", "api", "blank", "blocked", "bot",
+    "billing", "button", "cancel", "card", "channel", "charge", "charged",
+    "checkout", "connect", "connection", "course", "dashboard", "discord",
+    "download", "email", "error", "expire", "expired", "fail", "failed",
+    "failure", "grant", "invoice", "invite", "lesson", "link", "load",
+    "loading", "login", "logout", "member", "membership", "missing",
+    "mobile", "otp", "page", "password", "payment", "payout", "player",
+    "purchase", "refund", "renew", "reset", "revoke", "security", "sign",
+    "signin", "slow", "stream", "stuck", "subscription", "sync", "telegram",
+    "timeout", "token", "trial", "upi", "upload", "verification", "verify",
+    "video", "webhook",
+}
+
 _STOP_WORDS = {
     "about", "after", "again", "also", "any", "are", "because", "been",
     "before", "being", "below", "between", "both", "but", "can", "cannot",
@@ -34,7 +48,9 @@ def _ticket_terms(message):
     text = _URL_RE.sub(" ", text)
     text = _UUID_RE.sub(" ", text)
     text = _NUMBER_RE.sub(" ", text)
-    return {word for word in _WORD_RE.findall(text) if word not in _STOP_WORDS}
+    # Keep only product-neutral issue vocabulary in rendered signals. This
+    # prevents personal names or arbitrary free-text identifiers from leaking.
+    return {word for word in _WORD_RE.findall(text) if word in _ALLOWED_SYMPTOM_TERMS}
 
 
 def build_support_issue_clusters(tickets, *, min_customers=3, min_tickets=3, similarity_threshold=0.45):
