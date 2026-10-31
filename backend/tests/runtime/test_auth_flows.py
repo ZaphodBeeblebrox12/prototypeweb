@@ -59,10 +59,24 @@ class TestSignupPage:
 
 @pytest.mark.django_db
 class TestLogout:
-    def test_desktop_and_mobile_navigation_post_to_logout(self, client):
+    def _verified_member(self, username):
+        from allauth.account.models import EmailAddress
+
         user = User.objects.create_user(
-            username="logout-member", email="logout-member@example.com"
+            username=username,
+            email=f"{username}@example.com",
+            is_staff=False,
+            is_superuser=False,
         )
+        EmailAddress.objects.create(
+            user=user, email=user.email, primary=True, verified=True
+        )
+        assert not user.is_staff
+        assert not user.is_superuser
+        return user
+
+    def test_desktop_and_mobile_navigation_post_to_logout(self, client):
+        user = self._verified_member("logout-member")
         client.force_login(user)
 
         response = client.get("/dashboard/")
@@ -77,10 +91,30 @@ class TestLogout:
         assert html.count('name="csrfmiddlewaretoken"') >= 2
         assert 'href="/accounts/logout/"' not in html
 
-    def test_post_logout_clears_session_and_redirects_without_confirmation(self, client):
+    def test_unverified_member_logout_on_verification_page_is_post(self, rf):
+        from django.template.loader import render_to_string
+
         user = User.objects.create_user(
-            username="logout-session", email="logout-session@example.com"
+            username="unverified-member",
+            email="unverified-member@example.com",
+            is_staff=False,
+            is_superuser=False,
         )
+        request = rf.get("/accounts/confirm-email/")
+        request.user = user
+
+        html = render_to_string(
+            "account/verification_required.html",
+            {"request": request},
+            request=request,
+        )
+
+        assert 'method="post" action="/accounts/logout/"' in html
+        assert 'name="csrfmiddlewaretoken"' in html
+        assert 'href="/accounts/logout/"' not in html
+
+    def test_post_logout_clears_session_and_redirects_without_confirmation(self, client):
+        user = self._verified_member("logout-session")
         client.force_login(user)
 
         response = client.post(reverse("account_logout"))
