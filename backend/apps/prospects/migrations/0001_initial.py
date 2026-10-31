@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ("name", models.CharField(max_length=120)),
                 ("email", models.EmailField(max_length=254)),
                 ("phone", models.CharField(blank=True, max_length=40)),
-                ("starting_point", models.CharField(blank=True, max_length=80)),
+                ("starting_point", models.CharField(blank=True, choices=[("", "Not specified"), ("learning_charts", "Learning to read charts"), ("know_patterns", "Know patterns, need a connected plan"), ("risk_management", "Working on risk and trade management"), ("review_process", "Want a more consistent review process")], max_length=32)),
                 ("question", models.TextField(blank=True)),
                 ("contact_consent", models.BooleanField(default=False)),
                 ("marketing_opt_in", models.BooleanField(default=False)),
