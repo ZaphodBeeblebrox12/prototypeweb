@@ -5,12 +5,13 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import FileExtensionValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .storage import course_asset_storage
+from .video_storage import lesson_video_storage
 
 
 class GoogleDriveCredential(models.Model):
@@ -490,6 +491,13 @@ def course_media_asset_upload_to(instance, filename):
     return f"academy/course-assets/{uuid.uuid4().hex}{suffix}"
 
 
+def protected_lesson_video_upload_to(instance, filename):
+    suffix = Path(filename).suffix.lower()
+    if suffix not in {".mp4", ".mov", ".mkv", ".webm"}:
+        suffix = ".mp4"
+    return f"academy/video-source/{instance.lesson_id}/{uuid.uuid4().hex}{suffix}"
+
+
 class CourseImport(models.Model):
     """Editable builder draft until submitted; reviewable snapshots never mutate live course rows."""
 
@@ -604,6 +612,66 @@ class CourseMediaAsset(models.Model):
 
     def __str__(self):
         return f"{self.course.title} · {self.asset_key}"
+
+
+class ProtectedLessonVideo(models.Model):
+    """Private source video and its generated encrypted HLS rendition."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Pending processing")
+        PROCESSING = "processing", _("Processing")
+        READY = "ready", _("Protected stream ready")
+        FAILED = "failed", _("Processing failed")
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    lesson = models.OneToOneField(
+        Lesson, on_delete=models.CASCADE, related_name="protected_video"
+    )
+    source_file = models.FileField(
+        storage=lesson_video_storage,
+        upload_to=protected_lesson_video_upload_to,
+        blank=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=["mp4", "mov", "mkv", "webm"])
+        ],
+    )
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING)
+    stream_directory = models.CharField(max_length=512, blank=True)
+    processing_error = models.TextField(blank=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="academy_protected_videos_created",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["lesson__module__course__title", "lesson__title"]
+
+    def clean(self):
+        super().clean()
+        if not self.source_file:
+            raise ValidationError({"source_file": "Upload a source video before saving."})
+        if (
+            not settings.DEBUG
+            and getattr(settings, "ACADEMY_REQUIRE_DURABLE_VIDEO_STORAGE", True)
+            and not lesson_video_storage.is_durable
+        ):
+            raise ValidationError(
+                {
+                    "source_file": (
+                        "Video uploads are disabled until private Google Drive storage or "
+                        "a persistent local video volume is configured."
+                    )
+                }
+            )
+
+    def __str__(self):
+        return f"Protected video · {self.lesson}"
 
 
 class CourseContentRevision(models.Model):

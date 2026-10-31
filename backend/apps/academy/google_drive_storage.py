@@ -182,11 +182,16 @@ class GoogleDriveStorageMixin:
         return self._drive_session_cache
 
     def _drive_request(self, method, url, *, expected=(200,), **kwargs):
+        # Allow large resumable uploads to use a longer read timeout without
+        # changing the timeout used by ordinary Drive metadata and image calls.
+        timeout = kwargs.pop(
+            "timeout", int(getattr(settings, "ACADEMY_GOOGLE_DRIVE_TIMEOUT", 20))
+        )
         try:
             response = self._drive_session().request(
                 method,
                 url,
-                timeout=int(getattr(settings, "ACADEMY_GOOGLE_DRIVE_TIMEOUT", 20)),
+                timeout=timeout,
                 **kwargs,
             )
         except Exception as exc:
