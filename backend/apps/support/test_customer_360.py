@@ -196,6 +196,37 @@ class Customer360Tests(TestCase):
         self.assertNotContains(response, "Subscriptions &amp; access history")
         self.assertNotContains(response, "Course access")
 
+    def test_superuser_requester_can_open_only_the_visible_support_profile(self):
+        admin_requester = User.objects.create_superuser(
+            username="customer-360-admin-requester",
+            email="customer-360-admin-requester@example.test",
+            password="test-password-123!",
+        )
+        ticket = SupportTicket.objects.create(
+            user=admin_requester,
+            category=SupportTicket.Category.TECHNICAL,
+            message="Internal administrator test request.",
+        )
+        reviewer = User.objects.create_user(
+            username="customer-360-admin-request-reviewer",
+            email="customer-360-admin-request-reviewer@example.test",
+            is_staff=True,
+        )
+        self.client.force_login(reviewer)
+
+        response = self.client.get(
+            reverse("staff_admin_desk_customer_360", args=[admin_requester.pk])
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertTrue(response.context["is_internal_account"])
+        self.assertContains(response, "Internal staff requester")
+        self.assertContains(response, ticket.short_id)
+        self.assertFalse(response.context["can_view_payments"])
+        self.assertFalse(response.context["can_view_subscriptions"])
+        self.assertFalse(response.context["can_view_academy_records"])
+        self.assertFalse(response.context["can_view_security_events"])
+
     def test_support_ticket_detail_links_to_customer_360(self):
         response = self.client.get(
             reverse("staff_admin_desk_support_ticket", args=[self.ticket.pk])
