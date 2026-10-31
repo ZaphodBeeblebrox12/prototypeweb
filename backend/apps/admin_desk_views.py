@@ -479,6 +479,40 @@ def admin_desk_customer_360(request, user_id):
         raise PermissionDenied
 
     is_internal_account = bool(account.is_staff or account.is_superuser)
+    # Community membership is owned by bot_integration, not the legacy
+    # Telegram/Discord login fields on User. Keep internal staff profiles
+    # support-only and avoid exposing their personal community identities.
+    telegram_community_account = None
+    discord_community_account = None
+    telegram_community_status = "Not linked"
+    discord_community_status = "Not linked"
+    if not is_internal_account:
+        from apps.bot_integration.models import TelegramAccount, DiscordAccount
+
+        telegram_community_account = TelegramAccount.objects.filter(
+            user_id=account.pk
+        ).only("id", "is_active").first()
+        discord_community_account = DiscordAccount.objects.filter(
+            user_id=account.pk
+        ).only("id", "is_active").first()
+
+        if telegram_community_account is not None:
+            telegram_community_status = (
+                "Linked" if telegram_community_account.is_active
+                else "Disconnect pending"
+            )
+        elif account.telegram_verified or account.telegram_id:
+            # Telegram login verification is not the same as linking the bot
+            # chat used for community access and transactional notifications.
+            telegram_community_status = "Login only"
+
+        if discord_community_account is not None:
+            discord_community_status = (
+                "Linked" if discord_community_account.is_active
+                else "Disconnect pending"
+            )
+        elif account.discord_verified or account.discord_id:
+            discord_community_status = "Legacy identity only"
     # Staff accounts may submit support requests, but their internal profile
     # is deliberately limited to identity + reviewer-visible support history.
     can_view_subscriptions = (
@@ -773,6 +807,8 @@ def admin_desk_customer_360(request, user_id):
         {
             "account": account,
             "is_internal_account": is_internal_account,
+            "telegram_community_status": telegram_community_status,
+            "discord_community_status": discord_community_status,
             "subscriptions": subscriptions,
             "subscription_history": subscription_history,
             "payments": payments,
@@ -889,7 +925,10 @@ def admin_desk_operations_timeline(request):
         from apps.jobs.models import PeriodicJob
 
         periodic_errors = list(
-            PeriodicJob.objects.filter(last_status=PeriodicJob.Status.ERROR)
+            PeriodicJob.objects.filter(
+                last_status=PeriodicJob.Status.ERROR,
+                last_run_at__gte=since,
+            )
             .only("name", "enabled", "last_run_at", "last_status")
             .order_by("name")[:30]
         )
@@ -961,7 +1000,7 @@ def admin_desk_operations_timeline(request):
             f"{job.kind} {job_state}",
             f"Status {job.status} · {job.attempts}/{job.max_attempts} attempts",
             "critical" if failed else "warning",
-            reverse("admin:jobs_job_changelist"),
+            reverse("staff_admin_desk_operations_job", args=[job.pk]),
         )
     for operation in provisioning_incidents:
         add_activity(
@@ -970,6 +1009,7 @@ def admin_desk_operations_timeline(request):
             f"External {operation.operation} {operation.state.replace('_', ' ')}",
             f"{operation.attempts} attempts · external state requires review",
             "critical" if operation.state == operation.ST_FAILED else "warning",
+            reverse("staff_admin_desk_operations_provisioning", args=[operation.pk]),
         )
     for periodic in periodic_errors:
         add_activity(
@@ -1039,6 +1079,55 @@ def admin_desk_operations_timeline(request):
             "support_queue_url": reverse("staff_admin_desk_support_tickets"),
             "desk_url": reverse("staff_admin_desk"),
             "desk_nav": _nav(request),
+        },
+    )
+
+
+@login_required
+@require_GET
+def admin_desk_operations_job(request, job_id):
+    """Read-only, safe worker-job detail inside the Admin Desk."""
+    _guard(request, "jobs.view_job")
+    from apps.jobs.models import Job
+
+    job = get_object_or_404(
+        Job.objects.only(
+            "id", "kind", "status", "attempts", "max_attempts",
+            "created_at", "updated_at", "next_attempt_at", "locked_at",
+        ),
+        pk=job_id,
+    )
+    return render(
+        request,
+        "admin/desk_operations_job.html",
+        {
+            "job": job,
+            "desk_nav": _nav(request),
+            "timeline_url": reverse("staff_admin_desk_operations_timeline"),
+        },
+    )
+
+
+@login_required
+@require_GET
+def admin_desk_operations_provisioning(request, operation_id):
+    """Read-only provisioning-operation detail without external IDs or payloads."""
+    _guard(request, "jobs.view_provisioningoperation")
+    from apps.jobs.models import ProvisioningOperation
+
+    operation = get_object_or_404(
+        ProvisioningOperation.objects.only(
+            "id", "operation", "state", "attempts", "created_at", "updated_at",
+        ),
+        pk=operation_id,
+    )
+    return render(
+        request,
+        "admin/desk_operations_provisioning.html",
+        {
+            "operation": operation,
+            "desk_nav": _nav(request),
+            "timeline_url": reverse("staff_admin_desk_operations_timeline"),
         },
     )
 

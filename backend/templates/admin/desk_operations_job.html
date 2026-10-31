@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Worker job · Operations | TradeThesis{% endblock %}
+{% block page_title %}Worker job{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-detail{max-width:900px;margin:12px auto 40px;color:#26342f}
+  .tt-detail .eyebrow{font-size:11px;font-weight:750;letter-spacing:.09em;text-transform:uppercase;color:#68736c}
+  .tt-detail h1{font-size:27px;margin:5px 0 8px}
+  .tt-detail .intro{font-size:13px;line-height:1.55;color:#68736c;max-width:700px}
+  .tt-detail .panel{margin-top:16px;padding:17px;border:1px solid #dedfd5;background:#fffefa}
+  .tt-detail dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 22px;margin:0}
+  .tt-detail dl div{padding:12px 0;border-bottom:1px solid #ecece5;min-width:0}
+  .tt-detail dt{font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:750;color:#68736c}
+  .tt-detail dd{margin:5px 0 0;font-size:13px;font-weight:650;overflow-wrap:anywhere}
+  .tt-detail .note{margin-top:14px;padding:11px 12px;border-left:3px solid #b99a56;background:#fff9e9;color:#6a5730;font-size:11px;line-height:1.5}
+  .tt-detail .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+  .tt-detail a{color:#315b43;text-underline-offset:3px}
+  @media(max-width:560px){.tt-detail dl{grid-template-columns:1fr}.tt-detail h1{font-size:23px}}
+</style>
+{% endblock %}
+{% block content %}
+<main class="tt-detail">
+  <p class="eyebrow"><a href="{{ timeline_url }}">Operations timeline</a> / Worker job</p>
+  <h1>{{ job.kind }}</h1>
+  <p class="intro">Read-only operational detail for this background job. The underlying payload and provider error content are deliberately not exposed in the Admin Desk.</p>
+  <section class="panel">
+    <dl>
+      <div><dt>Status</dt><dd>{{ job.get_status_display }}</dd></div>
+      <div><dt>Attempts</dt><dd>{{ job.attempts }} / {{ job.max_attempts }}</dd></div>
+      <div><dt>Created</dt><dd>{{ job.created_at|date:"j M Y · H:i:s" }}</dd></div>
+      <div><dt>Last updated</dt><dd>{{ job.updated_at|date:"j M Y · H:i:s" }}</dd></div>
+      <div><dt>Next attempt</dt><dd>{{ job.next_attempt_at|date:"j M Y · H:i:s"|default:"Not scheduled" }}</dd></div>
+      <div><dt>Worker lock</dt><dd>{{ job.locked_at|date:"j M Y · H:i:s"|default:"Not locked" }}</dd></div>
+    </dl>
+    <p class="note">This page does not offer retry or cancellation controls. Those actions require a separate guarded workflow with idempotency and audit coverage.</p>
+  </section>
+  <div class="actions"><a href="{{ timeline_url }}">← Back to operations timeline</a></div>
+</main>
+{% endblock %}

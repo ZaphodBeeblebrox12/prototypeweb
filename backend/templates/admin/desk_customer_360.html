@@ -93,11 +93,16 @@
       <span class="value">{{ account.last_login|date:"j M Y · H:i"|default:"Not recorded" }}</span>
       <span class="subvalue">Account's latest successful login timestamp</span>
     </div>
-    <div class="identity-cell">
-      <span class="label">Community connections</span>
-      <span class="value">Telegram · {% if account.telegram_verified %}Verified{% elif account.telegram_id %}Linked{% else %}Not linked{% endif %}</span>
-      <span class="subvalue">Discord · {% if account.discord_verified %}Verified{% elif account.discord_id %}Linked{% else %}Not linked{% endif %}</span>
-    </div>
+    {% if not is_internal_account %}
+      <div class="identity-cell">
+        <span class="label">Community connections</span>
+        <span class="value">Telegram · {{ telegram_community_status }}</span>
+        <span class="subvalue">Discord · {{ discord_community_status }}</span>
+        {% if telegram_community_status == "Login only" or discord_community_status == "Legacy identity only" %}
+          <span class="subvalue">Legacy login identity does not confirm a managed community connection.</span>
+        {% endif %}
+      </div>
+    {% endif %}
   </section>
 
   {% if is_internal_account %}
