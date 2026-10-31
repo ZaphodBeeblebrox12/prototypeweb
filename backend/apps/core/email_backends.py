@@ -1,19 +1,23 @@
-"""Django email backend that sends through Resend's HTTPS API.
+"""Django email backend for Resend's HTTPS API.
 
-Render Free blocks outbound SMTP ports, but permits HTTPS requests. Keeping this
-as a normal Django backend lets django-allauth verification and password-reset
-emails use the existing templates and delivery calls without auth-flow changes.
+Render Free blocks outbound SMTP ports. This backend sends over HTTPS and records
+provider acceptance in apps.emailing.Delivery. Resend webhooks later refine the
+state to delivered, bounced, complained, or suppressed.
 """
 
 import base64
+import hashlib
 import logging
+import uuid
 from email.message import Message
 from typing import Any
 
 import requests
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail.backends.base import BaseEmailBackend
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +38,7 @@ class ResendEmailBackend(BaseEmailBackend):
         return sent_count
 
     def _send(self, message: Any) -> bool:
+        deliveries = []
         try:
             api_key = getattr(settings, "RESEND_API_KEY", "")
             if not api_key:
@@ -42,24 +47,122 @@ class ResendEmailBackend(BaseEmailBackend):
                 )
 
             payload = self._build_payload(message)
+            idempotency_key = (
+                getattr(message, "_tradethesis_idempotency_key", None)
+                or uuid.uuid4().hex
+            )
+            if len(idempotency_key) > 256:
+                raise ValueError("Email idempotency key must be 256 characters or fewer.")
+
+            # Persist the attempt before calling the provider. If the request
+            # times out after Resend accepted it, a retry can reuse the same
+            # key on the same EmailMessage instance without sending twice.
+            deliveries = self._start_delivery_records(message, idempotency_key)
+            if deliveries and all(
+                item.state in {"sent", "delivered", "bounced", "complained", "suppressed"}
+                for item in deliveries
+            ):
+                return True
+
             response = requests.post(
                 self.api_url,
                 headers={
                     "Authorization": f"Bearer {api_key}",
                     "Content-Type": "application/json",
+                    "Idempotency-Key": idempotency_key,
                 },
                 json=payload,
                 timeout=float(getattr(settings, "RESEND_API_TIMEOUT", 10)),
             )
             response.raise_for_status()
+            try:
+                response_data = response.json()
+            except (ValueError, requests.exceptions.JSONDecodeError) as exc:
+                raise RuntimeError("Resend returned a non-JSON success response.") from exc
+
+            provider_message_id = (
+                response_data.get("id") if isinstance(response_data, dict) else None
+            )
+            if not provider_message_id:
+                raise RuntimeError("Resend response did not include an email id.")
+
+            if deliveries:
+                from apps.emailing.models import Delivery
+
+                Delivery.objects.filter(pk__in=[item.pk for item in deliveries]).update(
+                    state=Delivery.State.SENT,
+                    provider_message_id=str(provider_message_id),
+                    sent_at=timezone.now(),
+                    error="",
+                )
             return True
+
         except Exception as exc:
+            self._mark_failed(deliveries, exc)
             if self.fail_silently:
                 logger.warning("Resend email delivery failed (%s).", type(exc).__name__)
                 return False
             if isinstance(exc, (ImproperlyConfigured, ValueError)):
                 raise
-            raise RuntimeError(f"Resend email delivery failed ({type(exc).__name__}).") from exc
+            raise RuntimeError(
+                f"Resend email delivery failed ({type(exc).__name__})."
+            ) from exc
+
+    @staticmethod
+    def _start_delivery_records(message: Any, idempotency_key: str) -> list[Any]:
+        """Create one audit row per recipient without storing message contents."""
+        from apps.emailing.models import Delivery, Template
+
+        user_model = get_user_model()
+        deliveries = []
+        for recipient in message.to:
+            recipient_digest = hashlib.sha256(
+                recipient.strip().lower().encode("utf-8")
+            ).hexdigest()[:16]
+            delivery_key = f"{idempotency_key}:{recipient_digest}"[:255]
+            user_id = getattr(message, "_tradethesis_user_id", None)
+            if user_id is None:
+                user_id = (
+                    user_model.objects.filter(email__iexact=recipient)
+                    .values_list("pk", flat=True)
+                    .first()
+                )
+
+            delivery, _ = Delivery.objects.get_or_create(
+                idempotency_key=delivery_key,
+                defaults={
+                    "user_id": user_id,
+                    "to_email": recipient,
+                    "kind": getattr(message, "_tradethesis_kind", Template.Kind.TRANSACTIONAL),
+                    "subject": message.subject or "",
+                    "state": Delivery.State.SENDING,
+                    "provider": "resend",
+                },
+            )
+            deliveries.append(delivery)
+        return deliveries
+
+    @staticmethod
+    def _mark_failed(deliveries: list[Any], exc: Exception) -> None:
+        """Store a safe error code; never persist message bodies or API credentials."""
+        if not deliveries:
+            return
+        from apps.emailing.models import Delivery
+
+        status_code = getattr(getattr(exc, "response", None), "status_code", None)
+        error_code = (
+            f"resend_http_{status_code}"
+            if status_code
+            else f"resend_{type(exc).__name__.lower()}"
+        )
+        Delivery.objects.filter(pk__in=[item.pk for item in deliveries]).exclude(
+            state__in=[
+                Delivery.State.DELIVERED,
+                Delivery.State.BOUNCED,
+                Delivery.State.COMPLAINED,
+                Delivery.State.SUPPRESSED,
+            ]
+        ).update(state=Delivery.State.FAILED, error=error_code)
 
     @staticmethod
     def _build_payload(message: Any) -> dict[str, Any]:
