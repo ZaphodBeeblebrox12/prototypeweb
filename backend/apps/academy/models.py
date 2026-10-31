@@ -659,13 +659,13 @@ class ProtectedLessonVideo(models.Model):
         if (
             not settings.DEBUG
             and getattr(settings, "ACADEMY_REQUIRE_DURABLE_VIDEO_STORAGE", True)
-            and not getattr(settings, "ACADEMY_VIDEO_STORAGE_DURABLE", False)
+            and not lesson_video_storage.is_durable
         ):
             raise ValidationError(
                 {
                     "source_file": (
-                        "Video uploads are disabled until ACADEMY_VIDEO_STORAGE_ROOT points "
-                        "to a persistent disk and ACADEMY_VIDEO_STORAGE_DURABLE is true."
+                        "Video uploads are disabled until private Google Drive storage or "
+                        "a persistent local video volume is configured."
                     )
                 }
             )
