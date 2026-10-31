@@ -1993,30 +1993,3 @@ def admin_desk_prospect_enquiry_update(request, enquiry_id):
             )
     messages.success(request, "Prospect follow-up saved.")
     return redirect("staff_admin_desk_prospect_enquiry", enquiry_id=enquiry.pk)
-
-
-    old_status = enquiry.status
-    notes_changed = staff_notes != enquiry.staff_notes
-    with transaction.atomic():
-        enquiry.status = new_status
-        enquiry.staff_notes = staff_notes
-        update_fields = ["status", "staff_notes", "updated_at"]
-        if new_status == ProspectEnquiry.Status.CONTACTED and enquiry.last_contacted_at is None:
-            enquiry.last_contacted_at = timezone.now()
-            update_fields.append("last_contacted_at")
-        enquiry.save(update_fields=update_fields)
-        if old_status != new_status or notes_changed:
-            _audit(
-                "admin.prospect_enquiry.updated",
-                request.user,
-                "prospect_enquiry",
-                enquiry.pk,
-                {
-                    "status_from": old_status,
-                    "status_to": new_status,
-                    "staff_notes_changed": notes_changed,
-                },
-            )
-    messages.success(request, "Prospect follow-up saved.")
-    return redirect("staff_admin_desk_prospect_enquiry", enquiry_id=enquiry.pk)
-
