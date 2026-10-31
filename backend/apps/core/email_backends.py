@@ -246,12 +246,12 @@ class ResendEmailBackend(BaseEmailBackend):
             text_body = strip_tags(html_body)
         text_body = str(text_body or "").strip()
         if not re.search(
-            r"(?im)^TradeThesis\\s*\\r?\\n\\s*Conviction before execution\\b",
+            r"(?im)^TradeThesis\s*\r?\n\s*Conviction before execution\b",
             text_body,
         ):
             text_body = (
                 text_body.rstrip()
-                + "\\n\\nTradeThesis\\nConviction before Execution"
+                + "\n\nTradeThesis\nConviction before Execution"
                 + "\\nTrading involves risk. TradeThesis content is for educational "
                 + "purposes and is not investment advice."
             )
