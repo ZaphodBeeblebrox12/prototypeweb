@@ -6,6 +6,7 @@ proxies manifests, AES keys, and segments after checking learner entitlement.
 import hashlib
 import logging
 import mimetypes
+import re
 from pathlib import Path
 
 from django.conf import settings
@@ -123,7 +124,7 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
             if response.status_code in (200, 201):
                 return content_length
             range_header = response.headers.get("Range", "")
-            match = re.fullmatch(r"bytes=0-(\\d+)", range_header)
+            match = re.fullmatch(r"bytes=0-(\d+)", range_header)
             return int(match.group(1)) + 1 if match else 0
 
         while offset < content_length:
