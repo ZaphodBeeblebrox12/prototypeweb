@@ -1,18 +1,16 @@
-{% load i18n %}{% blocktrans %}Hi there!{% endblocktrans %}
+Hello,
 
-{% blocktrans with sender_name=sender_name plan_name=plan_name duration_days=duration_days %}{{ sender_name }} has gifted you a {{ plan_name }} subscription for {{ duration_days }} days!{% endblocktrans %}
+{{ sender_name }} has gifted you a {{ plan_name }} subscription for {{ duration_days }} days.
 
-{% if message %}
+{% if message %}Their message:
 "{{ message }}"
-
 {% endif %}
-{% blocktrans %}Claim your gift by clicking the link below:{% endblocktrans %}
-
+Claim your gift:
 {{ claim_url }}
 
-{% blocktrans with expires_at=expires_at|date:"F j, Y" %}This gift link expires on {{ expires_at }}.{% endblocktrans %}
+This gift link expires on {{ expires_at|date:"F d, Y" }}. If you don't have a TradeThesis account yet, you'll be able to create one while claiming the gift.
 
-{% blocktrans %}Enjoy!{% endblocktrans %}
+TradeThesis
+Conviction before Execution
 
----
-{{ site_name }}
+Trading involves risk. TradeThesis content is for educational purposes and is not investment advice.
