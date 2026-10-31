@@ -54,9 +54,14 @@ def start_telegram_connect(request):
         )
     )
     if orphaned_access:
+        from django.db import transaction
         from apps.jobs.enqueue import enqueue_reconcile
         try:
-            enqueue_reconcile(request.user.pk, reason="orphaned_telegram_cleanup")
+            with transaction.atomic():
+                # Expire any link token minted before the orphaned cleanup
+                # was detected, so a delayed /start cannot restore the old link.
+                TelegramVerificationToken.objects.filter(user=request.user).delete()
+                enqueue_reconcile(request.user.pk, reason="orphaned_telegram_cleanup")
         except Exception:
             logger.exception("Could not queue orphaned Telegram cleanup user=%s", request.user.pk)
         messages.error(
