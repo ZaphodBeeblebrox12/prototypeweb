@@ -190,9 +190,11 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
 
 class PrivateLessonVideoDriveUploadTests(TestCase):
     def test_drive_upload_sends_resumable_chunks_with_content_ranges(self):
-        from unittest.mock import Mock, patch
+        import hashlib
+        from unittest.mock import Mock, PropertyMock, patch
+
         from django.core.files.base import ContentFile
-        from django.test.utils import override_settings
+
         from .video_storage import PrivateLessonVideoStorage
 
         payload = b"x" * (8 * 1024 * 1024 + 17)
@@ -215,7 +217,7 @@ class PrivateLessonVideoDriveUploadTests(TestCase):
             ]) as request,
             patch(
                 "apps.academy.google_drive_storage.GoogleDriveStorageMixin._asset_folder_id",
-                new_callable=__import__("unittest.mock", fromlist=["PropertyMock"]).PropertyMock,
+                new_callable=PropertyMock,
                 return_value="private-folder",
             ),
         ):
@@ -223,7 +225,7 @@ class PrivateLessonVideoDriveUploadTests(TestCase):
                 "academy/video-source/lesson/source.mp4",
                 content,
                 len(payload),
-                __import__("hashlib").md5(payload).hexdigest(),
+                hashlib.md5(payload).hexdigest(),
                 "video/mp4",
             )
 
