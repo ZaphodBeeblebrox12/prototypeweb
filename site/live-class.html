@@ -811,47 +811,38 @@
         No pressure to pretend you are further along than you are.
        </p>
       </div>
-      <form class="enquiry-form" data-form-key="live-class-enquiry-v1" id="liveEnquiryForm">
-       <label for="liveName">
-        Your name
-        <input autocomplete="name" data-course-slug="trade-construction-management-live" data-enquiry-version="1" id="liveName" name="name" placeholder="What should we call you?" required=""/>
+      <form class="enquiry-form" id="enquiry-form" method="post" action="#" data-academy-path="/public/enquiries/">
+       <input type="hidden" name="programme" value="live_classroom">
+       <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden">
+        <label for="liveWebsite">Leave this field blank</label>
+        <input id="liveWebsite" name="company_website" type="text" tabindex="-1" autocomplete="off">
+       </div>
+       <label for="liveName">Your name
+        <input autocomplete="name" id="liveName" name="name" maxlength="120" placeholder="What should we call you?" required>
        </label>
-       <label for="liveEmail">
-        Email address
-        <input autocomplete="email" data-course-slug="trade-construction-management-live" data-enquiry-version="1" id="liveEmail" name="email" placeholder="you@example.com" required="" type="email"/>
+       <label for="liveEmail">Email address
+        <input autocomplete="email" id="liveEmail" name="email" maxlength="254" placeholder="you@example.com" required type="email">
        </label>
-       <label for="liveStartingPoint">
-        Where are you starting from?
-        <select data-course-slug="trade-construction-management-live" data-enquiry-version="1" id="liveStartingPoint" name="starting_point">
-         <option value="">
-          Choose one (optional)
-         </option>
-         <option>
-          Learning to read charts
-         </option>
-         <option>
-          Know some patterns, need a connected plan
-         </option>
-         <option>
-          Working on risk and trade management
-         </option>
-         <option>
-          Want a more consistent review process
-         </option>
+       <label for="liveStartingPoint">Where are you starting from?
+        <select id="liveStartingPoint" name="starting_point">
+         <option value="">Choose one (optional)</option>
+         <option value="learning_charts">Learning to read charts</option>
+         <option value="connected_plan">Know some patterns, need a connected plan</option>
+         <option value="risk_management">Working on risk and trade management</option>
+         <option value="review_process">Want a more consistent review process</option>
+         <option value="other">Something else</option>
         </select>
        </label>
-       <label for="liveQuestion">
-        What would you most like to work on?
-        <textarea data-course-slug="trade-construction-management-live" data-enquiry-version="1" id="liveQuestion" name="question" placeholder="A question about context, risk, management…"></textarea>
+       <label for="liveQuestion">What would you most like to work on?
+        <textarea id="liveQuestion" name="message" maxlength="2000" placeholder="A question about context, risk, management or the next class…"></textarea>
        </label>
-       <button class="button" type="submit">
-        Review enquiry ↗
-       </button>
-       <p class="fine-note">
-        Preview only: this form does not send or store your details. Connect it to the Django enquiry workflow before publishing.
-       </p>
-       <div aria-live="polite" class="enquiry-result" id="liveEnquiryResult" role="status">
-       </div>
+       <label class="enquiry-consent" for="liveConsent">
+        <input id="liveConsent" name="consent" type="checkbox" value="yes" required>
+        <span>I agree that TradeThesis may use these details to respond to this enquiry. See the <a href="#" data-academy-path="/policies/privacy/">privacy policy</a>.</span>
+       </label>
+       <button class="button" type="submit">Send enquiry ↗</button>
+       <p class="fine-note">Your details are used to respond to this enquiry; this does not subscribe you to marketing messages. No payment is taken.</p>
+       <div aria-live="polite" class="enquiry-result" id="liveEnquiryResult" role="status" tabindex="-1"></div>
       </form>
      </div>
     </div>
@@ -936,25 +927,21 @@ document.querySelectorAll('[data-live-answer]').forEach(btn=>btn.addEventListene
  target.textContent=(item.correct?'Good distinction. ':'Look again. ')+item.text;
  target.dataset.result=item.correct?'correct':'review';
 }));
-const enquiry=document.getElementById('liveEnquiryForm');
-if(enquiry){
- const result=document.getElementById('liveEnquiryResult');
- const clearReview=()=>{
-  if(!result)return;
-  result.textContent='';
-  result.classList.remove('show');
-  delete result.dataset.result;
- };
- enquiry.addEventListener('input',clearReview);
- enquiry.addEventListener('change',clearReview);
- enquiry.addEventListener('submit',e=>{
-  e.preventDefault();
-  if(!result)return;
-  result.textContent='Preview complete: your required fields and email format passed the browser checks. Nothing has been sent or saved.';
-  result.dataset.result='preview';
-  result.classList.add('show');
- });
+function showCourseEnquiryStatus(elementId) {
+  const state = new URLSearchParams(window.location.search).get("enquiry");
+  const result = document.getElementById(elementId);
+  if (!result || !state) return;
+  const copy = {
+    received: "Thank you. Your enquiry has been received. We will use the email address you provided to follow up. This is not a course enrolment or payment confirmation.",
+    invalid: "The form could not be submitted. Please check your name, email address and consent, then try again.",
+    recent: "We have already received an enquiry from this email address about this programme recently. Please check your inbox or try again later."
+  };
+  if (!copy[state]) return;
+  result.textContent = copy[state];
+  result.dataset.result = state;
+  result.classList.add("show");
 }
+showCourseEnquiryStatus("liveEnquiryResult");
   </script>
    <script src="assets/academy-config.js?v=20261026-catalogue-config-r2"></script>
   <script src="assets/sitewide-nav.js" defer></script>
