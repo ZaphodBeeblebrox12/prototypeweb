@@ -91,11 +91,27 @@ def _process_protected_lesson_video(payload, job):
     if not video.source_file:
         raise ValueError(f"Protected lesson video {video_id} has no source file.")
 
-    call_command(
-        "process_lesson_videos",
-        video=str(video.pk),
-        force=bool((payload or {}).get("force", False)),
-    )
+    try:
+        call_command(
+            "process_lesson_videos",
+            video=str(video.pk),
+            force=bool((payload or {}).get("force", False)),
+        )
+    except Exception as exc:
+        # Failures before _process_one starts (for example, missing FFmpeg or
+        # an unavailable Drive provider) must not leave the Admin row Pending.
+        current = ProtectedLessonVideo.objects.filter(pk=video.pk).first()
+        if current is not None:
+            if current.status == ProtectedLessonVideo.Status.READY and current.stream_directory:
+                if not current.processing_error:
+                    current.processing_error = (
+                        f"Rebuild failed; previous stream retained: {exc}"
+                    )[-1200:]
+            else:
+                current.status = ProtectedLessonVideo.Status.FAILED
+                current.processing_error = current.processing_error or str(exc)[-1200:]
+            current.save(update_fields=("status", "processing_error", "updated_at"))
+        raise
 
 
 def register_builtin_handlers():

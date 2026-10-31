@@ -242,6 +242,54 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
         )
 
 
+    def test_queue_handler_marks_preflight_failure_as_failed(self):
+        from django.core.management.base import CommandError
+
+        from apps.jobs.handlers import _process_protected_lesson_video
+
+        self.video.source_file.name = "academy/video-source/test/source.mp4"
+        self.video.status = ProtectedLessonVideo.Status.PENDING
+        self.video.stream_directory = ""
+        self.video.processing_error = ""
+        self.video.save(update_fields=["source_file", "status", "stream_directory", "processing_error"])
+
+        with (
+            patch("django.core.management.call_command", side_effect=CommandError("FFmpeg unavailable")),
+            self.assertRaises(CommandError),
+        ):
+            _process_protected_lesson_video(
+                {"video_id": str(self.video.pk), "force": True},
+                job=None,
+            )
+
+        self.video.refresh_from_db()
+        self.assertEqual(self.video.status, ProtectedLessonVideo.Status.FAILED)
+        self.assertIn("FFmpeg unavailable", self.video.processing_error)
+
+    def test_queue_handler_preserves_ready_stream_on_rebuild_preflight_failure(self):
+        from django.core.management.base import CommandError
+
+        from apps.jobs.handlers import _process_protected_lesson_video
+
+        previous_prefix = self.video.stream_directory
+        self.video.source_file.name = "academy/video-source/test/source.mp4"
+        self.video.save(update_fields=["source_file"])
+
+        with (
+            patch("django.core.management.call_command", side_effect=CommandError("FFmpeg unavailable")),
+            self.assertRaises(CommandError),
+        ):
+            _process_protected_lesson_video(
+                {"video_id": str(self.video.pk), "force": True},
+                job=None,
+            )
+
+        self.video.refresh_from_db()
+        self.assertEqual(self.video.status, ProtectedLessonVideo.Status.READY)
+        self.assertEqual(self.video.stream_directory, previous_prefix)
+        self.assertIn("previous stream retained", self.video.processing_error)
+
+
 class PrivateLessonVideoDriveUploadTests(TestCase):
     def test_drive_upload_sends_resumable_chunks_with_content_ranges(self):
         import hashlib
