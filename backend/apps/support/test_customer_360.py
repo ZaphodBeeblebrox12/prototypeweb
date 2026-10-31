@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from apps.support.models import AffiliateLink, SupportTicket, TicketMessage
-from apps.bot_integration.models import TelegramAccount, DiscordAccount
+from apps.bot_integration.models import TelegramAccount, DiscordAccount, UserChannelAssignment
 from apps.subscriptions.models import Plan
 
 User = get_user_model()
@@ -262,6 +262,24 @@ class Customer360Tests(TestCase):
         self.assertEqual(response.context["discord_community_status"], "Linked")
         self.assertContains(response, "Telegram · Linked")
         self.assertContains(response, "Discord · Linked")
+
+    def test_customer_360_flags_orphaned_telegram_access_for_cleanup(self):
+        UserChannelAssignment.objects.create(
+            user=self.member,
+            platform="telegram",
+            external_id="-100710000050",
+            is_active=True,
+        )
+
+        response = self.client.get(self.url())
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(
+            response.context["telegram_community_status"],
+            "Access cleanup pending",
+        )
+        self.assertContains(response, "Telegram · Access cleanup pending")
+        self.assertNotContains(response, "Telegram · Not linked")
 
     def test_customer_360_distinguishes_legacy_login_from_bot_community_link(self):
         self.member.telegram_id = 710000002
