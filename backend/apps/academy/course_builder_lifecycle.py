@@ -22,7 +22,16 @@ def mark_builder_draft_deleted(record):
                 lambda storage=storage, name=name: storage.delete(name),
                 robust=True,
             )
+    for video in record.videos.all():
+        if video.source_file:
+            storage = video.source_file.storage
+            name = video.source_file.name
+            transaction.on_commit(
+                lambda storage=storage, name=name: storage.delete(name),
+                robust=True,
+            )
     record.assets.all().delete()
+    record.videos.all().delete()
     record.status = CourseImport.Status.DELETED
     record.save(update_fields=["status", "updated_at"])
     return True

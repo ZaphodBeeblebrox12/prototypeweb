@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import logging
 import re
 import uuid
 import xml.etree.ElementTree as ET
@@ -29,6 +30,7 @@ from .models import (
     CourseModule,
     Lesson,
     LessonInstructorMaterial,
+    ProtectedLessonVideo,
 )
 from .regional_content import (
     CONTENT_COUNTRY_TO_REGION,
@@ -40,6 +42,85 @@ from .regional_content import (
 from .services import sync_free_membership_course_access
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
+
+
+def _queue_builder_protected_video(video_id, previous_source_name=""):
+    """Queue private HLS packaging after the course publication transaction commits."""
+    from apps.jobs.enqueue import enqueue_generic
+
+    payload = {"video_id": str(video_id), "force": True}
+    if previous_source_name:
+        payload["previous_source_name"] = previous_source_name
+    try:
+        enqueue_generic(
+            "process_protected_lesson_video",
+            payload,
+            idempotency_key=f"academy:protected-video:{video_id}",
+        )
+    except Exception:
+        # Course publication must not be rolled back because a queue insert failed.
+        # The Pending row remains visible in Protected Lesson Videos Admin for retry.
+        logger.exception("Could not queue protected video processing for %s", video_id)
+
+
+def _transfer_builder_video(record, lesson_data, lesson, user):
+    """Attach the staged private source to its real Lesson and queue HLS conversion."""
+    builder_lesson_id = str(lesson_data.get("builder_lesson_id") or "").strip()[:120]
+    if not builder_lesson_id:
+        return None
+
+    staged = (
+        record.videos.select_for_update()
+        .filter(lesson_id=builder_lesson_id)
+        .first()
+    )
+    if staged is None or not staged.source_file:
+        return None
+
+    video = (
+        ProtectedLessonVideo.objects.select_for_update()
+        .filter(lesson=lesson)
+        .first()
+    )
+    previous_source_name = (
+        video.source_file.name
+        if video is not None and video.source_file
+        else ""
+    )
+    staged_source_name = staged.source_file.name
+
+    if video is None:
+        video = ProtectedLessonVideo(
+            lesson=lesson,
+            status=ProtectedLessonVideo.Status.PENDING,
+            created_by=user,
+        )
+    else:
+        # Keep a working rendition live while a replacement source is encoded.
+        video.status = (
+            ProtectedLessonVideo.Status.READY
+            if video.stream_directory
+            else ProtectedLessonVideo.Status.PENDING
+        )
+        video.processing_error = ""
+        if not video.stream_directory:
+            video.processed_at = None
+        if video.created_by_id is None:
+            video.created_by = user
+
+    # Both fields use the same private storage backend. Reassign the storage key
+    # instead of downloading and uploading a second copy of a potentially large file.
+    video.source_file.name = staged_source_name
+    video.save()
+    staged.delete()
+    transaction.on_commit(
+        lambda video_id=video.pk, old_name=previous_source_name: _queue_builder_protected_video(
+            video_id, old_name if old_name and old_name != staged_source_name else ""
+        ),
+        robust=True,
+    )
+    return video
 _LESSON_HEADING = re.compile(
     r"^##\s+Lesson\s+(?P<source_id>\d+\.\d+)\s*[—–-]\s*(?P<title>.+?)\s*$",
     re.MULTILINE,
@@ -856,6 +937,7 @@ def publish_course_import(record, *, user):
                 for field, value in next_fields.items():
                     setattr(lesson, field, value)
                 lesson.save()
+                _transfer_builder_video(record, lesson_data, lesson, user)
                 # Course Builder answer keys stay in the instructor-only table and never enter learner JSON.
                 private_material = lesson_data.get("instructor_material")
                 if isinstance(private_material, dict):
@@ -897,6 +979,18 @@ def publish_course_import(record, *, user):
             module.is_published = True
             module.save(update_fields=["position", "is_published", "updated_at"])
         course.modules.exclude(slug__in=module_slugs).update(is_published=False)
+
+        # Any staged video whose builder lesson was removed before review is
+        # discarded; it must never become an orphaned Drive source object.
+        for unused_video in record.videos.all():
+            if unused_video.source_file:
+                storage = unused_video.source_file.storage
+                name = unused_video.source_file.name
+                transaction.on_commit(
+                    lambda storage=storage, name=name: storage.delete(name),
+                    robust=True,
+                )
+            unused_video.delete()
 
         for asset_data in payload.get("assets", []):
             asset_id = asset_data["stable_asset_id"]

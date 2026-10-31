@@ -498,6 +498,17 @@ def protected_lesson_video_upload_to(instance, filename):
     return f"academy/video-source/{instance.lesson_id}/{uuid.uuid4().hex}{suffix}"
 
 
+def course_import_video_upload_to(instance, filename):
+    suffix = Path(filename).suffix.lower()
+    if suffix not in {".mp4", ".mov", ".mkv", ".webm"}:
+        suffix = ".mp4"
+    draft_key = uuid.uuid5(
+        uuid.NAMESPACE_URL,
+        f"tradethesis-course-import-video:{instance.course_import_id}:{instance.lesson_id}",
+    ).hex
+    return f"academy/video-drafts/{instance.course_import_id}/{draft_key}/{uuid.uuid4().hex}{suffix}"
+
+
 class CourseImport(models.Model):
     """Editable builder draft until submitted; reviewable snapshots never mutate live course rows."""
 
@@ -580,6 +591,48 @@ class CourseImportAsset(models.Model):
         return f"{self.course_import.title} · {self.asset_key}"
 
 
+class CourseImportVideo(models.Model):
+    """Private source video staged against a stable Course Builder lesson ID."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    course_import = models.ForeignKey(
+        CourseImport, on_delete=models.CASCADE, related_name="videos"
+    )
+    lesson_id = models.CharField(max_length=120)
+    source_file = models.FileField(
+        max_length=512,
+        storage=lesson_video_storage,
+        upload_to=course_import_video_upload_to,
+        blank=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=["mp4", "mov", "mkv", "webm"])
+        ],
+    )
+    original_filename = models.CharField(max_length=255, blank=True)
+    size_bytes = models.PositiveBigIntegerField(default=0)
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="academy_course_import_videos_uploaded",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["course_import_id", "lesson_id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["course_import", "lesson_id"],
+                name="academy_import_video_lesson_uq",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.course_import.title} · {self.original_filename or self.lesson_id}"
+
+
 class CourseMediaAsset(models.Model):
     """Shared course asset with a stable ID and protected delivery route."""
 
@@ -628,6 +681,7 @@ class ProtectedLessonVideo(models.Model):
         Lesson, on_delete=models.CASCADE, related_name="protected_video"
     )
     source_file = models.FileField(
+        max_length=512,
         storage=lesson_video_storage,
         upload_to=protected_lesson_video_upload_to,
         blank=True,

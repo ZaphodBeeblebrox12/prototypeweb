@@ -45,10 +45,12 @@ from .models import (
     Course,
     CourseImport,
     CourseImportAsset,
+    CourseImportVideo,
     CourseMediaAsset,
     GoogleDriveCredential,
     Lesson,
     LessonInstructorMaterial,
+    ProtectedLessonVideo,
 )
 from .permissions import is_course_content_admin
 from .regional_content import (
@@ -89,6 +91,8 @@ def _trading_path_import_candidate():
     return candidate
 
 _MAX_IMAGE_BYTES = 10 * 1024 * 1024
+_MAX_PROTECTED_VIDEO_BYTES = 5 * 1024 * 1024 * 1024
+_ALLOWED_PROTECTED_VIDEO_SUFFIXES = {".mp4", ".mov", ".mkv", ".webm"}
 _ALLOWED_IMAGES = {
     "image/jpeg": ("JPEG", ".jpg"),
     "image/png": ("PNG", ".png"),
@@ -282,6 +286,10 @@ def _clean_image_payload(course_state, course_slug):
 
     for module in snapshot.get("modules", []):
         for lesson in module.get("lessons", []):
+            if isinstance(lesson, dict):
+                # Upload metadata is generated from the private staging table;
+                # never trust a browser-supplied protected-video status or filename.
+                lesson.pop("protectedVideo", None)
             images = lesson.get("images")
             if not isinstance(images, list):
                 legacy = lesson.get("image")
@@ -867,6 +875,7 @@ def _build_import_payload(course_state, course_slug):
             lessons.append(
                 {
                     "source_id": f"{module_index}.{lesson_index}",
+                    "builder_lesson_id": str(lesson.get("id") or "")[:120],
                     "slug": lesson_slug,
                     "title": title,
                     "summary": str(lesson.get("summary") or "")[:360],
@@ -1124,9 +1133,23 @@ def _retire_legacy_drafts_for_deleted_courses(records):
     return retired_ids
 
 
+def _protected_video_editor_metadata(video):
+    """Expose status only; never return the private source or stream storage key."""
+    return {
+        "status": str(video.status),
+        "has_source": bool(video.source_file),
+        "processed_at": video.processed_at.isoformat() if video.processed_at else "",
+        "processing_error": str(video.processing_error or "")[:600],
+    }
+
+
 def _builder_state_from_published_course(course):
     """Hydrate published learner content and private authoring material for a revision."""
     all_assets = {str(asset.pk): asset for asset in course.media_assets.all()}
+    protected_videos_by_lesson = {
+        str(video.lesson_id): video
+        for video in ProtectedLessonVideo.objects.filter(lesson__module__course=course)
+    }
     modules = []
     for module in course.modules.filter(is_published=True).order_by("position", "title"):
         lessons = []
@@ -1414,6 +1437,9 @@ def _builder_state_from_published_course(course):
                     ],
                 }
             )
+            existing_video = protected_videos_by_lesson.get(str(lesson.pk))
+            if existing_video:
+                lessons[-1]["protectedVideo"] = _protected_video_editor_metadata(existing_video)
         if lessons:
             modules.append(
                 {
@@ -1501,6 +1527,18 @@ def _draft_response(record, request):
         seeded_copy = default_presentation_for_course(record.course_slug)
         if seeded_copy is not None:
             state.update(builder_fields_for_catalogue_presentation(seeded_copy, True))
+    staged_videos = {
+        video.lesson_id: video for video in record.videos.all()
+        if video.source_file
+    }
+    live_videos = {}
+    if record.target_course_id:
+        live_videos = {
+            str(video.lesson_id): video
+            for video in ProtectedLessonVideo.objects.filter(
+                lesson__module__course_id=record.target_course_id
+            )
+        }
     for module in state.get("modules", []):
         for lesson in module.get("lessons", []):
             images = lesson.get("images") if isinstance(lesson.get("images"), list) else []
@@ -1512,6 +1550,20 @@ def _draft_response(record, request):
                     else ""
                 )
             lesson["image"] = deepcopy(images[0]) if images else None
+            staged_video = staged_videos.get(str(lesson.get("id") or ""))
+            if staged_video:
+                lesson["protectedVideo"] = {
+                    "status": "stored_for_draft",
+                    "filename": staged_video.original_filename,
+                    "size_bytes": staged_video.size_bytes,
+                    "uploaded_at": staged_video.updated_at.isoformat(),
+                }
+            else:
+                live_video = live_videos.get(str(lesson.get("id") or ""))
+                if live_video:
+                    lesson["protectedVideo"] = _protected_video_editor_metadata(live_video)
+                else:
+                    lesson.pop("protectedVideo", None)
     state["serverDraftId"] = str(record.pk)
     state["serverUpdatedAt"] = record.updated_at.isoformat()
     state["status"] = "draft-update" if record.target_course_id else "draft"
@@ -2185,6 +2237,26 @@ def course_builder_api(request):
                         robust=True,
                     )
                 stale_asset.delete()
+            builder_state = current_record.payload.get("builder_state") or {}
+            live_builder_lesson_ids = {
+                str(lesson.get("id"))
+                for module in (builder_state.get("modules") or [])
+                if isinstance(module, dict)
+                for lesson in (module.get("lessons") or [])
+                if isinstance(lesson, dict) and lesson.get("id")
+            }
+            staged_videos = current_record.videos.all()
+            if live_builder_lesson_ids:
+                staged_videos = staged_videos.exclude(lesson_id__in=live_builder_lesson_ids)
+            for stale_video in staged_videos:
+                if stale_video.source_file:
+                    storage = stale_video.source_file.storage
+                    name = stale_video.source_file.name
+                    transaction.on_commit(
+                        lambda storage=storage, name=name: storage.delete(name),
+                        robust=True,
+                    )
+                stale_video.delete()
             if mode == "submit":
                 CourseImport.objects.filter(
                     course_slug=slug,
@@ -2301,3 +2373,139 @@ def course_builder_asset(request, import_id, asset_id):
     response["Cache-Control"] = "private, no-store"
     response["X-Content-Type-Options"] = "nosniff"
     return response
+
+
+@login_required
+@require_http_methods(["POST"])
+def course_builder_video_upload(request, import_id, lesson_id):
+    """Store one private video against an editable draft lesson."""
+
+    _require_admin(request)
+    uploaded = request.FILES.get("file")
+    if uploaded is None:
+        return JsonResponse({"detail": "Choose a video file to upload."}, status=400)
+
+    filename = str(uploaded.name or "lesson-video").replace("\\", "/").rsplit("/", 1)[-1]
+    suffix = Path(filename).suffix.lower()
+    if suffix not in _ALLOWED_PROTECTED_VIDEO_SUFFIXES:
+        return JsonResponse(
+            {"detail": "Upload an MP4, MOV, MKV or WebM video."},
+            status=400,
+        )
+    if uploaded.size <= 0:
+        return JsonResponse({"detail": "The video file is empty."}, status=400)
+    if uploaded.size > _MAX_PROTECTED_VIDEO_BYTES:
+        return JsonResponse(
+            {"detail": "Course Builder videos must be 5 GB or smaller."},
+            status=400,
+        )
+
+    staged_upload = CourseImportVideo(
+        course_import_id=import_id,
+        lesson_id=str(lesson_id),
+    )
+    storage = staged_upload.source_file.storage
+    uploaded_name = ""
+
+    def discard_unattached_upload():
+        if not uploaded_name:
+            return
+        try:
+            storage.delete(uploaded_name)
+        except Exception:
+            logger.exception(
+                "Could not clean up an unattached Course Builder video upload for draft %s",
+                import_id,
+            )
+
+    try:
+        # Write the large binary to private storage before opening a database
+        # transaction. Never hold a row lock while a multi-GB Drive upload runs.
+        staged_upload.source_file.save(filename, uploaded, save=False)
+        uploaded_name = staged_upload.source_file.name
+
+        with transaction.atomic():
+            record = get_object_or_404(
+                CourseImport.objects.select_for_update(),
+                pk=import_id,
+                status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
+            )
+            builder_state = (record.payload or {}).get("builder_state")
+            lesson_exists = (
+                isinstance(builder_state, dict)
+                and any(
+                    str(lesson.get("id") or "") == str(lesson_id)
+                    for module in (builder_state.get("modules") or [])
+                    if isinstance(module, dict)
+                    for lesson in (module.get("lessons") or [])
+                    if isinstance(lesson, dict)
+                )
+            )
+            if not lesson_exists:
+                raise Http404
+
+            current_video = (
+                record.videos.select_for_update().filter(lesson_id=str(lesson_id)).first()
+            )
+            previous_name = (
+                current_video.source_file.name
+                if current_video is not None and current_video.source_file
+                else ""
+            )
+
+            if current_video is None:
+                staged_upload.original_filename = filename[:255]
+                staged_upload.size_bytes = uploaded.size
+                staged_upload.uploaded_by = request.user
+                staged_upload.save()
+                staged_video = staged_upload
+            else:
+                current_video.source_file.name = uploaded_name
+                current_video.original_filename = filename[:255]
+                current_video.size_bytes = uploaded.size
+                current_video.uploaded_by = request.user
+                current_video.save()
+                staged_video = current_video
+
+            record.save(update_fields=["updated_at"])
+            if previous_name and previous_name != uploaded_name:
+                transaction.on_commit(
+                    lambda storage=storage, name=previous_name: storage.delete(name),
+                    robust=True,
+                )
+    except Http404:
+        discard_unattached_upload()
+        raise
+    except (ImproperlyConfigured, OSError):
+        discard_unattached_upload()
+        logger.exception("Course Builder protected-video upload failed for draft %s", import_id)
+        return JsonResponse(
+            {
+                "detail": (
+                    "Private video storage is temporarily unavailable. "
+                    "The existing draft and any previous video upload were preserved."
+                ),
+                "retryable": True,
+            },
+            status=503,
+        )
+    except Exception:
+        discard_unattached_upload()
+        raise
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "video": {
+                "status": "stored_for_draft",
+                "filename": staged_video.original_filename,
+                "size_bytes": staged_video.size_bytes,
+                "uploaded_at": staged_video.updated_at.isoformat(),
+            },
+            "message": (
+                "Video stored privately. Encrypted streaming is prepared automatically "
+                "after this course is approved and published."
+            ),
+        },
+        status=201,
+    )
