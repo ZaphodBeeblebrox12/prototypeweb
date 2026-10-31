@@ -1,14 +1,9 @@
 """Contract tests keeping public Trading Path offers aligned with Academy data."""
 
-from pathlib import Path
-
 from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 
 from .models import Course, CourseModule, Lesson
-
-
-REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 
 
 class PublicTradingPathCommerceContractTests(TestCase):
@@ -58,10 +53,13 @@ class PublicTradingPathCommerceContractTests(TestCase):
 
 class PublicTradingPathStaticContractTests(SimpleTestCase):
     def test_homepage_and_course_page_use_academy_backed_commerce_fields(self):
-        homepage = (REPOSITORY_ROOT / "site" / "index.html").read_text(encoding="utf-8")
-        course_page = (REPOSITORY_ROOT / "site" / "trading-path.html").read_text(encoding="utf-8")
+        from pathlib import Path
+
+        repository_root = Path(__file__).resolve().parents[3]
+        homepage = (repository_root / "site" / "index.html").read_text(encoding="utf-8")
+        course_page = (repository_root / "site" / "trading-path.html").read_text(encoding="utf-8")
         commerce_script = (
-            REPOSITORY_ROOT / "site" / "assets" / "course-commerce.js"
+            repository_root / "site" / "assets" / "course-commerce.js"
         ).read_text(encoding="utf-8")
 
         self.assertNotIn("₹999", homepage)
