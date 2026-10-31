@@ -55,8 +55,37 @@
       {% if desk_access.subscriptions %}<li><a href="{% url 'staff_admin_desk_subscriptions' %}">Manage subscriptions &amp; access →</a></li>{% endif %}
       {% if desk_access.finance %}<li><a href="{% url 'staff_admin_desk_finance' %}">Payments &amp; invoice register →</a></li>{% endif %}
       {% if desk_access.business %}<li><a href="{% url 'staff_admin_desk_business' %}">Business details &amp; tax settings →</a></li>{% endif %}
+      {% if desk_access.prospects %}<li><a href="{% url 'staff_admin_desk_prospect_enquiries' %}">Prospect enquiries →</a></li>{% endif %}
     </ul>
   </section>
+
+  {% if prospect_enquiries %}
+  <section class="section" aria-labelledby="prospect-enquiries-heading">
+    <div class="section-head">
+      <h2 id="prospect-enquiries-heading">Prospect enquiries</h2>
+      <p>Public requests about courses · separate from member support</p>
+    </div>
+    <div class="panel">
+      <div class="section-head">
+        <h2>{{ prospect_enquiries.new }} new · {{ prospect_enquiries.follow_up }} in follow-up</h2>
+        <p><a href="{{ prospect_enquiries.links.new }}">View new enquiries →</a> · <a href="{{ prospect_enquiries.links.all }}">Open prospect queue →</a></p>
+      </div>
+      {% if prospect_enquiries.recent %}
+      <ul class="signal-list" style="margin-top:12px">
+        {% for enquiry in prospect_enquiries.recent %}
+        <li>
+          <a href="{% url 'staff_admin_desk_prospect_enquiry' enquiry.pk %}">{{ enquiry.name }} · {{ enquiry.get_programme_display }}</a>
+          <span class="signal-count">{{ enquiry.get_status_display }} · {{ enquiry.created_at|date:"j M Y, H:i" }}</span>
+          <span class="note">{{ enquiry.email }} — {{ enquiry.question|default:"No additional question"|truncatechars:120 }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="note" style="margin-top:10px">No prospect enquiries have been submitted yet.</p>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
 
   {% if support_tickets %}
   <section class="section" aria-labelledby="support-tickets-heading">
