@@ -50,6 +50,7 @@
   <section class="section" aria-labelledby="daily-management-heading">
     <div class="section-head"><h2 id="daily-management-heading">Everyday management</h2><p>Routine creator tasks, without opening Django Admin.</p></div>
     <ul class="link-list">
+      <li><a href="{% url 'staff_admin_desk_operations_timeline' %}">Operations timeline &amp; incident signals →</a></li>
       {% if desk_access.accounts %}<li><a href="{% url 'staff_admin_desk_accounts' %}">Manage learner accounts →</a></li>{% endif %}
       {% if desk_access.subscriptions %}<li><a href="{% url 'staff_admin_desk_subscriptions' %}">Manage subscriptions &amp; access →</a></li>{% endif %}
       {% if desk_access.finance %}<li><a href="{% url 'staff_admin_desk_finance' %}">Payments &amp; invoice register →</a></li>{% endif %}
