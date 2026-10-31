@@ -5,6 +5,7 @@ network request is made.
 """
 from urllib.parse import parse_qs, urlsplit
 
+from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -20,6 +21,9 @@ class TelegramConnectionFlowTests(TestCase):
             username="telegram-member",
             email="telegram-member@example.com",
             password="Test-password-123!",
+        )
+        EmailAddress.objects.create(
+            user=self.user, email=self.user.email, primary=True, verified=True
         )
         self.client.force_login(self.user)
 
