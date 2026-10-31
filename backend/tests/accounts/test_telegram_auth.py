@@ -209,6 +209,38 @@ class TestTelegramAuthView:
         assert "expired" in response.json()["error"].lower()
         assert not User.objects.filter(telegram_id=telegram_auth_data["id"]).exists()
 
+    def test_telegram_auth_uses_existing_canonical_telegram_account(self, client, telegram_auth_data, telegram_auth_bot_config):
+        from apps.bot_integration.models import TelegramAccount
+
+        linked_user = User.objects.create_user(
+            username="canonical-linked-user",
+            email="canonical-linked-user@example.com",
+        )
+        TelegramAccount.objects.create(
+            user=linked_user,
+            chat_id=telegram_auth_data["id"],
+            telegram_user_id=telegram_auth_data["id"],
+            is_active=True,
+        )
+        token = "test_token"
+        data_check_string = "\\n".join(
+            f"{k}={v}" for k, v in sorted(telegram_auth_data.items()) if v
+        )
+        secret_key = hashlib.sha256(token.encode()).digest()
+        telegram_auth_data["hash"] = hmac.new(
+            secret_key, data_check_string.encode(), hashlib.sha256
+        ).hexdigest()
+
+        response = client.post(
+            "/api/auth/telegram/",
+            telegram_auth_data,
+            content_type="application/json",
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["created"] is False
+        assert response.json()["user_id"] == str(linked_user.id)
+
     def test_telegram_auth_does_not_attach_by_reusable_username(self, client, telegram_auth_data, telegram_auth_bot_config):
         import time
 
