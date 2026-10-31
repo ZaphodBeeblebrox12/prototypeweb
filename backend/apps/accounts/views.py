@@ -582,6 +582,27 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
         telegram_account = getattr(user, "telegram_account", None)
         discord_account = getattr(user, "discord_account", None)
         discord_connected = bool(discord_account and discord_account.is_active)
+        from apps.jobs.models import ProvisioningOperation
+        telegram_cleanup_pending = bool(
+            telegram_account is None
+            and (
+                UserChannelAssignment.objects.filter(
+                    user=user, platform="telegram", is_active=True,
+                ).exists()
+                or ProvisioningOperation.objects.filter(
+                    user_id=user.pk,
+                    operation=ProvisioningOperation.OP_GRANT,
+                    state__in=[
+                        ProvisioningOperation.ST_PENDING,
+                        ProvisioningOperation.ST_CREATING,
+                        ProvisioningOperation.ST_CREATED,
+                        ProvisioningOperation.ST_SENDING,
+                        ProvisioningOperation.ST_SENT,
+                        ProvisioningOperation.ST_UNKNOWN,
+                    ],
+                ).exists()
+            )
+        )
         public_site_url = os.environ.get(
             "TRADETHESIS_PUBLIC_SITE_URL",
             "https://tradethesis-public-staging.onrender.com/",
@@ -625,6 +646,7 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
             "member_active_entitlements": len(active_entitlements),
             "member_access_record_count": len(active_entitlements) + len(active_subs),
             "telegram_account": telegram_account,
+            "telegram_cleanup_pending": telegram_cleanup_pending,
             "telegram_bot_configured": telegram_bot_configured,
             # Backward-compatible alias for templates/integrations not yet updated.
             "telegram_verification_configured": telegram_bot_configured,
