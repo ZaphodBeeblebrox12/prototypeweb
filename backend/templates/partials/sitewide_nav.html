@@ -43,7 +43,10 @@
           {% if user.is_staff %}<a href="{% url 'staff_admin_desk' %}">Admin Desk</a>{% endif %}
           <a href="{% url 'profile' %}">Profile &amp; security</a>
           <a href="{% url 'growth:referral_dashboard' %}">Referral credits</a>
-          <a href="{% url 'account_logout' %}">Sign out</a>
+          <form method="post" action="{% url 'account_logout' %}" class="tt-account-logout-form">
+            {% csrf_token %}
+            <button type="submit" class="tt-account-logout-button">Sign out</button>
+          </form>
         </div>
       </details>
     {% endif %}
@@ -58,7 +61,10 @@
       {% if user.is_staff %}<a href="{% url 'staff_admin_desk' %}">Admin Desk</a>{% endif %}
       <a href="{% url 'profile' %}">Profile &amp; security</a>
       <a href="{% url 'growth:referral_dashboard' %}">Referral credits</a>
-      <a class="mobile-menu-cta" href="{% url 'account_logout' %}">Sign out</a>
+      <form method="post" action="{% url 'account_logout' %}" class="mobile-menu-logout-form">
+        {% csrf_token %}
+        <button class="mobile-menu-cta" type="submit">Sign out</button>
+      </form>
     {% elif request.path == '/accounts/login/' %}
       <a class="mobile-menu-cta" href="{% url 'account_signup' %}">Create account ↗</a>
     {% elif request.path == '/accounts/signup/' %}
