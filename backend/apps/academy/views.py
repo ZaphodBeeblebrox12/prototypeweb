@@ -699,7 +699,7 @@ def lesson_detail(request, course_slug, lesson_id):
         else ""
     )
     video_is_file = video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
-    video_watermark_name = request.user.get_full_name().strip() or request.user.email
+    video_watermark_name = request.user.full_name.strip() or request.user.email
     practice_questions = (
         lesson.content_json.get("questions", []) if isinstance(lesson.content_json, dict) else []
     )
