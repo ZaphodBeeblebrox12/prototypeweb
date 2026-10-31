@@ -139,9 +139,9 @@ class ProtectedLessonVideoAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["source_file"].help_text = (
-            "Upload a source video (MP4, MOV, MKV or WebM). After saving, run "
-            "python manage.py process_lesson_videos --lesson <LESSON_UUID> "
-            "from the Django service shell. The source remains private."
+            "Upload a source video (MP4, MOV, MKV or WebM). After saving, return "
+            "to the list and choose Actions → Queue / rebuild protected streams. "
+            "The source and generated stream remain private."
         )
 
     class Meta:

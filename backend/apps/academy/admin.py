@@ -826,6 +826,7 @@ class CourseMediaAssetAdmin(admin.ModelAdmin):
 @admin.register(ProtectedLessonVideo)
 class ProtectedLessonVideoAdmin(admin.ModelAdmin):
     form = ProtectedLessonVideoAdminForm
+    actions = ("queue_processing",)
     list_display = ("lesson", "course_title", "status", "processed_at", "updated_at")
     list_filter = ("status", "lesson__module__course")
     search_fields = ("lesson__title", "lesson__module__course__title")
@@ -853,6 +854,37 @@ class ProtectedLessonVideoAdmin(admin.ModelAdmin):
     @admin.display(description="Course")
     def course_title(self, obj):
         return obj.lesson.module.course.title
+
+    @admin.action(description="Queue / rebuild protected streams for selected videos")
+    def queue_processing(self, request, queryset):
+        from apps.jobs.enqueue import enqueue_generic
+
+        queued = 0
+        skipped = 0
+        for video in queryset.iterator():
+            if not video.source_file:
+                skipped += 1
+                continue
+            enqueue_generic(
+                "process_protected_lesson_video",
+                {"video_id": str(video.pk), "force": True},
+                idempotency_key=f"academy:protected-video:{video.pk}",
+            )
+            queued += 1
+
+        if queued:
+            messages.success(
+                request,
+                (
+                    f"Queued background processing for {queued} protected video(s). "
+                    "Refresh this page to check the processing status."
+                ),
+            )
+        if skipped:
+            messages.warning(
+                request,
+                f"Skipped {skipped} selected row(s) without a source video.",
+            )
 
     def has_module_permission(self, request):
         return is_course_content_admin(request.user)
