@@ -172,13 +172,17 @@ class NotificationService:
         from_email = from_email or settings.DEFAULT_FROM_EMAIL
 
         try:
-            send_mail(
+            sent_count = send_mail(
                 subject=subject,
                 message=body,
                 from_email=from_email,
                 recipient_list=[to_email],
                 html_message=html_body,
+                fail_silently=False,
             )
+            if not sent_count:
+                logger.warning("Email backend accepted zero messages for recipient=%s", to_email)
+                return False
             return True
         except Exception as e:
             logger.error(f"Failed to send simple email to {to_email}: {e}")
