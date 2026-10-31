@@ -8,6 +8,7 @@ import json
 import time
 
 from django.conf import settings
+from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -52,7 +53,7 @@ def _verify_resend_signature(request) -> bool:
 @csrf_exempt
 @require_POST
 def resend_webhook(request):
-    """Apply signed Resend lifecycle events to matching Delivery rows."""
+    """Apply signed Resend lifecycle events to matching recipient delivery rows."""
     if not getattr(settings, "RESEND_WEBHOOK_SECRET", ""):
         return JsonResponse({"error": "Webhook secret is not configured."}, status=503)
     if not _verify_resend_signature(request):
@@ -71,6 +72,7 @@ def resend_webhook(request):
         "email.sent": "sent",
         "email.delivered": "delivered",
         "email.delivery_delayed": "delayed",
+        "email.failed": "failed",
         "email.bounced": "bounced",
         "email.complained": "complained",
         "email.suppressed": "suppressed",
@@ -80,39 +82,65 @@ def resend_webhook(request):
         return JsonResponse({"ok": True, "ignored": True})
 
     data = event.get("data")
-    email_id = data.get("email_id") if isinstance(data, dict) else None
+    if not isinstance(data, dict):
+        return JsonResponse({"error": "Invalid event data."}, status=400)
+
+    email_id = data.get("email_id")
+    recipients = data.get("to")
     if not email_id:
         return JsonResponse({"error": "Event is missing data.email_id."}, status=400)
+    if (
+        not isinstance(recipients, list)
+        or not recipients
+        or any(not isinstance(item, str) or not item.strip() for item in recipients)
+    ):
+        return JsonResponse({"error": "Event is missing valid data.to recipients."}, status=400)
 
     from apps.emailing.models import Delivery
 
-    delivery_qs = Delivery.objects.filter(
+    matching_email = Delivery.objects.filter(
         provider="resend",
         provider_message_id=email_id,
     )
-    if not delivery_qs.exists():
+    if not matching_email.exists():
         # Resend retries non-2xx webhook deliveries. This also covers the very
         # small race where the webhook arrives before the send response is saved.
         return JsonResponse({"error": "Email delivery record is not available yet."}, status=503)
 
+    # Resend now emits recipient-scoped lifecycle events. Match data.to as well
+    # as email_id, because one recipient can bounce while another delivers.
+    recipient_filter = Q()
+    for recipient in recipients:
+        recipient_filter |= Q(to_email__iexact=recipient.strip())
+    delivery_qs = matching_email.filter(recipient_filter)
+
     # Webhooks can be retried or arrive out of order. A late "sent" or
     # "delivery delayed" event must never downgrade a confirmed delivery,
-    # bounce, complaint, or suppression outcome.
+    # bounce, complaint, failure, or suppression outcome.
     protected_states_by_event = {
         "email.sent": [
             Delivery.State.DELIVERED,
             Delivery.State.DELAYED,
+            Delivery.State.FAILED,
             Delivery.State.BOUNCED,
             Delivery.State.COMPLAINED,
             Delivery.State.SUPPRESSED,
         ],
         "email.delivery_delayed": [
             Delivery.State.DELIVERED,
+            Delivery.State.FAILED,
+            Delivery.State.BOUNCED,
+            Delivery.State.COMPLAINED,
+            Delivery.State.SUPPRESSED,
+        ],
+        "email.failed": [
+            Delivery.State.DELIVERED,
             Delivery.State.BOUNCED,
             Delivery.State.COMPLAINED,
             Delivery.State.SUPPRESSED,
         ],
         "email.delivered": [
+            Delivery.State.FAILED,
             Delivery.State.BOUNCED,
             Delivery.State.COMPLAINED,
             Delivery.State.SUPPRESSED,
