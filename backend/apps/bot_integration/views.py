@@ -391,39 +391,39 @@ def telegram_webhook(request):
                     else:
                         status = "account_conflict"
                 elif (
-                TelegramAccount.objects.filter(chat_id=chat_id)
-                .exclude(user_id=user.id).exists()
-                or User.objects.filter(
-                    telegram_id=telegram_user_id
-                ).exclude(pk=user.id).exists()
-            ):
-                # Preserve the token so support can resolve the existing link;
-                # don't replace or detach another TradeThesis user's account,
-                # including a legacy Telegram Login Widget identity.
-                status = "conflict"
-            else:
-                TelegramAccount.objects.update_or_create(
-                    user=user,
-                    defaults={
-                        "chat_id": chat_id,
-                        "telegram_user_id": telegram_user_id,
-                        "is_active": True,
-                        "username": from_user.get("username") or "",
-                        "first_name": from_user.get("first_name") or "",
-                    },
-                )
-                token.delete()
-                BotAccessAudit.objects.create(
-                    user=user, action="link", platform="telegram",
-                    target=str(chat_id), status="success",
-                )
-                enqueue_reconcile(user.id, reason="telegram_link")
-                transaction.on_commit(
-                    lambda uid=user.id: sync_telegram_profile_for_user(uid)
-                )
-                transaction.on_commit(
-                    lambda uid=user.id: sync_channel_memberships_for_user(uid)
-                )
+                    TelegramAccount.objects.filter(chat_id=chat_id)
+                    .exclude(user_id=user.id).exists()
+                    or User.objects.filter(
+                        telegram_id=telegram_user_id
+                    ).exclude(pk=user.id).exists()
+                ):
+                    # Preserve the token so support can resolve the existing link;
+                    # don't replace or detach another TradeThesis user's account,
+                    # including a legacy Telegram Login Widget identity.
+                    status = "conflict"
+                else:
+                    TelegramAccount.objects.update_or_create(
+                        user=user,
+                        defaults={
+                            "chat_id": chat_id,
+                            "telegram_user_id": telegram_user_id,
+                            "is_active": True,
+                            "username": from_user.get("username") or "",
+                            "first_name": from_user.get("first_name") or "",
+                        },
+                    )
+                    token.delete()
+                    BotAccessAudit.objects.create(
+                        user=user, action="link", platform="telegram",
+                        target=str(chat_id), status="success",
+                    )
+                    enqueue_reconcile(user.id, reason="telegram_link")
+                    transaction.on_commit(
+                        lambda uid=user.id: sync_telegram_profile_for_user(uid)
+                    )
+                    transaction.on_commit(
+                        lambda uid=user.id: sync_channel_memberships_for_user(uid)
+                    )
     except TelegramVerificationToken.DoesNotExist:
         # Telegram may retry a webhook after its first successful response.
         # Treat the already-linked identity as idempotent rather than telling
