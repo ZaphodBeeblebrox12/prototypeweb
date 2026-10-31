@@ -91,6 +91,29 @@ class ResendEmailBackendTests(TestCase):
         self.assertIn("Conviction before Execution", payload["text"])
         self.assertIn("educational purposes", payload["text"])
 
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    def test_notification_service_simple_email_uses_branded_shell_even_without_template(self):
+        from django.core import mail
+
+        from apps.notifications.services import NotificationService
+
+        self.assertTrue(NotificationService.send_simple_email(
+            to_email="learner@example.com",
+            subject="A direct account update",
+            body="Your account details were updated.",
+        ))
+
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(message.subject, "[TradeThesis] A direct account update")
+        self.assertEqual(message.from_email, "TradeThesis <noreply@tradethesis.in>")
+        self.assertIn("TradeThesis", message.body)
+        self.assertIn("Conviction before Execution", message.body)
+        html = message.alternatives[0][0]
+        self.assertIn("tradethesis-email-shell-v1", html)
+        self.assertIn("tradethesis-logo.png", html)
+        self.assertIn("Your account details were updated.", html)
+
     @patch("apps.core.email_backends.requests.post")
     def test_replaces_default_example_com_subject_prefix_before_send(self, post):
         post.return_value = self._success_response("re_branded_id")
