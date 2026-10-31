@@ -13,6 +13,9 @@ from apps.emailing.models import Delivery
 @override_settings(RESEND_WEBHOOK_SECRET="whsec_c2VjcmV0X3NpZ25pbmdfa2V5")
 class ResendWebhookTests(TestCase):
     def _signed_post(self, event, *, timestamp=None, signature_override=None):
+        # Resend now scopes email lifecycle events to recipient(s) in data.to.
+        if event.get("type", "").startswith("email.") and isinstance(event.get("data"), dict):
+            event["data"].setdefault("to", ["learner@example.com"])
         timestamp = str(timestamp or int(time.time()))
         message_id = "msg_resend_test_001"
         body = json.dumps(event, separators=(",", ":")).encode("utf-8")
@@ -64,6 +67,7 @@ class ResendWebhookTests(TestCase):
             ("email.bounced", "re_bounced", Delivery.State.BOUNCED),
             ("email.complained", "re_complained", Delivery.State.COMPLAINED),
             ("email.delivery_delayed", "re_delayed", Delivery.State.DELAYED),
+            ("email.failed", "re_failed", Delivery.State.FAILED),
             ("email.suppressed", "re_suppressed", Delivery.State.SUPPRESSED),
         ]
         for event_type, email_id, expected_state in cases:
@@ -109,6 +113,44 @@ class ResendWebhookTests(TestCase):
         self.assertEqual(response.status_code, 200)
         delivery.refresh_from_db()
         self.assertEqual(delivery.state, Delivery.State.DELIVERED)
+
+    def test_recipient_scoped_bounce_does_not_mark_other_recipients(self):
+        first = Delivery.objects.create(
+            idempotency_key="webhook-multi-a",
+            to_email="first@example.com",
+            state=Delivery.State.SENT,
+            provider="resend",
+            provider_message_id="re_multi_recipient",
+        )
+        second = Delivery.objects.create(
+            idempotency_key="webhook-multi-b",
+            to_email="second@example.com",
+            state=Delivery.State.SENT,
+            provider="resend",
+            provider_message_id="re_multi_recipient",
+        )
+
+        response = self._signed_post({
+            "type": "email.bounced",
+            "data": {
+                "email_id": "re_multi_recipient",
+                "to": ["first@example.com"],
+            },
+        })
+
+        self.assertEqual(response.status_code, 200)
+        first.refresh_from_db()
+        second.refresh_from_db()
+        self.assertEqual(first.state, Delivery.State.BOUNCED)
+        self.assertEqual(second.state, Delivery.State.SENT)
+
+    def test_missing_recipient_list_is_rejected(self):
+        response = self._signed_post({
+            "type": "email.delivered",
+            "data": {"email_id": "re_not_found"},
+        })
+        # _signed_post adds the default single recipient for email events.
+        self.assertEqual(response.status_code, 503)
 
     def test_invalid_signature_is_rejected(self):
         self._delivery()
