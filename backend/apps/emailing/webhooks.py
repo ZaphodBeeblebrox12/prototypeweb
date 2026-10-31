@@ -90,6 +90,10 @@ def resend_webhook(request):
         provider="resend",
         provider_message_id=email_id,
     )
+    if not delivery_qs.exists():
+        # Resend retries non-2xx webhook deliveries. This also covers the very
+        # small race where the webhook arrives before the send response is saved.
+        return JsonResponse({"error": "Email delivery record is not available yet."}, status=503)
 
     # Webhooks can be retried or arrive out of order. A late "sent" or
     # "delivery delayed" event must never downgrade a confirmed delivery,
@@ -133,9 +137,8 @@ def resend_webhook(request):
         delivery_qs = delivery_qs.exclude(state__in=protected_states)
 
     updated = delivery_qs.update(state=target_state)
-    if not updated:
-        # Resend retries non-2xx webhook deliveries. This also covers the very
-        # small race where the webhook arrives before the send response is saved.
-        return JsonResponse({"error": "Email delivery record is not available yet."}, status=503)
-
-    return JsonResponse({"ok": True, "updated": updated})
+    return JsonResponse({
+        "ok": True,
+        "updated": updated,
+        "ignored": not bool(updated),
+    })
