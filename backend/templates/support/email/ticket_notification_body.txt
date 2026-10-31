@@ -1,0 +1,9 @@
+{{ message }}
+
+{% if action_url %}{% if button_label %}{{ button_label }}{% else %}View support ticket{% endif %}:
+{{ action_url }}{% endif %}
+
+TradeThesis
+Conviction before Execution
+
+Trading involves risk. TradeThesis content is for educational purposes and is not investment advice.
