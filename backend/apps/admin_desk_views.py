@@ -487,7 +487,10 @@ def admin_desk_customer_360(request, user_id):
     telegram_community_status = "Not linked"
     discord_community_status = "Not linked"
     if not is_internal_account:
-        from apps.bot_integration.models import TelegramAccount, DiscordAccount
+        from apps.bot_integration.models import (
+            TelegramAccount, DiscordAccount, UserChannelAssignment,
+        )
+        from apps.jobs.models import ProvisioningOperation
 
         telegram_community_account = TelegramAccount.objects.filter(
             user_id=account.pk
@@ -501,6 +504,24 @@ def admin_desk_customer_360(request, user_id):
                 "Linked" if telegram_community_account.is_active
                 else "Disconnect pending"
             )
+        elif (
+            UserChannelAssignment.objects.filter(
+                user_id=account.pk, platform="telegram", is_active=True,
+            ).exists()
+            or ProvisioningOperation.objects.filter(
+                user_id=account.pk,
+                operation=ProvisioningOperation.OP_GRANT,
+                state__in=[
+                    ProvisioningOperation.ST_PENDING,
+                    ProvisioningOperation.ST_CREATING,
+                    ProvisioningOperation.ST_CREATED,
+                    ProvisioningOperation.ST_SENDING,
+                    ProvisioningOperation.ST_SENT,
+                    ProvisioningOperation.ST_UNKNOWN,
+                ],
+            ).exists()
+        ):
+            telegram_community_status = "Access cleanup pending"
         elif account.telegram_verified or account.telegram_id:
             # Telegram login verification is not the same as linking the bot
             # chat used for community access and transactional notifications.
