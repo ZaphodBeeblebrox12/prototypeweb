@@ -445,33 +445,63 @@ def admin_desk_customer_360(request, user_id):
     """Read-only, permission-scoped customer profile opened from a support ticket."""
     _guard(request)
     User = get_user_model()
-    account = get_object_or_404(
-        User.objects.filter(is_staff=False, is_superuser=False),
-        pk=user_id,
-    )
-
     from apps.support.models import SupportTicket, TicketMessage
     from apps.support.services import reviewable_ticket_queryset
 
+    # Resolve a profile through a ticket the reviewer is explicitly allowed
+    # to see before applying the learner-only fallback. Some legacy/support
+    # accounts have is_staff=True; excluding them before checking the ticket
+    # made valid ticket-to-profile links return a misleading 404.
     visible_tickets = reviewable_ticket_queryset(
         request.user,
-        SupportTicket.objects.filter(user=account).select_related(
-            "assigned_to", "plan", "affiliate_link"
+        SupportTicket.objects.filter(user_id=user_id).select_related(
+            "user", "assigned_to", "plan", "affiliate_link"
         ),
     )
-    # A reviewer can open a customer profile only from a ticket in their
-    # permitted queue, unless they separately hold global learner-view access.
-    if not visible_tickets.exists() and not _allowed(request.user, "accounts.view_user"):
+    visible_ticket = visible_tickets.order_by("-created_at").first()
+    can_view_all_learners = _allowed(request.user, "accounts.view_user")
+    if visible_ticket is not None:
+        # Internal staff/admin requesters are allowed only through a ticket
+        # visible to this reviewer; their profile is restricted below.
+        account = visible_ticket.user
+    elif can_view_all_learners:
+        account = get_object_or_404(
+            User.objects.filter(is_staff=False, is_superuser=False),
+            pk=user_id,
+        )
+        visible_tickets = reviewable_ticket_queryset(
+            request.user,
+            SupportTicket.objects.filter(user=account).select_related(
+                "assigned_to", "plan", "affiliate_link"
+            ),
+        )
+    else:
         raise PermissionDenied
 
-    can_view_subscriptions = _allowed(request.user, "subscriptions.view_subscription")
-    can_view_payments = _allowed(request.user, "payments.view_paymentintent")
-    can_view_invoices = _allowed(request.user, "payments.view_invoice")
+    is_internal_account = bool(account.is_staff or account.is_superuser)
+    # Staff accounts may submit support requests, but their internal profile
+    # is deliberately limited to identity + reviewer-visible support history.
+    can_view_subscriptions = (
+        not is_internal_account
+        and _allowed(request.user, "subscriptions.view_subscription")
+    )
+    can_view_payments = (
+        not is_internal_account
+        and _allowed(request.user, "payments.view_paymentintent")
+    )
+    can_view_invoices = (
+        not is_internal_account
+        and _allowed(request.user, "payments.view_invoice")
+    )
     can_view_academy_records = (
-        _allowed(request.user, "academy.view_courseentitlement")
+        not is_internal_account
+        and _allowed(request.user, "academy.view_courseentitlement")
         and _allowed(request.user, "academy.view_lessonprogress")
     )
-    can_view_security_events = _allowed(request.user, "accounts.view_securityevent")
+    can_view_security_events = (
+        not is_internal_account
+        and _allowed(request.user, "accounts.view_securityevent")
+    )
 
     subscriptions = []
     subscription_history = []
@@ -742,6 +772,7 @@ def admin_desk_customer_360(request, user_id):
         "admin/desk_customer_360.html",
         {
             "account": account,
+            "is_internal_account": is_internal_account,
             "subscriptions": subscriptions,
             "subscription_history": subscription_history,
             "payments": payments,
@@ -764,6 +795,250 @@ def admin_desk_customer_360(request, user_id):
             "desk_nav": _nav(request),
             "support_queue_url": reverse("staff_admin_desk_support_tickets"),
             "accounts_url": reverse("staff_admin_desk_accounts"),
+        },
+    )
+
+
+@login_required
+@require_GET
+def admin_desk_operations_timeline(request):
+    """Cross-customer support signals and application-operational timeline."""
+    _guard(request)
+    from apps.support.models import SupportTicket
+    from apps.support.services import reviewable_ticket_queryset
+    from apps.support.operational_signals import build_support_issue_clusters
+
+    now = timezone.now()
+    window = request.GET.get("window", "7d").strip()
+    if window not in {"24h", "7d"}:
+        window = "7d"
+    since = now - timedelta(hours=24 if window == "24h" else 24 * 7)
+
+    visible_tickets = reviewable_ticket_queryset(
+        request.user,
+        SupportTicket.objects.filter(created_at__gte=since),
+    )
+    # Bound clustering work and all event feeds; summaries are limited to
+    # the current reviewer-visible queue and the selected time window.
+    cluster_tickets = list(
+        visible_tickets.select_related("user", "plan", "affiliate_link")
+        .order_by("-created_at")[:250]
+    )
+    issue_clusters = build_support_issue_clusters(cluster_tickets)
+    category_rows = list(
+        visible_tickets.values("category")
+        .annotate(
+            ticket_count=Count("id"),
+            customer_count=Count("user_id", distinct=True),
+            open_count=Count("id", filter=Q(status__in=SupportTicket.ACTIVE_STATUSES)),
+            urgent_count=Count("id", filter=Q(priority=SupportTicket.Priority.URGENT)),
+        )
+        .order_by("-ticket_count", "category")
+    )
+    for item in category_rows:
+        item["label"] = dict(SupportTicket.Category.choices).get(
+            item["category"], item["category"]
+        )
+    recent_tickets = cluster_tickets[:30]
+
+    can_view_jobs = _allowed(request.user, "jobs.view_job")
+    can_view_provisioning = _allowed(request.user, "jobs.view_provisioningoperation")
+    can_view_periodic_jobs = _allowed(request.user, "jobs.view_periodicjob")
+    can_view_domain_events = _allowed(request.user, "events.view_event")
+    can_view_audit = _allowed(request.user, "audit.view_auditlog")
+    can_view_security = _allowed(request.user, "accounts.view_securityevent")
+
+    job_incidents = []
+    if can_view_jobs:
+        from apps.jobs.models import Job
+
+        job_incidents = list(
+            Job.objects.filter(
+                Q(status=Job.STATUS_FAILED, updated_at__gte=since)
+                | Q(status__in=Job.OPEN_STATUSES, attempts__gte=3)
+                | Q(
+                    status=Job.STATUS_RUNNING,
+                    locked_at__lt=now - timedelta(minutes=15),
+                )
+            )
+            .only(
+                "kind", "status", "attempts", "max_attempts", "created_at",
+                "updated_at", "next_attempt_at", "locked_at",
+            )
+            .order_by("-updated_at")[:40]
+        )
+
+    provisioning_incidents = []
+    if can_view_provisioning:
+        from apps.jobs.models import ProvisioningOperation
+
+        provisioning_incidents = list(
+            ProvisioningOperation.objects.filter(
+                state__in=[
+                    ProvisioningOperation.ST_FAILED,
+                    ProvisioningOperation.ST_UNKNOWN,
+                ],
+                updated_at__gte=since,
+            )
+            .only("operation", "state", "attempts", "created_at", "updated_at")
+            .order_by("-updated_at")[:30]
+        )
+
+    periodic_errors = []
+    if can_view_periodic_jobs:
+        from apps.jobs.models import PeriodicJob
+
+        periodic_errors = list(
+            PeriodicJob.objects.filter(last_status=PeriodicJob.Status.ERROR)
+            .only("name", "enabled", "last_run_at", "last_status")
+            .order_by("name")[:30]
+        )
+
+    domain_events = []
+    if can_view_domain_events:
+        from apps.events.models import Event
+
+        domain_events = list(
+            Event.objects.filter(occurred_at__gte=since)
+            .order_by("-occurred_at")[:60]
+        )
+
+    audit_events = []
+    if can_view_audit:
+        from apps.audit.models import AuditLog
+
+        audit_events = list(
+            AuditLog.objects.filter(created_at__gte=since)
+            .only("action", "object_type", "created_at")
+            .order_by("-created_at")[:40]
+        )
+
+    security_summary = []
+    if can_view_security:
+        from apps.accounts.models import SecurityEvent
+
+        security_summary = list(
+            SecurityEvent.objects.filter(occurred_at__gte=since)
+            .values("event_type")
+            .annotate(total=Count("id"))
+            .order_by("-total", "event_type")
+        )
+        for item in security_summary:
+            item["label"] = dict(SecurityEvent.EventType.choices).get(
+                item["event_type"], item["event_type"]
+            )
+
+    activity = []
+
+    def add_activity(occurred_at, kind, title, description="", level="info", url=""):
+        if occurred_at:
+            activity.append({
+                "occurred_at": occurred_at,
+                "kind": kind,
+                "title": title,
+                "description": description,
+                "level": level,
+                "url": url,
+            })
+
+    for ticket in recent_tickets:
+        add_activity(
+            ticket.created_at,
+            "Support",
+            f"Ticket #{ticket.short_id} opened",
+            f"{ticket.get_category_display()} · {ticket.get_priority_display()} priority · {ticket.get_status_display()}",
+            "warning" if ticket.priority in {
+                SupportTicket.Priority.HIGH, SupportTicket.Priority.URGENT
+            } else "info",
+            reverse("staff_admin_desk_support_ticket", args=[ticket.pk]),
+        )
+    for job in job_incidents:
+        failed = job.status == Job.STATUS_FAILED
+        job_state = "failed" if failed else "stalled / retrying"
+        add_activity(
+            job.updated_at,
+            "Worker",
+            f"{job.kind} {job_state}",
+            f"Status {job.status} · {job.attempts}/{job.max_attempts} attempts",
+            "critical" if failed else "warning",
+            reverse("admin:jobs_job_changelist"),
+        )
+    for operation in provisioning_incidents:
+        add_activity(
+            operation.updated_at,
+            "Provisioning",
+            f"External {operation.operation} {operation.state.replace('_', ' ')}",
+            f"{operation.attempts} attempts · external state requires review",
+            "critical" if operation.state == operation.ST_FAILED else "warning",
+        )
+    for periodic in periodic_errors:
+        add_activity(
+            periodic.last_run_at or since,
+            "Scheduler",
+            f"Scheduled task {periodic.name} reported an error",
+            "Enabled" if periodic.enabled else "Disabled",
+            "warning",
+        )
+    for event in domain_events:
+        add_activity(
+            event.occurred_at,
+            "Domain event",
+            event.get_event_type_display(),
+            "Business event recorded",
+            "critical" if event.event_type in {
+                "payment.failed", "payment.chargeback"
+            } else "info",
+        )
+    for event in audit_events:
+        add_activity(
+            event.created_at,
+            "Audit",
+            event.action.replace(".", " · "),
+            f"Record type: {event.object_type or 'system'}",
+            "info",
+        )
+
+    activity.sort(key=lambda item: item["occurred_at"], reverse=True)
+    failed_job_count = sum(job.status == "failed" for job in job_incidents)
+    stalled_job_count = sum(
+        job.status in {"pending", "running"} for job in job_incidents
+    )
+    visible_open_count = visible_tickets.filter(
+        status__in=SupportTicket.ACTIVE_STATUSES
+    ).count()
+
+    return render(
+        request,
+        "admin/desk_operations_timeline.html",
+        {
+            "window": window,
+            "window_label": "Last 24 hours" if window == "24h" else "Last 7 days",
+            "since": since,
+            "issue_clusters": issue_clusters,
+            "category_rows": category_rows,
+            "recent_tickets": recent_tickets,
+            "activity": activity[:100],
+            "job_incidents": job_incidents,
+            "provisioning_incidents": provisioning_incidents,
+            "periodic_errors": periodic_errors,
+            "security_summary": security_summary,
+            "stats": {
+                "open_tickets": visible_open_count,
+                "potential_patterns": len(issue_clusters),
+                "failed_jobs": failed_job_count,
+                "stalled_jobs": stalled_job_count,
+                "provisioning_issues": len(provisioning_incidents),
+                "scheduler_errors": len(periodic_errors),
+            },
+            "can_view_jobs": can_view_jobs,
+            "can_view_provisioning": can_view_provisioning,
+            "can_view_periodic_jobs": can_view_periodic_jobs,
+            "can_view_domain_events": can_view_domain_events,
+            "can_view_audit": can_view_audit,
+            "can_view_security": can_view_security,
+            "support_queue_url": reverse("staff_admin_desk_support_tickets"),
+            "desk_url": reverse("staff_admin_desk"),
+            "desk_nav": _nav(request),
         },
     )
 

@@ -68,6 +68,7 @@
       <p class="intro">A read-only view of this member's relationship with TradeThesis. Sections are shown only when your role has permission to view those records.</p>
     </div>
     <div class="actions">
+      <a class="button" href="{% url 'staff_admin_desk_operations_timeline' %}">Operations timeline</a>
       <a class="button secondary" href="{{ support_queue_url }}">Support queue</a>
       <a class="button secondary" href="{{ accounts_url }}">Learner accounts</a>
     </div>
@@ -98,6 +99,10 @@
       <span class="subvalue">Discord · {% if account.discord_verified %}Verified{% elif account.discord_id %}Linked{% else %}Not linked{% endif %}</span>
     </div>
   </section>
+
+  {% if is_internal_account %}
+    <div class="security-note" style="margin-top:12px">Internal staff requester · This profile is limited to identity and tickets visible to your reviewer role. Subscription, payment, invoice, course and security records are hidden for internal accounts.</div>
+  {% endif %}
 
   <section class="stats" aria-label="Customer summary">
     <div class="stat"><strong>{{ stats.open_tickets }}</strong><span>Open support tickets in your queue scope</span></div>

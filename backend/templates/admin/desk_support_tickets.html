@@ -41,7 +41,10 @@
       <h1>Support workspace</h1>
       <p class="intro">Review member requests, keep the conversation in one place, and resolve access, billing and technical issues without opening Django Admin. Tickets are scoped to your reviewer permissions.</p>
     </div>
-    <a class="button secondary" href="{% url 'staff_admin_desk' %}">← Admin Desk</a>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a class="button" href="{% url 'staff_admin_desk_operations_timeline' %}">Operations timeline →</a>
+      <a class="button secondary" href="{% url 'staff_admin_desk' %}">← Admin Desk</a>
+    </div>
   </header>
 
   <section class="stats" aria-label="Support ticket summary">
