@@ -273,6 +273,85 @@ class TestTelegramAuthView:
 
 
 
+@pytest.mark.django_db
+class TestLegacyAuthenticatedTelegramConnectApi:
+    def _signed_payload(self, auth_date=None, telegram_id=456789123):
+        import time
+        if auth_date is None:
+            auth_date = int(time.time())
+        data = {
+            "id": telegram_id,
+            "auth_date": auth_date,
+            "first_name": "API",
+            "last_name": "Member",
+            "username": "api_member",
+        }
+        data_check_string = "\n".join(
+            f"{key}={value}" for key, value in sorted(data.items())
+        )
+        secret_key = hashlib.sha256(b"test_token").digest()
+        data["hash"] = hmac.new(
+            secret_key, data_check_string.encode(), hashlib.sha256
+        ).hexdigest()
+        return data
+
+    def test_legacy_authenticated_endpoint_uses_canonical_bot_config(self, client, user_factory, telegram_auth_bot_config):
+        user = user_factory(telegram_id=None, telegram_username="")
+        client.force_login(user)
+
+        response = client.post(
+            "/api/auth/telegram/connect/",
+            self._signed_payload(),
+            content_type="application/json",
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        user.refresh_from_db()
+        assert user.telegram_id == 456789123
+        assert response.json()["community_linked"] is False
+        from apps.bot_integration.models import TelegramAccount
+        assert not TelegramAccount.objects.filter(user=user).exists()
+
+    def test_legacy_authenticated_endpoint_rejects_stale_payload(self, client, user_factory, telegram_auth_bot_config):
+        import time
+        user = user_factory(telegram_id=None, telegram_username="")
+        client.force_login(user)
+
+        response = client.post(
+            "/api/auth/telegram/connect/",
+            self._signed_payload(auth_date=int(time.time()) - 25 * 60 * 60),
+            content_type="application/json",
+        )
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        user.refresh_from_db()
+        assert user.telegram_id is None
+
+    def test_legacy_authenticated_endpoint_rejects_identity_linked_to_another_member(self, client, user_factory, telegram_auth_bot_config):
+        from apps.bot_integration.models import TelegramAccount
+
+        user = user_factory(telegram_id=None, telegram_username="")
+        other = user_factory(telegram_id=None, telegram_username="")
+        TelegramAccount.objects.create(
+            user=other,
+            chat_id=456789123,
+            telegram_user_id=456789123,
+            is_active=True,
+        )
+        client.force_login(user)
+
+        response = client.post(
+            "/api/auth/telegram/connect/",
+            self._signed_payload(),
+            content_type="application/json",
+        )
+
+        assert response.status_code == status.HTTP_409_CONFLICT
+        user.refresh_from_db()
+        assert user.telegram_id is None
+
+
+
 class TestParseTelegramAuthData:
     """Test parsing Telegram auth data."""
 
