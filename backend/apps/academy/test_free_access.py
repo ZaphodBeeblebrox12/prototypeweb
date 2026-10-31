@@ -25,6 +25,7 @@ from .models import (
     CourseModule,
     CourseOffer,
     Lesson,
+    LessonProgress,
     PlanCourseAccess,
 )
 from .services import can_access_lesson, has_active_plan_access, sync_free_membership_course_access
@@ -99,6 +100,30 @@ class FreeAcademyAccessTests(TestCase):
         self.assertNotContains(response, "Get the full course")
         self.assertNotContains(response, "Continue to secure checkout")
         self.assertEqual(PaymentIntent.objects.count(), 0)
+
+    def test_first_session_guide_disappears_after_the_first_lesson_is_opened(self):
+        self.client.post(reverse("academy:enrol-free-course", args=[self.course.slug]))
+
+        overview = self.client.get(
+            reverse("academy:course-detail", args=[self.course.slug])
+        )
+        self.assertEqual(overview.status_code, 200)
+        self.assertContains(overview, "Let's make your first session useful.")
+        self.assertContains(overview, "Start your first lesson")
+
+        lesson_response = self.client.get(
+            reverse("academy:lesson", args=[self.course.slug, self.lesson.pk])
+        )
+        self.assertEqual(lesson_response.status_code, 200)
+        progress = LessonProgress.objects.get(user=self.user, lesson=self.lesson)
+        self.assertEqual(progress.status, LessonProgress.Status.IN_PROGRESS)
+
+        resumed_overview = self.client.get(
+            reverse("academy:course-detail", args=[self.course.slug])
+        )
+        self.assertEqual(resumed_overview.status_code, 200)
+        self.assertNotContains(resumed_overview, "Let's make your first session useful.")
+        self.assertContains(resumed_overview, "Continue learning")
 
     def test_individual_course_offer_is_not_saleable_for_free_or_membership_courses(self):
         product = Product.objects.create(

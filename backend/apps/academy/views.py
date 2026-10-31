@@ -410,6 +410,9 @@ def course_detail(request, course_slug):
         p.lesson_id: p
         for p in LessonProgress.objects.filter(user=request.user, lesson_id__in=lesson_ids)
     }
+    # Determine first-session state after access has been resolved. Historical
+    # progress on a currently locked lesson must not hide the orientation.
+    has_started = False
     module_rows = []
     now = timezone.now()
     access_record = entitlement or membership_subscription
@@ -429,6 +432,11 @@ def course_detail(request, course_slug):
         if rows:
             module_rows.append({"module": module, "lessons": rows})
 
+    has_started = any(
+        item["accessible"] and item["progress"] is not None
+        for row in module_rows
+        for item in row["lessons"]
+    )
     first_accessible_lesson = next(
         (item["lesson"] for row in module_rows for item in row["lessons"] if item["accessible"]),
         None,
@@ -490,6 +498,7 @@ def course_detail(request, course_slug):
             "total_study_hours": total_study_minutes // 60,
             "total_study_minutes_remainder": total_study_minutes % 60,
             "first_accessible_lesson": first_accessible_lesson,
+            "has_started": has_started,
             "is_course_content_admin": is_course_content_admin(request.user),
             "progress_percent": round(completed * 100 / total) if total else 0,
         },
