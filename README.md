@@ -1,6 +1,6 @@
 # TradeThesis — Full Design & Course Project
 
-This package collects the current TradeThesis static website prototype, approved Pass 6 course-room redesign, source materials for the 30-day starter drip course, learner downloads, logo assets, and handoff notes in one place.
+This package collects the current TradeThesis static website prototype, approved Pass 6 course-room redesign, source materials for the self-paced Trading Path course, learner downloads, logo assets, and handoff notes in one place.
 
 ## Start here
 
@@ -22,11 +22,11 @@ This package collects the current TradeThesis static website prototype, approved
 
 ## Course catalogue design
 
-The ₹999 Trading Path and ₹17,000 CONSTRUCT offers now share a course-card system: common outer framing, two-column layout, heading and price hierarchy, spacing, offer-panel geometry, and mobile stacking. Their differences are intentional and content-led: the Trading Path emphasizes self-study, lessons, checkpoints and permanent course access; CONSTRUCT emphasizes feedback, deadlines, Review Clinics, risk accountability and 12 months in The Wobbling Candle community with no separate fee. The homepage gives the ₹999 Trading Path the only detailed offer card; CONSTRUCT and the six-week live classroom are compact routes to explore when the visitor is ready for more support.
+The free Trading Path and ₹17,000 CONSTRUCT offers now share a course-card system: common outer framing, two-column layout, heading and price hierarchy, spacing, offer-panel geometry, and mobile stacking. Their differences are intentional and content-led: the Trading Path emphasizes self-study, lessons, checkpoints and permanent course access; CONSTRUCT emphasizes feedback, deadlines, Review Clinics, risk accountability and 12 months in The Wobbling Candle community with no separate fee. The homepage gives the free Trading Path the only detailed offer card; CONSTRUCT and the six-week live classroom are compact routes to explore when the visitor is ready for more support.
 
 ## Important status and access notes
 
-The website and standalone course-room previews remain design/content-review surfaces. The Django runtime now lives under `backend/`; checkout, authenticated learner accounts, server-side progress, scheduled daily release and production Telegram delivery still require end-to-end staging verification before launch. The course-room prototype deliberately has all 30 lessons available for review. The ₹999 Trading Path does **not** include trading-bot access; delivery of course lessons through Telegram is separate from access to any trading bot.
+The website and standalone course-room previews remain design/content-review surfaces. The Django runtime now lives under `backend/`. The TradeThesis Trading Path is a **free, self-paced course** with all 30 lessons available immediately and permanent course access. The optional 30-day study plan is guidance only, not a timed lesson-release schedule or completion deadline. The course does not include community or trading-bot access. Telegram lesson delivery is not part of the current verified course offer. Authentication, payment, entitlement and progress flows still require end-to-end staging acceptance before they are described as production-ready.
 
 Do not publish the entire package to a public web server. The `course-source/` folder contains full paid-course content and internal delivery/production materials. Publish only the appropriate website pages and implement authenticated access and scheduled release before selling the course. The prototype's locally available lesson files are not access-controlled.
 
@@ -51,11 +51,9 @@ python -m http.server 8000
 
 Then open `http://localhost:8000/START_HERE.html`.
 
-## Pass 2 positioning note
-The homepage features the ₹999 Trading Path as the only full-size offer. CONSTRUCT and the six-week live classroom are compact routes to explore when a visitor is ready for more support. The Courses catalogue keeps both detailed offers within a shared visual system, with distinct handwritten paper notes.
+## Historical design notes
 
-## Pass 2 content and presentation
-The homepage gives the ₹999 Trading Path the only full-size offer card; CONSTRUCT and the six-week live classroom remain compact options. The Courses page keeps detailed cards for both priced courses in a shared design system. Small tilted paper notes add a handwritten editorial touch. CONSTRUCT is paper-trading-led, includes 12 months in The Wobbling Candle at no separate fee, lets learners bring questions to the instructor, and features live lessons demonstrating trade execution and management. The public copy does not state the number or calendar timing of those live lessons.
+Earlier Pass 2 notes described a superseded ₹999 paid/drip-course version of the Trading Path. They are removed from the current product summary; use the current product facts above and the active Academy access configuration as the source of truth.
 
 
 ## Support & Resistance course source checkpoint
