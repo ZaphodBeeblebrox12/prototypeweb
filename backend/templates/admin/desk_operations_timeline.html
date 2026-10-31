@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block title %}Operations timeline | Admin Desk | TradeThesis{% endblock %}
+{% block page_title %}Operations timeline{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-ops{--ink:#26342f;--muted:#68736c;--line:#dedfd5;--surface:#fffefa;--green:#456653;max-width:1280px;margin:8px auto 38px;color:var(--ink)}
+  .tt-ops *{box-sizing:border-box}
+  .tt-ops a{color:#315b43;text-underline-offset:3px}
+  .tt-ops .head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+  .tt-ops .eyebrow{margin:0 0 6px;color:var(--muted);font-size:11px;font-weight:750;letter-spacing:.1em;text-transform:uppercase}
+  .tt-ops h1{margin:0;color:var(--ink);font-size:29px;line-height:1.16}
+  .tt-ops h2{margin:0;color:var(--ink);font-size:16px}
+  .tt-ops .intro{margin:8px 0 0;color:var(--muted);font-size:13px;max-width:760px;line-height:1.5}
+  .tt-ops .actions{display:flex;gap:8px;flex-wrap:wrap}
+  .tt-ops .button{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:9px 13px;border:1px solid var(--green);border-radius:4px;background:var(--green);color:white;text-decoration:none;font-size:13px;font-weight:700}
+  .tt-ops .button.secondary{background:var(--surface);color:#315b43}
+  .tt-ops .window{display:flex;gap:5px;padding:4px;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+  .tt-ops .window a{padding:7px 10px;border-radius:3px;color:var(--muted);font-size:12px;font-weight:700;text-decoration:none}
+  .tt-ops .window a.active{background:#eaf0e8;color:#315b43}
+  .tt-ops .stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px;margin:15px 0}
+  .tt-ops .stat{min-width:0;padding:13px 14px;border:1px solid var(--line);border-radius:5px;background:var(--surface)}
+  .tt-ops .stat strong{display:block;font-size:25px;line-height:1.1;font-variant-numeric:tabular-nums}
+  .tt-ops .stat span{display:block;margin-top:6px;color:var(--muted);font-size:11px;line-height:1.35}
+  .tt-ops .layout{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(330px,.82fr);gap:13px;align-items:start}
+  .tt-ops .panel{margin:12px 0;padding:16px 17px;border:1px solid var(--line);border-radius:5px;background:var(--surface);min-width:0}
+  .tt-ops .panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .tt-ops .note{margin:5px 0 0;color:var(--muted);font-size:11px;line-height:1.5}
+  .tt-ops .signal{padding:13px 14px;border:1px solid #e4d5ad;border-left:3px solid #c2913f;border-radius:4px;background:#fffaf0;margin:9px 0}
+  .tt-ops .signal-title{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+  .tt-ops .signal-title strong{font-size:13px}
+  .tt-ops .metrics{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .tt-ops .metric{padding:4px 7px;border:1px solid #e7dfcc;border-radius:3px;background:#fff;font-size:10px;color:#64563e}
+  .tt-ops .terms{margin-top:8px;color:#75623f;font-size:11px}
+  .tt-ops .ticket-links{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+  .tt-ops .ticket-links a{font-size:11px;font-weight:700}
+  .tt-ops .table-wrap{width:100%;overflow-x:auto}
+  .tt-ops table{width:100%;border-collapse:collapse;min-width:460px}
+  .tt-ops th,.tt-ops td{padding:9px 8px;border-bottom:1px solid #ecece5;text-align:left;vertical-align:top;font-size:12px}
+  .tt-ops th{color:var(--muted);font-size:10px;font-weight:750;letter-spacing:.06em;text-transform:uppercase}
+  .tt-ops tr:last-child td{border-bottom:0}
+  .tt-ops .pill{display:inline-flex;padding:4px 7px;border:1px solid var(--line);border-radius:3px;background:#f5f5ef;color:#45554a;font-size:10px;font-weight:700;white-space:nowrap}
+  .tt-ops .pill.critical{border-color:#e0b5ab;background:#fff3f0;color:#914638}
+  .tt-ops .pill.warning{border-color:#e5d3a7;background:#fff9e9;color:#79591d}
+  .tt-ops .muted{color:var(--muted);font-size:11px}
+  .tt-ops .timeline{display:grid}
+  .tt-ops .event{display:grid;grid-template-columns:104px minmax(0,1fr);gap:12px;padding:11px 0;border-bottom:1px solid #ecece5}
+  .tt-ops .event:last-child{border-bottom:0}
+  .tt-ops .event time{color:var(--muted);font-size:10px;line-height:1.45}
+  .tt-ops .event-title{font-size:12px;font-weight:750;overflow-wrap:anywhere}
+  .tt-ops .event-desc{margin-top:4px;color:var(--muted);font-size:11px;line-height:1.45;overflow-wrap:anywhere}
+  .tt-ops .kind{display:inline-block;margin-right:6px;padding:3px 6px;border:1px solid #e1e4da;border-radius:3px;background:#f5f6f0;color:#506052;font-size:9px;font-weight:750;text-transform:uppercase;letter-spacing:.04em}
+  .tt-ops .empty{padding:22px 10px;text-align:center;color:var(--muted);font-size:12px}
+  .tt-ops .footnote{padding:10px 12px;border:1px solid #dce4da;border-radius:4px;background:#f5f7f1;color:#5c6d5d;font-size:11px;line-height:1.5}
+  @media(max-width:1080px){.tt-ops .stats{grid-template-columns:repeat(3,minmax(0,1fr))}.tt-ops .layout{grid-template-columns:1fr}}
+  @media(max-width:560px){.tt-ops{margin:0 0 26px}.tt-ops h1{font-size:25px}.tt-ops .stats{grid-template-columns:repeat(2,minmax(0,1fr))}.tt-ops .panel{padding:13px}.tt-ops .event{grid-template-columns:82px minmax(0,1fr)}.tt-ops .head .button{width:100%}.tt-ops .window{width:100%}.tt-ops .window a{flex:1;text-align:center}}
+</style>
+{% endblock %}
+{% block content %}
+<main class="tt-ops">
+  <header class="head">
+    <div>
+      <p class="eyebrow"><a href="{{ desk_url }}">Admin Desk</a> / Operations</p>
+      <h1>Operations timeline</h1>
+      <p class="intro">One view across reviewer-visible customer support signals and the application systems that can create or amplify them. Possible patterns are prompts for investigation, not automatically confirmed incidents.</p>
+    </div>
+    <div class="actions">
+      <nav class="window" aria-label="Time window">
+        <a class="{% if window == '24h' %}active{% endif %}" href="?window=24h">24 hours</a>
+        <a class="{% if window == '7d' %}active{% endif %}" href="?window=7d">7 days</a>
+      </nav>
+      <a class="button secondary" href="{{ support_queue_url }}">Support queue</a>
+    </div>
+  </header>
+
+  <section class="stats" aria-label="Operational overview">
+    <div class="stat"><strong>{{ stats.open_tickets }}</strong><span>Visible tickets opened in this window</span></div>
+    <div class="stat"><strong>{{ stats.potential_patterns }}</strong><span>Potential multi-customer patterns</span></div>
+    <div class="stat"><strong>{{ stats.failed_jobs|default:"—" }}</strong><span>Failed background jobs</span></div>
+    <div class="stat"><strong>{{ stats.stalled_jobs|default:"—" }}</strong><span>Stalled / retrying jobs</span></div>
+    <div class="stat"><strong>{{ stats.provisioning_issues|default:"—" }}</strong><span>Provisioning issues</span></div>
+    <div class="stat"><strong>{{ stats.scheduler_errors|default:"—" }}</strong><span>Scheduled-task errors</span></div>
+  </section>
+
+  <div class="footnote">Support signals and ticket counts are calculated only from tickets your current reviewer role can see. The system feeds use the separate viewing permissions for jobs, domain events, audit and security records. Raw ticket messages, provider IDs, job payloads, security IP addresses and internal support notes are not shown.</div>
+
+  <div class="layout">
+    <section>
+      <section class="panel">
+        <div class="panel-head">
+          <div><h2>Potential multi-customer patterns</h2><p class="note">Similar wording, same ticket category, at least three distinct customers. Review the linked tickets to confirm whether they share a cause.</p></div>
+          <span class="pill warning">{{ issue_clusters|length }} signal{{ issue_clusters|length|pluralize }}</span>
+        </div>
+        {% for signal in issue_clusters %}
+          <article class="signal">
+            <div class="signal-title">
+              <strong>{{ signal.category }} · possible common issue</strong>
+              <span class="pill warning">{{ signal.customer_count }} customers</span>
+            </div>
+            <div class="metrics">
+              <span class="metric">{{ signal.ticket_count }} matching tickets</span>
+              <span class="metric">{{ signal.open_count }} still open</span>
+              {% if signal.urgent_count %}<span class="pill critical">{{ signal.urgent_count }} urgent</span>{% endif %}
+              <span class="metric">First {{ signal.first_seen|date:"j M H:i" }}</span>
+              <span class="metric">Latest {{ signal.last_seen|date:"j M H:i" }}</span>
+            </div>
+            {% if signal.terms %}<div class="terms">Repeated symptom terms: {{ signal.terms|join:", " }}</div>{% endif %}
+            <div class="ticket-links">
+              {% for ticket in signal.tickets %}
+                <a href="{% url 'staff_admin_desk_support_ticket' ticket.pk %}">Review #{{ ticket.short_id }} ↗</a>
+              {% endfor %}
+            </div>
+          </article>
+        {% empty %}
+          <div class="empty">No repeated symptom pattern across three or more visible customers in this window.</div>
+        {% endfor %}
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><div><h2>Support volume by category</h2><p class="note">Distinct customers and open/urgent pressure, limited to your review scope.</p></div></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Category</th><th>Tickets</th><th>Customers</th><th>Open</th><th>Urgent</th></tr></thead>
+          <tbody>{% for item in category_rows %}
+            <tr><td><strong>{{ item.label }}</strong></td><td>{{ item.ticket_count }}</td><td>{{ item.customer_count }}</td><td>{{ item.open_count }}</td><td>{% if item.urgent_count %}<span class="pill critical">{{ item.urgent_count }}</span>{% else %}0{% endif %}</td></tr>
+          {% empty %}<tr><td colspan="5" class="empty">No visible tickets opened in this window.</td></tr>{% endfor %}</tbody>
+        </table></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><div><h2>Background worker health</h2><p class="note">Failed jobs, jobs with repeated attempts, and long-running locks. Payloads and error contents are intentionally withheld.</p></div></div>
+        {% if can_view_jobs %}
+          <div class="table-wrap"><table>
+            <thead><tr><th>Job</th><th>State</th><th>Attempts</th><th>Updated</th></tr></thead>
+            <tbody>{% for job in job_incidents %}
+              <tr><td><strong>{{ job.kind }}</strong></td><td><span class="pill {% if job.status == 'failed' %}critical{% else %}warning{% endif %}">{{ job.status }}</span></td><td>{{ job.attempts }} / {{ job.max_attempts }}</td><td>{{ job.updated_at|date:"j M · H:i" }}</td></tr>
+            {% empty %}<tr><td colspan="4" class="empty">No failed or stalled jobs detected.</td></tr>{% endfor %}</tbody>
+          </table></div>
+        {% else %}<div class="empty">Your role does not have permission to view background jobs.</div>{% endif %}
+      </section>
+
+      {% if can_view_provisioning or can_view_periodic_jobs %}
+        <section class="panel">
+          <div class="panel-head"><div><h2>Provisioning &amp; scheduled tasks</h2><p class="note">External access operations and scheduler failures. Raw provider error text and invite links are hidden.</p></div></div>
+          {% if can_view_provisioning %}
+            <h3 style="font-size:12px;margin:12px 0 6px">Provisioning</h3>
+            <div class="table-wrap"><table><thead><tr><th>Operation</th><th>State</th><th>Attempts</th><th>Updated</th></tr></thead><tbody>
+              {% for item in provisioning_incidents %}<tr><td>{{ item.operation }}</td><td><span class="pill {% if item.state == 'failed' %}critical{% else %}warning{% endif %}">{{ item.state }}</span></td><td>{{ item.attempts }}</td><td>{{ item.updated_at|date:"j M · H:i" }}</td></tr>{% empty %}<tr><td colspan="4" class="empty">No provisioning failures or unknown states.</td></tr>{% endfor %}
+            </tbody></table></div>
+          {% endif %}
+          {% if can_view_periodic_jobs %}
+            <h3 style="font-size:12px;margin:16px 0 6px">Scheduled tasks</h3>
+            <div class="table-wrap"><table><thead><tr><th>Task</th><th>State</th><th>Last run</th></tr></thead><tbody>
+              {% for item in periodic_errors %}<tr><td>{{ item.name }}</td><td><span class="pill warning">{{ item.last_status }}</span></td><td>{{ item.last_run_at|date:"j M · H:i"|default:"Not recorded" }}</td></tr>{% empty %}<tr><td colspan="3" class="empty">No scheduled-task errors recorded.</td></tr>{% endfor %}
+            </tbody></table></div>
+          {% endif %}
+        </section>
+      {% endif %}
+    </section>
+
+    <aside>
+      <section class="panel">
+        <div class="panel-head"><div><h2>Unified operational timeline</h2><p class="note">{{ window_label }} · newest first</p></div></div>
+        <div class="timeline">
+          {% for item in activity %}
+            <article class="event">
+              <time>{{ item.occurred_at|date:"j M Y · H:i" }}</time>
+              <div>
+                <span class="kind">{{ item.kind }}</span>
+                {% if item.url %}<a class="event-title" href="{{ item.url }}">{{ item.title }}</a>{% else %}<span class="event-title">{{ item.title }}</span>{% endif %}
+                {% if item.description %}<div class="event-desc">{{ item.description }}</div>{% endif %}
+                {% if item.level == 'critical' %}<span class="pill critical">Needs attention</span>{% elif item.level == 'warning' %}<span class="pill warning">Review</span>{% endif %}
+              </div>
+            </article>
+          {% empty %}<div class="empty">No operational events are available in this time window.</div>{% endfor %}
+        </div>
+      </section>
+
+      {% if can_view_security %}
+        <section class="panel">
+          <div class="panel-head"><div><h2>Security event summary</h2><p class="note">Counts only. No IP addresses, user agents or raw event details.</p></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Event type</th><th>Count</th></tr></thead><tbody>
+            {% for item in security_summary %}<tr><td>{{ item.label }}</td><td><strong>{{ item.total }}</strong></td></tr>
+            {% empty %}<tr><td colspan="2" class="empty">No security events in this window.</td></tr>{% endfor %}
+          </tbody></table></div>
+        </section>
+      {% endif %}
+
+      {% if not can_view_domain_events and not can_view_audit %}
+        <section class="panel"><p class="note">Domain and audit events are hidden because your role does not have those view permissions.</p></section>
+      {% endif %}
+    </aside>
+  </div>
+</main>
+{% endblock %}
