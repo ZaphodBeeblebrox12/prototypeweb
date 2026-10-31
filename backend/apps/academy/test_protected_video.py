@@ -78,15 +78,17 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
         (self.stream_dir / "encryption.key").write_bytes(b"0123456789abcdef")
         (self.stream_dir / "segment_00000.ts").write_bytes(b"private-segment")
         (self.stream_dir / "index.m3u8").write_text(
-            "#EXTM3U\n"
-            '#EXT-X-KEY:METHOD=AES-128,URI="protected-key",IV=0x0123456789abcdef\n'
-            "#EXTINF:6.0,\n"
-            "segment_00000.ts\n"
-            "#EXT-X-ENDLIST\n",
+            "#EXTM3U\\n"
+            '#EXT-X-KEY:METHOD=AES-128,URI="protected-key",IV=0x0123456789abcdef\\n'
+            "#EXTINF:6.0,\\n"
+            "segment_00000.ts\\n"
+            "#EXT-X-ENDLIST\\n",
             encoding="utf-8",
         )
 
-        self.client.force_login(self.user, backend="django.contrib.auth.backends.ModelBackend")
+        self.client.force_login(
+            self.user, backend="django.contrib.auth.backends.ModelBackend"
+        )
         self.manifest_url = reverse(
             "academy:protected-video-manifest", args=[self.video.pk]
         )
@@ -102,6 +104,13 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
         ticket = parse_qs(urlparse(key_match.group(1)).query).get("ticket", [])
         self.assertTrue(ticket)
         return playlist, ticket[0]
+
+    def _segment_url(self, playlist):
+        return next(
+            line
+            for line in playlist.splitlines()
+            if "segment_00000.ts" in line and "ticket=" in line
+        )
 
     def test_manifest_rewrites_key_and_segment_to_session_bound_routes(self):
         playlist, _ = self._playlist_and_ticket()
@@ -121,9 +130,7 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
     def test_key_and_segment_are_delivered_only_to_the_entitled_session(self):
         playlist, _ticket = self._playlist_and_ticket()
         key_url = re.search(r'URI="([^"]+)"', playlist).group(1)
-        segment_url = next(
-            line for line in playlist.splitlines() if "segment_00000.ts?ticket=" in line
-        )
+        segment_url = self._segment_url(playlist)
 
         key_response = self.client.get(key_url)
         self.assertEqual(key_response.status_code, 200)
@@ -131,17 +138,19 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
 
         segment_response = self.client.get(segment_url)
         self.assertEqual(segment_response.status_code, 200)
-        self.assertEqual(b"".join(segment_response.streaming_content), b"private-segment")
+        self.assertEqual(
+            b"".join(segment_response.streaming_content), b"private-segment"
+        )
         self.assertIn("no-store", segment_response["Cache-Control"])
 
     def test_ticket_cannot_be_reused_from_a_different_login_session(self):
         playlist, _ticket = self._playlist_and_ticket()
-        segment_url = next(
-            line for line in playlist.splitlines() if "segment_00000.ts?ticket=" in line
-        )
+        segment_url = self._segment_url(playlist)
 
         second_session = Client()
-        second_session.force_login(self.user, backend="django.contrib.auth.backends.ModelBackend")
+        second_session.force_login(
+            self.user, backend="django.contrib.auth.backends.ModelBackend"
+        )
         response = second_session.get(segment_url)
         self.assertEqual(response.status_code, 404)
 
@@ -159,7 +168,9 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
             verified=True,
         )
         client = Client()
-        client.force_login(other_user, backend="django.contrib.auth.backends.ModelBackend")
+        client.force_login(
+            other_user, backend="django.contrib.auth.backends.ModelBackend"
+        )
 
         response = client.get(self.manifest_url)
         self.assertEqual(response.status_code, 404)
