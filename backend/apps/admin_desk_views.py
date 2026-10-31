@@ -1326,6 +1326,7 @@ def _nav(request):
             or _allowed(request.user, "payments.view_invoice")
         ),
         "business": business_allowed,
+        "prospects": _allowed(request.user, "prospects.view_prospectenquiry"),
     }
 
 
@@ -1841,3 +1842,123 @@ def admin_desk_invoice_detail(request, invoice_id):
         "back_url": f"{reverse('staff_admin_desk_finance')}?tab=invoices",
         "desk_nav": _nav(request),
     })
+
+@login_required
+@require_GET
+def admin_desk_prospect_enquiries(request):
+    """Permission-filtered public prospect queue; separate from member support tickets."""
+    _guard(request, "prospects.view_prospectenquiry")
+    from apps.prospects.models import ProspectEnquiry
+
+    queryset = ProspectEnquiry.objects.select_related("assigned_to")
+    query = request.GET.get("q", "").strip()[:160]
+    status_filter = request.GET.get("status", "").strip()
+    programme_filter = request.GET.get("programme", "").strip()
+
+    if query:
+        search_filter = (
+            Q(name__icontains=query)
+            | Q(email__icontains=query)
+            | Q(question__icontains=query)
+            | Q(phone__icontains=query)
+        )
+        from uuid import UUID
+        try:
+            exact_id = UUID(query)
+        except (TypeError, ValueError, AttributeError):
+            exact_id = None
+        if exact_id:
+            search_filter |= Q(pk=exact_id)
+        queryset = queryset.filter(search_filter)
+
+    valid_statuses = {value for value, _label in ProspectEnquiry.Status.choices}
+    valid_programmes = {value for value, _label in ProspectEnquiry.Programme.choices}
+    if status_filter in valid_statuses:
+        queryset = queryset.filter(status=status_filter)
+    if programme_filter in valid_programmes:
+        queryset = queryset.filter(programme=programme_filter)
+
+    all_enquiries = ProspectEnquiry.objects.all()
+    stats = {
+        "new": all_enquiries.filter(status=ProspectEnquiry.Status.NEW).count(),
+        "follow_up": all_enquiries.filter(
+            status__in=[ProspectEnquiry.Status.CONTACTED, ProspectEnquiry.Status.QUALIFIED]
+        ).count(),
+        "qualified": all_enquiries.filter(status=ProspectEnquiry.Status.QUALIFIED).count(),
+        "enrolled": all_enquiries.filter(status=ProspectEnquiry.Status.ENROLLED).count(),
+    }
+    page = Paginator(queryset.order_by("-created_at"), 25).get_page(
+        request.GET.get("page")
+    )
+    return render(request, "admin/desk_prospect_enquiries.html", {
+        "enquiry_page": page,
+        "query": query,
+        "status_filter": status_filter,
+        "programme_filter": programme_filter,
+        "status_choices": ProspectEnquiry.Status.choices,
+        "programme_choices": ProspectEnquiry.Programme.choices,
+        "stats": stats,
+        "desk_nav": _nav(request),
+    })
+
+
+@login_required
+@require_GET
+def admin_desk_prospect_enquiry(request, enquiry_id):
+    """Read a prospect enquiry inside the Admin Desk."""
+    _guard(request, "prospects.view_prospectenquiry")
+    from apps.prospects.models import ProspectEnquiry
+
+    enquiry = get_object_or_404(
+        ProspectEnquiry.objects.select_related("assigned_to"),
+        pk=enquiry_id,
+    )
+    return render(request, "admin/desk_prospect_enquiry.html", {
+        "enquiry": enquiry,
+        "status_choices": ProspectEnquiry.Status.choices,
+        "can_change": _allowed(request.user, "prospects.change_prospectenquiry"),
+        "desk_nav": _nav(request),
+        "queue_url": reverse("staff_admin_desk_prospect_enquiries"),
+    })
+
+
+@login_required
+@require_POST
+def admin_desk_prospect_enquiry_update(request, enquiry_id):
+    """Update status and private follow-up notes with a permission check and audit event."""
+    _guard(request, "prospects.change_prospectenquiry")
+    from apps.prospects.models import ProspectEnquiry
+
+    enquiry = get_object_or_404(ProspectEnquiry, pk=enquiry_id)
+    new_status = request.POST.get("status", "").strip()
+    staff_notes = request.POST.get("staff_notes", "")[:10000]
+    valid_statuses = {value for value, _label in ProspectEnquiry.Status.choices}
+    if new_status not in valid_statuses:
+        messages.error(request, "Choose a valid enquiry status.")
+        return redirect("staff_admin_desk_prospect_enquiry", enquiry_id=enquiry.pk)
+
+    old_status = enquiry.status
+    notes_changed = staff_notes != enquiry.staff_notes
+    with transaction.atomic():
+        enquiry.status = new_status
+        enquiry.staff_notes = staff_notes
+        update_fields = ["status", "staff_notes", "updated_at"]
+        if new_status == ProspectEnquiry.Status.CONTACTED and enquiry.last_contacted_at is None:
+            enquiry.last_contacted_at = timezone.now()
+            update_fields.append("last_contacted_at")
+        enquiry.save(update_fields=update_fields)
+        if old_status != new_status or notes_changed:
+            _audit(
+                "admin.prospect_enquiry.updated",
+                request.user,
+                "prospect_enquiry",
+                enquiry.pk,
+                {
+                    "status_from": old_status,
+                    "status_to": new_status,
+                    "staff_notes_changed": notes_changed,
+                },
+            )
+    messages.success(request, "Prospect follow-up saved.")
+    return redirect("staff_admin_desk_prospect_enquiry", enquiry_id=enquiry.pk)
+
