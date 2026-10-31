@@ -1,5 +1,4 @@
 """Package uploaded lesson videos as private AES-128 HLS VOD."""
-import os
 import secrets
 import shutil
 import subprocess
