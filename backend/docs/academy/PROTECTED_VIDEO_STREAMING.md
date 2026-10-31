@@ -19,18 +19,42 @@ a licensed DRM/key service and are a separate upgrade.
 
 ## Production storage and runtime
 
-Do not use Render's ephemeral application filesystem for course videos. Attach
-a persistent disk to the Django service and set:
+### Current staging storage: Google Drive
 
-- `ACADEMY_VIDEO_STORAGE_ROOT=/var/data/tradethesis-videos` (use the actual disk mount path)
+Protected video source files, AES keys, HLS manifests, and HLS segments use the
+same private Google Drive asset folder already used by Academy images. The
+Drive objects are not shared publicly; the Django application reads them
+server-side and streams them only after checking the learner's session and
+course entitlement. Large source uploads use Drive's resumable-upload protocol.
+
+Set `ACADEMY_VIDEO_STORAGE_BACKEND=google_drive` (the default), and ensure the
+existing Academy Google Drive credentials and asset-folder ID are configured.
+`ACADEMY_REQUIRE_DURABLE_VIDEO_STORAGE=true` remains enabled in production;
+the application refuses to fall back silently to Render's ephemeral disk.
+
+Google Drive is a practical staging bridge, not an ideal video CDN. Each HLS
+segment request is proxied through Django and fetched from Drive, so playback
+latency, Drive API quotas, and egress should be monitored before scaling.
+
+### Future persistent-disk migration
+
+When a persistent disk is available, switch storage without changing the
+learner player or entitlement routes:
+
+- `ACADEMY_VIDEO_STORAGE_BACKEND=filesystem`
+- `ACADEMY_VIDEO_STORAGE_ROOT=/var/data/tradethesis-videos` (actual mount path)
 - `ACADEMY_VIDEO_STORAGE_DURABLE=true`
 - `ACADEMY_REQUIRE_DURABLE_VIDEO_STORAGE=true`
-- `ACADEMY_ALLOW_LEGACY_VIDEO_URLS=false`
+
+Copy existing Drive source files and generated HLS objects to the same logical
+storage keys on the mounted disk before switching the backend. Verify every
+video, then change the environment variable and deploy. Keep the Drive copy
+until the migration is verified and rollback is no longer needed.
 
 The Docker runtime image installs FFmpeg. If the current Render service uses
 the native Python runtime rather than the Dockerfile, install FFmpeg in that
 runtime before processing videos or set `ACADEMY_FFMPEG_BINARY` to its path.
-The web process and the processing command must see the same persistent disk.
+The web process and processing command must use the same storage backend.
 
 The source MP4s and generated HLS files live under this private root, outside
 `MEDIA_ROOT`, `STATIC_ROOT`, and any public CDN. Back up this disk; the
