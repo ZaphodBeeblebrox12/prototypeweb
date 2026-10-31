@@ -8,7 +8,7 @@ import json
 import time
 
 from django.conf import settings
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
@@ -86,10 +86,53 @@ def resend_webhook(request):
 
     from apps.emailing.models import Delivery
 
-    updated = Delivery.objects.filter(
+    delivery_qs = Delivery.objects.filter(
         provider="resend",
         provider_message_id=email_id,
-    ).update(state=target_state)
+    )
+
+    # Webhooks can be retried or arrive out of order. A late "sent" or
+    # "delivery delayed" event must never downgrade a confirmed delivery,
+    # bounce, complaint, or suppression outcome.
+    protected_states_by_event = {
+        "email.sent": [
+            Delivery.State.DELIVERED,
+            Delivery.State.DELAYED,
+            Delivery.State.BOUNCED,
+            Delivery.State.COMPLAINED,
+            Delivery.State.SUPPRESSED,
+        ],
+        "email.delivery_delayed": [
+            Delivery.State.DELIVERED,
+            Delivery.State.BOUNCED,
+            Delivery.State.COMPLAINED,
+            Delivery.State.SUPPRESSED,
+        ],
+        "email.delivered": [
+            Delivery.State.BOUNCED,
+            Delivery.State.COMPLAINED,
+            Delivery.State.SUPPRESSED,
+        ],
+        "email.bounced": [
+            Delivery.State.DELIVERED,
+            Delivery.State.COMPLAINED,
+            Delivery.State.SUPPRESSED,
+        ],
+        "email.complained": [
+            Delivery.State.BOUNCED,
+            Delivery.State.SUPPRESSED,
+        ],
+        "email.suppressed": [
+            Delivery.State.DELIVERED,
+            Delivery.State.BOUNCED,
+            Delivery.State.COMPLAINED,
+        ],
+    }
+    protected_states = protected_states_by_event.get(event_type, [])
+    if protected_states:
+        delivery_qs = delivery_qs.exclude(state__in=protected_states)
+
+    updated = delivery_qs.update(state=target_state)
     if not updated:
         # Resend retries non-2xx webhook deliveries. This also covers the very
         # small race where the webhook arrives before the send response is saved.
