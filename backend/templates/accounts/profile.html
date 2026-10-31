@@ -60,6 +60,10 @@
                   {% csrf_token %}
                   <button type="submit" class="btn secondary small">Retry disconnect</button>
                 </form>
+              {% elif telegram_cleanup_pending %}
+                <p>A previous Telegram link was removed before access cleanup finished.</p>
+                <span class="member-status-pill">Access cleanup pending</span>
+                <a class="member-text-link" href="{% url 'support:request_ticket' %}">Contact support about access cleanup ↗</a>
               {% elif telegram_bot_configured %}
                 <p>Not connected to this account.</p>
                 <a class="member-text-link" href="{% url 'bot_integration:telegram_connect' %}">Connect Telegram ↗</a>
