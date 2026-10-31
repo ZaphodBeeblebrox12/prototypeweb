@@ -77,9 +77,16 @@ class Command(BaseCommand):
         previous_processed_at = video.processed_at
         output_prefix = f"streams/{video.pk}/{uuid.uuid4().hex}"
         uploaded_names = []
-        video.status = ProtectedLessonVideo.Status.PROCESSING
+        # Keep an existing ready rendition available while a forced rebuild runs.
+        # Only first-time processing needs to hide playback as PROCESSING.
+        video.status = (
+            ProtectedLessonVideo.Status.READY
+            if previous_status == ProtectedLessonVideo.Status.READY
+            else ProtectedLessonVideo.Status.PROCESSING
+        )
         video.processing_error = ""
-        video.processed_at = None
+        if previous_status != ProtectedLessonVideo.Status.READY:
+            video.processed_at = None
         video.save(update_fields=("status", "processing_error", "processed_at", "updated_at"))
 
         try:
@@ -94,13 +101,15 @@ class Command(BaseCommand):
                 output_dir = work_dir / "hls"
                 output_dir.mkdir()
                 key = secrets.token_bytes(16)
-                iv = secrets.token_hex(16)
                 key_path = output_dir / "encryption.key"
                 key_path.write_bytes(key)
                 key_path.chmod(0o600)
                 key_info_path = work_dir / "key-info.txt"
+                # Omitting the optional IV makes FFmpeg use each segment's
+                # media-sequence number as its IV instead of reusing one IV
+                # for every segment encrypted with this key.
                 key_info_path.write_text(
-                    f"protected-key\n{key_path}\n0x{iv}\n", encoding="utf-8"
+                    f"protected-key\n{key_path}\n", encoding="utf-8"
                 )
                 manifest_path = output_dir / "index.m3u8"
                 command = [
