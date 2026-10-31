@@ -68,11 +68,26 @@ def banned_user(user_factory, db):
 
 
 @pytest.fixture
+def telegram_auth_bot_config(db):
+    """Canonical Telegram bot config for Login Widget tests."""
+    from apps.bot_integration.models import BotConfig
+    return BotConfig.objects.update_or_create(
+        pk=1,
+        defaults={
+            "telegram_bot_username": "tradethesis_test_bot",
+            "telegram_bot_token": "test_token",
+            "is_active": True,
+        },
+    )[0]
+
+
+@pytest.fixture
 def telegram_auth_data():
-    """Sample Telegram auth data for testing."""
+    """Sample fresh Telegram auth data for testing."""
+    import time
     return {
         "id": 123456789,
-        "auth_date": 1704067200,
+        "auth_date": int(time.time()),
         "first_name": "Test",
         "last_name": "User",
         "username": "testuser",

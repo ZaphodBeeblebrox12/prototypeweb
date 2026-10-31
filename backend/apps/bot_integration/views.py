@@ -27,6 +27,70 @@ logger = logging.getLogger(__name__)
 @login_required
 def start_telegram_connect(request):
     """Generate a deep link to the existing TradeThesis Telegram bot."""
+    # A disconnect is not complete until managed channel access has been
+    # revoked. Do not allow a replacement identity to race that cleanup.
+    from apps.jobs.models import ProvisioningOperation
+    active_account_linked = TelegramAccount.objects.filter(
+        user=request.user, is_active=True
+    ).exists()
+    if active_account_linked:
+        messages.info(
+            request,
+            "Telegram is already connected. Disconnect it first and wait for "
+            "managed community access to be removed before linking another account.",
+        )
+        return redirect(f"{reverse('dashboard')}#connections")
+
+    pending_account_disconnect = TelegramAccount.objects.filter(
+        user=request.user, is_active=False
+    ).exists()
+    orphaned_access = (
+        not TelegramAccount.objects.filter(user=request.user).exists()
+        and (
+            UserChannelAssignment.objects.filter(
+                user=request.user, platform="telegram", is_active=True,
+            ).exists()
+            or ProvisioningOperation.objects.filter(
+                user_id=request.user.pk,
+                operation=ProvisioningOperation.OP_GRANT,
+                state__in=[
+                    ProvisioningOperation.ST_PENDING,
+                    ProvisioningOperation.ST_CREATING,
+                    ProvisioningOperation.ST_CREATED,
+                    ProvisioningOperation.ST_SENDING,
+                    ProvisioningOperation.ST_SENT,
+                    ProvisioningOperation.ST_UNKNOWN,
+                ],
+            ).exists()
+        )
+    )
+    if orphaned_access:
+        from django.db import transaction
+        from apps.jobs.enqueue import enqueue_reconcile
+        try:
+            with transaction.atomic():
+                # Expire any link token minted before the orphaned cleanup
+                # was detected, so a delayed /start cannot restore the old link.
+                TelegramVerificationToken.objects.filter(user=request.user).delete()
+                enqueue_reconcile(request.user.pk, reason="orphaned_telegram_cleanup")
+        except Exception:
+            logger.exception("Could not queue orphaned Telegram cleanup user=%s", request.user.pk)
+        messages.error(
+            request,
+            "A previous Telegram connection still has community access to clean up. "
+            "We're resolving it before allowing a new Telegram link. Contact support "
+            "if this status does not clear.",
+        )
+        return redirect(f"{reverse('dashboard')}#connections")
+
+    if pending_account_disconnect:
+        messages.error(
+            request,
+            "Your previous Telegram disconnect is still being completed. "
+            "Retry disconnecting from Connected accounts before linking again.",
+        )
+        return redirect(f"{reverse('dashboard')}#connections")
+
     # Verification and normal channel access share one bot identity.
     # BotConfig is the canonical credential source used by TelegramBotService.
     config = BotConfig.get_config()
@@ -49,35 +113,81 @@ def start_telegram_connect(request):
 @login_required
 @require_POST
 def unlink_telegram(request):
-    """Disconnect Telegram account from user profile."""
-    try:
-        tg = TelegramAccount.objects.get(user=request.user)
-        old_chat_id = tg.chat_id
-        tg.delete()
-        # Best-effort confirmation: the disconnect must succeed even if Telegram
-        # is temporarily unavailable or the user has blocked the bot.
-        try:
-            sent = TelegramBotService.send_message(
-                old_chat_id,
-                "🔓 Telegram disconnected. Your TradeThesis account has been disconnected from Telegram. "
-                "You can reconnect anytime from your Dashboard.",
-            )
-            if not sent:
-                logger.info("Telegram disconnect confirmation was not accepted chat_id=%s", old_chat_id)
-        except Exception:
-            logger.exception("Telegram disconnect confirmation failed chat_id=%s", old_chat_id)
-        BotAccessAudit.objects.create(
-            user=request.user,
-            action='unlink',
-            platform='telegram',
-            target=str(old_chat_id),
-            status='success'
+    """Request a safe Telegram disconnect; revoke paid access before deleting identity."""
+    from django.db import transaction
+    from apps.jobs.enqueue import enqueue_reconcile
+
+    account = TelegramAccount.objects.filter(user=request.user).first()
+    if account is None:
+        from apps.jobs.models import ProvisioningOperation
+        open_grant_states = [
+            ProvisioningOperation.ST_PENDING,
+            ProvisioningOperation.ST_CREATING,
+            ProvisioningOperation.ST_CREATED,
+            ProvisioningOperation.ST_SENDING,
+            ProvisioningOperation.ST_SENT,
+            ProvisioningOperation.ST_UNKNOWN,
+        ]
+        orphaned_access = (
+            UserChannelAssignment.objects.filter(
+                user=request.user, platform="telegram", is_active=True,
+            ).exists()
+            or ProvisioningOperation.objects.filter(
+                user_id=request.user.pk,
+                operation=ProvisioningOperation.OP_GRANT,
+                state__in=open_grant_states,
+            ).exists()
         )
-        from apps.jobs.enqueue import enqueue_reconcile
-        enqueue_reconcile(request.user.id, reason="telegram_unlink")
-        messages.success(request, "✅ Telegram disconnected. You can reconnect anytime from Connected accounts in your Dashboard.")
-    except TelegramAccount.DoesNotExist:
-        messages.info(request, "No Telegram account is currently linked.")
+        if not orphaned_access:
+            messages.info(request, "No Telegram account is currently linked.")
+            return redirect(f"{reverse('dashboard')}#connections")
+        try:
+            with transaction.atomic():
+                TelegramVerificationToken.objects.filter(user=request.user).delete()
+                enqueue_reconcile(request.user.pk, reason="orphaned_telegram_cleanup")
+        except Exception:
+            logger.exception("Orphaned Telegram cleanup retry could not be queued user=%s", request.user.pk)
+            messages.error(
+                request,
+                "We couldn't queue the Telegram access cleanup. Please contact support.",
+            )
+        else:
+            messages.info(
+                request,
+                "Telegram access cleanup has been queued again. A new link will only "
+                "be offered after the previous managed access is resolved.",
+            )
+        return redirect(f"{reverse('dashboard')}#connections")
+
+    try:
+        # The account row (including telegram_user_id) is the credential needed
+        # to revoke paid-channel membership. Keep it, but pause all new grants.
+        # State change and durable job enqueue commit or roll back together.
+        with transaction.atomic():
+            # Invalidate any link flow started before the disconnect request.
+            TelegramVerificationToken.objects.filter(user=request.user).delete()
+            account = TelegramAccount.objects.select_for_update().get(
+                pk=account.pk, user=request.user
+            )
+            if account.is_active:
+                account.is_active = False
+                account.save(update_fields=["is_active"])
+            enqueue_reconcile(request.user.id, reason="telegram_unlink")
+    except Exception:
+        logger.exception("Telegram disconnect could not be queued user=%s", request.user.pk)
+        messages.error(
+            request,
+            "We couldn't safely start the Telegram disconnect. Your account "
+            "remains linked; please try again.",
+        )
+        return redirect(f"{reverse('dashboard')}#connections")
+
+    messages.info(
+        request,
+        "Telegram disconnect requested. TradeThesis will remove managed "
+        "community access before completing the disconnect. You can retry "
+        "from Connected accounts if it remains pending.",
+    )
     return redirect(f"{reverse('dashboard')}#connections")
 
 
@@ -92,7 +202,93 @@ def unlink_discord(request):
     """Remove managed Discord roles before disconnecting the linked account."""
     dc = DiscordAccount.objects.filter(user=request.user).first()
     if dc is None:
-        messages.info(request, "No Discord account is currently linked.")
+        # Older OAuth flows stored only User.discord_id and never created the
+        # managed DiscordAccount row. Reconcile any roles TradeThesis owns
+        # before clearing that legacy identity; never treat an unreadable
+        # provider state as a successful disconnect.
+        legacy_id = str(getattr(request.user, "discord_id", "") or "").strip()
+        if not legacy_id:
+            messages.info(request, "No Discord account is currently linked.")
+            return _discord_connections_redirect()
+
+        actual_roles = DiscordBotService.get_member_roles(legacy_id)
+        if actual_roles is None:
+            messages.error(
+                request,
+                "We couldn't verify your Discord roles. Your legacy identity "
+                "has been kept so access cleanup can be retried.",
+            )
+            return _discord_connections_redirect()
+
+        managed_roles = set(UserChannelAssignment.objects.filter(
+            user=request.user, platform="discord", is_active=True,
+        ).values_list("external_id", flat=True))
+        managed_roles.update(PlanChannelMapping.objects.filter(
+            platform="discord",
+        ).values_list("external_id", flat=True))
+        roles_to_remove = managed_roles & set(actual_roles)
+        failed_roles = []
+        for role_id in sorted(roles_to_remove):
+            if DiscordBotService.remove_role(legacy_id, role_id):
+                UserChannelAssignment.objects.filter(
+                    user=request.user, platform="discord", external_id=role_id,
+                    is_active=True,
+                ).update(is_active=False, revoked_at=timezone.now())
+                BotAccessAudit.objects.create(
+                    user=request.user, action="revoke", platform="discord",
+                    target=role_id, status="success",
+                )
+            else:
+                failed_roles.append(role_id)
+                BotAccessAudit.objects.create(
+                    user=request.user, action="revoke", platform="discord",
+                    target=role_id, status="failed",
+                    error_message="Role removal failed during legacy Discord disconnect.",
+                )
+
+        remaining_roles = DiscordBotService.get_member_roles(legacy_id)
+        unresolved = (
+            failed_roles
+            or remaining_roles is None
+            or bool(managed_roles & set(remaining_roles or []))
+        )
+        if unresolved:
+            messages.error(
+                request,
+                "Some managed Discord roles could not be verified as removed. "
+                "Your legacy identity remains in place; retry disconnecting "
+                "or contact support.",
+            )
+            return _discord_connections_redirect()
+
+        from apps.audit.models import AuditLog
+        legacy_username = request.user.discord_username
+        request.user.discord_id = None
+        request.user.discord_username = ""
+        request.user.discord_avatar = ""
+        request.user.discord_verified = False
+        request.user.save(update_fields=[
+            "discord_id", "discord_username", "discord_avatar", "discord_verified",
+        ])
+        AuditLog.log(
+            action="discord_disconnected",
+            user=request.user,
+            object_type="user",
+            object_id=request.user.id,
+            metadata={
+                "discord_id": legacy_id,
+                "discord_username": legacy_username or "",
+                "legacy_identity_only": True,
+            },
+        )
+        BotAccessAudit.objects.create(
+            user=request.user, action="unlink", platform="discord",
+            target=legacy_id, status="success",
+        )
+        messages.success(
+            request,
+            "Legacy Discord connection cleared and TradeThesis-managed roles removed.",
+        )
         return _discord_connections_redirect()
 
     # Pause grants before any outbound role-removal request. This closes the
@@ -242,9 +438,11 @@ def telegram_webhook(request):
         return JsonResponse({"ok": True})
 
     token_str = payload[7:]
+    from django.contrib.auth import get_user_model
     from django.db import IntegrityError, transaction
     from apps.jobs.enqueue import enqueue_reconcile
 
+    User = get_user_model()
     status = "linked"
     user = None
     try:
@@ -257,35 +455,61 @@ def telegram_webhook(request):
             if not token.is_valid():
                 token.delete()
                 status = "expired"
-            elif TelegramAccount.objects.filter(chat_id=chat_id).exclude(
-                user_id=user.id
-            ).exists():
-                # Preserve the token so support can resolve the existing link;
-                # don't replace or detach another TradeThesis user's account.
-                status = "conflict"
             else:
-                TelegramAccount.objects.update_or_create(
-                    user=user,
-                    defaults={
-                        "chat_id": chat_id,
-                        "telegram_user_id": telegram_user_id,
-                        "is_active": True,
-                        "username": from_user.get("username") or "",
-                        "first_name": from_user.get("first_name") or "",
-                    },
-                )
-                token.delete()
-                BotAccessAudit.objects.create(
-                    user=user, action="link", platform="telegram",
-                    target=str(chat_id), status="success",
-                )
-                enqueue_reconcile(user.id, reason="telegram_link")
-                transaction.on_commit(
-                    lambda uid=user.id: sync_telegram_profile_for_user(uid)
-                )
-                transaction.on_commit(
-                    lambda uid=user.id: sync_channel_memberships_for_user(uid)
-                )
+                existing_account = TelegramAccount.objects.select_for_update().filter(
+                    user_id=user.id
+                ).first()
+                if existing_account is not None and not existing_account.is_active:
+                    # A delayed deep link must never reactivate an identity while
+                    # paid access revocation is still running.
+                    token.delete()
+                    status = "disconnect_pending"
+                elif existing_account is not None:
+                    # A link is immutable while active. Rebinding to a new
+                    # Telegram identity must go through managed unlink first,
+                    # otherwise the old identity's paid memberships are orphaned.
+                    token.delete()
+                    if (
+                        existing_account.chat_id == chat_id
+                        and existing_account.telegram_user_id == telegram_user_id
+                    ):
+                        status = "already_linked"
+                    else:
+                        status = "account_conflict"
+                elif (
+                    TelegramAccount.objects.filter(chat_id=chat_id)
+                    .exclude(user_id=user.id).exists()
+                    or User.objects.filter(
+                        telegram_id=telegram_user_id
+                    ).exclude(pk=user.id).exists()
+                ):
+                    # Preserve the token so support can resolve the existing link;
+                    # don't replace or detach another TradeThesis user's account,
+                    # including a legacy Telegram Login Widget identity.
+                    status = "conflict"
+                else:
+                    TelegramAccount.objects.update_or_create(
+                        user=user,
+                        defaults={
+                            "chat_id": chat_id,
+                            "telegram_user_id": telegram_user_id,
+                            "is_active": True,
+                            "username": from_user.get("username") or "",
+                            "first_name": from_user.get("first_name") or "",
+                        },
+                    )
+                    token.delete()
+                    BotAccessAudit.objects.create(
+                        user=user, action="link", platform="telegram",
+                        target=str(chat_id), status="success",
+                    )
+                    enqueue_reconcile(user.id, reason="telegram_link")
+                    transaction.on_commit(
+                        lambda uid=user.id: sync_telegram_profile_for_user(uid)
+                    )
+                    transaction.on_commit(
+                        lambda uid=user.id: sync_channel_memberships_for_user(uid)
+                    )
     except TelegramVerificationToken.DoesNotExist:
         # Telegram may retry a webhook after its first successful response.
         # Treat the already-linked identity as idempotent rather than telling
@@ -333,6 +557,36 @@ def telegram_webhook(request):
             "Please contact support so we can help resolve it.",
         )
         return JsonResponse({"ok": True})
+    if status == "disconnect_pending":
+        TelegramBotService.send_message(
+            chat_id,
+            "⏳ Your previous Telegram disconnect is still being completed. "
+            "Please return to your TradeThesis Member Desk and retry connecting "
+            "after the pending disconnect has finished.",
+        )
+        return JsonResponse({"ok": True})
+    if status == "already_linked":
+        TelegramBotService.send_message(
+            chat_id, "🎉 This Telegram account is already connected to TradeThesis."
+        )
+        return JsonResponse({"ok": True})
+    if status == "account_conflict":
+        if user is not None:
+            BotAccessAudit.objects.create(
+                user=user,
+                action="link",
+                platform="telegram",
+                target=str(chat_id),
+                status="failed",
+                error_message="A different Telegram account is already linked; disconnect before rebinding.",
+            )
+        TelegramBotService.send_message(
+            chat_id,
+            "⚠️ A different Telegram account is already connected to your TradeThesis "
+            "profile. Disconnect it from your Member Desk and wait for access cleanup "
+            "before linking another account.",
+        )
+        return JsonResponse({"ok": True})
 
     TelegramBotService.send_message(
         chat_id, "🎉 You’re connected! Your TradeThesis account is now linked to Telegram. "
@@ -344,6 +598,10 @@ def telegram_webhook(request):
 @login_required
 def discord_oauth_start(request):
     """Begin a session-bound OAuth flow for linking and joining the community."""
+    if getattr(request.user, "is_banned", False):
+        return render(request, "accounts/banned.html", {
+            "ban_reason": request.user.ban_reason,
+        })
     if DiscordAccount.objects.filter(
         user=request.user, is_active=False
     ).exists():
@@ -388,6 +646,11 @@ def discord_oauth_start(request):
 def discord_oauth_callback(request):
     """Validate OAuth, join the configured guild, link the account, then sync roles."""
     import requests
+
+    if getattr(request.user, "is_banned", False):
+        return render(request, "accounts/banned.html", {
+            "ban_reason": request.user.ban_reason,
+        })
 
     code = request.GET.get("code")
     state = request.GET.get("state")
@@ -473,9 +736,15 @@ def discord_oauth_callback(request):
         messages.error(request, "Discord did not return an account ID. Please try again.")
         return _discord_connections_redirect()
 
-    if DiscordAccount.objects.filter(discord_user_id=discord_id).exclude(
-        user=request.user
-    ).exists():
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    canonical_identity_exists = DiscordAccount.objects.filter(
+        discord_user_id=discord_id
+    ).exclude(user=request.user).exists()
+    legacy_identity_exists = User.objects.filter(
+        discord_id=discord_id
+    ).exclude(pk=request.user.pk).exists()
+    if canonical_identity_exists or legacy_identity_exists:
         messages.error(request, "This Discord account is already linked to another TradeThesis account.")
         return _discord_connections_redirect()
 

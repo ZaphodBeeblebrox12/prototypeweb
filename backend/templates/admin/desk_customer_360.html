@@ -101,6 +101,9 @@
         {% if telegram_community_status == "Login only" or discord_community_status == "Legacy identity only" %}
           <span class="subvalue">Legacy login identity does not confirm a managed community connection.</span>
         {% endif %}
+        {% if telegram_community_status == "Access cleanup pending" %}
+          <span class="subvalue">A previous Telegram link was removed before managed channel access was fully revoked. Review the operational cleanup before allowing a new link.</span>
+        {% endif %}
       </div>
     {% endif %}
   </section>

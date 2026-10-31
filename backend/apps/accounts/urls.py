@@ -10,7 +10,7 @@ from apps.accounts.views import (
     UserActivityAPIView,
     ReferralDashboardView,          # <-- NEW IMPORT
 )
-from apps.accounts.discord_views import discord_connect_api
+from apps.accounts.discord_views import discord_connect_api, DiscordCallbackView
 
 urlpatterns = [
     # Telegram endpoints
@@ -18,6 +18,9 @@ urlpatterns = [
 
     # Discord endpoints
     path("discord/connect/", discord_connect_api, name="api_discord_connect"),
+    # Older Discord app registrations may still point at this API-prefixed callback.
+    # Delegate it to the same managed integration callback.
+    path("discord/callback/", DiscordCallbackView.as_view(), name="api_discord_callback_legacy"),
 
     # User API endpoints - FIXED paths and names
     path("me/", UserMeAPIView.as_view(), name="api_user_me"),

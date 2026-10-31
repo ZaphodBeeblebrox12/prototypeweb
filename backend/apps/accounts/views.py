@@ -5,6 +5,7 @@ import hashlib
 import hmac
 import json
 import os
+import time
 from datetime import datetime
 from decimal import Decimal
 
@@ -12,6 +13,7 @@ from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
@@ -582,6 +584,28 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
         telegram_account = getattr(user, "telegram_account", None)
         discord_account = getattr(user, "discord_account", None)
         discord_connected = bool(discord_account and discord_account.is_active)
+        from apps.bot_integration.models import UserChannelAssignment
+        from apps.jobs.models import ProvisioningOperation
+        telegram_cleanup_pending = bool(
+            telegram_account is None
+            and (
+                UserChannelAssignment.objects.filter(
+                    user=user, platform="telegram", is_active=True,
+                ).exists()
+                or ProvisioningOperation.objects.filter(
+                    user_id=user.pk,
+                    operation=ProvisioningOperation.OP_GRANT,
+                    state__in=[
+                        ProvisioningOperation.ST_PENDING,
+                        ProvisioningOperation.ST_CREATING,
+                        ProvisioningOperation.ST_CREATED,
+                        ProvisioningOperation.ST_SENDING,
+                        ProvisioningOperation.ST_SENT,
+                        ProvisioningOperation.ST_UNKNOWN,
+                    ],
+                ).exists()
+            )
+        )
         public_site_url = os.environ.get(
             "TRADETHESIS_PUBLIC_SITE_URL",
             "https://tradethesis-public-staging.onrender.com/",
@@ -625,6 +649,7 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
             "member_active_entitlements": len(active_entitlements),
             "member_access_record_count": len(active_entitlements) + len(active_subs),
             "telegram_account": telegram_account,
+            "telegram_cleanup_pending": telegram_cleanup_pending,
             "telegram_bot_configured": telegram_bot_configured,
             # Backward-compatible alias for templates/integrations not yet updated.
             "telegram_verification_configured": telegram_bot_configured,
@@ -714,9 +739,46 @@ class ProfileView(View):
     """User profile view and edit."""
 
     def get(self, request):
+        from apps.bot_integration.models import BotConfig, TelegramAccount, DiscordAccount
+
+        telegram_account = TelegramAccount.objects.filter(user=request.user).first()
+        discord_account = DiscordAccount.objects.filter(user=request.user).first()
+        from apps.bot_integration.models import UserChannelAssignment
+        from apps.jobs.models import ProvisioningOperation
+        telegram_cleanup_pending = bool(
+            telegram_account is None
+            and (
+                UserChannelAssignment.objects.filter(
+                    user=request.user, platform="telegram", is_active=True,
+                ).exists()
+                or ProvisioningOperation.objects.filter(
+                    user_id=request.user.pk,
+                    operation=ProvisioningOperation.OP_GRANT,
+                    state__in=[
+                        ProvisioningOperation.ST_PENDING,
+                        ProvisioningOperation.ST_CREATING,
+                        ProvisioningOperation.ST_CREATED,
+                        ProvisioningOperation.ST_SENDING,
+                        ProvisioningOperation.ST_SENT,
+                        ProvisioningOperation.ST_UNKNOWN,
+                    ],
+                ).exists()
+            )
+        )
+        bot_config = BotConfig.get_config()
+        telegram_bot_configured = bool(
+            bot_config.is_active
+            and (bot_config.telegram_bot_username or "").strip()
+            and (bot_config.telegram_bot_token or "").strip()
+        )
         return render(request, "accounts/profile.html", {
             "user": request.user,
-            "telegram_connected": bool(request.user.telegram_id and request.user.telegram_verified),
+            "telegram_account": telegram_account,
+            "telegram_connected": bool(telegram_account and telegram_account.is_active),
+            "telegram_cleanup_pending": telegram_cleanup_pending,
+            "telegram_bot_configured": telegram_bot_configured,
+            "discord_account": discord_account,
+            "discord_connected": bool(discord_account and discord_account.is_active),
         })
 
     def post(self, request):
@@ -786,88 +848,105 @@ class NotificationsView(View):
 @api_view(["POST"])
 @permission_classes([permissions.IsAuthenticated])
 def telegram_connect(request):
-    """
-    Connect Telegram account to user profile.
-    Verifies Telegram widget hash and stores telegram_id.
+    """Verify a Login Widget identity without impersonating a community link.
+
+    This is a legacy authenticated-user API. Community provisioning continues
+    to require the bot's private-chat deep-link flow and TelegramAccount row.
     """
     user = request.user
-
     data = request.data
+    check_hash = str(data.get("hash") or "").strip()
+    raw_telegram_id = str(data.get("id") or "").strip()
+    raw_auth_date = data.get("auth_date")
 
-    # Required fields from Telegram widget
-    check_hash = data.get("hash")
-    telegram_id = data.get("id")
-    username = data.get("username", "")
-
-    if not check_hash or not telegram_id:
+    if not check_hash or not raw_telegram_id or raw_auth_date in (None, ""):
         return Response(
-            {"error": "Missing required fields"},
-            status=status.HTTP_400_BAD_REQUEST
+            {"error": "Missing required Telegram identity, auth_date or hash"},
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # Verify Telegram hash
-    bot_token = settings.TELEGRAM_BOT_TOKEN
-    if not bot_token:
+    try:
+        telegram_id = int(raw_telegram_id)
+        auth_date = int(raw_auth_date)
+    except (TypeError, ValueError):
+        return Response(
+            {"error": "Invalid Telegram identity or auth_date"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    if telegram_id <= 0 or auth_date <= 0:
+        return Response(
+            {"error": "Invalid Telegram identity or auth_date"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    now = int(time.time())
+    if auth_date > now + 60 or now - auth_date > 24 * 60 * 60:
+        return Response(
+            {"error": "Telegram authentication has expired"},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    # Use the same singleton credential as the member dashboard, webhook and
+    # Login Widget page. No stale environment-var or test-token fallback.
+    from apps.bot_integration.models import BotConfig, TelegramAccount
+    config = BotConfig.get_config()
+    bot_token = (config.telegram_bot_token or "").strip()
+    if not config.is_active or not bot_token:
         return Response(
             {"error": "Telegram bot not configured"},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            status=status.HTTP_503_SERVICE_UNAVAILABLE,
         )
 
-    # Create data_check_string
     data_fields = []
     for key in ["auth_date", "first_name", "id", "last_name", "photo_url", "username"]:
-        if key in data and data[key]:
-            data_fields.append(f"{key}={data[key]}")
-    data_fields.sort()
-    data_check_string = chr(10).join(data_fields)
-
-    # Calculate secret key
+        value = data.get(key)
+        if value not in (None, ""):
+            data_fields.append(f"{key}={value}")
+    data_check_string = "\n".join(sorted(data_fields))
     secret_key = hashlib.sha256(bot_token.encode()).digest()
-
-    # Calculate hash
     calculated_hash = hmac.new(
-        secret_key,
-        data_check_string.encode(),
-        hashlib.sha256
+        secret_key, data_check_string.encode(), hashlib.sha256
     ).hexdigest()
-
-    if calculated_hash != check_hash:
+    if not hmac.compare_digest(calculated_hash, check_hash):
         return Response(
             {"error": "Invalid Telegram hash"},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_403_FORBIDDEN,
         )
 
-    # Check if telegram_id is already connected to another user
     existing_user = User.objects.filter(
         telegram_id=telegram_id
-    ).exclude(id=user.id).first()
-
-    if existing_user:
+    ).exclude(pk=user.pk).first()
+    linked_elsewhere = TelegramAccount.objects.filter(
+        Q(telegram_user_id=telegram_id) | Q(chat_id=telegram_id)
+    ).exclude(user_id=user.pk).exists()
+    if existing_user or linked_elsewhere:
         return Response(
             {"error": "This Telegram account is already connected to another user"},
-            status=status.HTTP_400_BAD_REQUEST
+            status=status.HTTP_409_CONFLICT,
         )
 
-    # Store Telegram info
+    username = str(data.get("username") or "").strip()[:64]
     user.telegram_id = telegram_id
     user.telegram_username = username
     user.telegram_verified = True
-    user.save()
+    user.save(update_fields=["telegram_id", "telegram_username", "telegram_verified"])
 
-    # Log the connection
     AuditLog.log(
         action="telegram_connected",
         user=user,
         object_type="user",
         object_id=user.id,
-        metadata={"telegram_id": telegram_id, "telegram_username": username}
+        metadata={"telegram_id": telegram_id, "telegram_username": username},
     )
 
     return Response({
         "success": True,
-        "telegram_id": telegram_id,
-        "telegram_username": username,
-        "telegram_verified": True
+        "telegram_id": user.telegram_id,
+        "telegram_username": user.telegram_username,
+        "telegram_verified": True,
+        "community_linked": bool(TelegramAccount.objects.filter(
+            user=user, is_active=True
+        ).exists()),
     })
 
 

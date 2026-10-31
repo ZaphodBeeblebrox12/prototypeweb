@@ -129,6 +129,24 @@ class TelegramConnectDeepLinkTests(TestCase):
         self.assertEqual(BotConfig.get_config().telegram_bot_username,
                          "inderjeetbot")
 
+    def test_active_telegram_account_must_disconnect_before_starting_another_link(self):
+        make_config("inderjeetbot")
+        user = make_user("already-connected")
+        TelegramAccount.objects.create(
+            user=user,
+            chat_id=555000222,
+            telegram_user_id=555000222,
+            is_active=True,
+        )
+        client = Client()
+        client.force_login(user)
+
+        response = client.get("/bot/telegram/connect/")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response["Location"].endswith("#connections"))
+        self.assertFalse(TelegramVerificationToken.objects.filter(user=user).exists())
+
     def test_superuser_flow_identical_to_normal_user(self):
         make_config("@inderjeetbot")
         user = make_user("admin1", superuser=True)
@@ -254,6 +272,65 @@ class TelegramWebhookVerifyFlowTests(TestCase):
             token=self.token.token).exists())   # token consumed
         task.assert_called_once_with(self.user.id, reason="telegram_link")
         svc.send_message.assert_called_once()    # confirmation DM sent
+
+    @mock.patch("apps.bot_integration.views.TelegramBotService")
+    @override_settings(TELEGRAM_WEBHOOK_SECRET="native-test-secret")
+    def test_legacy_user_telegram_identity_cannot_be_linked_to_another_member(self, svc):
+        legacy_owner = make_user("legacy-telegram-owner")
+        legacy_owner.telegram_id = 555000111
+        legacy_owner.telegram_verified = True
+        legacy_owner.save(update_fields=["telegram_id", "telegram_verified"])
+
+        r = self._post_native_start(f"/start verify_{self.token.token}")
+
+        self.assertEqual(r.status_code, 200)
+        self.assertFalse(TelegramAccount.objects.filter(user=self.user).exists())
+        self.assertTrue(TelegramVerificationToken.objects.filter(pk=self.token.pk).exists())
+        self.assertIn("already linked", svc.send_message.call_args.args[1].lower())
+
+    @mock.patch("apps.jobs.enqueue.enqueue_reconcile")
+    @mock.patch("apps.bot_integration.views.TelegramBotService")
+    @override_settings(TELEGRAM_WEBHOOK_SECRET="native-test-secret")
+    def test_stale_token_cannot_replace_an_active_telegram_identity(self, svc, enqueue):
+        existing = TelegramAccount.objects.create(
+            user=self.user,
+            chat_id=555000222,
+            telegram_user_id=555000222,
+            is_active=True,
+        )
+
+        r = self._post_native_start(f"/start verify_{self.token.token}")
+
+        self.assertEqual(r.status_code, 200)
+        existing.refresh_from_db()
+        self.assertEqual(existing.chat_id, 555000222)
+        self.assertEqual(existing.telegram_user_id, 555000222)
+        self.assertFalse(TelegramAccount.objects.filter(
+            user=self.user, chat_id=555000111
+        ).exists())
+        self.assertFalse(TelegramVerificationToken.objects.filter(pk=self.token.pk).exists())
+        enqueue.assert_not_called()
+        self.assertIn("different Telegram account is already connected",
+                      svc.send_message.call_args.args[1])
+
+    @mock.patch("apps.jobs.enqueue.enqueue_reconcile")
+    @mock.patch("apps.bot_integration.views.TelegramBotService")
+    @override_settings(TELEGRAM_WEBHOOK_SECRET="native-test-secret")
+    def test_same_active_telegram_identity_is_idempotent(self, svc, enqueue):
+        TelegramAccount.objects.create(
+            user=self.user,
+            chat_id=555000111,
+            telegram_user_id=555000111,
+            is_active=True,
+        )
+
+        r = self._post_native_start(f"/start verify_{self.token.token}")
+
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(TelegramAccount.objects.filter(user=self.user).count(), 1)
+        self.assertFalse(TelegramVerificationToken.objects.filter(pk=self.token.pk).exists())
+        enqueue.assert_not_called()
+        self.assertIn("already connected", svc.send_message.call_args.args[1].lower())
 
     @mock.patch("apps.bot_integration.views.TelegramBotService")
     def test_invalid_token_rejected_no_account(self, svc):

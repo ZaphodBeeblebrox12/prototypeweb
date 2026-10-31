@@ -58,6 +58,7 @@ class EmailVerificationMiddleware:
         # Revocation remains available even to legacy/unverified members: it
         # reduces access and must not be blocked by the verification gate.
         'discord_unlink',
+        'telegram_unlink',
         'index',
         'home',
     ]

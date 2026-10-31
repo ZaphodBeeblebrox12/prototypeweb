@@ -228,79 +228,231 @@ def _recover_membership(user_id, telegram_user_id, channel_id, transport):
     elif op.state == ProvisioningOperation.ST_FAILED:
         _audit(user_id, "grant", "telegram", channel_id, False,
                op.last_error[:500])
+        raise RuntimeError(
+            f"Telegram membership recovery failed for channel {channel_id}: {op.last_error[:300]}"
+        )
 
 
 def run_user_reconcile(user_id: int, transport=None) -> None:
     """Reconcile Telegram and Discord access for every active entitlement.
 
-    Discord is intentionally independent of Telegram account linkage: members
-    may use Discord only. Failed Discord mutations raise so the durable job
-    worker applies its normal backoff/retry policy.
+    Inactive TelegramAccount rows represent an in-progress disconnect. Keep
+    their Telegram identity until all managed channel revokes are verified.
+    Provider failures raise so the durable worker retries instead of silently
+    completing a partial access change.
     """
     target = compute_target_access(user_id)
-    account = TelegramAccount.objects.filter(
-        user_id=user_id, is_active=True
-    ).first()
-    if account and account.telegram_user_id:
-        tg_id = account.telegram_user_id
+    account = TelegramAccount.objects.filter(user_id=user_id).first()
+    if account is None:
+        # Older unlink code deleted TelegramAccount before reconciliation. Its
+        # audit event retained the private chat ID (equal to the numeric user
+        # ID for the private bot conversation); use that only as a recovery
+        # credential for revocation, never to create or re-link an account.
+        from apps.jobs.models import ProvisioningOperation
+        open_grant_states = [
+            ProvisioningOperation.ST_PENDING,
+            ProvisioningOperation.ST_CREATING,
+            ProvisioningOperation.ST_CREATED,
+            ProvisioningOperation.ST_SENDING,
+            ProvisioningOperation.ST_SENT,
+            ProvisioningOperation.ST_UNKNOWN,
+        ]
+        orphaned_assignments = set(
+            UserChannelAssignment.objects.filter(
+                user_id=user_id, platform="telegram", is_active=True,
+            ).values_list("external_id", flat=True)
+        )
+        open_grants = set(
+            ProvisioningOperation.objects.filter(
+                user_id=user_id,
+                operation=ProvisioningOperation.OP_GRANT,
+                state__in=open_grant_states,
+            ).values_list("channel_id", flat=True)
+        )
+        if orphaned_assignments or open_grants:
+            prior_unlink = BotAccessAudit.objects.filter(
+                user_id=user_id, action="unlink", platform="telegram",
+            ).order_by("-created_at", "-pk").first()
+            try:
+                tg_id = int(prior_unlink.target) if prior_unlink else 0
+            except (TypeError, ValueError):
+                tg_id = 0
+            if tg_id <= 0:
+                raise RuntimeError(
+                    f"Telegram assignments exist without a recoverable Telegram identity for user {user_id}"
+                )
+
+            transport = transport or ProvisionTransport()
+            orphan_targets = orphaned_assignments | open_grants
+            # Include the most recently granted destinations as a final recovery
+            # source. This catches an invite operation that was closed or lost
+            # its assignment row during the old eager-delete flow.
+            orphan_targets |= set(
+                ProvisioningOperation.objects.filter(
+                    user_id=user_id,
+                    operation=ProvisioningOperation.OP_GRANT,
+                ).values_list("channel_id", flat=True)
+            )
+            for channel_id in sorted(orphan_targets):
+                error = _control_channel_guard(channel_id)
+                if error:
+                    _audit(user_id, "revoke", "telegram", channel_id, False, error)
+                    raise RuntimeError(error)
+                op = _get_or_create_operation(
+                    user_id, channel_id, ProvisioningOperation.OP_REVOKE, tg_id
+                )
+                execute_operation(op, transport)
+                if op.state == ProvisioningOperation.ST_COMPLETED:
+                    _finalize_revoke(user_id, channel_id)
+                    _supersede_open_grants(user_id, channel_id)
+                else:
+                    message = op.last_error or f"revoke remains unresolved ({op.state})"
+                    _audit(user_id, "revoke", "telegram", channel_id, False, message[:500])
+                    raise RuntimeError(
+                        f"Orphaned Telegram revoke failed for channel {channel_id}: {message[:300]}"
+                    )
+
+    if account is not None:
+        tg_id = account.telegram_user_id or account.chat_id
+        if not tg_id:
+            raise RuntimeError(
+                f"Telegram account has no usable numeric identity for user {user_id}"
+            )
 
         existing = set(UserChannelAssignment.objects.filter(
             user_id=user_id, platform="telegram", is_active=True,
         ).values_list("external_id", flat=True))
 
-        wanted = set(target.telegram_ids) if target.has_plan else set()
+        disconnecting = not account.is_active
+        wanted = (
+            {str(channel_id) for channel_id in target.telegram_ids}
+            if target.has_plan and not disconnecting else set()
+        )
+        revoke_targets = existing - wanted
+        grant_targets = wanted - existing
+
+        if disconnecting:
+            # Sweep all known managed grant destinations as well as current
+            # entitlements. This catches a sent/unknown invite or stale local
+            # assignment even if the assignment ledger is incomplete.
+            historical_grants = set(
+                ProvisioningOperation.objects.filter(
+                    user_id=user_id,
+                    operation=ProvisioningOperation.OP_GRANT,
+                ).values_list("channel_id", flat=True)
+            )
+            revoke_targets |= historical_grants
+            revoke_targets |= {str(channel_id) for channel_id in target.telegram_ids}
+
         guard = _control_channel_guard
         transport = transport or ProvisionTransport()
 
-        # Revokes first (drop access), then grants.
-        for channel_id in sorted(existing - wanted):
-            if guard(channel_id):
-                _audit(user_id, "revoke", "telegram", channel_id, False, guard(channel_id))
-                continue
-            op = _get_or_create_operation(user_id, channel_id,
-                                          ProvisioningOperation.OP_REVOKE, tg_id)
+        # Revokes always run first. A failed or unverified revoke is NOT
+        # success: raise to leave the durable job retryable and retain identity.
+        for channel_id in sorted(revoke_targets):
+            error = guard(channel_id)
+            if error:
+                _audit(user_id, "revoke", "telegram", channel_id, False, error)
+                raise RuntimeError(error)
+            op = _get_or_create_operation(
+                user_id, channel_id, ProvisioningOperation.OP_REVOKE, tg_id
+            )
             execute_operation(op, transport)
             if op.state == ProvisioningOperation.ST_COMPLETED:
                 _finalize_revoke(user_id, channel_id)
-                # A completed revoke ENDS the grant lifecycle: a later re-grant
-                # must run the FULL grant path (ProvisionClient.grant ->
-                # /provision/v1/access -> bot do_grant), which performs the
-                # unban.  An old ST_SENT grant must NOT be reused for that.
                 _supersede_open_grants(user_id, channel_id)
             elif op.state == ProvisioningOperation.ST_FAILED:
                 _audit(user_id, "revoke", "telegram", channel_id, False, op.last_error[:500])
+                raise RuntimeError(
+                    f"Telegram revoke failed for channel {channel_id}: {op.last_error[:300]}"
+                )
+            else:
+                raise RuntimeError(
+                    f"Telegram revoke remains unresolved for channel {channel_id} ({op.state})"
+                )
 
-        for channel_id in sorted(wanted - existing):
-            if guard(channel_id):
-                _audit(user_id, "grant", "telegram", channel_id, False, guard(channel_id))
-                continue
-            op = _get_or_create_operation(user_id, channel_id,
-                                          ProvisioningOperation.OP_GRANT, tg_id)
+        # Grants only run while the Telegram account is active.
+        for channel_id in sorted(grant_targets):
+            error = guard(channel_id)
+            if error:
+                _audit(user_id, "grant", "telegram", channel_id, False, error)
+                raise RuntimeError(error)
+            op = _get_or_create_operation(
+                user_id, channel_id, ProvisioningOperation.OP_GRANT, tg_id
+            )
             execute_operation(op, transport)
-            if op.state in (ProvisioningOperation.ST_COMPLETED,
-                            ProvisioningOperation.ST_SENT):
-                # COMPLETED: the user joined.  SENT: the invite was created and
-                # the DM delivered, but the user has not joined yet.  Both mean
-                # the entitlement is provisioned, so the assignment becomes/stays
-                # active: is_active means "entitled/authorized", NOT "currently a
-                # Telegram member".  The operation may legitimately remain
-                # ST_SENT while membership is pending; later runs converge it.
+            if op.state in (ProvisioningOperation.ST_COMPLETED, ProvisioningOperation.ST_SENT):
+                # SENT means the invite DM was accepted; membership can still
+                # be pending. The assignment records the entitlement, not presence.
                 _finalize_grant(user_id, channel_id)
                 if op.state == ProvisioningOperation.ST_SENT:
                     _stamp_invite_sent(user_id, channel_id)
             elif op.state == ProvisioningOperation.ST_FAILED:
                 _audit(user_id, "grant", "telegram", channel_id, False, op.last_error[:500])
+                raise RuntimeError(
+                    f"Telegram grant failed for channel {channel_id}: {op.last_error[:300]}"
+                )
+            else:
+                raise RuntimeError(
+                    f"Telegram grant remains unresolved for channel {channel_id} ({op.state})"
+                )
 
-        # Membership recovery: entitlement AND active assignment exist, but the
-        # user may no longer be in the channel.  Recover access without touching
-        # the assignment (the entitlement still exists).
+        # Membership recovery applies only to a still-linked, active identity.
         for channel_id in sorted(wanted & existing):
-            if guard(channel_id):
-                continue
             _recover_membership(user_id, tg_id, channel_id, transport)
 
-        account.last_synced_at = timezone.now()
-        account.save(update_fields=["last_synced_at"])
+        if disconnecting:
+            remaining = UserChannelAssignment.objects.filter(
+                user_id=user_id, platform="telegram", is_active=True,
+            ).exists()
+            open_grants = ProvisioningOperation.objects.filter(
+                user_id=user_id,
+                operation=ProvisioningOperation.OP_GRANT,
+                state__in=[
+                    ProvisioningOperation.ST_PENDING,
+                    ProvisioningOperation.ST_CREATING,
+                    ProvisioningOperation.ST_CREATED,
+                    ProvisioningOperation.ST_SENDING,
+                    ProvisioningOperation.ST_SENT,
+                    ProvisioningOperation.ST_UNKNOWN,
+                ],
+            ).exists()
+            if remaining or open_grants:
+                raise RuntimeError(
+                    f"Telegram disconnect still has unresolved access for user {user_id}"
+                )
+
+            old_chat_id = account.chat_id
+            from django.db import transaction
+            with transaction.atomic():
+                locked_account = TelegramAccount.objects.select_for_update().filter(
+                    pk=account.pk, is_active=False
+                ).first()
+                if locked_account is not None:
+                    locked_account.delete()
+                    BotAccessAudit.objects.create(
+                        user_id=user_id,
+                        action="unlink",
+                        platform="telegram",
+                        target=str(old_chat_id),
+                        status="success",
+                    )
+            # Confirmation is best effort and happens only after access is
+            # removed. A blocked bot must not undo a successful disconnect.
+            try:
+                from apps.bot_integration.services.telegram import TelegramBotService
+                TelegramBotService.send_message(
+                    old_chat_id,
+                    "🔓 Telegram disconnected. TradeThesis has removed your managed "
+                    "community access. You can reconnect from your Member Desk.",
+                )
+            except Exception:
+                logger.exception(
+                    "Telegram disconnect confirmation failed user=%s", user_id
+                )
+        else:
+            account.last_synced_at = timezone.now()
+            account.save(update_fields=["last_synced_at"])
 
     discord_account = DiscordAccount.objects.filter(
         user_id=user_id, is_active=True
