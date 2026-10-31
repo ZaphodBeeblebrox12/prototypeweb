@@ -54,7 +54,7 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
             raise NotImplementedError("Google Drive lesson videos do not have a local filesystem path.")
         return self._local_backend().path(name)
 
-    def _drive_video_upload(self, name, raw, content_type):
+    def _drive_video_upload(self, name, content, content_length, content_md5, content_type):
         """Use Drive's resumable-upload protocol; source videos can exceed 5 MB."""
         logical_key = str(name).replace("\\", "/").lstrip("/")
         if not logical_key or any(part in {".", ".."} for part in logical_key.split("/")):
@@ -72,8 +72,7 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
         if len(listing) > 1:
             logger.warning("Duplicate Drive protected-video keys found; newest item selected.")
         existing = listing[0] if listing else None
-        digest = hashlib.md5(raw).hexdigest()
-        if existing and str(existing.get("md5Checksum") or "").lower() == digest:
+        if existing and str(existing.get("md5Checksum") or "").lower() == content_md5:
             return existing
 
         metadata = {
@@ -92,7 +91,7 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
             headers={
                 "Content-Type": "application/json; charset=UTF-8",
                 "X-Upload-Content-Type": metadata["mimeType"],
-                "X-Upload-Content-Length": str(len(raw)),
+                "X-Upload-Content-Length": str(content_length),
             },
             json=metadata,
         )
@@ -101,8 +100,8 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
             raise OSError("Google Drive did not create a resumable upload session.")
         uploaded = self._drive_request(
             "PUT", upload_url, expected=(200, 201),
-            headers={"Content-Type": metadata["mimeType"], "Content-Length": str(len(raw))},
-            data=raw,
+            headers={"Content-Type": metadata["mimeType"], "Content-Length": str(content_length)},
+            data=content,
         )
         result = uploaded.json()
         if not isinstance(result, dict) or not result.get("id"):
@@ -111,9 +110,16 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
 
     def _save(self, name, content):
         if self._use_drive:
-            raw = b"".join(content.chunks())
+            digest = hashlib.md5()
+            content_length = 0
+            content.seek(0)
+            for chunk in content.chunks():
+                digest.update(chunk)
+                content_length += len(chunk)
+            content.seek(0)
             self._drive_video_upload(
-                name, raw, getattr(content, "content_type", None)
+                name, content, content_length, digest.hexdigest(),
+                getattr(content, "content_type", None)
                 or mimetypes.guess_type(name)[0] or "application/octet-stream",
             )
             return name
