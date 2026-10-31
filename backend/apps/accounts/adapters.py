@@ -8,6 +8,7 @@ from allauth.account.models import EmailAddress
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.sites.models import Site
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
@@ -125,6 +126,14 @@ class CustomAccountAdapter(DefaultAccountAdapter):
     def get_logout_redirect_url(self, request):
         return "/"
 
+    def format_email_subject(self, subject):
+        """Brand account mail directly; never inherit the Sites DB seed name."""
+        clean_subject = " ".join(str(subject).splitlines()).strip()
+        prefix = "[TradeThesis] "
+        if clean_subject.startswith(prefix):
+            return clean_subject
+        return f"{prefix}{clean_subject}"
+
     def send_mail(self, template_prefix, email, context):
         """Add TradeThesis branding and absolute account links to Allauth mail."""
         context.setdefault("logo_url", getattr(settings, "EMAIL_LOGO_URL", ""))
@@ -132,6 +141,14 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         if base_url:
             context.setdefault("dashboard_url", f"{base_url}/dashboard/")
             context.setdefault("support_url", f"{base_url}/support/")
+            domain = urlsplit(base_url).netloc
+            if domain:
+                # Avoid leaking the default Django Sites row (example.com) into
+                # email headers or any template that renders current_site.
+                context["current_site"] = Site(
+                    domain=domain,
+                    name="TradeThesis",
+                )
         return super().send_mail(template_prefix, email, context)
 
     def _is_email_verified(self, user):
