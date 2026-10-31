@@ -5,7 +5,7 @@ casual link sharing. It is not standards-based DRM: an entitled viewer's
 browser must receive the HLS key to play the video.
 """
 import re
-from pathlib import Path
+from pathlib import PurePosixPath
 from urllib.parse import quote
 
 from django.conf import settings
@@ -18,24 +18,28 @@ from django.views.decorators.http import require_GET
 from .models import ProtectedLessonVideo
 from .permissions import is_course_content_admin
 from .services import can_access_lesson
+from .video_storage import lesson_video_storage
 
 _TICKET_SALT = "tradethesis.academy.protected-video.v1"
 _SEGMENT_RE = re.compile(r"^segment_\d{5}\.ts$")
 
 
-def _private_stream_directory(video):
-    root = Path(settings.ACADEMY_VIDEO_STORAGE_ROOT).resolve()
-    candidate = (root / video.stream_directory).resolve()
-    if candidate == root or root not in candidate.parents:
+def _stream_object_name(video, filename):
+    prefix = PurePosixPath(str(video.stream_directory or ""))
+    if (
+        prefix.is_absolute()
+        or not prefix.parts
+        or any(part in {"", ".", ".."} for part in prefix.parts)
+        or len(prefix.parts) > 4
+    ):
         raise Http404
-    return candidate
+    return str(prefix / filename)
 
 
 def _assert_video_access(request, video):
     if is_course_content_admin(request.user):
         return
     if not can_access_lesson(request.user, video.lesson):
-        # Do not reveal whether a protected video exists to an unentitled account.
         raise Http404
 
 
@@ -85,7 +89,6 @@ def protected_video_manifest(request, video_id):
     """Return a per-viewer playlist with session-bound URLs for every resource."""
     if not request.user.is_authenticated:
         from django.contrib.auth.views import redirect_to_login
-
         return redirect_to_login(request.get_full_path())
 
     video = get_object_or_404(
@@ -95,18 +98,19 @@ def protected_video_manifest(request, video_id):
     )
     _assert_video_access(request, video)
 
-    stream_dir = _private_stream_directory(video)
-    manifest_path = (stream_dir / "index.m3u8").resolve()
-    if stream_dir not in manifest_path.parents or not manifest_path.is_file():
-        raise Http404
-    key_path = (stream_dir / "encryption.key").resolve()
-    if stream_dir not in key_path.parents or not key_path.is_file() or key_path.stat().st_size != 16:
+    try:
+        with lesson_video_storage.open(_stream_object_name(video, "index.m3u8"), "rb") as source:
+            playlist = source.read().decode("utf-8")
+        with lesson_video_storage.open(_stream_object_name(video, "encryption.key"), "rb") as key_file:
+            key_valid = len(key_file.read()) == 16
+    except (OSError, UnicodeDecodeError, NotImplementedError):
+        raise Http404 from None
+    if not key_valid:
         raise Http404
 
     ticket = quote(_make_ticket(request, video), safe="")
     key_url = f"{reverse('academy:protected-video-key', args=[video.pk])}?ticket={ticket}"
     segment_url = reverse("academy:protected-video-segment", args=[video.pk, "PLACEHOLDER"])
-    playlist = manifest_path.read_text(encoding="utf-8")
     rewritten_lines = []
     has_aes128_key = False
     for line in playlist.splitlines():
@@ -117,7 +121,7 @@ def protected_video_manifest(request, video_id):
             line = re.sub(r'URI="[^"]+"', f'URI="{key_url}"', line)
             has_aes128_key = True
         elif stripped and not stripped.startswith("#"):
-            name = Path(stripped).name
+            name = PurePosixPath(stripped).name
             if name != stripped or not _SEGMENT_RE.fullmatch(name):
                 raise Http404
             line = segment_url.replace("PLACEHOLDER", quote(name, safe="")) + f"?ticket={ticket}"
@@ -125,7 +129,6 @@ def protected_video_manifest(request, video_id):
 
     if not has_aes128_key:
         raise Http404
-
     response = HttpResponse(
         "\n".join(rewritten_lines) + "\n",
         content_type="application/vnd.apple.mpegurl",
@@ -143,12 +146,14 @@ def protected_video_key(request, video_id):
         status=ProtectedLessonVideo.Status.READY,
     )
     _verify_ticket(request, video, request.GET.get("ticket", ""))
-    stream_dir = _private_stream_directory(video)
-    key_path = (stream_dir / "encryption.key").resolve()
-    if stream_dir not in key_path.parents or not key_path.is_file() or key_path.stat().st_size != 16:
+    try:
+        with lesson_video_storage.open(_stream_object_name(video, "encryption.key"), "rb") as key_file:
+            key = key_file.read()
+    except (OSError, NotImplementedError):
+        raise Http404 from None
+    if len(key) != 16:
         raise Http404
-    response = HttpResponse(key_path.read_bytes(), content_type="application/octet-stream")
-    return _private_response_headers(response)
+    return _private_response_headers(HttpResponse(key, content_type="application/octet-stream"))
 
 
 @require_GET
@@ -161,9 +166,9 @@ def protected_video_segment(request, video_id, segment_name):
         status=ProtectedLessonVideo.Status.READY,
     )
     _verify_ticket(request, video, request.GET.get("ticket", ""))
-    stream_dir = _private_stream_directory(video)
-    segment_path = (stream_dir / segment_name).resolve()
-    if stream_dir not in segment_path.parents or not segment_path.is_file():
-        raise Http404
-    response = FileResponse(segment_path.open("rb"), content_type="video/mp2t")
+    try:
+        segment = lesson_video_storage.open(_stream_object_name(video, segment_name), "rb")
+    except (OSError, FileNotFoundError, NotImplementedError):
+        raise Http404 from None
+    response = FileResponse(segment, content_type="video/mp2t")
     return _private_response_headers(response)
