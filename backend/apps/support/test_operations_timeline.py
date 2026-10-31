@@ -1,5 +1,6 @@
 """Tests for the cross-customer support and engineering timeline."""
 
+from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -142,6 +143,12 @@ class OperationsTimelineTests(TestCase):
         learner = User.objects.create_user(
             username="operations-timeline-learner",
             email="operations-timeline-learner@example.test",
+        )
+        EmailAddress.objects.create(
+            user=learner,
+            email=learner.email,
+            verified=True,
+            primary=True,
         )
         self.client.force_login(learner)
 
