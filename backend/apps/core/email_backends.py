@@ -89,12 +89,26 @@ class ResendEmailBackend(BaseEmailBackend):
             if deliveries:
                 from apps.emailing.models import Delivery
 
-                Delivery.objects.filter(pk__in=[item.pk for item in deliveries]).update(
-                    state=Delivery.State.SENT,
+                delivery_ids = [item.pk for item in deliveries]
+                delivery_qs = Delivery.objects.filter(pk__in=delivery_ids)
+                accepted_at = timezone.now()
+                # The webhook can arrive before this API request returns. Save
+                # the provider ID/time for every recipient, but do not downgrade
+                # a delivery outcome already written by that webhook.
+                delivery_qs.update(
                     provider_message_id=str(provider_message_id),
-                    sent_at=timezone.now(),
-                    error="",
+                    sent_at=accepted_at,
                 )
+                delivery_qs.exclude(
+                    state__in=[
+                        Delivery.State.DELIVERED,
+                        Delivery.State.DELAYED,
+                        Delivery.State.FAILED,
+                        Delivery.State.BOUNCED,
+                        Delivery.State.COMPLAINED,
+                        Delivery.State.SUPPRESSED,
+                    ]
+                ).update(state=Delivery.State.SENT, error="")
             return True
 
         except Exception as exc:
@@ -119,7 +133,10 @@ class ResendEmailBackend(BaseEmailBackend):
             recipient_digest = hashlib.sha256(
                 recipient.strip().lower().encode("utf-8")
             ).hexdigest()[:16]
-            delivery_key = f"{idempotency_key}:{recipient_digest}"[:255]
+            request_digest = hashlib.sha256(
+                idempotency_key.encode("utf-8")
+            ).hexdigest()
+            delivery_key = f"resend:{request_digest}:{recipient_digest}"
             user_id = getattr(message, "_tradethesis_user_id", None)
             if user_id is None:
                 user_id = (
@@ -128,7 +145,7 @@ class ResendEmailBackend(BaseEmailBackend):
                     .first()
                 )
 
-            delivery, _ = Delivery.objects.get_or_create(
+            delivery, created = Delivery.objects.get_or_create(
                 idempotency_key=delivery_key,
                 defaults={
                     "user_id": user_id,
@@ -139,6 +156,15 @@ class ResendEmailBackend(BaseEmailBackend):
                     "provider": "resend",
                 },
             )
+            if not created and delivery.state in {
+                Delivery.State.QUEUED,
+                Delivery.State.FAILED,
+            }:
+                Delivery.objects.filter(
+                    pk=delivery.pk,
+                    state__in=[Delivery.State.QUEUED, Delivery.State.FAILED],
+                ).update(state=Delivery.State.SENDING, error="")
+                delivery.refresh_from_db(fields=["state", "error"])
             deliveries.append(delivery)
         return deliveries
 
