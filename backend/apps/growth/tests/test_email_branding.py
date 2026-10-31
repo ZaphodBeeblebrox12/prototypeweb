@@ -30,6 +30,7 @@ class GiftInvitationBrandingTests(SimpleTestCase):
             email="asha@example.test",
         )
         gift_subscription = SimpleNamespace(
+            id="gift-subscription-test",
             from_user=sender,
             plan=SimpleNamespace(name="Foundations"),
             duration_days=30,
