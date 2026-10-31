@@ -27,6 +27,7 @@ from apps.admin_desk_views import (
     admin_desk_support_tickets, admin_desk_support_ticket,
     admin_desk_support_ticket_action, admin_desk_customer_360,
     admin_desk_operations_timeline,
+    admin_desk_operations_job, admin_desk_operations_provisioning,
 )
 from apps.core.views import health_check
 
@@ -52,6 +53,8 @@ urlpatterns = [
     path("staff/admin-desk/support/tickets/<uuid:ticket_id>/action/", admin_desk_support_ticket_action, name="staff_admin_desk_support_ticket_action"),
     path("staff/admin-desk/customers/<uuid:user_id>/", admin_desk_customer_360, name="staff_admin_desk_customer_360"),
     path("staff/admin-desk/operations/", admin_desk_operations_timeline, name="staff_admin_desk_operations_timeline"),
+    path("staff/admin-desk/operations/jobs/<int:job_id>/", admin_desk_operations_job, name="staff_admin_desk_operations_job"),
+    path("staff/admin-desk/operations/provisioning/<int:operation_id>/", admin_desk_operations_provisioning, name="staff_admin_desk_operations_provisioning"),
     path("staff/admin-desk/accounts/", admin_desk_accounts, name="staff_admin_desk_accounts"),
     path("staff/admin-desk/accounts/<uuid:user_id>/", admin_desk_account_detail, name="staff_admin_desk_account_detail"),
     path("staff/admin-desk/accounts/<uuid:user_id>/action/", admin_desk_account_action, name="staff_admin_desk_account_action"),
