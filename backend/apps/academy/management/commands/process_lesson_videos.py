@@ -19,7 +19,8 @@ class Command(BaseCommand):
     help = "Convert uploaded lesson videos to private AES-128 HLS using Drive or durable local storage."
 
     def add_arguments(self, parser):
-        parser.add_argument("--lesson", help="Process one lesson UUID.")
+        parser.add_argument("--video", help="Process one protected lesson-video UUID.")
+        parser.add_argument("--lesson", help="Process the protected video attached to one lesson UUID.")
         parser.add_argument("--all", action="store_true", help="Process all pending/failed uploads.")
         parser.add_argument("--force", action="store_true", help="Rebuild already-ready streams.")
 
@@ -50,14 +51,31 @@ class Command(BaseCommand):
                 "the imageio-ffmpeg wheel, or set ACADEMY_FFMPEG_BINARY."
             )
 
+        video_selector = options.get("video")
+        lesson_selector = options.get("lesson")
+        if video_selector and lesson_selector:
+            raise CommandError("Use either --video or --lesson, not both.")
+
         videos = ProtectedLessonVideo.objects.select_related("lesson").order_by("created_at")
-        if options["lesson"]:
-            videos = videos.filter(lesson_id=options["lesson"])
-        elif not options["all"]:
+        if video_selector:
+            try:
+                video_id = uuid.UUID(str(video_selector))
+            except (TypeError, ValueError) as exc:
+                raise CommandError("--video must be a protected lesson-video UUID.") from exc
+            videos = videos.filter(pk=video_id)
+            if not videos.exists():
+                raise CommandError(f"No protected lesson video found with ID {video_id}.")
+        elif lesson_selector:
+            videos = videos.filter(lesson_id=lesson_selector)
+            if not videos.exists():
+                raise CommandError(
+                    f"No protected video is registered for lesson {lesson_selector}."
+                )
+        elif not options.get("all", False):
             videos = videos.filter(
                 status__in=(ProtectedLessonVideo.Status.PENDING, ProtectedLessonVideo.Status.FAILED)
             )
-        if not options["force"]:
+        if not options.get("force", False):
             videos = videos.exclude(status=ProtectedLessonVideo.Status.READY)
         videos = list(videos)
         if not videos:

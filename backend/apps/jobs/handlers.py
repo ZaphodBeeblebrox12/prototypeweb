@@ -93,7 +93,7 @@ def _process_protected_lesson_video(payload, job):
 
     call_command(
         "process_lesson_videos",
-        lesson=str(video.pk),
+        video=str(video.pk),
         force=bool((payload or {}).get("force", False)),
     )
 

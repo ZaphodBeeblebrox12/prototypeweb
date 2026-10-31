@@ -3,6 +3,7 @@
 import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 from urllib.parse import parse_qs, urlparse
 
 from allauth.account.models import EmailAddress
@@ -186,6 +187,59 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
         response = Client().get(self.manifest_url)
         self.assertEqual(response.status_code, 302)
         self.assertIn("/accounts/login/", response["Location"])
+
+    def test_processing_command_targets_the_protected_video_uuid(self):
+        from apps.academy.management.commands.process_lesson_videos import Command
+
+        with (
+            override_settings(DEBUG=True),
+            patch("shutil.which", return_value="/usr/bin/ffmpeg"),
+            patch.object(Command, "_process_one") as process_one,
+        ):
+            Command().handle(
+                video=str(self.video.pk),
+                lesson=None,
+                all=False,
+                force=True,
+            )
+
+        process_one.assert_called_once()
+        self.assertEqual(process_one.call_args.args[0].pk, self.video.pk)
+
+    def test_processing_command_rejects_an_unknown_protected_video_uuid(self):
+        from django.core.management.base import CommandError
+
+        from apps.academy.management.commands.process_lesson_videos import Command
+
+        with (
+            override_settings(DEBUG=True),
+            patch("shutil.which", return_value="/usr/bin/ffmpeg"),
+            self.assertRaises(CommandError),
+        ):
+            Command().handle(
+                video="aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+                lesson=None,
+                all=False,
+                force=True,
+            )
+
+    def test_queue_handler_passes_video_uuid_not_lesson_uuid_to_command(self):
+        from apps.jobs.handlers import _process_protected_lesson_video
+
+        self.video.source_file.name = "academy/video-source/test/source.mp4"
+        self.video.save(update_fields=["source_file"])
+
+        with patch("django.core.management.call_command") as run_command:
+            _process_protected_lesson_video(
+                {"video_id": str(self.video.pk), "force": True},
+                job=None,
+            )
+
+        run_command.assert_called_once_with(
+            "process_lesson_videos",
+            video=str(self.video.pk),
+            force=True,
+        )
 
 
 class PrivateLessonVideoDriveUploadTests(TestCase):
