@@ -42,6 +42,7 @@ from .models import (
 )
 from .permissions import is_course_content_admin
 from .storage import course_asset_storage
+from .video_storage import lesson_video_storage
 
 logger = logging.getLogger(__name__)
 
@@ -868,6 +869,40 @@ class ProtectedLessonVideoAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return is_course_content_admin(request.user)
 
+    @staticmethod
+    def _delete_rendition(prefix):
+        """Remove HLS objects through the configured provider, including Drive."""
+        if not prefix or prefix.startswith("/") or any(
+            part in {"", ".", ".."} for part in prefix.split("/")
+        ):
+            return
+        try:
+            with lesson_video_storage.open(f"{prefix}/index.m3u8", "rb") as handle:
+                playlist = handle.read().decode("utf-8")
+        except (OSError, UnicodeDecodeError, NotImplementedError):
+            playlist = ""
+
+        names = {f"{prefix}/index.m3u8", f"{prefix}/encryption.key"}
+        for line in playlist.splitlines():
+            segment = line.strip()
+            if (
+                segment
+                and not segment.startswith("#")
+                and "/" not in segment
+                and segment.startswith("segment_")
+                and segment.endswith(".ts")
+                and segment[8:-3].isdigit()
+            ):
+                names.add(f"{prefix}/{segment}")
+        for name in names:
+            try:
+                lesson_video_storage.delete(name)
+            except OSError as exc:
+                logger.warning(
+                    "Could not remove old protected video object (%s).",
+                    exc.__class__.__name__,
+                )
+
     def save_model(self, request, obj, form, change):
         previous = ProtectedLessonVideo.objects.filter(pk=obj.pk).first() if change else None
         previous_name = previous.source_file.name if previous and previous.source_file else ""
@@ -885,24 +920,19 @@ class ProtectedLessonVideoAdmin(admin.ModelAdmin):
             if previous_name:
                 previous.source_file.storage.delete(previous_name)
             if previous_directory:
-                root = Path(settings.ACADEMY_VIDEO_STORAGE_ROOT).resolve()
-                old_directory = (root / previous_directory).resolve()
-                if root in old_directory.parents and old_directory.is_dir():
-                    import shutil
-
-                    shutil.rmtree(old_directory, ignore_errors=True)
+                self._delete_rendition(previous_directory)
 
     def delete_model(self, request, obj):
-        import shutil
-
-        if obj.stream_directory:
-            root = Path(settings.ACADEMY_VIDEO_STORAGE_ROOT).resolve()
-            directory = (root / obj.stream_directory).resolve()
-            if root in directory.parents and directory.is_dir():
-                shutil.rmtree(directory, ignore_errors=True)
+        self._delete_rendition(obj.stream_directory)
         if obj.source_file:
             obj.source_file.delete(save=False)
         super().delete_model(request, obj)
+
+    def delete_queryset(self, request, queryset):
+        # Django's bulk-delete path bypasses delete_model; keep Drive and disk
+        # cleanup consistent for the admin "delete selected" action.
+        for obj in queryset.iterator():
+            self.delete_model(request, obj)
 
 
 @admin.register(CourseContentRevision)
