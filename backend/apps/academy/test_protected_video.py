@@ -186,3 +186,60 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
         response = Client().get(self.manifest_url)
         self.assertEqual(response.status_code, 302)
         self.assertIn("/accounts/login/", response["Location"])
+
+
+class PrivateLessonVideoDriveUploadTests(TestCase):
+    def test_drive_upload_sends_resumable_chunks_with_content_ranges(self):
+        from unittest.mock import Mock, patch
+        from django.core.files.base import ContentFile
+        from django.test.utils import override_settings
+        from .video_storage import PrivateLessonVideoStorage
+
+        payload = b"x" * (8 * 1024 * 1024 + 17)
+        content = ContentFile(payload)
+        listing = Mock()
+        listing.json.return_value = {"files": []}
+        start = Mock()
+        start.headers = {"Location": "https://upload.example/session"}
+        first_chunk = Mock()
+        first_chunk.status_code = 308
+        first_chunk.headers = {"Range": "bytes=0-8388607"}
+        final_chunk = Mock()
+        final_chunk.status_code = 200
+        final_chunk.json.return_value = {"id": "drive-object-id"}
+
+        storage = PrivateLessonVideoStorage()
+        with (
+            patch.object(storage, "_drive_request", side_effect=[
+                listing, start, first_chunk, final_chunk
+            ]) as request,
+            patch(
+                "apps.academy.google_drive_storage.GoogleDriveStorageMixin._asset_folder_id",
+                new_callable=__import__("unittest.mock", fromlist=["PropertyMock"]).PropertyMock,
+                return_value="private-folder",
+            ),
+        ):
+            result = storage._drive_video_upload(
+                "academy/video-source/lesson/source.mp4",
+                content,
+                len(payload),
+                __import__("hashlib").md5(payload).hexdigest(),
+                "video/mp4",
+            )
+
+        self.assertEqual(result["id"], "drive-object-id")
+        put_calls = [
+            call for call in request.call_args_list if call.args[0] == "PUT"
+        ]
+        self.assertEqual(len(put_calls), 2)
+        self.assertEqual(
+            put_calls[0].kwargs["headers"]["Content-Range"],
+            f"bytes 0-{8 * 1024 * 1024 - 1}/{len(payload)}",
+        )
+        self.assertEqual(
+            put_calls[1].kwargs["headers"]["Content-Range"],
+            f"bytes {8 * 1024 * 1024}-{len(payload) - 1}/{len(payload)}",
+        )
+        self.assertEqual(len(put_calls[0].kwargs["data"]), 8 * 1024 * 1024)
+        self.assertEqual(len(put_calls[1].kwargs["data"]), 17)
+        self.assertEqual(put_calls[0].kwargs["timeout"], (20, 300))
