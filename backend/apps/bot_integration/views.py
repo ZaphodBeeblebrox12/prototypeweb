@@ -319,6 +319,13 @@ def telegram_webhook(request):
             if not token.is_valid():
                 token.delete()
                 status = "expired"
+            elif TelegramAccount.objects.select_for_update().filter(
+                user_id=user.id, is_active=False
+            ).exists():
+                # A delayed deep link must never reactivate an identity while
+                # paid access revocation is still running.
+                token.delete()
+                status = "disconnect_pending"
             elif TelegramAccount.objects.filter(chat_id=chat_id).exclude(
                 user_id=user.id
             ).exists():
@@ -393,6 +400,14 @@ def telegram_webhook(request):
             chat_id,
             "⚠️ This Telegram account is already linked to another TradeThesis account. "
             "Please contact support so we can help resolve it.",
+        )
+        return JsonResponse({"ok": True})
+    if status == "disconnect_pending":
+        TelegramBotService.send_message(
+            chat_id,
+            "⏳ Your previous Telegram disconnect is still being completed. "
+            "Please return to your TradeThesis Member Desk and retry connecting "
+            "after the pending disconnect has finished.",
         )
         return JsonResponse({"ok": True})
 
