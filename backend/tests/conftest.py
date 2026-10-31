@@ -69,10 +69,11 @@ def banned_user(user_factory, db):
 
 @pytest.fixture
 def telegram_auth_data():
-    """Sample Telegram auth data for testing."""
+    """Sample fresh Telegram auth data for testing."""
+    import time
     return {
         "id": 123456789,
-        "auth_date": 1704067200,
+        "auth_date": int(time.time()),
         "first_name": "Test",
         "last_name": "User",
         "username": "testuser",
