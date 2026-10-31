@@ -47,6 +47,7 @@ class ResendEmailBackend(BaseEmailBackend):
 
     def _send(self, message: Any) -> bool:
         deliveries = []
+        response = None
         try:
             api_key = getattr(settings, "RESEND_API_KEY", "")
             if not api_key:
@@ -120,7 +121,7 @@ class ResendEmailBackend(BaseEmailBackend):
             return True
 
         except Exception as exc:
-            self._mark_failed(deliveries, exc)
+            self._mark_failed(deliveries, exc, response=response)
             if self.fail_silently:
                 logger.warning("Resend email delivery failed (%s).", type(exc).__name__)
                 return False
@@ -182,13 +183,18 @@ class ResendEmailBackend(BaseEmailBackend):
         return deliveries
 
     @staticmethod
-    def _mark_failed(deliveries: list[Any], exc: Exception) -> None:
+    def _mark_failed(
+        deliveries: list[Any], exc: Exception, response: Any = None
+    ) -> None:
         """Store a safe error code; never persist message bodies or API credentials."""
         if not deliveries:
             return
         from apps.emailing.models import Delivery
 
-        status_code = getattr(getattr(exc, "response", None), "status_code", None)
+        status_code = (
+            getattr(getattr(exc, "response", None), "status_code", None)
+            or getattr(response, "status_code", None)
+        )
         error_code = (
             f"resend_http_{status_code}"
             if status_code
