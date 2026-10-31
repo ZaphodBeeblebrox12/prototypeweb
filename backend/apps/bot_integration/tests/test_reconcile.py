@@ -982,6 +982,37 @@ class DiscordOAuthFlowTests(TestCase):
         self.assertEqual(account.discord_user_id, "discord-987")
         self.assertEqual(account.username, "chartreader")
 
+    @mock.patch("apps.bot_integration.views.DiscordBotService.add_member", return_value=True)
+    @mock.patch("requests.get")
+    @mock.patch("requests.post")
+    def test_legacy_user_discord_identity_cannot_be_linked_to_another_member(
+        self, token_post, profile_get, add_member
+    ):
+        legacy_owner = make_user("discord-legacy-owner")
+        legacy_owner.discord_id = "discord-legacy-identity"
+        legacy_owner.discord_verified = True
+        legacy_owner.save(update_fields=["discord_id", "discord_verified"])
+
+        self.client.force_login(self.user)
+        self._store_state()
+        token_response = mock.Mock(status_code=200)
+        token_response.json.return_value = {"access_token": "one-time-oauth-token"}
+        token_post.return_value = token_response
+        profile_response = mock.Mock(status_code=200)
+        profile_response.json.return_value = {
+            "id": "discord-legacy-identity",
+            "username": "legacy_owner",
+        }
+        profile_get.return_value = profile_response
+
+        self.client.get(
+            reverse("bot_integration:discord_callback"),
+            {"code": "authorization-code", "state": "state-once"},
+        )
+
+        self.assertFalse(DiscordAccount.objects.filter(user=self.user).exists())
+        add_member.assert_not_called()
+
     @mock.patch("apps.bot_integration.views.DiscordBotService.add_member", return_value=False)
     @mock.patch("requests.get")
     @mock.patch("requests.post")
