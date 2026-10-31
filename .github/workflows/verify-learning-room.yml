@@ -645,36 +645,51 @@ jobs:
               "Member-area sample data must be clearly identified as a preview");
             console.log("MEMBER_UX_PASS: preview-only auth copy, light theme and mobile fit.");
 
-            // The Trading Path is free. Ensure its primary CTA points to the Academy
-            // course detail route rather than the legacy paid checkout endpoint.
+            // The Trading Path offer is resolved from the public Academy catalogue.
+            // Stub only that read so this browser check is deterministic and never depends
+            // on staging CORS, real prices or mutable course data.
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
+            await cataloguePage.route(
+              "https://tradethesis-academy-staging.onrender.com/api/academy/catalogue/",
+              route => route.fulfill({
+                status: 200,
+                contentType: "application/json",
+                headers: { "access-control-allow-origin": "*" },
+                body: JSON.stringify({
+                  courses: [{
+                    slug: "trading-path",
+                    status: "published",
+                    accessType: "free",
+                    price: "Free",
+                    priceNote: "Enrol with your account · no payment required",
+                    priceConfigured: true,
+                    academyUrl: "https://tradethesis-academy-staging.onrender.com/learn/course/trading-path/"
+                  }]
+                })
+              })
+            );
             await cataloguePage.goto(server + "/trading-path.html", { waitUntil: "networkidle" });
-            const tradingPathEnrolment = cataloguePage.locator('a.product-enrol-button[data-academy-path="/learn/course/trading-path/"]');
+            await cataloguePage.waitForFunction(() =>
+              document.querySelector('[data-course-commerce="trading-path"]')
+                ?.dataset.courseCommerceState === "ready"
+            );
+            const tradingPathEnrolment = cataloguePage.locator('a.product-enrol-button[data-course-enrol-cta]');
             assert.equal(await tradingPathEnrolment.count(), 1,
               "Trading Path must expose one primary free-enrolment link");
             assert.ok(await tradingPathEnrolment.isVisible(),
               "Trading Path free-enrolment CTA must be visible");
-            console.log("TRADING_PATH_ENROLMENT_DIAGNOSTIC", JSON.stringify(
-              await tradingPathEnrolment.evaluate(el => ({
-                textContent: el.textContent,
-                innerText: el.innerText,
-                outerHTML: el.outerHTML,
-                display: getComputedStyle(el).display,
-                visibility: getComputedStyle(el).visibility,
-                opacity: getComputedStyle(el).opacity
-              }))
-            ));
             assert.ok((await tradingPathEnrolment.innerText()).toLowerCase().includes("enrol for free"),
-              "Trading Path CTA must say enrol for free");
+              "Trading Path CTA must reflect the server-confirmed free access type");
             assert.equal(
               await tradingPathEnrolment.getAttribute("href"),
               "https://tradethesis-academy-staging.onrender.com/learn/course/trading-path/",
-              "Trading Path CTA must resolve to the Academy course-detail route",
+              "Trading Path CTA must resolve to the server-returned Academy course-detail route",
             );
             assert.equal(await cataloguePage.locator("[data-course-purchase]").count(), 0,
-              "Trading Path must not expose the paid checkout CTA");
-            assert.ok((await cataloguePage.locator(".product-price").innerText()).includes("Free"),
-              "Trading Path page must show a free price");
+              "Trading Path must not expose the legacy paid checkout CTA");
+            assert.ok((await cataloguePage.locator("[data-course-price]").innerText()).includes("Free"),
+              "Trading Path page must show the server-confirmed free price");
+            await cataloguePage.unroute("https://tradethesis-academy-staging.onrender.com/api/academy/catalogue/");
 
             // Prospect enquiry forms are live server-backed forms now. Inspect their
             // contract, but never submit fixtures into the shared staging database.
