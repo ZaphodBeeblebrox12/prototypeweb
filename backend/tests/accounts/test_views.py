@@ -7,6 +7,7 @@ import json
 from datetime import datetime, timedelta
 from unittest.mock import patch, MagicMock
 
+from allauth.account.models import EmailAddress
 from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 from django.utils import timezone
