@@ -66,7 +66,7 @@ class NotificationService:
         Raises:
             NotificationServiceError: If email fails to send
         """
-        from_email = from_email or settings.DEFAULT_FROM_EMAIL
+        from_email = normalise_from_email(from_email, settings.DEFAULT_FROM_EMAIL)
         context = dict(context or {})
 
         # Add site to context
