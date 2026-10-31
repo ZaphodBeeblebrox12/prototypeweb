@@ -231,3 +231,17 @@ class EnqueueGenericTests(TestCase):
         j1 = enqueue_generic("update_maxmind", {}, idempotency_key="sched:mm")
         j2 = enqueue_generic("update_maxmind", {}, idempotency_key="sched:mm")
         self.assertEqual(j1.pk, j2.pk)
+
+    def test_global_video_worker_key_serializes_distinct_video_requests(self):
+        first = enqueue_generic(
+            "process_protected_lesson_video",
+            {"video_id": "video-one", "force": True},
+            idempotency_key="academy:protected-video:single-worker",
+        )
+        second = enqueue_generic(
+            "process_protected_lesson_video",
+            {"video_id": "video-two", "force": True},
+            idempotency_key="academy:protected-video:single-worker",
+        )
+        self.assertEqual(first.pk, second.pk)
+        self.assertEqual(second.payload["video_id"], "video-one")

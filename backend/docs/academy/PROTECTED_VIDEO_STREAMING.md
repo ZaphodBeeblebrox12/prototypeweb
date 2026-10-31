@@ -67,12 +67,14 @@ still have infrastructure costs.
 1. Run migrations: `python manage.py migrate`.
 2. In Django Admin, open **Protected lesson videos** and add one row for the
    lesson. Upload an MP4, MOV, MKV, or WebM source file.
-3. Return to the **Protected lesson videos** list, select the uploaded
-   row, choose **Queue / rebuild protected streams for selected videos** from
-   the Actions menu, and click **Go**. The Academy job queue runs the existing
-   processing command in the background. Refresh the list to follow the status;
-   a failed attempt records its error on the video row and is retried by the job
-   queue according to its retry policy.
+3. Return to the **Protected lesson videos** list, select one uploaded row,
+   choose **Queue / rebuild one protected video stream** from the Actions menu,
+   and click **Go**. The Academy job queue runs the existing processing command
+   in the background. Refresh the list to follow the status; a failed attempt
+   records its error on the video row and is retried by the job queue according
+   to its retry policy. The staging queue is single-flight: only one protected
+   video can be queued or processed at a time. Select the next row after the
+   current one finishes.
 
    On the current Render Free staging service, the queue is drained by the
    in-process scheduler. Long-running video jobs refresh their job lease so the

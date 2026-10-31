@@ -855,30 +855,42 @@ class ProtectedLessonVideoAdmin(admin.ModelAdmin):
     def course_title(self, obj):
         return obj.lesson.module.course.title
 
-    @admin.action(description="Queue / rebuild protected streams for selected videos")
+    @admin.action(description="Queue / rebuild one protected video stream")
     def queue_processing(self, request, queryset):
         from apps.jobs.enqueue import enqueue_generic
 
-        queued = 0
-        skipped = 0
-        for video in queryset.iterator():
-            if not video.source_file:
-                skipped += 1
-                continue
-            enqueue_generic(
-                "process_protected_lesson_video",
-                {"video_id": str(video.pk), "force": True},
-                idempotency_key=f"academy:protected-video:{video.pk}",
-            )
-            queued += 1
+        videos = list(queryset.select_related("lesson").order_by("pk"))
+        candidates = [video for video in videos if video.source_file]
+        skipped = len(videos) - len(candidates)
+        if not candidates:
+            messages.warning(request, "None of the selected rows has a source video.")
+            return
 
-        if queued:
+        video = candidates[0]
+        job = enqueue_generic(
+            "process_protected_lesson_video",
+            {"video_id": str(video.pk), "force": True},
+            idempotency_key="academy:protected-video:single-worker",
+        )
+        if str(job.payload.get("video_id")) != str(video.pk):
+            messages.warning(
+                request,
+                "Another protected video is already queued or processing. "
+                "Wait for it to finish, then queue this video.",
+            )
+        else:
             messages.success(
                 request,
                 (
-                    f"Queued background processing for {queued} protected video(s). "
-                    "Refresh this page to check the processing status."
+                    f"Queued or already processing: {video.lesson.title}. "
+                    "Only one protected video is processed at a time on staging."
                 ),
+            )
+
+        if len(candidates) > 1:
+            messages.info(
+                request,
+                "Only the first selected video was queued. Queue the next one after this finishes.",
             )
         if skipped:
             messages.warning(
