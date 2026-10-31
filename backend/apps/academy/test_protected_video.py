@@ -5,6 +5,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from urllib.parse import parse_qs, urlparse
 
+from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
@@ -33,6 +34,12 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
             email="learner@example.com",
             password="test-password",
             role=User.Role.USER,
+        )
+        EmailAddress.objects.create(
+            user=self.user,
+            email=self.user.email,
+            primary=True,
+            verified=True,
         )
         self.course = Course.objects.create(
             title="Protected Video Course",
@@ -144,6 +151,12 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
             email="other@example.com",
             password="test-password",
             role=User.Role.USER,
+        )
+        EmailAddress.objects.create(
+            user=other_user,
+            email=other_user.email,
+            primary=True,
+            verified=True,
         )
         client = Client()
         client.force_login(other_user, backend="django.contrib.auth.backends.ModelBackend")
