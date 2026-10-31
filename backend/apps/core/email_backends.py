@@ -8,6 +8,7 @@ state to delivered, bounced, complained, or suppressed.
 import base64
 import hashlib
 import logging
+import re
 import uuid
 from email.message import Message
 from typing import Any
@@ -123,6 +124,18 @@ class ResendEmailBackend(BaseEmailBackend):
             ) from exc
 
     @staticmethod
+    def _normalise_subject(subject: Any) -> str:
+        """Replace Django Sites' default example.com prefix before provider send."""
+        value = str(subject or "")
+        return re.sub(
+            r"^\\s*\\[example\\.com\\]\\s*",
+            "[TradeThesis] ",
+            value,
+            count=1,
+            flags=re.IGNORECASE,
+        )
+
+    @staticmethod
     def _start_delivery_records(message: Any, idempotency_key: str) -> list[Any]:
         """Create one audit row per recipient without storing message contents."""
         from apps.emailing.models import Delivery, Template
@@ -151,7 +164,7 @@ class ResendEmailBackend(BaseEmailBackend):
                     "user_id": user_id,
                     "to_email": recipient,
                     "kind": getattr(message, "_tradethesis_kind", Template.Kind.TRANSACTIONAL),
-                    "subject": message.subject or "",
+                    "subject": ResendEmailBackend._normalise_subject(message.subject),
                     "state": Delivery.State.SENDING,
                     "provider": "resend",
                 },
