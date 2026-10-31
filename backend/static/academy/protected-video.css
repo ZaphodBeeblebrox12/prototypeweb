@@ -1,0 +1,63 @@
+.tt-video-lesson--protected {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: #080b10;
+}
+
+.tt-video-lesson--protected video {
+  display: block;
+  width: 100%;
+  max-height: min(72vh, 760px);
+  aspect-ratio: 16 / 9;
+  background: #080b10;
+  object-fit: contain;
+}
+
+.tt-video-watermark {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: min(86%, 440px);
+  padding: 6px 9px;
+  border: 1px solid rgb(255 255 255 / 19%);
+  border-radius: 4px;
+  background: rgb(10 15 22 / 38%);
+  color: rgb(255 255 255 / 92%);
+  font-size: clamp(10px, 1.25vw, 13px);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0;
+  transition: opacity 220ms ease;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 75%);
+}
+
+.tt-video-watermark.is-visible {
+  opacity: 0.72;
+}
+
+.tt-video-watermark [data-video-watermark-name] {
+  font-weight: 700;
+  letter-spacing: 0.015em;
+}
+
+.tt-video-watermark [data-video-watermark-email] {
+  font-weight: 500;
+  opacity: 0.94;
+}
+
+.tt-video-player-status {
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  color: inherit;
+  font-size: 0.875rem;
+}
+
+.tt-video-player-status:not(:empty) {
+  padding: 10px 12px;
+}

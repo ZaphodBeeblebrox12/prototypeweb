@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import video_protection, views
 
 app_name = "academy"
 
@@ -49,4 +49,19 @@ urlpatterns = [
         name="lesson-reflection-submit",
     ),
     path("media/<uuid:asset_id>/", views.media_asset, name="media-asset"),
+    path(
+        "video/<uuid:video_id>/manifest.m3u8",
+        video_protection.protected_video_manifest,
+        name="protected-video-manifest",
+    ),
+    path(
+        "video/<uuid:video_id>/key/",
+        video_protection.protected_video_key,
+        name="protected-video-key",
+    ),
+    path(
+        "video/<uuid:video_id>/segment/<str:segment_name>/",
+        video_protection.protected_video_segment,
+        name="protected-video-segment",
+    ),
 ]

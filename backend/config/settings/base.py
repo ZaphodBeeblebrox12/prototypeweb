@@ -172,6 +172,26 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 32 * 1024 * 1024
 # Private instructional images must live outside MEDIA_ROOT (which can be served directly in DEBUG).
 # In production, point this at a durable mounted volume.
 ACADEMY_PRIVATE_MEDIA_ROOT = env("ACADEMY_PRIVATE_MEDIA_ROOT", default=str(BASE_DIR / "private_course_media"))
+# Video sources and generated HLS output use a dedicated private local filesystem. In production,
+# point this at a persistent disk; it must never be served from MEDIA_URL or STATIC_URL.
+ACADEMY_VIDEO_STORAGE_ROOT = env(
+    "ACADEMY_VIDEO_STORAGE_ROOT", default=str(BASE_DIR / "private_course_videos")
+)
+ACADEMY_VIDEO_STORAGE_BACKEND = env("ACADEMY_VIDEO_STORAGE_BACKEND", default="google_drive").strip().lower()
+if ACADEMY_VIDEO_STORAGE_BACKEND not in {"google_drive", "filesystem"}:
+    raise ValueError("ACADEMY_VIDEO_STORAGE_BACKEND must be google_drive or filesystem.")
+ACADEMY_VIDEO_STORAGE_DURABLE = env.bool("ACADEMY_VIDEO_STORAGE_DURABLE", default=False)
+ACADEMY_REQUIRE_DURABLE_VIDEO_STORAGE = env.bool(
+    "ACADEMY_REQUIRE_DURABLE_VIDEO_STORAGE", default=not DEBUG
+)
+# Keep legacy external MP4 links off by default in production. During local development the
+# old player remains available so existing authoring workflows can still be previewed.
+ACADEMY_ALLOW_LEGACY_VIDEO_URLS = env.bool(
+    "ACADEMY_ALLOW_LEGACY_VIDEO_URLS", default=DEBUG
+)
+ACADEMY_FFMPEG_BINARY = env("ACADEMY_FFMPEG_BINARY", default="ffmpeg")
+ACADEMY_VIDEO_FFMPEG_TIMEOUT = env.int("ACADEMY_VIDEO_FFMPEG_TIMEOUT", default=14400)
+ACADEMY_VIDEO_TICKET_MAX_AGE = env.int("ACADEMY_VIDEO_TICKET_MAX_AGE", default=14400)
 # Hosted deployments must use a durable provider rather than silently writing to ephemeral disk.
 ACADEMY_REQUIRE_DURABLE_ASSETS = env.bool("ACADEMY_REQUIRE_DURABLE_ASSETS", default=not DEBUG)
 # Do not accept support screenshots onto Render's ephemeral filesystem in hosted environments.
