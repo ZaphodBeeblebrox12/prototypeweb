@@ -213,3 +213,72 @@ class TelegramUnlinkRouteTests(TestCase):
         self.assertContains(follow, "previous Telegram disconnect is still being completed")
         self.assertContains(follow, "Disconnect pending")
         self.assertContains(follow, "Retry disconnect")
+
+
+
+class CanonicalProfileConnectionStatusTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="canonical-profile-member",
+            email="canonical-profile-member@example.com",
+            password="Test-password-123!",
+        )
+        self.client.force_login(self.user)
+
+    def test_profile_does_not_treat_legacy_telegram_identity_as_bot_link(self):
+        self.user.telegram_id = 710000020
+        self.user.telegram_username = "legacy_handle"
+        self.user.telegram_verified = True
+        self.user.save(update_fields=[
+            "telegram_id", "telegram_username", "telegram_verified",
+        ])
+
+        response = self.client.get(reverse("profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Not connected to this account.")
+        self.assertNotContains(response, "Connected as @legacy_handle")
+
+    def test_profile_uses_canonical_telegram_account(self):
+        TelegramAccount.objects.create(
+            user=self.user,
+            chat_id=710000021,
+            telegram_user_id=710000021,
+            username="canonical_handle",
+            is_active=True,
+        )
+
+        response = self.client.get(reverse("profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Connected as @canonical_handle")
+        self.assertContains(response, "Disconnect Telegram")
+
+    def test_profile_shows_retry_for_pending_telegram_disconnect(self):
+        TelegramAccount.objects.create(
+            user=self.user,
+            chat_id=710000022,
+            telegram_user_id=710000022,
+            username="pending_handle",
+            is_active=False,
+        )
+
+        response = self.client.get(reverse("profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Disconnect pending")
+        self.assertContains(response, "Retry disconnect")
+
+    def test_profile_uses_canonical_discord_account_not_legacy_fields(self):
+        self.user.discord_id = "legacy-discord-id"
+        self.user.discord_username = "legacy-discord-handle"
+        self.user.discord_verified = True
+        self.user.save(update_fields=[
+            "discord_id", "discord_username", "discord_verified",
+        ])
+
+        response = self.client.get(reverse("profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Connect Discord")
+        self.assertNotContains(response, "legacy-discord-handle")
