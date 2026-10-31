@@ -621,6 +621,9 @@ def admin_desk_customer_360(request, user_id):
             .order_by("-created_at")[:25]
         )
 
+    open_ticket_count = visible_tickets.filter(
+        status__in=SupportTicket.ACTIVE_STATUSES
+    ).count()
     ticket_rows = list(visible_tickets.order_by("-created_at")[:40])
     ticket_ids = [ticket.pk for ticket in ticket_rows]
     public_messages = list(
@@ -722,9 +725,6 @@ def admin_desk_customer_360(request, user_id):
             )
 
     activity.sort(key=lambda item: item["occurred_at"], reverse=True)
-    open_ticket_count = sum(
-        ticket.status in SupportTicket.ACTIVE_STATUSES for ticket in ticket_rows
-    )
     active_subscription_count = sum(
         subscription.is_active
         and subscription.status == subscription.Status.ACTIVE
