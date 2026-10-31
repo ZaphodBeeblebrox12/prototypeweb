@@ -28,7 +28,9 @@ from apps.admin_desk_views import (
     admin_desk_support_ticket_action, admin_desk_customer_360,
     admin_desk_operations_timeline,
     admin_desk_operations_job, admin_desk_operations_provisioning,
+    admin_desk_course_enquiries, admin_desk_course_enquiry,
 )
+from apps.support.public_enquiries import create_course_enquiry
 from apps.core.views import health_check
 from apps.emailing.webhooks import resend_webhook
 
@@ -66,6 +68,9 @@ urlpatterns = [
     path("staff/admin-desk/business/", admin_desk_business, name="staff_admin_desk_business"),
     path("staff/admin-desk/finance/", admin_desk_finance, name="staff_admin_desk_finance"),
     path("staff/admin-desk/invoices/<uuid:invoice_id>/", admin_desk_invoice_detail, name="staff_admin_desk_invoice_detail"),
+    path("staff/admin-desk/course-enquiries/", admin_desk_course_enquiries, name="staff_admin_desk_course_enquiries"),
+    path("staff/admin-desk/course-enquiries/<uuid:enquiry_id>/", admin_desk_course_enquiry, name="staff_admin_desk_course_enquiry"),
+    path("public/enquiries/", create_course_enquiry, name="public_course_enquiry_create"),
     # Growth admin views - MUST be first to avoid catch_all_view interception
     path("admin/", include("apps.growth.admin_urls", namespace="growth_admin")),
 
