@@ -110,7 +110,7 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
         return result
 
     def _save(self, name, content):
-        if self._drive_asset_enabled:
+        if self._use_drive:
             raw = b"".join(content.chunks())
             self._drive_video_upload(
                 name, raw, getattr(content, "content_type", None)
@@ -125,7 +125,7 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
         return self._local_backend()._save(name, content)
 
     def _open(self, name, mode="rb"):
-        if self._drive_asset_enabled:
+        if self._use_drive:
             found = self._find_drive_file(name, self._asset_folder_id)
             if found:
                 response = self._drive_request(
@@ -141,14 +141,14 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
         return self._local_backend().exists(name)
 
     def size(self, name):
-        if self._drive_asset_enabled:
+        if self._use_drive:
             found = self._find_drive_file(name, self._asset_folder_id)
             if found and found.get("size") is not None:
                 return int(found["size"])
         return self._local_backend().size(name)
 
     def delete(self, name):
-        if self._drive_asset_enabled:
+        if self._use_drive:
             found = self._find_drive_file(name, self._asset_folder_id)
             if found:
                 self._drive_request("DELETE", f"{DRIVE_API}/files/{found['id']}", expected=(204,))
