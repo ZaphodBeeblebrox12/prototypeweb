@@ -20,19 +20,20 @@ logger = logging.getLogger(__name__)
 
 @deconstructible
 class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
-    """Store source and HLS objects in the existing private Drive asset folder.
-
-    When Drive is not configured, local filesystem storage remains available for
-    development/tests. Hosted production writes fail closed rather than silently
-    using Render's ephemeral filesystem.
-    """
+    """Store source and HLS objects in the existing private Drive asset folder."""
 
     def __init__(self):
         location = getattr(settings, "ACADEMY_VIDEO_STORAGE_ROOT", "")
         super().__init__(location=str(location) if location else None, base_url=None)
 
+    @property
+    def is_durable(self):
+        return bool(
+            self._drive_asset_enabled
+            or getattr(settings, "ACADEMY_VIDEO_STORAGE_DURABLE", False)
+        )
+
     def url(self, name):
-        # Never expose a Drive URL or a public media URL for lesson videos.
         return ""
 
     def path(self, name):
