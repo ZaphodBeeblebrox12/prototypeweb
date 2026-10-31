@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Enquiry received | TradeThesis{% endblock %}
+{% block page_title %}Enquiry received{% endblock %}
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-received{max-width:720px;margin:48px auto;padding:30px;border:1px solid #ded8ca;background:#fffdf8;color:#29382e;text-align:center}
+  .tt-received .mark{display:grid;place-items:center;width:48px;height:48px;margin:0 auto 18px;border-radius:50%;background:#e6edde;color:#355a46;font-size:24px}
+  .tt-received h1{font:400 clamp(32px,5vw,46px)/1.08 Georgia,serif;margin:0 0 12px}
+  .tt-received p{color:#687268;line-height:1.7}
+  .tt-received a{display:inline-flex;margin-top:14px;padding:11px 16px;background:#355a46;color:#fff;text-decoration:none}
+</style>
+{% endblock %}
+{% block content %}
+<main class="tt-received">
+  <div class="mark" aria-hidden="true">✓</div>
+  <h1>Your enquiry has been recorded.</h1>
+  <p>Thank you for contacting TradeThesis. The team will review your request and follow up using the contact details you provided.</p>
+  <p>This is an enquiry receipt, not an enrolment or payment confirmation. A separate email receipt is sent when email delivery is configured and available.</p>
+  <a href="{{ public_site_url }}/courses.html">Return to courses</a>
+</main>
+{% endblock %}
