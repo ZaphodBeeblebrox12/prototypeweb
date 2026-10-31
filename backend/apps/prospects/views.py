@@ -6,6 +6,7 @@ from datetime import timedelta
 from django.conf import settings
 from django.db import transaction
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
@@ -52,6 +53,9 @@ def _send_enquiry_notifications(enquiry):
         if str(value).strip()
     ]
     staff_subject = f"New TradeThesis enquiry · {enquiry.get_programme_display()}"
+    site_base_url = str(getattr(settings, "SITE_BASE_URL", "") or "").rstrip("/")
+    queue_path = reverse("staff_admin_desk_prospect_enquiries")
+    queue_url = f"{site_base_url}{queue_path}" if site_base_url else queue_path
     staff_body = (
         "A new prospect enquiry has been saved in the TradeThesis Admin Desk.\n\n"
         f"Reference: {enquiry.short_reference}\n"
@@ -61,7 +65,7 @@ def _send_enquiry_notifications(enquiry):
         f"Phone: {enquiry.phone or 'Not provided'}\n"
         f"Starting point: {enquiry.get_starting_point_display()}\n"
         f"Question: {enquiry.question or 'No additional question'}\n\n"
-        "Open the Prospect enquiries queue in the TradeThesis Admin Desk to follow up."
+        f"Open the prospect queue: {queue_url}"
     )
     staff_ok = bool(staff_recipients)
     for recipient in staff_recipients:
