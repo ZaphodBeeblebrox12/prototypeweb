@@ -167,6 +167,7 @@ class TelegramUnlinkRouteTests(TestCase):
 
     @mock.patch("apps.jobs.enqueue.enqueue_reconcile")
     def test_unlink_pauses_account_and_enqueues_before_removing_identity(self, enqueue):
+        stale_token = TelegramVerificationToken.create_token(self.user)
         response = self.client.post(reverse("bot_integration:telegram_unlink"))
 
         self.assertEqual(response.status_code, 302)
@@ -174,6 +175,7 @@ class TelegramUnlinkRouteTests(TestCase):
         self.account.refresh_from_db()
         self.assertFalse(self.account.is_active)
         self.assertTrue(TelegramAccount.objects.filter(user=self.user).exists())
+        self.assertFalse(TelegramVerificationToken.objects.filter(pk=stale_token.pk).exists())
         enqueue.assert_called_once_with(self.user.pk, reason="telegram_unlink")
         self.assertFalse(BotAccessAudit.objects.filter(
             user=self.user, action="unlink", status="success",
