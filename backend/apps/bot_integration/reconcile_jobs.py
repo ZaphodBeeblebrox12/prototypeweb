@@ -248,7 +248,6 @@ def run_user_reconcile(user_id: int, transport=None) -> None:
         # audit event retained the private chat ID (equal to the numeric user
         # ID for the private bot conversation); use that only as a recovery
         # credential for revocation, never to create or re-link an account.
-        from django.db.models import Q
         from apps.jobs.models import ProvisioningOperation
         open_grant_states = [
             ProvisioningOperation.ST_PENDING,
