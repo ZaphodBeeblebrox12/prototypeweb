@@ -4,8 +4,6 @@ from typing import Optional, Tuple, List
 from decimal import Decimal, ROUND_HALF_UP
 
 
-logger = logging.getLogger(__name__)
-
 from django.db import transaction
 from django.utils import timezone
 from django.conf import settings
@@ -24,6 +22,8 @@ from ..models import (
     GiftInvite,
     PendingGiftClaim,
 )
+
+logger = logging.getLogger(__name__)
 
 # ============================================================================
 # GIFT SERVICES (Existing - preserved)
