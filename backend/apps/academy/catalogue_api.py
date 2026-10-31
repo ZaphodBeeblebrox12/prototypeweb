@@ -197,7 +197,7 @@ def public_course_catalogue(request):
         )
     response = JsonResponse({"courses": rows})
     response["Access-Control-Allow-Origin"] = "*"
-    response["Cache-Control"] = "public, max-age=60"
+    response["Cache-Control"] = "private, no-store"
     response["X-Content-Type-Options"] = "nosniff"
     patch_vary_headers(response, ["Origin"])
     return response
