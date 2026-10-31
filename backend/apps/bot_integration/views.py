@@ -421,6 +421,10 @@ def telegram_webhook(request):
 @login_required
 def discord_oauth_start(request):
     """Begin a session-bound OAuth flow for linking and joining the community."""
+    if getattr(request.user, "is_banned", False):
+        return render(request, "accounts/banned.html", {
+            "ban_reason": request.user.ban_reason,
+        })
     if DiscordAccount.objects.filter(
         user=request.user, is_active=False
     ).exists():
@@ -465,6 +469,11 @@ def discord_oauth_start(request):
 def discord_oauth_callback(request):
     """Validate OAuth, join the configured guild, link the account, then sync roles."""
     import requests
+
+    if getattr(request.user, "is_banned", False):
+        return render(request, "accounts/banned.html", {
+            "ban_reason": request.user.ban_reason,
+        })
 
     code = request.GET.get("code")
     state = request.GET.get("state")
