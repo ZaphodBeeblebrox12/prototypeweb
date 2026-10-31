@@ -140,7 +140,7 @@ class ProtectedLessonVideoAdminForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["source_file"].help_text = (
             "Upload a source video (MP4, MOV, MKV or WebM). After saving, return "
-            "to the list and choose Actions → Queue / rebuild protected streams. "
+            "to the list and choose Actions → Queue / rebuild one protected video stream. "
             "The source and generated stream remain private."
         )
 
