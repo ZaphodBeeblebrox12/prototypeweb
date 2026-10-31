@@ -14,6 +14,8 @@ from apps.emailing.models import Delivery
     RESEND_API_KEY="re_test_key",
     RESEND_API_TIMEOUT=7,
     DEFAULT_FROM_EMAIL="TradeThesis <noreply@tradethesis.in>",
+    SITE_BASE_URL="https://academy.example.test",
+    EMAIL_LOGO_URL="https://cdn.example.test/tradethesis-logo.png",
 )
 class ResendEmailBackendTests(TestCase):
     def _success_response(self, email_id="re_test_message_id"):
@@ -47,24 +49,47 @@ class ResendEmailBackendTests(TestCase):
         self.assertEqual(kwargs["headers"]["Content-Type"], "application/json")
         self.assertEqual(kwargs["headers"]["Idempotency-Key"], message._tradethesis_idempotency_key)
         self.assertEqual(kwargs["timeout"], 7.0)
-        self.assertEqual(
-            kwargs["json"],
-            {
-                "from": "TradeThesis <noreply@tradethesis.in>",
-                "to": ["learner@example.com"],
-                "subject": "[TradeThesis] Confirm your email",
-                "reply_to": ["support@example.com"],
-                "headers": {"X-TradeThesis": "account"},
-                "text": "Open the confirmation link.",
-                "html": "<p>Open the confirmation link.</p>",
-            },
-        )
+        payload = kwargs["json"]
+        self.assertEqual(payload["from"], "TradeThesis <noreply@tradethesis.in>")
+        self.assertEqual(payload["to"], ["learner@example.com"])
+        self.assertEqual(payload["subject"], "[TradeThesis] Confirm your email")
+        self.assertEqual(payload["reply_to"], ["support@example.com"])
+        self.assertEqual(payload["headers"], {"X-TradeThesis": "account"})
+        self.assertIn("Open the confirmation link.", payload["text"])
+        self.assertIn("TradeThesis", payload["text"])
+        self.assertIn("Conviction before Execution", payload["text"])
+        self.assertIn("tradethesis-email-shell-v1", payload["html"])
+        self.assertIn("tradethesis-logo.png", payload["html"])
+        self.assertIn("<p>Open the confirmation link.</p>", payload["html"])
+        self.assertIn("academy.example.test/dashboard/", payload["html"])
 
         delivery = Delivery.objects.get(to_email="learner@example.com")
         self.assertEqual(delivery.state, Delivery.State.SENT)
         self.assertEqual(delivery.provider, "resend")
         self.assertEqual(delivery.provider_message_id, "re_test_message_id")
         self.assertIsNotNone(delivery.sent_at)
+
+    @patch("apps.core.email_backends.requests.post")
+    def test_plain_text_message_is_wrapped_in_trade_thesis_email_shell(self, post):
+        post.return_value = self._success_response("re_plain_branding")
+        message = EmailMultiAlternatives(
+            subject="A simple account update",
+            body="Your account setting was changed.",
+            from_email="noreply@tradethesis.in",
+            to=["learner@example.com"],
+        )
+
+        self.assertEqual(ResendEmailBackend().send_messages([message]), 1)
+
+        payload = post.call_args.kwargs["json"]
+        self.assertEqual(payload["subject"], "[TradeThesis] A simple account update")
+        self.assertEqual(payload["from"], "TradeThesis <noreply@tradethesis.in>")
+        self.assertIn("tradethesis-email-shell-v1", payload["html"])
+        self.assertIn("tradethesis-logo.png", payload["html"])
+        self.assertIn("Your account setting was changed.", payload["html"])
+        self.assertIn("TradeThesis", payload["text"])
+        self.assertIn("Conviction before Execution", payload["text"])
+        self.assertIn("educational purposes", payload["text"])
 
     @patch("apps.core.email_backends.requests.post")
     def test_replaces_default_example_com_subject_prefix_before_send(self, post):
