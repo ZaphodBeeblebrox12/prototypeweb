@@ -373,14 +373,19 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
+# Development keeps messages in the console. Hosted environments default to
+# Resend's HTTPS API: Render Free blocks outbound SMTP ports.
 EMAIL_BACKEND = env(
     "EMAIL_BACKEND",
-    default="django.core.mail.backends.console.EmailBackend"
+    default=(
+        "django.core.mail.backends.console.EmailBackend"
+        if DEBUG else "apps.core.email_backends.ResendEmailBackend"
+    ),
 )
 
-# Resend is optional; set EMAIL_BACKEND to apps.core.email_backends.ResendEmailBackend in hosting config.
 RESEND_API_KEY = env("RESEND_API_KEY", default="")
-RESEND_API_TIMEOUT = env("RESEND_API_TIMEOUT", default=10)
+RESEND_API_TIMEOUT = env.int("RESEND_API_TIMEOUT", default=10)
+RESEND_WEBHOOK_SECRET = env("RESEND_WEBHOOK_SECRET", default="")
 
 EMAIL_HOST = env("EMAIL_HOST", default="")
 EMAIL_PORT = env("EMAIL_PORT", default=587)
