@@ -27,11 +27,18 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
         super().__init__(location=str(location) if location else None, base_url=None)
 
     @property
-    def is_durable(self):
-        return bool(
-            self._drive_asset_enabled
-            or getattr(settings, "ACADEMY_VIDEO_STORAGE_DURABLE", False)
+    def _use_drive(self):
+        return (
+            getattr(settings, "ACADEMY_VIDEO_STORAGE_BACKEND", "google_drive") == "google_drive"
+            and self._drive_asset_enabled
         )
+
+    @property
+    def is_durable(self):
+        backend = getattr(settings, "ACADEMY_VIDEO_STORAGE_BACKEND", "google_drive")
+        if backend == "google_drive":
+            return self._drive_asset_enabled
+        return bool(getattr(settings, "ACADEMY_VIDEO_STORAGE_DURABLE", False))
 
     def _local_backend(self):
         return FileSystemStorage(
@@ -43,7 +50,7 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
         return ""
 
     def path(self, name):
-        if self._drive_asset_enabled:
+        if self._use_drive:
             raise NotImplementedError("Google Drive lesson videos do not have a local filesystem path.")
         return self._local_backend().path(name)
 
@@ -129,7 +136,7 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
         return self._local_backend()._open(name, mode)
 
     def exists(self, name):
-        if self._drive_asset_enabled and self._find_drive_file(name, self._asset_folder_id):
+        if self._use_drive and self._find_drive_file(name, self._asset_folder_id):
             return True
         return self._local_backend().exists(name)
 
