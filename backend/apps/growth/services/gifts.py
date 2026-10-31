@@ -511,7 +511,7 @@ class GiftEmailService:
         try:
             NotificationService.send_email(
                 to_email=gift_invite.recipient_email,
-                template='growth/gift_invite',
+                template='growth/email/gift_invite',
                 subject=f"You've received a gift subscription from {sender_display_name}!",
                 context=context,
                 metadata={
