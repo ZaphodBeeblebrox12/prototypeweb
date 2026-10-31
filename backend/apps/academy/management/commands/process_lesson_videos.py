@@ -3,6 +3,7 @@ import secrets
 import shutil
 import subprocess
 import tempfile
+import uuid
 from pathlib import Path
 
 from django.conf import settings
@@ -64,20 +65,21 @@ class Command(BaseCommand):
             return
 
         for video in videos:
-            self._process_one(video, ffmpeg, force=options["force"])
+            self._process_one(video, ffmpeg)
 
-    def _process_one(self, video, ffmpeg, force=False):
+    def _process_one(self, video, ffmpeg):
         if not video.source_file:
             self._fail(video, "No source video file is attached.")
             return
 
-        output_prefix = f"streams/{video.pk}"
+        previous_status = video.status
+        previous_prefix = video.stream_directory
+        output_prefix = f"streams/{video.pk}/{uuid.uuid4().hex}"
         uploaded_names = []
         video.status = ProtectedLessonVideo.Status.PROCESSING
         video.processing_error = ""
-        video.stream_directory = output_prefix
         video.processed_at = None
-        video.save(update_fields=("status", "processing_error", "stream_directory", "processed_at", "updated_at"))
+        video.save(update_fields=("status", "processing_error", "processed_at", "updated_at"))
 
         try:
             # FFmpeg needs local seekable files. Download the private Drive source
@@ -121,10 +123,6 @@ class Command(BaseCommand):
                 if not manifest_path.is_file() or not segments or len(key) != 16:
                     raise RuntimeError("FFmpeg did not create a valid encrypted HLS rendition.")
 
-                # Remove any old rendition only after a complete new rendition exists.
-                if force:
-                    self._delete_old_rendition(output_prefix)
-
                 objects = [(f"{output_prefix}/encryption.key", key_path),
                            (f"{output_prefix}/index.m3u8", manifest_path)]
                 objects.extend((f"{output_prefix}/{segment.name}", segment) for segment in segments)
@@ -135,8 +133,14 @@ class Command(BaseCommand):
 
             video.status = ProtectedLessonVideo.Status.READY
             video.processing_error = ""
+            video.stream_directory = output_prefix
             video.processed_at = timezone.now()
-            video.save(update_fields=("status", "processing_error", "processed_at", "updated_at"))
+            video.save(update_fields=("status", "processing_error", "stream_directory", "processed_at", "updated_at"))
+            if previous_prefix and previous_prefix != output_prefix:
+                try:
+                    self._delete_rendition(previous_prefix)
+                except OSError:
+                    self.stderr.write("The previous Drive rendition could not be cleaned up; the new stream is active.")
             self.stdout.write(self.style.SUCCESS(
                 f"Protected stream ready: {video.lesson.title} ({len(segments)} segments)."
             ))
@@ -146,14 +150,19 @@ class Command(BaseCommand):
                     lesson_video_storage.delete(name)
                 except OSError:
                     self.stderr.write(f"Could not clean up incomplete Drive object: {name}")
-            video.status = ProtectedLessonVideo.Status.FAILED
-            video.stream_directory = ""
-            video.processing_error = str(exc)[-1200:]
+            if previous_status == ProtectedLessonVideo.Status.READY and previous_prefix:
+                video.status = ProtectedLessonVideo.Status.READY
+                video.stream_directory = previous_prefix
+                video.processing_error = f"Rebuild failed; previous stream retained: {exc}"[-1200:]
+            else:
+                video.status = ProtectedLessonVideo.Status.FAILED
+                video.stream_directory = ""
+                video.processing_error = str(exc)[-1200:]
             video.save(update_fields=("status", "stream_directory", "processing_error", "updated_at"))
             raise CommandError(f"Processing failed for lesson {video.lesson_id}: {exc}") from exc
 
     @staticmethod
-    def _delete_old_rendition(prefix):
+    def _delete_rendition(prefix):
         # Read the old playlist before deleting it so its segment keys remain discoverable.
         try:
             with lesson_video_storage.open(f"{prefix}/index.m3u8", "rb") as handle:
