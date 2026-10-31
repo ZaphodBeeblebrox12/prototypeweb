@@ -5,7 +5,6 @@ import hashlib
 import hmac
 
 import pytest
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework import status
 
@@ -108,10 +107,10 @@ class TestTelegramHashVerification:
 class TestTelegramAuthView:
     """Test Telegram authentication endpoint."""
 
-    def test_telegram_auth_creates_user(self, client, telegram_auth_data):
+    def test_telegram_auth_creates_user(self, client, telegram_auth_data, telegram_auth_bot_config):
         """Test that Telegram auth creates a new user."""
         # Create valid hash for the data
-        token = settings.TELEGRAM_BOT_TOKEN or "test_token"
+        token = "test_token"
         data_check_string = "\n".join(
             f"{k}={v}" for k, v in sorted(telegram_auth_data.items()) if v
         )
@@ -145,7 +144,7 @@ class TestTelegramAuthView:
             object_id=str(user.id)
         ).exists()
 
-    def test_telegram_auth_invalid_hash(self, client, telegram_auth_data):
+    def test_telegram_auth_invalid_hash(self, client, telegram_auth_data, telegram_auth_bot_config):
         """Test that invalid hash is rejected."""
         telegram_auth_data["hash"] = "invalid_hash"
 
@@ -158,7 +157,7 @@ class TestTelegramAuthView:
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert "Invalid authentication hash" in response.json()["error"]
 
-    def test_telegram_auth_banned_user(self, client, banned_user, telegram_auth_data):
+    def test_telegram_auth_banned_user(self, client, banned_user, telegram_auth_data, telegram_auth_bot_config):
         """Test that banned users cannot log in."""
         # Use banned user's telegram_id
         telegram_auth_data["id"] = banned_user.telegram_id
@@ -185,6 +184,61 @@ class TestTelegramAuthView:
 
         assert response.status_code == status.HTTP_403_FORBIDDEN
         assert "Account is banned" in response.json()["error"]
+
+
+    def test_telegram_auth_rejects_stale_signed_payload(self, client, telegram_auth_data, telegram_auth_bot_config):
+        import time
+
+        telegram_auth_data["auth_date"] = int(time.time()) - 25 * 60 * 60
+        token = "test_token"
+        data_check_string = "\\n".join(
+            f"{k}={v}" for k, v in sorted(telegram_auth_data.items()) if v
+        )
+        secret_key = hashlib.sha256(token.encode()).digest()
+        telegram_auth_data["hash"] = hmac.new(
+            secret_key, data_check_string.encode(), hashlib.sha256
+        ).hexdigest()
+
+        response = client.post(
+            "/api/auth/telegram/",
+            telegram_auth_data,
+            content_type="application/json",
+        )
+
+        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert "expired" in response.json()["error"].lower()
+        assert not User.objects.filter(telegram_id=telegram_auth_data["id"]).exists()
+
+    def test_telegram_auth_does_not_attach_by_reusable_username(self, client, telegram_auth_data, telegram_auth_bot_config):
+        import time
+
+        legacy_user = User.objects.create_user(
+            username="old-telegram-user",
+            email="old-telegram-user@example.com",
+            telegram_username=telegram_auth_data["username"],
+        )
+        telegram_auth_data["auth_date"] = int(time.time())
+        token = "test_token"
+        data_check_string = "\\n".join(
+            f"{k}={v}" for k, v in sorted(telegram_auth_data.items()) if v
+        )
+        secret_key = hashlib.sha256(token.encode()).digest()
+        telegram_auth_data["hash"] = hmac.new(
+            secret_key, data_check_string.encode(), hashlib.sha256
+        ).hexdigest()
+
+        response = client.post(
+            "/api/auth/telegram/",
+            telegram_auth_data,
+            content_type="application/json",
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["created"] is True
+        assert response.json()["user_id"] != str(legacy_user.id)
+        legacy_user.refresh_from_db()
+        assert legacy_user.telegram_id is None
+
 
 
 class TestParseTelegramAuthData:
