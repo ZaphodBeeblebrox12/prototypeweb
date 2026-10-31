@@ -90,31 +90,31 @@ class PublicProspectEnquiryTests(TestCase):
         self.assertEqual(ProspectEnquiry.objects.count(), 0)
         self.assertEqual(len(mail.outbox), 0)
 
-    def test_rate_limit_uses_a_hmac_fingerprint_and_does_not_store_raw_ip(self):
-        ip = "127.0.0.1"
+    def test_rate_limit_uses_a_keyed_email_fingerprint(self):
+        email = "prospect@example.test"
         fingerprint = hmac.new(
             str(settings.SECRET_KEY).encode("utf-8"),
-            ip.encode("utf-8"),
+            email.encode("utf-8"),
             hashlib.sha256,
         ).hexdigest()
         for index in range(5):
             ProspectEnquiry.objects.create(
                 programme=ProspectEnquiry.Programme.CONSTRUCT,
                 name=f"Existing Prospect {index}",
-                email=f"existing{index}@example.test",
+                email=email,
                 contact_consent=True,
-                ip_fingerprint=fingerprint,
+                email_fingerprint=fingerprint,
                 created_at=timezone.now() - timedelta(minutes=index),
             )
 
         response = self.client.post(
             reverse("prospects:enquiry", args=[ProspectEnquiry.Programme.CONSTRUCT]),
-            self.valid_payload(),
+            self.valid_payload(email=email),
         )
         self.assertEqual(response.status_code, 429)
         self.assertContains(response, "several requests", status_code=429)
         self.assertEqual(ProspectEnquiry.objects.count(), 5)
-        self.assertNotIn(ip, ProspectEnquiry.objects.first().ip_fingerprint)
+        self.assertNotIn(email, ProspectEnquiry.objects.first().email_fingerprint)
 
     @patch("apps.prospects.views.NotificationService.send_simple_email", return_value=False)
     def test_email_provider_failure_does_not_discard_enquiry_or_claim_email_was_sent(self, _send):
