@@ -103,6 +103,7 @@ class Delivery(models.Model):
         QUEUED = "queued", "Queued"
         SENDING = "sending", "Sending"
         SENT = "sent", "Sent"
+        DELIVERED = "delivered", "Delivered"
         FAILED = "failed", "Failed"
         BOUNCED = "bounced", "Bounced"
         COMPLAINED = "complained", "Complained"
