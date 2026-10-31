@@ -33,13 +33,19 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
             or getattr(settings, "ACADEMY_VIDEO_STORAGE_DURABLE", False)
         )
 
+    def _local_backend(self):
+        return FileSystemStorage(
+            location=str(getattr(settings, "ACADEMY_VIDEO_STORAGE_ROOT", "") or ""),
+            base_url=None,
+        )
+
     def url(self, name):
         return ""
 
     def path(self, name):
         if self._drive_asset_enabled:
             raise NotImplementedError("Google Drive lesson videos do not have a local filesystem path.")
-        return super().path(name)
+        return self._local_backend().path(name)
 
     def _drive_video_upload(self, name, raw, content_type):
         """Use Drive's resumable-upload protocol; source videos can exceed 5 MB."""
@@ -109,7 +115,7 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
                 "Protected video storage is not configured. Connect Google Drive or configure "
                 "a durable local video volume before uploading videos."
             )
-        return super()._save(name, content)
+        return self._local_backend()._save(name, content)
 
     def _open(self, name, mode="rb"):
         if self._drive_asset_enabled:
@@ -120,19 +126,19 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
                     params={"alt": "media"}, expected=(200,),
                 )
                 return ContentFile(response.content, name=name)
-        return super()._open(name, mode)
+        return self._local_backend()._open(name, mode)
 
     def exists(self, name):
         if self._drive_asset_enabled and self._find_drive_file(name, self._asset_folder_id):
             return True
-        return super().exists(name)
+        return self._local_backend().exists(name)
 
     def size(self, name):
         if self._drive_asset_enabled:
             found = self._find_drive_file(name, self._asset_folder_id)
             if found and found.get("size") is not None:
                 return int(found["size"])
-        return super().size(name)
+        return self._local_backend().size(name)
 
     def delete(self, name):
         if self._drive_asset_enabled:
@@ -140,7 +146,7 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
             if found:
                 self._drive_request("DELETE", f"{DRIVE_API}/files/{found['id']}", expected=(204,))
                 return
-        return super().delete(name)
+        return self._local_backend().delete(name)
 
 
 lesson_video_storage = PrivateLessonVideoStorage()
