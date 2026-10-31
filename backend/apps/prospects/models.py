@@ -5,6 +5,15 @@ from django.db import models
 from django.utils import timezone
 
 
+STARTING_POINT_CHOICES = [
+    ("", "Not specified"),
+    ("learning_charts", "Learning to read charts"),
+    ("know_patterns", "Know patterns, need a connected plan"),
+    ("risk_management", "Working on risk and trade management"),
+    ("review_process", "Want a more consistent review process"),
+]
+
+
 class ProspectEnquiry(models.Model):
     class Programme(models.TextChoices):
         CONSTRUCT = "construct", "CONSTRUCT"
@@ -22,7 +31,7 @@ class ProspectEnquiry(models.Model):
     name = models.CharField(max_length=120)
     email = models.EmailField()
     phone = models.CharField(max_length=40, blank=True)
-    starting_point = models.CharField(max_length=80, blank=True)
+    starting_point = models.CharField(max_length=32, blank=True, choices=STARTING_POINT_CHOICES)
     question = models.TextField(blank=True)
     contact_consent = models.BooleanField(default=False)
     marketing_opt_in = models.BooleanField(default=False)
