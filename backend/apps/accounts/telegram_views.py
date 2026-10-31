@@ -6,7 +6,7 @@ import uuid
 
 from django.contrib.auth import login
 from django.db.models import Q
-from django.http import HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views import View
@@ -47,7 +47,7 @@ class TelegramCallbackView(View):
     def _error(request, message, status_code):
         if request.content_type == "application/json":
             return JsonResponse({"error": message}, status=status_code)
-        return HttpResponseBadRequest(message)
+        return HttpResponse(message, status=status_code)
 
     def post(self, request):
         is_json = request.content_type == "application/json"
