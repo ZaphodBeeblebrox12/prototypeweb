@@ -25,7 +25,7 @@ from apps.admin_desk_views import (
     admin_desk_course_approve, admin_desk_course_reject,
     admin_desk_course_import_cleanup, admin_desk_course_import_delete,
     admin_desk_support_tickets, admin_desk_support_ticket,
-    admin_desk_support_ticket_action,
+    admin_desk_support_ticket_action, admin_desk_customer_360,
 )
 from apps.core.views import health_check
 
@@ -49,6 +49,7 @@ urlpatterns = [
     path("staff/admin-desk/support/tickets/", admin_desk_support_tickets, name="staff_admin_desk_support_tickets"),
     path("staff/admin-desk/support/tickets/<uuid:ticket_id>/", admin_desk_support_ticket, name="staff_admin_desk_support_ticket"),
     path("staff/admin-desk/support/tickets/<uuid:ticket_id>/action/", admin_desk_support_ticket_action, name="staff_admin_desk_support_ticket_action"),
+    path("staff/admin-desk/customers/<uuid:user_id>/", admin_desk_customer_360, name="staff_admin_desk_customer_360"),
     path("staff/admin-desk/accounts/", admin_desk_accounts, name="staff_admin_desk_accounts"),
     path("staff/admin-desk/accounts/<uuid:user_id>/", admin_desk_account_detail, name="staff_admin_desk_account_detail"),
     path("staff/admin-desk/accounts/<uuid:user_id>/action/", admin_desk_account_action, name="staff_admin_desk_account_action"),

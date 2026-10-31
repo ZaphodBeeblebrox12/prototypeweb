@@ -440,6 +440,335 @@ def admin_desk_support_ticket(request, ticket_id):
 
 
 @login_required
+@require_GET
+def admin_desk_customer_360(request, user_id):
+    """Read-only, permission-scoped customer profile opened from a support ticket."""
+    _guard(request)
+    User = get_user_model()
+    account = get_object_or_404(
+        User.objects.filter(is_staff=False, is_superuser=False),
+        pk=user_id,
+    )
+
+    from apps.support.models import SupportTicket, TicketMessage
+    from apps.support.services import reviewable_ticket_queryset
+
+    visible_tickets = reviewable_ticket_queryset(
+        request.user,
+        SupportTicket.objects.filter(user=account).select_related(
+            "assigned_to", "plan", "affiliate_link"
+        ),
+    )
+    # A reviewer can open a customer profile only from a ticket in their
+    # permitted queue, unless they separately hold global learner-view access.
+    if not visible_tickets.exists() and not _allowed(request.user, "accounts.view_user"):
+        raise PermissionDenied
+
+    can_view_subscriptions = _allowed(request.user, "subscriptions.view_subscription")
+    can_view_payments = _allowed(request.user, "payments.view_paymentintent")
+    can_view_invoices = _allowed(request.user, "payments.view_invoice")
+    can_view_academy_records = (
+        _allowed(request.user, "academy.view_courseentitlement")
+        and _allowed(request.user, "academy.view_lessonprogress")
+    )
+    can_view_security_events = _allowed(request.user, "accounts.view_securityevent")
+
+    subscriptions = []
+    subscription_history = []
+    if can_view_subscriptions:
+        from apps.subscriptions.models import Subscription, SubscriptionHistory
+
+        subscriptions = list(
+            Subscription.objects.filter(user=account)
+            .select_related("plan", "product")
+            .order_by("-created_at")[:30]
+        )
+        subscription_history = list(
+            SubscriptionHistory.objects.filter(user=account)
+            .select_related("subscription", "subscription__plan")
+            .order_by("-created_at")[:25]
+        )
+
+    payments = []
+    if can_view_payments:
+        from apps.payments.models import PaymentIntent
+
+        payments = list(
+            PaymentIntent.objects.filter(user=account)
+            .select_related("plan")
+            .prefetch_related("refunds")
+            .order_by("-created_at")[:30]
+        )
+        for payment in payments:
+            payment.refund_count = len(payment._prefetched_objects_cache.get("refunds", []))
+            if payment.chargeback_confirmed:
+                payment.financial_state_label = "Chargeback confirmed"
+            elif payment.chargeback:
+                payment.financial_state_label = "Dispute open"
+            elif payment.refunded_cents:
+                payment.financial_state_label = (
+                    f"Refunded {payment.currency} {payment.refunded_cents / 100:,.2f}"
+                )
+            else:
+                payment.financial_state_label = "No refund recorded"
+
+    invoices = []
+    if can_view_invoices:
+        from apps.payments.models import Invoice
+
+        invoices = list(
+            Invoice.objects.filter(payment_intent__user=account)
+            .select_related("payment_intent")
+            .order_by("-issued_at")[:25]
+        )
+
+    course_entitlements = []
+    course_progress = []
+    entitlement_events = []
+    if can_view_academy_records:
+        from apps.academy.models import (
+            Course,
+            CourseEntitlement,
+            CourseEntitlementEvent,
+            LessonProgress,
+        )
+
+        now = timezone.now()
+        course_entitlements = list(
+            CourseEntitlement.objects.filter(user=account)
+            .select_related("course", "offer", "granted_by")
+            .order_by("-created_at")[:40]
+        )
+        for entitlement in course_entitlements:
+            if entitlement.status == CourseEntitlement.Status.REVOKED:
+                entitlement.access_state = "Revoked"
+            elif entitlement.starts_at > now:
+                entitlement.access_state = "Scheduled"
+            elif entitlement.expires_at is not None and entitlement.expires_at <= now:
+                entitlement.access_state = "Expired"
+            else:
+                entitlement.access_state = "Active"
+
+        progress_course_ids = set(
+            CourseEntitlement.objects.filter(
+                user=account,
+                course__status=Course.Status.PUBLISHED,
+            ).values_list("course_id", flat=True)
+        )
+        progress_course_ids.update(
+            LessonProgress.objects.filter(
+                user=account,
+                lesson__is_published=True,
+                lesson__module__is_published=True,
+                lesson__module__course__status=Course.Status.PUBLISHED,
+            )
+            .values_list("lesson__module__course_id", flat=True)
+            .distinct()
+        )
+        course_progress = list(
+            Course.objects.filter(
+                pk__in=progress_course_ids,
+                status=Course.Status.PUBLISHED,
+            )
+            .annotate(
+                total_lessons=Count(
+                    "modules__lessons",
+                    filter=Q(
+                        modules__is_published=True,
+                        modules__lessons__is_published=True,
+                    ),
+                    distinct=True,
+                ),
+                completed_lessons=Count(
+                    "modules__lessons",
+                    filter=Q(
+                        modules__is_published=True,
+                        modules__lessons__is_published=True,
+                        modules__lessons__learner_progress__user=account,
+                        modules__lessons__learner_progress__status=LessonProgress.Status.COMPLETED,
+                    ),
+                    distinct=True,
+                ),
+                time_spent_seconds=Sum(
+                    "modules__lessons__learner_progress__time_spent_seconds",
+                    filter=Q(
+                        modules__is_published=True,
+                        modules__lessons__is_published=True,
+                        modules__lessons__learner_progress__user=account,
+                    ),
+                ),
+                last_activity=Max(
+                    "modules__lessons__learner_progress__last_seen_at",
+                    filter=Q(
+                        modules__is_published=True,
+                        modules__lessons__is_published=True,
+                        modules__lessons__learner_progress__user=account,
+                    ),
+                ),
+            )
+            .order_by("-last_activity", "title")
+        )
+        for item in course_progress:
+            item.progress_percent = (
+                round(item.completed_lessons * 100 / item.total_lessons)
+                if item.total_lessons
+                else 0
+            )
+            item.time_spent_minutes = round((item.time_spent_seconds or 0) / 60)
+        entitlement_events = list(
+            CourseEntitlementEvent.objects.filter(entitlement__user=account)
+            .select_related("entitlement", "entitlement__course")
+            .order_by("-created_at")[:25]
+        )
+
+    open_ticket_count = visible_tickets.filter(
+        status__in=SupportTicket.ACTIVE_STATUSES
+    ).count()
+    ticket_rows = list(visible_tickets.order_by("-created_at")[:40])
+    ticket_ids = [ticket.pk for ticket in ticket_rows]
+    public_messages = list(
+        TicketMessage.objects.filter(
+            ticket_id__in=ticket_ids,
+            is_internal=False,
+        )
+        .select_related("ticket", "author")
+        .order_by("-created_at")[:25]
+    )
+
+    # A single, chronological, read-only operational timeline. It contains
+    # only records the current reviewer is allowed to see; internal support
+    # notes, raw security identifiers and payment-provider IDs are excluded.
+    activity = []
+
+    def add_activity(occurred_at, kind, title, description="", url=""):
+        if occurred_at:
+            activity.append(
+                {
+                    "occurred_at": occurred_at,
+                    "kind": kind,
+                    "title": title,
+                    "description": description,
+                    "url": url,
+                }
+            )
+
+    for ticket in ticket_rows:
+        add_activity(
+            ticket.created_at,
+            "Support",
+            f"Ticket #{ticket.short_id} opened",
+            f"{ticket.get_category_display()} · {ticket.get_status_display()}",
+            reverse("staff_admin_desk_support_ticket", args=[ticket.pk]),
+        )
+    for message in public_messages:
+        author = "Member" if message.author_id == account.pk else "Support reply"
+        add_activity(
+            message.created_at,
+            "Conversation",
+            author,
+            message.body[:180],
+            reverse("staff_admin_desk_support_ticket", args=[message.ticket_id]),
+        )
+    for item in subscription_history:
+        add_activity(
+            item.created_at,
+            "Subscription",
+            item.get_event_type_display(),
+            item.subscription.plan.name,
+            reverse("staff_admin_desk_subscriptions"),
+        )
+    for payment in payments:
+        add_activity(
+            payment.created_at,
+            "Payment",
+            f"Payment {payment.get_status_display().lower()}",
+            f"{payment.plan.name} · {payment.currency} {payment.amount_dollars:,.2f}",
+            "",
+        )
+        for refund in payment.refunds.all():
+            add_activity(
+                refund.refunded_at,
+                "Refund",
+                "Refund processed",
+                f"{refund.currency} {refund.amount_cents / 100:,.2f} · {payment.plan.name}",
+                "",
+            )
+        if payment.chargeback_at:
+            add_activity(
+                payment.chargeback_at,
+                "Dispute",
+                "Payment dispute opened",
+                payment.plan.name,
+                "",
+            )
+    for event in entitlement_events:
+        add_activity(
+            event.created_at,
+            "Course access",
+            event.get_event_type_display(),
+            event.entitlement.course.title,
+            "",
+        )
+    if can_view_security_events:
+        from apps.accounts.models import SecurityEvent
+
+        security_events = SecurityEvent.objects.filter(user=account).order_by(
+            "-occurred_at"
+        )[:20]
+        for event in security_events:
+            add_activity(
+                event.occurred_at,
+                "Security",
+                event.get_event_type_display(),
+                "Security event recorded",
+                "",
+            )
+
+    activity.sort(key=lambda item: item["occurred_at"], reverse=True)
+    active_subscription_count = sum(
+        subscription.is_active
+        and subscription.status == subscription.Status.ACTIVE
+        for subscription in subscriptions
+    )
+    successful_payment_count = sum(
+        payment.status == payment.Status.SUCCESS for payment in payments
+    )
+    active_course_count = sum(
+        entitlement.access_state == "Active" for entitlement in course_entitlements
+    )
+
+    return render(
+        request,
+        "admin/desk_customer_360.html",
+        {
+            "account": account,
+            "subscriptions": subscriptions,
+            "subscription_history": subscription_history,
+            "payments": payments,
+            "invoices": invoices,
+            "course_entitlements": course_entitlements,
+            "course_progress": course_progress,
+            "support_tickets": ticket_rows,
+            "activity": activity[:40],
+            "stats": {
+                "open_tickets": open_ticket_count,
+                "active_subscriptions": active_subscription_count,
+                "successful_payments": successful_payment_count,
+                "active_courses": active_course_count,
+            },
+            "can_view_subscriptions": can_view_subscriptions,
+            "can_view_payments": can_view_payments,
+            "can_view_invoices": can_view_invoices,
+            "can_view_academy_records": can_view_academy_records,
+            "can_view_security_events": can_view_security_events,
+            "desk_nav": _nav(request),
+            "support_queue_url": reverse("staff_admin_desk_support_tickets"),
+            "accounts_url": reverse("staff_admin_desk_accounts"),
+        },
+    )
+
+
+@login_required
 @require_POST
 def admin_desk_support_ticket_action(request, ticket_id):
     """Apply the existing support-ticket workflow from a dashboard POST."""
