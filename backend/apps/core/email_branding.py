@@ -24,3 +24,20 @@ def normalise_from_email(from_email, default_from_email):
     if not address:
         return candidate
     return formataddr(("TradeThesis", address))
+
+_BRANDED_TEXT_RE = re.compile(
+    r"(?im)^TradeThesis\\s*\\r?\\n\\s*Conviction before execution\\b"
+)
+
+
+def ensure_branded_plain_text(body):
+    """Ensure the text alternative carries the TradeThesis identity and disclaimer."""
+    value = str(body or "").strip()
+    if _BRANDED_TEXT_RE.search(value):
+        return value
+    return (
+        value
+        + "\\n\\nTradeThesis\\nConviction before Execution"
+        + "\\nTrading involves risk. TradeThesis content is for educational "
+        + "purposes and is not investment advice."
+    )
