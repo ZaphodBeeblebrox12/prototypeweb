@@ -740,6 +740,28 @@ class ProfileView(View):
 
         telegram_account = TelegramAccount.objects.filter(user=request.user).first()
         discord_account = DiscordAccount.objects.filter(user=request.user).first()
+        from apps.bot_integration.models import UserChannelAssignment
+        from apps.jobs.models import ProvisioningOperation
+        telegram_cleanup_pending = bool(
+            telegram_account is None
+            and (
+                UserChannelAssignment.objects.filter(
+                    user=request.user, platform="telegram", is_active=True,
+                ).exists()
+                or ProvisioningOperation.objects.filter(
+                    user_id=request.user.pk,
+                    operation=ProvisioningOperation.OP_GRANT,
+                    state__in=[
+                        ProvisioningOperation.ST_PENDING,
+                        ProvisioningOperation.ST_CREATING,
+                        ProvisioningOperation.ST_CREATED,
+                        ProvisioningOperation.ST_SENDING,
+                        ProvisioningOperation.ST_SENT,
+                        ProvisioningOperation.ST_UNKNOWN,
+                    ],
+                ).exists()
+            )
+        )
         bot_config = BotConfig.get_config()
         telegram_bot_configured = bool(
             bot_config.is_active
@@ -750,6 +772,7 @@ class ProfileView(View):
             "user": request.user,
             "telegram_account": telegram_account,
             "telegram_connected": bool(telegram_account and telegram_account.is_active),
+            "telegram_cleanup_pending": telegram_cleanup_pending,
             "telegram_bot_configured": telegram_bot_configured,
             "discord_account": discord_account,
             "discord_connected": bool(discord_account and discord_account.is_active),
