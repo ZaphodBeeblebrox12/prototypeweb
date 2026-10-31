@@ -828,9 +828,6 @@ def admin_lesson_preview(request, course_slug, lesson_id):
         Lesson.objects.select_related("module__course"),
         pk=lesson_id,
         module__course__slug=course_slug,
-        module__course__status=Course.Status.PUBLISHED,
-        module__is_published=True,
-        is_published=True,
     )
     course = lesson.module.course
     entitlement = get_active_entitlement(request.user, course)
@@ -850,14 +847,11 @@ def admin_lesson_preview(request, course_slug, lesson_id):
 
     now = timezone.now()
     modules = (
-        CourseModule.objects.filter(
-            course=course,
-            is_published=True,
-        )
+        CourseModule.objects.filter(course=course)
         .prefetch_related(
             Prefetch(
                 "lessons",
-                queryset=Lesson.objects.filter(is_published=True).order_by("position", "title"),
+                queryset=Lesson.objects.order_by("position", "title"),
             )
         )
         .order_by("position", "title")
@@ -901,10 +895,22 @@ def admin_lesson_preview(request, course_slug, lesson_id):
         asset_urls,
         content_json.get("figures", {}),
     )
+    protected_video = ProtectedLessonVideo.objects.filter(
+        lesson=lesson,
+        status=ProtectedLessonVideo.Status.READY,
+    ).first()
     video_url = content_json.get("video_url", "")
-    if not isinstance(video_url, str) or not video_url.startswith(("https://", "http://")):
+    if protected_video or not isinstance(video_url, str) or not video_url.startswith(
+        ("https://", "http://")
+    ):
         video_url = ""
     video_is_file = video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
+    video_watermark_name = request.user.full_name.strip() or request.user.email
+    protected_video_manifest_url = (
+        reverse("academy:protected-video-manifest", args=[protected_video.pk])
+        if protected_video
+        else ""
+    )
     regional_country, regional_region = _regional_audience(request, admin_preview=True)
 
     return render(
@@ -944,6 +950,10 @@ def admin_lesson_preview(request, course_slug, lesson_id):
             "practice_questions": practice_questions,
             "video_url": video_url,
             "video_is_file": video_is_file,
+            "protected_video": protected_video,
+            "protected_video_manifest_url": protected_video_manifest_url,
+            "video_watermark_name": video_watermark_name,
+            "video_watermark_email": request.user.email,
             "previous_lesson": previous_lesson,
             "next_lesson": next_lesson,
             "course_progress_percent": 0,
