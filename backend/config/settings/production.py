@@ -62,7 +62,7 @@ CONN_MAX_AGE = 60
 # and Telegram/email links all build from SITE_BASE_URL (base.py).
 # Set SITE_BASE_URL in Render env vars to your https://<app>.onrender.com.
 
-# NOTE: ACCOUNT_EMAIL_VERIFICATION is "mandatory" (base.py). Without SMTP
-# credentials users cannot complete signup. Configure EMAIL_* env vars on
-# Render (e.g. Gmail app password, SendGrid, Mailgun) BEFORE opening
-# registration, or override ACCOUNT_EMAIL_VERIFICATION here for launch.
+# NOTE: ACCOUNT_EMAIL_VERIFICATION is mandatory. Hosted deployments default
+# to the Resend HTTPS backend because Render Free blocks outbound SMTP.
+# Configure RESEND_API_KEY, RESEND_WEBHOOK_SECRET, and a verified sender in
+# Render before enabling public registration and customer email notifications.
