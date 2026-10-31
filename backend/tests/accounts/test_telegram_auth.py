@@ -191,7 +191,7 @@ class TestTelegramAuthView:
 
         telegram_auth_data["auth_date"] = int(time.time()) - 25 * 60 * 60
         token = "test_token"
-        data_check_string = "\\n".join(
+        data_check_string = "\n".join(
             f"{k}={v}" for k, v in sorted(telegram_auth_data.items()) if v
         )
         secret_key = hashlib.sha256(token.encode()).digest()
@@ -223,7 +223,7 @@ class TestTelegramAuthView:
             is_active=True,
         )
         token = "test_token"
-        data_check_string = "\\n".join(
+        data_check_string = "\n".join(
             f"{k}={v}" for k, v in sorted(telegram_auth_data.items()) if v
         )
         secret_key = hashlib.sha256(token.encode()).digest()
@@ -251,7 +251,7 @@ class TestTelegramAuthView:
         )
         telegram_auth_data["auth_date"] = int(time.time())
         token = "test_token"
-        data_check_string = "\\n".join(
+        data_check_string = "\n".join(
             f"{k}={v}" for k, v in sorted(telegram_auth_data.items()) if v
         )
         secret_key = hashlib.sha256(token.encode()).digest()
