@@ -652,7 +652,7 @@ class SupportTicketWorkflowTests(TestCase):
         self.assertIn("TradeThesis", payload["html_message"])
         self.assertIn("tradethesis-logo.png", payload["html_message"])
         self.assertIn(
-            f"/support/tickets/{self.ticket.pk}/",
+            reverse("support:ticket_detail", kwargs={"pk": self.ticket.pk}),
             payload["html_message"],
         )
         self.assertIn("View support ticket", payload["html_message"])
