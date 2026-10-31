@@ -108,7 +108,7 @@ The current customer-experience feature branch now includes a first implementati
 - Public forms require permission to contact the prospect; optional marketing opt-in is stored separately and is not treated as consent to contact about the enquiry.
 - Form input is validated server-side. A honeypot catches basic automated submissions, and a keyed HMAC of the normalized email is used for a basic rate limit without storing another raw copy of the address.
 - Enquiries are committed before email is attempted. Mail delivery is best-effort; failed or console-only email delivery does not delete the enquiry or set a sent timestamp.
-- The staff queue and detail pages live in the TradeThesis Admin Desk, use separate `prospects.view_prospectenquiry` / `prospects.change_prospectenquiry` permissions, and audit status/private-note changes. Member support tickets remain separate.
+- The staff queue and detail pages live in the TradeThesis Admin Desk, use separate `prospects.view_prospectenquiry` / `prospects.change_prospectenquiry` permissions, support active-staff assignment, and audit status/assignment/private-note changes. Member support tickets remain separate.
 - The CONSTRUCT and Live Classroom public CTAs now point to their distinct Django prospect routes. The old modal and non-persisting browser-only form were removed.
 - The enquiry form links to the actual named Django privacy-policy route rather than a non-existent static page.
 
