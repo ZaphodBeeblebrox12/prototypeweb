@@ -34,7 +34,7 @@
 
       <div class="tt-overview-actions">
         {% if first_accessible_lesson %}
-          <a class="tt-overview-button" href="{% url 'academy:lesson' course.slug first_accessible_lesson.id %}">{% if has_course_access %}Continue learning{% else %}Explore a preview lesson{% endif %} <span aria-hidden="true">↗</span></a>
+          <a class="tt-overview-button" href="{% url 'academy:lesson' course.slug first_accessible_lesson.id %}">{% if has_course_access and not has_started %}Start your first lesson{% elif has_course_access %}Continue learning{% else %}Explore a preview lesson{% endif %} <span aria-hidden="true">↗</span></a>
         {% else %}
           <a class="tt-overview-button" href="#tt-course-curriculum">Explore curriculum <span aria-hidden="true">↓</span></a>
         {% endif %}
@@ -64,6 +64,28 @@
       </div>
     </div>
   </section>
+
+  {% if has_course_access and not has_started and first_accessible_lesson %}
+  <section class="tt-overview-first-session" aria-labelledby="tt-first-session-title">
+    <div class="tt-overview-first-session-copy">
+      <p class="tt-overview-eyebrow">YOUR FIRST SESSION</p>
+      <h2 id="tt-first-session-title">Let's make your first session useful.</h2>
+      <p>You don't need to finish the course today. Start with the first available lesson, try its practice prompt and record one thing you understand more clearly. Your place is saved when you open the lesson.</p>
+      <div class="tt-overview-first-session-facts">
+        {% if first_accessible_lesson.duration_minutes %}<span>First lesson · {{ first_accessible_lesson.duration_minutes }} min</span>{% endif %}
+        <span>Learn at your own pace</span>
+        <span>Return whenever you're ready</span>
+      </div>
+    </div>
+    <div class="tt-overview-first-session-guide">
+      <div class="tt-overview-first-session-step"><span>01</span><div><strong>Notice</strong><small>Describe what you can see.</small></div></div>
+      <div class="tt-overview-first-session-step"><span>02</span><div><strong>Compare</strong><small>Consider another explanation.</small></div></div>
+      <div class="tt-overview-first-session-step"><span>03</span><div><strong>Apply</strong><small>Try the lesson's practice prompt.</small></div></div>
+      <div class="tt-overview-first-session-step"><span>04</span><div><strong>Review</strong><small>Record what you learned.</small></div></div>
+      <a class="tt-overview-button" href="{% url 'academy:lesson' course.slug first_accessible_lesson.id %}">Start your first lesson ↗</a>
+    </div>
+  </section>
+  {% endif %}
 
   {% if can_enrol_free %}
   <section class="tt-overview-access" aria-labelledby="tt-free-course-access-title">
