@@ -445,33 +445,64 @@ def admin_desk_customer_360(request, user_id):
     """Read-only, permission-scoped customer profile opened from a support ticket."""
     _guard(request)
     User = get_user_model()
-    account = get_object_or_404(
-        User.objects.filter(is_staff=False, is_superuser=False),
-        pk=user_id,
-    )
-
     from apps.support.models import SupportTicket, TicketMessage
     from apps.support.services import reviewable_ticket_queryset
 
+    # Resolve a profile through a ticket the reviewer is explicitly allowed
+    # to see before applying the learner-only fallback. Some legacy/support
+    # accounts have is_staff=True; excluding them before checking the ticket
+    # made valid ticket-to-profile links return a misleading 404.
     visible_tickets = reviewable_ticket_queryset(
         request.user,
-        SupportTicket.objects.filter(user=account).select_related(
-            "assigned_to", "plan", "affiliate_link"
+        SupportTicket.objects.filter(user_id=user_id).select_related(
+            "user", "assigned_to", "plan", "affiliate_link"
         ),
     )
-    # A reviewer can open a customer profile only from a ticket in their
-    # permitted queue, unless they separately hold global learner-view access.
-    if not visible_tickets.exists() and not _allowed(request.user, "accounts.view_user"):
+    visible_ticket = visible_tickets.order_by("-created_at").first()
+    can_view_all_learners = _allowed(request.user, "accounts.view_user")
+    if visible_ticket is not None:
+        account = visible_ticket.user
+        # Superuser accounts are never rendered as customer profiles.
+        if account.is_superuser:
+            raise PermissionDenied
+    elif can_view_all_learners:
+        account = get_object_or_404(
+            User.objects.filter(is_staff=False, is_superuser=False),
+            pk=user_id,
+        )
+        visible_tickets = reviewable_ticket_queryset(
+            request.user,
+            SupportTicket.objects.filter(user=account).select_related(
+                "assigned_to", "plan", "affiliate_link"
+            ),
+        )
+    else:
         raise PermissionDenied
 
-    can_view_subscriptions = _allowed(request.user, "subscriptions.view_subscription")
-    can_view_payments = _allowed(request.user, "payments.view_paymentintent")
-    can_view_invoices = _allowed(request.user, "payments.view_invoice")
+    is_internal_account = bool(account.is_staff or account.is_superuser)
+    # Staff accounts may submit support requests, but their internal profile
+    # is deliberately limited to identity + reviewer-visible support history.
+    can_view_subscriptions = (
+        not is_internal_account
+        and _allowed(request.user, "subscriptions.view_subscription")
+    )
+    can_view_payments = (
+        not is_internal_account
+        and _allowed(request.user, "payments.view_paymentintent")
+    )
+    can_view_invoices = (
+        not is_internal_account
+        and _allowed(request.user, "payments.view_invoice")
+    )
     can_view_academy_records = (
-        _allowed(request.user, "academy.view_courseentitlement")
+        not is_internal_account
+        and _allowed(request.user, "academy.view_courseentitlement")
         and _allowed(request.user, "academy.view_lessonprogress")
     )
-    can_view_security_events = _allowed(request.user, "accounts.view_securityevent")
+    can_view_security_events = (
+        not is_internal_account
+        and _allowed(request.user, "accounts.view_securityevent")
+    )
 
     subscriptions = []
     subscription_history = []
@@ -742,6 +773,7 @@ def admin_desk_customer_360(request, user_id):
         "admin/desk_customer_360.html",
         {
             "account": account,
+            "is_internal_account": is_internal_account,
             "subscriptions": subscriptions,
             "subscription_history": subscription_history,
             "payments": payments,
