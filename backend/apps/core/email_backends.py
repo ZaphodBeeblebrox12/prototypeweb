@@ -59,7 +59,7 @@ class ResendEmailBackend(BaseEmailBackend):
             # key on the same EmailMessage instance without sending twice.
             deliveries = self._start_delivery_records(message, idempotency_key)
             if deliveries and all(
-                item.state in {"sent", "delivered", "bounced", "complained", "suppressed"}
+                item.state in {"sent", "delivered", "delayed", "bounced", "complained", "suppressed"}
                 for item in deliveries
             ):
                 return True
@@ -158,6 +158,7 @@ class ResendEmailBackend(BaseEmailBackend):
         Delivery.objects.filter(pk__in=[item.pk for item in deliveries]).exclude(
             state__in=[
                 Delivery.State.DELIVERED,
+                Delivery.State.DELAYED,
                 Delivery.State.BOUNCED,
                 Delivery.State.COMPLAINED,
                 Delivery.State.SUPPRESSED,
