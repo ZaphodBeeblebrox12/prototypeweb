@@ -30,16 +30,15 @@ PROGRAMMES = {
 }
 
 
-def _visitor_fingerprint(request):
-    """Return a keyed visitor fingerprint without storing the raw IP address."""
-    address = request.META.get("REMOTE_ADDR", "").strip()
-    if not address:
-        return ""
+def _email_fingerprint(email):
+    """Return a keyed fingerprint for a normalised email address."""
+    normalised = email.strip().lower()
     return hmac.new(
         str(settings.SECRET_KEY).encode("utf-8"),
-        address.encode("utf-8"),
+        normalised.encode("utf-8"),
         hashlib.sha256,
     ).hexdigest()
+
 
 
 def _send_enquiry_notifications(enquiry):
@@ -123,10 +122,10 @@ def enquiry(request, programme):
                 {"programme": programme_context, "reference": ""},
             )
 
-        fingerprint = _visitor_fingerprint(request)
+        fingerprint = _email_fingerprint(form.cleaned_data["email"])
         if fingerprint:
             recent_count = ProspectEnquiry.objects.filter(
-                ip_fingerprint=fingerprint,
+                email_fingerprint=fingerprint,
                 created_at__gte=timezone.now() - timedelta(hours=1),
             ).count()
             if recent_count >= 5:
