@@ -811,48 +811,10 @@
         No pressure to pretend you are further along than you are.
        </p>
       </div>
-      <form class="enquiry-form" data-form-key="live-class-enquiry-v1" id="liveEnquiryForm">
-       <label for="liveName">
-        Your name
-        <input autocomplete="name" data-course-slug="trade-construction-management-live" data-enquiry-version="1" id="liveName" name="name" placeholder="What should we call you?" required=""/>
-       </label>
-       <label for="liveEmail">
-        Email address
-        <input autocomplete="email" data-course-slug="trade-construction-management-live" data-enquiry-version="1" id="liveEmail" name="email" placeholder="you@example.com" required="" type="email"/>
-       </label>
-       <label for="liveStartingPoint">
-        Where are you starting from?
-        <select data-course-slug="trade-construction-management-live" data-enquiry-version="1" id="liveStartingPoint" name="starting_point">
-         <option value="">
-          Choose one (optional)
-         </option>
-         <option>
-          Learning to read charts
-         </option>
-         <option>
-          Know some patterns, need a connected plan
-         </option>
-         <option>
-          Working on risk and trade management
-         </option>
-         <option>
-          Want a more consistent review process
-         </option>
-        </select>
-       </label>
-       <label for="liveQuestion">
-        What would you most like to work on?
-        <textarea data-course-slug="trade-construction-management-live" data-enquiry-version="1" id="liveQuestion" name="question" placeholder="A question about context, risk, management…"></textarea>
-       </label>
-       <button class="button" type="submit">
-        Review enquiry ↗
-       </button>
-       <p class="fine-note">
-        Preview only: this form does not send or store your details. Connect it to the Django enquiry workflow before publishing.
-       </p>
-       <div aria-live="polite" class="enquiry-result" id="liveEnquiryResult" role="status">
-       </div>
-      </form>
+      <div class="enquiry-form">
+       <a class="button" href="#" data-academy-path="/enquire/live_classroom/">Ask about the next class ↗</a>
+       <p class="fine-note">Your request is saved securely in TradeThesis. The team will follow up with confirmed intake dates, fees and session details.</p>
+      </div>
      </div>
     </div>
    </section>
@@ -936,25 +898,7 @@ document.querySelectorAll('[data-live-answer]').forEach(btn=>btn.addEventListene
  target.textContent=(item.correct?'Good distinction. ':'Look again. ')+item.text;
  target.dataset.result=item.correct?'correct':'review';
 }));
-const enquiry=document.getElementById('liveEnquiryForm');
-if(enquiry){
- const result=document.getElementById('liveEnquiryResult');
- const clearReview=()=>{
-  if(!result)return;
-  result.textContent='';
-  result.classList.remove('show');
-  delete result.dataset.result;
- };
- enquiry.addEventListener('input',clearReview);
- enquiry.addEventListener('change',clearReview);
- enquiry.addEventListener('submit',e=>{
-  e.preventDefault();
-  if(!result)return;
-  result.textContent='Preview complete: your required fields and email format passed the browser checks. Nothing has been sent or saved.';
-  result.dataset.result='preview';
-  result.classList.add('show');
- });
-}
+
   </script>
    <script src="assets/academy-config.js?v=20261026-catalogue-config-r2"></script>
   <script src="assets/sitewide-nav.js" defer></script>
