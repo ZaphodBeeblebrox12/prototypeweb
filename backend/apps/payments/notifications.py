@@ -257,7 +257,7 @@ def _send(user, template, subject, context, telegram_text):
         try:
             from apps.notifications.services import NotificationService
             NotificationService.send_email(
-                email, template, subject, context, {"billing": True})
+                email, template, subject, context, metadata={"billing": True})
         except Exception:
             logger.exception("billing email failed: %s", template)
     try:
