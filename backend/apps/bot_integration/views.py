@@ -108,7 +108,44 @@ def unlink_telegram(request):
 
     account = TelegramAccount.objects.filter(user=request.user).first()
     if account is None:
-        messages.info(request, "No Telegram account is currently linked.")
+        from apps.jobs.models import ProvisioningOperation
+        open_grant_states = [
+            ProvisioningOperation.ST_PENDING,
+            ProvisioningOperation.ST_CREATING,
+            ProvisioningOperation.ST_CREATED,
+            ProvisioningOperation.ST_SENDING,
+            ProvisioningOperation.ST_SENT,
+            ProvisioningOperation.ST_UNKNOWN,
+        ]
+        orphaned_access = (
+            UserChannelAssignment.objects.filter(
+                user=request.user, platform="telegram", is_active=True,
+            ).exists()
+            or ProvisioningOperation.objects.filter(
+                user_id=request.user.pk,
+                operation=ProvisioningOperation.OP_GRANT,
+                state__in=open_grant_states,
+            ).exists()
+        )
+        if not orphaned_access:
+            messages.info(request, "No Telegram account is currently linked.")
+            return redirect(f"{reverse('dashboard')}#connections")
+        try:
+            with transaction.atomic():
+                TelegramVerificationToken.objects.filter(user=request.user).delete()
+                enqueue_reconcile(request.user.pk, reason="orphaned_telegram_cleanup")
+        except Exception:
+            logger.exception("Orphaned Telegram cleanup retry could not be queued user=%s", request.user.pk)
+            messages.error(
+                request,
+                "We couldn't queue the Telegram access cleanup. Please contact support.",
+            )
+        else:
+            messages.info(
+                request,
+                "Telegram access cleanup has been queued again. A new link will only "
+                "be offered after the previous managed access is resolved.",
+            )
         return redirect(f"{reverse('dashboard')}#connections")
 
     try:
