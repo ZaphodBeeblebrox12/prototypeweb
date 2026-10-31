@@ -1004,9 +1004,9 @@ def admin_desk_operations_timeline(request):
     stalled_job_count = sum(
         job.status in {"pending", "running"} for job in job_incidents
     )
-    visible_open_count = sum(
-        ticket.status in SupportTicket.ACTIVE_STATUSES for ticket in cluster_tickets
-    )
+    visible_open_count = visible_tickets.filter(
+        status__in=SupportTicket.ACTIVE_STATUSES
+    ).count()
 
     return render(
         request,
