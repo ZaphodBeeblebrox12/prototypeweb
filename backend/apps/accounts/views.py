@@ -584,6 +584,7 @@ You'll get discounts and exclusive access, and I'll get extra subscription days 
         telegram_account = getattr(user, "telegram_account", None)
         discord_account = getattr(user, "discord_account", None)
         discord_connected = bool(discord_account and discord_account.is_active)
+        from apps.bot_integration.models import UserChannelAssignment
         from apps.jobs.models import ProvisioningOperation
         telegram_cleanup_pending = bool(
             telegram_account is None
