@@ -1,12 +1,9 @@
 """
 Discord authentication views for account verification.
 """
-import secrets
 
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponseRedirect
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
@@ -14,9 +11,6 @@ from rest_framework import permissions, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
-from apps.accounts.models import User
-from apps.accounts.services.discord_service import DiscordOAuth2Service
-from apps.audit.models import AuditLog
 
 
 def check_banned(view_func):
