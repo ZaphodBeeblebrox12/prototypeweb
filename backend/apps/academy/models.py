@@ -5,12 +5,13 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import FileExtensionValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .storage import course_asset_storage
+from .video_storage import lesson_video_storage
 
 
 class GoogleDriveCredential(models.Model):
@@ -20,6 +21,7 @@ class GoogleDriveCredential(models.Model):
     encrypted_refresh_token = models.TextField(blank=True)
     asset_folder_id = models.CharField(max_length=255, blank=True)
     source_folder_id = models.CharField(max_length=255, blank=True)
+    support_attachment_folder_id = models.CharField(max_length=255, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     @staticmethod
@@ -59,6 +61,12 @@ class Course(models.Model):
         MINI = "mini", _("Mini-course")
         HIDDEN = "hidden", _("Not listed on the Courses page")
 
+    class AccessType(models.TextChoices):
+        FREE = "free", _("Free course")
+        MEMBERSHIP = "membership", _("Included in free membership")
+        PAID = "paid", _("Paid individual purchase")
+        MIXED = "mixed", _("Free membership or individual purchase")
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=160, unique=True)
@@ -74,6 +82,15 @@ class Course(models.Model):
         default=CatalogueRole.MINI,
         help_text="Controls which section of the public Courses page displays this course.",
     )
+    access_type = models.CharField(
+        max_length=16,
+        choices=AccessType.choices,
+        default=AccessType.PAID,
+        help_text=(
+            "Controls learner access. Existing courses retain paid-offer behaviour unless "
+            "an administrator explicitly changes this setting."
+        ),
+    )
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.DRAFT)
     position = models.PositiveSmallIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -85,6 +102,37 @@ class Course(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class PlanCourseAccess(models.Model):
+    """An active subscription plan that unlocks a specific published course."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    plan = models.ForeignKey(
+        "subscriptions.Plan",
+        on_delete=models.CASCADE,
+        related_name="academy_course_access",
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name="plan_access",
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["course__position", "course__title"]
+        constraints = [
+            models.UniqueConstraint(fields=["plan", "course"], name="academy_plan_course_access_uq"),
+        ]
+        indexes = [
+            models.Index(fields=["course", "is_active"], name="academy_plan_access_course_idx"),
+        ]
+
+    def __str__(self):
+        return f"{self.plan.name} · {self.course.title}"
 
 
 class CourseModule(models.Model):
@@ -210,6 +258,13 @@ class CourseOffer(models.Model):
                 errors["plan"] = "An active course offer must map to a commerce Plan."
             if self.course_id and self.course.status != Course.Status.PUBLISHED:
                 errors["course"] = "Publish the course before activating its offer."
+            if self.course_id and self.course.access_type not in (
+                Course.AccessType.PAID,
+                Course.AccessType.MIXED,
+            ):
+                errors["course"] = (
+                    "Individual purchase offers are only valid for paid or mixed-access courses."
+                )
             if self.plan_id:
                 if not self.plan.is_hidden:
                     errors["plan"] = (
@@ -265,7 +320,11 @@ class CourseOffer(models.Model):
     @property
     def is_saleable(self):
         return bool(
-            self.is_active and self.plan_id and self.course.status == Course.Status.PUBLISHED
+            self.is_active
+            and self.plan_id
+            and self.course.status == Course.Status.PUBLISHED
+            and self.course.access_type
+            in (Course.AccessType.PAID, Course.AccessType.MIXED)
         )
 
     def __str__(self):
@@ -417,7 +476,12 @@ def course_import_asset_upload_to(instance, filename):
     suffix = Path(filename).suffix.lower()
     if suffix not in {".jpg", ".jpeg", ".png", ".webp", ".svg"}:
         suffix = ".png"
-    return f"academy/course-imports/{instance.course_import_id}/{uuid.uuid4().hex}{suffix}"
+    stable_asset_id = getattr(instance, "stable_asset_id", None) or getattr(instance, "pk", None)
+    try:
+        filename_id = uuid.UUID(str(stable_asset_id)).hex if stable_asset_id else uuid.uuid4().hex
+    except (ValueError, TypeError, AttributeError):
+        filename_id = uuid.uuid4().hex
+    return f"academy/course-imports/{instance.course_import_id}/{filename_id}{suffix}"
 
 
 def course_media_asset_upload_to(instance, filename):
@@ -425,6 +489,13 @@ def course_media_asset_upload_to(instance, filename):
     if suffix not in {".jpg", ".jpeg", ".png", ".webp"}:
         suffix = ".png"
     return f"academy/course-assets/{uuid.uuid4().hex}{suffix}"
+
+
+def protected_lesson_video_upload_to(instance, filename):
+    suffix = Path(filename).suffix.lower()
+    if suffix not in {".mp4", ".mov", ".mkv", ".webm"}:
+        suffix = ".mp4"
+    return f"academy/video-source/{instance.lesson_id}/{uuid.uuid4().hex}{suffix}"
 
 
 class CourseImport(models.Model):
@@ -541,6 +612,66 @@ class CourseMediaAsset(models.Model):
 
     def __str__(self):
         return f"{self.course.title} · {self.asset_key}"
+
+
+class ProtectedLessonVideo(models.Model):
+    """Private source video and its generated encrypted HLS rendition."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Pending processing")
+        PROCESSING = "processing", _("Processing")
+        READY = "ready", _("Protected stream ready")
+        FAILED = "failed", _("Processing failed")
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    lesson = models.OneToOneField(
+        Lesson, on_delete=models.CASCADE, related_name="protected_video"
+    )
+    source_file = models.FileField(
+        storage=lesson_video_storage,
+        upload_to=protected_lesson_video_upload_to,
+        blank=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=["mp4", "mov", "mkv", "webm"])
+        ],
+    )
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING)
+    stream_directory = models.CharField(max_length=512, blank=True)
+    processing_error = models.TextField(blank=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="academy_protected_videos_created",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["lesson__module__course__title", "lesson__title"]
+
+    def clean(self):
+        super().clean()
+        if not self.source_file:
+            raise ValidationError({"source_file": "Upload a source video before saving."})
+        if (
+            not settings.DEBUG
+            and getattr(settings, "ACADEMY_REQUIRE_DURABLE_VIDEO_STORAGE", True)
+            and not lesson_video_storage.is_durable
+        ):
+            raise ValidationError(
+                {
+                    "source_file": (
+                        "Video uploads are disabled until private Google Drive storage or "
+                        "a persistent local video volume is configured."
+                    )
+                }
+            )
+
+    def __str__(self):
+        return f"Protected video · {self.lesson}"
 
 
 class CourseContentRevision(models.Model):

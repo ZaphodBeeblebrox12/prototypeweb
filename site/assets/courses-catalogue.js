@@ -36,6 +36,16 @@
     return `<svg class="cc-programme-art" viewBox="0 0 175 95" aria-hidden="true"><rect x="3" y="7" width="169" height="81" rx="8" fill="#f6f1e3" stroke="#d7ddcb"/><g stroke="#d3d8c9" stroke-dasharray="3 4"><path d="M13 27H162M13 47H162M13 67H162"/></g><rect x="13" y="58" width="148" height="14" rx="2" fill="#c3d3b8" opacity=".7"/><path d="M13 66L32 58L47 63L64 42L81 51L98 32L116 44L136 20L160 29" fill="none" stroke="#355a46" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><g stroke="#355a46" stroke-width="1.4"><path d="M31 51V70M48 53V72M65 35V57M82 45V65M99 25V44M116 37V57M137 13V34M154 18V38"/></g><g fill="#c96f50"><rect x="27" y="56" width="8" height="9" rx="1"/><rect x="44" y="57" width="8" height="9" rx="1"/><rect x="61" y="42" width="8" height="10" rx="1"/><rect x="78" y="48" width="8" height="10" rx="1"/><rect x="95" y="29" width="8" height="10" rx="1"/><rect x="112" y="41" width="8" height="10" rx="1"/><rect x="133" y="17" width="8" height="10" rx="1"/><rect x="150" y="24" width="8" height="9" rx="1"/></g></svg>`;
   };
 
+  // Personal annotation for CONSTRUCT: review the trader's original thesis, not just the outcome.
+  const renderConstructPersonalNote = () =>
+    '<aside class="ed-construct-personal-note" aria-label="A note about reviewing the trade">' +
+      '<div class="ed-construct-note-label">A thought worth keeping</div>' +
+      '<p class="ed-construct-note-headline">Before the<br>chart <span>answered.</span></p>' +
+      '<p class="ed-construct-note-body"><span class="ed-construct-note-question">What did you believe then?</span><span class="ed-construct-note-after">Don\'t let the ending answer for you.</span></p>' +
+    '</aside>';
+  const isConstructCourse = course => [course.id, course.slug, course.title, course.subtitle, course.category]
+    .some(value => /construct(?:ion)?/i.test(String(value || '')));
+
   const renderEditorialProgramme = (course, variant) => {
     const isConstruct = variant === 'construct';
     const outcomes = (course.outcomes || []).slice(0, isConstruct ? 3 : 3).map((item, index) => '<li><span>0' + (index + 1) + '</span>' + escapeHTML(item) + '</li>').join('');
@@ -61,6 +71,7 @@
       '<p class="ed-offer-promise">' + escapeHTML(course.promise) + '</p>' +
       '<p class="ed-offer-description">' + escapeHTML(course.description) + '</p>' +
       '<div class="ed-offer-facts">' + facts + '</div>' +
+      renderConstructPersonalNote() +
       '<ul class="ed-offer-outcomes">' + outcomes + '</ul>' +
       '<div class="ed-offer-bottom">' + price + action + '</div>' +
       '<p class="ed-offer-note">' + escapeHTML(course.community) + '</p>' +
@@ -79,7 +90,9 @@
   const sameCatalogueCourse = (item, incoming) => {
     if (!item || !incoming) return false;
     const incomingKeys = [incoming.slug, incoming.id].filter(Boolean).map(String);
-    const itemKeys = [item.slug, item.id].filter(Boolean).map(String);
+    // A curated static card may intentionally point at a Builder-managed slug
+    // while retaining its original stable ID and marketing copy.
+    const itemKeys = [item.slug, item.id, item.academySlug].filter(Boolean).map(String);
     return incomingKeys.some(key => itemKeys.includes(key));
   };
   const findStaticProgramme = incoming => (data.programmes || []).find(item => sameCatalogueCourse(item, incoming));
@@ -111,6 +124,7 @@
       '<p class="ed-offer-promise">' + escapeHTML(course.promise || course.hook || course.outcome || 'A focused learning programme built around a clear trading skill.') + '</p>' +
       '<p class="ed-offer-description">' + escapeHTML(course.description || '') + '</p>' +
       '<div class="ed-offer-facts">' + facts + '</div>' +
+      (isConstructCourse(course) ? renderConstructPersonalNote() : '') +
       (outcomes ? '<ul class="ed-offer-outcomes">' + outcomes + '</ul>' : '') +
       '<div class="ed-offer-bottom"><div class="ed-offer-price"><strong>' + escapeHTML(price) + '</strong><span>' + escapeHTML(priceNote) + '</span></div>' + action + '</div>' +
     '</div>';
@@ -207,6 +221,23 @@
 
   let microCourses = data.microCourses.filter(isCatalogueVisible).sort((a, b) => a.priority - b.priority || (a.order ?? 0) - (b.order ?? 0));
 
+  // A stored position of zero is the database default, not a deliberate request
+  // to move an existing curated tile to the front of the catalogue.
+  const positiveCatalogueOrder = value => {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+  };
+  const resolveCatalogueOrder = (incoming, prior) =>
+    positiveCatalogueOrder(incoming.catalogueOrder) ??
+    positiveCatalogueOrder(prior && prior.catalogueOrder) ??
+    positiveCatalogueOrder(prior && prior.order) ??
+    (1000 + microCourses.length);
+  const compareCatalogueCourses = (a, b) =>
+    (Number(a.priority ?? 3) - Number(b.priority ?? 3)) ||
+    ((positiveCatalogueOrder(a.order) ?? 1000) - (positiveCatalogueOrder(b.order) ?? 1000)) ||
+    String(a.title || "").localeCompare(String(b.title || "")) ||
+    String(a.slug || a.id || "").localeCompare(String(b.slug || b.id || ""));
+
   function renderMicroCard(course, index) {
     const hook = course.hook || course.description || '';
     const problem = course.problem || '';
@@ -302,7 +333,8 @@
     <div class="cc-outline-header"><h3>Inside the course</h3><span>Open a section to preview it</span></div>
     <div class="cc-outline" id="cc-outline">${course.modules.map((module, index) => `<section class="cc-outline-item ${index === 0 ? 'is-open' : ''}"><button class="cc-outline-toggle" type="button" aria-expanded="${index === 0 ? 'true' : 'false'}" aria-controls="cc-outline-preview-${escapeHTML(course.id)}-${index}"><span class="cc-outline-num">${String(index + 1).padStart(2, '0')}</span><span class="cc-outline-title">${escapeHTML(module.title)}</span><span class="cc-outline-count">${escapeHTML(module.count)}</span><span class="cc-outline-sign" aria-hidden="true">+</span></button><div class="cc-outline-preview" id="cc-outline-preview-${escapeHTML(course.id)}-${index}" ${index === 0 ? '' : 'hidden'}><p>${escapeHTML(module.preview)}</p><ul>${module.points.map(point => `<li>${escapeHTML(point)}</li>`).join('')}</ul></div></section>`).join('')}</div>
     <p class="cc-modal-fit"><b>Where it fits:</b> ${escapeHTML(course.complements)} This is designed as a standalone micro-course; community access is not included.</p>`;
-    modalFooter.innerHTML = `<div class="cc-modal-price-wrap"><span class="cc-modal-price">${escapeHTML(course.price)}</span><span class="cc-modal-price-note">${course.status === 'coming-soon' ? 'No enrolment yet · launch details to follow' : (course.status === 'in-development' ? 'Development outline only · no enrolment yet' : 'Indicative price · preview only')}</span></div>${course.status === 'coming-soon' ? '<button class="button cc-modal-cta" type="button" disabled aria-disabled="true">Coming soon</button>' : (course.status === 'in-development' ? '<button class="button cc-modal-cta" type="button" disabled aria-disabled="true">Course in development</button>' : `<button class="button cc-modal-cta" type="button" data-get-course="${escapeHTML(course.id)}">Preview only <span aria-hidden="true">↗</span></button>`)}`;
+    const hasAcademyDestination = course.status === 'published' && Boolean(course.academyUrl);
+    modalFooter.innerHTML = `<div class="cc-modal-price-wrap"><span class="cc-modal-price">${escapeHTML(course.price)}</span><span class="cc-modal-price-note">${course.status === 'coming-soon' ? 'No enrolment yet · launch details to follow' : (course.status === 'in-development' ? 'Development outline only · no enrolment yet' : (hasAcademyDestination ? 'Continue to Academy to enrol or access your course' : 'Indicative price · preview only'))}</span></div>${course.status === 'coming-soon' ? '<button class="button cc-modal-cta" type="button" disabled aria-disabled="true">Coming soon</button>' : (course.status === 'in-development' ? '<button class="button cc-modal-cta" type="button" disabled aria-disabled="true">Course in development</button>' : (hasAcademyDestination ? `<a class="button cc-modal-cta" href="${escapeHTML(course.academyUrl)}">Continue to course <span aria-hidden="true">↗</span></a>` : `<button class="button cc-modal-cta" type="button" data-get-course="${escapeHTML(course.id)}">Preview only <span aria-hidden="true">↗</span></button>`))}`;
   }
 
   function openModal(course, opener) {
@@ -345,13 +377,21 @@
       link.href = course.academyUrl;
       link.textContent = 'Open in Academy ↗';
       modalFooter.replaceChildren(link);
+      const priceWrap = document.createElement('div');
+      priceWrap.className = 'cc-modal-price-wrap';
+      const price = document.createElement('span');
+      price.className = 'cc-modal-price';
+      price.textContent = course.price || '';
       const note = document.createElement('span');
       note.className = 'cc-modal-price-note';
-      note.textContent = 'Published in the Academy · access and pricing configured separately';
-      modalFooter.prepend(note);
+      note.textContent = course.priceNote || 'Open the course details to confirm its access terms.';
+      priceWrap.append(price, note);
+      modalFooter.replaceChildren(priceWrap, link);
     }
   };
-  fetch("https://tradethesis-academy-staging.onrender.com/api/academy/catalogue/", {headers: {"Accept":"application/json"}})
+  const academyBaseUrl = String(window.TRADETHESIS_ACADEMY_CONFIG?.baseUrl || "").trim().replace(/\/+$/, "");
+  const academyCatalogueUrl = academyBaseUrl ? academyBaseUrl + "/api/academy/catalogue/" : "";
+  if (academyCatalogueUrl) fetch(academyCatalogueUrl, {headers: {"Accept":"application/json"}})
     .then(response => { if (!response.ok) throw new Error("Academy catalogue unavailable"); return response.json(); })
     .then(payload => {
       const academyEntries = (payload.courses || []).filter(course => course && (
@@ -382,6 +422,7 @@
           continue;
         }
 
+        const catalogueOrder = resolveCatalogueOrder(incoming, prior);
         const normalized = {
           ...(prior || {}),
           ...incoming,
@@ -390,9 +431,7 @@
           id: (prior && prior.id) || incoming.id,
           slug: incoming.slug || (prior && prior.slug) || String(incoming.id || ""),
           catalogueRole: role,
-          catalogueOrder: Number.isFinite(Number(incoming.catalogueOrder))
-            ? Number(incoming.catalogueOrder)
-            : ((prior && Number.isFinite(Number(prior.order))) ? Number(prior.order) : 1000),
+          catalogueOrder,
           category: incoming.category || (prior && prior.category) || "TradeThesis courses",
           level: incoming.level || (prior && prior.level) || "Self-paced",
           // The API currently supplies generic fallback artwork. Preserve a curated tile's
@@ -406,11 +445,10 @@
             (incoming.status === "coming-soon"
               ? "This course is being prepared. Full details will be shared closer to launch."
               : "Explore this published course in the TradeThesis Academy."),
-          price: incoming.price || (prior && prior.price) || "",
+          price: incoming.priceConfigured ? (incoming.price || "") : (prior && prior.price) || incoming.price || "",
+          priceNote: incoming.priceConfigured ? (incoming.priceNote || "") : incoming.priceNote || (prior && prior.priceNote) || "",
           priority: role === "flagship" ? 1 : role === "supporting" ? 2 : 3,
-          order: Number.isFinite(Number(incoming.catalogueOrder))
-            ? Number(incoming.catalogueOrder)
-            : ((prior && Number.isFinite(Number(prior.order))) ? Number(prior.order) : 1000 + microCourses.length)
+          order: catalogueOrder
         };
 
         if (normalized.cataloguePresentationConfigured) {
@@ -462,6 +500,11 @@
       }
 
       if (catalogueChanged) {
+        // Synchronisation removes and re-adds matched cards; sort once after the
+        // full payload so saved positive positions and stable tie-breakers win.
+        microCourses.sort(compareCatalogueCourses);
+        dynamicFlagshipCourses.sort(compareCatalogueCourses);
+        dynamicSupportingCourses.sort(compareCatalogueCourses);
         renderProgrammeSections();
         renderSupportingProgrammes();
         renderFilterButtons();

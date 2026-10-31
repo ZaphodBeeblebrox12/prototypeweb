@@ -12,19 +12,18 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import path, reverse
 from django.utils.html import format_html
 
-from .content_rendering import build_lesson_sections
 from .course_builder_lifecycle import mark_builder_draft_deleted
 from .forms import (
     CourseImportAssetAdminForm,
     CourseMediaAssetAdminForm,
     LessonAdminForm,
     LessonFigureAdminForm,
+    ProtectedLessonVideoAdminForm,
 )
 from .importing import (
     inspect_manifest,
     publish_course_import,
     stage_course_import,
-    validate_import_for_publish,
 )
 from .models import (
     Course,
@@ -39,10 +38,11 @@ from .models import (
     Lesson,
     LessonInstructorMaterial,
     LessonProgress,
+    ProtectedLessonVideo,
 )
 from .permissions import is_course_content_admin
 from .storage import course_asset_storage
-from .views import _reflection_for_display
+from .video_storage import lesson_video_storage
 
 logger = logging.getLogger(__name__)
 
@@ -575,128 +575,15 @@ class CourseImportAdmin(admin.ModelAdmin):
     def review_view(self, request, object_id):
         if not self._is_authorized(request):
             return HttpResponseForbidden("Administrator course-content access is required.")
+        from .review_context import build_course_import_review_data
+
         record = get_object_or_404(CourseImport, pk=object_id)
-        asset_urls = {}
-        staged_assets = list(record.assets.all())
-        for asset in staged_assets:
-            live_asset = CourseMediaAsset.objects.filter(pk=asset.stable_asset_id).first()
-            if asset.file or (live_asset and live_asset.file):
-                asset_urls[str(asset.stable_asset_id)] = reverse(
-                    "admin:academy_courseimport_asset", args=[record.pk, asset.stable_asset_id]
-                )
-            elif asset.original_url.startswith(("https://", "http://")):
-                asset_urls[str(asset.stable_asset_id)] = asset.original_url
-            elif live_asset and live_asset.original_url.startswith(("https://", "http://")):
-                asset_urls[str(asset.stable_asset_id)] = live_asset.original_url
-
-        review_modules = []
-        for module in record.payload.get("modules", []):
-            review_lessons = []
-            for lesson_data in module.get("lessons", []):
-                content_json = lesson_data.get("content_json", {})
-                if not isinstance(content_json, dict):
-                    content_json = {}
-                figure_metadata = content_json.get("figures", {})
-                if not isinstance(figure_metadata, dict):
-                    figure_metadata = {}
-                notebook = content_json.get("notebook") or record.payload.get("notebook", {})
-                reflection = _reflection_for_display(content_json.get("reflection", {}))
-                sections = build_lesson_sections(
-                    lesson_data.get("content_markdown", ""),
-                    asset_urls,
-                    user=request.user,
-                    admin_preview=True,
-                    figure_metadata=figure_metadata,
-                    figure_prefix=f"{module.get('position', 0)}.{lesson_data.get('position', 0)}",
-                    module_label=f"Module {module.get('position', '')} · {module.get('title', '')}",
-                    course_title=str(
-                        (record.payload.get("course") or {}).get("title") or record.title
-                    ),
-                )
-                questions = []
-                raw_questions = content_json.get("questions", [])
-                if isinstance(raw_questions, list):
-                    for raw_question in raw_questions[:50]:
-                        if not isinstance(raw_question, dict):
-                            continue
-                        question = dict(raw_question)
-                        asset_id = str(question.get("image_asset_id") or "")
-                        image_metadata = figure_metadata.get(asset_id, {})
-                        if not isinstance(image_metadata, dict):
-                            image_metadata = {}
-                        question["image_url"] = asset_urls.get(asset_id, "") if asset_id else ""
-                        question["image_title"] = str(image_metadata.get("title") or "Chart")[:240]
-                        question["image_alt"] = str(
-                            image_metadata.get("alt") or question["image_title"]
-                        )[:500]
-                        question["image_caption"] = str(image_metadata.get("caption") or "")[:500]
-                        questions.append(question)
-
-                raw_video_url = content_json.get("video_url", "")
-                video_url = raw_video_url.strip() if isinstance(raw_video_url, str) else ""
-                if not video_url.startswith(("https://", "http://")):
-                    video_url = ""
-                video_is_file = (
-                    video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
-                )
-                review_lessons.append(
-                    {
-                        "lesson": lesson_data,
-                        "sections": sections,
-                        "notebook": notebook,
-                        "reflection": reflection,
-                        "reflection_response": "",
-                        "questions": questions,
-                        "video_url": video_url,
-                        "video_is_file": video_is_file,
-                        "tab_id_prefix": f"review-{module.get('position', 0)}-{lesson_data.get('position', 0)}",
-                    }
-                )
-            review_modules.append({"module": module, "lessons": review_lessons})
-
-        errors = (
-            validate_import_for_publish(record)
-            if record.status == CourseImport.Status.REVIEW
-            else []
-        )
-        asset_rows = []
-        for asset in staged_assets:
-            live_asset = CourseMediaAsset.objects.filter(pk=asset.stable_asset_id).first()
-            asset_rows.append(
-                {
-                    "asset": asset,
-                    "has_file": bool(asset.file) or bool(live_asset and live_asset.file),
-                    "preview_url": asset_urls.get(str(asset.stable_asset_id), ""),
-                    "original_url": asset.original_url
-                    or (live_asset.original_url if live_asset else ""),
-                    "has_external_source": bool(
-                        (
-                            asset.original_url or (live_asset.original_url if live_asset else "")
-                        ).startswith(("https://", "http://"))
-                    ),
-                    "status_label": (
-                        "Uploaded replacement"
-                        if (bool(asset.file) or bool(live_asset and live_asset.file))
-                        else (
-                            "Using URL for now"
-                            if (
-                                asset.original_url
-                                or (live_asset.original_url if live_asset else "")
-                            ).startswith(("https://", "http://"))
-                            else "Needs upload"
-                        )
-                    ),
-                    "edit_url": reverse("admin:academy_courseimportasset_change", args=[asset.pk]),
-                }
-            )
         context = {
             **self.admin_site.each_context(request),
             "opts": self.model._meta,
             "title": "Review course import",
             "import_record": record,
-            "review_modules": review_modules,
-            "publish_errors": errors,
-            "asset_rows": asset_rows,
+            **build_course_import_review_data(record, request),
             "publish_url": reverse("admin:academy_courseimport_publish", args=[record.pk]),
             "changelist_url": reverse("admin:academy_courseimport_changelist"),
         }
@@ -934,6 +821,118 @@ class CourseMediaAssetAdmin(admin.ModelAdmin):
                     "new_file": obj.file.name if obj.file else "",
                 },
             )
+
+
+@admin.register(ProtectedLessonVideo)
+class ProtectedLessonVideoAdmin(admin.ModelAdmin):
+    form = ProtectedLessonVideoAdminForm
+    list_display = ("lesson", "course_title", "status", "processed_at", "updated_at")
+    list_filter = ("status", "lesson__module__course")
+    search_fields = ("lesson__title", "lesson__module__course__title")
+    fields = (
+        "lesson",
+        "source_file",
+        "status",
+        "stream_directory",
+        "processing_error",
+        "processed_at",
+        "created_by",
+        "created_at",
+        "updated_at",
+    )
+    readonly_fields = (
+        "status",
+        "stream_directory",
+        "processing_error",
+        "processed_at",
+        "created_by",
+        "created_at",
+        "updated_at",
+    )
+
+    @admin.display(description="Course")
+    def course_title(self, obj):
+        return obj.lesson.module.course.title
+
+    def has_module_permission(self, request):
+        return is_course_content_admin(request.user)
+
+    def has_view_permission(self, request, obj=None):
+        return is_course_content_admin(request.user)
+
+    def has_add_permission(self, request):
+        return is_course_content_admin(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        return is_course_content_admin(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return is_course_content_admin(request.user)
+
+    @staticmethod
+    def _delete_rendition(prefix):
+        """Remove HLS objects through the configured provider, including Drive."""
+        if not prefix or prefix.startswith("/") or any(
+            part in {"", ".", ".."} for part in prefix.split("/")
+        ):
+            return
+        try:
+            with lesson_video_storage.open(f"{prefix}/index.m3u8", "rb") as handle:
+                playlist = handle.read().decode("utf-8")
+        except (OSError, UnicodeDecodeError, NotImplementedError):
+            playlist = ""
+
+        names = {f"{prefix}/index.m3u8", f"{prefix}/encryption.key"}
+        for line in playlist.splitlines():
+            segment = line.strip()
+            if (
+                segment
+                and not segment.startswith("#")
+                and "/" not in segment
+                and segment.startswith("segment_")
+                and segment.endswith(".ts")
+                and segment[8:-3].isdigit()
+            ):
+                names.add(f"{prefix}/{segment}")
+        for name in names:
+            try:
+                lesson_video_storage.delete(name)
+            except OSError as exc:
+                logger.warning(
+                    "Could not remove old protected video object (%s).",
+                    exc.__class__.__name__,
+                )
+
+    def save_model(self, request, obj, form, change):
+        previous = ProtectedLessonVideo.objects.filter(pk=obj.pk).first() if change else None
+        previous_name = previous.source_file.name if previous and previous.source_file else ""
+        previous_directory = previous.stream_directory if previous else ""
+        replacing_source = not change or previous_name != (obj.source_file.name if obj.source_file else "")
+        if replacing_source:
+            obj.status = ProtectedLessonVideo.Status.PENDING
+            obj.stream_directory = ""
+            obj.processing_error = ""
+            obj.processed_at = None
+        if not change:
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+        if replacing_source and previous:
+            if previous_name:
+                previous.source_file.storage.delete(previous_name)
+            if previous_directory:
+                self._delete_rendition(previous_directory)
+
+    def delete_model(self, request, obj):
+        self._delete_rendition(obj.stream_directory)
+        if obj.source_file:
+            obj.source_file.delete(save=False)
+        super().delete_model(request, obj)
+
+    def delete_queryset(self, request, queryset):
+        # Django's bulk-delete path bypasses delete_model; keep Drive and disk
+        # cleanup consistent for the admin "delete selected" action.
+        for obj in queryset.iterator():
+            self.delete_model(request, obj)
 
 
 @admin.register(CourseContentRevision)

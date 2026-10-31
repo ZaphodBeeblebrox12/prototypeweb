@@ -4,5 +4,9 @@
   const stagingRoutes = {
     "tradethesis-public-staging.onrender.com": "https://tradethesis-academy-staging.onrender.com"
   };
-  window.TRADETHESIS_ACADEMY_BASE_URL = stagingRoutes[host] || "";
+  // Preserve an explicit deployment override; only fall back to the staging
+  // route map when no Academy origin has been supplied.
+  if (!String(window.TRADETHESIS_ACADEMY_BASE_URL || "").trim()) {
+    window.TRADETHESIS_ACADEMY_BASE_URL = stagingRoutes[host] || "";
+  }
 })();

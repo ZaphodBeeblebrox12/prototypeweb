@@ -267,6 +267,43 @@ def _subscription_dashboard_context(request):
                     "jobs", "job", {"queue_state": "stalled"}),
             },
         }
+    # Support tickets are reviewed in the TradeThesis Admin Desk. Keep the
+    # same plan-approver scoping that protects the Django Admin queue.
+    from apps.support.models import SupportTicket
+    from apps.support.services import reviewable_ticket_queryset
+
+    support_admin = admin.site._registry.get(SupportTicket)
+    if support_admin and support_admin.has_view_permission(request):
+        visible_tickets = reviewable_ticket_queryset(
+            request.user,
+            SupportTicket.objects.select_related(
+                "user", "plan", "affiliate_link", "assigned_to"
+            ),
+        )
+        desk_ticket_list = reverse("staff_admin_desk_support_tickets")
+        recent_tickets = [
+            {"ticket": ticket, "can_review": True}
+            for ticket in visible_tickets.order_by("-created_at")[:5]
+        ]
+        ctx["support_tickets"] = {
+            "pending": visible_tickets.filter(
+                status=SupportTicket.Status.PENDING
+            ).count(),
+            "open": visible_tickets.filter(
+                status__in=SupportTicket.ACTIVE_STATUSES
+            ).count(),
+            "overdue_sla": visible_tickets.filter(
+                status__in=SupportTicket.ACTIVE_STATUSES,
+                first_response_at__isnull=True,
+                first_response_due_at__lt=now,
+            ).count(),
+            "recent": recent_tickets,
+            "links": {
+                "all": desk_ticket_list,
+                "pending": f"{desk_ticket_list}?status={SupportTicket.Status.PENDING}",
+            },
+        }
+
     return ctx
 
 
@@ -353,12 +390,24 @@ def staff_admin_desk(request):
             )
         )
         context["course_metrics"] = course_counts
+        pending_course_reviews = (
+            CourseImport.objects.filter(status=CourseImport.Status.REVIEW)
+            .select_related("imported_by", "target_course")
+            .order_by("-imported_at", "title")
+        )
+        context["course_review_items"] = [
+            {
+                "record": record,
+                "url": reverse("staff_admin_desk_course_review", args=[record.pk]),
+            }
+            for record in pending_course_reviews[:5]
+        ]
+        context["course_review_queue_url"] = reverse("staff_admin_desk_course_reviews")
         link_models = {
             "courses": Course,
             "modules": CourseModule,
             "lessons": Lesson,
             "offers": CourseOffer,
-            "imports": CourseImport,
             "entitlements": CourseEntitlement,
         }
         course_links = {}
@@ -368,6 +417,7 @@ def staff_admin_desk(request):
                 course_links[key] = reverse(
                     f"admin:{model._meta.app_label}_{model._meta.model_name}_changelist"
                 )
+        course_links["imports"] = context["course_review_queue_url"]
         context["course_links"] = course_links
 
     return render(request, "admin/desk.html", context)

@@ -21,6 +21,12 @@ TOKEN_URL = "https://oauth2.googleapis.com/token"
 DRIVE_API = "https://www.googleapis.com/drive/v3/files"
 SCOPE = "https://www.googleapis.com/auth/drive.file"
 STATE_SESSION_KEY = "academy_google_drive_oauth_state"
+FORCE_REFRESH_SESSION_KEY = "academy_google_drive_oauth_force_refresh"
+
+
+class FreshRefreshTokenRequiredError(Exception):
+    """Google did not return a new offline refresh token for a forced reconnect."""
+
 
 
 def _require_course_admin(request):
@@ -67,6 +73,7 @@ def google_drive_oauth_start(request):
         return redirect("staff_course_builder_preview")
     state = secrets.token_urlsafe(32)
     request.session[STATE_SESSION_KEY] = state
+    request.session[FORCE_REFRESH_SESSION_KEY] = request.GET.get("force_refresh") == "1"
     request.session.modified = True
     query = urlencode(
         {
@@ -87,6 +94,7 @@ def google_drive_oauth_start(request):
 @require_GET
 def google_drive_oauth_callback(request):
     _require_course_admin(request)
+    force_refresh = bool(request.session.pop(FORCE_REFRESH_SESSION_KEY, False))
     expected_state = request.session.pop(STATE_SESSION_KEY, None)
     received_state = request.GET.get("state", "")
     if not expected_state or not secrets.compare_digest(str(expected_state), str(received_state)):
@@ -124,18 +132,34 @@ def google_drive_oauth_callback(request):
             raise ValueError("access token missing")
         from .models import GoogleDriveCredential
 
-        credential, _ = GoogleDriveCredential.objects.get_or_create(pk=1)
-        if not refresh_token and credential.encrypted_refresh_token:
+        credential = GoogleDriveCredential.objects.filter(pk=1).first()
+        if not refresh_token and force_refresh:
+            # Do not mistake the already-invalid stored token for a newly issued
+            # token. In forced renewal mode, require Google to return a fresh one.
+            raise FreshRefreshTokenRequiredError()
+        if not refresh_token and credential and credential.encrypted_refresh_token:
             refresh_token = credential.get_refresh_token()
         if not refresh_token:
             raise ValueError("offline access token missing")
+        if credential is None:
+            credential, _ = GoogleDriveCredential.objects.get_or_create(pk=1)
         headers = {"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"}
-        folder_ids = [credential.asset_folder_id, credential.source_folder_id]
-        for index, folder_name in enumerate(
-            ("TradeThesis Course Assets", "TradeThesis Course Source Snapshots")
-        ):
+        folder_fields = (
+            "asset_folder_id",
+            "source_folder_id",
+            "support_attachment_folder_id",
+        )
+        folder_names = (
+            "TradeThesis Course Assets",
+            "TradeThesis Course Source Snapshots",
+            "TradeThesis Support Attachments",
+        )
+        folder_ids = [getattr(credential, field) for field in folder_fields]
+        for index, folder_name in enumerate(folder_names):
             if folder_ids[index]:
                 continue
+            # Drive's default for a newly created folder is private to the
+            # connected account. Do not add public or anyone-with-link permissions.
             folder_response = requests.post(
                 DRIVE_API,
                 headers=headers,
@@ -150,22 +174,22 @@ def google_drive_oauth_callback(request):
             if not folder_id:
                 raise ValueError("Drive folder id missing")
             folder_ids[index] = folder_id
-            if index == 0:
-                credential.asset_folder_id = folder_id
-                credential.save(update_fields=["asset_folder_id", "updated_at"])
-            else:
-                credential.source_folder_id = folder_id
-                credential.save(update_fields=["source_folder_id", "updated_at"])
+            setattr(credential, folder_fields[index], folder_id)
+            credential.save(update_fields=[folder_fields[index], "updated_at"])
+
         credential.set_refresh_token(refresh_token)
-        credential.asset_folder_id, credential.source_folder_id = folder_ids
+        for field, folder_id in zip(folder_fields, folder_ids, strict=True):
+            setattr(credential, field, folder_id)
         credential.save(
-            update_fields=[
-                "encrypted_refresh_token",
-                "asset_folder_id",
-                "source_folder_id",
-                "updated_at",
-            ]
+            update_fields=["encrypted_refresh_token", *folder_fields, "updated_at"]
         )
+    except FreshRefreshTokenRequiredError:
+        messages.error(
+            request,
+            "Google did not issue a new refresh token. The existing credential was left unchanged. "
+            "Revoke TradeThesis access in your Google Account, then connect again.",
+        )
+        return redirect("staff_course_builder_preview")
     except Exception:
         messages.error(
             request, "Google Drive setup failed safely. Check staging configuration and try again."
@@ -173,6 +197,7 @@ def google_drive_oauth_callback(request):
         return redirect("staff_course_builder_preview")
     messages.success(
         request,
-        "Google Drive connected. Private asset and source folders were created in your Drive.",
+        "Google Drive connected. Separate private folders for course assets, source snapshots, "
+        "and support attachments are ready in your Drive.",
     )
     return redirect("staff_course_builder_preview")

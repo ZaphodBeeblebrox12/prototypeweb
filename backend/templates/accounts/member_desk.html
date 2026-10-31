@@ -95,7 +95,7 @@
             <div class="no-purchase-panel-foot">Some community spaces require qualifying course access or a plan.</div>
           </article>
         </div>
-        <div class="no-purchase-notice"><strong>A clear start, without pressure.</strong> This dashboard does not invent purchases, active plans or learning progress. Your account, billing and learning details will be shown from their recorded data.</div>
+        
       </div>
       {% else %}
       <div class="overview-masthead"><div class="masthead-copy"><div class="kicker">YOUR MEMBER DESK / ACCOUNT SUMMARY</div><h1>Good to see you, {{ user.first_name|default:user.username }}.</h1><p>Courses, community access and payments—together, with your access terms and account activity kept clear.</p><div class="masthead-flags"><span>{{ member_owned_courses|length }} course access record{{ member_owned_courses|length|pluralize }}</span><span>{{ subscription_cards|length }} active plan{{ subscription_cards|length|pluralize }}</span><span>Member since {{ user.date_joined|date:"M Y" }}</span></div></div><div class="masthead-art"><div class="masthead-art-top"><span>TRADETHESIS / MEMBER EDITION</span><span class="masthead-stamp">T</span></div><div class="masthead-rule"></div><strong>Access you own.<br>Plans you control.</strong><small>MEMBER DESK · ACCOUNT OVERVIEW</small></div></div>

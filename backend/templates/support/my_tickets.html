@@ -14,10 +14,11 @@
           <div>
             <h3><a class="member-text-link" href="{% url 'support:ticket_detail' ticket.pk %}">Ticket {{ ticket.short_id }} ↗</a></h3>
             <p>{{ ticket.get_category_display }}{% if ticket.plan %} · {{ ticket.plan.name }}{% endif %}</p>
-            <small>Submitted {{ ticket.created_at|date:"M d, Y · H:i" }}</small>
+            <small>Submitted {{ ticket.created_at|date:"M d, Y · H:i" }} · Last activity {{ ticket.updated_at|date:"M d, Y · H:i" }}</small>
+            {% if ticket.assigned_to %}<small>Assigned to {{ ticket.assigned_to.get_full_name|default:ticket.assigned_to.get_username }}</small>{% endif %}
           </div>
           <div>
-            <span class="member-status-pill{% if ticket.status == 'pending' %} is-waiting{% elif ticket.status == 'approved' %} is-good{% elif ticket.status == 'rejected' %} is-bad{% endif %}">{{ ticket.get_status_display }}</span>
+            <span class="member-status-pill{% if ticket.status == 'pending' or ticket.status == 'in_progress' or ticket.status == 'awaiting_member' %} is-waiting{% elif ticket.status == 'approved' %} is-good{% elif ticket.status == 'rejected' %} is-bad{% endif %}">{{ ticket.get_status_display }}</span>
           </div>
         </article>
       {% endfor %}

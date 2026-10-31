@@ -50,12 +50,59 @@
   <section class="section" aria-labelledby="daily-management-heading">
     <div class="section-head"><h2 id="daily-management-heading">Everyday management</h2><p>Routine creator tasks, without opening Django Admin.</p></div>
     <ul class="link-list">
+      <li><a href="{% url 'staff_admin_desk_operations_timeline' %}">Operations timeline &amp; incident signals →</a></li>
       {% if desk_access.accounts %}<li><a href="{% url 'staff_admin_desk_accounts' %}">Manage learner accounts →</a></li>{% endif %}
       {% if desk_access.subscriptions %}<li><a href="{% url 'staff_admin_desk_subscriptions' %}">Manage subscriptions &amp; access →</a></li>{% endif %}
       {% if desk_access.finance %}<li><a href="{% url 'staff_admin_desk_finance' %}">Payments &amp; invoice register →</a></li>{% endif %}
       {% if desk_access.business %}<li><a href="{% url 'staff_admin_desk_business' %}">Business details &amp; tax settings →</a></li>{% endif %}
     </ul>
   </section>
+
+  {% if support_tickets %}
+  <section class="section" aria-labelledby="support-tickets-heading">
+    <div class="section-head">
+      <h2 id="support-tickets-heading">Support tickets</h2>
+      <p>Member requests · newest first</p>
+    </div>
+    <div class="panel">
+      <div class="section-head">
+        <h2>{{ support_tickets.open }} open · {{ support_tickets.overdue_sla }} overdue</h2>
+        <p>
+          <a href="{{ support_tickets.links.pending }}">View pending queue →</a>
+          · <a href="{{ support_tickets.links.all }}">Open support workspace →</a>
+        </p>
+      </div>
+      {% if support_tickets.recent %}
+      <ul class="signal-list" style="margin-top:12px">
+        {% for ticket_row in support_tickets.recent %}
+        <li>
+          {% if ticket_row.can_review %}
+          <a href="{% url 'staff_admin_desk_support_ticket' ticket_row.ticket.pk %}">#{{ ticket_row.ticket.short_id }} · {{ ticket_row.ticket.get_category_display }}</a>
+          {% else %}
+          <span>#{{ ticket_row.ticket.short_id }} · {{ ticket_row.ticket.get_category_display }}</span>
+          {% endif %}
+          <span class="signal-count">
+            {{ ticket_row.ticket.get_status_display }} · {{ ticket_row.ticket.get_priority_display }}
+            {% if ticket_row.ticket.is_sla_overdue %} · SLA overdue{% endif %}
+          </span>
+          <span class="note">
+            {% if ticket_row.can_review %}
+              {{ ticket_row.ticket.user }} · {{ ticket_row.ticket.created_at|date:"j M Y, H:i" }}
+              {% if ticket_row.ticket.assigned_to %} · Assigned to {{ ticket_row.ticket.assigned_to }}{% endif %}
+              — {{ ticket_row.ticket.message|truncatechars:120 }}
+            {% else %}
+              Request details are restricted to the ticket's assigned reviewer.
+            {% endif %}
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="note" style="margin-top:10px">No support tickets have been submitted yet.</p>
+      {% endif %}
+    </div>
+  </section>
+  {% endif %}
 
   {% if accounts or subscriptions %}
   <section class="section" aria-labelledby="business-overview-heading">
@@ -83,11 +130,34 @@
       <div class="metric"><span class="value">{{ course_metrics.draft_courses }}</span><span class="label">Draft courses</span></div>
       <div class="metric"><span class="value">{{ course_metrics.archived_courses }}</span><span class="label">Archived courses</span></div>
       <div class="metric"><span class="value">{{ course_metrics.published_lessons }}</span><span class="label">Published lessons</span></div>
+      <div class="metric"><span class="value">{{ course_metrics.imports_awaiting_review }}</span><span class="label">Awaiting course approval</span></div>
       <div class="metric"><span class="value">{{ course_metrics.active_offers }}</span><span class="label">Active course offers</span></div>
       <div class="metric"><span class="value">{{ course_metrics.active_entitlements }}</span><span class="label">Active course accesses</span></div>
       <div class="metric"><span class="value">{{ course_metrics.completed_lessons }}</span><span class="label">Completed lesson records</span></div>
     </div>
     <p class="note" style="margin-top:10px">Published records can still contain starter copy or lack a released lesson. Catalogue-ready courses have a real learner-facing title and summary plus at least one published module and lesson.</p>
+    <div class="panel" style="margin-top:12px">
+      <div class="section-head">
+        <h2>Pending course approvals</h2>
+        <p>{{ course_metrics.imports_awaiting_review }} waiting for review</p>
+      </div>
+      {% if course_review_items %}
+        <ul class="signal-list">
+          {% for item in course_review_items %}
+            <li>
+              <span>
+                <strong>{{ item.record.title }}</strong>
+                <span class="note"> · {% if item.record.target_course %}Revision{% else %}New course{% endif %} · {{ item.record.imported_at|date:"j M Y, H:i" }}</span>
+              </span>
+              <a href="{{ item.url }}">Review →</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="note">No course submissions are waiting for approval.</p>
+      {% endif %}
+      <p style="margin:12px 0 0"><a href="{{ course_review_queue_url }}">Open course approval queue →</a></p>
+    </div>
   </section>
 
   <section class="section" aria-labelledby="course-actions-heading">
@@ -98,7 +168,8 @@
       {% if course_links.modules %}<li><a href="{{ course_links.modules }}">Manage modules →</a></li>{% endif %}
       {% if course_links.lessons %}<li><a href="{{ course_links.lessons }}">Manage lessons &amp; release dates →</a></li>{% endif %}
       {% if course_links.offers %}<li><a href="{{ course_links.offers }}">Manage course offers →</a></li>{% endif %}
-      {% if course_links.imports %}<li><a href="{{ course_links.imports }}">Review course imports <span class="signal-count">{{ course_metrics.imports_awaiting_review }}</span> →</a></li>{% endif %}
+      {% if course_links.imports %}<li><a href="{{ course_links.imports }}">Review course approvals <span class="signal-count">{{ course_metrics.imports_awaiting_review }}</span> →</a></li>{% endif %}
+      <li><a href="{% url 'staff_admin_desk_course_import_cleanup' %}">Permanently remove test imports →</a></li>
       {% if course_links.entitlements %}<li><a href="{{ course_links.entitlements }}">Review learner access →</a></li>{% endif %}
     </ul>
   </section>
@@ -221,7 +292,7 @@
         </ul>
       </div>
       {% endif %}
-      {% if not payments and not invoicing and not telegram and not jobs and not subscriptions and not policy_readiness and not business_readiness and not runtime_readiness %}
+      {% if not payments and not invoicing and not telegram and not jobs and not subscriptions and not support_tickets and not policy_readiness and not business_readiness and not runtime_readiness %}
       <div class="panel"><p class="note">No operational metrics are available for your current permissions. Use Django administration to review the records you are authorised to access.</p></div>
       {% endif %}
     </div>

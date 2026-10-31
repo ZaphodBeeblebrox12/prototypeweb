@@ -4,6 +4,7 @@ Subscription serializers for API responses.
 from rest_framework import serializers
 
 from .models import (
+    FREE_MEMBERSHIP_PRODUCT_SLUG,
     Plan, PlanPrice, Subscription, SubscriptionHistory,
     GiftSubscription, UpgradeHistory, GeoPlanPrice
 )
@@ -39,6 +40,7 @@ class PlanSerializer(serializers.ModelSerializer):
     """Serializer for subscription plans."""
 
     prices = PlanPriceSerializer(many=True, read_only=True)
+    is_free = serializers.SerializerMethodField()
 
     class Meta:
         model = Plan
@@ -53,9 +55,37 @@ class PlanSerializer(serializers.ModelSerializer):
             "is_active",
             "display_order",
             "prices",
+            "is_free",
             "created_at",
         ]
         read_only_fields = fields
+
+    def get_is_free(self, obj: Plan) -> bool:
+        if (
+            obj.tier != Plan.Tier.FREE
+            or obj.is_trial
+            or not obj.product_id
+            or obj.product.slug != FREE_MEMBERSHIP_PRODUCT_SLUG
+        ):
+            return False
+        has_zero_monthly_price = obj.prices.filter(
+            interval=PlanPrice.Interval.MONTHLY,
+            is_active=True,
+            price_cents=0,
+        ).exists()
+        has_nonzero_base = obj.prices.filter(is_active=True).exclude(price_cents=0).exists()
+        has_nonzero_geo = obj.geo_prices.filter(is_active=True).exclude(price_cents=0).exists()
+        has_included_course = obj.academy_course_access.filter(
+            is_active=True,
+            course__status="published",
+            course__access_type__in=["membership", "mixed"],
+        ).exists()
+        return (
+            has_zero_monthly_price
+            and not has_nonzero_base
+            and not has_nonzero_geo
+            and has_included_course
+        )
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):

@@ -9,6 +9,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from apps.academy.models import Course, CourseModule, Lesson
+from apps.support.models import SupportTicket
 
 User = get_user_model()
 
@@ -83,6 +84,56 @@ class AdminDeskTests(TestCase):
             response.context["course_links"]["lessons"],
             reverse("admin:academy_lesson_changelist"),
         )
+
+    def test_support_tickets_are_visible_to_staff_in_the_custom_admin_desk(self):
+        operator = User.objects.create_user(
+            username="support-desk-operator",
+            email="support-desk-operator@example.test",
+            is_staff=True,
+        )
+        learner = User.objects.create_user(
+            username="support-ticket-learner",
+            email="support-ticket-learner@example.test",
+        )
+        ticket = SupportTicket.objects.create(
+            user=learner,
+            category=SupportTicket.Category.BILLING,
+            message="Payment completed but access is still missing.",
+        )
+        self.client.force_login(operator)
+
+        response = self.client.get(reverse("staff_admin_desk"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Support tickets")
+        self.assertContains(response, "Payment completed but access is still missing.")
+        self.assertEqual(response.context["support_tickets"]["pending"], 1)
+        self.assertEqual(
+            response.context["support_tickets"]["links"]["all"],
+            reverse("staff_admin_desk_support_tickets"),
+        )
+        self.assertEqual(
+            response.context["support_tickets"]["links"]["pending"],
+            reverse("staff_admin_desk_support_tickets") + "?status=pending",
+        )
+        self.assertEqual(
+            response.context["support_tickets"]["recent"][0]["can_review"],
+            True,
+        )
+
+        queue_response = self.client.get(response.context["support_tickets"]["links"]["pending"])
+        self.assertEqual(queue_response.status_code, 200)
+        self.assertContains(queue_response, ticket.short_id)
+        self.assertNotContains(
+            queue_response,
+            reverse("admin:support_supportticket_changelist"),
+        )
+        detail_response = self.client.get(
+            reverse("staff_admin_desk_support_ticket", args=[ticket.pk])
+        )
+        self.assertEqual(detail_response.status_code, 200)
+        self.assertContains(detail_response, "Conversation")
+        self.assertContains(detail_response, "Assignment &amp; priority")
 
     def test_non_staff_user_is_forbidden(self):
         learner = User.objects.create_user(

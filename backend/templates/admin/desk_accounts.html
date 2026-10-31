@@ -15,7 +15,7 @@
 <p class="intro">Routine customer support for learner accounts. Staff and administrator accounts are excluded for safety.</p>
 <nav class="toolbar"><a class="btn secondary" href="{% url 'staff_admin_desk' %}">Admin Desk</a>{% if desk_nav.subscriptions %}<a class="btn secondary" href="{% url 'staff_admin_desk_subscriptions' %}">Subscriptions</a>{% endif %}{% if desk_nav.finance %}<a class="btn secondary" href="{% url 'staff_admin_desk_finance' %}">Payments &amp; invoices</a>{% endif %}{% if desk_nav.business %}<a class="btn secondary" href="{% url 'staff_admin_desk_business' %}">Business settings</a>{% endif %}</nav>
 {% if account %}
-<div class="toolbar"><a class="btn secondary" href="{% url 'staff_admin_desk_accounts' %}">← All learner accounts</a></div>
+<div class="toolbar"><a class="btn secondary" href="{% url 'staff_admin_desk_accounts' %}">← All learner accounts</a><a class="btn" href="{% url 'staff_admin_desk_customer_360' account.id %}">Open Customer 360 →</a></div>
 <section class="panel"><div class="grid"><div><span class="muted">Customer ID</span><p><code>{{ account.id }}</code></p><span class="muted">Username</span><h2>{{ account.username }}</h2><p>{{ account.full_name|default:"Name not provided" }}</p></div>
 <div><span class="muted">Email</span><p>{{ account.email|default:"No email" }}</p><span class="muted">Joined {{ account.date_joined|date:"M j, Y" }}</span></div>
 <div><span class="muted">Account status</span><p><span class="status {% if not account.is_active or account.is_banned %}bad{% endif %}">{% if account.is_banned %}Banned{% elif account.is_active %}Active{% else %}Inactive{% endif %}</span></p><span class="muted">Last login {{ account.last_login|date:"M j, Y H:i"|default:"not recorded" }}</span></div>

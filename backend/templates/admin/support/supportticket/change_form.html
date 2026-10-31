@@ -2,8 +2,11 @@
 {% load i18n %}
 {% block submit_buttons_bottom %}
   {{ block.super }}
-  {% if original.status == "pending" %}
+  {% if original.is_open %}
   <div class="submit-row" style="margin-top:10px">
+    {% if original.status != "in_progress" %}
+    <input type="submit" value="{% trans 'Start / Resume Review' %}" name="_start_review">
+    {% endif %}
     {% if original.category == "access_request" %}
     <input type="submit" value="{% trans 'Approve & Grant Access' %}" name="_approve_grant"
            class="default" style="background:#2e7d32">
@@ -12,6 +15,32 @@
            class="default" style="background:#2e7d32">
     {% endif %}
     <input type="submit" value="{% trans 'Reject / Close' %}" name="_reject" style="background:#b71c1c">
+  </div>
+  {% elif original.status == "approved" or original.status == "rejected" %}
+  <div class="submit-row" style="margin-top:10px">
+    <input type="submit" value="{% trans 'Reopen Ticket' %}" name="_reopen_ticket" class="default">
+  </div>
+  {% endif %}
+
+  {% if original and original.is_open %}
+  <div class="module" style="margin-top:18px;padding:16px">
+    <h2>Reply to member</h2>
+    <p>Public replies notify the member. Check “Internal staff note” to save a note that only authorized staff can see.</p>
+    <fieldset class="module aligned">
+      <div class="form-row">
+        <label for="staff-reply">Message</label>
+        <textarea id="staff-reply" name="staff_reply" rows="4" maxlength="10000"
+                  style="width:100%;max-width:760px"></textarea>
+      </div>
+      <div class="form-row">
+        <label for="staff-is-internal">Visibility</label>
+        <input id="staff-is-internal" type="checkbox" name="staff_is_internal">
+        <span>Internal staff note (not sent to member)</span>
+      </div>
+    </fieldset>
+    <div class="submit-row">
+      <input type="submit" value="Send reply / save note" name="_send_reply" class="default">
+    </div>
   </div>
   {% endif %}
 {% endblock %}

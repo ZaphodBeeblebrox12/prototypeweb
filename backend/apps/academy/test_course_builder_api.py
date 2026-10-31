@@ -1,6 +1,8 @@
 import base64
 import json
+import re
 import uuid
+from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import Mock, patch
@@ -10,6 +12,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
+from PIL import Image
 
 from .models import (
     Course,
@@ -46,6 +49,7 @@ class CourseBuilderApiTests(TestCase):
                 "level": "Intermediate",
                 "duration": "Self-paced",
                 "price": "",
+                "accessType": "paid",
                 "status": "draft",
                 "outcomes": ["Describe evidence before interpreting it."],
                 "modules": [
@@ -120,6 +124,10 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "Reflection & reasoning")
         self.assertContains(response, "Require course-owned images before publishing")
         self.assertContains(response, "Courses page placement")
+        self.assertContains(response, 'id="courseAccessType"')
+        self.assertContains(response, 'value="free"')
+        self.assertContains(response, 'value="membership"')
+        self.assertContains(response, 'value="mixed"')
         self.assertContains(response, 'data-field="catalogueRole"')
         self.assertContains(response, "Not listed on the Courses page")
         self.assertContains(response, 'data-field="catalogueHook"')
@@ -158,12 +166,52 @@ class CourseBuilderApiTests(TestCase):
         self.assertNotContains(response, "Reuse the Learning Room template")
         self.assertContains(response, "Regional content")
         self.assertContains(response, "previewAudienceSelect")
-        self.assertContains(response, "data-regional-variant")
-        self.assertContains(response, "Regional content")
-        self.assertContains(response, "previewAudienceSelect")
-        self.assertContains(response, "data-regional-variant")
         self.assertContains(response, "lessonContentAudienceSelect")
         self.assertContains(response, "Start a custom version")
+
+    def test_submit_navigation_happens_after_save_guard_is_cleared(self):
+        response = self.client.get(reverse("staff_course_builder_preview"))
+        self.assertEqual(response.status_code, 200, response.content)
+        builder_source = response.content.decode("utf-8")
+
+        save_start = builder_source.index("async function saveCurrentToAcademy(")
+        save_end = builder_source.index("  persist = function", save_start)
+        save_function = builder_source[save_start:save_end]
+        self.assertNotIn("window.location.assign(result.review_url)", save_function)
+        self.assertIn("finally {", save_function)
+        self.assertIn("academySaving = false;", save_function)
+
+        publish_start = builder_source.index("publishCourse = async function()")
+        publish_end = builder_source.index("  async function loadPublishedCourse()", publish_start)
+        publish_handler = builder_source[publish_start:publish_end]
+        save_position = publish_handler.index("await saveCurrentToAcademy(true)")
+        redirect_position = publish_handler.index("window.location.assign(result.review_url)")
+        self.assertLess(save_position, redirect_position)
+        self.assertIn(
+            "if (hasUnsavedChanges || academySaving || academySavePending)",
+            publish_handler,
+        )
+
+    def test_course_access_type_is_saved_and_reloaded_with_builder_draft(self):
+        payload = self.draft_payload("builder-membership-course")
+        payload["course"]["accessType"] = "membership"
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        record = CourseImport.objects.get(pk=response.json()["record_id"])
+        self.assertEqual(record.payload["course"]["access_type"], "membership")
+        self.assertEqual(record.payload["builder_state"]["accessType"], "membership")
+
+        refreshed = self.client.get(reverse("staff_course_builder_api"))
+        self.assertEqual(refreshed.status_code, 200, refreshed.content)
+        reloaded = next(
+            draft for draft in refreshed.json()["drafts"]
+            if draft["serverDraftId"] == str(record.pk)
+        )
+        self.assertEqual(reloaded["accessType"], "membership")
 
     def test_rich_text_format_dropdown_uses_accessible_custom_menu(self):
         response = self.client.get(reverse("staff_course_builder_preview"))
@@ -280,6 +328,18 @@ class CourseBuilderApiTests(TestCase):
         saved_state = record.payload["builder_state"]["modules"][0]["lessons"][0]
         self.assertEqual(saved_state["regionalBlocks"][0]["title"], "Risk disclosure")
         self.assertEqual(saved_state["regionalContent"], lesson["regionalContent"])
+
+        # Exercise the editor's reload path: a fresh API GET must hydrate the
+        # same regional blocks and audience overrides that were just saved.
+        refreshed = self.client.get(reverse("staff_course_builder_api"))
+        self.assertEqual(refreshed.status_code, 200, refreshed.content)
+        reloaded_state = next(
+            draft for draft in refreshed.json()["drafts"]
+            if draft["serverDraftId"] == str(record.pk)
+        )
+        reloaded_lesson = reloaded_state["modules"][0]["lessons"][0]
+        self.assertEqual(reloaded_lesson["regionalBlocks"], lesson["regionalBlocks"])
+        self.assertEqual(reloaded_lesson["regionalContent"], lesson["regionalContent"])
 
     def test_whole_lesson_override_images_use_stable_managed_asset_ids(self):
         from .course_builder_api import _asset_uuid, _build_import_payload
@@ -618,6 +678,130 @@ class CourseBuilderApiTests(TestCase):
         migrated_id, migrated_asset = migrate_asset.call_args.args
         self.assertEqual(migrated_id, stable_id)
         self.assertEqual(migrated_asset.pk, asset.pk)
+
+    def test_course_import_asset_upload_path_is_stable_for_retry(self):
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(self.draft_payload("builder-stable-image-path")),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        record = CourseImport.objects.get(pk=response.json()["record_id"])
+        stable_id = uuid.uuid4()
+        asset = CourseImportAsset.objects.create(
+            course_import=record,
+            asset_key="builder/stable-image-path",
+            stable_asset_id=stable_id,
+        )
+
+        from .models import course_import_asset_upload_to
+
+        first_path = course_import_asset_upload_to(asset, "figure.png")
+        second_path = course_import_asset_upload_to(asset, "figure.png")
+        self.assertEqual(first_path, second_path)
+        self.assertIn(stable_id.hex, first_path)
+
+    def test_routine_save_skips_remote_lookups_for_already_saved_images(self):
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(self.draft_payload("builder-routine-save-skips-drive-check")),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        record = CourseImport.objects.get(pk=response.json()["record_id"])
+        asset = CourseImportAsset.objects.create(
+            course_import=record,
+            asset_key="builder/saved-image-no-recheck",
+            stable_asset_id=uuid.uuid4(),
+            file="academy/course-imports/saved-image-no-recheck.png",
+        )
+        storage = asset.file.storage
+
+        with (
+            patch.object(storage, "status") as storage_status,
+            patch.object(storage, "remote_exists") as remote_exists,
+            patch.object(storage, "exists") as exists,
+            patch("apps.academy.course_builder_api._copy_existing_asset") as copy_asset,
+        ):
+            from .course_builder_api import _store_images
+
+            _store_images(record, {}, verify_existing_assets=False)
+
+        storage_status.assert_not_called()
+        remote_exists.assert_not_called()
+        exists.assert_not_called()
+        copy_asset.assert_not_called()
+
+    def test_existing_durable_asset_does_not_issue_duplicate_remote_lookup(self):
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(self.draft_payload("builder-existing-drive-image")),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        record = CourseImport.objects.get(pk=response.json()["record_id"])
+        asset = CourseImportAsset.objects.create(
+            course_import=record,
+            asset_key="builder/existing-drive-image",
+            stable_asset_id=uuid.uuid4(),
+            file="academy/course-imports/existing-drive-image.png",
+        )
+
+        with (
+            patch(
+                "apps.academy.course_builder_api.course_asset_storage.status",
+                return_value={
+                    "backend": "google_drive",
+                    "label": "Google Drive",
+                    "durable": True,
+                    "writes_enabled": True,
+                },
+            ),
+            patch(
+                "apps.academy.course_builder_api.course_asset_storage.remote_exists",
+                return_value=True,
+            ) as remote_exists,
+            patch("apps.academy.course_builder_api.course_asset_storage.exists") as storage_exists,
+            patch("apps.academy.course_builder_api._copy_existing_asset") as migrate_asset,
+        ):
+            from .course_builder_api import _store_images
+
+            _store_images(record, {})
+
+        remote_exists.assert_called_once_with(asset.file.name)
+        storage_exists.assert_not_called()
+        migrate_asset.assert_not_called()
+
+    def test_drive_image_write_failure_returns_retryable_storage_error(self):
+        payload = self.draft_payload("builder-drive-image-storage-failure")
+        lesson = payload["course"]["modules"][0]["lessons"][0]
+        png = BytesIO()
+        Image.new("RGB", (2, 2), color=(255, 255, 255)).save(png, format="PNG")
+        lesson["images"] = [
+            {
+                "id": "drive-write-failure-figure",
+                "name": "figure.png",
+                "title": "Storage failure test figure",
+                "alt": "A small test figure",
+                "caption": "Used to verify storage failure handling.",
+                "data": "data:image/png;base64," + base64.b64encode(png.getvalue()).decode("ascii"),
+            }
+        ]
+        lesson["image"] = lesson["images"][0]
+
+        with patch(
+            "apps.academy.course_builder_api._persist_image_file",
+            side_effect=OSError("Google Drive invalid_grant"),
+        ):
+            response = self.client.post(
+                reverse("staff_course_builder_api"),
+                data=json.dumps(payload),
+                content_type="application/json",
+            )
+
+        self.assertEqual(response.status_code, 503, response.content)
+        self.assertTrue(response.json()["retryable"])
+        self.assertIn("temporarily unavailable", response.json()["detail"])
 
     def test_catalogue_presentation_fields_persist_in_saved_builder_draft(self):
         payload = self.draft_payload("catalogue-presentation-save")
@@ -1591,6 +1775,83 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(figure["cards"][2]["title"], "More smoothed")
         self.assertEqual(figure["note"], "Compare one setting at a time.")
 
+    def test_course_builder_shows_persistent_review_feedback_for_returned_draft(self):
+        saved = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(self.draft_payload("builder-feedback-banner")),
+            content_type="application/json",
+        )
+        self.assertEqual(saved.status_code, 200, saved.content)
+        record = CourseImport.objects.get(pk=saved.json()["record_id"])
+        record.payload["review_feedback"] = "Clarify the opening lesson and replace its chart."
+        record.status = CourseImport.Status.REJECTED
+        record.save(update_fields=["payload", "status", "updated_at"])
+
+        response = self.client.get(reverse("staff_course_builder_preview"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "builder-review-feedback")
+        self.assertContains(response, "Returned for changes · reviewer feedback")
+        self.assertContains(response, "Update this saved draft, then submit it for review again.")
+        self.assertContains(response, "esc(reviewFeedback)")
+
+    def test_returned_submission_can_be_reopened_saved_and_resubmitted_in_builder(self):
+        saved = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(self.draft_payload("builder-returned-for-changes")),
+            content_type="application/json",
+        )
+        self.assertEqual(saved.status_code, 200, saved.content)
+        record = CourseImport.objects.get(pk=saved.json()["record_id"])
+        record.payload["review_feedback"] = "Clarify the course outcome before publication."
+        record.status = CourseImport.Status.REJECTED
+        record.save(update_fields=["payload", "status", "updated_at"])
+
+        refreshed = self.client.get(reverse("staff_course_builder_api"))
+        self.assertEqual(refreshed.status_code, 200, refreshed.content)
+        returned_state = next(
+            draft for draft in refreshed.json()["drafts"]
+            if draft["serverDraftId"] == str(record.pk)
+        )
+        self.assertEqual(
+            returned_state["reviewFeedback"],
+            "Clarify the course outcome before publication.",
+        )
+        returned_state["summary"] = "A revised practical course summary."
+
+        resaved = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps({
+                "course": returned_state,
+                "mode": "save",
+                "sync_source": False,
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(resaved.status_code, 200, resaved.content)
+        record.refresh_from_db()
+        self.assertEqual(record.status, CourseImport.Status.DRAFT)
+        self.assertNotIn("review_feedback", record.payload)
+        self.assertEqual(resaved.json()["draft"]["reviewFeedback"], "")
+
+        with patch("apps.academy.course_builder_api.validate_import_for_publish", return_value=[]):
+            resubmitted = self.client.post(
+                reverse("staff_course_builder_api"),
+                data=json.dumps({
+                    "course": resaved.json()["draft"],
+                    "mode": "submit",
+                    "sync_source": False,
+                }),
+                content_type="application/json",
+            )
+        self.assertEqual(resubmitted.status_code, 200, resubmitted.content)
+        self.assertEqual(
+            resubmitted.json()["review_url"],
+            reverse("staff_admin_desk_course_review", args=[record.pk]),
+        )
+        record.refresh_from_db()
+        self.assertEqual(record.status, CourseImport.Status.REVIEW)
+
     def test_admin_can_delete_saved_builder_draft_and_it_disappears_from_the_list(self):
         saved = self.client.post(
             reverse("staff_course_builder_api"),
@@ -2004,6 +2265,48 @@ class CourseBuilderApiTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIsNone(response.json().get("trading_path_import_candidate"))
 
+
+    def test_support_resistance_import_includes_six_modules_eighteen_lessons_and_safe_charts(self):
+        response = self.client.get(
+            reverse("staff_course_builder_preview"),
+            {"import": "support-resistance"},
+        )
+        self.assertEqual(response.status_code, 200, response.content[:1000])
+        document = response.content.decode("utf-8")
+        match = re.search(
+            r'<script type="application/json" id="courseBuilderImportedDraft">(.*?)</script>',
+            document,
+            re.DOTALL,
+        )
+        self.assertIsNotNone(match, "The bundled draft payload should be injected for import.")
+        payload = json.loads(match.group(1))
+        course = payload["course"]
+        self.assertEqual(course["slug"], "support-resistance-draft")
+        self.assertEqual(course["status"], "draft")
+        self.assertEqual(len(course["modules"]), 6)
+        self.assertEqual(
+            sum(len(module["lessons"]) for module in course["modules"]),
+            18,
+        )
+        lesson_body = json.dumps(course, ensure_ascii=False)
+        self.assertNotIn("ChartLab", lesson_body)
+        self.assertIn("genuine instructor trade record", lesson_body)
+        self.assertIn("authentic failed or invalidated thesis", lesson_body)
+        self.assertIn("Stage 6 — Exit and outcome", lesson_body)
+        self.assertIn("Alternative case — the decision to stand aside", lesson_body)
+        self.assertIn("assessment and rubric remain a draft", lesson_body)
+        hydrated_images = [
+            image
+            for module in course["modules"]
+            for lesson in module["lessons"]
+            for image in lesson.get("images", [])
+        ]
+        self.assertGreaterEqual(len(hydrated_images), 18)
+        self.assertTrue(all(image["data"].startswith("data:image/png;base64,") for image in hydrated_images))
+        self.assertTrue(all(image["id"].startswith("sr-") for image in hydrated_images))
+        self.assertNotIn("imageRefs", lesson_body)
+        self.assertIsNone(course["publishedSnapshot"])
+
 class CourseBuilderPreviewWiringTests(SimpleTestCase):
     def test_empty_notebook_prompts_are_materialized_as_editable_pause_interpret_apply_fields(self):
         source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
@@ -2031,6 +2334,64 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
         ):
             with self.subTest(marker=marker):
                 self.assertIn(marker, source)
+
+
+    def test_support_resistance_import_uses_shared_draft_save_flow_without_publishing(self):
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
+        for marker in (
+            "supportResistanceImportRequested",
+            "requestedSupportResistanceDraft",
+            "clearSupportResistanceImportQuery()",
+            "result.drafts",
+            "!supportResistanceImportRequested && candidateCourse",
+            "await saveCurrentToAcademy(false, false)",
+            "Imported Support & Resistance as an editable 18-lesson draft. Nothing was published.",
+            "Opened the existing Support & Resistance draft. No duplicate was created or published.",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, source)
+
+    def test_legacy_regional_block_tab_is_removed_but_country_selector_remains(self):
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
+
+        # The block-level editor tab is retired in favour of the whole-lesson
+        # country/region selector. Legacy block persistence and rendering remain
+        # available so older drafts and published lessons retain their content.
+        for retired_marker in (
+            "['regional','Regional content']",
+            "else if(tab==='regional')panel=regionalFields(l);",
+            "function regionalFields(lesson)",
+            "case'add-regional-block':",
+            "case'add-regional-variant':",
+            "case'remove-regional-block':",
+            "case'remove-regional-variant':",
+            "case'insert-regional-block':",
+            "case'insert-regional-image':",
+            "if (el.matches('[data-regional-variant][data-field]'))",
+        ):
+            with self.subTest(marker=retired_marker):
+                self.assertNotIn(retired_marker, source)
+
+        self.assertNotIn(
+            "['overview', 'curriculum', 'lesson', 'questions', 'media', 'reflection', 'regional', 'preview'].includes(normalized.tab)",
+            source,
+        )
+        self.assertIn("lessonContentAudienceSelect", source)
+        self.assertIn("function lessonBodyAudienceControlsMarkup(lesson)", source)
+        self.assertIn("function setLessonBodyForAudience(lesson, content, audience)", source)
+        self.assertIn('data-action="start-regional-lesson-content"', source)
+        self.assertIn("previewAudienceSelect", source)
+        self.assertIn("Use Figures for charts and the country/region audience selector above for full-lesson variations.", source)
+        self.assertNotIn("Regional content for country or region differences", source)
+
+    def test_local_autosave_is_not_suppressed_by_legacy_preview_view_state(self):
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
+        start = source.index("function schedulePersist(){")
+        end = source.index("function renderHeaderState()", start)
+        schedule_persist = source[start:end]
+
+        self.assertNotIn("state.view==='preview'", schedule_persist)
+        self.assertIn("saveTimer=setTimeout(()=>{persist(false)", schedule_persist)
 
     def test_new_course_buttons_use_responsive_capture_phase_handler(self):
         source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
@@ -2090,6 +2451,12 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
                 self.assertIn(marker, source)
         self.assertIn("requestDiagnostic.payloadKeys", source)
         self.assertIn("requestDiagnostic.payloadSummary", source)
+        self.assertIn(
+            "const timeoutMs = method === 'GET' ? 20000 : (body?.mode === 'submit' ? 100000 : 30000);",
+            source,
+        )
+        self.assertIn("sync_source:submit", source)
+        self.assertNotIn("sync_source:notify || submit", source)
         self.assertNotIn("fetch('/staff/course-builder/diagnostics", source)
 
     def test_builder_preview_routes_selected_lesson_to_academy_template(self):

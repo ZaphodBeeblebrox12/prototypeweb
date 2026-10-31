@@ -5,12 +5,15 @@ from django.urls import reverse
 from django.utils.cache import patch_vary_headers
 from django.views.decorators.http import require_GET
 
+from apps.subscriptions.models import PlanPrice
+
 from .catalogue_presentation import (
     catalogue_presentation_api_fields,
     catalogue_presentation_from_payload,
     normalize_catalogue_presentation,
 )
 from .course_card_utils import is_course_card_recommendable
+from .course_pricing import resolved_course_offer_price
 from .models import Course, CourseImport
 
 
@@ -27,8 +30,10 @@ def public_course_catalogue(request):
         presentation, configured = catalogue_presentation_from_payload(import_record.payload)
         if configured:
             presentation_by_slug[import_record.course_slug] = presentation
-    courses = Course.objects.filter(status=Course.Status.PUBLISHED).prefetch_related(
-        "modules__lessons"
+    courses = (
+        Course.objects.filter(status=Course.Status.PUBLISHED)
+        .prefetch_related("modules__lessons", "offers__plan")
+        .order_by("position", "title", "slug")
     )
     for course in courses:
         # Send only a minimal marker for hidden courses so the static marketing
@@ -60,11 +65,52 @@ def public_course_catalogue(request):
             )
         if not modules:
             continue
+        offers = [
+            offer for offer in course.offers.all()
+            if offer.is_active and offer.plan_id and offer.plan.is_active and offer.is_saleable
+        ]
+        resolved_price = resolved_course_offer_price(offers[0], request) if offers else None
+        has_configured_offer_price = bool(
+            offers
+            and (
+                offers[0].plan.prices.filter(
+                    interval=PlanPrice.Interval.ONE_TIME, is_active=True
+                ).exists()
+                or offers[0].plan.geo_prices.filter(
+                    interval=PlanPrice.Interval.ONE_TIME, is_active=True
+                ).exists()
+            )
+        ) if offers and not resolved_price else bool(resolved_price)
+        if resolved_price:
+            course_price, _currency = resolved_price
+            price_note = (
+                "One-time purchase · also included in TradeThesis Free"
+                if course.access_type == Course.AccessType.MIXED
+                else "One-time purchase · secure checkout"
+            )
+            price_configured = True
+        elif course.access_type == Course.AccessType.FREE:
+            course_price, price_note, price_configured = "Free", "Enrol with your account · no payment required", True
+        elif course.access_type == Course.AccessType.MEMBERSHIP:
+            course_price, price_note, price_configured = "Included in TradeThesis Free", "Free membership access", True
+        elif course.access_type == Course.AccessType.MIXED:
+            course_price, price_note, price_configured = "Included in TradeThesis Free", "Free membership or individual purchase", True
+        elif course.access_type == Course.AccessType.PAID and has_configured_offer_price:
+            course_price, price_note, price_configured = "", "Individual checkout is not available in your market", True
+        else:
+            course_price, price_note, price_configured = "", "No active purchase price is configured", False
+
         rows.append(
             {
                 "id": str(course.pk),
                 "slug": course.slug,
                 "title": course.title,
+                "accessType": course.access_type,
+                "isFree": course.access_type == Course.AccessType.FREE,
+                "includedInFreeMembership": course.access_type in (
+                    Course.AccessType.MEMBERSHIP,
+                    Course.AccessType.MIXED,
+                ),
                 "category": course.category or "TradeThesis courses",
                 "level": course.level or "Self-paced",
                 "description": (course.summary or course.description)[:360],
@@ -74,7 +120,9 @@ def public_course_catalogue(request):
                     else course.description[:360]
                 ),
                 "complements": "Explore this published course in the TradeThesis Academy.",
-                "price": "",
+                "price": course_price,
+                "priceNote": price_note,
+                "priceConfigured": price_configured,
                 "status": "published",
                 "catalogueRole": course.catalogue_role,
                 "catalogueOrder": course.position,
@@ -101,7 +149,7 @@ def public_course_catalogue(request):
     teasers = CourseImport.objects.filter(
         status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REVIEW],
         target_course__isnull=True,
-    ).order_by("-updated_at")
+    ).order_by("-updated_at", "course_slug")
     for record in teasers:
         state = (record.payload or {}).get("builder_state") or {}
         title = str(state.get("title") or record.title)[:200]

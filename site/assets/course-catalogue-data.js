@@ -27,12 +27,12 @@ window.TRADETHESIS_COURSE_DATA = {
         "Connect a trade idea to an entry, invalidation point and risk.",
         "Review decisions and build the habit of recording your reasoning."
       ],
-      price: "₹999",
-      priceNote: "one-time payment · lifetime access",
+      price: "Free",
+      priceNote: "no payment required · permanent access",
       delivery: "15–20 min lesson + action step · written lessons · Telegram delivery",
       community: "Standalone course. Community access is not included.",
       href: "trading-path.html",
-      cta: "Explore Trading Path"
+      cta: "Explore the free course"
     },
     {
       id: "construct",
@@ -76,6 +76,10 @@ window.TRADETHESIS_COURSE_DATA = {
   microCourses: [
     {
       id: "support-resistance",
+      // The Builder draft is kept on a distinct database slug to avoid colliding
+      // with the older seeded course row. Once published, merge it into this
+      // existing curated card instead of rendering a second Support & Resistance tile.
+      academySlug: "support-resistance-draft",
       catalogueVisibility: "visible",
       priority: 3,
       order: 10,

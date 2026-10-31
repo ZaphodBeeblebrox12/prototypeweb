@@ -7,10 +7,13 @@ import json
 import logging
 import mimetypes
 import re
+import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from copy import deepcopy
 from io import BytesIO
 from pathlib import Path
+from threading import local
 from urllib.parse import quote
 
 import requests
@@ -36,6 +39,7 @@ from .catalogue_presentation import (
 )
 from .course_builder_lifecycle import mark_builder_draft_deleted
 from .course_card_utils import is_course_card_recommendable
+from .course_pricing import parse_course_pricing, pricing_fields_for_builder
 from .importing import validate_import_for_publish
 from .models import (
     Course,
@@ -271,7 +275,7 @@ def _clean_image_payload(course_state, course_slug):
     snapshot = deepcopy(course_state)
     server_draft_id = str(course_state.get("serverDraftId") or "").strip()
     server_course_id = str(course_state.get("serverCourseId") or "").strip()
-    for transient in ("serverDraftId", "serverUpdatedAt", "serverCourseId"):
+    for transient in ("serverDraftId", "serverUpdatedAt", "serverCourseId", "reviewFeedback"):
         snapshot.pop(transient, None)
     images_by_key = {}
     specs_by_key = {}
@@ -347,6 +351,10 @@ def _clean_image_payload(course_state, course_slug):
 
 def _build_import_payload(course_state, course_slug):
     snapshot, image_sources, asset_specs = _clean_image_payload(course_state, course_slug)
+    access_type = str(snapshot.get("accessType") or Course.AccessType.PAID).strip()
+    if access_type not in Course.AccessType.values:
+        raise ValidationError("Choose a valid course access model.")
+    pricing = parse_course_pricing(snapshot)
     modules = []
     seen_module_slugs = set()
     for module_index, module in enumerate(snapshot.get("modules") or [], start=1):
@@ -897,6 +905,8 @@ def _build_import_payload(course_state, course_slug):
             "category": str(snapshot.get("category") or "").strip()[:80],
             "level": str(snapshot.get("level") or "").strip()[:40],
             "estimated_duration": str(snapshot.get("duration") or "").strip()[:80],
+            "access_type": access_type,
+            "pricing": pricing,
             "learning_outcomes": [
                 str(value).strip()[:500]
                 for value in (snapshot.get("outcomes") or [])
@@ -955,7 +965,25 @@ def path_name(value):
     return str(value).rsplit("/", 1)[-1] or "course-figure"
 
 
-def _store_images(record, image_sources):
+class CourseAssetStorageError(OSError):
+    """Validated course image could not be persisted to the configured storage."""
+
+
+_ASSET_STORAGE_WORKER_LOCAL = local()
+_MAX_PARALLEL_IMAGE_WRITES = 6
+
+
+def _persist_image_file(storage_class, name, raw):
+    """Write one image through a worker-local storage instance."""
+    storage = getattr(_ASSET_STORAGE_WORKER_LOCAL, "storage", None)
+    if storage is None or type(storage) is not storage_class:
+        storage = storage_class()
+        _ASSET_STORAGE_WORKER_LOCAL.storage = storage
+    return storage.save(name, ContentFile(raw, name=Path(name).name))
+
+
+def _store_images(record, image_sources, *, verify_existing_assets=True):
+    pending_writes = []
     for asset in record.assets.all():
         source = image_sources.get(asset.asset_key, "")
         if source.startswith("data:"):
@@ -973,34 +1001,68 @@ def _store_images(record, image_sources):
                     expected_format, suffix = _ALLOWED_IMAGES[mime]
                     if image.format != expected_format:
                         raise ValueError("Image file content does not match its declared type.")
-                asset.file.save(f"figure{suffix}", ContentFile(raw), save=True)
-                asset.alt_text = asset.alt_text[:500]
-                asset.source_error = ""
-                asset.save(update_fields=["alt_text", "source_error", "updated_at"])
-            except (
-                ImproperlyConfigured,
-                ValueError,
-                binascii.Error,
-                UnidentifiedImageError,
-                OSError,
-            ) as exc:
-                raise ValidationError(f"Could not save image {asset.asset_key}: {exc}") from exc
+            except (ValueError, binascii.Error, UnidentifiedImageError, OSError) as exc:
+                raise ValidationError(f"Invalid image {asset.asset_key}: {exc}") from exc
+
+            # Generate the provider key on the request thread, then write image
+            # bytes concurrently. Keep ORM updates on this thread and only commit
+            # file names after every external write has succeeded.
+            storage = asset.file.storage
+            name = asset.file.field.generate_filename(asset, f"figure{suffix}")
+            pending_writes.append((asset, type(storage), name, raw))
         elif asset.file:
+            # Existing durable files are validated on review submission, not on
+            # every autosave. A per-asset Drive listing is a network round trip;
+            # repeating it for 20+ images made routine saves exceed 30 seconds.
+            if not verify_existing_assets:
+                continue
             storage = asset.file.storage
             storage_status = storage.status()
-            if storage_status.get("durable") and not storage.remote_exists(asset.file.name):
-                # The usual exists() intentionally includes local fallback for
-                # compatibility. Check remote providers separately so a local file
-                # is migrated instead of being mistaken for a durable upload.
-                if not _copy_existing_asset(asset.stable_asset_id, asset):
-                    raise ValidationError(
-                        f"Image {asset.asset_key} is only present in temporary storage. "
-                        "Re-upload it before relying on this lesson."
-                    )
-            elif not storage.exists(asset.file.name):
+            if (
+                storage_status.get("durable")
+                and not storage.remote_exists(asset.file.name)
+                and not _copy_existing_asset(asset.stable_asset_id, asset)
+            ):
+                raise ValidationError(
+                    f"Image {asset.asset_key} is only present in temporary storage. "
+                    "Re-upload it before relying on this lesson."
+                )
+            elif not storage_status.get("durable") and not storage.exists(asset.file.name):
                 _copy_existing_asset(asset.stable_asset_id, asset)
-        else:
+        elif verify_existing_assets:
             _copy_existing_asset(asset.stable_asset_id, asset)
+
+    if not pending_writes:
+        return
+
+    saved_names = {}
+    failures = []
+    with ThreadPoolExecutor(
+        max_workers=min(_MAX_PARALLEL_IMAGE_WRITES, len(pending_writes)),
+        thread_name_prefix="course-image-write",
+    ) as executor:
+        future_to_write = {
+            executor.submit(_persist_image_file, storage_class, name, raw): (asset, raw)
+            for asset, storage_class, name, raw in pending_writes
+        }
+        for future in as_completed(future_to_write):
+            asset, _raw = future_to_write[future]
+            try:
+                saved_names[asset.pk] = future.result()
+            except Exception as exc:
+                failures.append((asset, exc))
+
+    if failures:
+        failed_asset, cause = failures[0]
+        raise CourseAssetStorageError(
+            f"Could not persist image {failed_asset.asset_key} to course storage."
+        ) from cause
+
+    for asset, _storage_class, _name, _raw in pending_writes:
+        asset.file = saved_names[asset.pk]
+        asset.alt_text = asset.alt_text[:500]
+        asset.source_error = ""
+        asset.save(update_fields=["file", "alt_text", "source_error", "updated_at"])
 
 
 def _retire_legacy_drafts_for_deleted_courses(records):
@@ -1052,7 +1114,7 @@ def _retire_legacy_drafts_for_deleted_courses(records):
                     CourseImport.objects.select_for_update()
                     .filter(
                         pk=record.pk,
-                        status=CourseImport.Status.DRAFT,
+                        status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
                     )
                     .first()
                 )
@@ -1415,8 +1477,8 @@ def _builder_state_from_published_course(course):
         "category": course.category or "Technical analysis",
         "level": course.level or "Intermediate",
         "duration": course.estimated_duration or "Self-paced",
-        "price": "",
-        "priceNote": "Pricing and checkout are configured separately.",
+        **pricing_fields_for_builder(course),
+        "accessType": course.access_type,
         "status": "draft-update",
         "comingSoon": False,
         "requiresOwnedAssets": requires_owned_assets,
@@ -1453,6 +1515,11 @@ def _draft_response(record, request):
     state["serverDraftId"] = str(record.pk)
     state["serverUpdatedAt"] = record.updated_at.isoformat()
     state["status"] = "draft-update" if record.target_course_id else "draft"
+    state["reviewFeedback"] = (
+        str((record.payload or {}).get("review_feedback") or "")[:2000]
+        if record.status == CourseImport.Status.REJECTED
+        else ""
+    )
     if record.target_course_id:
         state["serverCourseId"] = str(record.target_course_id)
     return state
@@ -1481,7 +1548,7 @@ def course_builder_api(request):
             record = get_object_or_404(
                 CourseImport.objects.select_for_update(),
                 pk=draft_id,
-                status=CourseImport.Status.DRAFT,
+                status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
             )
             if not record.payload.get("builder_state"):
                 return JsonResponse(
@@ -1493,14 +1560,16 @@ def course_builder_api(request):
     if request.method == "GET":
         drafts = []
         builder_records = list(
-            CourseImport.objects.filter(status=CourseImport.Status.DRAFT).order_by("-updated_at")
+            CourseImport.objects.filter(
+                status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED]
+            ).order_by("-updated_at")
         )
         retired_ids = _retire_legacy_drafts_for_deleted_courses(builder_records)
         for record in builder_records:
             if (
                 record.payload.get("builder_state")
                 and str(record.pk) not in retired_ids
-                and record.status == CourseImport.Status.DRAFT
+                and record.status in (CourseImport.Status.DRAFT, CourseImport.Status.REJECTED)
             ):
                 drafts.append(_draft_response(record, request))
         related_courses = []
@@ -1662,6 +1731,11 @@ def course_builder_api(request):
             }
         )
 
+    save_started = time.monotonic()
+    logger.info(
+        "Course Builder write request received: body_bytes=%s",
+        request.META.get("CONTENT_LENGTH", "unknown"),
+    )
     try:
         body = json.loads(request.body.decode("utf-8"))
         if not isinstance(body, dict):
@@ -1684,7 +1758,8 @@ def course_builder_api(request):
                 )
             existing_edit = (
                 CourseImport.objects.filter(
-                    target_course=published_course, status=CourseImport.Status.DRAFT
+                    target_course=published_course,
+                    status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
                 )
                 .order_by("-updated_at")
                 .first()
@@ -1715,7 +1790,7 @@ def course_builder_api(request):
             server_draft_uuid = uuid.UUID(server_draft_id)
             if not CourseImport.objects.filter(
                 pk=server_draft_uuid,
-                status=CourseImport.Status.DRAFT,
+                status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
             ).exists():
                 return JsonResponse(
                     {
@@ -1755,7 +1830,7 @@ def course_builder_api(request):
                 and CourseImport.objects.filter(
                     pk=server_draft_id,
                     course_slug=slug,
-                    status=CourseImport.Status.DRAFT,
+                    status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
                     target_course__isnull=True,
                 ).exists()
             )
@@ -1768,6 +1843,15 @@ def course_builder_api(request):
                 )
         course_state["slug"] = slug
         payload, image_sources = _build_import_payload(course_state, slug)
+        inline_image_count = sum(
+            1 for source in image_sources.values() if str(source).startswith("data:")
+        )
+        logger.info(
+            "Course Builder payload prepared: slug=%s inline_image_count=%s body_bytes=%s",
+            slug,
+            inline_image_count,
+            request.META.get("CONTENT_LENGTH", "unknown"),
+        )
         if not payload["modules"]:
             return JsonResponse({"detail": "Add at least one module before saving."}, status=400)
         for module in payload["modules"]:
@@ -1805,7 +1889,7 @@ def course_builder_api(request):
                     CourseImport.objects.select_for_update()
                     .filter(
                         pk=server_draft_uuid,
-                        status=CourseImport.Status.DRAFT,
+                        status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
                     )
                     .first()
                 )
@@ -1835,7 +1919,7 @@ def course_builder_api(request):
                     CourseImport.objects.select_for_update()
                     .filter(
                         course_slug=slug,
-                        status=CourseImport.Status.DRAFT,
+                        status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
                     )
                     .exclude(pk=draft.pk)
                     .exists()
@@ -1852,7 +1936,7 @@ def course_builder_api(request):
                     CourseImport.objects.select_for_update()
                     .filter(
                         course_slug=slug,
-                        status=CourseImport.Status.DRAFT,
+                        status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
                         target_course=server_course,
                     )
                     .first()
@@ -1862,7 +1946,7 @@ def course_builder_api(request):
                     CourseImport.objects.select_for_update()
                     .filter(
                         course_slug=slug,
-                        status=CourseImport.Status.DRAFT,
+                        status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
                         target_course__isnull=True,
                     )
                     .first()
@@ -1882,7 +1966,7 @@ def course_builder_api(request):
                 )
                 if existing_review is not None:
                     review_url = reverse(
-                        "admin:academy_courseimport_review",
+                        "staff_admin_desk_course_review",
                         args=[existing_review.pk],
                     )
                     return JsonResponse(
@@ -1915,17 +1999,59 @@ def course_builder_api(request):
                 digest = hashlib.sha256(encoded).hexdigest()
 
             if draft is None:
-                record = CourseImport.objects.create(
+                defaults = {
+                    "title": title,
+                    "manifest_version": "course-builder-v1",
+                    "source_manifest": f"builder://{slug}",
+                    "payload": payload,
+                    "status": CourseImport.Status.DRAFT,
+                    "target_course": server_course,
+                    "imported_by": request.user,
+                }
+                # Two retries can reach the create path before either one has
+                # committed a draft row. get_or_create handles the unique
+                # (course_slug, content_hash) race rather than returning HTTP 500.
+                record, created = CourseImport.objects.get_or_create(
                     course_slug=slug,
-                    title=title,
-                    manifest_version="course-builder-v1",
                     content_hash=digest,
-                    source_manifest=f"builder://{slug}",
-                    payload=payload,
-                    status=CourseImport.Status.DRAFT,
-                    target_course=server_course,
-                    imported_by=request.user,
+                    defaults=defaults,
                 )
+                if not created and record.status != CourseImport.Status.DRAFT:
+                    if mode == "submit" and record.status == CourseImport.Status.REVIEW:
+                        review_url = reverse(
+                            "staff_admin_desk_course_review",
+                            args=[record.pk],
+                        )
+                        return JsonResponse(
+                            {
+                                "ok": True,
+                                "submitted": True,
+                                "record_id": str(record.pk),
+                                "review_url": review_url,
+                                "publish_errors": [],
+                                "github_source_synced": None,
+                                "source_snapshot_backend": None,
+                                "source_snapshot_synced": False,
+                                "message": "This course version is already awaiting review. No duplicate submission was created.",
+                            }
+                        )
+                    # The conflicting version became visible after the earlier
+                    # conflict check. Never overwrite an immutable review/published
+                    # import. Fork a new editable version instead.
+                    payload["builder_revision"] = str(uuid.uuid4())
+                    encoded = json.dumps(
+                        payload, sort_keys=True, ensure_ascii=False, separators=(",", ":")
+                    ).encode("utf-8")
+                    digest = hashlib.sha256(encoded).hexdigest()
+                    defaults["payload"] = payload
+                    record, created = CourseImport.objects.get_or_create(
+                        course_slug=slug,
+                        content_hash=digest,
+                        defaults=defaults,
+                    )
+                # Mark the record as preserved even when this request won the
+                # create race and then failed while writing images.
+                draft = record
             else:
                 record = draft
                 if server_course:
@@ -1935,6 +2061,12 @@ def course_builder_api(request):
                 record.manifest_version = "course-builder-v1"
                 record.content_hash = digest
                 record.source_manifest = f"builder://{slug}"
+                if record.status == CourseImport.Status.REJECTED:
+                    previous_feedback = str(
+                        (record.payload or {}).get("review_feedback") or ""
+                    )
+                    if previous_feedback:
+                        payload["review_feedback"] = previous_feedback
                 record.payload = payload
                 record.imported_by = request.user
                 record.save(
@@ -1982,7 +2114,18 @@ def course_builder_api(request):
                         )
                     removed_asset.delete()
 
-            _store_images(record, image_sources)
+            image_store_started = time.monotonic()
+            _store_images(
+                record,
+                image_sources,
+                verify_existing_assets=(mode == "submit"),
+            )
+            logger.info(
+                "Course Builder image persistence completed: slug=%s inline_image_count=%s duration_ms=%s",
+                slug,
+                inline_image_count,
+                int((time.monotonic() - image_store_started) * 1000),
+            )
             errors = validate_import_for_publish(record)
             if mode == "submit" and errors:
                 return JsonResponse(
@@ -1995,9 +2138,22 @@ def course_builder_api(request):
             # Keep review transitions and stale-asset deletion until after a
             # requested remote source snapshot has been confirmed.
 
+        logger.info(
+            "Course Builder draft transaction completed: slug=%s elapsed_ms=%s",
+            slug,
+            int((time.monotonic() - save_started) * 1000),
+        )
+        source_sync_started = time.monotonic()
         source_snapshot_backend = (
             _sync_course_source_to_storage(payload, slug) if sync_source_requested else None
         )
+        if sync_source_requested:
+            logger.info(
+                "Course Builder source snapshot completed: slug=%s backend=%s duration_ms=%s",
+                slug,
+                source_snapshot_backend,
+                int((time.monotonic() - source_sync_started) * 1000),
+            )
         github_source_synced = (
             source_snapshot_backend == "github" if source_snapshot_backend is not None else None
         )
@@ -2034,11 +2190,16 @@ def course_builder_api(request):
                     course_slug=slug,
                     status=CourseImport.Status.REVIEW,
                 ).exclude(pk=current_record.pk).update(status=CourseImport.Status.SUPERSEDED)
+                current_record.payload.pop("review_feedback", None)
                 current_record.status = CourseImport.Status.REVIEW
-                current_record.save(update_fields=["status", "updated_at"])
+                current_record.save(update_fields=["status", "payload", "updated_at"])
+            elif current_record.status == CourseImport.Status.REJECTED:
+                current_record.payload.pop("review_feedback", None)
+                current_record.status = CourseImport.Status.DRAFT
+                current_record.save(update_fields=["status", "payload", "updated_at"])
             record = current_record
 
-        review_url = reverse("admin:academy_courseimport_review", args=[record.pk])
+        review_url = reverse("staff_admin_desk_course_review", args=[record.pk])
         if mode == "submit":
             return JsonResponse(
                 {
@@ -2079,7 +2240,7 @@ def course_builder_api(request):
                     else (
                         "Draft saved to the Academy and source snapshot synced to GitHub."
                         if source_snapshot_backend == "github"
-                        else "Draft autosaved to the Academy. Use Save draft to create a source snapshot."
+                        else "Draft saved to the Academy. A source snapshot backup is created when you submit for review."
                     )
                 ),
             }

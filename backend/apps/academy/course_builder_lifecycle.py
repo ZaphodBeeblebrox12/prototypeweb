@@ -6,12 +6,12 @@ from .models import CourseImport
 
 
 def mark_builder_draft_deleted(record):
-    """Hide a builder draft permanently and remove its private staged media.
+    """Hide a builder draft or returned submission permanently and remove its private staged media.
 
     Keep the CourseImport row as a tombstone so a stale browser tab cannot
     recreate the draft by autosaving an old serverDraftId.
     """
-    if record.status != CourseImport.Status.DRAFT:
+    if record.status not in (CourseImport.Status.DRAFT, CourseImport.Status.REJECTED):
         return False
 
     for asset in record.assets.all():
