@@ -146,7 +146,7 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
             role=User.Role.USER,
         )
         client = Client()
-        client.force_login(other_user)
+        client.force_login(other_user, backend="django.contrib.auth.backends.ModelBackend")
 
         response = client.get(self.manifest_url)
         self.assertEqual(response.status_code, 404)
