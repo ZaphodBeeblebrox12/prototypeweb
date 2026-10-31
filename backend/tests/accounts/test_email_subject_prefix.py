@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
-from django.test import SimpleTestCase, override_settings
+from django.contrib.sites.models import Site
+from django.test import SimpleTestCase, TestCase, override_settings
 
 from apps.accounts.adapters import CustomAccountAdapter
 
@@ -40,3 +41,12 @@ class EmailSubjectBrandingTests(SimpleTestCase):
             context["dashboard_url"],
             "https://tradethesis-academy-staging.onrender.com/dashboard/",
         )
+
+
+
+class TradeThesisSiteRecordTests(TestCase):
+    def test_default_site_record_no_longer_uses_example_com(self):
+        site = Site.objects.get(pk=1)
+
+        self.assertEqual(site.name, "TradeThesis")
+        self.assertNotEqual(site.domain, "example.com")
