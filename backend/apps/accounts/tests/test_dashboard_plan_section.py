@@ -8,6 +8,7 @@ payments/support flows (no duplicated business logic in the UI).
 """
 import datetime
 
+from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -25,7 +26,11 @@ User = get_user_model()
 
 
 def make_user(username="dashuser"):
-    return User.objects.create_user(username=username, email=f"{username}@t.co")
+    user = User.objects.create_user(username=username, email=f"{username}@t.co")
+    EmailAddress.objects.create(
+        user=user, email=user.email, primary=True, verified=True
+    )
+    return user
 
 
 def make_plan(name, tier, order, **kwargs):
