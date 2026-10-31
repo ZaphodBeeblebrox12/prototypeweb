@@ -5,6 +5,7 @@ import time
 import uuid
 
 from django.contrib.auth import login
+from django.db.models import Q
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -119,7 +120,7 @@ class TelegramCallbackView(View):
         # do not allow this older login route to reactivate it.
         canonical_accounts = list(
             TelegramAccount.objects.filter(
-                telegram_user_id=telegram_id
+                Q(telegram_user_id=telegram_id) | Q(chat_id=telegram_id)
             ).select_related("user")[:2]
         )
         if len(canonical_accounts) > 1:
