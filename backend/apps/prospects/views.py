@@ -40,9 +40,12 @@ def _email_fingerprint(email):
     ).hexdigest()
 
 
-
 def _send_enquiry_notifications(enquiry):
     """Send best-effort notifications after the enquiry record has committed."""
+    # The console backend writes to server logs only; it is not customer delivery.
+    if "console.EmailBackend" in str(getattr(settings, "EMAIL_BACKEND", "")):
+        logger.warning("Prospect enquiry email skipped because the console backend is configured enquiry=%s", enquiry.pk)
+        return
     staff_recipients = [
         str(value).strip()
         for value in (getattr(settings, "PROSPECT_ENQUIRY_RECIPIENTS", []) or [])
