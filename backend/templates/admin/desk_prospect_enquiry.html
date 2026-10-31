@@ -37,7 +37,7 @@
         <h2>Enquiry details</h2>
         <div class="fact"><span class="label">Email</span><div class="value"><a href="mailto:{{ enquiry.email }}">{{ enquiry.email }}</a></div></div>
         <div class="fact"><span class="label">Phone / WhatsApp</span><div class="value">{{ enquiry.phone|default:"Not provided" }}</div></div>
-        <div class="fact"><span class="label">Starting point</span><div class="value">{{ enquiry.starting_point|default:"Not specified" }}</div></div>
+        <div class="fact"><span class="label">Starting point</span><div class="value">{{ enquiry.get_starting_point_display|default:"Not specified" }}</div></div>
         <div class="fact"><span class="label">Question</span><div class="value">{{ enquiry.question|default:"No additional question"|linebreaksbr }}</div></div>
         <div class="fact"><span class="label">Source page</span><div class="value">{{ enquiry.source_path|default:"Not recorded" }}</div></div>
       </div>
