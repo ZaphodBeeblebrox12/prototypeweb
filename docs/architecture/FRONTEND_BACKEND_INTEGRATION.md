@@ -13,7 +13,7 @@ The branch contains the static TradeThesis website, course-room prototype, learn
 - Public-site review: `site/00_OPEN_INTERACTIVE_PREVIEW.html` and `site/MOBILE_PREVIEW.html`.
 - Public pages: `site/index.html`, `site/courses.html`, `site/trading-path.html`, `site/construct.html`, `site/live-class.html`.
 - Current member UI prototypes: `site/member-access.html` and `site/member-area.html`.
-- Starter drip course source: `course-source/starter-drip-course/`.
+- Trading Path curriculum source (legacy folder name): `course-source/starter-drip-course/`.
 - CONSTRUCT source: `course-source/construct/`.
 - Volume Price Analysis source: `course-source/volume-price-analysis/`.
 - Support & Resistance course: `course-content/support-resistance/`.
@@ -73,7 +73,7 @@ Create explicit Course/Module/Lesson records from the approved source metadata. 
 
 | Product / content source | Intended backend representation | Important rule |
 |---|---|---|
-| ₹999 Trading Path / starter drip | One Course with the 30 ordered daily lessons, checkpoint metadata and its own CourseOffer | One-time payment grants course entitlement only; lifetime access must not imply bot access. Keep drip pacing separate from expiry. |
+| Free Trading Path | One published Course with 30 lessons, checkpoint metadata and free permanent course entitlement | All lessons are available immediately. The optional 30-day study plan is guidance only, not a server-enforced drip schedule. No community or trading-bot access is included. Do not promise Telegram lesson delivery unless that delivery path has passed end-to-end acceptance. |
 | Support & Resistance | One Course, six modules and 18 lessons mapped from `course-content/support-resistance/production/course_content_manifest.json` | Preserve the three approved ChartLab placements. Instructor answer keys and internal feedback must not be added to learner payloads. |
 | Volume Price Analysis | Separate Course and ordered modules/lessons from `course-source/volume-price-analysis/` | Keep it distinct from Support & Resistance and the Trading Path; do not merge curricula just because they share the member area. |
 | CONSTRUCT | Its own Course/offer and curriculum, using `course-source/construct/` as source of truth | ₹17,000 core offer and included 12-month community access are separate entitlements/business rules. The current one-course CourseOffer does not by itself model an included community bundle; add explicit bundle/community entitlement support before selling through this integration. |
@@ -89,7 +89,7 @@ The mapping above is the proposed implementation model; it does not mean these p
 3. **Course cards and detail pages:** public pages may preview course names, summaries and public offer metadata. Paid lesson bodies, answer keys, learner submissions and private downloads must only be delivered after server-side permission checks.
 4. **Checkout:** link each CTA to a server-resolved active offer. Never trust an amount/discount supplied by the browser or grant access from a success-return URL alone. Course access follows verified provider payment processing and an idempotent entitlement grant.
 5. **Lesson progress:** use the Django lesson/progress routes with same-origin session and CSRF protection. Show “saved” only after a successful response; preserve a visible error/retry state on failure.
-6. **Drip release:** release eligibility is computed by the backend. The front end presents release state but cannot unlock a lesson by changing JavaScript or DOM state.
+6. **Staged release:** where a product uses scheduled lesson releases (for example, CONSTRUCT), eligibility is computed by the backend. The Trading Path is self-paced with all 30 lessons available immediately. The front end must never unlock a staged lesson by changing JavaScript or DOM state.
 7. **Media and charts:** preserve readability and zoom/open controls. Any confidential reference/answer state must be separately protected at delivery time; CSS-only hiding is not permission enforcement.
 8. **Sitewide UX:** verify public site, login/signup/recovery, member home, course overview, lesson, checkout, locked lesson, progress/error states and mobile view as one continuous journey.
 
