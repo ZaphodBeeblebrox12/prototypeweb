@@ -24,6 +24,8 @@ def _verify_resend_signature(request) -> bool:
         return False
 
     try:
+        if not timestamp.isascii() or not timestamp.isdecimal():
+            return False
         timestamp_number = int(timestamp)
         if abs(time.time() - timestamp_number) > 300:
             return False
