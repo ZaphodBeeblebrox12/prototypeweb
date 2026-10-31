@@ -8,6 +8,7 @@ This workflow collects anonymous prospect enquiries for CONSTRUCT and the six-we
 2. Configure the exact public website origin(s) in the Academy service:
    - `TRADETHESIS_PUBLIC_SITE_ORIGINS=https://your-public-site-host`
    - Keep `TRADETHESIS_PUBLIC_SITE_URL` set to the public website's canonical origin as used by the existing account and email flows.
+   - The default allowlist also includes the repository GitHub Pages preview origin `https://zaphodbeeblebrox12.github.io` (the `/prototypeweb/` path is not part of the origin). Override the list explicitly when the public host changes; include only origins that genuinely serve the TradeThesis forms.
    - Do not use wildcards or include unrelated origins. For multiple approved public hosts, supply a comma-separated list.
 3. Ensure the public website injects the correct `TRADETHESIS_ACADEMY_BASE_URL` before `site/assets/academy-config.js` runs. The staging host mapping already exists; unknown production hosts intentionally remain disabled until explicitly configured.
 4. Configure the existing transactional email backend, `DEFAULT_FROM_EMAIL`, and the provider credentials required by that backend. The enquiry itself is saved even if an email attempt fails; receipt status is recorded on the enquiry.
