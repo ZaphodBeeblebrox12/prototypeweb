@@ -74,6 +74,7 @@ class Command(BaseCommand):
 
         previous_status = video.status
         previous_prefix = video.stream_directory
+        previous_processed_at = video.processed_at
         output_prefix = f"streams/{video.pk}/{uuid.uuid4().hex}"
         uploaded_names = []
         video.status = ProtectedLessonVideo.Status.PROCESSING
@@ -153,12 +154,13 @@ class Command(BaseCommand):
             if previous_status == ProtectedLessonVideo.Status.READY and previous_prefix:
                 video.status = ProtectedLessonVideo.Status.READY
                 video.stream_directory = previous_prefix
+                video.processed_at = previous_processed_at
                 video.processing_error = f"Rebuild failed; previous stream retained: {exc}"[-1200:]
             else:
                 video.status = ProtectedLessonVideo.Status.FAILED
                 video.stream_directory = ""
                 video.processing_error = str(exc)[-1200:]
-            video.save(update_fields=("status", "stream_directory", "processing_error", "updated_at"))
+            video.save(update_fields=("status", "stream_directory", "processed_at", "processing_error", "updated_at"))
             raise CommandError(f"Processing failed for lesson {video.lesson_id}: {exc}") from exc
 
     @staticmethod
