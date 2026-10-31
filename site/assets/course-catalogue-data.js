@@ -20,7 +20,7 @@ window.TRADETHESIS_COURSE_DATA = {
       title: "The TradeThesis Trading Path",
       promise: "Understand the screen before you risk the money.",
       description: "A guided introduction to markets, charts and trading decisions. Start with what price, orders and candles mean, then build towards chart reading, risk, planning and review.",
-      facts: ["30 written lessons", "4 connected stages", "30-day guided sequence"],
+      facts: ["30 written lessons", "4 connected stages", "Self-paced access"],
       outcomes: [
         "Understand what markets are and how a trade works.",
         "Read basic chart structure and use tools as evidence, not automatic signals.",
@@ -29,7 +29,7 @@ window.TRADETHESIS_COURSE_DATA = {
       ],
       price: "Free",
       priceNote: "no payment required · permanent access",
-      delivery: "15–20 min lesson + action step · written lessons · Telegram delivery",
+      delivery: "15–20 min lessons · practical action steps · optional 30-day study plan",
       community: "Standalone course. Community access is not included.",
       href: "trading-path.html",
       cta: "Explore the free course"
