@@ -25,6 +25,7 @@ from .models import (
     CourseModule,
     CourseOffer,
     Lesson,
+    LessonProgress,
     PlanCourseAccess,
 )
 from .services import can_access_lesson, has_active_plan_access, sync_free_membership_course_access
