@@ -9,7 +9,7 @@ import mimetypes
 from pathlib import Path
 
 from django.conf import settings
-from django.core.files.base import ContentFile
+from django.core.files import File
 from django.core.files.storage import FileSystemStorage
 from django.utils.deconstruct import deconstructible
 
@@ -130,9 +130,9 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
             if found:
                 response = self._drive_request(
                     "GET", f"{DRIVE_API}/files/{found['id']}",
-                    params={"alt": "media"}, expected=(200,),
+                    params={"alt": "media"}, expected=(200,), stream=True,
                 )
-                return ContentFile(response.content, name=name)
+                return File(response.raw, name=name)
         return self._local_backend()._open(name, mode)
 
     def exists(self, name):
