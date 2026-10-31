@@ -7,12 +7,14 @@ from apps.accounts.models import User
 
 
 PUBLIC_ORIGIN = "https://tradethesis-public-staging.onrender.com"
+GITHUB_PAGES_ORIGIN = "https://zaphodbeeblebrox12.github.io"
+GITHUB_PAGES_MEMBER_ACCESS = f"{GITHUB_PAGES_ORIGIN}/prototypeweb/member-access.html"
 LOGIN_PASSWORD = "A-strong-test-password-852!"
 
 
 @override_settings(
     TRADETHESIS_PUBLIC_SITE_URL=PUBLIC_ORIGIN,
-    TRADETHESIS_MEMBER_LOGIN_ORIGINS=[PUBLIC_ORIGIN],
+    TRADETHESIS_MEMBER_LOGIN_ORIGINS=[PUBLIC_ORIGIN, GITHUB_PAGES_ORIGIN],
 )
 class MemberAccessLoginTests(TestCase):
     def setUp(self):
@@ -57,6 +59,17 @@ class MemberAccessLoginTests(TestCase):
         )
         self.assertFalse(self.client.session.get("_auth_user_id"))
 
+    def test_invalid_credentials_from_github_pages_return_to_the_project_member_room(self):
+        response = self.client.post(
+            reverse("member_access_login"),
+            {"login": self.user.email, "password": "not-the-password"},
+            HTTP_ORIGIN=GITHUB_PAGES_ORIGIN,
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], f"{GITHUB_PAGES_MEMBER_ACCESS}?login=invalid")
+        self.assertFalse(self.client.session.get("_auth_user_id"))
+
     def test_unapproved_origin_is_rejected(self):
         response = self.client.post(
             reverse("member_access_login"),
@@ -83,7 +96,7 @@ class MemberAccessLoginTests(TestCase):
 
 @override_settings(
     TRADETHESIS_PUBLIC_SITE_URL=PUBLIC_ORIGIN,
-    TRADETHESIS_MEMBER_LOGIN_ORIGINS=[PUBLIC_ORIGIN],
+    TRADETHESIS_MEMBER_LOGIN_ORIGINS=[PUBLIC_ORIGIN, GITHUB_PAGES_ORIGIN],
 )
 class MemberEntryTests(TestCase):
     def setUp(self):
@@ -110,3 +123,22 @@ class MemberEntryTests(TestCase):
             f"{PUBLIC_ORIGIN}/member-access.html",
         )
         self.assertEqual(response["Cache-Control"], "no-store")
+
+    def test_anonymous_member_returns_to_github_pages_project_path_from_referer(self):
+        response = self.client.get(
+            reverse("member_entry"),
+            HTTP_REFERER=f"{GITHUB_PAGES_ORIGIN}/prototypeweb/index.html",
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], GITHUB_PAGES_MEMBER_ACCESS)
+        self.assertEqual(response["Cache-Control"], "no-store")
+
+    def test_untrusted_member_entry_referer_falls_back_to_configured_public_site(self):
+        response = self.client.get(
+            reverse("member_entry"),
+            HTTP_REFERER="https://attacker.invalid/prototypeweb/index.html",
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], f"{PUBLIC_ORIGIN}/member-access.html")

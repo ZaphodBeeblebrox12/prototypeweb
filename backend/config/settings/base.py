@@ -34,9 +34,10 @@ TRADETHESIS_PUBLIC_SITE_URL = env(
     "TRADETHESIS_PUBLIC_SITE_URL",
     default="https://tradethesis-public-staging.onrender.com",
 ).rstrip("/")
+GITHUB_PAGES_PUBLIC_ORIGIN = "https://zaphodbeeblebrox12.github.io"
 TRADETHESIS_MEMBER_LOGIN_ORIGINS = env.list(
     "TRADETHESIS_MEMBER_LOGIN_ORIGINS",
-    default=[TRADETHESIS_PUBLIC_SITE_URL],
+    default=[TRADETHESIS_PUBLIC_SITE_URL, GITHUB_PAGES_PUBLIC_ORIGIN],
 )
 
 # Application definition

@@ -2,6 +2,9 @@
 (() => {
   const stagingOrigin = "https://tradethesis-academy-staging.onrender.com";
   const hostname = String(window.location.hostname || "").toLowerCase();
+  const pathname = String(window.location.pathname || "");
+  const isGitHubPagesPreview = hostname === "zaphodbeeblebrox12.github.io" &&
+    (pathname === "/prototypeweb" || pathname.startsWith("/prototypeweb/"));
   // A deployment may define window.TRADETHESIS_ACADEMY_BASE_URL before this script loads.
   const inheritedBaseUrl = String(window.TRADETHESIS_ACADEMY_BASE_URL || "").trim().replace(/\/+$/, "");
   const isValidOrigin = value => {
@@ -13,15 +16,18 @@
     }
   };
   const isLocalPreview = hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+  const isKnownPublicPreview = hostname === "tradethesis-public-staging.onrender.com" ||
+    isLocalPreview || isGitHubPagesPreview;
   const configuredBaseUrl = isValidOrigin(inheritedBaseUrl)
     ? inheritedBaseUrl
-    : (hostname === "tradethesis-public-staging.onrender.com" || isLocalPreview ? stagingOrigin : "");
+    : (isKnownPublicPreview ? stagingOrigin : "");
 
   window.TRADETHESIS_ACADEMY_CONFIG = Object.freeze({ baseUrl: configuredBaseUrl });
 
   // All Academy paths are represented as paths in HTML and resolved here.
-  // Staging is enabled only on its public staging host or local previews; an
-  // unconfigured production hostname must never silently send learners to staging.
+  // Staging is enabled only on the public staging host, local previews, and the
+  // repository GitHub Pages preview (/prototypeweb/). Unknown production hosts
+  // must never silently send learners to staging.
   document.querySelectorAll("[data-academy-path]").forEach(element => {
     const path = String(element.getAttribute("data-academy-path") || "");
     if (!path.startsWith("/") || path.startsWith("//")) return;

@@ -15,6 +15,7 @@ from django.conf import settings
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
+from urllib.parse import urlsplit
 from django.views.decorators.http import require_POST
 
 
@@ -25,6 +26,44 @@ def _allowed_member_access_origins():
         for origin in getattr(settings, "TRADETHESIS_MEMBER_LOGIN_ORIGINS", [])
         if origin and origin.strip()
     }
+
+
+GITHUB_PAGES_PUBLIC_ORIGIN = "https://zaphodbeeblebrox12.github.io"
+GITHUB_PAGES_MEMBER_ACCESS_PATH = "/prototypeweb/member-access.html"
+
+
+def _public_member_access_url(origin=None):
+    """Return a fixed member-access URL for a trusted public-site origin."""
+    allowed_origins = _allowed_member_access_origins()
+    normalized_origin = str(origin or "").strip().rstrip("/")
+    if normalized_origin in allowed_origins:
+        if normalized_origin == GITHUB_PAGES_PUBLIC_ORIGIN:
+            return normalized_origin + GITHUB_PAGES_MEMBER_ACCESS_PATH
+        return normalized_origin + "/member-access.html"
+
+    public_site_url = getattr(
+        settings,
+        "TRADETHESIS_PUBLIC_SITE_URL",
+        "https://tradethesis-public-staging.onrender.com",
+    ).strip().rstrip("/")
+    if not public_site_url.startswith("https://"):
+        public_site_url = "https://tradethesis-public-staging.onrender.com"
+    return public_site_url + "/member-access.html"
+
+
+def _trusted_referer_origin(request):
+    """Extract a Referer origin only when it is HTTPS and exactly allowlisted."""
+    referer = str(request.headers.get("Referer", "")).strip()
+    if not referer:
+        return ""
+    try:
+        parsed = urlsplit(referer)
+    except ValueError:
+        return ""
+    if parsed.scheme != "https" or not parsed.netloc or parsed.username or parsed.password:
+        return ""
+    origin = f"{parsed.scheme}://{parsed.netloc}".rstrip("/")
+    return origin if origin in _allowed_member_access_origins() else ""
 
 
 @csrf_exempt
@@ -41,14 +80,7 @@ def member_access_login(request):
         response["Cache-Control"] = "no-store"
         return response
 
-    public_site_url = getattr(
-        settings,
-        "TRADETHESIS_PUBLIC_SITE_URL",
-        "https://tradethesis-public-staging.onrender.com",
-    ).strip().rstrip("/")
-    if not public_site_url.startswith("https://"):
-        public_site_url = "https://tradethesis-public-staging.onrender.com"
-    response = HttpResponseRedirect(f"{public_site_url}/member-access.html?login=invalid")
+    response = HttpResponseRedirect(f"{_public_member_access_url(origin)}?login=invalid")
     response["Cache-Control"] = "no-store"
     return response
 
@@ -64,15 +96,8 @@ def member_entry(request):
     if request.user.is_authenticated:
         response = HttpResponseRedirect(reverse("dashboard"))
     else:
-        public_site_url = getattr(
-            settings,
-            "TRADETHESIS_PUBLIC_SITE_URL",
-            "https://tradethesis-public-staging.onrender.com",
-        ).strip().rstrip("/")
-        if not public_site_url.startswith("https://") or any(
-            ord(char) < 32 for char in public_site_url
-        ):
-            public_site_url = "https://tradethesis-public-staging.onrender.com"
-        response = HttpResponseRedirect(f"{public_site_url}/member-access.html")
+        response = HttpResponseRedirect(
+            _public_member_access_url(_trusted_referer_origin(request))
+        )
     response["Cache-Control"] = "no-store"
     return response
