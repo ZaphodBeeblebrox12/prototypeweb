@@ -55,6 +55,7 @@
       {% if desk_access.subscriptions %}<li><a href="{% url 'staff_admin_desk_subscriptions' %}">Manage subscriptions &amp; access →</a></li>{% endif %}
       {% if desk_access.finance %}<li><a href="{% url 'staff_admin_desk_finance' %}">Payments &amp; invoice register →</a></li>{% endif %}
       {% if desk_access.business %}<li><a href="{% url 'staff_admin_desk_business' %}">Business details &amp; tax settings →</a></li>{% endif %}
+      {% if desk_access.enquiries %}<li><a href="{% url 'staff_admin_desk_course_enquiries' %}">Programme enquiries →</a></li>{% endif %}
     </ul>
   </section>
 
