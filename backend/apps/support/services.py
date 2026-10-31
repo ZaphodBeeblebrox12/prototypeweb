@@ -132,8 +132,17 @@ def _send_email(user, email, subject, text, template):
 
 def _send_telegram(user, text, ticket_id, kind):
     try:
-        TransactionalTelegramService.send_text(user, text)
-        return True
+        result = TransactionalTelegramService.send_text(user, text)
+        delivered = bool(getattr(result, "sent", False))
+        if not delivered:
+            logger.warning(
+                "support Telegram message not delivered ticket=%s kind=%s outcome=%s code=%s",
+                ticket_id,
+                kind,
+                getattr(result, "outcome", "unknown"),
+                getattr(result, "error_code", ""),
+            )
+        return delivered
     except Exception:
         logger.exception("support Telegram delivery failed ticket=%s kind=%s", ticket_id, kind)
         return False
