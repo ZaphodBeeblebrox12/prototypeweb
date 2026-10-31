@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                 ("contact_consent", models.BooleanField(default=False)),
                 ("marketing_opt_in", models.BooleanField(default=False)),
                 ("source_path", models.CharField(blank=True, max_length=255)),
-                ("ip_fingerprint", models.CharField(blank=True, db_index=True, max_length=64)),
+                ("email_fingerprint", models.CharField(blank=True, db_index=True, max_length=64)),
                 ("status", models.CharField(choices=[("new", "New"), ("contacted", "Contacted"), ("qualified", "Qualified"), ("enrolled", "Enrolled"), ("closed", "Closed")], default="new", max_length=16)),
                 ("staff_notes", models.TextField(blank=True)),
                 ("last_contacted_at", models.DateTimeField(blank=True, null=True)),
