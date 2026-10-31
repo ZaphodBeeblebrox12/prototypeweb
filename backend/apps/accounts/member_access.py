@@ -10,12 +10,13 @@ cookie/token pair from the static origin. To compensate, the endpoint requires
 an exact, configured Origin match and rejects requests without it. Do not broaden
 the origin list to wildcards.
 """
+from urllib.parse import urlsplit
+
 from allauth.account.forms import LoginForm
 from django.conf import settings
 from django.http import HttpResponseForbidden, HttpResponseRedirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from urllib.parse import urlsplit
 from django.views.decorators.http import require_POST
 
 
