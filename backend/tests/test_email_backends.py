@@ -67,6 +67,29 @@ class ResendEmailBackendTests(TestCase):
         self.assertIsNotNone(delivery.sent_at)
 
     @patch("apps.core.email_backends.requests.post")
+    def test_replaces_default_example_com_subject_prefix_before_send(self, post):
+        post.return_value = self._success_response("re_branded_id")
+        message = EmailMultiAlternatives(
+            subject="[example.com] Reset your TradeThesis password",
+            body="Use the secure reset link.",
+            from_email=None,
+            to=["learner@example.com"],
+        )
+
+        self.assertEqual(ResendEmailBackend().send_messages([message]), 1)
+
+        payload = post.call_args.kwargs["json"]
+        self.assertEqual(
+            payload["subject"],
+            "[TradeThesis] Reset your TradeThesis password",
+        )
+        delivery = Delivery.objects.get(to_email="learner@example.com")
+        self.assertEqual(
+            delivery.subject,
+            "[TradeThesis] Reset your TradeThesis password",
+        )
+
+    @patch("apps.core.email_backends.requests.post")
     def test_encodes_attachments_and_tracks_provider_id(self, post):
         post.return_value = self._success_response("re_receipt_id")
         message = EmailMultiAlternatives(
