@@ -104,6 +104,7 @@ class Delivery(models.Model):
         SENDING = "sending", "Sending"
         SENT = "sent", "Sent"
         DELIVERED = "delivered", "Delivered"
+        DELAYED = "delayed", "Delivery delayed"
         FAILED = "failed", "Failed"
         BOUNCED = "bounced", "Bounced"
         COMPLAINED = "complained", "Complained"
