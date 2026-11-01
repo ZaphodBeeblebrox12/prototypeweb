@@ -15,7 +15,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.decorators.http import require_GET
 
-from .models import PersonalizedProtectedVideo, ProtectedLessonVideo, CourseEntitlement
+from .models import CourseEntitlement, PersonalizedProtectedVideo, ProtectedLessonVideo
 from .permissions import is_course_content_admin
 from .services import can_access_lesson
 from .video_storage import lesson_video_storage
