@@ -11,6 +11,11 @@ urlpatterns = [
         views.staging_payment_simulator,
         name="staging-payment-simulator",
     ),
+    path(
+        "staff/staging-payment-simulator/retry/<uuid:rendition_id>/",
+        views.retry_staging_personalized_video,
+        name="staging-retry-video",
+    ),
     path("free-membership/", views.free_membership_landing, name="free-membership"),
     path(
         "free-membership/join/",
