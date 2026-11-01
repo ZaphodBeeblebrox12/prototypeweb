@@ -5,13 +5,17 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from django import forms
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from PIL import Image, UnidentifiedImageError
 
 from .content_rendering import validate_markdown_source
 from .models import (
+    Course,
     CourseImportAsset,
     CourseMediaAsset,
+    CourseOffer,
     Lesson,
     ProtectedLessonVideo,
 )
@@ -155,3 +159,47 @@ class ProtectedLessonVideoAdminForm(forms.ModelForm):
         if upload and upload.size > 5 * 1024 * 1024 * 1024:
             raise ValidationError("Video uploads must be 5 GB or smaller.")
         return upload
+
+
+
+class StagingPaymentSimulatorForm(forms.Form):
+    """Select a test learner and active course offer for a no-money staging grant."""
+
+    course_offer = forms.ModelChoiceField(
+        label="Course",
+        queryset=CourseOffer.objects.none(),
+        empty_label="Choose a published paid course",
+    )
+    learner = forms.ModelChoiceField(
+        label="Test learner",
+        queryset=get_user_model().objects.none(),
+        empty_label="Choose a non-staff learner account",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["course_offer"].queryset = (
+            CourseOffer.objects.filter(
+                is_active=True,
+                course__status=Course.Status.PUBLISHED,
+                course__access_type__in=(Course.AccessType.PAID, Course.AccessType.MIXED),
+                plan__is_active=True,
+                plan__is_hidden=True,
+            )
+            .filter(
+                Q(plan__prices__interval="one_time", plan__prices__is_active=True)
+                | Q(plan__geo_prices__interval="one_time", plan__geo_prices__is_active=True)
+            )
+            .select_related("course", "plan")
+            .distinct()
+            .order_by("position", "name")
+        )
+        User = get_user_model()
+        self.fields["learner"].queryset = (
+            User.objects.filter(is_active=True, is_staff=False, is_superuser=False)
+            .exclude(role="admin")
+            .order_by("email", "username")
+        )
+        self.fields["learner"].label_from_instance = (
+            lambda user: f"{user.email or user.username} ({user.username})"
+        )
