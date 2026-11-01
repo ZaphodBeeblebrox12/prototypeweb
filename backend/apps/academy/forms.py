@@ -191,9 +191,9 @@ class StagingPaymentSimulatorForm(forms.Form):
                 f"{course.get_access_type_display()}"
             )
         )
-        User = get_user_model()
+        user_model = get_user_model()
         self.fields["learner"].queryset = (
-            User.objects.filter(is_active=True, is_staff=False, is_superuser=False)
+            user_model.objects.filter(is_active=True, is_staff=False, is_superuser=False)
             .exclude(role="admin")
             .order_by("email", "username")
         )
