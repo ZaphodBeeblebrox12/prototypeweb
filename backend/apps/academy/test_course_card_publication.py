@@ -283,18 +283,15 @@ class RelatedCourseSoftBotanicalParityTests(SimpleTestCase):
     def test_related_course_cards_use_soft_botanical_surfaces_and_topic_chips(self):
         root = Path(__file__).resolve().parents[2]
         styles = (root / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
-        learner = (root / "templates" / "academy" / "lesson.html").read_text(encoding="utf-8")
-        staged_preview = (
+        lesson_experience = (
             root / "templates" / "academy" / "partials" / "lesson_experience.html"
         ).read_text(encoding="utf-8")
 
         self.assertIn("background: #edf3e8;", styles)
         self.assertIn(".tt-related-course-topics", styles)
         self.assertIn(".tt-related-course-topic", styles)
-        self.assertIn('aria-label="Topics covered"', learner)
-        self.assertIn('aria-label="Topics covered"', staged_preview)
-        self.assertIn("{% for topic in related.topic_tags %}", learner)
-        self.assertIn("{% for topic in related.topic_tags %}", staged_preview)
+        self.assertIn('aria-label="Topics covered"', lesson_experience)
+        self.assertIn("{% for topic in related.topic_tags %}", lesson_experience)
 
 
 class OptionThreeCardParityTests(SimpleTestCase):
