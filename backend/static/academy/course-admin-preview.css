@@ -1,5 +1,5 @@
-/* Administrator preview banner and course-overview-only presentation.
-   Lesson geometry is deliberately owned by learning-room.css for every route. */
+/* Administrator-only course overview banner and preview frame.
+   The shared course overview structure remains in course_detail.html. */
 .tt-admin-preview-banner {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
