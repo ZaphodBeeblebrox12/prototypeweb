@@ -285,7 +285,7 @@ class RelatedCourseSoftBotanicalParityTests(SimpleTestCase):
         styles = (root / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
         learner = (root / "templates" / "academy" / "lesson.html").read_text(encoding="utf-8")
         staged_preview = (
-            root / "templates" / "academy" / "course_import_website_preview.html"
+            root / "templates" / "academy" / "partials" / "lesson_experience.html"
         ).read_text(encoding="utf-8")
 
         self.assertIn("background: #edf3e8;", styles)
@@ -300,12 +300,12 @@ class RelatedCourseSoftBotanicalParityTests(SimpleTestCase):
 class OptionThreeCardParityTests(SimpleTestCase):
     def test_admin_website_preview_matches_builder_option_three_dimensions(self):
         root = Path(__file__).resolve().parents[2]
-        admin_css = (root / "static" / "academy" / "course-import-preview.css").read_text(
+        admin_css = (root / "static" / "academy" / "learning-room.css").read_text(
             encoding="utf-8"
         )
 
         self.assertIn(
-            ".tt-admin-learning-preview .tt-tab-panel .tt-course-preview-card {", admin_css
+            ".tt-lesson-experience .tt-tab-panel .tt-course-preview-card {", admin_css
         )
         self.assertIn("width: min(72%, 640px);", admin_css)
         self.assertIn("max-width: 640px;", admin_css)
