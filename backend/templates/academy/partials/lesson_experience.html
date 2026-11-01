@@ -1,5 +1,11 @@
-<div class="tt-learning-room tt-lesson-experience{% if course_import_preview %} tt-admin-learning-preview{% elif admin_preview %} tt-admin-lesson-preview{% endif %}">
-  {% if admin_preview and not course_import_preview %}<aside class="tt-admin-lesson-preview-banner" role="status"><strong>ADMIN PREVIEW · LOCKED ACCESS BYPASSED FOR REVIEW ONLY</strong><span>This read-only view does not unlock the lesson for learners, save progress, or submit notebook and quiz responses.</span><a href="{% url 'academy:course-detail' course.slug %}">Back to course overview ↗</a></aside>{% endif %}
+<div class="tt-learning-room tt-lesson-experience{% if admin_preview %} tt-admin-lesson-preview{% endif %}">
+  {% if admin_preview %}
+    <aside class="tt-admin-lesson-preview-banner" role="status">
+      <strong>ADMIN PREVIEW · {% if course_import_preview %}UNPUBLISHED CONTENT REVIEW{% else %}LOCKED ACCESS BYPASSED FOR REVIEW ONLY{% endif %}</strong>
+      <span>{% if course_import_preview %}This read-only draft preview does not publish the course, save learner progress, or submit notebook and quiz responses.{% else %}This read-only view does not unlock the lesson for learners, save progress, or submit notebook and quiz responses.{% endif %}</span>
+      {% if course_import_preview %}<a href="{{ admin_review_url }}">Back to content review ↗</a>{% else %}<a href="{% url 'academy:course-detail' course.slug %}">Back to course overview ↗</a>{% endif %}
+    </aside>
+  {% endif %}
   <div class="tt-breadcrumb">{% if course_import_preview %}<a href="{{ overview_url }}">Academy</a><span>/</span><a href="{{ overview_url }}">{{ course.title }}</a>{% else %}<a href="{% url 'academy:home' %}">Academy</a><span>/</span><a href="{% url 'academy:course-detail' course.slug %}">{{ course.title }}</a>{% endif %}<span>/</span><span>{{ module.title }}</span></div>
 
 
