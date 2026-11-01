@@ -23,7 +23,10 @@ logger = logging.getLogger(__name__)
 REAPER_STALE_SECONDS = 300
 BACKOFF_BASE_SECONDS = 30
 JOB_HEARTBEAT_SECONDS = 45
-LONG_RUNNING_JOB_KINDS = {"process_protected_lesson_video"}
+LONG_RUNNING_JOB_KINDS = {
+    "process_protected_lesson_video",
+    "process_personalized_video",
+}
 
 
 def reaper_reset():
