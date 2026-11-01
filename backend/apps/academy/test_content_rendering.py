@@ -379,8 +379,8 @@ class SharedLessonRenderingTests(SimpleTestCase):
         builder = (Path(__file__).resolve().parent / "course_builder_preview.html").read_text(
             encoding="utf-8"
         )
-        website_preview = (
-            backend_root / "templates" / "academy" / "course_import_website_preview.html"
+        course_overview = (
+            backend_root / "templates" / "academy" / "course_detail.html"
         ).read_text(encoding="utf-8")
         lesson_experience = (
             backend_root
@@ -413,7 +413,11 @@ class SharedLessonRenderingTests(SimpleTestCase):
             'return render(request, "academy/lesson.html", preview_context)',
             views_source,
         )
-        self.assertNotIn("tt-course-header--depth", website_preview)
+        self.assertNotIn("tt-course-header--depth", course_overview)
+        self.assertIn(
+            'return render(request, "academy/course_detail.html", preview_context)',
+            views_source,
+        )
         self.assertIn("{{ lesson_sections.idea_html|safe }}", tabs_template)
         self.assertIn('{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections', lesson_experience)
         self.assertIn("{{ lesson_sections.examples_html|safe }}", tabs_template)
@@ -907,8 +911,8 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         lesson_template = (backend / "templates" / "academy" / "lesson.html").read_text(
             encoding="utf-8"
         )
-        draft_template = (
-            backend / "templates" / "academy" / "course_import_website_preview.html"
+        course_overview_template = (
+            backend / "templates" / "academy" / "course_detail.html"
         ).read_text(encoding="utf-8")
         tabs_template = (
             backend / "templates" / "academy" / "partials" / "lesson_tabs.html"
@@ -918,10 +922,9 @@ class TradingNotebookTemplateTests(SimpleTestCase):
             lesson_template.index("notebook-card.css"),
             lesson_template.index("admin-lesson-preview.css"),
         )
-        self.assertGreater(
-            draft_template.index("notebook-card.css"),
-            draft_template.index("course-import-preview.css"),
-        )
+        self.assertIn("course-admin-preview.css", course_overview_template)
+        self.assertNotIn("notebook-card.css", course_overview_template)
+        self.assertNotIn("learning-room.css", course_overview_template)
         self.assertIn("grid-template-columns: minmax(0, 1fr) 220.5px;", notebook_styles)
         self.assertIn("font-size: 25px;", notebook_styles)
         self.assertIn("font-weight: 700;", notebook_styles)
@@ -987,7 +990,10 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         lesson_styles = (backend / "static" / "academy" / "learning-room.css").read_text(
             encoding="utf-8"
         )
-        preview_styles = (backend / "static" / "academy" / "course-import-preview.css").read_text(
+        preview_styles = (backend / "static" / "academy" / "course-admin-preview.css").read_text(
+            encoding="utf-8"
+        )
+        notebook_styles = (backend / "static" / "academy" / "notebook-card.css").read_text(
             encoding="utf-8"
         )
         tabs_template = (
@@ -1000,12 +1006,11 @@ class TradingNotebookTemplateTests(SimpleTestCase):
             encoding="utf-8"
         )
 
-        # The canonical lesson stylesheet owns the page width and 245px notebook column
-        # for members and both administrator preview modes.
-        self.assertIn(".main-content:has(> .tt-admin-course-preview)", lesson_styles)
+        # The shared lesson shell owns page width; the Notebook component owns its column.
+        self.assertIn(".main-content:has(> .tt-lesson-experience)", lesson_styles)
         self.assertIn("width: min(1600px, 100%)", lesson_styles)
-        self.assertIn("grid-template-columns: minmax(0, 1fr) 245px", lesson_styles)
-        self.assertNotIn("grid-template-columns: minmax(0, 1fr) 245px", preview_styles)
+        self.assertIn("grid-template-columns: minmax(0, 1fr) 220.5px", notebook_styles)
+        self.assertNotIn("learning-content-grid", preview_styles)
         self.assertIn("font-size: clamp(42px, 5vw, 64px)", lesson_styles)
         # Authored H2-H5 roles now live in the canonical shared stylesheet.
         for selector in (
@@ -1061,8 +1066,8 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         learning_room_css = (backend / "static" / "academy" / "learning-room.css").read_text(
             encoding="utf-8"
         )
-        website_preview_css = (
-            backend / "static" / "academy" / "course-import-preview.css"
+        course_admin_preview_css = (
+            backend / "static" / "academy" / "course-admin-preview.css"
         ).read_text(encoding="utf-8")
         builder_source = (backend / "apps" / "academy" / "course_builder_preview.html").read_text(
             encoding="utf-8"
@@ -1070,18 +1075,17 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         lesson_template = (backend / "templates" / "academy" / "lesson.html").read_text(
             encoding="utf-8"
         )
-        admin_template = (
-            backend / "templates" / "academy" / "course_import_website_preview.html"
+        course_overview_template = (
+            backend / "templates" / "academy" / "course_detail.html"
         ).read_text(encoding="utf-8")
 
         self.assertGreater(
             lesson_template.index("course-template-parity.css"),
             lesson_template.index("notebook-card.css"),
         )
-        self.assertGreater(
-            admin_template.index("course-template-parity.css"),
-            admin_template.index("notebook-card.css"),
-        )
+        self.assertIn("course-admin-preview.css", course_overview_template)
+        self.assertNotIn("course-template-parity.css", course_overview_template)
+        self.assertNotIn("notebook-card.css", course_overview_template)
         parity_link = builder_source.index("/static/academy/course-template-parity.css")
         self.assertGreater(parity_link, builder_source.index("</style>"))
         self.assertLess(parity_link, builder_source.index("</head>"))
@@ -1108,7 +1112,7 @@ class TradingNotebookTemplateTests(SimpleTestCase):
             "Visual parity pass 7: map every Academy content heading", learning_room_css
         )
         self.assertNotIn(
-            "Visual parity pass 7: apply the canonical heading ladder", website_preview_css
+            "Visual parity pass 7: apply the canonical heading ladder", course_admin_preview_css
         )
         self.assertNotIn("Canonical authored-heading ladder", builder_source)
         # Only the global fallback remains in learning-room.css; the canonical stylesheet owns the scoped ladder.
@@ -1121,7 +1125,7 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertNotIn("h6:first-child", parity_css)
         self.assertNotIn(".eyebrow:first-child", parity_css)
         self.assertEqual(learning_room_css.count("/*"), learning_room_css.count("*/"))
-        self.assertEqual(website_preview_css.count("/*"), website_preview_css.count("*/"))
+        self.assertEqual(course_admin_preview_css.count("/*"), course_admin_preview_css.count("*/"))
 
         def rule_body(selector):
             start = parity_css.index(selector)
