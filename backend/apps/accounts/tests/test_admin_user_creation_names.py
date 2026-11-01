@@ -12,7 +12,7 @@ class AdminUserCreationNamesTests(TestCase):
         admin_user = User.objects.create_superuser(
             username="names-admin",
             email="names-admin@example.com",
-            password="A-strong-admin-password-9842!z",
+            password="7!Qv#9mL2$pR8xZ4@tW",
         )
         self.client.force_login(admin_user)
         self.add_url = reverse("admin:accounts_user_add")
@@ -33,8 +33,8 @@ class AdminUserCreationNamesTests(TestCase):
                 "first_name": "Nisha",
                 "last_name": "Kapoor",
                 "nickname": "Nisha",
-                "password1": "A-strong-member-password-9842!z",
-                "password2": "A-strong-member-password-9842!z",
+                "password1": "4#nV8!xB2$qL6@rT9p",
+                "password2": "4#nV8!xB2$qL6@rT9p",
             },
         )
 
@@ -53,8 +53,8 @@ class AdminUserCreationNamesTests(TestCase):
                 "email": "incomplete@example.com",
                 "first_name": "",
                 "last_name": "Member",
-                "password1": "A-strong-member-password-9842!z",
-                "password2": "A-strong-member-password-9842!z",
+                "password1": "4#nV8!xB2$qL6@rT9p",
+                "password2": "4#nV8!xB2$qL6@rT9p",
             },
         )
 
