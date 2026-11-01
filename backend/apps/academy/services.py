@@ -509,7 +509,7 @@ def grant_course_entitlement(
                         "simulation_note": "Staging test only; no money was collected.",
                     }
                     if payment_intent
-                    and payment_intent.provider == "simulator"
+                    and getattr(payment_intent, "is_simulated", False)
                     else {}
                 ),
             },
@@ -631,7 +631,7 @@ def activate_course_payment(payment_intent, offer, *, send_notifications=True, g
         source=CourseEntitlement.Source.PURCHASE,
         reason=(
             "STAGING SIMULATION — no money collected"
-            if payment_intent.provider == "simulator"
+            if getattr(payment_intent, "is_simulated", False)
             else "Verified one-time course payment"
         ),
     )
@@ -645,7 +645,7 @@ def activate_course_payment(payment_intent, offer, *, send_notifications=True, g
         )
         from apps.events.models import record_event
 
-        simulated = payment_intent.provider == "simulator"
+        simulated = getattr(payment_intent, "is_simulated", False)
         event_name = (
             "academy.entitlement_simulated" if simulated else "academy.entitlement_granted"
         )
