@@ -74,9 +74,8 @@
             <span>LESSON VIDEO</span>
             <span>Watch the walkthrough</span>
           </div>
-          <details class="tt-lesson-video-disclosure">
-          <summary>Lesson video <span>Optional walkthrough</span></summary>
-          {% if personalized_video_rendition and personalized_video_rendition.status == "ready" %}<section class="tt-video-lesson tt-video-lesson--protected" aria-label="Personalised protected lesson video" data-protected-video-container>
+          <div class="tt-member-video-panel-content">
+{% if personalized_video_rendition and personalized_video_rendition.status == "ready" %}<section class="tt-video-lesson tt-video-lesson--protected" aria-label="Personalised protected lesson video" data-protected-video-container>
           <video playsinline preload="none" data-protected-video data-manifest-url="{{ personalized_video_manifest_url }}" disablepictureinpicture>
             Your browser does not support protected HLS video playback.
           </video>
@@ -130,9 +129,10 @@
           {% if video_processing_error %}<p class="small text-muted">{{ video_processing_error }}</p>{% endif %}
         </section>
         {% elif video_url %}<section class="tt-video-lesson" aria-label="Lesson video">{% if video_is_file %}<video controls preload="metadata" src="{{ video_url }}">Your browser does not support video playback.</video>{% else %}<a href="{{ video_url }}" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a><p class="small text-muted">This video opens in a new tab.</p>{% endif %}</section>{% endif %}
+          </div>
         </section>
         {% endif %}
-{% if admin_preview %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook reflection=reflection reflection_response=reflection_response course_slug=course.slug practice_questions=practice_questions admin_preview=True only %}{% else %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook lesson=lesson reflection=reflection reflection_response=reflection_response course_slug=course.slug practice_questions=practice_questions only %}{% endif %}
+        {% if admin_preview %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook reflection=reflection reflection_response=reflection_response course_slug=course.slug practice_questions=practice_questions admin_preview=True only %}{% else %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook lesson=lesson reflection=reflection reflection_response=reflection_response course_slug=course.slug practice_questions=practice_questions only %}{% endif %}
         {% if personalized_video_rendition or personalized_video_status or protected_video or admin_preview and video_processing_status or video_url %}
         <details class="tt-lesson-video-disclosure">
           <summary>Lesson video <span>Optional walkthrough</span></summary>
@@ -192,7 +192,7 @@
         {% elif video_url %}<section class="tt-video-lesson" aria-label="Lesson video">{% if video_is_file %}<video controls preload="metadata" src="{{ video_url }}">Your browser does not support video playback.</video>{% else %}<a href="{{ video_url }}" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a><p class="small text-muted">This video opens in a new tab.</p>{% endif %}</section>{% endif %}
         </details>
         {% endif %}
-        {% if related_courses %}
+{% if related_courses %}
         <section class="tt-related-courses tt-related-courses--cards" aria-labelledby="tt-related-courses-heading">
           <div class="tt-related-courses-header">
             <div class="tt-related-courses-heading">
