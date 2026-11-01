@@ -64,3 +64,28 @@ class TradeThesisSignupForm(SignupForm):
         user.last_name = self.cleaned_data["last_name"]
         user.save(update_fields=["first_name", "last_name"])
         return user
+
+
+
+from django.contrib.auth.forms import UserCreationForm
+
+
+class TradeThesisAdminUserCreationForm(UserCreationForm):
+    """Require a member's first and last names when staff create an account."""
+
+    first_name = forms.CharField(
+        label="First name",
+        max_length=255,
+        required=True,
+        strip=True,
+    )
+    last_name = forms.CharField(
+        label="Last name",
+        max_length=255,
+        required=True,
+        strip=True,
+    )
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ("username", "email", "first_name", "last_name", "nickname")
