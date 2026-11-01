@@ -6,29 +6,55 @@ from django.test import SimpleTestCase
 
 
 class LessonTemplateParityTests(SimpleTestCase):
-    def test_all_lesson_routes_use_one_canonical_experience_template(self):
-        member_template = get_template("academy/lesson.html").template.source
-        overview_template = get_template(
-            "academy/course_import_website_preview.html"
-        ).template.source
+    def test_member_and_every_admin_preview_use_one_lesson_page(self):
+        templates_root = Path(settings.BASE_DIR) / "templates" / "academy"
+        lesson_page = get_template("academy/lesson.html").template.source
         experience = get_template(
             "academy/partials/lesson_experience.html"
         ).template.source
+        course_overview = get_template("academy/course_detail.html").template.source
+        views_source = " ".join(
+            (Path(settings.BASE_DIR) / "apps" / "academy" / "views.py")
+            .read_text(encoding="utf-8")
+            .split()
+        )
 
-        include = 'include "academy/partials/lesson_experience.html"'
-        self.assertIn(include, member_template)
-        self.assertNotIn(include, overview_template)
+        shared_include = '{% include "academy/partials/lesson_experience.html" %}'
+        self.assertIn(shared_include, lesson_page)
         self.assertIn('<header class="tt-course-header tt-course-header--depth">', experience)
-        views_source = Path(settings.BASE_DIR / "apps" / "academy" / "views.py").read_text(
-            encoding="utf-8"
-        )
-        self.assertIn(
-            'return render(request, "academy/lesson.html", preview_context)',
-            " ".join(views_source.split()),
-        )
         self.assertIn('<div class="tt-room-grid">', experience)
-        self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', member_template)
-        self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', overview_template)
+        self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', lesson_page)
+        self.assertNotIn('<div class="tt-room-grid">', lesson_page)
+        self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', course_overview)
+        self.assertNotIn('<div class="tt-room-grid">', course_overview)
+
+        # Member lessons, published admin previews and draft lessons all render lesson.html.
+        self.assertIn('return render(request, "academy/lesson.html", preview_context)', views_source)
+        # Draft course overviews reuse the same template as published course overviews.
+        self.assertIn('return render(request, "academy/course_detail.html", preview_context)', views_source)
+
+        # The deleted duplicate must not silently reappear.
+        self.assertFalse(
+            (templates_root / "course_import_website_preview.html").exists(),
+            "Do not recreate a Course Import-specific page template.",
+        )
+
+    def test_only_shared_lesson_partial_owns_the_learning_room_shell(self):
+        templates_root = Path(settings.BASE_DIR) / "templates" / "academy"
+        experience_path = templates_root / "partials" / "lesson_experience.html"
+        owned_markers = (
+            '<header class="tt-course-header tt-course-header--depth">',
+            '<div class="tt-room-grid">',
+        )
+        for template_path in templates_root.rglob("*.html"):
+            source = template_path.read_text(encoding="utf-8")
+            for marker in owned_markers:
+                if marker in source:
+                    self.assertEqual(
+                        template_path,
+                        experience_path,
+                        f"{template_path.relative_to(templates_root)} duplicates lesson layout markup",
+                    )
 
     def test_canonical_header_geometry_is_owned_by_learning_room_css(self):
         css_path = Path(settings.BASE_DIR) / "static" / "academy" / "learning-room.css"
