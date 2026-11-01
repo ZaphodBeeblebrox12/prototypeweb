@@ -1354,3 +1354,135 @@
     background-position: right bottom, center center;
   }
 }
+
+/* One canonical Learning Room surface shared by learners and all admin previews. */
+.main-content:has(> .tt-lesson-experience) {
+  box-sizing: border-box;
+  width: min(1600px, 100%);
+  padding: 24px clamp(16px, 3vw, 42px) 52px;
+}
+
+.tt-lesson-experience {
+  box-sizing: border-box;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: clamp(20px, 3vw, 40px);
+  border: 1px solid #e7e0d2;
+  background:
+    radial-gradient(ellipse at 12% 0%, #e4eadb62, transparent 42%),
+    radial-gradient(ellipse at 94% 26%, #f2e6ce45, transparent 34%);
+}
+
+.tt-lesson-experience .tt-outline {
+  border: 1px solid #ded7c8;
+  border-radius: 0;
+  background: #f7f7f0;
+}
+
+.tt-lesson-experience .tt-lesson-article,
+.tt-lesson-experience .tt-lesson-main {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
+}
+
+.tt-lesson-experience .learning-content-grid {
+  grid-template-columns: minmax(0, 1fr) 245px;
+  gap: clamp(20px, 2.5vw, 34px);
+}
+
+.tt-lesson-experience .tt-lesson-navigation { margin-top: 16px; }
+
+/* Header height and progress-rail placement are identical in every mode. */
+.tt-lesson-experience .tt-course-header--depth {
+  position: relative;
+  padding-bottom: 25px;
+}
+
+.tt-lesson-experience .tt-course-header--depth .tt-course-progress {
+  position: absolute;
+  left: clamp(27px, 3.5vw, 44px);
+  right: clamp(27px, 3.5vw, 44px);
+  bottom: 0;
+  width: auto;
+  height: 5px;
+  margin: 0;
+}
+
+/* Keep the video visible in the same position for members and previews. */
+.tt-lesson-experience .tt-lesson-video-panel {
+  margin: 0 0 24px;
+  overflow: hidden;
+  border: 1px solid #ded7c8;
+  border-radius: 8px;
+  background: #fffdf8;
+  box-shadow: 0 8px 22px rgba(41, 56, 46, .05);
+}
+
+.tt-lesson-experience .tt-lesson-video-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 17px;
+  border-bottom: 1px solid #ded7c8;
+  color: #294b38;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+
+.tt-lesson-experience .tt-lesson-video-panel-heading span + span {
+  color: #68736c;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: normal;
+}
+
+.tt-lesson-experience .tt-lesson-video-panel .tt-video-lesson {
+  margin: 0;
+  padding: 16px;
+}
+
+.tt-lesson-experience .tt-lesson-video-panel .tt-video-lesson video {
+  display: block;
+  width: 100%;
+  max-height: 560px;
+  background: #17231c;
+}
+
+.tt-lesson-experience .tt-lesson-video-panel .tt-video-lesson--status { padding: 18px; }
+
+@media (max-width: 920px) {
+  .tt-lesson-experience .learning-content-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .tt-lesson-experience .tt-outline {
+    position: static;
+    top: auto;
+    max-height: none;
+    overflow: visible;
+    scroll-margin-top: 0;
+  }
+}
+
+@media (min-width: 921px) {
+  .tt-lesson-experience .tt-outline {
+    position: sticky;
+    top: 95px;
+    max-height: calc(100vh - 113px);
+    scroll-margin-top: 95px;
+  }
+}
+
+@media (max-width: 680px) {
+  .main-content:has(> .tt-lesson-experience) { padding: 14px 8px 25px; }
+  .tt-lesson-experience { padding: 14px 11px 24px; }
+  .tt-lesson-experience .tt-course-header--depth .tt-course-progress {
+    left: 15px;
+    right: 15px;
+  }
+}
