@@ -29,6 +29,7 @@ from .content_rendering import (
 )
 from .course_card_utils import course_topic_tags, is_course_card_recommendable
 from .course_pricing import resolved_course_offer_price
+from .forms import StagingPaymentSimulatorForm
 from .models import (
     Course,
     CourseEntitlement,
