@@ -34,6 +34,11 @@ class StagingConfirmationEmailTests(TestCase):
         self.assertContains(response, "First name")
         self.assertContains(response, "Last name")
 
+    @override_settings(
+        ACADEMY_STAGING_UNVERIFIED_LOGIN_ENABLED=True,
+        ACCOUNT_EMAIL_VERIFICATION="none",
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    )
     def test_staging_signup_creates_unverified_account_with_name_without_sending_email(self):
         email = "staging-real-inbox@example.com"
         response = self.client.post(
