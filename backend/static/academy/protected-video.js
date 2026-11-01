@@ -108,6 +108,98 @@
 
   // Keep the viewer identity watermark in the player at all times. Do not hide
   // it on pause, during buffering, or when the tab loses focus.
+  // Do not rely on the browser's native video controls: Firefox can ignore
+  // controlslist="nofullscreen" and fullscreen only the <video>, which drops
+  // sibling overlays such as the persistent viewer watermark. All controls
+  // are owned by this player, and its fullscreen button expands the wrapper.
+  const playToggle = container.querySelector("[data-video-play-toggle]");
+  const seekControl = container.querySelector("[data-video-seek]");
+  const timeDisplay = container.querySelector("[data-video-time]");
+  const muteToggle = container.querySelector("[data-video-mute-toggle]");
+  const volumeControl = container.querySelector("[data-video-volume]");
+
+  const formatVideoTime = seconds => {
+    if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
+    const whole = Math.floor(seconds);
+    const hours = Math.floor(whole / 3600);
+    const minutes = Math.floor((whole % 3600) / 60);
+    const remainder = String(whole % 60).padStart(2, "0");
+    return hours ? `${hours}:${String(minutes).padStart(2, "0")}:${remainder}` : `${minutes}:${remainder}`;
+  };
+
+  const updatePlayControl = () => {
+    if (!playToggle) return;
+    playToggle.textContent = video.paused ? "Play" : "Pause";
+    playToggle.setAttribute("aria-label", video.paused ? "Play video" : "Pause video");
+  };
+
+  const updateTimeControls = () => {
+    if (!seekControl || !timeDisplay) return;
+    const duration = Number.isFinite(video.duration) ? video.duration : 0;
+    const currentTime = Number.isFinite(video.currentTime) ? video.currentTime : 0;
+    seekControl.disabled = duration <= 0;
+    seekControl.value = duration > 0 ? String(Math.round((currentTime / duration) * 1000)) : "0";
+    timeDisplay.textContent = `${formatVideoTime(currentTime)} / ${formatVideoTime(duration)}`;
+  };
+
+  const updateVolumeControls = () => {
+    if (muteToggle) {
+      const muted = video.muted || video.volume === 0;
+      muteToggle.textContent = muted ? "Unmute" : "Mute";
+      muteToggle.setAttribute("aria-label", muted ? "Unmute video" : "Mute video");
+    }
+    if (volumeControl) volumeControl.value = video.muted ? "0" : String(video.volume);
+  };
+
+  if (playToggle) {
+    playToggle.addEventListener("click", () => {
+      if (video.paused) {
+        const playPromise = video.play();
+        if (playPromise && typeof playPromise.catch === "function") {
+          playPromise.catch(() => showStatus("Playback was blocked. Press Play again to start the video."));
+        }
+      } else {
+        video.pause();
+      }
+    });
+    video.addEventListener("play", updatePlayControl);
+    video.addEventListener("pause", updatePlayControl);
+    video.addEventListener("ended", updatePlayControl);
+    updatePlayControl();
+  }
+
+  if (seekControl) {
+    seekControl.addEventListener("input", () => {
+      const duration = Number.isFinite(video.duration) ? video.duration : 0;
+      if (duration > 0) {
+        video.currentTime = (Number(seekControl.value) / 1000) * duration;
+        updateTimeControls();
+      }
+    });
+    video.addEventListener("timeupdate", updateTimeControls);
+    video.addEventListener("loadedmetadata", updateTimeControls);
+    video.addEventListener("durationchange", updateTimeControls);
+    updateTimeControls();
+  }
+
+  if (muteToggle) {
+    muteToggle.addEventListener("click", () => {
+      video.muted = !(video.muted || video.volume === 0);
+      updateVolumeControls();
+    });
+    video.addEventListener("volumechange", updateVolumeControls);
+    updateVolumeControls();
+  }
+
+  if (volumeControl) {
+    volumeControl.addEventListener("input", () => {
+      const nextVolume = Math.max(0, Math.min(1, Number(volumeControl.value)));
+      video.volume = nextVolume;
+      video.muted = nextVolume === 0;
+      updateVolumeControls();
+    });
+  }
+
   if (fullscreenButton) {
     const updateFullscreenLabel = () => {
       const active = document.fullscreenElement === container;
@@ -315,6 +407,13 @@
     clearMetadataWatchdog();
     if (watermarkMoveTimer !== null) window.clearTimeout(watermarkMoveTimer);
     window.removeEventListener("resize", moveWatermark);
+    if (playToggle) video.removeEventListener("play", updatePlayControl);
+    if (playToggle) video.removeEventListener("pause", updatePlayControl);
+    if (playToggle) video.removeEventListener("ended", updatePlayControl);
+    if (seekControl) video.removeEventListener("timeupdate", updateTimeControls);
+    if (seekControl) video.removeEventListener("loadedmetadata", updateTimeControls);
+    if (seekControl) video.removeEventListener("durationchange", updateTimeControls);
+    if (muteToggle) video.removeEventListener("volumechange", updateVolumeControls);
     player.destroy();
   }, { once: true });
 
