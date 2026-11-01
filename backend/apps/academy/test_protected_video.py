@@ -155,6 +155,28 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
             payload__rendition_id=str(rendition.pk),
         ).exists())
 
+    def test_paid_learner_receives_only_the_ready_burned_watermark_manifest(self):
+        self.entitlement.source = CourseEntitlement.Source.PURCHASE
+        self.entitlement.save(update_fields=["source"])
+        rendition = PersonalizedProtectedVideo.objects.create(
+            user=self.user,
+            protected_video=self.video,
+            status=PersonalizedProtectedVideo.Status.READY,
+            stream_directory=f"personalized/{self.video.pk}/{self.user.pk}/ready",
+            tracking_code="VIEWER1234",
+        )
+
+        response = self.client.get(
+            reverse("academy:lesson", args=[self.course.slug, self.lesson.pk])
+        )
+
+        manifest_url = reverse("academy:personalized-video-manifest", args=[rendition.pk])
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, manifest_url)
+        self.assertContains(response, 'data-protected-video-container')
+        self.assertNotContains(response, self.manifest_url)
+        self.assertNotContains(response, 'data-video-watermark-email')
+
     def test_admin_lesson_preview_renders_ready_protected_video_player(self):
         client = self._admin_preview_client()
 
