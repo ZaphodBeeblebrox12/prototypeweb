@@ -212,7 +212,7 @@ class CourseReviewTemplateTests(TestCase):
 
         self.assertEqual(response.status_code, 200, response.content)
         self.assertTemplateUsed(response, "academy/course_detail.html")
-        self.assertTemplateNotUsed(response, "academy/course_import_website_preview.html")
+        self.assertTemplateNotUsed(response, "academy/course_detail.html")
         self.assertContains(response, "Website Preview Course")
         self.assertContains(response, "A short promise for the course.")
         self.assertContains(response, 'class="tt-course-overview')
