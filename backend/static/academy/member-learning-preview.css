@@ -23,6 +23,31 @@
   border-bottom-color: #ded7c8;
 }
 
+/* Match the admin-preview hero height: its progress rail sits on the
+   bottom edge instead of consuming an extra grid row. */
+.tt-member-learning-preview .tt-course-header--depth {
+  position: relative;
+  padding-bottom: 25px;
+}
+
+.tt-member-learning-preview .tt-course-header--depth .tt-course-progress {
+  position: absolute;
+  left: clamp(27px, 3.5vw, 44px);
+  right: clamp(27px, 3.5vw, 44px);
+  bottom: 0;
+  width: auto;
+  height: 5px;
+  margin: 0;
+}
+
+@media (max-width: 680px) {
+  .tt-member-learning-preview .tt-course-header--depth .tt-course-progress {
+    left: 15px;
+    right: 15px;
+  }
+}
+
+
 .tt-member-learning-preview .tt-outline {
   border: 1px solid #ded7c8;
   border-radius: 0;
