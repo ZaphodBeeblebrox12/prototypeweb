@@ -217,6 +217,7 @@ class ProfilePageNameTest(TestCase):
         self.assertEqual(self.user.last_name, "Kapoor")
         self.assertEqual(self.user.full_name, "Nisha Kapoor")
 
+
 class DashboardAccessTest(TestCase):
     """Test dashboard access and ban enforcement."""
 
