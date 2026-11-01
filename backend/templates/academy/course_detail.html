@@ -1,22 +1,36 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}{{ course.title }} · TradeThesis Academy{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'academy/course-overview.css' %}">{% endblock %}
+{% block title %}{% if course_import_preview %}Website preview · {{ course.title }} · TradeThesis Academy{% else %}{{ course.title }} · TradeThesis Academy{% endif %}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'academy/course-overview.css' %}">{% if course_import_preview %}<link rel="stylesheet" href="{% static 'academy/course-admin-preview.css' %}">{% endif %}{% endblock %}
 {% block page_context %}
 <div class="page-context-status page-context-status--standalone" aria-label="Account status">
+{% if course_import_preview %}<span class="badge bg-warning text-dark">ADMIN PREVIEW</span>{% endif %}
 {% if user.is_banned %}<span class="badge bg-danger">BANNED</span>{% endif %}
 {% if user.telegram_verified %}<span class="badge bg-success"><i class="bi bi-telegram"></i> Telegram connected</span>{% endif %}
 </div>
 {% endblock %}
 {% block content %}
+{% if course_import_preview %}
+<div class="tt-admin-course-preview">
+  <aside class="tt-admin-preview-banner" role="status" aria-label="Administrator-only website preview">
+    <span class="tt-admin-preview-mark">PREVIEW</span>
+    <div class="tt-admin-preview-copy">
+      <strong>Unpublished course · administrator-only website preview</strong>
+      <p>You are viewing the standard TradeThesis course overview using this staged course's actual content. Nothing here publishes the course or changes learner access or progress.</p>
+    </div>
+    <div class="tt-admin-preview-actions"><a href="{{ admin_review_url }}">Content review ↗</a></div>
+  </aside>
+  <div class="tt-course-overview tt-admin-course-overview">
+{% else %}
 <div class="tt-course-overview">
+{% endif %}
   <nav class="tt-overview-breadcrumb" aria-label="Breadcrumb">
     <a href="{% url 'academy:home' %}">Academy</a><span aria-hidden="true">/</span><span aria-current="page">{{ course.title }}</span>
   </nav>
 
   <section class="tt-overview-hero" aria-labelledby="tt-course-title">
     <div class="tt-overview-hero-copy">
-      <p class="tt-overview-eyebrow">{% if course.category %}{{ course.category }}{% else %}TRADETHESIS MICRO-COURSE{% endif %}{% if course.level %} · {{ course.level }}{% endif %}</p>
+      <p class="tt-overview-eyebrow">{% if course_import_preview %}TRADETHESIS MICRO-COURSE · TEMPLATE PREVIEW{% else %}{% if course.category %}{{ course.category }}{% else %}TRADETHESIS MICRO-COURSE{% endif %}{% if course.level %} · {{ course.level }}{% endif %}{% endif %}</p>
       <h1 id="tt-course-title">{{ course.title }}</h1>
       {% if course.summary %}<p class="tt-overview-lede">{{ course.summary }}</p>{% endif %}
       {% if course.description %}<div class="tt-overview-description tt-markdown-description">{{ course_description_html|safe }}</div>{% endif %}
@@ -33,14 +47,16 @@
       </div>
 
       <div class="tt-overview-actions">
-        {% if first_accessible_lesson %}
+        {% if course_import_preview %}
+          {% if total_lessons %}<a class="tt-overview-button" href="{{ first_preview_url }}">Open first lesson ↗</a>{% else %}<a class="tt-overview-button" href="#tt-course-curriculum">Explore curriculum ↓</a>{% endif %}
+        {% elif first_accessible_lesson %}
           <a class="tt-overview-button" href="{% url 'academy:lesson' course.slug first_accessible_lesson.id %}">{% if has_course_access %}Continue learning{% else %}Explore a preview lesson{% endif %} <span aria-hidden="true">↗</span></a>
         {% else %}
           <a class="tt-overview-button" href="#tt-course-curriculum">Explore curriculum <span aria-hidden="true">↓</span></a>
         {% endif %}
-        <a class="tt-overview-button tt-overview-button--secondary" href="#tt-course-curriculum">View curriculum ↓</a>
+        <a class="tt-overview-button tt-overview-button--secondary" href="#tt-course-curriculum">{% if course_import_preview %}Explore curriculum ↓{% else %}View curriculum ↓{% endif %}</a>
       </div>
-      <p class="tt-overview-hero-note">Work through the material at your own pace. Lesson availability follows your course access and release schedule.</p>
+      <p class="tt-overview-hero-note">{% if course_import_preview %}This is an unpublished source preview. Checkout, learner progress and access controls are intentionally omitted from this administrator-only view.{% else %}Work through the material at your own pace. Lesson availability follows your course access and release schedule.{% endif %}</p>
 
       {% if has_course_access %}
       <div class="tt-overview-progress" aria-label="Course progress">
@@ -65,6 +81,7 @@
     </div>
   </section>
 
+  {% if not course_import_preview %}
   {% if can_enrol_free %}
   <section class="tt-overview-access" aria-labelledby="tt-free-course-access-title">
     <div><h2 id="tt-free-course-access-title">Start this course for free</h2><p>Enrol with your account and keep permanent access. No payment or subscription is required.</p></div>
@@ -102,6 +119,9 @@
   </aside>
   {% endif %}
 
+  {% endif %}
+  {% endif %}
+
   {% if course.learning_outcomes %}
   <section class="tt-overview-section" aria-labelledby="tt-course-outcomes-title">
     <div class="tt-overview-section-head">
@@ -134,7 +154,7 @@
   <section id="tt-course-curriculum" class="tt-overview-section tt-overview-curriculum" aria-labelledby="tt-course-curriculum-title">
     <div class="tt-overview-section-head">
       <div><p class="tt-overview-eyebrow">INSIDE THE COURSE</p><h2 id="tt-course-curriculum-title">Work through the curriculum.</h2></div>
-      <p>Browse the modules and their lessons. Open lessons when they are available to your account; locked lessons remain protected until access and release conditions allow them.</p>
+      <p>{% if course_import_preview %}Choose any lesson to review its full learner-facing content, including teaching examples, practice and notebook prompts.{% else %}Browse the modules and their lessons. Open lessons when they are available to your account; locked lessons remain protected until access and release conditions allow them.{% endif %}</p>
     </div>
 
     <div class="tt-overview-curriculum-grid">
@@ -152,21 +172,26 @@
             <div class="tt-overview-lesson-main">
               <span class="tt-overview-lesson-number">{{ row.module.position }}.{{ item.lesson.position }}</span>
               <div>
-                {% if item.accessible %}<a class="tt-overview-lesson-title" href="{% url 'academy:lesson' course.slug item.lesson.id %}">{{ item.lesson.title }}</a>{% elif is_course_content_admin %}<a class="tt-overview-lesson-title" href="{% url 'academy:admin-lesson-preview' course.slug item.lesson.id %}">{{ item.lesson.title }}</a>{% else %}<span class="tt-overview-lesson-title">{{ item.lesson.title }}</span>{% endif %}
+                {% if course_import_preview %}<a class="tt-overview-lesson-title" href="{{ item.preview_url }}">{{ item.lesson.title }}</a>{% elif item.accessible %}<a class="tt-overview-lesson-title" href="{% url 'academy:lesson' course.slug item.lesson.id %}">{{ item.lesson.title }}</a>{% elif is_course_content_admin %}<a class="tt-overview-lesson-title" href="{% url 'academy:admin-lesson-preview' course.slug item.lesson.id %}">{{ item.lesson.title }}</a>{% else %}<span class="tt-overview-lesson-title">{{ item.lesson.title }}</span>{% endif %}
                 {% if item.lesson.summary %}<span class="tt-overview-lesson-summary">{{ item.lesson.summary }}</span>{% endif %}
               </div>
             </div>
             <div class="tt-overview-lesson-state">
-              {% if item.progress and item.progress.status == "completed" %}<span class="tt-overview-chip">Complete</span>{% endif %}
-              {% if item.lesson.is_preview %}<span class="tt-overview-chip tt-overview-chip--preview">Preview</span>{% elif item.release_at and not item.accessible %}<span>Available {{ item.release_at|date:"M j, Y" }}</span>{% elif not item.accessible %}<span class="tt-overview-chip tt-overview-chip--locked">Locked</span>{% elif item.progress and item.progress.status != "completed" %}<span>In progress</span>{% endif %}
-              {% if item.accessible %}<a href="{% url 'academy:lesson' course.slug item.lesson.id %}" aria-label="Open {{ item.lesson.title }}">↗</a>{% elif is_course_content_admin %}<a class="tt-overview-admin-preview-link" href="{% url 'academy:admin-lesson-preview' course.slug item.lesson.id %}" aria-label="Preview locked lesson {{ item.lesson.title }}">Admin preview ↗</a>{% endif %}
+              {% if course_import_preview %}
+                <span class="tt-overview-chip tt-overview-chip--preview">Preview lesson</span>
+                <a href="{{ item.preview_url }}" aria-label="Preview {{ item.lesson.title }}">↗</a>
+              {% else %}
+                {% if item.progress and item.progress.status == "completed" %}<span class="tt-overview-chip">Complete</span>{% endif %}
+                {% if item.lesson.is_preview %}<span class="tt-overview-chip tt-overview-chip--preview">Preview</span>{% elif item.release_at and not item.accessible %}<span>Available {{ item.release_at|date:"M j, Y" }}</span>{% elif not item.accessible %}<span class="tt-overview-chip tt-overview-chip--locked">Locked</span>{% elif item.progress and item.progress.status != "completed" %}<span>In progress</span>{% endif %}
+                {% if item.accessible %}<a href="{% url 'academy:lesson' course.slug item.lesson.id %}" aria-label="Open {{ item.lesson.title }}">↗</a>{% elif is_course_content_admin %}<a class="tt-overview-admin-preview-link" href="{% url 'academy:admin-lesson-preview' course.slug item.lesson.id %}" aria-label="Preview locked lesson {{ item.lesson.title }}">Admin preview ↗</a>{% endif %}
+              {% endif %}
             </div>
           </li>
           {% endfor %}
         </ul>
         <div class="tt-overview-module-footer">
           {% with first_item=row.lessons.0 %}
-            {% if first_item.accessible %}<a href="{% url 'academy:lesson' course.slug first_item.lesson.id %}">Start this module ↗</a>{% elif is_course_content_admin %}<a href="{% url 'academy:admin-lesson-preview' course.slug first_item.lesson.id %}">Preview module as admin ↗</a>{% else %}Lessons open according to your course access and release schedule.{% endif %}
+            {% if course_import_preview %}<a href="{{ first_item.preview_url }}">Preview this module ↗</a>{% elif first_item.accessible %}<a href="{% url 'academy:lesson' course.slug first_item.lesson.id %}">Start this module ↗</a>{% elif is_course_content_admin %}<a href="{% url 'academy:admin-lesson-preview' course.slug first_item.lesson.id %}">Preview module as admin ↗</a>{% else %}Lessons open according to your course access and release schedule.{% endif %}
           {% endwith %}
         </div>
       </article>
@@ -176,11 +201,19 @@
     </div>
   </section>
 
+  {% if course_import_preview %}
+  <section class="tt-overview-bottom-note" aria-label="Administrator preview note">
+    <div><h2>Review the content in its intended setting.</h2><p>Use the curriculum to move between lessons. Return to Content review to inspect publishing checks; this preview does not make the course visible to learners.</p></div>
+    <a class="tt-overview-button tt-overview-button--secondary" href="{{ admin_review_url }}">Back to content review ↗</a>
+  </section>
+  {% else %}
   <section class="tt-overview-bottom-note" aria-label="Course study reminder">
     <div><h2>Take the time to build the reasoning.</h2><p>Use the examples and practice prompts to check your reading. Course progress is saved to your account, and access rules remain in place for each lesson.</p></div>
     {% if first_accessible_lesson %}<a class="tt-overview-button" href="{% url 'academy:lesson' course.slug first_accessible_lesson.id %}">{% if entitlement %}Continue learning{% else %}Open preview lesson{% endif %} ↗</a>{% else %}<a class="tt-overview-button tt-overview-button--secondary" href="#tt-course-curriculum">Review curriculum ↑</a>{% endif %}
   </section>
+  {% endif %}
 </div>
+{% if course_import_preview %}</div>{% endif %}
 
 <script>
 (() => {
