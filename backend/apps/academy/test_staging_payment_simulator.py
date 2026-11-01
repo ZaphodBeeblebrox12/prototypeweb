@@ -131,7 +131,9 @@ class StagingPaymentSimulatorTests(TestCase):
         self.assertContains(response, "SIMULATOR — NO MONEY COLLECTED")
 
         intent = PaymentIntent.objects.get(user=self.learner)
-        self.assertEqual(intent.provider, PaymentIntent.Provider.SIMULATOR)
+        self.assertEqual(intent.provider, PaymentIntent.Provider.RAZORPAY)
+        self.assertTrue(intent.is_simulated)
+        self.assertEqual(intent.get_provider_display(), "Simulator — no money collected")
         self.assertEqual(intent.status, PaymentIntent.Status.SUCCESS)
         self.assertEqual(intent.amount, self.price.price_cents)
         self.assertEqual(intent.currency, self.price.currency)
