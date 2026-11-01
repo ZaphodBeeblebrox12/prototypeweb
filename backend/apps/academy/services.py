@@ -259,8 +259,9 @@ def enqueue_personalized_videos_for_course(*, user, course):
 
 def revoke_personalized_video_renditions_for_entitlement(*, user_id, course):
     """Disable and queue deletion of a learner's private renditions after access revocation."""
-    from .models import PersonalizedProtectedVideo
     from apps.jobs.enqueue import enqueue_generic
+
+    from .models import PersonalizedProtectedVideo
 
     renditions = PersonalizedProtectedVideo.objects.filter(
         user_id=user_id,
