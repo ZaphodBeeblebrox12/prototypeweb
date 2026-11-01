@@ -728,6 +728,54 @@ class ProtectedLessonVideo(models.Model):
         return f"Protected video · {self.lesson}"
 
 
+class PersonalizedProtectedVideo(models.Model):
+    """Per-purchaser HLS rendition with the viewer identity burned into pixels."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Waiting to prepare")
+        PROCESSING = "processing", _("Preparing personalised video")
+        READY = "ready", _("Personalised video ready")
+        FAILED = "failed", _("Personalised video preparation failed")
+        REVOKED = "revoked", _("Access revoked")
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    protected_video = models.ForeignKey(
+        ProtectedLessonVideo,
+        on_delete=models.CASCADE,
+        related_name="personalized_renditions",
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="academy_personalized_videos",
+    )
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING)
+    stream_directory = models.CharField(max_length=512, blank=True)
+    tracking_code = models.CharField(max_length=16, blank=True)
+    processing_error = models.TextField(blank=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["protected_video__lesson__module__course__title", "protected_video__lesson__title"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "protected_video"],
+                name="academy_personal_video_user_source_uq",
+            ),
+        ]
+        indexes = [
+            models.Index(
+                fields=["user", "status"],
+                name="academy_personal_video_user_status_idx",
+            ),
+        ]
+
+    def __str__(self):
+        return f"Personalised video · {self.user_id} · {self.protected_video_id}"
+
+
 class CourseContentRevision(models.Model):
     """Previous lesson content, retained before admin edits or approved imports."""
 
