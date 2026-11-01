@@ -78,6 +78,13 @@
           </div>
           <p class="tt-video-player-status" data-video-player-status role="status" aria-live="polite"></p>
         </section>
+        {% elif admin_preview and video_processing_status %}<section class="tt-video-lesson tt-video-lesson--status" aria-label="Protected lesson video status">
+          <div role="status" aria-live="polite">
+            <strong>Protected lesson video</strong>
+            <p>{{ video_processing_status }}</p>
+          </div>
+          {% if video_processing_error %}<p class="small text-muted">{{ video_processing_error }}</p>{% endif %}
+        </section>
         {% elif video_url %}<section class="tt-video-lesson" aria-label="Lesson video">{% if video_is_file %}<video controls preload="metadata" src="{{ video_url }}">Your browser does not support video playback.</video>{% else %}<a href="{{ video_url }}" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a><p class="small text-muted">This video opens in a new tab.</p>{% endif %}</section>{% endif %}
         {% if admin_preview %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook reflection=reflection reflection_response=reflection_response course_slug=course.slug practice_questions=practice_questions admin_preview=True only %}{% else %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook lesson=lesson reflection=reflection reflection_response=reflection_response course_slug=course.slug practice_questions=practice_questions only %}{% endif %}
         {% if related_courses %}
