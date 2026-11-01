@@ -133,65 +133,6 @@
         </section>
         {% endif %}
         {% if admin_preview %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook reflection=reflection reflection_response=reflection_response course_slug=course.slug practice_questions=practice_questions admin_preview=True only %}{% else %}{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections notebook=notebook lesson=lesson reflection=reflection reflection_response=reflection_response course_slug=course.slug practice_questions=practice_questions only %}{% endif %}
-        {% if personalized_video_rendition or personalized_video_status or protected_video or admin_preview and video_processing_status or video_url %}
-        <details class="tt-lesson-video-disclosure">
-          <summary>Lesson video <span>Optional walkthrough</span></summary>
-          {% if personalized_video_rendition and personalized_video_rendition.status == "ready" %}<section class="tt-video-lesson tt-video-lesson--protected" aria-label="Personalised protected lesson video" data-protected-video-container>
-          <video playsinline preload="none" data-protected-video data-manifest-url="{{ personalized_video_manifest_url }}" disablepictureinpicture>
-            Your browser does not support protected HLS video playback.
-          </video>
-          <div class="tt-video-controls" data-video-controls role="group" aria-label="Video controls">
-            <button class="tt-video-control-button" type="button" data-video-play-toggle aria-label="Play video">Play</button>
-            <input class="tt-video-seek" type="range" min="0" max="1000" step="1" value="0" data-video-seek aria-label="Seek video" disabled>
-            <span class="tt-video-time" data-video-time aria-live="off">0:00 / 0:00</span>
-            <button class="tt-video-control-button" type="button" data-video-mute-toggle aria-label="Mute video">Mute</button>
-            <input class="tt-video-volume" type="range" min="0" max="1" step="0.05" value="1" data-video-volume aria-label="Volume">
-            <button class="tt-video-fullscreen-button" type="button" data-video-fullscreen aria-label="View video full screen">Full screen</button>
-          </div>
-          <p class="tt-video-player-status" data-video-player-status role="status" aria-live="polite"></p>
-        </section>
-        {% elif personalized_video_rendition %}<section class="tt-video-lesson tt-video-lesson--status" aria-label="Personalised protected video status" data-personalized-video-status data-status-url="{{ personalized_video_status_url }}">
-          <div role="status" aria-live="polite">
-            <strong>Your protected course video is being prepared</strong>
-            <p data-personalized-video-status-message>We are preparing your personal copy with your viewer watermark. This lesson will become playable automatically when it is ready.</p>
-          </div>
-        </section>
-        {% elif personalized_video_status %}<section class="tt-video-lesson tt-video-lesson--status" aria-label="Personalised protected video status">
-          <div role="status" aria-live="polite">
-            <strong>Your protected course video is being prepared</strong>
-            <p>{{ personalized_video_status }}. Please refresh this lesson shortly.</p>
-          </div>
-        </section>
-        {% elif protected_video %}<section class="tt-video-lesson tt-video-lesson--protected" aria-label="Protected lesson video" data-protected-video-container>
-          <video playsinline preload="none" data-protected-video data-manifest-url="{{ protected_video_manifest_url }}" disablepictureinpicture>
-            Your browser does not support protected HLS video playback.
-          </video>
-          <div class="tt-video-watermark" data-video-watermark aria-label="Viewer identity watermark">
-            <span data-video-watermark-name>{{ video_watermark_name }}</span>
-            <span data-video-watermark-email>{{ video_watermark_email }}</span>
-          </div>
-          <div class="tt-video-controls" data-video-controls role="group" aria-label="Video controls">
-            <button class="tt-video-control-button" type="button" data-video-play-toggle aria-label="Play video">Play</button>
-            <input class="tt-video-seek" type="range" min="0" max="1000" step="1" value="0" data-video-seek aria-label="Seek video" disabled>
-            <span class="tt-video-time" data-video-time aria-live="off">0:00 / 0:00</span>
-            <button class="tt-video-control-button" type="button" data-video-mute-toggle aria-label="Mute video">Mute</button>
-            <input class="tt-video-volume" type="range" min="0" max="1" step="0.05" value="1" data-video-volume aria-label="Volume">
-            <button class="tt-video-fullscreen-button" type="button" data-video-fullscreen aria-label="View video full screen">
-              Full screen
-            </button>
-          </div>
-          <p class="tt-video-player-status" data-video-player-status role="status" aria-live="polite"></p>
-        </section>
-        {% elif admin_preview and video_processing_status %}<section class="tt-video-lesson tt-video-lesson--status" aria-label="Protected lesson video status">
-          <div role="status" aria-live="polite">
-            <strong>Protected lesson video</strong>
-            <p>{{ video_processing_status }}</p>
-          </div>
-          {% if video_processing_error %}<p class="small text-muted">{{ video_processing_error }}</p>{% endif %}
-        </section>
-        {% elif video_url %}<section class="tt-video-lesson" aria-label="Lesson video">{% if video_is_file %}<video controls preload="metadata" src="{{ video_url }}">Your browser does not support video playback.</video>{% else %}<a href="{{ video_url }}" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a><p class="small text-muted">This video opens in a new tab.</p>{% endif %}</section>{% endif %}
-        </details>
-        {% endif %}
 {% if related_courses %}
         <section class="tt-related-courses tt-related-courses--cards" aria-labelledby="tt-related-courses-heading">
           <div class="tt-related-courses-header">
