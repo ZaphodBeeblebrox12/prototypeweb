@@ -64,4 +64,24 @@ urlpatterns = [
         video_protection.protected_video_segment,
         name="protected-video-segment",
     ),
+    path(
+        "video/personalized/<uuid:rendition_id>/status/",
+        video_protection.personalized_video_status,
+        name="personalized-video-status",
+    ),
+    path(
+        "video/personalized/<uuid:rendition_id>/manifest.m3u8",
+        video_protection.personalized_video_manifest,
+        name="personalized-video-manifest",
+    ),
+    path(
+        "video/personalized/<uuid:rendition_id>/key/",
+        video_protection.personalized_video_key,
+        name="personalized-video-key",
+    ),
+    path(
+        "video/personalized/<uuid:rendition_id>/segment/<str:segment_name>/",
+        video_protection.personalized_video_segment,
+        name="personalized-video-segment",
+    ),
 ]
