@@ -3,9 +3,9 @@
 Email uniqueness is a sign-up rule, not a global email-field rule: password
 reset must accept an address that already belongs to an account.
 """
+from allauth.account.forms import SignupForm
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from allauth.account.forms import SignupForm
 
 from apps.accounts.models import User
 
