@@ -2472,18 +2472,11 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
 
     def test_member_and_admin_lessons_share_one_canonical_experience_template(self):
         backend_root = Path(__file__).resolve().parents[2]
-        lesson_template = (backend_root / "templates" / "academy" / "lesson.html").read_text(
-            encoding="utf-8"
-        )
-        website_preview = (
-            backend_root / "templates" / "academy" / "course_import_website_preview.html"
-        ).read_text(encoding="utf-8")
+        templates_root = backend_root / "templates" / "academy"
+        lesson_template = (templates_root / "lesson.html").read_text(encoding="utf-8")
+        course_overview = (templates_root / "course_detail.html").read_text(encoding="utf-8")
         experience = (
-            backend_root
-            / "templates"
-            / "academy"
-            / "partials"
-            / "lesson_experience.html"
+            templates_root / "partials" / "lesson_experience.html"
         ).read_text(encoding="utf-8")
         views_source = " ".join(
             Path(__file__).with_name("views.py").read_text(encoding="utf-8").split()
@@ -2491,19 +2484,22 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
 
         include = 'include "academy/partials/lesson_experience.html"'
         self.assertIn(include, lesson_template)
-        self.assertNotIn(include, website_preview)
-        self.assertIn(
-            'return render(request, "academy/lesson.html", preview_context)', views_source
-        )
         self.assertIn('<header class="tt-course-header tt-course-header--depth">', experience)
         self.assertIn('<div class="tt-room-grid">', experience)
         self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', lesson_template)
-        self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', website_preview)
+        self.assertNotIn('<div class="tt-room-grid">', lesson_template)
+        self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', course_overview)
+        self.assertNotIn('<div class="tt-room-grid">', course_overview)
+
         self.assertIn(
-            '"module_display_title": _module_display_title(lesson.module.title)', views_source
+            'return render(request, "academy/lesson.html", preview_context)', views_source
         )
-        self.assertIn('"selected_module_display_title": _module_display_title(', views_source)
-        self.assertIn('selected_module.get("title") if selected_module else ""', views_source)
+        self.assertIn(
+            'return render(request, "academy/course_detail.html", preview_context)', views_source
+        )
+        self.assertFalse(
+            (templates_root / "course_import_website_preview.html").exists()
+        )
 
     def test_module_display_name_removes_an_optional_number_prefix(self):
         from .views import _module_display_title
