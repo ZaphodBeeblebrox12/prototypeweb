@@ -119,6 +119,12 @@ class EmailVerificationMiddleware:
         - Users who signed up via social auth (Google)
         - Users with verified email
         """
+        # This flag is set only by production.py when an explicit env switch
+        # AND the exact Academy staging hostname both match. Never infer a
+        # staging exception from DEBUG or the request's Host header alone.
+        if getattr(settings, "ACADEMY_STAGING_UNVERIFIED_LOGIN_ENABLED", False):
+            return False
+
         # Superusers and staff are exempt
         if user.is_superuser or user.is_staff:
             return False
