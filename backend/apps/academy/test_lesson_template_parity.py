@@ -53,6 +53,9 @@ class LessonTemplateParityTests(SimpleTestCase):
             (templates_root / "course_import_website_preview.html").exists(),
             "Do not recreate a Course Import-specific page template.",
         )
+        static_root = Path(settings.BASE_DIR) / "static" / "academy"
+        self.assertFalse((static_root / "course-import-preview.css").exists())
+        self.assertFalse((static_root / "member-learning-preview.css").exists())
 
     def test_only_shared_lesson_partial_owns_the_learning_room_shell(self):
         templates_root = Path(settings.BASE_DIR) / "templates" / "academy"
