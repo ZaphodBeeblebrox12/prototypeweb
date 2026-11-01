@@ -1,3 +1,6 @@
+from pathlib import Path
+
+from django.conf import settings
 from django.template.loader import get_template
 from django.test import SimpleTestCase
 
@@ -8,6 +11,20 @@ class LessonTemplateParityTests(SimpleTestCase):
 
         self.assertIn("tt-member-learning-preview", source)
         self.assertIn("academy/member-learning-preview.css", source)
+
+    def test_member_header_progress_rail_matches_admin_preview_height(self):
+        css_path = (
+            Path(settings.BASE_DIR)
+            / "static"
+            / "academy"
+            / "member-learning-preview.css"
+        )
+        css = css_path.read_text(encoding="utf-8")
+
+        self.assertIn("padding-bottom: 25px;", css)
+        self.assertIn("position: absolute;", css)
+        self.assertIn("bottom: 0;", css)
+        self.assertIn("margin: 0;", css)
 
     def test_member_video_is_visible_before_the_primary_lesson_content(self):
         source = get_template("academy/lesson.html").template.source
