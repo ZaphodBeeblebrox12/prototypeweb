@@ -28,8 +28,12 @@
           <dd class="col-sm-8"><code>{{ result.payment_intent.pk }}</code></dd>
           <dt class="col-sm-4">Payment record</dt>
           <dd class="col-sm-8"><strong>SIMULATOR — NO MONEY COLLECTED</strong></dd>
-          <dt class="col-sm-4">Personal video jobs</dt>
-          <dd class="col-sm-8">{{ result.queued_count }} queued</dd>
+              <dt class="col-sm-4">Personal video jobs</dt>
+          <dd class="col-sm-8">{{ result.queued_count }} queued or ready</dd>
+          {% if result.simulator_only_offer %}
+            <dt class="col-sm-4">Test offer</dt>
+            <dd class="col-sm-8">Internal only · inactive · not visible to learners</dd>
+          {% endif %}
         </dl>
         <p class="small text-muted">
           No payment receipt or invoice was sent. The learner's course entitlement and
@@ -48,9 +52,9 @@
       <div class="card-header">Create a no-money course purchase</div>
       <div class="card-body">
         <p class="text-muted">
-          Choose a published paid course and a non-staff test learner. The simulator requires
-          at least one ready protected source video in that course. FFmpeg jobs are queued only
-          for this learner.
+          Choose any published course and a non-staff test learner. The course needs at least one
+          ready protected source video. If it has no active paid offer, the simulator creates a
+          hidden, inactive test offer used only for this no-money grant; normal learners cannot buy it.
         </p>
         <form method="post" novalidate>
           {% csrf_token %}
@@ -58,9 +62,9 @@
             <div class="alert alert-danger">{{ form.non_field_errors }}</div>
           {% endif %}
           <div class="mb-3">
-            <label class="form-label" for="{{ form.course_offer.id_for_label }}">{{ form.course_offer.label }}</label>
-            {{ form.course_offer }}
-            {% for error in form.course_offer.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            <label class="form-label" for="{{ form.course.id_for_label }}">{{ form.course.label }}</label>
+            {{ form.course }}
+            {% for error in form.course.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
           </div>
           <div class="mb-3">
             <label class="form-label" for="{{ form.learner.id_for_label }}">{{ form.learner.label }}</label>
@@ -82,7 +86,7 @@
   {% endif %}
 </section>
 <style>
-  #id_course_offer, #id_learner {
+  #id_course, #id_learner {
     display: block;
     width: 100%;
     min-height: 42px;
