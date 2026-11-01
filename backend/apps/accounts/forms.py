@@ -67,7 +67,6 @@ class TradeThesisSignupForm(SignupForm):
         return user
 
 
-
 class TradeThesisAdminUserCreationForm(UserCreationForm):
     """Require a member's first and last names when staff create an account."""
 
