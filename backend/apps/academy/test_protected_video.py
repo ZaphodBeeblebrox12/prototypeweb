@@ -311,6 +311,7 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
 
     def test_paid_purchase_queues_personalised_renditions_for_ready_course_videos(self):
         from apps.jobs.models import Job
+
         from .services import enqueue_personalized_videos_for_course
 
         self.entitlement.source = CourseEntitlement.Source.PURCHASE
