@@ -5,10 +5,41 @@ Overrides base with security hardening, env-driven hosts, Postgres via
 DATABASE_URL (handled in base), and whitenoise manifest storage.
 """
 import json
+from urllib.parse import urlsplit
 
 from .base import *
 
 DEBUG = env("DEBUG", default=False)
+
+# Staging-only login escape hatch for test learners. This never changes
+# production verification policy: the flag is effective only when SITE_BASE_URL
+# is the exact Academy staging hostname. Emails remain unverified; this only
+# avoids an outbound confirmation email blocking staging sign-in.
+ACADEMY_STAGING_UNVERIFIED_LOGIN_ENABLED = False
+_allow_staging_unverified_login = env.bool(
+    "ACADEMY_STAGING_ALLOW_UNVERIFIED_LOGIN", default=False
+)
+_configured_site_host = (
+    urlsplit(str(SITE_BASE_URL or "")).hostname or ""
+).lower()
+_expected_academy_staging_host = (
+    getattr(
+        __import__("django.conf", fromlist=["settings"]).settings,
+        "ACADEMY_STAGING_PAYMENT_SIMULATOR_HOST",
+        "tradethesis-academy-staging.onrender.com",
+    )
+    .strip()
+    .lower()
+)
+if (
+    _allow_staging_unverified_login
+    and _configured_site_host == _expected_academy_staging_host
+):
+    ACADEMY_STAGING_UNVERIFIED_LOGIN_ENABLED = True
+    ACCOUNT_EMAIL_VERIFICATION = "optional"
+else:
+    # Hosted environments remain strict unless the exact staging gate passes.
+    ACCOUNT_EMAIL_VERIFICATION = "mandatory"
 
 # Env is configured in base.py with ALLOWED_HOSTS cast to list, so env()
 # already returns a list here. Use env.list() consistently for comma-separated
