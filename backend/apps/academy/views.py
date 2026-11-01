@@ -1063,6 +1063,8 @@ def course_import_website_preview(request, import_id):
     record = get_object_or_404(CourseImport, pk=import_id)
     payload = record.payload if isinstance(record.payload, dict) else {}
     course = payload.get("course") if isinstance(payload.get("course"), dict) else {}
+    if not course.get("slug"):
+        course = {**course, "slug": record.course_slug}
     modules = payload.get("modules") if isinstance(payload.get("modules"), list) else []
     raw_assets = list(record.assets.all())
     live_assets = {
@@ -1210,42 +1212,64 @@ def course_import_website_preview(request, import_id):
                     raw_video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
                 )
 
-    return render(
-        request,
-        "academy/course_import_website_preview.html",
-        {
-            "import_record": record,
-            "course": course,
-            "course_description_html": _render_course_description(
-                course.get("description", ""),
-                user=request.user,
-                admin_preview=True,
-            ),
-            "preview_modules": preview_modules,
-            "total_modules": len(preview_modules),
-            "total_lessons": total_lessons,
-            "total_study_minutes": total_study_minutes,
-            "total_study_hours": total_study_minutes // 60,
-            "total_study_minutes_remainder": total_study_minutes % 60,
-            "overview_url": overview_url,
-            "first_preview_url": first_preview_url,
-            "admin_review_url": admin_review_url,
-            "selected_lesson": selected_lesson,
-            "selected_module": selected_module,
-            "selected_module_display_title": _module_display_title(
-                selected_module.get("title") if selected_module else ""
-            ),
-            "selected_sections": selected_sections,
-            "selected_notebook": selected_notebook,
-            "selected_reflection": selected_reflection,
-            "selected_reflection_response": "",
-            "selected_practice_questions": selected_practice_questions,
-            "selected_video_url": selected_video_url,
-            "selected_video_is_file": selected_video_is_file,
-            "selected_related_courses": selected_related_courses,
-        },
-    )
+    preview_context = {
+        "import_record": record,
+        "course": course,
+        "course_description_html": _render_course_description(
+            course.get("description", ""),
+            user=request.user,
+            admin_preview=True,
+        ),
+        "preview_modules": preview_modules,
+        "total_modules": len(preview_modules),
+        "total_lessons": total_lessons,
+        "total_study_minutes": total_study_minutes,
+        "total_study_hours": total_study_minutes // 60,
+        "total_study_minutes_remainder": total_study_minutes % 60,
+        "overview_url": overview_url,
+        "first_preview_url": first_preview_url,
+        "admin_review_url": admin_review_url,
+        "selected_lesson": selected_lesson,
+        "selected_module": selected_module,
+        "selected_module_display_title": _module_display_title(
+            selected_module.get("title") if selected_module else ""
+        ),
+        "selected_sections": selected_sections,
+        "selected_notebook": selected_notebook,
+        "selected_reflection": selected_reflection,
+        "selected_reflection_response": "",
+        "selected_practice_questions": selected_practice_questions,
+        "selected_video_url": selected_video_url,
+        "selected_video_is_file": selected_video_is_file,
+        "selected_related_courses": selected_related_courses,
+    }
+    if selected_lesson is not None:
+        # Draft lessons use the exact same full page template as published lessons.
+        preview_context.update(
+            {
+                "lesson": selected_lesson,
+                "module": selected_module,
+                "module_display_title": preview_context["selected_module_display_title"],
+                "outline_modules": preview_modules,
+                "lesson_sections": selected_sections,
+                "notebook": selected_notebook,
+                "reflection": selected_reflection,
+                "reflection_response": "",
+                "practice_questions": selected_practice_questions,
+                "video_url": selected_video_url,
+                "video_is_file": selected_video_is_file,
+                "related_courses": selected_related_courses,
+                "admin_preview": True,
+                "course_import_preview": True,
+                "progress": None,
+                "course_progress_percent": 0,
+                "previous_lesson": None,
+                "next_lesson": None,
+            }
+        )
+        return render(request, "academy/lesson.html", preview_context)
 
+    return render(request, "academy/course_import_website_preview.html", preview_context)
 
 @login_required
 @require_POST
