@@ -721,6 +721,10 @@ def lesson_detail(request, course_slug, lesson_id):
                 personalized_video_status = personalized_video_rendition.get_status_display()
         elif protected_video_record:
             personalized_video_status = protected_video_record.get_status_display()
+        else:
+            personalized_video_status = (
+                "No protected video source has been uploaded for this lesson yet."
+            )
         protected_video = None
 
     video_url = (
