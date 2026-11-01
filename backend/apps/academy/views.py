@@ -38,6 +38,7 @@ from .models import (
     Lesson,
     LessonInstructorMaterial,
     LessonProgress,
+    PersonalizedProtectedVideo,
     ProtectedLessonVideo,
 )
 from .permissions import is_course_content_admin
@@ -681,13 +682,52 @@ def lesson_detail(request, course_slug, lesson_id):
                     if isinstance(saved_responses, list) and prompt_index < len(saved_responses)
                     else ""
                 )
-    protected_video = ProtectedLessonVideo.objects.filter(
-        lesson=lesson,
-        status=ProtectedLessonVideo.Status.READY,
-    ).first()
+    protected_video_record = ProtectedLessonVideo.objects.filter(lesson=lesson).first()
+    protected_video = (
+        protected_video_record
+        if protected_video_record
+        and protected_video_record.status == ProtectedLessonVideo.Status.READY
+        else None
+    )
+    personalized_video_rendition = None
+    personalized_video_status = ""
+    paid_purchase = bool(
+        entitlement
+        and entitlement.source == CourseEntitlement.Source.PURCHASE
+        and entitlement.has_access_at(now)
+    )
+    if paid_purchase:
+        # Paid learners never receive the shared unpersonalised HLS rendition.
+        # The purchase flow normally queues all course videos; this is an
+        # idempotent repair path for existing paid learners or delayed uploads.
+        if protected_video:
+            from .services import enqueue_personalized_video_for_purchase
+            personalized_video_rendition = PersonalizedProtectedVideo.objects.filter(
+                user=request.user,
+                protected_video=protected_video,
+            ).first()
+            if (
+                personalized_video_rendition is None
+                or personalized_video_rendition.status in (
+                    PersonalizedProtectedVideo.Status.FAILED,
+                    PersonalizedProtectedVideo.Status.REVOKED,
+                )
+            ):
+                personalized_video_rendition = enqueue_personalized_video_for_purchase(
+                    user=request.user,
+                    protected_video=protected_video,
+                )
+            if personalized_video_rendition:
+                personalized_video_status = personalized_video_rendition.get_status_display()
+        elif protected_video_record:
+            personalized_video_status = protected_video_record.get_status_display()
+        protected_video = None
+
     video_url = (
         lesson.content_json.get("video_url", "") if isinstance(lesson.content_json, dict) else ""
     )
+    if paid_purchase:
+        video_url = ""
     video_url = (
         video_url
         if (
@@ -806,6 +846,25 @@ def lesson_detail(request, course_slug, lesson_id):
                 if protected_video
                 else ""
             ),
+            "personalized_video_rendition": personalized_video_rendition,
+            "personalized_video_manifest_url": (
+                reverse(
+                    "academy:personalized-video-manifest",
+                    args=[personalized_video_rendition.pk],
+                )
+                if personalized_video_rendition
+                and personalized_video_rendition.status == PersonalizedProtectedVideo.Status.READY
+                else ""
+            ),
+            "personalized_video_status_url": (
+                reverse(
+                    "academy:personalized-video-status",
+                    args=[personalized_video_rendition.pk],
+                )
+                if personalized_video_rendition
+                else ""
+            ),
+            "personalized_video_status": personalized_video_status,
             "video_watermark_name": video_watermark_name,
             "video_watermark_email": request.user.email,
             "previous_lesson": previous_lesson,
