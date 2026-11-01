@@ -222,6 +222,8 @@ class CourseReviewTemplateTests(TestCase):
         self.assertContains(response, "Content review")
         self.assertNotContains(response, "data-notebook-response")
         self.assertNotContains(response, "data-practice-quiz>")
+        self.assertNotContains(response, "Continue to secure checkout")
+        self.assertNotContains(response, "Enrol for free")
         self.assertIsNone(response.context["selected_lesson"])
 
     def test_website_preview_renders_lesson_tabs_read_only(self):
