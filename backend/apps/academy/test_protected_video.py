@@ -355,6 +355,42 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
 
 
 class PrivateLessonVideoDriveUploadTests(TestCase):
+    def test_drive_media_stream_is_decoded_before_returning_file(self):
+        import gzip
+        from io import BytesIO
+        from unittest.mock import Mock, PropertyMock, patch
+
+        from urllib3.response import HTTPResponse
+
+        from .video_storage import PrivateLessonVideoStorage
+
+        payload = b"encrypted-hls-segment-bytes-" * 200
+        compressed = gzip.compress(payload)
+        raw = HTTPResponse(
+            body=BytesIO(compressed),
+            headers={"Content-Encoding": "gzip"},
+            preload_content=False,
+        )
+        response = Mock()
+        response.raw = raw
+        storage = PrivateLessonVideoStorage()
+
+        with (
+            patch(
+                "apps.academy.google_drive_storage.GoogleDriveStorageMixin._drive_asset_enabled",
+                new_callable=PropertyMock,
+                return_value=True,
+            ),
+            patch.object(storage, "_find_drive_file", return_value={"id": "drive-segment"}),
+            patch.object(storage, "_drive_request", return_value=response) as request,
+        ):
+            delivered = storage._open("streams/video-id/segment_00000.ts")
+            self.assertEqual(delivered.read(), payload)
+
+        self.assertTrue(raw.decode_content)
+        self.assertEqual(request.call_args.kwargs["headers"], {"Accept-Encoding": "identity"})
+        self.assertTrue(request.call_args.kwargs["stream"])
+
     def test_drive_upload_sends_resumable_chunks_with_content_ranges(self):
         import hashlib
         from unittest.mock import Mock, PropertyMock, patch
