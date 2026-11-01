@@ -98,7 +98,7 @@ class StagingPaymentSimulatorTests(TestCase):
         self.assertContains(response, "STAGING ONLY")
         self.assertContains(response, "NO MONEY COLLECTED")
 
-        wrong_host = self.client.get(self.url, HTTP_HOST="tradethesis.com")
+        wrong_host = self.client.get(self.url, HTTP_HOST="tradethesis-public-staging.onrender.com")
         self.assertEqual(wrong_host.status_code, 404)
 
     def test_disabled_setting_hides_simulator_even_on_staging_host(self):
@@ -121,6 +121,7 @@ class StagingPaymentSimulatorTests(TestCase):
             {
                 "course_offer": str(self.offer.pk),
                 "learner": str(self.learner.pk),
+                "acknowledge": "on",
             },
             HTTP_HOST=STAGING_HOST,
         )
