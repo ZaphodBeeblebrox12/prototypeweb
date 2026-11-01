@@ -162,7 +162,7 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
             user=self.user,
             protected_video=self.video,
             status=PersonalizedProtectedVideo.Status.READY,
-            stream_directory=f"personalized/{self.video.pk}/{self.user.pk}/ready",
+            stream_directory=f"personalized/{self.video.pk}/{self.user.pk}/0123456789abcdef0123456789abcdef",
             tracking_code="VIEWER1234",
         )
 
@@ -365,7 +365,7 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
             user=self.user,
             protected_video=self.video,
             status=PersonalizedProtectedVideo.Status.READY,
-            stream_directory=f"personalized/{self.video.pk}/{self.user.pk}/test",
+            stream_directory=f"personalized/{self.video.pk}/{self.user.pk}/0123456789abcdef0123456789abcdef",
             tracking_code="ABC123TEST",
         )
         rendition_dir = Path(self.temp_dir.name) / rendition.stream_directory
