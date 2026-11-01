@@ -8,6 +8,7 @@ from apps.academy.models import (
     CourseEntitlementEvent,
     CourseModule,
     CourseOffer,
+    Lesson,
     PersonalizedProtectedVideo,
     ProtectedLessonVideo,
 )
@@ -65,9 +66,7 @@ class StagingPaymentSimulatorTests(TestCase):
             position=1,
             is_published=True,
         )
-        self.lesson = __import__(
-            "apps.academy.models", fromlist=["Lesson"]
-        ).Lesson.objects.create(
+        self.lesson = Lesson.objects.create(
             module=self.module,
             title="Test lesson",
             slug="test-lesson",
