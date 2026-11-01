@@ -151,7 +151,23 @@ class CoursePaymentActivationTests(TestCase):
         self.assertEqual(job.payload["rendition_id"], str(rendition.pk))
 
     def test_full_refund_revokes_only_the_current_course_purchase(self):
+        from apps.jobs.models import Job
+
+        video = ProtectedLessonVideo.objects.create(
+            lesson=self.lesson,
+            source_file="academy/video-source/trading-path/lesson-1.mp4",
+            status=ProtectedLessonVideo.Status.READY,
+            stream_directory="streams/shared/lesson-1",
+        )
         _activated, entitlement = activate_paid_subscription(self.intent)
+        rendition = PersonalizedProtectedVideo.objects.get(
+            user=self.user,
+            protected_video=video,
+        )
+        rendition.status = PersonalizedProtectedVideo.Status.READY
+        rendition.stream_directory = "personalized/lesson-1/buyer-1/old-rendition"
+        rendition.save(update_fields=["status", "stream_directory"])
+
         PaymentIntent.objects.filter(pk=self.intent.pk).update(refunded_cents=self.intent.amount)
 
         result = apply_refund_policy(self.intent)
@@ -159,6 +175,15 @@ class CoursePaymentActivationTests(TestCase):
         entitlement.refresh_from_db()
         self.assertEqual(entitlement.status, CourseEntitlement.Status.REVOKED)
         self.assertFalse(entitlement.has_access)
+        rendition.refresh_from_db()
+        self.assertEqual(rendition.status, PersonalizedProtectedVideo.Status.REVOKED)
+        self.assertTrue(
+            Job.objects.filter(
+                kind="delete_personalized_video",
+                payload__rendition_id=str(rendition.pk),
+                payload__stream_directory="personalized/lesson-1/buyer-1/old-rendition",
+            ).exists()
+        )
 
         # A duplicate captured-payment event after the refund must not reinstate
         # the same original entitlement.
