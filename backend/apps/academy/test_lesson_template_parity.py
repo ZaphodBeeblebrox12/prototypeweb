@@ -8,7 +8,7 @@ from django.test import SimpleTestCase
 class LessonTemplateParityTests(SimpleTestCase):
     def test_all_lesson_routes_use_one_canonical_experience_template(self):
         member_template = get_template("academy/lesson.html").template.source
-        import_template = get_template(
+        overview_template = get_template(
             "academy/course_import_website_preview.html"
         ).template.source
         experience = get_template(
@@ -17,11 +17,18 @@ class LessonTemplateParityTests(SimpleTestCase):
 
         include = 'include "academy/partials/lesson_experience.html"'
         self.assertIn(include, member_template)
-        self.assertIn(include, import_template)
+        self.assertNotIn(include, overview_template)
         self.assertIn('<header class="tt-course-header tt-course-header--depth">', experience)
+        views_source = Path(settings.BASE_DIR / "apps" / "academy" / "views.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            'return render(request, "academy/lesson.html", preview_context)',
+            " ".join(views_source.split()),
+        )
         self.assertIn('<div class="tt-room-grid">', experience)
         self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', member_template)
-        self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', import_template)
+        self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', overview_template)
 
     def test_canonical_header_geometry_is_owned_by_learning_room_css(self):
         css_path = Path(settings.BASE_DIR) / "static" / "academy" / "learning-room.css"
