@@ -1498,6 +1498,7 @@ def staging_payment_simulator(request):
         else:
             from apps.academy.models import ProtectedLessonVideo
             from apps.payments.models import PaymentIntent
+            from apps.subscriptions.models import GeoPlanPrice, PlanPrice
             from apps.academy.services import activate_course_payment
 
             ready_sources = [
@@ -1535,8 +1536,8 @@ def staging_payment_simulator(request):
                         intent = PaymentIntent.objects.create(
                             user=learner,
                             plan=offer.plan,
-                            plan_price=price if price.__class__.__name__ == "PlanPrice" else None,
-                            geo_plan_price=price if price.__class__.__name__ == "GeoPlanPrice" else None,
+                            plan_price=price if isinstance(price, PlanPrice) else None,
+                            geo_plan_price=price if isinstance(price, GeoPlanPrice) else None,
                             amount=price.price_cents,
                             base_amount_cents=price.price_cents,
                             subtotal_cents=price.price_cents,
@@ -1587,7 +1588,7 @@ def staging_payment_simulator(request):
                                 args=[offer.course.slug, first_lesson.pk],
                             )
                             if first_lesson
-                            else "",
+                            else ""
                         ),
                     }
 
