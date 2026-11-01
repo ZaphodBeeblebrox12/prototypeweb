@@ -1000,9 +1000,12 @@ class TradingNotebookTemplateTests(SimpleTestCase):
             encoding="utf-8"
         )
 
-        self.assertIn(".main-content:has(> .tt-admin-course-preview)", preview_styles)
-        self.assertIn("width: min(1600px, 100%)", preview_styles)
-        self.assertIn("grid-template-columns: minmax(0, 1fr) 245px", preview_styles)
+        # The canonical lesson stylesheet owns the page width and 245px notebook column
+        # for members and both administrator preview modes.
+        self.assertIn(".main-content:has(> .tt-admin-course-preview)", lesson_styles)
+        self.assertIn("width: min(1600px, 100%)", lesson_styles)
+        self.assertIn("grid-template-columns: minmax(0, 1fr) 245px", lesson_styles)
+        self.assertNotIn("grid-template-columns: minmax(0, 1fr) 245px", preview_styles)
         self.assertIn("font-size: clamp(42px, 5vw, 64px)", lesson_styles)
         # Authored H2-H5 roles now live in the canonical shared stylesheet.
         for selector in (
