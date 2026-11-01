@@ -88,7 +88,7 @@ class CourseBuilderPricingTests(TestCase):
         ]
         self.assertEqual(len(lock_queries), 1)
         self.assertIn(
-            f"FOR UPDATE OF {connection.ops.quote_name(CourseOffer._meta.db_table)}",
+            f"FOR UPDATE OF {connection.ops.quote_name(CourseOffer._meta.db_table)}".upper(),
             lock_queries[0].upper(),
         )
 
