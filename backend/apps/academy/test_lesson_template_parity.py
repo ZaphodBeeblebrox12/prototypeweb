@@ -56,6 +56,18 @@ class LessonTemplateParityTests(SimpleTestCase):
                         f"{template_path.relative_to(templates_root)} duplicates lesson layout markup",
                     )
 
+    def test_course_import_overview_uses_its_own_shared_course_page_styles(self):
+        course_overview = get_template("academy/course_detail.html").template.source
+        css_path = Path(settings.BASE_DIR) / "static" / "academy" / "course-admin-preview.css"
+        css = css_path.read_text(encoding="utf-8")
+
+        self.assertIn("course-admin-preview.css", course_overview)
+        self.assertNotIn("learning-room.css", course_overview)
+        self.assertIn(".main-content:has(> .tt-admin-course-preview)", css)
+        self.assertIn("width: min(1600px, 100%)", css)
+        self.assertNotIn(".tt-lesson-experience", css)
+        self.assertNotIn(".tt-tab-panel", css)
+
     def test_canonical_header_geometry_is_owned_by_learning_room_css(self):
         css_path = Path(settings.BASE_DIR) / "static" / "academy" / "learning-room.css"
         css = css_path.read_text(encoding="utf-8")
