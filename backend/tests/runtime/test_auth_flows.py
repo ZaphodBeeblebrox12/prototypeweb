@@ -92,10 +92,13 @@ class TestLogout:
 
         # Both responsive navigation variants must use a CSRF-protected POST,
         # never a GET link that opens Allauth's legacy confirmation template.
-        assert html.count('class="tt-account-logout-form"') == 1
-        assert html.count('class="mobile-menu-logout-form"') == 1
-        assert html.count('action="/accounts/logout/"') == 2
-        assert html.count('name="csrfmiddlewaretoken"') >= 2
+        # Count only the sitewide header: the member dashboard also has a
+        # separate sign-out action inside its Account & Security panel.
+        header = html.split("</header>", 1)[0]
+        assert header.count('class="tt-account-logout-form"') == 1
+        assert header.count('class="mobile-menu-logout-form"') == 1
+        assert header.count('action="/accounts/logout/"') == 2
+        assert header.count('name="csrfmiddlewaretoken"') >= 2
         assert 'href="/accounts/logout/"' not in html
 
     def test_unverified_member_logout_on_verification_page_is_post(self, rf):
