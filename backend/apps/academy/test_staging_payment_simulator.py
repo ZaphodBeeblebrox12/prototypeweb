@@ -152,6 +152,9 @@ class StagingPaymentSimulatorTests(TestCase):
         self.assertTrue(event.details["simulated"])
         self.assertIn("no money was collected", event.details["simulation_note"])
 
+        self.assertContains(response, "Personalised video preparation status")
+        self.assertContains(response, "Waiting to prepare")
+        self.assertContains(response, "Background job:")
         rendition = PersonalizedProtectedVideo.objects.get(
             user=self.learner,
             protected_video=self.video,
@@ -289,6 +292,13 @@ class StagingPaymentSimulatorTests(TestCase):
 
         self.assertEqual(retry_response.status_code, 302)
         self.assertEqual(retry_response["Location"], self.url)
+
+        status_page = self.client.get(self.url, HTTP_HOST=STAGING_HOST)
+        self.assertEqual(status_page.status_code, 200)
+        self.assertContains(status_page, "Personalised video preparation status")
+        self.assertContains(status_page, "Waiting to prepare")
+        self.assertContains(status_page, "Background job:")
+        self.assertNotContains(status_page, "Personalised videos that need a retry")
 
         rendition.refresh_from_db()
         self.assertEqual(rendition.status, PersonalizedProtectedVideo.Status.PENDING)
