@@ -1,15 +1,18 @@
 import json
+from unittest import skipUnless
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from apps.payments.models import PaymentIntent
 from apps.subscriptions.models import GeoPlanPrice, PlanPrice
 
 from .course_pricing import parse_course_pricing, sync_course_purchase_offer
-from .models import Course
+from .models import Course, CourseOffer
 
 User = get_user_model()
 
@@ -66,6 +69,28 @@ class CourseBuilderPricingTests(TestCase):
             )
         with self.assertRaises(ValidationError):
             parse_course_pricing({"priceAmount": "0", "priceCurrency": "INR"})
+
+    @skipUnless(
+        connection.features.has_select_for_update_of,
+        "The database backend does not support targeted SELECT FOR UPDATE locks.",
+    )
+    def test_pricing_sync_locks_only_course_offer_when_plan_join_is_nullable(self):
+        pricing = parse_course_pricing(
+            {"priceAmount": "999", "priceCurrency": "INR", "geoPriceOverrides": ""}
+        )
+        with CaptureQueriesContext(connection) as captured:
+            sync_course_purchase_offer(self.course, pricing)
+
+        lock_queries = [
+            query["sql"]
+            for query in captured.captured_queries
+            if "FOR UPDATE" in query["sql"].upper()
+        ]
+        self.assertEqual(len(lock_queries), 1)
+        self.assertIn(
+            f"FOR UPDATE OF {connection.ops.quote_name(CourseOffer._meta.db_table)}",
+            lock_queries[0].upper(),
+        )
 
     def test_published_course_pricing_creates_and_updates_hidden_one_time_offer(self):
         first = parse_course_pricing(
