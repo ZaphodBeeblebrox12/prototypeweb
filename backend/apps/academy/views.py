@@ -1476,6 +1476,110 @@ def _staging_payment_simulator_enabled(request):
 
 @login_required
 @never_cache
+def _get_staging_simulator_offer_and_price(course):
+    """Use a real active offer when present, otherwise make an inactive test-only offer.
+
+    The fallback product, plan and offer are all disabled/hidden and therefore
+    cannot appear in the public catalogue or normal checkout flow.
+    """
+    from apps.subscriptions.models import GeoPlanPrice, Plan, PlanPrice, Product
+
+    for offer in (
+        CourseOffer.objects.filter(
+            course=course,
+            is_active=True,
+            plan__is_active=True,
+        )
+        .select_related("plan")
+        .order_by("position", "name")
+    ):
+        geo_price = offer.plan.geo_prices.filter(
+            interval="one_time", is_active=True, country="IN"
+        ).order_by("pk").first()
+        global_price = offer.plan.prices.filter(
+            interval="one_time", is_active=True
+        ).order_by("pk").first()
+        any_geo_price = offer.plan.geo_prices.filter(
+            interval="one_time", is_active=True
+        ).order_by("pk").first()
+        price = geo_price or global_price or any_geo_price
+        if price is not None and price.price_cents > 0:
+            return offer, price, False
+
+    # Some courses are correctly published for review but do not yet have a
+    # public sales offer. Keep the test path available without activating a
+    # real offer, product or plan for learners.
+    suffix = course.pk.hex
+    product, _ = Product.objects.get_or_create(
+        slug=f"staging-sim-{suffix}",
+        defaults={
+            "name": f"STAGING SIMULATOR ONLY · {course.title}"[:100],
+            "description": "Inactive internal product used only for no-money Academy staging tests.",
+            "is_active": False,
+            "display_order": 32767,
+        },
+    )
+    if product.is_active:
+        product.is_active = False
+        product.save(update_fields=["is_active", "updated_at"])
+
+    plan, _ = Plan.objects.get_or_create(
+        product=product,
+        tier=Plan.Tier.BASIC,
+        is_trial=False,
+        defaults={
+            "name": f"STAGING SIMULATOR ONLY · {course.title}"[:100],
+            "description": "Hidden internal one-time price for a no-money staging simulation.",
+            "is_active": False,
+            "is_hidden": True,
+            "display_order": 32767,
+        },
+    )
+    changed_plan_fields = []
+    if plan.is_active:
+        plan.is_active = False
+        changed_plan_fields.append("is_active")
+    if not plan.is_hidden:
+        plan.is_hidden = True
+        changed_plan_fields.append("is_hidden")
+    if changed_plan_fields:
+        plan.save(update_fields=changed_plan_fields + ["updated_at"])
+
+    price, _ = PlanPrice.objects.get_or_create(
+        plan=plan,
+        interval=PlanPrice.Interval.ONE_TIME,
+        currency="INR",
+        defaults={"price_cents": 100, "is_active": True},
+    )
+    if not price.is_active:
+        price.is_active = True
+        price.save(update_fields=["is_active", "updated_at"])
+
+    offer, _ = CourseOffer.objects.get_or_create(
+        slug=f"staging-sim-{suffix}",
+        defaults={
+            "course": course,
+            "name": f"STAGING SIMULATOR ONLY · {course.title}"[:200],
+            "plan": plan,
+            "access_duration_days": None,
+            "is_active": False,
+            "position": 32767,
+        },
+    )
+    if offer.course_id != course.pk or offer.plan_id != plan.pk:
+        raise ValidationError(
+            "The internal staging simulation offer does not match this course. "
+            "No learner access was changed."
+        )
+    if offer.is_active:
+        offer.is_active = False
+        offer.save(update_fields=["is_active", "updated_at"])
+
+    return offer, price, True
+
+
+@login_required
+@never_cache
 def staging_payment_simulator(request):
     """Grant a clearly-labelled no-money course purchase on Academy staging only."""
     if not _staging_payment_simulator_enabled(request) or not is_course_content_admin(
@@ -1486,12 +1590,12 @@ def staging_payment_simulator(request):
     form = StagingPaymentSimulatorForm(request.POST or None)
     result = None
     if request.method == "POST" and form.is_valid():
-        offer = form.cleaned_data["course_offer"]
+        course = form.cleaned_data["course"]
         learner = form.cleaned_data["learner"]
 
-        if not offer.is_saleable or not offer.plan_id:
-            form.add_error("course_offer", "This course offer is no longer available.")
-        elif get_active_entitlement(learner, offer.course) is not None:
+        if course.status != Course.Status.PUBLISHED:
+            form.add_error("course", "Only published courses can be simulated.")
+        elif get_active_entitlement(learner, course) is not None:
             form.add_error(
                 "learner",
                 "This learner already has active access. Use a separate test learner without access.",
@@ -1502,100 +1606,96 @@ def staging_payment_simulator(request):
             from apps.subscriptions.models import GeoPlanPrice, PlanPrice
             from apps.academy.services import activate_course_payment
 
-            ready_sources = [
-                video
-                for video in ProtectedLessonVideo.objects.filter(
-                    lesson__module__course=offer.course,
-                    status=ProtectedLessonVideo.Status.READY,
-                ).select_related("lesson")
-                if video.source_file
-            ]
-            if not ready_sources:
+            has_ready_source = ProtectedLessonVideo.objects.filter(
+                lesson__module__course=course,
+                status=ProtectedLessonVideo.Status.READY,
+            ).exclude(source_file="").exists()
+
+            if not has_ready_source:
                 form.add_error(
                     None,
-                    "This course has no ready protected source videos. Upload and process at least one lesson video first.",
+                    "This course is published, but it has no ready protected source video yet. "
+                    "Upload a lesson video and finish processing it first.",
                 )
             else:
-                geo_price = offer.plan.geo_prices.filter(
-                    interval="one_time", is_active=True, country="IN"
-                ).order_by("pk").first()
-                global_price = offer.plan.prices.filter(
-                    interval="one_time", is_active=True
-                ).order_by("pk").first()
-                any_geo_price = offer.plan.geo_prices.filter(
-                    interval="one_time", is_active=True
-                ).order_by("pk").first()
-                price = geo_price or global_price or any_geo_price
-
-                if price is None or price.price_cents <= 0:
-                    form.add_error(
-                        "course_offer",
-                        "This course offer must have an active, non-zero one-time price.",
-                    )
-                else:
-                    try:
-                        with transaction.atomic():
-                            intent = PaymentIntent.objects.create(
-                                user=learner,
-                                plan=offer.plan,
-                                plan_price=price if isinstance(price, PlanPrice) else None,
-                                geo_plan_price=price if isinstance(price, GeoPlanPrice) else None,
-                                amount=price.price_cents,
-                                base_amount_cents=price.price_cents,
-                                subtotal_cents=price.price_cents,
-                                currency=price.currency,
-                                country=getattr(price, "country", "") or "",
-                                provider=PaymentIntent.Provider.RAZORPAY,
-                                is_simulated=True,
-                                status=PaymentIntent.Status.PENDING,
-                            )
-                            activated, entitlement = activate_course_payment(
-                                intent,
-                                offer,
-                                send_notifications=False,
-                                granted_by=request.user,
-                            )
-                            if not activated:
-                                raise ValidationError(
-                                    "The simulated entitlement was not created. No learner access was changed."
-                                )
-                    except ValidationError as exc:
-                        form.add_error(None, exc)
-                    else:
-                        from .models import PersonalizedProtectedVideo
-
-                        queued_count = PersonalizedProtectedVideo.objects.filter(
-                            user=learner,
-                            protected_video__lesson__module__course=offer.course,
-                            status=PersonalizedProtectedVideo.Status.PENDING,
-                        ).count()
-                        first_lesson = (
-                            Lesson.objects.filter(
-                                module__course=offer.course,
-                                is_published=True,
-                                module__is_published=True,
-                            )
-                            .order_by("module__position", "position")
-                            .first()
+                try:
+                    with transaction.atomic():
+                        offer, price, simulator_only_offer = (
+                            _get_staging_simulator_offer_and_price(course)
                         )
-                        result = {
-                            "learner": learner,
-                            "course": offer.course,
-                            "payment_intent": intent,
-                            "entitlement": entitlement,
-                            "queued_count": queued_count,
-                            "course_url": reverse(
-                                "academy:course-detail", args=[offer.course.slug]
-                            ),
-                            "lesson_url": (
-                                reverse(
-                                    "academy:lesson",
-                                    args=[offer.course.slug, first_lesson.pk],
-                                )
-                                if first_lesson
-                                else ""
-                            ),
-                        }
+                        if price.price_cents <= 0:
+                            raise ValidationError(
+                                "The selected one-time test price is invalid. "
+                                "No learner access was changed."
+                            )
+
+                        intent = PaymentIntent.objects.create(
+                            user=learner,
+                            plan=offer.plan,
+                            plan_price=price if isinstance(price, PlanPrice) else None,
+                            geo_plan_price=price if isinstance(price, GeoPlanPrice) else None,
+                            amount=price.price_cents,
+                            base_amount_cents=price.price_cents,
+                            subtotal_cents=price.price_cents,
+                            currency=price.currency,
+                            country=getattr(price, "country", "") or "",
+                            provider=PaymentIntent.Provider.RAZORPAY,
+                            is_simulated=True,
+                            status=PaymentIntent.Status.PENDING,
+                        )
+                        activated, entitlement = activate_course_payment(
+                            intent,
+                            offer,
+                            send_notifications=False,
+                            granted_by=request.user,
+                        )
+                        if not activated:
+                            raise ValidationError(
+                                "The simulated entitlement was not created. "
+                                "No learner access was changed."
+                            )
+                except ValidationError as exc:
+                    form.add_error(None, exc)
+                else:
+                    from .models import PersonalizedProtectedVideo
+
+                    queued_count = PersonalizedProtectedVideo.objects.filter(
+                        user=learner,
+                        protected_video__lesson__module__course=course,
+                        status__in=[
+                            PersonalizedProtectedVideo.Status.PENDING,
+                            PersonalizedProtectedVideo.Status.PROCESSING,
+                            PersonalizedProtectedVideo.Status.READY,
+                        ],
+                    ).count()
+                    first_lesson = (
+                        Lesson.objects.filter(
+                            module__course=course,
+                            is_published=True,
+                            module__is_published=True,
+                        )
+                        .order_by("module__position", "position")
+                        .first()
+                    )
+                    result = {
+                        "learner": learner,
+                        "course": course,
+                        "payment_intent": intent,
+                        "entitlement": entitlement,
+                        "queued_count": queued_count,
+                        "simulator_only_offer": simulator_only_offer,
+                        "course_url": reverse(
+                            "academy:course-detail", args=[course.slug]
+                        ),
+                        "lesson_url": (
+                            reverse(
+                                "academy:lesson",
+                                args=[course.slug, first_lesson.pk],
+                            )
+                            if first_lesson
+                            else ""
+                        ),
+                    }
 
     return render(
         request,
