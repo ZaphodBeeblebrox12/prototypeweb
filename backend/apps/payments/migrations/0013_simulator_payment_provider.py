@@ -16,9 +16,8 @@ class Migration(migrations.Migration):
                 choices=[
                     ("stripe", _("Stripe")),
                     ("razorpay", _("Razorpay")),
-                    ("simulator", _("Staging simulator — no money collected")),
                 ],
-                help_text="Payment provider",
+                help_text=_("Payment provider"),
                 max_length=20,
             ),
         ),
