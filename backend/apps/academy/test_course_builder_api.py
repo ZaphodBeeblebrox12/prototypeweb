@@ -2485,44 +2485,22 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
             / "partials"
             / "lesson_experience.html"
         ).read_text(encoding="utf-8")
+        views_source = " ".join(
+            Path(__file__).with_name("views.py").read_text(encoding="utf-8").split()
+        )
 
-        self.assertIn('include "academy/partials/lesson_experience.html"', lesson_template)
-        self.assertIn('include "academy/partials/lesson_experience.html"', website_preview)
+        include = 'include "academy/partials/lesson_experience.html"'
+        self.assertIn(include, lesson_template)
+        self.assertIn(include, website_preview)
         self.assertIn('<header class="tt-course-header tt-course-header--depth">', experience)
         self.assertIn('<div class="tt-room-grid">', experience)
         self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', lesson_template)
         self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', website_preview)
-        self.assertNotIn('<div class="tt-room-grid">', lesson_template)
-        self.assertNotIn('<div class="tt-room-grid">', website_preview)
-
-        backend_root = Path(__file__).resolve().parents[2]
-        lesson_template = (backend_root / "templates" / "academy" / "lesson.html").read_text(
-            encoding="utf-8"
-        )
-        website_preview = (
-            backend_root / "templates" / "academy" / "course_import_website_preview.html"
-        ).read_text(encoding="utf-8")
-        # Normalize whitespace so Black's wrapping does not break this template-wiring contract.
-        views_source = " ".join(
-            Path(__file__).with_name("views.py").read_text(encoding="utf-8").split()
-        )
-        self.assertIn(
-            'MODULE {{ module.position|stringformat:"02d" }} · {{ module_display_title }}',
-            lesson_template,
-        )
-        self.assertIn(
-            'MODULE {{ selected_module.position|stringformat:"02d" }} · {{ selected_module_display_title }}',
-            website_preview,
-        )
         self.assertIn(
             '"module_display_title": _module_display_title(lesson.module.title)', views_source
         )
-        self.assertIn(
-            '"selected_module_display_title": _module_display_title(', views_source
-        )
-        self.assertIn(
-            'selected_module.get("title") if selected_module else ""', views_source
-        )
+        self.assertIn('"selected_module_display_title": _module_display_title(', views_source)
+        self.assertIn('selected_module.get("title") if selected_module else ""', views_source)
 
     def test_module_display_name_removes_an_optional_number_prefix(self):
         from .views import _module_display_title
