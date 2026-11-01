@@ -179,7 +179,7 @@ def pricing_fields_for_builder(course: Course) -> dict[str, Any]:
 def sync_course_purchase_offer(course: Course, pricing: dict[str, Any]) -> CourseOffer | None:
     """Apply an approved course's price to the existing one-time commerce system."""
     offer = (
-        CourseOffer.objects.select_for_update()
+        CourseOffer.objects.select_for_update(of=("self",))
         .filter(course=course)
         .select_related("plan")
         .order_by("position", "created_at")
