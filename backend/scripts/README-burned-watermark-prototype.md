@@ -24,7 +24,7 @@ python backend/scripts/prototype_burned_watermark.py \
 
 Remove `--sample-duration 90` to process the whole lesson. The default H.264 settings are CRF 23 and preset `veryfast`; adjust only after comparing visual quality and resource use.
 
-The command reports source/output dimensions, codecs, sizes, processing time and speed relative to real time. It derives a short tracking code from the viewer email and source hash, and the watermark moves smoothly between pseudo-random positions at the requested interval.
+The command reports source/output dimensions, codecs, sizes, processing time and speed relative to real time. It derives a short tracking code from the viewer email and source hash, and the watermark moves smoothly between pseudo-random positions at the requested interval. The current lighter treatment uses 90% white text, a 50% black backing, and a 25% white border.
 
 ## Scope and security
 
