@@ -175,6 +175,10 @@ class StagingPaymentSimulatorForm(forms.Form):
         queryset=get_user_model().objects.none(),
         empty_label="Choose a non-staff learner account",
     )
+    acknowledge = forms.BooleanField(
+        label="I understand this is a staging simulation and no money will be collected.",
+        required=True,
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
