@@ -18,6 +18,7 @@ class SitewideNavbarRoleTests(SimpleTestCase):
             "user": user,
             "request": request,
             "public_site_url": "https://tradethesis.example",
+            "csrf_token": "test-csrf-token",
         })
 
     def test_regular_member_gets_dashboard_entry_without_account_dropdown(self):
