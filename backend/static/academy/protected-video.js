@@ -8,6 +8,94 @@
   const status = container.querySelector("[data-video-player-status]");
   const manifestUrl = video && video.dataset.manifestUrl;
   const fullscreenButton = container.querySelector("[data-video-fullscreen]");
+  const watermark = container.querySelector("[data-video-watermark]");
+
+  // Keep the viewer identity visible continuously, but move it to a new
+  // unpredictable position over the video every few seconds. Coordinates are
+  // calculated from the rendered video box, so the same behavior works in
+  // normal and fullscreen layouts.
+  let watermarkMoveTimer = null;
+  let previousWatermarkPoint = null;
+
+  const moveWatermark = () => {
+    if (!video || !watermark || !container.isConnected) return;
+
+    const videoRect = video.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    if (videoRect.width <= 0 || videoRect.height <= 0) return;
+
+    const watermarkRect = watermark.getBoundingClientRect();
+    const markWidth = watermarkRect.width || watermark.offsetWidth;
+    const markHeight = watermarkRect.height || watermark.offsetHeight;
+    const edgePadding = 12;
+    // Keep clear of the native video control strip at the bottom.
+    const bottomControlsReserve = 66;
+    const maxX = Math.max(edgePadding, videoRect.width - markWidth - edgePadding);
+    const maxY = Math.max(
+      edgePadding,
+      videoRect.height - markHeight - bottomControlsReserve
+    );
+
+    let chosen = { x: edgePadding, y: edgePadding };
+    const minTravel = Math.max(70, Math.min(videoRect.width, videoRect.height) * 0.22);
+    const fullscreenRect = fullscreenButton?.getBoundingClientRect();
+
+    for (let attempt = 0; attempt < 24; attempt += 1) {
+      const candidate = {
+        x: edgePadding + Math.random() * Math.max(0, maxX - edgePadding),
+        y: edgePadding + Math.random() * Math.max(0, maxY - edgePadding)
+      };
+
+      // Do not cover the custom fullscreen button.
+      if (fullscreenRect && fullscreenRect.width > 0) {
+        const candidateLeft = videoRect.left + candidate.x;
+        const candidateTop = videoRect.top + candidate.y;
+        const overlapsFullscreen =
+          candidateLeft < fullscreenRect.right + 10 &&
+          candidateLeft + markWidth > fullscreenRect.left - 10 &&
+          candidateTop < fullscreenRect.bottom + 10 &&
+          candidateTop + markHeight > fullscreenRect.top - 10;
+        if (overlapsFullscreen) continue;
+      }
+
+      if (previousWatermarkPoint) {
+        const distance = Math.hypot(
+          candidate.x - previousWatermarkPoint.x,
+          candidate.y - previousWatermarkPoint.y
+        );
+        if (distance < minTravel) continue;
+      }
+
+      chosen = candidate;
+      break;
+    }
+
+    watermark.style.left = `${videoRect.left - containerRect.left + chosen.x}px`;
+    watermark.style.top = `${videoRect.top - containerRect.top + chosen.y}px`;
+    watermark.style.right = "auto";
+    watermark.style.bottom = "auto";
+    watermark.style.visibility = "visible";
+    previousWatermarkPoint = chosen;
+  };
+
+  const scheduleWatermarkMove = () => {
+    if (watermarkMoveTimer !== null) {
+      window.clearTimeout(watermarkMoveTimer);
+    }
+    watermarkMoveTimer = window.setTimeout(() => {
+      moveWatermark();
+      scheduleWatermarkMove();
+    }, 2700 + Math.random() * 2300);
+  };
+
+  if (watermark && video) {
+    moveWatermark();
+    scheduleWatermarkMove();
+    window.addEventListener("resize", moveWatermark);
+    document.addEventListener("fullscreenchange", () => {
+      window.setTimeout(moveWatermark, 120);
+    });
+  }
 
   const showStatus = message => {
     if (status) status.textContent = message || "";
@@ -225,6 +313,8 @@
 
   container.addEventListener("tradeThesisVideoDestroy", () => {
     clearMetadataWatchdog();
+    if (watermarkMoveTimer !== null) window.clearTimeout(watermarkMoveTimer);
+    window.removeEventListener("resize", moveWatermark);
     player.destroy();
   }, { once: true });
 
