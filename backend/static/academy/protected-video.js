@@ -159,17 +159,26 @@
     // Include hls.js's parser reason; the event name alone does not tell us
     // whether the decrypted segment has invalid TS sync bytes, bad PES data,
     // missing tables, or another demux problem. Never log signed request URLs.
-    const rawReason = String(data.reason || data.error?.message || "");
+    const underlyingError = data.error || data.err;
+    const rawReason = String(
+      (typeof underlyingError === "string" ? underlyingError : underlyingError?.message) ||
+      data.reason ||
+      "No underlying parser exception was provided."
+    );
+    const errorName = String(underlyingError?.name || "")
+      .replace(/[^a-zA-Z0-9_.-]/g, "")
+      .slice(0, 50);
     const reason = rawReason
       .replace(/ticket=[^&\s]+/gi, "ticket=[redacted]")
       .replace(/https?:\/\/[^\s]+/gi, "[url redacted]")
       .replace(/[^a-zA-Z0-9_ .,:;()'-]/g, " ")
       .trim()
-      .slice(0, 180);
-    lastHlsError = [detail, reason].filter(Boolean).join(": ");
+      .slice(0, 220);
+    lastHlsError = [detail, errorName, reason].filter(Boolean).join(": ");
     console.warn("TradeThesis protected-video playback error", {
       type: data.type,
       details: data.details,
+      errorName: errorName || undefined,
       reason: reason || undefined,
       fatal: Boolean(data.fatal)
     });
