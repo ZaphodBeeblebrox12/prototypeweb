@@ -93,6 +93,24 @@ class Command(BaseCommand):
         if not ffmpeg:
             self._fail(rendition, "FFmpeg was not found; install imageio-ffmpeg or configure ACADEMY_FFMPEG_BINARY.")
             raise CommandError("FFmpeg was not found.")
+        capabilities = subprocess.run(
+            [ffmpeg, "-hide_banner", "-filters"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        encoders = subprocess.run(
+            [ffmpeg, "-hide_banner", "-encoders"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if "drawtext" not in (capabilities.stdout + capabilities.stderr):
+            self._fail(rendition, "The configured FFmpeg build does not include the drawtext filter.")
+            raise CommandError("The configured FFmpeg build does not include drawtext.")
+        if "libx264" not in (encoders.stdout + encoders.stderr):
+            self._fail(rendition, "The configured FFmpeg build does not include the libx264 encoder.")
+            raise CommandError("The configured FFmpeg build does not include libx264.")
 
         video = rendition.protected_video
         entitlement = get_active_entitlement(rendition.user, video.lesson.module.course)
