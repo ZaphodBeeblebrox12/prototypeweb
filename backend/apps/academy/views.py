@@ -1481,7 +1481,7 @@ def _ensure_staging_simulator_offer_and_price(course):
     The fallback product, plan and offer are all disabled/hidden and therefore
     cannot appear in the public catalogue or normal checkout flow.
     """
-    from apps.subscriptions.models import GeoPlanPrice, Plan, PlanPrice, Product
+    from apps.subscriptions.models import Plan, PlanPrice, Product
 
     for offer in (
         CourseOffer.objects.filter(
@@ -1660,9 +1660,9 @@ def staging_payment_simulator(request):
             )
         else:
             from apps.academy.models import ProtectedLessonVideo
+            from apps.academy.services import activate_course_payment
             from apps.payments.models import PaymentIntent
             from apps.subscriptions.models import GeoPlanPrice, PlanPrice
-            from apps.academy.services import activate_course_payment
 
             has_ready_source = ProtectedLessonVideo.objects.filter(
                 lesson__module__course=course,
