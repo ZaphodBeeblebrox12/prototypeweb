@@ -21,15 +21,19 @@ class SitewideNavbarRoleTests(SimpleTestCase):
             "csrf_token": "test-csrf-token",
         })
 
-    def test_regular_member_gets_dashboard_entry_without_account_dropdown(self):
+    def test_regular_member_gets_account_menu_and_signout_actions(self):
         rendered = self.render_nav()
 
         self.assertIn("Member Area ↗", rendered)
         self.assertNotIn("Open member dashboard", rendered)
-        self.assertNotIn('class="tt-account-menu"', rendered)
-        self.assertNotIn("Profile &amp; security", rendered)
-        self.assertNotIn("Referral credits", rendered)
-        self.assertNotIn("Sign out", rendered)
+        self.assertEqual(rendered.count('class="tt-account-menu"'), 1)
+        self.assertIn("Profile &amp; security", rendered)
+        self.assertIn("Referral credits", rendered)
+        self.assertEqual(rendered.count('class="tt-account-logout-form"'), 1)
+        self.assertEqual(rendered.count('class="mobile-menu-logout-form"'), 1)
+        self.assertEqual(rendered.count('action="/accounts/logout/"'), 2)
+        self.assertGreaterEqual(rendered.count('name="csrfmiddlewaretoken"'), 2)
+        self.assertEqual(rendered.count(">Sign out</button>"), 2)
 
     def test_admin_gets_account_dropdown_and_account_actions(self):
         rendered = self.render_nav(is_admin=True, is_staff=True)
