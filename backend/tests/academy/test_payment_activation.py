@@ -10,6 +10,8 @@ from apps.academy.models import (
     CourseModule,
     CourseOffer,
     Lesson,
+    PersonalizedProtectedVideo,
+    ProtectedLessonVideo,
 )
 from apps.payments.models import PaymentIntent
 from apps.payments.services import activate_paid_subscription, apply_refund_policy
@@ -123,6 +125,30 @@ class CoursePaymentActivationTests(TestCase):
             1,
         )
         self.assertEqual(CourseEntitlementEvent.objects.filter(entitlement=entitlement).count(), 1)
+
+    def test_verified_purchase_queues_every_ready_protected_video_for_that_buyer(self):
+        from apps.jobs.models import Job
+
+        video = ProtectedLessonVideo.objects.create(
+            lesson=self.lesson,
+            source_file="academy/video-source/trading-path/lesson-1.mp4",
+            status=ProtectedLessonVideo.Status.READY,
+            stream_directory="streams/shared/lesson-1",
+        )
+
+        activated, entitlement = activate_paid_subscription(self.intent)
+
+        self.assertTrue(activated)
+        self.assertEqual(entitlement.source, CourseEntitlement.Source.PURCHASE)
+        rendition = PersonalizedProtectedVideo.objects.get(
+            user=self.user,
+            protected_video=video,
+        )
+        self.assertEqual(rendition.status, PersonalizedProtectedVideo.Status.PENDING)
+        job = Job.objects.get(kind="process_personalized_video")
+        self.assertEqual(job.payload["user_id"], str(self.user.pk))
+        self.assertEqual(job.payload["video_id"], str(video.pk))
+        self.assertEqual(job.payload["rendition_id"], str(rendition.pk))
 
     def test_full_refund_revokes_only_the_current_course_purchase(self):
         _activated, entitlement = activate_paid_subscription(self.intent)
