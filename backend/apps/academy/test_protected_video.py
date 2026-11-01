@@ -127,6 +127,33 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
         client.force_login(admin, backend="django.contrib.auth.backends.ModelBackend")
         return client
 
+    def test_paid_learner_lesson_view_uses_only_the_personalised_rendition(self):
+        from apps.jobs.models import Job
+
+        self.entitlement.source = CourseEntitlement.Source.PURCHASE
+        self.entitlement.save(update_fields=["source"])
+        self.video.source_file.name = "academy/video-source/test/source.mp4"
+        self.video.save(update_fields=["source_file"])
+
+        response = self.client.get(
+            reverse("academy:lesson", args=[self.course.slug, self.lesson.pk])
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        rendition = PersonalizedProtectedVideo.objects.get(
+            user=self.user,
+            protected_video=self.video,
+        )
+        self.assertEqual(rendition.status, PersonalizedProtectedVideo.Status.PENDING)
+        self.assertContains(response, "Your protected course video is being prepared")
+        self.assertContains(response, reverse("academy:personalized-video-status", args=[rendition.pk]))
+        self.assertNotContains(response, 'data-video-watermark-email')
+        self.assertNotContains(response, self.manifest_url)
+        self.assertTrue(Job.objects.filter(
+            kind="process_personalized_video",
+            payload__rendition_id=str(rendition.pk),
+        ).exists())
+
     def test_admin_lesson_preview_renders_ready_protected_video_player(self):
         client = self._admin_preview_client()
 
