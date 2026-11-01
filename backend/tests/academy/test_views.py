@@ -351,6 +351,7 @@ class AcademyViewTests(TestCase):
             reverse("academy:course-import-preview", args=[record.pk])
         )
         self.assertEqual(overview_response.status_code, 200, overview_response.content)
+        self.assertTemplateUsed(overview_response, "academy/course_detail.html")
         self.assertContains(overview_response, "<h3>What learners will practise</h3>")
         self.assertContains(overview_response, "<ul>")
         self.assertContains(
@@ -364,6 +365,8 @@ class AcademyViewTests(TestCase):
         self.assertContains(overview_response, 'class="tt-overview-outcome-grid"')
 
         self.assertEqual(response.status_code, 200, response.content)
+        self.assertTemplateUsed(response, "academy/lesson.html")
+        self.assertTemplateNotUsed(response, "academy/course_detail.html")
         self.assertContains(response, "How should the observation be used?")
         self.assertContains(response, "As evidence to assess in context")
         self.assertContains(
