@@ -1715,8 +1715,6 @@ def staging_payment_simulator(request):
                 except ValidationError as exc:
                     form.add_error(None, exc)
                 else:
-                    from .models import PersonalizedProtectedVideo
-
                     queued_count = PersonalizedProtectedVideo.objects.filter(
                         user=learner,
                         protected_video__lesson__module__course=course,
