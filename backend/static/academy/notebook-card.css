@@ -1,7 +1,7 @@
 /*
  * Canonical Pause and Record card.
- * Loaded last by both the learner lesson and unpublished Builder website preview
- * so both routes share the same notebook dimensions and typography.
+ * Loaded by the canonical Academy lesson page in member and admin modes.
+ * The learner, published-course preview and draft preview share these dimensions.
  */
 .tt-learning-room .learning-content-grid{
   grid-template-columns: minmax(0, 1fr) 220.5px;
@@ -142,8 +142,8 @@
   .tt-learning-room .tt-notebook-prompts .tt-notebook-number{ margin: 0; }
 }
 
-/* Builder-only sticky offset: keep the Pause and Record card below the
-   sticky sitewide header. The normal learner view retains its 18px offset. */
+/* Shared sticky offset: keep the Notebook card below the sitewide header
+   in every lesson mode. */
 .tt-learning-room .tt-notebook {
   top: 95px; /* shared sticky site header + breathing room */
 }
