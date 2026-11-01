@@ -178,6 +178,7 @@ class StagingPaymentSimulatorForm(forms.Form):
     acknowledge = forms.BooleanField(
         label="I understand this is a staging simulation and no money will be collected.",
         required=True,
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
 
     def __init__(self, *args, **kwargs):
