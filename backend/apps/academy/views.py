@@ -1545,7 +1545,8 @@ def staging_payment_simulator(request):
                                 subtotal_cents=price.price_cents,
                                 currency=price.currency,
                                 country=getattr(price, "country", "") or "",
-                                provider=PaymentIntent.Provider.SIMULATOR,
+                                provider=PaymentIntent.Provider.RAZORPAY,
+                                is_simulated=True,
                                 status=PaymentIntent.Status.PENDING,
                             )
                             activated, entitlement = activate_course_payment(
