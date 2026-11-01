@@ -1,4 +1,5 @@
 from django.db import migrations, models
+from django.utils.translation import gettext_lazy as _
 
 
 class Migration(migrations.Migration):
@@ -13,9 +14,9 @@ class Migration(migrations.Migration):
             name="provider",
             field=models.CharField(
                 choices=[
-                    ("stripe", "Stripe"),
-                    ("razorpay", "Razorpay"),
-                    ("simulator", "Staging simulator — no money collected"),
+                    ("stripe", _("Stripe")),
+                    ("razorpay", _("Razorpay")),
+                    ("simulator", _("Staging simulator — no money collected")),
                 ],
                 help_text="Payment provider",
                 max_length=20,
