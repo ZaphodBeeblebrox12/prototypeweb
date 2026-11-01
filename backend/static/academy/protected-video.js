@@ -161,9 +161,9 @@
     // missing tables, or another demux problem. Never log signed request URLs.
     const rawReason = String(data.reason || data.error?.message || "");
     const reason = rawReason
-      .replace(/ticket=[^&\\s]+/gi, "ticket=[redacted]")
-      .replace(/https?:\\/\\/[^\\s]+/gi, "[url redacted]")
-      .replace(/[^a-zA-Z0-9_ .,:;()\\-/]/g, "")
+      .replace(/ticket=[^&\s]+/gi, "ticket=[redacted]")
+      .replace(/https?:\/\/[^\s]+/gi, "[url redacted]")
+      .replace(/[^a-zA-Z0-9_ .,:;()'-]/g, " ")
       .trim()
       .slice(0, 180);
     lastHlsError = [detail, reason].filter(Boolean).join(": ");
