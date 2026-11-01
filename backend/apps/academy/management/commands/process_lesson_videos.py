@@ -167,7 +167,10 @@ class Command(BaseCommand):
             # A lesson video uploaded after a learner purchased the course must
             # also receive that learner's personalised rendition.
             try:
-                from apps.academy.services import enqueue_personalized_videos_for_existing_purchasers
+                from apps.academy.services import (
+                    enqueue_personalized_videos_for_existing_purchasers,
+                )
+
                 enqueue_personalized_videos_for_existing_purchasers(protected_video=video)
             except Exception:
                 self.stderr.write(
