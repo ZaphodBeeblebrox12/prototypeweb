@@ -69,13 +69,16 @@
     </header>
       <article class="tt-lesson-article">
         {% if protected_video %}<section class="tt-video-lesson tt-video-lesson--protected" aria-label="Protected lesson video" data-protected-video-container>
-          <video controls playsinline preload="none" data-protected-video data-manifest-url="{{ protected_video_manifest_url }}" controlslist="nodownload noremoteplayback" disablepictureinpicture>
+          <video controls playsinline preload="none" data-protected-video data-manifest-url="{{ protected_video_manifest_url }}" controlslist="nodownload noremoteplayback nofullscreen" disablepictureinpicture>
             Your browser does not support protected HLS video playback.
           </video>
-          <div class="tt-video-watermark" data-video-watermark aria-hidden="true">
+          <div class="tt-video-watermark" data-video-watermark aria-label="Viewer identity watermark">
             <span data-video-watermark-name>{{ video_watermark_name }}</span>
             <span data-video-watermark-email>{{ video_watermark_email }}</span>
           </div>
+          <button class="tt-video-fullscreen-button" type="button" data-video-fullscreen aria-label="View video full screen">
+            Full screen
+          </button>
           <p class="tt-video-player-status" data-video-player-status role="status" aria-live="polite"></p>
         </section>
         {% elif admin_preview and video_processing_status %}<section class="tt-video-lesson tt-video-lesson--status" aria-label="Protected lesson video status">
