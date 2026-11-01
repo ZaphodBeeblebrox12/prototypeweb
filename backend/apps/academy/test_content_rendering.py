@@ -968,7 +968,7 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn("@media (max-width: 920px)", notebook_styles)
         self.assertIn("display: none !important;", notebook_styles)
         self.assertIn(
-            ".tt-learning-room .tt-mobile-pause-and-record,\n  .tt-admin-course-preview",
+            ".tt-learning-room .tt-mobile-pause-and-record {",
             notebook_styles,
         )
         self.assertIn("display: block;", notebook_styles)
