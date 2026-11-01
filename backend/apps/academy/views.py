@@ -719,6 +719,11 @@ def lesson_detail(request, course_slug, lesson_id):
                 )
             if personalized_video_rendition:
                 personalized_video_status = personalized_video_rendition.get_status_display()
+            else:
+                personalized_video_status = (
+                    "A private source video is not available for personalised preparation. "
+                    "Please contact course support."
+                )
         elif protected_video_record:
             personalized_video_status = protected_video_record.get_status_display()
         else:
