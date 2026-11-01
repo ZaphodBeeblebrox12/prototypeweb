@@ -175,6 +175,12 @@ class CustomAccountAdapter(DefaultAccountAdapter):
 
     def send_confirmation_mail(self, request, emailconfirmation, signup):
         """Send confirmation email with custom context."""
+        # Academy staging can explicitly disable verification for test accounts.
+        # Do not call Resend at all in that mode: its test sender/domain policy
+        # otherwise raises HTTP 403 and turns signup/login into HTTP 500.
+        if getattr(settings, "ACADEMY_STAGING_UNVERIFIED_LOGIN_ENABLED", False):
+            return
+
         activate_url = self.get_email_confirmation_url(request, emailconfirmation)
         next_url = self._safe_redirect_destination(request)
         if next_url:
