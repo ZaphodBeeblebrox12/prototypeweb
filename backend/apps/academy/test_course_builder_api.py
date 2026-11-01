@@ -2490,9 +2490,6 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
         )
 
         include = 'include "academy/partials/lesson_experience.html"'
-        views_source = " ".join(
-            Path(__file__).with_name("views.py").read_text(encoding="utf-8").split()
-        )
         self.assertIn(include, lesson_template)
         self.assertNotIn(include, website_preview)
         self.assertIn(
