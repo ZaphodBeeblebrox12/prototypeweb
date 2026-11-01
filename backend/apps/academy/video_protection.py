@@ -185,12 +185,20 @@ _PERSONALIZED_TICKET_SALT = "tradethesis.academy.personalized-video.v1"
 
 def _personalized_object_name(rendition, filename):
     prefix = PurePosixPath(str(rendition.stream_directory or ""))
+    expected_prefix = (
+        "personalized",
+        str(rendition.protected_video_id),
+        str(rendition.user_id),
+    )
     if (
         prefix.is_absolute()
-        or not prefix.parts
+        or len(prefix.parts) != 4
+        or prefix.parts[:3] != expected_prefix
         or any(part in {"", ".", ".."} for part in prefix.parts)
-        or len(prefix.parts) > 5
+        or not re.fullmatch(r"[0-9a-f]{32}", prefix.parts[3])
     ):
+        raise Http404
+    if filename not in {"index.m3u8", "encryption.key"} and not _SEGMENT_RE.fullmatch(filename):
         raise Http404
     return str(prefix / filename)
 
