@@ -1526,71 +1526,74 @@ def staging_payment_simulator(request):
                 ).order_by("pk").first()
                 price = geo_price or global_price or any_geo_price
 
-                if price is None:
+                if price is None or price.price_cents <= 0:
                     form.add_error(
                         "course_offer",
-                        "This course offer has no active one-time price.",
+                        "This course offer must have an active, non-zero one-time price.",
                     )
                 else:
-                    with transaction.atomic():
-                        intent = PaymentIntent.objects.create(
+                    try:
+                        with transaction.atomic():
+                            intent = PaymentIntent.objects.create(
+                                user=learner,
+                                plan=offer.plan,
+                                plan_price=price if isinstance(price, PlanPrice) else None,
+                                geo_plan_price=price if isinstance(price, GeoPlanPrice) else None,
+                                amount=price.price_cents,
+                                base_amount_cents=price.price_cents,
+                                subtotal_cents=price.price_cents,
+                                currency=price.currency,
+                                country=getattr(price, "country", "") or "",
+                                provider=PaymentIntent.Provider.SIMULATOR,
+                                status=PaymentIntent.Status.PENDING,
+                            )
+                            activated, entitlement = activate_course_payment(
+                                intent,
+                                offer,
+                                send_notifications=False,
+                                granted_by=request.user,
+                            )
+                            if not activated:
+                                raise ValidationError(
+                                    "The simulated entitlement was not created. No learner access was changed."
+                                )
+                    except ValidationError as exc:
+                        form.add_error(None, exc)
+                    else:
+                        from .models import PersonalizedProtectedVideo
+
+                        queued_count = PersonalizedProtectedVideo.objects.filter(
                             user=learner,
-                            plan=offer.plan,
-                            plan_price=price if isinstance(price, PlanPrice) else None,
-                            geo_plan_price=price if isinstance(price, GeoPlanPrice) else None,
-                            amount=price.price_cents,
-                            base_amount_cents=price.price_cents,
-                            subtotal_cents=price.price_cents,
-                            currency=price.currency,
-                            country=getattr(price, "country", "") or "",
-                            provider=PaymentIntent.Provider.SIMULATOR,
-                            status=PaymentIntent.Status.PENDING,
-                        )
-                        activated, entitlement = activate_course_payment(
-                            intent,
-                            offer,
-                            send_notifications=False,
-                            granted_by=request.user,
-                        )
-                        if not activated:
-                            raise ValidationError(
-                                "The simulated entitlement was not created. No learner access was changed."
+                            protected_video__lesson__module__course=offer.course,
+                            status=PersonalizedProtectedVideo.Status.PENDING,
+                        ).count()
+                        first_lesson = (
+                            Lesson.objects.filter(
+                                module__course=offer.course,
+                                is_published=True,
+                                module__is_published=True,
                             )
-
-                    from .models import PersonalizedProtectedVideo
-
-                    queued_count = PersonalizedProtectedVideo.objects.filter(
-                        user=learner,
-                        protected_video__lesson__module__course=offer.course,
-                        status=PersonalizedProtectedVideo.Status.PENDING,
-                    ).count()
-                    first_lesson = (
-                        Lesson.objects.filter(
-                            module__course=offer.course,
-                            is_published=True,
-                            module__is_published=True,
+                            .order_by("module__position", "position")
+                            .first()
                         )
-                        .order_by("module__position", "position")
-                        .first()
-                    )
-                    result = {
-                        "learner": learner,
-                        "course": offer.course,
-                        "payment_intent": intent,
-                        "entitlement": entitlement,
-                        "queued_count": queued_count,
-                        "course_url": reverse(
-                            "academy:course-detail", args=[offer.course.slug]
-                        ),
-                        "lesson_url": (
-                            reverse(
-                                "academy:lesson",
-                                args=[offer.course.slug, first_lesson.pk],
-                            )
-                            if first_lesson
-                            else ""
-                        ),
-                    }
+                        result = {
+                            "learner": learner,
+                            "course": offer.course,
+                            "payment_intent": intent,
+                            "entitlement": entitlement,
+                            "queued_count": queued_count,
+                            "course_url": reverse(
+                                "academy:course-detail", args=[offer.course.slug]
+                            ),
+                            "lesson_url": (
+                                reverse(
+                                    "academy:lesson",
+                                    args=[offer.course.slug, first_lesson.pk],
+                                )
+                                if first_lesson
+                                else ""
+                            ),
+                        }
 
     return render(
         request,
