@@ -22,33 +22,68 @@
     {% endfor %}
   {% endif %}
 
-  {% if failed_simulated_renditions %}
-    <div class="card border-danger mb-4">
-      <div class="card-header">Personalised videos that need a retry</div>
+  {% if simulated_video_statuses %}
+    <div class="card mb-4">
+      <div class="card-header">Personalised video preparation status</div>
       <div class="card-body">
-        <p class="text-muted small">
-          These are failed video renditions attached to existing simulated purchases.
-          Retrying only requeues FFmpeg processing; it does not create another payment or grant access again.
+        <p class="text-muted small mb-3">
+          Live database status for videos belonging to existing simulated purchases.
+          Refresh this page to see progress. Retrying never creates another payment.
         </p>
-        {% for rendition in failed_simulated_renditions %}
-          <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 py-3 border-top">
-            <div>
-              <div class="fw-semibold">{{ rendition.protected_video.lesson.title }}</div>
-              <div class="small text-muted">
-                {{ rendition.user.email|default:rendition.user.username }} ·
-                {{ rendition.protected_video.lesson.module.course.title }}
+        {% for item in simulated_video_statuses %}
+          <div class="py-3 border-top">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+              <div>
+                <div class="fw-semibold">{{ item.rendition.protected_video.lesson.title }}</div>
+                <div class="small text-muted">
+                  {{ item.learner.email|default:item.learner.username }} · {{ item.course.title }}
+                </div>
               </div>
-              {% if rendition.processing_error %}
-                <div class="small text-danger mt-1">{{ rendition.processing_error|truncatechars:240 }}</div>
+              {% if item.rendition.status == "ready" %}
+                <span class="badge bg-success">{{ item.rendition.get_status_display }}</span>
+              {% elif item.rendition.status == "failed" or item.rendition.status == "revoked" %}
+                <span class="badge bg-danger">{{ item.rendition.get_status_display }}</span>
+              {% elif item.rendition.status == "processing" %}
+                <span class="badge bg-primary">{{ item.rendition.get_status_display }}</span>
+              {% else %}
+                <span class="badge bg-warning text-dark">{{ item.rendition.get_status_display }}</span>
               {% endif %}
             </div>
-            <form method="post" action="{% url 'academy:staging-retry-video' rendition.pk %}">
-              {% csrf_token %}
-              <button class="btn btn-outline-danger" type="submit">Retry video preparation</button>
-            </form>
+            <div class="small text-muted mt-2">
+              {% if item.job %}
+                Background job: <strong>{{ item.job.status|title }}</strong>
+                · Attempt {{ item.job.attempts }} of {{ item.job.max_attempts }}
+                {% if item.job.status == "pending" %}
+                  · Next attempt {{ item.job.next_attempt_at|date:"H:i:s" }}
+                {% endif %}
+              {% else %}
+                No background job record found for this rendition.
+              {% endif %}
+              · Updated {{ item.rendition.updated_at|date:"Y-m-d H:i:s" }} UTC
+            </div>
+            {% if item.rendition.processing_error %}
+              <div class="small text-danger mt-2">
+                {{ item.rendition.processing_error|truncatechars:500 }}
+              </div>
+            {% endif %}
+            {% if item.rendition.status == "failed" %}
+              <form method="post" action="{% url 'academy:staging-retry-video' item.rendition.pk %}" class="mt-3">
+                {% csrf_token %}
+                <button class="btn btn-outline-danger" type="submit">Retry video preparation</button>
+              </form>
+            {% elif item.rendition.status == "ready" %}
+              <span class="small text-success d-inline-block mt-2">Personalised encrypted video is ready for this learner.</span>
+            {% elif item.rendition.status == "pending" or item.rendition.status == "processing" %}
+              <span class="small text-muted d-inline-block mt-2">No action needed yet. The background worker should prepare this rendition.</span>
+            {% endif %}
           </div>
         {% endfor %}
       </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info mb-4" role="status">
+      No personalised video renditions are currently linked to an active simulated purchase.
+      This does not affect the simulated course entitlement.
     </div>
   {% endif %}
 
