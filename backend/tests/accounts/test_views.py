@@ -170,6 +170,45 @@ class ProfileUpdateTest(APITestCase):
         self.assertIsNone(self.user.telegram_id)
 
 
+class ProfilePageNameTest(TestCase):
+    """The learner-facing Profile tab reads and writes the User name fields."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="profile_name_member",
+            email="profile-name@example.com",
+            password="A-strong-test-password-852!",
+        )
+        self.client.force_login(self.user)
+
+    def test_profile_page_displays_existing_first_and_last_name(self):
+        self.user.first_name = "Nisha"
+        self.user.last_name = "Kapoor"
+        self.user.save(update_fields=["first_name", "last_name"])
+
+        response = self.client.get(reverse("profile"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'value="Nisha"')
+        self.assertContains(response, 'value="Kapoor"')
+
+    def test_profile_page_saves_first_and_last_name(self):
+        response = self.client.post(
+            reverse("profile"),
+            {
+                "first_name": "Nisha",
+                "last_name": "Kapoor",
+                "email": self.user.email,
+                "bio": "Learning markets with discipline.",
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.first_name, "Nisha")
+        self.assertEqual(self.user.last_name, "Kapoor")
+        self.assertEqual(self.user.full_name, "Nisha Kapoor")
+
 class DashboardAccessTest(TestCase):
     """Test dashboard access and ban enforcement."""
 
