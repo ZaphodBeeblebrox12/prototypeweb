@@ -38,6 +38,14 @@ class SitewideNavbarRoleTests(SimpleTestCase):
         self.assertIn("Referral credits", rendered)
         self.assertIn("Sign out", rendered)
 
+    def test_member_dashboard_keeps_signout_inside_profile_security(self):
+        source = get_template("accounts/member_desk.html").template.source
+
+        self.assertIn('action="{% url \'account_logout\' %}"', source)
+        self.assertIn('class="inline-form"', source)
+        self.assertIn("{% csrf_token %}", source)
+        self.assertIn(">Sign out</button>", source)
+
     def test_staff_account_keeps_privileged_navigation(self):
         rendered = self.render_nav(is_staff=True)
 
