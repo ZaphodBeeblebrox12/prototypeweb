@@ -211,6 +211,7 @@ class CourseReviewTemplateTests(TestCase):
         response = self.client.get(reverse("academy:course-import-preview", args=[record.pk]))
 
         self.assertEqual(response.status_code, 200, response.content)
+        self.assertTemplateUsed(response, "academy/course_import_website_preview.html")
         self.assertContains(response, "Website Preview Course")
         self.assertContains(response, "A short promise for the course.")
         self.assertContains(response, 'class="tt-course-overview')
@@ -342,6 +343,7 @@ class CourseReviewTemplateTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200, response.content)
+        self.assertTemplateUsed(response, "academy/lesson.html")
         content = response.content
         grid_index = content.index(b'class="tt-room-grid"')
         outline_index = content.index(b'class="tt-outline"')
