@@ -119,7 +119,7 @@ class StagingPaymentSimulatorTests(TestCase):
         response = self.client.post(
             self.url,
             {
-                "course_offer": str(self.offer.pk),
+                "course": str(self.course.pk),
                 "learner": str(self.learner.pk),
                 "acknowledge": "on",
             },
@@ -167,6 +167,91 @@ class StagingPaymentSimulatorTests(TestCase):
         self.assertEqual(intent.provider_payment_id, "")
         self.assertEqual(intent.provider_reference, "")
 
+    def test_published_course_without_public_offer_is_available_for_internal_simulation(self):
+        from apps.subscriptions.models import Product
+
+        course = Course.objects.create(
+            title="No-offer simulation course",
+            slug="no-offer-simulation-course",
+            summary="A published test course without a public checkout offer.",
+            status=Course.Status.PUBLISHED,
+            access_type=Course.AccessType.FREE,
+        )
+        module = CourseModule.objects.create(
+            course=course,
+            title="Protected video module",
+            slug="protected-video-module",
+            position=1,
+            is_published=True,
+        )
+        lesson = Lesson.objects.create(
+            module=module,
+            title="Protected test video",
+            slug="protected-test-video",
+            position=1,
+            is_published=True,
+        )
+        video = ProtectedLessonVideo.objects.create(
+            lesson=lesson,
+            source_file="academy/video-source/no-offer/source.mp4",
+            status=ProtectedLessonVideo.Status.READY,
+            stream_directory="streams/no-offer/source",
+        )
+
+        page = self.client.get(self.url, HTTP_HOST=STAGING_HOST)
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, "No-offer simulation course")
+
+        response = self.client.post(
+            self.url,
+            {
+                "course": str(course.pk),
+                "learner": str(self.learner.pk),
+                "acknowledge": "on",
+            },
+            HTTP_HOST=STAGING_HOST,
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, "Course access was granted successfully")
+        self.assertContains(response, "Internal only")
+
+        intent = PaymentIntent.objects.get(user=self.learner)
+        self.assertEqual(intent.status, PaymentIntent.Status.SUCCESS)
+        self.assertTrue(intent.is_simulated)
+        self.assertEqual(intent.currency, "INR")
+        self.assertEqual(intent.amount, 100)
+
+        entitlement = CourseEntitlement.objects.get(
+            user=self.learner,
+            course=course,
+        )
+        self.assertEqual(entitlement.source, CourseEntitlement.Source.PURCHASE)
+        self.assertEqual(entitlement.payment_intent_id, intent.pk)
+
+        offer = CourseOffer.objects.get(course=course, slug=f"staging-sim-{course.pk.hex}")
+        self.assertFalse(offer.is_active)
+        self.assertFalse(offer.is_saleable)
+        self.assertFalse(offer.plan.is_active)
+        self.assertTrue(offer.plan.is_hidden)
+        self.assertIsInstance(offer.plan.product, Product)
+        self.assertFalse(offer.plan.product.is_active)
+        self.assertEqual(
+            offer.plan.prices.get(interval=PlanPrice.Interval.ONE_TIME).price_cents,
+            100,
+        )
+
+        rendition = PersonalizedProtectedVideo.objects.get(
+            user=self.learner,
+            protected_video=video,
+        )
+        self.assertEqual(rendition.status, PersonalizedProtectedVideo.Status.PENDING)
+        job = Job.objects.get(
+            kind="process_personalized_video",
+            payload__rendition_id=str(rendition.pk),
+        )
+        self.assertEqual(job.payload["user_id"], str(self.learner.pk))
+
     def test_learner_with_existing_active_access_cannot_receive_duplicate_simulation(self):
         CourseEntitlement.objects.create(
             user=self.learner,
@@ -176,7 +261,7 @@ class StagingPaymentSimulatorTests(TestCase):
         response = self.client.post(
             self.url,
             {
-                "course_offer": str(self.offer.pk),
+                "course": str(self.course.pk),
                 "learner": str(self.learner.pk),
                 "acknowledge": "on",
             },
