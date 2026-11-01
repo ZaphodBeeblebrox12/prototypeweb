@@ -1388,10 +1388,6 @@
   margin: 0;
 }
 
-.tt-lesson-experience .learning-content-grid {
-  grid-template-columns: minmax(0, 1fr) 245px;
-  gap: clamp(20px, 2.5vw, 34px);
-}
 
 .tt-lesson-experience .tt-lesson-navigation { margin-top: 16px; }
 
@@ -1456,11 +1452,6 @@
 .tt-lesson-experience .tt-lesson-video-panel .tt-video-lesson--status { padding: 18px; }
 
 @media (max-width: 920px) {
-  .tt-lesson-experience .learning-content-grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 18px;
-  }
-
   .tt-lesson-experience .tt-outline {
     position: static;
     top: auto;
