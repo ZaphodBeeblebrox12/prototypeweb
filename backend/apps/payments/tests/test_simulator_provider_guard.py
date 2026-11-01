@@ -11,7 +11,7 @@ from apps.payments.providers import (
 
 class SimulatorProviderGuardTests(SimpleTestCase):
     def setUp(self):
-        self.intent = SimpleNamespace(provider="simulator")
+        self.intent = SimpleNamespace(provider="razorpay", is_simulated=True)
 
     def test_simulator_cannot_create_external_checkout(self):
         with self.assertRaises(ProviderConfigurationError):
