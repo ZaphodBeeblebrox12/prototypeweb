@@ -49,55 +49,50 @@
   margin-top: 16px;
 }
 
-/* Keep the video available without making it the first thing a learner sees.
-   The approved preview leads with the lesson idea and the Trading Notebook. */
-.tt-member-learning-preview .tt-lesson-video-disclosure {
-  margin: 20px 0 24px;
+/* Keep the lesson video visible, while retaining the approved reading layout. */
+.tt-member-learning-preview .tt-member-video-panel {
+  margin: 0 0 24px;
   overflow: hidden;
   border: 1px solid #ded7c8;
   border-radius: 8px;
   background: #fffdf8;
+  box-shadow: 0 8px 22px rgba(41, 56, 46, .05);
 }
 
-.tt-member-learning-preview .tt-lesson-video-disclosure > summary {
+.tt-member-learning-preview .tt-member-video-panel-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 17px;
-  color: #294b38;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 750;
-  list-style: none;
-}
-
-.tt-member-learning-preview .tt-lesson-video-disclosure > summary::-webkit-details-marker {
-  display: none;
-}
-
-.tt-member-learning-preview .tt-lesson-video-disclosure > summary::after {
-  content: "+";
-  color: #a78034;
-  font-size: 19px;
-  font-weight: 500;
-}
-
-.tt-member-learning-preview .tt-lesson-video-disclosure[open] > summary {
+  padding: 12px 17px;
   border-bottom: 1px solid #ded7c8;
+  color: #294b38;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .12em;
 }
 
-.tt-member-learning-preview .tt-lesson-video-disclosure[open] > summary::after {
-  content: "−";
+.tt-member-learning-preview .tt-member-video-panel-heading span + span {
+  color: #68736c;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: normal;
 }
 
-.tt-member-learning-preview .tt-lesson-video-disclosure .tt-video-lesson {
+.tt-member-learning-preview .tt-member-video-panel .tt-video-lesson {
   margin: 0;
   padding: 16px;
 }
 
-.tt-member-learning-preview .tt-lesson-video-disclosure .tt-video-lesson video {
+.tt-member-learning-preview .tt-member-video-panel .tt-video-lesson video {
+  display: block;
+  width: 100%;
   max-height: 560px;
+  background: #17231c;
+}
+
+.tt-member-learning-preview .tt-member-video-panel .tt-video-lesson--status {
+  padding: 18px;
 }
 
 @media (min-width: 921px) {
