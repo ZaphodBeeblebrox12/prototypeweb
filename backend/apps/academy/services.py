@@ -185,6 +185,97 @@ def enrol_in_free_course(*, user, course):
         return entitlement
 
 
+def enqueue_personalized_video_for_purchase(*, user, protected_video):
+    """Queue one viewer-specific rendition, but only for an active paid purchase."""
+    from .models import PersonalizedProtectedVideo, ProtectedLessonVideo
+
+    if not isinstance(protected_video, ProtectedLessonVideo):
+        raise TypeError("protected_video must be a ProtectedLessonVideo")
+    entitlement = get_active_entitlement(user, protected_video.lesson.module.course)
+    if (
+        entitlement is None
+        or entitlement.source != CourseEntitlement.Source.PURCHASE
+        or not entitlement.has_access_at()
+        or protected_video.status != ProtectedLessonVideo.Status.READY
+        or not protected_video.source_file
+    ):
+        return None
+
+    rendition, _created = PersonalizedProtectedVideo.objects.get_or_create(
+        user=user,
+        protected_video=protected_video,
+    )
+    if rendition.status == PersonalizedProtectedVideo.Status.READY and rendition.stream_directory:
+        return rendition
+
+    if rendition.status in (
+        PersonalizedProtectedVideo.Status.REVOKED,
+        PersonalizedProtectedVideo.Status.FAILED,
+    ):
+        rendition.status = PersonalizedProtectedVideo.Status.PENDING
+        rendition.processing_error = ""
+        rendition.save(update_fields=["status", "processing_error", "updated_at"])
+
+    # This job is written to the same durable database queue as the entitlement.
+    # Repeated webhook deliveries and page visits share one open idempotency key.
+    from apps.jobs.enqueue import enqueue_generic
+
+    enqueue_generic(
+        "process_personalized_video",
+        {
+            "rendition_id": str(rendition.pk),
+            "user_id": str(user.pk),
+            "video_id": str(protected_video.pk),
+        },
+        idempotency_key=f"personalized-video:{rendition.pk}",
+    )
+    return rendition
+
+
+def enqueue_personalized_videos_for_course(*, user, course):
+    """Queue all currently-ready protected lesson videos after a paid purchase."""
+    from .models import ProtectedLessonVideo
+
+    videos = (
+        ProtectedLessonVideo.objects.filter(
+            lesson__module__course=course,
+            status=ProtectedLessonVideo.Status.READY,
+        )
+        .select_related("lesson__module__course")
+        .order_by("lesson__module__position", "lesson__position")
+    )
+    return [
+        rendition
+        for video in videos
+        if (rendition := enqueue_personalized_video_for_purchase(
+            user=user, protected_video=video
+        )) is not None
+    ]
+
+
+def enqueue_personalized_videos_for_existing_purchasers(*, protected_video):
+    """When a new protected lesson video is processed, queue it for paid learners."""
+    from .models import CourseEntitlement
+
+    entitlements = (
+        CourseEntitlement.objects.filter(
+            course=protected_video.lesson.module.course,
+            source=CourseEntitlement.Source.PURCHASE,
+            status=CourseEntitlement.Status.ACTIVE,
+            starts_at__lte=timezone.now(),
+        )
+        .filter(Q(expires_at__isnull=True) | Q(expires_at__gt=timezone.now()))
+        .select_related("user", "course")
+    )
+    return [
+        rendition
+        for entitlement in entitlements
+        if (rendition := enqueue_personalized_video_for_purchase(
+            user=entitlement.user, protected_video=protected_video
+        )) is not None
+    ]
+
+
 def lesson_release_at(access_record, lesson):
     """Return a lesson's unlock time for either a course entitlement or subscription."""
     started_at = getattr(access_record, "starts_at", None) or getattr(
@@ -495,6 +586,13 @@ def activate_course_payment(payment_intent, offer):
         reason="Verified one-time course payment",
     )
     if created:
+        # Paid course purchase is the sole trigger for viewer-specific video work.
+        # The durable rendition jobs are committed with the entitlement so a
+        # successful purchase cannot silently lose its preparation queue.
+        enqueue_personalized_videos_for_course(
+            user=payment_intent.user,
+            course=offer.course,
+        )
         from apps.events.models import record_event
 
         record_event(
