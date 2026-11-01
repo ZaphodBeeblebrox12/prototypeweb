@@ -870,7 +870,7 @@ class ProtectedLessonVideoAdmin(admin.ModelAdmin):
         job = enqueue_generic(
             "process_protected_lesson_video",
             {"video_id": str(video.pk), "force": True},
-            idempotency_key="academy:protected-video:single-worker",
+            idempotency_key=f"academy:protected-video:{video.pk}",
         )
         if str(job.payload.get("video_id")) != str(video.pk):
             messages.warning(

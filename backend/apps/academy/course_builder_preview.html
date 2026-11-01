@@ -2370,7 +2370,35 @@ body.builder-dialog-open { overflow:hidden; }
     });
   }
 
-  function lessonFields(l){if(l&&!l.notebook)l.notebook={title:'Before you make the call',prompts:[]};if(l&&l.notebook&&(!Array.isArray(l.notebook.prompts)||l.notebook.prompts.length===0))l.notebook.prompts=[{label:'Pause',text:'What evidence is visible?'},{label:'Interpret',text:'What could it mean in context?'},{label:'Apply',text:'What would change your view?'}];if(l&&l.notebook&&String(l.notebook.title||'').trim()==='Your Trading Notebook')l.notebook.title='Before you make the call';if(l&&!l.videoUrl)l.videoUrl='';return `<div class="section-intro"><h3>Lesson content</h3><p>Write the main lesson first, then switch audience to customise an entire country or region version in this same editor. The same rich-text tools work for both.</p></div>${l?`<div data-lesson-body-audience-controls>${lessonBodyAudienceControlsMarkup(l)}</div><div class="lesson-outline-layout"><aside class="lesson-outline-aside">${lessonOutlineMarkup()}</aside><div class="lesson-outline-content"><div class="field"><label>${lessonBodyAudienceLabel()}</label>${visualEditorMarkup(lessonBodyForAudience(l), {kind: lessonBodyEditorKind(), audience: selectedLessonBodyAudience()})}<span class="help">Use the toolbar above to format headings, emphasis, lists, links, quotes, dividers, and tables. To add a chart between paragraphs, click where it belongs, then choose Figures → Insert at cursor. The website preview preserves this placement.</span></div>${courseCardPickerMarkup()}</div></div><div class="helper-note">This is the content learners will read in the Learning Room. Review the website preview before submitting the course for review.</div><div class="field" style="margin-top:14px"><label>Legacy video URL (unprotected)</label><input class="input" type="url" data-entity="lesson" data-field="videoUrl" value="${esc(l.videoUrl||"")}" placeholder="https://…"><span class="help">This direct link is not protected and production learner pages hide it by default. For paid lessons, save the lesson first, then add it under Django Admin → Protected lesson videos, upload the source file, and run the processing command. Do not paste a paid-video MP4 URL here.</span></div><div class="related-course-box"><h4>Notebook prompts</h4><p>These editable prompts appear in the learner’s Your Trading Notebook section.</p><div class="field"><label>Notebook heading</label><input class="input" data-entity="notebook" data-field="title" value="${esc(l.notebook?.title||"Before you make the call")}"><span class="help">This is the large heading shown inside the Your Trading Notebook section of the learner view.</span></div>${(l.notebook?.prompts||[]).map((prompt,index)=>`<div class="q-card"><div class="field"><label>Prompt ${index+1} label</label><input class="input" data-entity="notebook-prompt" data-index="${index}" data-field="label" value="${esc(prompt.label||"")}"></div><div class="field" style="margin-top:8px"><label>Prompt text</label><textarea class="textarea" data-entity="notebook-prompt" data-index="${index}" data-field="text">${esc(prompt.text||"")}</textarea></div></div>`).join("")}</div><div class="notebook-editor-preview"><h4>How learners will see the notebook</h4><p>Preview the styled notebook block here. Changes to the heading or prompts above update this preview.</p><div data-notebook-preview>${notebookPreviewMarkup(l)}</div></div><div class="related-course-box"><h4>Related-course metadata (optional)</h4><p>These selections record course relationships for discovery; they do not insert a card into the lesson body. To place the compact Option 3 inline course card, use the companion-course picker directly below the Lesson body field. Individual lesson links are managed separately.</p><input class="input" type="search" data-related-course-search placeholder="Search published or announced courses by title or topic" aria-label="Search published or announced related courses"><div class="related-course-list">${demoOffers.map(course=>{const checked=(l.relatedCourseIds||[]).includes(course.id);return `<div class="related-course-item related-course-entry"><label class="related-course-choice"><input type="checkbox" data-related-course="${esc(course.id)}" ${checked ? "checked" : ""}><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">${esc(course.state)}${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}${course.duration ? " · " + esc(course.duration) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></label></div>`;}).join("")}${comingSoonOffers.map(course=>`<div class="related-course-item related-course-entry"><div class="related-course-choice"><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">Coming soon${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></div></div>`).join("")}${demoOffers.length || comingSoonOffers.length ? "" : '<p class="microcopy">No published or announced courses are available to associate yet.</p>'}</div><div class="helper-note">These selections record related-course metadata only. Use the dedicated inline course-card picker below Lesson body to insert a visual companion-course card into the lesson. No course is automatically published.</div></div><div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap"><button class="btn" type="button" data-action="go-curriculum">← Curriculum</button><button class="btn primary" type="button" data-action="go-questions">Edit practice questions →</button></div>`:'<div class="empty-state"><p>Select a lesson in the curriculum first.</p></div>'}`;}
+  function protectedVideoSummaryMarkup(video) {
+    if (!video) {
+      return '<div class="microcopy">No protected video is attached to this lesson yet.</div>';
+    }
+    if (video.status === 'stored_for_draft') {
+      const filename = esc(video.filename || 'Video source');
+      const sizeMb = (Number(video.size_bytes || 0) / 1024 / 1024).toFixed(1);
+      return '<div class="helper-note" role="status"><strong>Stored privately</strong> · ' +
+        filename + ' · ' + sizeMb +
+        ' MB. Encrypted streaming is prepared automatically after this course is approved and published.</div>';
+    }
+    const labels = {
+      pending: 'Queued for encrypted processing',
+      processing: 'Converting to encrypted HLS',
+      ready: 'Protected stream ready',
+      failed: 'Video processing failed'
+    };
+    const label = labels[video.status] || 'Protected video attached';
+    const detail = video.processing_error
+      ? '<p class="help">' + esc(video.processing_error) + '</p>'
+      : '';
+    const readyNote = video.status === 'ready'
+      ? 'This lesson is using its private encrypted stream. Upload a new source to replace it.'
+      : '';
+    return '<div class="helper-note" role="status"><strong>' + esc(label) +
+      '</strong><p>' + esc(readyNote || 'The source remains private and is never exposed as a public file link.') +
+      '</p>' + detail + '</div>';
+  }
+  function lessonFields(l){if(l&&!l.notebook)l.notebook={title:'Before you make the call',prompts:[]};if(l&&l.notebook&&(!Array.isArray(l.notebook.prompts)||l.notebook.prompts.length===0))l.notebook.prompts=[{label:'Pause',text:'What evidence is visible?'},{label:'Interpret',text:'What could it mean in context?'},{label:'Apply',text:'What would change your view?'}];if(l&&l.notebook&&String(l.notebook.title||'').trim()==='Your Trading Notebook')l.notebook.title='Before you make the call';if(l&&!l.videoUrl)l.videoUrl='';return `<div class="section-intro"><h3>Lesson content</h3><p>Write the main lesson first, then switch audience to customise an entire country or region version in this same editor. The same rich-text tools work for both.</p></div>${l?`<div data-lesson-body-audience-controls>${lessonBodyAudienceControlsMarkup(l)}</div><div class="lesson-outline-layout"><aside class="lesson-outline-aside">${lessonOutlineMarkup()}</aside><div class="lesson-outline-content"><div class="field"><label>${lessonBodyAudienceLabel()}</label>${visualEditorMarkup(lessonBodyForAudience(l), {kind: lessonBodyEditorKind(), audience: selectedLessonBodyAudience()})}<span class="help">Use the toolbar above to format headings, emphasis, lists, links, quotes, dividers, and tables. To add a chart between paragraphs, click where it belongs, then choose Figures → Insert at cursor. The website preview preserves this placement.</span></div>${courseCardPickerMarkup()}</div></div><div class="helper-note">This is the content learners will read in the Learning Room. Review the website preview before submitting the course for review.</div><div class="field" style="margin-top:14px"><label>Legacy video URL (unprotected)</label><input class="input" type="url" data-entity="lesson" data-field="videoUrl" value="${esc(l.videoUrl||"")}" placeholder="https://…"><span class="help">This direct link is not protected and production learner pages hide it by default. Use the protected video upload below for paid course content; do not paste a private MP4 URL here.</span></div><div class="related-course-box" style="margin-top:14px"><h4>Protected lesson video</h4><p>Upload the original source here. It is stored privately in Google Drive and never exposed as a public file link.</p>${protectedVideoSummaryMarkup(l.protectedVideo)}<div class="field" style="margin-top:10px"><label>Upload or replace source video</label><input class="input" type="file" accept=".mp4,.mov,.mkv,.webm,video/mp4,video/quicktime,video/x-matroska,video/webm" data-protected-video-upload="${esc(l.id)}"><span class="help">MP4, MOV, MKV or WebM · Maximum 5 GB. Save the draft first; the upload remains attached to this lesson if you reorder or rename it.</span></div><div class="microcopy" role="status" aria-live="polite" data-protected-video-status></div></div><div class="related-course-box"><h4>Notebook prompts</h4><p>These editable prompts appear in the learner’s Your Trading Notebook section.</p><div class="field"><label>Notebook heading</label><input class="input" data-entity="notebook" data-field="title" value="${esc(l.notebook?.title||"Before you make the call")}"><span class="help">This is the large heading shown inside the Your Trading Notebook section of the learner view.</span></div>${(l.notebook?.prompts||[]).map((prompt,index)=>`<div class="q-card"><div class="field"><label>Prompt ${index+1} label</label><input class="input" data-entity="notebook-prompt" data-index="${index}" data-field="label" value="${esc(prompt.label||"")}"></div><div class="field" style="margin-top:8px"><label>Prompt text</label><textarea class="textarea" data-entity="notebook-prompt" data-index="${index}" data-field="text">${esc(prompt.text||"")}</textarea></div></div>`).join("")}</div><div class="notebook-editor-preview"><h4>How learners will see the notebook</h4><p>Preview the styled notebook block here. Changes to the heading or prompts above update this preview.</p><div data-notebook-preview>${notebookPreviewMarkup(l)}</div></div><div class="related-course-box"><h4>Related-course metadata (optional)</h4><p>These selections record course relationships for discovery; they do not insert a card into the lesson body. To place the compact Option 3 inline course card, use the companion-course picker directly below the Lesson body field. Individual lesson links are managed separately.</p><input class="input" type="search" data-related-course-search placeholder="Search published or announced courses by title or topic" aria-label="Search published or announced related courses"><div class="related-course-list">${demoOffers.map(course=>{const checked=(l.relatedCourseIds||[]).includes(course.id);return `<div class="related-course-item related-course-entry"><label class="related-course-choice"><input type="checkbox" data-related-course="${esc(course.id)}" ${checked ? "checked" : ""}><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">${esc(course.state)}${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}${course.duration ? " · " + esc(course.duration) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></label></div>`;}).join("")}${comingSoonOffers.map(course=>`<div class="related-course-item related-course-entry"><div class="related-course-choice"><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">Coming soon${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></div></div>`).join("")}${demoOffers.length || comingSoonOffers.length ? "" : '<p class="microcopy">No published or announced courses are available to associate yet.</p>'}</div><div class="helper-note">These selections record related-course metadata only. Use the dedicated inline course-card picker below Lesson body to insert a visual companion-course card into the lesson. No course is automatically published.</div></div><div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap"><button class="btn" type="button" data-action="go-curriculum">← Curriculum</button><button class="btn primary" type="button" data-action="go-questions">Edit practice questions →</button></div>`:'<div class="empty-state"><p>Select a lesson in the curriculum first.</p></div>'}`;}
   function questionImageMarkup(q, l) {
     const images = Array.isArray(l.images) ? l.images : (l.image ? [l.image] : []);
     const image = images.find(function(item) {
@@ -4450,6 +4478,7 @@ body.builder-dialog-open { overflow:hidden; }
   let academySaveTimer = null;
   let academySaving = false;
   let academySavePending = false;
+  let protectedVideoUploadInProgress = false;
   const csrfValue = () => {
     const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
     return match ? decodeURIComponent(match[1]) : '';
@@ -4602,6 +4631,76 @@ body.builder-dialog-open { overflow:hidden; }
       }
     }
   }
+  document.addEventListener('change', async event => {
+    const input = event.target;
+    if (!input.matches('[data-protected-video-upload]')) return;
+    const file = input.files && input.files[0];
+    const course = currentCourse();
+    const lessonId = String(input.dataset.protectedVideoUpload || '');
+    const lesson = course ? allLessons(course).find(item => String(item.id) === lessonId) : null;
+    if (!file || !course || !lesson) return;
+
+    const allowedSuffixes = ['.mp4', '.mov', '.mkv', '.webm'];
+    const filename = String(file.name || '');
+    const suffix = filename.toLowerCase().slice(filename.lastIndexOf('.'));
+    if (!allowedSuffixes.includes(suffix)) {
+      toast('Choose an MP4, MOV, MKV or WebM video.');
+      input.value = '';
+      return;
+    }
+    if (!file.size || file.size > 5 * 1024 * 1024 * 1024) {
+      toast('Choose a video file larger than 0 bytes and no larger than 5 GB.');
+      input.value = '';
+      return;
+    }
+    if (protectedVideoUploadInProgress) {
+      toast('Another lesson video upload is already in progress.');
+      input.value = '';
+      return;
+    }
+
+    protectedVideoUploadInProgress = true;
+    input.disabled = true;
+    const status = input.closest('.related-course-box')?.querySelector('[data-protected-video-status]');
+    if (status) status.textContent = 'Saving the lesson draft before upload…';
+    try {
+      clearTimeout(academySaveTimer);
+      await saveCurrentToAcademy(false, false);
+      if (!course.serverDraftId) throw new Error('The Academy did not return a saved draft ID.');
+      if (status) status.textContent = 'Uploading to private video storage. Keep this tab open until the upload finishes…';
+
+      const formData = new FormData();
+      formData.append('file', file, file.name);
+      const uploadUrl = '/staff/course-builder/videos/' +
+        encodeURIComponent(course.serverDraftId) + '/' + encodeURIComponent(lessonId) + '/';
+      const response = await fetch(uploadUrl, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {'Accept': 'application/json', 'X-CSRFToken': csrfValue()},
+        body: formData
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.detail || 'The protected video upload could not be saved.');
+      }
+      lesson.protectedVideo = payload.video || {
+        status: 'stored_for_draft',
+        filename: file.name,
+        size_bytes: file.size
+      };
+      state.savedAt = nowText();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) {}
+      if (status) status.textContent = 'Video stored privately. Encrypted HLS processing will start after course approval and publication.';
+      toast(payload.message || 'Protected lesson video stored privately.');
+    } catch (error) {
+      if (status) status.textContent = 'Upload not completed: ' + String(error.message || error);
+      toast('Could not upload protected video: ' + String(error.message || error));
+    } finally {
+      protectedVideoUploadInProgress = false;
+      input.value = '';
+      if (currentCourse()?.id === course.id && currentLesson()?.id === lessonId) renderEditor();
+    }
+  });
   persist = function(showToast=false) {
     try {
       if(!suppressDirtyTracking)markDirty();
@@ -4626,6 +4725,10 @@ body.builder-dialog-open { overflow:hidden; }
   publishCourse = async function() {
     const course = currentCourse();
     if (!course) return;
+    if (protectedVideoUploadInProgress) {
+      toast('Wait for the protected video upload to finish before submitting this course.');
+      return;
+    }
     if (!course.title.trim() || !course.summary.trim() || !course.modules.length || !allLessons(course).length || allLessons(course).some(lesson=>!lesson.title.trim()||!lesson.content.trim())) {
       toast('Add a title, summary, at least one module, and complete lesson content before submitting.');
       state.tab = !course.title.trim() || !course.summary.trim() ? 'overview' : 'lesson';

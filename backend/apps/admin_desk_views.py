@@ -256,7 +256,7 @@ def admin_desk_course_import_delete(request, import_id):
     deleted_id = str(import_id)
     with transaction.atomic():
         record = get_object_or_404(
-            CourseImport.objects.select_for_update().prefetch_related("assets"),
+            CourseImport.objects.select_for_update().prefetch_related("assets", "videos"),
             pk=import_id,
         )
         if not _can_permanently_delete_test_import(record):
@@ -272,6 +272,14 @@ def admin_desk_course_import_delete(request, import_id):
             if asset.file:
                 storage = asset.file.storage
                 name = asset.file.name
+                transaction.on_commit(
+                    lambda storage=storage, name=name: storage.delete(name),
+                    robust=True,
+                )
+        for video in record.videos.all():
+            if video.source_file:
+                storage = video.source_file.storage
+                name = video.source_file.name
                 transaction.on_commit(
                     lambda storage=storage, name=name: storage.delete(name),
                     robust=True,

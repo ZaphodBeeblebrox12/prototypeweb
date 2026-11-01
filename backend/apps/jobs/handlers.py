@@ -1,6 +1,9 @@
 """Built-in non-reconcile job handlers (sweep / referrals / MaxMind)."""
 
 import logging
+import os
+import tempfile
+
 from django.utils import timezone
 
 from .models import Job
@@ -91,12 +94,44 @@ def _process_protected_lesson_video(payload, job):
     if not video.source_file:
         raise ValueError(f"Protected lesson video {video_id} has no source file.")
 
-    try:
+    def process_with_cleanup():
         call_command(
             "process_lesson_videos",
             video=str(video.pk),
             force=bool((payload or {}).get("force", False)),
         )
+        previous_source_name = str((payload or {}).get("previous_source_name") or "").strip()
+        current_source_name = video.source_file.name if video.source_file else ""
+        if previous_source_name and previous_source_name != current_source_name:
+            from apps.academy.video_storage import lesson_video_storage
+
+            try:
+                lesson_video_storage.delete(previous_source_name)
+            except Exception:
+                # The new rendition is already active; an orphaned old source is
+                # a cleanup warning, not a reason to mark successful processing failed.
+                logger.exception(
+                    "Could not remove the previous private video source for %s",
+                    video.pk,
+                )
+
+    try:
+        if os.name == "nt":
+            process_with_cleanup()
+        else:
+            import fcntl
+
+            lock_path = os.path.join(
+                tempfile.gettempdir(),
+                "tradethesis-protected-video-processing.lock",
+            )
+            # All Gunicorn workers on one Render instance share /tmp. This
+            # serializes CPU-heavy FFmpeg/Drive jobs even when several jobs
+            # have distinct idempotency keys and are claimed by separate workers.
+            with open(lock_path, "a", encoding="utf-8") as lock_file:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+                process_with_cleanup()
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
     except Exception as exc:
         # Failures before _process_one starts (for example, missing FFmpeg or
         # an unavailable Drive provider) must not leave the Admin row Pending.
