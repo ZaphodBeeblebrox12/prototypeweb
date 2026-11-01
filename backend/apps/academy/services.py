@@ -599,7 +599,7 @@ def update_lesson_progress(
 
 
 @transaction.atomic
-def activate_course_payment(payment_intent, offer, *, send_notifications=True):
+def activate_course_payment(payment_intent, offer, *, send_notifications=True, granted_by=None):
     """Atomically claim a verified one-time payment and grant course access."""
     from apps.payments.models import PaymentIntent
 
@@ -627,8 +627,13 @@ def activate_course_payment(payment_intent, offer, *, send_notifications=True):
         user=payment_intent.user,
         offer=offer,
         payment_intent=payment_intent,
+        granted_by=granted_by,
         source=CourseEntitlement.Source.PURCHASE,
-        reason="Verified one-time course payment",
+        reason=(
+            "STAGING SIMULATION — no money collected"
+            if payment_intent.provider == "simulator"
+            else "Verified one-time course payment"
+        ),
     )
     if created:
         # Paid course purchase is the sole trigger for viewer-specific video work.
