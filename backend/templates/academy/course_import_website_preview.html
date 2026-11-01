@@ -25,67 +25,30 @@
     </div>
     <div class="tt-admin-preview-actions">
       <a href="{{ admin_review_url }}">Content review ↗</a>
-      {% if selected_lesson %}<a href="{{ overview_url }}">Course overview</a>{% endif %}
-    </div>
-  </aside>
-
-  {% if selected_lesson %}
-  <div class="tt-learning-room tt-admin-learning-preview">
-    <div class="tt-breadcrumb">
-      <a href="{{ overview_url }}">Academy</a><span>/</span>
-      <a href="{{ overview_url }}">{{ course.title }}</a><span>/</span>
-      <span>{{ selected_module.title }}</span>
-    </div>
-
-
-    <div class="tt-room-grid">
-      <aside class="tt-outline" aria-label="Course lesson outline">
-        <div class="tt-outline-heading"><h2>Course outline</h2><span>{{ course.title }}</span></div>
-        <label class="tt-outline-search"><span class="visually-hidden">Search lessons</span><input type="search" placeholder="Find a lesson…" data-outline-search></label>
-        <nav>
-          {% for group in preview_modules %}
-          <section class="tt-outline-module">
-            <h3>{{ group.module.position|stringformat:"02d" }} · {{ group.module.title }}</h3>
-            <ul>
-              {% for item in group.lessons %}
-              <li class="tt-outline-item" data-outline-item>
-                <a href="{{ item.preview_url }}"{% if item.current %} aria-current="page" class="is-current"{% endif %}>
-                  <span>{{ item.lesson.title }}</span>
-                  {% if item.current %}<span class="tt-complete-mark" aria-label="Current lesson">●</span>{% endif %}
-                </a>
-              </li>
-              {% endfor %}
-            </ul>
-          </section>
-          {% endfor %}
-        </nav>
-      </aside>
-
-      <main class="tt-lesson-main">
-      <header class="tt-course-header tt-course-header--depth">
-        <div class="tt-course-header-copy">
-          <div class="tt-course-header-tags"><span class="tt-course-header-tag">Module {{ selected_module.position|stringformat:"02d" }}</span><span class="tt-course-header-tag">Lesson {{ selected_lesson.source_id }}</span></div>
-          <p class="tt-eyebrow tt-module-eyebrow"><span class="tt-heading-rule" aria-hidden="true"></span> MODULE {{ selected_module.position|stringformat:"02d" }} · {{ selected_module_display_title }}</p>
-          <h1>{{ selected_lesson.title }}</h1>
-          {% if selected_lesson.summary %}<p class="tt-lesson-summary">{{ selected_lesson.summary }}</p>{% endif %}
-          <div class="tt-lesson-meta"><span>{{ selected_lesson.duration_minutes }} minutes</span><span class="tt-preview-label">Administrator preview</span></div>
-        </div>
-        <aside class="tt-lesson-plan" aria-label="In this lesson">
-          <div class="tt-lesson-plan-top"><strong>In this lesson</strong><span>{{ selected_lesson.source_id }}</span></div>
-          <p class="tt-lesson-plan-kicker">Study time</p>
-          <div class="tt-lesson-plan-time"><strong>{{ selected_lesson.duration_minutes }} minutes</strong><span>Estimated study time</span></div>
-          <div class="tt-lesson-plan-divider"></div>
-          <p class="tt-lesson-plan-kicker">You will work through</p>
-          <div class="tt-lesson-plan-steps"><div><span>01</span><strong>Describe</strong></div><div><span>02</span><strong>Interpret</strong></div><div><span>03</span><strong>Apply</strong></div></div>
-        </aside>
-        <div class="tt-course-progress tt-course-progress--draft" role="progressbar" aria-label="Draft preview progress (unstarted)" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span style="width:0%"></span></div>
-      </header>
-        <article class="tt-lesson-article">
-          {% if selected_video_url %}
-          <section class="tt-video-lesson" aria-label="Lesson video">
-            {% if selected_video_is_file %}
-            <video controls preload="metadata" src="{{ selected_video_url }}">Your browser does not support video playback.</video>
-            {% else %}
+      {% if selected_lesson %}
+  {% include "academy/partials/lesson_experience.html" with
+    course=course
+    lesson=selected_lesson
+    module=selected_module
+    module_display_title=selected_module_display_title
+    outline_modules=preview_modules
+    lesson_sections=selected_sections
+    notebook=selected_notebook
+    reflection=selected_reflection
+    reflection_response=selected_reflection_response
+    practice_questions=selected_practice_questions
+    video_url=selected_video_url
+    video_is_file=selected_video_is_file
+    related_courses=selected_related_courses
+    admin_preview=True
+    course_import_preview=True
+    progress=None
+    course_progress_percent=0
+    overview_url=overview_url
+    admin_review_url=admin_review_url
+    only
+  %}
+  {% else %}
             <a href="{{ selected_video_url }}" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a>
             <p class="small text-muted">This video opens in a new tab.</p>
             {% endif %}
