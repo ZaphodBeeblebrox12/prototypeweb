@@ -19,8 +19,8 @@
   z-index: 4;
   left: 14px;
   right: auto;
-  top: auto;
-  bottom: 54px;
+  top: 14px;
+  bottom: auto;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -36,6 +36,7 @@
   pointer-events: none;
   user-select: none;
   opacity: 0.94;
+  transition: left 650ms ease-in-out, top 650ms ease-in-out;
   text-shadow: 0 1px 3px rgb(0 0 0 / 90%);
 }
 
