@@ -164,6 +164,16 @@ class Command(BaseCommand):
             video.stream_directory = output_prefix
             video.processed_at = timezone.now()
             video.save(update_fields=("status", "processing_error", "stream_directory", "processed_at", "updated_at"))
+            # A lesson video uploaded after a learner purchased the course must
+            # also receive that learner's personalised rendition.
+            try:
+                from apps.academy.services import enqueue_personalized_videos_for_existing_purchasers
+                enqueue_personalized_videos_for_existing_purchasers(protected_video=video)
+            except Exception:
+                self.stderr.write(
+                    "The shared protected stream is ready, but personalised renditions "
+                    "could not be queued for existing purchasers."
+                )
             if previous_prefix and previous_prefix != output_prefix:
                 try:
                     self._delete_rendition(previous_prefix)
