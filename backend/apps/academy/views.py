@@ -9,6 +9,7 @@ from urllib.parse import quote, urlsplit
 from uuid import UUID
 
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
@@ -1578,6 +1579,65 @@ def _ensure_staging_simulator_offer_and_price(course):
 
 @login_required
 @never_cache
+@login_required
+@require_POST
+@never_cache
+def retry_staging_personalized_video(request, rendition_id):
+    """Requeue one failed personalised rendition for an existing staging simulation."""
+    if not _staging_payment_simulator_enabled(request) or not is_course_content_admin(
+        request.user
+    ):
+        raise Http404
+
+    rendition = get_object_or_404(
+        PersonalizedProtectedVideo.objects.select_related(
+            "user",
+            "protected_video__lesson__module__course",
+        ),
+        pk=rendition_id,
+    )
+    course = rendition.protected_video.lesson.module.course
+    entitlement = get_active_entitlement(rendition.user, course)
+
+    # Never use this retry control for real purchases, complimentary grants,
+    # revoked access, or somebody else's rendition.
+    if (
+        entitlement is None
+        or entitlement.source != CourseEntitlement.Source.PURCHASE
+        or not entitlement.has_access_at()
+        or not entitlement.payment_intent_id
+        or not entitlement.payment_intent.is_simulated
+    ):
+        raise Http404
+
+    if rendition.status != PersonalizedProtectedVideo.Status.FAILED:
+        messages.warning(
+            request,
+            "This rendition is not in a failed state. No new job was queued.",
+        )
+        return redirect("academy:staging-payment-simulator")
+
+    from .services import enqueue_personalized_video_for_purchase
+
+    queued = enqueue_personalized_video_for_purchase(
+        user=rendition.user,
+        protected_video=rendition.protected_video,
+        force=True,
+    )
+    if queued is None:
+        messages.error(
+            request,
+            "The rendition could not be requeued because the paid entitlement or source video is no longer ready.",
+        )
+    else:
+        messages.success(
+            request,
+            f"Retry queued for {rendition.user.email or rendition.user.username} · {course.title}. "
+            "No new payment or entitlement was created.",
+        )
+    return redirect("academy:staging-payment-simulator")
+
+
 def staging_payment_simulator(request):
     """Grant a clearly-labelled no-money course purchase on Academy staging only."""
     if not _staging_payment_simulator_enabled(request) or not is_course_content_admin(
@@ -1695,12 +1755,49 @@ def staging_payment_simulator(request):
                         ),
                     }
 
+    from apps.payments.models import PaymentIntent
+
+    # Surface failed renditions belonging to recent simulated purchases so
+    # staging admins can retry the video job without simulating another payment.
+    failed_simulated_renditions = []
+    recent_simulated_intents = (
+        PaymentIntent.objects.filter(is_simulated=True)
+        .select_related("user")
+        .order_by("-created_at")[:10]
+    )
+    for simulated_intent in recent_simulated_intents:
+        simulated_entitlement = (
+            CourseEntitlement.objects.filter(
+                user=simulated_intent.user,
+                payment_intent=simulated_intent,
+                source=CourseEntitlement.Source.PURCHASE,
+                status=CourseEntitlement.Status.ACTIVE,
+            )
+            .select_related("course")
+            .first()
+        )
+        if (
+            simulated_entitlement is None
+            or not simulated_entitlement.has_access_at()
+        ):
+            continue
+        failed_simulated_renditions.extend(
+            PersonalizedProtectedVideo.objects.filter(
+                user=simulated_intent.user,
+                protected_video__lesson__module__course=simulated_entitlement.course,
+                status=PersonalizedProtectedVideo.Status.FAILED,
+            )
+            .select_related("protected_video__lesson")
+            .order_by("-updated_at")
+        )
+
     return render(
         request,
         "academy/staging_payment_simulator.html",
         {
             "form": form,
             "result": result,
+            "failed_simulated_renditions": failed_simulated_renditions,
             "simulator_host": getattr(
                 settings,
                 "ACADEMY_STAGING_PAYMENT_SIMULATOR_HOST",
