@@ -75,6 +75,32 @@ def _subscription_expiry(payload, job):
     return {"expired": expire_due_subscriptions()}
 
 
+def _process_personalized_video(payload, job):
+    """Create one paid learner's burned-watermark encrypted HLS rendition."""
+    from uuid import UUID
+
+    from django.core.management import call_command
+
+    from apps.academy.models import PersonalizedProtectedVideo
+
+    try:
+        rendition_id = UUID(str((payload or {}).get("rendition_id", "")))
+        user_id = UUID(str((payload or {}).get("user_id", "")))
+        video_id = UUID(str((payload or {}).get("video_id", "")))
+    except (AttributeError, TypeError, ValueError) as exc:
+        raise ValueError("Personalised-video jobs require rendition_id, user_id and video_id UUIDs.") from exc
+
+    rendition = (
+        PersonalizedProtectedVideo.objects
+        .filter(pk=rendition_id, user_id=user_id, protected_video_id=video_id)
+        .first()
+    )
+    if rendition is None:
+        raise ValueError("Personalised-video job does not match a stored learner rendition.")
+
+    call_command("process_personalized_videos", rendition=str(rendition.pk))
+
+
 def _process_protected_lesson_video(payload, job):
     """Package one private Academy source video as authenticated encrypted HLS."""
     from uuid import UUID
@@ -150,6 +176,7 @@ def _process_protected_lesson_video(payload, job):
 
 
 def register_builtin_handlers():
+    HANDLERS.setdefault("process_personalized_video", _process_personalized_video)
     HANDLERS.setdefault("process_protected_lesson_video", _process_protected_lesson_video)
     HANDLERS.setdefault("sweep", _sweep)
     HANDLERS.setdefault("subscription_expiry", _subscription_expiry)
