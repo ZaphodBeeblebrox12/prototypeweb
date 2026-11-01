@@ -145,6 +145,10 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
         self.assertContains(response, 'data-protected-video')
         self.assertContains(response, self.manifest_url)
         self.assertContains(response, 'data-video-watermark-name')
+        self.assertContains(response, 'data-video-watermark-email')
+        self.assertContains(response, 'data-video-fullscreen')
+        self.assertContains(response, 'controlslist="nodownload noremoteplayback nofullscreen"')
+        self.assertContains(response, "video-admin@example.com")
 
     def test_admin_lesson_preview_explains_pending_and_failed_video_states(self):
         client = self._admin_preview_client()
