@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from allauth.account.models import EmailAddress
@@ -50,6 +50,15 @@ class EmailVerificationMiddlewareTests(TestCase):
     def test_verification_sent_page_remains_accessible(self):
         user = self._user()
         response = self._request(reverse("account_email_verification_sent"), user)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b"allowed")
+
+    @override_settings(ACADEMY_STAGING_UNVERIFIED_LOGIN_ENABLED=True)
+    def test_staging_login_exception_allows_unverified_test_user_access(self):
+        user = self._user(username="staging-unverified", email="staging-unverified@example.com")
+
+        response = self._request(reverse("dashboard"), user)
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b"allowed")
 
