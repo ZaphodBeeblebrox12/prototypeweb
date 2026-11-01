@@ -63,20 +63,22 @@
     showStatus(`Video playback failed: ${reason}. Refresh the lesson and try again.`);
   });
 
-  if (video.canPlayType("application/vnd.apple.mpegurl")) {
-    // Safari and supported Apple browsers can play HLS natively.
-    showStatus("Loading protected video…");
-    video.src = manifestUrl;
-    video.load();
-    return;
-  }
-
-  if (!window.Hls || !window.Hls.isSupported()) {
-    showStatus("This browser does not support protected HLS playback. Please use a current version of Chrome, Edge or Firefox.");
-    return;
-  }
-
+  // Prefer hls.js when Media Source Extensions are available. Some browsers
+  // return a positive canPlayType() result for HLS without reliably playing
+  // encrypted HLS playlists. Native HLS remains the fallback for Safari/iOS,
+  // where Media Source Extensions may not be available.
+  const nativeHlsAvailable = Boolean(video.canPlayType("application/vnd.apple.mpegurl"));
   const Hls = window.Hls;
+  if (!Hls || !Hls.isSupported()) {
+    if (nativeHlsAvailable) {
+      showStatus("Loading protected video…");
+      video.src = manifestUrl;
+      video.load();
+      return;
+    }
+    showStatus("This browser does not support protected HLS playback. Please use a current version of Chrome, Edge or Safari.");
+    return;
+  }
   const player = new Hls({
     enableWorker: true,
     lowLatencyMode: false,
@@ -157,8 +159,20 @@
     });
 
     if (!data.fatal) {
-      if (/FRAG_PARSING|BUFFER_APPEND|BUFFER_ADD_CODEC|BUFFER_INCOMPATIBLE_CODECS/i.test(detail)) {
-        showStatus(`The browser received the video segment but could not decode it (${detail}).`);
+      // hls.js reports these details in camelCase (for example,
+      // fragParsingError and bufferAppendError). Normalize separators and case
+      // so parser/decrypt/buffer failures cannot leave the player on a stale
+      // "segment received" message indefinitely.
+      const normalizedDetail = String(data.details || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "");
+      const mediaPreparationError =
+        /fragparsingerror|fragdecrypterror|keyloaderror|keyloadtimeout|bufferappenderror|bufferaddcodecerror|bufferincompatiblecodecserror|transmuxererror/.test(normalizedDetail);
+      if (mediaPreparationError) {
+        clearMetadataWatchdog();
+        showStatus(`The segment downloaded, but the browser could not prepare it for playback (${detail}).`);
+      } else if (loadedFragments === 0 && normalizedDetail) {
+        showStatus(`The protected stream reported a playback issue (${detail}).`);
       }
       return;
     }
