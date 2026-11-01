@@ -1120,6 +1120,7 @@ def course_import_website_preview(request, import_id):
             row = {
                 "lesson": lesson_data,
                 "preview_url": lesson_url,
+                "accessible": True,
                 "current": bool(source_id and source_id == requested_source_id),
             }
             lesson_rows.append(row)
