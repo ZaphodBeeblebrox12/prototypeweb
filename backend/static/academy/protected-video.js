@@ -81,6 +81,10 @@
   }
   const player = new Hls({
     enableWorker: true,
+    // AES-128 encrypted HLS must be decrypted as a complete segment. Keep
+    // progressive FetchLoader mode disabled even if a future Hls build changes
+    // its loader-selection defaults.
+    progressive: false,
     lowLatencyMode: false,
     backBufferLength: 30,
     xhrSetup: xhr => {
@@ -89,6 +93,7 @@
   });
 
   let recoveredMediaError = false;
+  let parsingFailed = false;
   let loadedFragments = 0;
   let lastHlsError = "";
   let metadataWatchdog = window.setTimeout(() => {
@@ -151,10 +156,21 @@
     const detail = String(data.details || data.type || "unknown HLS error")
       .replace(/[^a-zA-Z0-9_ -]/g, "")
       .slice(0, 100);
-    lastHlsError = detail;
+    // Include hls.js's parser reason; the event name alone does not tell us
+    // whether the decrypted segment has invalid TS sync bytes, bad PES data,
+    // missing tables, or another demux problem. Never log signed request URLs.
+    const rawReason = String(data.reason || data.error?.message || "");
+    const reason = rawReason
+      .replace(/ticket=[^&\\s]+/gi, "ticket=[redacted]")
+      .replace(/https?:\\/\\/[^\\s]+/gi, "[url redacted]")
+      .replace(/[^a-zA-Z0-9_ .,:;()\\-/]/g, "")
+      .trim()
+      .slice(0, 180);
+    lastHlsError = [detail, reason].filter(Boolean).join(": ");
     console.warn("TradeThesis protected-video playback error", {
       type: data.type,
       details: data.details,
+      reason: reason || undefined,
       fatal: Boolean(data.fatal)
     });
 
@@ -170,9 +186,16 @@
         /fragparsingerror|fragdecrypterror|keyloaderror|keyloadtimeout|bufferappenderror|bufferaddcodecerror|bufferincompatiblecodecserror|transmuxererror/.test(normalizedDetail);
       if (mediaPreparationError) {
         clearMetadataWatchdog();
-        showStatus(`The segment downloaded, but the browser could not prepare it for playback (${detail}).`);
+        if (normalizedDetail === "fragparsingerror" && !parsingFailed) {
+          parsingFailed = true;
+          player.stopLoad();
+        }
+        showStatus(
+          `The segment downloaded, but the browser could not prepare it (${detail})` +
+          (reason ? `: ${reason}` : ".")
+        );
       } else if (loadedFragments === 0 && normalizedDetail) {
-        showStatus(`The protected stream reported a playback issue (${detail}).`);
+        showStatus(`The protected stream reported a playback issue (${detail})${reason ? `: ${reason}` : "."}`);
       }
       return;
     }
