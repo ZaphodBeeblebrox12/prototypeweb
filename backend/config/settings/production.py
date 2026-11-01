@@ -87,7 +87,9 @@ CONN_MAX_AGE = 60
 # and Telegram/email links all build from SITE_BASE_URL (base.py).
 # Set SITE_BASE_URL in Render env vars to your https://<app>.onrender.com.
 
-# NOTE: ACCOUNT_EMAIL_VERIFICATION is mandatory. Hosted deployments default
-# to the Resend HTTPS backend because Render Free blocks outbound SMTP.
-# Configure RESEND_API_KEY, RESEND_WEBHOOK_SECRET, and a verified sender in
-# Render before enabling public registration and customer email notifications.
+# Email verification remains mandatory on production and on every hosted
+# service by default. Only the exact Academy staging hostname can opt into
+# optional verification using ACADEMY_STAGING_ALLOW_UNVERIFIED_LOGIN=true.
+# Hosted deployments default to the Resend HTTPS backend because Render Free
+# blocks outbound SMTP. Configure a valid Resend key and verified sender before
+# relying on confirmation mail for customer-facing production registration.
