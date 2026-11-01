@@ -42,15 +42,22 @@ class TestSignupPage:
 
     def test_signup_valid_no_oauth(self, client):
         r = client.post("/accounts/signup/", {
+            "first_name": "Nisha",
+            "last_name": "Kapoor",
             "email": "new@x.com",
             "password1": "Str0ng!Pass9", "password2": "Str0ng!Pass9"})
         assert r.status_code in (200, 302)
-        # email-based signup: username is auto-generated, user is created
-        assert User.objects.filter(email="new@x.com").exists()
+        # Email-based signup: username is auto-generated and names are persisted.
+        user = User.objects.get(email="new@x.com")
+        assert user.first_name == "Nisha"
+        assert user.last_name == "Kapoor"
+        assert user.full_name == "Nisha Kapoor"
 
     def test_signup_duplicate_rejected(self, client):
         User.objects.create_user(username="existsemail", email="dup@x.com", password="pass12345!")
         r = client.post("/accounts/signup/", {
+            "first_name": "Duplicate",
+            "last_name": "Member",
             "email": "dup@x.com",
             "password1": "Str0ng!Pass9", "password2": "Str0ng!Pass9"})
         assert r.status_code in (200, 302)  # duplicate email -> form error
