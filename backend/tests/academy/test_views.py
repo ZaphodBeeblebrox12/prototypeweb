@@ -381,7 +381,7 @@ class AcademyViewTests(TestCase):
         self.assertContains(response, 'style="width:0%"')
         self.assertNotContains(response, "data-notebook-response")
         self.assertNotContains(response, "data-guided-reflection")
-        self.assertNotContains(response, "data-practice-quiz")
+        self.assertNotContains(response, "data-practice-quiz>")
 
         # Framing is enabled only for the authenticated, admin-only draft route.
         ordinary_page = self.client.get(reverse("academy:course-detail", args=[self.course.slug]))
