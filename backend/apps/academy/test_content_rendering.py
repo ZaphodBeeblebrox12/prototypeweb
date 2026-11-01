@@ -382,6 +382,13 @@ class SharedLessonRenderingTests(SimpleTestCase):
         website_preview = (
             backend_root / "templates" / "academy" / "course_import_website_preview.html"
         ).read_text(encoding="utf-8")
+        lesson_experience = (
+            backend_root
+            / "templates"
+            / "academy"
+            / "partials"
+            / "lesson_experience.html"
+        ).read_text(encoding="utf-8")
         tabs_template = (
             backend_root / "templates" / "academy" / "partials" / "lesson_tabs.html"
         ).read_text(encoding="utf-8")
@@ -403,10 +410,11 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn('figure_metadata=content_json.get("figures", {})', views_source)
         self.assertIn('table_metadata=content_json.get("tables", {})', views_source)
         self.assertIn(
-            '{% include "academy/partials/lesson_tabs.html" with lesson_sections=selected_sections',
+            '{% include "academy/partials/lesson_experience.html" with',
             website_preview,
         )
         self.assertIn("{{ lesson_sections.idea_html|safe }}", tabs_template)
+        self.assertIn('{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections', lesson_experience)
         self.assertIn("{{ lesson_sections.examples_html|safe }}", tabs_template)
         self.assertIn("{{ lesson_sections.practice_html|safe }}", tabs_template)
 
