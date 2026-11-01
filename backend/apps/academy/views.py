@@ -1474,9 +1474,7 @@ def _staging_payment_simulator_enabled(request):
     )
 
 
-@login_required
-@never_cache
-def _get_staging_simulator_offer_and_price(course):
+def _ensure_staging_simulator_offer_and_price(course):
     """Use a real active offer when present, otherwise make an inactive test-only offer.
 
     The fallback product, plan and offer are all disabled/hidden and therefore
@@ -1621,7 +1619,7 @@ def staging_payment_simulator(request):
                 try:
                     with transaction.atomic():
                         offer, price, simulator_only_offer = (
-                            _get_staging_simulator_offer_and_price(course)
+                            _ensure_staging_simulator_offer_and_price(course)
                         )
                         if price.price_cents <= 0:
                             raise ValidationError(
