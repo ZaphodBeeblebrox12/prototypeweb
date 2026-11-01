@@ -471,6 +471,13 @@ SITE_BASE_URL = os.environ.get("SITE_BASE_URL", "http://127.0.0.1:8000")
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
 RAZORPAY_WEBHOOK_SECRET = os.environ.get("RAZORPAY_WEBHOOK_SECRET", "")
 
+# Explicit opt-in for the no-money staging purchase simulator. The view also
+# requires the exact staging hostname; the default is disabled in every env.
+ACADEMY_STAGING_PAYMENT_SIMULATOR_ENABLED = env.bool(
+    "ACADEMY_STAGING_PAYMENT_SIMULATOR_ENABLED", default=False
+)
+ACADEMY_STAGING_PAYMENT_SIMULATOR_HOST = "tradethesis-academy-staging.onrender.com"
+
 # --- Chargeback implementation ----------------------------------------------
 # Independent salt for device/session HMACs (evidence layer). Rotating this
 # severs internal device continuity without touching SECRET_KEY sessions.
