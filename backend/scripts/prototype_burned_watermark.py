@@ -128,11 +128,11 @@ def main() -> int:
         drawtext = (
             f"drawtext=textfile='{text_path.as_posix()}':reload=0:"
             "font='DejaVu Sans':fontsize='max(18,min(34,h*0.030))':"
-            "fontcolor=white:line_spacing=5:box=1:boxborderw=12:"
-            "boxcolor=black@0.62:borderw=1:bordercolor=white@0.35:"
+            "fontcolor=white@0.90:line_spacing=5:box=1:boxborderw=12:"
+            "boxcolor=black@0.50:borderw=1:bordercolor=white@0.25:"
             f"x='12+(w-text_w-24)*({x_position})':"
             f"y='12+(h-text_h-24)*({y_position})':"
-            "shadowcolor=black@0.9:shadowx=1:shadowy=1"
+            "shadowcolor=black@0.75:shadowx=1:shadowy=1"
         )
         cmd = [
             ffmpeg, "-hide_banner", "-y", "-i", str(source),
