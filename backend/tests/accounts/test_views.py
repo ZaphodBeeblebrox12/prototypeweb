@@ -179,6 +179,14 @@ class ProfilePageNameTest(TestCase):
             email="profile-name@example.com",
             password="A-strong-test-password-852!",
         )
+        from allauth.account.models import EmailAddress
+
+        EmailAddress.objects.create(
+            user=self.user,
+            email=self.user.email,
+            primary=True,
+            verified=True,
+        )
         self.client.force_login(self.user)
 
     def test_profile_page_displays_existing_first_and_last_name(self):
