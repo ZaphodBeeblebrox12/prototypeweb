@@ -230,6 +230,8 @@ class CourseReviewTemplateTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200, response.content)
+        self.assertTemplateUsed(response, "academy/lesson.html")
+        self.assertTemplateNotUsed(response, "academy/course_import_website_preview.html")
         self.assertContains(response, "tt-admin-learning-preview")
         self.assertContains(response, "The idea")
         self.assertContains(response, "Chart examples")
