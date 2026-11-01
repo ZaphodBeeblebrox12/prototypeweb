@@ -375,11 +375,11 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
         (rendition_dir / "encryption.key").write_bytes(b"0123456789abcdef")
         (rendition_dir / "segment_00000.ts").write_bytes(b"personalised-segment")
         (rendition_dir / "index.m3u8").write_text(
-            "#EXTM3U\\n"
-            '#EXT-X-KEY:METHOD=AES-128,URI="protected-key",IV=0x0123456789abcdef\\n'
-            "#EXTINF:6.0,\\n"
-            "segment_00000.ts\\n"
-            "#EXT-X-ENDLIST\\n",
+            "#EXTM3U\n"
+            '#EXT-X-KEY:METHOD=AES-128,URI="protected-key",IV=0x0123456789abcdef\n'
+            "#EXTINF:6.0,\n"
+            "segment_00000.ts\n"
+            "#EXT-X-ENDLIST\n",
             encoding="utf-8",
         )
 
