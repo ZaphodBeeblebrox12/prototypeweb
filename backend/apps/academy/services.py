@@ -503,6 +503,15 @@ def grant_course_entitlement(
                 "expires_at": (
                     entitlement.expires_at.isoformat() if entitlement.expires_at else None
                 ),
+                **(
+                    {
+                        "simulated": True,
+                        "simulation_note": "Staging test only; no money was collected.",
+                    }
+                    if payment_intent
+                    and payment_intent.provider == "simulator"
+                    else {}
+                ),
             },
         )
         return entitlement, True
@@ -590,7 +599,7 @@ def update_lesson_progress(
 
 
 @transaction.atomic
-def activate_course_payment(payment_intent, offer):
+def activate_course_payment(payment_intent, offer, *, send_notifications=True):
     """Atomically claim a verified one-time payment and grant course access."""
     from apps.payments.models import PaymentIntent
 
@@ -623,17 +632,21 @@ def activate_course_payment(payment_intent, offer):
     )
     if created:
         # Paid course purchase is the sole trigger for viewer-specific video work.
-        # The durable rendition jobs are committed with the entitlement so a
-        # successful purchase cannot silently lose its preparation queue.
+        # A staging simulator enters through this same fulfillment path, but is
+        # visibly labelled and never sends a real payment receipt.
         enqueue_personalized_videos_for_course(
             user=payment_intent.user,
             course=offer.course,
         )
         from apps.events.models import record_event
 
+        simulated = payment_intent.provider == "simulator"
+        event_name = (
+            "academy.entitlement_simulated" if simulated else "academy.entitlement_granted"
+        )
         record_event(
-            "academy.entitlement_granted",
-            dedupe_key=f"academy.entitlement_granted:{payment_intent.pk}",
+            event_name,
+            dedupe_key=f"{event_name}:{payment_intent.pk}",
             user_id=payment_intent.user_id,
             object_ref=f"course_entitlement:{entitlement.pk}",
             payload={
@@ -641,11 +654,16 @@ def activate_course_payment(payment_intent, offer):
                 "course_id": str(offer.course_id),
                 "course_slug": offer.course.slug,
                 "entitlement_id": str(entitlement.pk),
+                "simulated": simulated,
+                "simulation_note": (
+                    "Staging test only; no money was collected." if simulated else ""
+                ),
             },
         )
-        transaction.on_commit(
-            lambda intent_id=payment_intent.pk: _notify_course_purchase(intent_id)
-        )
+        if send_notifications and not simulated:
+            transaction.on_commit(
+                lambda intent_id=payment_intent.pk: _notify_course_purchase(intent_id)
+            )
     return created, entitlement
 
 
