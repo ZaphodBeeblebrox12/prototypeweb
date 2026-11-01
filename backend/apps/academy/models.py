@@ -762,13 +762,13 @@ class PersonalizedProtectedVideo(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=["user", "protected_video"],
-                name="academy_personal_video_user_source_uq",
+                name="acad_pvid_user_src_uniq",
             ),
         ]
         indexes = [
             models.Index(
                 fields=["user", "status"],
-                name="academy_personal_video_user_status_idx",
+                name="acad_pvid_user_stat_idx",
             ),
         ]
 
