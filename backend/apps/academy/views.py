@@ -1753,11 +1753,14 @@ def staging_payment_simulator(request):
                         ),
                     }
 
+    from apps.jobs.models import Job
     from apps.payments.models import PaymentIntent
 
-    # Surface failed renditions belonging to recent simulated purchases so
-    # staging admins can retry the video job without simulating another payment.
-    failed_simulated_renditions = []
+    # Show the full lifecycle of every personalised rendition belonging to a
+    # recent simulated purchase. Failed-only lists hide a rendition as soon as
+    # a retry changes it to pending; that made it impossible to tell whether a
+    # retry was queued, running, completed or failed again.
+    simulated_video_statuses = []
     recent_simulated_intents = (
         PaymentIntent.objects.filter(is_simulated=True)
         .select_related("user")
@@ -1779,15 +1782,32 @@ def staging_payment_simulator(request):
             or not simulated_entitlement.has_access_at()
         ):
             continue
-        failed_simulated_renditions.extend(
+
+        renditions = (
             PersonalizedProtectedVideo.objects.filter(
                 user=simulated_intent.user,
                 protected_video__lesson__module__course=simulated_entitlement.course,
-                status=PersonalizedProtectedVideo.Status.FAILED,
             )
             .select_related("protected_video__lesson")
-            .order_by("-updated_at")
+            .order_by("protected_video__lesson__module__position", "protected_video__lesson__position")
         )
+        for rendition in renditions:
+            latest_job = (
+                Job.objects.filter(
+                    kind="process_personalized_video",
+                    payload__rendition_id=str(rendition.pk),
+                )
+                .order_by("-created_at")
+                .first()
+            )
+            simulated_video_statuses.append(
+                {
+                    "rendition": rendition,
+                    "job": latest_job,
+                    "learner": simulated_intent.user,
+                    "course": simulated_entitlement.course,
+                }
+            )
 
     return render(
         request,
@@ -1795,7 +1815,7 @@ def staging_payment_simulator(request):
         {
             "form": form,
             "result": result,
-            "failed_simulated_renditions": failed_simulated_renditions,
+            "simulated_video_statuses": simulated_video_statuses,
             "simulator_host": getattr(
                 settings,
                 "ACADEMY_STAGING_PAYMENT_SIMULATOR_HOST",
