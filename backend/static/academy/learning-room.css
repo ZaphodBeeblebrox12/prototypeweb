@@ -1356,8 +1356,7 @@
 }
 
 /* One canonical Learning Room surface shared by learners and all admin previews. */
-.main-content:has(> .tt-lesson-experience),
-.main-content:has(> .tt-admin-course-preview) {
+.main-content:has(> .tt-lesson-experience) {
   box-sizing: border-box;
   width: min(1600px, 100%);
   padding: 24px clamp(16px, 3vw, 42px) 52px;
@@ -1471,8 +1470,7 @@
 }
 
 @media (max-width: 680px) {
-  .main-content:has(> .tt-lesson-experience),
-  .main-content:has(> .tt-admin-course-preview) { padding: 14px 8px 25px; }
+  .main-content:has(> .tt-lesson-experience) { padding: 14px 8px 25px; }
   .tt-lesson-experience { padding: 14px 11px 24px; }
   .tt-lesson-experience .tt-course-header--depth .tt-course-progress {
     left: 15px;
