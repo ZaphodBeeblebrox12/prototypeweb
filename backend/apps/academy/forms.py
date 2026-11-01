@@ -7,7 +7,6 @@ from urllib.parse import urlsplit
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.db.models import Q
 from PIL import Image, UnidentifiedImageError
 
 from .content_rendering import validate_markdown_source
@@ -15,7 +14,6 @@ from .models import (
     Course,
     CourseImportAsset,
     CourseMediaAsset,
-    CourseOffer,
     Lesson,
     ProtectedLessonVideo,
 )
@@ -163,12 +161,12 @@ class ProtectedLessonVideoAdminForm(forms.ModelForm):
 
 
 class StagingPaymentSimulatorForm(forms.Form):
-    """Select a test learner and active course offer for a no-money staging grant."""
+    """Select any published course and a test learner for a no-money staging grant."""
 
-    course_offer = forms.ModelChoiceField(
-        label="Course",
-        queryset=CourseOffer.objects.none(),
-        empty_label="Choose a published paid course",
+    course = forms.ModelChoiceField(
+        label="Published course",
+        queryset=Course.objects.none(),
+        empty_label="Choose a published course",
     )
     learner = forms.ModelChoiceField(
         label="Test learner",
@@ -183,21 +181,12 @@ class StagingPaymentSimulatorForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["course_offer"].queryset = (
-            CourseOffer.objects.filter(
-                is_active=True,
-                course__status=Course.Status.PUBLISHED,
-                course__access_type__in=(Course.AccessType.PAID, Course.AccessType.MIXED),
-                plan__is_active=True,
-                plan__is_hidden=True,
-            )
-            .filter(
-                Q(plan__prices__interval="one_time", plan__prices__is_active=True)
-                | Q(plan__geo_prices__interval="one_time", plan__geo_prices__is_active=True)
-            )
-            .select_related("course", "plan")
-            .distinct()
-            .order_by("position", "name")
+        self.fields["course"].queryset = (
+            Course.objects.filter(status=Course.Status.PUBLISHED)
+            .order_by("position", "title")
+        )
+        self.fields["course"].label_from_instance = (
+            lambda course: f"{course.title} ({course.get_access_type_display()})"
         )
         User = get_user_model()
         self.fields["learner"].queryset = (
