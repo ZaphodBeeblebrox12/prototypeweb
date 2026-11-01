@@ -30,7 +30,9 @@ if (
     and _configured_site_host == _expected_academy_staging_host
 ):
     ACADEMY_STAGING_UNVERIFIED_LOGIN_ENABLED = True
-    ACCOUNT_EMAIL_VERIFICATION = "optional"
+    # No verification messages are attempted on staging. This keeps test
+    # signup/login usable without a verified sender domain or Resend delivery.
+    ACCOUNT_EMAIL_VERIFICATION = "none"
 else:
     # Hosted environments remain strict unless the exact staging gate passes.
     ACCOUNT_EMAIL_VERIFICATION = "mandatory"
