@@ -25,31 +25,7 @@
     </div>
     <div class="tt-admin-preview-actions">
       <a href="{{ admin_review_url }}">Content review ↗</a>
-      {% if selected_lesson %}
-  {% include "academy/partials/lesson_experience.html" with
-    course=course
-    lesson=selected_lesson
-    module=selected_module
-    module_display_title=selected_module_display_title
-    outline_modules=preview_modules
-    lesson_sections=selected_sections
-    notebook=selected_notebook
-    reflection=selected_reflection
-    reflection_response=selected_reflection_response
-    practice_questions=selected_practice_questions
-    video_url=selected_video_url
-    video_is_file=selected_video_is_file
-    related_courses=selected_related_courses
-    admin_preview=True
-    course_import_preview=True
-    progress=None
-    course_progress_percent=0
-    overview_url=overview_url
-    admin_review_url=admin_review_url
-    only
-  %}
-  {% else %}
-            <a href="{{ selected_video_url }}" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a>
+                <a href="{{ selected_video_url }}" target="_blank" rel="noopener noreferrer">Open lesson video ↗</a>
             <p class="small text-muted">This video opens in a new tab.</p>
             {% endif %}
           </section>
@@ -189,7 +165,6 @@
       <a class="tt-overview-button tt-overview-button--secondary" href="{{ admin_review_url }}">Back to content review ↗</a>
     </section>
   </div>
-  {% endif %}
 </div>
 <script src="{% static 'academy/learning-room.js' %}" defer></script>
 {% endblock %}
