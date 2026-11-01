@@ -108,8 +108,14 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         """Respect safe return destinations after login while enforcing verification."""
         user = request.user
 
-        # Do not grant access via an unverified email address.
-        if user.email and not self._is_email_verified(user):
+        # Production keeps mandatory verification. Staging may explicitly
+        # opt into optional verification for test learners so a failed
+        # outbound verification email cannot prevent test sign-in.
+        if (
+            getattr(settings, "ACCOUNT_EMAIL_VERIFICATION", "mandatory") == "mandatory"
+            and user.email
+            and not self._is_email_verified(user)
+        ):
             return reverse("account_email_verification_sent")
 
         # Allauth's login view validates next= before calling this fallback.
