@@ -1,15 +1,33 @@
 {% extends "base.html" %}
 {% block page_context %}
 <div class="page-context-status page-context-status--standalone" aria-label="Account status">
+{% if course_import_preview %}<span class="badge bg-warning text-dark">ADMIN PREVIEW</span>{% endif %}
 {% if user.is_banned %}<span class="badge bg-danger">BANNED</span>{% endif %}
 {% if user.telegram_verified %}<span class="badge bg-success"><i class="bi bi-telegram"></i> Telegram connected</span>{% endif %}
 </div>
 {% endblock %}
 {% load static %}
-{% block title %}{{ lesson.title }} · {{ course.title }}{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'academy/learning-room.css' %}"><link rel="stylesheet" href="{% static 'academy/lesson-references.css' %}">{% if admin_preview %}<link rel="stylesheet" href="{% static 'academy/admin-lesson-preview.css' %}">{% endif %}<link rel="stylesheet" href="{% static 'academy/notebook-card.css' %}"><link rel="stylesheet" href="{% static 'academy/course-template-parity.css' %}">{% if protected_video or personalized_video_rendition and personalized_video_rendition.status == "ready" %}<link rel="stylesheet" href="{% static 'academy/protected-video.css' %}">{% endif %}{% endblock %}
+{% block title %}{% if course_import_preview %}Website preview · {{ course.title }} · TradeThesis Academy{% else %}{{ lesson.title }} · {{ course.title }}{% endif %}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'academy/learning-room.css' %}"><link rel="stylesheet" href="{% static 'academy/lesson-references.css' %}">{% if admin_preview and not course_import_preview %}<link rel="stylesheet" href="{% static 'academy/admin-lesson-preview.css' %}">{% endif %}{% if course_import_preview %}<link rel="stylesheet" href="{% static 'academy/course-import-preview.css' %}">{% endif %}<link rel="stylesheet" href="{% static 'academy/notebook-card.css' %}"><link rel="stylesheet" href="{% static 'academy/course-template-parity.css' %}">{% if protected_video or personalized_video_rendition and personalized_video_rendition.status == "ready" %}<link rel="stylesheet" href="{% static 'academy/protected-video.css' %}">{% endif %}{% endblock %}
 {% block content %}
+{% if course_import_preview %}
+<div class="tt-admin-course-preview">
+  <aside class="tt-admin-preview-banner" role="status" aria-label="Administrator-only website preview">
+    <span class="tt-admin-preview-mark">PREVIEW</span>
+    <div class="tt-admin-preview-copy">
+      <strong>Unpublished course · administrator-only website preview</strong>
+      <p>You are viewing the learner-facing template using this staged course's actual content. Nothing here publishes the course or changes learner access or progress.</p>
+    </div>
+    <div class="tt-admin-preview-actions">
+      <a href="{{ admin_review_url }}">Content review ↗</a>
+      {% if selected_lesson %}<a href="{{ overview_url }}">Course overview</a>{% endif %}
+    </div>
+  </aside>
+  {% include "academy/partials/lesson_experience.html" %}
+</div>
+{% else %}
 {% include "academy/partials/lesson_experience.html" %}
+{% endif %}
 {% if protected_video or personalized_video_rendition and personalized_video_rendition.status == "ready" %}<script src="https://cdn.jsdelivr.net/npm/hls.js@1.7.4/dist/hls.min.js" defer></script><script src="{% static 'academy/protected-video.js' %}" defer></script>{% endif %}
 {% if personalized_video_status_url %}<script src="{% static 'academy/personalized-video-status.js' %}" defer></script>{% endif %}
 <script src="{% static 'academy/learning-room.js' %}" defer></script>
