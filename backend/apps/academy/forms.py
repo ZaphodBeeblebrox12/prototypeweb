@@ -186,7 +186,10 @@ class StagingPaymentSimulatorForm(forms.Form):
             .order_by("position", "title")
         )
         self.fields["course"].label_from_instance = (
-            lambda course: f"{course.title} ({course.get_access_type_display()})"
+            lambda course: (
+                f"{course.title} — {course.get_catalogue_role_display()} · "
+                f"{course.get_access_type_display()}"
+            )
         )
         User = get_user_model()
         self.fields["learner"].queryset = (
