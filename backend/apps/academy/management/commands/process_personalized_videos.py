@@ -215,6 +215,24 @@ class Command(BaseCommand):
                         )
                     uploaded_names.append(logical_name)
 
+            # Re-check entitlement after the expensive transcode and upload.
+            # A refund/chargeback during processing must not publish a rendition.
+            current_entitlement = get_active_entitlement(
+                rendition.user, video.lesson.module.course
+            )
+            if (
+                current_entitlement is None
+                or current_entitlement.source != CourseEntitlement.Source.PURCHASE
+                or not current_entitlement.has_access_at()
+            ):
+                for name in uploaded_names:
+                    lesson_video_storage.delete(name)
+                rendition.status = PersonalizedProtectedVideo.Status.REVOKED
+                rendition.processing_error = "Paid course entitlement was revoked during video preparation."
+                rendition.save(update_fields=["status", "processing_error", "updated_at"])
+                self.stdout.write("Discarded personalised rendition because paid access was revoked.")
+                return
+
             rendition.stream_directory = output_prefix
             rendition.status = PersonalizedProtectedVideo.Status.READY
             rendition.processing_error = ""
