@@ -93,18 +93,25 @@ class Command(BaseCommand):
         if not ffmpeg:
             self._fail(rendition, "FFmpeg was not found; install imageio-ffmpeg or configure ACADEMY_FFMPEG_BINARY.")
             raise CommandError("FFmpeg was not found.")
-        capabilities = subprocess.run(
-            [ffmpeg, "-hide_banner", "-filters"],
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
-        encoders = subprocess.run(
-            [ffmpeg, "-hide_banner", "-encoders"],
-            capture_output=True,
-            text=True,
-            timeout=30,
-        )
+        try:
+            capabilities = subprocess.run(
+                [ffmpeg, "-hide_banner", "-filters"],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=True,
+            )
+            encoders = subprocess.run(
+                [ffmpeg, "-hide_banner", "-encoders"],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                check=True,
+            )
+        except (OSError, subprocess.SubprocessError) as exc:
+            message = f"FFmpeg capability check failed: {exc}"
+            self._fail(rendition, message)
+            raise CommandError(message) from exc
         if "drawtext" not in (capabilities.stdout + capabilities.stderr):
             self._fail(rendition, "The configured FFmpeg build does not include the drawtext filter.")
             raise CommandError("The configured FFmpeg build does not include drawtext.")
