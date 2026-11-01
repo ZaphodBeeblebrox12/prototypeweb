@@ -218,8 +218,17 @@ class PrivateLessonVideoStorage(GoogleDriveStorageMixin, FileSystemStorage):
             if found:
                 response = self._drive_request(
                     "GET", f"{DRIVE_API}/files/{found['id']}",
-                    params={"alt": "media"}, expected=(200,), stream=True,
+                    params={"alt": "media"},
+                    headers={"Accept-Encoding": "identity"},
+                    expected=(200,),
+                    stream=True,
                 )
+                # requests.Response.content (used by the shared image storage)
+                # transparently decodes HTTP Content-Encoding. This path streams
+                # response.raw directly, so explicitly enable the same decoding
+                # behavior. Passing compressed Drive bytes straight to hls.js
+                # corrupts AES-CBC block alignment and makes TS transmuxing fail.
+                response.raw.decode_content = True
                 return File(response.raw, name=name)
         return self._local_backend()._open(name, mode)
 
