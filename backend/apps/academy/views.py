@@ -1055,7 +1055,7 @@ def admin_lesson_preview(request, course_slug, lesson_id):
 @xframe_options_sameorigin
 @never_cache
 @login_required
-def course_import_website_preview(request, import_id):
+def course_import_preview(request, import_id):
     """Render an unpublished CourseImport in the real Academy shell for admins only."""
     if not is_course_content_admin(request.user):
         raise PermissionDenied("Administrator course-content access is required.")
@@ -1063,8 +1063,11 @@ def course_import_website_preview(request, import_id):
     record = get_object_or_404(CourseImport, pk=import_id)
     payload = record.payload if isinstance(record.payload, dict) else {}
     course = payload.get("course") if isinstance(payload.get("course"), dict) else {}
-    if not course.get("slug"):
-        course = {**course, "slug": record.course_slug}
+    course = {
+        **course,
+        "slug": str(course.get("slug") or record.course_slug),
+        "learning_outcomes": course.get("learning_outcomes") or course.get("outcomes") or [],
+    }
     modules = payload.get("modules") if isinstance(payload.get("modules"), list) else []
     raw_assets = list(record.assets.all())
     live_assets = {
@@ -1135,7 +1138,11 @@ def course_import_website_preview(request, import_id):
                 selected_lesson = lesson_data
                 selected_module = module_data
         if lesson_rows:
-            preview_modules.append({"module": module_data, "lessons": lesson_rows})
+            preview_module = {
+                **module_data,
+                "description": module_data.get("description") or module_data.get("summary", ""),
+            }
+            preview_modules.append({"module": preview_module, "lessons": lesson_rows})
 
     selected_sections = None
     selected_notebook = {}
@@ -1269,7 +1276,27 @@ def course_import_website_preview(request, import_id):
         )
         return render(request, "academy/lesson.html", preview_context)
 
-    return render(request, "academy/course_import_website_preview.html", preview_context)
+    # The draft overview reuses the published course-detail page. Only the
+    # source data and preview-safe links differ; layout and presentation do not.
+    preview_context.update(
+        {
+            "module_rows": preview_modules,
+            "course_import_preview": True,
+            "admin_review_url": admin_review_url,
+            "first_preview_url": first_preview_url,
+            "first_accessible_lesson": None,
+            "has_course_access": False,
+            "can_enrol_free": False,
+            "free_membership_plan": None,
+            "offer": None,
+            "offer_price_display": "",
+            "completed_lessons": 0,
+            "progress_percent": 0,
+            "is_course_content_admin": True,
+            "entitlement": None,
+        }
+    )
+    return render(request, "academy/course_detail.html", preview_context)
 
 @login_required
 @require_POST
