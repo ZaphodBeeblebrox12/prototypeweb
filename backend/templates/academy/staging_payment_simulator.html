@@ -14,6 +14,44 @@
     </div>
   </div>
 
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-info{% endif %} mb-3" role="status">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% if failed_simulated_renditions %}
+    <div class="card border-danger mb-4">
+      <div class="card-header">Personalised videos that need a retry</div>
+      <div class="card-body">
+        <p class="text-muted small">
+          These are failed video renditions attached to existing simulated purchases.
+          Retrying only requeues FFmpeg processing; it does not create another payment or grant access again.
+        </p>
+        {% for rendition in failed_simulated_renditions %}
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 py-3 border-top">
+            <div>
+              <div class="fw-semibold">{{ rendition.protected_video.lesson.title }}</div>
+              <div class="small text-muted">
+                {{ rendition.user.email|default:rendition.user.username }} ·
+                {{ rendition.protected_video.lesson.module.course.title }}
+              </div>
+              {% if rendition.processing_error %}
+                <div class="small text-danger mt-1">{{ rendition.processing_error|truncatechars:240 }}</div>
+              {% endif %}
+            </div>
+            <form method="post" action="{% url 'academy:staging-retry-video' rendition.pk %}">
+              {% csrf_token %}
+              <button class="btn btn-outline-danger" type="submit">Retry video preparation</button>
+            </form>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
   {% if result %}
     <div class="card mb-4">
       <div class="card-header">Simulated purchase created</div>
