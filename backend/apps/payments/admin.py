@@ -37,7 +37,7 @@ class PaymentIntentAdmin(admin.ModelAdmin):
         "refund_display",
         "chargeback_display",
     ]
-    list_filter = ["status", "provider", "currency", "country", "created_at",
+    list_filter = ["status", "provider", "is_simulated", "currency", "country", "created_at",
                    "chargeback", "chargeback_confirmed"]
     list_select_related = ["user", "plan"]
     autocomplete_fields = ["user", "plan"]
@@ -60,12 +60,12 @@ class PaymentIntentAdmin(admin.ModelAdmin):
         resp["Content-Disposition"] = 'attachment; filename="payment_intents.csv"'
         w = csv.writer(resp)
         w.writerow(["date", "user", "plan", "amount_cents", "currency",
-                    "provider", "status", "refunded_cents", "chargeback",
+                    "provider", "is_simulated", "status", "refunded_cents", "chargeback",
                     "provider_reference"])
         for pi in queryset.select_related("user", "plan"):
             w.writerow([pi.created_at.isoformat(), pi.user.username, pi.plan.name,
-                        pi.amount, pi.currency, pi.provider, pi.status,
-                        pi.refunded_cents, pi.chargeback_confirmed,
+                        pi.amount, pi.currency, pi.get_provider_display(), pi.is_simulated,
+                        pi.status, pi.refunded_cents, pi.chargeback_confirmed,
                         pi.provider_reference])
         return resp
 
