@@ -28,7 +28,7 @@
           <dd class="col-sm-8"><code>{{ result.payment_intent.pk }}</code></dd>
           <dt class="col-sm-4">Payment record</dt>
           <dd class="col-sm-8"><strong>SIMULATOR — NO MONEY COLLECTED</strong></dd>
-              <dt class="col-sm-4">Personal video jobs</dt>
+          <dt class="col-sm-4">Personal video renditions</dt>
           <dd class="col-sm-8">{{ result.queued_count }} queued or ready</dd>
           {% if result.simulator_only_offer %}
             <dt class="col-sm-4">Test offer</dt>
@@ -65,6 +65,11 @@
             <label class="form-label" for="{{ form.course.id_for_label }}">{{ form.course.label }}</label>
             {{ form.course }}
             {% for error in form.course.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+            <div class="form-text">
+              Published status and Courses-page visibility are separate. The option label shows
+              the catalogue role; “Not listed on the Courses page” means the course is published
+              in Academy but intentionally hidden from the public catalogue.
+            </div>
           </div>
           <div class="mb-3">
             <label class="form-label" for="{{ form.learner.id_for_label }}">{{ form.learner.label }}</label>
