@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
+from allauth.account.models import EmailAddress
+
 from apps.academy.models import (
     Course,
     CourseEntitlement,
@@ -39,6 +41,12 @@ class StagingPaymentSimulatorTests(TestCase):
             email="simulator-learner@example.com",
             password="test-password",
             role=User.Role.USER,
+        )
+        EmailAddress.objects.create(
+            user=self.learner,
+            email=self.learner.email,
+            primary=True,
+            verified=True,
         )
         self.plan = Plan.objects.create(
             name="Simulator course plan",
