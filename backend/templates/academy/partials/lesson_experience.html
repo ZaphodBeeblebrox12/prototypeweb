@@ -1,4 +1,4 @@
-<div class="tt-learning-room tt-lesson-experience{% if course_import_preview %} tt-admin-learning-preview{% elif admin_preview %} tt-admin-lesson-preview{% else %} tt-member-learning-preview{% endif %}">
+<div class="tt-learning-room tt-lesson-experience{% if course_import_preview %} tt-admin-learning-preview{% elif admin_preview %} tt-admin-lesson-preview{% endif %}">
   {% if admin_preview and not course_import_preview %}<aside class="tt-admin-lesson-preview-banner" role="status"><strong>ADMIN PREVIEW · LOCKED ACCESS BYPASSED FOR REVIEW ONLY</strong><span>This read-only view does not unlock the lesson for learners, save progress, or submit notebook and quiz responses.</span><a href="{% url 'academy:course-detail' course.slug %}">Back to course overview ↗</a></aside>{% endif %}
   <div class="tt-breadcrumb">{% if course_import_preview %}<a href="{{ overview_url }}">Academy</a><span>/</span><a href="{{ overview_url }}">{{ course.title }}</a>{% else %}<a href="{% url 'academy:home' %}">Academy</a><span>/</span><a href="{% url 'academy:course-detail' course.slug %}">{{ course.title }}</a>{% endif %}<span>/</span><span>{{ module.title }}</span></div>
 
