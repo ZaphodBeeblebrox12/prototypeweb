@@ -176,6 +176,7 @@ class StagingPaymentSimulatorTests(TestCase):
             {
                 "course_offer": str(self.offer.pk),
                 "learner": str(self.learner.pk),
+                "acknowledge": "on",
             },
             HTTP_HOST=STAGING_HOST,
         )
