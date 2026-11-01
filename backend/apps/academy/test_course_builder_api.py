@@ -2470,7 +2470,31 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
         self.assertIn("async function refreshBuilderWebsitePreview(force = false)", source)
         self.assertNotIn('class="module-name-eyebrow"', source)
 
-    def test_module_title_is_rendered_in_both_academy_lesson_templates(self):
+    def test_member_and_admin_lessons_share_one_canonical_experience_template(self):
+        backend_root = Path(__file__).resolve().parents[2]
+        lesson_template = (backend_root / "templates" / "academy" / "lesson.html").read_text(
+            encoding="utf-8"
+        )
+        website_preview = (
+            backend_root / "templates" / "academy" / "course_import_website_preview.html"
+        ).read_text(encoding="utf-8")
+        experience = (
+            backend_root
+            / "templates"
+            / "academy"
+            / "partials"
+            / "lesson_experience.html"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn('include "academy/partials/lesson_experience.html"', lesson_template)
+        self.assertIn('include "academy/partials/lesson_experience.html"', website_preview)
+        self.assertIn('<header class="tt-course-header tt-course-header--depth">', experience)
+        self.assertIn('<div class="tt-room-grid">', experience)
+        self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', lesson_template)
+        self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', website_preview)
+        self.assertNotIn('<div class="tt-room-grid">', lesson_template)
+        self.assertNotIn('<div class="tt-room-grid">', website_preview)
+
         backend_root = Path(__file__).resolve().parents[2]
         lesson_template = (backend_root / "templates" / "academy" / "lesson.html").read_text(
             encoding="utf-8"
