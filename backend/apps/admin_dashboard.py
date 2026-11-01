@@ -102,11 +102,14 @@ def _subscription_dashboard_context(request):
     if _has_model_perm(request, "payments", "paymentintent"):
         ctx["payments"] = {
             "pending": PaymentIntent.objects.filter(
-                status=PaymentIntent.Status.PENDING).count(),
+                status=PaymentIntent.Status.PENDING,
+                is_simulated=False).count(),
             "failed": PaymentIntent.objects.filter(
-                status=PaymentIntent.Status.FAILED).count(),
+                status=PaymentIntent.Status.FAILED,
+                is_simulated=False).count(),
             "recent_success": PaymentIntent.objects.filter(
                 status=PaymentIntent.Status.SUCCESS,
+                is_simulated=False,
                 created_at__gte=recent).count(),
             "links": {
                 "pending": reverse("staff_admin_desk_finance") + "?tab=payments&payment_status=pending",
