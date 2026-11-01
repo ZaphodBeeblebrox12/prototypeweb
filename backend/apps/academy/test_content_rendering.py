@@ -410,9 +410,10 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn('figure_metadata=content_json.get("figures", {})', views_source)
         self.assertIn('table_metadata=content_json.get("tables", {})', views_source)
         self.assertIn(
-            '{% include "academy/partials/lesson_experience.html" with',
-            website_preview,
+            'return render(request, "academy/lesson.html", preview_context)',
+            views_source,
         )
+        self.assertNotIn("tt-course-header--depth", website_preview)
         self.assertIn("{{ lesson_sections.idea_html|safe }}", tabs_template)
         self.assertIn('{% include "academy/partials/lesson_tabs.html" with lesson_sections=lesson_sections', lesson_experience)
         self.assertIn("{{ lesson_sections.examples_html|safe }}", tabs_template)
