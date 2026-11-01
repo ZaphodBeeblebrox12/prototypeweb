@@ -185,7 +185,7 @@ def enrol_in_free_course(*, user, course):
         return entitlement
 
 
-def enqueue_personalized_video_for_purchase(*, user, protected_video):
+def enqueue_personalized_video_for_purchase(*, user, protected_video, force=False):
     """Queue one viewer-specific rendition, but only for an active paid purchase."""
     from .models import PersonalizedProtectedVideo, ProtectedLessonVideo
 
@@ -205,10 +205,14 @@ def enqueue_personalized_video_for_purchase(*, user, protected_video):
         user=user,
         protected_video=protected_video,
     )
-    if rendition.status == PersonalizedProtectedVideo.Status.READY and rendition.stream_directory:
+    if (
+        rendition.status == PersonalizedProtectedVideo.Status.READY
+        and rendition.stream_directory
+        and not force
+    ):
         return rendition
 
-    if rendition.status in (
+    if force or rendition.status in (
         PersonalizedProtectedVideo.Status.REVOKED,
         PersonalizedProtectedVideo.Status.FAILED,
     ):
@@ -271,7 +275,7 @@ def enqueue_personalized_videos_for_existing_purchasers(*, protected_video):
         rendition
         for entitlement in entitlements
         if (rendition := enqueue_personalized_video_for_purchase(
-            user=entitlement.user, protected_video=protected_video
+            user=entitlement.user, protected_video=protected_video, force=True
         )) is not None
     ]
 
