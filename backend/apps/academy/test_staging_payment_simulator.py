@@ -252,6 +252,76 @@ class StagingPaymentSimulatorTests(TestCase):
         )
         self.assertEqual(job.payload["user_id"], str(self.learner.pk))
 
+    def test_failed_simulated_video_can_be_requeued_without_new_payment_or_entitlement(self):
+        purchase_response = self.client.post(
+            self.url,
+            {
+                "course": str(self.course.pk),
+                "learner": str(self.learner.pk),
+                "acknowledge": "on",
+            },
+            HTTP_HOST=STAGING_HOST,
+        )
+        self.assertEqual(purchase_response.status_code, 200)
+
+        rendition = PersonalizedProtectedVideo.objects.get(
+            user=self.learner,
+            protected_video=self.video,
+        )
+        rendition.status = PersonalizedProtectedVideo.Status.FAILED
+        rendition.processing_error = "Simulated FFmpeg failure for test."
+        rendition.save(update_fields=["status", "processing_error", "updated_at"])
+
+        original_job = Job.objects.get(
+            kind="process_personalized_video",
+            payload__rendition_id=str(rendition.pk),
+        )
+        original_job.status = Job.STATUS_FAILED
+        original_job.attempts = original_job.max_attempts
+        original_job.idempotency_key = None
+        original_job.save(update_fields=["status", "attempts", "idempotency_key"])
+
+        retry_url = reverse(
+            "academy:staging-retry-video",
+            args=[rendition.pk],
+        )
+        retry_response = self.client.post(retry_url, HTTP_HOST=STAGING_HOST)
+
+        self.assertEqual(retry_response.status_code, 302)
+        self.assertEqual(retry_response["Location"], self.url)
+
+        rendition.refresh_from_db()
+        self.assertEqual(rendition.status, PersonalizedProtectedVideo.Status.PENDING)
+        self.assertEqual(
+            PaymentIntent.objects.filter(user=self.learner, is_simulated=True).count(),
+            1,
+        )
+        self.assertEqual(
+            CourseEntitlement.objects.filter(user=self.learner, course=self.course).count(),
+            1,
+        )
+
+        retry_job = Job.objects.get(
+            kind="process_personalized_video",
+            payload__rendition_id=str(rendition.pk),
+            status=Job.STATUS_PENDING,
+        )
+        self.assertNotEqual(retry_job.pk, original_job.pk)
+        self.assertEqual(retry_job.payload["user_id"], str(self.learner.pk))
+        self.assertEqual(retry_job.payload["video_id"], str(self.video.pk))
+
+    def test_retry_endpoint_is_hidden_from_non_admins(self):
+        learner_client = Client()
+        learner_client.force_login(
+            self.learner,
+            backend="django.contrib.auth.backends.ModelBackend",
+        )
+        response = learner_client.post(
+            reverse("academy:staging-retry-video", args=["28692e3b-ddc4-4a6a-9ada-99dbd8bf10a1"]),
+            HTTP_HOST=STAGING_HOST,
+        )
+        self.assertEqual(response.status_code, 404)
+
     def test_learner_with_existing_active_access_cannot_receive_duplicate_simulation(self):
         CourseEntitlement.objects.create(
             user=self.learner,
