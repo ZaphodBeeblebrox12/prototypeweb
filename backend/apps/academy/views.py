@@ -5,14 +5,15 @@ import mimetypes
 import re
 from contextlib import suppress
 from copy import deepcopy
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 from uuid import UUID
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import transaction
 from django.db.models import Prefetch, Q
-from django.http import FileResponse, JsonResponse
+from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -1449,4 +1450,157 @@ def lesson_progress(request, lesson_id):
             "completed_at": progress.completed_at.isoformat() if progress.completed_at else None,
             "time_spent_seconds": progress.time_spent_seconds,
         }
+    )
+
+
+
+def _staging_payment_simulator_enabled(request):
+    """Require an explicit feature flag and the exact Academy staging host."""
+    expected_host = getattr(
+        settings,
+        "ACADEMY_STAGING_PAYMENT_SIMULATOR_HOST",
+        "tradethesis-academy-staging.onrender.com",
+    )
+    try:
+        request_host = request.get_host().split(":", 1)[0].lower()
+        configured_host = (urlsplit(getattr(settings, "SITE_BASE_URL", "")).hostname or "").lower()
+    except (TypeError, ValueError):
+        return False
+    return bool(
+        getattr(settings, "ACADEMY_STAGING_PAYMENT_SIMULATOR_ENABLED", False)
+        and request_host == expected_host
+        and configured_host == expected_host
+    )
+
+
+@login_required
+@never_cache
+def staging_payment_simulator(request):
+    """Grant a clearly-labelled no-money course purchase on Academy staging only."""
+    if not _staging_payment_simulator_enabled(request) or not is_course_content_admin(
+        request.user
+    ):
+        raise Http404
+
+    form = StagingPaymentSimulatorForm(request.POST or None)
+    result = None
+    if request.method == "POST" and form.is_valid():
+        offer = form.cleaned_data["course_offer"]
+        learner = form.cleaned_data["learner"]
+
+        if not offer.is_saleable or not offer.plan_id:
+            form.add_error("course_offer", "This course offer is no longer available.")
+        elif get_active_entitlement(learner, offer.course) is not None:
+            form.add_error(
+                "learner",
+                "This learner already has active access. Use a separate test learner without access.",
+            )
+        else:
+            from apps.academy.models import ProtectedLessonVideo
+            from apps.payments.models import PaymentIntent
+            from apps.academy.services import activate_course_payment
+
+            ready_sources = [
+                video
+                for video in ProtectedLessonVideo.objects.filter(
+                    lesson__module__course=offer.course,
+                    status=ProtectedLessonVideo.Status.READY,
+                ).select_related("lesson")
+                if video.source_file
+            ]
+            if not ready_sources:
+                form.add_error(
+                    None,
+                    "This course has no ready protected source videos. Upload and process at least one lesson video first.",
+                )
+            else:
+                geo_price = offer.plan.geo_prices.filter(
+                    interval="one_time", is_active=True, country="IN"
+                ).order_by("pk").first()
+                global_price = offer.plan.prices.filter(
+                    interval="one_time", is_active=True
+                ).order_by("pk").first()
+                any_geo_price = offer.plan.geo_prices.filter(
+                    interval="one_time", is_active=True
+                ).order_by("pk").first()
+                price = geo_price or global_price or any_geo_price
+
+                if price is None:
+                    form.add_error(
+                        "course_offer",
+                        "This course offer has no active one-time price.",
+                    )
+                else:
+                    with transaction.atomic():
+                        intent = PaymentIntent.objects.create(
+                            user=learner,
+                            plan=offer.plan,
+                            plan_price=price if price.__class__.__name__ == "PlanPrice" else None,
+                            geo_plan_price=price if price.__class__.__name__ == "GeoPlanPrice" else None,
+                            amount=price.price_cents,
+                            base_amount_cents=price.price_cents,
+                            subtotal_cents=price.price_cents,
+                            currency=price.currency,
+                            country=getattr(price, "country", "") or "",
+                            provider=PaymentIntent.Provider.SIMULATOR,
+                            status=PaymentIntent.Status.PENDING,
+                        )
+                        activated, entitlement = activate_course_payment(
+                            intent,
+                            offer,
+                            send_notifications=False,
+                            granted_by=request.user,
+                        )
+                        if not activated:
+                            raise ValidationError(
+                                "The simulated entitlement was not created. No learner access was changed."
+                            )
+
+                    from .models import PersonalizedProtectedVideo
+
+                    queued_count = PersonalizedProtectedVideo.objects.filter(
+                        user=learner,
+                        protected_video__lesson__module__course=offer.course,
+                        status=PersonalizedProtectedVideo.Status.PENDING,
+                    ).count()
+                    first_lesson = (
+                        Lesson.objects.filter(
+                            module__course=offer.course,
+                            is_published=True,
+                            module__is_published=True,
+                        )
+                        .order_by("module__position", "position")
+                        .first()
+                    )
+                    result = {
+                        "learner": learner,
+                        "course": offer.course,
+                        "payment_intent": intent,
+                        "entitlement": entitlement,
+                        "queued_count": queued_count,
+                        "course_url": reverse(
+                            "academy:course-detail", args=[offer.course.slug]
+                        ),
+                        "lesson_url": (
+                            reverse(
+                                "academy:lesson",
+                                args=[offer.course.slug, first_lesson.pk],
+                            )
+                            if first_lesson
+                            else "",
+                        ),
+                    }
+
+    return render(
+        request,
+        "academy/staging_payment_simulator.html",
+        {
+            "form": form,
+            "result": result,
+            "simulator_host": getattr(
+                settings,
+                "ACADEMY_STAGING_PAYMENT_SIMULATOR_HOST",
+                "tradethesis-academy-staging.onrender.com",
+            ),
+        },
     )
