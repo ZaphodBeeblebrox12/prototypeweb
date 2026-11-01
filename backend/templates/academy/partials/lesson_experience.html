@@ -1,4 +1,4 @@
-<div class="tt-learning-room{% if course_import_preview %} tt-admin-learning-preview{% elif admin_preview %} tt-admin-lesson-preview{% else %} tt-member-learning-preview{% endif %}">
+<div class="tt-learning-room tt-lesson-experience{% if course_import_preview %} tt-admin-learning-preview{% elif admin_preview %} tt-admin-lesson-preview{% else %} tt-member-learning-preview{% endif %}">
   {% if admin_preview and not course_import_preview %}<aside class="tt-admin-lesson-preview-banner" role="status"><strong>ADMIN PREVIEW · LOCKED ACCESS BYPASSED FOR REVIEW ONLY</strong><span>This read-only view does not unlock the lesson for learners, save progress, or submit notebook and quiz responses.</span><a href="{% url 'academy:course-detail' course.slug %}">Back to course overview ↗</a></aside>{% endif %}
   <div class="tt-breadcrumb">{% if course_import_preview %}<a href="{{ overview_url }}">Academy</a><span>/</span><a href="{{ overview_url }}">{{ course.title }}</a>{% else %}<a href="{% url 'academy:home' %}">Academy</a><span>/</span><a href="{% url 'academy:course-detail' course.slug %}">{{ course.title }}</a>{% endif %}<span>/</span><span>{{ module.title }}</span></div>
 
@@ -61,11 +61,11 @@
       <article class="tt-lesson-article">
         {% if personalized_video_rendition or personalized_video_status or protected_video or admin_preview and video_processing_status or video_url %}
         <section class="tt-lesson-video-panel" aria-label="Lesson video">
-          <div class="tt-member-video-panel-heading">
+          <div class="tt-lesson-video-panel-heading">
             <span>LESSON VIDEO</span>
             <span>Watch the walkthrough</span>
           </div>
-          <div class="tt-member-video-panel-content">
+          <div class="tt-lesson-video-panel-content">
 {% if personalized_video_rendition and personalized_video_rendition.status == "ready" %}<section class="tt-video-lesson tt-video-lesson--protected" aria-label="Personalised protected lesson video" data-protected-video-container>
           <video playsinline preload="none" data-protected-video data-manifest-url="{{ personalized_video_manifest_url }}" disablepictureinpicture>
             Your browser does not support protected HLS video playback.
