@@ -370,6 +370,7 @@ class PrivateLessonVideoDriveUploadTests(TestCase):
             body=BytesIO(compressed),
             headers={"Content-Encoding": "gzip"},
             preload_content=False,
+            decode_content=False,
         )
         response = Mock()
         response.raw = raw
