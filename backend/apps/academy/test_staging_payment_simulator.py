@@ -1,8 +1,7 @@
+from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
-
-from allauth.account.models import EmailAddress
 
 from apps.academy.models import (
     Course,
