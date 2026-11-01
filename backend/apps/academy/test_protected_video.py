@@ -113,6 +113,66 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
             if "segment_00000.ts" in line and "ticket=" in line
         )
 
+    def _admin_preview_client(self):
+        admin = User.objects.create_user(
+            username="protected-video-admin",
+            email="video-admin@example.com",
+            password="test-password",
+            role="admin",
+            is_staff=True,
+        )
+        client = Client()
+        client.force_login(admin, backend="django.contrib.auth.backends.ModelBackend")
+        return client
+
+    def test_admin_lesson_preview_renders_ready_protected_video_player(self):
+        client = self._admin_preview_client()
+
+        response = client.get(
+            reverse(
+                "academy:admin-lesson-preview",
+                args=[self.course.slug, self.lesson.pk],
+            )
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.context["protected_video"].pk, self.video.pk)
+        self.assertEqual(
+            response.context["protected_video_manifest_url"],
+            self.manifest_url,
+        )
+        self.assertContains(response, 'data-protected-video-container')
+        self.assertContains(response, 'data-protected-video')
+        self.assertContains(response, self.manifest_url)
+        self.assertContains(response, 'data-video-watermark-name')
+
+    def test_admin_lesson_preview_explains_pending_and_failed_video_states(self):
+        client = self._admin_preview_client()
+        url = reverse(
+            "academy:admin-lesson-preview",
+            args=[self.course.slug, self.lesson.pk],
+        )
+
+        self.video.status = ProtectedLessonVideo.Status.PROCESSING
+        self.video.processing_error = ""
+        self.video.save(update_fields=("status", "processing_error"))
+        processing = client.get(url)
+
+        self.assertEqual(processing.status_code, 200, processing.content)
+        self.assertContains(processing, "Protected lesson video")
+        self.assertContains(processing, "Processing")
+        self.assertNotContains(processing, 'data-protected-video-container')
+
+        self.video.status = ProtectedLessonVideo.Status.FAILED
+        self.video.processing_error = "FFmpeg could not read the uploaded source."
+        self.video.save(update_fields=("status", "processing_error"))
+        failed = client.get(url)
+
+        self.assertEqual(failed.status_code, 200, failed.content)
+        self.assertContains(failed, "Processing failed")
+        self.assertContains(failed, "FFmpeg could not read the uploaded source.")
+        self.assertNotContains(failed, 'data-protected-video-container')
+
     def test_manifest_rewrites_key_and_segment_to_session_bound_routes(self):
         playlist, _ = self._playlist_and_ticket()
         self.assertIn(
