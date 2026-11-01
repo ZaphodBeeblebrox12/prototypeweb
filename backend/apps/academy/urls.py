@@ -35,7 +35,7 @@ urlpatterns = [
     ),
     path(
         "course-import/<uuid:import_id>/website-preview/",
-        views.course_import_website_preview,
+        views.course_import_preview,
         name="course-import-preview",
     ),
     path("course/<slug:course_slug>/lesson/<uuid:lesson_id>/", views.lesson_detail, name="lesson"),
