@@ -2486,9 +2486,13 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
         self.assertIn(include, lesson_template)
         self.assertIn('<header class="tt-course-header tt-course-header--depth">', experience)
         self.assertIn('<div class="tt-room-grid">', experience)
-        self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', lesson_template)
+        self.assertNotIn(
+            '<header class="tt-course-header tt-course-header--depth">', lesson_template
+        )
         self.assertNotIn('<div class="tt-room-grid">', lesson_template)
-        self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', course_overview)
+        self.assertNotIn(
+            '<header class="tt-course-header tt-course-header--depth">', course_overview
+        )
         self.assertNotIn('<div class="tt-room-grid">', course_overview)
 
         self.assertIn(
