@@ -22,15 +22,9 @@ _allow_staging_unverified_login = env.bool(
 _configured_site_host = (
     urlsplit(str(SITE_BASE_URL or "")).hostname or ""
 ).lower()
-_expected_academy_staging_host = (
-    getattr(
-        __import__("django.conf", fromlist=["settings"]).settings,
-        "ACADEMY_STAGING_PAYMENT_SIMULATOR_HOST",
-        "tradethesis-academy-staging.onrender.com",
-    )
-    .strip()
-    .lower()
-)
+_expected_academy_staging_host = str(
+    ACADEMY_STAGING_PAYMENT_SIMULATOR_HOST
+).strip().lower()
 if (
     _allow_staging_unverified_login
     and _configured_site_host == _expected_academy_staging_host
