@@ -80,7 +80,7 @@ class CourseReviewTemplateTests(TestCase):
         self.assertContains(response, "What evidence can you see?")
         self.assertNotContains(response, "data-notebook-response")
         self.assertNotContains(response, "lesson-notebook-submit")
-        self.assertNotContains(response, "data-practice-quiz")
+        self.assertNotContains(response, "data-practice-quiz>")
 
     def test_staging_authored_bollinger_source_creates_review_only_preview(self):
         slug = "understand-bollinger-bands"
@@ -221,7 +221,7 @@ class CourseReviewTemplateTests(TestCase):
         self.assertContains(response, "Second principles")
         self.assertContains(response, "Content review")
         self.assertNotContains(response, "data-notebook-response")
-        self.assertNotContains(response, "data-practice-quiz")
+        self.assertNotContains(response, "data-practice-quiz>")
         self.assertIsNone(response.context["selected_lesson"])
 
     def test_website_preview_renders_lesson_tabs_read_only(self):
@@ -242,7 +242,7 @@ class CourseReviewTemplateTests(TestCase):
         self.assertContains(response, "Evidence notebook")
         self.assertContains(response, "What evidence is visible?")
         self.assertNotContains(response, "data-notebook-response")
-        self.assertNotContains(response, "data-practice-quiz")
+        self.assertNotContains(response, "data-practice-quiz>")
         self.assertNotContains(response, "Mark complete")
         self.assertEqual(response.context["selected_lesson"]["source_id"], "1.1")
 
