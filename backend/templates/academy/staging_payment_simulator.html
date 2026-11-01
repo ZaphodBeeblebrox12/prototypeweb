@@ -68,11 +68,11 @@
             {% for error in form.learner.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
           </div>
           <div class="form-check mb-3">
-            <input class="form-check-input" type="checkbox" id="simulatorAcknowledge" required>
-            <label class="form-check-label small" for="simulatorAcknowledge">
-              I understand this is a staging simulation. No money is collected and the
-              payment record will be explicitly labelled as simulated.
+            {{ form.acknowledge }}
+            <label class="form-check-label small" for="{{ form.acknowledge.id_for_label }}">
+              {{ form.acknowledge.label }} The payment record will be explicitly labelled as simulated.
             </label>
+            {% for error in form.acknowledge.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
           </div>
           <button class="btn btn-primary" type="submit">Simulate successful purchase</button>
           <a class="btn btn-outline-secondary ms-2" href="{% url 'staff_admin_desk' %}">Back to Admin Desk</a>
