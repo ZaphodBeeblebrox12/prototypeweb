@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Staging payment simulator · TradeThesis{% endblock %}
+{% block page_title %}Staging payment simulator{% endblock %}
+
+{% block content %}
+<section class="container-fluid px-0" style="max-width: 920px;">
+  <div class="alert alert-warning border" role="alert">
+    <strong>STAGING ONLY · NO MONEY COLLECTED</strong>
+    <div class="small mt-1">
+      This tool creates a clearly labelled simulator payment record and grants course access
+      on {{ simulator_host }}. It never opens Razorpay or Stripe, creates a provider order,
+      sends a receipt, or collects money.
+    </div>
+  </div>
+
+  {% if result %}
+    <div class="card mb-4">
+      <div class="card-header">Simulated purchase created</div>
+      <div class="card-body">
+        <p class="text-success fw-semibold mb-3">Course access was granted successfully.</p>
+        <dl class="row mb-3">
+          <dt class="col-sm-4">Test learner</dt>
+          <dd class="col-sm-8">{{ result.learner.email|default:result.learner.username }}</dd>
+          <dt class="col-sm-4">Course</dt>
+          <dd class="col-sm-8">{{ result.course.title }}</dd>
+          <dt class="col-sm-4">Simulator payment ID</dt>
+          <dd class="col-sm-8"><code>{{ result.payment_intent.pk }}</code></dd>
+          <dt class="col-sm-4">Payment record</dt>
+          <dd class="col-sm-8"><strong>SIMULATOR — NO MONEY COLLECTED</strong></dd>
+          <dt class="col-sm-4">Personal video jobs</dt>
+          <dd class="col-sm-8">{{ result.queued_count }} queued</dd>
+        </dl>
+        <p class="small text-muted">
+          No payment receipt or invoice was sent. The learner's course entitlement and
+          per-viewer video preparation use the normal Academy fulfilment path.
+        </p>
+        {% if result.lesson_url %}
+          <a class="btn btn-primary" href="{{ result.lesson_url }}">Open first lesson</a>
+        {% else %}
+          <a class="btn btn-primary" href="{{ result.course_url }}">Open course</a>
+        {% endif %}
+        <a class="btn btn-outline-secondary ms-2" href="{% url 'academy:staging-payment-simulator' %}">Simulate another learner</a>
+      </div>
+    </div>
+  {% else %}
+    <div class="card">
+      <div class="card-header">Create a no-money course purchase</div>
+      <div class="card-body">
+        <p class="text-muted">
+          Choose a published paid course and a non-staff test learner. The simulator requires
+          at least one ready protected source video in that course. FFmpeg jobs are queued only
+          for this learner.
+        </p>
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+          {% endif %}
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.course_offer.id_for_label }}">{{ form.course_offer.label }}</label>
+            {{ form.course_offer }}
+            {% for error in form.course_offer.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.learner.id_for_label }}">{{ form.learner.label }}</label>
+            {{ form.learner }}
+            {% for error in form.learner.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="simulatorAcknowledge" required>
+            <label class="form-check-label small" for="simulatorAcknowledge">
+              I understand this is a staging simulation. No money is collected and the
+              payment record will be explicitly labelled as simulated.
+            </label>
+          </div>
+          <button class="btn btn-primary" type="submit">Simulate successful purchase</button>
+          <a class="btn btn-outline-secondary ms-2" href="{% url 'staff_admin_desk' %}">Back to Admin Desk</a>
+        </form>
+      </div>
+    </div>
+  {% endif %}
+</section>
+<style>
+  #id_course_offer, #id_learner {
+    display: block;
+    width: 100%;
+    min-height: 42px;
+    padding: 8px 12px;
+    border: 1px solid #c9c3b7;
+    border-radius: 4px;
+    background: #fffdf9;
+    color: #29382e;
+  }
+</style>
+{% endblock %}
