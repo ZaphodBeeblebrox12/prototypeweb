@@ -247,6 +247,144 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
         )
         self.assertEqual(response.status_code, 404)
 
+    def test_paid_purchase_cannot_use_shared_unpersonalised_hls(self):
+        self.entitlement.source = CourseEntitlement.Source.PURCHASE
+        self.entitlement.save(update_fields=["source"])
+
+        response = self.client.get(self.manifest_url)
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_paid_purchase_queues_personalised_renditions_for_ready_course_videos(self):
+        from apps.jobs.models import Job
+        from .services import enqueue_personalized_videos_for_course
+
+        self.entitlement.source = CourseEntitlement.Source.PURCHASE
+        self.entitlement.save(update_fields=["source"])
+        self.video.source_file.name = "academy/video-source/test/source.mp4"
+        self.video.save(update_fields=["source_file"])
+
+        queued = enqueue_personalized_videos_for_course(
+            user=self.user,
+            course=self.course,
+        )
+
+        self.assertEqual(len(queued), 1)
+        rendition = PersonalizedProtectedVideo.objects.get(
+            user=self.user,
+            protected_video=self.video,
+        )
+        self.assertEqual(rendition.status, PersonalizedProtectedVideo.Status.PENDING)
+        job = Job.objects.get(kind="process_personalized_video")
+        self.assertEqual(job.payload["rendition_id"], str(rendition.pk))
+        self.assertEqual(job.payload["user_id"], str(self.user.pk))
+        self.assertEqual(job.payload["video_id"], str(self.video.pk))
+
+        # A repeated payment callback/page visit reuses the rendition and open job.
+        enqueue_personalized_videos_for_course(user=self.user, course=self.course)
+        self.assertEqual(
+            PersonalizedProtectedVideo.objects.filter(user=self.user, protected_video=self.video).count(),
+            1,
+        )
+        self.assertEqual(Job.objects.filter(kind="process_personalized_video").count(), 1)
+
+    def test_complimentary_access_does_not_queue_personalised_renditions(self):
+        from apps.jobs.models import Job
+        from .services import enqueue_personalized_videos_for_course
+
+        self.video.source_file.name = "academy/video-source/test/source.mp4"
+        self.video.save(update_fields=["source_file"])
+
+        queued = enqueue_personalized_videos_for_course(
+            user=self.user,
+            course=self.course,
+        )
+
+        self.assertEqual(queued, [])
+        self.assertFalse(PersonalizedProtectedVideo.objects.exists())
+        self.assertFalse(Job.objects.filter(kind="process_personalized_video").exists())
+
+    def test_personalized_manifest_key_and_segment_are_session_bound(self):
+        self.entitlement.source = CourseEntitlement.Source.PURCHASE
+        self.entitlement.save(update_fields=["source"])
+        rendition = PersonalizedProtectedVideo.objects.create(
+            user=self.user,
+            protected_video=self.video,
+            status=PersonalizedProtectedVideo.Status.READY,
+            stream_directory=f"personalized/{self.video.pk}/{self.user.pk}/test",
+            tracking_code="ABC123TEST",
+        )
+        rendition_dir = Path(self.temp_dir.name) / rendition.stream_directory
+        rendition_dir.mkdir(parents=True)
+        (rendition_dir / "encryption.key").write_bytes(b"0123456789abcdef")
+        (rendition_dir / "segment_00000.ts").write_bytes(b"personalised-segment")
+        (rendition_dir / "index.m3u8").write_text(
+            "#EXTM3U\\n"
+            '#EXT-X-KEY:METHOD=AES-128,URI="protected-key",IV=0x0123456789abcdef\\n'
+            "#EXTINF:6.0,\\n"
+            "segment_00000.ts\\n"
+            "#EXT-X-ENDLIST\\n",
+            encoding="utf-8",
+        )
+
+        manifest_url = reverse("academy:personalized-video-manifest", args=[rendition.pk])
+        response = self.client.get(manifest_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("no-store", response["Cache-Control"])
+        playlist = response.content.decode("utf-8")
+        self.assertIn(
+            reverse("academy:personalized-video-key", args=[rendition.pk]),
+            playlist,
+        )
+        self.assertIn(
+            reverse(
+                "academy:personalized-video-segment",
+                args=[rendition.pk, "segment_00000.ts"],
+            ),
+            playlist,
+        )
+
+        key_url = re.search(r'URI="([^"]+)"', playlist).group(1)
+        segment_url = next(
+            line for line in playlist.splitlines()
+            if "segment_00000.ts" in line and "ticket=" in line
+        )
+        self.assertEqual(self.client.get(key_url).content, b"0123456789abcdef")
+        segment_response = self.client.get(segment_url)
+        self.assertEqual(segment_response.status_code, 200)
+        self.assertEqual(
+            b"".join(segment_response.streaming_content),
+            b"personalised-segment",
+        )
+
+        another_session = Client()
+        another_session.force_login(
+            self.user, backend="django.contrib.auth.backends.ModelBackend"
+        )
+        self.assertEqual(another_session.get(segment_url).status_code, 404)
+
+    def test_personalized_rendition_is_only_visible_to_its_owner(self):
+        self.entitlement.source = CourseEntitlement.Source.PURCHASE
+        self.entitlement.save(update_fields=["source"])
+        other_user = User.objects.create_user(
+            username="other-paid-video-learner",
+            email="other-paid@example.com",
+            password="test-password",
+            role=User.Role.USER,
+        )
+        rendition = PersonalizedProtectedVideo.objects.create(
+            user=other_user,
+            protected_video=self.video,
+            status=PersonalizedProtectedVideo.Status.READY,
+            stream_directory="personalized/other/only",
+        )
+
+        response = self.client.get(
+            reverse("academy:personalized-video-manifest", args=[rendition.pk])
+        )
+
+        self.assertEqual(response.status_code, 404)
+
     def test_anonymous_user_is_redirected_from_the_manifest(self):
         response = Client().get(self.manifest_url)
         self.assertEqual(response.status_code, 302)
