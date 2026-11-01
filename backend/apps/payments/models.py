@@ -24,7 +24,6 @@ class PaymentIntent(models.Model):
     class Provider(models.TextChoices):
         STRIPE = "stripe", _("Stripe")
         RAZORPAY = "razorpay", _("Razorpay")
-        SIMULATOR = "simulator", _("Staging simulator — no money collected")
 
     class PaymentMethod(models.TextChoices):
         CARD = "card", _("Card")
@@ -63,6 +62,10 @@ class PaymentIntent(models.Model):
                                 help_text=_("ISO 4217 currency code"))
     provider = models.CharField(max_length=20, choices=Provider.choices,
                                 help_text=_("Payment provider"))
+    is_simulated = models.BooleanField(
+        default=False,
+        help_text=_("Staging-only payment simulation. No money was collected."),
+    )
     payment_method = models.CharField(
         max_length=24,
         choices=PaymentMethod.choices,
@@ -117,6 +120,11 @@ class PaymentIntent(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user.username} - {self.plan.name} ({self.status})"
+
+    def get_provider_display(self):
+        if self.is_simulated:
+            return "Simulator — no money collected"
+        return dict(self.Provider.choices).get(self.provider, self.provider)
 
     @property
     def amount_dollars(self) -> float:
