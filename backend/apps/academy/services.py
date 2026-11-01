@@ -257,6 +257,34 @@ def enqueue_personalized_videos_for_course(*, user, course):
     ]
 
 
+def revoke_personalized_video_renditions_for_entitlement(*, user_id, course):
+    """Disable and queue deletion of a learner's private renditions after access revocation."""
+    from .models import PersonalizedProtectedVideo
+    from apps.jobs.enqueue import enqueue_generic
+
+    renditions = PersonalizedProtectedVideo.objects.filter(
+        user_id=user_id,
+        protected_video__lesson__module__course=course,
+    )
+    queued = 0
+    for rendition in renditions:
+        old_prefix = rendition.stream_directory
+        rendition.status = PersonalizedProtectedVideo.Status.REVOKED
+        rendition.processing_error = "Course entitlement was revoked."
+        rendition.save(update_fields=["status", "processing_error", "updated_at"])
+        if old_prefix:
+            enqueue_generic(
+                "delete_personalized_video",
+                {
+                    "rendition_id": str(rendition.pk),
+                    "stream_directory": old_prefix,
+                },
+                idempotency_key=f"delete-personalized-video:{rendition.pk}:{old_prefix[-32:]}",
+            )
+            queued += 1
+    return queued
+
+
 def enqueue_personalized_videos_for_existing_purchasers(*, protected_video):
     """When a new protected lesson video is processed, queue it for paid learners."""
     from .models import CourseEntitlement
@@ -508,6 +536,10 @@ def revoke_course_entitlement_for_payment(payment_intent, *, reason):
         entitlement.revoked_at = timezone.now()
         entitlement.revocation_reason = reason[:240]
         entitlement.save(update_fields=["status", "revoked_at", "revocation_reason", "updated_at"])
+        revoke_personalized_video_renditions_for_entitlement(
+            user_id=payment_intent.user_id,
+            course=offer.course,
+        )
         CourseEntitlementEvent.objects.create(
             entitlement=entitlement,
             payment_intent=payment_intent,
