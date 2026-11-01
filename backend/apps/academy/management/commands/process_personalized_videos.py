@@ -32,20 +32,25 @@ def _ffmpeg_binary():
         return ""
 
 
-def _position_expression(rng, interval, duration):
-    count = max(2, int(duration // interval) + 2)
-    points = [rng.uniform(0.06, 0.78) for _ in range(count)]
-    expression = f"{points[-1]:.6f}"
-    for index in reversed(range(count - 1)):
-        start = index * interval
-        end = (index + 1) * interval
-        a, b = points[index], points[index + 1]
-        blend = (
-            f"({a:.6f}+({b-a:.6f})*"
-            f"min(1,max(0,(t-{start:.3f})/{interval:.3f})))"
-        )
-        expression = f"if(lt(t,{end:.3f}),{blend},{expression})"
-    return expression
+def _position_expression(rng, interval=4.0, duration=None):
+    """Return a compact viewer-specific motion expression for FFmpeg drawtext.
+
+    The previous piecewise expression nested one FFmpeg if() per interval.
+    Long lessons created hundreds of nested functions and FFmpeg rejected the
+    filter with "Missing ')' or too many args". Two low-amplitude sine waves
+    produce smooth, irregular motion while keeping the text inside 6%-94% of
+    the usable frame. The seeded RNG gives each viewer/video pair its own path.
+    interval and duration remain accepted for compatibility with older callers.
+    """
+    del interval, duration
+    primary_speed = rng.uniform(0.48, 0.85)
+    secondary_speed = rng.uniform(0.12, 0.28)
+    primary_phase = rng.uniform(0.0, 2.0 * 3.141592653589793)
+    secondary_phase = rng.uniform(0.0, 2.0 * 3.141592653589793)
+    return (
+        f"(0.5+0.34*sin(t*{primary_speed:.5f}+{primary_phase:.5f})"
+        f"+0.10*sin(t*{secondary_speed:.5f}+{secondary_phase:.5f}))"
+    )
 
 
 def _delete_rendition(prefix):
@@ -207,13 +212,24 @@ class Command(BaseCommand):
                     "-hls_segment_filename", str(output_dir / "segment_%05d.ts"),
                     "-hls_key_info_file", str(key_info_path), str(manifest_path),
                 ]
-                subprocess.run(
+                encode_result = subprocess.run(
                     command,
-                    check=True,
+                    check=False,
                     capture_output=True,
                     text=True,
                     timeout=14400,
                 )
+                if encode_result.returncode != 0:
+                    # CalledProcessError.__str__ would dump the entire command,
+                    # including two huge filter expressions. Preserve the actual
+                    # FFmpeg diagnostic instead so failed jobs are actionable.
+                    diagnostic = (
+                        encode_result.stderr or encode_result.stdout or "No FFmpeg diagnostic output."
+                    ).strip()
+                    raise RuntimeError(
+                        f"FFmpeg HLS encoding failed (exit {encode_result.returncode}): "
+                        f"{diagnostic[-1400:]}"
+                    )
 
                 segments = sorted(output_dir.glob("segment_*.ts"))
                 playlist = manifest_path.read_text(encoding="utf-8") if manifest_path.is_file() else ""
