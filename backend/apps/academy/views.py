@@ -901,6 +901,24 @@ def admin_lesson_preview(request, course_slug, lesson_id):
         asset_urls,
         content_json.get("figures", {}),
     )
+    protected_video_record = ProtectedLessonVideo.objects.filter(lesson=lesson).first()
+    protected_video = (
+        protected_video_record
+        if protected_video_record
+        and protected_video_record.status == ProtectedLessonVideo.Status.READY
+        else None
+    )
+    video_processing_status = (
+        protected_video_record.get_status_display()
+        if protected_video_record and protected_video is None
+        else ""
+    )
+    video_processing_error = (
+        protected_video_record.processing_error
+        if protected_video_record
+        and protected_video_record.status == ProtectedLessonVideo.Status.FAILED
+        else ""
+    )
     video_url = content_json.get("video_url", "")
     if not isinstance(video_url, str) or not video_url.startswith(("https://", "http://")):
         video_url = ""
@@ -944,6 +962,16 @@ def admin_lesson_preview(request, course_slug, lesson_id):
             "practice_questions": practice_questions,
             "video_url": video_url,
             "video_is_file": video_is_file,
+            "protected_video": protected_video,
+            "protected_video_manifest_url": (
+                reverse("academy:protected-video-manifest", args=[protected_video.pk])
+                if protected_video
+                else ""
+            ),
+            "video_processing_status": video_processing_status,
+            "video_processing_error": video_processing_error,
+            "video_watermark_name": request.user.full_name.strip() or request.user.email,
+            "video_watermark_email": request.user.email,
             "previous_lesson": previous_lesson,
             "next_lesson": next_lesson,
             "course_progress_percent": 0,
