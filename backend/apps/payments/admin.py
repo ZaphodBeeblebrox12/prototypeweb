@@ -30,7 +30,7 @@ class PaymentIntentAdmin(admin.ModelAdmin):
         "plan",
         "amount_display",
         "currency",
-        "provider",
+        "provider_label",
         "status",
         "country",
         "created_at",
@@ -43,6 +43,10 @@ class PaymentIntentAdmin(admin.ModelAdmin):
     autocomplete_fields = ["user", "plan"]
     search_fields = ["user__username", "user__email", "plan__name",
                    "provider_reference", "provider_payment_id", "chargeback_reference"]
+    @admin.display(description="Provider")
+    def provider_label(self, obj):
+        return obj.get_provider_display()
+
     # PaymentIntent is financial/audit data: ALL fields read-only.  Payment
     # state is set only by the provider-verification flow (P1); an admin must
     # never mark paid/failed or edit amount/provider/snapshots by hand.
