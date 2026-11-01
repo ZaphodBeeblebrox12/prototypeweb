@@ -345,6 +345,7 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
 
     def test_complimentary_access_does_not_queue_personalised_renditions(self):
         from apps.jobs.models import Job
+
         from .services import enqueue_personalized_videos_for_course
 
         self.video.source_file.name = "academy/video-source/test/source.mp4"
