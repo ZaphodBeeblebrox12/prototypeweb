@@ -98,7 +98,55 @@ def _process_personalized_video(payload, job):
     if rendition is None:
         raise ValueError("Personalised-video job does not match a stored learner rendition.")
 
-    call_command("process_personalized_videos", rendition=str(rendition.pk))
+    def process_with_lock():
+        if os.name == "nt":
+            call_command("process_personalized_videos", rendition=str(rendition.pk))
+            return
+        import fcntl
+
+        lock_path = os.path.join(
+            tempfile.gettempdir(),
+            "tradethesis-protected-video-processing.lock",
+        )
+        with open(lock_path, "a", encoding="utf-8") as lock_file:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+            try:
+                call_command("process_personalized_videos", rendition=str(rendition.pk))
+            finally:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+    process_with_lock()
+
+
+def _delete_personalized_video(payload, job):
+    """Delete only the old private rendition directory captured by a revoke event."""
+    from pathlib import PurePosixPath
+    from uuid import UUID
+
+    from apps.academy.management.commands.process_personalized_videos import _delete_rendition
+    from apps.academy.models import PersonalizedProtectedVideo
+
+    try:
+        rendition_id = UUID(str((payload or {}).get("rendition_id", "")))
+    except (AttributeError, TypeError, ValueError) as exc:
+        raise ValueError("Personalised-video cleanup requires a valid rendition_id.") from exc
+
+    prefix = str((payload or {}).get("stream_directory") or "").strip()
+    safe_prefix = PurePosixPath(prefix)
+    if (
+        not prefix.startswith("personalized/")
+        or safe_prefix.is_absolute()
+        or not safe_prefix.parts
+        or any(part in {"", ".", ".."} for part in safe_prefix.parts)
+        or len(safe_prefix.parts) > 5
+    ):
+        raise ValueError("Refusing to delete an invalid personalised video storage prefix.")
+
+    _delete_rendition(prefix)
+    rendition = PersonalizedProtectedVideo.objects.filter(pk=rendition_id).first()
+    if rendition is not None and rendition.stream_directory == prefix:
+        rendition.stream_directory = ""
+        rendition.save(update_fields=["stream_directory", "updated_at"])
 
 
 def _process_protected_lesson_video(payload, job):
@@ -177,6 +225,7 @@ def _process_protected_lesson_video(payload, job):
 
 def register_builtin_handlers():
     HANDLERS.setdefault("process_personalized_video", _process_personalized_video)
+    HANDLERS.setdefault("delete_personalized_video", _delete_personalized_video)
     HANDLERS.setdefault("process_protected_lesson_video", _process_protected_lesson_video)
     HANDLERS.setdefault("sweep", _sweep)
     HANDLERS.setdefault("subscription_expiry", _subscription_expiry)
