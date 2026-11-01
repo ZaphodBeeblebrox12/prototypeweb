@@ -1,6 +1,5 @@
 from types import SimpleNamespace
 
-from django.template import Context
 from django.template.loader import get_template
 from django.test import RequestFactory, SimpleTestCase
 
@@ -15,11 +14,11 @@ class SitewideNavbarRoleTests(SimpleTestCase):
             first_name="",
         )
         request = RequestFactory().get("/")
-        return get_template("partials/sitewide_nav.html").render(Context({
+        return get_template("partials/sitewide_nav.html").render({
             "user": user,
             "request": request,
             "public_site_url": "https://tradethesis.example",
-        }))
+        })
 
     def test_regular_member_gets_dashboard_entry_without_account_dropdown(self):
         rendered = self.render_nav()
