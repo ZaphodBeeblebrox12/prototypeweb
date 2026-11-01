@@ -24,6 +24,7 @@ class PaymentIntent(models.Model):
     class Provider(models.TextChoices):
         STRIPE = "stripe", _("Stripe")
         RAZORPAY = "razorpay", _("Razorpay")
+        SIMULATOR = "simulator", _("Staging simulator — no money collected")
 
     class PaymentMethod(models.TextChoices):
         CARD = "card", _("Card")
