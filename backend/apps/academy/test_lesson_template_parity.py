@@ -21,17 +21,32 @@ class LessonTemplateParityTests(SimpleTestCase):
 
         shared_include = '{% include "academy/partials/lesson_experience.html" %}'
         self.assertIn(shared_include, lesson_page)
-        self.assertIn('<header class="tt-course-header tt-course-header--depth">', experience)
+        self.assertIn(
+            '<header class="tt-course-header tt-course-header--depth">',
+            experience,
+        )
         self.assertIn('<div class="tt-room-grid">', experience)
-        self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', lesson_page)
+        self.assertNotIn(
+            '<header class="tt-course-header tt-course-header--depth">',
+            lesson_page,
+        )
         self.assertNotIn('<div class="tt-room-grid">', lesson_page)
-        self.assertNotIn('<header class="tt-course-header tt-course-header--depth">', course_overview)
+        self.assertNotIn(
+            '<header class="tt-course-header tt-course-header--depth">',
+            course_overview,
+        )
         self.assertNotIn('<div class="tt-room-grid">', course_overview)
 
         # Member lessons, published admin previews and draft lessons all render lesson.html.
-        self.assertIn('return render(request, "academy/lesson.html", preview_context)', views_source)
-        # Draft course overviews reuse the same template as published course overviews.
-        self.assertIn('return render(request, "academy/course_detail.html", preview_context)', views_source)
+        self.assertIn(
+            'return render(request, "academy/lesson.html", preview_context)',
+            views_source,
+        )
+        # Draft course overviews reuse the template for published course overviews.
+        self.assertIn(
+            'return render(request, "academy/course_detail.html", preview_context)',
+            views_source,
+        )
 
         # The deleted duplicate must not silently reappear.
         self.assertFalse(
@@ -53,12 +68,15 @@ class LessonTemplateParityTests(SimpleTestCase):
                     self.assertEqual(
                         template_path,
                         experience_path,
-                        f"{template_path.relative_to(templates_root)} duplicates lesson layout markup",
+                        f"{template_path.relative_to(templates_root)} "
+                        "duplicates lesson layout markup",
                     )
 
     def test_course_import_overview_uses_its_own_shared_course_page_styles(self):
         course_overview = get_template("academy/course_detail.html").template.source
-        css_path = Path(settings.BASE_DIR) / "static" / "academy" / "course-admin-preview.css"
+        css_path = (
+            Path(settings.BASE_DIR) / "static" / "academy" / "course-admin-preview.css"
+        )
         css = css_path.read_text(encoding="utf-8")
 
         self.assertIn("course-admin-preview.css", course_overview)
