@@ -16,6 +16,7 @@ from .models import (
     CourseEntitlement,
     CourseModule,
     Lesson,
+    PersonalizedProtectedVideo,
     ProtectedLessonVideo,
 )
 
