@@ -63,10 +63,12 @@ class ProtectedLessonVideoDeliveryTests(TestCase):
             is_preview=False,
             is_published=True,
         )
+        # Most tests in this class exercise the legacy shared stream for
+        # complimentary access. Paid-purchase tests opt into PURCHASE explicitly.
         self.entitlement = CourseEntitlement.objects.create(
             user=self.user,
             course=self.course,
-            source=CourseEntitlement.Source.PURCHASE,
+            source=CourseEntitlement.Source.COMPLIMENTARY,
         )
         self.video = ProtectedLessonVideo.objects.create(
             lesson=self.lesson,
