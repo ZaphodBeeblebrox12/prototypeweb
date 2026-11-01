@@ -6,6 +6,11 @@ app_name = "academy"
 
 urlpatterns = [
     path("", views.academy_home, name="home"),
+    path(
+        "staff/staging-payment-simulator/",
+        views.staging_payment_simulator,
+        name="staging-payment-simulator",
+    ),
     path("free-membership/", views.free_membership_landing, name="free-membership"),
     path(
         "free-membership/join/",
