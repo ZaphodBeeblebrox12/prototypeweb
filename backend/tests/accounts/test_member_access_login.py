@@ -45,6 +45,42 @@ class MemberAccessLoginTests(TestCase):
         dashboard = self.client.get(reverse("dashboard"))
         self.assertEqual(dashboard.status_code, 200)
 
+    @override_settings(
+        ACCOUNT_EMAIL_VERIFICATION="optional",
+        ACADEMY_STAGING_UNVERIFIED_LOGIN_ENABLED=True,
+        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    )
+    def test_staging_test_learner_can_log_in_without_resend_confirmation(self):
+        """Staging test accounts must not be blocked by a failed Resend verification mail."""
+        from django.core import mail
+
+        test_user = User.objects.create_user(
+            username="staging_unverified_login",
+            email="staging-unverified-login@example.com",
+            password=LOGIN_PASSWORD,
+        )
+        self.assertFalse(
+            EmailAddress.objects.filter(user=test_user, email__iexact=test_user.email).exists()
+        )
+
+        response = self.client.post(
+            reverse("account_login"),
+            {"login": test_user.email, "password": LOGIN_PASSWORD},
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("dashboard"))
+        self.assertEqual(self.client.session.get("_auth_user_id"), str(test_user.pk))
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertFalse(
+            EmailAddress.objects.filter(
+                user=test_user,
+                email__iexact=test_user.email,
+                verified=True,
+            ).exists()
+        )
+        self.assertEqual(self.client.get(reverse("dashboard")).status_code, 200)
+
     def test_invalid_credentials_return_to_the_same_member_room(self):
         response = self.client.post(
             reverse("member_access_login"),
