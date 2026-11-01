@@ -23,7 +23,8 @@ class SitewideNavbarRoleTests(SimpleTestCase):
     def test_regular_member_gets_dashboard_entry_without_account_dropdown(self):
         rendered = self.render_nav()
 
-        self.assertIn("Open member dashboard", rendered)
+        self.assertIn("Member Area ↗", rendered)
+        self.assertNotIn("Open member dashboard", rendered)
         self.assertNotIn('class="tt-account-menu"', rendered)
         self.assertNotIn("Profile &amp; security", rendered)
         self.assertNotIn("Referral credits", rendered)
