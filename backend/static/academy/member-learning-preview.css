@@ -1,0 +1,135 @@
+/* Published learner lessons use the same wide Learning Room shell as the
+   approved Course Import website preview. Keep this scope learner-only so the
+   administrator preview and other Academy pages retain their own controls. */
+
+.main-content:has(> .tt-learning-room.tt-member-learning-preview) {
+  box-sizing: border-box;
+  width: min(1600px, 100%);
+  padding: 24px clamp(16px, 3vw, 42px) 52px;
+}
+
+.tt-learning-room.tt-member-learning-preview {
+  box-sizing: border-box;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: clamp(20px, 3vw, 40px);
+  border: 1px solid #e7e0d2;
+  background:
+    radial-gradient(ellipse at 12% 0%, #e4eadb62, transparent 42%),
+    radial-gradient(ellipse at 94% 26%, #f2e6ce45, transparent 34%);
+}
+
+.tt-member-learning-preview .tt-course-header {
+  border-bottom-color: #ded7c8;
+}
+
+.tt-member-learning-preview .tt-outline {
+  border: 1px solid #ded7c8;
+  border-radius: 0;
+  background: #f7f7f0;
+}
+
+.tt-member-learning-preview .tt-lesson-article {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.tt-member-learning-preview .tt-lesson-main {
+  width: 100%;
+  min-width: 0;
+}
+
+.tt-member-learning-preview .learning-content-grid {
+  grid-template-columns: minmax(0, 1fr) 245px;
+  gap: clamp(20px, 2.5vw, 34px);
+}
+
+.tt-member-learning-preview .tt-lesson-navigation {
+  margin-top: 16px;
+}
+
+/* Keep the video available without making it the first thing a learner sees.
+   The approved preview leads with the lesson idea and the Trading Notebook. */
+.tt-member-learning-preview .tt-lesson-video-disclosure {
+  margin: 20px 0 24px;
+  overflow: hidden;
+  border: 1px solid #ded7c8;
+  border-radius: 8px;
+  background: #fffdf8;
+}
+
+.tt-member-learning-preview .tt-lesson-video-disclosure > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 17px;
+  color: #294b38;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 750;
+  list-style: none;
+}
+
+.tt-member-learning-preview .tt-lesson-video-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.tt-member-learning-preview .tt-lesson-video-disclosure > summary::after {
+  content: "+";
+  color: #a78034;
+  font-size: 19px;
+  font-weight: 500;
+}
+
+.tt-member-learning-preview .tt-lesson-video-disclosure[open] > summary {
+  border-bottom: 1px solid #ded7c8;
+}
+
+.tt-member-learning-preview .tt-lesson-video-disclosure[open] > summary::after {
+  content: "−";
+}
+
+.tt-member-learning-preview .tt-lesson-video-disclosure .tt-video-lesson {
+  margin: 0;
+  padding: 16px;
+}
+
+.tt-member-learning-preview .tt-lesson-video-disclosure .tt-video-lesson video {
+  max-height: 560px;
+}
+
+@media (min-width: 921px) {
+  .tt-member-learning-preview .tt-outline {
+    position: sticky;
+    top: 95px;
+    max-height: calc(100vh - 113px);
+    scroll-margin-top: 95px;
+  }
+}
+
+@media (max-width: 920px) {
+  .tt-member-learning-preview .learning-content-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .tt-member-learning-preview .tt-outline {
+    position: static;
+    top: auto;
+    max-height: none;
+    overflow: visible;
+    scroll-margin-top: 0;
+  }
+}
+
+@media (max-width: 680px) {
+  .main-content:has(> .tt-learning-room.tt-member-learning-preview) {
+    padding: 14px 8px 25px;
+  }
+
+  .tt-learning-room.tt-member-learning-preview {
+    padding: 14px 11px 24px;
+  }
+}
