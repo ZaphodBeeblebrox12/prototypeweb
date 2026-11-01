@@ -201,14 +201,22 @@ def verify_razorpay_payment(intent) -> Optional[bool]:
 # ---------------------------------------------------------------------------
 
 def create_hosted_checkout(intent, success_url: str, cancel_url: str) -> CreatedCheckout:
-    """Dispatch to the intent's provider."""
+    """Dispatch to a real provider; simulated payments never create hosted checkouts."""
+    if intent.provider == "simulator":
+        raise ProviderConfigurationError(
+            "Staging simulator intents cannot be used for real provider checkout."
+        )
     if intent.provider == "razorpay":
         return create_razorpay_order(intent)
     return create_stripe_checkout(intent, success_url, cancel_url)
 
 
 def verify_provider_payment(intent) -> Optional[bool]:
-    """Dispatch verification. True/False/None (unknown/pending)."""
+    """Dispatch verification. Simulated intents have no external payment to verify."""
+    if intent.provider == "simulator":
+        raise ProviderConfigurationError(
+            "Staging simulator intents cannot be verified with a payment provider."
+        )
     if intent.provider == "razorpay":
         return verify_razorpay_payment(intent)
     return verify_stripe_payment(intent)
