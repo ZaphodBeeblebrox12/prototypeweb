@@ -9,7 +9,7 @@
 .tt-share-shell::before{position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#b56a4d 0%,#d5a17e 38%,#586c4d 100%);content:""}
 .tt-share-topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:25px 30px 15px}
 .tt-share-brand{display:flex;align-items:center;gap:10px;min-width:0}
-.tt-share-brandmark{display:grid;place-items:center;width:34px;height:34px;border:1px solid #c8bba6;border-radius:50%;background:#eee9dd;color:#35523d;font-family:Georgia,serif;font-size:14px;font-weight:700;letter-spacing:-1px}
+.tt-share-brand-logo{display:block;flex:0 0 42px;width:42px;height:42px;object-fit:contain;border-radius:9px}
 .tt-share-brandcopy{display:grid;gap:2px}
 .tt-share-brandcopy strong{font-size:10px;letter-spacing:.19em;color:#31483a}
 .tt-share-brandcopy span{font-size:9px;letter-spacing:.18em;color:#8a8779}
@@ -29,7 +29,7 @@
 .tt-share-card-dot{width:6px;height:6px;border-radius:50%;background:#b36b50}
 .tt-share-card-title{position:relative;z-index:1;max-width:270px;margin:20px 0 12px;color:#2b3d31;font-family:Georgia,"Times New Roman",serif;font-size:clamp(22px,3vw,29px);font-weight:400;line-height:1.08;letter-spacing:-.025em;overflow-wrap:anywhere}
 .tt-share-card-foot{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:8px;color:#65705f;font-size:9px;letter-spacing:.12em;text-transform:uppercase}
-.tt-share-card-monogram{display:grid;place-items:center;width:29px;height:29px;border:1px solid rgba(52,77,55,.34);border-radius:50%;color:#38513b;font-family:Georgia,serif;font-size:13px}
+.tt-share-card-logo{display:block;flex:0 0 30px;width:30px;height:30px;object-fit:contain;border-radius:7px}
 .tt-share-note{padding:0 2px}
 .tt-share-note-label{margin:0 0 5px;color:#a7654d;font-size:9px;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
 .tt-share-note-text{margin:0;color:#646f64;font-family:Georgia,"Times New Roman",serif;font-size:14px;line-height:1.55;white-space:pre-line;overflow-wrap:anywhere}
