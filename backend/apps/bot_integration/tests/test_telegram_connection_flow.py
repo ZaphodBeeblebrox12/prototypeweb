@@ -75,22 +75,26 @@ class TelegramConnectionFlowTests(TestCase):
         with override_settings(TELEGRAM_BOT_USERNAME="legacy_wrong_bot"):
             response = self.client.get(reverse("bot_integration:telegram_connect"))
 
-        self.assertEqual(response.status_code, 302)
-        parsed = urlsplit(response["Location"])
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("Location", response.headers)
+        parsed = urlsplit(response.context["deep_link"])
         self.assertEqual(parsed.netloc, "t.me")
         self.assertEqual(parsed.path, "/tradethesis_configured_bot")
         self.assertTrue(
             parse_qs(parsed.query).get("start", [""])[0].startswith("verify_")
         )
+        self.assertContains(response, "Open Telegram")
+        self.assertContains(response, "Tap Start")
 
-    def test_connect_generates_verification_token_and_redirects_to_telegram(self):
+    def test_connect_renders_explicit_handoff_and_preserves_replacement_token(self):
         self.configure_bot("tradethesis_test_bot")
         old_token = TelegramVerificationToken.create_token(self.user)
 
         response = self.client.get(reverse("bot_integration:telegram_connect"))
 
-        self.assertEqual(response.status_code, 302)
-        location = response["Location"]
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("Location", response.headers)
+        location = response.context["deep_link"]
         parsed = urlsplit(location)
         self.assertEqual(parsed.scheme, "https")
         self.assertEqual(parsed.netloc, "t.me")
@@ -102,6 +106,9 @@ class TelegramConnectionFlowTests(TestCase):
         token = TelegramVerificationToken.objects.get(user=self.user, token=token_value)
         self.assertTrue(token.is_valid())
         self.assertFalse(TelegramVerificationToken.objects.filter(pk=old_token.pk).exists())
+        self.assertContains(response, f'href="{location}"')
+        self.assertContains(response, "Tap Start")
+        self.assertNotContains(response, "http-equiv=\"refresh\"")
 
     def test_connect_requires_authentication(self):
         self.client.logout()

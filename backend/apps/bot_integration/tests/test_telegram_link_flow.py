@@ -87,11 +87,15 @@ class BotConfigUsernameNormalizationTests(TestCase):
 
 
 class TelegramConnectDeepLinkTests(TestCase):
-    """GET /bot/telegram/connect/ must 302 to a VALID t.me deep link."""
+    """GET /bot/telegram/connect/ prepares a valid, explicitly opened deep link."""
 
     def assert_valid_deep_link(self, response):
-        self.assertEqual(response.status_code, 302)
-        url = response["Location"]
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("Location", response.headers)
+        url = response.context["deep_link"]
+        self.assertContains(response, "Open Telegram")
+        self.assertContains(response, "Tap Start")
+        self.assertContains(response, f'href="{url}"')
         self.assertTrue(url.startswith("https://t.me/inderjeetbot?start=verify_"),
                         f"bad deep link: {url}")
         self.assertNotIn("https://t.me/@", url, f"'@' must not appear: {url}")

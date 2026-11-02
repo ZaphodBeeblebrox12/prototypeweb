@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def start_telegram_connect(request):
-    """Generate a deep link to the existing TradeThesis Telegram bot."""
+    """Prepare a Telegram bot handoff and wait for the member to open it."""
     # Verification and normal channel access share one bot identity.
     # BotConfig is the canonical credential source used by TelegramBotService.
     config = BotConfig.get_config()
@@ -39,12 +39,22 @@ def start_telegram_connect(request):
         )
         return redirect(f"{reverse('dashboard')}#connections")
 
-    # Delete old unused tokens for this user.
+    # Replace any previous unused token once, then keep this token stable while
+    # the member reads the handoff page and explicitly opens the bot chat.
     TelegramVerificationToken.objects.filter(user=request.user).delete()
-
     token = TelegramVerificationToken.create_token(request.user)
     deep_link = f"https://t.me/{bot_username}?start=verify_{token.token}"
-    return redirect(deep_link)
+
+    # Do not HTTP-redirect to t.me here: mobile browsers can hand the redirect
+    # straight to the Telegram app before the member sees the bot handoff.
+    return render(
+        request,
+        "bot_integration/telegram_connect.html",
+        {
+            "bot_username": bot_username,
+            "deep_link": deep_link,
+        },
+    )
 
 @login_required
 @require_POST
