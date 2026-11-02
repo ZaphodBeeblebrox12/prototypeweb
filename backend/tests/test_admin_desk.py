@@ -117,7 +117,7 @@ class AdminDeskTests(TestCase):
             reverse("staff_admin_desk_support_tickets") + "?status=pending",
         )
         self.assertEqual(
-            response.context["support_tickets"]["recent"][0]["can_review"],
+            response.context["support_tickets"]["attention"][0]["can_review"],
             True,
         )
 

@@ -32,7 +32,35 @@
   .tt-desk .signal-list li { display:flex; justify-content:space-between; gap:12px; padding-bottom:8px; border-bottom:1px solid #ecece5; }
   .tt-desk .signal-list li:last-child { padding-bottom:0; border-bottom:0; }
   .tt-desk .signal-count { min-width:2ch; color:var(--td-ink); font-weight:750; font-variant-numeric:tabular-nums; }
-  @media(max-width:640px) { .tt-desk .desk-head { gap:13px; } .tt-desk .btn { width:100%; } .tt-desk .metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .tt-desk .metric { padding:12px; } .tt-desk .metric .value { font-size:23px; } }
+  .tt-desk .support-summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:12px 0 18px; }
+  .tt-desk .support-stat { min-width:0; padding:11px 13px; border:1px solid var(--td-line); border-radius:5px; background:#fffefa; }
+  .tt-desk .support-stat .label { display:block; color:var(--td-muted); font-size:11px; }
+  .tt-desk .support-stat .value { display:block; margin-top:5px; color:var(--td-ink); font-size:23px; font-weight:750; line-height:1.1; font-variant-numeric:tabular-nums; }
+  .tt-desk .support-stat.overdue .value { color:#9b4b40; }
+  .tt-desk .support-list { display:grid; gap:0; margin:8px 0 0; padding:0; list-style:none; }
+  .tt-desk .support-list li { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(130px,.8fr) auto; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #ecece5; }
+  .tt-desk .support-list li:last-child { border-bottom:0; }
+  .tt-desk .support-ticket-title { display:block; font-weight:750; }
+  .tt-desk .support-ticket-meta { display:block; margin-top:4px; color:var(--td-muted); font-size:12px; line-height:1.4; overflow-wrap:anywhere; }
+  .tt-desk .support-ticket-state { display:grid; justify-items:start; gap:4px; }
+  .tt-desk .support-pill { display:inline-flex; padding:4px 7px; border:1px solid var(--td-line); border-radius:3px; background:#f5f5ef; color:#45554a; font-size:11px; font-weight:700; white-space:nowrap; }
+  .tt-desk .support-pill.overdue { border-color:#e0b5ab; background:#fff5f2; color:#914638; }
+  .tt-desk .support-empty { margin:8px 0 0; padding:18px 0; color:var(--td-muted); font-size:13px; }
+  .tt-desk .support-footer { display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-top:10px; padding-top:10px; border-top:1px solid #ecece5; color:var(--td-muted); font-size:11px; }
+  @media(max-width:640px) {
+    .tt-desk .desk-head { gap:13px; }
+    .tt-desk .btn { width:100%; }
+    .tt-desk .metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .tt-desk .metric { padding:12px; }
+    .tt-desk .metric .value { font-size:23px; }
+    .tt-desk .support-summary { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+    .tt-desk .support-stat { padding:10px 8px; }
+    .tt-desk .support-stat .value { font-size:20px; }
+    .tt-desk .support-list li { grid-template-columns:minmax(0,1fr) auto; gap:6px 10px; }
+    .tt-desk .support-ticket-state { grid-column:2; grid-row:1; }
+    .tt-desk .support-list li > .support-pill.overdue { grid-column:1/-1; justify-self:start; }
+    .tt-desk .support-footer { display:block; }
+  }
   @media(prefers-reduced-motion:reduce) { .tt-desk * { scroll-behavior:auto !important; } }
 </style>
 {% endblock %}
@@ -62,44 +90,69 @@
   <section class="section" aria-labelledby="support-tickets-heading">
     <div class="section-head">
       <h2 id="support-tickets-heading">Support tickets</h2>
-      <p>Member requests · newest first</p>
+      <p>Open requests · needs attention first</p>
     </div>
-    <div class="panel">
+    <div class="panel support-panel">
+      <div class="support-summary" aria-label="Support ticket summary">
+        <div class="support-stat">
+          <span class="label">Open tickets</span>
+          <span class="value">{{ support_tickets.open }}</span>
+        </div>
+        <div class="support-stat overdue">
+          <span class="label">First response overdue</span>
+          <span class="value">{{ support_tickets.overdue_sla }}</span>
+        </div>
+        <div class="support-stat">
+          <span class="label">Closed in last 7 days</span>
+          <span class="value">{{ support_tickets.recently_closed }}</span>
+        </div>
+      </div>
+
       <div class="section-head">
-        <h2>{{ support_tickets.open }} open · {{ support_tickets.overdue_sla }} overdue</h2>
+        <div>
+          <h2>Needs attention</h2>
+          <p>{{ support_tickets.needs_response }} waiting for a staff response</p>
+        </div>
         <p>
           <a href="{{ support_tickets.links.pending }}">View pending queue →</a>
           · <a href="{{ support_tickets.links.all }}">Open support workspace →</a>
         </p>
       </div>
-      {% if support_tickets.recent %}
-      <ul class="signal-list" style="margin-top:12px">
-        {% for ticket_row in support_tickets.recent %}
+
+      {% if support_tickets.attention %}
+      <ul class="support-list" aria-label="Tickets needing a staff response">
+        {% for ticket_row in support_tickets.attention %}
         <li>
-          {% if ticket_row.can_review %}
-          <a href="{% url 'staff_admin_desk_support_ticket' ticket_row.ticket.pk %}">#{{ ticket_row.ticket.short_id }} · {{ ticket_row.ticket.get_category_display }}</a>
-          {% else %}
-          <span>#{{ ticket_row.ticket.short_id }} · {{ ticket_row.ticket.get_category_display }}</span>
-          {% endif %}
-          <span class="signal-count">
-            {{ ticket_row.ticket.get_status_display }} · {{ ticket_row.ticket.get_priority_display }}
-            {% if ticket_row.ticket.is_sla_overdue %} · SLA overdue{% endif %}
-          </span>
-          <span class="note">
+          <div>
             {% if ticket_row.can_review %}
-              {{ ticket_row.ticket.user }} · {{ ticket_row.ticket.created_at|date:"j M Y, H:i" }}
-              {% if ticket_row.ticket.assigned_to %} · Assigned to {{ ticket_row.ticket.assigned_to }}{% endif %}
-              — {{ ticket_row.ticket.message|truncatechars:120 }}
+            <a class="support-ticket-title" href="{% url 'staff_admin_desk_support_ticket' ticket_row.ticket.pk %}">#{{ ticket_row.ticket.short_id }} · {{ ticket_row.ticket.get_category_display }}</a>
             {% else %}
-              Request details are restricted to the ticket's assigned reviewer.
+            <span class="support-ticket-title">#{{ ticket_row.ticket.short_id }} · {{ ticket_row.ticket.get_category_display }}</span>
             {% endif %}
-          </span>
+            <span class="support-ticket-meta">{{ ticket_row.ticket.user.get_full_name|default:ticket_row.ticket.user.get_username }} · {{ ticket_row.ticket.created_at|date:"j M Y, H:i" }}{% if ticket_row.ticket.assigned_to %} · Assigned to {{ ticket_row.ticket.assigned_to }}{% endif %}</span>
+            <span class="support-ticket-meta">{{ ticket_row.ticket.message|truncatechars:110 }}</span>
+          </div>
+          <div class="support-ticket-state">
+            <span class="support-pill">{{ ticket_row.ticket.get_status_display }}</span>
+            <span class="support-ticket-meta">{{ ticket_row.ticket.get_priority_display }} priority</span>
+          </div>
+          {% if ticket_row.ticket.is_sla_overdue %}
+          <span class="support-pill overdue">SLA overdue</span>
+          {% endif %}
         </li>
         {% endfor %}
       </ul>
       {% else %}
-      <p class="note" style="margin-top:10px">No support tickets have been submitted yet.</p>
+      <p class="support-empty">No tickets currently need a staff response.</p>
       {% endif %}
+
+      <div class="support-footer">
+        <span>
+          {% if support_tickets.awaiting_member %}{{ support_tickets.awaiting_member }} waiting for member replies · {% endif %}
+          Showing {{ support_tickets.attention|length }} of {{ support_tickets.needs_response }} tickets needing a staff response.
+        </span>
+        <a href="{{ support_tickets.links.active }}">View all open tickets →</a>
+      </div>
     </div>
   </section>
   {% endif %}

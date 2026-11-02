@@ -13,7 +13,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count, Q
+from django.db.models import Case, Count, IntegerField, Q, Value, When
 from django.db.models.functions import TruncDate
 from django.shortcuts import render
 from django.urls import reverse
@@ -271,7 +271,9 @@ def _subscription_dashboard_context(request):
             },
         }
     # Support tickets are reviewed in the TradeThesis Admin Desk. Keep the
-    # same plan-approver scoping that protects the Django Admin queue.
+    # same plan-approver scoping that protects the Django Admin queue. The
+    # homepage is an overview only: show staff-actionable tickets, never an
+    # unbounded or mixed-status history list.
     from apps.support.models import SupportTicket
     from apps.support.services import reviewable_ticket_queryset
 
@@ -284,9 +286,40 @@ def _subscription_dashboard_context(request):
             ),
         )
         desk_ticket_list = reverse("staff_admin_desk_support_tickets")
-        recent_tickets = [
+        actionable_statuses = (
+            SupportTicket.Status.PENDING,
+            SupportTicket.Status.IN_PROGRESS,
+        )
+        closed_statuses = (
+            SupportTicket.Status.APPROVED,
+            SupportTicket.Status.REJECTED,
+            SupportTicket.Status.WITHDRAWN,
+        )
+        actionable_queryset = visible_tickets.filter(
+            status__in=actionable_statuses
+        )
+        attention_queryset = actionable_queryset.annotate(
+            _sla_order=Case(
+                When(
+                    first_response_at__isnull=True,
+                    first_response_due_at__lt=now,
+                    then=Value(0),
+                ),
+                default=Value(1),
+                output_field=IntegerField(),
+            ),
+            _priority_order=Case(
+                When(priority=SupportTicket.Priority.URGENT, then=Value(0)),
+                When(priority=SupportTicket.Priority.HIGH, then=Value(1)),
+                When(priority=SupportTicket.Priority.NORMAL, then=Value(2)),
+                When(priority=SupportTicket.Priority.LOW, then=Value(3)),
+                default=Value(4),
+                output_field=IntegerField(),
+            ),
+        ).order_by("_sla_order", "_priority_order", "-created_at")
+        attention_tickets = [
             {"ticket": ticket, "can_review": True}
-            for ticket in visible_tickets.order_by("-created_at")[:5]
+            for ticket in attention_queryset[:5]
         ]
         ctx["support_tickets"] = {
             "pending": visible_tickets.filter(
@@ -295,14 +328,23 @@ def _subscription_dashboard_context(request):
             "open": visible_tickets.filter(
                 status__in=SupportTicket.ACTIVE_STATUSES
             ).count(),
+            "needs_response": actionable_queryset.count(),
+            "awaiting_member": visible_tickets.filter(
+                status=SupportTicket.Status.AWAITING_MEMBER
+            ).count(),
             "overdue_sla": visible_tickets.filter(
                 status__in=SupportTicket.ACTIVE_STATUSES,
                 first_response_at__isnull=True,
                 first_response_due_at__lt=now,
             ).count(),
-            "recent": recent_tickets,
+            "recently_closed": visible_tickets.filter(
+                status__in=closed_statuses,
+                updated_at__gte=recent,
+            ).count(),
+            "attention": attention_tickets,
             "links": {
                 "all": desk_ticket_list,
+                "active": f"{desk_ticket_list}?status=active",
                 "pending": f"{desk_ticket_list}?status={SupportTicket.Status.PENDING}",
             },
         }
