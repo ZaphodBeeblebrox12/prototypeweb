@@ -297,7 +297,8 @@ def _subscription_dashboard_context(request):
         )
         actionable_queryset = visible_tickets.filter(
             status__in=actionable_statuses
-        ).annotate(
+        )
+        attention_queryset = actionable_queryset.annotate(
             _sla_order=Case(
                 When(
                     first_response_at__isnull=True,
@@ -318,7 +319,7 @@ def _subscription_dashboard_context(request):
         ).order_by("_sla_order", "_priority_order", "-created_at")
         attention_tickets = [
             {"ticket": ticket, "can_review": True}
-            for ticket in actionable_queryset[:5]
+            for ticket in attention_queryset[:5]
         ]
         ctx["support_tickets"] = {
             "pending": visible_tickets.filter(
