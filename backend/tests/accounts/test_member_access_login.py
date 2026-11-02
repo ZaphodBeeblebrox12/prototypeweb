@@ -1,4 +1,4 @@
-"""End-to-end tests for sign-in from the public member-access room."""
+"""Regression tests for the single canonical TradeThesis authentication journey."""
 from allauth.account.models import EmailAddress
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -8,15 +8,13 @@ from apps.accounts.models import User
 
 PUBLIC_ORIGIN = "https://tradethesis-public-staging.onrender.com"
 GITHUB_PAGES_ORIGIN = "https://zaphodbeeblebrox12.github.io"
-GITHUB_PAGES_MEMBER_ACCESS = f"{GITHUB_PAGES_ORIGIN}/prototypeweb/member-access.html"
 LOGIN_PASSWORD = "A-strong-test-password-852!"
 
 
 @override_settings(
-    TRADETHESIS_PUBLIC_SITE_URL=PUBLIC_ORIGIN,
     TRADETHESIS_MEMBER_LOGIN_ORIGINS=[PUBLIC_ORIGIN, GITHUB_PAGES_ORIGIN],
 )
-class MemberAccessLoginTests(TestCase):
+class LegacyMemberAccessLoginTests(TestCase):
     def setUp(self):
         self.user = User.objects.create(
             username="member_room_login",
@@ -31,79 +29,29 @@ class MemberAccessLoginTests(TestCase):
             verified=True,
         )
 
-    def test_valid_login_goes_straight_to_member_dashboard(self):
+    def test_legacy_post_discards_credentials_and_redirects_to_canonical_login(self):
         response = self.client.post(
             reverse("member_access_login"),
             {"login": self.user.email, "password": LOGIN_PASSWORD, "remember": "on"},
             HTTP_ORIGIN=PUBLIC_ORIGIN,
         )
 
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], reverse("dashboard"))
-        self.assertTrue(self.client.session.get("_auth_user_id"))
-
-        dashboard = self.client.get(reverse("dashboard"))
-        self.assertEqual(dashboard.status_code, 200)
-
-    @override_settings(
-        ACCOUNT_EMAIL_VERIFICATION="optional",
-        ACADEMY_STAGING_UNVERIFIED_LOGIN_ENABLED=True,
-        EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
-    )
-    def test_staging_test_learner_can_log_in_without_resend_confirmation(self):
-        """Staging test accounts must not be blocked by a failed Resend verification mail."""
-        from django.core import mail
-
-        test_user = User.objects.create_user(
-            username="staging_unverified_login",
-            email="staging-unverified-login@example.com",
-            password=LOGIN_PASSWORD,
-        )
-        self.assertFalse(
-            EmailAddress.objects.filter(user=test_user, email__iexact=test_user.email).exists()
-        )
-
-        response = self.client.post(
-            reverse("account_login"),
-            {"login": test_user.email, "password": LOGIN_PASSWORD},
-        )
-
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], reverse("dashboard"))
-        self.assertEqual(self.client.session.get("_auth_user_id"), str(test_user.pk))
-        self.assertEqual(len(mail.outbox), 0)
-        self.assertFalse(
-            EmailAddress.objects.filter(
-                user=test_user,
-                email__iexact=test_user.email,
-                verified=True,
-            ).exists()
-        )
-        self.assertEqual(self.client.get(reverse("dashboard")).status_code, 200)
-
-    def test_invalid_credentials_return_to_the_same_member_room(self):
-        response = self.client.post(
-            reverse("member_access_login"),
-            {"login": self.user.email, "password": "not-the-password"},
-            HTTP_ORIGIN=PUBLIC_ORIGIN,
-        )
-
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 303)
         self.assertEqual(
             response["Location"],
-            f"{PUBLIC_ORIGIN}/member-access.html?login=invalid",
+            f"{reverse('account_login')}?next=%2Fdashboard%2F",
         )
+        self.assertEqual(response["Cache-Control"], "no-store")
         self.assertFalse(self.client.session.get("_auth_user_id"))
 
-    def test_invalid_credentials_from_github_pages_return_to_the_project_member_room(self):
+    def test_legacy_post_does_not_authenticate_even_with_valid_credentials(self):
         response = self.client.post(
             reverse("member_access_login"),
-            {"login": self.user.email, "password": "not-the-password"},
+            {"login": self.user.email, "password": LOGIN_PASSWORD},
             HTTP_ORIGIN=GITHUB_PAGES_ORIGIN,
         )
 
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], f"{GITHUB_PAGES_MEMBER_ACCESS}?login=invalid")
+        self.assertEqual(response.status_code, 303)
         self.assertFalse(self.client.session.get("_auth_user_id"))
 
     def test_unapproved_origin_is_rejected(self):
@@ -125,7 +73,7 @@ class MemberAccessLoginTests(TestCase):
         self.assertEqual(response.status_code, 403)
         self.assertFalse(self.client.session.get("_auth_user_id"))
 
-    def test_endpoint_only_accepts_post(self):
+    def test_legacy_endpoint_only_accepts_post(self):
         response = self.client.get(reverse("member_access_login"))
         self.assertEqual(response.status_code, 405)
 
@@ -153,31 +101,25 @@ class MemberEntryTests(TestCase):
         self.assertEqual(response["Location"], reverse("dashboard"))
         self.assertEqual(response["Cache-Control"], "no-store")
 
-    def test_anonymous_member_returns_to_the_same_access_room(self):
+    def test_anonymous_member_goes_to_the_canonical_django_login(self):
         response = self.client.get(reverse("member_entry"))
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
             response["Location"],
-            f"{PUBLIC_ORIGIN}/member-access.html",
+            f"{reverse('account_login')}?next=%2Fdashboard%2F",
         )
         self.assertEqual(response["Cache-Control"], "no-store")
 
-    def test_anonymous_member_returns_to_github_pages_project_path_from_referer(self):
-        response = self.client.get(
-            reverse("member_entry"),
-            HTTP_REFERER=f"{GITHUB_PAGES_ORIGIN}/prototypeweb/index.html",
-        )
-
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], GITHUB_PAGES_MEMBER_ACCESS)
-        self.assertEqual(response["Cache-Control"], "no-store")
-
-    def test_untrusted_member_entry_referer_falls_back_to_configured_public_site(self):
+    def test_member_entry_does_not_send_visitors_to_a_referer_selected_host(self):
         response = self.client.get(
             reverse("member_entry"),
             HTTP_REFERER="https://attacker.invalid/prototypeweb/index.html",
         )
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response["Location"], f"{PUBLIC_ORIGIN}/member-access.html")
+        self.assertEqual(
+            response["Location"],
+            f"{reverse('account_login')}?next=%2Fdashboard%2F",
+        )
+        self.assertEqual(response["Cache-Control"], "no-store")

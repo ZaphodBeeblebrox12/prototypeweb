@@ -1,27 +1,22 @@
-"""Secure cross-origin login handler for the public member-access room.
+"""Compatibility entry points for the public TradeThesis member area.
 
-The public marketing site is currently a static Render site, while Django owns
-authentication and session cookies. This endpoint lets the existing room submit
-credentials directly to Django without displaying a second login page.
-
-CSRF middleware is intentionally bypassed only for this single POST endpoint:
-the browser submits a cross-origin HTML form, so it cannot carry Django's CSRF
-cookie/token pair from the static origin. To compensate, the endpoint requires
-an exact, configured Origin match and rejects requests without it. Do not broaden
-the origin list to wildcards.
+Authentication is owned by Django/allauth. The public site no longer collects
+or submits passwords; it sends visitors to the canonical Academy login page.
+The old POST route remains briefly for cached public pages, but it discards the
+submitted credentials and redirects with 303 so the browser opens the canonical
+login form using GET.
 """
-from urllib.parse import urlsplit
+from urllib.parse import urlencode
 
-from allauth.account.forms import LoginForm
 from django.conf import settings
-from django.http import HttpResponseForbidden, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 
 def _allowed_member_access_origins():
-    """Return the configured public origins, normalized without trailing slashes."""
+    """Return explicitly configured public origins for the legacy POST bridge."""
     return {
         origin.strip().rstrip("/")
         for origin in getattr(settings, "TRADETHESIS_MEMBER_LOGIN_ORIGINS", [])
@@ -29,76 +24,35 @@ def _allowed_member_access_origins():
     }
 
 
-GITHUB_PAGES_PUBLIC_ORIGIN = "https://zaphodbeeblebrox12.github.io"
-GITHUB_PAGES_MEMBER_ACCESS_PATH = "/prototypeweb/member-access.html"
-
-
-def _public_member_access_url(origin=None):
-    """Return a fixed member-access URL for a trusted public-site origin."""
-    allowed_origins = _allowed_member_access_origins()
-    normalized_origin = str(origin or "").strip().rstrip("/")
-    if normalized_origin in allowed_origins:
-        if normalized_origin == GITHUB_PAGES_PUBLIC_ORIGIN:
-            return normalized_origin + GITHUB_PAGES_MEMBER_ACCESS_PATH
-        return normalized_origin + "/member-access.html"
-
-    public_site_url = getattr(
-        settings,
-        "TRADETHESIS_PUBLIC_SITE_URL",
-        "https://tradethesis-public-staging.onrender.com",
-    ).strip().rstrip("/")
-    if not public_site_url.startswith("https://"):
-        public_site_url = "https://tradethesis-public-staging.onrender.com"
-    return public_site_url + "/member-access.html"
-
-
-def _trusted_referer_origin(request):
-    """Extract a Referer origin only when it is HTTPS and exactly allowlisted."""
-    referer = str(request.headers.get("Referer", "")).strip()
-    if not referer:
-        return ""
-    try:
-        parsed = urlsplit(referer)
-    except ValueError:
-        return ""
-    if parsed.scheme != "https" or not parsed.netloc or parsed.username or parsed.password:
-        return ""
-    origin = f"{parsed.scheme}://{parsed.netloc}".rstrip("/")
-    return origin if origin in _allowed_member_access_origins() else ""
+def _canonical_login_url():
+    """Preserve the default member-area destination on the canonical login page."""
+    query = urlencode({"next": reverse("dashboard")})
+    return f"{reverse('account_login')}?{query}"
 
 
 @csrf_exempt
 @require_POST
 def member_access_login(request):
-    """Authenticate from the member-access form and go directly to the dashboard."""
+    """Redirect legacy cross-origin form submissions without authenticating them."""
     origin = request.headers.get("Origin", "").strip().rstrip("/")
     if not origin or origin not in _allowed_member_access_origins():
-        return HttpResponseForbidden("This sign-in request did not come from the member-access page.")
+        return HttpResponseForbidden(
+            "This legacy sign-in form is no longer available. Open the TradeThesis member area."
+        )
 
-    form = LoginForm(request=request, data=request.POST)
-    if form.is_valid():
-        response = form.login(request, redirect_url=reverse("dashboard"))
-        response["Cache-Control"] = "no-store"
-        return response
-
-    response = HttpResponseRedirect(f"{_public_member_access_url(origin)}?login=invalid")
+    # Deliberately do not inspect request.POST: the old page may still be cached,
+    # but all credential verification must happen on the canonical same-origin form.
+    response = HttpResponse(status=303)
+    response["Location"] = _canonical_login_url()
     response["Cache-Control"] = "no-store"
     return response
 
 
-
 def member_entry(request):
-    """Send signed-in visitors to their dashboard without another login prompt.
-
-    Anonymous visitors are returned to the public member-access room, where the
-    in-room sign-in form lives. This avoids showing Django's separate login page
-    just because someone clicked the dashboard link while signed out.
-    """
+    """Send members to the dashboard or the canonical login page."""
     if request.user.is_authenticated:
         response = HttpResponseRedirect(reverse("dashboard"))
     else:
-        response = HttpResponseRedirect(
-            _public_member_access_url(_trusted_referer_origin(request))
-        )
+        response = HttpResponseRedirect(_canonical_login_url())
     response["Cache-Control"] = "no-store"
     return response

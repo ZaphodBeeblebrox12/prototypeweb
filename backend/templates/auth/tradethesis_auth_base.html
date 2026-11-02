@@ -2,22 +2,204 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f7f3e9">
-<title>{% block title %}Member access{% endblock %} | TradeThesis</title>
-<style>
-:root{color-scheme:light;--paper:#f7f3e9;--surface:#fffdf8;--soft:#f2ecdf;--ink:#29382e;--muted:#687268;--line:#ded8ca;--green:#355a46;--deep:#254334;--tomato:#c96f50;--serif:Georgia,"Times New Roman",serif;--sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
-*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans)}a{color:inherit;text-decoration:none}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--tomato);outline-offset:3px}
-.topbar{height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(18px,5vw,66px);border-bottom:1px solid var(--line);background:var(--surface)}.brand img{width:196px;max-width:50vw;height:auto;display:block}.top-link,.text-link{color:var(--green);font-size:11px;font-weight:750}
-.layout{width:min(1110px,calc(100% - 44px));margin:48px auto 58px;display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.78fr);gap:clamp(28px,6vw,82px);align-items:center}.story{min-width:0}.eyebrow{display:flex;align-items:center;gap:9px;font-size:9px;font-weight:850;letter-spacing:.15em;text-transform:uppercase;color:var(--green)}.eyebrow:before{content:"";height:2px;width:18px;background:var(--tomato)}h1{margin:18px 0;font:400 clamp(43px,6.4vw,72px)/.99 var(--serif);letter-spacing:-.055em}h1 em{font-style:italic;color:var(--green)}.story-copy{max-width:490px;color:var(--muted);font-size:13px;line-height:1.9}.principles{margin-top:27px;display:grid;gap:13px;max-width:420px}.principle{display:grid;grid-template-columns:29px minmax(0,1fr);gap:11px;align-items:start}.index{display:grid;place-items:center;width:27px;height:27px;border-radius:9px;border:1px solid var(--line);color:var(--tomato);font:10px var(--serif)}.principle strong{display:block;font-size:11px}.principle small{display:block;margin-top:4px;color:var(--muted);font-size:10px;line-height:1.6}.margin-note{max-width:415px;margin-top:32px;padding:17px 20px;border-left:2px solid var(--tomato);background:var(--soft);color:var(--muted);font:italic 17px/1.45 var(--serif)}
-.access-card{min-width:0;padding:27px;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:0 21px 56px #29382e10}.card-kicker{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}.card-kicker strong{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--green)}.secure{border:1px solid var(--line);border-radius:99px;padding:5px 8px;font-size:8px;color:var(--muted);white-space:nowrap}.form-title{margin:12px 0 7px;font:400 32px/1.1 var(--serif);letter-spacing:-.03em}.form-intro{margin:0 0 20px;color:var(--muted);font-size:11px;line-height:1.7}.field{display:grid;gap:7px;margin:14px 0}.field label{font-size:10px;font-weight:750}.field input{width:100%;min-height:43px;padding:11px 12px;background:var(--paper);border:1px solid var(--line);border-radius:8px;color:var(--ink);font:12px var(--sans)}.field-error,.form-error{margin:4px 0 0;color:#9c4035;font-size:10px;line-height:1.6}.form-error{padding:10px 12px;margin-bottom:14px;border:1px solid #e7c3bb;background:#fff4f0;border-radius:8px}.form-row{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin:13px 0 18px}.remember{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--muted)}.remember input{accent-color:var(--green)}.primary{display:inline-flex;width:100%;min-height:46px;align-items:center;justify-content:center;border:1px solid var(--green);border-radius:99px;background:var(--green);color:var(--surface);font-size:11px;font-weight:800;cursor:pointer}.primary:hover{background:var(--deep)}.form-note{margin:13px 0 0;text-align:center;color:var(--muted);font-size:9px;line-height:1.7}.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:#8a9188;font-size:9px}.divider:before,.divider:after{content:"";height:1px;background:var(--line);flex:1}.social-link{display:flex;align-items:center;justify-content:center;width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;color:var(--ink);font-size:10px;font-weight:700}.bottom-row{padding-top:18px;margin-top:21px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:9px}.bottom-row a{color:var(--green);font-weight:800}.footer{border-top:1px solid var(--line);padding:17px clamp(18px,5vw,66px);display:flex;gap:15px;flex-wrap:wrap;justify-content:space-between;color:var(--muted);font-size:9px}
-@media(max-width:800px){.layout{grid-template-columns:1fr;max-width:580px;margin-top:34px;gap:30px}h1{font-size:clamp(43px,9vw,62px)}.principles{grid-template-columns:1fr 1fr;gap:12px}.margin-note{margin-top:22px}}@media(max-width:480px){.topbar{height:65px;padding:0 16px}.layout{width:calc(100% - 32px);margin:27px auto 39px}.access-card{padding:21px 18px}.principles{grid-template-columns:1fr}.top-link{font-size:10px}}
-</style><link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-nav.css"></head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f3e9">
+  <title>{% block title %}Member access{% endblock %} | TradeThesis</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f7f3e9;
+      --surface: #fffdf8;
+      --soft: #f2ecdf;
+      --ink: #29382e;
+      --muted: #687268;
+      --line: #ded8ca;
+      --green: #355a46;
+      --deep: #254334;
+      --tomato: #c96f50;
+      --serif: Georgia, "Times New Roman", serif;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--paper); }
+    body { min-height: 100vh; margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); }
+    a { color: inherit; text-decoration: none; }
+    a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid var(--tomato); outline-offset: 3px; }
+    .layout {
+      width: min(1110px, calc(100% - 44px));
+      margin: 48px auto 58px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, .78fr);
+      gap: clamp(28px, 6vw, 82px);
+      align-items: center;
+    }
+    .story { min-width: 0; }
+    .eyebrow {
+      display: flex; align-items: center; gap: 9px;
+      color: var(--green); font-size: 9px; font-weight: 850;
+      letter-spacing: .15em; text-transform: uppercase;
+    }
+    .eyebrow::before { content: ""; width: 18px; height: 2px; background: var(--tomato); }
+    h1 { margin: 18px 0; font: 400 clamp(43px, 6.4vw, 72px)/.99 var(--serif); letter-spacing: -.055em; }
+    h1 em { color: var(--green); font-style: italic; }
+    .story-copy { max-width: 490px; color: var(--muted); font-size: 13px; line-height: 1.9; }
+    .principles { max-width: 420px; margin-top: 27px; display: grid; gap: 13px; }
+    .principle { display: grid; grid-template-columns: 29px minmax(0, 1fr); gap: 11px; align-items: start; }
+    .index {
+      width: 27px; height: 27px; display: grid; place-items: center;
+      border: 1px solid var(--line); border-radius: 9px;
+      color: var(--tomato); font: 10px var(--serif);
+    }
+    .principle strong { display: block; font-size: 11px; }
+    .principle small { display: block; margin-top: 4px; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .margin-note {
+      max-width: 415px; margin-top: 32px; padding: 17px 20px;
+      border-left: 2px solid var(--tomato); background: var(--soft);
+      color: var(--muted); font: italic 17px/1.45 var(--serif);
+    }
+    .access-card {
+      min-width: 0; padding: 28px;
+      border: 1px solid var(--line); border-radius: 16px;
+      background: var(--surface); box-shadow: 0 21px 56px #29382e10;
+    }
+    .card-kicker {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 20px;
+    }
+    .card-kicker strong { color: var(--green); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; }
+    .secure {
+      padding: 5px 8px; border: 1px solid var(--line); border-radius: 99px;
+      color: var(--muted); font-size: 8px; white-space: nowrap;
+    }
+    .form-title { margin: 10px 0 7px; font: 400 32px/1.1 var(--serif); letter-spacing: -.03em; }
+    .form-intro { margin: 0 0 20px; color: var(--muted); font-size: 11px; line-height: 1.7; }
+    .field { display: grid; gap: 7px; margin: 14px 0; }
+    .field label { font-size: 10px; font-weight: 750; }
+    .field input {
+      width: 100%; min-height: 46px; padding: 11px 13px;
+      border: 1px solid var(--line); border-radius: 8px;
+      background: var(--paper); color: var(--ink); font: 13px var(--sans);
+    }
+    .field-error, .form-error { margin: 4px 0 0; color: #9c4035; font-size: 10px; line-height: 1.6; }
+    .form-error {
+      margin-bottom: 14px; padding: 10px 12px;
+      border: 1px solid #e7c3bb; border-radius: 8px; background: #fff4f0;
+    }
+    .form-error p { margin: 0; }
+    .form-row {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px; margin: 13px 0 18px;
+    }
+    .remember { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 10px; }
+    .remember input { accent-color: var(--green); }
+    .text-link { color: var(--green); font-size: 10px; font-weight: 750; }
+    .primary {
+      width: 100%; min-height: 48px; display: inline-flex;
+      align-items: center; justify-content: center;
+      border: 1px solid var(--green); border-radius: 99px;
+      background: var(--green); color: var(--surface);
+      font-size: 12px; font-weight: 800; cursor: pointer;
+    }
+    .primary:hover { background: var(--deep); }
+    .divider { display: flex; align-items: center; gap: 12px; margin: 19px 0; color: #8a9188; font-size: 9px; }
+    .divider::before, .divider::after { content: ""; height: 1px; flex: 1; background: var(--line); }
+    .social-link {
+      width: 100%; min-height: 46px; display: flex; align-items: center;
+      justify-content: center; gap: 10px; padding: 11px;
+      border: 1px solid var(--line); border-radius: 99px;
+      color: var(--ink); font-size: 11px; font-weight: 700;
+    }
+    .google-mark { color: #4285f4; font-size: 15px; font-weight: 850; }
+    .form-note { margin: 13px 0 0; color: var(--muted); text-align: center; font-size: 9px; line-height: 1.7; }
+    .bottom-row {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px; margin-top: 21px; padding-top: 18px;
+      border-top: 1px solid var(--line); color: var(--muted); font-size: 10px;
+    }
+    .bottom-row a { color: var(--green); font-weight: 800; }
+    .auth-messages { margin: 0 0 15px; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .auth-messages p { margin: 0 0 6px; }
+    .auth-notice {
+      margin: 16px 0; padding: 13px 14px;
+      border: 1px solid var(--line); border-left: 3px solid var(--tomato);
+      background: var(--soft); color: var(--muted); font-size: 11px; line-height: 1.7;
+    }
+    .secondary-action {
+      width: 100%; min-height: 44px; margin-top: 12px;
+      border: 1px solid var(--line); border-radius: 99px;
+      background: transparent; color: var(--green);
+      font-size: 11px; font-weight: 750; cursor: pointer;
+    }
+    .footer {
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px;
+      padding: 17px clamp(18px, 5vw, 66px);
+      border-top: 1px solid var(--line); color: var(--muted); font-size: 9px;
+    }
+    @media (max-width: 820px) {
+      .layout {
+        width: min(470px, calc(100% - 32px)); margin: 20px auto 30px;
+        grid-template-columns: 1fr; gap: 0;
+      }
+      .story { display: none; }
+      .access-card { padding: 24px 21px; border-radius: 14px; box-shadow: 0 12px 34px #29382e0d; }
+      .card-kicker { margin-bottom: 18px; }
+      .form-title { margin-top: 8px; font-size: 30px; }
+      .form-intro { margin-bottom: 17px; font-size: 13px; }
+      .field { gap: 8px; margin: 13px 0; }
+      .field label { font-size: 12px; }
+      .field input { min-height: 50px; padding: 13px 14px; font-size: 16px; }
+      .form-row { margin: 13px 0 17px; }
+      .remember, .text-link { font-size: 12px; }
+      .primary { min-height: 50px; font-size: 13px; }
+      .social-link { min-height: 49px; font-size: 12px; }
+      .form-note { font-size: 11px; }
+      .bottom-row { font-size: 11px; }
+      .footer { justify-content: center; text-align: center; padding: 14px 16px; font-size: 10px; }
+      .footer span:last-child { display: none; }
+    }
+    @media (max-width: 480px) {
+      .layout { width: calc(100% - 28px); margin: 16px auto 25px; }
+      .access-card { padding: 22px 18px; }
+      .secure { font-size: 8px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; }
+    }
+  </style>
+  <link rel="stylesheet" href="{{ public_site_url }}/assets/sitewide-nav.css">
+</head>
 <body>
-{% include "partials/sitewide_nav.html" %}
-<main class="layout" id="main-content" tabindex="-1">
-<section class="story"><div class="eyebrow">TradeThesis / member desk</div><h1>Your place to learn, connect and <em>keep track.</em></h1><p class="story-copy">One account for the courses you purchase, the communities you join and the receipts you need. We keep the process visible and the noise low.</p>
-<div class="principles"><div class="principle"><span class="index">01</span><div><strong>Your learning</strong><small>Return to your courses and pick up where you left off.</small></div></div><div class="principle"><span class="index">02</span><div><strong>Your access</strong><small>Understand which courses and membership features are available.</small></div></div><div class="principle"><span class="index">03</span><div><strong>Your account</strong><small>Keep your details and account security in one place.</small></div></div></div>
-<div class="margin-note">Stronger processes. Calmer decisions. Conviction before execution.</div></section>
-<section class="access-card" aria-labelledby="formTitle"><div class="card-kicker"><strong>Secure member access</strong><span class="secure">Django protected</span></div>{% block auth_content %}{% endblock %}</section>
-</main><footer class="footer"><span>TradeThesis · Conviction before execution</span><span>For educational purposes only. Trading involves risk.</span></footer><script src="{% static 'js/sitewide-nav.js' %}" defer></script></body></html>
+  {% include "partials/sitewide_nav.html" %}
+  <main class="layout" id="main-content" tabindex="-1">
+    <section class="story">
+      <div class="eyebrow">TradeThesis / member desk</div>
+      <h1>Your place to learn, connect and <em>keep track.</em></h1>
+      <p class="story-copy">One account for the courses you purchase, the communities you join and the receipts you need. We keep the process visible and the noise low.</p>
+      <div class="principles">
+        <div class="principle"><span class="index">01</span><div><strong>Your learning</strong><small>Return to your courses and pick up where you left off.</small></div></div>
+        <div class="principle"><span class="index">02</span><div><strong>Your access</strong><small>Understand which courses and membership features are available.</small></div></div>
+        <div class="principle"><span class="index">03</span><div><strong>Your account</strong><small>Keep your details and account security in one place.</small></div></div>
+      </div>
+      <div class="margin-note">Stronger processes. Calmer decisions. Conviction before execution.</div>
+    </section>
+    <section class="access-card" aria-labelledby="formTitle">
+      <div class="card-kicker">
+        <strong>Secure member access</strong>
+        <span class="secure">TradeThesis Academy</span>
+      </div>
+      {% if messages %}
+        <div class="auth-messages" role="status">
+          {% for message in messages %}<p>{{ message }}</p>{% endfor %}
+        </div>
+      {% endif %}
+      {% block auth_content %}{% endblock %}
+    </section>
+  </main>
+  <footer class="footer">
+    <span>TradeThesis · Conviction before execution</span>
+    <span>For educational purposes only. Trading involves risk.</span>
+  </footer>
+  <script src="{% static 'js/sitewide-nav.js' %}" defer></script>
+</body>
+</html>

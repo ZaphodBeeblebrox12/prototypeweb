@@ -1,0 +1,29 @@
+{% extends "auth/tradethesis_auth_base.html" %}
+{% block title %}Verify your email{% endblock %}
+{% block auth_content %}
+<h2 id="formTitle" class="form-title">Check your inbox.</h2>
+<p class="form-intro">
+  We’ve sent a confirmation link
+  {% if email %}to <strong>{{ email }}</strong>{% elif request.user.is_authenticated %}to <strong>{{ request.user.email }}</strong>{% else %}to your registered email address{% endif %}.
+  Open it to verify your TradeThesis account.
+</p>
+<div class="auth-notice">
+  The link is valid for three days. Check your spam or promotions folder if it does not appear.
+  Once confirmed, return to your original course or member destination.
+</div>
+{% if request.user.is_authenticated %}
+  <div class="bottom-row">
+    <span>Need another verification email?</span>
+    <a href="{% url 'account_email' %}">Manage email →</a>
+  </div>
+  <form method="post" action="{% url 'account_logout' %}">
+    {% csrf_token %}
+    <button type="submit" class="secondary-action">Sign out</button>
+  </form>
+{% else %}
+  <div class="bottom-row">
+    <span>Already verified?</span>
+    <a href="{% url 'account_login' %}">Return to sign in →</a>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "auth/tradethesis_auth_base.html" %}
+{% block title %}Email verification required{% endblock %}
+{% block auth_content %}
+<h2 id="formTitle" class="form-title">Verify your email first.</h2>
+<p class="form-intro">
+  This part of TradeThesis requires a verified email address.
+  {% if email %}We sent a confirmation link to <strong>{{ email }}</strong>.{% elif request.user.is_authenticated %}We sent a confirmation link to <strong>{{ request.user.email }}</strong>.{% else %}Sign in after confirming the address used for your account.{% endif %}
+</p>
+<div class="auth-notice">
+  Open the latest TradeThesis confirmation email and follow its link. Check your spam folder if it is not in your inbox.
+</div>
+{% if request.user.is_authenticated %}
+  <div class="bottom-row">
+    <span>Need another link?</span>
+    <a href="{% url 'account_email' %}">Manage email →</a>
+  </div>
+  <form method="post" action="{% url 'account_logout' %}">
+    {% csrf_token %}
+    <button type="submit" class="secondary-action">Sign out</button>
+  </form>
+{% else %}
+  <div class="bottom-row">
+    <span>Return to your account</span>
+    <a href="{% url 'account_login' %}">Sign in →</a>
+  </div>
+{% endif %}
+{% endblock %}
