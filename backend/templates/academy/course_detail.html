@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}{% if course_import_preview %}Website preview · {{ course.title }} · TradeThesis Academy{% else %}{{ course.title }} · TradeThesis Academy{% endif %}{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{{ public_site_url }}/assets/course-share.css?v=20261103-share-invitation-r2"><link rel="stylesheet" href="{% static 'academy/course-overview.css' %}">{% if course_import_preview %}<link rel="stylesheet" href="{% static 'academy/course-admin-preview.css' %}">{% endif %}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ public_site_url }}/assets/course-share.css?v=20261103-share-invitation-r3"><link rel="stylesheet" href="{% static 'academy/course-overview.css' %}">{% if course_import_preview %}<link rel="stylesheet" href="{% static 'academy/course-admin-preview.css' %}">{% endif %}{% endblock %}
 {% block page_context %}
 <div class="page-context-status page-context-status--standalone" aria-label="Account status">
 {% if course_import_preview %}<span class="badge bg-warning text-dark">ADMIN PREVIEW</span>{% endif %}
@@ -243,5 +243,5 @@
   });
 })();
 </script>
-<script src="{{ public_site_url }}/assets/course-share.js?v=20261103-share-invitation-r2" defer></script>
+<script src="{{ public_site_url }}/assets/course-share.js?v=20261103-share-invitation-r3" defer></script>
 {% endblock %}
