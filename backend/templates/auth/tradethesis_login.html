@@ -26,7 +26,7 @@
   </div>
   <div class="form-row">
     <label class="remember"><input type="checkbox" name="remember" id="id_remember" checked> Remember me</label>
-    <a class="text-link" href="{% url 'account_reset_password' %}{% if redirect_field_value %}?{{ redirect_field_name }}={{ redirect_field_value|urlencode }}{% endif %}">Forgot password?</a>
+    <a class="text-link" href="{% url 'account_reset_password' %}{% if redirect_field_value %}?{{ redirect_field_name }}={{ redirect_field_value|urlencode:"" }}{% endif %}">Forgot password?</a>
   </div>
   <button type="submit" class="primary">Sign in</button>
 </form>
@@ -41,6 +41,6 @@
 {% endfor %}
 <div class="bottom-row">
   <span>New to TradeThesis?</span>
-  <a href="{% url 'account_signup' %}{% if redirect_field_value %}?{{ redirect_field_name }}={{ redirect_field_value|urlencode }}{% endif %}">Create account →</a>
+  <a href="{% url 'account_signup' %}{% if redirect_field_value %}?{{ redirect_field_name }}={{ redirect_field_value|urlencode:"" }}{% endif %}">Create account →</a>
 </div>
 {% endblock %}
