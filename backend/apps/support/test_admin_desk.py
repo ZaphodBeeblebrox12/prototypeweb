@@ -1,10 +1,12 @@
 """Regression tests for the custom TradeThesis Admin Desk support workspace."""
 
+from datetime import timedelta
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.notifications.models import Notification
 from apps.subscriptions.models import Plan
@@ -52,7 +54,7 @@ class AdminDeskSupportTicketTests(TestCase):
             reverse("staff_admin_desk_support_tickets") + "?status=pending",
         )
         self.assertEqual(
-            response.context["support_tickets"]["recent"][0]["can_review"],
+            response.context["support_tickets"]["attention"][0]["can_review"],
             True,
         )
         self.assertContains(
@@ -60,6 +62,88 @@ class AdminDeskSupportTicketTests(TestCase):
             reverse("staff_admin_desk_support_ticket", args=[self.ticket.pk]),
         )
         self.assertNotContains(response, "/admin/support/supportticket/")
+
+    def test_dashboard_preview_is_capped_and_excludes_history_and_member_waiting(self):
+        now = timezone.now()
+        actionable_tickets = [self.ticket]
+        for index in range(6):
+            member = User.objects.create_user(
+                username=f"support-queue-member-{index}",
+                email=f"support-queue-member-{index}@example.test",
+            )
+            actionable_tickets.append(
+                SupportTicket.objects.create(
+                    user=member,
+                    category=SupportTicket.Category.TECHNICAL,
+                    message=f"Technical issue number {index}.",
+                )
+            )
+
+        # Overdue work should be promoted above newer, non-overdue tickets.
+        SupportTicket.objects.filter(pk=self.ticket.pk).update(
+            first_response_due_at=now - timedelta(hours=1)
+        )
+        waiting_member = SupportTicket.objects.create(
+            user=self.member,
+            category=SupportTicket.Category.TECHNICAL,
+            status=SupportTicket.Status.AWAITING_MEMBER,
+            message="Waiting for the member to provide a receipt.",
+        )
+
+        closed_tickets = [
+            SupportTicket.objects.create(
+                user=self.member,
+                category=SupportTicket.Category.BILLING,
+                status=status,
+                message=f"Closed history: {status}.",
+            )
+            for status in (
+                SupportTicket.Status.APPROVED,
+                SupportTicket.Status.REJECTED,
+                SupportTicket.Status.WITHDRAWN,
+            )
+        ]
+        old_closed_ticket = SupportTicket.objects.create(
+            user=self.member,
+            category=SupportTicket.Category.BILLING,
+            status=SupportTicket.Status.APPROVED,
+            message="Older closed history.",
+        )
+        SupportTicket.objects.filter(
+            pk__in=[ticket.pk for ticket in closed_tickets]
+        ).update(updated_at=now - timedelta(days=1))
+        SupportTicket.objects.filter(pk=old_closed_ticket.pk).update(
+            updated_at=now - timedelta(days=8)
+        )
+
+        response = self.client.get(reverse("staff_admin_desk"))
+
+        self.assertEqual(response.status_code, 200, response.content)
+        summary = response.context["support_tickets"]
+        self.assertEqual(summary["open"], 8)
+        self.assertEqual(summary["needs_response"], 7)
+        self.assertEqual(summary["awaiting_member"], 1)
+        self.assertEqual(summary["overdue_sla"], 1)
+        self.assertEqual(summary["recently_closed"], 3)
+        self.assertEqual(len(summary["attention"]), 5)
+        self.assertEqual(summary["attention"][0]["ticket"].pk, self.ticket.pk)
+        self.assertTrue(
+            all(
+                row["ticket"].status in {
+                    SupportTicket.Status.PENDING,
+                    SupportTicket.Status.IN_PROGRESS,
+                }
+                for row in summary["attention"]
+            )
+        )
+        self.assertEqual(
+            summary["links"]["active"],
+            reverse("staff_admin_desk_support_tickets") + "?status=active",
+        )
+        self.assertContains(response, "Closed in last 7 days")
+        self.assertNotContains(response, waiting_member.short_id)
+        for ticket in closed_tickets + [old_closed_ticket]:
+            self.assertNotContains(response, ticket.short_id)
 
     def test_queue_filters_to_ticket_status_and_support_reviewer_scope(self):
         restricted_plan = Plan.objects.create(
