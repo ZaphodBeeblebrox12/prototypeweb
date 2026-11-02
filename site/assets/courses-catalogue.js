@@ -12,7 +12,7 @@
   const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 
   const renderShareButton = course => course && course.shareUrl
-    ? '<button class="cc-share-button" type="button" data-course-share data-share-title="' + escapeHTML(course.shareTitle || course.title || 'TradeThesis course') + '" data-share-message="' + escapeHTML(course.shareMessage || '') + '" data-share-url="' + escapeHTML(course.shareUrl) + '">Share <span aria-hidden="true">↗</span></button>'
+    ? '<button class="cc-share-button" type="button" data-course-share data-share-title="' + escapeHTML(course.shareTitle || course.title || 'TradeThesis course') + '" data-share-message="' + escapeHTML(course.shareMessage || '') + '" data-share-url="' + escapeHTML(course.shareUrl) + '" data-share-logo="assets/tradethesis-icon.png">Share <span aria-hidden="true">↗</span></button>'
     : '';
 
   const chartArt = type => {
