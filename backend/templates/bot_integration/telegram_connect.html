@@ -1,0 +1,80 @@
+{% extends "accounts/member_page_base.html" %}
+
+{% block title %}Connect Telegram | TradeThesis{% endblock %}
+{% block page_kicker %}COMMUNITY CONNECTION{% endblock %}
+{% block page_heading %}Continue to Telegram{% endblock %}
+{% block page_description %}
+<p>Your Telegram connection is ready. Open the bot when you are ready; TradeThesis will not switch apps automatically.</p>
+{% endblock %}
+{% block page_actions %}
+<a class="btn secondary" href="{% url 'dashboard' %}#connections">Back to member area</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .telegram-handoff { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr); gap:14px; align-items:stretch; max-width:900px; }
+  .telegram-handoff .member-panel { min-width:0; }
+  .telegram-handoff-primary { display:grid; gap:15px; padding:24px; }
+  .telegram-handoff-brand { display:flex; align-items:center; gap:11px; }
+  .telegram-handoff-mark { display:grid; place-items:center; width:45px; height:45px; flex:0 0 45px; border-radius:13px; background:#e1edf1; color:#2386b6; }
+  .telegram-handoff-mark svg { display:block; width:25px; height:25px; fill:currentColor; }
+  .telegram-handoff-primary h2 { margin:0; font:400 27px/1.15 var(--serif); letter-spacing:-.025em; }
+  .telegram-handoff-primary p { margin:0; color:var(--muted); font-size:12px; line-height:1.75; }
+  .telegram-handoff-actions { display:flex; align-items:center; gap:9px; flex-wrap:wrap; padding-top:3px; }
+  .telegram-handoff-actions .btn { min-height:44px; }
+  .telegram-handoff-note { padding-top:13px; border-top:1px solid var(--line); font-size:10px !important; }
+  .telegram-handoff-steps { display:grid; gap:14px; margin:0; padding:20px 22px 22px; list-style:none; counter-reset:handoff-step; }
+  .telegram-handoff-steps li { display:grid; grid-template-columns:26px minmax(0,1fr); gap:10px; align-items:start; counter-increment:handoff-step; }
+  .telegram-handoff-steps li::before { content:counter(handoff-step,decimal-leading-zero); display:grid; place-items:center; width:26px; height:26px; border:1px solid var(--line); border-radius:50%; color:var(--green); font-size:9px; font-weight:800; }
+  .telegram-handoff-steps strong { display:block; margin:1px 0 4px; color:var(--ink); font-size:11px; }
+  .telegram-handoff-steps span { display:block; color:var(--muted); font-size:10px; line-height:1.65; }
+  @media(max-width:760px) {
+    .telegram-handoff { grid-template-columns:minmax(0,1fr); }
+    .telegram-handoff-primary { padding:20px 17px; }
+    .telegram-handoff-primary h2 { font-size:25px; }
+    .telegram-handoff-actions { display:grid; grid-template-columns:minmax(0,1fr); }
+    .telegram-handoff-actions .btn { width:100%; justify-content:center; }
+    .telegram-handoff-steps { padding:18px 17px; }
+  }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="telegram-handoff">
+  <article class="member-panel" aria-labelledby="telegram-handoff-heading">
+    <div class="telegram-handoff-primary">
+      <div class="telegram-handoff-brand">
+        <span class="telegram-handoff-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" focusable="false"><path d="M23.91 3.79 20.6 20.04c-.25 1.13-.92 1.4-1.86.87l-5.14-3.79-2.48 2.39c-.27.27-.49.49-.99.49l.35-5.24 9.52-8.6c.42-.37-.09-.58-.65-.21L7.59 13.25 2.51 11.5c-1.1-.34-1.12-1.1.23-1.61L22.6 2.3c.91-.34 1.72.22 1.31 1.49Z"/></svg>
+        </span>
+        <span class="member-status-pill is-waiting">Ready to connect</span>
+      </div>
+
+      <div>
+        <h2 id="telegram-handoff-heading">Open the TradeThesis bot</h2>
+        <p style="margin-top:8px">You are about to open <strong>@{{ bot_username }}</strong> in Telegram. The secure connection request is already prepared for your account.</p>
+      </div>
+
+      <div class="telegram-handoff-actions">
+        <a class="btn" href="{{ deep_link }}" rel="noopener">Open Telegram ↗</a>
+        <a class="btn secondary" href="{% url 'dashboard' %}#connections">Not now</a>
+      </div>
+
+      <p class="telegram-handoff-note">Your account is not linked yet. When the bot chat opens, tap <strong>Start</strong> in Telegram to complete the connection. You can return here without losing this request.</p>
+    </div>
+  </article>
+
+  <aside class="member-panel" aria-labelledby="telegram-handoff-steps-heading">
+    <div class="member-panel-head">
+      <div class="kicker">TWO-MINUTE SETUP</div>
+      <h2 id="telegram-handoff-steps-heading">Finish connecting</h2>
+      <p>The link only opens the bot. You remain in control of when the app opens and when the connection is confirmed.</p>
+    </div>
+    <ol class="telegram-handoff-steps">
+      <li><div><strong>Open Telegram</strong><span>Tap the button and go to the TradeThesis bot chat.</span></div></li>
+      <li><div><strong>Tap Start</strong><span>Telegram shows a Start button in the bot conversation. Tap it to send the secure verification request.</span></div></li>
+      <li><div><strong>Return to TradeThesis</strong><span>Your member area will show Telegram as connected after the bot confirms your account.</span></div></li>
+    </ol>
+  </aside>
+</div>
+{% endblock %}
