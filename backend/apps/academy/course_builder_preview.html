@@ -1226,7 +1226,7 @@ body.builder-dialog-open { overflow:hidden; }
     normalized.summary = String(source.summary ?? defaults.summary);
     normalized.description = String(source.description ?? defaults.description);
     normalized.shareTitle = String(source.shareTitle ?? defaults.shareTitle);
-    normalized.shareMessage = String(source.shareMessage ?? defaults.shareMessage);
+    normalized.shareMessage = String(source.shareMessage || defaults.shareMessage);
     for (const field of ['category', 'level', 'duration', 'price', 'priceNote', 'priceAmount', 'priceCurrency', 'geoPriceOverrides', 'catalogueRole', 'catalogueHook',
       'problemStatement', 'learningFocus', 'authoredTags', 'whyThisOne']) {
       normalized[field] = String(source[field] ?? defaults[field]);
