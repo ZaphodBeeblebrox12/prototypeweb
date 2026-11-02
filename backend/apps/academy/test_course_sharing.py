@@ -22,25 +22,39 @@ class CourseShareCopyTests(TestCase):
 
     def test_default_copy_inserts_course_title(self):
         self.assertEqual(course_share_title(self.course), self.course.title)
-        self.assertEqual(course_share_message(self.course), DEFAULT_SHARE_MESSAGE.replace("{course_title}", self.course.title))
+        self.assertEqual(
+            course_share_message(self.course),
+            DEFAULT_SHARE_MESSAGE.replace("{course_title}", self.course.title),
+        )
 
     def test_course_specific_copy_overrides_default(self):
         self.course.share_title = "A useful chart-reading course"
         self.course.share_message = "Take a look at {course_title}."
         self.course.save(update_fields=["share_title", "share_message", "updated_at"])
-        self.assertEqual(course_share_title(self.course), "A useful chart-reading course")
-        self.assertEqual(course_share_message(self.course), "Take a look at Support & Resistance.")
-        self.assertEqual(course_share_description(self.course), "Take a look at Support & Resistance.")
+        self.assertEqual(
+            course_share_title(self.course), "A useful chart-reading course"
+        )
+        self.assertEqual(
+            course_share_message(self.course), "Take a look at Support & Resistance."
+        )
+        self.assertEqual(
+            course_share_description(self.course),
+            "Take a look at Support & Resistance.",
+        )
 
     def test_share_page_is_public_and_includes_social_metadata(self):
-        response = self.client.get(reverse("academy:course-share", args=[self.course.slug]))
+        response = self.client.get(
+            reverse("academy:course-share", args=[self.course.slug])
+        )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'property="og:title"')
-        self.assertContains(response, self.course.title)
+        self.assertContains(response, "Support &amp; Resistance")
         self.assertContains(response, 'property="og:image"')
 
     def test_hidden_courses_cannot_be_shared(self):
         self.course.catalogue_role = Course.CatalogueRole.HIDDEN
         self.course.save(update_fields=["catalogue_role", "updated_at"])
-        response = self.client.get(reverse("academy:course-share", args=[self.course.slug]))
+        response = self.client.get(
+            reverse("academy:course-share", args=[self.course.slug])
+        )
         self.assertEqual(response.status_code, 404)
