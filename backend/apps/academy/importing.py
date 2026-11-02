@@ -819,6 +819,8 @@ def publish_course_import(record, *, user):
                 slug=course_data["slug"],
                 summary=course_data.get("summary", ""),
                 description=course_data.get("description", ""),
+                share_title=course_data.get("share_title", ""),
+                share_message=course_data.get("share_message", ""),
                 category=course_data.get("category", ""),
                 level=course_data.get("level", ""),
                 estimated_duration=course_data.get("estimated_duration", ""),
@@ -838,6 +840,8 @@ def publish_course_import(record, *, user):
         course.slug = course_data["slug"]
         course.summary = course_data.get("summary", "")
         course.description = course_data.get("description", "")
+        course.share_title = course_data.get("share_title", "")
+        course.share_message = course_data.get("share_message", "")
         course.category = course_data.get("category", course.category)
         course.level = course_data.get("level", course.level)
         course.estimated_duration = course_data.get("estimated_duration", course.estimated_duration)
@@ -851,6 +855,8 @@ def publish_course_import(record, *, user):
                 "slug",
                 "summary",
                 "description",
+                "share_title",
+                "share_message",
                 "category",
                 "level",
                 "estimated_duration",

@@ -72,6 +72,8 @@ class Course(models.Model):
     slug = models.SlugField(max_length=160, unique=True)
     summary = models.CharField(max_length=360, blank=True)
     description = models.TextField(blank=True)
+    share_title = models.CharField(max_length=200, blank=True)
+    share_message = models.TextField(blank=True)
     category = models.CharField(max_length=80, blank=True)
     level = models.CharField(max_length=40, blank=True)
     estimated_duration = models.CharField(max_length=80, blank=True)

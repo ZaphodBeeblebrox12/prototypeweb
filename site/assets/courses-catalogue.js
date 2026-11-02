@@ -11,6 +11,10 @@
   const isCatalogueVisible = item => item && item.catalogueVisibility !== 'hidden';
   const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 
+  const renderShareButton = course => course && course.shareUrl
+    ? '<button class="cc-share-button" type="button" data-course-share data-share-title="' + escapeHTML(course.shareTitle || course.title || 'TradeThesis course') + '" data-share-message="' + escapeHTML(course.shareMessage || '') + '" data-share-url="' + escapeHTML(course.shareUrl) + '">Share <span aria-hidden="true">↗</span></button>'
+    : '';
+
   const chartArt = type => {
     const base = `
       <g stroke="#cbd3c5" stroke-dasharray="3 5" opacity=".82"><path d="M10 20H210M10 42H210M10 64H210M10 86H210"/><path d="M54 10V92M100 10V92M146 10V92M192 10V92"/></g>
@@ -61,7 +65,7 @@
         '<p class="ed-offer-description">' + escapeHTML(course.description) + '</p>' +
         '<div class="ed-offer-facts">' + facts + '</div>' +
         '<ul class="ed-offer-outcomes">' + outcomes + '</ul>' +
-        '<div class="ed-offer-bottom">' + price + action + '</div></div>' +
+        '<div class="ed-offer-bottom">' + price + action + renderShareButton(course) + '</div></div>' +
         '<aside class="offer-side"><div><span class="eyebrow">The foundation</span><p class="ed-side-route">Market language <i>→</i> chart reading <i>→</i> risk <i>→</i> planning <i>→</i> review</p></div><div class="ed-side-note">Four connected stages<br>30-day guided sequence</div></aside>' +
       '</div>';
     }
@@ -73,7 +77,7 @@
       '<div class="ed-offer-facts">' + facts + '</div>' +
       renderConstructPersonalNote() +
       '<ul class="ed-offer-outcomes">' + outcomes + '</ul>' +
-      '<div class="ed-offer-bottom">' + price + action + '</div>' +
+      '<div class="ed-offer-bottom">' + price + action + renderShareButton(course) + '</div>' +
       '<p class="ed-offer-note">' + escapeHTML(course.community) + '</p>' +
     '</div>';
   };
@@ -126,7 +130,7 @@
       '<div class="ed-offer-facts">' + facts + '</div>' +
       (isConstructCourse(course) ? renderConstructPersonalNote() : '') +
       (outcomes ? '<ul class="ed-offer-outcomes">' + outcomes + '</ul>' : '') +
-      '<div class="ed-offer-bottom"><div class="ed-offer-price"><strong>' + escapeHTML(price) + '</strong><span>' + escapeHTML(priceNote) + '</span></div>' + action + '</div>' +
+      '<div class="ed-offer-bottom"><div class="ed-offer-price"><strong>' + escapeHTML(price) + '</strong><span>' + escapeHTML(priceNote) + '</span></div>' + action + renderShareButton(course) + '</div>' +
     '</div>';
   }
 
@@ -145,7 +149,7 @@
     return '<article class="ed-live-card" id="academy-support-' + escapeHTML(course.slug || course.id || index) + '">' +
       '<div class="ed-live-stamp">SUPPORTING /<br>PROGRAMME</div>' +
       '<div class="ed-live-copy"><span class="eyebrow">Supporting programme</span><h2>' + escapeHTML(course.title || 'Course title') + '</h2><p>' + escapeHTML(course.description || '') + '</p><div class="ed-live-facts">' + facts + '</div></div>' +
-      action + '</article>';
+      action + renderShareButton(course) + '</article>';
   }
 
   function renderProgrammeSections() {
@@ -196,7 +200,7 @@
       return '<article class="ed-live-card" id="' + escapeHTML(support.id) + '">' +
         '<div class="ed-live-stamp">LIVE /<br>CLASSROOM</div>' +
         '<div class="ed-live-copy"><span class="eyebrow">A separate delivery format</span><h2>' + escapeHTML(support.title) + '</h2><p>' + escapeHTML(support.description) + '</p><div class="ed-live-facts">' + facts.map(fact => '<span>' + escapeHTML(fact) + '</span>').join('') + '</div></div>' +
-        action + '</article>';
+        action + renderShareButton(support) + '</article>';
     }).join('');
     const section = $('#supporting-learning');
     if (section) section.style.display = rows.length ? '' : 'none';
@@ -264,7 +268,7 @@
       (problem ? '<p class="ed-tile-problem">' + escapeHTML(problem) + '</p>' : '') +
       '<div class="ed-tile-focus"><span>What you will work on</span><p>' + escapeHTML(learningFocus) + '</p></div>' +
       (whyThisOne ? '<p class="ed-tile-why"><b>Why this one</b><span>' + escapeHTML(whyThisOne) + '</span></p>' : '') +
-      '<div class="ed-tile-footer"><div class="ed-tile-price"><strong>' + escapeHTML(course.price || '') + '</strong></div><button class="ed-tile-action" type="button" data-open-course="' + escapeHTML(course.id) + '">See what is inside <i aria-hidden="true">↗</i></button></div></div></article>';
+      '<div class="ed-tile-footer"><div class="ed-tile-price"><strong>' + escapeHTML(course.price || '') + '</strong></div><button class="ed-tile-action" type="button" data-open-course="' + escapeHTML(course.id) + '">See what is inside <i aria-hidden="true">↗</i></button>' + renderShareButton(course) + '</div></div></article>';
   }
   function renderFilterButtons() {
     if (!filterHost) return;

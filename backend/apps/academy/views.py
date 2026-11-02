@@ -17,10 +17,11 @@ from django.db.models import Prefetch, Q
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.templatetags.static import static
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from django.views.decorators.clickjacking import xframe_options_sameorigin
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 
 from .content_rendering import (
     build_lesson_sections,
@@ -30,6 +31,7 @@ from .content_rendering import (
 )
 from .course_card_utils import course_topic_tags, is_course_card_recommendable
 from .course_pricing import resolved_course_offer_price
+from .course_sharing import course_share_description, course_share_message, course_share_title
 from .forms import StagingPaymentSimulatorForm
 from .models import (
     Course,
@@ -371,6 +373,29 @@ def academy_home(request):
     )
 
 
+@require_GET
+def course_share(request, course_slug):
+    """Public, crawler-readable course page used as the canonical social share target."""
+    course = get_object_or_404(Course, slug=course_slug, status=Course.Status.PUBLISHED)
+    if (
+        course.catalogue_role == Course.CatalogueRole.HIDDEN
+        or not is_course_card_recommendable(course.title, course.summary, course.description)
+    ):
+        raise Http404
+    share_url = request.build_absolute_uri(reverse("academy:course-share", args=[course.slug]))
+    share_title = course_share_title(course)
+    share_message = course_share_message(course)
+    return render(request, "academy/course_share.html", {
+        "course": course,
+        "share_title": share_title,
+        "share_message": share_message,
+        "share_description": course_share_description(course),
+        "share_url": share_url,
+        "share_image_url": request.build_absolute_uri(static("brand/tradethesis-horizontal.png")),
+        "course_detail_url": request.build_absolute_uri(reverse("academy:course-detail", args=[course.slug])),
+    })
+
+
 @login_required
 def course_detail(request, course_slug):
     from .services import get_active_plan_subscription, get_free_membership_plan_for_course
@@ -477,6 +502,11 @@ def course_detail(request, course_slug):
         "academy/course_detail.html",
         {
             "course": course,
+            "course_share_title": course_share_title(course),
+            "course_share_message": course_share_message(course),
+            "course_share_url": request.build_absolute_uri(
+                reverse("academy:course-share", args=[course.slug])
+            ),
             "course_description_html": _render_course_description(
                 course.description, user=request.user
             ),

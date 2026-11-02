@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}{% if course_import_preview %}Website preview · {{ course.title }} · TradeThesis Academy{% else %}{{ course.title }} · TradeThesis Academy{% endif %}{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{% static 'academy/course-overview.css' %}">{% if course_import_preview %}<link rel="stylesheet" href="{% static 'academy/course-admin-preview.css' %}">{% endif %}{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ public_site_url }}/assets/course-share.css"><link rel="stylesheet" href="{% static 'academy/course-overview.css' %}">{% if course_import_preview %}<link rel="stylesheet" href="{% static 'academy/course-admin-preview.css' %}">{% endif %}{% endblock %}
 {% block page_context %}
 <div class="page-context-status page-context-status--standalone" aria-label="Account status">
 {% if course_import_preview %}<span class="badge bg-warning text-dark">ADMIN PREVIEW</span>{% endif %}
@@ -55,6 +55,7 @@
           <a class="tt-overview-button" href="#tt-course-curriculum">Explore curriculum <span aria-hidden="true">↓</span></a>
         {% endif %}
         <a class="tt-overview-button tt-overview-button--secondary" href="#tt-course-curriculum">{% if course_import_preview %}Explore curriculum ↓{% else %}View curriculum ↓{% endif %}</a>
+        {% if not course_import_preview %}<button class="tt-overview-button tt-overview-button--share" type="button" data-course-share data-share-title="{{ course_share_title }}" data-share-message="{{ course_share_message }}" data-share-url="{{ course_share_url }}">Share course <span aria-hidden="true">↗</span></button>{% endif %}
       </div>
       <p class="tt-overview-hero-note">{% if course_import_preview %}This is an unpublished source preview. Checkout, learner progress and access controls are intentionally omitted from this administrator-only view.{% else %}Work through the material at your own pace. Lesson availability follows your course access and release schedule.{% endif %}</p>
 
@@ -242,4 +243,5 @@
   });
 })();
 </script>
+<script src="{{ public_site_url }}/assets/course-share.js" defer></script>
 {% endblock %}

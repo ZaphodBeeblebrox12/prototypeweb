@@ -14,6 +14,7 @@ from .catalogue_presentation import (
 )
 from .course_card_utils import is_course_card_recommendable
 from .course_pricing import resolved_course_offer_price
+from .course_sharing import course_share_message, course_share_title
 from .models import Course, CourseImport
 
 
@@ -114,6 +115,11 @@ def public_course_catalogue(request):
                 "category": course.category or "TradeThesis courses",
                 "level": course.level or "Self-paced",
                 "description": (course.summary or course.description)[:360],
+                "shareTitle": course_share_title(course),
+                "shareMessage": course_share_message(course),
+                "shareUrl": request.build_absolute_uri(
+                    reverse("academy:course-share", args=[course.slug])
+                ),
                 "outcome": (
                     " ".join(course.learning_outcomes)[:500]
                     if course.learning_outcomes

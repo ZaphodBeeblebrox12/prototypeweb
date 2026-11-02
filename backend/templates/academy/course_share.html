@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ share_title }} · TradeThesis{% endblock %}
+{% block extra_meta %}
+<meta name="description" content="{{ share_description }}">
+<link rel="canonical" href="{{ share_url }}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TradeThesis">
+<meta property="og:title" content="{{ share_title }}">
+<meta property="og:description" content="{{ share_description }}">
+<meta property="og:url" content="{{ share_url }}">
+<meta property="og:image" content="{{ share_image_url }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ share_title }}">
+<meta name="twitter:description" content="{{ share_description }}">
+<meta name="twitter:image" content="{{ share_image_url }}">
+{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ public_site_url }}/assets/course-share.css">{% endblock %}
+{% block content %}
+<section class="tt-course-share-landing" style="max-width:860px;margin:clamp(24px,6vw,64px) auto;padding:clamp(22px,5vw,48px);background:#fffdf8;border:1px solid #ded8ca;color:#29382e">
+  <p style="margin:0 0 12px;color:#687268;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase">TRADETHESIS · COURSE</p>
+  <h1 style="margin:0 0 14px;font:500 clamp(30px,5vw,48px)/1.08 Georgia,serif">{{ course.title }}</h1>
+  {% if course.summary %}<p style="margin:0 0 22px;color:#536157;font-size:17px;line-height:1.6">{{ course.summary }}</p>{% endif %}
+  <div style="padding:18px 20px;background:#f4f0e6;border-left:3px solid #bd7557;white-space:pre-line;line-height:1.65">{{ share_message }}</div>
+  {% if course.description %}<p style="margin:24px 0;color:#536157;line-height:1.7">{{ course.description|truncatewords:55 }}</p>{% endif %}
+  <a href="{{ course_detail_url }}" style="display:inline-flex;align-items:center;gap:9px;margin-top:10px;padding:13px 18px;background:#355a46;color:#fff;text-decoration:none;font-weight:650">Explore this course <span aria-hidden="true">↗</span></a>
+  <p style="margin:25px 0 0;color:#687268;font-size:12px">TradeThesis — Conviction before Execution.</p>
+</section>
+{% endblock %}
+{% block extra_js %}<script src="{{ public_site_url }}/assets/course-share.js" defer></script>{% endblock %}

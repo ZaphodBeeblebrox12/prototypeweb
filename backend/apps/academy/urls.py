@@ -22,6 +22,7 @@ urlpatterns = [
         views.join_free_membership_from_landing,
         name="join-free-membership-landing",
     ),
+    path("share/<slug:course_slug>/", views.course_share, name="course-share"),
     path("course/<slug:course_slug>/", views.course_detail, name="course-detail"),
     path(
         "course/<slug:course_slug>/enrol-free/",
