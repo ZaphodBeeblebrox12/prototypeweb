@@ -41,7 +41,7 @@ class AdminDeskSupportTicketTests(TestCase):
         )
         self.client.force_login(self.reviewer)
 
-    def test_dashboard_support_links_and_recent_ticket_open_inside_admin_desk(self):
+    def test_dashboard_support_links_and_actionable_ticket_open_inside_admin_desk(self):
         response = self.client.get(reverse("staff_admin_desk"))
 
         self.assertEqual(response.status_code, 200, response.content)
@@ -65,18 +65,15 @@ class AdminDeskSupportTicketTests(TestCase):
 
     def test_dashboard_preview_is_capped_and_excludes_history_and_member_waiting(self):
         now = timezone.now()
-        actionable_tickets = [self.ticket]
         for index in range(6):
             member = User.objects.create_user(
                 username=f"support-queue-member-{index}",
                 email=f"support-queue-member-{index}@example.test",
             )
-            actionable_tickets.append(
-                SupportTicket.objects.create(
-                    user=member,
-                    category=SupportTicket.Category.TECHNICAL,
-                    message=f"Technical issue number {index}.",
-                )
+            SupportTicket.objects.create(
+                user=member,
+                category=SupportTicket.Category.TECHNICAL,
+                message=f"Technical issue number {index}.",
             )
 
         # Overdue work should be promoted above newer, non-overdue tickets.
