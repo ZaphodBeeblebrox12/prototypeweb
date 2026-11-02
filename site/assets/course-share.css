@@ -59,3 +59,10 @@
 @media(max-width:600px){.tt-course-share-dialog{width:calc(100vw - 20px);max-height:calc(100dvh - 20px);border-radius:11px}.tt-share-shell{max-height:calc(100dvh - 20px)}.tt-share-topbar{padding:22px 19px 12px}.tt-share-content{padding:5px 19px 20px}.tt-share-intro{margin-bottom:18px}.tt-share-intro h2{font-size:30px}.tt-share-intro p:last-child{font-size:12px}.tt-share-layout{grid-template-columns:1fr;gap:13px}.tt-share-course-card{min-height:142px;padding:15px 17px}.tt-share-card-title{max-width:85%;margin:13px 0 8px;font-size:25px}.tt-share-right{padding:14px}.tt-course-share-options{grid-template-columns:repeat(2,minmax(0,1fr))}.tt-share-link-area{padding-top:14px}.tt-share-footer{margin-top:15px}}
 @media(max-width:360px){.tt-share-content{padding-right:14px;padding-left:14px}.tt-share-topbar{padding-right:14px;padding-left:14px}.tt-course-share-options{gap:6px}.tt-course-share-options a,.tt-course-share-options button{gap:7px;padding:7px;font-size:10px}}
 @media(prefers-reduced-motion:reduce){.tt-course-share-dialog[open]{animation:none}.tt-share-close,.tt-course-share-options a,.tt-course-share-options button{transition:none}}
+
+.tt-share-channel-icon--whatsapp{background:#e5f5ed;color:#16865f}
+.tt-share-channel-icon--telegram{background:#e8f2fa;color:#239bd3}
+.tt-share-channel-icon--linkedin{background:#e8f0fa;color:#1767a8}
+.tt-share-channel-icon--facebook{background:#e9effb;color:#2463b5}
+.tt-share-channel-icon--x{background:#eeefeb;color:#171a18}
+.tt-share-channel-icon--more{background:#f0ece2;color:#52684e}
