@@ -123,3 +123,123 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opa
 
 /* Render the real Telegram and Discord marks used by the overview community cards. */
 .no-purchase-service-logo svg{display:block;width:22px;height:22px;fill:currentColor}
+
+
+/* Mobile responsive overrides for the signed-in member dashboard.
+   Keep these after the base no-purchase rules so the breakpoints win. */
+@media (max-width: 900px) {
+  .no-purchase-choice-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .no-purchase-overview,
+  .no-purchase-hero-grid,
+  .no-purchase-choice-grid,
+  .no-purchase-lower-grid,
+  .no-purchase-panel {
+    min-width: 0;
+  }
+
+  .no-purchase-hero-grid,
+  .no-purchase-choice-grid,
+  .no-purchase-lower-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .no-purchase-hero-grid {
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  .no-purchase-hero,
+  .no-purchase-getting-started {
+    min-height: 0;
+    padding: 22px;
+  }
+
+  .no-purchase-section-title {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+    margin: 27px 0 14px;
+  }
+
+  .no-purchase-section-title h2 {
+    font-size: clamp(28px, 8vw, 32px);
+  }
+
+  .no-purchase-choice-card {
+    min-width: 0;
+    padding: 20px;
+  }
+
+  .no-purchase-choice-card h3 {
+    font-size: clamp(23px, 6vw, 27px);
+  }
+
+  .no-purchase-choice-card .btn {
+    max-width: 100%;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .no-purchase-lower-grid {
+    gap: 14px;
+    margin-top: 22px;
+  }
+
+  .no-purchase-panel-head {
+    min-width: 0;
+    padding: 20px 18px 14px;
+  }
+
+  .no-purchase-empty-row {
+    min-width: 0;
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .no-purchase-service-row {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr);
+    align-items: start;
+    gap: 8px 12px;
+    padding: 14px 18px;
+  }
+
+  .no-purchase-service-copy {
+    min-width: 0;
+  }
+
+  .no-purchase-service-row .btn {
+    grid-column: 2;
+    justify-self: start;
+    max-width: 100%;
+    margin: 0;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .no-purchase-panel-foot {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+}
+
+@media (max-width: 380px) {
+  .content {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .no-purchase-hero,
+  .no-purchase-getting-started {
+    padding: 20px 18px;
+  }
+
+  .no-purchase-choice-card {
+    padding: 18px;
+  }
+}
