@@ -37,11 +37,11 @@ class LoginPageTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('name="next" value="/learn/trading-path/"', html)
         self.assertIn(
-            'href="/accounts/signup/?next=%2Flearn%2Ftrading-path%2F"',
+            'href="/accounts/signup/?next=/learn/trading-path/"',
             html,
         )
         self.assertIn(
-            'href="/accounts/password/reset/?next=%2Flearn%2Ftrading-path%2F"',
+            'href="/accounts/password/reset/?next=/learn/trading-path/"',
             html,
         )
 
