@@ -279,11 +279,15 @@ class SharedLessonRenderingTests(SimpleTestCase):
             module_label="Module 5 · Build and trade setups",
         )
         self.assertLess(
-            rendered.index("Text before the figure."), rendered.index('class="tt-purpose-figure"')
+            rendered.index("Text before the figure."),
+            rendered.index('class="tt-purpose-figure tt-course-reference-figure"'),
         )
         self.assertLess(
-            rendered.index('class="tt-purpose-figure"'), rendered.index("Text after the figure.")
+            rendered.index('class="tt-purpose-figure tt-course-reference-figure"'),
+            rendered.index("Text after the figure."),
         )
+        self.assertIn('class="tt-course-reference-image"', rendered)
+        self.assertIn('class="tt-course-reference-kind">CHART REFERENCE</span>', rendered)
         self.assertIn("What changing the settings changes", rendered)
         self.assertIn("MODULE 5 · Build and trade setups", rendered)
         self.assertNotIn("TRADETHESIS · LEARNING ROOM", rendered)
@@ -318,8 +322,11 @@ class SharedLessonRenderingTests(SimpleTestCase):
             source,
             asset_urls={self.ASSET_ID: "/media/legacy.png"},
         )
-        self.assertIn('<figure class="tt-course-figure">', rendered)
+        self.assertIn('<figure class="tt-purpose-figure tt-course-reference-figure">', rendered)
+        self.assertIn('class="tt-course-reference-image"', rendered)
+        self.assertIn('class="tt-course-reference-kind">CHART REFERENCE</span>', rendered)
         self.assertIn("Legacy caption stays with the image.", rendered)
+        self.assertNotIn('<figure class="tt-course-figure">', rendered)
 
     def test_native_comparison_figure_renders_editable_cards_in_place(self):
         figure_id = "figure-block-01"
@@ -840,6 +847,13 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn('contenteditable="true" spellcheck="true"', preview)
         self.assertIn('data-rich-command="table" aria-label="Insert table">Table', preview)
         self.assertIn('data-visual-editor="true"', preview)
+        self.assertIn("tt-course-reference-figure", preview)
+        self.assertIn("tt-course-reference-image", preview)
+        self.assertIn("data-editor-drag-handle", preview)
+        self.assertIn("data-editor-block-move", preview)
+        self.assertIn("editorImageDropPlacement", preview)
+        self.assertIn("syncVisualEditorToModel(movedEditor)", preview)
+        self.assertIn(".tt-course-reference-figure", preview)
         self.assertIn("regionalCountryRegionMap = Object.fromEntries", preview)
         self.assertIn("regionalCountryOptions.map(([code, label, region])", preview)
         self.assertIn("regionalCountryRegionMap[country] || ''", preview)
