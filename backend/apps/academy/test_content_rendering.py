@@ -1301,11 +1301,35 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         builder_source = (backend / "apps" / "academy" / "course_builder_preview.html").read_text(
             encoding="utf-8"
         )
+        learner_css = (backend / "static" / "academy" / "learning-room.css").read_text(
+            encoding="utf-8"
+        )
 
         # The parity stylesheet loads after the builder's embedded component styles.
         parity_link = builder_source.index("/static/academy/course-template-parity.css")
         self.assertGreater(parity_link, builder_source.index("</style>"))
         self.assertLess(parity_link, builder_source.index("</head>"))
+        self.assertIn("/* Hard-block index — exact approved design. */", parity_css)
+        self.assertEqual(
+            1,
+            parity_css.count("/* Hard-block index — exact approved design. */"),
+            "Hard-block Index styling must have one shared source of truth.",
+        )
+        self.assertNotIn("/* Hard-block index — exact approved design. */", learner_css)
+        self.assertNotIn("/* Hard-block index — exact approved design. */", builder_source)
+        self.assertIn(
+            ".tt-tab-panel .tt-purpose-figure:not(.tt-image-group-hard-index),",
+            learner_css,
+        )
+        self.assertIn(
+            ".tt-learning-room .tt-tab-panel .tt-purpose-figure:not(.tt-image-group-hard-index),",
+            learner_css,
+        )
+        self.assertIn(
+            ".preview-body .tt-purpose-figure:not(.tt-image-group-hard-index) {",
+            builder_source,
+        )
+        self.assertNotIn(".preview-body .tt-purpose-figure {", builder_source)
         for selector in (
             ".rich-editor-canvas blockquote {",
             ".rich-editor-canvas blockquote::before {",
