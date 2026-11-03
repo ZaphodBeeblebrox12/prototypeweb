@@ -1001,6 +1001,90 @@
 .tt-guided-reflection-notes summary, .tt-guided-reflection-model summary { cursor:pointer; font-weight:650; }
 .tt-guided-reflection-notes p, .tt-guided-reflection-model p { margin-bottom:0; }
 
+
+/* Dedicated chart-reference image frame — restored from the approved course template.
+   Keep uploaded images distinct from purpose-built teaching diagrams and image groups. */
+.tt-learning-room .tt-tab-panel .tt-course-reference-figure {
+  display:block;
+  min-width:0;
+  margin:20px 0;
+  overflow:hidden;
+  border:1px solid var(--tt-line, #d8d0bf);
+  border-radius:11px;
+  background:#fffdf8;
+  box-shadow:0 5px 14px #29382e09;
+}
+.tt-learning-room .tt-tab-panel .tt-course-reference-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 12px;
+  border-bottom:1px solid var(--tt-line, #d8d0bf);
+  background:linear-gradient(100deg,#e7ecdf,#f6edda);
+}
+.tt-learning-room .tt-tab-panel .tt-course-reference-module {
+  color:var(--tt-green, #345943);
+  font-size:9px;
+  font-weight:850;
+  letter-spacing:.11em;
+  line-height:1.5;
+  text-transform:uppercase;
+}
+.tt-learning-room .tt-tab-panel .tt-course-reference-kind {
+  color:var(--tt-muted, #657268);
+  font-size:9px;
+  font-weight:750;
+  letter-spacing:.08em;
+  text-align:right;
+  text-transform:uppercase;
+}
+.tt-learning-room .tt-tab-panel .tt-course-reference-image {
+  display:flex;
+  min-height:150px;
+  align-items:center;
+  justify-content:center;
+  padding:8px;
+  overflow:hidden;
+  background:#fffdf8;
+}
+.tt-learning-room .tt-tab-panel .tt-course-reference-image img,
+.tt-learning-room .tt-tab-panel .tt-course-reference-img {
+  display:block;
+  width:100%;
+  max-width:100%;
+  max-height:470px;
+  margin:auto;
+  object-fit:contain;
+  object-position:center;
+  background:#fffdf8;
+}
+.tt-learning-room .tt-tab-panel .tt-course-reference-figure figcaption {
+  display:block;
+  padding:12px 13px 13px;
+  border-top:1px solid var(--tt-line, #d8d0bf);
+  background:#fffdf8;
+  color:var(--tt-muted, #657268);
+  font-size:12px;
+  line-height:1.6;
+}
+.tt-learning-room .tt-tab-panel .tt-course-reference-title {
+  display:block;
+  margin:0 0 5px;
+  color:var(--tt-ink, #27382e);
+  font:600 15px/1.35 Georgia, "Times New Roman", serif;
+}
+.tt-learning-room .tt-tab-panel .tt-course-reference-figure figcaption p { margin:0; }
+@media(max-width:620px) {
+  .tt-learning-room .tt-tab-panel .tt-course-reference-head { align-items:flex-start; flex-direction:column; gap:4px; padding:10px 11px; }
+  .tt-learning-room .tt-tab-panel .tt-course-reference-kind { text-align:left; }
+  .tt-learning-room .tt-tab-panel .tt-course-reference-image { min-height:110px; padding:7px; }
+  .tt-learning-room .tt-tab-panel .tt-course-reference-image img,
+  .tt-learning-room .tt-tab-panel .tt-course-reference-img { max-height:300px; }
+  .tt-learning-room .tt-tab-panel .tt-course-reference-figure figcaption { padding:10px 11px 12px; }
+}
+
+
 .tt-learning-room .tt-tab-panel .tt-image-group-figure {
   margin: 20px 0 22px;
   overflow: visible;
