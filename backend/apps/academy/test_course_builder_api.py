@@ -152,6 +152,41 @@ class CourseBuilderApiTests(TestCase):
             )
         )
 
+    def test_bollinger_bands_source_figures_are_available_in_staff_preview(self):
+        from .course_builder_api import _bollinger_bands_source_bundle
+
+        source_payload, asset_sources, _warnings = _bollinger_bands_source_bundle()
+        source_spec = next(
+            spec
+            for spec in source_payload["assets"]
+            if spec["asset_key"] in asset_sources
+        )
+        source_path = asset_sources[source_spec["asset_key"]]
+        record = CourseImport.objects.create(
+            course_slug="understand-bollinger-bands",
+            title="Understand Bollinger Bands",
+            manifest_version="course-builder-v1",
+            content_hash="c" * 64,
+            source_manifest="builder://understand-bollinger-bands",
+            status=CourseImport.Status.DRAFT,
+            imported_by=self.admin,
+            payload={"builder_state": {"modules": []}},
+        )
+
+        response = self.client.get(
+            reverse(
+                "staff_course_builder_asset",
+                args=[record.pk, source_spec["stable_asset_id"]],
+            )
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(b"".join(response.streaming_content), source_path.read_bytes())
+        self.assertEqual(
+            response["Content-Type"].split(";")[0],
+            "image/svg+xml",
+        )
+
     def test_builder_learner_preview_uses_academy_template_and_keeps_notebook_authoring(self):
         response = self.client.get(reverse("staff_course_builder_preview"))
 
