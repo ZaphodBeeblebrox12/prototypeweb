@@ -905,11 +905,11 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("data-image-tray-item", preview)
         self.assertIn("activeEditorImageDragMode = 'insert'", preview)
         self.assertIn(
-            r".replace(/^[ \\t]*(?:>[ \\t]*)+\\[\\[lesson-tab:",
+            r".replace(/^[ \t]*(?:>[ \t]*)+\[\[lesson-tab:",
             preview,
         )
         self.assertIn(
-            r".replace(/^[ \\t]*\\[\\[lesson-tab:",
+            r".replace(/^[ \t]*\[\[lesson-tab:",
             preview,
         )
         self.assertIn("#edf3f8", preview)
