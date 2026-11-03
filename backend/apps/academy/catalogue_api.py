@@ -118,7 +118,7 @@ def public_course_catalogue(request):
                 "shareTitle": course_share_title(course),
                 "shareMessage": course_share_message(course),
                 "shareUrl": request.build_absolute_uri(
-                    reverse("academy:course-share", args=[course.slug])
+                    reverse("academy:course-share-no-slash", args=[course.slug])
                 ),
                 "outcome": (
                     " ".join(course.learning_outcomes)[:500]
