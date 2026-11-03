@@ -3428,7 +3428,10 @@ body.builder-dialog-open { overflow:hidden; }
       ).replace(/\n{3,}/g, '\n\n');
     };
     const structuredTables = [];
-    let prepared = compactDuplicateCourseCards(resolveBuilderRegionalBlocks(String(src || ''), lesson, $('#previewAudienceSelect')?.value || 'GLOBAL')).replace(/^\s*\[\[lesson-tab:(?:idea|examples|practice)\]\]\s*$/gim, '').replace(/\[\[table-block:([A-Za-z0-9_-]{1,120})\]\]/g, function(match,id) {
+    let prepared = compactDuplicateCourseCards(resolveBuilderRegionalBlocks(String(src || ''), lesson, $('#previewAudienceSelect')?.value || 'GLOBAL'))
+      .replace(/^[ \t]*(?:>[ \t]*)+\[\[lesson-tab:(?:idea|examples|practice)\]\][ \t]*$/gim, '')
+      .replace(/^[ \t]*\[\[lesson-tab:(?:idea|examples|practice)\]\][ \t]*$/gim, '')
+      .replace(/\[\[table-block:([A-Za-z0-9_-]{1,120})\]\]/g, function(match,id) {
       const data = lesson?.tables?.[id];
       const token = 'TTSTRUCTUREDTABLEPREVIEW' + structuredTables.length + 'END';
       structuredTables.push(data ? structuredTableHtmlFromData(data,id,false) : '<aside class="tt-structured-table-unavailable">Table data is missing in this draft.</aside>');
