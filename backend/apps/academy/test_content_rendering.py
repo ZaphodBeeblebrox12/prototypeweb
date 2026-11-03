@@ -855,6 +855,8 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn('data-rich-command="table" aria-label="Insert table">Table', preview)
         self.assertIn('data-visual-editor="true"', preview)
         self.assertIn("tt-image-group-hard-index", preview)
+        self.assertIn("previewChartNumbers.get('asset:' + id)", preview)
+        self.assertIn("chart-grid count-1", preview)
         self.assertIn("tt-course-reference-image", preview)
         self.assertIn("Drag an image into the lesson", preview)
         self.assertIn("data-image-tray-item", preview)
