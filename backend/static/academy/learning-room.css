@@ -1600,3 +1600,16 @@
   }
 }
 
+
+
+
+/* Original cool blue image container — separate from green comparison diagrams. */
+.tt-learning-room .tt-tab-panel .tt-course-reference-figure { border-color:#cbd7e3; background:#f6f9fc; box-shadow:0 5px 16px rgba(40,61,82,.07); }
+.tt-learning-room .tt-tab-panel .tt-course-reference-head { border-color:#cbd7e3; background:linear-gradient(100deg,#e8eff6,#f2f6fa); }
+.tt-learning-room .tt-tab-panel .tt-course-reference-module { color:#38566f; }
+.tt-learning-room .tt-tab-panel .tt-course-reference-kind { color:#708397; }
+.tt-learning-room .tt-tab-panel .tt-course-reference-image { background:#edf3f8; }
+.tt-learning-room .tt-tab-panel .tt-course-reference-image img,.tt-learning-room .tt-tab-panel .tt-course-reference-img { background:#edf3f8; }
+.tt-learning-room .tt-tab-panel .tt-course-reference-figure figcaption { border-color:#cbd7e3; background:#f6f9fc; color:#536779; }
+.tt-learning-room .tt-tab-panel .tt-course-reference-title { color:#304a61; }
+
