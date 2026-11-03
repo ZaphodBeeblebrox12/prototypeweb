@@ -1,5 +1,4 @@
 import json
-import re
 from datetime import timedelta
 from io import BytesIO
 from urllib.parse import parse_qs, urlparse
@@ -761,7 +760,7 @@ class AcademyViewTests(TestCase):
         self.assertLess(tab_positions["idea"], tab_positions["examples"])
         self.assertLess(tab_positions["examples"], tab_positions["practice"])
         self.assertIn('<span class="tt-tab-count">3</span>', rendered_html)
-        for index, (alt_text, _heading, expected_tab, url) in enumerate(placements):
+        for alt_text, _heading, expected_tab, url in placements:
             self.assertIn(f'alt="{alt_text}"', rendered_html)
             image_position = rendered_html.index(f'src="{url}"')
             self.assertGreater(image_position, tab_positions[expected_tab])
