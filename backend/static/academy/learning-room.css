@@ -143,11 +143,71 @@
 .tt-lesson-nav-link strong { font-size: .88rem; line-height: 1.45; font-weight: 650; }
 .tt-lesson-nav-next { text-align: right; }
 .tt-lesson-nav-placeholder { align-self: center; color: var(--tt-muted); font-size: .8rem; }
-.tt-figure-dialog { width: min(1100px, calc(100vw - 28px)); max-width: none; max-height: calc(100vh - 28px); padding: 18px; border: 1px solid var(--tt-line); background: var(--tt-surface); color: var(--tt-ink); }
-.tt-figure-dialog::backdrop { background: rgba(17, 28, 20, .78); }
-.tt-figure-dialog button { display: block; margin: 0 0 12px auto; border: 1px solid var(--tt-line); background: var(--tt-paper); padding: 7px 10px; color: var(--tt-ink); cursor: pointer; }
-.tt-figure-dialog img { display: block; max-width: 100%; max-height: calc(100vh - 130px); object-fit: contain; margin: auto; }
-.tt-figure-dialog p { margin: 12px 0 0; text-align: center; color: var(--tt-muted); font-size: .85rem; }
+.tt-figure-dialog:not([open]) { display:none; }
+.tt-figure-dialog[open] {
+  position:fixed;
+  inset:8px;
+  display:grid;
+  grid-template-rows:42px minmax(0,1fr) auto;
+  gap:8px;
+  width:auto;
+  height:auto;
+  max-width:none;
+  max-height:none;
+  margin:0;
+  padding:10px;
+  box-sizing:border-box;
+  overflow:hidden;
+  border:1px solid #394555;
+  background:#101720;
+  color:#f4f1e8;
+}
+.tt-figure-dialog::backdrop { background:rgba(7,11,17,.92); }
+.tt-figure-dialog button {
+  grid-row:1;
+  justify-self:end;
+  display:block;
+  margin:0;
+  border:1px solid #566170;
+  background:#1c2733;
+  padding:7px 12px;
+  color:#f4f1e8;
+  cursor:pointer;
+}
+.tt-figure-dialog img {
+  grid-row:2;
+  display:block;
+  width:100%;
+  height:100%;
+  min-height:0;
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+  object-position:center;
+  margin:0 auto;
+  background:#101720;
+}
+.tt-figure-dialog p {
+  grid-row:3;
+  min-height:0;
+  margin:0;
+  padding:0 8px 2px;
+  text-align:center;
+  color:#cbd4df;
+  font-size:.82rem;
+  line-height:1.3;
+}
+.tt-figure-dialog p:empty { display:none; }
+@media(max-width:620px) {
+  .tt-figure-dialog[open] {
+    inset:4px;
+    grid-template-rows:38px minmax(0,1fr) auto;
+    gap:5px;
+    padding:7px;
+  }
+  .tt-figure-dialog button { padding:6px 9px; }
+  .tt-figure-dialog p { font-size:.75rem; }
+}
 .tt-tab-panel img[data-figure-zoom] { cursor: zoom-in; }
 @media(max-width:620px) {
   .tt-lesson-navigation { grid-template-columns: 1fr; }
@@ -1002,89 +1062,6 @@
 .tt-guided-reflection-notes p, .tt-guided-reflection-model p { margin-bottom:0; }
 
 
-/* Dedicated chart-reference image frame — restored from the approved course template.
-   Keep uploaded images distinct from purpose-built teaching diagrams and image groups. */
-.tt-learning-room .tt-tab-panel .tt-course-reference-figure {
-  display:block;
-  min-width:0;
-  margin:20px 0;
-  overflow:hidden;
-  border:1px solid var(--tt-line, #d8d0bf);
-  border-radius:11px;
-  background:#fffdf8;
-  box-shadow:0 5px 14px #29382e09;
-}
-.tt-learning-room .tt-tab-panel .tt-course-reference-head {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:10px 12px;
-  border-bottom:1px solid var(--tt-line, #d8d0bf);
-  background:linear-gradient(100deg,#e7ecdf,#f6edda);
-}
-.tt-learning-room .tt-tab-panel .tt-course-reference-module {
-  color:var(--tt-green, #345943);
-  font-size:9px;
-  font-weight:850;
-  letter-spacing:.11em;
-  line-height:1.5;
-  text-transform:uppercase;
-}
-.tt-learning-room .tt-tab-panel .tt-course-reference-kind {
-  color:var(--tt-muted, #657268);
-  font-size:9px;
-  font-weight:750;
-  letter-spacing:.08em;
-  text-align:right;
-  text-transform:uppercase;
-}
-.tt-learning-room .tt-tab-panel .tt-course-reference-image {
-  display:flex;
-  min-height:150px;
-  align-items:center;
-  justify-content:center;
-  padding:8px;
-  overflow:hidden;
-  background:#fffdf8;
-}
-.tt-learning-room .tt-tab-panel .tt-course-reference-image img,
-.tt-learning-room .tt-tab-panel .tt-course-reference-img {
-  display:block;
-  width:100%;
-  max-width:100%;
-  max-height:470px;
-  margin:auto;
-  object-fit:contain;
-  object-position:center;
-  background:#fffdf8;
-}
-.tt-learning-room .tt-tab-panel .tt-course-reference-figure figcaption {
-  display:block;
-  padding:12px 13px 13px;
-  border-top:1px solid var(--tt-line, #d8d0bf);
-  background:#fffdf8;
-  color:var(--tt-muted, #657268);
-  font-size:12px;
-  line-height:1.6;
-}
-.tt-learning-room .tt-tab-panel .tt-course-reference-title {
-  display:block;
-  margin:0 0 5px;
-  color:var(--tt-ink, #27382e);
-  font:600 15px/1.35 Georgia, "Times New Roman", serif;
-}
-.tt-learning-room .tt-tab-panel .tt-course-reference-figure figcaption p { margin:0; }
-@media(max-width:620px) {
-  .tt-learning-room .tt-tab-panel .tt-course-reference-head { align-items:flex-start; flex-direction:column; gap:4px; padding:10px 11px; }
-  .tt-learning-room .tt-tab-panel .tt-course-reference-kind { text-align:left; }
-  .tt-learning-room .tt-tab-panel .tt-course-reference-image { min-height:110px; padding:7px; }
-  .tt-learning-room .tt-tab-panel .tt-course-reference-image img,
-  .tt-learning-room .tt-tab-panel .tt-course-reference-img { max-height:300px; }
-  .tt-learning-room .tt-tab-panel .tt-course-reference-figure figcaption { padding:10px 11px 12px; }
-}
-
-
 .tt-learning-room .tt-tab-panel .tt-image-group-figure {
   margin: 20px 0 22px;
   overflow: visible;
@@ -1600,17 +1577,3 @@
     grid-template-columns: 54px minmax(0, 1fr);
   }
 }
-
-
-
-
-/* Original cool blue image container — separate from green comparison diagrams. */
-.tt-learning-room .tt-tab-panel .tt-course-reference-figure { border-color:#cbd7e3; background:#f6f9fc; box-shadow:0 5px 16px rgba(40,61,82,.07); }
-.tt-learning-room .tt-tab-panel .tt-course-reference-head { border-color:#cbd7e3; background:linear-gradient(100deg,#e8eff6,#f2f6fa); }
-.tt-learning-room .tt-tab-panel .tt-course-reference-module { color:#38566f; }
-.tt-learning-room .tt-tab-panel .tt-course-reference-kind { color:#708397; }
-.tt-learning-room .tt-tab-panel .tt-course-reference-image { background:#edf3f8; }
-.tt-learning-room .tt-tab-panel .tt-course-reference-image img,.tt-learning-room .tt-tab-panel .tt-course-reference-img { background:#edf3f8; }
-.tt-learning-room .tt-tab-panel .tt-course-reference-figure figcaption { border-color:#cbd7e3; background:#f6f9fc; color:#536779; }
-.tt-learning-room .tt-tab-panel .tt-course-reference-title { color:#304a61; }
-
