@@ -311,7 +311,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
             rendered.index('class="tt-purpose-figure tt-image-group-figure tt-image-group-hard-index"'),
             rendered.index("Text after the figure."),
         )
-        self.assertIn('class="tt-image-group-hard-index"', rendered)
+        self.assertIn('class="tt-purpose-figure tt-image-group-figure tt-image-group-hard-index"', rendered)
         self.assertIn('class="index-label">CHART STUDY</span>', rendered)
         self.assertIn('class="image-count">×1</span>', rendered)
         self.assertIn('class="item-index">A</span>', rendered)
@@ -585,30 +585,46 @@ class SharedLessonRenderingTests(SimpleTestCase):
         learner_css = (root / "static" / "academy" / "learning-room.css").read_text(
             encoding="utf-8"
         )
+        parity_css = (
+            root / "static" / "academy" / "course-template-parity.css"
+        ).read_text(encoding="utf-8")
         builder_html = (root / "apps" / "academy" / "course_builder_preview.html").read_text(
             encoding="utf-8"
         )
-        self.assertIn("Hard-block index — exact approved design.", learner_css)
-        self.assertIn("Hard-block index — exact approved design.", builder_html)
+
+        # The approved Hard-block Index is deliberately owned by one shared stylesheet.
+        self.assertEqual(
+            1,
+            parity_css.count("/* Hard-block index — exact approved design. */"),
+        )
+        self.assertNotIn("Hard-block index — exact approved design.", learner_css)
+        self.assertNotIn("Hard-block index — exact approved design.", builder_html)
+        for selector in (
+            ".tt-image-group-hard-index .count-1",
+            ".tt-image-group-hard-index .count-2",
+            ".tt-image-group-hard-index .count-3",
+            ".tt-image-group-hard-index .count-4",
+            ".tt-image-group-hard-index .index-block",
+            ".tt-image-group-hard-index .chart-item",
+        ):
+            with self.subTest(selector=selector):
+                self.assertIn(selector, parity_css)
+
+        self.assertIn(
+            ".tt-tab-panel .tt-purpose-figure:not(.tt-image-group-hard-index),",
+            learner_css,
+        )
+        self.assertIn(
+            ".preview-body .tt-purpose-figure:not(.tt-image-group-hard-index) {",
+            builder_html,
+        )
         self.assertIn("tt-image-group-hard-index", builder_html)
         self.assertIn(
             "if (!String(lesson.content || '').includes(token) || group.imageIds.length > 0) return;",
             builder_html,
         )
         self.assertNotIn("const replacement = survivor", builder_html)
-        for source in (learner_css, builder_html):
-            self.assertIn("grid-template-columns:repeat(3,minmax(0,1fr))", source)
-            self.assertIn(
-                ".count-4 { grid-template-columns:repeat(2,minmax(0,1fr)); }",
-                source,
-            )
-            self.assertIn("aspect-ratio:2.22", source)
-            self.assertIn("object-fit:contain", source)
-            self.assertIn("background:#345943", source)
-            self.assertIn("background:#202720", source)
-            self.assertIn("@media(max-width:760px)", source)
-            self.assertIn("@media(max-width:560px)", source)
-            self.assertIn("grid-template-columns:26px minmax(0,1fr)", source)
+
 
     def test_image_group_numbering_stays_consistent_across_lesson_tabs(self):
         first_id = "11111111-1111-4111-8111-111111111111"
@@ -655,7 +671,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
             },
             module_label="Module 5 · Build and trade setups",
         )
-        self.assertIn('<strong class="tt-purpose-figure-title">Chart</strong>', rendered)
+        self.assertIn('<span class="group-title">Chart</span>', rendered)
         self.assertNotIn("BANKNIFTY_2023-08-06_16-51-56_bd975.png", rendered)
 
     def test_structured_grouped_table_renders_spans_and_accessible_wrapper(self):
@@ -916,7 +932,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("data-editor-drag-handle", preview)
         self.assertIn("data-editor-block-move", preview)
         self.assertIn("editorImageDropPlacement", preview)
-        self.assertIn("syncVisualEditorToModel(movedEditor)", preview)
+        self.assertIn("syncVisualEditorToModel(editedEditor)", preview)
         self.assertIn('data-action="remove-image-reference"', preview)
         self.assertIn('data-action="remove-image-from-group"', preview)
         self.assertIn(".tt-image-group-hard-index", preview)
