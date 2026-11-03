@@ -57,7 +57,7 @@ class CourseShareCopyTests(TestCase):
         self.assertContains(response, 'property="og:image"')
         self.assertContains(response, "tradethesis-horizontal.png")
         self.assertContains(response, 'property="og:image:alt"')
-        self.assertContains(response, 'name="twitter:card" content="summary"')
+        self.assertContains(response, 'name="twitter:card" content="summary_large_image"')
 
     def test_hidden_courses_cannot_be_shared(self):
         self.course.catalogue_role = Course.CatalogueRole.HIDDEN
