@@ -11,6 +11,7 @@ import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from copy import deepcopy
+from functools import lru_cache
 from io import BytesIO
 from pathlib import Path
 from threading import local
@@ -40,7 +41,7 @@ from .catalogue_presentation import (
 from .course_builder_lifecycle import mark_builder_draft_deleted
 from .course_card_utils import is_course_card_recommendable
 from .course_pricing import parse_course_pricing, pricing_fields_for_builder
-from .importing import validate_import_for_publish
+from .importing import inspect_manifest, validate_import_for_publish
 from .models import (
     Course,
     CourseImport,
@@ -64,6 +65,160 @@ logger = logging.getLogger(__name__)
 
 _TRADING_PATH_IMPORT_FILE = Path(__file__).with_name("course_builder_trading_path_import.json")
 _TRADING_PATH_IMPORT_SLUG = "your-trading-path-import-draft"
+
+
+
+
+_BOLLINGER_BANDS_IMPORT_SLUG = "understand-bollinger-bands"
+_BOLLINGER_BANDS_MANIFEST = (
+    Path(__file__).resolve().parents[3]
+    / "course-source"
+    / _BOLLINGER_BANDS_IMPORT_SLUG
+    / "course-manifest.json"
+)
+
+
+@lru_cache(maxsize=1)
+def _bollinger_bands_source_bundle():
+    """Load and validate the canonical Bollinger Bands course package once per process."""
+    return inspect_manifest(_BOLLINGER_BANDS_MANIFEST)
+
+
+def _bollinger_bands_import_candidate():
+    """Offer the canonical course as an editable Builder draft when none exists."""
+    if Course.objects.exclude(status=Course.Status.ARCHIVED).filter(
+        slug=_BOLLINGER_BANDS_IMPORT_SLUG
+    ).exists():
+        return None
+
+    existing_records = CourseImport.objects.filter(
+        course_slug=_BOLLINGER_BANDS_IMPORT_SLUG
+    ).exclude(status=CourseImport.Status.DELETED).only("payload")
+    # Do not create a second editable copy when a saved Builder draft has been
+    # submitted for review or otherwise remains in the lifecycle.
+    if any((record.payload or {}).get("builder_state") for record in existing_records):
+        return None
+
+    try:
+        source_payload, _asset_sources, warnings = _bollinger_bands_source_bundle()
+    except (OSError, ValueError, KeyError, TypeError):
+        logger.exception("Could not prepare the bundled Bollinger Bands Builder draft")
+        return None
+
+    source_course = source_payload["course"]
+    asset_specs = {
+        str(spec["stable_asset_id"]): spec
+        for spec in source_payload.get("assets", [])
+        if isinstance(spec, dict) and spec.get("stable_asset_id")
+    }
+    default_notebook = source_payload.get("notebook") or {}
+    modules = []
+    lesson_count = 0
+    total_minutes = 0
+
+    for module_index, module in enumerate(source_payload.get("modules", []), start=1):
+        lessons = []
+        for lesson_index, lesson in enumerate(module.get("lessons", []), start=1):
+            lesson_count += 1
+            lesson_id = str(lesson.get("source_id") or f"{module_index}.{lesson_index}")
+            content = str(lesson.get("content_markdown") or "")
+            referenced_asset_ids = list(dict.fromkeys(_ASSET_REF.findall(content)))
+            images = []
+            for asset_id in referenced_asset_ids:
+                spec = asset_specs.get(asset_id)
+                if not spec:
+                    continue
+                source_name = str(spec.get("asset_key") or "course-figure").rsplit("/", 1)[-1]
+                images.append(
+                    {
+                        "id": asset_id,
+                        "name": source_name[:240],
+                        "title": "",
+                        "alt": str(spec.get("alt_text") or "Course figure")[:500],
+                        "caption": "",
+                        "data": "",
+                        "assetUuid": asset_id,
+                        "sha256": str(spec.get("sha256") or ""),
+                    }
+                )
+
+            duration = max(1, min(360, int(lesson.get("duration_minutes") or 15)))
+            total_minutes += duration
+            content_json = (
+                lesson.get("content_json")
+                if isinstance(lesson.get("content_json"), dict)
+                else {}
+            )
+            lessons.append(
+                {
+                    "id": "bollinger-bands-lesson-" + re.sub(
+                        r"[^A-Za-z0-9_-]", "-", lesson_id
+                    ),
+                    "title": str(lesson.get("title") or "")[:240],
+                    "summary": str(lesson.get("summary") or "")[:360],
+                    "minutes": duration,
+                    "format": str(lesson.get("format") or "reading"),
+                    "videoUrl": "",
+                    "content": content,
+                    "questions": [],
+                    "notebook": content_json.get("notebook") or default_notebook,
+                    "images": images,
+                    "image": images[0] if images else None,
+                    "imageGroups": [],
+                    "relatedCourseIds": [],
+                }
+            )
+        modules.append(
+            {
+                "id": f"bollinger-bands-module-{module_index}",
+                "title": str(module.get("title") or f"Module {module_index}")[:200],
+                "description": str(module.get("summary") or "")[:5000],
+                "lessons": lessons,
+            }
+        )
+
+    if not modules or not lesson_count:
+        logger.error("The Bollinger Bands manifest produced an empty Builder course")
+        return None
+
+    course = {
+        "id": "understand-bollinger-bands-import-course",
+        "title": str(source_course["title"])[:200],
+        "slug": _BOLLINGER_BANDS_IMPORT_SLUG,
+        "summary": str(source_course.get("summary") or "")[:360],
+        "description": str(source_course.get("description") or ""),
+        "category": "Technical analysis",
+        "level": "Intermediate",
+        "duration": f"{lesson_count} lessons · {max(1, round(total_minutes / 60))} hours · Self-paced",
+        "price": "",
+        "priceAmount": "",
+        "priceCurrency": "INR",
+        "priceNote": "No individual purchase price is configured yet.",
+        "accessType": "paid",
+        "catalogueRole": "mini",
+        "catalogueHook": "",
+        "problemStatement": "",
+        "learningFocus": "",
+        "authoredTags": "Bollinger Bands, volatility, market context, risk management",
+        "whyThisOne": "",
+        "cataloguePresentationConfigured": False,
+        "status": "draft",
+        "comingSoon": False,
+        "requiresOwnedAssets": True,
+        "position": int(source_course.get("position") or 0),
+        "createdAt": "Not saved yet",
+        "updatedAt": "Not saved yet",
+        "publishedAt": None,
+        "publishedSnapshot": None,
+        "outcomes": [],
+        "modules": modules,
+    }
+    if warnings:
+        logger.warning(
+            "Bollinger Bands Builder draft prepared with %s source-asset review warning(s)",
+            len(warnings),
+        )
+    return {"course": course}
 
 
 def _trading_path_import_candidate():
@@ -314,6 +469,22 @@ def _clean_image_payload(course_state, course_slug):
                             course_import_id=server_draft_id,
                             stable_asset_id=requested_stable_id,
                         ).exists()
+                if (
+                    not may_reuse_stable_id
+                    and course_slug == _BOLLINGER_BANDS_IMPORT_SLUG
+                    and _valid_uuid(requested_stable_id)
+                ):
+                    try:
+                        source_payload, _source_assets, _source_warnings = (
+                            _bollinger_bands_source_bundle()
+                        )
+                        may_reuse_stable_id = any(
+                            str(spec.get("stable_asset_id") or "") == requested_stable_id
+                            for spec in source_payload.get("assets", [])
+                            if isinstance(spec, dict)
+                        )
+                    except (OSError, ValueError, KeyError, TypeError):
+                        may_reuse_stable_id = False
                 stable_id = (
                     requested_stable_id
                     if may_reuse_stable_id
@@ -1696,6 +1867,11 @@ def course_builder_api(request):
                 }
             )
         trading_path_import_candidate = _trading_path_import_candidate()
+        bollinger_bands_import_candidate = (
+            None
+            if trading_path_import_candidate
+            else _bollinger_bands_import_candidate()
+        )
         asset_storage_status = course_asset_storage.status()
         logger.info(
             "Course Builder asset storage configured: backend=%s durable=%s writes_enabled=%s",
@@ -1784,6 +1960,7 @@ def course_builder_api(request):
                 "coming_soon_courses": coming_soon_courses,
                 "asset_storage": asset_storage_status,
                 "trading_path_import_candidate": trading_path_import_candidate,
+                "bollinger_bands_import_candidate": bollinger_bands_import_candidate,
             }
         )
 
@@ -2368,6 +2545,36 @@ def course_builder_asset(request, import_id, asset_id):
             from django.http import HttpResponseRedirect
 
             return HttpResponseRedirect(live_asset.original_url)
+    if file_field is None and record.course_slug == _BOLLINGER_BANDS_IMPORT_SLUG:
+        try:
+            source_payload, asset_sources, _source_warnings = _bollinger_bands_source_bundle()
+            source_spec = next(
+                (
+                    spec for spec in source_payload.get("assets", [])
+                    if isinstance(spec, dict)
+                    and str(spec.get("stable_asset_id") or "") == str(asset_id)
+                ),
+                None,
+            )
+            if source_spec:
+                original_url = str(source_spec.get("original_url") or "")
+                if re.match(r"^https?://", original_url, re.IGNORECASE):
+                    from django.http import HttpResponseRedirect
+
+                    return HttpResponseRedirect(original_url)
+                source_path = asset_sources.get(source_spec.get("asset_key"))
+                if source_path and source_path.is_file():
+                    response = FileResponse(
+                        source_path.open("rb"),
+                        content_type=mimetypes.guess_type(source_path.name)[0]
+                        or "application/octet-stream",
+                    )
+                    response["Cache-Control"] = "private, no-store"
+                    response["X-Content-Type-Options"] = "nosniff"
+                    return response
+        except (OSError, ValueError, KeyError, TypeError):
+            logger.exception("Could not serve a bundled Bollinger Bands source figure")
+
     if file_field is None:
         raise Http404
     response = FileResponse(
