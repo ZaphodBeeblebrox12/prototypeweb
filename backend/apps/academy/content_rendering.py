@@ -89,6 +89,12 @@ _LESSON_REF = re.compile(r"\[\[(lesson|lesson-card):([0-9a-fA-F-]{36})\]\]")
 _COURSE_CARD_REF = re.compile(r"\[\[course-card:(?:(coming-soon):)?([0-9a-fA-F-]{36})\]\]")
 _TABLE_BLOCK_TOKEN = re.compile(r"\[\[table-block:([A-Za-z0-9_-]{1,120})\]\]")
 _TAB_ROUTE_TOKEN = re.compile(r"^\s*\[\[lesson-tab:(idea|examples|practice)\]\]\s*$", re.IGNORECASE)
+# Quote serialization prefixes every Markdown quote line with "> ". A routing token
+# inside quote content is not a section boundary; hide it without routing the next heading.
+_QUOTED_TAB_ROUTE_TOKEN = re.compile(
+    r"^\s*(?:>\s*)+\[\[lesson-tab:(idea|examples|practice)\]\]\s*$",
+    re.IGNORECASE,
+)
 
 
 def _deduplicate_course_card_refs(source):
@@ -1032,6 +1038,11 @@ def build_lesson_sections(
         current_heading = None
 
     for line in lines:
+        if _QUOTED_TAB_ROUTE_TOKEN.match(line):
+            # This is a misplaced editor instruction captured inside a pull quote.
+            # Remove the token from rendered copy, but do not let it reroute a heading.
+            continue
+
         route_marker = _TAB_ROUTE_TOKEN.match(line)
         if route_marker:
             # A route token is an instruction for the next heading, not a command
