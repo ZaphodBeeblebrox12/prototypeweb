@@ -22,6 +22,8 @@ urlpatterns = [
         views.join_free_membership_from_landing,
         name="join-free-membership-landing",
     ),
+    # Serve both forms directly; some share crawlers strip trailing slashes.
+    path("share/<slug:course_slug>", views.course_share, name="course-share-no-slash"),
     path("share/<slug:course_slug>/", views.course_share, name="course-share"),
     path("course/<slug:course_slug>/", views.course_detail, name="course-detail"),
     path(
