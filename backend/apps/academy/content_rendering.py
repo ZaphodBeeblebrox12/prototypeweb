@@ -887,6 +887,8 @@ def render_safe_markdown(
             tag = tag.replace("<img", '<img class="chart-image"', 1)
         if "tabindex=" not in tag:
             tag = tag.replace("<img", '<img tabindex="0"', 1)
+        if "role=" not in tag:
+            tag = tag.replace("<img", '<img role="button"', 1)
         if "aria-label=" not in tag:
             tag = tag.replace("<img", '<img aria-label="Enlarge course figure"', 1)
         return tag
