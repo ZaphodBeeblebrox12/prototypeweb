@@ -957,6 +957,7 @@ caption-side:top; padding:9px 12px; border-bottom:1px solid #e1e3d9; background:
 .tt-image-group-hard-index .item-head { display:flex; align-items:baseline; gap:8px; min-width:0; margin:0 0 7px; }
 .tt-image-group-hard-index .item-index { display:inline-grid; flex:0 0 auto; place-items:center; width:21px; height:21px; background:#202720; color:#fffdf8; font-size:9px; font-weight:850; line-height:1; }
 .tt-image-group-hard-index .item-title { display:block; min-width:0; margin:0; color:#27382e; font-size:13px; font-weight:750; line-height:1.35; letter-spacing:-.01em; }
+.tt-image-group-hard-index .count-1 .item-head .item-title { display:none; }
 .tt-image-group-hard-index .tt-purpose-figure-image { display:block; width:100%; max-width:100%; min-width:0; margin:0; padding:0; overflow:hidden; border:0; border-radius:0; background:#151923; box-shadow:none; line-height:0; }
 .tt-image-group-hard-index .chart-item .tt-purpose-figure-image img.chart-image, .tt-image-group-hard-index .chart-item>img.chart-image { display:block; width:100%; max-width:100%; height:auto; max-height:none; margin:0; padding:0; aspect-ratio:2.22; object-fit:contain; border:0; border-radius:0; background:#151923; box-shadow:none; }
 .tt-image-group-hard-index .chart-image-missing { display:grid; width:100%; min-width:0; place-items:center; aspect-ratio:2.22; padding:10px; background:#151923; color:#fffdf8; border:0; border-radius:0; font-size:10px; line-height:1.5; text-align:center; }
@@ -3559,31 +3560,35 @@ body.builder-dialog-open { overflow:hidden; }
       const token = 'TTSTRUCTUREDTABLEPREVIEW' + structuredTables.length + 'END';
       structuredTables.push(data ? structuredTableHtmlFromData(data,id,false) : '<aside class="tt-structured-table-unavailable">Table data is missing in this draft.</aside>');
       return '\n\n' + token + '\n\n';
-    }).replace(/!\[([^\]]*)\]\(asset:\/\/([^)]+)\)/g, function(match, alt, id) {
+    });
+    const previewChartNumbers = new Map();
+    const chartBlockPattern = /\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]|!\[([^\]]*)\]\(asset:\/\/([^)]+)\)/g;
+    for (const chartMatch of prepared.matchAll(chartBlockPattern)) {
+      const key = chartMatch[1] ? 'group:' + chartMatch[1] : 'asset:' + chartMatch[3];
+      if (!previewChartNumbers.has(key)) previewChartNumbers.set(key, previewChartNumbers.size + 1);
+    }
+    prepared = prepared.replace(/!\[([^\]]*)\]\(asset:\/\/([^)]+)\)/g, function(match, alt, id) {
       const image = images.find(function(item) { return item.id === id || item.assetUuid === id; });
       if (!image) return match;
       const token = 'TTFIGURETOKEN' + figures.length + 'END';
       const title = displayTitle(image);
-      const caption = image.caption
-        ? '<figcaption><strong class="tt-course-reference-title">' + esc(title) + '</strong><p>' + esc(image.caption) + '</p></figcaption>'
-        : '<figcaption><strong class="tt-course-reference-title">' + esc(title) + '</strong></figcaption>';
-      const referenceImage = image.data
-        ? '<span class="tt-course-reference-image"><img class="tt-course-reference-img" data-figure-zoom src="' + esc(image.data) + '" alt="' + esc(image.alt || alt || title) + '" loading="lazy" decoding="async" tabindex="0" role="button" aria-label="Enlarge course figure"></span>'
-        : '<span class="tt-course-reference-image"><span class="tt-purpose-figure-missing">Image saved; preview source is not available in this browser.</span></span>';
-      figures.push('<figure class="tt-purpose-figure tt-course-reference-figure" data-figure-id="' + esc(id) + '"><span class="tt-course-reference-head"><span class="tt-course-reference-module">' + esc(moduleLabel) + '</span><span class="tt-course-reference-kind">CHART REFERENCE</span></span>' + referenceImage + caption + '</figure>');
-      return '\n\n' + token + '\n\n';
+      const groupNumber = String(previewChartNumbers.get('asset:' + id) || 1).padStart(2, '0');
+      const imageHtml = image.data
+        ? '<span class="tt-purpose-figure-image"><img class="chart-image" data-figure-zoom src="' + esc(image.data) + '" alt="' + esc(image.alt || alt || title) + '" loading="lazy" decoding="async" tabindex="0" role="button" aria-label="Enlarge course figure"></span>'
+        : '<span class="chart-image chart-image-missing" role="status">Image saved; preview source is not available in this browser.</span>';
+      const caption = String(image.caption || '').trim()
+        ? '<span class="caption"><span class="caption-label">Note</span> — ' + esc(String(image.caption).trim()) + '</span>'
+        : '';
+      const item = '<div class="chart-item"><div class="item-head"><span class="item-index">A</span><span class="item-title">' + esc(title) + '</span></div>' + imageHtml + caption + '</div>';
+      const heading = '<div class="group-heading"><div class="group-heading-copy"><span class="group-kicker">Chart group · ' + groupNumber + '</span><span class="group-title">' + esc(title) + '</span></div><span class="group-mark">01</span></div>';
+      figures.push('<figure class="tt-purpose-figure tt-image-group-figure tt-image-group-hard-index" data-figure-id="' + esc(id) + '"><div class="indexed"><aside class="index-block" aria-label="Group index"><span class="group-number">' + groupNumber + '</span><span class="index-label">CHART STUDY</span><span class="image-count">×1</span></aside><div class="group-content">' + heading + '<div class="chart-grid count-1">' + item + '</div></div></div></figure>');
+      return '\\n\\n' + token + '\\n\\n';
     });
-    const previewGroupNumbers = new Map();
-    for (const groupMatch of prepared.matchAll(/\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]/g)) {
-      if (!previewGroupNumbers.has(groupMatch[1])) {
-        previewGroupNumbers.set(groupMatch[1], previewGroupNumbers.size + 1);
-      }
-    }
     prepared = prepared.replace(/\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]/g, function(match, id) {
       const group = (lesson?.imageGroups || []).find(item => String(item.id) === id);
       if (!group) return match;
       const token = 'TTFIGURETOKEN' + figures.length + 'END';
-      const groupIndex = previewGroupNumbers.get(id) || 1;
+      const groupIndex = previewChartNumbers.get('group:' + id) || 1;
       const groupNumber = String(groupIndex).padStart(2, '0');
       const groupedImages = (group.imageIds || []).slice(0, 4)
         .map(imageId => images.find(item => item.id === imageId || item.assetUuid === imageId))
