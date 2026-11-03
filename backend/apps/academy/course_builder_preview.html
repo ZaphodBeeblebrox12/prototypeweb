@@ -3582,7 +3582,7 @@ body.builder-dialog-open { overflow:hidden; }
       const item = '<div class="chart-item"><div class="item-head"><span class="item-index">A</span><span class="item-title">' + esc(title) + '</span></div>' + imageHtml + caption + '</div>';
       const heading = '<div class="group-heading"><div class="group-heading-copy"><span class="group-kicker">Chart group · ' + groupNumber + '</span><span class="group-title">' + esc(title) + '</span></div><span class="group-mark">01</span></div>';
       figures.push('<figure class="tt-purpose-figure tt-image-group-figure tt-image-group-hard-index" data-figure-id="' + esc(id) + '"><div class="indexed"><aside class="index-block" aria-label="Group index"><span class="group-number">' + groupNumber + '</span><span class="index-label">CHART STUDY</span><span class="image-count">×1</span></aside><div class="group-content">' + heading + '<div class="chart-grid count-1">' + item + '</div></div></div></figure>');
-      return '\\n\\n' + token + '\\n\\n';
+      return '\n\n' + token + '\n\n';
     });
     prepared = prepared.replace(/\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]/g, function(match, id) {
       const group = (lesson?.imageGroups || []).find(item => String(item.id) === id);
