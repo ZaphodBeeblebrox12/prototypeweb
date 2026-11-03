@@ -381,7 +381,7 @@ def course_share(request, course_slug):
         or not is_course_card_recommendable(course.title, course.summary, course.description)
     ):
         raise Http404
-    share_url = request.build_absolute_uri(reverse("academy:course-share", args=[course.slug]))
+    share_url = request.build_absolute_uri(reverse("academy:course-share-no-slash", args=[course.slug]))
     share_title = course_share_title(course)
     share_message = course_share_message(course)
     return render(request, "academy/course_share.html", {
@@ -504,7 +504,7 @@ def course_detail(request, course_slug):
             "course_share_title": course_share_title(course),
             "course_share_message": course_share_message(course),
             "course_share_url": request.build_absolute_uri(
-                reverse("academy:course-share", args=[course.slug])
+                reverse("academy:course-share-no-slash", args=[course.slug])
             ),
             "course_description_html": _render_course_description(
                 course.description, user=request.user
