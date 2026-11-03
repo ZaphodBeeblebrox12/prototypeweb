@@ -1,5 +1,4 @@
 import json
-import re
 from datetime import timedelta
 from io import BytesIO
 from urllib.parse import parse_qs, urlparse
@@ -751,26 +750,27 @@ class AcademyViewTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         rendered_html = response.content.decode()
-        panel_patterns = {
-            tab: re.compile(
-                rf'<div class="tt-tab-panel"[^>]*data-tab-panel="{tab}"[^>]*>(.*?)</div>',
-                re.DOTALL,
-            )
+        # Hard-block Index figures contain nested divs, so a non-greedy regex ending
+        # at the first </div> truncates the panel before its image. Check the
+        # ordered tab boundaries instead, preserving the per-tab placement guarantee.
+        tab_positions = {
+            tab: rendered_html.index(f'data-tab-panel="{tab}"')
             for tab in ("idea", "examples", "practice")
         }
-        panels = {}
-        for tab, pattern in panel_patterns.items():
-            match = pattern.search(rendered_html)
-            self.assertIsNotNone(match, f"Published lesson is missing the {tab} tab panel.")
-            panels[tab] = match.group(1)
-
+        self.assertLess(tab_positions["idea"], tab_positions["examples"])
+        self.assertLess(tab_positions["examples"], tab_positions["practice"])
         self.assertIn('<span class="tt-tab-count">3</span>', rendered_html)
         for alt_text, _heading, expected_tab, url in placements:
-            self.assertIn(f'alt="{alt_text}"', panels[expected_tab])
-            self.assertIn(f'src="{url}"', panels[expected_tab])
-            for other_tab, panel_html in panels.items():
-                if other_tab != expected_tab:
-                    self.assertNotIn(url, panel_html)
+            self.assertIn(f'alt="{alt_text}"', rendered_html)
+            image_position = rendered_html.index(f'src="{url}"')
+            self.assertGreater(image_position, tab_positions[expected_tab])
+            following_tabs = [
+                position for tab, position in tab_positions.items()
+                if position > tab_positions[expected_tab]
+            ]
+            if following_tabs:
+                self.assertLess(image_position, min(following_tabs))
+            self.assertEqual(rendered_html.count(f'src="{url}"'), 1)
 
     def test_uploaded_replacement_renders_through_protected_media_and_retains_source_url(self):
         source_url = "https://example.com/charts/original.png"
