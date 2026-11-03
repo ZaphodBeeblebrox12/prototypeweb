@@ -855,8 +855,7 @@ def render_safe_markdown(
     rendered = re.sub(
         r"<img\b", '<img tabindex="0" role="button" aria-label="Enlarge course figure"', rendered
     )
-    def wrap_legacy_course_image(match):
-        image_html, caption_html = match.groups()
+    def wrap_legacy_course_image(image_html, caption_html=""):
         return (
             '<figure class="tt-purpose-figure tt-course-reference-figure">'
             '<span class="tt-course-reference-head">'
@@ -867,16 +866,14 @@ def render_safe_markdown(
         )
 
     rendered = re.sub(
-        r"<p>(<img\b[^>]*>)</p>\s*<p>(.*?)</p>",
-        wrap_legacy_course_image,
+        r"<p>(<img\\b[^>]*>)</p>\\s*<p>(.*?)</p>",
+        lambda match: wrap_legacy_course_image(match.group(1), match.group(2)),
         rendered,
         flags=re.DOTALL,
     )
     rendered = re.sub(
-        r"<p>(<img\b[^>]*>)</p>",
-        lambda match: wrap_legacy_course_image(
-            type("ImageMatch", (), {"groups": lambda self: (match.group(1), "")})()
-        ),
+        r"<p>(<img\\b[^>]*>)</p>",
+        lambda match: wrap_legacy_course_image(match.group(1)),
         rendered,
     )
     for token, markup in figure_frames.items():
