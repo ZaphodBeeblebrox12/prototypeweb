@@ -21,6 +21,10 @@ from .views import _notebook_for_course_display
 class SharedLessonRenderingTests(SimpleTestCase):
     ASSET_ID = "8c0f08ab-c9be-45d2-9cde-1f5a0a1c9031"
 
+    def test_inline_underline_survives_safe_markdown_rendering(self):
+        rendered = render_safe_markdown("This is <u>underlined</u> text.")
+        self.assertIn("<u>underlined</u>", rendered)
+
     def test_whole_lesson_body_uses_country_then_region_then_main_fallback(self):
         source = "Main lesson body."
         overrides = {
@@ -851,6 +855,16 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("margin: 19px 0", preview)
         self.assertIn("max-height: min(56vh, 500px)", preview)
         self.assertIn('data-rich-command="bold" aria-label="Bold"', preview)
+        self.assertIn('data-rich-command="italic" aria-label="Italic"', preview)
+        self.assertIn('data-rich-command="underline" aria-label="Underline"', preview)
+        self.assertIn('aria-keyshortcuts="Control+B Meta+B"', preview)
+        self.assertIn('aria-keyshortcuts="Control+I Meta+I"', preview)
+        self.assertIn('aria-keyshortcuts="Control+U Meta+U"', preview)
+        self.assertIn("event.ctrlKey || event.metaKey", preview)
+        self.assertIn("syncVisualEditorToModel(editor)", preview)
+        self.assertIn("if (tag === 'u') return '<u>' + inner + '</u>'", preview)
+        self.assertIn('title="1 image in this chart group"', preview)
+        self.assertIn("images in this chart group", preview)
         self.assertIn('contenteditable="true" spellcheck="true"', preview)
         self.assertIn('data-rich-command="table" aria-label="Insert table">Table', preview)
         self.assertIn('data-visual-editor="true"', preview)
