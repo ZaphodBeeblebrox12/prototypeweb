@@ -904,6 +904,14 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("Drag an image into the lesson", preview)
         self.assertIn("data-image-tray-item", preview)
         self.assertIn("activeEditorImageDragMode = 'insert'", preview)
+        self.assertIn(
+            r".replace(/^[ \\t]*(?:>[ \\t]*)+\\[\\[lesson-tab:",
+            preview,
+        )
+        self.assertIn(
+            r".replace(/^[ \\t]*\\[\\[lesson-tab:",
+            preview,
+        )
         self.assertIn("#edf3f8", preview)
         self.assertIn("data-editor-drag-handle", preview)
         self.assertIn("data-editor-block-move", preview)
