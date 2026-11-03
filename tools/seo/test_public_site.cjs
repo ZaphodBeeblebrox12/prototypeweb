@@ -50,7 +50,7 @@ try {
   assert.equal(result.sitemapUrls, PUBLIC_PAGES.length);
   assert.ok(read(production, 'robots.txt').includes('Sitemap: https://tradethesis.example/sitemap.xml'));
   assert.match(read(production, 'index.html'), /name="robots" content="index, follow"/);
-  assert.match(read(production, 'index.html'), /rel="canonical" href="https://tradethesis\.example/"/);
+  assert.ok(read(production, 'index.html').includes('rel="canonical" href="https://tradethesis.example/'));
   assert.match(read(production, 'index.html'), /tradethesis-social-preview\.jpg/);
   assert.match(read(production, 'index.html'), /tradethesis-academy-base-url/);
   assert.match(read(production, 'member-area-preview.html'), /noindex, nofollow/);
