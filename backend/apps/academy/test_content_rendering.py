@@ -1341,8 +1341,11 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         quote_rule = parity_css[quote_start:quote_end]
         self.assertIn("min-height: 64px;", quote_rule)
         self.assertIn("padding: 0 0 0 92px;", quote_rule)
+        self.assertIn("font-size: 20px;", parity_css)
+        self.assertNotIn("font-size: 18px;", parity_css)
+        self.assertNotIn("Quote Option 2: the chosen large editorial pull quote.", (backend / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8"))
         self.assertIn("border: 0;", quote_rule)
-        self.assertIn('font: 400 21px/1.45 Georgia, "Times New Roman", serif;', quote_rule)
+        self.assertIn('font: 400 clamp(20px, 2.2vw, 27px)/1.5 Georgia, "Times New Roman", serif;', quote_rule)
 
         opening_quote_start = parity_css.index(".tt-learning-room .tt-tab-panel blockquote::after,")
         opening_quote_end = parity_css.index(
