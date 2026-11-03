@@ -464,100 +464,6 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .preview-body .tt-purpose-figure-note { font-size: 11px; line-height: 1.6; }
 
 
-/* Uploaded lesson images use the dedicated chart-reference frame in both preview and learner output. */
-
-/* Original cool blue image container — separate from green comparison diagrams. */
-.preview-body .tt-course-reference-figure { border-color:#cbd7e3; background:#f6f9fc; box-shadow:0 5px 16px rgba(40,61,82,.07); }
-.preview-body .tt-course-reference-head { border-color:#cbd7e3; background:linear-gradient(100deg,#e8eff6,#f2f6fa); }
-.preview-body .tt-course-reference-module { color:#38566f; }
-.preview-body .tt-course-reference-kind { color:#708397; }
-.preview-body .tt-course-reference-image { background:#edf3f8; }
-.preview-body .tt-course-reference-image img,.preview-body .tt-course-reference-img { background:#edf3f8; }
-.preview-body .tt-course-reference-figure figcaption { border-color:#cbd7e3; background:#f6f9fc; color:#536779; }
-.preview-body .tt-course-reference-title { color:#304a61; }
-
-.preview-body .tt-course-reference-figure {
-  display:block;
-  min-width:0;
-  margin:19px 0;
-  overflow:hidden;
-  border:1px solid #d9d0bf;
-  border-radius:12px;
-  background:#fffdf8;
-  box-shadow:0 5px 16px rgba(39,56,46,.055);
-}
-.preview-body .tt-course-reference-head {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:11px 13px;
-  border-bottom:1px solid #ded5c3;
-  background:linear-gradient(100deg,#e7ecdf,#f6edda);
-}
-.preview-body .tt-course-reference-module {
-  color:var(--site-primary);
-  font-size:9px;
-  font-weight:850;
-  letter-spacing:.11em;
-  line-height:1.5;
-  text-transform:uppercase;
-}
-.preview-body .tt-course-reference-kind {
-  color:var(--muted);
-  font-size:9px;
-  font-weight:750;
-  letter-spacing:.08em;
-  text-align:right;
-  text-transform:uppercase;
-}
-.preview-body .tt-course-reference-image {
-  display:flex;
-  min-height:150px;
-  align-items:center;
-  justify-content:center;
-  padding:8px;
-  overflow:hidden;
-  background:#fffdf8;
-}
-.preview-body .tt-course-reference-image img,
-.preview-body .tt-course-reference-img {
-  display:block;
-  width:100%;
-  max-width:100%;
-  max-height:470px;
-  margin:auto;
-  object-fit:contain;
-  object-position:center;
-  background:#fffdf8;
-}
-.preview-body .tt-course-reference-figure figcaption {
-  display:block;
-  padding:12px 13px 13px;
-  border-top:1px solid #ded5c3;
-  background:#fffdf8;
-  color:var(--muted);
-  font-size:12px;
-  line-height:1.6;
-}
-.preview-body .tt-course-reference-title {
-  display:block;
-  margin:0 0 5px;
-  color:var(--ink);
-  font:600 15px/1.35 var(--site-font-heading);
-}
-.preview-body .tt-course-reference-figure figcaption p { margin:0; }
-@media(max-width:620px) {
-  .preview-body .tt-course-reference-head { align-items:flex-start; flex-direction:column; gap:4px; padding:10px 11px; }
-  .preview-body .tt-course-reference-kind { text-align:left; }
-  .preview-body .tt-course-reference-image { min-height:110px; padding:7px; }
-  .preview-body .tt-course-reference-image img,
-  .preview-body .tt-course-reference-img { max-height:300px; }
-  .preview-body .tt-course-reference-figure figcaption { padding:10px 11px 12px; }
-}
-
-
-
 @media(max-width:760px) {
   .preview-body .tt-purpose-figure-head { padding: 11px 12px; }
   .preview-body .tt-purpose-figure-body { padding: 10px; }
@@ -872,6 +778,10 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .tt-editor-image-move-button,.tt-editor-image-drag-handle { display:inline-grid; place-items:center; min-width:24px; height:24px; padding:0 5px; border:1px solid var(--line); border-radius:4px; background:var(--paper); color:var(--muted); font:750 11px/1 var(--site-font-body); cursor:pointer; }
 .tt-editor-image-drag-handle { cursor:grab; font-size:15px; user-select:none; }
 .tt-editor-image-drag-handle:active { cursor:grabbing; }
+.tt-editor-image-reference-actions { display:flex; justify-content:flex-end; margin-top:2px; }
+.tt-editor-image-reference-remove { padding:4px 8px; border:1px solid #d7b9ad; background:#fffaf7; color:#8b4435; font-size:10px; font-weight:750; cursor:pointer; }
+.tt-editor-image-reference-remove:hover { background:#f8ebe5; }
+.tt-editor-image-group-remove { justify-self:end; margin:6px 0 8px auto; }
 
 .rich-editor-canvas.is-image-dragging { outline:1px dashed var(--site-secondary); outline-offset:4px; }
 .rich-editor-canvas > [data-editor-image-block="true"].is-image-dragging { opacity:.48; }
@@ -1870,7 +1780,7 @@ body.builder-dialog-open { overflow:hidden; }
       '<button type="button" class="tt-editor-image-drag-handle" draggable="true" data-editor-drag-handle aria-label="Drag to move ' + subject + '" title="Drag to move">⠿</button>' +
       '</span>';
   }
-  function inlineImageCaptionItemMarkup(image, lesson, movable) {
+  function inlineImageCaptionItemMarkup(image, lesson, movable, groupId) {
     const imageId = String(image?.id || image?.assetUuid || '');
     if (!imageId) return '';
     const title = String(image.title || '').trim();
@@ -1881,6 +1791,11 @@ body.builder-dialog-open { overflow:hidden; }
     const preview = previewSource
       ? '<img src="' + esc(previewSource) + '" alt="' + esc(image.alt || displayTitle || 'Course image') + '" loading="lazy">'
       : 'Saved image';
+    const referenceAction = groupId
+      ? '<button type="button" class="tt-editor-image-reference-remove" data-action="remove-image-from-group" data-group-id="' + esc(groupId) + '" data-id="' + esc(imageId) + '">Remove from group</button>'
+      : (movable
+        ? '<button type="button" class="tt-editor-image-reference-remove" data-action="remove-image-reference">Remove from lesson</button>'
+        : '');
     return '<span class="tt-editor-image-item">' +
       '<span class="tt-editor-image-heading"><span class="tt-editor-image-thumb">' + preview + '</span>' +
       '<span class="tt-editor-image-heading-copy"><span class="tt-editor-image-eyebrow">IMAGE CAPTION</span>' +
@@ -1892,6 +1807,7 @@ body.builder-dialog-open { overflow:hidden; }
       '" maxlength="500" rows="2" placeholder="Write what the learner should notice in this image…">' +
       esc(String(image.caption || '')) + '</textarea></label>' +
       '<span class="tt-editor-image-help">Edit here. The caption is saved with this course draft.</span>' +
+      (referenceAction ? '<span class="tt-editor-image-reference-actions">' + referenceAction + '</span>' : '') +
       '</span>';
   }
   function inlineImageCaptionMarkup(token) {
@@ -1922,7 +1838,9 @@ body.builder-dialog-open { overflow:hidden; }
       editorImageMoveControls('image group') +
       '<span class="tt-editor-image-heading-copy"><span class="tt-editor-image-eyebrow">IMAGE GROUP</span>' +
       '<strong class="tt-editor-image-title">' + esc(String(group.title || '').trim() || 'Image group') +
-      '</strong></span>' + members.map(image => inlineImageCaptionItemMarkup(image, lesson)).join('') + '</span>';
+      '</strong></span>' +
+      '<button type="button" class="tt-editor-image-reference-remove tt-editor-image-group-remove" data-action="remove-image-reference">Remove group from lesson</button>' +
+      members.map(image => inlineImageCaptionItemMarkup(image, lesson, false, group.id)).join('') + '</span>';
   }
   function markdownToVisualEditor(source) {
     const tokens = [];
@@ -2619,10 +2537,10 @@ body.builder-dialog-open { overflow:hidden; }
           <input class="input" data-image-item="${esc(image.id)}" data-field="alt" value="${esc(image.alt || '')}" maxlength="500" placeholder="Describe the figure for accessibility">
           <label>Caption / explanation</label>
           <textarea class="textarea" rows="3" data-image-item="${esc(image.id)}" data-field="caption" maxlength="500" placeholder="Explain what the learner should notice.">${esc(image.caption || '')}</textarea>
-          <p class="help">Use your own title; the uploaded filename is never used as the display heading. Insert the image on its own, or select it inside an image group below.</p>
+          <p class="help">Use your own title; the uploaded filename is never used as the display heading. Insert the image on its own, or select it inside an image group below. “Delete uploaded asset” removes the upload and every lesson reference; to remove only one occurrence, use “Remove from lesson” on the inserted block.</p>
           <div class="figure-inline-actions">
             <button class="btn small primary" type="button" data-action="insert-figure" data-id="${esc(image.id)}">Insert at cursor</button>
-            <button class="btn small danger" type="button" data-action="remove-figure" data-id="${esc(image.id)}">Remove image</button>
+            <button class="btn small danger" type="button" data-action="remove-figure" data-id="${esc(image.id)}">Delete uploaded asset</button>
           </div>
         </div>
       </article>`).join('');
@@ -4272,6 +4190,40 @@ body.builder-dialog-open { overflow:hidden; }
       persist(false);
       renderEditor();
       toast('Teaching figure removed.');
+      return;
+    }
+    if (lesson && action === 'remove-image-reference') {
+      const block = el.closest('[data-editor-image-block="true"][data-editor-token][data-editor-block="true"]');
+      const editor = block?.closest('[data-visual-editor]');
+      const token = String(block?.dataset?.editorToken || '');
+      if (!block || !editor || (!token.startsWith('![') && !token.startsWith('[[image-group:'))) {
+        toast('Select an inserted image or image group in the lesson body first.');
+        return;
+      }
+      block.remove();
+      syncVisualEditorToModel(editor);
+      updateLessonOutlineFromEditor(editor);
+      captureRichEditorRange();
+      toast('Removed this image reference from the lesson. The uploaded image remains available in Figures.');
+      return;
+    }
+    if (lesson && action === 'remove-image-from-group') {
+      const groupId = String(el.dataset.groupId || '');
+      const imageId = String(el.dataset.id || '');
+      const group = (lesson.imageGroups || []).find(item => String(item.id) === groupId);
+      if (!group) {
+        toast('That image group is no longer available. Refresh the lesson editor.');
+        return;
+      }
+      const members = Array.isArray(group.imageIds) ? group.imageIds.map(String) : [];
+      if (members.length <= 1) {
+        toast('This is the final image in the group. Remove the whole group from the lesson instead.');
+        return;
+      }
+      group.imageIds = members.filter(value => value !== imageId);
+      persist(false);
+      renderEditor();
+      toast('Image removed from this group. The uploaded image remains available in Figures.');
       return;
     }
     if (lesson && action === 'insert-figure') {
