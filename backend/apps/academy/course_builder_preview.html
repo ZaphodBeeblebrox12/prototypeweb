@@ -465,6 +465,17 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 
 
 /* Uploaded lesson images use the dedicated chart-reference frame in both preview and learner output. */
+
+/* Original cool blue image container — separate from green comparison diagrams. */
+.preview-body .tt-course-reference-figure { border-color:#cbd7e3; background:#f6f9fc; box-shadow:0 5px 16px rgba(40,61,82,.07); }
+.preview-body .tt-course-reference-head { border-color:#cbd7e3; background:linear-gradient(100deg,#e8eff6,#f2f6fa); }
+.preview-body .tt-course-reference-module { color:#38566f; }
+.preview-body .tt-course-reference-kind { color:#708397; }
+.preview-body .tt-course-reference-image { background:#edf3f8; }
+.preview-body .tt-course-reference-image img,.preview-body .tt-course-reference-img { background:#edf3f8; }
+.preview-body .tt-course-reference-figure figcaption { border-color:#cbd7e3; background:#f6f9fc; color:#536779; }
+.preview-body .tt-course-reference-title { color:#304a61; }
+
 .preview-body .tt-course-reference-figure {
   display:block;
   min-width:0;
@@ -842,10 +853,31 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .tt-editor-image-caption:focus { outline:2px solid var(--site-secondary); outline-offset:1px; }
 .tt-editor-image-help { color:var(--muted); font-size:10px; font-weight:500; line-height:1.45; }
 .tt-editor-image-group-card { gap:10px; }
+
+.tt-lesson-image-tray { margin:12px 0 10px; padding:10px; border:1px solid var(--line); border-left:3px solid var(--site-secondary); background:var(--panel-soft); }
+.tt-lesson-image-tray-heading { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:4px 12px; margin-bottom:8px; }
+.tt-lesson-image-tray-heading strong { color:var(--ink); font-size:11px; }
+.tt-lesson-image-tray-heading span,.tt-lesson-image-tray.is-empty p { color:var(--muted); font-size:10px; line-height:1.5; }
+.tt-lesson-image-tray-items { display:flex; gap:8px; overflow-x:auto; padding:2px 0 4px; }
+.tt-lesson-image-tray-item { display:grid; grid-template-columns:55px minmax(80px,1fr); align-items:center; gap:7px; flex:0 0 205px; min-width:0; padding:6px; border:1px solid var(--line); background:var(--paper); cursor:grab; }
+.tt-lesson-image-tray-item:active { cursor:grabbing; }
+.tt-lesson-image-tray-thumb { display:grid; place-items:center; width:55px; height:42px; overflow:hidden; border:1px solid var(--line); background:#edf3f8; color:var(--muted); font-size:8px; }
+.tt-lesson-image-tray-thumb img { display:block; width:100%; height:100%; object-fit:contain; }
+.tt-lesson-image-tray-copy { display:flex; min-width:0; flex-direction:column; gap:3px; }
+.tt-lesson-image-tray-copy strong { overflow:hidden; color:var(--ink); font-size:10px; line-height:1.35; text-overflow:ellipsis; white-space:nowrap; }
+.tt-lesson-image-tray-copy small { color:var(--muted); font-size:7px; font-weight:800; letter-spacing:.06em; }
+.tt-lesson-image-tray-insert { grid-column:1/-1; justify-self:start; padding:3px 6px; border:1px solid var(--line); background:transparent; color:var(--site-primary); font-size:9px; font-weight:750; cursor:pointer; }
+.tt-lesson-image-tray.is-empty p { margin:0; }
 .tt-editor-image-controls { display:inline-flex; align-items:center; gap:3px; flex:0 0 auto; margin-left:auto; }
 .tt-editor-image-move-button,.tt-editor-image-drag-handle { display:inline-grid; place-items:center; min-width:24px; height:24px; padding:0 5px; border:1px solid var(--line); border-radius:4px; background:var(--paper); color:var(--muted); font:750 11px/1 var(--site-font-body); cursor:pointer; }
 .tt-editor-image-drag-handle { cursor:grab; font-size:15px; user-select:none; }
 .tt-editor-image-drag-handle:active { cursor:grabbing; }
+
+.rich-editor-canvas.is-image-dragging { outline:1px dashed var(--site-secondary); outline-offset:4px; }
+.rich-editor-canvas > [data-editor-image-block="true"].is-image-dragging { opacity:.48; }
+.rich-editor-canvas > [data-editor-drop-side="before"] { box-shadow:0 -3px 0 var(--site-secondary); }
+.rich-editor-canvas > [data-editor-drop-side="after"] { box-shadow:0 3px 0 var(--site-secondary); }
+.rich-editor-canvas.is-image-drop-end::after { display:block; height:3px; margin:7px 0; background:var(--site-secondary); content:""; }
 .rich-editor-canvas.is-image-dragging { outline:1px dashed var(--site-secondary); outline-offset:4px; }
 .rich-editor-canvas > [data-editor-image-block="true"].is-image-dragging { opacity:.48; }
 .rich-editor-canvas > [data-editor-drop-side="before"] { box-shadow:0 -3px 0 var(--site-secondary); }
@@ -2205,7 +2237,7 @@ body.builder-dialog-open { overflow:hidden; }
       '<button type="button" data-rich-command="bold" aria-label="Bold"><strong>B</strong></button><button type="button" data-rich-command="italic" aria-label="Italic"><em>I</em></button><button type="button" data-rich-command="strikeThrough" aria-label="Strikethrough"><s>S</s></button>' +
       '<button type="button" data-rich-command="insertUnorderedList" aria-label="Bulleted list">• List</button><button type="button" data-rich-command="insertOrderedList" aria-label="Numbered list">1. List</button>' +
       '<button type="button" data-rich-command="link" aria-label="Insert link">Link</button><button type="button" data-rich-command="blockquote" aria-label="Insert pull quote">Quote</button><button type="button" data-rich-command="insertHorizontalRule" aria-label="Insert divider">Divider</button><button type="button" data-rich-command="table" aria-label="Insert table">Table</button><button type="button" data-rich-command="grouped-table" aria-label="Insert grouped-header table">Grouped table</button><button type="button" data-rich-table-action="add-column" aria-label="Add a column to the selected table">Column +</button><button type="button" data-rich-table-action="add-row" aria-label="Add a row to the selected table">Row +</button><button type="button" data-rich-table-action="remove-column" aria-label="Remove the last column from the selected table">Column −</button><button type="button" data-rich-table-action="remove-row" aria-label="Remove the selected body row from the table">Row −</button><button type="button" data-rich-table-action="group-headers" aria-label="Add grouped headers to the selected table">Group headers</button><button type="button" data-rich-command="undo" aria-label="Undo">Undo</button><button type="button" data-rich-command="redo" aria-label="Redo">Redo</button></div>' +
-      '<div class="rich-editor-canvas' + minClass + '" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="' + (kind === 'main' ? 'Lesson body rich text editor' : 'Lesson body rich text editor for selected audience') + '" data-visual-editor="true" data-visual-kind="' + esc(kind) + '" data-audience="' + esc(audience) + '" data-field="' + field + '" data-placeholder="Start writing your lesson…">' +
+      '<div class="rich-editor-canvas' + minClass + '" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="' + (kind === 'main' ? 'Lesson body rich text editor' : 'Lesson body rich text editor for selected audience') + '" data-visual-editor="true" data-visual-kind="' + esc(kind) + '" data-audience="' + esc(audience) + '" data-lesson-id="' + esc(String(options.lessonId || '')) + '" data-field="' + field + '" data-placeholder="Start writing your lesson…">' +
       markdownToVisualEditor(value) + '</div></div>';
   }
   function syncVisualEditorToModel(editor) {
@@ -2502,7 +2534,30 @@ body.builder-dialog-open { overflow:hidden; }
       '</strong><p>' + esc(readyNote || 'The source remains private and is never exposed as a public file link.') +
       '</p>' + detail + '</div>';
   }
-  function lessonFields(l){if(l&&!l.notebook)l.notebook={title:'Before you make the call',prompts:[]};if(l&&l.notebook&&(!Array.isArray(l.notebook.prompts)||l.notebook.prompts.length===0))l.notebook.prompts=[{label:'Pause',text:'What evidence is visible?'},{label:'Interpret',text:'What could it mean in context?'},{label:'Apply',text:'What would change your view?'}];if(l&&l.notebook&&String(l.notebook.title||'').trim()==='Your Trading Notebook')l.notebook.title='Before you make the call';if(l&&!l.videoUrl)l.videoUrl='';return `<div class="section-intro"><h3>Lesson content</h3><p>Write the main lesson first, then switch audience to customise an entire country or region version in this same editor. The same rich-text tools work for both.</p></div>${l?`<div data-lesson-body-audience-controls>${lessonBodyAudienceControlsMarkup(l)}</div><div class="lesson-outline-layout"><aside class="lesson-outline-aside">${lessonOutlineMarkup()}</aside><div class="lesson-outline-content"><div class="field"><label>${lessonBodyAudienceLabel()}</label>${visualEditorMarkup(lessonBodyForAudience(l), {kind: lessonBodyEditorKind(), audience: selectedLessonBodyAudience()})}<span class="help">Use the toolbar above to format headings, emphasis, lists, links, quotes, dividers, and tables. To add a chart between paragraphs, click where it belongs, then choose Figures → Insert at cursor. The website preview preserves this placement.</span></div>${courseCardPickerMarkup()}</div></div><div class="helper-note">This is the content learners will read in the Learning Room. Review the website preview before submitting the course for review.</div><div class="field" style="margin-top:14px"><label>Legacy video URL (unprotected)</label><input class="input" type="url" data-entity="lesson" data-field="videoUrl" value="${esc(l.videoUrl||"")}" placeholder="https://…"><span class="help">This direct link is not protected and production learner pages hide it by default. Use the protected video upload below for paid course content; do not paste a private MP4 URL here.</span></div><div class="related-course-box" style="margin-top:14px"><h4>Protected lesson video</h4><p>Upload the original source here. It is stored privately in Google Drive and never exposed as a public file link.</p>${protectedVideoSummaryMarkup(l.protectedVideo)}<div class="field" style="margin-top:10px"><label>Upload or replace source video</label><input class="input" type="file" accept=".mp4,.mov,.mkv,.webm,video/mp4,video/quicktime,video/x-matroska,video/webm" data-protected-video-upload="${esc(l.id)}"><span class="help">MP4, MOV, MKV or WebM · Maximum 5 GB. Save the draft first; the upload remains attached to this lesson if you reorder or rename it.</span></div><div class="microcopy" role="status" aria-live="polite" data-protected-video-status></div></div><div class="related-course-box"><h4>Notebook prompts</h4><p>These editable prompts appear in the learner’s Your Trading Notebook section.</p><div class="field"><label>Notebook heading</label><input class="input" data-entity="notebook" data-field="title" value="${esc(l.notebook?.title||"Before you make the call")}"><span class="help">This is the large heading shown inside the Your Trading Notebook section of the learner view.</span></div>${(l.notebook?.prompts||[]).map((prompt,index)=>`<div class="q-card"><div class="field"><label>Prompt ${index+1} label</label><input class="input" data-entity="notebook-prompt" data-index="${index}" data-field="label" value="${esc(prompt.label||"")}"></div><div class="field" style="margin-top:8px"><label>Prompt text</label><textarea class="textarea" data-entity="notebook-prompt" data-index="${index}" data-field="text">${esc(prompt.text||"")}</textarea></div></div>`).join("")}</div><div class="notebook-editor-preview"><h4>How learners will see the notebook</h4><p>Preview the styled notebook block here. Changes to the heading or prompts above update this preview.</p><div data-notebook-preview>${notebookPreviewMarkup(l)}</div></div><div class="related-course-box"><h4>Related-course metadata (optional)</h4><p>These selections record course relationships for discovery; they do not insert a card into the lesson body. To place the compact Option 3 inline course card, use the companion-course picker directly below the Lesson body field. Individual lesson links are managed separately.</p><input class="input" type="search" data-related-course-search placeholder="Search published or announced courses by title or topic" aria-label="Search published or announced related courses"><div class="related-course-list">${demoOffers.map(course=>{const checked=(l.relatedCourseIds||[]).includes(course.id);return `<div class="related-course-item related-course-entry"><label class="related-course-choice"><input type="checkbox" data-related-course="${esc(course.id)}" ${checked ? "checked" : ""}><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">${esc(course.state)}${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}${course.duration ? " · " + esc(course.duration) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></label></div>`;}).join("")}${comingSoonOffers.map(course=>`<div class="related-course-item related-course-entry"><div class="related-course-choice"><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">Coming soon${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></div></div>`).join("")}${demoOffers.length || comingSoonOffers.length ? "" : '<p class="microcopy">No published or announced courses are available to associate yet.</p>'}</div><div class="helper-note">These selections record related-course metadata only. Use the dedicated inline course-card picker below Lesson body to insert a visual companion-course card into the lesson. No course is automatically published.</div></div><div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap"><button class="btn" type="button" data-action="go-curriculum">← Curriculum</button><button class="btn primary" type="button" data-action="go-questions">Edit practice questions →</button></div>`:'<div class="empty-state"><p>Select a lesson in the curriculum first.</p></div>'}`;}
+  function lessonImageTrayMarkup(lesson) {
+    const images = Array.isArray(lesson?.images) ? lesson.images : (lesson?.image ? [lesson.image] : []);
+    const heading = '<div class="tt-lesson-image-tray-heading"><strong>Drag an image into the lesson</strong><span>Drop it between paragraphs, or use Insert at cursor.</span></div>';
+    if (!images.length) {
+      return '<section class="tt-lesson-image-tray is-empty" aria-label="Lesson image tray">' + heading +
+        '<p>No images yet. Upload charts in Figures to make them available here.</p></section>';
+    }
+    const items = images.map((image, index) => {
+      const imageId = String(image.id || image.assetUuid || '');
+      if (!imageId) return '';
+      const title = String(image.title || '').trim() || String(image.alt || '').trim() || 'Untitled image';
+      const source = editorImagePreviewSource(image);
+      const visual = source ? '<img src="' + esc(source) + '" alt="" loading="lazy">' : '<span>Saved image</span>';
+      return '<div class="tt-lesson-image-tray-item" draggable="true" data-image-tray-item="' + esc(imageId) +
+        '" data-image-tray-lesson="' + esc(String(lesson.id || '')) + '" role="group" aria-label="Drag ' + esc(title) + ' into the lesson">' +
+        '<span class="tt-lesson-image-tray-thumb">' + visual + '</span>' +
+        '<span class="tt-lesson-image-tray-copy"><strong>' + esc(title) + '</strong><small>IMAGE ' + String(index + 1).padStart(2, '0') + ' · DRAG TO LESSON</small></span>' +
+        '<button class="tt-lesson-image-tray-insert" type="button" data-action="insert-figure" data-id="' + esc(imageId) + '">Insert at cursor</button>' +
+        '</div>';
+    }).join('');
+    return '<section class="tt-lesson-image-tray" aria-label="Lesson image tray">' + heading +
+      '<div class="tt-lesson-image-tray-items">' + items + '</div></section>';
+  }
+  function lessonFields(l){if(l&&!l.notebook)l.notebook={title:'Before you make the call',prompts:[]};if(l&&l.notebook&&(!Array.isArray(l.notebook.prompts)||l.notebook.prompts.length===0))l.notebook.prompts=[{label:'Pause',text:'What evidence is visible?'},{label:'Interpret',text:'What could it mean in context?'},{label:'Apply',text:'What would change your view?'}];if(l&&l.notebook&&String(l.notebook.title||'').trim()==='Your Trading Notebook')l.notebook.title='Before you make the call';if(l&&!l.videoUrl)l.videoUrl='';return `<div class="section-intro"><h3>Lesson content</h3><p>Write the main lesson first, then switch audience to customise an entire country or region version in this same editor. The same rich-text tools work for both.</p></div>${l?`<div data-lesson-body-audience-controls>${lessonBodyAudienceControlsMarkup(l)}</div><div class="lesson-outline-layout"><aside class="lesson-outline-aside">${lessonOutlineMarkup()}</aside><div class="lesson-outline-content"><div class="field"><label>${lessonBodyAudienceLabel()}</label>${lessonImageTrayMarkup(l)}${visualEditorMarkup(lessonBodyForAudience(l), {kind: lessonBodyEditorKind(), audience: selectedLessonBodyAudience(), lessonId: l.id})}<span class="help">Drag a chart from the image tray above into the lesson, or use Insert at cursor. To reposition an image already in the lesson, drag its handle; up/down controls are also available.</span></div>${courseCardPickerMarkup()}</div></div><div class="helper-note">This is the content learners will read in the Learning Room. Review the website preview before submitting the course for review.</div><div class="field" style="margin-top:14px"><label>Legacy video URL (unprotected)</label><input class="input" type="url" data-entity="lesson" data-field="videoUrl" value="${esc(l.videoUrl||"")}" placeholder="https://…"><span class="help">This direct link is not protected and production learner pages hide it by default. Use the protected video upload below for paid course content; do not paste a private MP4 URL here.</span></div><div class="related-course-box" style="margin-top:14px"><h4>Protected lesson video</h4><p>Upload the original source here. It is stored privately in Google Drive and never exposed as a public file link.</p>${protectedVideoSummaryMarkup(l.protectedVideo)}<div class="field" style="margin-top:10px"><label>Upload or replace source video</label><input class="input" type="file" accept=".mp4,.mov,.mkv,.webm,video/mp4,video/quicktime,video/x-matroska,video/webm" data-protected-video-upload="${esc(l.id)}"><span class="help">MP4, MOV, MKV or WebM · Maximum 5 GB. Save the draft first; the upload remains attached to this lesson if you reorder or rename it.</span></div><div class="microcopy" role="status" aria-live="polite" data-protected-video-status></div></div><div class="related-course-box"><h4>Notebook prompts</h4><p>These editable prompts appear in the learner’s Your Trading Notebook section.</p><div class="field"><label>Notebook heading</label><input class="input" data-entity="notebook" data-field="title" value="${esc(l.notebook?.title||"Before you make the call")}"><span class="help">This is the large heading shown inside the Your Trading Notebook section of the learner view.</span></div>${(l.notebook?.prompts||[]).map((prompt,index)=>`<div class="q-card"><div class="field"><label>Prompt ${index+1} label</label><input class="input" data-entity="notebook-prompt" data-index="${index}" data-field="label" value="${esc(prompt.label||"")}"></div><div class="field" style="margin-top:8px"><label>Prompt text</label><textarea class="textarea" data-entity="notebook-prompt" data-index="${index}" data-field="text">${esc(prompt.text||"")}</textarea></div></div>`).join("")}</div><div class="notebook-editor-preview"><h4>How learners will see the notebook</h4><p>Preview the styled notebook block here. Changes to the heading or prompts above update this preview.</p><div data-notebook-preview>${notebookPreviewMarkup(l)}</div></div><div class="related-course-box"><h4>Related-course metadata (optional)</h4><p>These selections record course relationships for discovery; they do not insert a card into the lesson body. To place the compact Option 3 inline course card, use the companion-course picker directly below the Lesson body field. Individual lesson links are managed separately.</p><input class="input" type="search" data-related-course-search placeholder="Search published or announced courses by title or topic" aria-label="Search published or announced related courses"><div class="related-course-list">${demoOffers.map(course=>{const checked=(l.relatedCourseIds||[]).includes(course.id);return `<div class="related-course-item related-course-entry"><label class="related-course-choice"><input type="checkbox" data-related-course="${esc(course.id)}" ${checked ? "checked" : ""}><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">${esc(course.state)}${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}${course.duration ? " · " + esc(course.duration) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></label></div>`;}).join("")}${comingSoonOffers.map(course=>`<div class="related-course-item related-course-entry"><div class="related-course-choice"><span><strong>${esc(course.title)}</strong><span>${esc(course.summary)}</span><span class="related-meta">Coming soon${course.category ? " · " + esc(course.category) : ""}${course.level ? " · " + esc(course.level) : ""}</span><span class="related-course-outcomes">${(course.outcomes||[]).slice(0,2).map(outcome=>`<span class="related-course-outcome">${esc(outcome)}</span>`).join("")}</span></span></div></div>`).join("")}${demoOffers.length || comingSoonOffers.length ? "" : '<p class="microcopy">No published or announced courses are available to associate yet.</p>'}</div><div class="helper-note">These selections record related-course metadata only. Use the dedicated inline course-card picker below Lesson body to insert a visual companion-course card into the lesson. No course is automatically published.</div></div><div style="margin-top:14px;display:flex;gap:9px;flex-wrap:wrap"><button class="btn" type="button" data-action="go-curriculum">← Curriculum</button><button class="btn primary" type="button" data-action="go-questions">Edit practice questions →</button></div>`:'<div class="empty-state"><p>Select a lesson in the curriculum first.</p></div>'}`;}
   function questionImageMarkup(q, l) {
     const images = Array.isArray(l.images) ? l.images : (l.image ? [l.image] : []);
     const image = images.find(function(item) {
@@ -4416,6 +4471,9 @@ body.builder-dialog-open { overflow:hidden; }
   document.addEventListener('selectionchange', captureRichEditorRange);
   let activeEditorImageDrag = null;
   let activeEditorImageDragSource = null;
+  let activeEditorImageDragMode = '';
+  let activeEditorImageDragImage = null;
+  let activeEditorImageDragLessonId = '';
 
   function editorDirectChild(editor, node) {
     let element = node instanceof Element ? node : node?.parentElement;
@@ -4442,9 +4500,30 @@ body.builder-dialog-open { overflow:hidden; }
     document.querySelectorAll('[data-editor-image-block].is-image-dragging').forEach(block => block.classList.remove('is-image-dragging'));
     activeEditorImageDrag = null;
     activeEditorImageDragSource = null;
+    activeEditorImageDragMode = '';
+    activeEditorImageDragImage = null;
+    activeEditorImageDragLessonId = '';
   }
 
   document.addEventListener('dragstart', event => {
+    const trayItem = event.target.closest?.('[data-image-tray-item]');
+    if (trayItem) {
+      const lessonId = String(trayItem.dataset.imageTrayLesson || '');
+      const lesson = currentLesson();
+      if (!lesson || !lessonId || String(lesson.id || '') !== lessonId) return;
+      const images = Array.isArray(lesson.images) ? lesson.images : (lesson.image ? [lesson.image] : []);
+      const image = images.find(item => String(item.id || item.assetUuid || '') === String(trayItem.dataset.imageTrayItem || ''));
+      if (!image || !image.id) return;
+      activeEditorImageDragMode = 'insert';
+      activeEditorImageDragImage = image;
+      activeEditorImageDragLessonId = lessonId;
+      if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = 'copy';
+        event.dataTransfer.setData('text/plain', 'tradethesis-course-image-insert:' + String(image.id));
+      }
+      return;
+    }
+
     const handle = event.target.closest?.('[data-editor-drag-handle]');
     if (!handle) return;
     const block = handle.closest('[data-editor-image-block="true"][data-editor-token][data-editor-block="true"]');
@@ -4452,9 +4531,12 @@ body.builder-dialog-open { overflow:hidden; }
     if (!block || !editor) return;
     activeEditorImageDrag = block;
     activeEditorImageDragSource = editor;
+    activeEditorImageDragMode = 'move';
+    activeEditorImageDragLessonId = String(editor.dataset.lessonId || '');
+    activeEditorImageDragImage = null;
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = 'move';
-      event.dataTransfer.setData('text/plain', 'tradethesis-course-image');
+      event.dataTransfer.setData('text/plain', 'tradethesis-course-image-move');
     }
     block.classList.add('is-image-dragging');
     editor.classList.add('is-image-dragging');
@@ -4462,37 +4544,51 @@ body.builder-dialog-open { overflow:hidden; }
 
   document.addEventListener('dragover', event => {
     const editor = event.target.closest?.('[data-visual-editor]');
-    if (!activeEditorImageDrag || !editor || editor !== activeEditorImageDragSource) return;
+    if (!activeEditorImageDragMode || !editor) return;
+    if (String(editor.dataset.lessonId || '') !== activeEditorImageDragLessonId) return;
+    if (activeEditorImageDragMode === 'move' && editor !== activeEditorImageDragSource) return;
     event.preventDefault();
-    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    if (event.dataTransfer) event.dataTransfer.dropEffect = activeEditorImageDragMode === 'insert' ? 'copy' : 'move';
     clearEditorImageDropTargets(editor);
     const placement = editorImageDropPlacement(editor, event);
     if (placement) placement.target.setAttribute('data-editor-drop-side', placement.after ? 'after' : 'before');
     else if (event.target === editor) editor.classList.add('is-image-drop-end');
+    editor.classList.add('is-image-dragging');
   });
 
   document.addEventListener('drop', event => {
-    if (!activeEditorImageDrag) return;
+    if (!activeEditorImageDragMode) return;
     const editor = event.target.closest?.('[data-visual-editor]');
-    if (!editor || editor !== activeEditorImageDragSource) return;
+    if (!editor || String(editor.dataset.lessonId || '') !== activeEditorImageDragLessonId) return;
+    if (activeEditorImageDragMode === 'move' && editor !== activeEditorImageDragSource) return;
     event.preventDefault();
     const placement = editorImageDropPlacement(editor, event);
-    if (!placement) {
-      if (event.target === editor) editor.appendChild(activeEditorImageDrag);
-      else {
-        resetEditorImageDrag();
-        return;
-      }
-    } else if (placement.after) {
-      editor.insertBefore(activeEditorImageDrag, placement.target.nextSibling);
+
+    if (activeEditorImageDragMode === 'insert') {
+      const image = activeEditorImageDragImage;
+      if (!image || !image.id) { resetEditorImageDrag(); return; }
+      const alt = String(image.alt || image.title || 'Course image').replace(/[\]\r\n]/g, ' ');
+      const token = '![' + alt + '](asset://' + String(image.id) + ')';
+      const holder = document.createElement('div');
+      holder.innerHTML = inlineImageCaptionMarkup(token);
+      const block = holder.firstElementChild;
+      if (!block) { resetEditorImageDrag(); return; }
+      if (placement) editor.insertBefore(block, placement.after ? placement.target.nextSibling : placement.target);
+      else if (event.target === editor) editor.appendChild(block);
+      else { resetEditorImageDrag(); return; }
     } else {
-      editor.insertBefore(activeEditorImageDrag, placement.target);
+      if (!activeEditorImageDrag) { resetEditorImageDrag(); return; }
+      if (placement) editor.insertBefore(activeEditorImageDrag, placement.after ? placement.target.nextSibling : placement.target);
+      else if (event.target === editor) editor.appendChild(activeEditorImageDrag);
+      else { resetEditorImageDrag(); return; }
     }
-    const movedEditor = editor;
+
+    const editedEditor = editor;
+    const wasInsert = activeEditorImageDragMode === 'insert';
     resetEditorImageDrag();
-    syncVisualEditorToModel(movedEditor);
+    syncVisualEditorToModel(editedEditor);
     captureRichEditorRange();
-    toast('Image moved in the lesson.');
+    toast(wasInsert ? 'Image inserted at the drop point in the lesson.' : 'Image moved in the lesson.');
   });
 
   document.addEventListener('dragend', resetEditorImageDrag);
