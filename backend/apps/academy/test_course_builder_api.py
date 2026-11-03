@@ -180,7 +180,7 @@ class CourseBuilderApiTests(TestCase):
             )
         )
 
-        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.status_code, 200)
         self.assertEqual(b"".join(response.streaming_content), source_path.read_bytes())
         self.assertEqual(
             response["Content-Type"].split(";")[0],
