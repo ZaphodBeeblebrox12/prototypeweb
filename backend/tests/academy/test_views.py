@@ -67,6 +67,23 @@ class AcademyViewTests(TestCase):
         self.assertContains(response, "Private lesson")
         self.assertNotContains(response, "SECRET PAID LESSON BODY")
 
+    def test_published_course_overview_is_public_without_exposing_paid_lesson_body(self):
+        self.client.logout()
+        response = self.client.get(reverse("academy:course-detail", args=[self.course.slug]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Trading Path")
+        self.assertContains(response, "Preview lesson")
+        self.assertContains(response, "Create an account to preview")
+        self.assertNotContains(response, "SECRET PAID LESSON BODY")
+        self.assertContains(response, 'name="robots" content="noindex, follow"')
+
+    def test_unpublished_course_overview_remains_private_to_anonymous_visitors(self):
+        self.client.logout()
+        self.course.status = Course.Status.DRAFT
+        self.course.save(update_fields=["status", "updated_at"])
+        response = self.client.get(reverse("academy:course-detail", args=[self.course.slug]))
+        self.assertEqual(response.status_code, 404)
+
     def test_course_overview_renders_markdown_description_as_heading_and_list(self):
         self.course.description = (
             "### What learners will practise\n\n"

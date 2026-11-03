@@ -1,6 +1,19 @@
 {% extends "base.html" %}
 {% load static %}
 {% block title %}{% if course_import_preview %}Website preview · {{ course.title }} · TradeThesis Academy{% else %}{{ course.title }} · TradeThesis Academy{% endif %}{% endblock %}
+{% block extra_meta %}
+<meta name="description" content="{{ seo_description }}">
+{% if seo_indexable %}<link rel="canonical" href="{{ canonical_url }}">{% endif %}
+<meta name="robots" content="{% if seo_indexable %}index, follow{% else %}noindex, follow{% endif %}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TradeThesis">
+<meta property="og:title" content="{{ course.title }} · TradeThesis Academy">
+<meta property="og:description" content="{{ seo_description }}">
+<meta property="og:url" content="{{ canonical_url }}">
+<meta property="og:image" content="{{ seo_image_url }}">
+<meta property="og:image:alt" content="TradeThesis course overview for {{ course.title }}">
+<script type="application/ld+json">{{ course_json_ld|safe }}</script>
+{% endblock %}
 {% block extra_css %}<link rel="stylesheet" href="{{ public_site_url }}/assets/course-share.css?v=20261103-share-invitation-r3"><link rel="stylesheet" href="{% static 'academy/course-overview.css' %}">{% if course_import_preview %}<link rel="stylesheet" href="{% static 'academy/course-admin-preview.css' %}">{% endif %}{% endblock %}
 {% block page_context %}
 <div class="page-context-status page-context-status--standalone" aria-label="Account status">
@@ -50,7 +63,11 @@
         {% if course_import_preview %}
           {% if total_lessons %}<a class="tt-overview-button" href="{{ first_preview_url }}">Open first lesson ↗</a>{% else %}<a class="tt-overview-button" href="#tt-course-curriculum">Explore curriculum ↓</a>{% endif %}
         {% elif first_accessible_lesson %}
+          {% if user.is_authenticated %}
           <a class="tt-overview-button" href="{% url 'academy:lesson' course.slug first_accessible_lesson.id %}">{% if has_course_access %}Continue learning{% else %}Explore a preview lesson{% endif %} <span aria-hidden="true">↗</span></a>
+          {% else %}
+          <a class="tt-overview-button" href="{% url 'account_signup' %}?next={{ request.get_full_path|urlencode }}">Create an account to preview ↗</a>
+          {% endif %}
         {% else %}
           <a class="tt-overview-button" href="#tt-course-curriculum">Explore curriculum <span aria-hidden="true">↓</span></a>
         {% endif %}
@@ -86,18 +103,26 @@
   {% if can_enrol_free %}
   <section class="tt-overview-access" aria-labelledby="tt-free-course-access-title">
     <div><h2 id="tt-free-course-access-title">Start this course for free</h2><p>Enrol with your account and keep permanent access. No payment or subscription is required.</p></div>
+    {% if user.is_authenticated %}
     <form action="{% url 'academy:enrol-free-course' course.slug %}" method="post">
       {% csrf_token %}<button type="submit" class="tt-overview-button">Enrol for free ↗</button>
     </form>
+    {% else %}
+    <a class="tt-overview-button" href="{% url 'account_signup' %}?next={{ request.get_full_path|urlencode }}">Create a free account ↗</a>
+    {% endif %}
   </section>
   {% endif %}
 
   {% if free_membership_plan and not has_course_access %}
   <section class="tt-overview-access" aria-labelledby="tt-free-membership-access-title">
     <div><h2 id="tt-free-membership-access-title">Included in TradeThesis Free</h2><p>Join the free membership to unlock this course. No purchase or payment details are required.</p></div>
+    {% if user.is_authenticated %}
     <form action="{% url 'academy:join-free-membership' course.slug %}" method="post">
       {% csrf_token %}<button type="submit" class="tt-overview-button">Join free membership ↗</button>
     </form>
+    {% else %}
+    <a class="tt-overview-button" href="{% url 'account_signup' %}?next={{ request.get_full_path|urlencode }}">Create a free account ↗</a>
+    {% endif %}
   </section>
   {% endif %}
 
@@ -105,11 +130,16 @@
   {% if course.access_type == 'paid' or course.access_type == 'mixed' %}
   <section class="tt-overview-access" aria-labelledby="tt-course-access-title">
     <div><h2 id="tt-course-access-title">Get the full course</h2><p>Use secure checkout to enrol. Course access is granted only after the payment provider confirms payment.</p>{% if offer_price_display %}<p class="tt-overview-hero-note"><strong>{{ offer_price_display }}</strong> one-time purchase.</p>{% endif %}</div>
+    {% if user.is_authenticated %}
     <form action="{% url 'payment-start' %}" method="post" data-academy-checkout>
       {% csrf_token %}<input type="hidden" name="plan_id" value="{{ offer.plan_id }}"><input type="hidden" name="interval" value="one_time">
       <button type="submit" class="tt-overview-button">Continue to secure checkout ↗</button>
       <p class="tt-overview-checkout-error" data-checkout-error role="status"></p>
     </form>
+    {% else %}
+    <a class="tt-overview-button" href="{% url 'account_signup' %}?next={{ request.get_full_path|urlencode }}">Create an account to enrol ↗</a>
+    <p class="small">Already registered? <a href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">Sign in</a>.</p>
+    {% endif %}
   </section>
   {% endif %}
   {% endif %}

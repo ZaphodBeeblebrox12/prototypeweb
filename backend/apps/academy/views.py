@@ -395,7 +395,6 @@ def course_share(request, course_slug):
     })
 
 
-@login_required
 def course_detail(request, course_slug):
     from .services import get_active_plan_subscription, get_free_membership_plan_for_course
 
@@ -434,10 +433,14 @@ def course_detail(request, course_slug):
         .prefetch_related(Prefetch("lessons", queryset=lesson_queryset))
     )
     lesson_ids = [lesson.pk for module in modules for lesson in module.lessons.all()]
-    progress_by_lesson = {
-        p.lesson_id: p
-        for p in LessonProgress.objects.filter(user=request.user, lesson_id__in=lesson_ids)
-    }
+    progress_by_lesson = (
+        {
+            p.lesson_id: p
+            for p in LessonProgress.objects.filter(user=request.user, lesson_id__in=lesson_ids)
+        }
+        if request.user.is_authenticated
+        else {}
+    )
     module_rows = []
     now = timezone.now()
     access_record = entitlement or membership_subscription
@@ -488,14 +491,48 @@ def course_detail(request, course_slug):
         module__is_published=True,
         is_published=True,
     ).values_list("pk", flat=True)
-    completed = LessonProgress.objects.filter(
-        user=request.user,
-        lesson_id__in=visible_lesson_ids,
-        status=LessonProgress.Status.COMPLETED,
-    ).count()
+    completed = (
+        LessonProgress.objects.filter(
+            user=request.user,
+            lesson_id__in=visible_lesson_ids,
+            status=LessonProgress.Status.COMPLETED,
+        ).count()
+        if request.user.is_authenticated
+        else 0
+    )
     total = Lesson.objects.filter(
         module__course=course, module__is_published=True, is_published=True
     ).count()
+    canonical_url = request.build_absolute_uri(
+        reverse("academy:course-detail", args=[course.slug])
+    )
+    seo_description = re.sub(
+        r"\s+", " ", str(course.summary or course.description or "")
+    ).strip()[:160]
+    if not seo_description:
+        seo_description = f"Explore the {course.title} course from TradeThesis."
+    seo_indexable = bool(
+        getattr(settings, "TRADETHESIS_SEO_INDEXABLE", False)
+        and course.status == Course.Status.PUBLISHED
+    )
+    course_schema = {
+        "@context": "https://schema.org",
+        "@type": "Course",
+        "name": course.title,
+        "description": seo_description,
+        "provider": {
+            "@type": "Organization",
+            "name": "TradeThesis",
+            "url": settings.TRADETHESIS_PUBLIC_SITE_URL,
+        },
+        "url": canonical_url,
+    }
+    if course.level:
+        course_schema["educationalLevel"] = course.level
+    course_json_ld = json.dumps(course_schema, ensure_ascii=False).replace(
+        "<", "\\u003c"
+    ).replace(">", "\\u003e").replace("&", "\\u0026")
+
     return render(
         request,
         "academy/course_detail.html",
@@ -525,6 +562,13 @@ def course_detail(request, course_slug):
             "first_accessible_lesson": first_accessible_lesson,
             "is_course_content_admin": is_course_content_admin(request.user),
             "progress_percent": round(completed * 100 / total) if total else 0,
+            "canonical_url": canonical_url,
+            "seo_description": seo_description,
+            "seo_image_url": (
+                f"{settings.TRADETHESIS_PUBLIC_SITE_URL}/assets/tradethesis-social-preview.jpg"
+            ),
+            "seo_indexable": seo_indexable,
+            "course_json_ld": course_json_ld,
         },
     )
 

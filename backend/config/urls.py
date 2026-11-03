@@ -34,9 +34,12 @@ from apps.admin_desk_views import (
     admin_desk_operations_job, admin_desk_operations_provisioning,
 )
 from apps.core.views import health_check
+from apps.academy.seo import academy_robots_txt, academy_sitemap_xml
 from apps.emailing.webhooks import resend_webhook
 
 urlpatterns = [
+    path("robots.txt", academy_robots_txt, name="academy_robots"),
+    path("sitemap.xml", academy_sitemap_xml, name="academy_sitemap"),
     # Render readiness probe: confirm Django and its primary database respond.
     path("health/", health_check, name="health_check"),
     # Resend delivers signed delivery/bounce/complaint events here.
