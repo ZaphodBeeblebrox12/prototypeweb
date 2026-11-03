@@ -643,23 +643,30 @@ def render_safe_markdown(
         image_url = asset_urls.get(asset_id, "")
         if image_url:
             safe_url = escape(str(image_url), quote=True)
-            body = (
-                f'<span class="tt-purpose-figure-image"><img src="{safe_url}" alt="{safe_alt}" '
+            image = (
+                f'<img class="tt-course-reference-img" src="{safe_url}" alt="{safe_alt}" '
                 'loading="lazy" decoding="async" tabindex="0" role="button" '
-                'aria-label="Enlarge course figure"></span>'
+                'aria-label="Enlarge course figure">'
             )
         else:
-            body = (
+            image = (
                 '<span class="tt-purpose-figure-missing" role="status">'
                 "<strong>Figure awaiting upload</strong>"
                 "<span>The image for this figure is not available in this preview.</span>"
                 "</span>"
             )
-        caption_markup = f"<figcaption><p>{safe_caption}</p></figcaption>" if safe_caption else ""
+        caption_markup = (
+            f'<figcaption><strong class="tt-course-reference-title">{escape(title)}</strong>'
+            f'<p>{safe_caption}</p></figcaption>'
+            if safe_caption
+            else f'<figcaption><strong class="tt-course-reference-title">{escape(title)}</strong></figcaption>'
+        )
         markup = (
-            f'<figure class="tt-purpose-figure" data-figure-id="{safe_asset_id}">'
-            f"{figure_header(title)}"
-            f'<span class="tt-purpose-figure-body">{body}</span>{caption_markup}</figure>'
+            f'<figure class="tt-purpose-figure tt-course-reference-figure" data-figure-id="{safe_asset_id}">'
+            '<span class="tt-course-reference-head">'
+            f'<span class="tt-course-reference-module">{safe_module_title}</span>'
+            '<span class="tt-course-reference-kind">CHART REFERENCE</span></span>'
+            f'<span class="tt-course-reference-image">{image}</span>{caption_markup}</figure>'
         )
         token = f"TTSTRUCTUREDFIGURE{len(figure_frames)}END"
         figure_frames[token] = markup
@@ -843,15 +850,34 @@ def render_safe_markdown(
         rendered,
         flags=re.IGNORECASE | re.DOTALL,
     )
-    # Existing authored image-plus-caption pairs continue to work for old course content.
+    # Existing authored image-plus-caption pairs continue to work, but use the
+    # dedicated chart-reference frame rather than the generic legacy course figure.
     rendered = re.sub(
         r"<img\b", '<img tabindex="0" role="button" aria-label="Enlarge course figure"', rendered
     )
+    def wrap_legacy_course_image(match):
+        image_html, caption_html = match.groups()
+        return (
+            '<figure class="tt-purpose-figure tt-course-reference-figure">'
+            '<span class="tt-course-reference-head">'
+            '<span class="tt-course-reference-module">LESSON IMAGE</span>'
+            '<span class="tt-course-reference-kind">CHART REFERENCE</span></span>'
+            f'<span class="tt-course-reference-image">{image_html}</span>'
+            f'<figcaption>{caption_html}</figcaption></figure>'
+        )
+
     rendered = re.sub(
         r"<p>(<img\b[^>]*>)</p>\s*<p>(.*?)</p>",
-        r'<figure class="tt-course-figure">\1<figcaption>\2</figcaption></figure>',
+        wrap_legacy_course_image,
         rendered,
         flags=re.DOTALL,
+    )
+    rendered = re.sub(
+        r"<p>(<img\b[^>]*>)</p>",
+        lambda match: wrap_legacy_course_image(
+            type("ImageMatch", (), {"groups": lambda self: (match.group(1), "")})()
+        ),
+        rendered,
     )
     for token, markup in figure_frames.items():
         rendered = rendered.replace(f"<p>{token}</p>", markup).replace(token, markup)
