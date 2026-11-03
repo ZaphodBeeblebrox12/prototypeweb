@@ -213,6 +213,27 @@ class SharedLessonRenderingTests(SimpleTestCase):
             sections["idea_html"] + sections["examples_html"] + sections["practice_html"],
         )
 
+    def test_tab_route_marker_inside_quote_is_hidden_without_breaking_quote(self):
+        source = "\\n".join(
+            [
+                "## Why prices move",
+                "",
+                "Prices move for one reason only:",
+                "",
+                "> [[lesson-tab:idea]]",
+                ">",
+                "> **When aggressive buyers outnumber aggressive sellers, price rises.**",
+            ]
+        )
+
+        sections = build_lesson_sections(source)
+        rendered = sections["idea_html"] + sections["examples_html"] + sections["practice_html"]
+
+        self.assertNotIn("[[lesson-tab:idea]]", rendered)
+        self.assertIn("<blockquote>", sections["idea_html"])
+        self.assertIn("<strong>When aggressive buyers outnumber aggressive sellers, price rises.</strong>", sections["idea_html"])
+        self.assertIn("Why prices move", sections["idea_html"])
+
     def test_explicit_tab_route_applies_to_the_heading_after_the_marker(self):
         source = "\n".join(
             [
