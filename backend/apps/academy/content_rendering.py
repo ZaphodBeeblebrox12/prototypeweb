@@ -636,46 +636,69 @@ def render_safe_markdown(
         alt = str(metadata.get("alt") or alt_from_markdown or "Course image").strip()
         title = display_image_title(metadata)
         caption = str(metadata.get("caption") or "").strip()
-
         safe_alt = escape(alt, quote=True)
         safe_asset_id = escape(asset_id, quote=True)
-        safe_caption = escape(caption)
         image_url = asset_urls.get(asset_id, "")
         if image_url:
-            safe_url = escape(str(image_url), quote=True)
             image = (
-                f'<img class="tt-course-reference-img" src="{safe_url}" alt="{safe_alt}" '
+                '<span class="tt-purpose-figure-image">'
+                f'<img class="chart-image" src="{escape(str(image_url), quote=True)}" alt="{safe_alt}" '
                 'loading="lazy" decoding="async" tabindex="0" role="button" '
-                'aria-label="Enlarge course figure">'
+                'aria-label="Enlarge course figure"></span>'
             )
         else:
             image = (
-                '<span class="tt-purpose-figure-missing" role="status">'
-                "<strong>Figure awaiting upload</strong>"
-                "<span>The image for this figure is not available in this preview.</span>"
+                '<span class="chart-image chart-image-missing" role="status">'
+                "Figure awaiting upload"
                 "</span>"
             )
         caption_markup = (
-            f'<figcaption><strong class="tt-course-reference-title">{escape(title)}</strong>'
-            f'<p>{safe_caption}</p></figcaption>'
-            if safe_caption
-            else f'<figcaption><strong class="tt-course-reference-title">{escape(title)}</strong></figcaption>'
+            f'<span class="caption"><span class="caption-label">Note</span> — {escape(caption)}</span>'
+            if caption else ""
+        )
+        try:
+            image_number = max(1, int(image_block_numbers.get(("asset", asset_id), 1)))
+        except (TypeError, ValueError):
+            image_number = 1
+        number_text = f"{image_number:02d}"
+        safe_title = escape(title or "Chart")
+        item = (
+            '<div class="chart-item"><div class="item-head">'
+            '<span class="item-index">A</span>'
+            f'<span class="item-title">{safe_title}</span></div>'
+            f'{image}{caption_markup}</div>'
+        )
+        group_heading = (
+            '<div class="group-heading"><div class="group-heading-copy">'
+            f'<span class="group-kicker">Chart group · {number_text}</span>'
+            f'<span class="group-title">{safe_title}</span>'
+            '</div><span class="group-mark">01</span></div>'
         )
         markup = (
-            f'<figure class="tt-purpose-figure tt-course-reference-figure" data-figure-id="{safe_asset_id}">'
-            '<span class="tt-course-reference-head">'
-            f'<span class="tt-course-reference-module">{safe_module_title}</span>'
-            '<span class="tt-course-reference-kind">CHART REFERENCE</span></span>'
-            f'<span class="tt-course-reference-image">{image}</span>{caption_markup}</figure>'
+            f'<figure class="tt-purpose-figure tt-image-group-figure tt-image-group-hard-index" data-figure-id="{safe_asset_id}">'
+            '<div class="indexed"><aside class="index-block" aria-label="Group index">'
+            f'<span class="group-number">{number_text}</span>'
+            '<span class="index-label">CHART STUDY</span>'
+            '<span class="image-count">×1</span></aside>'
+            f'<div class="group-content">{group_heading}'
+            f'<div class="chart-grid count-1">{item}</div></div></div></figure>'
         )
         token = f"TTSTRUCTUREDFIGURE{len(figure_frames)}END"
         figure_frames[token] = markup
         return token
 
-    # Number groups by their first appearance in lesson content, independent of media IDs.
+    # Number every chart block in reading order, including standalone images and groups.
+    image_block_numbers = {}
+    chart_block_pattern = re.compile(
+        r"\[\[image-group:([A-Za-z0-9_-]{1,120})\]\]|!\[([^\]]*)\]\(asset://([0-9a-fA-F-]{36})(?:\s+[^)]*)?\)"
+    )
+    for chart_match in chart_block_pattern.finditer(source or ""):
+        key = ("group", chart_match.group(1)) if chart_match.group(1) else ("asset", chart_match.group(3))
+        image_block_numbers.setdefault(key, len(image_block_numbers) + 1)
+
     group_numbers = {}
-    for group_match in _IMAGE_GROUP_TOKEN.finditer(source or ""):
-        group_numbers.setdefault(group_match.group(1), len(group_numbers) + 1)
+    for group_id in _IMAGE_GROUP_TOKEN.findall(source or ""):
+        group_numbers.setdefault(group_id, image_block_numbers.get(("group", group_id), len(group_numbers) + 1))
 
     def replace_image_group(match):
         group_id = match.group(1)
@@ -850,19 +873,49 @@ def render_safe_markdown(
         rendered,
         flags=re.IGNORECASE | re.DOTALL,
     )
-    # Existing authored image-plus-caption pairs continue to work, but use the
-    # dedicated chart-reference frame rather than the generic legacy course figure.
-    rendered = re.sub(
-        r"<img\b", '<img tabindex="0" role="button" aria-label="Enlarge course figure"', rendered
-    )
+    # Legacy authored image markup uses the same one-item Hard-block Index too.
+    def add_legacy_image_controls(match):
+        tag = match.group(0)
+        if re.search(r'\bclass="[^"]*"', tag):
+            tag = re.sub(
+                r'\bclass="([^"]*)"',
+                lambda cls: 'class="' + cls.group(1) + ' chart-image"',
+                tag,
+                count=1,
+            )
+        else:
+            tag = tag.replace("<img", '<img class="chart-image"', 1)
+        if "tabindex=" not in tag:
+            tag = tag.replace("<img", '<img tabindex="0"', 1)
+        if "aria-label=" not in tag:
+            tag = tag.replace("<img", '<img aria-label="Enlarge course figure"', 1)
+        return tag
+
+    rendered = re.sub(r"<img\b[^>]*>", add_legacy_image_controls, rendered)
+
     def wrap_legacy_course_image(image_html, caption_html=""):
+        from html import unescape
+
+        alt_match = re.search(r'\balt="([^"]*)"', image_html)
+        title = escape(unescape(alt_match.group(1)) if alt_match else "Chart")
+        caption_text = re.sub(r"^<p[^>]*>|</p>$", "", str(caption_html or "").strip(), flags=re.DOTALL)
+        caption_markup = (
+            f'<span class="caption"><span class="caption-label">Note</span> — {caption_text}</span>'
+            if caption_text else ""
+        )
         return (
-            '<figure class="tt-purpose-figure tt-course-reference-figure">'
-            '<span class="tt-course-reference-head">'
-            '<span class="tt-course-reference-module">LESSON IMAGE</span>'
-            '<span class="tt-course-reference-kind">CHART REFERENCE</span></span>'
-            f'<span class="tt-course-reference-image">{image_html}</span>'
-            f'<figcaption>{caption_html}</figcaption></figure>'
+            '<figure class="tt-purpose-figure tt-image-group-figure tt-image-group-hard-index">'
+            '<div class="indexed"><aside class="index-block" aria-label="Group index">'
+            '<span class="group-number">01</span><span class="index-label">CHART STUDY</span>'
+            '<span class="image-count">×1</span></aside><div class="group-content">'
+            '<div class="group-heading"><div class="group-heading-copy">'
+            '<span class="group-kicker">Chart group · 01</span>'
+            f'<span class="group-title">{title}</span>'
+            '</div><span class="group-mark">01</span></div>'
+            '<div class="chart-grid count-1"><div class="chart-item"><div class="item-head">'
+            f'<span class="item-index">A</span><span class="item-title">{title}</span></div>'
+            f'<span class="tt-purpose-figure-image">{image_html}</span>{caption_markup}'
+            '</div></div></div></div></figure>'
         )
 
     rendered = re.sub(
