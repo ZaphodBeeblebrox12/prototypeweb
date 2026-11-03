@@ -95,6 +95,63 @@ class CourseBuilderApiTests(TestCase):
             "mode": "save",
         }
 
+    def test_bollinger_bands_manifest_is_offered_as_a_complete_builder_draft(self):
+        from .course_builder_api import (
+            _bollinger_bands_import_candidate,
+            _build_import_payload,
+        )
+
+        # The manifest review importer creates a REVIEW-only record without
+        # builder_state. That must not suppress the independent Builder draft.
+        CourseImport.objects.create(
+            course_slug="understand-bollinger-bands",
+            title="Understand Bollinger Bands",
+            manifest_version="1",
+            content_hash="b" * 64,
+            source_manifest="course-source/understand-bollinger-bands/course-manifest.json",
+            status=CourseImport.Status.REVIEW,
+            imported_by=self.admin,
+            payload={"course": {}, "modules": []},
+        )
+
+        candidate = _bollinger_bands_import_candidate()
+        self.assertIsNotNone(candidate)
+        course = candidate["course"]
+        self.assertEqual(course["slug"], "understand-bollinger-bands")
+        self.assertEqual(len(course["modules"]), 7)
+        lessons = [
+            lesson
+            for module in course["modules"]
+            for lesson in module["lessons"]
+        ]
+        self.assertEqual(len(lessons), 30)
+        self.assertTrue(any(lesson["images"] for lesson in lessons))
+        self.assertTrue(
+            any("Bollinger Bands" in lesson["content"] for lesson in lessons)
+        )
+
+        # The Builder save serializer must keep the manifest's trusted asset IDs.
+        first_image_lesson = next(lesson for lesson in lessons if lesson["images"])
+        stable_asset_id = first_image_lesson["images"][0]["assetUuid"]
+        imported, _image_sources = _build_import_payload(
+            course,
+            "understand-bollinger-bands",
+        )
+        saved_lessons = [
+            lesson
+            for module in imported["modules"]
+            for lesson in module["lessons"]
+        ]
+        self.assertTrue(
+            any(stable_asset_id in lesson["content_json"]["asset_ids"] for lesson in saved_lessons)
+        )
+        self.assertTrue(
+            any(
+                spec["stable_asset_id"] == stable_asset_id
+                for spec in imported["assets"]
+            )
+        )
+
     def test_builder_learner_preview_uses_academy_template_and_keeps_notebook_authoring(self):
         response = self.client.get(reverse("staff_course_builder_preview"))
 
