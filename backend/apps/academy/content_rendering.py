@@ -866,13 +866,13 @@ def render_safe_markdown(
         )
 
     rendered = re.sub(
-        r"<p>(<img\\b[^>]*>)</p>\\s*<p>(.*?)</p>",
+        r"<p>(<img\b[^>]*>)</p>\s*<p>(.*?)</p>",
         lambda match: wrap_legacy_course_image(match.group(1), match.group(2)),
         rendered,
         flags=re.DOTALL,
     )
     rendered = re.sub(
-        r"<p>(<img\\b[^>]*>)</p>",
+        r"<p>(<img\b[^>]*>)</p>",
         lambda match: wrap_legacy_course_image(match.group(1)),
         rendered,
     )
