@@ -4955,6 +4955,27 @@ body.builder-dialog-open { overflow:hidden; }
         stateChanged = true;
         autoImportedTradingPath = true;
       }
+      let autoImportedBollingerBands = false;
+      const bollingerBandsCandidate = result.bollinger_bands_import_candidate;
+      const candidateBollingerCourse = bollingerBandsCandidate && bollingerBandsCandidate.course;
+      if (!tradingPathImportRequested && !supportResistanceImportRequested && !candidateCourse &&
+          candidateBollingerCourse && typeof candidateBollingerCourse === 'object' &&
+          !remoteDrafts.some(remote => String(remote.slug || '') === String(candidateBollingerCourse.slug || ''))) {
+        let importedCourse = state.courses.find(local =>
+          String(local.slug || '') === String(candidateBollingerCourse.slug || '')
+        );
+        if (!importedCourse) {
+          importedCourse = normalizeCourseState(candidateBollingerCourse);
+          state.courses.unshift(importedCourse);
+        }
+        state.selectedCourseId = importedCourse.id;
+        state.selectedModuleId = importedCourse.modules?.[0]?.id || null;
+        state.selectedLessonId = importedCourse.modules?.[0]?.lessons?.[0]?.id || null;
+        state.view = 'editor';
+        state.tab = 'curriculum';
+        stateChanged = true;
+        autoImportedBollingerBands = true;
+      }
       const selectedTradingPath = state.courses.find(course =>
         String(course.id) === String(state.selectedCourseId || '') &&
         String(course.slug || '') === 'your-trading-path-import-draft'
@@ -5007,6 +5028,16 @@ body.builder-dialog-open { overflow:hidden; }
           toast('Your Trading Path is now in Your courses as an editable draft. Nothing was published.');
         } catch (saveError) {
           toast('Your Trading Path is loaded in the builder but the shared draft save failed: ' + String(saveError?.message || saveError));
+        }
+      } else if (autoImportedBollingerBands) {
+        clearTimeout(academySaveTimer);
+        try {
+          await saveCurrentToAcademy(false, false);
+          renderSidebar();
+          renderHeaderState();
+          toast('Understand Bollinger Bands is now in Your courses as an editable draft. Nothing was published.');
+        } catch (saveError) {
+          toast('Understand Bollinger Bands is loaded in the builder, but the shared draft save failed: ' + String(saveError?.message || saveError));
         }
       } else if (tradingPathImportRequested && requestedTradingPathDraft) {
         const desiredSlug = String(requestedTradingPathDraft.slug || '');
