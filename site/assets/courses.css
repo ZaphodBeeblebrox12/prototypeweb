@@ -754,3 +754,20 @@
   .courses-catalogue-page .ed-construct-note-headline{font-size:25px}
   .courses-catalogue-page .ed-construct-note-body{margin-top:10px}
 }
+
+
+/* Search-friendly Academy links retain the catalogue's editorial title styling. */
+.ed-tile-title-link {
+  color: inherit;
+  text-decoration: none;
+  text-decoration-thickness: .06em;
+  text-underline-offset: .16em;
+}
+.ed-tile-title-link:hover {
+  color: var(--green, #355a46);
+  text-decoration: underline;
+}
+.ed-tile-title-link:focus-visible {
+  outline: 2px solid var(--coral, #c96f50);
+  outline-offset: 3px;
+}

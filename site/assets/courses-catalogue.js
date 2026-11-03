@@ -263,7 +263,9 @@
     return '<article class="ed-micro-tile" data-course-id="' + escapeHTML(course.id) + '">' +
       '<div class="ed-tile-art"><span class="ed-tile-serial">FIELD STUDY <i>/</i> ' + serial + '</span>' + chartArt(course.art) + '<span class="ed-tile-art-caption">' + escapeHTML(artLabel) + '</span></div>' +
       '<div class="ed-tile-body"><div class="ed-tile-meta"><span>' + escapeHTML(course.category || 'Focused study') + '</span><span>' + escapeHTML(course.level || 'Self-paced') + '</span></div>' +
-      '<h3 class="ed-tile-title">' + escapeHTML(course.title) + '</h3>' + status +
+      '<h3 class="ed-tile-title">' + (course.status === 'published' && course.academyUrl
+        ? '<a class="ed-tile-title-link" href="' + escapeHTML(course.academyUrl) + '">' + escapeHTML(course.title) + '</a>'
+        : escapeHTML(course.title)) + '</h3>' + status +
       '<div class="ed-tile-problem-label">The trader’s question</div><p class="ed-tile-hook cc-card-hook">' + escapeHTML(hook) + '</p>' +
       (problem ? '<p class="ed-tile-problem">' + escapeHTML(problem) + '</p>' : '') +
       '<div class="ed-tile-focus"><span>What you will work on</span><p>' + escapeHTML(learningFocus) + '</p></div>' +

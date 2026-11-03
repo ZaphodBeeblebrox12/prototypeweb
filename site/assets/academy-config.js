@@ -6,7 +6,10 @@
   const isGitHubPagesPreview = hostname === "zaphodbeeblebrox12.github.io" &&
     (pathname === "/prototypeweb" || pathname.startsWith("/prototypeweb/"));
   // A deployment may define window.TRADETHESIS_ACADEMY_BASE_URL before this script loads.
-  const inheritedBaseUrl = String(window.TRADETHESIS_ACADEMY_BASE_URL || "").trim().replace(/\/+$/, "");
+  const academyMeta = document.querySelector('meta[name="tradethesis-academy-base-url"]');
+  const inheritedBaseUrl = String(
+    window.TRADETHESIS_ACADEMY_BASE_URL || academyMeta?.content || ""
+  ).trim().replace(/\/+$/, "");
   const isValidOrigin = value => {
     try {
       const url = new URL(value);

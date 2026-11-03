@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Production sitemap is generated at build time after a permanent public URL
+# and explicit indexing approval have been configured.
