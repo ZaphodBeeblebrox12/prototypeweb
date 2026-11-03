@@ -866,6 +866,12 @@ class SharedLessonRenderingTests(SimpleTestCase):
 
     def test_course_builder_preview_has_visual_table_editor_support(self):
         preview = (Path(__file__).resolve().parent / "course_builder_preview.html").read_text()
+        learner_css = (
+            Path(__file__).resolve().parents[2]
+            / "static"
+            / "academy"
+            / "learning-room.css"
+        ).read_text(encoding="utf-8")
         self.assertIn("const renderTable = block =>", preview)
         self.assertIn("isTableDivider", preview)
         self.assertIn('class="lesson-table-wrap" role="region"', preview)
