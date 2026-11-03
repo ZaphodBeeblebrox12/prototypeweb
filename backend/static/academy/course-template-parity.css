@@ -143,8 +143,8 @@
   border-radius: 0;
   background: transparent;
   color: #2f4939;
-  font: 400 21px/1.45 Georgia, "Times New Roman", serif;
-  letter-spacing: -.01em;
+  font: 400 clamp(20px, 2.2vw, 27px)/1.5 Georgia, "Times New Roman", serif;
+  letter-spacing: -.018em;
 }
 
 .tt-learning-room .tt-tab-panel blockquote::before,
@@ -380,8 +380,8 @@
   .preview-body blockquote,
   .rich-editor-canvas blockquote {
     padding: 0 0 0 74px;
-    font-size: 18px;
-    line-height: 1.45;
+    font-size: 20px;
+    line-height: 1.5;
   }
 
   .tt-learning-room .tt-tab-panel blockquote::before,
