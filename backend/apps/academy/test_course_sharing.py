@@ -48,6 +48,11 @@ class CourseShareCopyTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'property="og:title"')
+        response_without_slash = self.client.get(
+            reverse("academy:course-share-no-slash", args=[self.course.slug])
+        )
+        self.assertEqual(response_without_slash.status_code, 200)
+        self.assertContains(response_without_slash, 'property="og:image"')
         self.assertContains(response, "Support &amp; Resistance")
         self.assertContains(response, 'property="og:image"')
         self.assertContains(response, "/assets/tradethesis-icon.png")
