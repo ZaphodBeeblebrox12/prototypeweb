@@ -48,7 +48,7 @@ try {
   });
   assert.equal(result.indexable, true);
   assert.equal(result.sitemapUrls, PUBLIC_PAGES.length);
-  assert.match(read(production, 'robots.txt'), /Sitemap: https://tradethesis\.example/sitemap\.xml/);
+  assert.ok(read(production, 'robots.txt').includes('Sitemap: https://tradethesis.example/sitemap.xml'));
   assert.match(read(production, 'index.html'), /name="robots" content="index, follow"/);
   assert.match(read(production, 'index.html'), /rel="canonical" href="https://tradethesis\.example/"/);
   assert.match(read(production, 'index.html'), /tradethesis-social-preview\.jpg/);
