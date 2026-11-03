@@ -3509,9 +3509,6 @@ body.builder-dialog-open { overflow:hidden; }
       if (!image) return match;
       const token = 'TTFIGURETOKEN' + figures.length + 'END';
       const title = displayTitle(image);
-      const imageHtml = image.data
-        ? '<span class="tt-purpose-figure-image"><img data-figure-zoom src="' + esc(image.data) + '" alt="' + esc(image.alt || alt || title) + '" loading="lazy" style="max-width:100%;max-height:460px"></span>'
-        : '<span class="tt-purpose-figure-missing">Image saved; preview source is not available in this browser.</span>';
       const caption = image.caption
         ? '<figcaption><strong class="tt-course-reference-title">' + esc(title) + '</strong><p>' + esc(image.caption) + '</p></figcaption>'
         : '<figcaption><strong class="tt-course-reference-title">' + esc(title) + '</strong></figcaption>';
