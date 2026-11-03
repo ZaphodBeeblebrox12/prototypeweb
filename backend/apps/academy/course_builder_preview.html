@@ -464,6 +464,89 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .preview-body .tt-purpose-figure-note { font-size: 11px; line-height: 1.6; }
 
 
+/* Uploaded lesson images use the dedicated chart-reference frame in both preview and learner output. */
+.preview-body .tt-course-reference-figure {
+  display:block;
+  min-width:0;
+  margin:19px 0;
+  overflow:hidden;
+  border:1px solid #d9d0bf;
+  border-radius:12px;
+  background:#fffdf8;
+  box-shadow:0 5px 16px rgba(39,56,46,.055);
+}
+.preview-body .tt-course-reference-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:11px 13px;
+  border-bottom:1px solid #ded5c3;
+  background:linear-gradient(100deg,#e7ecdf,#f6edda);
+}
+.preview-body .tt-course-reference-module {
+  color:var(--site-primary);
+  font-size:9px;
+  font-weight:850;
+  letter-spacing:.11em;
+  line-height:1.5;
+  text-transform:uppercase;
+}
+.preview-body .tt-course-reference-kind {
+  color:var(--muted);
+  font-size:9px;
+  font-weight:750;
+  letter-spacing:.08em;
+  text-align:right;
+  text-transform:uppercase;
+}
+.preview-body .tt-course-reference-image {
+  display:flex;
+  min-height:150px;
+  align-items:center;
+  justify-content:center;
+  padding:8px;
+  overflow:hidden;
+  background:#fffdf8;
+}
+.preview-body .tt-course-reference-image img,
+.preview-body .tt-course-reference-img {
+  display:block;
+  width:100%;
+  max-width:100%;
+  max-height:470px;
+  margin:auto;
+  object-fit:contain;
+  object-position:center;
+  background:#fffdf8;
+}
+.preview-body .tt-course-reference-figure figcaption {
+  display:block;
+  padding:12px 13px 13px;
+  border-top:1px solid #ded5c3;
+  background:#fffdf8;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.6;
+}
+.preview-body .tt-course-reference-title {
+  display:block;
+  margin:0 0 5px;
+  color:var(--ink);
+  font:600 15px/1.35 var(--site-font-heading);
+}
+.preview-body .tt-course-reference-figure figcaption p { margin:0; }
+@media(max-width:620px) {
+  .preview-body .tt-course-reference-head { align-items:flex-start; flex-direction:column; gap:4px; padding:10px 11px; }
+  .preview-body .tt-course-reference-kind { text-align:left; }
+  .preview-body .tt-course-reference-image { min-height:110px; padding:7px; }
+  .preview-body .tt-course-reference-image img,
+  .preview-body .tt-course-reference-img { max-height:300px; }
+  .preview-body .tt-course-reference-figure figcaption { padding:10px 11px 12px; }
+}
+
+
+
 @media(max-width:760px) {
   .preview-body .tt-purpose-figure-head { padding: 11px 12px; }
   .preview-body .tt-purpose-figure-body { padding: 10px; }
@@ -759,6 +842,15 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .tt-editor-image-caption:focus { outline:2px solid var(--site-secondary); outline-offset:1px; }
 .tt-editor-image-help { color:var(--muted); font-size:10px; font-weight:500; line-height:1.45; }
 .tt-editor-image-group-card { gap:10px; }
+.tt-editor-image-controls { display:inline-flex; align-items:center; gap:3px; flex:0 0 auto; margin-left:auto; }
+.tt-editor-image-move-button,.tt-editor-image-drag-handle { display:inline-grid; place-items:center; min-width:24px; height:24px; padding:0 5px; border:1px solid var(--line); border-radius:4px; background:var(--paper); color:var(--muted); font:750 11px/1 var(--site-font-body); cursor:pointer; }
+.tt-editor-image-drag-handle { cursor:grab; font-size:15px; user-select:none; }
+.tt-editor-image-drag-handle:active { cursor:grabbing; }
+.rich-editor-canvas.is-image-dragging { outline:1px dashed var(--site-secondary); outline-offset:4px; }
+.rich-editor-canvas > [data-editor-image-block="true"].is-image-dragging { opacity:.48; }
+.rich-editor-canvas > [data-editor-drop-side="before"] { box-shadow:0 -3px 0 var(--site-secondary); }
+.rich-editor-canvas > [data-editor-drop-side="after"] { box-shadow:0 3px 0 var(--site-secondary); }
+.rich-editor-canvas.is-image-drop-end::after { display:block; height:3px; margin:7px 0; background:var(--site-secondary); content:""; }
 @media(max-width:620px) {
   .tt-editor-image-card { padding:10px; }
   .tt-editor-image-thumb { flex-basis:64px; width:64px; height:48px; }
@@ -1737,7 +1829,15 @@ body.builder-dialog-open { overflow:hidden; }
     if (source.startsWith('/') && !source.startsWith('//')) return source;
     return '';
   }
-  function inlineImageCaptionItemMarkup(image, lesson) {
+  function editorImageMoveControls(label) {
+    const subject = esc(String(label || 'image'));
+    return '<span class="tt-editor-image-controls" role="group" aria-label="Move ' + subject + '">' +
+      '<button type="button" class="tt-editor-image-move-button" data-editor-block-move="up" aria-label="Move ' + subject + ' up" title="Move up">↑</button>' +
+      '<button type="button" class="tt-editor-image-move-button" data-editor-block-move="down" aria-label="Move ' + subject + ' down" title="Move down">↓</button>' +
+      '<button type="button" class="tt-editor-image-drag-handle" draggable="true" data-editor-drag-handle aria-label="Drag to move ' + subject + '" title="Drag to move">⠿</button>' +
+      '</span>';
+  }
+  function inlineImageCaptionItemMarkup(image, lesson, movable) {
     const imageId = String(image?.id || image?.assetUuid || '');
     if (!imageId) return '';
     const title = String(image.title || '').trim();
@@ -1751,7 +1851,8 @@ body.builder-dialog-open { overflow:hidden; }
     return '<span class="tt-editor-image-item">' +
       '<span class="tt-editor-image-heading"><span class="tt-editor-image-thumb">' + preview + '</span>' +
       '<span class="tt-editor-image-heading-copy"><span class="tt-editor-image-eyebrow">IMAGE CAPTION</span>' +
-      '<strong class="tt-editor-image-title">' + esc(displayTitle) + '</strong></span></span>' +
+      '<strong class="tt-editor-image-title">' + esc(displayTitle) + '</strong></span>' +
+      (movable ? editorImageMoveControls('image') : '') + '</span>' +
       '<label class="tt-editor-image-caption-label">Caption shown to learners' +
       '<textarea class="tt-editor-image-caption" data-inline-image-caption="' + esc(imageId) +
       '" data-inline-image-lesson="' + esc(String(lesson?.id || '')) +
@@ -1771,8 +1872,8 @@ body.builder-dialog-open { overflow:hidden; }
       );
       if (!image) return '';
       return '<span class="tt-editor-token tt-editor-token-block tt-editor-image-card" contenteditable="false" data-editor-token="' +
-        esc(token) + '" data-editor-block="true" role="group" aria-label="Image and caption editor">' +
-        inlineImageCaptionItemMarkup(image, lesson) + '</span>';
+        esc(token) + '" data-editor-block="true" data-editor-image-block="true" role="group" aria-label="Image and caption editor">' +
+        inlineImageCaptionItemMarkup(image, lesson, true) + '</span>';
     }
     const groupMatch = String(token || '').match(/^\[\[image-group:([^\]]+)\]\]$/);
     if (!groupMatch) return '';
@@ -1784,7 +1885,8 @@ body.builder-dialog-open { overflow:hidden; }
     )).filter(Boolean);
     if (!members.length) return '';
     return '<span class="tt-editor-token tt-editor-token-block tt-editor-image-card tt-editor-image-group-card" contenteditable="false" data-editor-token="' +
-      esc(token) + '" data-editor-block="true" role="group" aria-label="Image group caption editor">' +
+      esc(token) + '" data-editor-block="true" data-editor-image-block="true" role="group" aria-label="Image group caption editor">' +
+      editorImageMoveControls('image group') +
       '<span class="tt-editor-image-heading-copy"><span class="tt-editor-image-eyebrow">IMAGE GROUP</span>' +
       '<strong class="tt-editor-image-title">' + esc(String(group.title || '').trim() || 'Image group') +
       '</strong></span>' + members.map(image => inlineImageCaptionItemMarkup(image, lesson)).join('') + '</span>';
@@ -3410,8 +3512,13 @@ body.builder-dialog-open { overflow:hidden; }
       const imageHtml = image.data
         ? '<span class="tt-purpose-figure-image"><img data-figure-zoom src="' + esc(image.data) + '" alt="' + esc(image.alt || alt || title) + '" loading="lazy" style="max-width:100%;max-height:460px"></span>'
         : '<span class="tt-purpose-figure-missing">Image saved; preview source is not available in this browser.</span>';
-      const caption = image.caption ? '<figcaption><p>' + esc(image.caption) + '</p></figcaption>' : '';
-      figures.push('<figure class="tt-purpose-figure" data-figure-id="' + esc(id) + '">' + figureHeader(title) + '<span class="tt-purpose-figure-body">' + imageHtml + '</span>' + caption + '</figure>');
+      const caption = image.caption
+        ? '<figcaption><strong class="tt-course-reference-title">' + esc(title) + '</strong><p>' + esc(image.caption) + '</p></figcaption>'
+        : '<figcaption><strong class="tt-course-reference-title">' + esc(title) + '</strong></figcaption>';
+      const referenceImage = image.data
+        ? '<span class="tt-course-reference-image"><img class="tt-course-reference-img" data-figure-zoom src="' + esc(image.data) + '" alt="' + esc(image.alt || alt || title) + '" loading="lazy" decoding="async" tabindex="0" role="button" aria-label="Enlarge course figure"></span>'
+        : '<span class="tt-course-reference-image"><span class="tt-purpose-figure-missing">Image saved; preview source is not available in this browser.</span></span>';
+      figures.push('<figure class="tt-purpose-figure tt-course-reference-figure" data-figure-id="' + esc(id) + '"><span class="tt-course-reference-head"><span class="tt-course-reference-module">' + esc(moduleLabel) + '</span><span class="tt-course-reference-kind">CHART REFERENCE</span></span>' + referenceImage + caption + '</figure>');
       return '\n\n' + token + '\n\n';
     });
     const previewGroupNumbers = new Map();
@@ -4310,6 +4417,110 @@ body.builder-dialog-open { overflow:hidden; }
     if (pendingVisualEditorSync === editor) flushVisualEditorSync();
   }, true);
   document.addEventListener('selectionchange', captureRichEditorRange);
+  let activeEditorImageDrag = null;
+  let activeEditorImageDragSource = null;
+
+  function editorDirectChild(editor, node) {
+    let element = node instanceof Element ? node : node?.parentElement;
+    while (element && element.parentElement !== editor) element = element.parentElement;
+    return element && element.parentElement === editor ? element : null;
+  }
+
+  function clearEditorImageDropTargets(editor) {
+    const root = editor || document;
+    root.querySelectorAll('[data-editor-drop-side]').forEach(node => node.removeAttribute('data-editor-drop-side'));
+    if (editor) editor.classList.remove('is-image-drop-end');
+  }
+
+  function editorImageDropPlacement(editor, event) {
+    const target = editorDirectChild(editor, event.target);
+    if (!target || target === activeEditorImageDrag || activeEditorImageDrag?.contains(target)) return null;
+    const rect = target.getBoundingClientRect();
+    return {target, after:event.clientY >= rect.top + rect.height / 2};
+  }
+
+  function resetEditorImageDrag() {
+    clearEditorImageDropTargets();
+    document.querySelectorAll('[data-visual-editor].is-image-dragging').forEach(editor => editor.classList.remove('is-image-dragging'));
+    document.querySelectorAll('[data-editor-image-block].is-image-dragging').forEach(block => block.classList.remove('is-image-dragging'));
+    activeEditorImageDrag = null;
+    activeEditorImageDragSource = null;
+  }
+
+  document.addEventListener('dragstart', event => {
+    const handle = event.target.closest?.('[data-editor-drag-handle]');
+    if (!handle) return;
+    const block = handle.closest('[data-editor-image-block="true"][data-editor-token][data-editor-block="true"]');
+    const editor = block?.closest('[data-visual-editor]');
+    if (!block || !editor) return;
+    activeEditorImageDrag = block;
+    activeEditorImageDragSource = editor;
+    if (event.dataTransfer) {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', 'tradethesis-course-image');
+    }
+    block.classList.add('is-image-dragging');
+    editor.classList.add('is-image-dragging');
+  });
+
+  document.addEventListener('dragover', event => {
+    const editor = event.target.closest?.('[data-visual-editor]');
+    if (!activeEditorImageDrag || !editor || editor !== activeEditorImageDragSource) return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    clearEditorImageDropTargets(editor);
+    const placement = editorImageDropPlacement(editor, event);
+    if (placement) placement.target.setAttribute('data-editor-drop-side', placement.after ? 'after' : 'before');
+    else if (event.target === editor) editor.classList.add('is-image-drop-end');
+  });
+
+  document.addEventListener('drop', event => {
+    if (!activeEditorImageDrag) return;
+    const editor = event.target.closest?.('[data-visual-editor]');
+    if (!editor || editor !== activeEditorImageDragSource) return;
+    event.preventDefault();
+    const placement = editorImageDropPlacement(editor, event);
+    if (!placement) {
+      if (event.target === editor) editor.appendChild(activeEditorImageDrag);
+      else {
+        resetEditorImageDrag();
+        return;
+      }
+    } else if (placement.after) {
+      editor.insertBefore(activeEditorImageDrag, placement.target.nextSibling);
+    } else {
+      editor.insertBefore(activeEditorImageDrag, placement.target);
+    }
+    const movedEditor = editor;
+    resetEditorImageDrag();
+    syncVisualEditorToModel(movedEditor);
+    captureRichEditorRange();
+    toast('Image moved in the lesson.');
+  });
+
+  document.addEventListener('dragend', resetEditorImageDrag);
+
+  document.addEventListener('click', event => {
+    const button = event.target.closest?.('[data-editor-block-move]');
+    if (!button) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const block = button.closest('[data-editor-image-block="true"][data-editor-token][data-editor-block="true"]');
+    const editor = block?.closest('[data-visual-editor]');
+    if (!block || !editor) return;
+    const direction = button.dataset.editorBlockMove;
+    const sibling = direction === 'up' ? block.previousElementSibling : block.nextElementSibling;
+    if (!sibling) {
+      toast(direction === 'up' ? 'This image is already first in the lesson.' : 'This image is already last in the lesson.');
+      return;
+    }
+    if (direction === 'up') editor.insertBefore(block, sibling);
+    else editor.insertBefore(block, sibling.nextSibling);
+    syncVisualEditorToModel(editor);
+    captureRichEditorRange();
+    toast('Image moved in the lesson.');
+  });
+
   document.addEventListener('input', event => {
     const captionField = event.target.closest?.('[data-inline-image-caption]');
     if (captionField) {
