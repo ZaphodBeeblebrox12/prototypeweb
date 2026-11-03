@@ -390,7 +390,7 @@ def course_share(request, course_slug):
         "share_message": share_message,
         "share_description": course_share_description(course),
         "share_url": share_url,
-        "share_image_url": f"{settings.TRADETHESIS_PUBLIC_SITE_URL}/assets/tradethesis-icon.png",
+        "share_image_url": f"{settings.TRADETHESIS_PUBLIC_SITE_URL}/assets/tradethesis-horizontal.png",
         "course_detail_url": request.build_absolute_uri(reverse("academy:course-detail", args=[course.slug])),
     })
 
