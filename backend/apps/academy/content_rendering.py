@@ -54,6 +54,7 @@ _ALLOWED_TAGS = {
     "thead",
     "tr",
     "ul",
+    "u",
 }
 _ALLOWED_ATTRIBUTES = {
     "a": ["href", "title", "rel", "class"],
@@ -672,7 +673,7 @@ def render_safe_markdown(
             '<div class="group-heading"><div class="group-heading-copy">'
             f'<span class="group-kicker">Chart group · {number_text}</span>'
             f'<span class="group-title">{safe_title}</span>'
-            '</div><span class="group-mark">01</span></div>'
+            '</div><span class="group-mark" title="1 image in this chart group" aria-label="1 image in this chart group">01</span></div>'
         )
         markup = (
             f'<figure class="tt-purpose-figure tt-image-group-figure tt-image-group-hard-index" data-figure-id="{safe_asset_id}">'
@@ -767,7 +768,7 @@ def render_safe_markdown(
             '<div class="group-heading"><div class="group-heading-copy">'
             f'<span class="group-kicker">Chart group · {group_number_text}</span>'
             f'<span class="group-title">{title}</span>{description_markup}</div>'
-            f'<span class="group-mark">{count:02d}</span></div>'
+            f'<span class="group-mark" title="{count} images in this chart group" aria-label="{count} images in this chart group">{count:02d}</span></div>'
         )
         markup = (
             f'<figure class="tt-purpose-figure tt-image-group-figure tt-image-group-hard-index" data-figure-id="{safe_group_id}">'
@@ -913,7 +914,7 @@ def render_safe_markdown(
             '<div class="group-heading"><div class="group-heading-copy">'
             '<span class="group-kicker">Chart group · 01</span>'
             f'<span class="group-title">{title}</span>'
-            '</div><span class="group-mark">01</span></div>'
+            '</div><span class="group-mark" title="1 image in this chart group" aria-label="1 image in this chart group">01</span></div>'
             '<div class="chart-grid count-1"><div class="chart-item"><div class="item-head">'
             f'<span class="item-index">A</span><span class="item-title">{title}</span></div>'
             f'<span class="tt-purpose-figure-image">{image_html}</span>{caption_markup}'
