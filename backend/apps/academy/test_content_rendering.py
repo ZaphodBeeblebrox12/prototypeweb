@@ -214,7 +214,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
         )
 
     def test_tab_route_marker_inside_quote_is_hidden_without_breaking_quote(self):
-        source = "\\n".join(
+        source = "\n".join(
             [
                 "## Why prices move",
                 "",
