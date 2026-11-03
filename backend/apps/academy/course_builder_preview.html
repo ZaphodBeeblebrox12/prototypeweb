@@ -1883,6 +1883,7 @@ body.builder-dialog-open { overflow:hidden; }
     const inner = Array.from(node.childNodes).map(richInlineMarkdown).join('');
     if (tag === 'strong' || tag === 'b') return '**' + inner + '**';
     if (tag === 'em' || tag === 'i') return '*' + inner + '*';
+    if (tag === 'u') return '<u>' + inner + '</u>';
     if (tag === 'del' || tag === 's' || tag === 'strike') return '~~' + inner + '~~';
     if (tag === 'a') {
       const href = String(node.getAttribute('href') || '').trim();
@@ -2153,7 +2154,7 @@ body.builder-dialog-open { overflow:hidden; }
     return '<div class="rich-editor-wrapper" data-rich-editor-wrapper>' +
       '<div class="rich-editor-toolbar" role="toolbar" aria-label="Text formatting">' +
       richFormatPickerMarkup() +
-      '<button type="button" data-rich-command="bold" aria-label="Bold"><strong>B</strong></button><button type="button" data-rich-command="italic" aria-label="Italic"><em>I</em></button><button type="button" data-rich-command="strikeThrough" aria-label="Strikethrough"><s>S</s></button>' +
+      '<button type="button" data-rich-command="bold" aria-label="Bold" title="Bold (Ctrl/Cmd+B)" aria-keyshortcuts="Control+B Meta+B"><strong>B</strong></button><button type="button" data-rich-command="italic" aria-label="Italic" title="Italic (Ctrl/Cmd+I)" aria-keyshortcuts="Control+I Meta+I"><em>I</em></button><button type="button" data-rich-command="underline" aria-label="Underline" title="Underline (Ctrl/Cmd+U)" aria-keyshortcuts="Control+U Meta+U"><u>U</u></button><button type="button" data-rich-command="strikeThrough" aria-label="Strikethrough"><s>S</s></button>' +
       '<button type="button" data-rich-command="insertUnorderedList" aria-label="Bulleted list">• List</button><button type="button" data-rich-command="insertOrderedList" aria-label="Numbered list">1. List</button>' +
       '<button type="button" data-rich-command="link" aria-label="Insert link">Link</button><button type="button" data-rich-command="blockquote" aria-label="Insert pull quote">Quote</button><button type="button" data-rich-command="insertHorizontalRule" aria-label="Insert divider">Divider</button><button type="button" data-rich-command="table" aria-label="Insert table">Table</button><button type="button" data-rich-command="grouped-table" aria-label="Insert grouped-header table">Grouped table</button><button type="button" data-rich-table-action="add-column" aria-label="Add a column to the selected table">Column +</button><button type="button" data-rich-table-action="add-row" aria-label="Add a row to the selected table">Row +</button><button type="button" data-rich-table-action="remove-column" aria-label="Remove the last column from the selected table">Column −</button><button type="button" data-rich-table-action="remove-row" aria-label="Remove the selected body row from the table">Row −</button><button type="button" data-rich-table-action="group-headers" aria-label="Add grouped headers to the selected table">Group headers</button><button type="button" data-rich-command="undo" aria-label="Undo">Undo</button><button type="button" data-rich-command="redo" aria-label="Redo">Redo</button></div>' +
       '<div class="rich-editor-canvas' + minClass + '" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="' + (kind === 'main' ? 'Lesson body rich text editor' : 'Lesson body rich text editor for selected audience') + '" data-visual-editor="true" data-visual-kind="' + esc(kind) + '" data-audience="' + esc(audience) + '" data-lesson-id="' + esc(String(options.lessonId || '')) + '" data-field="' + field + '" data-placeholder="Start writing your lesson…">' +
@@ -3498,7 +3499,7 @@ body.builder-dialog-open { overflow:hidden; }
         ? '<span class="caption"><span class="caption-label">Note</span> — ' + esc(String(image.caption).trim()) + '</span>'
         : '';
       const item = '<div class="chart-item"><div class="item-head"><span class="item-index">A</span><span class="item-title">' + esc(title) + '</span></div>' + imageHtml + caption + '</div>';
-      const heading = '<div class="group-heading"><div class="group-heading-copy"><span class="group-kicker">Chart group · ' + groupNumber + '</span><span class="group-title">' + esc(title) + '</span></div><span class="group-mark">01</span></div>';
+      const heading = '<div class="group-heading"><div class="group-heading-copy"><span class="group-kicker">Chart group · ' + groupNumber + '</span><span class="group-title">' + esc(title) + '</span></div><span class="group-mark" title="1 image in this chart group" aria-label="1 image in this chart group">01</span></div>';
       figures.push('<figure class="tt-purpose-figure tt-image-group-figure tt-image-group-hard-index" data-figure-id="' + esc(id) + '"><div class="indexed"><aside class="index-block" aria-label="Group index"><span class="group-number">' + groupNumber + '</span><span class="index-label">CHART STUDY</span><span class="image-count">×1</span></aside><div class="group-content">' + heading + '<div class="chart-grid count-1">' + item + '</div></div></div></figure>');
       return '\n\n' + token + '\n\n';
     });
@@ -3527,7 +3528,7 @@ body.builder-dialog-open { overflow:hidden; }
       const description = descriptionText ? '<span class="group-description">' + esc(descriptionText) + '</span>' : '';
       const groupHeader = '<div class="group-heading"><div class="group-heading-copy"><span class="group-kicker">Chart group · ' +
         groupNumber + '</span><span class="group-title">' + esc(group.title || 'Image group') + '</span>' +
-        description + '</div><span class="group-mark">' + String(groupedImages.length).padStart(2, '0') + '</span></div>';
+        description + '</div><span class="group-mark" title="' + groupedImages.length + ' image' + (groupedImages.length === 1 ? '' : 's') + ' in this chart group" aria-label="' + groupedImages.length + ' images in this chart group">' + String(groupedImages.length).padStart(2, '0') + '</span></div>';
       const groupMarkup = groupedImages.length >= 1
         ? '<figure class="tt-purpose-figure tt-image-group-figure tt-image-group-hard-index" data-figure-id="' + esc(id) +
           '"><div class="indexed"><aside class="index-block" aria-label="Group index"><span class="group-number">' +
@@ -4701,6 +4702,23 @@ body.builder-dialog-open { overflow:hidden; }
     if (!event.target.closest?.('[data-rich-format-picker]')) closeRichFormatPickers();
   });
   document.addEventListener('keydown', event => {
+    const target = event.target instanceof Element ? event.target : null;
+    const editor = target?.closest('[data-visual-editor="true"]');
+    if (editor && (event.ctrlKey || event.metaKey) && !event.altKey) {
+      const key = String(event.key || '').toLowerCase();
+      const command = key === 'b' ? 'bold' : key === 'i' ? 'italic' : key === 'u' ? 'underline' : '';
+      const selection = window.getSelection();
+      const isEditorControl = target !== editor && target?.closest('input, textarea, select, button, [contenteditable="false"]');
+      if (command && !isEditorControl && selection?.anchorNode && editor.contains(selection.anchorNode)) {
+        event.preventDefault();
+        event.stopPropagation();
+        document.execCommand(command, false, null);
+        syncVisualEditorToModel(editor);
+        updateLessonOutlineFromEditor(editor);
+        captureRichEditorRange();
+        return;
+      }
+    }
     const toggle = event.target.closest?.('[data-rich-format-toggle]');
     const option = event.target.closest?.('[data-rich-format-option]');
     if (toggle && event.key === 'ArrowDown') {
