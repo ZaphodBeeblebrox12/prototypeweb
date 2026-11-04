@@ -1818,12 +1818,14 @@ class CourseBuilderFormatPreservationRegressionTests(SimpleTestCase):
             script_path.unlink(missing_ok=True)
         self.assertEqual(result.returncode, 0, result.stderr)
 
-    def test_pending_caret_restoration_does_not_store_an_unused_position(self):
+    def test_pending_caret_restoration_targets_the_inserted_token(self):
         source = self.builder_source
-        self.assertIn("pendingLessonCaret = {lessonId:lesson.id};", source)
-        self.assertNotIn("pendingLessonCaret.position", source)
-        self.assertIn("if (currentEditor) {", source)
-        self.assertIn("range.collapse(false);", source)
+        self.assertIn("const caretPosition = before.length + prefix.length + token.length;", source)
+        self.assertIn("tokenOccurrence", source)
+        self.assertIn("pendingLessonCaret = {lessonId:lesson.id, position:caretPosition, token, tokenOccurrence};", source)
+        self.assertIn("querySelectorAll('[data-editor-token]')", source)
+        self.assertIn("range.setStartAfter(insertedToken);", source)
+        self.assertIn("range.selectNodeContents(currentEditor);", source)
 
     def test_obsolete_textarea_caret_handler_is_not_retained(self):
         source = self.builder_source

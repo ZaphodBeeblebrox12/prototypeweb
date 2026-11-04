@@ -46,19 +46,53 @@ class AcademySeoEndpointTests(TestCase):
         hidden = Course.objects.create(
             title="Internal Draft Course",
             slug="internal-draft-course",
+            summary="A complete internal course that must remain undiscoverable.",
             status=Course.Status.PUBLISHED,
             catalogue_role=Course.CatalogueRole.HIDDEN,
+        )
+        hidden_module = CourseModule.objects.create(
+            course=hidden,
+            title="Internal module",
+            slug="internal-module",
+            is_published=True,
+        )
+        Lesson.objects.create(
+            module=hidden_module,
+            title="Internal lesson",
+            slug="internal-lesson",
+            is_published=True,
         )
         draft = Course.objects.create(
             title="Unpublished Course",
             slug="unpublished-course",
             status=Course.Status.DRAFT,
         )
+        not_indexed = Course.objects.create(
+            title="Excluded Search Course",
+            slug="excluded-search-course",
+            status=Course.Status.PUBLISHED,
+            seo_indexable=False,
+        )
+        not_indexed_module = CourseModule.objects.create(
+            course=not_indexed,
+            title="Module",
+            slug="module",
+            position=1,
+            is_published=True,
+        )
+        Lesson.objects.create(
+            module=not_indexed_module,
+            title="Lesson",
+            slug="lesson",
+            position=1,
+            is_published=True,
+        )
         response = self.client.get(reverse("academy_sitemap"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "/learn/course/support-and-resistance/")
         self.assertNotContains(response, hidden.slug)
         self.assertNotContains(response, draft.slug)
+        self.assertNotContains(response, not_indexed.slug)
 
     @override_settings(TRADETHESIS_SEO_INDEXABLE=True)
     def test_production_robots_advertises_the_sitemap(self):
@@ -66,3 +100,135 @@ class AcademySeoEndpointTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Sitemap: ")
         self.assertContains(response, "/sitemap.xml")
+
+
+    @override_settings(TRADETHESIS_SEO_INDEXABLE=True)
+    def test_course_overview_renders_custom_search_metadata(self):
+        self.course.seo_title = "Support and Resistance Trading Course | TradeThesis"
+        self.course.seo_description = (
+            "Learn to identify meaningful support and resistance zones, "
+            "compare reactions and define invalidation."
+        )
+        self.course.seo_primary_topic = "Support and resistance trading"
+        self.course.save(update_fields=[
+            "seo_title", "seo_description", "seo_primary_topic"
+        ])
+
+        response = self.client.get(
+            reverse("academy:course-detail", args=[self.course.slug])
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(
+            response,
+            "<title>Support and Resistance Trading Course | TradeThesis</title>",
+            html=True,
+        )
+        self.assertContains(response, 'name="description"')
+        self.assertContains(response, "Learn to identify meaningful support and resistance zones")
+        self.assertContains(response, 'name="robots" content="index, follow"')
+        self.assertContains(response, 'rel="canonical"')
+        self.assertContains(response, '"about": {"@type": "Thing", "name": "Support and resistance trading"}')
+
+    @override_settings(TRADETHESIS_SEO_INDEXABLE=True)
+    def test_course_can_opt_out_of_indexing_without_changing_access(self):
+        self.course.seo_indexable = False
+        self.course.save(update_fields=["seo_indexable"])
+
+        response = self.client.get(
+            reverse("academy:course-detail", args=[self.course.slug])
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, 'name="robots" content="noindex, follow"')
+        self.assertNotContains(response, 'rel="canonical"')
+
+
+    @override_settings(TRADETHESIS_SEO_INDEXABLE=True)
+    def test_course_detail_indexing_matches_public_catalogue_eligibility(self):
+        public_response = self.client.get(
+            reverse("academy:course-detail", args=[self.course.slug])
+        )
+        self.assertEqual(public_response.status_code, 200)
+        public_html = public_response.content.decode("utf-8")
+        self.assertIn('name="robots" content="index, follow"', public_html)
+        self.assertIn('rel="canonical"', public_html)
+        self.assertIn('"@type": "Course"', public_html)
+
+        hidden = Course.objects.create(
+            title="Internal Published Course",
+            slug="internal-published-course",
+            summary="A complete course reserved for internal use.",
+            status=Course.Status.PUBLISHED,
+            catalogue_role=Course.CatalogueRole.HIDDEN,
+        )
+        hidden_module = CourseModule.objects.create(
+            course=hidden,
+            title="Internal module",
+            slug="internal-module",
+            is_published=True,
+        )
+        Lesson.objects.create(
+            module=hidden_module,
+            title="Internal lesson",
+            slug="internal-lesson",
+            is_published=True,
+        )
+        hidden_response = self.client.get(
+            reverse("academy:course-detail", args=[hidden.slug])
+        )
+        hidden_html = hidden_response.content.decode("utf-8")
+        self.assertIn('name="robots" content="noindex, follow"', hidden_html)
+        self.assertNotIn('rel="canonical"', hidden_html)
+        self.assertNotIn('"@type": "Course"', hidden_html)
+
+        incomplete = Course.objects.create(
+            title="Published Course Without Lesson Content",
+            slug="published-course-without-lesson-content",
+            summary="A course that has not released any lesson content yet.",
+            status=Course.Status.PUBLISHED,
+        )
+        incomplete_response = self.client.get(
+            reverse("academy:course-detail", args=[incomplete.slug])
+        )
+        incomplete_html = incomplete_response.content.decode("utf-8")
+        self.assertIn('name="robots" content="noindex, follow"', incomplete_html)
+        self.assertNotIn('rel="canonical"', incomplete_html)
+        self.assertNotIn('"@type": "Course"', incomplete_html)
+
+        placeholder = Course.objects.create(
+            title="New micro-course draft",
+            slug="starter-copy-course",
+            summary="Add a concise course promise here.",
+            status=Course.Status.PUBLISHED,
+        )
+        placeholder_module = CourseModule.objects.create(
+            course=placeholder,
+            title="Starter module",
+            slug="starter-module",
+            is_published=True,
+        )
+        Lesson.objects.create(
+            module=placeholder_module,
+            title="Starter lesson",
+            slug="starter-lesson",
+            is_published=True,
+        )
+        placeholder_response = self.client.get(
+            reverse("academy:course-detail", args=[placeholder.slug])
+        )
+        placeholder_html = placeholder_response.content.decode("utf-8")
+        self.assertIn('name="robots" content="noindex, follow"', placeholder_html)
+        self.assertNotIn('rel="canonical"', placeholder_html)
+        self.assertNotIn('"@type": "Course"', placeholder_html)
+
+    @override_settings(TRADETHESIS_SEO_INDEXABLE=False)
+    def test_staging_course_detail_remains_noindex_without_canonical_or_schema(self):
+        response = self.client.get(
+            reverse("academy:course-detail", args=[self.course.slug])
+        )
+        self.assertEqual(response.status_code, 200)
+        html = response.content.decode("utf-8")
+        self.assertIn('name="robots" content="noindex, follow"', html)
+        self.assertNotIn('rel="canonical"', html)
+        self.assertNotIn('"@type": "Course"', html)

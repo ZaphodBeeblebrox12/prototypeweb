@@ -7,28 +7,59 @@ const DEFAULT_PUBLIC_BASE_URL = 'https://tradethesis-public-staging.onrender.com
 const DEFAULT_ACADEMY_BASE_URL = 'https://tradethesis-academy-staging.onrender.com';
 
 const PUBLIC_PAGES = [
-  { file: 'index.html', route: '/', kind: 'home' },
-  { file: 'courses.html', route: '/courses.html', kind: 'course-list' },
-  { file: 'trading-path.html', route: '/trading-path.html', kind: 'trading-path' },
-  { file: 'construct.html', route: '/construct.html', kind: 'construct' },
-  { file: 'live-class.html', route: '/live-class.html', kind: 'live-class' },
-  { file: 'community.html', route: '/community.html', kind: 'community' }
+  {
+    file: 'index.html', route: '/', kind: 'home',
+    topics: ['trading education', 'chart reading', 'risk management']
+  },
+  {
+    file: 'courses.html', route: '/courses.html', kind: 'course-list',
+    topics: ['trading courses', 'technical analysis', 'trade management']
+  },
+  {
+    file: 'trading-path.html', route: '/trading-path.html', kind: 'trading-path',
+    topics: ['trading education', 'market mechanics', 'technical analysis', 'trading risk management'],
+    breadcrumbs: [
+      { name: 'Home', route: '/' },
+      { name: 'Courses', route: '/courses.html' },
+      { name: 'The TradeThesis Trading Path', route: '/trading-path.html' }
+    ]
+  },
+  {
+    file: 'construct.html', route: '/construct.html', kind: 'construct',
+    topics: ['trade construction', 'trade management', 'risk management', 'trading plan'],
+    breadcrumbs: [
+      { name: 'Home', route: '/' },
+      { name: 'Courses', route: '/courses.html' },
+      { name: 'Trading Path', route: '/trading-path.html' },
+      { name: 'CONSTRUCT', route: '/construct.html' }
+    ]
+  },
+  {
+    file: 'live-class.html', route: '/live-class.html', kind: 'live-class',
+    topics: ['live trading education', 'trade planning', 'risk management', 'trade review'],
+    breadcrumbs: [
+      { name: 'Home', route: '/' },
+      { name: 'Courses', route: '/courses.html' },
+      { name: 'Live classroom', route: '/live-class.html' }
+    ]
+  },
+  {
+    file: 'community.html', route: '/community.html', kind: 'community',
+    topics: ['trading education community', 'trade thesis review', 'trading risk']
+  }
 ];
 
 const COURSE_OFFERS = [
   {
     name: 'The TradeThesis Trading Path',
-    description: 'A practical course in markets, chart reading, risk and review.',
     route: '/trading-path.html'
   },
   {
     name: 'CONSTRUCT: Trade Construction and Management',
-    description: 'A guided programme for building and reviewing a trading process.',
     route: '/construct.html'
   },
   {
     name: 'Trade Construction and Management Live Classroom',
-    description: 'Six live sessions on trade planning, risk and management.',
     route: '/live-class.html'
   }
 ];
@@ -93,7 +124,22 @@ function safeJson(value) {
     .replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
 }
 
-function structuredData(page, pageUrl, title, description, baseUrl) {
+function readCoursePageDescriptions(siteDir) {
+  const descriptions = new Map();
+  for (const course of COURSE_OFFERS) {
+    const page = PUBLIC_PAGES.find(candidate => candidate.route === course.route);
+    if (!page) throw new Error('Course schema route is not in PUBLIC_PAGES: ' + course.route);
+    const source = fs.readFileSync(path.join(siteDir, page.file), 'utf8');
+    const match = source.match(/<head\b[^>]*>[\s\S]*?<\/head>/i);
+    if (!match) throw new Error('Missing HTML head in course page ' + page.file);
+    const description = getMetaContent(match[0], 'description');
+    if (!description) throw new Error('Missing meta description for course schema page ' + page.file);
+    descriptions.set(course.route, description);
+  }
+  return descriptions;
+}
+
+function structuredData(page, pageUrl, title, description, baseUrl, courseDescriptions) {
   const organizationId = baseUrl + '/#organization';
   const websiteId = baseUrl + '/#website';
   const graph = [
@@ -118,16 +164,28 @@ function structuredData(page, pageUrl, title, description, baseUrl) {
       name: title,
       description,
       isPartOf: { '@id': websiteId },
-      about: { '@id': organizationId }
+      about: (page.topics || []).map(name => ({ '@type': 'Thing', name }))
     }
   ];
+
+  if (Array.isArray(page.breadcrumbs) && page.breadcrumbs.length) {
+    graph.push({
+      '@type': 'BreadcrumbList',
+      itemListElement: page.breadcrumbs.map((crumb, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: crumb.name,
+        item: baseUrl + crumb.route
+      }))
+    });
+  }
 
   const course = COURSE_OFFERS.find(item => item.route === page.route);
   if (course) {
     graph.push({
       '@type': 'Course',
       name: course.name,
-      description: course.description,
+      description: courseDescriptions.get(course.route),
       url: pageUrl,
       provider: { '@id': organizationId }
     });
@@ -144,7 +202,7 @@ function structuredData(page, pageUrl, title, description, baseUrl) {
         item: {
           '@type': 'Course',
           name: item.name,
-          description: item.description,
+          description: courseDescriptions.get(item.route),
           provider: { '@id': organizationId },
           url: baseUrl + item.route
         }
@@ -183,6 +241,8 @@ function buildPublicSite(options = {}) {
     'TRADETHESIS_PUBLIC_BASE_URL');
   const academyBaseUrl = normalizeBaseUrl(rawAcademyBaseUrl || DEFAULT_ACADEMY_BASE_URL,
     'TRADETHESIS_ACADEMY_BASE_URL');
+
+  const courseDescriptions = indexable ? readCoursePageDescriptions(siteDir) : new Map();
 
   const publicHost = new URL(publicBaseUrl).hostname.toLowerCase();
   if (indexable && (publicHost === 'localhost' || publicHost.endsWith('.onrender.com') ||
@@ -231,7 +291,7 @@ function buildPublicSite(options = {}) {
       head = replaceMeta(head, 'name', 'twitter:image', imageUrl);
 
       head = head.replace(/<script\b(?=[^>]*\bid=["']tt-seo-jsonld["'])[^>]*>[\s\S]*?<\/script>\s*/gi, '');
-      const jsonLd = safeJson(structuredData(page, pageUrl, title, description, publicBaseUrl));
+      const jsonLd = safeJson(structuredData(page, pageUrl, title, description, publicBaseUrl, courseDescriptions));
       head = head.replace(/<\/head>/i,
         '  <script type="application/ld+json" id="tt-seo-jsonld">' + jsonLd + '</script>\n</head>');
     } else {

@@ -1,0 +1,72 @@
+name: Verify public-site SEO
+
+on:
+  pull_request:
+    branches:
+      - my-new-branch
+      - main
+    paths:
+      - "site/**"
+      - "tools/seo/**"
+      - ".github/workflows/verify-public-site-seo.yml"
+  push:
+    branches:
+      - my-new-branch
+    paths:
+      - "site/**"
+      - "tools/seo/**"
+      - ".github/workflows/verify-public-site-seo.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run public-site SEO tests
+        run: node tools/seo/test_public_site.cjs
+
+      - name: Build a non-indexable staging copy
+        env:
+          TRADETHESIS_PUBLIC_BASE_URL: https://tradethesis-public-staging.onrender.com
+          TRADETHESIS_ACADEMY_BASE_URL: https://tradethesis-academy-staging.onrender.com
+          TRADETHESIS_SEO_INDEXABLE: "false"
+        run: node tools/seo/build_public_site.cjs
+
+      - name: Confirm the staging output remains non-indexable
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          root = Path("site")
+          pages = (
+              "index.html",
+              "courses.html",
+              "trading-path.html",
+              "construct.html",
+              "live-class.html",
+              "community.html",
+          )
+          for name in pages:
+              html = (root / name).read_text(encoding="utf-8")
+              if not re.search(r'<meta\b(?=[^>]*\bname=["\']robots["\'])[^>]*content=["\']noindex, nofollow["\']', html, re.I):
+                  raise SystemExit(f"{name} must remain noindex on staging")
+              if re.search(r'<link\b(?=[^>]*\brel=["\']canonical["\'])', html, re.I):
+                  raise SystemExit(f"{name} must not emit a staging canonical")
+          robots = (root / "robots.txt").read_text(encoding="utf-8")
+          sitemap = (root / "sitemap.xml").read_text(encoding="utf-8")
+          if "Sitemap:" in robots or re.search(r"<url>", sitemap):
+              raise SystemExit("Staging must not publish sitemap URLs")
+          print("Six public pages remain noindex; staging emits no canonical URLs or sitemap entries.")
+          PY
