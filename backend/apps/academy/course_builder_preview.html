@@ -2471,7 +2471,13 @@ body.builder-dialog-open { overflow:hidden; }
   }
   function captureRichEditorRange() {
     const selection = window.getSelection();
-    if (!selection || !selection.rangeCount) return;
+    if (!selection || !selection.rangeCount) {
+      document.querySelectorAll('[data-rich-table-tools]').forEach(tools => {
+        tools.hidden = true;
+        tools.setAttribute('aria-hidden','true');
+      });
+      return;
+    }
     const range = selection.getRangeAt(0);
     const anchor = range.commonAncestorContainer.nodeType === 1 ? range.commonAncestorContainer : range.commonAncestorContainer.parentElement;
     const editor = anchor?.closest?.('[data-visual-editor]');
