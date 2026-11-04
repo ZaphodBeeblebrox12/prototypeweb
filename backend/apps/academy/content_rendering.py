@@ -691,10 +691,10 @@ def render_safe_markdown(
                     '<div class="lesson-table-wrap tt-structured-table-wrap" role="region" tabindex="0" '
                     'aria-label="Scrollable table: ' + title + '">'
                     '<table class="tt-structured-table tt-auto-layout" data-column-count="' + str(column_count) + '">'
-                    + _table_colgroup_markup(widths)
                     + '<caption class="tt-structured-table-caption">'
                     + title
                     + "</caption>"
+                    + _table_colgroup_markup(widths)
                     + thead
                     + tbody
                     + "</table></div>"
