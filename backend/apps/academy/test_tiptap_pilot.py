@@ -43,6 +43,8 @@ class TiptapPilotViewTests(TestCase):
         self.assertContains(response, "Sandbox only")
         self.assertContains(response, reverse("staff_course_builder_preview"))
         self.assertContains(response, reverse("staff_course_builder_tiptap_api"))
+        self.assertContains(response, "/static/academy/tiptap-pilot.css")
+        self.assertContains(response, "/static/academy/tiptap-pilot.js")
 
     def test_pilot_route_is_hidden_when_feature_flag_is_disabled(self):
         with self.settings(ACADEMY_TIPTAP_PILOT_ENABLED=False):
