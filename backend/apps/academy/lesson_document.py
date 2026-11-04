@@ -268,22 +268,21 @@ def _validate_node_attrs(node_type: str, attrs: dict[str, Any], path: str) -> No
             raise LessonDocumentValidationError(f"{path}.attrs.caption: expected short text.")
         _validate_enum(attrs.get("layout", "auto"), {"auto", "fixed"}, path, "layout")
         widths = attrs.get("columnWidths")
-        if widths is not None:
-            if (
-                not isinstance(widths, list)
-                or not 1 <= len(widths) <= 12
-                or any(
-                    not isinstance(width, (int, float))
-                    or isinstance(width, bool)
-                    or not math.isfinite(width)
-                    or not 5 <= width <= 85
-                    for width in widths
-                )
-                or not 99 <= sum(widths) <= 101
-            ):
-                raise LessonDocumentValidationError(
-                    f"{path}.attrs.columnWidths: expected 1–12 percentage widths totalling 100."
-                )
+        if widths is not None and (
+            not isinstance(widths, list)
+            or not 1 <= len(widths) <= 12
+            or any(
+                not isinstance(width, (int, float))
+                or isinstance(width, bool)
+                or not math.isfinite(width)
+                or not 5 <= width <= 85
+                for width in widths
+            )
+            or not 99 <= sum(widths) <= 101
+        ):
+            raise LessonDocumentValidationError(
+                f"{path}.attrs.columnWidths: expected 1–12 percentage widths totalling 100."
+            )
     if node_type == "codeBlock":
         language = attrs.get("language")
         if language is not None and (
