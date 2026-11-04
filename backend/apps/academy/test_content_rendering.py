@@ -1658,11 +1658,11 @@ class CourseBuilderToolbarRegressionTests(SimpleTestCase):
         # The editor shell must clip rounded edges without trapping position:sticky.
         self.assertRegex(
             builder_source,
-            r"\.editor-shell\\s*\\{[^}]*overflow:clip;",
+            r"\.editor-shell\s*\{[^}]*overflow:clip;",
         )
         self.assertRegex(
             builder_source,
-            r"\.rich-editor-toolbar\\s*\\{\\s*position:sticky;\\s*top:10px;",
+            r"\.rich-editor-toolbar\s*\{\s*position:sticky;\s*top:10px;",
         )
 
         # Insertion remains available; destructive/structural table actions are hidden
