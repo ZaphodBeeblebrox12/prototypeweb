@@ -174,7 +174,7 @@ def _validate_node(
     if node_type == "text":
         allowed_keys.add("text")
         allowed_keys.add("marks")
-    elif node_type in {"paragraph", "heading", "blockquote", "bulletList", "orderedList", "listItem", "codeBlock", "table", "tableRow", "tableCell", "tableHeader"}:
+    elif node_type in {"doc", "paragraph", "heading", "blockquote", "bulletList", "orderedList", "listItem", "codeBlock", "table", "tableRow", "tableCell", "tableHeader"}:
         allowed_keys.add("content")
 
     unexpected = set(node) - allowed_keys
