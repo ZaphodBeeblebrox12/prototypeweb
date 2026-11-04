@@ -152,7 +152,7 @@ Deciding exits from emotion after entry rather than from the trade's original re
 
 > **Choose management rules that fit the setup, and write them before price tests your discipline.**
 
-**Source and further reading:** The idea of treating bands as setup tools rather than continuous advice follows Bollinger's Official Rule 22. The exit examples in this lesson are used in this course and should be tested. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
+**Source and further reading:** The idea of treating bands as setup tools rather than continuous advice follows Bollinger's Official Rule 22. I use the exit examples in this lesson for practice; test them before treating them as rules. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
 
 ---
 
@@ -230,7 +230,7 @@ Changing the method after every losing example until the history looks clean.
 
 > **A useful test includes the trades that failed, the cases you skipped, and the conditions that were difficult—not just the wins.**
 
-**Source and further reading:** Bollinger's Official Rules 9 and 11 caution against treating defaults or parameter choices as universal. The review process here is a method used in this course to test consistency, not a promise of future performance. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
+**Source and further reading:** Bollinger's Official Rules 9 and 11 caution against treating defaults or parameter choices as universal. The review process here is the method I use to test consistency; it is not a promise of future performance. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
 
 ---
 
@@ -320,7 +320,7 @@ Calling the analysis good because a trade won, or bad simply because it lost.
 
 > **Judge the process by the evidence and rules available at the decision point. The outcome is important feedback, but it is not the whole review.**
 
-**Source and further reading:** This lesson synthesises the course's evidence-first approach. It is a TradeThesis assessment framework, not a Bollinger-prescribed grading system.
+**Source and further reading:** This lesson brings together the evidence-first approach I teach at TradeThesis. It is my TradeThesis assessment framework, not a grading system prescribed by Bollinger.
 
 ---
 
