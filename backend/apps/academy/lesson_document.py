@@ -246,7 +246,7 @@ def validate_lesson_document(value) -> dict:
         raise LessonDocumentError("The lesson document format is not recognised.")
 
     version = value.get("version")
-    if version != LESSON_DOCUMENT_VERSION:
+    if type(version) is not int or version != LESSON_DOCUMENT_VERSION:
         raise LessonDocumentError(f"Unsupported lesson document version: {version!r}.")
 
     document = value.get("document")
