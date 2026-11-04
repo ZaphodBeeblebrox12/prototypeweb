@@ -63,13 +63,15 @@ test('TradeThesis schema accepts common lesson content, merged tables and refere
       { type: 'ttRegionalBlock', attrs: { blockId: 'regional-risk' } },
       { type: 'ttLessonReference', attrs: { lessonId: '12345678-1234-5678-1234-567812345678' } },
       { type: 'ttProtectedVideo', attrs: { videoId: '87654321-4321-8765-4321-876543218765' } },
+      { type: 'ttCourseReference', attrs: { courseId: '12345678-1234-5678-1234-567812345678', comingSoon: true } },
+      { type: 'ttLessonTab', attrs: { section: 'practice' } },
       { type: 'ttLegacyReference', attrs: { token: '[[old-widget:one]]', referenceKind: 'unknown' } },
     ],
   };
 
   const node = schema.nodeFromJSON(document);
   node.check();
-  assert.equal(node.childCount, 10);
+  assert.equal(node.childCount, 12);
   const mergedCell = node.toJSON().content[3].content[0].content[0];
   assert.equal(mergedCell.attrs.colspan, 2);
   assert.deepEqual(mergedCell.attrs.colwidth, [120, 180]);
