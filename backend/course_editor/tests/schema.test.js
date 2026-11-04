@@ -70,7 +70,10 @@ test('TradeThesis schema accepts common lesson content, merged tables and refere
   const node = schema.nodeFromJSON(document);
   node.check();
   assert.equal(node.childCount, 10);
-  assert.equal(schema.nodes.tableCell.spec.attrs.align.default, null);
+  const mergedCell = node.toJSON().content[3].content[0].content[0];
+  assert.equal(mergedCell.attrs.colspan, 2);
+  assert.deepEqual(mergedCell.attrs.colwidth, [120, 180]);
+  assert.equal(mergedCell.attrs.align, 'center');
 });
 
 test('TradeThesis schema refuses unknown content node types', () => {
