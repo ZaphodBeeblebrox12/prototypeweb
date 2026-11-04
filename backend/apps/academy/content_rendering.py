@@ -190,7 +190,7 @@ def _add_markdown_table_layouts(markup):
         if column_count < 2 or not widths:
             return table_html
         table_open = opening.group(0)
-        class_match = re.search(r'\\bclass=(["\\'])(.*?)\\1', table_open, re.IGNORECASE)
+        class_match = re.search(r'\bclass=(["\'])(.*?)\1', table_open, re.IGNORECASE)
         if class_match:
             classes = class_match.group(2).split()
             if "tt-auto-layout" not in classes:
@@ -204,7 +204,7 @@ def _add_markdown_table_layouts(markup):
         else:
             table_open = table_open[:-1] + ' class="tt-auto-layout">'
         table_open = re.sub(
-            r'\\sdata-column-count=(["\\']).*?\\1',
+            r'\sdata-column-count=(["\']).*?\1',
             "",
             table_open,
             flags=re.IGNORECASE,
