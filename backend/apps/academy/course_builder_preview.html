@@ -2206,6 +2206,7 @@ body.builder-dialog-open { overflow:hidden; }
     const table=selectedEditorTable(editor);
     if(!table){toast('Place the cursor inside a table first.');return;}
     if(action==='auto-fit'){
+      const lesson=currentLesson();
       const id=String(table.dataset.editorStructuredTable||'');
       if(id&&lesson?.tables?.[id])delete lesson.tables[id].columnWidths;
       table.dataset.tableLayout='auto';
