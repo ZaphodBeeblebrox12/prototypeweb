@@ -711,8 +711,6 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .rich-editor-toolbar { position:relative; z-index:2; display:flex; flex-wrap:wrap; align-items:center; gap:5px; padding:8px; border-bottom:1px solid var(--line); border-radius:10px 10px 0 0; background:var(--panel-soft); }
 .rich-editor-toolbar button,.rich-editor-toolbar .rich-format-trigger { min-height:33px; padding:5px 9px; border:1px solid var(--line); border-radius:7px; background:var(--panel); color:var(--ink); font-size:12px; font-weight:700; }
 .rich-editor-toolbar button:hover,.rich-editor-toolbar .rich-format-trigger:hover { border-color:var(--site-primary); color:var(--site-primary); }
-.rich-editor-toolbar button[data-rich-table-action="delete-table"] { color:var(--danger); border-color:var(--danger); }
-.rich-editor-toolbar button[data-rich-table-action="delete-table"]:hover { background:light-dark(#FFF5F2,#332522); color:var(--danger); border-color:var(--danger); }
 .rich-format-picker { position:relative; flex:0 0 auto; }
 .rich-editor-toolbar .rich-format-trigger { display:flex; align-items:center; justify-content:space-between; gap:13px; min-width:96px; cursor:pointer; }
 .rich-format-caret { color:var(--muted); font-size:11px; line-height:1; }
@@ -834,6 +832,13 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .builder-lesson-preview-sidebar .preview-notebook-number { display:block; margin-bottom:4px; }
 .builder-lesson-preview-sidebar .preview-notebook-examples-button { width:100%; }
 .tt-editor-table-scroll { max-width:100%; overflow-x:auto; margin:10px 0; }
+.tt-editor-table-editable-wrap { position:relative; }
+.tt-editor-table-delete { position:absolute; z-index:5; top:6px; right:6px; display:grid; place-items:center; width:28px; height:28px; min-height:28px!important; padding:0!important; border:1px solid #d7c7be!important; border-radius:50%!important; background:rgba(255,253,248,.96)!important; color:#9b4c40!important; font-size:19px!important; font-weight:500!important; line-height:1!important; opacity:0; pointer-events:none; transform:translateY(-2px); transition:opacity .14s ease,transform .14s ease,background .14s ease; }
+.tt-editor-table-editable-wrap:hover > .tt-editor-table-delete,
+.tt-editor-table-editable-wrap.is-active > .tt-editor-table-delete,
+.tt-editor-table-editable-wrap:focus-within > .tt-editor-table-delete,
+.tt-editor-table-delete:focus-visible { opacity:1; pointer-events:auto; transform:none; }
+.tt-editor-table-delete:hover { border-color:#bd7667!important; background:#fff0ec!important; color:#8e392f!important; }
 .rich-editor-canvas .tt-editor-structured-table { min-width:520px; width:100%; border-collapse:separate; border-spacing:0; }
 
 
@@ -1830,6 +1835,7 @@ body.builder-dialog-open { overflow:hidden; }
     if (!node) return '';
     if (node.nodeType === 3) return String(node.nodeValue || '').replace(/\u00a0/g, ' ');
     if (node.nodeType !== 1) return '';
+    if (node.hasAttribute('data-editor-ui')) return '';
     if (node.hasAttribute('data-table-resize-handle')) return '';
     if (node.hasAttribute('data-editor-token')) {
       const token = node.getAttribute('data-editor-token') || '';
@@ -1867,6 +1873,7 @@ body.builder-dialog-open { overflow:hidden; }
     if (!node) return '';
     if (node.nodeType === 3) return String(node.nodeValue || '').trim();
     if (node.nodeType !== 1) return '';
+    if (node.hasAttribute('data-editor-ui')) return '';
     if (node.hasAttribute('data-editor-token')) return node.getAttribute('data-editor-token') || '';
     const tag = node.tagName.toLowerCase();
     if (/^h[1-6]$/.test(tag)) return '#'.repeat(Number(tag.slice(1))) + ' ' + richInlineMarkdown(node).trim();
@@ -2056,10 +2063,28 @@ body.builder-dialog-open { overflow:hidden; }
     table.dataset.tableLayout = manual ? 'manual' : 'auto';
     table.style.tableLayout = 'fixed';
   }
+  function prepareTableDeleteControl(table) {
+    const wrapper = table?.parentElement;
+    if (!wrapper || !wrapper.matches('.tt-editor-table-scroll, .lesson-table-wrap')) return;
+    wrapper.classList.add('tt-editor-table-editable-wrap');
+    if (wrapper.querySelector(':scope > [data-table-delete-control]')) return;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'tt-editor-table-delete';
+    button.contentEditable = 'false';
+    button.dataset.editorUi = 'true';
+    button.dataset.tableDeleteControl = 'true';
+    button.dataset.richTableAction = 'delete-table';
+    button.setAttribute('aria-label','Delete this table');
+    button.title = 'Delete table';
+    button.textContent = '×';
+    wrapper.appendChild(button);
+  }
   function prepareEditorTable(table, rebuildHandles) {
     if (!table || !table.closest('[data-visual-editor]')) return;
     const count = tableLogicalWidth(table);
     if (!count) return;
+    prepareTableDeleteControl(table);
     const lesson = currentLesson();
     const tableId = String(table.dataset.editorStructuredTable || '');
     const saved = tableId && lesson?.tables?.[tableId] ? lesson.tables[tableId].columnWidths : null;
@@ -2212,9 +2237,9 @@ body.builder-dialog-open { overflow:hidden; }
     syncVisualEditorToModel(editor);captureRichEditorRange();
     toast('Grouped table inserted. Drag a header grip to resize columns; use Auto-fit to restore automatic widths.');
   }
-  async function editSelectedTable(action,editor) {
+  async function editSelectedTable(action,editor,targetTable) {
     restoreRichEditorSelection(editor);
-    const table=selectedEditorTable(editor);
+    const table=targetTable||selectedEditorTable(editor);
     if(!table){toast('Place the cursor inside a table first.');return;}
     if(action==='delete-table'){
       const lesson=currentLesson();
@@ -2333,7 +2358,7 @@ body.builder-dialog-open { overflow:hidden; }
       richFormatPickerMarkup() +
       '<button type="button" data-rich-command="bold" aria-label="Bold" title="Bold (Ctrl/Cmd+B)" aria-keyshortcuts="Control+B Meta+B"><strong>B</strong></button><button type="button" data-rich-command="italic" aria-label="Italic" title="Italic (Ctrl/Cmd+I)" aria-keyshortcuts="Control+I Meta+I"><em>I</em></button><button type="button" data-rich-command="underline" aria-label="Underline" title="Underline (Ctrl/Cmd+U)" aria-keyshortcuts="Control+U Meta+U"><u>U</u></button><button type="button" data-rich-command="strikeThrough" aria-label="Strikethrough"><s>S</s></button>' +
       '<button type="button" data-rich-command="insertUnorderedList" aria-label="Bulleted list">• List</button><button type="button" data-rich-command="insertOrderedList" aria-label="Numbered list">1. List</button>' +
-      '<button type="button" data-rich-command="link" aria-label="Insert link">Link</button><button type="button" data-rich-command="blockquote" aria-label="Insert pull quote">Quote</button><button type="button" data-rich-command="insertHorizontalRule" aria-label="Insert divider">Divider</button><button type="button" data-rich-command="table" aria-label="Insert table">Table</button><button type="button" data-rich-command="grouped-table" aria-label="Insert grouped-header table">Grouped table</button><button type="button" data-rich-table-action="auto-fit" aria-label="Restore automatic column widths">Auto-fit</button><button type="button" data-rich-table-action="add-column" aria-label="Add a column to the selected table">Column +</button><button type="button" data-rich-table-action="add-row" aria-label="Add a row to the selected table">Row +</button><button type="button" data-rich-table-action="remove-column" aria-label="Remove the last column from the selected table">Column −</button><button type="button" data-rich-table-action="remove-row" aria-label="Remove the selected body row from the table">Row −</button><button type="button" data-rich-table-action="group-headers" aria-label="Add grouped headers to the selected table">Group headers</button><button type="button" class="table-delete-action" data-rich-table-action="delete-table" aria-label="Delete the selected table" title="Delete the selected table">Delete table</button><button type="button" data-rich-command="undo" aria-label="Undo">Undo</button><button type="button" data-rich-command="redo" aria-label="Redo">Redo</button></div>' +
+      '<button type="button" data-rich-command="link" aria-label="Insert link">Link</button><button type="button" data-rich-command="blockquote" aria-label="Insert pull quote">Quote</button><button type="button" data-rich-command="insertHorizontalRule" aria-label="Insert divider">Divider</button><button type="button" data-rich-command="table" aria-label="Insert table">Table</button><button type="button" data-rich-command="grouped-table" aria-label="Insert grouped-header table">Grouped table</button><button type="button" data-rich-table-action="auto-fit" aria-label="Restore automatic column widths">Auto-fit</button><button type="button" data-rich-table-action="add-column" aria-label="Add a column to the selected table">Column +</button><button type="button" data-rich-table-action="add-row" aria-label="Add a row to the selected table">Row +</button><button type="button" data-rich-table-action="remove-column" aria-label="Remove the last column from the selected table">Column −</button><button type="button" data-rich-table-action="remove-row" aria-label="Remove the selected body row from the table">Row −</button><button type="button" data-rich-table-action="group-headers" aria-label="Add grouped headers to the selected table">Group headers</button><button type="button" data-rich-command="undo" aria-label="Undo">Undo</button><button type="button" data-rich-command="redo" aria-label="Redo">Redo</button></div>' +
       '<div class="rich-editor-canvas' + minClass + '" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="' + (kind === 'main' ? 'Lesson body rich text editor' : 'Lesson body rich text editor for selected audience') + '" data-visual-editor="true" data-visual-kind="' + esc(kind) + '" data-audience="' + esc(audience) + '" data-lesson-id="' + esc(String(options.lessonId || '')) + '" data-field="' + field + '" data-placeholder="Start writing your lesson…">' +
       markdownToVisualEditor(value) + '</div></div>';
   }
@@ -4834,11 +4859,21 @@ body.builder-dialog-open { overflow:hidden; }
     if (!button) return;
     event.preventDefault();
     const editor = button.closest('[data-rich-editor-wrapper]')?.querySelector('[data-visual-editor]');
-    if (editor) await editSelectedTable(button.dataset.richTableAction, editor);
+    const targetTable = button.hasAttribute('data-table-delete-control')
+      ? button.closest('.tt-editor-table-editable-wrap')?.querySelector('table')
+      : null;
+    if (editor) await editSelectedTable(button.dataset.richTableAction, editor, targetTable);
   });
   document.addEventListener('focusin', event => {
     const editor = event.target.closest?.('[data-visual-editor]');
     if (editor) prepareEditorTables(editor);
+  });
+  document.addEventListener('click', event => {
+    const editor = event.target.closest?.('[data-visual-editor]');
+    if (!editor) return;
+    editor.querySelectorAll('.tt-editor-table-editable-wrap.is-active').forEach(wrapper => wrapper.classList.remove('is-active'));
+    const table = event.target.closest?.('table');
+    if (table && editor.contains(table)) table.parentElement?.classList.add('is-active');
   });
   document.addEventListener('input', event => {
     const editor = event.target.closest?.('[data-visual-editor]');
