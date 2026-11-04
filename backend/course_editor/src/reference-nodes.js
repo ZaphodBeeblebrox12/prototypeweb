@@ -188,6 +188,25 @@ export function createTradeThesisReferenceNodes(options = {}) {
       dataAttribute: 'data-video-id',
     }),
     referenceCard({
+      marker: 'ttCourseReference',
+      label: 'Related course card',
+      referenceAttribute: 'courseId',
+      dataAttribute: 'data-course-id',
+      extraAttributes: {
+        comingSoon: {
+          default: false,
+          parseHTML: element => element.getAttribute('data-coming-soon') === 'true',
+          renderHTML: attributes => ({ 'data-coming-soon': String(Boolean(attributes.comingSoon)) }),
+        },
+      },
+    }),
+    referenceCard({
+      marker: 'ttLessonTab',
+      label: 'Lesson section marker',
+      referenceAttribute: 'section',
+      dataAttribute: 'data-section',
+    }),
+    referenceCard({
       marker: 'ttLegacyReference',
       label: 'Unconverted legacy reference',
       referenceAttribute: 'token',
