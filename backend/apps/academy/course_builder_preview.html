@@ -4845,7 +4845,7 @@ body.builder-dialog-open { overflow:hidden; }
   document.addEventListener('pointermove', event => {
     const active = activeTableColumnResize;
     if (!active) return;
-    const minimum = Math.max(80,active.tableWidth * .05);
+    const minimum = Math.min(Math.max(80,active.tableWidth * .05),active.pairWidth / 2);
     const lowerBound = Math.max(minimum,active.pairWidth - active.tableWidth * .85);
     const upperBound = Math.min(active.pairWidth - minimum,active.tableWidth * .85);
     const delta = event.clientX - active.startX;
