@@ -250,3 +250,59 @@
   font: inherit;
   font-size: 12px;
 }
+
+
+.tt-editor-language-select {
+  min-height: 32px;
+  max-width: 140px;
+  padding: 5px 9px;
+  border: 1px solid var(--line, #dce1d7);
+  border-radius: 4px;
+  background: var(--input, #fff);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+}
+
+.tt-editor-link-panel {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--line, #dce1d7);
+  background: var(--panel, #fff);
+}
+
+.tt-editor-link-panel[hidden] {
+  display: none;
+}
+
+.tt-editor-link-panel input {
+  min-height: 32px;
+  min-width: min(320px, 55vw);
+  padding: 5px 9px;
+  border: 1px solid var(--line, #dce1d7);
+  border-radius: 4px;
+  background: var(--input, #fff);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+}
+
+.tt-editor-link-panel button {
+  min-height: 32px;
+  padding: 5px 9px;
+  border: 1px solid var(--line, #dce1d7);
+  border-radius: 4px;
+  background: var(--panel-soft, #f0f1e8);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.tt-editor-link-error {
+  color: #9a3b2e;
+  font-size: 11px;
+}
