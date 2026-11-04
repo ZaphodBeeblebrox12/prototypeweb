@@ -42,6 +42,16 @@ jobs:
       - name: Validate Render build script syntax
         run: bash -n build.sh
 
+      - name: Set up Node for the isolated Tiptap editor
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.22.1"
+
+      - name: Build the self-hosted Tiptap pilot bundle
+        run: |
+          npm install --prefix tools/course-builder-tiptap --no-audit --no-fund
+          npm run build --prefix tools/course-builder-tiptap
+
       - name: Check Django migration state
         run: python manage.py makemigrations --check --dry-run
 
