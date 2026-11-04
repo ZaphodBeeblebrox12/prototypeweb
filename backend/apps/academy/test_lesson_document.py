@@ -88,7 +88,6 @@ class LessonDocumentContractTests(SimpleTestCase):
                 "content": [
                     {
                         "type": "table",
-                        "attrs": {"columnWidths": [120, 180, 160], "layout": "fixed"},
                         "content": [
                             {
                                 "type": "tableRow",
