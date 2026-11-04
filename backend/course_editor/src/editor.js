@@ -240,7 +240,11 @@ export function mountTradeThesisEditor(element, options = {}) {
     event.preventDefault();
     const href = linkInput.value.trim();
     const scheme = href.match(/^([A-Za-z][A-Za-z0-9+.-]*):/)?.[1]?.toLowerCase() || '';
-    if (!href || href.length > 2048 || ['javascript', 'data', 'vbscript', 'file'].includes(scheme)) {
+    if (
+      !href ||
+      href.length > 2048 ||
+      (scheme && !['http', 'https', 'mailto', 'tel'].includes(scheme))
+    ) {
       linkError.textContent = 'Enter a valid web, email or telephone link.';
       return;
     }
@@ -313,7 +317,6 @@ export function mountTradeThesisEditor(element, options = {}) {
     },
     destroy() {
       if (!editor.isDestroyed) editor.destroy();
-      linkButton.removeEventListener('click', hideLinkPanel);
       element.replaceChildren();
       element.classList.remove('tt-editor-root');
     },
