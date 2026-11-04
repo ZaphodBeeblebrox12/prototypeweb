@@ -15,6 +15,13 @@ const TableCellPresentation = Extension.create({
       {
         types: ['tableCell', 'tableHeader'],
         attributes: {
+          align: {
+            default: null,
+            parseHTML: element => element.getAttribute('align') || element.style.textAlign || null,
+            renderHTML: attributes => attributes.align
+              ? { style: `text-align: ${attributes.align}` }
+              : {},
+          },
           verticalAlign: {
             default: null,
             parseHTML: element => element.style.verticalAlign || null,
