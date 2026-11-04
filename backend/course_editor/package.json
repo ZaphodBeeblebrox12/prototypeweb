@@ -1,0 +1,25 @@
+{
+  "name": "@tradethesis/course-editor",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Local, structured Tiptap editor package for the TradeThesis Academy Course Builder.",
+  "scripts": {
+    "build": "esbuild src/index.js --bundle --minify --format=iife --target=es2022 --outfile=../static/academy/course_editor/editor.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "@tiptap/core": "3.32.2",
+    "@tiptap/extension-highlight": "3.32.2",
+    "@tiptap/extension-placeholder": "3.32.2",
+    "@tiptap/extension-table": "3.32.2",
+    "@tiptap/extension-text-align": "3.32.2",
+    "@tiptap/starter-kit": "3.32.2"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
