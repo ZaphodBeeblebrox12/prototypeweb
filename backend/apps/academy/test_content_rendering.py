@@ -1818,6 +1818,13 @@ class CourseBuilderFormatPreservationRegressionTests(SimpleTestCase):
             script_path.unlink(missing_ok=True)
         self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_pending_caret_restoration_does_not_store_an_unused_position(self):
+        source = self.builder_source
+        self.assertIn("pendingLessonCaret = {lessonId:lesson.id};", source)
+        self.assertNotIn("pendingLessonCaret.position", source)
+        self.assertIn("if (currentEditor) {", source)
+        self.assertIn("range.collapse(false);", source)
+
     def test_obsolete_textarea_caret_handler_is_not_retained(self):
         source = self.builder_source
         self.assertNotIn("rememberLessonContentCaret", source)
