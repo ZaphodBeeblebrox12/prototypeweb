@@ -6,9 +6,6 @@ never rendered directly until the learner renderer supports the same version.
 
 from __future__ import annotations
 
-from copy import deepcopy
-from urllib.parse import urlsplit
-
 
 LESSON_DOCUMENT_FORMAT = "tradethesis.lesson-document"
 LESSON_DOCUMENT_VERSION = 1
@@ -126,6 +123,8 @@ def _validate_json_value(value, *, path: str, depth: int = 0) -> None:
 
 
 def _validate_link_target(value: str, *, path: str) -> None:
+    from urllib.parse import urlsplit
+
     target = value.strip()
     if not target:
         return
@@ -234,6 +233,8 @@ def _validate_node(node, *, path: str, node_counter: list[int], depth: int) -> N
 
 
 def validate_lesson_document(value) -> dict:
+    from copy import deepcopy
+
     """Validate and return a detached copy of a versioned lesson document.
 
     Unknown node or mark types are rejected rather than stripped. This is a
