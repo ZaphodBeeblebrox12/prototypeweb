@@ -43,7 +43,11 @@ from .course_builder_lifecycle import mark_builder_draft_deleted
 from .course_card_utils import is_course_card_recommendable
 from .course_pricing import parse_course_pricing, pricing_fields_for_builder
 from .importing import inspect_manifest, validate_import_for_publish
-from .lesson_document import LessonDocumentError, lesson_document_from_content_json, validate_lesson_document
+from .lesson_document import (
+    LessonDocumentError,
+    lesson_document_from_content_json,
+    validate_lesson_document,
+)
 from .models import (
     Course,
     CourseImport,
