@@ -1703,10 +1703,16 @@ class CourseBuilderToolbarRegressionTests(SimpleTestCase):
         self.assertIn("updateRichTableToolbar(editor);", capture_function)
         self.assertIn("tools.hidden = true;", capture_function)
         self.assertIn("function updateRichTableToolbar(editor, tableOverride)", builder_source)
-        self.assertIn("const table = arguments.length > 1 ? tableOverride : selectedEditorTable(editor);", builder_source)
+        self.assertIn(
+            "const table = arguments.length > 1 ? tableOverride : selectedEditorTable(editor);",
+            builder_source,
+        )
         self.assertIn("updateRichTableToolbar(editor, table);", builder_source)
         self.assertIn("updateRichTableToolbar(editor, null);", builder_source)
-        self.assertIn("button.setAttribute('aria-pressed', pressed ? 'true' : 'false');", builder_source)
+        self.assertIn(
+            "button.setAttribute('aria-pressed', pressed ? 'true' : 'false');",
+            builder_source,
+        )
         for command in (
             "bold",
             "italic",
