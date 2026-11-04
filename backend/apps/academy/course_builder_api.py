@@ -6,6 +6,7 @@ import hashlib
 import json
 import logging
 import mimetypes
+import math
 import re
 import time
 import uuid
@@ -962,10 +963,36 @@ def _build_import_payload(course_state, course_slug):
                         raise ValidationError(
                             f"{title}: each grouped-table row must cover the same 1–12 columns."
                         )
-                tables_payload[table_id] = {
+                table_payload = {
                     "title": str(raw_table.get("title") or "Lesson table").strip()[:240],
                     "rows": clean_rows,
                 }
+                raw_column_widths = raw_table.get("columnWidths")
+                if raw_column_widths is not None:
+                    if not isinstance(raw_column_widths, list) or len(raw_column_widths) != expected_width:
+                        raise ValidationError(
+                            f"{title}: saved table column widths must match its {expected_width} columns."
+                        )
+                    try:
+                        column_widths = [float(value) for value in raw_column_widths]
+                    except (TypeError, ValueError):
+                        raise ValidationError(
+                            f"{title}: table column widths must be numeric percentages."
+                        ) from None
+                    total_width = sum(column_widths)
+                    if (
+                        not all(math.isfinite(value) and 5 <= value <= 85 for value in column_widths)
+                        or not 99 <= total_width <= 101
+                    ):
+                        raise ValidationError(
+                            f"{title}: table column widths must be 5–85% each and total 100%."
+                        )
+                    normalized_widths = [
+                        round(value * 100.0 / total_width, 1) for value in column_widths
+                    ]
+                    normalized_widths[-1] = round(100.0 - sum(normalized_widths[:-1]), 1)
+                    table_payload["columnWidths"] = normalized_widths
+                tables_payload[table_id] = table_payload
 
             learner_questions = []
             for question_index, question in enumerate(questions, start=1):
