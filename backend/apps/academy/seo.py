@@ -17,6 +17,15 @@ def _indexing_enabled():
     return bool(getattr(settings, "TRADETHESIS_SEO_INDEXABLE", False))
 
 
+def is_public_course_seo_candidate(course):
+    """Return whether a published course belongs in public search discovery."""
+    return (
+        course.status == Course.Status.PUBLISHED
+        and course.catalogue_role != Course.CatalogueRole.HIDDEN
+        and is_course_card_recommendable(course.title, course.summary, course.description)
+    )
+
+
 @require_GET
 def academy_robots_txt(request):
     """Allow crawlers to read noindex tags; advertise sitemap only after opt-in."""
@@ -44,7 +53,7 @@ def academy_sitemap_xml(request):
         .order_by("position", "title", "slug")
     )
     for course in courses:
-        if not is_course_card_recommendable(course.title, course.summary, course.description):
+        if not is_public_course_seo_candidate(course):
             continue
         node = ElementTree.SubElement(root, f"{{{SITEMAP_NS}}}url")
         loc = request.build_absolute_uri(reverse("academy:course-detail", args=[course.slug]))
