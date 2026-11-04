@@ -50,7 +50,6 @@ _NODE_ATTRS = {
     "heading": frozenset({"level", "textAlign"}),
     "orderedList": frozenset({"start", "type"}),
     "codeBlock": frozenset({"language"}),
-    "table": frozenset({"columnWidths", "layout"}),
     "tableCell": frozenset(
         {"colspan", "rowspan", "colwidth", "align", "verticalAlign", "backgroundColor"}
     ),
@@ -263,15 +262,6 @@ def _validate_node_attrs(node_type: str, attrs: dict[str, Any], path: str) -> No
             r"[A-Za-z0-9_+-]*", language
         ):
             raise LessonDocumentValidationError(f"{path}.attrs.language: invalid language identifier.")
-    if node_type == "table":
-        widths = attrs.get("columnWidths")
-        if widths is not None and (
-            not isinstance(widths, list)
-            or len(widths) > 100
-            or any(not _positive_int(width) for width in widths)
-        ):
-            raise LessonDocumentValidationError(f"{path}.attrs.columnWidths: invalid column widths.")
-        _validate_enum(attrs.get("layout"), {"auto", "fixed"}, path, "layout")
     if node_type in {"tableCell", "tableHeader"}:
         for key in ("colspan", "rowspan"):
             value = attrs.get(key, 1)
