@@ -1703,6 +1703,7 @@ class CourseBuilderApiTests(TestCase):
         lesson["tables"] = {
             "market-comparison": {
                 "title": "Market comparison",
+                "columnWidths": [20, 20, 25, 35],
                 "rows": [
                     {
                         "section": "head",
@@ -1757,6 +1758,7 @@ class CourseBuilderApiTests(TestCase):
         saved_lesson = record.payload["modules"][0]["lessons"][0]
         saved_table = saved_lesson["content_json"]["tables"]["market-comparison"]
         self.assertEqual(saved_table["title"], "Market comparison")
+        self.assertEqual(saved_table["columnWidths"], [20.0, 20.0, 25.0, 35.0])
         self.assertEqual(saved_table["rows"][0]["cells"][0]["colspan"], 2)
         self.assertEqual(saved_table["rows"][1]["cells"][2]["text"], "Confirmed")
         self.assertEqual(saved_lesson["content_markdown"], lesson["content"])
