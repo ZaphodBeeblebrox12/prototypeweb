@@ -1766,10 +1766,11 @@ class CourseBuilderFormatPreservationRegressionTests(SimpleTestCase):
         self.assertIn("const dividerCells = alignments.map", source)
         self.assertIn("function tableCellMarkup(tag,text,colspan,rowspan,alignment)", source)
         self.assertIn("align:['left','center','right']", source)
-        self.assertIn("hasMergedCells", source)
-        self.assertIn("hasGroupedHeaders", source)
-        self.assertIn("hasCaption", source)
-        self.assertIn("ensureStructuredTableForResize(node)", source)
+        self.assertIn("function editorTableNeedsStructuredStorage(table)", source)
+        self.assertIn("function promoteComplexEditorTables(editor)", source)
+        self.assertIn("promoteComplexEditorTables(editor);", source)
+        self.assertIn("if (node.isConnected) refreshStructuredTableMetadata(node);", source)
+        self.assertNotIn("ensureStructuredTableForResize(node)", source)
 
     def test_obsolete_textarea_caret_handler_is_not_retained(self):
         source = self.builder_source
