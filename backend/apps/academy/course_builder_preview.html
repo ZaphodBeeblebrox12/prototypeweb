@@ -4190,8 +4190,18 @@ body.builder-dialog-open { overflow:hidden; }
       if (before && !/\s$/.test(before)) prefix = ' ';
       if (after && !/^\s/.test(after)) suffix = ' ';
     }
-    setLessonBodyForAudience(lesson, before + prefix + token + suffix + after, audience);
-    pendingLessonCaret = {lessonId:lesson.id, position:before.length + prefix.length + token.length};
+    const insertedMarkdown = before + prefix + token + suffix + after;
+    setLessonBodyForAudience(lesson, insertedMarkdown, audience);
+    const caretPosition = before.length + prefix.length + token.length;
+    let tokenOccurrence = 0;
+    let searchFrom = 0;
+    while (true) {
+      const tokenIndex = insertedMarkdown.indexOf(token, searchFrom);
+      if (tokenIndex < 0 || tokenIndex >= caretPosition) break;
+      tokenOccurrence += 1;
+      searchFrom = tokenIndex + token.length;
+    }
+    pendingLessonCaret = {lessonId:lesson.id, position:caretPosition, token, tokenOccurrence};
     lessonContentCaret = null;
     state.tab = 'lesson';
     persist(false);
@@ -4256,19 +4266,30 @@ body.builder-dialog-open { overflow:hidden; }
         else field.insertAdjacentHTML('afterend', lessonReferencePickerMarkup());
       }
       if (pendingLessonCaret && currentLesson()?.id === pendingLessonCaret.lessonId && visualEditor) {
+        const pendingCaret = pendingLessonCaret;
         pendingLessonCaret = null;
         requestAnimationFrame(() => {
           const currentEditor = $('#workspace [data-visual-editor][data-visual-kind="main"]');
-          if (currentEditor) {
-            currentEditor.focus();
-            const range = document.createRange();
+          if (!currentEditor) return;
+          currentEditor.focus();
+          const matchingTokens = Array.from(currentEditor.querySelectorAll('[data-editor-token]'))
+            .filter(node => node.getAttribute('data-editor-token') === pendingCaret.token);
+          const insertedToken = matchingTokens[pendingCaret.tokenOccurrence] || null;
+          const range = document.createRange();
+          if (insertedToken) {
+            // Place the caret immediately after the newly inserted reference, not at
+            // the end of a long lesson. The suffix (if any) remains after the caret.
+            range.setStartAfter(insertedToken);
+            range.collapse(true);
+          } else {
+            // A removed or unrenderable token should still leave the editor usable.
             range.selectNodeContents(currentEditor);
             range.collapse(false);
-            const selection = window.getSelection();
-            selection.removeAllRanges();
-            selection.addRange(range);
-            captureRichEditorRange();
           }
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          captureRichEditorRange();
         });
       }
     }
