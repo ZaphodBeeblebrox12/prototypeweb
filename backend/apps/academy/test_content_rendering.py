@@ -747,8 +747,8 @@ class SharedLessonRenderingTests(SimpleTestCase):
 
     def test_markdown_tables_receive_automatic_column_layout(self):
         rendered = render_safe_markdown(
-            "| Order type | How it works | Advantage | Risk and when to use it |\\n"
-            "| --- | --- | --- | --- |\\n"
+            "| Order type | How it works | Advantage | Risk and when to use it |\n"
+            "| --- | --- | --- | --- |\n"
             "| Market order | Executes at the best available price | Fast execution | Slippage can occur |"
         )
         self.assertIn('class="tt-auto-layout" data-column-count="4"', rendered)
