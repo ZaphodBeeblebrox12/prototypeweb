@@ -814,3 +814,36 @@ class CourseContentRevision(models.Model):
 
     def __str__(self):
         return f"Revision · {self.lesson} · {self.created_at:%Y-%m-%d %H:%M}"
+
+class CourseBuilderTiptapDraft(models.Model):
+    """Private sandbox documents for the parallel Tiptap editor pilot.
+
+    These records are deliberately separate from CourseImport, Lesson and published
+    course content. They cannot be submitted for review or published.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="academy_tiptap_pilot_drafts",
+    )
+    title = models.CharField(max_length=200, default="Untitled pilot lesson")
+    document = models.JSONField(default=dict)
+    revision = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "academy_course_builder_tiptap_draft"
+        ordering = ["-updated_at"]
+        indexes = [
+            models.Index(
+                fields=["owner", "updated_at"],
+                name="academy_tiptap_owner_upd",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.title} · Tiptap pilot"
+
