@@ -226,3 +226,27 @@
 .tt-editor-table-toolbar[hidden] {
   display: none;
 }
+
+
+.tt-editor-content .tiptap table[data-tt-caption]::before {
+  content: attr(data-tt-caption);
+  display: table-caption;
+  caption-side: top;
+  padding: 0 0 7px;
+  color: var(--muted, #667269);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.tt-editor-table-caption-input {
+  min-width: min(260px, 45vw);
+  min-height: 32px;
+  padding: 5px 9px;
+  border: 1px solid var(--line, #dce1d7);
+  border-radius: 4px;
+  background: var(--input, #fff);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+}
