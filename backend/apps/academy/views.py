@@ -46,6 +46,7 @@ from .models import (
     ProtectedLessonVideo,
 )
 from .permissions import is_course_content_admin
+from .seo import is_public_course_seo_candidate
 from .regional_content import (
     ASSET_REFERENCE_RE,
     IMAGE_GROUP_REFERENCE_RE,
@@ -513,7 +514,11 @@ def course_detail(request, course_slug):
         seo_description = f"Explore the {course.title} course from TradeThesis."
     seo_indexable = bool(
         getattr(settings, "TRADETHESIS_SEO_INDEXABLE", False)
-        and course.status == Course.Status.PUBLISHED
+        and is_public_course_seo_candidate(course)
+        and course.modules.filter(
+            is_published=True,
+            lessons__is_published=True,
+        ).exists()
     )
     course_schema = {
         "@context": "https://schema.org",
