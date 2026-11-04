@@ -107,6 +107,19 @@ export function mountTradeThesisEditor(element, options = {}) {
   toolbar.className = 'tt-editor-toolbar';
   toolbar.setAttribute('role', 'toolbar');
   toolbar.setAttribute('aria-label', 'Lesson formatting');
+  const codeLanguage = document.createElement('select');
+  codeLanguage.className = 'tt-editor-language-select';
+  codeLanguage.setAttribute('aria-label', 'Code block language');
+  for (const [value, label] of [
+    ['', 'Code language'], ['python', 'Python'], ['javascript', 'JavaScript'],
+    ['typescript', 'TypeScript'], ['bash', 'Bash'], ['sql', 'SQL'],
+    ['json', 'JSON'], ['html', 'HTML'], ['css', 'CSS'], ['pine', 'Pine Script'],
+  ]) {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    codeLanguage.append(option);
+  }
   const linkButton = document.createElement('button');
   linkButton.type = 'button';
   linkButton.className = 'tt-editor-toolbar__button';
@@ -168,6 +181,13 @@ export function mountTradeThesisEditor(element, options = {}) {
     if (!editor || editor.isDestroyed) return;
     refreshButtons(editor, toolbar, TOOLBAR_ACTIONS);
     refreshButtons(editor, tableToolbar, TABLE_ACTIONS);
+    codeLanguage.disabled = !editor.isEditable || !editor.isActive('codeBlock');
+    if (document.activeElement !== codeLanguage) {
+      codeLanguage.value = editor.getAttributes('codeBlock').language || '';
+    }
+    linkButton.disabled = !editor.isEditable || contentError;
+    linkButton.setAttribute('aria-pressed', editor.isActive('link') ? 'true' : 'false');
+    captionSave.disabled = !editor.isEditable || !editor.isActive('table');
     const inTable = editor.isActive('table');
     tableToolbar.hidden = !inTable;
     if (inTable && document.activeElement !== captionInput) {
@@ -213,7 +233,15 @@ export function mountTradeThesisEditor(element, options = {}) {
   for (const action of TOOLBAR_ACTIONS) {
     toolbar.append(makeButton(action, editor, toolbar, refresh));
   }
-  toolbar.append(linkButton);
+  toolbar.append(codeLanguage, linkButton);
+  codeLanguage.addEventListener('change', () => {
+    if (editor.isEditable && editor.isActive('codeBlock')) {
+      editor.chain().focus().updateAttributes('codeBlock', {
+        language: codeLanguage.value || null,
+      }).run();
+    }
+    refresh();
+  });
   for (const action of TABLE_ACTIONS) {
     tableToolbar.append(makeButton(action, editor, tableToolbar, refresh));
   }
