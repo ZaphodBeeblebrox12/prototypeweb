@@ -233,14 +233,13 @@ def _validate_node(node, *, path: str, node_counter: list[int], depth: int) -> N
 
 
 def validate_lesson_document(value) -> dict:
-    from copy import deepcopy
-
     """Validate and return a detached copy of a versioned lesson document.
 
     Unknown node or mark types are rejected rather than stripped. This is a
     deliberate data-preservation rule: a newer editor must never silently
     destroy content created by an extension it does not understand.
     """
+    from copy import deepcopy
     if not isinstance(value, dict):
         raise LessonDocumentError("A lesson document must be an object.")
 
