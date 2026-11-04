@@ -160,6 +160,32 @@ class LessonDocumentContractTests(SimpleTestCase):
         self.assertTrue(is_lesson_document(document))
         self.assertNotIn("src", document["content"]["content"][0]["attrs"])
 
+    def test_course_cards_and_lesson_tab_markers_are_typed_nodes(self):
+        document = new_lesson_document(
+            {
+                "type": "doc",
+                "content": [
+                    {
+                        "type": "ttCourseReference",
+                        "attrs": {
+                            "courseId": "12345678-1234-5678-1234-567812345678",
+                            "comingSoon": True,
+                        },
+                    },
+                    {
+                        "type": "ttLessonTab",
+                        "attrs": {"section": "practice"},
+                    },
+                ],
+            }
+        )
+        self.assertEqual(
+            document["content"]["content"][0]["attrs"]["courseId"],
+            "12345678-1234-5678-1234-567812345678",
+        )
+        self.assertTrue(document["content"]["content"][0]["attrs"]["comingSoon"])
+        self.assertEqual(document["content"]["content"][1]["attrs"]["section"], "practice")
+
     def test_unconverted_legacy_tokens_can_be_preserved_as_visible_reference_nodes(self):
         document = new_lesson_document(
             {
