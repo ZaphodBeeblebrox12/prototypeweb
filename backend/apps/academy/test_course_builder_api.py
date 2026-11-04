@@ -1062,6 +1062,12 @@ class CourseBuilderApiTests(TestCase):
         from .models import LessonInstructorMaterial
 
         payload = self.draft_payload("private-quiz-course")
+        payload["course"].update({
+            "seoTitle": "Private Quiz Course | TradeThesis",
+            "seoDescription": "A public overview for a course with protected lesson content.",
+            "seoPrimaryTopic": "Trading education",
+            "seoIndexable": False,
+        })
         payload["mode"] = "submit"
         payload["sync_source"] = False
         response = self.client.post(
@@ -1074,6 +1080,13 @@ class CourseBuilderApiTests(TestCase):
         course = publish_course_import(record, user=self.admin)
         self.assertEqual(course.learning_outcomes, ["Describe evidence before interpreting it."])
         self.assertEqual(course.category, "Chart reading")
+        self.assertEqual(course.seo_title, "Private Quiz Course | TradeThesis")
+        self.assertEqual(
+            course.seo_description,
+            "A public overview for a course with protected lesson content.",
+        )
+        self.assertEqual(course.seo_primary_topic, "Trading education")
+        self.assertFalse(course.seo_indexable)
         lesson = Lesson.objects.get(module__course=course)
         self.assertEqual(lesson.content_json["video_url"], "https://media.example.test/lesson.mp4")
         self.assertEqual(lesson.content_json["notebook"]["prompts"][0]["label"], "Observe")
