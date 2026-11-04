@@ -596,44 +596,44 @@ jobs:
             await cataloguePage.keyboard.press("Escape");
             console.log("PUBLISHED_COURSE_CTA_PASS: Academy course-detail link rendered for published course.");
 
-            // Member entry points must hand off to real Django/allauth routes; the password form posts directly to Academy over HTTPS.
-            await cataloguePage.setViewportSize({ width: 1280, height: 900 });
+            // Member access is a lightweight bridge page. Test its visual state without
+            // loading the Academy config (which intentionally redirects immediately).
+            await cataloguePage.route("**/assets/academy-config.js", route => route.fulfill({
+              status: 200,
+              contentType: "text/javascript",
+              body: "// Intentionally disabled for the public bridge-page layout check."
+            }));
+            await cataloguePage.setViewportSize({ width: 390, height: 844 });
             await cataloguePage.goto(server + "/member-access.html", { waitUntil: "domcontentloaded" });
             assert.equal(await cataloguePage.evaluate(() => getComputedStyle(document.documentElement).colorScheme), "light",
-              "Member access should use the TradeThesis light theme");
-            const loginForm = cataloguePage.locator("#memberLoginForm");
-            assert.equal((await loginForm.getAttribute("method") || "get").toLowerCase(), "post",
-              "Member credentials must be submitted with POST, not a query string");
-            const loginActionUrl = new URL(await loginForm.getAttribute("action") || "");
-            assert.equal(loginActionUrl.origin, new URL(academyBaseUrl).origin,
-              "The public sign-in form must submit to the configured Academy origin");
-            assert.equal(loginActionUrl.pathname, "/accounts/login/from-member-access/",
-              "The public sign-in form must keep its intended login endpoint");
-            const resetUrl = new URL(await cataloguePage.locator('a[href*="/accounts/password/reset/"]').getAttribute("href") || "");
-            const signupUrl = new URL(await cataloguePage.locator('a[href*="/accounts/signup/"]').getAttribute("href") || "");
-            assert.equal(resetUrl.origin, new URL(academyBaseUrl).origin,
-              "The password-reset link must follow the configured Academy origin");
-            assert.equal(signupUrl.origin, new URL(academyBaseUrl).origin,
-              "The signup link must follow the configured Academy origin");
-            assert.equal(await loginForm.locator('input[type="password"]').count(), 1,
-              "The member sign-in form should expose one password field for direct Academy verification");
-            assert.equal(await loginForm.locator('button[type="submit"]').count(), 1,
-              "Sign-in should use the existing POST form, not a separate marketing link");
-            assert.equal(resetUrl.pathname, "/accounts/password/reset/",
-              "Password reset must route to Django/allauth");
-            await cataloguePage.locator("#createTab").click();
-            const signupHref = await cataloguePage.locator("#createPanel a.primary").getAttribute("href");
-            assert.equal(new URL(signupHref || "").origin, new URL(academyBaseUrl).origin,
-              "Sign-up CTA must use the configured Academy origin");
-            assert.equal(new URL(signupHref || "").pathname, "/accounts/signup/",
-              "Sign-up CTA must lead to the server-side Django signup");
-            await cataloguePage.setViewportSize({ width: 390, height: 844 });
+              "Member access bridge should use the TradeThesis light theme");
+            assert.equal(await cataloguePage.locator("[data-academy-path]").getAttribute("data-academy-path"),
+              "/accounts/member-entry/",
+              "Member access should point to the Django member-entry route");
             const accessOverflow = await cataloguePage.evaluate(() => ({
               viewport: document.documentElement.clientWidth,
               document: document.documentElement.scrollWidth
             }));
             assert.ok(accessOverflow.document <= accessOverflow.viewport + 1,
               "Member-access page has horizontal scrolling on mobile: " + JSON.stringify(accessOverflow));
+            await cataloguePage.unroute("**/assets/academy-config.js");
+
+            // With the Academy origin configured, the bridge must redirect to the real
+            // Django entry route. Fulfill only that external route to keep CI self-contained.
+            await cataloguePage.route("https://academy.example.test/accounts/member-entry/", route => route.fulfill({
+              status: 200,
+              contentType: "text/html",
+              body: "<!doctype html><html lang='en'><head><meta charset='utf-8'><title>Academy handoff fixture</title></head><body>Academy member-entry fixture</body></html>"
+            }));
+            await cataloguePage.setViewportSize({ width: 1280, height: 900 });
+            await cataloguePage.goto(server + "/member-access.html", { waitUntil: "domcontentloaded" });
+            await cataloguePage.waitForURL("https://academy.example.test/accounts/member-entry/");
+            const memberEntryUrl = new URL(cataloguePage.url());
+            assert.equal(memberEntryUrl.origin, "https://academy.example.test",
+              "Member access must follow the configured Academy origin");
+            assert.equal(memberEntryUrl.pathname, "/accounts/member-entry/",
+              "Member access must hand off to Django's member-entry route");
+            await cataloguePage.unroute("https://academy.example.test/accounts/member-entry/");
 
             await cataloguePage.goto(server + "/member-area-preview.html", { waitUntil: "domcontentloaded" });
             assert.equal(await cataloguePage.evaluate(() => getComputedStyle(document.documentElement).colorScheme), "light",
@@ -647,7 +647,7 @@ jobs:
               "Member-area preview has horizontal scrolling on mobile: " + JSON.stringify(memberOverflow));
             assert.ok((await cataloguePage.locator("body").innerText()).toLowerCase().includes("preview"),
               "Member-area sample data must be clearly identified as a preview");
-            console.log("MEMBER_UX_PASS: preview-only auth copy, light theme and mobile fit.");
+            console.log("MEMBER_UX_PASS: bridge theme, mobile fit, configured Django hand-off and preview labeling.");
 
             // The Trading Path is free. Local previews resolve Academy links to the
             // staging service, but must point to the course detail / free-enrolment route,
