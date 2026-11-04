@@ -4172,7 +4172,7 @@ body.builder-dialog-open { overflow:hidden; }
       if (after && !/^\s/.test(after)) suffix = ' ';
     }
     setLessonBodyForAudience(lesson, before + prefix + token + suffix + after, audience);
-    pendingLessonCaret = {lessonId:lesson.id, position:before.length + prefix.length + token.length};
+    pendingLessonCaret = {lessonId:lesson.id};
     lessonContentCaret = null;
     state.tab = 'lesson';
     persist(false);
