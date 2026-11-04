@@ -183,6 +183,10 @@ ACADEMY_VIDEO_STORAGE_ROOT = env(
     "ACADEMY_VIDEO_STORAGE_ROOT", default=str(BASE_DIR / "private_course_videos")
 )
 ACADEMY_VIDEO_STORAGE_BACKEND = env("ACADEMY_VIDEO_STORAGE_BACKEND", default="google_drive").strip().lower()
+
+# The separate Tiptap authoring pilot is disabled unless explicitly enabled
+# for a controlled staff-only environment (for example, Academy staging).
+ACADEMY_TIPTAP_PILOT_ENABLED = env.bool("ACADEMY_TIPTAP_PILOT_ENABLED", default=False)
 if ACADEMY_VIDEO_STORAGE_BACKEND not in {"google_drive", "filesystem"}:
     raise ValueError("ACADEMY_VIDEO_STORAGE_BACKEND must be google_drive or filesystem.")
 ACADEMY_VIDEO_STORAGE_DURABLE = env.bool("ACADEMY_VIDEO_STORAGE_DURABLE", default=False)
