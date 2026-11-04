@@ -742,6 +742,16 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn("Closing copy.", rendered)
         self.assertNotIn("[[table-block:", rendered)
 
+    def test_markdown_tables_receive_automatic_column_layout(self):
+        rendered = render_safe_markdown(
+            "| Order type | How it works | Advantage | Risk and when to use it |\\n"
+            "| --- | --- | --- | --- |\\n"
+            "| Market order | Executes at the best available price | Fast execution | Slippage can occur |"
+        )
+        self.assertIn('class="tt-auto-layout" data-column-count="4"', rendered)
+        self.assertIn("<colgroup><col width=", rendered)
+        self.assertIn('class="lesson-table-wrap"', rendered)
+
     def test_option_five_table_styles_override_generic_lesson_table_skin(self):
         root = Path(__file__).resolve().parents[2]
         styles = (root / "static" / "academy" / "learning-room.css").read_text(encoding="utf-8")
@@ -1374,6 +1384,11 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn(".tt-learning-room .tt-lesson-idea-copy,\n.preview-body {", parity_css)
         self.assertIn(".rich-editor-canvas {", parity_css)
         self.assertIn("max-width: none;", parity_css)
+        self.assertIn("table.tt-auto-layout", parity_css)
+        self.assertIn("overflow-wrap: break-word;", parity_css)
+        self.assertIn(".tt-table-resize-handle", parity_css)
+        self.assertIn('data-rich-table-action="auto-fit"', builder_source)
+        self.assertIn("data-table-resize-handle", builder_source)
         for selector in (
             ".tt-learning-room .tt-tab-panel h6,",
             ".tt-learning-room .tt-lesson-idea-copy h6,",
