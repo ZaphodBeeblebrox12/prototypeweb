@@ -69,7 +69,7 @@ test('TradeThesis schema accepts common lesson content, merged tables and refere
 
   const node = schema.nodeFromJSON(document);
   node.check();
-  assert.equal(node.childCount, 9);
+  assert.equal(node.childCount, 10);
   assert.equal(schema.nodes.tableCell.spec.attrs.align.default, null);
 });
 
