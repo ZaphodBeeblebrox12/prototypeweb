@@ -24,6 +24,8 @@ _ALLOWED_TAGS = {
     "br",
     "caption",
     "code",
+    "col",
+    "colgroup",
     "del",
     "div",
     "em",
@@ -62,7 +64,8 @@ _ALLOWED_ATTRIBUTES = {
     "div": ["class", "role", "aria-label", "tabindex"],
     "figure": ["class", "data-figure-id"],
     "figcaption": ["class"],
-    "table": ["class"],
+    "table": ["class", "data-column-count"],
+    "col": ["width"],
     "caption": ["class"],
     "img": [
         "class",
@@ -95,6 +98,102 @@ _QUOTED_TAB_ROUTE_TOKEN = re.compile(
     r"^\s*(?:>\s*)+\[\[lesson-tab:(idea|examples|practice)\]\]\s*$",
     re.IGNORECASE,
 )
+
+
+def _table_layout_from_rows(rows):
+    """Return a balanced percentage layout for Markdown or structured table rows."""
+    normalized = []
+    column_count = 0
+    for row in rows if isinstance(rows, list) else []:
+        raw_cells = row.get("cells", []) if isinstance(row, dict) else row
+        if not isinstance(raw_cells, (list, tuple)):
+            continue
+        cells = []
+        row_width = 0
+        for raw_cell in raw_cells[:12]:
+            if isinstance(raw_cell, dict):
+                text = str(raw_cell.get("text") or "")
+                try:
+                    colspan = max(1, min(12, int(raw_cell.get("colspan", 1))))
+                except (TypeError, ValueError):
+                    colspan = 1
+            else:
+                text = str(raw_cell or "")
+                colspan = 1
+            cells.append((text, colspan))
+            row_width += colspan
+        if cells:
+            normalized.append(cells)
+            column_count = max(column_count, min(12, row_width))
+
+    if column_count < 1:
+        return 0, []
+
+    stats = [{"characters": 0.0, "longest_word": 0} for _ in range(column_count)]
+    for row in normalized:
+        column = 0
+        for text, colspan in row:
+            span = min(colspan, column_count - column)
+            if span <= 0:
+                break
+            words = re.findall(r"[^\s]+", text)
+            per_column_length = max(0.0, len(text) / span)
+            longest_word = max((len(word) for word in words), default=0)
+            for offset in range(span):
+                stats[column + offset]["characters"] += per_column_length
+                stats[column + offset]["longest_word"] = max(
+                    stats[column + offset]["longest_word"], longest_word
+                )
+            column += span
+
+    weights = [
+        52.0 + 3.0 * (item["characters"] ** 0.7) + 1.8 * item["longest_word"]
+        for item in stats
+    ]
+    total = sum(weights) or float(column_count)
+    percentages = [round(weight * 100.0 / total, 1) for weight in weights]
+    percentages[-1] = round(100.0 - sum(percentages[:-1]), 1)
+    return column_count, percentages
+
+
+def _table_colgroup_markup(widths):
+    if not widths:
+        return ""
+    return "<colgroup>" + "".join(
+        '<col width="' + format(float(width), ".1f") + '%">'
+        for width in widths
+    ) + "</colgroup>"
+
+
+def _add_markdown_table_layouts(markup):
+    """Add a content-aware column layout to rendered Markdown tables."""
+    table_pattern = re.compile(r"<table\b[^>]*>.*?</table>", re.IGNORECASE | re.DOTALL)
+
+    def add_layout(match):
+        table_html = match.group(0)
+        opening = re.match(r"<table\b[^>]*>", table_html, re.IGNORECASE)
+        if not opening or "<colgroup" in table_html.lower():
+            return table_html
+        row_values = []
+        for row_match in re.finditer(r"<tr\b[^>]*>(.*?)</tr>", table_html, re.IGNORECASE | re.DOTALL):
+            cells = []
+            for cell_match in re.finditer(
+                r"<(?:th|td)\b[^>]*>(.*?)</(?:th|td)>",
+                row_match.group(1),
+                re.IGNORECASE | re.DOTALL,
+            ):
+                text = html.unescape(re.sub(r"<[^>]+>", " ", cell_match.group(1)))
+                cells.append(re.sub(r"\s+", " ", text).strip())
+            if cells:
+                row_values.append(cells)
+        column_count, widths = _table_layout_from_rows(row_values)
+        if column_count < 2 or not widths:
+            return table_html
+        table_open = opening.group(0)
+        table_open = table_open[:-1] + ' class="tt-auto-layout" data-column-count="' + str(column_count) + '">'
+        return table_open + _table_colgroup_markup(widths) + table_html[opening.end():]
+
+    return table_pattern.sub(add_layout, markup)
 
 
 def _deduplicate_course_card_refs(source):
@@ -541,6 +640,18 @@ def render_safe_markdown(
         else:
             head_rows, body_rows = [], []
             title = escape(str(metadata.get("title") or "Lesson table").strip() or "Lesson table")
+            column_count, automatic_widths = _table_layout_from_rows(rows)
+            requested_widths = metadata.get("columnWidths")
+            widths = automatic_widths
+            if (
+                isinstance(requested_widths, list)
+                and len(requested_widths) == column_count
+                and all(isinstance(value, (int, float)) and 5 <= value <= 85 for value in requested_widths)
+                and 99 <= sum(requested_widths) <= 101
+            ):
+                total_width = float(sum(requested_widths))
+                widths = [round(float(value) * 100.0 / total_width, 1) for value in requested_widths]
+                widths[-1] = round(100.0 - sum(widths[:-1]), 1)
             for row in rows[:60]:
                 if not isinstance(row, dict):
                     continue
@@ -579,7 +690,9 @@ def render_safe_markdown(
                 markup = (
                     '<div class="lesson-table-wrap tt-structured-table-wrap" role="region" tabindex="0" '
                     'aria-label="Scrollable table: ' + title + '">'
-                    '<table class="tt-structured-table"><caption class="tt-structured-table-caption">'
+                    '<table class="tt-structured-table tt-auto-layout" data-column-count="' + str(column_count) + '">'
+                    + _table_colgroup_markup(widths)
+                    + '<caption class="tt-structured-table-caption">'
                     + title
                     + "</caption>"
                     + thead
@@ -843,6 +956,7 @@ def render_safe_markdown(
         extensions=["tables", "sane_lists", "smarty"],
         output_format="html",
     )
+    rendered = _add_markdown_table_layouts(rendered)
 
     # Python-Markdown expresses table alignment as inline CSS. The sanitizer
     # intentionally strips style attributes, so convert only its known safe
