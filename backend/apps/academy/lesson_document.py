@@ -6,8 +6,8 @@ never rendered directly until the learner renderer supports the same version.
 
 from __future__ import annotations
 
-from copy import deepcopy
 import math
+from copy import deepcopy
 from urllib.parse import urlsplit
 
 
