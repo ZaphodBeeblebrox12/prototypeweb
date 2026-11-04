@@ -153,6 +153,27 @@ class LessonDocumentContractTests(SimpleTestCase):
         self.assertTrue(is_lesson_document(document))
         self.assertNotIn("src", document["content"]["content"][0]["attrs"])
 
+    def test_unconverted_legacy_tokens_can_be_preserved_as_visible_reference_nodes(self):
+        document = new_lesson_document(
+            {
+                "type": "doc",
+                "content": [
+                    {
+                        "type": "ttLegacyReference",
+                        "attrs": {
+                            "token": "[[unknown-widget:original-id]]",
+                            "referenceKind": "unknown",
+                        },
+                    }
+                ],
+            }
+        )
+        self.assertTrue(is_lesson_document(document))
+        self.assertEqual(
+            document["content"]["content"][0]["attrs"]["token"],
+            "[[unknown-widget:original-id]]",
+        )
+
     def test_unsafe_links_are_rejected(self):
         with self.assertRaisesRegex(LessonDocumentValidationError, "unsafe link"):
             new_lesson_document(
