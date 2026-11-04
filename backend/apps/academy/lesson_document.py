@@ -7,6 +7,7 @@ never rendered directly until the learner renderer supports the same version.
 from __future__ import annotations
 
 from copy import deepcopy
+import math
 from urllib.parse import urlsplit
 
 
@@ -84,7 +85,11 @@ def _validate_json_value(value, *, path: str, depth: int = 0) -> None:
     if depth > MAX_ATTRIBUTE_DEPTH:
         raise LessonDocumentError(f"{path}: attribute nesting is too deep.")
 
-    if value is None or isinstance(value, (bool, int, float)):
+    if value is None or isinstance(value, (bool, int)):
+        return
+    if isinstance(value, float):
+        if not math.isfinite(value):
+            raise LessonDocumentError(f"{path}: non-finite numbers are not allowed.")
         return
 
     if isinstance(value, str):
@@ -151,7 +156,7 @@ def _validate_marks(marks, *, path: str, node_counter: list[int], depth: int) ->
         if not isinstance(mark, dict):
             raise LessonDocumentError(f"{mark_path}: mark must be an object.")
         mark_type = mark.get("type")
-        if mark_type not in ALLOWED_MARK_TYPES:
+        if not isinstance(mark_type, str) or mark_type not in ALLOWED_MARK_TYPES:
             raise LessonDocumentError(f"{mark_path}: unsupported mark type {mark_type!r}.")
         if mark_type in seen:
             raise LessonDocumentError(f"{mark_path}: duplicate mark type {mark_type!r}.")
@@ -176,7 +181,7 @@ def _validate_node(node, *, path: str, node_counter: list[int], depth: int) -> N
         raise LessonDocumentError(f"{path}: node must be an object.")
 
     node_type = node.get("type")
-    if node_type not in ALLOWED_NODE_TYPES:
+    if not isinstance(node_type, str) or node_type not in ALLOWED_NODE_TYPES:
         raise LessonDocumentError(f"{path}: unsupported node type {node_type!r}.")
 
     if node_type == "text":
@@ -240,6 +245,8 @@ def validate_lesson_document(value) -> dict:
     document = value.get("document")
     if not isinstance(document, dict) or document.get("type") != "doc":
         raise LessonDocumentError("The lesson document root must be a doc node.")
+    if not isinstance(document.get("content"), list) or not document["content"]:
+        raise LessonDocumentError("The lesson document must contain at least one block.")
 
     counter = [0]
     _validate_node(document, path="document", node_counter=counter, depth=0)
