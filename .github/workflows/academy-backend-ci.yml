@@ -51,6 +51,8 @@ jobs:
         run: |
           npm install --prefix tools/course-builder-tiptap --no-audit --no-fund
           npm run build --prefix tools/course-builder-tiptap
+          test -s static/academy/tiptap-pilot.js
+          node --check static/academy/tiptap-pilot.js
 
       - name: Check Django migration state
         run: python manage.py makemigrations --check --dry-run
