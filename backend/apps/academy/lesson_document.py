@@ -6,7 +6,6 @@ never rendered directly until the learner renderer supports the same version.
 
 from __future__ import annotations
 
-import math
 from copy import deepcopy
 from urllib.parse import urlsplit
 
@@ -88,6 +87,8 @@ def _validate_json_value(value, *, path: str, depth: int = 0) -> None:
     if value is None or isinstance(value, (bool, int)):
         return
     if isinstance(value, float):
+        import math
+
         if not math.isfinite(value):
             raise LessonDocumentError(f"{path}: non-finite numbers are not allowed.")
         return
