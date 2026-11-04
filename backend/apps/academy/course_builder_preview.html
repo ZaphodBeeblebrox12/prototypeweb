@@ -1850,6 +1850,7 @@ body.builder-dialog-open { overflow:hidden; }
     }
     const tag = node.tagName.toLowerCase();
     if (tag === 'br') return '\n';
+    if (tag === 'code') return '`' + String(node.textContent || '').replace(/`/g, '\\`') + '`';
     const inner = Array.from(node.childNodes).map(richInlineMarkdown).join('');
     if (tag === 'strong' || tag === 'b') return '**' + inner + '**';
     if (tag === 'em' || tag === 'i') return '*' + inner + '*';
@@ -1868,13 +1869,40 @@ body.builder-dialog-open { overflow:hidden; }
       richInlineMarkdown(cell).replace(/\|/g,'\\|').replace(/\n/g,' ').trim()
     ));
     const width = Math.max(1, ...cells.map(row => row.length));
+    const alignments = Array.from({length:width}, (_, columnIndex) => {
+      for (const row of rows) {
+        const cell = Array.from(row.querySelectorAll('th,td'))[columnIndex];
+        if (!cell) continue;
+        const alignment = String(cell.getAttribute('align') || cell.style?.textAlign || '').toLowerCase();
+        if (['left','center','right'].includes(alignment)) return alignment;
+      }
+      return '';
+    });
     const lines = cells.map(row => {
       while (row.length < width) row.push('');
       return '| ' + row.join(' | ') + ' |';
     });
-    if (lines.length === 1) lines.push('| ' + Array(width).fill('---').join(' | ') + ' |');
-    else lines.splice(1, 0, '| ' + Array(width).fill('---').join(' | ') + ' |');
+    const dividerCells = alignments.map(alignment =>
+      alignment === 'center' ? ':---:' :
+      alignment === 'right' ? '---:' :
+      alignment === 'left' ? ':---' : '---'
+    );
+    lines.splice(1, 0, '| ' + dividerCells.join(' | ') + ' |');
     return lines.join('\n');
+  }
+  function richListMarkdown(list, depth=0) {
+    const tag = list.tagName.toLowerCase();
+    const start = tag === 'ol' ? Math.max(1, Number(list.getAttribute('start') || 1)) : 1;
+    const items = Array.from(list.children).filter(child => child.tagName?.toLowerCase() === 'li');
+    return items.map((item,index) => {
+      const nestedLists = Array.from(item.children).filter(child => ['ul','ol'].includes(child.tagName?.toLowerCase()));
+      const content = Array.from(item.childNodes)
+        .filter(child => !(child.nodeType === 1 && ['ul','ol'].includes(child.tagName.toLowerCase())))
+        .map(richInlineMarkdown).join('').trim();
+      const marker = tag === 'ol' ? (start + index) + '. ' : '- ';
+      const line = '  '.repeat(depth) + marker + content;
+      return [line, ...nestedLists.map(child => richListMarkdown(child, depth + 1))].join('\n');
+    }).join('\n');
   }
   function richBlockMarkdown(node) {
     if (!node) return '';
@@ -1894,19 +1922,25 @@ body.builder-dialog-open { overflow:hidden; }
       const quoteContent = paragraphs.join('\n\n');
       return quoteContent.split('\n').map(line => line ? '> ' + line : '>').join('\n');
     }
-    if (tag === 'ul' || tag === 'ol') {
-      const items = Array.from(node.children).filter(child => child.tagName && child.tagName.toLowerCase() === 'li');
-      return items.map((item,index) => {
-        const content = Array.from(item.childNodes).map(child => child.nodeType === 1 && ['ul','ol'].includes(child.tagName.toLowerCase()) ? '' : richInlineMarkdown(child)).join('').trim();
-        return tag === 'ol' ? (index+1) + '. ' + content : '- ' + content;
-      }).join('\n');
+    if (tag === 'ul' || tag === 'ol') return richListMarkdown(node);
+    if (tag === 'table') {
+      // Serialisation stays pure: promotion to structured storage happens against the
+      // connected editor table before save or caret-offset measurement.
+      if (node.dataset.editorStructuredTable) {
+        if (node.isConnected) refreshStructuredTableMetadata(node);
+        return '[[table-block:' + String(node.dataset.editorStructuredTable) + ']]';
+      }
+      return richTableMarkdown(node);
     }
-    if (tag === 'table' && node.dataset.editorStructuredTable) {
-      refreshStructuredTableMetadata(node);
-      return '[[table-block:' + String(node.dataset.editorStructuredTable) + ']]';
+    if (tag === 'pre') {
+      const code = node.querySelector('code');
+      const codeText = String(code ? code.textContent : node.textContent || '').replace(/^\n+|\n+$/g,'');
+      const languageClass = Array.from(code?.classList || []).find(name => /^language-[a-z0-9_-]+$/i.test(name));
+      const language = languageClass ? languageClass.slice('language-'.length) : '';
+      const longestFence = Math.max(0, ...Array.from(codeText.matchAll(/~+/g), match => match[0].length));
+      const fence = '~'.repeat(Math.max(3, longestFence + 1));
+      return fence + language + '\n' + codeText + '\n' + fence;
     }
-    if (tag === 'table') return richTableMarkdown(node);
-    if (tag === 'pre') return '~~~\n' + node.textContent.replace(/^\n+|\n+$/g,'') + '\n~~~';
     if (tag === 'br') return '';
     if (tag === 'div' || tag === 'section' || tag === 'article' || tag === 'aside') {
       const hasBlockChild = Array.from(node.children).some(child => /^(p|div|h[1-6]|ul|ol|blockquote|hr|table|pre)$/.test(child.tagName.toLowerCase()) || child.hasAttribute('data-editor-token'));
@@ -2146,11 +2180,12 @@ body.builder-dialog-open { overflow:hidden; }
     }
     return table.dataset.editorStructuredTable;
   }
-  function tableCellMarkup(tag,text,colspan,rowspan) {
+  function tableCellMarkup(tag,text,colspan,rowspan,alignment) {
     const col=Number(colspan)>1?' colspan="'+Number(colspan)+'"':'';
     const row=Number(rowspan)>1?' rowspan="'+Number(rowspan)+'"':'';
+    const align=['left','center','right'].includes(String(alignment||'').toLowerCase())?' align="'+String(alignment).toLowerCase()+'"':'';
     const scope=tag==='th'?(Number(colspan)>1?' scope="colgroup"':' scope="col"'):'';
-    return '<'+tag+col+row+scope+'>'+esc(text||'')+'</'+tag+'>';
+    return '<'+tag+col+row+align+scope+'>'+esc(text||'')+'</'+tag+'>';
   }
   function structuredTableEditorMarkup(tableId) {
     const data=currentLesson()?.tables?.[tableId];
@@ -2158,7 +2193,7 @@ body.builder-dialog-open { overflow:hidden; }
     const heads=[],bodies=[];
     data.rows.forEach(row=>{
       if(!row||!Array.isArray(row.cells))return;
-      const cells=row.cells.map(cell=>tableCellMarkup(row.section==='head'||cell.header?'th':'td',cell.text,cell.colspan,cell.rowspan)).join('');
+      const cells=row.cells.map(cell=>tableCellMarkup(row.section==='head'||cell.header?'th':'td',cell.text,cell.colspan,cell.rowspan,cell.align)).join('');
       if(!cells)return;
       (row.section==='head'?heads:bodies).push('<tr>'+cells+'</tr>');
     });
@@ -2174,7 +2209,7 @@ body.builder-dialog-open { overflow:hidden; }
   }
   function structuredTableHtmlFromData(data, tableId, editorMode) {
     if(!data||!Array.isArray(data.rows))return '';
-    const renderRow=row=>'<tr>'+(row.cells||[]).map(cell=>tableCellMarkup(row.section==='head'||cell.header?'th':'td',cell.text,cell.colspan,cell.rowspan)).join('')+'</tr>';
+    const renderRow=row=>'<tr>'+(row.cells||[]).map(cell=>tableCellMarkup(row.section==='head'||cell.header?'th':'td',cell.text,cell.colspan,cell.rowspan,cell.align)).join('')+'</tr>';
     const heads=data.rows.filter(row=>row.section==='head').map(renderRow).join('');
     const bodies=data.rows.filter(row=>row.section!=='head').map(renderRow).join('');
     const title=String(data.title||'From observation to execution');
@@ -2202,6 +2237,8 @@ body.builder-dialog-open { overflow:hidden; }
           text:richInlineMarkdown(cell).replace(/\n+/g,' ').trim(),
           colspan:Math.max(1,Number(cell.getAttribute('colspan')||1)),
           rowspan:Math.max(1,Number(cell.getAttribute('rowspan')||1)),
+          align:['left','center','right'].includes(String(cell.getAttribute('align')||cell.style?.textAlign||'').toLowerCase())
+            ? String(cell.getAttribute('align')||cell.style?.textAlign||'').toLowerCase() : '',
           header:cell.tagName.toLowerCase()==='th'
         }))
       }))
@@ -2211,6 +2248,23 @@ body.builder-dialog-open { overflow:hidden; }
       if(widths)savedTable.columnWidths=widths;
     }
     lesson.tables[id]=savedTable;
+  }
+  function editorTableNeedsStructuredStorage(table) {
+    if (!table) return false;
+    const hasMergedCells = Array.from(table.querySelectorAll('th,td')).some(cell =>
+      Number(cell.getAttribute('colspan') || 1) > 1 || Number(cell.getAttribute('rowspan') || 1) > 1
+    );
+    const hasGroupedHeaders = table.querySelectorAll(':scope > thead > tr').length > 1;
+    const hasCaption = Boolean(table.querySelector(':scope > caption'));
+    return hasMergedCells || hasGroupedHeaders || hasCaption;
+  }
+  function promoteComplexEditorTables(editor) {
+    if (!editor) return;
+    editor.querySelectorAll('table').forEach(table => {
+      if (table.dataset.editorStructuredTable || !editorTableNeedsStructuredStorage(table)) return;
+      const id = ensureStructuredTableForResize(table);
+      if (id) refreshStructuredTableMetadata(table);
+    });
   }
   function selectedEditorTable(editor) {
     const saved=richEditorRange;const range=saved?.editor===editor?saved.range:null;
@@ -2411,6 +2465,7 @@ body.builder-dialog-open { overflow:hidden; }
     }
     const lesson = currentLesson();
     if (!lesson) return;
+    promoteComplexEditorTables(editor);
     const markdown = visualEditorToMarkdown(editor);
     const kind = editor.dataset.visualKind;
     if (kind === 'main') lesson.content = markdown;
@@ -2502,6 +2557,7 @@ body.builder-dialog-open { overflow:hidden; }
     if (!editor || editor.dataset.visualKind !== 'main' || !range) return;
     const lesson = currentLesson();
     if (!lesson || !saved.lessonId || saved.lessonId !== lesson.id || !editor.contains(range.startContainer)) return;
+    promoteComplexEditorTables(editor);
     const prefixRange = document.createRange();
     prefixRange.selectNodeContents(editor);
     try { prefixRange.setEnd(range.startContainer, range.startOffset); } catch (_) { return; }
@@ -3497,13 +3553,33 @@ body.builder-dialog-open { overflow:hidden; }
     const html = baseLessonFields(l);
     return !l ? html : html + '<section class="markdown-guide"><h4>Visual editor tips</h4><p>Select text and use the toolbar to format it. Drag a narrow grip between table headings to resize a column, or choose Auto-fit to restore balanced widths. Use Figures for charts and the country/region audience selector above for full-lesson variations. Use companion-course controls for related course cards. The learner preview shows the Learning Room layout.</p></section>';
   };
+  // Canonical base Markdown renderer: used by the visual editor when reopening saved content.
+  // Keep its supported inline/block syntax in sync with richInlineMarkdown/richBlockMarkdown.
   renderMarkdown = function(src) {
-    const inline = value => esc(String(value ?? ''))
-      .replace(/\x60([^\x60]+)\x60/g, '<code>$1</code>')
-      .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
-      .replace(/~~([^~\n]+)~~/g, '<del>$1</del>')
-      .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    const inline = (value, depth=0) => {
+      if (depth > 12) return esc(String(value ?? ''));
+      let source = String(value ?? '');
+      const protectedMarkup = [];
+      const protect = html => {
+        const marker = '\uE100' + protectedMarkup.length + '\uE101';
+        protectedMarkup.push(html);
+        return marker;
+      };
+      // Parse code first so markup-looking characters inside code remain literal.
+      source = source.replace(/\x60((?:\\\x60|[^\x60])+)\x60/g,
+        (match, code) => protect('<code>' + esc(code.replace(/\\\x60/g, '\x60')) + '</code>'));
+      // Underline is stored as a small, explicitly supported HTML tag in lesson Markdown.
+      // Recursing lets bold, italic, links and code continue to work inside underlined text.
+      source = source.replace(/<u>([\s\S]*?)<\/u>/gi,
+        (match, content) => protect('<u>' + inline(content, depth + 1) + '</u>'));
+      source = esc(source)
+        .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
+        .replace(/~~([^~\n]+)~~/g, '<del>$1</del>')
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+      return source.replace(/\uE100(\d+)\uE101/g,
+        (match, index) => protectedMarkup[Number(index)] ?? match);
+    };
     const splitTableRow = row => row.trim()
       .replace(/^\|/, '')
       .replace(/\|$/, '')
@@ -3560,6 +3636,42 @@ body.builder-dialog-open { overflow:hidden; }
         isFence(line) ||
         isTableAt(index)
       );
+    };
+    const listMarkerMatch = line => {
+      const match = String(line || '').match(/^([ \t]*)([-*+]|\d+[.)])[ \t]+(.*)$/);
+      if (!match) return null;
+      return {
+        indent:match[1].replace(/\t/g,'  ').length,
+        marker:match[2],
+        tag:/^\d/.test(match[2]) ? 'ol' : 'ul',
+        content:match[3]
+      };
+    };
+    const parseList = baseIndent => {
+      const first = listMarkerMatch(lines[index]);
+      if (!first || first.indent !== baseIndent) return '';
+      const tag = first.tag;
+      const startNumber = tag === 'ol' ? (Number.parseInt(first.marker,10) || 1) : 1;
+      const items = [];
+      while (index < lines.length) {
+        const marker = listMarkerMatch(lines[index]);
+        if (!marker || marker.indent < baseIndent) break;
+        if (marker.indent > baseIndent) {
+          if (!items.length) break;
+          const nested = parseList(marker.indent);
+          if (!nested) break;
+          items[items.length - 1].nested.push(nested);
+          continue;
+        }
+        if (marker.tag !== tag) break;
+        items.push({content:marker.content,nested:[]});
+        index += 1;
+      }
+      if (!items.length) return '';
+      const startAttribute = tag === 'ol' && startNumber !== 1 ? ' start="' + startNumber + '"' : '';
+      return '<' + tag + startAttribute + '>' + items.map(item =>
+        '<li>' + inline(item.content) + item.nested.join('') + '</li>'
+      ).join('') + '</' + tag + '>';
     };
     const renderParagraph = paragraphLines => {
       const value = paragraphLines.join('\n').trim();
@@ -3637,30 +3749,14 @@ body.builder-dialog-open { overflow:hidden; }
         continue;
       }
 
-      const unordered = /^\s*[-*+]\s+/.test(line);
-      const ordered = /^\s*\d+[.)]\s+/.test(line);
-      if (unordered || ordered) {
-        const listStart = index;
-        const items = [];
-        while (index < lines.length) {
-          const current = lines[index];
-          // Empty list items are valid editor output. Capturing (.*), rather than
-          // (.+), keeps the recogniser aligned with the prefix test above.
-          const item = unordered
-            ? current.match(/^\s*[-*+]\s+(.*)$/)
-            : current.match(/^\s*\d+[.)]\s+(.*)$/);
-          if (!item) break;
-          items.push('<li>' + inline(item[1]) + '</li>');
-          index += 1;
-        }
-        if (index === listStart) {
-          // Defensive progress guarantee: malformed Markdown must never leave the
-          // outer parser on the same line forever.
+      const listMarker = listMarkerMatch(line);
+      if (listMarker) {
+        const list = parseList(listMarker.indent);
+        if (list) output.push(list);
+        else {
+          // Defensive progress guarantee for malformed list input.
           output.push(renderParagraph([lines[index]]));
           index += 1;
-        } else {
-          const tag = ordered ? 'ol' : 'ul';
-          output.push('<' + tag + '>' + items.join('') + '</' + tag + '>');
         }
         continue;
       }
@@ -3675,6 +3771,8 @@ body.builder-dialog-open { overflow:hidden; }
 
     return output.join('');
   };
+  // Freeze the canonical parser before regional/media/course-card presentation is layered on.
+  // The editor intentionally hydrates from this base parser, not from learner-only wrappers.
   const baseMarkdownRenderer = renderMarkdown;
   function resolveBuilderRegionalBlocks(source, lesson, audience) {
     const blocks = Array.isArray(lesson?.regionalBlocks) ? lesson.regionalBlocks : [];
@@ -4039,25 +4137,6 @@ body.builder-dialog-open { overflow:hidden; }
     return html + lessonPlacementToolsMarkup() + inlineLessonReferenceManagerMarkup(lesson);
   };
 
-  function rememberLessonContentCaret(target) {
-    if (!target || !target.matches('textarea[data-entity="lesson"][data-field="content"]')) return;
-    const lesson = currentLesson();
-    if (!lesson) return;
-    const save = () => {
-      if (!target.isConnected || currentLesson()?.id !== lesson.id) return;
-      lessonContentCaret = {
-        lessonId: lesson.id,
-        start: Number(target.selectionStart) || 0,
-        end: Number(target.selectionEnd) || 0
-      };
-    };
-    save();
-    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(save);
-  }
-  ['click', 'keyup', 'select', 'input', 'mouseup'].forEach(eventName => {
-    document.addEventListener(eventName, event => rememberLessonContentCaret(event.target), true);
-  });
-
   function insertLessonContentAtCaret(lesson, token, isBlock) {
     if (!lesson) return;
     const audience = selectedLessonBodyAudience();
@@ -4146,8 +4225,8 @@ body.builder-dialog-open { overflow:hidden; }
     if (state.tab === 'lesson') {
       const outlineEditor = $('#workspace .lesson-outline-layout [data-visual-editor]');
       if (outlineEditor) updateLessonOutlineFromEditor(outlineEditor);
-      const textarea = $('#workspace [data-visual-editor][data-visual-kind="main"]');
-      const field = textarea && textarea.closest('.field');
+      const visualEditor = $('#workspace [data-visual-editor][data-visual-kind="main"]');
+      const field = visualEditor && visualEditor.closest('.field');
       if (field && !$('#workspace [data-course-card-picker]')) {
         field.insertAdjacentHTML('afterend', courseCardPickerMarkup());
       }
@@ -4156,7 +4235,7 @@ body.builder-dialog-open { overflow:hidden; }
         if (coursePicker) coursePicker.insertAdjacentHTML('afterend', lessonReferencePickerMarkup());
         else field.insertAdjacentHTML('afterend', lessonReferencePickerMarkup());
       }
-      if (pendingLessonCaret && currentLesson()?.id === pendingLessonCaret.lessonId && textarea) {
+      if (pendingLessonCaret && currentLesson()?.id === pendingLessonCaret.lessonId && visualEditor) {
         pendingLessonCaret = null;
         requestAnimationFrame(() => {
           const currentEditor = $('#workspace [data-visual-editor][data-visual-kind="main"]');
