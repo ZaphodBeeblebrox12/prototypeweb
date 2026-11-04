@@ -1388,7 +1388,7 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn(".rich-editor-canvas {", parity_css)
         self.assertIn("max-width: none;", parity_css)
         self.assertIn("table.tt-auto-layout", parity_css)
-        self.assertIn("overflow-wrap: break-word;", parity_css)
+        self.assertIn("overflow-wrap: normal;", parity_css)
         self.assertIn(".tt-table-resize-handle", parity_css)
         self.assertIn('data-rich-table-action="auto-fit"', builder_source)
         self.assertIn("data-table-resize-handle", builder_source)
