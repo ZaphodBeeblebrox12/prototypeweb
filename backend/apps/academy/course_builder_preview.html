@@ -2062,9 +2062,10 @@ body.builder-dialog-open { overflow:hidden; }
     const tableId = String(table.dataset.editorStructuredTable || '');
     const saved = tableId && lesson?.tables?.[tableId] ? lesson.tables[tableId].columnWidths : null;
     const stored = normalizeTableColumnWidths(saved,count);
-    const existing = table.dataset.tableLayout === 'manual'
+    const current = table.dataset.tableLayout === 'manual'
       ? tableColumnWidthsFromDom(table)
       : null;
+    const existing = current && current.length === count ? current : null;
     const manual = Boolean(existing || stored);
     const widths = existing || stored || autoTableColumnWidths(table);
     applyTableColumnWidths(table,widths,manual);
@@ -4832,10 +4833,10 @@ body.builder-dialog-open { overflow:hidden; }
     const columns = group ? Array.from(group.children) : [];
     if (columnIndex < 0 || columnIndex >= columns.length - 1) return;
     const tableWidth = table.getBoundingClientRect().width || table.clientWidth;
-    const widths = columns.map(column => {
-      const raw = Number.parseFloat(window.getComputedStyle(column).width);
-      return Number.isFinite(raw) && raw > 0 ? raw : tableWidth / columns.length;
-    });
+    const percentages = tableColumnWidthsFromDom(table);
+    const widths = percentages && percentages.length === columns.length
+      ? percentages.map(value => value * tableWidth / 100)
+      : columns.map(() => tableWidth / columns.length);
     const pairWidth = widths[columnIndex] + widths[columnIndex + 1];
     activeTableColumnResize = {table,editor,columnIndex,tableWidth,widths,pairWidth,startX:event.clientX};
     table.classList.add('tt-table-resizing');
