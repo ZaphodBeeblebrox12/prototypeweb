@@ -101,7 +101,7 @@ class AcademySeoEndpointTests(TestCase):
         self.assertContains(response, "Learn to identify meaningful support and resistance zones")
         self.assertContains(response, 'name="robots" content="index, follow"')
         self.assertContains(response, 'rel="canonical"')
-        self.assertContains(response, '"about":{"@type":"Thing","name":"Support and resistance trading"}')
+        self.assertContains(response, '"about": {"@type": "Thing", "name": "Support and resistance trading"}')
 
     @override_settings(TRADETHESIS_SEO_INDEXABLE=True)
     def test_course_can_opt_out_of_indexing_without_changing_access(self):
