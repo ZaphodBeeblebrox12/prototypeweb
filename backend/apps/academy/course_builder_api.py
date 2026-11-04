@@ -43,6 +43,7 @@ from .course_builder_lifecycle import mark_builder_draft_deleted
 from .course_card_utils import is_course_card_recommendable
 from .course_pricing import parse_course_pricing, pricing_fields_for_builder
 from .importing import inspect_manifest, validate_import_for_publish
+from .lesson_document import LessonDocumentError, lesson_document_from_content_json, validate_lesson_document
 from .models import (
     Course,
     CourseImport,
@@ -1070,6 +1071,11 @@ def _build_import_payload(course_state, course_slug):
                 "regional_blocks": regional_blocks_payload,
                 "regional_lesson_content": regional_lesson_content_payload,
             }
+            # Keep a structured editor document beside the Markdown compatibility
+            # mirror. Existing drafts without this field remain valid and unchanged.
+            editor_document = lesson.get("document")
+            if editor_document is not None:
+                content_json["lesson_document"] = validate_lesson_document(editor_document)
             lessons.append(
                 {
                     "source_id": f"{module_index}.{lesson_index}",
@@ -1561,6 +1567,20 @@ def _builder_state_from_published_course(course):
                 if isinstance(content_json.get("tables"), dict)
                 else {}
             )
+            try:
+                editor_document = lesson_document_from_content_json(content_json)
+                editor_document_error = ""
+            except LessonDocumentError as exc:
+                # Never block a legacy course from opening because a newer document
+                # schema is not understood. Keep the Markdown fallback and surface
+                # the reason to the structured editor instead.
+                editor_document = None
+                editor_document_error = str(exc)[:300]
+                logger.warning(
+                    "Invalid structured lesson document; using Markdown fallback: lesson_id=%s error=%s",
+                    lesson.pk,
+                    editor_document_error,
+                )
             lessons.append(
                 {
                     "id": str(lesson.pk),
@@ -1593,6 +1613,8 @@ def _builder_state_from_published_course(course):
                         ],
                     },
                     "tables": tables,
+                    "document": editor_document,
+                    "documentValidationError": editor_document_error,
                     "content": lesson.content_markdown or "",
                     "questions": normalized_questions,
                     "images": images,
