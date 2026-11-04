@@ -16,11 +16,7 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.cache import add_never_cache_headers
 from django.views.decorators.http import require_GET, require_http_methods
 
-from .lesson_document import (
-    LessonDocumentError,
-    make_lesson_document,
-    validate_lesson_document,
-)
+from .lesson_document import LessonDocumentError, validate_lesson_document
 from .models import CourseBuilderTiptapDraft
 from .permissions import is_course_content_admin
 
@@ -122,7 +118,8 @@ def tiptap_pilot_api(request):
 
     raw_id = body.get("id")
     if raw_id is None:
-        if CourseBuilderTiptapDraft.objects.filter(owner=request.user).count() >= MAX_PILOT_DRAFTS_PER_AUTHOR:
+        draft_count = CourseBuilderTiptapDraft.objects.filter(owner=request.user).count()
+        if draft_count >= MAX_PILOT_DRAFTS_PER_AUTHOR:
             return JsonResponse(
                 {"detail": "The pilot draft limit has been reached for this account."},
                 status=400,
@@ -174,7 +171,3 @@ def tiptap_pilot_api(request):
 
     return JsonResponse({"draft": _draft_summary(draft), "document": draft.document})
 
-
-def empty_tiptap_pilot_document():
-    """Return the supported empty document for UI bootstrapping and tests."""
-    return make_lesson_document()
