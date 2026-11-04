@@ -1,0 +1,149 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>TradeThesis · Structured editor pilot</title>
+  <link rel="stylesheet" href="/{% static 'academy/tiptap-pilot.css' %}">
+  <script defer src="/{% static 'academy/tiptap-pilot.js' %}"></script>
+</head>
+<body class="tt-tiptap-body">
+  <form class="tt-tiptap-csrf" aria-hidden="true">
+    {% csrf_token %}
+  </form>
+
+  <main
+    class="tt-tiptap-page"
+    id="tt-tiptap-app"
+    data-api-url="{% url 'staff_course_builder_tiptap_api' %}"
+  >
+    <header class="tt-tiptap-header">
+      <div class="tt-tiptap-brandline">
+        <span>TRADETHESIS</span>
+        <span class="tt-tiptap-brand-separator">/</span>
+        <span>COURSE BUILDER</span>
+        <span class="tt-tiptap-pilot-tag">SEPARATE PILOT</span>
+      </div>
+      <div class="tt-tiptap-header-row">
+        <div>
+          <h1>Structured lesson editor</h1>
+          <p class="tt-tiptap-subtitle">
+            A parallel authoring sandbox. Your existing Course Builder and published lessons are untouched.
+          </p>
+        </div>
+        <a class="tt-tiptap-back-link" href="{% url 'staff_course_builder_preview' %}">
+          Return to current Course Builder
+        </a>
+      </div>
+    </header>
+
+    <section class="tt-tiptap-sandbox-note" aria-label="Pilot safety information">
+      <span class="tt-tiptap-note-mark" aria-hidden="true">i</span>
+      <p>
+        <strong>Sandbox only.</strong>
+        Drafts saved here are stored separately. They cannot be submitted for review or published.
+      </p>
+    </section>
+
+    <section class="tt-tiptap-workspace" aria-label="Structured lesson editor">
+      <div class="tt-tiptap-document-bar">
+        <label class="tt-tiptap-title-field">
+          <span>Draft title</span>
+          <input
+            id="tt-tiptap-title"
+            type="text"
+            maxlength="200"
+            value="Untitled pilot lesson"
+            autocomplete="off"
+            spellcheck="true"
+          >
+        </label>
+
+        <label class="tt-tiptap-draft-picker">
+          <span>Saved pilot drafts</span>
+          <select id="tt-tiptap-draft-list">
+            <option value="">No saved drafts loaded</option>
+          </select>
+        </label>
+
+        <div class="tt-tiptap-document-actions">
+          <button type="button" class="tt-tiptap-button tt-tiptap-button-secondary" id="tt-tiptap-new">
+            New sandbox draft
+          </button>
+          <button type="button" class="tt-tiptap-button tt-tiptap-button-primary" id="tt-tiptap-save">
+            Save sandbox draft
+          </button>
+        </div>
+      </div>
+
+      <div class="tt-tiptap-editor-card">
+        <div class="tt-tiptap-toolbar" role="toolbar" aria-label="Text formatting">
+          <div class="tt-tiptap-toolbar-group">
+            <label class="tt-tiptap-sr-only" for="tt-tiptap-block-style">Text style</label>
+            <select id="tt-tiptap-block-style" class="tt-tiptap-select" title="Text style">
+              <option value="paragraph">Paragraph</option>
+              <option value="1">Heading 1</option>
+              <option value="2">Heading 2</option>
+              <option value="3">Heading 3</option>
+            </select>
+          </div>
+
+          <div class="tt-tiptap-toolbar-group">
+            <button type="button" data-command="bold" aria-label="Bold" title="Bold (Ctrl/Cmd+B)"><strong>B</strong></button>
+            <button type="button" data-command="italic" aria-label="Italic" title="Italic (Ctrl/Cmd+I)"><em>I</em></button>
+            <button type="button" data-command="underline" aria-label="Underline" title="Underline (Ctrl/Cmd+U)"><span class="tt-tiptap-underlined">U</span></button>
+            <button type="button" data-command="strike" aria-label="Strikethrough" title="Strikethrough"><s>S</s></button>
+            <button type="button" data-command="code" aria-label="Inline code" title="Inline code">&lt;/&gt;</button>
+          </div>
+
+          <div class="tt-tiptap-toolbar-group">
+            <button type="button" data-command="bulletList" aria-label="Bulleted list" title="Bulleted list">• List</button>
+            <button type="button" data-command="orderedList" aria-label="Numbered list" title="Numbered list">1. List</button>
+            <button type="button" data-command="blockquote" aria-label="Quote" title="Quote">Quote</button>
+            <button type="button" data-command="codeBlock" aria-label="Code block" title="Code block">Code block</button>
+          </div>
+
+          <div class="tt-tiptap-toolbar-group">
+            <button type="button" data-command="link" aria-label="Insert link" title="Insert link">Link</button>
+            <button type="button" data-command="horizontalRule" aria-label="Insert divider" title="Insert divider">Divider</button>
+            <button type="button" data-command="insertTable" aria-label="Insert table" title="Insert a 3 by 3 table">Table +</button>
+          </div>
+
+          <div class="tt-tiptap-toolbar-group tt-tiptap-table-tools" id="tt-tiptap-table-tools" hidden>
+            <span class="tt-tiptap-table-label">Table tools</span>
+            <button type="button" data-command="addRowAfter" title="Add row">Row +</button>
+            <button type="button" data-command="deleteRow" title="Delete row">Row −</button>
+            <button type="button" data-command="addColumnAfter" title="Add column">Column +</button>
+            <button type="button" data-command="deleteColumn" title="Delete column">Column −</button>
+            <button type="button" data-command="mergeCells" title="Merge selected cells">Merge</button>
+            <button type="button" data-command="splitCell" title="Split selected cell">Split</button>
+            <button type="button" data-command="deleteTable" title="Delete table">Delete table</button>
+          </div>
+
+          <div class="tt-tiptap-toolbar-spacer"></div>
+          <div class="tt-tiptap-toolbar-group">
+            <button type="button" data-command="undo" aria-label="Undo" title="Undo (Ctrl/Cmd+Z)">↶</button>
+            <button type="button" data-command="redo" aria-label="Redo" title="Redo (Ctrl/Cmd+Shift+Z)">↷</button>
+          </div>
+        </div>
+
+        <div class="tt-tiptap-canvas-wrap">
+          <div id="tt-tiptap-editor" class="tt-tiptap-canvas" aria-label="Lesson content editor"></div>
+        </div>
+      </div>
+
+      <footer class="tt-tiptap-statusbar">
+        <span id="tt-tiptap-save-status" role="status" aria-live="polite">Starting editor…</span>
+        <span id="tt-tiptap-document-meta">Structured document · v1</span>
+      </footer>
+    </section>
+
+    <footer class="tt-tiptap-footer">
+      <span>TRADETHESIS · CONVICTION BEFORE EXECUTION</span>
+      <span>This pilot is separate from the live course workflow.</span>
+    </footer>
+  </main>
+</body>
+</html>

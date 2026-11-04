@@ -19,6 +19,7 @@ from apps.academy.course_builder_api import (
     course_builder_asset,
     course_builder_video_upload,
 )
+from apps.academy.tiptap_pilot import tiptap_pilot_api, tiptap_pilot_editor
 from apps.academy.google_drive_oauth import google_drive_oauth_start, google_drive_oauth_callback
 from apps.academy.catalogue_api import public_course_catalogue
 from apps.admin_desk_views import (
@@ -44,6 +45,9 @@ urlpatterns = [
     path("health/", health_check, name="health_check"),
     # Resend delivers signed delivery/bounce/complaint events here.
     path("api/email/webhooks/resend/", resend_webhook, name="resend_email_webhook"),
+    # Separate, feature-flagged Tiptap sandbox. It does not replace the legacy builder.
+    path("staff/course-builder/tiptap/api/", tiptap_pilot_api, name="staff_course_builder_tiptap_api"),
+    path("staff/course-builder/tiptap/", tiptap_pilot_editor, name="staff_course_builder_tiptap"),
     path("staff/course-builder/api/", course_builder_api, name="staff_course_builder_api"),
     path("staff/course-builder/videos/<uuid:import_id>/<str:lesson_id>/", course_builder_video_upload, name="staff_course_builder_video_upload"),
     path("staff/google-drive/connect/", google_drive_oauth_start, name="academy_google_drive_oauth_start"),

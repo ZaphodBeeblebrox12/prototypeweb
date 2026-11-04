@@ -42,6 +42,18 @@ jobs:
       - name: Validate Render build script syntax
         run: bash -n build.sh
 
+      - name: Set up Node for the isolated Tiptap editor
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.22.1"
+
+      - name: Build the self-hosted Tiptap pilot bundle
+        run: |
+          npm install --prefix tools/course-builder-tiptap --no-audit --no-fund
+          npm run build --prefix tools/course-builder-tiptap
+          test -s static/academy/tiptap-pilot.js
+          node --check static/academy/tiptap-pilot.js
+
       - name: Check Django migration state
         run: python manage.py makemigrations --check --dry-run
 
@@ -52,6 +64,10 @@ jobs:
       - name: Check formatting with black
         continue-on-error: true
         run: black --check apps/academy/ tests/academy/
+
+      - name: Show formatting diff for new Tiptap pilot view
+        if: always()
+        run: black --diff apps/academy/tiptap_pilot.py || true
 
       - name: Run type checking with mypy
         run: mypy apps/academy/ --follow-imports=silent

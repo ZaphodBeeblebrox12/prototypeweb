@@ -1,0 +1,22 @@
+{
+  "name": "tradethesis-course-builder-tiptap-pilot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20 <25"
+  },
+  "scripts": {
+    "build": "esbuild src/main.js --bundle --minify --format=iife --target=es2020 --outfile=../../static/academy/tiptap-pilot.js"
+  },
+  "dependencies": {
+    "@tiptap/core": "3.32.2",
+    "@tiptap/extension-code-block": "3.32.2",
+    "@tiptap/extension-table": "3.32.2",
+    "@tiptap/pm": "3.32.2",
+    "@tiptap/starter-kit": "3.32.2"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}

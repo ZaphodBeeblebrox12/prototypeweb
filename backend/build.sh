@@ -2,6 +2,29 @@
 set -o errexit
 
 pip install -r requirements.txt
+
+# Build the self-hosted Tiptap pilot bundle only in environments that
+# explicitly enable it. Production and the legacy editor stay independent.
+if [[ "${ACADEMY_TIPTAP_PILOT_ENABLED:-false}" == "true" ]]; then
+  if [[ ! -f tools/course-builder-tiptap/package.json ]]; then
+    echo "Tiptap pilot is enabled but its package manifest is missing." >&2
+    exit 1
+  fi
+  command -v node >/dev/null 2>&1 || {
+    echo "Node.js is required to build the Course Builder Tiptap pilot." >&2
+    exit 1
+  }
+  command -v npm >/dev/null 2>&1 || {
+    echo "npm is required to build the Course Builder Tiptap pilot." >&2
+    exit 1
+  }
+  mkdir -p static/academy
+  npm install --prefix tools/course-builder-tiptap --no-audit --no-fund
+  npm run build --prefix tools/course-builder-tiptap
+else
+  rm -f static/academy/tiptap-pilot.js
+fi
+
 python manage.py collectstatic --noinput
 python manage.py migrate --noinput
 
