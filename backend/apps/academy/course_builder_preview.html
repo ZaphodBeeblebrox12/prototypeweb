@@ -3422,7 +3422,9 @@ body.builder-dialog-open { overflow:hidden; }
         return '<tr>' + headers.map((_, i) => cellHtml(cells[i] ?? '', 'td', i)).join('') + '</tr>';
       }).join('');
       const body = bodyRows ? '<tbody>' + bodyRows + '</tbody>' : '';
-      return '<div class="lesson-table-wrap" role="region" aria-label="Scrollable information table" tabindex="0"><table>' + head + body + '</table></div>';
+      const previewRows = [headers, ...rows.slice(2).map(splitTableRow)];
+      const previewWidths = autoTableColumnWidthsFromRows(previewRows);
+      return '<div class="lesson-table-wrap" role="region" aria-label="Scrollable information table" tabindex="0"><table class="tt-auto-layout" data-column-count="' + headers.length + '">' + columnGroupMarkup(previewWidths) + head + body + '</table></div>';
     };
     const lines = String(src || '').replace(/\r\n?/g, '\n').split('\n');
     const output = [];
