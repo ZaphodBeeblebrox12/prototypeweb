@@ -657,6 +657,7 @@ jobs:
             await cataloguePage.route("https://tradethesis-academy-staging.onrender.com/api/academy/catalogue/", route => route.fulfill({
               status: 200,
               contentType: "application/json",
+              headers: { "access-control-allow-origin": "*" },
               body: JSON.stringify({
                 courses: [{
                   slug: "trading-path",
