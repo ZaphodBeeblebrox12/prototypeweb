@@ -159,7 +159,7 @@ jobs:
             });
 
             const server = "http://127.0.0.1:4173";
-            await page.goto(server + "/support-resistance-room.html", { waitUntil: "networkidle" });
+            await page.goto(server + "/support-resistance-room.html", { waitUntil: "domcontentloaded" });
             await page.waitForSelector("#sr-lesson-title");
 
             async function openLesson(id, expectedTitle) {
@@ -300,7 +300,7 @@ jobs:
               { id: 13, sections: 10, terms: ["The depth of the return matters", "Three responses that share the same name", "Some breakouts never retest the zone", "Role reversal is possible, not automatic"] },
               { id: 14, sections: 18, terms: ["Range-edge upthrust or false upside break", "Trendline penetration and reclaim", "The first pullback holds; a later pullback fails", "Process and outcome are not the same thing"] }
             ]) {
-              await page.goto(server + "/support-resistance-room.html?lesson=" + check.id, { waitUntil: "networkidle" });
+              await page.goto(server + "/support-resistance-room.html?lesson=" + check.id, { waitUntil: "domcontentloaded" });
               await page.waitForSelector("#sr-v52-longform:not([hidden])");
               await page.waitForFunction(id => document.querySelector("#sr-lesson-number").textContent.includes(String(id).padStart(2, "0")), check.id);
               const panel = page.locator("#sr-v52-longform");
@@ -317,7 +317,7 @@ jobs:
 
             // Lesson notes and the existing synthetic staged chart remain in the same room.
             await page.evaluate(() => localStorage.clear());
-            await page.goto(server + "/support-resistance-room.html?lesson=13", { waitUntil: "networkidle" });
+            await page.goto(server + "/support-resistance-room.html?lesson=13", { waitUntil: "domcontentloaded" });
             await page.waitForSelector("#sr-v52-longform:not([hidden])");
             await page.locator("#sr-v52-longform [data-sr-v52-jump='notes']").click();
             await page.waitForFunction(() => document.querySelector("#sr-tab-notes") && !document.querySelector("#sr-tab-notes").hidden);
@@ -341,11 +341,11 @@ jobs:
             await page.waitForFunction(() => !document.querySelector("#sr-v52-final-review").hidden);
 
             // Old reader links resolve into the same Learning Room; mobile content must not overflow.
-            await page.goto(server + "/module5-v5_2/index.html?lesson=14", { waitUntil: "networkidle" });
+            await page.goto(server + "/module5-v5_2/index.html?lesson=14", { waitUntil: "domcontentloaded" });
             await page.waitForFunction(() => window.location.pathname.endsWith("/support-resistance-room.html") && new URLSearchParams(window.location.search).get("lesson") === "14");
             await page.waitForSelector("#sr-v52-longform:not([hidden])");
             await page.setViewportSize({ width: 390, height: 844 });
-            await page.goto(server + "/support-resistance-room.html?lesson=13", { waitUntil: "networkidle" });
+            await page.goto(server + "/support-resistance-room.html?lesson=13", { waitUntil: "domcontentloaded" });
             await page.waitForSelector("#sr-v52-longform:not([hidden])");
             const overflow = await page.evaluate(() => {
               const viewport = document.documentElement.clientWidth;
@@ -474,7 +474,7 @@ jobs:
                 }
               });
             });
-            await cataloguePage.goto(server + "/courses.html", { waitUntil: "networkidle" });
+            await cataloguePage.goto(server + "/courses.html", { waitUntil: "domcontentloaded" });
             const academyBaseUrl = await cataloguePage.evaluate(() => window.TRADETHESIS_ACADEMY_CONFIG?.baseUrl || "");
             assert.equal(academyBaseUrl, "https://academy.example.test",
               "The public Academy origin should be overrideable for a different deployment");
@@ -543,7 +543,7 @@ jobs:
 
             // Verify the Course tab and expandable micro-course outline before unrelated public journeys.
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
-            await cataloguePage.goto(server + "/courses.html", { waitUntil: "networkidle" });
+            await cataloguePage.goto(server + "/courses.html", { waitUntil: "domcontentloaded" });
             const firstMicroCourseCard = cataloguePage.locator('#cc-micro-grid article.ed-micro-tile:has([data-open-course="support-resistance"])');
             const firstMicroCourse = cataloguePage.locator('#cc-micro-grid [data-open-course="support-resistance"]');
             await firstMicroCourse.waitFor({ state: "visible" });
@@ -598,7 +598,7 @@ jobs:
 
             // Member entry points must hand off to real Django/allauth routes; the password form posts directly to Academy over HTTPS.
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
-            await cataloguePage.goto(server + "/member-access.html", { waitUntil: "networkidle" });
+            await cataloguePage.goto(server + "/member-access.html", { waitUntil: "domcontentloaded" });
             assert.equal(await cataloguePage.evaluate(() => getComputedStyle(document.documentElement).colorScheme), "light",
               "Member access should use the TradeThesis light theme");
             const loginForm = cataloguePage.locator("#memberLoginForm");
@@ -635,7 +635,7 @@ jobs:
             assert.ok(accessOverflow.document <= accessOverflow.viewport + 1,
               "Member-access page has horizontal scrolling on mobile: " + JSON.stringify(accessOverflow));
 
-            await cataloguePage.goto(server + "/member-area-preview.html", { waitUntil: "networkidle" });
+            await cataloguePage.goto(server + "/member-area-preview.html", { waitUntil: "domcontentloaded" });
             assert.equal(await cataloguePage.evaluate(() => getComputedStyle(document.documentElement).colorScheme), "light",
               "Member area should use the TradeThesis light theme");
             await cataloguePage.waitForSelector(".app");
@@ -653,7 +653,7 @@ jobs:
             // staging service, but must point to the course detail / free-enrolment route,
             // never the legacy paid checkout endpoint.
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
-            await cataloguePage.goto(server + "/trading-path.html", { waitUntil: "networkidle" });
+            await cataloguePage.goto(server + "/trading-path.html", { waitUntil: "domcontentloaded" });
             const tradingPathEnrolment = cataloguePage.locator('[data-academy-path="/learn/course/trading-path/"]').first();
             assert.equal(await tradingPathEnrolment.count(), 1,
               "Trading Path must expose a free-enrolment link");
@@ -669,7 +669,7 @@ jobs:
             assert.ok((await cataloguePage.locator(".product-price").innerText()).includes("Free"),
               "Trading Path page must show a free price");
 
-            await cataloguePage.goto(server + "/construct.html", { waitUntil: "networkidle" });
+            await cataloguePage.goto(server + "/construct.html", { waitUntil: "domcontentloaded" });
             await cataloguePage.locator("[data-preview-enquiry]").first().click();
             assert.ok((await cataloguePage.locator("#previewModal").getAttribute("class")).includes("open"),
               "CONSTRUCT enquiry CTA should open its preview disclosure");
@@ -677,7 +677,7 @@ jobs:
               "CONSTRUCT enquiry CTA must be honest about its preview-only status");
             await cataloguePage.locator("#previewModal .modal-close").click();
 
-            await cataloguePage.goto(server + "/live-class.html", { waitUntil: "networkidle" });
+            await cataloguePage.goto(server + "/live-class.html", { waitUntil: "domcontentloaded" });
             await cataloguePage.locator("#liveName").fill("Preview Learner");
             await cataloguePage.locator("#liveEmail").fill("learner@example.test");
             await cataloguePage.locator('#liveEnquiryForm button[type="submit"]').click();
@@ -709,8 +709,8 @@ jobs:
             for (const route of siteRoutes) {
               await cataloguePage.setViewportSize({ width: 390, height: 844 });
               console.log("SITE_ROUTE_MOBILE_CHECK: " + route);
-              await cataloguePage.goto(server + route, { waitUntil: "networkidle", timeout: 30000 });
-              await cataloguePage.waitForLoadState("networkidle");
+              await cataloguePage.goto(server + route, { waitUntil: "domcontentloaded", timeout: 30000 });
+              await cataloguePage.waitForLoadState("domcontentloaded");
               const mobileLayout = await cataloguePage.evaluate(() => ({
                 viewport: document.documentElement.clientWidth,
                 page: document.documentElement.scrollWidth
