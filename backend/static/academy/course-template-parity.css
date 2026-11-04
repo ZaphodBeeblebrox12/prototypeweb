@@ -484,3 +484,102 @@
 .rich-editor-canvas > .tt-editor-table-scroll {
   width: 100%;
 }
+
+/* Content-aware course tables. Widths are authored as percentages, while the
+   column-count floor keeps dense comparisons readable and scrollable on mobile. */
+.tt-learning-room .tt-tab-panel table.tt-auto-layout,
+.preview-body table.tt-auto-layout,
+.rich-editor-canvas table.tt-auto-layout {
+  table-layout: fixed;
+}
+.tt-learning-room .tt-tab-panel .lesson-table-wrap table.tt-auto-layout[data-column-count="2"],
+.preview-body .lesson-table-wrap table.tt-auto-layout[data-column-count="2"],
+.rich-editor-canvas table.tt-auto-layout[data-column-count="2"] { min-width: 520px; }
+.tt-learning-room .tt-tab-panel .lesson-table-wrap table.tt-auto-layout[data-column-count="3"],
+.preview-body .lesson-table-wrap table.tt-auto-layout[data-column-count="3"],
+.rich-editor-canvas table.tt-auto-layout[data-column-count="3"] { min-width: 560px; }
+.tt-learning-room .tt-tab-panel .lesson-table-wrap table.tt-auto-layout[data-column-count="4"],
+.preview-body .lesson-table-wrap table.tt-auto-layout[data-column-count="4"],
+.rich-editor-canvas table.tt-auto-layout[data-column-count="4"] { min-width: 680px; }
+.tt-learning-room .tt-tab-panel .lesson-table-wrap table.tt-auto-layout[data-column-count="5"],
+.preview-body .lesson-table-wrap table.tt-auto-layout[data-column-count="5"],
+.rich-editor-canvas table.tt-auto-layout[data-column-count="5"] { min-width: 820px; }
+.tt-learning-room .tt-tab-panel .lesson-table-wrap table.tt-auto-layout[data-column-count="6"],
+.preview-body .lesson-table-wrap table.tt-auto-layout[data-column-count="6"],
+.rich-editor-canvas table.tt-auto-layout[data-column-count="6"] { min-width: 960px; }
+.tt-learning-room .tt-tab-panel .lesson-table-wrap table.tt-auto-layout[data-column-count="7"],
+.preview-body .lesson-table-wrap table.tt-auto-layout[data-column-count="7"],
+.rich-editor-canvas table.tt-auto-layout[data-column-count="7"] { min-width: 1100px; }
+.tt-learning-room .tt-tab-panel .lesson-table-wrap table.tt-auto-layout[data-column-count="8"],
+.preview-body .lesson-table-wrap table.tt-auto-layout[data-column-count="8"],
+.rich-editor-canvas table.tt-auto-layout[data-column-count="8"] { min-width: 1240px; }
+.tt-learning-room .tt-tab-panel .lesson-table-wrap table.tt-auto-layout[data-column-count="9"],
+.preview-body .lesson-table-wrap table.tt-auto-layout[data-column-count="9"],
+.rich-editor-canvas table.tt-auto-layout[data-column-count="9"] { min-width: 1380px; }
+.tt-learning-room .tt-tab-panel .lesson-table-wrap table.tt-auto-layout[data-column-count="10"],
+.preview-body .lesson-table-wrap table.tt-auto-layout[data-column-count="10"],
+.rich-editor-canvas table.tt-auto-layout[data-column-count="10"] { min-width: 1520px; }
+.tt-learning-room .tt-tab-panel .lesson-table-wrap table.tt-auto-layout[data-column-count="11"],
+.preview-body .lesson-table-wrap table.tt-auto-layout[data-column-count="11"],
+.rich-editor-canvas table.tt-auto-layout[data-column-count="11"] { min-width: 1660px; }
+.tt-learning-room .tt-tab-panel .lesson-table-wrap table.tt-auto-layout[data-column-count="12"],
+.preview-body .lesson-table-wrap table.tt-auto-layout[data-column-count="12"],
+.rich-editor-canvas table.tt-auto-layout[data-column-count="12"] { min-width: 1800px; }
+
+.tt-learning-room .tt-tab-panel table.tt-auto-layout th,
+.tt-learning-room .tt-tab-panel table.tt-auto-layout td,
+.preview-body table.tt-auto-layout th,
+.preview-body table.tt-auto-layout td,
+.rich-editor-canvas table.tt-auto-layout th,
+.rich-editor-canvas table.tt-auto-layout td {
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: none;
+}
+
+.rich-editor-canvas table.tt-auto-layout thead th { position: relative; }
+.rich-editor-canvas .tt-table-resize-handle {
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  right: -5px;
+  bottom: 0;
+  width: 10px;
+  min-width: 0;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+}
+.rich-editor-canvas .tt-table-resize-handle::after {
+  content: "";
+  position: absolute;
+  top: 18%;
+  bottom: 18%;
+  left: 4px;
+  width: 2px;
+  border-radius: 2px;
+  background: #b48635;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+.rich-editor-canvas table.tt-auto-layout thead th:hover .tt-table-resize-handle::after,
+.rich-editor-canvas .tt-table-resize-handle:focus-visible::after,
+.rich-editor-canvas table.tt-table-resizing .tt-table-resize-handle::after {
+  opacity: .9;
+}
+.rich-editor-canvas table.tt-table-resizing,
+.rich-editor-canvas table.tt-table-resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+.rich-editor-canvas .tt-table-resize-handle:focus-visible {
+  outline: 2px solid #b48635;
+  outline-offset: -2px;
+}
+
