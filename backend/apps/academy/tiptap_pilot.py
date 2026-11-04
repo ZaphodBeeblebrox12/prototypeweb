@@ -20,7 +20,6 @@ from .lesson_document import LessonDocumentError, validate_lesson_document
 from .models import CourseBuilderTiptapDraft
 from .permissions import is_course_content_admin
 
-
 MAX_PILOT_REQUEST_BYTES = 1_500_000
 MAX_PILOT_DRAFTS_PER_AUTHOR = 100
 
