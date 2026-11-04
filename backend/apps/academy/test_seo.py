@@ -60,6 +60,20 @@ class AcademySeoEndpointTests(TestCase):
             status=Course.Status.PUBLISHED,
             seo_indexable=False,
         )
+        not_indexed_module = CourseModule.objects.create(
+            course=not_indexed,
+            title="Module",
+            slug="module",
+            position=1,
+            is_published=True,
+        )
+        Lesson.objects.create(
+            module=not_indexed_module,
+            title="Lesson",
+            slug="lesson",
+            position=1,
+            is_published=True,
+        )
         response = self.client.get(reverse("academy_sitemap"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "/learn/course/support-and-resistance/")
