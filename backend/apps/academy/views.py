@@ -507,18 +507,18 @@ def course_detail(request, course_slug):
     canonical_url = request.build_absolute_uri(
         reverse("academy:course-detail", args=[course.slug])
     )
+    seo_title = str(course.seo_title or "").strip() or f"{course.title} · TradeThesis Academy"
+    seo_description_source = course.seo_description or course.summary or course.description
     seo_description = re.sub(
-        r"\s+", " ", str(course.summary or course.description or "")
-    ).strip()[:160]
+        r"\s+", " ", str(seo_description_source or "")
+    ).strip()[:320]
     if not seo_description:
         seo_description = f"Explore the {course.title} course from TradeThesis."
+    seo_primary_topic = str(course.seo_primary_topic or "").strip()
     seo_indexable = bool(
         getattr(settings, "TRADETHESIS_SEO_INDEXABLE", False)
         and is_public_course_seo_candidate(course)
-        and course.modules.filter(
-            is_published=True,
-            lessons__is_published=True,
-        ).exists()
+        and total > 0
     )
     course_schema = {
         "@context": "https://schema.org",
@@ -534,6 +534,8 @@ def course_detail(request, course_slug):
     }
     if course.level:
         course_schema["educationalLevel"] = course.level
+    if seo_primary_topic:
+        course_schema["about"] = {"@type": "Thing", "name": seo_primary_topic}
     course_json_ld = json.dumps(course_schema, ensure_ascii=False).replace(
         "<", "\\u003c"
     ).replace(">", "\\u003e").replace("&", "\\u0026")
@@ -568,7 +570,9 @@ def course_detail(request, course_slug):
             "is_course_content_admin": is_course_content_admin(request.user),
             "progress_percent": round(completed * 100 / total) if total else 0,
             "canonical_url": canonical_url,
+            "seo_title": seo_title,
             "seo_description": seo_description,
+            "seo_primary_topic": seo_primary_topic,
             "seo_image_url": (
                 f"{settings.TRADETHESIS_PUBLIC_SITE_URL}/assets/tradethesis-social-preview.jpg"
             ),

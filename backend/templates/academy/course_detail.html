@@ -1,14 +1,17 @@
 {% extends "base.html" %}
 {% load static %}
-{% block title %}{% if course_import_preview %}Website preview · {{ course.title }} · TradeThesis Academy{% else %}{{ course.title }} · TradeThesis Academy{% endif %}{% endblock %}
+{% block title %}{% if course_import_preview %}Website preview · {{ course.title }} · TradeThesis Academy{% else %}{{ seo_title }}{% endif %}{% endblock %}
 {% block extra_meta %}
 <meta name="description" content="{{ seo_description }}">
 {% if seo_indexable %}<link rel="canonical" href="{{ canonical_url }}">{% endif %}
 <meta name="robots" content="{% if seo_indexable %}index, follow{% else %}noindex, follow{% endif %}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="TradeThesis">
-<meta property="og:title" content="{{ course.title }} · TradeThesis Academy">
+<meta property="og:title" content="{{ seo_title }}">
 <meta property="og:description" content="{{ seo_description }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ seo_title }}">
+<meta name="twitter:description" content="{{ seo_description }}">
 <meta property="og:url" content="{{ canonical_url }}">
 <meta property="og:image" content="{{ seo_image_url }}">
 <meta property="og:image:alt" content="TradeThesis course overview for {{ course.title }}">

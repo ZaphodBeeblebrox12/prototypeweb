@@ -74,6 +74,25 @@ class Course(models.Model):
     description = models.TextField(blank=True)
     share_title = models.CharField(max_length=200, blank=True)
     share_message = models.TextField(blank=True)
+    seo_title = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Optional search title. Leave blank to use the course title.",
+    )
+    seo_description = models.CharField(
+        max_length=320,
+        blank=True,
+        help_text="Optional search description. Leave blank to use the course summary.",
+    )
+    seo_primary_topic = models.CharField(
+        max_length=160,
+        blank=True,
+        help_text="The main search topic this public course overview serves.",
+    )
+    seo_indexable = models.BooleanField(
+        default=True,
+        help_text="Allow indexing when the deployment, publication status and catalogue visibility also permit it.",
+    )
     category = models.CharField(max_length=80, blank=True)
     level = models.CharField(max_length=40, blank=True)
     estimated_duration = models.CharField(max_length=80, blank=True)

@@ -67,11 +67,32 @@ class AcademySeoEndpointTests(TestCase):
             slug="unpublished-course",
             status=Course.Status.DRAFT,
         )
+        not_indexed = Course.objects.create(
+            title="Excluded Search Course",
+            slug="excluded-search-course",
+            status=Course.Status.PUBLISHED,
+            seo_indexable=False,
+        )
+        not_indexed_module = CourseModule.objects.create(
+            course=not_indexed,
+            title="Module",
+            slug="module",
+            position=1,
+            is_published=True,
+        )
+        Lesson.objects.create(
+            module=not_indexed_module,
+            title="Lesson",
+            slug="lesson",
+            position=1,
+            is_published=True,
+        )
         response = self.client.get(reverse("academy_sitemap"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "/learn/course/support-and-resistance/")
         self.assertNotContains(response, hidden.slug)
         self.assertNotContains(response, draft.slug)
+        self.assertNotContains(response, not_indexed.slug)
 
     @override_settings(TRADETHESIS_SEO_INDEXABLE=True)
     def test_production_robots_advertises_the_sitemap(self):
@@ -79,6 +100,48 @@ class AcademySeoEndpointTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Sitemap: ")
         self.assertContains(response, "/sitemap.xml")
+
+
+    @override_settings(TRADETHESIS_SEO_INDEXABLE=True)
+    def test_course_overview_renders_custom_search_metadata(self):
+        self.course.seo_title = "Support and Resistance Trading Course | TradeThesis"
+        self.course.seo_description = (
+            "Learn to identify meaningful support and resistance zones, "
+            "compare reactions and define invalidation."
+        )
+        self.course.seo_primary_topic = "Support and resistance trading"
+        self.course.save(update_fields=[
+            "seo_title", "seo_description", "seo_primary_topic"
+        ])
+
+        response = self.client.get(
+            reverse("academy:course-detail", args=[self.course.slug])
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(
+            response,
+            "<title>Support and Resistance Trading Course | TradeThesis</title>",
+            html=True,
+        )
+        self.assertContains(response, 'name="description"')
+        self.assertContains(response, "Learn to identify meaningful support and resistance zones")
+        self.assertContains(response, 'name="robots" content="index, follow"')
+        self.assertContains(response, 'rel="canonical"')
+        self.assertContains(response, '"about": {"@type": "Thing", "name": "Support and resistance trading"}')
+
+    @override_settings(TRADETHESIS_SEO_INDEXABLE=True)
+    def test_course_can_opt_out_of_indexing_without_changing_access(self):
+        self.course.seo_indexable = False
+        self.course.save(update_fields=["seo_indexable"])
+
+        response = self.client.get(
+            reverse("academy:course-detail", args=[self.course.slug])
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, 'name="robots" content="noindex, follow"')
+        self.assertNotContains(response, 'rel="canonical"')
 
 
     @override_settings(TRADETHESIS_SEO_INDEXABLE=True)

@@ -21,6 +21,7 @@ def is_public_course_seo_candidate(course):
     """Return whether a published course belongs in public search discovery."""
     return (
         course.status == Course.Status.PUBLISHED
+        and course.seo_indexable
         and course.catalogue_role != Course.CatalogueRole.HIDDEN
         and is_course_card_recommendable(course.title, course.summary, course.description)
     )
@@ -45,6 +46,7 @@ def academy_sitemap_xml(request):
     courses = (
         Course.objects.filter(
             status=Course.Status.PUBLISHED,
+            seo_indexable=True,
             modules__is_published=True,
             modules__lessons__is_published=True,
         )
