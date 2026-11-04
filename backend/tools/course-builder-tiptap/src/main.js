@@ -32,7 +32,7 @@ if (root) {
   let editor = null;
   let activeDraftId = null;
   let activeRevision = null;
-  let dirty = true;
+  let dirty = false;
   let suppressUpdates = false;
   let saving = false;
   let loading = false;
@@ -204,10 +204,10 @@ if (root) {
     activeRevision = null;
     titleInput.value = 'Untitled pilot lesson';
     setEditorDocument(emptyDocument);
-    dirty = true;
+    dirty = false;
     draftSelect.value = '';
     documentMeta.textContent = 'Structured document v1 · New sandbox draft';
-    setStatus('New sandbox draft · not saved', 'dirty');
+    setStatus('New sandbox draft · not saved', 'neutral');
     saveButton.disabled = false;
     titleInput.focus();
     titleInput.select();
