@@ -160,6 +160,19 @@ class LessonDocumentContractTests(SimpleTestCase):
         self.assertTrue(is_lesson_document(document))
         self.assertNotIn("src", document["content"]["content"][0]["attrs"])
 
+    def test_code_blocks_accept_an_unselected_language(self):
+        document = new_lesson_document(
+            {
+                "type": "doc",
+                "content": [
+                    {"type": "codeBlock", "attrs": {"language": None}, "content": [
+                        {"type": "text", "text": "print('hello')"}
+                    ]}
+                ],
+            }
+        )
+        self.assertIsNone(document["content"]["content"][0]["attrs"]["language"])
+
     def test_course_cards_and_lesson_tab_markers_are_typed_nodes(self):
         document = new_lesson_document(
             {
