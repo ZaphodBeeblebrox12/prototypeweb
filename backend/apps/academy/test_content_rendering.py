@@ -1,4 +1,7 @@
 import re
+import shutil
+import subprocess
+import tempfile
 from pathlib import Path
 
 from django.test import SimpleTestCase
@@ -1771,6 +1774,36 @@ class CourseBuilderFormatPreservationRegressionTests(SimpleTestCase):
         self.assertIn("promoteComplexEditorTables(editor);", source)
         self.assertIn("if (node.isConnected) refreshStructuredTableMetadata(node);", source)
         self.assertNotIn("ensureStructuredTableForResize(node)", source)
+
+
+    def test_embedded_course_builder_javascript_passes_node_syntax_check(self):
+        node = shutil.which("node")
+        if not node:
+            self.skipTest("Node.js is unavailable in this test environment.")
+        scripts = re.findall(
+            r"<script\\b[^>]*>(.*?)</script>",
+            self.builder_source,
+            flags=re.DOTALL,
+        )
+        self.assertTrue(scripts, "The Course Builder preview should include its editor script.")
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            suffix=".js",
+            encoding="utf-8",
+            delete=False,
+        ) as script_file:
+            script_file.write("\\n;\\n".join(scripts))
+            script_path = Path(script_file.name)
+        try:
+            result = subprocess.run(
+                [node, "--check", str(script_path)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        finally:
+            script_path.unlink(missing_ok=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_obsolete_textarea_caret_handler_is_not_retained(self):
         source = self.builder_source
