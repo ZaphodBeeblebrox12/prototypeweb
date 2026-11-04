@@ -4846,8 +4846,10 @@ body.builder-dialog-open { overflow:hidden; }
     const active = activeTableColumnResize;
     if (!active) return;
     const minimum = Math.max(80,active.tableWidth * .05);
+    const lowerBound = Math.max(minimum,active.pairWidth - active.tableWidth * .85);
+    const upperBound = Math.min(active.pairWidth - minimum,active.tableWidth * .85);
     const delta = event.clientX - active.startX;
-    const left = Math.max(minimum,Math.min(active.pairWidth - minimum,active.widths[active.columnIndex] + delta));
+    const left = Math.max(lowerBound,Math.min(upperBound,active.widths[active.columnIndex] + delta));
     const nextWidths = active.widths.slice();
     nextWidths[active.columnIndex] = left;
     nextWidths[active.columnIndex + 1] = active.pairWidth - left;
