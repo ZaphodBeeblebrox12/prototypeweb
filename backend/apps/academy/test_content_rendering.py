@@ -681,6 +681,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
             table_metadata={
                 "market-comparison": {
                     "title": "Market comparison",
+                    "columnWidths": [20, 20, 25, 35],
                     "rows": [
                         {
                             "section": "head",
@@ -737,6 +738,8 @@ class SharedLessonRenderingTests(SimpleTestCase):
             '<caption class="tt-structured-table-caption">Market comparison</caption>', rendered
         )
         self.assertIn('colspan="2" scope="colgroup"', rendered)
+        self.assertIn('class="tt-structured-table tt-auto-layout" data-column-count="4"', rendered)
+        self.assertIn('<col width="20.0%">', rendered)
         self.assertIn("Repeated rejection", rendered)
         self.assertIn("Opening copy.", rendered)
         self.assertIn("Closing copy.", rendered)
