@@ -230,9 +230,8 @@ class LessonDocumentContractTests(SimpleTestCase):
             },
         ]
         for content in malformed_documents:
-            with self.subTest(content=content):
-                with self.assertRaises(LessonDocumentValidationError):
-                    new_lesson_document(content)
+            with self.subTest(content=content), self.assertRaises(LessonDocumentValidationError):
+                new_lesson_document(content)
 
     def test_invalid_nested_content_is_rejected(self):
         with self.assertRaisesRegex(LessonDocumentValidationError, "not allowed inside"):
