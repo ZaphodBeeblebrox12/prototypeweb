@@ -4818,9 +4818,11 @@ body.builder-dialog-open { overflow:hidden; }
   document.addEventListener('input', event => {
     const editor = event.target.closest?.('[data-visual-editor]');
     if (!editor) return;
-    // Prepare newly pasted tables only; recalculating widths on every keystroke
-    // would cause visible column movement while the author is typing.
-    editor.querySelectorAll('table:not(.tt-auto-layout)').forEach(table => prepareEditorTable(table,false));
+    const selection = window.getSelection();
+    const node = selection?.anchorNode;
+    const activeNode = node?.nodeType === 1 ? node : node?.parentElement;
+    const table = activeNode?.closest?.('table');
+    if (table && !table.classList.contains('tt-auto-layout')) prepareEditorTable(table,false);
   });
   let activeTableColumnResize = null;
   document.addEventListener('pointerdown', event => {
