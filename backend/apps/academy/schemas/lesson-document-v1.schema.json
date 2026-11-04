@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:tradethesis:lesson-document:v1",
+  "title": "TradeThesis Lesson Document v1",
+  "type": "object",
+  "required": [
+    "format",
+    "version",
+    "document"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "tradethesis.lesson-document"
+    },
+    "version": {
+      "const": 1
+    },
+    "document": {
+      "$ref": "#/$defs/node"
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "doc",
+            "paragraph",
+            "heading",
+            "text",
+            "hardBreak",
+            "horizontalRule",
+            "blockquote",
+            "bulletList",
+            "orderedList",
+            "listItem",
+            "codeBlock",
+            "table",
+            "tableRow",
+            "tableHeader",
+            "tableCell",
+            "image",
+            "courseFigure",
+            "imageGroup",
+            "comparisonFigure",
+            "courseCard",
+            "lessonReference",
+            "regionalBlock",
+            "practiceQuestion",
+            "videoBlock",
+            "notebookBlock",
+            "reflectionBlock",
+            "lessonTab",
+            "tableReference",
+            "legacyMarkdown",
+            "callout"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "maxLength": 250000
+        },
+        "attrs": {
+          "type": "object",
+          "maxProperties": 64
+        },
+        "marks": {
+          "type": "array",
+          "maxItems": 20,
+          "items": {
+            "$ref": "#/$defs/mark"
+          }
+        },
+        "content": {
+          "type": "array",
+          "maxItems": 2000,
+          "items": {
+            "$ref": "#/$defs/node"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "text"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "required": [
+              "text"
+            ],
+            "not": {
+              "required": [
+                "content"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "doc"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "properties": {
+              "content": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "mark": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "bold",
+            "italic",
+            "strike",
+            "underline",
+            "code",
+            "link",
+            "subscript",
+            "superscript",
+            "highlight",
+            "textStyle"
+          ]
+        },
+        "attrs": {
+          "type": "object",
+          "maxProperties": 64
+        }
+      }
+    }
+  }
+}
