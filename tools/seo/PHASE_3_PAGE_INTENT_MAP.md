@@ -54,9 +54,11 @@ Do not create thin pages just to target these phrases. A course overview should 
 ## Structured-data and indexation findings
 
 - The static builder currently includes six public routes in `PUBLIC_PAGES`; its sitemap should remain limited to those routes until the route inventory changes deliberately.
-- Its catalogue `ItemList` currently describes the three flagship offers. The visible catalogue data also contains nine micro-course records. Reconcile this before expanding the schema: include only offers that are visibly represented, have a stable public destination and are genuinely published. Do not invent destination URLs or mark a “coming soon” course as an available offer.
+- Its catalogue `ItemList` describes the three primary public learning offers: the free Trading Path, CONSTRUCT and the separate live classroom. The nine micro-course records are not added to this static list because their direct destinations and publication state come from the Academy catalogue API. Do not invent destination URLs or mark a “coming soon” course as an available offer.
 - Catalogue cards are hydrated client-side from the Academy catalogue API; their direct destinations are supplied by published Academy records rather than hard-coded in the static course data. Preserve that source of truth when improving crawlability.
-- Academy course overview pages are the correct place for course-specific metadata and Course structured data once the Phase 1–2 changes are merged and the corresponding course is published and indexable.
+- The three static Course schema descriptions now read from the corresponding page meta descriptions, so the catalogue ItemList and the individual course overview schema cannot silently drift apart when editorial metadata changes.
+- Each public WebPage now has page-specific `about` topics. `BreadcrumbList` is emitted only on pages that visibly render a breadcrumb; the page hierarchy and schema use the same route labels.
+- Academy course overview pages are the correct place for micro-course metadata and Course structured data once the Phase 1–2 changes are merged and the corresponding course is published and indexable.
 - The browser-only Support & Resistance Learning Room, member access, member-area preview, admin/editor previews and other review pages are not public acquisition pages. Keep them `noindex, nofollow` and out of the sitemap.
 - The staging robots file currently has no sitemap declaration and the sitemap is empty. Keep `TRADETHESIS_SEO_INDEXABLE=false` on staging. Do not change canonical base URLs or enable indexing until the permanent public domain is confirmed.
 
