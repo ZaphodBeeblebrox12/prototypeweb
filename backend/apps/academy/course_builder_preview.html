@@ -3681,7 +3681,8 @@ body.builder-dialog-open { overflow:hidden; }
       return '<p>' + inline(value).replace(/\n/g, '<br>') + '</p>';
     };
 
-    for (let index = 0; index < lines.length;) {
+    let index = 0;
+    for (; index < lines.length;) {
       const line = lines[index];
       const trimmed = line.trim();
       if (!trimmed) {
