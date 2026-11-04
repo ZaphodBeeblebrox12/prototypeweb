@@ -850,7 +850,7 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn('role="region"', rendered)
         self.assertIn('aria-label="Scrollable information table"', rendered)
         self.assertIn('tabindex="0"', rendered)
-        self.assertIn("<table>", rendered)
+        self.assertIn('<table class="tt-auto-layout" data-column-count="3">', rendered)
         self.assertIn("<thead>", rendered)
         self.assertIn("<tbody>", rendered)
         self.assertIn('<th align="left">Confirmed move</th>', rendered)
