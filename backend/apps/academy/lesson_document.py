@@ -8,6 +8,7 @@ existing lessons.
 
 from __future__ import annotations
 
+import math
 import re
 from copy import deepcopy
 from typing import Any
@@ -50,6 +51,7 @@ _NODE_ATTRS = {
     "heading": frozenset({"level", "textAlign"}),
     "orderedList": frozenset({"start", "type"}),
     "codeBlock": frozenset({"language"}),
+    "table": frozenset({"caption", "columnWidths", "layout"}),
     "tableCell": frozenset(
         {"colspan", "rowspan", "colwidth", "align", "verticalAlign", "backgroundColor"}
     ),
@@ -256,6 +258,28 @@ def _validate_node_attrs(node_type: str, attrs: dict[str, Any], path: str) -> No
         if not isinstance(start, int) or isinstance(start, bool) or not 1 <= start <= 1_000_000:
             raise LessonDocumentValidationError(f"{path}.attrs.start: expected a positive list start.")
         _validate_enum(attrs.get("type"), {"1", "a", "A", "i", "I"}, path, "type")
+    if node_type == "table":
+        caption = attrs.get("caption", "")
+        if not isinstance(caption, str) or len(caption) > 2400:
+            raise LessonDocumentValidationError(f"{path}.attrs.caption: expected short text.")
+        _validate_enum(attrs.get("layout", "auto"), {"auto", "fixed"}, path, "layout")
+        widths = attrs.get("columnWidths")
+        if widths is not None:
+            if (
+                not isinstance(widths, list)
+                or not 1 <= len(widths) <= 12
+                or any(
+                    not isinstance(width, (int, float))
+                    or isinstance(width, bool)
+                    or not math.isfinite(width)
+                    or not 5 <= width <= 85
+                    for width in widths
+                )
+                or not 99 <= sum(widths) <= 101
+            ):
+                raise LessonDocumentValidationError(
+                    f"{path}.attrs.columnWidths: expected 1–12 percentage widths totalling 100."
+                )
     if node_type == "codeBlock":
         language = attrs.get("language", "")
         if not isinstance(language, str) or len(language) > 40 or not re.fullmatch(
