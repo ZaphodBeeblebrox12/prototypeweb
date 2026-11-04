@@ -302,7 +302,7 @@ Entering just because the bands are narrow, or because price has made its first 
 
 > **A squeeze tells you to pay attention to changing volatility. Price must still show which scenario, if any, is developing.**
 
-**Source and further reading:** John Bollinger's Official Rules 8 and 19 and *Bollinger on Bollinger Bands*, chapter on the Squeeze. Specific boundary, confirmation and invalidation rules in this lesson are examples used in this course, not claims that Bollinger prescribed one universal entry system. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
+**Source and further reading:** John Bollinger's Official Rules 8 and 19 and *Bollinger on Bollinger Bands*, chapter on the Squeeze. The boundary, confirmation and invalidation rules I use in this lesson are examples for practice, not claims that Bollinger prescribed one universal entry system. [Official rules](https://www.bollingerbands.com/bollinger-band-rules).
 
 ---
 
