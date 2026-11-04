@@ -1,10 +1,10 @@
-# Module 5 — Use the Setups the Authors Actually Wrote
+# Module 5 — Applying Bollinger's Published Setups
 
 Bollinger Bands are more than a way to describe volatility. John Bollinger's book includes three named trading methods, each built around a different idea. His later official material adds a fourth, confirmed-breakout method. John Carter's TTM Squeeze is a separate approach that combines Bollinger Bands with Keltner Channels and momentum.
 
-This is the practical centre of the course. You will learn the rules as the authors describe them, see what a long and short case look like, and understand what still needs a decision before you risk money.
+This is where I bring the published methods into practical trading decisions. I will walk you through each setup, show what a long and short case can look like, and point out the decisions you still need to make before risking money.
 
-One distinction matters throughout: **a published setup is a method to study, not proof that it will be profitable in every market.** We should teach the authors' setups faithfully, then test how they behave on the instruments and timeframes we care about.
+One distinction matters throughout: **a published setup is a method to study, not proof that it will be profitable in every market.** I want you to understand what Bollinger actually published, separate that from the practical execution choices I introduce, and test the methods on the instruments and timeframes you trade.
 
 Use **Observe → Interpret → Test** with every method: describe the evidence, consider what it means and what else could explain it, then identify the next condition that would support or weaken the trade idea.
 
@@ -67,7 +67,7 @@ The question is fair: **a close-confirmed breakout will usually give you a worse
 
 **Choose and record one entry style before reviewing results:**
 
-- **Close-confirmation entry — the default for this course.** After a squeeze, act only after a completed close beyond the upper band for a long or lower band for a short. The trade is not “too late” by definition, but it can be too extended in a particular chart. Check the stop distance and the next obstacle before accepting the entry.
+- **Close-confirmation entry — the default approach I use here.** After a squeeze, act only after a completed close beyond the upper band for a long or lower band for a short. The trade is not “too late” by definition, but it can be too extended in a particular chart. Check the stop distance and the next obstacle before accepting the entry.
 - **Earlier breakout entry — an aggressive course variant.** Enter as price crosses a pre-marked breakout level while the bar is still forming. This can get a better price, but the bar can return inside the band before closing. You must define which level is monitored and test the rule without looking ahead; do not call it the same thing as a confirmed-close entry.
 - **Retest entry — a separate course variant.** Let price break out first, then wait for a pullback/retest that holds near the broken range edge or band, and enter only when price resumes through the pullback’s short-term swing. It may reduce chasing, but some breakouts never retest. Do not treat a retest as a requirement of Bollinger’s basic Method I.
 
@@ -122,7 +122,7 @@ BandWidth is at a six-month low, but price remains inside the recent range. Shou
 
 ### Worked comparison: Breakout condition versus a false start
 
-Assume BandWidth has contracted while price remains between 100 and 104. A completed candle then closes at 105, beyond the upper band and range high. Under the course baseline, this is the point to assess the long scenario—not the earlier moment when the bands became narrow. Before entry, check where the setup would be invalidated and whether the distance to the next resistance area leaves adequate room.
+Assume BandWidth has contracted while price remains between 100 and 104. A completed candle then closes at 105, beyond the upper band and range high. Under the baseline I use here, this is the point to assess the long scenario—not the earlier moment when the bands became narrow. Before entry, check where the setup would be invalidated and whether the distance to the next resistance area leaves adequate room.
 
 A contrasting chart also closes at 105 but the next candle falls back to 102 and closes inside the old range. The first close looked like a breakout, yet follow-through did not appear. A rule that requires a later hold would reject this case; a basic breakout plan still needs its stated stop or failure rule. The return inside is not automatically a short. Reassess and wait for a fresh, separately defined setup.
 
@@ -184,7 +184,7 @@ When both conditions are true, Method II gives a sell/short signal. Price is in 
 
 **Entry choices:** the simpler course rule is to act at the close of the qualifying bar, if the remaining reward justifies the stop. A more cautious course variant is to wait for price to break the signal bar’s high for a long or low for a short; this avoids some immediate failures but gives up price and can miss the trade. If price has already travelled far from the recent structure, do not chase solely because both readings remain extreme.
 
-**Stop and size:** Bollinger discusses a modified Parabolic stop or an opposite-band tag as exit approaches; the related published strategy notes also mention Parabolic SAR. For a fixed-risk practice plan, mark the recent swing/pullback that would invalidate the continuation idea, and size the trade from that distance. A stop below the signal candle for a long (above for a short) is a tighter course variant, not a universal author rule. If the stop is wide or a nearby resistance/support leaves poor reward relative to risk, pass.
+**Stop and size:** Bollinger discusses a modified Parabolic stop or an opposite-band tag as exit approaches; the related published strategy notes also mention Parabolic SAR. For a fixed-risk practice plan, I ask you to mark the recent swing/pullback that would invalidate the continuation idea, then size the trade from that distance. A stop below the signal candle for a long (above for a short) is a tighter execution variant I use for practice, not a universal rule Bollinger states. If the stop is wide or a nearby resistance/support leaves poor reward relative to risk, pass.
 
 **What weakens it:** the indicators do not agree, the threshold is only touched intrabar, the move is already extended, or price immediately loses the breakout area. A signal is evidence to consider a trade, not an obligation to enter.
 
@@ -664,4 +664,4 @@ In the contrasting case, the same compression resolves downward and the momentum
 
 ## Source note for this module
 
-John Bollinger's three book methods are documented in Chapters 16, 19 and 20 of *Bollinger on Bollinger Bands*. Method IV is a later official extension, documented in Bollinger's own TradeStation manual. Carter's TTM Squeeze is a separate method. The setup conditions above are attributed to the relevant method; where the course adds a boundary, risk filter or execution choice, it must be treated as an additional rule to test rather than part of the author's original setup.
+John Bollinger's three book methods are documented in Chapters 16, 19 and 20 of *Bollinger on Bollinger Bands*. Method IV is a later official extension, documented in Bollinger's own TradeStation manual. Carter's TTM Squeeze is a separate method. The setup conditions above are attributed to the relevant method; where I add a boundary, risk filter or execution choice, treat it as an additional rule to test rather than part of Bollinger's original setup.
