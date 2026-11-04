@@ -1727,3 +1727,56 @@ class CourseBuilderToolbarRegressionTests(SimpleTestCase):
             with self.subTest(command=command):
                 self.assertIn('data-rich-command="' + command + '"', builder_source)
 
+class CourseBuilderFormatPreservationRegressionTests(SimpleTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        backend = Path(__file__).resolve().parents[2]
+        cls.builder_source = (
+            backend / "apps" / "academy" / "course_builder_preview.html"
+        ).read_text(encoding="utf-8")
+
+    def test_underline_and_inline_code_survive_editor_round_trip(self):
+        source = self.builder_source
+        self.assertIn("if (tag === 'u') return '<u>' + inner + '</u>'", source)
+        self.assertIn("source.replace(/<u>([\\s\\S]*?)<\\/u>/gi", source)
+        self.assertIn("if (tag === 'code') return", source)
+        self.assertIn("protectedMarkup[Number(index)]", source)
+
+    def test_nested_and_start_numbered_lists_are_preserved(self):
+        source = self.builder_source
+        self.assertIn("function richListMarkdown(list, depth=0)", source)
+        self.assertIn("const nestedLists = Array.from(item.children)", source)
+        self.assertIn("item.nested.join('')", source)
+        self.assertIn("const listMarkerMatch = line =>", source)
+        self.assertIn("const parseList = baseIndent =>", source)
+        self.assertIn("const startAttribute = tag === 'ol'", source)
+        self.assertIn("const listMarker = listMarkerMatch(line);", source)
+
+    def test_code_block_language_and_long_fences_are_preserved(self):
+        source = self.builder_source
+        self.assertIn("const languageClass = Array.from(code?.classList || []).find", source)
+        self.assertIn("const longestFence = Math.max", source)
+        self.assertIn("return fence + language + '\\n' + codeText + '\\n' + fence;", source)
+        self.assertIn("const isFence = line =>", source)
+
+    def test_simple_and_structured_table_alignment_are_preserved(self):
+        source = self.builder_source
+        self.assertIn("const alignments = Array.from({length:width}", source)
+        self.assertIn("const dividerCells = alignments.map", source)
+        self.assertIn("function tableCellMarkup(tag,text,colspan,rowspan,alignment)", source)
+        self.assertIn("align:['left','center','right']", source)
+        self.assertIn("hasMergedCells", source)
+        self.assertIn("hasGroupedHeaders", source)
+        self.assertIn("hasCaption", source)
+        self.assertIn("ensureStructuredTableForResize(node)", source)
+
+    def test_obsolete_textarea_caret_handler_is_not_retained(self):
+        source = self.builder_source
+        self.assertNotIn("rememberLessonContentCaret", source)
+        self.assertNotIn('textarea[data-entity="lesson"][data-field="content"]', source)
+        # The contenteditable editor still has its active selection-to-Markdown path.
+        self.assertIn("function rememberRichEditorCaretOffset()", source)
+        self.assertIn("visualEditorToMarkdown(prefix)", source)
+        self.assertIn("insertVisualTokenAtCursor(visualEditor, token, isBlock)", source)
+
