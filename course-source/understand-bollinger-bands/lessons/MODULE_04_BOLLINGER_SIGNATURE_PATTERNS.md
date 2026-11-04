@@ -30,7 +30,7 @@ Look at Figure 4.1 and identify:
 1. The first low.
 2. The move away from that low.
 3. The second low.
-4. The intervening swing high that price would need to overcome under the course's example confirmation rule.
+4. The intervening swing high that price would need to overcome under the example confirmation rule I use here.
 
 The first low may appear at or below the lower band, showing a relatively low position. The second low should be judged in relation to the band and to the first low, rather than by looking at price alone. If price makes a lower low but the second low is no longer outside the lower band, the relative position may be improving even though price has dipped further. That contrast is what makes the pattern worth investigating.
 
@@ -38,7 +38,7 @@ It is still only a candidate. Price can remain weak, make another low, or move s
 
 ### What confirmation means here
 
-For practice, we will use a clear confirmation rule: price moves above the intervening swing high between the two lows. This gives the setup a condition that can be identified and tested consistently. It is an example rule for this course, not a universal rule that Bollinger prescribed in this exact form.
+For practice, I use a clear confirmation rule: price moves above the intervening swing high between the two lows. This gives the setup a condition that can be identified and tested consistently. It is a practical rule I use here to make the example testable, not a universal rule that Bollinger prescribed in this exact form.
 
 The trigger does not guarantee success. It simply makes the decision specific: the learner can identify what event must occur, where the idea is invalidated, and how much risk the plan permits.
 
@@ -48,7 +48,7 @@ In the second panel, the two lows look similar but the important relationship or
 
 ### Observe and interpret: Compare the two lows
 
-In Figure 4.1, mark the two lows, describe how each sits relative to the lower band, and identify what event would confirm the course's example long plan.
+In Figure 4.1, mark the two lows, describe how each sits relative to the lower band, and identify what event would confirm the example long plan I use here.
 
 **Model reasoning:** The first low provides the initial reference. The second low's relationship to the lower band may show a change in relative weakness. A break above the intervening swing high is the chosen course trigger. If it never occurs, the plan remains inactive.
 
@@ -80,7 +80,7 @@ Buying every pair of lows that looks like the letter W.
 
 > **The W shape starts the question. The relationship to the bands and the later price evidence help you judge whether a reversal plan is justified.**
 
-**Source and further reading:** John Bollinger discusses W-type bottoms in *Bollinger on Bollinger Bands*, Chapter 12, and refers to the use of the bands to clarify common patterns. See the [publisher's contents](https://www.mheducation.com/highered/mhp/product/bollinger-bollinger-bands). The intervening-swing trigger in this lesson is a teaching framework, not presented as a verbatim author rule.
+**Source and further reading:** John Bollinger discusses W-type bottoms in *Bollinger on Bollinger Bands*, Chapter 12, and refers to the use of the bands to clarify common patterns. See the [publisher's contents](https://www.mheducation.com/highered/mhp/product/bollinger-bollinger-bands). I use the intervening-swing trigger as a teaching framework to make the pattern testable; I am not presenting it as a rule Bollinger stated verbatim.
 
 ---
 
@@ -110,7 +110,7 @@ But several alternatives remain possible. The market could be consolidating befo
 
 ### A confirmation rule for practice
 
-For practice, this course uses a break below the intervening swing low as one possible confirmation trigger for a short scenario. This makes the rule observable and testable. It is a framework used in this course, not a claim that every M-top must be traded this way.
+For practice, I use a break below the intervening swing low as one possible confirmation trigger for a short scenario. This makes the rule observable and testable. It is a framework I use for practice, not a claim that every M-top must be traded this way.
 
 Before a trade, define the point that would show the idea is wrong, such as price reclaiming the high area under your plan. Set the stop around the invalidating structure rather than placing it at an arbitrary band line. Then check whether the available distance to a reasonable target justifies the risk.
 
@@ -152,7 +152,7 @@ Shorting the second high before price has shown a meaningful change.
 
 > **A possible M-top warns you to examine the second high carefully. It does not give you permission to short without a plan.**
 
-**Source and further reading:** John Bollinger discusses M-type tops in *Bollinger on Bollinger Bands*, Chapter 13. The course's intervening-low trigger is a testable teaching implementation, not an author-attributed universal rule.
+**Source and further reading:** John Bollinger discusses M-type tops in *Bollinger on Bollinger Bands*, Chapter 13. I use the intervening-low trigger as a testable teaching framework; it is not a universal rule I attribute to Bollinger.
 
 ---
 
@@ -256,7 +256,7 @@ Figure 4.4 shows four states that can look similar at first glance.
 
 One of the hardest traps is hindsight. After price has moved, a neat pattern may seem obvious. But traders have to decide with the information available at the time. When you inspect a historical example, mentally stop the chart at the original decision point. Ask what was visible then and what remained unknown.
 
-A course confirmation rule can help make the exercise testable. For example, this course may use a break of the intervening swing high after a W-bottom candidate or a break of the intervening swing low after an M-top candidate. Those are not guarantees and should not be described as universal rules from Bollinger unless the source verification supports that precise attribution.
+The confirmation rules I use help make these exercises testable. For example, I may use a break of the intervening swing high after a W-bottom candidate or a break of the intervening swing low after an M-top candidate. Those are not guarantees and should not be described as universal rules from Bollinger unless the source verification supports that precise attribution.
 
 ### The plan still needs risk logic
 
@@ -270,7 +270,7 @@ Classify each panel in Figure 4.4 as candidate, confirmed under the stated cours
 
 ### Test: Apply the reading to a new case
 
-A W-bottom candidate has met the course trigger, but the entry is far above the invalidation point and the next resistance area is close. What should you do?
+A W-bottom candidate has met my example trigger, but the entry is far above the invalidation point and the next resistance area is close. What should you do?
 
 **Model response:** The pattern trigger has occurred, but the trade may have poor reward relative to risk. I can skip it. A valid pattern is not a requirement to trade.
 
@@ -300,10 +300,10 @@ Assuming that once a pattern is identified, an entry must follow.
 
 > **A pattern is one part of a plan. It does not replace context, a trigger, invalidation, or risk assessment.**
 
-**Source and further reading:** Pattern categories and the W/M treatments are grounded in John Bollinger's *Bollinger on Bollinger Bands*, Chapters 10–13. The state labels and confirmation rules are teaching frameworks used in this course.
+**Source and further reading:** Pattern categories and the W/M treatments are grounded in John Bollinger's *Bollinger on Bollinger Bands*, Chapters 10–13. The state labels and confirmation rules are teaching frameworks I use in this course.
 
 ---
 
 ## References and further reading
 
-Primary reference: John Bollinger, *Bollinger on Bollinger Bands*, Chapters 10–13, especially the W-Type Bottoms and M-Type Tops chapters. The publisher's [table of contents](https://www.mheducation.com/highered/mhp/product/bollinger-bollinger-bands) confirms the book's dedicated treatment of those subjects. The course uses original wording and clearly labels any operational confirmation rule that is not verified as a direct author rule.
+Primary reference: John Bollinger, *Bollinger on Bollinger Bands*, Chapters 10–13, especially the W-Type Bottoms and M-Type Tops chapters. The publisher's [table of contents](https://www.mheducation.com/highered/mhp/product/bollinger-bollinger-bands) confirms the book's dedicated treatment of those subjects. I use original teaching explanations and clearly distinguish any operational confirmation rule that I cannot verify as a rule Bollinger stated directly.
