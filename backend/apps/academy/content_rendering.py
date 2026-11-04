@@ -190,7 +190,26 @@ def _add_markdown_table_layouts(markup):
         if column_count < 2 or not widths:
             return table_html
         table_open = opening.group(0)
-        table_open = table_open[:-1] + ' class="tt-auto-layout" data-column-count="' + str(column_count) + '">'
+        class_match = re.search(r'\\bclass=(["\\'])(.*?)\\1', table_open, re.IGNORECASE)
+        if class_match:
+            classes = class_match.group(2).split()
+            if "tt-auto-layout" not in classes:
+                classes.append("tt-auto-layout")
+            class_attribute = 'class="' + html.escape(" ".join(classes), quote=True) + '"'
+            table_open = (
+                table_open[:class_match.start()]
+                + class_attribute
+                + table_open[class_match.end():]
+            )
+        else:
+            table_open = table_open[:-1] + ' class="tt-auto-layout">'
+        table_open = re.sub(
+            r'\\sdata-column-count=(["\\']).*?\\1',
+            "",
+            table_open,
+            flags=re.IGNORECASE,
+        )
+        table_open = table_open[:-1] + ' data-column-count="' + str(column_count) + '">'
         return table_open + _table_colgroup_markup(widths) + table_html[opening.end():]
 
     return table_pattern.sub(add_layout, markup)
