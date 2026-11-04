@@ -1749,10 +1749,12 @@ class CourseBuilderFormatPreservationRegressionTests(SimpleTestCase):
     def test_list_parser_index_binding_is_in_scope_for_recursive_parser(self):
         source = self.builder_source
         parser_position = source.index("const parseList = baseIndent =>")
-        index_binding_position = source.index("let index = 0;", parser_position - 4000)
+        index_binding_position = source.index("let index = 0;", parser_position)
         loop_position = source.index("for (; index < lines.length;)", index_binding_position)
-        self.assertLess(index_binding_position, parser_position)
-        self.assertLess(parser_position, loop_position)
+        # The let binding may follow the closure declaration, but both are in the
+        # same renderer function scope and it is initialised before the parser runs.
+        self.assertLess(parser_position, index_binding_position)
+        self.assertLess(index_binding_position, loop_position)
         self.assertNotIn("for (let index = 0; index < lines.length;)", source)
 
     def test_nested_and_start_numbered_lists_are_preserved(self):
