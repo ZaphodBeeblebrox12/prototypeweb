@@ -56,10 +56,10 @@ try {
   assert.match(read(production, 'member-area-preview.html'), /noindex, nofollow/);
   const indexedMetadata = PUBLIC_PAGES.map(page => {
     const html = read(production, page.file);
-    const titleMatch = html.match(/<title\\b[^>]*>([\\s\\S]*?)<\\/title>/i);
-    const descriptionTag = (html.match(/<meta\\b[^>]*\\bname=["']description["'][^>]*>/i) || [])[0] || '';
-    const descriptionMatch = descriptionTag.match(/\\bcontent\\s*=\\s*(["'])([\\s\\S]*?)\\1/i);
-    const title = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim() : '';
+    const titleMatch = html.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i);
+    const descriptionTag = (html.match(/<meta\b[^>]*\bname=["']description["'][^>]*>/i) || [])[0] || '';
+    const descriptionMatch = descriptionTag.match(/\bcontent\s*=\s*(["'])([\s\S]*?)\1/i);
+    const title = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
     const description = descriptionMatch ? descriptionMatch[2].trim() : '';
     assert.ok(title, page.file + ' must have a page title.');
     assert.ok(description.length >= 90 && description.length <= 180,
