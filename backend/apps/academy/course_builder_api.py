@@ -1571,10 +1571,10 @@ def _builder_state_from_published_course(course):
                 editor_document = lesson_document_from_content_json(content_json)
                 editor_document_error = ""
             except LessonDocumentError as exc:
-                # Never block a legacy course from opening because a newer document
-                # schema is not understood. Keep the Markdown fallback and surface
-                # the reason to the structured editor instead.
-                editor_document = None
+                # Keep the unknown document opaque in the builder state. The current
+                # editor can show the Markdown fallback, but a save is rejected until
+                # a compatible editor can validate the newer document version.
+                editor_document = deepcopy(content_json.get("lesson_document"))
                 editor_document_error = str(exc)[:300]
                 logger.warning(
                     "Invalid structured lesson document; using Markdown fallback: lesson_id=%s error=%s",
