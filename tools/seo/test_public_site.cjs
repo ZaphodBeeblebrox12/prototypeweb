@@ -54,6 +54,21 @@ try {
   assert.match(read(production, 'index.html'), /tradethesis-social-preview\.jpg/);
   assert.match(read(production, 'index.html'), /tradethesis-academy-base-url/);
   assert.match(read(production, 'member-area-preview.html'), /noindex, nofollow/);
+  const indexedMetadata = PUBLIC_PAGES.map(page => {
+    const html = read(production, page.file);
+    const titleMatch = html.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i);
+    const descriptionTag = (html.match(/<meta\b[^>]*\bname=["']description["'][^>]*>/i) || [])[0] || '';
+    const descriptionMatch = descriptionTag.match(/\bcontent\s*=\s*(["'])([\s\S]*?)\1/i);
+    const title = titleMatch ? titleMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : '';
+    const description = descriptionMatch ? descriptionMatch[2].trim() : '';
+    assert.ok(title, page.file + ' must have a page title.');
+    assert.ok(description.length >= 90 && description.length <= 180,
+      page.file + ' must have a useful, concise meta description (90–180 characters).');
+    return title;
+  });
+  assert.equal(new Set(indexedMetadata).size, indexedMetadata.length,
+    'Each indexable public page must have a distinct title.');
+
   const sitemap = read(production, 'sitemap.xml');
   assert.equal((sitemap.match(/<url>/g) || []).length, PUBLIC_PAGES.length);
   assert.doesNotMatch(sitemap, /member-area-preview|00_OPEN_INTERACTIVE_PREVIEW|support-resistance-room/);
