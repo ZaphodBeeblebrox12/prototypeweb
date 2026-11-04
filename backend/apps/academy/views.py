@@ -46,7 +46,6 @@ from .models import (
     ProtectedLessonVideo,
 )
 from .permissions import is_course_content_admin
-from .seo import is_public_course_seo_candidate
 from .regional_content import (
     ASSET_REFERENCE_RE,
     IMAGE_GROUP_REFERENCE_RE,
@@ -55,6 +54,7 @@ from .regional_content import (
     regional_block_asset_ids,
     regional_lesson_content_asset_ids,
 )
+from .seo import is_public_course_seo_candidate
 from .services import (
     can_access_lesson,
     get_active_entitlement,
