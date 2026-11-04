@@ -1,6 +1,6 @@
 import { Node, mergeAttributes } from '@tiptap/core';
 
-function referenceCard({ label, referenceAttribute, dataAttribute, marker, extraAttributes = {} }) {
+function referenceCard({ label, referenceAttribute, dataAttribute, marker, extraAttributes = {}, defaultReferenceValue = null }) {
   return Node.create({
     name: marker,
     group: 'block',
@@ -11,8 +11,8 @@ function referenceCard({ label, referenceAttribute, dataAttribute, marker, extra
     addAttributes() {
       return {
         [referenceAttribute]: {
-          default: null,
-          parseHTML: element => element.getAttribute(dataAttribute),
+          default: defaultReferenceValue,
+          parseHTML: element => element.getAttribute(dataAttribute) || defaultReferenceValue,
           renderHTML: attributes => ({
             [dataAttribute]: attributes[referenceAttribute],
           }),
@@ -205,6 +205,7 @@ export function createTradeThesisReferenceNodes(options = {}) {
       label: 'Lesson section marker',
       referenceAttribute: 'section',
       dataAttribute: 'data-section',
+      defaultReferenceValue: 'idea',
     }),
     referenceCard({
       marker: 'ttLegacyReference',
