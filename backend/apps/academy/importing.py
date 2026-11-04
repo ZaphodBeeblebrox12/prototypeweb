@@ -846,10 +846,12 @@ def publish_course_import(record, *, user):
         course.description = course_data.get("description", "")
         course.share_title = course_data.get("share_title", "")
         course.share_message = course_data.get("share_message", "")
-        course.seo_title = course_data.get("seo_title", "")
-        course.seo_description = course_data.get("seo_description", "")
-        course.seo_primary_topic = course_data.get("seo_primary_topic", "")
-        course.seo_indexable = course_data.get("seo_indexable", True)
+        course.seo_title = course_data.get("seo_title", course.seo_title)
+        course.seo_description = course_data.get("seo_description", course.seo_description)
+        course.seo_primary_topic = course_data.get(
+            "seo_primary_topic", course.seo_primary_topic
+        )
+        course.seo_indexable = course_data.get("seo_indexable", course.seo_indexable)
         course.category = course_data.get("category", course.category)
         course.level = course_data.get("level", course.level)
         course.estimated_duration = course_data.get("estimated_duration", course.estimated_duration)
