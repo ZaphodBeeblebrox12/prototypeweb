@@ -19,8 +19,8 @@ MAX_DOCUMENT_NODES = 20_000
 MAX_DOCUMENT_DEPTH = 64
 MAX_DOCUMENT_TEXT_CHARS = 2_000_000
 
-_SAFE_REFERENCE_ID = re.compile(r"[A-Za-z0-9_-]{1,120}\\Z")
-_SAFE_COLOR = re.compile(r"#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?\\Z")
+_SAFE_REFERENCE_ID = re.compile(r"[A-Za-z0-9_-]{1,120}\Z")
+_SAFE_COLOR = re.compile(r"#[0-9A-Fa-f]{6}(?:[0-9A-Fa-f]{2})?\Z")
 
 BLOCK_NODES = frozenset(
     {
@@ -172,7 +172,7 @@ def _validate_node(
     if node_type == "text":
         allowed_keys.add("text")
         allowed_keys.add("marks")
-    elif node_type not in INLINE_NODES and node_type != "horizontalRule":
+    elif node_type in {"paragraph", "heading", "blockquote", "bulletList", "orderedList", "listItem", "codeBlock", "table", "tableRow", "tableCell", "tableHeader"}:
         allowed_keys.add("content")
 
     unexpected = set(node) - allowed_keys
@@ -198,7 +198,9 @@ def _validate_node(
         _validate_marks(node.get("marks", []), f"{path}.marks")
         return
 
-    if node_type in INLINE_NODES or node_type == "horizontalRule":
+    if node_type in INLINE_NODES or node_type == "horizontalRule" or node_type in {
+        "ttAssetImage", "ttFigure", "ttRegionalBlock", "ttLessonReference", "ttProtectedVideo"
+    }:
         if "content" in node:
             raise LessonDocumentValidationError(f"{path}: this node cannot contain children.")
         return
@@ -313,6 +315,11 @@ def _validate_marks(marks: Any, path: str) -> None:
         mark_path = f"{path}[{index}]"
         if not isinstance(mark, dict):
             raise LessonDocumentValidationError(f"{mark_path}: mark must be an object.")
+        unexpected_mark_keys = set(mark) - {"type", "attrs"}
+        if unexpected_mark_keys:
+            raise LessonDocumentValidationError(
+                f"{mark_path}: unsupported mark property {sorted(unexpected_mark_keys)[0]!r}."
+            )
         mark_type = mark.get("type")
         if mark_type not in MARK_TYPES:
             raise LessonDocumentValidationError(f"{mark_path}: unsupported mark type {mark_type!r}.")
@@ -360,7 +367,7 @@ def _validate_uuid_reference(value: Any, path: str, field: str) -> None:
 
 
 def _validate_enum(value: Any, allowed: set[str], path: str, field: str) -> None:
-    if value is not None and value not in allowed:
+    if value is not None and (not isinstance(value, str) or value not in allowed):
         raise LessonDocumentValidationError(f"{path}.attrs.{field}: unsupported value {value!r}.")
 
 
