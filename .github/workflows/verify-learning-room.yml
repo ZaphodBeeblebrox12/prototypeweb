@@ -83,6 +83,10 @@ jobs:
               html = Path(name).read_text(encoding="utf-8")
               if "assets/academy-config.js" not in html:
                   raise SystemExit(f"{name}: missing the shared Academy endpoint config")
+              # The dedicated sign-in page uses login/signup actions, not the shared dashboard CTA.
+              # Its Academy hand-off is verified by the Playwright member-access checks below.
+              if name == "site/member-access.html":
+                  continue
               links = re.findall(
                   r'<a\b[^>]*>\s*Open member dashboard ↗\s*</a>',
                   html,
