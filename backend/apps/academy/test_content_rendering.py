@@ -924,7 +924,10 @@ class SharedLessonRenderingTests(SimpleTestCase):
         self.assertIn('title="1 image in this chart group"', preview)
         self.assertIn("images in this chart group", preview)
         self.assertIn('contenteditable="true" spellcheck="true"', preview)
-        self.assertIn('data-rich-command="table" aria-label="Insert table">Table', preview)
+        self.assertIn(
+            'data-rich-command="table" aria-label="Insert table" title="Insert a table">Table',
+            preview,
+        )
         self.assertIn('data-visual-editor="true"', preview)
         self.assertIn("tt-image-group-hard-index", preview)
         self.assertIn("previewChartNumbers.get('asset:' + id)", preview)
@@ -1646,3 +1649,81 @@ class LessonSectionRoutingRegressionTests(SimpleTestCase):
         result = build_lesson_sections(source)
         self.assertIn("Compare the possibilities", result["idea_html"])
         self.assertNotIn("Compare the possibilities", result["examples_html"])
+
+
+class CourseBuilderToolbarRegressionTests(SimpleTestCase):
+    def test_visual_editor_toolbar_sticks_and_table_tools_are_contextual(self):
+        backend = Path(__file__).resolve().parents[2]
+        builder_source = (
+            backend / "apps" / "academy" / "course_builder_preview.html"
+        ).read_text(encoding="utf-8")
+
+        # The editor shell must clip rounded edges without trapping position:sticky.
+        self.assertRegex(
+            builder_source,
+            r"\.editor-shell\s*\{[^}]*overflow:clip;",
+        )
+        self.assertRegex(
+            builder_source,
+            r"\.rich-editor-toolbar\s*\{\s*position:sticky;\s*top:10px;",
+        )
+
+        # Insertion remains available; destructive/structural table actions are hidden
+        # until the caret or selection is inside a table.
+        toolbar_start = builder_source.index('<div class="rich-editor-toolbar"')
+        table_tools_start = builder_source.index(
+            'data-rich-table-tools hidden role="group"',
+            toolbar_start,
+        )
+        table_tools_end = builder_source.index("</div>", table_tools_start)
+        self.assertLess(
+            builder_source.index('data-rich-command="grouped-table"', toolbar_start),
+            table_tools_start,
+        )
+        for action in (
+            "auto-fit",
+            "add-column",
+            "add-row",
+            "remove-column",
+            "remove-row",
+            "group-headers",
+        ):
+            with self.subTest(action=action):
+                action_position = builder_source.index(
+                    'data-rich-table-action="' + action + '"',
+                    table_tools_start,
+                )
+                self.assertLess(action_position, table_tools_end)
+
+        # Selection changes update the contextual tools and active formatting states.
+        capture_start = builder_source.index("function captureRichEditorRange()")
+        capture_end = builder_source.index(
+            "function rememberRichEditorCaretOffset()",
+            capture_start,
+        )
+        capture_function = builder_source[capture_start:capture_end]
+        self.assertIn("syncRichToolbarStateFromSelection(editor, selection);", capture_function)
+        self.assertIn("updateRichTableToolbar(editor);", capture_function)
+        self.assertIn("tools.hidden = true;", capture_function)
+        self.assertIn("function updateRichTableToolbar(editor, tableOverride)", builder_source)
+        self.assertIn(
+            "const table = arguments.length > 1 ? tableOverride : selectedEditorTable(editor);",
+            builder_source,
+        )
+        self.assertIn("updateRichTableToolbar(editor, table);", builder_source)
+        self.assertIn("updateRichTableToolbar(editor, null);", builder_source)
+        self.assertIn(
+            "button.setAttribute('aria-pressed', pressed ? 'true' : 'false');",
+            builder_source,
+        )
+        for command in (
+            "bold",
+            "italic",
+            "underline",
+            "strikeThrough",
+            "insertUnorderedList",
+            "insertOrderedList",
+        ):
+            with self.subTest(command=command):
+                self.assertIn('data-rich-command="' + command + '"', builder_source)
+
