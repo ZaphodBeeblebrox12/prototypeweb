@@ -25,7 +25,7 @@ function jsonLd(directory, file) {
 }
 function metaDescription(html) {
   const tag = (html.match(/<meta\b[^>]*\bname=["']description["'][^>]*>/i) || [])[0] || '';
-  const match = tag.match(/\bcontent\s*=\s*(["'])([\s\S]*?)\\1/i);
+  const match = tag.match(/\bcontent\s*=\s*(["'])([\s\S]*?)\1/i);
   return match ? match[2].trim() : '';
 }
 
@@ -122,10 +122,10 @@ try {
   }
 
   const tradingPath = read(production, 'trading-path.html');
-  assert.doesNotMatch(tradingPath, /<a href="construct\\.html">CONSTRUCT<\/a>/,
+  assert.doesNotMatch(tradingPath, /<a href="construct\.html">CONSTRUCT<\/a>/,
     'The Trading Path must not show CONSTRUCT as a parent breadcrumb.');
   const construct = read(production, 'construct.html');
-  assert.match(construct, /<a href="trading-path\\.html">Trading Path<\/a>/,
+  assert.match(construct, /<a href="trading-path\.html">Trading Path<\/a>/,
     'CONSTRUCT must link to its stated preceding learning path in the breadcrumb.');
 } finally {
   clean(production);
