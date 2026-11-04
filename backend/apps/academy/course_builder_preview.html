@@ -2186,11 +2186,12 @@ body.builder-dialog-open { overflow:hidden; }
     }
     return table.dataset.editorStructuredTable;
   }
-  function tableCellMarkup(tag,text,colspan,rowspan) {
+  function tableCellMarkup(tag,text,colspan,rowspan,alignment) {
     const col=Number(colspan)>1?' colspan="'+Number(colspan)+'"':'';
     const row=Number(rowspan)>1?' rowspan="'+Number(rowspan)+'"':'';
+    const align=['left','center','right'].includes(String(alignment||'').toLowerCase())?' align="'+String(alignment).toLowerCase()+'"':'';
     const scope=tag==='th'?(Number(colspan)>1?' scope="colgroup"':' scope="col"'):'';
-    return '<'+tag+col+row+scope+'>'+esc(text||'')+'</'+tag+'>';
+    return '<'+tag+col+row+align+scope+'>'+esc(text||'')+'</'+tag+'>';
   }
   function structuredTableEditorMarkup(tableId) {
     const data=currentLesson()?.tables?.[tableId];
@@ -2198,7 +2199,7 @@ body.builder-dialog-open { overflow:hidden; }
     const heads=[],bodies=[];
     data.rows.forEach(row=>{
       if(!row||!Array.isArray(row.cells))return;
-      const cells=row.cells.map(cell=>tableCellMarkup(row.section==='head'||cell.header?'th':'td',cell.text,cell.colspan,cell.rowspan)).join('');
+      const cells=row.cells.map(cell=>tableCellMarkup(row.section==='head'||cell.header?'th':'td',cell.text,cell.colspan,cell.rowspan,cell.align)).join('');
       if(!cells)return;
       (row.section==='head'?heads:bodies).push('<tr>'+cells+'</tr>');
     });
@@ -2214,7 +2215,7 @@ body.builder-dialog-open { overflow:hidden; }
   }
   function structuredTableHtmlFromData(data, tableId, editorMode) {
     if(!data||!Array.isArray(data.rows))return '';
-    const renderRow=row=>'<tr>'+(row.cells||[]).map(cell=>tableCellMarkup(row.section==='head'||cell.header?'th':'td',cell.text,cell.colspan,cell.rowspan)).join('')+'</tr>';
+    const renderRow=row=>'<tr>'+(row.cells||[]).map(cell=>tableCellMarkup(row.section==='head'||cell.header?'th':'td',cell.text,cell.colspan,cell.rowspan,cell.align)).join('')+'</tr>';
     const heads=data.rows.filter(row=>row.section==='head').map(renderRow).join('');
     const bodies=data.rows.filter(row=>row.section!=='head').map(renderRow).join('');
     const title=String(data.title||'From observation to execution');
@@ -2242,6 +2243,8 @@ body.builder-dialog-open { overflow:hidden; }
           text:richInlineMarkdown(cell).replace(/\n+/g,' ').trim(),
           colspan:Math.max(1,Number(cell.getAttribute('colspan')||1)),
           rowspan:Math.max(1,Number(cell.getAttribute('rowspan')||1)),
+          align:['left','center','right'].includes(String(cell.getAttribute('align')||cell.style?.textAlign||'').toLowerCase())
+            ? String(cell.getAttribute('align')||cell.style?.textAlign||'').toLowerCase() : '',
           header:cell.tagName.toLowerCase()==='th'
         }))
       }))
@@ -3550,7 +3553,7 @@ body.builder-dialog-open { overflow:hidden; }
         return marker;
       };
       // Parse code first so markup-looking characters inside code remain literal.
-      source = source.replace(/\x60((?:\\\x60|[^\x60])+)\\x60/g,
+      source = source.replace(/\x60((?:\\\x60|[^\x60])+)\x60/g,
         (match, code) => protect('<code>' + esc(code.replace(/\\\x60/g, '\x60')) + '</code>'));
       // Underline is stored as a small, explicitly supported HTML tag in lesson Markdown.
       // Recursing lets bold, italic, links and code continue to work inside underlined text.
@@ -3620,6 +3623,42 @@ body.builder-dialog-open { overflow:hidden; }
         isFence(line) ||
         isTableAt(index)
       );
+    };
+    const listMarkerMatch = line => {
+      const match = String(line || '').match(/^([ \\t]*)([-*+]|\\d+[.)])[ \\t]+(.*)$/);
+      if (!match) return null;
+      return {
+        indent:match[1].replace(/\\t/g,'  ').length,
+        marker:match[2],
+        tag:/^\\d/.test(match[2]) ? 'ol' : 'ul',
+        content:match[3]
+      };
+    };
+    const parseList = baseIndent => {
+      const first = listMarkerMatch(lines[index]);
+      if (!first || first.indent !== baseIndent) return '';
+      const tag = first.tag;
+      const startNumber = tag === 'ol' ? (Number.parseInt(first.marker,10) || 1) : 1;
+      const items = [];
+      while (index < lines.length) {
+        const marker = listMarkerMatch(lines[index]);
+        if (!marker || marker.indent < baseIndent) break;
+        if (marker.indent > baseIndent) {
+          if (!items.length) break;
+          const nested = parseList(marker.indent);
+          if (!nested) break;
+          items[items.length - 1].nested.push(nested);
+          continue;
+        }
+        if (marker.tag !== tag) break;
+        items.push({content:marker.content,nested:[]});
+        index += 1;
+      }
+      if (!items.length) return '';
+      const startAttribute = tag === 'ol' && startNumber !== 1 ? ' start="' + startNumber + '"' : '';
+      return '<' + tag + startAttribute + '>' + items.map(item =>
+        '<li>' + inline(item.content) + item.nested.join('') + '</li>'
+      ).join('') + '</' + tag + '>';
     };
     const renderParagraph = paragraphLines => {
       const value = paragraphLines.join('\n').trim();
@@ -3697,30 +3736,14 @@ body.builder-dialog-open { overflow:hidden; }
         continue;
       }
 
-      const unordered = /^\s*[-*+]\s+/.test(line);
-      const ordered = /^\s*\d+[.)]\s+/.test(line);
-      if (unordered || ordered) {
-        const listStart = index;
-        const items = [];
-        while (index < lines.length) {
-          const current = lines[index];
-          // Empty list items are valid editor output. Capturing (.*), rather than
-          // (.+), keeps the recogniser aligned with the prefix test above.
-          const item = unordered
-            ? current.match(/^\s*[-*+]\s+(.*)$/)
-            : current.match(/^\s*\d+[.)]\s+(.*)$/);
-          if (!item) break;
-          items.push('<li>' + inline(item[1]) + '</li>');
-          index += 1;
-        }
-        if (index === listStart) {
-          // Defensive progress guarantee: malformed Markdown must never leave the
-          // outer parser on the same line forever.
+      const listMarker = listMarkerMatch(line);
+      if (listMarker) {
+        const list = parseList(listMarker.indent);
+        if (list) output.push(list);
+        else {
+          // Defensive progress guarantee for malformed list input.
           output.push(renderParagraph([lines[index]]));
           index += 1;
-        } else {
-          const tag = ordered ? 'ol' : 'ul';
-          output.push('<' + tag + '>' + items.join('') + '</' + tag + '>');
         }
         continue;
       }
