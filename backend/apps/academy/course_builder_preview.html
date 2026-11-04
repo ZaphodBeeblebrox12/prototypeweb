@@ -2035,7 +2035,8 @@ body.builder-dialog-open { overflow:hidden; }
     let group = table.querySelector(':scope > colgroup');
     if (!group) {
       group = document.createElement('colgroup');
-      table.insertBefore(group,table.firstChild);
+      const caption = table.querySelector(':scope > caption');
+      table.insertBefore(group,caption ? caption.nextSibling : table.firstChild);
     }
     const columns = Array.from(group.children).filter(node => node.tagName.toLowerCase()==='col');
     if (columns.length !== cleanWidths.length) {
@@ -2096,9 +2097,16 @@ body.builder-dialog-open { overflow:hidden; }
     if (!lesson.tables || typeof lesson.tables !== 'object') lesson.tables = {};
     if (!table.dataset.editorStructuredTable) {
       const id = uid('table');
-      const caption = table.querySelector('caption');
+      let caption = table.querySelector(':scope > caption');
+      if (!caption) {
+        caption = document.createElement('caption');
+        caption.className = 'tt-structured-table-caption';
+        caption.textContent = 'Lesson table';
+        const group = table.querySelector(':scope > colgroup');
+        table.insertBefore(caption,group || table.firstChild);
+      }
       table.dataset.editorStructuredTable = id;
-      table.dataset.tableTitle = String(caption?.textContent || 'Lesson table').trim() || 'Lesson table';
+      table.dataset.tableTitle = String(caption.textContent || 'Lesson table').trim() || 'Lesson table';
       lesson.tables[id] = {title:table.dataset.tableTitle,rows:[]};
     }
     return table.dataset.editorStructuredTable;
@@ -2125,8 +2133,8 @@ body.builder-dialog-open { overflow:hidden; }
     const widths=savedWidths||autoTableColumnWidthsFromRows(data.rows);
     const layout=savedWidths?'manual':'auto';
     return '<div class="tt-editor-table-scroll"><table class="tt-editor-structured-table tt-auto-layout" data-column-count="'+count+'" data-table-layout="'+layout+'" data-column-widths="'+esc(widths.join(','))+'" data-editor-structured-table="'+esc(tableId)+'" data-table-title="'+esc(title)+'">'+
-      columnGroupMarkup(widths)+
       '<caption class="tt-structured-table-caption">'+esc(title)+'</caption>'+
+      columnGroupMarkup(widths)+
       (heads.length?'<thead>'+heads.join('')+'</thead>':'')+(bodies.length?'<tbody>'+bodies.join('')+'</tbody>':'')+'</table></div><p><br></p>';
   }
   function structuredTableHtmlFromData(data, tableId, editorMode) {
@@ -2140,7 +2148,7 @@ body.builder-dialog-open { overflow:hidden; }
     const widths=savedWidths||autoTableColumnWidthsFromRows(data.rows);
     const caption='<caption class="tt-structured-table-caption">'+esc(title)+'</caption>';
     const attrs=editorMode?' data-editor-structured-table="'+esc(tableId)+'" data-table-title="'+esc(title)+'"':'';
-    return '<div class="lesson-table-wrap tt-structured-table-wrap'+(editorMode?' tt-editor-table-scroll':'')+'" role="region" tabindex="0" aria-label="Scrollable table: '+esc(title)+'"><table class="'+(editorMode?'tt-editor-structured-table':'tt-structured-table')+' tt-auto-layout" data-column-count="'+count+'"'+(savedWidths?' data-table-layout="manual"':'')+attrs+'>'+columnGroupMarkup(widths)+caption+
+    return '<div class="lesson-table-wrap tt-structured-table-wrap'+(editorMode?' tt-editor-table-scroll':'')+'" role="region" tabindex="0" aria-label="Scrollable table: '+esc(title)+'"><table class="'+(editorMode?'tt-editor-structured-table':'tt-structured-table')+' tt-auto-layout" data-column-count="'+count+'"'+(savedWidths?' data-table-layout="manual"':'')+attrs+'>'+caption+columnGroupMarkup(widths)+
       (heads?'<thead>'+heads+'</thead>':'')+(bodies?'<tbody>'+bodies+'</tbody>':'')+'</table></div>'+(editorMode?'<p><br></p>':'');
   }
   function refreshStructuredTableMetadata(table) {
