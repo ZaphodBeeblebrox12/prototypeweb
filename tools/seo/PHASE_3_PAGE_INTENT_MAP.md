@@ -46,7 +46,7 @@ Do not create thin pages just to target these phrases. A course overview should 
 ## Internal-linking plan
 
 1. **Homepage → catalogue and learning routes.** Keep one clear route to the catalogue and contextual links to the Trading Path, CONSTRUCT and live classroom. The current homepage already has these links; preserve them.
-2. **Catalogue → exact course overview.** Each available course card should lead to its own canonical Academy overview, not a generic dashboard or an ambiguous modal-only destination. Keep “coming soon” items informational until enrolment and public overview states are real.
+2. **Catalogue → exact course overview.** The catalogue is hydrated from the Academy catalogue API. Preserve the current publication gate: expose a direct course link only when the Academy record is published and supplies an `academyUrl`; keep “coming soon” items informational and hidden records out of the catalogue. Each available course card should lead to its own canonical Academy overview, not a generic dashboard or an ambiguous modal-only destination.
 3. **Learning progression → relevant next step.** Trading Path can point to CONSTRUCT for deeper guided practice; CONSTRUCT can point to the live classroom only as a different learning format. Explain the distinction rather than repeating the same CTA everywhere.
 4. **Course overview → related learning.** Link to one or two genuinely complementary topics and back to the catalogue. Use descriptive link text such as “learn the foundations of chart structure,” not repeated “click here” labels.
 5. **Community → learning context.** Link to the relevant learning route without presenting community discussion as a substitute for a course or individualized financial advice.
@@ -55,6 +55,7 @@ Do not create thin pages just to target these phrases. A course overview should 
 
 - The static builder currently includes six public routes in `PUBLIC_PAGES`; its sitemap should remain limited to those routes until the route inventory changes deliberately.
 - Its catalogue `ItemList` currently describes the three flagship offers. The visible catalogue data also contains nine micro-course records. Reconcile this before expanding the schema: include only offers that are visibly represented, have a stable public destination and are genuinely published. Do not invent destination URLs or mark a “coming soon” course as an available offer.
+- Catalogue cards are hydrated client-side from the Academy catalogue API; their direct destinations are supplied by published Academy records rather than hard-coded in the static course data. Preserve that source of truth when improving crawlability.
 - Academy course overview pages are the correct place for course-specific metadata and Course structured data once the Phase 1–2 changes are merged and the corresponding course is published and indexable.
 - The browser-only Support & Resistance Learning Room, member access, member-area preview, admin/editor previews and other review pages are not public acquisition pages. Keep them `noindex, nofollow` and out of the sitemap.
 - The staging robots file currently has no sitemap declaration and the sitemap is empty. Keep `TRADETHESIS_SEO_INDEXABLE=false` on staging. Do not change canonical base URLs or enable indexing until the permanent public domain is confirmed.
