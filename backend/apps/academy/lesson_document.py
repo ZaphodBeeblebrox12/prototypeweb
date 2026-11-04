@@ -39,6 +39,8 @@ BLOCK_NODES = frozenset(
         "ttLessonReference",
         "ttProtectedVideo",
         "ttLegacyReference",
+        "ttCourseReference",
+        "ttLessonTab",
     }
 )
 INLINE_NODES = frozenset({"text", "hardBreak"})
@@ -63,6 +65,8 @@ _NODE_ATTRS = {
     "ttRegionalBlock": frozenset({"blockId"}),
     "ttLessonReference": frozenset({"lessonId"}),
     "ttProtectedVideo": frozenset({"videoId"}),
+    "ttCourseReference": frozenset({"courseId", "comingSoon"}),
+    "ttLessonTab": frozenset({"section"}),
     "ttLegacyReference": frozenset({"token", "referenceKind", "referenceId"}),
 }
 _MARK_ATTRS = {
@@ -202,7 +206,7 @@ def _validate_node(
         return
 
     if node_type in INLINE_NODES or node_type == "horizontalRule" or node_type in {
-        "ttAssetImage", "ttFigure", "ttRegionalBlock", "ttLessonReference", "ttProtectedVideo", "ttLegacyReference"
+        "ttAssetImage", "ttFigure", "ttRegionalBlock", "ttLessonReference", "ttProtectedVideo", "ttLegacyReference", "ttCourseReference", "ttLessonTab"
     }:
         if "content" in node:
             raise LessonDocumentValidationError(f"{path}: this node cannot contain children.")
@@ -234,7 +238,7 @@ def _child_type_allowed(parent: str, child: str | None) -> bool:
     if parent in {"bulletList", "orderedList"}:
         return child == "listItem"
     if parent == "listItem":
-        return child in BLOCK_NODES - {"ttAssetImage", "ttFigure", "ttRegionalBlock", "ttLessonReference", "ttProtectedVideo"}
+        return child in BLOCK_NODES - {"ttAssetImage", "ttFigure", "ttRegionalBlock", "ttLessonReference", "ttProtectedVideo", "ttCourseReference", "ttLessonTab"}
     if parent == "codeBlock":
         return child == "text"
     if parent == "table":
@@ -242,7 +246,7 @@ def _child_type_allowed(parent: str, child: str | None) -> bool:
     if parent == "tableRow":
         return child in {"tableCell", "tableHeader"}
     if parent in {"tableCell", "tableHeader"}:
-        return child in BLOCK_NODES - {"table", "ttAssetImage", "ttFigure", "ttRegionalBlock", "ttLessonReference", "ttProtectedVideo"}
+        return child in BLOCK_NODES - {"table", "ttAssetImage", "ttFigure", "ttRegionalBlock", "ttLessonReference", "ttProtectedVideo", "ttCourseReference", "ttLessonTab"}
     return False
 
 
@@ -321,13 +325,19 @@ def _validate_node_attrs(node_type: str, attrs: dict[str, Any], path: str) -> No
         _validate_uuid_reference(attrs.get("lessonId"), path, "lessonId")
     if node_type == "ttProtectedVideo":
         _validate_uuid_reference(attrs.get("videoId"), path, "videoId")
+    if node_type == "ttCourseReference":
+        _validate_uuid_reference(attrs.get("courseId"), path, "courseId")
+        if not isinstance(attrs.get("comingSoon", False), bool):
+            raise LessonDocumentValidationError(f"{path}.attrs.comingSoon: expected a boolean.")
+    if node_type == "ttLessonTab":
+        _validate_enum(attrs.get("section"), {"idea", "examples", "practice"}, path, "section")
     if node_type == "ttLegacyReference":
         token = attrs.get("token")
         if not isinstance(token, str) or not token.startswith("[[") or not token.endswith("]]") or len(token) > 2000:
             raise LessonDocumentValidationError(f"{path}.attrs.token: invalid legacy reference token.")
         _validate_enum(
             attrs.get("referenceKind"),
-            {"asset", "figure", "table", "regional-block", "image-group", "lesson", "lesson-card", "unknown"},
+            {"asset", "figure", "teaching-figure", "table", "regional-block", "image-group", "lesson", "lesson-card", "course-card", "lesson-tab", "unknown"},
             path,
             "referenceKind",
         )
