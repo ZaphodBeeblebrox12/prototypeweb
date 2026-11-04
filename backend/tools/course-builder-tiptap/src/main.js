@@ -98,6 +98,7 @@ if (root) {
       if (accepted === false) {
         throw new Error('The editor could not read this structured document.');
       }
+      editor.setEditable(true);
     } finally {
       suppressUpdates = false;
     }
