@@ -1,0 +1,56 @@
+name: Build Course Editor static bundle
+
+on:
+  pull_request:
+    branches: [my-new-branch, main]
+    paths:
+      - "backend/course_editor/**"
+      - ".github/workflows/course-editor-build.yml"
+  push:
+    branches: [my-new-branch]
+    paths:
+      - "backend/course_editor/**"
+      - ".github/workflows/course-editor-build.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/course_editor
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: "22"
+
+      - name: Resolve exact dependency lock
+        run: npm install --package-lock-only
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Test Tiptap document schema
+        run: npm test
+
+      - name: Build local Django static bundle
+        run: npm run build
+
+      - name: Commit lockfile and static bundle after integration merge
+        if: github.event_name == 'push' && github.ref == 'refs/heads/my-new-branch'
+        run: |
+          cd ..
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add course_editor/package-lock.json static/academy/course_editor/editor.js static/academy/course_editor/editor.css
+          if git diff --cached --quiet; then
+            echo "Course Editor bundle is already up to date."
+          else
+            git commit -m "Build pinned Course Editor static bundle"
+            git push
+          fi

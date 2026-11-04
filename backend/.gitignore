@@ -69,3 +69,6 @@ logs/
 .DS_Store
 Thumbs.db
 coverage.xml
+
+# Course Editor Node dependencies
+course_editor/node_modules/
