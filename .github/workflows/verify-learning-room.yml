@@ -716,6 +716,13 @@ jobs:
               "Live-class page has horizontal scrolling on mobile: " + JSON.stringify(publicOverflow));
             console.log("PUBLIC_CTA_PREVIEW_PASS: checkout, programme enquiry and live-class form are honest preview flows.");
 
+            // foundations.html is a legacy alias with an immediate meta-refresh to the
+            // Trading Path. Verify the redirect separately; do not measure layout while it navigates.
+            await cataloguePage.goto(server + "/foundations.html", { waitUntil: "domcontentloaded" });
+            await cataloguePage.waitForURL(server + "/trading-path.html");
+            assert.equal(new URL(cataloguePage.url()).pathname, "/trading-path.html",
+              "The legacy foundations route should hand off to the current Trading Path page");
+
             // Sweep the main site journeys for document-level overflow at a narrow mobile width and desktop width.
             const siteRoutes = [
               "/index.html",
@@ -724,7 +731,6 @@ jobs:
               "/construct.html",
               "/live-class.html",
               "/community.html",
-              "/foundations.html",
               "/member-access.html",
               "/member-area-preview.html",
               "/support-resistance-room.html",
