@@ -165,7 +165,7 @@ def _validate_node(
         raise LessonDocumentValidationError("Lesson document exceeds the node limit.")
 
     node_type = node.get("type")
-    if node_type not in NODE_TYPES:
+    if not isinstance(node_type, str) or node_type not in NODE_TYPES:
         raise LessonDocumentValidationError(f"{path}: unsupported node type {node_type!r}.")
 
     allowed_keys = {"type"}
@@ -216,7 +216,7 @@ def _validate_node(
 
     for index, child in enumerate(children):
         child_type = child.get("type") if isinstance(child, dict) else None
-        if not _child_type_allowed(node_type, child_type):
+        if not isinstance(child_type, str) or not _child_type_allowed(node_type, child_type):
             raise LessonDocumentValidationError(
                 f"{path}.content[{index}]: {child_type!r} is not allowed inside {node_type!r}."
             )
@@ -335,7 +335,7 @@ def _validate_marks(marks: Any, path: str) -> None:
                 f"{mark_path}: unsupported mark property {sorted(unexpected_mark_keys)[0]!r}."
             )
         mark_type = mark.get("type")
-        if mark_type not in MARK_TYPES:
+        if not isinstance(mark_type, str) or mark_type not in MARK_TYPES:
             raise LessonDocumentValidationError(f"{mark_path}: unsupported mark type {mark_type!r}.")
         if mark_type in seen:
             raise LessonDocumentValidationError(f"{mark_path}: duplicate mark {mark_type!r}.")
