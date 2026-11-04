@@ -1924,17 +1924,11 @@ body.builder-dialog-open { overflow:hidden; }
     }
     if (tag === 'ul' || tag === 'ol') return richListMarkdown(node);
     if (tag === 'table') {
-      const hasMergedCells = Array.from(node.querySelectorAll('th,td')).some(cell =>
-        Number(cell.getAttribute('colspan') || 1) > 1 || Number(cell.getAttribute('rowspan') || 1) > 1
-      );
-      const hasGroupedHeaders = node.querySelectorAll(':scope > thead > tr').length > 1;
-      const hasCaption = Boolean(node.querySelector(':scope > caption'));
-      if (node.dataset.editorStructuredTable || hasMergedCells || hasGroupedHeaders || hasCaption) {
-        const id = node.dataset.editorStructuredTable || ensureStructuredTableForResize(node);
-        if (id) {
-          refreshStructuredTableMetadata(node);
-          return '[[table-block:' + String(id) + ']]';
-        }
+      // Serialisation stays pure: promotion to structured storage happens against the
+      // connected editor table before save or caret-offset measurement.
+      if (node.dataset.editorStructuredTable) {
+        if (node.isConnected) refreshStructuredTableMetadata(node);
+        return '[[table-block:' + String(node.dataset.editorStructuredTable) + ']]';
       }
       return richTableMarkdown(node);
     }
@@ -2255,6 +2249,23 @@ body.builder-dialog-open { overflow:hidden; }
     }
     lesson.tables[id]=savedTable;
   }
+  function editorTableNeedsStructuredStorage(table) {
+    if (!table) return false;
+    const hasMergedCells = Array.from(table.querySelectorAll('th,td')).some(cell =>
+      Number(cell.getAttribute('colspan') || 1) > 1 || Number(cell.getAttribute('rowspan') || 1) > 1
+    );
+    const hasGroupedHeaders = table.querySelectorAll(':scope > thead > tr').length > 1;
+    const hasCaption = Boolean(table.querySelector(':scope > caption'));
+    return hasMergedCells || hasGroupedHeaders || hasCaption;
+  }
+  function promoteComplexEditorTables(editor) {
+    if (!editor) return;
+    editor.querySelectorAll('table').forEach(table => {
+      if (table.dataset.editorStructuredTable || !editorTableNeedsStructuredStorage(table)) return;
+      const id = ensureStructuredTableForResize(table);
+      if (id) refreshStructuredTableMetadata(table);
+    });
+  }
   function selectedEditorTable(editor) {
     const saved=richEditorRange;const range=saved?.editor===editor?saved.range:null;
     const container=range?.startContainer;const node=container?.nodeType===1?container:container?.parentElement;
@@ -2454,6 +2465,7 @@ body.builder-dialog-open { overflow:hidden; }
     }
     const lesson = currentLesson();
     if (!lesson) return;
+    promoteComplexEditorTables(editor);
     const markdown = visualEditorToMarkdown(editor);
     const kind = editor.dataset.visualKind;
     if (kind === 'main') lesson.content = markdown;
@@ -2545,6 +2557,7 @@ body.builder-dialog-open { overflow:hidden; }
     if (!editor || editor.dataset.visualKind !== 'main' || !range) return;
     const lesson = currentLesson();
     if (!lesson || !saved.lessonId || saved.lessonId !== lesson.id || !editor.contains(range.startContainer)) return;
+    promoteComplexEditorTables(editor);
     const prefixRange = document.createRange();
     prefixRange.selectNodeContents(editor);
     try { prefixRange.setEnd(range.startContainer, range.startOffset); } catch (_) { return; }
