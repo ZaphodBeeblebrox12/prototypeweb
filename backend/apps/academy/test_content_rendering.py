@@ -1781,7 +1781,7 @@ class CourseBuilderFormatPreservationRegressionTests(SimpleTestCase):
         if not node:
             self.skipTest("Node.js is unavailable in this test environment.")
         scripts = re.findall(
-            r"<script\\b[^>]*>(.*?)</script>",
+            r"<script\b[^>]*>(.*?)</script>",
             self.builder_source,
             flags=re.DOTALL,
         )
@@ -1792,7 +1792,7 @@ class CourseBuilderFormatPreservationRegressionTests(SimpleTestCase):
             encoding="utf-8",
             delete=False,
         ) as script_file:
-            script_file.write("\\n;\\n".join(scripts))
+            script_file.write("\n;\n".join(scripts))
             script_path = Path(script_file.name)
         try:
             result = subprocess.run(
