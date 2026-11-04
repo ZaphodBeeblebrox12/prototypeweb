@@ -1391,6 +1391,11 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         self.assertIn("overflow-wrap: normal;", parity_css)
         self.assertIn(".tt-table-resize-handle", parity_css)
         self.assertIn('data-rich-table-action="auto-fit"', builder_source)
+        self.assertIn('data-rich-table-action="delete-table"', builder_source)
+        self.assertIn("action==='delete-table'", builder_source)
+        self.assertIn("delete lesson.tables[tableId]", builder_source)
+        self.assertIn("tableContainer.replaceWith(placeholder)", builder_source)
+        self.assertIn("syncVisualEditorToModel(editor)", builder_source)
         self.assertIn("data-table-resize-handle", builder_source)
         for selector in (
             ".tt-learning-room .tt-tab-panel h6,",
