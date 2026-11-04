@@ -37,6 +37,7 @@ BLOCK_NODES = frozenset(
         "ttRegionalBlock",
         "ttLessonReference",
         "ttProtectedVideo",
+        "ttLegacyReference",
     }
 )
 INLINE_NODES = frozenset({"text", "hardBreak"})
@@ -61,6 +62,7 @@ _NODE_ATTRS = {
     "ttRegionalBlock": frozenset({"blockId"}),
     "ttLessonReference": frozenset({"lessonId"}),
     "ttProtectedVideo": frozenset({"videoId"}),
+    "ttLegacyReference": frozenset({"token", "referenceKind", "referenceId"}),
 }
 _MARK_ATTRS = {
     "link": frozenset({"href", "target", "rel"}),
@@ -199,7 +201,7 @@ def _validate_node(
         return
 
     if node_type in INLINE_NODES or node_type == "horizontalRule" or node_type in {
-        "ttAssetImage", "ttFigure", "ttRegionalBlock", "ttLessonReference", "ttProtectedVideo"
+        "ttAssetImage", "ttFigure", "ttRegionalBlock", "ttLessonReference", "ttProtectedVideo", "ttLegacyReference"
     }:
         if "content" in node:
             raise LessonDocumentValidationError(f"{path}: this node cannot contain children.")
@@ -305,6 +307,18 @@ def _validate_node_attrs(node_type: str, attrs: dict[str, Any], path: str) -> No
         _validate_uuid_reference(attrs.get("lessonId"), path, "lessonId")
     if node_type == "ttProtectedVideo":
         _validate_uuid_reference(attrs.get("videoId"), path, "videoId")
+    if node_type == "ttLegacyReference":
+        token = attrs.get("token")
+        if not isinstance(token, str) or not token.startswith("[[") or not token.endswith("]]") or len(token) > 2000:
+            raise LessonDocumentValidationError(f"{path}.attrs.token: invalid legacy reference token.")
+        _validate_enum(
+            attrs.get("referenceKind"),
+            {"asset", "figure", "table", "regional-block", "image-group", "lesson", "lesson-card", "unknown"},
+            path,
+            "referenceKind",
+        )
+        if attrs.get("referenceId") is not None:
+            _validate_reference(attrs.get("referenceId"), path, "referenceId")
 
 
 def _validate_marks(marks: Any, path: str) -> None:
