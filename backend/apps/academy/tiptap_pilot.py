@@ -23,6 +23,48 @@ from .permissions import is_course_content_admin
 MAX_PILOT_REQUEST_BYTES = 1_500_000
 MAX_PILOT_DRAFTS_PER_AUTHOR = 100
 
+PILOT_NODE_TYPES = frozenset(
+    {
+        "doc",
+        "paragraph",
+        "heading",
+        "text",
+        "hardBreak",
+        "horizontalRule",
+        "blockquote",
+        "bulletList",
+        "orderedList",
+        "listItem",
+        "codeBlock",
+        "table",
+        "tableRow",
+        "tableHeader",
+        "tableCell",
+    }
+)
+PILOT_MARK_TYPES = frozenset(
+    {"bold", "italic", "strike", "underline", "code", "link"}
+)
+
+
+def _validate_pilot_schema(document):
+    """Reject valid future lesson blocks until the pilot has their editor extensions."""
+    def visit(node):
+        node_type = node["type"]
+        if node_type not in PILOT_NODE_TYPES:
+            raise LessonDocumentError(
+                f"The Tiptap pilot does not support the {node_type!r} block yet."
+            )
+        for mark in node.get("marks", []):
+            if mark["type"] not in PILOT_MARK_TYPES:
+                raise LessonDocumentError(
+                    f"The Tiptap pilot does not support the {mark['type']!r} format yet."
+                )
+        for child in node.get("content", []):
+            visit(child)
+
+    visit(document)
+
 
 def _require_tiptap_pilot_access(request):
     if not getattr(settings, "ACADEMY_TIPTAP_PILOT_ENABLED", False):
@@ -112,6 +154,7 @@ def tiptap_pilot_api(request):
 
     try:
         document = validate_lesson_document(body.get("document"))
+        _validate_pilot_schema(document["document"])
     except LessonDocumentError as exc:
         return JsonResponse({"detail": str(exc)}, status=400)
 
