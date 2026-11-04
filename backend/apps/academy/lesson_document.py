@@ -285,9 +285,11 @@ def _validate_node_attrs(node_type: str, attrs: dict[str, Any], path: str) -> No
                     f"{path}.attrs.columnWidths: expected 1–12 percentage widths totalling 100."
                 )
     if node_type == "codeBlock":
-        language = attrs.get("language", "")
-        if not isinstance(language, str) or len(language) > 40 or not re.fullmatch(
-            r"[A-Za-z0-9_+-]*", language
+        language = attrs.get("language")
+        if language is not None and (
+            not isinstance(language, str)
+            or len(language) > 40
+            or not re.fullmatch(r"[A-Za-z0-9_+-]*", language)
         ):
             raise LessonDocumentValidationError(f"{path}.attrs.language: invalid language identifier.")
     if node_type in {"tableCell", "tableHeader"}:
@@ -330,7 +332,9 @@ def _validate_node_attrs(node_type: str, attrs: dict[str, Any], path: str) -> No
         if not isinstance(attrs.get("comingSoon", False), bool):
             raise LessonDocumentValidationError(f"{path}.attrs.comingSoon: expected a boolean.")
     if node_type == "ttLessonTab":
-        _validate_enum(attrs.get("section"), {"idea", "examples", "practice"}, path, "section")
+        section = attrs.get("section")
+        if not isinstance(section, str) or section not in {"idea", "examples", "practice"}:
+            raise LessonDocumentValidationError(f"{path}.attrs.section: expected idea, examples or practice.")
     if node_type == "ttLegacyReference":
         token = attrs.get("token")
         if not isinstance(token, str) or not token.startswith("[[") or not token.endswith("]]") or len(token) > 2000:
