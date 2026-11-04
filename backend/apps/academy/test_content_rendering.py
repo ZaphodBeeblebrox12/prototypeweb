@@ -1,7 +1,9 @@
+import json
 import re
 import shutil
 import subprocess
 import tempfile
+from html.parser import HTMLParser
 from pathlib import Path
 
 from django.test import SimpleTestCase
@@ -1824,4 +1826,198 @@ class CourseBuilderFormatPreservationRegressionTests(SimpleTestCase):
         self.assertIn("function rememberRichEditorCaretOffset()", source)
         self.assertIn("visualEditorToMarkdown(prefix)", source)
         self.assertIn("insertVisualTokenAtCursor(visualEditor, token, isBlock)", source)
+
+class CourseBuilderRealRoundTripTests(SimpleTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        backend = Path(__file__).resolve().parents[2]
+        cls.builder_source = (
+            backend / "apps" / "academy" / "course_builder_preview.html"
+        ).read_text(encoding="utf-8")
+        cls.node = shutil.which("node")
+
+    def _round_trip_harness(self):
+        source = self.builder_source
+        renderer_start = source.index("  renderMarkdown = function(src) {")
+        renderer_end = source.index(
+            ";\n  // Freeze the canonical parser",
+            renderer_start,
+        ) + 1
+        serializer_start = source.index("  function richInlineMarkdown(node) {")
+        serializer_end = source.index(
+            "  async function promptTableDimension",
+            serializer_start,
+        )
+        renderer = source[renderer_start:renderer_end]
+        serializer = source[serializer_start:serializer_end]
+
+        return r"""
+const fs = require('node:fs');
+const esc = value => String(value ?? '').replace(/[&<>"]/g, char => ({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'
+}[char]));
+const columnGroupMarkup = () => '';
+const autoTableColumnWidthsFromRows = () => [];
+function refreshStructuredTableMetadata() {}
+let renderMarkdown;
+""" + renderer + "\n" + serializer + r"""
+function makeNode(spec) {
+  if (Object.prototype.hasOwnProperty.call(spec, 'text')) {
+    return {nodeType:3, nodeValue:String(spec.text), textContent:String(spec.text)};
+  }
+  const attrs = spec.attrs || {};
+  const childNodes = (spec.children || []).map(makeNode);
+  const node = {
+    nodeType:1,
+    tagName:String(spec.tag || 'div').toUpperCase(),
+    childNodes,
+    children:childNodes.filter(child => child.nodeType === 1),
+    dataset:{},
+    classList:String(attrs.class || '').split(/\s+/).filter(Boolean),
+    isConnected:true,
+    hasAttribute(name) { return Object.prototype.hasOwnProperty.call(attrs,name); },
+    getAttribute(name) { return Object.prototype.hasOwnProperty.call(attrs,name) ? attrs[name] : null; },
+    querySelectorAll(selector) {
+      const wanted = selector.split(',').map(part => part.trim().toLowerCase());
+      const found = [];
+      const visit = parent => parent.children.forEach(child => {
+        if (wanted.includes(child.tagName.toLowerCase())) found.push(child);
+        visit(child);
+      });
+      visit(this);
+      return found;
+    },
+    querySelector(selector) { return this.querySelectorAll(selector)[0] || null; }
+  };
+  Object.entries(attrs).forEach(([key,value]) => {
+    if (key.startsWith('data-')) {
+      const name = key.slice(5).replace(/-([a-z])/g, (_,letter) => letter.toUpperCase());
+      node.dataset[name] = value;
+    }
+  });
+  Object.defineProperty(node, 'textContent', {
+    get() { return this.childNodes.map(child => child.textContent).join(''); }
+  });
+  return node;
+}
+const payload = JSON.parse(fs.readFileSync(0, 'utf8'));
+if (payload.mode === 'render') {
+  process.stdout.write(JSON.stringify(renderMarkdown(payload.markdown)));
+} else if (payload.mode === 'serialize') {
+  process.stdout.write(JSON.stringify(visualEditorToMarkdown(makeNode(payload.tree))));
+} else {
+  throw new Error('Unknown harness mode');
+}
+"""
+
+    def _run_harness(self, harness, payload):
+        result = subprocess.run(
+            [self.node, "-e", harness],
+            input=json.dumps(payload),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return json.loads(result.stdout)
+
+    def _html_tree(self, html):
+        class TreeParser(HTMLParser):
+            VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input",
+                         "link", "meta", "param", "source", "track", "wbr"}
+
+            def __init__(self):
+                super().__init__(convert_charrefs=True)
+                self.root = {"tag": "div", "attrs": {}, "children": []}
+                self.stack = [self.root]
+
+            def handle_starttag(self, tag, attrs):
+                node = {"tag": tag, "attrs": dict(attrs), "children": []}
+                self.stack[-1]["children"].append(node)
+                if tag not in self.VOID_TAGS:
+                    self.stack.append(node)
+
+            def handle_startendtag(self, tag, attrs):
+                self.stack[-1]["children"].append(
+                    {"tag": tag, "attrs": dict(attrs), "children": []}
+                )
+
+            def handle_endtag(self, tag):
+                for position in range(len(self.stack) - 1, 0, -1):
+                    if self.stack[position]["tag"] == tag:
+                        del self.stack[position:]
+                        break
+
+            def handle_data(self, data):
+                if data:
+                    self.stack[-1]["children"].append({"text": data})
+
+        parser = TreeParser()
+        parser.feed(html)
+        parser.close()
+        return parser.root
+
+    def _shape(self, node):
+        if "text" in node:
+            return ("#text", node["text"])
+        attrs = node.get("attrs", {})
+        stable_attrs = tuple(sorted(
+            (key, value) for key, value in attrs.items()
+            if key in {"align", "start", "class", "data-column-count"}
+        ))
+        children = tuple(
+            self._shape(child) for child in node.get("children", [])
+            if not ("text" in child and not child["text"].strip())
+        )
+        return (node["tag"], stable_attrs, children)
+
+    def test_editor_markdown_html_markdown_html_round_trip(self):
+        if not self.node:
+            self.skipTest("Node.js is unavailable in this test environment.")
+
+        harness = self._round_trip_harness()
+        markdown = (
+            "# Round-trip lesson\n\n"
+            "**Bold**, *italic*, <u>underlined</u>, \x60inline code\x60, and ~~removed~~.\n\n"
+            "1. First item\n"
+            "  - Nested bullet\n"
+            "    1. Deeper numbered item\n"
+            "2. Second item\n\n"
+            "> A quoted teaching point.\n\n"
+            "| Left | Centre | Right |\n"
+            "|:---|:---:|---:|\n"
+            "| Alpha | Beta | Gamma |\n\n"
+            "~~~python\n"
+            "print('hello')\n"
+            "~~~"
+        )
+
+        first_html = self._run_harness(harness, {"mode": "render", "markdown": markdown})
+        first_tree = self._html_tree(first_html)
+        saved_markdown = self._run_harness(
+            harness, {"mode": "serialize", "tree": first_tree}
+        )
+        reopened_html = self._run_harness(
+            harness, {"mode": "render", "markdown": saved_markdown}
+        )
+        reopened_tree = self._html_tree(reopened_html)
+
+        self.assertEqual(self._shape(first_tree), self._shape(reopened_tree))
+        for expected in (
+            "# Round-trip lesson",
+            "**Bold**",
+            "*italic*",
+            "<u>underlined</u>",
+            "\x60inline code\x60",
+            "1. First item",
+            "  - Nested bullet",
+            "    1. Deeper numbered item",
+            "> A quoted teaching point.",
+            "| :--- | :---: | ---: |",
+            "~~~python",
+            "print('hello')",
+        ):
+            with self.subTest(expected=expected):
+                self.assertIn(expected, saved_markdown)
 
