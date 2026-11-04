@@ -122,6 +122,11 @@ def tiptap_pilot_api(request):
 
     raw_id = body.get("id")
     if raw_id is None:
+        if CourseBuilderTiptapDraft.objects.filter(owner=request.user).count() >= MAX_PILOT_DRAFTS_PER_AUTHOR:
+            return JsonResponse(
+                {"detail": "The pilot draft limit has been reached for this account."},
+                status=400,
+            )
         draft = CourseBuilderTiptapDraft.objects.create(
             owner=request.user,
             title=title.strip(),
