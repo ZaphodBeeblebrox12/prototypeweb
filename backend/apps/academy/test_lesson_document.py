@@ -156,6 +156,23 @@ class LessonDocumentContractTests(SimpleTestCase):
                 }
             )
 
+    def test_non_finite_numbers_and_empty_root_documents_are_rejected(self):
+        with self.assertRaisesMessage(LessonDocumentError, "at least one block"):
+            make_lesson_document({"type": "doc", "content": []})
+
+        with self.assertRaisesMessage(LessonDocumentError, "non-finite numbers"):
+            make_lesson_document(
+                {
+                    "type": "doc",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "attrs": {"scale": float("nan")},
+                        }
+                    ],
+                }
+            )
+
     def test_unsupported_document_version_is_rejected(self):
         document = make_lesson_document()
         document["version"] = 99
