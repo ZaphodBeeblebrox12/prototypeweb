@@ -821,6 +821,10 @@ def publish_course_import(record, *, user):
                 description=course_data.get("description", ""),
                 share_title=course_data.get("share_title", ""),
                 share_message=course_data.get("share_message", ""),
+                seo_title=course_data.get("seo_title", ""),
+                seo_description=course_data.get("seo_description", ""),
+                seo_primary_topic=course_data.get("seo_primary_topic", ""),
+                seo_indexable=course_data.get("seo_indexable", True),
                 category=course_data.get("category", ""),
                 level=course_data.get("level", ""),
                 estimated_duration=course_data.get("estimated_duration", ""),
@@ -842,6 +846,10 @@ def publish_course_import(record, *, user):
         course.description = course_data.get("description", "")
         course.share_title = course_data.get("share_title", "")
         course.share_message = course_data.get("share_message", "")
+        course.seo_title = course_data.get("seo_title", "")
+        course.seo_description = course_data.get("seo_description", "")
+        course.seo_primary_topic = course_data.get("seo_primary_topic", "")
+        course.seo_indexable = course_data.get("seo_indexable", True)
         course.category = course_data.get("category", course.category)
         course.level = course_data.get("level", course.level)
         course.estimated_duration = course_data.get("estimated_duration", course.estimated_duration)
@@ -857,6 +865,10 @@ def publish_course_import(record, *, user):
                 "description",
                 "share_title",
                 "share_message",
+                "seo_title",
+                "seo_description",
+                "seo_primary_topic",
+                "seo_indexable",
                 "category",
                 "level",
                 "estimated_duration",
