@@ -4,9 +4,6 @@ The document is stored beside legacy Markdown during the editor migration. It is
 never rendered directly until the learner renderer supports the same version.
 """
 
-from __future__ import annotations
-
-
 LESSON_DOCUMENT_FORMAT = "tradethesis.lesson-document"
 LESSON_DOCUMENT_VERSION = 1
 
@@ -136,6 +133,8 @@ def _validate_link_target(value: str, *, path: str) -> None:
 
 
 def _validate_media_source(value: str, *, path: str) -> None:
+    from urllib.parse import urlsplit
+
     target = value.strip()
     if not target:
         return
@@ -240,6 +239,7 @@ def validate_lesson_document(value) -> dict:
     destroy content created by an extension it does not understand.
     """
     from copy import deepcopy
+
     if not isinstance(value, dict):
         raise LessonDocumentError("A lesson document must be an object.")
 
@@ -296,6 +296,8 @@ def lesson_document_from_content_json(content_json) -> dict | None:
 
 def content_json_with_lesson_document(content_json, document) -> dict:
     """Return content_json with a validated canonical document attached."""
+    from copy import deepcopy
+
     result = deepcopy(content_json) if isinstance(content_json, dict) else {}
     result["lesson_document"] = validate_lesson_document(document)
     return result
