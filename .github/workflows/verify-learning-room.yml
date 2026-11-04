@@ -652,9 +652,31 @@ jobs:
             // The Trading Path is free. Local previews resolve Academy links to the
             // staging service, but must point to the course detail / free-enrolment route,
             // never the legacy paid checkout endpoint.
+            // Keep the public CTA smoke test deterministic: the Academy API is represented
+            // by a small published/free course fixture instead of depending on staging uptime.
+            await cataloguePage.route("https://tradethesis-academy-staging.onrender.com/api/academy/catalogue/", route => route.fulfill({
+              status: 200,
+              contentType: "application/json",
+              body: JSON.stringify({
+                courses: [{
+                  slug: "trading-path",
+                  title: "The TradeThesis Trading Path",
+                  status: "published",
+                  accessType: "free",
+                  price: "Free",
+                  priceNote: "Free membership access",
+                  priceConfigured: true,
+                  academyUrl: "https://tradethesis-academy-staging.onrender.com/learn/course/trading-path/"
+                }]
+              })
+            }));
             await cataloguePage.setViewportSize({ width: 1280, height: 900 });
             await cataloguePage.goto(server + "/trading-path.html", { waitUntil: "domcontentloaded" });
             const tradingPathEnrolment = cataloguePage.locator('[data-academy-path="/learn/course/trading-path/"]').first();
+            await cataloguePage.waitForFunction(() => {
+              const link = document.querySelector('[data-course-enrol-cta]');
+              return link && link.textContent.includes("Enrol for free") && !link.hasAttribute("aria-disabled");
+            }, { timeout: 8000 });
             assert.equal(await tradingPathEnrolment.count(), 1,
               "Trading Path must expose a free-enrolment link");
             assert.ok((await tradingPathEnrolment.innerText()).toLowerCase().includes("enrol for free"),
@@ -668,6 +690,7 @@ jobs:
               "Trading Path must not expose the paid checkout CTA");
             assert.ok((await cataloguePage.locator(".product-price").innerText()).includes("Free"),
               "Trading Path page must show a free price");
+            await cataloguePage.unroute("https://tradethesis-academy-staging.onrender.com/api/academy/catalogue/");
 
             await cataloguePage.goto(server + "/construct.html", { waitUntil: "domcontentloaded" });
             await cataloguePage.locator("[data-preview-enquiry]").first().click();
