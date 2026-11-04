@@ -321,6 +321,8 @@ export function mountTradeThesisEditor(element, options = {}) {
         'ttRegionalBlock',
         'ttLessonReference',
         'ttProtectedVideo',
+        'ttCourseReference',
+        'ttLessonTab',
         'ttLegacyReference',
       ]);
       if (!referenceTypes.has(type) || !editor.schema.nodes[type]) {
@@ -332,7 +334,7 @@ export function mountTradeThesisEditor(element, options = {}) {
       // The server will validate reference ownership and permissions on save.
       // Never pass URLs or storage keys as reference identifiers.
       const referenceId = attrs.assetId || attrs.figureId || attrs.blockId ||
-        attrs.lessonId || attrs.videoId || attrs.token;
+        attrs.lessonId || attrs.videoId || attrs.courseId || attrs.section || attrs.token;
       if (type !== 'ttLegacyReference' && !isSafeReferenceId(String(referenceId || ''))) {
         throw new TypeError('A stable TradeThesis reference ID is required.');
       }
