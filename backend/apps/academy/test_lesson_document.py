@@ -88,6 +88,11 @@ class LessonDocumentContractTests(SimpleTestCase):
                 "content": [
                     {
                         "type": "table",
+                        "attrs": {
+                            "caption": "Grouped reference table",
+                            "columnWidths": [40.0, 60.0],
+                            "layout": "fixed",
+                        },
                         "content": [
                             {
                                 "type": "tableRow",
@@ -129,6 +134,9 @@ class LessonDocumentContractTests(SimpleTestCase):
         self.assertEqual(cell["attrs"]["colspan"], 2)
         self.assertEqual(cell["attrs"]["align"], "center")
         self.assertEqual(cell["attrs"]["colwidth"], [120, 180])
+        table = document["content"]["content"][0]
+        self.assertEqual(table["attrs"]["caption"], "Grouped reference table")
+        self.assertEqual(table["attrs"]["columnWidths"], [40.0, 60.0])
 
     def test_trade_thesis_reference_nodes_store_ids_not_private_urls(self):
         document = new_lesson_document(
