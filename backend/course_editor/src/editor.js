@@ -116,6 +116,17 @@ export function mountTradeThesisEditor(element, options = {}) {
   linkButton.setAttribute('aria-expanded', 'false');
   const tableToolbar = document.createElement('div');
   tableToolbar.className = 'tt-editor-table-toolbar';
+  const captionInput = document.createElement('input');
+  captionInput.type = 'text';
+  captionInput.maxLength = 2400;
+  captionInput.placeholder = 'Table caption…';
+  captionInput.className = 'tt-editor-table-caption-input';
+  captionInput.setAttribute('aria-label', 'Table caption');
+  const captionSave = document.createElement('button');
+  captionSave.type = 'button';
+  captionSave.className = 'tt-editor-toolbar__button';
+  captionSave.textContent = 'Set caption';
+  captionSave.title = 'Save table caption';
   tableToolbar.setAttribute('role', 'toolbar');
   tableToolbar.setAttribute('aria-label', 'Table editing');
   tableToolbar.hidden = true;
@@ -159,6 +170,9 @@ export function mountTradeThesisEditor(element, options = {}) {
     refreshButtons(editor, tableToolbar, TABLE_ACTIONS);
     const inTable = editor.isActive('table');
     tableToolbar.hidden = !inTable;
+    if (inTable && document.activeElement !== captionInput) {
+      captionInput.value = editor.getAttributes('table').caption || '';
+    }
     for (const alignment of CELL_ALIGNMENTS) {
       const button = tableToolbar.querySelector(`[data-cell-align="${alignment.value}"]`);
       if (!button) continue;
@@ -203,6 +217,15 @@ export function mountTradeThesisEditor(element, options = {}) {
   for (const action of TABLE_ACTIONS) {
     tableToolbar.append(makeButton(action, editor, tableToolbar, refresh));
   }
+  captionSave.addEventListener('mousedown', event => event.preventDefault());
+  captionSave.addEventListener('click', () => {
+    const caption = captionInput.value.trim();
+    if (editor.isEditable && editor.isActive('table')) {
+      editor.chain().focus().updateAttributes('table', { caption }).run();
+    }
+    refresh();
+  });
+  tableToolbar.append(captionInput, captionSave);
   for (const alignment of CELL_ALIGNMENTS) {
     const button = document.createElement('button');
     button.type = 'button';
