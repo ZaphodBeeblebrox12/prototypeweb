@@ -532,7 +532,7 @@
 .preview-body table.tt-auto-layout td,
 .rich-editor-canvas table.tt-auto-layout th,
 .rich-editor-canvas table.tt-auto-layout td {
-  overflow-wrap: break-word;
+  overflow-wrap: normal;
   word-break: normal;
   hyphens: none;
 }
