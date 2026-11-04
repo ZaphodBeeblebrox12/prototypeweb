@@ -1,6 +1,6 @@
 # Module 2 — Read the Bands and Their Measurements
 
-This module explains the core settings and the two measurements most closely associated with Bollinger Bands: %B and BandWidth. The goal is not to turn the course into a mathematics class. It is to help you understand what each number adds and what it leaves unanswered.
+This module explains the core settings and the two measurements most closely associated with Bollinger Bands: %B and BandWidth. I am not trying to turn this into a mathematics class. I want you to understand what each number adds and what it leaves unanswered.
 
 By the end, you should be able to explain the usual settings, recognise the effect of changing them, read %B as a measure of relative position, and use BandWidth to compare how narrow or wide the bands are.
 
