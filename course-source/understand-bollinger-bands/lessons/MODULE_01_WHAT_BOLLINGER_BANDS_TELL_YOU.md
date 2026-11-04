@@ -1,12 +1,12 @@
 # Module 1 — What Bollinger Bands Actually Tell You
 
-This module establishes the course's first habit: describe what the bands show before deciding what the chart might mean. Bollinger Bands help describe price relative to its recent behaviour. They do not tell you, by themselves, what price must do next.
+In this module, I want you to build the first habit of this course: describe what the bands show before deciding what the chart might mean. Bollinger Bands help describe price relative to its recent behaviour. They do not tell you, by themselves, what price must do next.
 
 By the end, you should be able to explain the middle and outer bands in plain language, read a band touch without turning it into an automatic signal, recognise changing volatility, and state the limits of what the bands can tell you.
 
 ## A three-step habit for reading any chart: Observe → Interpret → Test
 
-Use this simple routine throughout the course:
+I want you to use this simple routine throughout the course:
 
 - **Observe:** Describe what is actually visible. Where is price relative to the bands? Are the bands narrow or wide? What have the recent highs, lows and closes done? Avoid predicting in this first step.
 - **Interpret:** Explain what those facts might mean in this market context. Also name one other explanation that could fit the evidence. For example, a close above the upper band may fit continuation, but the move can still fail.
@@ -210,7 +210,7 @@ Figure 1.3 presents three common states:
 
 **Wide bands:** Price has recently been moving more broadly. A new entry may now be late if the move has already travelled far from the level that would make the setup attractive.
 
-The same band width can also mean different things across instruments or timeframes. A width that is unusually narrow for one market may be ordinary for another. We will later use BandWidth to make relative comparisons more systematic.
+The same band width can also mean different things across instruments or timeframes. A width that is unusually narrow for one market may be ordinary for another. Later in the course, I use BandWidth to make relative comparisons more systematic.
 
 ### What widening does—and does not—confirm
 
