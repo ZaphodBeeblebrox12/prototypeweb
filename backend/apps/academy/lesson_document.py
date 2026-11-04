@@ -9,7 +9,6 @@ from __future__ import annotations
 from copy import deepcopy
 from urllib.parse import urlsplit
 
-
 LESSON_DOCUMENT_FORMAT = "tradethesis.lesson-document"
 LESSON_DOCUMENT_VERSION = 1
 
