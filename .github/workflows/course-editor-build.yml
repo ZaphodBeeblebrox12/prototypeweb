@@ -28,8 +28,6 @@ jobs:
         uses: actions/setup-node@v7.0.0
         with:
           node-version: "22"
-          cache: npm
-          cache-dependency-path: backend/course_editor/package-lock.json
 
       - name: Resolve exact dependency lock
         run: npm install --package-lock-only
