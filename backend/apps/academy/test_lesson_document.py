@@ -214,6 +214,27 @@ class LessonDocumentContractTests(SimpleTestCase):
                 }
             )
 
+    def test_malformed_node_and_mark_types_are_rejected_without_type_errors(self):
+        malformed_documents = [
+            {"type": "doc", "content": [{"type": ["paragraph"]}]},
+            {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": ["text"]}]}]},
+            {
+                "type": "doc",
+                "content": [
+                    {
+                        "type": "paragraph",
+                        "content": [
+                            {"type": "text", "text": "bad", "marks": [{"type": ["bold"]}]}
+                        ],
+                    }
+                ],
+            },
+        ]
+        for content in malformed_documents:
+            with self.subTest(content=content):
+                with self.assertRaises(LessonDocumentValidationError):
+                    new_lesson_document(content)
+
     def test_invalid_nested_content_is_rejected(self):
         with self.assertRaisesRegex(LessonDocumentValidationError, "not allowed inside"):
             new_lesson_document(
