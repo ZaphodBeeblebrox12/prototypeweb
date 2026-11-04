@@ -3625,12 +3625,12 @@ body.builder-dialog-open { overflow:hidden; }
       );
     };
     const listMarkerMatch = line => {
-      const match = String(line || '').match(/^([ \\t]*)([-*+]|\\d+[.)])[ \\t]+(.*)$/);
+      const match = String(line || '').match(/^([ \t]*)([-*+]|\d+[.)])[ \t]+(.*)$/);
       if (!match) return null;
       return {
-        indent:match[1].replace(/\\t/g,'  ').length,
+        indent:match[1].replace(/\t/g,'  ').length,
         marker:match[2],
-        tag:/^\\d/.test(match[2]) ? 'ol' : 'ul',
+        tag:/^\d/.test(match[2]) ? 'ol' : 'ul',
         content:match[3]
       };
     };
