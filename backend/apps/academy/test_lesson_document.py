@@ -173,10 +173,13 @@ class LessonDocumentContractTests(SimpleTestCase):
                 }
             )
 
-    def test_unsupported_document_version_is_rejected(self):
+    def test_unsupported_and_boolean_document_versions_are_rejected(self):
         document = make_lesson_document()
         document["version"] = 99
+        with self.assertRaisesMessage(LessonDocumentError, "Unsupported lesson document version"):
+            validate_lesson_document(document)
 
+        document["version"] = True
         with self.assertRaisesMessage(LessonDocumentError, "Unsupported lesson document version"):
             validate_lesson_document(document)
 
