@@ -60,9 +60,9 @@ jobs:
           )
           for name in pages:
               html = (root / name).read_text(encoding="utf-8")
-              if not re.search(r'<meta\\b(?=[^>]*\\bname=["\']robots["\'])[^>]*content=["\']noindex, nofollow["\']', html, re.I):
+              if not re.search(r'<meta\b(?=[^>]*\bname=["\']robots["\'])[^>]*content=["\']noindex, nofollow["\']', html, re.I):
                   raise SystemExit(f"{name} must remain noindex on staging")
-              if re.search(r'<link\\b(?=[^>]*\\brel=["\']canonical["\'])', html, re.I):
+              if re.search(r'<link\b(?=[^>]*\brel=["\']canonical["\'])', html, re.I):
                   raise SystemExit(f"{name} must not emit a staging canonical")
           robots = (root / "robots.txt").read_text(encoding="utf-8")
           sitemap = (root / "sitemap.xml").read_text(encoding="utf-8")
