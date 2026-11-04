@@ -191,6 +191,22 @@ class TiptapPilotDraftApiTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(CourseBuilderTiptapDraft.objects.count(), 0)
 
+    def test_trade_thesis_blocks_wait_for_their_pilot_extension(self):
+        future_block = {
+            "format": "tradethesis.lesson-document",
+            "version": 1,
+            "document": {
+                "type": "doc",
+                "content": [{"type": "courseFigure", "attrs": {"figureId": "figure-1"}}],
+            },
+        }
+
+        response = self.post_document(document=future_block)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("does not support the 'courseFigure' block yet", response.json()["detail"])
+        self.assertEqual(CourseBuilderTiptapDraft.objects.count(), 0)
+
     def test_executable_links_are_rejected_without_saving(self):
         invalid = {
             "format": "tradethesis.lesson-document",
