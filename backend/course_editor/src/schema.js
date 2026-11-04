@@ -13,6 +13,39 @@ const TableCellPresentation = Extension.create({
   addGlobalAttributes() {
     return [
       {
+        types: ['table'],
+        attributes: {
+          caption: {
+            default: '',
+            parseHTML: element => element.getAttribute('data-tt-caption') || '',
+            renderHTML: attributes => attributes.caption
+              ? { 'data-tt-caption': attributes.caption }
+              : {},
+          },
+          columnWidths: {
+            default: null,
+            parseHTML: element => {
+              try {
+                const value = JSON.parse(element.getAttribute('data-tt-column-widths') || 'null');
+                return Array.isArray(value) ? value : null;
+              } catch {
+                return null;
+              }
+            },
+            renderHTML: attributes => Array.isArray(attributes.columnWidths)
+              ? { 'data-tt-column-widths': JSON.stringify(attributes.columnWidths) }
+              : {},
+          },
+          layout: {
+            default: 'auto',
+            parseHTML: element => element.getAttribute('data-tt-layout') || 'auto',
+            renderHTML: attributes => attributes.layout && attributes.layout !== 'auto'
+              ? { 'data-tt-layout': attributes.layout }
+              : {},
+          },
+        },
+      },
+      {
         types: ['tableCell', 'tableHeader'],
         attributes: {
           align: {
