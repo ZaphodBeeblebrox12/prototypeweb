@@ -67,6 +67,8 @@ The document body supports normal prose nodes and marks (paragraphs, headings, l
 - `ttRegionalBlock`: references the existing regional-block sidecar by block ID.
 - `ttLessonReference`: references a lesson by UUID.
 - `ttProtectedVideo`: references the protected video record by opaque ID.
+- `ttCourseReference`: references a related course card by course UUID, with the coming-soon state retained.
+- `ttLessonTab`: preserves the Idea / Examples / Practice section marker.
 - `ttLegacyReference`: preserves an unconverted legacy token visibly until a specific importer supports it.
 
 Questions, answer keys, notebook prompts, reflection responses, pricing, course metadata and publishing state are not generic document nodes.
