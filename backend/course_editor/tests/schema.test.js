@@ -23,6 +23,11 @@ test('TradeThesis schema accepts common lesson content, merged tables and refere
         ],
       },
       {
+        type: 'codeBlock',
+        attrs: { language: 'python' },
+        content: [{ type: 'text', text: "print('hello')" }],
+      },
+      {
         type: 'orderedList',
         attrs: { start: 3 },
         content: [
@@ -71,7 +76,7 @@ test('TradeThesis schema accepts common lesson content, merged tables and refere
 
   const node = schema.nodeFromJSON(document);
   node.check();
-  assert.equal(node.childCount, 12);
+  assert.equal(node.childCount, 13);
   const mergedCell = node.toJSON().content[3].content[0].content[0];
   assert.equal(mergedCell.attrs.colspan, 2);
   assert.deepEqual(mergedCell.attrs.colwidth, [120, 180]);
