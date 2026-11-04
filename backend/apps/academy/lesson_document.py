@@ -6,8 +6,8 @@ never rendered directly until the learner renderer supports the same version.
 
 from __future__ import annotations
 
-from copy import deepcopy
 import math
+from copy import deepcopy
 from urllib.parse import urlsplit
 
 
@@ -111,7 +111,9 @@ def _validate_json_value(value, *, path: str, depth: int = 0) -> None:
             if not isinstance(key, str) or not key or len(key) > 100:
                 raise LessonDocumentError(f"{path}: attribute keys must be short strings.")
             if key.casefold().startswith("on") or key in {"__proto__", "constructor", "prototype"}:
-                raise LessonDocumentError(f"{path}: executable or reserved attribute is not allowed.")
+                raise LessonDocumentError(
+                    f"{path}: executable or reserved attribute is not allowed."
+                )
             if key.casefold() in {"href", "url"} and isinstance(item, str):
                 _validate_link_target(item, path=f"{path}.{key}")
             if key.casefold() == "src" and isinstance(item, str):
@@ -192,7 +194,12 @@ def _validate_node(node, *, path: str, node_counter: list[int], depth: int) -> N
             raise LessonDocumentError(f"{path}.text: text is too long.")
         if "content" in node:
             raise LessonDocumentError(f"{path}: text nodes cannot contain child nodes.")
-        _validate_marks(node.get("marks"), path=f"{path}.marks", node_counter=node_counter, depth=depth)
+        _validate_marks(
+            node.get("marks"),
+            path=f"{path}.marks",
+            node_counter=node_counter,
+            depth=depth,
+        )
         return
 
     if "text" in node:
