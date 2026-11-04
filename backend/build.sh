@@ -2,6 +2,23 @@
 set -o errexit
 
 pip install -r requirements.txt
+
+# Build the self-hosted Tiptap pilot bundle before Django collects static files.
+# This is a separate staff-only editor; it does not replace the legacy builder.
+if [[ -f tools/course-builder-tiptap/package.json ]]; then
+  command -v node >/dev/null 2>&1 || {
+    echo "Node.js is required to build the Course Builder Tiptap pilot." >&2
+    exit 1
+  }
+  command -v npm >/dev/null 2>&1 || {
+    echo "npm is required to build the Course Builder Tiptap pilot." >&2
+    exit 1
+  }
+  mkdir -p static/academy
+  npm install --prefix tools/course-builder-tiptap --no-audit --no-fund
+  npm run build --prefix tools/course-builder-tiptap
+fi
+
 python manage.py collectstatic --noinput
 python manage.py migrate --noinput
 
