@@ -1828,6 +1828,7 @@ body.builder-dialog-open { overflow:hidden; }
     if (!node) return '';
     if (node.nodeType === 3) return String(node.nodeValue || '').replace(/\u00a0/g, ' ');
     if (node.nodeType !== 1) return '';
+    if (node.hasAttribute('data-table-resize-handle')) return '';
     if (node.hasAttribute('data-editor-token')) {
       const token = node.getAttribute('data-editor-token') || '';
       return node.getAttribute('data-editor-block') === 'true' ? '\n\n' + token + '\n\n' : token;
@@ -1942,6 +1943,166 @@ body.builder-dialog-open { overflow:hidden; }
   function tableLogicalWidth(table) {
     return tableGridLayout(table).width;
   }
+  function normalizeTableColumnWidths(values, width) {
+    if (!Array.isArray(values) || values.length !== width || width < 1) return null;
+    const numeric = values.map(Number);
+    if (numeric.some(value => !Number.isFinite(value) || value <= 0)) return null;
+    const total = numeric.reduce((sum, value) => sum + value, 0);
+    if (!Number.isFinite(total) || total <= 0) return null;
+    const normalized = numeric.map(value => Math.round(value * 1000 / total) / 10);
+    normalized[normalized.length - 1] = Math.round((100 - normalized.slice(0, -1).reduce((sum, value) => sum + value, 0)) * 10) / 10;
+    return normalized;
+  }
+  function tableWidthStatsFromRows(rows) {
+    const normalizedRows = [];
+    let width = 0;
+    (Array.isArray(rows) ? rows : []).forEach(row => {
+      const cells = Array.isArray(row) ? row : (Array.isArray(row?.cells) ? row.cells : []);
+      let rowWidth = 0;
+      const normalizedCells = cells.slice(0, 12).map(rawCell => {
+        const cell = rawCell && typeof rawCell === 'object' ? rawCell : {text:rawCell};
+        const colspan = Math.max(1, Math.min(12, Number(cell.colspan) || 1));
+        rowWidth += colspan;
+        return {text:String(cell.text || ''),colspan};
+      });
+      if (normalizedCells.length) {
+        normalizedRows.push(normalizedCells);
+        width = Math.max(width, Math.min(12, rowWidth));
+      }
+    });
+    const stats = Array.from({length:width}, () => ({characters:0,longestWord:0}));
+    normalizedRows.forEach(row => {
+      let column = 0;
+      row.forEach(cell => {
+        const span = Math.min(cell.colspan, width - column);
+        if (span <= 0) return;
+        const words = cell.text.match(/[^\s]+/g) || [];
+        const perColumnLength = cell.text.length / span;
+        const longestWord = words.reduce((longest, word) => Math.max(longest, word.length), 0);
+        for (let offset=0;offset<span;offset++) {
+          stats[column + offset].characters += perColumnLength;
+          stats[column + offset].longestWord = Math.max(stats[column + offset].longestWord,longestWord);
+        }
+        column += span;
+      });
+    });
+    return {width,stats};
+  }
+  function tableWidthsFromStats(stats) {
+    if (!Array.isArray(stats) || !stats.length) return [];
+    const weights = stats.map(item => 52 + 3 * Math.pow(item.characters || 0, .7) + 1.8 * (item.longestWord || 0));
+    const total = weights.reduce((sum,value) => sum + value, 0) || weights.length;
+    const widths = weights.map(value => Math.round(value * 1000 / total) / 10);
+    widths[widths.length - 1] = Math.round((100 - widths.slice(0, -1).reduce((sum,value) => sum + value, 0)) * 10) / 10;
+    return widths;
+  }
+  function autoTableColumnWidthsFromRows(rows) {
+    return tableWidthsFromStats(tableWidthStatsFromRows(rows).stats);
+  }
+  function autoTableColumnWidths(table) {
+    const layout = tableGridLayout(table);
+    const stats = Array.from({length:layout.width}, () => ({characters:0,longestWord:0}));
+    layout.rows.forEach(info => info.placements.forEach(placement => {
+      const span = Math.min(placement.colspan,layout.width - placement.start);
+      if (span <= 0) return;
+      const value = richInlineMarkdown(placement.cell).replace(/\s+/g,' ').trim();
+      const words = value.match(/[^\s]+/g) || [];
+      const perColumnLength = value.length / span;
+      const longestWord = words.reduce((longest,word) => Math.max(longest,word.length),0);
+      for(let offset=0;offset<span;offset++){
+        stats[placement.start + offset].characters += perColumnLength;
+        stats[placement.start + offset].longestWord = Math.max(stats[placement.start + offset].longestWord,longestWord);
+      }
+    }));
+    return tableWidthsFromStats(stats);
+  }
+  function tableColumnWidthsFromDom(table) {
+    const group = table?.querySelector(':scope > colgroup');
+    const columns = group ? Array.from(group.children).filter(node => node.tagName.toLowerCase()==='col') : [];
+    if (!columns.length) return null;
+    return normalizeTableColumnWidths(columns.map(column => {
+      const raw = String(column.getAttribute('width') || column.style.width || '').trim();
+      return raw.endsWith('%') ? Number.parseFloat(raw) : NaN;
+    }),columns.length);
+  }
+  function columnGroupMarkup(widths) {
+    return '<colgroup>' + widths.map(width => '<col width="' + Number(width).toFixed(1) + '%">').join('') + '</colgroup>';
+  }
+  function applyTableColumnWidths(table, widths, manual) {
+    if (!table || !Array.isArray(widths) || !widths.length) return;
+    const cleanWidths = normalizeTableColumnWidths(widths,widths.length);
+    if (!cleanWidths) return;
+    let group = table.querySelector(':scope > colgroup');
+    if (!group) {
+      group = document.createElement('colgroup');
+      table.insertBefore(group,table.firstChild);
+    }
+    const columns = Array.from(group.children).filter(node => node.tagName.toLowerCase()==='col');
+    if (columns.length !== cleanWidths.length) {
+      group.innerHTML = '';
+      cleanWidths.forEach(() => group.appendChild(document.createElement('col')));
+    }
+    Array.from(group.children).forEach((column,index) => {
+      const width = cleanWidths[index];
+      column.setAttribute('width',width.toFixed(1) + '%');
+      column.style.width = width.toFixed(1) + '%';
+    });
+    table.classList.add('tt-auto-layout');
+    table.dataset.columnCount = String(cleanWidths.length);
+    table.dataset.columnWidths = cleanWidths.join(',');
+    table.dataset.tableLayout = manual ? 'manual' : 'auto';
+    table.style.tableLayout = 'fixed';
+  }
+  function prepareEditorTable(table, rebuildHandles) {
+    if (!table || !table.closest('[data-visual-editor]')) return;
+    const count = tableLogicalWidth(table);
+    if (!count) return;
+    const lesson = currentLesson();
+    const tableId = String(table.dataset.editorStructuredTable || '');
+    const saved = tableId && lesson?.tables?.[tableId] ? lesson.tables[tableId].columnWidths : null;
+    const stored = normalizeTableColumnWidths(saved,count);
+    const existing = table.dataset.tableLayout === 'manual'
+      ? tableColumnWidthsFromDom(table)
+      : null;
+    const manual = Boolean(existing || stored);
+    const widths = existing || stored || autoTableColumnWidths(table);
+    applyTableColumnWidths(table,widths,manual);
+    if (rebuildHandles) table.querySelectorAll('[data-table-resize-handle]').forEach(handle => handle.remove());
+    const layout = tableGridLayout(table);
+    layout.rows.forEach(info => {
+      if (!info.row.closest('thead')) return;
+      info.placements.forEach(placement => {
+        if (placement.colspan !== 1 || placement.end >= count - 1) return;
+        if (placement.cell.querySelector('[data-table-resize-handle]')) return;
+        const handle = document.createElement('button');
+        handle.type = 'button';
+        handle.className = 'tt-table-resize-handle';
+        handle.contentEditable = 'false';
+        handle.dataset.tableResizeHandle = 'true';
+        handle.dataset.tableResizeColumn = String(placement.end);
+        handle.setAttribute('aria-label','Drag to resize the column boundary');
+        handle.title = 'Drag to resize this column';
+        placement.cell.appendChild(handle);
+      });
+    });
+  }
+  function prepareEditorTables(editor) {
+    if (!editor) return;
+    editor.querySelectorAll('table').forEach(table => prepareEditorTable(table,false));
+  }
+  function ensureStructuredTableForResize(table) {
+    const lesson = currentLesson();
+    if (!lesson || !table) return '';
+    if (!lesson.tables || typeof lesson.tables !== 'object') lesson.tables = {};
+    if (!table.dataset.editorStructuredTable) {
+      const id = uid('table');
+      const caption = table.querySelector('caption');
+      table.dataset.editorStructuredTable = id;
+      table.dataset.tableTitle = String(caption?.textContent || 'Lesson table').trim() || 'Lesson table';
+      lesson.tables[id] = {title:table.dataset.tableTitle,rows:[]};
+    }
+    return table.dataset.editorStructuredTable;
+  }
   function tableCellMarkup(tag,text,colspan,rowspan) {
     const col=Number(colspan)>1?' colspan="'+Number(colspan)+'"':'';
     const row=Number(rowspan)>1?' rowspan="'+Number(rowspan)+'"':'';
@@ -1959,7 +2120,12 @@ body.builder-dialog-open { overflow:hidden; }
       (row.section==='head'?heads:bodies).push('<tr>'+cells+'</tr>');
     });
     const title=String(data.title||'From observation to execution');
-    return '<div class="tt-editor-table-scroll"><table class="tt-editor-structured-table" data-editor-structured-table="'+esc(tableId)+'" data-table-title="'+esc(title)+'">'+
+    const count=tableWidthStatsFromRows(data.rows).width;
+    const savedWidths=normalizeTableColumnWidths(data.columnWidths,count);
+    const widths=savedWidths||autoTableColumnWidthsFromRows(data.rows);
+    const layout=savedWidths?'manual':'auto';
+    return '<div class="tt-editor-table-scroll"><table class="tt-editor-structured-table tt-auto-layout" data-column-count="'+count+'" data-table-layout="'+layout+'" data-column-widths="'+esc(widths.join(','))+'" data-editor-structured-table="'+esc(tableId)+'" data-table-title="'+esc(title)+'">'+
+      columnGroupMarkup(widths)+
       '<caption class="tt-structured-table-caption">'+esc(title)+'</caption>'+
       (heads.length?'<thead>'+heads.join('')+'</thead>':'')+(bodies.length?'<tbody>'+bodies.join('')+'</tbody>':'')+'</table></div><p><br></p>';
   }
@@ -1969,9 +2135,12 @@ body.builder-dialog-open { overflow:hidden; }
     const heads=data.rows.filter(row=>row.section==='head').map(renderRow).join('');
     const bodies=data.rows.filter(row=>row.section!=='head').map(renderRow).join('');
     const title=String(data.title||'From observation to execution');
+    const count=tableWidthStatsFromRows(data.rows).width;
+    const savedWidths=normalizeTableColumnWidths(data.columnWidths,count);
+    const widths=savedWidths||autoTableColumnWidthsFromRows(data.rows);
     const caption='<caption class="tt-structured-table-caption">'+esc(title)+'</caption>';
     const attrs=editorMode?' data-editor-structured-table="'+esc(tableId)+'" data-table-title="'+esc(title)+'"':'';
-    return '<div class="lesson-table-wrap tt-structured-table-wrap'+(editorMode?' tt-editor-table-scroll':'')+'" role="region" tabindex="0" aria-label="Scrollable table: '+esc(title)+'"><table class="'+(editorMode?'tt-editor-structured-table':'tt-structured-table')+'"'+attrs+'>'+caption+
+    return '<div class="lesson-table-wrap tt-structured-table-wrap'+(editorMode?' tt-editor-table-scroll':'')+'" role="region" tabindex="0" aria-label="Scrollable table: '+esc(title)+'"><table class="'+(editorMode?'tt-editor-structured-table':'tt-structured-table')+' tt-auto-layout" data-column-count="'+count+'"'+(savedWidths?' data-table-layout="manual"':'')+attrs+'>'+columnGroupMarkup(widths)+caption+
       (heads?'<thead>'+heads+'</thead>':'')+(bodies?'<tbody>'+bodies+'</tbody>':'')+'</table></div>'+(editorMode?'<p><br></p>':'');
   }
   function refreshStructuredTableMetadata(table) {
@@ -1982,7 +2151,7 @@ body.builder-dialog-open { overflow:hidden; }
     const caption=table.querySelector('caption');
     const title=caption?String(caption.textContent||'').trim():'';
     if(title)table.dataset.tableTitle=title;
-    lesson.tables[id]={
+    const savedTable={
       title:table.dataset.tableTitle||lesson.tables[id]?.title||'From observation to execution',
       rows:Array.from(table.querySelectorAll('tr')).map(row=>({
         section:row.closest('thead')?'head':'body',
@@ -1994,6 +2163,11 @@ body.builder-dialog-open { overflow:hidden; }
         }))
       }))
     };
+    if(table.dataset.tableLayout==='manual'){
+      const widths=tableColumnWidthsFromDom(table);
+      if(widths)savedTable.columnWidths=widths;
+    }
+    lesson.tables[id]=savedTable;
   }
   function selectedEditorTable(editor) {
     const saved=richEditorRange;const range=saved?.editor===editor?saved.range:null;
@@ -2023,13 +2197,26 @@ body.builder-dialog-open { overflow:hidden; }
     const id=uid('table');
     lesson.tables[id]={title:title.trim()||'From observation to execution',rows};
     restoreRichEditorSelection(editor);document.execCommand('insertHTML',false,structuredTableEditorMarkup(id));
+    prepareEditorTables(editor);
     syncVisualEditorToModel(editor);captureRichEditorRange();
-    toast('Option 5 grouped table inserted. Edit the caption, grouped heading, leaf labels and data cells directly; row and column controls preserve merged headers.');
+    toast('Grouped table inserted. Drag a header grip to resize columns; use Auto-fit to restore automatic widths.');
   }
   async function editSelectedTable(action,editor) {
     restoreRichEditorSelection(editor);
     const table=selectedEditorTable(editor);
     if(!table){toast('Place the cursor inside a table first.');return;}
+    if(action==='auto-fit'){
+      const id=String(table.dataset.editorStructuredTable||'');
+      if(id&&lesson?.tables?.[id])delete lesson.tables[id].columnWidths;
+      table.dataset.tableLayout='auto';
+      delete table.dataset.columnWidths;
+      applyTableColumnWidths(table,autoTableColumnWidths(table),false);
+      prepareEditorTable(table,true);
+      if(table.dataset.editorStructuredTable)refreshStructuredTableMetadata(table);
+      syncVisualEditorToModel(editor);captureRichEditorRange();
+      toast('Automatic column widths restored.');
+      return;
+    }
     if(action==='group-headers'){
       if(table.querySelector('thead th[colspan]')){toast('This table already has grouped header cells. Edit the group labels directly.');return;}
       const width=tableLogicalWidth(table);if(width<2){toast('Add at least two columns before grouping headers.');return;}
@@ -2071,6 +2258,7 @@ body.builder-dialog-open { overflow:hidden; }
       if(!row||!row.closest('tbody')){toast('Place the cursor inside a body row to remove that row.');return;}
       if(row.parentElement.querySelectorAll('tr').length<=1){toast('Keep at least one data row in the table.');return;}row.remove();
     }
+    prepareEditorTable(table,true);
     refreshStructuredTableMetadata(table);syncVisualEditorToModel(editor);captureRichEditorRange();
   }
   function richTableMarkup(rows, columns) {
@@ -2078,7 +2266,7 @@ body.builder-dialog-open { overflow:hidden; }
     const bodyRows = Array.from({length: Math.max(0, rows - 1)}, () =>
       '<tr>' + Array.from({length: columns}, () => '<td><br></td>').join('') + '</tr>'
     ).join('');
-    return '<table><thead><tr>' + headings + '</tr></thead><tbody>' + bodyRows + '</tbody></table><p><br></p>';
+    return '<div class="tt-editor-table-scroll lesson-table-wrap" role="region" tabindex="0" aria-label="Scrollable lesson table"><table><thead><tr>' + headings + '</tr></thead><tbody>' + bodyRows + '</tbody></table></div><p><br></p>';
   }
   function richFormatPickerMarkup() {
     const choices = [
@@ -2110,7 +2298,7 @@ body.builder-dialog-open { overflow:hidden; }
       richFormatPickerMarkup() +
       '<button type="button" data-rich-command="bold" aria-label="Bold" title="Bold (Ctrl/Cmd+B)" aria-keyshortcuts="Control+B Meta+B"><strong>B</strong></button><button type="button" data-rich-command="italic" aria-label="Italic" title="Italic (Ctrl/Cmd+I)" aria-keyshortcuts="Control+I Meta+I"><em>I</em></button><button type="button" data-rich-command="underline" aria-label="Underline" title="Underline (Ctrl/Cmd+U)" aria-keyshortcuts="Control+U Meta+U"><u>U</u></button><button type="button" data-rich-command="strikeThrough" aria-label="Strikethrough"><s>S</s></button>' +
       '<button type="button" data-rich-command="insertUnorderedList" aria-label="Bulleted list">• List</button><button type="button" data-rich-command="insertOrderedList" aria-label="Numbered list">1. List</button>' +
-      '<button type="button" data-rich-command="link" aria-label="Insert link">Link</button><button type="button" data-rich-command="blockquote" aria-label="Insert pull quote">Quote</button><button type="button" data-rich-command="insertHorizontalRule" aria-label="Insert divider">Divider</button><button type="button" data-rich-command="table" aria-label="Insert table">Table</button><button type="button" data-rich-command="grouped-table" aria-label="Insert grouped-header table">Grouped table</button><button type="button" data-rich-table-action="add-column" aria-label="Add a column to the selected table">Column +</button><button type="button" data-rich-table-action="add-row" aria-label="Add a row to the selected table">Row +</button><button type="button" data-rich-table-action="remove-column" aria-label="Remove the last column from the selected table">Column −</button><button type="button" data-rich-table-action="remove-row" aria-label="Remove the selected body row from the table">Row −</button><button type="button" data-rich-table-action="group-headers" aria-label="Add grouped headers to the selected table">Group headers</button><button type="button" data-rich-command="undo" aria-label="Undo">Undo</button><button type="button" data-rich-command="redo" aria-label="Redo">Redo</button></div>' +
+      '<button type="button" data-rich-command="link" aria-label="Insert link">Link</button><button type="button" data-rich-command="blockquote" aria-label="Insert pull quote">Quote</button><button type="button" data-rich-command="insertHorizontalRule" aria-label="Insert divider">Divider</button><button type="button" data-rich-command="table" aria-label="Insert table">Table</button><button type="button" data-rich-command="grouped-table" aria-label="Insert grouped-header table">Grouped table</button><button type="button" data-rich-table-action="auto-fit" aria-label="Restore automatic column widths">Auto-fit</button><button type="button" data-rich-table-action="add-column" aria-label="Add a column to the selected table">Column +</button><button type="button" data-rich-table-action="add-row" aria-label="Add a row to the selected table">Row +</button><button type="button" data-rich-table-action="remove-column" aria-label="Remove the last column from the selected table">Column −</button><button type="button" data-rich-table-action="remove-row" aria-label="Remove the selected body row from the table">Row −</button><button type="button" data-rich-table-action="group-headers" aria-label="Add grouped headers to the selected table">Group headers</button><button type="button" data-rich-command="undo" aria-label="Undo">Undo</button><button type="button" data-rich-command="redo" aria-label="Redo">Redo</button></div>' +
       '<div class="rich-editor-canvas' + minClass + '" contenteditable="true" spellcheck="true" role="textbox" aria-multiline="true" aria-label="' + (kind === 'main' ? 'Lesson body rich text editor' : 'Lesson body rich text editor for selected audience') + '" data-visual-editor="true" data-visual-kind="' + esc(kind) + '" data-audience="' + esc(audience) + '" data-lesson-id="' + esc(String(options.lessonId || '')) + '" data-field="' + field + '" data-placeholder="Start writing your lesson…">' +
       markdownToVisualEditor(value) + '</div></div>';
   }
@@ -3193,7 +3381,7 @@ body.builder-dialog-open { overflow:hidden; }
   lessonFields = function(l) {
     migrateLegacyNotebookPrompts(l);
     const html = baseLessonFields(l);
-    return !l ? html : html + '<section class="markdown-guide"><h4>Visual editor tips</h4><p>Select text and use the toolbar to format it. Use Figures for charts and the country/region audience selector above for full-lesson variations. Use companion-course controls for related course cards. The learner preview shows the Learning Room layout.</p></section>';
+    return !l ? html : html + '<section class="markdown-guide"><h4>Visual editor tips</h4><p>Select text and use the toolbar to format it. Drag a narrow grip between table headings to resize a column, or choose Auto-fit to restore balanced widths. Use Figures for charts and the country/region audience selector above for full-lesson variations. Use companion-course controls for related course cards. The learner preview shows the Learning Room layout.</p></section>';
   };
   renderMarkdown = function(src) {
     const inline = value => esc(String(value ?? ''))
@@ -4560,7 +4748,7 @@ body.builder-dialog-open { overflow:hidden; }
   });
   document.addEventListener('mousedown', event => {
     // Preserve the content selection while clicking formatting controls.
-    if (event.target.closest?.('[data-rich-command], [data-rich-table-action], [data-rich-format-toggle], [data-rich-format-option]')) event.preventDefault();
+    if (event.target.closest?.('[data-rich-command], [data-rich-table-action], [data-rich-format-toggle], [data-rich-format-option], [data-table-resize-handle]')) event.preventDefault();
   });
   document.addEventListener('click', async event => {
     const button = event.target.closest?.('[data-rich-command]');
@@ -4581,6 +4769,7 @@ body.builder-dialog-open { overflow:hidden; }
       const rows = await promptTableDimension('Number of rows', 3, 30);
       if (rows === null || rows === false) return;
       document.execCommand('insertHTML', false, richTableMarkup(rows, columns));
+      prepareEditorTables(editor);
     } else if (command === 'link') {
       const selection = window.getSelection();
       const selectedText = selection && selection.toString();
@@ -4610,6 +4799,67 @@ body.builder-dialog-open { overflow:hidden; }
     const editor = button.closest('[data-rich-editor-wrapper]')?.querySelector('[data-visual-editor]');
     if (editor) await editSelectedTable(button.dataset.richTableAction, editor);
   });
+  document.addEventListener('focusin', event => {
+    const editor = event.target.closest?.('[data-visual-editor]');
+    if (editor) prepareEditorTables(editor);
+  });
+  document.addEventListener('input', event => {
+    const editor = event.target.closest?.('[data-visual-editor]');
+    const table = event.target.closest?.('table');
+    if (editor && table) prepareEditorTable(table,false);
+  });
+  let activeTableColumnResize = null;
+  document.addEventListener('pointerdown', event => {
+    const handle = event.target.closest?.('[data-table-resize-handle]');
+    if (!handle) return;
+    const table = handle.closest('table');
+    const editor = table?.closest('[data-visual-editor]');
+    const columnIndex = Number(handle.dataset.tableResizeColumn);
+    if (!table || !editor || !Number.isInteger(columnIndex)) return;
+    prepareEditorTable(table,false);
+    const group = table.querySelector(':scope > colgroup');
+    const columns = group ? Array.from(group.children) : [];
+    if (columnIndex < 0 || columnIndex >= columns.length - 1) return;
+    const tableWidth = table.getBoundingClientRect().width || table.clientWidth;
+    const widths = columns.map(column => {
+      const raw = Number.parseFloat(window.getComputedStyle(column).width);
+      return Number.isFinite(raw) && raw > 0 ? raw : tableWidth / columns.length;
+    });
+    const pairWidth = widths[columnIndex] + widths[columnIndex + 1];
+    activeTableColumnResize = {table,editor,columnIndex,tableWidth,widths,pairWidth,startX:event.clientX};
+    table.classList.add('tt-table-resizing');
+    event.preventDefault();
+    event.stopPropagation();
+  });
+  document.addEventListener('pointermove', event => {
+    const active = activeTableColumnResize;
+    if (!active) return;
+    const minimum = Math.max(80,active.tableWidth * .05);
+    const delta = event.clientX - active.startX;
+    const left = Math.max(minimum,Math.min(active.pairWidth - minimum,active.widths[active.columnIndex] + delta));
+    const nextWidths = active.widths.slice();
+    nextWidths[active.columnIndex] = left;
+    nextWidths[active.columnIndex + 1] = active.pairWidth - left;
+    applyTableColumnWidths(active.table,nextWidths.map(value => value * 100 / active.tableWidth),true);
+    event.preventDefault();
+  });
+  function finishTableColumnResize() {
+    const active = activeTableColumnResize;
+    if (!active) return;
+    activeTableColumnResize = null;
+    active.table.classList.remove('tt-table-resizing');
+    const widths = tableColumnWidthsFromDom(active.table);
+    if (widths) {
+      ensureStructuredTableForResize(active.table);
+      applyTableColumnWidths(active.table,widths,true);
+      refreshStructuredTableMetadata(active.table);
+      syncVisualEditorToModel(active.editor);
+      updateLessonOutlineFromEditor(active.editor);
+      captureRichEditorRange();
+    }
+  }
+  document.addEventListener('pointerup', finishTableColumnResize);
+  document.addEventListener('pointercancel', finishTableColumnResize);
   function closeRichFormatPickers(exceptPicker) {
     document.querySelectorAll('[data-rich-format-picker]').forEach(picker => {
       if (picker === exceptPicker) return;
