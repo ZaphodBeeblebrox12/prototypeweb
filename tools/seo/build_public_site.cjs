@@ -130,7 +130,7 @@ function readCoursePageDescriptions(siteDir) {
     const page = PUBLIC_PAGES.find(candidate => candidate.route === course.route);
     if (!page) throw new Error('Course schema route is not in PUBLIC_PAGES: ' + course.route);
     const source = fs.readFileSync(path.join(siteDir, page.file), 'utf8');
-    const match = source.match(/<head\\b[^>]*>[\\s\\S]*?<\\/head>/i);
+    const match = source.match(/<head\b[^>]*>[\s\S]*?<\/head>/i);
     if (!match) throw new Error('Missing HTML head in course page ' + page.file);
     const description = getMetaContent(match[0], 'description');
     if (!description) throw new Error('Missing meta description for course schema page ' + page.file);
@@ -167,6 +167,18 @@ function structuredData(page, pageUrl, title, description, baseUrl, courseDescri
       about: (page.topics || []).map(name => ({ '@type': 'Thing', name }))
     }
   ];
+
+  if (Array.isArray(page.breadcrumbs) && page.breadcrumbs.length) {
+    graph.push({
+      '@type': 'BreadcrumbList',
+      itemListElement: page.breadcrumbs.map((crumb, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: crumb.name,
+        item: baseUrl + crumb.route
+      }))
+    });
+  }
 
   const course = COURSE_OFFERS.find(item => item.route === page.route);
   if (course) {
