@@ -19,13 +19,13 @@ function clean(directory) {
 }
 function jsonLd(directory, file) {
   const html = read(directory, file);
-  const match = html.match(/<script\\b(?=[^>]*\\bid=["']tt-seo-jsonld["'])[^>]*>([\\s\\S]*?)<\\/script>/i);
+  const match = html.match(/<script\b(?=[^>]*\bid=["']tt-seo-jsonld["'])[^>]*>([\s\S]*?)<\/script>/i);
   assert.ok(match, file + ' must include generated JSON-LD.');
   return JSON.parse(match[1]);
 }
 function metaDescription(html) {
-  const tag = (html.match(/<meta\\b[^>]*\\bname=["']description["'][^>]*>/i) || [])[0] || '';
-  const match = tag.match(/\\bcontent\\s*=\\s*(["'])([\\s\\S]*?)\\1/i);
+  const tag = (html.match(/<meta\b[^>]*\bname=["']description["'][^>]*>/i) || [])[0] || '';
+  const match = tag.match(/\bcontent\s*=\s*(["'])([\s\S]*?)\\1/i);
   return match ? match[2].trim() : '';
 }
 
@@ -86,17 +86,17 @@ try {
   const catalogueSchema = jsonLd(production, 'courses.html');
   const catalogueList = catalogueSchema['@graph'].find(item => item['@type'] === 'ItemList');
   assert.ok(catalogueList, 'The catalogue must describe its three primary learning offers.');
-  assert.equal(catalogueList.itemListElement.length, COURSE_OFFERS.length);
-  for (const offer of COURSE_OFFERS) {
-    const page = PUBLIC_PAGES.find(item => item.route === offer.route);
+  assert.equal(catalogueList.itemListElement.length, 3);
+  for (const route of ['/trading-path.html', '/construct.html', '/live-class.html']) {
+    const page = PUBLIC_PAGES.find(item => item.route === route);
     const pageHtml = read(production, page.file);
-    const listed = catalogueList.itemListElement.find(item => item.item.url === 'https://tradethesis.example' + offer.route);
-    assert.ok(listed, offer.route + ' must appear in the catalogue ItemList.');
+    const listed = catalogueList.itemListElement.find(item => item.item.url === 'https://tradethesis.example' + route);
+    assert.ok(listed, route + ' must appear in the catalogue ItemList.');
     assert.equal(listed.item.description, metaDescription(pageHtml),
-      offer.route + ' schema description must stay synchronized with visible page metadata.');
+      route + ' schema description must stay synchronized with visible page metadata.');
     const pageSchema = jsonLd(production, page.file);
     const courseSchema = pageSchema['@graph'].find(item => item['@type'] === 'Course');
-    assert.ok(courseSchema, offer.route + ' must retain its Course structured data.');
+    assert.ok(courseSchema, route + ' must retain its Course structured data.');
     assert.equal(courseSchema.description, metaDescription(pageHtml));
   }
 
@@ -122,10 +122,10 @@ try {
   }
 
   const tradingPath = read(production, 'trading-path.html');
-  assert.doesNotMatch(tradingPath, /<a href="construct\\.html">CONSTRUCT<\\/a>/,
+  assert.doesNotMatch(tradingPath, /<a href="construct\\.html">CONSTRUCT<\/a>/,
     'The Trading Path must not show CONSTRUCT as a parent breadcrumb.');
   const construct = read(production, 'construct.html');
-  assert.match(construct, /<a href="trading-path\\.html">Trading Path<\\/a>/,
+  assert.match(construct, /<a href="trading-path\\.html">Trading Path<\/a>/,
     'CONSTRUCT must link to its stated preceding learning path in the breadcrumb.');
 } finally {
   clean(production);
