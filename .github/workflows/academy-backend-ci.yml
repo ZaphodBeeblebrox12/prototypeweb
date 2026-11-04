@@ -65,6 +65,10 @@ jobs:
         continue-on-error: true
         run: black --check apps/academy/ tests/academy/
 
+      - name: Show formatting diff for new Tiptap pilot view
+        if: always()
+        run: black --diff apps/academy/tiptap_pilot.py || true
+
       - name: Run type checking with mypy
         run: mypy apps/academy/ --follow-imports=silent
 
