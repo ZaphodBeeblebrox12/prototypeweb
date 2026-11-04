@@ -4,6 +4,7 @@ from copy import deepcopy
 
 from django.test import SimpleTestCase
 
+from apps.academy.course_builder_api import _build_import_payload
 from apps.academy.lesson_document import (
     LESSON_DOCUMENT_FORMAT,
     LESSON_DOCUMENT_VERSION,
@@ -196,3 +197,69 @@ class LessonDocumentContractTests(SimpleTestCase):
     def test_legacy_lesson_without_document_remains_valid(self):
         self.assertIsNone(lesson_document_from_content_json({"schema_version": 1}))
         self.assertIsNone(lesson_document_from_content_json(None))
+
+class LessonDocumentImportPayloadTests(SimpleTestCase):
+    def test_builder_import_payload_carries_document_beside_markdown(self):
+        document = make_lesson_document(
+            {
+                "type": "doc",
+                "content": [
+                    {
+                        "type": "paragraph",
+                        "content": [{"type": "text", "text": "Structured body"}],
+                    }
+                ],
+            }
+        )
+        state = {
+            "title": "Structured Editor Pilot",
+            "accessType": "free",
+            "modules": [
+                {
+                    "title": "Foundations",
+                    "lessons": [
+                        {
+                            "id": "lesson-1",
+                            "title": "Read the evidence",
+                            "content": "# Existing Markdown mirror",
+                            "document": document,
+                        }
+                    ],
+                }
+            ],
+        }
+
+        payload, _image_sources = _build_import_payload(
+            state,
+            "structured-editor-pilot",
+        )
+        saved_lesson = payload["modules"][0]["lessons"][0]
+
+        self.assertEqual(saved_lesson["content_markdown"], "# Existing Markdown mirror")
+        self.assertEqual(saved_lesson["content_json"]["lesson_document"], document)
+        self.assertEqual(payload["builder_state"]["modules"][0]["lessons"][0]["document"], document)
+
+    def test_legacy_builder_payload_remains_markdown_only(self):
+        state = {
+            "title": "Legacy Markdown Course",
+            "accessType": "free",
+            "modules": [
+                {
+                    "title": "Foundations",
+                    "lessons": [
+                        {
+                            "id": "lesson-1",
+                            "title": "Read the evidence",
+                            "content": "# Legacy lesson body",
+                        }
+                    ],
+                }
+            ],
+        }
+
+        payload, _image_sources = _build_import_payload(state, "legacy-markdown-course")
+        saved_lesson = payload["modules"][0]["lessons"][0]
+
+        self.assertEqual(saved_lesson["content_markdown"], "# Legacy lesson body")
+        self.assertNotIn("lesson_document", saved_lesson["content_json"])
+
