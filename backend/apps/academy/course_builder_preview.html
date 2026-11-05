@@ -1320,6 +1320,14 @@ body.builder-dialog-open { overflow:hidden; }
     }
     return getSeed();
   }
+  const requestedOpenCourseSlug = String(
+    new URLSearchParams(window.location.search).get('open_course') || ''
+  ).trim().toLowerCase();
+  function clearOpenCourseQuery() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('open_course');
+    window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+  }
   const tradingPathImportRequested = new URLSearchParams(window.location.search).get('import') === 'trading-path';
   let requestedTradingPathDraft = null;
   if (tradingPathImportRequested) {
@@ -5659,7 +5667,9 @@ body.builder-dialog-open { overflow:hidden; }
       let autoImportedTradingPath = false;
       const tradingPathCandidate = result.trading_path_import_candidate;
       const candidateCourse = tradingPathCandidate && tradingPathCandidate.course;
-      if (!supportResistanceImportRequested && candidateCourse && typeof candidateCourse === 'object' &&
+      if ((!requestedOpenCourseSlug ||
+           requestedOpenCourseSlug === String(candidateCourse?.slug || '').toLowerCase()) &&
+          !supportResistanceImportRequested && candidateCourse && typeof candidateCourse === 'object' &&
           !remoteDrafts.some(remote => String(remote.slug || '') === String(candidateCourse.slug || ''))) {
         let importedCourse = state.courses.find(local =>
           String(local.slug || '') === String(candidateCourse.slug || '')
@@ -5681,7 +5691,9 @@ body.builder-dialog-open { overflow:hidden; }
       let autoImportedBollingerBands = false;
       const bollingerBandsCandidate = result.bollinger_bands_import_candidate;
       const candidateBollingerCourse = bollingerBandsCandidate && bollingerBandsCandidate.course;
-      if (!tradingPathImportRequested && !supportResistanceImportRequested && !candidateCourse &&
+      if ((!requestedOpenCourseSlug ||
+           requestedOpenCourseSlug === String(candidateBollingerCourse?.slug || '').toLowerCase()) &&
+          !tradingPathImportRequested && !supportResistanceImportRequested && !candidateCourse &&
           candidateBollingerCourse && typeof candidateBollingerCourse === 'object' &&
           !remoteDrafts.some(remote => String(remote.slug || '') === String(candidateBollingerCourse.slug || ''))) {
         let importedCourse = state.courses.find(local =>
@@ -5724,6 +5736,66 @@ body.builder-dialog-open { overflow:hidden; }
         state.supportResistanceOutlineAutoOpened = true;
         stateChanged = true;
       }
+      let requestedOpenCourseNeedsSave = false;
+      let requestedOpenCourseFound = false;
+      if (requestedOpenCourseSlug) {
+        const savedDraft = remoteDrafts.find(
+          remote => String(remote.slug || '').toLowerCase() === requestedOpenCourseSlug
+        );
+        let requestedCourse = savedDraft
+          ? state.courses.find(course =>
+              String(course.serverDraftId || '') === String(savedDraft.serverDraftId || '')
+            ) || state.courses.find(course =>
+              String(course.slug || '').toLowerCase() === requestedOpenCourseSlug
+            )
+          : null;
+
+        if (!requestedCourse) {
+          const publishedOption = (result.published_course_options || []).find(
+            course => String(course.slug || '').toLowerCase() === requestedOpenCourseSlug
+          );
+          if (publishedOption) {
+            const opened = await academyRequest('POST', {
+              action: 'begin_edit_published_course',
+              courseId: publishedOption.id
+            });
+            const rawCourse = opened.draft || opened.course;
+            if (!rawCourse) {
+              throw new Error('The Academy did not return the requested course.');
+            }
+            requestedCourse = normalizeCourseState(rawCourse);
+            const existingIndex = state.courses.findIndex(course =>
+              (requestedCourse.serverDraftId &&
+                String(course.serverDraftId || '') === String(requestedCourse.serverDraftId)) ||
+              (requestedCourse.serverCourseId &&
+                String(course.serverCourseId || '') === String(requestedCourse.serverCourseId)) ||
+              String(course.slug || '').toLowerCase() === requestedOpenCourseSlug
+            );
+            if (existingIndex >= 0) state.courses[existingIndex] = requestedCourse;
+            else state.courses.unshift(requestedCourse);
+            stateChanged = true;
+            requestedOpenCourseNeedsSave = !requestedCourse.serverDraftId;
+          }
+        }
+
+        if (!requestedCourse) {
+          requestedCourse = state.courses.find(
+            course => String(course.slug || '').toLowerCase() === requestedOpenCourseSlug
+          ) || null;
+        }
+        if (requestedCourse) {
+          state.selectedCourseId = requestedCourse.id;
+          state.selectedModuleId = requestedCourse.modules?.[0]?.id || null;
+          state.selectedLessonId = requestedCourse.modules?.[0]?.lessons?.[0]?.id || null;
+          state.view = 'editor';
+          state.tab = 'overview';
+          stateChanged = true;
+          requestedOpenCourseFound = true;
+        } else {
+          toast('That course was not found in the saved Builder drafts or published Academy catalogue.');
+        }
+      }
+
       academyReady = true;
       if (editRevision === revisionAtStart) hasUnsavedChanges = false;
       if (stateChanged) {
@@ -5821,6 +5893,23 @@ body.builder-dialog-open { overflow:hidden; }
               toast('Support & Resistance is loaded in the Builder, but saving to the shared Academy failed: ' + String(saveError?.message || saveError));
             }
           }
+        }
+      }
+      if (requestedOpenCourseSlug && requestedOpenCourseFound) {
+        if (requestedOpenCourseNeedsSave) {
+          clearTimeout(academySaveTimer);
+          try {
+            await saveCurrentToAcademy(false, false);
+            clearOpenCourseQuery();
+            renderSidebar();
+            renderHeaderState();
+            toast('Opened the selected published course as a review draft. The live course is unchanged.');
+          } catch (saveError) {
+            toast('The course is open, but its review draft could not be saved: ' + String(saveError?.message || saveError));
+          }
+        } else {
+          clearOpenCourseQuery();
+          toast('Opened the selected course.');
         }
       }
     } catch (error) {
