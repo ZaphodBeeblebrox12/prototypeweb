@@ -69,7 +69,10 @@ function firstObject(...values) {
  */
 export function buildTradeThesisSidecarReferences(lessonValue = {}) {
   const lesson = asObject(lessonValue);
-  const contentJson = firstObject(lesson.contentJson, lesson.content_json);
+  const builderContentJson = asObject(lesson.contentJson);
+  const contentJson = Object.keys(builderContentJson).length
+    ? builderContentJson
+    : asObject(lesson.content_json);
   const lessonId = safeId(lesson.id || lesson.lessonId || lesson.lesson_id);
   const markdown = String(
     lesson.content ?? lesson.content_markdown ?? lesson.markdown ?? "",
@@ -249,9 +252,10 @@ export function buildTradeThesisSidecarReferences(lessonValue = {}) {
   // Whole-lesson regional alternatives are stored separately from inline blocks.
   // Keep each complete Markdown body outside the learner document and reference it
   // by its validated country/region key.
-  const regionalLessonSource = lesson.regionalContent
-    ?? contentJson.regional_lesson_content
-    ?? contentJson.regionalLessonContent;
+  const builderRegionalLessonContent = asObject(lesson.regionalContent);
+  const regionalLessonSource = Object.keys(builderRegionalLessonContent).length
+    ? builderRegionalLessonContent
+    : (contentJson.regional_lesson_content ?? contentJson.regionalLessonContent);
   const regionalLessonContent = {};
   for (const [rawKey, rawContent] of mapEntries(regionalLessonSource)) {
     if (typeof rawContent !== "string") continue;
@@ -328,7 +332,10 @@ export function buildTradeThesisSidecarReferences(lessonValue = {}) {
     chartNotes: reflectionChartNotes,
   } : null;
 
-  const rawVideo = firstObject(lesson.protectedVideo, lesson.protected_video);
+  const builderVideo = asObject(lesson.protectedVideo);
+  const rawVideo = Object.keys(builderVideo).length
+    ? builderVideo
+    : asObject(lesson.protected_video);
   const videoId = safeId(rawVideo.id || rawVideo.videoId || rawVideo.video_id);
   const protectedVideo = videoId ? {
     id: videoId,
@@ -368,6 +375,11 @@ export function buildTradeThesisSidecarReferences(lessonValue = {}) {
     ASSET_REF,
     match => UUID.test(match[1]) ? match[1].toLowerCase() : "",
   );
+  // A Markdown asset token is itself a stable reference even when older content
+  // predates the separate asset_ids sidecar list.
+  for (const id of referencedAssetIds) {
+    if (!assets[id]) assets[id] = { id, title: "", alt: "", caption: "" };
+  }
   const referencedFigureIds = collectMatches(markdown, FIGURE_REF, match => safeId(match[1]));
   const referencedImageGroupIds = collectMatches(markdown, IMAGE_GROUP_REF, match => safeId(match[1]));
   const referencedRegionalBlockIds = collectMatches(markdown, REGIONAL_REF, match => safeId(match[1]));
