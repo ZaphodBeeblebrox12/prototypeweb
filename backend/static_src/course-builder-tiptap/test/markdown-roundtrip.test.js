@@ -6,7 +6,7 @@ import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { TableKit } from "@tiptap/extension-table";
 import { Markdown } from "@tiptap/markdown";
-import { TradeThesisExtensions, prepareTradeThesisMarkdown } from "../src/tradethesis-nodes.js";
+import { TradeThesisExtensions } from "../src/tradethesis-nodes.js";
 
 function createEditor(content, contentType = "markdown") {
   const dom = new JSDOM("<!doctype html><html><body><div id='editor'></div></body></html>", {
@@ -41,7 +41,7 @@ function createEditor(content, contentType = "markdown") {
 
   const editor = new Editor(options);
   if (content && contentType === "markdown") {
-    editor.commands.setContent(prepareTradeThesisMarkdown(content), { contentType: "markdown" });
+    editor.commands.setContent(content, { contentType: "markdown" });
   } else if (content && contentType === "json") {
     editor.commands.setContent(content);
   }
