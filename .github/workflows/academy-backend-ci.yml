@@ -93,8 +93,8 @@ jobs:
       - name: Run TradeThesis marker round-trip tests
         run: npm run test:markdown-references
 
-      - name: Run asset-backed image round-trip test
-        run: npm run test:markdown-image
+      - name: Run asset-backed image extension contract test
+        run: npm run test:image-extension
 
       - name: Run JSON-only lesson sidecar block round-trip test
         run: npm run test:markdown-sidecar-blocks
