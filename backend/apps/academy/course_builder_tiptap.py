@@ -72,7 +72,7 @@ def _payload_lesson(payload, lesson_id):
     return None
 
 
-def _document_reference_errors(document, lesson_state, lesson_payload, lesson_id):
+def _document_reference_errors(document, lesson_state, lesson_payload, lesson_id, record=None):
     """Reject document references that the existing Academy renderer cannot resolve."""
     content_json = (
         lesson_payload.get("content_json")
@@ -258,7 +258,23 @@ def _document_reference_errors(document, lesson_state, lesson_payload, lesson_id
                 reason = "practice question is not part of this saved lesson"
         elif node_type == "videoBlock":
             reference = str(attrs.get("videoId") or "")
-            if not reference or reference != video_id:
+            staged_video_exists = bool(
+                record
+                and record.videos.filter(
+                    pk=reference,
+                    lesson_id=str(lesson_id),
+                ).exclude(source_file="").exists()
+            )
+            live_video_exists = bool(
+                record
+                and record.target_course_id
+                and ProtectedLessonVideo.objects.filter(
+                    pk=reference,
+                    lesson_id=str(lesson_id),
+                    lesson__module__course_id=record.target_course_id,
+                ).exclude(source_file="").exists()
+            )
+            if not (staged_video_exists or live_video_exists or (reference and reference == video_id)):
                 reason = "protected-video reference is not part of this saved lesson"
         elif node_type == "notebookBlock":
             reference = str(attrs.get("notebookId") or "")
@@ -553,6 +569,7 @@ def course_builder_tiptap_api(request, draft_id=None, lesson_id=None):
             state_lesson,
             import_lesson,
             lesson_id,
+            record=record,
         )
         if reference_errors:
             return JsonResponse(
