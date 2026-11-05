@@ -22,8 +22,9 @@ from django.utils.cache import add_never_cache_headers
 from django.views.decorators.http import require_GET, require_http_methods
 
 from .content_rendering import validate_markdown_source
+from .course_card_utils import is_course_card_recommendable
 from .lesson_document import LessonDocumentError, validate_lesson_document
-from .models import CourseImport
+from .models import Course, CourseImport, Lesson
 from .permissions import is_course_content_admin
 
 
@@ -179,6 +180,65 @@ def _document_reference_errors(document, lesson_state, lesson_payload, lesson_id
             reference = str(attrs.get("variantKey") or "")
             if reference not in regional_content:
                 reason = "whole-lesson regional variant is not part of this saved lesson"
+        elif node_type == "courseCard":
+            reference = str(attrs.get("courseId") or "")
+            if attrs.get("comingSoon"):
+                try:
+                    teaser_id = uuid.UUID(reference)
+                except (TypeError, ValueError, AttributeError):
+                    teaser_id = None
+                teaser = (
+                    CourseImport.objects.filter(
+                        pk=teaser_id,
+                        status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REVIEW],
+                    ).first()
+                    if teaser_id
+                    else None
+                )
+                teaser_state = (
+                    teaser.payload.get("builder_state")
+                    if teaser and isinstance(teaser.payload, dict)
+                    else None
+                )
+                if not isinstance(teaser_state, dict) or not teaser_state.get("comingSoon"):
+                    reason = "coming-soon course-card reference is not an active teaser"
+            else:
+                try:
+                    course_id = uuid.UUID(reference)
+                except (TypeError, ValueError, AttributeError):
+                    course_id = None
+                course = (
+                    Course.objects.filter(
+                        pk=course_id,
+                        status=Course.Status.PUBLISHED,
+                    ).first()
+                    if course_id
+                    else None
+                )
+                if course is None or not is_course_card_recommendable(
+                    course.title,
+                    course.summary,
+                    course.description,
+                ):
+                    reason = "course-card reference is not a recommendable published course"
+        elif node_type == "lessonReference":
+            reference = str(attrs.get("lessonId") or "")
+            try:
+                lesson_reference_id = uuid.UUID(reference)
+            except (TypeError, ValueError, AttributeError):
+                lesson_reference_id = None
+            available_lesson = (
+                Lesson.objects.filter(
+                    pk=lesson_reference_id,
+                    is_published=True,
+                    module__is_published=True,
+                    module__course__status=Course.Status.PUBLISHED,
+                ).exists()
+                if lesson_reference_id
+                else False
+            )
+            if not available_lesson:
+                reason = "lesson reference is not a published Academy lesson"
         elif node_type == "practiceQuestion":
             reference = str(attrs.get("questionId") or "")
             if reference not in question_ids:
