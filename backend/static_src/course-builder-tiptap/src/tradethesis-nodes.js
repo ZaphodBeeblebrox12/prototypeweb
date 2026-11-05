@@ -70,12 +70,18 @@ function createReferenceNode({ name, label, attributes, identifier, serialize, g
       if (typeof node.attrs.rawToken === "string" && node.attrs.rawToken) {
         return node.attrs.rawToken;
       }
-      const output = serialize ? serialize(node.attrs) : "";
-      if (typeof output !== "string" || !output) {
+      if (typeof serialize !== "function") {
         throw new Error(
           "TradeThesis " + name + " content has no lossless Markdown representation yet.",
         );
       }
+      const output = serialize(node.attrs);
+      if (typeof output !== "string") {
+        throw new Error("TradeThesis " + name + " Markdown adapter must return a string.");
+      }
+      // Sidecar-only nodes are stored in the canonical document and their
+      // existing content_json / protected-media records. They intentionally
+      // have no inline Markdown token in the legacy learner renderer.
       return output;
     },
   });
@@ -243,6 +249,7 @@ const practiceQuestion = createReferenceNode({
   label: "Practice question",
   attributes: ["questionId", "rawToken"],
   identifier: attrs => attrs.questionId,
+  serialize: () => "",
 });
 
 const videoBlock = createReferenceNode({
@@ -251,6 +258,7 @@ const videoBlock = createReferenceNode({
   label: "Protected video reference",
   attributes: ["videoId", "rawToken"],
   identifier: attrs => attrs.videoId,
+  serialize: () => "",
 });
 
 const notebookBlock = createReferenceNode({
@@ -259,6 +267,7 @@ const notebookBlock = createReferenceNode({
   label: "Notebook",
   attributes: ["notebookId", "rawToken"],
   identifier: attrs => attrs.notebookId,
+  serialize: () => "",
 });
 
 const reflectionBlock = createReferenceNode({
@@ -267,6 +276,7 @@ const reflectionBlock = createReferenceNode({
   label: "Reflection",
   attributes: ["reflectionId", "rawToken"],
   identifier: attrs => attrs.reflectionId,
+  serialize: () => "",
 });
 
 const lessonTab = createReferenceNode({
@@ -285,6 +295,7 @@ const regionalLessonVariant = createReferenceNode({
   label: "Whole-lesson regional variant",
   attributes: ["variantKey", "rawToken"],
   identifier: attrs => attrs.variantKey,
+  serialize: () => "",
 });
 
 const tableReference = createReferenceNode({
@@ -303,6 +314,7 @@ const callout = createReferenceNode({
   group: "block",
   attributes: ["calloutId", "tone", "title", "rawToken"],
   identifier: attrs => attrs.calloutId || attrs.title || attrs.tone,
+  serialize: () => "",
 });
 
 const legacyMarkdown = Node.create({
