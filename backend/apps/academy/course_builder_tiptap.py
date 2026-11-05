@@ -8,6 +8,7 @@ remain the source of lifecycle and preview behaviour.
 import hashlib
 import json
 from copy import deepcopy
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -196,7 +197,10 @@ def _document_reference_errors(document, lesson_state, lesson_payload, lesson_id
                 reason = "reflection reference is not part of this saved lesson"
         elif node_type == "callout":
             reference = str(attrs.get("calloutId") or "")
-            reason = "callout blocks do not yet have learner-renderer parity"
+            reason = (
+                "callout-renderer-not-supported: "
+                "callout blocks do not yet have learner-renderer parity"
+            )
         if reason:
             errors.append(f"{node_type or 'unknown'} {reference!r}: {reason}.")
         for index, child in enumerate(node.get("content", []) if isinstance(node.get("content"), list) else []):
@@ -276,11 +280,23 @@ def _editor_draft_list(request):
     return response
 
 
+def _learner_preview_url(record, lesson_payload):
+    preview_url = reverse("academy:course-import-preview", args=[record.pk])
+    source_id = str(lesson_payload.get("source_id") or "").strip()
+    if source_id:
+        preview_url += "?" + urlencode({"lesson": source_id})
+    return preview_url
+
+
 def _editor_lesson_response(request, record, lesson_id):
     state = _draft_state(record, request)
     lesson = _builder_lesson(state, lesson_id)
     if lesson is None:
         return JsonResponse({"detail": "That lesson is not part of this saved draft."}, status=404)
+    payload = record.payload if isinstance(record.payload, dict) else {}
+    lesson_payload = _payload_lesson(payload, lesson_id)
+    if lesson_payload is None:
+        return JsonResponse({"detail": "That lesson is missing from the saved import snapshot."}, status=409)
 
     document = lesson.get("document")
     document_error = ""
@@ -306,7 +322,7 @@ def _editor_lesson_response(request, record, lesson_id):
             },
             "lesson": safe_lesson,
             "expected_updated_at": record.updated_at.isoformat(),
-            "learner_preview_url": reverse("academy:course-import-preview", args=[record.pk]),
+            "learner_preview_url": _learner_preview_url(record, import_lesson),
         }
     )
     add_never_cache_headers(response)
