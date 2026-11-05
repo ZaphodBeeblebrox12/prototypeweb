@@ -122,6 +122,8 @@ export function buildTradeThesisSidecarReferences(lessonValue = {}) {
       id,
       type,
       title: String(figure.title || "").slice(0, 240),
+      alt: String(figure.alt || "").slice(0, 500),
+      caption: String(figure.caption || "").slice(0, 500),
       imageIds,
       description: String(figure.description || figure.note || "").slice(0, 1500),
       cards: asArray(figure.cards).slice(0, 4).map(cardValue => {
@@ -177,7 +179,12 @@ export function buildTradeThesisSidecarReferences(lessonValue = {}) {
   // content_json figures map and no separate images array.
   for (const [id, figure] of Object.entries(figures)) {
     if (figure.type === "image" && !assets[id]) {
-      assets[id] = { id, title: figure.title, alt: "", caption: "" };
+      assets[id] = {
+        id,
+        title: figure.title,
+        alt: figure.alt || "",
+        caption: figure.caption || "",
+      };
     }
   }
 
@@ -210,7 +217,10 @@ export function buildTradeThesisSidecarReferences(lessonValue = {}) {
     };
   }
 
-  const regionalSource = lesson.regionalBlocks ?? contentJson.regional_blocks;
+  const builderRegionalBlocks = asArray(lesson.regionalBlocks);
+  const regionalSource = builderRegionalBlocks.length
+    ? builderRegionalBlocks
+    : contentJson.regional_blocks;
   const regionalBlocks = {};
   const regionalEntries = Array.isArray(regionalSource)
     ? regionalSource.map(block => [asObject(block).id, block])
@@ -275,7 +285,10 @@ export function buildTradeThesisSidecarReferences(lessonValue = {}) {
     };
   });
 
-  const notebookValue = firstObject(lesson.notebook, contentJson.notebook);
+  const builderNotebook = asObject(lesson.notebook);
+  const notebookValue = Object.keys(builderNotebook).length
+    ? builderNotebook
+    : asObject(contentJson.notebook);
   const notebookPrompts = asArray(notebookValue.prompts).slice(0, 30).map(promptValue => {
     const prompt = asObject(promptValue);
     return {
@@ -291,7 +304,10 @@ export function buildTradeThesisSidecarReferences(lessonValue = {}) {
     prompts: notebookPrompts,
   } : null;
 
-  const reflectionValue = firstObject(lesson.reflection, contentJson.reflection);
+  const builderReflection = asObject(lesson.reflection);
+  const reflectionValue = Object.keys(builderReflection).length
+    ? builderReflection
+    : asObject(contentJson.reflection);
   const reflectionPrompt = String(
     lesson.reflectionPrompt ?? lesson.reflection_prompt ?? reflectionValue.prompt ?? "",
   ).slice(0, 1000);
@@ -321,7 +337,9 @@ export function buildTradeThesisSidecarReferences(lessonValue = {}) {
   } : null;
 
   const callouts = {};
-  asArray(lesson.callouts || contentJson.callouts).forEach((calloutValue, index) => {
+  const builderCallouts = asArray(lesson.callouts);
+  const calloutSource = builderCallouts.length ? builderCallouts : contentJson.callouts;
+  asArray(calloutSource).forEach((calloutValue, index) => {
     const callout = asObject(calloutValue);
     const id = safeId(callout.id) || (
       lessonId ? "callout-" + lessonId + "-" + (index + 1) : ""
