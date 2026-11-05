@@ -168,12 +168,12 @@ import { TradeThesisExtensions } from "./tradethesis-nodes.js";
         return;
       }
       const confirmed = window.confirm(
-        "Replace the editor contents with this Markdown? This test importer handles standard Markdown only. TradeThesis-specific blocks and reference tokens are not converted yet."
+        "Replace the editor contents with this Markdown? Recognised TradeThesis markers will appear as reference placeholders; linked records and protected media are not loaded in this sandbox."
       );
       if (!confirmed) return;
       try {
         editor.commands.setContent(source, { contentType: "markdown" });
-        markdownStatus.textContent = "Imported as standard Markdown. Review any TradeThesis-specific reference tokens manually.";
+        markdownStatus.textContent = "Imported Markdown with typed TradeThesis reference placeholders. Linked records are not loaded.";
         state.textContent = "Markdown imported · prototype only";
       } catch (importError) {
         markdownStatus.textContent = "Markdown could not be imported: " + String(importError?.message || "Unknown conversion error.");
