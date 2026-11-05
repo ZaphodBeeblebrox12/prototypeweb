@@ -46,6 +46,7 @@ ALLOWED_NODE_TYPES = frozenset(
         "courseCard",
         "lessonReference",
         "regionalBlock",
+        "regionalLessonVariant",
         "practiceQuestion",
         "videoBlock",
         "notebookBlock",
