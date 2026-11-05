@@ -91,24 +91,46 @@ const imageNode = Node.create({
     };
   },
   parseHTML() {
-    return [{
-      tag: "img[src]",
-      getAttrs: element => {
-        const src = element.getAttribute("src") || "";
-        const asset = ASSET_SOURCE_PATTERN.exec(src);
-        return {
-          src,
-          alt: element.getAttribute("alt") || "",
-          title: element.getAttribute("title"),
-          assetId: asset ? asset[1] : null,
-        };
+    return [
+      {
+        tag: "img[src]",
+        getAttrs: element => {
+          const src = element.getAttribute("src") || "";
+          const asset = ASSET_SOURCE_PATTERN.exec(src);
+          return {
+            src,
+            alt: element.getAttribute("alt") || "",
+            title: element.getAttribute("title"),
+            assetId: asset ? asset[1] : null,
+          };
+        },
       },
-    }];
+      {
+        tag: 'span[data-tt-node="image"]',
+        getAttrs: element => ({
+          src: null,
+          alt: element.textContent.replace(/^Image asset(?:\s*·\s*)?/, ""),
+          title: null,
+          assetId: element.getAttribute("data-tt-asset-id"),
+        }),
+      },
+    ];
   },
   renderHTML({ node, HTMLAttributes }) {
     const src = node.attrs.src || (
       node.attrs.assetId ? "asset://" + node.attrs.assetId : ""
     );
+    if (node.attrs.assetId || src.startsWith("asset://")) {
+      const assetId = node.attrs.assetId || src.slice("asset://".length);
+      return [
+        "span",
+        mergeAttributes(HTMLAttributes, {
+          "data-tt-node": "image",
+          "data-tt-asset-id": assetId,
+        }),
+        "Image asset" + (node.attrs.alt ? " · " + node.attrs.alt : ""),
+      ];
+    }
     return ["img", mergeAttributes(HTMLAttributes, {
       src,
       alt: node.attrs.alt || "",
