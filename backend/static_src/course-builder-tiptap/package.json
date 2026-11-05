@@ -5,7 +5,17 @@
   "description": "Self-hosted isolated Tiptap prototype for TradeThesis Course Builder",
   "scripts": {
     "build": "esbuild src/main.js --bundle --minify --legal-comments=none --format=iife --target=es2020 --outfile=../../static/academy/course-builder-tiptap.js",
-    "test": "node --test test/*.test.js"
+    "test": "npm run test:sidecar && npm run test:markdown-core && npm run test:markdown-references && npm run test:image-extension && npm run test:markdown-sidecar-blocks && npm run test:markdown-code && npm run test:markdown-course",
+    "test:markdown": "node test/markdown-roundtrip.test.js",
+    "test:sidecar": "node test/tradethesis-sidecar.test.js",
+    "test:markdown-basic": "node --test --test-name-pattern='Markdown round-trip preserves common lesson formatting|GitHub-Flavored Markdown tables parse into structured table nodes|TradeThesis reference markers parse to typed nodes and serialize unchanged|unknown TradeThesis markers are retained as explicit legacy nodes|asset-backed Markdown images retain their stable asset ID|JSON-only TradeThesis blocks survive as typed references and block lossy Markdown export|reference-looking text inside inline and fenced code stays code' test/markdown-roundtrip.test.js",
+    "test:markdown-course": "node --test --test-name-pattern='Bollinger Bands course source parses and round-trips without losing lesson structure' test/markdown-roundtrip.test.js",
+    "test:markdown-core": "node --test --test-name-pattern='Markdown round-trip preserves common lesson formatting|GitHub-Flavored Markdown tables parse into structured table nodes' test/markdown-roundtrip.test.js",
+    "test:markdown-references": "node --test --test-name-pattern='TradeThesis reference markers parse to typed nodes and serialize unchanged|unknown TradeThesis markers are retained as explicit legacy nodes' test/markdown-roundtrip.test.js",
+    "test:markdown-assets": "node --test --test-name-pattern='asset-backed Markdown images retain their stable asset ID|JSON-only TradeThesis blocks survive as typed references and block lossy Markdown export' test/markdown-roundtrip.test.js",
+    "test:markdown-code": "node --test --test-name-pattern='reference-looking text inside inline and fenced code stays code' test/markdown-roundtrip.test.js",
+    "test:markdown-sidecar-blocks": "node --test --test-name-pattern='JSON-only TradeThesis blocks survive as typed references and block lossy Markdown export' test/markdown-roundtrip.test.js",
+    "test:image-extension": "node test/tradethesis-nodes.test.js"
   },
   "dependencies": {
     "@tiptap/core": "3.32.2",

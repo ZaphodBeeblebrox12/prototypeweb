@@ -222,3 +222,131 @@ its exported syntax. The marker's text survives re-import, but the escaped
 Markdown is not currently executable by the existing learner resolver. A custom
 TradeThesis Markdown spec is therefore required before any exported Markdown can
 be used as the compatibility mirror.
+
+## Phase 3 completion checkpoint — 5 November 2026
+
+The isolated Tiptap editor now has the TradeThesis-specific extension registry and
+sidecar reference adapter.
+
+### Structured nodes
+
+- Inline references: figure, image group, course card, lesson reference,
+  regional content block, structured table reference and lesson-tab marker.
+- Comparison-card figures are resolved to a distinct typed node.
+- Asset-backed images retain stable `asset://UUID` references and display local
+  placeholders; the editor never requests an asset URL during import.
+- Sidecar-backed block nodes: practice question, protected video, notebook,
+  reflection, callout, and whole-lesson regional variant.
+- Unknown `[[...]]` markers remain explicit `legacyMarkdown` nodes.
+- JSON-only blocks with no proven lossless Markdown representation refuse
+  Markdown export rather than being dropped.
+
+### Existing Academy sidecars
+
+The adapter accepts either the current Course Builder lesson shape or the
+published `Lesson.content_json` shape and indexes:
+
+- Image metadata, stable assets, figures, image groups and comparison cards.
+- Structured table rows and cell spans.
+- Inline regional blocks and country/region whole-lesson alternatives.
+- Public practice-question prompts/options and linked question images.
+- Notebook prompts and reflection material.
+- Protected-video record ID, staged/protected kind and status only.
+- Existing course/lesson references and marker IDs.
+
+Typed nodes carry stable IDs or audience keys; the existing sidecar stores keep
+the underlying authoring data. Question answer keys/correct indices and question
+explanations are excluded from the sidecar reference index. Reflection fields stay
+in their separate reflection sidecar and are not copied into the learner document.
+Private video file names, storage paths, HLS manifests, stream keys and
+encryption details are never copied into the document. Missing or mismatched
+references produce diagnostics, and adding sidecar-backed nodes is idempotent.
+
+The protected-video builder metadata now includes the stable record ID and
+record kind so the new document can reference staged or published media without
+exposing any private media location. The versioned Python validator and shared
+JSON Schema accept the whole-lesson regional-variant node.
+
+### Validation coverage
+
+The Node suite includes the complete Bollinger Bands course source package
+(30 lessons, 62 image references and Markdown tables), TradeThesis marker
+round-trips, unknown-marker preservation, sidecar hydration, stable-reference
+resolution, regional variants, privacy boundaries and lossy-export refusal.
+The existing Academy Django tests cover the staff-only route and protected-video
+metadata contract.
+
+### Phase boundary
+
+Phase 3 provides the typed extension and sidecar-reference layer. It does not
+connect the sandbox to live draft loading/saving, publishing, review or learner
+rendering. Those are Phase 4 parity and integration tasks. The legacy Course
+Builder remains the live editing path and is not modified or deployed by this
+checkpoint.
+
+
+## Phase 4 implementation checkpoint — 5 November 2026
+
+The isolated staff Tiptap route now connects to saved Course Builder drafts through
+a separate API. The existing /staff/course-builder/ route remains unchanged.
+
+### Draft loading and saving
+
+- The editor lists editable CourseImport drafts and loads one selected lesson
+  at a time. It can open new drafts and saved revisions created through the
+  existing Course Builder workflow.
+- A lesson with no lesson_document is imported from its existing Markdown
+  mirror. A supported v1 document is opened from content_json.lesson_document.
+- The editor hydrates typed references from the existing image, figure, table,
+  regional, question, notebook, reflection and protected-video records.
+- Save writes the versioned JSON document into content_json.lesson_document
+  and updates the Markdown compatibility mirror in the same CourseImport
+  draft snapshot. It does not write to a live Course or Lesson row.
+- The save request carries the draft's updated_at revision token. A stale tab
+  receives HTTP 409 and cannot overwrite a newer save. A deleted, submitted or
+  otherwise non-editable draft is rejected. Rejected drafts return to editable
+  Draft status only after a successful save.
+- Instructor answer keys and explanations are removed from the browser load
+  response. They remain in their existing instructor-material payload.
+- The browser and server both check sidecar references before accepting a save.
+  Missing or mismatched assets, figures, tables, questions, video, notebook,
+  reflection or regional references block the save.
+
+### Preview and lifecycle parity
+
+The editor exposes the existing Academy course-import-preview page for the
+selected saved draft. That page uses the same learner lesson template and
+legacy Academy renderer as the current published lesson view. It resolves the
+saved Markdown compatibility mirror with the same figure/table/regional,
+question, notebook, reflection and protected-video records.
+
+Tiptap is not a publishing interface. Review, approval, publication, course
+offers, pricing, access grants and protected-video processing remain in their
+existing Academy services. The old Course Builder remains available as the
+fallback. An administrator can first use its existing Edit published course
+flow to create a reviewable draft, save it, and then open that saved revision
+in the Tiptap preview route.
+
+### Explicit compatibility limits
+
+- Unknown legacyMarkdown markers keep their original token and can be saved
+  without conversion to ordinary text.
+- JSON-only question, protected-video, notebook, reflection and whole-lesson
+  regional references stay in their respective existing Academy sidecars.
+  Their document nodes are not serialized as fake learner Markdown.
+- Callout nodes remain read-only: the existing Academy learner renderer has no
+  corresponding callout component, so the browser and server block a save
+  rather than omit callout content in the learner preview.
+- Unknown document versions remain read-only until a compatible editor is
+  available.
+
+### Rollout boundary
+
+Phase 4 is still a staff-only, opt-in preview. The feature flag remains off by
+default. No database migration, automatic conversion of existing lessons,
+staging/production deployment, direct edit of live lesson rows, publication,
+or removal of the legacy editor is included in this checkpoint.
+
+The Phase 4 acceptance tests cover draft listing, lesson load, private answer
+key isolation, JSON/Markdown save, preserved sidecars, stale-revision rejection,
+server-side reference validation and the existing Academy learner preview.

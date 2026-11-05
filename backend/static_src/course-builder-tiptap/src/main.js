@@ -2,6 +2,12 @@ import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { TableKit } from "@tiptap/extension-table";
 import { Markdown } from "@tiptap/markdown";
+import { TradeThesisExtensions } from "./tradethesis-nodes.js";
+import {
+  appendTradeThesisSidecarNodes,
+  buildTradeThesisSidecarReferences,
+  resolveTradeThesisDocument,
+} from "./tradethesis-sidecar.js";
 
 (() => {
   const root = document.querySelector("[data-tiptap-lab]");
@@ -16,16 +22,39 @@ import { Markdown } from "@tiptap/markdown";
   const error = root.querySelector("[data-editor-error]");
   const headingSelect = root.querySelector("[data-heading]");
   const formatButtons = [...root.querySelectorAll("[data-action]")];
+  const draftSelect = root.querySelector("[data-draft-select]");
+  const lessonSelect = root.querySelector("[data-lesson-select]");
+  const loadLessonButton = root.querySelector("[data-load-lesson]");
+  const lessonTitle = root.querySelector("[data-lesson-title]");
+  const saveButton = root.querySelector("[data-save-draft]");
+  const saveStatus = root.querySelector("[data-save-status]");
+  const learnerPreview = root.querySelector("[data-learner-preview]");
+  const sidecarPanel = root.querySelector("[data-sidecars]");
+  const sidecarCopy = root.querySelector("[data-sidecars-copy]");
+  const apiBase = String(root.dataset.apiUrl || "");
 
-  if (!mount || !state || !jsonOutput || !tableTools) return;
+  if (
+    !mount || !state || !jsonOutput || !tableTools || !draftSelect
+    || !lessonSelect || !loadLessonButton || !saveButton || !apiBase
+  ) return;
 
-  const documentEnvelope = document => ({
+  const documentEnvelope = documentValue => ({
     format: "tradethesis.lesson-document",
     version: 1,
-    document,
+    document: documentValue,
   });
 
   let editor;
+  let currentDraftId = "";
+  let currentLessonId = "";
+  let expectedUpdatedAt = "";
+  let currentPreviewUrl = "";
+  let isLoading = false;
+  let isDirty = false;
+  let hasCompatibilityBlockers = false;
+  let loaded = false;
+  let conflict = false;
+
   const actionMap = {
     bold: () => editor.chain().focus().toggleBold().run(),
     italic: () => editor.chain().focus().toggleItalic().run(),
@@ -52,9 +81,35 @@ import { Markdown } from "@tiptap/markdown";
     return documentEnvelope(editor.getJSON());
   }
 
+  function csrfToken() {
+    const match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+    return match ? decodeURIComponent(match[1]) : "";
+  }
+
+  function setStatus(message, tone = "normal") {
+    state.textContent = message;
+    state.dataset.tone = tone;
+    if (saveStatus) saveStatus.textContent = message;
+  }
+
   function syncJson() {
+    if (!editor) return;
     jsonOutput.textContent = JSON.stringify(currentDocument(), null, 2);
-    state.textContent = "Prototype · not saved";
+    if (isLoading) return;
+    if (isDirty) {
+      setStatus("Unsaved changes", "warning");
+    } else if (loaded && !conflict) {
+      setStatus("Saved draft · ready to edit", "success");
+    } else if (!loaded) {
+      setStatus("Choose a saved draft and lesson");
+    }
+    syncSaveControls();
+  }
+
+  function syncSaveControls() {
+    const canSave = loaded && isDirty && !conflict && !hasCompatibilityBlockers;
+    saveButton.disabled = !canSave;
+    loadLessonButton.disabled = !draftSelect.value || !lessonSelect.value;
   }
 
   function syncToolbar() {
@@ -74,12 +129,17 @@ import { Markdown } from "@tiptap/markdown";
       if (Object.prototype.hasOwnProperty.call(active, action)) {
         button.setAttribute("aria-pressed", String(active[action]));
       }
+      button.disabled = !loaded;
     }
     tableTools.classList.toggle("is-visible", editor.isActive("table"));
-    const heading = editor.getAttributes("heading").level;
-    headingSelect.value = editor.isActive("heading") ? String(heading || 1) : "paragraph";
-    root.querySelector('[data-action="undo"]').disabled = !editor.can().undo();
-    root.querySelector('[data-action="redo"]').disabled = !editor.can().redo();
+    headingSelect.value = editor.isActive("heading")
+      ? String(editor.getAttributes("heading").level || 1)
+      : "paragraph";
+    headingSelect.disabled = !loaded;
+    const undo = root.querySelector('[data-action="undo"]');
+    const redo = root.querySelector('[data-action="redo"]');
+    if (undo) undo.disabled = !loaded || !editor.can().undo();
+    if (redo) redo.disabled = !loaded || !editor.can().redo();
   }
 
   function safeLink(value) {
@@ -103,17 +163,270 @@ import { Markdown } from "@tiptap/markdown";
     editor.chain().focus().extendMarkRange("link").setLink({ href }).run();
   }
 
+  function markDirty() {
+    if (!loaded || isLoading || conflict) return;
+    isDirty = true;
+    syncJson();
+  }
+
+  async function fetchJson(url, options = {}) {
+    const response = await fetch(url, {
+      credentials: "same-origin",
+      cache: "no-store",
+      ...options,
+      headers: {
+        ...(options.headers || {}),
+        ...(options.method && options.method !== "GET" ? { "X-CSRFToken": csrfToken() } : {}),
+      },
+    });
+    let payload;
+    try {
+      payload = await response.json();
+    } catch {
+      throw new Error("The server returned an unreadable response.");
+    }
+    if (!response.ok) {
+      const errorMessage = Array.isArray(payload.detail)
+        ? payload.detail.join(" ")
+        : String(payload.detail || "The request could not be completed.");
+      const requestError = new Error(errorMessage);
+      requestError.status = response.status;
+      requestError.payload = payload;
+      throw requestError;
+    }
+    return payload;
+  }
+
+  function populateDrafts(drafts) {
+    draftSelect.replaceChildren();
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = drafts.length ? "Select a saved draft…" : "No editable drafts found";
+    draftSelect.append(placeholder);
+
+    for (const draft of drafts) {
+      const option = document.createElement("option");
+      option.value = draft.id;
+      const date = draft.updated_at ? new Date(draft.updated_at).toLocaleString() : "";
+      option.textContent = draft.title + (draft.status === "rejected" ? " · Returned" : "")
+        + (date ? " · " + date : "");
+      option.dataset.draft = JSON.stringify(draft);
+      draftSelect.append(option);
+    }
+    draftSelect.disabled = drafts.length === 0;
+    lessonSelect.replaceChildren(new Option("Choose a draft first", ""));
+    lessonSelect.disabled = true;
+    syncSaveControls();
+  }
+
+  function selectedDraft() {
+    const option = draftSelect.selectedOptions[0];
+    if (!option || !option.dataset.draft) return null;
+    try {
+      return JSON.parse(option.dataset.draft);
+    } catch {
+      return null;
+    }
+  }
+
+  function populateLessons(draft) {
+    lessonSelect.replaceChildren();
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "Select a lesson…";
+    lessonSelect.append(placeholder);
+    for (const module of draft?.modules || []) {
+      const group = document.createElement("optgroup");
+      group.label = module.title || "Module";
+      for (const lesson of module.lessons || []) {
+        const option = document.createElement("option");
+        option.value = lesson.id;
+        option.textContent = lesson.title || "Untitled lesson";
+        group.append(option);
+      }
+      if (group.children.length) lessonSelect.append(group);
+    }
+    lessonSelect.disabled = !draft || !draft.modules?.some(module => module.lessons?.length);
+    syncSaveControls();
+  }
+
+  function displaySidecars(sidecar) {
+    if (!sidecarPanel || !sidecarCopy) return;
+    const items = [];
+    const questionCount = Object.keys(sidecar.questions || {}).length;
+    if (questionCount) items.push(questionCount + " practice question" + (questionCount === 1 ? "" : "s"));
+    if (Object.keys(sidecar.figures || {}).length) {
+      items.push(Object.keys(sidecar.figures).length + " figure / image-group reference(s)");
+    }
+    if (sidecar.tables && Object.keys(sidecar.tables).length) {
+      items.push(Object.keys(sidecar.tables).length + " structured table(s)");
+    }
+    if (Object.keys(sidecar.regionalBlocks || {}).length
+      || Object.keys(sidecar.regionalLessonContent || {}).length) {
+      items.push("regional lesson content");
+    }
+    if (sidecar.notebook) items.push("notebook prompts");
+    if (sidecar.reflection) items.push("reflection content");
+    if (sidecar.protectedVideo) items.push("protected video · " + sidecar.protectedVideo.status);
+    sidecarCopy.textContent = items.length
+      ? items.join(" · ") + ". These records stay in their existing Academy fields and are retained when you save the lesson body."
+      : "No separate question, notebook, reflection or protected-video records were found for this lesson.";
+    sidecarPanel.hidden = false;
+  }
+
+  function populatePreview(url) {
+    currentPreviewUrl = String(url || "");
+    if (!learnerPreview) return;
+    learnerPreview.href = currentPreviewUrl;
+    learnerPreview.hidden = !currentPreviewUrl;
+  }
+
+  function loadDocumentFromLesson(lesson) {
+    if (lesson.documentValidationError) {
+      throw new Error(
+        "This lesson contains a structured document version the current editor cannot safely open: "
+        + lesson.documentValidationError + " The lesson is read-only here; use the legacy editor or a compatible editor version.",
+      );
+    }
+    if (lesson.document && lesson.document.document) {
+      editor.commands.setContent(lesson.document.document);
+    } else {
+      editor.commands.setContent(String(lesson.content || ""), { contentType: "markdown" });
+    }
+
+    const sidecar = buildTradeThesisSidecarReferences(lesson);
+    const withSidecars = appendTradeThesisSidecarNodes(currentDocument(), sidecar);
+    editor.commands.setContent(withSidecars.document || withSidecars);
+    const resolved = resolveTradeThesisDocument(currentDocument(), sidecar);
+    editor.commands.setContent(resolved.document.document || resolved.document);
+    const blocking = resolved.diagnostics.filter(item => item.reason !== "preserved-opaque-marker");
+    hasCompatibilityBlockers = blocking.length > 0;
+    displaySidecars(sidecar);
+
+    if (blocking.length) {
+      const summary = blocking.slice(0, 3).map(item => item.nodeType + ": " + item.reason).join(" · ");
+      setStatus("Compatibility warning — " + summary, "warning");
+      saveStatus.textContent = "Saving is disabled because one or more lesson references could not be resolved. Nothing has been removed.";
+    } else if (resolved.diagnostics.length) {
+      setStatus("Loaded · unknown markers preserved", "warning");
+    }
+    return sidecar;
+  }
+
+  async function loadLesson() {
+    const draftId = draftSelect.value;
+    const lessonId = lessonSelect.value;
+    if (!draftId || !lessonId) return;
+    if (isDirty && !window.confirm("Discard the unsaved changes in this lesson and open another one?")) {
+      return;
+    }
+
+    isLoading = true;
+    loaded = false;
+    isDirty = false;
+    conflict = false;
+    hasCompatibilityBlockers = false;
+    syncSaveControls();
+    setStatus("Loading saved lesson…");
+    saveStatus.textContent = "Loading the saved Course Builder lesson.";
+    try {
+      const url = apiBase + encodeURIComponent(draftId) + "/" + encodeURIComponent(lessonId) + "/";
+      const payload = await fetchJson(url);
+      const lesson = payload.lesson;
+      currentDraftId = draftId;
+      currentLessonId = lessonId;
+      expectedUpdatedAt = payload.expected_updated_at;
+      lessonTitle.textContent = payload.draft.title + " · " + lesson.title;
+      populatePreview(payload.learner_preview_url);
+      loadDocumentFromLesson(lesson);
+      loaded = !lesson.documentValidationError;
+      isDirty = false;
+      conflict = false;
+      setStatus(loaded ? "Loaded saved lesson" : "Read-only compatibility warning", loaded ? "success" : "warning");
+      saveStatus.textContent = loaded
+        ? "Edits are saved only to this Course Builder draft. Review and publishing remain separate."
+        : "This document version is not supported here. The saved lesson has not been changed.";
+      markdownInput.value = String(lesson.content || "");
+      markdownStatus.textContent = "Loaded the current Markdown compatibility mirror.";
+    } catch (loadError) {
+      loaded = false;
+      setStatus("Could not load lesson", "error");
+      saveStatus.textContent = String(loadError.message || loadError);
+      window.alert("The lesson could not be opened: " + String(loadError.message || loadError));
+    } finally {
+      isLoading = false;
+      syncToolbar();
+      syncJson();
+      syncSaveControls();
+    }
+  }
+
+  async function saveDraft() {
+    if (!loaded || !isDirty || conflict || hasCompatibilityBlockers) return;
+    let markdown;
+    try {
+      markdown = editor.getMarkdown();
+    } catch (exportError) {
+      saveStatus.textContent = "Save stopped: " + String(exportError?.message || "The lesson cannot be exported without losing content.");
+      return;
+    }
+
+    saveButton.disabled = true;
+    saveStatus.textContent = "Saving this lesson to the selected draft…";
+    try {
+      const url = apiBase + encodeURIComponent(currentDraftId) + "/" + encodeURIComponent(currentLessonId) + "/";
+      const payload = await fetchJson(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          expected_updated_at: expectedUpdatedAt,
+          document: currentDocument(),
+          markdown,
+        }),
+      });
+      expectedUpdatedAt = payload.updated_at;
+      currentPreviewUrl = payload.learner_preview_url || currentPreviewUrl;
+      populatePreview(currentPreviewUrl);
+      isDirty = false;
+      conflict = false;
+      setStatus("Saved · draft updated", "success");
+      saveStatus.textContent = "Saved successfully. Open the learner preview to compare the saved draft with the existing Academy renderer.";
+      markdownInput.value = markdown;
+      markdownStatus.textContent = "Markdown compatibility mirror updated with the saved lesson.";
+    } catch (saveError) {
+      if (saveError.status === 409 || saveError.status === 410) {
+        conflict = true;
+        setStatus("Save blocked · draft changed", "warning");
+        saveStatus.textContent = String(saveError.message || saveError) + " Reload the lesson before editing further.";
+      } else {
+        saveStatus.textContent = "Save failed: " + String(saveError.message || saveError) + " Your unsaved changes remain in this editor.";
+      }
+    } finally {
+      syncSaveControls();
+    }
+  }
+
+  function setInitialEditorEnabled(enabled) {
+    editor.setEditable(Boolean(enabled));
+    for (const control of root.querySelectorAll("[data-action], [data-heading], [data-markdown], [data-export]")) {
+      control.disabled = !enabled;
+    }
+    syncToolbar();
+  }
+
   editor = new Editor({
     element: mount,
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
       TableKit.configure({ table: { resizable: true } }),
+      ...TradeThesisExtensions,
       Markdown.configure({ markedOptions: { gfm: true } }),
     ],
     content: {
       type: "doc",
       content: [{ type: "paragraph" }],
     },
+    editable: false,
     editorProps: {
       attributes: {
         "aria-label": "Lesson content",
@@ -123,11 +436,13 @@ import { Markdown } from "@tiptap/markdown";
     onCreate: () => {
       syncJson();
       syncToolbar();
-      state.textContent = "Ready · prototype only";
+      setStatus("Loading saved course drafts…");
     },
     onUpdate: () => {
+      if (loaded && !isLoading) isDirty = true;
       syncJson();
       syncToolbar();
+      syncSaveControls();
     },
     onSelectionUpdate: syncToolbar,
     onTransaction: syncToolbar,
@@ -146,6 +461,7 @@ import { Markdown } from "@tiptap/markdown";
   });
 
   headingSelect.addEventListener("change", () => {
+    if (!loaded) return;
     const value = headingSelect.value;
     if (value === "paragraph") {
       editor.chain().focus().setParagraph().run();
@@ -154,9 +470,16 @@ import { Markdown } from "@tiptap/markdown";
     }
   });
 
+  draftSelect.addEventListener("change", () => {
+    populateLessons(selectedDraft());
+  });
+  lessonSelect.addEventListener("change", syncSaveControls);
+  loadLessonButton.addEventListener("click", loadLesson);
+  saveButton.addEventListener("click", saveDraft);
+
   root.addEventListener("click", async event => {
     const button = event.target.closest("[data-markdown]");
-    if (!button || !markdownInput || !markdownStatus) return;
+    if (!button || !markdownInput || !markdownStatus || !loaded) return;
 
     const action = button.dataset.markdown;
     if (action === "import") {
@@ -165,14 +488,11 @@ import { Markdown } from "@tiptap/markdown";
         markdownStatus.textContent = "Paste Markdown into the box first.";
         return;
       }
-      const confirmed = window.confirm(
-        "Replace the editor contents with this Markdown? This test importer handles standard Markdown only. TradeThesis-specific blocks and reference tokens are not converted yet."
-      );
+      const confirmed = window.confirm("Replace the editor contents with this Markdown?");
       if (!confirmed) return;
       try {
         editor.commands.setContent(source, { contentType: "markdown" });
-        markdownStatus.textContent = "Imported as standard Markdown. Review any TradeThesis-specific reference tokens manually.";
-        state.textContent = "Markdown imported · prototype only";
+        markdownStatus.textContent = "Imported Markdown with typed TradeThesis references. Save to update the selected draft.";
       } catch (importError) {
         markdownStatus.textContent = "Markdown could not be imported: " + String(importError?.message || "Unknown conversion error.");
       }
@@ -211,14 +531,15 @@ import { Markdown } from "@tiptap/markdown";
       markdownStatus.textContent = "Markdown file downloaded.";
     }
   });
+
   root.addEventListener("click", async event => {
     const button = event.target.closest("[data-export]");
-    if (!button) return;
+    if (!button || !loaded) return;
     const json = JSON.stringify(currentDocument(), null, 2);
     if (button.dataset.export === "copy") {
       try {
         await navigator.clipboard.writeText(json);
-        state.textContent = "JSON copied · not saved";
+        state.textContent = "JSON copied";
       } catch {
         state.textContent = "Clipboard unavailable · use Download JSON";
       }
@@ -231,16 +552,46 @@ import { Markdown } from "@tiptap/markdown";
     anchor.download = "tradethesis-lesson-document-v1.json";
     anchor.click();
     URL.revokeObjectURL(url);
-    state.textContent = "JSON downloaded · not saved";
   });
 
-  window.addEventListener("beforeunload", () => editor?.destroy(), { once: true });
-})();
+  window.addEventListener("beforeunload", event => {
+    if (loaded && isDirty) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+    editor?.destroy();
+  }, { once: true });
 
-// If the application bundle was loaded but initialization failed, expose a
-// visible fallback rather than leaving a blank editor surface.
-window.addEventListener("error", event => {
-  if (!String(event?.message || "").includes("tiptap")) return;
-  const fallback = document.querySelector("[data-editor-error]");
-  if (fallback) fallback.hidden = false;
-});
+  async function initialiseDraftList() {
+    try {
+      const payload = await fetchJson(apiBase);
+      populateDrafts(payload.drafts || []);
+      if (!payload.drafts?.length) {
+        setStatus("No editable saved drafts found", "warning");
+        saveStatus.textContent = "Create or save a draft in the Course Builder first. It will appear here.";
+        return;
+      }
+      draftSelect.value = payload.drafts[0].id;
+      populateLessons(payload.drafts[0]);
+      const firstLesson = payload.drafts[0].modules
+        ?.flatMap(module => module.lessons || [])[0];
+      if (firstLesson) {
+        lessonSelect.value = firstLesson.id;
+        await loadLesson();
+      } else {
+        setStatus("The selected draft contains no lessons", "warning");
+      }
+    } catch (loadError) {
+      setStatus("Could not load saved drafts", "error");
+      saveStatus.textContent = String(loadError.message || loadError);
+    }
+  }
+
+  window.addEventListener("error", event => {
+    if (!String(event?.message || "").toLowerCase().includes("tiptap")) return;
+    if (error) error.hidden = false;
+  });
+
+  setInitialEditorEnabled(false);
+  initialiseDraftList();
+})();
