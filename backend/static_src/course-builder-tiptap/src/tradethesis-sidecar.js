@@ -236,6 +236,24 @@ export function buildTradeThesisSidecarReferences(lessonValue = {}) {
     };
   }
 
+  // Whole-lesson regional alternatives are stored separately from inline blocks.
+  // Keep each complete Markdown body outside the learner document and reference it
+  // by its validated country/region key.
+  const regionalLessonSource = lesson.regionalContent
+    ?? contentJson.regional_lesson_content
+    ?? contentJson.regionalLessonContent;
+  const regionalLessonContent = {};
+  for (const [rawKey, rawContent] of mapEntries(regionalLessonSource)) {
+    if (typeof rawContent !== "string") continue;
+    const match = /^(country|region):([A-Za-z0-9-]{2,12})$/i.exec(rawKey.trim());
+    if (!match) continue;
+    const scope = match[1].toLowerCase();
+    const code = match[2].toUpperCase();
+    if (scope === "country" && !/^[A-Z]{2}$/.test(code)) continue;
+    if (scope === "region" && !["APAC", "EU", "NA", "LATAM", "MENA", "SSA"].includes(code)) continue;
+    regionalLessonContent[scope + ":" + code] = rawContent;
+  }
+
   const questionSource = Array.isArray(lesson.questions) && lesson.questions.length
     ? lesson.questions
     : contentJson.questions;
@@ -349,6 +367,7 @@ export function buildTradeThesisSidecarReferences(lessonValue = {}) {
     figures,
     tables,
     regionalBlocks,
+    regionalLessonContent,
     questions,
     notebook,
     reflection,
@@ -359,6 +378,7 @@ export function buildTradeThesisSidecarReferences(lessonValue = {}) {
       figureIds: referencedFigureIds,
       imageGroupIds: referencedImageGroupIds,
       regionalBlockIds: referencedRegionalBlockIds,
+      regionalLessonVariantKeys: Object.keys(regionalLessonContent).sort(),
       tableIds: referencedTableIds,
       lessonIds: referencedLessonIds,
       courseIds: [...new Set([...relatedCourseIds, ...referencedCourseIds])],
@@ -396,6 +416,7 @@ export function resolveTradeThesisDocument(documentValue, sidecarValue) {
       courseCard: attrs.courseId,
       lessonReference: attrs.lessonId,
       regionalBlock: attrs.blockId,
+      regionalLessonVariant: attrs.variantKey,
       tableReference: attrs.tableId,
       practiceQuestion: attrs.questionId,
       videoBlock: attrs.videoId,
@@ -443,6 +464,8 @@ export function resolveTradeThesisDocument(documentValue, sidecarValue) {
       }
     } else if (node.type === "regionalBlock" && !asObject(sidecar.regionalBlocks)[safeId(idFor)]?.id) {
       diagnostics.push({ nodeType: "regionalBlock", id: String(idFor || ""), reason: "regional-block-not-in-sidecar" });
+    } else if (node.type === "regionalLessonVariant" && !Object.hasOwn(asObject(sidecar.regionalLessonContent), String(idFor || ""))) {
+      diagnostics.push({ nodeType: "regionalLessonVariant", id: String(idFor || ""), reason: "regional-lesson-variant-not-in-sidecar" });
     } else if (node.type === "tableReference" && !asObject(sidecar.tables)[safeId(idFor)]?.id) {
       diagnostics.push({ nodeType: "tableReference", id: String(idFor || ""), reason: "table-not-in-sidecar" });
     } else if (node.type === "practiceQuestion" && !asObject(sidecar.questions)[safeId(idFor)]?.id) {
@@ -496,6 +519,9 @@ export function createTradeThesisSidecarNodes(sidecarValue) {
   if (asObject(sidecar.reflection).id) {
     nodes.push({ type: "reflectionBlock", attrs: { reflectionId: sidecar.reflection.id } });
   }
+  for (const variantKey of Object.keys(asObject(sidecar.regionalLessonContent)).sort()) {
+    nodes.push({ type: "regionalLessonVariant", attrs: { variantKey } });
+  }
   for (const id of Object.keys(asObject(sidecar.callouts)).sort()) {
     nodes.push({ type: "callout", attrs: { calloutId: id } });
   }
@@ -516,7 +542,7 @@ export function appendTradeThesisSidecarNodes(documentValue, sidecarValue) {
   const collect = node => {
     if (!node || typeof node !== "object") return;
     const attrs = asObject(node.attrs);
-    for (const key of ["questionId", "videoId", "notebookId", "reflectionId", "calloutId"]) {
+    for (const key of ["questionId", "videoId", "notebookId", "reflectionId", "variantKey", "calloutId"]) {
       if (attrs[key]) existing.add(node.type + ":" + attrs[key]);
     }
     for (const child of asArray(node.content)) collect(child);
@@ -526,7 +552,7 @@ export function appendTradeThesisSidecarNodes(documentValue, sidecarValue) {
   for (const node of createTradeThesisSidecarNodes(sidecarValue)) {
     const attrs = asObject(node.attrs);
     const refId = attrs.questionId || attrs.videoId || attrs.notebookId
-      || attrs.reflectionId || attrs.calloutId;
+      || attrs.reflectionId || attrs.variantKey || attrs.calloutId;
     const key = node.type + ":" + refId;
     if (!existing.has(key)) {
       root.content.push(cloneJSON(node));
