@@ -216,6 +216,13 @@ class CourseBuilderApiTests(TestCase):
         self.assertContains(response, "Reflection & reasoning")
         self.assertContains(response, "Require course-owned images before publishing")
         self.assertContains(response, "Courses page placement")
+        self.assertContains(response, "SEO &amp; discoverability")
+        self.assertContains(response, 'data-field="seoTitle"')
+        self.assertContains(response, 'data-field="seoDescription"')
+        self.assertContains(response, 'data-field="seoPrimaryTopic"')
+        self.assertContains(response, 'data-field="seoIndexable"')
+        self.assertContains(response, 'data-action="suggest-seo"')
+        self.assertContains(response, "Google search preview")
         self.assertContains(response, 'id="courseAccessType"')
         self.assertContains(response, 'value="free"')
         self.assertContains(response, 'value="membership"')
@@ -304,6 +311,39 @@ class CourseBuilderApiTests(TestCase):
             if draft["serverDraftId"] == str(record.pk)
         )
         self.assertEqual(reloaded["accessType"], "membership")
+
+    def test_course_seo_metadata_is_saved_and_reloaded_with_builder_draft(self):
+        payload = self.draft_payload("builder-seo-course")
+        payload["course"].update({
+            "seoTitle": "Bollinger Bands Trading Course | TradeThesis",
+            "seoDescription": "Learn to read Bollinger Bands, understand volatility and test trading ideas in context.",
+            "seoPrimaryTopic": "Bollinger Bands trading course",
+            "seoIndexable": False,
+        })
+        response = self.client.post(
+            reverse("staff_course_builder_api"),
+            data=json.dumps(payload),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        record = CourseImport.objects.get(pk=response.json()["record_id"])
+        self.assertEqual(record.payload["course"]["seo_title"], "Bollinger Bands Trading Course | TradeThesis")
+        self.assertEqual(record.payload["course"]["seo_description"], payload["course"]["seoDescription"])
+        self.assertEqual(record.payload["course"]["seo_primary_topic"], "Bollinger Bands trading course")
+        self.assertFalse(record.payload["course"]["seo_indexable"])
+        self.assertEqual(record.payload["builder_state"]["seoTitle"], "Bollinger Bands Trading Course | TradeThesis")
+        self.assertFalse(record.payload["builder_state"]["seoIndexable"])
+
+        refreshed = self.client.get(reverse("staff_course_builder_api"))
+        self.assertEqual(refreshed.status_code, 200, refreshed.content)
+        reloaded = next(
+            draft for draft in refreshed.json()["drafts"]
+            if draft["serverDraftId"] == str(record.pk)
+        )
+        self.assertEqual(reloaded["seoTitle"], "Bollinger Bands Trading Course | TradeThesis")
+        self.assertEqual(reloaded["seoDescription"], payload["course"]["seoDescription"])
+        self.assertEqual(reloaded["seoPrimaryTopic"], "Bollinger Bands trading course")
+        self.assertFalse(reloaded["seoIndexable"])
 
     def test_rich_text_format_dropdown_uses_accessible_custom_menu(self):
         response = self.client.get(reverse("staff_course_builder_preview"))
@@ -1022,6 +1062,12 @@ class CourseBuilderApiTests(TestCase):
         from .models import LessonInstructorMaterial
 
         payload = self.draft_payload("private-quiz-course")
+        payload["course"].update({
+            "seoTitle": "Private Quiz Course | TradeThesis",
+            "seoDescription": "A public overview for a course with protected lesson content.",
+            "seoPrimaryTopic": "Trading education",
+            "seoIndexable": False,
+        })
         payload["mode"] = "submit"
         payload["sync_source"] = False
         response = self.client.post(
@@ -1034,6 +1080,13 @@ class CourseBuilderApiTests(TestCase):
         course = publish_course_import(record, user=self.admin)
         self.assertEqual(course.learning_outcomes, ["Describe evidence before interpreting it."])
         self.assertEqual(course.category, "Chart reading")
+        self.assertEqual(course.seo_title, "Private Quiz Course | TradeThesis")
+        self.assertEqual(
+            course.seo_description,
+            "A public overview for a course with protected lesson content.",
+        )
+        self.assertEqual(course.seo_primary_topic, "Trading education")
+        self.assertFalse(course.seo_indexable)
         lesson = Lesson.objects.get(module__course=course)
         self.assertEqual(lesson.content_json["video_url"], "https://media.example.test/lesson.mp4")
         self.assertEqual(lesson.content_json["notebook"]["prompts"][0]["label"], "Observe")

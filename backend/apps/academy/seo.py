@@ -36,6 +36,7 @@ def academy_sitemap_xml(request):
     courses = (
         Course.objects.filter(
             status=Course.Status.PUBLISHED,
+            seo_indexable=True,
             modules__is_published=True,
             modules__lessons__is_published=True,
         )
