@@ -209,3 +209,8 @@ figures, regional variants, course/lesson references, quizzes, notebooks,
 reflections and video references) still require explicit custom parsing and
 serialization. Until those adapters are tested, the legacy Markdown field
 remains untouched and the import panel warns authors not to overwrite lessons.
+
+
+The prototype now has Node-based DOM tests for ordinary Markdown formatting,
+GFM tables, and preservation of the current plain-text TradeThesis reference
+tokens. These tests run during the Academy CI bundle build.

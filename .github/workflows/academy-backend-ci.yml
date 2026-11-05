@@ -66,6 +66,7 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           npm run build
+          npm test
 
       - name: Collect static assets for test environment
         run: python manage.py collectstatic --noinput
