@@ -175,6 +175,7 @@ class CourseBuilderTiptapPreviewTests(TestCase):
         self.assertNotIn("explanation", response.json()["lesson"]["questions"][0])
         self.assertTrue(response.json()["expected_updated_at"])
         self.assertIn(str(record.pk), response.json()["learner_preview_url"])
+        self.assertIn("?lesson=1.1", response.json()["learner_preview_url"])
 
     @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
     def test_save_updates_only_selected_lesson_document_and_markdown_mirror(self):
@@ -352,7 +353,8 @@ class CourseBuilderTiptapPreviewTests(TestCase):
         )
         self.assertEqual(save.status_code, 200)
 
-        preview = self.client.get(reverse("academy:course-import-preview", args=[record.pk]))
+        preview = self.client.get(save.json()["learner_preview_url"])
+        self.assertIn("?lesson=1.1", save.json()["learner_preview_url"])
         self.assertEqual(preview.status_code, 200)
         self.assertContains(preview, "This is the saved Academy preview body.")
 
