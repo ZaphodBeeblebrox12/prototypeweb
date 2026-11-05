@@ -8,6 +8,7 @@ remain the source of lifecycle and preview behaviour.
 import hashlib
 import json
 import uuid
+
 from contextlib import suppress
 from copy import deepcopy
 from io import BytesIO
@@ -496,7 +497,13 @@ def course_builder_tiptap_api(request, draft_id=None, lesson_id=None):
             status=400,
         )
     if video_url_supplied and external_video_url:
-        parsed_video_url = urlsplit(external_video_url)
+        try:
+            parsed_video_url = urlsplit(external_video_url)
+        except ValueError:
+            return JsonResponse(
+                {"detail": "External video links must be valid HTTP or HTTPS URLs."},
+                status=400,
+            )
         if (
             parsed_video_url.scheme.lower() not in {"https", "http"}
             or not parsed_video_url.netloc
