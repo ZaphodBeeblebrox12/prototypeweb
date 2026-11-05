@@ -27,10 +27,14 @@ def course_builder_tiptap_preview(request):
     add_never_cache_headers(response)
     response["X-Frame-Options"] = "DENY"
     response["Referrer-Policy"] = "same-origin"
+    public_site_origin = str(
+        getattr(settings, "TRADETHESIS_PUBLIC_SITE_URL", "") or ""
+    ).rstrip("/")
     response["Content-Security-Policy"] = (
         "default-src 'self'; "
         "script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; "
-        "style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; "
+        f"style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline' {public_site_origin}; "
+        f"font-src 'self' data: {public_site_origin}; "
         "img-src 'self' data: blob:; "
         "connect-src 'self'; "
         "object-src 'none'; base-uri 'self'; frame-ancestors 'none'"

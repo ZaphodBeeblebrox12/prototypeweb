@@ -45,12 +45,6 @@ jobs:
       - name: Check Django migration state
         run: python manage.py makemigrations --check --dry-run
 
-      - name: Diagnose Tiptap test import ordering
-        run: |
-          ruff check --fix apps/academy/test_course_builder_tiptap.py || true
-          git diff -- apps/academy/test_course_builder_tiptap.py
-          git checkout -- apps/academy/test_course_builder_tiptap.py
-
       - name: Run linting with ruff
         run: ruff check apps/academy/ tests/academy/
 
