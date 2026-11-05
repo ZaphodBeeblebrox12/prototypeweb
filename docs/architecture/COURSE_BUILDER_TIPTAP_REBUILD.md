@@ -223,30 +223,61 @@ Markdown is not currently executable by the existing learner resolver. A custom
 TradeThesis Markdown spec is therefore required before any exported Markdown can
 be used as the compatibility mirror.
 
-## Phase 3A checkpoint — TradeThesis reference extensions
+## Phase 3 completion checkpoint — 5 November 2026
 
-The isolated Tiptap lab now registers typed placeholders for the current Markdown reference
-markers used by the Academy renderer:
+The isolated Tiptap editor now has the TradeThesis-specific extension registry and
+sidecar reference adapter.
 
-- `[[teaching-figure:...]]` and `[[image-group:...]]`
-- `[[lesson:UUID]]` and `[[lesson-card:UUID]]`
-- `[[course-card:UUID]]` and `[[course-card:coming-soon:UUID]]`
-- `[[regional-block:...]]`, `[[table-block:...]]`, and `[[lesson-tab:idea|examples|practice]]`
+### Structured nodes
 
-Recognised marker nodes retain the exact source token and expose stable identifiers in the
-versioned JSON tree. Unknown `[[...]]` markers become explicit `legacyMarkdown` nodes;
-they are not converted into ordinary text or silently discarded. `asset://UUID` image
-references are represented as image nodes with stable asset IDs and visible placeholders;
-the prototype does not request those asset URLs or embed protected media.
+- Inline references: figure, image group, course card, lesson reference,
+  regional content block, structured table reference and lesson-tab marker.
+- Comparison-card figures are resolved to a distinct typed node.
+- Asset-backed images retain stable `asset://UUID` references and display local
+  placeholders; the editor never requests an asset URL during import.
+- Sidecar-backed block nodes: practice question, protected video, notebook,
+  reflection, callout, and whole-lesson regional variant.
+- Unknown `[[...]]` markers remain explicit `legacyMarkdown` nodes.
+- JSON-only blocks with no proven lossless Markdown representation refuse
+  Markdown export rather than being dropped.
 
-The extension registry also defines typed placeholders for comparison figures, practice
-questions, protected video references, notebooks, reflections and callouts. These records
-are not hydrated from the existing `content_json` metadata yet. Where no safe, lossless
-Markdown representation exists, Markdown export raises a compatibility error instead
-of silently dropping the block.
+### Existing Academy sidecars
 
-The Node test suite now round-trips the complete Bollinger Bands source package from its
-manifest (30 lessons, 62 image references and the included Markdown tables), alongside
-targeted tests for each recognised marker family and unknown-marker preservation.
-This remains a browser-side prototype only: no lesson loader, draft-save endpoint,
-publishing path, learner renderer or database migration is introduced by this phase.
+The adapter accepts either the current Course Builder lesson shape or the
+published `Lesson.content_json` shape and indexes:
+
+- Image metadata, stable assets, figures, image groups and comparison cards.
+- Structured table rows and cell spans.
+- Inline regional blocks and country/region whole-lesson alternatives.
+- Public practice-question prompts/options and linked question images.
+- Notebook prompts and reflection material.
+- Protected-video record ID, staged/protected kind and status only.
+- Existing course/lesson references and marker IDs.
+
+Typed nodes carry stable IDs or audience keys; the existing sidecar stores keep
+the underlying authoring data. Instructor answers/explanations are excluded.
+Private video file names, storage paths, HLS manifests, stream keys and
+encryption details are never copied into the document. Missing or mismatched
+references produce diagnostics, and adding sidecar-backed nodes is idempotent.
+
+The protected-video builder metadata now includes the stable record ID and
+record kind so the new document can reference staged or published media without
+exposing any private media location. The versioned Python validator and shared
+JSON Schema accept the whole-lesson regional-variant node.
+
+### Validation coverage
+
+The Node suite includes the complete Bollinger Bands course source package
+(30 lessons, 62 image references and Markdown tables), TradeThesis marker
+round-trips, unknown-marker preservation, sidecar hydration, stable-reference
+resolution, regional variants, privacy boundaries and lossy-export refusal.
+The existing Academy Django tests cover the staff-only route and protected-video
+metadata contract.
+
+### Phase boundary
+
+Phase 3 provides the typed extension and sidecar-reference layer. It does not
+connect the sandbox to live draft loading/saving, publishing, review or learner
+rendering. Those are Phase 4 parity and integration tasks. The legacy Course
+Builder remains the live editing path and is not modified or deployed by this
+checkpoint.
