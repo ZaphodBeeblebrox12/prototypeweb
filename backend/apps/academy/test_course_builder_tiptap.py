@@ -278,6 +278,50 @@ class CourseBuilderTiptapPreviewTests(TestCase):
         self.assertIn("callout-renderer-not-supported", str(response.json()))
 
     @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
+    def test_unavailable_course_and_lesson_references_are_rejected_server_side(self):
+        record, lesson_id = self.create_saved_draft()
+        document = make_lesson_document(
+            {
+                "type": "doc",
+                "content": [
+                    {
+                        "type": "courseCard",
+                        "attrs": {
+                            "courseId": str(uuid.uuid4()),
+                            "comingSoon": False,
+                        },
+                    },
+                    {
+                        "type": "lessonReference",
+                        "attrs": {
+                            "lessonId": str(uuid.uuid4()),
+                            "displayMode": "inline",
+                        },
+                    },
+                ],
+            }
+        )
+        response = self.client.post(
+            reverse(
+                "staff_course_builder_tiptap_lesson_api",
+                args=[record.pk, lesson_id],
+            ),
+            data=json.dumps(
+                {
+                    "expected_updated_at": record.updated_at.isoformat(),
+                    "markdown": "## Original lesson",
+                    "document": document,
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        compatibility_errors = " ".join(response.json()["compatibility_errors"])
+        self.assertIn("course-card reference is not a recommendable published course", compatibility_errors)
+        self.assertIn("lesson reference is not a published Academy lesson", compatibility_errors)
+
+    @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
     def test_stale_revision_is_rejected_without_overwriting_newer_work(self):
         record, lesson_id = self.create_saved_draft()
         stale_revision = record.updated_at.isoformat()
