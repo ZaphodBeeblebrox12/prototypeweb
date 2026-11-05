@@ -34,8 +34,8 @@ def course_builder_tiptap_preview(request):
         "default-src 'self'; "
         "script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; "
         f"style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline' {public_site_origin}; "
-        f"font-src 'self' data: {public_site_origin}; "
-        "img-src 'self' data: blob:; "
+        f"font-src 'self' data: https://cdn.jsdelivr.net {public_site_origin}; "
+        f"img-src 'self' data: blob: {public_site_origin}; "
         "connect-src 'self'; "
         "object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
     )
