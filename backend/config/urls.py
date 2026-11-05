@@ -36,11 +36,13 @@ from apps.admin_desk_views import (
 )
 from apps.core.views import health_check
 from apps.academy.seo import academy_robots_txt, academy_sitemap_xml
+from apps.academy.seo_admin import seo_dashboard
 from apps.emailing.webhooks import resend_webhook
 
 urlpatterns = [
     path("robots.txt", academy_robots_txt, name="academy_robots"),
     path("sitemap.xml", academy_sitemap_xml, name="academy_sitemap"),
+    path("staff/admin-desk/seo/", seo_dashboard, name="staff_admin_desk_seo"),
     # Render readiness probe: confirm Django and its primary database respond.
     path("health/", health_check, name="health_check"),
     # Resend delivers signed delivery/bounce/complaint events here.
