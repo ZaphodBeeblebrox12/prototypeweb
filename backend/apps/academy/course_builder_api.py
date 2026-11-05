@@ -1350,6 +1350,8 @@ def _retire_legacy_drafts_for_deleted_courses(records):
 def _protected_video_editor_metadata(video):
     """Expose status only; never return the private source or stream storage key."""
     return {
+        "id": str(video.pk),
+        "kind": "protected",
         "status": str(video.status),
         "has_source": bool(video.source_file),
         "processed_at": video.processed_at.isoformat() if video.processed_at else "",
@@ -1789,6 +1791,8 @@ def _draft_response(record, request):
             staged_video = staged_videos.get(str(lesson.get("id") or ""))
             if staged_video:
                 lesson["protectedVideo"] = {
+                    "id": str(staged_video.pk),
+                    "kind": "staged",
                     "status": "stored_for_draft",
                     "filename": staged_video.original_filename,
                     "size_bytes": staged_video.size_bytes,
