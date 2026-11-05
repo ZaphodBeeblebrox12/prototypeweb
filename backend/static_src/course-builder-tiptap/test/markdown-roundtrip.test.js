@@ -244,10 +244,13 @@ test("JSON-only TradeThesis blocks survive as typed references and block lossy M
       harness.dom.window.document.querySelectorAll('div[data-tt-node="videoBlock"]').length,
       1,
     );
-    assert.throws(
-      () => harness.editor.getMarkdown(),
-      /no lossless Markdown representation yet/,
-    );
+    const markdown = harness.editor.getMarkdown();
+    assert.match(markdown, /The lesson body remains separate/);
+    assert.doesNotMatch(markdown, /question-01|video-01|notebook-01|reflection-01|country:IN/);
+    // These typed references remain in JSON; their learner-facing data is
+    // preserved in the question, video, notebook, reflection and regional
+    // sidecars consumed by the existing Academy lesson renderer.
+    assert.equal(collectNodes(json, "regionalLessonVariant")[0]?.attrs.variantKey, "country:IN");
   } finally {
     harness.close();
   }
