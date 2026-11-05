@@ -84,9 +84,9 @@ const imageNode = Node.create({
   selectable: true,
   addAttributes() {
     return {
-      src: { default: null },
-      alt: { default: "" },
-      title: { default: null },
+      src: { default: null, renderHTML: () => ({}) },
+      alt: { default: "", renderHTML: () => ({}) },
+      title: { default: null, renderHTML: () => ({}) },
       assetId: { default: null, renderHTML: () => ({}) },
     };
   },
