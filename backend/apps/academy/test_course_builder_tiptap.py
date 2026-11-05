@@ -5,9 +5,9 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
-from PIL import Image
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from PIL import Image
 
 from .lesson_document import make_lesson_document
 from .models import CourseImport, CourseImportAsset, CourseImportVideo
