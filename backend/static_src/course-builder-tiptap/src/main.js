@@ -1,6 +1,6 @@
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
-import Table from "@tiptap/extension-table";
+import { TableKit } from "@tiptap/extension-table";
 
 (() => {
   const root = document.querySelector("[data-tiptap-lab]");
@@ -104,7 +104,7 @@ import Table from "@tiptap/extension-table";
     element: mount,
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
-      Table.configure({ resizable: true }),
+      TableKit.configure({ table: { resizable: true } }),
     ],
     content: {
       type: "doc",
