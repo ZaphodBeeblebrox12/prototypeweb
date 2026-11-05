@@ -319,74 +319,6 @@ const legacyMarkdown = Node.create({
       "Unmapped lesson marker · " + (node.attrs.tokenKind || "unknown"),
     ];
   },
-  markdownTokenName: "tradethesis_token",
-  markdownTokenizer: {
-    name: "tradethesis_token",
-    level: "inline",
-    start(source) {
-      const index = source.indexOf("[[");
-      return index < 0 ? undefined : index;
-    },
-    tokenizer(source) {
-      const match = /^\[\[([^\]\r\n]{1,200})\]\]/.exec(source);
-      if (!match) return undefined;
-      const separator = match[1].indexOf(":");
-      return {
-        type: "tradethesis_token",
-        raw: match[0],
-        tokenKind: separator < 0 ? "unknown" : match[1].slice(0, separator).toLowerCase(),
-        tokenValue: separator < 0 ? match[1] : match[1].slice(separator + 1),
-      };
-    },
-  },
-  parseMarkdown(token) {
-    const kind = String(token.tokenKind || "unknown").toLowerCase();
-    const value = String(token.tokenValue || "").trim();
-    const rawToken = String(token.raw || "");
-    const legacy = () => ({
-      type: "legacyMarkdown",
-      attrs: { rawToken, tokenKind: kind },
-    });
-
-    if (!rawToken) return legacy();
-
-    if (kind === "teaching-figure" && SAFE_REFERENCE_PATTERN.test(value)) {
-      return { type: "courseFigure", attrs: { figureId: value, rawToken } };
-    }
-    if (kind === "image-group" && SAFE_REFERENCE_PATTERN.test(value)) {
-      return { type: "imageGroup", attrs: { groupId: value, rawToken } };
-    }
-    if ((kind === "lesson" || kind === "lesson-card") && UUID_PATTERN.test(value)) {
-      return {
-        type: "lessonReference",
-        attrs: {
-          lessonId: value,
-          displayMode: kind === "lesson-card" ? "card" : "inline",
-          rawToken,
-        },
-      };
-    }
-    if (kind === "course-card") {
-      const comingSoon = value.startsWith("coming-soon:");
-      const courseId = comingSoon ? value.slice("coming-soon:".length) : value;
-      if (UUID_PATTERN.test(courseId)) {
-        return {
-          type: "courseCard",
-          attrs: { courseId, comingSoon, rawToken },
-        };
-      }
-    }
-    if (kind === "regional-block" && SAFE_REFERENCE_PATTERN.test(value)) {
-      return { type: "regionalBlock", attrs: { blockId: value, rawToken } };
-    }
-    if (kind === "table-block" && SAFE_REFERENCE_PATTERN.test(value)) {
-      return { type: "tableReference", attrs: { tableId: value, rawToken } };
-    }
-    if (kind === "lesson-tab" && ["idea", "examples", "practice"].includes(value)) {
-      return { type: "lessonTab", attrs: { tab: value, rawToken } };
-    }
-    return legacy();
-  },
   renderMarkdown(node) {
     if (typeof node.attrs.rawToken !== "string" || !node.attrs.rawToken) {
       throw new Error("An unmapped lesson marker cannot be exported without its original token.");
@@ -412,3 +344,145 @@ export const TradeThesisExtensions = [
   callout,
   legacyMarkdown,
 ];
+
+function escapeHtmlAttribute(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function referencePlaceholder(name, attributes, rawToken) {
+  const values = { ...attributes, rawToken };
+  const htmlAttributes = { "data-tt-node": name };
+  for (const [key, value] of Object.entries(values)) {
+    if (value === null || value === undefined) continue;
+    htmlAttributes["data-tt-" + kebabCase(key)] = String(value);
+  }
+  const markup = Object.entries(htmlAttributes)
+    .map(([key, value]) => key + '="' + escapeHtmlAttribute(value) + '"')
+    .join(" ");
+  return "<span " + markup + "></span>";
+}
+
+function parseReferenceToken(rawToken) {
+  const body = rawToken.slice(2, -2);
+  const separator = body.indexOf(":");
+  const kind = (separator < 0 ? body : body.slice(0, separator)).toLowerCase();
+  const value = separator < 0 ? "" : body.slice(separator + 1).trim();
+
+  if (kind === "teaching-figure" && SAFE_REFERENCE_PATTERN.test(value)) {
+    return referencePlaceholder("courseFigure", { figureId: value }, rawToken);
+  }
+  if (kind === "image-group" && SAFE_REFERENCE_PATTERN.test(value)) {
+    return referencePlaceholder("imageGroup", { groupId: value }, rawToken);
+  }
+  if ((kind === "lesson" || kind === "lesson-card") && UUID_PATTERN.test(value)) {
+    return referencePlaceholder("lessonReference", {
+      lessonId: value,
+      displayMode: kind === "lesson-card" ? "card" : "inline",
+    }, rawToken);
+  }
+  if (kind === "course-card") {
+    const comingSoon = value.startsWith("coming-soon:");
+    const courseId = comingSoon ? value.slice("coming-soon:".length) : value;
+    if (UUID_PATTERN.test(courseId)) {
+      return referencePlaceholder("courseCard", { courseId, comingSoon }, rawToken);
+    }
+  }
+  if (kind === "regional-block" && SAFE_REFERENCE_PATTERN.test(value)) {
+    return referencePlaceholder("regionalBlock", { blockId: value }, rawToken);
+  }
+  if (kind === "table-block" && SAFE_REFERENCE_PATTERN.test(value)) {
+    return referencePlaceholder("tableReference", { tableId: value }, rawToken);
+  }
+  if (kind === "lesson-tab" && ["idea", "examples", "practice"].includes(value)) {
+    return referencePlaceholder("lessonTab", { tab: value }, rawToken);
+  }
+  return referencePlaceholder("legacyMarkdown", {
+    rawToken,
+    tokenKind: kind || "unknown",
+  }, rawToken);
+}
+
+function isEscapedAt(source, index) {
+  let backslashes = 0;
+  for (let cursor = index - 1; cursor >= 0 && source[cursor] === "\\"; cursor -= 1) {
+    backslashes += 1;
+  }
+  return backslashes % 2 === 1;
+}
+
+function replaceMarkersOutsideInlineCode(line) {
+  const tick = String.fromCharCode(96);
+  let output = "";
+  let cursor = 0;
+  while (cursor < line.length) {
+    const nextTick = line.indexOf(tick, cursor);
+    const nextMarker = line.indexOf("[[", cursor);
+
+    if (nextMarker >= 0 && (nextTick < 0 || nextMarker < nextTick)) {
+      output += line.slice(cursor, nextMarker);
+      const match = /^\[\[([^\]\r\n]{1,200})\]\]/.exec(line.slice(nextMarker));
+      if (!match || isEscapedAt(line, nextMarker)) {
+        output += "[[";
+        cursor = nextMarker + 2;
+        continue;
+      }
+      output += parseReferenceToken(match[0]);
+      cursor = nextMarker + match[0].length;
+      continue;
+    }
+
+    if (nextTick < 0) {
+      output += line.slice(cursor);
+      break;
+    }
+
+    output += line.slice(cursor, nextTick);
+    let tickCount = 1;
+    while (line[nextTick + tickCount] === tick) tickCount += 1;
+    const delimiter = tick.repeat(tickCount);
+    const closing = line.indexOf(delimiter, nextTick + tickCount);
+    if (closing < 0) {
+      output += delimiter;
+      cursor = nextTick + tickCount;
+      continue;
+    }
+    output += line.slice(nextTick, closing + tickCount);
+    cursor = closing + tickCount;
+  }
+  return output;
+}
+
+export function prepareTradeThesisMarkdown(source) {
+  const chunks = String(source || "").split(/(\r?\n)/);
+  const output = [];
+  let fence = null;
+
+  for (const chunk of chunks) {
+    if (chunk === "\n" || chunk === "\r\n") {
+      output.push(chunk);
+      continue;
+    }
+    if (fence) {
+      output.push(chunk);
+      const close = new RegExp("^ {0,3}" + fence.character + "{" + fence.length + ",}\\s*$");
+      if (close.test(chunk)) fence = null;
+      continue;
+    }
+
+    const tick = String.fromCharCode(96);
+    const opener = new RegExp("^ {0,3}(" + tick + "{3,}|~{3,})").exec(chunk);
+    if (opener) {
+      fence = { character: opener[1][0], length: opener[1].length };
+      output.push(chunk);
+      continue;
+    }
+
+    output.push(replaceMarkersOutsideInlineCode(chunk));
+  }
+
+  return output.join("");
+}
