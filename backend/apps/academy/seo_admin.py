@@ -17,7 +17,7 @@ from .permissions import is_course_content_admin
 
 
 def _clean_text(value):
-    return re.sub(r"\\s+", " ", str(value or "")).strip()
+    return re.sub(r"\s+", " ", str(value or "")).strip()
 
 
 def _course_indexability_reasons(course, global_enabled):
