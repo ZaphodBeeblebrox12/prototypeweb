@@ -178,14 +178,14 @@ export function buildTradeThesisSidecarReferences(lessonValue = {}) {
   // Preserve figure metadata for assets even when the builder only supplied a
   // content_json figures map and no separate images array.
   for (const [id, figure] of Object.entries(figures)) {
-    if (figure.type === "image" && !assets[id]) {
-      assets[id] = {
-        id,
-        title: figure.title,
-        alt: figure.alt || "",
-        caption: figure.caption || "",
-      };
-    }
+    if (figure.type !== "image") continue;
+    const existing = asObject(assets[id]);
+    assets[id] = {
+      id,
+      title: existing.title || figure.title || "",
+      alt: existing.alt || figure.alt || "",
+      caption: existing.caption || figure.caption || "",
+    };
   }
 
   const lessonTables = asObject(lesson.tables);
