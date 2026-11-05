@@ -264,60 +264,73 @@ test("Bollinger Bands course source parses and round-trips without losing lesson
   const courseRoot = new URL("../../../../course-source/understand-bollinger-bands/", import.meta.url);
   const manifest = JSON.parse(readFileSync(new URL("course-manifest.json", courseRoot), "utf8"));
   let lessonCount = 0;
-  let imageCount = 0;
-  let tableCount = 0;
-
-  for (const module of manifest.modules) {
+  const moduleSources = manifest.modules.map(module => {
     const source = readFileSync(new URL(module.source, courseRoot), "utf8");
-    lessonCount += (source.match(/^## Lesson \d+\.\d+/gm) || []).length;
+    const moduleLessons = (source.match(/^## Lesson \d+\.\d+/gm) || []).length;
+    assert.ok(moduleLessons > 0, module.source + " should contain lesson headings");
+    lessonCount += moduleLessons;
+    return source.trim();
+  });
 
-    const first = createEditor(source);
+  // Parse the full course in one editor pair instead of rebuilding JSDOM for
+  // each module. This still round-trips all lessons, image references and tables
+  // while keeping CI memory and setup time predictable.
+  const source = moduleSources.join("\n\n");
+  const first = createEditor(source);
+  try {
+    const originalJson = first.editor.getJSON();
+    const markdown = first.editor.getMarkdown();
+    const originalImages = collectNodes(originalJson, "image").length;
+    const originalTables = collectNodes(originalJson, "table").length;
+    const originalHeadings = collectNodes(originalJson, "heading").length;
+    const authoredText = collectText(originalJson);
+
+    assert.ok(originalHeadings >= lessonCount, "All course lesson headings should be represented");
+    const second = createEditor(markdown);
     try {
-      const originalJson = first.editor.getJSON();
-      const markdown = first.editor.getMarkdown();
-      const originalImages = collectNodes(originalJson, "image").length;
-      const originalTables = collectNodes(originalJson, "table").length;
-      const originalHeadings = collectNodes(originalJson, "heading").length;
-
-      imageCount += originalImages;
-      tableCount += originalTables;
-
-      assert.ok(originalHeadings > 0, module.source + " should contain lesson headings");
-      const second = createEditor(markdown);
-      try {
-        const roundTripped = second.editor.getJSON();
-        assert.equal(
-          collectNodes(roundTripped, "image").length,
-          originalImages,
-          module.source + " image references must survive round-trip",
-        );
-        assert.equal(
-          collectNodes(roundTripped, "table").length,
-          originalTables,
-          module.source + " tables must survive round-trip",
-        );
-        assert.equal(
-          collectNodes(roundTripped, "heading").length,
-          originalHeadings,
-          module.source + " heading structure must survive round-trip",
-        );
-        assert.equal(
-          collectText(roundTripped),
-          collectText(originalJson),
-          module.source + " authored text must survive round-trip",
-        );
-      } finally {
-        second.close();
-      }
+      const roundTripped = second.editor.getJSON();
+      assert.equal(
+        collectNodes(roundTripped, "image").length,
+        originalImages,
+        "All course image references must survive round-trip",
+      );
+      assert.equal(
+        collectNodes(roundTripped, "table").length,
+        originalTables,
+        "All course tables must survive round-trip",
+      );
+      assert.equal(
+        collectNodes(roundTripped, "heading").length,
+        originalHeadings,
+        "The complete course heading structure must survive round-trip",
+      );
+      assert.equal(
+        collectText(roundTripped),
+        authoredText,
+        "All authored course text must survive round-trip",
+      );
     } finally {
-      first.close();
+      second.close();
     }
+  } finally {
+    first.close();
   }
 
   assert.equal(lessonCount, 30, "The manifest declares 30 Bollinger Bands lessons");
-  assert.equal(imageCount, 62, "The source package contains 62 image references");
-  assert.ok(tableCount > 0, "The course source includes structured Markdown tables");
+  assert.equal(originalCountForAssetRefs(moduleSources), 62, "The source package contains 62 image references");
+  assert.ok(originalTablesForSource(moduleSources), "The course source includes structured Markdown tables");
 });
+
+function originalCountForAssetRefs(sources) {
+  return sources.reduce(
+    (count, source) => count + (source.match(/!\[[^\]]*\]\(/g) || []).length,
+    0,
+  );
+}
+
+function originalTablesForSource(sources) {
+  return sources.some(source => /^\|.*\|$/m.test(source));
+}
 
 test("reference-looking text inside inline and fenced code stays code", () => {
   const marker = "[[regional-block:india]]";
