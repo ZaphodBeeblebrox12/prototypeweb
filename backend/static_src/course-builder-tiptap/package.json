@@ -5,7 +5,7 @@
   "description": "Self-hosted isolated Tiptap prototype for TradeThesis Course Builder",
   "scripts": {
     "build": "esbuild src/main.js --bundle --minify --legal-comments=none --format=iife --target=es2020 --outfile=../../static/academy/course-builder-tiptap.js",
-    "test": "node --test --test-concurrency=1 test/*.test.js"
+    "test": "node --test --test-reporter=spec --test-concurrency=1 test/*.test.js"
   },
   "dependencies": {
     "@tiptap/core": "3.32.2",
