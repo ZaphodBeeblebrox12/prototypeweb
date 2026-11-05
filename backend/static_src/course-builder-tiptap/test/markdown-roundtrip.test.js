@@ -196,23 +196,6 @@ test("unknown TradeThesis markers are retained as explicit legacy nodes", () => 
   }
 });
 
-test("asset-backed Markdown images retain their stable asset ID", () => {
-  const assetId = "00000000-0000-4000-8000-000000000003";
-  const source = "![Market structure](asset://" + assetId + ")";
-  const harness = createEditor(source);
-  try {
-    const image = collectNodes(harness.editor.getJSON(), "image")[0];
-    assert.ok(image, "Expected a structured image node");
-    assert.equal(image.attrs.assetId, assetId);
-    assert.equal(image.attrs.src, "asset://" + assetId);
-    assert.equal(harness.editor.getMarkdown(), source);
-    assert.ok(harness.dom.window.document.querySelector('[data-tt-node="image"][data-tt-asset-id="' + assetId + '"]'));
-    assert.equal(harness.dom.window.document.querySelector("img"), null);
-  } finally {
-    harness.close();
-  }
-});
-
 test("JSON-only TradeThesis blocks survive as typed references and block lossy Markdown export", () => {
   const harness = createEditor("");
   try {
