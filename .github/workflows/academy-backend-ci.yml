@@ -84,8 +84,11 @@ jobs:
           npm install --no-audit --no-fund
           npm run build
 
-      - name: Run Markdown and complete-course compatibility tests
-        run: npm run test:markdown
-
       - name: Run TradeThesis sidecar and privacy tests
         run: npm run test:sidecar
+
+      - name: Run standard Markdown and reference round-trip tests
+        run: npm run test:markdown-basic
+
+      - name: Run complete Bollinger Bands course round-trip
+        run: npm run test:markdown-course
