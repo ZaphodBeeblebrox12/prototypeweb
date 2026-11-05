@@ -73,6 +73,10 @@ function sampleLesson() {
         hidden: false,
       }],
     }],
+    regionalContent: {
+      "country:IN": "Complete India lesson body.",
+      "region:APAC": "Complete APAC lesson body.",
+    },
     questions: [{
       id: "question-01",
       prompt: "Which reading is supported by the chart?",
@@ -121,6 +125,11 @@ test("sidecar adapter indexes all existing Academy lesson content by stable IDs"
 
   assert.equal(sidecar.tables["market-table"].rows.length, 2);
   assert.equal(sidecar.regionalBlocks["india-note"].variants[0].code, "IN");
+  assert.deepEqual(sidecar.regionalLessonContent, {
+    "country:IN": "Complete India lesson body.",
+    "region:APAC": "Complete APAC lesson body.",
+  });
+  assert.deepEqual(sidecar.references.regionalLessonVariantKeys, ["country:IN", "region:APAC"]);
   assert.equal(sidecar.questions["question-01"].prompt, "Which reading is supported by the chart?");
   assert.deepEqual(sidecar.questions["question-01"].options, [
     "A visible reaction",
@@ -167,6 +176,7 @@ test("document resolver enriches assets and distinguishes comparison figures", (
           { type: "lessonReference", attrs: { lessonId: RELATED_LESSON_ID, displayMode: "inline" } },
           { type: "courseCard", attrs: { courseId: COURSE_ID, comingSoon: false } },
           { type: "regionalBlock", attrs: { blockId: "india-note" } },
+          { type: "regionalLessonVariant", attrs: { variantKey: "country:IN" } },
           { type: "tableReference", attrs: { tableId: "market-table" } },
           { type: "lessonTab", attrs: { tab: "practice" } },
         ],
@@ -197,13 +207,17 @@ test("sidecar-backed blocks become typed ID-only document nodes and append idemp
     "videoBlock",
     "notebookBlock",
     "reflectionBlock",
+    "regionalLessonVariant",
+    "regionalLessonVariant",
     "callout",
   ]);
   assert.equal(nodes[0].attrs.questionId, "question-01");
   assert.equal(nodes[1].attrs.videoId, VIDEO_ID);
   assert.equal(nodes[2].attrs.notebookId, "notebook-" + LESSON_ID);
   assert.equal(nodes[3].attrs.reflectionId, "reflection-" + LESSON_ID);
-  assert.equal(nodes[4].attrs.calloutId, "risk-note");
+  assert.equal(nodes[4].attrs.variantKey, "country:IN");
+  assert.equal(nodes[5].attrs.variantKey, "region:APAC");
+  assert.equal(nodes[6].attrs.calloutId, "risk-note");
 
   const start = {
     type: "doc",
@@ -212,7 +226,7 @@ test("sidecar-backed blocks become typed ID-only document nodes and append idemp
   const once = appendTradeThesisSidecarNodes(start, sidecar);
   const twice = appendTradeThesisSidecarNodes(once, sidecar);
 
-  assert.equal(once.content.length, 6);
+  assert.equal(once.content.length, 8);
   assert.deepEqual(twice, once);
   assert.deepEqual(
     once.content.slice(1).map(node => node.type),
