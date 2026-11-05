@@ -1471,6 +1471,42 @@ class TradingNotebookTemplateTests(SimpleTestCase):
         ):
             self.assertNotIn(legacy_rule, builder_source)
 
+    def test_context_first_margin_label_requires_a_separate_body_paragraph(self):
+        parity_css = (
+            Path(__file__).resolve().parents[2]
+            / "static"
+            / "academy"
+            / "course-template-parity.css"
+        ).read_text(encoding="utf-8")
+
+        label_selectors = (
+            ".tt-learning-room .tt-tab-panel blockquote:has(> p:nth-of-type(2)):has(> p:first-child > strong:only-child)::before,",
+            ".preview-body blockquote:has(> p:nth-of-type(2)):has(> p:first-child > strong:only-child)::before,",
+            ".rich-editor-canvas blockquote:has(> p:nth-of-type(2)):has(> p:first-child > strong:only-child)::before,",
+        )
+        paragraph_selectors = (
+            ".tt-learning-room .tt-tab-panel blockquote:has(> p:nth-of-type(2)) > p:first-child:has(> strong:only-child),",
+            ".preview-body blockquote:has(> p:nth-of-type(2)) > p:first-child:has(> strong:only-child),",
+            ".rich-editor-canvas blockquote:has(> p:nth-of-type(2)) > p:first-child:has(> strong:only-child),",
+        )
+        for selector in (*label_selectors, *paragraph_selectors):
+            with self.subTest(selector=selector):
+                self.assertIn(selector, parity_css)
+
+        # A single bold paragraph is the quote body, not a vertical margin label.
+        self.assertNotIn(
+            ".tt-learning-room .tt-tab-panel blockquote:has(> p:first-child > strong:only-child)::before,",
+            parity_css,
+        )
+        self.assertNotIn(
+            ".preview-body blockquote:has(> p:first-child > strong:only-child)::before,",
+            parity_css,
+        )
+        self.assertNotIn(
+            ".rich-editor-canvas blockquote:has(> p:first-child > strong:only-child)::before,",
+            parity_css,
+        )
+
     def test_builder_learner_preview_uses_the_saved_academy_website_template(self):
         builder = Path(__file__).resolve().parent / "course_builder_preview.html"
         source = builder.read_text(encoding="utf-8")
