@@ -59,6 +59,7 @@ import {
   let expectedUpdatedAt = "";
   let currentPreviewUrl = "";
   let currentProtectedVideo = null;
+  let loadedExternalVideoUrl = "";
   let isLoading = false;
   let isDirty = false;
   let hasCompatibilityBlockers = false;
@@ -297,6 +298,7 @@ import {
       const payload = await fetchJson(url, { method: "POST", body: form });
       expectedUpdatedAt = payload.updated_at || expectedUpdatedAt;
       updateProtectedVideoPresentation(payload.video);
+      if (externalVideoInput) externalVideoInput.value = "";
       if (payload.video?.id && !documentHasReference("videoBlock", "videoId", payload.video.id)) {
         editor.commands.insertContent({
           type: "videoBlock",
@@ -579,8 +581,9 @@ import {
       const sidecar = loadDocumentFromLesson(lesson);
       currentProtectedVideo = sidecar.protectedVideo?.id ? sidecar.protectedVideo : null;
       updateProtectedVideoPresentation(currentProtectedVideo);
+      loadedExternalVideoUrl = String(lesson.videoUrl || "").trim();
       if (externalVideoInput) {
-        externalVideoInput.value = currentProtectedVideo ? "" : String(lesson.videoUrl || "");
+        externalVideoInput.value = currentProtectedVideo ? "" : loadedExternalVideoUrl;
       }
       loaded = !lesson.documentValidationError;
       isDirty = false;
@@ -610,7 +613,8 @@ import {
     const externalVideoUrl = externalVideoInput && !currentProtectedVideo
       ? externalVideoInput.value.trim()
       : "";
-    if (!validExternalVideoUrl(externalVideoUrl)) {
+    const externalVideoChanged = externalVideoUrl !== loadedExternalVideoUrl;
+    if (externalVideoChanged && !validExternalVideoUrl(externalVideoUrl)) {
       setMediaStatus("Enter a valid HTTP or HTTPS video link, or clear the field.");
       externalVideoInput?.focus();
       return;
@@ -627,17 +631,19 @@ import {
     saveStatus.textContent = "Saving this lesson to the selected draft…";
     try {
       const url = apiBase + encodeURIComponent(currentDraftId) + "/" + encodeURIComponent(currentLessonId) + "/";
+      const saveBody = {
+        expected_updated_at: expectedUpdatedAt,
+        document: currentDocument(),
+        markdown,
+      };
+      if (externalVideoChanged) saveBody.video_url = externalVideoUrl;
       const payload = await fetchJson(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          expected_updated_at: expectedUpdatedAt,
-          document: currentDocument(),
-          markdown,
-          video_url: externalVideoUrl,
-        }),
+        body: JSON.stringify(saveBody),
       });
       expectedUpdatedAt = payload.updated_at;
+      if (externalVideoChanged) loadedExternalVideoUrl = externalVideoUrl;
       currentPreviewUrl = payload.learner_preview_url || currentPreviewUrl;
       populatePreview(currentPreviewUrl);
       isDirty = false;
