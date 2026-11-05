@@ -140,3 +140,28 @@ class AcademySeoDashboardTests(TestCase):
             [row["course"].slug for row in response.context["rows"]],
         )
         self.assertEqual(len(response.context["rows"]), 2)
+
+
+    def test_each_course_link_opens_the_matching_builder_course(self):
+        other = Course.objects.create(
+            title="Advanced Support and Resistance",
+            slug="advanced-support-resistance",
+            status=Course.Status.DRAFT,
+        )
+
+        response = self.client.get(reverse("staff_admin_desk_seo"))
+        self.assertEqual(response.status_code, 200)
+        urls = {
+            row["course"].slug: row["builder_url"]
+            for row in response.context["rows"]
+        }
+        expected_first = (
+            f"{reverse('staff_course_builder_preview')}?open_course=support-and-resistance"
+        )
+        expected_second = (
+            f"{reverse('staff_course_builder_preview')}?open_course=advanced-support-resistance"
+        )
+        self.assertEqual(urls[self.course.slug], expected_first)
+        self.assertEqual(urls[other.slug], expected_second)
+        self.assertContains(response, f'href="{expected_first}"')
+        self.assertContains(response, f'href="{expected_second}"')

@@ -2663,3 +2663,26 @@ class CourseBuilderPreviewWiringTests(SimpleTestCase):
             _module_display_title("Read the Market Before Reading the Signal"),
             "Read the Market Before Reading the Signal",
         )
+
+
+    def test_builder_honours_explicit_course_deep_links_before_automatic_imports(self):
+        source = Path(__file__).with_name("course_builder_preview.html").read_text(encoding="utf-8")
+        for marker in (
+            "get('open_course')",
+            "function clearOpenCourseQuery()",
+            "const savedDraft = remoteDrafts.find(",
+            "action: 'begin_edit_published_course'",
+            "state.selectedCourseId = requestedCourse.id;",
+            "requestedOpenCourseSlug === String(candidateCourse?.slug || '').toLowerCase()",
+            "requestedOpenCourseSlug === String(candidateBollingerCourse?.slug || '').toLowerCase()",
+            "clearOpenCourseQuery();",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, source)
+
+        # An explicit dashboard choice must override any course retained in the
+        # browser cache, instead of allowing the default Bollinger import to win.
+        self.assertLess(
+            source.index("const requestedOpenCourseSlug ="),
+            source.index("let autoImportedBollingerBands = false;"),
+        )
