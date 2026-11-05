@@ -7,6 +7,7 @@ remain the source of lifecycle and preview behaviour.
 
 import hashlib
 import json
+import uuid
 from copy import deepcopy
 from urllib.parse import urlencode
 
