@@ -2,6 +2,7 @@ import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { TableKit } from "@tiptap/extension-table";
 import { Markdown } from "@tiptap/markdown";
+import { TradeThesisExtensions } from "./tradethesis-nodes.js";
 
 (() => {
   const root = document.querySelector("[data-tiptap-lab]");
@@ -108,6 +109,7 @@ import { Markdown } from "@tiptap/markdown";
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
       TableKit.configure({ table: { resizable: true } }),
+      ...TradeThesisExtensions,
       Markdown.configure({ markedOptions: { gfm: true } }),
     ],
     content: {
