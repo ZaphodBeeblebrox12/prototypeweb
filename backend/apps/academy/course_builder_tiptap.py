@@ -453,8 +453,21 @@ def course_builder_tiptap_api(request, draft_id=None, lesson_id=None):
             ensure_ascii=False,
             separators=(",", ":"),
         ).encode("utf-8")
+        new_content_hash = hashlib.sha256(encoded).hexdigest()
+        duplicate_snapshot = CourseImport.objects.filter(
+            course_slug=record.course_slug,
+            content_hash=new_content_hash,
+        ).exclude(pk=record.pk).exists()
+        if duplicate_snapshot:
+            return JsonResponse(
+                {
+                    "detail": "An identical saved snapshot already exists for this course. Reload the draft list before saving again.",
+                    "conflict": True,
+                },
+                status=409,
+            )
         record.payload = payload
-        record.content_hash = hashlib.sha256(encoded).hexdigest()
+        record.content_hash = new_content_hash
         if record.status == CourseImport.Status.REJECTED:
             record.status = CourseImport.Status.DRAFT
             record.payload.pop("review_feedback", None)
