@@ -43,3 +43,28 @@ test("asset-backed image extension renders a safe placeholder instead of fetchin
   assert.equal(element[1]["data-tt-asset-id"], ASSET_ID);
   assert.match(element[2], /Market structure/);
 });
+
+
+test("asset-backed image renders its authenticated Academy preview without serializing that URL", () => {
+  const previewUrl = "/staff/course-builder/assets/draft/00000000-0000-4000-8000-000000000003/";
+  const attrs = {
+    src: "asset://" + ASSET_ID,
+    assetId: ASSET_ID,
+    previewUrl,
+    alt: "Market structure",
+    title: "Market structure",
+  };
+  const element = imageExtension.config.renderHTML({
+    node: { attrs },
+    HTMLAttributes: {},
+  });
+
+  assert.equal(element[0], "img");
+  assert.equal(element[1].src, previewUrl);
+  assert.equal(element[1]["data-tt-asset-id"], ASSET_ID);
+  assert.equal(element[1].alt, "Market structure");
+  assert.equal(
+    imageExtension.config.renderMarkdown({ attrs }),
+    "![Market structure](asset://" + ASSET_ID + ")",
+  );
+});
