@@ -84,3 +84,59 @@ class AcademySeoDashboardTests(TestCase):
         self.assertContains(response, "Duplicate search title")
         self.assertContains(response, "No search description")
         self.assertContains(response, incomplete.slug)
+
+
+    @override_settings(TRADETHESIS_SEO_INDEXABLE=True)
+    def test_topic_map_groups_shared_primary_topics_case_insensitively(self):
+        self.course.seo_primary_topic = "  Support and Resistance Trading "
+        self.course.save(update_fields=["seo_primary_topic"])
+        second = Course.objects.create(
+            title="Advanced Support and Resistance",
+            slug="advanced-support-resistance",
+            summary="Compare the strength and failure of important trading zones.",
+            description="An advanced course about context and reactions around price zones.",
+            status=Course.Status.DRAFT,
+            seo_primary_topic="support  and resistance trading",
+        )
+
+        response = self.client.get(reverse("staff_admin_desk_seo"))
+        self.assertEqual(response.status_code, 200)
+        clusters = response.context["topic_clusters"]
+        shared = [cluster for cluster in clusters if cluster["topic_overlap"]]
+        self.assertEqual(len(shared), 1)
+        self.assertEqual(shared[0]["course_count"], 2)
+        self.assertContains(response, "Shared primary topic")
+        self.assertContains(response, "Primary topic map")
+        self.assertIn(
+            second.slug,
+            [row["course"].slug for row in shared[0]["courses"]],
+        )
+
+    @override_settings(TRADETHESIS_SEO_INDEXABLE=True)
+    def test_topic_overlap_filter_returns_only_courses_with_shared_topics(self):
+        self.course.seo_primary_topic = "Support and resistance trading"
+        self.course.save(update_fields=["seo_primary_topic"])
+        Course.objects.create(
+            title="Advanced Support and Resistance",
+            slug="advanced-support-resistance",
+            status=Course.Status.DRAFT,
+            seo_primary_topic="support and resistance trading",
+        )
+        distinct = Course.objects.create(
+            title="Bollinger Bands",
+            slug="bollinger-bands",
+            status=Course.Status.DRAFT,
+            seo_primary_topic="Bollinger Bands trading strategy",
+        )
+
+        response = self.client.get(
+            reverse("staff_admin_desk_seo"),
+            {"filter": "topic-overlap"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(all(row["topic_overlap"] for row in response.context["rows"]))
+        self.assertNotIn(
+            distinct.slug,
+            [row["course"].slug for row in response.context["rows"]],
+        )
+        self.assertEqual(len(response.context["rows"]), 2)
