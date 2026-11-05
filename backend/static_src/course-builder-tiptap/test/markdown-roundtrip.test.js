@@ -5,8 +5,9 @@ import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { TableKit } from "@tiptap/extension-table";
 import { Markdown } from "@tiptap/markdown";
+import { TradeThesisExtensions } from "../src/tradethesis-nodes.js";
 
-function createEditor(markdown) {
+function createEditor(content, contentType = "markdown") {
   const dom = new JSDOM("<!doctype html><html><body><div id='editor'></div></body></html>", {
     url: "https://tradethesis.test/",
   });
@@ -23,17 +24,19 @@ function createEditor(markdown) {
     value: dom.window.navigator,
   });
 
-  const editor = new Editor({
+  const options = {
     element: dom.window.document.querySelector("#editor"),
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
       TableKit.configure({ table: { resizable: false } }),
+      ...TradeThesisExtensions,
       Markdown.configure({ markedOptions: { gfm: true } }),
     ],
-    content: markdown,
-    contentType: "markdown",
-  });
+    content,
+  };
+  if (contentType) options.contentType = contentType;
 
+  const editor = new Editor(options);
   return {
     editor,
     close() {
@@ -51,6 +54,13 @@ function createEditor(markdown) {
   };
 }
 
+function collectNodes(root, type, output = []) {
+  if (!root || typeof root !== "object") return output;
+  if (root.type === type) output.push(root);
+  for (const child of root.content || []) collectNodes(child, type, output);
+  return output;
+}
+
 test("Markdown round-trip preserves common lesson formatting", () => {
   const source = [
     "# Lesson heading",
@@ -62,9 +72,9 @@ test("Markdown round-trip preserves common lesson formatting", () => {
     "",
     "> A short quotation.",
     "",
-    "```text",
+    "~~~text",
     "A code example",
-    "```",
+    "~~~",
   ].join("\n");
 
   const harness = createEditor(source);
@@ -105,37 +115,121 @@ test("GitHub-Flavored Markdown tables parse into structured table nodes", () => 
   }
 });
 
-test("TradeThesis reference tokens remain visible as text in the basic adapter", () => {
+test("TradeThesis reference markers parse to typed nodes and serialize unchanged", () => {
+  const lessonId = "00000000-0000-4000-8000-000000000001";
+  const courseId = "00000000-0000-4000-8000-000000000002";
   const source = [
-    "The figure is linked below.",
+    "## Reference compatibility",
     "",
-    "asset://sample-figure-123",
+    "[[teaching-figure:figure_01]]",
+    "",
+    "[[image-group:group_01]]",
+    "",
+    "[[lesson:" + lessonId + "]]",
+    "",
+    "[[lesson-card:" + lessonId + "]]",
+    "",
+    "[[course-card:" + courseId + "]]",
+    "",
+    "[[course-card:coming-soon:" + courseId + "]]",
     "",
     "[[regional-block:india]]",
     "",
-    "[[lesson:00000000-0000-4000-8000-000000000001]]",
+    "[[table-block:table_01]]",
+    "",
+    "[[lesson-tab:practice]]",
   ].join("\n");
 
   const harness = createEditor(source);
-  let serialized;
   try {
-    serialized = harness.editor.getMarkdown();
+    const json = harness.editor.getJSON();
+    const serialized = harness.editor.getMarkdown();
 
-    assert.match(serialized, /asset:\/\/sample-figure-123/);
-    assert.ok(serialized.includes("\\[\\[regional-block:india\\]\\]"));
-    assert.ok(serialized.includes("\\[\\[lesson:00000000-0000-4000-8000-000000000001\\]\\]"));
+    assert.equal(collectNodes(json, "courseFigure")[0]?.attrs.figureId, "figure_01");
+    assert.equal(collectNodes(json, "imageGroup")[0]?.attrs.groupId, "group_01");
+    assert.equal(collectNodes(json, "lessonReference")[0]?.attrs.displayMode, "inline");
+    assert.equal(collectNodes(json, "lessonReference")[1]?.attrs.displayMode, "card");
+    assert.equal(collectNodes(json, "courseCard")[0]?.attrs.comingSoon, false);
+    assert.equal(collectNodes(json, "courseCard")[1]?.attrs.comingSoon, true);
+    assert.equal(collectNodes(json, "regionalBlock")[0]?.attrs.blockId, "india");
+    assert.equal(collectNodes(json, "tableReference")[0]?.attrs.tableId, "table_01");
+    assert.equal(collectNodes(json, "lessonTab")[0]?.attrs.tab, "practice");
+
+    for (const marker of [
+      "[[teaching-figure:figure_01]]",
+      "[[image-group:group_01]]",
+      "[[lesson:" + lessonId + "]]",
+      "[[lesson-card:" + lessonId + "]]",
+      "[[course-card:" + courseId + "]]",
+      "[[course-card:coming-soon:" + courseId + "]]",
+      "[[regional-block:india]]",
+      "[[table-block:table_01]]",
+      "[[lesson-tab:practice]]",
+    ]) {
+      assert.ok(serialized.includes(marker), "Expected exact marker in export: " + marker);
+    }
   } finally {
     harness.close();
   }
+});
 
-  // Tiptap escapes bracket markers in Markdown output. They must remain text
-  // and reappear in the document when that escaped Markdown is parsed again.
-  const roundTrip = createEditor(serialized);
+test("unknown TradeThesis markers are retained as explicit legacy nodes", () => {
+  const source = "Before.\n\n[[future-widget:opaque-value]]\n\nAfter.";
+  const harness = createEditor(source);
   try {
-    const documentText = JSON.stringify(roundTrip.editor.getJSON());
-    assert.ok(documentText.includes("[[regional-block:india]]"));
-    assert.ok(documentText.includes("[[lesson:00000000-0000-4000-8000-000000000001]]"));
+    const legacy = collectNodes(harness.editor.getJSON(), "legacyMarkdown");
+    assert.equal(legacy.length, 1);
+    assert.equal(legacy[0].attrs.tokenKind, "future-widget");
+    assert.equal(legacy[0].attrs.rawToken, "[[future-widget:opaque-value]]");
+    assert.ok(harness.editor.getMarkdown().includes("[[future-widget:opaque-value]]"));
   } finally {
-    roundTrip.close();
+    harness.close();
+  }
+});
+
+test("asset-backed Markdown images retain their stable asset ID", () => {
+  const assetId = "00000000-0000-4000-8000-000000000003";
+  const source = "![Market structure](asset://" + assetId + ")";
+  const harness = createEditor(source);
+  try {
+    const image = collectNodes(harness.editor.getJSON(), "image")[0];
+    assert.ok(image, "Expected a structured image node");
+    assert.equal(image.attrs.assetId, assetId);
+    assert.equal(image.attrs.src, "asset://" + assetId);
+    assert.equal(harness.editor.getMarkdown(), source);
+  } finally {
+    harness.close();
+  }
+});
+
+test("JSON-only TradeThesis blocks survive as typed references and block lossy Markdown export", () => {
+  const harness = createEditor("");
+  try {
+    harness.editor.commands.setContent({
+      type: "doc",
+      content: [{
+        type: "paragraph",
+        content: [
+          { type: "practiceQuestion", attrs: { questionId: "question-01" } },
+          { type: "videoBlock", attrs: { videoId: "video-01" } },
+          { type: "notebookBlock", attrs: { notebookId: "notebook-01" } },
+          { type: "reflectionBlock", attrs: { reflectionId: "reflection-01" } },
+          { type: "callout", attrs: { tone: "note", title: "Context" } },
+        ],
+      }],
+    });
+
+    const json = harness.editor.getJSON();
+    assert.equal(collectNodes(json, "practiceQuestion")[0]?.attrs.questionId, "question-01");
+    assert.equal(collectNodes(json, "videoBlock")[0]?.attrs.videoId, "video-01");
+    assert.equal(collectNodes(json, "notebookBlock")[0]?.attrs.notebookId, "notebook-01");
+    assert.equal(collectNodes(json, "reflectionBlock")[0]?.attrs.reflectionId, "reflection-01");
+    assert.equal(collectNodes(json, "callout")[0]?.attrs.title, "Context");
+    assert.throws(
+      () => harness.editor.getMarkdown(),
+      /no lossless Markdown representation yet/,
+    );
+  } finally {
+    harness.close();
   }
 });
