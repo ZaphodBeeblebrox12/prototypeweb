@@ -264,6 +264,8 @@ test("Bollinger Bands course source parses and round-trips without losing lesson
   const courseRoot = new URL("../../../../course-source/understand-bollinger-bands/", import.meta.url);
   const manifest = JSON.parse(readFileSync(new URL("course-manifest.json", courseRoot), "utf8"));
   let lessonCount = 0;
+  let imageCount = 0;
+  let tableCount = 0;
   const moduleSources = manifest.modules.map(module => {
     const source = readFileSync(new URL(module.source, courseRoot), "utf8");
     const moduleLessons = (source.match(/^## Lesson \d+\.\d+/gm) || []).length;
@@ -284,6 +286,8 @@ test("Bollinger Bands course source parses and round-trips without losing lesson
     const originalTables = collectNodes(originalJson, "table").length;
     const originalHeadings = collectNodes(originalJson, "heading").length;
     const authoredText = collectText(originalJson);
+    imageCount = originalImages;
+    tableCount = originalTables;
 
     assert.ok(originalHeadings >= lessonCount, "All course lesson headings should be represented");
     const second = createEditor(markdown);
@@ -317,20 +321,9 @@ test("Bollinger Bands course source parses and round-trips without losing lesson
   }
 
   assert.equal(lessonCount, 30, "The manifest declares 30 Bollinger Bands lessons");
-  assert.equal(originalCountForAssetRefs(moduleSources), 62, "The source package contains 62 image references");
-  assert.ok(originalTablesForSource(moduleSources), "The course source includes structured Markdown tables");
+  assert.equal(imageCount, 62, "The source package contains 62 image references");
+  assert.ok(tableCount > 0, "The course source includes structured Markdown tables");
 });
-
-function originalCountForAssetRefs(sources) {
-  return sources.reduce(
-    (count, source) => count + (source.match(/!\[[^\]]*\]\(/g) || []).length,
-    0,
-  );
-}
-
-function originalTablesForSource(sources) {
-  return sources.some(source => /^\|.*\|$/m.test(source));
-}
 
 test("reference-looking text inside inline and fenced code stays code", () => {
   const marker = "[[regional-block:india]]";
