@@ -482,7 +482,12 @@ def course_builder_tiptap_api(request, draft_id=None, lesson_id=None):
     expected_updated_at = str(body.get("expected_updated_at") or "").strip()
     markdown = body.get("markdown")
     video_url_supplied = "video_url" in body
-    external_video_url = str(body.get("video_url") or "").strip()[:1000]
+    external_video_url = str(body.get("video_url") or "").strip()
+    if len(external_video_url) > 1000:
+        return JsonResponse(
+            {"detail": "External video links must be 1,000 characters or fewer."},
+            status=400,
+        )
     if video_url_supplied and external_video_url:
         parsed_video_url = urlsplit(external_video_url)
         if (
@@ -855,7 +860,12 @@ def course_builder_tiptap_media_api(request, draft_id):
 
             if uploaded is not None:
                 image_id = str(uuid.uuid4())
-                stable_id = _asset_uuid(record.course_slug, image_id)
+                stable_id = str(
+                    uuid.uuid5(
+                        uuid.NAMESPACE_URL,
+                        f"tradethesis-course:{record.course_slug}:builder/{image_id}",
+                    )
+                )
                 filename = Path(str(uploaded.name or "course-image").replace("\\", "/")).name
                 filename = filename[:200] or "course-image"
                 image_name = Path(filename).stem[:160] or "course-image"
