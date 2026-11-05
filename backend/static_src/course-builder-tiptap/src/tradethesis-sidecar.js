@@ -65,7 +65,7 @@ function firstObject(...values) {
 /**
  * Build a detached, safe reference index from the builder lesson shape or the
  * published Lesson.content_json shape. The index intentionally omits video paths,
- * stream URLs, encryption details, question answers and instructor explanations.
+ * stream URLs, encryption details, and question answer keys/explanations.
  */
 export function buildTradeThesisSidecarReferences(lessonValue = {}) {
   const lesson = asObject(lessonValue);
