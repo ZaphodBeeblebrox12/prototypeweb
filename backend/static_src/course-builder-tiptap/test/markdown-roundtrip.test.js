@@ -122,8 +122,8 @@ test("TradeThesis reference tokens remain visible as text in the basic adapter",
     serialized = harness.editor.getMarkdown();
 
     assert.match(serialized, /asset:\/\/sample-figure-123/);
-    assert.match(serialized, /\\\[\[regional-block:india\\\]\]/);
-    assert.match(serialized, /\\\[\[lesson:00000000-0000-4000-8000-000000000001\\\]\]/);
+    assert.ok(serialized.includes("\\[\\[regional-block:india\\]\\]"));
+    assert.ok(serialized.includes("\\[\\[lesson:00000000-0000-4000-8000-000000000001\\]\\]"));
   } finally {
     harness.close();
   }
