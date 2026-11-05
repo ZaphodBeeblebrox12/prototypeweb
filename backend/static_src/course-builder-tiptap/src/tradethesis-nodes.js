@@ -12,11 +12,13 @@ function tokenFor(name, value) {
   return "[[" + name + ":" + value + "]]";
 }
 
-function createReferenceNode({ name, label, attributes, identifier, serialize }) {
+function createReferenceNode({ name, label, attributes, identifier, serialize, group = "inline" }) {
+  const isBlock = group === "block";
+  const tagName = isBlock ? "div" : "span";
   return Node.create({
     name,
-    group: "inline",
-    inline: true,
+    group,
+    inline: !isBlock,
     atom: true,
     selectable: true,
 
@@ -34,7 +36,7 @@ function createReferenceNode({ name, label, attributes, identifier, serialize })
 
     parseHTML() {
       return [{
-        tag: 'span[data-tt-node="' + name + '"]',
+        tag: tagName + '[data-tt-node="' + name + '"]',
         getAttrs: element => Object.fromEntries(
           attributes.map(attribute => {
             const value = element.getAttribute("data-tt-" + kebabCase(attribute));
@@ -58,7 +60,7 @@ function createReferenceNode({ name, label, attributes, identifier, serialize })
       }
       const reference = identifier ? identifier(node.attrs) : "";
       return [
-        "span",
+        tagName,
         mergeAttributes(HTMLAttributes, dataAttributes),
         label + (reference ? " · " + reference : ""),
       ];
@@ -237,6 +239,7 @@ const regionalBlock = createReferenceNode({
 
 const practiceQuestion = createReferenceNode({
   name: "practiceQuestion",
+  group: "block",
   label: "Practice question",
   attributes: ["questionId", "rawToken"],
   identifier: attrs => attrs.questionId,
@@ -244,6 +247,7 @@ const practiceQuestion = createReferenceNode({
 
 const videoBlock = createReferenceNode({
   name: "videoBlock",
+  group: "block",
   label: "Protected video reference",
   attributes: ["videoId", "rawToken"],
   identifier: attrs => attrs.videoId,
@@ -251,6 +255,7 @@ const videoBlock = createReferenceNode({
 
 const notebookBlock = createReferenceNode({
   name: "notebookBlock",
+  group: "block",
   label: "Notebook",
   attributes: ["notebookId", "rawToken"],
   identifier: attrs => attrs.notebookId,
@@ -258,6 +263,7 @@ const notebookBlock = createReferenceNode({
 
 const reflectionBlock = createReferenceNode({
   name: "reflectionBlock",
+  group: "block",
   label: "Reflection",
   attributes: ["reflectionId", "rawToken"],
   identifier: attrs => attrs.reflectionId,
@@ -286,8 +292,9 @@ const tableReference = createReferenceNode({
 const callout = createReferenceNode({
   name: "callout",
   label: "Callout",
-  attributes: ["tone", "title", "rawToken"],
-  identifier: attrs => attrs.title || attrs.tone,
+  group: "block",
+  attributes: ["calloutId", "tone", "title", "rawToken"],
+  identifier: attrs => attrs.calloutId || attrs.title || attrs.tone,
 });
 
 const legacyMarkdown = Node.create({
