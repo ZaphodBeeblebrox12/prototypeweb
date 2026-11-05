@@ -2773,11 +2773,14 @@ def course_builder_video_upload(request, import_id, lesson_id):
         {
             "ok": True,
             "video": {
+                "id": str(staged_video.pk),
+                "kind": "staged",
                 "status": "stored_for_draft",
                 "filename": staged_video.original_filename,
                 "size_bytes": staged_video.size_bytes,
                 "uploaded_at": staged_video.updated_at.isoformat(),
             },
+            "updated_at": record.updated_at.isoformat(),
             "message": (
                 "Video stored privately. Encrypted streaming is prepared automatically "
                 "after this course is approved and published."
