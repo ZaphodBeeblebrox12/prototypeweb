@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}SEO &amp; Discoverability | TradeThesis{% endblock %}
+{% block page_title %}SEO &amp; Discoverability{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+  .tt-seo { max-width:1180px; margin:0 auto; color:#26342f; }
+  .tt-seo * { box-sizing:border-box; }
+  .tt-seo a { color:#315b43; text-underline-offset:3px; }
+  .tt-seo .head { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; flex-wrap:wrap; margin:8px 0 22px; }
+  .tt-seo .eyebrow { margin:0 0 6px; color:#68736c; font-size:11px; font-weight:750; letter-spacing:.09em; text-transform:uppercase; }
+  .tt-seo .intro { max-width:760px; margin:0; color:#68736c; font-size:14px; line-height:1.55; }
+  .tt-seo .button { display:inline-flex; align-items:center; min-height:38px; padding:8px 13px; border:1px solid #456653; border-radius:4px; background:#456653; color:white; text-decoration:none; font-weight:700; }
+  .tt-seo .button.secondary { background:#fffefa; color:#315b43; }
+  .tt-seo .metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:18px 0; }
+  .tt-seo .metric { padding:14px 15px; border:1px solid #dedfd5; border-radius:5px; background:#fffefa; }
+  .tt-seo .metric strong { display:block; font-size:25px; line-height:1.15; font-variant-numeric:tabular-nums; }
+  .tt-seo .metric span { display:block; margin-top:6px; color:#68736c; font-size:12px; }
+  .tt-seo .status { display:flex; flex-wrap:wrap; align-items:center; gap:9px; margin:14px 0; padding:12px 14px; border:1px solid #dedfd5; border-radius:5px; background:#fbfaf6; }
+  .tt-seo .status strong { font-size:13px; }
+  .tt-seo .status span { color:#68736c; font-size:12px; }
+  .tt-seo .toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:20px 0 12px; }
+  .tt-seo .toolbar input, .tt-seo .toolbar select { min-height:38px; padding:8px 10px; border:1px solid #cfd3ca; border-radius:4px; background:#fffefa; color:#26342f; }
+  .tt-seo .toolbar input { min-width:min(100%,270px); }
+  .tt-seo .toolbar button { min-height:38px; padding:8px 13px; border:1px solid #456653; border-radius:4px; background:#456653; color:white; font-weight:700; }
+  .tt-seo .table-wrap { overflow-x:auto; border:1px solid #dedfd5; border-radius:5px; background:#fffefa; }
+  .tt-seo table { width:100%; border-collapse:collapse; min-width:850px; }
+  .tt-seo th, .tt-seo td { padding:12px 13px; border-bottom:1px solid #ecece5; text-align:left; vertical-align:top; font-size:12px; }
+  .tt-seo th { background:#f6f5ef; color:#68736c; font-size:10px; letter-spacing:.06em; text-transform:uppercase; }
+  .tt-seo tr:last-child td { border-bottom:0; }
+  .tt-seo .course-title { display:block; color:#26342f; font-size:13px; font-weight:750; text-decoration:none; }
+  .tt-seo .slug { display:block; margin-top:4px; color:#68736c; font-size:11px; }
+  .tt-seo .pill { display:inline-block; padding:4px 7px; border:1px solid #dedfd5; border-radius:3px; background:#f6f5ef; color:#45554a; font-size:10px; font-weight:750; white-space:nowrap; }
+  .tt-seo .pill.good { border-color:#b8c9bb; background:#f0f5ef; color:#315b43; }
+  .tt-seo .pill.warn { border-color:#e3c6a6; background:#fff8ed; color:#8b5b23; }
+  .tt-seo .pill.bad { border-color:#e0b5ab; background:#fff5f2; color:#914638; }
+  .tt-seo .small { display:block; margin-top:5px; color:#68736c; font-size:11px; line-height:1.4; }
+  .tt-seo .issues { display:grid; gap:5px; min-width:175px; }
+  .tt-seo .issue { color:#6b5b41; font-size:11px; line-height:1.35; }
+  .tt-seo .issue.warning { color:#914638; }
+  .tt-seo .foot { display:flex; flex-wrap:wrap; gap:14px; margin-top:17px; color:#68736c; font-size:12px; }
+  .tt-seo .empty { padding:28px 18px; color:#68736c; text-align:center; }
+  @media(max-width:640px) {
+    .tt-seo .head .button { width:100%; justify-content:center; }
+    .tt-seo .metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .tt-seo .metric { padding:12px; }
+    .tt-seo .metric strong { font-size:22px; }
+    .tt-seo .toolbar { align-items:stretch; }
+    .tt-seo .toolbar input, .tt-seo .toolbar select, .tt-seo .toolbar button { width:100%; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="tt-seo">
+  <header class="head">
+    <div>
+      <p class="eyebrow">TradeThesis · Content operations</p>
+      <p class="intro">A practical audit of the public course overview pages. This checks the metadata you control in Course Builder and explains why a course is or is not eligible for search indexing. It does not inspect private lesson content or predict Google rankings.</p>
+    </div>
+    <a class="button" href="{{ course_builder_url }}">Open Course Builder →</a>
+  </header>
+
+  <div class="status" role="status">
+    <strong>Site-wide indexing: {% if global_indexing_enabled %}enabled{% else %}disabled{% endif %}</strong>
+    <span>{% if global_indexing_enabled %}This deployment allows eligible course overview pages to be indexed.{% else %}This deployment is protected from search indexing. Keep this disabled on staging; enable it only after the production domain and canonical URLs are configured.{% endif %}</span>
+  </div>
+
+  <section class="metrics" aria-label="SEO summary">
+    <div class="metric"><strong>{{ published_count }}</strong><span>Published courses</span></div>
+    <div class="metric"><strong>{{ indexable_count }}</strong><span>Eligible for indexing now</span></div>
+    <div class="metric"><strong>{{ blocked_count }}</strong><span>Published but not indexable</span></div>
+    <div class="metric"><strong>{{ attention_count }}</strong><span>Pages needing attention</span></div>
+    <div class="metric"><strong>{{ missing_description_count }}</strong><span>Missing descriptions</span></div>
+    <div class="metric"><strong>{{ missing_topic_count }}</strong><span>Primary topics not recorded</span></div>
+  </section>
+
+  <form class="toolbar" method="get">
+    <input type="search" name="q" value="{{ query }}" placeholder="Search course, slug or topic" aria-label="Search course, slug or topic">
+    <select name="filter" aria-label="Filter course pages">
+      <option value="all" {% if active_filter == "all" %}selected{% endif %}>All course pages</option>
+      <option value="attention" {% if active_filter == "attention" %}selected{% endif %}>Needs attention</option>
+      <option value="indexable" {% if active_filter == "indexable" %}selected{% endif %}>Eligible for indexing</option>
+      <option value="blocked" {% if active_filter == "blocked" %}selected{% endif %}>Published but blocked</option>
+    </select>
+    <button type="submit">Apply filters</button>
+    <a class="button secondary" href="{% url 'staff_admin_desk_seo' %}">Reset</a>
+  </form>
+
+  <div class="table-wrap">
+    {% if rows %}
+    <table>
+      <thead>
+        <tr><th>Course</th><th>Search title</th><th>Description</th><th>Indexability</th><th>Audit notes</th></tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td>
+            <a class="course-title" href="{{ course_builder_url }}">{{ row.course.title }}</a>
+            <span class="slug">{{ row.course.slug }} · {{ row.course.get_status_display }}</span>
+            <span class="small">{{ row.published_lesson_count }} published lessons</span>
+          </td>
+          <td>
+            {{ row.title }}
+            <span class="small">{{ row.title_source }} · {{ row.title|length }} characters</span>
+          </td>
+          <td>
+            {% if row.description %}
+              {{ row.description|truncatechars:145 }}
+              <span class="small">{{ row.description_source }} · {{ row.description|length }} characters</span>
+            {% else %}
+              <span class="pill bad">Missing</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if row.indexable %}
+              <span class="pill good">Eligible</span>
+              <span class="small">Course overview can be indexed</span>
+            {% else %}
+              <span class="pill warn">Not indexable</span>
+              {% for reason in row.indexability_reasons %}<span class="small">{{ reason }}</span>{% endfor %}
+            {% endif %}
+          </td>
+          <td>
+            <div class="issues">
+              {% for issue in row.issues %}
+                <span class="issue {% if issue.level == 'warning' %}warning{% endif %}"><strong>{{ issue.label }}:</strong> {{ issue.detail }}</span>
+              {% empty %}
+                <span class="pill good">No obvious metadata issues</span>
+              {% endfor %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <div class="empty">No course pages match this filter.</div>
+    {% endif %}
+  </div>
+
+  <div class="foot">
+    <a href="{{ robots_url }}">View Academy robots.txt ↗</a>
+    <a href="{{ sitemap_url }}">View Academy sitemap.xml ↗</a>
+    <span>SEO length suggestions are editorial guidance, not ranking guarantees.</span>
+  </div>
+</div>
+{% endblock %}
