@@ -133,6 +133,8 @@ class CourseBuilderProtectedVideoUploadTests(TestCase):
         )
         lesson = reloaded["modules"][0]["lessons"][0]
         self.assertEqual(lesson["id"], "lesson-local-1")
+        self.assertEqual(lesson["protectedVideo"]["id"], str(staged.pk))
+        self.assertEqual(lesson["protectedVideo"]["kind"], "staged")
         self.assertEqual(lesson["protectedVideo"]["status"], "stored_for_draft")
         self.assertEqual(
             lesson["protectedVideo"]["filename"],
@@ -214,6 +216,8 @@ class CourseBuilderProtectedVideoUploadTests(TestCase):
         editor_lesson = state["modules"][0]["lessons"][0]
 
         self.assertEqual(editor_lesson["id"], str(lesson.pk))
+        self.assertEqual(editor_lesson["protectedVideo"]["id"], str(video.pk))
+        self.assertEqual(editor_lesson["protectedVideo"]["kind"], "protected")
         self.assertEqual(editor_lesson["protectedVideo"]["status"], "ready")
         self.assertTrue(editor_lesson["protectedVideo"]["has_source"])
         self.assertNotIn(video.source_file.name, str(editor_lesson["protectedVideo"]))
