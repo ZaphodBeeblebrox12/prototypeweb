@@ -149,6 +149,83 @@ test("sidecar adapter indexes all existing Academy lesson content by stable IDs"
   assert.deepEqual(sidecar.references.tableIds, ["market-table"]);
 });
 
+test("published Lesson.content_json sidecars preserve figures, tables, regional content and learner tools", () => {
+  const sidecar = buildTradeThesisSidecarReferences({
+    id: LESSON_ID,
+    content_markdown: "![Structure](asset://" + ASSET_ID + ")",
+    content_json: {
+      asset_ids: [ASSET_ID],
+      figures: {
+        [ASSET_ID]: {
+          type: "image",
+          title: "Published figure",
+          alt: "Published alt text",
+          caption: "Published caption.",
+        },
+        "published-group": {
+          type: "image-group",
+          title: "Published group",
+          image_ids: [ASSET_ID],
+        },
+        "published-comparison": {
+          type: "comparison-cards",
+          title: "Published comparison",
+          cards: [{ title: "Observe", body: "Describe what is visible." }],
+        },
+      },
+      tables: {
+        "published-table": {
+          title: "Published table",
+          rows: [{ section: "body", cells: [{ text: "Evidence" }] }],
+        },
+      },
+      regional_blocks: {
+        "published-region": {
+          title: "Published inline region",
+          base_content: "Base copy.",
+          variants: [{ scope: "country", code: "IN", content: "India copy." }],
+        },
+      },
+      regional_lesson_content: {
+        "country:IN": "Complete published India lesson body.",
+      },
+      questions: [{
+        id: "published-question",
+        prompt: "Which choice describes the evidence?",
+        options: ["Evidence", "Prediction"],
+        image_asset_id: ASSET_ID,
+        correctIndex: 0,
+        explanation: "Private authoring explanation.",
+      }],
+      notebook: {
+        title: "Published notebook",
+        prompts: [{ label: "Observe", text: "Describe the chart." }],
+      },
+      reflection: {
+        prompt: "What would change your view?",
+        model_reasoning: "Private instructor context.",
+        chart_notes: "Visible chart notes.",
+      },
+      related_course_ids: [COURSE_ID],
+    },
+  });
+
+  assert.equal(sidecar.assets[ASSET_ID].alt, "Published alt text");
+  assert.equal(sidecar.assets[ASSET_ID].caption, "Published caption.");
+  assert.equal(sidecar.figures["published-group"].type, "image-group");
+  assert.equal(sidecar.figures["published-comparison"].type, "comparison-cards");
+  assert.equal(sidecar.tables["published-table"].rows[0].cells[0].text, "Evidence");
+  assert.equal(sidecar.regionalBlocks["published-region"].variants[0].code, "IN");
+  assert.equal(sidecar.regionalLessonContent["country:IN"], "Complete published India lesson body.");
+  assert.equal(sidecar.questions["published-question"].imageId, ASSET_ID);
+  assert.equal(Object.hasOwn(sidecar.questions["published-question"], "correctIndex"), false);
+  assert.equal(Object.hasOwn(sidecar.questions["published-question"], "explanation"), false);
+  assert.equal(sidecar.notebook.title, "Published notebook");
+  assert.equal(sidecar.reflection.prompt, "What would change your view?");
+  assert.equal(sidecar.reflection.modelReasoning, "Private instructor context.");
+  assert.deepEqual(sidecar.references.courseIds, [COURSE_ID]);
+});
+
 test("sidecar references never copy instructor answers or private video storage details", () => {
   const sidecar = buildTradeThesisSidecarReferences(sampleLesson());
   const question = sidecar.questions["question-01"];
