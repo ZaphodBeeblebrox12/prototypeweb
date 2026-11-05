@@ -2,6 +2,20 @@
 set -o errexit
 
 pip install -r requirements.txt
+
+# The isolated Tiptap editor is opt-in. Existing deployments do not need Node
+# unless the staff-only prototype is deliberately enabled.
+if [[ "${ACADEMY_TIPTAP_EDITOR_ENABLED:-false}" =~ ^(1|true|TRUE|yes|YES)$ ]]; then
+  if ! command -v npm >/dev/null 2>&1; then
+    echo "ACADEMY_TIPTAP_EDITOR_ENABLED requires Node.js and npm in the build environment." >&2
+    exit 1
+  fi
+  (
+    cd static_src/course-builder-tiptap
+    npm install --no-audit --no-fund
+    npm run build
+  )
+fi
 python manage.py collectstatic --noinput
 python manage.py migrate --noinput
 

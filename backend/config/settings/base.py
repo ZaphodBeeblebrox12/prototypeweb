@@ -212,6 +212,8 @@ ACADEMY_GITHUB_ASSET_TOKEN = (
 )
 ACADEMY_GITHUB_ASSET_BRANCH = "my-new-branch"
 ACADEMY_GITHUB_ASSET_PATH_PREFIX = env("ACADEMY_GITHUB_ASSET_PATH_PREFIX", default="course-assets")
+# Keep the replacement editor isolated until its authoring and parity tests pass.
+ACADEMY_TIPTAP_EDITOR_ENABLED = env.bool("ACADEMY_TIPTAP_EDITOR_ENABLED", default=False)
 ACADEMY_GITHUB_ASSET_TIMEOUT = env.int("ACADEMY_GITHUB_ASSET_TIMEOUT", default=15)
 # Google Drive is the preferred durable store. Keep all credentials in Render env vars.
 ACADEMY_GOOGLE_DRIVE_SERVICE_ACCOUNT_JSON = (

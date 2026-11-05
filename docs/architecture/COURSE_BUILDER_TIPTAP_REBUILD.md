@@ -168,3 +168,27 @@ Only after telemetry and regression tests show no remaining callers:
 ## Current scope
 
 This implementation phase adds the document contract and safe additive storage only. It does not activate Tiptap for authors, rewrite any course, alter learner rendering, publish content, or deploy to production.
+
+
+## Phase 2 prototype checkpoint — 5 November 2026
+
+A separate staff-only Tiptap authoring lab is being introduced at
+`/staff/course-builder/tiptap/`. It is protected by the existing
+`is_course_content_admin` policy and the opt-in
+`ACADEMY_TIPTAP_EDITOR_ENABLED` setting (default: false).
+
+The first shell uses a self-hosted, version-pinned Tiptap 3 bundle and supports
+basic text structure, marks, lists, quotations, code blocks, links, undo/redo,
+and contextual table actions. It can export the v1 lesson-document envelope
+as JSON for inspection.
+
+This prototype is deliberately not connected to Course Builder draft saves,
+published lessons, import/review, or learner rendering. It is a safe authoring
+sandbox until the Markdown adapters, custom TradeThesis nodes, server save
+contract, and browser round-trip tests are ready. The existing Course Builder
+route and assets are not replaced.
+
+To build the bundle, the deployment must have Node.js/npm and set
+`ACADEMY_TIPTAP_EDITOR_ENABLED=true`. The CI workflow builds the bundle
+independently. Do not enable the flag on staging until the deployment build
+has completed successfully.
