@@ -56,18 +56,6 @@ jobs:
       - name: Run type checking with mypy
         run: mypy apps/academy/ --follow-imports=silent
 
-      - name: Set up Node for the isolated Tiptap prototype
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Build the self-hosted Tiptap prototype bundle
-        working-directory: backend/static_src/course-builder-tiptap
-        run: |
-          npm install --no-audit --no-fund
-          npm run build
-          npm test
-
       - name: Collect static assets for test environment
         run: python manage.py collectstatic --noinput
 
@@ -76,3 +64,23 @@ jobs:
 
       - name: Run full test suite
         run: pytest --cov=apps --cov=integrations --cov-report=xml
+
+  tiptap:
+    name: Tiptap bundle and DOM compatibility tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/static_src/course-builder-tiptap
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Set up Node for the isolated Tiptap prototype
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Build the self-hosted Tiptap prototype bundle
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          npm test
