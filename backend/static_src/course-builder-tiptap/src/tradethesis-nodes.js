@@ -36,10 +36,13 @@ function createReferenceNode({ name, label, attributes, identifier, serialize })
       return [{
         tag: 'span[data-tt-node="' + name + '"]',
         getAttrs: element => Object.fromEntries(
-          attributes.map(attribute => [
-            attribute,
-            element.getAttribute("data-tt-" + kebabCase(attribute)),
-          ]),
+          attributes.map(attribute => {
+            const value = element.getAttribute("data-tt-" + kebabCase(attribute));
+            return [
+              attribute,
+              attribute === "comingSoon" ? value === "true" : value,
+            ];
+          }),
         ),
       }];
     },
