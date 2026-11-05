@@ -255,7 +255,9 @@ published `Lesson.content_json` shape and indexes:
 - Existing course/lesson references and marker IDs.
 
 Typed nodes carry stable IDs or audience keys; the existing sidecar stores keep
-the underlying authoring data. Instructor answers/explanations are excluded.
+the underlying authoring data. Question answer keys/correct indices and question
+explanations are excluded from the sidecar reference index. Reflection fields stay
+in their separate reflection sidecar and are not copied into the learner document.
 Private video file names, storage paths, HLS manifests, stream keys and
 encryption details are never copied into the document. Missing or mismatched
 references produce diagnostics, and adding sidecar-backed nodes is idempotent.
