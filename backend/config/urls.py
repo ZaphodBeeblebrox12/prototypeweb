@@ -16,6 +16,7 @@ from apps.admin_dashboard import staff_admin_desk
 from apps.academy.course_builder_preview import course_builder_preview
 from apps.academy.course_builder_tiptap import (
     course_builder_tiptap_api,
+    course_builder_tiptap_media_api,
     course_builder_tiptap_preview,
 )
 from apps.academy.course_builder_api import (
@@ -58,6 +59,7 @@ urlpatterns = [
     path("staff/course-builder/tiptap/", course_builder_tiptap_preview, name="staff_course_builder_tiptap_preview"),
     path("staff/course-builder/tiptap/api/", course_builder_tiptap_api, name="staff_course_builder_tiptap_api"),
     path("staff/course-builder/tiptap/api/<uuid:draft_id>/<str:lesson_id>/", course_builder_tiptap_api, name="staff_course_builder_tiptap_lesson_api"),
+    path("staff/course-builder/tiptap/api/<uuid:draft_id>/media/", course_builder_tiptap_media_api, name="staff_course_builder_tiptap_media_api"),
     path("staff/course-builder/", course_builder_preview, name="staff_course_builder_preview"),
     path("api/academy/catalogue/", public_course_catalogue, name="academy_public_catalogue"),
     path("staff/admin-desk/", staff_admin_desk, name="staff_admin_desk"),
