@@ -327,8 +327,7 @@ const legacyMarkdown = Node.create({
     name: "tradethesis_token",
     level: "inline",
     start(source) {
-      const index = source.indexOf("[[");
-      return index < 0 ? undefined : index;
+      return source.indexOf("[[");
     },
     tokenize(source, _tokens, _lexer) {
       const match = /^\[\[([^\]\r\n]{1,200})\]\]/.exec(source);
