@@ -118,6 +118,8 @@ def seo_dashboard(request):
             "issues": issues,
             "needs_attention": any(issue["level"] == "warning" for issue in issues),
             "published_lesson_count": course.published_lesson_count,
+            "primary_topic": _clean_text(course.seo_primary_topic),
+            "topic_overlap": False,
         })
 
     duplicate_counts = Counter(row["title"].casefold() for row in rows)
@@ -130,6 +132,39 @@ def seo_dashboard(request):
             })
             row["needs_attention"] = True
 
+    topic_groups = {}
+    for row in rows:
+        topic = row["primary_topic"]
+        if not topic:
+            continue
+        key = topic.casefold()
+        topic_groups.setdefault(
+            key, {"topic": topic, "courses": []}
+        )["courses"].append(row)
+
+    topic_clusters = []
+    for group in topic_groups.values():
+        group["course_count"] = len(group["courses"])
+        group["topic_overlap"] = group["course_count"] > 1
+        if group["topic_overlap"]:
+            for row in group["courses"]:
+                row["topic_overlap"] = True
+                row["issues"].append({
+                    "level": "advice",
+                    "label": "Shared primary topic",
+                    "detail": (
+                        f'{group["course_count"]} course pages use this primary topic. '
+                        "Review whether each page serves a distinct learner question "
+                        "and purpose."
+                    ),
+                })
+                row["needs_attention"] = True
+        topic_clusters.append(group)
+
+    topic_clusters.sort(
+        key=lambda group: (not group["topic_overlap"], group["topic"].casefold())
+    )
+
     published_count = sum(row["course"].status == Course.Status.PUBLISHED for row in rows)
     indexable_count = sum(row["indexable"] for row in rows)
     blocked_count = sum(
@@ -137,12 +172,14 @@ def seo_dashboard(request):
         for row in rows
     )
     missing_description_count = sum(row["description_source"] == "Missing" for row in rows)
-    missing_topic_count = sum(not _clean_text(row["course"].seo_primary_topic) for row in rows)
+    missing_topic_count = sum(not row["primary_topic"] for row in rows)
+    unique_topic_count = len(topic_clusters)
+    overlapping_topic_count = sum(group["topic_overlap"] for group in topic_clusters)
     attention_count = sum(row["needs_attention"] for row in rows)
 
     query = _clean_text(request.GET.get("q"))
     active_filter = request.GET.get("filter", "all")
-    if active_filter not in {"all", "attention", "indexable", "blocked"}:
+    if active_filter not in {"all", "attention", "indexable", "blocked", "topic-overlap"}:
         active_filter = "all"
 
     filtered_rows = rows
@@ -152,7 +189,7 @@ def seo_dashboard(request):
             row for row in filtered_rows
             if needle in row["course"].title.casefold()
             or needle in row["course"].slug.casefold()
-            or needle in _clean_text(row["course"].seo_primary_topic).casefold()
+            or needle in row["primary_topic"].casefold()
         ]
     if active_filter == "attention":
         filtered_rows = [row for row in filtered_rows if row["needs_attention"]]
@@ -163,6 +200,8 @@ def seo_dashboard(request):
             row for row in filtered_rows
             if row["course"].status == Course.Status.PUBLISHED and not row["indexable"]
         ]
+    elif active_filter == "topic-overlap":
+        filtered_rows = [row for row in filtered_rows if row["topic_overlap"]]
 
     context = {
         "rows": filtered_rows,
@@ -175,6 +214,9 @@ def seo_dashboard(request):
         "attention_count": attention_count,
         "missing_description_count": missing_description_count,
         "missing_topic_count": missing_topic_count,
+        "unique_topic_count": unique_topic_count,
+        "overlapping_topic_count": overlapping_topic_count,
+        "topic_clusters": topic_clusters,
         "course_builder_url": reverse("staff_course_builder_preview"),
         "robots_url": request.build_absolute_uri(reverse("academy_robots")),
         "sitemap_url": request.build_absolute_uri(reverse("academy_sitemap")),
