@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import { JSDOM } from "jsdom";
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
@@ -235,4 +236,70 @@ test("JSON-only TradeThesis blocks survive as typed references and block lossy M
   } finally {
     harness.close();
   }
+});
+
+
+function collectText(root) {
+  if (!root || typeof root !== "object") return "";
+  if (root.type === "text") return root.text || "";
+  return (root.content || []).map(collectText).join("");
+}
+
+test("Bollinger Bands course source parses and round-trips without losing lesson structure", () => {
+  const courseRoot = new URL("../../../../course-source/understand-bollinger-bands/", import.meta.url);
+  const manifest = JSON.parse(readFileSync(new URL("course-manifest.json", courseRoot), "utf8"));
+  let lessonCount = 0;
+  let imageCount = 0;
+  let tableCount = 0;
+
+  for (const module of manifest.modules) {
+    const source = readFileSync(new URL(module.source, courseRoot), "utf8");
+    lessonCount += (source.match(/^## Lesson \d+\.\d+/gm) || []).length;
+
+    const first = createEditor(source);
+    try {
+      const originalJson = first.editor.getJSON();
+      const markdown = first.editor.getMarkdown();
+      const originalImages = collectNodes(originalJson, "image").length;
+      const originalTables = collectNodes(originalJson, "table").length;
+      const originalHeadings = collectNodes(originalJson, "heading").length;
+
+      imageCount += originalImages;
+      tableCount += originalTables;
+
+      assert.ok(originalHeadings > 0, module.source + " should contain lesson headings");
+      const second = createEditor(markdown);
+      try {
+        const roundTripped = second.editor.getJSON();
+        assert.equal(
+          collectNodes(roundTripped, "image").length,
+          originalImages,
+          module.source + " image references must survive round-trip",
+        );
+        assert.equal(
+          collectNodes(roundTripped, "table").length,
+          originalTables,
+          module.source + " tables must survive round-trip",
+        );
+        assert.equal(
+          collectNodes(roundTripped, "heading").length,
+          originalHeadings,
+          module.source + " heading structure must survive round-trip",
+        );
+        assert.equal(
+          collectText(roundTripped),
+          collectText(originalJson),
+          module.source + " authored text must survive round-trip",
+        );
+      } finally {
+        second.close();
+      }
+    } finally {
+      first.close();
+    }
+  }
+
+  assert.equal(lessonCount, 30, "The manifest declares 30 Bollinger Bands lessons");
+  assert.equal(imageCount, 62, "The source package contains 62 image references");
+  assert.ok(tableCount > 0, "The course source includes structured Markdown tables");
 });
