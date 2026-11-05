@@ -2,6 +2,7 @@
 
 import re
 from collections import Counter
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -59,6 +60,7 @@ def seo_dashboard(request):
         .order_by("position", "title")
     )
 
+    course_builder_base_url = reverse("staff_course_builder_preview")
     rows = []
     for course in courses:
         title = _clean_text(course.seo_title) or f"{course.title} · TradeThesis Academy"
@@ -105,6 +107,9 @@ def seo_dashboard(request):
 
         rows.append({
             "course": course,
+            "builder_url": (
+                f"{course_builder_base_url}?{urlencode({'open_course': course.slug)}"
+            ),
             "title": title,
             "description": description,
             "title_source": "Custom" if _clean_text(course.seo_title) else "Course title fallback",
@@ -217,7 +222,7 @@ def seo_dashboard(request):
         "unique_topic_count": unique_topic_count,
         "overlapping_topic_count": overlapping_topic_count,
         "topic_clusters": topic_clusters,
-        "course_builder_url": reverse("staff_course_builder_preview"),
+        "course_builder_url": course_builder_base_url,
         "robots_url": request.build_absolute_uri(reverse("academy_robots")),
         "sitemap_url": request.build_absolute_uri(reverse("academy_sitemap")),
     }
