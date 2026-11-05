@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Structured editor lab · TradeThesis{% endblock %}
+{% block page_title %}Structured editor lab{% endblock %}
+{% block extra_meta %}<meta name="robots" content="noindex, nofollow">{% endblock %}
+{% block extra_css %}
+<style>
+  .tt-tiptap-lab { max-width:1120px; margin:0 auto; color:#29382e; }
+  .tt-tiptap-lab__intro { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; margin-bottom:18px; }
+  .tt-tiptap-lab__eyebrow { margin:0 0 6px; color:#7a6241; font-size:10px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; }
+  .tt-tiptap-lab__title { margin:0; color:#29382e; font:400 clamp(25px,3vw,34px)/1.12 Georgia,serif; letter-spacing:-.025em; }
+  .tt-tiptap-lab__lede { max-width:700px; margin:8px 0 0; color:#687268; font-size:13px; line-height:1.65; }
+  .tt-tiptap-lab__notice { margin:18px 0; padding:12px 14px; border-left:3px solid #b27a42; background:#f5eddf; color:#5d4a31; font-size:12px; line-height:1.6; }
+  .tt-tiptap-lab__notice strong { color:#45351f; }
+  .tt-tiptap-lab__workspace { overflow:clip; border:1px solid #ded8ca; background:#fffdf9; }
+  .tt-tiptap-lab__topline { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid #ded8ca; background:#f8f5ee; }
+  .tt-tiptap-lab__topline strong { font-size:12px; }
+  .tt-tiptap-lab__state { color:#687268; font-size:11px; }
+  .tt-tiptap-lab__toolbar { position:sticky; top:0; z-index:5; display:flex; flex-wrap:wrap; align-items:center; gap:5px; padding:9px 12px; border-bottom:1px solid #ded8ca; background:#fffdf9; }
+  .tt-tiptap-lab__toolbar button, .tt-tiptap-lab__toolbar select, .tt-tiptap-lab__export button { min-height:32px; border:1px solid #d8d2c5; border-radius:3px; background:#fffdf9; color:#344b3d; padding:5px 9px; font:600 11px/1.2 system-ui,sans-serif; }
+  .tt-tiptap-lab__toolbar button:hover, .tt-tiptap-lab__toolbar select:hover, .tt-tiptap-lab__export button:hover { background:#f1eee5; }
+  .tt-tiptap-lab__toolbar button[aria-pressed="true"] { border-color:#68846f; background:#e8eee5; color:#274d36; }
+  .tt-tiptap-lab__toolbar button:disabled { opacity:.4; cursor:not-allowed; }
+  .tt-tiptap-lab__toolbar .separator { width:1px; height:22px; margin:0 3px; background:#ded8ca; }
+  .tt-tiptap-lab__table-tools { display:none; flex-wrap:wrap; gap:5px; padding:8px 12px; border-bottom:1px solid #ded8ca; background:#f5f7f1; }
+  .tt-tiptap-lab__table-tools.is-visible { display:flex; }
+  .tt-tiptap-lab__table-tools span { align-self:center; margin-right:3px; color:#687268; font-size:10px; font-weight:800; }
+  .tt-tiptap-lab__table-tools button { min-height:29px; border:1px solid #ced8cb; border-radius:3px; background:#fff; padding:4px 8px; color:#355a46; font-size:10px; }
+  .tt-tiptap-lab__canvas { min-height:440px; padding:clamp(22px,4vw,54px); }
+  .tt-tiptap-lab__canvas .ProseMirror { min-height:360px; outline:none; color:#29382e; font:400 15px/1.85 Georgia,serif; overflow-wrap:anywhere; }
+  .tt-tiptap-lab__canvas .ProseMirror > *:first-child { margin-top:0; }
+  .tt-tiptap-lab__canvas .ProseMirror h1, .tt-tiptap-lab__canvas .ProseMirror h2, .tt-tiptap-lab__canvas .ProseMirror h3 { color:#355a46; font-family:Georgia,serif; font-weight:500; line-height:1.2; }
+  .tt-tiptap-lab__canvas .ProseMirror h1 { font-size:30px; }
+  .tt-tiptap-lab__canvas .ProseMirror h2 { font-size:25px; }
+  .tt-tiptap-lab__canvas .ProseMirror h3 { font-size:20px; }
+  .tt-tiptap-lab__canvas .ProseMirror p { margin:0 0 15px; }
+  .tt-tiptap-lab__canvas .ProseMirror blockquote { margin:20px 0; padding:4px 0 4px 18px; border-left:3px solid #ba795a; color:#5e675c; }
+  .tt-tiptap-lab__canvas .ProseMirror pre { overflow:auto; padding:14px; border:1px solid #ded8ca; background:#f5f2ea; color:#354338; font:12px/1.65 ui-monospace,monospace; }
+  .tt-tiptap-lab__canvas .ProseMirror code { background:#f0ede5; padding:2px 4px; font: .88em ui-monospace,monospace; }
+  .tt-tiptap-lab__canvas .ProseMirror pre code { padding:0; background:transparent; }
+  .tt-tiptap-lab__canvas .ProseMirror a { color:#356b52; text-decoration:underline; text-underline-offset:3px; }
+  .tt-tiptap-lab__canvas .ProseMirror ul, .tt-tiptap-lab__canvas .ProseMirror ol { padding-left:26px; margin:0 0 16px; }
+  .tt-tiptap-lab__canvas .ProseMirror hr { margin:26px 0; border:0; border-top:1px solid #cfc7b7; }
+  .tt-tiptap-lab__canvas .ProseMirror table { width:100%; border-collapse:collapse; table-layout:fixed; margin:20px 0; overflow:hidden; }
+  .tt-tiptap-lab__canvas .ProseMirror th, .tt-tiptap-lab__canvas .ProseMirror td { min-width:1em; border:1px solid #cfc7b7; padding:8px 10px; text-align:left; vertical-align:top; }
+  .tt-tiptap-lab__canvas .ProseMirror th { background:#f3f0e8; font-weight:700; }
+  .tt-tiptap-lab__canvas .ProseMirror .selectedCell { background:#e9f0e5; }
+  .tt-tiptap-lab__export { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; padding:13px 16px; border-top:1px solid #ded8ca; background:#f8f5ee; }
+  .tt-tiptap-lab__export p { margin:0; color:#687268; font-size:10px; line-height:1.5; }
+  .tt-tiptap-lab__export-actions { display:flex; flex-wrap:wrap; gap:6px; }
+  .tt-tiptap-lab__json { margin-top:14px; border:1px solid #ded8ca; background:#fffdf9; }
+  .tt-tiptap-lab__json summary { padding:11px 14px; color:#355a46; font-size:11px; font-weight:800; cursor:pointer; }
+  .tt-tiptap-lab__json pre { max-height:400px; overflow:auto; margin:0; padding:14px; border-top:1px solid #ded8ca; color:#425043; background:#f7f4ed; font:11px/1.6 ui-monospace,monospace; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .tt-tiptap-lab__error { padding:20px; color:#8b332d; font-size:13px; }
+  @media(max-width:650px) {
+    .tt-tiptap-lab__intro { display:block; }
+    .tt-tiptap-lab__canvas { min-height:360px; padding:22px 17px; }
+    .tt-tiptap-lab__toolbar { position:relative; }
+    .tt-tiptap-lab__export { align-items:flex-start; flex-direction:column; }
+  }
+</style>
+{% endblock %}
+{% block content %}
+<section class="tt-tiptap-lab" data-tiptap-lab>
+  <header class="tt-tiptap-lab__intro">
+    <div>
+      <p class="tt-tiptap-lab__eyebrow">TradeThesis · isolated prototype</p>
+      <h2 class="tt-tiptap-lab__title">A structured writing surface</h2>
+      <p class="tt-tiptap-lab__lede">This is the replacement editor’s separate test space. Try formatting, lists, links and tables without changing any existing course or lesson.</p>
+    </div>
+  </header>
+
+  <div class="tt-tiptap-lab__notice" role="note">
+    <strong>Prototype only — not connected to course drafts.</strong>
+    Changes remain in this page. Exporting the document gives you a JSON test file; nothing is written to the Academy or learner-facing course content.
+  </div>
+
+  <section class="tt-tiptap-lab__workspace" aria-label="Structured lesson editor">
+    <div class="tt-tiptap-lab__topline">
+      <strong>Lesson content · Untitled test document</strong>
+      <span class="tt-tiptap-lab__state" data-editor-state>Loading editor…</span>
+    </div>
+
+    <div class="tt-tiptap-lab__toolbar" role="toolbar" aria-label="Text formatting">
+      <select data-heading aria-label="Paragraph style">
+        <option value="paragraph">Paragraph</option>
+        <option value="1">Heading 1</option>
+        <option value="2">Heading 2</option>
+        <option value="3">Heading 3</option>
+      </select>
+      <span class="separator" aria-hidden="true"></span>
+      <button type="button" data-action="bold" aria-label="Bold" aria-pressed="false"><strong>B</strong></button>
+      <button type="button" data-action="italic" aria-label="Italic" aria-pressed="false"><em>I</em></button>
+      <button type="button" data-action="underline" aria-label="Underline" aria-pressed="false"><u>U</u></button>
+      <button type="button" data-action="strike" aria-label="Strikethrough" aria-pressed="false"><s>S</s></button>
+      <button type="button" data-action="link" aria-label="Insert link">Link</button>
+      <span class="separator" aria-hidden="true"></span>
+      <button type="button" data-action="bulletList" aria-label="Bulleted list">• List</button>
+      <button type="button" data-action="orderedList" aria-label="Numbered list">1. List</button>
+      <button type="button" data-action="blockquote" aria-label="Block quote">Quote</button>
+      <button type="button" data-action="codeBlock" aria-label="Code block">Code</button>
+      <button type="button" data-action="horizontalRule" aria-label="Horizontal divider">Divider</button>
+      <button type="button" data-action="table" aria-label="Insert a table">Table</button>
+      <span class="separator" aria-hidden="true"></span>
+      <button type="button" data-action="undo" aria-label="Undo">Undo</button>
+      <button type="button" data-action="redo" aria-label="Redo">Redo</button>
+    </div>
+
+    <div class="tt-tiptap-lab__table-tools" data-table-tools aria-label="Table actions">
+      <span>TABLE</span>
+      <button type="button" data-action="addRowBefore">Row above</button>
+      <button type="button" data-action="addRowAfter">Row below</button>
+      <button type="button" data-action="deleteRow">Delete row</button>
+      <button type="button" data-action="addColumnBefore">Column left</button>
+      <button type="button" data-action="addColumnAfter">Column right</button>
+      <button type="button" data-action="deleteColumn">Delete column</button>
+      <button type="button" data-action="deleteTable">Delete table</button>
+    </div>
+
+    <div class="tt-tiptap-lab__canvas" data-editor-mount aria-label="Lesson writing area"></div>
+    <div class="tt-tiptap-lab__error" data-editor-error hidden>Editor assets could not be loaded. The existing Course Builder is unaffected.</div>
+
+    <footer class="tt-tiptap-lab__export">
+      <p>Keyboard shortcuts: Ctrl/Cmd+B bold · Ctrl/Cmd+I italic · Ctrl/Cmd+U underline.</p>
+      <div class="tt-tiptap-lab__export-actions">
+        <button type="button" data-export="copy">Copy JSON</button>
+        <button type="button" data-export="download">Download JSON</button>
+      </div>
+    </footer>
+  </section>
+
+  <details class="tt-tiptap-lab__json">
+    <summary>Inspect structured lesson JSON</summary>
+    <pre data-json-output aria-live="polite">{}</pre>
+  </details>
+</section>
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'academy/course-builder-tiptap.js' %}" defer></script>
+{% endblock %}

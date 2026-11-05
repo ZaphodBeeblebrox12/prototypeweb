@@ -1,0 +1,185 @@
+import { Editor } from "@tiptap/core";
+import StarterKit from "@tiptap/starter-kit";
+import Table from "@tiptap/extension-table";
+
+(() => {
+  const root = document.querySelector("[data-tiptap-lab]");
+  if (!root) return;
+
+  const mount = root.querySelector("[data-editor-mount]");
+  const state = root.querySelector("[data-editor-state]");
+  const jsonOutput = root.querySelector("[data-json-output]");
+  const tableTools = root.querySelector("[data-table-tools]");
+  const error = root.querySelector("[data-editor-error]");
+  const headingSelect = root.querySelector("[data-heading]");
+  const formatButtons = [...root.querySelectorAll("[data-action]")];
+
+  if (!mount || !state || !jsonOutput || !tableTools) return;
+
+  const documentEnvelope = document => ({
+    format: "tradethesis.lesson-document",
+    version: 1,
+    document,
+  });
+
+  let editor;
+  const actionMap = {
+    bold: () => editor.chain().focus().toggleBold().run(),
+    italic: () => editor.chain().focus().toggleItalic().run(),
+    underline: () => editor.chain().focus().toggleUnderline().run(),
+    strike: () => editor.chain().focus().toggleStrike().run(),
+    bulletList: () => editor.chain().focus().toggleBulletList().run(),
+    orderedList: () => editor.chain().focus().toggleOrderedList().run(),
+    blockquote: () => editor.chain().focus().toggleBlockquote().run(),
+    codeBlock: () => editor.chain().focus().toggleCodeBlock().run(),
+    horizontalRule: () => editor.chain().focus().setHorizontalRule().run(),
+    table: () => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
+    undo: () => editor.chain().focus().undo().run(),
+    redo: () => editor.chain().focus().redo().run(),
+    addRowBefore: () => editor.chain().focus().addRowBefore().run(),
+    addRowAfter: () => editor.chain().focus().addRowAfter().run(),
+    deleteRow: () => editor.chain().focus().deleteRow().run(),
+    addColumnBefore: () => editor.chain().focus().addColumnBefore().run(),
+    addColumnAfter: () => editor.chain().focus().addColumnAfter().run(),
+    deleteColumn: () => editor.chain().focus().deleteColumn().run(),
+    deleteTable: () => editor.chain().focus().deleteTable().run(),
+  };
+
+  function currentDocument() {
+    return documentEnvelope(editor.getJSON());
+  }
+
+  function syncJson() {
+    jsonOutput.textContent = JSON.stringify(currentDocument(), null, 2);
+    state.textContent = "Prototype · not saved";
+  }
+
+  function syncToolbar() {
+    if (!editor) return;
+    const active = {
+      bold: editor.isActive("bold"),
+      italic: editor.isActive("italic"),
+      underline: editor.isActive("underline"),
+      strike: editor.isActive("strike"),
+      bulletList: editor.isActive("bulletList"),
+      orderedList: editor.isActive("orderedList"),
+      blockquote: editor.isActive("blockquote"),
+      codeBlock: editor.isActive("codeBlock"),
+    };
+    for (const button of formatButtons) {
+      const action = button.dataset.action;
+      if (Object.prototype.hasOwnProperty.call(active, action)) {
+        button.setAttribute("aria-pressed", String(active[action]));
+      }
+    }
+    tableTools.classList.toggle("is-visible", editor.isActive("table"));
+    const heading = editor.getAttributes("heading").level;
+    headingSelect.value = editor.isActive("heading") ? String(heading || 1) : "paragraph";
+    root.querySelector('[data-action="undo"]').disabled = !editor.can().undo();
+    root.querySelector('[data-action="redo"]').disabled = !editor.can().redo();
+  }
+
+  function safeLink(value) {
+    try {
+      const parsed = new URL(value, window.location.origin);
+      return ["http:", "https:", "mailto:"].includes(parsed.protocol) ? parsed.href : "";
+    } catch {
+      return "";
+    }
+  }
+
+  function addLink() {
+    const previous = editor.getAttributes("link").href || "";
+    const entered = window.prompt("Enter a link address", previous);
+    if (entered === null) return;
+    const href = safeLink(entered.trim());
+    if (!href) {
+      window.alert("Use a valid http, https or mailto link.");
+      return;
+    }
+    editor.chain().focus().extendMarkRange("link").setLink({ href }).run();
+  }
+
+  editor = new Editor({
+    element: mount,
+    extensions: [
+      StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
+      Table.configure({ resizable: true }),
+    ],
+    content: {
+      type: "doc",
+      content: [{ type: "paragraph" }],
+    },
+    editorProps: {
+      attributes: {
+        "aria-label": "Lesson content",
+        spellcheck: "true",
+      },
+    },
+    onCreate: () => {
+      syncJson();
+      syncToolbar();
+      state.textContent = "Ready · prototype only";
+    },
+    onUpdate: () => {
+      syncJson();
+      syncToolbar();
+    },
+    onSelectionUpdate: syncToolbar,
+    onTransaction: syncToolbar,
+  });
+
+  root.addEventListener("click", event => {
+    const button = event.target.closest("[data-action]");
+    if (!button || button.disabled) return;
+    const action = button.dataset.action;
+    if (action === "link") {
+      addLink();
+      return;
+    }
+    const run = actionMap[action];
+    if (run) run();
+  });
+
+  headingSelect.addEventListener("change", () => {
+    const value = headingSelect.value;
+    if (value === "paragraph") {
+      editor.chain().focus().setParagraph().run();
+    } else {
+      editor.chain().focus().setHeading({ level: Number(value) }).run();
+    }
+  });
+
+  root.addEventListener("click", async event => {
+    const button = event.target.closest("[data-export]");
+    if (!button) return;
+    const json = JSON.stringify(currentDocument(), null, 2);
+    if (button.dataset.export === "copy") {
+      try {
+        await navigator.clipboard.writeText(json);
+        state.textContent = "JSON copied · not saved";
+      } catch {
+        state.textContent = "Clipboard unavailable · use Download JSON";
+      }
+      return;
+    }
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = "tradethesis-lesson-document-v1.json";
+    anchor.click();
+    URL.revokeObjectURL(url);
+    state.textContent = "JSON downloaded · not saved";
+  });
+
+  window.addEventListener("beforeunload", () => editor?.destroy(), { once: true });
+})();
+
+// If the application bundle was loaded but initialization failed, expose a
+// visible fallback rather than leaving a blank editor surface.
+window.addEventListener("error", event => {
+  if (!String(event?.message || "").includes("tiptap")) return;
+  const fallback = document.querySelector("[data-editor-error]");
+  if (fallback) fallback.hidden = false;
+});

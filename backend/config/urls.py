@@ -14,6 +14,7 @@ from apps.accounts.member_access import member_access_login, member_entry
 from apps.accounts.telegram_views import TelegramCallbackView
 from apps.admin_dashboard import staff_admin_desk
 from apps.academy.course_builder_preview import course_builder_preview
+from apps.academy.course_builder_tiptap import course_builder_tiptap_preview
 from apps.academy.course_builder_api import (
     course_builder_api,
     course_builder_asset,
@@ -49,6 +50,7 @@ urlpatterns = [
     path("staff/google-drive/connect/", google_drive_oauth_start, name="academy_google_drive_oauth_start"),
     path("staff/google-drive/oauth/callback/", google_drive_oauth_callback, name="academy_google_drive_oauth_callback"),
     path("staff/course-builder/assets/<uuid:import_id>/<uuid:asset_id>/", course_builder_asset, name="staff_course_builder_asset"),
+    path("staff/course-builder/tiptap/", course_builder_tiptap_preview, name="staff_course_builder_tiptap_preview"),
     path("staff/course-builder/", course_builder_preview, name="staff_course_builder_preview"),
     path("api/academy/catalogue/", public_course_catalogue, name="academy_public_catalogue"),
     path("staff/admin-desk/", staff_admin_desk, name="staff_admin_desk"),
