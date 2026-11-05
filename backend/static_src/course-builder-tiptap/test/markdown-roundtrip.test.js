@@ -310,3 +310,26 @@ test("Bollinger Bands course source parses and round-trips without losing lesson
   assert.equal(imageCount, 62, "The source package contains 62 image references");
   assert.ok(tableCount > 0, "The course source includes structured Markdown tables");
 });
+
+test("reference-looking text inside inline and fenced code stays code", () => {
+  const marker = "[[regional-block:india]]";
+  const tick = String.fromCharCode(96);
+  const source = [
+    "Inline " + tick + marker + tick + " should remain literal code.",
+    "",
+    "~~~text",
+    marker,
+    "~~~",
+  ].join("\n");
+  const harness = createEditor(source);
+  try {
+    const json = harness.editor.getJSON();
+    assert.equal(collectNodes(json, "regionalBlock").length, 0);
+    assert.equal(collectNodes(json, "codeBlock").length, 1);
+    const serialized = harness.editor.getMarkdown();
+    assert.ok(serialized.includes(tick + marker + tick));
+    assert.ok(serialized.includes("~~~text\n" + marker + "\n~~~"));
+  } finally {
+    harness.close();
+  }
+});
