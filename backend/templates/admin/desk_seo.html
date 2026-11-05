@@ -21,6 +21,14 @@
   .tt-seo .status { display:flex; flex-wrap:wrap; align-items:center; gap:9px; margin:14px 0; padding:12px 14px; border:1px solid #dedfd5; border-radius:5px; background:#fbfaf6; }
   .tt-seo .status strong { font-size:13px; }
   .tt-seo .status span { color:#68736c; font-size:12px; }
+  .tt-seo .topic-map { margin:22px 0 18px; }
+  .tt-seo .topic-map-head { display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:10px; }
+  .tt-seo .topic-map-head h2 { margin:0; color:#26342f; font:400 21px/1.2 Georgia,serif; }
+  .tt-seo .topic-map-head p { max-width:660px; margin:0; color:#68736c; font-size:12px; line-height:1.5; }
+  .tt-seo .topic-members { display:grid; gap:6px; }
+  .tt-seo .topic-member { display:block; color:#315b43; font-size:12px; font-weight:700; text-decoration:none; }
+  .tt-seo .topic-member span { display:block; margin-top:2px; color:#68736c; font-size:10px; font-weight:500; }
+  .tt-seo .topic-read { color:#68736c; font-size:11px; line-height:1.45; }
   .tt-seo .toolbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:20px 0 12px; }
   .tt-seo .toolbar input, .tt-seo .toolbar select { min-height:38px; padding:8px 10px; border:1px solid #cfd3ca; border-radius:4px; background:#fffefa; color:#26342f; }
   .tt-seo .toolbar input { min-width:min(100%,270px); }
@@ -58,7 +66,7 @@
   <header class="head">
     <div>
       <p class="eyebrow">TradeThesis · Content operations</p>
-      <p class="intro">A practical audit of the public course overview pages. This checks the metadata you control in Course Builder and explains why a course is or is not eligible for search indexing. It does not inspect private lesson content or predict Google rankings.</p>
+      <p class="intro">A practical audit of public course overview pages. Review the search title and description, see which course owns each primary topic, and spot possible overlap before changing copy. This is an editorial planning aid—not keyword-volume data or a prediction of Google rankings.</p>
     </div>
     <a class="button" href="{{ course_builder_url }}">Open Course Builder →</a>
   </header>
@@ -75,6 +83,50 @@
     <div class="metric"><strong>{{ attention_count }}</strong><span>Pages needing attention</span></div>
     <div class="metric"><strong>{{ missing_description_count }}</strong><span>Missing descriptions</span></div>
     <div class="metric"><strong>{{ missing_topic_count }}</strong><span>Primary topics not recorded</span></div>
+    <div class="metric"><strong>{{ unique_topic_count }}</strong><span>Distinct primary topics</span></div>
+    <div class="metric"><strong>{{ overlapping_topic_count }}</strong><span>Topics shared across pages</span></div>
+  </section>
+
+  <section class="topic-map" aria-labelledby="topicMapTitle">
+    <div class="topic-map-head">
+      <div>
+        <p class="eyebrow">Editorial planning</p>
+        <h2 id="topicMapTitle">Primary topic map</h2>
+      </div>
+      <p>Each course overview should have a clear purpose. Shared topics are review prompts, not proof of search cannibalisation or a ranking penalty.</p>
+    </div>
+    <div class="table-wrap">
+      {% if topic_clusters %}
+      <table>
+        <thead><tr><th>Primary topic</th><th>Course pages assigned</th><th>Editorial read</th></tr></thead>
+        <tbody>
+          {% for cluster in topic_clusters %}
+          <tr>
+            <td><strong>{{ cluster.topic }}</strong></td>
+            <td>
+              <div class="topic-members">
+                {% for row in cluster.courses %}
+                <a class="topic-member" href="{{ course_builder_url }}">{{ row.course.title }}<span>{{ row.course.slug }} · {{ row.course.get_status_display }}</span></a>
+                {% endfor %}
+              </div>
+            </td>
+            <td>
+              {% if cluster.topic_overlap %}
+                <span class="pill warn">Shared by {{ cluster.course_count }} courses</span>
+                <span class="small">Check that each page answers a different learner question and offers a distinct next step.</span>
+              {% else %}
+                <span class="pill good">Single assignment</span>
+                <span class="small">No other course currently uses this exact primary topic.</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">No primary topics have been assigned yet. Add one in the Course Builder SEO &amp; Discoverability tab.</div>
+      {% endif %}
+    </div>
   </section>
 
   <form class="toolbar" method="get">
@@ -84,6 +136,7 @@
       <option value="attention" {% if active_filter == "attention" %}selected{% endif %}>Needs attention</option>
       <option value="indexable" {% if active_filter == "indexable" %}selected{% endif %}>Eligible for indexing</option>
       <option value="blocked" {% if active_filter == "blocked" %}selected{% endif %}>Published but blocked</option>
+      <option value="topic-overlap" {% if active_filter == "topic-overlap" %}selected{% endif %}>Shared primary topic</option>
     </select>
     <button type="submit">Apply filters</button>
     <a class="button secondary" href="{% url 'staff_admin_desk_seo' %}">Reset</a>
