@@ -502,7 +502,7 @@ def course_builder_tiptap_api(request, draft_id=None, lesson_id=None):
             "draft_id": str(record.pk),
             "lesson_id": str(lesson_id),
             "updated_at": record.updated_at.isoformat(),
-            "learner_preview_url": reverse("academy:course-import-preview", args=[record.pk]),
+            "learner_preview_url": _learner_preview_url(record, import_lesson),
         }
     )
     add_never_cache_headers(response)
