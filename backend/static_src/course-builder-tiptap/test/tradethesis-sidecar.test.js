@@ -149,6 +149,32 @@ test("sidecar adapter indexes all existing Academy lesson content by stable IDs"
   assert.deepEqual(sidecar.references.tableIds, ["market-table"]);
 });
 
+test("saved image sidecars hydrate the private preview URL without changing the asset ID", () => {
+  const previewUrl = "/staff/course-builder/assets/draft/" + ASSET_ID + "/";
+  const sidecar = buildTradeThesisSidecarReferences({
+    id: LESSON_ID,
+    content: "![Market structure](asset://" + ASSET_ID + ")",
+    images: [{
+      id: "builder-image",
+      assetUuid: ASSET_ID,
+      alt: "Market structure",
+      data: previewUrl,
+    }],
+  });
+  const resolved = resolveTradeThesisDocument({
+    type: "doc",
+    content: [{
+      type: "image",
+      attrs: { src: "asset://" + ASSET_ID, assetId: ASSET_ID },
+    }],
+  }, sidecar);
+
+  assert.equal(sidecar.assets[ASSET_ID].previewUrl, previewUrl);
+  assert.equal(resolved.document.content[0].attrs.assetId, ASSET_ID);
+  assert.equal(resolved.document.content[0].attrs.previewUrl, previewUrl);
+  assert.deepEqual(resolved.diagnostics, []);
+});
+
 test("published Lesson.content_json sidecars preserve figures, tables, regional content and learner tools", () => {
   const sidecar = buildTradeThesisSidecarReferences({
     id: LESSON_ID,
