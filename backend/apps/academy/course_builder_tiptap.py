@@ -29,7 +29,7 @@ from PIL import Image, UnidentifiedImageError
 from .content_rendering import validate_markdown_source
 from .course_card_utils import is_course_card_recommendable
 from .lesson_document import LessonDocumentError, validate_lesson_document
-from .models import Course, CourseImport, CourseImportAsset, Lesson
+from .models import Course, CourseImport, CourseImportAsset, CourseImportVideo, Lesson, ProtectedLessonVideo
 from .permissions import is_course_content_admin
 
 
@@ -524,12 +524,25 @@ def course_builder_tiptap_api(request, draft_id=None, lesson_id=None):
         import_lesson = _payload_lesson(payload, lesson_id)
         if state_lesson is None or import_lesson is None:
             return JsonResponse({"detail": "That lesson no longer exists in this saved draft."}, status=409)
-        if video_url_supplied and external_video_url and state_lesson.get("protectedVideo"):
+        staged_protected_video = record.videos.filter(
+            lesson_id=str(lesson_id),
+        ).exclude(source_file="").exists()
+        live_protected_video = bool(
+            record.target_course_id
+            and ProtectedLessonVideo.objects.filter(
+                lesson_id=str(lesson_id),
+                lesson__module__course_id=record.target_course_id,
+            ).exclude(source_file="").exists()
+        )
+        if video_url_supplied and external_video_url and (
+            staged_protected_video or live_protected_video
+        ):
             return JsonResponse(
                 {
                     "detail": (
                         "This lesson already has a protected video. Keep that protected stream "
-                        "as the lesson video, or use an ordinary external link in the lesson body."
+                        "as the lesson video, or remove it through the existing Course Builder "
+                        "before switching to an external video link."
                     )
                 },
                 status=409,
