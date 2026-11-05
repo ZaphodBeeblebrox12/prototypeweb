@@ -83,6 +83,10 @@ class LessonDocumentContractTests(SimpleTestCase):
                         "attrs": {"blockId": "region-apac"},
                     },
                     {
+                        "type": "regionalLessonVariant",
+                        "attrs": {"variantKey": "country:IN"},
+                    },
+                    {
                         "type": "practiceQuestion",
                         "attrs": {"questionId": "question-1"},
                     },

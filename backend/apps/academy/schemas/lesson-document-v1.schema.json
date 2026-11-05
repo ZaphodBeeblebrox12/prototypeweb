@@ -52,6 +52,7 @@
             "courseCard",
             "lessonReference",
             "regionalBlock",
+            "regionalLessonVariant",
             "practiceQuestion",
             "videoBlock",
             "notebookBlock",

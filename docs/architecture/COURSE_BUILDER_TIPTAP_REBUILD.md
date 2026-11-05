@@ -222,3 +222,31 @@ its exported syntax. The marker's text survives re-import, but the escaped
 Markdown is not currently executable by the existing learner resolver. A custom
 TradeThesis Markdown spec is therefore required before any exported Markdown can
 be used as the compatibility mirror.
+
+## Phase 3A checkpoint — TradeThesis reference extensions
+
+The isolated Tiptap lab now registers typed placeholders for the current Markdown reference
+markers used by the Academy renderer:
+
+- `[[teaching-figure:...]]` and `[[image-group:...]]`
+- `[[lesson:UUID]]` and `[[lesson-card:UUID]]`
+- `[[course-card:UUID]]` and `[[course-card:coming-soon:UUID]]`
+- `[[regional-block:...]]`, `[[table-block:...]]`, and `[[lesson-tab:idea|examples|practice]]`
+
+Recognised marker nodes retain the exact source token and expose stable identifiers in the
+versioned JSON tree. Unknown `[[...]]` markers become explicit `legacyMarkdown` nodes;
+they are not converted into ordinary text or silently discarded. `asset://UUID` image
+references are represented as image nodes with stable asset IDs and visible placeholders;
+the prototype does not request those asset URLs or embed protected media.
+
+The extension registry also defines typed placeholders for comparison figures, practice
+questions, protected video references, notebooks, reflections and callouts. These records
+are not hydrated from the existing `content_json` metadata yet. Where no safe, lossless
+Markdown representation exists, Markdown export raises a compatibility error instead
+of silently dropping the block.
+
+The Node test suite now round-trips the complete Bollinger Bands source package from its
+manifest (30 lessons, 62 image references and the included Markdown tables), alongside
+targeted tests for each recognised marker family and unknown-marker preservation.
+This remains a browser-side prototype only: no lesson loader, draft-save endpoint,
+publishing path, learner renderer or database migration is introduced by this phase.

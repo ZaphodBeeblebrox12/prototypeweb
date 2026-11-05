@@ -38,6 +38,9 @@
   .tt-tiptap-lab__canvas .ProseMirror pre { overflow:auto; padding:14px; border:1px solid #ded8ca; background:#f5f2ea; color:#354338; font:12px/1.65 ui-monospace,monospace; }
   .tt-tiptap-lab__canvas .ProseMirror code { background:#f0ede5; padding:2px 4px; font: .88em ui-monospace,monospace; }
   .tt-tiptap-lab__canvas .ProseMirror pre code { padding:0; background:transparent; }
+  .tt-tiptap-lab__canvas .ProseMirror [data-tt-node] { display:inline-flex; max-width:100%; align-items:center; margin:2px 3px; padding:3px 7px; border:1px solid #d8d2c5; border-radius:2px; background:#f4f0e7; color:#53604f; font:600 10px/1.45 system-ui,sans-serif; vertical-align:middle; white-space:normal; overflow-wrap:anywhere; }
+  .tt-tiptap-lab__canvas .ProseMirror [data-tt-node="legacyMarkdown"] { border-color:#c98f72; background:#fbefe8; color:#80513c; }
+  .tt-tiptap-lab__canvas .ProseMirror img { max-width:100%; height:auto; }
   .tt-tiptap-lab__canvas .ProseMirror a { color:#356b52; text-decoration:underline; text-underline-offset:3px; }
   .tt-tiptap-lab__canvas .ProseMirror ul, .tt-tiptap-lab__canvas .ProseMirror ol { padding-left:26px; margin:0 0 16px; }
   .tt-tiptap-lab__canvas .ProseMirror hr { margin:26px 0; border:0; border-top:1px solid #cfc7b7; }
@@ -141,12 +144,13 @@
     <summary>Test Markdown import and export</summary>
     <div class="tt-tiptap-lab__markdown-body">
       <p class="tt-tiptap-lab__markdown-warning">
-        <strong>Experimental conversion.</strong> The Markdown extension is currently beta.
-        This tool covers standard Markdown and basic GFM tables only. It does not yet map
-        TradeThesis figure references, regional blocks, course cards, notebook prompts,
-        practice questions, reflections or protected-video tokens to custom nodes.
-        Markdown export also escapes bracketed reference markers; it is not yet compatible
-        with the legacy learner renderer. Do not use it to overwrite lesson content.
+        <strong>Compatibility preview — not a lesson import or save.</strong> Standard Markdown,
+        tables, asset-backed image references, and the current figure, image-group, course/lesson,
+        regional, table and lesson-tab markers are recognised. Linked asset metadata, regional
+        variants, question records, notebook prompts and protected-video records are not loaded
+        here; recognised items appear as reference placeholders only. Unknown markers remain
+        explicit legacy nodes. JSON-only blocks deliberately stop Markdown export until a
+        lossless representation exists. Do not use this sandbox to overwrite lesson content.
       </p>
       <label for="tiptapMarkdownInput">Markdown source / export</label>
       <textarea id="tiptapMarkdownInput" data-markdown-input spellcheck="false"
