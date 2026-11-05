@@ -116,6 +116,10 @@ class CourseBuilderProtectedVideoUploadTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 201, response.content)
+        self.assertEqual(response.json()["video"]["kind"], "staged")
+        self.assertEqual(response.json()["video"]["status"], "stored_for_draft")
+        self.assertTrue(response.json()["video"]["id"])
+        self.assertTrue(response.json()["updated_at"])
         staged = CourseImportVideo.objects.get(
             course_import=draft,
             lesson_id="lesson-local-1",
