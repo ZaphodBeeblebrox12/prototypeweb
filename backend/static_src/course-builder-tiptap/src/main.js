@@ -472,6 +472,7 @@ import {
   draftSelect.addEventListener("change", () => {
     populateLessons(selectedDraft());
   });
+  lessonSelect.addEventListener("change", syncSaveControls);
   loadLessonButton.addEventListener("click", loadLesson);
   saveButton.addEventListener("click", saveDraft);
 
