@@ -298,6 +298,7 @@ import {
     const withSidecars = appendTradeThesisSidecarNodes(currentDocument(), sidecar);
     editor.commands.setContent(withSidecars.document || withSidecars);
     const resolved = resolveTradeThesisDocument(currentDocument(), sidecar);
+    editor.commands.setContent(resolved.document.document || resolved.document);
     const blocking = resolved.diagnostics.filter(item => item.reason !== "preserved-opaque-marker");
     hasCompatibilityBlockers = blocking.length > 0;
     displaySidecars(sidecar);
