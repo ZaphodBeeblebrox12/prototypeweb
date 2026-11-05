@@ -8,6 +8,7 @@ remain the source of lifecycle and preview behaviour.
 import hashlib
 import json
 import uuid
+from contextlib import suppress
 from copy import deepcopy
 from io import BytesIO
 from pathlib import Path
@@ -29,7 +30,13 @@ from PIL import Image, UnidentifiedImageError
 from .content_rendering import validate_markdown_source
 from .course_card_utils import is_course_card_recommendable
 from .lesson_document import LessonDocumentError, validate_lesson_document
-from .models import Course, CourseImport, CourseImportAsset, CourseImportVideo, Lesson, ProtectedLessonVideo
+from .models import (
+    Course,
+    CourseImport,
+    CourseImportAsset,
+    Lesson,
+    ProtectedLessonVideo,
+)
 from .permissions import is_course_content_admin
 
 
@@ -1006,20 +1013,16 @@ def course_builder_tiptap_media_api(request, draft_id):
             }
     except (OSError, ValueError) as exc:
         if staged_file_name and staged_storage:
-            try:
+            with suppress(Exception):
                 staged_storage.delete(staged_file_name)
-            except Exception:
-                pass
         return JsonResponse(
             {"detail": "The image could not be saved to Academy asset storage: " + str(exc)},
             status=503,
         )
     except Exception:
         if staged_file_name and staged_storage:
-            try:
+            with suppress(Exception):
                 staged_storage.delete(staged_file_name)
-            except Exception:
-                pass
         raise
 
     response = JsonResponse(response_payload, status=201 if uploaded is not None else 200)
