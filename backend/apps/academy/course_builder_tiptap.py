@@ -151,13 +151,19 @@ def _document_reference_errors(document, lesson_state, lesson_payload, lesson_id
                     reason = "image asset is not part of this saved lesson"
         elif node_type in {"courseFigure", "comparisonFigure"}:
             reference = str(attrs.get("figureId") or "")
-            if reference not in figures and reference not in comparison_ids and reference not in image_ids:
-                reason = "figure reference is not part of this saved lesson"
+            figure = figures.get(reference)
+            figure_type = figure.get("type") if isinstance(figure, dict) else ""
+            if node_type == "comparisonFigure":
+                if reference not in comparison_ids and figure_type != "comparison-cards":
+                    reason = "comparison figure is not part of this saved lesson"
+            elif reference not in image_ids and figure_type != "image":
+                reason = "image figure is not part of this saved lesson"
         elif node_type == "imageGroup":
             reference = str(attrs.get("groupId") or "")
             figure = figures.get(reference)
-            if reference not in image_group_ids and not (
-                isinstance(figure, dict) and figure.get("type") == "image-group"
+            if not (
+                reference in image_group_ids
+                or (isinstance(figure, dict) and figure.get("type") == "image-group")
             ):
                 reason = "image-group reference is not part of this saved lesson"
         elif node_type == "tableReference":
@@ -446,6 +452,8 @@ def course_builder_tiptap_api(request, draft_id=None, lesson_id=None):
         import_lesson["content_markdown"] = markdown
         import_lesson["content_json"] = import_content_json
 
+        if record.status == CourseImport.Status.REJECTED:
+            payload.pop("review_feedback", None)
         payload["builder_state"] = state
         encoded = json.dumps(
             payload,
@@ -470,7 +478,6 @@ def course_builder_tiptap_api(request, draft_id=None, lesson_id=None):
         record.content_hash = new_content_hash
         if record.status == CourseImport.Status.REJECTED:
             record.status = CourseImport.Status.DRAFT
-            record.payload.pop("review_feedback", None)
         record.save(update_fields=["payload", "content_hash", "status", "updated_at"])
 
     response = JsonResponse(
