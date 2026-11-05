@@ -218,16 +218,14 @@ test("JSON-only TradeThesis blocks survive as typed references and block lossy M
   try {
     harness.editor.commands.setContent({
       type: "doc",
-      content: [{
-        type: "paragraph",
-        content: [
-          { type: "practiceQuestion", attrs: { questionId: "question-01" } },
-          { type: "videoBlock", attrs: { videoId: "video-01" } },
-          { type: "notebookBlock", attrs: { notebookId: "notebook-01" } },
-          { type: "reflectionBlock", attrs: { reflectionId: "reflection-01" } },
-          { type: "callout", attrs: { tone: "note", title: "Context" } },
-        ],
-      }],
+      content: [
+        { type: "paragraph", content: [{ type: "text", text: "The lesson body remains separate." }] },
+        { type: "practiceQuestion", attrs: { questionId: "question-01" } },
+        { type: "videoBlock", attrs: { videoId: "video-01" } },
+        { type: "notebookBlock", attrs: { notebookId: "notebook-01" } },
+        { type: "reflectionBlock", attrs: { reflectionId: "reflection-01" } },
+        { type: "callout", attrs: { calloutId: "callout-01", tone: "note", title: "Context" } },
+      ],
     });
 
     const json = harness.editor.getJSON();
@@ -236,6 +234,14 @@ test("JSON-only TradeThesis blocks survive as typed references and block lossy M
     assert.equal(collectNodes(json, "notebookBlock")[0]?.attrs.notebookId, "notebook-01");
     assert.equal(collectNodes(json, "reflectionBlock")[0]?.attrs.reflectionId, "reflection-01");
     assert.equal(collectNodes(json, "callout")[0]?.attrs.title, "Context");
+    assert.equal(
+      harness.dom.window.document.querySelectorAll('div[data-tt-node="practiceQuestion"]').length,
+      1,
+    );
+    assert.equal(
+      harness.dom.window.document.querySelectorAll('div[data-tt-node="videoBlock"]').length,
+      1,
+    );
     assert.throws(
       () => harness.editor.getMarkdown(),
       /no lossless Markdown representation yet/,
