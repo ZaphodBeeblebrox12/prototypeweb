@@ -224,6 +224,7 @@ test("JSON-only TradeThesis blocks survive as typed references and block lossy M
         { type: "videoBlock", attrs: { videoId: "video-01" } },
         { type: "notebookBlock", attrs: { notebookId: "notebook-01" } },
         { type: "reflectionBlock", attrs: { reflectionId: "reflection-01" } },
+        { type: "regionalLessonVariant", attrs: { variantKey: "country:IN" } },
         { type: "callout", attrs: { calloutId: "callout-01", tone: "note", title: "Context" } },
       ],
     });
@@ -233,6 +234,7 @@ test("JSON-only TradeThesis blocks survive as typed references and block lossy M
     assert.equal(collectNodes(json, "videoBlock")[0]?.attrs.videoId, "video-01");
     assert.equal(collectNodes(json, "notebookBlock")[0]?.attrs.notebookId, "notebook-01");
     assert.equal(collectNodes(json, "reflectionBlock")[0]?.attrs.reflectionId, "reflection-01");
+    assert.equal(collectNodes(json, "regionalLessonVariant")[0]?.attrs.variantKey, "country:IN");
     assert.equal(collectNodes(json, "callout")[0]?.attrs.title, "Context");
     assert.equal(
       harness.dom.window.document.querySelectorAll('div[data-tt-node="practiceQuestion"]').length,
