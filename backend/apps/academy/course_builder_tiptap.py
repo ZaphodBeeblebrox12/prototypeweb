@@ -322,7 +322,7 @@ def _editor_lesson_response(request, record, lesson_id):
             },
             "lesson": safe_lesson,
             "expected_updated_at": record.updated_at.isoformat(),
-            "learner_preview_url": _learner_preview_url(record, import_lesson),
+            "learner_preview_url": _learner_preview_url(record, lesson_payload),
         }
     )
     add_never_cache_headers(response)
