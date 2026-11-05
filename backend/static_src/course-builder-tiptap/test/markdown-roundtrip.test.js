@@ -39,6 +39,7 @@ function createEditor(content, contentType = "markdown") {
   const editor = new Editor(options);
   return {
     editor,
+    dom,
     close() {
       editor.destroy();
       dom.window.close();
@@ -197,6 +198,8 @@ test("asset-backed Markdown images retain their stable asset ID", () => {
     assert.equal(image.attrs.assetId, assetId);
     assert.equal(image.attrs.src, "asset://" + assetId);
     assert.equal(harness.editor.getMarkdown(), source);
+    assert.ok(harness.dom.window.document.querySelector('[data-tt-node="image"][data-tt-asset-id="' + assetId + '"]'));
+    assert.equal(harness.dom.window.document.querySelector("img"), null);
   } finally {
     harness.close();
   }
