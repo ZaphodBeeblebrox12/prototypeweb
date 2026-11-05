@@ -283,3 +283,70 @@ connect the sandbox to live draft loading/saving, publishing, review or learner
 rendering. Those are Phase 4 parity and integration tasks. The legacy Course
 Builder remains the live editing path and is not modified or deployed by this
 checkpoint.
+
+
+## Phase 4 implementation checkpoint — 5 November 2026
+
+The isolated staff Tiptap route now connects to saved Course Builder drafts through
+a separate API. The existing /staff/course-builder/ route remains unchanged.
+
+### Draft loading and saving
+
+- The editor lists editable CourseImport drafts and loads one selected lesson
+  at a time. It can open new drafts and saved revisions created through the
+  existing Course Builder workflow.
+- A lesson with no lesson_document is imported from its existing Markdown
+  mirror. A supported v1 document is opened from content_json.lesson_document.
+- The editor hydrates typed references from the existing image, figure, table,
+  regional, question, notebook, reflection and protected-video records.
+- Save writes the versioned JSON document into content_json.lesson_document
+  and updates the Markdown compatibility mirror in the same CourseImport
+  draft snapshot. It does not write to a live Course or Lesson row.
+- The save request carries the draft's updated_at revision token. A stale tab
+  receives HTTP 409 and cannot overwrite a newer save. A deleted, submitted or
+  otherwise non-editable draft is rejected. Rejected drafts return to editable
+  Draft status only after a successful save.
+- Instructor answer keys and explanations are removed from the browser load
+  response. They remain in their existing instructor-material payload.
+- The browser and server both check sidecar references before accepting a save.
+  Missing or mismatched assets, figures, tables, questions, video, notebook,
+  reflection or regional references block the save.
+
+### Preview and lifecycle parity
+
+The editor exposes the existing Academy course-import-preview page for the
+selected saved draft. That page uses the same learner lesson template and
+legacy Academy renderer as the current published lesson view. It resolves the
+saved Markdown compatibility mirror with the same figure/table/regional,
+question, notebook, reflection and protected-video records.
+
+Tiptap is not a publishing interface. Review, approval, publication, course
+offers, pricing, access grants and protected-video processing remain in their
+existing Academy services. The old Course Builder remains available as the
+fallback. An administrator can first use its existing Edit published course
+flow to create a reviewable draft, save it, and then open that saved revision
+in the Tiptap preview route.
+
+### Explicit compatibility limits
+
+- Unknown legacyMarkdown markers keep their original token and can be saved
+  without conversion to ordinary text.
+- JSON-only question, protected-video, notebook, reflection and whole-lesson
+  regional references stay in their respective existing Academy sidecars.
+  Their document nodes are not serialized as fake learner Markdown.
+- Callout nodes remain read-only: the existing Academy learner renderer has no
+  corresponding callout component, so the browser and server block a save
+  rather than omit callout content in the learner preview.
+- Unknown document versions remain read-only until a compatible editor is
+  available.
+
+### Rollout boundary
+
+Phase 4 is still a staff-only, opt-in preview. The feature flag remains off by
+default. No database migration, automatic conversion of existing lessons,
+staging/production deployment, direct edit of live lesson rows, publication,
+or removal of the legacy editor is included in this checkpoint.
+
+The Phase 4 acceptance tests cover draft listing, lesson load, private answer
+key isolation, JSON/Markdown save, preserved sidecars, stale-revision rejection,
+server-side reference validation and the existing Academy learner preview.
