@@ -83,4 +83,9 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           npm run build
-          npm test
+
+      - name: Run Markdown and complete-course compatibility tests
+        run: npm run test:markdown
+
+      - name: Run TradeThesis sidecar and privacy tests
+        run: npm run test:sidecar
