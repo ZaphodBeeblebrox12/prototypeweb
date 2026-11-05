@@ -1,8 +1,11 @@
 import json
 import uuid
+from io import BytesIO
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from PIL import Image
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
@@ -451,6 +454,44 @@ class CourseBuilderTiptapPreviewTests(TestCase):
         self.assertEqual(
             next(item for item in record.payload["assets"] if item["stable_asset_id"] == str(stable_asset_id))["asset_key"],
             asset.asset_key,
+        )
+
+    @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
+    def test_image_upload_uses_existing_academy_asset_storage_and_returns_preview(self):
+        record, lesson_id = self.create_saved_draft()
+        png = BytesIO()
+        Image.new("RGB", (4, 4), color=(245, 245, 245)).save(png, format="PNG")
+        storage = CourseImportAsset._meta.get_field("file").storage
+        with patch.object(
+            storage,
+            "save",
+            return_value="academy/course-imports/tiptap-upload/test-image.png",
+        ) as storage_save:
+            response = self.client.post(
+                reverse("staff_course_builder_tiptap_media_api", args=[record.pk]),
+                data={
+                    "expected_updated_at": record.updated_at.isoformat(),
+                    "lesson_id": lesson_id,
+                    "file": SimpleUploadedFile(
+                        "test-image.png",
+                        png.getvalue(),
+                        content_type="image/png",
+                    ),
+                },
+            )
+        self.assertEqual(response.status_code, 201, response.content)
+        storage_save.assert_called_once()
+        image = response.json()["image"]
+        self.assertTrue(image["assetUuid"])
+        self.assertIn(
+            reverse("staff_course_builder_asset", args=[record.pk, image["assetUuid"]]),
+            image["data"],
+        )
+        record.refresh_from_db()
+        self.assertEqual(record.assets.count(), 1)
+        self.assertEqual(
+            record.payload["builder_state"]["modules"][0]["lessons"][0]["images"][0]["assetUuid"],
+            image["assetUuid"],
         )
 
     @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
