@@ -1,6 +1,7 @@
 import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { TableKit } from "@tiptap/extension-table";
+import { Markdown } from "@tiptap/markdown";
 
 (() => {
   const root = document.querySelector("[data-tiptap-lab]");
@@ -9,6 +10,8 @@ import { TableKit } from "@tiptap/extension-table";
   const mount = root.querySelector("[data-editor-mount]");
   const state = root.querySelector("[data-editor-state]");
   const jsonOutput = root.querySelector("[data-json-output]");
+  const markdownInput = root.querySelector("[data-markdown-input]");
+  const markdownStatus = root.querySelector("[data-markdown-status]");
   const tableTools = root.querySelector("[data-table-tools]");
   const error = root.querySelector("[data-editor-error]");
   const headingSelect = root.querySelector("[data-heading]");
@@ -105,6 +108,7 @@ import { TableKit } from "@tiptap/extension-table";
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3] } }),
       TableKit.configure({ table: { resizable: true } }),
+      Markdown.configure({ markedOptions: { gfm: true } }),
     ],
     content: {
       type: "doc",
@@ -150,6 +154,63 @@ import { TableKit } from "@tiptap/extension-table";
     }
   });
 
+  root.addEventListener("click", async event => {
+    const button = event.target.closest("[data-markdown]");
+    if (!button || !markdownInput || !markdownStatus) return;
+
+    const action = button.dataset.markdown;
+    if (action === "import") {
+      const source = markdownInput.value;
+      if (!source.trim()) {
+        markdownStatus.textContent = "Paste Markdown into the box first.";
+        return;
+      }
+      const confirmed = window.confirm(
+        "Replace the editor contents with this Markdown? This test importer handles standard Markdown only. TradeThesis-specific blocks and reference tokens are not converted yet."
+      );
+      if (!confirmed) return;
+      try {
+        editor.commands.setContent(source, { contentType: "markdown" });
+        markdownStatus.textContent = "Imported as standard Markdown. Review any TradeThesis-specific reference tokens manually.";
+        state.textContent = "Markdown imported · prototype only";
+      } catch (importError) {
+        markdownStatus.textContent = "Markdown could not be imported: " + String(importError?.message || "Unknown conversion error.");
+      }
+      return;
+    }
+
+    let markdown;
+    try {
+      markdown = editor.getMarkdown();
+    } catch (exportError) {
+      markdownStatus.textContent = "Markdown export failed: " + String(exportError?.message || "Unknown conversion error.");
+      return;
+    }
+    markdownInput.value = markdown;
+    if (action === "export") {
+      markdownStatus.textContent = "Current editor content exported to the Markdown box.";
+      return;
+    }
+    if (action === "copy") {
+      try {
+        await navigator.clipboard.writeText(markdown);
+        markdownStatus.textContent = "Markdown copied to clipboard.";
+      } catch {
+        markdownStatus.textContent = "Clipboard unavailable. Select and copy the Markdown in the box.";
+      }
+      return;
+    }
+    if (action === "download") {
+      const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "tradethesis-lesson-test.md";
+      anchor.click();
+      URL.revokeObjectURL(url);
+      markdownStatus.textContent = "Markdown file downloaded.";
+    }
+  });
   root.addEventListener("click", async event => {
     const button = event.target.closest("[data-export]");
     if (!button) return;

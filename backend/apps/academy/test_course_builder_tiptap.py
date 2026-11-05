@@ -29,6 +29,11 @@ class CourseBuilderTiptapPreviewTests(TestCase):
         self.assertContains(response, "not connected to course drafts")
         self.assertContains(response, "course-builder-tiptap.js")
         self.assertContains(response, "Download JSON")
+        self.assertContains(response, "Test Markdown import and export")
+        self.assertContains(response, "Replace editor from Markdown")
+        self.assertContains(response, "Export editor to Markdown")
+        self.assertContains(response, "currently beta")
+        self.assertContains(response, "TradeThesis figure references")
         self.assertNotContains(response, "staff_course_builder_api")
 
     @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)

@@ -52,6 +52,14 @@
   .tt-tiptap-lab__json summary { padding:11px 14px; color:#355a46; font-size:11px; font-weight:800; cursor:pointer; }
   .tt-tiptap-lab__json pre { max-height:400px; overflow:auto; margin:0; padding:14px; border-top:1px solid #ded8ca; color:#425043; background:#f7f4ed; font:11px/1.6 ui-monospace,monospace; white-space:pre-wrap; overflow-wrap:anywhere; }
   .tt-tiptap-lab__error { padding:20px; color:#8b332d; font-size:13px; }
+  .tt-tiptap-lab__markdown { margin-top:14px; border:1px solid #ded8ca; background:#fffdf9; }
+  .tt-tiptap-lab__markdown summary { padding:11px 14px; color:#355a46; font-size:11px; font-weight:800; cursor:pointer; }
+  .tt-tiptap-lab__markdown-body { display:grid; gap:10px; padding:14px; border-top:1px solid #ded8ca; }
+  .tt-tiptap-lab__markdown-warning { margin:0; padding:10px 12px; border-left:3px solid #b27a42; background:#f5eddf; color:#5d4a31; font-size:11px; line-height:1.6; }
+  .tt-tiptap-lab__markdown textarea { width:100%; min-height:190px; resize:vertical; border:1px solid #d8d2c5; border-radius:3px; padding:12px; color:#344b3d; background:#fff; font:12px/1.6 ui-monospace,monospace; }
+  .tt-tiptap-lab__markdown-actions { display:flex; flex-wrap:wrap; gap:6px; }
+  .tt-tiptap-lab__markdown-actions button { min-height:32px; border:1px solid #d8d2c5; border-radius:3px; background:#fffdf9; color:#344b3d; padding:5px 9px; font:600 11px/1.2 system-ui,sans-serif; }
+  .tt-tiptap-lab__markdown-status { margin:0; color:#687268; font-size:10px; line-height:1.5; }
   @media(max-width:650px) {
     .tt-tiptap-lab__intro { display:block; }
     .tt-tiptap-lab__canvas { min-height:360px; padding:22px 17px; }
@@ -129,6 +137,28 @@
     </footer>
   </section>
 
+  <details class="tt-tiptap-lab__markdown">
+    <summary>Test Markdown import and export</summary>
+    <div class="tt-tiptap-lab__markdown-body">
+      <p class="tt-tiptap-lab__markdown-warning">
+        <strong>Experimental conversion.</strong> The Markdown extension is currently beta.
+        This tool covers standard Markdown and basic GFM tables only. It does not yet map
+        TradeThesis figure references, regional blocks, course cards, notebook prompts,
+        practice questions, reflections or protected-video tokens to custom nodes.
+        Do not use it to overwrite existing lesson content.
+      </p>
+      <label for="tiptapMarkdownInput">Markdown source / export</label>
+      <textarea id="tiptapMarkdownInput" data-markdown-input spellcheck="false"
+        placeholder="# Lesson heading&#10;&#10;Paste standard Markdown here, or export the current editor content into this box."></textarea>
+      <div class="tt-tiptap-lab__markdown-actions">
+        <button type="button" data-markdown="import">Replace editor from Markdown</button>
+        <button type="button" data-markdown="export">Export editor to Markdown</button>
+        <button type="button" data-markdown="copy">Copy Markdown</button>
+        <button type="button" data-markdown="download">Download .md</button>
+      </div>
+      <p class="tt-tiptap-lab__markdown-status" data-markdown-status aria-live="polite">Nothing imported or exported yet.</p>
+    </div>
+  </details>
   <details class="tt-tiptap-lab__json">
     <summary>Inspect structured lesson JSON</summary>
     <pre data-json-output aria-live="polite">{}</pre>

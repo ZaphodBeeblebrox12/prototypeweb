@@ -192,3 +192,20 @@ To build the bundle, the deployment must have Node.js/npm and set
 `ACADEMY_TIPTAP_EDITOR_ENABLED=true`. The CI workflow builds the bundle
 independently. Do not enable the flag on staging until the deployment build
 has completed successfully.
+
+
+## Markdown adapter prototype note — 5 November 2026
+
+The isolated authoring lab now includes an experimental Markdown import/export
+panel using the open-source `@tiptap/markdown` extension, pinned to the same
+Tiptap release as the editor. It is enabled only in the staff prototype and
+is not used to save or migrate any existing lesson.
+
+The upstream Markdown extension is currently beta. Its documented limitations
+include unsupported comments and limited table-cell child content. Standard
+Markdown/GFM import is useful for testing ordinary prose, but it is not our
+production compatibility adapter. TradeThesis-specific markers (asset IDs,
+figures, regional variants, course/lesson references, quizzes, notebooks,
+reflections and video references) still require explicit custom parsing and
+serialization. Until those adapters are tested, the legacy Markdown field
+remains untouched and the import panel warns authors not to overwrite lessons.
