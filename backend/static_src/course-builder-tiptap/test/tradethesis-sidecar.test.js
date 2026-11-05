@@ -302,6 +302,30 @@ test("document resolver enriches assets and distinguishes comparison figures", (
   assert.deepEqual(resolved.diagnostics, []);
 });
 
+test("image figures resolve and callouts remain blocked until learner-renderer parity exists", () => {
+  const sidecar = buildTradeThesisSidecarReferences(sampleLesson());
+  const resolved = resolveTradeThesisDocument({
+    type: "doc",
+    content: [{
+      type: "paragraph",
+      content: [{
+        type: "courseFigure",
+        attrs: { figureId: ASSET_ID, rawToken: "[[teaching-figure:" + ASSET_ID + "]]" },
+      }],
+    }, {
+      type: "callout",
+      attrs: { calloutId: "risk-note", tone: "warning", title: "Risk" },
+    }],
+  }, sidecar);
+
+  assert.equal(resolved.document.content[0].content[0].type, "courseFigure");
+  assert.deepEqual(resolved.diagnostics, [{
+    nodeType: "callout",
+    id: "risk-note",
+    reason: "callout-renderer-not-supported",
+  }]);
+});
+
 test("sidecar-backed blocks become typed ID-only document nodes and append idempotently", () => {
   const sidecar = buildTradeThesisSidecarReferences(sampleLesson());
   const nodes = createTradeThesisSidecarNodes(sidecar);
