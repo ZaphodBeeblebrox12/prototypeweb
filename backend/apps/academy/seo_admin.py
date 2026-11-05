@@ -107,8 +107,9 @@ def seo_dashboard(request):
 
         rows.append({
             "course": course,
-            "builder_url": (
-                f"{course_builder_base_url}?{urlencode({'open_course': course.slug)}"
+            "builder_url": "{}?{}".format(
+                course_builder_base_url,
+                urlencode({"open_course": course.slug}),
             ),
             "title": title,
             "description": description,
