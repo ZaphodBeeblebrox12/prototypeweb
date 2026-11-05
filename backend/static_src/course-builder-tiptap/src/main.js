@@ -2,7 +2,7 @@ import { Editor } from "@tiptap/core";
 import StarterKit from "@tiptap/starter-kit";
 import { TableKit } from "@tiptap/extension-table";
 import { Markdown } from "@tiptap/markdown";
-import { TradeThesisExtensions } from "./tradethesis-nodes.js";
+import { TradeThesisExtensions, prepareTradeThesisMarkdown } from "./tradethesis-nodes.js";
 
 (() => {
   const root = document.querySelector("[data-tiptap-lab]");
@@ -172,7 +172,7 @@ import { TradeThesisExtensions } from "./tradethesis-nodes.js";
       );
       if (!confirmed) return;
       try {
-        editor.commands.setContent(source, { contentType: "markdown" });
+        editor.commands.setContent(prepareTradeThesisMarkdown(source), { contentType: "markdown" });
         markdownStatus.textContent = "Imported Markdown with typed TradeThesis reference placeholders. Linked records are not loaded.";
         state.textContent = "Markdown imported · prototype only";
       } catch (importError) {
