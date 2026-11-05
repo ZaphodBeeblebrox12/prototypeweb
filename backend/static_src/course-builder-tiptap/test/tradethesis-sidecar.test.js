@@ -153,6 +153,8 @@ test("published Lesson.content_json sidecars preserve figures, tables, regional 
   const sidecar = buildTradeThesisSidecarReferences({
     id: LESSON_ID,
     content_markdown: "![Structure](asset://" + ASSET_ID + ")",
+    contentJson: {},
+    regionalContent: {},
     content_json: {
       asset_ids: [ASSET_ID],
       figures: {
@@ -224,6 +226,32 @@ test("published Lesson.content_json sidecars preserve figures, tables, regional 
   assert.equal(sidecar.reflection.prompt, "What would change your view?");
   assert.equal(sidecar.reflection.modelReasoning, "Private instructor context.");
   assert.deepEqual(sidecar.references.courseIds, [COURSE_ID]);
+});
+
+test("legacy Markdown asset tokens remain stable without an asset_ids sidecar list", () => {
+  const sidecar = buildTradeThesisSidecarReferences({
+    id: LESSON_ID,
+    content_markdown: "![Market structure](asset://" + ASSET_ID + ")",
+    content_json: {},
+  });
+  assert.deepEqual(sidecar.assets[ASSET_ID], {
+    id: ASSET_ID,
+    title: "",
+    alt: "",
+    caption: "",
+  });
+
+  const resolved = resolveTradeThesisDocument({
+    type: "doc",
+    content: [{
+      type: "paragraph",
+      content: [{
+        type: "image",
+        attrs: { src: "asset://" + ASSET_ID, alt: "", title: null },
+      }],
+    }],
+  }, sidecar);
+  assert.deepEqual(resolved.diagnostics, []);
 });
 
 test("sidecar references never copy instructor answers or private video storage details", () => {
