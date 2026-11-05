@@ -168,3 +168,57 @@ Only after telemetry and regression tests show no remaining callers:
 ## Current scope
 
 This implementation phase adds the document contract and safe additive storage only. It does not activate Tiptap for authors, rewrite any course, alter learner rendering, publish content, or deploy to production.
+
+
+## Phase 2 prototype checkpoint — 5 November 2026
+
+A separate staff-only Tiptap authoring lab is being introduced at
+`/staff/course-builder/tiptap/`. It is protected by the existing
+`is_course_content_admin` policy and the opt-in
+`ACADEMY_TIPTAP_EDITOR_ENABLED` setting (default: false).
+
+The first shell uses a self-hosted, version-pinned Tiptap 3 bundle and supports
+basic text structure, marks, lists, quotations, code blocks, links, undo/redo,
+and contextual table actions. It can export the v1 lesson-document envelope
+as JSON for inspection.
+
+This prototype is deliberately not connected to Course Builder draft saves,
+published lessons, import/review, or learner rendering. It is a safe authoring
+sandbox until the Markdown adapters, custom TradeThesis nodes, server save
+contract, and browser round-trip tests are ready. The existing Course Builder
+route and assets are not replaced.
+
+To build the bundle, the deployment must have Node.js/npm and set
+`ACADEMY_TIPTAP_EDITOR_ENABLED=true`. The CI workflow builds the bundle
+independently. Do not enable the flag on staging until the deployment build
+has completed successfully.
+
+
+## Markdown adapter prototype note — 5 November 2026
+
+The isolated authoring lab now includes an experimental Markdown import/export
+panel using the open-source `@tiptap/markdown` extension, pinned to the same
+Tiptap release as the editor. It is enabled only in the staff prototype and
+is not used to save or migrate any existing lesson.
+
+The upstream Markdown extension is currently beta. Its documented limitations
+include unsupported comments and limited table-cell child content. Standard
+Markdown/GFM import is useful for testing ordinary prose, but it is not our
+production compatibility adapter. TradeThesis-specific markers (asset IDs,
+figures, regional variants, course/lesson references, quizzes, notebooks,
+reflections and video references) still require explicit custom parsing and
+serialization. Until those adapters are tested, the legacy Markdown field
+remains untouched and the import panel warns authors not to overwrite lessons.
+
+
+The prototype now has Node-based DOM tests for ordinary Markdown formatting,
+GFM tables, and preservation of the current plain-text TradeThesis reference
+tokens. These tests run during the Academy CI bundle build.
+
+
+The round-trip tests found that the generic Markdown serializer escapes
+bracketed TradeThesis references (for example `[[regional-block:india]]`) in
+its exported syntax. The marker's text survives re-import, but the escaped
+Markdown is not currently executable by the existing learner resolver. A custom
+TradeThesis Markdown spec is therefore required before any exported Markdown can
+be used as the compatibility mirror.
