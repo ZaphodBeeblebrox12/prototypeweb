@@ -272,7 +272,7 @@ def _document_reference_errors(document, lesson_state, lesson_payload, lesson_id
                     pk=reference,
                     lesson_id=str(lesson_id),
                     lesson__module__course_id=record.target_course_id,
-                ).exclude(source_file="").exists()
+                ).exists()
             )
             if not (staged_video_exists or live_video_exists or (reference and reference == video_id)):
                 reason = "protected-video reference is not part of this saved lesson"
@@ -553,7 +553,7 @@ def course_builder_tiptap_api(request, draft_id=None, lesson_id=None):
             and ProtectedLessonVideo.objects.filter(
                 lesson_id=str(lesson_id),
                 lesson__module__course_id=record.target_course_id,
-            ).exclude(source_file="").exists()
+            ).exists()
         )
         if video_url_supplied and external_video_url and (
             staged_protected_video or live_protected_video
