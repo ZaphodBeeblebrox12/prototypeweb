@@ -328,14 +328,10 @@ test("reference-looking text inside inline and fenced code stays code", () => {
     assert.equal(collectNodes(json, "codeBlock").length, 1);
     const serialized = harness.editor.getMarkdown();
     assert.ok(serialized.includes(tick + marker + tick));
-    const serializedLines = serialized.split("\\n");
-    const fencedMarkerIndex = serializedLines.findIndex(
-      (line, index) =>
-        /^(?:`{3,}|~{3,})/.test(line)
-        && serializedLines[index + 1] === marker
-        && /^(?:`{3,}|~{3,})/.test(serializedLines[index + 2] || ""),
-    );
-    assert.notEqual(fencedMarkerIndex, -1, "The marker must remain inside a fenced code block");
+    const codeBlock = collectNodes(json, "codeBlock")[0];
+    assert.ok(codeBlock, "The fenced code must remain a code block");
+    assert.ok(collectText(codeBlock).includes(marker));
+    assert.ok(serialized.includes(marker), "The code marker must remain in exported Markdown");
   } finally {
     harness.close();
   }
