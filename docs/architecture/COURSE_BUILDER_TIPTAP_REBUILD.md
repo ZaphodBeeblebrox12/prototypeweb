@@ -214,3 +214,11 @@ remains untouched and the import panel warns authors not to overwrite lessons.
 The prototype now has Node-based DOM tests for ordinary Markdown formatting,
 GFM tables, and preservation of the current plain-text TradeThesis reference
 tokens. These tests run during the Academy CI bundle build.
+
+
+The round-trip tests found that the generic Markdown serializer escapes
+bracketed TradeThesis references (for example `[[regional-block:india]]`) in
+its exported syntax. The marker's text survives re-import, but the escaped
+Markdown is not currently executable by the existing learner resolver. A custom
+TradeThesis Markdown spec is therefore required before any exported Markdown can
+be used as the compatibility mirror.

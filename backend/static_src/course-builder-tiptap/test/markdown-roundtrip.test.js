@@ -99,7 +99,7 @@ test("GitHub-Flavored Markdown tables parse into structured table nodes", () => 
 
     assert.ok(table, "Expected a structured table node");
     assert.equal(table.content.length, 3);
-    assert.match(harness.editor.getMarkdown(), /\| Order type \| Purpose \|/);
+    assert.match(harness.editor.getMarkdown(), /^\| Order type\s+\| Purpose\s+\|$/m);
   } finally {
     harness.close();
   }
@@ -117,13 +117,25 @@ test("TradeThesis reference tokens remain visible as text in the basic adapter",
   ].join("\n");
 
   const harness = createEditor(source);
+  let serialized;
   try {
-    const serialized = harness.editor.getMarkdown();
+    serialized = harness.editor.getMarkdown();
 
     assert.match(serialized, /asset:\/\/sample-figure-123/);
-    assert.match(serialized, /\[\[regional-block:india\]\]/);
-    assert.match(serialized, /\[\[lesson:00000000-0000-4000-8000-000000000001\]\]/);
+    assert.match(serialized, /\\\[\[regional-block:india\\\]\]/);
+    assert.match(serialized, /\\\[\[lesson:00000000-0000-4000-8000-000000000001\\\]\]/);
   } finally {
     harness.close();
+  }
+
+  // Tiptap escapes bracket markers in Markdown output. They must remain text
+  // and reappear in the document when that escaped Markdown is parsed again.
+  const roundTrip = createEditor(serialized);
+  try {
+    const documentText = JSON.stringify(roundTrip.editor.getJSON());
+    assert.ok(documentText.includes("[[regional-block:india]]"));
+    assert.ok(documentText.includes("[[lesson:00000000-0000-4000-8000-000000000001]]"));
+  } finally {
+    roundTrip.close();
   }
 });

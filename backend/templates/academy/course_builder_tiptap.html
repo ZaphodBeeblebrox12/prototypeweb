@@ -145,7 +145,8 @@
         This tool covers standard Markdown and basic GFM tables only. It does not yet map
         TradeThesis figure references, regional blocks, course cards, notebook prompts,
         practice questions, reflections or protected-video tokens to custom nodes.
-        Do not use it to overwrite existing lesson content.
+        Markdown export also escapes bracketed reference markers; it is not yet compatible
+        with the legacy learner renderer. Do not use it to overwrite lesson content.
       </p>
       <label for="tiptapMarkdownInput">Markdown source / export</label>
       <textarea id="tiptapMarkdownInput" data-markdown-input spellcheck="false"
