@@ -87,8 +87,17 @@ jobs:
       - name: Run TradeThesis sidecar and privacy tests
         run: npm run test:sidecar
 
-      - name: Run standard Markdown and reference round-trip tests
-        run: npm run test:markdown-basic
+      - name: Run Markdown formatting and table tests
+        run: npm run test:markdown-core
+
+      - name: Run TradeThesis marker round-trip tests
+        run: npm run test:markdown-references
+
+      - name: Run asset and sidecar block tests
+        run: npm run test:markdown-assets
+
+      - name: Run code-marker preservation test
+        run: npm run test:markdown-code
 
       - name: Run complete Bollinger Bands course round-trip
         run: npm run test:markdown-course
