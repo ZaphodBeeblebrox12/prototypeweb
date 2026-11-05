@@ -279,6 +279,14 @@ const lessonTab = createReferenceNode({
     : "",
 });
 
+const regionalLessonVariant = createReferenceNode({
+  name: "regionalLessonVariant",
+  group: "block",
+  label: "Whole-lesson regional variant",
+  attributes: ["variantKey", "rawToken"],
+  identifier: attrs => attrs.variantKey,
+});
+
 const tableReference = createReferenceNode({
   name: "tableReference",
   label: "Structured table",
@@ -408,6 +416,7 @@ export const TradeThesisExtensions = [
   courseCard,
   lessonReference,
   regionalBlock,
+  regionalLessonVariant,
   practiceQuestion,
   videoBlock,
   notebookBlock,
