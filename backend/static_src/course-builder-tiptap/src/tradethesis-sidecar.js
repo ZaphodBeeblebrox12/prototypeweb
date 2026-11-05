@@ -466,8 +466,13 @@ export function resolveTradeThesisDocument(documentValue, sidecarValue) {
       }
     } else if (node.type === "courseFigure" || node.type === "comparisonFigure") {
       const figure = asObject(asObject(sidecar.figures)[safeId(idFor)]);
+      const asset = asObject(asObject(sidecar.assets)[safeId(idFor)]);
       if (figure.id && figure.type === "comparison-cards") {
         node.type = "comparisonFigure";
+      } else if (
+        (figure.id && figure.type === "image") || asset.id
+      ) {
+        node.type = "courseFigure";
       } else {
         diagnostics.push({
           nodeType: node.type,
@@ -506,8 +511,12 @@ export function resolveTradeThesisDocument(documentValue, sidecarValue) {
       diagnostics.push({ nodeType: "notebookBlock", id: String(idFor || ""), reason: "notebook-not-in-sidecar" });
     } else if (node.type === "reflectionBlock" && asObject(sidecar.reflection).id !== String(idFor || "")) {
       diagnostics.push({ nodeType: "reflectionBlock", id: String(idFor || ""), reason: "reflection-not-in-sidecar" });
-    } else if (node.type === "callout" && !asObject(sidecar.callouts)[safeId(idFor)]?.id) {
-      diagnostics.push({ nodeType: "callout", id: String(idFor || ""), reason: "callout-not-in-sidecar" });
+    } else if (node.type === "callout") {
+      diagnostics.push({
+        nodeType: "callout",
+        id: String(idFor || ""),
+        reason: "callout-renderer-not-supported",
+      });
     } else if (node.type === "legacyMarkdown") {
       diagnostics.push({ nodeType: "legacyMarkdown", id: String(attrs.rawToken || ""), reason: "preserved-opaque-marker" });
     }
