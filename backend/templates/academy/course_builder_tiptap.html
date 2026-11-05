@@ -12,6 +12,16 @@
   .tt-tiptap-lab__lede { max-width:700px; margin:8px 0 0; color:#687268; font-size:13px; line-height:1.65; }
   .tt-tiptap-lab__notice { margin:18px 0; padding:12px 14px; border-left:3px solid #b27a42; background:#f5eddf; color:#5d4a31; font-size:12px; line-height:1.6; }
   .tt-tiptap-lab__notice strong { color:#45351f; }
+  .tt-tiptap-lab__draft-picker { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) auto; gap:10px; align-items:end; margin:18px 0; padding:14px; border:1px solid #ded8ca; background:#fffdf9; }
+  .tt-tiptap-lab__draft-picker label { display:grid; gap:5px; color:#687268; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+  .tt-tiptap-lab__draft-picker select { width:100%; min-height:36px; border:1px solid #d8d2c5; border-radius:3px; padding:6px 9px; background:#fff; color:#344b3d; font:12px system-ui,sans-serif; }
+  .tt-tiptap-lab__draft-picker button, .tt-tiptap-lab__save button, .tt-tiptap-lab__save a { display:inline-flex; min-height:36px; align-items:center; justify-content:center; border:1px solid #b9c7b7; border-radius:3px; padding:7px 12px; background:#e8eee5; color:#274d36; font:700 11px system-ui,sans-serif; text-decoration:none; cursor:pointer; }
+  .tt-tiptap-lab__draft-picker button:disabled, .tt-tiptap-lab__save button:disabled { opacity:.45; cursor:not-allowed; }
+  .tt-tiptap-lab__save { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; border-top:1px solid #ded8ca; background:#f8f5ee; }
+  .tt-tiptap-lab__save-actions { display:flex; flex-wrap:wrap; gap:7px; }
+  .tt-tiptap-lab__save-status { margin:0; color:#687268; font-size:11px; line-height:1.5; }
+  .tt-tiptap-lab__sidecars { margin:12px 0 18px; padding:10px 13px; border-left:3px solid #9aaa91; background:#f2f4ee; color:#4f5c4f; font-size:11px; line-height:1.6; }
+  .tt-tiptap-lab__sidecars strong { display:block; margin-bottom:3px; color:#355a46; }
   .tt-tiptap-lab__workspace { overflow:clip; border:1px solid #ded8ca; background:#fffdf9; }
   .tt-tiptap-lab__topline { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid #ded8ca; background:#f8f5ee; }
   .tt-tiptap-lab__topline strong { font-size:12px; }
@@ -65,30 +75,45 @@
   .tt-tiptap-lab__markdown-status { margin:0; color:#687268; font-size:10px; line-height:1.5; }
   @media(max-width:650px) {
     .tt-tiptap-lab__intro { display:block; }
+    .tt-tiptap-lab__draft-picker { grid-template-columns:1fr; }
     .tt-tiptap-lab__canvas { min-height:360px; padding:22px 17px; }
     .tt-tiptap-lab__toolbar { position:relative; }
-    .tt-tiptap-lab__export { align-items:flex-start; flex-direction:column; }
+    .tt-tiptap-lab__export, .tt-tiptap-lab__save { align-items:flex-start; flex-direction:column; }
   }
 </style>
 {% endblock %}
 {% block content %}
-<section class="tt-tiptap-lab" data-tiptap-lab>
+<section class="tt-tiptap-lab" data-tiptap-lab data-api-url="{{ tiptap_api_url }}">
   <header class="tt-tiptap-lab__intro">
     <div>
-      <p class="tt-tiptap-lab__eyebrow">TradeThesis · isolated prototype</p>
-      <h2 class="tt-tiptap-lab__title">A structured writing surface</h2>
-      <p class="tt-tiptap-lab__lede">This is the replacement editor’s separate test space. Try formatting, lists, links and tables without changing any existing course or lesson.</p>
+      <p class="tt-tiptap-lab__eyebrow">TradeThesis · staff preview</p>
+      <h2 class="tt-tiptap-lab__title">Structured lesson editor</h2>
+      <p class="tt-tiptap-lab__lede">Open an existing saved Course Builder draft, edit its lesson body, save it, then compare the result in the real Academy learner preview. The current Course Builder remains available as the fallback.</p>
     </div>
   </header>
 
   <div class="tt-tiptap-lab__notice" role="note">
-    <strong>Prototype only — not connected to course drafts.</strong>
-    Changes remain in this page. Exporting the document gives you a JSON test file; nothing is written to the Academy or learner-facing course content.
+    <strong>Staff-only draft editing — no live lesson rows are changed.</strong>
+    Saves update the selected Course Builder draft snapshot only. Review and publication still use the existing Academy workflow; learner delivery continues through the existing renderer.
+  </div>
+
+  <div class="tt-tiptap-lab__draft-picker" aria-label="Choose a saved course draft">
+    <label>Saved course draft
+      <select data-draft-select><option value="">Loading saved drafts…</option></select>
+    </label>
+    <label>Lesson
+      <select data-lesson-select disabled><option value="">Choose a draft first</option></select>
+    </label>
+    <button type="button" data-load-lesson disabled>Open lesson</button>
+  </div>
+  <div class="tt-tiptap-lab__sidecars" data-sidecars hidden aria-live="polite">
+    <strong>Existing lesson components are kept in their current Academy records.</strong>
+    <span data-sidecars-copy></span>
   </div>
 
   <section class="tt-tiptap-lab__workspace" aria-label="Structured lesson editor">
     <div class="tt-tiptap-lab__topline">
-      <strong>Lesson content · Untitled test document</strong>
+      <strong data-lesson-title>Choose a saved draft and lesson</strong>
       <span class="tt-tiptap-lab__state" data-editor-state>Loading editor…</span>
     </div>
 
@@ -138,19 +163,25 @@
         <button type="button" data-export="download">Download JSON</button>
       </div>
     </footer>
+    <footer class="tt-tiptap-lab__save">
+      <p class="tt-tiptap-lab__save-status" data-save-status aria-live="polite">Open a saved lesson to begin.</p>
+      <div class="tt-tiptap-lab__save-actions">
+        <button type="button" data-save-draft disabled>Save draft</button>
+        <a data-learner-preview hidden target="_blank" rel="noopener">Open learner preview ↗</a>
+      </div>
+    </footer>
   </section>
 
   <details class="tt-tiptap-lab__markdown">
     <summary>Test Markdown import and export</summary>
     <div class="tt-tiptap-lab__markdown-body">
       <p class="tt-tiptap-lab__markdown-warning">
-        <strong>Compatibility preview — not a lesson import or save.</strong> Standard Markdown,
-        tables, asset-backed image references, and the current figure, image-group, course/lesson,
-        regional, table and lesson-tab markers are recognised. Linked asset metadata, regional
-        variants, question records, notebook prompts and protected-video records are not loaded
-        here; recognised items appear as reference placeholders only. Unknown markers remain
-        explicit legacy nodes. JSON-only blocks deliberately stop Markdown export until a
-        lossless representation exists. Do not use this sandbox to overwrite lesson content.
+        <strong>Compatibility adapter.</strong> Standard Markdown, tables, asset-backed image
+        references and TradeThesis markers are imported into the versioned document. Question,
+        notebook, reflection, regional and protected-video records remain in their existing
+        Academy sidecars; their typed references stay in document JSON while the compatibility
+        Markdown mirror omits those non-inline records. Unknown markers remain explicit legacy
+        nodes and keep their original token.
       </p>
       <label for="tiptapMarkdownInput">Markdown source / export</label>
       <textarea id="tiptapMarkdownInput" data-markdown-input spellcheck="false"
@@ -161,7 +192,7 @@
         <button type="button" data-markdown="copy">Copy Markdown</button>
         <button type="button" data-markdown="download">Download .md</button>
       </div>
-      <p class="tt-tiptap-lab__markdown-status" data-markdown-status aria-live="polite">Nothing imported or exported yet.</p>
+      <p class="tt-tiptap-lab__markdown-status" data-markdown-status aria-live="polite">The editor imports and exports the selected saved lesson.</p>
     </div>
   </details>
   <details class="tt-tiptap-lab__json">
