@@ -181,7 +181,8 @@ export function buildTradeThesisSidecarReferences(lessonValue = {}) {
     }
   }
 
-  const tablesSource = firstObject(lesson.tables, contentJson.tables);
+  const lessonTables = asObject(lesson.tables);
+  const tablesSource = Object.keys(lessonTables).length ? lessonTables : asObject(contentJson.tables);
   const tables = {};
   for (const [rawId, rawTable] of mapEntries(tablesSource)) {
     const id = safeId(rawId);
@@ -235,7 +236,9 @@ export function buildTradeThesisSidecarReferences(lessonValue = {}) {
     };
   }
 
-  const questionSource = Array.isArray(lesson.questions) ? lesson.questions : contentJson.questions;
+  const questionSource = Array.isArray(lesson.questions) && lesson.questions.length
+    ? lesson.questions
+    : contentJson.questions;
   const questions = {};
   asArray(questionSource).forEach((questionValue, index) => {
     const question = asObject(questionValue);
@@ -426,11 +429,11 @@ export function resolveTradeThesisDocument(documentValue, sidecarValue) {
       externalReferences.courseIds.push(String(idFor).toLowerCase());
     } else if (node.type === "lessonReference" && UUID.test(String(idFor || ""))) {
       externalReferences.lessonIds.push(String(idFor).toLowerCase());
-    } else if (node.type === "regionalBlock" && !asObject(sidecar.regionalBlocks)[safeId(idFor)].id) {
+    } else if (node.type === "regionalBlock" && !asObject(sidecar.regionalBlocks)[safeId(idFor)]?.id) {
       diagnostics.push({ nodeType: "regionalBlock", id: String(idFor || ""), reason: "regional-block-not-in-sidecar" });
-    } else if (node.type === "tableReference" && !asObject(sidecar.tables)[safeId(idFor)].id) {
+    } else if (node.type === "tableReference" && !asObject(sidecar.tables)[safeId(idFor)]?.id) {
       diagnostics.push({ nodeType: "tableReference", id: String(idFor || ""), reason: "table-not-in-sidecar" });
-    } else if (node.type === "practiceQuestion" && !asObject(sidecar.questions)[safeId(idFor)].id) {
+    } else if (node.type === "practiceQuestion" && !asObject(sidecar.questions)[safeId(idFor)]?.id) {
       diagnostics.push({ nodeType: "practiceQuestion", id: String(idFor || ""), reason: "question-not-in-sidecar" });
     } else if (node.type === "videoBlock" && !asObject(sidecar.protectedVideo).id) {
       diagnostics.push({ nodeType: "videoBlock", id: String(idFor || ""), reason: "protected-video-not-in-sidecar" });
@@ -438,7 +441,7 @@ export function resolveTradeThesisDocument(documentValue, sidecarValue) {
       diagnostics.push({ nodeType: "notebookBlock", id: String(idFor || ""), reason: "notebook-not-in-sidecar" });
     } else if (node.type === "reflectionBlock" && !asObject(sidecar.reflection).id) {
       diagnostics.push({ nodeType: "reflectionBlock", id: String(idFor || ""), reason: "reflection-not-in-sidecar" });
-    } else if (node.type === "callout" && !asObject(sidecar.callouts)[safeId(idFor)].id) {
+    } else if (node.type === "callout" && !asObject(sidecar.callouts)[safeId(idFor)]?.id) {
       diagnostics.push({ nodeType: "callout", id: String(idFor || ""), reason: "callout-not-in-sidecar" });
     } else if (node.type === "legacyMarkdown") {
       diagnostics.push({ nodeType: "legacyMarkdown", id: String(attrs.rawToken || ""), reason: "preserved-opaque-marker" });
