@@ -65,6 +65,6 @@ test("asset-backed image renders its authenticated Academy preview without seria
   assert.equal(element[1].alt, "Market structure");
   assert.equal(
     imageExtension.config.renderMarkdown({ attrs }),
-    "![Market structure](asset://" + ASSET_ID + ")",
+    "![Market structure](asset://" + ASSET_ID + ' "Market structure")',
   );
 });
