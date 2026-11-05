@@ -199,6 +199,10 @@ class CourseBuilderTiptapPreviewTests(TestCase):
                             }
                         ],
                     },
+                    {
+                        "type": "practiceQuestion",
+                        "attrs": {"questionId": "question-1"},
+                    },
                 ],
             }
         )
@@ -235,6 +239,42 @@ class CourseBuilderTiptapPreviewTests(TestCase):
             0,
         )
         self.assertTrue(response.json()["learner_preview_url"])
+
+    @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
+    def test_unrenderable_callout_reference_is_rejected_server_side(self):
+        record, lesson_id = self.create_saved_draft()
+        document = make_lesson_document(
+            {
+                "type": "doc",
+                "content": [
+                    {
+                        "type": "callout",
+                        "attrs": {
+                            "calloutId": "risk-note",
+                            "tone": "warning",
+                            "title": "Risk",
+                        },
+                    }
+                ],
+            }
+        )
+        response = self.client.post(
+            reverse(
+                "staff_course_builder_tiptap_lesson_api",
+                args=[record.pk, lesson_id],
+            ),
+            data=json.dumps(
+                {
+                    "expected_updated_at": record.updated_at.isoformat(),
+                    "markdown": "## Original lesson",
+                    "document": document,
+                }
+            ),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("callout-renderer-not-supported", str(response.json()))
 
     @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
     def test_stale_revision_is_rejected_without_overwriting_newer_work(self):
