@@ -61,7 +61,7 @@ function createReferenceNode({ name, label, attributes, identifier, serialize })
       ];
     },
 
-    renderMarkdown({ node }) {
+    renderMarkdown(node) {
       if (typeof node.attrs.rawToken === "string" && node.attrs.rawToken) {
         return node.attrs.rawToken;
       }
@@ -129,7 +129,7 @@ const imageNode = Node.create({
       },
     };
   },
-  renderMarkdown({ node }) {
+  renderMarkdown(node) {
     const src = String(node.attrs.src || (
       node.attrs.assetId ? "asset://" + node.attrs.assetId : ""
     ));
@@ -365,7 +365,7 @@ const legacyMarkdown = Node.create({
     }
     return legacy();
   },
-  renderMarkdown({ node }) {
+  renderMarkdown(node) {
     if (typeof node.attrs.rawToken !== "string" || !node.attrs.rawToken) {
       throw new Error("An unmapped lesson marker cannot be exported without its original token.");
     }
