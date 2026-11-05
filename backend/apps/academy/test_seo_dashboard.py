@@ -165,3 +165,82 @@ class AcademySeoDashboardTests(TestCase):
         self.assertEqual(urls[other.slug], expected_second)
         self.assertContains(response, f'href="{expected_first}"')
         self.assertContains(response, f'href="{expected_second}"')
+
+    @override_settings(TRADETHESIS_SEO_INDEXABLE=True)
+    def test_indexable_filter_returns_only_eligible_published_courses(self):
+        draft = Course.objects.create(
+            title="Bollinger Bands",
+            slug="bollinger-bands",
+            summary="Understand volatility and compare price behaviour around the bands.",
+            status=Course.Status.DRAFT,
+        )
+
+        response = self.client.get(
+            reverse("staff_admin_desk_seo"),
+            {"filter": "indexable"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [row["course"].slug for row in response.context["rows"]],
+            [self.course.slug],
+        )
+        self.assertNotIn(draft.slug, [row["course"].slug for row in response.context["rows"]])
+
+    @override_settings(TRADETHESIS_SEO_INDEXABLE=True)
+    def test_blocked_filter_returns_only_published_ineligible_courses(self):
+        self.course.seo_indexable = False
+        self.course.save(update_fields=["seo_indexable"])
+        published_without_lessons = Course.objects.create(
+            title="Unfinished Published Course",
+            slug="unfinished-published-course",
+            status=Course.Status.PUBLISHED,
+        )
+        draft = Course.objects.create(
+            title="Draft Course",
+            slug="draft-course",
+            status=Course.Status.DRAFT,
+        )
+
+        response = self.client.get(
+            reverse("staff_admin_desk_seo"),
+            {"filter": "blocked"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        result_slugs = [row["course"].slug for row in response.context["rows"]]
+        self.assertIn(self.course.slug, result_slugs)
+        self.assertIn(published_without_lessons.slug, result_slugs)
+        self.assertNotIn(draft.slug, result_slugs)
+
+    def test_search_matches_course_title_slug_and_primary_topic(self):
+        self.course.seo_primary_topic = "Support and resistance trading"
+        self.course.save(update_fields=["seo_primary_topic"])
+        topic_course = Course.objects.create(
+            title="Volatility study",
+            slug="volatility-study",
+            status=Course.Status.DRAFT,
+            seo_primary_topic="Bollinger Bands trading",
+        )
+        slug_course = Course.objects.create(
+            title="Market profile study",
+            slug="market-profile-structure",
+            status=Course.Status.DRAFT,
+        )
+
+        for query, expected_slug in (
+            ("Support and Resistance", self.course.slug),
+            ("Bollinger Bands", topic_course.slug),
+            ("market-profile", slug_course.slug),
+        ):
+            with self.subTest(query=query):
+                response = self.client.get(
+                    reverse("staff_admin_desk_seo"),
+                    {"q": query},
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(
+                    [row["course"].slug for row in response.context["rows"]],
+                    [expected_slug],
+                )
+
