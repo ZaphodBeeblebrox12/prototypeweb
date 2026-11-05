@@ -57,6 +57,151 @@ def _payload_lesson(payload, lesson_id):
     return None
 
 
+def _document_reference_errors(document, lesson_state, lesson_payload, lesson_id):
+    """Reject document references that the existing Academy renderer cannot resolve."""
+    content_json = (
+        lesson_payload.get("content_json")
+        if isinstance(lesson_payload.get("content_json"), dict)
+        else {}
+    )
+    figures = content_json.get("figures") if isinstance(content_json.get("figures"), dict) else {}
+    tables = content_json.get("tables") if isinstance(content_json.get("tables"), dict) else {}
+    regional_blocks = (
+        content_json.get("regional_blocks")
+        if isinstance(content_json.get("regional_blocks"), dict)
+        else {}
+    )
+    regional_content = (
+        content_json.get("regional_lesson_content")
+        if isinstance(content_json.get("regional_lesson_content"), dict)
+        else {}
+    )
+    public_questions = (
+        content_json.get("questions")
+        if isinstance(content_json.get("questions"), list)
+        else []
+    )
+    question_ids = {
+        str(item.get("id"))
+        for item in public_questions
+        if isinstance(item, dict) and item.get("id")
+    }
+    state_questions = (
+        lesson_state.get("questions") if isinstance(lesson_state.get("questions"), list) else []
+    )
+    question_ids.update(
+        str(item.get("id"))
+        for item in state_questions
+        if isinstance(item, dict) and item.get("id")
+    )
+    image_ids = {
+        str(value)
+        for value in content_json.get("asset_ids", [])
+        if value
+    }
+    state_images = (
+        lesson_state.get("images") if isinstance(lesson_state.get("images"), list) else []
+    )
+    image_ids.update(
+        str(item.get("assetUuid") or item.get("id"))
+        for item in state_images
+        if isinstance(item, dict) and (item.get("assetUuid") or item.get("id"))
+    )
+    image_group_ids = {
+        str(item.get("id"))
+        for item in (lesson_state.get("imageGroups") or [])
+        if isinstance(item, dict) and item.get("id")
+    }
+    comparison_ids = {
+        str(item.get("id"))
+        for item in (lesson_state.get("teachingFigures") or [])
+        if isinstance(item, dict) and item.get("id")
+    }
+    raw_video = (
+        lesson_state.get("protectedVideo")
+        if isinstance(lesson_state.get("protectedVideo"), dict)
+        else {}
+    )
+    video_id = str(raw_video.get("id") or "")
+    has_notebook = isinstance(lesson_state.get("notebook"), dict) and bool(
+        lesson_state.get("notebook")
+    )
+    has_reflection = any(
+        str(lesson_state.get(key) or "").strip()
+        for key in (
+            "reflectionPrompt",
+            "reflectionModelReasoning",
+            "reflectionChartNotes",
+        )
+    )
+    errors = []
+
+    def visit(node, path):
+        if not isinstance(node, dict):
+            return
+        node_type = node.get("type")
+        attrs = node.get("attrs") if isinstance(node.get("attrs"), dict) else {}
+        reference = ""
+        reason = ""
+        if node_type == "image":
+            source = str(attrs.get("assetId") or attrs.get("src") or "")
+            if source.startswith("asset://"):
+                reference = source[len("asset://"):]
+                if reference not in image_ids and reference not in figures:
+                    reason = "image asset is not part of this saved lesson"
+        elif node_type in {"courseFigure", "comparisonFigure"}:
+            reference = str(attrs.get("figureId") or "")
+            if reference not in figures and reference not in comparison_ids and reference not in image_ids:
+                reason = "figure reference is not part of this saved lesson"
+        elif node_type == "imageGroup":
+            reference = str(attrs.get("groupId") or "")
+            figure = figures.get(reference)
+            if reference not in image_group_ids and not (
+                isinstance(figure, dict) and figure.get("type") == "image-group"
+            ):
+                reason = "image-group reference is not part of this saved lesson"
+        elif node_type == "tableReference":
+            reference = str(attrs.get("tableId") or "")
+            if reference not in tables:
+                reason = "table reference is not part of this saved lesson"
+        elif node_type == "regionalBlock":
+            reference = str(attrs.get("blockId") or "")
+            if reference not in regional_blocks:
+                reason = "regional block is not part of this saved lesson"
+        elif node_type == "regionalLessonVariant":
+            reference = str(attrs.get("variantKey") or "")
+            if reference not in regional_content:
+                reason = "whole-lesson regional variant is not part of this saved lesson"
+        elif node_type == "practiceQuestion":
+            reference = str(attrs.get("questionId") or "")
+            if reference not in question_ids:
+                reason = "practice question is not part of this saved lesson"
+        elif node_type == "videoBlock":
+            reference = str(attrs.get("videoId") or "")
+            if not reference or reference != video_id:
+                reason = "protected-video reference is not part of this saved lesson"
+        elif node_type == "notebookBlock":
+            reference = str(attrs.get("notebookId") or "")
+            if not has_notebook or reference != "notebook-" + str(lesson_id):
+                reason = "notebook reference is not part of this saved lesson"
+        elif node_type == "reflectionBlock":
+            reference = str(attrs.get("reflectionId") or "")
+            if not has_reflection or reference != "reflection-" + str(lesson_id):
+                reason = "reflection reference is not part of this saved lesson"
+        elif node_type == "callout":
+            reference = str(attrs.get("calloutId") or "")
+            reason = "callout blocks do not yet have learner-renderer parity"
+        if reason:
+            errors.append(f"{node_type or 'unknown'} {reference!r}: {reason}.")
+        for index, child in enumerate(node.get("content", []) if isinstance(node.get("content"), list) else []):
+            visit(child, f"{path}.content[{index}]")
+
+    root = document.get("document") if isinstance(document, dict) else None
+    if isinstance(root, dict):
+        visit(root, "document")
+    return errors
+
+
 def _safe_editor_lesson(lesson):
     result = deepcopy(lesson)
     questions = result.get("questions")
@@ -270,6 +415,20 @@ def course_builder_tiptap_api(request, draft_id=None, lesson_id=None):
         import_lesson = _payload_lesson(payload, lesson_id)
         if state_lesson is None or import_lesson is None:
             return JsonResponse({"detail": "That lesson no longer exists in this saved draft."}, status=409)
+        reference_errors = _document_reference_errors(
+            document,
+            state_lesson,
+            import_lesson,
+            lesson_id,
+        )
+        if reference_errors:
+            return JsonResponse(
+                {
+                    "detail": "The lesson document contains references that cannot be rendered safely.",
+                    "compatibility_errors": reference_errors[:20],
+                },
+                status=400,
+            )
 
         # Update only the selected lesson's prose and canonical v1 document.
         # Course metadata, images, questions, regional variants, notebook,
