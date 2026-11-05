@@ -2319,3 +2319,10 @@ body.construct-page .paper-first-live small{display:block;font-size:10px;line-he
   }
   .course-explore-nudge__arrow{right:2px;width:68px;height:76px;}
 }
+
+/* TradeThesis public programme-enquiry form states. */
+.enquiry-form .enquiry-consent{display:flex;align-items:flex-start;gap:9px;font-size:10px;font-weight:550;line-height:1.6;color:var(--muted)}
+.enquiry-form .enquiry-consent input{width:16px;min-width:16px;min-height:16px;margin:2px 0 0;flex:0 0 16px;accent-color:var(--green)}
+.enquiry-form .enquiry-consent span{display:block}
+.enquiry-form .enquiry-consent a{text-decoration:underline;text-underline-offset:2px}
+.enquiry-result[data-result="invalid"],.enquiry-result[data-result="recent"]{background:#fff1ec;color:#81483d;border:1px solid #e5c4b9}

@@ -336,3 +336,119 @@ class TicketMessage(models.Model):
 
     def __str__(self):
         return f"Message on ticket {self.ticket_id} by {self.author}"
+
+
+class CourseEnquiry(models.Model):
+    """A public prospect enquiry, separate from authenticated member support tickets."""
+
+    class Programme(models.TextChoices):
+        CONSTRUCT = "construct", _("CONSTRUCT")
+        LIVE_CLASSROOM = "live_classroom", _("Trade Construction & Management — Live Classroom")
+
+    class Status(models.TextChoices):
+        NEW = "new", _("New")
+        IN_PROGRESS = "in_progress", _("In progress")
+        REPLIED = "replied", _("Replied")
+        CLOSED = "closed", _("Closed")
+
+    class StartingPoint(models.TextChoices):
+        CHARTS = "learning_charts", _("Learning to read charts")
+        CONNECTED_PLAN = "connected_plan", _("Know some patterns, need a connected plan")
+        RISK = "risk_management", _("Working on risk and trade management")
+        REVIEW = "review_process", _("Want a more consistent review process")
+        OTHER = "other", _("Something else")
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    programme = models.CharField(max_length=24, choices=Programme.choices)
+    name = models.CharField(max_length=120)
+    email = models.EmailField(max_length=254, db_index=True)
+    starting_point = models.CharField(
+        max_length=32, choices=StartingPoint.choices, blank=True, default=""
+    )
+    message = models.TextField(blank=True, default="", max_length=2000)
+    consent_at = models.DateTimeField(
+        help_text=_("Explicit consent to use these details to respond to this enquiry.")
+    )
+    status = models.CharField(
+        max_length=16, choices=Status.choices, default=Status.NEW, db_index=True
+    )
+    assigned_to = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="assigned_course_enquiries",
+        limit_choices_to={"is_staff": True},
+    )
+    internal_notes = models.TextField(blank=True, default="")
+    responded_at = models.DateTimeField(null=True, blank=True)
+    responded_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="responded_course_enquiries",
+        limit_choices_to={"is_staff": True},
+    )
+    confirmation_email_status = models.CharField(
+        max_length=12, choices=[
+            ("pending", _("Pending")),
+            ("accepted", _("Accepted by email backend")),
+            ("failed", _("Failed")),
+        ], default="pending"
+    )
+    confirmation_email_sent_at = models.DateTimeField(null=True, blank=True)
+    confirmation_email_error = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = _("course enquiry")
+        verbose_name_plural = _("course enquiries")
+        indexes = [
+            models.Index(fields=["programme", "status", "created_at"],
+                         name="support_enq_program_status_idx"),
+            models.Index(fields=["email", "created_at"],
+                         name="support_enq_email_created_idx"),
+        ]
+
+    def save(self, *args, **kwargs):
+        self.name = " ".join((self.name or "").split())
+        self.email = (self.email or "").strip().lower()
+        super().save(*args, **kwargs)
+
+    @property
+    def short_id(self):
+        return str(self.pk)[:8]
+
+    def __str__(self):
+        return f"{self.get_programme_display()} enquiry #{self.short_id}"
+
+
+class CourseEnquiryReply(models.Model):
+    """A staff email reply and its submission result; body is private staff data."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Pending")
+        ACCEPTED = "accepted", _("Accepted by email backend")
+        FAILED = "failed", _("Failed")
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    enquiry = models.ForeignKey(
+        CourseEnquiry, on_delete=models.CASCADE, related_name="replies"
+    )
+    author = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="course_enquiry_replies",
+    )
+    subject = models.CharField(max_length=255)
+    body = models.TextField(max_length=10000)
+    status = models.CharField(
+        max_length=12, choices=Status.choices, default=Status.PENDING
+    )
+    error_message = models.TextField(blank=True, default="")
+    sent_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "id"]
+        verbose_name = _("course enquiry reply")
+        verbose_name_plural = _("course enquiry replies")
+
+    def __str__(self):
+        return f"Reply to course enquiry #{self.enquiry_id}"
