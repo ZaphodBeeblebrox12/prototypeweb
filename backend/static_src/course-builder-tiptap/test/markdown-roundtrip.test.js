@@ -12,6 +12,19 @@ function createEditor(content, contentType = "markdown") {
   const dom = new JSDOM("<!doctype html><html><body><div id='editor'></div></body></html>", {
     url: "https://tradethesis.test/",
   });
+  const globalNames = [
+    "window",
+    "document",
+    "Node",
+    "HTMLElement",
+    "MutationObserver",
+    "DOMParser",
+    "getComputedStyle",
+    "navigator",
+  ];
+  const previousGlobals = new Map(
+    globalNames.map(name => [name, Object.getOwnPropertyDescriptor(globalThis, name)]),
+  );
 
   globalThis.window = dom.window;
   globalThis.document = dom.window.document;
@@ -51,14 +64,14 @@ function createEditor(content, contentType = "markdown") {
     close() {
       editor.destroy();
       dom.window.close();
-      delete globalThis.window;
-      delete globalThis.document;
-      delete globalThis.Node;
-      delete globalThis.HTMLElement;
-      delete globalThis.MutationObserver;
-      delete globalThis.DOMParser;
-      delete globalThis.getComputedStyle;
-      delete globalThis.navigator;
+      for (const name of globalNames) {
+        const descriptor = previousGlobals.get(name);
+        if (descriptor) {
+          Object.defineProperty(globalThis, name, descriptor);
+        } else {
+          delete globalThis[name];
+        }
+      }
     },
   };
 }
