@@ -129,3 +129,41 @@ class AcademySeoEndpointTests(TestCase):
         self.assertEqual(response.status_code, 200, response.content)
         self.assertContains(response, 'name="robots" content="noindex, follow"')
         self.assertNotContains(response, 'rel="canonical"')
+
+
+    @override_settings(TRADETHESIS_SEO_INDEXABLE=False)
+    def test_site_wide_setting_keeps_course_overview_noindex(self):
+        response = self.client.get(
+            reverse("academy:course-detail", args=[self.course.slug])
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, 'name="robots" content="noindex, follow"')
+        self.assertNotContains(response, 'rel="canonical"')
+
+    @override_settings(TRADETHESIS_SEO_INDEXABLE=True)
+    def test_hidden_course_overview_is_noindex(self):
+        self.course.catalogue_role = Course.CatalogueRole.HIDDEN
+        self.course.save(update_fields=["catalogue_role"])
+
+        response = self.client.get(
+            reverse("academy:course-detail", args=[self.course.slug])
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, 'name="robots" content="noindex, follow"')
+        self.assertNotContains(response, 'rel="canonical"')
+
+    @override_settings(TRADETHESIS_SEO_INDEXABLE=True)
+    def test_course_without_published_lessons_is_noindex(self):
+        lesson = Lesson.objects.get(module__course=self.course)
+        lesson.is_published = False
+        lesson.save(update_fields=["is_published"])
+
+        response = self.client.get(
+            reverse("academy:course-detail", args=[self.course.slug])
+        )
+
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertContains(response, 'name="robots" content="noindex, follow"')
+        self.assertNotContains(response, 'rel="canonical"')
