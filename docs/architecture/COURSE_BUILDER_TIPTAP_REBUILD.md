@@ -407,6 +407,9 @@ production deployment configuration.
   individual-purchase entitlements do not receive the unprotected external
   URL; authors should upload a protected source for those lessons. Ordinary
   hyperlinks in lesson text remain supported.
+- The existing Course Builder hydrates the explicit external URL when editing
+  a published lesson and retains both the explicit and legacy content keys on
+  save, so the two editors can coexist during the rollout.
 - External links are not encrypted, watermarked or access-controlled by the
   Academy protected-video player.
 
