@@ -11,6 +11,7 @@ from PIL import Image
 
 from .lesson_document import make_lesson_document
 from .models import CourseImport, CourseImportAsset, CourseImportVideo
+from .views import _lesson_video_url
 
 User = get_user_model()
 
@@ -532,7 +533,7 @@ class CourseBuilderTiptapPreviewTests(TestCase):
                 "expected_updated_at": record.updated_at.isoformat(),
                 "markdown": "Lesson copy.",
                 "document": document,
-                "video_url": external_url,
+                "external_video_url": external_url,
             }),
             content_type="application/json",
         )
@@ -541,7 +542,8 @@ class CourseBuilderTiptapPreviewTests(TestCase):
         state_lesson = record.payload["builder_state"]["modules"][0]["lessons"][0]
         payload_lesson = record.payload["modules"][0]["lessons"][0]
         self.assertEqual(state_lesson["videoUrl"], external_url)
-        self.assertEqual(payload_lesson["content_json"]["video_url"], external_url)
+        self.assertEqual(payload_lesson["content_json"]["external_video_url"], external_url)
+        self.assertNotIn("video_url", payload_lesson["content_json"])
 
     @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
     def test_external_video_link_rejects_non_http_schemes(self):
@@ -555,12 +557,56 @@ class CourseBuilderTiptapPreviewTests(TestCase):
                 "expected_updated_at": record.updated_at.isoformat(),
                 "markdown": "Lesson copy.",
                 "document": make_lesson_document({"type": "doc", "content": [{"type": "paragraph"}]}),
-                "video_url": "javascript:alert(1)",
+                "external_video_url": "javascript:alert(1)",
             }),
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 400)
         self.assertIn("HTTP or HTTPS", response.json()["detail"])
+
+    def test_external_url_is_production_safe_and_cannot_bypass_paid_video_protection(self):
+        external_url = "https://www.youtube.com/watch?v=example123"
+        with override_settings(ACADEMY_ALLOW_LEGACY_VIDEO_URLS=False):
+            self.assertEqual(
+                _lesson_video_url(
+                    {"external_video_url": external_url},
+                    paid_purchase=False,
+                    protected_video=False,
+                ),
+                external_url,
+            )
+            self.assertEqual(
+                _lesson_video_url(
+                    {"video_url": external_url},
+                    paid_purchase=False,
+                    protected_video=False,
+                ),
+                "",
+            )
+            self.assertEqual(
+                _lesson_video_url(
+                    {"external_video_url": external_url},
+                    paid_purchase=True,
+                    protected_video=False,
+                ),
+                "",
+            )
+            self.assertEqual(
+                _lesson_video_url(
+                    {"external_video_url": external_url},
+                    paid_purchase=False,
+                    protected_video=True,
+                ),
+                "",
+            )
+            self.assertEqual(
+                _lesson_video_url(
+                    {"external_video_url": "https://user:pass@example.com/video"},
+                    paid_purchase=False,
+                    protected_video=False,
+                ),
+                "",
+            )
 
     @override_settings(ACADEMY_TIPTAP_EDITOR_ENABLED=True)
     def test_protected_video_reference_is_validated_against_private_staging_record(self):
@@ -617,7 +663,7 @@ class CourseBuilderTiptapPreviewTests(TestCase):
                 "expected_updated_at": record.updated_at.isoformat(),
                 "markdown": "Lesson copy.",
                 "document": make_lesson_document({"type": "doc", "content": [{"type": "paragraph"}]}),
-                "video_url": "https://vimeo.com/123456",
+                "external_video_url": "https://vimeo.com/123456",
             }),
             content_type="application/json",
         )
