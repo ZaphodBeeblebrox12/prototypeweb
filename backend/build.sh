@@ -51,6 +51,7 @@ if [[ "${BOOTSTRAP_STAGING_ADMIN:-false}" =~ ^(1|true|TRUE|yes|YES)$ ]]; then
   python manage.py shell -c '
 import os
 from django.contrib.auth import get_user_model
+from allauth.account.models import EmailAddress
 
 User = get_user_model()
 username = os.environ["STAGING_ADMIN_USERNAME"].strip()
@@ -60,6 +61,7 @@ password = os.environ["STAGING_ADMIN_PASSWORD"]
 existing = User.objects.filter(username=username).first()
 if existing:
     if existing.is_superuser and existing.is_staff:
+        user = existing
         print("Staging admin bootstrap skipped: requested superuser already exists.")
     else:
         raise SystemExit(
@@ -67,8 +69,20 @@ if existing:
             "Choose a different STAGING_ADMIN_USERNAME."
         )
 else:
-    User.objects.create_superuser(username=username, email=email, password=password)
+    user = User.objects.create_superuser(username=username, email=email, password=password)
     print("Staging superuser created.")
+
+# A bootstrapped administrator cannot complete the email-verification flow
+# because this account is created outside allauth's signup signal.
+address, _ = EmailAddress.objects.get_or_create(
+    user=user,
+    email=email,
+    defaults={"verified": True, "primary": True},
+)
+address.email = email
+address.verified = True
+address.primary = True
+address.save(update_fields=["email", "verified", "primary"])
 '
 fi
 
