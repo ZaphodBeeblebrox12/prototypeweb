@@ -1071,6 +1071,9 @@ def _build_import_payload(course_state, course_slug):
                 "related_course_ids": [str(value) for value in related_ids if _valid_uuid(value)],
                 "questions": learner_questions,
                 "notebook": notebook_payload,
+                # Keep the explicit external-link field for production learner
+                # rendering while retaining the legacy key for older callers.
+                "external_video_url": video_url,
                 "video_url": video_url,
                 "regional_blocks": regional_blocks_payload,
                 "regional_lesson_content": regional_lesson_content_payload,
@@ -1598,7 +1601,11 @@ def _builder_state_from_published_course(course):
                     "summary": lesson.summary,
                     "minutes": lesson.duration_minutes,
                     "format": lesson.format,
-                    "videoUrl": str(content_json.get("video_url") or ""),
+                    "videoUrl": str(
+                        content_json.get("external_video_url")
+                        or content_json.get("video_url")
+                        or ""
+                    ),
                     "reflectionPrompt": str(
                         (content_json.get("reflection") or {}).get("prompt")
                         or "Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view."
