@@ -73,7 +73,7 @@ else:
     print("Staging superuser created.")
 
 # A bootstrapped administrator cannot complete the email-verification flow
-# because this account is created outside allauth's signup signal.
+# because this account is created outside the allauth signup signal.
 address, _ = EmailAddress.objects.get_or_create(
     user=user,
     email=email,
