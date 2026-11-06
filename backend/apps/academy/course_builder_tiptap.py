@@ -5,15 +5,14 @@ Lesson rows. The legacy Course Builder, review workflow, and learner renderer
 remain the source of lifecycle and preview behaviour.
 """
 
-import hashlib
-import json
-import uuid
-
 from contextlib import suppress
 from copy import deepcopy
+import hashlib
 from io import BytesIO
+import json
 from pathlib import Path
 from urllib.parse import urlencode, urlsplit
+import uuid
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -489,8 +488,13 @@ def course_builder_tiptap_api(request, draft_id=None, lesson_id=None):
 
     expected_updated_at = str(body.get("expected_updated_at") or "").strip()
     markdown = body.get("markdown")
-    video_url_supplied = "video_url" in body
-    external_video_url = str(body.get("video_url") or "").strip()
+    video_url_supplied = "external_video_url" in body or "video_url" in body
+    raw_external_video_url = (
+        body.get("external_video_url")
+        if "external_video_url" in body
+        else body.get("video_url")
+    )
+    external_video_url = str(raw_external_video_url or "").strip()
     if len(external_video_url) > 1000:
         return JsonResponse(
             {"detail": "External video links must be 1,000 characters or fewer."},
@@ -507,6 +511,7 @@ def course_builder_tiptap_api(request, draft_id=None, lesson_id=None):
         if (
             parsed_video_url.scheme.lower() not in {"https", "http"}
             or not parsed_video_url.netloc
+            or not parsed_video_url.hostname
             or parsed_video_url.username
             or parsed_video_url.password
         ):
@@ -614,7 +619,11 @@ def course_builder_tiptap_api(request, draft_id=None, lesson_id=None):
         import_content_json["lesson_document"] = document
         if video_url_supplied:
             state_lesson["videoUrl"] = external_video_url
-            import_content_json["video_url"] = external_video_url
+            import_content_json.pop("video_url", None)
+            if external_video_url:
+                import_content_json["external_video_url"] = external_video_url
+            else:
+                import_content_json.pop("external_video_url", None)
         import_lesson["content_markdown"] = markdown
         import_lesson["content_json"] = import_content_json
 
