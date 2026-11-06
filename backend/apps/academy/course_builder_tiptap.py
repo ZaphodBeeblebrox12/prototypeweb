@@ -5,14 +5,15 @@ Lesson rows. The legacy Course Builder, review workflow, and learner renderer
 remain the source of lifecycle and preview behaviour.
 """
 
+import hashlib
+import json
+import uuid
+
 from contextlib import suppress
 from copy import deepcopy
-import hashlib
 from io import BytesIO
-import json
 from pathlib import Path
 from urllib.parse import urlencode, urlsplit
-import uuid
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -38,7 +39,6 @@ from .models import (
     ProtectedLessonVideo,
 )
 from .permissions import is_course_content_admin
-
 
 _TIPTAP_MAX_IMAGE_BYTES = 10 * 1024 * 1024
 _TIPTAP_IMAGE_FORMATS = {
