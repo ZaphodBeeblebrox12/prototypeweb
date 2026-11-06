@@ -292,6 +292,7 @@ import {
     try {
       const form = new FormData();
       form.append("file", file);
+      form.append("expected_updated_at", expectedUpdatedAt);
       const url = "/staff/course-builder/videos/"
         + encodeURIComponent(currentDraftId) + "/"
         + encodeURIComponent(currentLessonId) + "/";
