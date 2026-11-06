@@ -8,7 +8,6 @@ remain the source of lifecycle and preview behaviour.
 import hashlib
 import json
 import uuid
-
 from contextlib import suppress
 from copy import deepcopy
 from io import BytesIO
