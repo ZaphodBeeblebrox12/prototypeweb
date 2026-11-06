@@ -395,12 +395,15 @@ production deployment configuration.
 ### External video links
 
 - A lesson can store an HTTP/HTTPS external video URL through the Tiptap media
-  controls. The existing Academy learner renderer opens that URL on the
-  external service in a new tab.
-- URLs are length-limited and reject unsupported schemes and embedded
-  credentials.
-- A protected video and an external video URL are mutually exclusive primary
-  lesson-video sources. Ordinary hyperlinks in lesson text remain supported.
+  controls under the explicit `external_video_url` content key. The legacy
+  `video_url` key remains gated by `ACADEMY_ALLOW_LEGACY_VIDEO_URLS`; the
+  Tiptap path does not enable that compatibility setting.
+- URLs are length-limited and reject unsupported schemes, missing hosts and
+  embedded credentials.
+- A protected video takes precedence over an external video URL. Direct
+  individual-purchase entitlements do not receive the unprotected external
+  URL; authors should upload a protected source for those lessons. Ordinary
+  hyperlinks in lesson text remain supported.
 - External links are not encrypted, watermarked or access-controlled by the
   Academy protected-video player.
 
@@ -408,7 +411,7 @@ production deployment configuration.
 
 The implementation is not production-ready until backend and Node CI pass,
 the editor is manually exercised against the Bollinger Bands draft, image and
-video delivery are confirmed in the authenticated learner preview, and
-stale-revision handling is verified in two tabs. The legacy editor remains
-available throughout evaluation. No staging or production deployment is part
-of this branch checkpoint.
+video delivery are confirmed in an authenticated preview, and stale-revision
+handling is verified in two tabs. The legacy editor remains available
+throughout evaluation. The feature branch is not merged or deployed to the
+main staging or production services as part of this checkpoint.
