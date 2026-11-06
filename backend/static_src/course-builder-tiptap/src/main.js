@@ -636,7 +636,7 @@ import {
         document: currentDocument(),
         markdown,
       };
-      if (externalVideoChanged) saveBody.video_url = externalVideoUrl;
+      if (externalVideoChanged) saveBody.external_video_url = externalVideoUrl;
       const payload = await fetchJson(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
