@@ -1071,6 +1071,9 @@ def _build_import_payload(course_state, course_slug):
                 "related_course_ids": [str(value) for value in related_ids if _valid_uuid(value)],
                 "questions": learner_questions,
                 "notebook": notebook_payload,
+                # Keep the explicit external-link field for production learner
+                # rendering while retaining the legacy key for older callers.
+                "external_video_url": video_url,
                 "video_url": video_url,
                 "regional_blocks": regional_blocks_payload,
                 "regional_lesson_content": regional_lesson_content_payload,
@@ -1598,7 +1601,11 @@ def _builder_state_from_published_course(course):
                     "summary": lesson.summary,
                     "minutes": lesson.duration_minutes,
                     "format": lesson.format,
-                    "videoUrl": str(content_json.get("video_url") or ""),
+                    "videoUrl": str(
+                        content_json.get("external_video_url")
+                        or content_json.get("video_url")
+                        or ""
+                    ),
                     "reflectionPrompt": str(
                         (content_json.get("reflection") or {}).get("prompt")
                         or "Before opening the model reasoning, write one observable fact, one possible interpretation, and one thing that would change your view."
@@ -2661,6 +2668,33 @@ def course_builder_video_upload(request, import_id, lesson_id):
     if uploaded is None:
         return JsonResponse({"detail": "Choose a video file to upload."}, status=400)
 
+    # Tiptap supplies an optimistic revision token. Keep it optional so the
+    # established legacy Course Builder upload contract remains compatible.
+    expected_updated_at = str(request.POST.get("expected_updated_at") or "").strip()
+    if expected_updated_at:
+        current_revision = (
+            CourseImport.objects.filter(
+                pk=import_id,
+                status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
+            )
+            .values_list("updated_at", flat=True)
+            .first()
+        )
+        if current_revision is None:
+            raise Http404
+        if current_revision.isoformat() != expected_updated_at:
+            return JsonResponse(
+                {
+                    "detail": (
+                        "This course draft changed in another tab or editor. "
+                        "Reload it before uploading media."
+                    ),
+                    "conflict": True,
+                    "latest_updated_at": current_revision.isoformat(),
+                },
+                status=409,
+            )
+
     filename = str(uploaded.name or "lesson-video").replace("\\", "/").rsplit("/", 1)[-1]
     suffix = Path(filename).suffix.lower()
     if suffix not in _ALLOWED_PROTECTED_VIDEO_SUFFIXES:
@@ -2706,6 +2740,22 @@ def course_builder_video_upload(request, import_id, lesson_id):
                 pk=import_id,
                 status__in=[CourseImport.Status.DRAFT, CourseImport.Status.REJECTED],
             )
+            actual_updated_at = record.updated_at.isoformat()
+            if expected_updated_at and actual_updated_at != expected_updated_at:
+                # A different editor saved while the private upload was in flight.
+                # Remove only this unattached upload; preserve the existing video.
+                discard_unattached_upload()
+                return JsonResponse(
+                    {
+                        "detail": (
+                            "This course draft changed while the video was uploading. "
+                            "Reload it before trying again."
+                        ),
+                        "conflict": True,
+                        "latest_updated_at": actual_updated_at,
+                    },
+                    status=409,
+                )
             builder_state = (record.payload or {}).get("builder_state")
             lesson_exists = (
                 isinstance(builder_state, dict)
@@ -2773,11 +2823,14 @@ def course_builder_video_upload(request, import_id, lesson_id):
         {
             "ok": True,
             "video": {
+                "id": str(staged_video.pk),
+                "kind": "staged",
                 "status": "stored_for_draft",
                 "filename": staged_video.original_filename,
                 "size_bytes": staged_video.size_bytes,
                 "uploaded_at": staged_video.updated_at.isoformat(),
             },
+            "updated_at": record.updated_at.isoformat(),
             "message": (
                 "Video stored privately. Encrypted streaming is prepared automatically "
                 "after this course is approved and published."

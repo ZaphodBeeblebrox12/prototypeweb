@@ -31,6 +31,15 @@ import {
   const learnerPreview = root.querySelector("[data-learner-preview]");
   const sidecarPanel = root.querySelector("[data-sidecars]");
   const sidecarCopy = root.querySelector("[data-sidecars-copy]");
+  const imageUploadInput = root.querySelector("[data-image-upload]");
+  const imageUploadButton = root.querySelector("[data-image-upload-button]");
+  const imageLibraryToggle = root.querySelector("[data-image-library-toggle]");
+  const imageLibrary = root.querySelector("[data-image-library]");
+  const protectedVideoInput = root.querySelector("[data-protected-video-upload]");
+  const protectedVideoButton = root.querySelector("[data-protected-video-upload-button]");
+  const protectedVideoStatus = root.querySelector("[data-protected-video-status]");
+  const externalVideoInput = root.querySelector("[data-external-video-url]");
+  const mediaStatus = root.querySelector("[data-media-status]");
   const apiBase = String(root.dataset.apiUrl || "");
 
   if (
@@ -49,6 +58,8 @@ import {
   let currentLessonId = "";
   let expectedUpdatedAt = "";
   let currentPreviewUrl = "";
+  let currentProtectedVideo = null;
+  let loadedExternalVideoUrl = "";
   let isLoading = false;
   let isDirty = false;
   let hasCompatibilityBlockers = false;
@@ -77,8 +88,21 @@ import {
     deleteTable: () => editor.chain().focus().deleteTable().run(),
   };
 
+  function withoutRuntimeMediaAttributes(value) {
+    const copy = JSON.parse(JSON.stringify(value));
+    const visit = node => {
+      if (!node || typeof node !== "object") return;
+      if (node.attrs && typeof node.attrs === "object") {
+        delete node.attrs.previewUrl;
+      }
+      if (Array.isArray(node.content)) node.content.forEach(visit);
+    };
+    visit(copy);
+    return copy;
+  }
+
   function currentDocument() {
-    return documentEnvelope(editor.getJSON());
+    return documentEnvelope(withoutRuntimeMediaAttributes(editor.getJSON()));
   }
 
   function csrfToken() {
@@ -90,6 +114,223 @@ import {
     state.textContent = message;
     state.dataset.tone = tone;
     if (saveStatus) saveStatus.textContent = message;
+  }
+
+  function setMediaStatus(message) {
+    if (mediaStatus) mediaStatus.textContent = String(message || "");
+  }
+
+  function mediaApiUrl() {
+    return apiBase + encodeURIComponent(currentDraftId) + "/media/";
+  }
+
+  function syncMediaControls() {
+    const enabled = loaded && !conflict;
+    if (imageUploadButton) imageUploadButton.disabled = !enabled;
+    if (imageLibraryToggle) imageLibraryToggle.disabled = !enabled;
+    if (protectedVideoButton) protectedVideoButton.disabled = !enabled;
+    if (externalVideoInput) {
+      externalVideoInput.disabled = !enabled || Boolean(currentProtectedVideo?.id);
+    }
+  }
+
+  function documentHasReference(type, field, value) {
+    const matches = node => {
+      if (!node || typeof node !== "object") return false;
+      if (node.type === type && String(node.attrs?.[field] || "") === String(value)) return true;
+      return Array.isArray(node.content) && node.content.some(matches);
+    };
+    return matches(editor.getJSON());
+  }
+
+  function insertAssetImage(image) {
+    const assetId = String(image?.assetUuid || image?.id || "");
+    if (!assetId) throw new Error("The image has no stable Academy asset ID.");
+    editor.chain().focus().insertContent({
+      type: "image",
+      attrs: {
+        src: "asset://" + assetId,
+        assetId,
+        previewUrl: String(image.data || ""),
+        alt: String(image.alt || ""),
+        title: String(image.title || ""),
+      },
+    }).run();
+    setMediaStatus("Image inserted. Save the lesson to store its position in the document.");
+  }
+
+  function renderImageLibrary(images) {
+    if (!imageLibrary) return;
+    imageLibrary.replaceChildren();
+    if (!images.length) {
+      const empty = document.createElement("p");
+      empty.className = "tt-tiptap-lab__media-status";
+      empty.textContent = "No saved images were found in this draft. Upload an image to begin the library.";
+      imageLibrary.append(empty);
+      return;
+    }
+
+    for (const image of images) {
+      const item = document.createElement("div");
+      item.className = "tt-tiptap-lab__image-item";
+      const thumb = document.createElement("div");
+      thumb.className = "tt-tiptap-lab__image-thumb";
+      const preview = document.createElement("img");
+      preview.src = String(image.data || "");
+      preview.alt = String(image.alt || image.title || "Course image");
+      preview.loading = "lazy";
+      thumb.append(preview);
+      const name = document.createElement("div");
+      name.className = "tt-tiptap-lab__image-name";
+      name.textContent = String(image.title || image.name || "Course image");
+      const insert = document.createElement("button");
+      insert.type = "button";
+      insert.textContent = "Insert into lesson";
+      insert.addEventListener("click", () => attachLibraryImage(image));
+      item.append(thumb, name, insert);
+      imageLibrary.append(item);
+    }
+  }
+
+  async function loadImageLibrary() {
+    if (!loaded || !currentDraftId || !imageLibrary || !imageLibraryToggle) return;
+    imageLibraryToggle.disabled = true;
+    setMediaStatus("Loading the saved image library…");
+    try {
+      const payload = await fetchJson(mediaApiUrl());
+      renderImageLibrary(payload.images || []);
+      imageLibrary.hidden = false;
+      imageLibraryToggle.textContent = "Hide image library";
+      setMediaStatus((payload.images || []).length + " saved image(s) available in this draft.");
+    } catch (libraryError) {
+      setMediaStatus("Image library could not be loaded: " + String(libraryError.message || libraryError));
+    } finally {
+      imageLibraryToggle.disabled = !loaded || conflict;
+    }
+  }
+
+  async function attachLibraryImage(image) {
+    if (!loaded || !currentDraftId || !currentLessonId) return;
+    try {
+      const payload = await fetchJson(mediaApiUrl(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          expected_updated_at: expectedUpdatedAt,
+          lesson_id: currentLessonId,
+          asset_id: image.assetUuid || image.id,
+        }),
+      });
+      expectedUpdatedAt = payload.updated_at;
+      insertAssetImage(payload.image);
+      syncSaveControls();
+      imageLibrary.hidden = true;
+      imageLibraryToggle.textContent = "Image library";
+    } catch (attachError) {
+      if (attachError.status === 409 || attachError.status === 410) {
+        conflict = true;
+        syncSaveControls();
+        syncMediaControls();
+      }
+      setMediaStatus("Image could not be added: " + String(attachError.message || attachError));
+    }
+  }
+
+  async function uploadImages(files) {
+    if (!loaded || !currentDraftId || !currentLessonId || !files.length) return;
+    imageUploadButton.disabled = true;
+    let uploadedCount = 0;
+    try {
+      for (const file of files) {
+        const form = new FormData();
+        form.append("expected_updated_at", expectedUpdatedAt);
+        form.append("lesson_id", currentLessonId);
+        form.append("file", file);
+        const payload = await fetchJson(mediaApiUrl(), { method: "POST", body: form });
+        expectedUpdatedAt = payload.updated_at;
+        insertAssetImage(payload.image);
+        uploadedCount += 1;
+      }
+      if (imageLibrary && !imageLibrary.hidden) await loadImageLibrary();
+      setMediaStatus(uploadedCount + " image(s) uploaded to Academy asset storage and inserted. Save the lesson to preserve their placement.");
+    } catch (uploadError) {
+      if (uploadError.status === 409 || uploadError.status === 410) {
+        conflict = true;
+        syncSaveControls();
+        syncMediaControls();
+      }
+      setMediaStatus("Image upload stopped after " + uploadedCount + " successful file(s): " + String(uploadError.message || uploadError));
+    } finally {
+      imageUploadButton.disabled = !loaded || conflict;
+      if (imageUploadInput) imageUploadInput.value = "";
+    }
+  }
+
+  function updateProtectedVideoPresentation(video) {
+    currentProtectedVideo = video && video.id ? video : null;
+    if (!protectedVideoStatus) return;
+    if (!currentProtectedVideo) {
+      protectedVideoStatus.textContent = "No protected video is attached to this lesson.";
+    } else if (currentProtectedVideo.status === "stored_for_draft") {
+      const sizeMb = (Number(currentProtectedVideo.size_bytes || 0) / 1024 / 1024).toFixed(1);
+      protectedVideoStatus.textContent = "Private source staged · "
+        + String(currentProtectedVideo.filename || "Video")
+        + (sizeMb !== "0.0" ? " · " + sizeMb + " MB" : "")
+        + ". Encrypted streaming is prepared after approval and publication.";
+    } else {
+      protectedVideoStatus.textContent = "Protected video · "
+        + String(currentProtectedVideo.status || "status unavailable")
+        + (currentProtectedVideo.processing_error ? " · " + currentProtectedVideo.processing_error : "");
+    }
+    syncMediaControls();
+  }
+
+  async function uploadProtectedVideo(file) {
+    if (!loaded || !currentDraftId || !currentLessonId || !file) return;
+    protectedVideoButton.disabled = true;
+    protectedVideoStatus.textContent = "Uploading to private video storage. Keep this tab open until the upload is acknowledged…";
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("expected_updated_at", expectedUpdatedAt);
+      const url = "/staff/course-builder/videos/"
+        + encodeURIComponent(currentDraftId) + "/"
+        + encodeURIComponent(currentLessonId) + "/";
+      const payload = await fetchJson(url, { method: "POST", body: form });
+      expectedUpdatedAt = payload.updated_at || expectedUpdatedAt;
+      updateProtectedVideoPresentation(payload.video);
+      if (externalVideoInput) externalVideoInput.value = "";
+      if (payload.video?.id && !documentHasReference("videoBlock", "videoId", payload.video.id)) {
+        editor.commands.insertContent({
+          type: "videoBlock",
+          attrs: { videoId: payload.video.id },
+        });
+      }
+      setMediaStatus(payload.message || "Protected video stored privately. Save the lesson to preserve its video reference.");
+    } catch (videoError) {
+      if (videoError.status === 409 || videoError.status === 410) {
+        conflict = true;
+        syncSaveControls();
+        syncMediaControls();
+      }
+      protectedVideoStatus.textContent = "Protected video upload failed: " + String(videoError.message || videoError);
+    } finally {
+      protectedVideoButton.disabled = !loaded || conflict;
+      if (protectedVideoInput) protectedVideoInput.value = "";
+    }
+  }
+
+  function validExternalVideoUrl(value) {
+    if (!value) return true;
+    try {
+      const parsed = new URL(value);
+      return ["http:", "https:"].includes(parsed.protocol)
+        && Boolean(parsed.hostname)
+        && !parsed.username
+        && !parsed.password;
+    } catch {
+      return false;
+    }
   }
 
   function syncJson() {
@@ -338,7 +579,13 @@ import {
       expectedUpdatedAt = payload.expected_updated_at;
       lessonTitle.textContent = payload.draft.title + " · " + lesson.title;
       populatePreview(payload.learner_preview_url);
-      loadDocumentFromLesson(lesson);
+      const sidecar = loadDocumentFromLesson(lesson);
+      currentProtectedVideo = sidecar.protectedVideo?.id ? sidecar.protectedVideo : null;
+      updateProtectedVideoPresentation(currentProtectedVideo);
+      loadedExternalVideoUrl = String(lesson.videoUrl || "").trim();
+      if (externalVideoInput) {
+        externalVideoInput.value = currentProtectedVideo ? "" : loadedExternalVideoUrl;
+      }
       loaded = !lesson.documentValidationError;
       isDirty = false;
       conflict = false;
@@ -358,11 +605,21 @@ import {
       syncToolbar();
       syncJson();
       syncSaveControls();
+      syncMediaControls();
     }
   }
 
   async function saveDraft() {
     if (!loaded || !isDirty || conflict || hasCompatibilityBlockers) return;
+    const externalVideoUrl = externalVideoInput && !currentProtectedVideo
+      ? externalVideoInput.value.trim()
+      : "";
+    const externalVideoChanged = externalVideoUrl !== loadedExternalVideoUrl;
+    if (externalVideoChanged && !validExternalVideoUrl(externalVideoUrl)) {
+      setMediaStatus("Enter a valid HTTP or HTTPS video link, or clear the field.");
+      externalVideoInput?.focus();
+      return;
+    }
     let markdown;
     try {
       markdown = editor.getMarkdown();
@@ -375,16 +632,19 @@ import {
     saveStatus.textContent = "Saving this lesson to the selected draft…";
     try {
       const url = apiBase + encodeURIComponent(currentDraftId) + "/" + encodeURIComponent(currentLessonId) + "/";
+      const saveBody = {
+        expected_updated_at: expectedUpdatedAt,
+        document: currentDocument(),
+        markdown,
+      };
+      if (externalVideoChanged) saveBody.external_video_url = externalVideoUrl;
       const payload = await fetchJson(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          expected_updated_at: expectedUpdatedAt,
-          document: currentDocument(),
-          markdown,
-        }),
+        body: JSON.stringify(saveBody),
       });
       expectedUpdatedAt = payload.updated_at;
+      if (externalVideoChanged) loadedExternalVideoUrl = externalVideoUrl;
       currentPreviewUrl = payload.learner_preview_url || currentPreviewUrl;
       populatePreview(currentPreviewUrl);
       isDirty = false;
@@ -403,6 +663,7 @@ import {
       }
     } finally {
       syncSaveControls();
+      syncMediaControls();
     }
   }
 
@@ -412,6 +673,7 @@ import {
       control.disabled = !enabled;
     }
     syncToolbar();
+    syncMediaControls();
   }
 
   editor = new Editor({
@@ -476,6 +738,29 @@ import {
   lessonSelect.addEventListener("change", syncSaveControls);
   loadLessonButton.addEventListener("click", loadLesson);
   saveButton.addEventListener("click", saveDraft);
+
+  imageUploadButton?.addEventListener("click", () => imageUploadInput?.click());
+  imageUploadInput?.addEventListener("change", () => {
+    uploadImages(Array.from(imageUploadInput.files || []));
+  });
+  imageLibraryToggle?.addEventListener("click", () => {
+    if (imageLibrary?.hidden) loadImageLibrary();
+    else if (imageLibrary) {
+      imageLibrary.hidden = true;
+      imageLibraryToggle.textContent = "Image library";
+    }
+  });
+  protectedVideoButton?.addEventListener("click", () => protectedVideoInput?.click());
+  protectedVideoInput?.addEventListener("change", () => {
+    uploadProtectedVideo(protectedVideoInput.files?.[0] || null);
+  });
+  externalVideoInput?.addEventListener("input", () => {
+    if (!loaded || currentProtectedVideo) return;
+    markDirty();
+    setMediaStatus(externalVideoInput.value.trim()
+      ? "External video link changed. Save the lesson to update the learner preview."
+      : "External video link cleared. Save the lesson to remove it from the learner preview.");
+  });
 
   root.addEventListener("click", async event => {
     const button = event.target.closest("[data-markdown]");
@@ -593,5 +878,6 @@ import {
   });
 
   setInitialEditorEnabled(false);
+  syncMediaControls();
   initialiseDraftList();
 })();
