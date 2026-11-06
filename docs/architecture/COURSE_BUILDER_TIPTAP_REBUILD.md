@@ -387,6 +387,9 @@ production deployment configuration.
 - The upload response includes the stable staged-video ID and updated draft
   revision so Tiptap can insert the sidecar reference without creating a
   false stale-save conflict.
+- Tiptap supplies the draft revision token before and after the private upload;
+  a stale upload is rejected and its unattached temporary file is discarded.
+  The token remains optional for the legacy Course Builder endpoint.
 - Protected-video references are validated against the staged record or the
   published `ProtectedLessonVideo` record, not a browser-supplied status.
 - Encrypted HLS processing remains in the existing approval/publication
