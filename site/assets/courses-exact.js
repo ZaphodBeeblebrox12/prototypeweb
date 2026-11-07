@@ -116,7 +116,7 @@
   }
   function renderFilters() {
     if (!filtersHost) return;
-    const allowed = courses.filter(course => course.status !== 'in-development' && course.status !== 'coming-soon' && course.catalogueVisibility !== 'hidden');
+    const allowed = courses.filter(course => course.status !== 'in-development' && course.catalogueVisibility !== 'hidden');
     const categories = [...new Set(allowed.map(course => course.category).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
     filtersHost.innerHTML = '<button type="button" data-filter="All topics" aria-pressed="true">All topics <span>' + allowed.length + '</span></button>' +
       categories.map(category => '<button type="button" data-filter="' + esc(category) + '" aria-pressed="false">' + esc(category) +
@@ -130,7 +130,7 @@
   function renderCourses() {
     if (!grid) return;
     const query = String(searchInput?.value || '').trim().toLocaleLowerCase();
-    const published = courses.filter(course => course.status !== 'in-development' && course.status !== 'coming-soon' && course.catalogueVisibility !== 'hidden');
+    const published = courses.filter(course => course.status !== 'in-development' && course.catalogueVisibility !== 'hidden');
     const shown = published.filter(course => {
       const categoryMatches = activeFilter === 'All topics' || course.category === activeFilter;
       const blob = [course.title,course.category,course.level,course.hook,course.problem,course.focus,course.description,course.outcome,course.why,course.complements].join(' ').toLocaleLowerCase();
