@@ -22,6 +22,8 @@
 
   let programmes = (source.programmes || []).filter(visible).slice().sort((a,b)=>(a.order||0)-(b.order||0));
   let supporting = (source.supportingProgrammes || []).filter(visible).slice();
+  let dynamicFlagships = [];
+  let dynamicSupporting = [];
   let courses = (source.microCourses || []).filter(visible).map(normaliseCourse).sort((a,b)=>(a.order||0)-(b.order||0));
   let activeFilter = 'All topics';
   let activeCourse = null;
@@ -55,39 +57,64 @@
       '<div class="construct-reflection-quote"><p class="construct-reflection-question">What did you believe then?</p>' +
       '<p class="construct-reflection-reminder">Don\'t let the ending answer for you.</p></div></aside>';
   }
+  function renderFlagshipCard(course,index) {
+    const isConstruct = course.id === 'construct' || /construct/i.test(course.title || '');
+    const isDark = isConstruct || (course.price && course.price !== 'Free');
+    const isPath = course.id === 'trading-path';
+    const heading = isPath ? 'The TradeThesis<br>Trading Path' : esc(course.title || '');
+    const badge = isConstruct ? 'Guided flagship · ' + esc(course.price || '₹17,000')
+      : (course.price === 'Free' || course.isFree ? 'Free · Permanent access' :
+        (course.price ? 'Flagship · ' + esc(course.price) : 'Full course'));
+    const facts = flagshipFacts(course).map(item =>
+      '<div><strong>' + esc(item[0]) + '</strong><span>' + esc(item[1]) + '</span></div>'
+    ).join('');
+    const href = isConstruct ? 'construct.html' : (isPath ? 'trading-path.html' : (course.href || course.academyUrl || '#'));
+    const className = 'flagship-card ' + (isDark ? 'flagship-card--construct' : 'flagship-card--path');
+    const serialText = isConstruct ? 'APPLICATION' : (isPath ? 'FOUNDATIONS' : 'FULL PROGRAMME');
+    const serial = String(index+1).padStart(2,'0') + ' <i>/</i> ' + serialText;
+    const kicker = course.kicker || (isConstruct ? 'THE GUIDED FLAGSHIP PROGRAMME' : (isPath ? 'THE BEGINNER PROGRAMME' : 'TRADETHESIS FLAGSHIP PROGRAMME'));
+    const subtitle = (isConstruct || course.subtitle)
+      ? '<p class="flagship-subtitle">' + esc(course.subtitle || 'Trade Construction &amp; Management') + '</p>' : '';
+    const reflection = isConstruct ? reflectionNote() : '';
+    const footer = isConstruct ? 'Guided practice · 12-month community access'
+      : (isPath ? 'Complete self-paced course' : (course.community || 'Complete flagship programme'));
+    const cta = isConstruct ? 'Explore CONSTRUCT' : (isPath ? 'Explore Trading Path' : (course.cta || 'Explore course'));
+    const aria = isConstruct ? 'Explore CONSTRUCT, the guided flagship course, priced at 17,000 rupees'
+      : (isPath ? 'Explore The TradeThesis Trading Path, free full course' : 'Explore ' + (course.title || 'TradeThesis flagship course'));
+    return '<a class="' + className + '" href="' + esc(href) + '" aria-label="' + esc(aria) + '">' +
+      '<div class="flagship-card-top"><span class="flagship-serial">' + serial + '</span><span class="flagship-badge">' + badge + '</span></div>' +
+      '<div class="flagship-card-main"><p class="flagship-card-kicker">' + esc(kicker) + '</p><h3>' + heading + '</h3>' + subtitle +
+      '<p class="flagship-promise">' + esc(course.promise || course.hook || '') + '</p><p class="flagship-description">' + esc(course.description || '') + '</p>' + reflection + '</div>' +
+      '<div class="flagship-facts ' + (isPath ? 'flagship-facts--three' : '') + '" aria-label="Course format">' + facts + '</div>' +
+      '<div class="flagship-card-footer"><span>' + esc(footer) + '</span><strong>' + esc(cta) + ' <i aria-hidden="true">↗</i></strong></div></a>';
+  }
   function renderFlagships() {
     if (!flagshipGrid) return;
-    flagshipGrid.innerHTML = programmes.map(course => {
-      const isConstruct = course.id === 'construct' || /construct/i.test(course.title || '');
-      const heading = course.id === 'trading-path' ? 'The TradeThesis<br>Trading Path' : esc(course.title || '');
-      const badge = isConstruct ? 'Guided flagship · ' + esc(course.price || '₹17,000') : 'Free · Permanent access';
-      const facts = flagshipFacts(course).map(item => '<div><strong>' + esc(item[0]) + '</strong><span>' + esc(item[1]) + '</span></div>').join('');
-      const href = isConstruct ? 'construct.html' : (course.href || 'trading-path.html');
-      const className = isConstruct ? 'flagship-card flagship-card--construct' : 'flagship-card flagship-card--path';
-      const serial = isConstruct ? '02 <i>/</i> APPLICATION' : '01 <i>/</i> FOUNDATIONS';
-      const kicker = isConstruct ? 'THE GUIDED FLAGSHIP PROGRAMME' : 'THE BEGINNER PROGRAMME';
-      const subtitle = isConstruct ? '<p class="flagship-subtitle">' + esc(course.subtitle || 'Trade Construction &amp; Management') + '</p>' : '';
-      const reflection = isConstruct ? reflectionNote() : '';
-      const footer = isConstruct ? 'Guided practice · 12-month community access' : 'Complete self-paced course';
-      const cta = isConstruct ? 'Explore CONSTRUCT' : 'Explore Trading Path';
-      const aria = isConstruct ? 'Explore CONSTRUCT, the guided flagship course, priced at 17,000 rupees' : 'Explore The TradeThesis Trading Path, free full course';
-      return '<a class="' + className + '" href="' + esc(href) + '" aria-label="' + aria + '">' +
-        '<div class="flagship-card-top"><span class="flagship-serial">' + serial + '</span><span class="flagship-badge">' + badge + '</span></div>' +
-        '<div class="flagship-card-main"><p class="flagship-card-kicker">' + kicker + '</p><h3>' + heading + '</h3>' + subtitle +
-        '<p class="flagship-promise">' + esc(course.promise || '') + '</p><p class="flagship-description">' + esc(course.description || '') + '</p>' + reflection + '</div>' +
-        '<div class="flagship-facts ' + (isConstruct ? '' : 'flagship-facts--three') + '" aria-label="Course format">' + facts + '</div>' +
-        '<div class="flagship-card-footer"><span>' + footer + '</span><strong>' + cta + ' <i aria-hidden="true">↗</i></strong></div></a>';
-    }).join('');
+    const entries = [...programmes,...dynamicFlagships].sort((a,b) =>
+      (a.catalogueOrder ?? a.order ?? 0) - (b.catalogueOrder ?? b.order ?? 0));
+    flagshipGrid.innerHTML = entries.map(renderFlagshipCard).join('');
+    const count = $('.flagship-count strong');
+    if (count) count.textContent = String(entries.length).padStart(2,'0');
+    const countLabel = $('.flagship-count');
+    if (countLabel) countLabel.setAttribute('aria-label',entries.length + ' flagship courses');
   }
   function renderLiveClassroom() {
     if (!liveHost) return;
-    const course = supporting.find(item => item.id === 'live-classroom') || supporting[0];
-    if (!course) { liveHost.hidden = true; return; }
-    liveHost.hidden = false;
-    liveHost.innerHTML = '<div class="live-classroom-copy"><p class="live-classroom-kicker">LIVE CLASSROOM</p>' +
-      '<h3>Trade Construction &amp; Management — Live Classroom</h3>' +
-      '<p>Six live weekend sessions, guided worksheets and checkpoints that lead towards a written personal playbook.</p></div>' +
-      '<a href="' + esc(course.href || 'live-class.html') + '">Explore the live programme <span aria-hidden="true">↗</span></a>';
+    const entries = [...supporting,...dynamicSupporting].sort((a,b) =>
+      (a.catalogueOrder ?? a.order ?? 0) - (b.catalogueOrder ?? b.order ?? 0));
+    liveHost.hidden = !entries.length;
+    liveHost.innerHTML = entries.map(course => {
+      const isLiveClassroom = course.id === 'live-classroom';
+      const title = isLiveClassroom ? 'Trade Construction &amp; Management — Live Classroom' : esc(course.title || 'Supporting programme');
+      const description = isLiveClassroom
+        ? 'Six live weekend sessions, guided worksheets and checkpoints that lead towards a written personal playbook.'
+        : esc(course.description || '');
+      const href = course.href || course.academyUrl || 'live-class.html';
+      const cta = isLiveClassroom ? 'Explore the live programme' : (course.cta || 'Explore programme');
+      return '<div class="live-classroom-line"><div class="live-classroom-copy">' +
+        '<p class="live-classroom-kicker">LIVE CLASSROOM</p><h3>' + title + '</h3><p>' + description +
+        '</p></div><a href="' + esc(href) + '">' + esc(cta) + ' <span aria-hidden="true">↗</span></a></div>';
+    }).join('');
   }
   function renderDevelopmentRail() {
     if (!developmentRail) return;
@@ -267,42 +294,86 @@
         let changed = false;
         (Array.isArray(payload.courses) ? payload.courses : []).forEach(incoming => {
           if (!incoming || !incoming.slug) return;
-          const match = courses.find(item => sameCourse(item,incoming));
-          if (incoming.catalogueRole === 'hidden' || incoming.status === 'hidden') {
-            if (match) { courses = courses.filter(item => item !== match); changed = true; }
+          const prior = [...programmes,...supporting,...courses,...dynamicFlagships,...dynamicSupporting]
+            .find(item => sameCourse(item,incoming));
+          const role = ['flagship','supporting','mini','hidden'].includes(incoming.catalogueRole)
+            ? incoming.catalogueRole : 'mini';
+
+          if (role === 'hidden' || incoming.status === 'hidden') {
+            programmes = programmes.filter(item => !sameCourse(item,incoming));
+            supporting = supporting.filter(item => !sameCourse(item,incoming));
+            courses = courses.filter(item => !sameCourse(item,incoming));
+            dynamicFlagships = dynamicFlagships.filter(item => !sameCourse(item,incoming));
+            dynamicSupporting = dynamicSupporting.filter(item => !sameCourse(item,incoming));
+            changed = true;
             return;
           }
-          if (incoming.catalogueRole && incoming.catalogueRole !== 'mini') return;
           if (incoming.status !== 'published' && incoming.status !== 'coming-soon') return;
-          const target = match || normaliseCourse({
-            id:incoming.slug,title:incoming.title,category:incoming.category || 'Focused study',
-            level:incoming.level || 'Self-paced',art:incoming.art || 'structure',
-            price:incoming.price || (incoming.status === 'coming-soon' ? 'Coming soon' : ''),
-            description:incoming.description || '',outcome:incoming.outcome || '',
-            modules:incoming.modules || [],catalogueVisibility:'visible'
+
+          const target = normaliseCourse({
+            ...(prior || {}),
+            ...incoming,
+            id:(prior && prior.id) || incoming.slug,
+            slug:incoming.slug,
+            category:incoming.category || (prior && prior.category) || 'Focused study',
+            level:incoming.level || (prior && prior.level) || 'Self-paced',
+            art:(prior && prior.art) || incoming.art || 'structure',
+            modules:Array.isArray(incoming.modules) && incoming.modules.length
+              ? incoming.modules : ((prior && prior.modules) || []),
+            status:incoming.status
           });
-          Object.assign(target,{
-            slug:incoming.slug,academyUrl:incoming.academyUrl || '',
-            shareUrl:incoming.shareUrl || '',shareTitle:incoming.shareTitle || target.title,
-            shareMessage:incoming.shareMessage || '',status:incoming.status,
-            price:incoming.priceConfigured ? (incoming.price || '') : (target.price || incoming.price || ''),
-            priceNote:incoming.priceNote || target.priceNote || '',
-            category:incoming.category || target.category,level:incoming.level || target.level,
-            description:incoming.description || target.description,outcome:incoming.outcome || target.outcome,
-            modules:Array.isArray(incoming.modules) && incoming.modules.length ? incoming.modules.map(asModule) : target.modules
-          });
+          target.academyUrl = incoming.academyUrl || '';
+          target.shareUrl = incoming.shareUrl || '';
+          target.shareTitle = incoming.shareTitle || target.title;
+          target.shareMessage = incoming.shareMessage || '';
+          target.price = incoming.priceConfigured
+            ? (incoming.price || '')
+            : ((prior && prior.price) || incoming.price || '');
+          target.priceNote = incoming.priceNote || (prior && prior.priceNote) || '';
+          target.catalogueRole = role;
+          target.catalogueOrder = Number.isFinite(Number(incoming.catalogueOrder))
+            ? Number(incoming.catalogueOrder) : ((prior && prior.catalogueOrder) || (prior && prior.order) || 0);
+          target.priority = role === 'flagship' ? 1 : role === 'supporting' ? 2 : 3;
           if (incoming.cataloguePresentationConfigured) {
-            target.hook = incoming.hook || ''; target.problem = incoming.problem || '';
-            target.focus = incoming.learningFocus || ''; target.why = incoming.whyThisOne || '';
+            target.hook = incoming.hook || '';
+            target.problem = incoming.problem || '';
+            target.focus = incoming.learningFocus || '';
+            target.why = incoming.whyThisOne || '';
+          } else if (prior) {
+            target.hook = prior.hook || target.hook || '';
+            target.problem = prior.problem || target.problem || '';
+            target.focus = prior.focus || target.focus || '';
+            target.why = prior.why || target.why || '';
           }
-          if (!match) courses.push(target);
+
+          programmes = programmes.filter(item => !sameCourse(item,incoming));
+          supporting = supporting.filter(item => !sameCourse(item,incoming));
+          courses = courses.filter(item => !sameCourse(item,incoming));
+          dynamicFlagships = dynamicFlagships.filter(item => !sameCourse(item,incoming));
+          dynamicSupporting = dynamicSupporting.filter(item => !sameCourse(item,incoming));
+
+          if (role === 'flagship') {
+            if (prior && (source.programmes || []).some(item => sameCourse(item,incoming))) {
+              programmes.push(target);
+            } else dynamicFlagships.push(target);
+          } else if (role === 'supporting') {
+            if (prior && (source.supportingProgrammes || []).some(item => sameCourse(item,incoming))) {
+              supporting.push(target);
+            } else dynamicSupporting.push(target);
+          } else {
+            courses.push(target);
+          }
           changed = true;
         });
         if (changed) {
           courses.sort((a,b)=>(a.priority||3)-(b.priority||3) ||
             (a.order||a.catalogueOrder||0)-(b.order||b.catalogueOrder||0) ||
             String(a.title||'').localeCompare(String(b.title||'')));
-          renderDevelopmentRail(); renderFilters(); renderCourses();
+          renderFlagships();
+          renderLiveClassroom();
+          renderDevelopmentRail();
+          renderFilters();
+          renderCourses();
         }
       })
       .catch(() => { /* Keep the checked-in catalogue usable if Academy is offline. */ });
