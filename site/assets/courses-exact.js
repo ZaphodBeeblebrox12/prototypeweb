@@ -91,8 +91,7 @@
   }
   function renderDevelopmentRail() {
     if (!developmentRail) return;
-    const items = (source.microCourses || []).filter(item => item &&
-      (item.status === 'in-development' || item.catalogueVisibility === 'in-development'));
+    const items = courses.filter(item => item && item.status === 'in-development');
     developmentRail.hidden = !items.length;
     developmentRail.innerHTML = items.map(item =>
       '<div><span class="development-label">In development</span><h3>' + esc(item.title) + '</h3><p>' +
@@ -303,7 +302,7 @@
           courses.sort((a,b)=>(a.priority||3)-(b.priority||3) ||
             (a.order||a.catalogueOrder||0)-(b.order||b.catalogueOrder||0) ||
             String(a.title||'').localeCompare(String(b.title||'')));
-          renderFilters(); renderCourses();
+          renderDevelopmentRail(); renderFilters(); renderCourses();
         }
       })
       .catch(() => { /* Keep the checked-in catalogue usable if Academy is offline. */ });
