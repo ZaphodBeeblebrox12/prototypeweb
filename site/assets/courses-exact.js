@@ -84,10 +84,10 @@
     const course = supporting.find(item => item.id === 'live-classroom') || supporting[0];
     if (!course) { liveHost.hidden = true; return; }
     liveHost.hidden = false;
-    liveHost.innerHTML = '<div class="live-classroom-copy"><p class="live-classroom-kicker">LIVE CLASSROOM</p><h3>' +
-      esc(course.title || 'Trade Construction &amp; Management — Live Classroom') + '</h3><p>' + esc(course.description || '') +
-      '</p></div><a href="' + esc(course.href || 'live-class.html') + '">' +
-      esc(course.cta || 'Explore the live programme') + ' <span aria-hidden="true">↗</span></a>';
+    liveHost.innerHTML = '<div class="live-classroom-copy"><p class="live-classroom-kicker">LIVE CLASSROOM</p>' +
+      '<h3>Trade Construction &amp; Management — Live Classroom</h3>' +
+      '<p>Six live weekend sessions, guided worksheets and checkpoints that lead towards a written personal playbook.</p></div>' +
+      '<a href="' + esc(course.href || 'live-class.html') + '">Explore the live programme <span aria-hidden="true">↗</span></a>';
   }
   function renderDevelopmentRail() {
     if (!developmentRail) return;
@@ -139,7 +139,7 @@
     grid.innerHTML = shown.map(course => {
       const topic = [course.category,course.level].filter(Boolean).join(' · ');
       return '<article class="course-tile" id="course-' + esc(course.id) + '" data-course-card="' + esc(course.id) +
-        '" tabindex="0" role="button" aria-label="Open course details for ' + esc(course.title) + '. You can also share this course.">' +
+        '" tabindex="0" aria-label="Open course details for ' + esc(course.title) + '. You can also share this course.">' +
         '<div class="tile-top"><span class="tile-topic">' + esc(topic) + '</span><span class="price-chip">' + esc(course.price || 'Details soon') + '</span></div>' +
         '<h3>' + esc(course.title) + '</h3><p class="course-hook">' + esc(course.hook || course.description || '') + '</p>' +
         '<div class="tile-bottom"><span>Course details</span><div class="tile-actions"><button type="button" data-open-course="' + esc(course.id) +
