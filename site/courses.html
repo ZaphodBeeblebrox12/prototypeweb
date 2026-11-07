@@ -5,19 +5,46 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Courses &amp; Micro-Courses | TradeThesis</title>
 <meta name="description" content="Practical trading education: two complete TradeThesis flagship courses, focused micro-courses and a guided live classroom.">
-<link rel="stylesheet" href="assets/courses-exact.css?v=20261107-exact-r1">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/tradethesis-icon.png">
+<link rel="stylesheet" href="assets/courses-exact.css?v=20261107-exact-r2">
+<link rel="stylesheet" href="assets/sitewide-nav.css?v=20261107-shell-r1">
+<link rel="stylesheet" href="assets/sitewide-footer.css?v=20261107-shell-r1">
 </head>
 <body>
-<main class="courses-catalogue-page">
-  <header class="site-header">
-    <a class="brand" href="#top">TRADE<span>THESIS</span></a>
-    <nav class="main-nav" aria-label="Main navigation">
-      <a href="#programmes">Learning paths</a>
-      <a class="active" href="#courses">Courses</a>
-      <a href="#approach">Our approach</a>
-      <a class="member-link" href="/accounts/member-entry/" data-academy-path="/accounts/member-entry/">Member area ↗</a>
-    </nav>
-  </header>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<header class="header sitewide-header" data-sitewide-nav>
+  <div class="wrap nav">
+    <a class="brand" href="index.html" aria-label="TradeThesis home"><img class="brand-logo brand-logo-header" src="assets/tradethesis-horizontal.png" alt="TradeThesis — Conviction before execution"></a>
+    <nav class="navlinks" aria-label="Main navigation">
+      <a href="index.html#approach">Our approach</a>
+      <a class="active" aria-current="page" href="courses.html">Courses</a>
+      <a href="community.html">Community</a>
+      </nav>
+
+    <div class="tt-live-control" data-youtube-live-control data-youtube-live-status-path="/api/youtube/live-status/" hidden>
+      <button class="tt-live-pill" type="button" aria-label="TradeThesis is live on YouTube" aria-expanded="false" aria-controls="ttYoutubeLivePopover" data-youtube-live-toggle>
+        <span class="tt-live-dot" aria-hidden="true"></span>
+        <span class="tt-live-pill-label">LIVE</span>
+        <span class="tt-live-pill-context">ON YOUTUBE</span>
+      </button>
+      <div class="tt-live-popover" id="ttYoutubeLivePopover" data-youtube-live-popover role="region" aria-label="TradeThesis YouTube live stream" hidden>
+        <div class="tt-live-popover-eyebrow"><span class="tt-live-dot" aria-hidden="true"></span> LIVE NOW</div>
+        <p class="tt-live-popover-title">TradeThesis is live on YouTube.</p>
+        <p class="tt-live-popover-copy">Join the session while it’s in progress.</p>
+        <a class="tt-live-watch-link" href="https://www.youtube.com/" data-youtube-live-watch target="_blank" rel="noopener noreferrer">Watch on YouTube <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    <a class="button member-area-link" href="#" data-academy-path="/accounts/member-entry/">Open member dashboard ↗</a>
+    <button class="mobile-toggle" type="button" aria-expanded="false" aria-label="Open navigation" data-sitewide-toggle>☰</button>
+  </div>
+  <nav class="wrap mobilelinks" aria-label="Mobile navigation" data-sitewide-mobile>
+    <a href="index.html#approach">Our approach</a>
+    <a class="active" aria-current="page" href="courses.html">Courses</a>
+    <a href="community.html">Community</a>
+    <a class="mobile-menu-cta" href="#" data-academy-path="/accounts/member-entry/">Open member dashboard ↗</a>
+  </nav>
+</header>
+<main id="main-content" class="courses-catalogue-page" tabindex="-1">
 
   <section class="hero" id="top">
     <div class="hero-copy">
@@ -80,19 +107,50 @@
     <span>Learn the reasoning. Own the decision.</span>
   </div>
 
-  <!-- The former ed-course-foot strip is folded into this single footer. -->
-  <footer class="site-footer" id="member">
-    <div class="footer-main">
-      <div class="footer-prompt">Ready to make your next chart decision with <em>more clarity?</em></div>
-      <div class="footer-actions"><a href="#courses">Browse focused courses</a><a class="footer-cta" href="#programmes">Explore Trading Path ↗</a></div>
-    </div>
-    <div class="footer-bottom">
-      <div><span class="footer-brand">TRADE<span>THESIS</span></span> <span> · Conviction before execution</span></div>
-      <div class="footer-legal"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Risk disclosure</a><a href="#">Contact</a></div>
-      <span>© TradeThesis · Conviction before execution</span>
+</main>
+
+<footer class="sitewide-footer" id="sitewide-footer">
+    <div class="sitewide-footer__paper">
+      <section class="sitewide-footer__patches" aria-label="A note before you go">
+        <div class="sitewide-footer__note-copy">
+          <span class="sitewide-footer__stamp">A NOTE BEFORE YOU GO</span>
+          <h2 class="sitewide-footer__statement">Make the decision yours.<br><em>Build the process.</em></h2>
+          <p class="sitewide-footer__message">A clearer view of the process behind the trade.</p>
+        </div>
+        <a class="sitewide-footer__cta" href="trading-path.html"><span class="sitewide-footer__cta-label">Explore the Trading Path</span><span class="sitewide-footer__cta-arrow" aria-hidden="true">↗</span></a>
+      </section>
+      <div class="sitewide-footer__main">
+        <div class="sitewide-footer__brand-block">
+          <a class="sitewide-footer__brand" href="index.html" aria-label="TradeThesis home">
+            <img src="assets/tradethesis-wordmark.png" alt="TradeThesis — Conviction before execution">
+          </a>
+          <p class="sitewide-footer__copy">No signals, no hype—just a better process.</p>
+        </div>
+        <nav class="sitewide-footer__links" aria-label="Footer navigation">
+          <section class="sitewide-footer__link-group" aria-labelledby="footer-learn">
+            <h3 id="footer-learn">Learn</h3>
+            <a href="courses.html">Courses</a>
+            <a href="trading-path.html">Trading Path</a>
+          </section>
+          <section class="sitewide-footer__link-group" aria-labelledby="footer-about">
+            <h3 id="footer-about">About</h3>
+            <a href="index.html#approach">Our principles</a>
+            <a href="community.html">Community</a>
+          </section>
+          <section class="sitewide-footer__link-group" aria-labelledby="footer-essentials">
+            <h3 id="footer-essentials">Essentials</h3>
+            <a href="member-access.html">Member access</a>
+            <a href="live-class.html">Live class</a>
+          </section>
+        </nav>
+      </div>
+      <div class="sitewide-footer__bottom">
+        <span class="sitewide-footer__copyright">© TradeThesis · Conviction before execution</span>
+        <p class="sitewide-footer__disclaimer" id="sitewide-footer-disclaimer">For educational purposes only. Nothing on this website is investment advice or a recommendation to buy or sell any financial instrument. Trading involves risk, including the possible loss of capital. Chart examples are illustrative, not live trading signals.</p>
+        <a class="sitewide-footer__top-link" href="#" aria-label="Back to top">Back to top ↑</a>
+      </div>
     </div>
   </footer>
-</main>
 
 <div class="modal-backdrop" id="courseModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <article class="course-modal">
@@ -144,6 +202,7 @@
 
 <script src="assets/academy-config.js?v=20261107-catalogue-exact-r1"></script>
 <script src="assets/course-catalogue-data.js?v=20261107-catalogue-exact-r1"></script>
+<script src="assets/sitewide-nav.js?v=20261107-shell-r1"></script>
 <script src="assets/courses-exact.js?v=20261107-exact-r1" defer></script>
 </body>
 </html>
