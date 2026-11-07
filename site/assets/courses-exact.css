@@ -647,3 +647,8 @@ button{font:inherit}
 /* Accessible skip link matching the public site page shell. */
 .skip-link{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;z-index:1000}
 .skip-link:focus{left:16px;top:12px;width:auto;height:auto;padding:10px 14px;background:#fffdf8;color:#254334;border:2px solid #355a46;border-radius:4px;box-shadow:0 3px 12px #29382e22}
+
+
+/* Modal layers must cover the shared sticky site navigation as well as page content. */
+.modal-backdrop{z-index:100}
+.share-backdrop{z-index:101}
