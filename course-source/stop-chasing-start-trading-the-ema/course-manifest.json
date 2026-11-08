@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "manifest_version": "1.0",
+  "course": {
+    "title": "Stop Chasing. Start Trading the EMA.",
+    "slug": "stop-chasing-start-trading-the-ema",
+    "summary": "Stop buying every EMA touch. Learn which setups deserve attention, where they fail, and when the best trade is no trade.",
+    "description": "An approximately 50-minute practical EMA strategy course for traders who already understand moving averages. Focus on market qualification, trend pullbacks, EMA reclaims and rejections, continuation entries, no-trade conditions, late entries, invalidation, loss control and building a testable playbook. It is not an EMA basics course and does not promise a profitable strategy.",
+    "position": 60,
+    "requires_owned_assets": true
+  },
+  "notebook": {
+    "title": "Your EMA Decision Notes",
+    "prompts": [
+      {
+        "label": "Qualify",
+        "text": "What is the market condition, and is it suitable for this setup? State the evidence."
+      },
+      {
+        "label": "Plan",
+        "text": "What must price do before entry? Where is the idea invalidated, and is there enough room?"
+      },
+      {
+        "label": "Review",
+        "text": "Was the decision consistent with the plan? Separate process quality from the trade outcome."
+      }
+    ]
+  },
+  "modules": [
+    {
+      "slug": "find-trades-worth-taking",
+      "title": "Find Trades Worth Taking",
+      "summary": "Qualify market conditions, recognise the core EMA setups and plan entries without chasing price.",
+      "position": 1,
+      "source": "lessons/MODULE_01_FIND_TRADES_WORTH_TAKING.md",
+      "lessons": [
+        {
+          "source_id": "1.1",
+          "title": "Qualify the Market Before Looking for an Entry",
+          "slug": "qualify-the-market-before-looking-for-an-entry",
+          "position": 1,
+          "duration_minutes": 7,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading",
+          "summary": "Start with market regime, structure and location. Decide whether an EMA setup is even worth looking for."
+        },
+        {
+          "source_id": "1.2",
+          "title": "The Trend-Pullback Setup",
+          "slug": "the-trend-pullback-setup",
+          "position": 2,
+          "duration_minutes": 7,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading",
+          "summary": "Plan a pullback in an established trend without treating every touch of the EMA as an entry."
+        },
+        {
+          "source_id": "1.3",
+          "title": "The EMA Reclaim and Rejection Setup",
+          "slug": "the-ema-reclaim-and-rejection-setup",
+          "position": 3,
+          "duration_minutes": 6,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading",
+          "summary": "Read a reclaim or rejection through price structure, follow-through and a defined invalidation point."
+        },
+        {
+          "source_id": "1.4",
+          "title": "Breakout, Retest and Trend Continuation",
+          "slug": "breakout-retest-and-trend-continuation",
+          "position": 4,
+          "duration_minutes": 6,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading",
+          "summary": "Separate a genuine continuation opportunity from a late breakout chase."
+        }
+      ]
+    },
+    {
+      "slug": "stay-out-and-avoid-failure",
+      "title": "Stay Out and Avoid Failure",
+      "summary": "Recognise poor conditions, late entries, failed setups and the evidence that should stop a trade.",
+      "position": 2,
+      "source": "lessons/MODULE_02_STAY_OUT_AND_AVOID_FAILURE.md",
+      "lessons": [
+        {
+          "source_id": "2.1",
+          "title": "The No-Trade Market",
+          "slug": "the-no-trade-market",
+          "position": 1,
+          "duration_minutes": 6,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading",
+          "summary": "Recognise chop, compression without direction, overlapping averages and conflicting structure."
+        },
+        {
+          "source_id": "2.2",
+          "title": "Late Entries, Extended Price and Poor Location",
+          "slug": "late-entries-extended-price-and-poor-location",
+          "position": 2,
+          "duration_minutes": 5,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading",
+          "summary": "Avoid entering after the move has already travelled too far or left too little room."
+        },
+        {
+          "source_id": "2.3",
+          "title": "Failed Setups, Invalidation and Loss Control",
+          "slug": "failed-setups-invalidation-and-loss-control",
+          "position": 3,
+          "duration_minutes": 6,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading",
+          "summary": "Know what would prove the trade idea wrong, and respond without widening risk."
+        },
+        {
+          "source_id": "2.4",
+          "title": "Test the Idea and Build Your EMA Playbook",
+          "slug": "test-the-idea-and-build-your-ema-playbook",
+          "position": 4,
+          "duration_minutes": 7,
+          "release_day": 1,
+          "is_preview": false,
+          "format": "reading",
+          "summary": "Turn the setups and skip rules into a testable personal process with a decision journal."
+        }
+      ]
+    }
+  ]
+}

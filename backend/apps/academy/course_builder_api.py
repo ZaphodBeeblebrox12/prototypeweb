@@ -83,6 +83,14 @@ _BOLLINGER_BANDS_MANIFEST = (
     / "course-manifest.json"
 )
 
+_EMA_STRATEGY_IMPORT_SLUG = "stop-chasing-start-trading-the-ema"
+_EMA_STRATEGY_MANIFEST = (
+    Path(__file__).resolve().parents[3]
+    / "course-source"
+    / _EMA_STRATEGY_IMPORT_SLUG
+    / "course-manifest.json"
+)
+
 
 @lru_cache(maxsize=1)
 def _bollinger_bands_source_bundle():
@@ -222,6 +230,155 @@ def _bollinger_bands_import_candidate():
     if warnings:
         logger.warning(
             "Bollinger Bands Builder draft prepared with %s source-asset review warning(s)",
+            len(warnings),
+        )
+    return {"course": course}
+
+
+@lru_cache(maxsize=1)
+def _ema_strategy_source_bundle():
+    """Load and validate the canonical EMA strategy course package once per process."""
+    return inspect_manifest(_EMA_STRATEGY_MANIFEST)
+
+
+def _ema_strategy_import_candidate():
+    """Offer the strategy course as an editable Builder draft without publishing it."""
+    if Course.objects.exclude(status=Course.Status.ARCHIVED).filter(
+        slug=_EMA_STRATEGY_IMPORT_SLUG
+    ).exists():
+        return None
+
+    existing_records = CourseImport.objects.filter(
+        course_slug=_EMA_STRATEGY_IMPORT_SLUG
+    ).exclude(status=CourseImport.Status.DELETED).only("payload")
+    if any((record.payload or {}).get("builder_state") for record in existing_records):
+        return None
+
+    try:
+        source_payload, _asset_sources, warnings = _ema_strategy_source_bundle()
+    except (OSError, ValueError, KeyError, TypeError):
+        logger.exception("Could not prepare the EMA strategy Course Builder draft")
+        return None
+
+    source_course = source_payload["course"]
+    asset_specs = {
+        str(spec["stable_asset_id"]): spec
+        for spec in source_payload.get("assets", [])
+        if isinstance(spec, dict) and spec.get("stable_asset_id")
+    }
+    default_notebook = source_payload.get("notebook") or {}
+    modules = []
+    lesson_count = 0
+    total_minutes = 0
+
+    for module_index, module in enumerate(source_payload.get("modules", []), start=1):
+        lessons = []
+        for lesson_index, lesson in enumerate(module.get("lessons", []), start=1):
+            lesson_count += 1
+            source_id = str(lesson.get("source_id") or f"{module_index}.{lesson_index}")
+            content = str(lesson.get("content_markdown") or "")
+            referenced_asset_ids = list(dict.fromkeys(_ASSET_REF.findall(content)))
+            images = []
+            for asset_id in referenced_asset_ids:
+                spec = asset_specs.get(asset_id)
+                if not spec:
+                    continue
+                source_name = str(spec.get("asset_key") or "temporary-chart").rsplit("/", 1)[-1]
+                images.append(
+                    {
+                        "id": asset_id,
+                        "name": source_name[:240],
+                        "title": "",
+                        "alt": str(spec.get("alt_text") or "Temporary chart reference")[:500],
+                        "caption": "Temporary web reference. Replace with a TradeThesis-owned or licensed chart before publication.",
+                        "data": "",
+                        "assetUuid": asset_id,
+                        "sha256": str(spec.get("sha256") or ""),
+                    }
+                )
+
+            duration = max(1, min(360, int(lesson.get("duration_minutes") or 6)))
+            total_minutes += duration
+            content_json = (
+                lesson.get("content_json")
+                if isinstance(lesson.get("content_json"), dict)
+                else {}
+            )
+            safe_id = re.sub(r"[^A-Za-z0-9_-]", "-", source_id)
+            lessons.append(
+                {
+                    "id": "ema-strategy-lesson-" + safe_id,
+                    "title": str(lesson.get("title") or "")[:240],
+                    "summary": str(lesson.get("summary") or "")[:360],
+                    "minutes": duration,
+                    "format": str(lesson.get("format") or "reading"),
+                    "videoUrl": "",
+                    "content": content,
+                    "questions": [],
+                    "notebook": content_json.get("notebook") or default_notebook,
+                    "images": images,
+                    "image": images[0] if images else None,
+                    "imageGroups": [],
+                    "relatedCourseIds": [],
+                }
+            )
+        modules.append(
+            {
+                "id": f"ema-strategy-module-{module_index}",
+                "title": str(module.get("title") or f"Module {module_index}")[:200],
+                "description": str(module.get("summary") or "")[:5000],
+                "lessons": lessons,
+            }
+        )
+
+    if len(modules) != 2 or lesson_count != 8:
+        logger.error(
+            "EMA strategy import must contain exactly two modules and eight lessons; got %s/%s",
+            len(modules),
+            lesson_count,
+        )
+        return None
+
+    course = {
+        "id": "stop-chasing-start-trading-the-ema-import-course",
+        "title": str(source_course["title"])[:200],
+        "slug": _EMA_STRATEGY_IMPORT_SLUG,
+        "summary": str(source_course.get("summary") or "")[:360],
+        "description": str(source_course.get("description") or ""),
+        "category": "Technical analysis",
+        "level": "Intermediate",
+        "duration": f"{lesson_count} lessons · {total_minutes} minutes · Self-paced",
+        "price": "",
+        "priceAmount": "",
+        "priceCurrency": "INR",
+        "priceNote": "Pricing is not configured. This import does not create a purchase offer.",
+        "accessType": "paid",
+        "catalogueRole": "mini",
+        "catalogueHook": "Stop buying every EMA touch. Learn which setups deserve attention, where they fail, and when the best trade is no trade.",
+        "problemStatement": "",
+        "learningFocus": "EMA strategy selection, market filters, no-trade conditions, entry quality and failure management.",
+        "authoredTags": "EMA, trend pullback, reclaim, rejection, continuation, no-trade, risk management",
+        "whyThisOne": "",
+        "cataloguePresentationConfigured": False,
+        "status": "draft",
+        "comingSoon": False,
+        "requiresOwnedAssets": True,
+        "position": int(source_course.get("position") or 60),
+        "createdAt": "Not saved yet",
+        "updatedAt": "Not saved yet",
+        "publishedAt": None,
+        "publishedSnapshot": None,
+        "outcomes": [
+            "Qualify the market before selecting an EMA setup.",
+            "Construct pullback, reclaim/rejection and continuation plans with explicit triggers and invalidation.",
+            "Recognise no-trade conditions, late entries and failed setups.",
+            "Build a testable EMA playbook that separates evidence from assumptions.",
+        ],
+        "modules": modules,
+    }
+    if warnings:
+        logger.warning(
+            "EMA strategy Builder draft prepared with %s temporary/missing asset warning(s)",
             len(warnings),
         )
     return {"course": course}
@@ -477,13 +634,16 @@ def _clean_image_payload(course_state, course_slug):
                         ).exists()
                 if (
                     not may_reuse_stable_id
-                    and course_slug == _BOLLINGER_BANDS_IMPORT_SLUG
+                    and course_slug in (_BOLLINGER_BANDS_IMPORT_SLUG, _EMA_STRATEGY_IMPORT_SLUG)
                     and _valid_uuid(requested_stable_id)
                 ):
                     try:
-                        source_payload, _source_assets, _source_warnings = (
+                        source_bundle = (
                             _bollinger_bands_source_bundle()
+                            if course_slug == _BOLLINGER_BANDS_IMPORT_SLUG
+                            else _ema_strategy_source_bundle()
                         )
+                        source_payload = source_bundle[0]
                         may_reuse_stable_id = any(
                             str(spec.get("stable_asset_id") or "") == requested_stable_id
                             for spec in source_payload.get("assets", [])
@@ -2026,6 +2186,7 @@ def course_builder_api(request):
                 "asset_storage": asset_storage_status,
                 "trading_path_import_candidate": trading_path_import_candidate,
                 "bollinger_bands_import_candidate": bollinger_bands_import_candidate,
+                "ema_strategy_import_candidate": _ema_strategy_import_candidate(),
             }
         )
 
@@ -2610,9 +2771,17 @@ def course_builder_asset(request, import_id, asset_id):
             from django.http import HttpResponseRedirect
 
             return HttpResponseRedirect(live_asset.original_url)
-    if file_field is None and record.course_slug == _BOLLINGER_BANDS_IMPORT_SLUG:
+    if file_field is None and record.course_slug in (
+        _BOLLINGER_BANDS_IMPORT_SLUG,
+        _EMA_STRATEGY_IMPORT_SLUG,
+    ):
         try:
-            source_payload, asset_sources, _source_warnings = _bollinger_bands_source_bundle()
+            source_bundle = (
+                _bollinger_bands_source_bundle()
+                if record.course_slug == _BOLLINGER_BANDS_IMPORT_SLUG
+                else _ema_strategy_source_bundle()
+            )
+            source_payload, asset_sources, _source_warnings = source_bundle
             source_spec = next(
                 (
                     spec for spec in source_payload.get("assets", [])
@@ -2638,7 +2807,7 @@ def course_builder_asset(request, import_id, asset_id):
                     response["X-Content-Type-Options"] = "nosniff"
                     return response
         except (OSError, ValueError, KeyError, TypeError):
-            logger.exception("Could not serve a bundled Bollinger Bands source figure")
+            logger.exception("Could not serve a bundled course source figure")
 
     if file_field is None:
         raise Http404

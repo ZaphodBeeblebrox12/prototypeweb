@@ -152,6 +152,79 @@ class CourseBuilderApiTests(TestCase):
             )
         )
 
+    def test_ema_strategy_manifest_is_offered_as_an_eight_lesson_builder_draft(self):
+        from .course_builder_api import (
+            _build_import_payload,
+            _ema_strategy_import_candidate,
+        )
+
+        # A review-only manifest import does not suppress the separate Builder draft.
+        CourseImport.objects.create(
+            course_slug="stop-chasing-start-trading-the-ema",
+            title="Stop Chasing. Start Trading the EMA.",
+            manifest_version="1",
+            content_hash="d" * 64,
+            source_manifest="course-source/stop-chasing-start-trading-the-ema/course-manifest.json",
+            status=CourseImport.Status.REVIEW,
+            imported_by=self.admin,
+            payload={"course": {}, "modules": []},
+        )
+
+        candidate = _ema_strategy_import_candidate()
+        self.assertIsNotNone(candidate)
+        course = candidate["course"]
+        self.assertEqual(course["title"], "Stop Chasing. Start Trading the EMA.")
+        self.assertEqual(course["slug"], "stop-chasing-start-trading-the-ema")
+        self.assertEqual(len(course["modules"]), 2)
+        lessons = [lesson for module in course["modules"] for lesson in module["lessons"]]
+        self.assertEqual(len(lessons), 8)
+        self.assertEqual(sum(lesson["minutes"] for lesson in lessons), 50)
+        self.assertTrue(any(lesson["images"] for lesson in lessons))
+
+        # The Builder serializer must retain trusted stable asset UUIDs and image slots.
+        first_image_lesson = next(lesson for lesson in lessons if lesson["images"])
+        stable_asset_id = first_image_lesson["images"][0]["assetUuid"]
+        imported, _image_sources = _build_import_payload(
+            course,
+            "stop-chasing-start-trading-the-ema",
+        )
+        saved_lessons = [lesson for module in imported["modules"] for lesson in module["lessons"]]
+        self.assertTrue(
+            any(stable_asset_id in lesson["content_json"]["asset_ids"] for lesson in saved_lessons)
+        )
+        self.assertTrue(
+            any(spec["stable_asset_id"] == stable_asset_id for spec in imported["assets"])
+        )
+
+    def test_ema_strategy_temporary_chart_slots_redirect_to_the_registered_source_url(self):
+        from .course_builder_api import _ema_strategy_source_bundle
+
+        source_payload, _asset_sources, _warnings = _ema_strategy_source_bundle()
+        source_spec = next(
+            spec for spec in source_payload["assets"]
+            if str(spec.get("original_url") or "").startswith("https://")
+        )
+        record = CourseImport.objects.create(
+            course_slug="stop-chasing-start-trading-the-ema",
+            title="Stop Chasing. Start Trading the EMA.",
+            manifest_version="course-builder-v1",
+            content_hash="e" * 64,
+            source_manifest="builder://stop-chasing-start-trading-the-ema",
+            status=CourseImport.Status.DRAFT,
+            imported_by=self.admin,
+            payload={"builder_state": {"modules": []}},
+        )
+
+        response = self.client.get(
+            reverse(
+                "staff_course_builder_asset",
+                args=[record.pk, source_spec["stable_asset_id"]],
+            )
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], source_spec["original_url"])
+
     def test_bollinger_bands_source_figures_are_available_in_staff_preview(self):
         from .course_builder_api import _bollinger_bands_source_bundle
 

@@ -5711,6 +5711,28 @@ body.builder-dialog-open { overflow:hidden; }
         stateChanged = true;
         autoImportedBollingerBands = true;
       }
+      let autoImportedEmaStrategy = false;
+      const emaStrategyCandidate = result.ema_strategy_import_candidate;
+      const candidateEmaStrategyCourse = emaStrategyCandidate && emaStrategyCandidate.course;
+      if (requestedOpenCourseSlug === String(candidateEmaStrategyCourse?.slug || '').toLowerCase() &&
+          !tradingPathImportRequested && !supportResistanceImportRequested &&
+          candidateEmaStrategyCourse && typeof candidateEmaStrategyCourse === 'object' &&
+          !remoteDrafts.some(remote => String(remote.slug || '') === String(candidateEmaStrategyCourse.slug || ''))) {
+        let importedCourse = state.courses.find(local =>
+          String(local.slug || '') === String(candidateEmaStrategyCourse.slug || '')
+        );
+        if (!importedCourse) {
+          importedCourse = normalizeCourseState(candidateEmaStrategyCourse);
+          state.courses.unshift(importedCourse);
+        }
+        state.selectedCourseId = importedCourse.id;
+        state.selectedModuleId = importedCourse.modules?.[0]?.id || null;
+        state.selectedLessonId = importedCourse.modules?.[0]?.lessons?.[0]?.id || null;
+        state.view = 'editor';
+        state.tab = 'curriculum';
+        stateChanged = true;
+        autoImportedEmaStrategy = true;
+      }
       const selectedTradingPath = state.courses.find(course =>
         String(course.id) === String(state.selectedCourseId || '') &&
         String(course.slug || '') === 'your-trading-path-import-draft'
@@ -5833,6 +5855,18 @@ body.builder-dialog-open { overflow:hidden; }
           toast('Understand Bollinger Bands is now in Your courses as an editable draft. Nothing was published.');
         } catch (saveError) {
           toast('Understand Bollinger Bands is loaded in the builder, but the shared draft save failed: ' + String(saveError?.message || saveError));
+        }
+      } else if (autoImportedEmaStrategy) {
+        clearTimeout(academySaveTimer);
+        state.tab = 'curriculum';
+        render();
+        try {
+          await saveCurrentToAcademy(false, false);
+          renderSidebar();
+          renderHeaderState();
+          toast('Stop Chasing. Start Trading the EMA. is now in Your courses as an editable draft. Nothing was published.');
+        } catch (saveError) {
+          toast('The EMA strategy course is loaded in the Builder, but the shared draft save failed: ' + String(saveError?.message || saveError));
         }
       } else if (tradingPathImportRequested && requestedTradingPathDraft) {
         const desiredSlug = String(requestedTradingPathDraft.slug || '');
