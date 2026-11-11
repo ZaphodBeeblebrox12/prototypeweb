@@ -200,17 +200,17 @@
   margin-bottom: 0;
 }
 
-/* A standalone bold first paragraph becomes the user-supplied margin label. */
-.tt-learning-room .tt-tab-panel blockquote:has(> p:first-child > strong:only-child)::before,
-.preview-body blockquote:has(> p:first-child > strong:only-child)::before,
-.rich-editor-canvas blockquote:has(> p:first-child > strong:only-child)::before {
+/* A bold-only first paragraph is a custom margin label only when a separate quote body follows. */
+.tt-learning-room .tt-tab-panel blockquote:has(> p:nth-of-type(2)):has(> p:first-child > strong:only-child)::before,
+.preview-body blockquote:has(> p:nth-of-type(2)):has(> p:first-child > strong:only-child)::before,
+.rich-editor-canvas blockquote:has(> p:nth-of-type(2)):has(> p:first-child > strong:only-child)::before {
   content: none;
   display: none;
 }
 
-.tt-learning-room .tt-tab-panel blockquote > p:first-child:has(> strong:only-child),
-.preview-body blockquote > p:first-child:has(> strong:only-child),
-.rich-editor-canvas blockquote > p:first-child:has(> strong:only-child) {
+.tt-learning-room .tt-tab-panel blockquote:has(> p:nth-of-type(2)) > p:first-child:has(> strong:only-child),
+.preview-body blockquote:has(> p:nth-of-type(2)) > p:first-child:has(> strong:only-child),
+.rich-editor-canvas blockquote:has(> p:nth-of-type(2)) > p:first-child:has(> strong:only-child) {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -227,9 +227,9 @@
   transform: rotate(180deg);
 }
 
-.tt-learning-room .tt-tab-panel blockquote > p:first-child:has(> strong:only-child) > strong,
-.preview-body blockquote > p:first-child:has(> strong:only-child) > strong,
-.rich-editor-canvas blockquote > p:first-child:has(> strong:only-child) > strong {
+.tt-learning-room .tt-tab-panel blockquote:has(> p:nth-of-type(2)) > p:first-child:has(> strong:only-child) > strong,
+.preview-body blockquote:has(> p:nth-of-type(2)) > p:first-child:has(> strong:only-child) > strong,
+.rich-editor-canvas blockquote:has(> p:nth-of-type(2)) > p:first-child:has(> strong:only-child) > strong {
   font: inherit;
 }
 
@@ -400,9 +400,9 @@
     font-size: 30px;
   }
 
-  .tt-learning-room .tt-tab-panel blockquote > p:first-child:has(> strong:only-child),
-  .preview-body blockquote > p:first-child:has(> strong:only-child),
-  .rich-editor-canvas blockquote > p:first-child:has(> strong:only-child) {
+  .tt-learning-room .tt-tab-panel blockquote:has(> p:nth-of-type(2)) > p:first-child:has(> strong:only-child),
+  .preview-body blockquote:has(> p:nth-of-type(2)) > p:first-child:has(> strong:only-child),
+  .rich-editor-canvas blockquote:has(> p:nth-of-type(2)) > p:first-child:has(> strong:only-child) {
     width: 23px;
     padding-right: 7px;
     font-size: 8px;
