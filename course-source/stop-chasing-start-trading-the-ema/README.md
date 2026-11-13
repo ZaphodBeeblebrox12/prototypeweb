@@ -19,7 +19,7 @@ It is not an EMA calculation or moving-average introduction course. The earlier 
 
 The course now uses the TradeThesis EMA entry comparison supplied with the research handoff. The original methodology, aggregate results and confirmation trade ledger are retained in `research/`. Lesson 1.2 introduces the result; Lesson 2.4 explains the comparison and its limitations.
 
-The experiment compares a touch-only control with a rejection-and-break confirmation rule on four daily price series from 1 January 2016 to 14 January 2026. It is exploratory, long-only and pre-cost. It does not establish a live-trading or options edge. The confirmation ledger contains 22 trades; the touch-only control is available as aggregate statistics only. Do not market either method as validated.
+The experiment compares a touch-only control with a rejection-and-break confirmation rule on four daily price series from 1 January 2016 to 14 January 2026. It is exploratory, long-only and pre-cost. Its chronological split is descriptive rather than a blind holdout, and the historical stock universe is not point-in-time. It does not establish a live-trading or options edge. The confirmation ledger contains 22 trades; the touch-only control is available as aggregate statistics only. Do not market either method as validated.
 
 ## Image handling
 
