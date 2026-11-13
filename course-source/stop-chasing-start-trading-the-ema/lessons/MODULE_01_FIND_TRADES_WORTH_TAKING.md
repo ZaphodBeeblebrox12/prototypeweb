@@ -115,11 +115,11 @@ For a short, look for a falling trend reference, lower highs and lower lows, and
 
 ### What one published backtest can — and cannot — tell us
 
-A separate published backtest examined a daily 20 EMA pullback rule across the NIFTY 50, Reliance, HDFC Bank and Infosys. It required price to close above the 200-day moving average, treated a close within 1% of the 20 EMA as a pullback signal, entered at the next session's open and exited on the first daily close back below the 20 EMA.
+A separate published backtest examined a daily, long-only 20 EMA pullback rule across the NIFTY 50, Reliance, HDFC Bank and Infosys. It required price to close above its 200-day moving average, treated a close within 1% of the 20 EMA as a pullback signal, entered at the next session's open and exited on the first daily close below the 20 EMA.
 
-The study reported 458 trades, a 45.2% win rate and a profit factor of 1.64. But its reported maximum drawdown in the trade-sequence view was 33.41%. Results also varied by instrument: the reported profit factor ranged from 1.22 for Infosys to 2.03 for Reliance.
+The study reported 458 trades, a 45.2% win rate and a profit factor of 1.64. Its reported maximum drawdown in the trade-sequence view was 33.41%. Results also varied between the four instruments.
 
-Brokerage, slippage and taxes were excluded. Only four instruments were tested, and the authors describe the result as a baseline that needs broader testing. The article's ₹1 lakh simulations are separate instrument views, not a combined portfolio result. Treat this as one published test, not a verified TradeThesis edge. [DailyBulls, 15 April 2026](https://dailybulls.in/20-ema-pullback-strategy-backtest/).
+Brokerage, slippage and taxes were excluded. The authors describe the result as a baseline requiring broader testing. The article's ₹1 lakh simulations are separate instrument views, not a combined portfolio result. Treat this as one published test, not a verified TradeThesis edge. [DailyBulls, 15 April 2026](https://dailybulls.in/20-ema-pullback-strategy-backtest/).
 
 ### Read the result, not just the headline
 
