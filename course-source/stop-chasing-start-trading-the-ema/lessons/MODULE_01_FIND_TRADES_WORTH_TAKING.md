@@ -113,9 +113,18 @@ For a short, look for a falling trend reference, lower highs and lower lows, and
 
 *Source: [The Right Trader, EMA pullback strategy](https://therighttrader.com/learn/trading-strategies/ema-pullback-strategy). The site presents this as a historical daily-chart illustration; it does not establish a universal win rate.*
 
-A separate published backtest tested a 20 EMA pullback rule on NIFTY 50, Reliance, HDFC Bank and Infosys. It reports 458 trades, 45.2% wins and a 1.64 profit factor, but also a 33.41% maximum drawdown in its trade-sequence view. Brokerage, slippage and taxes were excluded. The result varied by symbol, and the authors themselves say it is a baseline requiring broader testing. Treat it as one published test, not a verified TradeThesis edge. [DailyBulls, 15 April 2026](https://dailybulls.in/20-ema-pullback-strategy-backtest/).
+### What our own comparison found
 
-A win rate below 50% does not automatically make a system poor. Equally, a positive profit factor before realistic costs does not make it ready to trade. The full distribution, drawdown, instrument differences and fill assumptions matter.
+TradeThesis compared two ways of entering the same daily, long-side pullback context on NIFTY 50, Reliance, HDFC Bank and Infosys, from 1 January 2016 to 14 January 2026. The touch-only control entered at the next session's open after the first qualifying approach to the 20 EMA. The confirmation method waited for a bullish rejection candle and a break above its high.
+
+| Entry method | Trades | Win rate | Mean result | Profit factor |
+|---|---:|---:|---:|---:|
+| Touch-only control | 116 | 35.3% | +0.449R | 1.465 |
+| Rejection-and-break confirmation | 22 | 40.9% | -0.023R | 0.962 |
+
+The confirmation method won more often, but its average result and profit factor were worse in this sample. It also produced far fewer trades. **A higher win rate did not mean a better result.** This does not prove that touch entries are generally superior. It tells us only that this particular confirmation rule did not improve this particular test.
+
+The test is exploratory, long-only, pre-cost and limited to four instruments. It does not validate short setups, intraday trading or options execution. Lesson 2.4 examines the result and its limitations.
 
 ### What makes this setup poor?
 
