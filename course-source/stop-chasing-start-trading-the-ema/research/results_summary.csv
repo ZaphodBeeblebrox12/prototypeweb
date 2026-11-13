@@ -1,0 +1,15 @@
+method,symbol,trades,wins,losses,win_rate_pct,mean_R,median_R,profit_factor_R,period
+Touch-only control,NIFTY50,31,12,19,38.7,0.071,-1.000,1.050,2016-01-01 to 2026-01-14
+Touch-only control,RELIANCE,32,9,23,28.1,0.140,-1.000,1.163,2016-01-01 to 2026-01-14
+Touch-only control,HDFCBANK,29,9,20,31.0,0.569,-1.000,1.627,2016-01-01 to 2026-01-14
+Touch-only control,INFY,24,11,13,45.8,1.204,-1.000,3.077,2016-01-01 to 2026-01-14
+Touch-only control,POOLED_NOT_PORTFOLIO,116,41,75,35.3,0.449,-1.000,1.465,2016-01-01 to 2026-01-14
+TradeThesis rejection-and-break confirmation,NIFTY50,5,3,2,60.0,0.327,1.134,1.809,2016-01-01 to 2026-01-14
+TradeThesis rejection-and-break confirmation,RELIANCE,6,1,5,16.7,-0.565,-1.000,0.327,2016-01-01 to 2026-01-14
+TradeThesis rejection-and-break confirmation,HDFCBANK,9,3,6,33.3,-0.118,-1.000,0.827,2016-01-01 to 2026-01-14
+TradeThesis rejection-and-break confirmation,INFY,2,2,0,100.0,1.156,1.156,,2016-01-01 to 2026-01-14
+TradeThesis rejection-and-break confirmation,POOLED_NOT_PORTFOLIO,22,9,13,40.9,-0.023,-1.000,0.962,2016-01-01 to 2026-01-14
+Touch-only control,POOLED_NOT_PORTFOLIO,83,30,53,36.1,0.466,-1.000,1.488,2016-01-01 to 2021-12-31
+Touch-only control,POOLED_NOT_PORTFOLIO,33,11,22,33.3,0.406,-1.000,1.411,2022-01-01 to 2026-01-14
+TradeThesis rejection-and-break confirmation,POOLED_NOT_PORTFOLIO,16,7,9,43.8,0.016,-1.000,1.029,2016-01-01 to 2021-12-31
+TradeThesis rejection-and-break confirmation,POOLED_NOT_PORTFOLIO,6,2,4,33.3,-0.128,-1.000,0.808,2022-01-01 to 2026-01-14
