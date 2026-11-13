@@ -113,18 +113,19 @@ For a short, look for a falling trend reference, lower highs and lower lows, and
 
 *Source: [The Right Trader, EMA pullback strategy](https://therighttrader.com/learn/trading-strategies/ema-pullback-strategy). The site presents this as a historical daily-chart illustration; it does not establish a universal win rate.*
 
-### What our own comparison found
+### What one published backtest can — and cannot — tell us
 
-TradeThesis compared two ways of entering the same daily, long-side pullback context on NIFTY 50, Reliance, HDFC Bank and Infosys, from 1 January 2016 to 14 January 2026. The touch-only control entered at the next session's open after the first qualifying approach to the 20 EMA. The confirmation method waited for a bullish rejection candle and a break above its high.
+A separate published backtest examined a daily 20 EMA pullback rule across the NIFTY 50, Reliance, HDFC Bank and Infosys. It required price to close above the 200-day moving average, treated a close within 1% of the 20 EMA as a pullback signal, entered at the next session's open and exited on the first daily close back below the 20 EMA.
 
-| Entry method | Trades | Win rate | Mean result | Profit factor |
-|---|---:|---:|---:|---:|
-| Touch-only control | 116 | 35.3% | +0.449R | 1.465 |
-| Rejection-and-break confirmation | 22 | 40.9% | -0.023R | 0.962 |
+The study reported 458 trades, a 45.2% win rate and a profit factor of 1.64. But its reported maximum drawdown in the trade-sequence view was 33.41%. Results also varied by instrument: the reported profit factor ranged from 1.22 for Infosys to 2.03 for Reliance.
 
-The confirmation method won more often, but its average result and profit factor were worse in this sample. It also produced far fewer trades. **A higher win rate did not mean a better result.** This does not prove that touch entries are generally superior. It tells us only that this particular confirmation rule did not improve this particular test.
+Brokerage, slippage and taxes were excluded. Only four instruments were tested, and the authors describe the result as a baseline that needs broader testing. The article's ₹1 lakh simulations are separate instrument views, not a combined portfolio result. Treat this as one published test, not a verified TradeThesis edge. [DailyBulls, 15 April 2026](https://dailybulls.in/20-ema-pullback-strategy-backtest/).
 
-The test is exploratory, long-only, pre-cost and limited to four instruments. It does not validate short setups, intraday trading or options execution. Lesson 2.4 examines the result and its limitations.
+### Read the result, not just the headline
+
+A win rate below 50% does not automatically make a system poor. Equally, a positive profit factor before realistic costs does not make it ready to trade. The full distribution of wins and losses, drawdown, instrument differences and fill assumptions all matter.
+
+The point is not to copy the published rules blindly. It is to understand that a pullback can be a candidate under specific conditions — and that an EMA is a reference point, not a promise of continuation.
 
 ### What makes this setup poor?
 
