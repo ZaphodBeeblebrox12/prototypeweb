@@ -15,6 +15,12 @@ It is not an EMA calculation or moving-average introduction course. The earlier 
 - Total planned lesson time: 50 minutes. This is an editorial estimate, not measured learner completion time.
 - All eight lessons use release day 1; the course is not drip-locked.
 
+## Research basis
+
+The course now uses the TradeThesis EMA entry comparison supplied with the research handoff. The original methodology, aggregate results and confirmation trade ledger are retained in `research/`. Lesson 1.2 introduces the result; Lesson 2.4 explains the comparison and its limitations.
+
+The experiment compares a touch-only control with a rejection-and-break confirmation rule on four daily price series from 1 January 2016 to 14 January 2026. It is exploratory, long-only and pre-cost. It does not establish a live-trading or options edge. The confirmation ledger contains 22 trades; the touch-only control is available as aggregate statistics only. Do not market either method as validated.
+
 ## Image handling
 
 The lesson Markdown currently uses temporary third-party HTTP(S) chart references for research and review. The Course Builder imports these as individual image slots. Replace each with TradeThesis-owned or appropriately licensed chart captures before publication. The references are not presented as TradeThesis-owned content and the course is not cleared for public release merely because the images render.
