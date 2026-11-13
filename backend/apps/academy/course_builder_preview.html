@@ -594,6 +594,26 @@ button:disabled { cursor: not-allowed; opacity: .45; }
   margin:10px 0 18px;
 }
 .lesson-outline-aside,.lesson-outline-content { min-width:0; }
+/* Keep the legacy contenteditable editor inside its grid track. The toolbar and
+   authored content can otherwise establish an intrinsic width larger than the
+   available workspace and be clipped by .editor-shell. */
+.lesson-outline-content,
+.lesson-outline-content > .field,
+.rich-editor-wrapper {
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+}
+.rich-editor-canvas {
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
 .lesson-outline-panel {
   position:sticky;
   top:14px;
