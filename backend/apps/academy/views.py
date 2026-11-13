@@ -167,6 +167,39 @@ def _practice_questions_with_images(questions, asset_urls, figure_metadata):
     return hydrated
 
 
+def _validated_external_video_url(value):
+    """Return a bounded, credential-free HTTP(S) URL or an empty string."""
+    if not isinstance(value, str):
+        return ""
+    value = value.strip()
+    if not value or len(value) > 1000:
+        return ""
+    try:
+        parsed = urlsplit(value)
+        valid = (
+            parsed.scheme.lower() in {"http", "https"}
+            and bool(parsed.netloc)
+            and bool(parsed.hostname)
+            and not parsed.username
+            and not parsed.password
+        )
+    except ValueError:
+        valid = False
+    return value if valid else ""
+
+
+def _lesson_video_url(content_json, *, paid_purchase=False, protected_video=False):
+    """Resolve the primary lesson URL without weakening legacy or paid-video rules."""
+    if paid_purchase or protected_video or not isinstance(content_json, dict):
+        return ""
+    external_url = _validated_external_video_url(content_json.get("external_video_url"))
+    if external_url:
+        return external_url
+    if getattr(settings, "ACADEMY_ALLOW_LEGACY_VIDEO_URLS", False):
+        return _validated_external_video_url(content_json.get("video_url"))
+    return ""
+
+
 def _notebook_for_course_display(course_slug, notebook):
     """Return topic-appropriate prompts; only the Bollinger course gets Bollinger-specific copy."""
     result = deepcopy(notebook) if isinstance(notebook, dict) else {}
@@ -819,20 +852,10 @@ def lesson_detail(request, course_slug, lesson_id):
             )
         protected_video = None
 
-    video_url = (
-        lesson.content_json.get("video_url", "") if isinstance(lesson.content_json, dict) else ""
-    )
-    if paid_purchase:
-        video_url = ""
-    video_url = (
-        video_url
-        if (
-            not protected_video
-            and settings.ACADEMY_ALLOW_LEGACY_VIDEO_URLS
-            and isinstance(video_url, str)
-            and video_url.startswith(("https://", "http://"))
-        )
-        else ""
+    video_url = _lesson_video_url(
+        content_json,
+        paid_purchase=paid_purchase,
+        protected_video=bool(protected_video),
     )
     video_is_file = video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
     video_watermark_name = request.user.full_name.strip() or request.user.email
@@ -1074,9 +1097,9 @@ def admin_lesson_preview(request, course_slug, lesson_id):
         and protected_video_record.status == ProtectedLessonVideo.Status.FAILED
         else ""
     )
-    video_url = content_json.get("video_url", "")
-    if not isinstance(video_url, str) or not video_url.startswith(("https://", "http://")):
-        video_url = ""
+    video_url = _validated_external_video_url(
+        content_json.get("external_video_url") or content_json.get("video_url")
+    )
     video_is_file = video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
     regional_country, regional_region = _regional_audience(request, admin_preview=True)
 
@@ -1294,14 +1317,13 @@ def course_import_preview(request, import_id):
 
         # Match the learner lesson view: render only ordinary HTTP(S) video
         # destinations, and use the native player only for supported file types.
-        raw_video_url = content_json.get("video_url", "")
-        if isinstance(raw_video_url, str):
-            raw_video_url = raw_video_url.strip()
-            if raw_video_url.startswith(("https://", "http://")):
-                selected_video_url = raw_video_url
-                selected_video_is_file = (
-                    raw_video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
-                )
+        raw_video_url = (
+            content_json.get("external_video_url") or content_json.get("video_url", "")
+        )
+        selected_video_url = _validated_external_video_url(raw_video_url)
+        selected_video_is_file = (
+            selected_video_url.lower().split("?", 1)[0].endswith((".mp4", ".webm", ".ogg"))
+        )
 
     preview_context = {
         "import_record": record,

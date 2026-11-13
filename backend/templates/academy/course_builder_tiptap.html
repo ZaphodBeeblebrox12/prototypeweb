@@ -22,6 +22,27 @@
   .tt-tiptap-lab__save-status { margin:0; color:#687268; font-size:11px; line-height:1.5; }
   .tt-tiptap-lab__sidecars { margin:12px 0 18px; padding:10px 13px; border-left:3px solid #9aaa91; background:#f2f4ee; color:#4f5c4f; font-size:11px; line-height:1.6; }
   .tt-tiptap-lab__sidecars strong { display:block; margin-bottom:3px; color:#355a46; }
+  .tt-tiptap-lab__media { display:grid; gap:12px; margin:12px 0 18px; padding:14px; border:1px solid #ded8ca; background:#fbfaf6; }
+  .tt-tiptap-lab__media-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px; align-items:center; }
+  .tt-tiptap-lab__media-copy { min-width:0; }
+  .tt-tiptap-lab__media-copy strong { display:block; color:#355a46; font-size:12px; }
+  .tt-tiptap-lab__media-copy p { margin:3px 0 0; color:#687268; font-size:10px; line-height:1.5; }
+  .tt-tiptap-lab__media-actions { display:flex; flex-wrap:wrap; gap:6px; }
+  .tt-tiptap-lab__media button { min-height:33px; border:1px solid #cbd4c5; border-radius:3px; padding:6px 10px; background:#edf1e9; color:#2e513a; font:700 10px system-ui,sans-serif; cursor:pointer; }
+  .tt-tiptap-lab__media button:disabled { opacity:.45; cursor:not-allowed; }
+  .tt-tiptap-lab__media input[type=url] { width:100%; min-height:36px; border:1px solid #d8d2c5; border-radius:3px; padding:7px 10px; color:#344b3d; background:#fff; font:12px system-ui,sans-serif; }
+  .tt-tiptap-lab__media input[type=url]:disabled { background:#f0eee8; color:#777; }
+  .tt-tiptap-lab__media-field { display:grid; gap:6px; }
+  .tt-tiptap-lab__media-field label { color:#526154; font-size:10px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; }
+  .tt-tiptap-lab__media-status { margin:0; color:#687268; font-size:10px; line-height:1.5; }
+  .tt-tiptap-lab__image-library { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:8px; padding:10px; border:1px solid #e1dccf; background:#fffdf9; }
+  .tt-tiptap-lab__image-item { display:grid; gap:7px; min-width:0; padding:7px; border:1px solid #e1dccf; background:#fff; }
+  .tt-tiptap-lab__image-thumb { display:grid; place-items:center; min-height:78px; aspect-ratio:16/9; overflow:hidden; background:#f2efe8; }
+  .tt-tiptap-lab__image-thumb img { width:100%; height:100%; max-height:100px; object-fit:contain; }
+  .tt-tiptap-lab__image-name { overflow:hidden; color:#48564b; font-size:10px; text-overflow:ellipsis; white-space:nowrap; }
+  .tt-tiptap-lab__media-divider { height:1px; border:0; background:#e0dbcf; }
+  .tt-tiptap-lab__media-note { margin:0; color:#756d5e; font-size:10px; line-height:1.55; }
+  .tt-tiptap-lab__canvas .ProseMirror img[data-tt-node="image"] { display:block; max-width:100%; max-height:420px; width:auto; height:auto; object-fit:contain; margin:14px auto; border:1px solid #e3ded2; background:#f5f2ea; }
   .tt-tiptap-lab__workspace { overflow:clip; border:1px solid #ded8ca; background:#fffdf9; }
   .tt-tiptap-lab__topline { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid #ded8ca; background:#f8f5ee; }
   .tt-tiptap-lab__topline strong { font-size:12px; }
@@ -76,6 +97,8 @@
   @media(max-width:650px) {
     .tt-tiptap-lab__intro { display:block; }
     .tt-tiptap-lab__draft-picker { grid-template-columns:1fr; }
+    .tt-tiptap-lab__media-row { grid-template-columns:1fr; }
+    .tt-tiptap-lab__media-actions { justify-content:flex-start; }
     .tt-tiptap-lab__canvas { min-height:360px; padding:22px 17px; }
     .tt-tiptap-lab__toolbar { position:relative; }
     .tt-tiptap-lab__export, .tt-tiptap-lab__save { align-items:flex-start; flex-direction:column; }
@@ -110,6 +133,40 @@
     <strong>Existing lesson components are kept in their current Academy records.</strong>
     <span data-sidecars-copy></span>
   </div>
+
+  <section class="tt-tiptap-lab__media" aria-label="Lesson media">
+    <div class="tt-tiptap-lab__media-row">
+      <div class="tt-tiptap-lab__media-copy">
+        <strong>Images</strong>
+        <p>Upload a JPEG, PNG or WebP image, or reuse an image already attached to this draft. Images stay in the configured Academy asset store.</p>
+      </div>
+      <div class="tt-tiptap-lab__media-actions">
+        <input type="file" accept="image/jpeg,image/png,image/webp" multiple data-image-upload hidden>
+        <button type="button" data-image-upload-button disabled>Upload images</button>
+        <button type="button" data-image-library-toggle disabled>Image library</button>
+      </div>
+    </div>
+    <div class="tt-tiptap-lab__image-library" data-image-library hidden aria-label="Draft image library"></div>
+    <hr class="tt-tiptap-lab__media-divider">
+    <div class="tt-tiptap-lab__media-row">
+      <div class="tt-tiptap-lab__media-copy">
+        <strong>Protected lesson video</strong>
+        <p>Upload a private source file. It remains staged with this draft; encrypted HLS processing follows the existing approval and publication workflow.</p>
+      </div>
+      <div class="tt-tiptap-lab__media-actions">
+        <input type="file" accept="video/mp4,video/quicktime,video/x-matroska,video/webm,.mp4,.mov,.mkv,.webm" data-protected-video-upload hidden>
+        <button type="button" data-protected-video-upload-button disabled>Upload / replace video</button>
+      </div>
+    </div>
+    <p class="tt-tiptap-lab__media-status" data-protected-video-status aria-live="polite">Open a lesson to see its protected-video status.</p>
+    <hr class="tt-tiptap-lab__media-divider">
+    <div class="tt-tiptap-lab__media-field">
+      <label for="tiptapExternalVideoUrl">External lesson video link</label>
+      <input id="tiptapExternalVideoUrl" type="url" inputmode="url" maxlength="1000" placeholder="https://…" data-external-video-url disabled>
+      <p class="tt-tiptap-lab__media-note">Use a public or shareable HTTPS/HTTP link, such as YouTube or Vimeo. Learners open it on the external service; external links are not encrypted, watermarked or access-controlled by the Academy player. For individually purchased courses, use the protected upload instead. A protected upload takes precedence over an external video link.</p>
+    </div>
+    <p class="tt-tiptap-lab__media-status" data-media-status aria-live="polite">Media controls become available when a saved lesson is open.</p>
+  </section>
 
   <section class="tt-tiptap-lab__workspace" aria-label="Structured lesson editor">
     <div class="tt-tiptap-lab__topline">
