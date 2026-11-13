@@ -206,38 +206,64 @@ Before testing, define:
 
 If a rule depends on judgement such as “strong trend” or “clean pullback,” define what you mean or tag it for manual review. Otherwise the backtest may not be reproducible.
 
-### Two published tests, two different cautions
+### Our TradeThesis test: same context, different entry
 
-A 2026 DailyBulls article reports a 20 EMA pullback test over four instruments: NIFTY 50, Reliance, HDFC Bank and Infosys. It reports 458 trades, a 45.2% win rate, 1.64 profit factor and maximum drawdown of 33.41%. It explicitly says brokerage, slippage and taxes were not included. The reported median return per trade is negative while the mean is positive, which suggests a small number of larger winners may be carrying the average. The results vary by symbol. This is a useful example of why headline averages are not enough. [Source: DailyBulls, 15 April 2026](https://dailybulls.in/20-ema-pullback-strategy-backtest/).
+We tested whether adding a rejection-and-break trigger improved a 20 EMA pullback entry. Both methods used the same market, structure, pullback, stop and target framework. The intended difference was the entry decision:
 
-A separate NSE-stock research page compares several uptrend-pullback variants and reports that adding a 9/20/50 EMA touch did not improve the baseline across all stocks; the 50 EMA version was weakest in its combined sample. The page also discloses survivorship bias because it applies today's index membership to earlier years. That means the result is not a clean estimate of what a trader could have achieved in real time. [Source: TickerKhoj Pullback Lab](https://tickerkhoj.com/pullback-lab).
+- **Touch-only control:** enter at the next session's open after the first qualifying approach within 0.5 ATR(14) of the 20 EMA.
+- **TradeThesis confirmation:** wait for a bullish rejection candle that closes above the 20 EMA, above its open and the previous close, and in the upper 45% of its range. Enter only on a break above that candle's high, using a five-session trigger expiry.
 
-These results should not be averaged together or treated as a contest with a winner. Their universes, entry logic, exits, costs and biases differ. The lesson is more modest: **an EMA touch is not automatically an edge, and the same rule can behave very differently across instruments and samples.**
+The test used daily OHLC data from 1 January 2016 to 14 January 2026. The trend filter, swing structure, pullback limits, stop buffer and minimum target room were converted into explicit rules so the comparison could be repeated. Only one attempt was allowed per identified pullback.
 
-### What to measure
+| Entry method | Trades | Wins | Win rate | Mean R | Profit factor |
+|---|---:|---:|---:|---:|---:|
+| Touch-only control | 116 | 41 | 35.3% | +0.449R | 1.465 |
+| Rejection-and-break confirmation | 22 | 9 | 40.9% | -0.023R | 0.962 |
 
-- **Expectancy:** average outcome per trade after costs, expressed in currency or R.
-- **Profit factor:** gross profits divided by gross losses. Useful, but it hides the shape of drawdowns and the concentration of returns.
-- **Maximum drawdown:** the worst peak-to-trough decline. This affects whether the method is tolerable to trade.
-- **Win rate and average win/loss:** neither should be read alone.
-- **Median trade:** helps reveal whether a few outliers distort the mean.
-- **Trade count and time in market:** a small sample can flatter a strategy; an infrequent strategy may have long idle periods.
-- **Regime and instrument split:** check whether performance comes from one symbol or one market phase.
+The confirmation rule improved the win rate by 5.6 percentage points, but mean R fell by 0.472R and profit factor fell below 1. The method also produced 22 trades rather than 116. In this run, the extra confirmation filtered out many entries without improving the aggregate result.
 
-### Test without fooling yourself
+### The instrument split matters
 
-1. Write the rules before running the test.
-2. Use point-in-time instrument membership where possible; avoid survivorship bias.
-3. Keep a chronological holdout period that was not used to tune the strategy.
-4. Include brokerage, exchange charges, taxes, spread and slippage as appropriate to the product.
-5. Model gaps and realistic order execution.
-6. Avoid trying hundreds of parameter combinations and reporting only the winner.
-7. Recheck the method on different instruments and market regimes.
-8. Paper trade the exact rules before risking capital.
+The pooled result hides important differences. The confirmation method was not consistently better across all four instruments.
 
-![Example equity curve divided into in-sample and out-of-sample periods. Temporary third-party research visual; replace before publication.](https://miro.medium.com/v2/resize%3Afit%3A1400/1%2A4Fa5qr89E2ZwGJxIvAkwqw.jpeg)
+| Instrument | Touch-only: trades / win rate / PF | Confirmation: trades / win rate / PF |
+|---|---:|---:|
+| NIFTY 50 | 31 / 38.7% / 1.05 | 5 / 60.0% / 1.81 |
+| Reliance | 32 / 28.1% / 1.16 | 6 / 16.7% / 0.33 |
+| HDFC Bank | 29 / 31.0% / 1.63 | 9 / 33.3% / 0.83 |
+| Infosys | 24 / 45.8% / 3.08 | 2 / 100% / not meaningful |
 
-*Source: [Kevin Davey, article on price-action patterns and testing, 28 July 2020](https://kjtradingsystems.medium.com/15-price-action-patterns-that-work-in-2020-45cd8b224f1). This is not an EMA backtest. It is included only to illustrate the separation between in-sample and out-of-sample evaluation.*
+Do not turn the two Infosys winners into a 100% strategy claim. Two trades are far too few. The NIFTY confirmation result is also based on only five trades. The larger message is that an entry rule can behave differently by instrument; a pooled average does not remove that variation.
+
+### The later-period check is encouraging for caution, not proof
+
+A chronological split was summarised, but it was **not** a clean blind holdout: the rule choices had already been explored using the full period.
+
+- **2016–2021:** touch-only produced 83 trades, +0.466R mean and 1.488 PF. Confirmation produced 16 trades, +0.016R mean and 1.029 PF.
+- **2022–14 January 2026:** touch-only produced 33 trades, +0.406R mean and 1.411 PF. Confirmation produced only 6 trades, -0.128R mean and 0.808 PF.
+
+The six later-period confirmation trades are too few to support a strong conclusion. They do, however, give us no evidence that the confirmation rule improved the more recent sample.
+
+### What this test cannot establish
+
+Read the results with their boundaries in view:
+
+- The confirmation sample has only 22 trades. It is too small to establish a durable edge.
+- The test is long-only and uses daily price series. It does not test short execution, intraday setups, NIFTY futures or options.
+- Brokerage, STT, GST, exchange charges, stamp duty, spread, slippage, market impact and capital constraints were not included. The positive touch-only mean is therefore pre-cost, not a live expectation.
+- The pooled trades are independent observations concatenated for comparison, not a simultaneous portfolio. Overlapping positions and portfolio allocation were not modelled.
+- The stock dataset uses a NIFTY 50 constituent list reflecting January 2026, not historical point-in-time membership. This introduces selection and survivorship concerns.
+- Corporate-action adjustments aim at price continuity, not total shareholder return. Dividends and the cashflows/value of the demerged Reliance entity are not credited.
+- The NIFTY 50 index itself is not an executable instrument.
+- ATR thresholds, pivot widths, rejection-candle details, the stop buffer and the 1R minimum-room filter are modelling choices used to make the test deterministic. They are not universal trading rules.
+
+The trade ledger supplied with the research contains the 22 confirmation trades. The touch-only comparison is provided as an aggregate results summary, not a full trade-by-trade ledger. The original methodology, results CSV and confirmation ledger are retained in this course package under `research/`.
+
+### What should a trader take from it?
+
+Do not conclude “buy every EMA touch.” Do not conclude “confirmation is useless.” The defensible conclusion is narrower: **in this defined test, the confirmation rule did not improve the touch-only control.** A candle that looks more convincing is not automatically a better entry. It can improve selectivity while worsening the price paid, reducing the sample or filtering out trades that would have worked.
+
+Treat each setup as a hypothesis. Write the market filter, entry, invalidation, target, costs and cancellation rule before testing. Keep the touch-only and confirmation versions separate in your journal. Do not combine their results or change the rules after seeing the outcome.
 
 ### Your one-page EMA playbook
 
