@@ -538,3 +538,25 @@ The owner supplied a successful consolidated browser-console audit from Academy 
 - Keep the two findings open until a controlled source fix is reviewed, deployed to staging and retested with learner denial and authorised access.
 
 **Phase 0 remains open. Implementation remains NOT AUTHORISED.** Only planning documentation was updated; no app code, permissions, tests, migrations, Render settings, deployment, merge or rebase changed.
+
+
+## 20. Owner staffing context and revised Phase 0 role-test plan — 14 November 2026
+
+The owner confirmed that no staff members/accounts are currently available. Do not ask for existing Support, Academy, Revenue, Growth or Platform staff accounts as the next step. This is a test-persona availability constraint.
+
+Current source model notes:
+- Application User roles are `admin`, `staff` and `user`, with separate `is_staff_approved` and Django `is_staff` flags. The model's approval helper sets both approval and `is_staff`.
+- Academy content administration is restricted to superusers or application `role=admin`; ordinary `is_staff` alone is explicitly insufficient.
+- Support visibility requires active Django staff status; superusers see all, other staff are scoped by plan/affiliate-plan ticket approvers, with the current fallback permitting any staff when a plan has no approver assigned.
+- The User Role enum does not itself define Support/Academy/Revenue/Growth/Platform departments. Department scoping currently depends on Groups/model permissions and object/plan assignments.
+
+Revised sequence:
+1. Complete source-only mapping of actual Groups, model permissions, staff approval, object assignment and route gates across all six domains.
+2. Preserve the learner and admin/staff browser runs as the only verified live personas. Do not claim specialist-role coverage.
+3. If a live permission matrix is needed before hiring, ask the owner before creating temporary staging-only test accounts. Give each a distinct permission and object-assignment profile; never use production customer accounts as staff fixtures.
+4. Run GET-only route and detail checks for each temporary profile. Use POST/action tests only with a separate plan and disposable fixtures.
+5. Repeat the relevant checks later with real staff pilot accounts.
+
+No temporary staff/test accounts were created. No app code or permissions changed. The two open findings remain: missing `Sum` in the analytics promotion report and the login-only Growth referral rewards overview accessible to ordinary authenticated users.
+
+**Phase 0 remains open. Implementation remains NOT AUTHORISED.**
