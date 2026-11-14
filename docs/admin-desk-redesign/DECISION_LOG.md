@@ -1,6 +1,6 @@
 # Admin Desk Redesign — Decision Log
 
-**Status:** Open for brainstorming  
+**Status:** Open for brainstorming and mockup validation  
 **Branch:** `admin-desk-redesign-planning`  
 **Rule:** No implementation decisions are considered approved unless recorded here with an owner/date and explicit status.
 
@@ -15,20 +15,55 @@
 | Previous HTML redesign | Exploratory design only, not a specification | Agreed |
 | Tiptap | Do not assume it is the default integrated authoring path | Non-negotiable until separately approved |
 
-## Decisions to make together
+## Confirmed direction
+
+### Decision 1 — One unified Admin Desk
+
+- **Decision:** The Admin Desk should behave as one unified operating workspace.
+- **Options considered:** Separate destinations for Academy, customers, revenue and platform operations; or one shared application shell and sidebar.
+- **Chosen option:** One shared Admin Desk shell and sidebar. The proposed domains are Command Centre, Academy, Customers, Revenue, Growth and Platform.
+- **Reason:** Staff should be able to move between core operating functions without feeling they are entering disconnected administration products.
+- **Affected screens/workflows:** Global navigation, page shell, overview, Academy, customer support, commerce, growth tools, operations and settings.
+- **Open risks:** The exact grouping, labels, nesting, role-based visibility and responsive sidebar behaviour still need to be designed and validated.
+- **Approved by:** User
+- **Date:** 2026-11-14
+
+### Decision 2 — Action-first landing page
+
+- **Decision:** The Admin Desk landing page should prioritise work that needs attention or action, rather than leading with business metrics.
+- **Options considered:** Metrics dashboard, operational cockpit, personal workbench, or a hybrid.
+- **Chosen option:** Action queue first. Key metrics may provide context, but should not displace urgent work, blocked items, pending decisions or operational exceptions.
+- **Reason:** The first screen should answer “What needs my attention now?” before “How is the business performing?”
+- **Affected screens/workflows:** Command Centre overview, alerts, approvals, support, failed/stalled jobs and other pending operational work.
+- **Open risks:** We still need to define prioritisation, grouping, ownership, urgency, stale-item handling and which items are visible to each staff role.
+- **Approved by:** User
+- **Date:** 2026-11-14
+
+### Decision 3 — Phased migration from Django Admin
+
+- **Decision:** Bring everyday administration into the unified Admin Desk gradually, while retaining a separate Advanced Administration destination for Django Admin capabilities that have not yet been safely replaced.
+- **Options considered:** Migrate everything before launch; keep Django Admin as the permanent primary destination; or migrate by workflow while retaining a temporary/long-tail advanced destination.
+- **Chosen option:** Phased migration by workflow. The new Admin Desk becomes the primary experience for migrated day-to-day work. Django Admin remains accessible for advanced or low-frequency configuration until an equivalent, permission-safe experience exists in the new interface.
+- **Reason:** This avoids a risky all-at-once rewrite and prevents the redesign from hiding or breaking important existing administrative capabilities.
+- **Affected screens/workflows:** Navigation, staff permissions, advanced configuration, data maintenance, operational controls and the migration plan.
+- **Open risks:** We must identify every Django Admin feature, its users and risk level; define ownership for each migration; and avoid duplicate or conflicting controls during transition.
+- **Approved by:** User
+- **Date:** 2026-11-14
+
+## Decisions still to make together
 
 ### 1. Navigation hierarchy
-- [ ] Approve the proposed groups: Command Centre, Academy, Customers, Revenue, Growth, Platform.
-- [ ] Decide whether Growth is top-level or nested.
-- [ ] Decide which advanced actions remain in Django Admin for the first release.
-- Notes:
+- [x] Use one shared sidebar for the Admin Desk domains.
+- [x] Include the proposed domains: Command Centre, Academy, Customers, Revenue, Growth and Platform.
+- [ ] Finalise labels, grouping, nesting and order.
+- [ ] Define role-based visibility and the location/label for Advanced Administration.
+- Notes: The unified shell is approved; detailed information architecture remains open.
 
 ### 2. Overview philosophy
-- [ ] Action queue first.
-- [ ] Operational cockpit.
-- [ ] Personal workbench.
-- [ ] Hybrid.
-- Notes:
+- [x] Action queue first.
+- [ ] Decide the supporting mix of operational context, personal workbench elements and business metrics.
+- [ ] Define priority rules and how work is assigned or claimed.
+- Notes: Metrics are supporting context, not the primary purpose of the landing page.
 
 ### 3. Notifications and alerts
 - [ ] Personal notification inbox.
@@ -73,7 +108,7 @@
 
 ## Decision record format
 
-For each decision, record:
+For each future decision, record:
 
 - **Decision:**
 - **Options considered:**
