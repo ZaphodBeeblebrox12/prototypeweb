@@ -56,7 +56,52 @@ A browser-console message of `Promise { <state>: "pending" }` is the immediate r
 - This matrix does not test Django Admin's global `/admin/` boundary. The planned superuser-only cutover remains deferred until replacement workflows have parity.
 - This matrix does not settle specialist department permissions, Support object scoping, Academy authoring/review permission parity, or customer/finance record isolation.
 
-## 5. Remaining Phase 0 work
+## 5. Consolidated generic-staff route regression
+
+A subsequent read-only browser-console audit was run in the generic staff session on 15 November 2026. The session was on `/dashboard/`; all checks used same-origin GET requests and no mutations.
+
+**All 17 expected route decisions matched.**
+
+| Area | Expected | Observed | Result |
+|---|---:|---:|---|
+| Command Centre | 200 | 200 | PASS |
+| Operations | 200 | 200 | PASS |
+| Support queue | 200 | 200 | PASS |
+| Own notifications | 200 | 200 | PASS |
+| Customers / Accounts | 403 | 403 | PASS |
+| Academy review | 403 | 403 | PASS |
+| Academy SEO | 403 | 403 | PASS |
+| Legacy Course Builder | 403 | 403 | PASS |
+| Tiptap Builder | 403 | 403 | PASS |
+| Finance | 403 | 403 | PASS |
+| Subscriptions | 403 | 403 | PASS |
+| Business settings | 403 | 403 | PASS |
+| Growth referral rewards | 403 | 403 | PASS |
+| Growth gift sending | 403 | 403 | PASS |
+| Disputes | 403 | 403 | PASS |
+| Staff approvals API | 403 | 403 | PASS |
+| Growth analytics | 403 | 403 | PASS |
+
+Additional observations:
+- Five ticket detail URLs discovered from the Support queue returned HTTP 200. This confirms access to those queue-visible tickets only; it does **not** prove that out-of-scope tickets are denied.
+- No Platform job/provisioning detail links were found on the Operations page, so Platform detail access was not tested.
+- Legacy Django Admin `/admin/` returned HTTP 200. This is expected for now because the global staff lockout remains deliberately deferred pending workflow parity; it is recorded as legacy access, not as one of the 17 expected passes.
+- The script reported zero unexpected/review-required results. No action endpoint was submitted and no data was changed.
+
+This completes the generic-staff core-route smoke test for Command Centre, Operations, Support queue and own notifications, and confirms denials for the tested restricted sections. It does not close Support object-scope review: an out-of-scope ticket fixture/ID still needs a deliberate negative test. Specialist-role permissions and Platform detail permissions also remain unverified.
+
+## 6. Remaining Phase 0 work
+
+1. **Support object scope:** test a known out-of-scope ticket fixture against the generic-staff session. The source audit identified an any-staff fallback when no ticket approvers are assigned; resolve the policy and verify the boundary.
+2. **Specialist role matrix:** map and test actual Groups/model permissions for Academy, Revenue, Growth and Platform. These personas were not represented by the generic-staff account.
+3. **Platform detail access:** test known job/provisioning detail fixtures for permitted and unpermitted staff roles.
+4. **Django Admin cutover:** keep existing legacy access in place until workflow parity is demonstrated; do not globally lock out staff as part of this audit.
+5. **Account cleanup:** after all required checks, remove only the disposable staging test accounts created for this audit and revoke their sessions. Do not delete or alter the owner's main account.
+
+No additional application code, permissions, migrations, Render settings, deployments, merges, or rebases were changed as part of this verification.
+
+**Updated status:** The three-persona / five-route security matrix and the 17-route generic-staff regression are verified on live Academy staging. Phase 0 remains open pending Support object-scope review, specialist-role mapping, Platform detail checks and final staging cleanup.
+
 
 1. **Core staff workflow regression:** confirm generic staff can still reach the intended Command Centre, Operations and Support list routes. Verify expected read-only access and avoid any action submissions.
 2. **Support object scope:** check only saved/known ticket fixture URLs; confirm generic staff visibility is consistent with the intended plan/approver policy. The source audit identified an any-staff fallback when no ticket approvers are assigned; this remains a policy question.
