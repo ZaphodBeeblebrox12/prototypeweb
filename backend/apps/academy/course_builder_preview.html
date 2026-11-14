@@ -5678,6 +5678,33 @@ body.builder-dialog-open { overflow:hidden; }
       );
       if (!targetLesson) return;
 
+      const originalContent = String(targetLesson.content || '');
+      const hasQuickCheckHeading = /^#{1,6}\\s*Quick check\\b/im.test(originalContent);
+      const contentLines = originalContent.split(/\\r?\\n/);
+      const actionIndex = contentLines.findIndex(line =>
+        /^#{1,6}\\s*Today(?:'|’)?s action step\\b/i.test(line.trim())
+      );
+      let hasOrphanedQuickCheckItems = false;
+      if (!hasQuickCheckHeading && actionIndex >= 0) {
+        let previousHeading = -1;
+        for (let i = actionIndex - 1; i >= 0; i -= 1) {
+          if (/^#{1,6}\\s+/.test(contentLines[i])) {
+            previousHeading = i;
+            break;
+          }
+        }
+        if (previousHeading >= 0 && /key takeaways/i.test(contentLines[previousHeading])) {
+          const numberedItems = contentLines
+            .slice(previousHeading + 1, actionIndex)
+            .filter(line => /^\\s*\\d+[.)]\\s+/.test(line)).length;
+          hasOrphanedQuickCheckItems = numberedItems >= 2;
+        }
+      }
+      // Do not migrate the separate Level 1/2/3 checkpoint quizzes. This path is
+      // only for the daily Quick Check blocks (or numbered fragments left behind
+      // by earlier partial cleanup attempts).
+      if (!hasQuickCheckHeading && !hasOrphanedQuickCheckItems) return;
+
       const existingQuestions = Array.isArray(targetLesson.questions) ? targetLesson.questions : [];
       let finalQuestions = existingQuestions;
       if (existingQuestions.length < sourceQuestions.length) {
