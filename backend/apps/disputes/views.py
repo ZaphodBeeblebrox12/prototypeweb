@@ -1,5 +1,8 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
+from functools import wraps
+
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -21,11 +24,18 @@ def _has_dispute_permissions(user, permissions):
 
 def dispute_permission_required(*permissions):
     """Require the relevant Disputes model permission(s), not generic staff."""
-    return user_passes_test(
-        lambda user: _has_dispute_permissions(user, permissions),
-        login_url="/accounts/login/",
-        raise_exception=True,
-    )
+
+    def decorator(view_func):
+        @login_required(login_url="/accounts/login/")
+        @wraps(view_func)
+        def wrapped(request, *args, **kwargs):
+            if not _has_dispute_permissions(request.user, permissions):
+                raise PermissionDenied
+            return view_func(request, *args, **kwargs)
+
+        return wrapped
+
+    return decorator
 
 
 def _visible(user):
