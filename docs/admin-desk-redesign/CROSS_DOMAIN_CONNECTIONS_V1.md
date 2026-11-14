@@ -366,3 +366,37 @@ Key contracts:
 8. Affiliate first-touch attribution → canonical Revenue PaymentIntent → one AffiliateCommission per affiliate/payment → controlled internal state transitions; payout rail is not verified.
 
 All cross-links must open the canonical record in Customers, Revenue, Academy or Platform. Growth may display source-backed context but must not create duplicate editable copies.
+
+
+## 14. Platform record and lifecycle contract
+
+Platform is the operations/governance domain. It provides source-backed status and safe links, but it does not take ownership of customer, payment, subscription, course, campaign or support records.
+
+Key contracts:
+- Durable Job is worker-owned execution state. It is not editable business state and should not have an ordinary staff retry/replay/delete action without a new explicit safe-service contract.
+- PeriodicJob is a separate lightweight scheduler configuration/state row. Its interval, enabled flag and API call budget are not the same as Job attempts/backoff.
+- A scheduler reservation/last_run_at is not proof of successful completion; use last_status/error and any separate worker evidence.
+- ReconcileState desired-state version, ProvisioningOperation external mutation lifecycle, UserChannelAssignment entitlement mapping and ChannelMembershipSnapshot observed membership are distinct.
+- ProvisioningOperation UNKNOWN means the remote outcome could not be verified. It is not Failed. Do not send another invitation or claim member absence unless a subsequent membership probe returns a definite False.
+- The existing provisioning recovery uses the stored invite link where possible and an atomic six-hour resend throttle. The control/admin channel cannot be a subscriber target.
+- BotRuntimeState is legacy self-registered bridge diagnostic data. Native Telegram access currently calls Telegram Bot API directly from Django using BotConfig. Do not treat legacy bridge heartbeat as current native Telegram health.
+- Google Drive OAuth belongs to Academy course-content administration; keep its credential/editor flow in Academy.
+- Stripe/Razorpay WebhookEvent is durable and idempotent. On first receipt it enqueues process_webhook_event; duplicate provider event delivery reuses the same event row. Business mutation happens through the payment processor/service.
+- Resend webhook updates G1 Delivery state; it does not create a generic webhook inbox row and does not update transactional EmailLog. Telegram webhook evidence is another separate path; no durable event inbox was verified.
+- /health/ only verifies a SELECT 1 against the primary database. It does not test a worker, periodic scheduler, provider, storage, email, webhook or backup/restore.
+- Runtime readiness checks inspect configuration presence, not successful authentication or an end-to-end provider transaction.
+- AuditLog, SecurityEvent, BotAccessAudit, Event, WebhookEvent and PolicyAcceptance must remain distinct evidence sources. SecurityEvent and PolicyAcceptance have model-level write-once/append-only guards; AuditLog did not in the inspected source.
+- Published PolicyVersion is intended as versioned immutable legal evidence, but the inspected model/admin path does not fully lock published content against changes. Treat that as an engineering hardening item.
+- Staff access combines active account state, is_staff, application role, staff approval, superuser and Django Groups/model permissions. The IsRoleAdmin API class permission includes any is_staff user; do not collapse the source model into a clean role matrix before a complete audit.
+
+### Platform end-to-end validation sequence
+
+1. Revenue provider webhook → signature verification → idempotent WebhookEvent → durable process_webhook_event Job → canonical PaymentIntent/Refund/Dispute service → Revenue subscription/course access consequence.
+2. Revenue Subscription/Academy Course entitlement → ReconcileState desired version → durable reconcile Job → ProvisioningOperation → external Telegram/Discord API → verified membership/role result → BotAccessAudit and safe operational timeline.
+3. PeriodicJob becomes due → scheduler reserves it → registered light handler executes within configured budget → last_status/error/cursor records → Operations Timeline summary.
+4. Worker crashes with Running lock → reaper resets stale Job to Pending; long-running video lease heartbeat reduces false stale detection.
+5. SecurityEvent/AuditLog/domain Event/WebhookEvent → Audit & Security view with individual source type and permission filtering; raw IP, UA and provider payload stay restricted.
+6. Active PolicyVersion → exact PolicyAcceptance at checkout → Revenue payment/dispute evidence; preserve version identity and acceptance time.
+7. Staff approval request → staff-approval API → existing class-level IsRoleAdmin gate (currently admits is_staff/superuser as well as application Admin) → audited role change; redesign only after gate and maker/checker rules are approved.
+
+All cross-links resolve to the canonical owner domain. Platform should not become an alternate payment, subscription, account-ban, course-entitlement or support-action interface.
