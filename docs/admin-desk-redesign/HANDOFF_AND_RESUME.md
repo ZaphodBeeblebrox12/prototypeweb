@@ -491,3 +491,15 @@ Use one read-only browser-console batch script for all GET route probes and any 
 For object scope, collect fixture IDs visible to the superuser or fixture owner, then probe those exact detail URLs in the other role sessions. The script should never guess IDs. Keep all action/POST verification separate and use designated disposable fixtures only after an explicit test plan.
 
 **Phase 0 remains incomplete. Implementation remains NOT AUTHORISED.**
+
+## 17. High-priority staging access-control finding — referral rewards
+
+The 14 November 2026 16:59:25 UTC browser batch, run in a session labelled `Non-staff learner`, returned HTTP 200 from `GET /growth/admin/referral-rewards/` with no redirect. The other listed staff/Admin Desk routes returned 403; `/api/notifications/` returned 200; `/admin/`, `/admin/growth/send-gift/` and `/admin-disputes/` redirected to `/admin/login/`.
+
+Source inspection confirms `AdminReferralRewardsView` uses `LoginRequiredMixin` only. It supplies ReferralSettings, global reward count/issued/used/outstanding aggregates, and the latest 20 rewards with referrer/referred-user relations to a template. The template renders reward settings, financial totals, referrer and referred usernames, amounts, status, available balance and dates, with links to settings, all rewards, ledger and referral admin pages. This is a high-priority authenticated access-control failure in staging. The batch did not retain the HTML response body, so do not claim the exact individual values were inspected, but the source/template defines the data scope of the successful page response.
+
+**Immediate handling:** keep the route out of Admin Desk navigation and treat it as accessible to ordinary authenticated members until the server-side gate is corrected and re-tested. Do not rely on hiding the link. No source changes were made; implementation remains unauthorised.
+
+The later batch labelled `Superuser` returned 403 on all Admin Desk endpoints and redirected `/admin/`, `/admin/growth/send-gift/` and `/admin-disputes/` to `/admin/login/`. The label was manually entered and is not server identity proof. Do not count this as a superuser pass. Next batch should also GET `/api/auth/me/` and print only `role`, `is_staff` and `is_admin` from the server response; omit personal identifiers. That serializer does not expose `is_superuser`, so successful Django Admin access and actual superuser-only capabilities still need confirmation.
+
+**Phase 0 closure condition added:** referral rewards route denies the non-staff learner and allows only an authorised staff/domain permission persona; a superuser run is positively verified; other discovered Admin links are checked directly; no cross-domain data remains exposed.
