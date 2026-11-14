@@ -61,6 +61,16 @@
 - **Approved by:** User
 - **Date:** 2026-11-14
 
+### Visual preference — forest green, warm ivory and restrained terracotta
+
+- **Decision:** Use the user's supplied Customer 360 screenshot as the primary visual reference for the next M01/M02 revision.
+- **Reference characteristics:** Deep forest-green sidebar, warm ivory page canvas, warm-white content surfaces, restrained terracotta accent, muted sage status indicators, dark editorial serif page headings, compact sans-serif interface text, thin borders and minimal shadow.
+- **Reason:** The user explicitly preferred this earlier colour scheme and general style over the newer prototype treatment.
+- **Affected screens/workflows:** Shared application shell, Command Centre, domain workspace headers, selected navigation state, status colours and component styling.
+- **Open risks:** This is a selected visual direction, not final approval of every component or token. Density, exact sizing, contrast, responsive behaviour and data visualisation colours still need validation.
+- **Approved by:** User (visual preference)
+- **Date:** 2026-11-14
+
 ## Decisions still to make together
 
 ### 1. Navigation hierarchy
@@ -111,11 +121,11 @@
 - Notes:
 
 ### 8. Visual direction
-- [ ] Warm light / editorial.
-- [ ] Neutral light / data-dense.
+- [x] Forest-green sidebar + warm-ivory editorial workspace, with restrained terracotta and sage accents (selected reference; full token board pending).
+- [ ] Neutral light / data-dense alternative, only if needed for comparison.
 - [ ] Other direction to explore.
 - [ ] Density preference and target desktop width.
-- Notes:
+- Notes: User prefers the supplied Customer 360 screenshot's forest-green / ivory / terracotta visual language. M01/M02 v2 should match this before the visual system is frozen.
 
 ## Decision record format
 
