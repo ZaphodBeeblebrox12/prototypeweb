@@ -207,7 +207,7 @@ Critical lifecycle distinctions:
 - M24: first holistic navigation board exists; owner review still pending.
 - Academy: detailed V1 prototype/spec exists; owner review pending.
 - Customers: detailed V1 prototype/spec exists; owner review pending.
-- Revenue: not yet designed at screen level.
+- Revenue: detailed V1 prototype/spec/review notes exist; owner review pending.
 - Growth: not yet designed at screen level.
 - Platform: not yet designed at screen level.
 - Global accessibility, keyboard navigation, contrast and authenticated staging parity are not complete.
@@ -216,7 +216,7 @@ Do not mark a mockup as approved because it was created or smoke-tested. Record 
 
 ## 8. Recommended next steps
 
-1. Review the Customers prototype and specification with the owner; record requested changes and decisions.
+1. Review the Customers prototype/specification with the owner; record requested changes and decisions.
 2. Revise M10/M11/M12/M13/M27/M28 where necessary.
 3. Review the Revenue prototype/specification; revise the action hierarchy and record relationships from owner feedback.
 4. Design Growth next, then Platform, using the same fictional learner/payment/course/subscription/ticket records.
