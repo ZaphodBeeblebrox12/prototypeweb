@@ -590,7 +590,7 @@ This is a planning-only progress record. It does not alter the original approval
 | Customers | Detailed screen specification and clickable V1 prototype created | Owner review and revisions |
 | Revenue | Detailed screen specification, clickable V1 prototype and review notes created | Owner review and revisions |
 | Growth | Detailed screen specification, clickable V1 prototype and review notes created | Owner review and revisions |
-| Platform | High-level ownership/relationships documented | Screen-level design not started |
+| Platform | Detailed screen specification, clickable V1 prototype and review notes created | Owner review and revisions; holistic six-domain walkthrough follows |
 | Handoff and resumption | Dedicated `HANDOFF_AND_RESUME.md` created | Update it after each major design pass |
 
 ### Phase status
@@ -599,9 +599,9 @@ This is a planning-only progress record. It does not alter the original approval
 - **Phase 1 — User jobs, roles and task prioritisation:** initial operating model recorded; complete staff/persona and permission matrix remains open.
 - **Phase 2 — Information architecture:** six top-level domains and order approved; child navigation is proposed and remains reviewable.
 - **Phase 3 — Command Centre concepts:** three concepts prototyped; final composition and prioritisation rules remain open.
-- **Phase 4 — Screen-level wireframes:** Academy, Customers, Revenue and Growth V1 screens/specs drafted; Platform remains.
+- **Phase 4 — Screen-level wireframes:** Academy, Customers, Revenue, Growth and Platform V1 screens/specs drafted; owner review and holistic walkthrough remain.
 - **Phase 5 — Visual design system:** common V2 visual direction selected; complete component tokens and accessibility validation remain.
-- **Phase 6 — Clickable HTML mockups:** shell, six-domain architecture, Academy, Customers, Revenue and Growth static prototypes created and smoke-tested; Platform mockup and end-to-end holistic prototype remain.
+- **Phase 6 — Clickable HTML mockups:** shell, six-domain architecture, Academy, Customers, Revenue, Growth and Platform static prototypes created and smoke-tested; end-to-end holistic prototype remains.
 - **Phase 7 — Review and validation:** owner review is pending for the domain mockups; accessibility and authenticated staging parity remain.
 - **Phase 8 — Implementation handoff:** not started; only begins after the user approves the design and technical plan.
 
@@ -685,4 +685,57 @@ Growth-specific source boundaries confirmed include the admin-only Analytics API
 - **Review notes:** `GROWTH_REVIEW_NOTES_V1.md`.
 - **Smoke test:** All Growth destinations, campaign/coupon/referral/gift/Delivery filters, preview modals, Email Delivery subtabs, Advanced Growth subtabs and mobile drawer passed. No JavaScript or console errors; 390px viewport had no horizontal overflow after a responsive sizing correction.
 - **Data safety:** all sample people, campaigns, amounts, codes and delivery states are illustrative; no API, mail provider, job or database writes are connected.
+- **Review state:** V1 is draft for owner review; no implementation is approved.
+
+
+### Platform source files added to the design audit
+
+The Platform workspace pass also inspected these source files on my-new-branch:
+
+- backend/apps/jobs/models.py
+- backend/apps/jobs/admin.py
+- backend/apps/jobs/worker.py
+- backend/apps/jobs/scheduler.py
+- backend/apps/jobs/operations.py
+- backend/apps/jobs/handlers.py
+- backend/apps/jobs/enqueue.py
+- backend/apps/jobs/apps.py
+- backend/apps/audit/models.py
+- backend/apps/audit/admin.py
+- backend/apps/bot_integration/models.py
+- backend/apps/bot_integration/runtime_models.py
+- backend/apps/bot_integration/reconcile.py
+- backend/apps/bot_integration/reconcile_jobs.py
+- backend/apps/bot_integration/sync.py
+- backend/apps/bot_integration/views.py
+- backend/apps/bot_integration/urls.py
+- backend/apps/bot_integration/integration_admin.py
+- backend/apps/bot_integration/services/telegram.py
+- backend/apps/accounts/models.py
+- backend/apps/accounts/admin.py
+- backend/apps/accounts/admin_views.py
+- backend/apps/admin_dashboard.py
+- backend/apps/admin_desk_views.py
+- backend/apps/payments/models.py
+- backend/apps/payments/webhook_views.py
+- backend/apps/payments/webhook_processor.py
+- backend/apps/payments/admin.py
+- backend/apps/emailing/webhooks.py
+- backend/apps/policies/models.py
+- backend/apps/policies/services.py
+- backend/apps/policies/admin.py
+- backend/apps/policies/views.py
+- backend/apps/core/views.py
+- backend/config/urls.py
+
+Platform-specific source boundaries confirmed include the existing permission-filtered Operations Timeline and read-only Job/Provisioning details, a separate durable worker and PeriodicJob scheduler, persisted Telegram external provisioning operations and unknown-state recovery safeguards, direct native Telegram API vs legacy bridge runtime diagnostics, distinct provider webhook evidence paths, append-only SecurityEvent vs less-constrained AuditLog, partial policy-content immutability enforcement, and a staff API permission class broader than its Admin-only name suggests.
+
+### Platform screen-design pass — 14 November 2026
+
+- **Prototype:** tradethesis_admin_platform_workspace_v1.html.
+- **Specification:** PLATFORM_WORKSPACE_SPEC_V1.md.
+- **Review notes:** PLATFORM_REVIEW_NOTES_V1.md.
+- **Screens:** Platform Overview, Jobs & Scheduler, Access & Provisioning, Integrations & Webhooks, Audit & Security, Policies & Readiness, Staff & Permissions, Migration Boundary.
+- **Smoke test:** 30/30 browser checks passed. All Platform destinations, tabs, job filters, event-source filter, detail previews and mobile drawer passed. No JavaScript or console errors; 390px viewport had no horizontal overflow.
+- **Data safety:** names, IDs, states, incidents and counts are fictional. Prototype does not read secrets, query live APIs, enqueue jobs or perform provider actions.
 - **Review state:** V1 is draft for owner review; no implementation is approved.
