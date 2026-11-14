@@ -1031,3 +1031,14 @@ The Academy workspace is now developed in a separate screen-level specification:
 - `tradethesis_admin_academy_workspace_v1.html` — clickable static prototype using the selected V2 shell.
 
 The Academy screen proposal is still awaiting owner review. It does not authorise implementation and does not claim all proposed pages already exist as live Admin Desk routes.
+
+
+## 17. Customers screen-level specification
+
+The Customers domain has a first screen-level design proposal:
+
+- `CUSTOMERS_WORKSPACE_SPEC_V1.md` — detailed source-backed account, ticket and Customer 360 semantics, proposed screen layouts, permission scope, actions and cross-domain links.
+- `CUSTOMERS_REVIEW_NOTES_V1.md` — review boundary, validation and open owner decisions.
+- `tradethesis_admin_customers_workspace_v1.html` — clickable static prototype using the approved V2 shell.
+
+The proposal covers Customers Overview, Learners & Accounts, Learner Account Detail, Support Tickets, Ticket Detail and Customer 360. It remains pending owner review and does not authorise implementation.
