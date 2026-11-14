@@ -194,9 +194,9 @@ The Course Builder has a legacy authoring path. Tiptap work exists behind a feat
 11. **Avoid duplicate sources of truth.** A redesigned screen should consume existing domain data and services instead of creating new parallel records.
 12. **Progressive complexity.** Daily tasks belong in the Admin Desk; rare advanced record/configuration work may remain in Django Admin until deliberately migrated.
 
-## 6. Proposed information architecture — draft for discussion
+## 6. Information architecture — approved top-level domains, child structure in review
 
-This is a starting hypothesis, not an approved navigation decision.
+On 14 November 2026, the owner approved one unified Admin Desk with six top-level domains in this exact order: Command Centre, Academy, Customers, Revenue, Growth and Platform. The V2 forest-green / warm-ivory editorial shell is the selected shared visual template. The child destinations below remain a first-pass proposal for screen-by-screen review; they are not yet an implementation specification.
 
 ### 6.1 Command Centre
 - Overview
@@ -276,9 +276,9 @@ Tasks:
 **Purpose:** agree the structure before drawing detailed screens.
 
 Tasks:
-- Test the draft groups in Section 6 against the role/task matrix.
-- Decide which items are first-level, nested, contextual, or left in advanced Django Admin.
-- Decide whether Academy, Customers/Support, Revenue, Growth and Platform are all first-level groups or whether some should be consolidated.
+- Test the proposed child destinations in Section 6 against the role/task matrix.
+- Decide which items are nested, contextual, or left in Advanced Administration.
+- Finalise child labels, order, grouping and role-based visibility under the six approved top-level domains.
 - Define navigation badge rules: what counts as unread, pending, overdue, failed, or requiring action.
 - Design empty, loading, error, permission-denied and no-access states.
 - Define global search scope, quick actions and cross-links between course, learner, ticket and payment records.
@@ -501,7 +501,7 @@ Prepare a separate technical plan after mockups are approved:
 
 These questions should be answered in discussion, not silently decided by the prototype:
 
-1. **Primary navigation:** should Growth be a top-level group, or live under Revenue/Marketing?
+1. **Child navigation:** finalise submenu labels, destination order and role-based visibility under the six approved top-level domains.
 2. **Overview:** action queue first, operational cockpit, or personal workbench?
 3. **Notification model:** notification inbox, operational alerts, personal assignments, or separate surfaces?
 4. **Customer 360:** full page, side drawer from tickets, or both?
@@ -534,7 +534,7 @@ The design is not ready for implementation until:
 
 1. Complete and validate the current-state route/capability matrix.
 2. Agree personas and top tasks.
-3. Agree sitemap and navigation.
+3. Refine and approve the child-level sitemap, route-to-workspace map and permission-aware navigation.
 4. Create three Command Centre concepts.
 5. Select and refine the overview.
 6. Create Academy, Support and Customer 360 wireframes.
