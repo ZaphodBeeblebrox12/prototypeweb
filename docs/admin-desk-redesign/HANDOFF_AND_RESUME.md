@@ -432,3 +432,42 @@ Full test coverage and the explicit remaining limitations are in `PHASE_0_CURREN
 - Keep refund initiation and end-of-period cancellation classified as unsupported until a verified service contract exists.
 
 **CI is green; Phase 0 is still incomplete. Implementation remains NOT AUTHORISED.**
+
+
+## 15. Phase 0 continuation checkpoint — 14 November 2026 16:43 UTC
+
+This checkpoint supersedes the older source SHA, Academy deployment SHA and 15-commit source-delta references in Sections 13–14 above. It does not supersede or reopen any of the 60 owner decisions.
+
+### Current Git and deployment baseline
+
+- Source branch `my-new-branch` is at `8832ecf9cc979747dc2715a39ecfeb7a292e55ee` (`Migrate Trading Path key takeaways into notebook prompts`, 2026-11-14 16:39:00 UTC).
+- Planning branch was at `0f6e44a34c56cdccc17a3f717ee613b8b47081f1` before this report/handoff refresh. At that point it was 86 commits ahead and 18 behind source, merge base `251260448c480ec5fbfec4f1966d9017fa0854ff`. The documentation refresh adds planning-only commits; do not merge or rebase automatically.
+- The 18 source-only commits modify exactly three files: `backend/apps/academy/course_builder_api.py`, `backend/apps/academy/course_builder_preview.html` and `backend/apps/academy/course_builder_trading_path_import.json`. No Admin Desk route/view/permission/test file changed in this source-only delta.
+- Academy staging (`tradethesis-academy-staging`) is live on the exact current source SHA. Latest deployment `dep-dbs8tku7bikc73euh990` finished at 16:41:58 UTC on 14 November 2026. Auto-deploy remains disabled; the deployment was API-triggered. No Render setting was changed.
+- Public static staging remains live on `c5bdc0fb58be35122a41da3bc646a06c48dc162d` from 7 November 2026 09:01:26 UTC. This remains a separate deployment-parity item.
+
+### New Academy Builder migration in source
+
+The newest three source commits move Trading Path **Key takeaways** into the lesson notebook prompts **Pause**, **Interpret** and **Apply**. The source API now includes notebook data in the migration payload; the Builder migration copies exactly three non-empty labelled prompts to the matching draft lesson, retains existing target notebook metadata/title where present, removes the Key takeaways section from the lesson body, and reports migration counts. The user-facing toast says Q&A is preserved and nothing is published.
+
+Add explicit regression cases before relying on this transformation: repeated Builder loads must be idempotent; matching must be limited to intended Trading Path draft lessons; existing Q&A and notebook metadata/title must remain intact; only the Key takeaways section must be removed while surrounding content survives; published Course records must remain unchanged. The three changed source files contain no new dedicated test file for this migration.
+
+### Latest CI evidence
+
+GitHub Actions **Academy backend CI**, run [1891](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43616758224), for the deployed SHA completed successfully:
+- Python 3.11: 1,314 passed, 1 skipped, 178 subtests passed.
+- Python 3.12: 1,314 passed, 1 skipped, 178 subtests passed.
+- Tiptap bundle and DOM compatibility job: success. This does not make Tiptap the supported/default production Builder.
+
+CI is isolated test evidence. It does not establish authenticated staging permissions or live record/object visibility.
+
+### Remaining Phase 0 gate
+
+- Authenticated staging checks for learner, ordinary staff, Support reviewer, Academy editor/approver, Revenue staff, Growth staff, Platform operator and superuser remain unperformed. No password or secret should be pasted into project docs or chat.
+- For every authorised persona, test both allowed and denied direct routes/APIs and object-level visibility; record actual status codes and visible UI states.
+- Map actual user roles, Django Groups, model permissions and staff-approval state to the approved multiple-department access model.
+- Reconcile Django Admin superuser-only target against workflow-by-workflow cutover; resolve the broad `IsRoleAdmin` API boundary and login-only Growth referral overview before staff navigation migration.
+- Keep PSP refund initiation and end-of-period cancellation unsupported until a verified service contract exists.
+- Complete the Builder migration-specific idempotence/content-preservation tests and a staging draft-only verification.
+
+**Phase 0 remains incomplete. Implementation remains NOT AUTHORISED.** No application code, test, permission, migration, deployment, Render setting, merge or rebase was changed in this continuation. Only the planning audit and handoff documents were updated.
