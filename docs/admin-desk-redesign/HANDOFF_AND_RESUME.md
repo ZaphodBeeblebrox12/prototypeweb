@@ -4,7 +4,7 @@
 **Repository:** `ZaphodBeeblebrox12/prototypeweb`  
 **Planning branch:** `admin-desk-redesign-planning`  
 **Source/code baseline:** `my-new-branch`  
-**Current phase:** Phase 0 source/deployment baseline audit checkpoint; authenticated staging and role verification remain outstanding.  
+**Current phase:** Phase 0 partial authenticated staging checkpoint; non-staff learner and admin/staff baseline tested, specialist roles and cross-persona object scope remain outstanding.  
 **Implementation status:** Not authorised. Do not modify app code or deploy.
 
 ## 1. Resume instruction for a new chat
@@ -465,11 +465,12 @@ CI is isolated test evidence. It does not establish authenticated staging permis
 
 ### Remaining Phase 0 gate
 
-- Authenticated staging checks for learner, ordinary staff, Support reviewer, Academy editor/approver, Revenue staff, Growth staff, Platform operator and superuser remain unperformed. No password or secret should be pasted into project docs or chat.
+- Authenticated staging checks now include a server-verified non-staff learner and a server-verified admin/staff account. Ordinary approved staff, Support reviewer, Academy editor/approver, Revenue staff, Growth staff and Platform operator remain untested. A true Django superuser is not independently verified because /api/auth/me/ does not expose is_superuser. No password or secret should be pasted into project docs or chat.
 - For every authorised persona, test both allowed and denied direct routes/APIs and object-level visibility; record actual status codes and visible UI states.
 - Map actual user roles, Django Groups, model permissions and staff-approval state to the approved multiple-department access model.
-- Reconcile Django Admin superuser-only target against workflow-by-workflow cutover; resolve the broad `IsRoleAdmin` API boundary and login-only Growth referral overview before staff navigation migration.
+- Reconcile Django Admin superuser-only target against workflow-by-workflow cutover; resolve the broad IsRoleAdmin API boundary and the confirmed login-only Growth referral overview exposure before staff navigation migration. The learner test returned HTTP 200 from /growth/admin/referral-rewards/ while /api/auth/me/ reported role=user, is_staff=false, is_admin=false.
 - Keep PSP refund initiation and end-of-period cancellation unsupported until a verified service contract exists.
+- The 14 November admin baseline returned HTTP 500 from /api/analytics/overview/. Source inspection found promotion_performance() calls Sum("discount_cents") in backend/apps/analytics/services/report.py, but the module imports only Count. Treat this as the likely direct cause; collect a runtime traceback after a controlled fix. Existing analytics tests do not cover the promotion report.
 - Complete the Builder migration-specific idempotence/content-preservation tests and a staging draft-only verification.
 
 **Phase 0 remains incomplete. Implementation remains NOT AUTHORISED.** No application code, test, permission, migration, deployment, Render setting, merge or rebase was changed in this continuation. Only the planning audit and handoff documents were updated.
@@ -513,3 +514,27 @@ The same run again returned HTTP 200 for `/growth/admin/referral-rewards/`. This
 For the actual superuser pass, sign out through the staging UI, sign in with the authorised superuser account, then run the same consolidated batch. Do not proceed until `/api/auth/me/` reports elevated flags and `/admin/` reaches the admin index. The API serializer does not expose `is_superuser`; verify a superuser-only admin capability separately.
 
 **Phase 0 remains incomplete. Implementation remains NOT AUTHORISED.**
+
+## 19. Latest authenticated admin/staff baseline — 14 November 2026
+
+The owner supplied a successful consolidated browser-console audit from Academy staging at 17:17:36 UTC.
+
+**Session identity from GET /api/auth/me/:** HTTP 200, role=admin, is_staff=true, is_admin=true. The browser was top-level and same-origin fetches worked. The operator-entered label Superuser is not proof of the Django is_superuser flag; the serializer does not expose that field.
+
+**Results:** 20 named route checks: 19 HTTP 200, one HTTP 500 (/api/analytics/overview/). Six individual object detail checks returned 200: three support-ticket pages and three learner-account pages. The Admin Desk Command Centre, Operations, Accounts, Support, Course review, SEO, Course Builder, Tiptap preview, Finance, Subscriptions, Business settings, staff approvals API, own notifications, Growth referral overview, Gift sending, Django Admin and Disputes routes all returned 200. The Admin index loaded; the Disputes route returned a generic base title, so its rendered heading/content still needs visual confirmation.
+
+### Defect and security items
+
+1. **Analytics overview 500:** source inspection of the deployed source branch found report.py imports Count but promotion_performance() calls Sum. AnalyticsOverviewView calls that report. This is a source-level diagnosis consistent with the live 500; the Render traceback has not been collected. Existing analytics tests have no promotion-performance test. Recommended fix is a Sum import plus empty/populated promotion report tests. No code was changed.
+2. **Growth referral overview exposed to learners:** a previous run had server identity role=user, is_staff=false, is_admin=false and received HTTP 200 from /growth/admin/referral-rewards/. The view uses LoginRequiredMixin without a staff/domain permission gate. Its context includes global reward aggregates/settings and recent reward/referrer/referred-user data. This remains a confirmed high-priority authorization gap. Recommended fix is a server-side Growth permission with learner-denial and authorised-Growth-positive tests. No code was changed.
+
+### Resume from here
+
+- Do not repeat the learner or admin baseline unless the source/deploy changes. Preserve the output as current evidence for source SHA 8832ecf9cc979747dc2715a39ecfeb7a292e55ee.
+- Run the same GET-only audit with a separate ordinary approved staff account. Then run the Support, Academy editor/approver, Revenue, Growth and Platform accounts individually.
+- Use the six discovered account/ticket detail fixtures for role-specific positive and negative object-scope tests. Never infer permission from menu visibility alone.
+- Complete an actual Django superuser check separately. role=admin, is_staff=true, is_admin=true and HTTP 200 at /admin/ establish an admin/staff account, but not necessarily is_superuser=true.
+- Keep all POST/action tests separate and use designated disposable fixtures after a written test plan.
+- Keep the two findings open until a controlled source fix is reviewed, deployed to staging and retested with learner denial and authorised access.
+
+**Phase 0 remains open. Implementation remains NOT AUTHORISED.** Only planning documentation was updated; no app code, permissions, tests, migrations, Render settings, deployment, merge or rebase changed.
