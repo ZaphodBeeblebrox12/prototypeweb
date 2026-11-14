@@ -201,7 +201,7 @@ The current conversation includes downloadable HTML prototypes:
 - `tradethesis_admin_academy_workspace_v1.html`
 - `tradethesis_admin_customers_workspace_v1.html`
 
-The written specifications and design decisions are saved in this GitHub branch. The HTML files are standalone conversation artifacts; retain/download them when carrying design previews into another environment. If an artifact is not available in the next chat, rebuild its next revision from the saved screen-level specification rather than inferring live behaviour.
+The written specifications and design decisions are saved in this GitHub branch. The HTML files are standalone conversation artifacts; a portable archive named `tradethesis_admin_redesign_resume_bundle_v1.zip` was also created in the design review conversation with the four current prototypes and PNG previews. Retain/download that archive when carrying visual previews into another environment. If an artifact is not available in the next chat, rebuild its next revision from the saved screen-level specification rather than inferring live behaviour.
 
 ## 10. Safety and scope checklist for the next chat
 
