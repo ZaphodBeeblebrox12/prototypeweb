@@ -6238,6 +6238,11 @@ body.builder-dialog-open { overflow:hidden; }
           }
           renderSidebar();
           renderHeaderState();
+          if (tradingPathDraftsForQuickCheckSave.some(course =>
+            String(course.id || '') === String(state.selectedCourseId || '')
+          )) {
+            renderEditor();
+          }
           toast('Moved learning outcomes into Short lesson summary and removed inline Quick Checks across ' +
             tradingPathDraftsForQuickCheckSave.length + ' Trading Path draft(s). Q&A was preserved; nothing was published.');
         } catch (saveError) {
