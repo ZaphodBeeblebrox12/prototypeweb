@@ -5661,6 +5661,18 @@ body.builder-dialog-open { overflow:hidden; }
     return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
   }
 
+  function stripWhatYouWillLearnContent(markdown) {
+    const lines = String(markdown || '').split(/\r?\n/);
+    const start = lines.findIndex(line =>
+      /^#{1,6}\s*What you'll learn\s*$/i.test(line.trim())
+    );
+    if (start < 0) return String(markdown || '');
+    let end = start + 1;
+    while (end < lines.length && !/^#{1,6}\s+/.test(lines[end])) end += 1;
+    lines.splice(start, end - start);
+    return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  }
+
   function mergeTradingPathQuickChecks(targetCourse, sourceCourse) {
     const sourceLessons = (Array.isArray(sourceCourse?.modules) ? sourceCourse.modules : [])
       .flatMap(module => Array.isArray(module.lessons) ? module.lessons : []);
@@ -5668,79 +5680,102 @@ body.builder-dialog-open { overflow:hidden; }
       .flatMap(module => Array.isArray(module.lessons) ? module.lessons : []);
     let lessonCount = 0;
     let questionCount = 0;
+    let summaryCount = 0;
 
     sourceLessons.forEach(sourceLesson => {
-      const sourceQuestions = Array.isArray(sourceLesson.questions) ? sourceLesson.questions : [];
-      if (!sourceQuestions.length) return;
-
       const targetLesson = targetLessons.find(lesson =>
         tradingPathLessonTitleMatches(lesson.title, sourceLesson.title)
       );
       if (!targetLesson) return;
 
-      const originalContent = String(targetLesson.content || '');
-      const hasQuickCheckHeading = /^#{1,6}\s*Quick check\b/im.test(originalContent);
-      const contentLines = originalContent.split(/\r?\n/);
-      const actionIndex = contentLines.findIndex(line =>
-        /^#{1,6}\s*Today(?:'|’)?s action step\b/i.test(line.trim())
+      let lessonChanged = false;
+      const sourceSummary = String(sourceLesson.summary || '').trim();
+      const learningOutcomeLines = sourceSummary.split(/\r?\n/).filter(line =>
+        /^\s*\d+[.)]\s+\S/.test(line)
       );
-      let hasOrphanedQuickCheckItems = false;
-      if (!hasQuickCheckHeading && actionIndex >= 0) {
-        let previousHeading = -1;
-        for (let i = actionIndex - 1; i >= 0; i -= 1) {
-          if (/^#{1,6}\s+/.test(contentLines[i])) {
-            previousHeading = i;
-            break;
-          }
+      const hasLearningOutcomeSummary = learningOutcomeLines.length >= 2 &&
+        learningOutcomeLines.length === sourceSummary.split(/\r?\n/).filter(line => line.trim()).length;
+
+      if (hasLearningOutcomeSummary) {
+        if (String(targetLesson.summary || '').trim() !== sourceSummary) {
+          targetLesson.summary = sourceSummary;
+          summaryCount += 1;
+          lessonChanged = true;
         }
-        if (previousHeading >= 0 && /key takeaways/i.test(contentLines[previousHeading])) {
-          const numberedItems = contentLines
-            .slice(previousHeading + 1, actionIndex)
-            .filter(line => /^\s*\d+[.)]\s+/.test(line)).length;
-          hasOrphanedQuickCheckItems = numberedItems >= 2;
-        }
-      }
-      // Do not migrate the separate Level 1/2/3 checkpoint quizzes. This path is
-      // only for the daily Quick Check blocks (or numbered fragments left behind
-      // by earlier partial cleanup attempts).
-      if (!hasQuickCheckHeading && !hasOrphanedQuickCheckItems) return;
-
-      const existingQuestions = Array.isArray(targetLesson.questions) ? targetLesson.questions : [];
-      let finalQuestions = existingQuestions;
-      if (existingQuestions.length < sourceQuestions.length) {
-        const missingQuestions = sourceQuestions.slice(existingQuestions.length).map(question =>
-          JSON.parse(JSON.stringify(question))
-        );
-        finalQuestions = existingQuestions.concat(missingQuestions);
-        targetLesson.questions = finalQuestions;
-        questionCount += missingQuestions.length;
-      } else if (!Array.isArray(targetLesson.questions)) {
-        targetLesson.questions = [];
-      }
-
-      // The visible legacy lesson states Nifty lot = 65. Keep its actual question,
-      // answer and explanation consistent with that lesson rather than the older 75-unit key.
-      if (
-        /Nifty\s+lot\s+is\s+65/i.test(String(targetLesson.content || '')) &&
-        finalQuestions.length > 0
-      ) {
-        finalQuestions[0] = JSON.parse(JSON.stringify(sourceQuestions[0]));
-        targetLesson.questions = finalQuestions;
-      }
-
-      let lessonChanged = finalQuestions.length > 0 && existingQuestions.length < sourceQuestions.length;
-      if (finalQuestions.length >= sourceQuestions.length) {
         const originalContent = String(targetLesson.content || '');
-        const cleanedContent = stripTradingPathQuickCheckContent(originalContent);
+        const cleanedContent = stripWhatYouWillLearnContent(originalContent);
         if (cleanedContent !== originalContent) {
           targetLesson.content = cleanedContent;
           lessonChanged = true;
         }
       }
+
+      const sourceQuestions = Array.isArray(sourceLesson.questions) ? sourceLesson.questions : [];
+      if (sourceQuestions.length) {
+        const originalContent = String(targetLesson.content || '');
+        const hasQuickCheckHeading = /^#{1,6}\s*Quick check\b/im.test(originalContent);
+        const contentLines = originalContent.split(/\r?\n/);
+        const actionIndex = contentLines.findIndex(line =>
+          /^#{1,6}\s*Today(?:'|’)?s action step\b/i.test(line.trim())
+        );
+        let hasOrphanedQuickCheckItems = false;
+        if (!hasQuickCheckHeading && actionIndex >= 0) {
+          let previousHeading = -1;
+          for (let i = actionIndex - 1; i >= 0; i -= 1) {
+            if (/^#{1,6}\s+/.test(contentLines[i])) {
+              previousHeading = i;
+              break;
+            }
+          }
+          if (previousHeading >= 0 && /key takeaways/i.test(contentLines[previousHeading])) {
+            const numberedItems = contentLines
+              .slice(previousHeading + 1, actionIndex)
+              .filter(line => /^\s*\d+[.)]\s+/.test(line)).length;
+            hasOrphanedQuickCheckItems = numberedItems >= 2;
+          }
+        }
+
+        // Do not migrate separate Level 1/2/3 checkpoint quizzes. This path is
+        // only for daily Quick Check blocks or fragments left by partial cleanup.
+        if (hasQuickCheckHeading || hasOrphanedQuickCheckItems) {
+          const existingQuestions = Array.isArray(targetLesson.questions) ? targetLesson.questions : [];
+          let finalQuestions = existingQuestions;
+          if (existingQuestions.length < sourceQuestions.length) {
+            const missingQuestions = sourceQuestions.slice(existingQuestions.length).map(question =>
+              JSON.parse(JSON.stringify(question))
+            );
+            finalQuestions = existingQuestions.concat(missingQuestions);
+            targetLesson.questions = finalQuestions;
+            questionCount += missingQuestions.length;
+            lessonChanged = true;
+          } else if (!Array.isArray(targetLesson.questions)) {
+            targetLesson.questions = [];
+          }
+
+          // Keep the visible legacy 65-unit Nifty example aligned with its answer key.
+          if (
+            /Nifty\s+lot\s+is\s+65/i.test(String(targetLesson.content || '')) &&
+            finalQuestions.length > 0
+          ) {
+            finalQuestions[0] = JSON.parse(JSON.stringify(sourceQuestions[0]));
+            targetLesson.questions = finalQuestions;
+          }
+
+          if (finalQuestions.length >= sourceQuestions.length) {
+            const beforeQuickCheckCleanup = String(targetLesson.content || '');
+            const afterQuickCheckCleanup = stripTradingPathQuickCheckContent(beforeQuickCheckCleanup);
+            if (afterQuickCheckCleanup !== beforeQuickCheckCleanup) {
+              targetLesson.content = afterQuickCheckCleanup;
+              lessonChanged = true;
+            }
+          }
+        }
+      }
+
       if (lessonChanged) lessonCount += 1;
     });
 
-    return { lessonCount, questionCount };
+    return { lessonCount, questionCount, summaryCount };
   }
 
   async function syncAcademy() {
@@ -5969,7 +6004,8 @@ body.builder-dialog-open { overflow:hidden; }
               courseTitle:String(targetCourse.title || ''),
               courseSlug:String(targetCourse.slug || ''),
               lessonsUpdated:migration.lessonCount,
-              questionsAdded:migration.questionCount
+              questionsAdded:migration.questionCount,
+              summariesUpdated:migration.summaryCount
             });
           }
         }
@@ -6194,8 +6230,8 @@ body.builder-dialog-open { overflow:hidden; }
           }
           renderSidebar();
           renderHeaderState();
-          toast('Removed the inline Quick Checks and saved the Q&A for ' +
-            tradingPathDraftsForQuickCheckSave.length + ' Trading Path draft(s). Existing Q&A was preserved; nothing was published.');
+          toast('Moved learning outcomes into Short lesson summary and removed inline Quick Checks across ' +
+            tradingPathDraftsForQuickCheckSave.length + ' Trading Path draft(s). Q&A was preserved; nothing was published.');
         } catch (saveError) {
           toast('The Trading Path Quick Check cleanup could not be fully saved: ' +
             String(saveError?.message || saveError));
