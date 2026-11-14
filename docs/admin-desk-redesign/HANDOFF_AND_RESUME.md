@@ -71,12 +71,14 @@ Screen-level specifications:
 - `CUSTOMERS_WORKSPACE_SPEC_V1.md`
 - `REVENUE_WORKSPACE_SPEC_V1.md`
 - `GROWTH_WORKSPACE_SPEC_V1.md`
+- `PLATFORM_WORKSPACE_SPEC_V1.md`
 
 Review notes:
 - `M01_M02_REVIEW_NOTES.md`
 - `CUSTOMERS_REVIEW_NOTES_V1.md`
 - `REVENUE_REVIEW_NOTES_V1.md`
 - `GROWTH_REVIEW_NOTES_V1.md`
+- `PLATFORM_REVIEW_NOTES_V1.md`
 
 ## 5. Completed design work
 
@@ -156,6 +158,8 @@ Review notes:
 Prototype artifact:
 - `tradethesis_admin_revenue_workspace_v1.html`
 - `tradethesis_admin_growth_workspace_v1.html`
+- `tradethesis_admin_platform_workspace_v1.html`
+- `tradethesis_admin_growth_workspace_v1.html`
 
 ### Growth — M18 and M34–M41
 Screen types:
@@ -187,6 +191,37 @@ Review notes:
 
 Prototype artifact:
 - `tradethesis_admin_growth_workspace_v1.html`
+
+### Platform — M42–M49
+Screen types:
+- Platform Overview.
+- Jobs & Scheduler (durable Job, PeriodicJob and worker lifecycle).
+- Access & Provisioning.
+- Integrations & Webhooks.
+- Audit & Security.
+- Policies & Readiness.
+- Staff & Permissions.
+- Migration Boundary / Advanced Administration.
+
+Source boundaries preserved:
+- The existing Operations Timeline and read-only Job/Provisioning detail routes are the current operational foundation; Platform does not create a second queue.
+- Durable Job, PeriodicJob scheduler and worker lifecycle are separate. JobAdmin is read-only; no ordinary staff retry/replay/delete action was verified.
+- ProvisioningOperation, UserChannelAssignment and ChannelMembershipSnapshot remain separate. Unknown is not failure; unknown membership probe does not trigger resend; reuse stored invite and preserve six-hour resend throttle.
+- Native Telegram Bot API is direct from Django; BotRuntimeState is legacy bridge diagnostic only. Superuser-only live grant/revoke test remains Advanced Administration.
+- Stripe/Razorpay use durable WebhookEvent + queued worker processing; Resend updates G1 Delivery only; Telegram webhook ledger not verified. No unified integration monitor was found.
+- /health/ only executes SELECT 1 on primary DB; runtime settings-presence checks are not provider test evidence.
+- SecurityEvent is append-only; raw-IP/retention policy requires enforcement verification. AuditLog has no model append-only guard in the inspected source.
+- PolicyAcceptance is write-once, but published PolicyVersion content immutability is not fully enforced by the inspected model/admin path.
+- IsRoleAdmin allows role=ADMIN OR superuser OR any is_staff; Staff & Permissions cannot be migrated as an Admin-only permission matrix without further audit.
+
+Specification:
+- `PLATFORM_WORKSPACE_SPEC_V1.md`
+
+Review notes:
+- `PLATFORM_REVIEW_NOTES_V1.md`
+
+Prototype artifact:
+- `tradethesis_admin_platform_workspace_v1.html`
 
 ### Customers — M10–M13, M27 and M28
 Screen types:
@@ -245,22 +280,19 @@ Critical lifecycle distinctions:
 - Customers: detailed V1 prototype/spec exists; owner review pending.
 - Revenue: detailed V1 prototype/spec/review notes exist; owner review pending.
 - Growth: detailed V1 prototype/spec/review notes exist; owner review pending.
-- Platform: not yet designed at screen level.
+- Platform: detailed V1 prototype/spec/review notes exist; owner review pending.
 - Global accessibility, keyboard navigation, contrast and authenticated staging parity are not complete.
 
 Do not mark a mockup as approved because it was created or smoke-tested. Record owner feedback and decision status.
 
 ## 8. Recommended next steps
 
-1. Review the Customers prototype/specification with the owner; record requested changes and decisions.
-2. Revise M10/M11/M12/M13/M27/M28 where necessary.
-3. Review the Revenue prototype/specification; revise the action hierarchy and record relationships from owner feedback.
-4. Review and revise Growth V1 from owner feedback.
-5. Design Platform next, using the same fictional learner/payment/course/subscription/ticket/campaign/referral/gift records.
-6. Walk through cross-domain journeys again using the same stable fictional record set.
-7. Complete role/permission matrix and Django Admin migration inventory, including the Revenue full-refund/Plan configuration actions and Growth campaign, referral/reward, email and advanced-growth boundaries.
-8. Perform authenticated staging visual/role audit before producing an implementation handoff.
-9. Obtain explicit implementation approval before changing application code.
+1. Review Academy, Customers, Revenue, Growth and Platform V1 prototypes/specifications with the owner; record requested changes and decisions.
+2. Revise the relevant screens and update the decision log/mockup register.
+3. Run the six-domain holistic walkthrough with the same fictional learner, course, payment, subscription, ticket, campaign, referral, gift, job and provisioning records.
+4. Complete the cross-domain role/permission matrix and Django Admin migration inventory, including the Platform governance hardening items.
+5. Perform authenticated staging visual/role audit and verify the actual deployed source before producing an implementation handoff.
+6. Obtain explicit implementation approval before changing application code.
 
 ## 9. Prototype artifact availability
 
@@ -271,7 +303,7 @@ The current conversation includes downloadable HTML prototypes:
 - `tradethesis_admin_customers_workspace_v1.html`
 - `tradethesis_admin_revenue_workspace_v1.html`
 
-The written specifications and design decisions are saved in this GitHub branch. The HTML files are standalone conversation artifacts; a portable archive named `tradethesis_admin_redesign_resume_bundle_v3.zip` contains the six current main prototypes, domain preview images, the Growth build/test/capture scripts, Revenue smoke tests and the V3 resume README. Retain/download that archive when carrying visual previews into another environment. If an artifact is not available in the next chat, rebuild its next revision from the saved screen-level specification rather than inferring live behaviour.
+The written specifications and design decisions are saved in this GitHub branch. The HTML files are standalone conversation artifacts; a portable archive named `tradethesis_admin_redesign_resume_bundle_v4.zip` contains the seven current main prototypes, domain preview images, Growth and Platform build/test scripts, Revenue smoke tests and the V4 resume README. Retain/download that archive when carrying visual previews into another environment. If an artifact is not available in the next chat, rebuild its next revision from the saved screen-level specification rather than inferring live behaviour.
 
 ## 10. Safety and scope checklist for the next chat
 
