@@ -549,3 +549,45 @@ These results validate the committed code against isolated CI databases. They do
 The current Academy source/deployment SHA and CI are now aligned and green. The Admin Desk source-level authorization findings from the earlier inventory remain in force because no Admin Desk route/view/permission files changed in the 18-commit source-only delta.
 
 **Phase 0 remains open.** The outstanding exit blocker is live authenticated staging review with representative staff roles and a superuser, including direct-route/API denial, object-level scope and the actual User/Group/model-permission mapping. The Django Admin cutover policy, broad `IsRoleAdmin` boundary, login-only Growth referral view, refund-initiation capability and cancellation contract remain unresolved. **Implementation remains NOT AUTHORISED.**
+
+
+## 14. First live authenticated staging result — non-staff learner
+
+**Test timestamp:** 2026-11-14 16:59:25 UTC  
+**Target:** `https://tradethesis-academy-staging.onrender.com`  
+**Persona label supplied by operator:** Non-staff learner  
+**Method:** Browser console batch, same-origin `fetch`, GET only, redirects followed, no state-changing request.
+
+### Observed results in the supplied report
+
+| Route | HTTP | Observed interpretation |
+|---|---:|---|
+| `/health/` | 200 | Public health endpoint reachable; source contract says primary database `SELECT 1` only. |
+| `/staff/admin-desk/` | 403 | Forbidden |
+| `/staff/admin-desk/operations/` | 403 | Forbidden |
+| `/staff/admin-desk/accounts/` | 403 | Forbidden |
+| `/staff/admin-desk/support/tickets/` | 403 | Forbidden |
+| `/staff/admin-desk/courses/review/` | 403 | Forbidden |
+| `/staff/admin-desk/seo/` | 403 | Forbidden |
+| `/staff/course-builder/` | 403 | Forbidden |
+| `/staff/admin-desk/finance/` | 403 | Forbidden |
+| `/staff/admin-desk/subscriptions/` | 403 | Forbidden |
+| `/staff/admin-desk/business/` | 403 | Forbidden |
+| `/api/admin/staff-approvals/` | 403 | Forbidden |
+| `/api/analytics/overview/` | 403 | Forbidden |
+
+The JSON report marked the 403 pages with title `403 Forbidden`, `denialText=true`, and no redirect. The browser Network console independently displayed HTTP/3 403 for the listed staff routes.
+
+### Assessment and evidence limits
+
+- **Positive evidence:** all 12 listed staff/admin route/API checks denied access from the session labelled Non-staff learner; no login redirect was followed and no successful staff data response was reported for those paths.
+- **Health check:** `/health/` returns 200. This is expected and does not expose staff workspace access; the endpoint is a DB readiness probe, not a staff page.
+- **Identity confidence:** the persona is the operator-supplied label. The browser report did not include a server-verified user ID/role/`is_staff` value, so the test is recorded as a session labelled Non-staff learner rather than independently verified account metadata.
+- **Partial transcript:** the pasted JSON was truncated after the start of the checks array. Results for `/growth/admin/referral-rewards/`, `/api/notifications/`, `/admin/`, `/admin/growth/send-gift/`, `/admin-disputes/` and any discovered detail links were not available for review and are not recorded as pass or fail.
+- **Method scope:** this was a read-only GET test. It did not exercise POST actions, record mutation, staff approval, or object-scope restrictions across two different personas.
+
+### Updated status
+
+This is the first observed live authenticated staging evidence and supports the non-staff denial boundary for the 12 listed routes. It does not close Phase 0. Run the consolidated batch against each authorised test-account session and capture the full compact JSON summary. Then perform cross-persona object-scope checks using known test fixture IDs for tickets, learners, invoices, Academy imports and disputes.
+
+**Phase 0 remains open. Implementation remains NOT AUTHORISED.**
