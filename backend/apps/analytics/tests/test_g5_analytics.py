@@ -3,6 +3,8 @@ import datetime
 from unittest import mock
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.utils import timezone
 
@@ -13,6 +15,8 @@ from apps.analytics.services import report
 from apps.campaigns.models import Audience, Campaign, CampaignMetrics, CampaignRecipient
 from apps.emailing.models import Delivery, Template, TemplateVersion
 from apps.events.models import record_event
+from apps.promotions.models import Coupon, CouponRedemption
+from rest_framework.test import APIClient
 
 User = get_user_model()
 
@@ -111,3 +115,95 @@ class ReportTests(TestCase):
         result = report.campaign_performance()
         self.assertEqual(result[0]["campaign"], "C")
         self.assertEqual(result[0]["sent"], 4)
+
+
+class PromotionReportTests(TestCase):
+    def test_promotion_performance_sums_discount_cents(self):
+        coupon = Coupon.objects.create(
+            code="PROMO10",
+            name="Promotion test",
+            discount_type=Coupon.DiscountType.PERCENT,
+            percent_off=10,
+        )
+        first_user = User.objects.create_user(username="promo-first")
+        second_user = User.objects.create_user(username="promo-second")
+        CouponRedemption.objects.create(
+            coupon=coupon,
+            user=first_user,
+            discount_cents=250,
+        )
+        CouponRedemption.objects.create(
+            coupon=coupon,
+            user=second_user,
+            discount_cents=175,
+        )
+
+        result = report.promotion_performance()
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["code"], "PROMO10")
+        self.assertEqual(result[0]["redemptions"], 2)
+        self.assertEqual(result[0]["total_discount_cents"], 425)
+
+    def test_promotion_performance_handles_no_redemptions(self):
+        self.assertEqual(report.promotion_performance(), [])
+
+
+class AnalyticsOverviewPermissionTests(TestCase):
+    required_permissions = (
+        ("events", "view_event"),
+        ("emailing", "view_delivery"),
+        ("campaigns", "view_campaign"),
+        ("promotions", "view_couponredemption"),
+        ("growth", "view_referralreward"),
+    )
+
+    def _grant_growth_analytics(self, user):
+        permissions = []
+        for app_label, codename in self.required_permissions:
+            content_type = ContentType.objects.get(
+                app_label=app_label,
+                model=codename.removeprefix("view_"),
+            )
+            permissions.append(
+                Permission.objects.get(
+                    content_type=content_type,
+                    codename=codename,
+                )
+            )
+        user.user_permissions.add(*permissions)
+
+    def _get(self, user):
+        client = APIClient()
+        client.force_authenticate(user)
+        return client.get("/api/analytics/overview/")
+
+    def test_generic_staff_without_growth_grants_is_denied(self):
+        staff = User.objects.create_user(username="analytics-unprivileged")
+        staff.is_staff = True
+        staff.save(update_fields=["is_staff"])
+
+        response = self._get(staff)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_growth_staff_with_all_report_grants_is_allowed(self):
+        staff = User.objects.create_user(username="analytics-growth-staff")
+        staff.is_staff = True
+        staff.save(update_fields=["is_staff"])
+        self._grant_growth_analytics(staff)
+
+        response = self._get(staff)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("promotions", response.data)
+
+    def test_application_admin_is_allowed(self):
+        admin = User.objects.create_user(
+            username="analytics-admin",
+            role=User.Role.ADMIN,
+        )
+
+        response = self._get(admin)
+
+        self.assertEqual(response.status_code, 200)
