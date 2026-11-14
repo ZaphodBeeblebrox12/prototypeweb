@@ -59,6 +59,7 @@ Use this register to keep design work deliberate and reviewable. Each mockup sho
 | M47 | Policies & Readiness | Active policy versions, PolicyAcceptance, config presence, health probe and verification gaps | P1 | V1 drafted — review pending |
 | M48 | Staff & Permissions | Staff dimensions, approval API, current authorization caveat and proposed permission matrix | P0 | V1 drafted — review pending |
 | M49 | Migration Boundary | Read-only-first, later controlled actions, Advanced Administration and owning-domain rules | P0 | V1 drafted — review pending |
+| M50 | Holistic Workflow Walkthrough | Seven linked end-to-end journeys, shared 40-record dataset, canonical ownership, lifecycle distinctions and permission-safe hand-offs across all six domains | P0 | V1 drafted — review pending |
 
 ## Required annotations on every mockup
 
@@ -192,3 +193,18 @@ The supplied Customer 360 screenshot is a visual reference, not an instruction t
 - **Governance caveats:** SecurityEvent is append-only by model, but the raw IP/retention policy still needs enforcement review. AuditLog has no model-level append-only save guard. PolicyAcceptance is write-once; PolicyVersion published-content immutability is not fully enforced in the inspected admin/model path. IsRoleAdmin permits any is_staff user as well as role=ADMIN/superuser.
 - **Browser checks:** 30/30 exercised checks passed. All eight Platform destinations, queue/scheduler and governance tabs, job filters, audit filter, detail previews and mobile drawer passed. No JS/console errors; 390px viewport has no horizontal overflow.
 - **Review status:** Draft for owner review. No Platform screen is approved for implementation yet.
+
+
+## Holistic six-domain workflow pass — 14 November 2026
+
+- **Prototype:** `tradethesis_admin_holistic_workflow_v1.html` — integrated walkthrough with six-domain ownership board, seven journeys and shared record register.
+- **Specification:** `HOLISTIC_WALKTHROUGH_V1.md`.
+- **Review notes:** `HOLISTIC_REVIEW_NOTES_V1.md`.
+- **Dataset:** 40 fictional linked records; primary learner Maya Chen (USR-1042), referrer Rohan Patel (USR-1008), access requester Dev Singh (USR-1177).
+- **Journeys:** (1) publish/sell mini-course, (2) membership/community access, (3) campaign/referral acquisition, (4) support access request, (5) billing/refund/dispute, (6) gift invitation/email failure, and (7) email delivery/operational evidence.
+- **Source boundary:** Same fictional IDs are used wherever a record is referenced. The prototype does not use live APIs or mutate any canonical record.
+- **Important new course-path finding:** CourseOffer checkout may calculate/snapshot a coupon on PaymentIntent, but its activation path returns through Academy `activate_course_payment` before the ordinary membership `redeem_coupon` / CouponRedemption block. The sample course purchase is intentionally coupon-free pending a product/engineering decision.
+- **Important analytics finding:** `activate_course_payment` writes `academy.entitlement_granted` (or simulation event) and not `purchase.completed` in the inspected function. The current Growth purchase report should not be assumed to count one-time course purchases.
+- **Other distinctions tested:** job success vs external provisioning unknown; member Notification vs staff work queue; campaign stub Sent vs provider delivered; GiftInvite pending vs Subscription extension; open/funds-withdrawn dispute vs confirmed loss.
+- **Browser checks:** 159/159 passed. Desktop shell geometry, every journey/record preview, register search and owner filter, mobile drawer and 390px overflow on every destination tested; no JavaScript or console errors.
+- **Review status:** Draft for owner review. M50 and all six-domain prototypes remain pending owner approval; no implementation is authorised.
