@@ -591,3 +591,44 @@ The JSON report marked the 403 pages with title `403 Forbidden`, `denialText=tru
 This is the first observed live authenticated staging evidence and supports the non-staff denial boundary for the 12 listed routes. It does not close Phase 0. Run the consolidated batch against each authorised test-account session and capture the full compact JSON summary. Then perform cross-persona object-scope checks using known test fixture IDs for tickets, learners, invoices, Academy imports and disputes.
 
 **Phase 0 remains open. Implementation remains NOT AUTHORISED.**
+
+## 15. Confirmed learner-visible Growth referral rewards exposure
+
+**Priority:** High — authenticated non-staff data exposure in Academy staging.  
+**Observed:** 2026-11-14 16:59:25 UTC, on a browser session labelled `Non-staff learner`.  
+**Request:** `GET /growth/admin/referral-rewards/`.  
+**Observed response:** HTTP 200, no redirect, final path unchanged, title `Referral Rewards Overview | Django site admin`, `denialText=false`.
+
+### Source and rendered data scope
+
+The deployed source view `AdminReferralRewardsView` in `backend/apps/growth/views.py` inherits from `LoginRequiredMixin` and `TemplateView`; no staff-only or model-permission gate appears in the class. Its context includes:
+- ReferralSettings values: default reward percentage, minimum purchase amount and rewards-enabled state.
+- Global reward aggregates: total reward count, total issued amount, total used amount and computed outstanding amount.
+- The 20 most recent ReferralReward objects, with `referrer` and `referral.referred_user` selected.
+
+The corresponding `backend/apps/growth/templates/growth/admin/referral_rewards_overview.html` renders the settings values; reward counts and financial totals; and a recent-rewards table containing referrer username, referred-user username, amount, status, available amount and creation date. It also renders links to edit referral settings and open all rewards, reward ledger and referrals in Django Admin.
+
+This source/template evidence establishes what the 200 response is designed to render. The supplied console script did not retain or print the response body, so this audit does not reproduce or assert the actual individual values shown in the browser.
+
+### Finding
+
+The learner-labelled session was able to retrieve the referral rewards overview, although the same report returned 403 for the other listed staff/Admin Desk routes. This is a confirmed authenticated access-control failure for a staff-oriented Growth page. Aggregate reward values and referral-linked usernames are in scope for exposure. The availability of Django Admin links does not itself prove that the linked model pages can be opened by the learner; those links still need separate direct-route checks.
+
+**Immediate handling:** do not link or embed this view in the new Admin Desk. Treat the current staging response as exposed to ordinary authenticated members until the route's server-side authorization is restricted and retested. No code or permission change is made by this audit. Remediation should use an explicit staff/domain permission, not rely only on hiding the link or changing navigation.
+
+### Related results from the same learner-labelled report
+
+| Route | Result | Notes |
+|---|---|---|
+| `/api/notifications/` | 200 | Expected for a signed-in member; source scopes notifications to the current user. |
+| `/admin/` | Redirected to `/admin/login/` | Learner did not enter Django Admin. |
+| `/admin/growth/send-gift/` | Redirected to `/admin/login/` | Learner did not enter the staff gift form. |
+| `/admin-disputes/` | Redirected to `/admin/login/` | Learner did not enter the dispute dashboard. |
+
+The second consolidated report used the manually entered persona label `Superuser`, but it returned 403 for all staff Admin Desk pages and redirected `/admin/`, the gift route and disputes to `/admin/login/`. This is not a successful superuser test. The report does not provide server-verified identity metadata; either the account was not actually switched or it is not configured as a Django staff/superuser account. Do not count this run as a superuser result.
+
+### Corrective test instrumentation
+
+The next consolidated read-only batch should call `/api/auth/me/` and emit only the server-returned `role`, `is_staff` and `is_admin` flags, omitting user ID, email and names. The serializer does not expose `is_superuser`; verify the superuser session separately by successful entry into `/admin/` and its visible superuser-only capabilities. The manually entered persona label must remain descriptive metadata, not identity proof.
+
+**Phase 0 remains open.** This finding must be closed with a route-level permission fix, learner denial (403 or login redirect), and positive access for the explicitly authorised staff persona, before implementation migration or sign-off. Implementation remains NOT AUTHORISED.
