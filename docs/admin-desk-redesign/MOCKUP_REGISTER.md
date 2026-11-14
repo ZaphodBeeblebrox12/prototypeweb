@@ -27,7 +27,7 @@ Use this register to keep design work deliberate and reviewable. Each mockup sho
 | M15 | Business & Finance | Seller/invoice/tax settings, confirmation and configured-vs-tested distinction | P1 | V1 drafted — review pending |
 | M16 | Operations overview | Incident severity, affected customers, issue clusters, time range | P0 | Not started |
 | M17 | Jobs & provisioning | Queue states, attempts, lock age, unknown external state, error detail | P1 | Not started |
-| M18 | Growth & analytics | Signups, campaigns, promotions, referrals, gifts, email delivery/suppression | P2 | Not started |
+| M18 | Growth overview | Action-first growth work summary, cross-domain hand-offs and source-quality alerts | P1 | V1 drafted — review pending |
 | M19 | Notifications / attention | Event source, recipient, severity, read/acknowledged, deduplication, deep link | P0 | Not started |
 | M20 | Policies / audit / security | Readiness, policy versions, audit timeline, permission-scoped security views | P1 | Not started |
 | M21 | Responsive design board | Tablet, mobile navigation, dense tables, ticket actions, drawers and dialogs | P0 | Not started |
@@ -43,6 +43,14 @@ Use this register to keep design work deliberate and reviewable. Each mockup sho
 | M31 | Plans & Pricing | Product/Plan catalogue, active base prices, geo overrides, hidden/trial/channel configuration and migration boundary | P1 | V1 drafted — review pending |
 | M32 | Invoices | Immutable invoice register/detail, seller/customer/payment snapshots and print/save as PDF | P1 | V1 drafted — review pending |
 | M33 | Disputes | Case queue, evidence readiness/packages, provider deadline, external submission reference and final outcomes | P0 | V1 drafted — review pending |
+| M34 | Campaigns & Audiences | Frozen audience snapshot, immutable template version, CampaignRecipient states and real provider-delivery distinction | P1 | V1 drafted — review pending |
+| M35 | Journeys & Automation | Event trigger, delay, eligibility re-check, idempotent AutomationRun and linked Delivery | P2 | V1 drafted — review pending |
+| M36 | Promotions & Coupons | Coupon eligibility, campaign/plan scope, referral stacking, caps and immutable redemption provenance | P1 | V1 drafted — review pending |
+| M37 | Referrals & Rewards | Referral relationships, referee discount, currency-specific reward buckets and reward ledger | P1 | V1 drafted — review pending |
+| M38 | Gifts | Token invite vs legacy gift code, email result, claim and resulting Subscription | P1 | V1 drafted — review pending |
+| M39 | Email Delivery | G1 Delivery, transactional EmailLog, consent/suppression and immutable template versions | P1 | V1 drafted — review pending |
+| M40 | Advanced Growth | Affiliates/commissions, experiments, announcements and staged additional channels | P2 | V1 drafted — review pending |
+| M41 | Analytics & Attribution | Purchase events, first/last-touch definitions, report-source caveats and currency-safe reporting | P1 | V1 drafted — review pending |
 
 ## Required annotations on every mockup
 
@@ -148,3 +156,17 @@ The supplied Customer 360 screenshot is a visual reference, not an instruction t
 - **Pricing/business rules:** Country geo override → regional override → global base; geo price is override-only; one active base price per Plan+interval. Tax is a single fixed percentage today, not a jurisdiction-aware GST engine; explicit accountant confirmation is required before first enabling.
 - **Browser checks:** Revenue navigation, payment/subscription search/filter, payment and invoice detail, subscription inspection modal, hidden-plan filtering, dispute detail/filter, external submission reference preview and tax confirmation were exercised. No JavaScript errors or console errors. Mobile drawer open/navigation/close passed; 390px viewport has no horizontal overflow.
 - **Review status:** Draft for owner review. No Revenue screen is approved for implementation yet.
+
+
+## Growth screen-design pass — 14 November 2026
+
+- **Prototype:** `tradethesis_admin_growth_workspace_v1.html` — clickable Growth workspace using the selected V2 shell.
+- **Screens represented:** M18 Growth Overview; M41 Analytics & Attribution; M34 Campaigns & Audiences; M35 Journeys & Automation; M36 Promotions & Coupons; M37 Referrals & Rewards; M38 Gifts; M39 Email Delivery; M40 Advanced Growth.
+- **Detailed specification:** `GROWTH_WORKSPACE_SPEC_V1.md`.
+- **Review notes:** `GROWTH_REVIEW_NOTES_V1.md`.
+- **Source boundary:** Campaigns/Audiences, Automation rules/runs, Coupons/Redemptions, Referral/Reward/Settings, GiftInvite/legacy gifts, Templates/Delivery/Suppression/MarketingPreference, Affiliates/Experiments/Announcements and attribution models exist in Django Admin or existing custom/member/API routes. The proposed unified Growth screens are not existing Admin Desk routes.
+- **Analytics caveats:** API response's `signups` section counts `purchase.completed` events; promotion report calls `Sum` without importing it; email report omits Delivery delivered/delayed breakdown; CampaignMetrics bounce/complaint counts are not reconciled by the inspected webhook; report lacks full period/currency segmentation.
+- **Execution caveats:** G2 campaign send sweep uses provider=stub and marks Delivery SENT; Telegram/in-product CampaignAction rows are staged and not wired into campaign sweep. G1 Delivery and transactional EmailLog are separate ledgers. Referral reward unlock checks PaymentIntent statuses not present in the model choices; optional referee bonus helper logs only; reward balance helper sums across currencies; staff-only authorization of the custom Referral Rewards Overview route needs review.
+- **Gift boundary:** gift creation can succeed if email fails; GiftInvite is not a Subscription; modern token invite and legacy gift_code flows remain separate; no staff resend control was verified.
+- **Browser checks:** All Growth destinations, campaign/coupon/referral/gift/delivery filters, campaign/coupon/referral/gift preview modals, email sub-tabs, advanced Growth sub-tabs and mobile drawer exercised. No JS/console errors. 390px page has no horizontal overflow after responsive sizing correction.
+- **Review status:** Draft for owner review. No Growth screen is approved for implementation yet.
