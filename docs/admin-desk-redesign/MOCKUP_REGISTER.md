@@ -19,10 +19,10 @@ Use this register to keep design work deliberate and reviewable. Each mockup sho
 | M07 | Course review detail | Preview, outline, assets, validation, approve, return with mandatory feedback | P0 | V1 drafted — review pending |
 | M08 | Offers & pricing | Course-offer ↔ Plan, one-time price, geo-pricing, duration, active status | P0 | V1 drafted — review pending |
 | M09 | Learner access | Entitlements, scheduled/active/expired/revoked, event history, safe grant/revoke | P1 | V1 drafted — review pending |
-| M10 | Support queue | SLA, priority, category, assignment, mine/unassigned, filters | P0 | Not started |
-| M11 | Ticket detail | Conversation, attachments, public reply, internal note, approval/rejection, reassignment | P0 | Not started |
-| M12 | Learners & accounts | Search, account state, safe actions, list density | P1 | Not started |
-| M13 | Customer 360 | Course progress/access, subscription/payment, support, community, security restrictions | P0 | Not started |
+| M10 | Support queue | SLA, priority, category, assignment, mine/unassigned, filters | P0 | V1 drafted — review pending |
+| M11 | Ticket detail | Conversation, attachments, public reply, internal note, approval/rejection, reassignment | P0 | V1 drafted — review pending |
+| M12 | Learners & accounts | Search, account state, safe actions, list density | P1 | V1 drafted — review pending |
+| M13 | Customer 360 | Course progress/access, subscription/payment, support, community, security restrictions | P0 | V1 drafted — review pending |
 | M14 | Revenue overview | Payments, subscriptions, invoices, refunds/disputes | P1 | Not started |
 | M15 | Business readiness | Seller/invoice/legal/payment/email/runtime checks; configured vs tested | P1 | Not started |
 | M16 | Operations overview | Incident severity, affected customers, issue clusters, time range | P0 | Not started |
@@ -36,6 +36,8 @@ Use this register to keep design work deliberate and reviewable. Each mockup sho
 | M24 | Six-domain workspace map | Clickable top-level and child navigation; responsibilities, canonical records, cross-domain links and workflow hand-offs | P0 | V1 drafted — review pending |
 | M25 | SEO & Discoverability | Site-wide and course indexability, metadata, primary-topic map, blockers and editorial notes | P0 | V1 drafted — review pending |
 | M26 | Course Builder hand-off | Existing authoring route, saved draft selection, review lifecycle and Tiptap boundary | P1 | V1 drafted — review pending |
+| M27 | Customers overview | Action-first customer work summary and cross-domain routing | P0 | V1 drafted — review pending |
+| M28 | Learner account detail | Account identity/actions, subscription, course, payment and invoice history | P1 | V1 drafted — review pending |
 
 ## Required annotations on every mockup
 
@@ -114,3 +116,16 @@ The supplied Customer 360 screenshot is a visual reference, not an instruction t
 - **Workflow preservation:** CourseImport revision remains staged until approved; return requires reviewer feedback; permanent test-import cleanup stays separate; CourseOffer retains its hidden Plan, active one-time price and payment-history constraints.
 - **Browser checks:** Catalogue filtering, course-detail tabs, approval → review navigation, offers, learner-access tabs and SEO navigation exercised. No JS page errors observed. Mobile menu open/navigate/close and 390px horizontal-overflow check passed.
 - **Review status:** Draft for owner review. No Academy screen is approved for implementation yet.
+
+
+## Customers screen-design pass — 14 November 2026
+
+- **Prototype:** `tradethesis_admin_customers_workspace_v1.html` — clickable Customers workspace using the selected V2 shell.
+- **Screens represented:** M27 Customers Overview; M12 Learners & Accounts; M28 Learner Account Detail; M10 Support Tickets queue; M11 Ticket Detail; M13 Customer 360.
+- **Detailed specification:** `CUSTOMERS_WORKSPACE_SPEC_V1.md`.
+- **Review notes:** `CUSTOMERS_REVIEW_NOTES_V1.md`.
+- **Source boundary:** Existing staff account list/detail/actions, support queue/detail/actions and Customer 360 are mapped as existing routes. Customers Overview and the unified shell grouping are proposed; the account list/detail and support screens are redesigns of existing workflows, not new business logic.
+- **Important support rules:** Reviewer scope is enforced through plan/affiliate-plan ticket_approvers; existing any-staff behaviour applies when the approver list is empty. SLA targets are Urgent 2h, High 8h, Normal 24h and Low 72h. Public staff replies move an open ticket to Awaiting Member; internal notes are append-only and private.
+- **Important Customer 360 boundary:** Independent permission gates for subscriptions, payments, invoices, Academy records and security. Internal staff requester profiles remain identity + reviewer-visible support only. Managed Telegram/Discord link state is distinct from legacy login verification.
+- **Browser checks:** Ticket filtering, ticket detail hand-off, public/internal composer switching, Customer 360 tabs, internal-account restricted preview, learner search, account-detail hand-off and mobile drawer tested. No JavaScript errors in exercised paths; 390px viewport had no horizontal overflow.
+- **Review status:** Draft for owner review. No Customers screen is approved for implementation yet.
