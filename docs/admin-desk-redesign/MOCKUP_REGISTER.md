@@ -10,8 +10,8 @@ Use this register to keep design work deliberate and reviewable. Each mockup sho
 | ID | Screen / artefact | Required concepts or states | Priority | Status |
 |---|---|---|---|---|
 | M00 | Current-state reference board | Existing Admin Desk, shared nav, Django Admin boundary, key current routes | P0 | Not started |
-| M01 | Global application shell | Expanded/collapsed sidebar, top bar, breadcrumbs, search, notification entry, mobile menu | P0 | Not started |
-| M02 | Command Centre | Three alternatives: action queue, operational cockpit, personal workbench | P0 | Not started |
+| M01 | Global application shell | Expanded/collapsed sidebar, top bar, breadcrumbs, search, notification entry, mobile menu | P0 | V1 drafted — review pending |
+| M02 | Command Centre | Three alternatives: action queue, operational cockpit, personal workbench | P0 | V1 drafted — review pending |
 | M03 | Academy landing | Course catalogue summary, approvals and course health | P0 | Not started |
 | M04 | Course catalogue | Flagship/supporting/mini/hidden; lifecycle; access type; filters and density | P0 | Not started |
 | M05 | Course detail / control page | Content, catalogue role, access model, modules/lessons, linked offers, readiness | P0 | Not started |
@@ -63,3 +63,13 @@ Use this register to keep design work deliberate and reviewable. Each mockup sho
 ## Prototype safety
 
 HTML mockups must use local illustrative data and simulated interactions only. They must not make live API calls or perform actions against staging/production data. Every mockup must visibly state that its sample records are illustrative.
+
+## First design pass — 14 November 2026
+
+- **M01:** Shared application shell using the approved six-domain order. Includes desktop sidebar, mobile drawer, global search field, breadcrumb, notification entry point, staff context and a separate Advanced Administration link for the migration period.
+- **M02:** Three switchable overview directions: (1) action queue first, (2) operational cockpit, and (3) personal workbench. The action-queue direction is the recommended candidate for discussion, not a final design approval.
+- **Prototype artifact:** `tradethesis_admin_shell_command_centre_v1.html` (standalone HTML, supplied in the design review conversation).
+- **Viewport intent:** Desktop-first at approximately 1440px, with tablet/mobile responsive behaviour included in the prototype.
+- **Data safety:** All names, counts, IDs, queue entries and times are fictional illustrative data. No live APIs or backend actions are connected.
+- **Current visual direction:** Warm light, compact/editorial, restrained terracotta accent, thin borders, low card usage and dense but readable queue rows.
+- **Outstanding review:** Sidebar content/order below the six approved domains; balance and placement of overview context; task prioritisation, ownership and notification semantics; top-bar controls; small-screen navigation.
