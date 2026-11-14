@@ -4,14 +4,14 @@
 **Repository:** `ZaphodBeeblebrox12/prototypeweb`  
 **Planning branch:** `admin-desk-redesign-planning`  
 **Source/code baseline:** `my-new-branch`  
-**Current phase:** Phase 0 partial authenticated staging checkpoint; non-staff learner and admin/staff baseline tested, specialist roles and cross-persona object scope remain outstanding.  
-**Implementation status:** Not authorised. Do not modify app code or deploy.
+**Current phase:** Phase 0 security remediation merged and CI-validated; Academy staging deploy pending explicit Render workspace confirmation; specialist roles and cross-persona object scope remain outstanding.  
+**Implementation status:** PR #67 security remediation is merged to my-new-branch and CI-validated. No staging deploy has been triggered yet; obtain owner confirmation of the Render workspace before deploying. Production is untouched.
 
 ## 1. Resume instruction for a new chat
 
 Start a new chat and say:
 
-> Resume the TradeThesis Admin Desk redesign. Read `docs/admin-desk-redesign/HANDOFF_AND_RESUME.md` on branch `admin-desk-redesign-planning`, then inspect the latest Decision Log, Owner Decision Register, Implementation Readiness & Sequence, Mockup Register, Domain Workspace Blueprint and screen specifications. Continue from the next unreviewed design task. Keep all work on the planning branch and do not implement or deploy until I explicitly approve.
+> Resume the TradeThesis Admin Desk redesign. Read `docs/admin-desk-redesign/HANDOFF_AND_RESUME.md` on branch `admin-desk-redesign-planning`, then inspect the latest Decision Log, Owner Decision Register, Implementation Readiness & Sequence, Mockup Register, Domain Workspace Blueprint and screen specifications. First complete the pending Academy staging deploy only after confirming the Render workspace with me, verify the deployed SHA and run the read-only learner/generic-staff access audit. Do not deploy to production or change the global Django Admin boundary.
 
 The resume document is intended to restore project context without depending on the previous chat transcript.
 
@@ -600,3 +600,56 @@ The model defines Role values admin/staff/user plus separate is_staff and is_sta
 6. Run direct GET and object-scope denials for each persona, and separate POST tests only with a dedicated disposable test plan.
 
 **Phase 0 remains open. Implementation remains NOT AUTHORISED.** The staff account is a useful first generic-staff test identity but does not replace the role/department matrix. No application code, tests, permissions, migrations, Render settings, deployment, merge or rebase were changed.
+
+
+## 22. Security remediation merged and CI-validated — 14 November 2026
+
+### Merge
+
+- PR [#67 — Security: tighten staff, Growth and Disputes permissions](https://github.com/ZaphodBeeblebrox12/prototypeweb/pull/67) was squash-merged to `my-new-branch`.
+- Merged source commit / `my-new-branch` HEAD: `294c173e8dd084c31595ac2d5aeab93d64f31481`.
+- The fix branch PR head before merge was `87a5972a2f2006bf5c845c2ba5c7e3f99b22b673`.
+
+### Implementation delivered
+
+- User ban/unban/staff approval APIs now require the application Admin role or Django superuser; generic Django staff is denied.
+- Global Growth referral reporting requires explicit read grants for ReferralReward and ReferralSettings.
+- Gift creation requires Growth add GiftInvite, Subscriptions add GiftSubscription and Plan view permissions.
+- Growth analytics requires explicit view grants for Events, Deliveries, Campaigns, CouponRedemptions and ReferralRewards. The missing Sum import is fixed.
+- Disputes dashboard/detail require view_dispute; all note/generate/submit/resolve actions require view_dispute and change_dispute.
+- Regression tests cover the negative/positive permission cases and the promotion aggregate.
+
+### Current-head CI
+
+Exact PR head SHA: `87a5972a2f2006bf5c845c2ba5c7e3f99b22b673`.
+
+- Academy backend CI [43623494874](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43623494874): Python 3.11 and 3.12 pass; 1,338 passed, 1 skipped and 186 subtests on each; Tiptap compatibility tests pass.
+- Verify Django Academy backend [43623494896](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43623494896): Python 3.11 and 3.12 pass; 1,338 passed, 1 skipped and 186 subtests on each (534 warnings in each Verify run).
+- Merge was performed only after both workflows completed successfully.
+
+### Staging deployment is pending
+
+Academy staging service `tradethesis-academy-staging` (ID `srv-db9ioke1egvs73feb8ag`) is configured to `my-new-branch`, with auto-deploy disabled. The last live deploy observed after merge still points to old SHA `8832ecf9cc979747dc2715a39ecfeb7a292e55ee`. A manual staging deploy is required.
+
+Render's deploy action requires an explicit workspace. Render returned one available workspace:
+- `Roger Rose's Workspace`
+- ID `tea-cspa923gbbvc73bakhj0`
+
+The deploy trigger was not accepted because no workspace was selected. **Do not select it on the owner's behalf.** Ask the owner to confirm that exact workspace, then trigger a no-cache-preserving deploy (clearCache=false) for Academy staging only. Verify the live deployment SHA equals `294c173e8dd084c31595ac2d5aeab93d64f31481`. Do not deploy public static staging or production.
+
+### Required post-deploy verification
+
+Use the existing promoted staff account (`role=user`, `is_staff=true`, `is_admin=false`) and an ordinary learner account. Run GET-only tests:
+- Learner must receive 403 from `/growth/admin/referral-rewards/`.
+- Generic staff must receive 403 from `/api/admin/staff-approvals/`, `/admin/growth/send-gift/`, `/admin-disputes/`, and `/api/analytics/overview/` when no domain grants are assigned.
+- Existing generic staff Command Centre, Operations and Support list routes should remain available; test ticket detail only against the saved fixture paths and understand the existing plan-approver fallback.
+- Application Admin/superuser and explicitly permitted Growth/Gift/Disputes profiles should retain the expected access. Do not POST any user-affecting action as a smoke test.
+
+### Still deferred
+
+- Do not globally restrict Django Admin to superusers in this PR. Follow owner decisions 9 and 52: migrate each legacy workflow to Admin Desk parity before removing ordinary staff legacy access.
+- No staff accounts were created or modified by the remediation.
+- No Render settings changed and no deploy has yet happened.
+- Specialist role matrix, Support object-scope policy and true Django superuser verification remain Phase 0 follow-up items.
+
+**Current status:** security fixes are merged and CI-green, but they are not live in Academy staging until the owner confirms the Render workspace and the staging deploy completes. Phase 0 is not yet closed.
