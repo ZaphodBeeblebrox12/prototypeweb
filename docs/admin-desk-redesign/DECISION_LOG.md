@@ -1,6 +1,6 @@
 # Admin Desk Redesign — Decision Log
 
-**Status:** Open for brainstorming and mockup validation  
+**Status:** 60 owner decisions recorded; mockup review and implementation readiness remain in progress  
 **Branch:** `admin-desk-redesign-planning`  
 **Rule:** No implementation decisions are considered approved unless recorded here with an owner/date and explicit status.
 
@@ -149,3 +149,13 @@ For each future decision, record:
 - **Open risks:**
 - **Approved by:**
 - **Date:**
+
+
+## Owner decision rounds — 14 November 2026
+
+The owner completed 12 decision rounds and approved 60 product/operating-model decisions. The complete decision-by-decision record is maintained in:
+
+- `OWNER_DECISION_REGISTER_V1.md` — all 60 decisions, including cross-cutting interpretation rules and unresolved implementation clarifications.
+- `IMPLEMENTATION_READINESS_AND_SEQUENCE_V1.md` — dependency-based implementation recommendation, readiness blockers, exit gates and authorisation boundary.
+
+The 60 decisions define approved product direction. They do not constitute approval to modify application code, permissions, migrations, routes, tests, hosting configuration or deployments. The original planning-only guardrails remain in force.
