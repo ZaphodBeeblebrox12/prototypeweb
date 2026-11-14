@@ -81,16 +81,32 @@ Current route and ownership notes:
 
 ## 7. Platform
 
-
 | Proposed tab | Current route/source | Current state | Design mapping |
 |---|---|---|---|
-| Overview | Operational signals are available in `/staff/admin-desk/` and `/staff/admin-desk/operations/` | Existing aggregated signal sources | Proposed Platform landing with job, provisioning, integration and readiness exceptions. |
-| Background Jobs | Job detail `/staff/admin-desk/operations/jobs/<int:job_id>/`; job list/admin model in Django Admin; PeriodicJob is in Django Admin | Existing read-only detail and model administration | Proposed unified queue/register, but do not invent retry/cancel controls; current detail is read-only. |
-| Provisioning & Integrations | `/staff/admin-desk/operations/provisioning/<int:operation_id>/`; timeline at `/staff/admin-desk/operations/`; related Telegram/Discord and bot admin routes | Existing read-only operation detail and related integration administration | Proposed Platform workspace; show safe external state without leaking invite links, payloads or raw provider IDs. |
-| Security & Audit | AuditLog, SecurityEvent and domain Event models/admin; selected summaries in `/staff/admin-desk/operations/` | Existing model/event sources and timeline summary; separate detailed views live in admin/model tools | Proposed permission-scoped investigation destination with source type preserved. |
-| Policies & Readiness | Business readiness at `/staff/admin-desk/business/`; policy versions through Django Admin and readiness summary in staff dashboard | Existing partial checks and configuration surfaces | Proposed Platform view; preserve configured-vs-tested distinction and link to Revenue business configuration where appropriate. |
-| Staff & Permissions | Django Admin users/groups/permissions and object/plan-specific scopes | Existing administration in Django Admin; no unified permission explainer verified | Proposed initially read-only role/permission explainer; editing stays in Advanced Administration until safe parity exists. |
-| Advanced Administration | `/admin/` (including custom `/admin/growth/...` destinations) | Existing Django Admin and custom admin destinations | Retain as visually secondary migration destination; do not remove capabilities until reviewed parity exists. |
+| Overview | /staff/admin-desk/operations/; /staff/admin-desk/; Job, Provisioning, PeriodicJob, support, Event, AuditLog and SecurityEvent sources | Existing permission-filtered operational timeline and overview. No separate unified Platform landing page. | Proposed Platform router over existing Operations Timeline; do not create a second queue or unpermissioned cross-domain incident feed. |
+| Jobs & Scheduler | /staff/admin-desk/operations/jobs/<int:job_id>/; Job and PeriodicJob in Django Admin; runjobs management command | Existing read-only Job detail and Django Admin queue; JobAdmin disables add/delete and makes all fields readonly. PeriodicJob configuration is editable while last-run/status/error/cursor are readonly. | Proposed unified inspection view. Keep durable Job, PeriodicJob and worker lifecycle as separate concepts. No manual status changes, retry/replay/delete in V1. |
+| Access & Provisioning | /staff/admin-desk/operations/provisioning/<int:operation_id>/; /staff/admin-desk/operations/; ProvisioningOperation, UserChannelAssignment, ChannelMembershipSnapshot, BotAccessAudit | Existing read-only operation detail and timeline signals; underlying integration records are in Django Admin. Membership snapshots are display-only; operation has an explicit unknown state. | Proposed unified inspection view. Keep intent, entitlement assignment and observed membership separate. Unknown state must not become failure; no direct grant/revoke control. |
+| Integrations & Webhooks | /bot-admin/verify-bot/, /bot-admin/verify-control-channel/, /bot-admin/verify-target-channel/<int:mapping_id>/; superuser-only /bot-admin/test-grant-revoke/; /bot/telegram/webhook/; /bot/api/register/, /bot/api/heartbeat/; /webhooks/stripe/, /webhooks/razorpay/; /api/email/webhooks/resend/; Academy Drive route /staff/google-drive/connect/ | Existing provider endpoints and admin fragments. Telegram native Bot API is called by Django via BotConfig. BotRuntimeState is legacy bridge diagnostic. Stripe/Razorpay use durable WebhookEvent; Resend updates Delivery only; Telegram has no durable webhook ledger verified. Google Drive is course-admin-only and Academy-owned. | Proposed integration inspection page with distinct evidence models. Keep secrets and raw payloads restricted. Do not claim a single unified health signal. Do not move Google Drive ownership out of Academy or expose the live grant/revoke test as an ordinary action. |
+| Audit & Security | /staff/admin-desk/operations/ summaries; AuditLog, SecurityEvent, BotAccessAudit, Event, PolicyAcceptance and WebhookEvent model/admin sources | Existing event and audit sources; Ops Timeline permission-filters summary sections. SecurityEvent is append-only at model level; AuditLog has no append-only model guard verified. | Proposed source-specific evidence workspace. Preserve event/audit/security/webhook distinctions; redact raw IP, user-agent, provider payload and sensitive identifiers. |
+| Policies & Readiness | sales_policy_readiness() from staff dashboard; PolicyVersion and PolicyAcceptance in Django Admin; Revenue business settings/readiness via /staff/admin-desk/business/; /health/ | Existing partial readiness checks and policy publication/admin surface. /health/ only probes the primary database with SELECT 1. PolicyVersion published-content immutability is not fully enforced by inspected save/admin path. | Proposed view separating policy active/placeholder state, configuration presence and actual end-to-end test evidence. Revenue remains owner of business settings. Do not present DB health or credential presence as full service health. |
+| Staff & Permissions | /api/admin/staff-approvals/; /api/admin/staff-approvals/action/; /api/admin/ban/; /api/admin/unban/; Django Admin User, Group and permission models | Existing staff approval/ban API and Django Admin access control; no unified Admin Desk staff approval screen or complete assigned-role matrix verified. IsRoleAdmin allows role=ADMIN OR superuser OR any is_staff. | Proposed initially read-only access explainer and permission matrix. Ban/unban remains in Customers. Staff approval migration requires a corrected authorization gate, maker/checker policy and explicit action permission. |
+| Migration Boundary / Advanced Administration | /admin/ and custom /bot-admin/ | Existing Django Admin/custom staff surfaces remain authoritative for un-migrated operational configuration and privileged actions. | Proposed inventory of read-first vs controlled-action vs keep-advanced. Retain superuser-only Telegram grant/revoke test, credentials, role/group assignment and high-risk publication/configuration until safe parity and source hardening exist. |
+
+Existing Admin Desk operational routes:
+- /staff/admin-desk/operations/ — permission-aware 24h/7d timeline; includes ticket clusters and, according to model permissions, job, provisioning, PeriodicJob, domain Event, AuditLog and SecurityEvent summaries.
+- /staff/admin-desk/operations/jobs/<int:job_id>/ — read-only Job detail; requires jobs.view_job.
+- /staff/admin-desk/operations/provisioning/<int:operation_id>/ — read-only ProvisioningOperation detail; requires jobs.view_provisioningoperation.
+- /health/ — database SELECT 1 probe only.
+
+Important migration caveats:
+- Durable Job queue is worker-owned and read-only. A “stalled” filter is not a Job status.
+- PeriodicJob is a separate lightweight inline scheduler; do not combine its last result with durable worker status.
+- ProvisioningOperation state, UserChannelAssignment entitlement and ChannelMembershipSnapshot observation are three separate records.
+- Native Telegram Bot API is the current direct Django path; BotRuntimeState is legacy bridge diagnostic only.
+- Stripe/Razorpay WebhookEvent is durable and idempotent; Resend updates G1 Delivery only; Telegram webhook persistence was not verified.
+- Runtime readiness checks infer configuration presence, not successful provider auth, payment, webhook, email, backup or restore.
+- PolicyVersion published content and AuditLog immutability require hardening review before migration.
+- Staff/application roles, is_staff, is_staff_approved, active, superuser and Django Groups/model permissions must not be collapsed into one role badge.
 
 ## 8. Routes that are not Admin Desk destinations
 
@@ -162,3 +178,14 @@ The Growth prototype and specification are recorded in:
 - `tradethesis_admin_growth_workspace_v1.html`
 
 The current pages are proposed unified workspaces over existing models/admin routes; only the Analytics API, staff gift-send route, member referral routes and delivery/webhook foundations were source-backed. Campaign send provider remains stub, extra campaign channels remain staged, and the referral reward/analytics integrity caveats are documented in the specification.
+
+
+## Platform screen-design follow-up — 14 November 2026
+
+The Platform prototype and specification are recorded in:
+
+- PLATFORM_WORKSPACE_SPEC_V1.md
+- PLATFORM_REVIEW_NOTES_V1.md
+- tradethesis_admin_platform_workspace_v1.html
+
+The proposal extends the existing permission-filtered Operations Timeline and read-only job/provisioning detail routes. It does not introduce queue mutation or direct external-access actions. Source gaps and Advanced Administration boundaries are documented in the Platform specification.
