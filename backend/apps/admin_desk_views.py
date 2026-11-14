@@ -2756,16 +2756,8 @@ def admin_desk_search(request):
         if _allowed(request.user, "jobs.view_provisioningoperation"):
             from apps.jobs.models import ProvisioningOperation
 
-            provisioning_filter = Q(operation__icontains=query)
-            try:
-                from uuid import UUID
-                exact_operation_id = UUID(query)
-            except (TypeError, ValueError, AttributeError):
-                exact_operation_id = None
-            if exact_operation_id is not None:
-                provisioning_filter |= Q(operation_id=exact_operation_id)
             operations = ProvisioningOperation.objects.filter(
-                provisioning_filter
+                operation__icontains=query
             ).only("id", "operation", "state", "attempts", "updated_at").order_by(
                 "-updated_at"
             )[:5]
