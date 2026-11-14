@@ -35,7 +35,7 @@ from apps.admin_desk_views import (
     admin_desk_support_tickets, admin_desk_support_ticket,
     admin_desk_support_ticket_action, admin_desk_customer_360,
     admin_desk_customers, admin_desk_academy, admin_desk_platform, admin_desk_growth, admin_desk_revenue, admin_desk_operations_timeline,
-    admin_desk_operations_job, admin_desk_operations_provisioning,
+    admin_desk_operations_job, admin_desk_operations_provisioning, admin_desk_search,
 )
 from apps.core.views import health_check
 from apps.academy.seo import academy_robots_txt, academy_sitemap_xml
@@ -61,6 +61,7 @@ urlpatterns = [
     path("staff/course-builder/", course_builder_preview, name="staff_course_builder_preview"),
     path("api/academy/catalogue/", public_course_catalogue, name="academy_public_catalogue"),
     path("staff/admin-desk/", staff_admin_desk, name="staff_admin_desk"),
+    path("staff/admin-desk/search/", admin_desk_search, name="staff_admin_desk_search"),
     path("staff/admin-desk/my-work/", admin_desk_my_work, name="staff_admin_desk_my_work"),
     path("staff/admin-desk/courses/review/", admin_desk_course_reviews, name="staff_admin_desk_course_reviews"),
     path("staff/admin-desk/courses/review/<uuid:import_id>/", admin_desk_course_review, name="staff_admin_desk_course_review"),
