@@ -25,11 +25,11 @@ Use this register to keep design work deliberate and reviewable. Each mockup sho
 | M13 | Customer 360 | Course progress/access, subscription/payment, support, community, security restrictions | P0 | V1 drafted — review pending |
 | M14 | Revenue overview | Exception-first financial and access work; canonical links across payment, subscription and dispute | P0 | V1 drafted — review pending |
 | M15 | Business & Finance | Seller/invoice/tax settings, confirmation and configured-vs-tested distinction | P1 | V1 drafted — review pending |
-| M16 | Operations overview | Incident severity, affected customers, issue clusters, time range | P0 | Not started |
-| M17 | Jobs & provisioning | Queue states, attempts, lock age, unknown external state, error detail | P1 | Not started |
+| M16 | Platform overview | Permission-aware operations, service-health evidence, canonical incident routing | P0 | V1 drafted — review pending |
+| M17 | Jobs & provisioning | Durable queue, PeriodicJob scheduler, worker lifecycle and persisted external state | P1 | V1 drafted — review pending |
 | M18 | Growth overview | Action-first growth work summary, cross-domain hand-offs and source-quality alerts | P1 | V1 drafted — review pending |
 | M19 | Notifications / attention | Event source, recipient, severity, read/acknowledged, deduplication, deep link | P0 | Not started |
-| M20 | Policies / audit / security | Readiness, policy versions, audit timeline, permission-scoped security views | P1 | Not started |
+| M20 | Audit, security, policies & readiness | Permission-scoped event evidence, policy lifecycle and configured-vs-tested readiness | P1 | V1 drafted — review pending |
 | M21 | Responsive design board | Tablet, mobile navigation, dense tables, ticket actions, drawers and dialogs | P0 | Not started |
 | M22 | Component and visual system | Typography, spacing, tables, statuses, forms, menus, dialogs, toasts, empty/error states | P0 | Not started |
 | M23 | Clickable prototype | End-to-end priority journeys using clearly labelled illustrative data | P0 | Architecture prototype to follow after screen review |
@@ -51,6 +51,14 @@ Use this register to keep design work deliberate and reviewable. Each mockup sho
 | M39 | Email Delivery | G1 Delivery, transactional EmailLog, consent/suppression and immutable template versions | P1 | V1 drafted — review pending |
 | M40 | Advanced Growth | Affiliates/commissions, experiments, announcements and staged additional channels | P2 | V1 drafted — review pending |
 | M41 | Analytics & Attribution | Purchase events, first/last-touch definitions, report-source caveats and currency-safe reporting | P1 | V1 drafted — review pending |
+| M42 | Platform Overview | Existing Operations Timeline, job/provisioning exceptions, readiness evidence and canonical routing | P0 | V1 drafted — review pending |
+| M43 | Jobs & Scheduler | Separate durable Job queue, PeriodicJob scheduler, worker retry/reaper and lock lifecycle | P0 | V1 drafted — review pending |
+| M44 | Access & Provisioning | ProvisioningOperation, entitlement assignment and observed membership as separate records | P0 | V1 drafted — review pending |
+| M45 | Integrations & Webhooks | Telegram, Discord, Academy Drive, payment WebhookEvent, Resend and legacy bridge boundaries | P1 | V1 drafted — review pending |
+| M46 | Audit & Security | Domain events, AuditLog, BotAccessAudit, SecurityEvent, privacy and immutable evidence | P0 | V1 drafted — review pending |
+| M47 | Policies & Readiness | Active policy versions, PolicyAcceptance, config presence, health probe and verification gaps | P1 | V1 drafted — review pending |
+| M48 | Staff & Permissions | Staff dimensions, approval API, current authorization caveat and proposed permission matrix | P0 | V1 drafted — review pending |
+| M49 | Migration Boundary | Read-only-first, later controlled actions, Advanced Administration and owning-domain rules | P0 | V1 drafted — review pending |
 
 ## Required annotations on every mockup
 
@@ -170,3 +178,17 @@ The supplied Customer 360 screenshot is a visual reference, not an instruction t
 - **Gift boundary:** gift creation can succeed if email fails; GiftInvite is not a Subscription; modern token invite and legacy gift_code flows remain separate; no staff resend control was verified.
 - **Browser checks:** All Growth destinations, campaign/coupon/referral/gift/delivery filters, campaign/coupon/referral/gift preview modals, email sub-tabs, advanced Growth sub-tabs and mobile drawer exercised. No JS/console errors. 390px page has no horizontal overflow after responsive sizing correction.
 - **Review status:** Draft for owner review. No Growth screen is approved for implementation yet.
+
+
+## Platform screen-design pass — 14 November 2026
+
+- **Prototype:** `tradethesis_admin_platform_workspace_v1.html` — clickable Platform workspace using the selected V2 shell.
+- **Screens represented:** M42 Platform Overview; M43 Jobs & Scheduler; M44 Access & Provisioning; M45 Integrations & Webhooks; M46 Audit & Security; M47 Policies & Readiness; M48 Staff & Permissions; M49 Migration Boundary.
+- **Detailed specification:** `PLATFORM_WORKSPACE_SPEC_V1.md`.
+- **Review notes:** `PLATFORM_REVIEW_NOTES_V1.md`.
+- **Source boundary:** Existing Operations Timeline and read-only Job/Provisioning detail routes are the current Admin Desk foundation. Job, PeriodicJob, ProvisioningOperation, integration configuration, webhook events, audit/security evidence and policy records are split across Django Admin, service endpoints and staff routes. The proposed unified Platform screens are not existing Admin Desk routes.
+- **Operational distinctions:** Durable Job queue, lightweight PeriodicJob scheduler and worker lifecycle remain separate. ProvisioningOperation, UserChannelAssignment and ChannelMembershipSnapshot are separate. Unknown provisioning state does not permit resend. Current health endpoint is a primary DB SELECT 1 only.
+- **Integration caveats:** Native Telegram Bot API is called directly by Django; BotRuntimeState is legacy bridge diagnostics. Stripe/Razorpay create durable WebhookEvent rows and enqueue a processing Job. Resend updates Delivery only. Telegram webhook durability was not verified. Google Drive remains Academy-owned.
+- **Governance caveats:** SecurityEvent is append-only by model, but the raw IP/retention policy still needs enforcement review. AuditLog has no model-level append-only save guard. PolicyAcceptance is write-once; PolicyVersion published-content immutability is not fully enforced in the inspected admin/model path. IsRoleAdmin permits any is_staff user as well as role=ADMIN/superuser.
+- **Browser checks:** 30/30 exercised checks passed. All eight Platform destinations, queue/scheduler and governance tabs, job filters, audit filter, detail previews and mobile drawer passed. No JS/console errors; 390px viewport has no horizontal overflow.
+- **Review status:** Draft for owner review. No Platform screen is approved for implementation yet.
