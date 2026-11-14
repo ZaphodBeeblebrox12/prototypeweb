@@ -473,3 +473,21 @@ CI is isolated test evidence. It does not establish authenticated staging permis
 - Complete the Builder migration-specific idempotence/content-preservation tests and a staging draft-only verification.
 
 **Phase 0 remains incomplete. Implementation remains NOT AUTHORISED.** No application code, test, permission, migration, deployment, Render setting, merge or rebase was changed in this continuation. Only the planning audit and handoff documents were updated.
+
+## 16. First authenticated staging evidence — non-staff learner
+
+On 14 November 2026 at 16:59:25 UTC, the operator ran the browser-console audit on `tradethesis-academy-staging.onrender.com` using a session labelled `Non-staff learner`.
+
+Observed GET results from the supplied transcript:
+- `/health/`: 200.
+- 403 Forbidden: `/staff/admin-desk/`, `/staff/admin-desk/operations/`, `/staff/admin-desk/accounts/`, `/staff/admin-desk/support/tickets/`, `/staff/admin-desk/courses/review/`, `/staff/admin-desk/seo/`, `/staff/course-builder/`, `/staff/admin-desk/finance/`, `/staff/admin-desk/subscriptions/`, `/staff/admin-desk/business/`, `/api/admin/staff-approvals/` and `/api/analytics/overview/`.
+
+This is encouraging direct-route denial evidence for the 12 reported staff/admin endpoints. The health 200 is expected because `/health/` is a public database readiness probe. Record persona as operator-labelled; the report did not include server-verified role metadata. The pasted JSON was truncated, so the Growth referral rewards, notifications, Django Admin, gift and disputes results are unknown, not passed.
+
+### Consolidated access audit workflow
+
+Use one read-only browser-console batch script for all GET route probes and any detail links discovered from visible list pages. Run the same script in each distinct authorised account session (learner, ordinary approved staff, Support reviewer, Academy editor/approver, Revenue, Growth, Platform and superuser). Browser session cookies belong to one signed-in account; one browser session cannot truthfully impersonate all role personas. Do not paste passwords, cookies or API tokens into chat.
+
+For object scope, collect fixture IDs visible to the superuser or fixture owner, then probe those exact detail URLs in the other role sessions. The script should never guess IDs. Keep all action/POST verification separate and use designated disposable fixtures only after an explicit test plan.
+
+**Phase 0 remains incomplete. Implementation remains NOT AUTHORISED.**
