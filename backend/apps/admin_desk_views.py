@@ -2619,7 +2619,9 @@ def admin_desk_search(request):
                 "is_active", "is_banned",
             ).order_by("-date_joined")[:5]
             for learner in learners:
-                full_name = learner.get_full_name().strip()
+                full_name = " ".join(
+                    part for part in (learner.first_name, learner.last_name) if part
+                ).strip()
                 title = full_name or learner.username
                 if full_name and full_name != learner.username:
                     title = f"{title} · {learner.username}"
