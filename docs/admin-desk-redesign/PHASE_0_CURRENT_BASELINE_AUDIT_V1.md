@@ -47,27 +47,27 @@ This audit is not a penetration test, full code review, data inspection, product
 |---|---|
 | Repository | ZaphodBeeblebrox12/prototypeweb |
 | Source branch | my-new-branch |
-| Source HEAD | 6cdb7b9e78306850902da9b95467e494066baa13 |
-| Source HEAD subject | Refresh the selected Builder lesson after summary migration |
-| Source commit time | 2026-11-14 15:39:09 UTC |
+| Source HEAD | 8832ecf9cc979747dc2715a39ecfeb7a292e55ee |
+| Source HEAD subject | Migrate Trading Path key takeaways into notebook prompts |
+| Source commit time | 2026-11-14 16:39:00 UTC |
 | Planning branch | admin-desk-redesign-planning |
-| Planning HEAD | 69e3835eeb36fbe4d708fdbd3441f6c507e1e4a0 |
-| Planning HEAD subject | docs(admin-desk): align handoff next steps with approved decisions |
+| Planning HEAD before this document refresh | 0f6e44a34c56cdccc17a3f717ee613b8b47081f1 |
+| Planning HEAD subject before this document refresh | docs(admin-desk): add Phase 0 CI evidence to handoff |
 | Merge base | 251260448c480ec5fbfec4f1966d9017fa0854ff |
-| Planning-only commits relative to source | 82 |
-| Source-only commits relative to planning | 15 |
-| Planning-only changed files | 21; all are under docs/admin-desk-redesign/ |
+| Planning-only commits relative to source (before this refresh) | 86 |
+| Source-only commits relative to planning | 18 |
+| Planning-only changed files | 23; all are under docs/admin-desk-redesign/ |
 
-The branches are diverged. Do not merge or rebase automatically. The previous handoff said 10 commits behind and referred to two source-only commits. That record is stale: the current comparison is 15 source-only commits.
+The branches are diverged. Do not merge or rebase automatically. The current comparison is 86 planning-only commits and 18 source-only commits before this documentation refresh. The comparison uses merge base `251260448c480ec5fbfec4f1966d9017fa0854ff`; this planning-only branch should not be merged or rebased automatically.
 
 ### 3.1 Source-only changes since the planning branch baseline
 
-The 15 source-only commits modify exactly three files:
+The 18 source-only commits modify exactly three files:
 - backend/apps/academy/course_builder_api.py
 - backend/apps/academy/course_builder_preview.html
 - backend/apps/academy/course_builder_trading_path_import.json
 
-They cover two related Course Builder content migrations:
+They cover three related Course Builder content migrations:
 
 **Trading Path Quick Check / Q&A migration**
 - Move bundled Quick Check questions into Practice & Q&A.
@@ -82,9 +82,16 @@ They cover two related Course Builder content migrations:
 - Refresh the selected lesson editor after the migration.
 - The migration toast states that Q&A is preserved and nothing is published.
 
-No Admin Desk route, Admin Desk view or permission file appears in the source-only comparison. However, the Course Builder changes are material to Academy workflow parity and must be included in regression tests. Confirm on authenticated staging that the auto-reconciliation is idempotent, saves only the intended Trading Path draft(s), preserves existing Q&A and does not mutate published Course content.
+**Notebook / Key takeaways migration**
+- Add the source lesson's notebook data to the draft migration payload.
+- When the source notebook contains exactly three non-empty prompts labelled `Pause`, `Interpret` and `Apply` in that order, copy those prompts into the matching target lesson notebook.
+- Preserve the target notebook object and its other metadata; retain its existing title, otherwise use the source title or the fallback `Before you make the call`.
+- Remove the `Key takeaways` section from the matching target lesson body and report notebook/section migration counts in the Builder response and toast.
+- The toast states that inline sections were removed, Q&A was preserved and nothing was published.
 
-The 15 source-only commits are:
+No Admin Desk route, Admin Desk view or permission file appears in the source-only comparison. However, the Course Builder changes are material to Academy workflow parity and must be included in regression tests. Confirm on authenticated staging that every migration is idempotent, scoped only to the intended Trading Path draft(s), preserves Q&A and notebook metadata, removes only the intended Key takeaways section and does not mutate published Course content.
+
+The 18 source-only commits are:
 1. 8124dc4 — Move Trading Path Quick Checks into Course Builder Q&A
 2. fddfbfa — Merge Trading Path Quick Checks into saved Q&A drafts
 3. 9da97e9 — Expose Trading Path Quick Check source for saved drafts
@@ -100,6 +107,11 @@ The 15 source-only commits are:
 13. ef01f2f — Migrate learning outcomes into Trading Path lesson summaries
 14. c738c27 — Scope summary migration to Trading Path drafts
 15. 6cdb7b9 — Refresh the selected Builder lesson after summary migration
+16. a7738ea — Move Trading Path key takeaways into notebook prompts
+17. 192646d — Expose Trading Path notebook prompts to draft migration
+18. 8832ecf — Migrate Trading Path key takeaways into notebook prompts
+
+The changed-file comparison from the merge base confirms that all 18 source-only commits touch only the three Academy Course Builder files listed above. No Admin Desk URL, view, permission or test file is present in that source-only delta. The latest three commits do not add a dedicated regression test for the notebook/Key takeaways migration; the green full-suite CI result below is therefore not a substitute for the specific idempotence/content-preservation checks.
 
 ## 4. Current Render baseline
 
@@ -116,13 +128,13 @@ The 15 source-only commits are:
 | Auto-deploy trigger | Off |
 | Region | Oregon |
 | Health-check path | /health/ |
-| Latest deploy ID | dep-dbs81jon74is7394o89g |
-| Latest deployed commit | 6cdb7b9e78306850902da9b95467e494066baa13 |
+| Latest deploy ID | dep-dbs8tku7bikc73euh990 |
+| Latest deployed commit | 8832ecf9cc979747dc2715a39ecfeb7a292e55ee |
 | Latest deployment status | live |
 | Latest deployment trigger | api |
-| Deployment finished | 2026-11-14 15:41:57 UTC |
+| Deployment finished | 2026-11-14 16:41:58 UTC |
 
-The deployed commit exactly matches the current my-new-branch HEAD. This is a verified source/deployment match for this Render service.
+The deployed commit exactly matches the current `my-new-branch` HEAD. This is a verified source/deployment match for this Render service. The deployment was API-triggered because auto-deploy is disabled; no Render setting was changed.
 
 The deployment trigger is recorded as api, not an automatic commit deployment. Auto-deploy is currently disabled. No Render setting was changed.
 
@@ -497,3 +509,39 @@ The source/deployment baseline and CI state are now verified, and the source rou
 **Phase 0 still does not pass its exit gate.** Live authenticated staging checks with representative staff accounts and a superuser, plus the actual staff/group/object-scope matrix, remain outstanding. The web retrieval failure is not a substitute for those checks.
 
 No application code or tests were changed in this continuation. Only this planning audit document was extended.
+
+
+## 13. Latest source, deployment and CI checkpoint — 14 November 2026
+
+### 13.1 Branch and deployment refresh
+
+- Current application source branch: `my-new-branch`.
+- Current source HEAD: `8832ecf9cc979747dc2715a39ecfeb7a292e55ee` — `Migrate Trading Path key takeaways into notebook prompts` (2026-11-14 16:39:00 UTC).
+- Current Academy staging deployment: `dep-dbs8tku7bikc73euh990`, status `live`, finished at `2026-11-14 16:41:58 UTC`; deployed SHA matches the source HEAD above.
+- Academy staging remains configured to `my-new-branch` with auto-deploy disabled and API-triggered deployments.
+- Planning branch at the start of this refresh: `0f6e44a34c56cdccc17a3f717ee613b8b47081f1`. Before the two audit/handoff document updates, it was 86 commits ahead and 18 behind the source branch, with the same merge base recorded in Section 3. The document updates themselves add planning-only commits.
+- Public static staging remains on `c5bdc0fb58be35122a41da3bc646a06c48dc162d` (7 November 2026 09:01:26 UTC), older than the current application source. This is a separate frontend deployment-parity item, not a stale Academy backend deployment.
+
+### 13.2 Latest source-only Academy changes
+
+The 18 source-only commits since the planning branch merge base still touch only:
+- `backend/apps/academy/course_builder_api.py`
+- `backend/apps/academy/course_builder_preview.html`
+- `backend/apps/academy/course_builder_trading_path_import.json`
+
+The newest three commits add the `Pause`, `Interpret` and `Apply` notebook migration described in Section 3.1. No Admin Desk route, view, permission or test file changed in this source-only delta. Add explicit checks for: repeated Builder load idempotence; exact Trading Path lesson matching; preserving target notebook title/metadata and saved Q&A; removing only the Key takeaways section while retaining surrounding lesson content; and no mutation of published Course records.
+
+### 13.3 CI on the current deployed source SHA
+
+GitHub Actions **Academy backend CI**, run [1891](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43616758224), for commit `8832ecf9cc979747dc2715a39ecfeb7a292e55ee`, completed with conclusion **success**:
+- Python 3.11: success; full suite **1,314 passed, 1 skipped, 178 subtests passed**.
+- Python 3.12: success; full suite **1,314 passed, 1 skipped, 178 subtests passed**.
+- Tiptap bundle and DOM compatibility tests: success.
+
+These results validate the committed code against isolated CI databases. They do not test authenticated staging role assignments, actual staff-group mappings or live object-level access. The notebook migration itself has no dedicated test file in the source-only delta; add explicit migration-focused tests before treating its exact content transformation as independently regression-covered.
+
+### 13.4 Phase 0 status after refresh
+
+The current Academy source/deployment SHA and CI are now aligned and green. The Admin Desk source-level authorization findings from the earlier inventory remain in force because no Admin Desk route/view/permission files changed in the 18-commit source-only delta.
+
+**Phase 0 remains open.** The outstanding exit blocker is live authenticated staging review with representative staff roles and a superuser, including direct-route/API denial, object-level scope and the actual User/Group/model-permission mapping. The Django Admin cutover policy, broad `IsRoleAdmin` boundary, login-only Growth referral view, refund-initiation capability and cancellation contract remain unresolved. **Implementation remains NOT AUTHORISED.**
