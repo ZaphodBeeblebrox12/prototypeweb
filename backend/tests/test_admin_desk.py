@@ -361,9 +361,7 @@ class AdminDeskTests(TestCase):
             group["name"]: group["results"]
             for group in response.context["search_groups"]
         }
-        self.assertIn("Customers", groups)
-        self.assertIn("Academy", groups)
-        self.assertIn("Revenue", groups)
+        self.assertEqual(set(groups), {"Customers", "Academy", "Revenue"})
         self.assertContains(response, member.username)
         self.assertContains(response, visible_ticket.short_id)
         self.assertNotContains(response, hidden_ticket.short_id)
