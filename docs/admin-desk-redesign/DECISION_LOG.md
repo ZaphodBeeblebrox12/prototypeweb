@@ -71,6 +71,16 @@
 - **Approved by:** User (visual preference)
 - **Date:** 2026-11-14
 
+### Decision 5 — V2 visual template selected for all domain workspaces
+
+- **Decision:** Use the V2 Admin Desk shell and the visual language of the supplied Customer 360 screenshot as the common template for all six domains and their child destinations.
+- **Chosen visual language:** Deep forest-green navigation, warm-ivory workspace, warm-white surfaces, restrained terracotta emphasis, muted sage for positive/selected states, editorial serif page headings, compact sans-serif interface typography, fine borders and minimal shadows.
+- **Reason:** The user confirmed that the V2 visual language is the preferred TradeThesis Admin Desk direction and asked that this template be used consistently while developing every tab and its relationships.
+- **Affected screens/workflows:** All Command Centre, Academy, Customers, Revenue, Growth and Platform pages; shared tables, detail pages, filters, dialogs, status treatments, responsive layouts and cross-domain context panels.
+- **Open risks:** The visual foundation is selected; detailed tokens, density, accessibility/contrast, component dimensions and responsive patterns still need review as screens are developed.
+- **Approved by:** User
+- **Date:** 2026-11-14
+
 ## Decisions still to make together
 
 ### 1. Navigation hierarchy
@@ -121,11 +131,11 @@
 - Notes:
 
 ### 8. Visual direction
-- [x] Forest-green sidebar + warm-ivory editorial workspace, with restrained terracotta and sage accents (selected reference; full token board pending).
+- [x] Use V2 forest-green sidebar + warm-ivory editorial workspace, with restrained terracotta and sage accents, as the common template for all six domains.
 - [ ] Neutral light / data-dense alternative, only if needed for comparison.
 - [ ] Other direction to explore.
 - [ ] Density preference and target desktop width.
-- Notes: User prefers the supplied Customer 360 screenshot's forest-green / ivory / terracotta visual language. M01/M02 v2 should match this before the visual system is frozen.
+- Notes: V2 is the selected shared template. Full component tokens and accessibility checks remain part of the design validation.
 
 ## Decision record format
 
