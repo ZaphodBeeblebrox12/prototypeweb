@@ -1562,6 +1562,128 @@ def admin_desk_platform(request):
             readiness["url"] = reverse("admin:policies_policyversion_changelist")
             context["policy_readiness"] = readiness
 
+    from apps.academy.permissions import is_course_content_admin
+
+    def access_granted(permission):
+        return _allowed(request.user, permission)
+
+    def access_item(label, permission, detail=""):
+        return {
+            "label": label,
+            "granted": access_granted(permission),
+            "detail": detail,
+        }
+
+    role_display = getattr(request.user, "get_role_display", None)
+    role_value = (
+        role_display()
+        if callable(role_display)
+        else str(getattr(request.user, "role", "") or "Not set")
+    )
+    staff_approved = getattr(request.user, "is_staff_approved", None)
+    if staff_approved is None:
+        staff_approval_label = "Not recorded"
+    else:
+        staff_approval_label = "Approved" if staff_approved else "Not approved"
+
+    context["my_access"] = {
+        "identity": {
+            "application_role": role_value,
+            "is_active": request.user.is_active,
+            "is_staff": request.user.is_staff,
+            "is_superuser": request.user.is_superuser,
+            "staff_approval": staff_approval_label,
+        },
+        "groups": list(
+            request.user.groups.order_by("name").values_list("name", flat=True)
+        ),
+        "sections": [
+            {
+                "name": "Customers",
+                "items": [
+                    access_item("Learner accounts", "accounts.view_user"),
+                    access_item("Change account state", "accounts.change_user"),
+                    {
+                        "label": "Support tickets",
+                        "granted": True,
+                        "detail": "Staff route · each ticket is filtered by its reviewer/plan scope",
+                    },
+                ],
+            },
+            {
+                "name": "Academy",
+                "items": [
+                    {
+                        "label": "Course content administration",
+                        "granted": is_course_content_admin(request.user),
+                        "detail": "Existing content-admin role/superuser rule",
+                    },
+                    access_item("Course catalogue", "academy.view_course"),
+                    access_item("Course offers", "academy.view_courseoffer"),
+                    access_item("Learner entitlements", "academy.view_courseentitlement"),
+                    access_item("Lesson progress", "academy.view_lessonprogress"),
+                ],
+            },
+            {
+                "name": "Revenue",
+                "items": [
+                    access_item("Payments and refunds", "payments.view_paymentintent"),
+                    access_item("Invoices", "payments.view_invoice"),
+                    access_item("Subscriptions", "subscriptions.view_subscription"),
+                    access_item("Change subscriptions", "subscriptions.change_subscription"),
+                    {
+                        "label": "Business settings",
+                        "granted": (
+                            access_granted("payments.change_billingsettings")
+                            or access_granted("payments.add_billingsettings")
+                        ),
+                        "detail": "Add or change BillingSettings",
+                    },
+                    access_item("Disputes", "disputes.view_dispute"),
+                    access_item("Change disputes", "disputes.change_dispute"),
+                ],
+            },
+            {
+                "name": "Growth",
+                "items": [
+                    access_item("Analytics events", "events.view_event"),
+                    access_item("Campaigns", "campaigns.view_campaign"),
+                    access_item("Email delivery", "emailing.view_delivery"),
+                    access_item("Coupon redemptions", "promotions.view_couponredemption"),
+                    {
+                        "label": "Referral rewards",
+                        "granted": (
+                            access_granted("growth.view_referralreward")
+                            and access_granted("growth.view_referralsettings")
+                        ),
+                        "detail": "Both reward and settings read permissions are required",
+                    },
+                    access_item("Gift invite register", "growth.view_giftinvite"),
+                    {
+                        "label": "Create and send gifts",
+                        "granted": (
+                            access_granted("growth.add_giftinvite")
+                            and access_granted("subscriptions.add_giftsubscription")
+                            and access_granted("subscriptions.view_plan")
+                        ),
+                        "detail": "Requires all underlying create and plan-read permissions",
+                    },
+                ],
+            },
+            {
+                "name": "Platform",
+                "items": [
+                    access_item("Background jobs", "jobs.view_job"),
+                    access_item("Provisioning operations", "jobs.view_provisioningoperation"),
+                    access_item("Periodic scheduler", "jobs.view_periodicjob"),
+                    access_item("Audit log", "audit.view_auditlog"),
+                    access_item("Security events", "accounts.view_securityevent"),
+                    access_item("Policy versions", "policies.view_policyversion"),
+                ],
+            },
+        ],
+    }
+
     context["has_platform_records"] = any(
         key in context for key in (
             "job_summary", "provisioning_summary", "scheduler_summary",
