@@ -1014,6 +1014,7 @@ This document is a design blueprint, not an implementation authorisation.
 The first clickable six-domain navigation and relationship board is maintained as a standalone HTML planning artefact:
 
 - `tradethesis_admin_six_domain_workspaces_v1.html`
+- `ROUTE_TO_WORKSPACE_MAP_V1.md` — existing route and capability mapping, with proposed-vs-existing status.
 - It uses the selected V2 visual template and provides a clickable overview and child destination for every proposed tab.
 - Every page explains its workspace responsibility, records, lifecycle/hand-off, connected domains, source/proposal status and preservation rule.
 - Records and activity are illustrative; it does not call live APIs or mutate records.
