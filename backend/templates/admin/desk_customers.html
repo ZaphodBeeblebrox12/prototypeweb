@@ -71,12 +71,10 @@
   </header>
 
   <section class="metrics" aria-label="Customer operations summary">
-    {% if can_view_accounts %}
-    <div class="metric"><span class="metric-label">Active learner accounts</span><strong class="metric-value">{{ active_learners }}</strong></div>
-    {% endif %}
     <div class="metric"><span class="metric-label">Open tickets in your scope</span><strong class="metric-value">{{ support_summary.open }}</strong></div>
     <div class="metric alert"><span class="metric-label">First responses overdue</span><strong class="metric-value">{{ support_summary.overdue }}</strong></div>
     <div class="metric"><span class="metric-label">Unassigned · needs response</span><strong class="metric-value">{{ support_summary.unassigned }}</strong></div>
+    <div class="metric"><span class="metric-label">Resolved in the last 7 days</span><strong class="metric-value">{{ support_summary.recently_resolved }}</strong></div>
   </section>
 
   <div class="layout">
@@ -115,7 +113,7 @@
         {% else %}
         <div class="empty">No tickets currently need a staff response in your reviewer scope.</div>
         {% endif %}
-        <div class="count-label" style="margin-top:10px">{{ support_summary.needs_response }} ticket{{ support_summary.needs_response|pluralize }} awaiting a staff response · {{ support_summary.recently_resolved }} resolved in the last 7 days</div>
+        <div class="count-label" style="margin-top:10px">{{ support_summary.needs_response }} ticket{{ support_summary.needs_response|pluralize }} awaiting a first staff response</div>
       </div>
     </section>
 
@@ -127,7 +125,7 @@
             {% if can_view_accounts %}
             <li class="destination">
               <span class="destination-icon" aria-hidden="true"><i class="bi bi-people"></i></span>
-              <div class="destination-copy"><strong>Learners &amp; Accounts</strong><span>Search learner accounts and inspect permitted account state.</span></div>
+              <div class="destination-copy"><strong>Learners &amp; Accounts</strong><span>{{ active_learners }} active learner accounts · search and inspect permitted account state.</span></div>
               <a class="destination-link" href="{{ accounts_url }}">Open →</a>
             </li>
             {% endif %}
