@@ -452,6 +452,8 @@ The newest three source commits move Trading Path **Key takeaways** into the les
 
 Add explicit regression cases before relying on this transformation: repeated Builder loads must be idempotent; matching must be limited to intended Trading Path draft lessons; existing Q&A and notebook metadata/title must remain intact; only the Key takeaways section must be removed while surrounding content survives; published Course records must remain unchanged. The three changed source files contain no new dedicated test file for this migration.
 
+A static scan of the current import data found five modules and 48 lessons; 27 contain exactly three non-empty notebook prompts in the order Pause, Interpret, Apply, and 21 have no populated prompt array. None of the source lesson bodies has a Markdown Key takeaways heading, so the actual removal must be verified against saved target drafts. The cleanup helper stops at the next Markdown heading regardless of heading level; nested headings inside a Key takeaways section may be left behind. Add a nested-heading fixture and inspect the real target-draft structure before sign-off.
+
 ### Latest CI evidence
 
 GitHub Actions **Academy backend CI**, run [1891](https://github.com/ZaphodBeeblebrox12/prototypeweb/actions/runs/43616758224), for the deployed SHA completed successfully:
