@@ -407,6 +407,9 @@ def _trading_path_quick_checks_source():
                         "id": str(lesson.get("id") or ""),
                         "title": str(lesson.get("title") or ""),
                         "summary": str(lesson.get("summary") or "")[:360],
+                        "notebook": lesson.get("notebook", {})
+                        if isinstance(lesson.get("notebook"), dict)
+                        else {},
                         "questions": lesson.get("questions", [])
                         if isinstance(lesson.get("questions"), list)
                         else [],
