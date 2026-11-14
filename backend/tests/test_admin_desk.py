@@ -442,7 +442,9 @@ class AdminDeskTests(TestCase):
         )
         self.assertEqual(by_identifier.status_code, 200, by_identifier.content)
         self.assertEqual(by_identifier.context["search_groups"], [])
-        self.assertNotContains(by_identifier, str(operation.operation_id))
+        # The search input retains the query for usability; the UUID must not
+        # appear as a result, URL, or provisioning-detail identifier.
+        self.assertEqual(by_identifier.context["total_results"], 0)
 
         by_operation = self.client.get(
             reverse("staff_admin_desk_search"),
