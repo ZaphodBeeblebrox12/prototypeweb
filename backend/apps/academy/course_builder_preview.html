@@ -5661,6 +5661,18 @@ body.builder-dialog-open { overflow:hidden; }
     return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
   }
 
+  function stripKeyTakeawaysContent(markdown) {
+    const lines = String(markdown || '').split(/\r?\n/);
+    const start = lines.findIndex(line =>
+      /^#{1,6}\s*Key takeaways\s*$/i.test(line.trim())
+    );
+    if (start < 0) return String(markdown || '');
+    let end = start + 1;
+    while (end < lines.length && !/^#{1,6}\s+/.test(lines[end])) end += 1;
+    lines.splice(start, end - start);
+    return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  }
+
   function stripWhatYouWillLearnContent(markdown) {
     const lines = String(markdown || '').split(/\r?\n/);
     const start = lines.findIndex(line =>
@@ -5681,6 +5693,8 @@ body.builder-dialog-open { overflow:hidden; }
     let lessonCount = 0;
     let questionCount = 0;
     let summaryCount = 0;
+    let notebookCount = 0;
+    let keyTakeawaySectionCount = 0;
 
     sourceLessons.forEach(sourceLesson => {
       const targetLesson = targetLessons.find(lesson =>
@@ -5706,6 +5720,48 @@ body.builder-dialog-open { overflow:hidden; }
         const cleanedContent = stripWhatYouWillLearnContent(originalContent);
         if (cleanedContent !== originalContent) {
           targetLesson.content = cleanedContent;
+          lessonChanged = true;
+        }
+      }
+
+      const sourceNotebook = sourceLesson.notebook && typeof sourceLesson.notebook === 'object'
+        ? sourceLesson.notebook
+        : {};
+      const sourceNotebookPrompts = Array.isArray(sourceNotebook.prompts)
+        ? sourceNotebook.prompts
+        : [];
+      const requiredNotebookLabels = ['Pause', 'Interpret', 'Apply'];
+      const hasTakeawayNotebook = sourceNotebookPrompts.length === 3 &&
+        sourceNotebookPrompts.every((prompt, index) =>
+          String(prompt?.label || '').trim() === requiredNotebookLabels[index] &&
+          String(prompt?.text || '').trim()
+        );
+
+      if (hasTakeawayNotebook) {
+        const currentNotebook = targetLesson.notebook && typeof targetLesson.notebook === 'object'
+          ? targetLesson.notebook
+          : {};
+        const nextPrompts = sourceNotebookPrompts.map(prompt => ({
+          label: String(prompt.label),
+          text: String(prompt.text)
+        }));
+        const promptsChanged = JSON.stringify(currentNotebook.prompts || []) !== JSON.stringify(nextPrompts);
+        const nextTitle = String(currentNotebook.title || sourceNotebook.title || 'Before you make the call');
+        if (promptsChanged || !targetLesson.notebook || !String(currentNotebook.title || '').trim()) {
+          targetLesson.notebook = {
+            ...currentNotebook,
+            title: nextTitle,
+            prompts: nextPrompts
+          };
+          notebookCount += 1;
+          lessonChanged = true;
+        }
+
+        const originalContent = String(targetLesson.content || '');
+        const cleanedContent = stripKeyTakeawaysContent(originalContent);
+        if (cleanedContent !== originalContent) {
+          targetLesson.content = cleanedContent;
+          keyTakeawaySectionCount += 1;
           lessonChanged = true;
         }
       }
@@ -5752,7 +5808,6 @@ body.builder-dialog-open { overflow:hidden; }
             targetLesson.questions = [];
           }
 
-          // Keep the visible legacy 65-unit Nifty example aligned with its answer key.
           if (
             /Nifty\s+lot\s+is\s+65/i.test(String(targetLesson.content || '')) &&
             finalQuestions.length > 0
@@ -5775,7 +5830,13 @@ body.builder-dialog-open { overflow:hidden; }
       if (lessonChanged) lessonCount += 1;
     });
 
-    return { lessonCount, questionCount, summaryCount };
+    return {
+      lessonCount,
+      questionCount,
+      summaryCount,
+      notebookCount,
+      keyTakeawaySectionCount
+    };
   }
 
   async function syncAcademy() {
@@ -6013,7 +6074,9 @@ body.builder-dialog-open { overflow:hidden; }
               courseSlug:String(targetCourse.slug || ''),
               lessonsUpdated:migration.lessonCount,
               questionsAdded:migration.questionCount,
-              summariesUpdated:migration.summaryCount
+              summariesUpdated:migration.summaryCount,
+              notebookPromptsUpdated:migration.notebookCount,
+              keyTakeawaySectionsRemoved:migration.keyTakeawaySectionCount
             });
           }
         }
@@ -6243,8 +6306,8 @@ body.builder-dialog-open { overflow:hidden; }
           )) {
             renderEditor();
           }
-          toast('Moved learning outcomes into Short lesson summary and removed inline Quick Checks across ' +
-            tradingPathDraftsForQuickCheckSave.length + ' Trading Path draft(s). Q&A was preserved; nothing was published.');
+          toast('Moved learning outcomes into Short lesson summary and Key takeaways into Pause, Interpret and Apply across ' +
+            tradingPathDraftsForQuickCheckSave.length + ' Trading Path draft(s). Inline sections removed; Q&A preserved; nothing was published.');
         } catch (saveError) {
           toast('The Trading Path Quick Check cleanup could not be fully saved: ' +
             String(saveError?.message || saveError));
