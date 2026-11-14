@@ -1740,7 +1740,10 @@ def admin_desk_growth(request):
         )
         context["has_growth_data"] = True
 
-    if has_growth_permission(request.user, "growth.view_referralreward"):
+    if has_growth_permission(
+        request.user,
+        ("growth.view_referralreward", "growth.view_referralsettings"),
+    ):
         context["referral_report"] = report.referral_performance()
         context["has_growth_data"] = True
 
