@@ -384,6 +384,42 @@ def _ema_strategy_import_candidate():
     return {"course": course}
 
 
+def _trading_path_quick_checks_source():
+    """Return only the bundled Trading Path Q&A source for saved-draft reconciliation."""
+    try:
+        with _TRADING_PATH_IMPORT_FILE.open(encoding="utf-8") as source:
+            candidate = json.load(source)
+    except (OSError, json.JSONDecodeError):
+        logger.exception("Could not load the Trading Path Quick Check source")
+        return None
+    course = candidate.get("course") if isinstance(candidate, dict) else None
+    if not isinstance(course, dict) or not isinstance(course.get("modules"), list):
+        logger.error("The Trading Path Quick Check source has an invalid structure")
+        return None
+    return {
+        "slug": str(course.get("slug") or ""),
+        "modules": [
+            {
+                "id": str(module.get("id") or ""),
+                "title": str(module.get("title") or ""),
+                "lessons": [
+                    {
+                        "id": str(lesson.get("id") or ""),
+                        "title": str(lesson.get("title") or ""),
+                        "questions": lesson.get("questions", [])
+                        if isinstance(lesson.get("questions"), list)
+                        else [],
+                    }
+                    for lesson in (module.get("lessons") or [])
+                    if isinstance(lesson, dict)
+                ],
+            }
+            for module in course["modules"]
+            if isinstance(module, dict)
+        ],
+    }
+
+
 def _trading_path_import_candidate():
     """Offer the bundled course for one-time import until its draft exists."""
     if CourseImport.objects.filter(course_slug=_TRADING_PATH_IMPORT_SLUG).exclude(
@@ -2185,6 +2221,7 @@ def course_builder_api(request):
                 "coming_soon_courses": coming_soon_courses,
                 "asset_storage": asset_storage_status,
                 "trading_path_import_candidate": trading_path_import_candidate,
+                "trading_path_quick_checks_source": _trading_path_quick_checks_source(),
                 "bollinger_bands_import_candidate": bollinger_bands_import_candidate,
                 "ema_strategy_import_candidate": _ema_strategy_import_candidate(),
             }
