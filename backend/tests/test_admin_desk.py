@@ -371,6 +371,48 @@ class AdminDeskTests(TestCase):
         self.assertContains(response, "INR 1,299.00")
         self.assertNotContains(response, "Needle restricted support request")
 
+    def test_global_search_preserves_unknown_provisioning_state_without_exposing_id(self):
+        from uuid import uuid4
+        from django.contrib.auth.models import Permission
+        from apps.jobs.models import ProvisioningOperation
+
+        operator = User.objects.create_user(
+            username="global-search-platform-staff",
+            email="global-search-platform-staff@example.test",
+            is_staff=True,
+        )
+        EmailAddress.objects.create(
+            user=operator, email=operator.email, verified=True, primary=True
+        )
+        permission = Permission.objects.get(
+            content_type__app_label="jobs",
+            codename="view_provisioningoperation",
+        )
+        operator.user_permissions.add(permission)
+        operation = ProvisioningOperation.objects.create(
+            operation=ProvisioningOperation.OP_GRANT,
+            user_id=uuid4(),
+            channel_id="staging-channel",
+            state=ProvisioningOperation.ST_UNKNOWN,
+        )
+        self.client.force_login(operator)
+
+        by_identifier = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": str(operation.operation_id)},
+        )
+        self.assertEqual(by_identifier.status_code, 200, by_identifier.content)
+        self.assertEqual(by_identifier.context["search_groups"], [])
+        self.assertNotContains(by_identifier, str(operation.operation_id))
+
+        by_operation = self.client.get(
+            reverse("staff_admin_desk_search"),
+            {"q": "grant"},
+        )
+        self.assertEqual(by_operation.status_code, 200, by_operation.content)
+        self.assertContains(by_operation, "Needs verification")
+        self.assertNotContains(by_operation, str(operation.operation_id))
+
     def test_global_search_does_not_expose_unpermitted_account_or_course_records(self):
         operator = User.objects.create_user(
             username="global-search-limited-staff",
