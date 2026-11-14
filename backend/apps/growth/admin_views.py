@@ -86,10 +86,9 @@ class SendGiftAdminView(GrowthPermissionRequiredMixin, View):
 
 
 class SendGiftSuccessAdminView(GrowthPermissionRequiredMixin, View):
+    """Success page after an authorised gift is created."""
+
     permission_required = ("growth.add_giftinvite",)
-    """
-    Success page after sending a gift.
-    """
     template_name = "admin/growth/send_gift_success.html"
 
     def get(self, request, gift_invite_id):
