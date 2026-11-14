@@ -70,11 +70,13 @@ Screen-level specifications:
 - `ACADEMY_WORKSPACE_SPEC_V1.md`
 - `CUSTOMERS_WORKSPACE_SPEC_V1.md`
 - `REVENUE_WORKSPACE_SPEC_V1.md`
+- `GROWTH_WORKSPACE_SPEC_V1.md`
 
 Review notes:
 - `M01_M02_REVIEW_NOTES.md`
 - `CUSTOMERS_REVIEW_NOTES_V1.md`
 - `REVENUE_REVIEW_NOTES_V1.md`
+- `GROWTH_REVIEW_NOTES_V1.md`
 
 ## 5. Completed design work
 
@@ -153,6 +155,38 @@ Review notes:
 
 Prototype artifact:
 - `tradethesis_admin_revenue_workspace_v1.html`
+- `tradethesis_admin_growth_workspace_v1.html`
+
+### Growth — M18 and M34–M41
+Screen types:
+- Growth Overview.
+- Analytics & Attribution.
+- Campaigns & Audiences.
+- Journeys & Automation.
+- Promotions & Coupons.
+- Referrals & Rewards.
+- Gifts.
+- Email Delivery (G1 Delivery, transactional EmailLog, Consent/Suppression, Templates).
+- Advanced Growth (Affiliates/Commissions, Experiments, Announcements/Channels).
+
+Source boundaries preserved:
+- Analytics response key/function "signups" currently counts purchase.completed Events; promotion report references Sum without import; email report omits delivered/delayed; CampaignMetrics bounce/complaint counters are not reconciled by the inspected webhook.
+- Campaign audience membership is frozen at schedule; TemplateVersion is immutable. G2 send sweep uses provider=stub and marks Delivery SENT, not verified external delivery. Telegram/in-product campaign actions are staged and not wired into the send sweep.
+- CouponRedemption is created after successful activation and is read-only; campaign scoping uses first-touch SignupAttribution; referral discount stacking is configurable.
+- Referrer reward buckets are currency-bearing; UserRewardBalance currently sums across currencies. Reward unlock searches PaymentIntent statuses not in model choices; missing triggering Subscription stays pending; optional referee bonus helper logs only and does not persist.
+- The custom Referral Rewards Overview route uses LoginRequiredMixin, not staff-only authorization; do not reuse in staff navigation without permission review.
+- GiftInvite is separate from resulting Revenue Subscription; gift can be created while email fails; modern token and legacy gift-code flows remain distinct; no staff resend UI verified.
+- G1 Delivery and transactional EmailLog are separate; Resend webhook updates Delivery only. Marketing opt-in defaults false; global suppression overrides it, while transactional email is separate.
+- Affiliate commission Paid is an internal state, not proof of provider payout. Telegram marketing delivery is not membership provisioning.
+
+Specification:
+- `GROWTH_WORKSPACE_SPEC_V1.md`
+
+Review notes:
+- `GROWTH_REVIEW_NOTES_V1.md`
+
+Prototype artifact:
+- `tradethesis_admin_growth_workspace_v1.html`
 
 ### Customers — M10–M13, M27 and M28
 Screen types:
@@ -210,7 +244,7 @@ Critical lifecycle distinctions:
 - Academy: detailed V1 prototype/spec exists; owner review pending.
 - Customers: detailed V1 prototype/spec exists; owner review pending.
 - Revenue: detailed V1 prototype/spec/review notes exist; owner review pending.
-- Growth: not yet designed at screen level.
+- Growth: detailed V1 prototype/spec/review notes exist; owner review pending.
 - Platform: not yet designed at screen level.
 - Global accessibility, keyboard navigation, contrast and authenticated staging parity are not complete.
 
@@ -221,11 +255,12 @@ Do not mark a mockup as approved because it was created or smoke-tested. Record 
 1. Review the Customers prototype/specification with the owner; record requested changes and decisions.
 2. Revise M10/M11/M12/M13/M27/M28 where necessary.
 3. Review the Revenue prototype/specification; revise the action hierarchy and record relationships from owner feedback.
-4. Design Growth next, then Platform, using the same fictional learner/payment/course/subscription/ticket records.
-5. Walk through cross-domain journeys again using the same stable fictional record set.
-6. Complete role/permission matrix and Django Admin migration inventory, including the PaymentIntent manual full-refund and Plan/price configuration actions.
-7. Perform authenticated staging visual/role audit before producing an implementation handoff.
-8. Obtain explicit implementation approval before changing application code.
+4. Review and revise Growth V1 from owner feedback.
+5. Design Platform next, using the same fictional learner/payment/course/subscription/ticket/campaign/referral/gift records.
+6. Walk through cross-domain journeys again using the same stable fictional record set.
+7. Complete role/permission matrix and Django Admin migration inventory, including the Revenue full-refund/Plan configuration actions and Growth campaign, referral/reward, email and advanced-growth boundaries.
+8. Perform authenticated staging visual/role audit before producing an implementation handoff.
+9. Obtain explicit implementation approval before changing application code.
 
 ## 9. Prototype artifact availability
 
@@ -236,7 +271,7 @@ The current conversation includes downloadable HTML prototypes:
 - `tradethesis_admin_customers_workspace_v1.html`
 - `tradethesis_admin_revenue_workspace_v1.html`
 
-The written specifications and design decisions are saved in this GitHub branch. The HTML files are standalone conversation artifacts; a portable archive named `tradethesis_admin_redesign_resume_bundle_v2.zip` was also created in the design review conversation with the four current prototypes and PNG previews. Retain/download that archive when carrying visual previews into another environment. If an artifact is not available in the next chat, rebuild its next revision from the saved screen-level specification rather than inferring live behaviour.
+The written specifications and design decisions are saved in this GitHub branch. The HTML files are standalone conversation artifacts; a portable archive named `tradethesis_admin_redesign_resume_bundle_v3.zip` was also created in the design review conversation with the four current prototypes and PNG previews. Retain/download that archive when carrying visual previews into another environment. If an artifact is not available in the next chat, rebuild its next revision from the saved screen-level specification rather than inferring live behaviour.
 
 ## 10. Safety and scope checklist for the next chat
 
