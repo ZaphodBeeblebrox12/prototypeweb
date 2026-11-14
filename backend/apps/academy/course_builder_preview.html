@@ -5985,11 +5985,19 @@ body.builder-dialog-open { overflow:hidden; }
       // the same lesson titles. This also catches browser-local drafts not returned
       // in the server's CourseImport list.
       if (quickCheckSource) {
-        const candidateCourses = [...(state.courses || [])].sort((a, b) => {
-          const aSelected = String(a.id) === String(state.selectedCourseId || '') ? 1 : 0;
-          const bSelected = String(b.id) === String(state.selectedCourseId || '') ? 1 : 0;
-          return bSelected - aSelected;
-        });
+        const candidateCourses = [...(state.courses || [])]
+          .filter(course => {
+            const slug = String(course.slug || '').toLowerCase();
+            const title = String(course.title || '');
+            return slug === String(quickCheckSource.slug || '').toLowerCase() ||
+              slug === 'trading-path' ||
+              /trading path/i.test(title);
+          })
+          .sort((a, b) => {
+            const aSelected = String(a.id) === String(state.selectedCourseId || '') ? 1 : 0;
+            const bSelected = String(b.id) === String(state.selectedCourseId || '') ? 1 : 0;
+            return bSelected - aSelected;
+          });
         for (const targetCourse of candidateCourses) {
           const migration = mergeTradingPathQuickChecks(targetCourse, quickCheckSource);
           if (migration.lessonCount > 0) {
@@ -6000,7 +6008,7 @@ body.builder-dialog-open { overflow:hidden; }
             )) {
               tradingPathDraftsForQuickCheckSave.push(targetCourse);
             }
-            diagnosticStage('trading-path-quick-checks-reconciled', {
+            diagnosticStage('trading-path-lesson-content-reconciled', {
               courseTitle:String(targetCourse.title || ''),
               courseSlug:String(targetCourse.slug || ''),
               lessonsUpdated:migration.lessonCount,
