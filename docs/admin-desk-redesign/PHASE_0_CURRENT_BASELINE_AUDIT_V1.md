@@ -632,3 +632,34 @@ The second consolidated report used the manually entered persona label `Superuse
 The next consolidated read-only batch should call `/api/auth/me/` and emit only the server-returned `role`, `is_staff` and `is_admin` flags, omitting user ID, email and names. The serializer does not expose `is_superuser`; verify the superuser session separately by successful entry into `/admin/` and its visible superuser-only capabilities. The manually entered persona label must remain descriptive metadata, not identity proof.
 
 **Phase 0 remains open.** This finding must be closed with a route-level permission fix, learner denial (403 or login redirect), and positive access for the explicitly authorised staff persona, before implementation migration or sign-off. Implementation remains NOT AUTHORISED.
+
+## 16. Repeated consolidated test — server identity contradicts manual label
+
+**Timestamp:** 2026-11-14 17:05:19 UTC  
+**Operator-entered label:** `Superuser`  
+**Server identity endpoint:** `GET /api/auth/me/` returned HTTP 200.
+
+The response flags were:
+- `role`: `user`
+- `is_staff`: `false`
+- `is_admin`: `false`
+
+This proves the browser session used for this run was still a normal non-staff member account. The manually entered `Superuser` label is not evidence of the signed-in identity. The following 403 responses from staff routes are therefore expected for this session and must not be counted as a superuser permission failure or success:
+- `/staff/admin-desk/`, `/staff/admin-desk/operations/`, `/staff/admin-desk/accounts/`, `/staff/admin-desk/support/tickets/`;
+- `/staff/admin-desk/courses/review/`, `/staff/admin-desk/seo/`, `/staff/course-builder/`, `/staff/course-builder/tiptap/`;
+- `/staff/admin-desk/finance/`, `/staff/admin-desk/subscriptions/`, `/staff/admin-desk/business/`;
+- `/api/admin/staff-approvals/`, `/api/analytics/overview/`.
+
+`/admin/`, `/admin/growth/send-gift/` and `/admin-disputes/` followed a redirect to `/admin/login/`; this is also consistent with a non-staff/non-admin session.
+
+### Reproducibility of the Growth referral access failure
+
+The same run returned HTTP 200 for `/growth/admin/referral-rewards/`, with title `Referral Rewards Overview | Django site admin`. This is the second supplied browser run showing this route available from a session whose server identity is `role=user`, `is_staff=false`, `is_admin=false`. The access-control finding is therefore reproducible and now has server-verified non-staff identity evidence.
+
+The other successful member route `/api/notifications/` remains expected; source code scopes notifications to the current user. `/health/` returns 200 as a public database readiness endpoint.
+
+### Required next account-switch step
+
+Before the superuser run, explicitly sign out of Academy staging using the site's own sign-out control, then sign in using the authorised superuser account. In the same tab, check `/api/auth/me/` through the batch. Do not proceed until the server flags are consistent with an elevated account (`is_staff=true`, `is_admin=true` and role appropriate for the account). Then confirm `/admin/` reaches the admin index rather than redirecting to `/admin/login/`. The serializer does not expose `is_superuser`; use Django Admin access and an authorised superuser-only page/capability for final confirmation.
+
+**Phase 0 remains open.** The learner access failure on Growth referral rewards is reproducible. No code or permissions were changed. Implementation remains NOT AUTHORISED.
