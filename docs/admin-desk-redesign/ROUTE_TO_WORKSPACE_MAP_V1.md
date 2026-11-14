@@ -32,8 +32,8 @@
 | Review detail | `/staff/admin-desk/courses/review/<uuid:import_id>/`; assets under `.../assets/<uuid:asset_id>/`; actions under `.../approve/` and `.../return/` | Existing preview, asset, approve and return workflow | Preserve canonical publisher, feedback-required return and reviewer permissions. |
 | Course Builder | `/staff/course-builder/`; API under `/staff/course-builder/api/`; video/assets and Google Drive OAuth routes under `/staff/course-builder/...` and `/staff/google-drive/...` | Existing supported legacy authoring route | Keep as a separate authoring workspace launched from Academy; preserve the selected course and return context. |
 | Tiptap preview | `/staff/course-builder/tiptap/` and `/staff/course-builder/tiptap/api/...` | Development-only / feature-flagged staff path | Do not label as the live default editor until separately approved and integrated. |
-| Offers & Access | `CourseOffer`, `Plan`, `PlanPrice`, `GeoPlanPrice`, `CourseEntitlement` and related models; some record management remains in Django Admin | Existing underlying models and validations; no dedicated unified Admin Desk page verified | Proposed Academy workspace owns the CourseOffer-to-Course relationship. Open canonical Plan/price details in Revenue. |
-| Learner Access & Progress | Customer 360 exposes permission-scoped entitlements, progress and events at `/staff/admin-desk/customers/<uuid:user_id>/`; underlying model administration also exists | Existing data and Customer 360 context; no standalone Academy access workspace verified | Proposed standalone access/progress workspace with links to the canonical learner record. |
+| Offers & Access | `CourseOffer`, `Plan`, `PlanPrice`, `GeoPlanPrice`, `CourseEntitlement` and related models; some record management remains in Django Admin | Existing underlying models and validations; no dedicated unified Admin Desk page verified | Proposed Academy workspace owns the CourseOffer-to-Course relationship. Preserve validation: Published Paid/Mixed course, dedicated hidden Plan and active one-time base/geo price. Link to canonical Revenue Plan/price details. |
+| Learner Access & Progress | Customer 360 exposes permission-scoped CourseEntitlement, LessonProgress and entitlement events at `/staff/admin-desk/customers/<uuid:user_id>/`; underlying model administration also exists | Existing data and Customer 360 context; no standalone Academy access workspace verified. Direct paid/free-course access uses CourseEntitlement; the inspected membership-access helper specifically checks the dedicated TradeThesis Free plan/product and PlanCourseAccess mapping. | Proposed standalone access/progress workspace with direct entitlements, the source-verified Free membership path and progress shown separately; link to Customer 360. Do not imply every subscription tier unlocks mapped courses without further source verification. |
 | SEO & Discoverability | `/staff/admin-desk/seo/` | Existing dedicated Admin Desk diagnostic | Keep in Academy and link each issue to Course detail/Builder. |
 
 ## 4. Customers
@@ -101,8 +101,18 @@ Suggested migration sequence by workflow:
 
 1. Shared shell + Command Centre action-first home.
 2. Move existing Course Approvals, SEO, Support, Customer 360, Accounts, Subscriptions, Finance, Business and Operations destinations into consistent shell presentation, retaining their established services and permissions.
-3. Build missing unified workspaces over existing records: Academy Catalogue, Offers & Access, Learner Access, Revenue plan/pricing detail, Growth, Platform job/provisioning register, and role/permission explainer.
+3. Build missing unified workspaces over existing records: Academy Catalogue, Course Detail, Offers & Access, standalone Learner Access, Revenue plan/pricing detail, Growth, Platform job/provisioning register, and role/permission explainer.
 4. Move selected Django Admin model workflows only after parity and audit review.
 5. Retain Advanced Administration for low-frequency or high-risk functions that have not earned a safe replacement.
 
 This is a source-based route map for design planning. It does not authorise route/view or application-code changes.
+
+
+## Academy screen-design follow-up — 14 November 2026
+
+The detailed Academy prototype and specification are recorded in:
+
+- `ACADEMY_WORKSPACE_SPEC_V1.md`
+- `tradethesis_admin_academy_workspace_v1.html`
+
+The screen-level proposal covers Academy Overview, Course Catalogue, Course Detail, Approvals Queue, Review Detail, Course Builder hand-off, Offers & Access, Learner Access & Progress and SEO & Discoverability. All sample data is illustrative; proposed screens do not imply that a dedicated production route already exists.
