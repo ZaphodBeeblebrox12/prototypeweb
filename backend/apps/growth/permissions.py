@@ -26,7 +26,7 @@ class GrowthPermissionRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
 
     permission_required = ()
     login_url = "/accounts/login/"
-    raise_exception = True
+    raise_exception = False
 
     def test_func(self):
         return has_growth_permission(
